@@ -341,6 +341,9 @@ struct TranslArgs {
   JIT::RegionDescPtr m_region;
 };
 
+class Translator;
+extern Translator* tx;
+
 /*
  * Translator annotates a tracelet with input/output locations/types.
  */
@@ -354,6 +357,7 @@ struct Translator {
   JIT::UniqueStubs uniqueStubs;
 
 private:
+  friend class TranslatorX64;
   friend struct TraceletContext;
 
   void analyzeCallee(TraceletContext&,
@@ -394,7 +398,7 @@ private:
                        const Location& l,
                        bool specialize = false);
 
-protected:
+private:
   enum TranslateResult {
     Failure,
     Retry,
@@ -406,7 +410,7 @@ protected:
   void traceEnd();
   void traceFree();
 
-protected:
+private:
   void requestResetHighLevelTranslator();
 
   /* translateRegion reads from the RegionBlacklist to determine when
@@ -504,7 +508,7 @@ public:
     return debug || RuntimeOption::EvalDumpTC;
   }
 
-protected:
+private:
   PCFilter m_dbgBLPC;
   hphp_hash_set<SrcKey,SrcKey::Hasher> m_dbgBLSrcKey;
   Mutex m_dbgBlacklistLock;

@@ -166,9 +166,9 @@ struct IfCountNotStatic {
 
 
 void emitTransCounterInc(Asm& a) {
-  if (!tx64->isTransDBEnabled()) return;
+  if (!tx->isTransDBEnabled()) return;
 
-  a.    movq (tx64->getTransCounterAddr(), rAsm);
+  a.    movq (tx->getTransCounterAddr(), rAsm);
   a.    lock ();
   a.    incq (*rAsm);
 }
@@ -337,7 +337,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
   a.  jnz  (stubsCode.frontier());
 
   astubs.  movq  (rVmFp, argNumToRegName[0]);
-  emitCall(astubs, tx64->uniqueStubs.functionEnterHelper);
+  emitCall(astubs, tx->uniqueStubs.functionEnterHelper);
   if (inTracelet) {
     fixupMap.recordSyncPoint(stubsCode.frontier(),
                              fixup.m_pcOffset, fixup.m_spOffset);

@@ -96,14 +96,19 @@ constexpr size_t kX64CacheLineSize = 64;
 constexpr size_t kX64CacheLineMask = kX64CacheLineSize - 1;
 
 
-class TranslatorX64 : public Translator
-                    , private boost::noncopyable {
+class TranslatorX64 : private boost::noncopyable {
   friend class SrcRec; // so it can smash code.
   friend class SrcDB;  // For write lock and code invalidation.
   friend class Tx64Reaper;
   friend class HPHP::JIT::CodeGenerator;
 
   typedef X64Assembler Asm;
+
+public:
+  Translator& tx() { return m_tx; }
+
+private:
+  Translator           m_tx;
 
 public:
   CodeCache code;
@@ -218,7 +223,7 @@ public:
   bool profilePrologue(const SrcKey& sk) const;
 
   TCA getTopTranslation(SrcKey sk) {
-    return getSrcRec(sk)->getTopTranslation();
+    return m_tx.getSrcRec(sk)->getTopTranslation();
   }
 
   inline bool isValidCodeAddress(TCA tca) const {
@@ -245,7 +250,7 @@ public:
   }
 
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
-  TranslateResult translateTracelet(Tracelet& t);
+  Translator::TranslateResult translateTracelet(Tracelet& t);
 
 private:
   bool shouldTranslate() const {
@@ -315,7 +320,7 @@ public:
   // true iff calling thread is sole writer.
   static bool canWrite() {
     // We can get called early in boot, so allow null tx64.
-    return !tx64 || s_writeLease.amOwner();
+    return !tx64 || Translator::s_writeLease.amOwner();
   }
 
   // Returns true on success

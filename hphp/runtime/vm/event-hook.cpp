@@ -227,7 +227,7 @@ bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
 }
 
 void EventHook::onFunctionExit(const ActRec* ar) {
-  auto const inlinedRip = JIT::tx64->uniqueStubs.retInlHelper;
+  auto const inlinedRip = JIT::tx->uniqueStubs.retInlHelper;
   if ((JIT::TCA)ar->m_savedRip == inlinedRip) {
     // Inlined calls normally skip the function enter and exit events. If we
     // side exit in an inlined callee, we want to make sure to skip the exit

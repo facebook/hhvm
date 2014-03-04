@@ -220,8 +220,9 @@ void regionizeFunc(const Func*         func,
 
   assert(RuntimeOption::EvalJitPGO);
   FuncId funcId = func->getFuncId();
-  ProfData* profData = tx64->profData();
-  TransCFG cfg(funcId, profData, tx64->getSrcDB(), tx64->getJmpToTransIDMap());
+  ProfData* profData = tx64->tx().profData();
+  TransCFG cfg(funcId, profData, tx64->tx().getSrcDB(),
+               tx64->getJmpToTransIDMap());
 
   if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
     auto dotFileName = folly::to<std::string>(

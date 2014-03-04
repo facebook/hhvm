@@ -1092,7 +1092,7 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
     rFP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-      auto const destSR = m_tx64->getSrcRec(destSK);
+      auto const destSR = m_tx64->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
 }
@@ -1107,7 +1107,7 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
     rSP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-      auto const destSR = m_tx64->getSrcRec(destSK);
+      auto const destSR = m_tx64->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
 }
@@ -1240,7 +1240,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert((vals64 & mask64) == vals64);
 
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-  auto const destSR = m_tx64->getSrcRec(destSK);
+  auto const destSR = m_tx64->tx().getSrcRec(destSK);
 
   auto thenBody = [&] {
     auto bitsOff = sizeof(uint64_t) * (firstBitNum / 64);
@@ -1326,7 +1326,7 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   assert(m_unit.bcOff() == inst->marker().bcOff);
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-  auto const destSR = m_tx64->getSrcRec(destSK);
+  auto const destSR = m_tx64->tx().getSrcRec(destSK);
   destSR->emitFallbackJump(m_mainCode);
 }
 
@@ -1810,7 +1810,7 @@ void CodeGenerator::cgBlock(Block* block, std::vector<TransBCMapping>* bcMap) {
     // If we're on the first instruction of the block or we have a new
     // marker since the last instruction, update the bc mapping.
     if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
-        m_tx64->isTransDBEnabled() && bcMap) {
+        m_tx64->tx().isTransDBEnabled() && bcMap) {
       bcMap->push_back(TransBCMapping{inst->marker().func->unit()->md5(),
                                       inst->marker().bcOff,
                                       m_as.frontier(),

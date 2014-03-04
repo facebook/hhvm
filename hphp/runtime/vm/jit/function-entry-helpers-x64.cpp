@@ -65,7 +65,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
       uint64_t rip = ar->m_savedRip;
       if (g_context->doFCall(ar, g_context->m_pc)) {
         ar->m_savedRip = rip;
-        return tx64->uniqueStubs.resumeHelperRet;
+        return tx->uniqueStubs.resumeHelperRet;
       }
       // We've been asked to skip the function body
       // (fb_intercept). frame, stack and pc have
@@ -75,7 +75,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
     }
     setupAfterPrologue(ar, sp);
     assert(ar == g_context->m_fp);
-    return tx64->uniqueStubs.resumeHelper;
+    return tx->uniqueStubs.resumeHelper;
   } catch (...) {
     /*
       The return address is set to __fcallHelperThunk,
@@ -107,7 +107,7 @@ TCA funcBodyHelper(ActRec* fp, void* sp) {
   TCA tca = tx64->getCallArrayPrologue(func);
 
   if (!tca) {
-    tca = tx64->uniqueStubs.resumeHelper;
+    tca = tx->uniqueStubs.resumeHelper;
   }
   tl_regState = VMRegState::DIRTY;
   return tca;

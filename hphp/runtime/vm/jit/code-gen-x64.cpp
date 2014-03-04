@@ -1949,7 +1949,7 @@ void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc) {
   emitTypeTest(type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-      auto const destSR = m_tx64->getSrcRec(destSK);
+      auto const destSR = m_tx64->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
 }
@@ -2596,7 +2596,7 @@ void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
 }
 
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
-  if (rip == tx64->uniqueStubs.callToExit) {
+  if (rip == tx64->tx().uniqueStubs.callToExit) {
     return;
   }
   checkFrame(fp, sp, /*checkLocals*/ false);
@@ -2632,7 +2632,7 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   // another JITed function, the ret path is taken.
   if (curFunc()->attrs() & AttrVMEntry) {
     Label retLabel;
-    TCA callToExitStub = m_tx64->uniqueStubs.callToExit;
+    TCA callToExitStub = m_tx64->tx().uniqueStubs.callToExit;
     m_as.movq(callToExitStub, m_rScratch);
     m_as.cmpq(reg::rsp[0], m_rScratch);
     m_as.jcc8(CC_NE, retLabel);
@@ -2784,7 +2784,7 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
  */
 void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
   auto const fp       = srcLoc(0).reg();
-  auto const fakeRet  = m_tx64->uniqueStubs.retInlHelper;
+  auto const fakeRet  = m_tx64->tx().uniqueStubs.retInlHelper;
   auto const retBCOff = inst->extra<DefInlineFP>()->retBCOff;
 
   m_as.    storeq (fakeRet, fp[AROFF(m_savedRip)]);
@@ -3013,7 +3013,7 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   assert(m_unit.bcOff() == inst->marker().bcOff);
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-  auto const destSR = m_tx64->getSrcRec(destSK);
+  auto const destSR = m_tx64->tx().getSrcRec(destSK);
   destSR->emitFallbackJump(m_mainCode);
 }
 
@@ -3121,8 +3121,8 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   PhysRegSaverStub saver(a, toSave);
 
   auto const target = numLocals > kNumFreeLocalsHelpers
-    ? m_tx64->uniqueStubs.freeManyLocalsHelper
-    : m_tx64->uniqueStubs.freeLocalsHelpers[numLocals - 1];
+    ? m_tx64->tx().uniqueStubs.freeManyLocalsHelper
+    : m_tx64->tx().uniqueStubs.freeLocalsHelpers[numLocals - 1];
 
   a.lea(rFp[-numLocals * sizeof(TypedValue)], rDest);
   a.call(target);
@@ -3697,7 +3697,7 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   Offset after          = inst->extra<CallArray>()->after;
   cgCallHelper(
     m_as,
-    CppCall(m_tx64->uniqueStubs.fcallArrayHelper),
+    CppCall(m_tx64->tx().uniqueStubs.fcallArrayHelper),
     kVoidDest,
     SyncOptions::kSyncPoint,
     argGroup()
@@ -4838,7 +4838,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert((vals64 & mask64) == vals64);
 
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-  auto const destSR = m_tx64->getSrcRec(destSK);
+  auto const destSR = m_tx64->tx().getSrcRec(destSK);
 
   auto thenBody = [&] {
     auto bitsOff = sizeof(uint64_t) * (firstBitNum / 64);
@@ -5576,7 +5576,7 @@ void CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {
 void CodeGenerator::cgCheckCold(IRInstruction* inst) {
   Block*     label = inst->taken();
   TransID  transId = inst->extra<CheckCold>()->transId;
-  auto counterAddr = m_tx64->profData()->transCounterAddr(transId);
+  auto counterAddr = m_tx64->tx().profData()->transCounterAddr(transId);
 
   emitLoadImm(m_as, uint64_t(counterAddr), m_rScratch);
   m_as.decq(m_rScratch[0]);
@@ -6096,7 +6096,7 @@ void CodeGenerator::cgIncTransCounter(IRInstruction* inst) {
 
 void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
   TransID  transId = inst->extra<TransIDData>()->transId;
-  auto counterAddr = m_tx64->profData()->transCounterAddr(transId);
+  auto counterAddr = m_tx64->tx().profData()->transCounterAddr(transId);
   emitLoadImm(m_as, uint64_t(counterAddr), m_rScratch);
   m_as.decq(m_rScratch[0]);
 }
@@ -6229,8 +6229,8 @@ void CodeGenerator::cgBlock(Block* block, std::vector<TransBCMapping>* bcMap) {
     // If we're on the first instruction of the block or we have a new
     // marker since the last instruction, update the bc mapping.
     if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
-        (m_tx64->isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI) &&
-        bcMap) {
+        (m_tx64->tx().isTransDBEnabled() ||
+        RuntimeOption::EvalJitUseVtuneAPI) && bcMap) {
       bcMap->push_back(TransBCMapping{inst->marker().func->unit()->md5(),
                                       inst->marker().bcOff,
                                       m_as.frontier(),

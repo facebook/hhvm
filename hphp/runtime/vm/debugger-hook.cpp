@@ -27,6 +27,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debuggerflow);
+using JIT::tx;
 using JIT::tx64;
 
 // Hook called from the bytecode interpreter before every opcode executed while
@@ -108,7 +109,7 @@ static void blacklistRangesInJit(const Unit* unit,
        it != offsets.end(); ++it) {
     for (PC pc = unit->at(it->m_base); pc < unit->at(it->m_past);
          pc += instrLen((Op*)pc)) {
-      tx64->addDbgBLPC(pc);
+      tx->addDbgBLPC(pc);
     }
   }
   if (!tx64->addDbgGuards(unit)) {
@@ -172,7 +173,7 @@ static void addBreakPointFuncEntry(const Func* f) {
         f->fullName()->data(), f->unit(), f->base(), pc);
   getBreakPointFilter()->addPC(pc);
   if (RuntimeOption::EvalJit) {
-    if (tx64->addDbgBLPC(pc)) {
+    if (tx->addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
       if (!tx64->addDbgGuard(f, f->base())) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
@@ -249,7 +250,7 @@ void phpAddBreakPoint(const Unit* unit, Offset offset) {
   PC pc = unit->at(offset);
   getBreakPointFilter()->addPC(pc);
   if (RuntimeOption::EvalJit) {
-    if (tx64->addDbgBLPC(pc)) {
+    if (tx->addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
       if (!tx64->addDbgGuards(unit)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");

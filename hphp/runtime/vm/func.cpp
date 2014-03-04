@@ -39,6 +39,7 @@
 namespace HPHP {
 
 TRACE_SET_MOD(hhbc);
+using JIT::tx;
 using JIT::tx64;
 
 const StringData* Func::s___call = makeStaticString("__call");
@@ -139,7 +140,7 @@ void Func::setFullName() {
 }
 
 void Func::resetPrologue(int numParams) {
-  auto const& stubs = tx64->uniqueStubs;
+  auto const& stubs = tx->uniqueStubs;
   m_prologueTable[numParams] = stubs.fcallHelperThunk;
 }
 
@@ -149,7 +150,7 @@ void Func::initPrologues(int numParams) {
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
                                          : kNumFixedPrologues;
 
-  if (tx64 == nullptr) {
+  if (tx == nullptr) {
     m_funcBody = nullptr;
     for (int i = 0; i < numPrologues; i++) {
       m_prologueTable[i] = nullptr;
@@ -157,7 +158,7 @@ void Func::initPrologues(int numParams) {
     return;
   }
 
-  auto const& stubs = tx64->uniqueStubs;
+  auto const& stubs = tx->uniqueStubs;
 
   m_funcBody = stubs.funcBodyHelperThunk;
 

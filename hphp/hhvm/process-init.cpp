@@ -54,6 +54,7 @@ SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
 void ProcessInit() {
   // Create the global tx64 object
   JIT::tx64 = new JIT::TranslatorX64();
+  JIT::tx = &JIT::tx64->tx();
   JIT::tx64->initUniqueStubs();
 
   // Save the current options, and set things up so that

@@ -165,6 +165,9 @@ int locPhysicalOffset(Location l, const Func* f) {
   return -((l.offset + 1) * iterInflator + localsToSkip);
 }
 
+// The global Translator object.
+Translator* tx;
+
 RuntimeType Translator::liveType(Location l,
                                  const Unit& u,
                                  bool specialize) {
@@ -2635,7 +2638,7 @@ RuntimeType TraceletContext::currentType(const Location& l) const {
   if (!dl) {
     assert(!m_deletedSet.count(l));
     assert(!m_changeSet.count(l));
-    return tx64->liveType(l, *liveUnit());
+    return tx->liveType(l, *liveUnit());
   }
   return (*dl)->rtt;
 }
@@ -2659,11 +2662,11 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
         m_resolvedDeps[l] = dl;
       }
     } else {
-      const bool specialize = tx64->mode() == TransLive &&
+      const bool specialize = tx->mode() == TransLive &&
         (RuntimeOption::EvalHHBCRelaxGuards ||
          RuntimeOption::EvalHHIRRelaxGuards);
 
-      RuntimeType rtt = tx64->liveType(l, *liveUnit(), specialize);
+      RuntimeType rtt = tx->liveType(l, *liveUnit(), specialize);
       assert(rtt.isIter() || !rtt.isVagueValue());
       // Allocate a new DynLocation to represent this and store it in the
       // current map.

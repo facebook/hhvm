@@ -40,7 +40,7 @@ void emitStackCheck(int funcDepth, Offset pc) {
   a.   Sub  (rAsm, rAsm, funcDepth + Stack::sSurprisePageSize, vixl::SetFlags);
   // This doesn't need to be smashable, but it is a long jump from mainCode to
   // stubs, so it can't be direct.
-  emitSmashableJump(tx64->code.main(), tx64->uniqueStubs.stackOverflowHelper,
+  emitSmashableJump(tx64->code.main(), tx->uniqueStubs.stackOverflowHelper,
                     CC_L);
 }
 
@@ -63,7 +63,7 @@ TCA emitFuncGuard(vixl::MacroAssembler& a, Func* func) {
     assert(a.isFrontierAligned(8));
   }
   a.   bind  (&redispatchStubAddr);
-  a.   dc64  (tx64->uniqueStubs.funcPrologueRedispatch);
+  a.   dc64  (tx->uniqueStubs.funcPrologueRedispatch);
   // The guarded Func* comes right before the end so that
   // funcPrologueToGuardImmPtr() is simple.
   a.   bind  (&funcAddr);
@@ -81,7 +81,7 @@ constexpr auto kLocalsToInitializeInline = 9;
 SrcKey emitPrologueWork(Func* func, int nPassed) {
   vixl::MacroAssembler a { tx64->code.main() };
 
-  if (tx64->mode() == TransProflogue) {
+  if (tx->mode() == TransProflogue) {
     not_implemented();
   }
 

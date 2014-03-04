@@ -2149,7 +2149,7 @@ function mysqli_real_connect(mysqli $link,
                              ?string $dbname = null,
                              ?int $port = null,
                              ?string $socket = null,
-                             ?int $flags = null): bool {
+                             ?int $flags = 0): bool {
   return $link->real_connect($host, $username, $passwd, $dbname, $port, $socket,
                              $flags);
 }

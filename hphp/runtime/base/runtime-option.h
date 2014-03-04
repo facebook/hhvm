@@ -345,6 +345,7 @@ public:
   static bool EnableZendCompat;
   static bool TimeoutsUseWallTime;
   static bool CheckFlushOnUserClose;
+  static bool EvalAuthoritativeMode;
 
   static int GetScannerType();
 

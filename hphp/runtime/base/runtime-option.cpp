@@ -343,6 +343,7 @@ bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
+bool RuntimeOption::EvalAuthoritativeMode = false;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -1234,6 +1235,8 @@ void RuntimeOption::Load(Hdf &config,
     // NB: after we know the value of RepoAuthoritative.
     EnableArgsInBacktraces =
       eval["EnableArgsInBacktraces"].getBool(!RepoAuthoritative);
+    EvalAuthoritativeMode =
+      eval["AuthoritativeMode"].getBool(false) || RepoAuthoritative;
   }
   {
     Hdf sandbox = config["Sandbox"];

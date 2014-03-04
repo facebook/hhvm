@@ -593,13 +593,13 @@ Variant c_XMLReader::t___get(Variant name) {
 
 Variant c_XMLReader::t_expand(CObjRef basenode /* = null */) {
   p_DOMDocument doc;
-  xmlDocPtr docp = NULL;
+  xmlDocPtr docp = nullptr;
 
   if (!basenode.isNull()) {
     c_DOMNode *dombasenode = basenode.getTyped<c_DOMNode>();
     doc = dombasenode->doc();
     docp = (xmlDocPtr) doc->m_node;
-    if (docp == NULL) {
+    if (docp == nullptr) {
       raise_warning("Invalid State Error");
       return false;
     }
@@ -609,12 +609,12 @@ Variant c_XMLReader::t_expand(CObjRef basenode /* = null */) {
 
   if (m_ptr) {
     xmlNodePtr node = xmlTextReaderExpand(m_ptr);
-    if (node == NULL) {
+    if (node == nullptr) {
       raise_warning("An Error Occurred while expanding");
       return false;
     } else {
       xmlNodePtr nodec = xmlDocCopyNode(node, docp, 1);
-      if(nodec == NULL) {
+      if(nodec == nullptr) {
         raise_notice("Cannot expand this node type");
         return false;
       } else {

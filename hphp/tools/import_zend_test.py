@@ -203,6 +203,9 @@ bad_tests = (
 
     # flaky: t3846500
     '/ext/standard/tests/file/copy_variation8.php',
+
+    # flaky: t3851970
+    '/ext/standard/tests/misc/time_sleep_until_basic.php',
 )
 
 # Tests that work but not in repo mode

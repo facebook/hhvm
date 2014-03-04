@@ -2235,6 +2235,12 @@ MCGenerator::MCGenerator()
     profileInit();
     profileUp = true;
   }
+
+  if (Trace::moduleEnabledRelease(Trace::printir) &&
+      !RuntimeOption::EvalJit) {
+    Trace::traceRelease("TRACE=printir is set but the jit isn't on. "
+                        "Did you mean to run with -vEval.Jit=1?\n");
+  }
 }
 
 void MCGenerator::initUniqueStubs() {

@@ -535,7 +535,7 @@ HphpArray* HphpArray::MakeUncounted(ArrayData* array) {
 
 NEVER_INLINE
 void HphpArray::ReleasePacked(ArrayData* in) {
-  assert(in->m_count >= 0);
+  assert(in->isRefCounted());
   auto const ad = asPacked(in);
 
   if (!ad->isZombie()) {
@@ -560,7 +560,7 @@ void HphpArray::ReleasePacked(ArrayData* in) {
 
 NEVER_INLINE
 void HphpArray::Release(ArrayData* in) {
-  assert(in->m_count >= 0);
+  assert(in->isRefCounted());
   auto const ad = asMixed(in);
 
   if (!ad->isZombie()) {
@@ -598,19 +598,19 @@ void HphpArray::ReleaseUncounted(ArrayData* in) {
       if (!ad->isPacked()) {
         if (isTombstone(ptr->data.m_type)) continue;
         if (ptr->hasStrKey()) {
-          assert(ptr->key->m_count < 0);
+          assert(!ptr->key->isRefCounted());
           if (!ptr->key->isStatic()) {
             ptr->key->destructStatic();
           }
         }
       }
       if (ptr->data.m_type == KindOfString) {
-        assert(ptr->data.m_data.pstr->m_count < 0);
+        assert(!ptr->data.m_data.pstr->isRefCounted());
         if (!ptr->data.m_data.pstr->isStatic()) {
           ptr->data.m_data.pstr->destructStatic();
         }
       } else if (ptr->data.m_type == KindOfArray) {
-        assert(ptr->data.m_data.pstr->m_count < 0);
+        assert(!ptr->data.m_data.parr->isRefCounted());
         if (!ptr->data.m_data.parr->isStatic()) {
           ReleaseUncounted(ptr->data.m_data.parr);
         }

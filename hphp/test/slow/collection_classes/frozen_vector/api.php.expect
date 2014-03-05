@@ -32,11 +32,3 @@ array(3) {
 }
 int(1)
 int(-1)
-object(HH\ImmVector)#2 (2) {
-  [0]=>
-  int(2)
-  [1]=>
-  int(3)
-}
-object(HH\ImmVector)#2 (0) {
-}

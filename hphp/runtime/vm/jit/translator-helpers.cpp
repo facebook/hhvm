@@ -15,17 +15,17 @@
 */
 
 #include "hphp/runtime/vm/jit/translator-helpers.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP {
 namespace JIT {
 
 void translatorSync() {
-  tx64->sync();
+  mcg->sync();
 }
 
 void translatorTraceCodeGen() {
-  tx64->traceCodeGen();
+  mcg->traceCodeGen();
 }
 
 } // HPHP::JIT

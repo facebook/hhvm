@@ -21,8 +21,8 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
-#include "hphp/runtime/vm/jit/translator-x64-internal.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/asm-x64.h"
@@ -87,12 +87,12 @@ void emitBindJ(CodeBlock& cb, CodeBlock& stubs,
     emitJmpOrJcc(a, cc, toSmash);
   }
 
-  tx64->setJmpTransID(toSmash);
+  mcg->setJmpTransID(toSmash);
 
   TCA sr = (req == JIT::REQ_BIND_JMP
-            ? emitEphemeralServiceReq(tx64->code.stubs(), tx64->getFreeStub(),
+            ? emitEphemeralServiceReq(mcg->code.stubs(), mcg->getFreeStub(),
                                       req, toSmash, dest.offset())
-            : emitServiceReq(tx64->code.stubs(), req, toSmash, dest.offset()));
+            : emitServiceReq(mcg->code.stubs(), req, toSmash, dest.offset()));
 
   Asm a { cb };
   if (cb.base() == stubs.base()) {
@@ -123,7 +123,7 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
    */
   Asm a { mainCode };
   a.   movq  (rVmFp, argNumToRegName[0]);
-  if (tx64->fixupMap().eagerRecord(func)) {
+  if (mcg->fixupMap().eagerRecord(func)) {
     emitEagerSyncPoint(a, func->getEntry());
   }
   emitCall(a, (TCA)builtinFuncPtr);
@@ -144,7 +144,7 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
   Offset pcOffset = 0;  // NativeImpl is the only instruction in the func
   Offset stackOff = func->numLocals(); // Builtin stubs have no
                                        // non-arg locals
-  tx64->fixupMap().recordSyncPoint(mainCode.frontier(), pcOffset, stackOff);
+  mcg->fixupMap().recordSyncPoint(mainCode.frontier(), pcOffset, stackOff);
 
   /*
    * The native implementation already put the return value on the
@@ -172,7 +172,7 @@ void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& stubsCode,
   // went to the right Func*, correcting if necessary. We treat the first
   // Func we encounter as a decent prediction. Make space to burn in a
   // TCA.
-  ReqBindCall* req = tx64->globalData().alloc<ReqBindCall>();
+  ReqBindCall* req = mcg->globalData().alloc<ReqBindCall>();
 
   Asm a { mainCode };
   prepareForSmash(mainCode, kCallLen);
@@ -315,7 +315,7 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
     assert(funcd->numIterators() == 0);
     Asm a { mainCode };
     emitLea(a, rVmSp[cellsToBytes(numArgs)], rVmFp);
-    emitCheckSurpriseFlagsEnter(mainCode, stubsCode, true, tx64->fixupMap(),
+    emitCheckSurpriseFlagsEnter(mainCode, stubsCode, true, mcg->fixupMap(),
                                 Fixup(0, numArgs));
     // rVmSp is already correctly adjusted, because there's no locals
     // other than the arguments passed.

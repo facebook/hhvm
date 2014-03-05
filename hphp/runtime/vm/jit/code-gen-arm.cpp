@@ -554,13 +554,13 @@ void CodeGenerator::recordHostCallSyncPoint(vixl::MacroAssembler& as,
                                             TCA tca) {
   auto stackOff = m_curInst->marker().spOff;
   auto pcOff = m_curInst->marker().bcOff - m_curInst->marker().func->base();
-  m_tx64->fixupMap().recordSyncPoint(tca, pcOff, stackOff);
+  m_mcg->fixupMap().recordSyncPoint(tca, pcOff, stackOff);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgJmp(IRInstruction* inst) {
-  emitJumpToBlock(m_tx64->code.main(), inst->taken(), CC_None);
+  emitJumpToBlock(m_mcg->code.main(), inst->taken(), CC_None);
 }
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
@@ -648,7 +648,7 @@ void CodeGenerator::emitDecRefStaticType(Type type,
 
   m_as.  B    (&allDone, vixl::ne);
   cgCallHelper(m_as,
-               TranslatorX64::getDtorCall(type.toDataType()),
+               MCGenerator::getDtorCall(type.toDataType()),
                kVoidDest,
                SyncOptions::kSyncPoint,
                argGroup().reg(dataReg));
@@ -1092,7 +1092,7 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
     rFP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-      auto const destSR = m_tx64->tx().getSrcRec(destSK);
+      auto const destSR = m_mcg->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
 }
@@ -1107,7 +1107,7 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
     rSP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-      auto const destSR = m_tx64->tx().getSrcRec(destSK);
+      auto const destSR = m_mcg->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
 }
@@ -1121,7 +1121,7 @@ void CodeGenerator::cgCheckStk(IRInstruction* inst) {
     rAsm.W(),
     rSP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
-      emitJumpToBlock(m_tx64->code.main(), inst->taken(), ccNegate(cc));
+      emitJumpToBlock(m_mcg->code.main(), inst->taken(), ccNegate(cc));
     }
   );
 }
@@ -1154,7 +1154,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   };
 
   auto doJcc = [&] (ConditionCode cc) {
-    emitJumpToBlock(m_tx64->code.main(), inst->taken(), ccNegate(cc));
+    emitJumpToBlock(m_mcg->code.main(), inst->taken(), ccNegate(cc));
   };
 
   Type typeParam = inst->typeParam();
@@ -1165,7 +1165,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     return;
   }
   if (srcType.not(typeParam)) {
-    emitJumpToBlock(m_tx64->code.main(), inst->taken(), CC_None);
+    emitJumpToBlock(m_mcg->code.main(), inst->taken(), CC_None);
     return;
   }
 
@@ -1240,7 +1240,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert((vals64 & mask64) == vals64);
 
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-  auto const destSR = m_tx64->tx().getSrcRec(destSK);
+  auto const destSR = m_mcg->tx().getSrcRec(destSK);
 
   auto thenBody = [&] {
     auto bitsOff = sizeof(uint64_t) * (firstBitNum / 64);
@@ -1326,7 +1326,7 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   assert(m_unit.bcOff() == inst->marker().bcOff);
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-  auto const destSR = m_tx64->tx().getSrcRec(destSK);
+  auto const destSR = m_mcg->tx().getSrcRec(destSK);
   destSR->emitFallbackJump(m_mainCode);
 }
 
@@ -1504,7 +1504,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
   bool isImmutable = func->isConst() && !func->isA(Type::Null);
   const Func* funcd = isImmutable ? func->funcVal() : nullptr;
-  int32_t adjust  = emitBindCall(tx64->code.main(), tx64->code.stubs(),
+  int32_t adjust  = emitBindCall(mcg->code.main(), mcg->code.stubs(),
                                  srcKey, funcd, numArgs);
 
   emitRegGetsRegPlusImm(m_as, rVmSp, rVmSp, adjust);
@@ -1777,7 +1777,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   m_as.   Ldr   (rVmSp, rReturnReg[offsetof(ExecutionContext, m_stack) +
                                    Stack::topOfStackOffset()]);
 
-  emitServiceReq(tx64->code.main(), REQ_RESUME);
+  emitServiceReq(mcg->code.main(), REQ_RESUME);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1810,7 +1810,7 @@ void CodeGenerator::cgBlock(Block* block, std::vector<TransBCMapping>* bcMap) {
     // If we're on the first instruction of the block or we have a new
     // marker since the last instruction, update the bc mapping.
     if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
-        m_tx64->tx().isTransDBEnabled() && bcMap) {
+        m_mcg->tx().isTransDBEnabled() && bcMap) {
       bcMap->push_back(TransBCMapping{inst->marker().func->unit()->md5(),
                                       inst->marker().bcOff,
                                       m_as.frontier(),

@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP { namespace JIT {
 
@@ -102,7 +102,7 @@ static void smashX64JmpOrCall(TCA addr, TCA dest, bool isCall) {
   // smashable jumps that way.
   assert(isSmashable(addr, X64::kJmpLen));
 
-  auto& cb = tx64->code.blockFor(addr);
+  auto& cb = mcg->code.blockFor(addr);
   CodeCursor cursor { cb, addr };
   X64Assembler a { cb };
   if (dest > addr && dest - addr <= X64::kJmpLen) {
@@ -138,7 +138,7 @@ static void smashARMJmpOrCall(TCA addr, TCA dest, bool isCall) {
 //////////////////////////////////////////////////////////////////////
 
 void smashJmp(TCA jmpAddr, TCA newDest) {
-  assert(TranslatorX64::canWrite());
+  assert(MCGenerator::canWrite());
   FTRACE(2, "smashJmp: {} -> {}\n", jmpAddr, newDest);
   if (arch() == Arch::X64) {
     smashX64JmpOrCall(jmpAddr, newDest, false);
@@ -150,7 +150,7 @@ void smashJmp(TCA jmpAddr, TCA newDest) {
 }
 
 void smashCall(TCA callAddr, TCA newDest) {
-  assert(TranslatorX64::canWrite());
+  assert(MCGenerator::canWrite());
   FTRACE(2, "smashCall: {} -> {}\n", callAddr, newDest);
   if (arch() == Arch::X64) {
     smashX64JmpOrCall(callAddr, newDest, true);
@@ -162,7 +162,7 @@ void smashCall(TCA callAddr, TCA newDest) {
 }
 
 void smashJcc(TCA jccAddr, TCA newDest) {
-  assert(TranslatorX64::canWrite());
+  assert(MCGenerator::canWrite());
   FTRACE(2, "smashJcc: {} -> {}\n", jccAddr, newDest);
   if (arch() == Arch::X64) {
     // Make sure the encoding is what we expect. It has to be a rip-relative jcc

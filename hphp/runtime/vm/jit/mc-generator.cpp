@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 
 #include "folly/MapUtil.h"
@@ -127,12 +127,12 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/unwind.h"
 
-#include "hphp/runtime/vm/jit/translator-x64-internal.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
 
 namespace HPHP {
 namespace JIT {
 
-TRACE_SET_MOD(tx64);
+TRACE_SET_MOD(mcg);
 
 using namespace reg;
 using namespace Trace;
@@ -148,13 +148,13 @@ using std::max;
   TPC(enter_tc) \
   TPC(service_req)
 
-static const char* const kInstrCountTx64Name = "instr_tx64";
+static const char* const kInstrCountMCGName = "instr_mcg";
 static const char* const kInstrCountIRName = "instr_hhir";
 
 #define TPC(n) "jit_" #n,
 static const char* const kPerfCounterNames[] = {
   TRANS_PERF_COUNTERS
-  kInstrCountTx64Name,
+  kInstrCountMCGName,
   kInstrCountIRName,
 };
 #undef TPC
@@ -168,13 +168,13 @@ enum TransPerfCounter {
 static __thread int64_t s_perfCounters[tpc_num_counters];
 #define INC_TPC(n) ++s_perfCounters[tpc_ ## n];
 
-// The global TranslatorX64 object.
-TranslatorX64* tx64;
+// The global MCGenerator object.
+MCGenerator* mcg;
 
 // Register dirtiness: thread-private.
 __thread VMRegState tl_regState = VMRegState::CLEAN;
 
-JIT::CppCall TranslatorX64::getDtorCall(DataType type) {
+JIT::CppCall MCGenerator::getDtorCall(DataType type) {
   switch (type) {
   case BitwiseKindOfString:
     return JIT::CppCall(getMethodPtr(&StringData::release));
@@ -192,7 +192,7 @@ JIT::CppCall TranslatorX64::getDtorCall(DataType type) {
   }
 }
 
-bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
+bool MCGenerator::profileSrcKey(const SrcKey& sk) const {
   if (!sk.func()->shouldPGO()) return false;
 
   if (m_tx.profData()->optimized(sk.getFuncId())) return false;
@@ -222,7 +222,7 @@ bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
   return true;
 }
 
-bool TranslatorX64::profilePrologue(const SrcKey& sk) const {
+bool MCGenerator::profilePrologue(const SrcKey& sk) const {
   if (!sk.func()->shouldPGO()) return false;
 
   if (m_tx.profData()->optimized(sk.getFuncId())) return false;
@@ -239,7 +239,7 @@ bool TranslatorX64::profilePrologue(const SrcKey& sk) const {
  * Invalidate the SrcDB entries for func's SrcKeys that have any
  * Profile translation.
  */
-void TranslatorX64::invalidateFuncProfSrcKeys(const Func* func) {
+void MCGenerator::invalidateFuncProfSrcKeys(const Func* func) {
   assert(RuntimeOption::EvalJitPGO);
   FuncId funcId = func->getFuncId();
   for (auto tid : m_tx.profData()->funcProfTransIDs(funcId)) {
@@ -247,7 +247,7 @@ void TranslatorX64::invalidateFuncProfSrcKeys(const Func* func) {
   }
 }
 
-TCA TranslatorX64::retranslate(const TranslArgs& args) {
+TCA MCGenerator::retranslate(const TranslArgs& args) {
   SrcRec* sr = m_tx.getSrcDB().find(args.m_sk);
 
   bool locked = sr->tryLock();
@@ -278,7 +278,7 @@ TCA TranslatorX64::retranslate(const TranslArgs& args) {
   return translate(args);
 }
 
-TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
+TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   LeaseHolder writer(Translator::WriteLease());
   if (!writer || !shouldTranslate()) return nullptr;
   if (isDebuggerAttachedProcess()) return nullptr;
@@ -335,7 +335,7 @@ TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
  * a translation.
  */
 TCA
-TranslatorX64::getTranslation(const TranslArgs& args) {
+MCGenerator::getTranslation(const TranslArgs& args) {
   auto sk = args.m_sk;
   sk.func()->validate();
   SKTRACE(2, sk,
@@ -360,7 +360,7 @@ TranslatorX64::getTranslation(const TranslArgs& args) {
 }
 
 int
-TranslatorX64::numTranslations(SrcKey sk) const {
+MCGenerator::numTranslations(SrcKey sk) const {
   if (const SrcRec* sr = m_tx.getSrcDB().find(sk)) {
     return sr->translations().size();
   }
@@ -411,7 +411,7 @@ static void populateLiveContext(JIT::RegionContext& ctx) {
 }
 
 TCA
-TranslatorX64::createTranslation(const TranslArgs& args) {
+MCGenerator::createTranslation(const TranslArgs& args) {
   if (!shouldTranslate()) return nullptr;
 
   /*
@@ -472,7 +472,7 @@ TranslatorX64::createTranslation(const TranslArgs& args) {
 }
 
 TCA
-TranslatorX64::lookupTranslation(SrcKey sk) const {
+MCGenerator::lookupTranslation(SrcKey sk) const {
   if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
     return sr->getTopTranslation();
   }
@@ -480,7 +480,7 @@ TranslatorX64::lookupTranslation(SrcKey sk) const {
 }
 
 TCA
-TranslatorX64::translate(const TranslArgs& args) {
+MCGenerator::translate(const TranslArgs& args) {
   INC_TPC(translate);
 
   assert(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
@@ -518,7 +518,7 @@ TranslatorX64::translate(const TranslArgs& args) {
 }
 
 TCA
-TranslatorX64::getCallArrayPrologue(Func* func) {
+MCGenerator::getCallArrayPrologue(Func* func) {
   TCA tca = func->getFuncBody();
   if (tca != m_tx.uniqueStubs.funcBodyHelperThunk) return tca;
 
@@ -539,15 +539,15 @@ TranslatorX64::getCallArrayPrologue(Func* func) {
     func->setFuncBody(tca);
   } else {
     SrcKey sk(func, func->base());
-    tca = tx64->getTranslation(TranslArgs(sk, false).setFuncBody());
+    tca = mcg->getTranslation(TranslArgs(sk, false).setFuncBody());
   }
 
   return tca;
 }
 
 void
-TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
-                                   const Func* func) {
+MCGenerator::smashPrologueGuards(TCA* prologues, int numPrologues,
+                                 const Func* func) {
   DEBUG_ONLY std::unique_ptr<LeaseHolder> writer;
   for (int i = 0; i < numPrologues; i++) {
     if (prologues[i] != m_tx.uniqueStubs.fcallHelperThunk
@@ -615,8 +615,8 @@ TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
  * unpredictable relationship to the source.
  */
 bool
-TranslatorX64::checkCachedPrologue(const Func* func, int paramIdx,
-                                   TCA& prologue) const {
+MCGenerator::checkCachedPrologue(const Func* func, int paramIdx,
+                                 TCA& prologue) const {
   prologue = (TCA)func->getPrologue(paramIdx);
   if (prologue != m_tx.uniqueStubs.fcallHelperThunk) {
     TRACE(1, "cached prologue %s(%d) -> cached %p\n",
@@ -636,7 +636,7 @@ static void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
 }
 
 TCA
-TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
+MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
   int numParams = func->numParams();
@@ -711,7 +711,7 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   }();
 
   assert(JIT::funcPrologueHasGuard(start, func));
-  TRACE(2, "funcPrologue tx64 %p %s(%d) setting prologue %p\n",
+  TRACE(2, "funcPrologue mcg %p %s(%d) setting prologue %p\n",
         this, func->fullName()->data(), nPassed, start);
   assert(isValidCodeAddress(start));
   func->setPrologue(paramIndex, start);
@@ -743,8 +743,8 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
  * address for the translation corresponding to triggerSk, if such
  * translation is generated; otherwise returns nullptr.
  */
-TCA TranslatorX64::regeneratePrologue(TransID prologueTransId,
-                                      SrcKey triggerSk) {
+TCA MCGenerator::regeneratePrologue(TransID prologueTransId,
+                                    SrcKey triggerSk) {
   Func* func = m_tx.profData()->transFunc(prologueTransId);
   int  nArgs = m_tx.profData()->prologueArgs(prologueTransId);
 
@@ -811,7 +811,7 @@ TCA TranslatorX64::regeneratePrologue(TransID prologueTransId,
  * triggerSk, if such translation is generated; otherwise returns
  * nullptr.
  */
-TCA TranslatorX64::regeneratePrologues(Func* func, SrcKey triggerSk) {
+TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
   TCA triggerStart = nullptr;
   std::vector<TransID> prologTransIDs;
 
@@ -847,8 +847,8 @@ TCA TranslatorX64::regeneratePrologues(Func* func, SrcKey triggerSk) {
  *   u:dest from toSmash.
  */
 TCA
-TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk,
-                       JIT::ServiceRequest req, bool& smashed) {
+MCGenerator::bindJmp(TCA toSmash, SrcKey destSk,
+                     JIT::ServiceRequest req, bool& smashed) {
   TCA tDest = getTranslation(TranslArgs(destSk, false));
   if (!tDest) return nullptr;
   LeaseHolder writer(Translator::WriteLease());
@@ -912,11 +912,11 @@ TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk,
  * offNotTaken:
  */
 TCA
-TranslatorX64::bindJmpccFirst(TCA toSmash,
-                              Offset offTaken, Offset offNotTaken,
-                              bool taken,
-                              ConditionCode cc,
-                              bool& smashed) {
+MCGenerator::bindJmpccFirst(TCA toSmash,
+                            Offset offTaken, Offset offNotTaken,
+                            bool taken,
+                            ConditionCode cc,
+                            bool& smashed) {
   const Func* f = liveFunc();
   LeaseHolder writer(Translator::WriteLease());
   if (!writer) return nullptr;
@@ -986,8 +986,8 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
 
 // smashes a jcc to point to a new destination
 TCA
-TranslatorX64::bindJmpccSecond(TCA toSmash, const Offset off,
-                               ConditionCode cc, bool& smashed) {
+MCGenerator::bindJmpccSecond(TCA toSmash, const Offset off,
+                             ConditionCode cc, bool& smashed) {
   const Func* f = liveFunc();
   SrcKey dest(f, off);
   TCA branch = getTranslation(TranslArgs(dest, true));
@@ -1007,16 +1007,16 @@ TranslatorX64::bindJmpccSecond(TCA toSmash, const Offset off,
   return branch;
 }
 
-void TranslatorX64::emitResolvedDeps(const ChangeMap& resolvedDeps) {
+void MCGenerator::emitResolvedDeps(const ChangeMap& resolvedDeps) {
   for (const auto dep : resolvedDeps) {
     m_tx.irTrans()->assertType(dep.first, dep.second->rtt);
   }
 }
 
 void
-TranslatorX64::checkRefs(SrcKey sk,
-                         const RefDeps& refDeps,
-                         SrcRec& fail) {
+MCGenerator::checkRefs(SrcKey sk,
+                       const RefDeps& refDeps,
+                       SrcRec& fail) {
   if (refDeps.size() == 0) {
     return;
   }
@@ -1046,7 +1046,7 @@ class FreeRequestStubTrigger : public Treadmill::WorkItem {
   }
   virtual void operator()() {
     TRACE(3, "FreeStubTrigger: Firing @ %p , stub %p\n", this, m_stub);
-    if (tx64->freeRequestStub(m_stub) != true) {
+    if (mcg->freeRequestStub(m_stub) != true) {
       // If we can't free the stub, enqueue again to retry.
       TRACE(3, "FreeStubTrigger: write lease failed, requeueing %p\n", m_stub);
       enqueue(std::unique_ptr<WorkItem>(new FreeRequestStubTrigger(m_stub)));
@@ -1119,7 +1119,7 @@ struct TReqInfo {
 
 
 void
-TranslatorX64::enterTC(TCA start, void* data) {
+MCGenerator::enterTC(TCA start, void* data) {
   if (debug) {
     fflush(stdout);
     fflush(stderr);
@@ -1193,7 +1193,7 @@ TranslatorX64::enterTC(TCA start, void* data) {
         [] (vixl::Simulator* s) {
           if (tl_regState == VMRegState::DIRTY) {
             // This is a pseudo-copy of the logic in sync_regstate.
-            tx64->fixupMap().fixupWorkSimulated(g_context.getNoCheck());
+            mcg->fixupMap().fixupWorkSimulated(g_context.getNoCheck());
             tl_regState = VMRegState::CLEAN;
           }
         }
@@ -1300,9 +1300,9 @@ TranslatorX64::enterTC(TCA start, void* data) {
  * Call instruction. If we punt to the interpreter, the interpreter
  * will redo some of the work that the translator has already done.
  */
-bool TranslatorX64::handleServiceRequest(TReqInfo& info,
-                                         TCA& start,
-                                         SrcKey& sk) {
+bool MCGenerator::handleServiceRequest(TReqInfo& info,
+                                       TCA& start,
+                                       SrcKey& sk) {
   const JIT::ServiceRequest requestNum =
     static_cast<JIT::ServiceRequest>(info.requestNum);
   auto* const args = info.args;
@@ -1555,7 +1555,7 @@ void FreeStubList::push(TCA stub) {
 }
 
 bool
-TranslatorX64::freeRequestStub(TCA stub) {
+MCGenerator::freeRequestStub(TCA stub) {
   LeaseHolder writer(Translator::WriteLease());
   /*
    * If we can't acquire the write lock, the caller
@@ -1567,7 +1567,7 @@ TranslatorX64::freeRequestStub(TCA stub) {
   return true;
 }
 
-TCA TranslatorX64::getFreeStub() {
+TCA MCGenerator::getFreeStub() {
   TCA ret = m_freeStubs.maybePop();
   if (ret) {
     Stats::inc(Stats::Astubs_Reused);
@@ -1626,7 +1626,7 @@ OPCODES
 #undef O
 };
 
-TCA TranslatorX64::getTranslatedCaller() const {
+TCA MCGenerator::getTranslatedCaller() const {
   DECLARE_FRAME_POINTER(fp);
   ActRec* framePtr = fp;  // can't directly mutate the register-mapped one
   for (; framePtr; framePtr = (ActRec*)framePtr->m_savedRbp) {
@@ -1639,7 +1639,7 @@ TCA TranslatorX64::getTranslatedCaller() const {
 }
 
 void
-TranslatorX64::syncWork() {
+MCGenerator::syncWork() {
   assert(tl_regState == VMRegState::DIRTY);
   m_fixupMap.fixup(g_context.getNoCheck());
   tl_regState = VMRegState::CLEAN;
@@ -1647,7 +1647,7 @@ TranslatorX64::syncWork() {
 }
 
 TCA
-TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
+MCGenerator::emitNativeTrampoline(TCA helperAddr) {
   auto& trampolines = code.trampolines();
   if (!trampolines.canEmit(kExpectedPerTrampolineSize)) {
     // not enough space to emit a trampoline, so just return the
@@ -1687,7 +1687,7 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
 }
 
 TCA
-TranslatorX64::getNativeTrampoline(TCA helperAddr) {
+MCGenerator::getNativeTrampoline(TCA helperAddr) {
   if (!RuntimeOption::EvalJitTrampolines && !Stats::enabled()) {
     return helperAddr;
   }
@@ -1699,11 +1699,11 @@ TranslatorX64::getNativeTrampoline(TCA helperAddr) {
 }
 
 bool
-TranslatorX64::reachedTranslationLimit(SrcKey sk,
-                                       const SrcRec& srcRec) const {
+MCGenerator::reachedTranslationLimit(SrcKey sk,
+                                     const SrcRec& srcRec) const {
   if (srcRec.translations().size() == RuntimeOption::EvalJitMaxTranslations) {
     INC_TPC(max_trans);
-    if (debug && Trace::moduleEnabled(Trace::tx64, 2)) {
+    if (debug && Trace::moduleEnabled(Trace::mcg, 2)) {
       const auto& tns = srcRec.translations();
       TRACE(1, "Too many (%zd) translations: %s, BC offset %d\n",
             tns.size(), sk.unit()->filepath()->data(),
@@ -1736,10 +1736,10 @@ TranslatorX64::reachedTranslationLimit(SrcKey sk,
 }
 
 void
-TranslatorX64::emitGuardChecks(SrcKey sk,
-                               const ChangeMap& dependencies,
-                               const RefDeps& refDeps,
-                               SrcRec& fail) {
+MCGenerator::emitGuardChecks(SrcKey sk,
+                             const ChangeMap& dependencies,
+                             const RefDeps& refDeps,
+                             SrcRec& fail) {
   if (Trace::moduleEnabled(Trace::stats, 2)) {
     emitIncStat(code.main(), Stats::TraceletGuard_enter);
   }
@@ -1796,22 +1796,21 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
     if (ni->breaksTracelet) break;
   }
   TRACE(3, "----------------------------------------------\n");
-  if (Trace::moduleEnabled(Trace::tx64, 5)) {
+  if (Trace::moduleEnabled(Trace::mcg, 5)) {
     // prettyStack() expects to use vmpc(). Leave it in the state we
     // found it since this code is debug-only, and we don't want behavior
     // to vary across the optimized/debug builds.
     PC oldPC = vmpc();
     vmpc() = unit->at(sk.offset());
-    TRACE(3, g_context->prettyStack(std::string(" tx64 ")));
+    TRACE(3, g_context->prettyStack(std::string(" mcg ")));
     vmpc() = oldPC;
     TRACE(3, "----------------------------------------------\n");
   }
 }
 
 void
-TranslatorX64::translateWork(const TranslArgs& args) {
+MCGenerator::translateWork(const TranslArgs& args) {
   Timer _t("translate");
-
   auto sk = args.m_sk;
   std::unique_ptr<Tracelet> tp;
 
@@ -2031,14 +2030,14 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   TRACE(1, "newTranslation: %p  sk: (func %d, bcOff %d)\n",
         start, sk.getFuncId(), sk.offset());
   srcRec.newTranslation(start);
-  TRACE(1, "tx64: %zd-byte tracelet\n", code.main().frontier() - start);
+  TRACE(1, "mcg: %zd-byte tracelet\n", code.main().frontier() - start);
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
     Trace::traceRelease("%s", getUsage().c_str());
   }
 }
 
 Translator::TranslateResult
-TranslatorX64::translateTracelet(Tracelet& t) {
+MCGenerator::translateTracelet(Tracelet& t) {
   Timer _t("translateTracelet");
 
   FTRACE(2, "attempting to translate tracelet:\n{}\n", t.toString());
@@ -2185,7 +2184,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
   return Translator::Failure;
 }
 
-void TranslatorX64::traceCodeGen() {
+void MCGenerator::traceCodeGen() {
   HhbcTranslator& ht = m_tx.irTrans()->hhbcTrans();
   auto& unit = ht.unit();
 
@@ -2208,13 +2207,13 @@ void TranslatorX64::traceCodeGen() {
   m_numHHIRTrans++;
 }
 
-TranslatorX64::TranslatorX64()
+MCGenerator::MCGenerator()
   : m_numNativeTrampolines(0)
   , m_numHHIRTrans(0)
   , m_catchTraceMap(128)
 {
-  TRACE(1, "TranslatorX64@%p startup\n", this);
-  tx64 = this;
+  TRACE(1, "MCGenerator@%p startup\n", this);
+  mcg = this;
 
   m_unwindRegistrar = register_unwind_region(code.base(), code.codeSize());
 
@@ -2225,7 +2224,7 @@ TranslatorX64::TranslatorX64()
   }
 }
 
-void TranslatorX64::initUniqueStubs() {
+void MCGenerator::initUniqueStubs() {
   // Put the following stubs into ahot, rather than a.
   CodeCache::Selector asmSel(CodeCache::Selector::Args(code).hot(true));
   if (JIT::arch() == JIT::Arch::ARM) {
@@ -2235,26 +2234,26 @@ void TranslatorX64::initUniqueStubs() {
   }
 }
 
-void TranslatorX64::registerCatchBlock(CTCA ip, TCA block) {
+void MCGenerator::registerCatchBlock(CTCA ip, TCA block) {
   FTRACE(1, "registerCatchBlock: afterCall: {} block: {}\n", ip, block);
   m_pendingCatchTraces.emplace_back(ip, block);
 }
 
-void TranslatorX64::processPendingCatchTraces() {
+void MCGenerator::processPendingCatchTraces() {
   for (auto const& pair : m_pendingCatchTraces) {
     m_catchTraceMap.insert(pair.first, pair.second);
   }
   m_pendingCatchTraces.clear();
 }
 
-folly::Optional<TCA> TranslatorX64::getCatchTrace(CTCA ip) const {
+folly::Optional<TCA> MCGenerator::getCatchTrace(CTCA ip) const {
   TCA* found = m_catchTraceMap.find(ip);
   if (found) return *found;
   return folly::none;
 }
 
 void
-TranslatorX64::requestInit() {
+MCGenerator::requestInit() {
   TRACE(1, "in requestInit(%" PRId64 ")\n", g_context->m_currentThreadIdx);
   tl_regState = VMRegState::CLEAN;
   Timer::RequestInit();
@@ -2266,7 +2265,7 @@ TranslatorX64::requestInit() {
 }
 
 void
-TranslatorX64::requestExit() {
+MCGenerator::requestExit() {
   if (Translator::WriteLease().amOwner()) {
     Translator::WriteLease().drop();
   }
@@ -2281,8 +2280,8 @@ TranslatorX64::requestExit() {
   Stats::clear();
   Timer::RequestExit();
 
-  if (Trace::moduleEnabledRelease(Trace::tx64stats, 1)) {
-    Trace::traceRelease("TranslatorX64 perf counters for %s:\n",
+  if (Trace::moduleEnabledRelease(Trace::mcgstats, 1)) {
+    Trace::traceRelease("MCGenerator perf counters for %s:\n",
                         g_context->getRequestUrl(50).c_str());
     for (int i = 0; i < tpc_num_counters; i++) {
       Trace::traceRelease("%-20s %10" PRId64 "\n",
@@ -2293,7 +2292,7 @@ TranslatorX64::requestExit() {
 }
 
 bool
-TranslatorX64::isPseudoEvent(const char* event) {
+MCGenerator::isPseudoEvent(const char* event) {
   for (auto name : kPerfCounterNames) {
     if (!strcmp(event, name)) {
       return true;
@@ -2303,7 +2302,7 @@ TranslatorX64::isPseudoEvent(const char* event) {
 }
 
 void
-TranslatorX64::getPerfCounters(Array& ret) {
+MCGenerator::getPerfCounters(Array& ret) {
   for (int i = 0; i < tpc_num_counters; i++) {
     // Until Perflab can automatically scale the values we give it to
     // an appropriate range, we have to fudge these numbers so they
@@ -2323,7 +2322,7 @@ TranslatorX64::getPerfCounters(Array& ret) {
     };
 
     doCounts(Stats::Instr_TranslLowInvalid + STATS_PER_OPCODE,
-             kInstrCountTx64Name);
+             kInstrCountMCGName);
     doCounts(Stats::Instr_TranslIRPostLowInvalid + STATS_PER_OPCODE,
              kInstrCountIRName);
   }
@@ -2335,7 +2334,7 @@ TranslatorX64::getPerfCounters(Array& ret) {
   }
 }
 
-TranslatorX64::~TranslatorX64() {
+MCGenerator::~MCGenerator() {
 }
 
 static Debug::TCRange rangeFrom(const CodeBlock& cb, const TCA addr,
@@ -2344,21 +2343,21 @@ static Debug::TCRange rangeFrom(const CodeBlock& cb, const TCA addr,
   return Debug::TCRange(addr, cb.frontier(), isAstubs);
 }
 
-void TranslatorX64::recordBCInstr(uint32_t op,
-                                  const CodeBlock& cb,
-                                  const TCA addr) {
+void MCGenerator::recordBCInstr(uint32_t op,
+                                const CodeBlock& cb,
+                                const TCA addr) {
   if (addr != cb.frontier()) {
     m_debugInfo.recordBCInstr(Debug::TCRange(addr, cb.frontier(),
                                              &cb == &code.stubs()), op);
   }
 }
 
-void TranslatorX64::recordGdbTranslation(SrcKey sk,
-                                         const Func* srcFunc,
-                                         const CodeBlock& cb,
-                                         const TCA start,
-                                         bool exit,
-                                         bool inPrologue) {
+void MCGenerator::recordGdbTranslation(SrcKey sk,
+                                       const Func* srcFunc,
+                                       const CodeBlock& cb,
+                                       const TCA start,
+                                       bool exit,
+                                       bool inPrologue) {
   if (start != cb.frontier()) {
     assert(Translator::WriteLease().amOwner());
     if (!RuntimeOption::EvalJitNoGdb) {
@@ -2375,15 +2374,15 @@ void TranslatorX64::recordGdbTranslation(SrcKey sk,
   }
 }
 
-void TranslatorX64::recordGdbStub(const CodeBlock& cb,
-                                  const TCA start, const char* name) {
+void MCGenerator::recordGdbStub(const CodeBlock& cb,
+                                const TCA start, const char* name) {
   if (!RuntimeOption::EvalJitNoGdb) {
     m_debugInfo.recordStub(rangeFrom(cb, start, &cb == &code.stubs()),
                            name);
   }
 }
 
-std::string TranslatorX64::getUsage() {
+std::string MCGenerator::getUsage() {
   std::string usage;
   size_t totalBlockSize = 0;
   size_t totalBlockCapacity = 0;
@@ -2392,7 +2391,7 @@ std::string TranslatorX64::getUsage() {
     totalBlockSize += used;
     totalBlockCapacity += capacity;
     auto percent = capacity ? 100 * used / capacity : 0;
-    usage += folly::format("tx64: {:9} bytes ({}%) in {}\n",
+    usage += folly::format("mcg: {:9} bytes ({}%) in {}\n",
                            used, percent, name).str();
   };
   code.forEachBlock([&](const char* name, const CodeBlock& a) {
@@ -2412,7 +2411,7 @@ std::string TranslatorX64::getUsage() {
   return usage;
 }
 
-std::string TranslatorX64::getTCAddrs() {
+std::string MCGenerator::getTCAddrs() {
   std::string addrs;
   code.forEachBlock([&](const char* name, const CodeBlock& a) {
       addrs += folly::format("{}: {}\n", name, a.base()).str();
@@ -2420,7 +2419,7 @@ std::string TranslatorX64::getTCAddrs() {
   return addrs;
 }
 
-bool TranslatorX64::addDbgGuards(const Unit* unit) {
+bool MCGenerator::addDbgGuards(const Unit* unit) {
   // TODO refactor
   // It grabs the write lease and iterating through whole SrcDB...
   bool locked = Translator::WriteLease().acquire(true);
@@ -2447,13 +2446,13 @@ bool TranslatorX64::addDbgGuards(const Unit* unit) {
   Translator::WriteLease().drop();
   HPHP::Timer::GetMonotonicTime(tsEnd);
   int64_t elapsed = gettime_diff_us(tsBegin, tsEnd);
-  if (Trace::moduleEnabledRelease(Trace::tx64, 5)) {
+  if (Trace::moduleEnabledRelease(Trace::mcg, 5)) {
     Trace::traceRelease("addDbgGuards got lease for %" PRId64 " us\n", elapsed);
   }
   return true;
 }
 
-bool TranslatorX64::addDbgGuard(const Func* func, Offset offset) {
+bool MCGenerator::addDbgGuard(const Func* func, Offset offset) {
   SrcKey sk(func, offset);
   {
     if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
@@ -2484,7 +2483,7 @@ bool TranslatorX64::addDbgGuard(const Func* func, Offset offset) {
   return true;
 }
 
-bool TranslatorX64::dumpTCCode(const char* filename) {
+bool MCGenerator::dumpTCCode(const char* filename) {
 #define OPEN_FILE(F, SUFFIX)                                    \
   std::string F ## name = std::string(filename).append(SUFFIX); \
   FILE* F = fopen(F ## name .c_str(),"wb");                     \
@@ -2524,7 +2523,7 @@ bool TranslatorX64::dumpTCCode(const char* filename) {
 }
 
 // Returns true on success
-bool TranslatorX64::dumpTC(bool ignoreLease) {
+bool MCGenerator::dumpTC(bool ignoreLease) {
   if (!ignoreLease && !Translator::WriteLease().acquire(true)) return false;
   bool success = dumpTCData();
   if (success) {
@@ -2536,11 +2535,11 @@ bool TranslatorX64::dumpTC(bool ignoreLease) {
 
 // Returns true on success
 bool tc_dump(void) {
-  return tx64 && tx64->dumpTC();
+  return mcg && mcg->dumpTC();
 }
 
 // Returns true on success
-bool TranslatorX64::dumpTCData() {
+bool MCGenerator::dumpTCData() {
   gzFile tcDataFile = gzopen("/tmp/tc_data.txt.gz", "w");
   if (!tcDataFile) return false;
 
@@ -2576,7 +2575,7 @@ bool TranslatorX64::dumpTCData() {
   return true;
 }
 
-void TranslatorX64::invalidateSrcKey(SrcKey sk) {
+void MCGenerator::invalidateSrcKey(SrcKey sk) {
   assert(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
   assert(Translator::WriteLease().amOwner());
   /*
@@ -2593,7 +2592,7 @@ void TranslatorX64::invalidateSrcKey(SrcKey sk) {
   sr->replaceOldTranslations();
 }
 
-void TranslatorX64::setJmpTransID(TCA jmp) {
+void MCGenerator::setJmpTransID(TCA jmp) {
   if (m_tx.mode() != TransProfile) return;
 
   TransID transId = m_tx.profData()->curTransID();

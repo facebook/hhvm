@@ -18,7 +18,7 @@
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/jit/arch.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {

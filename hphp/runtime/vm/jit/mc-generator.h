@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -74,8 +74,8 @@ struct FreeStubList {
   void push(TCA stub);
 };
 
-class TranslatorX64;
-extern TranslatorX64* tx64;
+class MCGenerator;
+extern MCGenerator* mcg;
 
 extern void* interpOneEntryPoints[];
 
@@ -96,10 +96,10 @@ constexpr size_t kX64CacheLineSize = 64;
 constexpr size_t kX64CacheLineMask = kX64CacheLineSize - 1;
 
 
-class TranslatorX64 : private boost::noncopyable {
+class MCGenerator : private boost::noncopyable {
   friend class SrcRec; // so it can smash code.
   friend class SrcDB;  // For write lock and code invalidation.
-  friend class Tx64Reaper;
+  friend class MCGReaper;
   friend class HPHP::JIT::CodeGenerator;
 
   typedef X64Assembler Asm;
@@ -302,8 +302,8 @@ public:
     enterTC(start, nullptr);
   }
 
-  TranslatorX64();
-  ~TranslatorX64();
+  MCGenerator();
+  ~MCGenerator();
 
   void initUniqueStubs();
 
@@ -319,8 +319,8 @@ public:
 
   // true iff calling thread is sole writer.
   static bool canWrite() {
-    // We can get called early in boot, so allow null tx64.
-    return !tx64 || Translator::WriteLease().amOwner();
+    // We can get called early in boot, so allow null mcg.
+    return !mcg || Translator::WriteLease().amOwner();
   }
 
   // Returns true on success

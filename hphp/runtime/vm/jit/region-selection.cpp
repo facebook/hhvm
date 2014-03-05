@@ -434,14 +434,14 @@ RegionDescPtr selectRegion(const RegionContext& context,
 }
 
 RegionDescPtr selectHotRegion(TransID transId,
-                              TranslatorX64* tx64) {
+                              MCGenerator* mcg) {
 
   assert(RuntimeOption::EvalJitPGO);
 
-  const ProfData* profData = tx64->tx().profData();
+  const ProfData* profData = mcg->tx().profData();
   FuncId funcId = profData->transFuncId(transId);
-  TransCFG cfg(funcId, profData, tx64->tx().getSrcDB(),
-               tx64->getJmpToTransIDMap());
+  TransCFG cfg(funcId, profData, mcg->tx().getSrcDB(),
+               mcg->getJmpToTransIDMap());
   TransIDSet selectedTIDs;
   assert(regionMode() != RegionMode::Method);
   RegionDescPtr region;
@@ -462,7 +462,7 @@ RegionDescPtr selectHotRegion(TransID transId,
 
     cfg.print(dotFileName, funcId, profData, &selectedTIDs);
     FTRACE(5, "selectHotRegion: New Translation {} (file: {}) {}\n",
-           tx64->tx().profData()->curTransID(), dotFileName,
+           mcg->tx().profData()->curTransID(), dotFileName,
            region ? show(*region) : std::string("empty region"));
   }
 

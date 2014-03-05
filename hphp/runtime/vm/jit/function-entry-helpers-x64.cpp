@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
@@ -50,7 +50,7 @@ static void setupAfterPrologue(ActRec* fp, void* sp) {
 TCA fcallHelper(ActRec* ar, void* sp) {
   try {
     TCA tca =
-      tx64->getFuncPrologue((Func*)ar->m_func, ar->numArgs(), ar);
+      mcg->getFuncPrologue((Func*)ar->m_func, ar->numArgs(), ar);
     if (tca) {
       return tca;
     }
@@ -104,7 +104,7 @@ TCA funcBodyHelper(ActRec* fp, void* sp) {
   tl_regState = VMRegState::CLEAN;
   Func* func = const_cast<Func*>(fp->m_func);
 
-  TCA tca = tx64->getCallArrayPrologue(func);
+  TCA tca = mcg->getCallArrayPrologue(func);
 
   if (!tca) {
     tca = tx->uniqueStubs.resumeHelper;

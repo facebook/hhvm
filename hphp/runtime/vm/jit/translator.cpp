@@ -56,7 +56,7 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/pendq.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -2026,7 +2026,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
 
 void getInputs(SrcKey startSk, NormalizedInstruction& inst, InputInfos& infos,
                const Func* func, const LocalTypeFn& localType) {
-  // TranslatorX64 expected top of stack to be index -1, with indexes growing
+  // MCGenerator expected top of stack to be index -1, with indexes growing
   // down from there. hhir defines top of stack to be index 0, with indexes
   // growing up from there. To compensate we start with a stack offset of 1 and
   // negate the index of any stack input after the call to getInputs.
@@ -2142,7 +2142,7 @@ void getInputsImpl(SrcKey startSk,
     // hopes of avoiding further specialization. The localCount constraint
     // is an unfortunate consequence of the current generic machinery not
     // working for 0 locals.
-    if (tx64->numTranslations(startSk) >= kTooPolyRet && localCount > 0) {
+    if (mcg->numTranslations(startSk) >= kTooPolyRet && localCount > 0) {
       return false;
     }
     int numRefCounted = 0;

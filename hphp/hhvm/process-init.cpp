@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
@@ -52,10 +52,10 @@ SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
 #undef STRINGIZE_CLASS_NAME
 
 void ProcessInit() {
-  // Create the global tx64 object
-  JIT::tx64 = new JIT::TranslatorX64();
-  JIT::tx = &JIT::tx64->tx();
-  JIT::tx64->initUniqueStubs();
+  // Create the global mcg object
+  JIT::mcg = new JIT::MCGenerator();
+  JIT::tx = &JIT::mcg->tx();
+  JIT::mcg->initUniqueStubs();
 
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the

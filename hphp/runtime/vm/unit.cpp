@@ -38,7 +38,7 @@
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/verifier/check.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/func-inline.h"

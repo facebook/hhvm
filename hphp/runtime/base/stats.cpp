@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "hphp/util/data-block.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP {
 namespace Stats {

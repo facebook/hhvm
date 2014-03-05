@@ -59,8 +59,8 @@
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64-internal.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -83,7 +83,7 @@ using namespace X64; // XXX: we need to split the x64-specific parts out
  * codegen, unless you're directly dealing with an instruction that
  * does near-end-of-tracelet glue.  (Or also we sometimes use them
  * just for some static_assertions relating to calls to helpers from
- * tx64 that hardcode these registers.)
+ * mcg that hardcode these registers.)
  */
 
 const size_t kTypeWordOffset = (offsetof(TypedValue, m_type) % 8);
@@ -576,8 +576,8 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
   prepareForTestAndSmash(m_mainCode, 0, TestAndSmashFlags::kAlignJccAndJmp);
   auto const patchAddr = a.frontier();
   auto const jccStub =
-    emitEphemeralServiceReq(tx64->code.stubs(),
-                            tx64->getFreeStub(),
+    emitEphemeralServiceReq(mcg->code.stubs(),
+                            mcg->getFreeStub(),
                             REQ_BIND_JMPCC_FIRST,
                             patchAddr,
                             extra->taken,
@@ -585,10 +585,10 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
                             cc,
                             ccServiceReqArgInfo(cc));
 
-  tx64->setJmpTransID(a.frontier());
+  mcg->setJmpTransID(a.frontier());
   a.    jcc    (cc, jccStub);
 
-  tx64->setJmpTransID(a.frontier());
+  mcg->setJmpTransID(a.frontier());
   a.    jmp    (jccStub);
 }
 
@@ -646,7 +646,7 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   auto const& info = m_state.catches[inst->block()];
   assert(info.afterCall);
 
-  m_tx64->registerCatchBlock(info.afterCall, m_as.frontier());
+  m_mcg->registerCatchBlock(info.afterCall, m_as.frontier());
 
   emitIncStat(m_mainCode, Stats::TC_CatchTrace);
 
@@ -1033,7 +1033,7 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
     // throw. Register a null catch trace to indicate this to the
     // unwinder. Call and CallArray don't have catch blocks because they smash
     // all live values and optimizations are aware of this.
-    m_tx64->registerCatchBlock(a.frontier(), nullptr);
+    m_mcg->registerCatchBlock(a.frontier(), nullptr);
   }
 
   // copy the call result to the destination register(s)
@@ -1949,7 +1949,7 @@ void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc) {
   emitTypeTest(type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-      auto const destSR = m_tx64->tx().getSrcRec(destSK);
+      auto const destSR = m_mcg->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
 }
@@ -2596,7 +2596,7 @@ void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
 }
 
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
-  if (rip == tx64->tx().uniqueStubs.callToExit) {
+  if (rip == mcg->tx().uniqueStubs.callToExit) {
     return;
   }
   checkFrame(fp, sp, /*checkLocals*/ false);
@@ -2632,7 +2632,7 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   // another JITed function, the ret path is taken.
   if (curFunc()->attrs() & AttrVMEntry) {
     Label retLabel;
-    TCA callToExitStub = m_tx64->tx().uniqueStubs.callToExit;
+    TCA callToExitStub = m_mcg->tx().uniqueStubs.callToExit;
     m_as.movq(callToExitStub, m_rScratch);
     m_as.cmpq(reg::rsp[0], m_rScratch);
     m_as.jcc8(CC_NE, retLabel);
@@ -2657,9 +2657,9 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
 void CodeGenerator::emitReqBindAddr(const Func* func,
                                     TCA& dest,
                                     Offset offset) {
-  tx64->setJmpTransID((TCA)&dest);
+  mcg->setJmpTransID((TCA)&dest);
 
-  dest = emitServiceReq(tx64->code.stubs(), REQ_BIND_ADDR,
+  dest = emitServiceReq(mcg->code.stubs(), REQ_BIND_ADDR,
                         &dest,
                         offset);
 }
@@ -2677,18 +2677,18 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       m_as.    cmpq(data->cases - 2, indexReg);
       prepareForSmash(m_mainCode, kJmpccLen);
       TCA def = emitEphemeralServiceReq(
-        tx64->code.stubs(),
-        tx64->getFreeStub(),
+        mcg->code.stubs(),
+        mcg->getFreeStub(),
         REQ_BIND_JMPCC_SECOND,
         m_as.frontier(),
         data->defaultOff,
         CC_AE);
-      tx64->setJmpTransID(m_as.frontier());
+      mcg->setJmpTransID(m_as.frontier());
 
       m_as.    jae(def);
     }
 
-    TCA* table = m_tx64->allocData<TCA>(sizeof(TCA), data->cases);
+    TCA* table = m_mcg->allocData<TCA>(sizeof(TCA), data->cases);
     TCA afterLea = m_as.frontier() + kLeaRipLen;
     ptrdiff_t diff = (TCA)table - afterLea;
     assert(deltaFits(diff, sz::dword));
@@ -2718,14 +2718,14 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
 void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
   auto data = inst->extra<LdSSwitchDestFast>();
 
-  auto table = m_tx64->allocData<SSwitchMap>(64);
+  auto table = m_mcg->allocData<SSwitchMap>(64);
   table->init(data->numCases);
   for (int64_t i = 0; i < data->numCases; ++i) {
     table->add(data->cases[i].str, nullptr);
     TCA* addr = table->find(data->cases[i].str);
     emitReqBindAddr(data->func, *addr, data->cases[i].dest);
   }
-  TCA* def = m_tx64->allocData<TCA>(sizeof(TCA), 1);
+  TCA* def = m_mcg->allocData<TCA>(sizeof(TCA), 1);
   emitReqBindAddr(data->func, *def, data->defaultOff);
 
   cgCallHelper(m_as,
@@ -2752,9 +2752,9 @@ static TCA sswitchHelperSlow(TypedValue typedVal,
 void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
   auto data = inst->extra<LdSSwitchDestSlow>();
 
-  auto strtab = m_tx64->allocData<const StringData*>(
+  auto strtab = m_mcg->allocData<const StringData*>(
     sizeof(const StringData*), data->numCases);
-  auto jmptab = m_tx64->allocData<TCA>(sizeof(TCA), data->numCases + 1);
+  auto jmptab = m_mcg->allocData<TCA>(sizeof(TCA), data->numCases + 1);
   for (int i = 0; i < data->numCases; ++i) {
     strtab[i] = data->cases[i].str;
     emitReqBindAddr(data->func, jmptab[i], data->cases[i].dest);
@@ -2784,7 +2784,7 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
  */
 void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
   auto const fp       = srcLoc(0).reg();
-  auto const fakeRet  = m_tx64->tx().uniqueStubs.retInlHelper;
+  auto const fakeRet  = m_mcg->tx().uniqueStubs.retInlHelper;
   auto const retBCOff = inst->extra<DefInlineFP>()->retBCOff;
 
   m_as.    storeq (fakeRet, fp[AROFF(m_savedRip)]);
@@ -3006,14 +3006,14 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto extra = inst->extra<ReqRetranslateOpt>();
 
-  emitServiceReq(tx64->code.stubs(), REQ_RETRANSLATE_OPT,
+  emitServiceReq(mcg->code.stubs(), REQ_RETRANSLATE_OPT,
                  curFunc()->getFuncId(), extra->offset, extra->transId);
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   assert(m_unit.bcOff() == inst->marker().bcOff);
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-  auto const destSR = m_tx64->tx().getSrcRec(destSK);
+  auto const destSR = m_mcg->tx().getSrcRec(destSK);
   destSR->emitFallbackJump(m_mainCode);
 }
 
@@ -3121,8 +3121,8 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   PhysRegSaverStub saver(a, toSave);
 
   auto const target = numLocals > kNumFreeLocalsHelpers
-    ? m_tx64->tx().uniqueStubs.freeManyLocalsHelper
-    : m_tx64->tx().uniqueStubs.freeLocalsHelpers[numLocals - 1];
+    ? m_mcg->tx().uniqueStubs.freeManyLocalsHelper
+    : m_mcg->tx().uniqueStubs.freeLocalsHelpers[numLocals - 1];
 
   a.lea(rFp[-numLocals * sizeof(TypedValue)], rDest);
   a.call(target);
@@ -3267,7 +3267,7 @@ void CodeGenerator::cgDecRefStaticType(Type type,
       type, dataReg, [&] (Asm& a) {
         // Emit the call to release in m_astubs
         cgCallHelper(a,
-                     m_tx64->getDtorCall(type.toDataType()),
+                     m_mcg->getDtorCall(type.toDataType()),
                      kVoidDest,
                      SyncOptions::kSyncPoint,
                      argGroup()
@@ -3697,7 +3697,7 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   Offset after          = inst->extra<CallArray>()->after;
   cgCallHelper(
     m_as,
-    CppCall(m_tx64->tx().uniqueStubs.fcallArrayHelper),
+    CppCall(m_mcg->tx().uniqueStubs.fcallArrayHelper),
     kVoidDest,
     SyncOptions::kSyncPoint,
     argGroup()
@@ -3729,8 +3729,8 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
   bool isImmutable = func->isConst(Type::Func);
   const Func* funcd = isImmutable ? func->funcVal() : nullptr;
-  assert(m_as.base() == m_tx64->code.main().base());
-  int32_t adjust = emitBindCall(m_tx64->code.main(), m_tx64->code.stubs(),
+  assert(m_as.base() == m_mcg->code.main().base());
+  int32_t adjust = emitBindCall(m_mcg->code.main(), m_mcg->code.stubs(),
                                 srcKey, funcd, numArgs);
   if (adjust) {
     m_as.addq (adjust, rVmSp);
@@ -4587,7 +4587,7 @@ void CodeGenerator::recordSyncPoint(Asm& as,
 
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", as.frontier(), pcOff,
          stackOff);
-  m_tx64->fixupMap().recordSyncPoint(as.frontier(), pcOff, stackOff);
+  m_mcg->fixupMap().recordSyncPoint(as.frontier(), pcOff, stackOff);
 }
 
 void CodeGenerator::cgLdAddr(IRInstruction* inst) {
@@ -4838,7 +4838,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert((vals64 & mask64) == vals64);
 
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-  auto const destSR = m_tx64->tx().getSrcRec(destSK);
+  auto const destSR = m_mcg->tx().getSrcRec(destSK);
 
   auto thenBody = [&] {
     auto bitsOff = sizeof(uint64_t) * (firstBitNum / 64);
@@ -5576,7 +5576,7 @@ void CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {
 void CodeGenerator::cgCheckCold(IRInstruction* inst) {
   Block*     label = inst->taken();
   TransID  transId = inst->extra<CheckCold>()->transId;
-  auto counterAddr = m_tx64->tx().profData()->transCounterAddr(transId);
+  auto counterAddr = m_mcg->tx().profData()->transCounterAddr(transId);
 
   emitLoadImm(m_as, uint64_t(counterAddr), m_rScratch);
   m_as.decq(m_rScratch[0]);
@@ -6072,7 +6072,7 @@ void CodeGenerator::cgCIterFree(IRInstruction* inst) {
 
 void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
   auto data = inst->extra<NewStructData>();
-  StringData** table = m_tx64->allocData<StringData*>(sizeof(StringData*),
+  StringData** table = m_mcg->allocData<StringData*>(sizeof(StringData*),
                                                       data->numKeys);
   memcpy(table, data->keys, data->numKeys * sizeof(*data->keys));
   HphpArray* (*f)(uint32_t, StringData**, const TypedValue*) =
@@ -6096,7 +6096,7 @@ void CodeGenerator::cgIncTransCounter(IRInstruction* inst) {
 
 void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
   TransID  transId = inst->extra<TransIDData>()->transId;
-  auto counterAddr = m_tx64->tx().profData()->transCounterAddr(transId);
+  auto counterAddr = m_mcg->tx().profData()->transCounterAddr(transId);
   emitLoadImm(m_as, uint64_t(counterAddr), m_rScratch);
   m_as.decq(m_rScratch[0]);
 }
@@ -6229,7 +6229,7 @@ void CodeGenerator::cgBlock(Block* block, std::vector<TransBCMapping>* bcMap) {
     // If we're on the first instruction of the block or we have a new
     // marker since the last instruction, update the bc mapping.
     if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
-        (m_tx64->tx().isTransDBEnabled() ||
+        (m_mcg->tx().isTransDBEnabled() ||
         RuntimeOption::EvalJitUseVtuneAPI) && bcMap) {
       bcMap->push_back(TransBCMapping{inst->marker().func->unit()->md5(),
                                       inst->marker().bcOff,
@@ -6270,7 +6270,7 @@ void genCodeImpl(CodeBlock& mainCode,
                  CodeBlock& stubsCode,
                  IRUnit& unit,
                  std::vector<TransBCMapping>* bcMap,
-                 JIT::TranslatorX64* tx64,
+                 JIT::MCGenerator* mcg,
                  const RegAllocInfo& regs,
                  AsmInfo* asmInfo) {
   LiveRegs live_regs = computeLiveRegs(unit, regs);
@@ -6312,10 +6312,10 @@ void genCodeImpl(CodeBlock& mainCode,
     }
 
     if (arch() == Arch::ARM) {
-      ARM::CodeGenerator cg(unit, cb, stubsCode, tx64, state);
+      ARM::CodeGenerator cg(unit, cb, stubsCode, mcg, state);
       cg.cgBlock(block, bcMap);
     } else {
-      CodeGenerator cg(unit, cb, stubsCode, tx64, state);
+      CodeGenerator cg(unit, cb, stubsCode, mcg, state);
       cg.cgBlock(block, bcMap);
     }
 
@@ -6363,16 +6363,16 @@ void genCodeImpl(CodeBlock& mainCode,
 
 void genCode(CodeBlock& main, CodeBlock& stubs, IRUnit& unit,
              std::vector<TransBCMapping>* bcMap,
-             JIT::TranslatorX64* tx64,
+             JIT::MCGenerator* mcg,
              const RegAllocInfo& regs) {
   Timer _t("codeGen");
 
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
-    genCodeImpl(main, stubs, unit, bcMap, tx64, regs, &ai);
+    genCodeImpl(main, stubs, unit, bcMap, mcg, regs, &ai);
     dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs, &ai);
   } else {
-    genCodeImpl(main, stubs, unit, bcMap, tx64, regs, nullptr);
+    genCodeImpl(main, stubs, unit, bcMap, mcg, regs, nullptr);
   }
 }
 

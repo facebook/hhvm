@@ -28,7 +28,7 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -113,7 +113,7 @@ using std::string;
 using JIT::VMRegAnchor;
 using JIT::EagerVMRegAnchor;
 using JIT::tx;
-using JIT::tx64;
+using JIT::mcg;
 using JIT::tl_regState;
 using JIT::VMRegState;
 
@@ -1518,7 +1518,7 @@ bool ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
 
 void ExecutionContext::syncGdbState() {
   if (RuntimeOption::EvalJit && !RuntimeOption::EvalJitNoGdb) {
-    tx64->getDebugInfo()->debugSync();
+    mcg->getDebugInfo()->debugSync();
   }
 }
 
@@ -1530,7 +1530,7 @@ void ExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
     JIT::TCA start = enterFnAr->m_func->getPrologue(na);
-    tx64->enterTCAtPrologue(enterFnAr, start);
+    mcg->enterTCAtPrologue(enterFnAr, start);
   } else {
     if (prepareFuncEntry(enterFnAr, m_pc)) {
       enterVMWork(enterFnAr);
@@ -1550,10 +1550,10 @@ void ExecutionContext::enterVMWork(ActRec* enterFnAr) {
     (void) m_fp->unit()->offsetOf(m_pc); /* assert */
     if (enterFnAr) {
       assert(start);
-      tx64->enterTCAfterPrologue(start);
+      mcg->enterTCAfterPrologue(start);
     } else {
       SrcKey sk(m_fp->func(), m_pc);
-      tx64->enterTCAtSrcKey(sk);
+      mcg->enterTCAtSrcKey(sk);
     }
   } else {
     dispatch();
@@ -2856,7 +2856,7 @@ void ExecutionContext::preventReturnsToTC() {
     ActRec *ar = getFP();
     while (ar) {
       if (!isReturnHelper(ar->m_savedRip) &&
-          (tx64->isValidCodeAddress((JIT::TCA)ar->m_savedRip))) {
+          (mcg->isValidCodeAddress((JIT::TCA)ar->m_savedRip))) {
         TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
                  "func %s\n", ar, ar->m_savedRip,
                  ar->m_func->fullName()->data());
@@ -7450,7 +7450,7 @@ void ExecutionContext::PrintTCCallerInfo() {
   ActRec* fp = g_context->getFP();
   Unit* u = fp->m_func->unit();
   fprintf(stderr, "Called from TC address %p\n",
-          tx64->getTranslatedCaller());
+          mcg->getTranslatedCaller());
   std::cerr << u->filepath()->data() << ':'
             << u->getLineNumber(u->offsetOf(g_context->getPC())) << std::endl;
 }
@@ -7714,7 +7714,7 @@ void ExecutionContext::requestInit() {
   EnvConstants::requestInit(smart_new<EnvConstants>());
   VarEnv::createGlobal();
   m_stack.requestInit();
-  tx64->requestInit();
+  mcg->requestInit();
 
   if (UNLIKELY(RuntimeOption::EvalJitEnableRenameFunction)) {
     SystemLib::s_unit->merge();
@@ -7747,7 +7747,7 @@ void ExecutionContext::requestExit() {
 
   manageAPCHandle();
   syncGdbState();
-  tx64->requestExit();
+  mcg->requestExit();
   m_stack.requestExit();
   profileRequestEnd();
   EventHook::Disable();

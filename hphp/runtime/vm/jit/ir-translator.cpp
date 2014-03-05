@@ -31,7 +31,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/base/stats.h"
 
 #include "hphp/runtime/vm/jit/check.h"
@@ -130,7 +130,7 @@ void IRTranslator::assertType(const JIT::Location& l,
 
   switch (l.space) {
     case Location::Stack: {
-      // tx64LocPhysicalOffset returns positive offsets for stack values,
+      // locPhysicalOffset returns positive offsets for stack values,
       // relative to rVmSp
       uint32_t stackOffset = locPhysicalOffset(l);
       m_hhbcTrans.assertTypeStack(stackOffset, Type(rtt));

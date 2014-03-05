@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP { namespace JIT {
@@ -105,13 +105,13 @@ struct CodeGenerator {
   typedef JIT::X64Assembler Asm;
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
-                JIT::TranslatorX64* tx64, CodegenState& state)
+                JIT::MCGenerator* mcg, CodegenState& state)
     : m_unit(unit)
     , m_mainCode(mainCode)
     , m_stubsCode(stubsCode)
     , m_as(mainCode)
     , m_astubs(stubsCode)
-    , m_tx64(tx64)
+    , m_mcg(mcg)
     , m_state(state)
     , m_rScratch(InvalidReg)
     , m_curInst(nullptr)
@@ -401,7 +401,7 @@ private:
   CodeBlock&          m_stubsCode;
   Asm                 m_as;  // current "main" assembler
   Asm                 m_astubs; // for stubs and other cold code
-  TranslatorX64*      m_tx64;
+  MCGenerator*        m_mcg;
   CodegenState&       m_state;
   Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
@@ -416,7 +416,7 @@ void genCode(CodeBlock&              mainCode,
              CodeBlock&              stubsCode,
              IRUnit&                 unit,
              std::vector<TransBCMapping>* bcMap,
-             TranslatorX64*          tx64,
+             MCGenerator*            mcg,
              const RegAllocInfo&     regs);
 
 // Helpers to compute a reference to a TypedValue type and data

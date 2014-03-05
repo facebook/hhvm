@@ -69,7 +69,7 @@ void FrameState::update(const IRInstruction* inst) {
 
   switch (opc) {
   case DefInlineFP:    trackDefInlineFP(inst);  break;
-  case InlineReturn:   trackInlineReturn(inst); break;
+  case InlineReturn:   trackInlineReturn(); break;
 
   case Call:
     m_spValue = inst->dst();
@@ -604,7 +604,7 @@ void FrameState::trackDefInlineFP(const IRInstruction* inst) {
   m_locals.resize(target->numLocals());
 }
 
-void FrameState::trackInlineReturn(const IRInstruction* inst) {
+void FrameState::trackInlineReturn() {
   assert(m_inlineSavedStates.size());
   assert(m_inlineSavedStates.back().inlineSavedStates.empty());
   load(m_inlineSavedStates.back());
@@ -645,6 +645,13 @@ SSATmp* FrameState::cseLookup(IRInstruction* inst,
 }
 
 void FrameState::clear() {
+  // A previous run of reoptimize could've legitimately exited the trace in an
+  // inlined callee. If that happened, just pop all the saved states to return
+  // to the top-level func.
+  while (inlineDepth()) {
+    trackInlineReturn();
+  }
+
   clearCse();
   clearLocals(*this);
   m_frameSpansCall = false;

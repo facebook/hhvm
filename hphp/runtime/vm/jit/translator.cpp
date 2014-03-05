@@ -4065,7 +4065,7 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Check the prediction. If the predicted type is less specific than what
       // is currently on the eval stack, checkType won't emit any code.
-      if (doPrediction) {
+      if (doPrediction && inst.outPred < ht.topType(0, DataTypeGeneric)) {
         ht.checkTypeStack(0, inst.outPred,
                           sk.advanced(block->unit()).offset());
       }

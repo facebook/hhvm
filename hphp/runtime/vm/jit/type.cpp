@@ -168,6 +168,7 @@ Type Type::unionOf(Type t1, Type t2) {
   if (t1 < t2) return t2;
   static const Type union_types[] = {
 #   define IRT(name, ...) name,
+    IRT_PHP(IRT_BOXES)
     IRT_PHP_UNIONS(IRT_BOXES)
 #   undef IRT
     Gen,

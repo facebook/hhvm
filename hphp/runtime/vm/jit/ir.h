@@ -407,7 +407,6 @@ O(CheckPackedArrayElemNull,    D(Bool), S(Arr) S(Int),                     E) \
 O(VectorHasFrozenCopy,              ND, S(Obj),                            B) \
 O(VectorDoCow,                      ND, S(Obj),                          N|E) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr,Func),        P) \
-O(Unbox,                     DUnbox(0), S(Gen),                            B) \
 O(Box,                         DBox(0), S(Gen),                  E|N|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
 O(BoxPtr,            D(PtrToBoxedCell), S(PtrToGen),                       N) \

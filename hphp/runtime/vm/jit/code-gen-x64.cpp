@@ -2332,37 +2332,6 @@ void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
   emitDerefIfVariant(m_as, PhysReg(dstReg));
 }
 
-void CodeGenerator::cgUnbox(IRInstruction* inst) {
-  auto dst_loc = dstLoc(0);
-  auto src_loc = srcLoc(0);
-  auto dstValReg  = dst_loc.reg(0);
-  auto dstTypeReg = dst_loc.reg(1);
-  auto srcValReg  = src_loc.reg(0);
-  auto srcTypeReg = src_loc.reg(1);
-
-  assert(dstValReg != dstTypeReg);
-  assert(inst->src(0)->type().equals(Type::Gen));
-  assert(inst->dst()->type().notBoxed());
-
-  emitCmpTVType(m_as, HPHP::KindOfRef, srcTypeReg);
-  ifThenElse(CC_E, [&] {
-    // srcTypeReg == KindOfRef; srcValReg is RefData*
-    const size_t ref_tv_off = RefData::tvOffset();
-    if (dstValReg != srcValReg) {
-      emitLoadReg(m_as, srcValReg[ref_tv_off + TVOFF(m_data)], dstValReg);
-      emitLoadTVType(m_as, srcValReg[ref_tv_off + TVOFF(m_type)],
-                     r32(dstTypeReg));
-    } else {
-      emitLoadTVType(m_as, srcValReg[ref_tv_off + TVOFF(m_type)],
-                     r32(dstTypeReg));
-      m_as.loadq(srcValReg[ref_tv_off + TVOFF(m_data)], dstValReg);
-    }
-  }, [&] {
-    // srcTypeReg != KindOfRef; copy src -> dst
-    shuffle2(m_as, srcValReg, srcTypeReg, dstValReg, dstTypeReg);
-  });
-}
-
 void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {
   auto const dst  = dstLoc(0).reg();
   auto const name = inst->extra<LdFuncCachedData>()->name;

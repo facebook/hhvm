@@ -181,7 +181,6 @@ bool IRInstruction::isRawLoad() const {
     case LdProp:
     case LdPackedArrayElem:
     case LdGbl:
-    case Unbox:
       return true;
 
     default:

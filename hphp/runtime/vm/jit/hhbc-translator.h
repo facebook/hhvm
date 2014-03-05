@@ -851,6 +851,8 @@ private:
   void    extendStack(uint32_t index, Type type);
   void    replace(uint32_t index, SSATmp* tmp);
 
+  SSATmp* unbox(SSATmp* val, Block* exit);
+
   /*
    * Local instruction helpers. The ldgblExit is so helpers can emit the guard
    * for LdGbl insts if we're in the pseudomain. The ldrefExit is for helpers

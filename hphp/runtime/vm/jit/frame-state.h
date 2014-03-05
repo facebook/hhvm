@@ -272,7 +272,7 @@ struct FrameState : private LocalStateHook {
   };
 
   void trackDefInlineFP(const IRInstruction* inst);
-  void trackInlineReturn(const IRInstruction* inst);
+  void trackInlineReturn();
 
   /* LocalStateHook overrides */
   void setLocalValue(uint32_t id, SSATmp* value) override;

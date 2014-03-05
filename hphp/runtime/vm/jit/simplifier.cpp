@@ -420,7 +420,6 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
     case ConvCellToDbl: return simplifyConvCellToDbl(inst);
     case Floor:         return simplifyFloor(inst);
     case Ceil:          return simplifyCeil(inst);
-    case Unbox:         return simplifyUnbox(inst);
     case UnboxPtr:      return simplifyUnboxPtr(inst);
     case BoxPtr:        return simplifyBoxPtr(inst);
     case IsType:
@@ -1689,23 +1688,6 @@ SSATmp* Simplifier::simplifyFloor(const IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyCeil(const IRInstruction* inst) {
   return simplifyRoundCommon(inst, ceil);
-}
-
-SSATmp* Simplifier::simplifyUnbox(const IRInstruction* inst) {
-  auto* src = inst->src(0);
-  auto type = outputType(inst);
-
-  Type srcType = src->type();
-  if (srcType.notBoxed()) {
-    assert(type.equals(srcType));
-    return src;
-  }
-  if (srcType.isBoxed()) {
-    srcType = srcType.innerType();
-    assert(type.equals(srcType));
-    return gen(LdRef, type, inst->taken(), src);
-  }
-  return nullptr;
 }
 
 SSATmp* Simplifier::simplifyUnboxPtr(const IRInstruction* inst) {

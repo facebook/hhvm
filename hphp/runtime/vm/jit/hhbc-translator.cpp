@@ -463,7 +463,7 @@ void HhbcTranslator::emitPrint() {
 void HhbcTranslator::emitUnboxRAux() {
   Block* exit = makeExit();
   SSATmp* srcBox = popR();
-  SSATmp* unboxed = gen(Unbox, exit, srcBox);
+  SSATmp* unboxed = unbox(srcBox, exit);
   if (unboxed == srcBox) {
     // If the Unbox ended up being a noop, don't bother refcounting
     push(unboxed);
@@ -1957,10 +1957,8 @@ void HhbcTranslator::emitIsTypeC(DataType t) {
 void HhbcTranslator::emitIsTypeL(uint32_t id, DataType t) {
   auto const ldrefExit = makeExit();
   auto const ldgblExit = makeExit();
-  // TODO(t2598894) We should use the specific type if it's available but not
-  // require it.
   auto const val =
-    ldLocInnerWarn(id, ldrefExit, ldgblExit, DataTypeSpecific);
+    ldLocInnerWarn(id, ldrefExit, ldgblExit, DataTypeGeneric);
   push(gen(IsType, Type(t), val));
 }
 
@@ -2201,7 +2199,7 @@ void HhbcTranslator::emitFPassCOp() {
 void HhbcTranslator::emitFPassV() {
   Block* exit = makeExit();
   SSATmp* tmp = popV();
-  pushIncRef(gen(Unbox, exit, tmp));
+  pushIncRef(gen(LdRef, exit, tmp->type().innerType(), tmp));
   gen(DecRef, tmp);
 }
 
@@ -5576,6 +5574,30 @@ SSATmp* HhbcTranslator::ldStackAddr(int32_t offset, TypeConstraint tc) {
     StackOffset(offset + m_irb->stackDeficit() - m_irb->evalStack().numCells()),
     m_irb->sp()
   );
+}
+
+SSATmp* HhbcTranslator::unbox(SSATmp* val, Block* exit) {
+  auto const type = val->type();
+  // If we don't have an exit the LdRef can't be a guard.
+  auto const inner = exit ? (type & Type::BoxedCell).innerType() : Type::Cell;
+
+  if (type.isBoxed() || type.notBoxed()) {
+    m_irb->constrainValue(val, DataTypeCountness);
+    return type.isBoxed() ? gen(LdRef, inner, exit, val) : val;
+  }
+
+  return m_irb->cond(
+    0,
+    [&](Block* taken) {
+      return gen(CheckType, Type::BoxedCell, taken, val);
+    },
+    [&](SSATmp* box) { // Next: val is a ref
+      m_irb->constrainValue(box, DataTypeCountness);
+      return gen(LdRef, inner, exit, box);
+    },
+    [&] { // Taken: val is unboxed
+      return gen(AssertType, Type::Cell, val);
+    });
 }
 
 SSATmp* HhbcTranslator::ldLoc(uint32_t locId, Block* exit, TypeConstraint tc) {

@@ -119,8 +119,7 @@ bool isUnguardedLoad(IRInstruction* inst) {
           (opc == LdLoc && type == Type::Gen) ||
           (opc == LdRef && type == Type::Cell) ||
           (opc == LdMem && type == Type::Cell &&
-           inst->src(0)->type() == Type::PtrToCell) ||
-          (opc == Unbox && type == Type::Cell));
+           inst->src(0)->type() == Type::PtrToCell));
 }
 
 // removeUnreachable erases unreachable blocks from unit, and returns

@@ -219,6 +219,7 @@ TEST(Type, UnionOf) {
   EXPECT_EQ(Type::UncountedInit, Type::unionOf(Type::Int, Type::Dbl));
   EXPECT_EQ(Type::Str, Type::unionOf(Type::StaticStr, Type::Str));
   EXPECT_EQ(Type::Gen, Type::unionOf(Type::Cell, Type::BoxedInt));
+  EXPECT_EQ(Type::Bool, Type::unionOf(Type::cns(true), Type::cns(false)));
 }
 
 TEST(Type, Top) {

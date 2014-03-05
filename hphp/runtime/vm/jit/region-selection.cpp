@@ -558,6 +558,13 @@ struct IgnoreTypePred {
   const bool m_aLonger;
 };
 
+struct IgnoreKnownFunc {
+  // It's ok for a to have known funcs that b doesn't but not the other way
+  // around.
+  bool a(const Func*) const { return true; }
+  bool b(const Func*) const { return false; }
+};
+
 template<typename M, typename Cmp = std::equal_to<typename M::mapped_type>,
          typename IgnorePred = Ignore<typename M::mapped_type>>
 bool mapsEqual(const M& a, const M& b, SrcKey endSk, Cmp equal = Cmp(),
@@ -641,7 +648,8 @@ void diffRegions(const RegionDesc& a, const RegionDesc& b) {
     if (false && !mapsEqual(ab.reffinessPreds(), bb.reffinessPreds(), endSk)) {
       return fail("reffiness preds");
     }
-    if (!mapsEqual(ab.knownFuncs(), bb.knownFuncs(), endSk)) {
+    if (!mapsEqual(ab.knownFuncs(), bb.knownFuncs(), endSk,
+                   std::equal_to<const Func*>(), IgnoreKnownFunc())) {
       return fail("known funcs");
     }
   }

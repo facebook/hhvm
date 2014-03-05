@@ -232,7 +232,7 @@ RegionDescPtr RegionFormer::go() {
 
     // Since the current instruction is over, advance HhbcTranslator's sk
     // before emitting the prediction (if any).
-    if (doPrediction) {
+    if (doPrediction && m_inst.outPred < m_ht.topType(0, DataTypeGeneric)) {
       m_ht.setBcOff(m_sk.offset(), false);
       m_ht.checkTypeStack(0, m_inst.outPred, m_sk.offset());
     }
@@ -466,7 +466,10 @@ bool RegionFormer::tryInline() {
   }
 
   RegionDescIter iter(*region);
-  return shouldIRInline(curFunc(), callee, iter);
+  if (!shouldIRInline(curFunc(), callee, iter)) {
+    return refuse("shouldIRInline failed");
+  }
+  return true;
 }
 
 void RegionFormer::truncateLiterals() {

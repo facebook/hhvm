@@ -73,7 +73,8 @@ IRBuilder::~IRBuilder() {
  */
 bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
   if (!shouldConstrainGuards()) return false;
-  if (tmp && (tmp->inst()->is(DefConst) || tmp->isA(Type::Cls))) return false;
+  if (tmp && (canonical(tmp)->inst()->is(DefConst) ||
+              tmp->isA(Type::Cls))) return false;
 
   return true;
 }
@@ -672,8 +673,8 @@ void IRBuilder::reoptimize() {
   SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
   always_assert(m_savedBlocks.empty());
   always_assert(!m_curWhere);
-  always_assert(m_state.inlineDepth() == 0);
 
+  m_state.clear();
   m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_state.enableCse() && !m_enableSimplification) return;
@@ -684,7 +685,6 @@ void IRBuilder::reoptimize() {
 
   auto blocksIds = rpoSortCfgWithIds(m_unit);
   auto const idoms = findDominators(m_unit, blocksIds);
-  m_state.clear();
 
   for (auto* block : blocksIds.blocks) {
     FTRACE(5, "Block: {}\n", block->id());
@@ -880,7 +880,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     tc.category = tc.innerCat;
     tc.innerCat = DataTypeGeneric;
     return constrainValue(inst->src(1), tc);
-  } else if (inst->is(Box, BoxPtr, Unbox, UnboxPtr)) {
+  } else if (inst->is(Box, BoxPtr, UnboxPtr)) {
     // All Box/Unbox opcodes are similar to StRef/LdRef in some situations and
     // Mov in others (determined at runtime), so we need to constrain both
     // outer and inner.

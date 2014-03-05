@@ -596,7 +596,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
        mcodeIsProp(m_ni.immVecM[0])) ||
       simpleCollectionOp() != SimpleOp::None) {
     // In these cases we can pass the base by value, after unboxing if needed.
-    m_base = gen(Unbox, failedRef, getBase(DataTypeSpecific));
+    m_base = m_ht.unbox(getBase(DataTypeSpecific), failedRef);
 
     // Register that we care about the specific type of the base, and might
     // care about its specialized type.
@@ -1671,7 +1671,7 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* key) {
     },
     [&] { // Next:
       auto res = gen(LdPackedArrayElem, m_base, key);
-      auto unboxed = gen(Unbox, res);
+      auto unboxed = m_ht.unbox(res, nullptr);
       gen(IncRef, unboxed);
       return unboxed;
     },

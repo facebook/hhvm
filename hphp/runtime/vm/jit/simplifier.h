@@ -130,7 +130,6 @@ private:
   SSATmp* simplifyConvCellToDbl(const IRInstruction*);
   SSATmp* simplifyFloor(const IRInstruction*);
   SSATmp* simplifyCeil(const IRInstruction*);
-  SSATmp* simplifyUnbox(const IRInstruction*);
   SSATmp* simplifyUnboxPtr(const IRInstruction*);
   SSATmp* simplifyBoxPtr(const IRInstruction*);
   SSATmp* simplifyCheckInit(const IRInstruction* inst);

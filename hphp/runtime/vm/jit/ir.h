@@ -235,7 +235,6 @@ O(AndInt,                       D(Int), S(Int) S(Int),                     C) \
 O(OrInt,                        D(Int), S(Int) S(Int),                     C) \
 O(XorInt,                       D(Int), S(Int) S(Int),                     C) \
 O(XorBool,                     D(Bool), S(Bool) S(Bool),                   C) \
-O(Not,                         D(Bool), S(Bool),                           C) \
 O(Shl,                          D(Int), S(Int) S(Int),                     C) \
 O(Shr,                          D(Int), S(Int) S(Int),                     C) \
                                                                               \

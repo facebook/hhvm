@@ -300,6 +300,9 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
   case Shl: case Shr:
     if (i == 1) return true; // shift amount
     break;
+  case XorBool:
+    if (i == 1) return isI32(cint);
+    break;
   default:
     break;
   }

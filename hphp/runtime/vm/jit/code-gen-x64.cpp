@@ -1539,22 +1539,6 @@ void CodeGenerator::cgShr(IRInstruction* inst) {
   cgShiftCommon(inst, &Asm::sarq, &Asm::sarq);
 }
 
-void CodeGenerator::cgNot(IRInstruction* inst) {
-  auto const src = inst->src(0);
-  auto const dstReg = dstLoc(0).reg();
-  auto& a = m_as;
-
-  if (src->isConst()) {
-    a.    movb   (!src->boolVal(), rbyte(dstReg));
-  } else {
-    auto srcReg = srcLoc(0).reg();
-    if (dstReg != srcReg) {
-      a.  movb   (rbyte(srcReg), rbyte(dstReg));
-    }
-    a.    xorb   (1, rbyte(dstReg));
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Comparison Operators
 ///////////////////////////////////////////////////////////////////////////////

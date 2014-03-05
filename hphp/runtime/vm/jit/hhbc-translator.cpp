@@ -1670,7 +1670,7 @@ void HhbcTranslator::emitAsyncAwait() {
   );
 
   push(toPush);
-  push(gen(Not, gen(ConvIntToBool, state)));
+  push(gen(EqInt, state, cns(kSucceeded)));
 }
 
 void HhbcTranslator::emitAsyncESuspend(int64_t label, int numIters) {
@@ -1887,7 +1887,7 @@ void HhbcTranslator::emitIssetL(int32_t id) {
 void HhbcTranslator::emitEmptyL(int32_t id) {
   auto const exit = makeExit();
   auto const ld = ldLocInner(id, exit, DataTypeSpecific);
-  push(gen(Not, gen(ConvCellToBool, ld)));
+  push(gen(XorBool, gen(ConvCellToBool, ld), cns(true)));
 }
 
 void HhbcTranslator::emitIsTypeC(DataType t) {
@@ -3957,7 +3957,7 @@ void HhbcTranslator::emitBindMem(SSATmp* ptr, SSATmp* src) {
 
 void HhbcTranslator::emitEmptyMem(SSATmp* ptr) {
   SSATmp* ld = gen(LdMem, Type::Cell, gen(UnboxPtr, ptr), cns(0));
-  push(gen(Not, gen(ConvCellToBool, ld)));
+  push(gen(XorBool, gen(ConvCellToBool, ld), cns(true)));
 }
 
 void HhbcTranslator::destroyName(SSATmp* name) {
@@ -4122,7 +4122,7 @@ void HhbcTranslator::emitEmptyS() {
     [&] (SSATmp* ptr) {
       auto const unbox = gen(UnboxPtr, ptr);
       auto const val   = gen(LdMem, unbox->type().deref(), unbox, cns(0));
-      return gen(Not, gen(ConvCellToBool, val));
+      return gen(XorBool, gen(ConvCellToBool, val), cns(true));
     },
     [&] { // Taken: LdClsPropAddr* branched because it isn't defined
       return cns(true);
@@ -4198,7 +4198,7 @@ void HhbcTranslator::emitEmptyG() {
     [&] (SSATmp* ptr) { // Next: global exists
       auto const unboxed = gen(UnboxPtr, ptr);
       auto const val     = gen(LdMem, Type::Cell, unboxed, cns(0));
-      return gen(Not, gen(ConvCellToBool, val));
+      return gen(XorBool, gen(ConvCellToBool, val), cns(true));
     },
     [&] { // Taken: global doesn't exist
       return cns(true);
@@ -4240,7 +4240,7 @@ void HhbcTranslator::emitBinaryArith(Op op) {
 
 void HhbcTranslator::emitNot() {
   SSATmp* src = popC();
-  push(gen(Not, gen(ConvCellToBool, src)));
+  push(gen(XorBool, gen(ConvCellToBool, src), cns(true)));
   gen(DecRef, src);
 }
 

@@ -490,10 +490,6 @@ D:Bool = XorBool S0:Bool S1:Bool
   corresponding opcodes because they're handled at the bytecode level, to
   implement short-circuiting.)
 
-D:Bool = Not S0:Bool
-
-  Logical negation of the source.
-
 
 3. Type conversions
 

@@ -83,6 +83,7 @@ private:
   SSATmp* simplifyShl(IRInstruction* inst);
   SSATmp* simplifyShr(IRInstruction* inst);
   SSATmp* simplifyXorBool(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyXorTrue(SSATmp* src);
   SSATmp* simplifyGt(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyGte(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyLt(SSATmp* src1, SSATmp* src2);

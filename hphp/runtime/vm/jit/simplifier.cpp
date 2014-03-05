@@ -365,7 +365,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case ConcatCellCell: return simplifyConcatCellCell(inst);
   case ConcatStrStr:  return simplifyConcatStrStr(src1, src2);
   case Mov:           return simplifyMov(src1);
-  case Not:           return simplifyNot(src1);
   case ConvBoolToArr: return simplifyConvToArr(inst);
   case ConvDblToArr:  return simplifyConvToArr(inst);
   case ConvIntToArr:  return simplifyConvToArr(inst);
@@ -646,50 +645,6 @@ SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyMov(SSATmp* src) {
   return src;
-}
-
-SSATmp* Simplifier::simplifyNot(SSATmp* src) {
-  if (src->isConst()) {
-    return cns(!src->boolVal());
-  }
-
-  IRInstruction* inst = src->inst();
-  Opcode op = inst->op();
-
-  switch (op) {
-  // !!X --> X
-  case Not:
-    return inst->src(0);
-
-  // !(X cmp Y) --> X opposite_cmp Y
-  case Lt:
-  case Lte:
-  case Gt:
-  case Gte:
-  case Eq:
-  case Neq:
-  case Same:
-  case NSame:
-    // Not for Dbl:  (x < NaN) != !(x >= NaN)
-    if (!inst->src(0)->isA(Type::Dbl) &&
-        !inst->src(1)->isA(Type::Dbl)) {
-      return gen(negateQueryOp(op), inst->src(0), inst->src(1));
-    }
-    break;
-
-  case InstanceOfBitmask:
-  case NInstanceOfBitmask:
-    // TODO: combine this with the above check and use isQueryOp or
-    // add an isNegatable.
-    return gen(
-      negateQueryOp(op),
-      std::make_pair(inst->numSrcs(), inst->srcs().begin())
-    );
-    return nullptr;
-  // TODO !(X | non_zero) --> 0
-  default: (void)op;
-  }
-  return nullptr;
 }
 
 SSATmp* Simplifier::simplifyAbsDbl(IRInstruction* inst) {
@@ -1155,21 +1110,64 @@ SSATmp* Simplifier::simplifyXorInt(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyXorBool(SSATmp* src1, SSATmp* src2) {
-  // Canonicalize constants to the right.
-  if (src1->isConst() && !src2->isConst()) {
-    return gen(XorBool, src2, src1);
-  }
+SSATmp* Simplifier::simplifyXorTrue(SSATmp* src) {
+  IRInstruction* inst = src->inst();
+  Opcode op = inst->op();
 
+  switch (op) {
+  // !!X --> X
+  case XorBool:
+    if (inst->src(1)->isConst(true)) return inst->src(0);
+    return nullptr;
+
+  // !(X cmp Y) --> X opposite_cmp Y
+  case Lt:
+  case Lte:
+  case Gt:
+  case Gte:
+  case Eq:
+  case Neq:
+  case Same:
+  case NSame: {
+    auto s0 = inst->src(0);
+    auto s1 = inst->src(1);
+    // Not for Dbl:  (x < NaN) != !(x >= NaN)
+    if (!s0->isA(Type::Dbl) && !s1->isA(Type::Dbl)) {
+      return gen(negateQueryOp(op), s0, s1);
+    }
+    break;
+  }
+  case InstanceOfBitmask:
+  case NInstanceOfBitmask:
+    // TODO: combine this with the above check and use isQueryOp or
+    // add an isNegatable.
+    return gen(
+      negateQueryOp(op),
+      std::make_pair(inst->numSrcs(), inst->srcs().begin())
+    );
+    return nullptr;
+  // TODO !(X | non_zero) --> 0
+  default: (void)op;
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyXorBool(SSATmp* src1, SSATmp* src2) {
   // Both constants.
   if (src1->isConst() && src2->isConst()) {
     return cns(bool(src1->boolVal() ^ src2->boolVal()));
   }
 
-  // One constant: either a Not or constant result.
-  if (src2->isConst()) {
-    return src2->boolVal() ? gen(Not, src1) : src1;
+  // Canonicalize constants to the right.
+  if (src1->isConst() && !src2->isConst()) {
+    return gen(XorBool, src2, src1);
   }
+
+  // X^0 => X
+  if (src2->isConst(false)) return src1;
+
+  // X^1 => simplify "not" logic
+  if (src2->isConst(true)) return simplifyXorTrue(src1);
   return nullptr;
 }
 
@@ -1963,7 +1961,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
   }
 
   // Pull negations into the jump.
-  if (src->inst()->op() == Not) {
+  if (srcOpcode == XorBool && srcInst->src(1)->isConst(true)) {
     inst->setOpcode(inst->op() == JmpZero ? JmpNZero : JmpZero);
     inst->setSrc(0, srcInst->src(0));
     return nullptr;

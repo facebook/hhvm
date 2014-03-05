@@ -24,21 +24,3 @@ var_dump(round("1.95583", 2));
 var_dump(round("1241757", -3));
 var_dump(round("5.045", 2));
 var_dump(round("5.055", 2));
-
-// ext/standard/tests/math/round_modes.phpt
-var_dump(round(2.5, 0, PHP_ROUND_HALUP));
-var_dump(round(2.5, 0, PHP_ROUND_HALDOWN));
-var_dump(round(2.5, 0, PHP_ROUND_HALEVEN));
-var_dump(round(2.5, 0, PHP_ROUND_HALODD));
-var_dump(round(-2.5, 0, PHP_ROUND_HALUP));
-var_dump(round(-2.5, 0, PHP_ROUND_HALDOWN));
-var_dump(round(-2.5, 0, PHP_ROUND_HALEVEN));
-var_dump(round(-2.5, 0, PHP_ROUND_HALODD));
-var_dump(round(3.5, 0, PHP_ROUND_HALUP));
-var_dump(round(3.5, 0, PHP_ROUND_HALDOWN));
-var_dump(round(3.5, 0, PHP_ROUND_HALEVEN));
-var_dump(round(3.5, 0, PHP_ROUND_HALODD));
-var_dump(round(-3.5, 0, PHP_ROUND_HALUP));
-var_dump(round(-3.5, 0, PHP_ROUND_HALDOWN));
-var_dump(round(-3.5, 0, PHP_ROUND_HALEVEN));
-var_dump(round(-3.5, 0, PHP_ROUND_HALODD));

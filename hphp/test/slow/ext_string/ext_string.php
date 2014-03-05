@@ -403,7 +403,7 @@ var_dump($ret[ord("T")]);
 
 var_dump(str_word_count("Two Ts and one F."));
 var_dump(str_word_count("", 2));
-var_dump(str_word_count(1, 2));
+var_dump(str_word_count("1", 2));
 var_dump(str_word_count("1 2", 2));
 
 var_dump(levenshtein("carrrot", "carrot"));

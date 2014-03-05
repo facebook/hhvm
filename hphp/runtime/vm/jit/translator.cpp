@@ -2660,11 +2660,9 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
         m_resolvedDeps[l] = dl;
       }
     } else {
-      const bool specialize =
-        (tx64->mode() == TransLive    && (RuntimeOption::EvalHHBCRelaxGuards ||
-                                          RuntimeOption::EvalHHIRRelaxGuards))
-        ||
-        (tx64->mode() == TransProfile &&  RuntimeOption::EvalHHIRRelaxGuards);
+      const bool specialize = tx64->mode() == TransLive &&
+        (RuntimeOption::EvalHHBCRelaxGuards ||
+         RuntimeOption::EvalHHIRRelaxGuards);
 
       RuntimeType rtt = tx64->liveType(l, *liveUnit(), specialize);
       assert(rtt.isIter() || !rtt.isVagueValue());

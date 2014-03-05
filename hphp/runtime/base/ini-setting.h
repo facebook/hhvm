@@ -27,6 +27,7 @@ class Extension;
 
 bool ini_on_update(const folly::dynamic& value, bool& p);
 bool ini_on_update(const folly::dynamic& value, double& p);
+bool ini_on_update(const folly::dynamic& value, char& p);
 bool ini_on_update(const folly::dynamic& value, int16_t& p);
 bool ini_on_update(const folly::dynamic& value, int32_t& p);
 bool ini_on_update(const folly::dynamic& value, int64_t& p);
@@ -36,9 +37,16 @@ bool ini_on_update(const folly::dynamic& value, uint64_t& p);
 bool ini_on_update(const folly::dynamic& value, std::string& p);
 bool ini_on_update(const folly::dynamic& value, String& p);
 bool ini_on_update(const folly::dynamic& value, Array& p);
+bool ini_on_update(const folly::dynamic& value, std::vector<std::string>& p);
 bool ini_on_update(const folly::dynamic& value, std::set<std::string>& p);
+bool ini_on_update(const folly::dynamic& value,
+                   std::map<std::string, std::string>& p);
+bool ini_on_update(const folly::dynamic& value,
+                   std::map<std::string,
+                     std::map<std::string, std::string> >& p);
 folly::dynamic ini_get(bool& p);
 folly::dynamic ini_get(double& p);
+folly::dynamic ini_get(char& p);
 folly::dynamic ini_get(int16_t& p);
 folly::dynamic ini_get(int32_t& p);
 folly::dynamic ini_get(int64_t& p);
@@ -48,7 +56,11 @@ folly::dynamic ini_get(uint64_t& p);
 folly::dynamic ini_get(std::string& p);
 folly::dynamic ini_get(String& p);
 folly::dynamic ini_get(Array& p);
+folly::dynamic ini_get(std::vector<std::string>& p);
 folly::dynamic ini_get(std::set<std::string>& p);
+folly::dynamic ini_get(std::map<std::string, std::string>& p);
+folly::dynamic ini_get(std::map<std::string,
+                         std::map<std::string, std::string> >& p);
 
 class IniSetting {
 public:
@@ -144,8 +156,12 @@ public:
                       FollyDynamic);
   static bool SetUser(const String& name, const Variant& value);
 
+  /**
+   * A pair of callback functions used in Bind()
+   */
   template<class T>
   struct SetAndGet {
+    // The most common mistake is not returning a bool from your callback
     explicit SetAndGet(std::function<bool (const T&)> a, std::function<T ()> b)
       : setter(a), getter(b) {}
     explicit SetAndGet() {}

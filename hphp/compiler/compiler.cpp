@@ -395,6 +395,11 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
 
+  for (vector<string>::const_iterator it = po.config.begin();
+       it != po.config.end(); ++it) {
+    process_ini_settings(*it);
+  }
+
   if (po.dump) Option::DumpAst = true;
 
   if (po.inputDir.empty()) {

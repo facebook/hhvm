@@ -166,6 +166,11 @@ bool ini_on_update(const folly::dynamic& value, double& p) {
   return true;
 }
 
+bool ini_on_update(const folly::dynamic& value, char& p) {
+  p = value.data()[0];
+  return true;
+}
+
 bool ini_on_update(const folly::dynamic& value, int16_t& p) {
   INI_ASSERT_STR(value);
   auto n = convert_bytes_to_long(str);
@@ -240,10 +245,39 @@ bool ini_on_update(const folly::dynamic& value, Array& p) {
   return true;
 }
 
+bool ini_on_update(const folly::dynamic& value, std::vector<std::string>& p) {
+  INI_ASSERT_ARR(value);
+  for (auto& v : value.values()) {
+    p.push_back(v.data());
+  }
+  return true;
+}
+
 bool ini_on_update(const folly::dynamic& value, std::set<std::string>& p) {
   INI_ASSERT_ARR(value);
   for (auto& v : value.values()) {
     p.insert(v.data());
+  }
+  return true;
+}
+
+bool ini_on_update(const folly::dynamic& value,
+                   std::map<std::string, std::string>& p) {
+  INI_ASSERT_ARR(value);
+  for (auto& item : value.items()) {
+    p.insert(std::make_pair(item.first.data(), item.second.data()));
+  }
+  return true;
+}
+
+bool ini_on_update(const folly::dynamic& value,
+                   std::map<std::string,
+                     std::map<std::string, std::string> >& p) {
+  INI_ASSERT_ARR(value);
+  for (auto& item : value.items()) {
+    std::map<std::string, std::string> inner;
+    ini_on_update(item.second, inner);
+    p.insert(std::make_pair(item.first.data(), inner));
   }
   return true;
 }
@@ -253,6 +287,10 @@ folly::dynamic ini_get(bool& p) {
 }
 
 folly::dynamic ini_get(double& p) {
+  return p;
+}
+
+folly::dynamic ini_get(char& p) {
   return p;
 }
 
@@ -297,10 +335,35 @@ folly::dynamic ini_get(Array& p) {
   return ret;
 }
 
+folly::dynamic ini_get(std::vector<std::string>& p) {
+  folly::dynamic ret = folly::dynamic::object;
+  for (auto& s : p) {
+    ret.push_back(s);
+  }
+  return ret;
+}
+
 folly::dynamic ini_get(std::set<std::string>& p) {
   folly::dynamic ret = folly::dynamic::object;
   for (auto& s : p) {
     ret.push_back(s);
+  }
+  return ret;
+}
+
+folly::dynamic ini_get(std::map<std::string, std::string>& p) {
+  folly::dynamic ret = folly::dynamic::object;
+  for (auto& s : p) {
+    ret[s.first] = s.second;
+  }
+  return ret;
+}
+
+folly::dynamic ini_get(std::map<std::string,
+                         std::map<std::string, std::string> >& p) {
+  folly::dynamic ret = folly::dynamic::object;
+  for (auto& s : p) {
+    ret[s.first] = ini_get(s.second);
   }
   return ret;
 }

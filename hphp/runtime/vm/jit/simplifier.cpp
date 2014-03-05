@@ -339,10 +339,10 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
 
   case DivDbl:    return simplifyDivDbl(inst);
   case Mod:       return simplifyMod(src1, src2);
-  case BitAnd:    return simplifyBitAnd(src1, src2);
-  case BitOr:     return simplifyBitOr(src1, src2);
-  case BitXor:    return simplifyBitXor(src1, src2);
-  case LogicXor:  return simplifyLogicXor(src1, src2);
+  case AndInt:    return simplifyAndInt(src1, src2);
+  case OrInt:     return simplifyOrInt(src1, src2);
+  case XorInt:    return simplifyXorInt(src1, src2);
+  case XorBool:   return simplifyXorBool(src1, src2);
   case Shl:       return simplifyShl(inst);
   case Shr:       return simplifyShr(inst);
 
@@ -1095,10 +1095,10 @@ SSATmp* Simplifier::simplifyDivDbl(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyBitAnd(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyAndInt(SSATmp* src1, SSATmp* src2) {
   auto bit_and = [](int64_t a, int64_t b) { return a & b; };
   auto bit_or = [](int64_t a, int64_t b) { return a | b; };
-  auto simp = simplifyDistributive(src1, src2, BitAnd, BitOr, bit_and, bit_or);
+  auto simp = simplifyDistributive(src1, src2, AndInt, OrInt, bit_and, bit_or);
   if (simp != nullptr) {
     return simp;
   }
@@ -1119,10 +1119,10 @@ SSATmp* Simplifier::simplifyBitAnd(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyBitOr(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyOrInt(SSATmp* src1, SSATmp* src2) {
   auto bit_and = [](int64_t a, int64_t b) { return a & b; };
   auto bit_or = [](int64_t a, int64_t b) { return a | b; };
-  auto simp = simplifyDistributive(src1, src2, BitOr, BitAnd, bit_or, bit_and);
+  auto simp = simplifyDistributive(src1, src2, OrInt, AndInt, bit_or, bit_and);
   if (simp != nullptr) {
     return simp;
   }
@@ -1143,9 +1143,9 @@ SSATmp* Simplifier::simplifyBitOr(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyBitXor(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyXorInt(SSATmp* src1, SSATmp* src2) {
   auto bitxor = [](int64_t a, int64_t b) { return a ^ b; };
-  if (auto simp = simplifyCommutative(src1, src2, BitXor, bitxor)) {
+  if (auto simp = simplifyCommutative(src1, src2, XorInt, bitxor)) {
     return simp;
   }
   // X ^ X --> 0
@@ -1155,10 +1155,10 @@ SSATmp* Simplifier::simplifyBitXor(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyLogicXor(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyXorBool(SSATmp* src1, SSATmp* src2) {
   // Canonicalize constants to the right.
   if (src1->isConst() && !src2->isConst()) {
-    return gen(LogicXor, src2, src1);
+    return gen(XorBool, src2, src1);
   }
 
   // Both constants.

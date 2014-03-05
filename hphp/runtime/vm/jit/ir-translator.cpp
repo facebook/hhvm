@@ -176,15 +176,13 @@ IRTranslator::translateDiv(const NormalizedInstruction& i) {
 void
 IRTranslator::translateBinaryArithOp(const NormalizedInstruction& i) {
   switch (i.op()) {
-#define CASE(OpBc) case Op::OpBc: HHIR_EMIT(OpBc);
-    CASE(Add)
-    CASE(Sub)
-    CASE(Mul)
-    CASE(BitAnd)
-    CASE(BitOr)
-    CASE(BitXor)
-#undef CASE
-    default: break;
+  case Op::Add:    HHIR_EMIT(Add);
+  case Op::Sub:    HHIR_EMIT(Sub);
+  case Op::Mul:    HHIR_EMIT(Mul);
+  case Op::BitAnd: HHIR_EMIT(BitAnd);
+  case Op::BitOr:  HHIR_EMIT(BitOr);
+  case Op::BitXor: HHIR_EMIT(BitXor);
+  default: break;
   }
   not_reached();
 }

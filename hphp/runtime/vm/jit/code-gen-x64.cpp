@@ -1139,7 +1139,7 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
   const SSATmp* src2  = inst->src(1);
 
   // inputs must be ints, or a (bool,bool) operation that ends up behaving
-  // like an int anyway (e.g. LogicXor)
+  // like an int anyway (e.g. XorBool)
   assert((src1->isA(Type::Int) && src2->isA(Type::Int)) ||
          (src1->isA(Type::Bool) && src2->isA(Type::Bool)));
 
@@ -1369,7 +1369,7 @@ void CodeGenerator::cgDivDbl(IRInstruction* inst) {
   emitMovRegReg(m_as, resReg, dstReg);
 }
 
-void CodeGenerator::cgBitAnd(IRInstruction* inst) {
+void CodeGenerator::cgAndInt(IRInstruction* inst) {
   cgBinaryIntOp(inst,
                 &Asm::andq,
                 &Asm::andq,
@@ -1378,7 +1378,7 @@ void CodeGenerator::cgBitAnd(IRInstruction* inst) {
                 Commutative);
 }
 
-void CodeGenerator::cgBitOr(IRInstruction* inst) {
+void CodeGenerator::cgOrInt(IRInstruction* inst) {
   cgBinaryIntOp(inst,
                 &Asm::orq,
                 &Asm::orq,
@@ -1387,7 +1387,7 @@ void CodeGenerator::cgBitOr(IRInstruction* inst) {
                 Commutative);
 }
 
-void CodeGenerator::cgBitXor(IRInstruction* inst) {
+void CodeGenerator::cgXorInt(IRInstruction* inst) {
   if (inst->src(1)->isConst(-1)) {
     return cgUnaryIntOp(dstLoc(0), inst->src(0), srcLoc(0), &Asm::not);
   }
@@ -1399,7 +1399,7 @@ void CodeGenerator::cgBitXor(IRInstruction* inst) {
                 Commutative);
 }
 
-void CodeGenerator::cgLogicXor(IRInstruction* inst) {
+void CodeGenerator::cgXorBool(IRInstruction* inst) {
   cgBinaryIntOp(inst,
                 &Asm::xorb,
                 &Asm::xorb,

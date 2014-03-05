@@ -941,9 +941,9 @@ SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, SSATmp* src) {
   AOP(Mul, MulInt, MulDbl) \
 
 #define BINARY_BITOP  \
-  BOP(BitAnd)         \
-  BOP(BitOr)          \
-  BOP(BitXor)         \
+  BOP(BitAnd, AndInt) \
+  BOP(BitOr,  OrInt)  \
+  BOP(BitXor, XorInt) \
 
 static bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   auto checkArith = [](Type ty) {
@@ -958,7 +958,7 @@ static bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
     case Op::OP: return checkArith(t1) && checkArith(t2);
   BINARY_ARITH
   #undef AOP
-  #define BOP(OP) \
+  #define BOP(OP, OPI) \
     case Op::OP: return checkBitOp(t1) && checkBitOp(t2);
   BINARY_BITOP
   #undef BOP
@@ -986,7 +986,7 @@ Opcode dblArithOp(Op op) {
 
 Opcode bitOp(Op op) {
   switch (op) {
-    #define BOP(OP) case Op::OP: return OP;
+    #define BOP(OP, OPI) case Op::OP: return OPI;
     BINARY_BITOP
     #undef BOP
     default: not_reached();
@@ -995,7 +995,7 @@ Opcode bitOp(Op op) {
 
 bool isBitOp(Op op) {
   switch (op) {
-    #define BOP(OP) case Op::OP: return true;
+    #define BOP(OP, OPI) case Op::OP: return true;
     BINARY_BITOP
     #undef BOP
     default: return false;
@@ -4414,7 +4414,7 @@ void HhbcTranslator::emitAbs() {
   if (value->isA(Type::Int)) {
     // compute integer absolute value ((src>>63) ^ src) - (src>>63)
     auto t1 = gen(Shr, value, cns(63));
-    auto t2 = gen(BitXor, t1, value);
+    auto t2 = gen(XorInt, t1, value);
     push(gen(SubInt, t2, t1));
     return;
   }
@@ -4438,7 +4438,7 @@ void HhbcTranslator::emitAbs() {
 BINARY_ARITH
 #undef AOP
 
-#define BOP(OP) \
+#define BOP(OP, OPI) \
   void HhbcTranslator::emit ## OP() { emitBinaryBitOp(Op::OP); }
 BINARY_BITOP
 #undef BOP
@@ -4609,13 +4609,13 @@ void HhbcTranslator::emitBitNot() {
   auto const srcType = topC()->type();
   if (srcType <= Type::Int) {
     auto const src = popC();
-    push(gen(BitXor, src, cns(-1)));
+    push(gen(XorInt, src, cns(-1)));
     return;
   }
 
   if (srcType <= Type::Dbl) {
     auto const src = gen(ConvDblToInt, popC());
-    push(gen(BitXor, src, cns(-1)));
+    push(gen(XorInt, src, cns(-1)));
     return;
   }
 
@@ -4630,7 +4630,7 @@ void HhbcTranslator::emitXor() {
   SSATmp* btl = popC();
   SSATmp* tr = gen(ConvCellToBool, btr);
   SSATmp* tl = gen(ConvCellToBool, btl);
-  push(gen(ConvCellToBool, gen(LogicXor, tl, tr)));
+  push(gen(XorBool, tl, tr));
   gen(DecRef, btl);
   gen(DecRef, btr);
 }

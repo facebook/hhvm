@@ -77,12 +77,12 @@ private:
   SSATmp* simplifyMulDbl(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyMod(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyDivDbl(IRInstruction* inst);
-  SSATmp* simplifyBitAnd(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyBitOr(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyBitXor(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyAndInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyOrInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyXorInt(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyShl(IRInstruction* inst);
   SSATmp* simplifyShr(IRInstruction* inst);
-  SSATmp* simplifyLogicXor(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyXorBool(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyGt(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyGte(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyLt(SSATmp* src1, SSATmp* src2);

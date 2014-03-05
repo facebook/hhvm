@@ -234,7 +234,6 @@ O(AbsDbl,                       D(Dbl), S(Dbl),                            C) \
 O(BitAnd,                       D(Int), S(Int) S(Int),                     C) \
 O(BitOr,                        D(Int), S(Int) S(Int),                     C) \
 O(BitXor,                       D(Int), S(Int) S(Int),                     C) \
-O(BitNot,                       D(Int), S(Int),                            C) \
 O(LogicXor,                    D(Bool), S(Bool) S(Bool),                   C) \
 O(Not,                         D(Bool), S(Bool),                           C) \
 O(Shl,                          D(Int), S(Int) S(Int),                     C) \

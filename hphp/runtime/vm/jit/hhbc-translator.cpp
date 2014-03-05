@@ -4609,13 +4609,13 @@ void HhbcTranslator::emitBitNot() {
   auto const srcType = topC()->type();
   if (srcType <= Type::Int) {
     auto const src = popC();
-    push(gen(BitNot, src));
+    push(gen(BitXor, src, cns(-1)));
     return;
   }
 
   if (srcType <= Type::Dbl) {
     auto const src = gen(ConvDblToInt, popC());
-    push(gen(BitNot, src));
+    push(gen(BitXor, src, cns(-1)));
     return;
   }
 

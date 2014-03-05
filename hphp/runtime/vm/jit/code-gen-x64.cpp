@@ -1388,16 +1388,15 @@ void CodeGenerator::cgBitOr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgBitXor(IRInstruction* inst) {
+  if (inst->src(1)->isConst(-1)) {
+    return cgUnaryIntOp(dstLoc(0), inst->src(0), srcLoc(0), &Asm::not);
+  }
   cgBinaryIntOp(inst,
                 &Asm::xorq,
                 &Asm::xorq,
                 &Asm::movq,
                 &convertToReg64,
                 Commutative);
-}
-
-void CodeGenerator::cgBitNot(IRInstruction* inst) {
-  cgUnaryIntOp(dstLoc(0), inst->src(0), srcLoc(0), &Asm::not);
 }
 
 void CodeGenerator::cgLogicXor(IRInstruction* inst) {

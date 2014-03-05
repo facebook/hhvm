@@ -1149,17 +1149,9 @@ SSATmp* Simplifier::simplifyBitXor(SSATmp* src1, SSATmp* src2) {
     return simp;
   }
   // X ^ X --> 0
-  if (src1 == src2)
-    return cns(0);
-  // X ^ 0 --> X; X ^ -1 --> ~X
-  if (src2->isConst()) {
-    if (src2->intVal() == 0) {
-      return src1;
-    }
-    if (src2->intVal() == -1) {
-      return gen(BitNot, src1);
-    }
-  }
+  if (src1 == src2) return cns(0);
+  // X ^ 0 --> X
+  if (src2->isConst(0)) return src1;
   return nullptr;
 }
 

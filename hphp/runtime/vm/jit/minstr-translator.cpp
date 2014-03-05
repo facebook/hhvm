@@ -496,13 +496,12 @@ SSATmp* HhbcTranslator::MInstrTranslator::getValAddr() {
   const Location& l = dl.location;
   if (l.space == Location::Local) {
     assert(!m_stackInputs.count(0));
-    return m_ht.ldLocAddr(l.offset, DataTypeGeneric); // teleported to container
+    return m_ht.ldLocAddr(l.offset, DataTypeSpecific);
   } else {
     assert(l.space == Location::Stack);
     assert(m_stackInputs.count(0));
     m_ht.spillStack();
-    return m_ht.ldStackAddr(m_stackInputs[0],
-                            DataTypeGeneric); // teleported to container
+    return m_ht.ldStackAddr(m_stackInputs[0], DataTypeSpecific);
   }
 }
 
@@ -571,7 +570,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
       if (mia & MIA_define) {
         // We care whether or not the local is Uninit, and
         // CountnessInit will tell us that.
-        m_irb.constrainLocal(base.location.offset, DataTypeCountnessInit,
+        m_irb.constrainLocal(base.location.offset, DataTypeSpecific,
                             "emitBaseLCR: Uninit base local");
         gen(
           StLoc,
@@ -622,14 +621,14 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
     }
 
     if (base.location.space == Location::Local) {
-      m_base = m_ht.ldLocAddr(base.location.offset, DataTypeGeneric);
+      m_base = m_ht.ldLocAddr(base.location.offset, DataTypeSpecific);
     } else {
       assert(base.location.space == Location::Stack);
       // Make sure the stack is clean before getting a pointer to one of its
       // elements.
       m_ht.spillStack();
       assert(m_stackInputs.count(m_iInd));
-      m_base = m_ht.ldStackAddr(m_stackInputs[m_iInd], DataTypeGeneric);
+      m_base = m_ht.ldStackAddr(m_stackInputs[m_iInd], DataTypeSpecific);
     }
     assert(m_base->type().isPtr());
   }
@@ -2585,7 +2584,7 @@ void HhbcTranslator::MInstrTranslator::emitMPost() {
     switch (input.location.space) {
     case Location::Stack: {
       ++nStack;
-      auto input = getInput(i, DataTypeCountness); // just going to decref it
+      auto input = getInput(i, DataTypeSpecific);
       if (input->isA(Type::Gen)) {
         gen(DecRef, input);
         if (m_failedSetBlock) {

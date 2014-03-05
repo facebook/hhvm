@@ -788,7 +788,7 @@ void IRTranslator::translateFPassL(const NormalizedInstruction& ni) {
   if (ni.preppedByRef) {
     HHIR_EMIT(VGetL, locId);
   } else {
-    HHIR_EMIT(CGetL, locId);
+    HHIR_EMIT(FPassL, locId);
   }
 }
 

@@ -650,7 +650,7 @@ void HhbcTranslator::emitColAddElemC() {
   }
 
   auto* catchBlock = makeCatch();
-  auto const val = popC(DataTypeGeneric);
+  auto const val = popC();
   auto const key = popC();
   auto const coll = popC();
   push(gen(ColAddElemC, catchBlock, coll, key, val));
@@ -828,6 +828,11 @@ void HhbcTranslator::emitCGetL(int32_t id) {
   auto cat = curSrcKey().op() == OpFPassL ? DataTypeSpecific
                                           : DataTypeCountnessInit;
   pushIncRef(ldLocInnerWarn(id, exit, cat));
+}
+
+void HhbcTranslator::emitFPassL(int32_t id) {
+  auto exit = makeExit();
+  pushIncRef(ldLocInnerWarn(id, exit, DataTypeSpecific));
 }
 
 void HhbcTranslator::emitPushL(uint32_t id) {
@@ -1134,7 +1139,7 @@ void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
     return cachedBox;
   }();
   gen(IncRef, box);
-  auto const oldValue = ldLoc(locId, DataTypeGeneric);
+  auto const oldValue = ldLoc(locId, DataTypeSpecific);
   gen(StLoc, LocalId(locId), m_irb->fp(), box);
   gen(DecRef, oldValue);
   // We don't need to decref value---it's a bytecode invariant that
@@ -1468,7 +1473,7 @@ void HhbcTranslator::emitCreateCont() {
     // uninit so that we don't need to change refcounts. We pass
     // DataTypeGeneric to ldLoc because we're just teleporting the value.
     gen(StMem, contAR, cns(-cellsToBytes(i + 1)),
-        ldLoc(i, DataTypeGeneric));
+        ldLoc(i, DataTypeSpecific));
     gen(StLoc, LocalId(i), m_irb->fp(), cns(Type::Uninit));
   }
   if (fillThis) {
@@ -1713,7 +1718,7 @@ void HhbcTranslator::emitAsyncESuspend(int64_t label, int numIters) {
     // object and set the local to uninit so that we don't need to
     // change refcounts.
     gen(StMem, asyncAR, cns(-cellsToBytes(i + 1)),
-        ldLoc(i, DataTypeGeneric));
+        ldLoc(i, DataTypeSpecific));
     gen(StLoc, LocalId(i), m_irb->fp(), cns(Type::Uninit));
   }
 
@@ -1789,9 +1794,9 @@ void HhbcTranslator::emitIdx() {
 // that is where this function will be used and make more sense. It's only
 // called once now.
 void HhbcTranslator::emitIdxCommon(Opcode opc, Block* catchBlock) {
-  SSATmp* def = popC(DataTypeGeneric); // def is just pushed back on the stack
-  SSATmp* key = popC(DataTypeGeneric);
-  SSATmp* arr = popC(DataTypeGeneric);
+  SSATmp* def = popC(DataTypeSpecific);
+  SSATmp* key = popC(DataTypeSpecific);
+  SSATmp* arr = popC(DataTypeSpecific);
   push(gen(opc, catchBlock, arr, key, def));
   gen(DecRef, arr);
   gen(DecRef, key);

@@ -94,7 +94,7 @@ void optimizePredictions(IRUnit& unit) {
   auto optLdMem = [&] (IRInstruction* checkType) -> bool {
     auto const ldMem = checkType->src(0)->inst();
     if (ldMem->op() != LdMem) return false;
-    if (ldMem->src(1)->getValInt() != 0) return false;
+    if (ldMem->src(1)->intVal() != 0) return false;
     if (!typeSufficientlyGeneric(ldMem->typeParam())) return false;
 
     FTRACE(5, "candidate: {}\n", ldMem->toString());

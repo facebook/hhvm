@@ -136,7 +136,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     // This is not one of the values pushed onto the stack by this
     // spillstack instruction, so continue searching.
     SSATmp* prevSp = inst->src(0);
-    int64_t numPopped = inst->src(1)->getValInt();
+    int64_t numPopped = inst->src(1)->intVal();
     return getStackValue(prevSp,
                          // pop values pushed by spillstack
                          index - (numPushed - numPopped));
@@ -460,7 +460,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
   auto const sp           = inst->src(0);
-  auto const spDeficit    = inst->src(1)->getValInt();
+  auto const spDeficit    = inst->src(1)->intVal();
   auto const numSpillSrcs = inst->srcs().subpiece(2).size();
 
   // If there's nothing to spill, and no stack adjustment, we don't
@@ -521,13 +521,13 @@ SSATmp* Simplifier::simplifyConvClsToCctx(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
   SSATmp* clsName = inst->src(0);
   if (clsName->isConst()) {
-    const Class* cls = Unit::lookupClass(clsName->getValStr());
+    const Class* cls = Unit::lookupClass(clsName->strVal());
     if (cls) {
       if (RDS::isPersistentHandle(cls->classHandle())) {
         // the class is always defined
         return cns(cls);
       }
-      const Class* ctx = inst->src(1)->getValClass();
+      const Class* ctx = inst->src(1)->clsVal();
       if (ctx && ctx->classof(cls)) {
         // the class of the current function being compiled is the
         // same as or derived from cls, so cls must be defined and
@@ -650,7 +650,7 @@ SSATmp* Simplifier::simplifyMov(SSATmp* src) {
 
 SSATmp* Simplifier::simplifyNot(SSATmp* src) {
   if (src->isConst()) {
-    return cns(!src->getValBool());
+    return cns(!src->boolVal());
   }
 
   IRInstruction* inst = src->inst();
@@ -696,7 +696,7 @@ SSATmp* Simplifier::simplifyAbsDbl(IRInstruction* inst) {
   auto src = inst->src(0);
 
   if (src->isConst()) {
-    double val = src->getValDbl();
+    double val = src->dblVal();
     return cns(fabs(val));
   }
 
@@ -716,15 +716,15 @@ SSATmp* Simplifier::simplifyConst(SSATmp* src1, SSATmp* src2, Oper op) {
     }
     /* Null op ConstInt */
     if (src2->isA(Type::Int)) {
-      return cns(op(0, src2->getValInt()));
+      return cns(op(0, src2->intVal()));
     }
     /* Null op ConstBool */
     if (src2->isA(Type::Bool)) {
-      return cns(op(0, src2->getValRawInt()));
+      return cns(op(0, src2->rawVal()));
     }
     /* Null op StaticStr */
     if (src2->isA(Type::StaticStr)) {
-      const StringData* str = src2->getValStr();
+      const StringData* str = src2->strVal();
       if (str->isInteger()) {
         return cns(op(0, str->toInt64()));
       }
@@ -734,49 +734,49 @@ SSATmp* Simplifier::simplifyConst(SSATmp* src1, SSATmp* src2, Oper op) {
   if (src1->isA(Type::Int)) {
     /* ConstInt op Null */
     if (src2->isA(Type::Null)) {
-      return cns(op(src1->getValInt(), 0));
+      return cns(op(src1->intVal(), 0));
     }
     /* ConstInt op ConstInt */
     if (src2->isA(Type::Int)) {
-      return cns(op(src1->getValInt(), src2->getValInt()));
+      return cns(op(src1->intVal(), src2->intVal()));
     }
     /* ConstInt op ConstBool */
     if (src2->isA(Type::Bool)) {
-      return cns(op(src1->getValInt(), src2->getValRawInt()));
+      return cns(op(src1->intVal(), src2->rawVal()));
     }
     /* ConstInt op StaticStr */
     if (src2->isA(Type::StaticStr)) {
-      const StringData* str = src2->getValStr();
+      const StringData* str = src2->strVal();
       if (str->isInteger()) {
-        return cns(op(src1->getValInt(), str->toInt64()));
+        return cns(op(src1->intVal(), str->toInt64()));
       }
-      return cns(op(src1->getValInt(), 0));
+      return cns(op(src1->intVal(), 0));
     }
   }
   if (src1->isA(Type::Bool)) {
     /* ConstBool op Null */
     if (src2->isA(Type::Null)) {
-      return cns(op(src1->getValRawInt(), 0));
+      return cns(op(src1->rawVal(), 0));
     }
     /* ConstBool op ConstInt */
     if (src2->isA(Type::Int)) {
-      return cns(op(src1->getValRawInt(), src2->getValInt()));
+      return cns(op(src1->rawVal(), src2->intVal()));
     }
     /* ConstBool op ConstBool */
     if (src2->isA(Type::Bool)) {
-      return cns(op(src1->getValRawInt(), src2->getValRawInt()));
+      return cns(op(src1->rawVal(), src2->rawVal()));
     }
     /* ConstBool op StaticStr */
     if (src2->isA(Type::StaticStr)) {
-      const StringData* str = src2->getValStr();
+      const StringData* str = src2->strVal();
       if (str->isInteger()) {
-        return cns(op(src1->getValBool(), str->toInt64()));
+        return cns(op(src1->boolVal(), str->toInt64()));
       }
-      return cns(op(src1->getValRawInt(), 0));
+      return cns(op(src1->rawVal(), 0));
     }
   }
   if (src1->isA(Type::StaticStr)) {
-    const StringData* str = src1->getValStr();
+    const StringData* str = src1->strVal();
     int64_t strInt = 0;
     if (str->isInteger()) {
       strInt = str->toInt64();
@@ -787,15 +787,15 @@ SSATmp* Simplifier::simplifyConst(SSATmp* src1, SSATmp* src2, Oper op) {
     }
     /* StaticStr op ConstInt */
     if (src2->isA(Type::Int)) {
-      return cns(op(strInt, src2->getValInt()));
+      return cns(op(strInt, src2->intVal()));
     }
     /* StaticStr op ConstBool */
     if (src2->isA(Type::Bool)) {
-      return cns(op(strInt, src2->getValBool()));
+      return cns(op(strInt, src2->boolVal()));
     }
     /* StaticStr op StaticStr */
     if (src2->isA(Type::StaticStr)) {
-      const StringData* str2 = src2->getValStr();
+      const StringData* str2 = src2->strVal();
       if (str2->isInteger()) {
         return cns(op(strInt, str2->toInt64()));
       }
@@ -826,14 +826,14 @@ SSATmp* Simplifier::simplifyCommutative(SSATmp* src1,
   if (inst1->op() == opcode && inst1->src(1)->isConst()) {
     // (X + C1) + C2 --> X + C3
     if (src2->isConst()) {
-      int64_t right = inst1->src(1)->getValInt();
-      right = op(right, src2->getValInt());
+      int64_t right = inst1->src(1)->intVal();
+      right = op(right, src2->intVal());
       return gen(opcode, inst1->src(0), cns(right));
     }
     // (X + C1) + (Y + C2) --> X + Y + C3
     if (inst2->op() == opcode && inst2->src(1)->isConst()) {
-      int64_t right = inst1->src(1)->getValInt();
-      right = op(right, inst2->src(1)->getValInt());
+      int64_t right = inst1->src(1)->intVal();
+      right = op(right, inst2->src(1)->intVal());
       SSATmp* left = gen(opcode, inst1->src(0), inst2->src(0));
       return gen(opcode, left, cns(right));
     }
@@ -885,7 +885,7 @@ SSATmp* Simplifier::simplifyAddInt(SSATmp* src1, SSATmp* src2) {
     return simp;
   }
   if (src2->isConst()) {
-    int64_t src2Val = src2->getValInt();
+    int64_t src2Val = src2->intVal();
     // X + 0 --> X
     if (src2Val == 0) {
       return src1;
@@ -899,7 +899,7 @@ SSATmp* Simplifier::simplifyAddInt(SSATmp* src1, SSATmp* src2) {
   auto inst2 = src2->inst();
   if (inst2->op() == SubInt) {
     SSATmp* src = inst2->src(0);
-    if (src->isConst() && src->getValInt() == 0) {
+    if (src->isConst() && src->intVal() == 0) {
       return gen(SubInt, src1, inst2->src(1));
     }
   }
@@ -912,7 +912,7 @@ SSATmp* Simplifier::simplifyAddInt(SSATmp* src1, SSATmp* src2) {
 
     // (X - C1) + C2 --> X + (C2 - C1)
     if (src2->isConst()) {
-      auto rhs = gen(SubInt, cns(src2->getValInt()), c1);
+      auto rhs = gen(SubInt, cns(src2->intVal()), c1);
       return gen(AddInt, x, rhs);
     }
 
@@ -957,7 +957,7 @@ SSATmp* Simplifier::simplifySubInt(SSATmp* src1, SSATmp* src2) {
     return cns(0);
   }
   if (src2->isConst()) {
-    int64_t src2Val = src2->getValInt();
+    int64_t src2Val = src2->intVal();
     // X - 0 --> X
     if (src2Val == 0) {
       return src1;
@@ -971,7 +971,7 @@ SSATmp* Simplifier::simplifySubInt(SSATmp* src1, SSATmp* src2) {
   auto inst2 = src2->inst();
   if (inst2->op() == SubInt) {
     SSATmp* src = inst2->src(0);
-    if (src->isConst() && src->getValInt() == 0) {
+    if (src->isConst() && src->intVal() == 0) {
       return gen(AddInt, src1, inst2->src(1));
     }
   }
@@ -988,7 +988,7 @@ SSATmp* Simplifier::simplifyMulInt(SSATmp* src1, SSATmp* src2) {
     return nullptr;
   }
 
-  int64_t rhs = src2->getValInt();
+  int64_t rhs = src2->intVal();
 
   // X * (-1) --> -X
   if (rhs == -1) return gen(SubInt, cns(0), src1);
@@ -1049,15 +1049,15 @@ SSATmp* Simplifier::simplifyMod(SSATmp* src1, SSATmp* src2) {
   if (!src2->isConst()) {
     return nullptr;
   }
-  int64_t src2Val = src2->getValInt();
+  int64_t src2Val = src2->intVal();
   // refrain from generating undefined IR
   assert(src2Val != 0);
   // simplify const
   if (src1->isConst()) {
     // still don't want undefined IR
-    assert(src1->getValInt() != std::numeric_limits<int64_t>::min() ||
+    assert(src1->intVal() != std::numeric_limits<int64_t>::min() ||
            src2Val != -1);
-    return cns(src1->getValInt() % src2Val);
+    return cns(src1->intVal() % src2Val);
   }
   // X % 1, X % -1 --> 0
   if (src2Val == 1 || src2Val == -1LL) {
@@ -1077,7 +1077,7 @@ SSATmp* Simplifier::simplifyDivDbl(IRInstruction* inst) {
   if (!src2->isConst()) return nullptr;
 
   // not supporting integers (#2570625)
-  double src2Val = src2->getValDbl();
+  double src2Val = src2->dblVal();
 
   // X / 0 -> bool(false)
   if (src2Val == 0.0) {
@@ -1089,7 +1089,7 @@ SSATmp* Simplifier::simplifyDivDbl(IRInstruction* inst) {
 
   // statically compute X / Y
   if (src1->isConst()) {
-    return cns(src1->getValDbl() / src2Val);
+    return cns(src1->dblVal() / src2Val);
   }
 
   return nullptr;
@@ -1108,11 +1108,11 @@ SSATmp* Simplifier::simplifyBitAnd(SSATmp* src1, SSATmp* src2) {
   }
   if (src2->isConst()) {
     // X & 0 --> 0
-    if (src2->getValInt() == 0) {
+    if (src2->intVal() == 0) {
       return cns(0);
     }
     // X & (~0) --> X
-    if (src2->getValInt() == ~0L) {
+    if (src2->intVal() == ~0L) {
       return src1;
     }
   }
@@ -1132,11 +1132,11 @@ SSATmp* Simplifier::simplifyBitOr(SSATmp* src1, SSATmp* src2) {
   }
   if (src2->isConst()) {
     // X | 0 --> X
-    if (src2->getValInt() == 0) {
+    if (src2->intVal() == 0) {
       return src1;
     }
     // X | (~0) --> ~0
-    if (src2->getValInt() == ~uint64_t(0)) {
+    if (src2->intVal() == ~uint64_t(0)) {
       return cns(~uint64_t(0));
     }
   }
@@ -1153,10 +1153,10 @@ SSATmp* Simplifier::simplifyBitXor(SSATmp* src1, SSATmp* src2) {
     return cns(0);
   // X ^ 0 --> X; X ^ -1 --> ~X
   if (src2->isConst()) {
-    if (src2->getValInt() == 0) {
+    if (src2->intVal() == 0) {
       return src1;
     }
-    if (src2->getValInt() == -1) {
+    if (src2->intVal() == -1) {
       return gen(BitNot, src1);
     }
   }
@@ -1171,12 +1171,12 @@ SSATmp* Simplifier::simplifyLogicXor(SSATmp* src1, SSATmp* src2) {
 
   // Both constants.
   if (src1->isConst() && src2->isConst()) {
-    return cns(bool(src1->getValBool() ^ src2->getValBool()));
+    return cns(bool(src1->boolVal() ^ src2->boolVal()));
   }
 
   // One constant: either a Not or constant result.
   if (src2->isConst()) {
-    return src2->getValBool() ? gen(Not, src1) : src1;
+    return src2->boolVal() ? gen(Not, src1) : src1;
   }
   return nullptr;
 }
@@ -1184,16 +1184,16 @@ SSATmp* Simplifier::simplifyLogicXor(SSATmp* src1, SSATmp* src2) {
 template<class Oper>
 SSATmp* Simplifier::simplifyShift(SSATmp* src1, SSATmp* src2, Oper op) {
   if (src1->isConst()) {
-    if (src1->getValInt() == 0) {
+    if (src1->intVal() == 0) {
       return cns(0);
     }
 
     if (src2->isConst()) {
-      return cns(op(src1->getValInt(), src2->getValInt()));
+      return cns(op(src1->intVal(), src2->intVal()));
     }
   }
 
-  if (src2->isConst() && src2->getValInt() == 0) {
+  if (src2->isConst() && src2->intVal() == 0) {
     return src1;
   }
 
@@ -1279,8 +1279,8 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
     // resource.  Other types may simplify to OpEq and OpNeq, respectively
     if (type1 <= Type::Str && type2 <= Type::Str) {
       if (src1->isConst() && src2->isConst()) {
-        auto str1 = src1->getValStr();
-        auto str2 = src2->getValStr();
+        auto str1 = src1->strVal();
+        auto str2 = src2->strVal();
         bool same = str1->same(str2);
         return cns(bool(cmpOp(opName, same, 1)));
       } else {
@@ -1312,18 +1312,18 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
     // StaticStr cmp StaticStr
     if (src1->isA(Type::StaticStr) &&
         src2->isA(Type::StaticStr)) {
-      int cmp = src1->getValStr()->compare(src2->getValStr());
+      int cmp = src1->strVal()->compare(src2->strVal());
       return cns(bool(cmpOp(opName, cmp, 0)));
     }
     // ConstInt cmp ConstInt
     if (src1->isA(Type::Int) && src2->isA(Type::Int)) {
       return cns(bool(
-        cmpOp(opName, src1->getValInt(), src2->getValInt())));
+        cmpOp(opName, src1->intVal(), src2->intVal())));
     }
     // ConstBool cmp ConstBool
     if (src1->isA(Type::Bool) && src2->isA(Type::Bool)) {
       return cns(bool(
-        cmpOp(opName, src1->getValBool(), src2->getValBool())));
+        cmpOp(opName, src1->boolVal(), src2->boolVal())));
     }
   }
 
@@ -1334,7 +1334,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
 
   // Perform constant-bool optimizations
   if (src2->isA(Type::Bool) && src2->isConst()) {
-    bool b = src2->getValBool();
+    bool b = src2->boolVal();
 
     // The result of the comparison might be independent of the truth
     // value of the LHS. If so, then simplify.
@@ -1413,9 +1413,9 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   if (src2->isA(Type::Bool)) {
     if (src1->isConst()) {
       if (src1->isA(Type::Int)) {
-        return newInst(opName, cns(bool(src1->getValInt())), src2);
+        return newInst(opName, cns(bool(src1->intVal())), src2);
       } else if (src1->isA(Type::Str)) {
-        auto str = src1->getValStr();
+        auto str = src1->strVal();
         return newInst(opName, cns(str->toBoolean()), src2);
       }
     }
@@ -1425,7 +1425,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
       // Based on the const bool optimization (above) opName should be OpEq
       always_assert(opName == Eq);
 
-      if (src2->getValBool()) {
+      if (src2->boolVal()) {
         return newInst(Neq, src1, cns(0));
       } else {
         return newInst(Eq, src1, cns(0));
@@ -1458,7 +1458,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   //  are dealt with earlier, while other cases (like number-resource)
   //  are not caught at all (and end up exiting this macro at the bottom).
   if (src1->isConst(Type::Str) && src2->isA(Type::Int)) {
-    auto str = src1->getValStr();
+    auto str = src1->strVal();
     int64_t si; double sd;
     auto st = str->isNumericWithVal(si, sd, true /* allow errors */);
     if (st == KindOfDouble) {
@@ -1589,8 +1589,8 @@ SSATmp* Simplifier::simplifyConcatCellCell(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConcatStrStr(SSATmp* src1, SSATmp* src2) {
   if (src1->isConst() && src1->isA(Type::StaticStr) &&
       src2->isConst() && src2->isA(Type::StaticStr)) {
-    StringData* str1 = const_cast<StringData *>(src1->getValStr());
-    StringData* str2 = const_cast<StringData *>(src2->getValStr());
+    StringData* str1 = const_cast<StringData *>(src1->strVal());
+    StringData* str2 = const_cast<StringData *>(src2->strVal());
     StringData* merge = makeStaticString(concat_ss(str1, str2));
     return cns(merge);
   }
@@ -1601,7 +1601,7 @@ SSATmp* Simplifier::simplifyConcatStrStr(SSATmp* src1, SSATmp* src2) {
 SSATmp* Simplifier::simplifyConvToArr(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    Array arr = Array::Create(src->getValVariant());
+    Array arr = Array::Create(src->variantVal());
     return cns(ArrayData::GetScalarArray(arr.get()));
   }
   return nullptr;
@@ -1610,7 +1610,7 @@ SSATmp* Simplifier::simplifyConvToArr(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvArrToBool(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    if (src->getValArr()->empty()) {
+    if (src->arrVal()->empty()) {
       return cns(false);
     }
     return cns(true);
@@ -1621,7 +1621,7 @@ SSATmp* Simplifier::simplifyConvArrToBool(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvDblToBool(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    return cns(bool(src->getValDbl()));
+    return cns(bool(src->dblVal()));
   }
 
   return nullptr;
@@ -1630,7 +1630,7 @@ SSATmp* Simplifier::simplifyConvDblToBool(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvIntToBool(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    return cns(bool(src->getValInt()));
+    return cns(bool(src->intVal()));
   }
   return nullptr;
 }
@@ -1640,7 +1640,7 @@ SSATmp* Simplifier::simplifyConvStrToBool(IRInstruction* inst) {
   if (src->isConst()) {
     // only the strings "", and "0" convert to false, all other strings
     // are converted to true
-    const StringData* str = src->getValStr();
+    const StringData* str = src->strVal();
     return cns(!str->empty() && !str->isZero());
   }
   return nullptr;
@@ -1649,7 +1649,7 @@ SSATmp* Simplifier::simplifyConvStrToBool(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvArrToDbl(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   if (src->isConst()) {
-    if (src->getValArr()->empty()) {
+    if (src->arrVal()->empty()) {
       return cns(0.0);
     }
   }
@@ -1659,7 +1659,7 @@ SSATmp* Simplifier::simplifyConvArrToDbl(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvBoolToDbl(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   if (src->isConst()) {
-    return cns(double(src->getValBool()));
+    return cns(double(src->boolVal()));
   }
   return nullptr;
 }
@@ -1667,7 +1667,7 @@ SSATmp* Simplifier::simplifyConvBoolToDbl(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvIntToDbl(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   if (src->isConst()) {
-    return cns(double(src->getValInt()));
+    return cns(double(src->intVal()));
   }
   if (src->inst()->is(ConvBoolToInt)) {
     return gen(ConvBoolToDbl, src->inst()->src(0));
@@ -1678,7 +1678,7 @@ SSATmp* Simplifier::simplifyConvIntToDbl(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvStrToDbl(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   if (src->isConst()) {
-    const StringData *str = src->getValStr();
+    const StringData *str = src->strVal();
     int64_t lval;
     double dval;
     DataType ret = str->isNumericWithVal(lval, dval, 1);
@@ -1695,7 +1695,7 @@ SSATmp* Simplifier::simplifyConvStrToDbl(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvArrToInt(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    if (src->getValArr()->empty()) {
+    if (src->arrVal()->empty()) {
       return cns(0);
     }
     return cns(1);
@@ -1706,7 +1706,7 @@ SSATmp* Simplifier::simplifyConvArrToInt(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvBoolToInt(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    return cns(int(src->getValBool()));
+    return cns(int(src->boolVal()));
   }
   return nullptr;
 }
@@ -1714,7 +1714,7 @@ SSATmp* Simplifier::simplifyConvBoolToInt(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvDblToInt(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    return cns(toInt64(src->getValDbl()));
+    return cns(toInt64(src->dblVal()));
   }
   return nullptr;
 }
@@ -1722,7 +1722,7 @@ SSATmp* Simplifier::simplifyConvDblToInt(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvStrToInt(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    const StringData *str = src->getValStr();
+    const StringData *str = src->strVal();
     int64_t lval;
     double dval;
     DataType ret = str->isNumericWithVal(lval, dval, 1);
@@ -1739,7 +1739,7 @@ SSATmp* Simplifier::simplifyConvStrToInt(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvBoolToStr(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    if (src->getValBool()) {
+    if (src->boolVal()) {
       return cns(makeStaticString("1"));
     }
     return cns(makeStaticString(""));
@@ -1750,7 +1750,7 @@ SSATmp* Simplifier::simplifyConvBoolToStr(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvDblToStr(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
-    String dblStr(buildStringData(src->getValDbl()));
+    String dblStr(buildStringData(src->dblVal()));
     return cns(makeStaticString(dblStr));
   }
   return nullptr;
@@ -1760,7 +1760,7 @@ SSATmp* Simplifier::simplifyConvIntToStr(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     return cns(
-      makeStaticString(folly::to<std::string>(src->getValInt()))
+      makeStaticString(folly::to<std::string>(src->intVal()))
     );
   }
   return nullptr;
@@ -1853,7 +1853,7 @@ SSATmp* Simplifier::simplifyRoundCommon(IRInstruction* inst, Oper op) {
   auto const src  = inst->src(0);
 
   if (src->isConst()) {
-    return cns(op(src->getValDbl()));
+    return cns(op(src->dblVal()));
   }
 
   auto srcInst = src->inst();
@@ -1958,7 +1958,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
 
   // Constant propagate.
   if (src->isConst()) {
-    bool val = src->getValBool();
+    bool val = src->boolVal();
     if (inst->op() == JmpZero) {
       val = !val;
     }
@@ -2153,13 +2153,13 @@ SSATmp* Simplifier::simplifyCheckPackedArrayBounds(IRInstruction* inst) {
   auto* idx = inst->src(1);
 
   if (idx->isConst()) {
-    auto const idxVal = (uint64_t)idx->getValInt();
+    auto const idxVal = (uint64_t)idx->intVal();
     if (idxVal >= 0xffffffffull) {
       // ArrayData can't hold more than 2^32 - 1 elements, so this is always
       // going to fail.
       inst->convertToJmp();
     } else if (array->isConst()) {
-      if (idxVal >= array->getValArr()->size()) {
+      if (idxVal >= array->arrVal()->size()) {
         inst->convertToJmp();
       } else {
         // We should convert inst to a nop here but that exposes t3626113
@@ -2174,7 +2174,7 @@ SSATmp* Simplifier::simplifyLdPackedArrayElem(IRInstruction* inst) {
   auto* arrayTmp = inst->src(0);
   auto* idxTmp   = inst->src(1);
   if (arrayTmp->isConst() && idxTmp->isConst()) {
-    auto* value = arrayTmp->getValArr()->nvGet(idxTmp->getValInt());
+    auto* value = arrayTmp->arrVal()->nvGet(idxTmp->intVal());
     if (!value) {
       // The index doesn't exist. This code should be unreachable at runtime.
       return nullptr;

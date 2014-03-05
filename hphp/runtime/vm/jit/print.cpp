@@ -135,8 +135,8 @@ void printSrcs(std::ostream& os, const IRInstruction* inst,
                const RegAllocInfo* regs) {
   bool first = true;
   if (inst->op() == IncStat) {
-    os << " " << Stats::g_counterNames[inst->src(0)->getValInt()]
-       << ", " << inst->src(1)->getValInt();
+    os << " " << Stats::g_counterNames[inst->src(0)->intVal()]
+       << ", " << inst->src(1)->intVal();
     return;
   }
   for (uint32_t i = 0, n = inst->numSrcs(); i < n; i++) {

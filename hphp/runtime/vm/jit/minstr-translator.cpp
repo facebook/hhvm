@@ -1743,7 +1743,7 @@ void HhbcTranslator::MInstrTranslator::emitStringGet(SSATmp* key) {
 
 void HhbcTranslator::MInstrTranslator::emitVectorGet(SSATmp* key) {
   assert(key->isA(Type::Int));
-  if (key->isConst() && key->getValInt() < 0) {
+  if (key->isConst() && key->intVal() < 0) {
     PUNT(emitVectorGet);
   }
   SSATmp* size = gen(LdVectorSize, m_base);
@@ -1761,13 +1761,13 @@ void HhbcTranslator::MInstrTranslator::emitPairGet(SSATmp* key) {
   static_assert(sizeof(TypedValue) == 16,
                 "TypedValue size expected to be 16 bytes");
   if (key->isConst()) {
-    auto idx = key->getValInt();
+    auto idx = key->intVal();
     if (idx < 0 || idx > 1) {
       PUNT(emitPairGet);
     }
     // no reason to check bounds
     SSATmp* base = gen(LdPairBase, m_base);
-    auto index = cns(key->getValInt() << 4);
+    auto index = cns(key->intVal() << 4);
     m_result = gen(LdElem, base, index);
   } else {
     gen(CheckBounds, makeCatch(), key, cns(1));
@@ -2262,7 +2262,7 @@ void HhbcTranslator::MInstrTranslator::emitSetWithRefNewElem() {
 void HhbcTranslator::MInstrTranslator::emitVectorSet(
     SSATmp* key, SSATmp* value) {
   assert(key->isA(Type::Int));
-  if (key->isConst() && key->getValInt() < 0) {
+  if (key->isConst() && key->intVal() < 0) {
     PUNT(emitVectorSet); // will throw
   }
   SSATmp* size = gen(LdVectorSize, m_base);

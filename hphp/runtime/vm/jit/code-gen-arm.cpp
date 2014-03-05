@@ -721,7 +721,7 @@ void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
 void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
   emitDecRefMem(inst->typeParam(),
                 x2a(srcLoc(0).reg()),
-                inst->src(1)->getValInt());
+                inst->src(1)->intVal());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -737,7 +737,7 @@ void CodeGenerator::cgAddInt(IRInstruction* inst) {
   if (srcReg1 != InvalidReg) {
     m_as. Add(x2a(destReg), x2a(srcReg0), x2a(srcReg1));
   } else {
-    m_as. Add(x2a(destReg), x2a(srcReg0), inst->src(1)->getValInt());
+    m_as. Add(x2a(destReg), x2a(srcReg0), inst->src(1)->intVal());
   }
 
 }
@@ -788,7 +788,7 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     }
     if (rs.numAllocated() == 0) {
       assert(src->inst()->op() == DefConst);
-      m_as.  Mov  (x2a(rd.reg(0)), src->getValRawInt());
+      m_as.  Mov  (x2a(rd.reg(0)), src->rawVal());
     }
     if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
       // Move src known type to register
@@ -890,7 +890,7 @@ void CodeGenerator::cgCallNative(vixl::MacroAssembler& as,
     case FuncType::Call:
       return CppCall(info.func.call);
     case FuncType::SSA:
-      return CppCall(inst->src(info.func.srcIdx)->getValTCA());
+      return CppCall(inst->src(info.func.srcIdx)->tcaVal());
     }
     not_reached();
   }();
@@ -1142,7 +1142,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       if (rVal.IsValid()) {
         if (!valDst.Is(rVal)) m_as.Mov(valDst, rVal);
       } else {
-        if (src->isConst()) m_as.Mov(valDst, src->getValRawInt());
+        if (src->isConst()) m_as.Mov(valDst, src->rawVal());
       }
     }
     if (typeDst.IsValid()) {
@@ -1229,14 +1229,14 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   auto nParamsReg = x2a(nParamsLoc.reg());
   assert(nParamsReg.IsValid() || nParamsTmp->isConst());
 
-  auto firstBitNum = static_cast<uint32_t>(firstBitNumTmp->getValInt());
+  auto firstBitNum = static_cast<uint32_t>(firstBitNumTmp->intVal());
   auto mask64Reg = x2a(mask64Loc.reg());
-  uint64_t mask64 = mask64Tmp->getValInt();
+  uint64_t mask64 = mask64Tmp->intVal();
   assert(mask64Reg.IsValid() || mask64 == uint32_t(mask64));
   assert(mask64);
 
   auto vals64Reg = x2a(vals64Loc.reg());
-  uint64_t vals64 = vals64Tmp->getValInt();
+  uint64_t vals64 = vals64Tmp->intVal();
   assert(vals64Reg.IsValid() || vals64 == uint32_t(vals64));
   assert((vals64 & mask64) == vals64);
 
@@ -1366,7 +1366,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
 
   if (objOrCls->isA(Type::Cls)) {
     if (objOrCls->isConst()) {
-      m_as.Mov  (rAsm, uintptr_t(objOrCls->getValClass()) | 1);
+      m_as.Mov  (rAsm, uintptr_t(objOrCls->clsVal()) | 1);
       m_as.Str  (rAsm, spReg[spOff + AROFF(m_this)]);
     } else {
       m_as.Orr  (rAsm, objClsReg, 1);
@@ -1384,7 +1384,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     // Do nothing
     assert(func->isConst());
   } else if (func->isConst()) {
-    m_as.  Mov  (rAsm, func->getValFunc());
+    m_as.  Mov  (rAsm, func->funcVal());
     m_as.  Str  (rAsm, spReg[spOff + AROFF(m_func)]);
   } else {
     auto reg0 = x2a(funcLoc.reg(0));
@@ -1398,7 +1398,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
-  auto func = inst->src(0)->getValFunc();
+  auto func = inst->src(0)->funcVal();
   auto args = inst->srcs().subpiece(2);
   auto numArgs = args.size();
 
@@ -1497,14 +1497,14 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     emitStore(spReg, cellsToBytes(-(i + 1)), args[i], srcLoc(i + 3));
   }
 
-  m_as.  Mov  (rAsm.W(), returnBcOffset->getValInt());
+  m_as.  Mov  (rAsm.W(), returnBcOffset->intVal());
   m_as.  Str  (rAsm.W(), spReg[AROFF(m_soff)]);
   emitRegGetsRegPlusImm(m_as, spReg, spReg, adjustment);
 
   assert(m_curInst->marker().valid());
   SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
   bool isImmutable = func->isConst() && !func->isA(Type::Null);
-  const Func* funcd = isImmutable ? func->getValFunc() : nullptr;
+  const Func* funcd = isImmutable ? func->funcVal() : nullptr;
   int32_t adjust  = emitBindCall(tx64->code.main(), tx64->code.stubs(),
                                  srcKey, funcd, numArgs);
 
@@ -1604,7 +1604,7 @@ void CodeGenerator::emitStore(vixl::Register base,
     int64_t val = 0;
     if (type <= (Type::Bool | Type::Int | Type::Dbl |
                  Type::Arr | Type::StaticStr | Type::Cls)) {
-      val = src->getValRawInt();
+      val = src->rawVal();
     } else {
       not_reached();
     }
@@ -1650,7 +1650,7 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
   }
 
   if (offset->isConst()) {
-    auto kind   = offset->getValInt();
+    auto kind   = offset->intVal();
     auto& slot  = RawMemSlot::Get(RawMemSlot::Kind(kind));
     auto ldSize = slot.size();
     auto offs   = slot.offset();
@@ -1678,7 +1678,7 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
 void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
   auto destReg     = x2a(dstLoc(0).reg());
   auto contArReg   = x2a(srcLoc(0).reg());
-  auto kind        = inst->src(1)->getValInt();
+  auto kind        = inst->src(1)->intVal();
   auto const& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
 
   auto off = slot.offset() - c_Continuation::getArOffset();
@@ -1693,7 +1693,7 @@ void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   auto dstReg  = x2a(dstLoc(0).reg());
   auto baseReg = x2a(srcLoc(0).reg());
-  auto offset  = inst->src(1)->getValInt();
+  auto offset  = inst->src(1)->intVal();
   m_as.  Ldr  (dstReg, baseReg[offset + AROFF(m_func)]);
 }
 
@@ -1733,7 +1733,7 @@ void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
 void CodeGenerator::cgSpillStack(IRInstruction* inst) {
   // TODO(2966414): so much of this logic could be shared. The opcode itself
   // should probably be broken up.
-  auto const spDeficit    = inst->src(1)->getValInt();
+  auto const spDeficit    = inst->src(1)->intVal();
   auto const spillVals    = inst->srcs().subpiece(2);
   auto const numSpillSrcs = spillVals.size();
   auto const dstReg       = x2a(dstLoc(0).reg());

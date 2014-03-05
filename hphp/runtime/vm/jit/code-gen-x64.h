@@ -313,7 +313,7 @@ private:
   Class*      curClass() const { return curFunc()->cls(); }
   const Unit* curUnit() const { return curFunc()->unit(); }
   void recordSyncPoint(Asm& as, SyncOptions sync = SyncOptions::kSyncPoint);
-  int iterOffset(SSATmp* tmp) { return iterOffset(tmp->getValInt()); }
+  int iterOffset(SSATmp* tmp) { return iterOffset(tmp->intVal()); }
   int iterOffset(uint32_t id);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
 

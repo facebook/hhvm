@@ -912,7 +912,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst->is(ContEnter)) {
       resolveAllFrames();
     } else if (m_inst->is(CallBuiltin) &&
-               !strcasecmp(m_inst->src(0)->getValFunc()->fullName()->data(),
+               !strcasecmp(m_inst->src(0)->funcVal()->fullName()->data(),
                            "get_defined_vars")) {
       observeLocalRefs();
     } else if (m_inst->is(InterpOne, InterpOneCF)) {

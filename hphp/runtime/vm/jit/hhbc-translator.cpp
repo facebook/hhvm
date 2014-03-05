@@ -1087,7 +1087,7 @@ void HhbcTranslator::classExistsImpl(ClassKind kind) {
   if (!tCls->isA(Type::Str) ||
       !tAutoload->isConst() ||
       !tAutoload->isA(Type::Bool) ||
-      !tAutoload->getValBool()) {
+      !tAutoload->boolVal()) {
     return emitInterpOne(Type::Bool, 2);
   }
 
@@ -1750,7 +1750,7 @@ void HhbcTranslator::emitStrlen() {
     SSATmp* input = popC();
     if (input->isConst()) {
       // static string; fold its strlen operation
-      push(cns(input->getValStr()->size()));
+      push(cns(input->strVal()->size()));
     } else {
       push(gen(LdRaw, Type::Int, input, cns(RawMemSlot::StrLen)));
       gen(DecRef, input);
@@ -2148,10 +2148,10 @@ static const Func* findCuf(Op op,
   invName = nullptr;
 
   const StringData* str =
-    callable->isA(Type::Str) && callable->isConst() ? callable->getValStr()
+    callable->isA(Type::Str) && callable->isConst() ? callable->strVal()
                                                     : nullptr;
   const ArrayData* arr =
-    callable->isA(Type::Arr) && callable->isConst() ? callable->getValArr()
+    callable->isA(Type::Arr) && callable->isConst() ? callable->arrVal()
                                                     : nullptr;
 
   StringData* sclass = nullptr;
@@ -2221,7 +2221,7 @@ bool HhbcTranslator::emitFPushCufArray(SSATmp* callable, int32_t numParams) {
 
   auto callableSize = callableInst->src(0);
   if (!callableSize->isConst() ||
-      callableSize->getValInt() != 2) {
+      callableSize->intVal() != 2) {
     return false;
   }
 
@@ -2230,7 +2230,7 @@ bool HhbcTranslator::emitFPushCufArray(SSATmp* callable, int32_t numParams) {
   if (!method || !object) return false;
 
   if (!method->isConst(Type::Str) ||
-      strstr(method->getValStr()->data(), "::") != nullptr) {
+      strstr(method->strVal()->data(), "::") != nullptr) {
     return false;
   }
 
@@ -2247,7 +2247,7 @@ bool HhbcTranslator::emitFPushCufArray(SSATmp* callable, int32_t numParams) {
 
   gen(IncRef, object);
   emitFPushObjMethodCommon(object,
-                           method->getValStr(),
+                           method->strVal(),
                            numParams,
                            false /* shouldFatal */,
                            callable);
@@ -2834,7 +2834,7 @@ void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
     auto res =
       g_context->lookupClsMethod(func,
                                    cls,
-                                   methVal->getValStr(),
+                                   methVal->strVal(),
                                    nullptr,
                                    cls,
                                    false);
@@ -2872,8 +2872,8 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
     PUNT(FPushClsMethodF-unknownClassOrMethod);
   }
 
-  auto const cls = classTmp->getValClass();
-  auto const methName = methodTmp->getValStr();
+  auto const cls = classTmp->clsVal();
+  auto const methName = methodTmp->strVal();
 
   bool magicCall = false;
   const Func* func = lookupImmutableMethod(cls, methName, magicCall,
@@ -3519,10 +3519,10 @@ RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
   assert(IMPLIES(val, val->type().equals(t)));
   if (val && val->isConst()) {
     // RuntimeType holds constant Bool, Int, Str, and Cls.
-    if (val->isA(Type::Bool)) return RuntimeType(val->getValBool());
-    if (val->isA(Type::Int))  return RuntimeType(val->getValInt());
-    if (val->isA(Type::Str))  return RuntimeType(val->getValStr());
-    if (val->isA(Type::Cls))  return RuntimeType(val->getValClass());
+    if (val->isA(Type::Bool)) return RuntimeType(val->boolVal());
+    if (val->isA(Type::Int))  return RuntimeType(val->intVal());
+    if (val->isA(Type::Str))  return RuntimeType(val->strVal());
+    if (val->isA(Type::Cls))  return RuntimeType(val->clsVal());
   }
 
   return t.toRuntimeType();
@@ -3975,14 +3975,14 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
    */
   bool const useSpropCache = [&] {
     if (!ssaName->isConst()) return false;
-    auto const propName = ssaName->getValStr();
+    auto const propName = ssaName->strVal();
     auto const clsName  = findClassName(ssaCls);
     if (clsName && curClass() && curClass()->name()->isame(clsName)) {
       return true;
     }
 
     if (!ssaCls->isConst()) return false;
-    auto const cls = ssaCls->getValClass();
+    auto const cls = ssaCls->clsVal();
     if (!classIsPersistentOrCtxParent(cls)) return false;
 
     // TODO(#3575370): we should only check for 86sinit
@@ -3999,8 +3999,8 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
         !Repo::get().global().UsedHHBBC) {
       return RepoAuthType{};
     }
-    auto const slot = ssaCls->getValClass()->lookupSProp(ssaName->getValStr());
-    return ssaCls->getValClass()->staticPropRepoAuthType(slot);
+    auto const slot = ssaCls->clsVal()->lookupSProp(ssaName->strVal());
+    return ssaCls->clsVal()->staticPropRepoAuthType(slot);
   }();
 
   auto const ptrTy = convertToType(repoTy).ptr();
@@ -4461,10 +4461,10 @@ void HhbcTranslator::emitDiv() {
     if (divisor->isConst()) {
       int64_t divisorVal;
       if (divisor->isA(Type::Int)) {
-        divisorVal = divisor->getValInt();
+        divisorVal = divisor->intVal();
       } else {
         assert(divisor->isA(Type::Bool));
-        divisorVal = divisor->getValBool();
+        divisorVal = divisor->boolVal();
       }
 
       if (divisorVal == 0) {
@@ -4479,10 +4479,10 @@ void HhbcTranslator::emitDiv() {
       if (dividend->isConst()) {
         int64_t dividendVal;
         if (dividend->isA(Type::Int)) {
-          dividendVal = dividend->getValInt();
+          dividendVal = dividend->intVal();
         } else {
           assert(dividend->isA(Type::Bool));
-          dividendVal = dividend->getValBool();
+          dividendVal = dividend->boolVal();
         }
         popC();
         popC();
@@ -4552,9 +4552,9 @@ void HhbcTranslator::emitMod() {
   if (tr->isConst()) {
     // This whole block only exists so m_irb->cond doesn't get mad when one
     // of the branches gets optimized out due to constant folding.
-    if (tr->getValInt() == -1LL) {
+    if (tr->intVal() == -1LL) {
       push(cns(0));
-    } else if (tr->getValInt() == 0) {
+    } else if (tr->intVal() == 0) {
       // mod by zero is undefined. don't emit opmod for it because
       // this could cause issues in simplifier/codegen
       // this should never get reached anyway, we just need to dump
@@ -5507,7 +5507,7 @@ void HhbcTranslator::checkStrictlyInteger(
     keyType = KeyType::Str;
     if (key->isConst()) {
       int64_t i;
-      if (key->getValStr()->isStrictlyInteger(i)) {
+      if (key->strVal()->isStrictlyInteger(i)) {
         keyType = KeyType::Int;
         key = cns(i);
       }

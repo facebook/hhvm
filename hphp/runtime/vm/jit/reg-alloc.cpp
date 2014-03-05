@@ -160,7 +160,7 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
   // place of an immediate zero. TODO #3827905
   switch (inst.op()) {
   case GuardRefs:
-    if (i == 1) return inst.src(2)->getValInt() == 0; // nParams
+    if (i == 1) return inst.src(2)->intVal() == 0; // nParams
     if (i == 3) { // mask64
       return vixl::Assembler::IsImmLogical(cint, vixl::kXRegSize);
     }
@@ -214,7 +214,7 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
   cint = type.hasRawVal() ? type.rawVal() : 0;
   switch (inst.op()) {
   case GuardRefs:
-    if (i == 1) return inst.src(2)->getValInt() == 0; // nParams
+    if (i == 1) return inst.src(2)->intVal() == 0; // nParams
     if (i == 3) return isU32(cint); // mask64
     if (i == 4) return isU32(cint); // vals64
     break;

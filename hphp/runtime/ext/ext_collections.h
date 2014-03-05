@@ -157,14 +157,13 @@ class BaseVector : public ExtCollectionObjectData {
           return ret;
         }
         endPos = sz + intLen;
-        if (endPos <= startPos) {
-          return ret;
-        }
       }
     } else {
       endPos = sz;
     }
-    assert(startPos < endPos);
+    if (startPos >= endPos) {
+      return ret;
+    }
     uint targetSize = endPos - startPos;
     TypedValue* data;
     target->m_capacity = target->m_size = targetSize;

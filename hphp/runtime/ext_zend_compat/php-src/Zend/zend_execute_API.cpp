@@ -37,6 +37,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/ZendExceptionStore.h"
 namespace HPHP {
   void zBoxAndProxy(TypedValue* arg);
 }
@@ -120,6 +121,35 @@ ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, 
   return zend_call_function(&fci, NULL TSRMLS_CC);
 }
 
+static void zend_handle_cpp_exception(TSRMLS_D)
+{
+  ZendExceptionStore::getInstance().setPointer(std::current_exception());
+
+  try {
+    throw;
+  }
+
+  catch (HPHP::Object& e) {
+    HPHP::TypedValue tv = HPHP::make_tv<HPHP::KindOfObject>(e.get());
+    tvIncRef(&tv);
+    EG(exception) = HPHP::RefData::Make(tv);
+  }
+
+  catch (std::exception& e) {
+    std::string message(typeid(e).name());
+    message += ": ";
+    message += e.what();
+    EG(exception) = HPHP::RefData::Make(HPHP::make_tv<HPHP::KindOfObject>(
+        HPHP::SystemLib::AllocExceptionObject(HPHP::Variant(message))));
+  }
+
+  catch (...) {
+    std::string message("unexpected C++ exception");
+    EG(exception) = HPHP::RefData::Make(HPHP::make_tv<HPHP::KindOfObject>(
+        HPHP::SystemLib::AllocExceptionObject(HPHP::Variant(message))));
+  }
+}
+
 int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC) /* {{{ */
 {
   assert(fci->object_ptr == nullptr);
@@ -135,6 +165,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
   if (f == nullptr) {
     return FAILURE;
   }
+  *fci->retval_ptr_ptr = NULL;
 
   HPHP::PackedArrayInit ad_params(fci->param_count);
   for (int i = 0; i < fci->param_count; i++) {
@@ -149,15 +180,20 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
     }
   }
   HPHP::TypedValue retval;
-  HPHP::g_context->invokeFunc(
-    &retval, f, ad_params.toArray(), obj, cls,
-    nullptr, invName, HPHP::ExecutionContext::InvokeCuf
-  );
-  if (retval.m_type == HPHP::KindOfUninit) {
-    return FAILURE;
-  }
+  try {
+    HPHP::g_context->invokeFunc(
+      &retval, f, ad_params.toArray(), obj, cls,
+      nullptr, invName, HPHP::ExecutionContext::InvokeCuf
+    );
+    if (retval.m_type == HPHP::KindOfUninit) {
+      return FAILURE;
+    }
 
-  HPHP::zBoxAndProxy(&retval);
-  *fci->retval_ptr_ptr = retval.m_data.pref;
-  return SUCCESS;
+    HPHP::zBoxAndProxy(&retval);
+    *fci->retval_ptr_ptr = retval.m_data.pref;
+    return SUCCESS;
+  } catch (...) {
+    zend_handle_cpp_exception(TSRMLS_C);
+    return SUCCESS;
+  }
 }

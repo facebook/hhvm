@@ -18,6 +18,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <sys/types.h>
+#include <sys/utsname.h>
 #include <sys/wait.h>
 #include <pwd.h>
 #include <poll.h>

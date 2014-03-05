@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_COUNTABLE_H_
 #define incl_HPHP_COUNTABLE_H_
 
+#include <boost/noncopyable.hpp>
 #include <cstdlib>
 #include <cstdint>
 #include <cassert>

@@ -585,7 +585,7 @@ function run_one_config($options, $test, $hhvm, $hhvm_env) {
   }
 
   fclose($pipes[0]);
-  $output .= trim(stream_get_contents($pipes[1]));
+  $output = trim(stream_get_contents($pipes[1]));
   file_put_contents("$test.out", $output);
   fclose($pipes[1]);
 

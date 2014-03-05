@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_UTIL_ASM_X64_H_
 #define incl_HPHP_UTIL_ASM_X64_H_
 
+#include <boost/noncopyable.hpp>
 #include <type_traits>
 
 #include "hphp/util/data-block.h"

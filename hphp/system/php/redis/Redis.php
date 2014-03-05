@@ -1273,7 +1273,7 @@ class Redis {
     $ret = [];
     while($count--) {
       $key = array_shift($keys);
-      $val = $this->sockReadLine();
+      $val = $this->sockReadData($type);
       if ($unser_val) {
         $val = $this->unserialize($val);
       }

@@ -1079,11 +1079,41 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint check_flags, char **callable_name, int *callable_name_len, zend_fcall_info_cache *fcc, char **error TSRMLS_DC) /* {{{ */
 {
   HPHP::Variant name;
-  bool b = f_is_callable(tvAsVariant(callable->tv()), check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY, HPHP::ref(name));
+  int callable_name_len_local;
+  zend_fcall_info_cache fcc_local;
+
   if (callable_name) {
-    HPHP::StringData *sd = name.getStringData();
-    *callable_name = (char*) emalloc(sd->size() + 1);
-    memcpy(*callable_name, sd->data(), sd->size() + 1);
+    *callable_name = NULL;
+  }
+  if (callable_name_len == NULL) {
+    callable_name_len = &callable_name_len_local;
+  }
+  if (fcc == NULL) {
+    fcc = &fcc_local;
+  }
+  fcc->initialized = 0;
+  fcc->calling_scope = NULL;
+  fcc->called_scope = NULL;
+  fcc->function_handler = NULL;
+  fcc->calling_scope = NULL;
+  fcc->object_ptr = NULL;
+
+  bool b = f_is_callable(
+      tvAsVariant(callable->tv()),
+      check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY,
+      HPHP::ref(name));
+  if (b) {
+    if (callable_name) {
+      HPHP::StringData *sd = name.getStringData();
+      *callable_name = (char*) emalloc(sd->size() + 1);
+      memcpy(*callable_name, sd->data(), sd->size() + 1);
+      *callable_name_len = sd->size();
+    }
+
+    // This is mostly a lie -- we don't use zend_fcall_info_cache, so don't set
+    // its members. Callers depending on fields of this structure will probably
+    // fail.
+    fcc->initialized = 1;
   }
   return b;
 }
@@ -1099,7 +1129,12 @@ ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_i
   }
 
   fci->size = sizeof(*fci);
-  fci->object_ptr = fcc->object_ptr;
+
+  // In Zend, object_ptr would be set to the Callable object, but here, all the
+  // magic is in callable, so we just set this to NULL as if it were a global
+  // function, and hope nobody will notice.
+  fci->object_ptr = NULL;
+
   fci->function_name = callable;
   fci->retval_ptr_ptr = NULL;
   fci->param_count = 0;

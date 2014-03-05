@@ -39,13 +39,15 @@ ObjectData* new_ZendObjectData_Instance(Class* cls) {
 
   zend_class_entry* ce = zend_hphp_class_to_class_entry(cls);
   auto create_func = ce->create_object;
+  Class * current_class = cls;
   while (!create_func) {
-    Class* parent = cls->parent();
+    Class* parent = current_class->parent();
     if (!parent) {
       break;
     }
     zend_class_entry* parent_ce = zend_hphp_class_to_class_entry(parent);
     create_func = parent_ce->create_object;
+    current_class = parent;
   }
 
   zend_object_value ov;

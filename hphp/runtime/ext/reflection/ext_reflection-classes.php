@@ -71,7 +71,9 @@ class ReflectionParameter implements Reflector {
       return;
     }
 
-    if (is_string($func)) {
+    if ($func instanceof Closure) {
+      $params = (new ReflectionFunction($func))->getParameters();
+    } else if (is_string($func)) {
       $double_colon = strpos($func, "::");
       if ($double_colon === false) {
         $params = (new ReflectionFunction($func))->getParameters();

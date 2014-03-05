@@ -205,6 +205,7 @@ bad_tests = (
     '/ext/standard/tests/file/copy_variation8.php',
 
     # flaky: t3851970
+    '/ext/standard/tests/general_functions/bug39322.php',
     '/ext/standard/tests/misc/time_sleep_until_basic.php',
 )
 

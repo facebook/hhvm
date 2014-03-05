@@ -512,11 +512,13 @@ void ExecutionContext::executeFunctions(CArrRef funcs) {
 }
 
 void ExecutionContext::onShutdownPreSend() {
+  // in case obStart was called without obFlush
+  SCOPE_EXIT { obFlushAll(); };
+
   if (!m_shutdowns.isNull() && m_shutdowns.exists(ShutDown)) {
+    SCOPE_EXIT { m_shutdowns.remove(ShutDown); };
     executeFunctions(m_shutdowns[ShutDown].toArray());
-    m_shutdowns.remove(ShutDown);
   }
-  obFlushAll(); // in case obStart was called without obFlush
 }
 
 extern void ext_session_request_shutdown();
@@ -528,12 +530,12 @@ void ExecutionContext::onShutdownPostSend() {
       ServerStatsHelper ssh("psp", ServerStatsHelper::TRACK_HWINST);
       if (!m_shutdowns.isNull()) {
         if (m_shutdowns.exists(PostSend)) {
+          SCOPE_EXIT { m_shutdowns.remove(PostSend); };
           executeFunctions(m_shutdowns[PostSend].toArray());
-          m_shutdowns.remove(PostSend);
         }
         if (m_shutdowns.exists(CleanUp)) {
+          SCOPE_EXIT { m_shutdowns.remove(CleanUp); };
           executeFunctions(m_shutdowns[CleanUp].toArray());
-          m_shutdowns.remove(CleanUp);
         }
       }
     } catch (const ExitException &e) {

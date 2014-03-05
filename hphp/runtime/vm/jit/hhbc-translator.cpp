@@ -1557,7 +1557,7 @@ void HhbcTranslator::emitContSuspend(int64_t labelId) {
 void HhbcTranslator::emitContSuspendK(int64_t labelId) {
   emitContSuspendImpl(labelId);
 
-  auto const newKey = popC(DataTypeGeneric);
+  auto const newKey = popC();
   auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());
   gen(StContArKey, m_irb->fp(), newKey);
   gen(DecRef, oldKey);

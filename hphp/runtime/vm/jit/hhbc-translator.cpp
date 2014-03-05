@@ -1995,13 +1995,19 @@ void HhbcTranslator::emitJmpNZ(Offset taken, Offset next, bool bothPaths) {
   emitJmpHelper(taken, next, false, bothPaths, src);
 }
 
-// Objects compared with strings may involve calling a user-defined
-// __toString function.
+/*
+ * True if comparison may throw or reenter.
+ *
+ * 1. Objects compared with strings may involve calling a user-defined
+ * __toString function.
+ * 2. Array comparisons can throw if recursion is detected.
+ */
 bool cmpOpTypesMayReenter(Type t0, Type t1) {
   assert(!t0.equals(Type::Gen) && !t1.equals(Type::Gen));
   return (t0.maybe(Type::Obj) && t1.maybe(Type::Str)) ||
          (t0.maybe(Type::Str) && t1.maybe(Type::Obj)) ||
-         (t0.maybe(Type::Obj) && t1.maybe(Type::Obj));
+         (t0.maybe(Type::Obj) && t1.maybe(Type::Obj)) ||
+         (t0.maybe(Type::Arr) && t1.maybe(Type::Arr));
 }
 
 Opcode matchReentrantCmp(Opcode opc) {

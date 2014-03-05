@@ -303,6 +303,13 @@
     commit: 1fb5784662f438d7d96a541e305e28b812e2eeed
     install_root: twig
     test_root: twig
+  vfsstream:
+    url: https://github.com/mikey179/vfsStream.git
+    branch: v1.2.0
+    commit: 063fb10633f10c5ccbcac26227e94f46d9336f90
+    install_root: vfsstream
+    test_root: vfsstream
+    config_file: vfsstream/phpunit.xml.dist
   yii:
     url: https://github.com/yiisoft/yii.git
     branch: master

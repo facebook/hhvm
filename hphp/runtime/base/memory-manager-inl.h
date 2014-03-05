@@ -374,7 +374,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   // when it calls malloc(), so that this function can avoid
   // double-counting the malloced memory. Thus musage in the example
   // code may well substantially exceed m_stats.usage.
-  if (s_statsEnabled) {
+  if (m_enableStatsSync) {
     uint64_t jeDeallocated = *m_deallocated;
     uint64_t jeAllocated = *m_allocated;
 

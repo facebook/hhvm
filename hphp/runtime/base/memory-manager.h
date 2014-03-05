@@ -272,7 +272,9 @@ struct MemoryManager {
 
   /*
    * Reset all stats that are synchronzied externally from the memory manager.
-   * Used between sessions.
+   * Used between sessions and to signal that external sync is now safe to
+   * begin (after shared structure initialization that should not be counted is
+   * complete.)
    */
   void resetExternalStats();
 
@@ -382,6 +384,7 @@ private:
   mutable size_t m_cactiveLimit;
   static bool s_statsEnabled;
   static size_t s_cactiveLimitCeiling;
+  bool m_enableStatsSync;
 #endif
 
 private:

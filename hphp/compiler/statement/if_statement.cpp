@@ -238,7 +238,7 @@ void IfStatement::outputCodeModel(CodeGenerator &cg) {
       cg.printPropertyHeader("falseBlock");
       cg.printObjectHeader("BlockStatement", 1);
       cg.printPropertyHeader("statements");
-      printf("V:9:\"HH\\Vector\":1:{");
+      cg.printf("V:9:\"HH\\Vector\":1:{");
     }
     cg.printObjectHeader("ConditionalStatement", 4);
     cg.printPropertyHeader("condition");
@@ -249,10 +249,6 @@ void IfStatement::outputCodeModel(CodeGenerator &cg) {
     cg.printLocation(this->getLocation());
     // false block will be supplied by next iteration, or code following loop
   }
-  for (int i = 0; i < count-1; i++) {
-    cg.printObjectFooter(); //close the nested if
-    cg.printf("}"); //close the vector
-  }
   // supply the false block for the else
   cg.printPropertyHeader("falseBlock");
   if (elseBranch != nullptr) {
@@ -260,8 +256,16 @@ void IfStatement::outputCodeModel(CodeGenerator &cg) {
   } else {
     cg.printAsBlock(nullptr);
   }
-  cg.printObjectFooter(); //close the outer if
-  // no vector to close
+
+  for (int i = 0; i < count-1; i++) {
+    cg.printObjectFooter(); //close the nested if
+    cg.printf("}"); //close the vector
+    cg.printObjectFooter(); //close falseBlock block
+  }
+
+  // Close the outermose ConditionalStatement
+  cg.printObjectFooter();
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

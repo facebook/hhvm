@@ -5,6 +5,10 @@
 #include <unicode/uchriter.h>
 #include <typeinfo>
 
+#ifndef UTEXT_CURRENT32
+#define UTEXT_CURRENT32 utext_current32
+#endif
+
 namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 
@@ -130,10 +134,6 @@ class CodePointBreakIterator : public icu::BreakIterator {
 
   int32_t next(int32_t n) override {
     UBool res = utext_moveIndex32(m_text, n);
-
-#ifndef UTEXT_CURRENT32
-#define UTEXT_CURRENT32 utext_current32
-#endif
 
     if (res) {
       m_lastCodePoint = UTEXT_CURRENT32(m_text);

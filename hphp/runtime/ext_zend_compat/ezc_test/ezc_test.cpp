@@ -192,20 +192,18 @@ PHP_FUNCTION(ezc_throw)
 {
 	char *class_name = NULL;
 	int class_name_length;
-	/*zend_class_entry *ce;*/
+	zend_class_entry *ce;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &class_name, &class_name_length) == FAILURE) {
 		RETURN_FALSE;
 	}
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "zend_fetch_class_by_name() is unimplemented so this doesn't work right now");
 
-	/*
 	ce = zend_fetch_class_by_name(class_name, class_name_length, NULL, ZEND_FETCH_CLASS_SILENT);
 	if (!ce) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no such class \"%s\"", class_name);
 		RETURN_FALSE;
 	}
-	zend_throw_exception(ce, "ezc_throw", 0);*/
+	zend_throw_exception(ce, "ezc_throw", 0);
 }
 /* }}} */
 

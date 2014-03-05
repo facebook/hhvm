@@ -37,6 +37,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/ZendExceptionStore.h"
 namespace HPHP {
   void zBoxAndProxy(TypedValue* arg);
@@ -197,3 +198,34 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
     return SUCCESS;
   }
 }
+
+ZEND_API zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC)
+{
+  bool use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
+
+  assert(key == NULL); // not implemented
+  if (key != NULL) {
+    return NULL;
+  }
+  if (!class_name || !class_name_len) {
+    return NULL;
+  }
+  HPHP::StringData * sd = HPHP::StringData::Make(class_name, class_name_len, HPHP::CopyString);
+  HPHP::Class * cls = HPHP::Unit::getClass(sd, use_autoload);
+  if (cls == nullptr) {
+    if (use_autoload) {
+      if ((fetch_type & ZEND_FETCH_CLASS_SILENT) == 0 && !EG(exception)) {
+        if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
+          zend_error(E_ERROR, "Interface '%s' not found", class_name);
+        } else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
+          zend_error(E_ERROR, "Trait '%s' not found", class_name);
+        } else {
+          zend_error(E_ERROR, "Class '%s' not found", class_name);
+        }
+      }
+    }
+    return NULL;
+  }
+  return zend_hphp_class_to_class_entry(cls);
+}
+

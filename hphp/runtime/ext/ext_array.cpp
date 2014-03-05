@@ -78,9 +78,9 @@ using HPHP::JIT::EagerCallerFrame;
 
 #define getCheckedArray(input) getCheckedArrayRet(input, uninit_null())
 
-Variant f_array_change_key_case(CVarRef input, bool upper /* = false */) {
+Variant f_array_change_key_case(CVarRef input, int64_t case_ /* = 0 */) {
   getCheckedArrayRet(input, false);
-  return ArrayUtil::ChangeKeyCase(arr_input, !upper);
+  return ArrayUtil::ChangeKeyCase(arr_input, !case_);
 }
 
 Variant f_array_chunk(CVarRef input, int chunkSize,
@@ -998,7 +998,7 @@ bool f_shuffle(VRefParam array) {
   return true;
 }
 
-int64_t f_count(CVarRef var, bool recursive /* = false */) {
+int64_t f_count(CVarRef var, int64_t mode /* = 0 */) {
   switch (var.getType()) {
   case KindOfUninit:
   case KindOfNull:
@@ -1015,7 +1015,7 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
     }
     break;
   case KindOfArray:
-    if (recursive) {
+    if (mode) {
       CArrRef arr_var = var.toCArrRef();
       return php_count_recursive(arr_var);
     }
@@ -1026,8 +1026,8 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
   return 1;
 }
 
-int64_t f_sizeof(CVarRef var, bool recursive /* = false */) {
-  return f_count(var, recursive);
+int64_t f_sizeof(CVarRef var, int64_t mode /* = 0 */) {
+  return f_count(var, mode);
 }
 
 namespace {

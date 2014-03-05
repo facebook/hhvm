@@ -544,6 +544,14 @@ void BaseVector::init(CVarRef t) {
 }
 
 void BaseVector::cow() {
+  assert(!m_immCopy.isNull());
+  if (!m_size) {
+    m_data = nullptr;
+    m_capacity = 0;
+    m_immCopy.reset();
+    return;
+  }
+
   TypedValue* newData =
     (TypedValue*)MM().objMallocLogged(m_capacity * sizeof(TypedValue));
 

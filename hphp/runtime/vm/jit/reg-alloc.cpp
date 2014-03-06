@@ -315,6 +315,8 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
   case XorBool:
     if (i == 1) return isI32(cint);
     break;
+  case Mov:
+    return true; // x64 can mov a 64-bit imm into a register.
   default:
     break;
   }

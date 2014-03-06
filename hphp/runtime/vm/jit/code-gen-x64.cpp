@@ -1044,18 +1044,12 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
 void CodeGenerator::cgMov(IRInstruction* inst) {
   // TODO: t2082361: handle Gen & Cell
   assert(!srcLoc(0).hasReg(1));
-  SSATmp* src = inst->src(0);
-  auto dstReg = dstLoc(0).reg();
-  auto src_loc = srcLoc(0);
-  if (!src_loc.hasReg(0)) {
-    assert(src->isConst());
-    if (src->type() <= Type::Bool) {
-      emitLoadImm(m_as, (int64_t)src->boolVal(), dstReg);
-    } else {
-      emitLoadImm(m_as, src->rawVal(), dstReg);
-    }
+  auto sreg = srcLoc(0).reg();
+  auto dreg = dstLoc(0).reg();
+  if (sreg == InvalidReg) {
+    emitLoadImm(m_as, inst->src(0)->rawVal(), dreg);
   } else {
-    emitMovRegReg(m_as, src_loc.reg(), dstReg);
+    emitMovRegReg(m_as, sreg, dreg);
   }
 }
 

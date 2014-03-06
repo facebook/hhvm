@@ -108,10 +108,10 @@ void startRequest(int threadId) {
   GenCount startTime = getTime();
   {
     GenCountGuard g;
-    assert(threadId >= s_inflightRequests.size() ||
-           s_inflightRequests[threadId] == kIdleGenCount);
     if (threadId >= s_inflightRequests.size()) {
       s_inflightRequests.resize(threadId + 1, kIdleGenCount);
+    } else {
+      assert(s_inflightRequests[threadId] == kIdleGenCount);
     }
     s_inflightRequests[threadId] = correctTime(startTime);
     TRACE(1, "tid %d start @gen %lu\n", threadId, s_inflightRequests[threadId]);

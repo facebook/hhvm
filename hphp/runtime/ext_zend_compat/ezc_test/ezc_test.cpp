@@ -8,6 +8,7 @@
 #include "ext/standard/info.h"
 #include "php_ezc_test.h"
 #include "zend_exceptions.h"
+#include <stdexcept>
 
 ZEND_DECLARE_MODULE_GLOBALS(ezc_test)
 
@@ -207,6 +208,30 @@ PHP_FUNCTION(ezc_throw)
 }
 /* }}} */
 
+/* {{{ proto ezc_throw_cpp_std()
+ * Throw a C++ std::exception */
+PHP_FUNCTION(ezc_throw_std)
+{
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	throw std::runtime_error("ezc_throw_std");
+}
+/* }}} */
+
+/* {{{ proto ezc_throw_cpp_nonstd()
+ * Throw a non-standard C++ exception */
+PHP_FUNCTION(ezc_throw_nonstd)
+{
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	throw "ezc_throw_nonstd";
+}
+/* }}} */
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_ezc_fetch_global, 0)
 ZEND_END_ARG_INFO()
@@ -231,6 +256,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_ezc_throw, 0)
 	ZEND_ARG_INFO(0, class_name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_ezc_throw_std, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_ezc_throw_nonstd, 0)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ ezc_test_functions[]
@@ -241,6 +272,8 @@ const zend_function_entry ezc_test_functions[] = {
 	PHP_FE(ezc_call, arginfo_ezc_call)
 	PHP_FE(ezc_try_call, arginfo_ezc_try_call)
 	PHP_FE(ezc_throw, arginfo_ezc_throw)
+	PHP_FE(ezc_throw, arginfo_ezc_throw_std)
+	PHP_FE(ezc_throw, arginfo_ezc_throw_nonstd)
 	PHP_FE_END
 };
 /* }}} */

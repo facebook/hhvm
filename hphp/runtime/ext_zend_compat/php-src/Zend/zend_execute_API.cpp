@@ -132,7 +132,6 @@ static void zend_handle_cpp_exception(TSRMLS_D)
 
   catch (HPHP::Object& e) {
     HPHP::TypedValue tv = HPHP::make_tv<HPHP::KindOfObject>(e.get());
-    tvIncRef(&tv);
     EG(exception) = HPHP::RefData::Make(tv);
   }
 
@@ -149,6 +148,7 @@ static void zend_handle_cpp_exception(TSRMLS_D)
     EG(exception) = HPHP::RefData::Make(HPHP::make_tv<HPHP::KindOfObject>(
         HPHP::SystemLib::AllocExceptionObject(HPHP::Variant(message))));
   }
+  tvIncRef(EG(exception)->tv());
 }
 
 int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC) /* {{{ */

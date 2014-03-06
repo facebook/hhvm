@@ -31,6 +31,9 @@ const StaticString s_bucket_class("__SystemLib\\StreamFilterBucket");
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_default_filters_register_func(
+  "__SystemLib\\register_default_stream_filters");
+
 class StreamUserFilters : public RequestEventHandler {
  public:
   virtual ~StreamUserFilters() {}
@@ -66,7 +69,10 @@ class StreamUserFilters : public RequestEventHandler {
                                  /* append = */ true);
   }
 
-  virtual void requestInit() {}
+  virtual void requestInit() {
+    vm_call_user_func(s_default_filters_register_func, empty_array);
+  }
+
   virtual void requestShutdown() {}
 private:
   Variant appendOrPrependFilter(CResRef stream,

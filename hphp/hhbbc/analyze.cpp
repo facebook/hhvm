@@ -434,6 +434,15 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     }
   }
 
+  // TODO(#3696042): We don't have support for static properties with
+  // specialized array types in the minstr functions yet, so if we
+  // have one after 86sinit, throw it away.
+  for (auto& kv : clsAnalysis.privateStatics) {
+    if (is_specialized_array(kv.second)) {
+      kv.second = union_of(kv.second, TArr);
+    }
+  }
+
   /*
    * Similar to the function case in do_analyze, we have to handle the
    * fact that there are infinitely growing chains in our type lattice

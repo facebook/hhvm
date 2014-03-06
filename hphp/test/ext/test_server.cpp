@@ -297,6 +297,7 @@ bool TestServer::RunTests(const std::string &which) {
   RUN_TEST(TestInteraction);
   RUN_TEST(TestGet);
   RUN_TEST(TestPost);
+  RUN_TEST(TestExpectContinue);
   RUN_TEST(TestCookie);
   RUN_TEST(TestResponseHeader);
   RUN_TEST(TestSetCookie);
@@ -420,6 +421,15 @@ bool TestServer::TestPost() {
 
   VSPOST("<?php print $HTTP_RAW_POST_DATA;",
          "name=value", "string", params);
+
+  return true;
+}
+
+bool TestServer::TestExpectContinue() {
+  const char *params = "name=value";
+
+  VSRX("<?php print $_POST['name'];",
+       "value", "string", "POST", "Expect: 100-continue", params);
 
   return true;
 }

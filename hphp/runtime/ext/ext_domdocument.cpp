@@ -1029,7 +1029,7 @@ static xmlNodePtr php_dom_free_xinclude_node(xmlNodePtr cur) {
   return cur;
 }
 
-static void php_dom_remove_xinclude_nodes(xmlNodePtr cur) {
+void php_dom_remove_xinclude_nodes(xmlNodePtr cur) {
   while (cur) {
     if (cur->type == XML_XINCLUDE_START) {
       cur = php_dom_free_xinclude_node(cur);
@@ -1220,8 +1220,7 @@ static void clearNodeMap(xmlNodePtr startNode) {
   }
 }
 
-static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
-                                     bool owner = false) {
+Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc, bool owner) {
   String clsname = domClassname(obj);
   if (!clsname.get()) {
     raise_warning("Unsupported node type: %d", obj->type);

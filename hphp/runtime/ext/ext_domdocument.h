@@ -147,6 +147,8 @@ Variant f_dom_xpath_register_php_functions(
   const Variant& obj, const Variant& funcs = uninit_null());
 Variant f_dom_import_simplexml(const Object& node);
 
+Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
+                              bool owner = false);
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMNode
 

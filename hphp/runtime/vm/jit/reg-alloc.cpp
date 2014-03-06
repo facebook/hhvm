@@ -147,6 +147,7 @@ bool mustUseConst(const IRInstruction& inst, int i) {
   case LdAddr: return check(i == 1); // offset
   case Call: return check(i == 1); // returnBcOffset
   case CallBuiltin: return check(i == 0); // f
+  case LdRaw: return check(i == 1); // offset
   case StRaw: return check(i == 1); // offset
   default: break;
   }
@@ -263,7 +264,7 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     if (i == 2) return okStore(cint); // value
     break;
   case StRaw:
-    if (i == 2) return true; // but, uses scratch register for big imms
+    if (i == 2) return okStore(cint); // value
     break;
   case Jmp:
   case Shuffle:

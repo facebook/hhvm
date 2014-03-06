@@ -3906,44 +3906,20 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdRaw(IRInstruction* inst) {
-  SSATmp* dest   = inst->dst();
-  SSATmp* addr   = inst->src(0);
-  SSATmp* offset = inst->src(1);
-
-  assert(!(dest->isConst()));
-
-  Reg64 addrReg = srcLoc(0).reg();
   PhysReg destReg = dstLoc(0).reg();
+  Reg64 addrReg = srcLoc(0).reg();
+  int64_t kind = inst->src(1)->intVal();
 
-  if (addr->isConst()) {
-    addrReg = m_rScratch;
-    emitLoadImm(m_as, addr->rawVal(), addrReg);
-  }
-
-  if (offset->isConst()) {
-    assert(offset->type() <= Type::Int);
-    int64_t kind = offset->intVal();
-    RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
-    int ldSize = slot.size();
-    int64_t off = slot.offset();
-    if (ldSize == sz::qword) {
-      m_as.loadq (addrReg[off], destReg);
-    } else if (ldSize == sz::dword) {
-      m_as.loadl (addrReg[off], r32(destReg));
-    } else {
-      assert(ldSize == sz::byte);
-      m_as.loadzbl (addrReg[off], r32(destReg));
-    }
+  RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
+  int ldSize = slot.size();
+  int64_t off = slot.offset();
+  if (ldSize == sz::qword) {
+    m_as.loadq (addrReg[off], destReg);
+  } else if (ldSize == sz::dword) {
+    m_as.loadl (addrReg[off], r32(destReg));
   } else {
-    int ldSize = dest->type().nativeSize();
-    Reg64 offsetReg = r64(srcLoc(1).reg());
-    if (ldSize == sz::qword) {
-      m_as.loadq (addrReg[offsetReg], destReg);
-    } else {
-      // Not yet supported by our assembler
-      assert(ldSize == sz::byte);
-      not_implemented();
-    }
+    assert(ldSize == sz::byte);
+    m_as.loadzbl (addrReg[off], r32(destReg));
   }
 }
 
@@ -3958,17 +3934,18 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
   int64_t off = slot.offset();
   auto dest = baseReg[off];
 
-  if (value->isConst()) {
+  auto valueReg = srcLoc(2).reg();
+  if (valueReg == InvalidReg) {
+    auto val = value->rawVal();
     if (stSize == sz::qword) {
-      m_as.storeq(value->rawVal(), dest);
+      m_as.storeq(val, dest);
     } else if (stSize == sz::dword) {
-      m_as.storel(value->rawVal(), dest);
+      m_as.storel(val, dest);
     } else {
       assert(stSize == sz::byte);
-      m_as.storeb(value->boolVal(), dest);
+      m_as.storeb(val, dest);
     }
   } else {
-    auto valueReg = srcLoc(2).reg();
     if (stSize == sz::qword) {
       m_as.storeq(r64(valueReg), dest);
     } else if (stSize == sz::dword) {

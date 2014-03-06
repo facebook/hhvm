@@ -894,6 +894,19 @@ void assertOperandTypes(const IRInstruction* inst) {
     }
   };
 
+  auto checkCustom = [&] {
+    switch (inst->op()) {
+      case LdRaw:
+      case StRaw: {
+        auto s1 = inst->src(1); // field kind
+        check(s1->isConst() && s1->isA(Type::Int), Type::Int, nullptr);
+        break;
+      }
+      default:
+        break;
+    }
+  };
+
 #define IRT(name, ...) UNUSED static const Type name = Type::name;
   IR_TYPES
 #undef IRT
@@ -910,7 +923,7 @@ void assertOperandTypes(const IRInstruction* inst) {
                        "constant " #type);          \
                   ++curSrc;
 #define CStr     C(StaticStr)
-#define SUnk     return;
+#define SUnk     return checkCustom();
 #define SSpills  checkSpills();
 #define ND
 #define DMulti
@@ -945,7 +958,6 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef O
 
 #undef NA
-#undef SAny
 #undef S
 #undef C
 #undef CStr

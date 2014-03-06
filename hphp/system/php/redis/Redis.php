@@ -238,17 +238,17 @@ class Redis {
       if ($px) {
         $args[] = "px";
         $args[] = $optionArrayOrExpiration['px'];
-      } elseif($ex) {
+      } else if($ex) {
         $args[] = "ex";
         $args[] = $optionArrayOrExpiration['ex'];
       }
       if ($nx) {
         $args[] = "nx";
-      } elseif ($xx) {
+      } else if ($xx) {
         $args[] = "xx";
       }
       $this->processArrayCommand("SET", $args);
-    } elseif (is_numeric($optionArrayOrExpiration) && (int)$optionArrayOrExpiration > 0) {
+    } else if (is_numeric($optionArrayOrExpiration) && (int)$optionArrayOrExpiration > 0) {
       $this->processCommand("SETEX", $key, $optionArrayOrExpiration, $value);
     } else {
       $this->processCommand("SET", $key, $value);

@@ -35,7 +35,6 @@ class ZendExceptionStore final : public HPHP::RequestEventHandler {
       m_ptr = nullptr;
     }
     virtual void requestInit() {
-      clear();
     }
     virtual void requestShutdown() {
       clear();

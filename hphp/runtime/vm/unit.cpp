@@ -917,8 +917,8 @@ void Unit::initialMerge() {
               break;
             case UnitMergeKindReqDoc: {
               StringData* s = (StringData*)((char*)obj - (int)k);
-              HPHP::Eval::PhpFile* efile =
-                g_context->lookupIncludeRoot(s, InclOpDocRoot, nullptr, this);
+              auto const efile = g_context->lookupIncludeRoot(s,
+                InclOpFlags::DocRoot, nullptr, this);
               assert(efile);
               Unit* unit = efile->unit();
               unit->initialMerge();

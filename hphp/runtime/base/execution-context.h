@@ -120,22 +120,20 @@ enum class LookupResult {
   MethodNotFound,
 };
 
-enum InclOpFlags {
-  InclOpDefault = 0,
-  InclOpFatal = 1,
-  InclOpOnce = 2,
-  InclOpDocRoot = 8,
-  InclOpRelative = 16,
+enum class InclOpFlags {
+  Default = 0,
+  Fatal = 1,
+  Once = 2,
+  DocRoot = 8,
+  Relative = 16,
 };
 
-inline InclOpFlags
-operator|(const InclOpFlags &l, const InclOpFlags &r) {
-  return InclOpFlags(int(l) | int(r));
+inline InclOpFlags operator|(const InclOpFlags& l, const InclOpFlags& r) {
+  return static_cast<InclOpFlags>(static_cast<int>(l) | static_cast<int>(r));
 }
 
-inline InclOpFlags
-operator&(const InclOpFlags &l, const InclOpFlags &r) {
-  return InclOpFlags(int(l) & int(r));
+inline bool operator&(const InclOpFlags& l, const InclOpFlags& r) {
+  return static_cast<int>(l) & static_cast<int>(r);
 }
 
 struct VMParserFrame {

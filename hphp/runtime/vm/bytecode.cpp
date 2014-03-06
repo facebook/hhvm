@@ -2428,7 +2428,7 @@ HPHP::Eval::PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
                                                            bool* initial,
                                                            Unit* unit) {
   String absPath;
-  if ((flags & InclOpRelative)) {
+  if (flags & InclOpFlags::Relative) {
     namespace fs = boost::filesystem;
     if (!unit) unit = getFP()->m_func->unit();
     fs::path currentUnit(unit->filepath()->data());
@@ -2438,7 +2438,7 @@ HPHP::Eval::PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
           path->data(),
           absPath->data());
   } else {
-    assert(flags & InclOpDocRoot);
+    assert(flags & InclOpFlags::DocRoot);
     absPath = SourceRootInfo::GetCurrentPhpRoot();
     TRACE(2, "lookupIncludeRoot(%s): docRoot -> %s\n",
           path->data(),
@@ -6618,24 +6618,24 @@ OPTBLD_INLINE void inclOp(ExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
   String path(prepareKey(c1));
   bool initial;
   TRACE(2, "inclOp %s %s %s %s \"%s\"\n",
-        flags & InclOpOnce ? "Once" : "",
-        flags & InclOpDocRoot ? "DocRoot" : "",
-        flags & InclOpRelative ? "Relative" : "",
-        flags & InclOpFatal ? "Fatal" : "",
+        flags & InclOpFlags::Once ? "Once" : "",
+        flags & InclOpFlags::DocRoot ? "DocRoot" : "",
+        flags & InclOpFlags::Relative ? "Relative" : "",
+        flags & InclOpFlags::Fatal ? "Fatal" : "",
         path->data());
 
-  Unit* u = flags & (InclOpDocRoot|InclOpRelative) ?
+  Unit* u = flags & (InclOpFlags::DocRoot|InclOpFlags::Relative) ?
     ec->evalIncludeRoot(path.get(), flags, &initial) :
     ec->evalInclude(path.get(), ec->m_fp->m_func->unit()->filepath(), &initial);
   ec->m_stack.popC();
   if (u == nullptr) {
-    ((flags & InclOpFatal) ?
+    ((flags & InclOpFlags::Fatal) ?
      (void (*)(const char *, ...))raise_error :
      (void (*)(const char *, ...))raise_warning)("File not found: %s",
                                                  path->data());
     ec->m_stack.pushFalse();
   } else {
-    if (!(flags & InclOpOnce) || initial) {
+    if (!(flags & InclOpFlags::Once) || initial) {
       ec->evalUnit(u, pc, EventHook::PseudoMain);
     } else {
       Stats::inc(Stats::PseudoMain_Guarded);
@@ -6645,23 +6645,24 @@ OPTBLD_INLINE void inclOp(ExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
 }
 
 OPTBLD_INLINE void ExecutionContext::iopIncl(IOP_ARGS) {
-  inclOp(this, IOP_PASS_ARGS, InclOpDefault);
+  inclOp(this, IOP_PASS_ARGS, InclOpFlags::Default);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopInclOnce(IOP_ARGS) {
-  inclOp(this, IOP_PASS_ARGS, InclOpOnce);
+  inclOp(this, IOP_PASS_ARGS, InclOpFlags::Once);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopReq(IOP_ARGS) {
-  inclOp(this, IOP_PASS_ARGS, InclOpFatal);
+  inclOp(this, IOP_PASS_ARGS, InclOpFlags::Fatal);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopReqOnce(IOP_ARGS) {
-  inclOp(this, IOP_PASS_ARGS, InclOpFatal | InclOpOnce);
+  inclOp(this, IOP_PASS_ARGS, InclOpFlags::Fatal | InclOpFlags::Once);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopReqDoc(IOP_ARGS) {
-  inclOp(this, IOP_PASS_ARGS, InclOpFatal | InclOpOnce | InclOpDocRoot);
+  inclOp(this, IOP_PASS_ARGS,
+    InclOpFlags::Fatal | InclOpFlags::Once | InclOpFlags::DocRoot);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopEval(IOP_ARGS) {

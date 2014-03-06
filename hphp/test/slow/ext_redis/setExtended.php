@@ -44,3 +44,4 @@ try {
 } catch (RedisException $e) {
   echo 'Redis Exception: ' . $e->getMessage() . PHP_EOL; //Redis Exception: Invalid set options: nx and xx may not be specified at the same time
 }
+

@@ -223,17 +223,17 @@ class Redis {
   public function set($key, $value, $optionArrayOrExpiration = -1) {
     $key = $this->prefix($key);
     $value = $this->serialize($value);
-    if (is_array($optionArrayOrExpiration) AND count($optionArrayOrExpiration) > 0) {
+    if (is_array($optionArrayOrExpiration) && count($optionArrayOrExpiration) > 0) {
       $ex = array_key_exists('ex', $optionArrayOrExpiration);
       $px = array_key_exists('px', $optionArrayOrExpiration);
       $nx = in_array('nx', $optionArrayOrExpiration);
       $xx = in_array('xx', $optionArrayOrExpiration);
-      if ($nx AND $xx) {
+      if ($nx && $xx) {
         throw new RedisException("Invalid set options: nx and xx may not be specified at the same time");
       }
       $args = [
-              $key,
-              $value
+        $key,
+        $value
       ];
       if ($px) {
         $args[] = "px";

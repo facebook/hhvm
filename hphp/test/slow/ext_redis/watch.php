@@ -32,4 +32,3 @@ if ($checkValue !== null AND $checkValue == $value)
 {
 	var_dump($r1->multi()->del($key1)->exec());
 }
-echo 'finished';

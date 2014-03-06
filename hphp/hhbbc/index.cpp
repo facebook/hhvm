@@ -665,7 +665,7 @@ struct NamingEnv::Define {
     : env(env)
     , n(n)
   {
-    ITRACE(1, "defining {}\n", n->data());
+    ITRACE(2, "defining {}\n", n->data());
     always_assert(!env.names.count(n));
     env.names[n] = ci;
   }
@@ -728,7 +728,7 @@ void resolve_combinations(IndexData& index,
 
   if (!build_cls_info(borrow(cinfo))) return;
 
-  ITRACE(1, "  resolved: {}\n", cls->name->data());
+  ITRACE(2, "  resolved: {}\n", cls->name->data());
   index.allClassInfos.push_back(std::move(cinfo));
   index.classInfo.emplace(cls->name, borrow(index.allClassInfos.back()));
 }
@@ -739,7 +739,7 @@ void preresolve(IndexData& index, NamingEnv& env, SString clsName) {
   // TODO(#3649211): we'll need to handle inheritance cycles here
   // after hphpc is fixed not to just remove them.
 
-  ITRACE(1, "preresolve: {}\n", clsName->data());
+  ITRACE(2, "preresolve: {}\n", clsName->data());
   for (auto& kv : find_range(index.classes, clsName)) {
     if (kv.second->parentName) {
       preresolve(index, env, kv.second->parentName);
@@ -1264,6 +1264,8 @@ Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
     ++fdata->returnRefinments;
     return find_deps(*m_data, func, Dep::ReturnTy);
   }
+  FTRACE(1, "maxed out return type refinements on {}:{}\n",
+    func->unit->filename->data(), func->name->data());
   return {};
 }
 

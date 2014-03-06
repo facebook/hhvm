@@ -508,18 +508,18 @@ void handleBaseElemD(MIS& env) {
   auto& ty = env.base.type;
   if (ty.subtypeOf(TArr)) return;
   if (elemMustPromoteToArr(ty)) {
-    ty = aempty();
+    ty = counted_aempty();
     return;
   }
   // Intermediate ElemD operations on strings fatal, unless the
   // string is empty, which promotes to array.  So for any string
   // here we can assume it promoted to an empty array.
   if (ty.subtypeOf(TStr)) {
-    ty = aempty();
+    ty = counted_aempty();
     return;
   }
   if (elemCouldPromoteToArr(ty)) {
-    ty = union_of(ty, aempty());
+    ty = union_of(ty, counted_aempty());
   }
 }
 
@@ -1046,11 +1046,11 @@ void miFinalSetElem(MIS& env) {
   // general handleBaseElemD, since operates on strings as if this
   // was an intermediate ElemD.
   if (env.base.type.subtypeOf(sempty())) {
-    env.base.type = aempty();
+    env.base.type = counted_aempty();
   } else {
     auto& ty = env.base.type;
     if (ty.couldBe(TStr)) {
-      ty = union_of(loosen_statics(ty), aempty());
+      ty = union_of(loosen_statics(ty), counted_aempty());
     }
     if (!ty.subtypeOf(TStr)) {
       handleBaseElemD(env);

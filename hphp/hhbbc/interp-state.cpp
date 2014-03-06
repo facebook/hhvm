@@ -187,18 +187,18 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   }
 
   for (auto i = size_t{0}; i < dst.stack.size(); ++i) {
-    auto const newT = join(dst.stack[i], src.stack[i]);
+    auto newT = join(dst.stack[i], src.stack[i]);
     if (dst.stack[i] != newT) {
       changed = true;
-      dst.stack[i] = newT;
+      dst.stack[i] = std::move(newT);
     }
   }
 
   for (auto i = size_t{0}; i < dst.locals.size(); ++i) {
-    auto const newT = join(dst.locals[i], src.locals[i]);
+    auto newT = join(dst.locals[i], src.locals[i]);
     if (dst.locals[i] != newT) {
       changed = true;
-      dst.locals[i] = newT;
+      dst.locals[i] = std::move(newT);
     }
   }
 

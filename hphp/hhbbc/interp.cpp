@@ -1484,6 +1484,11 @@ void in(ISS& env, const bc::IterInit& op) {
   // below.
   freeIter(env, op.iter1);
   env.propagate(*op.target, env.state);
+  if (t1.subtypeOf(TArrE)) {
+    nothrow(env);
+    nofallthrough(env);
+    return;
+  }
   auto ity = iter_types(t1);
   setLoc(env, op.loc3, ity.second);
   setIter(env, op.iter1, TrackedIter { std::move(ity) });
@@ -1499,6 +1504,11 @@ void in(ISS& env, const bc::IterInitK& op) {
   auto const t1 = popC(env);
   freeIter(env, op.iter1);
   env.propagate(*op.target, env.state);
+  if (t1.subtypeOf(TArrE)) {
+    nothrow(env);
+    nofallthrough(env);
+    return;
+  }
   auto ity = iter_types(t1);
   setLoc(env, op.loc3, ity.second);
   setLoc(env, op.loc4, ity.first);
@@ -1996,18 +2006,16 @@ template<class Iterator>
 StepFlags interpOps(Interp& interp,
                     Iterator& iter, Iterator stop,
                     PropagateFn propagate) {
-  auto propagateThrow = [&] (const State& state) {
-    for (auto& factored : interp.blk->factoredExits) {
-      propagate(*factored, without_stacks(state));
-    }
-  };
-
   auto flags = StepFlags{};
   ISS env { interp, flags, propagate };
 
-  // Make a copy of the state (except stacks) in case we need to
-  // propagate across factored exits (if it's a PEI).
-  auto const stateBefore = without_stacks(interp.state);
+  // If there are factored edges, make a copy of the state (except
+  // stacks) in case we need to propagate across factored exits (if
+  // it's a PEI).
+  auto const stateBefore = interp.blk->factoredExits.empty()
+    ? State{}
+    : without_stacks(interp.state);
+
   auto const numPushed   = iter->numPush();
   interpStep(env, iter, stop);
   if (flags.wasPEI) {
@@ -2023,7 +2031,9 @@ StepFlags interpOps(Interp& interp,
       FTRACE(2, "   nothrow (due to constprop)\n");
     } else {
       FTRACE(2, "   PEI.\n");
-      propagateThrow(stateBefore);
+      for (auto& factored : interp.blk->factoredExits) {
+        propagate(*factored, stateBefore);
+      }
     }
   }
   return flags;

@@ -199,6 +199,15 @@ FuncAnalysis do_analyze(const Index& index,
       auto const needsWiden =
         nonWideVisits[target.id] >= options.analyzeFuncWideningLimit;
 
+      // We haven't optimized the widening operator much, because it
+      // doesn't happen in practice right now.  We want to know when
+      // it starts happening:
+      if (needsWiden) {
+        std::fprintf(stderr, "widening in %s on %s\n",
+          ctx.unit->filename->data(),
+          ctx.func->name->data());
+      }
+
       FTRACE(2, "     {}-> {}\n", needsWiden ? "widening " : "", target.id);
       FTRACE(4, "target old {}",
         state_string(*ctx.func, ai.bdata[target.id].stateIn));

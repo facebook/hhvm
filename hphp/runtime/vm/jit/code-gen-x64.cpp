@@ -1419,19 +1419,10 @@ void CodeGenerator::cgMod(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgSqrt(IRInstruction* inst) {
-  auto src = inst->src(0);
-
   auto srcReg = srcLoc(0).reg();
   auto dstReg = dstLoc(0).reg();
-
   auto resReg = dstReg.isSIMD() ? dstReg : PhysReg(rCgXMM0);
-
-  if (srcReg == InvalidReg) {
-    emitLoadImm  (m_as, src->rawVal(), m_rScratch);
-    emitMovRegReg(m_as, m_rScratch, resReg);
-  } else {
-    emitMovRegReg(m_as, srcReg, resReg);
-  }
+  emitMovRegReg(m_as, srcReg, resReg);
   m_as.  sqrtsd  (resReg, resReg);
   emitMovRegReg  (m_as, resReg, dstReg);
 }

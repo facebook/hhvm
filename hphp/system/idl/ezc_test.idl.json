@@ -84,7 +84,32 @@
                     "type": "Variant"
                 }
             ]
-        }
+		},
+        {
+            "name": "ezc_throw_std",
+            "desc": "Throw a C++ std::exception",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": []
+		},
+        {
+            "name": "ezc_throw_nonstd",
+            "desc": "Throw a non-standard C++ exception",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": []
+		}
+
     ],
     "classes": [
     ]

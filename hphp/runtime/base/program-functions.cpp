@@ -192,14 +192,14 @@ void process_env_variables(Variant &variables) {
   }
 }
 
-void process_ini_settings() {
-  if (RuntimeOption::IniFile.empty()) {
+void process_ini_settings(const std::string& name) {
+  if (name.empty()) {
     return;
   }
-  std::ifstream ifs(RuntimeOption::IniFile);
+  std::ifstream ifs(name);
   const std::string str((std::istreambuf_iterator<char>(ifs)),
                         std::istreambuf_iterator<char>());
-  auto settings = IniSetting::FromStringAsMap(str, RuntimeOption::IniFile);
+  auto settings = IniSetting::FromStringAsMap(str, name);
 
   for (auto& item : settings.items()) {
     IniSetting::Set(item.first.data(), item.second, IniSetting::FollyDynamic());
@@ -600,7 +600,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
 
   Extension::RequestInitModules();
-  process_ini_settings();
+  process_ini_settings(RuntimeOption::IniFile);
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {

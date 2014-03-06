@@ -53,6 +53,7 @@ public:
   static const char *LineNoFormatWithStar;
   static const char *LocalPrompt;
   static const char *ConfigFileName;
+  static const char *LegacyConfigFileName;
   static const char *HistoryFileName;
   static std::string HomePrefix;
   static std::string SourceRoot;
@@ -330,7 +331,6 @@ private:
   };
 
   std::string m_configFileName;
-  Hdf m_config;
   int m_tutorial;
   std::set<std::string> m_tutorialVisited;
   bool m_scriptMode; // Is this client being scripted by a test?
@@ -429,7 +429,7 @@ private:
                       const char *text);
 
   // config and macros
-  void defineColors();
+  void defineColors(const Hdf &config);
   void loadConfig();
   void saveConfig();
   void record(const char *line);
@@ -452,7 +452,7 @@ private:
                                const char *caller);
 
   // Zend executable for CmdZend, overridable via config.
-  std::string m_zendExe;
+  std::string m_zendExe = "php";
 
   bool m_unknownCmd;
 };

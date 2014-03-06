@@ -208,11 +208,12 @@ void Macro::load(Hdf node) {
   node["cmds"].get(m_cmds);
 }
 
-void Macro::save(Hdf node) {
+void Macro::save(std::ostream &stream, int key) {
   TRACE(2, "Macro::save\n");
-  node["name"] = m_name;
+  stream << "hhvm.macro.visited." << key << ".name = " << m_name;
   for (unsigned int i = 0; i < m_cmds.size(); i++) {
-    node["cmds"][i] = m_cmds[i];
+    stream << "hhvm.macro.visited." << key << ".cmds[" << i << "] = "
+           << m_cmds[i];
   }
 }
 

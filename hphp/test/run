@@ -332,7 +332,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
     hhvm_path(),
     '--config',
     find_test_ext($test, 'hdf'),
-    find_debug_config($test, 'hphpd.hdf'),
+    find_debug_config($test, 'hphpd.ini'),
     mode_cmd($options),
     '-vEval.EnableArgsInBacktraces=true',
     read_file(find_test_ext($test, 'opts')),

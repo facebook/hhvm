@@ -37,7 +37,7 @@ void CmdConfig::help(DebuggerClient &client) {
   client.helpBody(
     "Use this command to change default settings. "
     "The new values are persisted into "
-    "the configuration file that normally can be found at ~/.hphpd.hdf. "
+    "the configuration file that normally can be found at ~/.hphpd.ini. "
     "Level, count and limit can be <= 0, in which case they are unlimited."
   );
 }

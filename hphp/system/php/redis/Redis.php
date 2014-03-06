@@ -560,7 +560,8 @@ class Redis {
 
   public function watch($key, /* ... */) {
     $args = array_map([$this, 'prefix'], func_get_args());
-    return $this->processArrayCommand("WATCH", $args);
+    $this->processArrayCommand("WATCH", $args);
+    return $this->processBooleanResponse();;
   }
 
   /* Batch --------------------------------------------------------------- */

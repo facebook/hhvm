@@ -220,11 +220,39 @@ class Redis {
     return $this->processDoubleResponse();
   }
 
-  public function set($key, $value, $expire = -1) {
+  public function set($key, $value, $optionArrayOrExpiration = -1) {
     $key = $this->prefix($key);
     $value = $this->serialize($value);
-    if ($expire > 0) {
-      $this->processCommand("SETEX", $key, $expire, $value);
+
+    if (is_array($optionArrayOrExpiration) && count($optionArrayOrExpiration) > 0) {
+      $ex = array_key_exists('ex', $optionArrayOrExpiration);
+      $px = array_key_exists('px', $optionArrayOrExpiration);
+      $nx = in_array('nx', $optionArrayOrExpiration);
+      $xx = in_array('xx', $optionArrayOrExpiration);
+      if ($nx && $xx) {
+        throw new RedisException("Invalid set options: nx and xx may not be specified at the same time");
+      } elseif (!$ex && !$px && !$nx && !$xx) {
+	throw new RedisException("Invalid set options: unknown set options");
+      }
+      if ($px && $nx) {
+	$this->processCommand("SET", $key, $value, "PX {$optionArrayOrExpiration['px']}", "NX");
+      } elseif ($px && $xx) {
+	$this->processCommand("SET", $key, $value, "PX {$optionArrayOrExpiration['px']}", "XX");
+      } elseif ($ex && $nx) {
+	$this->processCommand("SET", $key, $value, "EX {$optionArrayOrExpiration['ex']}", "NX");
+      } elseif ($ex && $nx) {
+	$this->processCommand("SET", $key, $value, "EX {$optionArrayOrExpiration['ex']}", "XX");
+      } elseif ($px) {
+        $this->processCommand("SET", $key, $value, "PX {$optionArrayOrExpiration['px']}");
+      } elseif ($ex) {
+        $this->processCommand("SET", $key, $value, "EX {$optionArrayOrExpiration['ex']}");
+      } elseif ($nx) {
+	$this->processCommand("SET", $key, $value, "NX");
+      } elseif ($xx) {
+	$this->processCommand("SET", $key, $value, "XX");
+      }
+    } elseif (is_numeric($optionArrayOrExpiration) && (int)$optionArrayOrExpiration > 0) {
+      $this->processCommand("SETEX", $key, $optionArrayOrExpiration, $value);
     } else {
       $this->processCommand("SET", $key, $value);
     }

@@ -824,17 +824,8 @@ bool f_is_dir(const String& filename) {
   if (filename.empty()) {
     return false;
   }
-  bool isRelative = (filename.charAt(0) != '/');
-  if (isRelative) cwd = g_context->getCwd();
-  if (!isRelative || cwd == String(RuntimeOption::SourceRoot)) {
-    if (File::IsVirtualDirectory(filename)) {
-      return true;
-    }
-  }
-
   struct stat sb;
-  String path = isRelative ? cwd + String::FromChar('/') + filename : filename;
-  CHECK_SYSTEM(statSyscall(path, &sb, false, isRelative));
+  CHECK_SYSTEM(statSyscall(filename, &sb, false));
   return (sb.st_mode & S_IFMT) == S_IFDIR;
 }
 

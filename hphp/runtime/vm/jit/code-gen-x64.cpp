@@ -1073,16 +1073,8 @@ void CodeGenerator::cgUnaryIntOp(PhysLoc dst_loc,
 }
 
 void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
-  auto src = inst->src(0);
   auto srcReg = srcLoc(0).reg();
   auto dstReg = dstLoc(0).reg();
-
-  if (srcReg == InvalidReg) {
-    double srcVal = src->dblVal();
-    emitLoadImm(m_as, srcVal < 0 ? -srcVal : srcVal, dstReg);
-    return;
-  }
-
   auto resReg = dstReg.isSIMD() ? dstReg : PhysReg(rCgXMM0);
 
   emitMovRegReg(m_as, srcReg, resReg);

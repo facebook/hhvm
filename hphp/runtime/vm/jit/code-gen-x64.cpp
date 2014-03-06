@@ -2852,18 +2852,6 @@ void emitReload(Asm& as, const PhysLoc& s, const PhysLoc& d, Type t) {
   }
 }
 
-void CodeGenerator::cgSpill(IRInstruction* inst) {
-  assert(inst->dst()->numWords() == inst->src(0)->numWords());
-  SSATmp* src = inst->src(0);
-  emitSpill(m_as, srcLoc(0), dstLoc(0), src->type());
-}
-
-void CodeGenerator::cgReload(IRInstruction* inst) {
-  assert(inst->dst()->numWords() == inst->src(0)->numWords());
-  SSATmp* src = inst->src(0);
-  emitReload(m_as, srcLoc(0), dstLoc(0), src->type());
-}
-
 void CodeGenerator::cgShuffle(IRInstruction* inst) {
   // Each destination is unique, there are no mem-mem copies, and
   // there are no cycles involving spill slots.  So do the shuffling

@@ -39,7 +39,6 @@
 #include "hphp/runtime/ext/ext_iconv.h"
 #include "hphp/runtime/ext/ext_icu.h"
 #include "hphp/runtime/ext/ext_imap.h"
-#include "hphp/runtime/ext/ext_intl.h"
 #include "hphp/runtime/ext/ext_ipc.h"
 #include "hphp/runtime/ext/ext_ldap.h"
 #include "hphp/runtime/ext/ext_mailparse.h"

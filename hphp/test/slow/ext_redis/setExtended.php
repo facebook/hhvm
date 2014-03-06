@@ -6,7 +6,7 @@ require __DIR__ . '/redis.inc';
 {
   $r = NewRedisTestInstance();
   $r->setOption(Redis::OPT_PREFIX, GetTestKeyName(__FILE__) . ':');
-  $r->delete('test1', 'test2', 'test3', 'test4', 'test5');
+  $r->delete('test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7');
 }
 
 //normal sets

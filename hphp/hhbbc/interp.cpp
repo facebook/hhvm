@@ -1526,13 +1526,17 @@ void in(ISS& env, const bc::WIterInitK& op) {
 }
 
 void in(ISS& env, const bc::IterNext& op) {
+  auto const curLoc3 = locRaw(env, op.loc3);
+
   match<void>(
     env.state.iters[op.iter1->id],
     [&] (UnknownIter)           { setLoc(env, op.loc3, TInitCell); },
     [&] (const TrackedIter& ti) { setLoc(env, op.loc3, ti.kv.second); }
   );
   env.propagate(*op.target, env.state);
+
   freeIter(env, op.iter1);
+  setLocRaw(env, op.loc3, curLoc3);
 }
 
 void in(ISS& env, const bc::MIterNext& op) {
@@ -1541,6 +1545,9 @@ void in(ISS& env, const bc::MIterNext& op) {
 }
 
 void in(ISS& env, const bc::IterNextK& op) {
+  auto const curLoc3 = locRaw(env, op.loc3);
+  auto const curLoc4 = locRaw(env, op.loc4);
+
   match<void>(
     env.state.iters[op.iter1->id],
     [&] (UnknownIter) {
@@ -1553,7 +1560,10 @@ void in(ISS& env, const bc::IterNextK& op) {
     }
   );
   env.propagate(*op.target, env.state);
+
   freeIter(env, op.iter1);
+  setLocRaw(env, op.loc3, curLoc3);
+  setLocRaw(env, op.loc4, curLoc4);
 }
 
 void in(ISS& env, const bc::MIterNextK& op) {

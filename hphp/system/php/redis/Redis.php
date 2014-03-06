@@ -220,11 +220,40 @@ class Redis {
     return $this->processDoubleResponse();
   }
 
-  public function set($key, $value, $expire = -1) {
+  public function set($key, $value, $optionArrayOrExpiration = -1) {
     $key = $this->prefix($key);
     $value = $this->serialize($value);
-    if ($expire > 0) {
-      $this->processCommand("SETEX", $key, $expire, $value);
+    if (is_array($optionArrayOrExpiration) &&
+        count($optionArrayOrExpiration) > 0) {
+      $ex = array_key_exists('ex', $optionArrayOrExpiration);
+      $px = array_key_exists('px', $optionArrayOrExpiration);
+      $nx = in_array('nx', $optionArrayOrExpiration);
+      $xx = in_array('xx', $optionArrayOrExpiration);
+      if ($nx && $xx) {
+        throw new RedisException(
+          "Invalid set options: nx and xx may not be specified at the same time"
+        );
+      }
+      $args = [
+        $key,
+        $value
+      ];
+      if ($px) {
+        $args[] = "px";
+        $args[] = $optionArrayOrExpiration['px'];
+      } else if($ex) {
+        $args[] = "ex";
+        $args[] = $optionArrayOrExpiration['ex'];
+      }
+      if ($nx) {
+        $args[] = "nx";
+      } else if ($xx) {
+        $args[] = "xx";
+      }
+      $this->processArrayCommand("SET", $args);
+    } else if (is_numeric($optionArrayOrExpiration) &&
+               (int)$optionArrayOrExpiration > 0) {
+      $this->processCommand("SETEX", $key, $optionArrayOrExpiration, $value);
     } else {
       $this->processCommand("SET", $key, $value);
     }
@@ -531,6 +560,12 @@ class Redis {
     $this->discard();
     $this->mode = self::PIPELINE;
     return $this;
+  }
+
+  public function watch($key, /* ... */) {
+    $args = array_map([$this, 'prefix'], func_get_args());
+    $this->processArrayCommand("WATCH", $args);
+    return $this->processBooleanResponse();;
   }
 
   /* Batch --------------------------------------------------------------- */

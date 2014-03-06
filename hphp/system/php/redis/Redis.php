@@ -223,34 +223,31 @@ class Redis {
   public function set($key, $value, $optionArrayOrExpiration = -1) {
     $key = $this->prefix($key);
     $value = $this->serialize($value);
-
-    if (is_array($optionArrayOrExpiration) && count($optionArrayOrExpiration) > 0) {
+    if (is_array($optionArrayOrExpiration) AND count($optionArrayOrExpiration) > 0) {
       $ex = array_key_exists('ex', $optionArrayOrExpiration);
       $px = array_key_exists('px', $optionArrayOrExpiration);
       $nx = in_array('nx', $optionArrayOrExpiration);
       $xx = in_array('xx', $optionArrayOrExpiration);
-      if ($nx && $xx) {
+      if ($nx AND $xx) {
         throw new RedisException("Invalid set options: nx and xx may not be specified at the same time");
-      } elseif (!$ex && !$px && !$nx && !$xx) {
-        throw new RedisException("Invalid set options: unknown set options");
       }
-      if ($px && $nx) {
-        $this->processCommand("SET", $key, $value, "px", $optionArrayOrExpiration['px'], "nx");
-      } elseif ($px && $xx) {
-        $this->processCommand("SET", $key, $value, "px", $optionArrayOrExpiration['px'], "xx");
-      } elseif ($ex && $nx) {
-        $this->processCommand("SET", $key, $value, "ex", $optionArrayOrExpiration['ex'], "nx");
-      } elseif ($ex && $nx) {
-        $this->processCommand("SET", $key, $value, "ex", $optionArrayOrExpiration['ex'], "xx");
-      } elseif ($px) {
-        $this->processCommand("SET", $key, $value, "px", $optionArrayOrExpiration['px']);
-      } elseif ($ex) {
-        $this->processCommand("SET", $key, $value, "ex", $optionArrayOrExpiration['ex']);
-      } elseif ($nx) {
-        $this->processCommand("SET", $key, $value, "nx");
+      $args = [
+              $key,
+              $value
+      ];
+      if ($px) {
+        $args[] = "px";
+        $args[] = $optionArrayOrExpiration['px'];
+      } elseif($ex) {
+        $args[] = "ex";
+        $args[] = $optionArrayOrExpiration['ex'];
+      }
+      if ($nx) {
+        $args[] = "nx";
       } elseif ($xx) {
-        $this->processCommand("SET", $key, $value, "xx");
+        $args[] = "xx";
       }
+      $this->processArrayCommand("SET", $args);
     } elseif (is_numeric($optionArrayOrExpiration) && (int)$optionArrayOrExpiration > 0) {
       $this->processCommand("SETEX", $key, $optionArrayOrExpiration, $value);
     } else {
@@ -559,6 +556,11 @@ class Redis {
     $this->discard();
     $this->mode = self::PIPELINE;
     return $this;
+  }
+
+  public function watch($key, /* ... */) {
+    $args = array_map([$this, 'prefix'], func_get_args());
+    return $this->processArrayCommand("WATCH", $args);
   }
 
   /* Batch --------------------------------------------------------------- */

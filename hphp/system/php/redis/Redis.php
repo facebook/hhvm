@@ -232,24 +232,24 @@ class Redis {
       if ($nx && $xx) {
         throw new RedisException("Invalid set options: nx and xx may not be specified at the same time");
       } elseif (!$ex && !$px && !$nx && !$xx) {
-	throw new RedisException("Invalid set options: unknown set options");
+        throw new RedisException("Invalid set options: unknown set options");
       }
       if ($px && $nx) {
-	$this->processCommand("SET", $key, $value, "PX {$optionArrayOrExpiration['px']}", "NX");
+        $this->processCommand("SET", $key, $value, "PX {$optionArrayOrExpiration['px']}", "NX");
       } elseif ($px && $xx) {
-	$this->processCommand("SET", $key, $value, "PX {$optionArrayOrExpiration['px']}", "XX");
+        $this->processCommand("SET", $key, $value, "PX {$optionArrayOrExpiration['px']}", "XX");
       } elseif ($ex && $nx) {
-	$this->processCommand("SET", $key, $value, "EX {$optionArrayOrExpiration['ex']}", "NX");
+        $this->processCommand("SET", $key, $value, "EX {$optionArrayOrExpiration['ex']}", "NX");
       } elseif ($ex && $nx) {
-	$this->processCommand("SET", $key, $value, "EX {$optionArrayOrExpiration['ex']}", "XX");
+        $this->processCommand("SET", $key, $value, "EX {$optionArrayOrExpiration['ex']}", "XX");
       } elseif ($px) {
         $this->processCommand("SET", $key, $value, "PX {$optionArrayOrExpiration['px']}");
       } elseif ($ex) {
         $this->processCommand("SET", $key, $value, "EX {$optionArrayOrExpiration['ex']}");
       } elseif ($nx) {
-	$this->processCommand("SET", $key, $value, "NX");
+        $this->processCommand("SET", $key, $value, "NX");
       } elseif ($xx) {
-	$this->processCommand("SET", $key, $value, "XX");
+        $this->processCommand("SET", $key, $value, "XX");
       }
     } elseif (is_numeric($optionArrayOrExpiration) && (int)$optionArrayOrExpiration > 0) {
       $this->processCommand("SETEX", $key, $optionArrayOrExpiration, $value);

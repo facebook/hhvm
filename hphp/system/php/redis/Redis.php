@@ -529,7 +529,7 @@ class Redis {
     if ($this->mode === self::MULTI) {
       $this->mode = self::ATOMIC;
       $this->processCommand('EXEC');
-      return $this->flushCallbacks();
+      return $this->flushCallbacks(false);
     } else if ($this->mode === self::PIPELINE) {
       $this->mode = self::ATOMIC;
       foreach ($this->commands as $cmd) {

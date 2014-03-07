@@ -443,10 +443,10 @@ void in(ISS& env, const bc::Xor&) {
 
 void castBoolImpl(ISS& env, bool negate) {
   nothrow(env);
+  constprop(env);
   auto const t = popC(env);
   auto const v = tv(t);
   if (v) {
-    constprop(env);
     return push(env, eval_cell([&] {
       return make_tv<KindOfBoolean>(cellToBool(*v) != negate);
     }));
@@ -454,15 +454,24 @@ void castBoolImpl(ISS& env, bool negate) {
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::Not&)      { castBoolImpl(env, true); }
-void in(ISS& env, const bc::CastBool&) { castBoolImpl(env, false); }
+void in(ISS& env, const bc::Not&) {
+  castBoolImpl(env, true);
+}
+
+void in(ISS& env, const bc::CastBool&) {
+  auto const t = topC(env);
+  if (t.subtypeOf(TBool)) return reduce(env, bc::Nop {});
+  castBoolImpl(env, false);
+}
 
 void in(ISS& env, const bc::CastInt&) {
-  auto const t = popC(env);
-  if (!t.couldBe(TObj) && !t.couldBe(TRes)) nothrow(env);
-  auto const v = tv(t);
-  if (v) {
-    constprop(env);
+  constprop(env);
+  auto const t = topC(env);
+  if (t.subtypeOf(TInt)) return reduce(env, bc::Nop {});
+  popC(env);
+  // Objects can raise a warning about converting to int.
+  if (!t.couldBe(TObj)) nothrow(env);
+  if (auto const v = tv(t)) {
     return push(env, eval_cell([&] {
       return make_tv<KindOfInt64>(cellToInt(*v));
     }));
@@ -470,18 +479,27 @@ void in(ISS& env, const bc::CastInt&) {
   push(env, TInt);
 }
 
-void in(ISS& env, const bc::CastDouble&) { popC(env); push(env, TDbl); }
-void in(ISS& env, const bc::CastString&) { popC(env); push(env, TStr); }
-void in(ISS& env, const bc::CastArray&)  { popC(env); push(env, TArr); }
-void in(ISS& env, const bc::CastObject&) { popC(env); push(env, TObj); }
+void castImpl(ISS& env, Type target) {
+  auto const t = topC(env);
+  if (t.subtypeOf(target)) return reduce(env, bc::Nop {});
+  constprop(env);
+  // TODO(#3875556): constant evaluate conversions when we can.
+  popC(env);
+  push(env, target);
+}
+
+void in(ISS& env, const bc::CastDouble&) { castImpl(env, TDbl); }
+void in(ISS& env, const bc::CastString&) { castImpl(env, TStr); }
+void in(ISS& env, const bc::CastArray&)  { castImpl(env, TArr); }
+void in(ISS& env, const bc::CastObject&) { castImpl(env, TObj); }
 
 void in(ISS& env, const bc::Print& op) { popC(env); push(env, ival(1)); }
 
 void in(ISS& env, const bc::Clone& op) {
   auto const val = popC(env);
   push(env, val.subtypeOf(TObj) ? val :
-       is_opt(val)         ? unopt(val) :
-       TObj);
+            is_opt(val)         ? unopt(val) :
+            TObj);
 }
 
 void in(ISS& env, const bc::Exit&)  { popC(env); push(env, TInitNull); }

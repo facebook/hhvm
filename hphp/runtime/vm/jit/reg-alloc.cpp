@@ -331,6 +331,12 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     break;
   case Mov:
     return true; // x64 can mov a 64-bit imm into a register.
+  case StringIsset:
+    if (i == 1) return okCmp(cint);
+    break;
+  case CheckPackedArrayBounds:
+    if (i == 1) return okCmp(cint); // idx
+    break;
   default:
     break;
   }

@@ -4175,19 +4175,11 @@ void CodeGenerator::cgLdRef(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgStringIsset(IRInstruction* inst) {
-  auto str = inst->src(0);
-  auto idx = inst->src(1);
+  auto strReg = srcLoc(0).reg();
   auto idxReg = srcLoc(1).reg();
   auto dstReg = dstLoc(0).reg();
-  auto strReg = [&]() {
-    if (str->isConst()) {
-      emitLoadImm(m_as, (int64_t)str->strVal(), m_rScratch);
-      return PhysReg(m_rScratch);
-    }
-    return srcLoc(0).reg();
-  }();
-  if (idx->isConst()) {
-    m_as.cmpl(idx->intVal(), strReg[StringData::sizeOffset()]);
+  if (idxReg == InvalidReg) {
+    m_as.cmpl(inst->src(1)->intVal(), strReg[StringData::sizeOffset()]);
   } else {
     m_as.cmpl(r32(idxReg), strReg[StringData::sizeOffset()]);
   }
@@ -4196,35 +4188,19 @@ void CodeGenerator::cgStringIsset(IRInstruction* inst) {
 
 void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
   static_assert(ArrayData::sizeofSize() == 4, "");
-  Block* label = inst->taken();
-  assert(label);
-  SSATmp* arr = inst->src(0);
+  assert(inst->src(0)->type().getArrayKind() == ArrayData::kPackedKind);
+  assert(inst->taken());
   auto arrReg = srcLoc(0).reg();
-  assert(arr->type().getArrayKind() == ArrayData::kPackedKind);
-  auto idx = inst->src(1);
   auto idxReg = srcLoc(1).reg();
-  if (arr->isConst()) {
-    m_as.movq(arr->rawVal(), m_rScratch);
-    arrReg = m_rScratch;
-  }
-
-  if (idx->isConst()) {
-    auto const val = idx->intVal();
-    if ((uint64_t)val >= 0xffffffffull) {
-      // The check will always fail.
-      // TODO: #3728093 get rid of this, move it to Simplifier
-      emitFwdJmp(m_as, label, m_state);
-      return;
-    }
-
-    m_as.cmpl  (val, arrReg[ArrayData::offsetofSize()]);
+  if (idxReg == InvalidReg) {
+    m_as.cmpl  (inst->src(1)->intVal(), arrReg[ArrayData::offsetofSize()]);
   } else {
     // ArrayData::m_size is a uint32_t but we need to do a 64-bit comparison
     // since idx is KindOfInt64.
     m_as.loadl (arrReg[ArrayData::offsetofSize()], r32(m_rScratch));
     m_as.cmpq  (idxReg, m_rScratch);
   }
-  emitFwdJcc(CC_BE, label);
+  emitFwdJcc(CC_BE, inst->taken());
 }
 
 /**

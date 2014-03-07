@@ -25,6 +25,9 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
+#include <memory>
+#include <utility>
 
 #include "folly/Optional.h"
 #include "folly/Conv.h"
@@ -50,6 +53,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
@@ -536,8 +540,7 @@ predictMVec(const NormalizedInstruction* ni) {
  *   Provide a best guess for the output type of this instruction.
  */
 static DataType
-predictOutputs(SrcKey startSk,
-               const NormalizedInstruction* ni) {
+predictOutputs(const NormalizedInstruction* ni) {
   if (!RuntimeOption::EvalJitTypePrediction) return KindOfAny;
 
   if (RuntimeOption::EvalJitStressTypePredPercent &&
@@ -667,7 +670,7 @@ predictOutputs(SrcKey startSk,
       default:
         baseType = Type(ni->inputs[1]->rtt);
     }
-    if (baseType.isString() && ni->immVecM.size() == 1) {
+    if (baseType <= Type::Str && ni->immVecM.size() == 1) {
       return ni->immVecM[0] == MW ? inDt : KindOfString;
     }
 
@@ -694,14 +697,14 @@ predictOutputs(SrcKey startSk,
   if (pred.second < kAccept) {
     if (const StringData* invName = fcallToFuncName(ni)) {
       pred = predictType(TypeProfileKey(TypeProfileKey::MethodName, invName));
-      TRACE(1, "prediction for methods named %s: %d, %f\n",
-            invName->data(),
-            pred.first,
-            pred.second);
+      FTRACE(1, "prediction for methods named {}: {}, {:.2}\n",
+             invName->data(),
+             pred.first,
+             pred.second);
     }
   }
   if (pred.second >= kAccept) {
-    TRACE(1, "accepting prediction of type %d\n", pred.first);
+    FTRACE(1, "accepting prediction of type {}\n", pred.first);
     assert(pred.first != KindOfUninit);
     return pred.first;
   }
@@ -782,7 +785,7 @@ getDynLocType(const SrcKey startSk,
     } // Fall through
     case OutPred: {
       // In TransProfile mode, disable type prediction to avoid side exits.
-      auto dt = mode == TransProfile ? KindOfAny : predictOutputs(startSk, ni);
+      auto dt = mode == TransProfile ? KindOfAny : predictOutputs(ni);
       if (dt != KindOfAny) ni->outputPredicted = true;
       return RuntimeType(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
     }
@@ -990,7 +993,6 @@ static const struct {
   { OpString,      {None,             Stack1,       OutStringImm,      1 }},
   { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
-  { OpNewArrayReserve, {None,         Stack1,       OutArray,          1 }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutArray,         -2 }},
@@ -1447,15 +1449,14 @@ static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
 
 // Task #3449943: This returns true even if there's meta-data telling
 // that the value was inferred.
-bool outputIsPredicted(SrcKey startSk,
-                       NormalizedInstruction& inst) {
+bool outputIsPredicted(NormalizedInstruction& inst) {
   auto const& iInfo = getInstrInfo(inst.op());
   auto doPrediction =
     (iInfo.type == OutPred || iInfo.type == OutCns) && !inst.breaksTracelet;
   if (doPrediction) {
     // All OutPred ops except for SetM have a single stack output for now.
     assert(iInfo.out == Stack1 || inst.op() == OpSetM);
-    auto dt = predictOutputs(startSk, &inst);
+    auto dt = predictOutputs(&inst);
     if (dt != KindOfAny) {
       inst.outPred = Type(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
     } else {
@@ -3556,6 +3557,8 @@ bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
  */
 std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
                                               const TypeMap& initialTypes) {
+  Timer _t("analyze");
+
   std::unique_ptr<Tracelet> retval(new Tracelet());
   auto func = sk.func();
   auto unit = sk.unit();
@@ -3845,7 +3848,7 @@ breakBB:
 
 Translator::Translator()
   : uniqueStubs{}
-  , m_createdTime(Timer::GetCurrentTimeMicros())
+  , m_createdTime(HPHP::Timer::GetCurrentTimeMicros())
   , m_mode(TransInvalid)
   , m_profData(nullptr)
   , m_analysisDepth(0)
@@ -4121,12 +4124,15 @@ void Translator::traceFree() {
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             RegionBlacklist& toInterp) {
+  Timer _t("translateRegion");
+
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   assert(!region.blocks.empty());
   const SrcKey startSk = region.blocks.front()->start();
   auto profilingFunc = false;
 
+  Timer irGenTimer("translateRegion_irGeneration");
   for (auto b = 0; b < region.blocks.size(); b++) {
     auto const& block = region.blocks[b];
     Unit::MetaHandle metaHand;
@@ -4228,23 +4234,6 @@ Translator::translateRegion(const RegionDesc& region,
           return takenIncluded && fallthruIncluded;
         }();
       }
-      // If this block ends with an inlined FCall, we don't emit anything for
-      // the FCall and instead set up HhbcTranslator for inlining. Blocks from
-      // the callee will be next in the region.
-      if (i == block->length() - 1 &&
-          inst.op() == OpFCall && block->inlinedCallee()) {
-        auto const* callee = block->inlinedCallee();
-        FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
-               "and stack:\n{}\n",
-               block->func()->fullName()->data(),
-               callee->fullName()->data(),
-               inst.imm[0].u_IVA,
-               ht.showStack());
-        auto returnSk = inst.nextSk();
-        auto returnFuncOff = returnSk.offset() - block->func()->base();
-        ht.beginInlining(inst.imm[0].u_IVA, callee, returnFuncOff);
-        continue;
-      }
 
       // We can get a more precise output type for interpOne if we know all of
       // its inputs, so we still populate the rest of the instruction even if
@@ -4293,7 +4282,26 @@ Translator::translateRegion(const RegionDesc& region,
       // stack essentially does the role of type prediction.  And, if the value
       // is also inferred, then the guard is omitted.
       auto const doPrediction = mode() != TransOptimize &&
-                                outputIsPredicted(startSk, inst);
+                                outputIsPredicted(inst);
+
+      // If this block ends with an inlined FCall, we don't emit anything for
+      // the FCall and instead set up HhbcTranslator for inlining. Blocks from
+      // the callee will be next in the region.
+      if (i == block->length() - 1 &&
+          inst.op() == OpFCall && block->inlinedCallee()) {
+        auto const* callee = block->inlinedCallee();
+        FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
+               "and stack:\n{}\n",
+               block->func()->fullName()->data(),
+               callee->fullName()->data(),
+               inst.imm[0].u_IVA,
+               ht.showStack());
+        auto returnSk = inst.nextSk();
+        auto returnFuncOff = returnSk.offset() - block->func()->base();
+        ht.beginInlining(inst.imm[0].u_IVA, callee, returnFuncOff,
+                         doPrediction ? inst.outPred : Type::Gen);
+        continue;
+      }
 
       // Emit IR for the body of the instruction.
       try {
@@ -4336,6 +4344,8 @@ Translator::translateRegion(const RegionDesc& region,
   }
 
   traceEnd();
+  irGenTimer.end();
+
   try {
     traceCodeGen();
     if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
@@ -4377,7 +4387,7 @@ void Translator::addTranslation(const TransRec& transRec) {
   if (Trace::moduleEnabledRelease(Trace::trans, 1)) {
     // Log the translation's size, creation time, SrcKey, and size
     Trace::traceRelease("New translation: %" PRId64 " %s %u %u %d\n",
-                        Timer::GetCurrentTimeMicros() - m_createdTime,
+                        HPHP::Timer::GetCurrentTimeMicros() - m_createdTime,
                         folly::format("{}:{}:{}",
                           transRec.src.unit()->filepath()->data(),
                           transRec.src.getFuncId(),
@@ -4432,7 +4442,7 @@ struct DeferredPathInvalidate : public DeferredWorkItem {
      * this lookup; since the path has changed, the file we'll get out is
      * going to be some new file, not the old file that needs invalidation.
      */
-    (void)g_vmContext->lookupPhpFile(spath.get(), "");
+    (void)g_context->lookupPhpFile(spath.get(), "");
   }
 };
 
@@ -4629,8 +4639,8 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
   const Func* func;
   LookupResult res = staticLookup ?
-    g_vmContext->lookupClsMethod(func, cls, name, nullptr, ctx, false) :
-    g_vmContext->lookupObjMethod(func, cls, name, ctx, false);
+    g_context->lookupClsMethod(func, cls, name, nullptr, ctx, false) :
+    g_context->lookupObjMethod(func, cls, name, ctx, false);
 
   if (res == LookupResult::MethodNotFound) return nullptr;
 

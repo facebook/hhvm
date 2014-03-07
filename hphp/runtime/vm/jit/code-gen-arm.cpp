@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
+#include <vector>
 
 #include "folly/Optional.h"
 
@@ -100,7 +101,6 @@ PUNT_OPCODE(CheckDefinedClsEq)
 PUNT_OPCODE(TryEndCatch)
 PUNT_OPCODE(LdUnwinderValue)
 PUNT_OPCODE(DeleteUnwinderException)
-PUNT_OPCODE(AddInt)
 PUNT_OPCODE(SubInt)
 PUNT_OPCODE(MulInt)
 PUNT_OPCODE(AddDbl)
@@ -725,6 +725,24 @@ void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// Arithmetic Instructions
+
+void CodeGenerator::cgAddInt(IRInstruction* inst) {
+  assert(inst->numSrcs() == 2 && inst->numDsts() == 1);
+
+  auto destReg = dstLoc(0).reg();
+  auto srcReg0 = srcLoc(0).reg();
+  auto srcReg1 = srcLoc(1).reg();
+
+  if (srcReg1 != InvalidReg) {
+    m_as. Add(x2a(destReg), x2a(srcReg0), x2a(srcReg1));
+  } else {
+    m_as. Add(x2a(destReg), x2a(srcReg0), inst->src(1)->getValInt());
+  }
+
+}
+
+//////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgShuffle(IRInstruction* inst) {
   PhysReg::Map<PhysReg> moves;
@@ -1025,7 +1043,7 @@ void CodeGenerator::emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
   }
 
   ConditionCode cc;
-  if (type.isString()) {
+  if (type <= Type::Str) {
     // Note: ARM can actually do better here; it has a fused test-and-branch
     // instruction. The way this code is factored makes it difficult to use,
     // though; the jump instruction will be written by some other code.
@@ -1194,7 +1212,6 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
 void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert(inst->numSrcs() == 5);
 
-  DEBUG_ONLY SSATmp* funcPtrTmp = inst->src(0);
   DEBUG_ONLY SSATmp* nParamsTmp = inst->src(1);
   DEBUG_ONLY SSATmp* firstBitNumTmp = inst->src(2);
   DEBUG_ONLY SSATmp* mask64Tmp  = inst->src(3);
@@ -1206,29 +1223,21 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   auto vals64Loc = srcLoc(4);
 
   // Get values in place
-  assert(funcPtrTmp->type() == Type::Func);
   auto funcPtrReg = x2a(funcPtrLoc.reg());
   assert(funcPtrReg.IsValid());
 
-  assert(nParamsTmp->type() == Type::Int);
   auto nParamsReg = x2a(nParamsLoc.reg());
   assert(nParamsReg.IsValid() || nParamsTmp->isConst());
 
-  assert(firstBitNumTmp->isConst() && firstBitNumTmp->type() == Type::Int);
-  uint32_t firstBitNum = (uint32_t)(firstBitNumTmp->getValInt());
-
-  assert(mask64Tmp->type() == Type::Int);
-  assert(mask64Tmp->isConst());
+  auto firstBitNum = static_cast<uint32_t>(firstBitNumTmp->getValInt());
   auto mask64Reg = x2a(mask64Loc.reg());
-  assert(mask64Reg.IsValid() || mask64Tmp->inst()->op() != LdConst);
   uint64_t mask64 = mask64Tmp->getValInt();
+  assert(mask64Reg.IsValid() || mask64 == uint32_t(mask64));
   assert(mask64);
 
-  assert(vals64Tmp->type() == Type::Int);
-  assert(vals64Tmp->isConst());
   auto vals64Reg = x2a(vals64Loc.reg());
-  assert(vals64Reg.IsValid() || vals64Tmp->inst()->op() != LdConst);
   uint64_t vals64 = vals64Tmp->getValInt();
+  assert(vals64Reg.IsValid() || vals64 == uint32_t(vals64));
   assert((vals64 & mask64) == vals64);
 
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
@@ -1253,31 +1262,21 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
     m_as.    Ldr  (bitsReg, bitsPtrReg[bitsOff]);
 
     // Mask the bits. There are restrictions on what can be encoded as an
-    // immediate in ARM's logical instructions, and if they're not met, we'll
-    // have to use a register.
-    if (vixl::Assembler::IsImmLogical(mask64, vixl::kXRegSize)) {
-      m_as.  And  (bitsReg, bitsReg, mask64);
+    // immediate in ARM's logical instructions, and if they're not met,
+    // the assembler will compensate using ip0 or ip1 as tmps.
+    if (mask64Reg.IsValid()) {
+      m_as.  And  (bitsReg, bitsReg, mask64Reg);
     } else {
-      if (mask64Reg.IsValid()) {
-        m_as.And  (bitsReg, bitsReg, mask64Reg);
-      } else {
-        m_as.Mov  (rAsm2, mask64);
-        m_as.And  (bitsReg, bitsReg, rAsm2);
-      }
+      m_as.  And  (bitsReg, bitsReg, mask64);
     }
 
     // Now do the compare. There are also restrictions on immediates in
     // arithmetic instructions (of which Cmp is one; it's just a subtract that
     // sets flags), so same deal as with the mask immediate above.
-    if (vixl::Assembler::IsImmArithmetic(vals64)) {
-      m_as.  Cmp  (bitsReg, vals64);
+    if (vals64Reg.IsValid()) {
+      m_as.  Cmp  (bitsReg, vals64Reg);
     } else {
-      if (vals64Reg.IsValid()) {
-        m_as.Cmp  (bitsReg, vals64Reg);
-      } else {
-        m_as.Mov  (rAsm2, vals64);
-        m_as.Cmp  (bitsReg, rAsm2);
-      }
+      m_as.  Cmp  (bitsReg, vals64);
     }
     destSR->emitFallbackJump(m_mainCode, cond);
   };
@@ -1381,7 +1380,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   }
 
   // Now set func, and possibly this/cls
-  if (func->type().isNull()) {
+  if (func->isA(Type::Null)) {
     // Do nothing
     assert(func->isConst());
   } else if (func->isConst()) {
@@ -1409,11 +1408,11 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   if (FixupMap::eagerRecord(func)) {
     // Save VM registers
     auto const* pc = curFunc()->unit()->entry() + m_curInst->marker().bcOff;
-    m_as.Str  (rVmFp, rGContextReg[offsetof(VMExecutionContext, m_fp)]);
-    m_as.Str  (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
+    m_as.Str  (rVmFp, rGContextReg[offsetof(ExecutionContext, m_fp)]);
+    m_as.Str  (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
                                    Stack::topOfStackOffset()]);
     m_as.Mov  (rAsm, pc);
-    m_as.Str  (rAsm, rGContextReg[offsetof(VMExecutionContext, m_pc)]);
+    m_as.Str  (rAsm, rGContextReg[offsetof(ExecutionContext, m_pc)]);
   }
 
   // The stack pointer currently points to the MInstrState we need to use.
@@ -1504,7 +1503,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 
   assert(m_curInst->marker().valid());
   SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
-  bool isImmutable = (func->isConst() && !func->type().isNull());
+  bool isImmutable = func->isConst() && !func->isA(Type::Null);
   const Func* funcd = isImmutable ? func->getValFunc() : nullptr;
   int32_t adjust  = emitBindCall(tx64->code.main(), tx64->code.stubs(),
                                  srcKey, funcd, numArgs);
@@ -1572,7 +1571,7 @@ void CodeGenerator::emitLoad(Type type, PhysLoc dstLoc,
   if (label) {
     not_implemented();
   }
-  if (type.isNull()) return;
+  if (type <= Type::Null) return;
 
   auto dstReg = x2a(dstLoc.reg());
   if (!dstReg.IsValid()) return;
@@ -1598,7 +1597,7 @@ void CodeGenerator::emitStore(vixl::Register base,
       m_as.  Strb  (rAsm.W(), base[offset + TVOFF(m_type)]);
     }
   }
-  if (type.isNull()) {
+  if (type <= Type::Null) {
     return;
   }
   if (src->isConst()) {
@@ -1637,14 +1636,6 @@ void CodeGenerator::cgLdStack(IRInstruction* inst) {
   auto srcReg = x2a(srcLoc(0).reg());
   auto offset = cellsToBytes(inst->extra<LdStack>()->offset);
   emitLoad(inst->dst()->type(), dstLoc(0), srcReg, offset);
-}
-
-void CodeGenerator::cgLdConst(IRInstruction* inst) {
-  auto const dstReg = x2a(dstLoc(0).reg());
-  auto const val    = inst->extra<LdConst>()->as<uintptr_t>();
-  if (dstReg.IsValid()) {
-    m_as.  Mov  (dstReg, val);
-  }
 }
 
 void CodeGenerator::cgLdRaw(IRInstruction* inst) {
@@ -1751,7 +1742,6 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
 
   int64_t adjustment = (spDeficit - spillCells) * sizeof(Cell);
   for (uint32_t i = 0; i < numSpillSrcs; ++i) {
-    assert(spillVals[i]->type() != Type::None);
     const int64_t offset = i * sizeof(Cell) + adjustment;
     emitStore(spReg, offset, spillVals[i], srcLoc(i + 2));
   }
@@ -1784,8 +1774,8 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
 void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   cgInterpOneCommon(inst);
 
-  m_as.   Ldr   (rVmFp, rReturnReg[offsetof(VMExecutionContext, m_fp)]);
-  m_as.   Ldr   (rVmSp, rReturnReg[offsetof(VMExecutionContext, m_stack) +
+  m_as.   Ldr   (rVmFp, rReturnReg[offsetof(ExecutionContext, m_fp)]);
+  m_as.   Ldr   (rVmSp, rReturnReg[offsetof(ExecutionContext, m_stack) +
                                    Stack::topOfStackOffset()]);
 
   emitServiceReq(tx64->code.main(), REQ_RESUME);

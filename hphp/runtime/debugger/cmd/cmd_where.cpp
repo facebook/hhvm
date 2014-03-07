@@ -240,7 +240,7 @@ bool CmdWhere::onServer(DebuggerProxy &proxy) {
   if (m_type == KindOfWhereAsync) {
     m_stacktrace = createAsyncStacktrace();
   } else {
-    m_stacktrace = g_vmContext->debugBacktrace(false, true, false);
+    m_stacktrace = g_context->debugBacktrace(false, true, false);
     if (!m_stackArgs) {
       removeArgs();
     }

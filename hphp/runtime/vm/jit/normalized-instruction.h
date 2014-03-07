@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
+#include <memory>
 
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/bytecode.h"

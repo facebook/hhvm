@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/vm/jit/opt.h"
+#include <algorithm>
+#include <utility>
 
 #include "folly/Lazy.h"
 #include "folly/Optional.h"
@@ -32,6 +34,7 @@
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP { namespace JIT {
@@ -1707,6 +1710,7 @@ void eliminateTakeStacks(const BlockList& blocks) {
  * refcount of each object has not changed.
  */
 void optimizeRefcounts(IRUnit& unit) noexcept {
+  Timer _t("optimize_refcountOpts");
   FTRACE(2, "vvvvvvvvvv refcount opts vvvvvvvvvv\n");
   auto const changed = splitCriticalEdges(unit);
   if (changed) {

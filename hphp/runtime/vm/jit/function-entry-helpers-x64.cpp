@@ -25,8 +25,8 @@ namespace HPHP {
 namespace JIT {
 
 static void setupAfterPrologue(ActRec* fp, void* sp) {
-  g_vmContext->m_fp = fp;
-  g_vmContext->m_stack.top() = (Cell*)sp;
+  g_context->m_fp = fp;
+  g_context->m_stack.top() = (Cell*)sp;
   int nargs = fp->numArgs();
   int nparams = fp->m_func->numParams();
   Offset firstDVInitializer = InvalidAbsoluteOffset;
@@ -41,9 +41,9 @@ static void setupAfterPrologue(ActRec* fp, void* sp) {
     }
   }
   if (firstDVInitializer != InvalidAbsoluteOffset) {
-    g_vmContext->m_pc = fp->m_func->unit()->entry() + firstDVInitializer;
+    g_context->m_pc = fp->m_func->unit()->entry() + firstDVInitializer;
   } else {
-    g_vmContext->m_pc = fp->m_func->getEntry();
+    g_context->m_pc = fp->m_func->getEntry();
   }
 }
 
@@ -63,7 +63,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
        */
       VMRegAnchor _(ar);
       uint64_t rip = ar->m_savedRip;
-      if (g_vmContext->doFCall(ar, g_vmContext->m_pc)) {
+      if (g_context->doFCall(ar, g_context->m_pc)) {
         ar->m_savedRip = rip;
         return tx64->uniqueStubs.resumeHelperRet;
       }
@@ -74,7 +74,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
       return (TCA)-rip;
     }
     setupAfterPrologue(ar, sp);
-    assert(ar == g_vmContext->m_fp);
+    assert(ar == g_context->m_fp);
     return tx64->uniqueStubs.resumeHelper;
   } catch (...) {
     /*
@@ -122,7 +122,7 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func) {
 
   auto ar = (ActRec*)framePtr->m_savedRbp;
   if (LIKELY(ar->m_func->isBuiltin())) {
-    ar = g_vmContext->getOuterVMFrame(ar);
+    ar = g_context->getOuterVMFrame(ar);
   }
   const Func* f = vm_decode_function(tvAsVariant(&func),
                                      ar, false,

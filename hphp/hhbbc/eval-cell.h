@@ -17,6 +17,7 @@
 #define incl_HHBBC_EVAL_CELL_H_
 
 #include <stdexcept>
+#include <exception>
 
 #include "hphp/runtime/base/complex-types.h"
 

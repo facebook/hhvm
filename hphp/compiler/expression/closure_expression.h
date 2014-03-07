@@ -18,6 +18,7 @@
 #define incl_HPHP_CLOSURE_EXPRESSION_H_
 
 #include "hphp/compiler/expression/expression.h"
+#include <set>
 #include "hphp/parser/parser.h"
 
 namespace HPHP {

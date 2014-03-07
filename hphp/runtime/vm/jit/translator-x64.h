@@ -26,6 +26,8 @@
 #include "hphp/util/code-cache.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include <tbb/concurrent_hash_map.h>
+#include <utility>
+#include <vector>
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"

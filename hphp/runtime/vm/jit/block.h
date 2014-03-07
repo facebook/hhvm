@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_BLOCK_H_
 
 #include "hphp/runtime/base/smart-containers.h"
+#include <algorithm>
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -126,6 +127,7 @@ struct Block : boost::noncopyable {
   void splice(iterator pos, Block* from, iterator begin, iterator end);
   void push_back(IRInstruction* inst);
   template <class Predicate> void remove_if(Predicate p);
+  InstructionList&& moveInstrs();
 
   // return the first instruction in the block.
   reference front();
@@ -263,6 +265,11 @@ inline void Block::push_back(IRInstruction* inst) {
 template <class Predicate> inline
 void Block::remove_if(Predicate p) {
   m_instrs.remove_if(p);
+}
+
+inline InstructionList&& Block::moveInstrs() {
+  for (auto i = begin(); i != end(); ++i) i->setBlock(nullptr);
+  return std::move(m_instrs);
 }
 
 inline bool Block::isCatch() const {

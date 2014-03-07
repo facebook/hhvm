@@ -62,8 +62,8 @@ void emitReturnHelpers(UniqueStubs& us) {
 void emitResumeHelpers(UniqueStubs& us) {
   MacroAssembler a { tx64->code.main() };
 
-  auto const fpOff = offsetof(VMExecutionContext, m_fp);
-  auto const spOff = offsetof(VMExecutionContext, m_stack) +
+  auto const fpOff = offsetof(ExecutionContext, m_fp);
+  auto const spOff = offsetof(ExecutionContext, m_stack) +
                        Stack::topOfStackOffset();
 
   us.resumeHelperRet = a.frontier();
@@ -192,8 +192,8 @@ void emitFCallHelperThunk(UniqueStubs& us) {
   a.   Cmp   (rReturnReg, 0);
   a.   B     (&jmpRet, vixl::gt);
   a.   Neg   (rReturnReg, rReturnReg);
-  a.   Ldr   (rVmFp, rGContextReg[offsetof(VMExecutionContext, m_fp)]);
-  a.   Ldr   (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
+  a.   Ldr   (rVmFp, rGContextReg[offsetof(ExecutionContext, m_fp)]);
+  a.   Ldr   (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
                                   Stack::topOfStackOffset()]);
 
   a.   bind  (&jmpRet);
@@ -254,7 +254,7 @@ void emitFunctionEnterHelper(UniqueStubs& us) {
   auto rIgnored = rAsm2;
   a.   Pop     (rVmFp, rAsm);
   a.   Pop     (rIgnored, rLinkReg);
-  a.   Ldr     (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
+  a.   Ldr     (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
                                     Stack::topOfStackOffset()]);
   a.   Br      (rAsm);
 

@@ -35,7 +35,6 @@ namespace HPHP { namespace JIT { namespace X64 {
 
 //////////////////////////////////////////////////////////////////////
 
-using namespace Util;
 using namespace JIT::reg;
 
 TRACE_SET_MOD(hhir);
@@ -58,7 +57,6 @@ void moveToAlign(CodeBlock& cb,
   // TODO(2967396) implement properly, move function
   if (arch() == Arch::ARM) return;
 
-  using namespace HPHP::Util;
   X64Assembler a { cb };
   assert(folly::isPowTwo(align));
   size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
@@ -73,10 +71,10 @@ void moveToAlign(CodeBlock& cb,
 }
 
 void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc) {
-  static COff spOff = offsetof(VMExecutionContext, m_stack) +
+  static COff spOff = offsetof(ExecutionContext, m_stack) +
     Stack::topOfStackOffset();
-  static COff fpOff = offsetof(VMExecutionContext, m_fp);
-  static COff pcOff = offsetof(VMExecutionContext, m_pc);
+  static COff fpOff = offsetof(ExecutionContext, m_fp);
+  static COff pcOff = offsetof(ExecutionContext, m_pc);
 
   /* we can't use rAsm because the pc store uses it as a
      temporary */
@@ -106,10 +104,10 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
 
   emitGetGContext(as, rEC);
 
-  static COff spOff = offsetof(VMExecutionContext, m_stack) +
+  static COff spOff = offsetof(ExecutionContext, m_stack) +
     Stack::topOfStackOffset();
-  static COff fpOff = offsetof(VMExecutionContext, m_fp) - spOff;
-  static COff pcOff = offsetof(VMExecutionContext, m_pc) - spOff;
+  static COff fpOff = offsetof(ExecutionContext, m_fp) - spOff;
+  static COff pcOff = offsetof(ExecutionContext, m_pc) - spOff;
 
   assert(spOff != 0);
   as.   addq   (spOff, r64(rEC));

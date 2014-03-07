@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/analysis/ref_dict.h"
+#include <vector>
 #include "hphp/compiler/analysis/alias_manager.h"
 #include "hphp/compiler/analysis/function_scope.h"
 

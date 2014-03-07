@@ -17,6 +17,7 @@
 #define incl_HPHP_JIT_CODE_GEN_ARM_H
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
+#include <vector>
 
 #include "hphp/util/data-block.h"
 #include "hphp/runtime/vm/jit/block.h"

@@ -30,6 +30,7 @@
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "folly/Unicode.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
 
@@ -477,18 +478,17 @@ Variant f_chunk_split(const String& body, int chunklen /* = 76 */,
   return StringUtil::ChunkSplit(body, chunklen, end);
 }
 
-class TokenizerData : public RequestEventHandler {
-public:
+struct TokenizerData final : RequestEventHandler {
   String str;
   int pos;
   int mask[256];
 
-  virtual void requestInit() {
+  void requestInit() override {
     str.reset();
     pos = 0;
     memset(&mask, 0, sizeof(mask));
   }
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     requestInit();
   }
 };
@@ -1301,21 +1301,21 @@ Variant f_metaphone(const String& str, int phones /* = 0 */) {
 }
 
 String f_html_entity_decode(const String& str, int flags /* = k_ENT_COMPAT */,
-                            const String& charset /* = "ISO-8859-1" */) {
+                            const String& charset /* = "UTF-8" */) {
   const char *scharset = charset.data();
-  if (!*scharset) scharset = "UTF-8";
+  if (!*scharset) scharset = "ISO-8859-1";
   return StringUtil::HtmlDecode(str, StringUtil::toQuoteStyle(flags),
                                 scharset, true);
 }
 
 String f_htmlentities(const String& str, int flags /* = k_ENT_COMPAT */,
-                      const String& charset /* = "ISO-8859-1" */,
+                      const String& charset /* = "UTF-8" */,
                       bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
-  if (!*scharset) scharset = "UTF-8";
+  if (!*scharset) scharset = "ISO-8859-1";
   return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyleBitmask(flags),
-                                scharset, true);
+                                scharset, double_encode, true);
 }
 
 String f_htmlspecialchars_decode(const String& str,
@@ -1325,13 +1325,13 @@ String f_htmlspecialchars_decode(const String& str,
 }
 
 String f_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
-                          const String& charset /* = "ISO-8859-1" */,
+                          const String& charset /* = "UTF-8" */,
                           bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
-  if (!*scharset) scharset = "UTF-8";
+  if (!*scharset) scharset = "ISO-8859-1";
   return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyleBitmask(flags),
-                                scharset, false);
+                                scharset, double_encode, false);
 }
 
 String f_fb_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,

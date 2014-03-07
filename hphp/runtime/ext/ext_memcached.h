@@ -21,6 +21,9 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include <libmemcached/memcached.h>
+#include <map>
+#include <memory>
+#include <vector>
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

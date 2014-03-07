@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include <algorithm>
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/print.h"

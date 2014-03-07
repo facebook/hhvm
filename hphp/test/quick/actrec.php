@@ -5,7 +5,7 @@ class X {
   function __destruct() {
     var_dump(__METHOD__);
     global $e;
-    $e = debug_backtrace(true);
+    $e = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT);
   }
   function foo($ids) {
     return array($this->bar,

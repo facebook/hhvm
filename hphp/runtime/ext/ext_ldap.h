@@ -83,6 +83,10 @@ Variant f_ldap_get_values_len
 (CResRef link, CResRef result_entry, const String& attribute);
 Variant f_ldap_get_values(
   CResRef link, CResRef result_entry, const String& attribute);
+bool f_ldap_control_paged_result(CResRef link, int pagesize,
+  bool iscritical = false, const String& cookie = empty_string);
+bool f_ldap_control_paged_result_response(CResRef link, CResRef result,
+  VRefParam cookie = uninit_null(), VRefParam estimated = uninit_null());
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -18,6 +18,8 @@
 #define incl_HPHP_PROF_TRANS_DATA_H_
 
 #include <vector>
+#include <memory>
+#include <unordered_map>
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/func.h"

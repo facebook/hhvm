@@ -23,7 +23,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/http-client.h"
@@ -54,12 +54,12 @@ namespace HPHP {
 static bool read_all_post_data(Transport *transport,
                                const void *&data, int &size) {
   if (transport->hasMorePostData()) {
-    data = Util::buffer_duplicate(data, size);
+    data = buffer_duplicate(data, size);
     do {
       int delta = 0;
       const void *extra = transport->getMorePostData(delta);
       if (size + delta < VirtualHost::GetMaxPostSize()) {
-        data = Util::buffer_append(data, size, extra, delta);
+        data = buffer_append(data, size, extra, delta);
         size += delta;
       }
     } while (transport->hasMorePostData());
@@ -305,7 +305,7 @@ void HttpProtocol::PreparePostVariables(Variant& post,
           // upload.cpp:read_post.
           if (RuntimeOption::AlwaysPopulateRawPostData) {
             needDelete = true;
-            data = Util::buffer_duplicate(data, size);
+            data = buffer_duplicate(data, size);
           } else {
             invalidate = true;
           }

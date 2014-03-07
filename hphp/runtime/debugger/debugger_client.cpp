@@ -31,6 +31,7 @@
 #include "hphp/util/text-art.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/string-vsnprintf.h"
 #include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -43,6 +44,11 @@
 #else
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <algorithm>
+#include <map>
+#include <memory>
+#include <set>
+#include <vector>
 #endif
 
 using namespace HPHP::TextArt;

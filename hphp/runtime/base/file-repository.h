@@ -19,6 +19,9 @@
 
 #include <time.h>
 #include <sys/stat.h>
+#include <atomic>
+#include <set>
+#include <vector>
 #include "hphp/util/lock.h"
 
 #include "hphp/runtime/base/runtime-option.h"

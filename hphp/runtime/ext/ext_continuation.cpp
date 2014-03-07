@@ -228,7 +228,7 @@ namespace {
 void c_Continuation::call_send(Cell& v) {
   assert(SystemLib::s_continuationSendFunc ==
          getVMClass()->lookupMethod(s_send.get()));
-  g_vmContext->invokeContFunc(SystemLib::s_continuationSendFunc, this, &v);
+  g_context->invokeContFunc(SystemLib::s_continuationSendFunc, this, &v);
 }
 
 void c_Continuation::call_raise(ObjectData* e) {
@@ -239,7 +239,7 @@ void c_Continuation::call_raise(ObjectData* e) {
   Cell arg;
   arg.m_type = KindOfObject;
   arg.m_data.pobj = e;
-  g_vmContext->invokeContFunc(SystemLib::s_continuationRaiseFunc, this, &arg);
+  g_context->invokeContFunc(SystemLib::s_continuationRaiseFunc, this, &arg);
 }
 
 // Compute the bytecode offset at which execution will resume assuming

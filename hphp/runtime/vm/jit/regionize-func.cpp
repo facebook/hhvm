@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include <algorithm>
+#include <vector>
 
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -21,6 +23,7 @@
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/region-hot-trace.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace JIT {
 
@@ -213,6 +216,8 @@ static bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
 void regionizeFunc(const Func*         func,
                    JIT::TranslatorX64* tx64,
                    RegionVec&          regions) {
+  Timer _t("regionizeFunc");
+
   assert(RuntimeOption::EvalJitPGO);
   FuncId funcId = func->getFuncId();
   ProfData* profData = tx64->profData();

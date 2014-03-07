@@ -60,7 +60,7 @@ FixupMap::recordIndirectFixup(CodeAddress frontier, int dwordsPushed) {
 }
 
 namespace {
-bool isVMFrame(const VMExecutionContext* ec, const ActRec* ar) {
+bool isVMFrame(const ExecutionContext* ec, const ActRec* ar) {
   // If this assert is failing, you may have forgotten a sync point somewhere
   assert(ar);
   bool ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
@@ -73,7 +73,7 @@ bool isVMFrame(const VMExecutionContext* ec, const ActRec* ar) {
 }
 
 void
-FixupMap::fixupWork(VMExecutionContext* ec, ActRec* rbp) const {
+FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
   assert(RuntimeOption::EvalJit);
 
   TRACE(1, "fixup(begin):\n");
@@ -110,7 +110,7 @@ FixupMap::fixupWork(VMExecutionContext* ec, ActRec* rbp) const {
 }
 
 void
-FixupMap::fixupWorkSimulated(VMExecutionContext* ec) const {
+FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
   TRACE(1, "fixup(begin):\n");
 
   auto isVMFrame = [] (ActRec* ar, const vixl::Simulator* sim) {
@@ -120,8 +120,8 @@ FixupMap::fixupWorkSimulated(VMExecutionContext* ec) const {
       uintptr_t(ar) - s_stackLimit >= s_stackSize &&
       !sim->is_on_stack(ar);
     assert(!ret ||
-           (ar >= g_vmContext->m_stack.getStackLowAddress() &&
-            ar < g_vmContext->m_stack.getStackHighAddress()) ||
+           (ar >= g_context->m_stack.getStackLowAddress() &&
+            ar < g_context->m_stack.getStackHighAddress()) ||
            ar->inGenerator());
     return ret;
   };
@@ -169,7 +169,7 @@ FixupMap::fixupWorkSimulated(VMExecutionContext* ec) const {
 }
 
 void
-FixupMap::fixup(VMExecutionContext* ec) const {
+FixupMap::fixup(ExecutionContext* ec) const {
   if (RuntimeOption::EvalSimulateARM) {
     // Walking the C++ stack doesn't work in simulation mode. Fortunately, the
     // execution context has a stack of simulators, which we consult instead.

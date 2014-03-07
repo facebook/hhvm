@@ -107,8 +107,14 @@ trait StrictIterable {
   public function toVector() {
     return new Vector($this);
   }
+  public function toImmVector() {
+    return new ImmVector($this);
+  }
   public function toSet() {
     return new Set($this);
+  }
+  public function toImmSet() {
+    return new ImmSet($this);
   }
   public function values() {
     return new Vector($this);
@@ -167,11 +173,20 @@ trait StrictKeyedIterable {
   public function toVector() {
     return new Vector($this);
   }
+  public function toImmVector() {
+    return new ImmVector($this);
+  }
   public function toMap() {
     return new Map($this);
   }
+  public function toImmMap() {
+    return new ImmMap($this);
+  }
   public function toSet() {
     return new Set($this);
+  }
+  public function toImmSet() {
+    return new ImmSet($this);
   }
   public function lazy() {
     return new LazyKeyedIterableView($this);
@@ -244,8 +259,14 @@ trait LazyIterable {
   public function toVector() {
     return new Vector($this);
   }
+  public function toImmVector() {
+    return new ImmVector($this);
+  }
   public function toSet() {
     return new Set($this);
+  }
+  public function toImmSet() {
+    return new ImmSet($this);
   }
   public function lazy() {
     return $this;
@@ -289,11 +310,20 @@ trait LazyKeyedIterable {
   public function toVector() {
     return new Vector($this);
   }
+  public function toImmVector() {
+    return new ImmVector($this);
+  }
   public function toMap() {
     return new Map($this);
   }
+  public function toImmMap() {
+    return new ImmMap($this);
+  }
   public function toSet() {
     return new Set($this);
+  }
+  public function toImmSet() {
+    return new ImmSet($this);
   }
   public function lazy() {
     return $this;
@@ -844,8 +874,14 @@ class LazyIterableView implements \HH\Iterable {
   public function toVector() {
     return $this->iterable->toVector();
   }
+  public function toImmVector() {
+    return $this->iterable->toImmVector();
+  }
   public function toSet() {
     return $this->iterable->toSet();
+  }
+  public function toImmSet() {
+    return $this->iterable->toImmSet();
   }
   public function lazy() {
     return $this;
@@ -893,11 +929,20 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
   public function toVector() {
     return $this->iterable->toVector();
   }
+  public function toImmVector() {
+    return $this->iterable->toImmVector();
+  }
   public function toMap() {
     return $this->iterable->toMap();
   }
+  public function toImmMap() {
+    return $this->iterable->toImmMap();
+  }
   public function toSet() {
     return $this->iterable->toSet();
+  }
+  public function toImmSet() {
+    return $this->iterable->toImmSet();
   }
   public function lazy() {
     return $this;

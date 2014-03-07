@@ -187,15 +187,13 @@ private:
                                 bool& isResolved);
 
   template<class Loc1, class Loc2, class JmpFn>
-  void emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc, JmpFn doJcc,
-                    OptType prevType = folly::none );
+  void emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc, JmpFn doJcc);
 
   template<class DataLoc, class JmpFn>
   void emitSpecializedTypeTest(Type type, DataLoc data, JmpFn doJcc);
 
   template<class Loc>
-  void emitTypeCheck(Type type, Loc typeSrc, Loc dataSrc, Block* taken,
-                     OptType prevType = folly::none);
+  void emitTypeCheck(Type type, Loc typeSrc, Loc dataSrc, Block* taken);
   template<class Loc>
   void emitTypeGuard(Type type, Loc typeLoc, Loc dataLoc);
 
@@ -253,8 +251,7 @@ private:
 
   template<class Loc>
   void emitSideExitGuard(Type type, Loc typeLoc,
-                         Loc dataLoc, Offset taken,
-                         OptType prevType = folly::none);
+                         Loc dataLoc, Offset taken);
   void emitReqBindJcc(ConditionCode cc, const ReqBindJccData*);
 
   void emitCompare(IRInstruction* inst);

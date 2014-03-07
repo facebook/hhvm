@@ -1,0 +1,11 @@
+HipHop Notice: Undefined index: z in %s/slow/hhbbc/array_034.php on line 10
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+array(1) {
+  ["z"]=>
+  array(0) {
+  }
+}

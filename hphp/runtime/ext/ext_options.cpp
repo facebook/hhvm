@@ -20,6 +20,8 @@
 #include <sys/resource.h>
 #include <sys/utsname.h>
 #include <pwd.h>
+#include <algorithm>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 
@@ -37,22 +39,22 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/process.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #define ZEND_VERSION "2.4.99"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class OptionData : public RequestEventHandler {
-public:
-  virtual void requestInit() {
+struct OptionData final : RequestEventHandler {
+  void requestInit() override {
     assertActive = RuntimeOption::AssertActive ? 1 : 0;
     assertWarning = RuntimeOption::AssertWarning ? 1 : 0;
     assertBail = 0;
     assertQuietEval = false;
   }
 
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     assertCallback.unset();
   }
 
@@ -104,7 +106,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     if (s_option_data->assertQuietEval) f_error_reporting(oldErrorLevel);
   };
 
-  auto const unit = g_vmContext->compileEvalString(prefixedCode.get());
+  auto const unit = g_context->compileEvalString(prefixedCode.get());
   if (unit == nullptr) {
     raise_recoverable_error("Syntax error in assert()");
     // Failure to compile the eval string doesn't count as an
@@ -114,7 +116,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
 
   auto const func = unit->getMain();
   TypedValue retVal;
-  g_vmContext->invokeFunc(
+  g_context->invokeFunc(
     &retVal,
     func,
     init_null_variant,
@@ -124,7 +126,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     // builtin, but we deviate by having no shared env here.
     nullptr /* VarEnv */,
     nullptr,
-    VMExecutionContext::InvokePseudoMain
+    ExecutionContext::InvokePseudoMain
   );
 
   return tvAsVariant(&retVal);
@@ -234,7 +236,7 @@ String f_set_include_path(const String& new_include_path) {
 Array f_get_included_files() {
   Array included_files = Array::Create();
   int idx = 0;
-  for (auto& file: g_vmContext->m_evaledFilesOrder) {
+  for (auto& file: g_context->m_evaledFilesOrder) {
     included_files.set(idx++, file->getFileName());
   }
   return included_files;
@@ -727,7 +729,7 @@ bool f_clock_settime(int clk_id, int64_t sec, int64_t nsec) {
 int64_t f_cpu_get_count() { return Process::GetCPUCount();}
 String f_cpu_get_model() { return Process::GetCPUModel();}
 
-String f_ini_get(const String& varname) {
+Variant f_ini_get(const String& varname) {
   String value = empty_string;
   IniSetting::Get(varname, value);
   return value;
@@ -740,27 +742,36 @@ Array f_ini_get_all(const String& extension, bool detailed) {
 void f_ini_restore(const String& varname) {
 }
 
-String f_ini_set(const String& varname, const String& newvalue) {
-  String oldvalue = f_ini_get(varname);
-  IniSetting::SetUser(varname, newvalue);
+Variant f_ini_set(const String& varname, const Variant& newvalue) {
+  auto oldvalue = f_ini_get(varname);
+  auto ret = IniSetting::SetUser(varname, newvalue);
+  if (!ret) {
+    return false;
+  }
   return oldvalue;
 }
 
 int64_t f_memory_get_allocation() {
   auto const& stats = MM().getStats();
   int64_t ret = stats.totalAlloc;
+  assert(ret >= 0);
   return ret;
 }
 
 int64_t f_memory_get_peak_usage(bool real_usage /* = false */) {
   auto const& stats = MM().getStats();
-  return real_usage ? stats.peakUsage : stats.peakAlloc;
+  int64_t ret = real_usage ? stats.peakUsage : stats.peakAlloc;
+  assert(ret >= 0);
+  return ret;
 }
 
 int64_t f_memory_get_usage(bool real_usage /* = false */) {
   auto const& stats = MM().getStats();
   int64_t ret = real_usage ? stats.usage : stats.alloc;
-  // TODO(#3137377)
+  // Since we don't always alloc and dealloc a shared structure from the same
+  // thread it is possible that this can go negative when we are tracking
+  // jemalloc stats.
+  assert((use_jemalloc && real_usage) || ret >= 0);
   return std::max<int64_t>(ret, 0);
 }
 

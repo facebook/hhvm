@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
+#include <vector>
 
 #include "folly/dynamic.h"
 #include "folly/json.h"
@@ -254,7 +255,7 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
       }
     }
 
-    Array variables = g_vmContext->getLocalDefinedVariables(0);
+    Array variables = g_context->getLocalDefinedVariables(0);
     variables += CmdVariable::GetGlobalVariables();
     std::vector<std::string> &vars =
       m_acLiveLists[DebuggerClient::AutoCompleteVariables];

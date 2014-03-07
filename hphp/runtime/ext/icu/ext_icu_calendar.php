@@ -630,7 +630,7 @@ function intlcal_clear(IntlCalendar $cal,
  */
 function intlcal_create_instance(mixed $timeZone = NULL,
                                  string $locale = ""): IntlCalendar {
-  return IntlCalendar::createInstance($timezone, $locale);
+  return IntlCalendar::createInstance($timeZone, $locale);
 }
 
 /**

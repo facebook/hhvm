@@ -18,13 +18,13 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 FilesMatch::FilesMatch(Hdf vh) {
-  m_pattern = Util::format_pattern(vh["pattern"].get(""), true);
+  m_pattern = format_pattern(vh["pattern"].get(""), true);
   vh["headers"].get(m_headers);
 }
 

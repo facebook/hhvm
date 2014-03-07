@@ -155,7 +155,7 @@ void CodeCoverage::Report(const std::string &filename) {
 
 void CodeCoverage::Reset() {
   m_hits.clear();
-  g_vmContext->resetCoverageCounters();
+  g_context->resetCoverageCounters();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

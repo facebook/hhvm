@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/util/atomic-vector.h"
-#include "hphp/util/util.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/strings.h"
@@ -237,20 +236,11 @@ void* Func::allocFuncMem(
 Func::Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2,
            Offset base, Offset past, const StringData* name, Attr attrs,
            bool top, const StringData* docComment, int numParams)
-  : m_unit(&unit)
-  , m_cls(nullptr)
-  , m_baseCls(nullptr)
-  , m_name(name)
-  , m_namedEntity(nullptr)
-  , m_refBitVal(0)
-  , m_cachedFunc(RDS::kInvalidHandle)
-  , m_maxStackCells(0)
-  , m_numParams(0)
+  : m_name(name)
+  , m_unit(&unit)
   , m_attrs(attrs)
-  , m_funcId(InvalidFuncId)
-  , m_profCounter(0)
-  , m_hasPrivateAncestor(false)
 {
+  m_hasPrivateAncestor = false;
   m_shared = new SharedData(preClass, preClass ? -1 : id,
                             base, past, line1, line2,
                             top, docComment);
@@ -671,7 +661,7 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
           // that access of undefined class constants can cause the eval() to
           // fatal. Zend lets such fatals propagate, so don't bother catching
           // exceptions here.
-          CVarRef v = g_vmContext->getEvaledArg(
+          CVarRef v = g_context->getEvaledArg(
             fpi.phpCode(),
             cls() ? cls()->nameRef() : nameRef()
           );

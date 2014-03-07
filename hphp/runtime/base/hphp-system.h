@@ -32,7 +32,6 @@
 #include "hphp/runtime/base/smart-object.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/util/util.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/externals.h"

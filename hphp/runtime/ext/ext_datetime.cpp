@@ -22,10 +22,13 @@
 
 namespace HPHP {
 
-IMPLEMENT_THREAD_LOCAL(double, s_date_default_latitude);
-IMPLEMENT_THREAD_LOCAL(double, s_date_default_longitude);
-IMPLEMENT_THREAD_LOCAL(double, s_date_default_sunset_zenith);
-IMPLEMENT_THREAD_LOCAL(double, s_date_default_sunrise_zenith);
+struct DateGlobals {
+  double default_latitude;
+  double default_longitude;
+  double sunset_zenith;
+  double sunrise_zenith;
+};
+IMPLEMENT_THREAD_LOCAL(DateGlobals, s_date_globals);
 
 static class DateExtension : public Extension {
  public:
@@ -35,28 +38,29 @@ static class DateExtension : public Extension {
       this, IniSetting::PHP_INI_ALL,
       "date.timezone",
       g_context->getDefaultTimeZone().c_str(),
-      dateTimezoneIniUpdate, dateTimezoneIniGet,
-      nullptr
+      IniSetting::SetAndGet<std::string>(
+        dateTimezoneIniUpdate, dateTimezoneIniGet
+      )
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.default_latitude", "31.7667",
-      s_date_default_latitude.get()
+      &s_date_globals->default_latitude
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.default_longitude", "35.2333",
-      s_date_default_longitude.get()
+      &s_date_globals->default_longitude
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.sunset_zenith", "90.583333",
-      s_date_default_sunset_zenith.get()
+      &s_date_globals->sunset_zenith
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.sunrise_zenith", "90.583333",
-      s_date_default_sunrise_zenith.get()
+      &s_date_globals->sunrise_zenith
     );
   }
 
@@ -68,15 +72,14 @@ static class DateExtension : public Extension {
   }
 
  private:
-  static bool dateTimezoneIniUpdate(const HPHP::String& value, void *p) {
-    assert(p == nullptr);
+  static bool dateTimezoneIniUpdate(const std::string& value) {
     if (value.empty()) {
       return false;
     }
     return f_date_default_timezone_set(value);
   }
 
-  static std::string dateTimezoneIniGet(void* p) {
+  static std::string dateTimezoneIniGet() {
     auto ret = g_context->getTimeZone();
     if (ret.isNull()) {
       return "";
@@ -690,19 +693,19 @@ Object f_date_sub(CObjRef datetime, CObjRef interval) {
 // sun
 
 double get_date_default_latitude() {
-  return *s_date_default_latitude;
+  return s_date_globals->default_latitude;
 }
 
 double get_date_default_longitude() {
-  return *s_date_default_longitude;
+  return s_date_globals->default_longitude;
 }
 
 double get_date_default_sunset_zenith() {
-  return *s_date_default_sunset_zenith;
+  return s_date_globals->sunset_zenith;
 }
 
 double get_date_default_sunrise_zenith() {
-  return *s_date_default_sunrise_zenith;
+  return s_date_globals->sunrise_zenith;
 }
 
 double get_date_default_gmt_offset() {
@@ -715,7 +718,7 @@ Array f_date_sun_info(int64_t ts, double latitude, double longitude) {
 
 Variant f_date_sunrise(int64_t timestamp,
                        int format,
-                       double latitude ,
+                       double latitude,
                        double longitude,
                        double zenith,
                        double gmt_offset) {

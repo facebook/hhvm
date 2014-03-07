@@ -73,7 +73,7 @@ public:
     int32_t len;
     const char *e = m_enum->next(&len, error);
     if (U_FAILURE(error)) {
-      s_intl_error->set(error, "Error fetching next iteration element");
+      s_intl_error->setError(error, "Error fetching next iteration element");
       m_current = uninit_null();
     } else {
       m_current = String(e, len, CopyString);
@@ -86,7 +86,7 @@ public:
     UErrorCode error = U_ZERO_ERROR;
     m_enum->reset(error);
     if (U_FAILURE(error)) {
-      s_intl_error->set(error, "Error resetting enumeration");
+      s_intl_error->setError(error, "Error resetting enumeration");
       m_current = uninit_null();
       return false;
     }

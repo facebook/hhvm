@@ -178,6 +178,10 @@ namespace Stats {
   STAT(Switch_Generic) \
   STAT(Switch_Integer) \
   STAT(Switch_String) \
+  /* ARM simulator */ \
+  STAT(vixl_SimulatedInstr) \
+  STAT(vixl_SimulatedLoad) \
+  STAT(vixl_SimulatedStore) \
 
 enum StatCounter {
 #define STAT(name) \

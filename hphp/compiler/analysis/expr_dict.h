@@ -18,6 +18,8 @@
 #define incl_HPHP_EXPR_DICT_H_
 
 #include "hphp/compiler/analysis/dictionary.h"
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

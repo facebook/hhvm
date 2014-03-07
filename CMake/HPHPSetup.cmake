@@ -8,10 +8,14 @@ CHECK_CXX_SOURCE_COMPILES("
 #endif
 int main() { return 0; }" IS_AARCH64)
 
-if (APPLE OR IS_AARCH64)
+if (APPLE)
 	set(HHVM_ANCHOR_SYMS
             -Wl,-u,_register_libevent_server
             -Wl,-all_load hphp_runtime_static)
+elseif (IS_AARCH64)
+	set(HHVM_ANCHOR_SYMS
+            -Wl,-uregister_libevent_server
+            -Wl,--whole-archive hphp_runtime_static -Wl,--no-whole-archive)
 else()
 	set(ENABLE_FASTCGI 1)
 	set(HHVM_ANCHOR_SYMS

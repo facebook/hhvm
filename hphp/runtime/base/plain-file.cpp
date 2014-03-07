@@ -25,11 +25,18 @@
 
 namespace HPHP {
 
+const StaticString s_plainfile("plainfile");
+const StaticString s_stdio("STDIO");
+
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-PlainFile::PlainFile(FILE *stream, bool nonblocking)
-  : File(nonblocking), m_stream(stream), m_buffer(nullptr) {
+PlainFile::PlainFile(FILE *stream, bool nonblocking,
+                     const String& wrapper_type, const String& stream_type)
+  : File(nonblocking,
+         wrapper_type.isNull() ? s_plainfile : wrapper_type,
+         stream_type.isNull() ? s_stdio : stream_type),
+    m_stream(stream), m_buffer(nullptr) {
   if (stream) {
     m_fd = fileno(stream);
     m_buffer = (char *)malloc(BUFSIZ);
@@ -39,8 +46,12 @@ PlainFile::PlainFile(FILE *stream, bool nonblocking)
   m_isLocal = true;
 }
 
-PlainFile::PlainFile(int fd, bool nonblocking)
-  : File(nonblocking), m_stream(nullptr), m_buffer(nullptr) {
+PlainFile::PlainFile(int fd, bool nonblocking,
+                     const String& wrapper_type, const String& stream_type)
+  : File(nonblocking,
+         wrapper_type.isNull() ? s_plainfile : wrapper_type,
+         stream_type.isNull() ? s_stdio : stream_type),
+    m_stream(nullptr), m_buffer(nullptr) {
   m_fd = fd;
 }
 

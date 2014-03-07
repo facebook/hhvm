@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/param.h>
+#include <vector>
 
 #include "folly/MapUtil.h"
 
@@ -27,6 +28,8 @@
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/hooks.h"
+#include "hphp/util/text-util.h"
+#include "hphp/util/file-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -507,9 +510,9 @@ StatCache::NodePtr StatCache::getNode(const std::string& path, bool follow) {
 }
 
 bool StatCache::mergePath(const std::string& path, bool follow) {
-  std::string canonicalPath = Util::canonicalize(path);
+  std::string canonicalPath = FileUtil::canonicalize(path);
   std::vector<std::string> pvec;
-  Util::split('/', canonicalPath.c_str(), pvec);
+  split('/', canonicalPath.c_str(), pvec);
   assert((pvec[0].size() == 0)); // path should be absolute.
   // Lazily initialize so that if StatCache never gets used, no kernel
   // resources are consumed.

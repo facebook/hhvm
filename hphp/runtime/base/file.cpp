@@ -26,15 +26,16 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
-#include "hphp/util/util.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "folly/String.h"
+#include "hphp/util/file-util.h"
 
 #include <sys/file.h>
+#include <algorithm>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,13 +49,14 @@ const int File::USE_INCLUDE_PATH = 1;
 
 String File::TranslatePathKeepRelative(const String& filename) {
   String canonicalized(
-    Util::canonicalize(
+    FileUtil::canonicalize(
       filename.data(),
       strlen(filename.data()) // canonicalize asserts that we don't have nulls
     ),
     AttachString);
-  if (RuntimeOption::SafeFileAccess) {
-    auto const& allowedDirectories = VirtualHost::GetAllowedDirectories();
+  if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess()) {
+    auto const& allowedDirectories = ThreadInfo::s_threadInfo->
+      m_reqInjectionData.getAllowedDirectories();
     auto it = std::upper_bound(allowedDirectories.begin(),
                                allowedDirectories.end(), canonicalized,
                                [](const String& val, const std::string& dir) {
@@ -99,7 +101,7 @@ String File::TranslatePath(const String& filename) {
 
 String File::TranslatePathWithFileCache(const String& filename) {
   String canonicalized(
-    Util::canonicalize(
+    FileUtil::canonicalize(
       filename.data(),
       strlen(filename.data()) // canonicalize asserts that we don't have nulls
     ),
@@ -152,9 +154,10 @@ Variant File::Open(const String& filename, const String& mode,
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-File::File(bool nonblocking)
+File::File(bool nonblocking, const String& wrapper, const String& stream_type)
   : m_isLocal(false), m_fd(-1), m_closed(false), m_nonblocking(nonblocking),
     m_writepos(0), m_readpos(0), m_position(0), m_eof(false),
+    m_wrapperType(wrapper.get()), m_streamType(stream_type.get()),
     m_buffer(nullptr) {
 }
 
@@ -172,6 +175,8 @@ void File::sweep() {
   using std::string;
   m_name.~string();
   m_mode.~string();
+  m_wrapperType = nullptr;
+  m_streamType = nullptr;
 }
 
 void File::closeImpl() {
@@ -391,7 +396,7 @@ const StaticString
 
 Array File::getMetaData() {
   ArrayInit ret(10);
-  ret.set(s_wrapper_type, o_getClassName());
+  ret.set(s_wrapper_type, getWrapperType());
   ret.set(s_stream_type,  getStreamType());
   ret.set(s_mode,         String(m_mode));
   ret.set(s_unread_bytes, 0);
@@ -402,6 +407,13 @@ Array File::getMetaData() {
   ret.set(s_eof,          eof());
   ret.set(s_wrapper_data, getWrapperMetaData());
   return ret.create();
+}
+
+String File::getWrapperType() const {
+  if ((!m_wrapperType) || m_wrapperType->empty()) {
+    return o_getClassName();
+  }
+  return m_wrapperType;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

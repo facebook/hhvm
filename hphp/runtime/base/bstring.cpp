@@ -15,8 +15,6 @@
 */
 
 #include "hphp/runtime/base/bstring.h"
-#include "hphp/util/util.h"
-
 #include "folly/Portability.h"
 
 namespace HPHP {

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/expression/constant_expression.h"
+#include <vector>
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
@@ -23,7 +24,7 @@
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/util/hash.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/parser/hphp.tab.hpp"
@@ -58,7 +59,7 @@ ExpressionPtr ConstantExpression::clone() {
 
 bool ConstantExpression::isScalar() const {
   if (m_name == "INF" || m_name == "NAN") return true;
-  string lower = Util::toLower(m_name);
+  string lower = toLower(m_name);
   return lower == "true" || lower == "false" || lower == "null";
 }
 
@@ -67,12 +68,12 @@ bool ConstantExpression::isLiteralNull() const {
 }
 
 bool ConstantExpression::isNull() const {
-  string lower = Util::toLower(m_name);
+  string lower = toLower(m_name);
   return (lower == "null");
 }
 
 bool ConstantExpression::isBoolean() const {
-  string lower = Util::toLower(m_name);
+  string lower = toLower(m_name);
   return (lower == "true" || lower == "false");
 }
 
@@ -81,7 +82,7 @@ bool ConstantExpression::isDouble() const {
 }
 
 bool ConstantExpression::getBooleanValue() const {
-  string lower = Util::toLower(m_name);
+  string lower = toLower(m_name);
   assert(lower == "true" || lower == "false");
   return lower == "true";
 }
@@ -101,7 +102,7 @@ bool ConstantExpression::getScalarValue(Variant &value) {
 }
 
 unsigned ConstantExpression::getCanonHash() const {
-  int64_t val = hash_string(Util::toLower(m_name).c_str(), m_name.size());
+  int64_t val = hash_string(toLower(m_name).c_str(), m_name.size());
   return ~unsigned(val) ^ unsigned(val >> 32);
 }
 
@@ -217,7 +218,7 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     return Type::Double;
   }
 
-  string lower = Util::toLower(m_name);
+  string lower = toLower(m_name);
   TypePtr actualType;
   ConstructPtr self = shared_from_this();
   if (lower == "true" || lower == "false") {

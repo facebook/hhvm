@@ -1,0 +1,4 @@
+string(6) "&nbsp;"
+string(24) "&lt;foo&gt; &amp; &nbsp;"
+string(10) "&amp;nbsp;"
+string(28) "&lt;foo&gt; &amp; &amp;nbsp;"

@@ -26,6 +26,7 @@
 #include <vector>
 #include <stack>
 #include <list>
+#include <map>
 
 #include "hphp/util/thread-local.h"
 #include "hphp/util/mutex.h"
@@ -267,10 +268,14 @@ public:
   static const ssize_t LastFlag             = DebuggerSignalFlag;
 
   RequestInjectionData()
-    : cflagsPtr(nullptr),
-      m_timeoutSeconds(-1), m_hasTimer(false), m_timerActive(false),
-      m_debugger(false), m_debuggerIntr(false), m_coverage(false),
-      m_jit(false) {
+      : cflagsPtr(nullptr),
+        m_timeoutSeconds(0), // no timeout by default
+        m_hasTimer(false),
+        m_timerActive(false),
+        m_debugger(false),
+        m_debuggerIntr(false),
+        m_coverage(false),
+        m_jit(false) {
     threadInit();
   }
 
@@ -300,15 +305,17 @@ public:
   bool m_coverage;       // is coverage being collected
   bool m_jit;            // is the jit enabled
 
-  // Things corresponding to zend INI settings
-  std::string m_argSeparatorOutput;
+  // Things corresponding to user setable INI settings
   std::string m_maxMemory;
+  std::string m_argSeparatorOutput;
   std::string m_defaultCharset;
-  int64_t m_socketDefaultTimeout;
+  std::vector<std::string> m_include_paths;
   int64_t m_errorReportingLevel;
   bool m_logErrors;
   std::string m_errorLog;
-  std::vector<std::string> m_include_paths;
+  int64_t m_socketDefaultTimeout;
+  std::vector<std::string> m_allowedDirectories;
+  bool m_safeFileAccess;
 
  public:
   int getTimeout() const { return m_timeoutSeconds; }
@@ -337,10 +344,17 @@ public:
   }
   void updateJit();
 
-  int64_t getSocketDefaultTimeout() { return m_socketDefaultTimeout; }
-  int64_t getErrorReportingLevel() { return m_errorReportingLevel; }
+
+  // getters for user setable INI settings
   std::vector<std::string> getIncludePaths() { return m_include_paths; }
   std::string getDefaultIncludePath();
+  int64_t getErrorReportingLevel() { return m_errorReportingLevel; }
+  void setErrorReportingLevel(int level) { m_errorReportingLevel = level; }
+  int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
+  std::vector<std::string> getAllowedDirectories() const {
+    return m_allowedDirectories;
+  }
+  bool hasSafeFileAccess() const { return m_safeFileAccess; }
 
   std::stack<void *> interrupts;   // CmdInterrupts this thread's handling
 

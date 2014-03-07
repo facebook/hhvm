@@ -93,8 +93,8 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   }
 
   // Save VM regs
-  a.     Str   (rVmFp, rGContextReg[offsetof(VMExecutionContext, m_fp)]);
-  a.     Str   (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
+  a.     Str   (rVmFp, rGContextReg[offsetof(ExecutionContext, m_fp)]);
+  a.     Str   (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
                                     Stack::topOfStackOffset()]);
 
   if (persist) {
@@ -146,9 +146,9 @@ int32_t emitNativeImpl(CodeBlock& cb, const Func* func) {
   a.  Mov  (argReg(0), rVmFp);
   if (tx64->fixupMap().eagerRecord(func)) {
     a.Mov  (rAsm, func->getEntry());
-    a.Str  (rAsm, rGContextReg[offsetof(VMExecutionContext, m_pc)]);
-    a.Str  (rVmFp, rGContextReg[offsetof(VMExecutionContext, m_fp)]);
-    a.Str  (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
+    a.Str  (rAsm, rGContextReg[offsetof(ExecutionContext, m_pc)]);
+    a.Str  (rVmFp, rGContextReg[offsetof(ExecutionContext, m_fp)]);
+    a.Str  (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
                                 Stack::topOfStackOffset()]);
   }
   auto syncPoint = emitCall(a, CppCall(builtinFuncPtr));

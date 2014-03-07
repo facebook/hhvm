@@ -15,6 +15,9 @@
 */
 
 #include "hphp/compiler/analysis/alias_manager.h"
+#include <map>
+#include <utility>
+#include <vector>
 
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -68,7 +71,7 @@
 
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/parser/location.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 
 #define spc(T,p) static_pointer_cast<T>(p)
 #define dpc(T,p) dynamic_pointer_cast<T>(p)
@@ -2638,7 +2641,7 @@ private:
         // This could be a primitive type, so don't assert anything
         return ExpressionPtr();
       }
-      TypePtr o(Type::CreateObjectType(Util::toLower(s)));
+      TypePtr o(Type::CreateObjectType(toLower(s)));
 
       // don't do specific type assertions for unknown classes
       ClassScopePtr cscope(o->getClass(m_ar, sv->getScope()));

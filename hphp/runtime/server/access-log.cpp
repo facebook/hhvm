@@ -34,7 +34,6 @@
 #include "hphp/util/atomic.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/timer.h"
-#include "hphp/util/util.h"
 #include "hphp/runtime/base/hardware-counter.h"
 
 using std::endl;
@@ -329,7 +328,13 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
       const char *method = nullptr;
       switch (transport->getMethod()) {
       case Transport::Method::GET: method = "GET"; break;
-      case Transport::Method::POST: method = "POST"; break;
+      case Transport::Method::POST:
+        if (transport->getExtendedMethod() == nullptr) {
+          method = "POST";
+        } else {
+          method = transport->getExtendedMethod();
+        }
+        break;
       case Transport::Method::HEAD: method = "HEAD"; break;
       default: break;
       }

@@ -20,6 +20,7 @@
 #include <utility>
 #include <boost/container/flat_map.hpp>
 #include <boost/range/iterator_range.hpp>
+#include <vector>
 
 #include "folly/Format.h"
 

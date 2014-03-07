@@ -16,7 +16,7 @@
 
 #include "hphp/compiler/construct.h"
 #include "hphp/compiler/parser/parser.h"
-#include "hphp/util/util.h"
+#include "hphp/util/string-vsnprintf.h"
 
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"

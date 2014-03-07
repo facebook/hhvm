@@ -686,7 +686,7 @@ void getInputs(SrcKey startSk, NormalizedInstruction& inst, InputInfos& infos,
 void getInputsImpl(SrcKey startSk, NormalizedInstruction* inst,
                    int& currentStackOffset, InputInfos& inputs,
                    const Func* func, const LocalTypeFn& localType);
-bool outputIsPredicted(SrcKey startSk, NormalizedInstruction& inst);
+bool outputIsPredicted(NormalizedInstruction& inst);
 bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller);
 int locPhysicalOffset(Location l, const Func* f = nullptr);

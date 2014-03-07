@@ -22,57 +22,10 @@
 #include <unicode/utypes.h>
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
+#include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
-
-struct intl_error {
-  UErrorCode code;
-  String custom_error_message;
-  intl_error() : code(U_ZERO_ERROR) {}
-  void clear() {
-    code = U_ZERO_ERROR;
-    custom_error_message.reset();
-  }
-};
-
-/* Request global error set by all Intl classes
- * and accessed via intl_get_error_code|message()
- */
-class IntlGlobalError : public RequestEventHandler {
-public:
-  intl_error m_error;
-  IntlGlobalError() {
-    m_error.clear();
-  }
-  void requestInit() override {
-    m_error.clear();
-  }
-  void requestShutdown() override {
-    m_error.clear();
-  }
-
-  void set(UErrorCode code, const char *format, va_list args) {
-    char message[1024];
-    int message_len = vsnprintf(message, sizeof(message), format, args);
-    m_error.code = code;
-    m_error.custom_error_message = String(message, message_len, CopyString);
-  }
-
-  void set(UErrorCode code, const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    set(code, format, args);
-    va_end(args);
-  }
-
-  void clear() { m_error.clear(); }
-
-  UErrorCode getErrorCode() const { return m_error.code; }
-  const String getErrorMessage() const { return m_error.custom_error_message; }
-};
-
-DECLARE_EXTERN_REQUEST_LOCAL(IntlGlobalError, s_intl_error);
 
 namespace Intl {
 
@@ -80,39 +33,8 @@ namespace Intl {
  */
 class IntlError {
  public:
-  void setError(intl_error& err) {
-    s_intl_error->m_error = err;
-    m_errorCode = err.code;
-    if (err.custom_error_message.empty()) {
-      m_errorMessage.clear();
-    } else {
-      m_errorMessage = err.custom_error_message->toCppString();
-    }
-  }
-
-  void setError(UErrorCode code, const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    s_intl_error->set(code, format, args);
-    va_end(args);
-    m_errorCode = code;
-    if (s_intl_error->m_error.custom_error_message.empty()) {
-      m_errorMessage.clear();
-    } else {
-      m_errorMessage =
-        s_intl_error->m_error.custom_error_message->toCppString();
-    }
-  }
-
-  void setError(UErrorCode code) {
-    const char *errorMsg = u_errorName(code);
-    setError(code, "%s", errorMsg);
-  }
-
-  void clearError() {
-    m_errorCode = U_ZERO_ERROR;
-    m_errorMessage.clear();
-  }
+  void setError(UErrorCode code, const char *format = nullptr, ...);
+  void clearError(bool clearGlobalError = true);
 
   void throwException(const char *format, ...) {
     va_list args;
@@ -125,7 +47,10 @@ class IntlError {
 
   UErrorCode getErrorCode() const { return m_errorCode; }
 
-  String getErrorMessage() const {
+  String getErrorMessage(bool appendCode = true) const {
+    if (!appendCode) {
+      return m_errorMessage;
+    }
     auto errorName = u_errorName(m_errorCode);
     if (m_errorMessage.empty()) {
       return errorName;
@@ -134,13 +59,8 @@ class IntlError {
   }
 
  private:
-   /* NativeData instances can't contain sweepable objects
-    * Map around s_intl_error's use of String
-    * TODO: Finish intl extension and unify s_intl_error back
-    * onto std::string -sgolemon(2014-02-20)
-    */
   std::string m_errorMessage;
-  UErrorCode m_errorCode;
+  UErrorCode m_errorCode{U_ZERO_ERROR};
 };
 
 template<class T>
@@ -171,21 +91,16 @@ bool SetDefaultLocale(const String& locale);
 double VariantToMilliseconds(CVarRef arg);
 
 // Common encoding conversions UTF8<->UTF16
-String u16(const char *u8, int32_t u8_len, UErrorCode &error);
-inline String u16(const String u8, UErrorCode &error) {
-  return u16(u8.c_str(), u8.size(), error);
+icu::UnicodeString u16(const char* u8, int32_t u8_len, UErrorCode &error,
+                       UChar32 subst = 0);
+inline icu::UnicodeString u16(const String& u8, UErrorCode& error,
+                       UChar32 subst = 0) {
+  return u16(u8.c_str(), u8.size(), error, subst);
 }
 String u8(const UChar *u16, int32_t u16_len, UErrorCode &error);
-inline String u8(const String &u16, UErrorCode &error) {
-  return u8((const UChar *)u16.c_str(), u16.size() / sizeof(UChar), error);
-}
-inline String u8(const icu::UnicodeString& u16, UErrorCode &error) {
+inline String u8(const icu::UnicodeString& u16, UErrorCode& error) {
   return u8(u16.getBuffer(), u16.length(), error);
 }
-
-bool ustring_from_char(icu::UnicodeString& ret,
-                       const String& str,
-                       UErrorCode &error);
 
 class IntlExtension : public Extension {
  public:
@@ -203,6 +118,13 @@ class IntlExtension : public Extension {
     initIterator();
     initDateFormatter();
     initCalendar();
+    initGrapheme();
+    initBreakIterator(); // Must come after initIterator()
+    initUConverter();
+    initUcsDet();
+    initUSpoof();
+    initMisc();
+    initCollator();
   }
 
   void threadInit() override {
@@ -218,11 +140,28 @@ class IntlExtension : public Extension {
   void initIterator();
   void initDateFormatter();
   void initCalendar();
+  void initGrapheme();
+  void initBreakIterator();
+  void initUConverter();
+  void initUcsDet();
+  void initUSpoof();
+  void initMisc();
+  void initCollator();
 };
 
 } // namespace Intl
 
-extern Intl::IntlExtension s_intl_extension;
+/* Request global error set by all Intl classes
+ * and accessed via intl_get_error_code|message()
+ */
+struct IntlGlobalError final : RequestEventHandler, Intl::IntlError {
+  IntlGlobalError() {}
+  void requestInit() override {}
+  void requestShutdown() override {
+    clearError();
+  }
+};
+DECLARE_EXTERN_REQUEST_LOCAL(IntlGlobalError, s_intl_error);
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

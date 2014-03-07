@@ -1,0 +1,14 @@
+bool(true)
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      object(stdClass)#1 (1) {
+        ["foo"]=>
+        int(2)
+      }
+    }
+  }
+}

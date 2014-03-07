@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_domdocument.h"
+#include <map>
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_string.h"
@@ -132,10 +133,10 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
  * error handler callbacks.
  */
 
-void php_libxml_ctx_error(void *ctx,
-                          const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
-void php_libxml_ctx_error(void *ctx,
-                          const char *msg, ...) {
+static void php_libxml_ctx_error(void *ctx,
+                                 const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
+static void php_libxml_ctx_error(void *ctx,
+                                 const char *msg, ...) {
   va_list args;
   va_start(args, msg);
   try {
@@ -144,10 +145,10 @@ void php_libxml_ctx_error(void *ctx,
   va_end(args);
 }
 
-void php_libxml_ctx_warning(void *ctx,
-                            const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
-void php_libxml_ctx_warning(void *ctx,
-                            const char *msg, ...) {
+static void php_libxml_ctx_warning(void *ctx,
+                                   const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
+static void php_libxml_ctx_warning(void *ctx,
+                                   const char *msg, ...) {
   va_list args;
   va_start(args, msg);
   try {
@@ -1244,7 +1245,7 @@ static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
   }
   auto it = s_nodeMap->find(obj);
   if (it == s_nodeMap->end()) {
-    auto od = g_vmContext->createObjectOnly(clsname.get());
+    auto od = g_context->createObjectOnly(clsname.get());
     auto nodeobj = static_cast<c_DOMNode*>(od);
     auto inserted = s_nodeMap->insert(std::make_pair(obj, nodeobj));
     assert(inserted.second);

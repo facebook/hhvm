@@ -34,7 +34,6 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/util/process.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
 #include "hphp/util/mutex.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/memory-manager.h"
@@ -586,7 +585,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                             first ? "" : ",", name, value);
        first = false;
     };
-    ServerPtr server = HttpServer::Server->getPageServer();
+    HPHP::Server* server = HttpServer::Server->getPageServer();
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
     auto* tx = JIT::tx64;
@@ -775,7 +774,7 @@ bool AdminRequestHandler::handleCPUProfilerRequest(const std::string &cmd,
     Process::HostName + "/hphp.prof";
 
   if (cmd == "prof-cpu-on") {
-    if (Util::mkdir(file)) {
+    if (FileUtil::mkdir(file)) {
       ProfilerStart(file.c_str());
       transport->sendString("OK\n");
     } else {

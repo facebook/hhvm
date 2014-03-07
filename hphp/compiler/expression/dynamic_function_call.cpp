@@ -21,7 +21,6 @@
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/util/util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/analysis/variable_table.h"
 

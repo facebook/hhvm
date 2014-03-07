@@ -17,6 +17,7 @@
 
 #include <boost/next_prior.hpp>
 #include <unordered_set>
+#include <bitset>
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/ir.h"
@@ -218,8 +219,8 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
      * analysis does not scan into the callee stack when searching for a type
      * of value in the caller.
      *
-     * Tmps defined by DefConst are always available and not assigned to
-     * registers.  However, results of LdConst may not span calls.
+     * Tmps defined by DefConst are always available and may be assigned to
+     * registers if needed by the instructions using the const.
      */
     return (inst.is(ReDefSP) && src->isA(Type::StkPtr)) ||
            (inst.is(ReDefGeneratorSP) && src->isA(Type::StkPtr)) ||
@@ -326,7 +327,7 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
         }
         DEBUG_ONLY auto src = inst.src(i);
         assert(rs.numWords() == src->numWords() ||
-               (src->inst()->op() == DefConst && rs.numWords() == 0));
+               (src->isConst() && rs.numWords() == 0));
         DEBUG_ONLY auto allocated = rs.numAllocated();
         if (allocated == 2) {
           if (rs.spilled()) {

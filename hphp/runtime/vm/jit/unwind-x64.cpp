@@ -74,7 +74,7 @@ void sync_regstate(_Unwind_Context* context) {
   fakeAr.m_savedRip = frameRip;
 
   Stats::inc(Stats::TC_SyncUnwind);
-  tx64->fixupMap().fixupWork(g_vmContext, &fakeAr);
+  tx64->fixupMap().fixupWork(g_context.getNoCheck(), &fakeAr);
   tl_regState = VMRegState::CLEAN;
 }
 

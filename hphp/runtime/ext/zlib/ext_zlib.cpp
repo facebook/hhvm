@@ -31,6 +31,7 @@
 #include <lz4.h>
 #include <lz4hc.h>
 #include <memory>
+#include <algorithm>
 
 #define PHP_ZLIB_MODIFIER 1000
 
@@ -370,6 +371,8 @@ Variant HHVM_FUNCTION(gzwrite, CResRef zp, const String& str,
 
 #ifdef HAVE_QUICKLZ
 
+#define QLZ_MEMORY_SAFE
+
 namespace QuickLZ1 {
 #ifdef QLZ_COMPRESSION_LEVEL
 #undef QLZ_COMPRESSION_LEVEL
@@ -490,7 +493,9 @@ Variant HHVM_FUNCTION(qlzuncompress, const String& data, int level /* = 1 */) {
     }
   }
 
-  assert(dsize == size);
+  if (dsize != size) {
+    return false;
+  }
   return s.setSize(dsize);
 }
 #endif // HAVE_QUICKLZ

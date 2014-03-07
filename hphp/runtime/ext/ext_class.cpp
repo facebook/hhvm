@@ -22,7 +22,6 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/util/util.h"
 
 namespace HPHP {
 
@@ -32,15 +31,8 @@ using JIT::VMRegAnchor;
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-static String get_classname(CVarRef class_or_object) {
-  if (class_or_object.is(KindOfObject)) {
-    return class_or_object.toCObjRef().get()->o_getClassName();
-  }
-  return class_or_object.toString();
-}
-
 static inline const String& ctxClassName() {
-  Class* ctx = g_vmContext->getContextClass();
+  Class* ctx = g_context->getContextClass();
   return ctx ? ctx->nameRef() : empty_string;
 }
 
@@ -165,7 +157,7 @@ Array f_get_class_methods(const Variant& class_or_object) {
   auto retVal = Array::attach(HphpArray::MakeReserve(cls->numMethods()));
   getMethodNamesImpl(
     cls,
-    arGetContextClassFromBuiltin(g_vmContext->getFP()),
+    arGetContextClassFromBuiltin(g_context->getFP()),
     retVal
   );
   return f_array_values(retVal).toArray();
@@ -339,12 +331,16 @@ bool f_method_exists(CVarRef class_or_object, const String& method_name) {
 }
 
 Variant f_property_exists(CVarRef class_or_object, const String& property) {
+  Class* cls = nullptr;
+  ObjectData* obj = nullptr;
   if (class_or_object.isObject()) {
-    const String& context = ctxClassName();
-    return (bool)class_or_object.toObject()->o_realProp(
-      property, ObjectData::RealPropExist, context);
-  }
-  if (!class_or_object.isString()) {
+    obj = class_or_object.getObjectData();
+    cls = obj->getVMClass();
+    assert(cls);
+  } else if (class_or_object.isString()) {
+    cls = Unit::lookupClass(class_or_object.toCStrRef().get());
+    if (!cls) return false;
+  } else {
     raise_warning(
       "First parameter must either be an object"
       " or the name of an existing class"
@@ -352,13 +348,14 @@ Variant f_property_exists(CVarRef class_or_object, const String& property) {
     return Variant(Variant::NullInit());
   }
 
-  Class* cls = Unit::lookupClass(get_classname(class_or_object).get());
-  if (!cls) {
-    return false;
-  }
   bool accessible;
   auto propInd = cls->getDeclPropIndex(cls, property.get(), accessible);
   if (propInd != kInvalidSlot) {
+    return true;
+  }
+  if (obj &&
+      UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr)) &&
+      obj->dynPropArray()->nvGet(property.get())) {
     return true;
   }
   propInd = cls->lookupSProp(property.get());

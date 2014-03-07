@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/statement/switch_statement.h"
+#include <set>
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/statement/case_statement.h"
@@ -23,7 +24,7 @@
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/scalar_expression.h"
-
+#include "hphp/util/text-util.h"
 #include "hphp/runtime/base/comparisons.h"
 
 using namespace HPHP;
@@ -85,7 +86,7 @@ void SwitchStatement::analyzeProgram(AnalysisResultPtr ar) {
             dynamic_pointer_cast<ScalarExpression>(caseCond);
           if (name && name->isLiteralString()) {
             string className = name->getLiteralString();
-            ClassScopePtr cls = ar->findClass(Util::toLower(className));
+            ClassScopePtr cls = ar->findClass(toLower(className));
             if (cls && cls->isUserClass()) {
               cls->setVolatile();
             }

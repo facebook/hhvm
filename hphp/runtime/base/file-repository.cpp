@@ -21,6 +21,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <memory>
+#include <set>
 
 #include "folly/ScopeGuard.h"
 
@@ -29,6 +31,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
+#include "hphp/util/file-util.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
@@ -549,12 +552,12 @@ static bool findFileWrapper(const String& file, void* ctx) {
   }
   std::string server_root(SourceRootInfo::GetCurrentSourceRoot());
   if (server_root.empty()) {
-    server_root = std::string(g_vmContext->getCwd()->data());
+    server_root = std::string(g_context->getCwd()->data());
     if (server_root.empty() || server_root[server_root.size() - 1] != '/') {
       server_root += "/";
     }
   }
-  String rel_path(Util::relativePath(server_root, translatedPath.data()));
+  String rel_path(FileUtil::relativePath(server_root, translatedPath.data()));
   if (HPHP::Eval::FileRepository::findFile(rel_path.get(),
                                            context->s)) {
     context->path = rel_path;

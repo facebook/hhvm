@@ -200,7 +200,7 @@ private:
 
   ArgGroup& vectorKeyImpl(int i, bool allowInt) {
     auto key = m_inst->src(i);
-    if (key->isString() || (allowInt && key->isA(Type::Int))) {
+    if (key->isA(Type::Str) || (allowInt && key->isA(Type::Int))) {
       return packed_tv ? none().ssa(i) : ssa(i).none();
     }
     return typedValue(i);

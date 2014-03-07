@@ -24,6 +24,8 @@
 #include <type_traits>
 #include <string>
 #include <atomic>
+#include <algorithm>
+#include <exception>
 
 #include "folly/ScopeGuard.h"
 

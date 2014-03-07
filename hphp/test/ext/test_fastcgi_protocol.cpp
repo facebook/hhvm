@@ -15,6 +15,11 @@
 */
 
 #include "hphp/test/ext/test_fastcgi_protocol.h"
+#include <algorithm>
+#include <iterator>
+#include <map>
+#include <memory>
+#include <vector>
 #include "hphp/test/ext/test_fastcgi.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-session.h"
 #include "hphp/runtime/server/fastcgi/protocol-session-handler.h"

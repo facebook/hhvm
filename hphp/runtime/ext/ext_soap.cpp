@@ -16,6 +16,8 @@
 */
 
 #include "hphp/runtime/ext/ext_soap.h"
+#include <map>
+#include <memory>
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/base/class-info.h"
@@ -1311,7 +1313,7 @@ static xmlDocPtr serialize_response_call(
         xmlNodePtr node = xmlNewNode(NULL, BAD_CAST("faultcode"));
         String str = StringUtil::HtmlEncode(obj->o_get("faultcode"),
                                             StringUtil::QuoteStyle::Double,
-                                            "UTF-8", true);
+                                            "UTF-8", true, true);
         xmlAddChild(param, node);
         if (!fault_ns.empty()) {
           xmlNsPtr nsptr = encode_add_ns(node, fault_ns.c_str());
@@ -1341,7 +1343,7 @@ static xmlDocPtr serialize_response_call(
         xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Code"), NULL);
         String str = StringUtil::HtmlEncode(obj->o_get("faultcode"),
                                             StringUtil::QuoteStyle::Double,
-                                            "UTF-8", true);
+                                            "UTF-8", true, true);
         node = xmlNewChild(node, ns, BAD_CAST("Value"), NULL);
         if (!fault_ns.empty()) {
           xmlNsPtr nsptr = encode_add_ns(node, fault_ns.c_str());

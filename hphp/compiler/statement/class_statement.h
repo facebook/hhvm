@@ -18,6 +18,7 @@
 #define incl_HPHP_CLASS_STATEMENT_H_
 
 #include "hphp/compiler/statement/interface_statement.h"
+#include <vector>
 #include "hphp/compiler/expression/modifier_expression.h"
 
 namespace HPHP {

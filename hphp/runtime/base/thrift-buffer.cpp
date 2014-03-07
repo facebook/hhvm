@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/thrift-buffer.h"
+#include <vector>
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-unserializer.h"

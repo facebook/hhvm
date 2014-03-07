@@ -20,12 +20,12 @@
 #include "hphp/compiler/code_generator.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/type.h"
-#include "hphp/util/util.h"
 #include "hphp/util/process.h"
+#include "hphp/util/file-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include <pcre.h>
 #include "hphp/runtime/ext/ext_file.h"
+#include <pcre.h>
 
 using std::istringstream;
 using std::ostringstream;
@@ -60,7 +60,7 @@ bool TestCodeRun::CleanUp() {
 static bool GenerateMainPHP(const std::string &fullPath,
                             const char *file, int line,
                             const char *input) {
-  Util::mkdir(fullPath.c_str());
+  FileUtil::mkdir(fullPath.c_str());
   std::ofstream f(fullPath.c_str());
   if (!f) {
     printf("Unable to open %s for write. Run this test from hphp/.\n",

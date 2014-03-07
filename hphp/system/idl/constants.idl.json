@@ -840,18 +840,6 @@
             "value": 8192
         },
         {
-            "name": "GRAPHEME_EXTR_COUNT",
-            "value": 0
-        },
-        {
-            "name": "GRAPHEME_EXTR_MAXBYTES",
-            "value": 1
-        },
-        {
-            "name": "GRAPHEME_EXTR_MAXCHARS",
-            "value": 2
-        },
-        {
             "name": "HASH_HMAC",
             "value": 1
         },
@@ -1309,14 +1297,6 @@
         },
         {
             "name": "INI_USER",
-            "value": 1
-        },
-        {
-            "name": "INTL_IDNA_VARIANT_2003",
-            "value": 0
-        },
-        {
-            "name": "INTL_IDNA_VARIANT_UTS46",
             "value": 1
         },
         {
@@ -3779,7 +3759,7 @@
         },
         {
             "name": "PHP_VERSION",
-            "value": "5.4.99-hiphop"
+            "value": "5.5.99-hiphop"
         },
         {
             "name": "PHP_MAJOR_VERSION",

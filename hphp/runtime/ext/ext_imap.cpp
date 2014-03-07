@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_imap.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/logger.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -93,9 +94,8 @@ struct MESSAGELIST {
   struct MESSAGELIST *next;
 };
 
-class ImapRequestData : public RequestEventHandler {
-public:
-  virtual void requestInit() {
+struct ImapRequestData final : RequestEventHandler {
+  void requestInit() override {
     m_user.clear();
     m_password.clear();
 
@@ -103,7 +103,7 @@ public:
     m_alertstack = NIL;
     //m_gets_stream = NIL;
   }
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     if (m_errorstack != NIL) {
       /* output any remaining errors at their original error level */
       for (ERRORLIST *ecur = m_errorstack; ecur != NIL; ecur = ecur->next) {
@@ -193,7 +193,7 @@ public:
     /* set default timeout values */
     void *timeout = reinterpret_cast<void *>(
       ThreadInfo::s_threadInfo.getNoCheck()->
-      m_reqInjectionData.getSocketDefaultTimeout());
+        m_reqInjectionData.getSocketDefaultTimeout());
 
     mail_parameters(NIL, SET_OPENTIMEOUT,  timeout);
     mail_parameters(NIL, SET_READTIMEOUT,  timeout);

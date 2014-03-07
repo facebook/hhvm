@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/expression/query_expression.h"
+#include <vector>
 #include "hphp/compiler/expression/modifier_expression.h"
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/simple_query_clause.h"

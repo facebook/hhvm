@@ -18,7 +18,6 @@
 #define incl_HPHP_CPP_BASE_EXCEPTIONS_H_
 
 #include "hphp/util/exception.h"
-#include "hphp/util/util.h"
 #include "hphp/runtime/base/types.h"
 #include "folly/String.h"
 

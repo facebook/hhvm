@@ -21,6 +21,11 @@
 #include <sstream>
 #include <boost/format.hpp>
 #include <boost/bind.hpp>
+#include <atomic>
+#include <map>
+#include <set>
+#include <utility>
+#include <vector>
 #include "hphp/compiler/analysis/alias_manager.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
@@ -50,7 +55,7 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/process.h"
 #include "hphp/util/job-queue.h"
@@ -196,7 +201,7 @@ BlockScopePtr AnalysisResult::findConstantDeclarer(
 
 ClassScopePtr AnalysisResult::findClass(const std::string &name) const {
   AnalysisResultConstPtr ar = shared_from_this();
-  string lname = Util::toLower(name);
+  string lname = toLower(name);
   StringToClassScopePtrMap::const_iterator sysIter =
     m_systemClasses.find(lname);
   if (sysIter != m_systemClasses.end()) return sysIter->second;
@@ -213,7 +218,7 @@ ClassScopePtr AnalysisResult::findClass(const std::string &name,
   AnalysisResultPtr ar = shared_from_this();
   if (by == PropertyName) return ClassScopePtr();
 
-  string lname = Util::toLower(name);
+  string lname = toLower(name);
   if (by == MethodName) {
     StringToClassScopePtrVecMap::iterator iter =
       m_methodToClassDecs.find(lname);
@@ -288,7 +293,7 @@ ClassScopePtr AnalysisResult::findExactClass(ConstructPtr cs,
 bool AnalysisResult::checkClassPresent(ConstructPtr cs,
                                        const std::string &name) const {
   if (name == "self" || name == "parent") return true;
-  std::string lowerName = Util::toLower(name);
+  std::string lowerName = toLower(name);
   if (ClassScopePtr currentCls = cs->getClassScope()) {
     if (lowerName == currentCls->getName() ||
         currentCls->derivesFrom(shared_from_this(), lowerName,
@@ -456,8 +461,8 @@ void AnalysisResult::markRedeclaringClasses() {
    * as redeclaring for now.
    */
   for (auto& kv : m_classAliases) {
-    assert(kv.first == Util::toLower(kv.first));
-    assert(kv.second == Util::toLower(kv.second));
+    assert(kv.first == toLower(kv.first));
+    assert(kv.second == toLower(kv.second));
     markRedeclaring(kv.first);
     markRedeclaring(kv.second);
   }
@@ -469,7 +474,7 @@ void AnalysisResult::markRedeclaringClasses() {
    * that things like 'instanceof Foo' will not mean the same thing.
    */
   for (auto& name : m_typeAliasNames) {
-    assert(Util::toLower(name) == name);
+    assert(toLower(name) == name);
     markRedeclaring(name);
   }
 }
@@ -695,7 +700,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   // Analyze some special cases
   for (set<string>::const_iterator it = Option::VolatileClasses.begin();
        it != Option::VolatileClasses.end(); ++it) {
-    ClassScopePtr cls = findClass(Util::toLower(*it));
+    ClassScopePtr cls = findClass(toLower(*it));
     if (cls && cls->isUserClass()) {
       cls->setVolatile();
     }

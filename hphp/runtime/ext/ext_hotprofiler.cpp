@@ -28,6 +28,7 @@
 #include "hphp/util/cycles.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -65,6 +66,11 @@
 #include <iostream>
 #include <fstream>
 #include <zlib.h>
+#include <algorithm>
+#include <map>
+#include <new>
+#include <utility>
+#include <vector>
 
 // Append the delimiter
 #define HP_STACK_DELIM        "==>"
@@ -1382,7 +1388,7 @@ class MemoProfiler : public Profiler {
  private:
   virtual void beginFrame(const char *symbol) {
     JIT::VMRegAnchor _;
-    ActRec *ar = g_vmContext->getFP();
+    ActRec *ar = g_context->getFP();
     Frame f(symbol);
     if (ar->hasThis()) {
       auto& memo = m_memos[symbol];
@@ -1418,12 +1424,12 @@ class MemoProfiler : public Profiler {
     ++memo.m_count;
     memo.m_ignore = true;
     JIT::VMRegAnchor _;
-    ActRec *ar = g_vmContext->getFP();
+    ActRec *ar = g_context->getFP();
     // Lots of random cases to skip just to keep this simple for
     // now. There's no reason not to do more later.
-    if (!g_vmContext->m_faults.empty()) return;
+    if (!g_context->m_faults.empty()) return;
     if (ar->m_func->isCPPBuiltin() || ar->inGenerator()) return;
-    auto ret_tv = g_vmContext->m_stack.topTV();
+    auto ret_tv = g_context->m_stack.topTV();
     auto ret = tvAsCVarRef(ret_tv);
     if (ret.isNull()) return;
     if (!(ret.isString() || ret.isObject() || ret.isArray())) return;
@@ -1571,8 +1577,7 @@ class MemoProfiler : public Profiler {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ProfilerFactory : public RequestEventHandler {
-public:
+struct ProfilerFactory final : RequestEventHandler {
   enum Level {
     Simple       = 1,
     Hierarchical = 2,
@@ -1596,10 +1601,8 @@ public:
     return m_profiler;
   }
 
-  virtual void requestInit() {
-  }
-
-  virtual void requestShutdown() {
+  void requestInit() override {}
+  void requestShutdown() override {
     stop();
     m_artificialFrameNames.reset();
   }
@@ -1720,7 +1723,7 @@ void f_fb_setprofile(CVarRef callback) {
     return;
   }
 #endif
-  g_vmContext->m_setprofileCallback = callback;
+  g_context->m_setprofileCallback = callback;
   if (callback.isNull()) {
     HPHP::EventHook::Disable();
   } else {

@@ -15,10 +15,13 @@
 */
 
 #include "folly/Conv.h"
+#include <vector>
 #include "folly/Format.h"
 #include "folly/MapUtil.h"
 #include "folly/gen/Base.h"
 
+#include "hphp/util/abi-cxx.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -37,6 +40,56 @@ TRACE_SET_MOD(hhir);
 IR_TYPES
 #undef IRT
 
+std::string Type::constValString() const {
+  assert(isConst());
+
+  if (subtypeOf(Int)) {
+    return folly::format("{}", m_intVal).str();
+  } else if (subtypeOf(Dbl)) {
+    // don't format doubles as integers.
+    auto s = folly::format("{}", m_dblVal).str();
+    if (!strchr(s.c_str(), '.') && !strchr(s.c_str(), 'e')) {
+      return folly::format("{:.1f}", m_dblVal).str();
+    }
+    return s;
+  } else if (subtypeOf(Bool)) {
+    return m_boolVal ? "true" : "false";
+  } else if (subtypeOf(StaticStr)) {
+    auto str = m_strVal;
+    return folly::format("\"{}\"", escapeStringForCPP(str->data(),
+                                                      str->size())).str();
+  } else if (subtypeOf(StaticArr)) {
+    if (m_arrVal->empty()) {
+      return "array()";
+    }
+    return folly::format("Array({})", m_arrVal).str();
+  } else if (subtypeOf(Func)) {
+    return folly::format("Func({})", m_funcVal ? m_funcVal->fullName()->data()
+                                               : "nullptr").str();
+  } else if (subtypeOf(Cls)) {
+    return folly::format("Cls({})", m_clsVal ? m_clsVal->name()->data()
+                                             : "nullptr").str();
+  } else if (subtypeOf(TCA)) {
+    auto name = getNativeFunctionName(m_tcaVal);
+    const char* hphp = "HPHP::";
+
+    if (!name.compare(0, strlen(hphp), hphp)) {
+      name = name.substr(strlen(hphp));
+    }
+    auto pos = name.find_first_of('(');
+    if (pos != std::string::npos) {
+      name = name.substr(0, pos);
+    }
+    return folly::format("TCA: {}({})", m_tcaVal, boost::trim_copy(name)).str();
+  } else if (subtypeOf(RDSHandle)) {
+    return folly::format("RDS::Handle({:#x})", m_rdsHandleVal).str();
+  } else if (subtypeOfAny(Null, Nullptr) || isPtr()) {
+    return toString();
+  } else {
+    not_reached();
+  }
+}
+
 std::string Type::toString() const {
   // Try to find an exact match to a predefined type
 # define IRT(name, ...) if (*this == name) return #name;
@@ -47,7 +100,14 @@ std::string Type::toString() const {
     return folly::to<std::string>("Boxed", innerType().toString());
   }
   if (isPtr()) {
-    return folly::to<std::string>("PtrTo", deref().toString());
+    auto ret = folly::to<std::string>("PtrTo", deref().toString());
+    if (isConst()) ret += folly::format("({})", m_ptrVal).str();
+    return ret;
+  }
+
+  if (m_hasConstVal) {
+    return folly::format("{}<{}>",
+                         dropConstVal().toString(), constValString()).str();
   }
 
   auto t = *this;
@@ -63,7 +123,7 @@ std::string Type::toString() const {
       assert(hasArrayKind());
       parts.push_back(
         folly::to<std::string>(Type(m_bits & kAnyArr).toString(), '<',
-                               ArrayData::kindToString(m_arrayKind), '>'));
+                               ArrayData::kindToString(getArrayKind()), '>'));
       t -= AnyArr;
     } else {
       not_reached();
@@ -74,7 +134,7 @@ std::string Type::toString() const {
 # define IRT(name, ...) if (name <= t) parts.push_back(#name);
   IRT_PRIMITIVE
 # undef IRT
-    assert(!parts.empty());
+  assert(!parts.empty());
   if (parts.size() == 1) {
     return parts.front();
   }
@@ -85,18 +145,6 @@ std::string Type::debugString(Type t) {
   return t.toString();
 }
 
-Type Type::fromString(const std::string& str) {
-  static hphp_string_map<Type> types;
-  static bool init = false;
-  if (UNLIKELY(!init)) {
-#   define IRT(name, ...) types[#name] = name;
-    IR_TYPES
-#   undef IRT
-    init = true;
-  }
-  return folly::get_default(types, str, Type::None);
-}
-
 bool Type::checkValid() const {
   static_assert(sizeof(m_arrayKind) == 1,
                 "Type expects ArrayKind to be one byte");
@@ -104,13 +152,30 @@ bool Type::checkValid() const {
     assert((!(m_bits & kAnyObj) || !(m_bits & kAnyArr)) &&
            "Conflicting specialization");
 
-    if (canSpecializeArrayKind() && hasArrayKind()) {
+    if (canSpecializeArrayKind() && hasArrayKind() && !m_hasConstVal) {
       assert(!(m_extra & 0xffffffffffff0000) &&
              "Non-zero padding bits in Type with array kind");
     }
   }
 
   return true;
+}
+
+Type Type::unionOf(Type t1, Type t2) {
+  if (t1 == t2 || t2 < t1) return t1;
+  if (t1 < t2) return t2;
+  static const Type union_types[] = {
+#   define IRT(name, ...) name,
+    IRT_PHP_UNIONS(IRT_BOXES)
+#   undef IRT
+    Gen,
+    PtrToGen,
+  };
+  Type t12 = t1 | t2;
+  for (auto u : union_types) {
+    if (t12 <= u) return u;
+  }
+  not_reached();
 }
 
 DataType Type::toDataType() const {
@@ -121,7 +186,6 @@ DataType Type::toDataType() const {
 
   // Order is important here: types must progress from more specific
   // to less specific to return the most specific DataType.
-  if (subtypeOf(None))          return KindOfNone;
   if (subtypeOf(Uninit))        return KindOfUninit;
   if (subtypeOf(Null))          return KindOfNull;
   if (subtypeOf(Bool))          return KindOfBoolean;
@@ -158,6 +222,7 @@ RuntimeType Type::toRuntimeType() const {
 
 Type::Type(const RuntimeType& rtt)
   : m_bits(bitsFromDataType(rtt.outerType(), rtt.innerType()))
+  , m_hasConstVal(false)
   , m_class(nullptr)
 {
   if (rtt.outerType() == KindOfObject && rtt.hasKnownClass()) {
@@ -168,12 +233,9 @@ Type::Type(const RuntimeType& rtt)
   }
 }
 
-Type::Type(const DynLocation* dl) {
-  // Temporary stop-gap until we embrace gcc 4.8 fully, and only ok because
-  // Type has no non-POD members. At that point we can switch to ctor
-  // delegation.
-  new (this) Type((assert(dl), dl->rtt));
-}
+Type::Type(const DynLocation* dl)
+  : Type(dl->rtt)
+{}
 
 Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
   assert(outer != KindOfInvalid);
@@ -240,8 +302,8 @@ struct ArrayOps {
 // Union and Intersect implement part of the logic for operator| and operator&,
 // respectively. Each has two static methods:
 //
-// combineClass: called when at least one of *this or b is specialized and
-//               they can both specialize on Class.
+// combineSame: called when at least one of *this or b is specialized and
+//              they can both specialize on the same type.
 // combineDifferent: called when *this and b can specialize different ways
 //                   and at least one of the two is specialized.
 
@@ -328,21 +390,21 @@ struct Type::Intersect {
  * cases delegate back to Oper.
  */
 template<typename Oper>
-Type Type::combine(bits_t newBits, Type other) const {
+Type Type::combine(bits_t newBits, Type a, Type b) {
   static_assert(std::is_same<Oper, Union>::value ||
                 std::is_same<Oper, Intersect>::value,
                 "Type::combine given unsupported template argument");
 
   // If neither type is specialized, the result is simple.
-  if (LIKELY(!isSpecialized() && !other.isSpecialized())) {
+  if (LIKELY(!a.isSpecialized() && !b.isSpecialized())) {
     return Type(newBits);
   }
 
   // If one of the types can't be specialized while the other is specialized,
   // preserve the specialization.
-  if (!canSpecializeAny() || !other.canSpecializeAny()) {
-    auto const specType = isSpecialized() ? specializedType()
-                                          : other.specializedType();
+  if (!a.canSpecializeAny() || !b.canSpecializeAny()) {
+    auto const specType = a.isSpecialized() ? a.specializedType()
+                                            : b.specializedType();
 
     // If the specialized type doesn't exist in newBits, drop the
     // specialization.
@@ -352,39 +414,75 @@ Type Type::combine(bits_t newBits, Type other) const {
 
   // If both types are eligible for the same kind of specialization and at
   // least one is specialized, delegate to Oper::combineSame.
-  if (canSpecializeClass() && other.canSpecializeClass()) {
+  if (a.canSpecializeClass() && b.canSpecializeClass()) {
     folly::Optional<const Class*> aClass, bClass;
-    if (getClass()) aClass = getClass();
-    if (other.getClass()) bClass = other.getClass();
+    if (a.getClass()) aClass = a.getClass();
+    if (b.getClass()) bClass = b.getClass();
 
     return Oper::template combineSame<ClassOps>(newBits, kAnyObj,
                                                 aClass, bClass);
   }
 
-  if (canSpecializeArrayKind() && other.canSpecializeArrayKind()) {
+  if (a.canSpecializeArrayKind() && b.canSpecializeArrayKind()) {
     folly::Optional<ArrayData::ArrayKind> aKind, bKind;
-    if (hasArrayKind()) aKind = getArrayKind();
-    if (other.hasArrayKind()) bKind = other.getArrayKind();
+    if (a.hasArrayKind()) aKind = a.getArrayKind();
+    if (b.hasArrayKind()) bKind = b.getArrayKind();
 
     return Oper::template combineSame<ArrayOps>(newBits, kAnyArr, aKind, bKind);
   }
 
   // The types are eligible for different kinds of specialization and at least
   // one is specialized, so delegate to Oper::combineDifferent.
-  return Oper::combineDifferent(newBits, *this, other);
+  return Oper::combineDifferent(newBits, a, b);
 }
 
-Type Type::operator|(Type other) const {
-  auto const newBits = m_bits | other.m_bits;
-  return combine<Union>(newBits, other);
+Type Type::operator|(Type b) const {
+  auto a = *this;
+
+  // Representing types like {Int<12>|Arr} could get messy and isn't useful in
+  // practice, so unless we're unioning a constant type with itself or Bottom,
+  // drop the constant value(s).
+  if (a == b || b == Bottom) return a;
+  if (a == Bottom) return b;
+
+  a = a.dropConstVal();
+  b = b.dropConstVal();
+
+  return combine<Union>(a.m_bits | b.m_bits, a, b);
 }
-Type Type::operator&(Type other) const {
-  auto const newBits = m_bits & other.m_bits;
-  return combine<Intersect>(newBits, other);
+
+Type Type::operator&(Type b) const {
+  auto a = *this;
+  auto const newBits = a.m_bits & b.m_bits;
+
+  // When intersecting a constant value with another type, the result will be
+  // the constant value if the other value is a supertype of the constant, and
+  // Bottom otherwise.
+  if (a.m_hasConstVal) return a <= b ? a : Bottom;
+  if (b.m_hasConstVal) return b <= a ? b : Bottom;
+
+  return combine<Intersect>(newBits, a, b);
 }
 
 Type Type::operator-(Type other) const {
   auto const newBits = m_bits & ~other.m_bits;
+
+  if (m_hasConstVal) {
+    // If other is a constant of the same type, the result is Bottom or this
+    // depending on whether or not it's the same constant.
+    if (other.m_bits == m_bits && other.m_hasConstVal) {
+      return other.m_extra == m_extra ? Bottom : *this;
+    }
+
+    // Otherwise, just check to see if the constant's type was removed in
+    // newBits.
+    return (newBits & m_bits) ? *this : Bottom;
+  }
+
+  // Rather than try to represent types like "all Ints except 24", treat t -
+  // Int<24> as t - Int.
+  other = other.dropConstVal();
+
   auto const spec1 = isSpecialized();
   auto const spec2 = other.isSpecialized();
 
@@ -417,7 +515,7 @@ Type Type::operator-(Type other) const {
     }
     if (canSpecializeArrayKind()) {
       if (!(newBits & kAnyArr)) return Type(newBits);
-      return Type(newBits, m_arrayKind);
+      return Type(newBits, getArrayKind());
     }
     not_reached();
   }
@@ -623,11 +721,12 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DofS(n)   return inst->src(n)->type();
 #define DUnbox(n) return inst->src(n)->type().unbox();
 #define DBox(n)   return boxType(inst->src(n)->type());
+#define DFilterS(n) return inst->src(n)->type() & inst->typeParam();
 #define DParam    return inst->typeParam();
 #define DAllocObj return allocObjReturn(inst);
 #define DLdRef    return ldRefReturn(inst);
 #define DThis     return thisReturn(inst);
-#define DMulti    return Type::None;
+#define DMulti    return Type::Bottom;
 #define DStk(in)  return stkReturn(inst, dstId,                         \
                                    [&]() -> Type { in not_reached(); });
 #define DSetElem  return setElemReturn(inst);
@@ -648,6 +747,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DofS
 #undef DUnbox
 #undef DBox
+#undef DFilterS
 #undef DParam
 #undef DAllocObj
 #undef DLdRef
@@ -785,11 +885,8 @@ void assertOperandTypes(const IRInstruction* inst) {
 
   auto checkSpills = [&] {
     for (; curSrc < inst->numSrcs(); ++curSrc) {
-      // SpillStack slots may be stack types or None, if the
-      // simplifier removed some.
-      auto const valid = inst->src(curSrc)->type()
-        .subtypeOfAny(Type::StackElem, Type::None);
-      check(valid, Type(), "Gen|Cls|None");
+      auto const valid = (inst->src(curSrc)->type() <= Type::StackElem);
+      check(valid, Type(), "Gen|Cls");
     }
   };
 
@@ -825,6 +922,9 @@ void assertOperandTypes(const IRInstruction* inst) {
                              "invalid src num");
 #define DofS(src)   checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
+#define DFilterS(src) checkDst(src < inst->numSrcs(),  \
+                               "invalid src num");     \
+                      requireTypeParam();
 #define DParam      requireTypeParam();
 #define DLdRef      requireTypeParam();
 #define DAllocObj
@@ -858,6 +958,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DSetElem
 #undef DBox
 #undef DofS
+#undef DFilterS
 #undef DParam
 #undef DAllocObj
 #undef DLdRef

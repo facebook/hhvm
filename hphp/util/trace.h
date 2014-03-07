@@ -102,6 +102,8 @@ namespace Trace {
       TM(regalloc)    \
       TM(bcinterp)    \
       TM(interpOne)   \
+      TM(dispatchBB)  \
+      TM(dispatchN)   \
       TM(refcount)    \
       TM(asmx64)      \
       TM(runtime)     \
@@ -134,6 +136,7 @@ namespace Trace {
       TM(region)      \
       TM(atomicvector)\
       TM(datablock)   \
+      TM(jittime)     \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
       TM(stress_txInterpSeed)   \

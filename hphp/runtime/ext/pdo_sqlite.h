@@ -19,6 +19,8 @@
 #define incl_HPHP_PDO_SQLITE_H_
 
 #include "hphp/runtime/ext/pdo_driver.h"
+#include <memory>
+#include <vector>
 #include "hphp/runtime/ext/ext_sqlite3.h"
 
 namespace HPHP {

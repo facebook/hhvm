@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace JIT {
 
@@ -153,13 +154,7 @@ bool removeGuard(IRUnit& unit, IRInstruction* inst, const FrameState& state) {
   if (!(type >= prevType)) {
     // Neither is a subtype of the other. If they have no intersection the
     // guard will always fail but we can let the simplifier take care of
-    // that. Otherwise, refine the guarded type to be a subtype of prevType.
-    auto common = type & prevType;
-    if (common != Type::Bottom) {
-      FTRACE(3, "setting typeParam to {}\n", common);
-      inst->setTypeParam(common);
-    }
-
+    // that.
     return false;
   }
 
@@ -200,6 +195,8 @@ Type relaxInner(Type t, TypeConstraint tc) {
  * DataTypeGeneric. Returns true iff any changes were made to the trace.
  */
 bool relaxGuards(IRUnit& unit, const GuardConstraints& guards, bool simple) {
+  Timer _t("optimize_relaxGuards");
+
   splitCriticalEdges(unit);
   auto blocks = rpoSortCfg(unit);
   auto changed = false;

@@ -18,7 +18,9 @@
 #define incl_HPHP_ZEND_EXECUTION_STACK
 
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_types.h"
+#include <vector>
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 enum class ZendStackMode {
   HHVM_STACK,
@@ -30,31 +32,29 @@ struct ZendStackEntry {
   void* value;
 };
 
-class ZendExecutionStack : public HPHP::RequestEventHandler {
-  public:
-    static zval* getArg(int i);
-    static int numArgs();
+struct ZendExecutionStack final : HPHP::RequestEventHandler {
+  static zval* getArg(int i);
+  static int numArgs();
 
-    static void push(void* z);
-    static void* pop();
-    static void pushHHVMStack();
-    static void popHHVMStack();
+  static void push(void* z);
+  static void* pop();
+  static void pushHHVMStack();
+  static void popHHVMStack();
 
   // Instance methods
-  public:
-    virtual void requestInit() {
-      clear();
-    }
-    virtual void requestShutdown() {
-      clear();
-    }
+  void requestInit() override {
+    clear();
+  }
+  void requestShutdown() override {
+    clear();
+  }
 
-  private:
-    static std::vector<ZendStackEntry>& getStack();
-    void clear() {
-      m_stack.clear();
-    }
-    std::vector<ZendStackEntry> m_stack;
+private:
+  static std::vector<ZendStackEntry>& getStack();
+  void clear() {
+    m_stack.clear();
+  }
+  std::vector<ZendStackEntry> m_stack;
 };
 
 #endif // incl_HPHP_ZEND_EXECUTION_STACK

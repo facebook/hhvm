@@ -42,6 +42,7 @@
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/file-util.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_fb.h"
@@ -66,6 +67,11 @@
 #include <oniguruma.h>
 #include <signal.h>
 #include <libxml/parser.h>
+#include <exception>
+#include <iterator>
+#include <map>
+#include <memory>
+#include <vector>
 
 #include "hphp/runtime/base/file-repository.h"
 
@@ -190,9 +196,13 @@ void process_ini_settings() {
   if (RuntimeOption::IniFile.empty()) {
     return;
   }
-  auto settings = f_parse_ini_file(String(RuntimeOption::IniFile));
-  for (ArrayIter iter(settings); iter; ++iter) {
-    IniSetting::Set(iter.first(), iter.second());
+  std::ifstream ifs(RuntimeOption::IniFile);
+  const std::string str((std::istreambuf_iterator<char>(ifs)),
+                        std::istreambuf_iterator<char>());
+  auto settings = IniSetting::FromStringAsMap(str, RuntimeOption::IniFile);
+
+  for (auto& item : settings.items()) {
+    IniSetting::Set(item.first.data(), item.second, IniSetting::FollyDynamic());
   }
 }
 
@@ -806,6 +816,7 @@ static int start_server(const std::string &username) {
   }
 
   HttpServer::Server->runOrExitProcess();
+  HttpServer::Server.reset();
   return 0;
 }
 
@@ -1259,7 +1270,7 @@ static int execute_program_impl(int argc, char** argv) {
 
     hphp_process_init();
     try {
-      HPHP::Eval::PhpFile* phpFile = g_vmContext->lookupPhpFile(
+      HPHP::Eval::PhpFile* phpFile = g_context->lookupPhpFile(
         makeStaticString(po.lint.c_str()), "", nullptr);
       if (phpFile == nullptr) {
         throw FileOpenException(po.lint.c_str());
@@ -1271,7 +1282,7 @@ static int execute_program_impl(int argc, char** argv) {
         VMParserFrame parserFrame;
         parserFrame.filename = po.lint.c_str();
         parserFrame.lineNumber = line;
-        Array bt = g_vmContext->debugBacktrace(false, true,
+        Array bt = g_context->debugBacktrace(false, true,
                                                false, &parserFrame);
         throw FatalErrorException(msg->data(), bt);
       }
@@ -1413,7 +1424,7 @@ static int execute_program_impl(int argc, char** argv) {
 }
 
 String canonicalize_path(const String& p, const char* root, int rootLen) {
-  String path(Util::canonicalize(p.c_str(), p.size()), AttachString);
+  String path(FileUtil::canonicalize(p.c_str(), p.size()), AttachString);
   if (path.charAt(0) == '/') {
     const string &sourceRoot = RuntimeOption::SourceRoot;
     int len = sourceRoot.size();
@@ -1595,7 +1606,7 @@ static bool hphp_warmup(ExecutionContext *context,
 void hphp_session_init() {
   init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
-  MM().resetStats();
+  MM().resetExternalStats();
 
 #ifdef ENABLE_SIMPLE_COUNTER
   SimpleCounter::Enabled = true;
@@ -1603,10 +1614,10 @@ void hphp_session_init() {
 #endif
 
   // Ordering is sensitive; StatCache::requestInit produces work that
-  // must be done in VMExecutionContext::requestInit.
+  // must be done in ExecutionContext::requestInit.
   StatCache::requestInit();
 
-  g_vmContext->requestInit();
+  g_context->requestInit();
 }
 
 ExecutionContext *hphp_context_init() {
@@ -1682,7 +1693,7 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
   }
 
   // Run shutdown handlers. This may cause user code to run.
-  static_cast<VMExecutionContext*>(context)->destructObjects();
+  static_cast<ExecutionContext*>(context)->destructObjects();
   if (shutdown) {
     context->onRequestShutdown();
   }
@@ -1709,7 +1720,6 @@ void hphp_session_exit() {
   ThreadInfo::s_threadInfo->clearPendingException();
 
   auto& mm = MM();
-  mm.resetStats();
 
   {
     ServerStatsHelper ssh("rollback");

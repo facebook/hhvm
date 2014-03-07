@@ -17,13 +17,13 @@
 #include "hphp/runtime/vm/jit/ir-translator.h"
 
 #include <stdint.h>
+#include <algorithm>
 #include "hphp/runtime/base/strings.h"
 
 #include "folly/Format.h"
 #include "folly/Conv.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/stack-trace.h"
-#include "hphp/util/util.h"
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -50,7 +50,6 @@ namespace HPHP {
 namespace JIT {
 
 using namespace reg;
-using namespace Util;
 using namespace Trace;
 using std::max;
 
@@ -398,12 +397,7 @@ IRTranslator::translateArray(const NormalizedInstruction& i) {
 
 void
 IRTranslator::translateNewArray(const NormalizedInstruction& i) {
-  HHIR_EMIT(NewArrayReserve, 0);
-}
-
-void
-IRTranslator::translateNewArrayReserve(const NormalizedInstruction& i) {
-  HHIR_EMIT(NewArrayReserve, i.imm[0].u_IVA);
+  HHIR_EMIT(NewArray, i.imm[0].u_IVA);
 }
 
 void
@@ -504,7 +498,7 @@ void
 IRTranslator::translateAdd(const NormalizedInstruction& i) {
   auto leftType = m_hhbcTrans.topType(1);
   auto rightType = m_hhbcTrans.topType(0);
-  if (leftType.isArray() && rightType.isArray()) {
+  if (leftType <= Type::Arr && rightType <= Type::Arr) {
     HHIR_EMIT(ArrayAdd);
   } else {
     HHIR_EMIT(Add);

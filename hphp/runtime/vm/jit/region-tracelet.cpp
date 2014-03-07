@@ -15,6 +15,8 @@
 */
 
 #include "hphp/util/trace.h"
+#include <algorithm>
+#include <vector>
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
@@ -22,6 +24,7 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
@@ -136,6 +139,7 @@ int RegionFormer::inliningDepth() const {
 
 RegionDescPtr RegionFormer::go() {
   uint32_t numJmps = 0;
+
   for (auto const& lt : m_ctx.liveTypes) {
     auto t = lt.type;
     if (t <= Type::Cls) {
@@ -164,7 +168,7 @@ RegionDescPtr RegionFormer::go() {
 
     m_inst.interp = m_interp.count(m_sk);
     auto const doPrediction =
-      m_profiling ? false : outputIsPredicted(m_startSk, m_inst);
+      m_profiling ? false : outputIsPredicted(m_inst);
 
     if (tryInline()) {
       // If m_inst is an FCall and the callee is suitable for inlining, we can
@@ -181,7 +185,8 @@ RegionDescPtr RegionFormer::go() {
       m_arStates.back().pop();
       m_arStates.emplace_back();
       m_curBlock->setInlinedCallee(callee);
-      m_ht.beginInlining(m_inst.imm[0].u_IVA, callee, returnFuncOff);
+      m_ht.beginInlining(m_inst.imm[0].u_IVA, callee, returnFuncOff,
+                         doPrediction ? m_inst.outPred : Type::Gen);
       m_metaHand = Unit::MetaHandle();
 
       m_sk = m_ht.curSrcKey();
@@ -530,9 +535,12 @@ void RegionFormer::recordDependencies() {
   auto blockStart = firstBlock.start();
   auto& unit = m_ht.unit();
   auto const doRelax = RuntimeOption::EvalHHIRRelaxGuards;
-  auto changed = doRelax ? relaxGuards(unit, *m_ht.irBuilder().guards(),
-                                       m_profiling)
-                         : false;
+  bool changed = false;
+  if (doRelax) {
+    Timer _t("selectTracelet_relaxGuards");
+    changed = relaxGuards(unit, *m_ht.irBuilder().guards(), m_profiling);
+  }
+
   visitGuards(unit, [&](const RegionDesc::Location& loc, Type type) {
     if (type <= Type::Cls) return;
     RegionDesc::TypePred pred{loc, type};
@@ -558,6 +566,7 @@ void RegionFormer::recordDependencies() {
  */
 RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
                              bool profiling) {
+  Timer _t("selectTracelet");
   InterpSet interp;
   RegionDescPtr region;
   uint32_t tries = 1;
@@ -571,8 +580,8 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
     return RegionDescPtr { nullptr };
   }
 
-  FTRACE(1, "selectTracelet returning after {} tries:\n{}\n",
-         tries, show(*region));
+  FTRACE(1, "selectTracelet returning, inlineDepth {}, {} tries:\n{}\n",
+         inlineDepth, tries, show(*region));
   if (region->blocks.back()->length() == 0) {
     // If the final block is empty because it would've only contained
     // instructions producing literal values, kill it.

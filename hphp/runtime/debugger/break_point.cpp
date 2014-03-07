@@ -16,6 +16,7 @@
 #include "hphp/runtime/debugger/break_point.h"
 
 #include <boost/lexical_cast.hpp>
+#include <vector>
 
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_proxy.h"
@@ -90,7 +91,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
       m_funcEntry(false) {
   TRACE(2, "InterruptSite::InterruptSite\n");
 #define bail_on(c) if (c) { return; }
-  VMExecutionContext* context = g_vmContext;
+  auto const context = g_context.getNoCheck();
   ActRec *fp = context->getFP();
   bail_on(!fp);
   if (hardBreakPoint && fp->skipFrame()) {
@@ -163,7 +164,7 @@ void InterruptSite::Initialize(ActRec *fp) {
 // longer than there is a guarantee that this site will be alive.
 const InterruptSite *InterruptSite::getCallingSite() const {
   if (m_callingSite != nullptr) return m_callingSite.get();
-  VMExecutionContext* context = g_vmContext;
+  auto const context = g_context.getNoCheck();
   Offset parentOffset;
   auto parentFp = context->getPrevVMState(m_activationRecord, &parentOffset);
   if (parentFp == nullptr) return nullptr;

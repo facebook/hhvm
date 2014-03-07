@@ -15,6 +15,9 @@
 */
 
 #include "hphp/runtime/debugger/debugger.h"
+#include <set>
+#include <stack>
+#include <vector>
 #include "hphp/runtime/debugger/debugger_server.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
@@ -22,7 +25,6 @@
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/text-color.h"
-#include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP { namespace Eval {
@@ -651,25 +653,25 @@ void Debugger::UsageLogInterrupt(const std::string &mode,
 
 DebuggerDummyEnv::DebuggerDummyEnv() {
   TRACE(2, "DebuggerDummyEnv::DebuggerDummyEnv\n");
-  g_vmContext->enterDebuggerDummyEnv();
+  g_context->enterDebuggerDummyEnv();
 }
 
 DebuggerDummyEnv::~DebuggerDummyEnv() {
   TRACE(2, "DebuggerDummyEnv::~DebuggerDummyEnv\n");
-  g_vmContext->exitDebuggerDummyEnv();
+  g_context->exitDebuggerDummyEnv();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 EvalBreakControl::EvalBreakControl(bool noBreak) {
   TRACE(2, "EvalBreakControl::EvalBreakControl\n");
-  m_noBreakSave = g_vmContext->m_dbgNoBreak;
-  g_vmContext->m_dbgNoBreak = noBreak;
+  m_noBreakSave = g_context->m_dbgNoBreak;
+  g_context->m_dbgNoBreak = noBreak;
 }
 
 EvalBreakControl::~EvalBreakControl() {
   TRACE(2, "EvalBreakControl::~EvalBreakControl\n");
-  g_vmContext->m_dbgNoBreak = m_noBreakSave;
+  g_context->m_dbgNoBreak = m_noBreakSave;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

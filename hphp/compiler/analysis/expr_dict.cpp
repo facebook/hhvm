@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/analysis/expr_dict.h"
+#include <vector>
 #include "hphp/compiler/analysis/alias_manager.h"
 
 #include "hphp/compiler/expression/expression.h"

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
+#include <algorithm>
 #include "hphp/runtime/vm/debugger-hook.h"
 
 namespace HPHP { namespace Eval {
@@ -82,10 +83,10 @@ bool CmdFlowControl::onServer(DebuggerProxy &proxy) {
 void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
   // We may be stopped at a place with no source info.
   if (!site || !site->valid()) return;
-  if (g_vmContext->m_lastLocFilter) {
-    g_vmContext->m_lastLocFilter->clear();
+  if (g_context->m_lastLocFilter) {
+    g_context->m_lastLocFilter->clear();
   } else {
-    g_vmContext->m_lastLocFilter = new PCFilter();
+    g_context->m_lastLocFilter = new PCFilter();
   }
   TRACE(3, "Prepare location filter for %s:%d, unit %p:\n",
         site->getFile(), site->getLine0(), site->getUnit());
@@ -111,14 +112,14 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
            (op != OpAsyncESuspend) &&
            (op != OpContRetC);
   };
-  g_vmContext->m_lastLocFilter->addRanges(unit, ranges,
+  g_context->m_lastLocFilter->addRanges(unit, ranges,
                                           excludeContinuationReturns);
 }
 
 void CmdFlowControl::removeLocationFilter() {
-  if (g_vmContext->m_lastLocFilter) {
-    delete g_vmContext->m_lastLocFilter;
-    g_vmContext->m_lastLocFilter = nullptr;
+  if (g_context->m_lastLocFilter) {
+    delete g_context->m_lastLocFilter;
+    g_context->m_lastLocFilter = nullptr;
   }
 }
 
@@ -140,12 +141,12 @@ bool CmdFlowControl::atStepOutOffset(Unit* unit, Offset o) {
 void CmdFlowControl::setupStepOuts() {
   // Existing step outs should be cleaned up before making new ones.
   assert(!hasStepOuts());
-  ActRec* fp = g_vmContext->getFP();
+  ActRec* fp = g_context->getFP();
   if (!fp) return; // No place to step out to!
   Offset returnOffset;
   bool fromVMEntry;
   while (!hasStepOuts()) {
-    fp = g_vmContext->getPrevVMState(fp, &returnOffset, nullptr, &fromVMEntry);
+    fp = g_context->getPrevVMState(fp, &returnOffset, nullptr, &fromVMEntry);
     // If we've run off the top of the stack, just return having setup no
     // step outs. This will cause cmds like Next and Out to just let the program
     // run, which is appropriate.

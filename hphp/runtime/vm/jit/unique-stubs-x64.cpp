@@ -104,8 +104,8 @@ void emitResumeHelpers(UniqueStubs& uniqueStubs) {
   Asm a { tx64->code.main() };
   moveToAlign(tx64->code.main());
 
-  auto const fpOff = offsetof(VMExecutionContext, m_fp);
-  auto const spOff = offsetof(VMExecutionContext, m_stack) +
+  auto const fpOff = offsetof(ExecutionContext, m_fp);
+  auto const spOff = offsetof(ExecutionContext, m_stack) +
                        Stack::topOfStackOffset();
 
   uniqueStubs.resumeHelperRet = a.frontier();
@@ -126,10 +126,10 @@ void emitDefClsHelper(UniqueStubs& uniqueStubs) {
   void (*helper)(PreClass*) = defClsHelper;
   PhysReg rEC = argNumToRegName[2];
   emitGetGContext(a, rEC);
-  a.   storeq (rVmFp, rEC[offsetof(VMExecutionContext, m_fp)]);
+  a.   storeq (rVmFp, rEC[offsetof(ExecutionContext, m_fp)]);
   a.   storeq (argNumToRegName[1],
-                  rEC[offsetof(VMExecutionContext, m_pc)]);
-  a.   storeq (rax, rEC[offsetof(VMExecutionContext, m_stack) +
+                  rEC[offsetof(ExecutionContext, m_pc)]);
+  a.   storeq (rax, rEC[offsetof(ExecutionContext, m_stack) +
                     Stack::topOfStackOffset()]);
   a.   jmp    (TCA(helper));
 
@@ -304,10 +304,10 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   auto const rBC     = r13;
   auto const rEC     = r15;
 
-  auto const spOff = offsetof(VMExecutionContext, m_stack) +
+  auto const spOff = offsetof(ExecutionContext, m_stack) +
                        Stack::topOfStackOffset();
-  auto const fpOff = offsetof(VMExecutionContext, m_fp);
-  auto const pcOff = offsetof(VMExecutionContext, m_pc);
+  auto const fpOff = offsetof(ExecutionContext, m_fp);
+  auto const pcOff = offsetof(ExecutionContext, m_pc);
 
   emitGetGContext(a, rEC);
   a.    storeq (rVmFp, rEC[fpOff]);
@@ -326,7 +326,7 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
 
   a.    movq   (rEC, argNumToRegName[0]);
   assert(rPCNext == argNumToRegName[1]);
-  a.    call   (TCA(getMethodPtr(&VMExecutionContext::doFCallArrayTC)));
+  a.    call   (TCA(getMethodPtr(&ExecutionContext::doFCallArrayTC)));
 
   a.    loadq  (rEC[spOff], rVmSp);
 
@@ -398,8 +398,8 @@ asm_label(a, popAndXchg);
 asm_label(a, skip);
   emitGetGContext(a, rdi);
   a.    neg    (rax);
-  a.    loadq  (rdi[offsetof(VMExecutionContext, m_fp)], rVmFp);
-  a.    loadq  (rdi[offsetof(VMExecutionContext, m_stack) +
+  a.    loadq  (rdi[offsetof(ExecutionContext, m_fp)], rVmFp);
+  a.    loadq  (rdi[offsetof(ExecutionContext, m_stack) +
                     Stack::topOfStackOffset()], rVmSp);
   a.    jmp    (rax);
   a.    ud2    ();
@@ -457,7 +457,7 @@ asm_label(a, skip);
   a.   pop     (rsi);
   a.   addq    (16, rsp); // drop our call frame
   emitGetGContext(a, rax);
-  a.   loadq   (rax[offsetof(VMExecutionContext, m_stack) +
+  a.   loadq   (rax[offsetof(ExecutionContext, m_stack) +
                     Stack::topOfStackOffset()], rVmSp);
   a.   jmp     (rsi);
   a.   ud2     ();

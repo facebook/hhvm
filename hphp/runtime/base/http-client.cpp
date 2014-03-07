@@ -22,6 +22,7 @@
 #include "hphp/util/timer.h"
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <vector>
 #include "hphp/util/logger.h"
 #include "hphp/util/ssl-init.h"
 

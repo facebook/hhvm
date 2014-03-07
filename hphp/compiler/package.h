@@ -18,6 +18,10 @@
 #define incl_HPHP_PACKAGE_H_
 
 #include "hphp/compiler/hphp.h"
+#include <map>
+#include <memory>
+#include <set>
+#include <vector>
 #include "hphp/util/string-bag.h"
 #include "hphp/util/file-cache.h"
 #include "hphp/util/mutex.h"

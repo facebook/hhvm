@@ -71,6 +71,7 @@ public:
 protected:
   void RunServer();
   void StopServer();
+  void KillServer();
   bool VerifyServerResponse(const char *input, const char *output,
                             const char *url, const char *method,
                             const char *header, const char *postdata,

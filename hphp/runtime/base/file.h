@@ -18,6 +18,7 @@
 #define incl_HPHP_FILE_H_
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/request-local.h"
 
@@ -28,16 +29,12 @@ namespace HPHP {
 
 class StreamContext;
 
-class FileData : public RequestEventHandler {
+class FileData final : public RequestEventHandler {
 public:
   FileData() : m_pcloseRet(0) {}
   void clear() { m_pcloseRet = 0; }
-  virtual void requestInit() {
-    clear();
-  }
-  virtual void requestShutdown() {
-    clear();
-  }
+  void requestInit() override { clear(); }
+  void requestShutdown() override { clear(); }
   int m_pcloseRet;
 };
 
@@ -66,7 +63,9 @@ public:
 public:
   static const int USE_INCLUDE_PATH;
 
-  explicit File(bool nonblocking = true);
+  explicit File(bool nonblocking = true,
+                const String& wrapper_type = null_string,
+                const String& stream_type = empty_string);
   virtual ~File();
 
   static StaticString& classnameof() {
@@ -126,7 +125,8 @@ public:
 
   virtual Array getMetaData();
   virtual Array getWrapperMetaData() { return null_array; }
-  virtual const char *getStreamType() const { return "";}
+  String getWrapperType() const;
+  String getStreamType() const { return m_streamType; }
   Resource &getStreamContext() { return m_streamContext; }
   void setStreamContext(Resource &context) { m_streamContext = context; }
 
@@ -191,6 +191,8 @@ protected:
   std::string m_name;
   std::string m_mode;
 
+  StringData* m_wrapperType;
+  StringData* m_streamType;
   Resource m_streamContext;
 
   void closeImpl();

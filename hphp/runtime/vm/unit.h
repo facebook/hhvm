@@ -739,35 +739,43 @@ private:
   // of the sub-statements.
   LineToOffsetRangeVecMap getLineToOffsetRangeVecMap() const;
 
-  // pseudoMain's return value, or KindOfUninit if its not known.
-  TypedValue m_mainReturn;
-  int64_t m_sn;
-  unsigned char const* m_bc;
-  size_t m_bclen;
-  unsigned char const* m_bc_meta;
-  size_t m_bc_meta_len;
-  const StringData* m_filepath;
-  const StringData* m_dirpath;
-  MD5 m_md5;
-  std::vector<NamedEntityPair> m_namedInfo;
-  std::vector<const ArrayData*> m_arrays;
-  PreClassPtrVec m_preClasses;
-  FixedVector<TypeAlias> m_typeAliases;
-  UnitMergeInfo* m_mergeInfo;
-  unsigned m_cacheOffset;
-  int8_t m_repoId;
-  uint8_t m_mergeState;
-  uint8_t m_cacheMask;
-  bool m_mergeOnly;
-  bool m_interpretOnly;
+  /*
+    Frequently used fields.
+    Do not reorder without good reason
+  */
+  unsigned char const* m_bc{nullptr};
+  size_t m_bclen{0};
+  const StringData* m_filepath{nullptr};
   // List of (line, offset) where offset is the offset of the first byte code
   // of the next line if there is one, m_bclen otherwise.
   // Sorted by offset. line values are not assumed to be unique.
   LineTable m_lineTable;
+  UnitMergeInfo* m_mergeInfo{nullptr};
+  unsigned m_cacheOffset{0};
+  int8_t m_repoId{-1};
+  uint8_t m_mergeState{UnitMergeStateUnmerged};
+  uint8_t m_cacheMask{0};
+  bool m_mergeOnly{false};
+  bool m_interpretOnly;
+  // pseudoMain's return value, or KindOfUninit if its not known.
+  TypedValue m_mainReturn;
+  PreClassPtrVec m_preClasses;
+  FixedVector<TypeAlias> m_typeAliases;
+  /*
+    End of freqently used fields
+  */
+
+  int64_t m_sn{-1};
+  unsigned char const* m_bc_meta{nullptr};
+  size_t m_bc_meta_len{0};
+  const StringData* m_dirpath{nullptr};
+  MD5 m_md5;
+  std::vector<NamedEntityPair> m_namedInfo;
+  std::vector<const ArrayData*> m_arrays;
   SourceLocTable m_sourceLocTable;
   LineToOffsetRangeVecMap m_lineToOffsetRangeVecMap;
   FuncTable m_funcTable;
-  mutable PseudoMainCacheMap *m_pseudoMainCache;
+  mutable PseudoMainCacheMap *m_pseudoMainCache{nullptr};
 };
 
 int getLineNumber(const LineTable& table, Offset pc);

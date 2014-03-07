@@ -17,6 +17,7 @@
 #include "hphp/runtime/ext/ext_pdo.h"
 
 #include <string>
+#include <set>
 
 #include "hphp/runtime/ext/pdo_driver.h"
 #include "hphp/runtime/ext/pdo_mysql.h"
@@ -32,8 +33,10 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-
+#include "hphp/util/string-vsnprintf.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/persistent-resource-store.h"
 
 #define PDO_HANDLE_DBH_ERR(dbh)                         \
   if (strcmp(dbh->error_code, PDO_ERR_NONE)) {          \
@@ -591,7 +594,7 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
   }
   TypedValue ret;
   ObjectData* inst = object.get();
-  g_vmContext->invokeFunc(&ret, cls->getCtor(), ctor_args.toArray(), inst);
+  g_context->invokeFunc(&ret, cls->getCtor(), ctor_args.toArray(), inst);
   tvRefcountedDecRef(&ret);
 }
 
@@ -886,14 +889,11 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64_t mod
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class PDORequestData : public RequestEventHandler {
-public:
-  virtual void requestInit() {
-  }
+struct PDORequestData final : RequestEventHandler {
+  void requestInit() override {}
 
-  virtual void requestShutdown() {
-    for (std::set<PDOConnection*>::iterator iter =
-            m_persistent_connections.begin();
+  void requestShutdown() override {
+    for (auto iter = m_persistent_connections.begin();
          iter != m_persistent_connections.end(); ++iter) {
       PDOConnection *conn = *iter;
       if (!conn) {
@@ -996,7 +996,7 @@ void c_PDO::t___construct(const String& dsn, const String& username /* = null_st
       shashkey = hashkey.detach();
       /* let's see if we have one cached.... */
       m_dbh = dynamic_cast<PDOConnection*>
-        (g_persistentObjects->get(PDOConnection::PersistentKey,
+        (g_persistentResources->get(PDOConnection::PersistentKey,
                                   shashkey.data()));
 
       if (m_dbh.get()) {
@@ -1047,7 +1047,7 @@ void c_PDO::t___construct(const String& dsn, const String& username /* = null_st
   } else if (m_dbh.get()) {
     if (is_persistent) {
       assert(!shashkey.empty());
-      g_persistentObjects->set(PDOConnection::PersistentKey, shashkey.data(),
+      g_persistentResources->set(PDOConnection::PersistentKey, shashkey.data(),
                                m_dbh.get());
       s_pdo_request_data->m_persistent_connections.insert(m_dbh.get());
     }

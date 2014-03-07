@@ -27,6 +27,8 @@
 
 #ifdef HAVE_LIBDL
 # include <dlfcn.h>
+#include <map>
+#include <vector>
 # ifndef RTLD_LAZY
 #  define RTLD_LAZY 1
 # endif

@@ -29,6 +29,10 @@
 # include <libkern/OSByteOrder.h>
 #else
 # include <byteswap.h>
+#include <map>
+#include <memory>
+#include <utility>
+#include <vector>
 #endif
 
 #if !defined(htonll) && !defined(ntohll)

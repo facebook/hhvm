@@ -23,10 +23,10 @@ public:
   FastCGIServerFactory() {}
 
   virtual ServerPtr createServer(const ServerOptions& options) override {
-    return std::make_shared<FastCGIServer>(options.m_address,
-                                           options.m_port,
-                                           options.m_numThreads,
-                                           options.m_useFileSocket);
+    return folly::make_unique<FastCGIServer>(options.m_address,
+                                             options.m_port,
+                                             options.m_numThreads,
+                                             options.m_useFileSocket);
   }
 };
 
@@ -45,4 +45,3 @@ void register_fastcgi_server() {
 }
 
 }
-

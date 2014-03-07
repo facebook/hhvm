@@ -27,6 +27,7 @@
 #include "hphp/system/systemlib.h"
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/int.hpp>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

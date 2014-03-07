@@ -23,6 +23,8 @@
 #endif
 
 #include <boost/static_assert.hpp>
+#include <algorithm>
+#include <vector>
 
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/types.h"

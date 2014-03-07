@@ -83,7 +83,7 @@ class IntlTimeZone : public IntlError {
   icu::TimeZone* timezone() const { return m_timezone; }
 
   static icu::TimeZone* ParseArg(CVarRef arg, const String& funcname,
-                                 intl_error &err);
+                                 IntlError *err);
  private:
   icu::TimeZone *m_timezone = nullptr;
   bool m_owned = false;

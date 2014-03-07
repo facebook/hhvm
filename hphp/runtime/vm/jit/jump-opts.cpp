@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace JIT {
 
@@ -244,6 +245,8 @@ void eliminateJmp(Block* lastBlock, IRInstruction* jmp, Block* target) {
 //////////////////////////////////////////////////////////////////////
 
 void optimizeJumps(IRUnit& unit) {
+  Timer _t("optimize_jumpOpts");
+
   postorderWalk(unit, [&](Block* b) {
     if (RuntimeOption::EvalHHIRDirectExit) {
       auto branch = &b->back();

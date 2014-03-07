@@ -16,7 +16,7 @@
 
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/parser/hphp.tab.hpp"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/variable_table.h"
@@ -103,7 +103,7 @@ void ScalarExpression::appendEncapString(const std::string &value) {
 
 void ScalarExpression::toLower(bool funcCall /* = false */) {
   assert(funcCall || !m_quoted);
-  m_value = Util::toLower(m_value);
+  m_value = HPHP::toLower(m_value);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -124,7 +124,7 @@ bool ScalarExpression::needsTranslation() const {
 
 void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    string id = Util::toLower(getIdentifier());
+    string id = HPHP::toLower(getIdentifier());
 
     switch (m_type) {
       case T_LINE:
@@ -461,7 +461,7 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     assert(m_quoted); // fall through
   case T_STRING:
     if (m_quoted) {
-      string output = Util::escapeStringForPHP(m_originalValue);
+      string output = escapeStringForPHP(m_originalValue);
       cg_printf("%s", output.c_str());
     } else {
       cg_printf("%s", m_originalValue.c_str());

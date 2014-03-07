@@ -2464,6 +2464,9 @@ ret:
     *se = (char *)s;
   result = sign ? -value(rv) : value(rv);
 
+  if (s_bigint_data.isNull()) {
+    return result;
+  }
   Bigint *&p5s = s_bigint_data->p5s;
   while (p5s) {
     tmp = p5s;

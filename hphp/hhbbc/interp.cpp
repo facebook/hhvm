@@ -629,7 +629,11 @@ void group(ISS& env,
            const bc::FPushObjMethodD& fpush) {
   auto const obj = locAsCell(env, cgetl.loc1);
   impl(env, cgetl, fpush);
-  if (!is_specialized_obj(obj)) setLoc(env, cgetl.loc1, TObj);
+  if (!is_specialized_obj(obj)) {
+    setLoc(env, cgetl.loc1, TObj);
+  } else if (is_opt(obj)) {
+    setLoc(env, cgetl.loc1, unopt(obj));
+  }
 }
 
 void in(ISS& env, const bc::Switch& op) {

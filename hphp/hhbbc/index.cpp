@@ -1257,7 +1257,7 @@ Index::lookup_private_statics(borrowed_ptr<const php::Class> cls) const {
 std::vector<Context>
 Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
   auto const fdata = create_func_info(*m_data, func);
-  assert(t.subtypeOf(fdata->returnTy));
+  always_assert(t.subtypeOf(fdata->returnTy));
   if (!t.strictSubtypeOf(fdata->returnTy)) return {};
   if (fdata->returnRefinments + 1 < options.returnTypeRefineLimit) {
     fdata->returnTy = t;

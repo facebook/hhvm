@@ -389,8 +389,7 @@ void in(ISS& env, const bc::BitNot& op) {
 template<bool Negate>
 void sameImpl(ISS& env) {
   nothrow(env);
-  // TODO(#3783145): should constprop this
-
+  constprop(env);
   auto const t1 = popC(env);
   auto const t2 = popC(env);
   auto const v1 = tv(t1);

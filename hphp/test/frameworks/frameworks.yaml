@@ -112,6 +112,10 @@
     commit: 07d6712836c4520963e78b9fda14b14d13ff000c
     install_root: joomla-cms
     test_root: joomla-cms
+    clowns:
+      - joomla-cms/tests/unit/suites/libraries/cms/pagination/JPaginationTest.php
+      - joomla-cms/tests/unit/suites/libraries/cms/toolbar/button/JToolbarButtonHelpTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/twitter/JTwitterTest.php
   klein:
     url: https://github.com/chriso/klein.php.git
     branch: v2.0.2

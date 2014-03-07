@@ -187,7 +187,7 @@ private:
       return null_resource;
     }
 
-    return Resource(NEWOBJ(StreamFilter)(obj));
+    return Resource(NEWOBJ(StreamFilter)(obj, stream));
   }
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(StreamUserFilters, s_stream_user_filters);
@@ -211,6 +211,18 @@ int64_t StreamFilter::invokeFilter(Resource in,
 
 void StreamFilter::invokeOnClose() {
   m_filter->o_invoke(s_onClose, Array::Create());
+}
+
+bool StreamFilter::remove() {
+  if (m_stream.isNull()) {
+    return false;
+  }
+  auto file = m_stream.getTyped<File>();
+  assert(file);
+  Resource rthis(this);
+  auto ret = file->removeFilter(rthis);
+  m_stream = null_resource;
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -285,6 +297,12 @@ Variant HHVM_FUNCTION(stream_filter_prepend,
                                               filtername,
                                               readwrite,
                                               params);
+}
+
+bool HHVM_FUNCTION(stream_filter_remove, const Resource& resource) {
+  auto filter = resource.getTyped<StreamFilter>();
+  assert(filter);
+  return filter->remove();
 }
 
 Variant HHVM_FUNCTION(stream_bucket_make_writeable, const Resource& bb_res) {

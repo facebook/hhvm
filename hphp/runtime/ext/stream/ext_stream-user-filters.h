@@ -52,12 +52,15 @@ public:
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
-  explicit StreamFilter(const Object& filter): m_filter(filter) { }
+  explicit StreamFilter(const Object& filter, const Resource& stream):
+      m_filter(filter), m_stream(stream) { }
 
   int64_t invokeFilter(Resource in, Resource out, bool closing);
   void invokeOnClose();
+  bool remove();
 private:
   Object m_filter;
+  Resource m_stream;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,6 +79,8 @@ Variant HHVM_FUNCTION(stream_filter_prepend,
                       const String& filtername,
                       const Variant& readwrite,
                       const Variant& params);
+bool HHVM_FUNCTION(stream_filter_remove,
+                   const Resource& filter);
 Variant HHVM_FUNCTION(stream_bucket_make_writeable, const Resource& bucket_brigade);
 void HHVM_FUNCTION(stream_bucket_append,
                    const Resource& bucket_brigade,

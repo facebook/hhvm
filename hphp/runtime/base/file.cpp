@@ -459,23 +459,41 @@ bool File::stat(struct stat *sb) {
 }
 
 void File::appendReadFilter(Resource& resource) {
-  assert(resource.getTyped<StreamFilter>());
+  assert(resource.is<StreamFilter>());
   m_readFilters.push_back(resource);
 }
 
 void File::appendWriteFilter(Resource& resource) {
-  assert(resource.getTyped<StreamFilter>());
+  assert(resource.is<StreamFilter>());
   m_writeFilters.push_back(resource);
 }
 
 void File::prependReadFilter(Resource& resource) {
-  assert(resource.getTyped<StreamFilter>());
+  assert(resource.is<StreamFilter>());
   m_readFilters.push_front(resource);
 }
 
 void File::prependWriteFilter(Resource& resource) {
-  assert(resource.getTyped<StreamFilter>());
+  assert(resource.is<StreamFilter>());
   m_writeFilters.push_front(resource);
+}
+
+bool File::removeFilter(Resource& resource) {
+  assert(resource.is<StreamFilter>());
+  ResourceData* rd = resource.get();
+  for (auto it = m_readFilters.begin(); it != m_readFilters.end(); ++it) {
+    if (it->get() == rd) {
+      m_readFilters.erase(it);
+      return true;
+    }
+  }
+  for (auto it = m_writeFilters.begin(); it != m_writeFilters.end(); ++it) {
+    if (it->get() == rd) {
+      m_writeFilters.erase(it);
+      return true;
+    }
+  }
+  return false;
 }
 
 const StaticString

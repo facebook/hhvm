@@ -164,6 +164,7 @@ public:
   void appendWriteFilter(Resource &filter);
   void prependReadFilter(Resource &filter);
   void prependWriteFilter(Resource &filter);
+  bool removeFilter(Resource &filter);
 
   int64_t bufferedLen() { return m_writepos - m_readpos; }
 

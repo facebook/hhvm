@@ -679,6 +679,7 @@ class StreamExtension : public Extension {
     HHVM_FE(stream_filter_register);
     HHVM_FE(stream_filter_append);
     HHVM_FE(stream_filter_prepend);
+    HHVM_FE(stream_filter_remove);
     HHVM_FE(stream_bucket_make_writeable);
     HHVM_FE(stream_bucket_append);
     HHVM_FE(stream_bucket_prepend);

@@ -46,3 +46,6 @@ script: time PHP_CURL_HTTP_REMOTE_SERVER="http://localhost:8444" hphp/hhvm/hhvm 
 notifications:
   email: false
   irc: "chat.freenode.net#hhvm"
+
+matrix:
+  fast_finish: true

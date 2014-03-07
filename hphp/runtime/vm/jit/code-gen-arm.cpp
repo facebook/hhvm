@@ -101,8 +101,6 @@ PUNT_OPCODE(CheckDefinedClsEq)
 PUNT_OPCODE(TryEndCatch)
 PUNT_OPCODE(LdUnwinderValue)
 PUNT_OPCODE(DeleteUnwinderException)
-PUNT_OPCODE(SubInt)
-PUNT_OPCODE(MulInt)
 PUNT_OPCODE(AddDbl)
 PUNT_OPCODE(SubDbl)
 PUNT_OPCODE(MulDbl)
@@ -110,12 +108,7 @@ PUNT_OPCODE(DivDbl)
 PUNT_OPCODE(Mod)
 PUNT_OPCODE(Sqrt)
 PUNT_OPCODE(AbsDbl)
-PUNT_OPCODE(AndInt)
-PUNT_OPCODE(OrInt)
-PUNT_OPCODE(XorInt)
 PUNT_OPCODE(XorBool)
-PUNT_OPCODE(Shl)
-PUNT_OPCODE(Shr)
 PUNT_OPCODE(ConvBoolToArr)
 PUNT_OPCODE(ConvDblToArr)
 PUNT_OPCODE(ConvIntToArr)
@@ -724,20 +717,93 @@ void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
 // Arithmetic Instructions
 
 void CodeGenerator::cgAddInt(IRInstruction* inst) {
-  assert(inst->numSrcs() == 2 && inst->numDsts() == 1);
+  auto dstReg = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
 
-  auto destReg = dstLoc(0).reg();
-  auto srcReg0 = srcLoc(0).reg();
-  auto srcReg1 = srcLoc(1).reg();
-
-  if (srcReg1 != InvalidReg) {
-    m_as. Add(x2a(destReg), x2a(srcReg0), x2a(srcReg1));
+  if (srcRegR != InvalidReg) {
+    m_as. Add(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
   } else {
-    m_as. Add(x2a(destReg), x2a(srcReg0), inst->src(1)->intVal());
+    m_as. Add(x2a(dstReg), x2a(srcRegL), inst->src(1)->intVal());
   }
-
 }
 
+void CodeGenerator::cgSubInt(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  if (srcRegR != InvalidReg) {
+    m_as. Sub(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+  } else {
+    m_as. Sub(x2a(dstReg), x2a(srcRegL), inst->src(1)->intVal());
+  }
+}
+
+void CodeGenerator::cgMulInt(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  m_as. Mul(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+}
+
+//////////////////////////////////////////////////////////////////////
+// Bitwise Operators
+
+void CodeGenerator::cgAndInt(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  if (srcRegL != InvalidReg) {
+    m_as. And(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+  } else {
+    m_as. And(x2a(dstReg), x2a(srcRegL), inst->src(1)->intVal());
+  }
+}
+
+void CodeGenerator::cgOrInt(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  if (srcRegL != InvalidReg) {
+    m_as. Orr(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+  } else {
+    m_as. Orr(x2a(dstReg), x2a(srcRegL), inst->src(1)->intVal());
+  }
+}
+
+void CodeGenerator::cgXorInt(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  if (srcRegL != InvalidReg) {
+    m_as. Eor(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+  } else {
+    m_as. Eor(x2a(dstReg), x2a(srcRegL), inst->src(1)->intVal());
+  }
+}
+
+void CodeGenerator::cgShl(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  // TODO: t3870154 add shift-by-immediate support to vixl
+  m_as. lslv(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+}
+
+void CodeGenerator::cgShr(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  // TODO: t3870154 add shift-by-immediate support to vixl
+  m_as. asrv(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+}
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgShuffle(IRInstruction* inst) {

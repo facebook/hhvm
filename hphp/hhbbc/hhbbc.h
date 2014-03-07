@@ -92,7 +92,7 @@ struct Options {
    * be dead.  When false, dead blocks are replaced with Fatal
    * bytecodes.
    */
-  bool RemoveDeadBlocks = false;
+  bool RemoveDeadBlocks = true;
 
   /*
    * Whether to propagate constant values by replacing instructions

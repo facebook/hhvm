@@ -261,8 +261,8 @@ FuncAnalysis do_analyze(const Index& index,
       ).str();
     }
     ret += sep + bsep;
-    ret += folly::format(
-      "Inferred return type: {}\n", show(ai.inferredReturn)).str();
+    folly::format(&ret,
+      "Inferred return type: {}\n", show(ai.inferredReturn));
     ret += bsep;
     return ret;
   }());

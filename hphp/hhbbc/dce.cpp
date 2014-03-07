@@ -20,10 +20,10 @@
 #include <utility>
 #include <bitset>
 #include <sstream>
-
-#include <boost/dynamic_bitset.hpp>
 #include <algorithm>
 #include <set>
+
+#include <boost/dynamic_bitset.hpp>
 
 #include "folly/gen/Base.h"
 #include "folly/gen/String.h"
@@ -159,6 +159,12 @@ TRACE_SET_MOD(hhbbc_dce);
  */
 
 namespace {
+
+//////////////////////////////////////////////////////////////////////
+
+const StaticString s_unreachable("static analysis error: supposedly "
+                                 "unreachable code was reached");
+
 
 //////////////////////////////////////////////////////////////////////
 
@@ -793,6 +799,40 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       blockStates[rpoId(b)].liveOut,
       blockStates[rpoId(b)].liveOutExn
     );
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void remove_unreachable_blocks(const Index& index, const FuncAnalysis& ainfo) {
+  boost::dynamic_bitset<> reachable(ainfo.ctx.func->nextBlockId);
+  for (auto& blk : ainfo.rpoBlocks) {
+    reachable[blk->id] = ainfo.bdata[blk->id].stateIn.initialized;
+    if (reachable[blk->id]) continue;
+    auto const srcLoc = blk->hhbcs.front().srcLoc;
+    blk->hhbcs = {
+      bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
+      bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
+    };
+    blk->fallthrough = nullptr;
+  }
+
+  if (!options.RemoveDeadBlocks) return;
+
+  for (auto& blk : ainfo.rpoBlocks) {
+    auto reachableTargets = false;
+    forEachTakenEdge(blk->hhbcs.back(), [&] (php::Block& target) {
+      if (reachable[target.id]) reachableTargets = true;
+    });
+    if (reachableTargets) continue;
+    switch (blk->hhbcs.back().op) {
+    case Op::JmpNZ:
+    case Op::JmpZ:
+      blk->hhbcs.back() = bc_with_loc(blk->hhbcs.back().srcLoc, bc::PopC {});
+      break;
+    default:
+      break;
+    }
   }
 }
 

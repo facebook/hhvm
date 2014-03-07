@@ -1,2 +1,2 @@
 Before error
-HipHop Fatal error: Undefined function: blah in %s(%d) : eval()'d code on line %d
+HipHop Fatal error: Call to undefined function blah() in %s(%d) : eval()'d code on line %d

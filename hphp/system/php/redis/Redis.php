@@ -1374,7 +1374,7 @@ class Redis {
   public function __call($fname, $args) {
     $fname = strtolower($fname);
     if (!isset(self::$map[$fname])) {
-      trigger_error("Call to undefined function Redis::$fname", E_USER_ERROR);
+      trigger_error("Call to undefined function Redis::$fname()", E_USER_ERROR);
       return null;
     }
     $func = self::$map[$fname];

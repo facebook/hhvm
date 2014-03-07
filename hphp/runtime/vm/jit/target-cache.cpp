@@ -92,7 +92,7 @@ const Func* FuncCache::lookup(RDS::Handle handle, StringData* sd) {
       JIT::VMRegAnchor _;
       func = Unit::loadFunc(sd);
       if (!func) {
-        raise_error("Undefined function: %s", sd->data());
+        raise_error("Call to undefined function %s()", sd->data());
       }
     }
     func->validate();

@@ -818,7 +818,7 @@ const Func* lookupUnknownFunc(const StringData* name) {
   JIT::VMRegAnchor _;
   auto const func = Unit::loadFunc(name);
   if (UNLIKELY(!func)) {
-    raise_error("Undefined function: %s", name->data());
+    raise_error("Call to undefined function %s()", name->data());
   }
   return func;
 }

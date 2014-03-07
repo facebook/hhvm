@@ -33,6 +33,11 @@
     commit: 735cffd3982c6e8cdebe292d5db39d077f65890f
     install_root: assetic
     test_root: assetic
+    clowns:
+      # Depends on the result of a google API, which has changed since the
+      # release of 1.1.2; test is fixed in master, but we want to test
+      # latest stable
+      - assetic/tests/Assetic/Test/Filter/GoogleClosure/CompilerApiFilterTest.php
   codeigniter:
     url: https://github.com/EllisLab/CodeIgniter.git
     # Stable is 2.1.4, but need develop since we have pull requests

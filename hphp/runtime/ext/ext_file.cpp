@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/base/zend-scanf.h"
@@ -121,21 +120,9 @@ static int accessSyscall(
 static int statSyscall(
     const String& path,
     struct stat* buf,
-    bool useFileCache = false,
-    bool isRelative = false) {
+    bool useFileCache = false) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  auto canUseFileCache = useFileCache && dynamic_cast<FileStreamWrapper*>(w);
-  if (isRelative) {
-    std::string realpath = StatCache::realpath(path.data());
-    // realpath will return an empty string for nonexistent files
-    if (realpath.empty()) {
-      return ENOENT;
-    }
-    auto translatedPath = canUseFileCache ?
-      File::TranslatePathWithFileCache(path) : File::TranslatePath(path);
-    return ::stat(translatedPath.data(), buf);
-  }
-  if (canUseFileCache) {
+  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
     return ::stat(File::TranslatePathWithFileCache(path).data(), buf);
   }
   return w->stat(path, buf);
@@ -833,8 +820,7 @@ bool f_is_dir(const String& filename) {
   }
 
   struct stat sb;
-  String path = isRelative ? cwd + String::FromChar('/') + filename : filename;
-  CHECK_SYSTEM(statSyscall(path, &sb, false, isRelative));
+  CHECK_SYSTEM(statSyscall(filename, &sb));
   return (sb.st_mode & S_IFMT) == S_IFDIR;
 }
 

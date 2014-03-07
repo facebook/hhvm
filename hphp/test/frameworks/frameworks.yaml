@@ -138,8 +138,8 @@
     # Bad test data in wikimedia/mediawiki-core at the moment
     url: https://github.com/fredemmott/mediawiki-core.git
     # When we move back to mediawiki-core, stable branch is wmf/1.22wmf22
-    branch: fix-old-dates
-    commit: 10a7426639664a9222e430d6775e68b299e657f4
+    branch: hhvm-fix
+    commit: 7b44088a86b09fab2b3dc6e31348c602335f2dd5
     install_root: mediawiki-core
     test_root: mediawiki-core/tests/phpunit
     test_file_regex: /.*(\Test.*\.php)$/

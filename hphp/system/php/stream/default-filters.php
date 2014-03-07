@@ -4,6 +4,18 @@ namespace __SystemLib {
   function register_default_stream_filters() {
     \stream_filter_register('zlib.deflate', '__SystemLib\DeflateStreamFilter');
     \stream_filter_register('zlib.inflate', '__SystemLib\InflateStreamFilter');
+    \stream_filter_register(
+      'string.rot13',
+      '__SystemLib\StringRot13StreamFilter'
+    );
+    \stream_filter_Register(
+      'string.toupper',
+      '__SystemLib\StringToUpperStreamFilter'
+    );
+    \stream_filter_Register(
+      'string.tolower',
+      '__SystemLib\StringToLowerStreamFilter'
+    );
   }
 
   class DeflateStreamFilter extends \php_user_filter {
@@ -49,7 +61,7 @@ namespace __SystemLib {
         $this_chunk = $this->impl->inflateChunk($bucket->data);
         stream_bucket_append(
           $out,
-          stream_bucket_new($this->stream,$this_chunk)
+          stream_bucket_new($this->stream, $this_chunk)
         );
       }
 
@@ -58,6 +70,42 @@ namespace __SystemLib {
       } else {
         return PSFS_FEED_ME;
       }
+    }
+  }
+
+  class StringToUpperStreamFilter extends \php_user_filter {
+    public function filter($in, $out, &$consumed, $closing): int {
+      while ($bucket = stream_bucket_make_writeable($in)) {
+        stream_bucket_append(
+          $out,
+          stream_bucket_new($this->stream, strtoupper($bucket->data))
+        );
+      }
+      return PSFS_PASS_ON;
+    }
+  }
+
+  class StringToLowerStreamFilter extends \php_user_filter {
+    public function filter($in, $out, &$consumed, $closing): int {
+      while ($bucket = stream_bucket_make_writeable($in)) {
+        stream_bucket_append(
+          $out,
+          stream_bucket_new($this->stream, strtolower($bucket->data))
+        );
+      }
+      return PSFS_PASS_ON;
+    }
+  }
+
+  class StringRot13StreamFilter extends \php_user_filter {
+    public function filter($in, $out, &$consumed, $closing): int {
+      while ($bucket = stream_bucket_make_writeable($in)) {
+        stream_bucket_append(
+          $out,
+          stream_bucket_new($this->stream, str_rot13($bucket->data))
+        );
+      }
+      return PSFS_PASS_ON;
     }
   }
 }

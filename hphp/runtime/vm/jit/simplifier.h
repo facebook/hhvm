@@ -124,7 +124,6 @@ private:
   SSATmp* simplifyUnboxPtr(IRInstruction*);
   SSATmp* simplifyBoxPtr(IRInstruction*);
   SSATmp* simplifyCheckInit(IRInstruction* inst);
-  SSATmp* simplifyPrint(IRInstruction* inst);
   SSATmp* simplifyDecRef(IRInstruction* inst);
   SSATmp* simplifyIncRef(IRInstruction* inst);
   SSATmp* simplifyIncRefCtx(IRInstruction* inst);

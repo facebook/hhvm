@@ -418,9 +418,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case JmpNSame:
     return simplifyQueryJmp(inst);
 
-  case PrintStr:
-  case PrintInt:
-  case PrintBool:    return simplifyPrint(inst);
   case DecRef:
   case DecRefNZ:     return simplifyDecRef(inst);
   case IncRef:       return simplifyIncRef(inst);
@@ -1898,13 +1895,6 @@ SSATmp* Simplifier::simplifyCheckInit(IRInstruction* inst) {
   assert(srcType.notPtr());
   assert(inst->taken());
   if (srcType.not(Type::Uninit)) inst->convertToNop();
-  return nullptr;
-}
-
-SSATmp* Simplifier::simplifyPrint(IRInstruction* inst) {
-  if (inst->src(0)->isA(Type::Null)) {
-    inst->convertToNop();
-  }
   return nullptr;
 }
 

@@ -174,13 +174,11 @@ char *string_crypt(const char *key, const char *salt) {
   assert(key);
   assert(salt);
 
-  char random_salt[13];
-  char itobuf[8];
+  char random_salt[12];
   if (!*salt) {
-    ito64(itobuf,rand(),8);
-    strcpy(random_salt,"$1$");
-    strcat(random_salt,itobuf);
-    random_salt[12] = '\0';
+    memcpy(random_salt,"$1$",3);
+    ito64(random_salt+3,rand(),8);
+    random_salt[11] = '\0';
     return string_crypt(key, random_salt);
   }
 

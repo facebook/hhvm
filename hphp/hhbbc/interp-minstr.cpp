@@ -903,23 +903,25 @@ void miFinalSetProp(MIS& env) {
   handleInSelfPropD(env);
   handleBasePropD(env);
 
+  auto const resultTy = env.base.type.subtypeOf(TObj) ? t1 : TInitCell;
+
   if (couldBeThisObj(env, env.base)) {
     if (!name) {
-      // We could just merge t1 into every thisProp, but not for
-      // now.
-      loseNonRefThisPropTypes(env);
-      push(env, TInitCell);
+      mergeEachThisPropRaw(env, [&] (Type propTy) {
+        if (propTy.couldBe(TInitCell)) {
+          return union_of(std::move(propTy), t1);
+        }
+        return TBottom;
+      });
+      push(env, resultTy);
       return;
     }
     mergeThisProp(env, name, t1);
-    // TODO(#3343813): I think we can push t1 if it's known to be
-    // any TObj (even ArrayAccess doesn't mess that up), but not for
-    // now.  (Need some additional testing first.)
-    push(env, mustBeThisObj(env, env.base) ? t1 : TInitCell);
+    push(env, resultTy);
     return;
   }
 
-  push(env, TInitCell);
+  push(env, resultTy);
 }
 
 void miFinalSetOpProp(MIS& env) {

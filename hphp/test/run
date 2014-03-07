@@ -364,7 +364,7 @@ function hphp_cmd($options, $test) {
     hhvm_path(),
     '--hphp',
     '--config',
-    find_file($test, 'hphp_config.ini'),
+    find_file($test, 'hphp_config.hdf'),
     read_file("$test.hphp_opts"),
     "-thhbc -l0 -k1 -o $test.repo $test",
   ));

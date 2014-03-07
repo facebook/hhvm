@@ -15,12 +15,6 @@
 */
 
 #include "hphp/compiler/option.h"
-
-#include <boost/algorithm/string/trim.hpp>
-#include <map>
-#include <set>
-#include <vector>
-
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
@@ -31,8 +25,11 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/process.h"
 #include "hphp/hhbbc/hhbbc.h"
+#include <boost/algorithm/string/trim.hpp>
+#include <map>
+#include <set>
+#include <vector>
 #include "hphp/runtime/base/preg.h"
-#include "hphp/runtime/base/ini-setting.h"
 
 namespace HPHP {
 
@@ -180,38 +177,21 @@ void Option::LoadRootHdf(const Hdf &roots, vector<string> &vec) {
 }
 
 void Option::Load(Hdf &config) {
-#define BIND(name, ...) \
-        IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, \
-                         "hhvm." #name, __VA_ARGS__)
-
   LoadRootHdf(config["IncludeRoots"], IncludeRoots);
-  BIND(include_roots, &IncludeRoots);
   LoadRootHdf(config["AutoloadRoots"], AutoloadRoots);
-  BIND(autoload_roots, &AutoloadRoots);
 
   config["PackageFiles"].get(PackageFiles);
-  BIND(package_files, &PackageFiles);
   config["IncludeSearchPaths"].get(IncludeSearchPaths);
-  BIND(include_search_paths, &IncludeSearchPaths);
   config["PackageDirectories"].get(PackageDirectories);
-  BIND(package_directories, &PackageDirectories);
   config["PackageExcludeDirs"].get(PackageExcludeDirs);
-  BIND(package_exclude_dirs, &PackageExcludeDirs);
   config["PackageExcludeFiles"].get(PackageExcludeFiles);
-  BIND(package_exclude_files, &PackageExcludeFiles);
   config["PackageExcludePatterns"].get(PackageExcludePatterns);
-  BIND(package_exclude_patterns, &PackageExcludePatterns);
   config["PackageExcludeStaticDirs"].get(PackageExcludeStaticDirs);
-  BIND(package_exclude_static_dirs, &PackageExcludeStaticDirs);
   config["PackageExcludeStaticFiles"].get(PackageExcludeStaticFiles);
-  BIND(package_exclude_static_files, &PackageExcludeStaticFiles);
   config["PackageExcludeStaticPatterns"].get(PackageExcludeStaticPatterns);
-  BIND(package_exclude_static_patterns, &PackageExcludeStaticPatterns);
   CachePHPFile = config["CachePHPFile"].getBool();
-  BIND(cache_php_file, &CachePHPFile);
 
   config["ParseOnDemandDirs"].get(ParseOnDemandDirs);
-  BIND(parse_on_demand_dirs, &ParseOnDemandDirs);
 
   {
     Hdf cg = config["CodeGeneration"];
@@ -221,47 +201,17 @@ void Option::Load(Hdf &config) {
     tmp = cg[#name].getString();                \
     if (!tmp.empty()) {                         \
       name = OptionStrings.add(tmp.c_str());    \
-    }                                           \
+    }
 
     READ_CG_OPTION(IdPrefix);
-    BIND(code_generation.id_prefix, IniSetting::SetAndGet<std::string>(
-      [](const std::string& value) {
-        if (value.empty()) {
-          return false;
-        }
-        IdPrefix = OptionStrings.add(value.c_str());
-        return true;
-      },
-      [] {
-        return IdPrefix;
-      }
-    ));
     READ_CG_OPTION(LambdaPrefix);
-    BIND(code_generation.lambda_prefix, IniSetting::SetAndGet<std::string>(
-      [](const std::string& value) {
-        if (value.empty()) {
-          return false;
-        }
-        LambdaPrefix = OptionStrings.add(value.c_str());
-        DynamicFunctionPrefixes.push_back(LambdaPrefix);
-        return true;
-      },
-      [] {
-        return LambdaPrefix;
-      }
-    ));
   }
 
   config["DynamicFunctionPrefix"].get(DynamicFunctionPrefixes);
-  BIND(dynamic_function_prefix, &DynamicFunctionPrefixes);
   config["DynamicFunctionPostfix"].get(DynamicFunctionPostfixes);
-  BIND(dynamic_function_postfix, &DynamicFunctionPostfixes);
   config["DynamicMethodPrefix"].get(DynamicMethodPrefixes);
-  BIND(dynamic_method_prefix, &DynamicMethodPrefixes);
   config["DynamicInvokeFunctions"].get(DynamicInvokeFunctions);
-  BIND(dynamic_invoke_functions, &DynamicInvokeFunctions);
   config["VolatileClasses"].get(VolatileClasses);
-  BIND(volatile_classes, &VolatileClasses);
 
   // build map from function names to sections
   for (Hdf hdf = config["FunctionSections"].firstChild(); hdf.exists();
@@ -271,64 +221,37 @@ void Option::Load(Hdf &config) {
            FunctionSections[hdfFunc.getString()] = hdf.getName();
     }
   }
-  typedef std::map<std::string, std::map<std::string, std::string> > MapOfMap;
-  BIND(function_setions, IniSetting::SetAndGet<MapOfMap>(
-    [](const MapOfMap& value) {
-      for (auto& root : value) {
-        for (auto& item : root.second) {
-          FunctionSections[item.second] = root.first;
-        }
-      }
-      return true;
-    },
-    nullptr
-  ));
 
   {
     Hdf repo = config["Repo"];
     {
       Hdf repoCentral = repo["Central"];
       RepoCentralPath = repoCentral["Path"].getString();
-      BIND(repo.central.path, &RepoCentralPath);
     }
     RepoDebugInfo = repo["DebugInfo"].getBool(false);
-    BIND(repo.debug_info, &RepoDebugInfo);
   }
 
   {
     Hdf autoloadMap = config["AutoloadMap"];
     autoloadMap["class"].get(AutoloadClassMap);
-    BIND(autoload_map.class, &AutoloadClassMap);
     autoloadMap["function"].get(AutoloadFuncMap);
-    BIND(autoload_map.function, &AutoloadFuncMap);
     autoloadMap["constant"].get(AutoloadConstMap);
-    BIND(autoload_map.constant, &AutoloadConstMap);
     AutoloadRoot = autoloadMap["root"].getString();
-    BIND(autoload_map.root, &AutoloadRoot);
   }
 
   HardTypeHints = config["HardTypeHints"].getBool(true);
-  BIND(hard_type_hints, &HardTypeHints);
   HardConstProp = config["HardConstProp"].getBool(true);
-  BIND(hard_const_prop, &HardConstProp);
 
   EnableHipHopSyntax = config["EnableHipHopSyntax"].getBool();
-  BIND(enable_hip_hop_syntax, &EnableHipHopSyntax);
   EnableZendCompat = config["EnableZendCompat"].getBool();
-  BIND(enable_zend_compat, &EnableZendCompat);
   JitEnableRenameFunction = config["JitEnableRenameFunction"].getBool();
-  BIND(jit_enable_rename_function, &JitEnableRenameFunction);
   EnableHipHopExperimentalSyntax =
     config["EnableHipHopExperimentalSyntax"].getBool();
-  BIND(enable_hip_hop_experimental_syntax, &EnableHipHopExperimentalSyntax);
   EnableShortTags = config["EnableShortTags"].getBool(true);
-  BIND(enable_short_tags, &EnableShortTags);
 
   EnableAspTags = config["EnableAspTags"].getBool();
-  BIND(enable_asp_tags, &EnableAspTags);
 
   EnableXHP = config["EnableXHP"].getBool(false);
-  BIND(enable_xhp, &EnableXHP);
 
   if (EnableHipHopSyntax) {
     // If EnableHipHopSyntax is true, it forces EnableXHP to true
@@ -340,24 +263,10 @@ void Option::Load(Hdf &config) {
   if (ParserThreadCount <= 0) {
     ParserThreadCount = Process::GetCPUCount();
   }
-  BIND(parser_thread_count, IniSetting::SetAndGet<int32_t>(
-    [](const int32_t& value) {
-      int32_t set = value;
-      if (value <= 0) {
-        set = Process::GetCPUCount();
-      }
-      ParserThreadCount = set;
-      return true;
-    },
-    []() { return ParserThreadCount; }
-  ));
 
   EnableEval = (EvalLevel)config["EnableEval"].getByte(0);
-  BIND(parser_thread_count, (char*)&EnableEval);
   AllDynamic = config["AllDynamic"].getBool(true);
-  BIND(all_dynamic, (char*)&AllDynamic);
   AllVolatile = config["AllVolatile"].getBool();
-  BIND(all_valatile, (char*)&AllVolatile);
 
   GenerateDocComments      = config["GenerateDocComments"].getBool(true);
   EliminateDeadCode        = config["EliminateDeadCode"].getBool(true);
@@ -372,22 +281,8 @@ void Option::Load(Hdf &config) {
   WholeProgram             = config["WholeProgram"].getBool(true);
   UseHHBBC                 = config["UseHHBBC"].getBool(UseHHBBC);
 
-  BIND(generate_doc_comments, &GenerateDocComments);
-  BIND(eliminate_dead_code, &EliminateDeadCode);
-  BIND(copy_prop, &CopyProp);
-  BIND(local_copy_prop, &LocalCopyProp);
-  BIND(string_loop_opts, &StringLoopOpts);
-  BIND(auto_inline, &AutoInline);
-  BIND(control_flow, &ControlFlow);
-  BIND(variable_coalescing, &VariableCoalescing);
-  BIND(array_access_idempotent, &ArrayAccessIdempotent);
-  BIND(dump_ast, &DumpAst);
-  BIND(whole_program, &WholeProgram);
-  BIND(use_hhbbc, &UseHHBBC);
-
   // Temporary, during file-cache migration.
   FileCache::UseNewCache   = config["UseNewCache"].getBool(false);
-  BIND(use_new_cache, &FileCache::UseNewCache);
 
   if (m_hookHandler) m_hookHandler(config);
 

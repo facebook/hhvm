@@ -19,6 +19,7 @@
 #include <gelf.h>
 #include <string>
 #include <vector>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 

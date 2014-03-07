@@ -20,6 +20,7 @@
 #include <functional>
 #include <exception>
 #include <utility>
+#include <iostream>
 
 #include "folly/Memory.h"
 #include "folly/Conv.h"

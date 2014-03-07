@@ -23,6 +23,8 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 
 namespace HPHP { namespace JIT { namespace ARM {
 
@@ -41,7 +43,7 @@ struct CodeGenerator {
     {
     }
 
-  void cgBlock(Block* block, std::vector<TransBCMapping>* bcMap);
+  Address cgInst(IRInstruction* inst);
 
  private:
   template<class Then>
@@ -105,8 +107,6 @@ struct CodeGenerator {
                  bool genStoreType = true);
   void emitLdRaw(IRInstruction* inst, size_t extraOff);
 
-  Address cgInst(IRInstruction* inst);
-
   const PhysLoc srcLoc(unsigned i) const {
     return m_state.regs[m_curInst].src(i);
   }
@@ -135,6 +135,7 @@ struct CodeGenerator {
 };
 
 void patchJumps(CodeBlock& cb, CodegenState& state, Block* block);
+void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state);
 
 }}}
 

@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
 
 namespace HPHP { namespace JIT { namespace X64 {
 

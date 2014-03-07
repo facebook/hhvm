@@ -547,6 +547,10 @@ void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
   }
 }
 
+void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state) {
+  always_assert(false);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::recordHostCallSyncPoint(vixl::MacroAssembler& as,
@@ -1839,29 +1843,6 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
   default:
     assert(0);
     return nullptr;
-  }
-}
-
-void CodeGenerator::cgBlock(Block* block, std::vector<TransBCMapping>* bcMap) {
-  FTRACE(6, "cgBlock: {}\n", block->id());
-
-  BCMarker prevMarker;
-  for (IRInstruction& instr : *block) {
-    IRInstruction* inst = &instr;
-    // If we're on the first instruction of the block or we have a new
-    // marker since the last instruction, update the bc mapping.
-    if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
-        m_mcg->tx().isTransDBEnabled() && bcMap) {
-      bcMap->push_back(TransBCMapping{inst->marker().func->unit()->md5(),
-                                      inst->marker().bcOff,
-                                      m_as.frontier(),
-                                      m_astubs.frontier()});
-      prevMarker = inst->marker();
-    }
-    auto* addr = cgInst(inst);
-    if (m_state.asmInfo && addr) {
-      m_state.asmInfo->updateForInstruction(inst, addr, m_as.frontier());
-    }
   }
 }
 

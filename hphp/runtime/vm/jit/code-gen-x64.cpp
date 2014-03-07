@@ -66,8 +66,7 @@
 
 using HPHP::JIT::TCA;
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace JIT { namespace X64 {
 
 TRACE_SET_MOD(hhir);
 
@@ -76,7 +75,6 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 using namespace JIT::reg;
-using namespace X64; // XXX: we need to split the x64-specific parts out
 
 /*
  * It's not normally ok to directly use tracelet abi registers in
@@ -85,15 +83,6 @@ using namespace X64; // XXX: we need to split the x64-specific parts out
  * just for some static_assertions relating to calls to helpers from
  * mcg that hardcode these registers.)
  */
-
-const size_t kTypeWordOffset = (offsetof(TypedValue, m_type) % 8);
-const size_t kTypeShiftBits = kTypeWordOffset * CHAR_BIT;
-
-// left shift an immediate DataType, for type, to the correct position
-// within one of the registers used to pass a TypedValue by value.
-uint64_t toDataTypeForCall(Type type) {
-  return uint64_t(type.toDataType()) << kTypeShiftBits;
-}
 
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
             const Func* vmFunc) {
@@ -112,56 +101,6 @@ const char* getContextName(Class* ctx) {
 }
 
 } // unnamed namespace
-
-//////////////////////////////////////////////////////////////////////
-
-ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val)
-  : m_imm(-1), m_zeroExtend(false), m_done(false) {
-  if (tmp->isConst()) {
-    // tmp is a constant
-    m_srcReg = InvalidReg;
-    if (val) {
-      m_imm = tmp->type() <= Type::Null ? 0 : tmp->rawVal();
-    } else {
-      m_imm = toDataTypeForCall(tmp->type());
-    }
-    m_kind = Kind::Imm;
-    return;
-  }
-  if (val) {
-    assert(loc.reg(0) != InvalidReg);
-    m_srcReg = loc.reg(0);
-    m_imm = 0;
-    m_kind = Kind::Reg;
-    // zero extend any boolean value that we pass to the helper in case
-    // the helper expects it (e.g., as TypedValue)
-    if (tmp->isA(Type::Bool)) m_zeroExtend = true;
-    return;
-  }
-  if (tmp->numWords() > 1) {
-    assert(loc.reg(1) != InvalidReg);
-    m_srcReg = loc.reg(1);
-    m_imm = 0;
-    // Since val is false then we're passing tmp's type. TypeReg lets
-    // CodeGenerator know that the value might require some massaging
-    // to be in the right format for the call.
-    m_kind = Kind::TypeReg;
-    return;
-  }
-  // arg is the (constant) type of a known-typed value.
-  m_srcReg = InvalidReg;
-  m_imm = toDataTypeForCall(tmp->type());
-  m_kind = Kind::Imm;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void AsmInfo::updateForInstruction(IRInstruction* inst, TCA start, TCA end) {
-  auto* block = inst->block();
-  instRanges[inst] = TcaRange(start, end);
-  asmRanges[block] = TcaRange(asmRanges[block].start(), end);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 const Func* CodeGenerator::curFunc() const {
@@ -392,6 +331,11 @@ static void emitFwdJmp(Asm& a, Block* target, CodegenState& state) {
   a.jmp(a.frontier());
   TCA immPtr = a.frontier() - 4;
   prependPatchAddr(state, target, immPtr);
+}
+
+void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state) {
+  Asm a { cb };
+  emitFwdJmp(a, target, state);
 }
 
 void CodeGenerator::emitFwdJcc(Asm& a, ConditionCode cc, Block* target) {
@@ -3430,17 +3374,6 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
                spOffset);
 }
 
-const Func* loadClassCtor(Class* cls) {
-  const Func* f = cls->getCtor();
-  if (UNLIKELY(!(f->attrs() & AttrPublic))) {
-    VMRegAnchor _;
-    UNUSED LookupResult res =
-      g_context->lookupCtorMethod(f, cls, true /*raise*/);
-    assert(res == LookupResult::MethodFoundWithThis);
-  }
-  return f;
-}
-
 void CodeGenerator::cgStClosureFunc(IRInstruction* inst) {
   auto const obj  = srcLoc(0).reg();
   auto const func = inst->extra<StClosureFunc>()->func;
@@ -6022,7 +5955,7 @@ void CodeGenerator::print() const {
   JIT::print(std::cout, m_unit, &m_state.regs, m_state.asmInfo);
 }
 
-static void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
+void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
   void* list = state.patches[block];
   Address labelAddr = cb.frontier();
   while (list) {
@@ -6036,168 +5969,4 @@ static void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
   }
 }
 
-void CodeGenerator::cgBlock(Block* block, std::vector<TransBCMapping>* bcMap) {
-  FTRACE(6, "cgBlock: {}\n", block->id());
-
-  BCMarker prevMarker;
-  for (IRInstruction& instr : *block) {
-    IRInstruction* inst = &instr;
-    // If we're on the first instruction of the block or we have a new
-    // marker since the last instruction, update the bc mapping.
-    if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
-        (m_mcg->tx().isTransDBEnabled() ||
-        RuntimeOption::EvalJitUseVtuneAPI) && bcMap) {
-      bcMap->push_back(TransBCMapping{inst->marker().func->unit()->md5(),
-                                      inst->marker().bcOff,
-                                      m_as.frontier(),
-                                      m_astubs.frontier()});
-      prevMarker = inst->marker();
-    }
-    auto* addr = cgInst(inst);
-    if (m_state.asmInfo && addr) {
-      m_state.asmInfo->updateForInstruction(inst, addr, m_as.frontier());
-    }
-  }
-}
-
-/*
- * Compute and save registers that are live *across* each inst, not including
- * registers whose lifetimes end at inst, nor registers defined by inst.
- */
-LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs) {
-  StateVector<Block, RegSet> liveMap(unit, RegSet());
-  LiveRegs live_regs(unit, RegSet());
-  postorderWalk(unit,
-    [&](Block* block) {
-      RegSet& live = liveMap[block];
-      if (Block* taken = block->taken()) live = liveMap[taken];
-      if (Block* next = block->next()) live |= liveMap[next];
-      for (auto it = block->end(); it != block->begin(); ) {
-        IRInstruction& inst = *--it;
-        live -= regs.dstRegs(inst);
-        live_regs[inst] = live;
-        live |= regs.srcRegs(inst);
-      }
-    });
-  return live_regs;
-}
-
-void genCodeImpl(CodeBlock& mainCode,
-                 CodeBlock& stubsCode,
-                 IRUnit& unit,
-                 std::vector<TransBCMapping>* bcMap,
-                 JIT::MCGenerator* mcg,
-                 const RegAllocInfo& regs,
-                 AsmInfo* asmInfo) {
-  LiveRegs live_regs = computeLiveRegs(unit, regs);
-  CodegenState state(unit, regs, live_regs, asmInfo);
-
-  // Returns: whether a block has already been emitted.
-  DEBUG_ONLY auto isEmitted = [&](Block* block) {
-    return state.addresses[block];
-  };
-
-  /*
-   * Emit the given block on the supplied assembler.  The `nextBlock'
-   * is the nextBlock that will be emitted on this assembler.  If is
-   * not the fallthrough block, emit a patchable jump to the
-   * fallthrough block.
-   */
-  auto emitBlock = [&](CodeBlock& cb, Block* block, Block* nextBlock) {
-    assert(!isEmitted(block));
-
-    FTRACE(6, "cgBlock {} on {}\n", block->id(),
-           cb.base() == stubsCode.base() ? "astubs" : "a");
-
-    auto const aStart      = cb.frontier();
-    auto const astubsStart = stubsCode.frontier();
-    switch (arch()) {
-      case Arch::X64:
-        patchJumps(cb, state, block);
-        break;
-      case Arch::ARM:
-        ARM::patchJumps(cb, state, block);
-        break;
-    }
-    state.addresses[block] = aStart;
-
-    // If the block ends with a Jmp and the next block is going to be
-    // its target, we don't need to actually emit it.
-    IRInstruction* last = &block->back();
-    state.noTerminalJmp = last->op() == Jmp && nextBlock == last->taken();
-
-    if (state.asmInfo) {
-      state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
-    }
-
-    switch (arch()) {
-      case Arch::X64: {
-        CodeGenerator cg(unit, cb, stubsCode, mcg, state);
-        cg.cgBlock(block, bcMap);
-        break;
-      }
-      case Arch::ARM: {
-        ARM::CodeGenerator cg(unit, cb, stubsCode, mcg, state);
-        cg.cgBlock(block, bcMap);
-        break;
-      }
-    }
-
-    if (auto next = block->next()) {
-      if (next != nextBlock) {
-        // If there's a fallthrough block and it's not the next thing
-        // going into this assembler, then emit a jump to it.
-        Asm a { cb };
-        emitFwdJmp(a, next, state);
-      }
-    }
-
-    if (state.asmInfo) {
-      state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
-      if (cb.base() != stubsCode.base()) {
-        state.asmInfo->astubRanges[block] = TcaRange(astubsStart,
-                                                     stubsCode.frontier());
-      }
-    }
-  };
-
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitTraceCall(mainCode, unit.bcOff());
-  }
-
-  auto const linfo = layoutBlocks(unit);
-
-  for (auto it = linfo.blocks.begin(); it != linfo.astubsIt; ++it) {
-    Block* nextBlock = boost::next(it) != linfo.astubsIt
-      ? *boost::next(it) : nullptr;
-    emitBlock(mainCode, *it, nextBlock);
-  }
-  for (auto it = linfo.astubsIt; it != linfo.blocks.end(); ++it) {
-    Block* nextBlock = boost::next(it) != linfo.blocks.end()
-      ? *boost::next(it) : nullptr;
-    emitBlock(stubsCode, *it, nextBlock);
-  }
-
-  if (debug) {
-    for (Block* UNUSED block : linfo.blocks) {
-      assert(isEmitted(block));
-    }
-  }
-}
-
-void genCode(CodeBlock& main, CodeBlock& stubs, IRUnit& unit,
-             std::vector<TransBCMapping>* bcMap,
-             JIT::MCGenerator* mcg,
-             const RegAllocInfo& regs) {
-  Timer _t(Timer::codeGen);
-
-  if (dumpIREnabled()) {
-    AsmInfo ai(unit);
-    genCodeImpl(main, stubs, unit, bcMap, mcg, regs, &ai);
-    dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs, &ai);
-  } else {
-    genCodeImpl(main, stubs, unit, bcMap, mcg, regs, nullptr);
-  }
-}
-
-}}
+}}}

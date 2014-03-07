@@ -262,9 +262,8 @@
     config_file: phpmyadmin/phpunit.xml.nocoverage
   phpunit:
     url: https://github.com/sebastianbergmann/phpunit.git
-    # 4.0 (formerly 3.8) becomes the latest stable branch on March 17, 2014. Use it.
-    branch: "4.0"
-    commit: 875303ab790427a4c0316cbb4457e52d608747f9
+    branch: "4.0.3"
+    commit: "6a0c2db"
     install_root: phpunit
     test_root: phpunit
   ratchet:

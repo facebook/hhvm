@@ -469,79 +469,58 @@ asm_label(a, notPF);
 }
 
 void CodeGenerator::emitCompare(IRInstruction* inst) {
-  auto src1 = inst->src(0);
-  auto src2 = inst->src(1);
-  auto loc1 = srcLoc(0);
-  auto loc2 = srcLoc(1);
-  auto const src1Type = src1->type();
-  auto const src2Type = src2->type();
+  auto src0 = inst->src(0);
+  auto src1 = inst->src(1);
+  auto loc0 = srcLoc(0);
+  auto loc1 = srcLoc(1);
+  auto const type0 = src0->type();
+  auto const type1 = src1->type();
 
   // can't generate CMP instructions correctly for anything that isn't
   // a bool or a numeric, and we can't mix bool/numerics because
   // -1 == true in PHP, but not in HHIR binary representation
-  if (!(((src1Type <= Type::Int || src1Type <= Type::Dbl) &&
-         (src2Type <= Type::Int || src2Type <= Type::Dbl)) ||
-        (src1Type <= Type::Bool && src2Type <= Type::Bool) ||
-        (src1Type <= Type::Cls && src2Type <= Type::Cls))) {
+  if (!(((type0 <= Type::Int || type0 <= Type::Dbl) &&
+         (type1 <= Type::Int || type1 <= Type::Dbl)) ||
+        (type0 <= Type::Bool && type1 <= Type::Bool) ||
+        (type0 <= Type::Cls && type1 <= Type::Cls))) {
     CG_PUNT(emitCompare);
   }
-  if (src1Type <= Type::Dbl || src2Type <= Type::Dbl) {
-    PhysReg srcReg1 = prepXMMReg(m_as, src1, loc1, rCgXMM0);
-    PhysReg srcReg2 = prepXMMReg(m_as, src2, loc2, rCgXMM1);
-    assert(srcReg1 != rCgXMM1 && srcReg2 != rCgXMM0);
-    doubleCmp(m_as, srcReg1, srcReg2);
+  if (type0 <= Type::Dbl || type1 <= Type::Dbl) {
+    PhysReg reg0 = prepXMMReg(m_as, src0, loc0, rCgXMM0);
+    PhysReg reg1 = prepXMMReg(m_as, src1, loc1, rCgXMM1);
+    assert(reg0 != rCgXMM1 && reg1 != rCgXMM0);
+    doubleCmp(m_as, reg0, reg1);
   } else {
-    auto srcReg1 = loc1.reg();
-    auto srcReg2 = loc2.reg();
+    auto reg0 = loc0.reg();
+    auto reg1 = loc1.reg();
 
-    // Note: when both src1 and src2 are constants, we should transform the
-    // branch into an unconditional jump earlier in the IR.
     if (src1->isConst()) {
-      // TODO: use compare with immediate or make sure simplifier
-      // canonicalizes this so that constant is src2
-      srcReg1 = m_rScratch;
-      m_as.      movq (src1->rawVal(), srcReg1);
-    }
-    if (src2->isConst()) {
-      if (src1Type <= Type::Bool) {
-        m_as.    cmpb (src2->rawVal(), rbyte(srcReg1));
+      if (type0 <= Type::Bool) {
+        m_as.    cmpb (src1->rawVal(), rbyte(reg0));
       } else {
-        m_as.    cmpq (src2->rawVal(), srcReg1);
+        m_as.    cmpq (src1->rawVal(), reg0);
       }
     } else {
       // Note the reverse syntax in the assembler.
-      // This cmp will compute srcReg1 - srcReg2
-      if (src1Type <= Type::Bool) {
-        m_as.    cmpb (rbyte(srcReg2), rbyte(srcReg1));
+      // This cmp will compute reg0 - reg1
+      if (type0 <= Type::Bool) {
+        m_as.    cmpb (rbyte(reg1), rbyte(reg0));
       } else {
-        m_as.    cmpq (srcReg2, srcReg1);
+        m_as.    cmpq (reg1, reg0);
       }
     }
   }
 }
 
-void
-CodeGenerator::emitCompareInt(IRInstruction* inst) {
-  assert(inst->src(0)->type() <= Type::Int);
-  assert(inst->src(1)->type() <= Type::Int);
-  auto srcReg1 = srcLoc(0).reg();
-  auto srcReg2 = srcLoc(1).reg();
-  auto src1 = inst->src(0);
-  auto src2 = inst->src(1);
-
-  // Note: when both src1 and src2 are constants, we should transform the
-  // branch into an unconditional jump earlier in the IR.
+void CodeGenerator::emitCompareInt(IRInstruction* inst) {
+  auto srcReg0 = srcLoc(0).reg();
+  auto srcReg1 = srcLoc(1).reg();
   if (srcReg1 == InvalidReg) {
-    // TODO: #3626251 lets us remove this case.
-    srcReg1 = m_rScratch;
-    m_as.    movq(src1->rawVal(), srcReg1);
-  }
-  if (srcReg2 == InvalidReg) {
-    m_as.    cmpq(src2->rawVal(), srcReg1);
+    m_as.    cmpq(inst->src(1)->rawVal(), srcReg0);
   } else {
     // Note the reverse syntax in the assembler.
-    // This cmp will compute srcReg1 - srcReg2
-    m_as.    cmpq(srcReg2, srcReg1);
+    // This cmp will compute srcReg0 - srcReg1
+    m_as.    cmpq(srcReg1, srcReg0);
   }
 }
 

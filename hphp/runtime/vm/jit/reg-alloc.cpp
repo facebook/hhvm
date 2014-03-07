@@ -291,6 +291,19 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
       if (type0 <= Type::Arr && type <= Type::Arr) return true;
     }
     break;
+  case JmpEq:  case SideExitJmpEq:  case ReqBindJmpEq:
+  case JmpNeq: case SideExitJmpNeq: case ReqBindJmpNeq:
+  case JmpGt:  case SideExitJmpGt:  case ReqBindJmpGt:
+  case JmpGte: case SideExitJmpGte: case ReqBindJmpGte:
+  case JmpLt:  case SideExitJmpLt:  case ReqBindJmpLt:
+  case JmpLte: case SideExitJmpLte: case ReqBindJmpLte:
+    if (i == 1) {
+      // cases in emitCompare()
+      auto type0 = inst.src(0)->type();
+      if (type0 <= Type::Bool && type <= Type::Bool) return true;
+      if (type0 <= Type::Cls && type <= Type::Cls) return isI32(cint);
+    }
+    break;
   case EqInt:
   case NeqInt:
   case LtInt:

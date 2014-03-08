@@ -708,49 +708,6 @@ class Variant : private TypedValue {
    */
   APCHandle *getAPCHandle() const;
 
-  /**
-   * Offset functions
-   */
-  Variant rvalAtHelper(int64_t offset, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(int offset, ACCESSPARAMS_DECL) const {
-    return rvalAt((int64_t)offset, flags);
-  }
-  Variant rvalAt(int64_t offset, ACCESSPARAMS_DECL) const {
-    if (m_type == KindOfArray) {
-      return m_data.parr->get(offset, flags & AccessFlags::Error);
-    }
-    return rvalAtHelper(offset, flags);
-  }
-  Variant rvalAt(double offset, ACCESSPARAMS_DECL) const = delete;
-  Variant rvalAt(litstr offset, ACCESSPARAMS_DECL) const = delete;
-  Variant rvalAt(const String& offset, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(const Variant& offset, ACCESSPARAMS_DECL) const;
-
-  // for when we know its an array or null
-  template <typename T>
-  const Variant& rvalAtRefHelper(T offset, ACCESSPARAMS_DECL) const;
-  const Variant& rvalAtRef(int offset, ACCESSPARAMS_DECL) const {
-    return rvalAtRefHelper((int64_t)offset, flags);
-  }
-  const Variant& rvalAtRef(double offset, ACCESSPARAMS_DECL) const = delete;
-  const Variant& rvalAtRef(int64_t offset, ACCESSPARAMS_DECL) const {
-    return rvalAtRefHelper(offset, flags);
-  }
-  const Variant& rvalAtRef(const String& offset, ACCESSPARAMS_DECL) const {
-    return rvalAtRefHelper<const String&>(offset, flags);
-  }
-  const Variant& rvalAtRef(const Variant& offset, ACCESSPARAMS_DECL) const {
-    return rvalAtRefHelper<const Variant&>(offset, flags);
-  }
-  const Variant operator[](int     key) const { return rvalAt(key);}
-  const Variant operator[](int64_t   key) const { return rvalAt(key);}
-  const Variant operator[](double  key) const = delete;
-  const Variant operator[](const String& key) const { return rvalAt(key);}
-  const Variant operator[](const Array& key) const { return rvalAt(key);}
-  const Variant operator[](const Object& key) const { return rvalAt(key);}
-  const Variant operator[](const Variant& key) const { return rvalAt(key);}
-  const Variant operator[](const char*) const = delete;
-
   template<typename T>
   Variant &lval(const T &key) {
     if (m_type == KindOfRef) {

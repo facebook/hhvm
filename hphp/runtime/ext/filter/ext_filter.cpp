@@ -239,7 +239,7 @@ static Variant fail(bool return_null, const Variant& options) {
   if (options.isArray()) {
     const Array& arr(options.toArray());
     if (arr.exists(s_default)) {
-      return options[s_default];
+      return arr[s_default];
     }
   }
   if (return_null) {
@@ -275,8 +275,9 @@ static bool filter_var(Variant& ret, const Variant& variable, int64_t filter,
   int64_t flags;
   Variant option_array;
   if (options.isArray()) {
-    flags = options[s_flags].toInt64();
-    option_array = options[s_options];
+    auto arr = options.toArray();
+    flags = arr[s_flags].toInt64();
+    option_array = arr[s_options];
   } else {
     flags = options.toInt64();
   }
@@ -288,7 +289,7 @@ static bool filter_var(Variant& ret, const Variant& variable, int64_t filter,
       ((flags & k_FILTER_NULL_ON_FAILURE && ret.isNull()) ||
        (!(flags & k_FILTER_NULL_ON_FAILURE) && ret.isBoolean() &&
         ret.asBooleanVal() == 0))) {
-    ret = option_array[s_default];
+    ret = option_array.toArray()[s_default];
   }
   return true;
 }
@@ -341,7 +342,7 @@ Variant f_filter_var(const Variant& variable, int64_t filter /* = 516 */,
                      const Variant& options /* = empty_array */) {
   int64_t filter_flags;
   if (options.isArray()) {
-    filter_flags = options[s_flags].toInt64();
+    filter_flags = options.toCArrRef()[s_flags].toInt64();
   } else {
     filter_flags = options.toInt64();
   }

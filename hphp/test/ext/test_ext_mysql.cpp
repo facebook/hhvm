@@ -379,7 +379,7 @@ bool TestExtMysql::test_mysql_list_dbs() {
   Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);
   Variant res = f_mysql_list_dbs();
   Variant db = f_mysql_fetch_assoc(res);
-  if (db[s_Database].toString().empty()) {
+  if (db.toArray()[s_Database].toString().empty()) {
     return CountSkip();
   }
   return Count(true);
@@ -389,7 +389,8 @@ bool TestExtMysql::test_mysql_list_tables() {
   Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);
   Variant res = f_mysql_list_tables(TEST_DATABASE);
   Variant table = f_mysql_fetch_assoc(res);
-  VERIFY(!table[String("Tables_in_") + TEST_DATABASE].toString().empty());
+  VERIFY(!table.toArray()[String("Tables_in_") + TEST_DATABASE].
+    toString().empty());
   return Count(true);
 }
 
@@ -409,7 +410,7 @@ bool TestExtMysql::test_mysql_list_processes() {
   Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME, TEST_PASSWORD);
   Variant res = f_mysql_list_processes();
   Variant process = f_mysql_fetch_assoc(res);
-  VERIFY(!process[s_Id].toString().empty());
+  VERIFY(!process.toArray()[s_Id].toString().empty());
   return Count(true);
 }
 

@@ -1319,8 +1319,9 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
                         q, ref(matches));
     int size = matches.toArray().size();
     if (size > 2) {
-      string verb = toLower(matches[size - 2].toString().data());
-      string table = toLower(matches[size - 1].toString().data());
+      auto marray = matches.toArray();
+      string verb = toLower(marray[size - 2].toString().data());
+      string table = toLower(marray[size - 1].toString().data());
       if (!table.empty() && table[0] == '`') {
         table = table.substr(1, table.length() - 2);
       }
@@ -1331,7 +1332,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
           HHVM_FN(preg_match)("([^\\s,]+)\\s*=\\s*([^\\s,]+)[\\+\\-]",
                               q, ref(matches));
           size = matches.toArray().size();
-          if (size > 2 && same(matches[1], matches[2])) {
+          if (size > 2 && same(matches.toArray()[1], matches.toArray()[2])) {
             MySqlStats::Record("incdec", rconn->m_xaction_count, table);
           }
         }
@@ -1345,8 +1346,9 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
                           "(begin|commit|rollback)/is",
                           query, ref(matches));
       size = matches.toArray().size();
+      auto marray = matches.toArray();
       if (size == 2) {
-        string verb = toLower(matches[1].toString().data());
+        string verb = toLower(marray[1].toString().data());
         rconn->m_xaction_count = ((verb == "begin") ? 1 : 0);
         ServerStats::Log(string("sql.query.") + verb, 1);
         if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {

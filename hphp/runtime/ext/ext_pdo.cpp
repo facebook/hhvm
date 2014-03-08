@@ -600,8 +600,9 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
 
 static bool valid_statement_class(sp_PDOConnection dbh, const Variant& opt,
                                   String &clsname, Variant &ctor_args) {
-  if (!opt.isArray() || !opt.toArray().exists(0) || !opt[0].isString() ||
-      !f_class_exists(opt[0].toString())) {
+  if (!opt.isArray() || !opt.toArray().exists(0) ||
+      !opt.toArray()[0].isString() ||
+      !f_class_exists(opt.toArray()[0].toString())) {
     pdo_raise_impl_error
       (dbh, nullptr, "HY000",
        "PDO::ATTR_STATEMENT_CLASS requires format array(classname, "
@@ -610,7 +611,7 @@ static bool valid_statement_class(sp_PDOConnection dbh, const Variant& opt,
     PDO_HANDLE_DBH_ERR(dbh);
     return false;
   }
-  clsname = opt[0].toString();
+  clsname = opt.toArray()[0].toString();
   if (clsname == String("PDOStatement")) {
     ctor_args = Variant(Array());
     return true;
@@ -634,7 +635,7 @@ static bool valid_statement_class(sp_PDOConnection dbh, const Variant& opt,
     }
   }
   if (opt.toArray().exists(1)) {
-    Variant item = opt[1];
+    Variant item = opt.toArray()[1];
     if (!item.isArray()) {
       pdo_raise_impl_error
         (dbh, nullptr, "HY000",
@@ -1199,8 +1200,8 @@ bool c_PDO::t_setattribute(int64_t attribute, const Variant& value) {
 
   case PDO_ATTR_DEFAULT_FETCH_MODE:
     if (value.isArray()) {
-      if (value.toArray().exists(0)) {
-        Variant tmp = value[0];
+      if (value.toCArrRef().exists(0)) {
+        Variant tmp = value.toCArrRef()[0];
         if (tmp.isInteger() && ((tmp.toInt64() == PDO_FETCH_INTO ||
                                  tmp.toInt64() == PDO_FETCH_CLASS))) {
           pdo_raise_impl_error(m_dbh, nullptr, "HY000",

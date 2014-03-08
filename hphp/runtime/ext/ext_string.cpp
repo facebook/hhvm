@@ -631,7 +631,7 @@ Variant f_substr_replace(const Variant& str, const Variant& replacement, const V
   if (!str.is(KindOfArray)) {
     String repl;
     if (replacement.is(KindOfArray)) {
-      repl = replacement[0].toString();
+      repl = replacement.asCArrRef()[0].toString();
     } else {
       repl = replacement.toString();
     }

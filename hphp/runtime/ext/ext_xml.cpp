@@ -337,8 +337,9 @@ static Variant xml_call_handler(XmlParser *parser, const Variant& handler,
           o_invoke(handler.toString(), args);
       }
     } else if (handler.isArray() && handler.getArrayData()->size() == 2 &&
-               (handler[0].isString() || handler[0].isObject()) &&
-               handler[1].isString()) {
+               (handler.toCArrRef()[0].isString() ||
+                handler.toCArrRef()[0].isObject()) &&
+               handler.toCArrRef()[1].isString()) {
       vm_call_user_func(handler, args);
     } else {
       raise_warning("Handler is invalid");
@@ -452,7 +453,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           // check if value exists, if yes append to that
           if (parser->ctag.toArray().exists(s_value))
           {
-            myval = parser->ctag.rvalAt(s_value).toString();
+            myval = parser->ctag.toArray().rvalAt(s_value).toString();
             myval += String(decoded_value, decoded_len, AttachString);
             parser->ctag.set(s_value, myval);
           } else {
@@ -466,10 +467,10 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           String mytype;
           curtag.assignRef(parser->data.getArrayData()->endRef());
           if (curtag.toArray().exists(s_type)) {
-            mytype = curtag.rvalAt(s_type).toString();
+            mytype = curtag.toArray().rvalAt(s_type).toString();
             if (!strcmp(mytype.data(), "cdata") &&
                 curtag.toArray().exists(s_value)) {
-              myval = curtag.rvalAt(s_value).toString();
+              myval = curtag.toArray().rvalAt(s_value).toString();
               myval += String(decoded_value, decoded_len, AttachString);
               curtag.set(s_value, myval);
               return;
@@ -669,8 +670,8 @@ void _xml_unparsedEntityDeclHandler(void *userData,
 static void xml_set_handler(Variant * handler, const Variant& data) {
   if (data.isNull() || same(data, false) || data.isString() ||
       (data.isArray() && data.getArrayData()->size() == 2 &&
-       (data[0].isString() || data[0].isObject()) &&
-       data[1].isString())) {
+       (data.toCArrRef()[0].isString() || data.toCArrRef()[0].isObject()) &&
+       data.toCArrRef()[1].isString())) {
     *handler = data;
   } else {
     raise_warning("Handler is invalid");

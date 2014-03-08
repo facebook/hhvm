@@ -112,7 +112,7 @@ bool TestExtServer::test_pagelet_server_task_result() {
     VS(expected, f_pagelet_server_task_result(tasks[i], ref(headers),
                                               ref(code), 0));
     VS(code, 200);
-    VS(headers[1], "ResponseHeader: okay");
+    VS(headers.toArray()[1], "ResponseHeader: okay");
 
     VS(expected, f_pagelet_server_task_result(tasks[i], ref(headers),
                                               ref(code), 1));
@@ -130,8 +130,8 @@ bool TestExtServer::test_xbox_send_message() {
     s_response("response");
   Variant ret;
   VERIFY(f_xbox_send_message("hello", ref(ret), 5000));
-  VS(ret[s_code], 200);
-  VS(ret[s_response], "olleh");
+  VS(ret.toArray()[s_code], 200);
+  VS(ret.toArray()[s_response], "olleh");
   return Count(true);
 }
 

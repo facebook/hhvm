@@ -1781,7 +1781,8 @@ static void send_soap_server_fault(
   USE_SOAP_GLOBAL;
   bool use_http_error_status = true;
   GlobalVariables *g = get_global_variables();
-  if (g->get(s__SERVER)[s_HTTP_USER_AGENT].toString() == s_Shockwave_Flash) {
+  if (g->get(s__SERVER).toArray()[s_HTTP_USER_AGENT].toString() ==
+      s_Shockwave_Flash) {
     use_http_error_status = false;
   }
   if (use_http_error_status) {
@@ -2125,7 +2126,8 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
 
     GlobalVariables *g = get_global_variables();
     if (g->get(s__SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
-      String encoding = g->get(s__SERVER)[s_HTTP_CONTENT_ENCODING].toString();
+      String encoding = g->get(s__SERVER)
+        .toArray()[s_HTTP_CONTENT_ENCODING].toString();
       Variant ret;
       if (encoding == s_gzip || encoding == s_xgzip) {
         ret = HHVM_FN(gzinflate)(String(data, size, CopyString));

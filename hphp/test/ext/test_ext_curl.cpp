@@ -143,7 +143,7 @@ static const StaticString
 
 bool TestExtCurl::test_curl_version() {
   Variant ret = HHVM_FN(curl_version)();
-  VERIFY(!ret[s_protocols].toArray().empty());
+  VERIFY(!ret.toArray()[s_protocols].toArray().empty());
   return Count(true);
 }
 
@@ -193,7 +193,7 @@ bool TestExtCurl::test_curl_getinfo() {
   HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_exec)(c.toResource());
   Variant ret = HHVM_FN(curl_getinfo)(c.toResource());
-  VS(ret[s_url], String(get_request_uri()));
+  VS(ret.toArray()[s_url], String(get_request_uri()));
   ret = HHVM_FN(curl_getinfo)(c.toResource(), k_CURLINFO_EFFECTIVE_URL);
   VS(ret, String(get_request_uri()));
   return Count(true);
@@ -314,7 +314,7 @@ bool TestExtCurl::test_curl_multi_info_read() {
   } while (more(still_running, 0));
 
   Variant ret = HHVM_FN(curl_multi_info_read)(mh);
-  VS(ret[s_result], 0);
+  VS(ret.toArray()[s_result], 0);
   return Count(true);
 }
 
@@ -335,3 +335,4 @@ bool TestExtCurl::test_curl_multi_close() {
   HHVM_FN(curl_multi_close)(mh);
   return Count(true);
 }
+

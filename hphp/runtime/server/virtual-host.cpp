@@ -345,7 +345,7 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
           }
         }
         if (backref >= 0) {
-          String br = matches[backref].toString();
+          String br = matches.toArray()[backref].toString();
           if (rule.encode_backrefs) {
             br = StringUtil::UrlEncode(br);
           }
@@ -387,9 +387,9 @@ std::string VirtualHost::serverName(const std::string &host) const {
                                       CopyString),
                                matches);
       if (ret.toInt64() > 0) {
-        String prefix = matches[1].toString();
+        String prefix = matches.toArray()[1].toString();
         if (prefix.empty()) {
-          prefix = matches[0].toString();
+          prefix = matches.toArray()[0].toString();
         }
         if (!prefix.empty()) {
           return std::string(prefix.data()) +

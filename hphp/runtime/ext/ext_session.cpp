@@ -226,7 +226,7 @@ const StaticString
 
 String SessionModule::create_sid() {
   GlobalVariables *g = get_global_variables();
-  String remote_addr = g->get(s__SERVER)[s_REMOTE_ADDR].toString();
+  String remote_addr = g->get(s__SERVER).toArray()[s_REMOTE_ADDR].toString();
 
   struct timeval tv;
   gettimeofday(&tv, NULL);
@@ -1360,7 +1360,7 @@ const StaticString s_PATH_TRANSLATED("PATH_TRANSLATED");
 
 static inline void last_modified() {
   GlobalVariables *g = get_global_variables();
-  String path = g->get(s__SERVER)[s_PATH_TRANSLATED].toString();
+  String path = g->get(s__SERVER).toArray()[s_PATH_TRANSLATED].toString();
   if (!path.empty()) {
     struct stat sb;
     if (stat(path.data(), &sb) == -1) {
@@ -1678,24 +1678,30 @@ bool f_session_start() {
    */
   GlobalVariables *g = get_global_variables();
   if (PS(id).empty()) {
-    if (PS(use_cookies) &&
-        g->get(s__COOKIE).toArray().exists(String(PS(session_name)))) {
-      PS(id) = g->get(s__COOKIE)[String(PS(session_name))].toString();
-      PS(apply_trans_sid) = 0;
-      PS(send_cookie) = 0;
-      PS(define_sid) = 0;
+    if (PS(use_cookies)) {
+      auto cookies = g->get(s__COOKIE).toArray();
+      if (cookies.exists(String(PS(session_name)))) {
+        PS(id) = cookies[String(PS(session_name))].toString();
+        PS(apply_trans_sid) = 0;
+        PS(send_cookie) = 0;
+        PS(define_sid) = 0;
+      }
     }
 
-    if (!PS(use_only_cookies) && !PS(id) &&
-        g->get(s__GET).toArray().exists(String(PS(session_name)))) {
-      PS(id) = g->get(s__GET)[String(PS(session_name))].toString();
-      PS(send_cookie) = 0;
+    if (!PS(use_only_cookies) && !PS(id)) {
+      auto get = g->get(s__GET).toArray();
+      if (get.exists(String(PS(session_name)))) {
+        PS(id) = get[String(PS(session_name))].toString();
+        PS(send_cookie) = 0;
+      }
     }
 
-    if (!PS(use_only_cookies) && !PS(id) &&
-        g->get(s__POST).toArray().exists(String(PS(session_name)))) {
-      PS(id) = g->get(s__POST)[String(PS(session_name))].toString();
-      PS(send_cookie) = 0;
+    if (!PS(use_only_cookies) && !PS(id)) {
+      auto post = g->get(s__POST).toArray();
+      if (post.exists(String(PS(session_name)))) {
+        PS(id) = post[String(PS(session_name))].toString();
+        PS(send_cookie) = 0;
+      }
     }
   }
 
@@ -1705,7 +1711,7 @@ bool f_session_start() {
      '<session-name>=<session-id>' to allow URLs of the form
      http://yoursite/<session-name>=<session-id>/script.php */
   if (!PS(use_only_cookies) && PS(id).empty()) {
-    value = g->get(s__SERVER)[s_REQUEST_URI].toString();
+    value = g->get(s__SERVER).toArray()[s_REQUEST_URI].toString();
     const char *p = strstr(value.data(), PS(session_name).c_str());
     if (p && p[lensess] == '=') {
       p += lensess + 1;
@@ -1720,7 +1726,7 @@ bool f_session_start() {
   /* check whether the current request was referred to by
      an external site which invalidates the previously found id */
   if (!PS(id).empty() && PS(extern_referer_chk)[0] != '\0') {
-    value = g->get(s__SERVER)[s_HTTP_REFERER].toString();
+    value = g->get(s__SERVER).toArray()[s_HTTP_REFERER].toString();
     if (strstr(value.data(), PS(extern_referer_chk).c_str()) == NULL) {
       PS(id).reset();
       PS(send_cookie) = 1;

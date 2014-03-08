@@ -20,7 +20,7 @@
 #include <map>
 #include <string>
 
-#include <boost/lexical_cast.hpp>
+#include "folly/Conv.h"
 
 #include "hphp/util/logger.h"
 #include "hphp/util/text-util.h"
@@ -43,8 +43,6 @@
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
 using std::map;
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
 using std::string;
 
 namespace HPHP {
@@ -549,12 +547,12 @@ void HttpProtocol::CopyPathInfo(Variant& server,
   assert(server.toCArrRef().exists(s_SERVER_PORT));
   std::string serverPort = "80";
   if (server.toCArrRef().exists(s_SERVER_PORT)) {
-    CHECK(server[s_SERVER_PORT].isInteger() ||
-          server[s_SERVER_PORT].isString());
-    if (server[s_SERVER_PORT].isInteger()) {
-      serverPort = lexical_cast<string>(server[s_SERVER_PORT].toInt32());
+    Variant port = server.toCArrRef()[s_SERVER_PORT];
+    always_assert(port.isInteger() || port.isString());
+    if (port.isInteger()) {
+      serverPort = folly::to<std::string>(port.toInt32());
     } else {
-      serverPort = server[s_SERVER_PORT].toString().data();
+      serverPort = port.toString().data();
     }
   }
 
@@ -565,12 +563,12 @@ void HttpProtocol::CopyPathInfo(Variant& server,
 
   string hostHeader;
   if (server.toCArrRef().exists(s_HTTP_HOST)) {
-    hostHeader = server[s_HTTP_HOST].toCStrRef().data();
+    hostHeader = server.toCArrRef()[s_HTTP_HOST].toCStrRef().data();
   }
   String hostName;
   if (server.toCArrRef().exists(s_SERVER_NAME)) {
-    assert(server[s_SERVER_NAME].isString());
-    hostName = server[s_SERVER_NAME].toCStrRef();
+    assert(server.toCArrRef()[s_SERVER_NAME].isString());
+    hostName = server.toCArrRef()[s_SERVER_NAME].toCStrRef();
   }
   server.set(s_SCRIPT_URI,
              String(prefix + (hostHeader.empty() ? hostName + port_suffix :
@@ -615,7 +613,7 @@ void HttpProtocol::CopyPathInfo(Variant& server,
     server.set(s_PATH_TRANSLATED, r.absolutePath());
   } else {
     assert(server.toCArrRef().exists(s_DOCUMENT_ROOT));
-    assert(server[s_DOCUMENT_ROOT].isString());
+    assert(server.toCArrRef()[s_DOCUMENT_ROOT].isString());
     // reset path_translated back to the transport if it has it.
     auto const& pathTranslated = transport->getPathTranslated();
     if (!pathTranslated.empty()) {
@@ -624,13 +622,13 @@ void HttpProtocol::CopyPathInfo(Variant& server,
         server.set(s_PATH_TRANSLATED, String(pathTranslated));
       } else {
         server.set(s_PATH_TRANSLATED,
-                   String(server[s_DOCUMENT_ROOT].toCStrRef() +
+                   String(server.toCArrRef()[s_DOCUMENT_ROOT].toCStrRef() +
                           pathTranslated));
       }
     } else {
       server.set(s_PATH_TRANSLATED,
-                 String(server[s_DOCUMENT_ROOT].toCStrRef() +
-                        server[s_SCRIPT_NAME].toCStrRef() +
+                 String(server.toCArrRef()[s_DOCUMENT_ROOT].toCStrRef() +
+                        server.toCArrRef()[s_SCRIPT_NAME].toCStrRef() +
                         r.pathInfo().data()));
     }
     server.set(s_PATH_INFO, r.pathInfo());

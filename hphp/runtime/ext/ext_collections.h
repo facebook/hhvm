@@ -285,6 +285,7 @@ class BaseVector : public ExtCollectionObjectData {
   // Friends
 
   friend class c_VectorIterator;
+  friend class c_Pair;
 
   template<class TVector>
   friend ObjectData* collectionDeepCopyBaseVector(TVector* vec);
@@ -503,6 +504,7 @@ public:
   }
 
   friend class c_Vector;
+  friend class c_Pair;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

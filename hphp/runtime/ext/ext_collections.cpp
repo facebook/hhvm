@@ -4904,8 +4904,8 @@ Object c_Pair::t_items() {
 
 Object c_Pair::t_keys() {
   assert(isFullyConstructed());
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
+  auto* vec = NEWOBJ(c_ImmVector)();
+  Object obj = vec;
   vec->reserve(2);
   vec->m_size = 2;
   vec->m_data[0].m_data.num = 0;
@@ -4916,7 +4916,7 @@ Object c_Pair::t_keys() {
 }
 
 Object c_Pair::t_values() {
-  auto* vec = NEWOBJ(c_Vector)();
+  auto* vec = NEWOBJ(c_ImmVector)();
   Object o = vec;
   vec->init(VarNR(this));
   return o;
@@ -4929,8 +4929,8 @@ Object c_Pair::t_lazy() {
 
 Object c_Pair::t_kvzip() {
   assert(isFullyConstructed());
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
+  auto* vec = NEWOBJ(c_ImmVector)();
+  Object obj = vec;
   vec->reserve(2);
   for (uint i = 0; i < 2; ++i) {
     auto* pair = NEWOBJ(c_Pair)();
@@ -5013,8 +5013,8 @@ Object c_Pair::t_map(const Variant& callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
+  auto* vec = NEWOBJ(c_ImmVector)();
+  Object obj = vec;
   vec->reserve(2);
   for (uint64_t i = 0; i < 2; ++i) {
     g_context->invokeFuncFew(&vec->m_data[i], ctx, 1, &getElms()[i]);
@@ -5032,8 +5032,8 @@ Object c_Pair::t_mapwithkey(const Variant& callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
+  auto* vec = NEWOBJ(c_ImmVector)();
+  Object obj = vec;
   vec->reserve(2);
   for (uint64_t i = 0; i < 2; ++i) {
     TypedValue args[2] = { make_tv<KindOfInt64>(i), getElms()[i] };
@@ -5052,8 +5052,8 @@ Object c_Pair::t_filter(const Variant& callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
+  auto* vec = NEWOBJ(c_ImmVector)();
+  Object obj = vec;
   for (uint64_t i = 0; i < 2; ++i) {
     Variant ret;
     g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &getElms()[i]);
@@ -5073,8 +5073,8 @@ Object c_Pair::t_filterwithkey(const Variant& callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
+  auto* vec = NEWOBJ(c_ImmVector)();
+  Object obj = vec;
   for (uint64_t i = 0; i < 2; ++i) {
     Variant ret;
     TypedValue args[2] = { make_tv<KindOfInt64>(i), getElms()[i] };
@@ -5090,8 +5090,8 @@ Object c_Pair::t_zip(const Variant& iterable) {
   assert(isFullyConstructed());
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
+  auto* vec = NEWOBJ(c_ImmVector)();
+  Object obj = vec;
   vec->reserve(std::min(sz, size_t(2)));
   for (uint64_t i = 0; i < 2 && iter; ++i, ++iter) {
     Variant v = iter.second();

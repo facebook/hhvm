@@ -127,6 +127,7 @@ class IntlExtension : public Extension {
     initCollator();
     initMessageFormatter();
     initNormalizer();
+    initResourceBundle();
   }
 
   void threadInit() override {
@@ -151,6 +152,7 @@ class IntlExtension : public Extension {
   void initCollator();
   void initMessageFormatter();
   void initNormalizer();
+  void initResourceBundle();
 };
 
 } // namespace Intl

@@ -1465,8 +1465,18 @@ class Redis {
       throw new RedisException("Named persistent connections not supported");
     }
 
-    if (($port <= 0) && (substr($host, 0, 1) != '/')) {
-      $port = self::DEFAULT_PORT;
+    if ($port <= 0) {
+      if ((strlen($host) > 0) && ($host[0] == '/')) {
+        // Turn file path into unix:///path/to/sock
+        $host = 'unix://' . $host;
+        $port = 0;
+      } elseif ((strlen($host) > 7) && !strncmp($host, 'unix://', 7)) {
+        // Leave explicit unix:// socket as is
+        $port = 0;
+      } else {
+        // Default port for TCP connections
+        $port = self::DEFAULT_PORT;
+      }
     }
 
     if ($persistent) {

@@ -17,12 +17,13 @@
 #ifndef incl_HPHP_REF_DATA_H
 #define incl_HPHP_REF_DATA_H
 
-#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
-#error Directly including 'ref_data.h' is prohibited. \
-       Include 'complex_types.h' instead.
-#endif
+#include "hphp/runtime/base/countable.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
+
+class Variant;
 
 /*
  * We heap allocate a RefData when we make a reference to something.
@@ -264,13 +265,7 @@ public:
   ~RefData();
 
 private:
-  static void compileTimeAsserts() {
-    static_assert(offsetof(RefData, m_count) ==
-                  FAST_REFCOUNT_OFFSET, "");
-    static_assert(sizeof(RefData::m_count) ==
-                  TypedValueAux::auxSize, "");
-    static_assert(sizeof(DataType) == 1, "required for m_cow/z packing");
-  }
+  static void compileTimeAsserts();
 
 #if defined(DEBUG) || defined(PACKED_TV)
 private:

@@ -157,7 +157,6 @@ struct ExecutionContext {
   Stack m_stack;
   ActRec* m_fp;
   PC m_pc;
-  int64_t m_currentThreadIdx;
 
   enum ShutdownType {
     ShutDown,
@@ -709,12 +708,7 @@ OPCODES
   // dispatchBB() tries to run until a control-flow instruction has been run.
   void dispatchBB();
 
-private:
-  static Mutex s_threadIdxLock;
-  static hphp_hash_map<pid_t, int64_t> s_threadIdxMap;
-
 public:
-  static int64_t s_threadIdxCounter;
   Variant m_setprofileCallback;
   bool m_executingSetprofileCallback;
 

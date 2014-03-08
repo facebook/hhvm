@@ -2274,20 +2274,17 @@ folly::Optional<TCA> MCGenerator::getCatchTrace(CTCA ip) const {
   return folly::none;
 }
 
-void
-MCGenerator::requestInit() {
-  TRACE(1, "in requestInit(%" PRId64 ")\n", g_context->m_currentThreadIdx);
+void MCGenerator::requestInit() {
   tl_regState = VMRegState::CLEAN;
   Timer::RequestInit();
   PendQ::drain();
   m_tx.requestResetHighLevelTranslator();
-  Treadmill::startRequest(g_context->m_currentThreadIdx);
+  Treadmill::startRequest();
   memset(&s_perfCounters, 0, sizeof(s_perfCounters));
   Stats::init();
 }
 
-void
-MCGenerator::requestExit() {
+void MCGenerator::requestExit() {
   if (Translator::WriteLease().amOwner()) {
     Translator::WriteLease().drop();
   }
@@ -2296,8 +2293,7 @@ MCGenerator::requestExit() {
             Process::GetThreadIdForTrace(), Translator::WriteLease().m_hintKept,
             Translator::WriteLease().m_hintGrabbed);
   PendQ::drain();
-  Treadmill::finishRequest(g_context->m_currentThreadIdx);
-  TRACE(1, "done requestExit(%" PRId64 ")\n", g_context->m_currentThreadIdx);
+  Treadmill::finishRequest();
   Stats::dump();
   Stats::clear();
   Timer::RequestExit();

@@ -54,10 +54,6 @@ namespace HPHP {
 
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 
-int64_t ExecutionContext::s_threadIdxCounter = 0;
-Mutex ExecutionContext::s_threadIdxLock;
-hphp_hash_map<pid_t, int64_t> ExecutionContext::s_threadIdxMap;
-
 ExecutionContext::ExecutionContext()
   : m_fp(nullptr)
   , m_pc(nullptr)
@@ -102,19 +98,6 @@ ExecutionContext::ExecutionContext()
                 "m_fp offset too large");
   static_assert(offsetof(ExecutionContext, m_pc) <= 0xff,
                 "m_pc offset too large");
-  static_assert(offsetof(ExecutionContext, m_currentThreadIdx) <= 0xff,
-                "m_currentThreadIdx offset too large");
-
-  {
-    Lock lock(s_threadIdxLock);
-    pid_t tid = Process::GetThreadPid();
-    if (auto const idx = folly::get_ptr(s_threadIdxMap, tid)) {
-      m_currentThreadIdx = *idx;
-    } else {
-      m_currentThreadIdx = s_threadIdxCounter++;
-      s_threadIdxMap[tid] = m_currentThreadIdx;
-    }
-  }
 }
 
 ExecutionContext::~ExecutionContext() {
@@ -130,10 +113,7 @@ ExecutionContext::~ExecutionContext() {
   delete m_breakPointFilter;
   delete m_lastLocFilter;
   obFlushAll();
-  for (std::list<OutputBuffer*>::const_iterator iter = m_buffers.begin();
-       iter != m_buffers.end(); ++iter) {
-    delete *iter;
-  }
+  for (auto& b : m_buffers) delete b;
 }
 
 void ExecutionContext::backupSession() {

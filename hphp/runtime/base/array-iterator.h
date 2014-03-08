@@ -91,7 +91,7 @@ class ArrayIter {
     setArrayData(data);
     m_pos = data->getIterBegin();
   }
-  explicit ArrayIter(CArrRef array);
+  explicit ArrayIter(const Array& array);
   explicit ArrayIter(ObjectData* obj);
   ArrayIter(ObjectData* obj, NoInc);
   explicit ArrayIter(CObjRef obj);

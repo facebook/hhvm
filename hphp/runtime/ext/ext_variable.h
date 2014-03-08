@@ -59,11 +59,11 @@ bool f_settype(VRefParam var, const String& type);
 Variant f_print_r(CVarRef expression, bool ret = false);
 Variant f_var_export(CVarRef expression, bool ret = false);
 void f_var_dump(CVarRef v);
-void f_var_dump(int _argc, CVarRef expression, CArrRef _argv = null_array);
+void f_var_dump(int _argc, CVarRef expression, const Array& _argv = null_array);
 void f_debug_zval_dump(CVarRef variable);
 String f_serialize(CVarRef value);
 Variant f_unserialize(const String& str,
-                      CArrRef class_whitelist = empty_array);
+                      const Array& class_whitelist = empty_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 // variable table
@@ -81,7 +81,7 @@ bool f_import_request_variables(const String& types, const String& prefix = "");
 #define EXTR_IF_EXISTS          6
 #define EXTR_REFS               0x100
 
-int64_t f_extract(CArrRef var_array, int extract_type = EXTR_OVERWRITE,
+int64_t f_extract(const Array& var_array, int extract_type = EXTR_OVERWRITE,
                   const String& prefix = "");
 
 ///////////////////////////////////////////////////////////////////////////////

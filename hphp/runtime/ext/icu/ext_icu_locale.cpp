@@ -305,7 +305,7 @@ inline void element_not_string() {
 }
 
 static bool append_key_value(String& ret,
-                             CArrRef subtags,
+                             const Array& subtags,
                              LocaleTag tag) {
   auto name = LocaleName(tag);
   if (!subtags.exists(name)) return true;
@@ -319,7 +319,7 @@ static bool append_key_value(String& ret,
 }
 
 static bool append_multiple_key_values(String& ret,
-                                       CArrRef subtags,
+                                       const Array& subtags,
                                        LocaleTag tag) {
   auto name = LocaleName(tag);
   if (subtags.exists(name)) {
@@ -382,7 +382,7 @@ static bool append_multiple_key_values(String& ret,
   return true;
 }
 
-static Variant HHVM_STATIC_METHOD(Locale, composeLocale, CArrRef subtags) {
+static Variant HHVM_STATIC_METHOD(Locale, composeLocale, const Array& subtags) {
   s_intl_error->clearError();
 
   if (subtags.exists(s_GRANDFATHERED)) {
@@ -539,7 +539,7 @@ inline void normalize_for_match(String& v) {
   v->invalidateHash();
 }
 
-static String HHVM_STATIC_METHOD(Locale, lookup, CArrRef langtag,
+static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
                                  const String& locale,
                                  bool canonicalize, const String& def) {
   String locname(localeOrDefault(locale), CopyString);

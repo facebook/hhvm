@@ -169,7 +169,7 @@ void f_var_dump(CVarRef v) {
 }
 
 void f_var_dump(int _argc, CVarRef expression,
-                CArrRef _argv /* = null_array */) {
+                const Array& _argv /* = null_array */) {
   f_var_dump(expression);
   for (int i = 0; i < _argv.size(); i++) {
     f_var_dump(_argv[i]);
@@ -181,7 +181,7 @@ void f_debug_zval_dump(CVarRef variable) {
   vs.serialize(variable, false);
 }
 
-Variant f_unserialize(const String& str, CArrRef class_whitelist /* = empty_array */) {
+Variant f_unserialize(const String& str, const Array& class_whitelist /* = empty_array */) {
   return unserialize_from_string(str, class_whitelist);
 }
 
@@ -208,7 +208,7 @@ bool f_import_request_variables(const String& types, const String& prefix /* = "
                               "this function is called.");
 }
 
-int64_t f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
+int64_t f_extract(const Array& var_array, int extract_type /* = EXTR_OVERWRITE */,
                   const String& prefix /* = "" */) {
   bool reference = extract_type & EXTR_REFS;
   extract_type &= ~EXTR_REFS;

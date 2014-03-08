@@ -249,7 +249,7 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param, Variant value,
 static xmlDocPtr serialize_function_call
 (c_SoapClient *client, std::shared_ptr<sdlFunction> function,
   const char *function_name,
-  const char *uri, CArrRef arguments, CArrRef soap_headers) {
+  const char *uri, const Array& arguments, const Array& soap_headers) {
   xmlNodePtr envelope = NULL, body, method = NULL, head = NULL;
   xmlNsPtr ns = NULL;
   int style, use;
@@ -1176,7 +1176,7 @@ static xmlDocPtr serialize_response_call(
     std::shared_ptr<sdlFunction> function,
     const char *function_name,
     const char *uri, Variant &ret,
-    CArrRef headers, int version) {
+    const Array& headers, int version) {
   xmlNodePtr envelope = NULL, body, param;
   xmlNsPtr ns = NULL;
   int use = SOAP_LITERAL;
@@ -1887,7 +1887,7 @@ const StaticString
   s_soapaction("soapaction");
 
 void c_SoapServer::t___construct(CVarRef wsdl,
-                                 CArrRef options /* = null_array */) {
+                                 const Array& options /* = null_array */) {
   USE_SOAP_GLOBAL;
   SoapServerScope ss(this);
 
@@ -1981,7 +1981,7 @@ void c_SoapServer::t___construct(CVarRef wsdl,
 }
 
 void c_SoapServer::t_setclass(int _argc, const String& name,
-                              CArrRef _argv /* = null_array */) {
+                              const Array& _argv /* = null_array */) {
   SoapServerScope ss(this);
   if (f_class_exists(name, true)) {
     m_type = SOAP_CLASS;
@@ -2352,7 +2352,7 @@ c_SoapClient::~c_SoapClient() {
 }
 
 void c_SoapClient::t___construct(CVarRef wsdl,
-                                 CArrRef options /* = null_array */) {
+                                 const Array& options /* = null_array */) {
   USE_SOAP_GLOBAL;
   SoapClientScope ss(this);
 
@@ -2474,8 +2474,8 @@ Variant c_SoapClient::t___call(Variant name, Variant args) {
   return t___soapcall(name.toString(), args.toArray());
 }
 
-Variant c_SoapClient::t___soapcall(const String& name, CArrRef args,
-                                   CArrRef options /* = null_array */,
+Variant c_SoapClient::t___soapcall(const String& name, const Array& args,
+                                   const Array& options /* = null_array */,
                                    CVarRef input_headers /* = null_variant */,
                                    VRefParam output_headers /* = null */) {
   SoapClientScope ss(this);

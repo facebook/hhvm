@@ -25,7 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 int64_t f_pcntl_alarm(int seconds);
-void f_pcntl_exec(const String& path, CArrRef args = null_array, CArrRef envs = null_array);
+void f_pcntl_exec(const String& path, const Array& args = null_array, const Array& envs = null_array);
 
 int64_t f_pcntl_fork();
 Variant f_pcntl_getpriority(int pid = 0, int process_identifier = 0);
@@ -60,7 +60,7 @@ String f_system(const String& command, VRefParam return_var = uninit_null());
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_proc_open(const String& cmd, CArrRef descriptorspec, VRefParam pipes,
+Variant f_proc_open(const String& cmd, const Array& descriptorspec, VRefParam pipes,
                     const String& cwd = null_string, CVarRef env = null_variant,
                     CVarRef other_options = null_variant);
 bool f_proc_terminate(CResRef process, int signal = 0);

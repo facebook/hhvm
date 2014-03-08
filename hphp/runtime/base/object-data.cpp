@@ -358,7 +358,7 @@ Variant ObjectData::o_setRef(const String& propName, CVarRef v,
   return o_setImpl<RefResult>(propName, ref(v), context);
 }
 
-void ObjectData::o_setArray(CArrRef properties) {
+void ObjectData::o_setArray(const Array& properties) {
   for (ArrayIter iter(properties); iter; ++iter) {
     String k = iter.first().toString();
     Class* ctx = nullptr;

@@ -27,11 +27,11 @@ Variant f_ldap_connect(const String& hostname = null_string, int port = 389);
 Variant f_ldap_explode_dn(const String& dn, int with_attrib);
 Variant f_ldap_dn2ufn(const String& db);
 String f_ldap_err2str(int errnum);
-bool f_ldap_add(CResRef link, const String& dn, CArrRef entry);
-bool f_ldap_mod_add(CResRef link, const String& dn, CArrRef entry);
-bool f_ldap_mod_del(CResRef link, const String& dn, CArrRef entry);
-bool f_ldap_mod_replace(CResRef link, const String& dn, CArrRef entry);
-bool f_ldap_modify(CResRef link, const String& dn, CArrRef entry);
+bool f_ldap_add(CResRef link, const String& dn, const Array& entry);
+bool f_ldap_mod_add(CResRef link, const String& dn, const Array& entry);
+bool f_ldap_mod_del(CResRef link, const String& dn, const Array& entry);
+bool f_ldap_mod_replace(CResRef link, const String& dn, const Array& entry);
+bool f_ldap_modify(CResRef link, const String& dn, const Array& entry);
 bool f_ldap_bind(
   CResRef link, const String& bind_rdn = null_string,
   const String& bind_password = null_string);
@@ -44,15 +44,15 @@ bool f_ldap_set_option(CVarRef link, int option, CVarRef newval);
 bool f_ldap_close(CResRef link);
 Variant f_ldap_list(
   CVarRef link, CVarRef base_dn, CVarRef filter,
-  CArrRef attributes = null_array, int attrsonly = 0, int sizelimit = -1,
+  const Array& attributes = null_array, int attrsonly = 0, int sizelimit = -1,
   int timelimit = -1, int deref = -1);
 Variant f_ldap_read(
   CVarRef link, CVarRef base_dn, CVarRef filter,
-  CArrRef attributes = null_array, int attrsonly = 0, int sizelimit = -1,
+  const Array& attributes = null_array, int attrsonly = 0, int sizelimit = -1,
   int timelimit = -1, int deref = -1);
 Variant f_ldap_search(
   CVarRef link, CVarRef base_dn, CVarRef filter,
-  CArrRef attributes = null_array, int attrsonly = 0, int sizelimit = -1,
+  const Array& attributes = null_array, int attrsonly = 0, int sizelimit = -1,
   int timelimit = -1, int deref = -1);
 bool f_ldap_rename(
   CResRef link, const String& dn, const String& newrdn,

@@ -64,21 +64,21 @@ bool f_key_exists(CVarRef key, CVarRef search);
 Variant f_array_keys(CVarRef input, CVarRef search_value = null_variant,
                      bool strict = false);
 Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1,
-                    CArrRef _argv = null_array);
+                    const Array& _argv = null_array);
 
-Variant f_array_merge_recursive(int _argc, CVarRef array1, CArrRef _argv = null_array);
+Variant f_array_merge_recursive(int _argc, CVarRef array1, const Array& _argv = null_array);
 
-Variant f_array_merge(int _argc, CVarRef array1, CArrRef _argv = null_array);
+Variant f_array_merge(int _argc, CVarRef array1, const Array& _argv = null_array);
 
-Variant f_array_replace_recursive(int _argc, CVarRef array1, CArrRef _argv = null_array);
+Variant f_array_replace_recursive(int _argc, CVarRef array1, const Array& _argv = null_array);
 
-Variant f_array_replace(int _argc, CVarRef array1, CArrRef _argv = null_array);
+Variant f_array_replace(int _argc, CVarRef array1, const Array& _argv = null_array);
 
 Variant f_array_pad(CVarRef input, int pad_size, CVarRef pad_value);
 Variant f_array_pop(VRefParam array);
 Variant f_array_product(CVarRef array);
 Variant f_array_push(int _argc, VRefParam container, CVarRef var,
-                     CArrRef _argv = null_array);
+                     const Array& _argv = null_array);
 
 Variant f_array_rand(CVarRef input, int num_req = 1);
 Variant f_array_reduce(CVarRef input, CVarRef callback,
@@ -97,7 +97,7 @@ Variant f_array_splice(VRefParam input, int offset,
 Variant f_array_sum(CVarRef array);
 Variant f_array_unique(CVarRef array, int sort_flags = 2);
 
-Variant f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
+Variant f_array_unshift(int _argc, VRefParam array, CVarRef var, const Array& _argv = null_array);
 
 Variant f_array_values(CVarRef input);
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
@@ -106,7 +106,7 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
 bool f_array_walk(VRefParam input, CVarRef funcname,
                   CVarRef userdata = null_variant);
 
-Array f_compact(int _argc, CVarRef varname, CArrRef _argv = null_array);
+Array f_compact(int _argc, CVarRef varname, const Array& _argv = null_array);
 
 bool f_shuffle(VRefParam array);
 int64_t f_count(CVarRef var, int64_t mode = 0);
@@ -124,35 +124,35 @@ Variant f_end(VRefParam array);
 bool f_in_array(CVarRef needle, CVarRef haystack, bool strict = false);
 Variant f_range(CVarRef low, CVarRef high, CVarRef step = 1);
 
-Variant f_array_diff(int _argc, CVarRef container1, CVarRef container2, CArrRef _argv = null_array);
-Variant f_array_diff_key(int _argc, CVarRef container1, CVarRef container2, CArrRef _argv = null_array);
+Variant f_array_diff(int _argc, CVarRef container1, CVarRef container2, const Array& _argv = null_array);
+Variant f_array_diff_key(int _argc, CVarRef container1, CVarRef container2, const Array& _argv = null_array);
 Variant f_array_udiff(int _argc, CVarRef array1, CVarRef array2,
-                      CVarRef data_compare_func, CArrRef _argv = null_array);
-Variant f_array_diff_assoc(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array);
+                      CVarRef data_compare_func, const Array& _argv = null_array);
+Variant f_array_diff_assoc(int _argc, CVarRef array1, CVarRef array2, const Array& _argv = null_array);
 Variant f_array_diff_uassoc(int _argc, CVarRef array1, CVarRef array2,
-                            CVarRef key_compare_func, CArrRef _argv = null_array);
+                            CVarRef key_compare_func, const Array& _argv = null_array);
 Variant f_array_udiff_assoc(int _argc, CVarRef array1, CVarRef array2,
-                            CVarRef data_compare_func, CArrRef _argv = null_array);
+                            CVarRef data_compare_func, const Array& _argv = null_array);
 Variant f_array_udiff_uassoc(int _argc, CVarRef array1, CVarRef array2,
                              CVarRef data_compare_func,
-                             CVarRef key_compare_func, CArrRef _argv = null_array);
+                             CVarRef key_compare_func, const Array& _argv = null_array);
 Variant f_array_diff_ukey(int _argc, CVarRef array1, CVarRef array2,
-                          CVarRef key_compare_func, CArrRef _argv = null_array);
+                          CVarRef key_compare_func, const Array& _argv = null_array);
 
-Variant f_array_intersect(int _argc, CVarRef container1, CVarRef container2, CArrRef _argv = null_array);
-Variant f_array_intersect_key(int _argc, CVarRef container1, CVarRef container2, CArrRef _argv = null_array);
+Variant f_array_intersect(int _argc, CVarRef container1, CVarRef container2, const Array& _argv = null_array);
+Variant f_array_intersect_key(int _argc, CVarRef container1, CVarRef container2, const Array& _argv = null_array);
 Variant f_array_uintersect(int _argc, CVarRef array1, CVarRef array2,
-                           CVarRef data_compare_func, CArrRef _argv = null_array);
-Variant f_array_intersect_assoc(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array);
+                           CVarRef data_compare_func, const Array& _argv = null_array);
+Variant f_array_intersect_assoc(int _argc, CVarRef array1, CVarRef array2, const Array& _argv = null_array);
 Variant f_array_intersect_uassoc(int _argc, CVarRef array1, CVarRef array2,
-                                 CVarRef key_compare_func, CArrRef _argv = null_array);
+                                 CVarRef key_compare_func, const Array& _argv = null_array);
 Variant f_array_uintersect_assoc(int _argc, CVarRef array1, CVarRef array2,
-                                 CVarRef data_compare_func, CArrRef _argv = null_array);
+                                 CVarRef data_compare_func, const Array& _argv = null_array);
 Variant f_array_uintersect_uassoc(int _argc, CVarRef array1, CVarRef array2,
                                   CVarRef data_compare_func,
-                                  CVarRef key_compare_func, CArrRef _argv = null_array);
+                                  CVarRef key_compare_func, const Array& _argv = null_array);
 Variant f_array_intersect_ukey(int _argc, CVarRef array1, CVarRef array2,
-                               CVarRef key_compare_func, CArrRef _argv = null_array);
+                               CVarRef key_compare_func, const Array& _argv = null_array);
 
 bool f_sort(VRefParam array, int sort_flags = 0, bool use_collator = false);
 bool f_rsort(VRefParam array, int sort_flags = 0, bool use_collator = false);
@@ -166,7 +166,7 @@ bool f_uksort(VRefParam array, CVarRef cmp_function);
 Variant f_natsort(VRefParam array);
 Variant f_natcasesort(VRefParam array);
 
-bool f_array_multisort(int _argc, VRefParam ar1, CArrRef _argv = null_array);
+bool f_array_multisort(int _argc, VRefParam ar1, const Array& _argv = null_array);
 
 String f_i18n_loc_get_default();
 bool f_i18n_loc_set_default(const String& locale);

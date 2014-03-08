@@ -1794,7 +1794,7 @@ void f_session_commit() {
 }
 
 bool f_session_register(int _argc, CVarRef var_names,
-                        CArrRef _argv /* = null_array */) {
+                        const Array& _argv /* = null_array */) {
   throw NotSupportedException
     (__func__, "Deprecated as of PHP 5.3.0 and REMOVED as of PHP 6.0.0. "
      "Relying on this feature is highly discouraged.");

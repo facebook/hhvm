@@ -43,10 +43,10 @@ public:
    * if there are no worker threads.
    */
   static Resource TaskStart(
-    const String& url, CArrRef headers,
+    const String& url, const Array& headers,
     const String& remote_host,
     const String& post_data = null_string,
-    CArrRef files = null_array,
+    const Array& files = null_array,
     int timeoutSeconds = -1,
     PageletServerTaskEvent *event = nullptr
   );
@@ -81,10 +81,10 @@ public:
 class PageletTransport : public Transport, public Synchronizable {
 public:
   PageletTransport(
-    const String& url, CArrRef headers, const String& postData,
+    const String& url, const Array& headers, const String& postData,
     const String& remoteHost,
     const std::set<std::string> &rfc1867UploadedFiles,
-    CArrRef files, int timeoutSeconds);
+    const Array& files, int timeoutSeconds);
 
   /**
    * Implementing Transport...

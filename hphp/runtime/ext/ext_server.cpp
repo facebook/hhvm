@@ -119,9 +119,9 @@ bool f_pagelet_server_is_enabled() {
 const StaticString s_Host("Host");
 
 Resource f_pagelet_server_task_start(const String& url,
-                                     CArrRef headers /* = null_array */,
+                                     const Array& headers /* = null_array */,
                                      const String& post_data /* = null_string */,
-                                     CArrRef files /* = null_array */) {
+                                     const Array& files /* = null_array */) {
   String remote_host;
   Transport *transport = g_context->getTransport();
   int timeout = ThreadInfo::s_threadInfo->m_reqInjectionData.getRemainingTime();

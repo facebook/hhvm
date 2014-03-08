@@ -36,9 +36,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 PageletTransport::PageletTransport(
-    const String& url, CArrRef headers, const String& postData,
+    const String& url, const Array& headers, const String& postData,
     const String& remoteHost, const set<std::string> &rfc1867UploadedFiles,
-    CArrRef files, int timeoutSeconds)
+    const Array& files, int timeoutSeconds)
     : m_refCount(0),
       m_timeoutSeconds(timeoutSeconds),
       m_done(false),
@@ -305,10 +305,10 @@ class PageletTask : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(PageletTask)
 
-  PageletTask(const String& url, CArrRef headers, const String& post_data,
+  PageletTask(const String& url, const Array& headers, const String& post_data,
               const String& remote_host,
               const std::set<std::string> &rfc1867UploadedFiles,
-              CArrRef files, int timeoutSeconds) {
+              const Array& files, int timeoutSeconds) {
     m_job = new PageletTransport(url, headers, remote_host, post_data,
                                  rfc1867UploadedFiles, files, timeoutSeconds);
     m_job->incRefCount();
@@ -366,10 +366,10 @@ void PageletServer::Stop() {
 }
 
 Resource PageletServer::TaskStart(
-  const String& url, CArrRef headers,
+  const String& url, const Array& headers,
   const String& remote_host,
   const String& post_data /* = null_string */,
-  CArrRef files /* = null_array */,
+  const Array& files /* = null_array */,
   int timeoutSeconds /* = -1 */,
   PageletServerTaskEvent *event /* = nullptr*/
 ) {

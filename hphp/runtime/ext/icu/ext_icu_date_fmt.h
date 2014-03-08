@@ -71,7 +71,7 @@ class IntlDateFormatter : public IntlError {
   int64_t timeType() const { return m_time_type; }
   int64_t calendar() const { return m_calendar; }
 
-  int64_t getArrayElemInt(CArrRef arr, const StaticString &key);
+  int64_t getArrayElemInt(const Array& arr, const StaticString &key);
   double getTimestamp(CVarRef arg);
 
  private:

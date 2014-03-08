@@ -82,8 +82,8 @@ static inline int unserializeImpl(const String& sdata, Variant& data) {
   return DebuggerWireHelpers::NoError;
 }
 
-int DebuggerWireHelpers::WireSerialize(CArrRef data, String& sdata) {
-  TRACE(7, "DebuggerWireHelpers::WireSerialize(CArrRef data,\n");
+int DebuggerWireHelpers::WireSerialize(const Array& data, String& sdata) {
+  TRACE(7, "DebuggerWireHelpers::WireSerialize(const Array& data,\n");
   return serializeImpl(data, sdata);
 }
 

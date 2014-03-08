@@ -28,18 +28,18 @@ bool f_function_exists(const String& function_name, bool autoload = true);
 bool f_is_callable(CVarRef v, bool syntax = false,
                    VRefParam name = uninit_null());
 Variant f_call_user_func(
-  int _argc, CVarRef function, CArrRef _argv = null_array);
+  int _argc, CVarRef function, const Array& _argv = null_array);
 Variant f_call_user_func_array(CVarRef function, CVarRef params);
 String f_call_user_func_serialized(const String& input);
 Variant f_call_user_func_array_rpc(
   const String& host, int port, const String& auth, int timeout,
-  CVarRef function, CArrRef params);
+  CVarRef function, const Array& params);
 Variant f_call_user_func_rpc(
   int _argc, const String& host, int port, const String& auth, int timeout,
-  CVarRef function, CArrRef _argv = null_array);
-Variant f_forward_static_call_array(CVarRef function, CArrRef params);
+  CVarRef function, const Array& _argv = null_array);
+Variant f_forward_static_call_array(CVarRef function, const Array& params);
 Variant f_forward_static_call(
-  int _argc, CVarRef function, CArrRef _argv = null_array);
+  int _argc, CVarRef function, const Array& _argv = null_array);
 Variant f_get_called_class();
 String f_create_function(const String& args, const String& code);
 
@@ -71,11 +71,11 @@ int64_t f_func_num_args();
 ///////////////////////////////////////////////////////////////////////////////
 
 void f_register_postsend_function(
-  int _argc, CVarRef function, CArrRef _argv = null_array);
+  int _argc, CVarRef function, const Array& _argv = null_array);
 void f_register_shutdown_function(
-  int _argc, CVarRef function, CArrRef _argv = null_array);
+  int _argc, CVarRef function, const Array& _argv = null_array);
 void f_register_cleanup_function(
-  int _argc, CVarRef function, CArrRef _argv = null_array);
+  int _argc, CVarRef function, const Array& _argv = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

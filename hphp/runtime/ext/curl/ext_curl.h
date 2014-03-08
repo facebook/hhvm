@@ -269,7 +269,7 @@ Variant HHVM_FUNCTION(curl_init, CVarRef url = null_string);
 Variant HHVM_FUNCTION(curl_copy_handle, CResRef ch);
 Variant HHVM_FUNCTION(curl_version, int uversion = k_CURLVERSION_NOW);
 bool HHVM_FUNCTION(curl_setopt, CResRef ch, int option, CVarRef value);
-bool HHVM_FUNCTION(curl_setopt_array, CResRef ch, CArrRef options);
+bool HHVM_FUNCTION(curl_setopt_array, CResRef ch, const Array& options);
 Variant HHVM_FUNCTION(fb_curl_getopt, CResRef ch, int64_t opt = 0);
 Variant HHVM_FUNCTION(curl_exec, CResRef ch);
 Variant HHVM_FUNCTION(curl_getinfo, CResRef ch, int opt = 0);

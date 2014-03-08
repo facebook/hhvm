@@ -39,14 +39,14 @@ int64_t f_fb_utf8_strlen_deprecated(const String& input);
 int64_t f_fb_utf8_strlen(const String& input);
 String f_fb_utf8_substr(const String& str, int start, int length = INT_MAX);
 Array f_fb_call_user_func_safe(int _argc, CVarRef function,
-                               CArrRef _argv = null_array);
+                               const Array& _argv = null_array);
 Variant f_fb_call_user_func_safe_return(
-  int _argc, CVarRef function, CVarRef def, CArrRef _argv = null_array);
-Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params);
+  int _argc, CVarRef function, CVarRef def, const Array& _argv = null_array);
+Array f_fb_call_user_func_array_safe(CVarRef function, const Array& params);
 Variant f_fb_get_code_coverage(bool flush);
 void f_fb_enable_code_coverage();
 Variant f_fb_disable_code_coverage();
-void f_xhprof_enable(int flags = 0, CArrRef args = null_array);
+void f_xhprof_enable(int flags = 0, const Array& args = null_array);
 Variant f_xhprof_disable();
 void f_xhprof_network_enable();
 Variant f_xhprof_network_disable();
@@ -57,7 +57,7 @@ void f_xhprof_sample_enable();
 Variant f_xhprof_sample_disable();
 void f_fb_setprofile(CVarRef callback);
 Array f_fb_parallel_query(
-  CArrRef sql_map, int max_thread = 50, bool combine_result = true,
+  const Array& sql_map, int max_thread = 50, bool combine_result = true,
   bool retry_query_on_fail = true, int connect_timeout = -1,
   int read_timeout = -1, bool timeout_in_ms = false);
 Variant f_fb_const_fetch(CVarRef key);

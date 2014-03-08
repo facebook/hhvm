@@ -384,7 +384,7 @@ int64_t ak_exist_string_obj(ObjectData* obj, StringData* key) {
   if (obj->isCollection()) {
     return collectionOffsetContains(obj, key);
   }
-  CArrRef arr = obj->o_toArray();
+  const Array& arr = obj->o_toArray();
   int64_t res = ak_exist_string_impl(arr.get(), key);
   return res;
 }
@@ -393,7 +393,7 @@ int64_t ak_exist_int_obj(ObjectData* obj, int64_t key) {
   if (obj->isCollection()) {
     return collectionOffsetContains(obj, key);
   }
-  CArrRef arr = obj->o_toArray();
+  const Array& arr = obj->o_toArray();
   bool res = arr.get()->exists(key);
   return res;
 }

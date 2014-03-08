@@ -78,7 +78,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
       assert(!ret.toBoolean());
       return -1;
     }
-    CArrRef stat = ret.toArray();
+    const Array& stat = ret.toArray();
     buf->st_size = stat[s_size].asInt64Val();
     buf->st_atime = stat[s_atime].asInt64Val();
     buf->st_mtime = stat[s_mtime].asInt64Val();

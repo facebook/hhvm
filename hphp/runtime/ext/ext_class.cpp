@@ -374,7 +374,7 @@ Variant f_call_user_method_array(const String& method_name, VRefParam obj,
 }
 
 Variant f_call_user_method(int _argc, const String& method_name, VRefParam obj,
-                           CArrRef _argv /* = null_array */) {
+                           const Array& _argv /* = null_array */) {
   return obj.toObject()->o_invoke(method_name, _argv);
 }
 

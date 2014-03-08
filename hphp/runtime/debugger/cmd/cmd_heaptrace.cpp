@@ -231,7 +231,7 @@ bool CmdHeaptrace::onServer(DebuggerProxy &proxy) {
 
   // globals
   std::vector<TypedValue *> roots;
-  CArrRef arr = g_context->m_globalVarEnv->getDefinedVariables();
+  const Array& arr = g_context->m_globalVarEnv->getDefinedVariables();
   arr->getChildren(roots);
 
   // static properties
@@ -246,7 +246,7 @@ bool CmdHeaptrace::onServer(DebuggerProxy &proxy) {
   for (int i = 0; i < numFrames; ++i) {
     locs.push_back(g_context->getLocalDefinedVariables(i));
   }
-  for (CArrRef locArr : locs) {
+  for (const Array& locArr : locs) {
     locArr->getChildren(roots);
   }
 

@@ -345,25 +345,25 @@ public:
   bool same (litstr  v2) const = delete;
   bool same (const StringData *v2) const;
   bool same (const String& v2) const;
-  bool same (CArrRef v2) const;
+  bool same (const Array& v2) const;
   bool same (CObjRef v2) const;
   bool same (CResRef v2) const;
   bool equal(litstr  v2) const = delete;
   bool equal(const StringData *v2) const;
   bool equal(const String& v2) const;
-  bool equal(CArrRef v2) const;
+  bool equal(const Array& v2) const;
   bool equal(CObjRef v2) const;
   bool equal(CResRef v2) const;
   bool less (litstr  v2) const = delete;
   bool less (const StringData *v2) const;
   bool less (const String& v2) const;
-  bool less (CArrRef v2) const;
+  bool less (const Array& v2) const;
   bool less (CObjRef v2) const;
   bool less (CResRef v2) const;
   bool more (litstr  v2) const = delete;
   bool more (const StringData *v2) const;
   bool more (const String& v2) const;
-  bool more (CArrRef v2) const;
+  bool more (const Array& v2) const;
   bool more (CObjRef v2) const;
   bool more (CResRef v2) const;
 
@@ -382,7 +382,7 @@ public:
     return rvalAtImpl(key ? key->toInt32() : 0);
   }
   String rvalAt(const String& key) const { return rvalAtImpl(key.toInt32());}
-  String rvalAt(CArrRef key) const;
+  String rvalAt(const Array& key) const;
   String rvalAt(CObjRef key) const;
   String rvalAt(CVarRef key) const;
 

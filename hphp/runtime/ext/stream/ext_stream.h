@@ -33,16 +33,16 @@ public:
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
-  StreamContext(CArrRef options, CArrRef params)
+  StreamContext(const Array& options, const Array& params)
     : m_options(options), m_params(params) {
   }
 
   static bool validateOptions(CVarRef options);
   void setOption(const String& wrapper, const String& option, CVarRef value);
-  void mergeOptions(CArrRef options);
+  void mergeOptions(const Array& options);
   Array getOptions() const;
   static bool validateParams(CVarRef params);
-  void mergeParams(CArrRef params);
+  void mergeParams(const Array& params);
   Array getParams() const;
 
 private:
@@ -53,8 +53,8 @@ private:
   Array m_params;
 };
 
-Variant f_stream_context_create(CArrRef options = null_array,
-                                 CArrRef params = null_array);
+Variant f_stream_context_create(const Array& options = null_array,
+                                 const Array& params = null_array);
 
 Variant f_stream_context_get_options(CResRef stream_or_context);
 
@@ -66,7 +66,7 @@ bool f_stream_context_set_option(CResRef stream_or_context,
 Variant f_stream_context_get_params(CResRef stream_or_context);
 
 bool f_stream_context_set_params(CResRef stream_or_context,
-                                 CArrRef params);
+                                 const Array& params);
 
 ///////////////////////////////////////////////////////////////////////////////
 

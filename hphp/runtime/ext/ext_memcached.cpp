@@ -260,13 +260,13 @@ Variant c_Memcached::t_getbykey(const String& server_key, const String& key,
   return returnValue;
 }
 
-Variant c_Memcached::t_getmulti(CArrRef keys,
+Variant c_Memcached::t_getmulti(const Array& keys,
                                 VRefParam cas_tokens /*= null_variant*/,
                                 int flags /*= 0*/) {
   return t_getmultibykey(null_string, keys, cas_tokens, flags);
 }
 
-Variant c_Memcached::t_getmultibykey(const String& server_key, CArrRef keys,
+Variant c_Memcached::t_getmultibykey(const String& server_key, const Array& keys,
                                      VRefParam cas_tokens /*= null_variant*/,
                                      int flags /*= 0*/) {
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
@@ -301,12 +301,12 @@ Variant c_Memcached::t_getmultibykey(const String& server_key, CArrRef keys,
   return returnValue;
 }
 
-bool c_Memcached::t_getdelayed(CArrRef keys, bool with_cas /*= false*/,
+bool c_Memcached::t_getdelayed(const Array& keys, bool with_cas /*= false*/,
                                CVarRef value_cb /*= null_variant*/) {
   return t_getdelayedbykey(null_string, keys, with_cas, value_cb);
 }
 
-bool c_Memcached::t_getdelayedbykey(const String& server_key, CArrRef keys,
+bool c_Memcached::t_getdelayedbykey(const String& server_key, const Array& keys,
     bool with_cas /*= false*/, CVarRef value_cb /*= null_variant*/) {
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
@@ -345,7 +345,7 @@ Variant c_Memcached::t_fetchall() {
   return returnValue;
 }
 
-bool c_Memcached::getMultiImpl(const String& server_key, CArrRef keys,
+bool c_Memcached::getMultiImpl(const String& server_key, const Array& keys,
                                bool enableCas, Array *returnValue) {
   std::vector<const char*> keysCopy;
   keysCopy.reserve(keys.size());
@@ -411,11 +411,11 @@ bool c_Memcached::t_setbykey(const String& server_key, const String& key, CVarRe
                           expiration);
 }
 
-bool c_Memcached::t_setmulti(CArrRef items, int expiration /*= 0*/) {
+bool c_Memcached::t_setmulti(const Array& items, int expiration /*= 0*/) {
   return t_setmultibykey(null_string, items, expiration);
 }
 
-bool c_Memcached::t_setmultibykey(const String& server_key, CArrRef items,
+bool c_Memcached::t_setmultibykey(const String& server_key, const Array& items,
                                   int expiration /*= 0*/) {
   m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
@@ -568,7 +568,7 @@ bool c_Memcached::t_addserver(const String& host, int port, int weight /*= 0*/) 
       host.c_str(), port, weight));
 }
 
-bool c_Memcached::t_addservers(CArrRef servers) {
+bool c_Memcached::t_addservers(const Array& servers) {
   int i = 1;
   for (ArrayIter iter(servers); iter; ++iter, ++i) {
     Variant entry = iter.second();

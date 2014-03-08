@@ -800,7 +800,7 @@ inline static int getnumber(const char *buffer, int *pos) {
  *  "x"   integer argument is printed as lowercase hexadecimal
  *  "X"   integer argument is printed as uppercase hexadecimal
  */
-char *string_printf(const char *format, int len, CArrRef args, int *outlen) {
+char *string_printf(const char *format, int len, const Array& args, int *outlen) {
   Array vargs = args;
   if (!vargs.isNull() && !vargs->isVectorData()) {
     vargs = Array::Create();

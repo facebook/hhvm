@@ -236,7 +236,7 @@ Object get_traversable_object_iterator(CVarRef obj) {
 }
 
 Variant f_iterator_apply(CVarRef obj, CVarRef func,
-                         CArrRef params /* = null_array */) {
+                         const Array& params /* = null_array */) {
   Object pobj = get_traversable_object_iterator(obj);
   pobj->o_invoke_few_args(s_rewind, 0);
   int64_t count = 0;
@@ -308,7 +308,7 @@ bool f_spl_autoload_unregister(CVarRef autoload_function) {
 }
 
 Variant f_spl_autoload_functions() {
-  CArrRef handlers = AutoloadHandler::s_instance->getHandlers();
+  const Array& handlers = AutoloadHandler::s_instance->getHandlers();
   if (handlers.isNull())
     return false;
   else

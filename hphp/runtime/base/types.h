@@ -192,8 +192,6 @@ inline bool isMutableType(Collection::Type ctype) {
  * cleaner.
  */
 typedef const char * litstr; /* literal string */
-//typedef const String & CStrRef;
-typedef const Array & CArrRef;
 typedef const Object & CObjRef;
 typedef const Resource & CResRef;
 typedef const Variant & CVarRef;

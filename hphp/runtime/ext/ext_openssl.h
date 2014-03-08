@@ -29,7 +29,7 @@ bool f_openssl_csr_export_to_file(CVarRef csr, const String& outfilename, bool n
 bool f_openssl_csr_export(CVarRef csr, VRefParam out, bool notext = true);
 Variant f_openssl_csr_get_public_key(CVarRef csr);
 Variant f_openssl_csr_get_subject(CVarRef csr, bool use_shortnames = true);
-Variant f_openssl_csr_new(CArrRef dn, VRefParam privkey, CVarRef configargs = null_variant, CVarRef extraattribs = null_variant);
+Variant f_openssl_csr_new(const Array& dn, VRefParam privkey, CVarRef configargs = null_variant, CVarRef extraattribs = null_variant);
 Variant f_openssl_csr_sign(CVarRef csr, CVarRef cacert, CVarRef priv_key, int days, CVarRef configargs = null_variant, int serial = 0);
 Variant f_openssl_error_string();
 bool f_openssl_open(const String& sealed_data, VRefParam open_data, const String& env_key, CVarRef priv_key_id);
@@ -37,9 +37,9 @@ bool f_openssl_pkcs12_export_to_file(CVarRef x509, const String& filename, CVarR
 bool f_openssl_pkcs12_export(CVarRef x509, VRefParam out, CVarRef priv_key, const String& pass, CVarRef args = null_variant);
 bool f_openssl_pkcs12_read(const String& pkcs12, VRefParam certs, const String& pass);
 bool f_openssl_pkcs7_decrypt(const String& infilename, const String& outfilename, CVarRef recipcert, CVarRef recipkey = null_variant);
-bool f_openssl_pkcs7_encrypt(const String& infilename, const String& outfilename, CVarRef recipcerts, CArrRef headers, int flags = 0, int cipherid = k_OPENSSL_CIPHER_RC2_40);
+bool f_openssl_pkcs7_encrypt(const String& infilename, const String& outfilename, CVarRef recipcerts, const Array& headers, int flags = 0, int cipherid = k_OPENSSL_CIPHER_RC2_40);
 bool f_openssl_pkcs7_sign(const String& infilename, const String& outfilename, CVarRef signcert, CVarRef privkey, CVarRef headers, int flags = k_PKCS7_DETACHED, const String& extracerts = null_string);
-Variant f_openssl_pkcs7_verify(const String& filename, int flags, const String& outfilename = null_string, CArrRef cainfo = null_array, const String& extracerts = null_string, const String& content = null_string);
+Variant f_openssl_pkcs7_verify(const String& filename, int flags, const String& outfilename = null_string, const Array& cainfo = null_array, const String& extracerts = null_string, const String& content = null_string);
 bool f_openssl_pkey_export_to_file(CVarRef key, const String& outfilename, const String& passphrase = null_string, CVarRef configargs = null_variant);
 bool f_openssl_pkey_export(CVarRef key, VRefParam out, const String& passphrase = null_string, CVarRef configargs = null_variant);
 void f_openssl_pkey_free(CResRef key);
@@ -54,11 +54,11 @@ bool f_openssl_private_decrypt(const String& data, VRefParam decrypted, CVarRef 
 bool f_openssl_private_encrypt(const String& data, VRefParam crypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING);
 bool f_openssl_public_decrypt(const String& data, VRefParam decrypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING);
 bool f_openssl_public_encrypt(const String& data, VRefParam crypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING);
-Variant f_openssl_seal(const String& data, VRefParam sealed_data, VRefParam env_keys, CArrRef pub_key_ids);
+Variant f_openssl_seal(const String& data, VRefParam sealed_data, VRefParam env_keys, const Array& pub_key_ids);
 bool f_openssl_sign(const String& data, VRefParam signature, CVarRef priv_key_id, int signature_alg = k_OPENSSL_ALGO_SHA1);
 Variant f_openssl_verify(const String& data, const String& signature, CVarRef pub_key_id, int signature_alg = k_OPENSSL_ALGO_SHA1);
 bool f_openssl_x509_check_private_key(CVarRef cert, CVarRef key);
-int64_t f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose, CArrRef cainfo = null_array, const String& untrustedfile = null_string);
+int64_t f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose, const Array& cainfo = null_array, const String& untrustedfile = null_string);
 bool f_openssl_x509_export_to_file(CVarRef x509, const String& outfilename, bool notext = true);
 bool f_openssl_x509_export(CVarRef x509, VRefParam output, bool notext = true);
 void f_openssl_x509_free(CResRef x509cert);

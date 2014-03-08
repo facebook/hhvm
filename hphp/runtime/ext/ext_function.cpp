@@ -87,7 +87,7 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
   }
 
   if (tv_func->m_type == KindOfArray) {
-    CArrRef arr = tv_func->m_data.parr;
+    const Array& arr = tv_func->m_data.parr;
     CVarRef clsname = arr.rvalAtRef(int64_t(0));
     CVarRef mthname = arr.rvalAtRef(int64_t(1));
     if (arr.size() != 2 ||
@@ -135,7 +135,7 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
 }
 
 Variant f_call_user_func(int _argc, CVarRef function,
-                         CArrRef _argv /* = null_array */) {
+                         const Array& _argv /* = null_array */) {
   return vm_call_user_func(function, _argv);
 }
 
@@ -175,14 +175,14 @@ String f_call_user_func_serialized(const String& input) {
 Variant f_call_user_func_array_rpc(const String& host, int port,
                                    const String& auth,
                                    int timeout, CVarRef function,
-                                   CArrRef params) {
+                                   const Array& params) {
   return f_call_user_func_rpc(0, host, port, auth, timeout, function, params);
 }
 
 Variant f_call_user_func_rpc(int _argc, const String& host, int port,
                              const String& auth,
                              int timeout, CVarRef function,
-                             CArrRef _argv /* = null_array */) {
+                             const Array& _argv /* = null_array */) {
   std::string shost = host.data();
   if (!RuntimeOption::DebuggerRpcHostDomain.empty()) {
     unsigned int pos = shost.find(RuntimeOption::DebuggerRpcHostDomain);
@@ -239,12 +239,12 @@ Variant f_call_user_func_rpc(int _argc, const String& host, int port,
   return res[s_ret];
 }
 
-Variant f_forward_static_call_array(CVarRef function, CArrRef params) {
+Variant f_forward_static_call_array(CVarRef function, const Array& params) {
   return f_forward_static_call(0, function, params);
 }
 
 Variant f_forward_static_call(int _argc, CVarRef function,
-                              CArrRef _argv /* = null_array */) {
+                              const Array& _argv /* = null_array */) {
   // Setting the bound parameter to true tells vm_call_user_func()
   // propogate the current late bound class
   return vm_call_user_func(function, _argv, true);
@@ -381,17 +381,17 @@ int64_t f_func_num_args() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_register_postsend_function(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
+void f_register_postsend_function(int _argc, CVarRef function, const Array& _argv /* = null_array */) {
   g_context->registerShutdownFunction(function, _argv,
                                       ExecutionContext::PostSend);
 }
 
-void f_register_shutdown_function(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
+void f_register_shutdown_function(int _argc, CVarRef function, const Array& _argv /* = null_array */) {
   g_context->registerShutdownFunction(function, _argv,
                                       ExecutionContext::ShutDown);
 }
 
-void f_register_cleanup_function(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
+void f_register_cleanup_function(int _argc, CVarRef function, const Array& _argv /* = null_array */) {
   g_context->registerShutdownFunction(function, _argv,
                                       ExecutionContext::CleanUp);
 }

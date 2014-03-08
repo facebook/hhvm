@@ -32,7 +32,7 @@ bool f_mb_check_encoding(const String& var = null_string, const String& encoding
 Variant f_mb_convert_case(const String& str, int mode, const String& encoding = null_string);
 Variant f_mb_convert_encoding(const String& str, const String& to_encoding, CVarRef from_encoding = null_variant);
 Variant f_mb_convert_kana(const String& str, const String& option = null_string, const String& encoding = null_string);
-Variant f_mb_convert_variables(int _argc, const String& to_encoding, CVarRef from_encoding, VRefParam vars, CArrRef _argv = null_array);
+Variant f_mb_convert_variables(int _argc, const String& to_encoding, CVarRef from_encoding, VRefParam vars, const Array& _argv = null_array);
 Variant f_mb_decode_mimeheader(const String& str);
 Variant f_mb_decode_numericentity(const String& str, CVarRef convmap, const String& encoding = null_string);
 Variant f_mb_detect_encoding(const String& str, CVarRef encoding_list = null_variant, CVarRef strict = null_variant);

@@ -45,7 +45,7 @@ ArrayIter::ArrayIter(const ArrayData* data) {
   arrInit(data);
 }
 
-ArrayIter::ArrayIter(CArrRef array) {
+ArrayIter::ArrayIter(const Array& array) {
   arrInit(array.get());
 }
 

@@ -106,7 +106,7 @@ void ZendPack::pack(CVarRef val, int size, int *map, char *output) {
   }
 }
 
-Variant ZendPack::pack(const String& fmt, CArrRef argv) {
+Variant ZendPack::pack(const String& fmt, const Array& argv) {
   /* Preprocess format into formatcodes and formatargs */
   std::vector<char> formatcodes;
   std::vector<int> formatargs;

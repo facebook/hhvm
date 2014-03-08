@@ -132,7 +132,7 @@ static int _get_lderrno(LDAP *ldap) {
   return lderr;
 }
 
-static bool php_ldap_do_modify(CResRef link, const String& dn, CArrRef entry,
+static bool php_ldap_do_modify(CResRef link, const String& dn, const Array& entry,
                                int oper) {
   bool is_full_add = false; /* flag for full add operation so ldap_mod_add
                                can be put back into oper, gerrit THomson */
@@ -275,7 +275,7 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref,
 }
 
 static Variant php_ldap_do_search(CVarRef link, CVarRef base_dn,
-                                  CVarRef filter, CArrRef attributes,
+                                  CVarRef filter, const Array& attributes,
                                   int attrsonly, int sizelimit, int timelimit,
                                   int deref, int scope) {
   int num_attribs = attributes.size();
@@ -596,23 +596,23 @@ String f_ldap_err2str(int errnum) {
   return String(ldap_err2string(errnum), CopyString);
 }
 
-bool f_ldap_add(CResRef link, const String& dn, CArrRef entry) {
+bool f_ldap_add(CResRef link, const String& dn, const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, PHP_LD_FULL_ADD);
 }
 
-bool f_ldap_mod_add(CResRef link, const String& dn, CArrRef entry) {
+bool f_ldap_mod_add(CResRef link, const String& dn, const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_ADD);
 }
 
-bool f_ldap_mod_del(CResRef link, const String& dn, CArrRef entry) {
+bool f_ldap_mod_del(CResRef link, const String& dn, const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_DELETE);
 }
 
-bool f_ldap_mod_replace(CResRef link, const String& dn, CArrRef entry) {
+bool f_ldap_mod_replace(CResRef link, const String& dn, const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_REPLACE);
 }
 
-bool f_ldap_modify(CResRef link, const String& dn, CArrRef entry) {
+bool f_ldap_modify(CResRef link, const String& dn, const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_REPLACE);
 }
 
@@ -927,7 +927,7 @@ bool f_ldap_close(CResRef link) {
 }
 
 Variant f_ldap_list(CVarRef link, CVarRef base_dn, CVarRef filter,
-                    CArrRef attributes /* = null_array */,
+                    const Array& attributes /* = null_array */,
                     int attrsonly /* = 0 */, int sizelimit /* = -1 */,
                     int timelimit /* = -1 */, int deref /* = -1 */) {
   return php_ldap_do_search(link, base_dn, filter, attributes, attrsonly,
@@ -935,7 +935,7 @@ Variant f_ldap_list(CVarRef link, CVarRef base_dn, CVarRef filter,
 }
 
 Variant f_ldap_read(CVarRef link, CVarRef base_dn, CVarRef filter,
-                    CArrRef attributes /* = null_array */,
+                    const Array& attributes /* = null_array */,
                     int attrsonly /* = 0 */, int sizelimit /* = -1 */,
                     int timelimit /* = -1 */, int deref /* = -1 */) {
   return php_ldap_do_search(link, base_dn, filter, attributes, attrsonly,
@@ -943,7 +943,7 @@ Variant f_ldap_read(CVarRef link, CVarRef base_dn, CVarRef filter,
 }
 
 Variant f_ldap_search(CVarRef link, CVarRef base_dn, CVarRef filter,
-                      CArrRef attributes /* = null_array */,
+                      const Array& attributes /* = null_array */,
                       int attrsonly /* = 0 */, int sizelimit /* = -1 */,
                       int timelimit /* = -1 */, int deref /* = -1 */) {
   return php_ldap_do_search(link, base_dn, filter, attributes, attrsonly,

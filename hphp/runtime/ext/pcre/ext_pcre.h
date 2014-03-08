@@ -27,7 +27,7 @@ namespace HPHP {
 Variant HHVM_FUNCTION(preg_filter, CVarRef pattern, CVarRef replacement,
                                    CVarRef subject, int limit = -1,
                                    VRefParam count = uninit_null());
-Variant HHVM_FUNCTION(preg_grep, const String& pattern, CArrRef input,
+Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Array& input,
                                  int flags = 0);
 Variant HHVM_FUNCTION(preg_match, const String& pattern, const String& subject,
                       VRefParam matches = uninit_null(), int flags = 0,

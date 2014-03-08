@@ -218,7 +218,7 @@ public:
   const char *getName() const { return m_name;}
 
   PDOConnection *createConnection(const String& datasource, const String& username,
-                                  const String& password, CArrRef options);
+                                  const String& password, const Array& options);
 
 private:
   static PDODriverMap s_drivers;
@@ -261,7 +261,7 @@ public:
 public:
   PDOConnection();
   virtual ~PDOConnection();
-  virtual bool create(CArrRef options) = 0;
+  virtual bool create(const Array& options) = 0;
   virtual void sweep();
 
   CLASSNAME_IS("PDOConnection")

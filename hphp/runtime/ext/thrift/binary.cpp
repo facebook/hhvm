@@ -60,9 +60,9 @@ const int8_t T_EXCEPTION = 3;
 const int INVALID_DATA = 1;
 const int BAD_VERSION = 4;
 
-void binary_deserialize_spec(CObjRef zthis, PHPInputTransport& transport, CArrRef spec);
-void binary_serialize_spec(CObjRef zthis, PHPOutputTransport& transport, CArrRef spec);
-void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport, CVarRef value, CArrRef fieldspec);
+void binary_deserialize_spec(CObjRef zthis, PHPInputTransport& transport, const Array& spec);
+void binary_serialize_spec(CObjRef zthis, PHPOutputTransport& transport, const Array& spec);
+void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport, CVarRef value, const Array& fieldspec);
 void skip_element(long thrift_typeID, PHPInputTransport& transport);
 
 // Create a PHP object given a typename and call the ctor, optionally passing up to 2 arguments
@@ -90,7 +90,7 @@ void throw_tprotocolexception(const String& what, long errorcode) {
 const StaticString s_TSPEC("_TSPEC");
 
 Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
-                           CArrRef fieldspec) {
+                           const Array& fieldspec) {
   Variant ret;
   switch (thrift_typeID) {
     case T_STOP:
@@ -357,7 +357,7 @@ inline bool ttypes_are_compatible(int8_t t1, int8_t t2) {
 }
 
 void binary_deserialize_spec(CObjRef zthis, PHPInputTransport& transport,
-                             CArrRef spec) {
+                             const Array& spec) {
   // SET and LIST have 'elem' => array('type', [optional] 'class')
   // MAP has 'val' => array('type', [optiona] 'class')
   while (true) {
@@ -388,7 +388,7 @@ void binary_deserialize_spec(CObjRef zthis, PHPInputTransport& transport,
 }
 
 void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
-                      CVarRef value, CArrRef fieldspec) {
+                      CVarRef value, const Array& fieldspec) {
   // At this point the typeID (and field num, if applicable) should've already
   // been written to the output so all we need to do is write the payload.
   switch (thrift_typeID) {
@@ -497,7 +497,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
 
 
 void binary_serialize_spec(CObjRef zthis, PHPOutputTransport& transport,
-                           CArrRef spec) {
+                           const Array& spec) {
   for (ArrayIter key_ptr = spec.begin(); !key_ptr.end(); ++key_ptr) {
     Variant key = key_ptr.first();
     if (!key.isInteger()) {

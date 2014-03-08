@@ -40,7 +40,7 @@ Variant *get_intercept_handler(const String& name, char* flag);
 /**
  * Call intercept handler with original parameters.
  */
-bool handle_intercept(CVarRef handler, const String& name, CArrRef params,
+bool handle_intercept(CVarRef handler, const String& name, const Array& params,
                       Variant &ret);
 
 /**

@@ -88,7 +88,7 @@ String f_htmlspecialchars(const String& str, int quote_style = k_ENT_COMPAT,
                           bool double_encode = true);
 String f_fb_htmlspecialchars(const String& str, int quote_style = k_ENT_COMPAT,
                              const String& charset = "ISO-8859-1",
-                             CArrRef extra = empty_array);
+                             const Array& extra = empty_array);
 String f_quoted_printable_encode(const String& str);
 String f_quoted_printable_decode(const String& str);
 Variant f_convert_uudecode(const String& data);
@@ -110,7 +110,7 @@ String f_hebrev(const String& hebrew_text, int max_chars_per_line = 0);
 
 String f_hebrevc(const String& hebrew_text, int max_chars_per_line = 0);
 
-Variant f_setlocale(int _argc, int category, CVarRef locale, CArrRef _argv = null_array);
+Variant f_setlocale(int _argc, int category, CVarRef locale, const Array& _argv = null_array);
 Array f_localeconv();
 
 String f_nl_langinfo(int item);
@@ -118,12 +118,12 @@ String f_nl_langinfo(int item);
 ///////////////////////////////////////////////////////////////////////////////
 // input/output
 
-Variant f_printf(int _argc, const String& format, CArrRef _argv = null_array);
-Variant f_vprintf(const String& format, CArrRef args);
-Variant f_sprintf(int _argc, const String& format, CArrRef _argv = null_array);
-Variant f_vsprintf(const String& format, CArrRef args);
+Variant f_printf(int _argc, const String& format, const Array& _argv = null_array);
+Variant f_vprintf(const String& format, const Array& args);
+Variant f_sprintf(int _argc, const String& format, const Array& _argv = null_array);
+Variant f_vsprintf(const String& format, const Array& args);
 
-Variant f_sscanf(int _argc, const String& str, const String& format, CArrRef _argv = null_array);
+Variant f_sscanf(int _argc, const String& str, const String& format, const Array& _argv = null_array);
 
 String f_chr(int64_t ascii);
 int64_t f_ord(const String& str);

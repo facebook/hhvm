@@ -237,7 +237,7 @@ void ThriftBuffer::read(Array &data) {
   data = unserialize_with_no_notice(sdata).toArray();
 }
 
-void ThriftBuffer::write(CArrRef data) {
+void ThriftBuffer::write(const Array& data) {
   VariableSerializer vs(m_serializerType);
   String sdata = vs.serialize(VarNR(data), true);
   write(sdata);

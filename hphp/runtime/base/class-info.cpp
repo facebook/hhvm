@@ -330,7 +330,7 @@ bool ClassInfo::GetClassMethods(MethodVec &ret, const ClassInfo *classInfo) {
   return true;
 }
 
-void ClassInfo::GetClassSymbolNames(CArrRef names, bool interface, bool trait,
+void ClassInfo::GetClassSymbolNames(const Array& names, bool interface, bool trait,
                                     std::vector<String> &classes,
                                     std::vector<String> *clsMethods,
                                     std::vector<String> *clsProperties,

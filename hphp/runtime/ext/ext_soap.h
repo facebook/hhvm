@@ -40,8 +40,8 @@ class c_SoapServer : public ExtObjectData {
   // need to implement
   public: c_SoapServer(Class* cls = c_SoapServer::classof());
   public: ~c_SoapServer();
-  public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
-  public: void t_setclass(int _argc, const String& name, CArrRef _argv = null_array);
+  public: void t___construct(CVarRef wsdl, const Array& options = null_array);
+  public: void t_setclass(int _argc, const String& name, const Array& _argv = null_array);
   public: void t_setobject(CObjRef obj);
   public: void t_addfunction(CVarRef func);
   public: Variant t_getfunctions();
@@ -79,9 +79,9 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   // need to implement
   public: c_SoapClient(Class* cls = c_SoapClient::classof());
   public: ~c_SoapClient();
-  public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
+  public: void t___construct(CVarRef wsdl, const Array& options = null_array);
   public: Variant t___call(Variant name, Variant args);
-  public: Variant t___soapcall(const String& name, CArrRef args, CArrRef options = null_array, CVarRef input_headers = null_variant, VRefParam output_headers = uninit_null());
+  public: Variant t___soapcall(const String& name, const Array& args, const Array& options = null_array, CVarRef input_headers = null_variant, VRefParam output_headers = uninit_null());
   public: Variant t___getlastrequest();
   public: Variant t___getlastresponse();
   public: Variant t___getlastrequestheaders();

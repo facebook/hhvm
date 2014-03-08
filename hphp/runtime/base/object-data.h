@@ -284,7 +284,7 @@ class ObjectData {
   Variant o_set(const String& s, RefResult v, const String& context);
   Variant o_setRef(const String& s, CVarRef v, const String& context);
 
-  void o_setArray(CArrRef properties);
+  void o_setArray(const Array& properties);
   void o_getArray(Array& props, bool pubOnly = false) const;
 
   static Object FromArray(ArrayData* properties);

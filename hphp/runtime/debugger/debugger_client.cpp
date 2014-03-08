@@ -2061,7 +2061,7 @@ void DebuggerClient::addWatch(const char *fmt, const std::string &php) {
   m_watches.push_back(watch);
 }
 
-void DebuggerClient::setStackTrace(CArrRef stacktrace, bool isAsync) {
+void DebuggerClient::setStackTrace(const Array& stacktrace, bool isAsync) {
   TRACE(2, "DebuggerClient::setStackTrace\n");
   m_stacktrace = stacktrace;
   //when we set a new stack we need to reset the frame position
@@ -2085,7 +2085,7 @@ void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
   if (m_frame < 0) {
     m_frame = 0;
   }
-  CArrRef frame = m_stacktrace[m_frame].toArray();
+  const Array& frame = m_stacktrace[m_frame].toArray();
   if (!frame.isNull()) {
     String file = frame[s_file].toString();
     int line = frame[s_line].toInt32();
@@ -2112,7 +2112,7 @@ const StaticString
   s_id("id"),
   s_ancestors("ancestors");
 
-void DebuggerClient::printFrame(int index, CArrRef frame) {
+void DebuggerClient::printFrame(int index, const Array& frame) {
   TRACE(2, "DebuggerClient::printFrame\n");
   StringBuffer args;
   for (ArrayIter iter(frame[s_args].toArray()); iter; ++iter) {

@@ -102,7 +102,7 @@ class c_Memcached : public ExtObjectData, public Sweepable {
   public: bool t_add(const String& key, CVarRef value, int expiration = 0);
   public: bool t_addbykey(const String& server_key, const String& key, CVarRef value, int expiration = 0);
   public: bool t_addserver(const String& host, int port, int weight = 0);
-  public: bool t_addservers(CArrRef servers);
+  public: bool t_addservers(const Array& servers);
   public: bool t_append(const String& key, const String& value);
   public: bool t_appendbykey(const String& server_key, const String& key, const String& value);
   public: bool t_cas(double cas_token, const String& key, CVarRef value, int expiration = 0);
@@ -115,10 +115,10 @@ class c_Memcached : public ExtObjectData, public Sweepable {
   public: bool t_flush(int delay = 0);
   public: Variant t_get(const String& key, CVarRef cache_cb = null_variant, VRefParam cas_token = null_variant);
   public: Variant t_getbykey(const String& server_key, const String& key, CVarRef cache_cb = null_variant, VRefParam cas_token = null_variant);
-  public: bool t_getdelayed(CArrRef keys, bool with_cas = false, CVarRef value_cb = null_variant);
-  public: bool t_getdelayedbykey(const String& server_key, CArrRef keys, bool with_cas = false, CVarRef value_cb = null_variant);
-  public: Variant t_getmulti(CArrRef keys, VRefParam cas_tokens = null_variant, int flags = 0);
-  public: Variant t_getmultibykey(const String& server_key, CArrRef keys, VRefParam cas_tokens = null_variant, int flags = 0);
+  public: bool t_getdelayed(const Array& keys, bool with_cas = false, CVarRef value_cb = null_variant);
+  public: bool t_getdelayedbykey(const String& server_key, const Array& keys, bool with_cas = false, CVarRef value_cb = null_variant);
+  public: Variant t_getmulti(const Array& keys, VRefParam cas_tokens = null_variant, int flags = 0);
+  public: Variant t_getmultibykey(const String& server_key, const Array& keys, VRefParam cas_tokens = null_variant, int flags = 0);
   public: Variant t_getoption(int option);
   public: int64_t t_getresultcode();
   public: String t_getresultmessage();
@@ -133,8 +133,8 @@ class c_Memcached : public ExtObjectData, public Sweepable {
   public: bool t_replacebykey(const String& server_key, const String& key, CVarRef value, int expiration = 0);
   public: bool t_set(const String& key, CVarRef value, int expiration = 0);
   public: bool t_setbykey(const String& server_key, const String& key, CVarRef value, int expiration = 0);
-  public: bool t_setmulti(CArrRef items, int expiration = 0);
-  public: bool t_setmultibykey(const String& server_key, CArrRef items, int expiration = 0);
+  public: bool t_setmulti(const Array& items, int expiration = 0);
+  public: bool t_setmultibykey(const String& server_key, const Array& items, int expiration = 0);
   public: bool t_setoption(int option, CVarRef value);
  private:
   class Impl {
@@ -155,7 +155,7 @@ class c_Memcached : public ExtObjectData, public Sweepable {
   bool toObject(Variant& value, const memcached_result_st &result);
   memcached_return doCacheCallback(CVarRef callback, const String& key,
                                    Variant& value);
-  bool getMultiImpl(const String& server_key, CArrRef keys, bool enableCas,
+  bool getMultiImpl(const String& server_key, const Array& keys, bool enableCas,
                     Array *returnValue);
   bool fetchImpl(memcached_result_st &result, Array &item);
   typedef memcached_return_t (*SetOperation)(memcached_st *,

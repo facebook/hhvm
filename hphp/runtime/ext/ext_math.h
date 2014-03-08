@@ -49,8 +49,8 @@ extern const int64_t k_PHP_ROUND_HALF_ODD;
 
 double f_pi();
 
-Variant f_min(int _argc, CVarRef value, CArrRef _argv = null_array);
-Variant f_max(int _argc, CVarRef value, CArrRef _argv = null_array);
+Variant f_min(int _argc, CVarRef value, const Array& _argv = null_array);
+Variant f_max(int _argc, CVarRef value, const Array& _argv = null_array);
 Variant f_abs(CVarRef number);
 
 bool f_is_finite(double val);

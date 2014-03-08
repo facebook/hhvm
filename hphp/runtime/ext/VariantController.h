@@ -54,8 +54,8 @@ struct VariantController {
   static const String& asString(const VariantType& obj) {
     return obj.toCStrRef();
   }
-  static CArrRef asMap(const VariantType& obj) { return obj.toCArrRef(); }
-  static CArrRef asVector(const VariantType& obj) { return obj.toCArrRef(); }
+  static const Array& asMap(const VariantType& obj) { return obj.toCArrRef(); }
+  static const Array& asVector(const VariantType& obj) { return obj.toCArrRef(); }
 
   // variant creators
   static VariantType createNull() { return null_variant; }

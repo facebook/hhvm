@@ -824,7 +824,7 @@ static char *php_unicode_convert_case(int case_mode, const char *srcstr,
  *  Even if any illegal encoding is detected the result may contain a list
  *  of parsed encodings.
  */
-static int php_mb_parse_encoding_array(CArrRef array,
+static int php_mb_parse_encoding_array(const Array& array,
                                        mbfl_no_encoding **return_list,
                                        int *return_size, int persistent) {
   int n, l, size, bauto,ret = 1;
@@ -1343,7 +1343,7 @@ static Variant php_mbfl_convert(CVarRef var,
 
 Variant f_mb_convert_variables(int _argc, const String& to_encoding,
                                CVarRef from_encoding, VRefParam vars,
-                               CArrRef _argv /* = null_array */) {
+                               const Array& _argv /* = null_array */) {
   mbfl_string string, result;
   mbfl_no_encoding _from_encoding, _to_encoding;
   mbfl_encoding_detector *identd;

@@ -573,7 +573,7 @@ static bool HHVM_METHOD(ZipArchive, addFromString, const String& localname,
   return true;
 }
 
-static bool addPattern(zip* zipStruct, const String& pattern, CArrRef options,
+static bool addPattern(zip* zipStruct, const String& pattern, const Array& options,
                        std::string path, int64_t flags, bool glob) {
   std::string removePath;
   if (options->exists(String("remove_path"))) {
@@ -675,7 +675,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, CArrRef options,
 }
 
 static bool HHVM_METHOD(ZipArchive, addGlob, const String& pattern,
-                        int64_t flags, CArrRef options) {
+                        int64_t flags, const Array& options) {
   auto zipDir = getResource<ZipDirectory>(this_, "zipDir");
 
   FAIL_IF_INVALID_ZIPARCHIVE(addGlob, zipDir);
@@ -685,7 +685,7 @@ static bool HHVM_METHOD(ZipArchive, addGlob, const String& pattern,
 }
 
 static bool HHVM_METHOD(ZipArchive, addPattern, const String& pattern,
-                        const String& path, CArrRef options) {
+                        const String& path, const Array& options) {
   auto zipDir = getResource<ZipDirectory>(this_, "zipDir");
 
   FAIL_IF_INVALID_ZIPARCHIVE(addPattern, zipDir);

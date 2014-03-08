@@ -87,7 +87,7 @@ Variant f_imagecolorsforindex(CResRef image, int index);
 Variant f_imagecolorstotal(CResRef image);
 Variant f_imagecolortransparent(CResRef image, int color = -1);
 bool f_imageconvolution(
-  CResRef image, CArrRef matrix, double div, double offset);
+  CResRef image, const Array& matrix, double div, double offset);
 bool f_imagecopy(
   CResRef dst_im, CResRef src_im, int dst_x, int dst_y, int src_x, int src_y,
   int src_w, int src_h);
@@ -126,7 +126,7 @@ bool f_imagefilledarc(
 bool f_imagefilledellipse(
   CResRef image, int cx, int cy, int width, int height, int color);
 bool f_imagefilledpolygon(
-  CResRef image, CArrRef points, int num_points, int color);
+  CResRef image, const Array& points, int num_points, int color);
 bool f_imagefilledrectangle(
   CResRef image, int x1, int y1, int x2, int y2, int color);
 bool f_imagefilltoborder(CResRef image, int x, int y, int border, int color);
@@ -137,10 +137,10 @@ int64_t f_imagefontheight(int font);
 int64_t f_imagefontwidth(int font);
 Variant f_imageftbbox(
   double size, double angle, const String& font_file, const String& text,
-  CArrRef extrainfo = Array());
+  const Array& extrainfo = Array());
 Variant f_imagefttext(
   CResRef image, double size, double angle, int x, int y, int col,
-  const String& font_file, const String& text, CArrRef extrainfo = Array());
+  const String& font_file, const String& text, const Array& extrainfo = Array());
 bool f_imagegammacorrect(CResRef image, double inputgamma, double outputgamma);
 bool f_imagegd2(
   CResRef image, const String& filename = null_string, int chunk_size = 0,
@@ -160,7 +160,7 @@ void f_imagepalettecopy(CResRef destination, CResRef source);
 bool f_imagepng(
   CResRef image, const String& filename = null_string, int quality = -1,
   int filters = -1);
-bool f_imagepolygon(CResRef image, CArrRef points, int num_points, int color);
+bool f_imagepolygon(CResRef image, const Array& points, int num_points, int color);
 Array f_imagepsbbox(
   const String& text, int font, int size, int space = 0, int tightness = 0,
   double angle = 0.0);
@@ -180,7 +180,7 @@ Variant f_imagerotate(
 bool f_imagesavealpha(CResRef image, bool saveflag);
 bool f_imagesetbrush(CResRef image, CResRef brush);
 bool f_imagesetpixel(CResRef image, int x, int y, int color);
-bool f_imagesetstyle(CResRef image, CArrRef style);
+bool f_imagesetstyle(CResRef image, const Array& style);
 bool f_imagesetthickness(CResRef image, int thickness);
 bool f_imagesettile(CResRef image, CResRef tile);
 bool f_imagestring(

@@ -54,7 +54,7 @@
   var_name##_len = 0;                                    \
   if (option_array.isArray() &&                          \
       !option_array.toArray().empty()) {                 \
-    CArrRef option_array_arr = option_array.toArray();   \
+    const Array& option_array_arr = option_array.toArray();   \
     if (option_array_arr.exists(option_name)) {          \
       Variant option_val(option_array_arr[option_name]); \
       if (option_val.isString()) {                       \
@@ -70,7 +70,7 @@
   var_name##_set = 0;                                    \
   if (option_array.isArray() &&                          \
       !option_array.toArray().empty()) {                 \
-    CArrRef option_array_arr = option_array.toArray();   \
+    const Array& option_array_arr = option_array.toArray();   \
     if (option_array_arr.exists(option_name)) {          \
       Variant option_val(option_array_arr[option_name]); \
       if (option_val.isInteger()) {                      \

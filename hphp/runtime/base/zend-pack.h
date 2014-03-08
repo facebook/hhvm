@@ -37,7 +37,7 @@ public:
    * to the format argument. pack() idea stolen from Perl (implemented formats
    * behave the same as there).
    */
-  Variant pack(const String& fmt, CArrRef argv);
+  Variant pack(const String& fmt, const Array& argv);
 
   /**
    * Unpack binary string into named array elements according to format

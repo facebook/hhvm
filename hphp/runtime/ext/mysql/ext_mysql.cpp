@@ -699,7 +699,7 @@ Variant f_mysql_fetch_array(CVarRef result, int result_type /* = 3 */) {
 
 Variant f_mysql_fetch_object(CVarRef result,
                              const String& class_name /* = "stdClass" */,
-                             CArrRef params /* = null */) {
+                             const Array& params /* = null */) {
   Variant properties = php_mysql_fetch_hash(result, PHP_MYSQL_ASSOC);
   if (!same(properties, false)) {
     Object obj = create_object(class_name, params);

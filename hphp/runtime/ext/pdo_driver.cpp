@@ -36,7 +36,7 @@ PDODriver::PDODriver(const char *name) : m_name(name) {
 
 PDOConnection *PDODriver::createConnection(const String& datasource,
                                            const String& username,
-                                           const String& password, CArrRef options) {
+                                           const String& password, const Array& options) {
   PDOConnection *conn = createConnectionObject();
   conn->data_source = std::string(datasource.data(), datasource.size());
   conn->username = std::string(username.data(), username.size());

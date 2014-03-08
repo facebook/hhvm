@@ -326,7 +326,7 @@ static String _xml_string_zval(const char *str) {
 }
 
 static Variant xml_call_handler(XmlParser *parser, CVarRef handler,
-                                CArrRef args) {
+                                const Array& args) {
   if (parser && handler.toBoolean()) {
     Variant retval;
     if (handler.isString()) {

@@ -1637,7 +1637,7 @@ bool hphp_invoke_simple(const std::string &filename,
 }
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
-                 bool func, CArrRef funcParams, VRefParam funcRet,
+                 bool func, const Array& funcParams, VRefParam funcRet,
                  const string &reqInitFunc, const string &reqInitDoc,
                  bool &error, string &errorMsg,
                  bool once /* = true */, bool warmupOnly /* = false */,

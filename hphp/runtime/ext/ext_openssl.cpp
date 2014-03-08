@@ -493,7 +493,7 @@ static void add_assoc_name_entry(Array &ret, const char *key,
   }
 }
 
-static const char *read_string(CArrRef args, const String& key, const char *def,
+static const char *read_string(const Array& args, const String& key, const char *def,
                                std::vector<String> &strings) {
   if (args.exists(key)) {
     String value = args[key].toString();
@@ -503,7 +503,7 @@ static const char *read_string(CArrRef args, const String& key, const char *def,
   return def;
 }
 
-static int64_t read_integer(CArrRef args, const String& key, int64_t def) {
+static int64_t read_integer(const Array& args, const String& key, int64_t def) {
   if (args.exists(key)) {
     return args[key].toInt64();
   }
@@ -564,7 +564,7 @@ const StaticString
   s_encrypt_key("encrypt_key");
 
 static bool php_openssl_parse_config(struct php_x509_request *req,
-                                     CArrRef args,
+                                     const Array& args,
                                      std::vector<String> &strings) {
   req->config_filename =
     read_string(args, s_config, default_ssl_conf_filename, strings);
@@ -729,7 +729,7 @@ end:
  * calist is an array containing file and directory names.  create a
  * certificate store and add those certs to it for use in verification.
  */
-static X509_STORE *setup_verify(CArrRef calist) {
+static X509_STORE *setup_verify(const Array& calist) {
   X509_STORE *store = X509_STORE_new();
   if (store == NULL) {
     return NULL;
@@ -784,7 +784,7 @@ static X509_STORE *setup_verify(CArrRef calist) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static bool add_entries(X509_NAME *subj, CArrRef items) {
+static bool add_entries(X509_NAME *subj, const Array& items) {
   for (ArrayIter iter(items); iter; ++iter) {
     String index = iter.first();
     String item = iter.second();
@@ -805,7 +805,7 @@ static bool add_entries(X509_NAME *subj, CArrRef items) {
 }
 
 static bool php_openssl_make_REQ(struct php_x509_request *req, X509_REQ *csr,
-                                 CArrRef dn, CArrRef attribs) {
+                                 const Array& dn, const Array& attribs) {
   char *dn_sect = CONF_get_string(req->req_config, req->section_name,
                                   "distinguished_name");
   if (dn_sect == NULL) return false;
@@ -966,7 +966,7 @@ Variant f_openssl_csr_get_subject(CVarRef csr,
   return ret;
 }
 
-Variant f_openssl_csr_new(CArrRef dn, VRefParam privkey,
+Variant f_openssl_csr_new(const Array& dn, VRefParam privkey,
                           CVarRef configargs /* = null_variant */,
                           CVarRef extraattribs /* = null_variant */) {
   Variant ret = false;
@@ -1397,7 +1397,7 @@ bool f_openssl_pkcs7_decrypt(const String& infilename, const String& outfilename
   return ret;
 }
 
-static void print_headers(BIO *outfile, CArrRef headers) {
+static void print_headers(BIO *outfile, const Array& headers) {
   if (!headers.isNull()) {
     if (headers->isVectorData()) {
       for (ArrayIter iter(headers); iter; ++iter) {
@@ -1413,7 +1413,7 @@ static void print_headers(BIO *outfile, CArrRef headers) {
 }
 
 bool f_openssl_pkcs7_encrypt(const String& infilename, const String& outfilename,
-                             CVarRef recipcerts, CArrRef headers,
+                             CVarRef recipcerts, const Array& headers,
                              int flags /* = 0 */,
                              int cipherid /* = k_OPENSSL_CIPHER_RC2_40 */) {
   bool ret = false;
@@ -1540,7 +1540,7 @@ bool f_openssl_pkcs7_sign(const String& infilename, const String& outfilename,
 
 Variant f_openssl_pkcs7_verify(const String& filename, int flags,
                                const String& outfilename /* = null_string */,
-                               CArrRef cainfo /* = null_array */,
+                               const Array& cainfo /* = null_array */,
                                const String& extracerts /* = null_string */,
                                const String& content /* = null_string */) {
   Variant ret = -1;
@@ -1970,7 +1970,7 @@ bool f_openssl_public_encrypt(const String& data, VRefParam crypted, CVarRef key
 }
 
 Variant f_openssl_seal(const String& data, VRefParam sealed_data, VRefParam env_keys,
-                       CArrRef pub_key_ids, const String& method /* = null_string */) {
+                       const Array& pub_key_ids, const String& method /* = null_string */) {
   int nkeys = pub_key_ids.size();
   if (nkeys == 0) {
     raise_warning("Fourth argument to openssl_seal() must be "
@@ -2174,7 +2174,7 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain,
 }
 
 int64_t f_openssl_x509_checkpurpose(CVarRef x509cert, int purpose,
-                                CArrRef cainfo /* = null_array */,
+                                const Array& cainfo /* = null_array */,
                                 const String& untrustedfile /* = null_string */) {
   int ret = -1;
   STACK_OF(X509) *untrustedchain = NULL;

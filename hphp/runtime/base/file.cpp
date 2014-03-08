@@ -677,7 +677,7 @@ int64_t File::print() {
   return total;
 }
 
-int64_t File::printf(const String& format, CArrRef args) {
+int64_t File::printf(const String& format, const Array& args) {
   int len = 0;
   char *output = string_printf(format.data(), format.size(), args, &len);
   return write(String(output, len, AttachString));
@@ -686,7 +686,7 @@ int64_t File::printf(const String& format, CArrRef args) {
 ///////////////////////////////////////////////////////////////////////////////
 // csv functions
 
-int64_t File::writeCSV(CArrRef fields, char delimiter_char /* = ',' */,
+int64_t File::writeCSV(const Array& fields, char delimiter_char /* = ',' */,
                      char enclosure_char /* = '"' */) {
   int line = 0;
   int count = fields.size();

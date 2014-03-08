@@ -35,7 +35,7 @@ bool f_msg_receive(CResRef queue, int64_t desiredmsgtype, VRefParam msgtype,
                    int64_t maxsize, VRefParam message, bool unserialize = true,
                    int64_t flags = 0, VRefParam errorcode = uninit_null());
 bool f_msg_remove_queue(CResRef queue);
-bool f_msg_set_queue(CResRef queue, CArrRef data);
+bool f_msg_set_queue(CResRef queue, const Array& data);
 Array f_msg_stat_queue(CResRef queue);
 
 ///////////////////////////////////////////////////////////////////////////////

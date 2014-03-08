@@ -734,7 +734,7 @@ String f_str_repeat(const String& input, int multiplier) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_printf(int _argc, const String& format, CArrRef _argv /* = null_array */) {
+Variant f_printf(int _argc, const String& format, const Array& _argv /* = null_array */) {
   int len = 0; char *output = string_printf(format.data(), format.size(),
                                             _argv, &len);
   if (output == NULL) return false;
@@ -742,7 +742,7 @@ Variant f_printf(int _argc, const String& format, CArrRef _argv /* = null_array 
   return len;
 }
 
-Variant f_vprintf(const String& format, CArrRef args) {
+Variant f_vprintf(const String& format, const Array& args) {
   int len = 0; char *output = string_printf(format.data(), format.size(),
                                             args, &len);
   if (output == NULL) return false;
@@ -750,21 +750,21 @@ Variant f_vprintf(const String& format, CArrRef args) {
   return len;
 }
 
-Variant f_sprintf(int _argc, const String& format, CArrRef _argv /* = null_array */) {
+Variant f_sprintf(int _argc, const String& format, const Array& _argv /* = null_array */) {
   int len = 0;
   char *output = string_printf(format.data(), format.size(), _argv, &len);
   if (output == NULL) return false;
   return String(output, len, AttachString);
 }
 
-Variant f_vsprintf(const String& format, CArrRef args) {
+Variant f_vsprintf(const String& format, const Array& args) {
   int len = 0;
   char *output = string_printf(format.data(), format.size(), args, &len);
   if (output == NULL) return false;
   return String(output, len, AttachString);
 }
 
-Variant f_sscanf(int _argc, const String& str, const String& format, CArrRef _argv /* = null_array */) {
+Variant f_sscanf(int _argc, const String& str, const String& format, const Array& _argv /* = null_array */) {
   Variant ret;
   int result;
   result = string_sscanf(str.c_str(), format.c_str(), _argv.size(), ret);
@@ -1338,7 +1338,7 @@ String f_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
 
 String f_fb_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
                              const String& charset /* = "ISO-8859-1" */,
-                             CArrRef extra /* = Array() */) {
+                             const Array& extra /* = Array() */) {
   return StringUtil::HtmlEncodeExtra(str, StringUtil::toQuoteStyle(flags),
                                      charset.data(), false, extra);
 }
@@ -1458,7 +1458,7 @@ void f_parse_str(const String& str, VRefParam arr /* = null */) {
   arr = result.toArray();
 }
 
-Variant f_setlocale(int _argc, int category, CVarRef locale, CArrRef _argv /* = null_array */) {
+Variant f_setlocale(int _argc, int category, CVarRef locale, const Array& _argv /* = null_array */) {
   Array argv = _argv;
   if (locale.is(KindOfArray)) {
     if (!argv.empty()) throw_invalid_argument("locale: not string)");

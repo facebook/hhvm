@@ -302,9 +302,9 @@ MagickBooleanType toMagickBool(bool value) {
 MagickBooleanType withMagickLocaleFix(
     const std::function<MagickBooleanType()>& lambda);
 
-std::vector<double> toDoubleArray(CArrRef array);
+std::vector<double> toDoubleArray(const Array& array);
 
-std::vector<PointInfo> toPointInfoArray(CArrRef coordinates);
+std::vector<PointInfo> toPointInfoArray(const Array& coordinates);
 
 //////////////////////////////////////////////////////////////////////////////
 // Imagick Helper

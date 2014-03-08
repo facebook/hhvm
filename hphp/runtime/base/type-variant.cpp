@@ -110,7 +110,7 @@ Variant::Variant(const std::string & v) {
   s->incRefCount();
 }
 
-Variant::Variant(CArrRef v) {
+Variant::Variant(const Array& v) {
   m_type = KindOfArray;
   ArrayData *a = v.get();
   if (a) {
@@ -1947,7 +1947,7 @@ VarNR::VarNR(const String& v) {
   }
 }
 
-VarNR::VarNR(CArrRef v) {
+VarNR::VarNR(const Array& v) {
   init(KindOfArray);
   ArrayData *a = v.get();
   if (a) {

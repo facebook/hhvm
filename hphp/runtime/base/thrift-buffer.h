@@ -277,7 +277,7 @@ public:
   void read(Array   &data);
   void read(Object  &data);
   void read(Variant &data);
-  void write(CArrRef data);
+  void write(const Array& data);
   void write(CObjRef data);
   void write(CVarRef data);
 

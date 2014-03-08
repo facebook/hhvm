@@ -56,7 +56,7 @@ MagickBooleanType withMagickLocaleFix(
   return ret;
 }
 
-std::vector<double> toDoubleArray(CArrRef array) {
+std::vector<double> toDoubleArray(const Array& array) {
   std::vector<double> ret;
   for (ArrayIter it(array); it; ++it) {
     ret.push_back(it.secondRefPlus().toDouble());
@@ -64,7 +64,7 @@ std::vector<double> toDoubleArray(CArrRef array) {
   return ret;
 }
 
-std::vector<PointInfo> toPointInfoArray(CArrRef coordinates) {
+std::vector<PointInfo> toPointInfoArray(const Array& coordinates) {
   std::vector<PointInfo> ret(coordinates.size());
   int idx = 0;
 
@@ -74,7 +74,7 @@ std::vector<PointInfo> toPointInfoArray(CArrRef coordinates) {
       return {};
     }
 
-    CArrRef coordinate = element.toCArrRef();
+    const Array& coordinate = element.toCArrRef();
     if (coordinate.size() != 2) {
       return {};
     }

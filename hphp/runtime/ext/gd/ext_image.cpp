@@ -2574,7 +2574,7 @@ static bool php_imagechar(CResRef image, int size, int x, int y,
 
 /* arg = 0  normal polygon
    arg = 1  filled polygon */
-static bool php_imagepolygon(CResRef image, CArrRef points, int num_points,
+static bool php_imagepolygon(CResRef image, const Array& points, int num_points,
                              int color, int filled) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -3043,7 +3043,7 @@ Variant f_imageloadfont(const String& file) {
 #endif
 }
 
-bool f_imagesetstyle(CResRef image, CArrRef style) {
+bool f_imagesetstyle(CResRef image, const Array& style) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   int *stylearr;
@@ -3833,12 +3833,12 @@ Variant f_imageinterlace(CResRef image, int interlace /* = 0 */) {
   return gdImageGetInterlaced(im);
 }
 
-bool f_imagepolygon(CResRef image, CArrRef points,
+bool f_imagepolygon(CResRef image, const Array& points,
                     int num_points, int color) {
   return php_imagepolygon(image, points, num_points, color, 0);
 }
 
-bool f_imagefilledpolygon(CResRef image, CArrRef points, int num_points,
+bool f_imagefilledpolygon(CResRef image, const Array& points, int num_points,
                           int color) {
   return php_imagepolygon(image, points, num_points, color, 1);
 }
@@ -3940,7 +3940,7 @@ Variant f_imagesy(CResRef image) {
 }
 
 Variant f_imageftbbox(double size, double angle, const String& font_file,
-                    const String& text, CArrRef extrainfo /* = null */) {
+                    const String& text, const Array& extrainfo /* = null */) {
 #if defined(ENABLE_GD_TTF) && HAVE_LIBGD20 && \
     HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
   return php_imagettftext_common(TTFTEXT_BBOX, 1,
@@ -3954,7 +3954,7 @@ Variant f_imageftbbox(double size, double angle, const String& font_file,
 
 Variant f_imagefttext(CResRef image, double size, double angle,
                     int x, int y, int col, const String& font_file,
-                    const String& text, CArrRef extrainfo /* = null */) {
+                    const String& text, const Array& extrainfo /* = null */) {
 #if defined(ENABLE_GD_TTF) && HAVE_LIBGD20 && \
   HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
   return php_imagettftext_common(TTFTEXT_DRAW, 1,
@@ -4177,7 +4177,7 @@ static int hphp_gdImageConvolution(gdImagePtr src, float filter[3][3],
   return 1;
 }
 
-bool f_imageconvolution(CResRef image, CArrRef matrix,
+bool f_imageconvolution(CResRef image, const Array& matrix,
                         double div, double offset) {
   gdImagePtr im_src = image.getTyped<Image>()->get();
   if (!im_src) return false;

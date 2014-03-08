@@ -115,9 +115,9 @@ inline bool is_empty_string(CVarRef v) {
 ///////////////////////////////////////////////////////////////////////////////
 // misc functions
 
-bool array_is_valid_callback(CArrRef arr);
+bool array_is_valid_callback(const Array& arr);
 
-Variant f_call_user_func_array(CVarRef function, CArrRef params,
+Variant f_call_user_func_array(CVarRef function, const Array& params,
                                bool bound = false);
 
 const HPHP::Func*
@@ -261,20 +261,20 @@ char const kUnserializableString[] = "\x01";
 String f_serialize(CVarRef value);
 Variant unserialize_ex(const String& str,
                        VariableUnserializer::Type type,
-                       CArrRef class_whitelist = null_array);
+                       const Array& class_whitelist = null_array);
 Variant unserialize_ex(const char* str, int len,
                        VariableUnserializer::Type type,
-                       CArrRef class_whitelist = null_array);
+                       const Array& class_whitelist = null_array);
 
 inline Variant unserialize_from_buffer(const char* str, int len,
-                                       CArrRef class_whitelist = null_array) {
+                                       const Array& class_whitelist = null_array) {
   return unserialize_ex(str, len,
                         VariableUnserializer::Type::Serialize,
                         class_whitelist);
 }
 
 inline Variant unserialize_from_string(const String& str,
-                                       CArrRef class_whitelist = null_array) {
+                                       const Array& class_whitelist = null_array) {
   return unserialize_from_buffer(str.data(), str.size(), class_whitelist);
 }
 
@@ -351,7 +351,7 @@ public:
   bool autoloadFunc(StringData* name);
   bool autoloadConstant(StringData* name);
   bool autoloadType(const String& name);
-  bool setMap(CArrRef map, const String& root);
+  bool setMap(const Array& map, const String& root);
   DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
 
 private:

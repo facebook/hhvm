@@ -214,7 +214,7 @@ class CompactWriter {
       lastFieldNum = 0;
 
       // Get field specification
-      CArrRef spec = HHVM_FN(hphp_get_static_property)(obj->o_getClassName(),
+      const Array& spec = HHVM_FN(hphp_get_static_property)(obj->o_getClassName(),
                                                        "_TSPEC", false)
         .toArray();
 
@@ -282,7 +282,7 @@ class CompactWriter {
     }
 
     void writeField(CVarRef value,
-                    CArrRef valueSpec,
+                    const Array& valueSpec,
                     TType type) {
       switch (type) {
         case T_STOP:
@@ -379,7 +379,7 @@ class CompactWriter {
       }
     }
 
-    void writeMap(Array arr, CArrRef spec) {
+    void writeMap(Array arr, const Array& spec) {
       TType keyType = (TType)spec
         .rvalAt(PHPTransport::s_ktype, AccessFlags::Error_Key).toByte();
       TType valueType = (TType)spec
@@ -400,7 +400,7 @@ class CompactWriter {
       writeCollectionEnd();
     }
 
-    void writeList(Array arr, CArrRef spec, CListType listType) {
+    void writeList(Array arr, const Array& spec, CListType listType) {
       TType valueType = (TType)spec
         .rvalAt(PHPTransport::s_etype, AccessFlags::Error_Key).toByte();
       Array valueSpec = spec
@@ -545,7 +545,7 @@ class CompactReader {
     std::stack<std::pair<CState, uint16_t> > structHistory;
     std::stack<CState> containerHistory;
 
-    void readStruct(CObjRef dest, CArrRef spec) {
+    void readStruct(CObjRef dest, const Array& spec) {
       readStructBegin();
 
       while (true) {
@@ -631,7 +631,7 @@ class CompactReader {
       state = STATE_FIELD_READ;
     }
 
-    Variant readField(CArrRef spec, TType type) {
+    Variant readField(const Array& spec, TType type) {
       switch (type) {
         case T_STOP:
         case T_VOID:
@@ -819,7 +819,7 @@ class CompactReader {
       }
     }
 
-    Variant readMap(CArrRef spec) {
+    Variant readMap(const Array& spec) {
       TType keyType, valueType;
       uint32_t size;
       readMapBegin(keyType, valueType, size);
@@ -847,7 +847,7 @@ class CompactReader {
       return ret;
     }
 
-    Variant readList(CArrRef spec) {
+    Variant readList(const Array& spec) {
       TType valueType;
       uint32_t size;
       readListBegin(valueType, size);
@@ -872,7 +872,7 @@ class CompactReader {
       return ret;
     }
 
-    Variant readSet(CArrRef spec) {
+    Variant readSet(const Array& spec) {
       TType valueType;
       uint32_t size;
       readListBegin(valueType, size);

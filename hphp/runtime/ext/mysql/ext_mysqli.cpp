@@ -450,7 +450,7 @@ static Variant HHVM_METHOD(mysqli, ssl_set, const Variant& key,
 //}
 //
 //static bool HHVM_METHOD(mysqli_driver, embedded_server_start, bool start,
-//                        CArrRef arguments, CArrRef groups) {
+//                        const Array& arguments, const Array& groups) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 

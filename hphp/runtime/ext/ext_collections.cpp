@@ -4262,7 +4262,7 @@ BaseSet::php_fromArray(CVarRef arr) {
 template<class TSet>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_fromArrays(int _argc, CArrRef _argv /* = null_array */) {
+BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
   TSet* st;
   Object ret = st = NEWOBJ(TSet)();
   for (ArrayIter iter(_argv); iter; ++iter) {
@@ -4694,7 +4694,7 @@ Object c_Set::ti_fromarray(CVarRef arr) {
   return BaseSet::php_fromArray<c_Set>(arr);
 }
 
-Object c_Set::ti_fromarrays(int _argc, CArrRef _argv /* = null_array */) {
+Object c_Set::ti_fromarrays(int _argc, const Array& _argv /* = null_array */) {
   return BaseSet::php_fromArrays<c_Set>(_argc, _argv);
 }
 
@@ -4778,7 +4778,7 @@ Object c_ImmSet::ti_fromitems(CVarRef iterable) {
   return BaseSet::php_fromItems<c_ImmSet>(iterable);
 }
 
-Object c_ImmSet::ti_fromarrays(int _argc, CArrRef _argv) {
+Object c_ImmSet::ti_fromarrays(int _argc, const Array& _argv) {
   return BaseSet::php_fromArrays<c_ImmSet>(_argc, _argv);
 }
 

@@ -326,7 +326,7 @@ static void fb_compact_serialize_string(StringBuffer& sb, const String& str) {
   }
 }
 
-static bool fb_compact_serialize_is_list(CArrRef arr, int64_t& index_limit) {
+static bool fb_compact_serialize_is_list(const Array& arr, int64_t& index_limit) {
   index_limit = arr.size();
   int64_t max_index = 0;
   for (ArrayIter it(arr); it; ++it) {
@@ -356,7 +356,7 @@ static int fb_compact_serialize_variant(StringBuffer& sd,
   CVarRef var, int depth);
 
 static void fb_compact_serialize_array_as_list_map(
-    StringBuffer& sb, CArrRef arr, int64_t index_limit, int depth) {
+    StringBuffer& sb, const Array& arr, int64_t index_limit, int depth) {
   fb_compact_serialize_code(sb, FB_CS_LIST_MAP);
   for (int64_t i = 0; i < index_limit; ++i) {
     if (arr.exists(i)) {
@@ -369,7 +369,7 @@ static void fb_compact_serialize_array_as_list_map(
 }
 
 static void fb_compact_serialize_array_as_map(
-    StringBuffer& sb, CArrRef arr, int depth) {
+    StringBuffer& sb, const Array& arr, int depth) {
   fb_compact_serialize_code(sb, FB_CS_MAP);
   for (ArrayIter it(arr); it; ++it) {
     Variant key = it.first();
@@ -750,7 +750,7 @@ const StaticString
   s_auth("auth"),
   s_timeout("timeout");
 
-Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
+Array f_fb_parallel_query(const Array& sql_map, int max_thread /* = 50 */,
                           bool combine_result /* = true */,
                           bool retry_query_on_fail /* = true */,
                           int connect_timeout /* = -1 */,
@@ -1105,20 +1105,20 @@ bool f_fb_autoload_map(CVarRef map, const String& root) {
 // call_user_func extensions
 
 Array f_fb_call_user_func_safe(int _argc, CVarRef function,
-                               CArrRef _argv /* = null_array */) {
+                               const Array& _argv /* = null_array */) {
   return f_fb_call_user_func_array_safe(function, _argv);
 }
 
 Variant f_fb_call_user_func_safe_return(int _argc, CVarRef function,
                                         CVarRef def,
-                                        CArrRef _argv /* = null_array */) {
+                                        const Array& _argv /* = null_array */) {
   if (f_is_callable(function)) {
     return vm_call_user_func(function, _argv);
   }
   return def;
 }
 
-Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
+Array f_fb_call_user_func_array_safe(CVarRef function, const Array& params) {
   if (f_is_callable(function)) {
     return make_packed_array(true, vm_call_user_func(function, params));
   }

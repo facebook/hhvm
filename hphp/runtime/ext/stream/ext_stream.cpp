@@ -53,8 +53,8 @@ static StreamContext* get_stream_context(CVarRef stream_or_context);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_stream_context_create(CArrRef options /* = null_array */,
-                                CArrRef params /* = null_array */) {
+Variant f_stream_context_create(const Array& options /* = null_array */,
+                                const Array& params /* = null_array */) {
   if (!options.isNull() && !StreamContext::validateOptions(options)) {
     return false;
   }
@@ -71,7 +71,7 @@ Variant f_stream_context_get_options(CResRef stream_or_context) {
 }
 
 bool f_stream_context_set_option0(StreamContext* context,
-                                  CArrRef options) {
+                                  const Array& options) {
   if (!StreamContext::validateOptions(options)) {
     raise_warning("options should have the form "
                   "[\"wrappername\"][\"optionname\"] = $value");
@@ -114,7 +114,7 @@ bool f_stream_context_set_option(CVarRef stream_or_context,
   }
 }
 
-Variant f_stream_context_get_default(CArrRef options /* = null_array */) {
+Variant f_stream_context_get_default(const Array& options /* = null_array */) {
   Resource &resource = g_context->getStreamContext();
   if (resource.isNull()) {
     resource = Resource(NEWOBJ(StreamContext)(Array::Create(),
@@ -128,7 +128,7 @@ Variant f_stream_context_get_default(CArrRef options /* = null_array */) {
   return resource;
 }
 
-Variant f_stream_context_set_default(CArrRef options) {
+Variant f_stream_context_set_default(const Array& options) {
   return f_stream_context_get_default(options);
 }
 
@@ -142,7 +142,7 @@ Variant f_stream_context_get_params(CResRef stream_or_context) {
 }
 
 bool f_stream_context_set_params(CResRef stream_or_context,
-                                 CArrRef params) {
+                                 const Array& params) {
   StreamContext* context = get_stream_context(stream_or_context);
   if (!context || !StreamContext::validateParams(params)) {
     raise_warning("Invalid stream/context parameter");
@@ -571,12 +571,12 @@ bool StreamContext::validateOptions(CVarRef options) {
   if (options.isNull() || !options.isArray()) {
     return false;
   }
-  CArrRef arr = options.toArray();
+  const Array& arr = options.toArray();
   for (ArrayIter it(arr); it; ++it) {
     if (!it.first().isString() || !it.second().isArray()) {
       return false;
     }
-    CArrRef opts = it.second().toArray();
+    const Array& opts = it.second().toArray();
     for (ArrayIter it2(opts); it2; ++it2) {
       if (!it2.first().isString()) {
         return false;
@@ -586,7 +586,7 @@ bool StreamContext::validateOptions(CVarRef options) {
   return true;
 }
 
-void StreamContext::mergeOptions(CArrRef options) {
+void StreamContext::mergeOptions(const Array& options) {
   if (m_options.isNull()) {
     m_options = Array::Create();
   }
@@ -629,7 +629,7 @@ bool StreamContext::validateParams(CVarRef params) {
   if (params.isNull() || !params.isArray()) {
     return false;
   }
-  CArrRef arr = params.toArray();
+  const Array& arr = params.toArray();
   const String& options_key = String::FromCStr("options");
   for (ArrayIter it(arr); it; ++it) {
     if (!it.first().isString()) {
@@ -644,7 +644,7 @@ bool StreamContext::validateParams(CVarRef params) {
   return true;
 }
 
-void StreamContext::mergeParams(CArrRef params) {
+void StreamContext::mergeParams(const Array& params) {
   if (m_params.isNull()) {
     m_params = Array::Create();
   }

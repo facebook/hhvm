@@ -29,7 +29,7 @@ struct PCREglobals {
   int64_t m_preg_recursion_limit;
 };
 
-Variant preg_grep(const String& pattern, CArrRef input, int flags = 0);
+Variant preg_grep(const String& pattern, const Array& input, int flags = 0);
 
 Variant preg_match(const String& pattern, const String& subject,
                    Variant &matches,

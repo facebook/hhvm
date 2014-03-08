@@ -392,7 +392,7 @@ static bool HHVM_METHOD(IntlCalendar, roll, int64_t field, CVarRef value) {
 }
 
 // TODO: Switch to AcrRec API once it lands
-static bool HHVM_METHOD(IntlCalendar, __set_array, CArrRef args) {
+static bool HHVM_METHOD(IntlCalendar, __set_array, const Array& args) {
   assert(args.size() == 6);
   CAL_FETCH(data, this_, false);
 
@@ -618,7 +618,7 @@ static bool HHVM_METHOD(IntlCalendar, setSkippedWallTimeOption,
 // IntlGregorianCalendar
 
 static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
-                        CArrRef args) {
+                        const Array& args) {
   assert(args.size() == 6);
 
   int32_t numargs;

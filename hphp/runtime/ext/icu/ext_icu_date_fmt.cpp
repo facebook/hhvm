@@ -114,7 +114,7 @@ void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   }
 }
 
-int64_t IntlDateFormatter::getArrayElemInt(CArrRef arr,
+int64_t IntlDateFormatter::getArrayElemInt(const Array& arr,
                                            const StaticString &key) {
   if (!arr.exists(key)) {
     return 0;

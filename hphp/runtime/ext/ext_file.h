@@ -50,18 +50,18 @@ Variant f_fgets(CResRef handle, int64_t length = 0);
 Variant f_fgetss(CResRef handle, int64_t length = 0,
                 const String& allowable_tags = null_string);
 Variant f_fscanf(
-  int _argc, CResRef handle, const String& format, CArrRef _argv = null_array);
+  int _argc, CResRef handle, const String& format, const Array& _argv = null_array);
 Variant f_fpassthru(CResRef handle);
 Variant f_fwrite(CResRef handle, const String& data, int64_t length = 0);
 Variant f_fputs(CResRef handle, const String& data, int64_t length = 0);
 Variant f_fprintf(
-  int _argc, CResRef handle, const String& format, CArrRef _argv = null_array);
-Variant f_vfprintf(CResRef handle, const String& format, CArrRef args);
+  int _argc, CResRef handle, const String& format, const Array& _argv = null_array);
+Variant f_vfprintf(CResRef handle, const String& format, const Array& args);
 bool f_fflush(CResRef handle);
 bool f_ftruncate(CResRef handle, int64_t size);
 bool f_flock(
   CResRef handle, int operation, VRefParam wouldblock = uninit_null());
-Variant f_fputcsv(CResRef handle, CArrRef fields, const String& delimiter = ",",
+Variant f_fputcsv(CResRef handle, const Array& fields, const String& delimiter = ",",
                   const String& enclosure = "\"");
 Variant f_fgetcsv(
   CResRef handle, int64_t length = 0, const String& delimiter = ",",

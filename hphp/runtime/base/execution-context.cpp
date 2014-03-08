@@ -481,7 +481,7 @@ void ExecutionContext::onRequestShutdown() {
   m_requestEventHandlerSet.clear();
 }
 
-void ExecutionContext::executeFunctions(CArrRef funcs) {
+void ExecutionContext::executeFunctions(const Array& funcs) {
   ThreadInfo::s_threadInfo->m_reqInjectionData.resetTimer(
     RuntimeOption::PspTimeoutSeconds);
 

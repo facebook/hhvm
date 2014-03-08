@@ -1751,7 +1751,7 @@ void f_xhprof_frame_end() {
 }
 
 void f_xhprof_enable(int flags/* = 0 */,
-                     CArrRef args /* = null_array */) {
+                     const Array& args /* = null_array */) {
 #ifdef HOTPROFILER
 #ifdef CLOCK_THREAD_CPUTIME_ID
   bool missingClockGetTimeNS =

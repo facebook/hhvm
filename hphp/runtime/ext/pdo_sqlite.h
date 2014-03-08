@@ -44,7 +44,7 @@ class PDOSqliteConnection : public PDOConnection {
 public:
   PDOSqliteConnection();
   virtual ~PDOSqliteConnection();
-  virtual bool create(CArrRef options);
+  virtual bool create(const Array& options);
   virtual void sweep();
 
   int handleError(const char *file, int line, PDOStatement *stmt = nullptr);

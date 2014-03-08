@@ -64,7 +64,7 @@ static void fail() {
   throw e;
 }
 
-Object c_GenArrayWaitHandle::ti_create(CArrRef inputDependencies) {
+Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
   Array depCopy = inputDependencies->copy();
   if (UNLIKELY(depCopy->kind() > ArrayData::kMixedKind)) {
     // The only array kind that can return a non-kPackedKind or
@@ -139,7 +139,7 @@ Object c_GenArrayWaitHandle::ti_create(CArrRef inputDependencies) {
   }
 }
 
-void c_GenArrayWaitHandle::initialize(CObjRef exception, CArrRef deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
+void c_GenArrayWaitHandle::initialize(CObjRef exception, const Array& deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;

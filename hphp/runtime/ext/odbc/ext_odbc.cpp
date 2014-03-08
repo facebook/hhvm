@@ -828,7 +828,7 @@ Variant HHVM_FUNCTION(odbc_exec, CResRef link, const String& query)
   return odbc_link->exec(query);
 }
 
-bool HHVM_FUNCTION(odbc_execute, CResRef result, const CArrRef params)
+bool HHVM_FUNCTION(odbc_execute, CResRef result, const Array& params)
 {
   ODBCCursor *odbc_result = safe_get_typed<ODBCCursor>(result);
   if (odbc_result == nullptr)

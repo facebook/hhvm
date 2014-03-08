@@ -124,7 +124,7 @@ const StaticString
   s_msg_lspid("msg_lspid"),
   s_msg_lrpid("msg_lrpid");
 
-bool f_msg_set_queue(CResRef queue, CArrRef data) {
+bool f_msg_set_queue(CResRef queue, const Array& data) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");

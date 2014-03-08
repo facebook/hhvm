@@ -78,7 +78,7 @@ const StaticString
 
 typedef smart::unique_ptr<CufIter> SmartCufIterPtr;
 
-bool array_is_valid_callback(CArrRef arr) {
+bool array_is_valid_callback(const Array& arr) {
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
   }
@@ -392,7 +392,7 @@ static bool vm_decode_function_cufiter(CVarRef function,
  * Wraps calling an (autoload) PHP function from a CufIter.
  */
 static Variant vm_call_user_func_cufiter(const CufIter& cufIter,
-                                         CArrRef params) {
+                                         const Array& params) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
   StringData* invName = cufIter.name();
@@ -566,7 +566,7 @@ Object create_object_only(const String& s) {
   return g_context->createObjectOnly(s.get());
 }
 
-Object create_object(const String& s, CArrRef params, bool init /* = true */) {
+Object create_object(const String& s, const Array& params, bool init /* = true */) {
   return g_context->createObject(s.get(), params, init);
 }
 
@@ -816,7 +816,7 @@ String f_serialize(CVarRef value) {
 
 Variant unserialize_ex(const char* str, int len,
                        VariableUnserializer::Type type,
-                       CArrRef class_whitelist /* = null_array */) {
+                       const Array& class_whitelist /* = null_array */) {
   if (str == nullptr || len <= 0) {
     return false;
   }
@@ -837,7 +837,7 @@ Variant unserialize_ex(const char* str, int len,
 
 Variant unserialize_ex(const String& str,
                        VariableUnserializer::Type type,
-                       CArrRef class_whitelist /* = null_array */) {
+                       const Array& class_whitelist /* = null_array */) {
   return unserialize_ex(str.data(), str.size(), type, class_whitelist);
 }
 
@@ -1084,7 +1084,7 @@ void AutoloadHandler::requestShutdown() {
   // m_handlers will be re-initialized by the next requestInit
 }
 
-bool AutoloadHandler::setMap(CArrRef map, const String& root) {
+bool AutoloadHandler::setMap(const Array& map, const String& root) {
   this->m_map = map;
   this->m_map_root = root;
   return true;

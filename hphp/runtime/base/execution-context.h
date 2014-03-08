@@ -366,7 +366,7 @@ private:
   const VirtualHost *m_vhost;
   // helper functions
   void resetCurrentBuffer();
-  void executeFunctions(CArrRef funcs);
+  void executeFunctions(const Array& funcs);
 
 public:
   DebuggerSettings debuggerSettings;

@@ -1465,7 +1465,7 @@ protected:
   template<class TSet>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
-  static php_fromArrays(int _argc, CArrRef _argv = null_array);
+  static php_fromArrays(int _argc, const Array& _argv = null_array);
 
 protected:
   // BaseSet is an abstract class.
@@ -1543,7 +1543,7 @@ class c_Set : public BaseSet {
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
-  static Object ti_fromarrays(int _argc, CArrRef _argv = null_array);
+  static Object ti_fromarrays(int _argc, const Array& _argv = null_array);
   Object t_immutable();
 
  public:
@@ -1595,7 +1595,7 @@ class c_ImmSet : public BaseSet {
 
   // Static methods.
   static Object ti_fromitems(CVarRef iterable);
-  static Object ti_fromarrays(int _argc, CArrRef _argv = null_array);
+  static Object ti_fromarrays(int _argc, const Array& _argv = null_array);
 
   Object t_immutable();
 

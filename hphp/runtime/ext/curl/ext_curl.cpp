@@ -670,7 +670,7 @@ public:
     return 0;
   }
 
-  Variant do_callback(CVarRef cb, CArrRef args) {
+  Variant do_callback(CVarRef cb, const Array& args) {
     assert(!m_exception);
     try {
       return vm_call_user_func(cb, args);
@@ -983,7 +983,7 @@ bool HHVM_FUNCTION(curl_setopt, CResRef ch, int option, CVarRef value) {
   return curl->setOption(option, value);
 }
 
-bool HHVM_FUNCTION(curl_setopt_array, CResRef ch, CArrRef options) {
+bool HHVM_FUNCTION(curl_setopt_array, CResRef ch, const Array& options) {
   CHECK_RESOURCE(curl);
   for (ArrayIter iter(options); iter; ++iter) {
     if (!curl->setOption(iter.first().toInt32(), iter.second())) {

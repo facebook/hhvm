@@ -303,7 +303,7 @@ Variant f_fgetss(CResRef handle, int64_t length /* = 0 */,
 }
 
 Variant f_fscanf(int _argc, CResRef handle, const String& format,
-                 CArrRef _argv /* = null_array */) {
+                 const Array& _argv /* = null_array */) {
   CHECK_HANDLE(handle, f);
   return f_sscanf(_argc, f->readLine(), format, _argv);
 }
@@ -328,12 +328,12 @@ Variant f_fputs(CResRef handle, const String& data, int64_t length /* = 0 */) {
 }
 
 Variant f_fprintf(int _argc, CResRef handle, const String& format,
-                  CArrRef _argv /* = null_array */) {
+                  const Array& _argv /* = null_array */) {
   CHECK_HANDLE(handle, f);
   return f->printf(format, _argv);
 }
 
-Variant f_vfprintf(CResRef handle, const String& format, CArrRef args) {
+Variant f_vfprintf(CResRef handle, const String& format, const Array& args) {
   CHECK_HANDLE(handle, f);
   return f->printf(format, args);
 }
@@ -376,7 +376,7 @@ bool f_flock(CResRef handle, int operation, VRefParam wouldblock /* = null */) {
   }                                                     \
   char NAME ## _char = NAME.charAt(0);                  \
 
-Variant f_fputcsv(CResRef handle, CArrRef fields,
+Variant f_fputcsv(CResRef handle, const Array& fields,
                   const String& delimiter /* = "," */,
                   const String& enclosure /* = "\"" */) {
   FCSV_CHECK_ARG(delimiter);

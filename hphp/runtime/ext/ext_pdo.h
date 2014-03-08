@@ -122,9 +122,9 @@ class c_PDO : public ExtObjectData {
   public: void t___construct(const String& dsn,
                              const String& username = null_string,
                              const String& password = null_string,
-                             CArrRef options = null_array);
+                             const Array& options = null_array);
   public: Variant t_prepare(const String& statement,
-                            CArrRef options = null_array);
+                            const Array& options = null_array);
   public: bool t_begintransaction();
   public: bool t_commit();
   public: bool t_rollback();
@@ -134,7 +134,7 @@ class c_PDO : public ExtObjectData {
   public: Variant t_lastinsertid(const String& seqname = null_string);
   public: Variant t_errorcode();
   public: Array t_errorinfo();
-  public: Variant t_query(int _argc, const String& sql, CArrRef _argv);
+  public: Variant t_query(int _argc, const String& sql, const Array& _argv);
   public: Variant t_quote(const String& str,
                           int64_t paramtype = q_PDO$$PARAM_STR);
   public: bool t_sqlitecreatefunction(const String& name, CVarRef callback,
@@ -159,7 +159,7 @@ class c_PDOStatement : public ExtObjectData {
   // need to implement
   public: c_PDOStatement(Class* cls = c_PDOStatement::classof());
   public: ~c_PDOStatement();
-  public: Variant t_execute(CArrRef params = null_array);
+  public: Variant t_execute(const Array& params = null_array);
   public: Variant t_fetch(int64_t how = 0,
                           int64_t orientation = q_PDO$$FETCH_ORI_NEXT,
                           int64_t offset = 0);
@@ -187,7 +187,7 @@ class c_PDOStatement : public ExtObjectData {
   public: int64_t t_columncount();
   public: Variant t_getcolumnmeta(int64_t column);
   public: bool t_setfetchmode(int _argc, int64_t mode,
-                              CArrRef _argv = null_array);
+                              const Array& _argv = null_array);
   public: bool t_nextrowset();
   public: bool t_closecursor();
   public: Variant t_debugdumpparams();

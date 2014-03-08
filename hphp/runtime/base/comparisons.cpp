@@ -57,7 +57,7 @@ bool same(CVarRef v1, const String& v2) {
   return same(v1, sd);
 }
 
-bool same(CVarRef v1, CArrRef v2) {
+bool same(CVarRef v1, const Array& v2) {
   bool null1 = v1.isNull();
   bool null2 = v2.isNull();
   if (null1 && null2) return true;

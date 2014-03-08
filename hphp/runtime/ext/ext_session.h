@@ -50,7 +50,7 @@ bool f_session_destroy();
 Variant f_session_unset();
 void f_session_write_close();
 void f_session_commit();
-bool f_session_register(int _argc, CVarRef var_names, CArrRef _argv = null_array);
+bool f_session_register(int _argc, CVarRef var_names, const Array& _argv = null_array);
 bool f_session_unregister(const String& varname);
 bool f_session_is_registered(const String& varname);
 

@@ -56,7 +56,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // build environment pair list
-static char **build_envp(CArrRef envs, std::vector<String> &senvs) {
+static char **build_envp(const Array& envs, std::vector<String> &senvs) {
   char **envp = NULL;
   int size = envs.size();
   if (size) {
@@ -125,8 +125,8 @@ int64_t f_pcntl_alarm(int seconds) {
   return alarm(seconds);
 }
 
-void f_pcntl_exec(const String& path, CArrRef args /* = null_array */,
-                  CArrRef envs /* = null_array */) {
+void f_pcntl_exec(const String& path, const Array& args /* = null_array */,
+                  const Array& envs /* = null_array */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(path.data())) {
     return;
   }
@@ -694,7 +694,7 @@ Mutex DescriptorItem::s_mutex(false);
 const StaticString s_pipe("pipe");
 const StaticString s_file("file");
 
-static bool pre_proc_open(CArrRef descriptorspec,
+static bool pre_proc_open(const Array& descriptorspec,
                           std::vector<DescriptorItem> &items) {
   /* walk the descriptor spec and set up files/pipes */
   items.resize(descriptorspec.size());
@@ -787,7 +787,7 @@ static Variant post_proc_open(const String& cmd, Variant &pipes,
   return Resource(proc);
 }
 
-Variant f_proc_open(const String& cmd, CArrRef descriptorspec, VRefParam pipes,
+Variant f_proc_open(const String& cmd, const Array& descriptorspec, VRefParam pipes,
                     const String& cwd /* = null_string */,
                     CVarRef env /* = null_variant */,
                     CVarRef other_options /* = null_variant */) {

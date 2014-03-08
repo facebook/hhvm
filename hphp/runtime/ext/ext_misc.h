@@ -35,7 +35,7 @@ Variant f_die(CVarRef status = null_variant);
 Variant f_exit(CVarRef status = null_variant);
 void f___halt_compiler();
 int64_t f_ignore_user_abort(bool setting = false);
-Variant f_pack(int _argc, const String& format, CArrRef _argv = null_array);
+Variant f_pack(int _argc, const String& format, const Array& _argv = null_array);
 int64_t f_sleep(int seconds);
 void f_usleep(int micro_seconds);
 Variant f_time_nanosleep(int seconds, int nanoseconds);

@@ -52,7 +52,7 @@ Variant f_get_object_vars(CObjRef object);
 Variant f_call_user_method_array(const String& method_name, VRefParam obj,
                                  CVarRef paramarr);
 Variant f_call_user_method(int _argc, const String& method_name, VRefParam obj,
-                           CArrRef _argv = null_array);
+                           const Array& _argv = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -91,7 +91,7 @@ PDOSqliteConnection::~PDOSqliteConnection() {
   }
 }
 
-bool PDOSqliteConnection::create(CArrRef options) {
+bool PDOSqliteConnection::create(const Array& options) {
   String filename = data_source.substr(0,1) == ":" ? String(data_source) :
                     File::TranslatePath(data_source);
   if (filename.empty()) {

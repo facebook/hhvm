@@ -26,7 +26,7 @@ class CmdVariable : public DebuggerCommand {
 public:
   static Array GetGlobalVariables();
   static void PrintVariable(DebuggerClient &client, const String& varName);
-  static void PrintVariables(DebuggerClient &client, CArrRef variables,
+  static void PrintVariables(DebuggerClient &client, const Array& variables,
                               int frame, const String& text, int version);
 
 public:

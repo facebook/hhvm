@@ -98,7 +98,7 @@ public:
    * with that single value (then one should use Array::Create() functions).
    */
   /* implicit */ Array(ArrayData* data) : ArrayBase(data) { }
-  /* implicit */ Array(CArrRef arr) : ArrayBase(arr.m_px) { }
+  /* implicit */ Array(const Array& arr) : ArrayBase(arr.m_px) { }
 
   /*
    * Special constructor for use from ArrayInit that creates an Array
@@ -142,13 +142,13 @@ public:
    * Operators
    */
   Array& operator =  (ArrayData* data);
-  Array& operator =  (CArrRef v);
+  Array& operator =  (const Array& v);
   Array& operator =  (CVarRef v);
   Array  operator +  (ArrayData* data) const;
-  Array  operator +  (CArrRef v) const;
+  Array  operator +  (const Array& v) const;
   Array  operator +  (CVarRef v) const = delete;
   Array& operator += (ArrayData* data);
-  Array& operator += (CArrRef v);
+  Array& operator += (const Array& v);
   Array& operator += (CVarRef v);
 
   // Move assignment
@@ -200,7 +200,7 @@ public:
    * Slice: Taking a slice. When "preserve_keys" is true, a vector will turn
    * into numerically keyed map.
    */
-  Array& merge(CArrRef arr);
+  Array& merge(const Array& arr);
 
   /*
    * Sorting.
@@ -238,7 +238,7 @@ public:
   };
   static bool MultiSort(std::vector<SortData>& data, bool renumber);
 
-  static void SortImpl(std::vector<int>& indices, CArrRef source,
+  static void SortImpl(std::vector<int>& indices, const Array& source,
                        Array::SortData& opaque,
                        Array::PFUNC_CMP cmp_func,
                        bool by_key, const void* data = nullptr);
@@ -257,14 +257,14 @@ public:
   /*
    * Comparisons
    */
-  bool same (CArrRef v2) const;
+  bool same (const Array& v2) const;
   bool same (CObjRef v2) const;
-  bool equal(CArrRef v2) const;
+  bool equal(const Array& v2) const;
   bool equal(CObjRef v2) const;
-  bool less (CArrRef v2, bool flip = false) const;
+  bool less (const Array& v2, bool flip = false) const;
   bool less (CObjRef v2) const;
   bool less (CVarRef v2) const;
-  bool more (CArrRef v2, bool flip = true) const;
+  bool more (const Array& v2, bool flip = true) const;
   bool more (CObjRef v2) const;
   bool more (CVarRef v2) const;
 
@@ -405,7 +405,7 @@ public:
  private:
   Array& plusImpl(ArrayData* data);
   Array& mergeImpl(ArrayData* data);
-  Array diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
+  Array diffImpl(const Array& array, bool by_key, bool by_value, bool match,
                  PFUNC_CMP key_cmp_function, const void* key_data,
                  PFUNC_CMP value_cmp_function, const void* value_data) const;
 
@@ -454,7 +454,7 @@ struct ArrNR {
     m_px = a.m_px;
   }
 
-  operator CArrRef() const { return asArray(); }
+  operator const Array&() const { return asArray(); }
 
   Array& asArray() {
     return *reinterpret_cast<Array*>(this); // XXX

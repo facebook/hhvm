@@ -62,7 +62,7 @@ Array &Array::operator=(ArrayData *data) {
   return *this;
 }
 
-Array &Array::operator=(CArrRef arr) {
+Array &Array::operator=(const Array& arr) {
   ArrayBase::operator=(arr.m_px);
   return *this;
 }
@@ -86,7 +86,7 @@ Array Array::operator+(ArrayData *data) const {
   return Array(m_px).plusImpl(data);
 }
 
-Array Array::operator+(CArrRef arr) const {
+Array Array::operator+(const Array& arr) const {
   return Array(m_px).plusImpl(arr.m_px);
 }
 
@@ -101,7 +101,7 @@ Array &Array::operator+=(CVarRef var) {
   return operator+=(var.getArrayData());
 }
 
-Array &Array::operator+=(CArrRef arr) {
+Array &Array::operator+=(const Array& arr) {
   return plusImpl(arr.m_px);
 }
 
@@ -137,7 +137,7 @@ static int CompareAsStrings(CVarRef v1, CVarRef v2, const void *data) {
   return HPHP::same(HPHP::toString(v1), HPHP::toString(v2)) ? 0 : -1;
 }
 
-Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
+Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match,
                       PFUNC_CMP key_cmp_function,
                       const void *key_data,
                       PFUNC_CMP value_cmp_function,
@@ -270,7 +270,7 @@ String Array::toString() const {
   return "Array";
 }
 
-Array &Array::merge(CArrRef arr) {
+Array &Array::merge(const Array& arr) {
   return mergeImpl(arr.m_px);
 }
 
@@ -306,7 +306,7 @@ Array &Array::mergeImpl(ArrayData *data) {
 ///////////////////////////////////////////////////////////////////////////////
 // comparisons
 
-bool Array::same(CArrRef v2) const {
+bool Array::same(const Array& v2) const {
   if (m_px == nullptr && v2.get() == nullptr) return true;
   if (m_px && v2.get()) {
     return m_px->equal(v2.get(), true);
@@ -318,7 +318,7 @@ bool Array::same(CObjRef v2) const {
   return false;
 }
 
-bool Array::equal(CArrRef v2) const {
+bool Array::equal(const Array& v2) const {
   if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::equal(toBoolean(), v2.toBoolean());
   }
@@ -332,7 +332,7 @@ bool Array::equal(CObjRef v2) const {
   return false;
 }
 
-bool Array::less(CArrRef v2, bool flip /* = false */) const {
+bool Array::less(const Array& v2, bool flip /* = false */) const {
   if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
@@ -360,7 +360,7 @@ bool Array::less(CVarRef v2) const {
   return HPHP::more(v2, *this);
 }
 
-bool Array::more(CArrRef v2, bool flip /* = true */) const {
+bool Array::more(const Array& v2, bool flip /* = true */) const {
   if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
@@ -800,7 +800,7 @@ static int multi_compare_func(const void *n1, const void *n2, const void *op) {
   return 0;
 }
 
-void Array::SortImpl(std::vector<int> &indices, CArrRef source,
+void Array::SortImpl(std::vector<int> &indices, const Array& source,
                      Array::SortData &opaque, Array::PFUNC_CMP cmp_func,
                      bool by_key, const void *data /* = NULL */) {
   assert(cmp_func);
@@ -862,7 +862,7 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
     }
 
     opaque.positions.reserve(size);
-    CArrRef arr = *opaque.array;
+    const Array& arr = *opaque.array;
     if (!arr.empty()) {
       for (ssize_t pos = arr->iter_begin(); pos != ArrayData::invalid_index;
            pos = arr->iter_advance(pos)) {
@@ -883,7 +883,7 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
 
   for (unsigned int k = 0; k < data.size(); k++) {
     SortData &opaque = data[k];
-    CArrRef arr = *opaque.array;
+    const Array& arr = *opaque.array;
 
     Array sorted;
     for (int i = 0; i < count; i++) {

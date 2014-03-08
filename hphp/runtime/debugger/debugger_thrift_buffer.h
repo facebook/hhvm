@@ -68,7 +68,7 @@ public:
   // Serialization functions for Array, Object, and Variant
   // Return true on success, false on error
   // On error, the result would be a special string indicating the error
-  static int WireSerialize(CArrRef data, String& sdata);
+  static int WireSerialize(const Array& data, String& sdata);
   static int WireSerialize(CObjRef data, String& sdata);
   static int WireSerialize(CVarRef data, String& sdata);
   static int WireUnserialize(String& sdata, Array& data);

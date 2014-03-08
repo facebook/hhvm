@@ -30,7 +30,7 @@ const int64_t k_PHP_ROUND_HALF_ODD =  PHP_ROUND_HALF_ODD;
 
 double f_pi() { return k_M_PI;}
 
-Variant f_min(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
+Variant f_min(int _argc, CVarRef value, const Array& _argv /* = null_array */) {
   if (_argv.empty()) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {
@@ -62,7 +62,7 @@ Variant f_min(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
   return ret;
 }
 
-Variant f_max(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
+Variant f_max(int _argc, CVarRef value, const Array& _argv /* = null_array */) {
   if (_argv.empty()) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {

@@ -216,7 +216,7 @@ int64_t f_ignore_user_abort(bool setting /* = false */) {
   return 0;
 }
 
-Variant f_pack(int _argc, const String& format, CArrRef _argv /* = null_array */) {
+Variant f_pack(int _argc, const String& format, const Array& _argv /* = null_array */) {
   return ZendPack().pack(format, _argv);
 }
 

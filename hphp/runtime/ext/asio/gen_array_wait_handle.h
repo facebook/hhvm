@@ -43,7 +43,7 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
 
   void t___construct();
   static void ti_setoncreatecallback(CVarRef callback);
-  static Object ti_create(CArrRef dependencies);
+  static Object ti_create(const Array& dependencies);
 
  public:
   String getName();
@@ -54,7 +54,7 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   void enterContextImpl(context_idx_t ctx_idx);
 
  private:
-  void initialize(CObjRef exception, CArrRef deps,
+  void initialize(CObjRef exception, const Array& deps,
                   ssize_t iter_pos, c_WaitableWaitHandle* child);
 
  private:

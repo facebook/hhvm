@@ -28,9 +28,9 @@ public:
   explicit UserFSNode(Class *cls, CVarRef context = uninit_null());
 
 protected:
-  Variant invoke(const Func *func, const String& name, CArrRef args,
+  Variant invoke(const Func *func, const String& name, const Array& args,
                  bool &invoked);
-  Variant invoke(const Func *func, const String& name, CArrRef args) {
+  Variant invoke(const Func *func, const String& name, const Array& args) {
     bool invoked;
     return invoke(func, name, args, invoked);
   }

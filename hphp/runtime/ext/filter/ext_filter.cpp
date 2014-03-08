@@ -237,7 +237,7 @@ const StaticString
 
 static Variant fail(bool return_null, CVarRef options) {
   if (options.isArray()) {
-    CArrRef arr(options.toArray());
+    const Array& arr(options.toArray());
     if (arr.exists(s_default)) {
       return options[s_default];
     }

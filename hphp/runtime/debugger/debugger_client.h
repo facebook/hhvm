@@ -268,10 +268,10 @@ public:
    * Stacktraces.
    */
   Array getStackTrace() { return m_stacktrace; }
-  void setStackTrace(CArrRef stacktrace, bool isAsync);
+  void setStackTrace(const Array& stacktrace, bool isAsync);
   bool isStackTraceAsync() { return m_stacktraceAsync; }
   void moveToFrame(int index, bool display = true);
-  void printFrame(int index, CArrRef frame);
+  void printFrame(int index, const Array& frame);
   void setFrame(int frame) { m_frame = frame; }
   int getFrame() const { return m_frame; }
 

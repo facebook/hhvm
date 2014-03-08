@@ -76,7 +76,7 @@ using HPHP::JIT::EagerCallerFrame;
     return fail;                                                  \
   }                                                               \
   ArrNR arrNR_##input(cell_##input->m_data.parr);                 \
-  CArrRef arr_##input = arrNR_##input.asArray();
+  const Array& arr_##input = arrNR_##input.asArray();
 
 #define getCheckedArray(input) getCheckedArrayRet(input, uninit_null())
 
@@ -345,7 +345,7 @@ Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
   }
 }
 
-Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* = null_array */) {
+Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, const Array& _argv /* = null_array */) {
   CallCtx ctx;
   ctx.func = NULL;
   if (!callback.isNull()) {
@@ -425,12 +425,12 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
   return ret;
 }
 
-static void php_array_merge(Array &arr1, CArrRef arr2) {
+static void php_array_merge(Array &arr1, const Array& arr2) {
   arr1.merge(arr2);
 }
 
 static void php_array_merge_recursive(PointerSet &seen, bool check,
-                                      Array &arr1, CArrRef arr2) {
+                                      Array &arr1, const Array& arr2) {
   if (check) {
     if (seen.find((void*)arr1.get()) != seen.end()) {
       raise_warning("array_merge_recursive(): recursion detected");
@@ -464,7 +464,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
 }
 
 Variant f_array_merge(int _argc, CVarRef array1,
-                      CArrRef _argv /* = null_array */) {
+                      const Array& _argv /* = null_array */) {
   getCheckedArray(array1);
   Array ret = Array::Create();
   php_array_merge(ret, arr_array1);
@@ -474,14 +474,14 @@ Variant f_array_merge(int _argc, CVarRef array1,
       throw_expected_array_exception();
       return uninit_null();
     }
-    CArrRef arr_v = v.asCArrRef();
+    const Array& arr_v = v.asCArrRef();
     php_array_merge(ret, arr_v);
   }
   return ret;
 }
 
 Variant f_array_merge_recursive(int _argc, CVarRef array1,
-                                CArrRef _argv /* = null_array */) {
+                                const Array& _argv /* = null_array */) {
   getCheckedArray(array1);
   Array ret = Array::Create();
   PointerSet seen;
@@ -493,14 +493,14 @@ Variant f_array_merge_recursive(int _argc, CVarRef array1,
       throw_expected_array_exception();
       return uninit_null();
     }
-    CArrRef arr_v = v.asCArrRef();
+    const Array& arr_v = v.asCArrRef();
     php_array_merge_recursive(seen, false, ret, arr_v);
     assert(seen.empty());
   }
   return ret;
 }
 
-static void php_array_replace(Array &arr1, CArrRef arr2) {
+static void php_array_replace(Array &arr1, const Array& arr2) {
   for (ArrayIter iter(arr2); iter; ++iter) {
     Variant key = iter.first();
     CVarRef value = iter.secondRef();
@@ -509,7 +509,7 @@ static void php_array_replace(Array &arr1, CArrRef arr2) {
 }
 
 static void php_array_replace_recursive(PointerSet &seen, bool check,
-                                        Array &arr1, CArrRef arr2) {
+                                        Array &arr1, const Array& arr2) {
   if (check) {
     if (seen.find((void*)arr1.get()) != seen.end()) {
       raise_warning("array_replace_recursive(): recursion detected");
@@ -543,7 +543,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
 }
 
 Variant f_array_replace(int _argc, CVarRef array1,
-                        CArrRef _argv /* = null_array */) {
+                        const Array& _argv /* = null_array */) {
   getCheckedArray(array1);
   Array ret = Array::Create();
   php_array_replace(ret, arr_array1);
@@ -556,7 +556,7 @@ Variant f_array_replace(int _argc, CVarRef array1,
 }
 
 Variant f_array_replace_recursive(int _argc, CVarRef array1,
-                                  CArrRef _argv /* = null_array */) {
+                                  const Array& _argv /* = null_array */) {
   getCheckedArray(array1);
   Array ret = Array::Create();
   PointerSet seen;
@@ -618,7 +618,7 @@ Variant f_array_product(CVarRef array) {
 }
 
 Variant f_array_push(int _argc, VRefParam container,
-                     CVarRef var, CArrRef _argv /* = null_array */) {
+                     CVarRef var, const Array& _argv /* = null_array */) {
 
   if (LIKELY(container->isArray())) {
     auto const array_cell = container.wrapped().asCell();
@@ -702,7 +702,7 @@ Variant f_array_reverse(CVarRef input, bool preserve_keys /* = false */) {
 
   if (LIKELY(cell_input.m_type == KindOfArray)) {
     ArrNR arrNR(cell_input.m_data.parr);
-    CArrRef arr = arrNR.asArray();
+    const Array& arr = arrNR.asArray();
     return ArrayUtil::Reverse(arr, preserve_keys);
   }
 
@@ -821,7 +821,7 @@ Variant f_array_sum(CVarRef array) {
   }
 }
 
-Variant f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = null_array */) {
+Variant f_array_unshift(int _argc, VRefParam array, CVarRef var, const Array& _argv /* = null_array */) {
   const auto* cell_array = array->asCell();
   if (UNLIKELY(!isContainer(*cell_array))) {
     raise_warning("%s() expects parameter 1 to be an array, Vector, or Set",
@@ -969,7 +969,7 @@ static void compact(VarEnv* v, Array &ret, CVarRef var) {
   }
 }
 
-Array f_compact(int _argc, CVarRef varname, CArrRef _argv /* = null_array */) {
+Array f_compact(int _argc, CVarRef varname, const Array& _argv /* = null_array */) {
   Array ret = Array::Create();
   VarEnv* v = g_context->getVarEnv();
   if (v) {
@@ -979,12 +979,12 @@ Array f_compact(int _argc, CVarRef varname, CArrRef _argv /* = null_array */) {
   return ret;
 }
 
-static int php_count_recursive(CArrRef array) {
+static int php_count_recursive(const Array& array) {
   long cnt = array.size();
   for (ArrayIter iter(array); iter; ++iter) {
     Variant value = iter.second();
     if (value.isArray()) {
-      CArrRef arr_value = value.asCArrRef();
+      const Array& arr_value = value.asCArrRef();
       cnt += php_count_recursive(arr_value);
     }
   }
@@ -1018,7 +1018,7 @@ int64_t f_count(CVarRef var, int64_t mode /* = 0 */) {
     break;
   case KindOfArray:
     if (mode) {
-      CArrRef arr_var = var.toCArrRef();
+      const Array& arr_var = var.toCArrRef();
       return php_count_recursive(arr_var);
     }
     return var.getArrayData()->size();
@@ -1355,7 +1355,7 @@ static void containerKeysToSetHelper(c_Set* st, CVarRef container) {
   Array ret = Array::Create();
 
 Variant f_array_diff(int _argc, CVarRef container1, CVarRef container2,
-                     CArrRef _argv /* = null_array */) {
+                     const Array& _argv /* = null_array */) {
   ARRAY_DIFF_PRELUDE()
   // Put all of the values from all the containers (except container1 into a
   // Set. All types aside from integer and string will be cast to string, and
@@ -1387,7 +1387,7 @@ Variant f_array_diff(int _argc, CVarRef container1, CVarRef container2,
 }
 
 Variant f_array_diff_key(int _argc, CVarRef container1, CVarRef container2,
-                         CArrRef _argv /* = null_array */) {
+                         const Array& _argv /* = null_array */) {
   ARRAY_DIFF_PRELUDE()
   // If we're only dealing with two containers and if they are both arrays,
   // we can avoid creating an intermediate Set
@@ -1439,7 +1439,7 @@ Variant f_array_diff_key(int _argc, CVarRef container1, CVarRef container2,
 
 Variant f_array_udiff(int _argc, CVarRef array1, CVarRef array2,
                       CVarRef data_compare_func,
-                      CArrRef _argv /* = null_array */) {
+                      const Array& _argv /* = null_array */) {
   diff_intersect_body(diff, false COMMA true COMMA NULL COMMA NULL
                       COMMA cmp_func COMMA &func,
                       Variant func = data_compare_func;
@@ -1451,13 +1451,13 @@ Variant f_array_udiff(int _argc, CVarRef array1, CVarRef array2,
 }
 
 Variant f_array_diff_assoc(int _argc, CVarRef array1, CVarRef array2,
-                           CArrRef _argv /* = null_array */) {
+                           const Array& _argv /* = null_array */) {
   diff_intersect_body(diff, true COMMA true,);
 }
 
 Variant f_array_diff_uassoc(int _argc, CVarRef array1, CVarRef array2,
                             CVarRef key_compare_func,
-                            CArrRef _argv /* = null_array */) {
+                            const Array& _argv /* = null_array */) {
   diff_intersect_body(diff, true COMMA true COMMA cmp_func COMMA &func,
                       Variant func = key_compare_func;
                       Array extra = _argv;
@@ -1469,7 +1469,7 @@ Variant f_array_diff_uassoc(int _argc, CVarRef array1, CVarRef array2,
 
 Variant f_array_udiff_assoc(int _argc, CVarRef array1, CVarRef array2,
                             CVarRef data_compare_func,
-                            CArrRef _argv /* = null_array */) {
+                            const Array& _argv /* = null_array */) {
   diff_intersect_body(diff, true COMMA true COMMA NULL COMMA NULL
                       COMMA cmp_func COMMA &func,
                       Variant func = data_compare_func;
@@ -1483,7 +1483,7 @@ Variant f_array_udiff_assoc(int _argc, CVarRef array1, CVarRef array2,
 Variant f_array_udiff_uassoc(int _argc, CVarRef array1, CVarRef array2,
                              CVarRef data_compare_func,
                              CVarRef key_compare_func,
-                             CArrRef _argv /* = null_array */) {
+                             const Array& _argv /* = null_array */) {
   diff_intersect_body(diff, true COMMA true COMMA cmp_func COMMA &key_func
                       COMMA cmp_func COMMA &data_func,
                       Variant data_func = data_compare_func;
@@ -1499,7 +1499,7 @@ Variant f_array_udiff_uassoc(int _argc, CVarRef array1, CVarRef array2,
 
 Variant f_array_diff_ukey(int _argc, CVarRef array1, CVarRef array2,
                           CVarRef key_compare_func,
-                          CArrRef _argv /* = null_array */) {
+                          const Array& _argv /* = null_array */) {
   diff_intersect_body(diff, true COMMA false COMMA cmp_func COMMA &func,
                       Variant func = key_compare_func;
                       Array extra = _argv;
@@ -1513,7 +1513,7 @@ Variant f_array_diff_ukey(int _argc, CVarRef array1, CVarRef array2,
 // intersect functions
 
 static inline TypedValue* makeContainerListHelper(CVarRef a,
-                                                  CArrRef argv,
+                                                  const Array& argv,
                                                   int count,
                                                   int smallestPos) {
   assert(count == argv.size() + 1);
@@ -1719,7 +1719,7 @@ static void containerKeysIntersectHelper(c_Set* st,
   Array ret = Array::Create();
 
 Variant f_array_intersect(int _argc, CVarRef container1, CVarRef container2,
-                          CArrRef _argv /* = null_array */) {
+                          const Array& _argv /* = null_array */) {
   ARRAY_INTERSECT_PRELUDE()
   // Build up a Set containing the values that are present in all the
   // containers (except container1)
@@ -1756,7 +1756,7 @@ Variant f_array_intersect(int _argc, CVarRef container1, CVarRef container2,
 }
 
 Variant f_array_intersect_key(int _argc, CVarRef container1, CVarRef container2,
-                              CArrRef _argv /* = null_array */) {
+                              const Array& _argv /* = null_array */) {
   ARRAY_INTERSECT_PRELUDE()
   // If we're only dealing with two containers and if they are both arrays,
   // we can avoid creating an intermediate Set
@@ -1813,7 +1813,7 @@ Variant f_array_intersect_key(int _argc, CVarRef container1, CVarRef container2,
 
 Variant f_array_uintersect(int _argc, CVarRef array1, CVarRef array2,
                            CVarRef data_compare_func,
-                           CArrRef _argv /* = null_array */) {
+                           const Array& _argv /* = null_array */) {
   diff_intersect_body(intersect, false COMMA true COMMA NULL COMMA NULL
                       COMMA cmp_func COMMA &func,
                       Variant func = data_compare_func;
@@ -1825,13 +1825,13 @@ Variant f_array_uintersect(int _argc, CVarRef array1, CVarRef array2,
 }
 
 Variant f_array_intersect_assoc(int _argc, CVarRef array1, CVarRef array2,
-                                CArrRef _argv /* = null_array */) {
+                                const Array& _argv /* = null_array */) {
   diff_intersect_body(intersect, true COMMA true,);
 }
 
 Variant f_array_intersect_uassoc(int _argc, CVarRef array1, CVarRef array2,
                                  CVarRef key_compare_func,
-                                 CArrRef _argv /* = null_array */) {
+                                 const Array& _argv /* = null_array */) {
   diff_intersect_body(intersect, true COMMA true COMMA cmp_func COMMA &func,
                       Variant func = key_compare_func;
                       Array extra = _argv;
@@ -1843,7 +1843,7 @@ Variant f_array_intersect_uassoc(int _argc, CVarRef array1, CVarRef array2,
 
 Variant f_array_uintersect_assoc(int _argc, CVarRef array1, CVarRef array2,
                                  CVarRef data_compare_func,
-                                 CArrRef _argv /* = null_array */) {
+                                 const Array& _argv /* = null_array */) {
   diff_intersect_body(intersect, true COMMA true COMMA NULL COMMA NULL
                       COMMA cmp_func COMMA &func,
                       Variant func = data_compare_func;
@@ -1857,7 +1857,7 @@ Variant f_array_uintersect_assoc(int _argc, CVarRef array1, CVarRef array2,
 Variant f_array_uintersect_uassoc(int _argc, CVarRef array1, CVarRef array2,
                                   CVarRef data_compare_func,
                                   CVarRef key_compare_func,
-                                  CArrRef _argv /* = null_array */) {
+                                  const Array& _argv /* = null_array */) {
   diff_intersect_body(intersect, true COMMA true COMMA cmp_func COMMA &key_func
                       COMMA cmp_func COMMA &data_func,
                       Variant data_func = data_compare_func;
@@ -1872,7 +1872,7 @@ Variant f_array_uintersect_uassoc(int _argc, CVarRef array1, CVarRef array2,
 }
 
 Variant f_array_intersect_ukey(int _argc, CVarRef array1, CVarRef array2,
-                             CVarRef key_compare_func, CArrRef _argv /* = null_array */) {
+                             CVarRef key_compare_func, const Array& _argv /* = null_array */) {
   diff_intersect_body(intersect, true COMMA false COMMA cmp_func COMMA &func,
                       Variant func = key_compare_func;
                       Array extra = _argv;
@@ -2202,7 +2202,7 @@ bool f_uksort(VRefParam container, CVarRef cmp_function) {
 }
 
 bool f_array_multisort(int _argc, VRefParam ar1,
-                       CArrRef _argv /* = null_array */) {
+                       const Array& _argv /* = null_array */) {
   getCheckedArrayRet(ar1, false);
   std::vector<Array::SortData> data;
   std::vector<Array> arrays;

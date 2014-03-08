@@ -30,7 +30,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(preg_grep, const String& pattern, CArrRef input,
+Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Array& input,
                                  int flags /* = 0 */) {
   return preg_grep(pattern, input, flags);
 }

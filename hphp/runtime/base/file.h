@@ -187,12 +187,12 @@ public:
   /**
    * Write to file with specified format and arguments.
    */
-  int64_t printf(const String& format, CArrRef args);
+  int64_t printf(const String& format, const Array& args);
 
   /**
    * Write one line of csv record.
    */
-  int64_t writeCSV(CArrRef fields, char delimiter = ',', char enclosure = '"');
+  int64_t writeCSV(const Array& fields, char delimiter = ',', char enclosure = '"');
 
   /**
    * Read one line of csv record.

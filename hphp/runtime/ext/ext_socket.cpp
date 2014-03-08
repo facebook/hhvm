@@ -210,7 +210,7 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, Socket *sock,
   return true;
 }
 
-static void sock_array_to_fd_set(CArrRef sockets, pollfd *fds, int &nfds,
+static void sock_array_to_fd_set(const Array& sockets, pollfd *fds, int &nfds,
                                  short flag) {
   assert(fds);
   for (ArrayIter iter(sockets); iter; ++iter) {

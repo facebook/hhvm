@@ -41,7 +41,7 @@ UserFSNode::UserFSNode(Class *cls, CVarRef context /*= null */) {
 }
 
 Variant UserFSNode::invoke(const Func *func, const String& name,
-                           CArrRef args, bool &invoked) {
+                           const Array& args, bool &invoked) {
   JIT::VMRegAnchor _;
 
   // Assume failure

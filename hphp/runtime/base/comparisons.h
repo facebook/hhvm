@@ -33,7 +33,7 @@ bool same(CVarRef v1, double v2);
 bool same(CVarRef v1, const StringData* v2);
 bool same(CVarRef v1, const String& v2);
 bool same(CVarRef v1, litstr v2) = delete;
-bool same(CVarRef v1, CArrRef v2);
+bool same(CVarRef v1, const Array& v2);
 bool same(CVarRef v1, CObjRef v2);
 bool same(CVarRef v1, CResRef v2);
 inline bool same(CVarRef v1, CVarRef v2) {
@@ -52,7 +52,7 @@ inline bool equal(CVarRef v1, const String& v2) {
   return cellEqual(*v1.asCell(), v2.get());
 }
 inline bool equal(CVarRef v1, litstr  v2) = delete;
-inline bool equal(CVarRef v1, CArrRef v2) {
+inline bool equal(CVarRef v1, const Array& v2) {
   if (!v2.get()) return cellEqual(*v1.asCell(), false);
   return cellEqual(*v1.asCell(), v2.get());
 }
@@ -88,7 +88,7 @@ inline bool less(CVarRef v1, const String& v2) {
   return cellLess(*v1.asCell(), v2.get());
 }
 inline bool less(CVarRef v1, litstr  v2) = delete;
-inline bool less(CVarRef v1, CArrRef v2) {
+inline bool less(CVarRef v1, const Array& v2) {
   if (!v2.get()) return cellLess(*v1.asCell(), false);
   return cellLess(*v1.asCell(), v2.get());
 }
@@ -124,7 +124,7 @@ inline bool more(CVarRef v1, const String& v2) {
   return cellGreater(*v1.asCell(), v2.get());
 }
 inline bool more(CVarRef v1, litstr  v2) = delete;
-inline bool more(CVarRef v1, CArrRef v2) {
+inline bool more(CVarRef v1, const Array& v2) {
   if (!v2.get()) return cellGreater(*v1.asCell(), false);
   return cellGreater(*v1.asCell(), v2.get());
 }
@@ -150,7 +150,7 @@ inline bool same(bool v1, double  v2) = delete;
 inline bool same(bool v1, const StringData *v2)  { return false;}
 inline bool same(bool v1, const String& v2)  { return false;}
 inline bool same(bool v1, litstr  v2) = delete;
-inline bool same(bool v1, CArrRef v2)  { return false;}
+inline bool same(bool v1, const Array& v2)  { return false;}
 inline bool same(bool v1, CObjRef v2)  { return false;}
 inline bool same(bool v1, CResRef v2)  { return false;}
 inline bool same(bool v1, CVarRef v2)  { return same(v2, v1);}
@@ -162,7 +162,7 @@ inline bool equal(bool v1, double  v2) { return v1 == (v2 != 0.0);}
 inline bool equal(bool v1, const StringData *v2) { return v1 == toBoolean(v2);}
 inline bool equal(bool v1, const String& v2) { return v1 == v2.toBoolean();}
 inline bool equal(bool v1, litstr  v2) = delete;
-inline bool equal(bool v1, CArrRef v2) { return v1 == v2.toBoolean();}
+inline bool equal(bool v1, const Array& v2) { return v1 == v2.toBoolean();}
 inline bool equal(bool v1, CObjRef v2) { return v1 == v2.toBoolean();}
 inline bool equal(bool v1, CResRef v2) { return v1 == v2.toBoolean();}
 inline bool equal(bool v1, CVarRef v2) { return equal(v2, v1);}
@@ -176,7 +176,7 @@ inline bool less(bool v1, const StringData *v2)  {
 }
 inline bool less(bool v1, const String& v2)  { return less(v1,v2.toBoolean());}
 inline bool less(bool v1, litstr  v2) = delete;
-inline bool less(bool v1, CArrRef v2)  { return less(v1,v2.toBoolean());}
+inline bool less(bool v1, const Array& v2)  { return less(v1,v2.toBoolean());}
 inline bool less(bool v1, CObjRef v2)  { return less(v1,v2.toBoolean());}
 inline bool less(bool v1, CResRef v2)  { return less(v1,v2.toBoolean());}
 inline bool less(bool v1, CVarRef v2)  { return more(v2,v1);}
@@ -190,7 +190,7 @@ inline bool more(bool v1, const StringData *v2)  {
 }
 inline bool more(bool v1, const String& v2)  { return more(v1,v2.toBoolean());}
 inline bool more(bool v1, litstr  v2)  = delete;
-inline bool more(bool v1, CArrRef v2)  { return more(v1,v2.toBoolean());}
+inline bool more(bool v1, const Array& v2)  { return more(v1,v2.toBoolean());}
 inline bool more(bool v1, CObjRef v2)  { return more(v1,v2.toBoolean());}
 inline bool more(bool v1, CResRef v2)  { return more(v1,v2.toBoolean());}
 inline bool more(bool v1, CVarRef v2)  { return less(v2,v1);}
@@ -205,7 +205,7 @@ inline bool same(int v1, double  v2) = delete;
 inline bool same(int v1, const StringData *v2)  { return false;}
 inline bool same(int v1, const String& v2)  { return false;}
 inline bool same(int v1, litstr  v2)  = delete;
-inline bool same(int v1, CArrRef v2)  { return false;}
+inline bool same(int v1, const Array& v2)  { return false;}
 inline bool same(int v1, CObjRef v2)  { return false;}
 inline bool same(int v1, CResRef v2)  { return false;}
 inline bool same(int v1, CVarRef v2)  { return same(v2, v1);}
@@ -217,7 +217,7 @@ inline bool equal(int v1, double  v2) { return (double)v1 == v2;}
 bool equal(int v1, const StringData *v2);
 inline bool equal(int v1, const String& v2) { return equal(v1, v2.get());}
 inline bool equal(int v1, litstr  v2) = delete;
-inline bool equal(int v1, CArrRef v2) { return false;}
+inline bool equal(int v1, const Array& v2) { return false;}
 inline bool equal(int v1, CObjRef v2) {
   return v2->isCollection() ? false : equal(v1, v2.toInt64());
 }
@@ -233,7 +233,7 @@ inline bool less(int v1, double  v2)  { return v1 < v2;}
 bool less(int v1, const StringData *v2);
 inline bool less(int v1, const String& v2) { return less(v1, v2.get());}
 inline bool less(int v1, litstr  v2)  = delete;
-inline bool less(int v1, CArrRef v2)  { return true;}
+inline bool less(int v1, const Array& v2)  { return true;}
 inline bool less(int v1, CObjRef v2)  {
   return less(v1, v2.toInt64ForCompare());
 }
@@ -247,7 +247,7 @@ inline bool more(int v1, double  v2)  { return v1 > v2;}
 bool more(int v1, const StringData *v2);
 inline bool more(int v1, const String& v2) { return more(v1, v2.get());}
 inline bool more(int v1, litstr  v2)  = delete;
-inline bool more(int v1, CArrRef v2)  { return false;}
+inline bool more(int v1, const Array& v2)  { return false;}
 inline bool more(int v1, CObjRef v2)  {
   return more(v1, v2.toInt64ForCompare());
 }
@@ -264,7 +264,7 @@ inline bool same(int64_t v1, double  v2) = delete;
 inline bool same(int64_t v1, const StringData *v2)  { return false;}
 inline bool same(int64_t v1, const String& v2)  { return false;}
 inline bool same(int64_t v1, litstr  v2)  = delete;
-inline bool same(int64_t v1, CArrRef v2)  { return false;}
+inline bool same(int64_t v1, const Array& v2)  { return false;}
 inline bool same(int64_t v1, CObjRef v2)  { return false;}
 inline bool same(int64_t v1, CResRef v2)  { return false;}
 inline bool same(int64_t v1, CVarRef v2)  { return same(v2, v1);}
@@ -276,7 +276,7 @@ inline bool equal(int64_t v1, double  v2) { return (double)v1 == v2;}
 bool equal(int64_t v1, const StringData *v2);
 inline bool equal(int64_t v1, const String& v2) { return equal(v1, v2.get());}
 inline bool equal(int64_t v1, litstr  v2) = delete;
-inline bool equal(int64_t v1, CArrRef v2) { return false;}
+inline bool equal(int64_t v1, const Array& v2) { return false;}
 inline bool equal(int64_t v1, CObjRef v2) {
   return v2->isCollection() ? false : equal(v1, v2.toInt64());
 }
@@ -290,7 +290,7 @@ inline bool less(int64_t v1, double  v2)  { return v1 < v2;}
 bool less(int64_t v1, const StringData *v2);
 inline bool less(int64_t v1, const String& v2) { return less(v1, v2.get());}
 inline bool less(int64_t v1, litstr  v2)  = delete;
-inline bool less(int64_t v1, CArrRef v2)  { return true;}
+inline bool less(int64_t v1, const Array& v2)  { return true;}
 inline bool less(int64_t v1, CObjRef v2)  {
   return less(v1, v2.toInt64ForCompare());
 }
@@ -304,7 +304,7 @@ inline bool more(int64_t v1, double  v2)  { return v1 > v2;}
 bool more(int64_t v1, const StringData *v2);
 inline bool more(int64_t v1, const String& v2) { return more(v1, v2.get());}
 inline bool more(int64_t v1, litstr  v2)  = delete;
-inline bool more(int64_t v1, CArrRef v2)  { return false;}
+inline bool more(int64_t v1, const Array& v2)  { return false;}
 inline bool more(int64_t v1, CObjRef v2)  {
   return more(v1, v2.toInt64ForCompare());
 }
@@ -321,7 +321,7 @@ inline bool same(double v1, double  v2) = delete;
 inline bool same(double v1, const StringData *v2)  { return false;}
 inline bool same(double v1, const String& v2)  { return false;}
 inline bool same(double v1, litstr  v2)  = delete;
-inline bool same(double v1, CArrRef v2)  { return false;}
+inline bool same(double v1, const Array& v2)  { return false;}
 inline bool same(double v1, CObjRef v2)  { return false;}
 inline bool same(double v1, CResRef v2)  { return false;}
 inline bool same(double v1, CVarRef v2)  { return same(v2, v1);}
@@ -335,7 +335,7 @@ inline bool equal(double v1, const StringData *v2) {
 }
 inline bool equal(double v1, const String& v2) { return v1 == v2.toDouble();}
 inline bool equal(double v1, litstr  v2) = delete;
-inline bool equal(double v1, CArrRef v2) { return false;}
+inline bool equal(double v1, const Array& v2) { return false;}
 inline bool equal(double v1, CObjRef v2) {
   if (v2->isCollection()) return false;
   return equal(v1, v2.toDouble());
@@ -352,7 +352,7 @@ inline bool less(double v1, const StringData *v2)  {
 }
 inline bool less(double v1, const String& v2)  { return less(v1,v2.toDouble());}
 inline bool less(double v1, litstr  v2)  = delete;
-inline bool less(double v1, CArrRef v2)  { return true;}
+inline bool less(double v1, const Array& v2)  { return true;}
 inline bool less(double v1, CObjRef v2)  {
   return less(v1, v2.toDoubleForCompare());
 }
@@ -368,7 +368,7 @@ inline bool more(double v1, const StringData *v2)  {
 }
 inline bool more(double v1, const String& v2)  { return more(v1,v2.toDouble());}
 inline bool more(double v1, litstr  v2)  = delete;
-inline bool more(double v1, CArrRef v2)  { return false;}
+inline bool more(double v1, const Array& v2)  { return false;}
 inline bool more(double v1, CObjRef v2)  {
   return more(v1, v2.toDoubleForCompare());
 }
@@ -391,7 +391,7 @@ inline bool same(const StringData *v1, const String& v2)  {
   return same(v1, v2.get());
 }
 inline bool same(const StringData *v1, litstr  v2) = delete;
-inline bool same(const StringData *v1, CArrRef v2)  { return false; }
+inline bool same(const StringData *v1, const Array& v2)  { return false; }
 inline bool same(const StringData *v1, CObjRef v2)  { return false; }
 inline bool same(const StringData *v1, CResRef v2)  { return false; }
 inline bool same(const StringData *v1, CVarRef v2)  { return same(v2, v1);}
@@ -410,7 +410,7 @@ inline bool equal(const StringData *v1, const String& v2) {
   return equal(v1, v2.get());
 }
 inline bool equal(const StringData *v1, litstr  v2) = delete;
-inline bool equal(const StringData *v1, CArrRef v2) {
+inline bool equal(const StringData *v1, const Array& v2) {
   if (v1 == nullptr || v2.get() == nullptr) {
     return equal(toBoolean(v1), v2.toBoolean());
   }
@@ -445,7 +445,7 @@ inline bool less(const StringData *v1, const String& v2)  {
   return less(v1, v2.get());
 }
 inline bool less(const StringData *v1, litstr  v2) = delete;
-inline bool less(const StringData *v1, CArrRef v2)  {
+inline bool less(const StringData *v1, const Array& v2)  {
   if (v1 == nullptr || v2.get() == nullptr) {
     return less(toBoolean(v1), v2.toBoolean());
   }
@@ -480,7 +480,7 @@ inline bool more(const StringData *v1, const String& v2)  {
   return more(v1, v2.get());
 }
 inline bool more(const StringData *v1, litstr  v2) = delete;
-inline bool more(const StringData *v1, CArrRef v2)  {
+inline bool more(const StringData *v1, const Array& v2)  {
   if (v1 == nullptr || v2.get() == nullptr) {
     return more(toBoolean(v1), v2.toBoolean());
   }
@@ -515,7 +515,7 @@ inline bool same(const String& v1, const StringData *v2)  {
 }
 inline bool same(const String& v1, const String& v2)  { return v1.same(v2);}
 inline bool same(const String& v1, litstr  v2)  = delete;
-inline bool same(const String& v1, CArrRef v2)  { return v1.same(v2);}
+inline bool same(const String& v1, const Array& v2)  { return v1.same(v2);}
 inline bool same(const String& v1, CObjRef v2)  { return v1.same(v2);}
 inline bool same(const String& v1, CResRef v2)  { return v1.same(v2);}
 inline bool same(const String& v1, CVarRef v2)  { return same(v2, v1);}
@@ -529,7 +529,7 @@ inline bool equal(const String& v1, const StringData *v2) {
 }
 inline bool equal(const String& v1, const String& v2) { return v1.equal(v2);}
 inline bool equal(const String& v1, litstr  v2) = delete;
-inline bool equal(const String& v1, CArrRef v2) { return v1.equal(v2);}
+inline bool equal(const String& v1, const Array& v2) { return v1.equal(v2);}
 inline bool equal(const String& v1, CObjRef v2) { return v1.equal(v2);}
 inline bool equal(const String& v1, CResRef v2) { return v1.equal(v2);}
 inline bool equal(const String& v1, CVarRef v2) { return equal(v2, v1);}
@@ -543,7 +543,7 @@ inline bool less(const String& v1, const StringData *v2)  {
 }
 inline bool less(const String& v1, const String& v2)  { return v1.less(v2);}
 inline bool less(const String& v1, litstr  v2)  = delete;
-inline bool less(const String& v1, CArrRef v2)  { return v1.less(v2);}
+inline bool less(const String& v1, const Array& v2)  { return v1.less(v2);}
 inline bool less(const String& v1, CObjRef v2)  { return v1.less(v2);}
 inline bool less(const String& v1, CResRef v2)  { return v1.less(v2);}
 inline bool less(const String& v1, CVarRef v2)  { return more(v2, v1);}
@@ -557,7 +557,7 @@ inline bool more(const String& v1, const StringData *v2)  {
 }
 inline bool more(const String& v1, const String& v2)  { return v1.more(v2);}
 inline bool more(const String& v1, litstr  v2)  = delete;
-inline bool more(const String& v1, CArrRef v2)  { return v1.more(v2);}
+inline bool more(const String& v1, const Array& v2)  { return v1.more(v2);}
 inline bool more(const String& v1, CObjRef v2)  { return v1.more(v2);}
 inline bool more(const String& v1, CResRef v2)  { return v1.more(v2);}
 inline bool more(const String& v1, CVarRef v2)  { return less(v2, v1);}
@@ -572,7 +572,7 @@ inline bool same(litstr v1, double  v2) = delete;
 inline bool same(litstr v1, const StringData *v2)  = delete;
 inline bool same(litstr v1, const String& v2) = delete;
 inline bool same(litstr v1, litstr  v2) = delete;
-inline bool same(litstr v1, CArrRef v2) = delete;
+inline bool same(litstr v1, const Array& v2) = delete;
 inline bool same(litstr v1, CObjRef v2) = delete;
 inline bool same(litstr v1, CResRef v2) = delete;
 inline bool same(litstr v1, CVarRef v2) = delete;
@@ -584,7 +584,7 @@ inline bool equal(litstr v1, double  v2)= delete;
 inline bool equal(litstr v1, const StringData *v2)= delete;
 inline bool equal(litstr v1, const String& v2)= delete;
 inline bool equal(litstr v1, litstr  v2)= delete;
-inline bool equal(litstr v1, CArrRef v2)= delete;
+inline bool equal(litstr v1, const Array& v2)= delete;
 inline bool equal(litstr v1, CObjRef v2)= delete;
 inline bool equal(litstr v1, CResRef v2)= delete;
 inline bool equal(litstr v1, CVarRef v2)= delete;
@@ -596,7 +596,7 @@ inline bool less(litstr v1, double  v2) = delete;
 inline bool less(litstr v1, const StringData *v2) = delete;
 inline bool less(litstr v1, const String& v2) = delete;
 inline bool less(litstr v1, litstr  v2) = delete;
-inline bool less(litstr v1, CArrRef v2) = delete;
+inline bool less(litstr v1, const Array& v2) = delete;
 inline bool less(litstr v1, CObjRef v2) = delete;
 inline bool less(litstr v1, CResRef v2) = delete;
 inline bool less(litstr v1, CVarRef v2) = delete;
@@ -608,7 +608,7 @@ inline bool more(litstr v1, double  v2) = delete;
 inline bool more(litstr v1, const StringData *v2) = delete;
 inline bool more(litstr v1, const String& v2) = delete;
 inline bool more(litstr v1, litstr  v2) = delete;
-inline bool more(litstr v1, CArrRef v2) = delete;
+inline bool more(litstr v1, const Array& v2) = delete;
 inline bool more(litstr v1, CObjRef v2) = delete;
 inline bool more(litstr v1, CResRef v2) = delete;
 inline bool more(litstr v1, CVarRef v2) = delete;
@@ -616,53 +616,53 @@ inline bool more(litstr v1, CVarRef v2) = delete;
 ///////////////////////////////////////////////////////////////////////////////
 // Array
 
-inline bool same(CArrRef v1, bool    v2)  { return same(v2, v1);}
-inline bool same(CArrRef v1, int     v2)  { return same(v2, v1);}
-inline bool same(CArrRef v1, int64_t   v2)  { return same(v2, v1);}
-inline bool same(CArrRef v1, double  v2)  { return same(v2, v1);}
-inline bool same(CArrRef v1, const StringData *v2)  { return same(v2, v1);}
-inline bool same(CArrRef v1, const String& v2)  { return same(v2, v1);}
-inline bool same(CArrRef v1, litstr  v2)  = delete;
-inline bool same(CArrRef v1, CArrRef v2)  { return v1.same(v2);}
-inline bool same(CArrRef v1, CObjRef v2)  { return v1.same(v2);}
-inline bool same(CArrRef v1, CResRef v2)  { return false;}
-inline bool same(CArrRef v1, CVarRef v2)  { return same(v2, v1);}
+inline bool same(const Array& v1, bool    v2)  { return same(v2, v1);}
+inline bool same(const Array& v1, int     v2)  { return same(v2, v1);}
+inline bool same(const Array& v1, int64_t   v2)  { return same(v2, v1);}
+inline bool same(const Array& v1, double  v2)  { return same(v2, v1);}
+inline bool same(const Array& v1, const StringData *v2)  { return same(v2, v1);}
+inline bool same(const Array& v1, const String& v2)  { return same(v2, v1);}
+inline bool same(const Array& v1, litstr  v2)  = delete;
+inline bool same(const Array& v1, const Array& v2)  { return v1.same(v2);}
+inline bool same(const Array& v1, CObjRef v2)  { return v1.same(v2);}
+inline bool same(const Array& v1, CResRef v2)  { return false;}
+inline bool same(const Array& v1, CVarRef v2)  { return same(v2, v1);}
 
-inline bool equal(CArrRef v1, bool    v2) { return equal(v2, v1);}
-inline bool equal(CArrRef v1, int     v2) { return equal(v2, v1);}
-inline bool equal(CArrRef v1, int64_t   v2) { return equal(v2, v1);}
-inline bool equal(CArrRef v1, double  v2) { return equal(v2, v1);}
-inline bool equal(CArrRef v1, const StringData *v2) { return equal(v2, v1);}
-inline bool equal(CArrRef v1, const String& v2) { return equal(v2, v1);}
-inline bool equal(CArrRef v1, litstr  v2) = delete;
-inline bool equal(CArrRef v1, CArrRef v2) { return v1.equal(v2);}
-inline bool equal(CArrRef v1, CObjRef v2) { return v1.equal(v2);}
-inline bool equal(CArrRef v1, CResRef v2) { return false;}
-inline bool equal(CArrRef v1, CVarRef v2) { return equal(v2, v1);}
+inline bool equal(const Array& v1, bool    v2) { return equal(v2, v1);}
+inline bool equal(const Array& v1, int     v2) { return equal(v2, v1);}
+inline bool equal(const Array& v1, int64_t   v2) { return equal(v2, v1);}
+inline bool equal(const Array& v1, double  v2) { return equal(v2, v1);}
+inline bool equal(const Array& v1, const StringData *v2) { return equal(v2, v1);}
+inline bool equal(const Array& v1, const String& v2) { return equal(v2, v1);}
+inline bool equal(const Array& v1, litstr  v2) = delete;
+inline bool equal(const Array& v1, const Array& v2) { return v1.equal(v2);}
+inline bool equal(const Array& v1, CObjRef v2) { return v1.equal(v2);}
+inline bool equal(const Array& v1, CResRef v2) { return false;}
+inline bool equal(const Array& v1, CVarRef v2) { return equal(v2, v1);}
 
-inline bool less(CArrRef v1, bool    v2)  { return more(v2, v1);}
-inline bool less(CArrRef v1, int     v2)  { return more(v2, v1);}
-inline bool less(CArrRef v1, int64_t   v2)  { return more(v2, v1);}
-inline bool less(CArrRef v1, double  v2)  { return more(v2, v1);}
-inline bool less(CArrRef v1, const StringData *v2)  { return more(v2, v1);}
-inline bool less(CArrRef v1, const String& v2)  { return more(v2, v1);}
-inline bool less(CArrRef v1, litstr  v2) = delete;
-inline bool less(CArrRef v1, CArrRef v2)  { return v1.less(v2);}
-inline bool less(CArrRef v1, CObjRef v2)  { return v1.less(v2);}
-inline bool less(CArrRef v1, CResRef v2)  { return false;}
-inline bool less(CArrRef v1, CVarRef v2)  { return v1.less(v2);}
+inline bool less(const Array& v1, bool    v2)  { return more(v2, v1);}
+inline bool less(const Array& v1, int     v2)  { return more(v2, v1);}
+inline bool less(const Array& v1, int64_t   v2)  { return more(v2, v1);}
+inline bool less(const Array& v1, double  v2)  { return more(v2, v1);}
+inline bool less(const Array& v1, const StringData *v2)  { return more(v2, v1);}
+inline bool less(const Array& v1, const String& v2)  { return more(v2, v1);}
+inline bool less(const Array& v1, litstr  v2) = delete;
+inline bool less(const Array& v1, const Array& v2)  { return v1.less(v2);}
+inline bool less(const Array& v1, CObjRef v2)  { return v1.less(v2);}
+inline bool less(const Array& v1, CResRef v2)  { return false;}
+inline bool less(const Array& v1, CVarRef v2)  { return v1.less(v2);}
 
-inline bool more(CArrRef v1, bool    v2)  { return less(v2, v1);}
-inline bool more(CArrRef v1, int     v2)  { return less(v2, v1);}
-inline bool more(CArrRef v1, int64_t   v2)  { return less(v2, v1);}
-inline bool more(CArrRef v1, double  v2)  { return less(v2, v1);}
-inline bool more(CArrRef v1, const StringData *v2)  { return less(v2, v1);}
-inline bool more(CArrRef v1, const String& v2)  { return less(v2, v1);}
-inline bool more(CArrRef v1, litstr  v2)  = delete;
-inline bool more(CArrRef v1, CArrRef v2)  { return v1.more(v2);}
-inline bool more(CArrRef v1, CObjRef v2)  { return v1.more(v2);}
-inline bool more(CArrRef v1, CResRef v2)  { return true;}
-inline bool more(CArrRef v1, CVarRef v2)  { return v1.more(v2);}
+inline bool more(const Array& v1, bool    v2)  { return less(v2, v1);}
+inline bool more(const Array& v1, int     v2)  { return less(v2, v1);}
+inline bool more(const Array& v1, int64_t   v2)  { return less(v2, v1);}
+inline bool more(const Array& v1, double  v2)  { return less(v2, v1);}
+inline bool more(const Array& v1, const StringData *v2)  { return less(v2, v1);}
+inline bool more(const Array& v1, const String& v2)  { return less(v2, v1);}
+inline bool more(const Array& v1, litstr  v2)  = delete;
+inline bool more(const Array& v1, const Array& v2)  { return v1.more(v2);}
+inline bool more(const Array& v1, CObjRef v2)  { return v1.more(v2);}
+inline bool more(const Array& v1, CResRef v2)  { return true;}
+inline bool more(const Array& v1, CVarRef v2)  { return v1.more(v2);}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Object
@@ -674,7 +674,7 @@ inline bool same(CObjRef v1, double  v2)  { return same(v2, v1);}
 inline bool same(CObjRef v1, const StringData *v2)  { return same(v2, v1);}
 inline bool same(CObjRef v1, const String& v2)  { return same(v2, v1);}
 inline bool same(CObjRef v1, litstr  v2)  = delete;
-inline bool same(CObjRef v1, CArrRef v2)  { return same(v2, v1);}
+inline bool same(CObjRef v1, const Array& v2)  { return same(v2, v1);}
 inline bool same(CObjRef v1, CObjRef v2)  { return v1.same(v2);}
 inline bool same(CObjRef v1, CResRef v2)  { return false;}
 inline bool same(CObjRef v1, CVarRef v2)  { return same(v2, v1);}
@@ -686,7 +686,7 @@ inline bool equal(CObjRef v1, double  v2) { return equal(v2, v1);}
 inline bool equal(CObjRef v1, const StringData *v2) { return equal(v2, v1);}
 inline bool equal(CObjRef v1, const String& v2) { return equal(v2, v1);}
 inline bool equal(CObjRef v1, litstr  v2) = delete;
-inline bool equal(CObjRef v1, CArrRef v2) { return equal(v2, v1);}
+inline bool equal(CObjRef v1, const Array& v2) { return equal(v2, v1);}
 inline bool equal(CObjRef v1, CObjRef v2) { return v1.equal(v2);}
 inline bool equal(CObjRef v1, CResRef v2) { return false;}
 inline bool equal(CObjRef v1, CVarRef v2) { return equal(v2, v1);}
@@ -698,7 +698,7 @@ inline bool less(CObjRef v1, double  v2)  { return more(v2, v1);}
 inline bool less(CObjRef v1, const StringData *v2)  { return more(v2, v1);}
 inline bool less(CObjRef v1, const String& v2)  { return more(v2, v1);}
 inline bool less(CObjRef v1, litstr  v2)  = delete;
-inline bool less(CObjRef v1, CArrRef v2)  { return more(v2, v1);}
+inline bool less(CObjRef v1, const Array& v2)  { return more(v2, v1);}
 inline bool less(CObjRef v1, CObjRef v2)  { return v1.less(v2);}
 inline bool less(CObjRef v1, CResRef v2)  { return false;}
 inline bool less(CObjRef v1, CVarRef v2)  {
@@ -713,7 +713,7 @@ inline bool more(CObjRef v1, double  v2)  { return less(v2, v1);}
 inline bool more(CObjRef v1, const StringData *v2)  { return less(v2, v1);}
 inline bool more(CObjRef v1, const String& v2)  { return less(v2, v1);}
 inline bool more(CObjRef v1, litstr  v2)  = delete;
-inline bool more(CObjRef v1, CArrRef v2)  { return less(v2, v1);}
+inline bool more(CObjRef v1, const Array& v2)  { return less(v2, v1);}
 inline bool more(CObjRef v1, CObjRef v2)  { return v1.more(v2);}
 inline bool more(CObjRef v1, CResRef v2)  { return false;}
 inline bool more(CObjRef v1, CVarRef v2)  {
@@ -731,7 +731,7 @@ inline bool same(CResRef v1, double  v2)  { return same(v2, v1);}
 inline bool same(CResRef v1, const StringData *v2)  { return same(v2, v1);}
 inline bool same(CResRef v1, const String& v2)  { return same(v2, v1);}
 inline bool same(CResRef v1, litstr  v2)  = delete;
-inline bool same(CResRef v1, CArrRef v2)  { return false;}
+inline bool same(CResRef v1, const Array& v2)  { return false;}
 inline bool same(CResRef v1, CObjRef v2)  { return false;}
 inline bool same(CResRef v1, CResRef v2)  { return v1.same(v2);}
 inline bool same(CResRef v1, CVarRef v2)  { return same(v2, v1);}
@@ -743,7 +743,7 @@ inline bool equal(CResRef v1, double  v2) { return equal(v2, v1);}
 inline bool equal(CResRef v1, const StringData *v2) { return equal(v2, v1);}
 inline bool equal(CResRef v1, const String& v2) { return equal(v2, v1);}
 inline bool equal(CResRef v1, litstr  v2) = delete;
-inline bool equal(CResRef v1, CArrRef v2) { return false;}
+inline bool equal(CResRef v1, const Array& v2) { return false;}
 inline bool equal(CResRef v1, CObjRef v2) { return false;}
 inline bool equal(CResRef v1, CResRef v2) { return v1.equal(v2);}
 inline bool equal(CResRef v1, CVarRef v2) { return equal(v2, v1);}
@@ -755,7 +755,7 @@ inline bool less(CResRef v1, double  v2)  { return more(v2, v1);}
 inline bool less(CResRef v1, const StringData *v2)  { return more(v2, v1);}
 inline bool less(CResRef v1, const String& v2)  { return more(v2, v1);}
 inline bool less(CResRef v1, litstr  v2)  = delete;
-inline bool less(CResRef v1, CArrRef v2)  { return true;}
+inline bool less(CResRef v1, const Array& v2)  { return true;}
 inline bool less(CResRef v1, CObjRef v2)  { return false;}
 inline bool less(CResRef v1, CResRef v2)  { return v1.less(v2);}
 inline bool less(CResRef v1, CVarRef v2)  { return more(v2, v1);}
@@ -767,7 +767,7 @@ inline bool more(CResRef v1, double  v2)  { return less(v2, v1);}
 inline bool more(CResRef v1, const StringData *v2)  { return less(v2, v1);}
 inline bool more(CResRef v1, const String& v2)  { return less(v2, v1);}
 inline bool more(CResRef v1, litstr  v2)  = delete;
-inline bool more(CResRef v1, CArrRef v2)  { return false;}
+inline bool more(CResRef v1, const Array& v2)  { return false;}
 inline bool more(CResRef v1, CObjRef v2)  { return false;}
 inline bool more(CResRef v1, CResRef v2)  { return v1.more(v2);}
 inline bool more(CResRef v1, CVarRef v2)  { return less(v2, v1);}

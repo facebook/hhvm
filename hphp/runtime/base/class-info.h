@@ -281,7 +281,7 @@ public:
   /**
    * Return lists of names for auto-complete purposes.
    */
-  static void GetClassSymbolNames(CArrRef names, bool interface, bool trait,
+  static void GetClassSymbolNames(const Array& names, bool interface, bool trait,
                                   std::vector<String> &classes,
                                   std::vector<String> *clsMethods,
                                   std::vector<String> *clsProperties,

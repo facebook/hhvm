@@ -27,7 +27,7 @@ using CUCString = const unsigned char*;
 // class ImagickDraw
 ALWAYS_INLINE
 static void getAffineMatrixElement(
-    CArrRef& array, const String& key, double& ret) {
+    const Array& array, const String& key, double& ret) {
   CVarRef value = array.rvalAtRef(key);
   if (value.isNull()) {
     IMAGICKDRAW_THROW(
@@ -37,7 +37,7 @@ static void getAffineMatrixElement(
   }
 }
 
-static bool HHVM_METHOD(ImagickDraw, affine, CArrRef affine) {
+static bool HHVM_METHOD(ImagickDraw, affine, const Array& affine) {
   auto wand = getDrawingWandResource(this_);
   AffineMatrix affineMatrix;
   getAffineMatrixElement(affine, s_sx, affineMatrix.sx);
@@ -76,7 +76,7 @@ static TypedValue* HHVM_MN(ImagickDraw, arc)(ActRec* ar_) {
 }
 
 static bool HHVM_METHOD(ImagickDraw, bezier,
-    CArrRef coordinates) {
+    const Array& coordinates) {
   auto wand = getDrawingWandResource(this_);
   auto points = toPointInfoArray(coordinates);
   if (points.empty()) {
@@ -541,7 +541,7 @@ static bool HHVM_METHOD(ImagickDraw, point,
 }
 
 static bool HHVM_METHOD(ImagickDraw, polygon,
-    CArrRef coordinates) {
+    const Array& coordinates) {
   auto wand = getDrawingWandResource(this_);
   auto points = toPointInfoArray(coordinates);
   if (points.empty()) {
@@ -552,7 +552,7 @@ static bool HHVM_METHOD(ImagickDraw, polygon,
 }
 
 static bool HHVM_METHOD(ImagickDraw, polyline,
-    CArrRef coordinates) {
+    const Array& coordinates) {
   auto wand = getDrawingWandResource(this_);
   auto points = toPointInfoArray(coordinates);
   if (points.empty()) {
@@ -820,7 +820,7 @@ static bool HHVM_METHOD(ImagickDraw, setStrokeColor,
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokeDashArray,
-    CArrRef dashArray) {
+    const Array& dashArray) {
   auto wand = getDrawingWandResource(this_);
   auto dashes = toDoubleArray(dashArray);
   if (dashes.empty()) {

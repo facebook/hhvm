@@ -97,7 +97,7 @@ void ExtendedLogger::log(LogLevelType level, const std::string &msg,
   Logger::log(level, msg, stackTrace, escape, escapeMore);
 }
 
-void ExtendedLogger::Log(LogLevelType level, CArrRef stackTrace,
+void ExtendedLogger::Log(LogLevelType level, const Array& stackTrace,
                          bool escape /* = true */,
                          bool escapeMore /* = false */) {
   assert(!escapeMore || escape);
@@ -127,7 +127,7 @@ const StaticString
   s_type("type"),
   s_line("line");
 
-void ExtendedLogger::PrintStackTrace(FILE *f, CArrRef stackTrace,
+void ExtendedLogger::PrintStackTrace(FILE *f, const Array& stackTrace,
                                      bool escape /* = false */,
                                      bool escapeMore /* = false */) {
   int i = 0;
@@ -153,7 +153,7 @@ void ExtendedLogger::PrintStackTrace(FILE *f, CArrRef stackTrace,
   fflush(f);
 }
 
-std::string ExtendedLogger::StringOfFrame(CArrRef frame, int i, bool escape) {
+std::string ExtendedLogger::StringOfFrame(const Array& frame, int i, bool escape) {
   std::ostringstream ss;
 
   if (i > 0) {
@@ -177,7 +177,7 @@ std::string ExtendedLogger::StringOfFrame(CArrRef frame, int i, bool escape) {
   return ss.str();
 }
 
-std::string ExtendedLogger::StringOfStackTrace(CArrRef stackTrace) {
+std::string ExtendedLogger::StringOfStackTrace(const Array& stackTrace) {
   std::string buf;
   int i = 0;
   for (ArrayIter it(stackTrace); it; ++it, ++i) {

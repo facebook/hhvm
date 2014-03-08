@@ -218,7 +218,7 @@ int String::rfind(const String& s, int pos /* = 0 */,
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions: cannot inline these due to dependencies
 
-String String::rvalAt(CArrRef key) const {
+String String::rvalAt(const Array& key) const {
   return rvalAtImpl(key.toInt32());
 }
 
@@ -388,7 +388,7 @@ bool String::same(const String& v2) const {
   return HPHP::same(m_px, v2);
 }
 
-bool String::same(CArrRef v2) const {
+bool String::same(const Array& v2) const {
   return HPHP::same(m_px, v2);
 }
 
@@ -408,7 +408,7 @@ bool String::equal(const String& v2) const {
   return HPHP::equal(m_px, v2);
 }
 
-bool String::equal(CArrRef v2) const {
+bool String::equal(const Array& v2) const {
   return HPHP::equal(m_px, v2);
 }
 
@@ -428,7 +428,7 @@ bool String::less(const String& v2) const {
   return HPHP::less(m_px, v2);
 }
 
-bool String::less(CArrRef v2) const {
+bool String::less(const Array& v2) const {
   return HPHP::less(m_px, v2);
 }
 
@@ -448,7 +448,7 @@ bool String::more(const String& v2) const {
   return HPHP::more(m_px, v2);
 }
 
-bool String::more(CArrRef v2) const {
+bool String::more(const Array& v2) const {
   return HPHP::more(m_px, v2);
 }
 

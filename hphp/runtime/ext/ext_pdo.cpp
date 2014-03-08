@@ -556,7 +556,7 @@ static void pdo_handle_error(sp_PDOConnection dbh, sp_PDOStatement stmt) {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers for PDO class
 
-static inline int64_t pdo_attr_lval(CArrRef options, PDOAttributeType name,
+static inline int64_t pdo_attr_lval(const Array& options, PDOAttributeType name,
                                   int64_t defval) {
   if (options.exists(name)) {
     return options[name].toInt64();
@@ -758,7 +758,7 @@ static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
 }
 
 static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64_t mode,
-                                    CArrRef _argv) {
+                                    const Array& _argv) {
   _argc = _argv.size() + 1;
 
   if (stmt->default_fetch_type == PDO_FETCH_INTO) {
@@ -926,7 +926,7 @@ c_PDO::~c_PDO() {
 
 void c_PDO::t___construct(const String& dsn, const String& username /* = null_string */,
                           const String& password /* = null_string */,
-                          CArrRef options /* = null_array */) {
+                          const Array& options /* = null_array */) {
   String data_source = dsn;
 
   /* parse the data source name */
@@ -1061,7 +1061,7 @@ void c_PDO::t___construct(const String& dsn, const String& username /* = null_st
 
 
 Variant c_PDO::t_prepare(const String& statement,
-                         CArrRef options /* = null_array */) {
+                         const Array& options /* = null_array */) {
   assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
@@ -1399,7 +1399,7 @@ Array c_PDO::t_errorinfo() {
   return ret;
 }
 
-Variant c_PDO::t_query(int _argc, const String& sql, CArrRef _argv) {
+Variant c_PDO::t_query(int _argc, const String& sql, const Array& _argv) {
   SYNC_VM_REGS_SCOPED();
   assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
@@ -2636,7 +2636,7 @@ c_PDOStatement::~c_PDOStatement() {
   m_row.reset();
 }
 
-Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {
+Variant c_PDOStatement::t_execute(const Array& params /* = null_array */) {
   SYNC_VM_REGS_SCOPED();
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
 
@@ -3044,7 +3044,7 @@ Variant c_PDOStatement::t_getcolumnmeta(int64_t column) {
 }
 
 bool c_PDOStatement::t_setfetchmode(int _argc, int64_t mode,
-                                    CArrRef _argv /* = null_array */) {
+                                    const Array& _argv /* = null_array */) {
   return pdo_stmt_set_fetch_mode(m_stmt, _argc, mode, _argv);
 }
 

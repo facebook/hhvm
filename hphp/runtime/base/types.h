@@ -237,128 +237,6 @@ inline RefResult ref(Variant& v) {
 class Class;
 
 ///////////////////////////////////////////////////////////////////////////////
-// code injection classes
-
-class RequestInjectionData {
-public:
-  static const ssize_t MemExceededFlag      = 1 << 0;
-  static const ssize_t TimedOutFlag         = 1 << 1;
-  static const ssize_t SignaledFlag         = 1 << 2;
-  static const ssize_t EventHookFlag        = 1 << 3;
-  static const ssize_t PendingExceptionFlag = 1 << 4;
-  static const ssize_t InterceptFlag        = 1 << 5;
-  // Set by the debugger to break out of loops in translated code.
-  static const ssize_t DebuggerSignalFlag   = 1 << 6;
-  static const ssize_t LastFlag             = DebuggerSignalFlag;
-
-  RequestInjectionData()
-      : cflagsPtr(nullptr),
-        m_timeoutSeconds(0), // no timeout by default
-        m_hasTimer(false),
-        m_timerActive(false),
-        m_debugger(false),
-        m_debuggerIntr(false),
-        m_coverage(false),
-        m_jit(false) {
-    threadInit();
-  }
-
-  ~RequestInjectionData();
-
-  void threadInit();
-
-  inline std::atomic<ssize_t>* getConditionFlags() {
-    assert(cflagsPtr);
-    return cflagsPtr;
-  }
-
-  std::atomic<ssize_t>* cflagsPtr;  // this points to the real condition flags,
-                                    // somewhere in the thread's targetcache
-
- private:
-#ifndef __APPLE__
-  timer_t m_timer_id;    // id of our timer
-#endif
-  int m_timeoutSeconds;  // how many seconds to timeout
-  bool m_hasTimer;       // Whether we've created our timer yet
-  std::atomic<bool> m_timerActive;
-                         // Set true when we activate a timer,
-                         // cleared when the signal handler runs
-  bool m_debugger;       // whether there is a DebuggerProxy attached to me
-  bool m_debuggerIntr;   // indicating we should force interrupt for debugger
-  bool m_coverage;       // is coverage being collected
-  bool m_jit;            // is the jit enabled
-
-  // Things corresponding to user setable INI settings
-  std::string m_maxMemory;
-  std::string m_argSeparatorOutput;
-  std::string m_defaultCharset;
-  std::vector<std::string> m_include_paths;
-  int64_t m_errorReportingLevel;
-  bool m_logErrors;
-  std::string m_errorLog;
-  int64_t m_socketDefaultTimeout;
-  std::vector<std::string> m_allowedDirectories;
-  bool m_safeFileAccess;
-
- public:
-  int getTimeout() const { return m_timeoutSeconds; }
-  void setTimeout(int seconds);
-  int getRemainingTime() const;
-  void resetTimer(int seconds = 0);
-  void onTimeout();
-  bool getJit() const { return m_jit; }
-  bool getDebugger() const { return m_debugger; }
-  void setDebugger(bool d) {
-    m_debugger = d;
-    updateJit();
-  }
-  static constexpr uint32_t debuggerReadOnlyOffset() {
-    return offsetof(RequestInjectionData, m_debugger);
-  }
-  bool getDebuggerIntr() const { return m_debuggerIntr; }
-  void setDebuggerIntr(bool d) {
-    m_debuggerIntr = d;
-    updateJit();
-  }
-  bool getCoverage() const { return m_coverage; }
-  void setCoverage(bool flag) {
-    m_coverage = flag;
-    updateJit();
-  }
-  void updateJit();
-
-
-  // getters for user setable INI settings
-  std::vector<std::string> getIncludePaths() { return m_include_paths; }
-  std::string getDefaultIncludePath();
-  int64_t getErrorReportingLevel() { return m_errorReportingLevel; }
-  void setErrorReportingLevel(int level) { m_errorReportingLevel = level; }
-  int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
-  std::vector<std::string> getAllowedDirectories() const {
-    return m_allowedDirectories;
-  }
-  bool hasSafeFileAccess() const { return m_safeFileAccess; }
-
-  std::stack<void *> interrupts;   // CmdInterrupts this thread's handling
-
-  void reset();
-
-  void setMemExceededFlag();
-  void setTimedOutFlag();
-  void clearTimedOutFlag();
-  void setSignaledFlag();
-  void setEventHookFlag();
-  void clearEventHookFlag();
-  void setPendingExceptionFlag();
-  void clearPendingExceptionFlag();
-  void setInterceptFlag();
-  void clearInterceptFlag();
-  void setDebuggerSignalFlag();
-  ssize_t fetchAndClearFlags();
-
-  void onSessionInit();
-};
 
 class GlobalNameValueTableWrapper;
 class ObjectAllocatorBase;
@@ -374,79 +252,11 @@ typedef boost::intrusive_ptr<ArrayData> ArrayHolder;
 void intrusive_ptr_add_ref(ArrayData* a);
 void intrusive_ptr_release(ArrayData* a);
 
-class ThreadInfo {
-public:
-  enum Executing {
-    Idling,
-    RuntimeFunctions,
-    ExtensionFunctions,
-    UserFunctions,
-    NetworkIO,
-  };
-
-  static void GetExecutionSamples(std::map<Executing, int> &counts);
-
-public:
-  static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
-
-  RequestInjectionData m_reqInjectionData;
-
-  // For infinite recursion detection.  m_stacklimit is the lowest
-  // address the stack can grow to.
-  char *m_stacklimit;
-
-  // Either null, or populated by initialization of ThreadInfo as an
-  // approximation of the highest address of the current thread's
-  // stack.
-  static __thread char* t_stackbase;
-
-  // This is the amount of "slack" in stack usage checks - if the
-  // stack pointer gets within this distance from the end (minus
-  // overhead), throw an infinite recursion exception.
-  static const int StackSlack = 1024 * 1024;
-
-  MemoryManager* m_mm;
-
-  // This pointer is set by ProfilerFactory
-  Profiler *m_profiler;
-  CodeCoverage *m_coverage;
-
-  Executing m_executing;
-
-  // A C++ exception which will be thrown by the next surprise check.
-  Exception* m_pendingException;
-
-  ThreadInfo();
-  ~ThreadInfo();
-
-  void onSessionInit();
-  void onSessionExit();
-  void setPendingException(Exception* e);
-  void clearPendingException();
-
-  static bool valid(ThreadInfo* info);
-};
-
 extern void throw_infinite_recursion_exception();
 extern void throw_call_non_object() ATTRIBUTE_NORETURN;
 
-inline void* stack_top_ptr() {
-  DECLARE_STACK_POINTER(sp);
-  return sp;
-}
-
-inline bool stack_in_bounds(ThreadInfo *&info) {
-  return stack_top_ptr() >= info->m_stacklimit;
-}
-
-// The ThreadInfo pointer itself must be from the current stack frame.
-inline void check_recursion(ThreadInfo *&info) {
-  if (!stack_in_bounds(info)) {
-    throw_infinite_recursion_exception();
-  }
-}
-
 // implemented in runtime/base/builtin-functions.cpp
+struct ThreadInfo;
 extern ssize_t check_request_surprise(ThreadInfo *info);
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
@@ -454,26 +264,6 @@ extern void begin_profiler_frame(Profiler *p, const char *symbol);
 extern void end_profiler_frame(Profiler *p, const char *symbol);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-class ExecutionProfiler {
-public:
-  ExecutionProfiler(ThreadInfo *info, bool builtin) : m_info(info) {
-    m_executing = m_info->m_executing;
-    m_info->m_executing =
-      builtin ? ThreadInfo::ExtensionFunctions : ThreadInfo::UserFunctions;
-  }
-  explicit ExecutionProfiler(ThreadInfo::Executing executing) {
-    m_info = ThreadInfo::s_threadInfo.getNoCheck();
-    m_executing = m_info->m_executing;
-    m_info->m_executing = executing;
-  }
-  ~ExecutionProfiler() {
-    m_info->m_executing = m_executing;
-  }
-private:
-  ThreadInfo *m_info;
-  ThreadInfo::Executing m_executing;
-};
 
 class AccessFlags {
 public:

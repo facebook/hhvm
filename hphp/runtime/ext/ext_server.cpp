@@ -24,6 +24,7 @@
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/server/rpc-request-handler.h"
 
 #define DANGLING_HEADER "HPHP_DANGLING"

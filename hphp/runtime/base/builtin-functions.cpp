@@ -45,6 +45,7 @@
 #include "hphp/util/file-util.h"
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/request-injection-data.h"
 
 #include <limits>
 #include <algorithm>

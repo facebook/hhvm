@@ -39,6 +39,7 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/FBSerialize.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"

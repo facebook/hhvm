@@ -32,6 +32,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
 #include "hphp/runtime/base/proxy-array.h"
+#include "hphp/runtime/base/thread-info.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

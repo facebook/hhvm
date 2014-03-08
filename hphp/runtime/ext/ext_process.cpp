@@ -36,6 +36,7 @@
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/ext_file.h"

@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/util/logger.h"
 

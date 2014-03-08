@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 #include "folly/String.h"
 #include "hphp/util/file-util.h"

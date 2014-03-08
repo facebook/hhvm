@@ -234,6 +234,10 @@ static inline Class* frameStaticClass(ActRec* fp) {
   }
 }
 
+static Offset pcOff(const ExecutionContext* env) {
+  return env->getFP()->m_func->unit()->offsetOf(env->m_pc);
+}
+
 //=============================================================================
 // VarEnv.
 
@@ -846,8 +850,8 @@ string Stack::toString(const ActRec* fp, int offset,
   auto func = fp->func();
   os << prefix << "=== Stack at "
      << unit->filepath()->data() << ":"
-     << unit->getLineNumber(unit->offsetOf(vmpc())) << " func "
-     << func->fullName()->data() << " ===\n";
+     << unit->getLineNumber(unit->offsetOf(vmpc()))
+     << " func " << func->fullName()->data() << " ===\n";
 
   toStringFrame(os, fp, offset, m_top, prefix);
 
@@ -1237,7 +1241,7 @@ int ExecutionContext::getLine() {
   VMRegAnchor _;
   ActRec* ar = getFP();
   Unit* unit = ar ? ar->m_func->unit() : nullptr;
-  Offset pc = unit ? pcOff() : 0;
+  Offset pc = unit ? pcOff(this) : 0;
   if (ar == nullptr) return -1;
   if (ar->skipFrame()) {
     ar = getPrevVMState(ar, &pc);
@@ -2011,7 +2015,9 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   assert(prevFp);
   assert(prevFp->m_func->unit());
   if (prevSp) *prevSp = vmstate.sp;
-  if (prevPc) *prevPc = prevFp->m_func->unit()->offsetOf(vmstate.pc);
+  if (prevPc) {
+    *prevPc = prevFp->m_func->unit()->offsetOf(vmstate.pc);
+  }
   if (fromVMEntry) *fromVMEntry = true;
   return prevFp;
 }
@@ -2100,8 +2106,8 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
     ArrayInit frame(7);
 
     auto const curUnit = fp->m_func->unit();
-    auto const curOp = toOp(*curUnit->at(pc));
-    auto const isReturning = curOp == OpRetC || curOp == OpRetV;
+    auto const curOp = *reinterpret_cast<const Op*>(curUnit->at(pc));
+    auto const isReturning = curOp == Op::RetC || curOp == Op::RetV;
 
     // Builtins and generators don't have a file and line number
     if (prevFp && !prevFp->m_func->isBuiltin() && !fp->inGenerator()) {
@@ -2122,7 +2128,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
       // already do the right thing. The emitter associates object access with
       // the subsequent expression and this would be difficult to modify.
       auto const opAtPrevPc =
-        toOp(*reinterpret_cast<const Opcode*>(prevUnit->at(prevPc)));
+        *reinterpret_cast<const Op*>(prevUnit->at(prevPc));
       Offset pcAdjust = 0;
       if (opAtPrevPc == OpPopR || opAtPrevPc == OpUnboxR) {
         pcAdjust = 1;
@@ -2492,8 +2498,8 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   assert(getFP());
   assert(!m_fp->hasInvName());
   arSetSfp(ar, m_fp);
-  ar->m_soff = uintptr_t(m_fp->m_func->unit()->offsetOf(pc) -
-                         m_fp->m_func->base());
+  ar->m_soff = uintptr_t(
+    m_fp->m_func->unit()->offsetOf(pc) - m_fp->m_func->base());
   ar->m_savedRip = reinterpret_cast<uintptr_t>(tx->uniqueStubs.retHelper);
   assert(isReturnHelper(ar->m_savedRip));
   pushLocalsAndIterators(func);
@@ -4584,7 +4590,7 @@ OPTBLD_INLINE void ExecutionContext::iopCGetM(IOP_ARGS) {
   if (tvRet->m_type == KindOfRef) {
     tvUnbox(tvRet);
   }
-  assert(hasImmVector(toOp(*oldPC)));
+  assert(hasImmVector(*reinterpret_cast<const Op*>(oldPC)));
   const ImmVector& immVec = ImmVector::createFromStream(oldPC + 1);
   StringData* name;
   MemberCode mc;
@@ -6147,7 +6153,7 @@ bool ExecutionContext::doFCall(ActRec* ar, PC& pc) {
         int(m_fp->m_func->base()));
   ar->m_soff = m_fp->m_func->unit()->offsetOf(pc)
     - (uintptr_t)m_fp->m_func->base();
-  assert(pcOff() >= m_fp->m_func->base());
+  assert(pcOff(this) >= m_fp->m_func->base());
   prepareFuncEntry(ar, pc);
   SYNC();
   if (EventHook::FunctionEnter(ar, EventHook::NormalFunc)) return true;
@@ -6328,7 +6334,7 @@ bool ExecutionContext::doFCallArray(PC& pc) {
           int(m_fp->m_func->base()));
     ar->m_soff = m_fp->unit()->offsetOf(pc)
       - (uintptr_t)m_fp->m_func->base();
-    assert(pcOff() > m_fp->m_func->base());
+    assert(pcOff(this) > m_fp->m_func->base());
 
     if (UNLIKELY(!prepareArrayArgs(ar, args))) return false;
   }
@@ -7080,8 +7086,8 @@ void ExecutionContext::iopContEnter(IOP_ARGS) {
   ActRec* contAR = cont->actRec();
   arSetSfp(contAR, m_fp);
 
-  contAR->m_soff = m_fp->m_func->unit()->offsetOf(pc)
-    - (uintptr_t)m_fp->m_func->base();
+  contAR->m_soff = m_fp->m_func->unit()->offsetOf(pc) -
+    (uintptr_t)m_fp->m_func->base();
   contAR->m_savedRip =
     reinterpret_cast<uintptr_t>(tx->uniqueStubs.genRetHelper);
   assert(isReturnHelper(contAR->m_savedRip));
@@ -7407,7 +7413,7 @@ ExecutionContext::prettyStack(const string& prefix) const {
     return s;
   }
   int offset = (m_fp->m_func->unit() != nullptr)
-               ? pcOff()
+               ? pcOff(this)
                : 0;
   string begPrefix = prefix + "__";
   string midPrefix = prefix + "|| ";
@@ -7427,7 +7433,7 @@ void ExecutionContext::DumpStack() {
 
 void ExecutionContext::DumpCurUnit(int skip) {
   ActRec* fp = g_context->getFP();
-  Offset pc = fp->m_func->unit() ? g_context->pcOff() : 0;
+  Offset pc = fp->m_func->unit() ? pcOff(g_context.getNoCheck()) : 0;
   while (skip--) {
     fp = g_context->getPrevVMState(fp, &pc);
   }
@@ -7453,7 +7459,7 @@ void ExecutionContext::PrintTCCallerInfo() {
   fprintf(stderr, "Called from TC address %p\n",
           mcg->getTranslatedCaller());
   std::cerr << u->filepath()->data() << ':'
-            << u->getLineNumber(u->offsetOf(g_context->getPC())) << std::endl;
+            << u->getLineNumber(u->offsetOf(g_context->getPC())) << '\n';
 }
 
 static inline void
@@ -7469,21 +7475,23 @@ condStackTraceSep(const char* pfx) {
           string stack = prettyStack(pfx);                                    \
           Trace::trace("%s\n", stack.c_str());)
 
-#define O(name, imm, pusph, pop, flags)                                       \
-void ExecutionContext::op##name() {                                         \
-  condStackTraceSep("op"#name" ");                                            \
-  COND_STACKTRACE("op"#name" pre:  ");                                        \
-  PC pc = m_pc;                                                               \
-  assert(toOp(*pc) == Op##name);                                              \
-  ONTRACE(1,                                                                  \
-          int offset = m_fp->m_func->unit()->offsetOf(pc);                    \
-          Trace::trace("op"#name" offset: %d\n", offset));                    \
-  iop##name(IOP_PASS_ARGS);                                                   \
-  SYNC();                                                                     \
-  COND_STACKTRACE("op"#name" post: ");                                        \
-  condStackTraceSep("op"#name" ");                                            \
+#define O(name, imm, pusph, pop, flags)                     \
+void ExecutionContext::op##name() {                         \
+  condStackTraceSep("op"#name" ");                          \
+  COND_STACKTRACE("op"#name" pre:  ");                      \
+  PC pc = m_pc;                                             \
+  assert(*reinterpret_cast<const Op*>(pc) == Op##name);     \
+  ONTRACE(1,                                                \
+          auto offset = m_fp->m_func->unit()->offsetOf(pc); \
+          Trace::trace("op"#name" offset: %d\n", offset));  \
+  iop##name(IOP_PASS_ARGS);                                 \
+  SYNC();                                                   \
+  COND_STACKTRACE("op"#name" post: ");                      \
+  condStackTraceSep("op"#name" ");                          \
 }
+
 OPCODES
+
 #undef O
 #undef NEXT
 #undef DECODE_JMP
@@ -7551,10 +7559,10 @@ inline void ExecutionContext::dispatchImpl(int numInstrs) {
                            m_fp));                                      \
       return;                                                           \
     }                                                                   \
-    Op op = toOp(*pc);                                                  \
+    Op op = *reinterpret_cast<const Op*>(pc);                           \
     COND_STACKTRACE("dispatch:                    ");                   \
     ONTRACE(1,                                                          \
-            Trace::trace("dispatch: %d: %s\n", pcOff(),                 \
+            Trace::trace("dispatch: %d: %s\n", pcOff(this),             \
                          nametab[uint8_t(op)]));                        \
     if (profile && (op == OpRetC || op == OpRetV)) {                    \
       const_cast<Func*>(liveFunc())->incProfCounter();                  \
@@ -7642,7 +7650,7 @@ void ExecutionContext::recordCodeCoverage(PC pc) {
       unit == SystemLib::s_hhas_unit) {
     return;
   }
-  int line = unit->getLineNumber(pcOff());
+  int line = unit->getLineNumber(pcOff(this));
   assert(line != -1);
 
   if (unit != m_coverPrevUnit || line != m_coverPrevLine) {

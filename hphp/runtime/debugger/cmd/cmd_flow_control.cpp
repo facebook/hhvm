@@ -141,7 +141,7 @@ bool CmdFlowControl::atStepOutOffset(Unit* unit, Offset o) {
 void CmdFlowControl::setupStepOuts() {
   // Existing step outs should be cleaned up before making new ones.
   assert(!hasStepOuts());
-  ActRec* fp = g_context->getFP();
+  auto fp = g_context->getFP();
   if (!fp) return; // No place to step out to!
   Offset returnOffset;
   bool fromVMEntry;
@@ -155,16 +155,17 @@ void CmdFlowControl::setupStepOuts() {
     PC returnPC = returnUnit->at(returnOffset);
     TRACE(2, "CmdFlowControl::setupStepOuts: at '%s' offset %d opcode %s\n",
           fp->m_func->fullName()->data(), returnOffset,
-          opcodeToName(toOp(*returnPC)));
+          opcodeToName(*reinterpret_cast<const Op*>(returnPC)));
     // Don't step out to generated functions, keep looking.
     if (fp->m_func->line1() == 0) continue;
     if (fromVMEntry) {
       TRACE(2, "CmdFlowControl::setupStepOuts: VM entry\n");
       // We only execute this for opcodes which invoke more PHP, and that does
       // not include switches. Thus, we'll have at most two destinations.
-      assert(!isSwitch(*returnPC) && (numSuccs((Op*)returnPC) <= 2));
+      assert(!isSwitch(*reinterpret_cast<const Op*>(returnPC)) &&
+        (numSuccs(reinterpret_cast<const Op*>(returnPC)) <= 2));
       // Set an internal breakpoint after the instruction if it can fall thru.
-      if (instrAllowsFallThru(toOp(*returnPC))) {
+      if (instrAllowsFallThru(*reinterpret_cast<const Op*>(returnPC))) {
         Offset nextOffset = returnOffset + instrLen((Op*)returnPC);
         TRACE(2, "CmdFlowControl: step out to '%s' offset %d (fall-thru)\n",
               fp->m_func->fullName()->data(), nextOffset);
@@ -172,8 +173,9 @@ void CmdFlowControl::setupStepOuts() {
       }
       // Set an internal breakpoint at the target of a control flow instruction.
       // A good example of a control flow op that invokes PHP is IterNext.
-      if (instrIsControlFlow(toOp(*returnPC))) {
-        Offset target = instrJumpTarget((Op*)returnPC, 0);
+      if (instrIsControlFlow(*reinterpret_cast<const Op*>(returnPC))) {
+        Offset target =
+          instrJumpTarget(reinterpret_cast<const Op*>(returnPC), 0);
         if (target != InvalidAbsoluteOffset) {
           Offset targetOffset = returnOffset + target;
           TRACE(2, "CmdFlowControl: step out to '%s' offset %d (jump target)\n",

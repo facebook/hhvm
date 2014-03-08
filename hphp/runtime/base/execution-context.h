@@ -532,10 +532,6 @@ public:
   const Stack&  getStack() const { checkRegState(); return m_stack; }
         Stack&  getStack()       { checkRegState(); return m_stack; }
 
-  Offset pcOff() const {
-    return getFP()->m_func->unit()->offsetOf(m_pc);
-  }
-
   ActRec* m_firstAR;
   std::vector<Fault> m_faults;
 

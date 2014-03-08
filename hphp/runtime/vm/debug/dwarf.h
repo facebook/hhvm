@@ -180,11 +180,11 @@ struct DwarfInfo {
 
   const char *lookupFile(const Unit *unit);
   void addLineEntries(TCRange range, const Unit *unit,
-                      const Opcode *instr, FunctionInfo* f);
+                      const Op* instr, FunctionInfo* f);
   void transferFuncs(DwarfChunk* from, DwarfChunk* to);
   void compactChunks();
   DwarfChunk* addTracelet(TCRange range, const char* name,
-                          const Func* func, const Opcode *instr,
+                          const Func* func, const Op* instr,
                           bool exit, bool inPrologue);
   void syncChunks();
 };

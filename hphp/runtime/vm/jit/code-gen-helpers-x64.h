@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/ir.h"
 
 namespace HPHP {
 struct Func;
@@ -43,7 +44,7 @@ constexpr size_t kJmpTargetAlign = 16;
 
 void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
-void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc);
+void emitEagerSyncPoint(Asm& as, const Op* pc);
 void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
 void emitGetGContext(Asm& as, PhysReg dest);
 

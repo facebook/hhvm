@@ -3794,7 +3794,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   if (FixupMap::eagerRecord(func)) {
     const auto* pc = curUnit()->entry() + m_curInst->marker().bcOff;
     // we have spilled all args to stack, so spDiff is 0
-    emitEagerSyncPoint(m_as, pc);
+    emitEagerSyncPoint(m_as, reinterpret_cast<const Op*>(pc));
   }
   // RSP points to the MInstrState we need to use.
   // workaround the fact that rsp moves when we spill registers around call
@@ -3913,7 +3913,7 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
   BuiltinFunction builtinFuncPtr = fn->builtinFuncPtr();
   emitMovRegReg(m_as, srcLoc(1).reg(), argNumToRegName[0]);
   if (FixupMap::eagerRecord(fn)) {
-    emitEagerSyncPoint(m_as, fn->getEntry());
+    emitEagerSyncPoint(m_as, reinterpret_cast<const Op*>(fn->getEntry()));
   }
   m_as.call((TCA)builtinFuncPtr);
   recordSyncPoint(m_as);

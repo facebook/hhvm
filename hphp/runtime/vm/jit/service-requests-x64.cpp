@@ -124,7 +124,7 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
   Asm a { mainCode };
   a.   movq  (rVmFp, argNumToRegName[0]);
   if (mcg->fixupMap().eagerRecord(func)) {
-    emitEagerSyncPoint(a, func->getEntry());
+    emitEagerSyncPoint(a, reinterpret_cast<const Op*>(func->getEntry()));
   }
   emitCall(a, (TCA)builtinFuncPtr);
 
@@ -139,7 +139,7 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
    */
   assert(func->numIterators() == 0 && func->methInfo());
   assert(func->numLocals() == func->numParams());
-  assert(toOp(*func->getEntry()) == OpNativeImpl);
+  assert(*reinterpret_cast<const Op*>(func->getEntry()) == Op::NativeImpl);
   assert(instrLen((Op*)func->getEntry()) == func->past() - func->base());
   Offset pcOffset = 0;  // NativeImpl is the only instruction in the func
   Offset stackOff = func->numLocals(); // Builtin stubs have no

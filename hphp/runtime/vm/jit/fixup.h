@@ -140,7 +140,7 @@ class FixupMap {
 
 public:
   struct VMRegs {
-    const HPHP::Opcode* m_pc;
+    const Op* m_pc;
     TypedValue* m_sp;
     const ActRec* m_fp;
   };
@@ -185,8 +185,7 @@ private:
     m_fixups.insert(tca, FixupEntry(indirect));
   }
 
-  const HPHP::Opcode* pc(const ActRec* ar, const Func* f,
-                         const Fixup& fixup) const {
+  PC pc(const ActRec* ar, const Func* f, const Fixup& fixup) const {
     assert(f);
     return f->getEntry() + fixup.m_pcOffset;
   }
@@ -198,7 +197,7 @@ private:
     TRACE(3, "regsFromActRec:: tca %p -> (pcOff %d, spOff %d)\n",
           (void*)tca, fixup.m_pcOffset, fixup.m_spOffset);
     assert(fixup.m_spOffset >= 0);
-    outRegs->m_pc = pc(ar, f, fixup);
+    outRegs->m_pc = reinterpret_cast<const Op*>(pc(ar, f, fixup));
     outRegs->m_fp = ar;
 
     if (UNLIKELY(ar->inGenerator())) {

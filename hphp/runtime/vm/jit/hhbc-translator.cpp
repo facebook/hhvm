@@ -5234,14 +5234,14 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
   if (flag == ExitFlag::Interp) {
     auto interpSk = SrcKey {curFunc(), targetBcOff};
     auto pc = curUnit()->at(targetBcOff);
-    auto changesPC = opcodeChangesPC(toOp(*pc));
+    auto changesPC = opcodeChangesPC(*reinterpret_cast<const Op*>(pc));
     auto interpOp = changesPC ? InterpOneCF : InterpOne;
 
     InterpOneData idata;
     idata.bcOff = targetBcOff;
     idata.cellsPopped = getStackPopped(pc);
     idata.cellsPushed = getStackPushed(pc);
-    idata.opcode = toOp(*pc);
+    idata.opcode = *reinterpret_cast<const Op*>(pc);
 
     // This is deliberately ignoring anything the opcode might output on the
     // stack -- this Unit is about to end.

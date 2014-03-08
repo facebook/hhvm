@@ -418,20 +418,18 @@ struct Unit {
   PC entry() const { return m_bc; }
   Offset bclen() const { return m_bclen; }
 
-  PC at(const Offset off) const {
+  PC at(Offset off) const {
     assert(off >= 0 && off <= Offset(m_bclen));
     return m_bc + off;
   }
 
-  Offset offsetOf(const Opcode* op) const {
-    assert(op >= m_bc && op <= (m_bc + m_bclen));
-    return op - m_bc;
+  Offset offsetOf(PC pc) const {
+    assert(contains(pc));
+    return pc - m_bc;
   }
-  Offset offsetOf(const Op* op) const {
-    return offsetOf(reinterpret_cast<const Opcode*>(op));
-  }
-  bool contains(const Opcode* op) const {
-    return op >= m_bc && op <= m_bc + m_bclen;
+
+  bool contains(PC pc) const {
+    return pc >= m_bc && pc <= m_bc + m_bclen;
   }
 
   const StringData* filepath() const {
@@ -661,7 +659,7 @@ public:
 
   Op getOpcode(size_t instrOffset) const {
     assert(instrOffset < m_bclen);
-    return toOp(m_bc[instrOffset]);
+    return static_cast<Op>(m_bc[instrOffset]);
   }
 
   /*

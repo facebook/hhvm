@@ -269,7 +269,7 @@ struct Func {
     return shared()->m_id;
   }
   Offset base() const { return shared()->m_base; }
-  const inline Opcode* getEntry() const {
+  PC getEntry() const {
     return m_unit->entry() + shared()->m_base;
   }
   Offset past() const { return shared()->m_past; }

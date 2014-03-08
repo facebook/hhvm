@@ -281,13 +281,6 @@ public:
 #define ACCESSPARAMS_IMPL AccessFlags::Type flags
 
 /*
- * Non-enumerated version of type for referring to opcodes or the
- * bytecode stream.  (Use the enum Op in hhbc.h for an enumerated
- * version.)
- */
-typedef uint8_t Opcode;
-
-/*
  * Program counters in the bytecode interpreter.
  *
  * Normally points to an Opcode, but has type const uchar* because

@@ -746,12 +746,6 @@ inline bool isValidOpcode(Op op) {
   return op > OpLowInvalid && op < OpHighInvalid;
 }
 
-inline Op toOp(Opcode o) {
-  Op op = Op(o);
-  assert(isValidOpcode(op));
-  return op;
-}
-
 const MInstrInfo& getMInstrInfo(Op op);
 
 enum AstubsOp {
@@ -1083,10 +1077,6 @@ inline bool isSwitch(Op op) {
   }
 }
 
-inline bool isSwitch(Opcode op) {
-  return isSwitch(toOp(op));
-}
-
 template<typename Out, typename In>
 Out& readData(In*& it) {
   Out& r = *(Out*)it;
@@ -1107,9 +1097,9 @@ void foreachSwitchTarget(const Op* op, L func) {
 }
 
 template<typename L>
-void foreachSwitchString(Opcode* op, L func) {
-  assert(toOp(*op) == OpSSwitch);
-  readData<Opcode>(op);
+void foreachSwitchString(const Op* op, L func) {
+  assert(*op == Op::SSwitch);
+  readData<Op>(op);
   int32_t size = readData<int32_t>(op) - 1; // the last item is the default
   for (int i = 0; i < size; ++i) {
     func(readData<Id>(op));

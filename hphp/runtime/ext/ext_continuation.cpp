@@ -247,15 +247,15 @@ void c_Continuation::call_raise(ObjectData* e) {
 Offset c_Continuation::getExecutionOffset(int32_t label) const {
   auto func = actRec()->m_func;
   PC funcBase = func->unit()->entry() + func->base();
-  assert(toOp(*funcBase) == OpUnpackCont); // One byte
+  assert(*reinterpret_cast<const Op*>(funcBase) == Op::UnpackCont); // One byte
   PC switchOffset = funcBase + 1;
-  assert(toOp(*switchOffset) == OpSwitch);
+  assert(*reinterpret_cast<const Op*>(switchOffset) == Op::Switch);
   // The Switch opcode is one byte for the opcode itself, plus four
   // bytes for the jmp table size, then the jump table.
-  if (label >= *(int32_t*)(switchOffset + 1)) {
+  if (label >= *(int32_t*)(switchOffset + 1) /* XXX */) {
     return InvalidAbsoluteOffset;
   }
-  Offset* jmpTable = (Offset*)(switchOffset + 5);
+  Offset* jmpTable = (Offset*)(switchOffset + 5) /* XXX */;
   Offset relOff = jmpTable[label];
   return func->base() + relOff + 1;
 }

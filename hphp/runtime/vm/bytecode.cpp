@@ -5666,6 +5666,18 @@ void ExecutionContext::fPushObjMethodImpl(
   }
 }
 
+static void throw_call_non_object(const char* methodName) {
+  std::string msg;
+  folly::format(&msg, "Call to a member function {}() on a non-object",
+    methodName);
+
+  if (RuntimeOption::ThrowExceptionOnBadMethodCall) {
+    Object e(SystemLib::AllocBadMethodCallExceptionObject(String(msg)));
+    throw e;
+  }
+  throw FatalErrorException(msg.c_str());
+}
+
 OPTBLD_INLINE void ExecutionContext::iopFPushObjMethod(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);

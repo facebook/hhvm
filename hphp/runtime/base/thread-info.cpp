@@ -148,5 +148,48 @@ void ThreadInfo::onSessionExit() {
   RDS::requestExit();
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+void throw_infinite_recursion_exception() {
+  if (!RuntimeOption::NoInfiniteRecursionDetection) {
+    // Reset profiler otherwise it might recurse further causing segfault
+    DECLARE_THREAD_INFO
+    info->m_profiler = nullptr;
+    throw UncatchableException("infinite recursion detected");
+  }
+}
+
+ssize_t check_request_surprise(ThreadInfo* info) {
+  auto& p = info->m_reqInjectionData;
+  bool do_timedout, do_memExceeded, do_signaled;
+
+  ssize_t flags = p.fetchAndClearFlags();
+  do_timedout = (flags & RequestInjectionData::TimedOutFlag) &&
+    !p.getDebugger();
+  do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
+  do_signaled = (flags & RequestInjectionData::SignaledFlag);
+
+  // Start with any pending exception that might be on the thread.
+  Exception* pendingException = info->m_pendingException;
+  info->m_pendingException = nullptr;
+
+  if (do_timedout && !pendingException) {
+    pendingException = generate_request_timeout_exception();
+  }
+  if (do_memExceeded && !pendingException) {
+    pendingException = generate_memory_exceeded_exception();
+  }
+  if (do_signaled) {
+    extern bool f_pcntl_signal_dispatch();
+    f_pcntl_signal_dispatch();
+  }
+
+  if (pendingException) {
+    pendingException->throwException();
+  }
+  return flags;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/thread-info.h"
 
 namespace HPHP {
 
@@ -32,6 +33,10 @@ static StaticString s_exit("exit");
 static StaticString s_exception("exception");
 static StaticString s_name("name");
 static StaticString s_return("return");
+
+// implemented in runtime/ext/ext_hotprofiler.cpp
+extern void begin_profiler_frame(Profiler *p, const char *symbol);
+extern void end_profiler_frame(Profiler *p, const char *symbol);
 
 void EventHook::Enable() {
   ThreadInfo::s_threadInfo->m_reqInjectionData.setEventHookFlag();

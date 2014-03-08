@@ -442,16 +442,6 @@ class Variant : private TypedValue {
         &m_data.pobj : &m_data.pref->tv()->m_data.pobj);
   }
 
-  ObjectData *objectForCall() const {
-    if (m_type == KindOfObject) return m_data.pobj;
-    if (m_type == KindOfRef) {
-      Variant *t = m_data.pref->var();
-      if (t->m_type == KindOfObject) return t->m_data.pobj;
-    }
-    throw_call_non_object();
-    return nullptr;
-  }
-
   /**
    * Type testing functions
    */

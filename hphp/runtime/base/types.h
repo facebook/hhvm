@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_TYPES_H_
 #define incl_HPHP_TYPES_H_
 
-#include <boost/intrusive_ptr.hpp>
-
 #include <stdint.h>
 #include <atomic>
 #include <limits>
@@ -38,15 +36,7 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-// forward declarations of all data types
 
-/**
- * Complex data types. Note that Numeric, Primitive, PlusOperand and Sequence
- * are actually all Variant type in implementation, but we'd keep them using
- * their own names in different places, so not to lose their inferred types.
- * Should we need to take advantage of this extra type inference information
- * in the future, we will be able to.
- */
 class String;
 class StaticString;
 class Array;
@@ -58,10 +48,6 @@ class Variant;
 class VarNR;
 class RefData;
 
-/**
- * Macros related to Variant that are needed by StringData, ObjectData,
- * and ArrayData.
- */
 extern const Variant null_variant;      // uninitialized variant
 extern const Variant init_null_variant; // php null
 extern const VarNR null_varNR;
@@ -74,20 +60,11 @@ extern const String null_string;
 extern const Array null_array;
 extern const Array empty_array;
 
-/**
- * These are underlying data structures for the above complex data types. Since
- * we use reference counting to achieve copy-on-write and automatic object
- * lifetime, we need these data objects to store real data that's shared by
- * multiple wrapper objects.
- */
 class StringData;
 class ArrayData;
 class ObjectData;
 class ResourceData;
 
-/**
- * Miscellaneous objects to help arrays to construct or to iterate.
- */
 class ArrayIter;
 class MutableArrayIter;
 
@@ -234,25 +211,6 @@ class ObjectAllocatorBase;
 class Profiler;
 class CodeCoverage;
 typedef GlobalNameValueTableWrapper GlobalVariables;
-
-int object_alloc_size_to_index(size_t);
-size_t object_alloc_index_to_size(int);
-
-// implemented in runtime/base/thread-info
-typedef boost::intrusive_ptr<ArrayData> ArrayHolder;
-void intrusive_ptr_add_ref(ArrayData* a);
-void intrusive_ptr_release(ArrayData* a);
-
-extern void throw_infinite_recursion_exception();
-extern void throw_call_non_object() ATTRIBUTE_NORETURN;
-
-// implemented in runtime/base/builtin-functions.cpp
-struct ThreadInfo;
-extern ssize_t check_request_surprise(ThreadInfo *info);
-
-// implemented in runtime/ext/ext_hotprofiler.cpp
-extern void begin_profiler_frame(Profiler *p, const char *symbol);
-extern void end_profiler_frame(Profiler *p, const char *symbol);
 
 ///////////////////////////////////////////////////////////////////////////////
 

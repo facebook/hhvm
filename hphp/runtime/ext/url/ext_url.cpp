@@ -139,9 +139,9 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
   Array arr;
   if (varr.is(KindOfObject)) {
     Object o = varr.toObject();
-    arr = (o.objectForCall()->isCollection()) ?
-      varr.toArray() :
-      f_get_object_vars(o).toArray();
+    arr = o->isCollection()
+      ? varr.toArray()
+      : f_get_object_vars(o).toArray();
   } else {
     arr = varr.toArray();
   }

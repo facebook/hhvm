@@ -1113,8 +1113,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
           String stemp;
           if (callable) {
             if (replace_var.isObject()) {
-              stemp =
-                replace_var.objectForCall()->o_getClassName() + "::__invoke";
+              stemp = replace_var.asCObjRef()->o_getClassName() + "::__invoke";
             } else {
               stemp = replace_var.toString();
             }

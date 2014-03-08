@@ -26,6 +26,10 @@
 #include <tbb/concurrent_queue.h>
 #include <set>
 
+namespace HPHP {
+struct ThreadInfo;
+}
+
 namespace HPHP { namespace Eval {
 
 // Tag used on server log messages to highlight that they are likely useful to

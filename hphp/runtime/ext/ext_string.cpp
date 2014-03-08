@@ -1446,16 +1446,13 @@ Variant f_strtr(const String& str, const Variant& from, const Variant& to /* = n
 }
 
 void f_parse_str(const String& str, VRefParam arr /* = null */) {
-  Variant result;
-
+  Array result = Array::Create();
   HttpProtocol::DecodeParameters(result, str.data(), str.size());
-
   if (!arr.isReferenced()) {
-    f_extract(result.toArray());
+    f_extract(result);
     return;
   }
-
-  arr = result.toArray();
+  arr = result;
 }
 
 Variant f_setlocale(int _argc, int category, const Variant& locale, const Array& _argv /* = null_array */) {

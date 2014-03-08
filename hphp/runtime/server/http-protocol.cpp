@@ -68,6 +68,12 @@ static bool read_all_post_data(Transport *transport,
   return false;
 }
 
+static void CopyParams(Variant& dest, Array& src) {
+  for (ArrayIter iter(src); iter; ++iter) {
+    dest.set(iter.first(), iter.second());
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const VirtualHost *HttpProtocol::GetVirtualHost(Transport *transport) {
@@ -159,46 +165,7 @@ static auto const s_arraysToUnset = {
   s__SESSION,
 };
 
-/**
- * PHP has "EGPCS" processing order of these global variables, and this
- * order is important in preparing $_REQUEST that needs to know which to
- * overwrite what when name happens to be the same.
- */
-void HttpProtocol::PrepareSystemVariables(Transport *transport,
-                                          const RequestURI &r,
-                                          const SourceRootInfo &sri) {
-
-  const VirtualHost *vhost = VirtualHost::GetCurrent();
-  GlobalVariables *g = get_global_variables();
-  Variant emptyArr(HphpArray::GetStaticEmptyArray());
-  for (auto& key : s_arraysToClear) {
-    g->remove(key.get(), false);
-    g->set(key.get(), emptyArr, false);
-  }
-  for (auto& key : s_arraysToUnset) {
-    g->remove(key.get(), false);
-  }
-  g->set(s_HTTP_RAW_POST_DATA, empty_string, false);
-
-  StartRequest();
-  PrepareEnv(g->getRef(s__ENV), transport);
-  PrepareRequestVariables(g->getRef(s__REQUEST),
-                          g->getRef(s__GET),
-                          g->getRef(s__POST),
-                          g->getRef(s_HTTP_RAW_POST_DATA),
-                          g->getRef(s__FILES),
-                          g->getRef(s__COOKIE),
-                          transport,
-                          r);
-  PrepareServerVariable(g->getRef(s__SERVER),
-                        transport,
-                        r,
-                        sri,
-                        vhost);
-}
-
-void HttpProtocol::PrepareEnv(Variant& env,
-                              Transport *transport) {
+static void PrepareEnv(Array& env, Transport *transport) {
   // $_ENV
   process_env_variables(env);
   env.set(s_HPHP, 1);
@@ -234,12 +201,63 @@ void HttpProtocol::PrepareEnv(Variant& env,
   }
 }
 
+/**
+ * PHP has "EGPCS" processing order of these global variables, and this
+ * order is important in preparing $_REQUEST that needs to know which to
+ * overwrite what when name happens to be the same.
+ */
+void HttpProtocol::PrepareSystemVariables(Transport *transport,
+                                          const RequestURI &r,
+                                          const SourceRootInfo &sri) {
+
+  auto const vhost = VirtualHost::GetCurrent();
+  auto const g = get_global_variables();
+  Variant emptyArr(HphpArray::GetStaticEmptyArray());
+  for (auto& key : s_arraysToClear) {
+    g->remove(key.get(), false);
+    g->set(key.get(), emptyArr, false);
+  }
+  for (auto& key : s_arraysToUnset) {
+    g->remove(key.get(), false);
+  }
+  g->set(s_HTTP_RAW_POST_DATA, empty_string, false);
+
+  StartRequest();
+
+#define X(name)                                       \
+  Array name##arr(Array::Create());                   \
+  SCOPE_EXIT { g->set(s__##name, name##arr, false); };
+
+  X(ENV)
+  X(GET)
+  X(POST)
+  X(COOKIE)
+  X(FILES)
+
+#undef X
+
+  PrepareEnv(ENVarr, transport);
+  PrepareRequestVariables(g->getRef(s__REQUEST),
+                          GETarr,
+                          POSTarr,
+                          g->getRef(s_HTTP_RAW_POST_DATA),
+                          FILESarr,
+                          COOKIEarr,
+                          transport,
+                          r);
+  PrepareServerVariable(g->getRef(s__SERVER),
+                        transport,
+                        r,
+                        sri,
+                        vhost);
+}
+
 void HttpProtocol::PrepareRequestVariables(Variant& request,
-                                           Variant& get,
-                                           Variant& post,
+                                           Array& get,
+                                           Array& post,
                                            Variant& raw_post,
-                                           Variant& files,
-                                           Variant& cookie,
+                                           Array& files,
+                                           Array& cookie,
                                            Transport *transport,
                                            const RequestURI &r) {
 
@@ -261,16 +279,16 @@ void HttpProtocol::PrepareRequestVariables(Variant& request,
   }
 }
 
-void HttpProtocol::PrepareGetVariable(Variant& get,
+void HttpProtocol::PrepareGetVariable(Array& get,
                                       const RequestURI &r) {
   DecodeParameters(get,
                    r.queryString().data(),
                    r.queryString().size());
 }
 
-void HttpProtocol::PreparePostVariables(Variant& post,
+void HttpProtocol::PreparePostVariables(Array& post,
                                         Variant& raw_post,
-                                        Variant& files,
+                                        Array& files,
                                         Transport *transport) {
 
   std::string contentType = transport->getHeader("Content-Type");
@@ -363,7 +381,7 @@ void HttpProtocol::PreparePostVariables(Variant& post,
   }
 }
 
-bool HttpProtocol::PrepareCookieVariable(Variant& cookie,
+bool HttpProtocol::PrepareCookieVariable(Array& cookie,
                                          Transport *transport) {
 
   string cookie_data = transport->getHeader("Cookie");
@@ -730,16 +748,7 @@ void HttpProtocol::ClearRecord(bool success, const std::string &tmpfile) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void HttpProtocol::CopyParams(Variant &dest, Variant &src) {
-  if (src.isArray()) {
-    Array srcArray = src.toArray();
-    for (ArrayIter iter(srcArray); iter; ++iter) {
-      dest.set(iter.first(), iter.second());
-    }
-  }
-}
-
-void HttpProtocol::DecodeParameters(Variant &variables, const char *data,
+void HttpProtocol::DecodeParameters(Array& variables, const char *data,
                                     int size, bool post /* = false */) {
   if (data == nullptr || size == 0) {
     return;
@@ -781,7 +790,7 @@ void HttpProtocol::DecodeParameters(Variant &variables, const char *data,
   }
 }
 
-void HttpProtocol::DecodeCookies(Variant &variables, char *data) {
+void HttpProtocol::DecodeCookies(Array& variables, char *data) {
   assert(data && *data);
 
   char *strtok_buf = nullptr;
@@ -859,8 +868,8 @@ bool HttpProtocol::IsRfc1867(const string contentType, string &boundary) {
 }
 
 void HttpProtocol::DecodeRfc1867(Transport *transport,
-                                 Variant &post,
-                                 Variant &files,
+                                 Array& post,
+                                 Array& files,
                                  int contentLength,
                                  const void *&data,
                                  int &size,

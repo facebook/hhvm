@@ -35,7 +35,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program);
 /**
  * Setting up environment variables.
  */
-void process_env_variables(Variant &variables);
+void process_env_variables(Array& variables);
 
 /**
  * Reset all the ini settings from the config file
@@ -52,7 +52,9 @@ void process_ini_settings(const std::string& name);
  * cookie name for the same path and we should not overwrite more
  * specific cookies with the less specific ones.
  */
-void register_variable(Variant &variables, char *name, const Variant& value,
+void register_variable(Array& variables,
+                       char* name,
+                       const Variant& value,
                        bool overwrite = true);
 
 String canonicalize_path(const String& path, const char* root, int rootLen);

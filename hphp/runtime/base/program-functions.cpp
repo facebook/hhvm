@@ -177,11 +177,9 @@ static void process_cmd_arguments(int argc, char **argv) {
   g->set(s_argv, argvArray, false);
 }
 
-void process_env_variables(Variant &variables) {
-  for (std::map<string, string>::const_iterator iter =
-         RuntimeOption::EnvVariables.begin();
-       iter != RuntimeOption::EnvVariables.end(); ++iter) {
-    variables.set(String(iter->first), String(iter->second));
+void process_env_variables(Array& variables) {
+  for (auto& kv : RuntimeOption::EnvVariables) {
+    variables.set(String(kv.first), String(kv.second));
   }
   for (char **env = environ; env && *env; env++) {
     char *p = strchr(*env, '=');
@@ -207,7 +205,9 @@ void process_ini_settings(const std::string& name) {
   }
 }
 
-void register_variable(Variant &variables, char *name, const Variant& value,
+// Handle adding a variable to an array, supporting keys that look
+// like array expressions (like 'FOO[][key1][k2]').
+void register_variable(Array& variables, char *name, const Variant& value,
                        bool overwrite /* = true */) {
   // ignore leading spaces in the variable name
   char *var = name;
@@ -236,10 +236,18 @@ void register_variable(Variant &variables, char *name, const Variant& value,
     return;
   }
 
-  vector<Variant> gpc_elements;
-  gpc_elements.reserve(MAX_INPUT_NESTING_LEVEL); // important, so no resize
-  Variant *symtable = &variables;
-  char *index = var;
+  // GPC elements holds Variants that are acting as smart pointers to
+  // RefDatas that we've created in the process of a multi-dim key.
+  std::vector<Variant> gpc_elements;
+  if (is_array) gpc_elements.reserve(MAX_INPUT_NESTING_LEVEL);
+
+  // The array pointer we're currently adding to.  If we're doing a
+  // multi-dimensional set, this will point at the m_data.parr inside
+  // of a RefData sometimes (via toArrRef on the variants in
+  // gpc_elements).
+  Array* symtable = &variables;
+
+  char* index = var;
   int index_len = var_len;
 
   if (is_array) {
@@ -278,8 +286,7 @@ void register_variable(Variant &variables, char *name, const Variant& value,
       if (!index) {
         symtable->append(Array::Create());
         gpc_elements.push_back(uninit_null());
-        gpc_elements.back().assignRef(
-          symtable->lvalAt((int)symtable->toArray().size() - 1));
+        gpc_elements.back().assignRef(symtable->lvalAt(symtable->size() - 1));
       } else {
         String key(index, index_len, CopyString);
         Variant v = symtable->rvalAt(key);
@@ -289,7 +296,7 @@ void register_variable(Variant &variables, char *name, const Variant& value,
         gpc_elements.push_back(uninit_null());
         gpc_elements.back().assignRef(symtable->lvalAt(key));
       }
-      symtable = &gpc_elements.back();
+      symtable = &gpc_elements.back().toArrRef();
       /* ip pointed to the '[' character, now obtain the key */
       index = index_s;
       index_len = new_idx_len;
@@ -308,7 +315,7 @@ void register_variable(Variant &variables, char *name, const Variant& value,
       symtable->append(value);
     } else {
       String key(index, index_len, CopyString);
-      if (overwrite || !symtable->toArray().exists(key)) {
+      if (overwrite || !symtable->exists(key)) {
         symtable->set(key, value);
       }
     }
@@ -536,59 +543,64 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 
   GlobalVariables *g = get_global_variables();
 
-  Variant& env = g->getRef(s__ENV);
-  process_env_variables(env);
-  env.set(s_HPHP, 1);
-  env.set(s_HHVM, 1);
-  if (RuntimeOption::EvalJit) {
-    env.set(s_HHVM_JIT, 1);
-  }
-  switch (JIT::arch()) {
-  case JIT::Arch::X64:
-    env.set(s_HHVM_ARCH, "x64");
-    break;
-  case JIT::Arch::ARM:
-    env.set(s_HHVM_ARCH, "arm");
-    break;
+  {
+    Array envArr(Array::Create());
+    process_env_variables(envArr);
+    envArr.set(s_HPHP, 1);
+    envArr.set(s_HHVM, 1);
+    if (RuntimeOption::EvalJit) {
+      envArr.set(s_HHVM_JIT, 1);
+    }
+    switch (JIT::arch()) {
+    case JIT::Arch::X64:
+      envArr.set(s_HHVM_ARCH, "x64");
+      break;
+    case JIT::Arch::ARM:
+      envArr.set(s_HHVM_ARCH, "arm");
+      break;
+    }
+    g->set(s__ENV.get(), envArr, false);
   }
 
   process_cmd_arguments(argc, argv);
 
-  Variant& server = g->getRef(s__SERVER);
-  process_env_variables(server);
-  time_t now;
-  struct timeval tp = {0};
-  double now_double;
-  if (!gettimeofday(&tp, nullptr)) {
-    now_double = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
-    now = tp.tv_sec;
-  } else {
-    now = time(nullptr);
-    now_double = (double)now;
-  }
-  String file = empty_string;
-  if (argc > 0) {
-    file = StringData::Make(argv[0], CopyString);
-  }
-  server.set(s_REQUEST_START_TIME, now);
-  server.set(s_REQUEST_TIME, now);
-  server.set(s_REQUEST_TIME_FLOAT, now_double);
-  server.set(s_DOCUMENT_ROOT, empty_string);
-  server.set(s_SCRIPT_FILENAME, file);
-  server.set(s_SCRIPT_NAME, file);
-  server.set(s_PHP_SELF, file);
-  server.set(s_argv, g->get(s_argv));
-  server.set(s_argc, g->get(s_argc));
-  server.set(s_PWD, g_context->getCwd());
-  char hostname[1024];
-  if (!gethostname(hostname, 1024)) {
-    server.set(s_HOSTNAME, String(hostname, CopyString));
-  }
+  {
+    Array serverArr(Array::Create());
+    process_env_variables(serverArr);
+    time_t now;
+    struct timeval tp = {0};
+    double now_double;
+    if (!gettimeofday(&tp, nullptr)) {
+      now_double = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
+      now = tp.tv_sec;
+    } else {
+      now = time(nullptr);
+      now_double = (double)now;
+    }
+    String file = empty_string;
+    if (argc > 0) {
+      file = StringData::Make(argv[0], CopyString);
+    }
+    serverArr.set(s_REQUEST_START_TIME, now);
+    serverArr.set(s_REQUEST_TIME, now);
+    serverArr.set(s_REQUEST_TIME_FLOAT, now_double);
+    serverArr.set(s_DOCUMENT_ROOT, empty_string);
+    serverArr.set(s_SCRIPT_FILENAME, file);
+    serverArr.set(s_SCRIPT_NAME, file);
+    serverArr.set(s_PHP_SELF, file);
+    serverArr.set(s_argv, g->get(s_argv));
+    serverArr.set(s_argc, g->get(s_argc));
+    serverArr.set(s_PWD, g_context->getCwd());
+    char hostname[1024];
+    if (!gethostname(hostname, 1024)) {
+      serverArr.set(s_HOSTNAME, String(hostname, CopyString));
+    }
 
-  for(std::map<string,string>::iterator it =
-        RuntimeOption::ServerVariables.begin(),
-        end = RuntimeOption::ServerVariables.end(); it != end; ++it) {
-    server.set(String(it->first.c_str()), String(it->second.c_str()));
+    for (auto& kv : RuntimeOption::ServerVariables) {
+      serverArr.set(String(kv.first.c_str()), String(kv.second.c_str()));
+    }
+
+    g->set(s__SERVER.get(), serverArr, false);
   }
 
   if (xhprof) {

@@ -2072,7 +2072,7 @@ static bool valid_function(c_SoapServer *server, Object &soap_obj,
   } else if (!server->m_soap_functions.ft.empty()) {
     return server->m_soap_functions.ft.exists(f_strtolower(fn_name));
   }
-  HPHP::Func* f = cls->lookupMethod(fn_name.get());
+  HPHP::Func* f = cls ? cls->lookupMethod(fn_name.get()) : nullptr;
   return (f && f->isPublic());
 }
 

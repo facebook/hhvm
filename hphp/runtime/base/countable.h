@@ -23,6 +23,8 @@
 #include <cassert>
 #include <atomic>
 
+#include "hphp/runtime/base/memory-manager.h"
+
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/trace.h"

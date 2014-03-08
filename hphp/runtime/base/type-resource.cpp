@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/type-resource.h"
+
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/type-string.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -30,8 +30,20 @@ Resource::~Resource() {
   // force it out of line
 }
 
+String Resource::toString() const {
+  return m_px ? m_px->o_toString() : null_string;
+}
+
 Array Resource::toArray() const {
-  return m_px ? m_px->o_toArray() : Array();
+  return m_px ? m_px->o_toArray() : null_array;
+}
+
+const char* Resource::classname_cstr() const {
+  return m_px->o_getClassName().c_str();
+}
+
+void Resource::compileTimeAssertions() {
+  static_assert(sizeof(Resource) == sizeof(ResourceBase), "Fix this.");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

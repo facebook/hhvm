@@ -264,6 +264,12 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
 ///////////////////////////////////////////////////////////////////////////////
 // manipulations
 
+String Array::toString() const {
+  if (m_px == nullptr) return "";
+  raise_notice("Array to string conversion");
+  return "Array";
+}
+
 Array &Array::merge(CArrRef arr) {
   return mergeImpl(arr.m_px);
 }

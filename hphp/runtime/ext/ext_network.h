@@ -83,7 +83,7 @@ Array f_headers_list();
 
 bool f_headers_sent(VRefParam file = uninit_null(), VRefParam line = uninit_null());
 
-bool f_header_register_callback(CVarRef callback);
+bool f_header_register_callback(const Variant& callback);
 
 void f_header_remove(const String& name = null_string);
 

@@ -29,7 +29,7 @@ inline bool isContainer(const Cell& c) {
          (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
 }
 
-inline bool isContainer(CVarRef v) {
+inline bool isContainer(const Variant& v) {
   return isContainer(*v.asCell());
 }
 
@@ -39,7 +39,7 @@ inline bool isContainerOrNull(const Cell& c) {
          (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
 }
 
-inline bool isContainerOrNull(CVarRef v) {
+inline bool isContainerOrNull(const Variant& v) {
   return isContainerOrNull(*v.asCell());
 }
 
@@ -49,7 +49,7 @@ inline bool isMutableContainer(const Cell& c) {
          (c.m_type == KindOfObject && c.m_data.pobj->isMutableCollection());
 }
 
-inline bool isMutableContainer(CVarRef v) {
+inline bool isMutableContainer(const Variant& v) {
   return isMutableContainer(*v.asCell());
 }
 
@@ -62,7 +62,7 @@ inline size_t getContainerSize(const Cell& c) {
   return getCollectionSize(c.m_data.pobj);
 }
 
-inline size_t getContainerSize(CVarRef v) {
+inline size_t getContainerSize(const Variant& v) {
   return getContainerSize(*v.asCell());
 }
 

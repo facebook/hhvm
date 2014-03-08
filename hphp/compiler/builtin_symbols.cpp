@@ -350,12 +350,12 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
   Array constants = ClassInfo::GetSystemConstants();
   LocationPtr loc(new Location);
   for (ArrayIter it = constants.begin(); it; ++it) {
-    CVarRef key = it.first();
+    const Variant& key = it.first();
     if (!key.isString()) continue;
     std::string name = key.toCStrRef().data();
     if (cns->getSymbol(name)) continue;
     if (name == "true" || name == "false" || name == "null") continue;
-    CVarRef value = it.secondRef();
+    const Variant& value = it.secondRef();
     if (!value.isInitialized() || value.isObject()) continue;
     ExpressionPtr e = Expression::MakeScalarExpression(ar, ar, loc, value);
     TypePtr t =

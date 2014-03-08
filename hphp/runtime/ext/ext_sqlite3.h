@@ -65,8 +65,8 @@ class c_SQLite3 : public ExtObjectData {
   public: Variant t_prepare(const String& sql);
   public: Variant t_query(const String& sql);
   public: Variant t_querysingle(const String& sql, bool entire_row = false);
-  public: bool t_createfunction(const String& name, CVarRef callback, int64_t argcount = -1);
-  public: bool t_createaggregate(const String& name, CVarRef step, CVarRef final, int64_t argcount = -1);
+  public: bool t_createfunction(const String& name, const Variant& callback, int64_t argcount = -1);
+  public: bool t_createaggregate(const String& name, const Variant& step, const Variant& final, int64_t argcount = -1);
   public: bool t_openblob(const String& table, const String& column, int64_t rowid, const String& dbname = null_string);
 
 
@@ -97,8 +97,8 @@ class c_SQLite3Stmt : public ExtObjectData {
   public: bool t_close();
   public: bool t_reset();
   public: bool t_clear();
-  public: bool t_bindparam(CVarRef name, VRefParam parameter, int64_t type = k_SQLITE3_TEXT);
-  public: bool t_bindvalue(CVarRef name, CVarRef parameter, int64_t type = k_SQLITE3_TEXT);
+  public: bool t_bindparam(const Variant& name, VRefParam parameter, int64_t type = k_SQLITE3_TEXT);
+  public: bool t_bindvalue(const Variant& name, const Variant& parameter, int64_t type = k_SQLITE3_TEXT);
   public: Variant t_execute();
 
 

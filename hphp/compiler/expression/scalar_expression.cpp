@@ -59,7 +59,7 @@ ScalarExpression::ScalarExpression
 
 ScalarExpression::ScalarExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- CVarRef value, bool quoted /* = true */)
+ const Variant& value, bool quoted /* = true */)
     : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ScalarExpression)),
       m_quoted(quoted) {
   if (!value.isNull()) {

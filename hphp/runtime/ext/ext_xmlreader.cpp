@@ -521,7 +521,7 @@ public:
     }
   }
 
-  PropertyAccessor* get(CVarRef name) {
+  PropertyAccessor* get(const Variant& name) {
     if (name.isString()) {
       const_iterator iter = find(name.toString().data());
       if (iter != end()) {

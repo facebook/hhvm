@@ -176,7 +176,7 @@ bool PDOSqliteConnection::closer() {
 }
 
 bool PDOSqliteConnection::preparer(const String& sql, sp_PDOStatement *stmt,
-                                   CVarRef options) {
+                                   const Variant& options) {
   if (options.toArray().exists(PDO_ATTR_CURSOR) &&
       options[PDO_ATTR_CURSOR].toInt64() != PDO_CURSOR_FWDONLY) {
     m_einfo.errcode = SQLITE_ERROR;
@@ -248,7 +248,7 @@ bool PDOSqliteConnection::rollback() {
   return true;
 }
 
-bool PDOSqliteConnection::setAttribute(int64_t attr, CVarRef value) {
+bool PDOSqliteConnection::setAttribute(int64_t attr, const Variant& value) {
   switch (attr) {
   case PDO_ATTR_TIMEOUT:
     sqlite3_busy_timeout(m_db, value.toInt64() * 1000);
@@ -290,7 +290,7 @@ void php_sqlite3_callback_func(sqlite3_context* context, int argc,
                                sqlite3_value** argv);
 
 bool PDOSqliteConnection::createFunction(const String& name,
-                                         CVarRef callback,
+                                         const Variant& callback,
                                          int argcount) {
   if (!f_is_callable(callback)) {
     raise_warning("function '%s' is not callable", callback.toString().data());

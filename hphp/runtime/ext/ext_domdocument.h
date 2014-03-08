@@ -25,114 +25,114 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_dom_document_create_element(
-  CVarRef obj, const String& name, const String& value = null_string);
-Variant f_dom_document_create_document_fragment(CVarRef obj);
-Variant f_dom_document_create_text_node(CVarRef obj, const String& data);
-Variant f_dom_document_create_comment(CVarRef obj, const String& data);
-Variant f_dom_document_create_cdatasection(CVarRef obj, const String& data);
+  const Variant& obj, const String& name, const String& value = null_string);
+Variant f_dom_document_create_document_fragment(const Variant& obj);
+Variant f_dom_document_create_text_node(const Variant& obj, const String& data);
+Variant f_dom_document_create_comment(const Variant& obj, const String& data);
+Variant f_dom_document_create_cdatasection(const Variant& obj, const String& data);
 Variant f_dom_document_create_processing_instruction(
-  CVarRef obj, const String& target, const String& data = null_string);
-Variant f_dom_document_create_attribute(CVarRef obj, const String& name);
-Variant f_dom_document_create_entity_reference(CVarRef obj, const String& name);
+  const Variant& obj, const String& target, const String& data = null_string);
+Variant f_dom_document_create_attribute(const Variant& obj, const String& name);
+Variant f_dom_document_create_entity_reference(const Variant& obj, const String& name);
 Variant f_dom_document_get_elements_by_tag_name(
-  CVarRef obj, const String& name);
+  const Variant& obj, const String& name);
 Variant f_dom_document_import_node(
-  CVarRef obj, const Object& importednode, bool deep = false);
+  const Variant& obj, const Object& importednode, bool deep = false);
 Variant f_dom_document_create_element_ns(
-  CVarRef obj, const String& namespaceuri, const String& qualifiedname,
+  const Variant& obj, const String& namespaceuri, const String& qualifiedname,
   const String& value = null_string);
 Variant f_dom_document_create_attribute_ns(
-  CVarRef obj, const String& namespaceuri, const String& qualifiedname);
+  const Variant& obj, const String& namespaceuri, const String& qualifiedname);
 Variant f_dom_document_get_elements_by_tag_name_ns(
-  CVarRef obj, const String& namespaceuri, const String& localname);
-Variant f_dom_document_get_element_by_id(CVarRef obj, const String& elementid);
-Variant f_dom_document_normalize_document(CVarRef obj);
+  const Variant& obj, const String& namespaceuri, const String& localname);
+Variant f_dom_document_get_element_by_id(const Variant& obj, const String& elementid);
+Variant f_dom_document_normalize_document(const Variant& obj);
 Variant f_dom_document_save(
-  CVarRef obj, const String& file, int64_t options = 0);
+  const Variant& obj, const String& file, int64_t options = 0);
 Variant f_dom_document_savexml(
-  CVarRef obj, const Object& node = null_object, int64_t options = 0);
-Variant f_dom_document_validate(CVarRef obj);
-Variant f_dom_document_xinclude(CVarRef obj, int64_t options = 0);
-Variant f_dom_document_save_html(CVarRef obj, const Object& node = null_object);
-Variant f_dom_document_save_html_file(CVarRef obj, const String& file);
+  const Variant& obj, const Object& node = null_object, int64_t options = 0);
+Variant f_dom_document_validate(const Variant& obj);
+Variant f_dom_document_xinclude(const Variant& obj, int64_t options = 0);
+Variant f_dom_document_save_html(const Variant& obj, const Object& node = null_object);
+Variant f_dom_document_save_html_file(const Variant& obj, const String& file);
 Variant f_dom_document_schema_validate_file(
-  CVarRef obj, const String& filename);
-Variant f_dom_document_schema_validate_xml(CVarRef obj, const String& source);
+  const Variant& obj, const String& filename);
+Variant f_dom_document_schema_validate_xml(const Variant& obj, const String& source);
 Variant f_dom_document_relaxng_validate_file(
-  CVarRef obj, const String& filename);
-Variant f_dom_document_relaxng_validate_xml(CVarRef obj, const String& source);
+  const Variant& obj, const String& filename);
+Variant f_dom_document_relaxng_validate_xml(const Variant& obj, const String& source);
 Variant f_dom_node_insert_before(
-  CVarRef obj, const Object& newnode, const Object& refnode = Object());
+  const Variant& obj, const Object& newnode, const Object& refnode = Object());
 Variant f_dom_node_replace_child(
-  CVarRef obj, const Object& newchildobj, const Object& oldchildobj);
-Variant f_dom_node_remove_child(CVarRef obj, const Object& node);
-Variant f_dom_node_append_child(CVarRef obj, const Object& newnode);
-Variant f_dom_node_has_child_nodes(CVarRef obj);
-Variant f_dom_node_clone_node(CVarRef obj, bool deep = false);
-Variant f_dom_node_normalize(CVarRef obj);
+  const Variant& obj, const Object& newchildobj, const Object& oldchildobj);
+Variant f_dom_node_remove_child(const Variant& obj, const Object& node);
+Variant f_dom_node_append_child(const Variant& obj, const Object& newnode);
+Variant f_dom_node_has_child_nodes(const Variant& obj);
+Variant f_dom_node_clone_node(const Variant& obj, bool deep = false);
+Variant f_dom_node_normalize(const Variant& obj);
 Variant f_dom_node_is_supported(
-  CVarRef obj, const String& feature, const String& version);
-Variant f_dom_node_has_attributes(CVarRef obj);
-Variant f_dom_node_is_same_node(CVarRef obj, const Object& node);
-Variant f_dom_node_lookup_prefix(CVarRef obj, const String& prefix);
+  const Variant& obj, const String& feature, const String& version);
+Variant f_dom_node_has_attributes(const Variant& obj);
+Variant f_dom_node_is_same_node(const Variant& obj, const Object& node);
+Variant f_dom_node_lookup_prefix(const Variant& obj, const String& prefix);
 Variant f_dom_node_is_default_namespace(
-  CVarRef obj, const String& namespaceuri);
+  const Variant& obj, const String& namespaceuri);
 Variant f_dom_node_lookup_namespace_uri(
-  CVarRef obj, const String& namespaceuri);
-Variant f_dom_nodelist_item(CVarRef obj, int64_t index);
-Variant f_dom_namednodemap_get_named_item(CVarRef obj, const String& name);
-Variant f_dom_namednodemap_item(CVarRef obj, int64_t index);
+  const Variant& obj, const String& namespaceuri);
+Variant f_dom_nodelist_item(const Variant& obj, int64_t index);
+Variant f_dom_namednodemap_get_named_item(const Variant& obj, const String& name);
+Variant f_dom_namednodemap_item(const Variant& obj, int64_t index);
 Variant f_dom_namednodemap_get_named_item_ns(
-  CVarRef obj, const String& namespaceuri, const String& localname);
+  const Variant& obj, const String& namespaceuri, const String& localname);
 Variant f_dom_characterdata_substring_data(
-  CVarRef obj, int64_t offset, int64_t count);
-Variant f_dom_characterdata_append_data(CVarRef obj, const String& arg);
+  const Variant& obj, int64_t offset, int64_t count);
+Variant f_dom_characterdata_append_data(const Variant& obj, const String& arg);
 Variant f_dom_characterdata_insert_data(
-  CVarRef obj, int64_t offset, const String& data);
+  const Variant& obj, int64_t offset, const String& data);
 Variant f_dom_characterdata_delete_data(
-  CVarRef obj, int64_t offset, int64_t count);
+  const Variant& obj, int64_t offset, int64_t count);
 Variant f_dom_characterdata_replace_data(
-  CVarRef obj, int64_t offset, int64_t count, const String& data);
-Variant f_dom_attr_is_id(CVarRef obj);
-Variant f_dom_element_get_attribute(CVarRef obj, const String& name);
+  const Variant& obj, int64_t offset, int64_t count, const String& data);
+Variant f_dom_attr_is_id(const Variant& obj);
+Variant f_dom_element_get_attribute(const Variant& obj, const String& name);
 Variant f_dom_element_set_attribute(
-  CVarRef obj, const String& name, const String& value);
-Variant f_dom_element_remove_attribute(CVarRef obj, const String& name);
-Variant f_dom_element_get_attribute_node(CVarRef obj, const String& name);
-Variant f_dom_element_set_attribute_node(CVarRef obj, const Object& newattr);
-Variant f_dom_element_remove_attribute_node(CVarRef obj, const Object& oldattr);
-Variant f_dom_element_get_elements_by_tag_name(CVarRef obj, const String& name);
+  const Variant& obj, const String& name, const String& value);
+Variant f_dom_element_remove_attribute(const Variant& obj, const String& name);
+Variant f_dom_element_get_attribute_node(const Variant& obj, const String& name);
+Variant f_dom_element_set_attribute_node(const Variant& obj, const Object& newattr);
+Variant f_dom_element_remove_attribute_node(const Variant& obj, const Object& oldattr);
+Variant f_dom_element_get_elements_by_tag_name(const Variant& obj, const String& name);
 Variant f_dom_element_get_attribute_ns(
-  CVarRef obj, const String& namespaceuri, const String& localname);
+  const Variant& obj, const String& namespaceuri, const String& localname);
 Variant f_dom_element_set_attribute_ns(
-  CVarRef obj, const String& namespaceuri, const String& name,
+  const Variant& obj, const String& namespaceuri, const String& name,
   const String& value);
 Variant f_dom_element_remove_attribute_ns(
-  CVarRef obj, const String& namespaceuri, const String& localname);
+  const Variant& obj, const String& namespaceuri, const String& localname);
 Variant f_dom_element_get_attribute_node_ns(
-  CVarRef obj, const String& namespaceuri, const String& localname);
-Variant f_dom_element_set_attribute_node_ns(CVarRef obj, const Object& newattr);
+  const Variant& obj, const String& namespaceuri, const String& localname);
+Variant f_dom_element_set_attribute_node_ns(const Variant& obj, const Object& newattr);
 Variant f_dom_element_get_elements_by_tag_name_ns(
-  CVarRef obj, const String& namespaceuri, const String& localname);
-Variant f_dom_element_has_attribute(CVarRef obj, const String& name);
+  const Variant& obj, const String& namespaceuri, const String& localname);
+Variant f_dom_element_has_attribute(const Variant& obj, const String& name);
 Variant f_dom_element_has_attribute_ns(
-  CVarRef obj, const String& namespaceuri, const String& localname);
+  const Variant& obj, const String& namespaceuri, const String& localname);
 Variant f_dom_element_set_id_attribute(
-  CVarRef obj, const String& name, bool isid);
+  const Variant& obj, const String& name, bool isid);
 Variant f_dom_element_set_id_attribute_ns(
-  CVarRef obj, const String& namespaceuri, const String& localname, bool isid);
+  const Variant& obj, const String& namespaceuri, const String& localname, bool isid);
 Variant f_dom_element_set_id_attribute_node(
-  CVarRef obj, const Object& idattr, bool isid);
-Variant f_dom_text_split_text(CVarRef obj, int64_t offset);
-Variant f_dom_text_is_whitespace_in_element_content(CVarRef obj);
+  const Variant& obj, const Object& idattr, bool isid);
+Variant f_dom_text_split_text(const Variant& obj, int64_t offset);
+Variant f_dom_text_is_whitespace_in_element_content(const Variant& obj);
 Variant f_dom_xpath_register_ns(
-  CVarRef obj, const String& prefix, const String& uri);
+  const Variant& obj, const String& prefix, const String& uri);
 Variant f_dom_xpath_query(
-  CVarRef obj, const String& expr, const Object& context = null_object);
+  const Variant& obj, const String& expr, const Object& context = null_object);
 Variant f_dom_xpath_evaluate(
-  CVarRef obj, const String& expr, const Object& context = null_object);
+  const Variant& obj, const String& expr, const Object& context = null_object);
 Variant f_dom_xpath_register_php_functions(
-  CVarRef obj, CVarRef funcs = uninit_null());
+  const Variant& obj, const Variant& funcs = uninit_null());
 Variant f_dom_import_simplexml(const Object& node);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -168,11 +168,11 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|
   public: Variant t_removechild(const Object& node);
   public: Variant t_replacechild(const Object& newchildobj, const Object& oldchildobj);
   public: Variant t_c14n(bool exclusive = false, bool with_comments = false,
-                         CVarRef xpath = uninit_null(),
-                         CVarRef ns_prefixes = uninit_null());
+                         const Variant& xpath = uninit_null(),
+                         const Variant& ns_prefixes = uninit_null());
   public: Variant t_c14nfile(
     const String& uri, bool exclusive = false, bool with_comments = false,
-    CVarRef xpath = uninit_null(), CVarRef ns_prefixes = uninit_null());
+    const Variant& xpath = uninit_null(), const Variant& ns_prefixes = uninit_null());
   public: Variant t_getnodepath();
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
@@ -679,11 +679,11 @@ class c_DOMXPath
   // need to implement
   c_DOMXPath(Class* cls = c_DOMXPath::classof());
   ~c_DOMXPath();
-  public: void t___construct(CVarRef doc);
+  public: void t___construct(const Variant& doc);
   public: Variant t_evaluate(const String& expr, const Object& context = null_object);
   public: Variant t_query(const String& expr, const Object& context = null_object);
   public: bool t_registernamespace(const String& prefix, const String& uri);
-  public: Variant t_registerphpfunctions(CVarRef funcs = uninit_null());
+  public: Variant t_registerphpfunctions(const Variant& funcs = uninit_null());
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);

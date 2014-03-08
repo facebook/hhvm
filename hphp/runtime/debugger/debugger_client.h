@@ -115,7 +115,7 @@ public:
   static void AdjustScreenMetrics();
   static bool Match(const char *input, const char *cmd);
   static bool IsValidNumber(const std::string &arg);
-  static String FormatVariable(CVarRef v, int maxlen = 80,
+  static String FormatVariable(const Variant& v, int maxlen = 80,
                                char format = 'd');
   static String FormatInfoVec(const IDebuggable::InfoVec &info,
                               int *nameLen = nullptr);

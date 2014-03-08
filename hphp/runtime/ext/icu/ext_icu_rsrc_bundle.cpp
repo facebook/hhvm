@@ -67,8 +67,8 @@ static Variant extractValue(ResourceBundle* data,
 #undef EXTRACT_ERR
 }
 
-static void HHVM_METHOD(ResourceBundle, __construct, CVarRef locale,
-                                                     CVarRef bundleName,
+static void HHVM_METHOD(ResourceBundle, __construct, const Variant& locale,
+                                                     const Variant& bundleName,
                                                      bool fallback) {
   const char *bundle = bundleName.isNull() ? nullptr :
                        bundleName.toString().c_str();
@@ -111,7 +111,9 @@ static String HHVM_METHOD(ResourceBundle, getErrorMessage) {
   return data->getErrorMessage();
 }
 
-static Variant HHVM_METHOD(ResourceBundle, get, CVarRef index, bool fallback) {
+static Variant HHVM_METHOD(ResourceBundle, get,
+                           const Variant& index,
+                           bool fallback) {
   FETCH_RSRC(data, this_);
   UErrorCode error = U_ZERO_ERROR;
   icu::ResourceBundle child(error);

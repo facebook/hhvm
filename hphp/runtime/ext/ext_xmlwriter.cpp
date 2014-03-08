@@ -67,8 +67,10 @@ bool f_xmlwriter_start_element(const Object& xmlwriter, const String& name) {
     t_startelement(name);
 }
 
-bool f_xmlwriter_start_element_ns(const Object& xmlwriter, const CVarRef prefix,
-                                  const String& name, const String& uri) {
+bool f_xmlwriter_start_element_ns(const Object& xmlwriter,
+                                  const Variant& prefix,
+                                  const String& name,
+                                  const String& uri) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_startelementns(prefix, name, uri);
 }
@@ -378,7 +380,7 @@ bool c_XMLWriter::t_startelement(const String& name) {
   return ret != -1;
 }
 
-bool c_XMLWriter::t_startelementns(const CVarRef prefix, const String& name,
+bool c_XMLWriter::t_startelementns(const Variant& prefix, const String& name,
                                    const String& uri) {
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid element name: %s", name.data());
@@ -387,7 +389,7 @@ bool c_XMLWriter::t_startelementns(const CVarRef prefix, const String& name,
   int ret = -1;
   if (m_ptr) {
     // To be consistent with Zend PHP, we need to make a distinction between
-    // null strings and empty strings for the prefix. We use CVarRef above
+    // null strings and empty strings for the prefix. We use const Variant& above
     // because null strings are coerced to empty strings automatically.
     xmlChar * prefixData = prefix.isNull()
       ? nullptr : (xmlChar *)prefix.toString().data();

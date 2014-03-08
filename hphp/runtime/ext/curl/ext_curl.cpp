@@ -303,7 +303,7 @@ public:
     return String();
   }
 
-  bool setOption(long option, CVarRef value) {
+  bool setOption(long option, const Variant& value) {
     if (m_cp == nullptr) {
       return false;
     }
@@ -670,7 +670,7 @@ public:
     return 0;
   }
 
-  Variant do_callback(CVarRef cb, const Array& args) {
+  Variant do_callback(const Variant& cb, const Array& args) {
     assert(!m_exception);
     try {
       return vm_call_user_func(cb, args);
@@ -928,7 +928,7 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
     return false;                                                           \
   }                                                                         \
 
-Variant HHVM_FUNCTION(curl_init, CVarRef url /* = null_string */) {
+Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
   if (url.isNull()) {
     return NEWOBJ(CurlResource)(null_string);
   } else {
@@ -978,7 +978,7 @@ Variant HHVM_FUNCTION(curl_version, int uversion /* = k_CURLVERSION_NOW */) {
   return ret.create();
 }
 
-bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int option, CVarRef value) {
+bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int option, const Variant& value) {
   CHECK_RESOURCE(curl);
   return curl->setOption(option, value);
 }
@@ -1481,7 +1481,7 @@ public:
 IMPLEMENT_OBJECT_ALLOCATION(LibEventHttpHandle)
 
 static LibEventHttpClientPtr prepare_client
-(const String& url, const String& data, CVarRef headers, int timeout,
+(const String& url, const String& data, const Variant& headers, int timeout,
  bool async, bool post) {
   std::string sUrl = url.data();
   if (sUrl.size() < 7 || sUrl.substr(0, 7) != "http://") {
@@ -1564,7 +1564,7 @@ void HHVM_FUNCTION(evhttp_set_cache, const String& address, int max_conn,
 }
 
 Variant HHVM_FUNCTION(evhttp_get, const String& url,
-                                  CVarRef headers /* = null_array */,
+                                  const Variant& headers /* = null_array */,
                                   int timeout /* = 5 */) {
   if (RuntimeOption::ServerHttpSafeMode) {
     throw_fatal("evhttp_set_cache is disabled");
@@ -1580,7 +1580,7 @@ Variant HHVM_FUNCTION(evhttp_get, const String& url,
 }
 
 Variant HHVM_FUNCTION(evhttp_post, const String& url, const String& data,
-                      CVarRef headers /* = null_array */,
+                      const Variant& headers /* = null_array */,
                       int timeout /* = 5 */) {
   if (RuntimeOption::ServerHttpSafeMode) {
     throw_fatal("evhttp_post is disabled");
@@ -1596,7 +1596,7 @@ Variant HHVM_FUNCTION(evhttp_post, const String& url, const String& data,
 }
 
 Variant HHVM_FUNCTION(evhttp_async_get, const String& url,
-                           CVarRef headers /* = null_array */,
+                           const Variant& headers /* = null_array */,
                            int timeout /* = 5 */) {
   if (RuntimeOption::ServerHttpSafeMode) {
     throw_fatal("evhttp_async_get is disabled");
@@ -1610,7 +1610,7 @@ Variant HHVM_FUNCTION(evhttp_async_get, const String& url,
 }
 
 Variant HHVM_FUNCTION(evhttp_async_post, const String& url, const String& data,
-                            CVarRef headers /* = null_array */,
+                            const Variant& headers /* = null_array */,
                             int timeout /* = 5 */) {
   if (RuntimeOption::ServerHttpSafeMode) {
     throw_fatal("evhttp_async_post is disabled");

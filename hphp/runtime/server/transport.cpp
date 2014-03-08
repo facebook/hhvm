@@ -715,7 +715,7 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
   return response;
 }
 
-bool Transport::setHeaderCallback(CVarRef callback) {
+bool Transport::setHeaderCallback(const Variant& callback) {
   if (m_headerCallback.toBoolean()) {
     // return false if a callback has already been set.
     return false;

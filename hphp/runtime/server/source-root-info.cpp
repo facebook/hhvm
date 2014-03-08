@@ -266,8 +266,8 @@ const StaticString
 
 std::string& SourceRootInfo::initPhpRoot() {
   GlobalVariables *g = get_global_variables();
-  CVarRef server = g->get(s_SERVER);
-  CVarRef v = server.rvalAt(s_PHP_ROOT);
+  const Variant& server = g->get(s_SERVER);
+  const Variant& v = server.rvalAt(s_PHP_ROOT);
   if (v.isString()) {
     *s_phproot.getCheck() = std::string(v.asCStrRef().data()) + "/";
   } else {

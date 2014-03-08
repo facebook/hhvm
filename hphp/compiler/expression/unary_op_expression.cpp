@@ -222,7 +222,7 @@ void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
+bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {
   bool ret = true;
   try {
     g_context->setThrowAllErrors(true);

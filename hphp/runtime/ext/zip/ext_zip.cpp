@@ -84,7 +84,7 @@ void ZipStream::sweep() {
 class ZipStreamWrapper : public Stream::Wrapper {
  public:
   virtual File* open(const String& filename, const String& mode,
-                     int options, CVarRef context) {
+                     int options, const Variant& context) {
     std::string url(filename.c_str());
     auto pound = url.find('#');
     if (pound == std::string::npos) {
@@ -377,7 +377,7 @@ static T* getResource(const Object& obj, const char* varName) {
 }
 
 ALWAYS_INLINE
-static Variant setVariable(const Object& obj, const char* varName, CVarRef varValue) {
+static Variant setVariable(const Object& obj, const char* varName, const Variant& varValue) {
   return obj->o_set(varName, varValue, s_ZipArchive.get());
 }
 
@@ -777,7 +777,7 @@ static bool extractFileTo(zip* zip, const char* file, std::string& to,
 }
 
 static bool HHVM_METHOD(ZipArchive, extractTo, const String& destination,
-                        CVarRef entries) {
+                        const Variant& entries) {
   auto zipDir = getResource<ZipDirectory>(this_, "zipDir");
 
   FAIL_IF_INVALID_ZIPARCHIVE(extractTo, zipDir);

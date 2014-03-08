@@ -59,7 +59,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(Rfc1867Data, s_rfc1867_data);
  *
  */
 
-static void safe_php_register_variable(char *var, CVarRef val,
+static void safe_php_register_variable(char *var, const Variant& val,
                                        Variant &track_vars_array,
                                        bool override_protection);
 
@@ -153,7 +153,7 @@ static bool is_protected_variable(char *varname) {
 }
 
 
-static void safe_php_register_variable(char *var, CVarRef val,
+static void safe_php_register_variable(char *var, const Variant& val,
                                        Variant &track_vars_array,
                                        bool override_protection) {
   if (override_protection || !is_protected_variable(var)) {

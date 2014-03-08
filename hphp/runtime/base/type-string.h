@@ -277,7 +277,7 @@ public:
   String &operator =  (StringData *data);
   String &operator =  (litstr  v);
   String &operator =  (const String& v);
-  String &operator =  (CVarRef v);
+  String &operator =  (const Variant& v);
   String &operator =  (const std::string &s);
   // These should be members, but g++ doesn't yet support the rvalue
   // reference notation on lhs (http://goo.gl/LuCTo).
@@ -320,12 +320,12 @@ public:
   bool operator <= (const String& v) const = delete;
   bool operator >  (const String& v) const;
   bool operator <  (const String& v) const;
-  bool operator == (CVarRef v) const;
-  bool operator != (CVarRef v) const;
-  bool operator >= (CVarRef v) const = delete;
-  bool operator <= (CVarRef v) const = delete;
-  bool operator >  (CVarRef v) const;
-  bool operator <  (CVarRef v) const;
+  bool operator == (const Variant& v) const;
+  bool operator != (const Variant& v) const;
+  bool operator >= (const Variant& v) const = delete;
+  bool operator <= (const Variant& v) const = delete;
+  bool operator >  (const Variant& v) const;
+  bool operator <  (const Variant& v) const;
 
   /**
    * Type conversions
@@ -384,7 +384,7 @@ public:
   String rvalAt(const String& key) const { return rvalAtImpl(key.toInt32());}
   String rvalAt(const Array& key) const;
   String rvalAt(const Object& key) const;
-  String rvalAt(CVarRef key) const;
+  String rvalAt(const Variant& key) const;
 
   /**
    * Returns one character at specified position.

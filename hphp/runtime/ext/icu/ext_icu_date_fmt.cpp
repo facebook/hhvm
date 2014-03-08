@@ -40,7 +40,7 @@ Class* IntlDateFormatter::c_IntlDateFormatter = nullptr;
 
 void IntlDateFormatter::setDateFormatter(const String& locale,
                                          int64_t datetype, int64_t timetype,
-                                         CVarRef timezone, CVarRef calendar,
+                                         const Variant& timezone, const Variant& calendar,
                                          const String& pattern) {
   auto loc = icu::Locale::createFromName(locale.c_str());
   int64_t calType = UCAL_GREGORIAN;
@@ -130,7 +130,7 @@ int64_t IntlDateFormatter::getArrayElemInt(const Array& arr,
   return val.toInt64();
 }
 
-double IntlDateFormatter::getTimestamp(CVarRef arg) {
+double IntlDateFormatter::getTimestamp(const Variant& arg) {
   if (!arg.isArray()) {
     return VariantToMilliseconds(arg);
   }
@@ -192,7 +192,7 @@ static TypedValue* HHVM_MN(IntlDateFormatter, __construct)(ActRec *ar) {
   return &ar->m_r;
 }
 
-static String HHVM_METHOD(IntlDateFormatter, format, CVarRef value) {
+static String HHVM_METHOD(IntlDateFormatter, format, const Variant& value) {
   DATFMT_GET(data, this_, null_string);
   double ts = data->getTimestamp(value);
   if (ts == NAN) {
@@ -222,7 +222,7 @@ static String HHVM_METHOD(IntlDateFormatter, format, CVarRef value) {
 }
 
 static String HHVM_STATIC_METHOD(IntlDateFormatter, formatObject,
-                                 const Object& object, CVarRef format,
+                                 const Object& object, const Variant& format,
                                  const String& locale) {
   // TODO: Need IntlCalendar implemented first
   throw NotImplementedException("IntlDateFormatter::formatObject");
@@ -248,7 +248,7 @@ static String HHVM_METHOD(IntlDateFormatter, getErrorMessage) {
   return data->getErrorMessage();
 }
 
-static String HHVM_METHOD(IntlDateFormatter, getLocale, CVarRef which) {
+static String HHVM_METHOD(IntlDateFormatter, getLocale, const Variant& which) {
   ULocDataLocaleType whichloc = ULOC_ACTUAL_LOCALE;
   if (!which.isNull()) whichloc = (ULocDataLocaleType)which.toInt64();
 
@@ -420,7 +420,7 @@ static Variant HHVM_METHOD(IntlDateFormatter, parse,
   }
 }
 
-static bool HHVM_METHOD(IntlDateFormatter, setCalendar, CVarRef which) {
+static bool HHVM_METHOD(IntlDateFormatter, setCalendar, const Variant& which) {
   // TODO: Need IntlCalendar implemented first
   throw NotImplementedException("IntlDateFormatter::setCalendar");
 }
@@ -445,7 +445,7 @@ static bool HHVM_METHOD(IntlDateFormatter, setPattern,
   return true;
 }
 
-static bool HHVM_METHOD(IntlDateFormatter, setTimeZone, CVarRef zone) {
+static bool HHVM_METHOD(IntlDateFormatter, setTimeZone, const Variant& zone) {
   DATFMT_GET(data, this_, false);
   icu::TimeZone *tz = IntlTimeZone::ParseArg(zone, "datefmt_set_timezone",
                                              data);

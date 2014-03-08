@@ -222,7 +222,7 @@ public:
   /**
    * Output buffering.
    */
-  void obStart(CVarRef handler = uninit_null());
+  void obStart(const Variant& handler = uninit_null());
   String obCopyContents();
   String obDetachContents();
   int obGetContentLength();
@@ -249,7 +249,7 @@ public:
    * Request sequences and program execution hooks.
    */
   void registerRequestEventHandler(RequestEventHandler* handler);
-  void registerShutdownFunction(CVarRef function, Array arguments,
+  void registerShutdownFunction(const Variant& function, Array arguments,
                                 ShutdownType type);
   Variant popShutdownFunction(ShutdownType type);
   void onRequestShutdown();
@@ -259,8 +259,8 @@ public:
   /**
    * Error handling
    */
-  Variant pushUserErrorHandler(CVarRef function, int error_types);
-  Variant pushUserExceptionHandler(CVarRef function);
+  Variant pushUserErrorHandler(const Variant& function, int error_types);
+  Variant pushUserExceptionHandler(const Variant& function);
   void popUserErrorHandler();
   void popUserExceptionHandler();
   bool errorNeedsHandling(int errnum,
@@ -480,7 +480,7 @@ public:
                                 const Class* cls,
                                 bool raise = false);
   ObjectData* createObject(StringData* clsName,
-                           CVarRef params,
+                           const Variant& params,
                            bool init = true);
   ObjectData* createObjectOnly(StringData* clsName);
 
@@ -596,7 +596,7 @@ public:
   bool doFCall(ActRec* ar, PC& pc);
   bool doFCallArray(PC& pc);
   bool doFCallArrayTC(PC pc);
-  CVarRef getEvaledArg(const StringData* val, const String& namespacedName);
+  const Variant& getEvaledArg(const StringData* val, const String& namespacedName);
   String getLastErrorPath() const { return m_lastErrorPath; }
   int getLastErrorLine() const { return m_lastErrorLine; }
 
@@ -610,7 +610,7 @@ private:
   void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
   bool prepareFuncEntry(ActRec* ar, PC& pc);
-  bool prepareArrayArgs(ActRec* ar, CVarRef arrayArgs);
+  bool prepareArrayArgs(ActRec* ar, const Variant& arrayArgs);
   void recordCodeCoverage(PC pc);
   bool isReturnHelper(uintptr_t address);
   void switchModeForDebugger();
@@ -630,7 +630,7 @@ public:
   };
   void invokeFunc(TypedValue* retval,
                   const Func* f,
-                  CVarRef args_ = init_null_variant,
+                  const Variant& args_ = init_null_variant,
                   ObjectData* this_ = nullptr,
                   Class* class_ = nullptr,
                   VarEnv* varEnv = nullptr,
@@ -638,7 +638,7 @@ public:
                   InvokeFlags flags = InvokeNormal);
   void invokeFunc(TypedValue* retval,
                   const CallCtx& ctx,
-                  CVarRef args_,
+                  const Variant& args_,
                   VarEnv* varEnv = nullptr) {
     invokeFunc(retval, ctx.func, args_, ctx.this_, ctx.cls, varEnv,
                ctx.invName);

@@ -76,7 +76,7 @@ static int64_t ToKey(double d) {
   return d > std::numeric_limits<uint64_t>::max() ? 0u : uint64_t(d);
 }
 static VarNR ToKey(const String& s) { return s.toKey(); }
-static VarNR ToKey(CVarRef v) { return v.toKey(); }
+static VarNR ToKey(const Variant& v) { return v.toKey(); }
 
 ///////////////////////////////////////////////////////////////////////////////
 // private implementations
@@ -217,7 +217,7 @@ Variant::Variant(RefData *r, NoInc) {
 }
 
 // the version of the high frequency function that is not inlined
-Variant::Variant(CVarRef v) {
+Variant::Variant(const Variant& v) {
   constructValHelper(v);
 }
 
@@ -272,17 +272,17 @@ void tvDecRefHelper(DataType type, uint64_t datum) {
     g_destructors[typeToDestrIndex(type)]((void*)datum));
 }
 
-Variant &Variant::assign(CVarRef v) {
+Variant &Variant::assign(const Variant& v) {
   AssignValHelper(this, &v);
   return *this;
 }
 
-Variant &Variant::assignRef(CVarRef v) {
+Variant &Variant::assignRef(const Variant& v) {
   assignRefHelper(v);
   return *this;
 }
 
-Variant &Variant::setWithRef(CVarRef v) {
+Variant &Variant::setWithRef(const Variant& v) {
   setWithRefHelper(v, IS_REFCOUNTED_TYPE(m_type));
   return *this;
 }
@@ -305,7 +305,7 @@ Variant &Variant::setWithRef(CVarRef v) {
 #define IMPLEMENT_VOID_SET(name, setOp) \
   void IMPLEMENT_SET_IMPL(name, , , setOp, return)
 #define IMPLEMENT_SET(argType, setOp) \
-  CVarRef IMPLEMENT_SET_IMPL(set, argType, v, setOp, return *this)
+  const Variant& IMPLEMENT_SET_IMPL(set, argType, v, setOp, return *this)
 
 IMPLEMENT_VOID_SET(setNull, m_type = KindOfNull)
 IMPLEMENT_SET(bool, m_type = KindOfBoolean; m_data.num = v)
@@ -323,7 +323,7 @@ IMPLEMENT_SET(const StaticString&,
 #undef IMPLEMENT_SET
 
 #define IMPLEMENT_PTR_SET(ptr, member, dtype)                           \
-  CVarRef Variant::set(ptr *v) {                                        \
+  const Variant& Variant::set(ptr *v) {                                        \
     Variant *self = m_type == KindOfRef ? m_data.pref->var() : this;    \
     if (UNLIKELY(!v)) {                                                 \
       self->setNull();                                                  \
@@ -490,7 +490,7 @@ Variant Variant::dequeue() {
   return ret;
 }
 
-void Variant::prepend(CVarRef v) {
+void Variant::prepend(const Variant& v) {
   if (m_type == KindOfRef) {
     m_data.pref->var()->prepend(v);
     return;
@@ -719,7 +719,7 @@ ObjectData *Variant::getArrayAccess() const {
   return obj;
 }
 
-void Variant::callOffsetUnset(CVarRef key) {
+void Variant::callOffsetUnset(const Variant& key) {
   assert(getType() == KindOfObject);
   ObjectData* obj = getObjectData();
   if (LIKELY(obj->isCollection())) {
@@ -812,7 +812,7 @@ Variant Variant::rvalAt(const String& offset, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-Variant Variant::rvalAt(CVarRef offset, ACCESSPARAMS_IMPL) const {
+Variant Variant::rvalAt(const Variant& offset, ACCESSPARAMS_IMPL) const {
   if (m_type == KindOfArray) {
     // Fast path for KindOfArray
     switch (offset.m_type) {
@@ -882,7 +882,7 @@ Variant Variant::rvalAt(CVarRef offset, ACCESSPARAMS_IMPL) const {
 }
 
 template <typename T>
-CVarRef Variant::rvalAtRefHelper(T offset, ACCESSPARAMS_IMPL) const {
+const Variant& Variant::rvalAtRefHelper(T offset, ACCESSPARAMS_IMPL) const {
   if (LIKELY(m_type == KindOfArray)) {
     return asCArrRef().rvalAtRef(offset, flags);
   }
@@ -893,12 +893,12 @@ CVarRef Variant::rvalAtRefHelper(T offset, ACCESSPARAMS_IMPL) const {
 }
 
 template
-CVarRef Variant::rvalAtRefHelper<int64_t>(int64_t offset, ACCESSPARAMS_IMPL) const;
+const Variant& Variant::rvalAtRefHelper<int64_t>(int64_t offset, ACCESSPARAMS_IMPL) const;
 template
-CVarRef Variant::rvalAtRefHelper<const String&>(const String& offset,
+const Variant& Variant::rvalAtRefHelper<const String&>(const String& offset,
                                           ACCESSPARAMS_IMPL) const;
 template
-CVarRef Variant::rvalAtRefHelper<CVarRef>(CVarRef offset,
+const Variant& Variant::rvalAtRefHelper<const Variant&>(const Variant& offset,
                                           ACCESSPARAMS_IMPL) const;
 
 template <typename T>
@@ -927,7 +927,7 @@ public:
 };
 
 template<>
-class LvalHelper<CVarRef> {
+class LvalHelper<const Variant&> {
 public:
   typedef VarNR KeyType;
   static bool CheckKey(const KeyType &k) { return !k.isNull(); };
@@ -997,8 +997,8 @@ Variant &Variant::lvalAt(int64_t   key, ACCESSPARAMS_IMPL) {
 Variant &Variant::lvalAt(const String& key, ACCESSPARAMS_IMPL) {
   return lvalAtImpl<const String&>(key, flags);
 }
-Variant &Variant::lvalAt(CVarRef k, ACCESSPARAMS_IMPL) {
-  return lvalAtImpl<CVarRef>(k, flags);
+Variant &Variant::lvalAt(const Variant& k, ACCESSPARAMS_IMPL) {
+  return lvalAtImpl<const Variant&>(k, flags);
 }
 
 Variant &Variant::lvalRef(int     key, Variant& tmp, ACCESSPARAMS_IMPL) {
@@ -1010,8 +1010,8 @@ Variant &Variant::lvalRef(int64_t   key, Variant& tmp, ACCESSPARAMS_IMPL) {
 Variant &Variant::lvalRef(const String& key, Variant& tmp, ACCESSPARAMS_IMPL) {
   return Variant::LvalAtImpl0<const String&>(this, key, &tmp, false, flags);
 }
-Variant &Variant::lvalRef(CVarRef k, Variant& tmp, ACCESSPARAMS_IMPL) {
-  return Variant::LvalAtImpl0<CVarRef>(this, k, &tmp, false, flags);
+Variant &Variant::lvalRef(const Variant& k, Variant& tmp, ACCESSPARAMS_IMPL) {
+  return Variant::LvalAtImpl0<const Variant&>(this, k, &tmp, false, flags);
 }
 
 Variant &Variant::lvalAt() {
@@ -1080,7 +1080,7 @@ Variant &Variant::lvalBlackHole() {
 
 template <typename T>
 ALWAYS_INLINE
-CVarRef Variant::SetImpl(Variant *self, T key, CVarRef v, bool isKey) {
+const Variant& Variant::SetImpl(Variant *self, T key, const Variant& v, bool isKey) {
   retry:
   if (LIKELY(self->m_type == KindOfArray)) {
     ArrayData *escalated;
@@ -1164,20 +1164,20 @@ CVarRef Variant::SetImpl(Variant *self, T key, CVarRef v, bool isKey) {
   return v;
 }
 
-CVarRef Variant::set(int64_t key, CVarRef v) {
+const Variant& Variant::set(int64_t key, const Variant& v) {
   return SetImpl(this, key, v, false);
 }
 
-CVarRef Variant::set(const String& key, CVarRef v,
+const Variant& Variant::set(const String& key, const Variant& v,
                      bool isString /* = false */) {
   return SetImpl<const String&>(this, key, v, isString);
 }
 
-CVarRef Variant::set(CVarRef key, CVarRef v) {
-  return SetImpl<CVarRef>(this, key, v, false);
+const Variant& Variant::set(const Variant& key, const Variant& v) {
+  return SetImpl<const Variant&>(this, key, v, false);
 }
 
-CVarRef Variant::append(CVarRef v) {
+const Variant& Variant::append(const Variant& v) {
   switch (m_type) {
   case KindOfUninit:
   case KindOfNull:
@@ -1226,7 +1226,7 @@ CVarRef Variant::append(CVarRef v) {
 
 template <typename T>
 ALWAYS_INLINE
-CVarRef Variant::SetRefImpl(Variant *self, T key, CVarRef v, bool isKey) {
+const Variant& Variant::SetRefImpl(Variant *self, T key, const Variant& v, bool isKey) {
   retry:
   if (LIKELY(self->m_type == KindOfArray)) {
     ArrayData *escalated;
@@ -1285,20 +1285,20 @@ CVarRef Variant::SetRefImpl(Variant *self, T key, CVarRef v, bool isKey) {
   return v;
 }
 
-CVarRef Variant::setRef(int64_t key, CVarRef v) {
+const Variant& Variant::setRef(int64_t key, const Variant& v) {
   return SetRefImpl(this, key, v, false);
 }
 
-CVarRef Variant::setRef(const String& key, CVarRef v,
+const Variant& Variant::setRef(const String& key, const Variant& v,
                         bool isString /* = false */) {
   return SetRefImpl<const String&>(this, key, v, isString);
 }
 
-CVarRef Variant::setRef(CVarRef key, CVarRef v) {
-  return SetRefImpl<CVarRef>(this, key, v, false);
+const Variant& Variant::setRef(const Variant& key, const Variant& v) {
+  return SetRefImpl<const Variant&>(this, key, v, false);
 }
 
-CVarRef Variant::appendRef(CVarRef v) {
+const Variant& Variant::appendRef(const Variant& v) {
   switch (m_type) {
   case KindOfUninit:
   case KindOfNull:
@@ -1369,7 +1369,7 @@ void Variant::removeImpl(int64_t key) {
   }
 }
 
-void Variant::removeImpl(CVarRef key, bool isString /* false */) {
+void Variant::removeImpl(const Variant& key, bool isString /* false */) {
   switch (getType()) {
   case KindOfUninit:
   case KindOfNull:
@@ -1431,7 +1431,7 @@ void Variant::removeImpl(const String& key, bool isString /* false */) {
   }
 }
 
-void Variant::remove(CVarRef key) {
+void Variant::remove(const Variant& key) {
   switch(key.getType()) {
   case KindOfInt64:
     removeImpl(key.toInt64());

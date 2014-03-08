@@ -330,7 +330,7 @@ const StaticString
 
 static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
                                     bool exclusive, bool with_comments,
-                                    CVarRef xpath_array, CVarRef ns_prefixes,
+                                    const Variant& xpath_array, const Variant& ns_prefixes,
                                     int mode) {
   xmlDocPtr docp;
   xmlNodeSetPtr nodeset = NULL;
@@ -1689,7 +1689,7 @@ static Variant domnode_nodevalue_read(const Object& obj) {
   }
 }
 
-static void domnode_nodevalue_write(const Object& obj, CVarRef value) {
+static void domnode_nodevalue_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_NODE(nodep);
   /* Access to Element node is implemented as a convience method */
   switch (nodep->type) {
@@ -1842,7 +1842,7 @@ static Variant domnode_prefix_read(const Object& obj) {
   return "";
 }
 
-static void domnode_prefix_write(const Object& obj, CVarRef value) {
+static void domnode_prefix_write(const Object& obj, const Variant& value) {
   String svalue;
   xmlNode *nsnode = NULL;
   xmlNsPtr ns = NULL, curns;
@@ -1934,7 +1934,7 @@ static Variant domnode_textcontent_read(const Object& obj) {
   return "";
 }
 
-static void domnode_textcontent_write(const Object& obj, CVarRef value) {
+static void domnode_textcontent_write(const Object& obj, const Variant& value) {
   // do nothing
 }
 
@@ -2418,16 +2418,16 @@ Variant c_DOMNode::t_replacechild(const Object& newchildobj, const Object& oldch
 
 Variant c_DOMNode::t_c14n(bool exclusive /* = false */,
                           bool with_comments /* = false */,
-                          CVarRef xpath /* = null */,
-                          CVarRef ns_prefixes /* = null */) {
+                          const Variant& xpath /* = null */,
+                          const Variant& ns_prefixes /* = null */) {
   return dom_canonicalization(m_node, "", exclusive, with_comments,
                               xpath, ns_prefixes, 0);
 }
 
 Variant c_DOMNode::t_c14nfile(const String& uri, bool exclusive /* = false */,
                               bool with_comments /* = false */,
-                              CVarRef xpath /* = null */,
-                              CVarRef ns_prefixes /* = null */) {
+                              const Variant& xpath /* = null */,
+                              const Variant& ns_prefixes /* = null */) {
   return dom_canonicalization(m_node, uri, exclusive, with_comments,
                               xpath, ns_prefixes, 1);
 }
@@ -2482,7 +2482,7 @@ static Variant domattr_value_read(const Object& obj) {
   return "";
 }
 
-static void domattr_value_write(const Object& obj, CVarRef value) {
+static void domattr_value_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_ATTR(attrp);
   if (attrp->children) {
     node_list_unlink(attrp->children);
@@ -2560,7 +2560,7 @@ static Variant dom_characterdata_data_read(const Object& obj) {
   return "";
 }
 
-static void dom_characterdata_data_write(const Object& obj, CVarRef value) {
+static void dom_characterdata_data_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_NODE(nodep);
   String svalue = value.toString();
   xmlNodeSetContentLen(nodep, (xmlChar*)svalue.data(), svalue.size() + 1);
@@ -2897,7 +2897,7 @@ static Variant dom_document_encoding_read(const Object& obj) {
   return uninit_null();
 }
 
-static void dom_document_encoding_write(const Object& obj, CVarRef value) {
+static void dom_document_encoding_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_DOC(docp);
 
   String svalue = value.toString();
@@ -2920,7 +2920,7 @@ static Variant dom_document_standalone_read(const Object& obj) {
   return (bool)docp->standalone;
 }
 
-static void dom_document_standalone_write(const Object& obj, CVarRef value) {
+static void dom_document_standalone_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_DOC(docp);
   int64_t standalone = value.toInt64();
   if (standalone > 0) {
@@ -2941,7 +2941,7 @@ static Variant dom_document_version_read(const Object& obj) {
   return uninit_null();
 }
 
-static void dom_document_version_write(const Object& obj, CVarRef value) {
+static void dom_document_version_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_DOC(docp);
   if (docp->version != NULL) {
     xmlFree((xmlChar *)docp->version);
@@ -2956,7 +2956,7 @@ static void dom_document_version_write(const Object& obj, CVarRef value) {
     return domdoc->m_ ## member;                                        \
   }                                                                     \
   static void dom_document_ ##name## _write(const Object& obj,                \
-                                            CVarRef value) {            \
+                                            const Variant& value) {            \
     c_DOMDocument *domdoc = obj.getTyped<c_DOMDocument>();              \
     domdoc->m_ ## member = value.toBoolean();                           \
   }                                                                     \
@@ -2978,7 +2978,7 @@ static Variant dom_document_document_uri_read(const Object& obj) {
   return uninit_null();
 }
 
-static void dom_document_document_uri_write(const Object& obj, CVarRef value) {
+static void dom_document_document_uri_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_DOC(docp);
   if (docp->URL != NULL) {
     xmlFree((xmlChar *) docp->URL);
@@ -4400,7 +4400,7 @@ static Variant dom_entity_actual_encoding_read(const Object& obj) {
   return uninit_null();
 }
 
-static void dom_entity_actual_encoding_write(const Object& obj, CVarRef value) {
+static void dom_entity_actual_encoding_write(const Object& obj, const Variant& value) {
   // do nothing
 }
 
@@ -4408,7 +4408,7 @@ static Variant dom_entity_encoding_read(const Object& obj) {
   return uninit_null();
 }
 
-static void dom_entity_encoding_write(const Object& obj, CVarRef value) {
+static void dom_entity_encoding_write(const Object& obj, const Variant& value) {
   // do nothing
 }
 
@@ -4416,7 +4416,7 @@ static Variant dom_entity_version_read(const Object& obj) {
   return uninit_null();
 }
 
-static void dom_entity_version_write(const Object& obj, CVarRef value) {
+static void dom_entity_version_write(const Object& obj, const Variant& value) {
   // do nothing
 }
 
@@ -4541,7 +4541,7 @@ static Variant dom_processinginstruction_data_read(const Object& obj) {
   return "";
 }
 
-static void dom_processinginstruction_data_write(const Object& obj, CVarRef value) {
+static void dom_processinginstruction_data_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_NODE(nodep);
   String svalue = value.toString();
   xmlNodeSetContentLen(nodep, (xmlChar*)svalue.data(), svalue.size() + 1);
@@ -5181,7 +5181,7 @@ void c_DOMXPath::sweep() {
   }
 }
 
-void c_DOMXPath::t___construct(CVarRef doc) {
+void c_DOMXPath::t___construct(const Variant& doc) {
   m_doc = doc.toObject().getTyped<c_DOMDocument>();
   xmlDocPtr docp = (xmlDocPtr)m_doc->m_node;
   xmlXPathContextPtr ctx = xmlXPathNewContext(docp);
@@ -5233,7 +5233,7 @@ bool c_DOMXPath::t_registernamespace(const String& prefix, const String& uri) {
                             (xmlChar*)uri.data()) == 0;
 }
 
-Variant c_DOMXPath::t_registerphpfunctions(CVarRef funcs /* = null */) {
+Variant c_DOMXPath::t_registerphpfunctions(const Variant& funcs /* = null */) {
   if (funcs.isArray()) {
     Array arr = funcs.toArray();
     for (ArrayIter iter(arr); iter; ++iter) {
@@ -5421,411 +5421,411 @@ Variant c_DOMNodeIterator::t_valid() {
     return uninit_null();                                       \
   }
 
-Variant f_dom_document_create_element(CVarRef obj, const String& name,
+Variant f_dom_document_create_element(const Variant& obj, const String& name,
                                       const String& value /* = null_string */) {
   DOM_GET_OBJ(Document);
   return pobj->t_createelement(name, value);
 }
 
-Variant f_dom_document_create_document_fragment(CVarRef obj) {
+Variant f_dom_document_create_document_fragment(const Variant& obj) {
   DOM_GET_OBJ(Document);
   return pobj->t_createdocumentfragment();
 }
 
-Variant f_dom_document_create_text_node(CVarRef obj, const String& data) {
+Variant f_dom_document_create_text_node(const Variant& obj, const String& data) {
   DOM_GET_OBJ(Document);
   return pobj->t_createtextnode(data);
 }
 
-Variant f_dom_document_create_comment(CVarRef obj, const String& data) {
+Variant f_dom_document_create_comment(const Variant& obj, const String& data) {
   DOM_GET_OBJ(Document);
   return pobj->t_createcomment(data);
 }
 
-Variant f_dom_document_create_cdatasection(CVarRef obj, const String& data) {
+Variant f_dom_document_create_cdatasection(const Variant& obj, const String& data) {
   DOM_GET_OBJ(Document);
   return pobj->t_createcdatasection(data);
 }
 
 Variant f_dom_document_create_processing_instruction(
-    CVarRef obj, const String& target, const String& data /* = null_string */) {
+    const Variant& obj, const String& target, const String& data /* = null_string */) {
   DOM_GET_OBJ(Document);
   return pobj->t_createprocessinginstruction(target, data);
 }
 
-Variant f_dom_document_create_attribute(CVarRef obj, const String& name) {
+Variant f_dom_document_create_attribute(const Variant& obj, const String& name) {
   DOM_GET_OBJ(Document);
   return pobj->t_createattribute(name);
 }
 
-Variant f_dom_document_create_entity_reference(CVarRef obj,
+Variant f_dom_document_create_entity_reference(const Variant& obj,
                                                const String& name) {
   DOM_GET_OBJ(Document);
   return pobj->t_createentityreference(name);
 }
 
-Variant f_dom_document_get_elements_by_tag_name(CVarRef obj,
+Variant f_dom_document_get_elements_by_tag_name(const Variant& obj,
                                                 const String& name) {
   DOM_GET_OBJ(Document);
   return pobj->t_getelementsbytagname(name);
 }
 
-Variant f_dom_document_import_node(CVarRef obj, const Object& importednode,
+Variant f_dom_document_import_node(const Variant& obj, const Object& importednode,
                                    bool deep /* = false */) {
   DOM_GET_OBJ(Document);
   return pobj->t_importnode(importednode, deep);
 }
 
 Variant f_dom_document_create_element_ns(
-    CVarRef obj, const String& namespaceuri, const String& qualifiedname,
+    const Variant& obj, const String& namespaceuri, const String& qualifiedname,
     const String& value /* = null_string */) {
   DOM_GET_OBJ(Document);
   return pobj->t_createelementns(namespaceuri, qualifiedname, value);
 }
 
-Variant f_dom_document_create_attribute_ns(CVarRef obj,
+Variant f_dom_document_create_attribute_ns(const Variant& obj,
                                            const String& namespaceuri,
                                            const String& qualifiedname) {
   DOM_GET_OBJ(Document);
   return pobj->t_createattributens(namespaceuri, qualifiedname);
 }
 
-Variant f_dom_document_get_elements_by_tag_name_ns(CVarRef obj,
+Variant f_dom_document_get_elements_by_tag_name_ns(const Variant& obj,
                                                    const String& namespaceuri,
                                                    const String& localname) {
   DOM_GET_OBJ(Document);
   return pobj->t_getelementsbytagnamens(namespaceuri, localname);
 }
 
-Variant f_dom_document_get_element_by_id(CVarRef obj, const String& elementid) {
+Variant f_dom_document_get_element_by_id(const Variant& obj, const String& elementid) {
   DOM_GET_OBJ(Document);
   return pobj->t_getelementbyid(elementid);
 }
 
-Variant f_dom_document_normalize_document(CVarRef obj) {
+Variant f_dom_document_normalize_document(const Variant& obj) {
   DOM_GET_OBJ(Document);
   pobj->t_normalizedocument();
   return uninit_null();
 }
 
-Variant f_dom_document_save(CVarRef obj, const String& file,
+Variant f_dom_document_save(const Variant& obj, const String& file,
                             int64_t options /* = 0 */) {
   DOM_GET_OBJ(Document);
   return pobj->t_save(file, options);
 }
 
-Variant f_dom_document_savexml(CVarRef obj, const Object& node /* = null_object */,
+Variant f_dom_document_savexml(const Variant& obj, const Object& node /* = null_object */,
                                int64_t options /* = 0 */) {
   DOM_GET_OBJ(Document);
   return pobj->t_savexml(node, options);
 }
 
-Variant f_dom_document_validate(CVarRef obj) {
+Variant f_dom_document_validate(const Variant& obj) {
   DOM_GET_OBJ(Document);
   return pobj->t_validate();
 }
 
-Variant f_dom_document_xinclude(CVarRef obj, int64_t options /* = 0 */) {
+Variant f_dom_document_xinclude(const Variant& obj, int64_t options /* = 0 */) {
   DOM_GET_OBJ(Document);
   return pobj->t_xinclude(options);
 }
 
-Variant f_dom_document_save_html(CVarRef obj,
+Variant f_dom_document_save_html(const Variant& obj,
                                  const Object& node /* = null_object */) {
   DOM_GET_OBJ(Document);
   return pobj->t_savehtml(node);
 }
 
-Variant f_dom_document_save_html_file(CVarRef obj, const String& file) {
+Variant f_dom_document_save_html_file(const Variant& obj, const String& file) {
   DOM_GET_OBJ(Document);
   return pobj->t_savehtmlfile(file);
 }
 
-Variant f_dom_document_schema_validate_file(CVarRef obj,
+Variant f_dom_document_schema_validate_file(const Variant& obj,
                                             const String& filename) {
   DOM_GET_OBJ(Document);
   return pobj->t_schemavalidate(filename);
 }
 
-Variant f_dom_document_schema_validate_xml(CVarRef obj, const String& source) {
+Variant f_dom_document_schema_validate_xml(const Variant& obj, const String& source) {
   DOM_GET_OBJ(Document);
   return pobj->t_schemavalidatesource(source);
 }
 
-Variant f_dom_document_relaxng_validate_file(CVarRef obj,
+Variant f_dom_document_relaxng_validate_file(const Variant& obj,
                                              const String& filename) {
   DOM_GET_OBJ(Document);
   return pobj->t_relaxngvalidate(filename);
 }
 
-Variant f_dom_document_relaxng_validate_xml(CVarRef obj, const String& source) {
+Variant f_dom_document_relaxng_validate_xml(const Variant& obj, const String& source) {
   DOM_GET_OBJ(Document);
   return pobj->t_relaxngvalidatesource(source);
 }
 
-Variant f_dom_node_insert_before(CVarRef obj, const Object& newnode,
+Variant f_dom_node_insert_before(const Variant& obj, const Object& newnode,
                                  const Object& refnode /* = null */) {
   DOM_GET_OBJ(Node);
   return pobj->t_insertbefore(newnode, refnode);
 }
 
-Variant f_dom_node_replace_child(CVarRef obj, const Object& newchildobj,
+Variant f_dom_node_replace_child(const Variant& obj, const Object& newchildobj,
                                  const Object& oldchildobj) {
   DOM_GET_OBJ(Node);
   return pobj->t_replacechild(newchildobj, oldchildobj);
 }
 
-Variant f_dom_node_remove_child(CVarRef obj, const Object& node) {
+Variant f_dom_node_remove_child(const Variant& obj, const Object& node) {
   DOM_GET_OBJ(Node);
   return pobj->t_removechild(node);
 }
 
-Variant f_dom_node_append_child(CVarRef obj, const Object& newnode) {
+Variant f_dom_node_append_child(const Variant& obj, const Object& newnode) {
   DOM_GET_OBJ(Node);
   return pobj->t_appendchild(newnode);
 }
 
-Variant f_dom_node_has_child_nodes(CVarRef obj) {
+Variant f_dom_node_has_child_nodes(const Variant& obj) {
   DOM_GET_OBJ(Node);
   return pobj->t_haschildnodes();
 }
 
-Variant f_dom_node_clone_node(CVarRef obj, bool deep /* = false */) {
+Variant f_dom_node_clone_node(const Variant& obj, bool deep /* = false */) {
   DOM_GET_OBJ(Node);
   return pobj->t_clonenode(deep);
 }
 
-Variant f_dom_node_normalize(CVarRef obj) {
+Variant f_dom_node_normalize(const Variant& obj) {
   DOM_GET_OBJ(Node);
   pobj->t_normalize();
   return uninit_null();
 }
 
-Variant f_dom_node_is_supported(CVarRef obj, const String& feature,
+Variant f_dom_node_is_supported(const Variant& obj, const String& feature,
                                 const String& version) {
   DOM_GET_OBJ(Node);
   return pobj->t_issupported(feature, version);
 }
 
-Variant f_dom_node_has_attributes(CVarRef obj) {
+Variant f_dom_node_has_attributes(const Variant& obj) {
   DOM_GET_OBJ(Node);
   return pobj->t_hasattributes();
 }
 
-Variant f_dom_node_is_same_node(CVarRef obj, const Object& node) {
+Variant f_dom_node_is_same_node(const Variant& obj, const Object& node) {
   DOM_GET_OBJ(Node);
   return pobj->t_issamenode(node);
 }
 
-Variant f_dom_node_lookup_prefix(CVarRef obj, const String& prefix) {
+Variant f_dom_node_lookup_prefix(const Variant& obj, const String& prefix) {
   DOM_GET_OBJ(Node);
   return pobj->t_lookupprefix(prefix);
 }
 
-Variant f_dom_node_is_default_namespace(CVarRef obj,
+Variant f_dom_node_is_default_namespace(const Variant& obj,
                                         const String& namespaceuri) {
   DOM_GET_OBJ(Node);
   return pobj->t_isdefaultnamespace(namespaceuri);
 }
 
-Variant f_dom_node_lookup_namespace_uri(CVarRef obj,
+Variant f_dom_node_lookup_namespace_uri(const Variant& obj,
                                         const String& namespaceuri) {
   DOM_GET_OBJ(Node);
   return pobj->t_lookupnamespaceuri(namespaceuri);
 }
 
-Variant f_dom_nodelist_item(CVarRef obj, int64_t index) {
+Variant f_dom_nodelist_item(const Variant& obj, int64_t index) {
   DOM_GET_OBJ(NodeList);
   return pobj->t_item(index);
 }
 
-Variant f_dom_namednodemap_get_named_item(CVarRef obj, const String& name) {
+Variant f_dom_namednodemap_get_named_item(const Variant& obj, const String& name) {
   DOM_GET_OBJ(NamedNodeMap);
   return pobj->t_getnameditem(name);
 }
 
-Variant f_dom_namednodemap_item(CVarRef obj, int64_t index) {
+Variant f_dom_namednodemap_item(const Variant& obj, int64_t index) {
   DOM_GET_OBJ(NamedNodeMap);
   return pobj->t_item(index);
 }
 
-Variant f_dom_namednodemap_get_named_item_ns(CVarRef obj,
+Variant f_dom_namednodemap_get_named_item_ns(const Variant& obj,
                                              const String& namespaceuri,
                                              const String& localname) {
   DOM_GET_OBJ(NamedNodeMap);
   return pobj->t_getnameditemns(namespaceuri, localname);
 }
 
-Variant f_dom_characterdata_substring_data(CVarRef obj, int64_t offset,
+Variant f_dom_characterdata_substring_data(const Variant& obj, int64_t offset,
                                            int64_t count) {
   DOM_GET_OBJ(CharacterData);
   return pobj->t_substringdata(offset, count);
 }
 
-Variant f_dom_characterdata_append_data(CVarRef obj, const String& arg) {
+Variant f_dom_characterdata_append_data(const Variant& obj, const String& arg) {
   DOM_GET_OBJ(CharacterData);
   return pobj->t_appenddata(arg);
 }
 
-Variant f_dom_characterdata_insert_data(CVarRef obj, int64_t offset,
+Variant f_dom_characterdata_insert_data(const Variant& obj, int64_t offset,
                                         const String& data) {
   DOM_GET_OBJ(CharacterData);
   return pobj->t_insertdata(offset, data);
 }
 
-Variant f_dom_characterdata_delete_data(CVarRef obj, int64_t offset,
+Variant f_dom_characterdata_delete_data(const Variant& obj, int64_t offset,
                                         int64_t count) {
   DOM_GET_OBJ(CharacterData);
   return pobj->t_deletedata(offset, count);
 }
 
-Variant f_dom_characterdata_replace_data(CVarRef obj, int64_t offset,
+Variant f_dom_characterdata_replace_data(const Variant& obj, int64_t offset,
                                          int64_t count, const String& data) {
   DOM_GET_OBJ(CharacterData);
   return pobj->t_replacedata(offset, count, data);
 }
 
-Variant f_dom_attr_is_id(CVarRef obj) {
+Variant f_dom_attr_is_id(const Variant& obj) {
   DOM_GET_OBJ(Attr);
   return pobj->t_isid();
 }
 
-Variant f_dom_element_get_attribute(CVarRef obj, const String& name) {
+Variant f_dom_element_get_attribute(const Variant& obj, const String& name) {
   DOM_GET_OBJ(Element);
   return pobj->t_getattribute(name);
 }
 
-Variant f_dom_element_set_attribute(CVarRef obj, const String& name,
+Variant f_dom_element_set_attribute(const Variant& obj, const String& name,
                                     const String& value) {
   DOM_GET_OBJ(Element);
   return pobj->t_setattribute(name, value);
 }
 
-Variant f_dom_element_remove_attribute(CVarRef obj, const String& name) {
+Variant f_dom_element_remove_attribute(const Variant& obj, const String& name) {
   DOM_GET_OBJ(Element);
   return pobj->t_removeattribute(name);
 }
 
-Variant f_dom_element_get_attribute_node(CVarRef obj, const String& name) {
+Variant f_dom_element_get_attribute_node(const Variant& obj, const String& name) {
   DOM_GET_OBJ(Element);
   return pobj->t_getattributenode(name);
 }
 
-Variant f_dom_element_set_attribute_node(CVarRef obj, const Object& newattr) {
+Variant f_dom_element_set_attribute_node(const Variant& obj, const Object& newattr) {
   DOM_GET_OBJ(Element);
   return pobj->t_setattributenode(newattr);
 }
 
-Variant f_dom_element_remove_attribute_node(CVarRef obj, const Object& oldattr) {
+Variant f_dom_element_remove_attribute_node(const Variant& obj, const Object& oldattr) {
   DOM_GET_OBJ(Element);
   return pobj->t_removeattributenode(oldattr);
 }
 
-Variant f_dom_element_get_elements_by_tag_name(CVarRef obj,
+Variant f_dom_element_get_elements_by_tag_name(const Variant& obj,
                                                const String& name) {
   DOM_GET_OBJ(Element);
   return pobj->t_getelementsbytagname(name);
 }
 
-Variant f_dom_element_get_attribute_ns(CVarRef obj, const String& namespaceuri,
+Variant f_dom_element_get_attribute_ns(const Variant& obj, const String& namespaceuri,
                                        const String& localname) {
   DOM_GET_OBJ(Element);
   return pobj->t_getattributens(namespaceuri, localname);
 }
 
-Variant f_dom_element_set_attribute_ns(CVarRef obj, const String& namespaceuri,
+Variant f_dom_element_set_attribute_ns(const Variant& obj, const String& namespaceuri,
                                        const String& name,
                                        const String& value) {
   DOM_GET_OBJ(Element);
   return pobj->t_setattributens(namespaceuri, name, value);
 }
 
-Variant f_dom_element_remove_attribute_ns(CVarRef obj,
+Variant f_dom_element_remove_attribute_ns(const Variant& obj,
                                           const String& namespaceuri,
                                           const String& localname) {
   DOM_GET_OBJ(Element);
   return pobj->t_removeattributens(namespaceuri, localname);
 }
 
-Variant f_dom_element_get_attribute_node_ns(CVarRef obj,
+Variant f_dom_element_get_attribute_node_ns(const Variant& obj,
                                             const String& namespaceuri,
                                             const String& localname) {
   DOM_GET_OBJ(Element);
   return pobj->t_getattributenodens(namespaceuri, localname);
 }
 
-Variant f_dom_element_set_attribute_node_ns(CVarRef obj, const Object& newattr) {
+Variant f_dom_element_set_attribute_node_ns(const Variant& obj, const Object& newattr) {
   DOM_GET_OBJ(Element);
   return pobj->t_setattributenodens(newattr);
 }
 
-Variant f_dom_element_get_elements_by_tag_name_ns(CVarRef obj,
+Variant f_dom_element_get_elements_by_tag_name_ns(const Variant& obj,
                                                   const String& namespaceuri,
                                                   const String& localname) {
   DOM_GET_OBJ(Element);
   return pobj->t_getelementsbytagnamens(namespaceuri, localname);
 }
 
-Variant f_dom_element_has_attribute(CVarRef obj, const String& name) {
+Variant f_dom_element_has_attribute(const Variant& obj, const String& name) {
   DOM_GET_OBJ(Element);
   return pobj->t_hasattribute(name);
 }
 
-Variant f_dom_element_has_attribute_ns(CVarRef obj, const String& namespaceuri,
+Variant f_dom_element_has_attribute_ns(const Variant& obj, const String& namespaceuri,
                                        const String& localname) {
   DOM_GET_OBJ(Element);
   return pobj->t_hasattributens(namespaceuri, localname);
 }
 
-Variant f_dom_element_set_id_attribute(CVarRef obj, const String& name,
+Variant f_dom_element_set_id_attribute(const Variant& obj, const String& name,
                                        bool isid) {
   DOM_GET_OBJ(Element);
   return pobj->t_setidattribute(name, isid);
 }
 
-Variant f_dom_element_set_id_attribute_ns(CVarRef obj,
+Variant f_dom_element_set_id_attribute_ns(const Variant& obj,
                                           const String& namespaceuri,
                                           const String& localname, bool isid) {
   DOM_GET_OBJ(Element);
   return pobj->t_setidattributens(namespaceuri, localname, isid);
 }
 
-Variant f_dom_element_set_id_attribute_node(CVarRef obj, const Object& idattr,
+Variant f_dom_element_set_id_attribute_node(const Variant& obj, const Object& idattr,
                                             bool isid) {
   DOM_GET_OBJ(Element);
   return pobj->t_setidattributenode(idattr, isid);
 }
 
-Variant f_dom_text_split_text(CVarRef obj, int64_t offset) {
+Variant f_dom_text_split_text(const Variant& obj, int64_t offset) {
   DOM_GET_OBJ(Text);
   return pobj->t_splittext(offset);
 }
 
-Variant f_dom_text_is_whitespace_in_element_content(CVarRef obj) {
+Variant f_dom_text_is_whitespace_in_element_content(const Variant& obj) {
   DOM_GET_OBJ(Text);
   return pobj->t_iswhitespaceinelementcontent();
 }
 
-Variant f_dom_xpath_register_ns(CVarRef obj, const String& prefix,
+Variant f_dom_xpath_register_ns(const Variant& obj, const String& prefix,
                                 const String& uri) {
   DOM_GET_OBJ(XPath);
   return pobj->t_registernamespace(prefix, uri);
 }
 
-Variant f_dom_xpath_query(CVarRef obj, const String& expr,
+Variant f_dom_xpath_query(const Variant& obj, const String& expr,
                           const Object& context /* = null_object */) {
   DOM_GET_OBJ(XPath);
   return pobj->t_query(expr, context);
 }
 
-Variant f_dom_xpath_evaluate(CVarRef obj, const String& expr,
+Variant f_dom_xpath_evaluate(const Variant& obj, const String& expr,
                              const Object& context /* = null_object */) {
   DOM_GET_OBJ(XPath);
   return pobj->t_evaluate(expr, context);
 }
 
-Variant f_dom_xpath_register_php_functions(CVarRef obj,
-                                           CVarRef funcs /* = null */) {
+Variant f_dom_xpath_register_php_functions(const Variant& obj,
+                                           const Variant& funcs /* = null */) {
   DOM_GET_OBJ(XPath);
   return pobj->t_registerphpfunctions(funcs);
 }

@@ -27,7 +27,7 @@ class UserFile : public File, public UserFSNode {
 public:
   DECLARE_RESOURCE_ALLOCATION(UserFile);
 
-  explicit UserFile(Class *cls, CVarRef context = uninit_null());
+  explicit UserFile(Class *cls, const Variant& context = uninit_null());
   virtual ~UserFile();
 
   // overriding ResourceData

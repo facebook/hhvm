@@ -892,7 +892,7 @@ static int php_mb_parse_encoding_array(const Array& array,
   return ret;
 }
 
-static bool php_mb_parse_encoding(CVarRef encoding,
+static bool php_mb_parse_encoding(const Variant& encoding,
                                   mbfl_no_encoding **return_list,
                                   int *return_size, bool persistent) {
   bool ret;
@@ -1201,7 +1201,7 @@ Variant f_mb_convert_case(const String& str, int mode,
 }
 
 Variant f_mb_convert_encoding(const String& str, const String& to_encoding,
-                              CVarRef from_encoding /* = null_variant */) {
+                              const Variant& from_encoding /* = null_variant */) {
   String encoding = from_encoding.toString();
   if (from_encoding.is(KindOfArray)) {
     StringBuffer _from_encodings;
@@ -1283,7 +1283,7 @@ Variant f_mb_convert_kana(const String& str,
   return false;
 }
 
-static bool php_mbfl_encoding_detect(CVarRef var,
+static bool php_mbfl_encoding_detect(const Variant& var,
                                      mbfl_encoding_detector *identd,
                                      mbfl_string *string) {
   if (var.is(KindOfArray) || var.is(KindOfObject)) {
@@ -1304,7 +1304,7 @@ static bool php_mbfl_encoding_detect(CVarRef var,
   return false;
 }
 
-static Variant php_mbfl_convert(CVarRef var,
+static Variant php_mbfl_convert(const Variant& var,
                                 mbfl_buffer_converter *convd,
                                 mbfl_string *string,
                                 mbfl_string *result) {
@@ -1342,7 +1342,7 @@ static Variant php_mbfl_convert(CVarRef var,
 }
 
 Variant f_mb_convert_variables(int _argc, const String& to_encoding,
-                               CVarRef from_encoding, VRefParam vars,
+                               const Variant& from_encoding, VRefParam vars,
                                const Array& _argv /* = null_array */) {
   mbfl_string string, result;
   mbfl_no_encoding _from_encoding, _to_encoding;
@@ -1449,7 +1449,7 @@ Variant f_mb_decode_mimeheader(const String& str) {
   return false;
 }
 
-static Variant php_mb_numericentity_exec(const String& str, CVarRef convmap,
+static Variant php_mb_numericentity_exec(const String& str, const Variant& convmap,
                                          const String& encoding, int type) {
   int mapsize=0;
   mbfl_string string, result, *ret;
@@ -1498,14 +1498,14 @@ static Variant php_mb_numericentity_exec(const String& str, CVarRef convmap,
   return false;
 }
 
-Variant f_mb_decode_numericentity(const String& str, CVarRef convmap,
+Variant f_mb_decode_numericentity(const String& str, const Variant& convmap,
                                  const String& encoding /* = null_string */) {
   return php_mb_numericentity_exec(str, convmap, encoding, 1);
 }
 
 Variant f_mb_detect_encoding(const String& str,
-                             CVarRef encoding_list /* = null_variant */,
-                             CVarRef strict /* = null_variant */) {
+                             const Variant& encoding_list /* = null_variant */,
+                             const Variant& strict /* = null_variant */) {
   mbfl_string string;
   const char *ret;
   mbfl_no_encoding *elist;
@@ -1544,7 +1544,7 @@ Variant f_mb_detect_encoding(const String& str,
   return false;
 }
 
-Variant f_mb_detect_order(CVarRef encoding_list /* = null_variant */) {
+Variant f_mb_detect_order(const Variant& encoding_list /* = null_variant */) {
   int n, size;
   mbfl_no_encoding *list, *entry;
 
@@ -1626,7 +1626,7 @@ Variant f_mb_encode_mimeheader(const String& str,
   return false;
 }
 
-Variant f_mb_encode_numericentity(const String& str, CVarRef convmap,
+Variant f_mb_encode_numericentity(const String& str, const Variant& convmap,
                                  const String& encoding /* = null_string */) {
   return php_mb_numericentity_exec(str, convmap, encoding, 0);
 }
@@ -2504,7 +2504,7 @@ Variant f_mb_strpos(const String& haystack, const String& needle,
 }
 
 Variant f_mb_strrpos(const String& haystack, const String& needle,
-                     CVarRef offset /* = 0LL */,
+                     const Variant& offset /* = 0LL */,
                      const String& encoding /* = null_string */) {
   mbfl_string mbs_haystack;
   mbfl_string_init(&mbs_haystack);
@@ -2792,7 +2792,7 @@ Variant f_mb_strwidth(const String& str,
   return false;
 }
 
-Variant f_mb_substitute_character(CVarRef substrchar /* = null_variant */) {
+Variant f_mb_substitute_character(const Variant& substrchar /* = null_variant */) {
   if (substrchar.isNull()) {
     switch (MBSTRG(current_filter_illegal_mode)) {
     case MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE:
@@ -3237,7 +3237,7 @@ bool f_mb_ereg_match(const String& pattern, const String& str,
   return err >= 0;
 }
 
-static Variant _php_mb_regex_ereg_replace_exec(CVarRef pattern,
+static Variant _php_mb_regex_ereg_replace_exec(const Variant& pattern,
                                                const String& replacement,
                                                const String& str,
                                                const String& option,
@@ -3370,14 +3370,14 @@ static Variant _php_mb_regex_ereg_replace_exec(CVarRef pattern,
   return out_buf.detach();
 }
 
-Variant f_mb_ereg_replace(CVarRef pattern, const String& replacement,
+Variant f_mb_ereg_replace(const Variant& pattern, const String& replacement,
                           const String& str,
                          const String& option /* = null_string */) {
   return _php_mb_regex_ereg_replace_exec(pattern, replacement,
                                          str, option, 0);
 }
 
-Variant f_mb_eregi_replace(CVarRef pattern, const String& replacement,
+Variant f_mb_eregi_replace(const Variant& pattern, const String& replacement,
                            const String& str,
                            const String& option /* = null_string */) {
   return _php_mb_regex_ereg_replace_exec(pattern, replacement,
@@ -3561,7 +3561,7 @@ Variant f_mb_ereg_search_regs(const String& pattern /* = null_string */,
   return _php_mb_regex_ereg_search_exec(pattern, option, 2);
 }
 
-static Variant _php_mb_regex_ereg_exec(CVarRef pattern, const String& str,
+static Variant _php_mb_regex_ereg_exec(const Variant& pattern, const String& str,
                                        Variant &regs, int icase) {
   php_mb_regex_t *re;
   OnigRegion *regions = NULL;
@@ -3626,12 +3626,12 @@ static Variant _php_mb_regex_ereg_exec(CVarRef pattern, const String& str,
   return match_len;
 }
 
-Variant f_mb_ereg(CVarRef pattern, const String& str,
+Variant f_mb_ereg(const Variant& pattern, const String& str,
                   VRefParam regs /* = null */) {
   return _php_mb_regex_ereg_exec(pattern, str, regs, 0);
 }
 
-Variant f_mb_eregi(CVarRef pattern, const String& str,
+Variant f_mb_eregi(const Variant& pattern, const String& str,
                    VRefParam regs /* = null */) {
   return _php_mb_regex_ereg_exec(pattern, str, regs, 1);
 }

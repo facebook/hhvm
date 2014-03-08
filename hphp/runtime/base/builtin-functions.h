@@ -100,15 +100,15 @@ void throw_exception(const Object& e);
 ///////////////////////////////////////////////////////////////////////////////
 // type testing
 
-inline bool is_null(CVarRef v)   { return v.isNull();}
-inline bool is_not_null(CVarRef v) { return !v.isNull();}
-inline bool is_bool(CVarRef v)   { return v.is(KindOfBoolean);}
-inline bool is_int(CVarRef v)    { return v.isInteger();}
-inline bool is_double(CVarRef v) { return v.is(KindOfDouble);}
-inline bool is_string(CVarRef v) { return v.isString();}
-inline bool is_array(CVarRef v)  { return v.is(KindOfArray);}
-inline bool is_object(CVarRef var) { return var.is(KindOfObject); }
-inline bool is_empty_string(CVarRef v) {
+inline bool is_null(const Variant& v)   { return v.isNull();}
+inline bool is_not_null(const Variant& v) { return !v.isNull();}
+inline bool is_bool(const Variant& v)   { return v.is(KindOfBoolean);}
+inline bool is_int(const Variant& v)    { return v.isInteger();}
+inline bool is_double(const Variant& v) { return v.is(KindOfDouble);}
+inline bool is_string(const Variant& v) { return v.isString();}
+inline bool is_array(const Variant& v)  { return v.is(KindOfArray);}
+inline bool is_object(const Variant& var) { return var.is(KindOfObject); }
+inline bool is_empty_string(const Variant& v) {
   return v.isString() && v.getStringData()->empty();
 }
 
@@ -117,11 +117,11 @@ inline bool is_empty_string(CVarRef v) {
 
 bool array_is_valid_callback(const Array& arr);
 
-Variant f_call_user_func_array(CVarRef function, const Array& params,
+Variant f_call_user_func_array(const Variant& function, const Array& params,
                                bool bound = false);
 
 const HPHP::Func*
-vm_decode_function(CVarRef function,
+vm_decode_function(const Variant& function,
                    ActRec* ar,
                    bool forwarding,
                    ObjectData*& this_,
@@ -130,7 +130,7 @@ vm_decode_function(CVarRef function,
                    bool warn = true);
 
 inline void
-vm_decode_function(CVarRef function,
+vm_decode_function(const Variant& function,
                    ActRec* ar,
                    bool forwarding,
                    CallCtx& ctx,
@@ -140,14 +140,14 @@ vm_decode_function(CVarRef function,
 }
 
 ActRec* vm_get_previous_frame();
-Variant vm_call_user_func(CVarRef function, CVarRef params,
+Variant vm_call_user_func(const Variant& function, const Variant& params,
                           bool forwarding = false);
 
 /**
  * Invoking an arbitrary static method.
  */
 Variant invoke_static_method(const String& s, const String& method,
-                             CVarRef params, bool fatal = true);
+                             const Variant& params, bool fatal = true);
 
 /**
  * Fallback when a dynamic function call fails to find a user function
@@ -156,7 +156,7 @@ Variant invoke_static_method(const String& s, const String& method,
  */
 Variant invoke_failed(const char *func,
                       bool fatal = true);
-Variant invoke_failed(CVarRef func,
+Variant invoke_failed(const Variant& func,
                       bool fatal = true);
 
 Variant o_invoke_failed(const char *cls, const char *meth,
@@ -258,7 +258,7 @@ char const kUnserializableString[] = "\x01";
  * two functions in runtime/base, as there are functions in
  * runtime/base that depend on these two functions.
  */
-String f_serialize(CVarRef value);
+String f_serialize(const Variant& value);
 Variant unserialize_ex(const String& str,
                        VariableUnserializer::Type type,
                        const Array& class_whitelist = null_array);
@@ -310,7 +310,7 @@ class AutoloadHandler final : public RequestEventHandler {
 
   struct HandlerBundle {
     HandlerBundle() = delete;
-    HandlerBundle(CVarRef handler,
+    HandlerBundle(const Variant& handler,
                   smart::unique_ptr<CufIter>& cufIter) :
       m_handler(handler) {
       m_cufIter = std::move(cufIter);
@@ -342,8 +342,8 @@ public:
   virtual void requestShutdown();
 
   Array getHandlers();
-  bool addHandler(CVarRef handler, bool prepend);
-  void removeHandler(CVarRef handler);
+  bool addHandler(const Variant& handler, bool prepend);
+  void removeHandler(const Variant& handler);
   void removeAllHandlers();
   bool isRunning();
 
@@ -358,7 +358,7 @@ private:
   template <class T>
   Result loadFromMap(const String& name, const String& kind, bool toLower,
                      const T &checkExists);
-  static String getSignature(CVarRef handler);
+  static String getSignature(const Variant& handler);
 
   Array m_map;
   String m_map_root;

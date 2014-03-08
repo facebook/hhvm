@@ -52,21 +52,21 @@ String f_rtrim(String str, const String& charlist = k_HPHP_TRIM_CHARLIST);
 String f_chop(String str, const String& charlist = k_HPHP_TRIM_CHARLIST);
 Variant f_explode(const String& delimiter, const String& str, int limit = 0x7FFFFFFF);
 
-String f_implode(CVarRef arg1, CVarRef arg2 = null_variant);
+String f_implode(const Variant& arg1, const Variant& arg2 = null_variant);
 
-String f_join(CVarRef glue, CVarRef pieces = null_variant);
+String f_join(const Variant& glue, const Variant& pieces = null_variant);
 Variant f_str_split(const String& str, int split_length = 1);
 Variant f_chunk_split(const String& body, int chunklen = 76,
                       const String& end = "\r\n");
 
-Variant f_strtok(const String& str, CVarRef token = null_variant);
+Variant f_strtok(const String& str, const Variant& token = null_variant);
 
-Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
+Variant f_str_replace(const Variant& search, const Variant& replace, const Variant& subject,
                       VRefParam count = uninit_null());
-Variant f_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject,
+Variant f_str_ireplace(const Variant& search, const Variant& replace, const Variant& subject,
                        VRefParam count = uninit_null());
-Variant f_substr_replace(CVarRef str, CVarRef replacement, CVarRef start,
-                         CVarRef length = 0x7FFFFFFF);
+Variant f_substr_replace(const Variant& str, const Variant& replacement, const Variant& start,
+                         const Variant& length = 0x7FFFFFFF);
 
 Variant f_substr(const String& str, int start, int length = 0x7FFFFFFF);
 String f_str_pad(const String& input, int pad_length, const String& pad_string = " ",
@@ -98,7 +98,7 @@ int64_t f_crc32(const String& str);
 String f_crypt(const String& str, const String& salt = "");
 String f_md5(const String& str, bool raw_output = false);
 String f_sha1(const String& str, bool raw_output = false);
-Variant f_strtr(const String& str, CVarRef from, CVarRef to = null_variant);
+Variant f_strtr(const String& str, const Variant& from, const Variant& to = null_variant);
 
 String f_convert_cyr_string(const String& str, const String& from, const String& to);
 
@@ -110,7 +110,7 @@ String f_hebrev(const String& hebrew_text, int max_chars_per_line = 0);
 
 String f_hebrevc(const String& hebrew_text, int max_chars_per_line = 0);
 
-Variant f_setlocale(int _argc, int category, CVarRef locale, const Array& _argv = null_array);
+Variant f_setlocale(int _argc, int category, const Variant& locale, const Array& _argv = null_array);
 Array f_localeconv();
 
 String f_nl_langinfo(int item);
@@ -128,8 +128,8 @@ Variant f_sscanf(int _argc, const String& str, const String& format, const Array
 String f_chr(int64_t ascii);
 int64_t f_ord(const String& str);
 Variant f_money_format(const String& format, double number);
-String f_number_format(double number, int decimals = 0, CVarRef dec_point = ".",
-                       CVarRef thousands_sep = ",");
+String f_number_format(double number, int decimals = 0, const Variant& dec_point = ".",
+                       const Variant& thousands_sep = ",");
 
 ///////////////////////////////////////////////////////////////////////////////
 // analysis
@@ -145,17 +145,17 @@ int64_t f_strcoll(const String& str1, const String& str2);
 Variant f_substr_compare(const String& main_str, const String& str, int offset,
                          int length = INT_MAX, bool case_insensitivity = false);
 
-Variant f_strrchr(const String& haystack, CVarRef needle);
-Variant f_strstr(const String& haystack, CVarRef needle, bool before_needle = false);
-Variant f_stristr(const String& haystack, CVarRef needle);
+Variant f_strrchr(const String& haystack, const Variant& needle);
+Variant f_strstr(const String& haystack, const Variant& needle, bool before_needle = false);
+Variant f_stristr(const String& haystack, const Variant& needle);
 Variant f_strpbrk(const String& haystack, const String& char_list);
 
-Variant f_strchr(const String& haystack, CVarRef needle);
+Variant f_strchr(const String& haystack, const Variant& needle);
 
-Variant f_strpos(const String& haystack, CVarRef needle, int offset = 0);
-Variant f_stripos(const String& haystack, CVarRef needle, int offset = 0);
-Variant f_strrpos(const String& haystack, CVarRef needle, int offset = 0);
-Variant f_strripos(const String& haystack, CVarRef needle, int offset = 0);
+Variant f_strpos(const String& haystack, const Variant& needle, int offset = 0);
+Variant f_stripos(const String& haystack, const Variant& needle, int offset = 0);
+Variant f_strrpos(const String& haystack, const Variant& needle, int offset = 0);
+Variant f_strripos(const String& haystack, const Variant& needle, int offset = 0);
 
 Variant f_substr_count(const String& haystack, const String& needle, int offset = 0,
                        int length = 0x7FFFFFFF);
@@ -164,7 +164,7 @@ Variant f_strspn(const String& str1, const String& str2, int start = 0,
 Variant f_strcspn(const String& str1, const String& str2, int start = 0,
                   int length = 0x7FFFFFFF);
 
-Variant f_strlen(CVarRef vstr);
+Variant f_strlen(const Variant& vstr);
 
 Array f_str_getcsv(const String& str,
                    const String& delimiter = ",",

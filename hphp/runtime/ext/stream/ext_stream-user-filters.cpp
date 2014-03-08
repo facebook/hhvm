@@ -50,8 +50,8 @@ class StreamUserFilters : public RequestEventHandler {
 
   Variant prepend(const Resource& stream,
                  const String& filtername,
-                 CVarRef readwrite,
-                 CVarRef params) {
+                 const Variant& readwrite,
+                 const Variant& params) {
     return appendOrPrependFilter(stream,
                                  filtername,
                                  readwrite,
@@ -61,8 +61,8 @@ class StreamUserFilters : public RequestEventHandler {
 
   Variant append(const Resource& stream,
                  const String& filtername,
-                 CVarRef readwrite,
-                 CVarRef params) {
+                 const Variant& readwrite,
+                 const Variant& params) {
     return appendOrPrependFilter(stream,
                                  filtername,
                                  readwrite,
@@ -78,8 +78,8 @@ class StreamUserFilters : public RequestEventHandler {
 private:
   Variant appendOrPrependFilter(const Resource& stream,
                  const String& filtername,
-                 CVarRef readwrite,
-                 CVarRef params,
+                 const Variant& readwrite,
+                 const Variant& params,
                  bool append) {
     const char* func_name =
       append ? "stream_filter_append()" : "stream_filter_prepend()";
@@ -152,7 +152,7 @@ private:
   Resource createInstance(const char* php_func,
                           const Resource& stream,
                           const String& filter,
-                          CVarRef params) {
+                          const Variant& params) {
     auto class_name = m_registeredFilters.rvalAt(filter).asCStrRef();
     Class* class_ = Unit::lookupClass(class_name.get());
     Object obj = null_object;
@@ -268,8 +268,8 @@ Array HHVM_FUNCTION(stream_get_filters) {
 Variant HHVM_FUNCTION(stream_filter_append,
                       const Resource& stream,
                       const String& filtername,
-                      CVarRef readwrite,
-                      CVarRef params) {
+                      const Variant& readwrite,
+                      const Variant& params) {
   return s_stream_user_filters.get()->append(stream,
                                              filtername,
                                              readwrite,
@@ -279,8 +279,8 @@ Variant HHVM_FUNCTION(stream_filter_append,
 Variant HHVM_FUNCTION(stream_filter_prepend,
                       const Resource& stream,
                       const String& filtername,
-                      CVarRef readwrite,
-                      CVarRef params) {
+                      const Variant& readwrite,
+                      const Variant& params) {
   return s_stream_user_filters.get()->prepend(stream,
                                               filtername,
                                               readwrite,

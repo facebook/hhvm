@@ -175,7 +175,7 @@ Array f_msg_stat_queue(const Resource& queue) {
   return Array();
 }
 
-bool f_msg_send(const Resource& queue, int64_t msgtype, CVarRef message,
+bool f_msg_send(const Resource& queue, int64_t msgtype, const Variant& message,
                 bool serialize /* = true */, bool blocking /* = true */,
                 VRefParam errorcode /* = null */) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
@@ -722,7 +722,7 @@ bool f_shm_has_var(int64_t shm_identifier, int64_t variable_key) {
 }
 
 bool f_shm_put_var(int64_t shm_identifier, int64_t variable_key,
-                   CVarRef variable) {
+                   const Variant& variable) {
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
     g_shms.find((sysvshm_shm*)shm_identifier);

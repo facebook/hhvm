@@ -63,7 +63,7 @@ APCHandle* APCObject::Construct(ObjectData* objectData) {
   for (ArrayIter it(odProps); !it.end(); it.next()) {
     Variant key(it.first());
     assert(key.isString());
-    CVarRef value = it.secondRef();
+    const Variant& value = it.secondRef();
     APCHandle *val = nullptr;
     if (!value.isNull()) {
       val = APCHandle::Create(value, false, true, true);
@@ -119,7 +119,7 @@ void APCObject::Delete(APCHandle* handle) {
 
 //////////////////////////////////////////////////////////////////////
 
-APCHandle* APCObject::MakeAPCObject(APCHandle* obj, CVarRef value) {
+APCHandle* APCObject::MakeAPCObject(APCHandle* obj, const Variant& value) {
   if (!value.is(KindOfObject) || obj->getObjAttempted()) {
     return nullptr;
   }

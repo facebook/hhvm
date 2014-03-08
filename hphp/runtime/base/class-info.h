@@ -92,12 +92,12 @@ public:
     const char *valueText;
     const void* callback;
 
-    CVarRef getDeferredValue() const;
+    const Variant& getDeferredValue() const;
     Variant getValue() const;
     bool isDeferred() const { return deferred; }
     bool isCallback() const { return callback != nullptr; }
-    void setValue(CVarRef value);
-    void setStaticValue(CVarRef value);
+    void setValue(const Variant& value);
+    void setStaticValue(const Variant& value);
 
     bool isDynamic() const {
       return deferred;
@@ -115,7 +115,7 @@ public:
     String name;
 
     Variant getValue() const;
-    void setStaticValue(CVarRef value);
+    void setStaticValue(const Variant& value);
 
   private:
     Variant value;

@@ -67,7 +67,7 @@ public:
   static void deleteValues(const Class* klass);
 
   // Helper that raises a PHP exception
-  static void failLookup(CVarRef msg) ATTRIBUTE_NORETURN;
+  static void failLookup(const Variant& msg) ATTRIBUTE_NORETURN;
 
 private:
   // Class* to intptr_ti key helpers

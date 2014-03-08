@@ -71,7 +71,7 @@ enum class KeyType {
 template<KeyType kt>
 struct KeyTypeTraits {};
 template<> struct KeyTypeTraits<KeyType::Any> {
-  typedef CVarRef valType;
+  typedef const Variant& valType;
   typedef int64_t rawType; // This is never actually used but it's
                          // needed to keep the compiler happy
 };
@@ -101,7 +101,7 @@ inline int64_t keyAsValue<KeyType::Int>(TypedValue* key) {
   return reinterpret_cast<int64_t>(key);
 }
 template<>
-inline CVarRef keyAsValue<KeyType::Any>(TypedValue* key) {
+inline const Variant& keyAsValue<KeyType::Any>(TypedValue* key) {
   return tvAsCVarRef(key);
 }
 template<>
@@ -130,15 +130,15 @@ inline void initScratchKey(TypedValue& tv, TypedValue*& key) {
 
 void objArrayAccess(ObjectData* base);
 TypedValue* objOffsetGet(TypedValue& tvRef, ObjectData* base,
-                         CVarRef offset, bool validate=true);
-bool objOffsetIsset(TypedValue& tvRef, ObjectData* base, CVarRef offset,
+                         const Variant& offset, bool validate=true);
+bool objOffsetIsset(TypedValue& tvRef, ObjectData* base, const Variant& offset,
                     bool validate=true);
-bool objOffsetEmpty(TypedValue& tvRef, ObjectData* base, CVarRef offset,
+bool objOffsetEmpty(TypedValue& tvRef, ObjectData* base, const Variant& offset,
                     bool validate=true);
-void objOffsetSet(ObjectData* base, CVarRef offset, TypedValue* val,
+void objOffsetSet(ObjectData* base, const Variant& offset, TypedValue* val,
                   bool validate=true);
 void objOffsetAppend(ObjectData* base, TypedValue* val, bool validate=true);
-void objOffsetUnset(ObjectData* base, CVarRef offset);
+void objOffsetUnset(ObjectData* base, const Variant& offset);
 
 StringData* prepareAnyKey(TypedValue* tv);
 

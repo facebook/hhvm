@@ -62,12 +62,12 @@ const int BAD_VERSION = 4;
 
 void binary_deserialize_spec(const Object& zthis, PHPInputTransport& transport, const Array& spec);
 void binary_serialize_spec(const Object& zthis, PHPOutputTransport& transport, const Array& spec);
-void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport, CVarRef value, const Array& fieldspec);
+void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport, const Variant& value, const Array& fieldspec);
 void skip_element(long thrift_typeID, PHPInputTransport& transport);
 
 // Create a PHP object given a typename and call the ctor, optionally passing up to 2 arguments
 Object createObject(const String& obj_typename, int nargs = 0,
-                    CVarRef arg1 = null_variant, CVarRef arg2 = null_variant) {
+                    const Variant& arg1 = null_variant, const Variant& arg2 = null_variant) {
   if (!f_class_exists(obj_typename)) {
     raise_warning("runtime/ext_thrift: Class %s does not exist",
                   obj_typename.data());
@@ -388,7 +388,7 @@ void binary_deserialize_spec(const Object& zthis, PHPInputTransport& transport,
 }
 
 void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
-                      CVarRef value, const Array& fieldspec) {
+                      const Variant& value, const Array& fieldspec) {
   // At this point the typeID (and field num, if applicable) should've already
   // been written to the output so all we need to do is write the payload.
   switch (thrift_typeID) {

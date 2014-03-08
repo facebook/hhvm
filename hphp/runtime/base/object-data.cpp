@@ -331,21 +331,21 @@ ALWAYS_INLINE Variant ObjectData::o_setImpl(const String& propName, T v,
   return variant(v);
 }
 
-Variant ObjectData::o_set(const String& propName, CVarRef v) {
-  return o_setImpl<CVarRef>(propName, v, null_string);
+Variant ObjectData::o_set(const String& propName, const Variant& v) {
+  return o_setImpl<const Variant&>(propName, v, null_string);
 }
 
 Variant ObjectData::o_set(const String& propName, RefResult v) {
   return o_setRef(propName, variant(v), null_string);
 }
 
-Variant ObjectData::o_setRef(const String& propName, CVarRef v) {
+Variant ObjectData::o_setRef(const String& propName, const Variant& v) {
   return o_setImpl<RefResult>(propName, ref(v), null_string);
 }
 
-Variant ObjectData::o_set(const String& propName, CVarRef v,
+Variant ObjectData::o_set(const String& propName, const Variant& v,
                           const String& context) {
-  return o_setImpl<CVarRef>(propName, v, context);
+  return o_setImpl<const Variant&>(propName, v, context);
 }
 
 Variant ObjectData::o_set(const String& propName, RefResult v,
@@ -353,7 +353,7 @@ Variant ObjectData::o_set(const String& propName, RefResult v,
   return o_setRef(propName, variant(v), context);
 }
 
-Variant ObjectData::o_setRef(const String& propName, CVarRef v,
+Variant ObjectData::o_setRef(const String& propName, const Variant& v,
                              const String& context) {
   return o_setImpl<RefResult>(propName, ref(v), context);
 }
@@ -381,7 +381,7 @@ void ObjectData::o_setArray(const Array& properties) {
       k = k.substr(subLen);
     }
 
-    CVarRef secondRef = iter.secondRef();
+    const Variant& secondRef = iter.secondRef();
     setProp(ctx, k.get(), (TypedValue*)(&secondRef),
             secondRef.isReferenced());
   }
@@ -567,7 +567,7 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
   return true;
 }
 
-Variant ObjectData::o_invoke(const String& s, CVarRef params,
+Variant ObjectData::o_invoke(const String& s, const Variant& params,
                              bool fatal /* = true */) {
   CallCtx ctx;
   if (!decode_invoke(s, this, fatal, ctx) ||

@@ -50,7 +50,7 @@ void EnumCache::deleteValues(const Class* klass) {
   }
 }
 
-void EnumCache::failLookup(CVarRef msg) {
+void EnumCache::failLookup(const Variant& msg) {
   Object e(SystemLib::AllocExceptionObject(msg));
   throw e;
 }

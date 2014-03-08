@@ -49,7 +49,7 @@ void FileinfoResource::sweep() {
 
 static Variant HHVM_FUNCTION(finfo_open,
     int64_t options,
-    CVarRef magic_file) {
+    const Variant& magic_file) {
   auto magic = magic_open(options);
   if (magic == nullptr) {
     raise_warning("Invalid mode '%" PRId64 "'.", options);
@@ -100,7 +100,7 @@ static bool HHVM_FUNCTION(finfo_set_flags, const Resource& finfo, int64_t option
 
 static Variant php_finfo_get_type(
     const Resource& object, const Variant& what,
-    int64_t options, CVarRef context, int mode, int mimetype_emu)
+    int64_t options, const Variant& context, int mode, int mimetype_emu)
 {
   String ret_val;
   String buffer;
@@ -217,8 +217,8 @@ clean:
 }
 
 static String HHVM_FUNCTION(finfo_buffer,
-    const Resource& finfo, CVarRef string,
-    int64_t options, CVarRef context) {
+    const Resource& finfo, const Variant& string,
+    int64_t options, const Variant& context) {
 
   String s;
   if (!string.isNull()) {
@@ -230,8 +230,8 @@ static String HHVM_FUNCTION(finfo_buffer,
 }
 
 static String HHVM_FUNCTION(finfo_file,
-    const Resource& finfo, CVarRef file_name,
-    int64_t options, CVarRef context) {
+    const Resource& finfo, const Variant& file_name,
+    int64_t options, const Variant& context) {
 
   String fn;
   if (!file_name.isNull()) {

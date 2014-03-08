@@ -27,10 +27,10 @@ namespace HPHP {
 
 Object f_memcache_connect(const String& host, int port = 0, int timeout = 0, int timeoutms = 0);
 Object f_memcache_pconnect(const String& host, int port = 0, int timeout = 0, int timeoutms = 0);
-bool f_memcache_add(const Object& memcache, const String& key, CVarRef var, int flag = 0, int expire = 0);
-bool f_memcache_set(const Object& memcache, const String& key, CVarRef var, int flag = 0, int expire = 0);
-bool f_memcache_replace(const Object& memcache, const String& key, CVarRef var, int flag = 0, int expire = 0);
-Variant f_memcache_get(const Object& memcache, CVarRef key, VRefParam flags = uninit_null());
+bool f_memcache_add(const Object& memcache, const String& key, const Variant& var, int flag = 0, int expire = 0);
+bool f_memcache_set(const Object& memcache, const String& key, const Variant& var, int flag = 0, int expire = 0);
+bool f_memcache_replace(const Object& memcache, const String& key, const Variant& var, int flag = 0, int expire = 0);
+Variant f_memcache_get(const Object& memcache, const Variant& key, VRefParam flags = uninit_null());
 bool f_memcache_delete(const Object& memcache, const String& key, int expire = 0);
 int64_t f_memcache_increment(const Object& memcache, const String& key, int offset = 1);
 int64_t f_memcache_decrement(const Object& memcache, const String& key, int offset = 1);
@@ -42,8 +42,8 @@ int64_t f_memcache_get_server_status(const Object& memcache, const String& host,
 bool f_memcache_set_compress_threshold(const Object& memcache, int threshold, double min_savings = 0.2);
 Array f_memcache_get_stats(const Object& memcache, const String& type = null_string, int slabid = 0, int limit = 100);
 Array f_memcache_get_extended_stats(const Object& memcache, const String& type = null_string, int slabid = 0, int limit = 100);
-bool f_memcache_set_server_params(const Object& memcache, const String& host, int port = 11211, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant);
-bool f_memcache_add_server(const Object& memcache, const String& host, int port = 11211, bool persistent = false, int weight = 0, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant, int timeoutms = 0);
+bool f_memcache_set_server_params(const Object& memcache, const String& host, int port = 11211, int timeout = 0, int retry_interval = 0, bool status = true, const Variant& failure_callback = null_variant);
+bool f_memcache_add_server(const Object& memcache, const String& host, int port = 11211, bool persistent = false, int weight = 0, int timeout = 0, int retry_interval = 0, bool status = true, const Variant& failure_callback = null_variant, int timeoutms = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Memcache
@@ -59,10 +59,10 @@ class c_Memcache : public ExtObjectData, public Sweepable {
   public: void t___construct();
   public: bool t_connect(const String& host, int port = 0, int timeout = 0, int timeoutms = 0);
   public: bool t_pconnect(const String& host, int port = 0, int timeout = 0, int timeoutms = 0);
-  public: bool t_add(const String& key, CVarRef var, int flag = 0, int expire = 0);
-  public: bool t_set(const String& key, CVarRef var, int flag = 0, int expire = 0);
-  public: bool t_replace(const String& key, CVarRef var, int flag = 0, int expire = 0);
-  public: Variant t_get(CVarRef key, VRefParam flags = uninit_null());
+  public: bool t_add(const String& key, const Variant& var, int flag = 0, int expire = 0);
+  public: bool t_set(const String& key, const Variant& var, int flag = 0, int expire = 0);
+  public: bool t_replace(const String& key, const Variant& var, int flag = 0, int expire = 0);
+  public: Variant t_get(const Variant& key, VRefParam flags = uninit_null());
   public: bool t_delete(const String& key, int expire = 0);
   public: int64_t t_increment(const String& key, int offset = 1);
   public: int64_t t_decrement(const String& key, int offset = 1);
@@ -74,8 +74,8 @@ class c_Memcache : public ExtObjectData, public Sweepable {
   public: bool t_setcompressthreshold(int threshold, double min_savings = 0.2);
   public: Array t_getstats(const String& type = null_string, int slabid = 0, int limit = 100);
   public: Array t_getextendedstats(const String& type = null_string, int slabid = 0, int limit = 100);
-  public: bool t_setserverparams(const String& host, int port = 11211, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant);
-  public: bool t_addserver(const String& host, int port = 11211, bool persistent = false, int weight = 0, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant, int timeoutms = 0);
+  public: bool t_setserverparams(const String& host, int port = 11211, int timeout = 0, int retry_interval = 0, bool status = true, const Variant& failure_callback = null_variant);
+  public: bool t_addserver(const String& host, int port = 11211, bool persistent = false, int weight = 0, int timeout = 0, int retry_interval = 0, bool status = true, const Variant& failure_callback = null_variant, int timeoutms = 0);
   public: Variant t___destruct();
 
 

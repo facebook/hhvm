@@ -32,7 +32,7 @@ UserStreamWrapper::UserStreamWrapper(const String& name,
 }
 
 File* UserStreamWrapper::open(const String& filename, const String& mode,
-                              int options, CVarRef context) {
+                              int options, const Variant& context) {
   auto file = NEWOBJ(UserFile)(m_cls, context);
   Resource wrapper(file);
   auto ret = file->openImpl(filename, mode, options);

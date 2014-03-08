@@ -116,7 +116,7 @@ enum TType {
 /* Return the smallest (supported) unsigned length that can store the value */
 #define LEN_SIZE(x) ((((unsigned)x) == ((uint8_t)x)) ? 1 : 4)
 
-Variant f_fb_serialize(CVarRef thing) {
+Variant f_fb_serialize(const Variant& thing) {
   try {
     size_t len =
       HPHP::serialize::FBSerializer<VariantController>::serializedSize(thing);
@@ -129,7 +129,7 @@ Variant f_fb_serialize(CVarRef thing) {
   }
 }
 
-Variant f_fb_unserialize(CVarRef thing, VRefParam success) {
+Variant f_fb_unserialize(const Variant& thing, VRefParam success) {
   if (thing.isString()) {
     String sthing = thing.toString();
 
@@ -353,7 +353,7 @@ static bool fb_compact_serialize_is_list(const Array& arr, int64_t& index_limit)
 }
 
 static int fb_compact_serialize_variant(StringBuffer& sd,
-  CVarRef var, int depth);
+  const Variant& var, int depth);
 
 static void fb_compact_serialize_array_as_list_map(
     StringBuffer& sb, const Array& arr, int64_t index_limit, int depth) {
@@ -385,7 +385,7 @@ static void fb_compact_serialize_array_as_map(
 
 
 static int fb_compact_serialize_variant(
-    StringBuffer& sb, CVarRef var, int depth) {
+    StringBuffer& sb, const Variant& var, int depth) {
   if (depth > 256) {
     return 1;
   }
@@ -440,7 +440,7 @@ static int fb_compact_serialize_variant(
   return 0;
 }
 
-Variant f_fb_compact_serialize(CVarRef thing) {
+Variant f_fb_compact_serialize(const Variant& thing) {
   /**
    * If thing is a single int value [0, 127] normally we would serialize
    * it as a single byte (7 bit unsigned int).
@@ -687,7 +687,7 @@ Variant fb_compact_unserialize(const char* str, int len,
   return ret;
 }
 
-Variant f_fb_compact_unserialize(CVarRef thing, VRefParam success,
+Variant f_fb_compact_unserialize(const Variant& thing, VRefParam success,
                                  VRefParam errcode /* = null_variant */) {
   if (!thing.isString()) {
     success = false;
@@ -1033,8 +1033,8 @@ bool f_fb_could_include(const String& file) {
   return !Eval::resolveVmInclude(file.get(), "", &s).isNull();
 }
 
-bool f_fb_intercept(const String& name, CVarRef handler,
-                    CVarRef data /* = null_variant */) {
+bool f_fb_intercept(const String& name, const Variant& handler,
+                    const Variant& data /* = null_variant */) {
   return register_intercept(name, handler, data);
 }
 
@@ -1094,7 +1094,7 @@ bool f_fb_rename_function(const String& orig_func_name, const String& new_func_n
   (so will typically need to end with '/').
 */
 
-bool f_fb_autoload_map(CVarRef map, const String& root) {
+bool f_fb_autoload_map(const Variant& map, const String& root) {
   if (map.isArray()) {
     return AutoloadHandler::s_instance->setMap(map.toCArrRef(), root);
   }
@@ -1104,13 +1104,13 @@ bool f_fb_autoload_map(CVarRef map, const String& root) {
 ///////////////////////////////////////////////////////////////////////////////
 // call_user_func extensions
 
-Array f_fb_call_user_func_safe(int _argc, CVarRef function,
+Array f_fb_call_user_func_safe(int _argc, const Variant& function,
                                const Array& _argv /* = null_array */) {
   return f_fb_call_user_func_array_safe(function, _argv);
 }
 
-Variant f_fb_call_user_func_safe_return(int _argc, CVarRef function,
-                                        CVarRef def,
+Variant f_fb_call_user_func_safe_return(int _argc, const Variant& function,
+                                        const Variant& def,
                                         const Array& _argv /* = null_array */) {
   if (f_is_callable(function)) {
     return vm_call_user_func(function, _argv);
@@ -1118,7 +1118,7 @@ Variant f_fb_call_user_func_safe_return(int _argc, CVarRef function,
   return def;
 }
 
-Array f_fb_call_user_func_array_safe(CVarRef function, const Array& params) {
+Array f_fb_call_user_func_array_safe(const Variant& function, const Array& params) {
   if (f_is_callable(function)) {
     return make_packed_array(true, vm_call_user_func(function, params));
   }
@@ -1174,7 +1174,7 @@ bool f_fb_output_compression(bool new_value) {
   return false;
 }
 
-void f_fb_set_exit_callback(CVarRef function) {
+void f_fb_set_exit_callback(const Variant& function) {
   g_context->setExitCallback(function);
 }
 
@@ -1216,7 +1216,7 @@ String f_fb_lazy_realpath(const String& filename) {
 
 static Array const_data;
 
-Variant f_fb_const_fetch(CVarRef key) {
+Variant f_fb_const_fetch(const Variant& key) {
   String k = key.toString();
   if (ArrayData* ad = const_data.get()) {
     auto& v = ad->get(k, /*error*/false);
@@ -1227,7 +1227,7 @@ Variant f_fb_const_fetch(CVarRef key) {
   return Variant(false);
 }
 
-void const_load_set(const String& key, CVarRef value) {
+void const_load_set(const String& key, const Variant& value) {
   const_data.set(key, value, true);
 }
 

@@ -38,7 +38,7 @@ struct TestMessage {
   typedef std::vector<uint8_t> Body;
 
   bool bodyFromStr(const String& input);
-  bool fromJson(CVarRef json);
+  bool fromJson(const Variant& json);
 
   Command m_command;
   Body m_body;
@@ -47,7 +47,7 @@ struct TestMessage {
 };
 
 struct TestMessageExchange {
-  bool fromJson(CVarRef json);
+  bool fromJson(const Variant& json);
   TestMessageExchange aggregate() const;
   TestMessageExchange split() const;
 

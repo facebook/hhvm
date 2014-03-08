@@ -1155,7 +1155,7 @@ LookupResult ExecutionContext::lookupCtorMethod(const Func*& f,
 }
 
 ObjectData* ExecutionContext::createObject(StringData* clsName,
-                                             CVarRef params,
+                                             const Variant& params,
                                              bool init /* = true */) {
   Class* class_ = Unit::loadClass(clsName);
   if (class_ == nullptr) {
@@ -1665,7 +1665,7 @@ void ExecutionContext::reenterVM(TypedValue* retval,
 
 void ExecutionContext::invokeFunc(TypedValue* retval,
                                     const Func* f,
-                                    CVarRef args_,
+                                    const Variant& args_,
                                     ObjectData* this_ /* = NULL */,
                                     Class* cls /* = NULL */,
                                     VarEnv* varEnv /* = NULL */,
@@ -2524,12 +2524,12 @@ StaticString
   s_semicolon_curly("; }"),
   s_php_return("<?php return "),
   s_semicolon(";");
-CVarRef ExecutionContext::getEvaledArg(const StringData* val,
+const Variant& ExecutionContext::getEvaledArg(const StringData* val,
                                          const String& namespacedName) {
   const String& key = *(String*)&val;
 
   if (m_evaledArgs.get()) {
-    CVarRef arg = m_evaledArgs.get()->get(key);
+    const Variant& arg = m_evaledArgs.get()->get(key);
     if (&arg != &null_variant) return arg;
   }
 
@@ -6205,7 +6205,7 @@ OPTBLD_INLINE void ExecutionContext::iopFCallBuiltin(IOP_ARGS) {
   tvCopy(ret, *m_stack.allocTV());
 }
 
-bool ExecutionContext::prepareArrayArgs(ActRec* ar, CVarRef arrayArgs) {
+bool ExecutionContext::prepareArrayArgs(ActRec* ar, const Variant& arrayArgs) {
   const auto& args = *arrayArgs.asCell();
   assert(isContainer(args));
   if (UNLIKELY(ar->hasInvName())) {

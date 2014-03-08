@@ -2174,8 +2174,8 @@ static const Func* findCuf(Op op,
     sname = makeStaticString(name.substr(pos + 2).get());
   } else if (arr) {
     if (arr->size() != 2) return nullptr;
-    CVarRef e0 = arr->get(int64_t(0), false);
-    CVarRef e1 = arr->get(int64_t(1), false);
+    const Variant& e0 = arr->get(int64_t(0), false);
+    const Variant& e1 = arr->get(int64_t(1), false);
     if (!e0.isString() || !e1.isString()) return nullptr;
     sclass = e0.getStringData();
     sname = e1.getStringData();

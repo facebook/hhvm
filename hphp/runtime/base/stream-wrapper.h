@@ -38,7 +38,7 @@ class Wrapper : boost::noncopyable {
   void registerAs(const std::string &scheme);
 
   virtual File* open(const String& filename, const String& mode,
-                     int options, CVarRef context) = 0;
+                     int options, const Variant& context) = 0;
   virtual int access(const String& path, int mode) {
     return -1;
   }

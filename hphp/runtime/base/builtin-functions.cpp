@@ -94,7 +94,7 @@ bool array_is_valid_callback(const Array& arr) {
 }
 
 const HPHP::Func*
-vm_decode_function(CVarRef function,
+vm_decode_function(const Variant& function,
                    ActRec* ar,
                    bool forwarding,
                    ObjectData*& this_,
@@ -342,7 +342,7 @@ vm_decode_function(CVarRef function,
   return nullptr;
 }
 
-Variant vm_call_user_func(CVarRef function, CVarRef params,
+Variant vm_call_user_func(const Variant& function, const Variant& params,
                           bool forwarding /* = false */) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
@@ -362,7 +362,7 @@ Variant vm_call_user_func(CVarRef function, CVarRef params,
 /*
  * Helper method from converting between a PHP function and a CufIter.
  */
-static bool vm_decode_function_cufiter(CVarRef function,
+static bool vm_decode_function_cufiter(const Variant& function,
                                        SmartCufIterPtr& cufIter) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
@@ -414,7 +414,7 @@ static Variant vm_call_user_func_cufiter(const CufIter& cufIter,
   return ret;
 }
 
-Variant invoke(const String& function, CVarRef params,
+Variant invoke(const String& function, const Variant& params,
                strhash_t hash /* = -1 */, bool tryInterp /* = true */,
                bool fatal /* = true */) {
   Func* func = Unit::loadFunc(function.get());
@@ -426,14 +426,14 @@ Variant invoke(const String& function, CVarRef params,
   return invoke_failed(function.c_str(), fatal);
 }
 
-Variant invoke(const char *function, CVarRef params, strhash_t hash /* = -1 */,
+Variant invoke(const char *function, const Variant& params, strhash_t hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   String funcName(function, CopyString);
   return invoke(funcName, params, hash, tryInterp, fatal);
 }
 
 Variant invoke_static_method(const String& s, const String& method,
-                             CVarRef params, bool fatal /* = true */) {
+                             const Variant& params, bool fatal /* = true */) {
   HPHP::Class* class_ = Unit::lookupClass(s.get());
   if (class_ == nullptr) {
     o_invoke_failed(s.data(), method.data(), fatal);
@@ -450,7 +450,7 @@ Variant invoke_static_method(const String& s, const String& method,
   return ret;
 }
 
-Variant invoke_failed(CVarRef func,
+Variant invoke_failed(const Variant& func,
                       bool fatal /* = true */) {
   if (func.isObject()) {
     return o_invoke_failed(
@@ -771,7 +771,7 @@ void throw_call_non_object(const char *methodName) {
   throw FatalErrorException(msg.c_str());
 }
 
-String f_serialize(CVarRef value) {
+String f_serialize(const Variant& value) {
   switch (value.getType()) {
   case KindOfUninit:
   case KindOfNull:
@@ -1112,11 +1112,11 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& name,
                                                      const T &checkExists) {
   assert(!m_map.isNull());
   while (true) {
-    CVarRef &type_map = m_map.get()->get(kind);
+    const Variant& type_map = m_map.get()->get(kind);
     auto const typeMapCell = type_map.asCell();
     if (typeMapCell->m_type != KindOfArray) return Failure;
     String canonicalName = toLower ? f_strtolower(name) : name;
-    CVarRef &file = typeMapCell->m_data.parr->get(canonicalName);
+    const Variant& file = typeMapCell->m_data.parr->get(canonicalName);
     bool ok = false;
     if (file.isString()) {
       String fName = file.toCStrRef().get();
@@ -1145,7 +1145,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& name,
     if (ok && checkExists(name)) {
       return Success;
     }
-    CVarRef &func = m_map.get()->get(s_failure);
+    const Variant& func = m_map.get()->get(s_failure);
     if (func.isNull()) return Failure;
     // can throw, otherwise
     //  - true means the map was updated. try again
@@ -1293,7 +1293,7 @@ bool AutoloadHandler::CompareBundles::operator()(
   return lhs.func() == rhs.func();
 }
 
-bool AutoloadHandler::addHandler(CVarRef handler, bool prepend) {
+bool AutoloadHandler::addHandler(const Variant& handler, bool prepend) {
   SmartCufIterPtr cufIter = nullptr;
   if (!vm_decode_function_cufiter(handler, cufIter)) {
     return false;
@@ -1322,7 +1322,7 @@ bool AutoloadHandler::isRunning() {
   return !m_loading.empty();
 }
 
-void AutoloadHandler::removeHandler(CVarRef handler) {
+void AutoloadHandler::removeHandler(const Variant& handler) {
   SmartCufIterPtr cufIter = nullptr;
   if (!vm_decode_function_cufiter(handler, cufIter)) {
     return;

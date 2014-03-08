@@ -2103,21 +2103,21 @@ void HhbcTranslator::MInstrTranslator::emitEmptyElem() {
 }
 
 static inline ArrayData* checkedSet(ArrayData* a, StringData* key,
-                                    CVarRef value, bool copy) {
+                                    const Variant& value, bool copy) {
   int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i)) ? a->set(i, value, copy)
                                              : a->set(key, value, copy);
 }
 
 static inline ArrayData* checkedSet(ArrayData* a, int64_t key,
-                                    CVarRef value, bool copy) {
+                                    const Variant& value, bool copy) {
   not_reached();
 }
 
 template<KeyType keyType, bool checkForInt, bool setRef>
 static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
     ArrayData* a, typename KeyTypeTraits<keyType>::rawType key,
-    CVarRef value, RefData* ref) {
+    const Variant& value, RefData* ref) {
   static_assert(keyType != KeyType::Any,
                 "KeyType::Any is not supported in arraySetMImpl");
   const bool copy = a->hasMultipleRefs();

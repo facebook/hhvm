@@ -78,11 +78,11 @@ struct VariantController {
   static MapType getStaticEmptyMap() {
     return HphpArray::GetStaticEmptyArray();
   }
-  static HPHP::serialize::Type mapKeyType(CVarRef k) {
+  static HPHP::serialize::Type mapKeyType(const Variant& k) {
     return type(k);
   }
-  static int64_t mapKeyAsInt64(CVarRef k) { return k.toInt64(); }
-  static const String& mapKeyAsString(CVarRef k) {
+  static int64_t mapKeyAsInt64(const Variant& k) { return k.toInt64(); }
+  static const String& mapKeyAsString(const Variant& k) {
     return k.toCStrRef();
   }
   template <typename Key>

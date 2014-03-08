@@ -52,7 +52,7 @@ void process_ini_settings(const std::string& name);
  * cookie name for the same path and we should not overwrite more
  * specific cookies with the less specific ones.
  */
-void register_variable(Variant &variables, char *name, CVarRef value,
+void register_variable(Variant &variables, char *name, const Variant& value,
                        bool overwrite = true);
 
 String canonicalize_path(const String& path, const char* root, int rootLen);

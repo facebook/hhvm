@@ -100,7 +100,7 @@ public:
     return m_data.arr;
   }
 
-  CVarRef asCVarRef() const {
+  const Variant& asCVarRef() const {
     // Must be non-refcounted types
     assert(m_handle.m_shouldCache == false);
     assert(m_handle.m_flags == 0);

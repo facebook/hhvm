@@ -183,7 +183,7 @@ void ConcurrentTableSharedStore::addToExpirationQueue(const char* key,
 
 bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
                                                   APCHandle* svar,
-                                                  CVarRef value) {
+                                                  const Variant& value) {
   APCHandle *converted = APCObject::MakeAPCObject(svar, value);
   if (converted) {
     Map::accessor acc;
@@ -373,7 +373,7 @@ static int64_t adjust_ttl(int64_t ttl, bool overwritePrime) {
   return ttl;
 }
 
-bool ConcurrentTableSharedStore::store(const String& key, CVarRef value,
+bool ConcurrentTableSharedStore::store(const String& key, const Variant& value,
                                        int64_t ttl,
                                        bool overwrite /* = true */,
                                        bool limit_ttl /* = true */) {
@@ -465,7 +465,7 @@ bool ConcurrentTableSharedStore::constructPrime(const String& v,
   return true;
 }
 
-bool ConcurrentTableSharedStore::constructPrime(CVarRef v,
+bool ConcurrentTableSharedStore::constructPrime(const Variant& v,
                                                 KeyValuePair& item) {
   if (s_apc_file_storage.getState() !=
       SharedStoreFileStorage::StorageState::Invalid &&

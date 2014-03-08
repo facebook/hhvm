@@ -61,7 +61,7 @@ class ImagickExtension : public Extension {
       return ObjectData::newInstance(cls); \
     } \
     \
-    static Object allocObject(CVarRef arg) { \
+    static Object allocObject(const Variant& arg) { \
       Object ret = allocObject(); \
       TypedValue dummy; \
       g_context->invokeFunc(&dummy, \
@@ -320,7 +320,7 @@ Object createImagickPixel(PixelWand* wand, bool owner);
 
 Array createImagickPixelArray(size_t num, PixelWand* wands[], bool owner);
 
-std::pair<PixelWand*, bool> buildPixelWand(CVarRef color);
+std::pair<PixelWand*, bool> buildPixelWand(const Variant& color);
 
 //////////////////////////////////////////////////////////////////////////////
 // Init Module

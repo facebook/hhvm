@@ -68,7 +68,7 @@ static bool HHVM_METHOD(Imagick, clear) {
   }
 }
 
-static void HHVM_METHOD(Imagick, __construct, CVarRef files) {
+static void HHVM_METHOD(Imagick, __construct, const Variant& files) {
   auto wand = NewMagickWand();
   if (wand == nullptr) {
     IMAGICK_THROW("Failed to create ImagickDraw object");
@@ -103,7 +103,7 @@ static bool HHVM_METHOD(Imagick, drawImage, const Object& draw) {
 }
 
 static bool HHVM_METHOD(Imagick, newImage,
-    int64_t cols, int64_t rows, CVarRef background, const String& format) {
+    int64_t cols, int64_t rows, const Variant& background, const String& format) {
   auto wand = getMagickWandResource(this_);
   WandResource<PixelWand> pixel(buildPixelWand(background));
   auto status = MagickNewImage(wand->getWand(), cols, rows, pixel.getWand());

@@ -279,7 +279,7 @@ public:
   void read(Variant &data);
   void write(const Array& data);
   void write(const Object& data);
-  void write(CVarRef data);
+  void write(const Variant& data);
 
   void skip(int8_t type);
 

@@ -25,7 +25,7 @@ namespace HPHP { namespace Eval {
 class CmdPrint : public DebuggerCommand {
 public:
   static const char *Formats[];
-  static std::string FormatResult(const char *format, CVarRef ret);
+  static std::string FormatResult(const char *format, const Variant& ret);
 
 public:
   CmdPrint() : DebuggerCommand(KindOfPrint), m_bypassAccessCheck(false),

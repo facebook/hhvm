@@ -44,7 +44,7 @@ class IntlDateFormatter : public IntlError {
 
   void setDateFormatter(const String& locale,
                         int64_t datetype, int64_t timetype,
-                        CVarRef timezone, CVarRef calendar,
+                        const Variant& timezone, const Variant& calendar,
                         const String& pattern);
   void setDateFormatter(const IntlDateFormatter *orig);
 
@@ -72,7 +72,7 @@ class IntlDateFormatter : public IntlError {
   int64_t calendar() const { return m_calendar; }
 
   int64_t getArrayElemInt(const Array& arr, const StaticString &key);
-  double getTimestamp(CVarRef arg);
+  double getTimestamp(const Variant& arg);
 
  private:
   UDateFormat *m_date_fmt = nullptr;

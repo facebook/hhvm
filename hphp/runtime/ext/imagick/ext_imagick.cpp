@@ -69,7 +69,7 @@ std::vector<PointInfo> toPointInfoArray(const Array& coordinates) {
   int idx = 0;
 
   for (ArrayIter it(coordinates); it; ++it) {
-    CVarRef element = it.secondRefPlus();
+    const Variant& element = it.secondRefPlus();
     if (!element.isArray()) {
       return {};
     }

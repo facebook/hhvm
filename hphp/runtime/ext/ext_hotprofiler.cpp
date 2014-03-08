@@ -1716,7 +1716,7 @@ Variant f_phprof_disable() {
 #endif
 }
 
-void f_fb_setprofile(CVarRef callback) {
+void f_fb_setprofile(const Variant& callback) {
 #ifdef HOTPROFILER
   if (ThreadInfo::s_threadInfo->m_profiler != nullptr) {
     // phpprof is enabled, don't let PHP code override it

@@ -165,7 +165,7 @@ String u8(const UChar *u16, int32_t u16_len, UErrorCode &error) {
   return ret;
 }
 
-double VariantToMilliseconds(CVarRef arg) {
+double VariantToMilliseconds(const Variant& arg) {
   if (arg.isNumeric(true)) {
     return U_MILLIS_PER_SECOND * arg.toDouble();
   }

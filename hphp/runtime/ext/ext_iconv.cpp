@@ -1273,7 +1273,7 @@ const StaticString
   s_line_break_chars("line-break-chars");
 
 Variant f_iconv_mime_encode(const String& field_name, const String& field_value,
-                            CVarRef preferences /* = null_variant */) {
+                            const Variant& preferences /* = null_variant */) {
   php_iconv_enc_scheme_t scheme_id = PHP_ICONV_ENC_SCHEME_BASE64;
   String in_charset;
   String out_charset;

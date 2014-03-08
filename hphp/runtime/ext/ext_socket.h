@@ -35,12 +35,12 @@ bool f_socket_getsockname(const Resource& socket, VRefParam address,
 bool f_socket_set_block(const Resource& socket);
 bool f_socket_set_nonblock(const Resource& socket);
 bool f_socket_set_option(const Resource& socket, int level, int optname,
-                         CVarRef optval);
+                         const Variant& optval);
 bool f_socket_connect(const Resource& socket, const String& address, int port = 0);
 bool f_socket_bind(const Resource& socket, const String& address, int port = 0);
 bool f_socket_listen(const Resource& socket, int backlog = 0);
 Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
-                        CVarRef vtv_sec, int tv_usec = 0);
+                        const Variant& vtv_sec, int tv_usec = 0);
 Variant f_socket_server(const String& hostname, int port = -1,
                         VRefParam errnum = uninit_null(),
                         VRefParam errstr = uninit_null());

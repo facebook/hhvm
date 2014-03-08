@@ -33,28 +33,28 @@ namespace HPHP {
 #define INVOKE_FEW_ARGS_COUNT 6
 
 #define INVOKE_FEW_ARGS_DECL3                                           \
-                            CVarRef a0 = null_variant,                  \
-                            CVarRef a1 = null_variant,                  \
-                            CVarRef a2 = null_variant
+                            const Variant& a0 = null_variant,                  \
+                            const Variant& a1 = null_variant,                  \
+                            const Variant& a2 = null_variant
 #define INVOKE_FEW_ARGS_DECL6                                           \
                             INVOKE_FEW_ARGS_DECL3,                      \
-                            CVarRef a3 = null_variant,                  \
-                            CVarRef a4 = null_variant,                  \
-                            CVarRef a5 = null_variant
+                            const Variant& a3 = null_variant,                  \
+                            const Variant& a4 = null_variant,                  \
+                            const Variant& a5 = null_variant
 #define INVOKE_FEW_ARGS_DECL10                                          \
                             INVOKE_FEW_ARGS_DECL6,                      \
-                            CVarRef a6 = null_variant,                  \
-                            CVarRef a7 = null_variant,                  \
-                            CVarRef a8 = null_variant,                  \
-                            CVarRef a9 = null_variant
+                            const Variant& a6 = null_variant,                  \
+                            const Variant& a7 = null_variant,                  \
+                            const Variant& a8 = null_variant,                  \
+                            const Variant& a9 = null_variant
 #define INVOKE_FEW_ARGS_IMPL3                                           \
-                            CVarRef a0, CVarRef a1, CVarRef a2
+                            const Variant& a0, const Variant& a1, const Variant& a2
 #define INVOKE_FEW_ARGS_IMPL6                                           \
-                            INVOKE_FEW_ARGS_IMPL3, CVarRef a3, CVarRef a4, \
-                            CVarRef a5
+                            INVOKE_FEW_ARGS_IMPL3, const Variant& a3, const Variant& a4, \
+                            const Variant& a5
 #define INVOKE_FEW_ARGS_IMPL10                                          \
-                            INVOKE_FEW_ARGS_IMPL6, CVarRef a6, CVarRef a7, \
-                            CVarRef a8, CVarRef a9
+                            INVOKE_FEW_ARGS_IMPL6, const Variant& a6, const Variant& a7, \
+                            const Variant& a8, const Variant& a9
 
 #define INVOKE_FEW_ARGS_PASS3  a0, a1, a2
 #define INVOKE_FEW_ARGS_PASS6  INVOKE_FEW_ARGS_PASS3, a3, a4, a5

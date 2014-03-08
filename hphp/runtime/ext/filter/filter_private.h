@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/types.h"
 
 #define PHP_INPUT_FILTER_PARAM_DECL const String& value, long flags, \
-                                    CVarRef option_array
+                                    const Variant& option_array
 
 #define RETURN_VALIDATION_FAILED    \
   if (flags & k_FILTER_NULL_ON_FAILURE) {   \

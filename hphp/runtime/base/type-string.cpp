@@ -226,7 +226,7 @@ String String::rvalAt(const Object& key) const {
   return rvalAtImpl(key.toInt32());
 }
 
-String String::rvalAt(CVarRef key) const {
+String String::rvalAt(const Variant& key) const {
   return rvalAtImpl(key.toInt32());
 }
 
@@ -267,7 +267,7 @@ String &String::operator=(const String& str) {
   return *this;
 }
 
-String &String::operator=(CVarRef var) {
+String &String::operator=(const Variant& var) {
   return operator=(var.toString());
 }
 
@@ -479,19 +479,19 @@ bool String::operator<(const String& v) const {
   return HPHP::less(m_px, v);
 }
 
-bool String::operator==(CVarRef v) const {
+bool String::operator==(const Variant& v) const {
   return HPHP::equal(m_px, v);
 }
 
-bool String::operator!=(CVarRef v) const {
+bool String::operator!=(const Variant& v) const {
   return !HPHP::equal(m_px, v);
 }
 
-bool String::operator>(CVarRef v) const {
+bool String::operator>(const Variant& v) const {
   return HPHP::more(m_px, v);
 }
 
-bool String::operator<(CVarRef v) const {
+bool String::operator<(const Variant& v) const {
   return HPHP::less(m_px, v);
 }
 

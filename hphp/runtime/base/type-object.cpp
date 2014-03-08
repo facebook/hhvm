@@ -117,7 +117,7 @@ Variant Object::o_get(const String& propName, bool error /* = true */,
   return m_px->o_get(propName, error, context);
 }
 
-Variant Object::o_set(const String& propName, CVarRef val,
+Variant Object::o_set(const String& propName, const Variant& val,
                       const String& context /* = null_string */) {
   if (!m_px) {
     setToDefaultObject();
@@ -125,7 +125,7 @@ Variant Object::o_set(const String& propName, CVarRef val,
   return m_px->o_set(propName, val, context);
 }
 
-Variant Object::o_setRef(const String& propName, CVarRef val,
+Variant Object::o_setRef(const String& propName, const Variant& val,
                          const String& context /* = null_string */) {
   if (!m_px) {
     setToDefaultObject();

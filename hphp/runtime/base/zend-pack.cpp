@@ -98,7 +98,7 @@ ZendPack::ZendPack() {
   }
 }
 
-void ZendPack::pack(CVarRef val, int size, int *map, char *output) {
+void ZendPack::pack(const Variant& val, int size, int *map, char *output) {
   int32_t n = val.toInt32();
   char *v = (char*)&n;
   for (int i = 0; i < size; i++) {

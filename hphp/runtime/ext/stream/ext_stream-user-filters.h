@@ -69,13 +69,13 @@ Array HHVM_FUNCTION(stream_get_filters);
 Variant HHVM_FUNCTION(stream_filter_append,
                       const Resource& stream,
                       const String& filtername,
-                      CVarRef readwrite,
-                      CVarRef params);
+                      const Variant& readwrite,
+                      const Variant& params);
 Variant HHVM_FUNCTION(stream_filter_prepend,
                       const Resource& stream,
                       const String& filtername,
-                      CVarRef readwrite,
-                      CVarRef params);
+                      const Variant& readwrite,
+                      const Variant& params);
 Variant HHVM_FUNCTION(stream_bucket_make_writeable, const Resource& bucket_brigade);
 void HHVM_FUNCTION(stream_bucket_append,
                    const Resource& bucket_brigade,

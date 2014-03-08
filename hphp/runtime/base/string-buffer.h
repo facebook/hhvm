@@ -168,7 +168,7 @@ struct StringBuffer {
     }
     appendHelper(s, len);
   }
-  void append(CVarRef s);
+  void append(const Variant& s);
   void append(int n);
   void append(int64_t n);
 

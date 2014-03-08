@@ -34,7 +34,7 @@ Variant f_simplexml_load_file(const String& filename, const String& class_name =
 Variant f_libxml_get_errors();
 Variant f_libxml_get_last_error();
 void f_libxml_clear_errors();
-bool f_libxml_use_internal_errors(CVarRef use_errors = null_variant);
+bool f_libxml_use_internal_errors(const Variant& use_errors = null_variant);
 bool f_libxml_disable_entity_loader(bool disable = true);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,10 +63,10 @@ class c_SimpleXMLElement :
   public: c_SimpleXMLElement(Class* cls = c_SimpleXMLElement::classof());
   public: ~c_SimpleXMLElement();
   public: void t___construct(const String& data, int64_t options = 0, bool data_is_url = false, const String& ns = "", bool is_prefix = false);
-  public: bool t_offsetexists(CVarRef index);
-  public: Variant t_offsetget(CVarRef index);
-  public: void t_offsetset(CVarRef index, CVarRef newvalue);
-  public: void t_offsetunset(CVarRef index);
+  public: bool t_offsetexists(const Variant& index);
+  public: Variant t_offsetget(const Variant& index);
+  public: void t_offsetset(const Variant& index, const Variant& newvalue);
+  public: void t_offsetunset(const Variant& index);
   public: Variant t_getiterator();
   public: int64_t t_count();
   public: Variant t_xpath(const String& path);

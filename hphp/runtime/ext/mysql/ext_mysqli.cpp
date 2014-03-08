@@ -360,7 +360,7 @@ static DataType get_option_value_type(int64_t option) {
   not_reached();
 }
 
-static Variant HHVM_METHOD(mysqli, options, int64_t option, CVarRef value) {
+static Variant HHVM_METHOD(mysqli, options, int64_t option, const Variant& value) {
   auto conn = get_connection(this_);
   VALIDATE_CONN(conn, MySQLState::INITED)
 

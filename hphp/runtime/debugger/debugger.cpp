@@ -274,7 +274,7 @@ void Debugger::Interrupt(int type, const char *program,
 // as "BreakPointReached". Currently this results in spurious work in the
 // debugger.
 void Debugger::InterruptVMHook(int type /* = BreakPointReached */,
-                               CVarRef e /* = null_variant */) {
+                               const Variant& e /* = null_variant */) {
   TRACE(2, "Debugger::InterruptVMHook\n");
   // Computing the interrupt site here pulls in more data from the Unit to
   // describe the current execution point.

@@ -207,7 +207,7 @@ void process_ini_settings(const std::string& name) {
   }
 }
 
-void register_variable(Variant &variables, char *name, CVarRef value,
+void register_variable(Variant &variables, char *name, const Variant& value,
                        bool overwrite /* = true */) {
   // ignore leading spaces in the variable name
   char *var = name;

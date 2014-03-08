@@ -38,7 +38,7 @@ bool f_xmlwriter_start_document(const Object& xmlwriter,
                                 const String& encoding = null_string,
                                 const String& standalone = null_string);
 bool f_xmlwriter_start_element(const Object& xmlwriter, const String& name);
-bool f_xmlwriter_start_element_ns(const Object& xmlwriter, const CVarRef prefix, const String& name, const String& uri);
+bool f_xmlwriter_start_element_ns(const Object& xmlwriter, const Variant& prefix, const String& name, const String& uri);
 bool f_xmlwriter_write_element_ns(const Object& xmlwriter, const String& prefix, const String& name, const String& uri, const String& content = null_string);
 bool f_xmlwriter_write_element(const Object& xmlwriter, const String& name, const String& content = null_string);
 bool f_xmlwriter_end_element(const Object& xmlwriter);
@@ -92,7 +92,7 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
   public: bool t_setindent(bool indent);
   public: bool t_startdocument(const String& version = "1.0", const String& encoding = null_string, const String& standalone = null_string);
   public: bool t_startelement(const String& name);
-  public: bool t_startelementns(const CVarRef prefix, const String& name, const String& uri);
+  public: bool t_startelementns(const Variant& prefix, const String& name, const String& uri);
   public: bool t_writeelementns(const String& prefix, const String& name, const String& uri, const String& content = null_string);
   public: bool t_writeelement(const String& name, const String& content = null_string);
   public: bool t_endelement();

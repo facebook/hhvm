@@ -126,8 +126,8 @@ public:
    *    to that cert
    *  . it will be interpreted as the cert data
    */
-  static Resource Get(CVarRef var);
-  static BIO *ReadData(CVarRef var, bool *file = nullptr);
+  static Resource Get(const Variant& var);
+  static BIO *ReadData(const Variant& var, bool *file = nullptr);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

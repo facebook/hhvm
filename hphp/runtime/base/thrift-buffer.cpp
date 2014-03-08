@@ -261,7 +261,7 @@ void ThriftBuffer::read(Variant &data) {
   data = unserialize_with_no_notice(sdata);
 }
 
-void ThriftBuffer::write(CVarRef data) {
+void ThriftBuffer::write(const Variant& data) {
   VariableSerializer vs(m_serializerType);
   String sdata = vs.serialize(data, true);
   write(sdata);

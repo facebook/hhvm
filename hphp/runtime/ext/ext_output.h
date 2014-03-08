@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_ob_start(CVarRef output_callback = uninit_null(), int chunk_size = 0,
+bool f_ob_start(const Variant& output_callback = uninit_null(), int chunk_size = 0,
                 bool erase = true);
 void f_ob_clean();
 void f_ob_flush();

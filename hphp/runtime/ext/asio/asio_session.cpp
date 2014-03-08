@@ -104,7 +104,7 @@ void AsioSession::onAsyncFunctionAwait(c_AsyncFunctionWaitHandle* cont, c_WaitHa
   }
 }
 
-void AsioSession::onAsyncFunctionSuccess(c_AsyncFunctionWaitHandle* cont, CVarRef result) {
+void AsioSession::onAsyncFunctionSuccess(c_AsyncFunctionWaitHandle* cont, const Variant& result) {
   assert(m_onAsyncFunctionSuccessCallback.get());
   try {
     vm_call_user_func(
@@ -135,7 +135,7 @@ void AsioSession::onJoin(c_WaitHandle* wait_handle) {
   }
 }
 
-void AsioSession::onGenArrayCreate(c_GenArrayWaitHandle* wait_handle, CVarRef dependencies) {
+void AsioSession::onGenArrayCreate(c_GenArrayWaitHandle* wait_handle, const Variant& dependencies) {
   assert(m_onGenArrayCreateCallback.get());
   try {
     vm_call_user_func(
@@ -146,7 +146,7 @@ void AsioSession::onGenArrayCreate(c_GenArrayWaitHandle* wait_handle, CVarRef de
   }
 }
 
-void AsioSession::onGenMapCreate(c_GenMapWaitHandle* wait_handle, CVarRef dependencies) {
+void AsioSession::onGenMapCreate(c_GenMapWaitHandle* wait_handle, const Variant& dependencies) {
   assert(m_onGenMapCreateCallback.get());
   try {
     vm_call_user_func(
@@ -157,7 +157,7 @@ void AsioSession::onGenMapCreate(c_GenMapWaitHandle* wait_handle, CVarRef depend
   }
 }
 
-void AsioSession::onGenVectorCreate(c_GenVectorWaitHandle* wait_handle, CVarRef dependencies) {
+void AsioSession::onGenVectorCreate(c_GenVectorWaitHandle* wait_handle, const Variant& dependencies) {
   assert(m_onGenVectorCreateCallback.get());
   try {
     vm_call_user_func(

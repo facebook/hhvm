@@ -168,11 +168,11 @@ public:
   Variant o_get(const String& propName, bool error = true,
                 const String& context = null_string) const;
   Variant o_set(
-    const String& s, CVarRef v, const String& context = null_string);
+    const String& s, const Variant& v, const String& context = null_string);
   Variant o_set(
     const String& s, RefResult v, const String& context = null_string);
   Variant o_setRef(
-    const String& s, CVarRef v, const String& context = null_string);
+    const String& s, const Variant& v, const String& context = null_string);
 
   /**
    * Input/Output

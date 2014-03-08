@@ -25,7 +25,7 @@ namespace HPHP {
 File* GlobStreamWrapper::open(const String& filename,
                               const String& mode,
                               int options,
-                              CVarRef context) {
+                              const Variant& context) {
   // Can't open a glob as a file, it's meant to be opened as a directory
 
   // if the function was called via FCallBuiltin, we'll get a bogus name as

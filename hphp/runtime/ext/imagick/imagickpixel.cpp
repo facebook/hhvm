@@ -44,7 +44,7 @@ Array createImagickPixelArray(size_t num, PixelWand* wands[], bool owner) {
   }
 }
 
-std::pair<PixelWand*, bool> buildPixelWand(CVarRef color) {
+std::pair<PixelWand*, bool> buildPixelWand(const Variant& color) {
   if (color.isString()) {
     PixelWand* wand = NewPixelWand();
     if (wand == nullptr) {
@@ -159,7 +159,7 @@ static Array HHVM_METHOD(ImagickPixel, getHSL) {
   return ret.create();
 }
 
-static bool isSimilar(const Object& this_, CVarRef color,
+static bool isSimilar(const Object& this_, const Variant& color,
                       double fuzz, bool useQuantum) {
   auto wand = getPixelWandResource(this_);
   WandResource<PixelWand> pixel(buildPixelWand(color));
@@ -171,12 +171,12 @@ static bool isSimilar(const Object& this_, CVarRef color,
 }
 
 static bool HHVM_METHOD(ImagickPixel, isPixelSimilar,
-    CVarRef color, double fuzz) {
+    const Variant& color, double fuzz) {
   return isSimilar(this_, color, fuzz, true);
 }
 
 static bool HHVM_METHOD(ImagickPixel, isSimilar,
-    CVarRef color, double fuzz) {
+    const Variant& color, double fuzz) {
   raiseDeprecated(s_ImagickPixel.c_str(), "isSimilar",
                   s_ImagickPixel.c_str(), "isPixelSimilar");
   return isSimilar(this_, color, fuzz, false);

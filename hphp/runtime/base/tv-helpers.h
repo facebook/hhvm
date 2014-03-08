@@ -429,7 +429,7 @@ inline bool tvIsStatic(const TypedValue* tv) {
 }
 
 /**
- * tvAsVariant and tvAsCVarRef serve as escape hatches that allow us to call
+ * tvAsVariant and tvAsconst Variant& serve as escape hatches that allow us to call
  * into the Variant machinery. Ideally we will use these as little as possible
  * in the long term.
  */

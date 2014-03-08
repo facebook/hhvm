@@ -1453,8 +1453,8 @@ int64_t f_session_status() {
 void f_session_set_cookie_params(int64_t lifetime,
                                  const String& path /* = null_string */,
                                  const String& domain /* = null_string */,
-                                 CVarRef secure /* = null */,
-                                 CVarRef httponly /* = null */) {
+                                 const Variant& secure /* = null */,
+                                 const Variant& httponly /* = null */) {
   if (PS(use_cookies)) {
     f_ini_set("session.cookie_lifetime", lifetime);
     if (!path.isNull()) {
@@ -1793,7 +1793,7 @@ void f_session_commit() {
   f_session_write_close();
 }
 
-bool f_session_register(int _argc, CVarRef var_names,
+bool f_session_register(int _argc, const Variant& var_names,
                         const Array& _argv /* = null_array */) {
   throw NotSupportedException
     (__func__, "Deprecated as of PHP 5.3.0 and REMOVED as of PHP 6.0.0. "

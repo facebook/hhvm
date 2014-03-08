@@ -47,7 +47,7 @@ Variant HHVM_FUNCTION(bzwrite, const Resource& bz, const String& data,
 
 const StaticString s_r("r"), s_w("w");
 
-Variant HHVM_FUNCTION(bzopen, CVarRef filename, const String& mode) {
+Variant HHVM_FUNCTION(bzopen, const Variant& filename, const String& mode) {
   if (mode != s_r && mode != s_w) {
     raise_warning(
       "'%s' is not a valid mode for bzopen(). "

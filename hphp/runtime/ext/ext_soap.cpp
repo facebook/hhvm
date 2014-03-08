@@ -194,7 +194,7 @@ static sdlParamPtr get_param(sdlFunction *function, const char *param_name,
   return sdlParamPtr();
 }
 
-static xmlNodePtr serialize_zval(CVarRef val, sdlParamPtr param,
+static xmlNodePtr serialize_zval(const Variant& val, sdlParamPtr param,
                                  const char *paramName, int style,
                                  xmlNodePtr parent) {
   xmlNodePtr xmlParam;
@@ -1832,7 +1832,7 @@ bool f_use_soap_error_handler(bool handler /* = true */) {
   return old;
 }
 
-bool f_is_soap_fault(CVarRef fault) {
+bool f_is_soap_fault(const Variant& fault) {
   return fault.instanceof(SystemLib::s_SoapFaultClass);
 }
 
@@ -1886,7 +1886,7 @@ const StaticString
   s_user_agent("user_agent"),
   s_soapaction("soapaction");
 
-void c_SoapServer::t___construct(CVarRef wsdl,
+void c_SoapServer::t___construct(const Variant& wsdl,
                                  const Array& options /* = null_array */) {
   USE_SOAP_GLOBAL;
   SoapServerScope ss(this);
@@ -1999,7 +1999,7 @@ void c_SoapServer::t_setobject(const Object& obj) {
   m_soap_object = obj;
 }
 
-void c_SoapServer::t_addfunction(CVarRef func) {
+void c_SoapServer::t_addfunction(const Variant& func) {
   SoapServerScope ss(this);
 
   Array funcs;
@@ -2306,9 +2306,9 @@ void c_SoapServer::t_setpersistence(int64_t mode) {
   }
 }
 
-void c_SoapServer::t_fault(CVarRef code, const String& fault,
+void c_SoapServer::t_fault(const Variant& code, const String& fault,
                            const String& actor /* = null_string */,
-                           CVarRef detail /* = null */,
+                           const Variant& detail /* = null */,
                            const String& name /* = null_string */) {
   SoapServerScope ss(this);
   Object obj(SystemLib::AllocSoapFaultObject(code, fault, actor, detail, name));
@@ -2351,7 +2351,7 @@ c_SoapClient::c_SoapClient(Class* cb) :
 c_SoapClient::~c_SoapClient() {
 }
 
-void c_SoapClient::t___construct(CVarRef wsdl,
+void c_SoapClient::t___construct(const Variant& wsdl,
                                  const Array& options /* = null_array */) {
   USE_SOAP_GLOBAL;
   SoapClientScope ss(this);
@@ -2476,7 +2476,7 @@ Variant c_SoapClient::t___call(Variant name, Variant args) {
 
 Variant c_SoapClient::t___soapcall(const String& name, const Array& args,
                                    const Array& options /* = null_array */,
-                                   CVarRef input_headers /* = null_variant */,
+                                   const Variant& input_headers /* = null_variant */,
                                    VRefParam output_headers /* = null */) {
   SoapClientScope ss(this);
 
@@ -2789,7 +2789,7 @@ Variant c_SoapClient::t___setlocation(const String& new_location /* = null_strin
   return ret;
 }
 
-bool c_SoapClient::t___setsoapheaders(CVarRef headers /* = null_variant */) {
+bool c_SoapClient::t___setsoapheaders(const Variant& headers /* = null_variant */) {
   if (headers.isNull()) {
     m_default_headers = uninit_null();
   } else if (headers.isArray()) {
@@ -2813,7 +2813,7 @@ c_SoapVar::c_SoapVar(Class* cb) : ExtObjectData(cb) {
 c_SoapVar::~c_SoapVar() {
 }
 
-void c_SoapVar::t___construct(CVarRef data, CVarRef type,
+void c_SoapVar::t___construct(const Variant& data, const Variant& type,
                               const String& type_name /* = null_string */,
                               const String& type_namespace /* = null_string */,
                               const String& node_name /* = null_string */,
@@ -2848,7 +2848,7 @@ c_SoapParam::c_SoapParam(Class* cb) : ExtObjectData(cb) {
 c_SoapParam::~c_SoapParam() {
 }
 
-void c_SoapParam::t___construct(CVarRef data, const String& name) {
+void c_SoapParam::t___construct(const Variant& data, const String& name) {
   if (name.empty()) {
     raise_warning("Invalid parameter name");
     return;
@@ -2868,9 +2868,9 @@ c_SoapHeader::~c_SoapHeader() {
 }
 
 void c_SoapHeader::t___construct(const String& ns, const String& name,
-                                 CVarRef data /* = null */,
+                                 const Variant& data /* = null */,
                                  bool mustunderstand /* = false */,
-                                 CVarRef actor /* = null */) {
+                                 const Variant& actor /* = null */) {
   if (ns.empty()) {
     raise_warning("Invalid namespace");
     return;

@@ -325,7 +325,7 @@ static String _xml_string_zval(const char *str) {
   return String(str, CopyString);
 }
 
-static Variant xml_call_handler(XmlParser *parser, CVarRef handler,
+static Variant xml_call_handler(XmlParser *parser, const Variant& handler,
                                 const Array& args) {
   if (parser && handler.toBoolean()) {
     Variant retval;
@@ -666,7 +666,7 @@ void _xml_unparsedEntityDeclHandler(void *userData,
   }
 }
 
-static void xml_set_handler(Variant * handler, CVarRef data) {
+static void xml_set_handler(Variant * handler, const Variant& data) {
   if (same(data, false) || data.isString() ||
       (data.isArray() && data.getArrayData()->size() == 2 &&
        (data[0].isString() || data[0].isObject()) &&
@@ -749,7 +749,7 @@ Variant f_xml_parser_get_option(const Resource& parser, int option) {
   return false;
 }
 
-bool f_xml_parser_set_option(const Resource& parser, int option, CVarRef value) {
+bool f_xml_parser_set_option(const Resource& parser, int option, const Variant& value) {
   XmlParser * p = parser.getTyped<XmlParser>();
   switch (option) {
   case PHP_XML_OPTION_CASE_FOLDING:
@@ -779,22 +779,22 @@ bool f_xml_parser_set_option(const Resource& parser, int option, CVarRef value) 
   return true;
 }
 
-bool f_xml_set_character_data_handler(const Resource& parser, CVarRef handler) {
+bool f_xml_set_character_data_handler(const Resource& parser, const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->characterDataHandler, handler);
   XML_SetCharacterDataHandler(p->parser, _xml_characterDataHandler);
   return true;
 }
 
-bool f_xml_set_default_handler(const Resource& parser, CVarRef handler) {
+bool f_xml_set_default_handler(const Resource& parser, const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->defaultHandler, handler);
   XML_SetDefaultHandler(p->parser, _xml_defaultHandler);
   return true;
 }
 
-bool f_xml_set_element_handler(const Resource& parser, CVarRef start_element_handler,
-                               CVarRef end_element_handler) {
+bool f_xml_set_element_handler(const Resource& parser, const Variant& start_element_handler,
+                               const Variant& end_element_handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->startElementHandler, start_element_handler);
   xml_set_handler(&p->endElementHandler, end_element_handler);
@@ -803,7 +803,7 @@ bool f_xml_set_element_handler(const Resource& parser, CVarRef start_element_han
   return true;
 }
 
-bool f_xml_set_processing_instruction_handler(const Resource& parser, CVarRef handler){
+bool f_xml_set_processing_instruction_handler(const Resource& parser, const Variant& handler){
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->processingInstructionHandler, handler);
   XML_SetProcessingInstructionHandler(p->parser,
@@ -811,35 +811,35 @@ bool f_xml_set_processing_instruction_handler(const Resource& parser, CVarRef ha
   return true;
 }
 
-bool f_xml_set_start_namespace_decl_handler(const Resource& parser, CVarRef handler) {
+bool f_xml_set_start_namespace_decl_handler(const Resource& parser, const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->startNamespaceDeclHandler, handler);
   XML_SetStartNamespaceDeclHandler(p->parser, _xml_startNamespaceDeclHandler);
   return true;
 }
 
-bool f_xml_set_end_namespace_decl_handler(const Resource& parser, CVarRef handler) {
+bool f_xml_set_end_namespace_decl_handler(const Resource& parser, const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->endNamespaceDeclHandler, handler);
   XML_SetEndNamespaceDeclHandler(p->parser, _xml_endNamespaceDeclHandler);
   return true;
 }
 
-bool f_xml_set_unparsed_entity_decl_handler(const Resource& parser, CVarRef handler) {
+bool f_xml_set_unparsed_entity_decl_handler(const Resource& parser, const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->unparsedEntityDeclHandler, handler);
   XML_SetUnparsedEntityDeclHandler(p->parser, _xml_unparsedEntityDeclHandler);
   return true;
 }
 
-bool f_xml_set_external_entity_ref_handler(const Resource& parser, CVarRef handler) {
+bool f_xml_set_external_entity_ref_handler(const Resource& parser, const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->externalEntityRefHandler, handler);
   XML_SetExternalEntityRefHandler(p->parser, _xml_externalEntityRefHandler);
   return true;
 }
 
-bool f_xml_set_notation_decl_handler(const Resource& parser, CVarRef handler) {
+bool f_xml_set_notation_decl_handler(const Resource& parser, const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->notationDeclHandler, handler);
   XML_SetNotationDeclHandler(p->parser, _xml_notationDeclHandler);

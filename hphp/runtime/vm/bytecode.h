@@ -461,7 +461,7 @@ inline void arSetSfp(ActRec* ar, const ActRec* sfp) {
   ar->m_savedRbp = (uint64_t)sfp;
 }
 
-inline TypedValue* arReturn(ActRec* ar, CVarRef value) {
+inline TypedValue* arReturn(ActRec* ar, const Variant& value) {
   ar->m_r = *value.asTypedValue();
   return &ar->m_r;
 }

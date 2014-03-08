@@ -167,7 +167,7 @@ bool f_error_log(const String& message, int message_type /* = 0 */,
   return false;
 }
 
-int64_t f_error_reporting(CVarRef level /* = null */) {
+int64_t f_error_reporting(const Variant& level /* = null */) {
   auto& id = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
   int oldErrorReportingLevel = id.getErrorReportingLevel();
   if (!level.isNull()) {
@@ -186,12 +186,12 @@ bool f_restore_exception_handler() {
   return false;
 }
 
-Variant f_set_error_handler(CVarRef error_handler,
+Variant f_set_error_handler(const Variant& error_handler,
                             int error_types /* = k_E_ALL */) {
   return g_context->pushUserErrorHandler(error_handler, error_types);
 }
 
-Variant f_set_exception_handler(CVarRef exception_handler) {
+Variant f_set_exception_handler(const Variant& exception_handler) {
   return g_context->pushUserExceptionHandler(exception_handler);
 }
 

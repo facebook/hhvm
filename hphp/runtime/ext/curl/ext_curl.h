@@ -265,10 +265,10 @@ extern const int64_t k_CURL_VERSION_KERBEROS4;
 extern const int64_t k_CURL_VERSION_LIBZ;
 extern const int64_t k_CURL_VERSION_SSL;
 
-Variant HHVM_FUNCTION(curl_init, CVarRef url = null_string);
+Variant HHVM_FUNCTION(curl_init, const Variant& url = null_string);
 Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch);
 Variant HHVM_FUNCTION(curl_version, int uversion = k_CURLVERSION_NOW);
-bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int option, CVarRef value);
+bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int option, const Variant& value);
 bool HHVM_FUNCTION(curl_setopt_array, const Resource& ch, const Array& options);
 Variant HHVM_FUNCTION(fb_curl_getopt, const Resource& ch, int64_t opt = 0);
 Variant HHVM_FUNCTION(curl_exec, const Resource& ch);
@@ -293,13 +293,13 @@ Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh);
 void HHVM_FUNCTION(evhttp_set_cache, const String& address, int max_conn,
                         int port = 80);
 Variant HHVM_FUNCTION(evhttp_get, const String& url,
-                                CVarRef headers = null_array, int timeout = 5);
+                                const Variant& headers = null_array, int timeout = 5);
 Variant HHVM_FUNCTION(evhttp_post, const String& url, const String& data,
-                      CVarRef headers = null_array, int timeout = 5);
+                      const Variant& headers = null_array, int timeout = 5);
 Variant HHVM_FUNCTION(evhttp_async_get, const String& url,
-                           CVarRef headers = null_array, int timeout = 5);
+                           const Variant& headers = null_array, int timeout = 5);
 Variant HHVM_FUNCTION(evhttp_async_post, const String& url, const String& data,
-                            CVarRef headers = null_array, int timeout = 5);
+                            const Variant& headers = null_array, int timeout = 5);
 Variant HHVM_FUNCTION(evhttp_recv, const Resource& handle);
 
 ///////////////////////////////////////////////////////////////////////////////

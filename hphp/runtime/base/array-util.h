@@ -36,13 +36,13 @@ public:
    * with supplied array.
    */
   static Variant Splice(const Array& input, int offset, int64_t length = 0,
-                        CVarRef replacement = null_variant,
+                        const Variant& replacement = null_variant,
                         Array *removed = nullptr);
 
   /**
    * Returns a copy of input array padded with pad_value to size pad_size.
    */
-  static Variant Pad(const Array& input, CVarRef pad_value, int pad_size,
+  static Variant Pad(const Array& input, const Variant& pad_value, int pad_size,
                      bool pad_right = true);
 
   /**
@@ -118,19 +118,19 @@ public:
   /**
    * Apply a user function to every member of an array.
    */
-  typedef void (*PFUNC_WALK)(VRefParam value, CVarRef key, CVarRef userdata,
+  typedef void (*PFUNC_WALK)(VRefParam value, const Variant& key, const Variant& userdata,
                              const void *data);
   static void Walk(VRefParam input, PFUNC_WALK walk_function, const void *data,
                    bool recursive = false, PointerSet *seen = nullptr,
-                   CVarRef userdata = null_variant);
+                   const Variant& userdata = null_variant);
 
   /**
    * Iteratively reduce the array to a single value via the callback.
    */
-  typedef Variant (*PFUNC_REDUCE)(CVarRef result, CVarRef operand,
+  typedef Variant (*PFUNC_REDUCE)(const Variant& result, const Variant& operand,
                                   const void *data);
   static Variant Reduce(const Array& input, PFUNC_REDUCE reduce_function,
-                        const void *data, CVarRef initial = null_variant);
+                        const void *data, const Variant& initial = null_variant);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

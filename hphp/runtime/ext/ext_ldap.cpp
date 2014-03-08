@@ -274,8 +274,8 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref,
   }
 }
 
-static Variant php_ldap_do_search(CVarRef link, CVarRef base_dn,
-                                  CVarRef filter, const Array& attributes,
+static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
+                                  const Variant& filter, const Array& attributes,
                                   int attrsonly, int sizelimit, int timelimit,
                                   int deref, int scope) {
   int num_attribs = attributes.size();
@@ -629,7 +629,7 @@ bool f_ldap_bind(const Resource& link, const String& bind_rdn /* = null_string *
   return true;
 }
 
-bool f_ldap_set_rebind_proc(const Resource& link, CVarRef callback) {
+bool f_ldap_set_rebind_proc(const Resource& link, const Variant& callback) {
   LdapLink *ld = link.getTyped<LdapLink>();
 
   if (callback.isString() && callback.toString().empty()) {
@@ -777,7 +777,7 @@ const StaticString
   s_value("value"),
   s_iscritical("iscritical");
 
-bool f_ldap_set_option(CVarRef link, int option, CVarRef newval) {
+bool f_ldap_set_option(const Variant& link, int option, const Variant& newval) {
   LDAP *ldap = NULL;
   if (!link.isNull()) {
     LdapLink *ld = link.toResource().getTyped<LdapLink>();
@@ -926,7 +926,7 @@ bool f_ldap_close(const Resource& link) {
   return f_ldap_unbind(link);
 }
 
-Variant f_ldap_list(CVarRef link, CVarRef base_dn, CVarRef filter,
+Variant f_ldap_list(const Variant& link, const Variant& base_dn, const Variant& filter,
                     const Array& attributes /* = null_array */,
                     int attrsonly /* = 0 */, int sizelimit /* = -1 */,
                     int timelimit /* = -1 */, int deref /* = -1 */) {
@@ -934,7 +934,7 @@ Variant f_ldap_list(CVarRef link, CVarRef base_dn, CVarRef filter,
                             sizelimit, timelimit, deref, LDAP_SCOPE_ONELEVEL);
 }
 
-Variant f_ldap_read(CVarRef link, CVarRef base_dn, CVarRef filter,
+Variant f_ldap_read(const Variant& link, const Variant& base_dn, const Variant& filter,
                     const Array& attributes /* = null_array */,
                     int attrsonly /* = 0 */, int sizelimit /* = -1 */,
                     int timelimit /* = -1 */, int deref /* = -1 */) {
@@ -942,7 +942,7 @@ Variant f_ldap_read(CVarRef link, CVarRef base_dn, CVarRef filter,
                             sizelimit, timelimit, deref, LDAP_SCOPE_BASE);
 }
 
-Variant f_ldap_search(CVarRef link, CVarRef base_dn, CVarRef filter,
+Variant f_ldap_search(const Variant& link, const Variant& base_dn, const Variant& filter,
                       const Array& attributes /* = null_array */,
                       int attrsonly /* = 0 */, int sizelimit /* = -1 */,
                       int timelimit /* = -1 */, int deref /* = -1 */) {

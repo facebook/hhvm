@@ -68,7 +68,7 @@ ArrayIter::ArrayIter(const Cell& c) {
   cellInit(c);
 }
 
-ArrayIter::ArrayIter(CVarRef v) {
+ArrayIter::ArrayIter(const Variant& v) {
   cellInit(*v.asCell());
 }
 
@@ -413,7 +413,7 @@ Variant ArrayIter::second() {
   return obj->o_invoke_few_args(s_current, 0);
 }
 
-CVarRef ArrayIter::secondRef() {
+const Variant& ArrayIter::secondRef() {
   if (!hasArrayData()) {
     throw FatalErrorException("taking reference on iterator objects");
   }
@@ -424,7 +424,7 @@ CVarRef ArrayIter::secondRef() {
   return ad->getValueRef(m_pos);
 }
 
-CVarRef ArrayIter::secondRefPlus() {
+const Variant& ArrayIter::secondRefPlus() {
   if (LIKELY(hasArrayData())) {
     assert(m_pos != ArrayData::invalid_index);
     const ArrayData* ad = getArrayData();
@@ -1559,7 +1559,7 @@ int64_t miter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   return 1LL;
 }
 
-ArrayIter getContainerIter(CVarRef v) {
+ArrayIter getContainerIter(const Variant& v) {
   auto c = v.asCell();
   if (c->m_type == KindOfArray) {
     ArrayData* a = c->m_data.parr;
@@ -1572,7 +1572,7 @@ ArrayIter getContainerIter(CVarRef v) {
   throw_param_is_not_container();
 }
 
-ArrayIter getContainerIter(CVarRef v, size_t& sz) {
+ArrayIter getContainerIter(const Variant& v, size_t& sz) {
   auto c = v.asCell();
   if (c->m_type == KindOfArray) {
     auto a = c->m_data.parr;

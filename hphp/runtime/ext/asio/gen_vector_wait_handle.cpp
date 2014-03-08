@@ -47,7 +47,7 @@ void c_GenVectorWaitHandle::t___construct() {
   throw e;
 }
 
-void c_GenVectorWaitHandle::ti_setoncreatecallback(CVarRef callback) {
+void c_GenVectorWaitHandle::ti_setoncreatecallback(const Variant& callback) {
   if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set GenVectorWaitHandle::onCreate: on_create_cb not a closure"));
@@ -56,7 +56,7 @@ void c_GenVectorWaitHandle::ti_setoncreatecallback(CVarRef callback) {
   AsioSession::Get()->setOnGenVectorCreateCallback(callback.getObjectDataOrNull());
 }
 
-Object c_GenVectorWaitHandle::ti_create(CVarRef dependencies) {
+Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
   if (UNLIKELY(!dependencies.instanceof(c_Vector::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Expected dependencies to be an instance of Vector"));

@@ -72,14 +72,14 @@ c_Continuation::~c_Continuation() {
 
 void c_Continuation::t___construct() {}
 
-void c_Continuation::t_update(int64_t label, CVarRef value) {
+void c_Continuation::t_update(int64_t label, const Variant& value) {
   m_label = label;
   assert(m_label == label); // check m_label for truncation
   m_value.assignVal(value);
   m_key = ++m_index;
 }
 
-void c_Continuation::t_update_key(int64_t label, CVarRef key, CVarRef value) {
+void c_Continuation::t_update_key(int64_t label, const Variant& key, const Variant& value) {
   m_label = label;
   assert(m_label == label); // check m_label for truncation
   m_key.assignVal(key);
@@ -122,11 +122,11 @@ bool c_Continuation::t_valid() {
   return !done();
 }
 
-void c_Continuation::t_send(CVarRef v) {
+void c_Continuation::t_send(const Variant& v) {
   const_assert(false);
 }
 
-void c_Continuation::t_raise(CVarRef v) {
+void c_Continuation::t_raise(const Variant& v) {
   const_assert(false);
 }
 

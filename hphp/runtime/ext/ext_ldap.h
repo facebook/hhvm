@@ -35,23 +35,23 @@ bool f_ldap_modify(const Resource& link, const String& dn, const Array& entry);
 bool f_ldap_bind(
   const Resource& link, const String& bind_rdn = null_string,
   const String& bind_password = null_string);
-bool f_ldap_set_rebind_proc(const Resource& link, CVarRef callback);
+bool f_ldap_set_rebind_proc(const Resource& link, const Variant& callback);
 bool f_ldap_sort(const Resource& link, const Resource& result, const String& sortfilter);
 bool f_ldap_start_tls(const Resource& link);
 bool f_ldap_unbind(const Resource& link);
 bool f_ldap_get_option(const Resource& link, int option, VRefParam retval);
-bool f_ldap_set_option(CVarRef link, int option, CVarRef newval);
+bool f_ldap_set_option(const Variant& link, int option, const Variant& newval);
 bool f_ldap_close(const Resource& link);
 Variant f_ldap_list(
-  CVarRef link, CVarRef base_dn, CVarRef filter,
+  const Variant& link, const Variant& base_dn, const Variant& filter,
   const Array& attributes = null_array, int attrsonly = 0, int sizelimit = -1,
   int timelimit = -1, int deref = -1);
 Variant f_ldap_read(
-  CVarRef link, CVarRef base_dn, CVarRef filter,
+  const Variant& link, const Variant& base_dn, const Variant& filter,
   const Array& attributes = null_array, int attrsonly = 0, int sizelimit = -1,
   int timelimit = -1, int deref = -1);
 Variant f_ldap_search(
-  CVarRef link, CVarRef base_dn, CVarRef filter,
+  const Variant& link, const Variant& base_dn, const Variant& filter,
   const Array& attributes = null_array, int attrsonly = 0, int sizelimit = -1,
   int timelimit = -1, int deref = -1);
 bool f_ldap_rename(

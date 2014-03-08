@@ -1024,7 +1024,7 @@ bool f_headers_sent(VRefParam file /* = null */, VRefParam line /* = null */) {
   return false;
 }
 
-bool f_header_register_callback(CVarRef callback) {
+bool f_header_register_callback(const Variant& callback) {
   Transport *transport = g_context->getTransport();
   if (!transport) {
     // fail if there is no transport

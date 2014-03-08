@@ -276,13 +276,13 @@ class ObjectData {
   Variant o_get(const String& s, bool error = true,
                 const String& context = null_string);
 
-  Variant o_set(const String& s, CVarRef v);
+  Variant o_set(const String& s, const Variant& v);
   Variant o_set(const String& s, RefResult v);
-  Variant o_setRef(const String& s, CVarRef v);
+  Variant o_setRef(const String& s, const Variant& v);
 
-  Variant o_set(const String& s, CVarRef v, const String& context);
+  Variant o_set(const String& s, const Variant& v, const String& context);
   Variant o_set(const String& s, RefResult v, const String& context);
-  Variant o_setRef(const String& s, CVarRef v, const String& context);
+  Variant o_setRef(const String& s, const Variant& v, const String& context);
 
   void o_setArray(const Array& properties);
   void o_getArray(Array& props, bool pubOnly = false) const;
@@ -295,7 +295,7 @@ class ObjectData {
   // invokeFuncFew(), and vm_decode_function(). We should remove these APIs
   // and migrate all callers to use invokeFunc(), invokeFuncFew(), and
   // vm_decode_function() instead.
-  Variant o_invoke(const String& s, CVarRef params, bool fatal = true);
+  Variant o_invoke(const String& s, const Variant& params, bool fatal = true);
   Variant o_invoke_few_args(const String& s, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
 

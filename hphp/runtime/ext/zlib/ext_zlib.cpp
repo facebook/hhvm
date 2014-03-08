@@ -46,7 +46,7 @@ namespace {
 static class ZlibStreamWrapper : public Stream::Wrapper {
  public:
   virtual File* open(const String& filename, const String& mode,
-                     int options, CVarRef context) {
+                     int options, const Variant& context) {
     String fname;
     static const char cz[] = "compress.zlib://";
 

@@ -123,7 +123,7 @@ Array HHVM_FUNCTION(get_meta_tags, const String& filename,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void url_encode_array(StringBuffer &ret, CVarRef varr,
+static void url_encode_array(StringBuffer &ret, const Variant& varr,
                              std::set<void*> &seen_arrs,
                              const String& num_prefix, const String& key_prefix,
                              const String& key_suffix, const String& arg_sep) {
@@ -193,7 +193,7 @@ static void url_encode_array(StringBuffer &ret, CVarRef varr,
 
 const StaticString s_arg_separator_output("arg_separator.output");
 
-Variant HHVM_FUNCTION(http_build_query, CVarRef formdata,
+Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
                            const String& numeric_prefix /* = null_string */,
                            const String& arg_separator /* = null_string */) {
   if (!formdata.is(KindOfArray) && !formdata.is(KindOfObject)) {

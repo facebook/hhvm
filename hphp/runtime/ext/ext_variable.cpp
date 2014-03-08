@@ -36,7 +36,7 @@ const StaticString
   s_array("array"),
   s_null("null");
 
-String f_gettype(CVarRef v) {
+String f_gettype(const Variant& v) {
   if (v.getType() == KindOfResource && v.getResourceData()->isInvalid()) {
     return s_unknown_type;
   }
@@ -47,11 +47,11 @@ String f_get_resource_type(const Resource& handle) {
   return handle->o_getResourceName();
 }
 
-int64_t f_intval(CVarRef v, int64_t base /* = 10 */) { return v.toInt64(base);}
-double f_doubleval(CVarRef v) { return v.toDouble();}
-double f_floatval(CVarRef v) { return v.toDouble();}
-String f_strval(CVarRef v) { return v.toString();}
-bool f_boolval(CVarRef v) { return v.toBoolean();}
+int64_t f_intval(const Variant& v, int64_t base /* = 10 */) { return v.toInt64(base);}
+double f_doubleval(const Variant& v) { return v.toDouble();}
+double f_floatval(const Variant& v) { return v.toDouble();}
+String f_strval(const Variant& v) { return v.toString();}
+bool f_boolval(const Variant& v) { return v.toBoolean();}
 
 bool f_settype(VRefParam var, const String& type) {
   if      (type == s_boolean) var = var.toBoolean();
@@ -67,66 +67,66 @@ bool f_settype(VRefParam var, const String& type) {
   return true;
 }
 
-bool f_is_bool(CVarRef v) {
+bool f_is_bool(const Variant& v) {
   return is_bool(v);
 }
 
-bool f_is_int(CVarRef v) {
+bool f_is_int(const Variant& v) {
   return is_int(v);
 }
 
-bool f_is_integer(CVarRef v) {
+bool f_is_integer(const Variant& v) {
   return is_int(v);
 }
 
-bool f_is_long(CVarRef v) {
+bool f_is_long(const Variant& v) {
   return is_int(v);
 }
 
-bool f_is_double(CVarRef v) {
+bool f_is_double(const Variant& v) {
   return is_double(v);
 }
 
-bool f_is_float(CVarRef v) {
+bool f_is_float(const Variant& v) {
   return is_double(v);
 }
 
-bool f_is_numeric(CVarRef v) {
+bool f_is_numeric(const Variant& v) {
   return v.isNumeric(true);
 }
 
-bool f_is_real(CVarRef v) {
+bool f_is_real(const Variant& v) {
   return is_double(v);
 }
 
-bool f_is_string(CVarRef v) {
+bool f_is_string(const Variant& v) {
   return is_string(v);
 }
 
-bool f_is_scalar(CVarRef v) {
+bool f_is_scalar(const Variant& v) {
   return v.isScalar();
 }
 
-bool f_is_array(CVarRef v) {
+bool f_is_array(const Variant& v) {
   return is_array(v);
 }
 
-bool f_is_object(CVarRef v) {
+bool f_is_object(const Variant& v) {
   return is_object(v);
 }
 
-bool f_is_resource(CVarRef v) {
+bool f_is_resource(const Variant& v) {
   return (v.getType() == KindOfResource && !v.getResourceData()->isInvalid());
 }
 
-bool f_is_null(CVarRef v) {
+bool f_is_null(const Variant& v) {
   return is_null(v);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // input/output
 
-Variant f_print_r(CVarRef expression, bool ret /* = false */) {
+Variant f_print_r(const Variant& expression, bool ret /* = false */) {
   Variant res;
   try {
     VariableSerializer vs(VariableSerializer::Type::PrintR);
@@ -143,7 +143,7 @@ Variant f_print_r(CVarRef expression, bool ret /* = false */) {
   return res;
 }
 
-Variant f_var_export(CVarRef expression, bool ret /* = false */) {
+Variant f_var_export(const Variant& expression, bool ret /* = false */) {
   Variant res;
   try {
     VariableSerializer vs(VariableSerializer::Type::VarExport);
@@ -159,7 +159,7 @@ Variant f_var_export(CVarRef expression, bool ret /* = false */) {
   return res;
 }
 
-void f_var_dump(CVarRef v) {
+void f_var_dump(const Variant& v) {
   VariableSerializer vs(VariableSerializer::Type::VarDump, 0, 2);
   // manipulate maxCount to match PHP behavior
   if (!v.isObject()) {
@@ -168,7 +168,7 @@ void f_var_dump(CVarRef v) {
   vs.serialize(v, false);
 }
 
-void f_var_dump(int _argc, CVarRef expression,
+void f_var_dump(int _argc, const Variant& expression,
                 const Array& _argv /* = null_array */) {
   f_var_dump(expression);
   for (int i = 0; i < _argv.size(); i++) {
@@ -176,7 +176,7 @@ void f_var_dump(int _argc, CVarRef expression,
   }
 }
 
-void f_debug_zval_dump(CVarRef variable) {
+void f_debug_zval_dump(const Variant& variable) {
   VariableSerializer vs(VariableSerializer::Type::DebugDump);
   vs.serialize(variable, false);
 }

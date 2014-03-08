@@ -84,28 +84,28 @@ class SystemLib {
 
   static ObjectData* AllocStdClassObject();
   static ObjectData* AllocPinitSentinel();
-  static ObjectData* AllocExceptionObject(CVarRef message);
-  static ObjectData* AllocBadMethodCallExceptionObject(CVarRef message);
-  static ObjectData* AllocInvalidArgumentExceptionObject(CVarRef message);
-  static ObjectData* AllocRuntimeExceptionObject(CVarRef message);
-  static ObjectData* AllocOutOfBoundsExceptionObject(CVarRef message);
-  static ObjectData* AllocInvalidOperationExceptionObject(CVarRef message);
+  static ObjectData* AllocExceptionObject(const Variant& message);
+  static ObjectData* AllocBadMethodCallExceptionObject(const Variant& message);
+  static ObjectData* AllocInvalidArgumentExceptionObject(const Variant& message);
+  static ObjectData* AllocRuntimeExceptionObject(const Variant& message);
+  static ObjectData* AllocOutOfBoundsExceptionObject(const Variant& message);
+  static ObjectData* AllocInvalidOperationExceptionObject(const Variant& message);
   static ObjectData* AllocDOMDocumentObject(const String& version = null_string,
                                             const String& encoding = null_string);
-  static ObjectData* AllocDOMExceptionObject(CVarRef message,
-                                             CVarRef code);
+  static ObjectData* AllocDOMExceptionObject(const Variant& message,
+                                             const Variant& code);
   static ObjectData* AllocDirectoryObject();
   static ObjectData* AllocPDOExceptionObject();
-  static ObjectData* AllocSoapFaultObject(CVarRef code,
-                                          CVarRef message,
-                                          CVarRef actor = null_variant,
-                                          CVarRef detail = null_variant,
-                                          CVarRef name = null_variant,
-                                          CVarRef header = null_variant);
-  static ObjectData* AllocLazyKVZipIterableObject(CVarRef mp);
+  static ObjectData* AllocSoapFaultObject(const Variant& code,
+                                          const Variant& message,
+                                          const Variant& actor = null_variant,
+                                          const Variant& detail = null_variant,
+                                          const Variant& name = null_variant,
+                                          const Variant& header = null_variant);
+  static ObjectData* AllocLazyKVZipIterableObject(const Variant& mp);
 
-  static ObjectData* AllocLazyIterableViewObject(CVarRef iterable);
-  static ObjectData* AllocLazyKeyedIterableViewObject(CVarRef iterable);
+  static ObjectData* AllocLazyIterableViewObject(const Variant& iterable);
+  static ObjectData* AllocLazyKeyedIterableViewObject(const Variant& iterable);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -35,7 +35,7 @@ namespace HPHP {
 /**
  * Invoking an arbitrary user-defined function.
  */
-Variant invoke(const char *function, CVarRef params, strhash_t hash = -1,
+Variant invoke(const char *function, const Variant& params, strhash_t hash = -1,
     bool tryInterp = true, bool fatal = true);
 
 /**

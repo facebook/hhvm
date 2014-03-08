@@ -338,7 +338,7 @@ bool f_pcntl_signal_dispatch() {
   return true;
 }
 
-bool f_pcntl_signal(int signo, CVarRef handler,
+bool f_pcntl_signal(int signo, const Variant& handler,
                     bool restart_syscalls /* = true */) {
   /* Special long value case for SIG_DFL and SIG_IGN */
   if (handler.isInteger()) {
@@ -756,7 +756,7 @@ static bool pre_proc_open(const Array& descriptorspec,
 }
 
 static Variant post_proc_open(const String& cmd, Variant &pipes,
-                              CVarRef env, std::vector<DescriptorItem> &items,
+                              const Variant& env, std::vector<DescriptorItem> &items,
                               pid_t child) {
   if (child < 0) {
     /* failed to fork() */
@@ -789,8 +789,8 @@ static Variant post_proc_open(const String& cmd, Variant &pipes,
 
 Variant f_proc_open(const String& cmd, const Array& descriptorspec, VRefParam pipes,
                     const String& cwd /* = null_string */,
-                    CVarRef env /* = null_variant */,
-                    CVarRef other_options /* = null_variant */) {
+                    const Variant& env /* = null_variant */,
+                    const Variant& other_options /* = null_variant */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(cmd.data())) {
     return false;
   }

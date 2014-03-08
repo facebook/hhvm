@@ -2738,15 +2738,15 @@ static int php_imagefontsize(int size, int arg) {
 #ifdef ENABLE_GD_TTF
 
 static Variant php_imagettftext_common(int mode, int extended,
-                                       CVarRef arg1,
-                                       CVarRef arg2,
-                                       CVarRef arg3,
-                                       CVarRef arg4,
-                                       CVarRef arg5 = null_variant,
-                                       CVarRef arg6 = null_variant,
-                                       CVarRef arg7 = null_variant,
-                                       CVarRef arg8 = null_variant,
-                                       CVarRef arg9 = null_variant) {
+                                       const Variant& arg1,
+                                       const Variant& arg2,
+                                       const Variant& arg3,
+                                       const Variant& arg4,
+                                       const Variant& arg5 = null_variant,
+                                       const Variant& arg6 = null_variant,
+                                       const Variant& arg7 = null_variant,
+                                       const Variant& arg8 = null_variant,
+                                       const Variant& arg9 = null_variant) {
   gdImagePtr im=NULL;
   long col = -1, x = -1, y = -1;
   int brect[8];

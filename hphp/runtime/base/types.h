@@ -188,7 +188,6 @@ inline bool isMutableType(Collection::Type ctype) {
 //////////////////////////////////////////////////////////////////////
 
 typedef const char * litstr; /* literal string */
-typedef const Variant & CVarRef;
 
 typedef const class VRefParamValue    &VRefParam;
 typedef const class RefResultValue    &RefResult;
@@ -196,20 +195,20 @@ typedef const class VariantStrongBind &CVarStrongBind;
 typedef const class VariantWithRefBind&CVarWithRefBind;
 
 inline CVarStrongBind
-strongBind(CVarRef v)     { return *(VariantStrongBind*)&v; }
+strongBind(const Variant& v)     { return *(VariantStrongBind*)&v; }
 inline CVarStrongBind
 strongBind(RefResult v)   { return *(VariantStrongBind*)&v; }
 inline CVarWithRefBind
-withRefBind(CVarRef v)    { return *(VariantWithRefBind*)&v; }
+withRefBind(const Variant& v)    { return *(VariantWithRefBind*)&v; }
 
-inline CVarRef
+inline const Variant&
 variant(CVarStrongBind v) { return *(Variant*)&v; }
-inline CVarRef
+inline const Variant&
 variant(CVarWithRefBind v){ return *(Variant*)&v; }
-inline CVarRef
+inline const Variant&
 variant(RefResult v)      { return *(Variant*)&v; }
-inline CVarRef
-variant(CVarRef v)        { return v; }
+inline const Variant&
+variant(const Variant& v)        { return v; }
 
 /**
  * ref() can be used to cause strong binding
@@ -218,7 +217,7 @@ variant(CVarRef v)        { return v; }
  *   a = b;      // weak binding: a will copy or copy-on-write
  *
  */
-inline RefResult ref(CVarRef v) {
+inline RefResult ref(const Variant& v) {
   return *(RefResultValue*)&v;
 }
 

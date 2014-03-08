@@ -475,7 +475,7 @@ bool f_socket_set_nonblock(const Resource& socket) {
 }
 
 bool f_socket_set_option(const Resource& socket, int level, int optname,
-                         CVarRef optval) {
+                         const Variant& optval) {
   Socket *sock = socket.getTyped<Socket>();
 
   struct linger lv;
@@ -614,7 +614,7 @@ bool f_socket_listen(const Resource& socket, int backlog /* = 0 */) {
 }
 
 Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
-                        CVarRef vtv_sec, int tv_usec /* = 0 */) {
+                        const Variant& vtv_sec, int tv_usec /* = 0 */) {
   int count = 0;
   if (!read.isNull()) {
     count += read.toArray().size();

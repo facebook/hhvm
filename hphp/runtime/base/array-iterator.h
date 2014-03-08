@@ -96,7 +96,7 @@ class ArrayIter {
   ArrayIter(ObjectData* obj, NoInc);
   explicit ArrayIter(const Object& obj);
   explicit ArrayIter(const Cell& c);
-  explicit ArrayIter(CVarRef v);
+  explicit ArrayIter(const Variant& v);
 
   // Copy ctor
   ArrayIter(const ArrayIter& iter);
@@ -166,8 +166,8 @@ class ArrayIter {
   }
 
   Variant second();
-  CVarRef secondRef();
-  CVarRef secondRefPlus();
+  const Variant& secondRef();
+  const Variant& secondRefPlus();
   TypedValue* nvSecond() {
     const ArrayData* ad = getArrayData();
     assert(ad && m_pos != ArrayData::invalid_index);
@@ -557,7 +557,7 @@ class MArrayIter : public FullPos {
     assert(!getResetFlag() && data->validFullPos(*this));
     return data->getKey(m_pos);
   }
-  CVarRef val() {
+  const Variant& val() {
     ArrayData* data = getArray();
     assert(data && data == getContainer());
     assert(!data->hasMultipleRefs() || data->noCopyOnWrite());
@@ -639,8 +639,8 @@ int64_t new_miter_object(Iter* dest, RefData* obj, Class* ctx,
 int64_t new_miter_other(Iter* dest, RefData* data);
 int64_t miter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
-ArrayIter getContainerIter(CVarRef v);
-ArrayIter getContainerIter(CVarRef v, size_t& sz);
+ArrayIter getContainerIter(const Variant& v);
+ArrayIter getContainerIter(const Variant& v, size_t& sz);
 
 int64_t iter_next_ind(Iter* iter, TypedValue* valOut);
 int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut);

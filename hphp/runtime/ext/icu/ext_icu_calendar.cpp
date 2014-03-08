@@ -28,7 +28,7 @@ const StaticString
 Class* IntlCalendar::c_IntlCalendar = nullptr;
 
 const icu::Calendar*
-IntlCalendar::ParseArg(CVarRef cal, const icu::Locale &locale,
+IntlCalendar::ParseArg(const Variant& cal, const icu::Locale &locale,
                        const String &funcname, IntlError* err,
                        int64_t &calType, bool &calOwned) {
   icu::Calendar *ret = nullptr;
@@ -149,7 +149,7 @@ static bool HHVM_METHOD(IntlCalendar, before, const Object& other) {
   return intlcal_compare(this_, other, &icu::Calendar::before);
 }
 
-static bool HHVM_METHOD(IntlCalendar, clear, CVarRef field) {
+static bool HHVM_METHOD(IntlCalendar, clear, const Variant& field) {
   CAL_FETCH(data, this_, false);
   if (field.isNull()) {
     data->calendar()->clear();
@@ -160,7 +160,7 @@ static bool HHVM_METHOD(IntlCalendar, clear, CVarRef field) {
 }
 
 static Object HHVM_STATIC_METHOD(IntlCalendar, createInstance,
-                                 CVarRef timeZone, const String& locale) {
+                                 const Variant& timeZone, const String& locale) {
   icu::TimeZone *tz =
     IntlTimeZone::ParseArg(timeZone, "intlcal_create_instance",
                            s_intl_error.get());
@@ -185,7 +185,7 @@ static bool HHVM_METHOD(IntlCalendar, equals, const Object& other) {
 }
 
 static Variant HHVM_METHOD(IntlCalendar, fieldDifference,
-                           CVarRef when, int64_t field) {
+                           const Variant& when, int64_t field) {
   CAL_FETCH(data, this_, false);
   CAL_CHECK_FIELD(field, "intlcal_field_difference");
   UErrorCode error = U_ZERO_ERROR;
@@ -373,7 +373,7 @@ static bool HHVM_METHOD(IntlCalendar, _isSet, int64_t field) {
   return data->calendar()->isSet((UCalendarDateFields)field);
 }
 
-static bool HHVM_METHOD(IntlCalendar, roll, int64_t field, CVarRef value) {
+static bool HHVM_METHOD(IntlCalendar, roll, int64_t field, const Variant& value) {
   CAL_FETCH(data, this_, false);
   CAL_CHECK_FIELD(field, "intlcal_roll");
   UErrorCode error = U_ZERO_ERROR;
@@ -483,7 +483,7 @@ static bool HHVM_METHOD(IntlCalendar, setMinimalDaysInFirstWeek,
   return true;
 }
 
-static bool HHVM_METHOD(IntlCalendar, setTime, CVarRef date) {
+static bool HHVM_METHOD(IntlCalendar, setTime, const Variant& date) {
   CAL_FETCH(data, this_, false);
   UErrorCode error = U_ZERO_ERROR;
   data->calendar()->setTime((UDate)date.toDouble(), error);
@@ -494,7 +494,7 @@ static bool HHVM_METHOD(IntlCalendar, setTime, CVarRef date) {
   return true;
 }
 
-static bool HHVM_METHOD(IntlCalendar, setTimeZone, CVarRef timeZone) {
+static bool HHVM_METHOD(IntlCalendar, setTimeZone, const Variant& timeZone) {
   CAL_FETCH(data, this_, false);
   auto tz = IntlTimeZone::ParseArg(timeZone, "intlcal_set_time_zone",
                                    data);
@@ -563,7 +563,7 @@ static Variant HHVM_METHOD(IntlCalendar, getWeekendTransition,
   return ret;
 }
 
-static bool HHVM_METHOD(IntlCalendar, isWeekend, CVarRef date) {
+static bool HHVM_METHOD(IntlCalendar, isWeekend, const Variant& date) {
   CAL_FETCH(data, this_, false);
   if (date.isNull()) {
     return data->calendar()->isWeekend();

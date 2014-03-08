@@ -1595,7 +1595,7 @@ char *string_long_to_base(unsigned long value, int base) {
   return string_duplicate(ptr, end - ptr);
 }
 
-char *string_numeric_to_base(CVarRef value, int base) {
+char *string_numeric_to_base(const Variant& value, int base) {
   static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
   assert(string_validate_base(base));

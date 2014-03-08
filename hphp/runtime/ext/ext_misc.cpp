@@ -166,7 +166,7 @@ Variant f_constant(const String& name) {
   return uninit_null();
 }
 
-bool f_define(const String& name, CVarRef value,
+bool f_define(const String& name, const Variant& value,
               bool case_insensitive /* = false */) {
   if (case_insensitive) {
     raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
@@ -196,11 +196,11 @@ bool f_defined(const String& name, bool autoload /* = true */) {
   }
 }
 
-Variant f_die(CVarRef status /* = null_variant */) {
+Variant f_die(const Variant& status /* = null_variant */) {
   return f_exit(status);
 }
 
-Variant f_exit(CVarRef status /* = null_variant */) {
+Variant f_exit(const Variant& status /* = null_variant */) {
   if (status.isString()) {
     echo(status.toString());
     throw ExitException(0);
@@ -617,7 +617,7 @@ String f_token_name(int64_t token) {
   return "UNKNOWN";
 }
 
-String f_hphp_to_string(CVarRef v) {
+String f_hphp_to_string(const Variant& v) {
   return v.toString();
 }
 

@@ -55,13 +55,13 @@ public:
 
   virtual bool support(SupportedMethod method);
   virtual bool closer();
-  virtual bool preparer(const String& sql, sp_PDOStatement *stmt, CVarRef options);
+  virtual bool preparer(const String& sql, sp_PDOStatement *stmt, const Variant& options);
   virtual int64_t doer(const String& sql);
   virtual bool quoter(const String& input, String &quoted, PDOParamType paramtype);
   virtual bool begin();
   virtual bool commit();
   virtual bool rollback();
-  virtual bool setAttribute(int64_t attr, CVarRef value);
+  virtual bool setAttribute(int64_t attr, const Variant& value);
   virtual String lastId(const char *name);
   virtual bool fetchErr(PDOStatement *stmt, Array &info);
   virtual int getAttribute(int64_t attr, Variant &value);
@@ -474,7 +474,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
 }
 
 bool PDOMySqlConnection::preparer(const String& sql, sp_PDOStatement *stmt,
-                                  CVarRef options) {
+                                  const Variant& options) {
   PDOMySqlStatement *s = NEWOBJ(PDOMySqlStatement)(this, m_server);
   *stmt = s;
 
@@ -546,7 +546,7 @@ bool PDOMySqlConnection::rollback() {
   return mysql_rollback(m_server) >= 0;
 }
 
-bool PDOMySqlConnection::setAttribute(int64_t attr, CVarRef value) {
+bool PDOMySqlConnection::setAttribute(int64_t attr, const Variant& value) {
   switch (attr) {
   case PDO_ATTR_AUTOCOMMIT:
     /* ignore if the new value equals the old one */

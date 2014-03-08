@@ -49,7 +49,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static StreamContext* get_stream_context(CVarRef stream_or_context);
+static StreamContext* get_stream_context(const Variant& stream_or_context);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -84,15 +84,15 @@ bool f_stream_context_set_option0(StreamContext* context,
 bool f_stream_context_set_option1(StreamContext* context,
                                   const String& wrapper,
                                   const String& option,
-                                  CVarRef value) {
+                                  const Variant& value) {
   context->setOption(wrapper, option, value);
   return true;
 }
 
-bool f_stream_context_set_option(CVarRef stream_or_context,
-                                 CVarRef wrapper_or_options,
-                                 CVarRef option /* = null_variant */,
-                                 CVarRef value /* = null_variant */) {
+bool f_stream_context_set_option(const Variant& stream_or_context,
+                                 const Variant& wrapper_or_options,
+                                 const Variant& option /* = null_variant */,
+                                 const Variant& value /* = null_variant */) {
   StreamContext* context = get_stream_context(stream_or_context);
   if (!context) {
     raise_warning("Invalid stream/context parameter");
@@ -253,7 +253,7 @@ Variant f_stream_resolve_include_path(const String& filename,
 }
 
 Variant f_stream_select(VRefParam read, VRefParam write, VRefParam except,
-                        CVarRef vtv_sec, int tv_usec /* = 0 */) {
+                        const Variant& vtv_sec, int tv_usec /* = 0 */) {
   return f_socket_select(ref(read), ref(write), ref(except), vtv_sec, tv_usec);
 }
 
@@ -315,7 +315,7 @@ Array f_stream_get_wrappers() {
   return Stream::enumWrappers();
 }
 
-bool f_stream_is_local(CVarRef stream_or_url) {
+bool f_stream_is_local(const Variant& stream_or_url) {
   if (stream_or_url.isString()) {
     auto wrapper = Stream::getWrapperFromURI(stream_or_url.asCStrRef());
     return wrapper->m_isLocal;
@@ -545,7 +545,7 @@ bool f_stream_socket_shutdown(const Resource& stream, int how) {
   return f_socket_shutdown(stream, how);
 }
 
-static StreamContext* get_stream_context(CVarRef stream_or_context) {
+static StreamContext* get_stream_context(const Variant& stream_or_context) {
   if (!stream_or_context.isResource()) {
     return nullptr;
   }
@@ -567,7 +567,7 @@ static StreamContext* get_stream_context(CVarRef stream_or_context) {
   return nullptr;
 }
 
-bool StreamContext::validateOptions(CVarRef options) {
+bool StreamContext::validateOptions(const Variant& options) {
   if (options.isNull() || !options.isArray()) {
     return false;
   }
@@ -606,7 +606,7 @@ void StreamContext::mergeOptions(const Array& options) {
 
 void StreamContext::setOption(const String& wrapper,
                                const String& option,
-                               CVarRef value) {
+                               const Variant& value) {
   if (m_options.isNull()) {
     m_options = Array::Create();
   }
@@ -625,7 +625,7 @@ Array StreamContext::getOptions() const {
   return m_options;
 }
 
-bool StreamContext::validateParams(CVarRef params) {
+bool StreamContext::validateParams(const Variant& params) {
   if (params.isNull() || !params.isArray()) {
     return false;
   }

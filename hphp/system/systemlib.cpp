@@ -70,27 +70,27 @@ ObjectData* SystemLib::AllocPinitSentinel() {
   tvRefcountedDecRef(&ret);                                                 \
   return inst;
 
-ObjectData* SystemLib::AllocExceptionObject(CVarRef message) {
+ObjectData* SystemLib::AllocExceptionObject(const Variant& message) {
   CREATE_AND_CONSTRUCT(Exception, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocBadMethodCallExceptionObject(CVarRef message) {
+ObjectData* SystemLib::AllocBadMethodCallExceptionObject(const Variant& message) {
   CREATE_AND_CONSTRUCT(BadMethodCallException, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocInvalidArgumentExceptionObject(CVarRef message) {
+ObjectData* SystemLib::AllocInvalidArgumentExceptionObject(const Variant& message) {
   CREATE_AND_CONSTRUCT(InvalidArgumentException, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocRuntimeExceptionObject(CVarRef message) {
+ObjectData* SystemLib::AllocRuntimeExceptionObject(const Variant& message) {
   CREATE_AND_CONSTRUCT(RuntimeException, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocOutOfBoundsExceptionObject(CVarRef message) {
+ObjectData* SystemLib::AllocOutOfBoundsExceptionObject(const Variant& message) {
   CREATE_AND_CONSTRUCT(OutOfBoundsException, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocInvalidOperationExceptionObject(CVarRef message) {
+ObjectData* SystemLib::AllocInvalidOperationExceptionObject(const Variant& message) {
   CREATE_AND_CONSTRUCT(InvalidOperationException, make_packed_array(message));
 }
 
@@ -99,30 +99,30 @@ ObjectData* SystemLib::AllocDOMDocumentObject(const String& version,
   CREATE_AND_CONSTRUCT(DOMDocument, make_packed_array(version, encoding));
 }
 
-ObjectData* SystemLib::AllocDOMExceptionObject(CVarRef message, CVarRef code) {
+ObjectData* SystemLib::AllocDOMExceptionObject(const Variant& message, const Variant& code) {
   CREATE_AND_CONSTRUCT(DOMException, make_packed_array(message, code));
 }
 
 ObjectData*
-SystemLib::AllocSoapFaultObject(CVarRef code,
-                                CVarRef message,
-                                CVarRef actor /* = null_variant */,
-                                CVarRef detail /* = null_variant */,
-                                CVarRef name /* = null_variant */,
-                                CVarRef header /* = null_variant */) {
+SystemLib::AllocSoapFaultObject(const Variant& code,
+                                const Variant& message,
+                                const Variant& actor /* = null_variant */,
+                                const Variant& detail /* = null_variant */,
+                                const Variant& name /* = null_variant */,
+                                const Variant& header /* = null_variant */) {
   CREATE_AND_CONSTRUCT(SoapFault, make_packed_array(code, message, actor,
                                                  detail, name, header));
 }
 
-ObjectData* SystemLib::AllocLazyKVZipIterableObject(CVarRef mp) {
+ObjectData* SystemLib::AllocLazyKVZipIterableObject(const Variant& mp) {
   CREATE_AND_CONSTRUCT(LazyKVZipIterable, make_packed_array(mp));
 }
 
-ObjectData* SystemLib::AllocLazyIterableViewObject(CVarRef iterable) {
+ObjectData* SystemLib::AllocLazyIterableViewObject(const Variant& iterable) {
   CREATE_AND_CONSTRUCT(LazyIterableView, make_packed_array(iterable));
 }
 
-ObjectData* SystemLib::AllocLazyKeyedIterableViewObject(CVarRef iterable) {
+ObjectData* SystemLib::AllocLazyKeyedIterableViewObject(const Variant& iterable) {
   CREATE_AND_CONSTRUCT(LazyKeyedIterableView, make_packed_array(iterable));
 }
 

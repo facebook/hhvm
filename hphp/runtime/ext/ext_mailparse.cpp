@@ -162,22 +162,22 @@ bool f_mailparse_msg_parse(const Resource& mimemail, const String& data) {
   return mimemail.getTyped<MimePart>()->parse(data.data(), data.size());
 }
 
-Variant f_mailparse_msg_extract_part_file(const Resource& mimemail, CVarRef filename,
-                                          CVarRef callbackfunc /* = "" */) {
+Variant f_mailparse_msg_extract_part_file(const Resource& mimemail, const Variant& filename,
+                                          const Variant& callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(filename, callbackfunc,
             MimePart::Decode8Bit | MimePart::DecodeNoHeaders, true);
 }
 
 Variant f_mailparse_msg_extract_whole_part_file(const Resource& mimemail,
-                                                CVarRef filename,
-                                                CVarRef callbackfunc /* = "" */) {
+                                                const Variant& filename,
+                                                const Variant& callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(filename, callbackfunc, MimePart::DecodeNone, true);
 }
 
-Variant f_mailparse_msg_extract_part(const Resource& mimemail, CVarRef msgbody,
-                                     CVarRef callbackfunc /* = "" */) {
+Variant f_mailparse_msg_extract_part(const Resource& mimemail, const Variant& msgbody,
+                                     const Variant& callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(msgbody, callbackfunc,
             MimePart::Decode8Bit | MimePart::DecodeNoHeaders, false);

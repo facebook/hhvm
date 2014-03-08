@@ -451,7 +451,7 @@ Variant f_explode(const String& delimiter, const String& str, int limit /* = 0x7
   return StringUtil::Explode(str, delimiter, limit);
 }
 
-String f_implode(CVarRef arg1, CVarRef arg2 /* = null_variant */) {
+String f_implode(const Variant& arg1, const Variant& arg2 /* = null_variant */) {
   Array items;
   String delim;
   if (isContainer(arg1)) {
@@ -467,7 +467,7 @@ String f_implode(CVarRef arg1, CVarRef arg2 /* = null_variant */) {
   return StringUtil::Implode(items, delim);
 }
 
-String f_join(CVarRef glue, CVarRef pieces /* = null_variant */) {
+String f_join(const Variant& glue, const Variant& pieces /* = null_variant */) {
   return f_implode(glue, pieces);
 }
 
@@ -496,7 +496,7 @@ struct TokenizerData final : RequestEventHandler {
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(TokenizerData, s_tokenizer_data);
 
-Variant f_strtok(const String& str, CVarRef token /* = null_variant */) {
+Variant f_strtok(const String& str, const Variant& token /* = null_variant */) {
   String stoken;
   if (!token.isNull()) {
     s_tokenizer_data->str = str;
@@ -544,7 +544,7 @@ Variant f_strtok(const String& str, CVarRef token /* = null_variant */) {
 }
 
 static
-Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
+Variant str_replace(const Variant& search, const Variant& replace, const String& subject,
                     int &count, bool caseSensitive) {
   count = 0;
   if (search.is(KindOfArray)) {
@@ -586,7 +586,7 @@ Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
                         caseSensitive);
 }
 
-static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
+static Variant str_replace(const Variant& search, const Variant& replace, const Variant& subject,
                            int &count, bool caseSensitive) {
   count = 0;
   if (subject.is(KindOfArray)) {
@@ -610,7 +610,7 @@ static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                      caseSensitive);
 }
 
-Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
+Variant f_str_replace(const Variant& search, const Variant& replace, const Variant& subject,
                       VRefParam count /* = null */) {
   int nCount = 0;
   Variant ret = str_replace(search, replace, subject, nCount, true);
@@ -618,7 +618,7 @@ Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
   return ret;
 }
 
-Variant f_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject,
+Variant f_str_ireplace(const Variant& search, const Variant& replace, const Variant& subject,
                        VRefParam count /* = null */) {
   int nCount = 0;
   Variant ret = str_replace(search, replace, subject, nCount, false);
@@ -626,8 +626,8 @@ Variant f_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject,
   return ret;
 }
 
-Variant f_substr_replace(CVarRef str, CVarRef replacement, CVarRef start,
-                         CVarRef length /* = 0x7FFFFFFF */) {
+Variant f_substr_replace(const Variant& str, const Variant& replacement, const Variant& start,
+                         const Variant& length /* = 0x7FFFFFFF */) {
   if (!str.is(KindOfArray)) {
     String repl;
     if (replacement.is(KindOfArray)) {
@@ -798,8 +798,8 @@ Variant f_money_format(const String& format, double number) {
 }
 
 String f_number_format(double number, int decimals /* = 0 */,
-                       CVarRef dec_point /* = "." */,
-                       CVarRef thousands_sep /* = "," */) {
+                       const Variant& dec_point /* = "." */,
+                       const Variant& thousands_sep /* = "," */) {
   char ch_dec_point = '.';
   if (!dec_point.isNull()) {
     const String& s = dec_point.toString();
@@ -895,7 +895,7 @@ Variant f_substr_compare(const String& main_str, const String& str, int offset,
   return string_ncmp(s1 + offset, str.data(), cmp_len);
 }
 
-Variant f_strstr(const String& haystack, CVarRef needle,
+Variant f_strstr(const String& haystack, const Variant& needle,
                  bool before_needle /* = false */) {
   Variant ret = f_strpos(haystack, needle);
   if (same(ret, false)) {
@@ -908,7 +908,7 @@ Variant f_strstr(const String& haystack, CVarRef needle,
   }
 }
 
-Variant f_stristr(const String& haystack, CVarRef needle) {
+Variant f_stristr(const String& haystack, const Variant& needle) {
   Variant ret = f_stripos(haystack, needle);
   if (same(ret, false)) {
     return false;
@@ -928,11 +928,11 @@ Variant f_strpbrk(const String& haystack, const String& char_list) {
   return false;
 }
 
-Variant f_strchr(const String& haystack, CVarRef needle) {
+Variant f_strchr(const String& haystack, const Variant& needle) {
   return f_strstr(haystack, needle);
 }
 
-Variant f_strpos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
+Variant f_strpos(const String& haystack, const Variant& needle, int offset /* = 0 */) {
   if (offset < 0 || offset > haystack.size()) {
     raise_warning("Offset not contained in string");
     return false;
@@ -952,7 +952,7 @@ Variant f_strpos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
   return false;
 }
 
-Variant f_stripos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
+Variant f_stripos(const String& haystack, const Variant& needle, int offset /* = 0 */) {
   if (offset < 0 || offset > haystack.size()) {
     raise_warning("Offset not contained in string");
     return false;
@@ -969,7 +969,7 @@ Variant f_stripos(const String& haystack, CVarRef needle, int offset /* = 0 */) 
 
 static bool is_valid_strrpos_args(
     const String& haystack,
-    CVarRef needle,
+    const Variant& needle,
     int offset) {
   if (haystack.size() == 0) {
     return false;
@@ -984,7 +984,7 @@ static bool is_valid_strrpos_args(
   return true;
 }
 
-Variant f_strrchr(const String& haystack, CVarRef needle) {
+Variant f_strrchr(const String& haystack, const Variant& needle) {
   if (haystack.size() == 0) {
     return false;
   }
@@ -999,7 +999,7 @@ Variant f_strrchr(const String& haystack, CVarRef needle) {
   return haystack.substr(pos);
 }
 
-Variant f_strrpos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
+Variant f_strrpos(const String& haystack, const Variant& needle, int offset /* = 0 */) {
   if (!is_valid_strrpos_args(haystack, needle, offset)) {
     return false;
   }
@@ -1013,7 +1013,7 @@ Variant f_strrpos(const String& haystack, CVarRef needle, int offset /* = 0 */) 
   return false;
 }
 
-Variant f_strripos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
+Variant f_strripos(const String& haystack, const Variant& needle, int offset /* = 0 */) {
   if (!is_valid_strrpos_args(haystack, needle, offset)) {
     return false;
   }
@@ -1094,7 +1094,7 @@ Variant f_strcspn(const String& str1, const String& str2, int start /* = 0 */,
   return length;
 }
 
-Variant f_strlen(CVarRef vstr) {
+Variant f_strlen(const Variant& vstr) {
   auto const cell = vstr.asCell();
   switch (cell->m_type) {
   case KindOfString:
@@ -1384,7 +1384,7 @@ String f_sha1(const String& str, bool raw_output /* = false */) {
   return StringUtil::SHA1(str, raw_output);
 }
 
-Variant f_strtr(const String& str, CVarRef from, CVarRef to /* = null_variant */) {
+Variant f_strtr(const String& str, const Variant& from, const Variant& to /* = null_variant */) {
   if (str.empty()) {
     return str;
   }
@@ -1458,7 +1458,7 @@ void f_parse_str(const String& str, VRefParam arr /* = null */) {
   arr = result.toArray();
 }
 
-Variant f_setlocale(int _argc, int category, CVarRef locale, const Array& _argv /* = null_array */) {
+Variant f_setlocale(int _argc, int category, const Variant& locale, const Array& _argv /* = null_array */) {
   Array argv = _argv;
   if (locale.is(KindOfArray)) {
     if (!argv.empty()) throw_invalid_argument("locale: not string)");

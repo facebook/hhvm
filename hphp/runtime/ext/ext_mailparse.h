@@ -33,11 +33,11 @@ bool f_mailparse_msg_free(const Resource& mimemail);
 Variant f_mailparse_msg_parse_file(const String& filename);
 bool f_mailparse_msg_parse(const Resource& mimemail, const String& data);
 Variant f_mailparse_msg_extract_part_file(
-  const Resource& mimemail, CVarRef filename, CVarRef callbackfunc = "");
+  const Resource& mimemail, const Variant& filename, const Variant& callbackfunc = "");
 Variant f_mailparse_msg_extract_whole_part_file(
-  const Resource& mimemail, CVarRef filename, CVarRef callbackfunc = "");
+  const Resource& mimemail, const Variant& filename, const Variant& callbackfunc = "");
 Variant f_mailparse_msg_extract_part(
-  const Resource& mimemail, CVarRef msgbody, CVarRef callbackfunc = "");
+  const Resource& mimemail, const Variant& msgbody, const Variant& callbackfunc = "");
 Array f_mailparse_msg_get_part_data(const Resource& mimemail);
 Variant f_mailparse_msg_get_part(const Resource& mimemail, const String& mimesection);
 Array f_mailparse_msg_get_structure(const Resource& mimemail);

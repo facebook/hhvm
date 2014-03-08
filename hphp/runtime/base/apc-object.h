@@ -43,7 +43,7 @@ struct APCObject {
 
   // Return an APCObject instance from a serialized version of the
   // object.  May return null.
-  static APCHandle* MakeAPCObject(APCHandle* obj, CVarRef value);
+  static APCHandle* MakeAPCObject(APCHandle* obj, const Variant& value);
 
   // Return an instance of a PHP object from the given object handle
   static Variant MakeObject(APCHandle* handle);

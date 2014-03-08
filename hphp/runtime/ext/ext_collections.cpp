@@ -84,7 +84,7 @@ void throwStrOOB(StringData* key) {
   throw e;
 }
 
-ArrayIter getArrayIterHelper(CVarRef v, size_t& sz) {
+ArrayIter getArrayIterHelper(const Variant& v, size_t& sz) {
   if (v.isArray()) {
     ArrayData* ad = v.getArrayData();
     sz = ad->size();
@@ -149,7 +149,7 @@ Object BaseVector::items() {
 }
 
 // ConstIndexAccess
-bool BaseVector::containskey(CVarRef key) {
+bool BaseVector::containskey(const Variant& key) {
   if (key.isInteger()) {
     return contains(key.toInt64());
   }
@@ -157,7 +157,7 @@ bool BaseVector::containskey(CVarRef key) {
   return false;
 }
 
-Variant BaseVector::at(CVarRef key) {
+Variant BaseVector::at(const Variant& key) {
   if (key.isInteger()) {
     return tvAsCVarRef(at(key.toInt64()));
   }
@@ -165,7 +165,7 @@ Variant BaseVector::at(CVarRef key) {
   return uninit_null();
 }
 
-Variant BaseVector::get(CVarRef key) {
+Variant BaseVector::get(const Variant& key) {
   if (key.isInteger()) {
     TypedValue* tv = get(key.toInt64());
     if (tv) {
@@ -205,7 +205,7 @@ static std::array<TypedValue, 2> makeArgsFromVectorKeyAndValue(
 template<class TVector, class MakeArgs>
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
-BaseVector::php_map(CVarRef callback, MakeArgs makeArgs) {
+BaseVector::php_map(const Variant& callback, MakeArgs makeArgs) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -234,7 +234,7 @@ BaseVector::php_map(CVarRef callback, MakeArgs makeArgs) {
 template<class TVector, class MakeArgs>
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
-BaseVector::php_filter(CVarRef callback, MakeArgs makeArgs) {
+BaseVector::php_filter(const Variant& callback, MakeArgs makeArgs) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -259,8 +259,8 @@ BaseVector::php_filter(CVarRef callback, MakeArgs makeArgs) {
   return nv;
 }
 
-Object c_Vector::ti_slice(CVarRef vec, CVarRef offset,
-                          CVarRef len /* = uninit_null() */) {
+Object c_Vector::ti_slice(const Variant& vec, const Variant& offset,
+                          const Variant& len /* = uninit_null() */) {
   ObjectData* obj;
   if (!vec.isObject() ||
       (obj = vec.getObjectData())->getVMClass() != c_Vector::classof()) {
@@ -317,7 +317,7 @@ Object c_Vector::ti_slice(CVarRef vec, CVarRef offset,
 template<class TVector>
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
-BaseVector::php_take(CVarRef n) {
+BaseVector::php_take(const Variant& n) {
   if (!n.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter n must be an integer"));
@@ -341,7 +341,7 @@ BaseVector::php_take(CVarRef n) {
 template<class TVector, bool checkVersion>
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
-BaseVector::php_takeWhile(CVarRef fn) {
+BaseVector::php_takeWhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
@@ -371,7 +371,7 @@ BaseVector::php_takeWhile(CVarRef fn) {
 template<class TVector>
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
-BaseVector::php_skip(CVarRef n) {
+BaseVector::php_skip(const Variant& n) {
   if (!n.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter n must be an integer"));
@@ -394,7 +394,7 @@ BaseVector::php_skip(CVarRef n) {
 template<class TVector, bool checkVersion>
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
-BaseVector::php_skipWhile(CVarRef fn) {
+BaseVector::php_skipWhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
@@ -424,7 +424,7 @@ BaseVector::php_skipWhile(CVarRef fn) {
   return obj;
 }
 
-void BaseVector::zip(BaseVector* bvec, CVarRef iterable) {
+void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
   uint sz = m_size;
@@ -470,7 +470,7 @@ void BaseVector::keys(BaseVector* bvec) {
 
 // Others
 
-void BaseVector::construct(CVarRef iterable /* = null_variant */) {
+void BaseVector::construct(const Variant& iterable /* = null_variant */) {
   if (iterable.isNull()) return;
   init(iterable);
 }
@@ -496,7 +496,7 @@ Array BaseVector::tovaluesarray() {
   return toArrayImpl();
 }
 
-int64_t BaseVector::linearsearch(CVarRef search_value) {
+int64_t BaseVector::linearsearch(const Variant& search_value) {
   uint sz = m_size;
   for (uint i = 0; i < sz; ++i) {
     if (same(search_value, tvAsCVarRef(&m_data[i]))) {
@@ -694,7 +694,7 @@ void BaseVector::throwBadKeyType() {
   throw e;
 }
 
-void BaseVector::init(CVarRef t) {
+void BaseVector::init(const Variant& t) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(t, sz);
   if (sz) {
@@ -736,7 +736,7 @@ c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
   o_subclassData.u16 = Collection::VectorType;
 }
 
-void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
+void c_Vector::t___construct(const Variant& iterable /* = null_variant */) {
   BaseVector::construct(iterable);
 }
 
@@ -765,13 +765,13 @@ void c_Vector::resize(int64_t sz, TypedValue* val) {
   }
 }
 
-Object c_Vector::t_add(CVarRef val) {
+Object c_Vector::t_add(const Variant& val) {
   TypedValue* tv = cvarToCell(&val);
   add(tv);
   return this;
 }
 
-Object c_Vector::t_addall(CVarRef iterable) {
+Object c_Vector::t_addall(const Variant& iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -786,7 +786,7 @@ Object c_Vector::t_addall(CVarRef iterable) {
   return this;
 }
 
-Object c_Vector::t_append(CVarRef val) {
+Object c_Vector::t_append(const Variant& val) {
   TypedValue* tv = cvarToCell(&val);
   add(tv);
   return this;
@@ -807,7 +807,7 @@ Variant c_Vector::t_pop() {
   }
 }
 
-int64_t c_Vector::checkRequestedCapacity(CVarRef sz) {
+int64_t c_Vector::checkRequestedCapacity(const Variant& sz) {
   if (!sz.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter sz must be a non-negative integer"));
@@ -831,13 +831,13 @@ int64_t c_Vector::checkRequestedCapacity(CVarRef sz) {
   return intSz;
 }
 
-void c_Vector::t_resize(CVarRef sz, CVarRef value) {
+void c_Vector::t_resize(const Variant& sz, const Variant& value) {
   auto intSz = checkRequestedCapacity(sz);
   TypedValue* val = cvarToCell(&value);
   resize(intSz, val);
 }
 
-void c_Vector::t_reserve(CVarRef sz) {
+void c_Vector::t_reserve(const Variant& sz) {
   auto intSz = checkRequestedCapacity(sz);
   reserve(intSz);
 }
@@ -893,23 +893,23 @@ Object c_Vector::t_kvzip() {
   return obj;
 }
 
-Variant c_Vector::t_at(CVarRef key) {
+Variant c_Vector::t_at(const Variant& key) {
   return BaseVector::at(key);
 }
 
-Variant c_Vector::t_get(CVarRef key) {
+Variant c_Vector::t_get(const Variant& key) {
   return BaseVector::get(key);
 }
 
-bool c_Vector::t_contains(CVarRef key) {
+bool c_Vector::t_contains(const Variant& key) {
   return t_containskey(key);
 }
 
-bool c_Vector::t_containskey(CVarRef key) {
+bool c_Vector::t_containskey(const Variant& key) {
   return BaseVector::containskey(key);
 }
 
-Object c_Vector::t_removekey(CVarRef key) {
+Object c_Vector::t_removekey(const Variant& key) {
   if (!key.isInteger()) {
     throwBadKeyType();
   }
@@ -952,8 +952,8 @@ void c_Vector::t_reverse() {
   }
 }
 
-void c_Vector::t_splice(CVarRef offset, CVarRef len /* = null */,
-                        CVarRef replacement /* = null */) {
+void c_Vector::t_splice(const Variant& offset, const Variant& len /* = null */,
+                        const Variant& replacement /* = null */) {
   if (!offset.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter offset must be an integer"));
@@ -1017,7 +1017,7 @@ void c_Vector::t_splice(CVarRef offset, CVarRef len /* = null */,
   m_size -= (endPos - startPos);
 }
 
-int64_t c_Vector::t_linearsearch(CVarRef search_value) {
+int64_t c_Vector::t_linearsearch(const Variant& search_value) {
   return BaseVector::linearsearch(search_value);
 }
 
@@ -1033,66 +1033,66 @@ Object c_Vector::t_getiterator() {
   return BaseVector::getiterator();
 }
 
-Object c_Vector::t_map(CVarRef callback) {
+Object c_Vector::t_map(const Variant& callback) {
   return BaseVector::php_map<c_Vector>(
     callback, &makeArgsFromVectorValue);
 }
 
-Object c_Vector::t_mapwithkey(CVarRef callback) {
+Object c_Vector::t_mapwithkey(const Variant& callback) {
   return BaseVector::php_map<c_Vector>(
     callback, &makeArgsFromVectorKeyAndValue);
 }
 
-Object c_Vector::t_filter(CVarRef callback) {
+Object c_Vector::t_filter(const Variant& callback) {
   return BaseVector::php_filter<c_Vector>(
     callback, &makeArgsFromVectorValue);
 }
 
-Object c_Vector::t_filterwithkey(CVarRef callback) {
+Object c_Vector::t_filterwithkey(const Variant& callback) {
   return BaseVector::php_filter<c_Vector>(
     callback, &makeArgsFromVectorKeyAndValue);
 }
 
-Object c_Vector::t_zip(CVarRef iterable) {
+Object c_Vector::t_zip(const Variant& iterable) {
   auto* vec = NEWOBJ(c_Vector);
   Object obj = vec;
   BaseVector::zip(vec, iterable);
   return obj;
 }
 
-Object c_Vector::t_take(CVarRef n) {
+Object c_Vector::t_take(const Variant& n) {
   return BaseVector::php_take<c_Vector>(n);
 }
 
-Object c_ImmVector::t_take(CVarRef n) {
+Object c_ImmVector::t_take(const Variant& n) {
   return BaseVector::php_take<c_ImmVector>(n);
 }
 
-Object c_Vector::t_takewhile(CVarRef fn) {
+Object c_Vector::t_takewhile(const Variant& fn) {
   return BaseVector::php_takeWhile<c_Vector, true>(fn);
 }
 
-Object c_ImmVector::t_takewhile(CVarRef fn) {
+Object c_ImmVector::t_takewhile(const Variant& fn) {
   return BaseVector::php_takeWhile<c_ImmVector, false>(fn);
 }
 
-Object c_Vector::t_skip(CVarRef n) {
+Object c_Vector::t_skip(const Variant& n) {
   return BaseVector::php_skip<c_Vector>(n);
 }
 
-Object c_ImmVector::t_skip(CVarRef n) {
+Object c_ImmVector::t_skip(const Variant& n) {
   return BaseVector::php_skip<c_ImmVector>(n);
 }
 
-Object c_Vector::t_skipwhile(CVarRef fn) {
+Object c_Vector::t_skipwhile(const Variant& fn) {
   return BaseVector::php_skipWhile<c_Vector, true>(fn);
 }
 
-Object c_ImmVector::t_skipwhile(CVarRef fn) {
+Object c_ImmVector::t_skipwhile(const Variant& fn) {
   return BaseVector::php_skipWhile<c_ImmVector, false>(fn);
 }
 
-Object c_Vector::t_set(CVarRef key, CVarRef value) {
+Object c_Vector::t_set(const Variant& key, const Variant& value) {
   if (key.isInteger()) {
     TypedValue* tv = cvarToCell(&value);
     set(key.toInt64(), tv);
@@ -1102,7 +1102,7 @@ Object c_Vector::t_set(CVarRef key, CVarRef value) {
   return this;
 }
 
-Object c_Vector::t_setall(CVarRef iterable) {
+Object c_Vector::t_setall(const Variant& iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -1119,7 +1119,7 @@ Object c_Vector::t_setall(CVarRef iterable) {
   return this;
 }
 
-Object c_Vector::ti_fromitems(CVarRef iterable) {
+Object c_Vector::ti_fromitems(const Variant& iterable) {
   if (iterable.isNull()) return NEWOBJ(c_Vector)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -1133,7 +1133,7 @@ Object c_Vector::ti_fromitems(CVarRef iterable) {
   return ret;
 }
 
-Object c_Vector::ti_fromarray(CVarRef arr) {
+Object c_Vector::ti_fromarray(const Variant& arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -1234,7 +1234,7 @@ void c_Vector::sort(int sort_flags, bool ascending) {
 #undef SORT_CASE_BLOCK
 #undef CALL_SORT
 
-bool c_Vector::usort(CVarRef cmp_function) {
+bool c_Vector::usort(const Variant& cmp_function) {
   if (!m_size) {
     return true;
   }
@@ -1371,15 +1371,15 @@ Object c_ImmVector::t_items() {
 
 // ConstIndexAccess
 
-bool c_ImmVector::t_containskey(CVarRef key) {
+bool c_ImmVector::t_containskey(const Variant& key) {
   return BaseVector::containskey(key);
 }
 
-Variant c_ImmVector::t_at(CVarRef key) {
+Variant c_ImmVector::t_at(const Variant& key) {
   return BaseVector::at(key);
 }
 
-Variant c_ImmVector::t_get(CVarRef key) {
+Variant c_ImmVector::t_get(const Variant& key) {
   return BaseVector::get(key);
 }
 
@@ -1389,23 +1389,23 @@ Object c_ImmVector::t_getiterator() {
   return BaseVector::getiterator();
 }
 
-Object c_ImmVector::t_map(CVarRef callback) {
+Object c_ImmVector::t_map(const Variant& callback) {
   return php_map<c_ImmVector>(callback, &makeArgsFromVectorValue);
 }
 
-Object c_ImmVector::t_mapwithkey(CVarRef callback) {
+Object c_ImmVector::t_mapwithkey(const Variant& callback) {
   return php_map<c_ImmVector>(callback, &makeArgsFromVectorKeyAndValue);
 }
 
-Object c_ImmVector::t_filter(CVarRef callback) {
+Object c_ImmVector::t_filter(const Variant& callback) {
   return php_filter<c_ImmVector>(callback, &makeArgsFromVectorValue);
 }
 
-Object c_ImmVector::t_filterwithkey(CVarRef callback) {
+Object c_ImmVector::t_filterwithkey(const Variant& callback) {
   return php_filter<c_ImmVector>(callback, &makeArgsFromVectorKeyAndValue);
 }
 
-Object c_ImmVector::t_zip(CVarRef iterable) {
+Object c_ImmVector::t_zip(const Variant& iterable) {
   auto* vec = NEWOBJ(c_ImmVector);
   Object obj = vec;
   BaseVector::zip(vec, iterable);
@@ -1428,7 +1428,7 @@ Object c_ImmVector::t_keys() {
 
 // Others
 
-void c_ImmVector::t___construct(CVarRef iterable /* = null_variant */) {
+void c_ImmVector::t___construct(const Variant& iterable /* = null_variant */) {
   BaseVector::construct(iterable);
 }
 
@@ -1448,7 +1448,7 @@ Array c_ImmVector::t_tovaluesarray() {
   return BaseVector::tovaluesarray();
 }
 
-int64_t c_ImmVector::t_linearsearch(CVarRef search_value) {
+int64_t c_ImmVector::t_linearsearch(const Variant& search_value) {
   return BaseVector::linearsearch(search_value);
 }
 
@@ -1512,12 +1512,12 @@ void BaseMap::deleteElms() {
   }
 }
 
-void BaseMap::php_construct(CVarRef iterable /* = null_variant */) {
+void BaseMap::php_construct(const Variant& iterable /* = null_variant */) {
   if (iterable.isNull()) return;
   init(iterable);
 }
 
-void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
+void c_Map::t___construct(const Variant& iterable /* = null_variant */) {
   return php_construct(iterable);
 }
 
@@ -1577,7 +1577,7 @@ c_Map* c_Map::Clone(ObjectData* obj) {
   return BaseMap::Clone<c_Map>(obj);
 }
 
-void BaseMap::init(CVarRef t) {
+void BaseMap::init(const Variant& t) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(t, sz);
   if (sz) {
@@ -1597,15 +1597,15 @@ void BaseMap::init(CVarRef t) {
   }
 }
 
-Object BaseMap::php_add(CVarRef val) {
+Object BaseMap::php_add(const Variant& val) {
   TypedValue* tv = cvarToCell(&val);
   add(tv);
   return this;
 }
 
-Object c_Map::t_add(CVarRef val) { return php_add(val); }
+Object c_Map::t_add(const Variant& val) { return php_add(val); }
 
-Object BaseMap::php_addAll(CVarRef iterable) {
+Object BaseMap::php_addAll(const Variant& iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -1618,7 +1618,7 @@ Object BaseMap::php_addAll(CVarRef iterable) {
   return this;
 }
 
-Object c_Map::t_addall(CVarRef val) { return php_addAll(val); }
+Object c_Map::t_addall(const Variant& val) { return php_addAll(val); }
 
 Object BaseMap::php_clear() {
   deleteElms();
@@ -1719,7 +1719,7 @@ Object c_ImmMap::t_kvzip() { return php_kvzip(); }
 
 Object c_Map::t_kvzip() { return php_kvzip(); }
 
-Variant BaseMap::php_at(CVarRef key) const {
+Variant BaseMap::php_at(const Variant& key) const {
   if (key.isInteger()) {
     return tvAsCVarRef(at(key.toInt64()));
   } else if (key.isString()) {
@@ -1729,11 +1729,11 @@ Variant BaseMap::php_at(CVarRef key) const {
   return uninit_null();
 }
 
-Variant c_ImmMap::t_at(CVarRef key) { return php_at(key); }
+Variant c_ImmMap::t_at(const Variant& key) { return php_at(key); }
 
-Variant c_Map::t_at(CVarRef key) { return php_at(key); }
+Variant c_Map::t_at(const Variant& key) { return php_at(key); }
 
-Variant BaseMap::php_get(CVarRef key) const {
+Variant BaseMap::php_get(const Variant& key) const {
   if (key.isInteger()) {
     TypedValue* tv = get(key.toInt64());
     if (tv) {
@@ -1753,11 +1753,11 @@ Variant BaseMap::php_get(CVarRef key) const {
   return uninit_null();
 }
 
-Variant c_ImmMap::t_get(CVarRef key) { return php_get(key); }
+Variant c_ImmMap::t_get(const Variant& key) { return php_get(key); }
 
-Variant c_Map::t_get(CVarRef key) { return php_get(key); }
+Variant c_Map::t_get(const Variant& key) { return php_get(key); }
 
-Object BaseMap::php_set(CVarRef key, CVarRef value) {
+Object BaseMap::php_set(const Variant& key, const Variant& value) {
   TypedValue* val = cvarToCell(&value);
   if (key.isInteger()) {
     update(key.toInt64(), val);
@@ -1769,11 +1769,11 @@ Object BaseMap::php_set(CVarRef key, CVarRef value) {
   return this;
 }
 
-Object c_Map::t_set(CVarRef key, CVarRef value) {
+Object c_Map::t_set(const Variant& key, const Variant& value) {
   return php_set(key, value);
 }
 
-Object BaseMap::php_setAll(CVarRef iterable) {
+Object BaseMap::php_setAll(const Variant& iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -1793,9 +1793,9 @@ Object BaseMap::php_setAll(CVarRef iterable) {
   return this;
 }
 
-Object c_Map::t_setall(CVarRef iterable) { return php_setAll(iterable); }
+Object c_Map::t_setall(const Variant& iterable) { return php_setAll(iterable); }
 
-bool BaseMap::php_contains(CVarRef key) const {
+bool BaseMap::php_contains(const Variant& key) const {
   DataType t = key.getType();
   if (t == KindOfInt64) {
     return contains(key.toInt64());
@@ -1807,15 +1807,15 @@ bool BaseMap::php_contains(CVarRef key) const {
   return false;
 }
 
-bool c_ImmMap::t_contains(CVarRef key) { return php_contains(key); }
+bool c_ImmMap::t_contains(const Variant& key) { return php_contains(key); }
 
-bool c_Map::t_contains(CVarRef key) { return php_contains(key); }
+bool c_Map::t_contains(const Variant& key) { return php_contains(key); }
 
-bool c_ImmMap::t_containskey(CVarRef key) { return php_contains(key); }
+bool c_ImmMap::t_containskey(const Variant& key) { return php_contains(key); }
 
-bool c_Map::t_containskey(CVarRef key) { return php_contains(key); }
+bool c_Map::t_containskey(const Variant& key) { return php_contains(key); }
 
-Object BaseMap::php_remove(CVarRef key) {
+Object BaseMap::php_remove(const Variant& key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
     remove(key.toInt64());
@@ -1827,9 +1827,9 @@ Object BaseMap::php_remove(CVarRef key) {
   return this;
 }
 
-Object c_Map::t_remove(CVarRef key) { return php_remove(key); }
+Object c_Map::t_remove(const Variant& key) { return php_remove(key); }
 
-Object c_Map::t_removekey(CVarRef key) { return php_remove(key); }
+Object c_Map::t_removekey(const Variant& key) { return php_remove(key); }
 
 Array c_ImmMap::t_toarray() { return php_toArray(); }
 
@@ -1896,7 +1896,7 @@ Array c_Map::t_tovaluesarray() { return php_toValuesArray(); }
 template<typename TMap>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_differenceByKey(CVarRef it) {
+BaseMap::php_differenceByKey(const Variant& it) {
   if (!it.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
                "Parameter it must be an instance of Iterable"));
@@ -1930,11 +1930,11 @@ BaseMap::php_differenceByKey(CVarRef it) {
   return ret;
 }
 
-Object c_ImmMap::t_differencebykey(CVarRef it) {
+Object c_ImmMap::t_differencebykey(const Variant& it) {
   return php_differenceByKey<c_ImmMap>(it);
 }
 
-Object c_Map::t_differencebykey(CVarRef it) {
+Object c_Map::t_differencebykey(const Variant& it) {
   return php_differenceByKey<c_Map>(it);
 }
 
@@ -1982,7 +1982,7 @@ static std::array<TypedValue, 1> makeArgsFromMapValue(BaseMap::Elm& e) {
 template<typename TMap, class MakeArgs>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_map(CVarRef callback, MakeArgs makeArgs) const {
+BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -2030,26 +2030,26 @@ BaseMap::php_map(CVarRef callback, MakeArgs makeArgs) const {
   return obj;
 }
 
-Object c_ImmMap::t_map(CVarRef callback) {
+Object c_ImmMap::t_map(const Variant& callback) {
   return php_map<c_ImmMap>(callback, &makeArgsFromMapValue);
 }
 
-Object c_Map::t_map(CVarRef callback) {
+Object c_Map::t_map(const Variant& callback) {
   return php_map<c_Map>(callback, &makeArgsFromMapValue);
 }
 
-Object c_ImmMap::t_mapwithkey(CVarRef callback) {
+Object c_ImmMap::t_mapwithkey(const Variant& callback) {
   return php_map<c_ImmMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
-Object c_Map::t_mapwithkey(CVarRef callback) {
+Object c_Map::t_mapwithkey(const Variant& callback) {
   return php_map<c_Map>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 template<typename TMap, class MakeArgs>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_filter(CVarRef callback, MakeArgs makeArgs) const {
+BaseMap::php_filter(const Variant& callback, MakeArgs makeArgs) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -2083,24 +2083,24 @@ BaseMap::php_filter(CVarRef callback, MakeArgs makeArgs) const {
   return obj;
 }
 
-Object c_ImmMap::t_filter(CVarRef callback) {
+Object c_ImmMap::t_filter(const Variant& callback) {
   return php_filter<c_ImmMap>(callback, &makeArgsFromMapValue);
 }
 
-Object c_Map::t_filter(CVarRef callback) {
+Object c_Map::t_filter(const Variant& callback) {
   return php_filter<c_Map>(callback, &makeArgsFromMapValue);
 }
 
-Object c_ImmMap::t_filterwithkey(CVarRef callback) {
+Object c_ImmMap::t_filterwithkey(const Variant& callback) {
   return php_filter<c_ImmMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
-Object c_Map::t_filterwithkey(CVarRef callback) {
+Object c_Map::t_filterwithkey(const Variant& callback) {
   return php_filter<c_Map>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 template<class MakeArgs>
-Object BaseMap::php_retain(CVarRef callback, MakeArgs makeArgs) {
+Object BaseMap::php_retain(const Variant& callback, MakeArgs makeArgs) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -2139,18 +2139,18 @@ Object BaseMap::php_retain(CVarRef callback, MakeArgs makeArgs) {
   return this;
 }
 
-Object c_Map::t_retain(CVarRef callback) {
+Object c_Map::t_retain(const Variant& callback) {
   return php_retain(callback, &makeArgsFromMapValue);
 }
 
-Object c_Map::t_retainwithkey(CVarRef callback) {
+Object c_Map::t_retainwithkey(const Variant& callback) {
   return php_retain(callback, &makeArgsFromMapKeyAndValue);
 }
 
 template<typename TMap>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_zip(CVarRef iterable) const {
+BaseMap::php_zip(const Variant& iterable) const {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   TMap* mp;
@@ -2181,18 +2181,18 @@ BaseMap::php_zip(CVarRef iterable) const {
   return obj;
 }
 
-Object c_ImmMap::t_zip(CVarRef iterable) {
+Object c_ImmMap::t_zip(const Variant& iterable) {
   return php_zip<c_ImmMap>(iterable);
 }
 
-Object c_Map::t_zip(CVarRef iterable) {
+Object c_Map::t_zip(const Variant& iterable) {
   return php_zip<c_Map>(iterable);
 }
 
 template<class TMap>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_take(CVarRef n) {
+BaseMap::php_take(const Variant& n) {
   if (!n.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter n must be an integer"));
@@ -2236,7 +2236,7 @@ BaseMap::php_take(CVarRef n) {
 template<class TMap, bool checkVersion>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_takeWhile(CVarRef fn) {
+BaseMap::php_takeWhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
@@ -2274,7 +2274,7 @@ BaseMap::php_takeWhile(CVarRef fn) {
 template<class TMap>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_skip(CVarRef n) {
+BaseMap::php_skip(const Variant& n) {
   if (!n.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter n must be an integer"));
@@ -2336,7 +2336,7 @@ BaseMap::php_skip(CVarRef n) {
 template<class TMap, bool checkVersion>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_skipWhile(CVarRef fn) {
+BaseMap::php_skipWhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
@@ -2376,42 +2376,42 @@ BaseMap::php_skipWhile(CVarRef fn) {
   return obj;
 }
 
-Object c_Map::t_take(CVarRef n) {
+Object c_Map::t_take(const Variant& n) {
   return BaseMap::php_take<c_Map>(n);
 }
 
-Object c_ImmMap::t_take(CVarRef n) {
+Object c_ImmMap::t_take(const Variant& n) {
   return BaseMap::php_take<c_ImmMap>(n);
 }
 
-Object c_Map::t_takewhile(CVarRef fn) {
+Object c_Map::t_takewhile(const Variant& fn) {
   return BaseMap::php_takeWhile<c_Map, true>(fn);
 }
 
-Object c_ImmMap::t_takewhile(CVarRef fn) {
+Object c_ImmMap::t_takewhile(const Variant& fn) {
   return BaseMap::php_takeWhile<c_ImmMap, false>(fn);
 }
 
-Object c_Map::t_skip(CVarRef n) {
+Object c_Map::t_skip(const Variant& n) {
   return BaseMap::php_skip<c_Map>(n);
 }
 
-Object c_ImmMap::t_skip(CVarRef n) {
+Object c_ImmMap::t_skip(const Variant& n) {
   return BaseMap::php_skip<c_ImmMap>(n);
 }
 
-Object c_Map::t_skipwhile(CVarRef fn) {
+Object c_Map::t_skipwhile(const Variant& fn) {
   return BaseMap::php_skipWhile<c_Map, true>(fn);
 }
 
-Object c_ImmMap::t_skipwhile(CVarRef fn) {
+Object c_ImmMap::t_skipwhile(const Variant& fn) {
   return BaseMap::php_skipWhile<c_ImmMap, false>(fn);
 }
 
 template<typename TMap>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_mapFromIterable(CVarRef iterable) {
+BaseMap::php_mapFromIterable(const Variant& iterable) {
   if (iterable.isNull()) return NEWOBJ(TMap)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -2445,18 +2445,18 @@ BaseMap::php_mapFromIterable(CVarRef iterable) {
   return ret;
 }
 
-Object c_ImmMap::ti_fromitems(CVarRef iterable) {
+Object c_ImmMap::ti_fromitems(const Variant& iterable) {
   return php_mapFromIterable<c_ImmMap>(iterable);
 }
 
-Object c_Map::ti_fromitems(CVarRef iterable) {
+Object c_Map::ti_fromitems(const Variant& iterable) {
   return php_mapFromIterable<c_Map>(iterable);
 }
 
 template<typename TMap>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_mapFromArray(CVarRef arr) {
+BaseMap::php_mapFromArray(const Variant& arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -2479,7 +2479,7 @@ BaseMap::php_mapFromArray(CVarRef arr) {
   return ret;
 }
 
-Object c_Map::ti_fromarray(CVarRef arr) {
+Object c_Map::ti_fromarray(const Variant& arr) {
   return php_mapFromArray<c_Map>(arr);
 }
 
@@ -3175,11 +3175,11 @@ void BaseMap::ksort(int sort_flags, bool ascending) {
     return true;                                                \
   } while (0)
 
-bool BaseMap::uasort(CVarRef cmp_function) {
+bool BaseMap::uasort(const Variant& cmp_function) {
   USER_SORT_BODY(MapValAccessor);
 }
 
-bool BaseMap::uksort(CVarRef cmp_function) {
+bool BaseMap::uksort(const Variant& cmp_function) {
   USER_SORT_BODY(MapKeyAccessor);
 }
 
@@ -3447,7 +3447,7 @@ c_ImmMap::c_ImmMap(Class* cb) : BaseMap(cb) {
   o_subclassData.u16 = Collection::ImmMapType;
 }
 
-void c_ImmMap::t___construct(CVarRef iterable /* = null_variant */) {
+void c_ImmMap::t___construct(const Variant& iterable /* = null_variant */) {
   php_construct(iterable);
 }
 
@@ -3460,7 +3460,7 @@ c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
 
 // Public
 
-void BaseSet::init(CVarRef t) {
+void BaseSet::init(const Variant& t) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(t, sz);
   for (; iter; ++iter) {
@@ -3869,12 +3869,12 @@ BaseSet::Clone(ObjectData* obj) {
 
 // Protected (PHP-accesible methods)
 
-void BaseSet::php_construct(CVarRef iterable /* = null_variant */) {
+void BaseSet::php_construct(const Variant& iterable /* = null_variant */) {
   if (iterable.isNull()) return;
   init(iterable);
 }
 
-Object BaseSet::php_addAll(CVarRef iterable) {
+Object BaseSet::php_addAll(const Variant& iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -3903,7 +3903,7 @@ Object BaseSet::php_clear() {
   return this;
 }
 
-bool BaseSet::php_contains(CVarRef key) {
+bool BaseSet::php_contains(const Variant& key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
     return contains(key.toInt64());
@@ -3915,7 +3915,7 @@ bool BaseSet::php_contains(CVarRef key) {
   return false;
 }
 
-Object BaseSet::php_remove(CVarRef key) {
+Object BaseSet::php_remove(const Variant& key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
     remove(key.toInt64());
@@ -3949,7 +3949,7 @@ Object BaseSet::php_getIterator() {
 template<class TSet>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_map(CVarRef callback) {
+BaseSet::php_map(const Variant& callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -3978,7 +3978,7 @@ BaseSet::php_map(CVarRef callback) {
 template<class TSet>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_filter(CVarRef callback) {
+BaseSet::php_filter(const Variant& callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -4013,7 +4013,7 @@ BaseSet::php_filter(CVarRef callback) {
 template<class TSet>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_zip(CVarRef iterable) {
+BaseSet::php_zip(const Variant& iterable) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   if (m_size && iter) {
@@ -4029,7 +4029,7 @@ BaseSet::php_zip(CVarRef iterable) {
 template<class TSet>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_take(CVarRef n) {
+BaseSet::php_take(const Variant& n) {
   if (!n.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter n must be an integer"));
@@ -4071,7 +4071,7 @@ BaseSet::php_take(CVarRef n) {
 template<class TSet, bool checkVersion>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_takeWhile(CVarRef fn) {
+BaseSet::php_takeWhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
@@ -4110,7 +4110,7 @@ BaseSet::php_takeWhile(CVarRef fn) {
 template<class TSet>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_skip(CVarRef n) {
+BaseSet::php_skip(const Variant& n) {
   if (!n.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter n must be an integer"));
@@ -4170,7 +4170,7 @@ BaseSet::php_skip(CVarRef n) {
 template<class TSet, bool checkVersion>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_skipWhile(CVarRef fn) {
+BaseSet::php_skipWhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
@@ -4214,7 +4214,7 @@ BaseSet::php_skipWhile(CVarRef fn) {
 template<class TSet>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_fromItems(CVarRef iterable) {
+BaseSet::php_fromItems(const Variant& iterable) {
   if (iterable.isNull()) return NEWOBJ(TSet)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -4236,7 +4236,7 @@ BaseSet::php_fromItems(CVarRef iterable) {
 template<class TSet>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_fromArray(CVarRef arr) {
+BaseSet::php_fromArray(const Variant& arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
@@ -4247,7 +4247,7 @@ BaseSet::php_fromArray(CVarRef arr) {
   ArrayData* ad = arr.getArrayData();
   for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
-    CVarRef v = ad->getValueRef(pos);
+    const Variant& v = ad->getValueRef(pos);
     if (v.isInteger()) {
       st->add(v.toInt64());
     } else if (v.isString()) {
@@ -4568,15 +4568,15 @@ c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
   o_subclassData.u16 = Collection::SetType;
 }
 
-void c_Set::t___construct(CVarRef iterable /* = null_variant */) {
+void c_Set::t___construct(const Variant& iterable /* = null_variant */) {
   BaseSet::php_construct(iterable);
 }
 
-Object c_Set::t_add(CVarRef val) {
+Object c_Set::t_add(const Variant& val) {
   return BaseSet::php_add(val);
 }
 
-Object c_Set::t_addall(CVarRef iterable) {
+Object c_Set::t_addall(const Variant& iterable) {
   return BaseSet::php_addAll(iterable);
 }
 
@@ -4604,11 +4604,11 @@ Object c_Set::t_lazy() {
   return BaseSet::php_lazy();
 }
 
-bool c_Set::t_contains(CVarRef key) {
+bool c_Set::t_contains(const Variant& key) {
   return BaseSet::php_contains(key);
 }
 
-Object c_Set::t_remove(CVarRef key) {
+Object c_Set::t_remove(const Variant& key) {
   return BaseSet::php_remove(key);
 }
 
@@ -4628,51 +4628,51 @@ Object c_Set::t_getiterator() {
   return BaseSet::php_getIterator();
 }
 
-Object c_Set::t_map(CVarRef callback) {
+Object c_Set::t_map(const Variant& callback) {
   return BaseSet::php_map<c_Set>(callback);
 }
 
-Object c_Set::t_filter(CVarRef callback) {
+Object c_Set::t_filter(const Variant& callback) {
   return BaseSet::php_filter<c_Set>(callback);
 }
 
-Object c_Set::t_zip(CVarRef iterable) {
+Object c_Set::t_zip(const Variant& iterable) {
   return BaseSet::php_zip<c_Set>(iterable);
 }
 
-Object c_Set::t_take(CVarRef n) {
+Object c_Set::t_take(const Variant& n) {
   return BaseSet::php_take<c_Set>(n);
 }
 
-Object c_ImmSet::t_take(CVarRef n) {
+Object c_ImmSet::t_take(const Variant& n) {
   return BaseSet::php_take<c_ImmSet>(n);
 }
 
-Object c_Set::t_takewhile(CVarRef fn) {
+Object c_Set::t_takewhile(const Variant& fn) {
   return BaseSet::php_takeWhile<c_Set, true>(fn);
 }
 
-Object c_ImmSet::t_takewhile(CVarRef fn) {
+Object c_ImmSet::t_takewhile(const Variant& fn) {
   return BaseSet::php_takeWhile<c_ImmSet, false>(fn);
 }
 
-Object c_Set::t_skip(CVarRef n) {
+Object c_Set::t_skip(const Variant& n) {
   return BaseSet::php_skip<c_Set>(n);
 }
 
-Object c_ImmSet::t_skip(CVarRef n) {
+Object c_ImmSet::t_skip(const Variant& n) {
   return BaseSet::php_skip<c_ImmSet>(n);
 }
 
-Object c_Set::t_skipwhile(CVarRef fn) {
+Object c_Set::t_skipwhile(const Variant& fn) {
   return BaseSet::php_skipWhile<c_Set, true>(fn);
 }
 
-Object c_ImmSet::t_skipwhile(CVarRef fn) {
+Object c_ImmSet::t_skipwhile(const Variant& fn) {
   return BaseSet::php_skipWhile<c_ImmSet, false>(fn);
 }
 
-Object c_Set::t_removeall(CVarRef iterable) {
+Object c_Set::t_removeall(const Variant& iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -4682,15 +4682,15 @@ Object c_Set::t_removeall(CVarRef iterable) {
   return this;
 }
 
-Object c_Set::t_difference(CVarRef iterable) {
+Object c_Set::t_difference(const Variant& iterable) {
   return t_removeall(iterable);
 }
 
-Object c_Set::ti_fromitems(CVarRef iterable) {
+Object c_Set::ti_fromitems(const Variant& iterable) {
   return BaseSet::php_fromItems<c_Set>(iterable);
 }
 
-Object c_Set::ti_fromarray(CVarRef arr) {
+Object c_Set::ti_fromarray(const Variant& arr) {
   return BaseSet::php_fromArray<c_Set>(arr);
 }
 
@@ -4718,7 +4718,7 @@ Object c_Set::t_immutable() {
 ///////////////////////////////////////////////////////////////////////////////
 // ImmSet
 
-void c_ImmSet::t___construct(CVarRef iterable /* = null_variant */) {
+void c_ImmSet::t___construct(const Variant& iterable /* = null_variant */) {
   BaseSet::php_construct(iterable);
 }
 
@@ -4742,7 +4742,7 @@ Object c_ImmSet::t_lazy() {
   return BaseSet::php_lazy();
 }
 
-bool c_ImmSet::t_contains(CVarRef key) {
+bool c_ImmSet::t_contains(const Variant& key) {
   return BaseSet::php_contains(key);
 }
 
@@ -4762,19 +4762,19 @@ Object c_ImmSet::t_getiterator() {
   return BaseSet::php_getIterator();
 }
 
-Object c_ImmSet::t_map(CVarRef callback) {
+Object c_ImmSet::t_map(const Variant& callback) {
   return BaseSet::php_map<c_ImmSet>(callback);
 }
 
-Object c_ImmSet::t_filter(CVarRef callback) {
+Object c_ImmSet::t_filter(const Variant& callback) {
   return BaseSet::php_filter<c_ImmSet>(callback);
 }
 
-Object c_ImmSet::t_zip(CVarRef iterable) {
+Object c_ImmSet::t_zip(const Variant& iterable) {
   return BaseSet::php_zip<c_ImmSet>(iterable);
 }
 
-Object c_ImmSet::ti_fromitems(CVarRef iterable) {
+Object c_ImmSet::ti_fromitems(const Variant& iterable) {
   return BaseSet::php_fromItems<c_ImmSet>(iterable);
 }
 
@@ -4946,7 +4946,7 @@ Object c_Pair::t_kvzip() {
   return obj;
 }
 
-Variant c_Pair::t_at(CVarRef key) {
+Variant c_Pair::t_at(const Variant& key) {
   assert(isFullyConstructed());
   if (key.isInteger()) {
     return tvAsCVarRef(at(key.toInt64()));
@@ -4955,7 +4955,7 @@ Variant c_Pair::t_at(CVarRef key) {
   return init_null_variant;
 }
 
-Variant c_Pair::t_get(CVarRef key) {
+Variant c_Pair::t_get(const Variant& key) {
   assert(isFullyConstructed());
   if (key.isInteger()) {
     TypedValue* tv = get(key.toInt64());
@@ -4969,7 +4969,7 @@ Variant c_Pair::t_get(CVarRef key) {
   return init_null_variant;
 }
 
-bool c_Pair::t_containskey(CVarRef key) {
+bool c_Pair::t_containskey(const Variant& key) {
   assert(isFullyConstructed());
   if (key.isInteger()) {
     return contains(key.toInt64());
@@ -5004,7 +5004,7 @@ Object c_Pair::t_getiterator() {
   return it;
 }
 
-Object c_Pair::t_map(CVarRef callback) {
+Object c_Pair::t_map(const Variant& callback) {
   assert(isFullyConstructed());
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
@@ -5023,7 +5023,7 @@ Object c_Pair::t_map(CVarRef callback) {
   return obj;
 }
 
-Object c_Pair::t_mapwithkey(CVarRef callback) {
+Object c_Pair::t_mapwithkey(const Variant& callback) {
   assert(isFullyConstructed());
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
@@ -5043,7 +5043,7 @@ Object c_Pair::t_mapwithkey(CVarRef callback) {
   return obj;
 }
 
-Object c_Pair::t_filter(CVarRef callback) {
+Object c_Pair::t_filter(const Variant& callback) {
   assert(isFullyConstructed());
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
@@ -5064,7 +5064,7 @@ Object c_Pair::t_filter(CVarRef callback) {
   return obj;
 }
 
-Object c_Pair::t_filterwithkey(CVarRef callback) {
+Object c_Pair::t_filterwithkey(const Variant& callback) {
   assert(isFullyConstructed());
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
@@ -5086,7 +5086,7 @@ Object c_Pair::t_filterwithkey(CVarRef callback) {
   return obj;
 }
 
-Object c_Pair::t_zip(CVarRef iterable) {
+Object c_Pair::t_zip(const Variant& iterable) {
   assert(isFullyConstructed());
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -5113,7 +5113,7 @@ Object c_Pair::t_immutable() {
   return this;
 }
 
-Object c_Pair::t_take(CVarRef n) {
+Object c_Pair::t_take(const Variant& n) {
   if (!n.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter n must be an integer"));
@@ -5134,7 +5134,7 @@ Object c_Pair::t_take(CVarRef n) {
   return obj;
 }
 
-Object c_Pair::t_takewhile(CVarRef callback) {
+Object c_Pair::t_takewhile(const Variant& callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -5153,7 +5153,7 @@ Object c_Pair::t_takewhile(CVarRef callback) {
   return obj;
 }
 
-Object c_Pair::t_skip(CVarRef n) {
+Object c_Pair::t_skip(const Variant& n) {
   if (!n.isInteger()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter n must be an integer"));
@@ -5173,7 +5173,7 @@ Object c_Pair::t_skip(CVarRef n) {
   return obj;
 }
 
-Object c_Pair::t_skipwhile(CVarRef fn) {
+Object c_Pair::t_skipwhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
@@ -5920,12 +5920,12 @@ Variant& collectionOffsetGet(ObjectData* obj, const String& offset) {
   return collectionOffsetAtImpl<false>(obj, offset);
 }
 
-Variant& collectionOffsetAt(ObjectData* obj, CVarRef offset) {
+Variant& collectionOffsetAt(ObjectData* obj, const Variant& offset) {
   TypedValue* key = cvarToCell(&offset);
   return tvAsVariant(collectionAt(obj, key));
 }
 
-Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
+Variant& collectionOffsetGet(ObjectData* obj, const Variant& offset) {
   TypedValue* key = cvarToCell(&offset);
   auto* res = collectionGet(obj, key);
   if (!res) {
@@ -5934,7 +5934,7 @@ Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
   return tvAsVariant(res);
 }
 
-void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
+void collectionOffsetSet(ObjectData* obj, int64_t offset, const Variant& val) {
   TypedValue* tv = cvarToCell(&val);
   if (UNLIKELY(tv->m_type == KindOfUninit)) {
     tv = (TypedValue*)(&init_null_variant);
@@ -5965,7 +5965,7 @@ void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
   }
 }
 
-void collectionOffsetSet(ObjectData* obj, const String& offset, CVarRef val) {
+void collectionOffsetSet(ObjectData* obj, const String& offset, const Variant& val) {
   StringData* key = offset.get();
   TypedValue* tv = cvarToCell(&val);
   if (UNLIKELY(tv->m_type == KindOfUninit)) {
@@ -5997,7 +5997,7 @@ void collectionOffsetSet(ObjectData* obj, const String& offset, CVarRef val) {
   }
 }
 
-void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
+void collectionOffsetSet(ObjectData* obj, const Variant& offset, const Variant& val) {
   TypedValue* key = cvarToCell(&offset);
   TypedValue* tv = cvarToCell(&val);
   if (UNLIKELY(tv->m_type == KindOfUninit)) {
@@ -6006,7 +6006,7 @@ void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
   collectionSet(obj, key, tv);
 }
 
-bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
+bool collectionOffsetContains(ObjectData* obj, const Variant& offset) {
   TypedValue* key = cvarToCell(&offset);
   switch (obj->getCollectionType()) {
     case Collection::VectorType:

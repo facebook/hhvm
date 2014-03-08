@@ -45,15 +45,15 @@ Variant preg_match_all(const String& pattern, const String& subject,
 Variant preg_match_all(const String& pattern, const String& subject,
                        int flags = 0, int offset = 0);
 
-Variant preg_replace_impl(CVarRef pattern, CVarRef replacement,
-                          CVarRef subject, int limit, Variant &count,
+Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
+                          const Variant& subject, int limit, Variant &count,
                           bool is_callable, bool is_filter);
-int preg_replace(Variant &result, CVarRef pattern, CVarRef replacement,
-                 CVarRef subject, int limit = -1);
-int preg_replace_callback(Variant &result, CVarRef pattern, CVarRef callback,
-                          CVarRef subject, int limit = -1);
-int preg_filter(Variant &result, CVarRef pattern, CVarRef replacement,
-                CVarRef subject, int limit = -1);
+int preg_replace(Variant &result, const Variant& pattern, const Variant& replacement,
+                 const Variant& subject, int limit = -1);
+int preg_replace_callback(Variant &result, const Variant& pattern, const Variant& callback,
+                          const Variant& subject, int limit = -1);
+int preg_filter(Variant &result, const Variant& pattern, const Variant& replacement,
+                const Variant& subject, int limit = -1);
 
 Variant preg_split(const String& pattern, const String& subject, int limit = -1,
                    int flags = 0);

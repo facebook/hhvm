@@ -37,11 +37,11 @@ public:
     : m_options(options), m_params(params) {
   }
 
-  static bool validateOptions(CVarRef options);
-  void setOption(const String& wrapper, const String& option, CVarRef value);
+  static bool validateOptions(const Variant& options);
+  void setOption(const String& wrapper, const String& option, const Variant& value);
   void mergeOptions(const Array& options);
   Array getOptions() const;
-  static bool validateParams(CVarRef params);
+  static bool validateParams(const Variant& params);
   void mergeParams(const Array& params);
   Array getParams() const;
 
@@ -59,9 +59,9 @@ Variant f_stream_context_create(const Array& options = null_array,
 Variant f_stream_context_get_options(const Resource& stream_or_context);
 
 bool f_stream_context_set_option(const Resource& stream_or_context,
-                                 CVarRef wrapper,
+                                 const Variant& wrapper,
                                  const String& option = null_string,
-                                 CVarRef value = null_variant);
+                                 const Variant& value = null_variant);
 
 Variant f_stream_context_get_params(const Resource& stream_or_context);
 
@@ -86,7 +86,7 @@ Variant f_stream_get_meta_data(const Resource& stream);
 Array f_stream_get_transports();
 
 Array f_stream_get_wrappers();
-bool f_stream_is_local(CVarRef stream_or_url);
+bool f_stream_is_local(const Variant& stream_or_url);
 bool f_stream_register_wrapper(const String& protocol, const String& classname,
                                int flags);
 bool f_stream_wrapper_register(const String& protocol, const String& classname,
@@ -98,7 +98,7 @@ Variant f_stream_resolve_include_path(const String& filename,
                                      const Resource& context = null_resource);
 
 Variant f_stream_select(VRefParam read, VRefParam write, VRefParam except,
-                        CVarRef vtv_sec, int tv_usec = 0);
+                        const Variant& vtv_sec, int tv_usec = 0);
 
 bool f_stream_set_blocking(const Resource& stream, int mode);
 

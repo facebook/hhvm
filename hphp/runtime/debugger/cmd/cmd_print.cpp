@@ -29,7 +29,7 @@ const char *CmdPrint::Formats[] = {
   "r", "v", "x", "hex", "oct", "dec", "unsigned", "time", nullptr
 };
 
-std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
+std::string CmdPrint::FormatResult(const char *format, const Variant& ret) {
   if (format == nullptr) {
     String sret = DebuggerClient::FormatVariable(ret, -1);
     return std::string(sret.data(), sret.size());

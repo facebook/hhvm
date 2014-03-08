@@ -372,7 +372,7 @@ static Variant HHVM_FUNCTION(grapheme_strstr, const String& haystack,
 
 static Variant HHVM_FUNCTION(grapheme_substr, const String& str,
                                               int64_t start,
-                                              CVarRef len /*= NULL */) {
+                                              const Variant& len /*= NULL */) {
   if (outside_string(start, str.size())) {
     s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
                            "grapheme_substr: start not contained in string");

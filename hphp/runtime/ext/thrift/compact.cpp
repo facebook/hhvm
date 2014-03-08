@@ -281,7 +281,7 @@ class CompactWriter {
       lastFieldNum = fieldNum;
     }
 
-    void writeField(CVarRef value,
+    void writeField(const Variant& value,
                     const Array& valueSpec,
                     TType type) {
       switch (type) {

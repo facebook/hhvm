@@ -55,7 +55,7 @@ static bool HHVM_METHOD(Collator, asort, VRefParam arr, int64_t flag) {
   return ret;
 }
 
-static Variant HHVM_METHOD(Collator, compare, CVarRef str1, CVarRef str2) {
+static Variant HHVM_METHOD(Collator, compare, const Variant& str1, const Variant& str2) {
   FETCH_COL(data, this_);
   data->clearError();
   UErrorCode error = U_ZERO_ERROR;

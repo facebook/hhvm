@@ -46,7 +46,7 @@ template <typename T>
 class SmartObject : public Object {
 public:
   SmartObject()           { }
-  /* implicit */ SmartObject(CVarRef v) : Object(v.toObject().get()) { }
+  /* implicit */ SmartObject(const Variant& v) : Object(v.toObject().get()) { }
   /* implicit */ SmartObject(T *data) : Object(data) { }
   template<class Y>
   /* implicit */ SmartObject(Y *data) : Object(data) { }
@@ -55,7 +55,7 @@ public:
   /**
    * Assignment
    */
-  SmartObject &operator=(CVarRef v) {
+  SmartObject &operator=(const Variant& v) {
     Object::operator=(v.toObject().get());
     return *this;
   }
@@ -103,7 +103,7 @@ template <typename T>
 class SmartResource : public Resource {
 public:
   SmartResource()           { }
-  explicit SmartResource(CVarRef v) : Resource(v.toResource().get()) { }
+  explicit SmartResource(const Variant& v) : Resource(v.toResource().get()) { }
   /* implicit */ SmartResource(T *data) : Resource(data) { }
   template<class Y>
   explicit SmartResource(Y *data) : Resource(data) { }
@@ -112,7 +112,7 @@ public:
   /**
    * Assignment
    */
-  SmartResource &operator=(CVarRef v) {
+  SmartResource &operator=(const Variant& v) {
     Resource::operator=(v.toObject().get());
     return *this;
   }

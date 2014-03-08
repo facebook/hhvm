@@ -130,7 +130,7 @@ class AsioSession {
     bool hasOnAsyncFunctionFailCallback() { return m_onAsyncFunctionFailCallback.get(); }
     void onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont, c_WaitableWaitHandle* child);
     void onAsyncFunctionAwait(c_AsyncFunctionWaitHandle* cont, c_WaitHandle* child);
-    void onAsyncFunctionSuccess(c_AsyncFunctionWaitHandle* cont, CVarRef result);
+    void onAsyncFunctionSuccess(c_AsyncFunctionWaitHandle* cont, const Variant& result);
     void onAsyncFunctionFail(c_AsyncFunctionWaitHandle* cont, const Object& exception);
 
     // WaitHandle callbacks:
@@ -147,7 +147,7 @@ class AsioSession {
       m_onGenArrayCreateCallback = on_create;
     }
     bool hasOnGenArrayCreateCallback() { return m_onGenArrayCreateCallback.get(); }
-    void onGenArrayCreate(c_GenArrayWaitHandle* wait_handle, CVarRef dependencies);
+    void onGenArrayCreate(c_GenArrayWaitHandle* wait_handle, const Variant& dependencies);
 
     // GenMapWaitHandle callbacks:
     void setOnGenMapCreateCallback(ObjectData* on_create) {
@@ -155,7 +155,7 @@ class AsioSession {
       m_onGenMapCreateCallback = on_create;
     }
     bool hasOnGenMapCreateCallback() { return m_onGenMapCreateCallback.get(); }
-    void onGenMapCreate(c_GenMapWaitHandle* wait_handle, CVarRef dependencies);
+    void onGenMapCreate(c_GenMapWaitHandle* wait_handle, const Variant& dependencies);
 
     // GenVectorWaitHandle callbacks:
     void setOnGenVectorCreateCallback(ObjectData* on_create) {
@@ -163,7 +163,7 @@ class AsioSession {
       m_onGenVectorCreateCallback = on_create;
     }
     bool hasOnGenVectorCreateCallback() { return m_onGenVectorCreateCallback.get(); }
-    void onGenVectorCreate(c_GenVectorWaitHandle* wait_handle, CVarRef dependencies);
+    void onGenVectorCreate(c_GenVectorWaitHandle* wait_handle, const Variant& dependencies);
 
     // SetResultToRefWaitHandle callbacks:
     void setOnSetResultToRefCreateCallback(ObjectData* on_create) {

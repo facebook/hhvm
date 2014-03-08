@@ -367,7 +367,7 @@ bool DebuggerClient::IsValidNumber(const std::string &arg) {
   return true;
 }
 
-String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */,
+String DebuggerClient::FormatVariable(const Variant& v, int maxlen /* = 80 */,
                                       char format /* = 'd' */) {
   TRACE(2, "DebuggerClient::FormatVariable\n");
   String value;

@@ -69,16 +69,16 @@ class apcExtension : public Extension {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-Variant f_apc_add(CVarRef key_or_array, CVarRef var = null_variant,
+Variant f_apc_add(const Variant& key_or_array, const Variant& var = null_variant,
                   int64_t ttl = 0, int64_t cache_id = 0);
-Variant f_apc_store(CVarRef key_or_array, CVarRef var = null_variant,
+Variant f_apc_store(const Variant& key_or_array, const Variant& var = null_variant,
                     int64_t ttl = 0, int64_t cache_id = 0);
-bool f_apc_store_as_primed_do_not_use(const String& key, CVarRef var,
+bool f_apc_store_as_primed_do_not_use(const String& key, const Variant& var,
                                       int64_t cache_id = 0);
 
-Variant f_apc_fetch(CVarRef key, VRefParam success = uninit_null(),
+Variant f_apc_fetch(const Variant& key, VRefParam success = uninit_null(),
                     int64_t cache_id = 0);
-Variant f_apc_delete(CVarRef key, int64_t cache_id = 0);
+Variant f_apc_delete(const Variant& key, int64_t cache_id = 0);
 bool f_apc_clear_cache(int64_t cache_id = 0);
 Variant f_apc_inc(const String& key, int64_t step = 1,
                   VRefParam success = uninit_null(), int64_t cache_id = 0);
@@ -86,7 +86,7 @@ Variant f_apc_dec(const String& key, int64_t step = 1,
                   VRefParam success = uninit_null(), int64_t cache_id = 0);
 bool f_apc_cas(const String& key, int64_t old_cas, int64_t new_cas,
                int64_t cache_id = 0);
-Variant f_apc_exists(CVarRef key, int64_t cache_id = 0);
+Variant f_apc_exists(const Variant& key, int64_t cache_id = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -153,7 +153,7 @@ static_assert(sizeof(int64_t) == sizeof(long long),
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(CVarRef value);
+String apc_serialize(const Variant& value);
 Variant apc_unserialize(const char* data, int len);
 String apc_reserialize(const String& str);
 

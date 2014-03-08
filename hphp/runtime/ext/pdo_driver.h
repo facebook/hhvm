@@ -278,7 +278,7 @@ public:
   virtual bool closer();
 
   /* prepare a statement and stash driver specific portion into stmt */
-  virtual bool preparer(const String& sql, sp_PDOStatement *stmt, CVarRef options);
+  virtual bool preparer(const String& sql, sp_PDOStatement *stmt, const Variant& options);
 
   /* execute a statement (that does not return a result set) */
   virtual int64_t doer(const String& sql);
@@ -292,7 +292,7 @@ public:
   virtual bool rollback();
 
   /* setting of attributes */
-  virtual bool setAttribute(int64_t attr, CVarRef value);
+  virtual bool setAttribute(int64_t attr, const Variant& value);
 
   /* return last insert id.  NULL indicates error condition, otherwise,
      the return value MUST be an emalloc'd NULL terminated string. */
@@ -495,7 +495,7 @@ public:
   virtual bool paramHook(PDOBoundParam *param, PDOParamEvent event_type);
 
   /* setting of attributes */
-  virtual bool setAttribute(int64_t attr, CVarRef value);
+  virtual bool setAttribute(int64_t attr, const Variant& value);
 
   /* fetching of attributes: -1: error, 0: unsupported attribute */
   virtual int getAttribute(int64_t attr, Variant &value);
@@ -614,7 +614,7 @@ public:
 int pdo_parse_params(PDOStatement *stmt, const String& in, String &out);
 void pdo_raise_impl_error(sp_PDOConnection dbh, sp_PDOStatement stmt,
                           const char *sqlstate, const char *supp);
-void throw_pdo_exception(CVarRef code, CVarRef info,
+void throw_pdo_exception(const Variant& code, const Variant& info,
                          const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
 
 ///////////////////////////////////////////////////////////////////////////////

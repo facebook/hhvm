@@ -28,7 +28,7 @@ using CUCString = const unsigned char*;
 ALWAYS_INLINE
 static void getAffineMatrixElement(
     const Array& array, const String& key, double& ret) {
-  CVarRef value = array.rvalAtRef(key);
+  const Variant& value = array.rvalAtRef(key);
   if (value.isNull()) {
     IMAGICKDRAW_THROW(
       "AffineMatrix must contain keys: sx, rx, ry, sy, tx and ty");
@@ -701,7 +701,7 @@ static bool HHVM_METHOD(ImagickDraw, setFillAlpha, double opacity) {
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFillColor,
-    CVarRef fill_pixel) {
+    const Variant& fill_pixel) {
   auto wand = getDrawingWandResource(this_);
   WandResource<PixelWand> pixel(buildPixelWand(fill_pixel));
   DrawSetFillColor(wand->getWand(), pixel.getWand());
@@ -812,7 +812,7 @@ static bool HHVM_METHOD(ImagickDraw, setStrokeAntialias,
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokeColor,
-    CVarRef stroke_pixel) {
+    const Variant& stroke_pixel) {
   auto wand = getDrawingWandResource(this_);
   WandResource<PixelWand> pixel(buildPixelWand(stroke_pixel));
   DrawSetStrokeColor(wand->getWand(), pixel.getWand());
@@ -908,7 +908,7 @@ static bool HHVM_METHOD(ImagickDraw, setTextEncoding,
 }
 
 static bool HHVM_METHOD(ImagickDraw, setTextUnderColor,
-    CVarRef under_color) {
+    const Variant& under_color) {
   auto wand = getDrawingWandResource(this_);
   WandResource<PixelWand> pixel(buildPixelWand(under_color));
   DrawSetTextUnderColor(wand->getWand(), pixel.getWand());

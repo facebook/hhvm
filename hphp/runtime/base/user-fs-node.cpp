@@ -22,7 +22,7 @@ namespace HPHP {
 
 StaticString s_call("__call");
 
-UserFSNode::UserFSNode(Class *cls, CVarRef context /*= null */) {
+UserFSNode::UserFSNode(Class *cls, const Variant& context /*= null */) {
   JIT::VMRegAnchor _;
   const Func *ctor;
   m_cls = cls;

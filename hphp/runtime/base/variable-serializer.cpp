@@ -74,7 +74,7 @@ void VariableSerializer::setResourceInfo(const String& rsrcName, int rsrcId) {
   m_objCode = 0;
 }
 
-String VariableSerializer::serialize(CVarRef v, bool ret) {
+String VariableSerializer::serialize(const Variant& v, bool ret) {
   StringBuffer buf;
   m_buf = &buf;
   if (ret) {
@@ -93,7 +93,7 @@ String VariableSerializer::serialize(CVarRef v, bool ret) {
   return null_string;
 }
 
-String VariableSerializer::serializeValue(CVarRef v, bool limit) {
+String VariableSerializer::serializeValue(const Variant& v, bool limit) {
   StringBuffer buf;
   m_buf = &buf;
   if (limit) {
@@ -104,7 +104,7 @@ String VariableSerializer::serializeValue(CVarRef v, bool limit) {
   return m_buf->detach();
 }
 
-String VariableSerializer::serializeWithLimit(CVarRef v, int limit) {
+String VariableSerializer::serializeWithLimit(const Variant& v, int limit) {
   if (m_type == Type::Serialize || m_type == Type::JSON ||
       m_type == Type::APCSerialize || m_type == Type::DebuggerSerialize) {
     assert(false);
@@ -526,7 +526,7 @@ void VariableSerializer::write(const Object& v) {
   }
 }
 
-void VariableSerializer::write(CVarRef v, bool isArrayKey /* = false */) {
+void VariableSerializer::write(const Variant& v, bool isArrayKey /* = false */) {
   setReferenced(v.isReferenced());
   setRefCount(v.getRefCount());
   if (!isArrayKey && v.isObject()) {
@@ -901,7 +901,7 @@ void VariableSerializer::writeArrayKey(Variant key) {
   }
 }
 
-void VariableSerializer::writeCollectionKey(CVarRef key) {
+void VariableSerializer::writeCollectionKey(const Variant& key) {
   if (m_type == Type::Serialize || m_type == Type::APCSerialize ||
       m_type == Type::DebuggerSerialize) {
     m_valueCount++;
@@ -942,7 +942,7 @@ void VariableSerializer::writeCollectionKeylessPrefix() {
   }
 }
 
-void VariableSerializer::writeArrayValue(CVarRef value) {
+void VariableSerializer::writeArrayValue(const Variant& value) {
   // Do not count referenced values after the first
   if ((m_type == Type::Serialize || m_type == Type::APCSerialize ||
        m_type == Type::DebuggerSerialize) &&

@@ -44,7 +44,7 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
     if (m_ref) decRefRef(m_ref);
   }
   void t___construct();
-  static void ti_setoncreatecallback(CVarRef callback);
+  static void ti_setoncreatecallback(const Variant& callback);
   static Object ti_create(const Object& wait_handle, VRefParam ref);
 
 

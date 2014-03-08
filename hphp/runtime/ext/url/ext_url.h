@@ -40,7 +40,7 @@ Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */);
 Array HHVM_FUNCTION(get_meta_tags, const String& filename,
                                    bool use_include_path /* = false */);
 
-Variant HHVM_FUNCTION(http_build_query, CVarRef formdata,
+Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
                            const String& numeric_prefix /* = null_string */,
                            const String& arg_separator /* = null_string */);
 Variant HHVM_FUNCTION(parse_url, const String& url,

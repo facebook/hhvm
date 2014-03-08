@@ -43,8 +43,8 @@ class c_GenVectorWaitHandle : public c_BlockableWaitHandle {
   ~c_GenVectorWaitHandle() {}
 
   void t___construct();
-  static void ti_setoncreatecallback(CVarRef callback);
-  static Object ti_create(CVarRef dependencies);
+  static void ti_setoncreatecallback(const Variant& callback);
+  static Object ti_create(const Variant& dependencies);
 
  public:
   String getName();

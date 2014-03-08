@@ -176,7 +176,7 @@ void StringBuffer::append(int64_t n) {
   append(p, len);
 }
 
-void StringBuffer::append(CVarRef v) {
+void StringBuffer::append(const Variant& v) {
   auto const cell = v.asCell();
   switch (cell->m_type) {
   case KindOfStaticString:

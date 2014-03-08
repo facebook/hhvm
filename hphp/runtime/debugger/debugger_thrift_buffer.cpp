@@ -92,8 +92,8 @@ int DebuggerWireHelpers::WireSerialize(const Object& data, String& sdata) {
   return serializeImpl(data, sdata);
 }
 
-int DebuggerWireHelpers::WireSerialize(CVarRef data, String& sdata) {
-  TRACE(7, "DebuggerWireHelpers::WireSerialize(CVarRef data,\n");
+int DebuggerWireHelpers::WireSerialize(const Variant& data, String& sdata) {
+  TRACE(7, "DebuggerWireHelpers::WireSerialize(const Variant& data,\n");
   return serializeImpl(data, sdata);
 }
 

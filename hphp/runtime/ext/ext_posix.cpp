@@ -244,6 +244,8 @@ static Variant php_posix_passwd_to_array(int uid,
     return false;
   }
 
+  if (!retpwptr) return false;
+
   ArrayInit ret(7);
   ret.set(s_name,   String(pw.pw_name,   CopyString));
   ret.set(s_passwd, String(pw.pw_passwd, CopyString));

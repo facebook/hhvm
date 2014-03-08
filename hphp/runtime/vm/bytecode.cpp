@@ -19,6 +19,14 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cinttypes>
+
+#include <boost/format.hpp>
+
+#include <libgen.h>
+#include <sys/mman.h>
 
 #include "folly/String.h"
 
@@ -80,20 +88,12 @@
 #include "hphp/runtime/base/tracer.h"
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/container-functions.h"
 
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
-
-#include <iostream>
-#include <iomanip>
-#include <boost/format.hpp>
-
-#include <cinttypes>
-
-#include <libgen.h>
-#include <sys/mman.h>
 
 namespace HPHP {
 

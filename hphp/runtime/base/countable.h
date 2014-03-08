@@ -60,6 +60,16 @@ static_assert((uint32_t)StaticValue & (1uL << UncountedBitPos),
               "Check StaticValue and UncountedBitPos");
 
 /*
+ * All Refcounted types have their m_count field at the same offset
+ * in the object. This offset is chosen to allow a RefData's count
+ * field to pack after a TypedValue.
+ *
+ * Other refcounted types (ArrayData, StringData, and ObjectData)
+ * have small fields that are packed into the same space.
+ */
+const size_t FAST_REFCOUNT_OFFSET = 12;
+
+/*
  * Real count values should always be less than or equal to
  * RefCountMaxRealistic, and asserting this will also catch
  * common malloc freed-memory patterns (e.g. 0x5a5a5a5a and smart

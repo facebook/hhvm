@@ -93,7 +93,7 @@ ArrayIter getArrayIterHelper(CVarRef v, size_t& sz) {
   if (v.isObject()) {
     ObjectData* obj = v.getObjectData();
     if (obj->isCollection()) {
-      sz = obj->getCollectionSize();
+      sz = getCollectionSize(obj);
       return ArrayIter(obj);
     }
     bool isIterable;
@@ -5430,7 +5430,7 @@ static inline bool isKeylessCollectionType(Collection::Type ctype) {
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   assert(obj->isCollection());
-  int64_t sz = obj->getCollectionSize();
+  int64_t sz = getCollectionSize(obj);
   if (Collection::isVectorType(obj->getCollectionType()) ||
       Collection::isSetType(obj->getCollectionType()) ||
       obj->getCollectionType() == Collection::PairType) {

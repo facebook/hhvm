@@ -39,6 +39,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/container-functions.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {

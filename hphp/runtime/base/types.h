@@ -74,22 +74,6 @@ extern const String null_string;
 extern const Array null_array;
 extern const Array empty_array;
 
-/*
- * All Refcounted types have their m_count field at the same offset
- * in the object. This offset is chosen to allow a RefData's count
- * field to pack after a TypedValue.
- *
- * Other refcounted types (ArrayData, StringData, and ObjectData)
- * have small fields that are packed into the same space.
- */
-const size_t FAST_REFCOUNT_OFFSET = 12;
-
-/*
- * All native collection class have their m_size field at the same
- * offset in the object.
- */
-const size_t FAST_COLLECTION_SIZE_OFFSET = 20;
-
 /**
  * These are underlying data structures for the above complex data types. Since
  * we use reference counting to achieve copy-on-write and automatic object

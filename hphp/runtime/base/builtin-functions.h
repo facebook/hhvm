@@ -192,49 +192,6 @@ void check_collection_cast_to_array();
 Object create_object_only(const String& s);
 Object create_object(const String& s, const Array &params, bool init = true);
 
-inline bool isContainer(const Cell& c) {
-  assert(cellIsPlausible(c));
-  return c.m_type == KindOfArray ||
-         (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
-}
-
-inline bool isContainer(CVarRef v) {
-  return isContainer(*v.asCell());
-}
-
-inline bool isContainerOrNull(const Cell& c) {
-  assert(cellIsPlausible(c));
-  return IS_NULL_TYPE(c.m_type) || c.m_type == KindOfArray ||
-         (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
-}
-
-inline bool isContainerOrNull(CVarRef v) {
-  return isContainerOrNull(*v.asCell());
-}
-
-inline bool isMutableContainer(const Cell& c) {
-  assert(cellIsPlausible(c));
-  return c.m_type == KindOfArray ||
-         (c.m_type == KindOfObject && c.m_data.pobj->isMutableCollection());
-}
-
-inline bool isMutableContainer(CVarRef v) {
-  return isMutableContainer(*v.asCell());
-}
-
-inline size_t getContainerSize(const Cell& c) {
-  assert(isContainer(c));
-  if (c.m_type == KindOfArray) {
-    return c.m_data.parr->size();
-  }
-  assert(c.m_type == KindOfObject && c.m_data.pobj->isCollection());
-  return c.m_data.pobj->getCollectionSize();
-}
-
-inline size_t getContainerSize(CVarRef v) {
-  return getContainerSize(*v.asCell());
-}
-
 /**
  * Argument count handling.
  *   - When level is 2, it's from constructors that turn these into fatals

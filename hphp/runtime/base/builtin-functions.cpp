@@ -44,6 +44,7 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/file-util.h"
 #include "hphp/util/string-vsnprintf.h"
+#include "hphp/runtime/base/container-functions.h"
 
 #include <limits>
 #include <algorithm>

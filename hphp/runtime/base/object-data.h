@@ -211,11 +211,6 @@ class ObjectData {
                           : Collection::Type::InvalidType;
   }
 
-  size_t getCollectionSize() const {
-    assert(isCollection());
-    return *(uint*)((char*)this + FAST_COLLECTION_SIZE_OFFSET);
-  }
-
   bool implementsIterator() {
     return (instanceof(SystemLib::s_IteratorClass));
   }

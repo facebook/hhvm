@@ -1582,7 +1582,7 @@ ArrayIter getContainerIter(CVarRef v, size_t& sz) {
   if (c->m_type == KindOfObject) {
     auto o = c->m_data.pobj;
     if (o->isCollection()) {
-      sz = o->getCollectionSize();
+      sz = getCollectionSize(o);
       return ArrayIter(o);
     }
   }

@@ -32,6 +32,7 @@
 #include "folly/Unicode.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/zend/html-table.h"
+#include "hphp/runtime/base/container-functions.h"
 
 namespace HPHP {
 

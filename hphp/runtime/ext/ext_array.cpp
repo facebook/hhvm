@@ -14,9 +14,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_array.h"
+
 #include <vector>
+
+#include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -1007,7 +1009,7 @@ int64_t f_count(CVarRef var, int64_t mode /* = 0 */) {
     {
       Object obj = var.toObject();
       if (obj->isCollection()) {
-        return obj->getCollectionSize();
+        return getCollectionSize(obj.get());
       }
       if (obj.instanceof(SystemLib::s_CountableClass)) {
         return obj->o_invoke_few_args(s_count, 0).toInt64();

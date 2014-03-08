@@ -43,6 +43,18 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * All native collection class have their m_size field at the same
+ * offset in the object.
+ */
+constexpr ptrdiff_t FAST_COLLECTION_SIZE_OFFSET = 20;
+inline size_t getCollectionSize(const ObjectData* od) {
+  assert(od->isCollection());
+  return *reinterpret_cast<const uint32_t*>(
+    reinterpret_cast<const char*>(od) + FAST_COLLECTION_SIZE_OFFSET
+  );
+}
+
 /**
  * Called by the JIT on an emitVectorSet().
  */

@@ -578,7 +578,11 @@ String string_replace(const char *input, int len,
     return String(); // not found
   }
 
-  String retString(len + (len_replace - len_search) * count, ReserveString);
+  int reserve = len + (len_replace - len_search) * count;
+  if ((reserve - len) / count != (len_replace - len_search)) {
+    raise_error("String too large");
+  }
+  String retString(reserve, ReserveString);
   char *ret = retString.bufferSlice().ptr;
   char *p = ret;
   int pos = 0; // last position in input that hasn't been copied over yet

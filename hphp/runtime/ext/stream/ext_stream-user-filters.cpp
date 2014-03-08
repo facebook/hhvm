@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/ext_array.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -261,7 +262,7 @@ Array HHVM_FUNCTION(stream_get_filters) {
   if (UNLIKELY(filters.isNull())) {
     return Array::Create();
   }
-  return filters;
+  return f_array_keys(filters).toArray();
 }
 
 Variant HHVM_FUNCTION(stream_filter_append,

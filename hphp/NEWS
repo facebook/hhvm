@@ -1,3 +1,6 @@
+Next
+  - JIT default on in command line mode
+
 "Fifty Cent" 3-Mar-2014
   - Array parameter type constraints implicitly cast collections to arrays
   - Fix issues with feof and fwrite

@@ -449,7 +449,7 @@ c_SQLite3Stmt::~c_SQLite3Stmt() {
   }
 }
 
-void c_SQLite3Stmt::t___construct(CObjRef dbobject, const String& statement) {
+void c_SQLite3Stmt::t___construct(const Object& dbobject, const String& statement) {
   if (!statement.empty()) {
     c_SQLite3 *db = dbobject.getTyped<c_SQLite3>();
     db->validate();

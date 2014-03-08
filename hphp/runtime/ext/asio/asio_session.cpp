@@ -115,7 +115,7 @@ void AsioSession::onAsyncFunctionSuccess(c_AsyncFunctionWaitHandle* cont, CVarRe
   }
 }
 
-void AsioSession::onAsyncFunctionFail(c_AsyncFunctionWaitHandle* cont, CObjRef exception) {
+void AsioSession::onAsyncFunctionFail(c_AsyncFunctionWaitHandle* cont, const Object& exception) {
   assert(m_onAsyncFunctionFailCallback.get());
   try {
     vm_call_user_func(
@@ -168,7 +168,7 @@ void AsioSession::onGenVectorCreate(c_GenVectorWaitHandle* wait_handle, CVarRef 
   }
 }
 
-void AsioSession::onSetResultToRefCreate(c_SetResultToRefWaitHandle* wait_handle, CObjRef child) {
+void AsioSession::onSetResultToRefCreate(c_SetResultToRefWaitHandle* wait_handle, const Object& child) {
   assert(m_onSetResultToRefCreateCallback.get());
   try {
     vm_call_user_func(

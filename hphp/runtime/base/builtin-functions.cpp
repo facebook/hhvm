@@ -1351,7 +1351,7 @@ bool function_exists(const String& function_name) {
 ///////////////////////////////////////////////////////////////////////////////
 // debugger and code coverage instrumentation
 
-void throw_exception(CObjRef e) {
+void throw_exception(const Object& e) {
   if (!e.instanceof(SystemLib::s_ExceptionClass)) {
     raise_error("Exceptions must be valid objects derived from the "
                 "Exception base class");

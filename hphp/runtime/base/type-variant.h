@@ -133,7 +133,7 @@ class Variant : private TypedValue {
 
   /* implicit */ Variant(const String& v);
   /* implicit */ Variant(const Array& v);
-  /* implicit */ Variant(CObjRef v);
+  /* implicit */ Variant(const Object& v);
   /* implicit */ Variant(const Resource& v);
   /* implicit */ Variant(StringData *v);
   /* implicit */ Variant(ArrayData *v);
@@ -766,7 +766,7 @@ class Variant : private TypedValue {
   const Variant operator[](double  key) const = delete;
   const Variant operator[](const String& key) const { return rvalAt(key);}
   const Variant operator[](const Array& key) const { return rvalAt(key);}
-  const Variant operator[](CObjRef key) const { return rvalAt(key);}
+  const Variant operator[](const Object& key) const { return rvalAt(key);}
   const Variant operator[](CVarRef key) const { return rvalAt(key);}
   const Variant operator[](const char*) const = delete;
 
@@ -986,7 +986,7 @@ class Variant : private TypedValue {
   CVarRef set(const String& v) { return set(v.get()); }
   CVarRef set(const StaticString & v);
   CVarRef set(const Array& v) { return set(v.get()); }
-  CVarRef set(CObjRef v) { return set(v.get()); }
+  CVarRef set(const Object& v) { return set(v.get()); }
   CVarRef set(const Resource& v) { return set(v.get()); }
 
   template<typename T>
@@ -1275,7 +1275,7 @@ public:
 
   explicit VarNR(const String& v);
   explicit VarNR(const Array& v);
-  explicit VarNR(CObjRef v);
+  explicit VarNR(const Object& v);
   explicit VarNR(StringData *v);
   explicit VarNR(const StringData *v) {
     assert(v && v->isStatic());

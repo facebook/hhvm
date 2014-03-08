@@ -258,14 +258,14 @@ public:
    * Comparisons
    */
   bool same (const Array& v2) const;
-  bool same (CObjRef v2) const;
+  bool same (const Object& v2) const;
   bool equal(const Array& v2) const;
-  bool equal(CObjRef v2) const;
+  bool equal(const Object& v2) const;
   bool less (const Array& v2, bool flip = false) const;
-  bool less (CObjRef v2) const;
+  bool less (const Object& v2) const;
   bool less (CVarRef v2) const;
   bool more (const Array& v2, bool flip = true) const;
-  bool more (CObjRef v2) const;
+  bool more (const Object& v2) const;
   bool more (CVarRef v2) const;
 
   /*

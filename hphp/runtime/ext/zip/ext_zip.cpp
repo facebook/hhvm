@@ -368,7 +368,7 @@ const int64_t k_CM_PPMD = 98;
 
 template<class T>
 ALWAYS_INLINE
-static T* getResource(CObjRef obj, const char* varName) {
+static T* getResource(const Object& obj, const char* varName) {
   auto var = obj->o_get(varName, true, s_ZipArchive.get());
   if (var.getType() == KindOfNull) {
     return nullptr;
@@ -377,7 +377,7 @@ static T* getResource(CObjRef obj, const char* varName) {
 }
 
 ALWAYS_INLINE
-static Variant setVariable(CObjRef obj, const char* varName, CVarRef varValue) {
+static Variant setVariable(const Object& obj, const char* varName, CVarRef varValue) {
   return obj->o_set(varName, varValue, s_ZipArchive.get());
 }
 

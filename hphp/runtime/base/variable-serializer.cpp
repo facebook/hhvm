@@ -497,7 +497,7 @@ void VariableSerializer::write(const String& v) {
   }
 }
 
-void VariableSerializer::write(CObjRef v) {
+void VariableSerializer::write(const Object& v) {
   if (!v.isNull() && m_type == Type::JSON) {
 
     if (v.instanceof(s_JsonSerializable)) {

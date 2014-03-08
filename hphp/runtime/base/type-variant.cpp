@@ -121,7 +121,7 @@ Variant::Variant(const Array& v) {
   }
 }
 
-Variant::Variant(CObjRef v) {
+Variant::Variant(const Object& v) {
   m_type = KindOfObject;
   ObjectData *o = v.get();
   if (o) {
@@ -1957,7 +1957,7 @@ VarNR::VarNR(const Array& v) {
   }
 }
 
-VarNR::VarNR(CObjRef v) {
+VarNR::VarNR(const Object& v) {
   init(KindOfObject);
   ObjectData *o = v.get();
   if (o) {

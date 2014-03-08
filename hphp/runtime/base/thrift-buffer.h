@@ -278,7 +278,7 @@ public:
   void read(Object  &data);
   void read(Variant &data);
   void write(const Array& data);
-  void write(CObjRef data);
+  void write(const Object& data);
   void write(CVarRef data);
 
   void skip(int8_t type);

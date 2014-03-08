@@ -1520,7 +1520,7 @@ Variant f_session_module_name(const String& newname /* = null_string */) {
   return oldname;
 }
 
-bool f_hphp_session_set_save_handler(CObjRef sessionhandler,
+bool f_hphp_session_set_save_handler(const Object& sessionhandler,
     bool register_shutdown /* = true */) {
 
   if (PS(mod) &&

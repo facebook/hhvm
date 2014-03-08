@@ -139,7 +139,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
   }
 }
 
-void c_GenArrayWaitHandle::initialize(CObjRef exception, const Array& deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
+void c_GenArrayWaitHandle::initialize(const Object& exception, const Array& deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;

@@ -188,7 +188,6 @@ inline bool isMutableType(Collection::Type ctype) {
 //////////////////////////////////////////////////////////////////////
 
 typedef const char * litstr; /* literal string */
-typedef const Object & CObjRef;
 typedef const Variant & CVarRef;
 
 typedef const class VRefParamValue    &VRefParam;

@@ -314,7 +314,7 @@ bool Array::same(const Array& v2) const {
   return false;
 }
 
-bool Array::same(CObjRef v2) const {
+bool Array::same(const Object& v2) const {
   return false;
 }
 
@@ -325,7 +325,7 @@ bool Array::equal(const Array& v2) const {
   return m_px->equal(v2.get(), false);
 }
 
-bool Array::equal(CObjRef v2) const {
+bool Array::equal(const Object& v2) const {
   if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::equal(toBoolean(), v2.toBoolean());
   }
@@ -342,7 +342,7 @@ bool Array::less(const Array& v2, bool flip /* = false */) const {
   return m_px->compare(v2.get()) < 0;
 }
 
-bool Array::less(CObjRef v2) const {
+bool Array::less(const Object& v2) const {
   if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
@@ -370,7 +370,7 @@ bool Array::more(const Array& v2, bool flip /* = true */) const {
   return m_px->compare(v2.get()) > 0;
 }
 
-bool Array::more(CObjRef v2) const {
+bool Array::more(const Object& v2) const {
   if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }

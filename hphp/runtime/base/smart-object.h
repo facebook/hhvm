@@ -50,7 +50,7 @@ public:
   /* implicit */ SmartObject(T *data) : Object(data) { }
   template<class Y>
   /* implicit */ SmartObject(Y *data) : Object(data) { }
-  /* implicit */ SmartObject(CObjRef src) : Object(src) { }
+  /* implicit */ SmartObject(const Object& src) : Object(src) { }
 
   /**
    * Assignment
@@ -63,7 +63,7 @@ public:
     Object::operator=(src);
     return *this;
   }
-  SmartObject &operator=(CObjRef src) {
+  SmartObject &operator=(const Object& src) {
     Object::operator=(src);
     return *this;
   }

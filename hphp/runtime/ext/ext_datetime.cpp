@@ -121,13 +121,13 @@ const int64_t q_DateTimeZone$$PER_COUNTRY = 4096;
 ///////////////////////////////////////////////////////////////////////////////
 // methods
 
-Object c_DateTime::t_add(CObjRef interval) {
+Object c_DateTime::t_add(const Object& interval) {
   m_dt->add(c_DateInterval::unwrap(interval));
   return this;
 }
 
 void c_DateTime::t___construct(const String& time /*= "now"*/,
-                               CObjRef timezone /*= null_object*/) {
+                               const Object& timezone /*= null_object*/) {
   m_dt = NEWOBJ(DateTime)(TimeStamp::Current());
   if (!time.empty()) {
     m_dt->fromString(time, c_DateTimeZone::unwrap(timezone));
@@ -140,7 +140,7 @@ void c_DateTime::t___construct(const String& time /*= "now"*/,
 
 Variant c_DateTime::ti_createfromformat(const String& format,
                                         const String& time,
-                                        CObjRef timezone /*= null_object */) {
+                                        const Object& timezone /*= null_object */) {
   c_DateTime *datetime = NEWOBJ(c_DateTime);
   const auto curr = (format.find("!") != String::npos) ? 0 : f_time() ;
   datetime->m_dt = NEWOBJ(DateTime(curr, false));
@@ -152,7 +152,7 @@ Variant c_DateTime::ti_createfromformat(const String& format,
   return datetime;
 }
 
-Object c_DateTime::t_diff(CObjRef datetime2, bool absolute) {
+Object c_DateTime::t_diff(const Object& datetime2, bool absolute) {
   return c_DateInterval::wrap(m_dt->diff(c_DateTime::unwrap(datetime2),
                                          absolute));
 }
@@ -228,12 +228,12 @@ Object c_DateTime::t_settimestamp(int64_t unixtimestamp) {
   return this;
 }
 
-Object c_DateTime::t_settimezone(CObjRef timezone) {
+Object c_DateTime::t_settimezone(const Object& timezone) {
   m_dt->setTimezone(c_DateTimeZone::unwrap(timezone));
   return this;
 }
 
-Object c_DateTime::t_sub(CObjRef interval) {
+Object c_DateTime::t_sub(const Object& interval) {
   m_dt->sub(c_DateInterval::unwrap(interval));
   return this;
 }
@@ -276,7 +276,7 @@ String c_DateTimeZone::t_getname() {
   return m_tz->name();
 }
 
-int64_t c_DateTimeZone::t_getoffset(CObjRef datetime) {
+int64_t c_DateTimeZone::t_getoffset(const Object& datetime) {
   bool error;
   int64_t ts = c_DateTime::unwrap(datetime)->toTimeStamp(error);
   return m_tz->offset(ts);
@@ -551,19 +551,19 @@ Object f_timezone_open(const String& timezone) {
   return ret;
 }
 
-Array f_timezone_location_get(CObjRef timezone) {
+Array f_timezone_location_get(const Object& timezone) {
   return timezone.getTyped<c_DateTimeZone>()->t_getlocation();
 }
 
-String f_timezone_name_get(CObjRef object) {
+String f_timezone_name_get(const Object& object) {
   return object.getTyped<c_DateTimeZone>()->t_getname();
 }
 
-int64_t f_timezone_offset_get(CObjRef object, CObjRef dt) {
+int64_t f_timezone_offset_get(const Object& object, const Object& dt) {
   return object.getTyped<c_DateTimeZone>()->t_getoffset(dt);
 }
 
-Array f_timezone_transitions_get(CObjRef object) {
+Array f_timezone_transitions_get(const Object& object) {
   return object.getTyped<c_DateTimeZone>()->t_gettransitions();
 }
 
@@ -578,14 +578,14 @@ bool f_checkdate(int month, int day, int year) {
   return DateTime::IsValid(year, month, day);
 }
 
-Object f_date_add(CObjRef datetime, CObjRef interval) {
+Object f_date_add(const Object& datetime, const Object& interval) {
   return datetime.getTyped<c_DateTime>()->
     t_add(interval.getTyped<c_DateInterval>());
 }
 
 Variant f_date_create_from_format(const String& format,
                                  const String& time,
-                                 CObjRef timezone /* = null_object */) {
+                                 const Object& timezone /* = null_object */) {
   return c_DateTime::ti_createfromformat(format, time, timezone);
 }
 
@@ -598,7 +598,7 @@ Variant f_date_parse_from_format(const String& format, const String& date) {
 }
 
 Variant f_date_create(const String& time /* = null_string */,
-                      CObjRef timezone /* = null_object */) {
+                      const Object& timezone /* = null_object */) {
   c_DateTime *cdt = NEWOBJ(c_DateTime)();
   Object ret(cdt);
   // Don't set the time here because it will throw if it is bad
@@ -614,23 +614,23 @@ Variant f_date_create(const String& time /* = null_string */,
   return ret;
 }
 
-void f_date_date_set(CObjRef object, int year, int month, int day) {
+void f_date_date_set(const Object& object, int year, int month, int day) {
   object.getTyped<c_DateTime>()->t_setdate(year, month, day);
 }
 
-Object f_date_diff(CObjRef datetime,
-                   CObjRef datetime2,
+Object f_date_diff(const Object& datetime,
+                   const Object& datetime2,
                    bool absolute /* = false */) {
   return datetime.getTyped<c_DateTime>()->
     t_diff(datetime2.getTyped<c_DateTime>(), absolute);
 }
 
-void f_date_isodate_set(CObjRef object, int year, int week,
+void f_date_isodate_set(const Object& object, int year, int week,
                         int day /* = 1 */) {
   object.getTyped<c_DateTime>()->t_setisodate(year, week, day);
 }
 
-String f_date_format(CObjRef object, const String& format) {
+String f_date_format(const Object& object, const String& format) {
   return object.getTyped<c_DateTime>()->t_format(format);
 }
 
@@ -642,15 +642,15 @@ Object f_date_interval_create_from_date_string(const String& time) {
   return c_DateInterval::ti_createfromdatestring(time);
 }
 
-String f_date_interval_format(CObjRef interval, const String& format_spec) {
+String f_date_interval_format(const Object& interval, const String& format_spec) {
   return interval.getTyped<c_DateInterval>()->t_format(format_spec);
 }
 
-void f_date_modify(CObjRef object, const String& modify) {
+void f_date_modify(const Object& object, const String& modify) {
   object.getTyped<c_DateTime>()->t_modify(modify);
 }
 
-int64_t f_date_offset_get(CObjRef object) {
+int64_t f_date_offset_get(const Object& object) {
   return object.getTyped<c_DateTime>()->t_getoffset();
 }
 
@@ -662,29 +662,29 @@ Variant f_date_parse(const String& date) {
   return ret;
 }
 
-void f_date_time_set(CObjRef object, int hour, int minute,
+void f_date_time_set(const Object& object, int hour, int minute,
                      int second /* = 0 */) {
   object.getTyped<c_DateTime>()->t_settime(hour, minute, second);
 }
 
-int64_t f_date_timestamp_get(CObjRef datetime) {
+int64_t f_date_timestamp_get(const Object& datetime) {
   return datetime.getTyped<c_DateTime>()->t_gettimestamp();
 }
 
-Object f_date_timestamp_set(CObjRef datetime, int64_t timestamp) {
+Object f_date_timestamp_set(const Object& datetime, int64_t timestamp) {
   return datetime.getTyped<c_DateTime>()->
     t_settimestamp(timestamp);
 }
 
-Variant f_date_timezone_get(CObjRef object) {
+Variant f_date_timezone_get(const Object& object) {
   return object.getTyped<c_DateTime>()->t_gettimezone();
 }
 
-void f_date_timezone_set(CObjRef object, CObjRef timezone) {
+void f_date_timezone_set(const Object& object, const Object& timezone) {
   object.getTyped<c_DateTime>()->t_settimezone(timezone);
 }
 
-Object f_date_sub(CObjRef datetime, CObjRef interval) {
+Object f_date_sub(const Object& datetime, const Object& interval) {
   return datetime.getTyped<c_DateTime>()->
     t_sub(interval.getTyped<c_DateInterval>());
 }

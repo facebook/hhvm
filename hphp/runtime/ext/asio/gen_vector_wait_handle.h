@@ -55,7 +55,7 @@ class c_GenVectorWaitHandle : public c_BlockableWaitHandle {
   void enterContextImpl(context_idx_t ctx_idx);
 
  private:
-  void initialize(CObjRef exception, c_Vector* deps,
+  void initialize(const Object& exception, c_Vector* deps,
                   int64_t iter_pos, c_WaitableWaitHandle* child);
 
   Object m_exception;

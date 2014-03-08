@@ -45,7 +45,7 @@ bool f_is_subclass_of(CVarRef class_or_object, const String& class_name,
                       bool allow_string = true);
 bool f_method_exists(CVarRef class_or_object, const String& method_name);
 Variant f_property_exists(CVarRef class_or_object, const String& property);
-Variant f_get_object_vars(CObjRef object);
+Variant f_get_object_vars(const Object& object);
 
 ///////////////////////////////////////////////////////////////////////////////
 

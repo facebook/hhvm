@@ -24,7 +24,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////////
 // class ImagickPixelIterator
 ALWAYS_INLINE
-static void initPixelIterator(CObjRef this_, CObjRef magick) {
+static void initPixelIterator(const Object& this_, const Object& magick) {
   auto wand = getMagickWandResource(magick);
   auto it = NewPixelIterator(wand->getWand());
   if (it == nullptr) {
@@ -35,7 +35,7 @@ static void initPixelIterator(CObjRef this_, CObjRef magick) {
 }
 
 ALWAYS_INLINE
-static void initPixelRegionIterator(CObjRef this_, CObjRef magick,
+static void initPixelRegionIterator(const Object& this_, const Object& magick,
     int64_t x, int64_t y, int64_t columns, int64_t rows) {
   auto wand = getMagickWandResource(magick);
   auto it = NewPixelRegionIterator(wand->getWand(), x, y, columns, rows);
@@ -47,14 +47,14 @@ static void initPixelRegionIterator(CObjRef this_, CObjRef magick,
 }
 
 static Object HHVM_STATIC_METHOD(ImagickPixelIterator, getPixelIterator,
-    CObjRef magick) {
+    const Object& magick) {
   Object ret = ImagickPixelIterator::allocObject();
   initPixelIterator(ret, magick);
   return ret;
 }
 
 static Object HHVM_STATIC_METHOD(ImagickPixelIterator, getPixelRegionIterator,
-    CObjRef magick, int64_t x, int64_t y, int64_t columns, int64_t rows) {
+    const Object& magick, int64_t x, int64_t y, int64_t columns, int64_t rows) {
   Object ret = ImagickPixelIterator::allocObject();
   initPixelRegionIterator(ret, magick, x, y, columns, rows);
   return ret;
@@ -66,7 +66,7 @@ static bool HHVM_METHOD(ImagickPixelIterator, clear) {
   return true;
 }
 
-static void HHVM_METHOD(ImagickPixelIterator, __construct, CObjRef magick) {
+static void HHVM_METHOD(ImagickPixelIterator, __construct, const Object& magick) {
   initPixelIterator(this_, magick);
 }
 
@@ -101,7 +101,7 @@ static Array HHVM_METHOD(ImagickPixelIterator, getPreviousIteratorRow) {
 }
 
 static bool HHVM_METHOD(ImagickPixelIterator, newPixelIterator,
-    CObjRef magick) {
+    const Object& magick) {
   raiseDeprecated(s_ImagickPixelIterator.c_str(), "newPixelIterator",
                   s_ImagickPixelIterator.c_str(), "getPixelIterator");
   initPixelIterator(this_, magick);
@@ -109,7 +109,7 @@ static bool HHVM_METHOD(ImagickPixelIterator, newPixelIterator,
 }
 
 static bool HHVM_METHOD(ImagickPixelIterator, newPixelRegionIterator,
-    CObjRef magick, int64_t x, int64_t y, int64_t columns, int64_t rows) {
+    const Object& magick, int64_t x, int64_t y, int64_t columns, int64_t rows) {
   raiseDeprecated(s_ImagickPixelIterator.c_str(), "newPixelRegionIterator",
                   s_ImagickPixelIterator.c_str(), "getPixelRegionIterator");
   initPixelRegionIterator(this_, magick, x, y, columns, rows);

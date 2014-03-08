@@ -125,7 +125,7 @@ static bool s_inited = false;
 static int64_t s_hash_mask_handle = 0;
 static Mutex s_mutex;
 
-String f_spl_object_hash(CObjRef obj) {
+String f_spl_object_hash(const Object& obj) {
   if (!s_inited) {
     Lock lock(s_mutex);
     if (!s_inited) {
@@ -144,7 +144,7 @@ String f_spl_object_hash(CObjRef obj) {
   return String(buf, CopyString);
 }
 
-int64_t f_hphp_object_pointer(CObjRef obj) { return (int64_t)obj.get();}
+int64_t f_hphp_object_pointer(const Object& obj) { return (int64_t)obj.get();}
 
 Variant f_hphp_get_this() {
   return g_context->getThis();

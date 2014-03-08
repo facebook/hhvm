@@ -90,7 +90,7 @@ static bool HHVM_METHOD(Imagick, destroy) {
   return HHVM_MN(Imagick, clear)(this_);
 }
 
-static bool HHVM_METHOD(Imagick, drawImage, CObjRef draw) {
+static bool HHVM_METHOD(Imagick, drawImage, const Object& draw) {
   auto wand = getMagickWandResource(this_);
   auto drawing = getDrawingWandResource(draw);
   auto status = withMagickLocaleFix([&wand, &drawing](){
@@ -122,7 +122,7 @@ static bool HHVM_METHOD(Imagick, newImage,
 }
 
 static Array HHVM_METHOD(Imagick, queryFontMetrics,
-    CObjRef properties, const String& text, bool multiline) {
+    const Object& properties, const String& text, bool multiline) {
   throw NotImplementedException("Not Implemented");
 }
 

@@ -54,7 +54,7 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
   void enterContextImpl(context_idx_t ctx_idx);
 
  private:
-  void initialize(CObjRef exception, const Array& deps,
+  void initialize(const Object& exception, const Array& deps,
                   ssize_t iter_pos, c_WaitableWaitHandle* child);
 
  private:

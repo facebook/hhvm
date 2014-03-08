@@ -92,7 +92,7 @@ class c_SQLite3Stmt : public ExtObjectData {
   // need to implement
   public: c_SQLite3Stmt(Class* cls = c_SQLite3Stmt::classof());
   public: ~c_SQLite3Stmt();
-  public: void t___construct(CObjRef dbobject, const String& statement);
+  public: void t___construct(const Object& dbobject, const String& statement);
   public: int64_t t_paramcount();
   public: bool t_close();
   public: bool t_reset();

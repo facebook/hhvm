@@ -45,7 +45,7 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
   }
   void t___construct();
   static void ti_setoncreatecallback(CVarRef callback);
-  static Object ti_create(CObjRef wait_handle, VRefParam ref);
+  static Object ti_create(const Object& wait_handle, VRefParam ref);
 
 
  public:
@@ -59,7 +59,7 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
  private:
   void initialize(c_WaitableWaitHandle* wait_handle, RefData* ref);
   void markAsSucceeded(const Cell& result);
-  void markAsFailed(CObjRef exception);
+  void markAsFailed(const Object& exception);
 
   p_WaitableWaitHandle m_child;
   RefData* m_ref;

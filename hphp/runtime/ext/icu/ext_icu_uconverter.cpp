@@ -178,7 +178,7 @@ static void ucnvFromUCallback(ObjectData *objval,
   appendFromUTarget(data, ret, args);
 }
 
-static bool setCallback(CObjRef this_, UConverter *cnv) {
+static bool setCallback(const Object& this_, UConverter *cnv) {
   UErrorCode error = U_ZERO_ERROR;
   ucnv_setToUCallBack(cnv, (UConverterToUCallback)ucnvToUCallback,
                            this_.get(), nullptr, nullptr, &error);

@@ -42,13 +42,13 @@ class c_SoapServer : public ExtObjectData {
   public: ~c_SoapServer();
   public: void t___construct(CVarRef wsdl, const Array& options = null_array);
   public: void t_setclass(int _argc, const String& name, const Array& _argv = null_array);
-  public: void t_setobject(CObjRef obj);
+  public: void t_setobject(const Object& obj);
   public: void t_addfunction(CVarRef func);
   public: Variant t_getfunctions();
   public: void t_handle(const String& request = null_string);
   public: void t_setpersistence(int64_t mode);
   public: void t_fault(CVarRef code, const String& fault, const String& actor = null_string, CVarRef detail = uninit_null(), const String& name = null_string);
-  public: void t_addsoapheader(CObjRef fault);
+  public: void t_addsoapheader(const Object& fault);
 
 
 

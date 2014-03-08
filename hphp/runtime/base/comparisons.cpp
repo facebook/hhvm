@@ -67,7 +67,7 @@ bool same(CVarRef v1, const Array& v2) {
   return v2->equal(ad, true);
 }
 
-bool same(CVarRef v1, CObjRef v2) {
+bool same(CVarRef v1, const Object& v2) {
   bool null1 = v1.isNull();
   bool null2 = v2.isNull();
   if (null1 && null2) return true;

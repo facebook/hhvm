@@ -222,7 +222,7 @@ String String::rvalAt(const Array& key) const {
   return rvalAtImpl(key.toInt32());
 }
 
-String String::rvalAt(CObjRef key) const {
+String String::rvalAt(const Object& key) const {
   return rvalAtImpl(key.toInt32());
 }
 
@@ -392,7 +392,7 @@ bool String::same(const Array& v2) const {
   return HPHP::same(m_px, v2);
 }
 
-bool String::same(CObjRef v2) const {
+bool String::same(const Object& v2) const {
   return HPHP::same(m_px, v2);
 }
 
@@ -412,7 +412,7 @@ bool String::equal(const Array& v2) const {
   return HPHP::equal(m_px, v2);
 }
 
-bool String::equal(CObjRef v2) const {
+bool String::equal(const Object& v2) const {
   return HPHP::equal(m_px, v2);
 }
 
@@ -432,7 +432,7 @@ bool String::less(const Array& v2) const {
   return HPHP::less(m_px, v2);
 }
 
-bool String::less(CObjRef v2) const {
+bool String::less(const Object& v2) const {
   return HPHP::less(m_px, v2);
 }
 
@@ -452,7 +452,7 @@ bool String::more(const Array& v2) const {
   return HPHP::more(m_px, v2);
 }
 
-bool String::more(CObjRef v2) const {
+bool String::more(const Object& v2) const {
   return HPHP::more(m_px, v2);
 }
 

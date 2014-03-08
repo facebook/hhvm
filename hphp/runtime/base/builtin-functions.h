@@ -95,7 +95,7 @@ void NEVER_INLINE throw_invalid_property_name(const String& name)
 void NEVER_INLINE throw_null_object_prop();
 void NEVER_INLINE throw_null_get_object_prop();
 void NEVER_INLINE raise_null_object_prop();
-void throw_exception(CObjRef e);
+void throw_exception(const Object& e);
 
 ///////////////////////////////////////////////////////////////////////////////
 // type testing

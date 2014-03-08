@@ -362,7 +362,7 @@ Variant f_property_exists(CVarRef class_or_object, const String& property) {
   return (propInd != kInvalidSlot);
 }
 
-Variant f_get_object_vars(CObjRef object) {
+Variant f_get_object_vars(const Object& object) {
   return object->o_toIterArray(ctxClassName());
 }
 

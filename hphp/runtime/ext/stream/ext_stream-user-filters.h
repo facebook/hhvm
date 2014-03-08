@@ -34,8 +34,8 @@ public:
   BucketBrigade() { };
   explicit BucketBrigade(const String& data);
 
-  void prependBucket(CObjRef bucket);
-  void appendBucket(CObjRef bucket);
+  void prependBucket(const Object& bucket);
+  void appendBucket(const Object& bucket);
   Object popFront();
 
   String createString();
@@ -52,7 +52,7 @@ public:
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
-  explicit StreamFilter(CObjRef filter): m_filter(filter) { }
+  explicit StreamFilter(const Object& filter): m_filter(filter) { }
 
   int64_t invokeFilter(Resource in, Resource out, bool closing);
   void invokeOnClose();
@@ -79,10 +79,10 @@ Variant HHVM_FUNCTION(stream_filter_prepend,
 Variant HHVM_FUNCTION(stream_bucket_make_writeable, const Resource& bucket_brigade);
 void HHVM_FUNCTION(stream_bucket_append,
                    const Resource& bucket_brigade,
-                   CObjRef bucket);
+                   const Object& bucket);
 void HHVM_FUNCTION(stream_bucket_prepend,
                    const Resource& bucket_brigade,
-                   CObjRef bucket);
+                   const Object& bucket);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

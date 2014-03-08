@@ -113,7 +113,7 @@ Object c_GenMapWaitHandle::ti_create(CVarRef dependencies) {
   }
 }
 
-void c_GenMapWaitHandle::initialize(CObjRef exception, c_Map* deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
+void c_GenMapWaitHandle::initialize(const Object& exception, c_Map* deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;

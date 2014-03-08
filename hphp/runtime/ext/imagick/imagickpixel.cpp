@@ -159,7 +159,7 @@ static Array HHVM_METHOD(ImagickPixel, getHSL) {
   return ret.create();
 }
 
-static bool isSimilar(CObjRef this_, CVarRef color,
+static bool isSimilar(const Object& this_, CVarRef color,
                       double fuzz, bool useQuantum) {
   auto wand = getPixelWandResource(this_);
   WandResource<PixelWand> pixel(buildPixelWand(color));

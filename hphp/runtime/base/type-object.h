@@ -59,7 +59,7 @@ public:
    * Constructors
    */
   /* implicit */ Object(ObjectData *data) : ObjectBase(data) { }
-  /* implicit */ Object(CObjRef src) : ObjectBase(src.m_px) { }
+  /* implicit */ Object(const Object& src) : ObjectBase(src.m_px) { }
 
   // Move ctor
   Object(Object&& src) : ObjectBase(std::move(src)) {
@@ -160,10 +160,10 @@ public:
   /**
    * Comparisons
    */
-  bool same (CObjRef v2) const { return m_px == v2.get();}
-  bool equal(CObjRef v2) const;
-  bool less (CObjRef v2) const;
-  bool more (CObjRef v2) const;
+  bool same (const Object& v2) const { return m_px == v2.get();}
+  bool equal(const Object& v2) const;
+  bool less (const Object& v2) const;
+  bool more (const Object& v2) const;
 
   Variant o_get(const String& propName, bool error = true,
                 const String& context = null_string) const;

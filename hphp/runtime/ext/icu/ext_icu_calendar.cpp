@@ -128,7 +128,7 @@ static bool HHVM_METHOD(IntlCalendar, add, int64_t field, int64_t amount) {
   return true;
 }
 
-static bool intlcal_compare(CObjRef this_, CObjRef that_,
+static bool intlcal_compare(const Object& this_, const Object& that_,
   UBool (icu::Calendar::*func)(const icu::Calendar&, UErrorCode&) const) {
   CAL_FETCH(obj1, this_, false);
   CAL_FETCH(obj2, that_, false);
@@ -141,11 +141,11 @@ static bool intlcal_compare(CObjRef this_, CObjRef that_,
   return res;
 }
 
-static bool HHVM_METHOD(IntlCalendar, after, CObjRef other) {
+static bool HHVM_METHOD(IntlCalendar, after, const Object& other) {
   return intlcal_compare(this_, other, &icu::Calendar::after);
 }
 
-static bool HHVM_METHOD(IntlCalendar, before, CObjRef other) {
+static bool HHVM_METHOD(IntlCalendar, before, const Object& other) {
   return intlcal_compare(this_, other, &icu::Calendar::before);
 }
 
@@ -180,7 +180,7 @@ static Object HHVM_STATIC_METHOD(IntlCalendar, createInstance,
   return IntlCalendar::newInstance(cal);
 }
 
-static bool HHVM_METHOD(IntlCalendar, equals, CObjRef other) {
+static bool HHVM_METHOD(IntlCalendar, equals, const Object& other) {
   return intlcal_compare(this_, other, &icu::Calendar::equals);
 }
 
@@ -199,7 +199,7 @@ static Variant HHVM_METHOD(IntlCalendar, fieldDifference,
   return ret;
 }
 
-static Variant intlcal_field_method(CObjRef obj, int64_t field,
+static Variant intlcal_field_method(const Object& obj, int64_t field,
        int32_t (icu::Calendar::*func)(UCalendarDateFields, UErrorCode&) const,
        const char *method_name) {
   CAL_FETCH(data, obj, false);
@@ -213,7 +213,7 @@ static Variant intlcal_field_method(CObjRef obj, int64_t field,
   return ret;
 }
 
-static Variant intlcal_field_method(CObjRef obj, int64_t field,
+static Variant intlcal_field_method(const Object& obj, int64_t field,
        int32_t (icu::Calendar::*func)(UCalendarDateFields) const,
        const char *method_name) {
   CAL_FETCH(data, obj, false);
@@ -356,7 +356,7 @@ static bool HHVM_METHOD(IntlCalendar, inDaylightTime) {
   return ret;
 }
 
-static bool HHVM_METHOD(IntlCalendar, isEquivalentTo, CObjRef other) {
+static bool HHVM_METHOD(IntlCalendar, isEquivalentTo, const Object& other) {
   CAL_FETCH(obj1, this_, false);
   CAL_FETCH(obj2, other, false);
   return obj1->calendar()->isEquivalentTo(*obj2->calendar());

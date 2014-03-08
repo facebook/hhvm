@@ -60,7 +60,7 @@ double Object::toDoubleForCompare() const {
   return toDouble();
 }
 
-bool Object::equal(CObjRef v2) const {
+bool Object::equal(const Object& v2) const {
   if (m_px == v2.get()) {
     return true;
   }
@@ -88,7 +88,7 @@ bool Object::equal(CObjRef v2) const {
   return toArray().equal(v2.toArray());
 }
 
-bool Object::less(CObjRef v2) const {
+bool Object::less(const Object& v2) const {
   check_collection_compare(m_px, v2.get());
   if (UNLIKELY(m_px->instanceof(c_DateTime::classof()))) {
     return getTyped<c_DateTime>()->gettimestamp() <
@@ -97,7 +97,7 @@ bool Object::less(CObjRef v2) const {
   return m_px != v2.m_px && toArray().less(v2.toArray());
 }
 
-bool Object::more(CObjRef v2) const {
+bool Object::more(const Object& v2) const {
   check_collection_compare(m_px, v2.get());
   if (UNLIKELY(m_px->instanceof(c_DateTime::classof()))) {
     return getTyped<c_DateTime>()->gettimestamp() >

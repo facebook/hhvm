@@ -59,7 +59,7 @@ ArrayIter::ArrayIter(ObjectData* obj, NoInc)
   objInit<false>(obj);
 }
 
-ArrayIter::ArrayIter(CObjRef obj)
+ArrayIter::ArrayIter(const Object& obj)
   : m_pos(ArrayData::invalid_index) {
   objInit<true>(obj.get());
 }

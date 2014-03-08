@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_simplexml_import_dom(CObjRef node,
+Variant f_simplexml_import_dom(const Object& node,
                                const String& class_name = "SimpleXMLElement");
 Variant f_simplexml_load_string(const String& data,
                                 const String& class_name = "SimpleXMLElement",

@@ -1080,7 +1080,7 @@ static Class* class_from_name(const String& class_name, const char* callee) {
 }
 
 Variant f_simplexml_import_dom(
-  CObjRef node,
+  const Object& node,
   const String& class_name /* = "SimpleXMLElement" */) {
   c_DOMNode *domnode = node.getTyped<c_DOMNode>();
   xmlNodePtr nodep = domnode->m_node;

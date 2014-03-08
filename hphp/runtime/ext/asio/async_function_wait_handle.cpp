@@ -80,7 +80,7 @@ Object c_AsyncFunctionWaitHandle::t_getprivdata() {
   return m_privData;
 }
 
-void c_AsyncFunctionWaitHandle::t_setprivdata(CObjRef data) {
+void c_AsyncFunctionWaitHandle::t_setprivdata(const Object& data) {
   m_privData = data;
 }
 
@@ -247,7 +247,7 @@ void c_AsyncFunctionWaitHandle::markAsSucceeded(const Cell& result) {
   m_child = nullptr;
 }
 
-void c_AsyncFunctionWaitHandle::markAsFailed(CObjRef exception) {
+void c_AsyncFunctionWaitHandle::markAsFailed(const Object& exception) {
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnAsyncFunctionFailCallback())) {
     session->onAsyncFunctionFail(this, exception);

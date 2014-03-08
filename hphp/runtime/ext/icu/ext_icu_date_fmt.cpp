@@ -222,7 +222,7 @@ static String HHVM_METHOD(IntlDateFormatter, format, CVarRef value) {
 }
 
 static String HHVM_STATIC_METHOD(IntlDateFormatter, formatObject,
-                                 CObjRef object, CVarRef format,
+                                 const Object& object, CVarRef format,
                                  const String& locale) {
   // TODO: Need IntlCalendar implemented first
   throw NotImplementedException("IntlDateFormatter::formatObject");

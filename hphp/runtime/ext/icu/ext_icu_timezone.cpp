@@ -288,7 +288,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getTZDataVersion) {
   return String(tzdv, CopyString);
 }
 
-static bool HHVM_METHOD(IntlTimeZone, hasSameRules, CObjRef otherTimeZone) {
+static bool HHVM_METHOD(IntlTimeZone, hasSameRules, const Object& otherTimeZone) {
   TZ_GET(obj1, this_, false);
   TZ_GET(obj2, otherTimeZone, false);
   return obj1->timezone()->hasSameRules(*obj2->timezone());

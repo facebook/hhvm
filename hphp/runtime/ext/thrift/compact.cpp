@@ -193,7 +193,7 @@ class CompactWriter {
       state = STATE_VALUE_WRITE;
     }
 
-    void write(CObjRef obj) {
+    void write(const Object& obj) {
       writeStruct(obj);
     }
 
@@ -207,7 +207,7 @@ class CompactWriter {
     std::stack<std::pair<CState, uint16_t> > structHistory;
     std::stack<CState> containerHistory;
 
-    void writeStruct(CObjRef obj) {
+    void writeStruct(const Object& obj) {
       // Save state
       structHistory.push(std::make_pair(state, lastFieldNum));
       state = STATE_FIELD_WRITE;
@@ -492,7 +492,7 @@ class CompactWriter {
 
 class CompactReader {
   public:
-    explicit CompactReader(CObjRef _transportobj) :
+    explicit CompactReader(const Object& _transportobj) :
       transport(_transportobj),
       version(VERSION),
       state(STATE_CLEAR),
@@ -545,7 +545,7 @@ class CompactReader {
     std::stack<std::pair<CState, uint16_t> > structHistory;
     std::stack<CState> containerHistory;
 
-    void readStruct(CObjRef dest, const Array& spec) {
+    void readStruct(const Object& dest, const Array& spec) {
       readStructBegin();
 
       while (true) {
@@ -1002,10 +1002,10 @@ int f_thrift_protocol_set_compact_version(int version) {
   return result;
 }
 
-void f_thrift_protocol_write_compact(CObjRef transportobj,
+void f_thrift_protocol_write_compact(const Object& transportobj,
                                      const String& method_name,
                                      int64_t msgtype,
-                                     CObjRef request_struct,
+                                     const Object& request_struct,
                                      int seqid) {
   PHPOutputTransport transport(transportobj);
 
@@ -1017,7 +1017,7 @@ void f_thrift_protocol_write_compact(CObjRef transportobj,
   transport.flush();
 }
 
-Variant f_thrift_protocol_read_compact(CObjRef transportobj,
+Variant f_thrift_protocol_read_compact(const Object& transportobj,
                                        const String& obj_typename) {
   CompactReader reader(transportobj);
   return reader.read(obj_typename);

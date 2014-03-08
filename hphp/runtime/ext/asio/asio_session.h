@@ -97,7 +97,7 @@ class AsioSession {
     bool processSleepEvents();
 
     // Abrupt interrupt exception.
-    CObjRef getAbruptInterruptException() {
+    const Object& getAbruptInterruptException() {
       return m_abruptInterruptException;
     }
 
@@ -131,7 +131,7 @@ class AsioSession {
     void onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont, c_WaitableWaitHandle* child);
     void onAsyncFunctionAwait(c_AsyncFunctionWaitHandle* cont, c_WaitHandle* child);
     void onAsyncFunctionSuccess(c_AsyncFunctionWaitHandle* cont, CVarRef result);
-    void onAsyncFunctionFail(c_AsyncFunctionWaitHandle* cont, CObjRef exception);
+    void onAsyncFunctionFail(c_AsyncFunctionWaitHandle* cont, const Object& exception);
 
     // WaitHandle callbacks:
     void setOnJoinCallback(ObjectData* on_join) {
@@ -171,7 +171,7 @@ class AsioSession {
       m_onSetResultToRefCreateCallback = on_create;
     }
     bool hasOnSetResultToRefCreateCallback() { return m_onSetResultToRefCreateCallback.get(); }
-    void onSetResultToRefCreate(c_SetResultToRefWaitHandle* wait_handle, CObjRef child);
+    void onSetResultToRefCreate(c_SetResultToRefWaitHandle* wait_handle, const Object& child);
 
   private:
     static DECLARE_THREAD_LOCAL_PROXY(AsioSession, false, s_current);

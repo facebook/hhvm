@@ -249,7 +249,7 @@ void ThriftBuffer::read(Object &data) {
   data = unserialize_with_no_notice(sdata).toObject();
 }
 
-void ThriftBuffer::write(CObjRef data) {
+void ThriftBuffer::write(const Object& data) {
   VariableSerializer vs(m_serializerType);
   String sdata = vs.serialize(VarNR(data), true);
   write(sdata);

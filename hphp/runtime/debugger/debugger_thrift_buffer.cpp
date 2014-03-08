@@ -87,8 +87,8 @@ int DebuggerWireHelpers::WireSerialize(const Array& data, String& sdata) {
   return serializeImpl(data, sdata);
 }
 
-int DebuggerWireHelpers::WireSerialize(CObjRef data, String& sdata) {
-  TRACE(7, "DebuggerWireHelpers::WireSerialize(CObjRef data,\n");
+int DebuggerWireHelpers::WireSerialize(const Object& data, String& sdata) {
+  TRACE(7, "DebuggerWireHelpers::WireSerialize(const Object& data,\n");
   return serializeImpl(data, sdata);
 }
 

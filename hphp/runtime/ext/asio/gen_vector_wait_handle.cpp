@@ -107,7 +107,7 @@ Object c_GenVectorWaitHandle::ti_create(CVarRef dependencies) {
   }
 }
 
-void c_GenVectorWaitHandle::initialize(CObjRef exception, c_Vector* deps, int64_t iter_pos, c_WaitableWaitHandle* child) {
+void c_GenVectorWaitHandle::initialize(const Object& exception, c_Vector* deps, int64_t iter_pos, c_WaitableWaitHandle* child) {
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;

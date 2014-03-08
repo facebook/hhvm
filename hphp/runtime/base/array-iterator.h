@@ -94,7 +94,7 @@ class ArrayIter {
   explicit ArrayIter(const Array& array);
   explicit ArrayIter(ObjectData* obj);
   ArrayIter(ObjectData* obj, NoInc);
-  explicit ArrayIter(CObjRef obj);
+  explicit ArrayIter(const Object& obj);
   explicit ArrayIter(const Cell& c);
   explicit ArrayIter(CVarRef v);
 

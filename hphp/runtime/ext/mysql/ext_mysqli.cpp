@@ -422,7 +422,7 @@ static Variant HHVM_METHOD(mysqli, refresh, int64_t options) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 //
-//static bool HHVM_METHOD(mysqli, set_local_infile_handler, CObjRef read_func) {
+//static bool HHVM_METHOD(mysqli, set_local_infile_handler, const Object& read_func) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 
@@ -618,7 +618,7 @@ static int64_t HHVM_FUNCTION(mysqli_get_client_version) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 //
-//static void HHVM_FUNCTION(mysqli_set_local_infile_default, CObjRef link) {
+//static void HHVM_FUNCTION(mysqli_set_local_infile_default, const Object& link) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 

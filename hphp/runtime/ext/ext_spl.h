@@ -26,8 +26,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Array f_spl_classes();
-String f_spl_object_hash(CObjRef obj);
-int64_t f_hphp_object_pointer(CObjRef obj);
+String f_spl_object_hash(const Object& obj);
+int64_t f_hphp_object_pointer(const Object& obj);
 Variant f_hphp_get_this();
 Variant f_class_implements(CVarRef obj, bool autoload = true);
 Variant f_class_parents(CVarRef obj, bool autoload = true);

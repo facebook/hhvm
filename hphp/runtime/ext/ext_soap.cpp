@@ -1993,7 +1993,7 @@ void c_SoapServer::t_setclass(int _argc, const String& name,
   }
 }
 
-void c_SoapServer::t_setobject(CObjRef obj) {
+void c_SoapServer::t_setobject(const Object& obj) {
   SoapServerScope ss(this);
   m_type = SOAP_OBJECT;
   m_soap_object = obj;
@@ -2315,7 +2315,7 @@ void c_SoapServer::t_fault(CVarRef code, const String& fault,
   send_soap_server_fault(std::shared_ptr<sdlFunction>(), obj, NULL);
 }
 
-void c_SoapServer::t_addsoapheader(CObjRef fault) {
+void c_SoapServer::t_addsoapheader(const Object& fault) {
   SoapServerScope ss(this);
   soapHeader *p = NEWOBJ(soapHeader)();
   Resource obj(p);

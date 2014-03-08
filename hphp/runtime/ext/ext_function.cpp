@@ -148,7 +148,7 @@ Variant f_check_user_func_async(CVarRef handles, int timeout /* = -1 */) {
   return uninit_null();
 }
 
-Variant f_end_user_func_async(CObjRef handle,
+Variant f_end_user_func_async(const Object& handle,
                               int default_strategy /*= k_GLOBAL_STATE_IGNORE*/,
                               CVarRef additional_strategies /* = null */) {
   raise_error("%s is no longer supported", __func__);

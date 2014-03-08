@@ -346,25 +346,25 @@ public:
   bool same (const StringData *v2) const;
   bool same (const String& v2) const;
   bool same (const Array& v2) const;
-  bool same (CObjRef v2) const;
+  bool same (const Object& v2) const;
   bool same (const Resource& v2) const;
   bool equal(litstr  v2) const = delete;
   bool equal(const StringData *v2) const;
   bool equal(const String& v2) const;
   bool equal(const Array& v2) const;
-  bool equal(CObjRef v2) const;
+  bool equal(const Object& v2) const;
   bool equal(const Resource& v2) const;
   bool less (litstr  v2) const = delete;
   bool less (const StringData *v2) const;
   bool less (const String& v2) const;
   bool less (const Array& v2) const;
-  bool less (CObjRef v2) const;
+  bool less (const Object& v2) const;
   bool less (const Resource& v2) const;
   bool more (litstr  v2) const = delete;
   bool more (const StringData *v2) const;
   bool more (const String& v2) const;
   bool more (const Array& v2) const;
-  bool more (CObjRef v2) const;
+  bool more (const Object& v2) const;
   bool more (const Resource& v2) const;
 
   /**
@@ -383,7 +383,7 @@ public:
   }
   String rvalAt(const String& key) const { return rvalAtImpl(key.toInt32());}
   String rvalAt(const Array& key) const;
-  String rvalAt(CObjRef key) const;
+  String rvalAt(const Object& key) const;
   String rvalAt(CVarRef key) const;
 
   /**

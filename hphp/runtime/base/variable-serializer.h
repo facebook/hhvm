@@ -78,7 +78,7 @@ public:
   void write(double  v);
   void write(const char *v, int len = -1, bool isArrayKey = false);
   void write(const String& v);
-  void write(CObjRef v);
+  void write(const Object& v);
   void write(CVarRef v, bool isArrayKey = false);
 
   void writeNull();

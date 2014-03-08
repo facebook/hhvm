@@ -224,11 +224,11 @@ BucketBrigade::BucketBrigade(const String& data) {
   appendBucket(bucket);
 }
 
-void BucketBrigade::appendBucket(CObjRef bucket) {
+void BucketBrigade::appendBucket(const Object& bucket) {
   m_buckets.push_back(bucket);
 }
 
-void BucketBrigade::prependBucket(CObjRef bucket) {
+void BucketBrigade::prependBucket(const Object& bucket) {
   m_buckets.push_front(bucket);
 }
 
@@ -294,13 +294,13 @@ Variant HHVM_FUNCTION(stream_bucket_make_writeable, const Resource& bb_res) {
   return ret;
 }
 
-void HHVM_FUNCTION(stream_bucket_append, const Resource& bb_res, CObjRef bucket) {
+void HHVM_FUNCTION(stream_bucket_append, const Resource& bb_res, const Object& bucket) {
   auto brigade = bb_res.getTyped<BucketBrigade>();
   assert(brigade);
   brigade->appendBucket(bucket);
 }
 
-void HHVM_FUNCTION(stream_bucket_prepend, const Resource& bb_res, CObjRef bucket) {
+void HHVM_FUNCTION(stream_bucket_prepend, const Resource& bb_res, const Object& bucket) {
   auto brigade = bb_res.getTyped<BucketBrigade>();
   assert(brigade);
   brigade->prependBucket(bucket);

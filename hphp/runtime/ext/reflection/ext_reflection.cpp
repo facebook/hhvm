@@ -750,7 +750,7 @@ Array HHVM_FUNCTION(hphp_get_method_info, CVarRef class_or_object,
   return ret;
 }
 
-Array HHVM_FUNCTION(hphp_get_closure_info, CObjRef closure) {
+Array HHVM_FUNCTION(hphp_get_closure_info, const Object& closure) {
   Array mi = HHVM_FN(hphp_get_method_info)(closure->o_getClassName(), s___invoke);
   mi.set(s_name, s_closure_in_braces);
   mi.set(s_closureobj, closure);
@@ -1208,12 +1208,12 @@ Object HHVM_FUNCTION(hphp_create_object_without_constructor,
   return g_context->createObject(name.get(), init_null_variant, false);
 }
 
-Variant HHVM_FUNCTION(hphp_get_property, CObjRef obj, const String& cls,
+Variant HHVM_FUNCTION(hphp_get_property, const Object& obj, const String& cls,
                                          const String& prop) {
   return obj->o_get(prop, true /* error */, cls);
 }
 
-void HHVM_FUNCTION(hphp_set_property, CObjRef obj, const String& cls,
+void HHVM_FUNCTION(hphp_set_property, const Object& obj, const String& cls,
                                       const String& prop, CVarRef value) {
   if (!cls.empty() && RuntimeOption::RepoAuthoritative) {
     raise_error(

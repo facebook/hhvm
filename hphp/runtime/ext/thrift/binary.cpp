@@ -60,8 +60,8 @@ const int8_t T_EXCEPTION = 3;
 const int INVALID_DATA = 1;
 const int BAD_VERSION = 4;
 
-void binary_deserialize_spec(CObjRef zthis, PHPInputTransport& transport, const Array& spec);
-void binary_serialize_spec(CObjRef zthis, PHPOutputTransport& transport, const Array& spec);
+void binary_deserialize_spec(const Object& zthis, PHPInputTransport& transport, const Array& spec);
+void binary_serialize_spec(const Object& zthis, PHPOutputTransport& transport, const Array& spec);
 void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport, CVarRef value, const Array& fieldspec);
 void skip_element(long thrift_typeID, PHPInputTransport& transport);
 
@@ -356,7 +356,7 @@ inline bool ttypes_are_compatible(int8_t t1, int8_t t2) {
   return ((t1 == t2) || (ttype_is_int(t1) && ttype_is_int(t2)));
 }
 
-void binary_deserialize_spec(CObjRef zthis, PHPInputTransport& transport,
+void binary_deserialize_spec(const Object& zthis, PHPInputTransport& transport,
                              const Array& spec) {
   // SET and LIST have 'elem' => array('type', [optional] 'class')
   // MAP has 'val' => array('type', [optiona] 'class')
@@ -496,7 +496,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
 }
 
 
-void binary_serialize_spec(CObjRef zthis, PHPOutputTransport& transport,
+void binary_serialize_spec(const Object& zthis, PHPOutputTransport& transport,
                            const Array& spec) {
   for (ArrayIter key_ptr = spec.begin(); !key_ptr.end(); ++key_ptr) {
     Variant key = key_ptr.first();
@@ -525,8 +525,8 @@ void binary_serialize_spec(CObjRef zthis, PHPOutputTransport& transport,
   transport.writeI8(T_STOP); // struct end
 }
 
-void f_thrift_protocol_write_binary(CObjRef transportobj, const String& method_name,
-                                    int64_t msgtype, CObjRef request_struct,
+void f_thrift_protocol_write_binary(const Object& transportobj, const String& method_name,
+                                    int64_t msgtype, const Object& request_struct,
                                     int seqid, bool strict_write) {
 
   PHPOutputTransport transport(transportobj);
@@ -551,7 +551,7 @@ void f_thrift_protocol_write_binary(CObjRef transportobj, const String& method_n
   transport.flush();
 }
 
-Variant f_thrift_protocol_read_binary(CObjRef transportobj,
+Variant f_thrift_protocol_read_binary(const Object& transportobj,
                                       const String& obj_typename,
                                       bool strict_read) {
   PHPInputTransport transport(transportobj);

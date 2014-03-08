@@ -63,9 +63,9 @@ String f_system(const String& command, VRefParam return_var = uninit_null());
 Variant f_proc_open(const String& cmd, const Array& descriptorspec, VRefParam pipes,
                     const String& cwd = null_string, CVarRef env = null_variant,
                     CVarRef other_options = null_variant);
-bool f_proc_terminate(CResRef process, int signal = 0);
-int64_t f_proc_close(CResRef process);
-Array f_proc_get_status(CResRef process);
+bool f_proc_terminate(const Resource& process, int signal = 0);
+int64_t f_proc_close(const Resource& process);
+Array f_proc_get_status(const Resource& process);
 bool f_proc_nice(int increment);
 
 ///////////////////////////////////////////////////////////////////////////////

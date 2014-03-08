@@ -65,11 +65,11 @@ Variant f_pfsockopen(const String& hostname, int port = -1,
                      VRefParam errnum = uninit_null(),
                      VRefParam errstr = uninit_null(), double timeout = -1.0);
 
-Variant f_socket_get_status(CResRef stream);
+Variant f_socket_get_status(const Resource& stream);
 
-bool f_socket_set_blocking(CResRef stream, int mode);
+bool f_socket_set_blocking(const Resource& stream, int mode);
 
-bool f_socket_set_timeout(CResRef stream, int seconds,
+bool f_socket_set_timeout(const Resource& stream, int seconds,
                           int microseconds = 0);
 
 ///////////////////////////////////////////////////////////////////////////////

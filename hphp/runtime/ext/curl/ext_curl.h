@@ -266,30 +266,30 @@ extern const int64_t k_CURL_VERSION_LIBZ;
 extern const int64_t k_CURL_VERSION_SSL;
 
 Variant HHVM_FUNCTION(curl_init, CVarRef url = null_string);
-Variant HHVM_FUNCTION(curl_copy_handle, CResRef ch);
+Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch);
 Variant HHVM_FUNCTION(curl_version, int uversion = k_CURLVERSION_NOW);
-bool HHVM_FUNCTION(curl_setopt, CResRef ch, int option, CVarRef value);
-bool HHVM_FUNCTION(curl_setopt_array, CResRef ch, const Array& options);
-Variant HHVM_FUNCTION(fb_curl_getopt, CResRef ch, int64_t opt = 0);
-Variant HHVM_FUNCTION(curl_exec, CResRef ch);
-Variant HHVM_FUNCTION(curl_getinfo, CResRef ch, int opt = 0);
-Variant HHVM_FUNCTION(curl_errno, CResRef ch);
-Variant HHVM_FUNCTION(curl_error, CResRef ch);
-Variant HHVM_FUNCTION(curl_close, CResRef ch);
+bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int option, CVarRef value);
+bool HHVM_FUNCTION(curl_setopt_array, const Resource& ch, const Array& options);
+Variant HHVM_FUNCTION(fb_curl_getopt, const Resource& ch, int64_t opt = 0);
+Variant HHVM_FUNCTION(curl_exec, const Resource& ch);
+Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt = 0);
+Variant HHVM_FUNCTION(curl_errno, const Resource& ch);
+Variant HHVM_FUNCTION(curl_error, const Resource& ch);
+Variant HHVM_FUNCTION(curl_close, const Resource& ch);
 Resource HHVM_FUNCTION(curl_multi_init);
-Variant HHVM_FUNCTION(curl_multi_add_handle, CResRef mh, CResRef ch);
-Variant HHVM_FUNCTION(curl_multi_remove_handle, CResRef mh, CResRef ch);
-Variant HHVM_FUNCTION(curl_multi_exec, CResRef mh, VRefParam still_running);
-Variant HHVM_FUNCTION(curl_multi_select, CResRef mh, double timeout = 1.0);
-Variant HHVM_FUNCTION(curl_multi_getcontent, CResRef ch);
-Variant HHVM_FUNCTION(fb_curl_multi_fdset, CResRef mh,
+Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch);
+Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh, const Resource& ch);
+Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, VRefParam still_running);
+Variant HHVM_FUNCTION(curl_multi_select, const Resource& mh, double timeout = 1.0);
+Variant HHVM_FUNCTION(curl_multi_getcontent, const Resource& ch);
+Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
                               VRefParam read_fd_set,
                               VRefParam write_fd_set,
                               VRefParam exc_fd_set,
                               VRefParam max_fd = null_object);
-Variant HHVM_FUNCTION(curl_multi_info_read, CResRef mh,
+Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
                                VRefParam msgs_in_queue = null_object);
-Variant HHVM_FUNCTION(curl_multi_close, CResRef mh);
+Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh);
 void HHVM_FUNCTION(evhttp_set_cache, const String& address, int max_conn,
                         int port = 80);
 Variant HHVM_FUNCTION(evhttp_get, const String& url,
@@ -300,7 +300,7 @@ Variant HHVM_FUNCTION(evhttp_async_get, const String& url,
                            CVarRef headers = null_array, int timeout = 5);
 Variant HHVM_FUNCTION(evhttp_async_post, const String& url, const String& data,
                             CVarRef headers = null_array, int timeout = 5);
-Variant HHVM_FUNCTION(evhttp_recv, CResRef handle);
+Variant HHVM_FUNCTION(evhttp_recv, const Resource& handle);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

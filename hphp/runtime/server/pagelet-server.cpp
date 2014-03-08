@@ -408,7 +408,7 @@ Resource PageletServer::TaskStart(
   return null_resource;
 }
 
-int64_t PageletServer::TaskStatus(CResRef task) {
+int64_t PageletServer::TaskStatus(const Resource& task) {
   PageletTask *ptask = task.getTyped<PageletTask>();
   PageletTransport *job = ptask->getJob();
   if (!job->isPipelineEmpty()) {
@@ -420,7 +420,7 @@ int64_t PageletServer::TaskStatus(CResRef task) {
   return PAGELET_NOT_READY;
 }
 
-String PageletServer::TaskResult(CResRef task, Array &headers, int &code,
+String PageletServer::TaskResult(const Resource& task, Array &headers, int &code,
                                  int64_t timeout_ms) {
   PageletTask *ptask = task.getTyped<PageletTask>();
   return ptask->getJob()->getResults(headers, code, timeout_ms);

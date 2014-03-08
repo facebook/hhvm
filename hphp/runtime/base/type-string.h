@@ -347,25 +347,25 @@ public:
   bool same (const String& v2) const;
   bool same (const Array& v2) const;
   bool same (CObjRef v2) const;
-  bool same (CResRef v2) const;
+  bool same (const Resource& v2) const;
   bool equal(litstr  v2) const = delete;
   bool equal(const StringData *v2) const;
   bool equal(const String& v2) const;
   bool equal(const Array& v2) const;
   bool equal(CObjRef v2) const;
-  bool equal(CResRef v2) const;
+  bool equal(const Resource& v2) const;
   bool less (litstr  v2) const = delete;
   bool less (const StringData *v2) const;
   bool less (const String& v2) const;
   bool less (const Array& v2) const;
   bool less (CObjRef v2) const;
-  bool less (CResRef v2) const;
+  bool less (const Resource& v2) const;
   bool more (litstr  v2) const = delete;
   bool more (const StringData *v2) const;
   bool more (const String& v2) const;
   bool more (const Array& v2) const;
   bool more (CObjRef v2) const;
-  bool more (CResRef v2) const;
+  bool more (const Resource& v2) const;
 
   /**
    * Offset

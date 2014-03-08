@@ -62,19 +62,19 @@ Variant HHVM_FUNCTION(lz4uncompress, const String& compressed);
 
 Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
                               int64_t use_include_path = 0);
-bool HHVM_FUNCTION(gzclose, CResRef zp);
-Variant HHVM_FUNCTION(gzread, CResRef zp, int64_t length = 0);
-Variant HHVM_FUNCTION(gzseek, CResRef zp, int64_t offset,
+bool HHVM_FUNCTION(gzclose, const Resource& zp);
+Variant HHVM_FUNCTION(gzread, const Resource& zp, int64_t length = 0);
+Variant HHVM_FUNCTION(gzseek, const Resource& zp, int64_t offset,
                               int64_t whence = k_SEEK_SET);
-Variant HHVM_FUNCTION(gztell, CResRef zp);
-bool HHVM_FUNCTION(gzeof, CResRef zp);
-bool HHVM_FUNCTION(gzrewind, CResRef zp);
-Variant HHVM_FUNCTION(gzgetc, CResRef zp);
-Variant HHVM_FUNCTION(gzgets, CResRef zp, int64_t length = 1024);
-Variant HHVM_FUNCTION(gzgetss, CResRef zp, int64_t length = 0,
+Variant HHVM_FUNCTION(gztell, const Resource& zp);
+bool HHVM_FUNCTION(gzeof, const Resource& zp);
+bool HHVM_FUNCTION(gzrewind, const Resource& zp);
+Variant HHVM_FUNCTION(gzgetc, const Resource& zp);
+Variant HHVM_FUNCTION(gzgets, const Resource& zp, int64_t length = 1024);
+Variant HHVM_FUNCTION(gzgetss, const Resource& zp, int64_t length = 0,
                             const String& allowable_tags = null_string);
-Variant HHVM_FUNCTION(gzpassthru, CResRef zp);
-Variant HHVM_FUNCTION(gzwrite, CResRef zp, const String& str,
+Variant HHVM_FUNCTION(gzpassthru, const Resource& zp);
+Variant HHVM_FUNCTION(gzwrite, const Resource& zp, const String& str,
                                int64_t length = 0);
 
 ///////////////////////////////////////////////////////////////////////////////

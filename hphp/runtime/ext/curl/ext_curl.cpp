@@ -936,7 +936,7 @@ Variant HHVM_FUNCTION(curl_init, CVarRef url /* = null_string */) {
   }
 }
 
-Variant HHVM_FUNCTION(curl_copy_handle, CResRef ch) {
+Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch) {
   CHECK_RESOURCE(curl);
   return NEWOBJ(CurlResource)(curl);
 }
@@ -978,12 +978,12 @@ Variant HHVM_FUNCTION(curl_version, int uversion /* = k_CURLVERSION_NOW */) {
   return ret.create();
 }
 
-bool HHVM_FUNCTION(curl_setopt, CResRef ch, int option, CVarRef value) {
+bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int option, CVarRef value) {
   CHECK_RESOURCE(curl);
   return curl->setOption(option, value);
 }
 
-bool HHVM_FUNCTION(curl_setopt_array, CResRef ch, const Array& options) {
+bool HHVM_FUNCTION(curl_setopt_array, const Resource& ch, const Array& options) {
   CHECK_RESOURCE(curl);
   for (ArrayIter iter(options); iter; ++iter) {
     if (!curl->setOption(iter.first().toInt32(), iter.second())) {
@@ -993,12 +993,12 @@ bool HHVM_FUNCTION(curl_setopt_array, CResRef ch, const Array& options) {
   return true;
 }
 
-Variant HHVM_FUNCTION(fb_curl_getopt, CResRef ch, int64_t opt /* = 0 */) {
+Variant HHVM_FUNCTION(fb_curl_getopt, const Resource& ch, int64_t opt /* = 0 */) {
   CHECK_RESOURCE(curl);
   return curl->getOption(opt);
 }
 
-Variant HHVM_FUNCTION(curl_exec, CResRef ch) {
+Variant HHVM_FUNCTION(curl_exec, const Resource& ch) {
   CHECK_RESOURCE(curl);
   return curl->execute();
 }
@@ -1027,7 +1027,7 @@ const StaticString
   s_redirect_time("redirect_time"),
   s_request_header("request_header");
 
-Variant HHVM_FUNCTION(curl_getinfo, CResRef ch, int opt /* = 0 */) {
+Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
   CHECK_RESOURCE(curl);
   CURL *cp = curl->get();
 
@@ -1175,17 +1175,17 @@ Variant HHVM_FUNCTION(curl_getinfo, CResRef ch, int opt /* = 0 */) {
   return uninit_null();
 }
 
-Variant HHVM_FUNCTION(curl_errno, CResRef ch) {
+Variant HHVM_FUNCTION(curl_errno, const Resource& ch) {
   CHECK_RESOURCE(curl);
   return curl->getError();
 }
 
-Variant HHVM_FUNCTION(curl_error, CResRef ch) {
+Variant HHVM_FUNCTION(curl_error, const Resource& ch) {
   CHECK_RESOURCE(curl);
   return curl->getErrorString();
 }
 
-Variant HHVM_FUNCTION(curl_close, CResRef ch) {
+Variant HHVM_FUNCTION(curl_close, const Resource& ch) {
   CHECK_RESOURCE(curl);
   curl->close();
   return uninit_null();
@@ -1217,7 +1217,7 @@ public:
     }
   }
 
-  void add(CResRef ch) {
+  void add(const Resource& ch) {
     m_easyh.append(ch);
   }
 
@@ -1299,21 +1299,21 @@ Resource HHVM_FUNCTION(curl_multi_init) {
   return NEWOBJ(CurlMultiResource)();
 }
 
-Variant HHVM_FUNCTION(curl_multi_add_handle, CResRef mh, CResRef ch) {
+Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
   CurlResource *curle = ch.getTyped<CurlResource>();
   curlm->add(ch);
   return curl_multi_add_handle(curlm->get(), curle->get());
 }
 
-Variant HHVM_FUNCTION(curl_multi_remove_handle, CResRef mh, CResRef ch) {
+Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh, const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
   CurlResource *curle = ch.getTyped<CurlResource>();
   curlm->remove(curle);
   return curl_multi_remove_handle(curlm->get(), curle->get());
 }
 
-Variant HHVM_FUNCTION(curl_multi_exec, CResRef mh, VRefParam still_running) {
+Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, VRefParam still_running) {
   CHECK_MULTI_RESOURCE(curlm);
   int running = 0;
   IOStatusHelper io("curl_multi_exec");
@@ -1370,7 +1370,7 @@ static void hphp_curl_multi_select(CURLM *mh, int timeout_ms, int *ret) {
 #define curl_multi_select_func curl_multi_select
 #endif
 
-Variant HHVM_FUNCTION(curl_multi_select, CResRef mh,
+Variant HHVM_FUNCTION(curl_multi_select, const Resource& mh,
                                          double timeout /* = 1.0 */) {
   CHECK_MULTI_RESOURCE(curlm);
   int ret;
@@ -1380,7 +1380,7 @@ Variant HHVM_FUNCTION(curl_multi_select, CResRef mh,
   return ret;
 }
 
-Variant HHVM_FUNCTION(curl_multi_getcontent, CResRef ch) {
+Variant HHVM_FUNCTION(curl_multi_getcontent, const Resource& ch) {
   CHECK_RESOURCE(curl);
   return curl->getContents();
 }
@@ -1396,7 +1396,7 @@ Array curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
   return ret;
 }
 
-Variant HHVM_FUNCTION(fb_curl_multi_fdset, CResRef mh,
+Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
                               VRefParam read_fd_set,
                               VRefParam write_fd_set,
                               VRefParam exc_fd_set,
@@ -1428,7 +1428,7 @@ const StaticString
   s_headers("headers"),
   s_requests("requests");
 
-Variant HHVM_FUNCTION(curl_multi_info_read, CResRef mh,
+Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
                                VRefParam msgs_in_queue /* = null */) {
   CHECK_MULTI_RESOURCE(curlm);
 
@@ -1450,7 +1450,7 @@ Variant HHVM_FUNCTION(curl_multi_info_read, CResRef mh,
   return ret;
 }
 
-Variant HHVM_FUNCTION(curl_multi_close, CResRef mh) {
+Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh) {
   CHECK_MULTI_RESOURCE(curlm);
   curlm->close();
   return uninit_null();
@@ -1623,7 +1623,7 @@ Variant HHVM_FUNCTION(evhttp_async_post, const String& url, const String& data,
   return false;
 }
 
-Variant HHVM_FUNCTION(evhttp_recv, CResRef handle) {
+Variant HHVM_FUNCTION(evhttp_recv, const Resource& handle) {
   if (RuntimeOption::ServerHttpSafeMode) {
     throw_fatal("evhttp_recv is disabled");
   }

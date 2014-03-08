@@ -134,7 +134,7 @@ class Variant : private TypedValue {
   /* implicit */ Variant(const String& v);
   /* implicit */ Variant(const Array& v);
   /* implicit */ Variant(CObjRef v);
-  /* implicit */ Variant(CResRef v);
+  /* implicit */ Variant(const Resource& v);
   /* implicit */ Variant(StringData *v);
   /* implicit */ Variant(ArrayData *v);
   /* implicit */ Variant(ObjectData *v);
@@ -987,7 +987,7 @@ class Variant : private TypedValue {
   CVarRef set(const StaticString & v);
   CVarRef set(const Array& v) { return set(v.get()); }
   CVarRef set(CObjRef v) { return set(v.get()); }
-  CVarRef set(CResRef v) { return set(v.get()); }
+  CVarRef set(const Resource& v) { return set(v.get()); }
 
   template<typename T>
   CVarRef set(const SmartObject<T> &v) {

@@ -107,7 +107,7 @@ public:
   /* implicit */ SmartResource(T *data) : Resource(data) { }
   template<class Y>
   explicit SmartResource(Y *data) : Resource(data) { }
-  explicit SmartResource(CResRef src) : Resource(src) { }
+  explicit SmartResource(const Resource& src) : Resource(src) { }
 
   /**
    * Assignment
@@ -120,7 +120,7 @@ public:
     Resource::operator=(src);
     return *this;
   }
-  SmartResource &operator=(CResRef src) {
+  SmartResource &operator=(const Resource& src) {
     Resource::operator=(src);
     return *this;
   }

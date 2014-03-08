@@ -330,39 +330,39 @@ Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
   return handle;
 }
 
-bool HHVM_FUNCTION(gzclose, CResRef zp) {
+bool HHVM_FUNCTION(gzclose, const Resource& zp) {
   return f_fclose(zp);
 }
-Variant HHVM_FUNCTION(gzread, CResRef zp, int64_t length /* = 0 */) {
+Variant HHVM_FUNCTION(gzread, const Resource& zp, int64_t length /* = 0 */) {
   return f_fread(zp, length);
 }
-Variant HHVM_FUNCTION(gzseek, CResRef zp, int64_t offset,
+Variant HHVM_FUNCTION(gzseek, const Resource& zp, int64_t offset,
                               int64_t whence /* = k_SEEK_SET */) {
   return f_fseek(zp, offset, whence);
 }
-Variant HHVM_FUNCTION(gztell, CResRef zp) {
+Variant HHVM_FUNCTION(gztell, const Resource& zp) {
   return f_ftell(zp);
 }
-bool HHVM_FUNCTION(gzeof, CResRef zp) {
+bool HHVM_FUNCTION(gzeof, const Resource& zp) {
   return f_feof(zp);
 }
-bool HHVM_FUNCTION(gzrewind, CResRef zp) {
+bool HHVM_FUNCTION(gzrewind, const Resource& zp) {
   return f_rewind(zp);
 }
-Variant HHVM_FUNCTION(gzgetc, CResRef zp) {
+Variant HHVM_FUNCTION(gzgetc, const Resource& zp) {
   return f_fgetc(zp);
 }
-Variant HHVM_FUNCTION(gzgets, CResRef zp, int64_t length /* = 1024 */) {
+Variant HHVM_FUNCTION(gzgets, const Resource& zp, int64_t length /* = 1024 */) {
   return f_fgets(zp, length);
 }
-Variant HHVM_FUNCTION(gzgetss, CResRef zp, int64_t length /* = 0 */,
+Variant HHVM_FUNCTION(gzgetss, const Resource& zp, int64_t length /* = 0 */,
                             const String& allowable_tags /* = null_string */) {
   return f_fgetss(zp, length, allowable_tags);
 }
-Variant HHVM_FUNCTION(gzpassthru, CResRef zp) {
+Variant HHVM_FUNCTION(gzpassthru, const Resource& zp) {
   return f_fpassthru(zp);
 }
-Variant HHVM_FUNCTION(gzwrite, CResRef zp, const String& str,
+Variant HHVM_FUNCTION(gzwrite, const Resource& zp, const String& str,
                                int64_t length /* = 0 */) {
   return f_fwrite(zp, str, length);
 }

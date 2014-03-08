@@ -1143,7 +1143,7 @@ Variant f_openssl_error_string() {
   return false;
 }
 
-void f_openssl_free_key(CResRef key) {
+void f_openssl_free_key(const Resource& key) {
   return f_openssl_pkey_free(key);
 }
 
@@ -1675,7 +1675,7 @@ bool f_openssl_pkey_export(CVarRef key, VRefParam out,
   return ret;
 }
 
-void f_openssl_pkey_free(CResRef key) {
+void f_openssl_pkey_free(const Resource& key) {
   // do nothing
 }
 
@@ -1722,7 +1722,7 @@ static void add_bignum_as_string(Array &arr,
   smart_free(out);
 }
 
-Array f_openssl_pkey_get_details(CResRef key) {
+Array f_openssl_pkey_get_details(const Resource& key) {
   EVP_PKEY *pkey = key.getTyped<Key>()->m_key;
   BIO *out = BIO_new(BIO_s_mem());
   PEM_write_bio_PUBKEY(out, pkey);
@@ -2256,7 +2256,7 @@ bool f_openssl_x509_export(CVarRef x509, VRefParam output,
   return ret;
 }
 
-void f_openssl_x509_free(CResRef x509cert) {
+void f_openssl_x509_free(const Resource& x509cert) {
   // do nothing
 }
 

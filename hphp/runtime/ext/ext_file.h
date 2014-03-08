@@ -37,34 +37,34 @@ Variant f_fopen(
   const String& filename, const String& mode, bool use_include_path = false,
   CVarRef context = uninit_null());
 Variant f_popen(const String& command, const String& mode);
-bool f_fclose(CResRef handle);
-Variant f_pclose(CResRef handle);
-Variant f_fseek(CResRef handle, int64_t offset, int64_t whence = k_SEEK_SET);
-bool f_rewind(CResRef handle);
-Variant f_ftell(CResRef handle);
-bool f_feof(CResRef handle);
-Variant f_fstat(CResRef handle);
-Variant f_fread(CResRef handle, int64_t length);
-Variant f_fgetc(CResRef handle);
-Variant f_fgets(CResRef handle, int64_t length = 0);
-Variant f_fgetss(CResRef handle, int64_t length = 0,
+bool f_fclose(const Resource& handle);
+Variant f_pclose(const Resource& handle);
+Variant f_fseek(const Resource& handle, int64_t offset, int64_t whence = k_SEEK_SET);
+bool f_rewind(const Resource& handle);
+Variant f_ftell(const Resource& handle);
+bool f_feof(const Resource& handle);
+Variant f_fstat(const Resource& handle);
+Variant f_fread(const Resource& handle, int64_t length);
+Variant f_fgetc(const Resource& handle);
+Variant f_fgets(const Resource& handle, int64_t length = 0);
+Variant f_fgetss(const Resource& handle, int64_t length = 0,
                 const String& allowable_tags = null_string);
 Variant f_fscanf(
-  int _argc, CResRef handle, const String& format, const Array& _argv = null_array);
-Variant f_fpassthru(CResRef handle);
-Variant f_fwrite(CResRef handle, const String& data, int64_t length = 0);
-Variant f_fputs(CResRef handle, const String& data, int64_t length = 0);
+  int _argc, const Resource& handle, const String& format, const Array& _argv = null_array);
+Variant f_fpassthru(const Resource& handle);
+Variant f_fwrite(const Resource& handle, const String& data, int64_t length = 0);
+Variant f_fputs(const Resource& handle, const String& data, int64_t length = 0);
 Variant f_fprintf(
-  int _argc, CResRef handle, const String& format, const Array& _argv = null_array);
-Variant f_vfprintf(CResRef handle, const String& format, const Array& args);
-bool f_fflush(CResRef handle);
-bool f_ftruncate(CResRef handle, int64_t size);
+  int _argc, const Resource& handle, const String& format, const Array& _argv = null_array);
+Variant f_vfprintf(const Resource& handle, const String& format, const Array& args);
+bool f_fflush(const Resource& handle);
+bool f_ftruncate(const Resource& handle, int64_t size);
 bool f_flock(
-  CResRef handle, int operation, VRefParam wouldblock = uninit_null());
-Variant f_fputcsv(CResRef handle, const Array& fields, const String& delimiter = ",",
+  const Resource& handle, int operation, VRefParam wouldblock = uninit_null());
+Variant f_fputcsv(const Resource& handle, const Array& fields, const String& delimiter = ",",
                   const String& enclosure = "\"");
 Variant f_fgetcsv(
-  CResRef handle, int64_t length = 0, const String& delimiter = ",",
+  const Resource& handle, int64_t length = 0, const String& delimiter = ",",
   const String& enclosure = "\"", const String& escape = "\\");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,11 +159,11 @@ bool f_chdir(const String& directory);
 bool f_chroot(const String& directory);
 Variant f_dir(const String& directory);
 Variant f_opendir(const String& path, CVarRef context = uninit_null());
-Variant f_readdir(CResRef dir_handle = null_resource);
-void f_rewinddir(CResRef dir_handle = null_resource);
+Variant f_readdir(const Resource& dir_handle = null_resource);
+void f_rewinddir(const Resource& dir_handle = null_resource);
 Variant f_scandir(const String& directory, bool descending = false,
                   CVarRef context = uninit_null());
-void f_closedir(CResRef dir_handle = null_resource);
+void f_closedir(const Resource& dir_handle = null_resource);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

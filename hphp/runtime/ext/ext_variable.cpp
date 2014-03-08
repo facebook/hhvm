@@ -43,7 +43,7 @@ String f_gettype(CVarRef v) {
   return getDataTypeString(v.getType());
 }
 
-String f_get_resource_type(CResRef handle) {
+String f_get_resource_type(const Resource& handle) {
   return handle->o_getResourceName();
 }
 

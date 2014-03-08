@@ -396,7 +396,7 @@ bool String::same(CObjRef v2) const {
   return HPHP::same(m_px, v2);
 }
 
-bool String::same(CResRef v2) const {
+bool String::same(const Resource& v2) const {
   return HPHP::same(m_px, v2);
 }
 
@@ -416,7 +416,7 @@ bool String::equal(CObjRef v2) const {
   return HPHP::equal(m_px, v2);
 }
 
-bool String::equal(CResRef v2) const {
+bool String::equal(const Resource& v2) const {
   return HPHP::equal(m_px, v2);
 }
 
@@ -436,7 +436,7 @@ bool String::less(CObjRef v2) const {
   return HPHP::less(m_px, v2);
 }
 
-bool String::less(CResRef v2) const {
+bool String::less(const Resource& v2) const {
   return HPHP::less(m_px, v2);
 }
 
@@ -456,7 +456,7 @@ bool String::more(CObjRef v2) const {
   return HPHP::more(m_px, v2);
 }
 
-bool String::more(CResRef v2) const {
+bool String::more(const Resource& v2) const {
   return HPHP::more(m_px, v2);
 }
 

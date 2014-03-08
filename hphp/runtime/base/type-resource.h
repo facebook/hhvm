@@ -51,7 +51,7 @@ public:
    * Constructors
    */
   /* implicit */ Resource(ResourceData *data) : ResourceBase(data) { }
-  /* implicit */ Resource(CResRef src) : ResourceBase(src.m_px) { }
+  /* implicit */ Resource(const Resource& src) : ResourceBase(src.m_px) { }
 
   // Move ctor
   Resource(Resource&& src) : ResourceBase(std::move(src)) { }
@@ -138,10 +138,10 @@ public:
   /**
    * Comparisons
    */
-  bool same (CResRef v2) const { return m_px == v2.get();}
-  bool equal(CResRef v2) const { return m_px == v2.get();}
-  bool less (CResRef v2) const { return toInt64() < v2.toInt64();}
-  bool more (CResRef v2) const { return toInt64() > v2.toInt64();}
+  bool same (const Resource& v2) const { return m_px == v2.get();}
+  bool equal(const Resource& v2) const { return m_px == v2.get();}
+  bool less (const Resource& v2) const { return toInt64() < v2.toInt64();}
+  bool more (const Resource& v2) const { return toInt64() > v2.toInt64();}
 
   // Transfer ownership of our reference to this resource.
   ResourceData *detach() {

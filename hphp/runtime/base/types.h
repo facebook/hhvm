@@ -185,15 +185,10 @@ inline bool isMutableType(Collection::Type ctype) {
 
 }
 
-/**
- * Some of these typedefs are for platform independency, including "int64".
- * Some of them are for clarity, for example, "litstr". Some of them are purely
- * for being able to vertically align type-specialized functions so they look
- * cleaner.
- */
+//////////////////////////////////////////////////////////////////////
+
 typedef const char * litstr; /* literal string */
 typedef const Object & CObjRef;
-typedef const Resource & CResRef;
 typedef const Variant & CVarRef;
 
 typedef const class VRefParamValue    &VRefParam;

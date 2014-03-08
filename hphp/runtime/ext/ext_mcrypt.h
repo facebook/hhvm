@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_mcrypt_module_open(const String& algorithm, const String& algorithm_directory, const String& mode, const String& mode_directory);
-bool f_mcrypt_module_close(CResRef td);
+bool f_mcrypt_module_close(const Resource& td);
 Array f_mcrypt_list_algorithms(const String& lib_dir = null_string);
 Array f_mcrypt_list_modes(const String& lib_dir = null_string);
 int64_t f_mcrypt_module_get_algo_block_size(const String& algorithm, const String& lib_dir = null_string);
@@ -47,21 +47,21 @@ Variant f_mcrypt_get_block_size(const String& cipher, const String& module = nul
 Variant f_mcrypt_get_cipher_name(const String& cipher);
 Variant f_mcrypt_get_iv_size(const String& cipher, const String& mode);
 int64_t f_mcrypt_get_key_size(const String& cipher, const String& module);
-String f_mcrypt_enc_get_algorithms_name(CResRef td);
-int64_t f_mcrypt_enc_get_block_size(CResRef td);
-int64_t f_mcrypt_enc_get_iv_size(CResRef td);
-int64_t f_mcrypt_enc_get_key_size(CResRef td);
-String f_mcrypt_enc_get_modes_name(CResRef td);
-Array f_mcrypt_enc_get_supported_key_sizes(CResRef td);
-bool f_mcrypt_enc_is_block_algorithm_mode(CResRef td);
-bool f_mcrypt_enc_is_block_algorithm(CResRef td);
-bool f_mcrypt_enc_is_block_mode(CResRef td);
-int64_t f_mcrypt_enc_self_test(CResRef td);
-Variant f_mcrypt_generic(CResRef td, const String& data);
-int64_t f_mcrypt_generic_init(CResRef td, const String& key, const String& iv);
-Variant f_mdecrypt_generic(CResRef td, const String& data);
-bool f_mcrypt_generic_deinit(CResRef td);
-bool f_mcrypt_generic_end(CResRef td);
+String f_mcrypt_enc_get_algorithms_name(const Resource& td);
+int64_t f_mcrypt_enc_get_block_size(const Resource& td);
+int64_t f_mcrypt_enc_get_iv_size(const Resource& td);
+int64_t f_mcrypt_enc_get_key_size(const Resource& td);
+String f_mcrypt_enc_get_modes_name(const Resource& td);
+Array f_mcrypt_enc_get_supported_key_sizes(const Resource& td);
+bool f_mcrypt_enc_is_block_algorithm_mode(const Resource& td);
+bool f_mcrypt_enc_is_block_algorithm(const Resource& td);
+bool f_mcrypt_enc_is_block_mode(const Resource& td);
+int64_t f_mcrypt_enc_self_test(const Resource& td);
+Variant f_mcrypt_generic(const Resource& td, const String& data);
+int64_t f_mcrypt_generic_init(const Resource& td, const String& key, const String& iv);
+Variant f_mdecrypt_generic(const Resource& td, const String& data);
+bool f_mcrypt_generic_deinit(const Resource& td);
+bool f_mcrypt_generic_end(const Resource& td);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

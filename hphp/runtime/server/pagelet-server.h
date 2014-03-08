@@ -55,13 +55,13 @@ public:
    * Query if a task is finished. This is non-blocking and can be called as
    * many times as desired.
    */
-  static int64_t TaskStatus(CResRef task);
+  static int64_t TaskStatus(const Resource& task);
 
   /**
    * Get results of a task. This is blocking until task is finished or times
    * out. The status code is set to -1 in the event of a timeout.
    */
-  static String TaskResult(CResRef task,
+  static String TaskResult(const Resource& task,
                            Array &headers,
                            int &code,
                            int64_t timeout_ms);

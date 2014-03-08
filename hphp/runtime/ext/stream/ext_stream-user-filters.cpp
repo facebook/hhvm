@@ -48,7 +48,7 @@ class StreamUserFilters : public RequestEventHandler {
     return true;
   }
 
-  Variant prepend(CResRef stream,
+  Variant prepend(const Resource& stream,
                  const String& filtername,
                  CVarRef readwrite,
                  CVarRef params) {
@@ -59,7 +59,7 @@ class StreamUserFilters : public RequestEventHandler {
                                  /* append = */ false);
   }
 
-  Variant append(CResRef stream,
+  Variant append(const Resource& stream,
                  const String& filtername,
                  CVarRef readwrite,
                  CVarRef params) {
@@ -76,7 +76,7 @@ class StreamUserFilters : public RequestEventHandler {
 
   virtual void requestShutdown() {}
 private:
-  Variant appendOrPrependFilter(CResRef stream,
+  Variant appendOrPrependFilter(const Resource& stream,
                  const String& filtername,
                  CVarRef readwrite,
                  CVarRef params,
@@ -266,7 +266,7 @@ Array HHVM_FUNCTION(stream_get_filters) {
 }
 
 Variant HHVM_FUNCTION(stream_filter_append,
-                      CResRef stream,
+                      const Resource& stream,
                       const String& filtername,
                       CVarRef readwrite,
                       CVarRef params) {
@@ -277,7 +277,7 @@ Variant HHVM_FUNCTION(stream_filter_append,
 }
 
 Variant HHVM_FUNCTION(stream_filter_prepend,
-                      CResRef stream,
+                      const Resource& stream,
                       const String& filtername,
                       CVarRef readwrite,
                       CVarRef params) {
@@ -287,20 +287,20 @@ Variant HHVM_FUNCTION(stream_filter_prepend,
                                               params);
 }
 
-Variant HHVM_FUNCTION(stream_bucket_make_writeable, CResRef bb_res) {
+Variant HHVM_FUNCTION(stream_bucket_make_writeable, const Resource& bb_res) {
   auto brigade = bb_res.getTyped<BucketBrigade>();
   assert(brigade);
   auto ret = brigade->popFront();
   return ret;
 }
 
-void HHVM_FUNCTION(stream_bucket_append, CResRef bb_res, CObjRef bucket) {
+void HHVM_FUNCTION(stream_bucket_append, const Resource& bb_res, CObjRef bucket) {
   auto brigade = bb_res.getTyped<BucketBrigade>();
   assert(brigade);
   brigade->appendBucket(bucket);
 }
 
-void HHVM_FUNCTION(stream_bucket_prepend, CResRef bb_res, CObjRef bucket) {
+void HHVM_FUNCTION(stream_bucket_prepend, const Resource& bb_res, CObjRef bucket) {
   auto brigade = bb_res.getTyped<BucketBrigade>();
   assert(brigade);
   brigade->prependBucket(bucket);

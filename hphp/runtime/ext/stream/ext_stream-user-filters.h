@@ -67,21 +67,21 @@ bool HHVM_FUNCTION(stream_filter_register,
                    const String& classname);
 Array HHVM_FUNCTION(stream_get_filters);
 Variant HHVM_FUNCTION(stream_filter_append,
-                      CResRef stream,
+                      const Resource& stream,
                       const String& filtername,
                       CVarRef readwrite,
                       CVarRef params);
 Variant HHVM_FUNCTION(stream_filter_prepend,
-                      CResRef stream,
+                      const Resource& stream,
                       const String& filtername,
                       CVarRef readwrite,
                       CVarRef params);
-Variant HHVM_FUNCTION(stream_bucket_make_writeable, CResRef bucket_brigade);
+Variant HHVM_FUNCTION(stream_bucket_make_writeable, const Resource& bucket_brigade);
 void HHVM_FUNCTION(stream_bucket_append,
-                   CResRef bucket_brigade,
+                   const Resource& bucket_brigade,
                    CObjRef bucket);
 void HHVM_FUNCTION(stream_bucket_prepend,
-                   CResRef bucket_brigade,
+                   const Resource& bucket_brigade,
                    CObjRef bucket);
 
 ///////////////////////////////////////////////////////////////////////////////

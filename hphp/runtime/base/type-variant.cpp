@@ -132,7 +132,7 @@ Variant::Variant(CObjRef v) {
   }
 }
 
-Variant::Variant(CResRef v) {
+Variant::Variant(const Resource& v) {
   m_type = KindOfResource;
   ResourceData* o = v.get();
   if (o) {

@@ -893,15 +893,15 @@ bool f_getmxrr(const String& hostname, VRefParam mxhosts,
  * f_fsockopen() and f_pfsockopen() are implemented in ext_socket.cpp.
  */
 
-Variant f_socket_get_status(CResRef stream) {
+Variant f_socket_get_status(const Resource& stream) {
   return f_stream_get_meta_data(stream);
 }
 
-bool f_socket_set_blocking(CResRef stream, int mode) {
+bool f_socket_set_blocking(const Resource& stream, int mode) {
   return f_stream_set_blocking(stream, mode);
 }
 
-bool f_socket_set_timeout(CResRef stream, int seconds,
+bool f_socket_set_timeout(const Resource& stream, int seconds,
                           int microseconds /* = 0 */) {
   return f_stream_set_timeout(stream, seconds, microseconds);
 }

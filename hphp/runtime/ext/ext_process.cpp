@@ -895,12 +895,12 @@ Variant f_proc_open(const String& cmd, const Array& descriptorspec, VRefParam pi
   _exit(127);
 }
 
-bool f_proc_terminate(CResRef process, int signal /* = 0 */) {
+bool f_proc_terminate(const Resource& process, int signal /* = 0 */) {
   ChildProcess *proc = process.getTyped<ChildProcess>();
   return kill(proc->child, signal <= 0 ? SIGTERM : signal) == 0;
 }
 
-int64_t f_proc_close(CResRef process) {
+int64_t f_proc_close(const Resource& process) {
   return process.getTyped<ChildProcess>()->close();
 }
 
@@ -914,7 +914,7 @@ const StaticString
   s_termsig("termsig"),
   s_stopsig("stopsig");
 
-Array f_proc_get_status(CResRef process) {
+Array f_proc_get_status(const Resource& process) {
   ChildProcess *proc = process.getTyped<ChildProcess>();
 
   errno = 0;

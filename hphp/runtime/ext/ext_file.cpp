@@ -222,29 +222,29 @@ Variant f_popen(const String& command, const String& mode) {
   return handle;
 }
 
-bool f_fclose(CResRef handle) {
+bool f_fclose(const Resource& handle) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->close());
 }
 
-Variant f_pclose(CResRef handle) {
+Variant f_pclose(const Resource& handle) {
   CHECK_HANDLE(handle, f);
   CHECK_ERROR(f->close());
   return s_file_data->m_pcloseRet;
 }
 
-Variant f_fseek(CResRef handle, int64_t offset,
+Variant f_fseek(const Resource& handle, int64_t offset,
                 int64_t whence /* = k_SEEK_SET */) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->seek(offset, whence)) ? 0 : -1;
 }
 
-bool f_rewind(CResRef handle) {
+bool f_rewind(const Resource& handle) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->rewind());
 }
 
-Variant f_ftell(CResRef handle) {
+Variant f_ftell(const Resource& handle) {
   CHECK_HANDLE(handle, f);
   int64_t ret = f->tell();
   if (!CHECK_ERROR(ret != -1)) {
@@ -253,12 +253,12 @@ Variant f_ftell(CResRef handle) {
   return ret;
 }
 
-bool f_feof(CResRef handle) {
+bool f_feof(const Resource& handle) {
   CHECK_HANDLE(handle, f);
   return f->eof();
 }
 
-Variant f_fstat(CResRef handle) {
+Variant f_fstat(const Resource& handle) {
   CHECK_HANDLE(handle, f);
   struct stat sb;
   if (!CHECK_ERROR(f->stat(&sb)))
@@ -266,12 +266,12 @@ Variant f_fstat(CResRef handle) {
   return stat_impl(&sb);
 }
 
-Variant f_fread(CResRef handle, int64_t length) {
+Variant f_fread(const Resource& handle, int64_t length) {
   CHECK_HANDLE(handle, f);
   return f->read(length);
 }
 
-Variant f_fgetc(CResRef handle) {
+Variant f_fgetc(const Resource& handle) {
   CHECK_HANDLE(handle, f);
   int result = f->getc();
   if (result == EOF) {
@@ -280,7 +280,7 @@ Variant f_fgetc(CResRef handle) {
   return String::FromChar(result);
 }
 
-Variant f_fgets(CResRef handle, int64_t length /* = 0 */) {
+Variant f_fgets(const Resource& handle, int64_t length /* = 0 */) {
   if (length < 0) {
     throw_invalid_argument("length (negative): %" PRId64, length);
     return false;
@@ -293,7 +293,7 @@ Variant f_fgets(CResRef handle, int64_t length /* = 0 */) {
   return false;
 }
 
-Variant f_fgetss(CResRef handle, int64_t length /* = 0 */,
+Variant f_fgetss(const Resource& handle, int64_t length /* = 0 */,
                  const String& allowable_tags /* = null_string */) {
   Variant ret = f_fgets(handle, length);
   if (!same(ret, false)) {
@@ -302,55 +302,55 @@ Variant f_fgetss(CResRef handle, int64_t length /* = 0 */,
   return ret;
 }
 
-Variant f_fscanf(int _argc, CResRef handle, const String& format,
+Variant f_fscanf(int _argc, const Resource& handle, const String& format,
                  const Array& _argv /* = null_array */) {
   CHECK_HANDLE(handle, f);
   return f_sscanf(_argc, f->readLine(), format, _argv);
 }
 
-Variant f_fpassthru(CResRef handle) {
+Variant f_fpassthru(const Resource& handle) {
   CHECK_HANDLE(handle, f);
   return f->print();
 }
 
-Variant f_fwrite(CResRef handle, const String& data, int64_t length /* = 0 */) {
+Variant f_fwrite(const Resource& handle, const String& data, int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
   int64_t ret = f->write(data, length);
   if (ret < 0) ret = 0;
   return ret;
 }
 
-Variant f_fputs(CResRef handle, const String& data, int64_t length /* = 0 */) {
+Variant f_fputs(const Resource& handle, const String& data, int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
   int64_t ret = f->write(data, length);
   if (ret < 0) ret = 0;
   return ret;
 }
 
-Variant f_fprintf(int _argc, CResRef handle, const String& format,
+Variant f_fprintf(int _argc, const Resource& handle, const String& format,
                   const Array& _argv /* = null_array */) {
   CHECK_HANDLE(handle, f);
   return f->printf(format, _argv);
 }
 
-Variant f_vfprintf(CResRef handle, const String& format, const Array& args) {
+Variant f_vfprintf(const Resource& handle, const String& format, const Array& args) {
   CHECK_HANDLE(handle, f);
   return f->printf(format, args);
 }
 
-bool f_fflush(CResRef handle) {
+bool f_fflush(const Resource& handle) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->flush());
 }
 
-bool f_ftruncate(CResRef handle, int64_t size) {
+bool f_ftruncate(const Resource& handle, int64_t size) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->truncate(size));
 }
 
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
-bool f_flock(CResRef handle, int operation, VRefParam wouldblock /* = null */) {
+bool f_flock(const Resource& handle, int operation, VRefParam wouldblock /* = null */) {
   CHECK_HANDLE(handle, f);
   bool block = false;
   int act;
@@ -376,7 +376,7 @@ bool f_flock(CResRef handle, int operation, VRefParam wouldblock /* = null */) {
   }                                                     \
   char NAME ## _char = NAME.charAt(0);                  \
 
-Variant f_fputcsv(CResRef handle, const Array& fields,
+Variant f_fputcsv(const Resource& handle, const Array& fields,
                   const String& delimiter /* = "," */,
                   const String& enclosure /* = "\"" */) {
   FCSV_CHECK_ARG(delimiter);
@@ -386,7 +386,7 @@ Variant f_fputcsv(CResRef handle, const Array& fields,
   return f->writeCSV(fields, delimiter_char, enclosure_char);
 }
 
-Variant f_fgetcsv(CResRef handle, int64_t length /* = 0 */,
+Variant f_fgetcsv(const Resource& handle, int64_t length /* = 0 */,
                   const String& delimiter /* = "," */,
                   const String& enclosure /* = "\"" */,
                   const String& escape /* = "\\" */) {
@@ -1368,7 +1368,7 @@ const StaticString
   s_handle("handle"),
   s_path("path");
 
-static Directory *get_dir(CResRef dir_handle) {
+static Directory *get_dir(const Resource& dir_handle) {
   if (dir_handle.isNull()) {
     auto defaultDir = s_directory_data->defaultDirectory;
     if (defaultDir.isNull()) {
@@ -1407,7 +1407,7 @@ Variant f_opendir(const String& path, CVarRef context /* = null */) {
   return Resource(p);
 }
 
-Variant f_readdir(CResRef dir_handle /* = null */) {
+Variant f_readdir(const Resource& dir_handle /* = null */) {
   Directory *dir = get_dir(dir_handle);
   if (!dir) {
     return false;
@@ -1415,7 +1415,7 @@ Variant f_readdir(CResRef dir_handle /* = null */) {
   return dir->read();
 }
 
-void f_rewinddir(CResRef dir_handle /* = null */) {
+void f_rewinddir(const Resource& dir_handle /* = null */) {
   Directory *dir = get_dir(dir_handle);
   if (!dir) {
     return;
@@ -1463,7 +1463,7 @@ Variant f_scandir(const String& directory, bool descending /* = false */,
   return ret;
 }
 
-void f_closedir(CResRef dir_handle /* = null */) {
+void f_closedir(const Resource& dir_handle /* = null */) {
   Directory *d = get_dir(dir_handle);
   if (!d) {
     return;

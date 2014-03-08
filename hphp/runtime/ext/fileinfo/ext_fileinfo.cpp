@@ -71,7 +71,7 @@ static Variant HHVM_FUNCTION(finfo_open,
   return NEWOBJ(FileinfoResource)(magic);
 }
 
-static bool HHVM_FUNCTION(finfo_close, CResRef finfo) {
+static bool HHVM_FUNCTION(finfo_close, const Resource& finfo) {
   auto res = finfo.getTyped<FileinfoResource>();
   if (!res) {
     return false;
@@ -80,7 +80,7 @@ static bool HHVM_FUNCTION(finfo_close, CResRef finfo) {
   return true;
 }
 
-static bool HHVM_FUNCTION(finfo_set_flags, CResRef finfo, int64_t options) {
+static bool HHVM_FUNCTION(finfo_set_flags, const Resource& finfo, int64_t options) {
   auto magic = finfo.getTyped<FileinfoResource>()->getMagic();
   if (magic_setflags(magic, options) == -1) {
     raise_warning(
@@ -99,7 +99,7 @@ static bool HHVM_FUNCTION(finfo_set_flags, CResRef finfo, int64_t options) {
 #define FILEINFO_MODE_FILE 2
 
 static Variant php_finfo_get_type(
-    const CResRef& object, const Variant& what,
+    const Resource& object, const Variant& what,
     int64_t options, CVarRef context, int mode, int mimetype_emu)
 {
   String ret_val;
@@ -217,7 +217,7 @@ clean:
 }
 
 static String HHVM_FUNCTION(finfo_buffer,
-    CResRef finfo, CVarRef string,
+    const Resource& finfo, CVarRef string,
     int64_t options, CVarRef context) {
 
   String s;
@@ -230,7 +230,7 @@ static String HHVM_FUNCTION(finfo_buffer,
 }
 
 static String HHVM_FUNCTION(finfo_file,
-    CResRef finfo, CVarRef file_name,
+    const Resource& finfo, CVarRef file_name,
     int64_t options, CVarRef context) {
 
   String fn;

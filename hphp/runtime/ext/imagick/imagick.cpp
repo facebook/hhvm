@@ -145,7 +145,7 @@ static bool HHVM_METHOD(Imagick, writeImage,
 }
 
 static bool HHVM_METHOD(Imagick, writeImageFile,
-    CResRef filehandle) {
+    const Resource& filehandle) {
   throw NotImplementedException("Not Implemented");
 }
 
@@ -155,7 +155,7 @@ static bool HHVM_METHOD(Imagick, writeImages,
 }
 
 static bool HHVM_METHOD(Imagick, writeImagesFile,
-    CResRef filehandle) {
+    const Resource& filehandle) {
   throw NotImplementedException("Not Implemented");
 }
 

@@ -77,7 +77,7 @@ bool same(CVarRef v1, CObjRef v2) {
   return od == v2.get();
 }
 
-bool same(CVarRef v1, CResRef v2) {
+bool same(CVarRef v1, const Resource& v2) {
   bool null1 = v1.isNull();
   bool null2 = v2.isNull();
   if (null1 && null2) return true;

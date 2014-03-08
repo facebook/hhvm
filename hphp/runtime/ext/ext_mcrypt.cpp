@@ -181,7 +181,7 @@ static Variant php_mcrypt_do_crypt(const String& cipher, const String& key, cons
   return s.setSize(data_size);
 }
 
-static Variant mcrypt_generic(CResRef td, const String& data, bool dencrypt) {
+static Variant mcrypt_generic(const Resource& td, const String& data, bool dencrypt) {
   MCrypt *pm = td.getTyped<MCrypt>();
   if (!pm->m_init) {
     raise_warning("Operation disallowed prior to mcrypt_generic_init().");
@@ -239,7 +239,7 @@ Variant f_mcrypt_module_open(const String& algorithm, const String& algorithm_di
   return Resource(new MCrypt(td));
 }
 
-bool f_mcrypt_module_close(CResRef td) {
+bool f_mcrypt_module_close(const Resource& td) {
   td.getTyped<MCrypt>()->close();
   return true;
 }
@@ -468,33 +468,33 @@ int64_t f_mcrypt_get_key_size(const String& cipher, const String& module) {
   return ret;
 }
 
-String f_mcrypt_enc_get_algorithms_name(CResRef td) {
+String f_mcrypt_enc_get_algorithms_name(const Resource& td) {
   char *name = mcrypt_enc_get_algorithms_name(td.getTyped<MCrypt>()->m_td);
   String ret(name, CopyString);
   mcrypt_free(name);
   return ret;
 }
 
-int64_t f_mcrypt_enc_get_block_size(CResRef td) {
+int64_t f_mcrypt_enc_get_block_size(const Resource& td) {
   return mcrypt_enc_get_block_size(td.getTyped<MCrypt>()->m_td);
 }
 
-int64_t f_mcrypt_enc_get_iv_size(CResRef td) {
+int64_t f_mcrypt_enc_get_iv_size(const Resource& td) {
   return mcrypt_enc_get_iv_size(td.getTyped<MCrypt>()->m_td);
 }
 
-int64_t f_mcrypt_enc_get_key_size(CResRef td) {
+int64_t f_mcrypt_enc_get_key_size(const Resource& td) {
   return mcrypt_enc_get_key_size(td.getTyped<MCrypt>()->m_td);
 }
 
-String f_mcrypt_enc_get_modes_name(CResRef td) {
+String f_mcrypt_enc_get_modes_name(const Resource& td) {
   char *name = mcrypt_enc_get_modes_name(td.getTyped<MCrypt>()->m_td);
   String ret(name, CopyString);
   mcrypt_free(name);
   return ret;
 }
 
-Array f_mcrypt_enc_get_supported_key_sizes(CResRef td) {
+Array f_mcrypt_enc_get_supported_key_sizes(const Resource& td) {
   int count = 0;
   int *key_sizes =
     mcrypt_enc_get_supported_key_sizes(td.getTyped<MCrypt>()->m_td, &count);
@@ -507,23 +507,23 @@ Array f_mcrypt_enc_get_supported_key_sizes(CResRef td) {
   return ret;
 }
 
-bool f_mcrypt_enc_is_block_algorithm_mode(CResRef td) {
+bool f_mcrypt_enc_is_block_algorithm_mode(const Resource& td) {
   return mcrypt_enc_is_block_algorithm_mode(td.getTyped<MCrypt>()->m_td) == 1;
 }
 
-bool f_mcrypt_enc_is_block_algorithm(CResRef td) {
+bool f_mcrypt_enc_is_block_algorithm(const Resource& td) {
   return mcrypt_enc_is_block_algorithm(td.getTyped<MCrypt>()->m_td) == 1;
 }
 
-bool f_mcrypt_enc_is_block_mode(CResRef td) {
+bool f_mcrypt_enc_is_block_mode(const Resource& td) {
   return mcrypt_enc_is_block_mode(td.getTyped<MCrypt>()->m_td) == 1;
 }
 
-int64_t f_mcrypt_enc_self_test(CResRef td) {
+int64_t f_mcrypt_enc_self_test(const Resource& td) {
   return mcrypt_enc_self_test(td.getTyped<MCrypt>()->m_td);
 }
 
-int64_t f_mcrypt_generic_init(CResRef td, const String& key, const String& iv) {
+int64_t f_mcrypt_generic_init(const Resource& td, const String& key, const String& iv) {
   MCrypt *pm = td.getTyped<MCrypt>();
   int max_key_size = mcrypt_enc_get_key_size(pm->m_td);
   int iv_size = mcrypt_enc_get_iv_size(pm->m_td);
@@ -580,15 +580,15 @@ int64_t f_mcrypt_generic_init(CResRef td, const String& key, const String& iv) {
   return result;
 }
 
-Variant f_mcrypt_generic(CResRef td, const String& data) {
+Variant f_mcrypt_generic(const Resource& td, const String& data) {
   return mcrypt_generic(td, data, false);
 }
 
-Variant f_mdecrypt_generic(CResRef td, const String& data) {
+Variant f_mdecrypt_generic(const Resource& td, const String& data) {
   return mcrypt_generic(td, data, true);
 }
 
-bool f_mcrypt_generic_deinit(CResRef td) {
+bool f_mcrypt_generic_deinit(const Resource& td) {
   MCrypt *pm = td.getTyped<MCrypt>();
   if (mcrypt_generic_deinit(pm->m_td) < 0) {
     raise_warning("Could not terminate encryption specifier");
@@ -598,7 +598,7 @@ bool f_mcrypt_generic_deinit(CResRef td) {
   return true;
 }
 
-bool f_mcrypt_generic_end(CResRef td) {
+bool f_mcrypt_generic_end(const Resource& td) {
   return f_mcrypt_generic_deinit(td);
 }
 

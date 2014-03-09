@@ -731,15 +731,6 @@ class Variant : private TypedValue {
   const Variant& appendRef(const Variant& v);
   const Variant& append(RefResult v) { return appendRef(variant(v)); }
 
-  void remove(int     key) { removeImpl((int64_t)key);}
-  void remove(int64_t   key) { removeImpl(key);}
-  void remove(double  key) = delete;
-  void remove(litstr  key, bool isString = false) = delete;
-  void remove(const String& key, bool isString = false) {
-    removeImpl(key, isString);
-  }
-  void remove(const Variant& key);
-
   /**
    * Low level access that should be restricted to internal use.
    */
@@ -836,11 +827,6 @@ class Variant : private TypedValue {
       (m_type == KindOfBoolean && !m_data.num) ||
       (IS_STRING_TYPE(m_type) && m_data.pstr->empty());
   }
-
-  void removeImpl(double key) = delete;
-  void removeImpl(int64_t key);
-  void removeImpl(const Variant& key, bool isString = false);
-  void removeImpl(const String& key, bool isString = false);
 
   const Variant& set(bool    v);
   const Variant& set(int     v);

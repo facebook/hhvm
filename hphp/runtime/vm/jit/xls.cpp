@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/linear-scan.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -24,9 +24,12 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
 
 #include <unordered_set>
 #include <algorithm>
+#include <utility>
 
 // TODO
 //  - #3098109 dests of branch instructions start in next block
@@ -75,13 +78,16 @@ public:
   unsigned start, end;
 };
 
-// return [first, last+1)
-LiveRange closedRange(unsigned first, unsigned last);
-
 // An Interval stores the lifetime of an SSATmp as a sorted list of disjoint
 // ranges, and a sorted list of use positions.  If this interval was split,
 // then the first interval is deemed "parent" and the rest are "children",
 // and they're all connected as a singly linked list sorted by start.
+//
+// Every use position must be inside one of the ranges, or exactly at the
+// end of the last range.  Allowing a use exactly at the end facilitates
+// lifetime splitting when the use is a call argument that clobbers the
+// argument registers; we need to split the lifetime exactly at the call
+// position, which is exactly where the use is.
 struct Interval {
   Interval() {}
   explicit Interval(Interval* parent);
@@ -97,21 +103,20 @@ struct Interval {
   bool usedAt(unsigned pos) const;
   Interval* childAt(unsigned pos);
   unsigned nextIntersect(Interval*) const;
-  unsigned nextUseAfter(unsigned pos) const;
-  unsigned firstRegUse() const;
-  unsigned firstUse() const { return uses.front().pos; }
+  unsigned firstUseAfter(unsigned pos) const;
+  unsigned lastUseBefore(unsigned pos) const;
+  unsigned firstUse() const;
   // mutators
   void add(LiveRange r);
-  void setStart(unsigned start);
   void addUse(unsigned pos) { uses.push_back(Use{pos}); }
-  Interval* split(unsigned pos);
+  Interval* split(unsigned pos, bool keep_uses = false);
   // register/spill assignment
   RegPair regs() const;
   bool handled() const { return loc.hasReg(0) || loc.spilled(); }
   // debugging
   std::string toString();
   bool checkInvariants() const;
-  uint32_t id() const { return leader()->tmp->id(); }
+  uint32_t id() const { return tmp->id(); }
 public:
   bool blocked { false }; // cannot be spilled
   bool scratch { false }; // used as scratch or arg, cannot be spilled
@@ -144,28 +149,27 @@ struct XLS {
   void resolveEdges();
   // utilities
   void enqueue(Interval* interval);
-  bool allocPrefer(Interval* current, const RegPositions& until);
   void allocOne(Interval* current);
   void allocBlocked(Interval* current);
-  Interval* goodSplit(Interval*, unsigned pos);
   void spill(Interval*);
-  void assign(Interval*, RegPair r);
+  void spillAfter(Interval* ivl, unsigned pos);
+  void spillOthers(Interval* current, RegPair r);
+  void assignReg(Interval*, RegPair r);
+  void assignSpill(Interval*);
   void update(unsigned pos);
-  void spillActive(Interval* current);
-  void spillInactive(Interval* current);
   void insertCopy(Block* b, Block::iterator, IRInstruction*& shuffle,
                   SSATmp* src, const PhysLoc& rs, const PhysLoc& rd);
   void insertSpill(Interval* ivl);
+  void resolveFlow(Interval* ivl, Block* pred, Block* succ,
+                   unsigned pos1, unsigned pos2);
   // debugging
   void print(const char* caption);
   void dumpIntervals();
-  bool checkEdgeShuffles();
 private:
   struct Compare { bool operator()(const Interval*, const Interval*); };
 private:
   Intervals m_intervals; // parent intervals indexed by ssatmp
-  int m_nextSpill { 0 };
-  int m_numSplits { 0 };
+  unsigned m_nextSpill { 0 };
   IRUnit& m_unit;
   RegAllocInfo& m_regs;
   const Abi& m_abi;
@@ -178,20 +182,21 @@ private:
   smart::priority_queue<Interval*,Compare> m_pending;
   smart::vector<Interval*> m_active;
   smart::vector<Interval*> m_inactive;
-  StateVector<IRInstruction,IRInstruction*> m_between;
-  StateVector<Block,IRInstruction*> m_before;
-  StateVector<Block,IRInstruction*> m_after;
+  StateVector<Block,std::pair<IRInstruction*,IRInstruction*>> m_edgeCopies;
+  unsigned m_frontier { 0 }; // debug_only to detect backtracking
 };
 
-const uint32_t kMaximalPos = UINT32_MAX; // "infinity" use position
+const uint32_t kMaxPos = UINT32_MAX; // "infinity" use position
 
 // Keep track of a future use or conflict position for each register.
-// Initially all usable registers have kMaximalPos
+// Initially all usable registers have kMaxPos
 struct RegPositions {
   explicit RegPositions();
-  RegPair max2Reg(RegSet regs) const;
-  unsigned operator[](PhysReg r) const { return posns[r]; }
-  void setPos(Interval*, unsigned pos);
+  unsigned find1(RegSet allow, RegPair& regs) const;
+  unsigned find2(RegSet allow, RegPair& regs) const;
+  unsigned find(Interval* ivl, RegSet allow, RegPair& regs) const;
+  unsigned getPos(Interval*, RegPair regs) const;
+  unsigned setPos(Interval*, unsigned pos);
 private:
   PhysReg::Map<unsigned> posns;
 };
@@ -205,12 +210,11 @@ bool LiveRange::contains(LiveRange r) const {
   return r.start >= start && r.end <= end;
 }
 
-// Return a range for the closed interval [first,last], i.e. [first, last+1)
-LiveRange closedRange(unsigned first, unsigned last) {
-  return LiveRange(first, last + 1);
-}
-
 //////////////////////////////////////////////////////////////////////////////
+
+bool isDefConst(const Interval* ivl) {
+  return ivl->tmp->inst()->is(DefConst);
+}
 
 Interval::Interval(Interval* parent)
   : need(parent->need)
@@ -222,6 +226,7 @@ Interval::Interval(Interval* parent)
 
 // Add r to this interval, merging r with any existing overlapping ranges
 void Interval::add(LiveRange r) {
+  assert(r.start < r.end); // not empty
   while (!ranges.empty() && r.contains(ranges.back())) {
     ranges.pop_back();
   }
@@ -237,13 +242,6 @@ void Interval::add(LiveRange r) {
   }
 }
 
-// Update the start-position of the earliest range in this interval,
-// which is ranges.back() during buildIntervals().
-void Interval::setStart(unsigned start) {
-  assert(!ranges.empty() && ranges.back().contains(start));
-  ranges.back().start = start;
-}
-
 // Return true if one of the ranges in this interval includes pos
 bool Interval::covers(unsigned pos) const {
   if (pos < start() || pos >= end()) return false;
@@ -256,17 +254,17 @@ bool Interval::covers(unsigned pos) const {
 
 // Return true if there is a use position at pos
 bool Interval::usedAt(unsigned pos) const {
-  if (pos < start() || pos >= end()) return false;
+  if (pos < start() || pos > end()) return false;
   for (auto& u : uses) if (u.pos == pos) return true;
   return false;
 }
 
-// Return the interval which includes pos (this one or a child)
+// Return the interval which has a use position at pos
 Interval* Interval::childAt(unsigned pos) {
   assert(!isChild());
   for (auto ivl = this; ivl; ivl = ivl->next) {
     if (pos < ivl->start()) return nullptr;
-    if (ivl->covers(pos)) return ivl;
+    if (ivl->usedAt(pos)) return ivl;
   }
   return nullptr;
 }
@@ -280,19 +278,21 @@ unsigned Interval::nextIntersect(Interval* ivl) const {
   for (;;) {
     if (r1->start < r2->start) {
       if (r2->start < r1->end) return r2->start;
-      if (++r1 == e1) return kMaximalPos;
+      if (++r1 == e1) return kMaxPos;
     } else {
       if (r1->start < r2->end) return r1->start;
-      if (++r2 == e2) return kMaximalPos;
+      if (++r2 == e2) return kMaxPos;
     }
   }
-  return kMaximalPos;
+  return kMaxPos;
 }
 
 // Split this interval at pos and return the rest.  Pos must be
 // a location that ensures both shorter intervals are nonempty.
-// Pos must also be even, indicating a position between instructions.
-Interval* Interval::split(unsigned pos) {
+// Pos must also be odd, indicating a position between instructions.
+// If keep_uses is set, uses exactly at the end of the first interval
+// will stay with the first part.
+Interval* Interval::split(unsigned pos, bool keep_uses) {
   assert(pos > start() && pos < end());
   auto leader = this->leader();
   Interval* child = smart_new<Interval>(leader);
@@ -310,7 +310,11 @@ Interval* Interval::split(unsigned pos) {
   ranges.erase(r1, r2);
   // advance u1 to the first use position in child, then copy u1..end to child.
   auto u1 = uses.begin(), u2 = uses.end();
-  while (u1 != u2 && u1->pos < pos) u1++;
+  if (keep_uses) {
+    while (u1 != u2 && u1->pos <= end()) u1++;
+  } else {
+    while (u1 != u2 && u1->pos < child->start()) u1++;
+  }
   child->uses.insert(child->uses.end(), u1, u2);
   uses.erase(u1, u2);
   assert(checkInvariants() && child->checkInvariants());
@@ -319,17 +323,26 @@ Interval* Interval::split(unsigned pos) {
 
 // Return the position of the next use of this interval after (or equal to)
 // pos.  If there are no more uses after pos, return MAX.
-unsigned Interval::nextUseAfter(unsigned pos) const {
+unsigned Interval::firstUseAfter(unsigned pos) const {
   for (auto& u : uses) {
     if (pos <= u.pos) return u.pos;
   }
-  return kMaximalPos;
+  return kMaxPos;
+}
+
+unsigned Interval::lastUseBefore(unsigned pos) const {
+  auto prev = 0;
+  for (auto& u : uses) {
+    if (u.pos > pos) return prev;
+    prev = u.pos;
+  }
+  return prev;
 }
 
 // return the position of the first use that requires a register,
-// or kMaximalPos if no remaining uses need registers.
-unsigned Interval::firstRegUse() const {
-  return uses.empty() ? kMaximalPos : uses.front().pos;
+// or kMaxPos if no remaining uses need registers.
+unsigned Interval::firstUse() const {
+  return uses.empty() ? kMaxPos : uses.front().pos;
 }
 
 // Return the register(s) assigned to this interval as a pair.
@@ -346,9 +359,7 @@ XLS::XLS(IRUnit& unit, RegAllocInfo& regs, const Abi& abi)
   , m_abi(abi)
   , m_posns(unit, 0)
   , m_liveIn(unit, LiveSet())
-  , m_between(unit, nullptr)
-  , m_before(unit, nullptr)
-  , m_after(unit, nullptr) {
+  , m_edgeCopies(unit, { nullptr, nullptr }) {
   auto all = abi.all();
   for (auto r : m_blocked) {
     m_blocked[r].blocked = true;
@@ -356,7 +367,7 @@ XLS::XLS(IRUnit& unit, RegAllocInfo& regs, const Abi& abi)
     m_blocked[r].loc.setReg(r, 0);
     if (!all.contains(r)) {
       // r is never available
-      m_blocked[r].add(LiveRange(0, kMaximalPos));
+      m_blocked[r].add(LiveRange(0, kMaxPos));
     }
     m_scratch[r].scratch = true;
     m_scratch[r].need = 1;
@@ -380,62 +391,67 @@ void XLS::prepareBlocks() {
   m_blocks = rpoSortCfg(m_unit);
 }
 
-// compute the position number for each instruction.  Each instruction
-// gets two positions: the position where srcs are read, and the position
-// where dests are written.
+// compute the position number for each instruction.  Instructions are
+// assigned even positions; shuffles may later occupy inbetween positions.
 void XLS::computePositions() {
-  m_insts.reserve(m_unit.numInsts());
+  m_insts.resize(2 * (m_unit.numInsts() + m_unit.numBlocks()));
   unsigned pos = 0;
   for (auto b : m_blocks) {
+    auto& front = b->front();
+    if (front.numSrcs() > 0) {
+      // ensure no uses at block-start so livein ranges are nonempty
+      b->prepend(m_unit.gen(DefLabel, front.marker()));
+    }
     for (auto& inst : *b) {
-      m_insts[pos/2] = &inst;
+      m_insts[pos] = &inst;
       m_posns[inst] = pos;
       pos += 2;
     }
   }
 }
 
-bool allocUnusedDest(IRInstruction&) {
-  return false;
+// Return the reg mask that corresponds to a constraint, and deal with
+// the EvalHHIRAllocSIMDRegs option.  Only disable SIMD for constraints
+// that have some other option. (Don't create empty allow sets).
+// The check is intentionally here instead of in src/dstConstraint(), so
+// the latter can directly reflect the instruction-selection source code
+// in CodeGenerator.
+RegSet constrainedRegs(Constraint c, const Abi& abi) {
+  auto regs = RegSet();
+  if (c & Constraint::GP) regs |= abi.gp;
+  if (c & Constraint::SIMD) {
+    if (regs.empty() || RuntimeOption::EvalHHIRAllocSIMDRegs) {
+      regs |= abi.simd;
+    }
+  }
+  return regs;
 }
 
 // Reduce the allow and prefer sets according to this particular use
-void srcConstraints(IRInstruction& inst, int i, SSATmp* src, Interval* ivl,
-                    const Abi& abi) {
-  if (!packed_tv && RuntimeOption::EvalHHIRAllocSIMDRegs) {
-    if (src->type() <= Type::Dbl) {
-      ivl->prefer &= abi.simd;
-      return;
-    }
-    if (storesCell(inst, i) && src->numWords() == 2) {
-      ivl->prefer &= abi.simd;
-      return;
-    }
+void srcConstraints(Interval* ivl, const Abi& abi, Constraint constraint) {
+  auto allow = constrainedRegs(constraint, abi);
+  ivl->allow &= allow;
+  ivl->prefer &= allow;
+  if (!(ivl->allow & abi.simd).empty()) {
+    // we allow gp and simd, so prefer just simd
+    ivl->prefer &= abi.simd;
   }
-  ivl->allow &= abi.gp;
-  ivl->prefer &= abi.gp;
 }
 
 // Reduce the allow and prefer constraints based on this definition
-void dstConstraints(IRInstruction& inst, int i, SSATmp* dst, Interval* ivl,
-                    const Abi& abi) {
-  if (!packed_tv && RuntimeOption::EvalHHIRAllocSIMDRegs) {
-    if (dst->type() <= Type::Dbl) {
-      ivl->prefer &= abi.simd;
-      return;
-    }
-    if (loadsCell(inst.op()) && !inst.isControlFlow() && dst->numWords() == 2) {
-      ivl->prefer &= abi.simd;
-      if (!(ivl->allow & ivl->prefer).empty()) {
-        // we prefer simd, but allow gp and simd, so restrict allow to just
-        // simd to avoid (simd)<->(gpr,gpr) shuffles.
-        ivl->allow = ivl->prefer;
-      }
-      return;
-    }
+void dstConstraints(Interval* ivl, const Abi& abi, Constraint constraint) {
+  auto allow = constrainedRegs(constraint, abi);
+  ivl->allow &= allow;
+  ivl->prefer &= allow;
+  if (!(ivl->allow & abi.simd).empty()) {
+    // if we allow gp and simd, then prefer just simd
+    ivl->prefer &= abi.simd;
   }
-  ivl->allow &= abi.gp;
-  ivl->prefer &= abi.gp;
+  if (ivl->tmp->numWords() == 2 && !(ivl->allow & ivl->prefer).empty()) {
+    // we prefer simd, but allow gp and simd, so restrict allow to just
+    // simd to avoid (simd)<->(gpr,gpr) shuffles.
+    ivl->allow = ivl->prefer;
+  }
 }
 
 // build intervals in one pass by walking the block list backwards.
@@ -443,7 +459,7 @@ void dstConstraints(IRInstruction& inst, int i, SSATmp* dst, Interval* ivl,
 // they use/define tmps in the expected locations.
 void XLS::buildIntervals() {
   assert(checkBlockOrder(m_unit, m_blocks));
-  unsigned stress = 0;
+  unsigned min_need = 0;
   for (auto blockIt = m_blocks.end(); blockIt != m_blocks.begin();) {
     auto block = *--blockIt;
     // compute initial live set from liveIn[succsessors]
@@ -451,103 +467,106 @@ void XLS::buildIntervals() {
     if (auto taken = block->taken()) live |= m_liveIn[taken];
     if (auto next  = block->next())  live |= m_liveIn[next];
     // initialize live range for each live tmp to whole block
-    auto blockRange = closedRange(m_posns[block->front()],
-                                  m_posns[block->back()] + 1);
+    auto blockStart = m_posns[block->front()];
+    auto blockEnd = m_posns[block->back()] + 2;
     live.forEach([&](uint32_t id) {
-      m_intervals[id]->add(blockRange);
+      m_intervals[id]->add(LiveRange(blockStart, blockEnd));
     });
     for (auto instIt = block->end(); instIt != block->begin();) {
       auto& inst = *--instIt;
-      auto spos = m_posns[inst]; // position where srcs are read
-      auto dpos = spos + 1;     // position where dsts are written
+      auto pos = m_posns[inst];
       unsigned dst_need = 0;
       auto& inst_regs = m_regs[inst];
       for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
         auto d = inst.dst(i);
         auto dest = m_intervals[d];
+        auto constraint = dstConstraint(inst, i);
         if (!live[d]) {
           // dest is not live; give it a register anyway.
-          assert(!dest);
           if (d->numWords() == 0) continue;
-          auto r = forceAlloc(*d);
-          if (r != InvalidReg) {
-            inst_regs.dst(i).setReg(r, 0);
+          if (constraint.reg() != InvalidReg) {
+            inst_regs.dst(i).setReg(constraint.reg(), 0);
             continue;
           }
-          if (!allocUnusedDest(inst)) continue;
+          if (constraint & Constraint::VOID) {
+            continue; // unused dest will be InvalidReg
+          }
           m_intervals[d] = dest = smart_new<Interval>();
-          dest->add(closedRange(dpos, dpos));
+          dest->add(LiveRange(pos, pos + 1));
           dest->tmp = d;
           dest->need = d->numWords();
           dest->allow = dest->prefer = m_abi.all();
         } else {
           // adjust start pos for live intervals defined by this instruction
-          assert(dest->tmp == d);
-          dest->setStart(dpos);
+          dest->ranges.back().start = pos;
           live.erase(d);
         }
         dst_need += dest->need;
-        dest->addUse(dpos);
-        dstConstraints(inst, i, d, dest, m_abi);
+        dest->addUse(pos);
+        dstConstraints(dest, m_abi, constraint);
       }
-      stress = std::max(dst_need, stress);
+      min_need = std::max(min_need, dst_need);
       if (inst.isNative()) {
         if (RuntimeOption::EvalHHIREnableCalleeSavedOpt) {
           auto scratch = m_abi.gp - m_abi.saved;
           scratch.forEach([&](PhysReg r) {
-            m_scratch[r].add(LiveRange(spos, dpos));
+            m_scratch[r].add(LiveRange(pos, pos + 1));
           });
         }
+      }
+      if (inst.is(Call, CallArray, ContEnter)) {
+        // block all registers at php callsites.
+        m_abi.all().forEach([&](PhysReg r) {
+          m_blocked[r].add(LiveRange(pos, pos + 1));
+        });
       }
       // add live ranges for tmps used by this inst
       unsigned src_need = 0;
       for (unsigned i = 0, n = inst.numSrcs(); i < n; ++i) {
         auto s = inst.src(i);
-        if (s->inst()->op() == DefConst) continue;
+        auto constraint = srcConstraint(inst, i);
+        if (constraint == Constraint::IMM) continue;
+        if (s->isConst() && (constraint & Constraint::IMM)) continue;
         auto need = s->numWords();
-        if (need == 0) continue;
-        auto r = forceAlloc(*s);
-        if (r != InvalidReg) {
-          inst_regs.src(i).setReg(r, 0);
+        if (need == 0) continue; //XXX problematic for InitNull|UninitNull
+        if (constraint.reg() != InvalidReg) {
+          inst_regs.src(i).setReg(constraint.reg(), 0);
           continue;
         }
         auto src = m_intervals[s];
         if (!src) m_intervals[s] = src = smart_new<Interval>();
-        src->add(closedRange(blockRange.start, spos));
-        src->addUse(spos);
+        src->add(LiveRange(blockStart, pos));
+        src->addUse(pos);
         if (!src->tmp) {
           src->tmp = s;
           src->need = need;
           src->allow = src->prefer = m_abi.all();
-        } else {
-          assert(src->tmp == s);
         }
-        srcConstraints(inst, i, s, src, m_abi);
+        srcConstraints(src, m_abi, constraint);
         src_need += src->need;
         live.add(s);
       }
-      stress = std::max(src_need, stress);
+      min_need = std::max(min_need, src_need);
     }
     m_liveIn[block] = live;
   }
-  // Implement stress mode by blocking more registers.
-  stress += RuntimeOption::EvalHHIRNumFreeRegs;
-  assert(stress >= RuntimeOption::EvalHHIRNumFreeRegs); // no wraparound.
+  // Implement stress mode by blocking NumFreeRegs more than minimum needed.
+  min_need += RuntimeOption::EvalHHIRNumFreeRegs;
+  assert(min_need >= RuntimeOption::EvalHHIRNumFreeRegs); // no wraparound.
   for (auto r : m_blocked) {
     auto& blocked = m_blocked[r];
-    if (blocked.empty() || blocked.start() == 0) continue;
-    // r is not already blocked
-    if (stress > 0) {
-      stress--;
+    if (!blocked.empty() && blocked.start() == 0) continue;
+    // r is at least partially available
+    if (min_need > 0) {
+      min_need--;
       std::reverse(blocked.ranges.begin(), blocked.ranges.end());
     } else {
-      blocked.add(LiveRange(0, kMaximalPos));
+      blocked.add(LiveRange(0, kMaxPos));
       assert(blocked.ranges.size() == 1);
     }
   }
   for (auto r : m_scratch) {
     auto& scratch = m_scratch[r];
-    if (scratch.empty()) continue;
     std::reverse(scratch.ranges.begin(), scratch.ranges.end());
   }
   // We built the use list of each interval by appending.  Now reverse those
@@ -558,7 +577,7 @@ void XLS::buildIntervals() {
     std::reverse(ivl->ranges.begin(), ivl->ranges.end());
   }
   if (dumpIREnabled(kRegAllocLevel)) {
-    print(" after building intervals ");
+    print("after building intervals");
   }
 }
 
@@ -572,13 +591,15 @@ bool XLS::Compare::operator()(const Interval* i1, const Interval* i2) {
 // insert interval into pending list in order of start position
 void XLS::enqueue(Interval* ivl) {
   assert(ivl->checkInvariants() && !ivl->handled());
+  assert(ivl->start() >= m_frontier);
   m_pending.push(ivl);
 }
 
 // Assign the next available spill slot to interval
-void XLS::spill(Interval* ivl) {
+void XLS::assignSpill(Interval* ivl) {
   assert(!ivl->blocked && !ivl->scratch && ivl->isChild());
   assert(ivl->need == 1 || ivl->need == 2);
+  assert(ivl->firstUse() > ivl->end());
   auto leader = ivl->leader();
   if (!leader->spill.spilled()) {
     if (ivl->need == 1) {
@@ -596,7 +617,7 @@ void XLS::spill(Interval* ivl) {
 }
 
 // Assign one or both of the registers in r to this interval.
-void XLS::assign(Interval* ivl, RegPair r) {
+void XLS::assignReg(Interval* ivl, RegPair r) {
   assert(!ivl->blocked && !ivl->scratch);
   auto r0 = PhysReg(r.first);
   auto r1 = PhysReg(r.second);
@@ -613,19 +634,39 @@ void XLS::assign(Interval* ivl, RegPair r) {
       ivl->loc.setReg(r1, 1);
     }
   }
+  // now ivl has a register, so put it in active list.
+  m_active.push_back(ivl);
 }
 
 // initialize the positions array with maximal use positions.
 RegPositions::RegPositions() {
-  for (auto r : posns) posns[r] = kMaximalPos;
+  for (auto r : posns) posns[r] = kMaxPos;
+}
+
+// Find the register used furthest in the future, but only consider registers
+// in the given set.  Also return that register's position.
+unsigned
+RegPositions::find1(RegSet allow, RegPair& regs) const {
+  unsigned max1 = 0;
+  PhysReg r1 = *posns.begin();
+  allow.forEach([&](PhysReg r) {
+    if (posns[r] > max1) {
+      r1 = r;
+      max1 = posns[r];
+    }
+  });
+  regs = { r1, InvalidReg };
+  return max1;
 }
 
 // Find the two registers used furthest in the future, but only
-// consider registers in the given set
-RegPair RegPositions::max2Reg(const RegSet regs) const {
+// consider registers in the given set.  Return the registers, and
+// their minimum position
+unsigned
+RegPositions::find2(RegSet allow, RegPair& regs) const {
   unsigned max1 = 0, max2 = 0;
   PhysReg r1 = *posns.begin(), r2 = *posns.begin();
-  regs.forEach([&](PhysReg r) {
+  allow.forEach([&](PhysReg r) {
     if (posns[r] > max2) {
       if (posns[r] > max1) {
         r2 = r1; max2 = max1;
@@ -635,33 +676,38 @@ RegPair RegPositions::max2Reg(const RegSet regs) const {
       }
     }
   });
-  assert(posns[r1] >= posns[r2]);
-  return { r1, r2 };
+  assert(max1 >= max2);
+  regs = { r1, r2 };
+  return r1 != r2 ? max2 : 0;
+}
+
+unsigned
+RegPositions::find(Interval* ivl, RegSet allow, RegPair& regs) const {
+  return ivl->need == 1 ? find1(allow, regs) : find2(allow, regs);
+}
+
+unsigned RegPositions::getPos(Interval* ivl, RegPair regs) const {
+  return ivl->need == 1 ? posns[regs.first] :
+         regs.second != regs.first ? posns[regs.second] : 0;
 }
 
 // Update the position associated with the registers assigned to ivl,
 // to the minimum of pos and the existing position.
-void RegPositions::setPos(Interval* ivl, unsigned pos) {
+unsigned RegPositions::setPos(Interval* ivl, unsigned pos) {
   assert(ivl->loc.numAllocated() >= 1);
   auto r0 = ivl->loc.reg(0);
-  posns[r0] = std::min(pos, posns[r0]);
+  auto minpos = posns[r0] = std::min(pos, posns[r0]);
   if (ivl->loc.numAllocated() == 2) {
     auto r1 = ivl->loc.reg(1);
     posns[r1] = std::min(pos, posns[r1]);
+    minpos = std::min(minpos, posns[r1]);
   }
+  return minpos;
 }
 
-bool XLS::allocPrefer(Interval* current, const RegPositions& until) {
-  auto r = until.max2Reg(current->prefer);
-  auto untilPos = current->need == 1 ? until[r.first] : // 1 needed, 1 found
-                 r.second != r.first ? until[r.second] : // 2 needed, 2 found
-                 0; // 2 needed, 1 found
-  if (untilPos > current->end()) {
-    assign(current, r);
-    m_active.push_back(current);
-    return true;
-  }
-  return false;
+// return the closest valid split position on or before pos.
+unsigned nearestSplitBefore(unsigned pos) {
+  return pos == 0 || pos % 2 == 1 ? pos : pos - 1;
 }
 
 // Allocate one register for the current interval.
@@ -678,30 +724,69 @@ bool XLS::allocPrefer(Interval* current, const RegPositions& until) {
 // the SSA property.
 void XLS::allocOne(Interval* current) {
   assert(!current->handled());
-  RegPositions until;
+  if (current->isChild() && current->start() % 2 == 0) {
+    // TODO: #3098697 only spill if it's not on a block boundary.
+    assert(current->firstUse() > current->start());
+    return spill(current);
+  }
+  RegPositions until1; // free-until, ignoring scratch
+  RegPositions until2; // free-until, including scratch
   for (auto ivl : m_active) {
-    until.setPos(ivl, 0);
+    if (ivl->scratch) {
+      until2.setPos(ivl, 0);
+    } else {
+      until1.setPos(ivl, 0);
+      until2.setPos(ivl, 0);
+    }
   }
   for (auto ivl : m_inactive) {
-    until.setPos(ivl, current->nextIntersect(ivl));
+    auto intersectPos = current->nextIntersect(ivl);
+    if (ivl->scratch) {
+      until2.setPos(ivl, intersectPos);
+    } else {
+      auto pos = until1.setPos(ivl, intersectPos);
+      until2.setPos(ivl, pos);
+    }
   }
-  if (allocPrefer(current, until)) {
-    return;
+  // Try to get a preferred-non scratch register first
+  RegPair r;
+  auto until_pos = until2.find(current, current->prefer, r);
+  if (until_pos >= current->end()) {
+    // got one for all of current
+    return assignReg(current, r);
   }
   // find the register(s) that are free for the longest time.
-  auto r = until.max2Reg(current->allow);
-  auto untilPos = current->need == 1 ? until[r.first] : // 1 needed, 1 found
-                 r.second != r.first ? until[r.second] : // 2 needed, 2 found
-                 0; // 2 needed, 1 found
-  if (untilPos <= current->start()) {
+  until_pos = until2.find(current, current->allow, r);
+  if (until_pos >= current->end()) {
+    // got register for all of current
+    return assignReg(current, r);
+  }
+  // try prefer set again but ignore scratch register conflicts
+  until_pos = until1.find(current, current->prefer, r);
+  if (until_pos >= current->end()) {
+    // got one for all of current
+    return assignReg(current, r);
+  }
+  // try allow set again but ignore scratch register conflicts
+  until_pos = until1.find(current, current->allow, r);
+  if (until_pos >= current->end()) {
+    // got register for all of current
+    return assignReg(current, r);
+  }
+  if (until_pos <= current->start()) {
+    // nothing free for any of current
     return allocBlocked(current);
   }
-  if (untilPos < current->end()) {
-    auto second = goodSplit(current, untilPos); // got register for first part
-    enqueue(second);
-  }
-  assign(current, r);
-  m_active.push_back(current);
+  // register is free for part of current; assign register and enqueue
+  // the remaining part.
+  auto prev_use = current->lastUseBefore(until_pos);
+  auto min_split = std::max(prev_use, current->start() + 1);
+  auto max_split = until_pos;
+  assert(min_split <= max_split);
+  auto split_pos = std::max(min_split, max_split); // todo: find good spot
+  // got register for first part of current
+  enqueue(current->split(split_pos, true));
+  assignReg(current, r);
 }
 
 // When all registers are in use, find a good interval to split and spill,
@@ -711,49 +796,45 @@ void XLS::allocOne(Interval* current) {
 void XLS::allocBlocked(Interval* current) {
   RegPositions used;
   RegPositions blocked;
-  auto start = current->start();
+  auto const cur_start = current->start();
   // compute next use of active registers, so we can pick the furthest one
   for (auto ivl : m_active) {
     if (ivl->blocked) {
       blocked.setPos(ivl, 0);
       used.setPos(ivl, 0);
     } else {
-      used.setPos(ivl, ivl->nextUseAfter(start));
+      used.setPos(ivl, ivl->firstUseAfter(cur_start));
     }
   }
   // compute next intersection/use of inactive regs to find whats free longest
   for (auto ivl : m_inactive) {
     auto intersectPos = current->nextIntersect(ivl);
-    if (intersectPos == kMaximalPos) continue;
+    if (intersectPos == kMaxPos) continue;
     if (ivl->blocked) {
-      blocked.setPos(ivl, intersectPos);
-      used.setPos(ivl, blocked[ivl->regs().first]);
+      auto pos = blocked.setPos(ivl, intersectPos);
+      used.setPos(ivl, pos);
     } else {
-      used.setPos(ivl, ivl->nextUseAfter(start));
+      used.setPos(ivl, ivl->firstUseAfter(cur_start));
     }
   }
-  auto r = used.max2Reg(current->allow);
-  auto usedPos = current->need == 1 ? used[r.first] : used[r.second];
-  if (usedPos < current->firstUse()) {
-    // all active+inactive intervals used before current: spill current
-    auto second = goodSplit(current, current->firstRegUse());
-    assert(second != current);
-    spill(current);
-    enqueue(second);
-    return;
+  // choose the best victim register(s) to spill
+  RegPair r;
+  auto used_pos = used.find(current, current->allow, r);
+  if (used_pos < current->firstUse()) {
+    // all other intervals are used before current's first register-use
+    return spill(current);
   }
-  auto blockPos = current->need == 1 ? blocked[r.first] : blocked[r.second];
-  assert(blockPos >= usedPos);
-  if (blockPos < current->end()) {
-    // spilling made a register free for first part of current
-    auto second = goodSplit(current, blockPos);
-    assert(second != current);
-    enqueue(second);
+  auto block_pos = blocked.getPos(current, r);
+  if (block_pos < current->end()) {
+    auto prev_use = current->lastUseBefore(block_pos);
+    auto min_split = std::max(prev_use, cur_start + 1);
+    auto max_split = block_pos;
+    assert(cur_start < min_split && min_split <= max_split);
+    auto split_pos = std::max(min_split, max_split);
+    enqueue(current->split(split_pos, true));
   }
-  assign(current, r);
-  spillActive(current);
-  spillInactive(current);
-  m_active.push_back(current);
+  spillOthers(current, r);
+  assignReg(current, r);
 }
 
 // return true if r1 and r2 have any registers in common
@@ -766,92 +847,60 @@ bool conflict(RegPair r1, RegPair r2) {
           (r1.second == r2.first || r1.second == r2.second));
 }
 
-// Split and spill other active intervals that conflict with current for
+// split ivl at pos and spill the second part.  If pos is too close
+// to ivl->start(), spill all of ivl.
+void XLS::spillAfter(Interval* ivl, unsigned pos) {
+  auto split_pos = nearestSplitBefore(pos);
+  auto tail = split_pos <= ivl->start() ? ivl : ivl->split(split_pos);
+  spill(tail);
+}
+
+// Spill ivl from its start until its first register use.  If there
+// is no use, spill the entire interval.  Otherwise split the
+// interval just before the use, and enqueue the second part.
+void XLS::spill(Interval* ivl) {
+  unsigned first_use = ivl->firstUse();
+  if (first_use <= ivl->end()) {
+    auto split_pos = nearestSplitBefore(first_use);
+    if (split_pos <= ivl->start()) {
+      PUNT(RegSpill); // cannot split before first_use
+    }
+    enqueue(ivl->split(split_pos));
+  }
+  assert(ivl->uses.size() == 0);
+  if (!isDefConst(ivl)) assignSpill(ivl);
+}
+
+// Split and spill other intervals that conflict with current for
 // register r, at current->start().  If necessary, split the victims
 // again before their first use position that requires a register.
-void XLS::spillActive(Interval* current) {
-  auto start = current->start();
-  auto r = current->regs();
+void XLS::spillOthers(Interval* current, RegPair r) {
+  auto cur_start = current->start();
   for (auto i = m_active.begin(); i != m_active.end();) {
-    auto i2 = i++;
-    Interval* first = *i2;
-    if (first->scratch) continue;
-    auto r2 = first->regs();
-    if (!conflict(r, r2)) continue;
-    // split and spill first at current.start
-    i = m_active.erase(i2);
-    auto second = goodSplit(first, start);
-    auto reloadPos = second->firstRegUse();
-    if (reloadPos <= start) {
-      // not enough registers to hold srcs that must be in a register.
-      PUNT(RegSpill);
+    auto other = *i;
+    if (other->scratch || !conflict(r, other->regs())) {
+      i++; continue;
     }
-    if (reloadPos < kMaximalPos) {
-      if (reloadPos > second->start()) {
-        auto third = goodSplit(second, reloadPos);
-        spill(second);
-        enqueue(third);
-      } else {
-        enqueue(second);
-      }
-    } else {
-      spill(second);
-    }
+    i = m_active.erase(i);
+    spillAfter(other, cur_start);
   }
-}
-
-// Split and spill other inactive intervals that conflict with current
-// for register r, at current->start().  If necessary, split the victims
-// again before their first use position that requires a register.
-void XLS::spillInactive(Interval* current) {
-  auto start = current->start();
-  auto r = current->regs();
   for (auto i = m_inactive.begin(); i != m_inactive.end();) {
-    auto i2 = i++;
-    Interval* first = *i2;
-    if (first->scratch) continue;
-    auto r2 = first->regs();
-    if (!conflict(r, r2)) continue;
-    auto intersect = current->nextIntersect(first);
-    if (intersect == kMaximalPos) continue;
-    // split and spill the rest of it starting @current
-    i = m_inactive.erase(i2);
-    auto second = goodSplit(first, start);
-    auto reloadPos = second->firstRegUse();
-    if (reloadPos <= start) {
-      // not enough registers to hold srcs that must be in a register.
-      PUNT(RegSpill);
+    auto other = *i;
+    if (other->scratch || !conflict(r, other->regs())) {
+      i++; continue;
     }
-    if (reloadPos < kMaximalPos) {
-      if (reloadPos > second->start()) {
-        auto third = goodSplit(second, reloadPos);
-        spill(second);
-        enqueue(third);
-      } else {
-        enqueue(second);
-      }
-    } else {
-      spill(second);
+    auto intersect = current->nextIntersect(other);
+    if (intersect >= current->end()) {
+      i++; continue;
     }
+    i = m_inactive.erase(i);
+    spillAfter(other, cur_start);
   }
-}
-
-// split interval at or before pos, then return the new child.
-// If the position is at ivl.start, return the whole ivl without
-// splitting it.
-Interval* XLS::goodSplit(Interval* ivl, unsigned pos) {
-  m_numSplits++;
-  if (pos <= ivl->start()) return ivl;
-  if (pos % 2 == 1 && m_insts[pos/2]->op() == DefLabel) {
-    // correctness: move split point to start of block instead of
-    // in the middle of the DefLabel instruction.
-    pos--;
-  }
-  return ivl->split(pos);
 }
 
 // Update active/inactive sets based on pos
 void XLS::update(unsigned pos) {
+  m_frontier = pos;
   // check for intervals in active that are expired or inactive
   for (auto i = m_active.begin(); i != m_active.end();) {
     auto ivl = *i;
@@ -882,7 +931,12 @@ void XLS::update(unsigned pos) {
 void XLS::walkIntervals() {
   // fill the pending queue with nonempty intervals in order of start position
   for (auto ivl : m_intervals) {
-    if (ivl) m_pending.push(ivl);
+    if (!ivl) continue;
+    if (isDefConst(ivl)) {
+      spill(ivl);
+    } else {
+      enqueue(ivl);
+    }
   }
   for (auto r : m_scratch) {
     if (!m_scratch[r].empty()) m_inactive.push_back(&m_scratch[r]);
@@ -895,11 +949,12 @@ void XLS::walkIntervals() {
     m_pending.pop();
     update(current->start());
     allocOne(current);
-    assert(current->handled() && current->loc.numWords() == current->need);
+    assert(isDefConst(current) ||
+           (current->handled() && current->loc.numWords() == current->need));
   }
   if (dumpIREnabled(kRegAllocLevel)) {
-    if (m_numSplits) dumpIntervals();
-    print(" after walking intervals ");
+    dumpIntervals();
+    print("after walking intervals");
   }
 }
 
@@ -907,17 +962,18 @@ void XLS::walkIntervals() {
 void XLS::assignLocations() {
   for (auto b : m_blocks) {
     for (auto& inst : *b) {
-      auto spos = m_posns[inst];
+      auto pos = m_posns[inst];
       auto& inst_regs = m_regs[inst];
       for (unsigned i = 0, n = inst.numSrcs(); i < n; i++) {
         auto ivl = m_intervals[inst.src(i)];
-        if (!ivl) continue;
-        inst_regs.src(i) = ivl->childAt(spos)->loc;
+        if (ivl) {
+          ivl = ivl->childAt(pos);
+          if (ivl) inst_regs.src(i) = ivl->loc;
+        }
       }
       for (unsigned i = 0, n = inst.numDsts(); i < n; i++) {
         auto ivl = m_intervals[inst.dst(i)];
-        if (!ivl) continue;
-        inst_regs.dst(i) = ivl->loc;
+        if (ivl) inst_regs.dst(i) = ivl->loc;
       }
     }
   }
@@ -927,7 +983,7 @@ void XLS::assignLocations() {
 // if it exists.  Otherwise, create a new one and insert it at pos in block b.
 void XLS::insertCopy(Block* b, Block::iterator pos, IRInstruction* &shuffle,
                      SSATmp* src, const PhysLoc& rs, const PhysLoc& rd) {
-  if (rs == rd) return;
+  assert(rs != rd);
   unsigned i;
   if (shuffle) {
     // already have shuffle here
@@ -943,32 +999,28 @@ void XLS::insertCopy(Block* b, Block::iterator pos, IRInstruction* &shuffle,
     b->insert(pos, shuffle);
   }
   auto& shuffle_regs = m_regs[shuffle];
-  shuffle_regs.resize(i+1);
+  shuffle_regs.resize(i + 1);
   shuffle_regs.src(i) = rs;
-}
-
-// Return the first instruction in block b that is not a Shuffle
-IRInstruction* skipShuffle(Block* b) {
-  auto i = b->begin();
-  while (i->op() == Shuffle) ++i;
-  return i != b->end() ? &*i : nullptr;
+  auto inst_pos = m_posns[*pos];
+  m_posns[shuffle] = pos->op() == Shuffle ? inst_pos : inst_pos - 1;
 }
 
 // Insert a spill-store Shuffle after the instruction that defines ivl->tmp.
-// If the instruction is a branch, do the store at the beginning of the
-// next block.
+// If the instruction is a branch, do the store on the edge to the next block.
 void XLS::insertSpill(Interval* ivl) {
+  assert(!ivl->isChild() && ivl->start() % 2 == 0);
   auto inst = ivl->tmp->inst();
   if (inst->isBlockEnd()) {
     auto succ = inst->next();
-    auto pos = succ->skipHeader();
-    insertCopy(succ, pos, m_before[succ], ivl->tmp, ivl->loc, ivl->spill);
+    auto iter = succ->skipHeader();
+    auto& shuffle = m_edgeCopies[inst->block()].first;
+    insertCopy(succ, iter, shuffle, ivl->tmp, ivl->loc, ivl->spill);
   } else {
+    assert(inst != &inst->block()->back()); // can't be last in block
     auto block = inst->block();
-    auto pos = block->iteratorTo(inst);
-    auto& shuffle = (++pos) != block->end() ? m_between[*pos] :
-                    m_after[block];
-    insertCopy(block, pos, shuffle, ivl->tmp, ivl->loc, ivl->spill);
+    auto iter = block->iteratorTo(inst);
+    auto& shuffle = m_insts[ivl->start() + 1];
+    insertCopy(block, ++iter, shuffle, ivl->tmp, ivl->loc, ivl->spill);
   }
 }
 
@@ -1000,16 +1052,21 @@ void XLS::resolveSplits() {
     if (!i1) continue;
     if (i1->spill.spilled()) insertSpill(i1);
     for (auto i2 = i1->next; i2; i1 = i2, i2 = i2->next) {
-      auto pos1 = i1->end();
-      auto pos2 = i2->start();
-      if (!i2->loc.spilled() && pos1 == pos2 && i1->loc != i2->loc) {
-        auto inst = m_insts[pos2 / 2];
-        auto block = inst->block();
-        if (inst != skipShuffle(block)) {
-          assert(pos2 % 2 == 0);
-          insertCopy(block, block->iteratorTo(inst), m_between[inst], i1->tmp,
-                     i1->loc, i2->loc);
-        }
+      auto pos = i2->start();
+      if (i1->end() != pos) continue; // spans lifetime hole
+      if (i1->loc == i2->loc) continue; // no copy necessary
+      if (i2->loc.spilled() || !i2->loc.numAllocated()) continue; // i2 spilled
+      if (pos % 2 == 0) {
+        // even position requiring a copy must be on edge
+        assert(pos >= 2 && m_insts[pos - 2]->block() != m_insts[pos]->block());
+      } else {
+        // odd position
+        auto inst1 = m_insts[pos-1];
+        auto inst2 = m_insts[pos+1];
+        auto block = inst2->block();
+        if (inst1->block() != block) continue; // copy is on edge
+        insertCopy(block, block->iteratorTo(inst2), m_insts[pos],
+                   i1->tmp, i1->loc, i2->loc);
       }
     }
   }
@@ -1019,45 +1076,55 @@ void XLS::resolveSplits() {
 void XLS::resolveEdges() {
   const PhysLoc invalid_loc;
   for (auto succ : m_blocks) {
-    auto& inst2 = *skipShuffle(succ);
+    auto& inst2 = succ->front();
     auto pos2 = m_posns[inst2]; // pos of first inst in succ.
     succ->forEachPred([&](Block* pred) {
+      assert(pred->back().op() != Shuffle);
       auto it1 = pred->end();
-      while ((--it1)->op() == Shuffle) {}
-      auto& inst1 = *it1;
+      auto& inst1 = *(--it1);
       auto pos1 = m_posns[inst1]; // pos of last inst in pred
       if (inst1.op() == Jmp) {
-        // resolve Jmp->DefLabel copies
+        // insert copies on each Jmp->DefLabel edge
         for (unsigned i = 0, n = inst1.numSrcs(); i < n; ++i) {
-          auto i1 = m_intervals[inst1.src(i)];
-          auto i2 = m_intervals[inst2.dst(i)];
+          auto i1 = m_intervals[inst1.src(i)]; // null if const
+          auto i2 = m_intervals[inst2.dst(i)]; // null if unused
           if (i1) i1 = i1->childAt(pos1);
-          insertCopy(pred, it1, m_after[pred], inst1.src(i),
-                     i1 ? i1->loc : invalid_loc,
-                     i2 ? i2->loc : invalid_loc);
+          auto loc1 = i1 ? i1->loc : invalid_loc;
+          auto loc2 = i2 ? i2->loc : invalid_loc;
+          if (loc1 == loc2) continue;
+          auto& shuffle = m_edgeCopies[pred].second; // taken edge
+          insertCopy(pred, it1, shuffle, inst1.src(i), loc1, loc2);
         }
       }
       m_liveIn[succ].forEach([&](uint32_t id) {
         auto ivl = m_intervals[id];
-        auto i1 = ivl->childAt(pos1 + 1);
-        auto i2 = ivl->childAt(pos2);
-        assert(i1 && i2);
-        if (i2->loc.spilled()) return; // we did spill store after def.
-        if (pred->taken() && pred->next()) {
-          // insert copy at start of succesor
-          insertCopy(succ, succ->skipHeader(), m_before[succ],
-                     i1->tmp, i1->loc, i2->loc);
-        } else {
-          // insert copy at end of predecessor
-          auto pos = inst1.op() == Jmp ? it1 : pred->end();
-          insertCopy(pred, pos, m_after[pred], i1->tmp, i1->loc, i2->loc);
-        }
+        resolveFlow(ivl, pred, succ, pos1, pos2);
       });
     });
   }
-  assert(checkEdgeShuffles());
   if (dumpIREnabled(kRegAllocLevel)) {
-    print(" after resolving intervals ");
+    print("after resolving intervals");
+  }
+}
+
+void XLS::resolveFlow(Interval* parent, Block* pred, Block* succ,
+                      unsigned pos1, unsigned pos2) {
+  Interval* i1 = nullptr;
+  Interval* i2 = nullptr;
+  for (auto ivl = parent; ivl && !(i1 && i2); ivl = ivl->next) {
+    if (ivl->covers(pos1)) i1 = ivl;
+    if (ivl->covers(pos2)) i2 = ivl;
+  }
+  if (i2->loc.spilled()) return; // we did spill store after def.
+  if (i1->loc == i2->loc) return; // nothing to do.
+  auto& shuffle = pred->next() == succ ? m_edgeCopies[pred].first :
+                  m_edgeCopies[pred].second;
+  if (pred->taken() && pred->next()) {
+    // pred has 2+ successors; insert copy at start of succ
+    insertCopy(succ, succ->skipHeader(), shuffle, i1->tmp, i1->loc, i2->loc);
+  } else {
+    // insert copy at end of predecessor
+    insertCopy(pred, pred->backIter(), shuffle, i1->tmp, i1->loc, i2->loc);
   }
 }
 
@@ -1129,15 +1196,17 @@ void XLS::allocate() {
 //////////////////////////////////////////////////////////////////////////////
 
 void XLS::dumpIntervals() {
-  HPHP::Trace::traceRelease("Splits %d Spills %d\n", m_numSplits, m_nextSpill);
+  unsigned numSplits = 0;
   for (auto ivl : m_intervals) {
     if (!ivl) continue;
-    HPHP::Trace::traceRelease("i%-2d %s\n", ivl->tmp->id(),
+    HPHP::Trace::traceRelease("i%-2d %s\n", ivl->id(),
                               ivl->toString().c_str());
     for (ivl = ivl->next; ivl; ivl = ivl->next) {
+      numSplits++;
       HPHP::Trace::traceRelease("    %s\n", ivl->toString().c_str());
     }
   }
+  HPHP::Trace::traceRelease("Splits %d Spills %d\n", numSplits, m_nextSpill);
 }
 
 template<class F>
@@ -1148,15 +1217,22 @@ void forEachInterval(Intervals& intervals, F f) {
 }
 
 enum Mode { Light, Heavy };
-template<class F>
-const char* draw(unsigned pos, Mode m, F f) {
+template<class Pred>
+const char* draw(Interval* parent, unsigned pos, Mode m, Pred covers) {
                                // Light     Heavy
   static const char* top[]    = { "\u2575", "\u2579" };
   static const char* bottom[] = { "\u2577", "\u257B" };
   static const char* both[]   = { "\u2502", "\u2503" };
   static const char* empty[]  = { " ", " " };
+  auto f = [&](unsigned pos) {
+    for (auto ivl = parent; ivl; ivl = ivl->next) {
+      if (covers(ivl, pos)) return true;
+    }
+    return false;
+  };
+
   auto s = f(pos);
-  auto d = f(pos+1);
+  auto d = pos%2 == 1 ? s : f(pos+1);
   return ( s && !d) ? top[m] :
          ( s &&  d) ? both[m] :
          (!s &&  d) ? bottom[m] :
@@ -1167,29 +1243,21 @@ void XLS::print(const char* caption) {
   std::ostringstream str;
   str << "Intervals " << caption << "\n";
   forEachInterval(m_intervals, [&] (Interval* ivl) {
-    str << folly::format(" {: <2}", ivl->tmp->id());
+    str << folly::format(" {: <2}", ivl->id());
   });
   str << "\n";
   for (auto& b : m_blocks) {
     for (auto& i : *b) {
       auto pos = m_posns[i];
-      if (!pos) {
-        forEachInterval(m_intervals, [&](Interval* ivl) {
-          str << "   ";
+      forEachInterval(m_intervals, [&] (Interval* ivl) {
+        str << " ";
+        str << draw(ivl, pos, Light, [&](Interval* child, unsigned p) {
+          return child->covers(p);
         });
-      } else {
-        forEachInterval(m_intervals, [&] (Interval* ivl) {
-          str << " ";
-          str << draw(pos, Light, [&](unsigned p) {
-            auto c = ivl->childAt(p);
-            return c && c->covers(p);
-          });
-          str << draw(pos, Heavy, [&](unsigned p) {
-            auto c = ivl->childAt(p);
-            return c && c->usedAt(p);
-          });
+        str << draw(ivl, pos, Heavy, [&](Interval* child, unsigned p) {
+          return child->usedAt(p);
         });
-      }
+      });
       if (&i == &b->front()) {
         str << folly::format(" B{: <2}", b->id());
       } else {
@@ -1201,10 +1269,10 @@ void XLS::print(const char* caption) {
         str << folly::format(" {: <3} ", pos);
       }
       JIT::printOpcode(str, &i, nullptr);
-      JIT::printSrcs(str, &i, &m_regs, nullptr);
+      JIT::printSrcs(str, &i, &m_regs);
       if (i.numDsts()) {
         str << " => ";
-        JIT::printDsts(str, &i, &m_regs, nullptr);
+        JIT::printDsts(str, &i, &m_regs);
       }
       if (&i == &b->back()) {
         if (auto next = b->next()) {
@@ -1223,7 +1291,12 @@ void XLS::print(const char* caption) {
 std::string Interval::toString() {
   std::ostringstream out;
   auto delim = "";
-  out << loc << " [";
+  if (tmp) {
+    print(out, tmp, &loc);
+  } else {
+    out << loc;
+  }
+  out << " [";
   for (auto r : ranges) {
     out << delim << folly::format("{}-{}", r.start, r.end);
     delim = ",";
@@ -1240,45 +1313,31 @@ std::string Interval::toString() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-// During resolveEdges, we can insert shuffles "on edges", which comes down
-// to either before a successor or after a predecessor.  We must never have
-// a shuffle in both places, because that would be two sequential shuffles
-// along one edge.
-bool XLS::checkEdgeShuffles() {
-  for (auto b : m_blocks) {
-    DEBUG_ONLY auto numSucc = (!!b->next()) + (!!b->taken());
-    DEBUG_ONLY auto numPred = b->numPreds();
-    if (m_after[b]) {
-      assert(numSucc == 1);
-      assert(!m_before[b->next() ? b->next() : b->taken()]);
-    }
-    if (m_before[b]) {
-      assert(numPred == 1);
-      assert(!m_after[b->preds().front().inst()->block()]);
-    }
-    if (numSucc != 1) assert(!m_after[b]);
-    if (numPred != 1) assert(!m_before[b]);
-  }
-  return true;
-}
-
 // Check validity of this interval
 // 1. split-children cannot have more children, nor can the parent
 //    be a child of another interval.
-// 2. live ranges must be sorted and disjoint
-// 3. every use position must be inside a live range
-// 4. parent and children must all be sorted and disjoint
+// 2. live ranges must be nonempty, sorted, and disjoint
+// 3. holes between live ranges must also be non-empty
+// 4. uses must be sorted
+// 5. every use must be inside or just off the end of a range
+// 6. parent and children must all be sorted and disjoint
 bool Interval::checkInvariants() const {
   assert(!parent || !parent->parent); // 1: no crazy nesting
-  DEBUG_ONLY auto pos = 0;
+  assert(!ranges.empty());
+  DEBUG_ONLY auto min_start = 0;
+  DEBUG_ONLY auto u = uses.begin();
   for (auto r : ranges) {
-    assert(r.start <= r.end); // valid range
-    assert(r.start >= pos); // 2: ranges are sorted
-    pos = r.end + 1; // 2: ranges are disjoint with no empty holes
+    assert(r.start < r.end); // 2: nonempty range
+    assert(r.start >= min_start); // 2: ranges are sorted
+    min_start = r.end + 1; // 2,3: ranges are disjoint, no empty holes
+    DEBUG_ONLY auto min_use = r.start;
+    while (u != uses.end() && min_use <= u->pos && u->pos <= r.end) {
+      min_use = u->pos; // 4: uses must be sorted
+      u++;
+    }
   }
-  for (DEBUG_ONLY auto u : uses) {
-    assert(covers(u.pos)); // 3: every use must be in a live range
-  }
+  assert(u == uses.end()); // 4,5: all uses covered
+  assert(!next || next->start() >= end()); // 6: next child is ok.
   return true;
 }
 
@@ -1315,12 +1374,23 @@ const Abi arm_abi {
 
 // This is the public entry-point
 RegAllocInfo allocateRegs(IRUnit& unit) {
+  Timer _t("regalloc");
+
   RegAllocInfo regs(unit);
-  XLS xls(unit, regs, arch() == Arch::ARM ? arm_abi : x64_abi);
+  Abi abi;
+  switch (arch()) {
+    case Arch::X64:
+      abi = x64_abi;
+      break;
+    case Arch::ARM:
+      abi = arm_abi;
+      break;
+  }
+  XLS xls(unit, regs, abi);
   xls.allocate();
   if (dumpIREnabled()) {
     dumpTrace(kRegAllocLevel, unit, " after extended alloc ", &regs,
-              nullptr, nullptr, nullptr);
+              nullptr, nullptr);
   }
   return regs;
 }

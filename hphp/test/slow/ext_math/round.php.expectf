@@ -20,35 +20,3 @@ float(1.96)
 float(1242000)
 float(5.05)
 float(5.06)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALUP - assumed 'PHP_ROUND_HALUP' in %s/test/slow/ext_math/round.php on line 29
-float(3)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALDOWN - assumed 'PHP_ROUND_HALDOWN' in %s/test/slow/ext_math/round.php on line 30
-float(3)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALEVEN - assumed 'PHP_ROUND_HALEVEN' in %s/test/slow/ext_math/round.php on line 31
-float(3)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALODD - assumed 'PHP_ROUND_HALODD' in %s/test/slow/ext_math/round.php on line 32
-float(3)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALUP - assumed 'PHP_ROUND_HALUP' in %s/test/slow/ext_math/round.php on line 33
-float(-3)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALDOWN - assumed 'PHP_ROUND_HALDOWN' in %s/test/slow/ext_math/round.php on line 34
-float(-3)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALEVEN - assumed 'PHP_ROUND_HALEVEN' in %s/test/slow/ext_math/round.php on line 35
-float(-3)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALODD - assumed 'PHP_ROUND_HALODD' in %s/test/slow/ext_math/round.php on line 36
-float(-3)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALUP - assumed 'PHP_ROUND_HALUP' in %s/test/slow/ext_math/round.php on line 37
-float(4)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALDOWN - assumed 'PHP_ROUND_HALDOWN' in %s/test/slow/ext_math/round.php on line 38
-float(4)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALEVEN - assumed 'PHP_ROUND_HALEVEN' in %s/test/slow/ext_math/round.php on line 39
-float(4)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALODD - assumed 'PHP_ROUND_HALODD' in %s/test/slow/ext_math/round.php on line 40
-float(4)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALUP - assumed 'PHP_ROUND_HALUP' in %s/test/slow/ext_math/round.php on line 41
-float(-4)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALDOWN - assumed 'PHP_ROUND_HALDOWN' in %s/test/slow/ext_math/round.php on line 42
-float(-4)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALEVEN - assumed 'PHP_ROUND_HALEVEN' in %s/test/slow/ext_math/round.php on line 43
-float(-4)
-HipHop Notice: Use of undefined constant PHP_ROUND_HALODD - assumed 'PHP_ROUND_HALODD' in %s/test/slow/ext_math/round.php on line 44
-float(-4)

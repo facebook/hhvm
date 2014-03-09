@@ -19,6 +19,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <map>
+#include <memory>
+#include <set>
+#include <utility>
+#include <vector>
 #include "folly/String.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/parser/parser.h"
@@ -27,12 +32,12 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/json.h"
 #include "hphp/util/process.h"
-#include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/db-conn.h"
 #include "hphp/util/db-query.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/job-queue.h"
+#include "hphp/util/file-util.h"
 #include "hphp/runtime/base/execution-context.h"
 
 using namespace HPHP;
@@ -43,7 +48,7 @@ using std::set;
 Package::Package(const char *root, bool bShortTags /* = true */,
                  bool bAspTags /* = false */)
   : m_files(4000), m_dispatcher(0), m_lineCount(0), m_charCount(0) {
-  m_root = Util::normalizeDir(root);
+  m_root = FileUtil::normalizeDir(root);
   m_ar = AnalysisResultPtr(new AnalysisResult());
   m_fileCache = std::make_shared<FileCache>();
 }
@@ -107,10 +112,10 @@ void Package::addDirectory(const char *path, bool force) {
 void Package::addPHPDirectory(const char *path, bool force) {
   vector<string> files;
   if (force) {
-    Util::find(files, m_root, path, true);
+    FileUtil::find(files, m_root, path, true);
   } else {
-    Util::find(files, m_root, path, true,
-               &Option::PackageExcludeDirs, &Option::PackageExcludeFiles);
+    FileUtil::find(files, m_root, path, true,
+                   &Option::PackageExcludeDirs, &Option::PackageExcludeFiles);
     Option::FilterFiles(files, Option::PackageExcludePatterns);
   }
   int rootSize = m_root.size();
@@ -136,9 +141,9 @@ std::shared_ptr<FileCache> Package::getFileCache() {
   for (set<string>::const_iterator iter = m_directories.begin();
        iter != m_directories.end(); ++iter) {
     vector<string> files;
-    Util::find(files, m_root, iter->c_str(), false,
-               &Option::PackageExcludeStaticDirs,
-               &Option::PackageExcludeStaticFiles);
+    FileUtil::find(files, m_root, iter->c_str(), false,
+                   &Option::PackageExcludeStaticDirs,
+                   &Option::PackageExcludeStaticFiles);
     Option::FilterFiles(files, Option::PackageExcludeStaticPatterns);
     for (unsigned int i = 0; i < files.size(); i++) {
       string &file = files[i];
@@ -152,7 +157,7 @@ std::shared_ptr<FileCache> Package::getFileCache() {
   for (set<string>::const_iterator iter = m_staticDirectories.begin();
        iter != m_staticDirectories.end(); ++iter) {
     vector<string> files;
-    Util::find(files, m_root, iter->c_str(), false);
+    FileUtil::find(files, m_root, iter->c_str(), false);
     for (unsigned int i = 0; i < files.size(); i++) {
       string &file = files[i];
       string rpath = file.substr(m_root.size());
@@ -220,7 +225,8 @@ public:
 void Package::addSourceFile(const char *fileName, bool check /* = false */) {
   if (fileName && *fileName) {
     Lock lock(m_mutex);
-    bool inserted = m_filesToParse.insert(Util::canonicalize(fileName)).second;
+    auto canonFileName = FileUtil::canonicalize(fileName);
+    bool inserted = m_filesToParse.insert(canonFileName).second;
     if (inserted && m_dispatcher) {
       ((JobQueueDispatcher<ParserWorker>*)m_dispatcher)->enqueue(
           std::make_pair(m_files.add(fileName), check));

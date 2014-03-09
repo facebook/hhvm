@@ -17,6 +17,8 @@
 #include "hphp/runtime/ext/soap/encoding.h"
 
 #include <boost/lexical_cast.hpp>
+#include <map>
+#include <memory>
 
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/ext_soap.h"

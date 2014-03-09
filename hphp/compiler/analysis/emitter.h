@@ -31,6 +31,9 @@
 
 #include <deque>
 #include <utility>
+#include <map>
+#include <set>
+#include <vector>
 
 namespace HPHP {
 
@@ -669,6 +672,7 @@ private:
   std::set<std::string,stdltistr> m_hoistables;
   LocationPtr m_tempLoc;
   std::vector<Label> m_yieldLabels;
+  std::unordered_set<std::string> m_staticEmitted;
 
   // The stack of all Regions that this EmitterVisitor is currently inside
   std::vector<RegionPtr> m_regions;
@@ -823,7 +827,7 @@ public:
   // These methods handle the return, break, continue, and goto operations.
   // These methods are aware of try/finally blocks and foreach blocks and
   // will free iterators and jump to finally epilogues as appropriate.
-  void emitReturn(Emitter& e, char sym, StatementPtr s);
+  void emitReturn(Emitter& e, char sym, bool hasConstraint, StatementPtr s);
   void emitBreak(Emitter& e, int depth, StatementPtr s);
   void emitContinue(Emitter& e, int depth, StatementPtr s);
   void emitGoto(Emitter& e, StringData* name, StatementPtr s);

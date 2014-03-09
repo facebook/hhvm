@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/complex-types.h"
+#include <algorithm>
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"

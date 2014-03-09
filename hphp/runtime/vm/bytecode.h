@@ -18,9 +18,8 @@
 #define incl_HPHP_VM_BYTECODE_H_
 
 #include <type_traits>
-#include <boost/optional.hpp>
 
-#include "hphp/util/util.h"
+#include "hphp/util/arena.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-conversions.h"
@@ -32,7 +31,6 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/name-value-table.h"
-#include "hphp/runtime/vm/request-arena.h"
 
 namespace HPHP {
 
@@ -152,7 +150,7 @@ class VarEnv {
   // TinyVector<> for now increased icache misses, but maybe will be
   // feasable later (see D511561).
   std::vector<TypedValue**> m_restoreLocations;
-  boost::optional<NameValueTable> m_nvTable;
+  folly::Optional<NameValueTable> m_nvTable;
 
  private:
   explicit VarEnv();
@@ -242,9 +240,10 @@ struct ActRec {
       uint32_t m_soff;         // Saved offset of caller from beginning of
                                //   caller's Func's bytecode.
 
-      // Bits 0-30 are the number of function args; the high bit is
-      // whether this ActRec came from FPushCtor*.
-      uint32_t m_numArgsAndCtorFlag;
+      // Bits 0-29 are the number of function args.
+      // Bit 30 is whether this ActRec embedded in a Continuation object.
+      // Bit 31 is whether this ActRec came from FPushCtor*.
+      uint32_t m_numArgsAndGenCtorFlags;
     };
   };
   union {
@@ -274,37 +273,45 @@ struct ActRec {
   bool skipFrame() const;
 
   /**
-   * Accessors for the packed m_numArgsAndCtorFlag field. We track
+   * Accessors for the packed m_numArgsAndGenCtorFlags field. We track
    * whether ActRecs came from FPushCtor* so that during unwinding we
    * can set the flag not to call destructors for objects whose
    * constructors exit via an exception.
    */
 
   int32_t numArgs() const {
-    return decodeNumArgs(m_numArgsAndCtorFlag).first;
+    return m_numArgsAndGenCtorFlags & ~(3u << 30);
+  }
+
+  bool inGenerator() const {
+    return m_numArgsAndGenCtorFlags & (1u << 30);
   }
 
   bool isFromFPushCtor() const {
-    return decodeNumArgs(m_numArgsAndCtorFlag).second;
+    return m_numArgsAndGenCtorFlags & (1u << 31);
   }
 
   static inline uint32_t
-  encodeNumArgs(uint32_t numArgs, bool isFPushCtor = false) {
-    assert((numArgs & (1u << 31)) == 0);
-    return numArgs | (isFPushCtor << 31);
+  encodeNumArgs(uint32_t numArgs, bool inGenerator, bool isFPushCtor) {
+    assert((numArgs & (1u << 30)) == 0);
+    return numArgs | (inGenerator << 30) | (isFPushCtor << 31);
   }
 
-  static inline std::pair<uint32_t,bool>
-  decodeNumArgs(uint32_t numArgs) {
-    return { numArgs & ~(1u << 31), numArgs & (1u << 31) };
+  void initNumArgs(uint32_t numArgs) {
+    m_numArgsAndGenCtorFlags = encodeNumArgs(numArgs, false, false);
   }
 
-  void initNumArgs(uint32_t numArgs, bool isFPushCtor = false) {
-    m_numArgsAndCtorFlag = encodeNumArgs(numArgs, isFPushCtor);
+  void initNumArgsInGenerator(uint32_t numArgs) {
+    m_numArgsAndGenCtorFlags = encodeNumArgs(numArgs, true, false);
+  }
+
+  void initNumArgsFromFPushCtor(uint32_t numArgs) {
+    m_numArgsAndGenCtorFlags = encodeNumArgs(numArgs, false, true);
   }
 
   void setNumArgs(uint32_t numArgs) {
-    initNumArgs(numArgs, isFromFPushCtor());
+    m_numArgsAndGenCtorFlags = encodeNumArgs(numArgs, inGenerator(),
+                                             isFromFPushCtor());
   }
 
   static void* encodeThis(ObjectData* obj, Class* cls) {
@@ -983,15 +990,15 @@ visitStackElems(const ActRec* const fp,
                 ARFun arFun,
                 TVFun tvFun) {
   const TypedValue* const base =
-    fp->m_func->isGenerator() ? Stack::generatorStackBase(fp)
-                              : Stack::frameStackBase(fp);
+    fp->inGenerator() ? Stack::generatorStackBase(fp)
+                      : Stack::frameStackBase(fp);
   MaybeConstTVPtr cursor = stackTop;
   assert(cursor <= base);
 
   if (auto fe = fp->m_func->findFPI(bcOffset)) {
     for (;;) {
       ActRec* ar;
-      if (!fp->m_func->isGenerator()) {
+      if (!fp->inGenerator()) {
         ar = arAtOffset(fp, -fe->m_fpOff);
       } else {
         // fp is pointing into the continuation object. Since fpOff is

@@ -17,9 +17,6 @@ function main() {
 
   $m = Map{};
   array_push($m, 'a');
-
-  $sm = StableMap{};
-  array_push($sm, 'a');
 }
 main();
 echo "Done\n";

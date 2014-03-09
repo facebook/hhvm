@@ -33,7 +33,6 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -42,8 +41,12 @@
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
 #include "folly/Format.h"
+#include "hphp/util/text-util.h"
+#include "hphp/util/file-util.h"
+#include "hphp/util/string-vsnprintf.h"
 
 #include <limits>
+#include <algorithm>
 
 namespace HPHP {
 
@@ -251,7 +254,7 @@ vm_decode_function(CVarRef function,
     assert(cls);
     CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
     const HPHP::Func* f =
-      g_vmContext->lookupMethodCtx(cc, name.get(), ctx, lookupType);
+      g_context->lookupMethodCtx(cc, name.get(), ctx, lookupType);
     if (f && (f->attrs() & AttrStatic)) {
       // If we found a method and its static, null out this_
       this_ = nullptr;
@@ -349,7 +352,7 @@ Variant vm_call_user_func(CVarRef function, CVarRef params,
     return uninit_null();
   }
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
+  g_context->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
                           nullptr, invName, ExecutionContext::InvokeCuf);
   return ret;
 }
@@ -404,7 +407,7 @@ static Variant vm_call_user_func_cufiter(const CufIter& cufIter,
     invName->incRefCount();
   }
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
+  g_context->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
                           nullptr, invName, ExecutionContext::InvokeCuf);
   return ret;
 }
@@ -415,7 +418,7 @@ Variant invoke(const String& function, CVarRef params,
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     Variant ret;
-    g_vmContext->invokeFunc(ret.asTypedValue(), func, params);
+    g_context->invokeFunc(ret.asTypedValue(), func, params);
     return ret;
   }
   return invoke_failed(function.c_str(), fatal);
@@ -441,7 +444,7 @@ Variant invoke_static_method(const String& s, const String& method,
     return uninit_null();
   }
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, f, params, nullptr, class_);
+  g_context->invokeFunc((TypedValue*)&ret, f, params, nullptr, class_);
   return ret;
 }
 
@@ -558,11 +561,11 @@ void check_collection_cast_to_array() {
 }
 
 Object create_object_only(const String& s) {
-  return g_vmContext->createObjectOnly(s.get());
+  return g_context->createObjectOnly(s.get());
 }
 
 Object create_object(const String& s, CArrRef params, bool init /* = true */) {
-  return g_vmContext->createObject(s.get(), params, init);
+  return g_context->createObject(s.get(), params, init);
 }
 
 /*
@@ -671,7 +674,7 @@ void throw_bad_type_exception(const char *fmt, ...) {
 
 void throw_expected_array_exception() {
   const char* fn = "(unknown)";
-  ActRec *ar = g_vmContext->getStackFrame();
+  ActRec *ar = g_context->getStackFrame();
   if (ar) {
     fn = ar->m_func->name()->data();
   }
@@ -680,7 +683,7 @@ void throw_expected_array_exception() {
 
 void throw_expected_array_or_collection_exception() {
   const char* fn = "(unknown)";
-  ActRec *ar = g_vmContext->getStackFrame();
+  ActRec *ar = g_context->getStackFrame();
   if (ar) {
     fn = ar->m_func->name()->data();
   }
@@ -728,7 +731,7 @@ Exception* generate_request_timeout_exception() {
   exceptionMsg += cli ? " seconds exceeded" : " seconds and timed out";
   ArrayHolder exceptionStack;
   if (RuntimeOption::InjectedStackTrace) {
-    exceptionStack = g_vmContext->debugBacktrace(false, true, true).get();
+    exceptionStack = g_context->debugBacktrace(false, true, true).get();
   }
   ret = new RequestTimeoutException(exceptionMsg, exceptionStack.get());
 
@@ -738,7 +741,7 @@ Exception* generate_request_timeout_exception() {
 Exception* generate_memory_exceeded_exception() {
   ArrayHolder exceptionStack;
   if (RuntimeOption::InjectedStackTrace) {
-    exceptionStack = g_vmContext->debugBacktrace(false, true, true).get();
+    exceptionStack = g_context->debugBacktrace(false, true, true).get();
   }
   return new RequestMemoryExceededException(
     "request has exceeded memory limit", exceptionStack.get());
@@ -754,8 +757,7 @@ void throw_call_non_object(const char *methodName) {
   if (methodName == nullptr) {
     msg = "Call to a member function on a non-object";
   } else {
-    Util::string_printf(msg,
-                        "Call to a member function %s() on a non-object",
+    string_printf(msg, "Call to a member function %s() on a non-object",
                         methodName);
   }
 
@@ -817,7 +819,7 @@ Variant unserialize_ex(const char* str, int len,
     return false;
   }
 
-  VariableUnserializer vu(str, len, type, false, class_whitelist);
+  VariableUnserializer vu(str, len, type, true, class_whitelist);
   Variant v;
   try {
     v = vu.unserialize();
@@ -877,8 +879,8 @@ Variant include_impl_invoke(const String& file, bool once,
       } catch(PhpFileDoesNotExistException &e) {}
     }
 
-    String rel_path(Util::relativePath(RuntimeOption::SourceRoot,
-                                       string(file.data())));
+    String rel_path(FileUtil::relativePath(RuntimeOption::SourceRoot,
+                                           string(file.data())));
 
     // Don't try/catch - We want the exception to be passed along
     return invoke_file(rel_path, once, currentDir);
@@ -900,14 +902,14 @@ bool invoke_file_impl(Variant &res, const String& path, bool once,
                       const char *currentDir) {
   bool initial;
   HPHP::Eval::PhpFile* efile =
-    g_vmContext->lookupPhpFile(path.get(), currentDir, &initial);
+    g_context->lookupPhpFile(path.get(), currentDir, &initial);
   HPHP::Unit* u = nullptr;
   if (efile) u = efile->unit();
   if (u == nullptr) {
     return false;
   }
   if (!once || initial) {
-    g_vmContext->invokeUnit((TypedValue*)(&res), u);
+    g_context->invokeUnit((TypedValue*)(&res), u);
   }
   return true;
 }
@@ -954,7 +956,7 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
   } else if (c_file[0] == '/') {
-    String can_path(Util::canonicalize(file.c_str(), file.size()),
+    String can_path(FileUtil::canonicalize(file.c_str(), file.size()),
                     AttachString);
 
     if (tryFile(can_path, ctx)) {
@@ -965,7 +967,7 @@ String resolve_include(const String& file, const char* currentDir,
     c_file[1] == '.' && c_file[2] == '/')))) {
 
     String path(String(g_context->getCwd() + "/" + file));
-    String can_path(Util::canonicalize(path.c_str(), path.size()),
+    String can_path(FileUtil::canonicalize(path.c_str(), path.size()),
                     AttachString);
 
     if (tryFile(can_path, ctx)) {
@@ -973,12 +975,13 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
   } else {
-    Array includePaths = g_context->getIncludePathArray();
+    auto includePaths = ThreadInfo::s_threadInfo.getNoCheck()->
+      m_reqInjectionData.getIncludePaths();
     unsigned int path_count = includePaths.size();
 
     for (int i = 0; i < (int)path_count; i++) {
       String path("");
-      String includePath = includePaths[i].toString();
+      String includePath(includePaths[i]);
 
       if (includePath[0] != '/') {
         path += (g_context->getCwd() + "/");
@@ -991,7 +994,7 @@ String resolve_include(const String& file, const char* currentDir,
       }
 
       path += file;
-      String can_path(Util::canonicalize(path.c_str(), path.size()),
+      String can_path(FileUtil::canonicalize(path.c_str(), path.size()),
                       AttachString);
 
       if (tryFile(can_path, ctx)) {
@@ -1003,7 +1006,7 @@ String resolve_include(const String& file, const char* currentDir,
       String path(currentDir);
       path += "/";
       path += file;
-      String can_path(Util::canonicalize(path.c_str(), path.size()),
+      String can_path(FileUtil::canonicalize(path.c_str(), path.size()),
                       AttachString);
 
       if (tryFile(can_path, ctx)) {
@@ -1011,7 +1014,7 @@ String resolve_include(const String& file, const char* currentDir,
       }
     } else {
       String path(g_context->getCwd() + "/" + currentDir + file);
-      String can_path(Util::canonicalize(path.c_str(), path.size()),
+      String can_path(FileUtil::canonicalize(path.c_str(), path.size()),
                       AttachString);
 
       if (tryFile(can_path, ctx)) {
@@ -1123,7 +1126,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& name,
       try {
         JIT::VMRegAnchor _;
         bool initial;
-        VMExecutionContext* ec = g_vmContext;
+        auto const ec = g_context.getNoCheck();
         Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);
         if (u) {
           if (initial) {

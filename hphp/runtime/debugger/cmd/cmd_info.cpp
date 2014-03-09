@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
+#include <vector>
 
 #include "folly/dynamic.h"
 #include "folly/json.h"
@@ -250,17 +251,17 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
     for (unsigned int i = 0 ; i < sizeof(tempList)/sizeof(int); ++i) {
       for (unsigned int j = 0 ; j < tmpAcLiveLists[tempList[i]].size(); ++j) {
         m_acLiveLists[tempList[i]].push_back(
-          tmpAcLiveLists[tempList[i]][j]->toCPPString());
+          tmpAcLiveLists[tempList[i]][j].toCppString());
       }
     }
 
-    Array variables = g_vmContext->getLocalDefinedVariables(0);
+    Array variables = g_context->getLocalDefinedVariables(0);
     variables += CmdVariable::GetGlobalVariables();
     std::vector<std::string> &vars =
       m_acLiveLists[DebuggerClient::AutoCompleteVariables];
     vars.reserve(variables.size());
     for (ArrayIter iter(variables); iter; ++iter) {
-      vars.push_back("$" + iter.first().toString()->toCPPString());
+      vars.push_back("$" + iter.first().toString().toCppString());
     }
 
     return proxy.sendToClient(this);

@@ -1,6 +1,13 @@
 
 <h2>How to modify existing extension functions/classes</h2>
 
+*******************************************************************************
+WARNING: This documentation is obsolete. In new code, IDL should not be used.
+Instead, HNI should be used. Please see
+https://github.com/facebook/hhvm/wiki/Extension-API for details of the HNI
+interface.
+*******************************************************************************
+
 All commands and directories are from src/ in this guide.
 
 1. Update IDL

@@ -26,6 +26,7 @@
 #include <vector>
 #include <stack>
 #include <list>
+#include <map>
 
 #include "hphp/util/thread-local.h"
 #include "hphp/util/mutex.h"
@@ -145,9 +146,9 @@ enum Type : uint16_t { // stored in ObjectData::o_subclassData
   MapType = 2,
   SetType = 3,
   PairType = 4,
-  FrozenVectorType = 5,
-  FrozenMapType = 6,
-  FrozenSetType = 7,
+  ImmVectorType = 5,
+  ImmMapType = 6,
+  ImmSetType = 7,
 };
 const size_t MaxNumTypes = 8;
 
@@ -162,13 +163,11 @@ inline Type stringToType(const char* str, size_t len) {
       break;
     case 9:
       if (!strcasecmp(str, "hh\\vector")) return VectorType;
+      if (!strcasecmp(str, "hh\\immmap")) return ImmMapType;
+      if (!strcasecmp(str, "hh\\immset")) return ImmSetType;
       break;
     case 12:
-      if (!strcasecmp(str, "hh\\frozenmap")) return FrozenMapType;
-      if (!strcasecmp(str, "hh\\frozenset")) return FrozenSetType;
-      break;
-    case 15:
-      if (!strcasecmp(str, "hh\\frozenvector")) return FrozenVectorType;
+      if (!strcasecmp(str, "hh\\immvector")) return ImmVectorType;
       break;
     default:
       break;
@@ -180,19 +179,19 @@ inline Type stringToType(const std::string& s) {
 }
 inline bool isVectorType(Collection::Type ctype) {
   return (ctype == Collection::VectorType ||
-          ctype == Collection::FrozenVectorType);
+          ctype == Collection::ImmVectorType);
 }
 inline bool isMapType(Collection::Type ctype) {
   return (ctype == Collection::MapType ||
-          ctype == Collection::FrozenMapType);
+          ctype == Collection::ImmMapType);
 }
 inline bool isSetType(Collection::Type ctype) {
   return (ctype == Collection::SetType ||
-          ctype == Collection::FrozenSetType);
+          ctype == Collection::ImmSetType);
 }
 inline bool isInvalidType(Collection::Type ctype) {
   return (ctype == Collection::InvalidType ||
-          ctype >= Collection::MaxNumTypes);
+          static_cast<size_t>(ctype) >= Collection::MaxNumTypes);
 }
 inline bool isMutableType(Collection::Type ctype) {
   return (ctype == Collection::VectorType ||
@@ -269,13 +268,20 @@ public:
   static const ssize_t LastFlag             = DebuggerSignalFlag;
 
   RequestInjectionData()
-    : cflagsPtr(nullptr),
-      m_timeoutSeconds(-1), m_hasTimer(false), m_timerActive(false),
-      m_debugger(false), m_debuggerIntr(false), m_coverage(false),
-      m_jit(false) {
+      : cflagsPtr(nullptr),
+        m_timeoutSeconds(0), // no timeout by default
+        m_hasTimer(false),
+        m_timerActive(false),
+        m_debugger(false),
+        m_debuggerIntr(false),
+        m_coverage(false),
+        m_jit(false) {
+    threadInit();
   }
 
   ~RequestInjectionData();
+
+  void threadInit();
 
   inline std::atomic<ssize_t>* getConditionFlags() {
     assert(cflagsPtr);
@@ -298,6 +304,19 @@ public:
   bool m_debuggerIntr;   // indicating we should force interrupt for debugger
   bool m_coverage;       // is coverage being collected
   bool m_jit;            // is the jit enabled
+
+  // Things corresponding to user setable INI settings
+  std::string m_maxMemory;
+  std::string m_argSeparatorOutput;
+  std::string m_defaultCharset;
+  std::vector<std::string> m_include_paths;
+  int64_t m_errorReportingLevel;
+  bool m_logErrors;
+  std::string m_errorLog;
+  int64_t m_socketDefaultTimeout;
+  std::vector<std::string> m_allowedDirectories;
+  bool m_safeFileAccess;
+
  public:
   int getTimeout() const { return m_timeoutSeconds; }
   void setTimeout(int seconds);
@@ -324,6 +343,18 @@ public:
     updateJit();
   }
   void updateJit();
+
+
+  // getters for user setable INI settings
+  std::vector<std::string> getIncludePaths() { return m_include_paths; }
+  std::string getDefaultIncludePath();
+  int64_t getErrorReportingLevel() { return m_errorReportingLevel; }
+  void setErrorReportingLevel(int level) { m_errorReportingLevel = level; }
+  int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
+  std::vector<std::string> getAllowedDirectories() const {
+    return m_allowedDirectories;
+  }
+  bool hasSafeFileAccess() const { return m_safeFileAccess; }
 
   std::stack<void *> interrupts;   // CmdInterrupts this thread's handling
 

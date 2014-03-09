@@ -20,6 +20,7 @@
 #include <utility>
 #include <boost/container/flat_map.hpp>
 #include <boost/range/iterator_range.hpp>
+#include <vector>
 
 #include "folly/Format.h"
 
@@ -32,7 +33,7 @@ namespace HPHP {
 
 namespace JIT {
 struct Tracelet;
-struct TranslatorX64;
+struct MCGenerator;
 }
 
 namespace JIT {
@@ -151,6 +152,11 @@ struct RegionDesc::TypePred {
   Type type;
 };
 
+inline bool operator==(const RegionDesc::TypePred& a,
+                       const RegionDesc::TypePred& b) {
+  return a.location == b.location && a.type == b.type;
+}
+
 typedef std::vector<RegionDesc::TypePred> PostConditions;
 
 /*
@@ -168,6 +174,11 @@ struct RegionDesc::ReffinessPred {
   std::vector<bool> vals;
   int64_t arSpOffset;
 };
+
+inline bool operator==(const RegionDesc::ReffinessPred& a,
+                       const RegionDesc::ReffinessPred& b) {
+  return a.mask == b.mask && a.vals == b.vals && a.arSpOffset == b.arSpOffset;
+}
 
 /*
  * A basic block in the region, with type predictions for conditions
@@ -298,6 +309,7 @@ struct RegionContext {
   const Func* func;
   Offset bcOffset;
   Offset spOffset;
+  bool inGenerator;
   smart::vector<LiveType> liveTypes;
   smart::vector<PreLiveAR> preLiveARs;
 };
@@ -332,7 +344,7 @@ struct RegionContext::PreLiveAR {
  *
  * This function may return nullptr.
  *
- * For now this is hooked up in TranslatorX64::translateWork, and
+ * For now this is hooked up in MCGenerator::translateWork, and
  * returning nullptr causes it to use the current level 0 tracelet
  * analyzer.  Eventually we'd like this to completely replace analyze.
  */
@@ -346,7 +358,7 @@ RegionDescPtr selectRegion(const RegionContext& context,
  * translation that triggered the profiling-based region selection.
  */
 RegionDescPtr selectHotRegion(TransID transId,
-                              TranslatorX64* tx64);
+                              MCGenerator* mcg);
 
 /*
  * Select a compilation region using roughly the same heuristics as the old
@@ -373,9 +385,15 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
  * Creates regions covering all existing profile translations for
  * func, and returns them in the regions vector.
  */
-void regionizeFunc(const Func*    func,
-                   TranslatorX64* tx64,
-                   RegionVec&     regions);
+void regionizeFunc(const Func*  func,
+                   MCGenerator* mcg,
+                   RegionVec&   regions);
+
+/*
+ * Compare the two regions. If they differ in any way other than a being longer
+ * than b, trace both regions.
+ */
+void diffRegions(const RegionDesc& a, const RegionDesc& b);
 
 /*
  * Debug stringification for various things.

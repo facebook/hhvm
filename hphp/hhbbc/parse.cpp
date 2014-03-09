@@ -22,6 +22,12 @@
 
 #include <boost/variant.hpp>
 #include <boost/next_prior.hpp>
+#include <algorithm>
+#include <memory>
+#include <set>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include "folly/gen/Base.h"
 #include "folly/gen/String.h"
@@ -773,6 +779,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->attrs                  = fe.attrs();
   ret->userAttributes         = fe.getUserAttributes();
   ret->returnUserType         = fe.returnUserType();
+  ret->retTypeConstraint      = fe.returnTypeConstraint();
   ret->originalFilename       = fe.originalFilename();
 
   ret->top                    = fe.top();

@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <boost/variant.hpp>
+#include <map>
 
 #include "folly/Optional.h"
 
@@ -77,6 +78,8 @@ inline bool operator<(Context a, Context b) {
   return std::make_tuple(a.unit, a.func, a.cls) <
          std::make_tuple(b.unit, b.func, b.cls);
 }
+
+std::string show(Context);
 
 /*
  * State of properties on a class.  Map from property name to its

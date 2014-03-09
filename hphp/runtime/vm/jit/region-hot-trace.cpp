@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/trans-cfg.h"
+#include <limits>
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
@@ -122,7 +123,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
                              TransCFG& cfg,
                              TransIDSet& selectedSet,
                              TransIDVec* selectedVec) {
-  JIT::RegionDescPtr region = std::make_shared<JIT::RegionDesc>();
+  auto region = std::make_shared<RegionDesc>();
   TransID tid    = triggerId;
   TransID prevId = InvalidID;
   selectedSet.clear();

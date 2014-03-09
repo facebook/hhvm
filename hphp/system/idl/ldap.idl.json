@@ -1010,7 +1010,77 @@
                     "type": "String"
                 }
             ]
+        },
+        {
+            "name": "ldap_control_paged_result",
+            "desc": "Enable LDAP pagination by sending the pagination control (page size, cookie...).",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "link",
+                    "type": "Resource",
+                    "desc": "An LDAP link identifier, returned by ldap_connect()."
+                },
+                {
+                    "name": "pagesize",
+                    "type": "Int32",
+                    "desc": "The number of entries by page."
+                },
+                {
+                    "name": "iscritical",
+                    "type": "Boolean",
+                    "desc": "Indicates whether the pagination is critical of not. If true and if the server doesn't support pagination, the search will return no result.",
+                    "value": "false"
+                },
+                {
+                    "name": "cookie",
+                    "type": "String",
+                    "desc": "An opaque structure sent by the server.",
+                    "value": "\"\""
+                }
+            ]
+        },
+        {
+            "name": "ldap_control_paged_result_response",
+            "desc": "Retrieve the pagination information send by the server.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "link",
+                    "type": "Resource",
+                    "desc": "An LDAP link identifier, returned by ldap_connect()."
+                },
+                {
+                    "name": "result",
+                    "type": "Resource"
+                },
+                {
+                    "name": "cookie",
+                    "type": "Variant",
+                    "desc": "An opaque structure sent by the server.",
+                    "value": "null",
+                    "ref": true
+                },
+                {
+                    "name": "estimated",
+                    "type": "Variant",
+                    "desc": "The estimated number of entries to retrieve.",
+                    "value": "null",
+                    "ref": true
+                }
+            ]
         }
+
     ],
     "classes": [
     ]

@@ -16,7 +16,6 @@
 #ifndef incl_HPHP_RUNTIME_VM_JIT_TARGETCACHE_H_
 #define incl_HPHP_RUNTIME_VM_JIT_TARGETCACHE_H_
 
-#include "hphp/util/util.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -39,7 +38,7 @@ namespace HPHP { namespace JIT {
  * function isn't known at translation time).  4-way cache.
  */
 struct FuncCache {
-  static constexpr int kNumLines = 4;
+  static constexpr uint32_t kNumLines = 4;
 
   struct Pair {
     StringData*  m_key;
@@ -66,7 +65,7 @@ void invalidateForRenameFunction(const StringData* name);
  * class isn't known at translation time).  4-way cache.
  */
 struct ClassCache {
-  static constexpr int kNumLines = 4;
+  static constexpr uint32_t kNumLines = 4;
 
   struct Pair {
     StringData*  m_key;

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
+#include <vector>
 
 #include "folly/Optional.h"
 
@@ -100,22 +101,14 @@ PUNT_OPCODE(CheckDefinedClsEq)
 PUNT_OPCODE(TryEndCatch)
 PUNT_OPCODE(LdUnwinderValue)
 PUNT_OPCODE(DeleteUnwinderException)
-PUNT_OPCODE(Add)
-PUNT_OPCODE(Sub)
-PUNT_OPCODE(Mul)
+PUNT_OPCODE(AddDbl)
+PUNT_OPCODE(SubDbl)
+PUNT_OPCODE(MulDbl)
 PUNT_OPCODE(DivDbl)
 PUNT_OPCODE(Mod)
 PUNT_OPCODE(Sqrt)
-PUNT_OPCODE(AbsInt)
 PUNT_OPCODE(AbsDbl)
-PUNT_OPCODE(BitAnd)
-PUNT_OPCODE(BitOr)
-PUNT_OPCODE(BitXor)
-PUNT_OPCODE(BitNot)
-PUNT_OPCODE(LogicXor)
-PUNT_OPCODE(Not)
-PUNT_OPCODE(Shl)
-PUNT_OPCODE(Shr)
+PUNT_OPCODE(XorBool)
 PUNT_OPCODE(ConvBoolToArr)
 PUNT_OPCODE(ConvDblToArr)
 PUNT_OPCODE(ConvIntToArr)
@@ -201,7 +194,6 @@ PUNT_OPCODE(JmpInstanceOfBitmask)
 PUNT_OPCODE(JmpNInstanceOfBitmask)
 PUNT_OPCODE(JmpZero)
 PUNT_OPCODE(JmpNZero)
-PUNT_OPCODE(Jmp)
 PUNT_OPCODE(ReqBindJmpGt)
 PUNT_OPCODE(ReqBindJmpGte)
 PUNT_OPCODE(ReqBindJmpLt)
@@ -340,7 +332,6 @@ PUNT_OPCODE(StMem)
 PUNT_OPCODE(StProp)
 PUNT_OPCODE(StLocNT)
 PUNT_OPCODE(StRef)
-PUNT_OPCODE(StRefNT)
 PUNT_OPCODE(StRaw)
 PUNT_OPCODE(StElem)
 PUNT_OPCODE(IterCopy)
@@ -350,7 +341,6 @@ PUNT_OPCODE(ClosureStaticLocInit)
 PUNT_OPCODE(StaticLocInitCached)
 PUNT_OPCODE(CufIterSpillFrame)
 PUNT_OPCODE(ReqRetranslateOpt)
-PUNT_OPCODE(ReqRetranslate)
 PUNT_OPCODE(Mov)
 PUNT_OPCODE(LdAddr)
 PUNT_OPCODE(IncRefCtx)
@@ -370,6 +360,9 @@ PUNT_OPCODE(ReDefGeneratorSP)
 PUNT_OPCODE(VerifyParamCls)
 PUNT_OPCODE(VerifyParamCallable)
 PUNT_OPCODE(VerifyParamFail)
+PUNT_OPCODE(VerifyRetCls)
+PUNT_OPCODE(VerifyRetCallable)
+PUNT_OPCODE(VerifyRetFail)
 PUNT_OPCODE(RaiseUninitLoc)
 PUNT_OPCODE(WarnNonObjProp)
 PUNT_OPCODE(ThrowNonObjProp)
@@ -382,8 +375,6 @@ PUNT_OPCODE(ColAddNewElemC)
 PUNT_OPCODE(ConcatCellCell)
 PUNT_OPCODE(ArrayAdd)
 PUNT_OPCODE(AKExists)
-PUNT_OPCODE(Spill)
-PUNT_OPCODE(Reload)
 PUNT_OPCODE(CreateContFunc)
 PUNT_OPCODE(CreateContMeth)
 PUNT_OPCODE(ContEnter)
@@ -553,10 +544,14 @@ void CodeGenerator::recordHostCallSyncPoint(vixl::MacroAssembler& as,
                                             TCA tca) {
   auto stackOff = m_curInst->marker().spOff;
   auto pcOff = m_curInst->marker().bcOff - m_curInst->marker().func->base();
-  m_tx64->fixupMap().recordSyncPoint(tca, pcOff, stackOff);
+  m_mcg->fixupMap().recordSyncPoint(tca, pcOff, stackOff);
 }
 
 //////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgJmp(IRInstruction* inst) {
+  emitJumpToBlock(m_mcg->code.main(), inst->taken(), CC_None);
+}
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
   vixl::Label done;
@@ -643,7 +638,7 @@ void CodeGenerator::emitDecRefStaticType(Type type,
 
   m_as.  B    (&allDone, vixl::ne);
   cgCallHelper(m_as,
-               TranslatorX64::getDtorCall(type.toDataType()),
+               MCGenerator::getDtorCall(type.toDataType()),
                kVoidDest,
                SyncOptions::kSyncPoint,
                argGroup().reg(dataReg));
@@ -715,9 +710,100 @@ void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
 void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
   emitDecRefMem(inst->typeParam(),
                 x2a(srcLoc(0).reg()),
-                inst->src(1)->getValInt());
+                inst->src(1)->intVal());
 }
 
+//////////////////////////////////////////////////////////////////////
+// Arithmetic Instructions
+
+void CodeGenerator::cgAddInt(IRInstruction* inst) {
+  auto dstReg = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  if (srcRegR != InvalidReg) {
+    m_as. Add(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+  } else {
+    m_as. Add(x2a(dstReg), x2a(srcRegL), inst->src(1)->intVal());
+  }
+}
+
+void CodeGenerator::cgSubInt(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  if (srcRegR != InvalidReg) {
+    m_as. Sub(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+  } else {
+    m_as. Sub(x2a(dstReg), x2a(srcRegL), inst->src(1)->intVal());
+  }
+}
+
+void CodeGenerator::cgMulInt(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  m_as. Mul(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+}
+
+//////////////////////////////////////////////////////////////////////
+// Bitwise Operators
+
+void CodeGenerator::cgAndInt(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  if (srcRegL != InvalidReg) {
+    m_as. And(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+  } else {
+    m_as. And(x2a(dstReg), x2a(srcRegL), inst->src(1)->intVal());
+  }
+}
+
+void CodeGenerator::cgOrInt(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  if (srcRegL != InvalidReg) {
+    m_as. Orr(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+  } else {
+    m_as. Orr(x2a(dstReg), x2a(srcRegL), inst->src(1)->intVal());
+  }
+}
+
+void CodeGenerator::cgXorInt(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  if (srcRegL != InvalidReg) {
+    m_as. Eor(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+  } else {
+    m_as. Eor(x2a(dstReg), x2a(srcRegL), inst->src(1)->intVal());
+  }
+}
+
+void CodeGenerator::cgShl(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  // TODO: t3870154 add shift-by-immediate support to vixl
+  m_as. lslv(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+}
+
+void CodeGenerator::cgShr(IRInstruction* inst) {
+  auto dstReg  = dstLoc(0).reg();
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  // TODO: t3870154 add shift-by-immediate support to vixl
+  m_as. asrv(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
+}
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgShuffle(IRInstruction* inst) {
@@ -764,7 +850,7 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     }
     if (rs.numAllocated() == 0) {
       assert(src->inst()->op() == DefConst);
-      m_as.  Mov  (x2a(rd.reg(0)), src->getValRawInt());
+      m_as.  Mov  (x2a(rd.reg(0)), src->rawVal());
     }
     if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
       // Move src known type to register
@@ -866,7 +952,7 @@ void CodeGenerator::cgCallNative(vixl::MacroAssembler& as,
     case FuncType::Call:
       return CppCall(info.func.call);
     case FuncType::SSA:
-      return CppCall(inst->src(info.func.srcIdx)->getValTCA());
+      return CppCall(inst->src(info.func.srcIdx)->tcaVal());
     }
     not_reached();
   }();
@@ -1019,7 +1105,7 @@ void CodeGenerator::emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
   }
 
   ConditionCode cc;
-  if (type.isString()) {
+  if (type <= Type::Str) {
     // Note: ARM can actually do better here; it has a fused test-and-branch
     // instruction. The way this code is factored makes it difficult to use,
     // though; the jump instruction will be written by some other code.
@@ -1069,7 +1155,7 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
     rFP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-      auto const destSR = m_tx64->getSrcRec(destSK);
+      auto const destSR = m_mcg->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
 }
@@ -1084,7 +1170,7 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
     rSP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-      auto const destSR = m_tx64->getSrcRec(destSK);
+      auto const destSR = m_mcg->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
 }
@@ -1098,7 +1184,7 @@ void CodeGenerator::cgCheckStk(IRInstruction* inst) {
     rAsm.W(),
     rSP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
-      emitJumpToBlock(m_tx64->code.main(), inst->taken(), ccNegate(cc));
+      emitJumpToBlock(m_mcg->code.main(), inst->taken(), ccNegate(cc));
     }
   );
 }
@@ -1118,7 +1204,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       if (rVal.IsValid()) {
         if (!valDst.Is(rVal)) m_as.Mov(valDst, rVal);
       } else {
-        if (src->isConst()) m_as.Mov(valDst, src->getValRawInt());
+        if (src->isConst()) m_as.Mov(valDst, src->rawVal());
       }
     }
     if (typeDst.IsValid()) {
@@ -1131,7 +1217,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   };
 
   auto doJcc = [&] (ConditionCode cc) {
-    emitJumpToBlock(m_tx64->code.main(), inst->taken(), ccNegate(cc));
+    emitJumpToBlock(m_mcg->code.main(), inst->taken(), ccNegate(cc));
   };
 
   Type typeParam = inst->typeParam();
@@ -1142,7 +1228,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     return;
   }
   if (srcType.not(typeParam)) {
-    emitJumpToBlock(m_tx64->code.main(), inst->taken(), CC_None);
+    emitJumpToBlock(m_mcg->code.main(), inst->taken(), CC_None);
     return;
   }
 
@@ -1188,7 +1274,6 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
 void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert(inst->numSrcs() == 5);
 
-  DEBUG_ONLY SSATmp* funcPtrTmp = inst->src(0);
   DEBUG_ONLY SSATmp* nParamsTmp = inst->src(1);
   DEBUG_ONLY SSATmp* firstBitNumTmp = inst->src(2);
   DEBUG_ONLY SSATmp* mask64Tmp  = inst->src(3);
@@ -1200,33 +1285,25 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   auto vals64Loc = srcLoc(4);
 
   // Get values in place
-  assert(funcPtrTmp->type() == Type::Func);
   auto funcPtrReg = x2a(funcPtrLoc.reg());
   assert(funcPtrReg.IsValid());
 
-  assert(nParamsTmp->type() == Type::Int);
   auto nParamsReg = x2a(nParamsLoc.reg());
   assert(nParamsReg.IsValid() || nParamsTmp->isConst());
 
-  assert(firstBitNumTmp->isConst() && firstBitNumTmp->type() == Type::Int);
-  uint32_t firstBitNum = (uint32_t)(firstBitNumTmp->getValInt());
-
-  assert(mask64Tmp->type() == Type::Int);
-  assert(mask64Tmp->isConst());
+  auto firstBitNum = static_cast<uint32_t>(firstBitNumTmp->intVal());
   auto mask64Reg = x2a(mask64Loc.reg());
-  assert(mask64Reg.IsValid() || mask64Tmp->inst()->op() != LdConst);
-  uint64_t mask64 = mask64Tmp->getValInt();
+  uint64_t mask64 = mask64Tmp->intVal();
+  assert(mask64Reg.IsValid() || mask64 == uint32_t(mask64));
   assert(mask64);
 
-  assert(vals64Tmp->type() == Type::Int);
-  assert(vals64Tmp->isConst());
   auto vals64Reg = x2a(vals64Loc.reg());
-  assert(vals64Reg.IsValid() || vals64Tmp->inst()->op() != LdConst);
-  uint64_t vals64 = vals64Tmp->getValInt();
+  uint64_t vals64 = vals64Tmp->intVal();
+  assert(vals64Reg.IsValid() || vals64 == uint32_t(vals64));
   assert((vals64 & mask64) == vals64);
 
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
-  auto const destSR = m_tx64->getSrcRec(destSK);
+  auto const destSR = m_mcg->tx().getSrcRec(destSK);
 
   auto thenBody = [&] {
     auto bitsOff = sizeof(uint64_t) * (firstBitNum / 64);
@@ -1247,31 +1324,21 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
     m_as.    Ldr  (bitsReg, bitsPtrReg[bitsOff]);
 
     // Mask the bits. There are restrictions on what can be encoded as an
-    // immediate in ARM's logical instructions, and if they're not met, we'll
-    // have to use a register.
-    if (vixl::Assembler::IsImmLogical(mask64, vixl::kXRegSize)) {
-      m_as.  And  (bitsReg, bitsReg, mask64);
+    // immediate in ARM's logical instructions, and if they're not met,
+    // the assembler will compensate using ip0 or ip1 as tmps.
+    if (mask64Reg.IsValid()) {
+      m_as.  And  (bitsReg, bitsReg, mask64Reg);
     } else {
-      if (mask64Reg.IsValid()) {
-        m_as.And  (bitsReg, bitsReg, mask64Reg);
-      } else {
-        m_as.Mov  (rAsm2, mask64);
-        m_as.And  (bitsReg, bitsReg, rAsm2);
-      }
+      m_as.  And  (bitsReg, bitsReg, mask64);
     }
 
     // Now do the compare. There are also restrictions on immediates in
     // arithmetic instructions (of which Cmp is one; it's just a subtract that
     // sets flags), so same deal as with the mask immediate above.
-    if (vixl::Assembler::IsImmArithmetic(vals64)) {
-      m_as.  Cmp  (bitsReg, vals64);
+    if (vals64Reg.IsValid()) {
+      m_as.  Cmp  (bitsReg, vals64Reg);
     } else {
-      if (vals64Reg.IsValid()) {
-        m_as.Cmp  (bitsReg, vals64Reg);
-      } else {
-        m_as.Mov  (rAsm2, vals64);
-        m_as.Cmp  (bitsReg, rAsm2);
-      }
+      m_as.  Cmp  (bitsReg, vals64);
     }
     destSR->emitFallbackJump(m_mainCode, cond);
   };
@@ -1319,6 +1386,13 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   );
 }
 
+void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
+  assert(m_unit.bcOff() == inst->marker().bcOff);
+  auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
+  auto const destSR = m_mcg->tx().getSrcRec(destSK);
+  destSR->emitFallbackJump(m_mainCode);
+}
+
 void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   auto const func     = inst->src(2);
   auto const objOrCls = inst->src(3);
@@ -1338,7 +1412,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   // immediate argument is intptr_t, and the implicit int32->intptr conversion
   // will sign-extend, which isn't what we want.
   m_as.    Mov  (rAsm.W(), (uint32_t)nArgs);
-  m_as.    Str  (rAsm.W(), spReg[spOff + AROFF(m_numArgsAndCtorFlag)]);
+  m_as.    Str  (rAsm.W(), spReg[spOff + AROFF(m_numArgsAndGenCtorFlags)]);
 
   // Magic-call name.
   if (invName) {
@@ -1351,11 +1425,10 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
 
   // Func and this/class are slightly tricky. The func may be a tuple of a Func*
   // and context.
-  DEBUG_ONLY bool setThis = true;
 
   if (objOrCls->isA(Type::Cls)) {
     if (objOrCls->isConst()) {
-      m_as.Mov  (rAsm, uintptr_t(objOrCls->getValClass()) | 1);
+      m_as.Mov  (rAsm, uintptr_t(objOrCls->clsVal()) | 1);
       m_as.Str  (rAsm, spReg[spOff + AROFF(m_this)]);
     } else {
       m_as.Orr  (rAsm, objClsReg, 1);
@@ -1365,35 +1438,20 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     m_as.  Str  (objClsReg, spReg[spOff + AROFF(m_this)]);
   } else {
     assert(objOrCls->isA(Type::InitNull));
-    if (!func->isConst() && func->isA(Type::FuncCtx)) {
-      setThis = false;
-    } else {
-      m_as.Str  (vixl::xzr, spReg[spOff + AROFF(m_this)]);
-    }
+    m_as.Str  (vixl::xzr, spReg[spOff + AROFF(m_this)]);
   }
 
   // Now set func, and possibly this/cls
-  if (func->type().isNull()) {
+  if (func->isA(Type::Null)) {
     // Do nothing
     assert(func->isConst());
   } else if (func->isConst()) {
-    if (func->isA(Type::FuncCtx)) {
-      // x64 punts on this too
-      CG_PUNT(cgSpillFrame_ConstFuncCtx);
-    }
-    m_as.  Mov  (rAsm, func->getValFunc());
+    m_as.  Mov  (rAsm, func->funcVal());
     m_as.  Str  (rAsm, spReg[spOff + AROFF(m_func)]);
   } else {
     auto reg0 = x2a(funcLoc.reg(0));
     m_as.  Str  (reg0, spReg[spOff + AROFF(m_func)]);
-    if (func->isA(Type::FuncCtx)) {
-      auto reg1 = x2a(funcLoc.reg(1));
-      m_as.Str  (reg1, spReg[spOff + AROFF(m_cls)]);
-      setThis = true;
-    }
   }
-
-  assert(setThis);
 
   // Adjust stack pointer
   emitRegGetsRegPlusImm(m_as, x2a(dstLoc(0).reg()), spReg, spOff);
@@ -1402,7 +1460,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
-  auto func = inst->src(0)->getValFunc();
+  auto func = inst->src(0)->funcVal();
   auto args = inst->srcs().subpiece(2);
   auto numArgs = args.size();
 
@@ -1412,11 +1470,11 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   if (FixupMap::eagerRecord(func)) {
     // Save VM registers
     auto const* pc = curFunc()->unit()->entry() + m_curInst->marker().bcOff;
-    m_as.Str  (rVmFp, rGContextReg[offsetof(VMExecutionContext, m_fp)]);
-    m_as.Str  (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
+    m_as.Str  (rVmFp, rGContextReg[offsetof(ExecutionContext, m_fp)]);
+    m_as.Str  (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
                                    Stack::topOfStackOffset()]);
     m_as.Mov  (rAsm, pc);
-    m_as.Str  (rAsm, rGContextReg[offsetof(VMExecutionContext, m_pc)]);
+    m_as.Str  (rAsm, rGContextReg[offsetof(ExecutionContext, m_pc)]);
   }
 
   // The stack pointer currently points to the MInstrState we need to use.
@@ -1498,20 +1556,18 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 
   int64_t adjustment = cellsToBytes((int64_t)-numArgs);
   for (int32_t i = 0; i < numArgs; ++i) {
-    if (args[i]->type() != Type::None) {
-      emitStore(spReg, cellsToBytes(-(i + 1)), args[i], srcLoc(i + 3));
-    }
+    emitStore(spReg, cellsToBytes(-(i + 1)), args[i], srcLoc(i + 3));
   }
 
-  m_as.  Mov  (rAsm.W(), returnBcOffset->getValInt());
+  m_as.  Mov  (rAsm.W(), returnBcOffset->intVal());
   m_as.  Str  (rAsm.W(), spReg[AROFF(m_soff)]);
   emitRegGetsRegPlusImm(m_as, spReg, spReg, adjustment);
 
   assert(m_curInst->marker().valid());
   SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
-  bool isImmutable = (func->isConst() && !func->type().isNull());
-  const Func* funcd = isImmutable ? func->getValFunc() : nullptr;
-  int32_t adjust  = emitBindCall(tx64->code.main(), tx64->code.stubs(),
+  bool isImmutable = func->isConst() && !func->isA(Type::Null);
+  const Func* funcd = isImmutable ? func->funcVal() : nullptr;
+  int32_t adjust  = emitBindCall(mcg->code.main(), mcg->code.stubs(),
                                  srcKey, funcd, numArgs);
 
   emitRegGetsRegPlusImm(m_as, rVmSp, rVmSp, adjust);
@@ -1577,7 +1633,7 @@ void CodeGenerator::emitLoad(Type type, PhysLoc dstLoc,
   if (label) {
     not_implemented();
   }
-  if (type.isNull()) return;
+  if (type <= Type::Null) return;
 
   auto dstReg = x2a(dstLoc.reg());
   if (!dstReg.IsValid()) return;
@@ -1603,14 +1659,14 @@ void CodeGenerator::emitStore(vixl::Register base,
       m_as.  Strb  (rAsm.W(), base[offset + TVOFF(m_type)]);
     }
   }
-  if (type.isNull()) {
+  if (type <= Type::Null) {
     return;
   }
   if (src->isConst()) {
     int64_t val = 0;
     if (type <= (Type::Bool | Type::Int | Type::Dbl |
                  Type::Arr | Type::StaticStr | Type::Cls)) {
-      val = src->getValRawInt();
+      val = src->rawVal();
     } else {
       not_reached();
     }
@@ -1644,14 +1700,6 @@ void CodeGenerator::cgLdStack(IRInstruction* inst) {
   emitLoad(inst->dst()->type(), dstLoc(0), srcReg, offset);
 }
 
-void CodeGenerator::cgLdConst(IRInstruction* inst) {
-  auto const dstReg = x2a(dstLoc(0).reg());
-  auto const val    = inst->extra<LdConst>()->as<uintptr_t>();
-  if (dstReg.IsValid()) {
-    m_as.  Mov  (dstReg, val);
-  }
-}
-
 void CodeGenerator::cgLdRaw(IRInstruction* inst) {
   auto* addr   = inst->src(0);
   auto* offset = inst->src(1);
@@ -1664,7 +1712,7 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
   }
 
   if (offset->isConst()) {
-    auto kind   = offset->getValInt();
+    auto kind   = offset->intVal();
     auto& slot  = RawMemSlot::Get(RawMemSlot::Kind(kind));
     auto ldSize = slot.size();
     auto offs   = slot.offset();
@@ -1692,7 +1740,7 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
 void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
   auto destReg     = x2a(dstLoc(0).reg());
   auto contArReg   = x2a(srcLoc(0).reg());
-  auto kind        = inst->src(1)->getValInt();
+  auto kind        = inst->src(1)->intVal();
   auto const& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
 
   auto off = slot.offset() - c_Continuation::getArOffset();
@@ -1707,7 +1755,7 @@ void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   auto dstReg  = x2a(dstLoc(0).reg());
   auto baseReg = x2a(srcLoc(0).reg());
-  auto offset  = inst->src(1)->getValInt();
+  auto offset  = inst->src(1)->intVal();
   m_as.  Ldr  (dstReg, baseReg[offset + AROFF(m_func)]);
 }
 
@@ -1747,7 +1795,7 @@ void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
 void CodeGenerator::cgSpillStack(IRInstruction* inst) {
   // TODO(2966414): so much of this logic could be shared. The opcode itself
   // should probably be broken up.
-  auto const spDeficit    = inst->src(1)->getValInt();
+  auto const spDeficit    = inst->src(1)->intVal();
   auto const spillVals    = inst->srcs().subpiece(2);
   auto const numSpillSrcs = spillVals.size();
   auto const dstReg       = x2a(dstLoc(0).reg());
@@ -1756,7 +1804,6 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
 
   int64_t adjustment = (spDeficit - spillCells) * sizeof(Cell);
   for (uint32_t i = 0; i < numSpillSrcs; ++i) {
-    assert(spillVals[i]->type() != Type::None);
     const int64_t offset = i * sizeof(Cell) + adjustment;
     emitStore(spReg, offset, spillVals[i], srcLoc(i + 2));
   }
@@ -1789,11 +1836,11 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
 void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   cgInterpOneCommon(inst);
 
-  m_as.   Ldr   (rVmFp, rReturnReg[offsetof(VMExecutionContext, m_fp)]);
-  m_as.   Ldr   (rVmSp, rReturnReg[offsetof(VMExecutionContext, m_stack) +
+  m_as.   Ldr   (rVmFp, rReturnReg[offsetof(ExecutionContext, m_fp)]);
+  m_as.   Ldr   (rVmSp, rReturnReg[offsetof(ExecutionContext, m_stack) +
                                    Stack::topOfStackOffset()]);
 
-  emitServiceReq(tx64->code.main(), REQ_RESUME);
+  emitServiceReq(mcg->code.main(), REQ_RESUME);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1826,7 +1873,7 @@ void CodeGenerator::cgBlock(Block* block, std::vector<TransBCMapping>* bcMap) {
     // If we're on the first instruction of the block or we have a new
     // marker since the last instruction, update the bc mapping.
     if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
-        m_tx64->isTransDBEnabled() && bcMap) {
+        m_mcg->tx().isTransDBEnabled() && bcMap) {
       bcMap->push_back(TransBCMapping{inst->marker().func->unit()->md5(),
                                       inst->marker().bcOff,
                                       m_as.frontier(),

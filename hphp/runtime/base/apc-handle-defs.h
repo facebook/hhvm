@@ -28,7 +28,7 @@ inline void APCHandle::unreferenceRoot() {
   if (!getUncounted()) {
     realDecRef();
   } else {
-    g_vmContext->enqueueAPCHandle(this);
+    g_context->enqueueAPCHandle(this);
   }
 }
 

@@ -39,7 +39,6 @@
   CASE(String) \
   CASE(Array) \
   CASE(NewArray) \
-  CASE(NewArrayReserve) \
   CASE(NewPackedArray) \
   CASE(NewStructArray) \
   CASE(NewCol) \
@@ -125,6 +124,8 @@
   CASE(FCallArray) \
   CASE(FCallBuiltin) \
   CASE(VerifyParamType) \
+  CASE(VerifyRetTypeC) \
+  CASE(VerifyRetTypeV) \
   CASE(InstanceOfD) \
   CASE(InstanceOf) \
   CASE(StaticLocInit) \

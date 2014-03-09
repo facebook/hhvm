@@ -21,23 +21,21 @@
 namespace HPHP { namespace JIT {
 
 SSATmp::SSATmp(uint32_t opndId, IRInstruction* i, int dstId /* = 0 */)
-  : m_inst(i)
-  , m_type(outputType(i, dstId))
-  , m_id(opndId)
+  : m_id(opndId)
 {
+  setInstruction(i, dstId);
 }
 
-bool SSATmp::isConst() const {
-  return m_inst->op() == DefConst ||
-    m_inst->op() == LdConst;
+void SSATmp::setInstruction(IRInstruction* inst, int dstId) {
+  m_inst = inst;
+  m_type = outputType(inst, dstId);
 }
 
 namespace {
 int typeNeededWords(Type t) {
   assert(!t.equals(Type::Bottom));
 
-  if (t.subtypeOfAny(Type::None, Type::Null, Type::ActRec, Type::RetAddr,
-                     Type::Nullptr)) {
+  if (t.subtypeOfAny(Type::Null, Type::ActRec, Type::RetAddr, Type::Nullptr)) {
     // These don't need a register because their values are static or unused.
     //
     // RetAddr doesn't take any register because currently we only target x86,
@@ -52,18 +50,13 @@ int typeNeededWords(Type t) {
     // Ctx and PtrTo* may be statically unknown but always need just 1 register.
     return 1;
   }
-  if (t <= Type::FuncCtx) {
-    // 2 registers regardless of union status: 1 for the Func* and 1
-    // for the {Obj|Cctx}, differentiated by the low bit.
-    return 2;
-  }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.
-    assert(IMPLIES(t <= Type::Gen, t.isKnownDataType()));
+    assert(IMPLIES(t <= Type::StackElem, t.isKnownDataType()));
     return 1;
   }
 
-  assert(t <= Type::Gen);
+  assert(t <= Type::StackElem);
   return t.needsReg() ? 2 : 1;
 }
 }
@@ -72,98 +65,26 @@ int SSATmp::numWords() const {
   return typeNeededWords(type());
 }
 
-bool SSATmp::getValBool() const {
-  assert(isConst());
-  assert(m_inst->typeParam().equals(Type::Bool));
-  return m_inst->extra<ConstData>()->as<bool>();
-}
-
-int64_t SSATmp::getValInt() const {
-  assert(isConst());
-  assert(m_inst->typeParam().equals(Type::Int));
-  return m_inst->extra<ConstData>()->as<int64_t>();
-}
-
-int64_t SSATmp::getValRawInt() const {
-  assert(isConst());
-  return m_inst->extra<ConstData>()->as<int64_t>();
-}
-
-double SSATmp::getValDbl() const {
-  assert(isConst());
-  assert(m_inst->typeParam().equals(Type::Dbl));
-  return m_inst->extra<ConstData>()->as<double>();
-}
-
-const StringData* SSATmp::getValStr() const {
-  assert(isConst());
-  assert(m_inst->typeParam().equals(Type::StaticStr));
-  return m_inst->extra<ConstData>()->as<const StringData*>();
-}
-
-const ArrayData* SSATmp::getValArr() const {
-  assert(isConst());
-  // TODO: Task #2124292, Reintroduce StaticArr
-  assert(m_inst->typeParam() <= Type::Arr);
-  return m_inst->extra<ConstData>()->as<const ArrayData*>();
-}
-
-const Func* SSATmp::getValFunc() const {
-  assert(isConst());
-  assert(m_inst->typeParam().equals(Type::Func));
-  return m_inst->extra<ConstData>()->as<const Func*>();
-}
-
-const Class* SSATmp::getValClass() const {
-  assert(isConst());
-  assert(m_inst->typeParam().equals(Type::Cls));
-  return m_inst->extra<ConstData>()->as<const Class*>();
-}
-
-const NamedEntity* SSATmp::getValNamedEntity() const {
-  assert(isConst());
-  assert(m_inst->typeParam().equals(Type::NamedEntity));
-  return m_inst->extra<ConstData>()->as<const NamedEntity*>();
-}
-
-RDS::Handle SSATmp::getValRDSHandle() const {
-  assert(isConst());
-  assert(m_inst->typeParam().equals(Type::RDSHandle));
-  return m_inst->extra<ConstData>()->as<RDS::Handle>();
-}
-
-Variant SSATmp::getValVariant() const {
-  switch (m_inst->typeParam().toDataType()) {
+Variant SSATmp::variantVal() const {
+  switch (type().toDataType()) {
   case KindOfUninit:
     return uninit_null();
   case KindOfNull:
     return init_null();
   case KindOfBoolean:
-    return getValBool();
+    return boolVal();
   case KindOfInt64:
-    return getValInt();
+    return intVal();
   case KindOfDouble:
-    return getValDbl();
+    return dblVal();
   case KindOfString:
   case KindOfStaticString:
-    return Variant(getValStr());
+    return Variant(strVal());
   case KindOfArray:
-    return const_cast<ArrayData*>(getValArr());
+    return const_cast<ArrayData*>(arrVal());
   default:
     always_assert(false);
   }
-}
-
-TCA SSATmp::getValTCA() const {
-  assert(isConst());
-  assert(m_inst->typeParam().equals(Type::TCA));
-  return m_inst->extra<ConstData>()->as<TCA>();
-}
-
-uintptr_t SSATmp::getValCctx() const {
-  assert(isConst());
-  assert(m_inst->typeParam().equals(Type::Cctx));
-  return m_inst->extra<ConstData>()->as<uintptr_t>();
 }
 
 std::string SSATmp::toString() const {

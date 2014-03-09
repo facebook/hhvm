@@ -17,9 +17,12 @@
 #define incl_HHBBC_ANALYZE_H_
 
 #include <vector>
+#include <utility>
 
+#include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/interp-state.h"
+#include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/type-system.h"
 
@@ -113,13 +116,20 @@ ClassAnalysis analyze_class(const Index&, Context);
 /*
  * Propagate a block input State to each instruction in the block.
  *
- * Returns a State array that is parallel to the instruction array in
- * blk->hhbcs.
+ * Returns a vector that is parallel to the instruction array in the
+ * block, with one extra element.  The vector contains a state before
+ * each instruction, and the StepFlags for executing that instruction.
+ *
+ * The last element in the vector contains the state after the last
+ * instruction in the block, with undefined StepFlags.
+ *
+ * Pre: stateIn.initialized == true
  */
-std::vector<State> locally_propagated_states(const Index&,
-                                             Context,
-                                             borrowed_ptr<const php::Block>,
-                                             State);
+std::vector<std::pair<State,StepFlags>>
+locally_propagated_states(const Index&,
+                          Context,
+                          borrowed_ptr<const php::Block>,
+                          State stateIn);
 
 //////////////////////////////////////////////////////////////////////
 

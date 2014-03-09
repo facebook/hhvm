@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/frame-state.h"
+#include <algorithm>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -56,6 +57,8 @@ FrameState::~FrameState() {
 }
 
 void FrameState::update(const IRInstruction* inst) {
+  FTRACE(3, "FrameState::update processing {}\n", *inst);
+
   if (auto* taken = inst->taken()) {
     // When we're building the IR, we append a conditional jump after
     // generating its target block: see emitJmpCondHelper, where we
@@ -129,7 +132,7 @@ void FrameState::update(const IRInstruction* inst) {
   case SpillStack: {
     m_spValue = inst->dst();
     // Push the spilled values but adjust for the popped values
-    int64_t stackAdjustment = inst->src(1)->getValInt();
+    int64_t stackAdjustment = inst->src(1)->intVal();
     m_spOffset -= stackAdjustment;
     m_spOffset += spillValueCells(inst);
     break;
@@ -189,7 +192,7 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
                                  LocalStateHook& hook) const {
   auto killIterLocals = [&](const std::initializer_list<uint32_t>& ids) {
     for (auto id : ids) {
-      hook.setLocalValue(inst->src(id)->getValInt(), nullptr);
+      hook.setLocalValue(id, nullptr);
     }
   };
 
@@ -207,7 +210,6 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
       killLocalsForCall(hook, killedCallLocals);
       break;
 
-    case StRefNT:
     case StRef: {
       SSATmp* newRef = inst->dst();
       SSATmp* prevRef = inst->src(0);
@@ -232,7 +234,8 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
                            inst->dst());
       break;
 
-    case CheckType: {
+    case CheckType:
+    case AssertType: {
       SSATmp* newVal = inst->dst();
       SSATmp* oldVal = inst->src(0);
       refineLocalValues(hook, oldVal, newVal);
@@ -242,25 +245,27 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
     case IterInitK:
     case WIterInitK:
       // kill the locals to which this instruction stores iter's key and value
-      killIterLocals({3, 4});
+      killIterLocals({inst->extra<IterData>()->keyId,
+                      inst->extra<IterData>()->valId});
       break;
 
     case IterInit:
     case WIterInit:
       // kill the local to which this instruction stores iter's value
-      killIterLocals({3});
+      killIterLocals({inst->extra<IterData>()->valId});
       break;
 
     case IterNextK:
     case WIterNextK:
       // kill the locals to which this instruction stores iter's key and value
-      killIterLocals({2, 3});
+      killIterLocals({inst->extra<IterData>()->keyId,
+                      inst->extra<IterData>()->valId});
       break;
 
     case IterNext:
     case WIterNext:
       // kill the local to which this instruction stores iter's value
-      killIterLocals({2});
+      killIterLocals({inst->extra<IterData>()->valId});
       break;
 
     case InterpOne:
@@ -298,14 +303,15 @@ void FrameState::clearLocals(LocalStateHook& hook) const {
 
 void FrameState::refineLocalValues(LocalStateHook& hook,
                                    SSATmp* oldVal, SSATmp* newVal) const {
-  assert(newVal->inst()->is(CheckType));
+  assert(newVal->inst()->is(CheckType, AssertType));
   assert(newVal->inst()->src(0) == oldVal);
 
-  for (unsigned i = 0, n = m_locals.size(); i < n; ++i) {
-    if (m_locals[i].value == oldVal) {
-      hook.refineLocalValue(i, oldVal, newVal);
+  walkAllInlinedLocals(
+  [&](uint32_t i, unsigned inlineIdx, const LocalState& local) {
+    if (local.value == oldVal) {
+      hook.refineLocalValue(i, inlineIdx, oldVal, newVal);
     }
-  }
+  });
 }
 
 void FrameState::forEachFrame(FrameFunc body) const {
@@ -447,6 +453,34 @@ void FrameState::save(Block* block) {
   }
 }
 
+bool FrameState::compatible(Block* block) {
+  auto it = m_snapshots.find(block);
+  assert(it != m_snapshots.end());
+  auto& snapshot = it->second;
+  if (m_fpValue != snapshot.fpValue) return false;
+
+  assert(m_locals.size() == snapshot.locals.size());
+  for (int i = 0; i < m_locals.size(); ++i) {
+    // Enforce strict equality of types for now.  Eventually we could
+    // relax this depending on downstream operations.
+    //
+    // TODO(t3729135): We don't bother to check values here because we
+    // clear the CSE table at any merge.  Eventually we will support
+    // phis instead.
+    if (m_locals[i].type != snapshot.locals[i].type) {
+      return false;
+    }
+  }
+
+  // TODO(t3730468): We don't check the stack here, because we always
+  // spill the stack on all paths leading up to a merge, and insert a
+  // DefSP at the merge point to block walking the use-def chain past
+  // it.  It would be better to do proper type analysis on the stack
+  // values flowing in and insert phis or exits as needed.
+
+  return true;
+}
+
 void FrameState::load(Snapshot& state) {
   m_spValue = state.spValue;
   m_fpValue = state.fpValue;
@@ -458,12 +492,6 @@ void FrameState::load(Snapshot& state) {
   m_locals = std::move(state.locals);
   m_marker = state.curMarker;
   m_frameSpansCall = m_frameSpansCall || state.frameSpansCall;
-
-  // If spValue is null, we merged two different but equivalent values. We
-  // could define a new sp but that would drop a lot of useful information on
-  // the floor. Let's cross this bridge when we reach it.
-  always_assert(m_spValue &&
-                "Attempted to merge two states with different stack pointers");
 }
 
 /*
@@ -501,6 +529,12 @@ void FrameState::merge(Snapshot& state) {
     local.type = Type::unionOf(local.type, m_locals[i].type);
   }
 
+  // TODO(t3729135): If we are merging states from different bytecode
+  // paths, we conservatively clear the CSE table.
+  if (state.curMarker != m_marker) {
+    clearCse();
+  }
+
   // For now, we shouldn't be merging states with different inline states.
   assert(m_inlineSavedStates == state.inlineSavedStates);
 }
@@ -512,7 +546,7 @@ void FrameState::trackDefInlineFP(const IRInstruction* inst) {
   auto const calleeSP   = inst->src(0);
   auto const savedSP    = inst->src(1);
 
-  // Saved tracebuilder state will include the "return" fp/sp.
+  // Saved IRBuilder state will include the "return" fp/sp.
   // Whatever the current fpValue is is good enough, but we have to be
   // passed in the StkPtr that represents the stack prior to the
   // ActRec being allocated.
@@ -610,7 +644,6 @@ SSATmp* FrameState::localTypeSource(uint32_t id) const {
 
 Type FrameState::localType(uint32_t id) const {
   always_assert(id < m_locals.size());
-  assert(m_locals[id].type != Type::None);
   return m_locals[id].type;
 }
 
@@ -621,23 +654,23 @@ void FrameState::setLocalValue(uint32_t id, SSATmp* value) {
   m_locals[id].typeSource = value;
 }
 
-void FrameState::refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) {
-  always_assert(id < m_locals.size());
-  auto& local = m_locals[id];
-  local.value = newVal;
-  local.type = newVal->type();
-  local.typeSource = newVal;
-}
-
 void FrameState::refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {
   always_assert(id < m_locals.size());
   auto& local = m_locals[id];
   if (type.isBoxed() && local.type.isBoxed()) {
     // It's OK for the old and new inner types of boxed values not to
     // intersect, since the inner type is really just a prediction.
+    FTRACE(2, "updating local {}'s inner type: {} -> {}\n",
+           id, local.type, type);
     local.type = type;
   } else {
-    always_assert((local.type & type) != Type::Bottom);
+    auto const result = local.type & type;
+    always_assert_log(
+      result != Type::Bottom,
+      [&] {
+        return folly::format("Bad new type for local {}: {} & {} = {}",
+                             id, local.type, type, result).str();
+      });
     local.type = local.type & type;
   }
   local.typeSource = typeSource;
@@ -662,6 +695,16 @@ FrameState::LocalVec& FrameState::locals(unsigned inlineIdx) {
     assert(inlineIdx < m_inlineSavedStates.size());
     return m_inlineSavedStates[inlineIdx].locals;
   }
+}
+
+void FrameState::refineLocalValue(uint32_t id, unsigned inlineIdx,
+                                  SSATmp* oldVal, SSATmp* newVal) {
+  auto& locs = locals(inlineIdx);
+  always_assert(id < locs.size());
+  auto& local = locs[id];
+  local.value = newVal;
+  local.type = newVal->type();
+  local.typeSource = newVal;
 }
 
 void FrameState::killLocalForCall(uint32_t id, unsigned inlineIdx,

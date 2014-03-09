@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/util/file-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,7 +86,7 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
   // Fast path for files that exist
   if (vhost->checkExistenceBeforeRewrite()) {
     String canon(
-      Util::canonicalize(m_originalURL.c_str(), m_originalURL.size()),
+      FileUtil::canonicalize(m_originalURL.c_str(), m_originalURL.size()),
       AttachString);
     if (virtualFileExists(vhost, sourceRoot, pathTranslation, canon)) {
       m_rewrittenURL = canon;
@@ -162,7 +163,7 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
     splitURL(m_rewrittenURL, m_rewrittenURL, m_queryString);
   }
   m_rewrittenURL = String(
-      Util::canonicalize(m_rewrittenURL.c_str(), m_rewrittenURL.size()),
+      FileUtil::canonicalize(m_rewrittenURL.c_str(), m_rewrittenURL.size()),
       AttachString);
   if (!m_rewritten && m_rewrittenURL.charAt(0) == '/') {
     // A un-rewritten URL is always relative, so remove prepending /
@@ -212,7 +213,7 @@ bool RequestURI::resolveURL(const VirtualHost *vhost,
     startURL = m_originalURL;
   }
   startURL = String(
-      Util::canonicalize(startURL.c_str(), startURL.size(), false),
+      FileUtil::canonicalize(startURL.c_str(), startURL.size(), false),
       AttachString);
   m_resolvedURL = startURL;
 
@@ -247,7 +248,7 @@ bool RequestURI::resolveURL(const VirtualHost *vhost,
     m_originalURL = "/" + m_originalURL;
   }
   m_pathInfo = String(
-      Util::canonicalize(m_origPathInfo.c_str(), m_origPathInfo.size()),
+      FileUtil::canonicalize(m_origPathInfo.c_str(), m_origPathInfo.size()),
       AttachString);
   return true;
 }
@@ -259,7 +260,7 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
   if (filename.empty() || filename.charAt(filename.length() - 1) == '/') {
     return false;
   }
-  String canon(Util::canonicalize(filename.c_str(), filename.size()),
+  String canon(FileUtil::canonicalize(filename.c_str(), filename.size()),
                AttachString);
   if (!vhost->getDocumentRoot().empty()) {
     std::string fullname = canon.data();

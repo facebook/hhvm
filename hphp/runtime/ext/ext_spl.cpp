@@ -24,8 +24,10 @@
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/glob-stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #include "hphp/system/systemlib.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,7 +147,7 @@ String f_spl_object_hash(CObjRef obj) {
 int64_t f_hphp_object_pointer(CObjRef obj) { return (int64_t)obj.get();}
 
 Variant f_hphp_get_this() {
-  return g_vmContext->getThis();
+  return g_context->getThis();
 }
 
 Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {
@@ -318,12 +320,11 @@ void f_spl_autoload_call(const String& class_name) {
 }
 
 namespace {
-class ExtensionList : public RequestEventHandler {
-public:
-  virtual void requestInit() {
+struct ExtensionList final : RequestEventHandler {
+  void requestInit() override {
     extensions = make_packed_array(String(".inc"), String(".php"));
   }
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     extensions.reset();
   }
 

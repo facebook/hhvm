@@ -174,11 +174,12 @@ char *string_crypt(const char *key, const char *salt) {
   assert(key);
   assert(salt);
 
-  char random_salt[3];
+  char random_salt[12];
   if (!*salt) {
-    ito64(random_salt, rand(), 2);
-    random_salt[2] = '\0';
-    salt = random_salt;
+    memcpy(random_salt,"$1$",3);
+    ito64(random_salt+3,rand(),8);
+    random_salt[11] = '\0';
+    return string_crypt(key, random_salt);
   }
 
   if ((strlen(salt) > sizeof("$2X$00$")) &&
@@ -210,7 +211,7 @@ char *string_crypt(const char *key, const char *salt) {
 #else
     static Mutex mutex;
     Lock lock(mutex);
-    char *crypt_res = crypt(key, salt);
+    char *crypt_res = crypt(key,salt);
 #endif
 
     if (crypt_res) {

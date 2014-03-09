@@ -1,10 +1,11 @@
 
 Log {
   AlwaysLogUnhandledExceptions = false
+  Level = Verbose
 }
 
 Server {
-  Port = 8080
+  Port = 0
   SourceRoot != echo $(pwd)/runtime/tmp
   ThreadCount = 1
   AllowedFiles {
@@ -20,7 +21,7 @@ VirtualHost {
 Satellites {
   rpc {
     Type = RPCServer
-    Port = 8083
+    Port = 0
     Password = test
     RequestInitDocument = string
   }
@@ -39,5 +40,9 @@ PageletServer {
 }
 
 AdminServer {
-  Port = 8088
+  Port = 0
+}
+
+Fb303Server {
+  Enable = false
 }

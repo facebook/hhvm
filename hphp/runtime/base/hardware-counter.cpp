@@ -38,7 +38,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "folly/String.h"
 
 namespace HPHP {
@@ -172,7 +172,7 @@ public:
 };
 
 HardwareCounter::HardwareCounter()
-  : m_countersSet(false), m_pseudoEvents(false) {
+  : m_countersSet(false) {
   m_instructionCounter = new InstructionCounter();
   if (RuntimeOption::EvalProfileHWEvents == "") {
     m_loadCounter = new LoadCounter();
@@ -371,12 +371,10 @@ bool HardwareCounter::setPerfEvents(const String& events) {
 
   char* strtok_buf = nullptr;
   char* s = strtok_r(sevents_buf, ",", &strtok_buf);
-  m_pseudoEvents = false;
   while (s) {
     int len = strlen(s);
     char* event = url_decode(s, len);
-    bool isPseudoEvent = JIT::TranslatorX64::isPseudoEvent(event);
-    m_pseudoEvents = m_pseudoEvents || isPseudoEvent;
+    bool isPseudoEvent = JIT::MCGenerator::isPseudoEvent(event);
     if (!isPseudoEvent && !eventExists(event) && !addPerfEvent(event)) {
       return false;
     }
@@ -414,9 +412,7 @@ void HardwareCounter::getPerfEvents(Array& ret) {
   for (unsigned i = 0; i < m_counters.size(); i++) {
     ret.set(m_counters[i]->m_desc, m_counters[i]->read());
   }
-  if (m_pseudoEvents) {
-    JIT::tx64->getPerfCounters(ret);
-  }
+  JIT::mcg->getPerfCounters(ret);
 }
 
 void HardwareCounter::GetPerfEvents(Array& ret) {

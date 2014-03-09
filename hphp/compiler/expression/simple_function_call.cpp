@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/expression/simple_function_call.h"
+#include <map>
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
@@ -30,7 +31,7 @@
 #include "hphp/compiler/statement/method_statement.h"
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/parser/parser.h"
@@ -382,7 +383,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
     if (!m_class && !m_className.empty()) {
       if (Option::DynamicInvokeFunctions.find(
-            Util::toLower(m_className + "::" + m_name)) !=
+            toLower(m_className + "::" + m_name)) !=
           Option::DynamicInvokeFunctions.end()) {
         setNoInline();
       }
@@ -442,7 +443,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
             }
             case FunType::FunctionExists:
               {
-                FunctionScopePtr func = ar->findFunction(Util::toLower(symbol));
+                FunctionScopePtr func = ar->findFunction(toLower(symbol));
                 if (func && func->isUserFunction()) {
                   func->setVolatile();
                 }
@@ -451,7 +452,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
             case FunType::InterfaceExists:
             case FunType::ClassExists:
               {
-                ClassScopePtr cls = ar->findClass(Util::toLower(symbol));
+                ClassScopePtr cls = ar->findClass(toLower(symbol));
                 if (cls && cls->isUserClass()) {
                   cls->setVolatile();
                 }
@@ -943,7 +944,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             break;
           }
           case FunType::FunctionExists: {
-            const std::string &lname = Util::toLower(symbol);
+            const std::string &lname = toLower(symbol);
             if (Option::DynamicInvokeFunctions.find(lname) ==
                 Option::DynamicInvokeFunctions.end()) {
               FunctionScopePtr func = ar->findFunction(lname);
@@ -963,7 +964,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             break;
           }
           case FunType::InterfaceExists: {
-            ClassScopePtrVec classes = ar->findClasses(Util::toLower(symbol));
+            ClassScopePtrVec classes = ar->findClasses(toLower(symbol));
             bool interfaceFound = false;
             for (ClassScopePtrVec::const_iterator it = classes.begin();
                  it != classes.end(); ++it) {
@@ -987,7 +988,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             break;
           }
           case FunType::ClassExists: {
-            ClassScopePtrVec classes = ar->findClasses(Util::toLower(symbol));
+            ClassScopePtrVec classes = ar->findClasses(toLower(symbol));
             bool classFound = false;
             for (ClassScopePtrVec::const_iterator it = classes.begin();
                  it != classes.end(); ++it) {
@@ -1417,7 +1418,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
       if (v.isString()) {
         Variant t = StringUtil::Explode(v.toString(), "::", 3);
         if (!t.isArray() || t.toArray().size() != 2) {
-          std::string name = Util::toLower(v.toString().data());
+          std::string name = toLower(v.toString().data());
           FunctionScopePtr func = ar->findFunction(name);
           if (!func || func->isDynamicInvoke()) {
             error = !func;
@@ -1459,7 +1460,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
           return SimpleFunctionCallPtr();
         }
         std::string sclass = classname.toString().data();
-        std::string smethod = Util::toLower(methodname.toString().data());
+        std::string smethod = toLower(methodname.toString().data());
 
         ClassScopePtr cls;
         if (sclass == "self") {

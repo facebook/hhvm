@@ -34,9 +34,9 @@ using HPHP::JIT::CallerFrame;
 void f_hphpd_break(bool condition /* = true */) {
   TRACE(5, "in f_hphpd_break()\n");
   if (!RuntimeOption::EnableDebugger || !condition ||
-      g_vmContext->m_dbgNoBreak) {
+      g_context->m_dbgNoBreak) {
     TRACE(5, "bail !%d || !%d || %d\n", RuntimeOption::EnableDebugger,
-          condition, g_vmContext->m_dbgNoBreak);
+          condition, g_context->m_dbgNoBreak);
     return;
   }
   CallerFrame cf;

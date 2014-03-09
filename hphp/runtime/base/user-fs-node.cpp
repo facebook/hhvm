@@ -27,7 +27,7 @@ UserFSNode::UserFSNode(Class *cls, CVarRef context /*= null */) {
   const Func *ctor;
   m_cls = cls;
   if (LookupResult::MethodFoundWithThis !=
-      g_vmContext->lookupCtorMethod(ctor, m_cls)) {
+      g_context->lookupCtorMethod(ctor, m_cls)) {
     throw InvalidArgumentException(0, "Unable to call %s's constructor",
                                    m_cls->name()->data());
   }
@@ -35,25 +35,25 @@ UserFSNode::UserFSNode(Class *cls, CVarRef context /*= null */) {
   m_obj = ObjectData::newInstance(m_cls);
   m_obj.o_set("context", context);
   Variant ret;
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), ctor, m_obj.get());
+  g_context->invokeFuncFew(ret.asTypedValue(), ctor, m_obj.get());
 
   m_Call = lookupMethod(s_call.get());
 }
 
 Variant UserFSNode::invoke(const Func *func, const String& name,
-                           CArrRef args, bool &success) {
+                           CArrRef args, bool &invoked) {
   JIT::VMRegAnchor _;
 
   // Assume failure
-  success = false;
+  invoked = false;
 
   // Public method, no private ancestor, no need for further checks (common)
   if (func &&
       !(func->attrs() & (AttrPrivate|AttrProtected|AttrAbstract)) &&
       !func->hasPrivateAncestor()) {
     Variant ret;
-    g_vmContext->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
-    success = true;
+    g_context->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
+    invoked = true;
     return ret;
   }
 
@@ -65,21 +65,21 @@ Variant UserFSNode::invoke(const Func *func, const String& name,
 
   HPHP::JIT::CallerFrame cf;
   Class* ctx = arGetContextClass(cf());
-  switch(g_vmContext->lookupObjMethod(func, m_cls, name.get(), ctx)) {
+  switch(g_context->lookupObjMethod(func, m_cls, name.get(), ctx)) {
     case LookupResult::MethodFoundWithThis:
     {
       Variant ret;
-      g_vmContext->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
-      success = true;
+      g_context->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
+      invoked = true;
       return ret;
     }
 
     case LookupResult::MagicCallFound:
     {
       Variant ret;
-      g_vmContext->invokeFunc(ret.asTypedValue(), func,
+      g_context->invokeFunc(ret.asTypedValue(), func,
                               make_packed_array(name, args), m_obj.get());
-      success = true;
+      invoked = true;
       return ret;
     }
 

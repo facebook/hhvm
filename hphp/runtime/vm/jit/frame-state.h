@@ -93,7 +93,8 @@ private:
  */
 struct LocalStateHook {
   virtual void setLocalValue(uint32_t id, SSATmp* value) {}
-  virtual void refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) {}
+  virtual void refineLocalValue(uint32_t id, unsigned inlineIdx,
+                                SSATmp* oldVal, SSATmp* newVal) {}
   virtual void killLocalForCall(uint32_t id, unsigned inlineIdx, SSATmp* val) {}
   virtual void updateLocalRefValue(uint32_t id, unsigned inlineIdx,
                                    SSATmp* oldRef, SSATmp* newRef) {}
@@ -132,7 +133,6 @@ struct FrameState : private LocalStateHook {
   ~FrameState();
 
   void update(const IRInstruction* inst);
-  void clear();
 
   /*
    * Starts tracking state for a block and reloads any previously
@@ -151,6 +151,22 @@ struct FrameState : private LocalStateHook {
    * after working on another.
    */
   void pauseBlock(Block*);
+
+  /*
+   * Clear all tracked state.
+   */
+  void clear();
+
+  /*
+   * Clear the CSE table.
+   */
+  void clearCse();
+
+  /*
+   * Check current state for compatibility (matching types of
+   * stack/locals) with the state at block.
+   */
+  bool compatible(Block*);
 
   const Func* func() const { return m_curFunc; }
   Offset spOffset() const { return m_spOffset; }
@@ -248,7 +264,8 @@ struct FrameState : private LocalStateHook {
 
   /* LocalStateHook overrides */
   void setLocalValue(uint32_t id, SSATmp* value) override;
-  void refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) override;
+  void refineLocalValue(uint32_t id, unsigned inlineIdx,
+                        SSATmp* oldVal, SSATmp* newVal) override;
   void killLocalForCall(uint32_t id, unsigned inlineIdx, SSATmp* val) override;
   void updateLocalRefValue(uint32_t id, unsigned inlineIdx, SSATmp* oldRef,
                            SSATmp* newRef) override;
@@ -274,7 +291,6 @@ struct FrameState : private LocalStateHook {
   void cseInsert(const IRInstruction* inst);
   void cseKill(SSATmp* src);
   CSEHash* cseHashTable(const IRInstruction* inst);
-  void clearCse();
 
   Snapshot createSnapshot() const;
   void save(Block*);

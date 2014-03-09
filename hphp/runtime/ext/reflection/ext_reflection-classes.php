@@ -71,7 +71,9 @@ class ReflectionParameter implements Reflector {
       return;
     }
 
-    if (is_string($func)) {
+    if ($func instanceof Closure) {
+      $params = (new ReflectionFunction($func))->getParameters();
+    } else if (is_string($func)) {
       $double_colon = strpos($func, "::");
       if ($double_colon === false) {
         $params = (new ReflectionFunction($func))->getParameters();
@@ -925,10 +927,45 @@ class ReflectionClass implements Reflector {
     }
   }
 
+  private function mergeProperties() {
+    $properties = array();
+    $properties_idx = 0;
+    $old_properties = $this->info['properties'];
+    $old_properties_keys = array_keys($old_properties);
+    $old_properties_idx = 0;
+    // The info['private_properties_offsets'] array stores the offsets where
+    // each private property will reside in the final array. Here, for each
+    // private properties, we first append all the properties before it into
+    // the array, and then append the private property itself.
+    foreach ($this->info['private_properties'] as $prop_name => $prop_info) {
+      $offset = $this->info['private_properties_offsets'][$prop_name];
+      while ($properties_idx < $offset) {
+        $key = $old_properties_keys[$old_properties_idx];
+        $properties += array($key => $old_properties[$key]);
+        ++$properties_idx;
+        ++$old_properties_idx;
+      }
+      $properties += array($prop_name => $prop_info);
+      ++$properties_idx;
+    }
+    // After putting all the private properties in place, we append all the
+    // remaining properties.
+    $count = count($old_properties);
+    while ($old_properties_idx < $count) {
+      $key = $old_properties_keys[$old_properties_idx];
+      $properties += array($key => $old_properties[$key]);
+      ++$old_properties_idx;
+    }
+    $this->info['properties'] = $properties;
+  }
+
   private function getInfo() {
     if (!$this->info) {
       $this->info = self::fetch_recur($this->obj ?: $this->name);
-      $this->info['properties'] += $this->info['private_properties'];
+      // We store private properties in a separate info['private_properties']
+      // array, so when they are accessible, we merge them to the
+      // info['properties'] array.
+      $this->mergeProperties();
     }
     return $this->info;
   }
@@ -2378,12 +2415,15 @@ implements Reflector {
    */
   public function invoke($obj) {
     if ($this->info['accessible']) {
+      if ($this->isStatic()) {
+        // Docs says to pass null, but Zend completely ignores the argument
+        $obj = null;
+      }
       $args = func_get_args();
       array_shift($args);
       return hphp_invoke_method($obj, $this->info['class'], $this->info['name'],
                                 $args);
-    }
-    else {
+    } else {
       $className = $this->info['class'];
       $funcName = $this->info['name'];
       $access = $this->info['access'];

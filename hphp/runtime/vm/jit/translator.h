@@ -47,19 +47,16 @@
 /* Translator front-end. */
 namespace HPHP {
 namespace JIT {
-class HhbcTranslator;
-class IRTranslator;
+struct HhbcTranslator;
+struct IRTranslator;
 }
 namespace Debug {
-class DebugInfo;
+struct DebugInfo;
 }
 namespace JIT {
 
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
-
-class Translator;
-extern Translator* g_translator;
 
 /*
  * DIRTY when the live register state is spread across the stack and m_fixup,
@@ -174,24 +171,23 @@ struct TraceletContext;
 // Return a summary string of the bytecode in a tracelet.
 std::string traceletShape(const Tracelet&);
 
-class TranslationFailedExc : public std::runtime_error {
- public:
+struct TranslationFailedExc : std::runtime_error {
   TranslationFailedExc(const char* file, int line)
     : std::runtime_error(folly::format("TranslationFailedExc @ {}:{}",
                                        file, line).str())
   {}
 };
 
-class UnknownInputExc : public std::runtime_error {
- public:
-  const char* m_file; // must be static
-  const int m_line;
+struct UnknownInputExc : std::runtime_error {
   UnknownInputExc(const char* file, int line)
     : std::runtime_error(folly::format("UnknownInputExc @ {}:{}",
                                        file, line).str())
     , m_file(file)
     , m_line(line)
   {}
+
+  const char* m_file; // must be static
+  const int m_line;
 };
 
 #define punt() do { \
@@ -202,8 +198,7 @@ class UnknownInputExc : public std::runtime_error {
   throw JIT::UnknownInputExc(__FILE__, __LINE__); \
 } while(0);
 
-class GuardType {
- public:
+struct GuardType {
   explicit GuardType(DataType outer = KindOfAny,
                      DataType inner = KindOfNone);
   explicit GuardType(const RuntimeType& rtt);
@@ -346,6 +341,9 @@ struct TranslArgs {
   JIT::RegionDescPtr m_region;
 };
 
+class Translator;
+extern Translator* tx;
+
 /*
  * Translator annotates a tracelet with input/output locations/types.
  */
@@ -399,23 +397,21 @@ private:
                        const Location& l,
                        bool specialize = false);
 
-  virtual void syncWork() = 0;
-
-protected:
+public:
   enum TranslateResult {
     Failure,
     Retry,
     Success
   };
   static const char* translateResultName(TranslateResult r);
-  void traceStart(Offset initBcOffset, Offset initSpOffset, const Func* func);
-  virtual void traceCodeGen() = 0;
+  void traceStart(Offset initBcOffset, Offset initSpOffset, bool inGenerator,
+                  const Func* func);
   void traceEnd();
   void traceFree();
 
-protected:
   void requestResetHighLevelTranslator();
 
+public:
   /* translateRegion reads from the RegionBlacklist to determine when
    * to interpret an instruction, and adds failed instructions to the
    * blacklist so they're interpreted on the next attempt. */
@@ -423,16 +419,23 @@ protected:
   TranslateResult translateRegion(const RegionDesc& region,
                                   RegionBlacklist& interp);
 
+private:
   typedef std::map<TCA, TransID> TransDB;
-  TransDB                 m_transDB;
-  std::vector<TransRec>   m_translations;
-  std::vector<uint64_t*>  m_transCounters;
+  TransDB m_transDB;
+  std::vector<TransRec> m_translations;
+  std::vector<uint64_t*> m_transCounters;
 
-  int64_t              m_createdTime;
+  int64_t m_createdTime;
 
   std::unique_ptr<JIT::IRTranslator> m_irTrans;
 
-  SrcDB              m_srcDB;
+public:
+  JIT::IRTranslator* irTrans() {
+    return m_irTrans.get();
+  }
+
+private:
+  SrcDB m_srcDB;
 
   static Lease s_writeLease;
 
@@ -503,11 +506,6 @@ public:
                    Tracelet& t, TraceletContext& tas);
   static bool liveFrameIsPseudoMain();
 
-  inline void sync() {
-    if (tl_regState == VMRegState::CLEAN) return;
-    syncWork();
-  }
-
   inline bool stateIsDirty() {
     return tl_regState == VMRegState::DIRTY;
   }
@@ -516,12 +514,15 @@ public:
     return debug || RuntimeOption::EvalDumpTC;
   }
 
-protected:
+private:
   PCFilter m_dbgBLPC;
   hphp_hash_set<SrcKey,SrcKey::Hasher> m_dbgBLSrcKey;
   Mutex m_dbgBlacklistLock;
+
+public:
   bool isSrcKeyInBL(const SrcKey& sk);
 
+private:
   TransKind m_mode;
   ProfData* m_profData;
 
@@ -538,6 +539,9 @@ public:
 
   TransKind mode() const {
     return m_mode;
+  }
+  void setMode(TransKind mode) {
+    m_mode = mode;
   }
 
   int analysisDepth() const {
@@ -687,7 +691,7 @@ void getInputs(SrcKey startSk, NormalizedInstruction& inst, InputInfos& infos,
 void getInputsImpl(SrcKey startSk, NormalizedInstruction* inst,
                    int& currentStackOffset, InputInfos& inputs,
                    const Func* func, const LocalTypeFn& localType);
-bool outputIsPredicted(SrcKey startSk, NormalizedInstruction& inst);
+bool outputIsPredicted(NormalizedInstruction& inst);
 bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller);
 int locPhysicalOffset(Location l, const Func* f = nullptr);

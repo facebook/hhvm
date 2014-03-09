@@ -17,6 +17,8 @@
 
 #include <sstream>
 #include <boost/algorithm/string.hpp>
+#include <memory>
+#include <vector>
 
 #include "folly/Conv.h"
 #include "folly/Format.h"
@@ -472,48 +474,102 @@ std::string show(Type t) {
   case BTop:         ret = "Top";      break;
   }
 
-  if (t.m_data) {
-    if (t.m_bits != BObj && t.m_bits != BCls &&
-        t.m_bits != BOptObj) {
-      folly::toAppend("=", &ret);
-    }
-
-    switch (t.m_bits) {
-    case BOptInt:   // fallthrough
-    case BInt:      folly::toAppend(t.m_data->ival, &ret); break;
-    case BOptDbl:   // fallthrough
-    case BDbl:      folly::toAppend(t.m_data->dval, &ret); break;
-    case BOptSStr:  // fallthrough
-    case BSStr:     ret += escaped_string(t.m_data->sval); break;
-    case BOptSArr:  // fallthrough
-    case BSArr:     ret += array_string(t.m_data->aval);   break;
-    case BOptObj:
-      // fallthrough
-    case BCls:
-      switch (t.m_data->dobj.type) {
-      case DObj::Exact:
-        folly::toAppend("=", show(t.m_data->dobj.cls), &ret);
-        break;
-      case DObj::Sub:
-        folly::toAppend("<=", show(t.m_data->dobj.cls), &ret);
-        break;
-      }
-      break;
-    case BObj:
-      switch (t.m_data->dobj.type) {
-      case DObj::Exact:
-        folly::toAppend("=", show(t.m_data->dobj.cls), &ret);
-        break;
-      case DObj::Sub:
-        folly::toAppend("<=", show(t.m_data->dobj.cls), &ret);
-        break;
-      }
-      break;
-    default:
-      always_assert(0 && "invalid type with value");
-    }
+  switch (t.m_dataTag) {
+  case DataTag::None:
+    return ret;
+  case DataTag::Obj:
+  case DataTag::Cls:
+  case DataTag::ArrPacked:
+  case DataTag::ArrPackedN:
+  case DataTag::ArrStruct:
+  case DataTag::ArrMapN:
+    break;
+  case DataTag::Str:
+  case DataTag::ArrVal:
+  case DataTag::Int:
+  case DataTag::Dbl:
+    folly::toAppend("=", &ret);
+    break;
   }
 
+  switch (t.m_dataTag) {
+  case DataTag::Int: folly::toAppend(t.m_data.ival, &ret); break;
+  case DataTag::Dbl: folly::toAppend(t.m_data.dval, &ret); break;
+  case DataTag::Str: ret += escaped_string(t.m_data.sval); break;
+  case DataTag::ArrVal:
+    ret += array_string(t.m_data.aval);
+    break;
+  case DataTag::Obj:
+    switch (t.m_data.dobj.type) {
+    case DObj::Exact:
+      folly::toAppend("=", show(t.m_data.dobj.cls), &ret);
+      break;
+    case DObj::Sub:
+      folly::toAppend("<=", show(t.m_data.dobj.cls), &ret);
+      break;
+    }
+    break;
+  case DataTag::Cls:
+    switch (t.m_data.dcls.type) {
+    case DCls::Exact:
+      folly::toAppend("=", show(t.m_data.dcls.cls), &ret);
+      break;
+    case DCls::Sub:
+      folly::toAppend("<=", show(t.m_data.dcls.cls), &ret);
+      break;
+    }
+    break;
+  case DataTag::None:
+    break;
+  case DataTag::ArrPacked:
+    ret += folly::format(
+      "({})",
+      [&] {
+        using namespace folly::gen;
+        return from(t.m_data.apacked->elems)
+          | map([&] (const Type& t) { return show(t); })
+          | unsplit<std::string>(",");
+      }()
+    ).str();
+    break;
+  case DataTag::ArrPackedN:
+    ret += folly::format("([{}])", show(t.m_data.apackedn->type)).str();
+    break;
+  case DataTag::ArrStruct:
+    ret += folly::format(
+      "({})",
+      [&] {
+        using namespace folly::gen;
+        return from(t.m_data.astruct->map)
+          | map([&] (const std::pair<SString,Type>& kv) {
+              return folly::format("{}:{}",
+                kv.first->data(), show(kv.second)).str();
+            })
+          | unsplit<std::string>(",");
+      }()
+    ).str();
+    break;
+  case DataTag::ArrMapN:
+    ret += folly::format(
+      "([{}:{}])",
+      show(t.m_data.amapn->key),
+      show(t.m_data.amapn->val)
+    ).str();
+    break;
+  }
+
+  return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::string show(Context ctx) {
+  auto ret = std::string{};
+  if (ctx.cls) {
+    ret = ctx.cls->name->data();
+    ret += "::";
+  }
+  ret += ctx.func->name->data();
   return ret;
 }
 

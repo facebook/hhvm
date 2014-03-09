@@ -18,6 +18,7 @@
 #define incl_HPHP_TREADMILL_H_
 
 #include <stdint.h>
+#include <memory>
 
 namespace HPHP {
 
@@ -33,8 +34,17 @@ namespace Treadmill {
  *
  * The work item will be called from base rank.
  */
-void startRequest(int threadId);
-void finishRequest(int threadId);
+void startRequest();
+void finishRequest();
+
+/*
+ * Returns the oldest start time in seconds of all requests in flight.
+ * If there are no requests in flight the return value is 0.
+ * The value returned should be used as a conservative and true value
+ * for the oldest start time of any request in flight. In that sense
+ * the value is safe to compare against in a less-than relationship.
+ */
+int64_t getOldestStartTime();
 
 /*
  * Ask for memory to be freed (as in free, not delete) by the next
@@ -42,18 +52,18 @@ void finishRequest(int threadId);
  */
 void deferredFree(void*);
 
-typedef uint64_t GenCount;
+typedef int64_t GenCount;
 
 class WorkItem {
  protected:
   GenCount m_gen;
-  friend void finishRequest(int threadId);
+  friend void finishRequest();
 
  public:
   WorkItem();
   virtual ~WorkItem() { }
   virtual void operator()() = 0; // doesn't throw.
-  static void enqueue(WorkItem* gt);
+  static void enqueue(std::unique_ptr<WorkItem> gt);
 };
 
 class FreeMemoryTrigger : public WorkItem {

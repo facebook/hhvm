@@ -22,7 +22,7 @@
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <utility>
-#include "hphp/util/util.h"
+#include "folly/Bits.h"
 #include "hphp/util/atomic.h"
 
 namespace HPHP {
@@ -222,7 +222,7 @@ private:
   }
 
   size_t project(Table* tab, Key key) const {
-    assert(Util::isPowerOfTwo(tab->capac));
+    assert(folly::isPowTwo(tab->capac));
     return m_hash(key) & (tab->capac - 1);
   }
 

@@ -61,22 +61,29 @@ struct Simplifier {
    */
   SSATmp* simplify(IRInstruction*);
 
+  using ConstraintFunc = std::function<void(TypeConstraint)>;
+  SSATmp* simplifyAssertTypeOp(IRInstruction* inst, Type prevType,
+                               ConstraintFunc cf) const;
+
 private:
   SSATmp* simplifyMov(SSATmp* src);
   SSATmp* simplifyNot(SSATmp* src);
-  SSATmp* simplifyAbsInt(IRInstruction* inst);
   SSATmp* simplifyAbsDbl(IRInstruction* inst);
-  SSATmp* simplifyAdd(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifySub(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyMul(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyAddInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifySubInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyMulInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyAddDbl(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifySubDbl(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyMulDbl(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyMod(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyDivDbl(IRInstruction* inst);
-  SSATmp* simplifyBitAnd(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyBitOr(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyBitXor(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyAndInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyOrInt(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyXorInt(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyShl(IRInstruction* inst);
   SSATmp* simplifyShr(IRInstruction* inst);
-  SSATmp* simplifyLogicXor(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyXorBool(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyXorTrue(SSATmp* src);
   SSATmp* simplifyGt(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyGte(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyLt(SSATmp* src1, SSATmp* src2);
@@ -117,7 +124,6 @@ private:
   SSATmp* simplifyUnboxPtr(IRInstruction*);
   SSATmp* simplifyBoxPtr(IRInstruction*);
   SSATmp* simplifyCheckInit(IRInstruction* inst);
-  SSATmp* simplifyPrint(IRInstruction* inst);
   SSATmp* simplifyDecRef(IRInstruction* inst);
   SSATmp* simplifyIncRef(IRInstruction* inst);
   SSATmp* simplifyIncRefCtx(IRInstruction* inst);
@@ -131,7 +137,6 @@ private:
   SSATmp* simplifyGetCtxFwdCall(IRInstruction* inst);
   SSATmp* simplifyConvClsToCctx(IRInstruction* inst);
   SSATmp* simplifySpillStack(IRInstruction* inst);
-  SSATmp* simplifyCall(IRInstruction* inst);
   SSATmp* simplifyCmp(Opcode opName, IRInstruction* inst,
                       SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyCondJmp(IRInstruction*);
@@ -146,7 +151,6 @@ private:
   SSATmp* simplifyDecRefStack(IRInstruction*);
   SSATmp* simplifyDecRefLoc(IRInstruction*);
   SSATmp* simplifyLdLoc(IRInstruction*);
-  SSATmp* simplifyStRef(IRInstruction*);
   SSATmp* simplifyAssertNonNull(IRInstruction*);
 
 
@@ -174,7 +178,7 @@ private:
   SSATmp* simplifyCheckPackedArrayBounds(IRInstruction*);
   SSATmp* simplifyLdPackedArrayElem(IRInstruction*);
 
-private: // tracebuilder forwarders
+private: // IRBuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);
   template<class... Args> SSATmp* gen(Opcode op, Args&&...);
   template<class... Args> SSATmp* gen(Opcode op, BCMarker marker, Args&&...);
@@ -235,13 +239,6 @@ struct StackValueInfo {
 };
 
 /*
- * If the typeParam of inst isn't a subtype of oldType, filter out the
- * parts of the typeParam that aren't in oldType and return
- * true. Otherwise, return false.
- */
-bool filterAssertType(IRInstruction* inst, Type oldType);
-
-/*
  * Track down a value or type using the StkPtr chain.
  *
  * The spansCall parameter tracks whether the returned value's
@@ -257,13 +254,13 @@ StackValueInfo getStackValue(SSATmp* stack, uint32_t index);
  * given the particular depth.
  *
  * This function is used for computing available value for
- * DecRef->DecRefNZ conversions in tracebuilder.
+ * DecRef->DecRefNZ conversions in IRBuilder.
  */
 smart::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth);
 
 /*
  * Propagate very simple copies on the given instruction.
- * Specifically, Movs, and also IncRefs of non-refcounted types.
+ * Specifically, Movs.
  *
  * More complicated copy-propagation is performed in the Simplifier.
  */

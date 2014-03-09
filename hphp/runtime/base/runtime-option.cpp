@@ -21,17 +21,22 @@
 
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <map>
+#include <memory>
+#include <set>
+#include <vector>
 
 #include "folly/String.h"
 
 #include "hphp/util/hdf.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/network.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"
 #include "hphp/util/file-cache.h"
 #include "hphp/util/log-file-flusher.h"
+#include "hphp/util/file-util.h"
 
 #include "hphp/parser/scanner.h"
 
@@ -63,7 +68,7 @@ std::string RuntimeOption::PidFile = "www.pid";
 
 std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
-int RuntimeOption::LogHeaderMangle;
+int RuntimeOption::LogHeaderMangle = 0;
 bool RuntimeOption::AlwaysEscapeLog = false;
 bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::InjectedStackTrace = true;
@@ -94,10 +99,10 @@ int RuntimeOption::RaiseDebuggingFrequency = 1;
 int64_t RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
 int64_t RuntimeOption::StringOffsetLimit = 10 * 1024 * 1024; // 10MB
 
-std::string RuntimeOption::AccessLogDefaultFormat;
+std::string RuntimeOption::AccessLogDefaultFormat = "%h %l %u %t \"%r\" %>s %b";
 std::vector<AccessLogFileData> RuntimeOption::AccessLogs;
 
-std::string RuntimeOption::AdminLogFormat;
+std::string RuntimeOption::AdminLogFormat = "%h %t %s %U";
 std::string RuntimeOption::AdminLogFile;
 std::string RuntimeOption::AdminLogSymLink;
 
@@ -109,15 +114,13 @@ std::string RuntimeOption::ServerType = "libevent";
 std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerFileSocket;
 std::string RuntimeOption::ServerPrimaryIP;
-int RuntimeOption::ServerPort;
+int RuntimeOption::ServerPort = 80;
 int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
 bool RuntimeOption::ServerThreadRoundRobin = false;
-constexpr int kDefaultWarmupThrottleRequestCount = 0;
-int RuntimeOption::ServerWarmupThrottleRequestCount =
-  kDefaultWarmupThrottleRequestCount;
+int RuntimeOption::ServerWarmupThrottleRequestCount = 0;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::ServerThreadJobLIFOSwitchThreshold = INT_MAX;
 int RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds = -1;
@@ -132,18 +135,18 @@ bool RuntimeOption::PageletServerThreadRoundRobin = false;
 int RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::PageletServerQueueLimit = 0;
 bool RuntimeOption::PageletServerThreadDropStack = false;
-int RuntimeOption::FiberCount = 1;
+int RuntimeOption::FiberCount = Process::GetCPUCount();
 int RuntimeOption::RequestTimeoutSeconds = 0;
 int RuntimeOption::PspTimeoutSeconds = 0;
 size_t RuntimeOption::ServerMemoryHeadRoom = 0;
 int64_t RuntimeOption::RequestMemoryMaxBytes =
   std::numeric_limits<int64_t>::max();
 int64_t RuntimeOption::ImageMemoryMaxBytes = 0;
-int RuntimeOption::ResponseQueueCount;
-int RuntimeOption::ServerGracefulShutdownWait;
+int RuntimeOption::ResponseQueueCount = 0;
+int RuntimeOption::ServerGracefulShutdownWait = 0;
 bool RuntimeOption::ServerHarshShutdown = true;
 bool RuntimeOption::ServerEvilShutdown = true;
-int RuntimeOption::ServerDanglingWait;
+int RuntimeOption::ServerDanglingWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownListenNoWork = -1;
 int RuntimeOption::GzipCompressionLevel = 3;
@@ -162,15 +165,15 @@ std::string RuntimeOption::OutputHandler;
 bool RuntimeOption::ImplicitFlush = false;
 bool RuntimeOption::EnableEarlyFlush = true;
 bool RuntimeOption::ForceChunkedEncoding = false;
-int64_t RuntimeOption::MaxPostSize;
+int64_t RuntimeOption::MaxPostSize = 100;
 bool RuntimeOption::AlwaysPopulateRawPostData = true;
-int64_t RuntimeOption::UploadMaxFileSize;
-std::string RuntimeOption::UploadTmpDir;
-bool RuntimeOption::EnableFileUploads;
-bool RuntimeOption::EnableUploadProgress;
-int RuntimeOption::Rfc1867Freq;
-std::string RuntimeOption::Rfc1867Prefix;
-std::string RuntimeOption::Rfc1867Name;
+int64_t RuntimeOption::UploadMaxFileSize = 100;
+std::string RuntimeOption::UploadTmpDir = "/tmp";
+bool RuntimeOption::EnableFileUploads = true;
+bool RuntimeOption::EnableUploadProgress = false;
+int RuntimeOption::Rfc1867Freq = 256 * 1024;
+std::string RuntimeOption::Rfc1867Prefix = "vupload_";
+std::string RuntimeOption::Rfc1867Name = "video_ptoken";
 bool RuntimeOption::LibEventSyncSend = true;
 bool RuntimeOption::ExpiresActive = true;
 int RuntimeOption::ExpiresDefault = 2592000;
@@ -187,7 +190,7 @@ int RuntimeOption::SSLPortFd = -1;
 std::string RuntimeOption::SSLCertificateFile;
 std::string RuntimeOption::SSLCertificateKeyFile;
 std::string RuntimeOption::SSLCertificateDir;
-bool RuntimeOption::TLSDisableTLS1_2;
+bool RuntimeOption::TLSDisableTLS1_2 = false;
 std::string RuntimeOption::TLSClientCipherSpec;
 
 std::vector<std::shared_ptr<VirtualHost>> RuntimeOption::VirtualHosts;
@@ -250,7 +253,7 @@ bool RuntimeOption::UnserializationWhitelistCheck = false;
 bool RuntimeOption::UnserializationWhitelistCheckWarningOnly = true;
 
 std::string RuntimeOption::TakeoverFilename;
-int RuntimeOption::AdminServerPort;
+int RuntimeOption::AdminServerPort = 0;
 int RuntimeOption::AdminThreadCount = 1;
 std::string RuntimeOption::AdminPassword;
 std::set<std::string> RuntimeOption::AdminPasswords;
@@ -277,7 +280,7 @@ bool RuntimeOption::ServerErrorMessage = false;
 bool RuntimeOption::TranslateSource = false;
 bool RuntimeOption::RecordInput = false;
 bool RuntimeOption::ClearInputOnSuccess = true;
-std::string RuntimeOption::ProfilerOutputDir;
+std::string RuntimeOption::ProfilerOutputDir = "/tmp";
 std::string RuntimeOption::CoreDumpEmail;
 bool RuntimeOption::CoreDumpReport = true;
 std::string RuntimeOption::CoreDumpReportDirectory
@@ -305,7 +308,7 @@ int RuntimeOption::StatsMaxSlot = 12 * 6; // 12 hours
 int64_t RuntimeOption::MaxRSS = 0;
 int64_t RuntimeOption::MaxRSSPollingCycle = 0;
 int64_t RuntimeOption::DropCacheCycle = 0;
-int64_t RuntimeOption::MaxSQLRowCount = 10000;
+int64_t RuntimeOption::MaxSQLRowCount = 0;
 int64_t RuntimeOption::MaxMemcacheKeyCount = 0;
 int64_t RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::LockCodeMemory = false;
@@ -322,8 +325,8 @@ int RuntimeOption::DnsCacheKeyFrequencyUpdatePeriod = 1000;
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
 std::map<std::string, std::string> RuntimeOption::EnvVariables;
 
-std::string RuntimeOption::LightProcessFilePrefix;
-int RuntimeOption::LightProcessCount;
+std::string RuntimeOption::LightProcessFilePrefix = "./lightprocess";
+int RuntimeOption::LightProcessCount = 0;
 
 bool RuntimeOption::EnableHipHopSyntax = false;
 bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
@@ -339,6 +342,7 @@ int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::TimeoutsUseWallTime = true;
+bool RuntimeOption::CheckFlushOnUserClose = true;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -347,20 +351,6 @@ int RuntimeOption::GetScannerType() {
   if (EnableXHP) type |= Scanner::AllowXHPSyntax;
   if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   return type;
-}
-
-// Initializers for Eval flags.
-static inline bool evalJitDefault() {
-  // --mode server or --mode daemon
-  // run long enough to justify JIT
-  if (RuntimeOption::ServerExecutionMode()) {
-    return true;
-  }
-
-  // JIT explicitly turned on via .hhvm-jit file
-  static const char* path = "/.hhvm-jit";
-  struct stat dummy;
-  return stat(path, &dummy) == 0;
 }
 
 static inline std::string regionSelectorDefault() {
@@ -386,6 +376,11 @@ static inline bool hhirRelaxGuardsDefault() {
 
 static inline bool hhbcRelaxGuardsDefault() {
   return !RuntimeOption::EvalHHIRRelaxGuards;
+}
+
+static inline bool hhirRefcountOptsDefault() {
+  // TODO(t3091846)
+  return !RuntimeOption::EvalSimulateARM;
 }
 
 static inline bool simulateARMDefault() {
@@ -428,7 +423,7 @@ std::string RuntimeOption::RepoLocalMode;
 std::string RuntimeOption::RepoLocalPath;
 std::string RuntimeOption::RepoCentralPath;
 std::string RuntimeOption::RepoEvalMode;
-std::string RuntimeOption::RepoJournal;
+std::string RuntimeOption::RepoJournal = "delete";
 bool RuntimeOption::RepoCommit = true;
 bool RuntimeOption::RepoDebugInfo = true;
 // Missing: RuntimeOption::RepoAuthoritative's physical location is
@@ -440,7 +435,7 @@ std::string RuntimeOption::SandboxHome;
 std::string RuntimeOption::SandboxFallback;
 std::string RuntimeOption::SandboxConfFile;
 std::map<std::string, std::string> RuntimeOption::SandboxServerVariables;
-bool RuntimeOption::SandboxFromCommonRoot;
+bool RuntimeOption::SandboxFromCommonRoot = false;
 std::string RuntimeOption::SandboxDirectoriesRoot;
 std::string RuntimeOption::SandboxLogsRoot;
 
@@ -459,7 +454,7 @@ std::string RuntimeOption::DebuggerDefaultSandboxPath;
 std::string RuntimeOption::DebuggerStartupDocument;
 int RuntimeOption::DebuggerSignalTimeout = 1;
 
-std::string RuntimeOption::SendmailPath;
+std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
 
 long RuntimeOption::PregBacktraceLimit = 1000000;
@@ -475,8 +470,7 @@ bool RuntimeOption::HHProfServerAllocationProfile = false;
 int RuntimeOption::HHProfServerFilterMinAllocPerReq = 2;
 int RuntimeOption::HHProfServerFilterMinBytesPerReq = 128;
 
-// TODO (t3610856): Change the default to false once dependent code is fixed
-bool RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll = true;
+bool RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll = false;
 
 bool RuntimeOption::EnableHotProfiler = true;
 int RuntimeOption::ProfilerTraceBuffer = 2000000;
@@ -485,7 +479,7 @@ int RuntimeOption::ProfilerMaxTraceBuffer = 0;
 
 #ifdef FACEBOOK
 bool RuntimeOption::EnableFb303Server = true;
-int RuntimeOption::Fb303ServerPort;
+int RuntimeOption::Fb303ServerPort = 0;
 int RuntimeOption::Fb303ServerThreadStackSizeMb = 8;
 int RuntimeOption::Fb303ServerWorkerThreads = 1;
 int RuntimeOption::Fb303ServerPoolThreads = 1;
@@ -715,7 +709,7 @@ void RuntimeOption::Load(Hdf &config,
     ServerType = server["Type"].getString(ServerType);
     ServerIP = server["IP"].getString();
     ServerFileSocket = server["FileSocket"].getString();
-    ServerPrimaryIP = Util::GetPrimaryIP();
+    ServerPrimaryIP = GetPrimaryIP();
     ServerPort = server["Port"].getUInt16(80);
     ServerBacklog = server["Backlog"].getInt16(128);
     ServerConnectionLimit = server["ConnectionLimit"].getInt16(0);
@@ -723,7 +717,7 @@ void RuntimeOption::Load(Hdf &config,
     ServerThreadRoundRobin = server["ThreadRoundRobin"].getBool();
     ServerWarmupThrottleRequestCount =
       server["WarmupThrottleRequestCount"].getInt32(
-        kDefaultWarmupThrottleRequestCount
+        ServerWarmupThrottleRequestCount
       );
     ServerThreadDropCacheTimeoutSeconds =
       server["ThreadDropCacheTimeoutSeconds"].getInt32(0);
@@ -798,13 +792,13 @@ void RuntimeOption::Load(Hdf &config,
     TLSDisableTLS1_2 = server["TLSDisableTLS1_2"].getBool(false);
     TLSClientCipherSpec = server["TLSClientCipherSpec"].getString();
 
-    string srcRoot = Util::normalizeDir(server["SourceRoot"].getString());
+    string srcRoot = FileUtil::normalizeDir(server["SourceRoot"].getString());
     if (!srcRoot.empty()) SourceRoot = srcRoot;
     FileCache::SourceRoot = SourceRoot;
 
     server["IncludeSearchPaths"].get(IncludeSearchPaths);
     for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {
-      IncludeSearchPaths[i] = Util::normalizeDir(IncludeSearchPaths[i]);
+      IncludeSearchPaths[i] = FileUtil::normalizeDir(IncludeSearchPaths[i]);
     }
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
@@ -816,7 +810,7 @@ void RuntimeOption::Load(Hdf &config,
     ErrorDocument500 = server["ErrorDocument500"].getString();
     normalizePath(ErrorDocument500);
     FatalErrorMessage = server["FatalErrorMessage"].getString();
-    FontPath = Util::normalizeDir(server["FontPath"].getString());
+    FontPath = FileUtil::normalizeDir(server["FontPath"].getString());
     EnableStaticContentFromDisk =
       server["EnableStaticContentFromDisk"].getBool(true);
     EnableOnDemandUncompress =
@@ -890,7 +884,6 @@ void RuntimeOption::Load(Hdf &config,
     UploadMaxFileSize =
       (upload["UploadMaxFileSize"].getInt32(100)) * (1LL << 20);
     UploadTmpDir = upload["UploadTmpDir"].getString("/tmp");
-    RuntimeOption::AllowedDirectories.push_back(UploadTmpDir);
     EnableFileUploads = upload["EnableFileUploads"].getBool(true);
     EnableUploadProgress = upload["EnableUploadProgress"].getBool();
     Rfc1867Freq = upload["Rfc1867Freq"].getInt32(256 * 1024);
@@ -1009,7 +1002,7 @@ void RuntimeOption::Load(Hdf &config,
   }
   {
     Hdf admin = config["AdminServer"];
-    AdminServerPort = admin["Port"].getInt16(0);
+    AdminServerPort = admin["Port"].getUInt16(0);
     AdminThreadCount = admin["ThreadCount"].getInt32(1);
     AdminPassword = admin["Password"].getString();
     admin["Passwords"].get(AdminPasswords);
@@ -1097,6 +1090,7 @@ void RuntimeOption::Load(Hdf &config,
     EnableXHP = eval["EnableXHP"].getBool(false);
     EnableZendCompat = eval["EnableZendCompat"].getBool(false);
     TimeoutsUseWallTime = eval["TimeoutsUseWallTime"].getBool(true);
+    CheckFlushOnUserClose = eval["CheckFlushOnUserClose"].getBool(true);
 
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true
@@ -1136,7 +1130,7 @@ void RuntimeOption::Load(Hdf &config,
 #undef get_uint32
 #undef get_uint32_t
 #undef get_uint64
-    Util::low_malloc_huge_pages(EvalMaxLowMemHugePages);
+    low_malloc_huge_pages(EvalMaxLowMemHugePages);
     EvalJitEnableRenameFunction = EvalJitEnableRenameFunction || !EvalJit;
 
     EnableEmitSwitch = eval["EnableEmitSwitch"].getBool(true);
@@ -1230,8 +1224,7 @@ void RuntimeOption::Load(Hdf &config,
   {
     Hdf sandbox = config["Sandbox"];
     SandboxMode = sandbox["SandboxMode"].getBool();
-    SandboxPattern = Util::format_pattern
-      (sandbox["Pattern"].getString(), true);
+    SandboxPattern = format_pattern(sandbox["Pattern"].getString(), true);
     SandboxHome = sandbox["Home"].getString();
     SandboxFallback = sandbox["Fallback"].getString();
     SandboxConfFile = sandbox["ConfFile"].getString();
@@ -1254,7 +1247,7 @@ void RuntimeOption::Load(Hdf &config,
   {
     Hdf hhprofServer = config["HHProfServer"];
     HHProfServerEnabled = hhprofServer["Enabled"].getBool(false);
-    HHProfServerPort = hhprofServer["Port"].getInt16(4327);
+    HHProfServerPort = hhprofServer["Port"].getUInt16(4327);
     HHProfServerThreads = hhprofServer["Threads"].getInt16(2);
     HHProfServerTimeoutSeconds =
       hhprofServer["TimeoutSeconds"].getInt64(30);
@@ -1272,15 +1265,14 @@ void RuntimeOption::Load(Hdf &config,
   }
   {
     Hdf simplexml = config["SimpleXML"];
-    // TODO (t3610856): Change the default to false once dependent code is fixed
     SimpleXMLEmptyNamespaceMatchesAll =
-      simplexml["EmptyNamespaceMatchesAll"].getBool(true);
+      simplexml["EmptyNamespaceMatchesAll"].getBool(false);
   }
 #ifdef FACEBOOK
   {
     Hdf fb303Server = config["Fb303Server"];
     EnableFb303Server = fb303Server["Enable"].getBool(true);
-    Fb303ServerPort = fb303Server["Port"].getInt16(0);
+    Fb303ServerPort = fb303Server["Port"].getUInt16(0);
     Fb303ServerThreadStackSizeMb = fb303Server["ThreadStackSizeMb"].getInt16(8);
     Fb303ServerWorkerThreads = fb303Server["WorkerThreads"].getInt16(1);
     Fb303ServerPoolThreads = fb303Server["PoolThreads"].getInt16(1);
@@ -1288,6 +1280,92 @@ void RuntimeOption::Load(Hdf &config,
 #endif
 
   refineStaticStringTableSize();
+
+  // Language and Misc Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY, "expose_php",
+                   &RuntimeOption::ExposeHPHP);
+
+  // Data Handling
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "post_max_size",
+                   IniSetting::SetAndGet<int64_t>(
+                     nullptr,
+                     []() {
+                       return VirtualHost::GetMaxPostSize();
+                     }
+                   ),
+                   &RuntimeOption::MaxPostSize);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "always_populate_raw_post_data",
+                   &RuntimeOption::AlwaysPopulateRawPostData);
+
+  // Paths and Directories
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "doc_root", &RuntimeOption::SourceRoot);
+
+  // FastCGI
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
+                   "pid", &RuntimeOption::PidFile);
+
+  // File Uploads
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "file_uploads", "true",
+                   &RuntimeOption::EnableFileUploads);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "upload_tmp_dir", &RuntimeOption::UploadTmpDir);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "upload_max_filesize",
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) {
+                       return ini_on_update(
+                         value, RuntimeOption::UploadMaxFileSize);
+                     },
+                     []() {
+                       int uploadMaxFilesize =
+                         VirtualHost::GetUploadMaxFileSize() / (1 << 20);
+                       return std::to_string(uploadMaxFilesize) + "M";
+                     }
+                   ));
+  // Filesystem and Streams Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "allow_url_fopen",
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) { return false; },
+                     []() { return "1"; }));
+
+  // HPHP specific
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.compiler_id",
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) { return false; },
+                     []() { return getHphpCompilerId(); }
+                   ));
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.compiler_version",
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) { return false; },
+                     []() { return getHphpCompilerVersion(); }
+                   ));
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hhvm.ext_zend_compat",
+                   IniSetting::SetAndGet<bool>(
+                     [](const bool& value) { return false; },
+                     nullptr
+                   ),
+                   &RuntimeOption::EnableZendCompat),
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.build_id",
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) { return false; },
+                     nullptr
+                   ),
+                   &RuntimeOption::BuildId);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "notice_frequency",
+                   &RuntimeOption::NoticeFrequency);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "warning_frequency",
+                   &RuntimeOption::WarningFrequency);
 
   Extension::LoadModules(config);
   if (overwrites) Loaded = true;

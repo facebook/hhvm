@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/string-data.h"
 
 #include <cmath>
+#include <utility>
 
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -62,7 +63,7 @@ std::pair<StringData*,uint32_t> allocFlatForLen(uint32_t len) {
   }
 
   auto const cap = needed;
-  auto const ret = MM().smartMallocSizeBigLogged(cap);
+  auto const ret = MM().smartMallocSizeBigLogged<true>(cap);
   return std::make_pair(static_cast<StringData*>(ret.first),
                         static_cast<uint32_t>(ret.second));
 }
@@ -89,7 +90,7 @@ StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
   }
 
   auto const sd = static_cast<StringData*>(
-    Util::low_malloc(sizeof(StringData) + sl.len + 1)
+    low_malloc(sizeof(StringData) + sl.len + 1)
   );
   auto const data = reinterpret_cast<char*>(sd + 1);
 
@@ -128,7 +129,7 @@ StringData* StringData::MakeUncounted(StringSlice sl) {
 void StringData::destructStatic() {
   assert(checkSane());
   assert(isFlat());
-  Util::low_free(this);
+  low_free(this);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -652,7 +653,7 @@ strhash_t StringData::hashHelper() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Debug
 
-std::string StringData::toCPPString() const {
+std::string StringData::toCppString() const {
   StringSlice s = slice();
   return std::string(s.ptr, s.len);
 }

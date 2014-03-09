@@ -21,6 +21,9 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include <libmemcached/memcached.h>
+#include <map>
+#include <memory>
+#include <vector>
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -81,6 +84,8 @@ extern const int64_t q_Memcached$$RES_TIMEOUT;
 extern const int64_t q_Memcached$$RES_BAD_KEY_PROVIDED;
 extern const int64_t q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE;
 extern const int64_t q_Memcached$$RES_PAYLOAD_FAILURE;
+extern const int64_t q_Memcached$$RES_NOT_SUPPORTED;
+extern const int64_t q_Memcached$$RES_INVALID_HOST_PROTOCOL;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Memcached

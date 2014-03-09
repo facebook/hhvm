@@ -39,6 +39,7 @@
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/base/persistent-resource-store.h"
 #include "hphp/util/logger.h"
 
 #define PHP_NORMAL_READ 0x0001
@@ -77,7 +78,7 @@ static bool get_sockaddr(sockaddr *sa, socklen_t salen,
   case AF_INET:
     {
       struct sockaddr_in *sin = (struct sockaddr_in *)sa;
-      address = String(Util::safe_inet_ntoa(sin->sin_addr));
+      address = String(safe_inet_ntoa(sin->sin_addr));
       port = htons(sin->sin_port);
     }
     return true;
@@ -142,8 +143,8 @@ static bool php_set_inet_addr(struct sockaddr_in *sin, const char *address,
   if (inet_aton(address, &tmp)) {
     sin->sin_addr.s_addr = tmp.s_addr;
   } else {
-    Util::HostEnt result;
-    if (!Util::safe_gethostbyname(address, result)) {
+    HostEnt result;
+    if (!safe_gethostbyname(address, result)) {
       /* Note: < -10000 indicates a host lookup error */
       SOCKET_ERROR(sock, "Host lookup failed", (-10000 - result.herr));
       return false;
@@ -225,7 +226,7 @@ static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
                                    int &count, short flag) {
   assert(sockets.is(KindOfArray));
   Array sock_array = sockets.toArray();
-  Array ret;
+  Array ret = Array::Create();
   for (ArrayIter iter(sock_array); iter; ++iter) {
     pollfd &fd = fds[nfds++];
     assert(fd.fd == iter.second().toResource().getTyped<File>()->fd());
@@ -290,7 +291,7 @@ static int php_read(Socket *sock, void *buf, int maxlen, int flags) {
   return n;
 }
 
-static bool create_new_socket(const Util::HostURL &hosturl,
+static bool create_new_socket(const HostURL &hosturl,
                               Variant &errnum, Variant &errstr, Resource &ret,
                               Socket *&sock, double timeout) {
   int domain = hosturl.isIPv6() ? AF_INET6 : AF_INET;
@@ -331,8 +332,8 @@ Variant f_socket_create(int domain, int type, int protocol) {
 }
 
 Variant f_socket_create_listen(int port, int backlog /* = 128 */) {
-  Util::HostEnt result;
-  if (!Util::safe_gethostbyname("0.0.0.0", result)) {
+  HostEnt result;
+  if (!safe_gethostbyname("0.0.0.0", result)) {
     return false;
   }
 
@@ -696,13 +697,13 @@ Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
 Variant f_socket_server(const String& hostname, int port /* = -1 */,
                         VRefParam errnum /* = null */,
                         VRefParam errstr /* = null */) {
-  Util::HostURL hosturl(static_cast<const std::string>(hostname), port);
+  HostURL hosturl(static_cast<const std::string>(hostname), port);
   return socket_server_impl(hosturl,
                             k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN,
                             errnum, errstr);
 }
 
-Variant socket_server_impl(const Util::HostURL &hosturl,
+Variant socket_server_impl(const HostURL &hosturl,
                            int flags, /* = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN */
                            VRefParam errnum /* = null */,
                            VRefParam errstr /* = null */) {
@@ -957,7 +958,7 @@ Variant f_socket_recvfrom(CResRef socket, VRefParam buf, int len, int flags,
       recv_buf[retval] = 0;
       buf = String(recv_buf, retval, AttachString);
 
-      name = String(Util::safe_inet_ntoa(sin.sin_addr));
+      name = String(safe_inet_ntoa(sin.sin_addr));
       if (name.toString().empty()) {
         name = s_0_0_0_0;
       }
@@ -1040,7 +1041,7 @@ void f_socket_clear_error(CResRef socket /* = null_object */) {
 ///////////////////////////////////////////////////////////////////////////////
 // fsock: treating sockets as "file"
 
-Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
+Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
                       VRefParam errstr, double timeout, bool persistent) {
 
   std::string key;
@@ -1048,7 +1049,7 @@ Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
     key = hosturl.getHostURL() + ":" +
           boost::lexical_cast<std::string>(hosturl.getPort());
     Socket *sock =
-      dynamic_cast<Socket*>(g_persistentObjects->get("socket", key.c_str()));
+      dynamic_cast<Socket*>(g_persistentResources->get("socket", key.c_str()));
     if (sock) {
       if (sock->getError() == 0 && sock->checkLiveness()) {
         return Resource(sock);
@@ -1056,14 +1057,17 @@ Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
 
       // socket had an error earlier, we need to remove it from persistent
       // storage, and create a new one
-      g_persistentObjects->remove("socket", key.c_str());
+      g_persistentResources->remove("socket", key.c_str());
     }
   }
 
   Resource ret;
   Socket *sock = NULL;
 
-  if (timeout < 0) timeout = g_context->getSocketDefaultTimeout();
+  if (timeout < 0) {
+    timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+      m_reqInjectionData.getSocketDefaultTimeout();
+  }
   // test if protocol is SSL
   SSLSocket *sslsock = SSLSocket::Create(hosturl, timeout);
   if (sslsock) {
@@ -1142,7 +1146,7 @@ Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
 
   if (persistent) {
     assert(!key.empty());
-    g_persistentObjects->set("socket", key.c_str(), sock);
+    g_persistentResources->set("socket", key.c_str(), sock);
   }
 
   return ret;
@@ -1152,7 +1156,7 @@ Variant f_fsockopen(const String& hostname, int port /* = -1 */,
                     VRefParam errnum /* = null */,
                     VRefParam errstr /* = null */,
                     double timeout /* = -1.0 */) {
-  Util::HostURL hosturl(static_cast<const std::string>(hostname), port);
+  HostURL hosturl(static_cast<const std::string>(hostname), port);
   return sockopen_impl(hosturl, errnum, errstr, timeout, false);
 }
 
@@ -1161,7 +1165,7 @@ Variant f_pfsockopen(const String& hostname, int port /* = -1 */,
                      VRefParam errstr /* = null */,
                      double timeout /* = -1.0 */) {
   // TODO: persistent socket handling
-  Util::HostURL hosturl(static_cast<const std::string>(hostname), port);
+  HostURL hosturl(static_cast<const std::string>(hostname), port);
   return sockopen_impl(hosturl, errnum, errstr, timeout, true);
 }
 

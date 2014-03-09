@@ -22,7 +22,6 @@
 #include <emmintrin.h>
 #include <stdint.h>
 
-#include "hphp/util/util.h"
 #include "hphp/util/assertions.h"
 
 extern "C" {

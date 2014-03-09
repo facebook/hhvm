@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/hhbbc/hhbbc.h"
+#include <memory>
 
 #include "hphp/runtime/vm/unit.h"
 

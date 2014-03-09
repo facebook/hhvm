@@ -8,7 +8,7 @@ array(1) {
         [0]=>
         string(21) "Accept-Encoding: gzip"
         [1]=>
-        string(39) "User-Agent: Composer/source PHP 5.4.99)"
+        string(39) "User-Agent: Composer/source PHP 5.5.99)"
       }
     }
   }

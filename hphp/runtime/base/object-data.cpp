@@ -15,6 +15,7 @@
 */
 
 #include "folly/Hash.h"
+#include <vector>
 #include "folly/ScopeGuard.h"
 
 #include "hphp/runtime/base/complex-types.h"
@@ -36,6 +37,7 @@
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
@@ -74,7 +76,7 @@ static_assert(sizeof(ObjectData) == 32, "Change this only on purpose");
 
 bool ObjectData::destruct() {
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
-    g_vmContext->m_liveBCObjs.erase(this);
+    g_context->m_liveBCObjs.erase(this);
   }
   if (!noDestruct()) {
     setNoDestruct();
@@ -83,7 +85,7 @@ bool ObjectData::destruct() {
       // We want to minimize the PHP code we run while propagating fatals, so
       // we do this check here on a very common path, in the relativley slower
       // case.
-      auto& faults = g_vmContext->m_faults;
+      auto& faults = g_context->m_faults;
       if (!faults.empty()) {
         if (faults.back().m_faultType == Fault::Type::CppException) return true;
       }
@@ -95,7 +97,7 @@ bool ObjectData::destruct() {
       tvWriteNull(&retval);
       try {
         // Call the destructor method
-        g_vmContext->invokeFuncFew(&retval, meth, this);
+        g_context->invokeFuncFew(&retval, meth, this);
       } catch (...) {
         // Swallow any exceptions that escape the __destruct method
         handle_destructor_exception();
@@ -128,14 +130,14 @@ bool ObjectData::o_toBooleanImpl() const noexcept {
       return c_Vector::ToBool(this);
     } else if (m_cls == c_Map::classof()) {
       return c_Map::ToBool(this);
-    } else if (m_cls == c_FrozenMap::classof()) {
-      return c_FrozenMap::ToBool(this);
+    } else if (m_cls == c_ImmMap::classof()) {
+      return c_ImmMap::ToBool(this);
     } else if (m_cls == c_Set::classof()) {
       return c_Set::ToBool(this);
-    } else if (m_cls == c_FrozenVector::classof()) {
-      return c_FrozenVector::ToBool(this);
-    } else if (m_cls == c_FrozenSet::classof()) {
-      return c_FrozenSet::ToBool(this);
+    } else if (m_cls == c_ImmVector::classof()) {
+      return c_ImmVector::ToBool(this);
+    } else if (m_cls == c_ImmSet::classof()) {
+      return c_ImmSet::ToBool(this);
     } else {
       always_assert(false);
     }
@@ -222,15 +224,15 @@ MutableArrayIter ObjectData::begin(Variant* key, Variant& val,
 
 Array& ObjectData::dynPropArray() const {
   assert(getAttribute(HasDynPropArr));
-  assert(g_vmContext->dynPropTable.count(this));
-  return g_vmContext->dynPropTable[this].arr();
+  assert(g_context->dynPropTable.count(this));
+  return g_context->dynPropTable[this].arr();
 }
 
 Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
   if (getAttribute(HasDynPropArr)) return dynPropArray();
 
-  assert(!g_vmContext->dynPropTable.count(this));
-  auto& arr = g_vmContext->dynPropTable[this].arr();
+  assert(!g_context->dynPropTable.count(this));
+  auto& arr = g_context->dynPropTable[this].arr();
   arr = Array::attach(HphpArray::MakeReserve(numDynamic));
   setAttribute(HasDynPropArr);
   return arr;
@@ -428,12 +430,12 @@ Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
       return c_Set::ToArray(this);
     } else if (m_cls == c_Pair::classof()) {
       return c_Pair::ToArray(this);
-    } else if (m_cls == c_FrozenVector::classof()) {
-      return c_FrozenVector::ToArray(this);
-    } else if (m_cls == c_FrozenMap::classof()) {
-      return c_FrozenMap::ToArray(this);
-    } else if (m_cls == c_FrozenSet::classof()) {
-      return c_FrozenSet::ToArray(this);
+    } else if (m_cls == c_ImmVector::classof()) {
+      return c_ImmVector::ToArray(this);
+    } else if (m_cls == c_ImmMap::classof()) {
+      return c_ImmMap::ToArray(this);
+    } else if (m_cls == c_ImmSet::classof()) {
+      return c_ImmSet::ToArray(this);
     }
     // It's undefined what happens if you reach not_reached. We want to be sure
     // to hard fail if we get here.
@@ -572,7 +574,7 @@ Variant ObjectData::o_invoke(const String& s, CVarRef params,
     return Variant(Variant::NullInit());
   }
   Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, ctx, params);
+  g_context->invokeFunc((TypedValue*)&ret, ctx, params);
   return ret;
 }
 
@@ -605,7 +607,7 @@ Variant ObjectData::o_invoke_few_args(const String& s, int count,
   }
 
   Variant ret;
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, count, args);
+  g_context->invokeFuncFew(ret.asTypedValue(), ctx, count, args);
   return ret;
 }
 
@@ -626,7 +628,41 @@ const StaticString
   s_PHP_DebugDisplay("__PHP_DebugDisplay"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
-  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name");
+  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name"),
+  s_debugInfo("__debugInfo");
+
+/* Get properties from the actual object unless we're
+ * serializing for var_dump()/print_r() and the object
+ * exports a __debugInfo() magic method.
+ * In which case, call that and use the array it returns.
+ */
+inline Array getSerializeProps(const ObjectData* obj,
+                               VariableSerializer* serializer) {
+  if ((serializer->getType() != VariableSerializer::Type::PrintR) &&
+      (serializer->getType() != VariableSerializer::Type::VarDump)) {
+    return obj->o_toArray();
+  }
+  auto cls = obj->getVMClass();
+  auto debuginfo = cls->lookupMethod(s_debugInfo.get());
+  if (!debuginfo) {
+    return obj->o_toArray();
+  }
+  if (debuginfo->attrs() & (AttrPrivate|AttrProtected|
+                            AttrAbstract|AttrStatic)) {
+    raise_warning("%s::__debugInfo() must be public and non-static",
+                  cls->name()->data());
+    return obj->o_toArray();
+  }
+  Variant ret = const_cast<ObjectData*>(obj)->o_invoke_few_args(s_debugInfo, 0);
+  if (ret.isArray()) {
+    return ret.toArray();
+  }
+  if (ret.isNull()) {
+    return Array::Create();
+  }
+  raise_error("__debugInfo() must return an array");
+  not_reached();
+}
 
 void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   bool handleSleep = false;
@@ -650,7 +686,8 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     }
     // Only serialize CPP extension type instances which can actually
     // be deserialized.
-    if (getAttribute(IsCppBuiltin) && !getVMClass()->isCppSerializable()) {
+    auto cls = getVMClass();
+    if (cls->instanceCtor() && !cls->isCppSerializable()) {
       Object placeholder = ObjectData::newInstance(
         SystemLib::s___PHP_Unserializable_ClassClass);
       placeholder->o_set(s_PHP_Unserializable_Class_Name, o_getClassName());
@@ -778,7 +815,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       collectionSerialize(const_cast<ObjectData*>(this), serializer);
     } else {
       const String& className = o_getClassName();
-      Array properties = o_toArray();
+      Array properties = getSerializeProps(this, serializer);
       if (serializer->getType() ==
         VariableSerializer::Type::DebuggerSerialize) {
         try {
@@ -827,16 +864,16 @@ ObjectData* ObjectData::clone() {
         return c_Vector::Clone(this);
       } else if (m_cls == c_Map::classof()) {
         return c_Map::Clone(this);
-      } else if (m_cls == c_FrozenMap::classof()) {
-        return c_FrozenMap::Clone(this);
+      } else if (m_cls == c_ImmMap::classof()) {
+        return c_ImmMap::Clone(this);
       } else if (m_cls == c_Set::classof()) {
         return c_Set::Clone(this);
       } else if (m_cls == c_Pair::classof()) {
         return c_Pair::Clone(this);
-      } else if (m_cls == c_FrozenVector::classof()) {
-        return c_FrozenVector::Clone(this);
-      } else if (m_cls == c_FrozenSet::classof()) {
-        return c_FrozenSet::Clone(this);
+      } else if (m_cls == c_ImmVector::classof()) {
+        return c_ImmVector::Clone(this);
+      } else if (m_cls == c_ImmSet::classof()) {
+        return c_ImmSet::Clone(this);
       } else {
         always_assert(false);
       }
@@ -869,7 +906,7 @@ Variant ObjectData::offsetGet(Variant key) {
     return uninit_null();
   }
   Variant v;
-  g_vmContext->invokeFuncFew(v.asTypedValue(), method,
+  g_context->invokeFuncFew(v.asTypedValue(), method,
                              this, nullptr, 1, key.asCell());
   return v;
 }
@@ -924,7 +961,7 @@ ObjectData* ObjectData::callCustomInstanceInit() {
   // reasonable refcount.
   try {
     incRefCount();
-    g_vmContext->invokeFuncFew(&tv, init, this);
+    g_context->invokeFuncFew(&tv, init, this);
     decRefCount();
     assert(!IS_REFCOUNTED_TYPE(tv.m_type));
   } catch (...) {
@@ -941,13 +978,13 @@ ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
 }
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  return new (MM().smartMallocSizeBigLogged(size).first)
+  return new (MM().smartMallocSizeBigLogged<false>(size).first)
     ObjectData(cls, NoInit::noinit);
 }
 
 NEVER_INLINE
 static void freeDynPropArray(ObjectData* inst) {
-  auto& table = g_vmContext->dynPropTable;
+  auto& table = g_context->dynPropTable;
   auto it = table.find(inst);
   assert(it != end(table));
   it->second.destroy();
@@ -965,7 +1002,7 @@ ObjectData::~ObjectData() {
 void ObjectData::DeleteObject(ObjectData* objectData) {
   auto const cls = objectData->getVMClass();
 
-  if (UNLIKELY(objectData->getAttribute(IsCppBuiltin))) {
+  if (UNLIKELY(objectData->getAttribute(InstanceDtor))) {
     return cls->instanceDtor()(objectData, cls);
   }
 
@@ -1162,7 +1199,7 @@ struct MagicInvoker {
     TypedValue args[1] = {
       make_tv<KindOfString>(const_cast<StringData*>(info.key))
     };
-    g_vmContext->invokeFuncFew(retval, meth, info.obj, nullptr, 1, args);
+    g_context->invokeFuncFew(retval, meth, info.obj, nullptr, 1, args);
   }
 };
 
@@ -1181,7 +1218,7 @@ bool ObjectData::invokeSet(TypedValue* retval, const StringData* key,
         make_tv<KindOfString>(const_cast<StringData*>(key)),
         *tvToCell(val)
       };
-      g_vmContext->invokeFuncFew(retval, meth, this, nullptr, 2, args);
+      g_context->invokeFuncFew(retval, meth, this, nullptr, 2, args);
     }
   );
 }
@@ -1656,7 +1693,7 @@ Variant ObjectData::invokeSleep() {
   const Func* method = m_cls->lookupMethod(s___sleep.get());
   if (method) {
     TypedValue tv;
-    g_vmContext->invokeFuncFew(&tv, method, this);
+    g_context->invokeFuncFew(&tv, method, this);
     return tvAsVariant(&tv);
   } else {
     return uninit_null();
@@ -1667,7 +1704,7 @@ Variant ObjectData::invokeToDebugDisplay() {
   const Func* method = m_cls->lookupMethod(s___toDebugDisplay.get());
   if (method) {
     TypedValue tv;
-    g_vmContext->invokeFuncFew(&tv, method, this);
+    g_context->invokeFuncFew(&tv, method, this);
     return tvAsVariant(&tv);
   } else {
     return uninit_null();
@@ -1678,7 +1715,7 @@ Variant ObjectData::invokeWakeup() {
   const Func* method = m_cls->lookupMethod(s___wakeup.get());
   if (method) {
     TypedValue tv;
-    g_vmContext->invokeFuncFew(&tv, method, this);
+    g_context->invokeFuncFew(&tv, method, this);
     return tvAsVariant(&tv);
   } else {
     return uninit_null();
@@ -1699,7 +1736,7 @@ String ObjectData::invokeToString() {
     return empty_string;
   }
   TypedValue tv;
-  g_vmContext->invokeFuncFew(&tv, method, this);
+  g_context->invokeFuncFew(&tv, method, this);
   if (!IS_STRING_TYPE(tv.m_type)) {
     // Discard the value returned by the __toString() method and raise
     // a recoverable error
@@ -1754,6 +1791,9 @@ ObjectData* ObjectData::cloneImpl() {
   ObjectData* obj;
   Object o = obj = ObjectData::newInstance(m_cls);
   cloneSet(obj);
+  if (UNLIKELY(getAttribute(HasNativeData))) {
+    Native::nativeDataInstanceCopy(obj, this);
+  }
 
   auto const hasCloneBit = getAttribute(HasClone);
 
@@ -1769,7 +1809,7 @@ ObjectData* ObjectData::cloneImpl() {
 
   TypedValue tv;
   tvWriteNull(&tv);
-  g_vmContext->invokeFuncFew(&tv, method, obj);
+  g_context->invokeFuncFew(&tv, method, obj);
   tvRefcountedDecRef(&tv);
 
   return o.detach();

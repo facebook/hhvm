@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_extended.h"
+#include <memory>
+#include <vector>
 #include "hphp/runtime/debugger/cmd/all.h"
 #include "hphp/util/logger.h"
 

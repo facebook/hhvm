@@ -17,7 +17,7 @@
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
-
+#include "hphp/util/file-util.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/ext/ext_error.h"
@@ -87,7 +87,7 @@ static void bt_handler(int sig) {
                  +strlen(RuntimeOption::CoreDumpEmail.c_str())+1];
     sprintf(cmdline, format, tracefn, Process::GetAppName().c_str(),
             RuntimeOption::CoreDumpEmail.c_str());
-    Util::ssystem(cmdline);
+    FileUtil::ssystem(cmdline);
   }
 
   // Calling all of these library functions in a signal handler
@@ -104,7 +104,7 @@ static void bt_handler(int sig) {
     // sync up gdb Dwarf info so that gdb can do a full backtrace
     // from the core file. Do this at the very end as syncing needs
     // to allocate memory for the ELF file.
-    g_vmContext->syncGdbState();
+    g_context->syncGdbState();
   }
 
   // re-raise the signal and pass it to the default handler

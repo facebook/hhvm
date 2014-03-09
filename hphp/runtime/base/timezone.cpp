@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP {
 
@@ -55,11 +56,11 @@ public:
   "methods and you are still getting this warning, you most likely " \
   "misspelled the timezone identifier. "
 
-    Util::string_printf(m_warning, DATE_TZ_ERRMSG
-                        "We selected '%s' for '%s/%.1f/%s' instead",
-                        tzid, ta ? ta->tm_zone : "Unknown",
-                        ta ? (float) (ta->tm_gmtoff / 3600) : 0,
-                        ta ? (ta->tm_isdst ? "DST" : "no DST") : "Unknown");
+    string_printf(m_warning, DATE_TZ_ERRMSG
+                  "We selected '%s' for '%s/%.1f/%s' instead",
+                  tzid, ta ? ta->tm_zone : "Unknown",
+                  ta ? (float) (ta->tm_gmtoff / 3600) : 0,
+                  ta ? (ta->tm_isdst ? "DST" : "no DST") : "Unknown");
   }
 };
 static GuessedTimeZone s_guessed_timezone;

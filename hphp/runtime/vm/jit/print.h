@@ -20,7 +20,8 @@
 #include <iosfwd>
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/linear-scan.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
+#include "hphp/runtime/vm/jit/type.h"
 
 namespace HPHP {
 namespace JIT {
@@ -29,44 +30,34 @@ struct IRInstruction;
 class  SSATmp;
 struct Block;
 struct AsmInfo;
-struct LifetimeInfo;
 
 // IRInstruction
 void printInstr(std::ostream& ostream, const IRInstruction*,
                 const RegAllocInfo* regs = nullptr,
-                const LifetimeInfo* lifetime = nullptr,
                 const GuardConstraints* guards = nullptr);
 void printDsts(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs,
-               const LifetimeInfo* lifetime);
+               const RegAllocInfo* regs);
 void printSrcs(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs,
-               const LifetimeInfo* lifetime);
+               const RegAllocInfo* regs);
 void printOpcode(std::ostream& os, const IRInstruction* inst,
                  const GuardConstraints* guards);
 void printSrcs(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs,
-               const LifetimeInfo* lifetime = nullptr);
+               const RegAllocInfo* regs);
 void printDsts(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs,
-               const LifetimeInfo* lifetime = nullptr);
+               const RegAllocInfo* regs);
 void print(std::ostream& ostream, const IRInstruction*,
            const RegAllocInfo* regs = nullptr,
-           const LifetimeInfo* lifetime = nullptr,
            const GuardConstraints* guards = nullptr);
 void print(const IRInstruction*);
 
 // SSATmp
 void print(std::ostream& ostream, const SSATmp*,
-           const PhysLoc* loc = nullptr,
-           const LifetimeInfo* lifetime = nullptr,
-           bool printLastUse = false);
+           const PhysLoc* loc = nullptr);
 void print(const SSATmp*);
 
 // Block
 void print(std::ostream& os, const Block* block,
            const RegAllocInfo* regs = nullptr,
-           const LifetimeInfo* lifetime = nullptr,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr,
            BCMarker* curMarker = nullptr);
@@ -75,7 +66,6 @@ void print(const Block* block);
 // Unit
 void print(std::ostream& ostream, const IRUnit&,
            const RegAllocInfo* regs = nullptr,
-           const LifetimeInfo* lifetime = nullptr,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr);
 void print(const IRUnit& unit);
@@ -95,9 +85,12 @@ static const int kOptLevel = 4;
 static const int kExtraLevel = 6;
 
 void dumpTrace(int level, const IRUnit&, const char* caption,
-               const RegAllocInfo* regs = nullptr,
-               const LifetimeInfo* lifetime = nullptr,
-               AsmInfo* ai = nullptr, const GuardConstraints* guards = nullptr);
+               const RegAllocInfo* regs = nullptr, AsmInfo* ai = nullptr,
+               const GuardConstraints* guards = nullptr);
+
+inline std::ostream& operator<<(std::ostream& os, Type t) {
+  return os << t.toString();
+}
 
 }}
 

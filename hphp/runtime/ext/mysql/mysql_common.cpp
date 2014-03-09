@@ -21,6 +21,8 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <poll.h>
+#include <algorithm>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 #include "folly/String.h"
@@ -28,6 +30,7 @@
 #include "hphp/util/network.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/db-mysql.h"
+#include "hphp/util/text-util.h"
 
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/request-local.h"
@@ -40,6 +43,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/persistent-resource-store.h"
 
 namespace HPHP {
 
@@ -147,7 +151,7 @@ MySQL *MySQL::GetCachedImpl(const char *name, const String& host, int port,
                             const String& socket, const String& username,
                             const String& password, int client_flags) {
   String key = GetHash(host, port, socket, username, password, client_flags);
-  return dynamic_cast<MySQL*>(g_persistentObjects->get(name, key.data()));
+  return dynamic_cast<MySQL*>(g_persistentResources->get(name, key.data()));
 }
 
 void MySQL::SetCachedImpl(const char *name, const String& host, int port,
@@ -155,7 +159,7 @@ void MySQL::SetCachedImpl(const char *name, const String& host, int port,
                           const String& password, int client_flags,
                           MySQL *conn) {
   String key = GetHash(host, port, socket, username, password, client_flags);
-  g_persistentObjects->set(name, key.data(), conn);
+  g_persistentResources->set(name, key.data(), conn);
 }
 
 MySQL *MySQL::GetDefaultConn() {
@@ -523,7 +527,7 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
     server = server.substr(0, slash_pos - 1);
   }
 
-  Util::HostURL hosturl(std::string(server), MySQL::GetDefaultPort());
+  HostURL hosturl(std::string(server), MySQL::GetDefaultPort());
   if (hosturl.isValid()) {
     host = hosturl.getHost();
     port = hosturl.getPort();
@@ -639,13 +643,18 @@ void MySQLResult::setFieldCount(int64_t fields) {
 
 void MySQLResult::setFieldInfo(int64_t f, MYSQL_FIELD *field) {
   MySQLFieldInfo &info = m_fields[f];
-  info.name = String(field->name, CopyString);
-  info.table = String(field->table, CopyString);
-  info.def = String(field->def, CopyString);
+  info.name       = String(field->name, CopyString);
+  info.org_name   = String(field->org_name, CopyString);
+  info.table      = String(field->table, CopyString);
+  info.org_table  = String(field->org_table, CopyString);
+  info.def        = String(field->def, CopyString);
+  info.db         = String(field->db, CopyString);
   info.max_length = (int64_t)field->max_length;
-  info.length = (int64_t)field->length;
-  info.type = (int)field->type;
-  info.flags = field->flags;
+  info.length     = (int64_t)field->length;
+  info.type       = (int)field->type;
+  info.flags      = field->flags;
+  info.decimals   = field->decimals;
+  info.charsetnr  = field->charsetnr;
 }
 
 MySQLFieldInfo *MySQLResult::getFieldInfo(int64_t field) {
@@ -799,6 +808,7 @@ bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
         b->buffer_length = sizeof(int64_t);
         break;
       case MYSQL_TYPE_DATE:
+      case MYSQL_TYPE_NEWDATE:
       case MYSQL_TYPE_DATETIME:
       case MYSQL_TYPE_TIMESTAMP:
       case MYSQL_TYPE_TIME:
@@ -820,9 +830,9 @@ bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
                              fields[i].length;
         break;
       default:
-        // There exists some more types in this enum like MYSQL_TYPE_NEWDATE,
-        // MYSQL_TYPE_TIMESTAMP2, MYSQL_TYPE_DATETIME2, MYSQL_TYPE_TIME2 but
-        // they are just used on the server
+        // There exists some more types in this enum like MYSQL_TYPE_TIMESTAMP2
+        // MYSQL_TYPE_DATETIME2, MYSQL_TYPE_TIME2 but they are just used on the
+        // server
         assert(false);
     }
 
@@ -1156,7 +1166,7 @@ Variant MySQLStmt::result_metadata() {
   Object obj = ObjectData::newInstance(cls);
 
   TypedValue ret;
-  g_vmContext->invokeFunc(&ret, cls->getCtor(), args, obj.get());
+  g_context->invokeFunc(&ret, cls->getCtor(), args, obj.get());
   tvRefcountedDecRef(&ret);
 
   return obj;
@@ -1309,8 +1319,8 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
                         q, ref(matches));
     int size = matches.toArray().size();
     if (size > 2) {
-      string verb = Util::toLower(matches[size - 2].toString().data());
-      string table = Util::toLower(matches[size - 1].toString().data());
+      string verb = toLower(matches[size - 2].toString().data());
+      string table = toLower(matches[size - 1].toString().data());
       if (!table.empty() && table[0] == '`') {
         table = table.substr(1, table.length() - 2);
       }
@@ -1336,7 +1346,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
                           query, ref(matches));
       size = matches.toArray().size();
       if (size == 2) {
-        string verb = Util::toLower(matches[1].toString().data());
+        string verb = toLower(matches[1].toString().data());
         rconn->m_xaction_count = ((verb == "begin") ? 1 : 0);
         ServerStats::Log(string("sql.query.") + verb, 1);
         if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {

@@ -19,21 +19,44 @@
 
 #include <cstdint>
 #include <cstring>
-#include <boost/optional/optional.hpp>
+
+#include "folly/Optional.h"
 
 #include "hphp/util/data-block.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
+struct Func;
+
 namespace JIT {
 struct DynLocation;
 struct RuntimeType;
 }
 namespace JIT {
 
+namespace constToBits_detail {
+  template<class T>
+  struct needs_promotion
+    : std::integral_constant<
+        bool,
+        std::is_integral<T>::value ||
+          std::is_same<T,bool>::value ||
+          std::is_enum<T>::value
+      >
+  {};
+
+  template<class T>
+  typename std::enable_if<needs_promotion<T>::value,uint64_t>::type
+  promoteIfNeeded(T t) { return static_cast<uint64_t>(t); }
+
+  template<class T>
+  typename std::enable_if<!needs_promotion<T>::value,T>::type
+  promoteIfNeeded(T t) { return t; }
+}
 
 #define IRT_BOXES(name, bits)                                           \
   IRT(name,             (bits))                                         \
@@ -78,23 +101,19 @@ namespace JIT {
   IRT(Func,        1ULL << 45)                                          \
   IRT(VarEnv,      1ULL << 46)                                          \
   IRT(NamedEntity, 1ULL << 47)                                          \
-  IRT(FuncCls,     1ULL << 48) /* {Func*, Cctx} */                      \
-  IRT(FuncObj,     1ULL << 49) /* {Func*, Obj} */                       \
-  IRT(Cctx,        1ULL << 50) /* Class* with the lowest bit set,  */   \
+  IRT(Cctx,        1ULL << 48) /* Class* with the lowest bit set,  */   \
                                /* as stored in ActRec.m_cls field  */   \
-  IRT(RetAddr,     1ULL << 51) /* Return address */                     \
-  IRT(StkPtr,      1ULL << 52) /* stack pointer */                      \
-  IRT(FramePtr,    1ULL << 53) /* frame pointer */                      \
-  IRT(TCA,         1ULL << 54)                                          \
-  IRT(ActRec,      1ULL << 55)                                          \
-  IRT(None,        1ULL << 56)                                          \
-  IRT(RDSHandle,   1ULL << 57) /* RDS::Handle */                        \
-  IRT(Nullptr,     1ULL << 58)
+  IRT(RetAddr,     1ULL << 49) /* Return address */                     \
+  IRT(StkPtr,      1ULL << 50) /* stack pointer */                      \
+  IRT(FramePtr,    1ULL << 51) /* frame pointer */                      \
+  IRT(TCA,         1ULL << 52)                                          \
+  IRT(ActRec,      1ULL << 53)                                          \
+  IRT(RDSHandle,   1ULL << 54) /* RDS::Handle */                        \
+  IRT(Nullptr,     1ULL << 55)
 
 // The definitions for these are in ir.cpp
 #define IRT_UNIONS                                                      \
   IRT(Ctx,         kObj|kCctx)                                          \
-  IRT(FuncCtx,     kFuncCls|kFuncObj)
 
 // Gen, Counted, PtrToGen, and PtrToCounted are here instead of
 // IRT_PHP_UNIONS because boxing them (e.g., BoxedGen, PtrToBoxedGen)
@@ -151,41 +170,57 @@ class Type {
 #undef IRT
   };
 
-  union {
-    bits_t m_bits;
-    TypedBits m_typedBits;
-  };
+  bits_t m_bits:63;
+  bool m_hasConstVal:1;
 
   union {
     uintptr_t m_extra;
+
+    // Constant values. Validity determined by m_hasConstVal and m_bits.
+    bool m_boolVal;
+    int64_t m_intVal;
+    double m_dblVal;
+    const StringData* m_strVal;
+    const ArrayData* m_arrVal;
+    const HPHP::Func* m_funcVal;
+    const Class* m_clsVal;
+    JIT::TCA m_tcaVal;
+    RDS::Handle m_rdsHandleVal;
+    TypedValue* m_ptrVal;
+
+    // Specialization for object classes and array kinds.
     const Class* m_class;
     struct {
       bool m_arrayKindValid;
       ArrayData::ArrayKind m_arrayKind;
-      char padding[6];
+      uint64_t m_padding:48; // We want all 8 bytes of m_extra to be defined.
     };
   };
 
   bool checkValid() const;
 
   explicit Type(bits_t bits, uintptr_t extra = 0)
-    : m_bits(bits), m_extra(extra)
+    : m_bits(bits)
+    , m_hasConstVal(false)
+    , m_extra(extra)
   {
     assert(checkValid());
   }
 
   explicit Type(bits_t bits, const Class* klass)
-    : m_bits(bits), m_class(klass)
+    : m_bits(bits)
+    , m_hasConstVal(false)
+    , m_class(klass)
   {
     assert(checkValid());
   }
 
   explicit Type(bits_t bits, ArrayData::ArrayKind arrayKind)
     : m_bits(bits)
+    , m_hasConstVal(false)
     , m_arrayKindValid(true)
     , m_arrayKind(arrayKind)
-    , padding{0} // Keeping all 8 bytes of m_extra valid makes some comparisons
-                 // simpler
+    , m_padding(0)
   {
     assert(checkValid());
   }
@@ -195,7 +230,7 @@ class Type {
   // combine, Union, and Intersect are used for operator| and operator&. See
   // .cpp for details.
   template<typename Oper>
-  Type combine(bits_t newBits, Type b) const;
+  static Type combine(bits_t newBits, Type a, Type b);
 
   struct Union;
   struct Intersect;
@@ -206,12 +241,14 @@ public:
 # undef IRT
 
   Type()
-    : m_bits(kNone)
+    : m_bits(kBottom)
+    , m_hasConstVal(false)
     , m_extra(0)
   {}
 
   explicit Type(DataType outerType, DataType innerType = KindOfInvalid)
     : m_bits(bitsFromDataType(outerType, innerType))
+    , m_hasConstVal(false)
     , m_extra(0)
   {}
 
@@ -219,35 +256,199 @@ public:
   explicit Type(const DynLocation* dl);
 
   size_t hash() const {
-    return hash_int64_pair(m_bits, reinterpret_cast<uintptr_t>(m_class));
+    return hash_int64_pair(m_bits | (bits_t(m_hasConstVal) << 63), m_extra);
   }
 
-  bool operator==(Type other) const { return equals(other); }
-  bool operator!=(Type other) const { return !operator==(other); }
+  Type& operator=(Type b) {
+    m_bits = b.m_bits;
+    m_hasConstVal = b.m_hasConstVal;
+    m_extra = b.m_extra;
+    return *this;
+  }
 
-  Type operator|(Type other) const;
-  Type& operator|=(Type other) { return *this = *this | other; }
-
-  Type operator&(Type other) const;
-  Type& operator&=(Type other) { return *this = *this & other; }
-
-  Type operator-(Type other) const;
-  Type& operator-=(Type other) { return *this = *this - other; }
-
+  std::string constValString() const;
   std::string toString() const;
   static std::string debugString(Type t);
   static Type fromString(const std::string& str);
+
+  ////////// Support for constants //////////
+
+ private:
+  // forConst returns the Type to use for a given C++ value. The only
+  // interesting case is int/bool disambiguation.  Enums are treated as ints.
+  template<class T>
+  static typename std::enable_if<
+    std::is_integral<T>::value || std::is_enum<T>::value,
+    Type
+    >::type forConst(T) {
+    return std::is_same<T,bool>::value ? Type::Bool : Type::Int;
+  }
+  static Type forConst(const HPHP::Func*)        { return Func; }
+  static Type forConst(const Class*)             { return Cls; }
+  static Type forConst(JIT::TCA)                 { return TCA; }
+  static Type forConst(double)                   { return Dbl; }
+  static Type forConst(const StringData* sd) {
+    assert(sd->isStatic());
+    return StaticStr;
+  }
+  static Type forConst(const ArrayData* ad) {
+    assert(ad->isStatic());
+    return StaticArr.specialize(ad->kind());
+  }
+
+ public:
+  // Returns true iff this Type represents a known value.
+  bool isConst() const {
+    return m_hasConstVal || subtypeOfAny(Uninit, InitNull, Nullptr);
+  }
+
+  // Returns true iff this Type is a constant value of type t.
+  bool isConst(Type t) const {
+    return subtypeOf(t) && isConst();
+  }
+
+  // Returns true iff this Type represents the constant val, using the same C++
+  // type -> Type mapping as Type::cns().
+  template<typename T>
+  bool isConst(T val) const {
+    return subtypeOf(cns(val));
+  }
+
+  template<typename T>
+  static Type cns(T val, Type ret) {
+    assert(!ret.m_hasConstVal);
+    ret.m_hasConstVal = true;
+
+    static_assert(sizeof(T) <= sizeof ret,
+                  "Constant data was larger than supported");
+    static_assert(std::is_pod<T>::value,
+                  "Constant data wasn't a pod");
+    const auto toCopy = constToBits_detail::promoteIfNeeded(val);
+    static_assert(sizeof toCopy == 8,
+                  "Unexpected size for toCopy");
+    std::memcpy(&ret.m_extra, &toCopy, sizeof toCopy);
+    return ret;
+  }
+
+  template<typename T>
+  static Type cns(T val) {
+    return cns(val, forConst(val));
+  }
+
+  static Type cns(std::nullptr_t) {
+    return Type::Nullptr;
+  }
+
+  static Type cns(const TypedValue tv) {
+    auto ret = [&] {
+      switch (tv.m_type) {
+        case KindOfClass:
+        case KindOfUninit:
+        case KindOfNull:
+        case KindOfBoolean:
+        case KindOfInt64:
+        case KindOfDouble:
+        case KindOfStaticString:
+          return Type(tv.m_type);
+
+        case KindOfString:
+          return forConst(tv.m_data.pstr);
+
+        case KindOfArray:
+          return forConst(tv.m_data.parr);
+
+        default:
+          always_assert(false && "Invalid KindOf for constant TypedValue");
+      }
+    }();
+    ret.m_hasConstVal = true;
+    ret.m_extra = tv.m_data.num;
+    return ret;
+  }
+
+  // If this represents a constant value, return the most specific strict
+  // supertype of this we can represent. In most cases this just erases the
+  // constant value: Int<4> -> Int, Dbl<2.5> -> Dbl. Arrays are special since
+  // they can be both constant and specialized, so keep the array's kind in the
+  // resulting type.
+  Type dropConstVal() const {
+    if (!m_hasConstVal) return *this;
+    assert(!isUnion());
+
+    if (subtypeOf(StaticArr)) {
+      return Type::StaticArr.specialize(arrVal()->kind());
+    }
+    return Type(m_bits);
+  }
+
+  bool hasRawVal() const {
+    return m_hasConstVal;
+  }
+
+  uint64_t rawVal() const {
+    assert(m_hasConstVal);
+    return m_intVal;
+  }
+
+  bool boolVal() const {
+    assert(subtypeOf(Bool) && m_hasConstVal);
+    assert(m_boolVal <= 1);
+    return m_boolVal;
+  }
+
+  int64_t intVal() const {
+    assert(subtypeOf(Int) && m_hasConstVal);
+    return m_intVal;
+  }
+
+  double dblVal() const {
+    assert(subtypeOf(Dbl) && m_hasConstVal);
+    return m_dblVal;
+  }
+
+  const StringData* strVal() const {
+    assert(subtypeOf(StaticStr) && m_hasConstVal);
+    return m_strVal;
+  }
+
+  const ArrayData* arrVal() const {
+    assert(subtypeOf(StaticArr) && m_hasConstVal);
+    return m_arrVal;
+  }
+
+  const HPHP::Func* funcVal() const {
+    assert(subtypeOf(Func) && m_hasConstVal);
+    return m_funcVal;
+  }
+
+  const Class* clsVal() const {
+    assert(subtypeOf(Cls) && m_hasConstVal);
+    return m_clsVal;
+  }
+
+  RDS::Handle rdsHandleVal() const {
+    assert(subtypeOf(RDSHandle) && m_hasConstVal);
+    return m_rdsHandleVal;
+  }
+
+  JIT::TCA tcaVal() const {
+    assert(subtypeOf(TCA) && m_hasConstVal);
+    return m_tcaVal;
+  }
+
+  ////////// Methods to query properties of the type //////////
 
   bool isBoxed() const {
     return subtypeOf(BoxedCell);
   }
 
   bool notBoxed() const {
+    assert(subtypeOf(Gen));
     return subtypeOf(Cell);
   }
 
   bool maybeBoxed() const {
-    return (*this & BoxedCell) != Bottom;
+    return maybe(BoxedCell);
   }
 
   bool isPtr() const {
@@ -255,7 +456,7 @@ public:
   }
 
   bool notPtr() const {
-    return (*this & PtrToGen) == Bottom;
+    return not(PtrToGen);
   }
 
   bool isCounted() const {
@@ -263,43 +464,39 @@ public:
   }
 
   bool maybeCounted() const {
-    return (*this & Counted) != Bottom;
+    return maybe(Counted);
   }
 
   bool notCounted() const {
-    return !maybeCounted();
+    return not(Counted);
   }
 
   /*
-   * Returns true iff this is a union type. Note that this is the
-   * plain old set definition of union, so Type::Str, Type::Arr, and
-   * Type::Null will all return true.
+   * Returns true iff this is a union type. Note that this is the plain old set
+   * definition of union, so Type::Str, Type::Arr, and Type::Null will all
+   * return true.
    */
   bool isUnion() const {
-    // This will return true iff more than 1 bit is set in
-    // m_bits.
+    // This will return true iff more than 1 bit is set in m_bits.
     return (m_bits & (m_bits - 1)) != 0;
   }
 
   /*
-   * Returns true if this value has a known constant DataType enum
-   * value, except if the type is exactly Type::Str or Type::Null, it
-   * returns true anyway, even though it could be either
-   * KindOfStaticString or KindOfString, or KindOfUninit or
-   * KindOfNull, respectively.
+   * Returns true if this value has a known constant DataType enum value.  If
+   * the type is exactly Type::Str or Type::Null it returns true anyway, even
+   * though it could be either KindOfStaticString or KindOfString, or
+   * KindOfUninit or KindOfNull, respectively.
    *
-   * TODO(#3390819): this function should return false for Str and
-   * Null.
+   * TODO(#3390819): this function should return false for Str and Null.
    *
-   * Pre: subtypeOf(Gen | Cls) || equals(None)
+   * Pre: subtypeOf(StackElem)
    */
   bool isKnownDataType() const {
-    if (subtypeOf(Type::None)) return false;
-    assert(subtypeOf(Gen | Cls));
+    assert(subtypeOf(StackElem));
 
     // Some unions that correspond to single KindOfs.  And Type::Str
     // and Type::Null for now for historical reasons.
-    if (isString() || isArray() || isNull() || isBoxed()) {
+    if (subtypeOfAny(Str, Arr, Null, BoxedCell)) {
       return true;
     }
 
@@ -307,40 +504,51 @@ public:
   }
 
   /*
-   * Similar to isKnownDataType, with the added restriction that the
-   * type not be Boxed.
+   * Similar to isKnownDataType, with the added restriction that the type not
+   * be Boxed.
    */
   bool isKnownUnboxedDataType() const {
     return isKnownDataType() && notBoxed();
   }
 
   /*
-   * Returns true if this requires a register to hold a DataType at
-   * runtime.
+   * Returns true if this requires a register to hold a DataType at runtime.
    */
   bool needsReg() const {
-    return subtypeOf(Gen) && !isKnownDataType();
+    return subtypeOf(StackElem) && !isKnownDataType();
+  }
+
+  bool needsValueReg() const {
+    return !subtypeOfAny(Uninit, InitNull, Nullptr);
   }
 
   bool needsStaticBitCheck() const {
-    return (*this & (StaticStr | StaticArr)) != Bottom;
+    return maybe(StaticStr | StaticArr);
   }
 
-  // returns true if definitely not uninitialized
-  bool isInit() const {
-    return !Uninit.subtypeOf(*this);
+  bool canRunDtor() const {
+    return maybe(CountedArr | BoxedCountedArr | Obj | BoxedObj |
+                 Res | BoxedRes);
   }
 
-  bool maybeUninit() const {
-    return !isInit();
+  // return true if this corresponds to a type that is passed by value in C++
+  bool isSimpleType() const {
+    return subtypeOfAny(Bool, Int, Dbl, Null);
   }
 
-  /*
-   * Returns true if this is a strict subtype of t2.
-   */
-  bool strictSubtypeOf(Type t2) const {
-    return *this != t2 && subtypeOf(t2);
+  // return true if this corresponds to a type that is passed by reference in
+  // C++
+  bool isReferenceType() const {
+    return subtypeOfAny(Str, Arr, Obj, Res);
   }
+
+  int nativeSize() const {
+    if (subtypeOf(Type::Int | Type::Func)) return sz::qword;
+    if (subtypeOf(Type::Bool))             return sz::byte;
+    not_implemented();
+  }
+
+  ////////// Support for specialized types: Obj classes and Arr kinds //////////
 
   /*
    * True if type can have a specialized class.
@@ -360,26 +568,82 @@ public:
     return canSpecializeClass() || canSpecializeArrayKind();
   }
 
+  Type specialize(const Class* klass) const {
+    assert(canSpecializeClass() && m_class == nullptr);
+    return Type(m_bits, klass);
+  }
+
+  Type specialize(ArrayData::ArrayKind arrayKind) const {
+    assert(canSpecializeArrayKind());
+    return Type(m_bits, arrayKind);
+  }
+
+  bool isSpecialized() const {
+    return (canSpecializeClass() && getClass()) ||
+      (canSpecializeArrayKind() && hasArrayKind());
+  }
+
+  Type unspecialize() const {
+    return Type(m_bits);
+  }
+
+  const Class* getClass() const {
+    assert(canSpecializeClass());
+    return m_class;
+  }
+
+  bool hasArrayKind() const {
+    assert(canSpecializeArrayKind());
+    return m_hasConstVal || m_arrayKindValid;
+  }
+
+  ArrayData::ArrayKind getArrayKind() const {
+    assert(hasArrayKind());
+    return m_hasConstVal ? m_arrVal->kind() : m_arrayKind;
+  }
+
+  // Returns a subset of *this containing only the members relating to its
+  // specialization.
+  //
+  // {Int|Str|Obj<C>|BoxedObj<C>}.specializedType() == {Obj<C>|BoxedObj<C>}
+  Type specializedType() const {
+    assert(isSpecialized());
+    if (canSpecializeClass()) return *this & AnyObj;
+    if (canSpecializeArrayKind()) return *this & AnyArr;
+    not_reached();
+  }
+
+  ////////// Methods for comparing types //////////
+
   /*
-   * Returns true if this is same type or a subtype of any of the arguments.
+   * Returns true iff this represents a non-strict subset of t2.
    */
   bool subtypeOf(Type t2) const {
+    // First, check for any members in m_bits that aren't in t2.m_bits.
     if ((m_bits & t2.m_bits) != m_bits) return false;
 
-    if (canSpecializeClass()) {
-      return t2.m_class == nullptr ||
-        (m_class != nullptr && m_class->classof(t2.m_class));
+    // If t2 is a constant, we must be the same constant or Bottom.
+    if (t2.m_hasConstVal) {
+      assert(!t2.isUnion());
+      return m_bits == kBottom || (m_hasConstVal && m_extra == t2.m_extra);
     }
-    if (canSpecializeArrayKind()) {
-      return !t2.m_arrayKindValid ||
-        (m_arrayKindValid && m_arrayKind == t2.m_arrayKind);
+
+    // If t2 is specialized, we must either not be eligible for the same kind
+    // of specialization (Int <= {Int|Arr<Packed>}) or have a specialization
+    // that is a subtype of t2's specialization.
+    if (t2.isSpecialized()) {
+      if (t2.canSpecializeClass()) {
+        return !canSpecializeClass() ||
+          (m_class != nullptr && m_class->classof(t2.m_class));
+      }
+
+      return !canSpecializeArrayKind() ||
+        (m_arrayKindValid && getArrayKind() == t2.getArrayKind());
     }
+
     return true;
   }
 
-  /*
-   * Returns true if and only if this is the same as or a subtype of t2.
-   */
   template<typename... Types>
   bool subtypeOfAny(Type t2, Types... ts) const {
     return subtypeOf(t2) || subtypeOfAny(ts...);
@@ -387,6 +651,13 @@ public:
 
   bool subtypeOfAny() const {
     return false;
+  }
+
+  /*
+   * Returns true if this is a strict subtype of t2.
+   */
+  bool strictSubtypeOf(Type t2) const {
+    return *this != t2 && subtypeOf(t2);
   }
 
   /*
@@ -408,121 +679,44 @@ public:
    * probably mean subtypeOf.
    */
   bool equals(Type t2) const {
-    return m_bits == t2.m_bits && m_extra == t2.m_extra;
+    return m_bits == t2.m_bits && m_hasConstVal == t2.m_hasConstVal &&
+      m_extra == t2.m_extra;
   }
+
+  bool operator==(Type t2) const { return equals(t2); }
+  bool operator!=(Type t2) const { return !operator==(t2); }
+
+  ////////// Methods for combining Types in various ways //////////
 
   /*
-   * Returns the most refined of two types.
-   *
-   * Pre: the types must not be completely unrelated.
+   * Standard set operations: union, intersection, and difference.
    */
-  static Type mostRefined(Type t1, Type t2) {
-    assert(t1.subtypeOf(t2) || t2.subtypeOf(t1));
-    return t1.subtypeOf(t2) ? t1 : t2;
-  }
+  Type operator|(Type other) const;
+  Type& operator|=(Type other) { return *this = *this | other; }
 
-  bool isArray() const {
-    return subtypeOf(Arr);
-  }
+  Type operator&(Type other) const;
+  Type& operator&=(Type other) { return *this = *this & other; }
 
-  bool isBool() const {
-    return subtypeOf(Bool);
-  }
-
-  bool isDbl() const {
-    return subtypeOf(Dbl);
-  }
-
-  bool isInt() const {
-    return subtypeOf(Int);
-  }
-
-  bool isNull() const {
-    return subtypeOf(Null);
-  }
-
-  bool isObj() const {
-    return subtypeOf(Obj);
-  }
-
-  bool isRes() const {
-    return subtypeOf(Res);
-  }
-
-  bool isString() const {
-    return subtypeOf(Str);
-  }
-
-  bool isCls() const {
-    return subtypeOf(Cls);
-  }
-
-  const Class* getClass() const {
-    assert(canSpecializeClass());
-    return m_class;
-  }
-
-  bool hasArrayKind() const {
-    assert(canSpecializeArrayKind());
-    return m_arrayKindValid;
-  }
-
-  ArrayData::ArrayKind getArrayKind() const {
-    assert(canSpecializeArrayKind() && hasArrayKind());
-    return m_arrayKind;
-  }
-
-  // Returns a subset of *this containing only the members relating to its
-  // specialization.
-  //
-  // {Int|Str|Obj<C>|BoxedObj<C>}.specializedType() == {Obj<C>|BoxedObj<C>}
-  Type specializedType() const {
-    assert(isSpecialized());
-    if (canSpecializeClass()) return *this & AnyObj;
-    if (canSpecializeArrayKind()) return *this & AnyArr;
-    not_reached();
-  }
-
-  Type innerType() const {
-    assert(isBoxed());
-    return Type(m_bits >> kBoxShift, m_extra);
-  }
+  Type operator-(Type other) const;
+  Type& operator-=(Type other) { return *this = *this - other; }
 
   /*
-   * unionOf: return the least common predefined supertype of t1 and
-   * t2, i.e.. the most refined type t3 such that t1 <: t3 and t2 <:
-   * t3. Note that arbitrary union types are possible, but this
-   * function always returns one of the predefined types.
+   * unionOf: return the least common predefined supertype of t1 and t2,
+   * i.e.. the most refined type t3 such that t1 <= t3 and t2 <= t3. Note that
+   * arbitrary union types are possible using operator| but this function
+   * always returns one of the predefined types.
    */
-  static Type unionOf(Type t1, Type t2) {
-    assert(t1 != None && t2 != None);
-    if (t1 == t2) return t1;
-    if (t1.subtypeOf(t2)) return t2;
-    if (t2.subtypeOf(t1)) return t1;
-    static const Type union_types[] = {
-#   define IRT(name, ...) name,
-      IRT_PHP_UNIONS(IRT_BOXES)
-#   undef IRT
-      Gen,
-      PtrToGen,
-    };
-    Type t12 = t1 | t2;
-    for (auto u : union_types) {
-      if (t12.subtypeOf(u)) return u;
-    }
-    not_reached();
-  }
+  static Type unionOf(Type t1, Type t2);
+
+  ////////// Support for inner types of boxed and pointer types //////////
 
   Type box() const {
     assert(subtypeOf(Cell));
     // Boxing Uninit returns InitNull but that logic doesn't belong
     // here.
     assert(not(Uninit) || equals(Cell));
-    auto t = Type(m_bits << kBoxShift);
-    return
-      canSpecializeClass() ? t.specialize(m_class) :
-      canSpecializeArrayKind() && hasArrayKind() ? t.specialize(m_arrayKind) :
-      t;
+    return Type(m_bits << kBoxShift,
+                isSpecialized() && !m_hasConstVal ? m_extra : 0);
   }
 
   // This computes the type effects of the Unbox opcode.
@@ -531,13 +725,14 @@ public:
     return (*this & Cell) | (*this & BoxedCell).innerType();
   }
 
+  Type innerType() const {
+    assert(isBoxed() || equals(Bottom));
+    return Type(m_bits >> kBoxShift, m_extra);
+  }
+
   Type deref() const {
     assert(isPtr());
-    auto t = Type(m_bits >> kPtrShift);
-    return
-      canSpecializeClass() && m_class ? t.specialize(m_class) :
-      canSpecializeArrayKind() && hasArrayKind() ? t.specialize(m_arrayKind) :
-      t;
+    return Type(m_bits >> kPtrShift, isSpecialized() ? m_extra : 0);
   }
 
   Type derefIfPtr() const {
@@ -554,74 +749,26 @@ public:
   Type ptr() const {
     assert(!isPtr());
     assert(subtypeOf(Gen));
-    auto t = Type(m_bits << kPtrShift);
-    return
-      canSpecializeClass() ? t.specialize(m_class) :
-      canSpecializeArrayKind() && hasArrayKind() ? t.specialize(m_arrayKind) :
-      t;
-
+    return Type(m_bits << kPtrShift,
+                isSpecialized() && !m_hasConstVal ? m_extra : 0);
   }
 
-  Type specialize(const Class* klass) const {
-    assert(canSpecializeClass() && m_class == nullptr);
-    return Type(m_bits, klass);
-  }
-
-  bool isSpecialized() const {
-    return (canSpecializeClass() && m_class) ||
-      (canSpecializeArrayKind() && m_arrayKindValid);
-  }
-
-  Type unspecialize() const {
-    return Type(m_bits);
-  }
-
-  Type specialize(ArrayData::ArrayKind arrayKind) const {
-    assert(canSpecializeArrayKind());
-    return Type(m_bits, arrayKind);
-  }
-
-  bool canRunDtor() const {
-    return maybe(CountedArr | BoxedCountedArr | Obj | BoxedObj |
-                 Res | BoxedRes);
-  }
+  ////////// Methods for talking to other type systems in the VM //////////
 
   /*
-   * TODO(#3390819): this function does not exactly convert this type
-   * into a DataType in cases where a type does not exactly map to a
-   * DataType.  For example, Null.toDataType() returns KindOfNull,
-   * even though it could be KindOfUninit.
+   * TODO(#3390819): this function does not exactly convert this type into a
+   * DataType in cases where a type does not exactly map to a DataType.  For
+   * example, Null.toDataType() returns KindOfNull, even though it could be
+   * KindOfUninit.
    *
    * Try not to use this function in new code.
    */
   DataType toDataType() const;
 
   RuntimeType toRuntimeType() const;
-
-  // return true if this corresponds to a type that
-  // is passed by value in C++
-  bool isSimpleType() const {
-    return subtypeOf(Type::Bool)
-           || subtypeOf(Type::Int)
-           || subtypeOf(Type::Dbl)
-           || subtypeOf(Type::Null);
-  }
-
-  // return true if this corresponds to a type that
-  // is passed by reference in C++
-  bool isReferenceType() const {
-    return subtypeOf(Type::Str)
-           || subtypeOf(Type::Arr)
-           || subtypeOf(Type::Obj)
-           || subtypeOf(Type::Res);
-  }
-
-  int nativeSize() const {
-    if (subtypeOf(Type::Int | Type::Func)) return sz::qword;
-    if (subtypeOf(Type::Bool))             return sz::byte;
-    not_implemented();
-  }
 };
+
+typedef folly::Optional<Type> OptType;
 
 inline bool operator<(Type a, Type b) { return a.strictSubtypeOf(b); }
 inline bool operator>(Type a, Type b) { return b.strictSubtypeOf(a); }
@@ -655,10 +802,12 @@ Type convertToType(RepoAuthType ty);
 
 struct TypeConstraint {
   /* implicit */ TypeConstraint(DataTypeCategory cat = DataTypeGeneric,
-                                Type type = Type::Gen)
+                                Type aType = Type::Gen,
+                                DataTypeCategory inner = DataTypeGeneric)
     : category(cat)
+    , innerCat(inner)
     , weak(false)
-    , knownType(type)
+    , assertedType(aType)
   {}
 
   std::string toString() const;
@@ -672,21 +821,20 @@ struct TypeConstraint {
   // by consumers of the type.
   DataTypeCategory category;
 
-  // if innerCat is set, this object represents a constraint on the inner type
-  // of the current value. It is set and cleared when the constraint code
-  // traces through an operation that unboxes or boxes an operand,
-  // respectively.
-  boost::optional<DataTypeCategory> innerCat;
+  // When a value is boxed, innerCat is used to determine how we can relax the
+  // inner type.
+  DataTypeCategory innerCat;
 
   // If weak is true, the consumer of the value being constrained doesn't
   // actually want to constrain the guard (if found). Most often used to figure
   // out if a type can be used without further constraining guards.
   bool weak;
 
-  // knownType represents an upper bound for the type of the guard, which is
-  // known from static analysis or other guards that have been appropriately
-  // constrained. It can be used to convert some guards into asserts.
-  Type knownType;
+  // It's fairly common to emit an AssertType op with a type that is less
+  // specific than the current guard type, but more specific than the type the
+  // guard will eventually be relaxed to. We want to simplify these
+  // instructions away, and when we do, we remember their type in assertedType.
+  Type assertedType;
 };
 
 }}

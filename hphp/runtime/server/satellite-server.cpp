@@ -20,7 +20,7 @@
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "folly/Memory.h"
 
 using folly::make_unique;
@@ -34,7 +34,7 @@ int SatelliteServerInfo::DanglingServerPort = 0;
 
 SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
   m_name = hdf.getName();
-  m_port = hdf["Port"].getInt16(0);
+  m_port = hdf["Port"].getUInt16(0);
   m_threadCount = hdf["ThreadCount"].getInt32(5);
   m_maxRequest = hdf["MaxRequest"].getInt32(500);
   m_maxDuration = hdf["MaxDuration"].getInt32(120);
@@ -52,7 +52,7 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
     std::vector<std::string> urls;
     hdf["URLs"].get(urls);
     for (unsigned int i = 0; i < urls.size(); i++) {
-      m_urls.insert(Util::format_pattern(urls[i], true));
+      m_urls.insert(format_pattern(urls[i], true));
     }
     if (hdf["BlockMainServer"].getBool(true)) {
       InternalURLs.insert(m_urls.begin(), m_urls.end());
@@ -194,23 +194,22 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // SatelliteServer
 
-std::shared_ptr<SatelliteServer>
+std::unique_ptr<SatelliteServer>
 SatelliteServer::Create(std::shared_ptr<SatelliteServerInfo> info) {
-  std::shared_ptr<SatelliteServer> satellite;
+  std::unique_ptr<SatelliteServer> satellite;
   if (info->getPort()) {
-    using SatelliteServerPtr = std::shared_ptr<SatelliteServer>;
     switch (info->getType()) {
     case Type::KindOfInternalPageServer:
-      satellite = SatelliteServerPtr(new InternalPageServer(info));
+      satellite.reset(new InternalPageServer(info));
       break;
     case Type::KindOfDanglingPageServer:
-      satellite = SatelliteServerPtr(new DanglingPageServer(info));
+      satellite.reset(new DanglingPageServer(info));
       break;
     case Type::KindOfRPCServer:
-      satellite = SatelliteServerPtr(new RPCServer(info));
+      satellite.reset(new RPCServer(info));
       break;
     case Type::KindOfXboxServer:
-      satellite = SatelliteServerPtr(new RPCServer(info));
+      satellite.reset(new RPCServer(info));
       break;
     default:
       assert(false);

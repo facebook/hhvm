@@ -26,8 +26,8 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/util/trace.h"
+#include "hphp/util/text-util.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/ext_string.h"
 
@@ -46,7 +46,7 @@ BuildNativeClassUnitFn g_hphp_build_native_class_unit;
 void print_string(StringData* s) {
   g_context->write(s->data(), s->size());
   TRACE(1, "t-x64 output(str): (%p) %43s\n", s->data(),
-        Util::escapeStringForCPP(s->data(), s->size()).data());
+        escapeStringForCPP(s->data(), s->size()).data());
   decRefStr(s);
 }
 
@@ -78,9 +78,9 @@ void print_boolean(bool val) {
 NEW_COLLECTION_HELPER(Vector)
 NEW_COLLECTION_HELPER(Map)
 NEW_COLLECTION_HELPER(Set)
-NEW_COLLECTION_HELPER(FrozenMap)
-NEW_COLLECTION_HELPER(FrozenVector)
-NEW_COLLECTION_HELPER(FrozenSet)
+NEW_COLLECTION_HELPER(ImmMap)
+NEW_COLLECTION_HELPER(ImmVector)
+NEW_COLLECTION_HELPER(ImmSet)
 
 ObjectData* newPairHelper() {
   ObjectData *obj = NEWOBJ(c_Pair)();
@@ -90,29 +90,6 @@ ObjectData* newPairHelper() {
 }
 
 #undef NEW_COLLECTION_HELPER
-
-static inline void
-tvPairToCString(DataType t, uint64_t v,
-                const char** outStr,
-                size_t* outSz,
-                bool* outMustFree) {
-  if (IS_STRING_TYPE(t)) {
-    StringData *strd = (StringData*)v;
-    *outStr = strd->data();
-    *outSz = strd->size();
-    *outMustFree = false;
-    return;
-  }
-  Cell c;
-  c.m_type = t;
-  c.m_data.num = v;
-  String s = tvAsVariant(&c).toString();
-  *outStr = (const char*)malloc(s.size());
-  TRACE(1, "t-x64: stringified: %s -> %s\n", s.data(), *outStr);
-  memcpy((char*)*outStr, s.data(), s.size());
-  *outSz = s.size();
-  *outMustFree = true;
-}
 
 /**
  * concat_ss will will incRef the output string

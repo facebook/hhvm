@@ -45,7 +45,7 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   : m_type(type), m_option(option), m_buf(nullptr), m_indent(0),
     m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(maxRecur),
     m_levelDebugger(0) {
-  m_maxLevelDebugger = g_context->getDebuggerPrintLevel();
+  m_maxLevelDebugger = g_context->debuggerSettings.printLevel;
   if (type == Type::Serialize ||
       type == Type::APCSerialize ||
       type == Type::DebuggerSerialize) {
@@ -194,12 +194,15 @@ void VariableSerializer::write(int64_t v) {
 }
 
 void VariableSerializer::write(double v) {
+  auto const precision = 14;
+  auto const serde_precision = 17;
+
   switch (m_type) {
   case Type::JSON:
     if (!std::isinf(v) && !std::isnan(v)) {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
-      vspprintf(&buf, 0, "%.*k", 14, v);
+      vspprintf(&buf, 0, "%.*k", precision, v);
       m_buf->append(buf);
       free(buf);
     } else {
@@ -216,7 +219,7 @@ void VariableSerializer::write(double v) {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
       bool isExport = m_type == Type::VarExport || m_type == Type::PHPOutput;
-      vspprintf(&buf, 0, isExport ? "%.*H" : "%.*G", 14, v);
+      vspprintf(&buf, 0, isExport ? "%.*H" : "%.*G", precision, v);
       m_buf->append(buf);
       // In PHPOutput mode, we always want doubles to parse as
       // doubles, so make sure there's a decimal point.
@@ -231,7 +234,7 @@ void VariableSerializer::write(double v) {
     {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
-      vspprintf(&buf, 0, "float(%.*G)", 14, v);
+      vspprintf(&buf, 0, "float(%.*G)", precision, v);
       indent();
       m_buf->append(buf);
       free(buf);
@@ -251,7 +254,7 @@ void VariableSerializer::write(double v) {
     } else {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
-      vspprintf(&buf, 0, "%.*H", 14, v);
+      vspprintf(&buf, 0, "%.*H", serde_precision, v);
       m_buf->append(buf);
       free(buf);
     }

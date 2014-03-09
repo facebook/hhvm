@@ -25,59 +25,60 @@
 
 namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
+extern const StaticString s_IntlCalendar;
 
-class IntlCalendar : public IntlResourceData {
+class IntlCalendar : public IntlError {
  public:
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(IntlCalendar);
-  CLASSNAME_IS("IntlCalendar");
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  IntlCalendar() {}
+  IntlCalendar(const IntlCalendar&) = delete;
+  IntlCalendar& operator=(const IntlCalendar& src) {
+    setCalendar(src.calendar()->clone());
+    return *this;
+  }
+  ~IntlCalendar() {
+    setCalendar(nullptr);
+  }
 
-  explicit IntlCalendar(icu::Calendar *cal) : m_cal(cal) {}
-
-  void sweep() override {
+  void setCalendar(icu::Calendar *cal) {
     if (m_cal) {
       delete m_cal;
-      m_cal = nullptr;
     }
+    m_cal = cal;
   }
 
-  bool isInvalid() const override {
-    return m_cal == nullptr;
+  static Object newInstance(icu::Calendar *cal) {
+    if (!c_IntlCalendar) {
+      c_IntlCalendar = Unit::lookupClass(s_IntlCalendar.get());
+      assert(c_IntlCalendar);
+    }
+    auto ret = ObjectData::newInstance(c_IntlCalendar);
+    if (cal) {
+      Native::data<IntlCalendar>(ret)->setCalendar(cal);
+    }
+    return ret;
   }
 
-  static IntlCalendar *Get(Object obj);
-  Object wrap();
+  static IntlCalendar* Get(Object obj) {
+    return GetData<IntlCalendar>(obj, s_IntlCalendar);
+  }
+
+  bool isValid() const {
+    return m_cal;
+  }
 
   icu::Calendar *calendar() const { return m_cal; }
+  icu::GregorianCalendar *gcal() const {
+    return dynamic_cast<icu::GregorianCalendar*>(m_cal);
+  }
 
   static const icu::Calendar* ParseArg(CVarRef cal, const icu::Locale &locale,
-                                       const String &funcname, intl_error &err,
+                                       const String &funcname, IntlError *err,
                                        int64_t &calType, bool &calOwned);
  protected:
   icu::Calendar *m_cal = nullptr;
+
+  static Class* c_IntlCalendar;
 };
-
-class IntlGregorianCalendar : public IntlCalendar {
- public:
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(IntlGregorianCalendar);
-  CLASSNAME_IS("IntlGregorianCalendar");
-  const String& o_getClassNameHook() const override { return classnameof(); }
-
-  explicit IntlGregorianCalendar(icu::GregorianCalendar *cal)
-    : IntlCalendar(cal) {}
-
-  bool isInvalid() const override {
-    return m_cal == nullptr;
-  }
-
-  static IntlGregorianCalendar *Get(Object obj);
-  Object wrap();
-
-  icu::GregorianCalendar *calendar() const {
-    return dynamic_cast<icu::GregorianCalendar*>(m_cal);
-  }
-};
-
 
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Intl

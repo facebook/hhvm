@@ -340,10 +340,21 @@
                     ]
                 },
 		            {
-                    "name": "toFrozenVector",
+                    "name": "toImmVector",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this Vector.",
+                    "desc": "Returns a ImmVector built from the values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "immutable",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
                     "return": {
                         "type": "Object"
                     },
@@ -362,6 +373,17 @@
                     ]
                 },
                 {
+                    "name": "toImmMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmMap built from the keys and values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "toSet",
                     "flags": [
                     ],
@@ -373,10 +395,10 @@
                     ]
                 },
                 {
-                    "name": "toFrozenSet",
+                    "name": "toImmSet",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenSet built from the values of this Vector.",
+                    "desc": "Returns a ImmSet built from the values of this Vector.",
                     "return": {
                         "type": "Object"
                     },
@@ -685,10 +707,11 @@
             ]
         },
         {
-          "name": "HH\\FrozenVector",
+          "name": "HH\\ImmVector",
           "ifaces": [
             "ConstVector"
           ],
+          "desc": "An immutable ordered collection where values are keyed using integers 0 thru n-1 in order.",
           "flags": [
             "IsFinal",
             "IsCppSerializable",
@@ -699,7 +722,7 @@
                 "name": "__construct",
                 "flags": [
                 ],
-                "desc": "Returns a FrozenVector built from the values produced by the specified Iterable.",
+                "desc": "Returns a ImmVector built from the values produced by the specified Iterable.",
                 "return": {
                     "type": null
                 },
@@ -715,7 +738,7 @@
                   "name": "isEmpty",
                   "flags": [
                   ],
-                  "desc": "Returns true if the FrozenVector is empty, false otherwise.",
+                  "desc": "Returns true if the ImmVector is empty, false otherwise.",
                   "return": {
                       "type": "Boolean"
                   },
@@ -726,7 +749,7 @@
                   "name": "count",
                   "flags": [
                   ],
-                  "desc": "Returns the number of values in the FrozenVector.",
+                  "desc": "Returns the number of values in the ImmVector.",
                   "return": {
                       "type": "Int64"
                   },
@@ -737,7 +760,7 @@
                   "name": "items",
                   "flags": [
                   ],
-                  "desc": "Returns an Iterable that produces the values from this FrozenVector.",
+                  "desc": "Returns an Iterable that produces the values from this ImmVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -748,7 +771,7 @@
                   "name": "containsKey",
                   "flags": [
                   ],
-                  "desc": "Returns true if the specified key is present in the FrozenVector, returns false otherwise.",
+                  "desc": "Returns true if the specified key is present in the ImmVector, returns false otherwise.",
                   "return": {
                       "type": "Boolean"
                   },
@@ -793,7 +816,7 @@
                   "name": "getIterator",
                   "flags": [
                   ],
-                  "desc": "Returns an iterator that points to beginning of this FrozenVector.",
+                  "desc": "Returns an iterator that points to beginning of this ImmVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -804,7 +827,7 @@
                   "name": "map",
                   "flags": [
                   ],
-                  "desc": "Returns a Vector of the values produced by applying the specified callback on each value from this FrozenVector.",
+                  "desc": "Returns a Vector of the values produced by applying the specified callback on each value from this ImmVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -819,7 +842,7 @@
                  "name": "mapWithKey",
                  "flags": [
                   ],
-                  "desc": "Returns a Vector of the values produced by applying the specified callback on each key and value from this FrozenVector.",
+                  "desc": "Returns a Vector of the values produced by applying the specified callback on each key and value from this ImmVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -834,7 +857,7 @@
                   "name": "filter",
                   "flags": [
                   ],
-                  "desc": "Returns a Vector of all the values from this FrozenVector for which the specified callback returns true.",
+                  "desc": "Returns a Vector of all the values from this ImmVector for which the specified callback returns true.",
                   "return": {
                       "type": "Object"
                   },
@@ -849,7 +872,7 @@
                   "name": "filterWithKey",
                   "flags": [
                   ],
-                  "desc": "Returns a Vector of all the values from this FrozenVector for which the specified callback returns true.",
+                  "desc": "Returns a Vector of all the values from this ImmVector for which the specified callback returns true.",
                   "return": {
                       "type": "Object"
                   },
@@ -879,7 +902,7 @@
                   "name": "kvzip",
                   "flags": [
                   ],
-                  "desc": "Returns an Iterable that produces the key\/value pairs from this FrozenVector.",
+                  "desc": "Returns an Iterable that produces the key\/value pairs from this ImmVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -890,7 +913,7 @@
                   "name": "keys",
                   "flags": [
                   ],
-                  "desc": "Returns an Iterable that produces the keys from this FrozenVector.",
+                  "desc": "Returns an Iterable that produces the keys from this ImmVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -971,7 +994,7 @@
                   "name": "toVector",
                   "flags": [
                   ],
-                  "desc": "Returns a Vector built from the values of this FrozenVector.",
+                  "desc": "Returns a Vector built from the values of this ImmVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -979,10 +1002,10 @@
                   ]
               },
               {
-                  "name": "toFrozenVector",
+                  "name": "toImmVector",
                   "flags": [
                   ],
-                  "desc": "Returns a copy of this FrozenVector.",
+                  "desc": "Returns an immutable version of this collection.",
                   "return": {
                       "type": "Object"
                   },
@@ -993,7 +1016,18 @@
                   "name": "toMap",
                   "flags": [
                   ],
-                  "desc": "Returns a Map built from the keys and values of this FrozenVector.",
+                  "desc": "Returns a Map built from the keys and values of this ImmVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "toImmMap",
+                  "flags": [
+                  ],
+                  "desc": "Returns a ImmMap built from the keys and values of this ImmVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -1004,7 +1038,7 @@
                   "name": "toSet",
                   "flags": [
                   ],
-                  "desc": "Returns a Set built from the values of this FrozenVector.",
+                  "desc": "Returns a Set built from the values of this ImmVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -1012,10 +1046,21 @@
                   ]
              },
              {
-                 "name": "toFrozenSet",
+                 "name": "toImmSet",
                  "flags": [
                  ],
-                  "desc": "Returns a FrozenSet built from the values of this FrozenVector.",
+                  "desc": "Returns a ImmSet built from the values of this ImmVector.",
+                 "return": {
+                     "type": "Object"
+                 },
+                 "args": [
+                 ]
+             },
+             {
+                 "name": "immutable",
+                 "flags": [
+                 ],
+                 "desc": "Returns an immutable version of this collection.",
                  "return": {
                      "type": "Object"
                  },
@@ -1026,7 +1071,7 @@
                  "name": "values",
                  "flags": [
                  ],
-                 "desc": "Returns a clone of this FrozenVector.",
+                 "desc": "Returns a clone of this ImmVector.",
                  "return": {
                      "type": "Object"
                  },
@@ -1037,7 +1082,7 @@
                  "name": "lazy",
                  "flags": [
                  ],
-                 "desc": "Returns a lazy iterable view of this FrozenVector.",
+                 "desc": "Returns a lazy iterable view of this ImmVector.",
                  "return": {
                      "type": "Object"
                  },
@@ -1048,7 +1093,7 @@
                  "name": "toArray",
                   "flags": [
                   ],
-                  "desc": "Returns an array built from the values from this FrozenVector.",
+                  "desc": "Returns an array built from the values from this ImmVector.",
                   "return": {
                       "type": "VariantMap"
                   },
@@ -1059,7 +1104,7 @@
                   "name": "toKeysArray",
                   "flags": [
                   ],
-                  "desc": "Returns an array built from the keys from this FrozenVector.",
+                  "desc": "Returns an array built from the keys from this ImmVector.",
                   "return": {
                       "type": "VariantMap"
                   },
@@ -1070,7 +1115,7 @@
                   "name": "toValuesArray",
                   "flags": [
                   ],
-                  "desc": "Returns an array built from the values from this FrozenVector.",
+                  "desc": "Returns an array built from the values from this ImmVector.",
                   "return": {
                       "type": "VariantMap"
                   },
@@ -1091,31 +1136,6 @@
                           "type": "Variant"
                       }
                   ]
-              },
-              {
-                  "name": "slice",
-                  "flags": [
-                      "IsStatic"
-                  ],
-                  "desc": "Returns a FrozenVector built from the specified slice of values from the specified FrozenVector.",
-                  "return": {
-                      "type": "Object"
-                  },
-                  "args": [
-                      {
-                          "name": "vec",
-                          "type": "Variant"
-                      },
-                      {
-                          "name": "offset",
-                          "type": "Variant"
-                      },
-                      {
-                          "name": "len",
-                          "type": "Variant",
-                          "value": "null"
-                      }
-                  ]
               }
             ]
         },
@@ -1124,7 +1144,7 @@
             "ifaces": [
                 "HH\\KeyedIterator"
             ],
-            "desc": "An iterator implementation for iterating over a Vector\/FrozenVector.",
+            "desc": "An iterator implementation for iterating over a Vector\/ImmVector.",
             "flags": [
                 "IsFinal",
                 "NoDefaultSweep"
@@ -1481,10 +1501,10 @@
                     ]
                 },
 		            {
-                    "name": "toFrozenVector",
+                    "name": "toImmVector",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this Map.",
+                    "desc": "Returns a ImmVector built from the values of this Map.",
                     "return": {
                         "type": "Object"
                     },
@@ -1503,6 +1523,17 @@
                     ]
                 },
                 {
+                    "name": "toImmMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmMap built from the keys and values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "toSet",
                     "flags": [
                     ],
@@ -1514,10 +1545,21 @@
                     ]
                 },
                 {
-                    "name": "toFrozenSet",
+                    "name": "toImmSet",
                     "flags": [
                     ],
-                     "desc": "Returns a FrozenSet built from the values of this Map.",
+                     "desc": "Returns a ImmSet built from the values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "immutable",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
                     "return": {
                         "type": "Object"
                     },
@@ -1794,11 +1836,11 @@
             ]
         },
         {
-            "name": "HH\\FrozenMap",
+            "name": "HH\\ImmMap",
             "ifaces": [
                 "ConstMap"
             ],
-            "desc": "An immutable dictionary-style collection.",
+            "desc": "An immutable ordered dictionary-style collection.",
             "flags": [
                 "IsFinal",
                 "IsCppSerializable",
@@ -1809,7 +1851,7 @@
                     "name": "__construct",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenMap built from the keys and values produced by the specified KeyedIterable.",
+                    "desc": "Returns a ImmMap built from the keys and values produced by the specified KeyedIterable.",
                     "return": {
                         "type": null
                     },
@@ -1825,7 +1867,7 @@
                     "name": "isEmpty",
                     "flags": [
                     ],
-                    "desc": "Returns true if the FrozenMap is empty, false otherwise.",
+                    "desc": "Returns true if the ImmMap is empty, false otherwise.",
                     "return": {
                         "type": "Boolean"
                     },
@@ -1836,7 +1878,7 @@
                     "name": "count",
                     "flags": [
                     ],
-                    "desc": "Returns the number of key\/value pairs in the FrozenMap.",
+                    "desc": "Returns the number of key\/value pairs in the ImmMap.",
                     "return": {
                         "type": "Int64"
                     },
@@ -1847,7 +1889,7 @@
                     "name": "items",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the key\/value Pairs from this FrozenMap.",
+                    "desc": "Returns an Iterable that produces the key\/value Pairs from this ImmMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1858,7 +1900,7 @@
                     "name": "keys",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the keys of this FrozenMap.",
+                    "desc": "Returns a ImmVector built from the keys of this ImmMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1869,7 +1911,7 @@
                     "name": "lazy",
                     "flags": [
                     ],
-                    "desc": "Returns a lazy iterable view of this FrozenMap.",
+                    "desc": "Returns a lazy iterable view of this ImmMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1880,7 +1922,7 @@
                     "name": "kvzip",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the key\/value pairs from this FrozenMap.",
+                    "desc": "Returns an Iterable that produces the key\/value pairs from this ImmMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1921,7 +1963,7 @@
                     "name": "contains",
                     "flags": [
                     ],
-                    "desc": "Returns true if the specified key is present in the FrozenMap, false otherwise.",
+                    "desc": "Returns true if the specified key is present in the ImmMap, false otherwise.",
                     "return": {
                         "type": "Boolean"
                     },
@@ -1936,7 +1978,7 @@
                     "name": "containsKey",
                     "flags": [
                     ],
-                    "desc": "Returns true if the specified key is present in the FrozenMap, false otherwise.",
+                    "desc": "Returns true if the specified key is present in the ImmMap, false otherwise.",
                     "return": {
                         "type": "Boolean"
                     },
@@ -1951,7 +1993,7 @@
                     "name": "toArray",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the keys and values from this FrozenMap.",
+                    "desc": "Returns an array built from the keys and values from this ImmMap.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -1962,7 +2004,7 @@
                     "name": "toVector",
                     "flags": [
                     ],
-                    "desc": "Returns a Vector built from the values of this FrozenMap.",
+                    "desc": "Returns a Vector built from the values of this ImmMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1970,10 +2012,10 @@
                     ]
                 },
 		            {
-                    "name": "toFrozenVector",
+                    "name": "toImmVector",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this FrozenMap.",
+                    "desc": "Returns a ImmVector built from the values of this ImmMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1984,7 +2026,18 @@
                     "name": "toMap",
                     "flags": [
                     ],
-                    "desc": "Returns a Map built from the keys and values of this FrozenMap.",
+                    "desc": "Returns a Map built from the keys and values of this ImmMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toImmMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
                     "return": {
                         "type": "Object"
                     },
@@ -1995,7 +2048,7 @@
                     "name": "toSet",
                     "flags": [
                     ],
-                    "desc": "Returns a Set built from the values of this FrozenMap.",
+                    "desc": "Returns a Set built from the values of this ImmMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -2003,10 +2056,21 @@
                     ]
                 },
                 {
-                    "name": "toFrozenSet",
+                    "name": "toImmSet",
                     "flags": [
                     ],
-                     "desc": "Returns a FrozenSet built from the values of this FrozenMap.",
+                     "desc": "Returns a ImmSet built from the values of this ImmMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "immutable",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
                     "return": {
                         "type": "Object"
                     },
@@ -2017,7 +2081,7 @@
                     "name": "values",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this FrozenMap.",
+                    "desc": "Returns a ImmVector built from the values of this ImmMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -2028,7 +2092,7 @@
                     "name": "toKeysArray",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the keys from this FrozenMap.",
+                    "desc": "Returns an array built from the keys from this ImmMap.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -2039,7 +2103,7 @@
                     "name": "toValuesArray",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the values from this FrozenMap.",
+                    "desc": "Returns an array built from the values from this ImmMap.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -2064,7 +2128,7 @@
                     "name": "getIterator",
                     "flags": [
                     ],
-                    "desc": "Returns an iterator that points to beginning of this FrozenMap.",
+                    "desc": "Returns an iterator that points to beginning of this ImmMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -2075,7 +2139,7 @@
                     "name": "map",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenMap of the keys/values produced by applying the specified callback on each value from this FrozenMap.",
+                    "desc": "Returns a ImmMap of the keys/values produced by applying the specified callback on each value from this ImmMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -2090,7 +2154,7 @@
                     "name": "mapWithKey",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenMap of the keys/values produced by applying the specified callback on each key and value from this FrozenMap.",
+                    "desc": "Returns a ImmMap of the keys/values produced by applying the specified callback on each key and value from this ImmMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -2105,7 +2169,7 @@
                     "name": "filter",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenMap of all the keys/values from this FrozenMap for which the specified callback returns true.",
+                    "desc": "Returns a ImmMap of all the keys/values from this ImmMap for which the specified callback returns true.",
                     "return": {
                         "type": "Object"
                     },
@@ -2120,7 +2184,7 @@
                     "name": "filterWithKey",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenMap of all the keys/values from this FrozenMap for which the specified callback returns true.",
+                    "desc": "Returns a ImmMap of all the keys/values from this ImmMap for which the specified callback returns true.",
                     "return": {
                         "type": "Object"
                     },
@@ -2221,7 +2285,7 @@
                     "flags": [
                         "IsStatic"
                     ],
-                    "desc": "Returns a FrozenMap built from the key\/value Pairs produced by the specified Iterable.",
+                    "desc": "Returns a ImmMap built from the key\/value Pairs produced by the specified Iterable.",
                     "return": {
                         "type": "Object"
                     },
@@ -2321,7 +2385,7 @@
             "ifaces": [
                 "MutableSet"
             ],
-            "desc": "An unordered set-style collection.",
+            "desc": "An ordered set-style collection.",
             "flags": [
                 "IsFinal",
                 "IsCppSerializable",
@@ -2493,10 +2557,10 @@
                     ]
                 },
 		            {
-                    "name": "toFrozenVector",
+                    "name": "toImmVector",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this Set.",
+                    "desc": "Returns a ImmVector built from the values of this Set.",
                     "return": {
                         "type": "Object"
                     },
@@ -2515,11 +2579,22 @@
                     ]
                 },
                 {
-                    "name": "toFrozenSet",
+                    "name": "toImmSet",
                     "flags": [
                     ],
-                     "desc": "Returns a FrozenSet built from the values of this Set.",
+                     "desc": "Returns a ImmSet built from the values of this Set.",
                      "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "immutable",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
+                    "return": {
                         "type": "Object"
                     },
                     "args": [
@@ -2751,11 +2826,11 @@
             ]
         },
         {
-            "name": "HH\\FrozenSet",
+            "name": "HH\\ImmSet",
             "ifaces": [
                 "ConstSet"
             ],
-            "desc": "An unordered immutable set-style collection.",
+            "desc": "An immutable ordered set-style collection.",
             "flags": [
                 "IsFinal",
                 "IsCppSerializable",
@@ -2766,7 +2841,7 @@
                     "name": "__construct",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenSet built from the values produced by the specified Iterable.",
+                    "desc": "Returns a ImmSet built from the values produced by the specified Iterable.",
                     "return": {
                         "type": null
                     },
@@ -2782,7 +2857,7 @@
                     "name": "isEmpty",
                     "flags": [
                     ],
-                    "desc": "Returns true if the FrozenSet is empty, false otherwise.",
+                    "desc": "Returns true if the ImmSet is empty, false otherwise.",
                     "return": {
                         "type": "Boolean"
                     },
@@ -2793,7 +2868,7 @@
                     "name": "count",
                     "flags": [
                     ],
-                    "desc": "Returns the number of values in the FrozenSet.",
+                    "desc": "Returns the number of values in the ImmSet.",
                     "return": {
                         "type": "Int64"
                     },
@@ -2804,7 +2879,7 @@
                     "name": "items",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the values from this FrozenSet.",
+                    "desc": "Returns an Iterable that produces the values from this ImmSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2815,7 +2890,7 @@
                     "name": "values",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this FrozenSet.",
+                    "desc": "Returns a ImmVector built from the values of this ImmSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2826,7 +2901,7 @@
                     "name": "lazy",
                     "flags": [
                     ],
-                    "desc": "Returns a lazy iterable view of this FrozenSet.",
+                    "desc": "Returns a lazy iterable view of this ImmSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2837,7 +2912,7 @@
                     "name": "contains",
                     "flags": [
                     ],
-                    "desc": "Returns true if the specified value is present in the FrozenSet, returns false otherwise.",
+                    "desc": "Returns true if the specified value is present in the ImmSet, returns false otherwise.",
                     "return": {
                         "type": "Boolean"
                     },
@@ -2852,7 +2927,7 @@
                     "name": "toArray",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the values from this FrozenSet, array(val1 => val1, val2 => val2, ...). This maintains set-like semantics in array() land: O(1) membership test with `array_has_key($a['key'])` and iteration with `foreach($a as $member)`. Int-like strings end up with numerical array keys.",
+                    "desc": "Returns an array built from the values from this ImmSet, array(val1 => val1, val2 => val2, ...). This maintains set-like semantics in array() land: O(1) membership test with `array_has_key($a['key'])` and iteration with `foreach($a as $member)`. Int-like strings end up with numerical array keys.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -2863,7 +2938,7 @@
                     "name": "toVector",
                     "flags": [
                     ],
-                    "desc": "Returns a Vector built from the values of this FrozenSet.",
+                    "desc": "Returns a Vector built from the values of this ImmSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2871,10 +2946,10 @@
                     ]
                 },
 		            {
-                    "name": "toFrozenVector",
+                    "name": "toImmVector",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this FrozenSet.",
+                    "desc": "Returns a ImmVector built from the values of this ImmSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2885,7 +2960,7 @@
                     "name": "toSet",
                     "flags": [
                     ],
-                    "desc": "Returns a Set built from the values of this FrozenSet.",
+                    "desc": "Returns a Set built from the values of this ImmSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2893,10 +2968,21 @@
                     ]
                 },
                 {
-                    "name": "toFrozenSet",
+                    "name": "toImmSet",
                     "flags": [
                     ],
-                    "desc": "Returns a copy of this FrozenSet.",
+                    "desc": "Returns an immutable version of this collection.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "immutable",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
                     "return": {
                         "type": "Object"
                     },
@@ -2907,7 +2993,7 @@
                     "name": "toKeysArray",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the values from this FrozenSet.",
+                    "desc": "Returns an array built from the values from this ImmSet.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -2918,7 +3004,7 @@
                     "name": "toValuesArray",
                     "flags": [
                     ],
-                    "desc": "Returns an array built from the values from this FrozenSet.",
+                    "desc": "Returns an array built from the values from this ImmSet.",
                     "return": {
                         "type": "VariantMap"
                     },
@@ -2929,7 +3015,7 @@
                     "name": "getIterator",
                     "flags": [
                     ],
-                    "desc": "Returns an iterator that points to beginning of this FrozenSet.",
+                    "desc": "Returns an iterator that points to beginning of this ImmSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2940,7 +3026,7 @@
                     "name": "map",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenSet of the values produced by applying the specified callback on each value from this FrozenSet.",
+                    "desc": "Returns a ImmSet of the values produced by applying the specified callback on each value from this ImmSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -2955,7 +3041,7 @@
                     "name": "filter",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenSet of all the values from this FrozenSet for which the specified callback returns true.",
+                    "desc": "Returns a ImmSet of all the values from this ImmSet for which the specified callback returns true.",
                     "return": {
                         "type": "Object"
                     },
@@ -3056,7 +3142,7 @@
                     "flags": [
                         "IsStatic"
                     ],
-                    "desc": "Returns a FrozenSet built from the values produced by the specified Iterable.",
+                    "desc": "Returns a ImmSet built from the values produced by the specified Iterable.",
                     "return": {
                         "type": "Object"
                     },
@@ -3073,7 +3159,7 @@
                         "IsStatic",
                         "VariableArguments"
                     ],
-                    "desc": "Returns a FrozenSet built from the values from the specified arrays.",
+                    "desc": "Returns a ImmSet built from the values from the specified arrays.",
                     "return": {
                         "type": "Object"
                     },
@@ -3168,7 +3254,7 @@
             "ifaces": [
                 "ConstVector"
             ],
-            "desc": "An ordered fixed-sized container.",
+            "desc": "An immutable ordered fixed-sized container.",
             "flags": [
                 "IsFinal",
                 "IsCppSerializable",
@@ -3286,10 +3372,10 @@
                     ]
                 },
 		            {
-                    "name": "toFrozenVector",
+                    "name": "toImmVector",
                     "flags": [
                     ],
-                    "desc": "Returns a FrozenVector built from the values of this Pair.",
+                    "desc": "Returns a ImmVector built from the values of this Pair.",
                     "return": {
                         "type": "Object"
                     },
@@ -3308,6 +3394,17 @@
                     ]
                 },
                 {
+                    "name": "toImmMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmMap built from the keys and values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "toSet",
                     "flags": [
                     ],
@@ -3319,10 +3416,21 @@
                     ]
                 },
                 {
-                   "name": "toFrozenSet",
+                   "name": "toImmSet",
                    "flags": [
                    ],
-                    "desc": "Returns a FrozenSet built from the values of this Pair.",
+                    "desc": "Returns a ImmSet built from the values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "immutable",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
                     "return": {
                         "type": "Object"
                     },

@@ -27,6 +27,9 @@
 #include <boost/filesystem.hpp>
 
 #include <unistd.h>
+#include <exception>
+#include <utility>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 
@@ -45,6 +48,7 @@ namespace {
 
 std::string output_repo;
 std::string input_repo;
+bool logging = true;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -53,6 +57,9 @@ void parse_options(int argc, char** argv) {
 
   auto const defaultThreadCount =
     std::max<long>(sysconf(_SC_NPROCESSORS_ONLN) - 1, 1);
+
+  std::vector<std::string> interceptable;
+  bool no_logging = false;
 
   po::options_description basic("Options");
   basic.add_options()
@@ -66,12 +73,30 @@ void parse_options(int argc, char** argv) {
     ("no-optimizations",
       po::bool_switch(&options.NoOptimizations),
       "turn off all optimizations")
+    ("no-logging",
+      po::bool_switch(&no_logging),
+      "turn off logging")
+    ("extended-stats",
+      po::bool_switch(&options.extendedStats),
+      "Spend time to produce extra stats")
     ("parallel-num-threads",
       po::value(&parallel::num_threads)->default_value(defaultThreadCount),
       "Number of threads to use for parallelism")
     ("parallel-work-size",
       po::value(&parallel::work_chunk)->default_value(120),
       "Work unit size for parallelism")
+    ("interceptable",
+      po::value(&interceptable)->composing(),
+      "Add an interceptable function")
+    ;
+
+  // Some extra esoteric options that aren't exposed in --help for
+  // now.
+  po::options_description extended("Extended Options");
+  extended.add_options()
+    ("analyze-func-wlimit",  po::value(&options.analyzeFuncWideningLimit))
+    ("analyze-class-wlimit", po::value(&options.analyzeClassWideningLimit))
+    ("return-refine-limit",  po::value(&options.returnTypeRefineLimit))
     ;
 
   po::options_description oflags("Optimization Flags");
@@ -79,6 +104,7 @@ void parse_options(int argc, char** argv) {
     ("remove-dead-blocks",      po::value(&options.RemoveDeadBlocks))
     ("constant-prop",           po::value(&options.ConstantProp))
     ("local-dce",               po::value(&options.LocalDCE))
+    ("global-dce",              po::value(&options.GlobalDCE))
     ("insert-assertions",       po::value(&options.InsertAssertions))
     ("insert-stack-assertions", po::value(&options.InsertStackAssertions))
     ("filter-assertions",       po::value(&options.FilterAssertions))
@@ -91,7 +117,7 @@ void parse_options(int argc, char** argv) {
     ;
 
   po::options_description all;
-  all.add(basic).add(oflags);
+  all.add(basic).add(extended).add(oflags);
 
   po::positional_options_description pd;
   pd.add("input", 1);
@@ -128,6 +154,10 @@ void parse_options(int argc, char** argv) {
     std::cerr << "Invalid parallelism configuration.\n";
     std::exit(1);
   }
+
+  options.InterceptableFunctions.insert(begin(interceptable),
+                                        end(interceptable));
+  logging = !no_logging;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -174,7 +204,9 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues) {
 
 void compile_repo() {
   auto ues = load_input();
-  std::cout << folly::format("{} units\n", ues.size());
+  if (logging) {
+    std::cout << folly::format("{} units\n", ues.size());
+  }
 
   ues = whole_program(std::move(ues));
 
@@ -215,7 +247,7 @@ int main(int argc, char** argv) try {
 
   hphp_process_init();
 
-  Trace::BumpRelease bumper(Trace::hhbbc_time, -1);
+  Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
   compile_repo();
   return 0;
 }

@@ -1,7 +1,6 @@
 <?hh
 $vector = Vector {};
 $map = Map {};
-$smap = StableMap {};
 $set = Set {};
 $pair = Pair {null, null};
 var_dump($vector instanceof Traversable);
@@ -23,16 +22,6 @@ var_dump($map instanceof ConstMapAccess);
 var_dump($map instanceof ConstVector);
 var_dump($map instanceof ConstMap);
 var_dump($map instanceof ConstSet);
-echo "========\n";
-var_dump($smap instanceof Traversable);
-var_dump($smap instanceof KeyedTraversable);
-var_dump($smap instanceof Indexish);
-var_dump($smap instanceof ConstSetAccess);
-var_dump($smap instanceof ConstIndexAccess);
-var_dump($smap instanceof ConstMapAccess);
-var_dump($smap instanceof ConstVector);
-var_dump($smap instanceof ConstMap);
-var_dump($smap instanceof ConstSet);
 echo "========\n";
 var_dump($set instanceof Traversable);
 var_dump($set instanceof KeyedTraversable);

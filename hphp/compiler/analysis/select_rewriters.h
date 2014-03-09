@@ -18,6 +18,7 @@
 #define incl_HPHP_SELECT_REWRITERS_H_
 
 #include "hphp/compiler/expression/expression.h"
+#include <vector>
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/query_expression.h"
 #include "hphp/compiler/expression/simple_query_clause.h"
@@ -49,10 +50,17 @@ private:
   void rewriteSelect(SelectClausePtr sc);
   void rewriteExpressionList(ExpressionListPtr l);
   void rewriteOther(ExpressionPtr ep);
+  ExpressionPtr getResultColumn(ExpressionPtr expr);
+  bool isServerSideExpression(ExpressionPtr ep);
   void rewriteClientSide(ExpressionPtr sc);
   void collectSelectedColumns(ExpressionPtr ep);
   bool isTableName(ExpressionPtr ep);
   bool isColumnName(ExpressionPtr ep);
+
+  /**
+   *  The next index to use for a column in the result received from the server.
+   */
+  int m_columnIndex = 0;
 
   /**
    * A list of simple variables and object property expressions

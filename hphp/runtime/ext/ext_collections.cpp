@@ -20,11 +20,12 @@
 #include "hphp/runtime/base/sort-helpers.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_intl.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
 #include <folly/ScopeGuard.h>
+#include <algorithm>
+#include <array>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,8 +37,8 @@ namespace HPHP {
  */
 template<typename TCollection>
 inline static Object materializeDefaultImpl(ObjectData* obj) {
-  TCollection* col;
-  Object o = col = NEWOBJ(TCollection)();
+  auto* col = NEWOBJ(TCollection)();
+  Object o = col;
   col->init(VarNR(obj));
   return o;
 }
@@ -108,7 +109,7 @@ ArrayIter getArrayIterHelper(CVarRef v, size_t& sz) {
 }
 
 void triggerCow(c_Vector* vec) {
-  assert(!vec->m_frozenCopy.isNull()); // Should've been checked by the JIT.
+  assert(!vec->m_immCopy.isNull()); // Should've been checked by the JIT.
   vec->mutate();
 }
 
@@ -179,7 +180,7 @@ Variant BaseVector::get(CVarRef key) {
 
 // KeyedIterable
 Object BaseVector::getiterator() {
-  c_VectorIterator* it = NEWOBJ(c_VectorIterator)();
+  auto* it = NEWOBJ(c_VectorIterator)();
   it->m_obj = this;
   it->m_pos = 0;
   it->m_version = getVersion();
@@ -220,7 +221,7 @@ BaseVector::php_map(CVarRef callback, MakeArgs makeArgs) {
     TypedValue* tv = &nv->m_data[i];
     int32_t version = m_version;
     auto args = makeArgs(m_data[i], i);
-    g_vmContext->invokeFuncFew(tv, ctx, args.size(), &args[0]);
+    g_context->invokeFuncFew(tv, ctx, args.size(), &args[0]);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
@@ -247,7 +248,7 @@ BaseVector::php_filter(CVarRef callback, MakeArgs makeArgs) {
     Variant ret;
     int32_t version = m_version;
     auto args = makeArgs(m_data[i], i);
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, args.size(), &args[0]);
+    g_context->invokeFuncFew(ret.asTypedValue(), ctx, args.size(), &args[0]);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -256,6 +257,61 @@ BaseVector::php_filter(CVarRef callback, MakeArgs makeArgs) {
     }
   }
   return nv;
+}
+
+Object c_Vector::ti_slice(CVarRef vec, CVarRef offset,
+                          CVarRef len /* = uninit_null() */) {
+  ObjectData* obj;
+  if (!vec.isObject() ||
+      (obj = vec.getObjectData())->getVMClass() != c_Vector::classof()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter 1 must be an instance of Vector"));
+    throw e;
+  }
+  if (!offset.isInteger()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter 2 must be an integer"));
+    throw e;
+  }
+  if (!len.isNull() && !len.isInteger()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter 3 must be null or an integer"));
+    throw e;
+  }
+  auto* target = NEWOBJ(c_Vector)();
+  Object ret = target;
+  auto* v = static_cast<c_Vector*>(obj);
+  int64_t sz = v->m_size;
+  int64_t startPos = offset.toInt64();
+  if (UNLIKELY(uint64_t(startPos) >= uint64_t(sz))) {
+    if (startPos >= 0) {
+      assert(startPos >= sz);
+      return ret;
+    }
+    startPos = std::max<int64_t>(sz + startPos, 0);
+  }
+  int64_t endPos;
+  if (len.isInteger()) {
+    int64_t intLen = len.toInt64();
+    if (LIKELY(intLen >= 0)) {
+      endPos = startPos + std::min<int64_t>(intLen, sz - startPos);
+    } else {
+      endPos = sz + intLen;
+    }
+  } else {
+    endPos = sz;
+  }
+  if (startPos >= endPos) {
+    return ret;
+  }
+  uint targetSize = endPos - startPos;
+  target->reserve(targetSize);
+  target->m_size = targetSize;
+  auto* data = target->m_data;
+  for (uint i = 0; i < targetSize; ++i, ++startPos) {
+    cellDup(v->m_data[startPos], data[i]);
+  }
+  return ret;
 }
 
 void BaseVector::zip(BaseVector* bvec, CVarRef iterable) {
@@ -268,7 +324,7 @@ void BaseVector::zip(BaseVector* bvec, CVarRef iterable) {
     if (bvec->m_capacity <= bvec->m_size) {
       bvec->grow();
     }
-    c_Pair* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
     pair->initAdd(&m_data[i]);
     pair->initAdd(cvarToCell(&v));
@@ -281,7 +337,7 @@ void BaseVector::zip(BaseVector* bvec, CVarRef iterable) {
 void BaseVector::kvzip(BaseVector* bvec) {
   bvec->reserve(m_size);
   for (uint i = 0; i < m_size; ++i) {
-    c_Pair* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
     pair->elm0.m_type = KindOfInt64;
     pair->elm0.m_data.num = i;
@@ -502,15 +558,15 @@ void BaseVector::reserve(int64_t sz) {
 BaseVector::BaseVector(Class* cls)
     : ExtCollectionObjectData(cls)
     , m_size(0), m_data(nullptr), m_capacity(0)
-    , m_version(0), m_frozenCopy(nullptr) {
+    , m_version(0), m_immCopy(nullptr) {
 }
 
 /**
- * Delegate the responsibility for freeing the buffer to the
- * frozen copy, if it exists.
+ * Delegate the responsibility for freeing the buffer to the immutable copy,
+ * if it exists.
  */
 BaseVector::~BaseVector() {
-  if (m_frozenCopy.isNull() && m_data) {
+  if (m_immCopy.isNull() && m_data) {
     for (uint i = 0; i < m_size; ++i) {
       tvRefcountedDecRef(&m_data[i]);
     }
@@ -542,6 +598,14 @@ void BaseVector::init(CVarRef t) {
 }
 
 void BaseVector::cow() {
+  assert(!m_immCopy.isNull());
+  if (!m_size) {
+    m_data = nullptr;
+    m_capacity = 0;
+    m_immCopy.reset();
+    return;
+  }
+
   TypedValue* newData =
     (TypedValue*)MM().objMallocLogged(m_capacity * sizeof(TypedValue));
 
@@ -552,7 +616,7 @@ void BaseVector::cow() {
   }
 
   m_data = newData;
-  m_frozenCopy.reset();
+  m_immCopy.reset();
 }
 
 
@@ -698,9 +762,9 @@ Object c_Vector::t_items() {
 }
 
 Object c_Vector::t_keys() {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::keys(bv);
+  auto* vec = NEWOBJ(c_Vector);
+  Object obj = vec;
+  BaseVector::keys(vec);
   return obj;
 }
 
@@ -713,9 +777,9 @@ Object c_Vector::t_lazy() {
 }
 
 Object c_Vector::t_kvzip() {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::kvzip(bv);
+  auto* vec = NEWOBJ(c_Vector);
+  Object obj = vec;
+  BaseVector::kvzip(vec);
   return obj;
 }
 
@@ -880,9 +944,9 @@ Object c_Vector::t_filterwithkey(CVarRef callback) {
 }
 
 Object c_Vector::t_zip(CVarRef iterable) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_Vector);
-  BaseVector::zip(bv, iterable);
+  auto* vec = NEWOBJ(c_Vector);
+  Object obj = vec;
+  BaseVector::zip(vec, iterable);
   return obj;
 }
 
@@ -950,11 +1014,6 @@ Object c_Vector::ti_fromarray(CVarRef arr) {
     cellDup(*cvarToCell(&ad->getValueRef(pos)), data[i]);
   }
   return ret;
-}
-
-Object c_Vector::ti_slice(CVarRef vec, CVarRef offset,
-                          CVarRef len /* = null */) {
-  return BaseVector::slice<c_Vector>("Vector", vec, offset, len);
 }
 
 void c_Vector::throwOOB(int64_t key) {
@@ -1066,11 +1125,18 @@ void c_Vector::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throw e;
 }
 
-void c_Vector::initFvFields(c_FrozenVector* fv) {
-  fv->m_data = m_data;
-  fv->m_size = m_size;
-  fv->m_capacity = m_capacity;
-  fv->m_version = m_version;
+// This function will create a immutable copy of this Vector (if it doesn't
+// already exist) and then return it
+Object c_Vector::getImmutableCopy() {
+  if (m_immCopy.isNull()) {
+    auto* vec = NEWOBJ(c_ImmVector)();
+    m_immCopy = vec;
+    vec->m_data = m_data;
+    vec->m_size = m_size;
+    vec->m_capacity = m_capacity;
+    vec->m_version = m_version;
+  }
+  return m_immCopy;
 }
 
 Object c_Vector::t_tovector() {
@@ -1081,22 +1147,24 @@ Object c_Vector::t_toset() {
   return materializeDefaultImpl<c_Set>(this);
 }
 
-Object c_Vector::t_tofrozenvector() {
-  if (m_frozenCopy.isNull()) {
-    c_FrozenVector* fv = NEWOBJ(c_FrozenVector)();
-    initFvFields(fv);
-    m_frozenCopy = fv;
-  }
+Object c_Vector::t_toimmvector() {
+  return getImmutableCopy();
+}
 
-  return m_frozenCopy;
+Object c_Vector::t_immutable() {
+  return getImmutableCopy();
 }
 
 Object c_Vector::t_tomap() {
   return materializeDefaultImpl<c_Map>(this);
 }
 
-Object c_Vector::t_tofrozenset() {
-  return materializeDefaultImpl<c_FrozenSet>(this);
+Object c_Vector::t_toimmmap() {
+  return materializeDefaultImpl<c_ImmMap>(this);
+}
+
+Object c_Vector::t_toimmset() {
+  return materializeDefaultImpl<c_ImmSet>(this);
 }
 
 c_VectorIterator::c_VectorIterator(Class* cls
@@ -1143,119 +1211,117 @@ void c_VectorIterator::t_rewind() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// c_FrozenVector
+// c_ImmVector
 
 // ConstCollection
 
-bool c_FrozenVector::t_isempty() {
+bool c_ImmVector::t_isempty() {
   return BaseVector::isempty();
 }
 
-int64_t c_FrozenVector::t_count() {
+int64_t c_ImmVector::t_count() {
   return BaseVector::count();
 }
 
-Object c_FrozenVector::t_items() {
+Object c_ImmVector::t_items() {
   return BaseVector::items();
 }
 
 // ConstIndexAccess
 
-bool c_FrozenVector::t_containskey(CVarRef key) {
+bool c_ImmVector::t_containskey(CVarRef key) {
   return BaseVector::containskey(key);
 }
 
-Variant c_FrozenVector::t_at(CVarRef key) {
+Variant c_ImmVector::t_at(CVarRef key) {
   return BaseVector::at(key);
 }
 
-Variant c_FrozenVector::t_get(CVarRef key) {
+Variant c_ImmVector::t_get(CVarRef key) {
   return BaseVector::get(key);
 }
 
 // KeyedIterable
 
-Object c_FrozenVector::t_getiterator() {
+Object c_ImmVector::t_getiterator() {
   return BaseVector::getiterator();
 }
 
-Object c_FrozenVector::t_map(CVarRef callback) {
-  return php_map<c_FrozenVector>(callback, &makeArgsFromVectorValue);
+Object c_ImmVector::t_map(CVarRef callback) {
+  return php_map<c_ImmVector>(callback, &makeArgsFromVectorValue);
 }
 
-Object c_FrozenVector::t_mapwithkey(CVarRef callback) {
-  return php_map<c_FrozenVector>(callback, &makeArgsFromVectorKeyAndValue);
+Object c_ImmVector::t_mapwithkey(CVarRef callback) {
+  return php_map<c_ImmVector>(callback, &makeArgsFromVectorKeyAndValue);
 }
 
-Object c_FrozenVector::t_filter(CVarRef callback) {
-  return php_filter<c_FrozenVector>(callback, &makeArgsFromVectorValue);
+Object c_ImmVector::t_filter(CVarRef callback) {
+  return php_filter<c_ImmVector>(callback, &makeArgsFromVectorValue);
 }
 
-Object c_FrozenVector::t_filterwithkey(CVarRef callback) {
-  return php_filter<c_FrozenVector>(callback, &makeArgsFromVectorKeyAndValue);
+Object c_ImmVector::t_filterwithkey(CVarRef callback) {
+  return php_filter<c_ImmVector>(callback, &makeArgsFromVectorKeyAndValue);
 }
 
-Object c_FrozenVector::t_zip(CVarRef iterable) {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_FrozenVector);
-  BaseVector::zip(bv, iterable);
+Object c_ImmVector::t_zip(CVarRef iterable) {
+  auto* vec = NEWOBJ(c_ImmVector);
+  Object obj = vec;
+  BaseVector::zip(vec, iterable);
   return obj;
 }
 
-Object c_FrozenVector::t_kvzip() {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_FrozenVector);
-  BaseVector::kvzip(bv);
+Object c_ImmVector::t_kvzip() {
+  auto* vec = NEWOBJ(c_ImmVector);
+  Object obj = vec;
+  BaseVector::kvzip(vec);
   return obj;
 }
 
-Object c_FrozenVector::t_keys() {
-  BaseVector* bv;
-  Object obj = bv = NEWOBJ(c_FrozenVector);
-  BaseVector::keys(bv);
+Object c_ImmVector::t_keys() {
+  auto* vec = NEWOBJ(c_ImmVector);
+  Object obj = vec;
+  BaseVector::keys(vec);
   return obj;
-}
-
-Object c_FrozenVector::ti_slice(CVarRef vec, CVarRef offset,
-                                CVarRef len /* = null */) {
-  return BaseVector::slice<c_FrozenVector>("FrozenVector", vec, offset, len);
 }
 
 // Others
 
-void c_FrozenVector::t___construct(CVarRef iterable /* = null_variant */) {
+void c_ImmVector::t___construct(CVarRef iterable /* = null_variant */) {
   BaseVector::construct(iterable);
 }
 
-Object c_FrozenVector::t_lazy() {
+Object c_ImmVector::t_lazy() {
   return BaseVector::lazy();
 }
 
-Array c_FrozenVector::t_toarray() {
+Array c_ImmVector::t_toarray() {
   return BaseVector::toarray();
 }
 
-Array c_FrozenVector::t_tokeysarray() {
+Array c_ImmVector::t_tokeysarray() {
   return BaseVector::tokeysarray();
 }
 
-Array c_FrozenVector::t_tovaluesarray() {
+Array c_ImmVector::t_tovaluesarray() {
   return BaseVector::tovaluesarray();
 }
 
-int64_t c_FrozenVector::t_linearsearch(CVarRef search_value) {
+int64_t c_ImmVector::t_linearsearch(CVarRef search_value) {
   return BaseVector::linearsearch(search_value);
 }
 
-Object c_FrozenVector::t_values() {
-  return Object::attach(BaseVector::Clone<c_FrozenVector>(this));
+Object c_ImmVector::t_values() {
+  return Object::attach(BaseVector::Clone<c_ImmVector>(this));
 }
 
+Object c_ImmVector::t_immutable() {
+  return this;
+}
 
 // Non PHP methods.
 
-c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
-  o_subclassData.u16 = Collection::FrozenVectorType;
+c_ImmVector::c_ImmVector(Class* cls) : BaseVector(cls) {
+  o_subclassData.u16 = Collection::ImmVectorType;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1429,15 +1495,15 @@ Object BaseMap::php_clear() {
 
 Object c_Map::t_clear() { return php_clear(); }
 
-bool c_FrozenMap::t_isempty() { return php_isEmpty(); }
+bool c_ImmMap::t_isempty() { return php_isEmpty(); }
 
 bool c_Map::t_isempty() { return php_isEmpty();  }
 
-int64_t c_FrozenMap::t_count() { return size(); }
+int64_t c_ImmMap::t_count() { return size(); }
 
 int64_t c_Map::t_count() { return size(); }
 
-Object c_FrozenMap::t_items() { return php_items(); }
+Object c_ImmMap::t_items() { return php_items(); }
 
 Object c_Map::t_items() { return php_items(); }
 
@@ -1467,11 +1533,11 @@ Object BaseMap::php_keys() const {
   return obj;
 }
 
-Object c_FrozenMap::t_keys() { return php_keys(); }
+Object c_ImmMap::t_keys() { return php_keys(); }
 
 Object c_Map::t_keys() { return php_keys(); }
 
-Object c_FrozenMap::t_lazy() { return php_lazy(); }
+Object c_ImmMap::t_lazy() { return php_lazy(); }
 
 Object c_Map::t_lazy() { return php_lazy(); }
 
@@ -1487,7 +1553,7 @@ Object BaseMap::php_kvzip() const {
   ssize_t j = 0;
   for (; p != pLimit; ++p) {
     if (isTombstone(p->data.m_type)) continue;
-    c_Pair* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
     if (p->hasIntKey()) {
       pair->elm0.m_data.num = p->ikey;
@@ -1507,7 +1573,7 @@ Object BaseMap::php_kvzip() const {
   return obj;
 }
 
-Object c_FrozenMap::t_kvzip() { return php_kvzip(); }
+Object c_ImmMap::t_kvzip() { return php_kvzip(); }
 
 Object c_Map::t_kvzip() { return php_kvzip(); }
 
@@ -1521,7 +1587,7 @@ Variant BaseMap::php_at(CVarRef key) const {
   return uninit_null();
 }
 
-Variant c_FrozenMap::t_at(CVarRef key) { return php_at(key); }
+Variant c_ImmMap::t_at(CVarRef key) { return php_at(key); }
 
 Variant c_Map::t_at(CVarRef key) { return php_at(key); }
 
@@ -1545,7 +1611,7 @@ Variant BaseMap::php_get(CVarRef key) const {
   return uninit_null();
 }
 
-Variant c_FrozenMap::t_get(CVarRef key) { return php_get(key); }
+Variant c_ImmMap::t_get(CVarRef key) { return php_get(key); }
 
 Variant c_Map::t_get(CVarRef key) { return php_get(key); }
 
@@ -1599,11 +1665,11 @@ bool BaseMap::php_contains(CVarRef key) const {
   return false;
 }
 
-bool c_FrozenMap::t_contains(CVarRef key) { return php_contains(key); }
+bool c_ImmMap::t_contains(CVarRef key) { return php_contains(key); }
 
 bool c_Map::t_contains(CVarRef key) { return php_contains(key); }
 
-bool c_FrozenMap::t_containskey(CVarRef key) { return php_contains(key); }
+bool c_ImmMap::t_containskey(CVarRef key) { return php_contains(key); }
 
 bool c_Map::t_containskey(CVarRef key) { return php_contains(key); }
 
@@ -1623,7 +1689,7 @@ Object c_Map::t_remove(CVarRef key) { return php_remove(key); }
 
 Object c_Map::t_removekey(CVarRef key) { return php_remove(key); }
 
-Array c_FrozenMap::t_toarray() { return php_toArray(); }
+Array c_ImmMap::t_toarray() { return php_toArray(); }
 
 Array c_Map::t_toarray() { return php_toArray(); }
 
@@ -1649,7 +1715,7 @@ Object BaseMap::php_values() const {
   return ret;
 }
 
-Object c_FrozenMap::t_values() { return php_values(); }
+Object c_ImmMap::t_values() { return php_values(); }
 
 Object c_Map::t_values() { return php_values(); }
 
@@ -1667,7 +1733,7 @@ Array BaseMap::php_toKeysArray() const {
   return ai.toArray();
 }
 
-Array c_FrozenMap::t_tokeysarray() { return php_toKeysArray(); }
+Array c_ImmMap::t_tokeysarray() { return php_toKeysArray(); }
 
 Array c_Map::t_tokeysarray() { return php_toKeysArray(); }
 
@@ -1681,7 +1747,7 @@ Array BaseMap::php_toValuesArray() const {
   return ai.toArray();
 }
 
-Array c_FrozenMap::t_tovaluesarray() { return php_toValuesArray(); }
+Array c_ImmMap::t_tovaluesarray() { return php_toValuesArray(); }
 
 Array c_Map::t_tovaluesarray() { return php_toValuesArray(); }
 
@@ -1722,23 +1788,34 @@ BaseMap::php_differenceByKey(CVarRef it) {
   return ret;
 }
 
-Object c_FrozenMap::t_differencebykey(CVarRef it) {
-  return php_differenceByKey<c_FrozenMap>(it);
+Object c_ImmMap::t_differencebykey(CVarRef it) {
+  return php_differenceByKey<c_ImmMap>(it);
 }
 
 Object c_Map::t_differencebykey(CVarRef it) {
   return php_differenceByKey<c_Map>(it);
 }
 
+Object c_Map::t_immutable() {
+  auto* mp = NEWOBJ(c_ImmMap)();
+  Object o = mp;
+  mp->init(VarNR(this));
+  return o;
+}
+
+Object c_ImmMap::t_immutable() {
+  return this;
+}
+
 Object BaseMap::php_getIterator() {
-  c_MapIterator* it = NEWOBJ(c_MapIterator)();
+  auto* it = NEWOBJ(c_MapIterator)();
   it->m_obj = this;
   it->m_pos = iter_begin();
   it->m_version = getVersion();
   return it;
 }
 
-Object c_FrozenMap::t_getiterator() { return php_getIterator(); }
+Object c_ImmMap::t_getiterator() { return php_getIterator(); }
 
 Object c_Map::t_getiterator() { return php_getIterator(); }
 
@@ -1797,7 +1874,7 @@ BaseMap::php_map(CVarRef callback, MakeArgs makeArgs) const {
     TypedValue* tv = &np.data;
     int32_t version = m_version;
     auto args = makeArgs(p);
-    g_vmContext->invokeFuncFew(tv, ctx, args.size(), &(args[0]));
+    g_context->invokeFuncFew(tv, ctx, args.size(), &(args[0]));
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
@@ -1811,16 +1888,16 @@ BaseMap::php_map(CVarRef callback, MakeArgs makeArgs) const {
   return obj;
 }
 
-Object c_FrozenMap::t_map(CVarRef callback) {
-  return php_map<c_FrozenMap>(callback, &makeArgsFromMapValue);
+Object c_ImmMap::t_map(CVarRef callback) {
+  return php_map<c_ImmMap>(callback, &makeArgsFromMapValue);
 }
 
 Object c_Map::t_map(CVarRef callback) {
   return php_map<c_Map>(callback, &makeArgsFromMapValue);
 }
 
-Object c_FrozenMap::t_mapwithkey(CVarRef callback) {
-  return php_map<c_FrozenMap>(callback, &makeArgsFromMapKeyAndValue);
+Object c_ImmMap::t_mapwithkey(CVarRef callback) {
+  return php_map<c_ImmMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 Object c_Map::t_mapwithkey(CVarRef callback) {
@@ -1849,7 +1926,7 @@ BaseMap::php_filter(CVarRef callback, MakeArgs makeArgs) const {
     Variant ret;
     int32_t version = m_version;
     auto args = makeArgs(p);
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx,
+    g_context->invokeFuncFew(ret.asTypedValue(), ctx,
                                args.size(), &(args[0]));
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
@@ -1864,16 +1941,16 @@ BaseMap::php_filter(CVarRef callback, MakeArgs makeArgs) const {
   return obj;
 }
 
-Object c_FrozenMap::t_filter(CVarRef callback) {
-  return php_filter<c_FrozenMap>(callback, &makeArgsFromMapValue);
+Object c_ImmMap::t_filter(CVarRef callback) {
+  return php_filter<c_ImmMap>(callback, &makeArgsFromMapValue);
 }
 
 Object c_Map::t_filter(CVarRef callback) {
   return php_filter<c_Map>(callback, &makeArgsFromMapValue);
 }
 
-Object c_FrozenMap::t_filterwithkey(CVarRef callback) {
-  return php_filter<c_FrozenMap>(callback, &makeArgsFromMapKeyAndValue);
+Object c_ImmMap::t_filterwithkey(CVarRef callback) {
+  return php_filter<c_ImmMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 Object c_Map::t_filterwithkey(CVarRef callback) {
@@ -1900,7 +1977,7 @@ Object BaseMap::php_retain(CVarRef callback, MakeArgs makeArgs) {
     Variant ret;
     int32_t version = m_version;
     auto args = makeArgs(p);
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx,
+    g_context->invokeFuncFew(ret.asTypedValue(), ctx,
                                args.size(), &(args[0]));
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
@@ -1962,8 +2039,8 @@ BaseMap::php_zip(CVarRef iterable) const {
   return obj;
 }
 
-Object c_FrozenMap::t_zip(CVarRef iterable) {
-  return php_zip<c_FrozenMap>(iterable);
+Object c_ImmMap::t_zip(CVarRef iterable) {
+  return php_zip<c_ImmMap>(iterable);
 }
 
 Object c_Map::t_zip(CVarRef iterable) {
@@ -2007,8 +2084,8 @@ BaseMap::php_mapFromIterable(CVarRef iterable) {
   return ret;
 }
 
-Object c_FrozenMap::ti_fromitems(CVarRef iterable) {
-  return php_mapFromIterable<c_FrozenMap>(iterable);
+Object c_ImmMap::ti_fromitems(CVarRef iterable) {
+  return php_mapFromIterable<c_ImmMap>(iterable);
 }
 
 Object c_Map::ti_fromitems(CVarRef iterable) {
@@ -2060,8 +2137,8 @@ collectionDeepCopyBaseMap(TMap* mp) {
   return o.detach();
 }
 
-ObjectData* collectionDeepCopyFrozenMap(c_FrozenMap* map) {
-  return collectionDeepCopyBaseMap<c_FrozenMap>(map);
+ObjectData* collectionDeepCopyImmMap(c_ImmMap* map) {
+  return collectionDeepCopyBaseMap<c_ImmMap>(map);
 }
 
 ObjectData* collectionDeepCopyMap(c_Map* map) {
@@ -2485,7 +2562,7 @@ NEVER_INLINE void BaseMap::reserve(int64_t sz) {
 void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
   assert(m_size <= m_used && m_used <= m_cap);
   size_t newHashSize = size_t(newMask) + 1;
-  assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
+  assert(folly::isPowTwo(newHashSize) && computeMaxElms(newMask) == newCap);
   assert(m_size <= newCap && newCap <= MaxSize);
   auto* oldData = data();
   auto oldHashSize = oldData ? hashSize() : 0;
@@ -3005,16 +3082,16 @@ void c_MapIterator::t_rewind() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_FrozenMap::c_FrozenMap(Class* cb) : BaseMap(cb) {
-  o_subclassData.u16 = Collection::FrozenMapType;
+c_ImmMap::c_ImmMap(Class* cb) : BaseMap(cb) {
+  o_subclassData.u16 = Collection::ImmMapType;
 }
 
-void c_FrozenMap::t___construct(CVarRef iterable /* = null_variant */) {
+void c_ImmMap::t___construct(CVarRef iterable /* = null_variant */) {
   php_construct(iterable);
 }
 
-c_FrozenMap* c_FrozenMap::Clone(ObjectData* obj) {
-  return BaseMap::Clone<c_FrozenMap>(obj);
+c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
+  return BaseMap::Clone<c_ImmMap>(obj);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3239,7 +3316,7 @@ NEVER_INLINE void BaseSet::reserve(int64_t sz) {
 void BaseSet::grow(uint32_t newCap, uint32_t newMask) {
   assert(m_size <= m_used && m_used <= m_cap);
   size_t newHashSize = size_t(newMask) + 1;
-  assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
+  assert(folly::isPowTwo(newHashSize) && computeMaxElms(newMask) == newCap);
   assert(m_size <= newCap && newCap <= MaxSize);
   auto* oldData = data();
   auto oldHashSize = oldData ? hashSize() : 0;
@@ -3501,7 +3578,7 @@ Array BaseSet::php_toValuesArray() {
 }
 
 Object BaseSet::php_getIterator() {
-  c_SetIterator* it = NEWOBJ(c_SetIterator)();
+  auto* it = NEWOBJ(c_SetIterator)();
   it->m_obj = this;
   it->m_pos = iter_begin();
   it->m_version = getVersion();
@@ -3528,7 +3605,7 @@ BaseSet::php_map(CVarRef callback) {
     if (isTombstone(p->data.m_type)) continue;
     TypedValue tvCbRet;
     int32_t pVer = m_version;
-    g_vmContext->invokeFuncFew(&tvCbRet, ctx, 1, &p->data);
+    g_context->invokeFuncFew(&tvCbRet, ctx, 1, &p->data);
     // Now that tvCbRet is live, make sure to decref even if we throw.
     SCOPE_EXIT { tvRefcountedDecRef(&tvCbRet); };
     if (UNLIKELY(m_version != pVer)) throw_collection_modified();
@@ -3557,7 +3634,7 @@ BaseSet::php_filter(CVarRef callback) {
     if (isTombstone(p->data.m_type)) continue;
     Variant ret;
     int32_t version = m_version;
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p->data);
+    g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p->data);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -4053,86 +4130,96 @@ c_Set* c_Set::Clone(ObjectData* obj) {
   return BaseSet::Clone<c_Set>(obj);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// FrozenSet
+Object c_Set::t_immutable() {
+  auto* st = NEWOBJ(c_ImmSet)();
+  Object o = st;
+  st->init(VarNR(this));
+  return o;
+}
 
-void c_FrozenSet::t___construct(CVarRef iterable /* = null_variant */) {
+///////////////////////////////////////////////////////////////////////////////
+// ImmSet
+
+void c_ImmSet::t___construct(CVarRef iterable /* = null_variant */) {
   BaseSet::php_construct(iterable);
 }
 
-bool c_FrozenSet::t_isempty() {
+bool c_ImmSet::t_isempty() {
   return BaseSet::php_isEmpty();
 }
 
-int64_t c_FrozenSet::t_count() {
+int64_t c_ImmSet::t_count() {
   return BaseSet::php_count();
 }
 
-Object c_FrozenSet::t_items() {
+Object c_ImmSet::t_items() {
   return BaseSet::php_items();
 }
 
-Object c_FrozenSet::t_values() {
-  return BaseSet::php_values<c_FrozenVector>();
+Object c_ImmSet::t_values() {
+  return BaseSet::php_values<c_ImmVector>();
 }
 
-Object c_FrozenSet::t_lazy() {
+Object c_ImmSet::t_lazy() {
   return BaseSet::php_lazy();
 }
 
-bool c_FrozenSet::t_contains(CVarRef key) {
+bool c_ImmSet::t_contains(CVarRef key) {
   return BaseSet::php_contains(key);
 }
 
-Array c_FrozenSet::t_toarray() {
+Array c_ImmSet::t_toarray() {
   return BaseSet::php_toArray();
 }
 
-Array c_FrozenSet::t_tokeysarray() {
+Array c_ImmSet::t_tokeysarray() {
   return BaseSet::php_toKeysArray();
 }
 
-Array c_FrozenSet::t_tovaluesarray() {
+Array c_ImmSet::t_tovaluesarray() {
   return BaseSet::php_toValuesArray();
 }
 
-Object c_FrozenSet::t_getiterator() {
+Object c_ImmSet::t_getiterator() {
   return BaseSet::php_getIterator();
 }
 
-Object c_FrozenSet::t_map(CVarRef callback) {
-  return BaseSet::php_map<c_FrozenSet>(callback);
+Object c_ImmSet::t_map(CVarRef callback) {
+  return BaseSet::php_map<c_ImmSet>(callback);
 }
 
-Object c_FrozenSet::t_filter(CVarRef callback) {
-  return BaseSet::php_filter<c_FrozenSet>(callback);
+Object c_ImmSet::t_filter(CVarRef callback) {
+  return BaseSet::php_filter<c_ImmSet>(callback);
 }
 
-Object c_FrozenSet::t_zip(CVarRef iterable) {
-  return BaseSet::php_zip<c_FrozenSet>(iterable);
+Object c_ImmSet::t_zip(CVarRef iterable) {
+  return BaseSet::php_zip<c_ImmSet>(iterable);
 }
 
-Object c_FrozenSet::ti_fromitems(CVarRef iterable) {
-  return BaseSet::php_fromItems<c_FrozenSet>(iterable);
+Object c_ImmSet::ti_fromitems(CVarRef iterable) {
+  return BaseSet::php_fromItems<c_ImmSet>(iterable);
 }
 
-Object c_FrozenSet::ti_fromarrays(int _argc, CArrRef _argv) {
-  return BaseSet::php_fromArrays<c_FrozenSet>(_argc, _argv);
+Object c_ImmSet::ti_fromarrays(int _argc, CArrRef _argv) {
+  return BaseSet::php_fromArrays<c_ImmSet>(_argc, _argv);
 }
 
-c_FrozenSet::c_FrozenSet(Class* cls) : BaseSet(cls) {
-  o_subclassData.u16 = Collection::FrozenSetType;
+c_ImmSet::c_ImmSet(Class* cls) : BaseSet(cls) {
+  o_subclassData.u16 = Collection::ImmSetType;
 }
 
-void c_FrozenSet::Unserialize(ObjectData* obj, VariableUnserializer* uns,
+void c_ImmSet::Unserialize(ObjectData* obj, VariableUnserializer* uns,
     int64_t sz, char type) {
-  BaseSet::Unserialize("FrozenSet", obj, uns, sz, type);
+  BaseSet::Unserialize("ImmSet", obj, uns, sz, type);
 }
 
-c_FrozenSet* c_FrozenSet::Clone(ObjectData* obj) {
-  return BaseSet::Clone<c_FrozenSet>(obj);
+c_ImmSet* c_ImmSet::Clone(ObjectData* obj) {
+  return BaseSet::Clone<c_ImmSet>(obj);
 }
 
+Object c_ImmSet::t_immutable() {
+  return this;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -4251,8 +4338,8 @@ Object c_Pair::t_keys() {
 }
 
 Object c_Pair::t_values() {
-  c_Vector* vec;
-  Object o = vec = NEWOBJ(c_Vector)();
+  auto* vec = NEWOBJ(c_Vector)();
+  Object o = vec;
   vec->init(VarNR(this));
   return o;
 }
@@ -4268,7 +4355,7 @@ Object c_Pair::t_kvzip() {
   Object obj = vec = NEWOBJ(c_Vector)();
   vec->reserve(2);
   for (uint i = 0; i < 2; ++i) {
-    c_Pair* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
     pair->elm0.m_type = KindOfInt64;
     pair->elm0.m_data.num = i;
@@ -4333,7 +4420,7 @@ Array c_Pair::t_tovaluesarray() {
 
 Object c_Pair::t_getiterator() {
   assert(isFullyConstructed());
-  c_PairIterator* it = NEWOBJ(c_PairIterator)();
+  auto* it = NEWOBJ(c_PairIterator)();
   it->m_obj = this;
   it->m_pos = 0;
   return it;
@@ -4352,7 +4439,7 @@ Object c_Pair::t_map(CVarRef callback) {
   Object obj = vec = NEWOBJ(c_Vector)();
   vec->reserve(2);
   for (uint64_t i = 0; i < 2; ++i) {
-    g_vmContext->invokeFuncFew(&vec->m_data[i], ctx, 1, &getElms()[i]);
+    g_context->invokeFuncFew(&vec->m_data[i], ctx, 1, &getElms()[i]);
     ++vec->m_size;
   }
   return obj;
@@ -4372,7 +4459,7 @@ Object c_Pair::t_mapwithkey(CVarRef callback) {
   vec->reserve(2);
   for (uint64_t i = 0; i < 2; ++i) {
     TypedValue args[2] = { make_tv<KindOfInt64>(i), getElms()[i] };
-    g_vmContext->invokeFuncFew(&vec->m_data[i], ctx, 2, args);
+    g_context->invokeFuncFew(&vec->m_data[i], ctx, 2, args);
     ++vec->m_size;
   }
   return obj;
@@ -4391,7 +4478,7 @@ Object c_Pair::t_filter(CVarRef callback) {
   Object obj = vec = NEWOBJ(c_Vector)();
   for (uint64_t i = 0; i < 2; ++i) {
     Variant ret;
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &getElms()[i]);
+    g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &getElms()[i]);
     if (ret.toBoolean()) {
       vec->add(&getElms()[i]);
     }
@@ -4413,7 +4500,7 @@ Object c_Pair::t_filterwithkey(CVarRef callback) {
   for (uint64_t i = 0; i < 2; ++i) {
     Variant ret;
     TypedValue args[2] = { make_tv<KindOfInt64>(i), getElms()[i] };
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
+    g_context->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
     if (ret.toBoolean()) {
       vec->add(&getElms()[i]);
     }
@@ -4433,7 +4520,7 @@ Object c_Pair::t_zip(CVarRef iterable) {
     if (vec->m_capacity <= vec->m_size) {
       vec->grow();
     }
-    c_Pair* pair = NEWOBJ(c_Pair)();
+    auto* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
     pair->initAdd(&getElms()[i]);
     pair->initAdd(cvarToCell(&v));
@@ -4442,6 +4529,10 @@ Object c_Pair::t_zip(CVarRef iterable) {
     ++vec->m_size;
   }
   return obj;
+}
+
+Object c_Pair::t_immutable() {
+  return this;
 }
 
 void c_Pair::throwOOB(int64_t key) {
@@ -4614,37 +4705,37 @@ void c_PairIterator::t_rewind() {
   }
 
 COLLECTION_MAGIC_METHODS(Vector)
-COLLECTION_MAGIC_METHODS(FrozenVector)
+COLLECTION_MAGIC_METHODS(ImmVector)
 COLLECTION_MAGIC_METHODS(Map)
-COLLECTION_MAGIC_METHODS(FrozenMap)
+COLLECTION_MAGIC_METHODS(ImmMap)
 COLLECTION_MAGIC_METHODS(Set)
-COLLECTION_MAGIC_METHODS(FrozenSet)
+COLLECTION_MAGIC_METHODS(ImmSet)
 COLLECTION_MAGIC_METHODS(Pair)
 
 #undef COLLECTION_MAGIC_METHODS
 
 #define ITERABLE_MATERIALIZE_METHODS(cls) \
   Object c_##cls::t_tovector() { \
-    c_Vector* vec; \
-    Object o = vec = NEWOBJ(c_Vector)(); \
+    auto* vec = NEWOBJ(c_Vector)(); \
+    Object o = vec; \
     vec->init(VarNR(this)); \
     return o; \
   } \
-  Object c_##cls::t_tofrozenvector() { \
-    c_FrozenVector* fv; \
-    Object o = fv = NEWOBJ(c_FrozenVector)(); \
-    fv->init(VarNR(this)); \
+  Object c_##cls::t_toimmvector() { \
+    auto* vec = NEWOBJ(c_ImmVector)(); \
+    Object o = vec; \
+    vec->init(VarNR(this)); \
     return o; \
   } \
   Object c_##cls::t_toset() { \
-    c_Set* st; \
-    Object o = st = NEWOBJ(c_Set)(); \
+    auto* st = NEWOBJ(c_Set)(); \
+    Object o = st; \
     st->init(VarNR(this)); \
     return o; \
   } \
-  Object c_##cls::t_tofrozenset() { \
-    c_FrozenSet* st; \
-    Object o = st = NEWOBJ(c_FrozenSet)(); \
+  Object c_##cls::t_toimmset() { \
+    auto* st = NEWOBJ(c_ImmSet)(); \
+    Object o = st; \
     st->init(VarNR(this)); \
     return o; \
   }
@@ -4652,17 +4743,23 @@ COLLECTION_MAGIC_METHODS(Pair)
 #define KEYEDITERABLE_MATERIALIZE_METHODS(cls) \
   ITERABLE_MATERIALIZE_METHODS(cls) \
   Object c_##cls::t_tomap() { \
-    c_Map* mp; \
-    Object o = mp = NEWOBJ(c_Map)(); \
+    auto* mp = NEWOBJ(c_Map)(); \
+    Object o = mp; \
+    mp->init(VarNR(this)); \
+    return o; \
+  } \
+  Object c_##cls::t_toimmmap() { \
+    auto* mp = NEWOBJ(c_ImmMap)(); \
+    Object o = mp; \
     mp->init(VarNR(this)); \
     return o; \
   }
 KEYEDITERABLE_MATERIALIZE_METHODS(Map)
-KEYEDITERABLE_MATERIALIZE_METHODS(FrozenMap)
+KEYEDITERABLE_MATERIALIZE_METHODS(ImmMap)
 ITERABLE_MATERIALIZE_METHODS(Set)
-ITERABLE_MATERIALIZE_METHODS(FrozenSet)
+ITERABLE_MATERIALIZE_METHODS(ImmSet)
 KEYEDITERABLE_MATERIALIZE_METHODS(Pair)
-KEYEDITERABLE_MATERIALIZE_METHODS(FrozenVector)
+KEYEDITERABLE_MATERIALIZE_METHODS(ImmVector)
 
 #undef ITERABLE_MATERIALIZE_METHODS
 #undef KEYEDITERABLE_MATERIALIZE_METHODS
@@ -4731,8 +4828,8 @@ void collectionDeepCopyTV(TypedValue* tv) {
         case Collection::MapType:
           obj = collectionDeepCopyMap(static_cast<c_Map*>(obj));
           break;
-        case Collection::FrozenMapType:
-          obj = collectionDeepCopyFrozenMap(static_cast<c_FrozenMap*>(obj));
+        case Collection::ImmMapType:
+          obj = collectionDeepCopyImmMap(static_cast<c_ImmMap*>(obj));
           break;
         case Collection::SetType:
           obj = collectionDeepCopySet(static_cast<c_Set*>(obj));
@@ -4740,12 +4837,12 @@ void collectionDeepCopyTV(TypedValue* tv) {
         case Collection::PairType:
           obj = collectionDeepCopyPair(static_cast<c_Pair*>(obj));
           break;
-        case Collection::FrozenSetType:
-          obj = collectionDeepCopyFrozenSet(static_cast<c_FrozenSet*>(obj));
+        case Collection::ImmSetType:
+          obj = collectionDeepCopyImmSet(static_cast<c_ImmSet*>(obj));
           break;
-        case Collection::FrozenVectorType:
-          obj = collectionDeepCopyFrozenVector(
-                  static_cast<c_FrozenVector*>(obj));
+        case Collection::ImmVectorType:
+          obj = collectionDeepCopyImmVector(
+                  static_cast<c_ImmVector*>(obj));
           break;
         case Collection::InvalidType:
           assert(false);
@@ -4788,16 +4885,16 @@ ObjectData* collectionDeepCopyVector(c_Vector* vec) {
   return collectionDeepCopyBaseVector<c_Vector>(vec);
 }
 
-ObjectData* collectionDeepCopyFrozenVector(c_FrozenVector* vec) {
-  return collectionDeepCopyBaseVector<c_FrozenVector>(vec);
+ObjectData* collectionDeepCopyImmVector(c_ImmVector* vec) {
+  return collectionDeepCopyBaseVector<c_ImmVector>(vec);
 }
 
 ObjectData* collectionDeepCopySet(c_Set* st) {
   return c_Set::Clone(st);
 }
 
-ObjectData* collectionDeepCopyFrozenSet(c_FrozenSet* st) {
-  return c_FrozenSet::Clone(st);
+ObjectData* collectionDeepCopyImmSet(c_ImmSet* st) {
+  return c_ImmSet::Clone(st);
 }
 
 ObjectData* collectionDeepCopyPair(c_Pair* pair) {
@@ -4881,13 +4978,13 @@ static inline TypedValue* collectionAtImpl(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
-    case Collection::FrozenVectorType:
+    case Collection::ImmVectorType:
       return BaseVector::OffsetAt<throwOnMiss>(obj, key);
     case Collection::MapType:
-    case Collection::FrozenMapType:
+    case Collection::ImmMapType:
       return BaseMap::OffsetAt<throwOnMiss>(obj, key);
     case Collection::SetType:
-    case Collection::FrozenSetType:
+    case Collection::ImmSetType:
       return BaseSet::OffsetAt(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetAt<throwOnMiss>(obj, key);
@@ -4928,17 +5025,17 @@ void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
       BaseMap::OffsetSet(obj, key, val);
       break;
     case Collection::SetType:
-    case Collection::FrozenSetType:
+    case Collection::ImmSetType:
       BaseSet::OffsetSet(obj, key, val);
       break;
     case Collection::PairType:
       c_Pair::OffsetSet(obj, key, val);
       break;
-    case Collection::FrozenVectorType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
+    case Collection::ImmVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "ImmVector");
       break;
-    case Collection::FrozenMapType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenMap");
+    case Collection::ImmMapType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "ImmMap");
       break;
     case Collection::InvalidType:
       assert(false);
@@ -4950,13 +5047,13 @@ bool collectionIsset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
-    case Collection::FrozenVectorType:
+    case Collection::ImmVectorType:
       return BaseVector::OffsetIsset(obj, key);
     case Collection::MapType:
-    case Collection::FrozenMapType:
+    case Collection::ImmMapType:
       return BaseMap::OffsetIsset(obj, key);
     case Collection::SetType:
-    case Collection::FrozenSetType:
+    case Collection::ImmSetType:
       return BaseSet::OffsetIsset(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetIsset(obj, key);
@@ -4971,13 +5068,13 @@ bool collectionEmpty(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
-    case Collection::FrozenVectorType:
+    case Collection::ImmVectorType:
       return BaseVector::OffsetEmpty(obj, key);
     case Collection::MapType:
-    case Collection::FrozenMapType:
+    case Collection::ImmMapType:
       return BaseMap::OffsetEmpty(obj, key);
     case Collection::SetType:
-    case Collection::FrozenSetType:
+    case Collection::ImmSetType:
       return BaseSet::OffsetEmpty(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetEmpty(obj, key);
@@ -5003,14 +5100,14 @@ void collectionUnset(ObjectData* obj, TypedValue* key) {
     case Collection::PairType:
       c_Pair::OffsetUnset(obj, key);
       break;
-    case Collection::FrozenVectorType:
-      collectionThrowHelper(ErrMsgType::CannotUnset, "FrozenVector");
+    case Collection::ImmVectorType:
+      collectionThrowHelper(ErrMsgType::CannotUnset, "ImmVector");
       break;
-    case Collection::FrozenMapType:
-      collectionThrowHelper(ErrMsgType::CannotUnset, "FrozenMap");
+    case Collection::ImmMapType:
+      collectionThrowHelper(ErrMsgType::CannotUnset, "ImmMap");
       break;
-    case Collection::FrozenSetType:
-      collectionThrowHelper(ErrMsgType::CannotUnset, "FrozenSet");
+    case Collection::ImmSetType:
+      collectionThrowHelper(ErrMsgType::CannotUnset, "ImmSet");
       break;
     case Collection::InvalidType:
       assert(false);
@@ -5036,14 +5133,14 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
       assert(static_cast<c_Pair*>(obj)->isFullyConstructed());
       collectionThrowHelper(ErrMsgType::CannotAdd, "Pair");
       break;
-    case Collection::FrozenVectorType:
-      collectionThrowHelper(ErrMsgType::CannotAdd, "FrozenVector");
+    case Collection::ImmVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAdd, "ImmVector");
       break;
-    case Collection::FrozenMapType:
-      collectionThrowHelper(ErrMsgType::CannotAdd, "FrozenMap");
+    case Collection::ImmMapType:
+      collectionThrowHelper(ErrMsgType::CannotAdd, "ImmMap");
       break;
-    case Collection::FrozenSetType:
-      collectionThrowHelper(ErrMsgType::CannotAdd, "FrozenSet");
+    case Collection::ImmSetType:
+      collectionThrowHelper(ErrMsgType::CannotAdd, "ImmSet");
       break;
     case Collection::InvalidType:
       assert(false);
@@ -5056,18 +5153,18 @@ void collectionInitAppend(ObjectData* obj, TypedValue* val) {
   assert(val->m_type != KindOfUninit);
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
-    case Collection::FrozenVectorType:
+    case Collection::ImmVectorType:
       static_cast<BaseVector*>(obj)->add(val);
       break;
     case Collection::SetType:
-    case Collection::FrozenSetType:
+    case Collection::ImmSetType:
       static_cast<BaseSet*>(obj)->add(val);
       break;
     case Collection::PairType:
       static_cast<c_Pair*>(obj)->initAdd(val);
       break;
     case Collection::MapType:
-    case Collection::FrozenMapType:
+    case Collection::ImmMapType:
     case Collection::InvalidType:
       assert(false);
       break;
@@ -5079,17 +5176,17 @@ static inline Variant& collectionOffsetAtImpl(ObjectData* obj, int64_t offset) {
   TypedValue* res;
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
-    case Collection::FrozenVectorType:
+    case Collection::ImmVectorType:
       res = throwOnMiss ? static_cast<BaseVector*>(obj)->at(offset)
                         : static_cast<BaseVector*>(obj)->get(offset);
       break;
     case Collection::MapType:
-    case Collection::FrozenMapType:
+    case Collection::ImmMapType:
       res = throwOnMiss ? static_cast<BaseMap*>(obj)->at(offset)
                         : static_cast<BaseMap*>(obj)->get(offset);
       break;
     case Collection::SetType:
-    case Collection::FrozenSetType:
+    case Collection::ImmSetType:
       BaseSet::throwNoIndexAccess();
       res = nullptr;
       break;
@@ -5127,12 +5224,12 @@ static inline Variant& collectionOffsetAtImpl(ObjectData* obj,
       res = nullptr;
       break;
     case Collection::MapType:
-    case Collection::FrozenMapType:
+    case Collection::ImmMapType:
       res = throwOnMiss ? static_cast<BaseMap*>(obj)->at(key)
                         : static_cast<BaseMap*>(obj)->get(key);
       break;
     case Collection::SetType:
-    case Collection::FrozenSetType:
+    case Collection::ImmSetType:
       BaseSet::throwNoIndexAccess();
       res = nullptr;
       break;
@@ -5140,8 +5237,8 @@ static inline Variant& collectionOffsetAtImpl(ObjectData* obj,
       collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Pairs");
       res = nullptr;
       break;
-    case Collection::FrozenVectorType:
-      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "FrozenVectors");
+    case Collection::ImmVectorType:
+      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "ImmVectors");
       res = nullptr;
       break;
     case Collection::InvalidType:
@@ -5190,17 +5287,17 @@ void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
       static_cast<c_Map*>(obj)->set(offset, tv);
       break;
     case Collection::SetType:
-    case Collection::FrozenSetType:
+    case Collection::ImmSetType:
       BaseSet::throwNoIndexAccess();
       break;
     case Collection::PairType:
       collectionThrowHelper(ErrMsgType::CannotAssign, "Pair");
       break;
-    case Collection::FrozenVectorType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
+    case Collection::ImmVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "ImmVector");
       break;
-    case Collection::FrozenMapType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenMap");
+    case Collection::ImmMapType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "ImmMap");
       break;
     case Collection::InvalidType:
       assert(false);
@@ -5222,17 +5319,17 @@ void collectionOffsetSet(ObjectData* obj, const String& offset, CVarRef val) {
       static_cast<c_Map*>(obj)->set(key, tv);
       break;
     case Collection::SetType:
-    case Collection::FrozenSetType:
+    case Collection::ImmSetType:
       BaseSet::throwNoIndexAccess();
       break;
     case Collection::PairType:
       collectionThrowHelper(ErrMsgType::CannotAssign, "Pair");
       break;
-    case Collection::FrozenVectorType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
+    case Collection::ImmVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "ImmVector");
       break;
-    case Collection::FrozenMapType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenMap");
+    case Collection::ImmMapType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "ImmMap");
       break;
     case Collection::InvalidType:
       assert(false);
@@ -5253,13 +5350,13 @@ bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
   TypedValue* key = cvarToCell(&offset);
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
-    case Collection::FrozenVectorType:
+    case Collection::ImmVectorType:
       return BaseVector::OffsetContains(obj, key);
     case Collection::MapType:
-    case Collection::FrozenMapType:
+    case Collection::ImmMapType:
       return BaseMap::OffsetContains(obj, key);
     case Collection::SetType:
-    case Collection::FrozenSetType:
+    case Collection::ImmSetType:
       return BaseSet::OffsetContains(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetContains(obj, key);
@@ -5273,15 +5370,15 @@ bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
 void collectionReserve(ObjectData* obj, int64_t sz) {
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
-    case Collection::FrozenVectorType:
+    case Collection::ImmVectorType:
       static_cast<BaseVector*>(obj)->reserve(sz);
       break;
     case Collection::MapType:
-    case Collection::FrozenMapType:
+    case Collection::ImmMapType:
       static_cast<BaseMap*>(obj)->reserve(sz);
       break;
     case Collection::SetType:
-    case Collection::FrozenSetType:
+    case Collection::ImmSetType:
       static_cast<BaseSet*>(obj)->reserve(sz);
       break;
     case Collection::PairType:
@@ -5301,17 +5398,17 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
       c_Vector::Unserialize(obj, uns, sz, type);
       break;
     case Collection::MapType:
-    case Collection::FrozenMapType:
+    case Collection::ImmMapType:
       BaseMap::Unserialize(obj, uns, sz, type);
       break;
     case Collection::SetType:
       c_Set::Unserialize(obj, uns, sz, type);
       break;
-    case Collection::FrozenVectorType:
-      c_FrozenVector::Unserialize(obj, uns, sz, type);
+    case Collection::ImmVectorType:
+      c_ImmVector::Unserialize(obj, uns, sz, type);
       break;
-    case Collection::FrozenSetType:
-      c_FrozenSet::Unserialize(obj, uns, sz, type);
+    case Collection::ImmSetType:
+      c_ImmSet::Unserialize(obj, uns, sz, type);
       break;
     case Collection::PairType:
       c_Pair::Unserialize(obj, uns, sz, type);
@@ -5353,9 +5450,9 @@ ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {
     case Collection::MapType: obj = NEWOBJ(c_Map)(); break;
     case Collection::SetType: obj = NEWOBJ(c_Set)(); break;
     case Collection::PairType: obj = NEWOBJ(c_Pair)(); break;
-    case Collection::FrozenVectorType: obj = NEWOBJ(c_FrozenVector)(); break;
-    case Collection::FrozenMapType: obj = NEWOBJ(c_FrozenMap)(); break;
-    case Collection::FrozenSetType: obj = NEWOBJ(c_FrozenSet)(); break;
+    case Collection::ImmVectorType: obj = NEWOBJ(c_ImmVector)(); break;
+    case Collection::ImmMapType: obj = NEWOBJ(c_ImmMap)(); break;
+    case Collection::ImmSetType: obj = NEWOBJ(c_ImmSet)(); break;
     case Collection::InvalidType:
       obj = nullptr;
       raise_error("NewCol: Invalid collection type");

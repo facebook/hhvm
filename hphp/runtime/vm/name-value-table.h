@@ -21,7 +21,8 @@
 #include <deque>
 #include <limits>
 
-#include "hphp/util/util.h"
+#include "folly/Bits.h"
+
 #include "hphp/util/exp-arena.h"
 #include "hphp/runtime/base/complex-types.h"
 
@@ -94,7 +95,7 @@ struct NameValueTable : private boost::noncopyable {
      * (not uncommon for a VarEnv), this avoids reallocation when
      * someone does a lookupAdd() on the single element.
      */
-    allocate(std::max(Util::roundUpToPowerOfTwo(size * 4 / 3 + 1), 4ul));
+    allocate(std::max(folly::nextPowTwo(size * 4 / 3 + 1), 4ul));
   }
   ~NameValueTable();
 
@@ -269,11 +270,11 @@ private:
     if (desiredSize < curCapac * 3 / 4) { // .75 load factor
       return;
     }
-    allocate(Util::roundUpToPowerOfTwo(curCapac + 1));
+    allocate(folly::nextPowTwo(curCapac + 1));
   }
 
   void allocate(const size_t newCapac) {
-    assert(Util::isPowerOfTwo(newCapac));
+    assert(folly::isPowTwo(newCapac));
     const size_t newMask = newCapac - 1;
     assert(newMask <= std::numeric_limits<uint32_t>::max());
     Elm* newTab = static_cast<Elm*>(calloc(sizeof(Elm), newCapac));

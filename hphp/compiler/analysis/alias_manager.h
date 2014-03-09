@@ -18,6 +18,9 @@
 #define incl_HPHP_ALIAS_MANAGER_H_
 
 #include "hphp/compiler/expression/expression.h"
+#include <map>
+#include <set>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

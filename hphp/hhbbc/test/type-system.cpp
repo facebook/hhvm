@@ -17,6 +17,16 @@
 
 #include <gtest/gtest.h>
 #include <boost/range/join.hpp>
+#include <algorithm>
+#include <limits>
+#include <memory>
+#include <utility>
+#include <vector>
+
+#include "folly/Lazy.h"
+
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/array-init.h"
 
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
@@ -146,11 +156,56 @@ std::unique_ptr<php::Program> make_program() {
 
 //////////////////////////////////////////////////////////////////////
 
-auto const with_data = {
-  ival(2),
-  dval(2.0),
-  sval(s_test.get())
-};
+auto const test_empty_array = folly::lazy([&] {
+  return HphpArray::GetStaticEmptyArray();
+});
+
+auto const test_array_map_value = folly::lazy([&] {
+  auto ar = make_map_array(
+    s_A.get(), s_B.get(),
+    s_test.get(), 12
+  );
+  return ArrayData::GetScalarArray(ar.get());
+});
+
+auto const test_array_packed_value = folly::lazy([&] {
+  auto ar = make_packed_array(
+    42,
+    23,
+    12
+  );
+  return ArrayData::GetScalarArray(ar.get());
+});
+
+auto const test_array_packed_value2 = folly::lazy([&] {
+  auto ar = make_packed_array(
+    42,
+    23.0,
+    12
+  );
+  return ArrayData::GetScalarArray(ar.get());
+});
+
+auto const test_array_packed_value3 = folly::lazy([&] {
+  auto ar = make_packed_array(
+    1,
+    2,
+    3,
+    4,
+    5
+  );
+  return ArrayData::GetScalarArray(ar.get());
+});
+
+auto const with_data = folly::lazy([&] {
+  return std::vector<Type> {
+    ival(2),
+    dval(2.0),
+    sval(s_test.get()),
+    aval(test_array_map_value()),
+    aval(test_array_packed_value())
+  };
+});
 
 // In the sense of "non-union type", not the sense of TPrim.
 auto const primitives = {
@@ -205,7 +260,15 @@ auto const non_opt_unions = {
 };
 
 auto const all_unions = boost::join(optionals, non_opt_unions);
-auto const all = boost::join(boost::join(with_data, primitives), all_unions);
+
+auto const all = folly::lazy([&] {
+  std::vector<Type> ret;
+  auto const wdata = with_data();
+  ret.insert(end(ret), begin(primitives), end(primitives));
+  ret.insert(end(ret), begin(all_unions), end(all_unions));
+  ret.insert(end(ret), begin(wdata), end(wdata));
+  return ret;
+});
 
 template<class Range>
 std::vector<Type> wait_handles_of(const Index& index, const Range& r) {
@@ -215,10 +278,39 @@ std::vector<Type> wait_handles_of(const Index& index, const Range& r) {
 }
 
 std::vector<Type> all_with_waithandles(const Index& index) {
-  auto ret = wait_handles_of(index, all);
-  for (auto& t : all) ret.push_back(t);
+  auto ret = wait_handles_of(index, all());
+  for (auto& t : all()) ret.push_back(t);
   return ret;
 }
+
+auto const specialized_array_examples = folly::lazy([&] {
+  auto ret = std::vector<Type>{};
+
+  auto test_map_a          = StructMap{};
+  test_map_a[s_test.get()] = ival(2);
+  ret.emplace_back(sarr_struct(test_map_a));
+
+  auto test_map_b          = StructMap{};
+  test_map_b[s_test.get()] = TInt;
+  ret.emplace_back(sarr_struct(test_map_b));
+
+  auto test_map_c          = StructMap{};
+  test_map_c[s_A.get()]    = TInt;
+  ret.emplace_back(sarr_struct(test_map_c));
+
+  auto test_map_d          = StructMap{};
+  test_map_d[s_A.get()]    = TInt;
+  test_map_d[s_test.get()] = TDbl;
+  ret.emplace_back(sarr_struct(test_map_d));
+
+  ret.emplace_back(arr_packedn(TInt));
+  ret.emplace_back(arr_mapn(TSStr, arr_mapn(TInt, TSStr)));
+  ret.emplace_back(arr_mapn(TSStr, TArr));
+  ret.emplace_back(arr_mapn(TSStr, arr_packedn(TSStr)));
+  ret.emplace_back(arr_mapn(TSStr, arr_mapn(TSStr, TSStr)));
+
+  return ret;
+});
 
 //////////////////////////////////////////////////////////////////////
 
@@ -281,7 +373,7 @@ TEST(Type, Relations) {
 
   // couldBe is symmetric and reflexive
   for (auto& t1 : all_with_waithandles(index)) {
-    for (auto& t2 : all) {
+    for (auto& t2 : all()) {
       EXPECT_TRUE(t1.couldBe(t2) == t2.couldBe(t1));
     }
   }
@@ -391,6 +483,19 @@ TEST(Type, Prim) {
   }
 }
 
+TEST(Type, CouldBeValues) {
+  EXPECT_FALSE(ival(2).couldBe(ival(3)));
+  EXPECT_TRUE(ival(2).couldBe(ival(2)));
+  EXPECT_FALSE(aval(test_array_packed_value()).couldBe(
+    aval(test_array_map_value())));
+  EXPECT_TRUE(aval(test_array_packed_value()).couldBe(
+    aval(test_array_packed_value())));
+  EXPECT_TRUE(dval(2.0).couldBe(dval(2.0)));
+  EXPECT_FALSE(dval(2.0).couldBe(dval(3.0)));
+  EXPECT_FALSE(sval(s_test.get()).couldBe(sval(s_A.get())));
+  EXPECT_TRUE(sval(s_test.get()).couldBe(sval(s_test.get())));
+}
+
 TEST(Type, Unc) {
   EXPECT_TRUE(TInt.subtypeOf(TInitUnc));
   EXPECT_TRUE(TInt.subtypeOf(TUnc));
@@ -486,7 +591,7 @@ TEST(Type, Option) {
 
   for (auto& t : optionals) EXPECT_EQ(t, opt(unopt(t)));
   for (auto& t : optionals) EXPECT_TRUE(is_opt(t));
-  for (auto& t : all) {
+  for (auto& t : all()) {
     auto const found =
       std::find(begin(optionals), end(optionals), t) != end(optionals);
     EXPECT_EQ(found, is_opt(t));
@@ -1197,14 +1302,14 @@ TEST(Type, WaitH) {
   auto const program = make_program();
   Index index { borrow(program) };
 
-  for (auto& t : wait_handles_of(index, all)) {
+  for (auto& t : wait_handles_of(index, all())) {
     EXPECT_TRUE(is_specialized_wait_handle(t));
     EXPECT_TRUE(t.subtypeOf(wait_handle(index, TTop)));
   }
 
   // union_of(WaitH<A>, WaitH<B>) == WaitH<union_of(A, B)>
-  for (auto& t1 : all) {
-    for (auto& t2 : all) {
+  for (auto& t1 : all()) {
+    for (auto& t2 : all()) {
       auto const u1 = union_of(t1, t2);
       auto const u2 = union_of(wait_handle(index, t1), wait_handle(index, t2));
       EXPECT_TRUE(is_specialized_wait_handle(u2));
@@ -1214,8 +1319,8 @@ TEST(Type, WaitH) {
   }
 
   // union_of(?WaitH<A>, ?WaitH<B>) == ?WaitH<union_of(A, B)>
-  for (auto& t1 : all) {
-    for (auto& t2 : all) {
+  for (auto& t1 : all()) {
+    for (auto& t2 : all()) {
       auto const w1 = opt(wait_handle(index, t1));
       auto const w2 = opt(wait_handle(index, t2));
       auto const u1 = union_of(w1, w2);
@@ -1239,12 +1344,12 @@ TEST(Type, WaitH) {
   EXPECT_TRUE(optWH.couldBe(wait_handle(index, ival(2))));
 
   // union_of(WaitH<T>, Obj<=WaitHandle) == Obj<=WaitHandle
-  for (auto& t : all) {
+  for (auto& t : all()) {
     auto const u = union_of(wait_handle(index, t), twhobj);
     EXPECT_EQ(u, twhobj);
   }
 
-  for (auto& t : all) {
+  for (auto& t : all()) {
     auto const u1 = union_of(wait_handle(index, t), TInitNull);
     EXPECT_TRUE(is_opt(u1));
     EXPECT_TRUE(is_specialized_wait_handle(u1));
@@ -1255,7 +1360,7 @@ TEST(Type, WaitH) {
   }
 
   // You can have WaitH<WaitH<T>>.  And stuff.
-  for (auto& w : wait_handles_of(index, all)) {
+  for (auto& w : wait_handles_of(index, all())) {
     auto const ww  = wait_handle(index, w);
     auto const www = wait_handle(index, ww);
 
@@ -1295,6 +1400,461 @@ TEST(Type, FromHNIConstraint) {
   EXPECT_EQ(from_hni_constraint(makeStaticString("?stdClass")), TGen);
   EXPECT_EQ(from_hni_constraint(makeStaticString("fooooo")), TGen);
   EXPECT_EQ(from_hni_constraint(makeStaticString("")), TGen);
+}
+
+TEST(Type, ArrPacked1) {
+  auto const a1 = arr_packed({ival(2), TSStr, TInt});
+  auto const a2 = arr_packed({TInt,    TStr,  TInitCell});
+  auto const s1 = sarr_packed({ival(2), TSStr, TInt});
+  auto const s2 = sarr_packed({TInt,    TStr,  TInitCell});
+  auto const c1 = carr_packed({ival(2), TSStr, TInt});
+  auto const c2 = carr_packed({TInt,    TStr,  TInitCell});
+
+  for (auto& a : { a1, s1, c1, a2, s2, c2 }) {
+    EXPECT_TRUE(a.subtypeOf(TArr));
+    EXPECT_TRUE(a.subtypeOf(a));
+    EXPECT_EQ(a, a);
+  }
+
+  // Subtype stuff.
+
+  EXPECT_TRUE(a1.subtypeOf(TArr));
+  EXPECT_FALSE(a1.subtypeOf(TSArr));
+  EXPECT_FALSE(a1.subtypeOf(TCArr));
+
+  EXPECT_TRUE(s1.subtypeOf(TArr));
+  EXPECT_TRUE(s1.subtypeOf(TSArr));
+  EXPECT_FALSE(s1.subtypeOf(TCArr));
+
+  EXPECT_TRUE(c1.subtypeOf(TArr));
+  EXPECT_TRUE(c1.subtypeOf(TCArr));
+  EXPECT_FALSE(c1.subtypeOf(TSArr));
+
+  EXPECT_TRUE(a1.subtypeOf(a2));
+  EXPECT_TRUE(s1.subtypeOf(s2));
+  EXPECT_TRUE(c1.subtypeOf(c2));
+  EXPECT_TRUE(s1.subtypeOf(a1));
+  EXPECT_TRUE(c1.subtypeOf(a1));
+
+  EXPECT_FALSE(a1.subtypeOf(c1));
+  EXPECT_FALSE(s1.subtypeOf(c1));
+  EXPECT_FALSE(c1.subtypeOf(s1));
+  EXPECT_FALSE(a1.subtypeOf(c1));
+
+  // Could be stuff.
+
+  EXPECT_TRUE(c1.couldBe(a1));
+  EXPECT_TRUE(c2.couldBe(a2));
+  EXPECT_TRUE(s1.couldBe(a1));
+  EXPECT_TRUE(s2.couldBe(a2));
+
+  EXPECT_TRUE(a1.couldBe(a2));
+  EXPECT_TRUE(a2.couldBe(a1));
+  EXPECT_TRUE(s1.couldBe(a2));
+  EXPECT_TRUE(s2.couldBe(a1));
+  EXPECT_TRUE(c1.couldBe(a2));
+  EXPECT_TRUE(c2.couldBe(a1));
+
+  EXPECT_TRUE(s1.couldBe(s2));
+  EXPECT_TRUE(s2.couldBe(s1));
+  EXPECT_TRUE(c1.couldBe(c2));
+  EXPECT_TRUE(c2.couldBe(c1));
+
+  EXPECT_FALSE(c1.couldBe(s1));
+  EXPECT_FALSE(c2.couldBe(s1));
+  EXPECT_FALSE(c1.couldBe(s2));
+  EXPECT_FALSE(c2.couldBe(s2));
+
+  EXPECT_FALSE(s1.couldBe(c1));
+  EXPECT_FALSE(s2.couldBe(c1));
+  EXPECT_FALSE(s1.couldBe(c2));
+  EXPECT_FALSE(s2.couldBe(c2));
+}
+
+TEST(Type, OptArrPacked1) {
+  auto const a1 = opt(arr_packed({ival(2), TSStr, TInt}));
+  auto const a2 = opt(arr_packed({TInt,    TStr,  TInitCell}));
+  auto const s1 = opt(sarr_packed({ival(2), TSStr, TInt}));
+  auto const s2 = opt(sarr_packed({TInt,    TStr,  TInitCell}));
+  auto const c1 = opt(carr_packed({ival(2), TSStr, TInt}));
+  auto const c2 = opt(carr_packed({TInt,    TStr,  TInitCell}));
+
+  for (auto& a : { a1, s1, c1, a2, s2, c2 }) {
+    EXPECT_TRUE(a.subtypeOf(TOptArr));
+    EXPECT_TRUE(a.subtypeOf(a));
+    EXPECT_EQ(a, a);
+  }
+
+  // Subtype stuff.
+
+  EXPECT_TRUE(a1.subtypeOf(TOptArr));
+  EXPECT_FALSE(a1.subtypeOf(TOptSArr));
+  EXPECT_FALSE(a1.subtypeOf(TOptCArr));
+
+  EXPECT_TRUE(s1.subtypeOf(TOptArr));
+  EXPECT_TRUE(s1.subtypeOf(TOptSArr));
+  EXPECT_FALSE(s1.subtypeOf(TOptCArr));
+
+  EXPECT_TRUE(c1.subtypeOf(TOptArr));
+  EXPECT_TRUE(c1.subtypeOf(TOptCArr));
+  EXPECT_FALSE(c1.subtypeOf(TOptSArr));
+
+  EXPECT_TRUE(a1.subtypeOf(a2));
+  EXPECT_TRUE(s1.subtypeOf(s2));
+  EXPECT_TRUE(c1.subtypeOf(c2));
+  EXPECT_TRUE(s1.subtypeOf(a1));
+  EXPECT_TRUE(c1.subtypeOf(a1));
+
+  EXPECT_FALSE(a1.subtypeOf(c1));
+  EXPECT_FALSE(s1.subtypeOf(c1));
+  EXPECT_FALSE(c1.subtypeOf(s1));
+  EXPECT_FALSE(a1.subtypeOf(c1));
+
+  // Could be stuff.
+
+  EXPECT_TRUE(c1.couldBe(a1));
+  EXPECT_TRUE(c2.couldBe(a2));
+  EXPECT_TRUE(s1.couldBe(a1));
+  EXPECT_TRUE(s2.couldBe(a2));
+
+  EXPECT_TRUE(a1.couldBe(a2));
+  EXPECT_TRUE(a2.couldBe(a1));
+  EXPECT_TRUE(s1.couldBe(a2));
+  EXPECT_TRUE(s2.couldBe(a1));
+  EXPECT_TRUE(c1.couldBe(a2));
+  EXPECT_TRUE(c2.couldBe(a1));
+
+  EXPECT_TRUE(s1.couldBe(s2));
+  EXPECT_TRUE(s2.couldBe(s1));
+  EXPECT_TRUE(c1.couldBe(c2));
+  EXPECT_TRUE(c2.couldBe(c1));
+
+  EXPECT_TRUE(c1.couldBe(s1));
+  EXPECT_TRUE(c2.couldBe(s1));
+  EXPECT_TRUE(c1.couldBe(s2));
+  EXPECT_TRUE(c2.couldBe(s2));
+
+  EXPECT_TRUE(s1.couldBe(c1));
+  EXPECT_TRUE(s2.couldBe(c1));
+  EXPECT_TRUE(s1.couldBe(c2));
+  EXPECT_TRUE(s2.couldBe(c2));
+}
+
+TEST(Type, ArrPacked2) {
+  {
+    auto const a1 = arr_packed({TInt, TInt, TDbl});
+    auto const a2 = arr_packed({TInt, TInt});
+    EXPECT_FALSE(a1.subtypeOf(a2));
+    EXPECT_FALSE(a1.couldBe(a2));
+  }
+
+  {
+    auto const a1 = arr_packed({TInitCell, TInt});
+    auto const a2 = arr_packed({TInt, TInt});
+    EXPECT_TRUE(a1.couldBe(a2));
+    EXPECT_TRUE(a2.subtypeOf(a1));
+  }
+
+  {
+    auto const a1 = arr_packed({TInt, TInt, TInt});
+    auto const s1 = sarr_packed({TInt, TInt, TInt});
+    auto const c1 = carr_packed({TInt, TInt, TInt});
+    auto const s2 = aval(test_array_packed_value());
+    EXPECT_TRUE(s2.subtypeOf(a1));
+    EXPECT_TRUE(s2.subtypeOf(s1));
+    EXPECT_FALSE(s2.subtypeOf(c1));
+    EXPECT_TRUE(s2.couldBe(a1));
+    EXPECT_TRUE(s2.couldBe(s1));
+    EXPECT_FALSE(s2.couldBe(c1));
+  }
+
+  {
+    auto const s1 = sarr_packed({ival(42), ival(23), ival(12)});
+    auto const s2 = aval(test_array_packed_value());
+    auto const s3 = sarr_packed({TInt});
+    auto const a4 = sarr_packed({TInt});
+    auto const a5 = arr_packed({ival(42), ival(23), ival(12)});
+    auto const c6 = carr_packed({ival(42), ival(23), ival(12)});
+    EXPECT_TRUE(s1.subtypeOf(s2));
+    EXPECT_EQ(s1, s2);
+    EXPECT_FALSE(s2.subtypeOf(s3));
+    EXPECT_FALSE(s2.couldBe(s3));
+    EXPECT_FALSE(s2.subtypeOf(s3));
+    EXPECT_FALSE(s2.couldBe(s3));
+    EXPECT_TRUE(s2.couldBe(s1));
+    EXPECT_TRUE(s2.couldBe(a5));
+    EXPECT_TRUE(s2.subtypeOf(a5));
+    EXPECT_FALSE(a5.subtypeOf(s2));
+    EXPECT_FALSE(s2.subtypeOf(c6));
+    EXPECT_FALSE(c6.subtypeOf(s2));
+  }
+}
+
+TEST(Type, ArrPackedUnion) {
+  {
+    auto const a1 = arr_packed({TInt, TDbl});
+    auto const a2 = arr_packed({TDbl, TInt});
+    EXPECT_EQ(union_of(a1, a2), arr_packed({TNum, TNum}));
+  }
+
+  {
+    auto const s1 = sarr_packed({TInt, TDbl});
+    auto const s2 = sarr_packed({TDbl, TInt});
+    auto const c2 = carr_packed({TDbl, TInt});
+    EXPECT_EQ(union_of(s1, c2), arr_packed({TNum, TNum}));
+    EXPECT_EQ(union_of(s1, s1), s1);
+    EXPECT_EQ(union_of(s1, s2), sarr_packed({TNum, TNum}));
+  }
+
+  {
+    auto const s1 = sarr_packed({TInt});
+    auto const s2 = sarr_packed({TDbl, TDbl});
+    EXPECT_EQ(union_of(s1, s2), sarr_packedn(TNum));
+  }
+
+  {
+    auto const s1 = aval(test_array_packed_value());
+    auto const s2 = sarr_packed({TInt, TInt, TInt});
+    auto const s3 = sarr_packed({TInt, TNum, TInt});
+    auto const s4 = carr_packed({TInt, TObj, TInt});
+    EXPECT_EQ(union_of(s1, s2), s2);
+    EXPECT_EQ(union_of(s1, s3), s3);
+    EXPECT_EQ(union_of(s1, s4), arr_packed({TInt, TInitCell, TInt}));
+  }
+
+  {
+    auto const s1  = sarr_packed({TInt});
+    auto const os1 = opt(s1);
+    EXPECT_EQ(union_of(s1, TInitNull), os1);
+    EXPECT_EQ(union_of(os1, s1), os1);
+    EXPECT_EQ(union_of(TInitNull, s1), os1);
+    EXPECT_EQ(union_of(os1, os1), os1);
+  }
+
+  {
+    auto const s1 = sarr_packed({TInt});
+    EXPECT_EQ(union_of(s1, TObj), TInitCell);
+    EXPECT_EQ(union_of(s1, TCArr), TArr);
+  }
+
+  {
+    auto const s1 = aval(test_array_packed_value());
+    auto const s2 = aval(test_array_packed_value2());
+    EXPECT_EQ(union_of(s1, s2), sarr_packed({ival(42), TNum, ival(12)}));
+  }
+}
+
+TEST(Type, ArrPackedN) {
+  auto const s1 = aval(test_array_packed_value());
+  auto const s2 = sarr_packed({TInt, TInt});
+  EXPECT_EQ(union_of(s1, s2), sarr_packedn(TInt));
+
+  EXPECT_TRUE(s2.subtypeOf(sarr_packedn(TInt)));
+  EXPECT_FALSE(s2.subtypeOf(sarr_packedn(TDbl)));
+  EXPECT_TRUE(s2.subtypeOf(sarr_packedn(TNum)));
+  EXPECT_TRUE(s2.subtypeOf(arr_packedn(TInt)));
+  EXPECT_TRUE(s2.subtypeOf(opt(arr_packedn(TInt))));
+
+  EXPECT_TRUE(s2.couldBe(arr_packedn(TInt)));
+  EXPECT_TRUE(s2.couldBe(arr_packedn(TInitGen)));
+
+  auto const sn1 = sarr_packedn(TInt);
+  auto const sn2 = sarr_packedn(TInitNull);
+
+  EXPECT_EQ(union_of(sn1, sn2), sarr_packedn(TOptInt));
+  EXPECT_EQ(union_of(sn1, TInitNull), opt(sn1));
+  EXPECT_EQ(union_of(TInitNull, sn1), opt(sn1));
+  EXPECT_FALSE(sn2.couldBe(sn1));
+  EXPECT_FALSE(sn1.couldBe(sn2));
+
+  auto const sn3 = sarr_packedn(TInitCell);
+  EXPECT_TRUE(sn1.couldBe(sn3));
+  EXPECT_TRUE(sn2.couldBe(sn3));
+  EXPECT_TRUE(sn3.couldBe(sn1));
+  EXPECT_TRUE(sn3.couldBe(sn2));
+
+  EXPECT_TRUE(s2.couldBe(sn3));
+  EXPECT_TRUE(s2.couldBe(sn1));
+  EXPECT_FALSE(s2.couldBe(sn2));
+}
+
+TEST(Type, ArrStruct) {
+  auto test_map_a          = StructMap{};
+  test_map_a[s_test.get()] = ival(2);
+
+  auto test_map_b          = StructMap{};
+  test_map_b[s_test.get()] = TInt;
+
+  auto test_map_c          = StructMap{};
+  test_map_c[s_test.get()] = ival(2);
+  test_map_c[s_A.get()]    = TInt;
+  test_map_c[s_B.get()]    = TDbl;
+
+  auto const ta = arr_struct(test_map_a);
+  auto const tb = arr_struct(test_map_b);
+  auto const tc = arr_struct(test_map_c);
+
+  EXPECT_FALSE(ta.subtypeOf(tc));
+  EXPECT_FALSE(tc.subtypeOf(ta));
+  EXPECT_TRUE(ta.subtypeOf(tb));
+  EXPECT_FALSE(tb.subtypeOf(ta));
+  EXPECT_TRUE(ta.couldBe(tb));
+  EXPECT_TRUE(tb.couldBe(ta));
+  EXPECT_FALSE(tc.couldBe(ta));
+  EXPECT_FALSE(tc.couldBe(tb));
+
+  EXPECT_TRUE(ta.subtypeOf(TArr));
+  EXPECT_TRUE(tb.subtypeOf(TArr));
+  EXPECT_TRUE(tc.subtypeOf(TArr));
+
+  auto const sa = sarr_struct(test_map_a);
+  auto const sb = sarr_struct(test_map_b);
+  auto const sc = sarr_struct(test_map_c);
+
+  EXPECT_FALSE(sa.subtypeOf(sc));
+  EXPECT_FALSE(sc.subtypeOf(sa));
+  EXPECT_TRUE(sa.subtypeOf(sb));
+  EXPECT_FALSE(sb.subtypeOf(sa));
+  EXPECT_TRUE(sa.couldBe(sb));
+  EXPECT_TRUE(sb.couldBe(sa));
+  EXPECT_FALSE(sc.couldBe(sa));
+  EXPECT_FALSE(sc.couldBe(sb));
+
+  EXPECT_TRUE(sa.subtypeOf(TSArr));
+  EXPECT_TRUE(sb.subtypeOf(TSArr));
+  EXPECT_TRUE(sc.subtypeOf(TSArr));
+
+  auto test_map_d          = StructMap{};
+  test_map_d[s_A.get()]    = sval(s_B.get());
+  test_map_d[s_test.get()] = ival(12);
+  auto const sd = sarr_struct(test_map_d);
+  EXPECT_EQ(sd, aval(test_array_map_value()));
+
+  auto test_map_e          = StructMap{};
+  test_map_e[s_A.get()]    = TSStr;
+  test_map_e[s_test.get()] = TNum;
+  auto const se = sarr_struct(test_map_e);
+  EXPECT_TRUE(aval(test_array_map_value()).subtypeOf(se));
+  EXPECT_TRUE(se.couldBe(aval(test_array_map_value())));
+}
+
+TEST(Type, ArrMapN) {
+  auto const test_map = aval(test_array_map_value());
+  EXPECT_TRUE(test_map != arr_mapn(TSStr, TInitUnc));
+  EXPECT_TRUE(test_map.subtypeOf(arr_mapn(TSStr, TInitUnc)));
+  EXPECT_TRUE(test_map.subtypeOf(sarr_mapn(TSStr, TInitUnc)));
+  EXPECT_TRUE(!test_map.subtypeOf(carr_mapn(TSStr, TInitUnc)));
+  EXPECT_TRUE(sarr_packedn({TInt}).subtypeOf(arr_mapn(TInt, TInt)));
+  EXPECT_TRUE(sarr_packed({TInt}).subtypeOf(arr_mapn(TInt, TInt)));
+
+  auto test_map_a          = StructMap{};
+  test_map_a[s_test.get()] = ival(2);
+  auto const tstruct       = sarr_struct(test_map_a);
+
+  EXPECT_TRUE(tstruct.subtypeOf(arr_mapn(TSStr, ival(2))));
+  EXPECT_TRUE(tstruct.subtypeOf(arr_mapn(TSStr, TInt)));
+  EXPECT_TRUE(tstruct.subtypeOf(sarr_mapn(TSStr, TInt)));
+  EXPECT_TRUE(tstruct.subtypeOf(arr_mapn(TStr, TInt)));
+  EXPECT_TRUE(!tstruct.subtypeOf(carr_mapn(TStr, TInt)));
+
+  EXPECT_TRUE(test_map.couldBe(arr_mapn(TSStr, TInitCell)));
+  EXPECT_FALSE(test_map.couldBe(arr_mapn(TSStr, TCStr)));
+  EXPECT_FALSE(test_map.couldBe(arr_mapn(TSStr, TObj)));
+
+  EXPECT_FALSE(test_map.couldBe(aval(test_empty_array())));
+  EXPECT_FALSE(arr_mapn(TSStr, TInt).couldBe(aval(test_empty_array())));
+
+  EXPECT_TRUE(sarr_packedn(TInt).couldBe(sarr_mapn(TInt, TInt)));
+  EXPECT_FALSE(sarr_packedn(TInt).couldBe(sarr_mapn(TInt, TObj)));
+
+  EXPECT_TRUE(tstruct.couldBe(sarr_mapn(TSStr, TInt)));
+  EXPECT_FALSE(tstruct.couldBe(sarr_mapn(TSStr, TObj)));
+  EXPECT_FALSE(tstruct.couldBe(carr_mapn(TSStr, TObj)));
+  EXPECT_FALSE(tstruct.couldBe(carr_mapn(TSStr, TInt)));
+}
+
+TEST(Type, ArrEquivalentRepresentations) {
+  {
+    auto const simple = aval(test_array_packed_value());
+    auto const bulky  = sarr_packed({ival(42), ival(23), ival(12)});
+    EXPECT_EQ(simple, bulky);
+  }
+
+  {
+    auto const simple = aval(test_array_map_value());
+
+    auto map          = StructMap{};
+    map[s_A.get()]    = sval(s_B.get());
+    map[s_test.get()] = ival(12);
+    auto const bulky  = sarr_struct(map);
+
+    EXPECT_EQ(simple, bulky);
+  }
+}
+
+TEST(Type, ArrUnions) {
+  auto test_map_a          = StructMap{};
+  test_map_a[s_test.get()] = ival(2);
+  auto const tstruct       = sarr_struct(test_map_a);
+
+  auto test_map_b          = StructMap{};
+  test_map_b[s_test.get()] = TInt;
+  auto const tstruct2      = sarr_struct(test_map_b);
+
+  auto test_map_c          = StructMap{};
+  test_map_c[s_A.get()]    = TInt;
+  auto const tstruct3      = sarr_struct(test_map_c);
+
+  auto test_map_d          = StructMap{};
+  test_map_d[s_A.get()]    = TInt;
+  test_map_d[s_test.get()] = TDbl;
+  auto const tstruct4      = sarr_struct(test_map_d);
+
+  auto const packed_int = arr_packedn(TInt);
+
+  EXPECT_EQ(union_of(tstruct, packed_int),
+            arr_mapn(union_of(TSStr, TInt), TInt));
+  EXPECT_EQ(union_of(tstruct, tstruct2), tstruct2);
+  EXPECT_EQ(union_of(tstruct, tstruct3), sarr_mapn(TSStr, TInt));
+  EXPECT_EQ(union_of(tstruct, tstruct4), sarr_mapn(TSStr, TNum));
+
+  EXPECT_EQ(union_of(sarr_packed({TInt, TDbl, TDbl}), sarr_packedn(TDbl)),
+            sarr_packedn(TNum));
+  EXPECT_EQ(union_of(sarr_packed({TInt, TDbl}), tstruct),
+            sarr_mapn(union_of(TSStr, TInt), TNum));
+
+  EXPECT_EQ(union_of(arr_mapn(TInt, TTrue), arr_mapn(TDbl, TFalse)),
+            arr_mapn(TNum, TBool));
+
+  auto const aval1 = aval(test_array_packed_value());
+  auto const aval2 = aval(test_array_packed_value3());
+  EXPECT_EQ(union_of(aval1, aval2), sarr_packedn(TInt));
+}
+
+TEST(Type, ArrOfArr) {
+  auto const t1 = arr_mapn(TSStr, arr_mapn(TInt, TSStr));
+  auto const t2 = arr_mapn(TSStr, TArr);
+  auto const t3 = arr_mapn(TSStr, arr_packedn(TSStr));
+  auto const t4 = arr_mapn(TSStr, arr_mapn(TSStr, TSStr));
+  EXPECT_TRUE(t1.subtypeOf(t2));
+  EXPECT_TRUE(t1.couldBe(t3));
+  EXPECT_FALSE(t1.subtypeOf(t3));
+  EXPECT_TRUE(t3.subtypeOf(t1));
+  EXPECT_TRUE(t3.subtypeOf(t2));
+  EXPECT_FALSE(t1.couldBe(t4));
+  EXPECT_FALSE(t4.couldBe(t3));
+  EXPECT_TRUE(t4.subtypeOf(t2));
+}
+
+TEST(Type, WideningAlreadyStable) {
+  // A widening union on types that are already stable should not move
+  // the type anywhere.
+  for (auto& t : all()) {
+    EXPECT_EQ(widening_union(t, t), t);
+  }
+  for (auto& t : specialized_array_examples()) {
+    EXPECT_EQ(widening_union(t, t), t);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

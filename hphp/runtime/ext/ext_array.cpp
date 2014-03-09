@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_array.h"
+#include <vector>
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -26,6 +27,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/util/logger.h"
 
 #define SORT_DESC               3
@@ -76,9 +78,9 @@ using HPHP::JIT::EagerCallerFrame;
 
 #define getCheckedArray(input) getCheckedArrayRet(input, uninit_null())
 
-Variant f_array_change_key_case(CVarRef input, bool upper /* = false */) {
+Variant f_array_change_key_case(CVarRef input, int64_t case_ /* = 0 */) {
   getCheckedArrayRet(input, false);
-  return ArrayUtil::ChangeKeyCase(arr_input, !upper);
+  return ArrayUtil::ChangeKeyCase(arr_input, !case_);
 }
 
 Variant f_array_chunk(CVarRef input, int chunkSize,
@@ -217,7 +219,19 @@ Variant f_array_fill_keys(CVarRef keys, CVarRef value) {
 
   ArrayInit ai(size);
   for (ArrayIter iter(cell_keys); iter; ++iter) {
-    ai.set(iter.secondRefPlus(), value);
+    auto& key = iter.secondRefPlus();
+    // This is intentionally different to the $foo[$invalid_key] coercion.
+    // See tests/slow/ext_array/array_fill_keys_tostring.php for examples.
+    if (LIKELY(key.isInteger() || key.isString())) {
+      ai.set(key, value);
+    } else if (RuntimeOption::EnableHipHopSyntax) {
+      // @todo (fredemmott): Use the Zend toString() behavior, but retain the
+      // warning/error behind a separate config setting
+      raise_warning("array_fill_keys: keys must be ints or strings");
+      ai.set(key, value);
+    } else {
+      ai.set(key.toString(), value);
+    }
   }
   return ai.create();
 }
@@ -354,7 +368,7 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
     Array ret = Array::Create();
     for (ArrayIter iter(arr1); iter; ++iter) {
       Variant result;
-      g_vmContext->invokeFuncFew((TypedValue*)&result, ctx, 1,
+      g_context->invokeFuncFew((TypedValue*)&result, ctx, 1,
                                  iter.secondRefPlus().asCell());
       ret.add(iter.first(), result, true);
     }
@@ -398,7 +412,7 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
     }
     if (ctx.func) {
       Variant result;
-      g_vmContext->invokeFunc((TypedValue*)&result,
+      g_context->invokeFunc((TypedValue*)&result,
                               ctx.func, params, ctx.this_,
                               ctx.cls, nullptr, ctx.invName);
       ret.append(result);
@@ -659,7 +673,7 @@ static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant ret;
   TypedValue args[2] = { *result.asCell(), *operand.asCell() };
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), *ctx, 2, args);
+  g_context->invokeFuncFew(ret.asTypedValue(), *ctx, 2, args);
   return ret;
 }
 Variant f_array_reduce(CVarRef input, CVarRef callback,
@@ -904,7 +918,7 @@ static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
   CallCtx* ctx = (CallCtx*)data;
   Variant sink;
   TypedValue args[3] = { *value->asRef(), *key.asCell(), *userdata.asCell() };
-  g_vmContext->invokeFuncFew(sink.asTypedValue(), *ctx, 3, args);
+  g_context->invokeFuncFew(sink.asTypedValue(), *ctx, 3, args);
 }
 
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
@@ -955,7 +969,7 @@ static void compact(VarEnv* v, Array &ret, CVarRef var) {
 
 Array f_compact(int _argc, CVarRef varname, CArrRef _argv /* = null_array */) {
   Array ret = Array::Create();
-  VarEnv* v = g_vmContext->getVarEnv();
+  VarEnv* v = g_context->getVarEnv();
   if (v) {
     compact(v, ret, varname);
     compact(v, ret, _argv);
@@ -984,7 +998,7 @@ bool f_shuffle(VRefParam array) {
   return true;
 }
 
-int64_t f_count(CVarRef var, bool recursive /* = false */) {
+int64_t f_count(CVarRef var, int64_t mode /* = 0 */) {
   switch (var.getType()) {
   case KindOfUninit:
   case KindOfNull:
@@ -1001,7 +1015,7 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
     }
     break;
   case KindOfArray:
-    if (recursive) {
+    if (mode) {
       CArrRef arr_var = var.toCArrRef();
       return php_count_recursive(arr_var);
     }
@@ -1012,8 +1026,8 @@ int64_t f_count(CVarRef var, bool recursive /* = false */) {
   return 1;
 }
 
-int64_t f_sizeof(CVarRef var, bool recursive /* = false */) {
-  return f_count(var, recursive);
+int64_t f_sizeof(CVarRef var, int64_t mode /* = 0 */) {
+  return f_count(var, mode);
 }
 
 namespace {
@@ -1869,12 +1883,11 @@ Variant f_array_intersect_ukey(int _argc, CVarRef array1, CVarRef array2,
 ///////////////////////////////////////////////////////////////////////////////
 // sorting functions
 
-class Collator : public RequestEventHandler {
-public:
+struct Collator final : RequestEventHandler {
   String getLocale() {
     return m_locale;
   }
-  intl_error &getErrorCodeRef() {
+  Intl::IntlError &getErrorRef() {
     return m_errcode;
   }
   bool setLocale(const String& locale) {
@@ -1885,13 +1898,15 @@ public:
       ucol_close(m_ucoll);
       m_ucoll = NULL;
     }
-    m_errcode.clear();
-    m_ucoll = ucol_open(locale.data(), &(m_errcode.code));
+    m_errcode.clearError();
+    UErrorCode error = U_ZERO_ERROR;
+    m_ucoll = ucol_open(locale.data(), &error);
     if (m_ucoll == NULL) {
       raise_warning("failed to load %s locale from icu data", locale.data());
       return false;
     }
-    if (U_FAILURE(m_errcode.code)) {
+    if (U_FAILURE(error)) {
+      m_errcode.setError(error);
       ucol_close(m_ucoll);
       m_ucoll = NULL;
       return false;
@@ -1909,10 +1924,12 @@ public:
       Logger::Verbose("m_ucoll is NULL");
       return false;
     }
-    m_errcode.clear();
+    m_errcode.clearError();
+    UErrorCode error = U_ZERO_ERROR;
     ucol_setAttribute(m_ucoll, (UColAttribute)attr,
-                      (UColAttributeValue)val, &(m_errcode.code));
-    if (U_FAILURE(m_errcode.code)) {
+                      (UColAttributeValue)val, &error);
+    if (U_FAILURE(error)) {
+      m_errcode.setError(error);
       Logger::Verbose("Error setting attribute value");
       return false;
     }
@@ -1933,18 +1950,22 @@ public:
       Logger::Verbose("m_ucoll is NULL");
       return false;
     }
-    return m_errcode.code;
+    return m_errcode.getErrorCode();
   }
 
-  virtual void requestInit() {
+  void requestInit() override {
     m_locale = String(uloc_getDefault(), CopyString);
-    m_errcode.clear();
-    m_ucoll = ucol_open(m_locale.data(), &(m_errcode.code));
+    m_errcode.clearError();
+    UErrorCode error = U_ZERO_ERROR;
+    m_ucoll = ucol_open(m_locale.data(), &error);
+    if (U_FAILURE(error)) {
+      m_errcode.setError(error);
+    }
     assert(m_ucoll);
   }
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     m_locale.reset();
-    m_errcode.clear();
+    m_errcode.clearError(false);
     if (m_ucoll) {
       ucol_close(m_ucoll);
       m_ucoll = NULL;
@@ -1954,7 +1975,7 @@ public:
 private:
   String     m_locale;
   UCollator *m_ucoll;
-  intl_error m_errcode;
+  Intl::IntlError m_errcode;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(Collator, s_collator);
 
@@ -2009,7 +2030,7 @@ php_sort(VRefParam container, int sort_flags,
     if (use_collator && sort_flags != SORT_LOCALE_STRING) {
       UCollator *coll = s_collator->getCollator();
       if (coll) {
-        intl_error &errcode = s_collator->getErrorCodeRef();
+        Intl::IntlError &errcode = s_collator->getErrorRef();
         return collator_sort(container, sort_flags, ascending,
                              coll, &errcode);
       }
@@ -2042,7 +2063,7 @@ php_asort(VRefParam container, int sort_flags,
     if (use_collator && sort_flags != SORT_LOCALE_STRING) {
       UCollator *coll = s_collator->getCollator();
       if (coll) {
-        intl_error &errcode = s_collator->getErrorCodeRef();
+        Intl::IntlError &errcode = s_collator->getErrorRef();
         return collator_asort(container, sort_flags, ascending,
                               coll, &errcode);
       }

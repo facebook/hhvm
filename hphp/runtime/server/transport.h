@@ -35,7 +35,7 @@ namespace HPHP {
  */
 template <typename V>
 using CaseInsenMap =
-  std::unordered_map<std::string, V, string_hash, string_eqstri>;
+  std::unordered_map<std::string, V, string_hashi, string_eqstri>;
 
 using HeaderMap = CaseInsenMap<std::vector<std::string>>;
 using CookieMap = CaseInsenMap<std::string>;

@@ -35,8 +35,8 @@
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
 #include <dlfcn.h>
+#include <vector>
 
 using namespace HPHP;
 

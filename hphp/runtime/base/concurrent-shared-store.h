@@ -28,6 +28,9 @@
 #include "hphp/runtime/server/server-stats.h"
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_priority_queue.h>
+#include <atomic>
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 
@@ -165,7 +168,7 @@ private:
     return APCHandle::Create(v, false);
   }
 
-  bool eraseImpl(const String& key, bool expired);
+  bool eraseImpl(const String& key, bool expired, int64_t oldestTime = 0);
 
   void eraseAcc(Map::accessor &acc) {
     const char *pkey = acc->first;

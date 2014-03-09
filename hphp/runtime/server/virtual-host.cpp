@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -158,7 +158,7 @@ void VirtualHost::init(Hdf vh) {
 
   if (prefix) m_prefix = prefix;
   if (pattern) {
-    m_pattern = Util::format_pattern(pattern, false);
+    m_pattern = format_pattern(pattern, false);
     if (!m_pattern.empty()) {
       m_pattern += "i"; // case-insensitive
     }
@@ -182,7 +182,7 @@ void VirtualHost::init(Hdf vh) {
     RewriteRule dummy;
     m_rewriteRules.push_back(dummy);
     RewriteRule &rule = m_rewriteRules.back();
-    rule.pattern = Util::format_pattern(hdf["pattern"].getString(""), true);
+    rule.pattern = format_pattern(hdf["pattern"].getString(""), true);
     rule.to = hdf["to"].getString("");
     rule.qsa = hdf["qsa"].getBool(false);
     rule.redirect = hdf["redirect"].getInt16(0);
@@ -197,7 +197,7 @@ void VirtualHost::init(Hdf vh) {
       RewriteCond dummy;
       rule.rewriteConds.push_back(dummy);
       RewriteCond &cond = rule.rewriteConds.back();
-      cond.pattern = Util::format_pattern(chdf["pattern"].getString(""), true);
+      cond.pattern = format_pattern(chdf["pattern"].getString(""), true);
       if (cond.pattern.empty()) {
         throw InvalidArgumentException("rewrite rule", "(empty cond pattern)");
       }
@@ -227,7 +227,7 @@ void VirtualHost::init(Hdf vh) {
   Hdf logFilters = vh["LogFilters"];
   for (Hdf hdf = logFilters.firstChild(); hdf.exists(); hdf = hdf.next()) {
     QueryStringFilter filter;
-    filter.urlPattern = Util::format_pattern(hdf["url"].getString(""), true);
+    filter.urlPattern = format_pattern(hdf["url"].getString(""), true);
     filter.replaceWith = hdf["value"].getString("");
     filter.replaceWith = "\\1=" + filter.replaceWith;
 
@@ -246,7 +246,7 @@ void VirtualHost::init(Hdf vh) {
       }
       if (!pattern.empty()) {
         pattern += ")=.*?(?=(&|$))";
-        pattern = Util::format_pattern(pattern, false);
+        pattern = format_pattern(pattern, false);
       }
     } else if (!names.empty()) {
       throw InvalidArgumentException

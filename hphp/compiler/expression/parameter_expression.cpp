@@ -20,7 +20,7 @@
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/code_error.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/constant_expression.h"
 
@@ -47,7 +47,7 @@ ParameterExpression::ParameterExpression(
   , m_defaultValue(defaultValue)
   , m_attributeList(attributeList)
 {
-  m_type = Util::toLower(type ? type->vanillaName() : "");
+  m_type = toLower(type ? type->vanillaName() : "");
   if (m_defaultValue) {
     m_defaultValue->setContext(InParameterExpression);
   }
@@ -90,7 +90,7 @@ void ParameterExpression::fixupSelfAndParentTypehints(ClassScopePtr cls) {
     m_type = cls->getName();
   } else if (m_type == "parent") {
     if (!cls->getOriginalParent().empty()) {
-      m_type = Util::toLower(cls->getOriginalParent());
+      m_type = toLower(cls->getOriginalParent());
     }
   }
 }
@@ -311,7 +311,7 @@ void ParameterExpression::outputCodeModel(CodeGenerator &cg) {
   if (m_defaultValue != nullptr) propCount++;
   cg.printObjectHeader("ParameterDeclaration", propCount);
   if (m_attributeList) {
-    cg.printPropertyHeader("isPassedByReference");
+    cg.printPropertyHeader("attributes");
     cg.printExpressionVector(m_attributeList);
   }
   if (m_modifier != 0) {

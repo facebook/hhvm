@@ -17,6 +17,8 @@
 #define INLINE_VARIANT_HELPER 1
 
 #include "hphp/runtime/base/hphp-array.h"
+#include <algorithm>
+#include <utility>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -29,7 +31,6 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/util.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/base/stats.h"
@@ -534,7 +535,7 @@ HphpArray* HphpArray::MakeUncounted(ArrayData* array) {
 
 NEVER_INLINE
 void HphpArray::ReleasePacked(ArrayData* in) {
-  assert(in->m_count >= 0);
+  assert(in->isRefCounted());
   auto const ad = asPacked(in);
 
   if (!ad->isZombie()) {
@@ -559,7 +560,7 @@ void HphpArray::ReleasePacked(ArrayData* in) {
 
 NEVER_INLINE
 void HphpArray::Release(ArrayData* in) {
-  assert(in->m_count >= 0);
+  assert(in->isRefCounted());
   auto const ad = asMixed(in);
 
   if (!ad->isZombie()) {
@@ -597,19 +598,19 @@ void HphpArray::ReleaseUncounted(ArrayData* in) {
       if (!ad->isPacked()) {
         if (isTombstone(ptr->data.m_type)) continue;
         if (ptr->hasStrKey()) {
-          assert(ptr->key->m_count < 0);
+          assert(!ptr->key->isRefCounted());
           if (!ptr->key->isStatic()) {
             ptr->key->destructStatic();
           }
         }
       }
       if (ptr->data.m_type == KindOfString) {
-        assert(ptr->data.m_data.pstr->m_count < 0);
+        assert(!ptr->data.m_data.pstr->isRefCounted());
         if (!ptr->data.m_data.pstr->isStatic()) {
           ptr->data.m_data.pstr->destructStatic();
         }
       } else if (ptr->data.m_type == KindOfArray) {
-        assert(ptr->data.m_data.pstr->m_count < 0);
+        assert(!ptr->data.m_data.parr->isRefCounted());
         if (!ptr->data.m_data.parr->isStatic()) {
           ReleaseUncounted(ptr->data.m_data.parr);
         }
@@ -672,7 +673,7 @@ HphpArray* HphpArray::packedToMixed() {
  * All arrays (zombie or not):
  *
  *   m_tableMask is 2^k - 1 (required for quadratic probe)
- *   m_tableMask == nextPower2(m_cap) - 1;
+ *   m_tableMask == folly::nextPowTwo(m_cap) - 1;
  *   m_cap == computeMaxElms(m_tableMask);
  *
  * Zombie state:
@@ -711,7 +712,7 @@ bool HphpArray::checkInvariants() const {
 
   // All arrays:
   assert(m_tableMask > 0 && ((m_tableMask+1) & m_tableMask) == 0);
-  assert(m_tableMask == Util::nextPower2(m_cap) - 1);
+  assert(m_tableMask == folly::nextPowTwo(m_cap) - 1);
   assert(m_cap == computeMaxElms(m_tableMask));
 
   if (isZombie()) return true;

@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_DOMDOCUMENT_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include <memory>
 #include "hphp/runtime/ext/ext_domdocument_includes.h"
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -21,13 +21,7 @@ namespace HPHP { namespace Intl {
 
 const StaticString s_IntlIterator("IntlIterator");
 
-IntlIterator *IntlIterator::Get(Object obj) {
-  return GetResData<IntlIterator>(obj, s_IntlIterator.get());
-}
-
-Object IntlIterator::wrap() {
-  return WrapResData(s_IntlIterator.get());
-}
+Class* IntlIterator::c_IntlIterator = nullptr;
 
 #define II_GET(dest, src, def) \
   auto dest = IntlIterator::Get(src); \
@@ -76,6 +70,9 @@ void IntlExtension::initIterator() {
   HHVM_ME(IntlIterator, next);
   HHVM_ME(IntlIterator, rewind);
   HHVM_ME(IntlIterator, valid);
+
+  Native::registerNativeDataInfo<IntlIterator>(s_IntlIterator.get());
+
   loadSystemlib("icu_iterator");
 }
 

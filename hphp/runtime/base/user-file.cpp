@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -51,8 +52,7 @@ StaticString s_rmdir("rmdir");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-UserFile::UserFile(Class *cls, CVarRef context /*= null */) :
-                   UserFSNode(cls), m_opened(false) {
+UserFile::UserFile(Class *cls, CVarRef context /*= null */) : UserFSNode(cls) {
   m_StreamOpen  = lookupMethod(s_stream_open.get());
   m_StreamClose = lookupMethod(s_stream_close.get());
   m_StreamRead  = lookupMethod(s_stream_read.get());
@@ -70,10 +70,16 @@ UserFile::UserFile(Class *cls, CVarRef context /*= null */) :
   m_Mkdir       = lookupMethod(s_mkdir.get());
   m_Rmdir       = lookupMethod(s_rmdir.get());
   m_isLocal = true;
+
+  // UserFile, to match Zend, should not call stream_close() unless it was ever
+  // opened. This is a bit of a misuse of this field but the API doesn't allow
+  // one direct access to an not-yet-opened stream resource so it should be
+  // safe.
+  m_closed = true;
 }
 
 UserFile::~UserFile() {
-  if (m_opened && !m_closed) {
+  if (!m_closed) {
     close();
   }
 }
@@ -103,7 +109,7 @@ bool UserFile::openImpl(const String& filename, const String& mode,
     invoked
   );
   if (invoked && (ret.toBoolean() == true)) {
-    m_opened = true;
+    m_closed = false;
     return true;
   }
 
@@ -112,15 +118,18 @@ bool UserFile::openImpl(const String& filename, const String& mode,
 }
 
 bool UserFile::close() {
+  // fclose() should prevent this from being called on a closed stream
+  assert(!m_closed);
+
   // PHP's streams layer explicitly flushes on close
   // Mimick that for user-wrappers by pushing the flush here
   // without impacting other HPHP stream types.
-  flush();
+  bool ret = flushImpl(false) || !RuntimeOption::CheckFlushOnUserClose;
 
   // void stream_close()
   invoke(m_StreamClose, s_stream_close, Array::Create());
   m_closed = true;
-  return true;
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -233,15 +242,19 @@ bool UserFile::eof() {
   return ret.isBoolean() ? ret.toBoolean() : true;
 }
 
-bool UserFile::flush() {
+bool UserFile::flushImpl(bool strict) {
   // bool stream_flush()
   bool invoked = false;
   Variant ret = invoke(m_StreamFlush, s_stream_flush,
                        Array::Create(), invoked);
   if (!invoked) {
-    return false;
+    return !strict;
   }
-  return ret.isBoolean() ? ret.toBoolean() : false;
+  return strict ? same(ret, true) : !same(ret, false);
+}
+
+bool UserFile::flush() {
+  return flushImpl(true);
 }
 
 bool UserFile::truncate(int64_t size) {

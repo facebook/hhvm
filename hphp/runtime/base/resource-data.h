@@ -23,6 +23,7 @@
 #endif
 
 #include "hphp/runtime/base/complex-types.h"
+#include <map>
 #include "hphp/runtime/base/sweepable.h"
 
 namespace HPHP {
@@ -182,9 +183,6 @@ protected:
     delete this;
   }
 };
-
-typedef std::map<std::string, ResourceData*> ResourceMap;
-typedef std::map<std::string, ResourceMap> ResourceMapMap;
 
 ///////////////////////////////////////////////////////////////////////////////
 

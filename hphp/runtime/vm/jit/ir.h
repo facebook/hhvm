@@ -137,14 +137,14 @@ class FailedCodeGen : public std::runtime_error {
  *     DofS(N)   single dst has the type of src N
  *     DUnbox(N) single dst has unboxed type of src N
  *     DBox(N)   single dst has boxed type of src N
+ *     DFilterS(N) single dst's type is the intersection of src N and paramType
  *     DParam    single dst has type of the instruction's type parameter
- *     DLdRef    single dst has type of the instruction's type parameter, with
- *               any specialization removed
+ *     DLdRef    single dst has type of the instruction's type parameter,
+ *               loosened to allow efficient type checks
  *     DAllocObj single dst has a type of a newly allocated object; may be a
  *               specialized object type if the class is known
  *     DThis     single dst has type Obj<ctx>, where ctx is the
  *               current context class
- *     DArith    single dst has a type based on arithmetic type rules
  *     DMulti    multiple dests. type and number depend on instruction
  *     DSetElem  single dst is a subset of CountedStr|Nullptr depending on
  *               sources
@@ -165,7 +165,6 @@ class FailedCodeGen : public std::runtime_error {
  *     S(t1,...,tn)  source must be a subtype of {t1|..|tn}
  *     C(type)       source must be a constant, and subtype of type
  *     CStr          same as C(StaticStr)
- *     SNum          same as S(Int,Bool,Dbl)
  *     SSpills       SpillStack's variadic source list
  *
  * flags:
@@ -200,7 +199,7 @@ class FailedCodeGen : public std::runtime_error {
 
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(CheckType,                    DParam, S(Gen),                        B|E|P) \
+O(CheckType,               DFilterS(0), S(Gen),                        B|E|P) \
 O(AssertType,                   DParam, S(Gen,Cls),                    C|E|P) \
 O(CheckTypeMem,                     ND, S(PtrToGen),                     B|E) \
 O(GuardLoc,                D(FramePtr), S(FramePtr),                       E) \
@@ -213,7 +212,7 @@ O(AssertStk,                 D(StkPtr), S(StkPtr),                         E) \
 O(CheckDefinedClsEq,                ND, NA,                              B|E) \
 O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int)                              \
-                                          S(Int)                              \
+                                          C(Int)                              \
                                           S(Int)                              \
                                           S(Int),                          E) \
 O(AssertLoc,               D(FramePtr), S(FramePtr),                       E) \
@@ -222,20 +221,20 @@ O(EndCatch,                         ND, S(FramePtr) S(StkPtr),           E|T) \
 O(TryEndCatch,                      ND, S(FramePtr) S(StkPtr),             E) \
 O(LdUnwinderValue,              DParam, NA,                              PRc) \
 O(DeleteUnwinderException,          ND, NA,                              N|E) \
-O(Add,                          DArith, S(Int,Dbl) S(Int,Dbl),             C) \
-O(Sub,                          DArith, S(Int,Dbl) S(Int,Dbl),             C) \
-O(Mul,                          DArith, S(Int,Dbl) S(Int,Dbl),             C) \
+O(AddInt,                       D(Int), S(Int) S(Int),                     C) \
+O(SubInt,                       D(Int), S(Int) S(Int),                     C) \
+O(MulInt,                       D(Int), S(Int) S(Int),                     C) \
+O(AddDbl,                       D(Dbl), S(Dbl) S(Dbl),                     C) \
+O(SubDbl,                       D(Dbl), S(Dbl) S(Dbl),                     C) \
+O(MulDbl,                       D(Dbl), S(Dbl) S(Dbl),                     C) \
 O(DivDbl,                       D(Dbl), S(Dbl) S(Dbl),                   B|C) \
 O(Mod,                          D(Int), S(Int) S(Int),                     C) \
 O(Sqrt,                         D(Dbl), S(Dbl),                            C) \
-O(AbsInt,                       D(Int), S(Int),                            C) \
 O(AbsDbl,                       D(Dbl), S(Dbl),                            C) \
-O(BitAnd,                       D(Int), S(Int) S(Int),                     C) \
-O(BitOr,                        D(Int), S(Int) S(Int),                     C) \
-O(BitXor,                       D(Int), S(Int) S(Int),                     C) \
-O(BitNot,                       D(Int), S(Int),                            C) \
-O(LogicXor,                    D(Bool), S(Bool) S(Bool),                   C) \
-O(Not,                         D(Bool), S(Bool),                           C) \
+O(AndInt,                       D(Int), S(Int) S(Int),                     C) \
+O(OrInt,                        D(Int), S(Int) S(Int),                     C) \
+O(XorInt,                       D(Int), S(Int) S(Int),                     C) \
+O(XorBool,                     D(Bool), S(Bool) S(Bool),                   C) \
 O(Shl,                          D(Int), S(Int) S(Int),                     C) \
 O(Shr,                          D(Int), S(Int) S(Int),                     C) \
                                                                               \
@@ -316,26 +315,26 @@ O(NInstanceOfBitmask,          D(Bool), S(Cls) CStr,                       C) \
 O(IsType,                      D(Bool), S(Cell),                           C) \
 O(IsNType,                     D(Bool), S(Cell),                           C) \
 O(IsScalarType,                D(Bool), S(Cell),                           C) \
-O(JmpGt,                       D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpGte,                      D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpLt,                       D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpLte,                      D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpEq,                       D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpNeq,                      D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpSame,                     D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpNSame,                    D(None), S(Gen) S(Gen),                   B|E) \
-O(JmpGtInt,                    D(None), S(Int) S(Int),                   B|E) \
-O(JmpGteInt,                   D(None), S(Int) S(Int),                   B|E) \
-O(JmpLtInt,                    D(None), S(Int) S(Int),                   B|E) \
-O(JmpLteInt,                   D(None), S(Int) S(Int),                   B|E) \
-O(JmpEqInt,                    D(None), S(Int) S(Int),                   B|E) \
-O(JmpNeqInt,                   D(None), S(Int) S(Int),                   B|E) \
-O(JmpInstanceOfBitmask,        D(None), S(Cls) CStr,                     B|E) \
-O(JmpNInstanceOfBitmask,       D(None), S(Cls) CStr,                     B|E) \
+O(JmpGt,                            ND, S(Gen) S(Gen),                   B|E) \
+O(JmpGte,                           ND, S(Gen) S(Gen),                   B|E) \
+O(JmpLt,                            ND, S(Gen) S(Gen),                   B|E) \
+O(JmpLte,                           ND, S(Gen) S(Gen),                   B|E) \
+O(JmpEq,                            ND, S(Gen) S(Gen),                   B|E) \
+O(JmpNeq,                           ND, S(Gen) S(Gen),                   B|E) \
+O(JmpSame,                          ND, S(Gen) S(Gen),                   B|E) \
+O(JmpNSame,                         ND, S(Gen) S(Gen),                   B|E) \
+O(JmpGtInt,                         ND, S(Int) S(Int),                   B|E) \
+O(JmpGteInt,                        ND, S(Int) S(Int),                   B|E) \
+O(JmpLtInt,                         ND, S(Int) S(Int),                   B|E) \
+O(JmpLteInt,                        ND, S(Int) S(Int),                   B|E) \
+O(JmpEqInt,                         ND, S(Int) S(Int),                   B|E) \
+O(JmpNeqInt,                        ND, S(Int) S(Int),                   B|E) \
+O(JmpInstanceOfBitmask,             ND, S(Cls) CStr,                     B|E) \
+O(JmpNInstanceOfBitmask,            ND, S(Cls) CStr,                     B|E) \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(JmpZero,                     D(None), S(Int,Bool),                     B|E) \
-O(JmpNZero,                    D(None), S(Int,Bool),                     B|E) \
-O(Jmp,                         D(None), SUnk,                          B|T|E) \
+O(JmpZero,                          ND, S(Int,Bool),                     B|E) \
+O(JmpNZero,                         ND, S(Int,Bool),                     B|E) \
+O(Jmp,                              ND, SUnk,                          B|T|E) \
 O(ReqBindJmpGt,                     ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpGte,                    ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpLt,                     ND, S(Gen) S(Gen),                   T|E) \
@@ -352,28 +351,28 @@ O(ReqBindJmpSame,                   ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpNSame,                  ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpInstanceOfBitmask,      ND, S(Cls) CStr,                     T|E) \
 O(ReqBindJmpNInstanceOfBitmask,     ND, S(Cls) CStr,                     T|E) \
-O(ReqBindJmpZero,                   ND, SNum,                            T|E) \
-O(ReqBindJmpNZero,                  ND, SNum,                            T|E) \
-O(SideExitJmpGt,               D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpGte,              D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpLt,               D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpLte,              D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpEq,               D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpNeq,              D(None), S(Gen) S(Gen),                     E) \
-O(SideExitJmpGtInt,            D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpGteInt,           D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpLtInt,            D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpLteInt,           D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpEqInt,            D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpNeqInt,           D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpSame,             D(None), S(Int) S(Int),                     E) \
-O(SideExitJmpNSame,            D(None), S(Int) S(Int),                     E) \
+O(ReqBindJmpZero,                   ND, S(Int,Bool),                     T|E) \
+O(ReqBindJmpNZero,                  ND, S(Int,Bool),                     T|E) \
+O(SideExitJmpGt,                    ND, S(Gen) S(Gen),                     E) \
+O(SideExitJmpGte,                   ND, S(Gen) S(Gen),                     E) \
+O(SideExitJmpLt,                    ND, S(Gen) S(Gen),                     E) \
+O(SideExitJmpLte,                   ND, S(Gen) S(Gen),                     E) \
+O(SideExitJmpEq,                    ND, S(Gen) S(Gen),                     E) \
+O(SideExitJmpNeq,                   ND, S(Gen) S(Gen),                     E) \
+O(SideExitJmpGtInt,                 ND, S(Int) S(Int),                     E) \
+O(SideExitJmpGteInt,                ND, S(Int) S(Int),                     E) \
+O(SideExitJmpLtInt,                 ND, S(Int) S(Int),                     E) \
+O(SideExitJmpLteInt,                ND, S(Int) S(Int),                     E) \
+O(SideExitJmpEqInt,                 ND, S(Int) S(Int),                     E) \
+O(SideExitJmpNeqInt,                ND, S(Int) S(Int),                     E) \
+O(SideExitJmpSame,                  ND, S(Int) S(Int),                     E) \
+O(SideExitJmpNSame,                 ND, S(Int) S(Int),                     E) \
 O(SideExitJmpInstanceOfBitmask,                                               \
-                               D(None), S(Cls) CStr,                       E) \
+                                    ND, S(Cls) CStr,                       E) \
 O(SideExitJmpNInstanceOfBitmask,                                              \
-                               D(None), S(Cls) CStr,                       E) \
-O(SideExitJmpZero,             D(None), SNum,                              E) \
-O(SideExitJmpNZero,            D(None), SNum,                              E) \
+                                    ND, S(Cls) CStr,                       E) \
+O(SideExitJmpZero,                  ND, S(Int,Bool),                       E) \
+O(SideExitJmpNZero,                 ND, S(Int,Bool),                       E) \
 O(SideExitGuardLoc,        D(FramePtr), S(FramePtr),                       E) \
 O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
 /*    name                      dstinfo srcinfo                      flags */ \
@@ -416,7 +415,6 @@ O(LdPackedArrayElem,            D(Gen), S(Arr) S(Int),                     E) \
 O(LdRef,                        DLdRef, S(BoxedCell),                      B) \
 O(LdThis,                        DThis, S(FramePtr),                     B|C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
-O(LdConst,                      DParam, NA,                                C) \
 O(DefConst,                     DParam, NA,                                C) \
 O(ConvClsToCctx,               D(Cctx), S(Cls),                            C) \
 O(LdCtx,                        D(Ctx), S(FramePtr),                       C) \
@@ -440,8 +438,7 @@ O(LookupClsMethod,                  ND, S(Cls)                                \
                                           S(FramePtr),                N|E|Er) \
 O(LdClsMethodCacheFunc,D(Func|Nullptr), NA,                               NF) \
 O(LdClsMethodCacheCls,         D(Cctx), NA,                               NF) \
-O(LookupClsMethodCache,D(Func|Nullptr), C(NamedEntity)                        \
-                                          S(FramePtr),                N|E|Er) \
+O(LookupClsMethodCache,D(Func|Nullptr), S(FramePtr),                  N|E|Er) \
 O(LdClsMethodFCacheFunc,                                                      \
                        D(Func|Nullptr), NA,                               NF) \
 O(LookupClsMethodFCache,                                                      \
@@ -505,11 +502,10 @@ O(StRetVal,                         ND, S(FramePtr) S(Gen),            E|CRc) \
 O(RetAdjustStack,            D(StkPtr), S(FramePtr),                       E) \
 O(StMem,                            ND, S(PtrToGen)                           \
                                           C(Int) S(Gen),               E|CRc) \
-O(StProp,                           ND, S(Obj) S(Int) S(Gen),          E|CRc) \
+O(StProp,                           ND, S(Obj) C(Int) S(Gen),          E|CRc) \
 O(StLoc,                            ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StLocNT,                          ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StRef,                       DBox(1), S(BoxedCell) S(Cell),        E|CRc|P) \
-O(StRefNT,                     DBox(1), S(BoxedCell) S(Cell),        E|CRc|P) \
 O(StRaw,                            ND, SUnk,                              E) \
 O(StElem,                           ND, S(PtrToCell)                          \
                                           S(Int)                              \
@@ -525,7 +521,7 @@ O(StaticLocInitCached,              ND, S(BoxedCell) S(Cell),              E) \
 O(SpillStack,                D(StkPtr), S(StkPtr) C(Int) SSpills,        CRc) \
 O(SpillFrame,                D(StkPtr), S(StkPtr)                             \
                                           S(FramePtr)                         \
-                                          S(Func,FuncCls,FuncCtx,Null)        \
+                                          S(Func,InitNull)                    \
                                           S(Ctx,Cls,InitNull),           CRc) \
 O(CufIterSpillFrame,         D(StkPtr), S(StkPtr)                             \
                                           S(FramePtr),                    NF) \
@@ -562,7 +558,7 @@ O(VerifyParamCls,                   ND, S(Cls)                                \
                                           S(Cls)                              \
                                           C(Int)                              \
                                           C(Int),                     E|N|Er) \
-O(VerifyParamCallable,              ND, S(Cell) C(Int),               E|N|Er) \
+O(VerifyParamCallable,              ND, S(Gen) C(Int),                E|N|Er) \
 O(VerifyParamFail,                  ND, C(Int),                       E|N|Er) \
 O(RaiseUninitLoc,                   ND, S(Str),                       E|N|Er) \
 O(WarnNonObjProp,                   ND, NA,                           E|N|Er) \
@@ -571,6 +567,12 @@ O(RaiseUndefProp,                   ND, S(Obj) CStr,                  E|N|Er) \
 O(PrintStr,                         ND, S(Str),                      E|N|CRc) \
 O(PrintInt,                         ND, S(Int),                      E|N|CRc) \
 O(PrintBool,                        ND, S(Bool),                     E|N|CRc) \
+O(VerifyRetCls,                     ND, S(Cls)                                \
+                                          S(Cls)                              \
+                                          C(Int)                              \
+                                          S(Cell),                    E|N|Er) \
+O(VerifyRetCallable,                ND, S(Gen),                       E|N|Er) \
+O(VerifyRetFail,                    ND, S(Gen),                       E|N|Er) \
 O(AddElemStrKey,                D(Arr), S(Arr)                                \
                                           S(Str)                              \
                                           S(Cell),                 N|CRc|PRc) \
@@ -583,9 +585,9 @@ O(ColAddElemC,                  D(Obj), S(Obj)                                \
                                          S(Cell),                 N|Er|CRc|P) \
 O(ColAddNewElemC,               D(Obj), S(Obj) S(Cell),           N|Er|CRc|P) \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(ConcatStrStr,                 D(Str), S(Str) S(Str),             N|CRc|PRc) \
-O(ConcatIntStr,                 D(Str), S(Int) S(Str),                 N|PRc) \
-O(ConcatStrInt,                 D(Str), S(Str) S(Int),             N|CRc|PRc) \
+O(ConcatStrStr,                 D(Str), S(Str) S(Str),          Er|N|CRc|PRc) \
+O(ConcatIntStr,                 D(Str), S(Int) S(Str),              Er|N|PRc) \
+O(ConcatStrInt,                 D(Str), S(Str) S(Int),          Er|N|CRc|PRc) \
 O(ConcatCellCell,               D(Str), S(Cell) S(Cell),        Er|N|CRc|PRc) \
 O(ArrayAdd,                     D(Arr), S(Arr) S(Arr),          Er|N|CRc|PRc) \
 O(AKExists,                    D(Bool), S(Cell) S(Cell),                   N) \
@@ -593,8 +595,6 @@ O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                       E|N|Er) \
 O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                     T|E|N|Er) \
-O(Spill,                       DofS(0), SUnk,                             NF) \
-O(Reload,                      DofS(0), SUnk,                             NF) \
 O(Shuffle,                          ND, SUnk,                             NF) \
 O(CreateContFunc,               D(Obj), NA,                          E|N|PRc) \
 O(CreateContMeth,               D(Obj), S(Ctx),                      E|N|PRc) \
@@ -621,44 +621,23 @@ O(CreateAFWHMeth,               D(Obj), S(Ctx) C(Int) S(Obj), E|Er|N|CRc|PRc) \
 O(CreateSRWH,                   D(Obj), S(Cell),                   N|CRc|PRc) \
 O(CreateSEWH,                   D(Obj), S(Obj),                    N|CRc|PRc) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
-                                          S(FramePtr)                         \
-                                          C(Int)                              \
-                                          C(Int),                 Er|E|N|CRc) \
+                                          S(FramePtr),            Er|E|N|CRc) \
 O(IterInitK,                   D(Bool), S(Arr,Obj)                            \
-                                          S(FramePtr)                         \
-                                          C(Int)                              \
-                                          C(Int)                              \
-                                          C(Int),                 Er|E|N|CRc) \
-O(IterNext,                    D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),              Er|E|N) \
-O(IterNextK,                   D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int),       Er|E|N) \
+                                          S(FramePtr),            Er|E|N|CRc) \
+O(IterNext,                    D(Bool), S(FramePtr),                  Er|E|N) \
+O(IterNextK,                   D(Bool), S(FramePtr),                  Er|E|N) \
 O(WIterInit,                   D(Bool), S(Arr,Obj)                            \
-                                          S(FramePtr)                         \
-                                          C(Int)                              \
-                                          C(Int),                 Er|E|N|CRc) \
+                                          S(FramePtr),            Er|E|N|CRc) \
 O(WIterInitK,                  D(Bool), S(Arr,Obj)                            \
-                                          S(FramePtr)                         \
-                                          C(Int)                              \
-                                          C(Int)                              \
-                                          C(Int),                 Er|E|N|CRc) \
-O(WIterNext,                   D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),              Er|E|N) \
-O(WIterNextK,                  D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int),       Er|E|N) \
+                                          S(FramePtr),            Er|E|N|CRc) \
+O(WIterNext,                   D(Bool), S(FramePtr),                  Er|E|N) \
+O(WIterNextK,                  D(Bool), S(FramePtr),                  Er|E|N) \
 O(MIterInit,                   D(Bool), S(BoxedCell)                          \
-                                          S(FramePtr)                         \
-                                          C(Int)                              \
-                                          C(Int),                     Er|E|N) \
+                                          S(FramePtr),                Er|E|N) \
 O(MIterInitK,                  D(Bool), S(BoxedCell)                          \
-                                          S(FramePtr)                         \
-                                          C(Int)                              \
-                                          C(Int)                              \
-                                          C(Int),                     Er|E|N) \
-O(MIterNext,                   D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int),                 E|N) \
-O(MIterNextK,                  D(Bool), S(FramePtr)                           \
-                                          C(Int) C(Int) C(Int),          E|N) \
+                                          S(FramePtr),                Er|E|N) \
+O(MIterNext,                   D(Bool), S(FramePtr),                     E|N) \
+O(MIterNextK,                  D(Bool), S(FramePtr),                     E|N) \
 O(IterFree,                         ND, S(FramePtr),                     E|N) \
 O(MIterFree,                        ND, S(FramePtr),                     E|N) \
 O(DecodeCufIter,               D(Bool), S(Arr,Obj,Str)                        \
@@ -847,7 +826,7 @@ O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
 O(DbgAssertType,                    ND, S(Cell),                           E) \
 O(DbgAssertRetAddr,                 ND, NA,                                E) \
 O(Nop,                              ND, NA,                               NF) \
-/* */
+/* END. Nop must be the last opcode. */
 
 enum class Opcode : uint16_t {
 #define O(name, ...) name,
@@ -969,107 +948,6 @@ bool hasEdges(Opcode opc);
 bool opcodeHasFlags(Opcode opc, uint64_t flags);
 Opcode getStackModifyingOpcode(Opcode opc);
 
-/*
- * typeForConst(T)
- *
- *   returns the Type type for a C++ type that may be used with
- *   ConstData.
- */
-
-// The only interesting case is int/bool disambiguation.  Enums are
-// treated as ints.
-template<class T>
-typename std::enable_if<
-  std::is_integral<T>::value || std::is_enum<T>::value,
-  Type
->::type typeForConst(T) {
-  return std::is_same<T,bool>::value ? Type::Bool : Type::Int;
-}
-
-inline Type typeForConst(const NamedEntity*) { return Type::NamedEntity; }
-inline Type typeForConst(const Func*)        { return Type::Func; }
-inline Type typeForConst(const Class*)       { return Type::Cls; }
-inline Type typeForConst(const TypedValue*)  { return Type::PtrToGen; }
-inline Type typeForConst(TCA)                { return Type::TCA; }
-inline Type typeForConst(double)             { return Type::Dbl; }
-inline Type typeForConst(SetOpOp)            { return Type::Int; }
-inline Type typeForConst(IncDecOp)           { return Type::Int; }
-inline Type typeForConst(std::nullptr_t)     { return Type::Nullptr; }
-
-inline Type typeForConst(const StringData* sd) {
-  assert(sd->isStatic());
-  return Type::StaticStr;
-}
-inline Type typeForConst(const ArrayData* ad) {
-  assert(ad->isStatic());
-  return Type::StaticArr.specialize(ad->kind());
-}
-inline Type typeForConst(const TypedValue& tv) {
-  switch (tv.m_type) {
-    case KindOfClass:
-    case KindOfUninit:
-    case KindOfNull:
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfStaticString:
-      return Type(tv.m_type);
-
-    case KindOfString:
-      return typeForConst(tv.m_data.pstr);
-
-    case KindOfArray:
-      return typeForConst(tv.m_data.parr);
-
-    default:
-      always_assert(false && "Invalid KindOf for constant TypedValue");
-  }
-}
-
-/*
- * constToBits(T)
- *
- *  Returns a constant value as a 8-byte word (in the shape it would
- *  need to be to go into a register).  Takes care to ensure that
- *  various types are safely copied.
- */
-
-namespace constToBits_detail {
-  template<class T>
-  struct needs_promotion
-    : std::integral_constant<
-        bool,
-        std::is_integral<T>::value  ||
-          std::is_same<T,bool>::value ||
-          std::is_enum<T>::value
-      >
-  {};
-
-  template<class T>
-  typename std::enable_if<needs_promotion<T>::value,uint64_t>::type
-  promoteIfNeeded(T t) { return static_cast<uint64_t>(t); }
-
-  template<class T>
-  typename std::enable_if<!needs_promotion<T>::value,T>::type
-  promoteIfNeeded(T t) { return t; }
-}
-
-template<class T>
-uintptr_t constToBits(T input) {
-  uintptr_t ret;
-  static_assert(sizeof(T) <= sizeof ret,
-                "Constant data was larger than supported");
-  static_assert(std::is_pod<T>::value,
-                "Constant data wasn't a pod?");
-  const auto toCopy = constToBits_detail::promoteIfNeeded(input);
-  std::memcpy(&ret, &toCopy, sizeof toCopy);
-  return ret;
-}
-
-inline uintptr_t constToBits(const TypedValue& tv) {
-  return tv.m_data.num;
-}
-
 class RawMemSlot {
  public:
 
@@ -1164,11 +1042,7 @@ void assertOperandTypes(const IRInstruction*);
 
 
 int minstrBaseIdx(Opcode opc);
-int minstrKeyIdx(Opcode opc);
-int minstrValueIdx(Opcode opc);
 int minstrBaseIdx(const IRInstruction* inst);
-int minstrKeyIdx(const IRInstruction* inst);
-int minstrValueIdx(const IRInstruction* inst);
 
 struct MInstrEffects {
   static bool supported(Opcode op);

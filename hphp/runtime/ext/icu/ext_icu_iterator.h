@@ -24,28 +24,45 @@
 
 namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
+extern const StaticString s_IntlIterator;
 
-class IntlIterator : public IntlResourceData {
+class IntlIterator : public IntlError {
 public:
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(IntlIterator);
-  CLASSNAME_IS("IntlIterator");
-  const String& o_getClassNameHook() const override { return classnameof(); }
+  IntlIterator() {}
+  IntlIterator(const IntlIterator&) = delete;
+  IntlIterator& operator=(const IntlIterator& src) {
+    setEnumeration(src.enumeration()->clone());
+    return *this;
+  }
+  ~IntlIterator() {
+    setEnumeration(nullptr);
+  }
 
-  explicit IntlIterator(icu::StringEnumeration *se) : m_enum(se) {}
-
-  void sweep() override {
+  void setEnumeration(icu::StringEnumeration *se) {
     if (m_enum) {
       delete m_enum;
-      m_enum = nullptr;
     }
+    m_enum = se;
   }
 
-  bool isInvalid() const override {
-    return m_enum == nullptr;
+  bool isValid() const {
+    return m_enum;
   }
 
-  static IntlIterator *Get(Object obj);
-  Object wrap();
+  static Object newInstance(icu::StringEnumeration *se = nullptr) {
+    if (!c_IntlIterator) {
+      c_IntlIterator = Unit::lookupClass(s_IntlIterator.get());
+      assert(c_IntlIterator);
+    }
+    auto obj = ObjectData::newInstance(c_IntlIterator);
+    if (se) {
+      Native::data<IntlIterator>(obj)->setEnumeration(se);
+    }
+    return obj;
+  }
+  static IntlIterator* Get(Object obj) {
+    return GetData<IntlIterator>(obj, s_IntlIterator);
+  }
 
   int64_t key() const { return m_key; }
   Variant current() const { return m_current; }
@@ -56,7 +73,7 @@ public:
     int32_t len;
     const char *e = m_enum->next(&len, error);
     if (U_FAILURE(error)) {
-      s_intl_error->set(error, "Error fetching next iteration element");
+      s_intl_error->setError(error, "Error fetching next iteration element");
       m_current = uninit_null();
     } else {
       m_current = String(e, len, CopyString);
@@ -69,7 +86,7 @@ public:
     UErrorCode error = U_ZERO_ERROR;
     m_enum->reset(error);
     if (U_FAILURE(error)) {
-      s_intl_error->set(error, "Error resetting enumeration");
+      s_intl_error->setError(error, "Error resetting enumeration");
       m_current = uninit_null();
       return false;
     }
@@ -78,10 +95,14 @@ public:
     return true;
   }
 
+  icu::StringEnumeration *enumeration() const { return m_enum; }
+
 private:
   icu::StringEnumeration *m_enum = nullptr;
   int64_t m_key = -1;
   Variant m_current = null_string;
+
+  static Class* c_IntlIterator;
 };
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42

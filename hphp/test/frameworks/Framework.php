@@ -300,16 +300,23 @@ class Framework {
       $this->config_file = find_first_file_recursive($phpunit_config_files,
                                                      $this->test_path,
                                                      false);
-
-      if ($this->config_file !== null) {
-        verbose("Using phpunit xml file in: ".$this->config_file."\n",
-                Options::$verbose);
-      } else {
-        verbose("No phpunit xml file found for: ".$this->name.".\n",
-                Options::$verbose);
-      }
     } else {
       $this->config_file = Options::$frameworks_root."/".$config_file;
+    }
+
+    if ($this->config_file !== null) {
+      verbose("Using phpunit xml file in: ".$this->config_file."\n",
+              Options::$verbose);
+      // For now, remove any logging and code coverage settings from
+      // the configuration file.
+      $config_data = simplexml_load_file($this->config_file);
+      if ($config_data->logging !== null) {
+        unset($config_data->logging);
+      }
+      file_put_contents($this->config_file, $config_data->saveXML());
+    } else {
+      verbose("No phpunit xml file found for: ".$this->name.".\n",
+              Options::$verbose);
     }
   }
 
@@ -483,11 +490,11 @@ class Framework {
   }
 
   public static function sortFile(string $file): bool {
-    $results = StableMap {};
+    $results = Map {};
     $handle = fopen($file, "r");
     if ($handle) {
       while (!feof($handle)) {
-        // trim out newline since StableMap doesn't like them in its keys
+        // trim out newline since Map doesn't like them in its keys
         $test = rtrim(fgets($handle), PHP_EOL);
         if ($test !== "") {
           $status = rtrim(fgets($handle), PHP_EOL);

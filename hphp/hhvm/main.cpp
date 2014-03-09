@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/program-functions.h"
+#include <vector>
 #include "hphp/runtime/base/emulate-zend.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/compiler/compiler.h"
@@ -22,7 +23,7 @@
 
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/embedded-vfs.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 
 int main(int argc, char** argv) {
   if (!argc) return 0;
@@ -52,14 +53,14 @@ int main(int argc, char** argv) {
     return HPHP::emulate_zend(argc - 1, argv + 1);
   }
 
-  HPHP::Util::embedded_data data;
-  if (!HPHP::Util::get_embedded_data("repo", &data)) {
+  HPHP::embedded_data data;
+  if (!HPHP::get_embedded_data("repo", &data)) {
     return HPHP::execute_program(argc, argv);
   }
   std::string repo;
-  HPHP::Util::string_printf(repo, "%s:%u:%u",
-                            data.m_filename.c_str(),
-                            (unsigned)data.m_start, (unsigned)data.m_len);
+  HPHP::string_printf(repo, "%s:%u:%u",
+                      data.m_filename.c_str(),
+                      (unsigned)data.m_start, (unsigned)data.m_len);
   HPHP::sqlite3_embedded_initialize(nullptr, true);
 
   std::vector<char*> args;
@@ -73,4 +74,3 @@ int main(int argc, char** argv) {
   }
   return HPHP::execute_program(args.size(), &args[0]);
 }
-

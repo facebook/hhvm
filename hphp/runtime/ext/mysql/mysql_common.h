@@ -19,10 +19,12 @@
 #define incl_HPHP_MYSQL_COMMON_H_
 
 #include "folly/Optional.h"
+#include <vector>
 
 #include "hphp/runtime/base/base-includes.h"
 #include "mysql.h"
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR
@@ -149,11 +151,9 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MySQLRequestData : public RequestEventHandler {
-public:
-  virtual void requestInit();
-
-  virtual void requestShutdown() {
+struct MySQLRequestData final : RequestEventHandler {
+  void requestInit() override;
+  void requestShutdown() override {
     defaultConn.reset();
     totalRowCount = 0;
   }
@@ -170,16 +170,21 @@ public:
 class MySQLFieldInfo {
 public:
   MySQLFieldInfo()
-    : max_length(0), length(0), type(0), flags(0)
+    : max_length(0), length(0), type(0), flags(0), decimals(0), charsetnr(0)
   {}
 
   String name;
+  String org_name;
   String table;
+  String org_table;
   String def;
+  String db;
   int64_t max_length;
   int64_t length;
   int type;
   unsigned int flags;
+  unsigned int decimals;
+  unsigned int charsetnr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

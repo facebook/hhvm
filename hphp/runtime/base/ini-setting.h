@@ -25,6 +25,31 @@ namespace HPHP {
 
 class Extension;
 
+bool ini_on_update(const folly::dynamic& value, bool& p);
+bool ini_on_update(const folly::dynamic& value, double& p);
+bool ini_on_update(const folly::dynamic& value, int16_t& p);
+bool ini_on_update(const folly::dynamic& value, int32_t& p);
+bool ini_on_update(const folly::dynamic& value, int64_t& p);
+bool ini_on_update(const folly::dynamic& value, uint16_t& p);
+bool ini_on_update(const folly::dynamic& value, uint32_t& p);
+bool ini_on_update(const folly::dynamic& value, uint64_t& p);
+bool ini_on_update(const folly::dynamic& value, std::string& p);
+bool ini_on_update(const folly::dynamic& value, String& p);
+bool ini_on_update(const folly::dynamic& value, Array& p);
+bool ini_on_update(const folly::dynamic& value, std::set<std::string>& p);
+folly::dynamic ini_get(bool& p);
+folly::dynamic ini_get(double& p);
+folly::dynamic ini_get(int16_t& p);
+folly::dynamic ini_get(int32_t& p);
+folly::dynamic ini_get(int64_t& p);
+folly::dynamic ini_get(uint16_t& p);
+folly::dynamic ini_get(uint32_t& p);
+folly::dynamic ini_get(uint64_t& p);
+folly::dynamic ini_get(std::string& p);
+folly::dynamic ini_get(String& p);
+folly::dynamic ini_get(Array& p);
+folly::dynamic ini_get(std::set<std::string>& p);
+
 class IniSetting {
 public:
   static const Extension* CORE;
@@ -32,6 +57,7 @@ public:
     NormalScanner,
     RawScanner,
   };
+  typedef folly::dynamic Map;
 
   class ParserCallback {
   public:
@@ -46,6 +72,9 @@ public:
     virtual void onVar(std::string &result, const std::string &name);
     virtual void onOp(std::string &result, char type, const std::string& op1,
                       const std::string& op2);
+  private:
+    void makeArray(Variant &hash, const std::string &offset,
+                   const std::string &value);
   };
   class SectionParserCallback : public ParserCallback {
   public:
@@ -71,6 +100,9 @@ public:
     virtual void onPopEntry(const std::string &key, const std::string &value,
                             const std::string &offset, void *arg);
     virtual void onConstant(std::string &result, const std::string &name);
+  private:
+    void makeArray(Map &hash, const std::string &offset,
+                   const std::string &value);
   };
 
   enum Mode {
@@ -84,77 +116,129 @@ public:
     PHP_INI_ALL    = (1u << 4),
   };
 
-  typedef std::function<bool(const std::string& value, void*p)> UpdateCallback;
-  typedef std::function<std::string(void* p)> GetCallback;
-  typedef folly::dynamic Map;
-
 public:
   static Variant FromString(const String& ini, const String& filename,
                             bool process_sections, int scanner_mode);
   static Map FromStringAsMap(const std::string& ini,
                              const std::string& filename);
 
+  static bool Get(const std::string& name, folly::dynamic &value);
   static bool Get(const std::string& name, std::string &value);
-  static bool Get(const String& name, String &value);
-  static bool Set(const String& name, const String& value);
-  static bool SetUser(const String& name, const String& value);
+  static bool Get(const String& name, Variant& value);
+  static bool Get(const String& name, String& value);
+  static std::string Get(const std::string& name);
   static Array GetAll(const String& extension, bool details);
 
+  // Because folly::dynamic and Variant are too ambiguous
+  enum class FollyDynamic {};
+  /**
+   * Change an INI setting as if it was in the php.ini file
+   */
+  static bool Set(const std::string& name, const folly::dynamic& value,
+                  FollyDynamic);
+  static bool Set(const String& name, const Variant& value);
+  /**
+   * Change an INI setting as if there was a call to ini_set()
+   */
+  static bool SetUser(const std::string& name, const folly::dynamic& value,
+                      FollyDynamic);
+  static bool SetUser(const String& name, const Variant& value);
+
+  template<class T>
+  struct SetAndGet {
+    explicit SetAndGet(std::function<bool (const T&)> a, std::function<T ()> b)
+      : setter(a), getter(b) {}
+    explicit SetAndGet() {}
+    std::function<bool (const T&)> setter;
+    std::function<T ()> getter;
+  };
+
+  /**
+   * The heavy lifting of creating ini settings. First of all, if you don't
+   * have to use this method, please don't. Instead use the simpler:
+   *
+   *   IniSetting::Bind(this, PHP_INI_SYSTEM, "my.ini", &some_global_var);
+   *     or
+   *   IniSetting::Bind(this, PHP_INI_ALL, "my.ini", &some_thread_local_var);
+   *
+   * If you have to do something special before your variable is set or gotten
+   * then you can use this function to add callbacks. Both callbacks are
+   * optional (but if you don't pass any, why are you using this method in the
+   * first place?). If the setter callback returns "false" then the value will
+   * not be saved into p. If the getter is not provided, the contents of p will
+   * directly be used.
+   */
+  template<class T>
   static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   UpdateCallback updateCallback, GetCallback getCallback,
-                   void *p = nullptr);
+                   const char *name, const char *defaultValue,
+                   SetAndGet<T> callbacks, T* p = nullptr) {
+    auto setter = [callbacks, p](const folly::dynamic &value) {
+      T v;
+      auto ret = ini_on_update(value, v);
+      if (!ret) {
+        return false;
+      }
+      if (callbacks.setter) {
+        ret = callbacks.setter(v);
+        if (!ret) {
+          return false;
+        }
+      }
+      if (p) {
+        *p = v;
+      }
+      return true;
+    };
+    auto getter = [callbacks, p]() {
+      T v;
+      if (callbacks.getter) {
+        v = callbacks.getter();
+      } else if (p) {
+        v = *p;
+      }
+      return ini_get(v);
+    };
+    Bind(extension, mode, name, setter, getter);
+    if (defaultValue) {
+      setter(defaultValue);
+    }
+  }
+  template<class T>
   static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   UpdateCallback updateCallback, GetCallback getCallback,
-                   void *p = nullptr);
+                   const char *name, SetAndGet<T> callbacks, T* p = nullptr) {
+    Bind(extension, mode, name, nullptr, callbacks, p);
+  }
+  /**
+   * Prefer to use this method whenever possible (the non-default one is ok
+   * too).
+   */
+  template<class T>
   static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   std::string *p);
+                   const char *name, const char *defaultValue, T *p) {
+    Bind(extension, mode, name, defaultValue, SetAndGet<T>(), p);
+  }
+  template<class T>
   static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   std::string *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   String *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   String *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   bool *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   bool *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name,
-                   int64_t *p);
-  static void Bind(const Extension* extension, const Mode mode,
-                   const char *name, const char *value,
-                   int64_t *p);
+                   const char *name, T *p) {
+    Bind(extension, mode, name, nullptr, p);
+  }
+
   static void Unbind(const char *name);
 
-  static void SetGlobalDefault(const char *name, const char *value);
+  // Used to allow you to Bind to PHP_INI_SYSTEM settings even after modules
+  // have been initialized. This should only be used in rare cases that can't
+  // be refactored into registration before extensions are done.
+  static bool s_pretendExtensionsHaveNotBeenLoaded;
 
+private:
+  static void Bind(const Extension* extension, const Mode mode,
+                   const char *name,
+                   std::function<bool(const folly::dynamic& value)>
+                     updateCallback,
+                   std::function<folly::dynamic()> getCallback);
 };
 
 int64_t convert_bytes_to_long(const std::string& value);
-
-#define ini_on_update_fail HPHP::IniSetting::UpdateCallback()
-bool ini_on_update_bool(const std::string& value, void *p);
-bool ini_on_update_long(const std::string& value, void *p);
-bool ini_on_update_non_negative(const std::string& value, void *p);
-bool ini_on_update_real(const std::string& value, void *p);
-bool ini_on_update_stdstring(const std::string& value, void *p);
-bool ini_on_update_string(const std::string& value, void *p);
-
-std::string ini_get_bool(void *p);
-std::string ini_get_bool_as_int(void *p);
-std::string ini_get_long(void *p);
-std::string ini_get_real(void *p);
-std::string ini_get_string(void *p);
-std::string ini_get_stdstring(void *p);
-std::string ini_get_static_string_1(void *p);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

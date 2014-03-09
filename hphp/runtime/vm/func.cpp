@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/util/atomic-vector.h"
-#include "hphp/util/util.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/strings.h"
@@ -29,7 +28,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/file-repository.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/func-inline.h"
 #include "hphp/system/systemlib.h"
@@ -40,7 +39,8 @@
 namespace HPHP {
 
 TRACE_SET_MOD(hhbc);
-using JIT::tx64;
+using JIT::tx;
+using JIT::mcg;
 
 const StringData* Func::s___call = makeStaticString("__call");
 const StringData* Func::s___callStatic =
@@ -140,7 +140,7 @@ void Func::setFullName() {
 }
 
 void Func::resetPrologue(int numParams) {
-  auto const& stubs = tx64->uniqueStubs;
+  auto const& stubs = tx->uniqueStubs;
   m_prologueTable[numParams] = stubs.fcallHelperThunk;
 }
 
@@ -150,7 +150,7 @@ void Func::initPrologues(int numParams) {
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
                                          : kNumFixedPrologues;
 
-  if (tx64 == nullptr) {
+  if (tx == nullptr) {
     m_funcBody = nullptr;
     for (int i = 0; i < numPrologues; i++) {
       m_prologueTable[i] = nullptr;
@@ -158,7 +158,7 @@ void Func::initPrologues(int numParams) {
     return;
   }
 
-  auto const& stubs = tx64->uniqueStubs;
+  auto const& stubs = tx->uniqueStubs;
 
   m_funcBody = stubs.funcBodyHelperThunk;
 
@@ -214,7 +214,7 @@ void* Func::allocFuncMem(
     numExtraPrologues * sizeof(unsigned char*) +
     numExtraFuncPtrs * sizeof(Func*);
 
-  void* mem = lowMem ? Util::low_malloc(funcSize) : malloc(funcSize);
+  void* mem = lowMem ? low_malloc(funcSize) : malloc(funcSize);
 
   /**
    * The Func object can have optional generatorOrigFunc and nextClonedClosure
@@ -237,20 +237,11 @@ void* Func::allocFuncMem(
 Func::Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2,
            Offset base, Offset past, const StringData* name, Attr attrs,
            bool top, const StringData* docComment, int numParams)
-  : m_unit(&unit)
-  , m_cls(nullptr)
-  , m_baseCls(nullptr)
-  , m_name(name)
-  , m_namedEntity(nullptr)
-  , m_refBitVal(0)
-  , m_cachedFunc(RDS::kInvalidHandle)
-  , m_maxStackCells(0)
-  , m_numParams(0)
+  : m_name(name)
+  , m_unit(&unit)
   , m_attrs(attrs)
-  , m_funcId(InvalidFuncId)
-  , m_profCounter(0)
-  , m_hasPrivateAncestor(false)
 {
+  m_hasPrivateAncestor = false;
   m_shared = new SharedData(preClass, preClass ? -1 : id,
                             base, past, line1, line2,
                             top, docComment);
@@ -269,9 +260,9 @@ Func::~Func() {
   int numPrologues =
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
                                          : kNumFixedPrologues;
-  if (tx64 != nullptr) {
-    tx64->smashPrologueGuards((TCA *)m_prologueTable,
-                              numPrologues, this);
+  if (mcg != nullptr) {
+    mcg->smashPrologueGuards((TCA *)m_prologueTable,
+                             numPrologues, this);
   }
 #ifdef DEBUG
   validate();
@@ -305,7 +296,7 @@ void Func::destroy(Func* func) {
   }
   func->~Func();
   if (lowMem) {
-    Util::low_free(mem);
+    low_free(mem);
   } else {
     free(mem);
   }
@@ -671,7 +662,7 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
           // that access of undefined class constants can cause the eval() to
           // fatal. Zend lets such fatals propagate, so don't bother catching
           // exceptions here.
-          CVarRef v = g_vmContext->getEvaledArg(
+          CVarRef v = g_context->getEvaledArg(
             fpi.phpCode(),
             cls() ? cls()->nameRef() : nameRef()
           );
@@ -1169,7 +1160,7 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(m_name->data()[0]) ||
-    ParserBase::IsClosureName(m_name->toCPPString()) || m_isGenerator;
+    ParserBase::IsClosureName(m_name->toCppString()) || m_isGenerator;
 
   Attr attrs = m_attrs;
   if (preClass && preClass->attrs() & AttrInterface) {

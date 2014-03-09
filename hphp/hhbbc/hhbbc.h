@@ -46,6 +46,42 @@ struct Options {
   //////////////////////////////////////////////////////////////////////
 
   /*
+   * Flags for various limits on when to perform widening operations.
+   * See analyze.cpp for details.
+   */
+  uint32_t analyzeFuncWideningLimit = 20;
+  uint32_t analyzeClassWideningLimit = 20;
+
+  /*
+   * When to stop refining return types.
+   *
+   * This needs to be limited because types can walk downwards in our
+   * type lattice indefinitely.  The index never contains incorrect
+   * return types, since the return types only shrink, which means we
+   * can just stop refining a return type whenever we want to without
+   * causing problems.
+   *
+   * For an example of where this can occur, imagine the analysis of the
+   * following function:
+   *
+   *    function foo() { return array('x' => foo()); }
+   *
+   * Each time we visit `foo', we'll discover a slightly smaller return
+   * type, in a downward-moving sequence that would never terminate:
+   *
+   *   InitCell, CArr(x:InitCell), CArr(x:CArr(x:InitCell)), ...
+   */
+  uint32_t returnTypeRefineLimit = 15;
+
+  /*
+   * Whether to produce extended stats information.  (Takes extra
+   * time.)
+   */
+  bool extendedStats = false;
+
+  //////////////////////////////////////////////////////////////////////
+
+  /*
    * If true, all optimizations are disabled, and analysis isn't even
    * performed.
    */
@@ -66,13 +102,15 @@ struct Options {
   bool ConstantProp = true;
 
   /*
-   * Whether to perform local dead code elimination.  This removes
-   * unnecessary instructions within a single block.
+   * Whether to perform local or global dead code elimination.  This
+   * removes unnecessary instructions within a single block, or across
+   * blocks, respectively.
    *
    * Note: this is off for now because it is a bit of a work in
    * progress (needs more testing).
    */
   bool LocalDCE = false;
+  bool GlobalDCE = false;
 
   /*
    * If true, insert opcodes that assert inferred types, so we can
@@ -102,7 +140,7 @@ struct Options {
    * This allows possible overrides of a method to be resolved as a
    * set of candidates when we aren't sure which one it would be.
    */
-  bool FuncFamilies = false;
+  bool FuncFamilies = true;
 
   //////////////////////////////////////////////////////////////////////
   // Flags below this line perform optimizations that intentionally

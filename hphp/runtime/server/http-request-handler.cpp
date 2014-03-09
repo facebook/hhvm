@@ -76,7 +76,7 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
          strcmp(valp + 5, "html")  == 0)) {
       // Apache adds character set for these two types
       val += "; charset=";
-      val += g_context->getDefaultCharset().toCppString();
+      val += IniSetting::Get("default_charset");
       valp = val.c_str();
     }
     transport->addHeader("Content-Type", valp);
@@ -206,7 +206,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     bool original = compressed;
     // check against static content cache
     if (StaticContentCache::TheCache.find(path, data, len, compressed)) {
-      Util::ScopedMem decompressed_data;
+      ScopedMem decompressed_data;
       // (qigao) not calling stat at this point because the timestamp of
       // local cache file is not valuable, maybe misleading. This way
       // the Last-Modified header will not show in response.
@@ -333,6 +333,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     ServerStatsHelper ssh("input");
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
     Extension::RequestInitModules();
+    process_ini_settings(RuntimeOption::IniFile);
 
     if (RuntimeOption::EnableDebugger) {
       Eval::DSandboxInfo sInfo = sourceRootInfo.getSandboxInfo();

@@ -16,7 +16,7 @@ class Exception {
   protected $trace;         // full stacktrace
   private $inited = false;
 
-  private static $traceOpts = false;
+  private static $traceOpts = 0;
 
   /**
    * This cannot be implemented in __construct, because a derived class may
@@ -220,7 +220,7 @@ class Exception {
   }
 
   public static function setTraceOptions($opts) {
-    self::$traceOpts = $opts;
+    self::$traceOpts = (int)$opts;
   }
 }
 

@@ -1,0 +1,4 @@
+Tests in this fold are copied and modified from php-imagick extension:
+  https://github.com/mkoppanen/imagick
+
+A script convert_phpt_tests.pl is provided to convert these tests.

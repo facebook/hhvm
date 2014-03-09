@@ -18,6 +18,7 @@
 #define incl_HPHP_MEMORY_MANAGER_INL_H
 
 #include <limits>
+#include <utility>
 
 #include "hphp/util/compilation-flags.h"
 
@@ -81,15 +82,22 @@ void smart_delete_array(T* t, size_t count) {
 struct MemoryManager::MaskAlloc {
   explicit MaskAlloc(MemoryManager& mm) : m_mm(mm) {
     // capture all mallocs prior to construction
+    FTRACE(1, "MaskAlloc()\n");
     m_mm.refreshStats();
   }
   ~MaskAlloc() {
+    FTRACE(1, "~MaskAlloc()\n");
 #ifdef USE_JEMALLOC
     // exclude mallocs and frees since construction
     if (s_statsEnabled) {
-      m_mm.m_prevAllocated = int64_t(*m_mm.m_allocated);
-      m_mm.m_delta = int64_t(*m_mm.m_allocated) -
-        int64_t(*m_mm.m_deallocated);
+      FTRACE(1, "old: prev alloc: {}\nprev dealloc: {}\n",
+        m_mm.m_prevAllocated, m_mm.m_prevDeallocated);
+
+      m_mm.m_prevAllocated = *m_mm.m_allocated;
+      m_mm.m_prevDeallocated = *m_mm.m_deallocated;
+
+      FTRACE(1, "new: prev alloc: {}\nprev dealloc: {}\n\n",
+        m_mm.m_prevAllocated, m_mm.m_prevDeallocated);
     }
 #endif
   }
@@ -203,7 +211,7 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
   }
   assert(reinterpret_cast<uintptr_t>(p) % 16 == 0);
 
-  FTRACE(1, "smartMallocSize: {} -> {}\n", bytes, p);
+  FTRACE(3, "smartMallocSize: {} -> {}\n", bytes, p);
   return debugPostAllocate(p, bytes, bytes);
 }
 
@@ -217,24 +225,24 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
   m_freelists[i].push(debugPreFree(ptr, bytes, bytes));
   m_stats.usage -= bytes;
 
-  FTRACE(1, "smartFreeSize: {} ({} bytes)\n", ptr, bytes);
+  FTRACE(3, "smartFreeSize: {} ({} bytes)\n", ptr, bytes);
 }
 
+template<bool callerSavesActualSize>
 ALWAYS_INLINE
 std::pair<void*,size_t> MemoryManager::smartMallocSizeBig(size_t bytes) {
 #ifdef USE_JEMALLOC
   void* ptr;
   size_t sz;
-  auto const retptr = smartMallocSizeBigHelper(ptr, sz, bytes);
-  FTRACE(1, "smartMallocBig: {} ({} requested, {} usable)\n",
+  auto const retptr =
+    smartMallocSizeBigHelper<callerSavesActualSize>(ptr, sz, bytes);
+  FTRACE(3, "smartMallocBig: {} ({} requested, {} usable)\n",
          retptr, bytes, sz);
   return std::make_pair(retptr, sz);
 #else
   m_stats.usage += bytes;
-  // TODO(#2831116): we only add sizeof(SmallNode) so smartMallocBig
-  // can subtract it.
-  auto const ret = smartMallocBig(debugAddExtra(bytes + sizeof(SmallNode)));
-  FTRACE(1, "smartMallocBig: {} ({} bytes)\n", ret, bytes);
+  auto const ret = smartMallocBig(debugAddExtra(bytes));
+  FTRACE(3, "smartMallocBig: {} ({} bytes)\n", ret, bytes);
   return std::make_pair(debugPostAllocate(ret, bytes, bytes), bytes);
 #endif
 }
@@ -242,7 +250,10 @@ std::pair<void*,size_t> MemoryManager::smartMallocSizeBig(size_t bytes) {
 ALWAYS_INLINE
 void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
   m_stats.usage -= bytes;
-  FTRACE(1, "smartFreeBig: {} ({} bytes)\n", vp, bytes);
+  // Since we account for these direct allocations in our usage and adjust for
+  // them on allocation, we also need to adjust for them negatively on free.
+  JEMALLOC_STATS_ADJUST(&m_stats, -bytes);
+  FTRACE(3, "smartFreeBig: {} ({} bytes)\n", vp, bytes);
   return smartFreeBig(static_cast<SweepNode*>(debugPreFree(vp, bytes, 0)) - 1);
 }
 
@@ -251,7 +262,7 @@ void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
 ALWAYS_INLINE
 void* MemoryManager::objMalloc(size_t size) {
   if (LIKELY(size <= kMaxSmartSize)) return smartMallocSize(size);
-  return smartMallocSizeBig(size).first;
+  return smartMallocSizeBig<false>(size).first;
 }
 
 ALWAYS_INLINE
@@ -275,9 +286,10 @@ void MemoryManager::smartFreeSizeLogged(void* p, uint32_t size) {
   return smartFreeSize(p, size);
 }
 
+template<bool callerSavesActualSize>
 ALWAYS_INLINE
 std::pair<void*,size_t> MemoryManager::smartMallocSizeBigLogged(size_t size) {
-  auto const retptr = smartMallocSizeBig(size);
+  auto const retptr = smartMallocSizeBig<callerSavesActualSize>(size);
   if (memory_profiling) { logAllocation(retptr.first, size); }
   return retptr;
 }
@@ -354,7 +366,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   // Incrementally incorporate the difference between the previous and current
   // deltas into the memory usage statistic.  For reference, the total
   // malloced memory usage could be calculated as such, if delta0 were
-  // recorded in resetStats():
+  // recorded in resetStatsImpl():
   //
   //   int64 musage = delta - delta0;
   //
@@ -362,16 +374,57 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   // when it calls malloc(), so that this function can avoid
   // double-counting the malloced memory. Thus musage in the example
   // code may well substantially exceed m_stats.usage.
-  if (s_statsEnabled) {
-    int64_t delta = int64_t(*m_allocated) - int64_t(*m_deallocated);
-    int64_t deltaAllocated = int64_t(*m_allocated) - m_prevAllocated;
-    stats.usage += delta - m_delta - stats.jemallocDebt;
+  if (m_enableStatsSync) {
+    uint64_t jeDeallocated = *m_deallocated;
+    uint64_t jeAllocated = *m_allocated;
+
+    // We can't currently handle wrapping so make sure this isn't happening.
+    assert(jeAllocated >= 0 &&
+           jeAllocated <= std::numeric_limits<int64_t>::max());
+    assert(jeDeallocated >= 0 &&
+           jeDeallocated <= std::numeric_limits<int64_t>::max());
+
+    // Since these deltas potentially include memory allocated from another
+    // thread but deallocated on this one, it is possible for these nubmers to
+    // go negative.
+    int64_t jeDeltaAllocated =
+      int64_t(jeAllocated) - int64_t(jeDeallocated);
+    int64_t mmDeltaAllocated =
+      int64_t(m_prevAllocated) - int64_t(m_prevDeallocated);
+
+    // This is the delta between the current and the previous jemalloc reading.
+    int64_t jeMMDeltaAllocated =
+      int64_t(jeAllocated) - int64_t(m_prevAllocated);
+
+    FTRACE(1, "Before stats sync:\n");
+    FTRACE(1, "je alloc:\ncurrent: {}\nprevious: {}\ndelta with MM: {}\n",
+      jeAllocated, m_prevAllocated, jeAllocated - m_prevAllocated);
+    FTRACE(1, "je dealloc:\ncurrent: {}\nprevious: {}\ndelta with MM: {}\n",
+      jeDeallocated, m_prevDeallocated, jeDeallocated - m_prevDeallocated);
+    FTRACE(1, "je delta:\ncurrent: {}\nprevious: {}\n",
+      jeDeltaAllocated, mmDeltaAllocated);
+    FTRACE(1, "usage: {}\ntotal (je) alloc: {}\nje debt: {}\n",
+      stats.usage, stats.totalAlloc, stats.jemallocDebt);
+
+    // Subtract the old jemalloc adjustment (delta0) and add the current one
+    // (delta) to arrive at the new combined usage number.
+    stats.usage += jeDeltaAllocated - mmDeltaAllocated;
+    // Remove the "debt" accrued from allocating the slabs so we don't double
+    // count the slab-based allocations.
+    stats.usage -= stats.jemallocDebt;
+
     stats.jemallocDebt = 0;
-    stats.totalAlloc += deltaAllocated;
+    // We need to do the calculation instead of just setting it to jeAllocated
+    // because of the MaskAlloc capability.
+    stats.totalAlloc += jeMMDeltaAllocated;
     if (live) {
-      m_delta = delta;
-      m_prevAllocated = int64_t(*m_allocated);
+      m_prevAllocated = jeAllocated;
+      m_prevDeallocated = jeDeallocated;
     }
+
+    FTRACE(1, "After stats sync:\n");
+    FTRACE(1, "usage: {}\ntotal (je) alloc: {}\n\n",
+      stats.usage, stats.totalAlloc);
   }
 #endif
   if (stats.usage > stats.peakUsage) {
@@ -402,6 +455,8 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     stats.peakUsage = stats.usage;
   }
 }
+
+inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
 
 //////////////////////////////////////////////////////////////////////
 

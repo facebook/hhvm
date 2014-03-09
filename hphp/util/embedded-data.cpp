@@ -32,7 +32,7 @@
 #include <mach-o/getsect.h>
 #endif
 
-namespace HPHP { namespace Util {
+namespace HPHP {
 
 bool get_embedded_data(const char *section, embedded_data* desc,
                        const std::string &filename /*= "" */) {
@@ -51,6 +51,7 @@ bool get_embedded_data(const char *section, embedded_data* desc,
   SCOPE_EXIT { close(fd); };
 
   Elf* e = elf_begin(fd, ELF_C_READ, nullptr);
+  SCOPE_EXIT { elf_end(e); };
   if (e == nullptr || elf_kind(e) != ELF_K_ELF) {
     return false;
   }
@@ -94,4 +95,4 @@ bool get_embedded_data(const char *section, embedded_data* desc,
   return false;
 }
 
-} }
+}

@@ -23,7 +23,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-TempFile::TempFile(bool autoDelete /* = true */) : m_autoDelete(autoDelete) {
+TempFile::TempFile(bool autoDelete /* = true */,
+                   const String& wrapper_type,
+                   const String& stream_type)
+  : PlainFile(nullptr, false, wrapper_type, stream_type),
+    m_autoDelete(autoDelete) {
   char path[PATH_MAX];
 
   // open a temporary file
@@ -34,6 +38,7 @@ TempFile::TempFile(bool autoDelete /* = true */) : m_autoDelete(autoDelete) {
     return;
   }
   m_fd = fd;
+  m_stream = fdopen(fd, "r+");
   m_name = std::string(path);
   m_rawName = std::string(path);
 }
@@ -55,6 +60,7 @@ bool TempFile::open(const String& filename, const String& mode) {
 }
 
 bool TempFile::close() {
+  invokeFiltersOnClose();
   return closeImpl();
 }
 

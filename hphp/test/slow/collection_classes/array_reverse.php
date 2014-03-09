@@ -22,10 +22,10 @@ function main() {
   reverse(Set {'foo', 'bar', 'baz'});
   reverse(Map { 'a' => 'foo', 'b' => 'bar', 'c' => 'baz'});
   reverse(Map { 10 => 'foo', 20 => 'bar', 30 => 'baz'});
-  reverse(FrozenVector {'foo', 'bar', 'baz'});
-  reverse(FrozenSet {'foo', 'bar', 'baz'});
-  reverse(FrozenMap { 'a' => 'foo', 'b' => 'bar', 'c' => 'baz'});
-  reverse(FrozenMap { 10 => 'foo', 20 => 'bar', 30 => 'baz'});
+  reverse(ImmVector {'foo', 'bar', 'baz'});
+  reverse(ImmSet {'foo', 'bar', 'baz'});
+  reverse(ImmMap { 'a' => 'foo', 'b' => 'bar', 'c' => 'baz'});
+  reverse(ImmMap { 10 => 'foo', 20 => 'bar', 30 => 'baz'});
 }
 
 main();

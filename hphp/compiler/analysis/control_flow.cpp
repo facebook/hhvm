@@ -16,6 +16,8 @@
 #include "hphp/compiler/analysis/control_flow.h"
 
 #include <boost/graph/depth_first_search.hpp>
+#include <map>
+#include <utility>
 
 #include "hphp/compiler/analysis/ast_walker.h"
 #include "hphp/compiler/analysis/data_flow.h"

@@ -23,6 +23,7 @@
 #endif
 
 #include "hphp/runtime/base/smart-ptr.h"
+#include <algorithm>
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"

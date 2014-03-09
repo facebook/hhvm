@@ -18,7 +18,6 @@
 #define incl_HPHP_CPP_BASE_EXCEPTIONS_H_
 
 #include "hphp/util/exception.h"
-#include "hphp/util/util.h"
 #include "hphp/runtime/base/types.h"
 #include "folly/String.h"
 
@@ -289,7 +288,7 @@ public:
 class NotSupportedException : public ExtendedException {
 public:
   NotSupportedException(const char *feature, const char *reason)
-    : ExtendedException("%s is not going to be supported: %s",
+    : ExtendedException("%s is not supported: %s",
                         feature, reason) {}
   virtual ~NotSupportedException() throw() {}
   EXCEPTION_COMMON_IMPL(NotSupportedException);

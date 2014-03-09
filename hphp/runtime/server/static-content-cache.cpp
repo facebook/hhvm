@@ -19,7 +19,6 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
-#include "hphp/util/util.h"
 #include "hphp/util/compression.h"
 
 namespace HPHP {

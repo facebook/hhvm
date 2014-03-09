@@ -18,6 +18,7 @@
 #define incl_HPHP_EXPRESSION_LIST_H_
 
 #include "hphp/compiler/expression/expression.h"
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

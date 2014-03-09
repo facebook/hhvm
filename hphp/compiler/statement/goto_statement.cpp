@@ -25,7 +25,7 @@ using namespace HPHP;
 GotoStatement::GotoStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(GotoStatement)),
-    m_label(label), m_error((ParserBase::GotoError)0), m_id(0) {
+    m_label(label), m_error((ParserBase::GotoError)0) {
 }
 
 StatementPtr GotoStatement::clone() {
@@ -103,4 +103,3 @@ void GotoStatement::outputCodeModel(CodeGenerator &cg) {
 void GotoStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf("goto %s;\n", m_label.c_str());
 }
-

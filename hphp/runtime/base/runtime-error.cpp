@@ -19,13 +19,14 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Careful in these functions: they can be called when tl_regState is
- * REGSTATE_DIRTY.  VMExecutionContext::handleError is dirty-reg safe,
+ * REGSTATE_DIRTY.  ExecutionContext::handleError is dirty-reg safe,
  * but evaluate other functions that you might need here.
  */
 
@@ -247,6 +248,17 @@ void raise_message(ErrorConstants::ErrorModes mode,
                    va_list ap) {
   std::string msg;
   string_vsnprintf(msg, fmt, ap);
+  raise_message(mode, msg);
+}
+
+void raise_message(ErrorConstants::ErrorModes mode,
+                   const char *fmt,
+                   ...) {
+  std::string msg;
+  va_list ap;
+  va_start(ap, fmt);
+  string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
   raise_message(mode, msg);
 }
 

@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP { namespace JIT {
@@ -37,17 +37,17 @@ static constexpr size_t dbgOff =
 namespace X64 {
 
 void addDbgGuardImpl(SrcKey sk) {
-  Asm a { tx64->code.main() };
+  Asm a { mcg->code.main() };
 
   // Emit the checks for debugger attach
   emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, reg::rAsm);
-  a.   load_reg64_disp_reg32(reg::rAsm, dbgOff, reg::rAsm);
-  a.   testb((int8_t)0xff, rbyte(reg::rAsm));
+  a.   loadb  (reg::rAsm[dbgOff], rbyte(reg::rAsm));
+  a.   testb  ((int8_t)0xff, rbyte(reg::rAsm));
 
   // Branch to a special REQ_INTERPRET if attached
-  TCA fallback =
-    emitServiceReq(tx64->code.stubs(), REQ_INTERPRET, sk.offset(), 0);
-  a. jnz(fallback);
+  auto const fallback =
+    emitServiceReq(mcg->code.stubs(), REQ_INTERPRET, sk.offset(), 0);
+  a.   jnz    (fallback);
 }
 
 }
@@ -57,7 +57,7 @@ void addDbgGuardImpl(SrcKey sk) {
 namespace ARM {
 
 void addDbgGuardImpl(SrcKey sk) {
-  vixl::MacroAssembler a { tx64->code.main() };
+  vixl::MacroAssembler a { mcg->code.main() };
 
   vixl::Label after;
   vixl::Label interpReqAddr;
@@ -79,7 +79,7 @@ void addDbgGuardImpl(SrcKey sk) {
   }
   a.   bind (&interpReqAddr);
   TCA interpReq =
-    emitServiceReq(tx64->code.stubs(), REQ_INTERPRET, sk.offset(), 0);
+    emitServiceReq(mcg->code.stubs(), REQ_INTERPRET, sk.offset(), 0);
   a.   dc64 (interpReq);
   a.   bind (&after);
 }
@@ -94,12 +94,12 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec) {
     // no translations, nothing to do
     return;
   }
-  TCA dbgGuard = tx64->code.main().frontier();
+  TCA dbgGuard = mcg->code.main().frontier();
 
   switch (arch()) {
     case Arch::X64:
       X64::addDbgGuardImpl(sk);
-      prepareForSmash(tx64->code.main(), X64::kJmpLen);
+      prepareForSmash(mcg->code.main(), X64::kJmpLen);
       break;
     case Arch::ARM:
       ARM::addDbgGuardImpl(sk);
@@ -109,8 +109,8 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec) {
   }
 
   // Emit a jump to the actual code
-  TCA dbgBranchGuardSrc = tx64->code.main().frontier();
-  emitSmashableJump(tx64->code.main(), realCode, CC_None);
+  TCA dbgBranchGuardSrc = mcg->code.main().frontier();
+  emitSmashableJump(mcg->code.main(), realCode, CC_None);
 
   // Add it to srcRec
   srcRec->addDebuggerGuard(dbgGuard, dbgBranchGuardSrc);

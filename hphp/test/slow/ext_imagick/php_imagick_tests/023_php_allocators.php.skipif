@@ -1,0 +1,5 @@
+<?php require_once(dirname(__FILE__) . '/skipif.inc');
+
+if (!Imagick::USE_ZEND_MM)
+  die ('skip Only active when compiled with --enable-imagick-zend-mm');
+?>

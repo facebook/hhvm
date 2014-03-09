@@ -231,7 +231,9 @@ struct IRInstruction {
   bool       hasTypeParam() const      { return m_typeParam.hasValue(); }
   Type       typeParam() const         { return m_typeParam.value(); }
   folly::Optional<Type> maybeTypeParam() const { return m_typeParam; }
-  void       setTypeParam(Type t)      { m_typeParam.assign(t); }
+  void       setTypeParam(Type t) {
+    m_typeParam.assign(t);
+  }
   uint32_t   numSrcs()  const          { return m_numSrcs; }
   SSATmp*    src(uint32_t i) const;
   void       setSrc(uint32_t i, SSATmp* newSrc);

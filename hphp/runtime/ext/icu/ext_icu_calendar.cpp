@@ -25,17 +25,11 @@ const StaticString
   s_IntlCalendar("IntlCalendar"),
   s_IntlGregorianCalendar("IntlGregorianCalendar");
 
-IntlCalendar *IntlCalendar::Get(Object obj) {
-  return GetResData<IntlCalendar>(obj, s_IntlCalendar.get());
-}
-
-Object IntlCalendar::wrap() {
-  return WrapResData(s_IntlCalendar.get());
-}
+Class* IntlCalendar::c_IntlCalendar = nullptr;
 
 const icu::Calendar*
 IntlCalendar::ParseArg(CVarRef cal, const icu::Locale &locale,
-                       const String &funcname, intl_error &err,
+                       const String &funcname, IntlError* err,
                        int64_t &calType, bool &calOwned) {
   icu::Calendar *ret = nullptr;
   UErrorCode error = U_ZERO_ERROR;
@@ -46,13 +40,12 @@ IntlCalendar::ParseArg(CVarRef cal, const icu::Locale &locale,
   } else if (cal.isInteger()) {
     calType = cal.toInt64();
     if (calType != UCAL_GREGORIAN && calType != UCAL_TRADITIONAL) {
-      err.code = U_ILLEGAL_ARGUMENT_ERROR;
-      err.custom_error_message = funcname +
-        String(": invalid value for calendar type; it must be "
-               "one of IntlDateFormatter::TRADITIONAL (locale's default "
-               "calendar) or IntlDateFormatter::GREGORIAN. "
-               "Alternatively, it can be an IntlCalendar object",
-               CopyString);
+      err->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                    "%s: invalid value for calendar type; it must be "
+                    "one of IntlDateFormatter::TRADITIONAL (locale's default "
+                    "calendar) or IntlDateFormatter::GREGORIAN. "
+                    "Alternatively, it can be an IntlCalendar object",
+                    funcname.c_str());
       return nullptr;
     }
     ret = (calType == UCAL_TRADITIONAL)
@@ -76,10 +69,9 @@ IntlCalendar::ParseArg(CVarRef cal, const icu::Locale &locale,
     return data->calendar();
   } else {
 bad_argument:
-    err.code = U_ILLEGAL_ARGUMENT_ERROR;
-    err.custom_error_message = funcname +
-      String(": Invalid calendar argument; should be an integer "
-             "or an IntlCalendar instance", CopyString);
+    err->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                  "%s: Invalid calendar argument; should be an integer "
+                  "or an IntlCalendar instance", funcname.c_str());
     return nullptr;
   }
   if (ret) {
@@ -93,24 +85,12 @@ bad_argument:
     error = U_MEMORY_ALLOCATION_ERROR;
   }
 
-  err.code = error;
-  err.custom_error_message = funcname +
-    String(": Failure instantiating calendar", CopyString);
+  err->setError(error, "%s: Failure instantiating calendar", funcname.c_str());
   return nullptr;
-}
-
-IntlGregorianCalendar *IntlGregorianCalendar::Get(Object obj) {
-  return GetResData<IntlGregorianCalendar>(obj, s_IntlGregorianCalendar.get());
-}
-
-Object IntlGregorianCalendar::wrap() {
-  return WrapResData(s_IntlGregorianCalendar.get());
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // Methods
-
-#define ULOC_DEFAULT(loc) (loc.empty() ? Intl::GetDefaultLocale() : loc)
 
 #define CAL_FETCH(dest, src, def) \
   auto dest = IntlCalendar::Get(src); \
@@ -126,8 +106,8 @@ Object IntlGregorianCalendar::wrap() {
   }
 
 #define GCAL_FETCH(dest, src, def) \
-  auto dest = IntlGregorianCalendar::Get(src); \
-  if (!dest) { \
+  auto dest = IntlCalendar::Get(src); \
+  if (!dest || !dest->gcal()) { \
     return def; \
   }
 
@@ -183,21 +163,21 @@ static Object HHVM_STATIC_METHOD(IntlCalendar, createInstance,
                                  CVarRef timeZone, const String& locale) {
   icu::TimeZone *tz =
     IntlTimeZone::ParseArg(timeZone, "intlcal_create_instance",
-                           s_intl_error->m_error);
+                           s_intl_error.get());
   if (!tz) {
     return null_object;
   }
-  String loc = ULOC_DEFAULT(locale);
+  String loc = localeOrDefault(locale);
   UErrorCode error = U_ZERO_ERROR;
   icu::Calendar *cal =
     icu::Calendar::createInstance(tz, icu::Locale::createFromName(loc.c_str()),
                                   error);
   if (!cal) {
     delete tz;
-    s_intl_error->set(error, "Error creating ICU Calendar object");
+    s_intl_error->setError(error, "Error creating ICU Calendar object");
     return null_object;
   }
-  return (NEWOBJ(IntlCalendar)(cal))->wrap();
+  return IntlCalendar::newInstance(cal);
 }
 
 static bool HHVM_METHOD(IntlCalendar, equals, CObjRef other) {
@@ -355,8 +335,8 @@ static Variant HHVM_METHOD(IntlCalendar, getTime) {
 
 static Object HHVM_METHOD(IntlCalendar, getTimeZone) {
   CAL_FETCH(data, this_, null_object);
-  auto tz = data->calendar()->getTimeZone().clone();
-  return (NEWOBJ(IntlTimeZone)(tz))->wrap();
+  return IntlTimeZone::newInstance(
+    data->calendar()->getTimeZone().clone());
 }
 
 static Variant HHVM_METHOD(IntlCalendar, getType) {
@@ -517,7 +497,7 @@ static bool HHVM_METHOD(IntlCalendar, setTime, CVarRef date) {
 static bool HHVM_METHOD(IntlCalendar, setTimeZone, CVarRef timeZone) {
   CAL_FETCH(data, this_, false);
   auto tz = IntlTimeZone::ParseArg(timeZone, "intlcal_set_time_zone",
-                                   data->m_error);
+                                   data);
   if (!tz) {
     // error already set
     return false;
@@ -532,16 +512,15 @@ static Variant HHVM_STATIC_METHOD(IntlCalendar, getKeywordValuesForLocale,
                                  bool common) {
   UErrorCode error = U_ZERO_ERROR;
   UEnumeration *uenum = ucal_getKeywordValuesForLocale(key.c_str(),
-                                   ULOC_DEFAULT(locale).c_str(),
+                                   localeOrDefault(locale).c_str(),
                                    common, &error);
   if (U_FAILURE(error)) {
     if (uenum) { uenum_close(uenum); }
-    s_intl_error->set(error, "intlcal_get_keyword_values_for_locale: "
-                             "error calling underlying method");
+    s_intl_error->setError(error, "intlcal_get_keyword_values_for_locale: "
+                                  "error calling underlying method");
     return false;
   }
-  icu::StringEnumeration *se = new BugStringCharEnumeration(uenum);
-  return (NEWOBJ(IntlIterator)(se))->wrap();
+  return IntlIterator::newInstance(new BugStringCharEnumeration(uenum));
 }
 #endif // ICU 4.2
 
@@ -650,8 +629,8 @@ static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
   }
 
   if (numargs > 6) {
-    s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                      "intlgregcal_create_instance: too many arguments");
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "intlgregcal_create_instance: too many arguments");
     return;
   }
 
@@ -663,13 +642,13 @@ static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
   UErrorCode error;
   if (numargs < 3) {
     tz = IntlTimeZone::ParseArg(args[0], "intlgregcal_create_instance",
-                                         s_intl_error->m_error);
-    String loc(ULOC_DEFAULT(args[1].toString()));
+                                         s_intl_error.get());
+    String loc(localeOrDefault(args[1].toString()));
     error = U_ZERO_ERROR;
     gcal = new icu::GregorianCalendar(tz,
                icu::Locale::createFromName(loc.c_str()), error);
     if (U_FAILURE(error)) {
-      s_intl_error->set(error, "intlgregcal_create_instance: error "
+      s_intl_error->setError(error, "intlgregcal_create_instance: error "
                "creating ICU GregorianCalendar from time zone and locale");
       return;
     }
@@ -681,8 +660,8 @@ static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
   for (int i = 0; i < numargs; ++i) {
     int64_t arg = args[i].toInt64();
     if ((arg < INT32_MIN) || (arg > INT32_MAX)) {
-      s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                        "intlgregcal_create_instance: at least one of "
+      s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                             "intlgregcal_create_instance: at least one of "
                              "the arguments has an absolute value that is "
                              "too large");
       return;
@@ -697,9 +676,9 @@ static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
                                         error);
       break;
     case 4:
-      s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                        "intlgregcal_create_instance: no variant with "
-                        "4 arguments (excluding trailing NULLs)");
+      s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                             "intlgregcal_create_instance: no variant with "
+                             "4 arguments (excluding trailing NULLs)");
       return;
     case 5: // ..., hour, minute
       gcal = new icu::GregorianCalendar(intarg[0], intarg[1], intarg[2],
@@ -716,13 +695,13 @@ static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
       return;
   }
   if (U_FAILURE(error)) {
-    s_intl_error->set(error, "intlgregcal_create_instance: error "
-                             "creating ICU GregorianCalendar from date");
+    s_intl_error->setError(error, "intlgregcal_create_instance: error "
+                                  "creating ICU GregorianCalendar from date");
     return;
   }
 
   tz = IntlTimeZone::ParseArg(uninit_null(), "intlgregcal_create_instance",
-                                             s_intl_error->m_error);
+                                             s_intl_error.get());
   if (!tz) {
     // error already set
     return;
@@ -730,8 +709,7 @@ static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
   gcal->adoptTimeZone(tz);
 
 success:
-  auto data = NEWOBJ(IntlGregorianCalendar)(gcal);
-  this_->o_set(s_resdata, Resource(data), s_IntlGregorianCalendar.get());
+  Native::data<IntlCalendar>(this_.get())->setCalendar(gcal);
   gcal = nullptr; // prevent SCOPE_EXIT sweeps
 }
 
@@ -742,19 +720,19 @@ static bool HHVM_METHOD(IntlGregorianCalendar, isLeapYear, int64_t year) {
                    "intlgregcal_is_leap_year: year out of bounds");
     return false;
   }
-  return (bool)data->calendar()->isLeapYear((int32_t)year);
+  return (bool)data->gcal()->isLeapYear((int32_t)year);
 }
 
 static double HHVM_METHOD(IntlGregorianCalendar, getGregorianChange) {
   GCAL_FETCH(data, this_, 0.0);
-  return (double)data->calendar()->getGregorianChange();
+  return (double)data->gcal()->getGregorianChange();
 }
 
 static bool HHVM_METHOD(IntlGregorianCalendar, setGregorianChange,
                         double change) {
   GCAL_FETCH(data, this_, false);
   UErrorCode error = U_ZERO_ERROR;
-  data->calendar()->setGregorianChange(change, error);
+  data->gcal()->setGregorianChange(change, error);
   if (U_FAILURE(error)) {
     data->setError(error, "intlgregcal_set_gregorian_change: error "
                           "calling ICU method");
@@ -894,6 +872,8 @@ void IntlExtension::initCalendar() {
   HHVM_ME(IntlGregorianCalendar, isLeapYear);
   HHVM_ME(IntlGregorianCalendar, getGregorianChange);
   HHVM_ME(IntlGregorianCalendar, setGregorianChange);
+
+  Native::registerNativeDataInfo<IntlCalendar>(s_IntlCalendar.get());
 
   loadSystemlib("icu_calendar");
 }

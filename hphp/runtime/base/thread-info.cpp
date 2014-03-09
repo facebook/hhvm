@@ -20,14 +20,19 @@
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <signal.h>
+#include <limits>
+#include <map>
+#include <set>
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/logger.h"
 #include "folly/String.h"
 
 using std::map;
@@ -42,14 +47,14 @@ __thread char* ThreadInfo::t_stackbase = 0;
 
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
-std::string ini_get_max_execution_time(void*) {
-  int64_t timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+const StaticString s_dot(".");
+
+static int64_t ini_get_max_execution_time() {
+  return ThreadInfo::s_threadInfo.getNoCheck()->
     m_reqInjectionData.getTimeout();
-  return std::to_string(timeout);
 }
 
-bool ini_on_update_max_execution_time(const String& value, void*) {
-  int64_t limit = value.toInt64();
+static bool ini_on_update_max_execution_time(const int64_t &limit) {
   ThreadInfo::s_threadInfo.getNoCheck()->
     m_reqInjectionData.setTimeout(limit);
   return true;
@@ -101,27 +106,29 @@ void ThreadInfo::onSessionInit() {
   // Take the address of the cached per-thread stackLimit, and use this to allow
   // some slack for (a) stack usage above the caller of reset() and (b) stack
   // usage after the position gets checked.
-  // If we're not in a threaded environment, then Util::s_stackSize will be
+  // If we're not in a threaded environment, then s_stackSize will be
   // zero. Use getrlimit to figure out what the size of the stack is to
   // calculate an approximation of where the bottom of the stack should be.
-  if (Util::s_stackSize == 0) {
+  if (s_stackSize == 0) {
     struct rlimit rl;
 
     getrlimit(RLIMIT_STACK, &rl);
     m_stacklimit = t_stackbase - (rl.rlim_cur - StackSlack);
   } else {
-    m_stacklimit = (char *)Util::s_stackLimit + StackSlack;
-    assert(uintptr_t(m_stacklimit) < (Util::s_stackLimit + Util::s_stackSize));
+    m_stacklimit = (char *)s_stackLimit + StackSlack;
+    assert(uintptr_t(m_stacklimit) < s_stackLimit + s_stackSize);
   }
 
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "max_execution_time",
-                   ini_on_update_max_execution_time,
-                   ini_get_max_execution_time);
+                   IniSetting::SetAndGet<int64_t>(
+                     ini_on_update_max_execution_time,
+                     ini_get_max_execution_time));
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "maximum_execution_time",
-                   ini_on_update_max_execution_time,
-                   ini_get_max_execution_time);
+                   IniSetting::SetAndGet<int64_t>(
+                     ini_on_update_max_execution_time,
+                     ini_get_max_execution_time));
 }
 
 void ThreadInfo::clearPendingException() {
@@ -148,6 +155,173 @@ RequestInjectionData::~RequestInjectionData() {
     timer_delete(m_timer_id);
   }
 #endif
+}
+
+void RequestInjectionData::threadInit() {
+  // Resource Limits
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "memory_limit",
+                   IniSetting::SetAndGet<std::string>(
+                     [this](const std::string& value) {
+                       int64_t newInt = strtoll(value.c_str(), nullptr, 10);
+                       if (newInt <= 0) {
+                         newInt = std::numeric_limits<int64_t>::max();
+                         m_maxMemory = std::to_string(newInt);
+                       } else {
+                         m_maxMemory = value;
+                         newInt = convert_bytes_to_long(value);
+                         if (newInt <= 0) {
+                           newInt = std::numeric_limits<int64_t>::max();
+                         }
+                       }
+                       MM().getStatsNoRefresh().maxBytes = newInt;
+                       return true;
+                     },
+                     nullptr
+                   ), &m_maxMemory);
+
+  // Data Handling
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "arg_separator.output", "&",
+                   &m_argSeparatorOutput);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
+                   &m_defaultCharset);
+
+  // Paths and Directories
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "include_path", getDefaultIncludePath().c_str(),
+                   IniSetting::SetAndGet<std::string>(
+                     [this](const std::string& value) {
+                       auto paths = f_explode(":", value);
+                       m_include_paths.clear();
+                       for (ArrayIter iter(paths); iter; ++iter) {
+                         m_include_paths.push_back(
+                           iter.second().toString().toCppString());
+                       }
+                       return true;
+                     },
+                     [this]() {
+                       std::string ret;
+                       bool first = true;
+                       for (auto &path : m_include_paths) {
+                         if (first) {
+                           first = false;
+                         } else {
+                           ret += ":";
+                         }
+                         ret += path;
+                       }
+                       return ret;
+                     }
+                   ));
+
+  // Paths and Directories
+  m_allowedDirectories = RuntimeOption::AllowedDirectories;
+  m_safeFileAccess = RuntimeOption::SafeFileAccess;
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "open_basedir",
+                   IniSetting::SetAndGet<std::string>(
+                     [this](const std::string& value) {
+                       auto boom = f_explode(";", value).toCArrRef();
+
+                       std::vector<std::string> directories;
+                       directories.reserve(boom.size());
+                       for (ArrayIter iter(boom); iter; ++iter) {
+                         const auto& path = iter.second().toString();
+
+                         // Canonicalise the path
+                         if (!path.empty() &&
+                             File::TranslatePathKeepRelative(path).empty()) {
+                           return false;
+                         }
+
+                         if (path.equal(s_dot)) {
+                           auto cwd = g_context->getCwd().toCppString();
+                           directories.push_back(cwd);
+                         } else {
+                           directories.push_back(path.toCppString());
+                         }
+                       }
+                       m_allowedDirectories = directories;
+                       m_safeFileAccess = !boom.empty();
+                       return true;
+                     },
+                     [this]() -> std::string {
+                       if (!hasSafeFileAccess()) {
+                         return "";
+                       }
+
+                       std::string out;
+                       for (auto& directory: getAllowedDirectories()) {
+                         if (!directory.empty()) {
+                           out += directory + ";";
+                         }
+                       }
+
+                       // Remove the trailing ;
+                       if (!out.empty()) {
+                         out.erase(std::end(out) - 1, std::end(out));
+                       }
+                       return out;
+                     }
+                   ));
+
+  // Errors and Logging Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "error_reporting",
+                   std::to_string(RuntimeOption::RuntimeErrorReportingLevel)
+                    .c_str(),
+                   &m_errorReportingLevel);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "log_errors",
+                   IniSetting::SetAndGet<bool>(
+                     [this](const bool& on) {
+                       if (m_logErrors != on) {
+                         if (on) {
+                           if (!m_errorLog.empty()) {
+                             FILE *output = fopen(m_errorLog.data(), "a");
+                             if (output) {
+                               Logger::SetNewOutput(output);
+                             }
+                           }
+                         } else {
+                           Logger::SetNewOutput(nullptr);
+                         }
+                       }
+                       return true;
+                     },
+                     nullptr
+                   ),
+                   &m_logErrors);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "error_log",
+                   IniSetting::SetAndGet<std::string>(
+                     [this](const std::string& value) {
+                       if (m_logErrors && !m_errorLog.empty()) {
+                         FILE *output = fopen(m_errorLog.data(), "a");
+                         if (output) {
+                           Logger::SetNewOutput(output);
+                         }
+                       }
+                       return true;
+                     },
+                     nullptr
+                   ), &m_errorLog);
+
+  // Filesystem and Streams Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "default_socket_timeout",
+                   std::to_string(RuntimeOption::SocketDefaultTimeout).c_str(),
+                   &m_socketDefaultTimeout);
+}
+
+
+std::string RequestInjectionData::getDefaultIncludePath() {
+  auto include_paths = Array::Create();
+  for (unsigned int i = 0; i < RuntimeOption::IncludeSearchPaths.size(); ++i) {
+    include_paths.append(String(RuntimeOption::IncludeSearchPaths[i]));
+  }
+  return f_implode(":", include_paths).toCppString();
 }
 
 void RequestInjectionData::onSessionInit() {

@@ -18,6 +18,7 @@
 #define incl_HPHP_SIMPLE_FUNCTION_CALL_H_
 
 #include "hphp/compiler/expression/function_call.h"
+#include <map>
 #include "hphp/compiler/analysis/variable_table.h"
 
 namespace HPHP {

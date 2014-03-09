@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_filter.h"
 #include "hphp/runtime/ext/filter/logical_filters.h"
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
 
@@ -85,9 +86,8 @@ const StaticString
   s_SERVER("_SERVER"),
   s_ENV("_ENV");
 
-class FilterRequestData : public RequestEventHandler {
-public:
-  virtual void requestInit() {
+struct FilterRequestData final : RequestEventHandler {
+  void requestInit() override {
     GlobalVariables *g = get_global_variables();
     // This doesn't copy them yet, but will do COW if they are modified
     m_GET = g->get(s_GET).toArray();
@@ -97,7 +97,7 @@ public:
     m_ENV = g->get(s_ENV).toArray();
   }
 
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     m_GET = nullptr;
     m_POST = nullptr;
     m_COOKIE = nullptr;

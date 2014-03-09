@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 
 #include <vector>
+#include <algorithm>
 
 #include "folly/MapUtil.h"
 

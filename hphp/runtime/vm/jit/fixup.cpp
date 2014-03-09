@@ -18,7 +18,7 @@
 #include "hphp/vixl/a64/simulator-a64.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/data-block.h"
 
@@ -59,22 +59,24 @@ FixupMap::recordIndirectFixup(CodeAddress frontier, int dwordsPushed) {
   recordIndirectFixup(frontier, IndirectFixup((2 + dwordsPushed) * 8));
 }
 
+namespace {
+bool isVMFrame(const ExecutionContext* ec, const ActRec* ar) {
+  // If this assert is failing, you may have forgotten a sync point somewhere
+  assert(ar);
+  bool ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
+  assert(!ret ||
+         (ar >= ec->m_stack.getStackLowAddress() &&
+          ar < ec->m_stack.getStackHighAddress()) ||
+         (ar->m_func->validate(), ar->inGenerator()));
+  return ret;
+}
+}
+
 void
-FixupMap::fixupWork(VMExecutionContext* ec, ActRec* rbp) const {
+FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
   assert(RuntimeOption::EvalJit);
 
   TRACE(1, "fixup(begin):\n");
-
-  auto isVMFrame = [] (ActRec* ar) {
-    // If this assert is failing, you may have forgotten a sync point somewhere
-    assert(ar);
-    bool ret = uintptr_t(ar) - Util::s_stackLimit >= Util::s_stackSize;
-    assert(!ret ||
-           (ar >= g_vmContext->m_stack.getStackLowAddress() &&
-            ar < g_vmContext->m_stack.getStackHighAddress()) ||
-           ar->m_func->isGenerator());
-    return ret;
-  };
 
   auto* nextRbp = rbp;
   rbp = 0;
@@ -85,7 +87,7 @@ FixupMap::fixupWork(VMExecutionContext* ec, ActRec* rbp) const {
     nextRbp = reinterpret_cast<ActRec*>(rbp->m_savedRbp);
     TRACE(2, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
 
-    if (isVMFrame(nextRbp)) {
+    if (isVMFrame(ec, nextRbp)) {
       TRACE(2, "fixup checking vm frame %s\n",
                nextRbp->m_func->name()->data());
       VMRegs regs;
@@ -108,19 +110,19 @@ FixupMap::fixupWork(VMExecutionContext* ec, ActRec* rbp) const {
 }
 
 void
-FixupMap::fixupWorkSimulated(VMExecutionContext* ec) const {
+FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
   TRACE(1, "fixup(begin):\n");
 
   auto isVMFrame = [] (ActRec* ar, const vixl::Simulator* sim) {
     // If this assert is failing, you may have forgotten a sync point somewhere
     assert(ar);
     bool ret =
-      uintptr_t(ar) - Util::s_stackLimit >= Util::s_stackSize &&
+      uintptr_t(ar) - s_stackLimit >= s_stackSize &&
       !sim->is_on_stack(ar);
     assert(!ret ||
-           (ar >= g_vmContext->m_stack.getStackLowAddress() &&
-            ar < g_vmContext->m_stack.getStackHighAddress()) ||
-           ar->m_func->isGenerator());
+           (ar >= g_context->m_stack.getStackLowAddress() &&
+            ar < g_context->m_stack.getStackHighAddress()) ||
+           ar->inGenerator());
     return ret;
   };
 
@@ -167,7 +169,7 @@ FixupMap::fixupWorkSimulated(VMExecutionContext* ec) const {
 }
 
 void
-FixupMap::fixup(VMExecutionContext* ec) const {
+FixupMap::fixup(ExecutionContext* ec) const {
   if (RuntimeOption::EvalSimulateARM) {
     // Walking the C++ stack doesn't work in simulation mode. Fortunately, the
     // execution context has a stack of simulators, which we consult instead.
@@ -184,7 +186,7 @@ void
 FixupMap::processPendingFixups() {
   for (uint i = 0; i < m_pendingFixups.size(); i++) {
     TCA tca = m_pendingFixups[i].m_tca;
-    assert(tx64->isValidCodeAddress(tca));
+    assert(mcg->isValidCodeAddress(tca));
     recordFixup(tca, m_pendingFixups[i].m_fixup);
   }
   m_pendingFixups.clear();

@@ -15,7 +15,8 @@
 */
 
 #include "hphp/compiler/type_annotation.h"
-#include "hphp/util/util.h"
+#include <vector>
+#include "hphp/util/text-util.h"
 
 namespace HPHP {
 
@@ -133,8 +134,8 @@ void TypeAnnotation::xhpTypeName(std::string &name) const {
     name += m_name;
   }
   // un-mangle back
-  Util::replaceAll(name, "__", ":");
-  Util::replaceAll(name, "_", "-");
+  replaceAll(name, "__", ":");
+  replaceAll(name, "_", "-");
 }
 
 void TypeAnnotation::tupleTypeName(std::string &name) const {
@@ -186,8 +187,15 @@ void TypeAnnotation::outputCodeModel(CodeGenerator& cg) {
   auto numProps = 1;
   if (m_nullable) numProps++;
   if (m_soft) numProps++;
-  if (m_function) numProps++;
-  if (numTypeArgs > 0) numProps++;
+  if (m_function) {
+    numProps++;
+    // Since this is a function type, the first type argument is the return type
+    // and no typeArguments property will be serialized unless there are at
+    // least two type arguments.
+    if (numTypeArgs > 1) numProps++;
+  } else {
+    if (numTypeArgs > 0) numProps++;
+  }
   cg.printObjectHeader("TypeExpression", numProps);
   cg.printPropertyHeader("name");
   cg.printValue(m_tuple ? "tuple" : m_name);
@@ -203,6 +211,9 @@ void TypeAnnotation::outputCodeModel(CodeGenerator& cg) {
     cg.printPropertyHeader("returnType");
     typeArgsElem->outputCodeModel(cg);
     typeArgsElem = typeArgsElem->m_typeList;
+    // Since we've grabbed the first element of the list as the return
+    // type, make sure that the logic for serializing type arguments gets
+    // disabled unless there is at least one more type argument.
     numTypeArgs--;
   }
   if (numTypeArgs > 0) {

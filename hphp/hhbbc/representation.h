@@ -24,6 +24,7 @@
 #include <list>
 
 #include <boost/variant.hpp>
+#include <utility>
 
 #include "hphp/util/md5.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -374,6 +375,13 @@ struct Func {
    * passed through to expose it to reflection.
    */
   SString returnUserType;
+
+  /*
+   * Return type specified in the source code (ex. "function foo(): Bar").
+   * HHVM checks if the a function's return value matches it's return type
+   * constraint via the VerifyRetType* instructions.
+   */
+  TypeConstraint retTypeConstraint;
 
   /*
    * If traits are being flattened by hphpc, we keep the original

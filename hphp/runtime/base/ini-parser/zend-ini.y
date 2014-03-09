@@ -39,7 +39,6 @@ using namespace HPHP;
 %token TC_STRING
 %token TC_WHITESPACE
 %token TC_LABEL
-%token TC_OFFSET
 %token TC_DOLLAR_CURLY
 %token TC_VARNAME
 %token TC_QUOTED_STRING
@@ -61,12 +60,21 @@ statement_list:
 ;
 
 statement:
-    TC_SECTION section_string_or_value ']'  { zend_ini_on_section($2);}
+     TC_SECTION section_string_or_value ']' { zend_ini_on_section($2);}
+  |  TC_LABEL offset_list '=' 
+     string_or_value                        { zend_ini_on_pop_entry($1, $4, $2);}
   |  TC_LABEL '=' string_or_value           { zend_ini_on_entry($1, $3);}
-  |  TC_OFFSET option_offset ']' '=' 
-     string_or_value                        { zend_ini_on_pop_entry($1, $5, $2);}
   |  TC_LABEL                               { zend_ini_on_label($1);}
   |  END_OF_LINE
+;
+
+offset_list:
+     offset_list offset                     { $$ = $1 + '\0' + $2;}
+  |  offset                                 { $$ = $1;}
+;
+
+offset:
+     '[' option_offset ']'                  { $$ = $2;}
 ;
 
 section_string_or_value:

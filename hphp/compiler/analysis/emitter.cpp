@@ -21,6 +21,10 @@
 #include <vector>
 #include <algorithm>
 #include <memory>
+#include <deque>
+#include <exception>
+#include <set>
+#include <utility>
 
 #include "folly/MapUtil.h"
 #include "folly/Memory.h"
@@ -93,7 +97,6 @@
 
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -1415,7 +1418,8 @@ void EmitterVisitor::emitJump(Emitter& e, IterVec& iters, Label& target) {
   }
 }
 
-void EmitterVisitor::emitReturn(Emitter& e, char sym, StatementPtr s) {
+void EmitterVisitor::emitReturn(Emitter& e, char sym, bool hasConstraint,
+                                StatementPtr s) {
   Region* region = m_regions.back().get();
   registerReturn(s, region, sym);
   assert(getEvalStack().size() == 1);
@@ -1428,13 +1432,20 @@ void EmitterVisitor::emitReturn(Emitter& e, char sym, StatementPtr s) {
       // Free the pending iterators and perform the actual return.
       emitIterFree(e, iters);
       if (sym == StackSym::C) {
+        if (hasConstraint) {
+          e.VerifyRetTypeC();
+        }
         e.RetC();
       } else {
         assert(sym == StackSym::V);
+        if (hasConstraint) {
+          e.VerifyRetTypeV();
+        }
         e.RetV();
       }
       return;
     }
+
     if (r->isTryFinally()) {
       // We encountered a try block - a finally needs to be run
       // before returning.
@@ -3151,7 +3162,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
                       false, 0, 0);
         }
 
-        emitReturn(e, retSym, r);
+        auto tc = m_curFunc->returnTypeConstraint();
+        emitReturn(e, retSym, tc.hasConstraint(), r);
+
         return false;
       }
 
@@ -3170,14 +3183,16 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           StringData* name = makeStaticString(sv->getName());
           Id local = m_curFunc->lookupVarId(name);
 
-          Func::SVInfo svInfo;
-          svInfo.name = name;
-          std::ostringstream os;
-          CodeGenerator cg(&os, CodeGenerator::PickledPHP);
-          AnalysisResultPtr ar(new AnalysisResult());
-          value->outputPHP(cg, ar);
-          svInfo.phpCode = makeStaticString(os.str());
-          m_curFunc->addStaticVar(svInfo);
+          if (m_staticEmitted.insert(sv->getName()).second) {
+            Func::SVInfo svInfo;
+            svInfo.name = name;
+            std::ostringstream os;
+            CodeGenerator cg(&os, CodeGenerator::PickledPHP);
+            AnalysisResultPtr ar(new AnalysisResult());
+            value->outputPHP(cg, ar);
+            svInfo.phpCode = makeStaticString(os.str());
+            m_curFunc->addStaticVar(svInfo);
+          }
 
           if (value->isScalar()) {
             visit(value);
@@ -3602,9 +3617,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               }
             }
             if (capacityHint != -1) {
-              e.NewArrayReserve(capacityHint);
+              e.NewArray(capacityHint);
             } else {
-              e.NewArray();
+              e.NewArray(HphpArray::SmallSize);
             }
             visit(ex);
           }
@@ -3867,8 +3882,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             throw IncludeTimeFatalException(b,
               "Cannot use collection initialization for non-collection class");
           }
-          bool kvPairs = cType == Collection::FrozenMapType
-            || cType == Collection::MapType;
+          bool kvPairs = (cType == Collection::MapType ||
+                          cType == Collection::ImmMapType);
           e.NewCol(cType, nElms);
           if (kvPairs) {
             for (int i = 0; i < nElms; i++) {
@@ -6469,6 +6484,49 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
   return attrs;
 }
 
+/**
+ * The code below is used for both, function/method parameter type as well as
+ * for function/method return type.
+ */
+static TypeConstraint
+determine_type_constraint_from_annot(const TypeAnnotationPtr annot,
+                                     bool is_return) {
+  if (annot) {
+    auto flags = TypeConstraint::ExtendedHint | TypeConstraint::HHType;
+
+    // We only care about a subset of extended type constaints:
+    // typevar, nullable, soft, return types.
+    //
+    // For everything else, we return {}. We also return {} for annotations
+    // we don't know how to handle.
+    if (annot->isFunction() || annot->isMixed()) {
+      return {};
+    }
+    if (annot->isTypeVar()) {
+      flags = flags | TypeConstraint::TypeVar;
+    }
+    if (annot->isNullable()) {
+      flags = flags | TypeConstraint::Nullable;
+    }
+    if (annot->isSoft()) {
+      flags = flags | TypeConstraint::Soft;
+    }
+    if (!is_return &&
+        (flags == (TypeConstraint::ExtendedHint | TypeConstraint::HHType))) {
+      return {};
+    }
+
+    auto strippedName = annot->stripNullable().stripSoft().vanillaName();
+
+    return TypeConstraint{
+      makeStaticString(strippedName),
+      flags
+    };
+  }
+
+  return {};
+}
+
 static TypeConstraint
 determine_type_constraint(const ParameterExpressionPtr& par) {
   if (par->hasTypeHint()) {
@@ -6486,41 +6544,7 @@ determine_type_constraint(const ParameterExpressionPtr& par) {
     };
   }
 
-  if (auto annot = par->annotation()) {
-    auto flags = TypeConstraint::ExtendedHint | TypeConstraint::HHType;
-
-    // We only care about a subset of extended type constaints:
-    // typevar
-    // nullable
-    // soft
-    //
-    // For everything else, we return {}. We also return {} for annotations
-    // we don't know how to handle.
-    if (annot->isFunction() || annot->isMixed()) {
-      return {};
-    }
-    if (annot->isTypeVar()) {
-      flags = flags | TypeConstraint::TypeVar;
-    }
-    if (annot->isNullable()) {
-      flags = flags | TypeConstraint::Nullable;
-    }
-    if (annot->isSoft()) {
-      flags = flags | TypeConstraint::Soft;
-    }
-    if (flags == (TypeConstraint::ExtendedHint | TypeConstraint::HHType)) {
-      return {};
-    }
-
-    auto strippedName = annot->stripNullable().stripSoft().vanillaName();
-
-    return TypeConstraint{
-      makeStaticString(strippedName),
-      flags
-    };
-  }
-
-  return {};
+  return determine_type_constraint_from_annot(par->annotation(), false);
 }
 
 void EmitterVisitor::emitPostponedMeths() {
@@ -6748,8 +6772,16 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
     fillFuncEmitterParams(fe, meth->getParams());
 
     // copy declared return type (hack)
-    fe->setReturnUserType(
-      makeStaticString(meth->getReturnTypeConstraint()));
+    fe->setReturnUserType(makeStaticString(meth->getReturnTypeConstraint()));
+
+    auto annot = meth->retTypeAnnotation();
+    // Ideally we should handle the void case in TypeConstraint::check. This
+    // should however get done in a different diff, since it could impact
+    // perf in a negative way (#3145038)
+    if (annot && !annot->isVoid() && !annot->isThis()) {
+      fe->setReturnTypeConstraint(
+        determine_type_constraint_from_annot(annot, true));
+    }
   }
 
   // add the original filename for flattened traits
@@ -8353,6 +8385,7 @@ void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe) {
   copyOverCatchAndFaultRegions(fe);
   copyOverFPIRegions(fe);
   m_yieldLabels.clear();
+  m_staticEmitted.clear();
   Offset past = e.getUnitEmitter().bcPos();
   fe->finish(past, false);
   e.getUnitEmitter().recordFunction(fe);
@@ -8586,7 +8619,7 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     // and requires that the hhas systemlib is already loaded.
     if (auto const existing = Unit::lookupFunc(name)) {
       if (!existing->isCPPBuiltin()) {
-        name = makeStaticString("__builtin_" + name->toCPPString());
+        name = makeStaticString("__builtin_" + name->toCppString());
       }
     }
 

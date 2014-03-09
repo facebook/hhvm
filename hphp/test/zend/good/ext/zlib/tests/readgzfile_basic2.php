@@ -6,7 +6,7 @@ for all languages
 
 EOT;
 $dirname = 'readgzfile_temp';
-$filename = $dirname.'/readgzfile_basic2.txt';
+$filename = $dirname.'/plainfile.txt';
 mkdir($dirname);
 $h = fopen($filename, 'w');
 fwrite($h, $plaintxt);

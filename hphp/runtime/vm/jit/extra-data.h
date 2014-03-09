@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_EXTRADATA_H_
 
 #include "hphp/util/ringbuffer.h"
+#include <algorithm>
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-loc.h"
@@ -152,6 +153,19 @@ struct IterId : IRExtraData {
   uint32_t iterId;
 };
 
+struct IterData : IRExtraData {
+  explicit IterData(uint32_t iter, uint32_t key, uint32_t val)
+    : iterId(iter), keyId(key), valId(val)
+  {}
+  std::string show() const {
+    return folly::format("{}::{}::{}", iterId, valId, valId).str();
+  }
+
+  uint32_t iterId;
+  uint32_t keyId;
+  uint32_t valId;
+};
+
 struct ClassData : IRExtraData {
   explicit ClassData(const Class* cls) : cls(cls) {}
   std::string show() const {
@@ -173,9 +187,11 @@ struct FuncData : IRExtraData {
 };
 
 struct ClsMethodData : IRExtraData {
-  ClsMethodData(const StringData* cls, const StringData* method)
+  ClsMethodData(const StringData* cls, const StringData* method,
+                const NamedEntity* ne = nullptr)
     : clsName(cls)
     , methodName(method)
+    , namedEntity(ne)
   {}
 
   std::string show() const {
@@ -192,6 +208,7 @@ struct ClsMethodData : IRExtraData {
 
   const StringData* clsName;
   const StringData* methodName;
+  const NamedEntity* namedEntity;
 };
 
 struct FPushCufData : IRExtraData {
@@ -211,27 +228,6 @@ struct FPushCufData : IRExtraData {
 
   uint32_t args;
   uint32_t iterId;
-};
-
-struct ConstData : IRExtraData {
-  template<class T>
-  explicit ConstData(T data)
-    : m_dataBits(constToBits(data))
-  {}
-
-  template<class T>
-  T as() const {
-    T ret;
-    static_assert(sizeof ret <= sizeof m_dataBits, "Return type too big");
-    std::memcpy(&ret, &m_dataBits, sizeof ret);
-    return ret;
-  }
-
-  bool cseEquals(ConstData o) const { return m_dataBits == o.m_dataBits; }
-  size_t cseHash() const { return std::hash<uintptr_t>()(m_dataBits); }
-
-private:
-  uintptr_t m_dataBits;
 };
 
 /*
@@ -279,9 +275,11 @@ struct ActRecInfo : IRExtraData {
   int32_t numArgs;
 
   std::string show() const {
-    auto numArgsAndCtorFlag = ActRec::decodeNumArgs(numArgs);
-    return folly::to<std::string>(numArgsAndCtorFlag.first,
-                                  numArgsAndCtorFlag.second ? ",ctor" : "",
+    ActRec ar;
+    ar.m_numArgsAndGenCtorFlags = numArgs;
+    return folly::to<std::string>(ar.numArgs(),
+                                  ar.isFromFPushCtor() ? ",ctor" : "",
+                                  ar.inGenerator() ? ",gen" : "",
                                   invName ? " M" : "");
   }
 };
@@ -354,20 +352,22 @@ struct PropByteOffset : IRExtraData {
 };
 
 /*
- * DefInlineFP is present when we need to create a frame for inlining.
- * This instruction also carries some metadata used by tracebuilder to
- * track state during an inlined call.
+ * DefInlineFP is present when we need to create a frame for inlining.  This
+ * instruction also carries some metadata used by IRBuilder to track state
+ * during an inlined call.
  */
 struct DefInlineFPData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
-      target->fullName()->data(), "(),", retBCOff, ',', retSPOff
+      target->fullName()->data(), "(),", retBCOff, ',', retSPOff,
+      retTypePred < Type::Gen ? (',' + retTypePred.toString()) : ""
     );
   }
 
   const Func* target;
   Offset retBCOff;
   Offset retSPOff;
+  Type retTypePred;
 };
 
 /*
@@ -749,11 +749,21 @@ X(IterFree,                     IterId);
 X(MIterFree,                    IterId);
 X(CIterFree,                    IterId);
 X(DecodeCufIter,                IterId);
+X(IterInit,                     IterData);
+X(IterInitK,                    IterData);
+X(IterNext,                     IterData);
+X(IterNextK,                    IterData);
+X(WIterInit,                    IterData);
+X(WIterInitK,                   IterData);
+X(WIterNext,                    IterData);
+X(WIterNextK,                   IterData);
+X(MIterInit,                    IterData);
+X(MIterInitK,                   IterData);
+X(MIterNext,                    IterData);
+X(MIterNextK,                   IterData);
 X(AllocObjFast,                 ClassData);
 X(LdCtx,                        FuncData);
 X(CufIterSpillFrame,            FPushCufData);
-X(DefConst,                     ConstData);
-X(LdConst,                      ConstData);
 X(SpillFrame,                   ActRecInfo);
 X(GuardStk,                     StackOffset);
 X(CheckStk,                     StackOffset);

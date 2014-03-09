@@ -17,7 +17,6 @@
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/util/util.h"
 #include "folly/String.h"
 #include <poll.h>
 
@@ -308,7 +307,7 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SSLSocket *SSLSocket::Create(const Util::HostURL &hosturl, double timeout) {
+SSLSocket *SSLSocket::Create(const HostURL &hosturl, double timeout) {
   CryptoMethod method;
   const std::string scheme = hosturl.getScheme();
 
@@ -337,6 +336,7 @@ SSLSocket *SSLSocket::Create(const Util::HostURL &hosturl, double timeout) {
 }
 
 bool SSLSocket::close() {
+  invokeFiltersOnClose();
   return closeImpl();
 }
 

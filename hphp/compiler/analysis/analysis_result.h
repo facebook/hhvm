@@ -31,6 +31,11 @@
 
 #include <boost/graph/adjacency_list.hpp>
 #include <tbb/concurrent_hash_map.h>
+#include <atomic>
+#include <map>
+#include <set>
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

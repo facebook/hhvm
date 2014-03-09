@@ -62,15 +62,20 @@ struct PropInfo;
 struct HhbcTranslator {
   HhbcTranslator(Offset startOffset,
                  uint32_t initialSpOffsetFromFp,
+                 bool inGenerator,
                  const Func* func);
 
   // Accessors.
-  IRBuilder& traceBuilder() const { return *m_irb.get(); }
+  IRBuilder& irBuilder() const { return *m_irb.get(); }
   IRUnit& unit() { return m_unit; }
 
   // In between each emit* call, irtranslator indicates the new
   // bytecode offset (or whether we're finished) using this API.
-  void setBcOff(Offset newOff, bool lastBcOff);
+  void setBcOff(Offset newOff, bool lastBcOff, bool maybeStartBlock = false);
+
+  // End a bytecode block and do the right thing with fallthrough.
+  void endBlock(Offset next);
+
   void end();
   void end(Offset nextPc);
 
@@ -99,7 +104,8 @@ struct HhbcTranslator {
   // Inlining-related functions.
   void beginInlining(unsigned numArgs,
                      const Func* target,
-                     Offset returnBcOffset);
+                     Offset returnBcOffset,
+                     Type retTypePred = Type::Gen);
   bool isInlining() const;
   int inliningDepth() const;
   void profileFunctionEntry(const char* category);
@@ -129,7 +135,7 @@ struct HhbcTranslator {
   void emitBareThis(int notice);
   void emitInitThisLoc(int32_t id);
   void emitArray(int arrayId);
-  void emitNewArrayReserve(int capacity);
+  void emitNewArray(int capacity);
   void emitNewPackedArray(int n);
   void emitNewStructArray(uint32_t n, StringData** keys);
   void emitNewCol(int capacity);
@@ -162,6 +168,7 @@ struct HhbcTranslator {
   void emitTrue();
   void emitFalse();
   void emitCGetL(int32_t id);
+  void emitFPassL(int32_t id);
   void emitPushL(uint32_t id);
   void emitCGetL2(int32_t id);
   void emitCGetS();
@@ -183,9 +190,9 @@ struct HhbcTranslator {
   void emitEmptyL(int32_t id);
   void emitEmptyS();
   void emitEmptyG();
-  // The subOpc param can be one of either
+  // The subOp param can be one of either
   // Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor
-  void emitSetOpL(Opcode subOpc, uint32_t id);
+  void emitSetOpL(Op subOp, uint32_t id);
   // the pre & inc params encode the 4 possible sub opcodes:
   // PreInc, PostInc, PreDec, PostDec
   void emitIncDecL(bool pre, bool inc, uint32_t id);
@@ -195,8 +202,8 @@ struct HhbcTranslator {
   void emitPopR();
   void emitDup();
   void emitUnboxR();
-  void emitJmpZ(Offset taken);
-  void emitJmpNZ(Offset taken);
+  void emitJmpZ(Offset taken, Offset next, bool bothPaths);
+  void emitJmpNZ(Offset taken, Offset next, bool bothPaths);
   void emitJmp(int32_t offset, bool breakTracelet, bool noSurprise);
   void emitGt()    { emitCmp(Gt);    }
   void emitGte()   { emitCmp(Gte);   }
@@ -259,7 +266,10 @@ struct HhbcTranslator {
   void emitAGetL(int localId);
   void emitIsScalarL(int id);
   void emitIsScalarC();
+  void emitVerifyTypeImpl(int32_t id);
   void emitVerifyParamType(int32_t paramId);
+  void emitVerifyRetTypeC();
+  void emitVerifyRetTypeV();
   void emitInstanceOfD(int classNameStrId);
   void emitInstanceOf();
   void emitNop() {}
@@ -290,15 +300,15 @@ struct HhbcTranslator {
   void emitPredictTL(int32_t id, AssertTOp);
   void emitPredictTStk(int32_t offset, AssertTOp);
 
-  // binary arithmetic ops
+  // arithmetic ops
   void emitAdd();
   void emitSub();
+  void emitMul();
   void emitBitAnd();
   void emitBitOr();
   void emitBitXor();
   void emitBitNot();
   void emitAbs();
-  void emitMul();
   void emitMod();
   void emitDiv();
   void emitSqrt();
@@ -552,7 +562,7 @@ private:
       PackedArray,
       // simple opcode on String
       String,
-      // simple opcode on Vector* (c_Vector* or c_FrozenVector*)
+      // simple opcode on Vector* (c_Vector* or c_ImmVector*)
       Vector,
       // simple opcode on Map* (c_Map*)
       Map,
@@ -622,7 +632,7 @@ private:
     std::vector<Block*> m_failedVec;
   };
 
-private: // tracebuilder forwarding utilities
+private: // forwarding utilities
   template<class... Args>
   SSATmp* cns(Args&&... args) {
     return m_unit.cns(std::forward<Args>(args)...);
@@ -652,8 +662,9 @@ private:
   void emitRet(Type type, bool freeInline);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
+  void emitJmpHelper(int32_t taken, int32_t next, bool negate,
+                     bool bothPaths, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
-  void emitBinaryArith(Opcode);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc, bool invertCond);
   BCMarker makeMarker(Offset bcOff);
@@ -676,6 +687,12 @@ private: // Exit trace creation routines.
   Block* makeExit(Offset targetBcOff, std::vector<SSATmp*>& spillValues);
   Block* makeExitWarn(Offset targetBcOff, std::vector<SSATmp*>& spillValues,
                       const StringData* warning);
+
+  SSATmp* promoteBool(SSATmp* src);
+  Opcode promoteBinaryDoubles(Op op, SSATmp*& src1, SSATmp*& src2);
+
+  void emitBinaryBitOp(Op op);
+  void emitBinaryArith(Op op);
 
   /*
    * Create a custom side exit---that is, an exit that does some
@@ -709,6 +726,11 @@ private: // Exit trace creation routines.
   Block* makeCatchNoSpill();
 
   /*
+   * Create a block for a branch target that will be generated later.
+   */
+  Block* makeBlock(Offset);
+
+  /*
    * Implementation for the above.  Takes spillValues, target offset,
    * and a flag for whether to make a no-IR exit.
    *
@@ -732,12 +754,13 @@ public:
    * Accessors for the current function being compiled and its
    * class and unit.
    */
-  const Func* curFunc()   const { return m_bcStateStack.back().func; }
-  Class*      curClass()  const { return curFunc()->cls(); }
-  Unit*       curUnit()   const { return curFunc()->unit(); }
-  Offset      bcOff()     const { return m_bcStateStack.back().bcOff; }
-  SrcKey      curSrcKey() const { return SrcKey(curFunc(), bcOff()); }
-  size_t      spOffset()  const;
+  const Func* curFunc()     const { return m_bcStateStack.back().func; }
+  Class*      curClass()    const { return curFunc()->cls(); }
+  Unit*       curUnit()     const { return curFunc()->unit(); }
+  Offset      bcOff()       const { return m_bcStateStack.back().bcOff; }
+  SrcKey      curSrcKey()   const { return SrcKey(curFunc(), bcOff()); }
+  bool        inGenerator() const { return m_bcStateStack.back().inGenerator; }
+  size_t      spOffset()    const;
   Type        topType(uint32_t i, TypeConstraint c = DataTypeSpecific) const;
 
 private:
@@ -778,12 +801,12 @@ private:
    * Eval stack helpers.
    */
   SSATmp* push(SSATmp* tmp);
-  SSATmp* pushIncRef(SSATmp* tmp) { gen(IncRef, tmp); return push(tmp); }
+  SSATmp* pushIncRef(SSATmp* tmp, TypeConstraint tc = DataTypeCountness);
   SSATmp* pop(Type type, TypeConstraint tc = DataTypeSpecific);
   void    popDecRef(Type type, TypeConstraint tc = DataTypeCountness);
   void    discard(unsigned n);
   SSATmp* popC(TypeConstraint tc = DataTypeSpecific) {
-    return pop(Type::Cell, {tc.category, std::min(Type::Cell, tc.knownType)});
+    return pop(Type::Cell, tc);
   }
   SSATmp* popV() { return pop(Type::BoxedCell); }
   SSATmp* popR() { return pop(Type::Gen);       }
@@ -798,6 +821,7 @@ private:
     return top(Type::Cell, i, tc);
   }
   SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
+  SSATmp* topR(uint32_t i = 0) { return top(Type::Gen, i); }
   std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals);
@@ -806,7 +830,6 @@ private:
   SSATmp* ldStackAddr(int32_t offset, TypeConstraint tc);
   void    extendStack(uint32_t index, Type type);
   void    replace(uint32_t index, SSATmp* tmp);
-  void    refineType(SSATmp* tmp, Type type);
 
   /*
    * Local instruction helpers.
@@ -830,12 +853,14 @@ private:
   // function we are in.  Goes in m_bcStateStack; we push and pop as
   // we deal with inlined calls.
   struct BcState {
-    explicit BcState(Offset bcOff, const Func* func)
+    explicit BcState(Offset bcOff, bool inGenerator, const Func* func)
       : bcOff(bcOff)
+      , inGenerator(inGenerator)
       , func(func)
     {}
 
     Offset bcOff;
+    bool inGenerator;
     const Func* func;
   };
 

@@ -245,7 +245,7 @@ void CmdVariable::onClient(DebuggerClient &client) {
 const StaticString s_GLOBALS("GLOBALS");
 
 Array CmdVariable::GetGlobalVariables() {
-  Array ret = g_vmContext->m_globalVarEnv->getDefinedVariables();
+  Array ret = g_context->m_globalVarEnv->getDefinedVariables();
   ret.remove(s_GLOBALS);
   return ret;
 }
@@ -312,11 +312,11 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
     }
   }
   else if (m_frame < 0) {
-    m_variables = g_vmContext->m_globalVarEnv->getDefinedVariables();
+    m_variables = g_context->m_globalVarEnv->getDefinedVariables();
     m_global = true;
   } else {
-    m_variables = g_vmContext->getLocalDefinedVariables(m_frame);
-    m_global = g_vmContext->getVarEnv(m_frame) == g_vmContext->m_globalVarEnv;
+    m_variables = g_context->getLocalDefinedVariables(m_frame);
+    m_global = g_context->getVarEnv(m_frame) == g_context->m_globalVarEnv;
   }
 
   if (m_global) {

@@ -1,0 +1,8 @@
+bool(false)
+bool(false)
+array(2) {
+  ["x"]=>
+  int(1)
+  ["b"]=>
+  &string(10) "not an int"
+}

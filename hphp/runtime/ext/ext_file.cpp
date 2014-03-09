@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -35,8 +35,8 @@
 #include "hphp/runtime/base/directory.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
 #include "hphp/util/process.h"
+#include "hphp/util/file-util.h"
 #include "folly/String.h"
 #include <dirent.h>
 #include <glob.h>
@@ -51,6 +51,7 @@
 #include <grp.h>
 #include <pwd.h>
 #include <fnmatch.h>
+#include <vector>
 
 #define CHECK_HANDLE_BASE(handle, f, ret)               \
   File *f = handle.getTyped<File>(true, true);          \
@@ -489,13 +490,12 @@ Variant f_file_put_contents(const String& filename, CVarRef data,
     break;
   }
 
-  if (numbytes < 0) {
+  // like fwrite(), fclose() can error when fflush()ing
+  if (numbytes < 0 || !f->close()) {
     return false;
   }
 
-  // Since streams (ex. buffered files) often do the real work in close() we
-  // call it here and check the result instead of out-of-band in the destructor.
-  return f->close() ? numbytes : false;
+  return numbytes;
 }
 
 Variant f_file(const String& filename, int flags /* = 0 */,
@@ -598,7 +598,7 @@ Variant f_parse_ini_file(const String& filename,
   String translated = File::TranslatePath(filename);
   if (translated.empty() || !f_file_exists(translated)) {
     if (filename[0] != '/') {
-      String cfd = g_vmContext->getContainingFileName();
+      String cfd = g_context->getContainingFileName();
       if (!cfd.empty()) {
         int npos = cfd.rfind('/');
         if (npos >= 0) {
@@ -707,11 +707,7 @@ Variant f_linkinfo(const String& filename) {
 }
 
 bool f_is_writable(const String& filename) {
-  struct stat sb;
   if (filename.empty()) {
-    return false;
-  }
-  if (statSyscall(filename, &sb)) {
     return false;
   }
   CHECK_SYSTEM(accessSyscall(filename, W_OK));
@@ -745,11 +741,9 @@ bool f_is_writeable(const String& filename) {
 }
 
 bool f_is_readable(const String& filename) {
-  struct stat sb;
   if (filename.empty()) {
     return false;
   }
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
   CHECK_SYSTEM(accessSyscall(filename, R_OK, true));
   return true;
   /*
@@ -777,11 +771,9 @@ bool f_is_readable(const String& filename) {
 }
 
 bool f_is_executable(const String& filename) {
-  struct stat sb;
   if (filename.empty()) {
     return false;
   }
-  CHECK_SYSTEM(statSyscall(filename, &sb));
   CHECK_SYSTEM(accessSyscall(filename, X_OK));
   return true;
   /*
@@ -899,14 +891,16 @@ Variant f_realpath(const String& path) {
       StaticContentCache::TheFileCache->exists(translated.data(), false)) {
     return translated;
   }
-  if (accessSyscall(path, F_OK) == 0) {
-    char resolved_path[PATH_MAX];
-    if (!realpath(translated.c_str(), resolved_path)) {
-      return false;
-    }
-    return String(resolved_path, CopyString);
+  // Zend doesn't support streams in realpath
+  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
+  if (!dynamic_cast<FileStreamWrapper*>(w)) {
+    return false;
   }
-  return false;
+  char resolved_path[PATH_MAX];
+  if (!realpath(translated.c_str(), resolved_path)) {
+    return false;
+  }
+  return String(resolved_path, CopyString);
 }
 
 #define PHP_PATHINFO_DIRNAME    1
@@ -1104,15 +1098,19 @@ bool f_copy(const String& source, const String& dest,
       return false;
     }
 
-    return f_stream_copy_to_stream(sfile.toResource(),
-      dfile.toResource()).toBoolean();
+    if (!f_stream_copy_to_stream(sfile.toResource(),
+                                 dfile.toResource()).toBoolean()) {
+      return false;
+    }
+
+    return f_fclose(dfile.toResource());
   } else {
     int ret =
       RuntimeOption::UseDirectCopy ?
-      Util::directCopy(File::TranslatePath(source).data(),
+      FileUtil::directCopy(File::TranslatePath(source).data(),
           File::TranslatePath(dest).data())
       :
-      Util::copy(File::TranslatePath(source).data(),
+      FileUtil::copy(File::TranslatePath(source).data(),
           File::TranslatePath(dest).data());
     return (ret == 0);
   }
@@ -1230,7 +1228,7 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
   }
   int nret = glob(work_pattern.data(), flags & GLOB_FLAGMASK, NULL, &globbuf);
   if (nret == GLOB_NOMATCH || !globbuf.gl_pathc || !globbuf.gl_pathv) {
-    if (RuntimeOption::SafeFileAccess) {
+    if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess()) {
       if (!f_is_dir(work_pattern)) {
         return false;
       }
@@ -1326,7 +1324,7 @@ bool f_rmdir(const String& dirname, CVarRef context /* = null */) {
 
 String f_dirname(const String& path) {
   char *buf = strndup(path.data(), path.size());
-  int len = Util::dirname_helper(buf, path.size());
+  int len = FileUtil::dirname_helper(buf, path.size());
   return String(buf, len, AttachString);
 }
 

@@ -25,30 +25,43 @@
 
 namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
+extern const StaticString s_IntlDateFormatter;
 
-class IntlDateFormatter : public IntlResourceData {
+class IntlDateFormatter : public IntlError {
  public:
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(IntlDateFormatter);
-  CLASSNAME_IS("IntlDateFormatter");
-  const String& o_getClassNameHook() const override { return classnameof(); }
-
-  IntlDateFormatter(const String& locale, int64_t datetype, int64_t timetype,
-                    CVarRef timezone, CVarRef calendar, const String& pattern);
-  explicit IntlDateFormatter(const IntlDateFormatter *orig);
-
-  void sweep() override {
+  IntlDateFormatter() {}
+  IntlDateFormatter(const IntlDateFormatter&) = delete;
+  IntlDateFormatter& operator=(const IntlDateFormatter& src) {
+    setDateFormatter(&src);
+    return *this;
+  }
+  ~IntlDateFormatter() {
     if (m_date_fmt) {
       udat_close((UDateFormat*)m_date_fmt);
       m_date_fmt = nullptr;
     }
   }
 
-  bool isInvalid() const override {
-    return m_date_fmt == nullptr;
+  void setDateFormatter(const String& locale,
+                        int64_t datetype, int64_t timetype,
+                        CVarRef timezone, CVarRef calendar,
+                        const String& pattern);
+  void setDateFormatter(const IntlDateFormatter *orig);
+
+  bool isValid() const {
+    return m_date_fmt;
   }
 
-  static IntlDateFormatter *Get(Object obj);
-  Object wrap();
+  static Object newInstance() {
+    if (!c_IntlDateFormatter) {
+      c_IntlDateFormatter = Unit::lookupClass(s_IntlDateFormatter.get());
+      assert(c_IntlDateFormatter);
+    }
+    return ObjectData::newInstance(c_IntlDateFormatter);
+  }
+  static IntlDateFormatter* Get(Object obj) {
+    return GetData<IntlDateFormatter>(obj, s_IntlDateFormatter);
+  }
 
   // Zend seems to think casting UDateFormat* to icu::DateFormat*
   // is a good idea.  Sounds dodgy as heck to me though...
@@ -67,6 +80,8 @@ class IntlDateFormatter : public IntlResourceData {
   int64_t m_date_type;
   int64_t m_time_type;
   int64_t m_calendar;
+
+  static Class* c_IntlDateFormatter;
 };
 
 /////////////////////////////////////////////////////////////////////////////

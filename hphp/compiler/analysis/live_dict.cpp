@@ -15,6 +15,11 @@
 */
 
 #include "hphp/compiler/analysis/live_dict.h"
+#include <algorithm>
+#include <map>
+#include <set>
+#include <utility>
+#include <vector>
 
 #include "hphp/compiler/analysis/alias_manager.h"
 #include "hphp/compiler/analysis/function_scope.h"

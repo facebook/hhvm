@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include <algorithm>
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -97,7 +98,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
       return srcNo == 0;
 
     case StRef:
-    case StRefNT:
     case StClosureArg:
     case StClosureCtx:
     case StContArValue:
@@ -203,7 +203,7 @@ SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
   assert(is(IncRef, PassFP, PassSP,
             CheckType, AssertType, AssertNonNull,
-            StRef, StRefNT,
+            StRef,
             ColAddElemC, ColAddNewElemC,
             Mov));
   return src(0);
@@ -315,6 +315,7 @@ void IRInstruction::convertToMov() {
   m_op = Mov;
   m_typeParam.clear();
   m_extra = nullptr;
+  if (m_numDsts == 1) m_dst->setInstruction(this); // recompute type
   assert(m_numSrcs == 1);
   // Instructions in the simplifier don't have dests yet
   assert((m_numDsts == 1) != isTransient());

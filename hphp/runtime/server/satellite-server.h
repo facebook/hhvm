@@ -41,7 +41,7 @@ public:
   const std::string &getName() const { return m_name;}
 
 public:
-  static std::shared_ptr<SatelliteServer>
+  static std::unique_ptr<SatelliteServer>
     Create(std::shared_ptr<SatelliteServerInfo> info);
 
   virtual ~SatelliteServer() {}
@@ -98,17 +98,17 @@ public:
 protected:
   std::string m_name;
   SatelliteServer::Type m_type;
-  int m_port;
-  int m_threadCount;
-  int m_maxRequest;
-  int m_maxDuration;
+  int m_port = 0;
+  int m_threadCount = 5;
+  int m_maxRequest = 500;
+  int m_maxDuration = 120;
   std::chrono::seconds m_timeoutSeconds;
   std::set<std::string> m_urls; // url regex patterns
   std::string m_reqInitFunc;
   std::string m_reqInitDoc;
   std::string m_password;
   std::set<std::string> m_passwords;
-  bool m_alwaysReset;
+  bool m_alwaysReset = false;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

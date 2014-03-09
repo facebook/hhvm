@@ -91,7 +91,7 @@ function main() {
   class Z {
     const FOO = 456;
     const BAR = "yo";
-    public $prop = StableMap {FOO => BAR, Z::FOO => Z::BAR};
+    public $prop = Map {FOO => BAR, Z::FOO => Z::BAR};
   }
   $obj1 = new Z;
   var_dump($obj1->prop[FOO], $obj1->prop[Z::FOO], count($obj1->prop));

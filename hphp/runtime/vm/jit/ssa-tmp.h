@@ -30,39 +30,34 @@ class SSATmp {
 public:
   uint32_t          id() const { return m_id; }
   IRInstruction*    inst() const { return m_inst; }
-  void              setInstruction(IRInstruction* i) { m_inst = i; }
+  void              setInstruction(IRInstruction* i, int dstId = 0);
   Type              type() const { return m_type; }
   void              setType(Type t) { m_type = t; }
-  bool              isBoxed() const { return type().isBoxed(); }
-  bool              isString() const { return isA(Type::Str); }
-  bool              isArray() const { return isA(Type::Arr); }
   std::string       toString() const;
 
-  // XXX: false for Null, etc.  Would rather it returns whether we
-  // have a compile-time constant value.
-  bool isConst() const;
+  // Convenience wrapper for type().isConst(...). See type.h for details.
+  template<typename... Args>
+  bool isConst(Args&&... args) const {
+    return type().isConst(std::forward<Args>(args)...);
+  }
 
   /*
    * For SSATmps with a compile-time constant value, the following
    * functions allow accessing it.
    *
-   * Pre: inst() &&
-   *   (inst()->op() == DefConst ||
-   *    inst()->op() == LdConst)
+   * Pre: inst() && isConst()
    */
-  bool               getValBool() const;
-  int64_t            getValInt() const;
-  int64_t            getValRawInt() const;
-  double             getValDbl() const;
-  const StringData*  getValStr() const;
-  const ArrayData*   getValArr() const;
-  const Func*        getValFunc() const;
-  const Class*       getValClass() const;
-  const NamedEntity* getValNamedEntity() const;
-  RDS::Handle        getValRDSHandle() const;
-  Variant            getValVariant() const;
-  TCA                getValTCA() const;
-  uintptr_t          getValCctx() const;
+  bool               boolVal() const      { return type().boolVal(); }
+  int64_t            intVal() const       { return type().intVal(); }
+  uint64_t           rawVal() const       { return type().rawVal(); }
+  double             dblVal() const       { return type().dblVal(); }
+  const StringData*  strVal() const       { return type().strVal(); }
+  const ArrayData*   arrVal() const       { return type().arrVal(); }
+  const Func*        funcVal() const      { return type().funcVal(); }
+  const Class*       clsVal() const       { return type().clsVal(); }
+  RDS::Handle        rdsHandleVal() const { return type().rdsHandleVal(); }
+  TCA                tcaVal() const       { return type().tcaVal(); }
+  Variant            variantVal() const;
 
   /*
    * Returns: Type::subtypeOf(type(), tag).
@@ -87,7 +82,7 @@ private:
 
   // May only be created via IRUnit.  Note that this class is never
   // destructed, so don't add complex members.
-  SSATmp(uint32_t opndId, IRInstruction* i, int dstId = 0);
+  SSATmp(uint32_t opndId, IRInstruction* inst, int dstId = 0);
   SSATmp(const SSATmp&) = delete;
   SSATmp& operator=(const SSATmp&) = delete;
 

@@ -24,24 +24,34 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Usage stats, all in bytes.
+ * Usage stats for a request, all in bytes.
+ *
+ * If jemalloc is being used, then usage and peakUsage also include bytes that
+ * are reported by jemalloc's per-thread stats that are allocated outside of
+ * the smart allocator size class APIs (smartMallocSize, smartMallocSizeBig,
+ * objMalloc.) totalAlloc will also be maintained, otherwise it will be 0.
  */
 struct MemoryUsageStats {
-  int64_t maxBytes;   // what's request's max bytes allowed
+  int64_t maxBytes;   // the max bytes allowed for a request before it is
+                      // terminated for exceeding the memory limit
   int64_t usage;      // how many bytes are currently being used
 #if defined(USE_JEMALLOC)
   int64_t jemallocDebt; // how many bytes of jemalloced memory have not
                       // been processed by MemoryManager::refreshStats
-  int64_t alloc;      // how many bytes are currently malloc-ed
+  int64_t alloc;      // how many bytes are currently malloc-ed in slabs
+                      // by the smart allocator size class APIs
 #else
   union {
     int64_t jemallocDebt; // unused
-    int64_t alloc;    // how many bytes are currently malloc-ed
+    int64_t alloc;    // how many bytes are currently malloc-ed in slabs
+                      // by the smart allocator size class APIs
   };
 #endif
-  int64_t peakUsage;  // how many bytes have been dispensed at maximum
-  int64_t peakAlloc;  // how many bytes malloc-ed at maximum
-  int64_t totalAlloc; // how many bytes allocated, in total.
+  int64_t peakUsage;  // how many bytes have been used at maximum
+  int64_t peakAlloc;  // how many bytes malloc-ed in slabs by the smart
+                      // allocator size class APIs at maximum
+  int64_t totalAlloc; // how many bytes have cumulatively been allocated
+                      // by the underlying allocator
 };
 
 #define JEMALLOC_STATS_ADJUST(stats, amt)       \

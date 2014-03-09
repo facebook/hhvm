@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/vm/jit/opt.h"
+#include <algorithm>
+#include <utility>
 
 #include "folly/Lazy.h"
 #include "folly/Optional.h"
@@ -32,6 +34,7 @@
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP { namespace JIT {
@@ -381,11 +384,8 @@ struct SinkPoint {
   SSATmp* value;
 };
 
-#ifdef HAVE_BOOST1_49
 typedef smart::flat_multimap<IncSet, SinkPoint> SinkPoints;
-#else
-typedef smart::multimap<IncSet, SinkPoint> SinkPoints;
-#endif
+
 struct SinkPointsMap {
   // Maps values to SinkPoints for their IncRefs
   smart::hash_map<SSATmp*, SinkPoints> points;
@@ -595,8 +595,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
         mergedState.pessimize();
       }
 
-      auto* incVal = folly::get_default(retState.canon, pair.first,
-        pair.first);
+      auto* incVal =
+        folly::get_default(retState.canon, pair.first, pair.first);
       auto const mergedDelta = mergedState.optDelta();
       for (auto& inBlock : pair.second.inBlocks) {
         auto& inState = inBlock.value;
@@ -651,11 +651,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
     // First, build a map from canonical values to the values they map to and
     // how many incoming branches have the mapped value available.
-#ifdef HAVE_BOOST1_49
     smart::flat_map<SSATmp*, smart::flat_map<SSATmp*, int>> mergedCanon;
-#else
-    smart::map<SSATmp*, smart::map<SSATmp*, int>> mergedCanon;
-#endif
 
     for (auto const& inState : states) {
       for (auto const& pair : inState.state.canon) {
@@ -829,7 +825,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // locals and $this pointers.
       consumeAllLocals();
       consumeAllFrames();
-    } else if (m_inst->is(GenericRetDecRefs)) {
+    } else if (m_inst->is(GenericRetDecRefs, NativeImpl)) {
       consumeAllLocals();
     } else {
       // All other instructions take the generic path.
@@ -916,7 +912,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst->is(ContEnter)) {
       resolveAllFrames();
     } else if (m_inst->is(CallBuiltin) &&
-               !strcasecmp(m_inst->src(0)->getValFunc()->fullName()->data(),
+               !strcasecmp(m_inst->src(0)->funcVal()->fullName()->data(),
                            "get_defined_vars")) {
       observeLocalRefs();
     } else if (m_inst->is(InterpOne, InterpOneCF)) {
@@ -933,6 +929,13 @@ struct SinkPointAnalyzer : private LocalStateHook {
         // This isn't optimal, but InterpOne of FCallBuiltin is rare enough
         // that it doesn't matter.
         observeLocalRefs();
+      }
+
+      if (m_inst->is(InterpOneCF)) {
+        // InterpOneCF's normal path leaves the trace, so consume all live
+        // references.
+        consumeAllLocals();
+        consumeAllFrames();
       }
     }
 
@@ -951,26 +954,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       Indent _i;
       auto* src = m_inst->src(i);
 
-      if (src->isA(Type::None)) {
-        assert(m_inst->is(Call, SpillStack));
-        auto const isCall = m_inst->is(Call);
-        auto const& ldStacks = ldStacksLazy();
-        auto* spillInst = isCall ? m_inst->src(0)->inst() : m_inst;
-        auto const adjustment =
-          spillInst->src(1)->getValInt() - spillValueCells(spillInst);
-        uint32_t targetOff;
-        if (isCall) {
-          targetOff = -(i - 3 + 1) + adjustment;
-        } else {
-          targetOff = i - 2 + adjustment;
-        }
-
-        auto it = ldStacks.find(targetOff);
-        if (it != ldStacks.end()) {
-          ITRACE(3, "consuming {} instead of src {} of None\n", *it->second, i);
-          consumeValue(it->second);
-        }
-      } else if (src->isA(Type::StkPtr) && src->inst()->is(SpillFrame) &&
+      if (src->isA(Type::StkPtr) && src->inst()->is(SpillFrame) &&
                  !m_inst->is(DefInlineFP, DefInlineSP,
                              Call, CallArray, ContEnter)) {
         // If the StkPtr being consumed points to a pre-live ActRec, observe
@@ -1056,6 +1040,10 @@ struct SinkPointAnalyzer : private LocalStateHook {
     });
   }
 
+  /*
+   * When we leave a trace, we have to account for all the references we're
+   * tracking in pre-live frames and inlined frames.
+   */
   void consumeAllFrames() {
     forEachFrame([this](Frame& f) {
       if (f.currentThis) {
@@ -1345,9 +1333,10 @@ struct SinkPointAnalyzer : private LocalStateHook {
     }
   }
 
-  void refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) {
+  void refineLocalValue(uint32_t id, unsigned inlineIdx,
+                        SSATmp* oldVal, SSATmp* newVal) override {
     if (oldVal->type().maybeCounted() && newVal->type().notCounted()) {
-      assert(newVal->inst()->is(CheckType));
+      assert(newVal->inst()->is(CheckType, AssertType));
       assert(newVal->inst()->src(0) == oldVal);
       // Similar to what we do when processing the CheckType directly, we
       // "consume" the value on behalf of the CheckType.
@@ -1508,7 +1497,7 @@ std::string show(const SinkPointsMap& sinkPoints, const IdMap& ids) {
     const IncSet* lastIncs = nullptr;
     for (auto const& point : points) {
       auto* thisIncs = &point.first;
-      if (lastIncs != thisIncs) {
+      if (!lastIncs || *lastIncs != *thisIncs) {
         ret += folly::format("    {}\n", show(*thisIncs, ids)).str();
         lastIncs = thisIncs;
       }
@@ -1592,7 +1581,7 @@ void sinkIncRefs(IRUnit& unit, const SinkPointsMap& info, const IdMap& ids) {
           // If inst is a DecRef that won't go to zero of the same value as the
           // IncRef, we're good.
           if (info.decRefs.count(ids.before(inst)) &&
-              sp.value == canonical(inst->src(0))) {
+              canonical(sp.value) == canonical(inst->src(0))) {
             return true;
           }
 
@@ -1721,6 +1710,7 @@ void eliminateTakeStacks(const BlockList& blocks) {
  * refcount of each object has not changed.
  */
 void optimizeRefcounts(IRUnit& unit) noexcept {
+  Timer _t("optimize_refcountOpts");
   FTRACE(2, "vvvvvvvvvv refcount opts vvvvvvvvvv\n");
   auto const changed = splitCriticalEdges(unit);
   if (changed) {

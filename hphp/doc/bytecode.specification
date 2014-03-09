@@ -1046,15 +1046,11 @@ Array <scalar array id>              []  ->  [C:Arr]
 
   Push immediate. Pushes %1 onto the stack.
 
-NewArray    []  ->  [C:Arr]
+NewArray <capacity hint>    []  ->  [C:Arr]
 
-  New array. Creates a new empty array and pushes it onto the stack.
-
-NewArrayReserve <capacity hint>    []  ->  [C:Arr]
-
-  New array, with capacity hint. Creates a new array and pushes it onto the
+  New array, with a capacity hint. Creates a new array and pushes it onto the
   stack. The implementation may make use of the hint in %1 to pre-size the
-  array.
+  array. The hint %1 must be greater than or equal to 0.
 
 NewPackedArray <num elems>    [C..C]  ->  [C]
 
@@ -3929,9 +3925,16 @@ VerifyParamType <parameter id>    []  ->  []
   of arguments they will accept. These type constraints are memoized into each
   function's FPI structure.
 
-  VerifyParamTypes checks the specified parameter against the enclosing
+  VerifyParamType checks the specified parameter against the enclosing
   function's corresponding parameter constraints. In case of a mismatch, a
   recoverable error is raised.
+
+VerifyRetTypeC    [C] -> [C]
+VerifyRetTypeV    [V] -> [V]
+
+  Verify return type. This instruction pops $1 off of the stack, checks if $1
+  is compatible with the current function's return type annotation and raises
+  a warning if there is a mismatch, and then it pushes $1 back onto the stack.
 
 Self    []  ->  [A]
 

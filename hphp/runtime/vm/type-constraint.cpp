@@ -91,10 +91,6 @@ void TypeConstraint::init() {
     m_type.metatype = MetaType::Precise;
     return;
   }
-  if (m_typeName && isExtended()) {
-    assert((isNullable() || isSoft()) &&
-           "Only nullable and soft extended type hints are implemented");
-  }
 
   if (m_typeName == nullptr) {
     m_type.dt = KindOfInvalid;
@@ -282,21 +278,30 @@ static const char* describe_actual_type(const TypedValue* tv) {
   not_reached();
 }
 
-void TypeConstraint::verifyFail(const Func* func, int paramNum,
-                                TypedValue* tv) const {
+void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
+                                int id) const {
   JIT::VMRegAnchor _;
-
   const StringData* tn = typeName();
   if (isSelf()) {
     selfToTypeName(func, &tn);
   } else if (isParent()) {
     parentToTypeName(func, &tn);
   }
-
   auto const givenType = describe_actual_type(tv);
-
+  // Handle return type constraint failures
+  if (id == ReturnId) {
+    raise_warning(
+      "Value returned from %s() must be of type %s, %s given",
+      func->fullName()->data(),
+      tn->data(),
+      givenType
+    );
+    return;
+  }
+  // Handle implicit collection->array conversion for array parameter type
+  // constraints
   auto c = tvToCell(tv);
-  if (isArray() && !isSoft() && !func->mustBeRef(paramNum) &&
+  if (isArray() && !isSoft() && !func->mustBeRef(id) &&
       c->m_type == KindOfObject && c->m_data.pobj->isCollection()) {
     // To ease migration, the 'array' type constraint will implicitly cast
     // collections to arrays, provided the type constraint is not soft and
@@ -307,32 +312,34 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
       folly::format(
         "Argument {} to {}() must be of type {}, {} given; argument {} was "
         "implicitly cast to array",
-        paramNum + 1, func->fullName()->data(), fullName(), givenType,
-        paramNum + 1
+        id + 1, func->fullName()->data(), fullName(), givenType, id + 1
       ).str()
     );
     tvCastToArrayInPlace(tv);
     return;
   }
-
+  // Handle parameter type constraint failures
   if (isExtended() && isSoft()) {
     // Soft extended type hints raise warnings instead of recoverable
     // errors, to ease migration.
     raise_debugging(
-      "Argument %d to %s() must be of type %s, %s given",
-      paramNum + 1, func->fullName()->data(), fullName().c_str(), givenType);
+      folly::format(
+        "Argument {} to {}() must be of type {}, {} given",
+        id + 1, func->fullName()->data(), fullName(), givenType
+      ).str()
+    );
   } else if (isExtended() && isNullable()) {
     raise_typehint_error(
       folly::format(
         "Argument {} to {}() must be of type {}, {} given",
-        paramNum + 1, func->fullName()->data(), fullName(), givenType
+        id + 1, func->fullName()->data(), fullName(), givenType
       ).str()
     );
   } else {
     raise_typehint_error(
       folly::format(
         "Argument {} passed to {}() must be an instance of {}, {} given",
-        paramNum + 1, func->fullName()->data(), tn->data(), givenType
+        id + 1, func->fullName()->data(), tn->data(), givenType
       ).str()
     );
   }

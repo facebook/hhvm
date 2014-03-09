@@ -54,6 +54,7 @@ bool ZipFile::open(const String& filename, const String& mode) {
 }
 
 bool ZipFile::close() {
+  invokeFiltersOnClose();
   return closeImpl();
 }
 

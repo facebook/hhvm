@@ -16,6 +16,10 @@
 #include "hphp/runtime/debugger/debugger_proxy.h"
 
 #include <boost/lexical_cast.hpp>
+#include <exception>
+#include <map>
+#include <stack>
+#include <vector>
 
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
@@ -779,7 +783,7 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
     if (flags & ExecutePHPFlagsAtInterrupt) disableSignalPolling();
     switchThreadMode(origThreadMode, m_thread);
   };
-  failed = g_vmContext->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
+  failed = g_context->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
   g_context->setStdout(nullptr, nullptr);
   g_context->swapOutputBuffer(save);
   if (flags & ExecutePHPFlagsLog) {
@@ -792,8 +796,8 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
 int DebuggerProxy::getRealStackDepth() {
   TRACE(2, "DebuggerProxy::getRealStackDepth\n");
   int depth = 0;
-  VMExecutionContext* context = g_vmContext;
-  ActRec *fp = context->getFP();
+  auto const context = g_context.getNoCheck();
+  auto fp = context->getFP();
   if (!fp) return 0;
 
   while (fp != nullptr) {
@@ -806,8 +810,8 @@ int DebuggerProxy::getRealStackDepth() {
 int DebuggerProxy::getStackDepth() {
   TRACE(2, "DebuggerProxy::getStackDepth\n");
   int depth = 0;
-  VMExecutionContext* context = g_vmContext;
-  ActRec *fp = context->getFP();
+  auto const context = g_context.getNoCheck();
+  auto fp = context->getFP();
   if (!fp) return 0;
   ActRec *prev = fp->arGetSfp();
   while (fp != prev) {

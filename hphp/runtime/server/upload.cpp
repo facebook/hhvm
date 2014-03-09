@@ -24,6 +24,8 @@
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/util/text-util.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 using std::set;
 
@@ -32,21 +34,20 @@ namespace HPHP {
 
 static void destroy_uploaded_files();
 
-class Rfc1867Data : public RequestEventHandler {
-public:
+struct Rfc1867Data final : RequestEventHandler {
   std::set<std::string> rfc1867ProtectedVariables;
   std::set<std::string> rfc1867UploadedFiles;
   apc_rfc1867_data rfc1867ApcData;
   int (*rfc1867Callback)(apc_rfc1867_data *rfc1867ApcData,
                          unsigned int event, void *event_data, void **extra);
-  virtual void requestInit() {
+  void requestInit() override {
     if (RuntimeOption::EnableUploadProgress) {
       rfc1867Callback = apc_rfc1867_progress;
     } else {
       rfc1867Callback = nullptr;
     }
   }
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     if (!rfc1867UploadedFiles.empty()) destroy_uploaded_files();
   }
 };
@@ -239,7 +240,7 @@ static uint32_t read_post(multipart_buffer *self, char *buf,
     if (RuntimeOption::AlwaysPopulateRawPostData) {
       // Possible overflow in buffer_append if post_size + extra_byte_read >=
       // MAX INT
-      self->post_data = (const char *)Util::buffer_append(
+      self->post_data = (const char *)buffer_append(
         self->post_data, self->post_size, extra, extra_byte_read);
       self->cursor = (char*)self->post_data + self->post_size;
     } else {

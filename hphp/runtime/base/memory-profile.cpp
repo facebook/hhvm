@@ -32,16 +32,16 @@ static ProfileStackTrace getStackTrace() {
 
   if (g_context.isNull()) return trace;
   JIT::VMRegAnchor _;
-  ActRec *fp = g_vmContext->getFP();
+  ActRec *fp = g_context->getFP();
   if (!fp) return trace;
-  PC pc = g_vmContext->getPC();
+  PC pc = g_context->getPC();
 
   const Func *f = fp->m_func;
   Unit *u = f->unit();
   Offset off = pc - u->entry();
   for (;;) {
     trace.push_back({ f, off });
-    fp = g_vmContext->getPrevVMState(fp, &off);
+    fp = g_context->getPrevVMState(fp, &off);
     if (!fp) break;
     f = fp->m_func;
   }

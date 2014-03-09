@@ -42,6 +42,7 @@
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/file-util.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_fb.h"
@@ -66,6 +67,11 @@
 #include <oniguruma.h>
 #include <signal.h>
 #include <libxml/parser.h>
+#include <exception>
+#include <iterator>
+#include <map>
+#include <memory>
+#include <vector>
 
 #include "hphp/runtime/base/file-repository.h"
 
@@ -100,7 +106,8 @@ void (*g_vmProcessInit)();
 
 struct ProgramOptions {
   string     mode;
-  string     config;
+  std::vector<std::string>
+             config;
   std::vector<std::string>
              confStrings;
   int        port;
@@ -186,13 +193,17 @@ void process_env_variables(Variant &variables) {
   }
 }
 
-void process_ini_settings() {
-  if (RuntimeOption::IniFile.empty()) {
+void process_ini_settings(const std::string& name) {
+  if (name.empty()) {
     return;
   }
-  auto settings = f_parse_ini_file(String(RuntimeOption::IniFile));
-  for (ArrayIter iter(settings); iter; ++iter) {
-    IniSetting::Set(iter.first(), iter.second());
+  std::ifstream ifs(name);
+  const std::string str((std::istreambuf_iterator<char>(ifs)),
+                        std::istreambuf_iterator<char>());
+  auto settings = IniSetting::FromStringAsMap(str, name);
+
+  for (auto& item : settings.items()) {
+    IniSetting::Set(item.first.data(), item.second, IniSetting::FollyDynamic());
   }
 }
 
@@ -334,7 +345,7 @@ static void bump_counter_and_rethrow() {
 #ifdef USE_JEMALLOC
     // Capture a pprof (C++) dump when we OOM a request
     // TODO: (t3753133) Should dump a PHP-instrumented pprof dump here as well
-    Util::jemalloc_pprof_dump("", false);
+    jemalloc_pprof_dump("", false);
 #endif
 
     throw;
@@ -590,7 +601,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
 
   Extension::RequestInitModules();
-  process_ini_settings();
+  process_ini_settings(RuntimeOption::IniFile);
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
@@ -801,11 +812,12 @@ static int start_server(const std::string &username) {
 #ifdef USE_JEMALLOC
     mallctl("arenas.purge", nullptr, nullptr, nullptr, 0);
 #endif
-    Util::enable_numa(RuntimeOption::EvalEnableNumaLocal);
+    enable_numa(RuntimeOption::EvalEnableNumaLocal);
 
   }
 
   HttpServer::Server->runOrExitProcess();
+  HttpServer::Server.reset();
   return 0;
 }
 
@@ -997,7 +1009,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("repo-schema", "display the repository schema id")
     ("mode,m", value<string>(&po.mode)->default_value("run"),
      "run | debug (d) | server (s) | daemon | replay | translate (t)")
-    ("config,c", value<string>(&po.config),
+    ("config,c", value<vector<string> >(&po.config)->composing(),
      "load specified config file")
     ("config-value,v", value<std::vector<std::string>>(&po.confStrings)->composing(),
      "individual configuration string in a format of name=value, where "
@@ -1116,7 +1128,7 @@ static int execute_program_impl(int argc, char** argv) {
       auto default_config_file = "/etc/hhvm/config.hdf";
       if (access(default_config_file, R_OK) != -1) {
         Logger::Verbose("Using default config file: %s", default_config_file);
-        po.config = default_config_file;
+        po.config.push_back(default_config_file);
       }
     }
   } catch (error &e) {
@@ -1171,8 +1183,8 @@ static int execute_program_impl(int argc, char** argv) {
   pcre_init();
 
   Hdf config;
-  if (!po.config.empty()) {
-    config.open(po.config);
+  for (auto& c : po.config) {
+    config.open(c);
   }
   RuntimeOption::Load(config, &po.confStrings);
   vector<string> badnodes;
@@ -1180,6 +1192,9 @@ static int execute_program_impl(int argc, char** argv) {
   for (unsigned int i = 0; i < badnodes.size(); i++) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
+  // Reload the thread local ini settings now that RuntimeOption is right
+  ThreadInfo::s_threadInfo.getNoCheck()->
+    m_reqInjectionData.threadInit();
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     HPHP::initTypeProfileStructure();
   }
@@ -1256,7 +1271,7 @@ static int execute_program_impl(int argc, char** argv) {
 
     hphp_process_init();
     try {
-      HPHP::Eval::PhpFile* phpFile = g_vmContext->lookupPhpFile(
+      HPHP::Eval::PhpFile* phpFile = g_context->lookupPhpFile(
         makeStaticString(po.lint.c_str()), "", nullptr);
       if (phpFile == nullptr) {
         throw FileOpenException(po.lint.c_str());
@@ -1268,7 +1283,7 @@ static int execute_program_impl(int argc, char** argv) {
         VMParserFrame parserFrame;
         parserFrame.filename = po.lint.c_str();
         parserFrame.lineNumber = line;
-        Array bt = g_vmContext->debugBacktrace(false, true,
+        Array bt = g_context->debugBacktrace(false, true,
                                                false, &parserFrame);
         throw FatalErrorException(msg->data(), bt);
       }
@@ -1410,7 +1425,7 @@ static int execute_program_impl(int argc, char** argv) {
 }
 
 String canonicalize_path(const String& p, const char* root, int rootLen) {
-  String path(Util::canonicalize(p.c_str(), p.size()), AttachString);
+  String path(FileUtil::canonicalize(p.c_str(), p.size()), AttachString);
   if (path.charAt(0) == '/') {
     const string &sourceRoot = RuntimeOption::SourceRoot;
     int len = sourceRoot.size();
@@ -1452,8 +1467,8 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
     }
   }
 
-  Util::embedded_data desc;
-  if (!Util::get_embedded_data(section.c_str(), &desc, filename)) return "";
+  embedded_data desc;
+  if (!get_embedded_data(section.c_str(), &desc, filename)) return "";
 
   std::ifstream ifs(desc.m_filename);
   if (!ifs.good()) return "";
@@ -1485,7 +1500,7 @@ void hphp_process_init() {
 #else
   pthread_attr_init(&attr);
 #endif
-  Util::init_stack_limits(&attr);
+  init_stack_limits(&attr);
   pthread_attr_destroy(&attr);
 
   struct sigaction action = {};
@@ -1592,7 +1607,7 @@ static bool hphp_warmup(ExecutionContext *context,
 void hphp_session_init() {
   init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
-  MM().resetStats();
+  MM().resetExternalStats();
 
 #ifdef ENABLE_SIMPLE_COUNTER
   SimpleCounter::Enabled = true;
@@ -1600,10 +1615,10 @@ void hphp_session_init() {
 #endif
 
   // Ordering is sensitive; StatCache::requestInit produces work that
-  // must be done in VMExecutionContext::requestInit.
+  // must be done in ExecutionContext::requestInit.
   StatCache::requestInit();
 
-  g_vmContext->requestInit();
+  g_context->requestInit();
 }
 
 ExecutionContext *hphp_context_init() {
@@ -1679,7 +1694,7 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
   }
 
   // Run shutdown handlers. This may cause user code to run.
-  static_cast<VMExecutionContext*>(context)->destructObjects();
+  static_cast<ExecutionContext*>(context)->destructObjects();
   if (shutdown) {
     context->onRequestShutdown();
   }
@@ -1706,7 +1721,6 @@ void hphp_session_exit() {
   ThreadInfo::s_threadInfo->clearPendingException();
 
   auto& mm = MM();
-  mm.resetStats();
 
   {
     ServerStatsHelper ssh("rollback");

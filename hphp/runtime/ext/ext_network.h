@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_NETWORK_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/util/network.h"
 #include <syslog.h>
 
@@ -54,7 +54,7 @@ bool f_getmxrr(const String& hostname, VRefParam mxhosts,
 ///////////////////////////////////////////////////////////////////////////////
 // socket
 
-Variant sockopen_impl(const Util::HostURL &hosturl,
+Variant sockopen_impl(const HostURL &hosturl,
                       VRefParam errnum, VRefParam errstr,
                       double timeout = -1.0, bool persistent = false);
 Variant f_fsockopen(const String& hostname, int port = -1,

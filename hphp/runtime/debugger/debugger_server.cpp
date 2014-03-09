@@ -16,6 +16,7 @@
 #include "hphp/runtime/debugger/debugger_server.h"
 
 #include <poll.h>
+#include <exception>
 
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger.h"

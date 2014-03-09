@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP { namespace JIT {
@@ -105,13 +105,13 @@ struct CodeGenerator {
   typedef JIT::X64Assembler Asm;
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
-                JIT::TranslatorX64* tx64, CodegenState& state)
+                JIT::MCGenerator* mcg, CodegenState& state)
     : m_unit(unit)
     , m_mainCode(mainCode)
     , m_stubsCode(stubsCode)
     , m_as(mainCode)
     , m_astubs(stubsCode)
-    , m_tx64(tx64)
+    , m_mcg(mcg)
     , m_state(state)
     , m_rScratch(InvalidReg)
     , m_curInst(nullptr)
@@ -197,43 +197,31 @@ private:
   template<class Loc>
   void emitTypeGuard(Type type, Loc typeLoc, Loc dataLoc);
 
-  void cgStRefWork(IRInstruction* inst, Width);
   void cgIncRefWork(Type type, SSATmp* src, PhysLoc srcLoc);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
-  template<class OpInstr, class Oper>
-  void cgUnaryIntOp(PhysLoc dst, SSATmp* src, PhysLoc src_loc, OpInstr, Oper);
+  template<class OpInstr>
+  void cgUnaryIntOp(PhysLoc dst, SSATmp* src, PhysLoc src_loc, OpInstr);
 
   enum Commutativity { Commutative, NonCommutative };
 
   void cgRoundCommon(IRInstruction* inst, RoundDirection dir);
 
-  template<class Oper, class RegType>
-  void cgBinaryOp(IRInstruction*,
-                  void (Asm::*intImm)(Immed, RegType),
-                  void (Asm::*intRR)(RegType, RegType),
-                  void (Asm::*mov)(RegType, RegType),
-                  void (Asm::*fpRR)(RegXMM, RegXMM),
-                  Oper,
-                  RegType (*conv)(PhysReg),
-                  Commutativity);
-  template<class Oper, class RegType>
+  template<class RegType>
   void cgBinaryIntOp(IRInstruction*,
                      void (Asm::*intImm)(Immed, RegType),
                      void (Asm::*intRR)(RegType, RegType),
                      void (Asm::*mov)(RegType, RegType),
-                     Oper,
                      RegType (*conv)(PhysReg),
                      Commutativity);
+  void cgBinaryDblOp(IRInstruction*,
+                     void (Asm::*fpRR)(RegXMM, RegXMM));
 
-  template<class Oper>
   void cgShiftCommon(IRInstruction* inst,
                      void (Asm::*instrIR)(Immed, Reg64),
-                     void (Asm::*instrR)(Reg64),
-                     Oper oper);
+                     void (Asm::*instrR)(Reg64));
 
-  void cgNegateWork(PhysLoc dst, SSATmp* src, PhysLoc src_loc);
-  void cgNotWork(SSATmp* dst, SSATmp* src);
+  void cgVerifyClsWork(IRInstruction* inst);
 
   void emitGetCtxFwdCallWithThis(PhysReg ctxReg,
                                  bool    staticCallee);
@@ -269,10 +257,6 @@ private:
   bool emitIncDecHelper(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
                         SSATmp* src2, PhysLoc loc2,
                         void(Asm::*emitFunc)(Reg64));
-  bool emitInc(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-               SSATmp* src2, PhysLoc loc2);
-  bool emitDec(PhysLoc dst, SSATmp* src1, PhysLoc loc1,
-               SSATmp* src2, PhysLoc loc2);
 
 private:
   PhysReg selectScratchReg(IRInstruction* inst);
@@ -326,7 +310,7 @@ private:
   Class*      curClass() const { return curFunc()->cls(); }
   const Unit* curUnit() const { return curFunc()->unit(); }
   void recordSyncPoint(Asm& as, SyncOptions sync = SyncOptions::kSyncPoint);
-  int iterOffset(SSATmp* tmp) { return iterOffset(tmp->getValInt()); }
+  int iterOffset(SSATmp* tmp) { return iterOffset(tmp->intVal()); }
   int iterOffset(uint32_t id);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
 
@@ -417,7 +401,7 @@ private:
   CodeBlock&          m_stubsCode;
   Asm                 m_as;  // current "main" assembler
   Asm                 m_astubs; // for stubs and other cold code
-  TranslatorX64*      m_tx64;
+  MCGenerator*        m_mcg;
   CodegenState&       m_state;
   Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
@@ -432,7 +416,7 @@ void genCode(CodeBlock&              mainCode,
              CodeBlock&              stubsCode,
              IRUnit&                 unit,
              std::vector<TransBCMapping>* bcMap,
-             TranslatorX64*          tx64,
+             MCGenerator*            mcg,
              const RegAllocInfo&     regs);
 
 // Helpers to compute a reference to a TypedValue type and data

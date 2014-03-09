@@ -49,7 +49,7 @@ protected:
 private:
   int m_frame;
   Array m_variables;
-  bool m_global; // Set true by onServer if it used g_vmContext->m_globalVarEnv
+  bool m_global; // Set true by onServer if it used g_context->m_globalVarEnv
   String m_varName;
   String m_filter;
 };

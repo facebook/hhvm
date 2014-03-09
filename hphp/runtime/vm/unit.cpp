@@ -26,9 +26,9 @@
 
 #include "hphp/compiler/option.h"
 #include "hphp/util/lock.h"
-#include "hphp/util/util.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/read-only-arena.h"
+#include "hphp/util/file-util.h"
 #include "hphp/parser/parser.h"
 
 #include "hphp/runtime/ext/ext_variable.h"
@@ -38,7 +38,7 @@
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/verifier/check.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/func-inline.h"
@@ -49,13 +49,19 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-using Util::getDataRef;
-
 TRACE_SET_MOD(hhbc);
 
-static const StaticString s_stdin("STDIN");
-static const StaticString s_stdout("STDOUT");
-static const StaticString s_stderr("STDERR");
+const StaticString s_stdin("STDIN");
+const StaticString s_stdout("STDOUT");
+const StaticString s_stderr("STDERR");
+
+/**
+ * Read typed data from an offset relative to a base address
+ */
+template <class T>
+T& getDataRef(void* base, unsigned offset) {
+  return *(T*)((char*)base + offset);
+}
 
 ReadOnlyArena& get_readonly_arena() {
   static ReadOnlyArena arena(RuntimeOption::EvalHHBCArenaChunkSize);
@@ -413,17 +419,7 @@ void LitstrTable::insert(RepoTxn& txn, UnitOrigin uo) {
 //=============================================================================
 // Unit.
 
-Unit::Unit()
-    : m_sn(-1), m_bc(nullptr), m_bclen(0),
-      m_bc_meta(nullptr), m_bc_meta_len(0), m_filepath(nullptr),
-      m_dirpath(nullptr), m_md5(),
-      m_mergeInfo(nullptr),
-      m_cacheOffset(0),
-      m_repoId(-1),
-      m_mergeState(UnitMergeStateUnmerged),
-      m_cacheMask(0),
-      m_mergeOnly(false),
-      m_pseudoMainCache(nullptr) {
+Unit::Unit() {
   tvWriteUninit(&m_mainReturn);
 }
 
@@ -467,11 +463,11 @@ Unit::~Unit() {
 }
 
 void* Unit::operator new(size_t sz) {
-  return Util::low_malloc(sz);
+  return low_malloc(sz);
 }
 
 void Unit::operator delete(void* p, size_t sz) {
-  Util::low_free(p);
+  low_free(p);
 }
 
 bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
@@ -520,7 +516,7 @@ bool Unit::parseFatal(const StringData*& msg, int& line) const {
 class FrameRestore {
  public:
   explicit FrameRestore(const PreClass* preClass) {
-    VMExecutionContext* ec = g_vmContext;
+    auto const ec = g_context.getNoCheck();
     ActRec* fp = ec->getFP();
     PC pc = ec->getPC();
 
@@ -557,7 +553,7 @@ class FrameRestore {
     }
   }
   ~FrameRestore() {
-    VMExecutionContext* ec = g_vmContext;
+    auto const ec = g_context.getNoCheck();
     if (m_top) {
       ec->m_stack.top() = m_top;
       ec->m_fp = m_fp;
@@ -779,7 +775,7 @@ void Unit::defTypeAlias(Id id) {
 }
 
 void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
-  // renameFunc() should only be used by VMExecutionContext::createFunction.
+  // renameFunc() should only be used by ExecutionContext::createFunction.
   // We do a linear scan over all the functions in the unit searching for the
   // func with a given name; in practice this is okay because the units created
   // by create_function() will always have the function being renamed at the
@@ -921,8 +917,8 @@ void Unit::initialMerge() {
               break;
             case UnitMergeKindReqDoc: {
               StringData* s = (StringData*)((char*)obj - (int)k);
-              HPHP::Eval::PhpFile* efile =
-                g_vmContext->lookupIncludeRoot(s, InclOpDocRoot, nullptr, this);
+              auto const efile = g_context->lookupIncludeRoot(s,
+                InclOpFlags::DocRoot, nullptr, this);
               assert(efile);
               Unit* unit = efile->unit();
               unit->initialMerge();
@@ -1068,7 +1064,7 @@ void Unit::defDynamicSystemConstant(const StringData* cnsName,
 }
 
 static void setGlobal(StringData* name, TypedValue *value) {
-  g_vmContext->m_globalVarEnv->set(name, value);
+  g_context->m_globalVarEnv->set(name, value);
 }
 
 void Unit::merge() {
@@ -1414,9 +1410,9 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
               Stats::inc(Stats::PseudoMain_Reentered);
               TypedValue ret;
               VarEnv* ve = nullptr;
-              ActRec* fp = g_vmContext->m_fp;
+              ActRec* fp = g_context->m_fp;
               if (!fp) {
-                ve = g_vmContext->m_globalVarEnv;
+                ve = g_context->m_globalVarEnv;
               } else {
                 if (fp->hasVarEnv()) {
                   ve = fp->m_varEnv;
@@ -1426,7 +1422,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
                   // local scope.
                 }
               }
-              g_vmContext->invokeFunc(&ret, unit->getMain(), init_null_variant,
+              g_context->invokeFunc(&ret, unit->getMain(), init_null_variant,
                                       nullptr, nullptr, ve);
               tvRefcountedDecRef(&ret);
             } else {
@@ -2573,8 +2569,8 @@ Unit* UnitEmitter::create() {
   u->m_mainReturn = m_mainReturn;
   u->m_mergeOnly = m_mergeOnly;
   {
-    const std::string& dirname = Util::safe_dirname(m_filepath->data(),
-                                                    m_filepath->size());
+    const std::string& dirname = FileUtil::safe_dirname(m_filepath->data(),
+                                                        m_filepath->size());
     u->m_dirpath = makeStaticString(dirname);
   }
   u->m_md5 = m_md5;

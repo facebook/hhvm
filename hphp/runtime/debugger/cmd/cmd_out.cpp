@@ -38,7 +38,7 @@ void CmdOut::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   TRACE(2, "CmdOut::onSetup\n");
   assert(!m_complete); // Complete cmds should not be asked to do work.
   m_stackDepth = proxy.getStackDepth();
-  m_vmDepth = g_vmContext->m_nesting;
+  m_vmDepth = g_context->m_nesting;
 
   // Simply setup a "step out breakpoint" and let the program run.
   setupStepOuts();
@@ -55,7 +55,7 @@ void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
     return;
   }
 
-  int currentVMDepth = g_vmContext->m_nesting;
+  int currentVMDepth = g_context->m_nesting;
   int currentStackDepth = proxy.getStackDepth();
 
   // Deeper or same depth? Keep running.
@@ -79,7 +79,7 @@ void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   cleanupStepOuts();
   int depth = decCount();
   if (depth == 0) {
-    PC pc = g_vmContext->getPC();
+    PC pc = g_context->getPC();
     // Step over PopR following a call
     if (toOp(*pc) == OpPopR) {
       m_skippingOverPopR = true;

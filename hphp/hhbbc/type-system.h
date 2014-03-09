@@ -17,6 +17,10 @@
 #define incl_HHBBC_TYPE_SYSTEM_H_
 
 #include <cstdint>
+#include <vector>
+#include <utility>
+
+#include <boost/container/flat_map.hpp>
 
 #include "folly/Optional.h"
 
@@ -25,8 +29,9 @@
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/index.h"
 
-namespace HPHP { struct TypeConstraint; }
 namespace HPHP { namespace HHBBC {
+
+struct Type;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -50,16 +55,16 @@ namespace HPHP { namespace HHBBC {
  *                       |  \          |        |  Obj<=c Obj<=WaitHandle
  *                     Prim  \         |        |    |       |
  *                     / |   InitUnc   |        |  Obj=c   WaitH<T>
- *                    /  |   /  | |    |        |
- *                   /   |  /   | |    |        |
- *                  /    | /    | |    |        |
- *                 /     |/     | |    |        |
- *              Null  InitPrim  | \    |        |
- *             /  |    / |      |  \  Arr      Str
- *            /   |   /  |      |   \ / \      / \
- *      Uninit  InitNull |      |   SArr CArr /  CStr
- *                       |      |    |       /
- *                       |      |   SArr=a  /
+ *                    /  |   /  |  |   |        |
+ *                   /   |  /   |  |   |        |
+ *                  /    | /    |  |   |        |
+ *                 /     |/     |  |   |        |
+ *              Null  InitPrim  |  |   |        |
+ *             /  |    / |      |  |  Arr      Str
+ *            /   |   /  |      |  |  / \      / \
+ *      Uninit  InitNull |      | SArr  ...   /  CStr
+ *                       |      |  |         /
+ *                       |      | ...       /
  *                       |      |          /
  *                       |      \         /
  *                       |       \       /
@@ -77,7 +82,7 @@ namespace HPHP { namespace HHBBC {
  *                                 |    |
  *                               Int=n Dbl=n
  *
- * Some description of the types here:
+ * Some notes on some of the basic types:
  *
  *   {Init,}Prim
  *
@@ -94,6 +99,59 @@ namespace HPHP { namespace HHBBC {
  *       A WaitHandle that is known will either return a value of type
  *       T from its join() method (or AsyncAwait), or else throw an
  *       exception.
+ *
+ * "Specialized" array types:
+ *
+ *   Types for arrays come in static and counted flavors (replace Arr
+ *   with SArr or CArr below).  Both static and counted arrays are
+ *   subtypes of the corresponding Arr type (which has unknown
+ *   countedness).  Arrays with partially known structure have
+ *   additional information in parenthesis, which is probably best
+ *   explained by some examples:
+ *
+ *     SArr(Bool,Int)
+ *
+ *         Static two-element array with contiguous integer keys,
+ *         containing a Bool and an Int with unknown values.
+ *
+ *     CArr([Bool])
+ *
+ *         Reference counted array with contiguous integer keys
+ *         (unknown size), values all are subtypes of Bool.
+ *
+ *     Arr(x:Int,y:Int)
+ *
+ *         Struct-like array with known fields "x" and "y" that have
+ *         Int values, and no other fields.  Struct-like arrays always
+ *         have known string keys, and the type contains only those
+ *         array values with exactly the given key set.  Order of the
+ *         array elements is not tracked in the type system.
+ *
+ *     Arr([SStr:InitCell])
+ *
+ *         Map-like array with unknown keys, but all non-reference
+ *         counted strings, and all values InitCell.  In this case the
+ *         array itself may or may not be static.
+ *
+ *         Note that struct-like arrays will be subtypes of map-like
+ *         arrays with string keys.
+ *
+ *     Arr([Int:InitPrim])
+ *
+ *         Map-like array with only integer keys (not-necessarily
+ *         contiguous) and values that are all subtypes of InitPrim.
+ *         Note that the keys *may* be contiguous integers, so for
+ *         example Arr([InitPrim]) <: Arr([Int => InitPrim]).
+ *
+ *     Arr([InitCell:InitCell])
+ *
+ *         Map-like array with either integer or string keys, and
+ *         InitCell values. TODO(#3774082): we should have a Str|Int
+ *         type.
+ *
+ *   Importantly: all the above specialized array types imply the
+ *   array is non-empty.  (Later we may make a bit for the empty array
+ *   so it has its own type and may be unioned with these types.)
  *
  */
 
@@ -121,7 +179,7 @@ enum trep : uint32_t {
   BBool     = BFalse | BTrue,
   BNum      = BInt | BDbl,
   BStr      = BSStr | BCStr,
-  BArr      = BSArr | BCArr,
+  BArr      = BSArr | BCArr,             // may have value / data
 
   // Nullable types.
   BOptTrue     = BInitNull | BTrue,
@@ -133,9 +191,9 @@ enum trep : uint32_t {
   BOptSStr     = BInitNull | BSStr,      // may have value
   BOptCStr     = BInitNull | BCStr,
   BOptStr      = BInitNull | BStr,
-  BOptSArr     = BInitNull | BSArr,      // may have value
-  BOptCArr     = BInitNull | BCArr,
-  BOptArr      = BInitNull | BArr,
+  BOptSArr     = BInitNull | BSArr,      // may have value / data
+  BOptCArr     = BInitNull | BCArr,      // may have value / data
+  BOptArr      = BInitNull | BArr,       // may have value / data
   BOptObj      = BInitNull | BObj,       // may have data
   BOptRes      = BInitNull | BRes,
 
@@ -149,6 +207,21 @@ enum trep : uint32_t {
   BGen      = BUninit | BInitGen,
 
   BTop      = static_cast<uint32_t>(-1),
+};
+
+// Tag for what kind of specialized data a Type object has.
+enum class DataTag : uint8_t {
+  None,
+  Str,
+  Obj,
+  Int,
+  Dbl,
+  Cls,
+  ArrVal,
+  ArrPacked,
+  ArrPackedN,
+  ArrStruct,
+  ArrMapN,
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -167,13 +240,26 @@ struct DCls {
  * exact or a subtype of the supplied class.
  *
  * If the class is WaitHandle, we can also carry a type that joining
- * the wait handle will produce.  (This is hoisted into Type to keep
- * DObj and Type::Data trivially copyable for now.)
+ * the wait handle will produce.
  */
 struct DObj {
-  enum { Exact, Sub } type;
+  enum Tag { Exact, Sub };
+
+  explicit DObj(Tag type, res::Class cls)
+    : type(type)
+    , cls(cls)
+  {}
+
+  Tag type;
   res::Class cls;
+  copy_ptr<Type> whType;
 };
+
+struct DArrPacked;
+struct DArrPackedN;
+struct DArrStruct;
+struct DArrMapN;
+using StructMap = boost::container::flat_map<SString,Type>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -184,6 +270,12 @@ struct Type {
   explicit Type(trep t) : m_bits(t) {
     assert(checkInvariants());
   }
+
+  Type(const Type&) noexcept;
+  Type(Type&&) noexcept;
+  Type& operator=(const Type&) noexcept;
+  Type& operator=(Type&&) noexcept;
+  ~Type() noexcept;
 
   /*
    * Exact equality or inequality of types.
@@ -223,6 +315,7 @@ struct Type {
 private:
   friend Type wait_handle(const Index&, Type);
   friend bool is_specialized_wait_handle(const Type&);
+  friend bool is_specialized_array(const Type&);
   friend Type wait_handle_inner(const Type&);
   friend Type sval(SString);
   friend Type ival(int64_t);
@@ -232,39 +325,105 @@ private:
   friend Type objExact(res::Class);
   friend Type subCls(res::Class);
   friend Type clsExact(res::Class);
+  friend Type arr_packed(std::vector<Type>);
+  friend Type sarr_packed(std::vector<Type>);
+  friend Type carr_packed(std::vector<Type>);
+  friend Type arr_packedn(Type);
+  friend Type sarr_packedn(Type);
+  friend Type carr_packedn(Type);
+  friend Type arr_struct(StructMap);
+  friend Type sarr_struct(StructMap);
+  friend Type carr_struct(StructMap);
+  friend Type arr_mapn(Type k, Type v);
+  friend Type sarr_mapn(Type k, Type v);
+  friend Type carr_mapn(Type k, Type v);
   friend DObj dobj_of(const Type&);
   friend DCls dcls_of(Type);
   friend Type union_of(Type, Type);
+  friend Type widening_union(const Type&, const Type&);
   friend Type opt(Type);
   friend Type unopt(Type);
   friend bool is_opt(Type);
   friend folly::Optional<Cell> tv(Type);
   friend std::string show(Type);
+  friend struct ArrKey disect_key(const Type&);
+  friend Type array_elem(const Type&, const Type&);
+  friend Type array_set(Type, const Type&, const Type&);
+  friend std::pair<Type,Type> array_newelem_key(const Type&, const Type&);
+  friend std::pair<Type,Type> iter_types(const Type&);
 
 private:
   union Data {
-    Data() : sval(nullptr) {}
+    Data() {}
+    ~Data() {}
 
     SString sval;
     int64_t ival;
-    double  dval;
-    SArray  aval;
-    DObj    dobj;
-    DCls    dcls;
+    double dval;
+    SArray aval;
+    DObj dobj;
+    DCls dcls;
+    copy_ptr<DArrPacked> apacked;
+    copy_ptr<DArrPackedN> apackedn;
+    copy_ptr<DArrStruct> astruct;
+    copy_ptr<DArrMapN> amapn;
   };
 
+  template<class Ret, class T, class Function>
+  struct DJHelperFn;
+  struct ArrKey;
+
 private:
-  Type(trep t, Data d);
-  bool equivData(Type o) const;
-  bool subtypeData(Type o) const;
-  bool couldBeData(Type o) const;
+  static Type wait_handle_outer(const Type&);
+  static Type unionArr(const Type& a, const Type& b);
+
+private:
+  template<class Ret, class T, class Function>
+  Ret dj2nd(const Type&, DJHelperFn<Ret,T,Function>) const;
+  template<class Function>
+  typename Function::result_type disjointDataFn(const Type&, Function) const;
+  bool hasData() const;
+  bool equivData(const Type&) const;
+  bool subtypeData(const Type&) const;
+  bool couldBeData(const Type&) const;
   bool checkInvariants() const;
 
 private:
   trep m_bits;
-  folly::Optional<Data> m_data;
-  copy_ptr<Type> m_whType;
+  DataTag m_dataTag = DataTag::None;
+  Data m_data;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+struct DArrPacked {
+  explicit DArrPacked(std::vector<Type> elems)
+    : elems(std::move(elems))
+  {}
+
+  std::vector<Type> elems;
+};
+
+struct DArrPackedN {
+  explicit DArrPackedN(Type t) : type(std::move(t)) {}
+  Type type;
+};
+
+struct DArrStruct {
+  explicit DArrStruct(StructMap map) : map(std::move(map)) {}
+  StructMap map;
+};
+
+struct DArrMapN {
+  explicit DArrMapN(Type key, Type val)
+    : key(std::move(key))
+    , val(std::move(val))
+  {}
+  Type key;
+  Type val;
+};
+
+//////////////////////////////////////////////////////////////////////
 
 #define X(y) const Type T##y = Type(B##y);
 
@@ -342,6 +501,12 @@ Type dval(double);
 Type aval(SArray);
 
 /*
+ * Create empty array or string types.
+ */
+Type sempty();
+Type aempty();
+
+/*
  * Create types for objects or classes with some known constraint on
  * which res::Class is associated with them.
  */
@@ -349,6 +514,40 @@ Type subObj(res::Class);
 Type objExact(res::Class);
 Type subCls(res::Class);
 Type clsExact(res::Class);
+
+/*
+ * Packed array types with known size.
+ *
+ * Pre: !v.empty()
+ */
+Type arr_packed(std::vector<Type> v);
+Type sarr_packed(std::vector<Type> v);
+Type carr_packed(std::vector<Type> v);
+
+/*
+ * Packed array types of unknown size.
+ *
+ * Note that these types imply the arrays are non-empty.
+ */
+Type arr_packedn(Type);
+Type sarr_packedn(Type);
+Type carr_packedn(Type);
+
+/*
+ * Struct-like arrays.
+ *
+ * Pre: !m.empty()
+ */
+Type arr_struct(StructMap m);
+Type sarr_struct(StructMap m);
+Type carr_struct(StructMap m);
+
+/*
+ * Map-like arrays.
+ */
+Type arr_mapn(Type k, Type v);
+Type sarr_mapn(Type k, Type v);
+Type carr_mapn(Type k, Type v);
 
 /*
  * Create the optional version of the Type t.
@@ -384,6 +583,13 @@ bool is_specialized_obj(Type t);
  * tracked inner type.
  */
 bool is_specialized_wait_handle(const Type& t);
+
+/*
+ * Returns whether `t' is a Arr=something or Arr(something) type, or
+ * an optional version of one of those types.  That is, an array with
+ * either a constant value or some (maybe partially) known shape.
+ */
+bool is_specialized_array(const Type& t);
 
 /*
  * Returns the best known TCls subtype for an object type.
@@ -443,15 +649,36 @@ Type from_DataType(DataType dt);
  * Create a Type from a builtin type specification string.
  *
  * This is used for HNI class properties.  We assume that these are
- * accurate.  s may be null.
+ * accurate.  `s' may be nullptr.
  */
 Type from_hni_constraint(SString s);
 
 /*
  * Make a type that represents values from either of the supplied
  * types.
+ *
+ * Importantly, note that there are infinitely long chains of array
+ * types that continue to become less specialized, so chains of
+ * union_of operations are not guaranteed to reach a stable point in
+ * finite steps.
  */
 Type union_of(Type a, Type b);
+
+/*
+ * Widening union.
+ *
+ * This operation returns a type T, such that a is a subtype of T, b
+ * is a subtype of T, and union_of(a, b) is a subtype of T.  The
+ * widening union also has the property that every possible chain of
+ * successive applications of the function eventually reaches a stable
+ * point.
+ *
+ * For portions of our analysis that rely on growing types reaching
+ * stable points for termination, this function must occasionally be
+ * used instead of union_of to guarantee termination.  See details in
+ * analyze.cpp.
+ */
+Type widening_union(const Type& a, const Type& b);
 
 /*
  * Returns the smallest type that `a' is a subtype of, from the
@@ -476,6 +703,9 @@ Type loosen_statics(Type);
  * Precisely: strict subtypes of TInt, TDbl, TBool, TSStr, and TSArr
  * become exactly that corresponding type.  Additionally, TOptTrue and
  * TOptFalse become TOptBool.  All other types are unchanged.
+ *
+ * TODO(#3696042): loosen values of an array shape should keep the
+ * shape.
  */
 Type loosen_values(Type);
 
@@ -487,6 +717,44 @@ Type loosen_values(Type);
  * Pre: t.subtypeOf(TCell)
  */
 Type remove_uninit(Type t);
+
+/*
+ * Returns the best known type of an array inner element given a type
+ * for the key.  The returned type is always a subtype of TInitCell.
+ *
+ * Pre: arr.subtypeOf(TArr)
+ */
+Type array_elem(const Type& arr, const Type& key);
+
+/*
+ * Perform an array set on types.  Returns a type that represents the
+ * effects of arr[key] = val.
+ *
+ * Pre arr.subtypeOf(TArr)
+ */
+Type array_set(Type arr, const Type& key, const Type& val);
+
+/*
+ * Perform a newelem operation on an array type.  Returns an array
+ * that contains a new pushed-back element with the supplied value, in
+ * the sense of arr[] = val.
+ *
+ * Pre: arr.subtypeOf(TArr)
+ */
+Type array_newelem(const Type& arr, const Type& val);
+
+/*
+ * The same as array_newelem, except return the best known type of the
+ * key that was added.  (This is either TInt or a subtype of it.)
+ */
+std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val);
+
+/*
+ * Return the best known key and value type for iteration of the
+ * supplied type.  This is only intended for non-mutable iteration, so
+ * the returned types are at worst InitCell.
+ */
+std::pair<Type,Type> iter_types(const Type&);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
+#include <memory>
 
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -45,9 +46,6 @@ class NormalizedInstruction {
                      // *not* the function whose body the NI belongs to.
                      // Note that for an FPush* may be set to the (statically
                      // known Func* that /this/ instruction is pushing)
-  const StringData* funcName;
-    // For FCall's, an opaque identifier that is either null, or uniquely
-    // identifies the (functionName, -arity) pair of this call site.
   const Unit* m_unit;
 
   std::vector<DynLocation*> inputs;
@@ -93,6 +91,7 @@ class NormalizedInstruction {
   Offset nextOffset; // for intra-trace* non-call control-flow instructions,
                      // this is the offset of the next instruction in the trace*
   bool breaksTracelet:1;
+  bool includeBothPaths:1;
   bool changesPC:1;
   bool fuseBranch:1;
   bool preppedByRef:1;

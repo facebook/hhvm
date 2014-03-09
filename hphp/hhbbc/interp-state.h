@@ -19,10 +19,13 @@
 #include <vector>
 #include <string>
 
+#include <boost/variant.hpp>
+
 #include "folly/Optional.h"
 
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/bc.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -47,24 +50,40 @@ struct ActRec {
 };
 
 /*
+ * State of an iterator in the program.
+ */
+struct UnknownIter {};
+struct TrackedIter { std::pair<Type,Type> kv; };
+using Iter = boost::variant< UnknownIter
+                           , TrackedIter
+                           >;
+
+/*
  * A program state at a position in a php::Block.
  */
 struct State {
   bool initialized = false;
   bool thisAvailable = false;
   std::vector<Type> locals;
+  std::vector<Iter> iters;
   std::vector<Type> stack;
   std::vector<ActRec> fpiStack;
 };
 
 /*
- * States are EqualityComparible (provided they are in-states for the
+ * States are EqualityComparable (provided they are in-states for the
  * same block).
  */
 bool operator==(const ActRec&, const ActRec&);
 bool operator!=(const ActRec&, const ActRec&);
 bool operator==(const State&, const State&);
 bool operator!=(const State&, const State&);
+
+/*
+ * Return a copy of a State without copying either the evaluation
+ * stack or FPI stack.
+ */
+State without_stacks(const State&);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -95,13 +114,19 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * State merging functions.
+ * State merging functions, based on the union_of operation for types.
  *
  * These return true if the destination state changed.
  */
-bool merge_into(PropState&, const PropState&);
 bool merge_into(ActRec&, const ActRec&);
 bool merge_into(State&, const State&);
+
+/*
+ * State merging functions, based on the widening_union operation.
+ * See analyze.cpp for details on when this is needed.
+ */
+bool widen_into(PropState&, const PropState&);
+bool widen_into(State&, const State&);
 
 //////////////////////////////////////////////////////////////////////
 

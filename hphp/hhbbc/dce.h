@@ -26,14 +26,21 @@ struct Index;
 struct State;
 struct Context;
 struct Bytecode;
+struct FuncAnalysis;
 namespace php { struct Block; }
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<Bytecode> local_dce(const Index&,
-                                Context,
-                                borrowed_ptr<php::Block>,
-                                const State&);
+/*
+ * Perform DCE on a single basic block.
+ */
+void local_dce(const Index&, Context, borrowed_ptr<php::Block>, const State&);
+
+/*
+ * Eliminate dead code in a function, across basic blocks, based on
+ * results from a previous analyze_func call.
+ */
+void global_dce(const Index&, const FuncAnalysis&);
 
 //////////////////////////////////////////////////////////////////////
 

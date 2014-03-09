@@ -22,8 +22,8 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
-#include "hphp/runtime/vm/jit/translator-x64-internal.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
@@ -261,30 +261,13 @@ void raise_error_sd(const StringData *msg) {
   raise_error("%s", msg->data());
 }
 
-void VerifyParamTypeFail(int paramNum) {
-  VMRegAnchor _;
-  const ActRec* ar = liveFrame();
-  const Func* func = ar->m_func;
-  auto const& tc = func->params()[paramNum].typeConstraint();
-  TypedValue* tv = frame_local(ar, paramNum);
-  assert(!tc.check(tv, func));
-  tc.verifyFail(func, paramNum, tv);
-}
-
-void VerifyParamTypeCallable(TypedValue value, int param) {
-  if (UNLIKELY(!f_is_callable(tvAsCVarRef(&value)))) {
-    VerifyParamTypeFail(param);
-  }
-}
-
-void VerifyParamTypeSlow(const Class* cls,
-                         const Class* constraint,
-                         int param,
-                         const HPHP::TypeConstraint* expected) {
+ALWAYS_INLINE
+static bool VerifyTypeSlowImpl(const Class* cls,
+                               const Class* constraint,
+                               const HPHP::TypeConstraint* expected) {
   if (LIKELY(constraint && cls->classof(constraint))) {
-    return;
+    return true;
   }
-
   // Check a typedef for a class.  We interp'd if the param wasn't an
   // object, so if it's a typedef for something non-objecty we're
   // failing anyway.
@@ -304,14 +287,62 @@ void VerifyParamTypeSlow(const Class* cls,
       // mixed.
       if (def->kind == KindOfObject) {
         constraint = def->klass;
-        if (constraint && cls->classof(constraint)) return;
+        if (constraint && cls->classof(constraint)) return true;
       } else if (def->kind == KindOfAny) {
-        return;
+        return true;
       }
     }
   }
+  return false;
+}
 
-  VerifyParamTypeFail(param);
+void VerifyParamTypeSlow(const Class* cls,
+                         const Class* constraint,
+                         const HPHP::TypeConstraint* expected,
+                         int param) {
+  if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
+    VerifyParamTypeFail(param);
+  }
+}
+
+void VerifyParamTypeCallable(TypedValue value, int param) {
+  if (UNLIKELY(!f_is_callable(tvAsCVarRef(&value)))) {
+    VerifyParamTypeFail(param);
+  }
+}
+
+void VerifyParamTypeFail(int paramNum) {
+  VMRegAnchor _;
+  const ActRec* ar = liveFrame();
+  const Func* func = ar->m_func;
+  auto const& tc = func->params()[paramNum].typeConstraint();
+  TypedValue* tv = frame_local(ar, paramNum);
+  assert(!tc.check(tv, func));
+  tc.verifyParamFail(func, tv, paramNum);
+}
+
+void VerifyRetTypeSlow(const Class* cls,
+                       const Class* constraint,
+                       const HPHP::TypeConstraint* expected,
+                       const TypedValue tv) {
+  if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
+    VerifyRetTypeFail(tv);
+  }
+}
+
+void VerifyRetTypeCallable(TypedValue value) {
+  if (UNLIKELY(!f_is_callable(tvAsCVarRef(&value)))) {
+    VerifyRetTypeFail(value);
+  }
+}
+
+void VerifyRetTypeFail(TypedValue tv) {
+  VMRegAnchor _;
+  const ActRec* ar = liveFrame();
+  const Func* func = ar->m_func;
+  const HPHP::TypeConstraint& tc = func->returnTypeConstraint();
+  assert(!tc.check(&tv, func));
+  tc.verifyReturnFail(func, &tv);
 }
 
 RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
@@ -407,7 +438,7 @@ TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
                          .append(tvAsVariant(&def))
                          .toArray();
   TypedValue ret;
-  g_vmContext->invokeFunc(&ret, func, args);
+  g_context->invokeFunc(&ret, func, args);
   return ret;
 }
 
@@ -416,11 +447,11 @@ int32_t arrayVsize(ArrayData* ad) {
 }
 
 TypedValue* ldGblAddrHelper(StringData* name) {
-  return g_vmContext->m_globalVarEnv->lookup(name);
+  return g_context->m_globalVarEnv->lookup(name);
 }
 
 TypedValue* ldGblAddrDefHelper(StringData* name) {
-  return g_vmContext->m_globalVarEnv->lookupAdd(name);
+  return g_context->m_globalVarEnv->lookupAdd(name);
 }
 
 template <typename T>
@@ -483,7 +514,7 @@ TCA sswitchHelperFast(const StringData* val,
 
 // TODO(#2031980): clear these out
 void tv_release_generic(TypedValue* tv) {
-  assert(JIT::tx64->stateIsDirty());
+  assert(JIT::tx->stateIsDirty());
   assert(tv->m_type == KindOfString || tv->m_type == KindOfArray ||
          tv->m_type == KindOfObject || tv->m_type == KindOfResource ||
          tv->m_type == KindOfRef);
@@ -542,7 +573,7 @@ void lookupClsMethodHelper(Class* cls,
     ObjectData* obj = fp->hasThis() ? fp->getThis() : nullptr;
     Class* ctx = fp->m_func->cls();
     LookupResult res =
-      g_vmContext->lookupClsMethod(f, cls, meth, obj, ctx, true);
+      g_context->lookupClsMethod(f, cls, meth, obj, ctx, true);
     if (res == LookupResult::MethodFoundNoThis ||
         res == LookupResult::MagicCallStaticFound) {
       ar->setClass(cls);
@@ -620,11 +651,11 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
   // TODO: validate this pointer from actrec
   int numLocals = func->numLocals();
   assert(sp <= (Cell*)fp - func->numSlotsInFrame()
-         || func->isGenerator());
+         || fp->inGenerator());
   if (checkLocals) {
     int numParams = func->numParams();
     for (int i=0; i < numLocals; i++) {
-      if (i >= numParams && func->isGenerator() && i < func->numNamedLocals()) {
+      if (i >= numParams && fp->inGenerator() && i < func->numNamedLocals()) {
         continue;
       }
       assert(tvIsPlausible(*frame_local(fp, i)));
@@ -734,7 +765,7 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
     }
 
     auto const inst = elem0->m_data.pobj;
-    auto const func = g_vmContext->lookupMethodCtx(
+    auto const func = g_context->lookupMethodCtx(
       inst->getVMClass(),
       elem1->m_data.pstr,
       fp->m_func->cls(),
@@ -808,7 +839,7 @@ Cell lookupClassConstantTv(TypedValue* cache,
                            const NamedEntity* ne,
                            const StringData* cls,
                            const StringData* cns) {
-  Cell clsCns = g_vmContext->lookupClsCns(ne, cls, cns);
+  Cell clsCns = g_context->lookupClsCns(ne, cls, cns);
   assert(isUncounted(clsCns));
   cellDup(clsCns, *cache);
   return clsCns;
@@ -870,7 +901,7 @@ ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
  */
 static void sync_regstate_to_caller(ActRec* preLive) {
   assert(tl_regState == VMRegState::DIRTY);
-  VMExecutionContext* ec = g_vmContext;
+  auto const ec = g_context.getNoCheck();
   ec->m_stack.top() = (TypedValue*)preLive - preLive->numArgs();
   ActRec* fp = preLive == ec->m_firstAR ?
     ec->m_nestedVMs.back().m_savedState.fp : (ActRec*)preLive->m_savedRbp;

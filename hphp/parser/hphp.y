@@ -5,7 +5,7 @@
 #include "hphp/compiler/parser/parser.h"
 #endif
 #include <boost/lexical_cast.hpp>
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"
 
 // macros for bison
@@ -314,7 +314,7 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
   _p->onMethodStart(fname, modifiers);
 
   std::vector<std::string> classes;
-  HPHP::Util::split(':', attributes.text().c_str(), classes, true);
+  HPHP::split(':', attributes.text().c_str(), classes, true);
   Token arrAttributes; _p->onArray(arrAttributes, attributes);
 
   Token dummy;

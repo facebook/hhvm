@@ -19,9 +19,11 @@
 #include <cstdio>
 
 #include <sys/mman.h>
+#include <atomic>
 
 #include "folly/String.h"
 #include "folly/Hash.h"
+#include "folly/Bits.h"
 
 #include "hphp/util/maphuge.h"
 #include "hphp/util/mutex.h"
@@ -135,7 +137,7 @@ namespace detail {
 
 Handle alloc(Mode mode, size_t numBytes, size_t align) {
   s_allocMutex.assertOwnedBySelf();
-  align = Util::roundUpToPowerOfTwo(align);
+  align = folly::nextPowTwo(align);
   auto& frontier = mode == Mode::Persistent ? s_persistent_frontier
                                             : s_frontier;
 
@@ -296,7 +298,7 @@ void threadInit() {
   tl_base = mmap(nullptr, RuntimeOption::EvalJitTargetCacheSize,
                  PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
   always_assert(tl_base != MAP_FAILED);
-  Util::numa_bind_to(tl_base, s_persistent_base, Util::s_numaNode);
+  numa_bind_to(tl_base, s_persistent_base, s_numaNode);
   if (RuntimeOption::EvalMapTgtCacheHuge) {
     hintHuge(tl_base, RuntimeOption::EvalJitTargetCacheSize);
   }

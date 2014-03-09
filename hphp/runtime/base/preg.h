@@ -23,6 +23,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct PCREglobals {
+  // pcre ini_settings
+  int64_t m_preg_backtrace_limit;
+  int64_t m_preg_recursion_limit;
+};
+
 Variant preg_grep(const String& pattern, CArrRef input, int flags = 0);
 
 Variant preg_match(const String& pattern, const String& subject,

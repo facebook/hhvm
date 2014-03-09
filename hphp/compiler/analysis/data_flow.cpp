@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/analysis/data_flow.h"
+#include <utility>
 
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/simple_variable.h"

@@ -1,0 +1,112 @@
+array(6) {
+  [0]=>
+  string(15) "privateProperty"
+  [1]=>
+  string(21) "privateStaticProperty"
+  [2]=>
+  string(17) "protectedProperty"
+  [3]=>
+  string(14) "publicProperty"
+  [4]=>
+  string(23) "protectedStaticProperty"
+  [5]=>
+  string(20) "publicStaticProperty"
+}
+array(6) {
+  [0]=>
+  string(17) "protectedProperty"
+  [1]=>
+  string(14) "publicProperty"
+  [2]=>
+  string(23) "protectedStaticProperty"
+  [3]=>
+  string(20) "publicStaticProperty"
+  [4]=>
+  string(15) "privateProperty"
+  [5]=>
+  string(21) "privateStaticProperty"
+}
+array(6) {
+  [0]=>
+  string(17) "protectedProperty"
+  [1]=>
+  string(23) "protectedStaticProperty"
+  [2]=>
+  string(15) "privateProperty"
+  [3]=>
+  string(14) "publicProperty"
+  [4]=>
+  string(21) "privateStaticProperty"
+  [5]=>
+  string(20) "publicStaticProperty"
+}
+array(6) {
+  [0]=>
+  string(15) "privateProperty"
+  [1]=>
+  string(14) "publicProperty"
+  [2]=>
+  string(21) "privateStaticProperty"
+  [3]=>
+  string(20) "publicStaticProperty"
+  [4]=>
+  string(17) "protectedProperty"
+  [5]=>
+  string(23) "protectedStaticProperty"
+}
+array(6) {
+  [0]=>
+  string(14) "publicProperty"
+  [1]=>
+  string(20) "publicStaticProperty"
+  [2]=>
+  string(15) "privateProperty"
+  [3]=>
+  string(17) "protectedProperty"
+  [4]=>
+  string(21) "privateStaticProperty"
+  [5]=>
+  string(23) "protectedStaticProperty"
+}
+array(6) {
+  [0]=>
+  string(15) "privateProperty"
+  [1]=>
+  string(17) "protectedProperty"
+  [2]=>
+  string(21) "privateStaticProperty"
+  [3]=>
+  string(23) "protectedStaticProperty"
+  [4]=>
+  string(14) "publicProperty"
+  [5]=>
+  string(20) "publicStaticProperty"
+}
+array(6) {
+  [0]=>
+  string(21) "privateStaticProperty"
+  [1]=>
+  string(23) "protectedStaticProperty"
+  [2]=>
+  string(20) "publicStaticProperty"
+  [3]=>
+  string(15) "privateProperty"
+  [4]=>
+  string(17) "protectedProperty"
+  [5]=>
+  string(14) "publicProperty"
+}
+array(6) {
+  [0]=>
+  string(15) "privateProperty"
+  [1]=>
+  string(17) "protectedProperty"
+  [2]=>
+  string(14) "publicProperty"
+  [3]=>
+  string(21) "privateStaticProperty"
+  [4]=>
+  string(23) "protectedStaticProperty"
+  [5]=>
+  string(20) "publicStaticProperty"
+}

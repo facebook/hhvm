@@ -1,7 +1,7 @@
 {
     "minimum-stability": "dev",
     "require-dev": {
-        "phpunit/phpunit": "3.8.x-dev#fd67d0929d3c71bf348cfe3b6950c4f0aeecd077",
+        "phpunit/phpunit": "4.0.3",
         "phpunit/php-invoker": "1.1.3",
         "phpunit/dbunit": "1.2.3",
         "phpunit/phpunit-selenium": "1.3.2",

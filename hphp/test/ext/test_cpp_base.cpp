@@ -223,7 +223,7 @@ bool TestCppBase::TestArray() {
   {
     Variant arr = make_map_array("n1", "v1", "n2", "v2");
     arr.escalate();
-    for (ArrayIter iter = arr.begin(arr, true); !iter->end(); iter->next()){
+    for (ArrayIter iter = arr.begin(arr, true); !iter->end(); iter->next()) {
       arr.lvalAt(iter->first()).reset();
     }
     VS(arr, Array::Create());

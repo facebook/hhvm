@@ -34,13 +34,13 @@ void gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c)
 	rx = r << 1;
 	ry = 0;
 	x = a;
-	while (x > 0){
+	while (x > 0) {
 		if (r > 0) {
 			my1++;my2--;
 			ry +=dx;
 			r  -=ry;
 		}
-		if (r <= 0){
+		if (r <= 0) {
 			x--;
 			mx1++;mx2--;
 			rx -=dy;
@@ -79,25 +79,25 @@ void gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
 	ry = 0;
 	x = a;
 	old_y2=-2;
-	while (x > 0){
+	while (x > 0) {
 		if (r > 0) {
 			my1++;my2--;
 			ry +=dx;
 			r  -=ry;
 		}
-		if (r <= 0){
+		if (r <= 0) {
 			x--;
 			mx1++;mx2--;
 			rx -=dy;
 			r  +=rx;
 		}
-		if(old_y2!=my2){
-			for(i=mx1;i<=mx2;i++){
+		if(old_y2!=my2) {
+			for(i=mx1;i<=mx2;i++) {
 				gdImageSetPixel(im,i,my1,c);
 			}
 		}
-		if(old_y2!=my2){
-			for(i=mx1;i<=mx2;i++){
+		if(old_y2!=my2) {
+			for(i=mx1;i<=mx2;i++) {
 				gdImageSetPixel(im,i,my2,c);
 			}
 		}

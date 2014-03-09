@@ -145,7 +145,7 @@ const ExtendedCommandMap &CmdExtended::getCommandMap() {
   return GetExtendedCommandMap();
 }
 
-void CmdExtended::invokeList(DebuggerClient &client, const std::string &cls){
+void CmdExtended::invokeList(DebuggerClient &client, const std::string &cls) {
   DebuggerCommandPtr cmd = CreateExtendedCommand(cls);
   if (cmd) {
     cmd->list(client);
@@ -161,7 +161,7 @@ bool CmdExtended::invokeHelp(DebuggerClient &client, const std::string &cls) {
   return false;
 }
 
-bool CmdExtended::invokeClient(DebuggerClient &client, const std::string &cls){
+bool CmdExtended::invokeClient(DebuggerClient &client, const std::string &cls) {
   client.usageLogCommand("extended", cls);
   DebuggerCommandPtr cmd = CreateExtendedCommand(cls);
   if (cmd) {

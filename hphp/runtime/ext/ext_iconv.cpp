@@ -437,7 +437,7 @@ static php_iconv_err_t _php_iconv_strlen(unsigned int *pretval,
 
 static php_iconv_err_t _php_iconv_substr(StringBuffer &pretval,
                                          const char *str, size_t nbytes,
-                                         int offset, int len, const char *enc){
+                                         int offset, int len, const char *enc) {
   char buf[GENERIC_SUPERSET_NBYTES];
   php_iconv_err_t err = PHP_ICONV_ERR_SUCCESS;
   iconv_t cd1, cd2;

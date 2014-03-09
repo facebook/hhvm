@@ -2783,7 +2783,7 @@ Variant c_SoapClient::t___setcookie(const String& name,
   return uninit_null();
 }
 
-Variant c_SoapClient::t___setlocation(const String& new_location /* = null_string */){
+Variant c_SoapClient::t___setlocation(const String& new_location /* = null_string */) {
   Variant ret = m_location;
   m_location = new_location;
   return ret;

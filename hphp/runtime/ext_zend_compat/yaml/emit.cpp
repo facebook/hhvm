@@ -733,7 +733,7 @@ y_write_object_callback (
   }
 
   if (SUCCESS != zend_hash_find(
-      Z_ARRVAL_P(zret), "data", sizeof("data"), (void **)&zdata)){
+      Z_ARRVAL_P(zret), "data", sizeof("data"), (void **)&zdata)) {
     php_error_docref(NULL TSRMLS_CC, E_WARNING,
         "Expected callback result for class '%s'"
         " to contain a key named 'data'",

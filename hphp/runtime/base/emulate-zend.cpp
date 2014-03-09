@@ -41,7 +41,7 @@ bool check_option(const char *option) {
   return false;
 }
 
-int emulate_zend(int argc, char** argv){
+int emulate_zend(int argc, char** argv) {
   std::vector<std::string> newargv;
 
   newargv.push_back(argv[0]);

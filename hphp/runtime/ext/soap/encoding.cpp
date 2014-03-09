@@ -1551,7 +1551,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model,
             property = master_to_xml(enc, val, style, node);
             if (property->children && property->children->content &&
                 !model->u_element->fixed.empty() &&
-                model->u_element->fixed != (char*)property->children->content){
+                model->u_element->fixed != (char*)property->children->content) {
               throw SoapException("Encoding: Element '%s' has fixed value "
                                   "'%s' (value '%s' is not allowed)",
                                   model->u_element->name.c_str(),

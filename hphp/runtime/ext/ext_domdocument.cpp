@@ -2004,7 +2004,7 @@ Variant c_DOMNode::t_appendchild(const Object& newnode) {
     raise_warning("Document Fragment is empty");
     return false;
   }
-  if (child->parent != NULL){
+  if (child->parent != NULL) {
     xmlUnlinkNode(child);
   }
   if (child->type == XML_TEXT_NODE && nodep->last != NULL &&
@@ -2195,7 +2195,7 @@ Variant c_DOMNode::t_insertbefore(const Object& newnode,
       new_child = xmlAddPrevSibling(refp, child);
     }
   } else {
-    if (child->parent != NULL){
+    if (child->parent != NULL) {
       xmlUnlinkNode(child);
     }
     if (child->type == XML_TEXT_NODE && parentp->last != NULL &&

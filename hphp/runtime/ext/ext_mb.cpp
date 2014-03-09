@@ -2135,7 +2135,7 @@ static mbfl_no_encoding _php_mb_encoding_handler_ex
 
     arg.set(String(var, CopyString), String(val, val_len, CopyString));
 
-    if (convd != NULL){
+    if (convd != NULL) {
       mbfl_string_clear(&resvar);
       mbfl_string_clear(&resval);
     }

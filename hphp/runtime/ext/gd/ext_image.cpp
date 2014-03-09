@@ -2144,7 +2144,7 @@ static bool _php_image_output(const Resource& image, const String& filename,
       break;
 #if HAVE_LIBGD20
     case PHP_GDIMG_TYPE_GD:
-      if (im->trueColor){
+      if (im->trueColor) {
         gdImageTrueColorToPalette(im,1,256);
       }
       // gdImageGd
@@ -4425,7 +4425,7 @@ Variant f_iptcparse(const String& iptcblock) {
   buffer = (unsigned char *)iptcblock.c_str();
   while (inx < str_len) { /* find 1st tag */
     if ((buffer[inx] == 0x1c) &&
-        ((buffer[inx+1] == 0x01) || (buffer[inx+1] == 0x02))){
+        ((buffer[inx+1] == 0x01) || (buffer[inx+1] == 0x02))) {
       break;
     } else {
       inx++;

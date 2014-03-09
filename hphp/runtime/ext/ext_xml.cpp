@@ -300,7 +300,7 @@ static Variant php_xml_parser_create_impl(const String& encoding_param,
   }
 
   String separator;
-  if (ns_support && ns_param.empty()){
+  if (ns_support && ns_param.empty()) {
     separator = ":";
   } else {
     separator = ns_param;
@@ -803,7 +803,7 @@ bool f_xml_set_element_handler(const Resource& parser, const Variant& start_elem
   return true;
 }
 
-bool f_xml_set_processing_instruction_handler(const Resource& parser, const Variant& handler){
+bool f_xml_set_processing_instruction_handler(const Resource& parser, const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->processingInstructionHandler, handler);
   XML_SetProcessingInstructionHandler(p->parser,

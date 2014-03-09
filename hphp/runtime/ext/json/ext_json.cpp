@@ -77,7 +77,7 @@ String HHVM_FUNCTION(json_encode, const Variant& value, int64_t options /* = 0 *
 }
 
 Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
-                      int64_t depth /* = 512 */, int64_t options /* = 0 */){
+                      int64_t depth /* = 512 */, int64_t options /* = 0 */) {
 
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
 

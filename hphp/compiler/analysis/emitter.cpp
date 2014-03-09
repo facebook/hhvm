@@ -6810,7 +6810,7 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
 
 void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
                                            ExpressionListPtr params,
-                                           bool builtin /*= false */){
+                                           bool builtin /*= false */) {
   int numParam = params ? params->getCount() : 0;
   for (int i = 0; i < numParam; i++) {
     ParameterExpressionPtr par(

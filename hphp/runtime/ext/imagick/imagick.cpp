@@ -93,7 +93,7 @@ static bool HHVM_METHOD(Imagick, destroy) {
 static bool HHVM_METHOD(Imagick, drawImage, const Object& draw) {
   auto wand = getMagickWandResource(this_);
   auto drawing = getDrawingWandResource(draw);
-  auto status = withMagickLocaleFix([&wand, &drawing](){
+  auto status = withMagickLocaleFix([&wand, &drawing]() {
     return MagickDrawImage(wand->getWand(), drawing->getWand());
   });
   if (status == MagickFalse) {

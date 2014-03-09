@@ -788,14 +788,6 @@ class Variant : private TypedValue {
   void remove(const Variant& key);
 
   /**
-   * For C++ library users to write "var.cast<c_MyClass>()->mf_func()".
-   */
-  template<typename T>
-  T *cast() const {
-    return toObject().getTyped<T>();
-  }
-
-  /**
    * Low level access that should be restricted to internal use.
    */
   int64_t *getInt64Data() const {

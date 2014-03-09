@@ -692,39 +692,8 @@ class Variant : private TypedValue {
   void unserialize(VariableUnserializer *unserializer,
                    Uns::Mode mode = Uns::Mode::Value);
 
-  template<typename T>
-  Variant &lval(const T &key) {
-    if (m_type == KindOfRef) {
-      return m_data.pref->var()->lval(key);
-    }
-
-    assert(m_type == KindOfArray);
-    Variant *ret = nullptr;
-    ArrayData *arr = m_data.parr;
-    ArrayData *escalated = arr->lval(key, ret, arr->hasMultipleRefs());
-    if (escalated != arr) set(escalated);
-    assert(ret);
-    return *ret;
-  }
-
-  Variant &lvalAt();
-
   static Variant &lvalInvalid();
   static Variant &lvalBlackHole();
-
-  Variant &lvalAt(int     key, ACCESSPARAMS_DECL);
-  Variant &lvalAt(int64_t   key, ACCESSPARAMS_DECL);
-  Variant &lvalAt(double  key, ACCESSPARAMS_DECL) = delete;
-  Variant &lvalAt(litstr  key, ACCESSPARAMS_DECL) = delete;
-  Variant &lvalAt(const String& key, ACCESSPARAMS_DECL);
-  Variant &lvalAt(const Variant& key, ACCESSPARAMS_DECL);
-
-  Variant &lvalRef(int     key, Variant& tmp, ACCESSPARAMS_DECL);
-  Variant &lvalRef(int64_t   key, Variant& tmp, ACCESSPARAMS_DECL);
-  Variant &lvalRef(double  key, Variant& tmp, ACCESSPARAMS_DECL) = delete;
-  Variant &lvalRef(litstr  key, Variant& tmp, ACCESSPARAMS_DECL) = delete;
-  Variant &lvalRef(const String& key, Variant& tmp, ACCESSPARAMS_DECL);
-  Variant &lvalRef(const Variant& key, Variant& tmp, ACCESSPARAMS_DECL);
 
   template <typename T>
   ALWAYS_INLINE static const Variant& SetImpl(Variant *self, T key, const Variant& v,
@@ -1027,13 +996,6 @@ public:
 #ifdef INLINE_VARIANT_HELPER
 private:
 #endif
-
-  template<typename T>
-  static ALWAYS_INLINE Variant &LvalAtImpl0(Variant *self, T key, Variant *tmp,
-                                            bool blackHole, ACCESSPARAMS_DECL);
-
-  template<typename T>
-  ALWAYS_INLINE Variant &lvalAtImpl(T key, ACCESSPARAMS_DECL);
 
  private:
   /**

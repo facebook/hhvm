@@ -451,44 +451,6 @@ bool TestCppBase::TestArray() {
     VS(arr, make_map_array("n0", "s2", "n1", "s3"));
   }
 
-  // escalation
-  {
-    Array arr;
-    arr.lvalAt(0).lvalAt(0) = 1.2;
-    VS(arr, make_packed_array(make_packed_array(1.2)));
-  }
-  {
-    Array arr;
-    arr.lvalAt(s_name).lvalAt(0) = 1.2;
-    VS(arr, make_map_array(s_name, make_packed_array(1.2)));
-  }
-  {
-    Array arr = Array::Create();
-    arr.lvalAt(0).lvalAt(0) = 1.2;
-    VS(arr, make_packed_array(make_packed_array(1.2)));
-  }
-  {
-    Array arr = Array::Create();
-    arr.lvalAt(s_name).lvalAt(0) = 1.2;
-    VS(arr, make_map_array(s_name, make_packed_array(1.2)));
-  }
-  {
-    Array arr = Array::Create("test");
-    arr.lvalAt(0) = make_packed_array(1.2);
-    VS(arr, make_packed_array(make_packed_array(1.2)));
-  }
-  {
-    Array arr = Array::Create("test");
-    arr.lvalAt(s_name).lvalAt(0) = 1.2;
-    VS(arr, make_map_array(0, "test", s_name, make_packed_array(1.2)));
-  }
-  {
-    Array arr = Array::Create();
-    arr.append("apple");
-    arr.set(2, "pear");
-    VS(arr[2], "pear");
-  }
-
   {
     Array arr = make_map_array(0, "a", 1, "b");
     VERIFY(arr->isVectorData());

@@ -1170,7 +1170,7 @@ static bool get_zval_property(Variant &object, const char* name,
     if (!arr.exists(sname)) {
       return false;
     }
-    if (ret) ret->assignRef(object.lvalAt(sname));
+    if (ret) ret->assignRef(object.toArrRef().lvalAt(sname));
     return true;
   }
   return false;
@@ -1221,8 +1221,8 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
         /* Add array element */
         if (name) {
           String name_str(name);
-          if (any.toArray().exists(name_str)) {
-            Variant &el = any.lvalAt(name_str);
+          if (any.toArrRef().exists(name_str)) {
+            Variant &el = any.toArrRef().lvalAt(name_str);
             if (!el.isArray()) {
               /* Convert into array */
               Array arr = Array::Create();
@@ -2438,10 +2438,10 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
       i = 0;
       Variant *ar = &ret;
       while (i < dimension-1) {
-        if (!ar->toArray().exists(pos[i])) {
+        if (!ar->toArrRef().exists(pos[i])) {
           ar->set(pos[i], Array::Create());
         }
-        ar = &ar->lvalAt(pos[i]);
+        ar = &ar->toArrRef().lvalAt(pos[i]);
         i++;
       }
       ar->set(pos[i], tmpVal);

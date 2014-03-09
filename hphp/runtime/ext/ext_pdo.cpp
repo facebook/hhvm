@@ -1943,8 +1943,9 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
 
     case PDO_FETCH_NAMED: {
       /* already have an item with this name? */
-      if (ret.toArray().exists(name)) {
-        Variant &curr_val = ret.lvalAt(name);
+      forceToArray(ret);
+      if (ret.toArrRef().exists(name)) {
+        auto& curr_val = ret.toArrRef().lvalAt(name);
         if (!curr_val.isArray()) {
           Array arr = Array::Create();
           arr.append(curr_val);
@@ -2023,7 +2024,8 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
     if ((flags & PDO_FETCH_UNIQUE) == PDO_FETCH_UNIQUE) {
       return_all->set(grp_val, ret);
     } else {
-      return_all->lvalAt(grp_val).append(ret);
+      forceToArray(*return_all);
+      return_all->toArrRef().lvalAt(grp_val).append(ret);
     }
   }
 

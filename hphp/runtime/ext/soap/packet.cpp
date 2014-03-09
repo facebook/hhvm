@@ -364,8 +364,8 @@ bool parse_packet_soap(c_SoapClient *obj, const char *buffer,
             Variant tmp = master_to_zval(encodePtr(), val);
             if (val->name) {
               String key((char*)val->name, CopyString);
-              if (return_value.toArray().exists(key)) {
-                return_value.lvalAt(key).append(tmp);
+              if (return_value.toCArrRef().exists(key)) {
+                return_value.toArrRef().lvalAt(key).append(tmp);
               } else if (val->next && get_node(val->next, (char*)val->name)) {
                 Array arr = Array::Create();
                 arr.append(tmp);

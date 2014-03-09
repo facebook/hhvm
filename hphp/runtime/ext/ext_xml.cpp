@@ -354,10 +354,11 @@ static void _xml_add_to_info(XmlParser *parser, char *name) {
     return;
   }
   String nameStr(name, CopyString);
-  if (!parser->info.toArray().exists(nameStr)) {
+  forceToArray(parser->info);
+  if (!parser->info.toCArrRef().exists(nameStr)) {
     parser->info.set(nameStr, Array::Create());
   }
-  parser->info.lvalAt(nameStr).append(parser->curtag);
+  parser->info.toArrRef().lvalAt(nameStr).append(parser->curtag);
   parser->curtag++;
 }
 

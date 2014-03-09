@@ -323,16 +323,16 @@ void IniSetting::ParserCallback::onPopEntry(
     const std::string &key, const std::string &value, const std::string &offset,
     void *arg) {
   Variant *arr = (Variant*)arg;
-  Variant &hash = arr->lvalAt(String(key));
-  if (!hash.isArray()) {
-    hash = Array::Create();
-  }
+  forceToArray(*arr);
+  auto& hash = arr->toArrRef().lvalAt(String(key));
+  forceToArray(hash);
   if (!offset.empty()) {
     makeArray(hash, offset, value);
   } else {
     hash.append(value);
   }
 }
+
 void IniSetting::ParserCallback::makeArray(Variant &hash,
                                            const std::string &offset,
                                            const std::string &value) {
@@ -344,8 +344,16 @@ void IniSetting::ParserCallback::makeArray(Variant &hash,
   do {
     String index(p);
     last = p + index.size() >= start + offset.size();
-    auto def = Variant(Array::Create());
-    Variant newval = last ? Variant(value) : val.lvalRef(index, def);
+    Variant newval;
+    if (last) {
+      newval = Variant(value);
+    } else {
+      if (val.toArray().exists(index)) {
+        newval = val.toArray().rvalAt(index);
+      } else {
+        newval = Variant(Array::Create());
+      }
+    }
     val.setRef(index, newval);
     if (!last) {
       val = strongBind(newval);
@@ -353,6 +361,7 @@ void IniSetting::ParserCallback::makeArray(Variant &hash,
     }
   } while (!last);
 }
+
 void IniSetting::ParserCallback::onConstant(std::string &result,
                                             const std::string &name) {
   if (f_defined(name)) {

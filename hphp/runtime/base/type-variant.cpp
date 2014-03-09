@@ -473,28 +473,6 @@ inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// iterator functions
-
-ArrayIter Variant::begin(const String& context /* = null_string */) const {
-  if (is(KindOfArray)) {
-    return ArrayIter(getArrayData());
-  }
-  if (is(KindOfObject)) {
-    return getObjectData()->begin(context);
-  }
-  raise_warning("Invalid argument supplied for foreach()");
-  return ArrayIter();
-}
-
-MutableArrayIter Variant::begin(Variant *key, Variant &val,
-                                const String& context /* = null_string */) {
-  if (is(KindOfObject)) {
-    return getObjectData()->begin(key, val, context);
-  }
-  return MutableArrayIter(this, key, val);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // type conversions
 
 bool Variant::toBooleanHelper() const {

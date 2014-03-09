@@ -93,7 +93,9 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
       buf.append("(");
       if (!ignore_args) {
         bool first = true;
-        for (ArrayIter it = frame->get(s_args).begin(); !it.end(); it.next()) {
+        for (ArrayIter it(frame->get(s_args).toArray());
+            !it.end();
+            it.next()) {
           if (!first) {
             buf.append(", ");
           } else {

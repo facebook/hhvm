@@ -499,6 +499,17 @@ Variant ArrayUtil::RegularSortUnique(const Array& input) {
 ///////////////////////////////////////////////////////////////////////////////
 // iterations
 
+namespace {
+
+MutableArrayIter iter_begin(Variant& var, Variant* key, Variant& val) {
+  if (var.is(KindOfObject)) {
+    return var.getObjectData()->begin(key, val, null_string);
+  }
+  return MutableArrayIter(&var, key, val);
+}
+
+}
+
 void ArrayUtil::Walk(VRefParam input, PFUNC_WALK walk_function,
                      const void *data, bool recursive /* = false */,
                      PointerSet *seen /* = NULL */,
@@ -507,7 +518,7 @@ void ArrayUtil::Walk(VRefParam input, PFUNC_WALK walk_function,
 
   Variant k;
   Variant v;
-  for (MutableArrayIter iter = input->begin(&k, v); iter.advance(); ) {
+  for (MutableArrayIter iter = iter_begin(input, &k, v); iter.advance(); ) {
     if (recursive && v.is(KindOfArray)) {
       assert(seen);
       ArrayData *arr = v.getArrayData();

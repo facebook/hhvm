@@ -34,9 +34,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ArrayIter;
-class MutableArrayIter;
-
 /*
  * This class predates HHVM.
  *
@@ -596,14 +593,6 @@ class Variant : private TypedValue {
   Variant  operator ++ (int) = delete;
   Variant &operator -- () = delete;
   Variant  operator -- (int) = delete;
-
-  /**
-   * Iterator functions. See array-iterator.h for end() and next().
-   */
-  ArrayIter begin(const String& context = null_string) const;
-  // used by generated code
-  MutableArrayIter begin(Variant *key, Variant &val,
-                         const String& context = null_string);
 
   /*
    * Variant used to implicitly convert to all these types.  (It still

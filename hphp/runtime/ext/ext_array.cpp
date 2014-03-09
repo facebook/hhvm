@@ -591,7 +591,7 @@ Variant f_array_pop(VRefParam containerRef) {
     return uninit_null();
   }
   if (container->m_type == KindOfArray) {
-    return containerRef.pop();
+    return containerRef.wrapped().toArrRef().pop();
   }
   assert(container->m_type == KindOfObject);
   auto* obj = container->m_data.pobj;
@@ -723,7 +723,7 @@ Variant f_array_shift(VRefParam array) {
     return uninit_null();
   }
   if (cell_array->m_type == KindOfArray) {
-    return array.dequeue();
+    return array.wrapped().toArrRef().dequeue();
   }
   assert(cell_array->m_type == KindOfObject);
   auto* obj = cell_array->m_data.pobj;
@@ -833,10 +833,10 @@ Variant f_array_unshift(int _argc, VRefParam array, const Variant& var, const Ar
       if (!_argv.empty()) {
         for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
           pos = _argv->iter_rewind(pos)) {
-          array.prepend(_argv->getValueRef(pos));
+          array.wrapped().toArrRef().prepend(_argv->getValueRef(pos));
         }
       }
-      array.prepend(var);
+      array.wrapped().toArrRef().prepend(var);
     } else {
       {
         Array newArray;

@@ -413,7 +413,7 @@ Variant ExecutionContext::popShutdownFunction(ShutdownType type) {
   if (!funcs.isArray()) {
     return uninit_null();
   }
-  return funcs.pop();
+  return funcs.toArrRef().pop();
 }
 
 Variant ExecutionContext::pushUserErrorHandler(const Variant& function,

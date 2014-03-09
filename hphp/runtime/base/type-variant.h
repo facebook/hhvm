@@ -788,13 +788,6 @@ class Variant : private TypedValue {
   void remove(const Variant& key);
 
   /**
-   * More array operations.
-   */
-  Variant pop();
-  Variant dequeue();
-  void prepend(const Variant& v);
-
-  /**
    * For C++ library users to write "var.cast<c_MyClass>()->mf_func()".
    */
   template<typename T>
@@ -1162,10 +1155,6 @@ public:
   ObjectData *getObjectData() const { return m_var.getObjectData(); }
 
   const Variant& append(const Variant& v) const { return m_var.append(v); }
-
-  Variant pop() const { return m_var.pop(); }
-  Variant dequeue() const { return m_var.dequeue(); }
-  void prepend(const Variant& v) const { m_var.prepend(v); }
 
   bool isArray() const { return m_var.isArray(); }
   ArrNR toArrNR() const { return m_var.toArrNR(); }

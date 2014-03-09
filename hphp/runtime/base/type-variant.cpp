@@ -465,54 +465,6 @@ bool Variant::instanceof(Class* cls) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// array operations
-
-Variant Variant::pop() {
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->pop();
-  }
-  if (!is(KindOfArray)) {
-    throw_bad_type_exception("expecting an array");
-    return null_variant;
-  }
-
-  Variant ret;
-  ArrayData* a = getArrayData();
-  ArrayData* newarr = a->pop(ret);
-  if (newarr != a) set(newarr);
-  return ret;
-}
-
-Variant Variant::dequeue() {
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->dequeue();
-  }
-  if (!is(KindOfArray)) {
-    throw_bad_type_exception("expecting an array");
-    return null_variant;
-  }
-
-  Variant ret;
-  ArrayData* a = getArrayData();
-  ArrayData* newarr = a->dequeue(ret);
-  if (newarr != a) set(newarr);
-  return ret;
-}
-
-void Variant::prepend(const Variant& v) {
-  if (m_type == KindOfRef) {
-    m_data.pref->var()->prepend(v);
-    return;
-  }
-  if (isNull()) set(Array::Create());
-  if (is(KindOfArray)) {
-    ArrayData *arr = getArrayData();
-    ArrayData *newarr = arr->prepend(v, (arr->hasMultipleRefs()));
-    if (newarr != arr) set(newarr);
-  } else {
-    throw_bad_type_exception("expecting an array");
-  }
-}
 
 inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
   StringData *s = getStringData();

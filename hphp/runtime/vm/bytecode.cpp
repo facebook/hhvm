@@ -2643,7 +2643,7 @@ Unit* ExecutionContext::compileEvalString(
 
 const String& ExecutionContext::createFunction(const String& args,
                                                const String& code) {
-  if (UNLIKELY(RuntimeOption::RepoAuthoritative)) {
+  if (UNLIKELY(RuntimeOption::EvalAuthoritativeMode)) {
     // Whole program optimizations need to assume they can see all the
     // code.
     raise_error("You can't use create_function in RepoAuthoritative mode; "
@@ -6675,7 +6675,7 @@ OPTBLD_INLINE void ExecutionContext::iopEval(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
 
-  if (UNLIKELY(RuntimeOption::RepoAuthoritative)) {
+  if (UNLIKELY(RuntimeOption::EvalAuthoritativeMode)) {
     // Ahead of time whole program optimizations need to assume it can
     // see all the code, or it really can't do much.
     raise_error("You can't use eval in RepoAuthoritative mode");

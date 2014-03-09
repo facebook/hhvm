@@ -292,6 +292,7 @@ static void appendJsonEscape(StringBuffer& sb,
     }
     if (c == UTF8_ERROR) {
       // discard the part that has been already decoded.
+      json_set_last_error_code(json_error_codes::JSON_ERROR_UTF8);
       sb.resize(start);
       sb.append("null", 4);
       break;

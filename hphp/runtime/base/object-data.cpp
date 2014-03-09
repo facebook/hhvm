@@ -1629,7 +1629,7 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
 
   bool tryUnset = getAttribute(UseUnset);
 
-  if (propInd != kInvalidSlot && !tryUnset) {
+  if (propInd != kInvalidSlot && !accessible && !tryUnset) {
     // defined property that is not accessible
     raise_error("Cannot unset inaccessible property");
   }

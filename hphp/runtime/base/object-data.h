@@ -18,15 +18,16 @@
 #define incl_HPHP_OBJECT_DATA_H_
 
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/smart-ptr.h"
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/types.h"
+
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
+
 #include "hphp/system/systemlib.h"
-#include <boost/mpl/eval_if.hpp>
-#include <boost/mpl/int.hpp>
+
 #include <vector>
 
 namespace HPHP {
@@ -249,7 +250,7 @@ class ObjectData {
     if (UNLIKELY(getAttribute(CallToImpl) && !isCollection())) {
       return o_toInt64Impl();
     }
-    raiseObjToIntNotice(o_getClassName().data());
+    raiseObjToIntNotice(classname_cstr());
     return 1;
   }
 
@@ -325,9 +326,7 @@ class ObjectData {
   /*
    * Returns whether this object has any dynamic properties.
    */
-  bool hasDynProps() const {
-    return getAttribute(HasDynPropArr) ? dynPropArray().size() : false;
-  }
+  bool hasDynProps() const;
 
   /*
    * Returns the dynamic properties array for this object.
@@ -349,15 +348,7 @@ class ObjectData {
   Array& reserveProperties(int nProp = 2);
 
   // heap profiling helpers
-  void getChildren(std::vector<TypedValue*> &out) {
-    Slot nProps = m_cls->numDeclProperties();
-    for (Slot i = 0; i < nProps; ++i) {
-      out.push_back(&propVec()[i]);
-    }
-    if (UNLIKELY(getAttribute(HasDynPropArr))) {
-      dynPropArray()->getChildren(out);
-    }
-  }
+  void getChildren(std::vector<TypedValue*>& out);
 
  protected:
   TypedValue* propVec();
@@ -444,9 +435,10 @@ class ObjectData {
 
 private:
   friend struct MemoryProfile;
-  static void compileTimeAssertions() {
-    static_assert(offsetof(ObjectData, m_count) == FAST_REFCOUNT_OFFSET, "");
-  }
+
+  const char* classname_cstr() const;
+
+  static void compileTimeAssertions();
 
 private:
   Class* m_cls;

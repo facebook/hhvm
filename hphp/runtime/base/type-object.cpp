@@ -14,12 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/type-object.h"
+
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/variable-serializer.h"
+
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_datetime.h"
 
@@ -30,6 +33,10 @@ namespace HPHP {
 const Object Object::s_nullObject = Object();
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ObjNR::compileTimeAssertions() {
+  static_assert(offsetof(ObjNR, m_px) == kExpectedMPxOffset, "");
+}
 
 Object::~Object() {
   // force it out of line

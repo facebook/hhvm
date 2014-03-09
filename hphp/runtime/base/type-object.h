@@ -17,16 +17,12 @@
 #ifndef incl_HPHP_OBJECT_H_
 #define incl_HPHP_OBJECT_H_
 
-#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
-#error Directly including 'type_object.h' is prohibited. \
-       Include 'complex_types.h' instead.
-#endif
-
-#include "hphp/runtime/base/smart-ptr.h"
-#include <algorithm>
 #include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
+
+#include <algorithm>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,14 +141,14 @@ public:
   /**
    * Type conversions
    */
-  bool   toBoolean() const { return m_px ? m_px->o_toBoolean() : false;}
-  char   toByte   () const { return m_px ? m_px->o_toInt64() : 0;}
-  short  toInt16  () const { return m_px ? m_px->o_toInt64() : 0;}
-  int    toInt32  () const { return m_px ? m_px->o_toInt64() : 0;}
-  int64_t  toInt64  () const { return m_px ? m_px->o_toInt64() : 0;}
-  double toDouble () const { return m_px ? m_px->o_toDouble() : 0;}
-  String toString () const { return m_px ? m_px->invokeToString() : String();}
-  Array  toArray  () const;
+  bool    toBoolean() const { return m_px ? m_px->o_toBoolean() : false;}
+  char    toByte   () const { return m_px ? m_px->o_toInt64() : 0;}
+  short   toInt16  () const { return m_px ? m_px->o_toInt64() : 0;}
+  int     toInt32  () const { return m_px ? m_px->o_toInt64() : 0;}
+  int64_t toInt64  () const { return m_px ? m_px->o_toInt64() : 0;}
+  double  toDouble () const { return m_px ? m_px->o_toDouble() : 0;}
+  String  toString () const { return m_px ? m_px->invokeToString() : String();}
+  Array   toArray  () const;
 
   int64_t toInt64ForCompare() const;
   double toDoubleForCompare() const;
@@ -203,7 +199,7 @@ public:
 
 class ObjNR {
 public:
-  explicit ObjNR(ObjectData *data) {
+  explicit ObjNR(ObjectData* data) {
     m_px = data;
   }
 
@@ -218,9 +214,7 @@ public:
 private:
   ObjectData* m_px;
 
-  static void compileTimeAssertions() {
-    static_assert(offsetof(ObjNR, m_px) == kExpectedMPxOffset, "");
-  }
+  static void compileTimeAssertions();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

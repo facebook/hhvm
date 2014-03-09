@@ -14,33 +14,38 @@
    +----------------------------------------------------------------------+
 */
 
-#include "folly/Hash.h"
-#include <vector>
-#include "folly/ScopeGuard.h"
+#include "hphp/runtime/base/object-data.h"
 
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/memory-profile.h"
-#include "hphp/runtime/base/smart-containers.h"
-#include "hphp/util/lock.h"
 #include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/memory-profile.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/variable-serializer.h"
+
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_datetime.h"
 #include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
+
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/container-functions.h"
+
 #include "hphp/system/systemlib.h"
+
+#include "folly/Hash.h"
+#include "folly/ScopeGuard.h"
+
+#include <vector>
 
 namespace HPHP {
 
@@ -1824,6 +1829,28 @@ RefData* ObjectData::zGetProp(Class* ctx, const StringData* key,
     tvBox(tv);
   }
   return tv->m_data.pref;
+}
+
+bool ObjectData::hasDynProps() const {
+  return getAttribute(HasDynPropArr) && dynPropArray().size() != 0;
+}
+
+void ObjectData::getChildren(std::vector<TypedValue*>& out) {
+  Slot nProps = m_cls->numDeclProperties();
+  for (Slot i = 0; i < nProps; ++i) {
+    out.push_back(&propVec()[i]);
+  }
+  if (UNLIKELY(getAttribute(HasDynPropArr))) {
+    dynPropArray()->getChildren(out);
+  }
+}
+
+const char* ObjectData::classname_cstr() const {
+  return o_getClassName().data();
+}
+
+void ObjectData::compileTimeAssertions() {
+  static_assert(offsetof(ObjectData, m_count) == FAST_REFCOUNT_OFFSET, "");
 }
 
 } // HPHP

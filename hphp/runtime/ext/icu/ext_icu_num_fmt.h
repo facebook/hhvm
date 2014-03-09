@@ -26,7 +26,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_NumberFormatter;
 
-class NumberFormatter : public IntlResourceData {
+class NumberFormatter : public IntlError {
 public:
   NumberFormatter() {}
   NumberFormatter(const NumberFormatter&) = delete;
@@ -34,7 +34,7 @@ public:
     setNumberFormatter(&src);
     return *this;
   }
-  ~NumberFormatter() override {
+  ~NumberFormatter() {
     if (m_formatter) {
       unum_close(m_formatter);
       m_formatter = nullptr;
@@ -46,12 +46,16 @@ public:
                           const String& pattern);
   void setNumberFormatter(const NumberFormatter *orig);
 
-  bool isValid() const override {
+  bool isValid() const {
     return m_formatter;
   }
 
   static Object newInstance() {
-    return NewInstance(s_NumberFormatter);
+    if (!c_NumberFormatter) {
+      c_NumberFormatter = Unit::lookupClass(s_NumberFormatter.get());
+      assert(c_NumberFormatter);
+    }
+    return ObjectData::newInstance(c_NumberFormatter);
   }
   static NumberFormatter* Get(Object obj) {
     return GetData<NumberFormatter>(obj, s_NumberFormatter);
@@ -61,6 +65,7 @@ public:
 
 private:
   UNumberFormat *m_formatter = nullptr;
+  static Class* c_NumberFormatter;
 };
 
 /////////////////////////////////////////////////////////////////////////////

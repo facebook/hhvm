@@ -30,7 +30,9 @@ class TempFile : public PlainFile {
 public:
   DECLARE_RESOURCE_ALLOCATION(TempFile);
 
-  explicit TempFile(bool autoDelete = true);
+  explicit TempFile(bool autoDelete = true,
+                    const String& wrapper_type = null_string,
+                    const String& stream_type = empty_string);
   virtual ~TempFile();
 
   // overriding ResourceData

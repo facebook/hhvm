@@ -18,7 +18,6 @@ function f($x) {
 function main() {
   $vector = Vector {11, 22, 33, '22'};
   $map = Map {'a' => 11, 'b' => 22, 'c' => 33, 'd' => '22'};
-  $smap = StableMap {'a' => 11, 'b' => 22, 'c' => 33, 'd' => '22'};
   $set = Set {11, 22, 33, '22'};
   $pair = Pair {22, '22'};
 
@@ -26,8 +25,6 @@ function main() {
   f($vector->toKeysArray());
   f(array_keys($map));
   f($map->toKeysArray());
-  f(array_keys($smap));
-  f($smap->toKeysArray());
   f(array_keys($set));
   f($set->toKeysArray());
   f(array_keys($pair));
@@ -37,8 +34,6 @@ function main() {
   f(array_keys($vector, '22'));
   f(array_keys($map, 22));
   f(array_keys($map, '22'));
-  f(array_keys($smap, 22));
-  f(array_keys($smap, '22'));
   f(array_keys($set, 22));
   f(array_keys($set, '22'));
   f(array_keys($pair, 22));
@@ -48,8 +43,6 @@ function main() {
   f(array_keys($vector, '22', false));
   f(array_keys($map, 22, false));
   f(array_keys($map, '22', false));
-  f(array_keys($smap, 22, false));
-  f(array_keys($smap, '22', false));
   f(array_keys($set, 22, false));
   f(array_keys($set, '22', false));
   f(array_keys($pair, 22, false));
@@ -59,8 +52,6 @@ function main() {
   f(array_keys($vector, '22', true));
   f(array_keys($map, 22, true));
   f(array_keys($map, '22', true));
-  f(array_keys($smap, 22, true));
-  f(array_keys($smap, '22', true));
   f(array_keys($set, 22, true));
   f(array_keys($set, '22', true));
   f(array_keys($pair, 22, true));

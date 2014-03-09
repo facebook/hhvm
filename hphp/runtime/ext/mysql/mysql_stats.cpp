@@ -18,7 +18,7 @@
 
 #include <sstream>
 
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ MySqlStats::Verb MySqlStats::Translate(const std::string &verb,
                                        int xactionCount) {
   if (!s_inited) Init();
   std::string composed = xactionCount ? (xactionCount > 1 ? "x_" : "t_") : "n_";
-  composed += Util::toLower(verb);
+  composed += toLower(verb);
   hphp_string_map<Verb>::const_iterator iter = s_verbs.find(composed);
   if (iter != s_verbs.end()) {
     return iter->second;
@@ -111,7 +111,7 @@ void MySqlStats::Record(const std::string &verb,
   Verb v = Translate(verb, xactionCount);
   if (v == UNKNOWN) return;
 
-  std::string ltable = Util::toLower(table);
+  std::string ltable = toLower(table);
 
   Lock lock(s_mutex);
   auto iter = s_stats.find(ltable);

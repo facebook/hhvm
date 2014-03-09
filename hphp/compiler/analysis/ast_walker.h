@@ -18,6 +18,7 @@
 #define incl_HPHP_AST_WALKER_H_
 
 #include "hphp/compiler/hphp.h"
+#include <vector>
 #include "hphp/compiler/construct.h"
 
 namespace HPHP {

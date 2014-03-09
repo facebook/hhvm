@@ -14,7 +14,7 @@ not_array:
           InstanceOfD "HH\\Set"
           JmpNZ start_kt
           CGetL $arr
-          InstanceOfD "HH\\FrozenSet"
+          InstanceOfD "HH\\ImmSet"
           JmpNZ start_kt
           String "array_filter() expects parameter 1 to be an array or collection"
           Jmp warning
@@ -36,7 +36,7 @@ start:    IsTypeL $arr Arr
           CGetL $func
           DecodeCufIter 0 bad_param2
 .try_fault kill_iter_0 {
-            NewArray
+            NewArray 3  # HphpArray::SmallSize
             SetL $res
             PopC
 
@@ -56,7 +56,7 @@ endloop_a:CIterFree 0
 endloop_n:CGetL $res
           RetC
 
-no_func:  NewArray
+no_func:  NewArray 3
           SetL $res
           PopC
           CGetL $arr
@@ -75,7 +75,7 @@ start_kt: IssetL $func
           CGetL $func
           DecodeCufIter 0 bad_param2
 .try_fault kill_iter_0_kt {
-            NewArray
+            NewArray 3
             SetL $res
             PopC
 
@@ -97,7 +97,7 @@ endloop_a_kt:CIterFree 0
 endloop_n_kt:CGetL $res
              RetC
 
-no_func_kt:  NewArray
+no_func_kt:  NewArray 3
              SetL $res
              PopC
              CGetL $arr

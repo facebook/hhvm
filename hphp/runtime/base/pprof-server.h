@@ -22,6 +22,7 @@
 
 #include <condition_variable>
 #include <mutex>
+#include <memory>
 
 namespace HPHP {
 

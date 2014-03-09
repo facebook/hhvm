@@ -1,19 +1,14 @@
 string(0) ""
 string(0) ""
-HipHop Notice: Use of undefined constant INT_MAX - assumed 'INT_MAX' in %s/test/slow/ext_fb/utf8_substr.php on line 9
-string(0) ""
+string(6) "hon�"
 string(3) "hon"
-HipHop Notice: Use of undefined constant INT_MAX - assumed 'INT_MAX' in %s/test/slow/ext_fb/utf8_substr.php on line 11
-string(0) ""
+string(5) "on�"
 string(1) "X"
-HipHop Notice: Use of undefined constant INT_MAX - assumed 'INT_MAX' in %s/test/slow/ext_fb/utf8_substr.php on line 15
-string(0) ""
+string(4) "Hell"
 string(2) "el"
 string(2) "\u"
-HipHop Notice: Use of undefined constant INT_MAX - assumed 'INT_MAX' in %s/test/slow/ext_fb/utf8_substr.php on line 20
 string(0) ""
-HipHop Notice: Use of undefined constant INT_MAX - assumed 'INT_MAX' in %s/test/slow/ext_fb/utf8_substr.php on line 21
-string(0) ""
+string(1) "e"
 string(1) "d"
 string(0) ""
 string(1) "X"

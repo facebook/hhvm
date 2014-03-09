@@ -13,15 +13,20 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #ifndef incl_HPHP_EXECUTION_CONTEXT_H_
 #define incl_HPHP_EXECUTION_CONTEXT_H_
+
+#include <list>
+#include <set>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+#include <string>
 
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/server/transport.h"
-#include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/hphp-array.h"
@@ -29,56 +34,25 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
-#include <setjmp.h>
 
 #define PHP_OUTPUT_HANDLER_START  (1<<0)
 #define PHP_OUTPUT_HANDLER_CONT   (1<<1)
 #define PHP_OUTPUT_HANDLER_END    (1<<2)
 
-namespace vixl {
-class Simulator;
+namespace vixl { class Simulator; }
+
+namespace HPHP {
+struct c_Continuation;
+struct RequestEventHandler;
+struct EventHook;
+struct PCFilter;
+namespace Eval { struct PhpFile; }
+namespace JIT { struct Translator; }
 }
 
 namespace HPHP {
-class c_Continuation;
-namespace Eval {
-class PhpFile;
-}
-
-class EventHook;
-namespace JIT {
-class Translator;
-}
-class PCFilter;
 
 ///////////////////////////////////////////////////////////////////////////////
-
-typedef hphp_hash_map<StringData*, HPHP::Eval::PhpFile*, string_data_hash,
-                      string_data_same> EvaledFilesMap;
-typedef std::vector<HPHP::Eval::PhpFile*> EvaledFilesVec;
-
-/**
- * Mainly designed for extensions to perform initialization and shutdown
- * sequences at request scope.
- */
-class RequestEventHandler {
-public:
-  RequestEventHandler() : m_inited(false) {}
-  virtual ~RequestEventHandler() {}
-
-  virtual void requestInit() = 0;
-  virtual void requestShutdown() = 0;
-
-  void setInited(bool inited) { m_inited = inited;}
-  bool getInited() const { return m_inited;}
-
-  // Priority of request shutdown call. Lower priority value means
-  // requestShutdown is called earlier than higher priority values.
-  virtual int priority() const { return 0;}
-
-protected:
-  bool m_inited;
-};
 
 struct VMState {
   PC pc;
@@ -130,7 +104,7 @@ class ClassInfoVM : public ClassInfo,
   UserAttributeVec m_userAttrVec;
 
  public:
-  friend class HPHP::Class;
+  friend class Class;
 };
 
 enum class CallType {
@@ -146,22 +120,20 @@ enum class LookupResult {
   MethodNotFound,
 };
 
-enum InclOpFlags {
-  InclOpDefault = 0,
-  InclOpFatal = 1,
-  InclOpOnce = 2,
-  InclOpDocRoot = 8,
-  InclOpRelative = 16,
+enum class InclOpFlags {
+  Default = 0,
+  Fatal = 1,
+  Once = 2,
+  DocRoot = 8,
+  Relative = 16,
 };
 
-inline InclOpFlags
-operator|(const InclOpFlags &l, const InclOpFlags &r) {
-  return InclOpFlags(int(l) | int(r));
+inline InclOpFlags operator|(const InclOpFlags& l, const InclOpFlags& r) {
+  return static_cast<InclOpFlags>(static_cast<int>(l) | static_cast<int>(r));
 }
 
-inline InclOpFlags
-operator&(const InclOpFlags &l, const InclOpFlags &r) {
-  return InclOpFlags(int(l) & int(r));
+inline bool operator&(const InclOpFlags& l, const InclOpFlags& r) {
+  return static_cast<int>(l) & static_cast<int>(r);
 }
 
 struct VMParserFrame {
@@ -169,14 +141,15 @@ struct VMParserFrame {
   int lineNumber;
 };
 
+struct DebuggerSettings {
+  bool bypassCheck = false;
+  bool stackArgs = true;
+  int printLevel = -1;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * Put all global variables here so we can gather them into one thread-local
- * variable for easy access.
- */
-class BaseExecutionContext : public IDebuggable {
-public:
+struct ExecutionContext {
   // These members are declared first for performance reasons: they
   // are accessed from within the TC and having their offset fit
   // within a single byte makes the generated code slightly smaller
@@ -184,8 +157,7 @@ public:
   Stack m_stack;
   ActRec* m_fp;
   PC m_pc;
-  int64_t m_currentThreadIdx;
-public:
+
   enum ShutdownType {
     ShutDown,
     PostSend,
@@ -208,15 +180,22 @@ public:
   };
 
 public:
-  BaseExecutionContext();
-  ~BaseExecutionContext();
+  ExecutionContext();
+  ExecutionContext(const ExecutionContext&) = delete;
+  ExecutionContext& operator=(const ExecutionContext&) = delete;
+  ~ExecutionContext();
 
   // For RPCRequestHandler
   void backupSession();
   void restoreSession();
 
-  // implementing IDebuggable
-  virtual void debuggerInfo(InfoVec &info);
+  /*
+   * API for the debugger.  Format of the vector is the same as
+   * IDebuggable::debuggerInfo, but we don't actually need to
+   * implement that interface since the execution context is not
+   * accessed by the debugger polymorphically.
+   */
+  void debuggerInfo(std::vector<std::pair<const char*,std::string>>&);
 
   /**
    * System settings.
@@ -226,8 +205,6 @@ public:
   std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;
   void setContentType(const String& mimetype, const String& charset);
-  String getRequestMemoryMaxBytes() const { return m_maxMemory; }
-  void setRequestMemoryMaxBytes(const std::string& max);
   String getCwd() const { return m_cwd;}
   void setCwd(const String& cwd) { m_cwd = cwd;}
 
@@ -271,7 +248,7 @@ public:
   /**
    * Request sequences and program execution hooks.
    */
-  void registerRequestEventHandler(RequestEventHandler *handler);
+  void registerRequestEventHandler(RequestEventHandler* handler);
   void registerShutdownFunction(CVarRef function, Array arguments,
                                 ShutdownType type);
   Variant popShutdownFunction(ShutdownType type);
@@ -298,21 +275,15 @@ public:
                    bool skipFrame = false);
   bool callUserErrorHandler(const Exception &e, int errnum,
                             bool swallowExceptions);
-  virtual void recordLastError(const Exception &e, int errnum = 0);
+  void recordLastError(const Exception &e, int errnum = 0);
   bool onFatalError(const Exception &e); // returns handled
   bool onUnhandledException(Object e);
   ErrorState getErrorState() const { return m_errorState;}
   void setErrorState(ErrorState state) { m_errorState = state;}
   String getLastError() const { return m_lastError;}
   int getLastErrorNumber() const { return m_lastErrorNum;}
-  int getErrorReportingLevel() const { return m_errorReportingLevel;}
-  void setErrorReportingLevel(int level) { m_errorReportingLevel = level;}
   String getErrorPage() const { return m_errorPage;}
   void setErrorPage(const String& page) { m_errorPage = (std::string) page; }
-  bool getLogErrors() const { return m_logErrors;}
-  void setLogErrors(bool on);
-  String getErrorLog() const { return m_errorLog;}
-  void setErrorLog(const String& filename);
 
   /**
    * Misc. settings
@@ -333,20 +304,11 @@ public:
   void setStreamContext(Resource &context) { m_streamContext = context; }
   Resource &getStreamContext() { return m_streamContext; }
 
-  String getDefaultCharset() const { return m_defaultCharset; }
-  int64_t getSocketDefaultTimeout() const { return m_socketDefaultTimeout; }
-
-  void restoreIncludePath();
-  void setIncludePath(const String& path);
-  String getIncludePath() const;
-  Array getIncludePathArray() const { return m_include_paths; }
   const VirtualHost *getVirtualHost() const { return m_vhost; }
   void setVirtualHost(const VirtualHost *vhost) { m_vhost = vhost; }
 
   const String& getSandboxId() const { return m_sandboxId; }
   void setSandboxId(const String& sandboxId) { m_sandboxId = sandboxId; }
-
-  DECLARE_DBG_SETTING_ACCESSORS
 
 private:
   class OutputBuffer {
@@ -360,7 +322,6 @@ private:
   static const StaticString s_amp;
   // system settings
   Transport *m_transport;
-  std::string m_maxMemory;
   String m_cwd;
 
   // output buffering
@@ -381,22 +342,16 @@ private:
   std::vector<std::pair<Variant,int> > m_userErrorHandlers;
   std::vector<Variant> m_userExceptionHandlers;
   ErrorState m_errorState;
-  int64_t m_errorReportingLevel;
   String m_lastError;
   int m_lastErrorNum;
   std::string m_errorPage;
-  bool m_logErrors;
-  String m_errorLog;
 
   // misc settings
   Array m_envs;
   String m_timezone;
   String m_timezoneDefault;
-  String m_argSeparatorOutput;
   bool m_throwAllErrors;
   Resource m_streamContext;
-  String m_defaultCharset;
-  int64_t m_socketDefaultTimeout;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;
@@ -404,9 +359,6 @@ private:
   std::vector<Variant> m_userExceptionHandlersBackup;
 
   Variant m_exitCallback;
-
-  // include_path configuration option
-  Array m_include_paths;
 
   // cache the sandbox id for the request
   String m_sandboxId;
@@ -416,20 +368,15 @@ private:
   void resetCurrentBuffer();
   void executeFunctions(CArrRef funcs);
 
-  DECLARE_DBG_SETTING
-};
-
-class VMExecutionContext : public BaseExecutionContext {
 public:
-  VMExecutionContext();
-  ~VMExecutionContext();
+  DebuggerSettings debuggerSettings;
 
+  // TODO(#3666438): reorder the fields.  This ordering is historical
+  // (due to a transitional period where we had two subclasses of a
+  // ExecutionContext, for hphpc and hhvm).
+public:
   typedef std::set<ObjectData*> LiveObjSet;
   LiveObjSet m_liveBCObjs;
-
-  // pcre ini_settings
-  long m_preg_backtrace_limit;
-  long m_preg_recursion_limit;
 
 public:
   void requestInit();
@@ -437,7 +384,7 @@ public:
 
   static void fillContinuationVars(
     ActRec* origFp, const Func* origFunc, ActRec* genFp, const Func* genFunc);
-  void pushLocalsAndIterators(const HPHP::Func* f, int nparams = 0);
+  void pushLocalsAndIterators(const Func* f, int nparams = 0);
   void enqueueAPCHandle(APCHandle* handle);
 
 private:
@@ -487,7 +434,7 @@ private:
   template<class Op> void implCellBinOp(IOP_ARGS, Op op);
   template<class Op> void implCellBinOpBool(IOP_ARGS, Op op);
   void implVerifyRetType(IOP_ARGS);
-  bool cellInstanceOf(TypedValue* c, const HPHP::NamedEntity* s);
+  bool cellInstanceOf(TypedValue* c, const NamedEntity* s);
   bool iopInstanceOfHelper(const StringData* s1, Cell* c2);
   bool initIterator(PC& pc, PC& origPc, Iter* it,
                     Offset offset, Cell* c1);
@@ -513,24 +460,24 @@ public:
 
   std::unordered_map<const ObjectData*,ArrayNoDtor> dynPropTable;
 
-  const HPHP::Func* lookupMethodCtx(const HPHP::Class* cls,
+  const Func* lookupMethodCtx(const Class* cls,
                                         const StringData* methodName,
-                                        const HPHP::Class* pctx,
+                                        const Class* pctx,
                                         CallType lookupType,
                                         bool raise = false);
-  LookupResult lookupObjMethod(const HPHP::Func*& f,
-                               const HPHP::Class* cls,
+  LookupResult lookupObjMethod(const Func*& f,
+                               const Class* cls,
                                const StringData* methodName,
                                const Class* ctx,
                                bool raise = false);
-  LookupResult lookupClsMethod(const HPHP::Func*& f,
-                               const HPHP::Class* cls,
+  LookupResult lookupClsMethod(const Func*& f,
+                               const Class* cls,
                                const StringData* methodName,
                                ObjectData* this_,
                                const Class* ctx,
                                bool raise = false);
-  LookupResult lookupCtorMethod(const HPHP::Func*& f,
-                                const HPHP::Class* cls,
+  LookupResult lookupCtorMethod(const Func*& f,
+                                const Class* cls,
                                 bool raise = false);
   ObjectData* createObject(StringData* clsName,
                            CVarRef params,
@@ -544,7 +491,7 @@ public:
    * type.  Raises an error if the class has no constant with that
    * name, or if the class is not defined.
    */
-  Cell lookupClsCns(const HPHP::NamedEntity* ne,
+  Cell lookupClsCns(const NamedEntity* ne,
                     const StringData* cls,
                     const StringData* cns);
   Cell lookupClsCns(const StringData* cls,
@@ -560,13 +507,17 @@ public:
 
   VarEnv* m_globalVarEnv;
 
-  EvaledFilesMap m_evaledFiles;
-  EvaledFilesVec m_evaledFilesOrder;
-  typedef std::vector<HPHP::Unit*> EvaledUnitsVec;
-  EvaledUnitsVec m_createdFuncs;
+  hphp_hash_map<
+    StringData*,
+    Eval::PhpFile*,
+    string_data_hash,
+    string_data_same
+  > m_evaledFiles;
+  std::vector<Eval::PhpFile*> m_evaledFilesOrder;
+  std::vector<Unit*> m_createdFuncs;
 
   /*
-   * Accessors for VMExecutionContext state that check safety wrt
+   * Accessors for ExecutionContext state that check safety wrt
    * whether these values may be stale due to TC.  Asserts in these
    * usually mean the need for a VMRegAnchor somewhere in the call
    * chain.
@@ -595,18 +546,18 @@ public:
   const String& getContainingFileName();
   int getLine();
   Array getCallerInfo();
-  HPHP::Eval::PhpFile* lookupPhpFile(
+  Eval::PhpFile* lookupPhpFile(
       StringData* path, const char* currentDir, bool* initial = nullptr);
-  HPHP::Unit* evalInclude(StringData* path,
+  Unit* evalInclude(StringData* path,
                               const StringData* curUnitFilePath, bool* initial);
-  HPHP::Unit* evalIncludeRoot(StringData* path,
+  Unit* evalIncludeRoot(StringData* path,
                                   InclOpFlags flags, bool* initial);
-  HPHP::Eval::PhpFile* lookupIncludeRoot(StringData* path,
+  Eval::PhpFile* lookupIncludeRoot(StringData* path,
                                          InclOpFlags flags, bool* initial,
-                                         HPHP::Unit* unit = 0);
-  bool evalUnit(HPHP::Unit* unit, PC& pc, int funcType);
-  void invokeUnit(TypedValue* retval, HPHP::Unit* unit);
-  HPHP::Unit* compileEvalString(StringData* code,
+                                         Unit* unit = 0);
+  bool evalUnit(Unit* unit, PC& pc, int funcType);
+  void invokeUnit(TypedValue* retval, Unit* unit);
+  Unit* compileEvalString(StringData* code,
                                 const char* evalFilename = nullptr);
   const String& createFunction(const String& args, const String& code);
   bool evalPHPDebugger(TypedValue* retval, StringData *code, int frame);
@@ -643,14 +594,13 @@ public:
   VarEnv* getVarEnv(int frame = 0);
   void setVar(StringData* name, TypedValue* v, bool ref);
   Array getLocalDefinedVariables(int frame);
-  HPHP::PCFilter* m_breakPointFilter;
-  HPHP::PCFilter* m_lastLocFilter;
+  PCFilter* m_breakPointFilter;
+  PCFilter* m_lastLocFilter;
   bool m_dbgNoBreak;
-  bool doFCall(HPHP::ActRec* ar, PC& pc);
+  bool doFCall(ActRec* ar, PC& pc);
   bool doFCallArray(PC& pc);
   bool doFCallArrayTC(PC pc);
   CVarRef getEvaledArg(const StringData* val, const String& namespacedName);
-  virtual void recordLastError(const Exception &e, int errnum = 0);
   String getLastErrorPath() const { return m_lastErrorPath; }
   int getLastErrorLine() const { return m_lastErrorLine; }
 
@@ -669,7 +619,7 @@ private:
   bool isReturnHelper(uintptr_t address);
   void switchModeForDebugger();
   int m_coverPrevLine;
-  HPHP::Unit* m_coverPrevUnit;
+  Unit* m_coverPrevUnit;
   Array m_evaledArgs;
   String m_lastErrorPath;
   int m_lastErrorLine;
@@ -683,10 +633,10 @@ public:
     InvokePseudoMain = 2
   };
   void invokeFunc(TypedValue* retval,
-                  const HPHP::Func* f,
+                  const Func* f,
                   CVarRef args_ = init_null_variant,
                   ObjectData* this_ = nullptr,
-                  HPHP::Class* class_ = nullptr,
+                  Class* class_ = nullptr,
                   VarEnv* varEnv = nullptr,
                   StringData* invName = nullptr,
                   InvokeFlags flags = InvokeNormal);
@@ -701,13 +651,13 @@ public:
                                ActRec* ar,
                                int numArgsPushed);
   void invokeFuncFew(TypedValue* retval,
-                     const HPHP::Func* f,
+                     const Func* f,
                      void* thisOrCls,
                      StringData* invName,
                      int argc,
                      const TypedValue* argv);
   void invokeFuncFew(TypedValue* retval,
-                     const HPHP::Func* f,
+                     const Func* f,
                      void* thisOrCls,
                      StringData* invName = nullptr) {
     invokeFuncFew(retval, f, thisOrCls, invName, 0, nullptr);
@@ -721,7 +671,7 @@ public:
                   ctx.cls ? (char*)ctx.cls + 1 : nullptr,
                   ctx.invName, argc, argv);
   }
-  void invokeContFunc(const HPHP::Func* f,
+  void invokeContFunc(const Func* f,
                       ObjectData* this_,
                       Cell* param = nullptr);
   // VM ClassInfo support
@@ -758,56 +708,18 @@ OPCODES
   // dispatchBB() tries to run until a control-flow instruction has been run.
   void dispatchBB();
 
-private:
-  static Mutex s_threadIdxLock;
-  static hphp_hash_map<pid_t, int64_t> s_threadIdxMap;
-
 public:
-  static int64_t s_threadIdxCounter;
   Variant m_setprofileCallback;
   bool m_executingSetprofileCallback;
 
   std::vector<vixl::Simulator*> m_activeSims;
 };
 
-class ExecutionContext : public VMExecutionContext {};
-
-#if DEBUG
-#define g_vmContext (&dynamic_cast<HPHP::VMExecutionContext&>( \
-                       *HPHP::g_context.getNoCheck()))
-#else
-#define g_vmContext (static_cast<HPHP::VMExecutionContext*>( \
-                                   static_cast<HPHP::BaseExecutionContext*>( \
-                                     HPHP::g_context.getNoCheck())))
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
-
-class PersistentObjectStore {
-public:
-  ~PersistentObjectStore();
-
-  int size() const;
-
-  void set(const char *type, const char *name, ResourceData *obj);
-  ResourceData *get(const char *type, const char *name);
-  void remove(const char *type, const char *name);
-
-  const ResourceMap &getMap(const char *type);
-
-private:
-  ResourceMapMap m_objects;
-
-  void removeObject(ResourceData *data);
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 
 extern DECLARE_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
-extern DECLARE_THREAD_LOCAL_NO_CHECK(PersistentObjectStore,
-                                     g_persistentObjects);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXECUTION_CONTEXT_H_
+#endif

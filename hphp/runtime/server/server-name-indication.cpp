@@ -17,9 +17,8 @@
 #include "hphp/runtime/server/server-name-indication.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/extended-logger.h"
-#include "hphp/util/util.h"
+#include "hphp/util/file-util.h"
 #include <openssl/ssl.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -93,7 +92,7 @@ void ServerNameIndication::find_server_names(
 
   // Iterate through all files in the cert directory.
   std::vector<std::string> crt_dir_files;
-  Util::find(crt_dir_files, "/", path.c_str(), /* php */ false);
+  FileUtil::find(crt_dir_files, "/", path.c_str(), /* php */ false);
   for (auto it = crt_dir_files.begin(); it != crt_dir_files.end(); ++it) {
     // Skip default cert and key; we'll fall back to those anyway.
     size_t filename_len = it->size() - path.size();

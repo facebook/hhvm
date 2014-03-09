@@ -18,7 +18,7 @@ function callFailsafe((function (Pair): string) $f) {
 
 function main() {
 
-  $functions = FrozenVector {
+  $functions = ImmVector {
     function ($pp) {
       // __toString()
       return (string)$pp;

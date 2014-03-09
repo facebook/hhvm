@@ -1,10 +1,10 @@
 <?hh
 
-// Test that FrozenMap is immutable.
+// Test that ImmMap is immutable.
 
 function wrap_exception(callable $f) {
   try {
-    $f(FrozenMap {'a' => 1, 'b' => 2, 'c' => 3});
+    $f(ImmMap {'a' => 1, 'b' => 2, 'c' => 3});
   } catch (Exception $e) {
     return get_class($e) . ": " . $e->getMessage();
   }
@@ -32,7 +32,7 @@ function main() {
 }
 
 function nomutatorfuncs() {
-  $fm = FrozenMap{};
+  $fm = ImmMap{};
   var_dump(method_exists($fm, 'add'));
   var_dump(method_exists($fm, 'addAll'));
   var_dump(method_exists($fm, 'set'));

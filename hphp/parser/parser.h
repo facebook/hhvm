@@ -21,6 +21,7 @@
 #include <set>
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "hphp/parser/scanner.h"
 #include "hphp/util/lock.h"

@@ -15,12 +15,13 @@
 */
 
 #include "hphp/compiler/expression/class_constant_expression.h"
+#include <set>
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/util/hash.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/scalar_expression.h"
@@ -81,13 +82,6 @@ void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
     }
     addUserClass(ar, m_className);
   }
-}
-
-string ClassConstantExpression::getActualClassName() const {
-  if (m_defScope) {
-    return static_cast<ClassScope*>(m_defScope)->getId();
-  }
-  return m_className;
 }
 
 ConstructPtr ClassConstantExpression::getNthKid(int n) const {
@@ -210,8 +204,8 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
 
 unsigned ClassConstantExpression::getCanonHash() const {
   int64_t val =
-    hash_string(Util::toLower(m_varName).c_str(), m_varName.size()) -
-    hash_string(Util::toLower(m_className).c_str(), m_className.size());
+    hash_string(toLower(m_varName).c_str(), m_varName.size()) -
+    hash_string(toLower(m_className).c_str(), m_className.size());
   return ~unsigned(val) ^ unsigned(val >> 32);
 }
 

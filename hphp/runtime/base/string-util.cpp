@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/base/string-util.h"
+#include <algorithm>
+#include <vector>
 #include "hphp/zend/zend-html.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"
@@ -198,13 +200,13 @@ Variant StringUtil::ChunkSplit(const String& body, int chunklen /* = 76 */,
 // encoding/decoding
 
 String StringUtil::HtmlEncode(const String& input, QuoteStyle quoteStyle,
-                              const char *charset, bool nbsp) {
+                              const char *charset, bool dEncode, bool htmlEnt) {
   return HtmlEncode(input, static_cast<int64_t>(quoteStyle),
-                    charset, nbsp);
+                    charset, dEncode, htmlEnt);
 }
 
 String StringUtil::HtmlEncode(const String& input, const int64_t qsBitmask,
-                              const char *charset, bool nbsp) {
+                              const char *charset, bool dEncode, bool htmlEnt) {
   if (input.empty()) return input;
 
   assert(charset);
@@ -217,7 +219,7 @@ String StringUtil::HtmlEncode(const String& input, const int64_t qsBitmask,
 
   int len = input.size();
   char *ret = string_html_encode(input.data(), len,
-                                 qsBitmask, utf8, nbsp);
+                                 qsBitmask, utf8, dEncode, htmlEnt);
   if (!ret) {
     return empty_string;
   }

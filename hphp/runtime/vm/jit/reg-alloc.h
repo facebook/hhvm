@@ -18,14 +18,16 @@
 #define incl_HPHP_VM_REG_ALLOC_H_
 
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include <vector>
 #include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
 
 namespace HPHP {  namespace JIT {
 
 class IRUnit;
 
 // This value must be consistent with the number of pre-allocated
-// bytes for spill locations in __enterTCHelper in translator-x64.cpp.
+// bytes for spill locations in __enterTCHelper in mc-generator.cpp.
 // Be careful when changing this value.
 const size_t NumPreAllocatedSpillLocs = kReservedRSPSpillSpace /
                                         sizeof(uint64_t);
@@ -33,9 +35,15 @@ const size_t NumPreAllocatedSpillLocs = kReservedRSPSpillSpace /
 struct RegAllocInfo {
   struct RegMap {
     // new way
-    PhysLoc& src(unsigned i) { return at(i); }
+    PhysLoc& src(unsigned i) {
+      assert(i < m_dstOff);
+      return at(i);
+    }
     PhysLoc& dst(unsigned i) { return at(i + m_dstOff); }
-    const PhysLoc& src(unsigned i) const { return at(i); }
+    const PhysLoc& src(unsigned i) const {
+      assert(i < m_dstOff);
+      return at(i);
+    }
     const PhysLoc& dst(unsigned i) const { return at(i + m_dstOff); }
     void resize(unsigned n) const {
       m_dstOff = n;
@@ -102,29 +110,91 @@ private:
   StateVector<IRInstruction,RegMap> m_regs;
 };
 
-// Return a valid register if this tmp should be forced into a particular
-// register, otherwise return InvalidReg.
-PhysReg forceAlloc(SSATmp& t);
-
 /*
  * New register allocator doing extended linear scan
  */
 RegAllocInfo allocateRegs(IRUnit&);
 
 /*
- * Returns true if the instruction can store source operand srcIdx to
- * memory as a cell using a 16-byte store.  (implying its okay to
- * clobber TypedValue.m_aux)
+ * A Constraint represents a set of locations an operand may
+ * be assigned to by the register allocator.  GP and SIMD are
+ * self explanitory.  VOID means no-location, i.e. InvalidReg.
+ * Only some instructions allow a VOID destination, so VOID
+ * is explicit.
  */
-bool storesCell(const IRInstruction& inst, uint32_t srcIdx);
+struct Constraint {
+  enum Mask: uint8_t {
+    GP = 1,
+    SIMD = 2,
+    VOID = 4,   // used for unused dests that can be InvalidReg
+    IMM = 8
+  };
+
+  /* implicit */ Constraint(Mask m)
+    : m_mask(m)
+    , m_reg(InvalidReg)
+  {}
+  /* implicit */ Constraint(PhysReg r)
+    : m_mask(maskFromReg(r))
+    , m_reg(r)
+  {}
+
+  Constraint& operator=(Constraint c2) {
+    m_mask = c2.m_mask;
+    m_reg = c2.m_reg;
+    return *this;
+  }
+
+  bool operator==(Constraint c2) const {
+    return m_mask == c2.m_mask && m_reg == c2.m_reg;
+  }
+
+  bool operator!=(Constraint c2) const {
+    return !(*this == c2);
+  }
+
+  PhysReg reg() const { return m_reg; }
+
+  Constraint operator|(Constraint c2) const {
+    return (*this == c2) ? *this :
+           Constraint(Mask(m_mask | c2.m_mask));
+  }
+
+  Constraint operator&(Constraint c2) const {
+    return (*this == c2) ? *this :
+           Constraint(Mask(m_mask & c2.m_mask));
+  }
+
+  Constraint operator-(Constraint c2) const {
+    assert(m_reg == InvalidReg && c2.m_reg == InvalidReg);
+    return Mask(m_mask & ~c2.m_mask);
+  }
+
+  Constraint& operator|=(Constraint c2) { return *this = *this | c2; }
+  Constraint& operator&=(Constraint c2) { return *this = *this & c2; }
+  Constraint& operator-=(Constraint c2) { return *this = *this - c2; }
+
+  explicit operator bool() const { return m_mask != 0; }
+
+private:
+  static Mask maskFromReg(PhysReg r) {
+    return r.isGP() ? GP : r.isSIMD() ? SIMD : VOID;
+  }
+
+private:
+  Mask m_mask;
+  PhysReg m_reg; // if valid, force this register
+};
 
 /*
- * Return true if this instruction can load a TypedValue using a 16-byte
- * load into a SIMD register.  Note that this function returns
- * false for instructions that load internal meta-data, such as Func*,
- * Class*, etc.
+ * return a constraint for the given src
  */
-bool loadsCell(Opcode op);
+Constraint srcConstraint(const IRInstruction& inst, unsigned src);
+
+/*
+ * Return a constraint for the given destination.
+ */
+Constraint dstConstraint(const IRInstruction& inst, unsigned dst);
 
 }}
 

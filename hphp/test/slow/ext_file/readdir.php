@@ -6,7 +6,7 @@ while ($ent = readdir($d->handle)) {
     var_dump($ent);
   }
 }
-closedir($d);
+closedir($d->handle);
 
 $d = opendir(__DIR__);
 while ($ent = readdir($d)) {

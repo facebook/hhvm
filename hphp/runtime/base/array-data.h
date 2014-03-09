@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/macros.h"
 #include <climits>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -20,6 +20,7 @@
 #include "hphp/compiler/statement/method_statement.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/util/text-util.h"
 
 using namespace HPHP;
 
@@ -53,7 +54,7 @@ void UseTraitStatement::onParseRecur(AnalysisResultConstPtr ar,
   vector<string> usedTraits;
   getUsedTraitNames(usedTraits);
   for (auto &t : usedTraits) {
-    ar->parseOnDemandByClass(Util::toLower(t));
+    ar->parseOnDemandByClass(toLower(t));
   }
   scope->addUsedTraits(usedTraits);
 }

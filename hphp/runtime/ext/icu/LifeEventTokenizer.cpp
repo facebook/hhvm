@@ -15,6 +15,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/icu/LifeEventTokenizer.h"
+#include <atomic>
+#include <vector>
 
 using namespace U_ICU_NAMESPACE;
 

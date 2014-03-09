@@ -18,7 +18,7 @@
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/jit/arch.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
@@ -62,7 +62,7 @@ inline bool funcPrologueHasGuard(JIT::TCA prologue, const Func* func) {
 
 inline TCA funcPrologueToGuard(TCA prologue, const Func* func) {
   assert(arch() == Arch::X64);
-  if (!prologue || prologue == tx64->uniqueStubs.fcallHelperThunk) {
+  if (!prologue || prologue == tx->uniqueStubs.fcallHelperThunk) {
     return prologue;
   }
   return prologue -

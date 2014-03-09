@@ -13,6 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#include "hphp/runtime/base/preg.h"
+
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/util/lock.h"
@@ -30,6 +33,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include <tbb/concurrent_hash_map.h>
+#include <utility>
 
 #define PREG_PATTERN_ORDER          1
 #define PREG_SET_ORDER              2
@@ -62,6 +66,8 @@ enum {
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // regex cache and helpers
+
+IMPLEMENT_THREAD_LOCAL(PCREglobals, s_pcre_globals);
 
 class pcre_cache_entry {
   pcre_cache_entry(const pcre_cache_entry&);
@@ -335,8 +341,8 @@ static void set_extra_limits(pcre_extra*& extra) {
       PCRE_EXTRA_MATCH_LIMIT_RECURSION;
     extra = &extra_data;
   }
-  extra->match_limit = g_context->m_preg_backtrace_limit;
-  extra->match_limit_recursion = g_context->m_preg_recursion_limit;
+  extra->match_limit = s_pcre_globals->m_preg_backtrace_limit;
+  extra->match_limit_recursion = s_pcre_globals->m_preg_recursion_limit;
 }
 
 static int *create_offset_array(const pcre_cache_entry *pce,
@@ -440,10 +446,11 @@ static void pcre_log_error(const char *func, int line, int pcre_code,
     "UNKNOWN";
   raise_debugging(
     "REGEXERR: %s/%d: err=%d(%s), pattern='%s', subject='%s', repl='%s', "
-    "limits=(%ld, %ld), extra=(%d, %d, %d, %d)",
+    "limits=(%" PRId64 ", %" PRId64 "), extra=(%d, %d, %d, %d)",
     func, line, pcre_code, errString,
     escapedPattern, escapedSubject, escapedRepl,
-    g_context->m_preg_backtrace_limit, g_context->m_preg_recursion_limit,
+    s_pcre_globals->m_preg_backtrace_limit,
+    s_pcre_globals->m_preg_recursion_limit,
     arg1, arg2, arg3, arg4);
   free((void *)escapedPattern);
   free((void *)escapedSubject);
@@ -1045,14 +1052,14 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
             JIT::VMRegAnchor _;
             String prefixedCode = concat(concat(
                 "<?php return ", result + result_len), ";");
-            Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
+            Unit* unit = g_context->compileEvalString(prefixedCode.get());
             Variant v;
             Func* func = unit->getMain();
-            g_vmContext->invokeFunc(v.asTypedValue(), func, init_null_variant,
-                                    g_vmContext->getThis(),
-                                    g_vmContext->getContextClass(), nullptr,
+            g_context->invokeFunc(v.asTypedValue(), func, init_null_variant,
+                                    g_context->getThis(),
+                                    g_context->getContextClass(), nullptr,
                                     nullptr,
-                                    VMExecutionContext::InvokePseudoMain);
+                                    ExecutionContext::InvokePseudoMain);
             eval_result = v;
 
             // Make sure that we have enough space in result

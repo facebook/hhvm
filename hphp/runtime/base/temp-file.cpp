@@ -23,7 +23,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-TempFile::TempFile(bool autoDelete /* = true */) : m_autoDelete(autoDelete) {
+TempFile::TempFile(bool autoDelete /* = true */,
+                   const String& wrapper_type,
+                   const String& stream_type)
+  : PlainFile(nullptr, false, wrapper_type, stream_type),
+    m_autoDelete(autoDelete) {
   char path[PATH_MAX];
 
   // open a temporary file
@@ -56,6 +60,7 @@ bool TempFile::open(const String& filename, const String& mode) {
 }
 
 bool TempFile::close() {
+  invokeFiltersOnClose();
   return closeImpl();
 }
 

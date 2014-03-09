@@ -17,6 +17,8 @@
 #include "hphp/runtime/ext/ext_function.h"
 
 #include <boost/lexical_cast.hpp>
+#include <algorithm>
+#include <vector>
 
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_class.h"
@@ -28,7 +30,6 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/exception.h"
-#include "hphp/util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -260,7 +261,7 @@ Variant f_get_called_class() {
 }
 
 String f_create_function(const String& args, const String& code) {
-  return g_vmContext->createFunction(args, code);
+  return g_context->createFunction(args, code);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

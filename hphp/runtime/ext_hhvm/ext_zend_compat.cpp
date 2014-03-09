@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/ext_hhvm/ext_zend_compat.h"
+#include <algorithm>
 #include "hphp/runtime/base/proxy-array.h"
 
 namespace HPHP {

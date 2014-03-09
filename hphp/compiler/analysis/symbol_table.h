@@ -18,10 +18,14 @@
 #define incl_HPHP_SYMBOL_TABLE_H_
 
 #include "hphp/compiler/hphp.h"
+#include <map>
+#include <memory>
+#include <set>
+#include <vector>
 #include "hphp/compiler/json.h"
-#include "hphp/util/util.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/hash-map-typedefs.h"
+#include "folly/Bits.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -343,7 +347,7 @@ public:
    * How big of a hash table for generate C++ switch statements.
    */
   int getJumpTableSize() const {
-    return Util::roundUpToPowerOfTwo(m_symbolVec.size() * 2);
+    return folly::nextPowTwo(m_symbolVec.size() * 2);
   }
 
   void canonicalizeSymbolOrder();

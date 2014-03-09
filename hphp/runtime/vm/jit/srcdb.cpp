@@ -21,7 +21,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP {
 namespace JIT {
@@ -49,7 +49,7 @@ TCA SrcRec::getFallbackTranslation() const {
 
 void SrcRec::chainFrom(IncomingBranch br) {
   assert(br.type() == IncomingBranch::Tag::ADDR ||
-         tx64->code.isValidCodeAddress(br.toSmash()));
+         mcg->code.isValidCodeAddress(br.toSmash()));
   TCA destAddr = getTopTranslation();
   m_incomingBranches.push_back(br);
   TRACE(1, "SrcRec(%p)::chainFrom %p -> %p (type %d); %zd incoming branches\n",

@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/mailparse/mime.h"
-#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/runtime-error.h"
 

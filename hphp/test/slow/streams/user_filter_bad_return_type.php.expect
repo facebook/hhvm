@@ -1,0 +1,8 @@
+---FatalFilter---
+string(0) ""
+---StrPassFilter---
+string(6) "FOOfoo"
+---BoolPassFilter---
+string(0) ""
+---NullFilter---
+string(0) ""

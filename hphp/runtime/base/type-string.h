@@ -23,6 +23,7 @@
 #endif
 
 #include "hphp/util/assertions.h"
+#include <algorithm>
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/types.h"

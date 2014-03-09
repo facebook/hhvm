@@ -37,10 +37,12 @@ public:
 
   // test $_ variables
   bool TestServerVariables();
+
   // test things that need more than one request
   bool TestInteraction();
   bool TestGet();
   bool TestPost();
+  bool TestExpectContinue();
   bool TestCookie();
 
   // test transport related extension functions
@@ -71,6 +73,7 @@ public:
 protected:
   void RunServer();
   void StopServer();
+  void KillServer();
   bool VerifyServerResponse(const char *input, const char *output,
                             const char *url, const char *method,
                             const char *header, const char *postdata,

@@ -1,0 +1,64 @@
+array(3) {
+  ["target"]=>
+  string(11) "php://stdin"
+  ["wrapper"]=>
+  string(3) "PHP"
+  ["stream"]=>
+  string(5) "STDIO"
+}
+array(3) {
+  ["target"]=>
+  string(12) "php://stdout"
+  ["wrapper"]=>
+  string(3) "PHP"
+  ["stream"]=>
+  string(5) "STDIO"
+}
+array(3) {
+  ["target"]=>
+  string(12) "php://stderr"
+  ["wrapper"]=>
+  string(3) "PHP"
+  ["stream"]=>
+  string(5) "STDIO"
+}
+array(3) {
+  ["target"]=>
+  string(10) "php://fd/1"
+  ["wrapper"]=>
+  string(3) "PHP"
+  ["stream"]=>
+  string(5) "STDIO"
+}
+array(3) {
+  ["target"]=>
+  string(10) "php://temp"
+  ["wrapper"]=>
+  string(3) "PHP"
+  ["stream"]=>
+  string(4) "TEMP"
+}
+array(3) {
+  ["target"]=>
+  string(12) "php://memory"
+  ["wrapper"]=>
+  string(3) "PHP"
+  ["stream"]=>
+  string(6) "MEMORY"
+}
+array(3) {
+  ["target"]=>
+  string(11) "php://input"
+  ["wrapper"]=>
+  string(3) "PHP"
+  ["stream"]=>
+  string(5) "Input"
+}
+array(3) {
+  ["target"]=>
+  string(12) "php://output"
+  ["wrapper"]=>
+  string(3) "PHP"
+  ["stream"]=>
+  string(6) "Output"
+}

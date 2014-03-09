@@ -18,23 +18,6 @@ array(3) {
 }
 bool(true)
 array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "c"
-  [2]=>
-  string(1) "d"
-}
-bool(true)
-array(3) {
   [11]=>
   string(1) "a"
   [22]=>
@@ -44,20 +27,12 @@ array(3) {
 }
 bool(true)
 array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
-  string(1) "b"
-  [1]=>
-  string(1) "c"
-  [2]=>
+  [11]=>
   string(1) "d"
+  [22]=>
+  string(1) "c"
+  [33]=>
+  string(1) "b"
 }
 ========
 bool(true)
@@ -80,23 +55,6 @@ array(3) {
 }
 bool(true)
 array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "c"
-  [2]=>
-  string(1) "d"
-}
-bool(true)
-array(3) {
   [11]=>
   string(1) "a"
   [22]=>
@@ -106,106 +64,12 @@ array(3) {
 }
 bool(true)
 array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
+  [11]=>
+  string(1) "d"
+  [22]=>
+  string(1) "c"
+  [33]=>
   string(1) "b"
-  [1]=>
-  string(1) "c"
-  [2]=>
-  string(1) "d"
-}
-========
-bool(true)
-array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "c"
-  [2]=>
-  string(1) "d"
-}
-bool(true)
-array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "c"
-  [2]=>
-  string(1) "d"
-}
-bool(true)
-array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "c"
-  [2]=>
-  string(1) "d"
-}
-bool(true)
-array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "c"
-  [2]=>
-  string(1) "d"
-}
-bool(true)
-array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
-  string(1) "b"
-  [1]=>
-  string(1) "c"
-  [2]=>
-  string(1) "d"
 }
 ========
 bool(true)
@@ -228,23 +92,6 @@ array(3) {
 }
 bool(true)
 array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "c"
-  [2]=>
-  string(1) "d"
-}
-bool(true)
-array(3) {
   [11]=>
   string(1) "a"
   [22]=>
@@ -254,106 +101,49 @@ array(3) {
 }
 bool(true)
 array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
-  string(1) "b"
-  [1]=>
-  string(1) "c"
-  [2]=>
+  [11]=>
   string(1) "d"
+  [22]=>
+  string(1) "c"
+  [33]=>
+  string(1) "b"
 }
 ========
 bool(true)
 array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
+  [33]=>
   string(1) "a"
-  [1]=>
+  [11]=>
   string(1) "b"
-  [2]=>
+  [22]=>
   string(1) "d"
 }
 bool(true)
 array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
+  [33]=>
   string(1) "a"
-  [1]=>
+  [11]=>
   string(1) "b"
-  [2]=>
+  [22]=>
   string(1) "d"
 }
 bool(true)
 array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
+  [33]=>
   string(1) "a"
-  [1]=>
+  [11]=>
   string(1) "b"
-  [2]=>
+  [22]=>
   string(1) "d"
 }
 bool(true)
 array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
+  [33]=>
   string(1) "d"
-}
-bool(true)
-array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-}
-array(3) {
-  [0]=>
+  [11]=>
   string(1) "a"
-  [1]=>
+  [22]=>
   string(1) "c"
-  [2]=>
-  string(1) "d"
 }
 
 
@@ -384,27 +174,6 @@ array(4) {
 }
 bool(true)
 array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-  [3]=>
-  string(2) "22"
-}
-bool(true)
-array(4) {
   ["a"]=>
   int(11)
   ["b"]=>
@@ -416,24 +185,14 @@ array(4) {
 }
 bool(true)
 array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
+  ["a"]=>
   int(33)
-  [3]=>
+  ["b"]=>
+  int(11)
+  ["c"]=>
   string(2) "22"
+  ["d"]=>
+  int(22)
 }
 ========
 bool(true)
@@ -460,27 +219,6 @@ array(4) {
 }
 bool(true)
 array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-  [3]=>
-  string(2) "22"
-}
-bool(true)
-array(4) {
   ["a"]=>
   int(11)
   ["b"]=>
@@ -492,130 +230,14 @@ array(4) {
 }
 bool(true)
 array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
+  ["a"]=>
   int(33)
-  [3]=>
-  string(2) "22"
-}
-========
-bool(true)
-array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
+  ["b"]=>
   int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-  [3]=>
+  ["c"]=>
   string(2) "22"
-}
-bool(true)
-array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
-  int(11)
-  [1]=>
+  ["d"]=>
   int(22)
-  [2]=>
-  int(33)
-  [3]=>
-  string(2) "22"
-}
-bool(true)
-array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-  [3]=>
-  string(2) "22"
-}
-bool(true)
-array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-  [3]=>
-  string(2) "22"
-}
-bool(true)
-array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-  [3]=>
-  string(2) "22"
 }
 ========
 bool(true)
@@ -642,27 +264,6 @@ array(4) {
 }
 bool(true)
 array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-  [3]=>
-  string(2) "22"
-}
-bool(true)
-array(4) {
   ["a"]=>
   int(11)
   ["b"]=>
@@ -674,130 +275,59 @@ array(4) {
 }
 bool(true)
 array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
+  ["a"]=>
   int(33)
-  [3]=>
+  ["b"]=>
+  int(11)
+  ["c"]=>
   string(2) "22"
+  ["d"]=>
+  int(22)
 }
 ========
 bool(true)
 array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
+  ["d"]=>
   int(11)
-  [1]=>
+  ["a"]=>
   int(22)
-  [2]=>
+  ["b"]=>
   int(33)
-  [3]=>
+  ["c"]=>
   string(2) "22"
 }
 bool(true)
 array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
+  ["d"]=>
   int(11)
-  [1]=>
+  ["a"]=>
   int(22)
-  [2]=>
+  ["b"]=>
   int(33)
-  [3]=>
+  ["c"]=>
   string(2) "22"
 }
 bool(true)
 array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
+  ["d"]=>
   int(11)
-  [1]=>
+  ["a"]=>
   int(22)
-  [2]=>
+  ["b"]=>
   int(33)
-  [3]=>
+  ["c"]=>
   string(2) "22"
 }
 bool(true)
 array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
+  ["d"]=>
   int(33)
-  [3]=>
-  string(2) "22"
-}
-bool(true)
-array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
-  [0]=>
+  ["a"]=>
   int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-  [3]=>
+  ["b"]=>
   string(2) "22"
+  ["c"]=>
+  int(22)
 }
 
 

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/analysis/symbol_table.h"
+#include <map>
 #include "hphp/compiler/analysis/type.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"
@@ -32,6 +33,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/util/logger.h"
+#include "hphp/util/text-util.h"
 
 using namespace HPHP;
 
@@ -587,6 +589,6 @@ string SymbolTable::getEscapedText(Variant v, int &len) {
   VariableSerializer vs(VariableSerializer::Type::Serialize);
   String str = vs.serialize(v, true);
   len = str.length();
-  string output = Util::escapeStringForCPP(str.data(), len);
+  string output = escapeStringForCPP(str.data(), len);
   return output;
 }

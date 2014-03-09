@@ -6,11 +6,10 @@
 
 class A {
 
-  public $fv  = FrozenVector {FrozenVector {1, 2}, 3};
+  public $fv  = ImmVector {ImmVector {1, 2}, 3};
   public $v   = Vector {Vector {1, 2}, 3};
   public $s   = Set {1, 2, 3};
   public $m   = Map {0 => Map{0 => 1}, 1 => 2, 2 => 3};
-  public $sm  = StableMap {0 => StableMap{0 => 1}, 1 => 2, 2 => 3};
   public $p   = Pair {Pair{1, 2}, 3};
 
 }
@@ -35,19 +34,14 @@ function main() {
   $a1->m[3] = 4;
   var_dump($a1->m == $a2->m);
 
-  echo "\nStableMap...\n";
-  $a1->sm[3] = 4;
-  print_r($a1->sm);
-  print_r($a2->sm);
-
-  // Pair and FrozenVector are immutable, so
+  // Pair and ImmVector are immutable, so
   // we can't do a similar test for them.
 
   echo "\nPair...\n";
   print_r($a1->p);
   print_r($a2->p);
 
-  echo "\nFrozenVector...\n";
+  echo "\nImmVector...\n";
   print_r($a1->fv);
   print_r($a2->fv);
 }

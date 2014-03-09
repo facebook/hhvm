@@ -359,3 +359,18 @@ function lz4hccompress(string $uncompressed): mixed;
  */
 <<__Native, __HipHopSpecific>>
 function lz4uncompress(string $compressed): mixed;
+
+/**
+ * Implementation detail for zlib.inflate stream filter.
+ *
+ * Not a public API - ideally this would be in namespace __SystemLib, but that
+ * isn't currently supported.
+ */
+<<__NativeData("__SystemLib_ChunkedInflator")>>
+class __SystemLib_ChunkedInflator {
+  <<__Native>>
+  function eof(): bool;
+
+  <<__Native>>
+  function inflateChunk(string $chunk): string;
+}

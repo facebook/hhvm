@@ -20,6 +20,10 @@
 
 #include <dlfcn.h>
 #include <sys/time.h> // gettimeofday
+#include <limits>
+#include <memory>
+#include <set>
+#include <vector>
 
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_fb.h"
@@ -83,14 +87,15 @@ void apcExtension::moduleLoad(Hdf config) {
 
   UseUncounted = apc["MemModelTreadmill"].getBool(
       RuntimeOption::ServerExecutionMode());
+
+  IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enabled", &Enable);
+  IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.stat",
+                   RuntimeOption::RepoAuthoritative ? "0" : "1", &Stat);
+  IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enable_cli",
+                   &EnableCLI);
 }
 
 void apcExtension::moduleInit() {
-  IniSetting::SetGlobalDefault("apc.enabled","1");
-  IniSetting::SetGlobalDefault("apc.stat",
-                               RuntimeOption::RepoAuthoritative
-                               ? "0" : "1");
-  IniSetting::SetGlobalDefault("apc.enable_cli", "1");
   if (UseFileStorage) {
     s_apc_file_storage.enable(FileStoragePrefix,
                               FileStorageChunkSize,
@@ -132,6 +137,9 @@ bool apcExtension::ConcurrentTableLockFree = false;
 bool apcExtension::FileStorageKeepFileLinked = false;
 std::vector<std::string> apcExtension::NoTTLPrefix;
 bool apcExtension::UseUncounted = false;
+bool apcExtension::Stat = true;
+// Different from zend default but matches what we've been returning for years
+bool apcExtension::EnableCLI = true;
 
 static apcExtension s_apc_extension;
 

@@ -23,7 +23,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(tx64);
+TRACE_SET_MOD(mcg);
 
 static const int kMaxTranslationBytes = 8192;
 

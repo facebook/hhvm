@@ -18,10 +18,13 @@
 #define incl_HPHP_ZEND_REQUEST_LOCAL
 
 #include "hphp/runtime/base/request-local.h"
+#include <unordered_map>
+#include <vector>
+#include "hphp/runtime/base/request-event-handler.h"
 
 #define ZEND_REQUEST_LOCAL_LIST(T, N) static __thread HPHP::RequestLocal<ZendRequestLocalList<T> > N;
 template <class T>
-class ZendRequestLocalList : public HPHP::RequestEventHandler {
+class ZendRequestLocalList final : public HPHP::RequestEventHandler {
   private:
     void clear() {
       m_list.clear();
@@ -44,20 +47,13 @@ class ZendRequestLocalList : public HPHP::RequestEventHandler {
 
 #define ZEND_REQUEST_LOCAL_MAP(K, V, N) static __thread HPHP::RequestLocal<ZendRequestLocalMap<K,V> > N;
 template <class K, class V>
-class ZendRequestLocalMap : public HPHP::RequestEventHandler {
-  public:
-    typedef std::unordered_map<K, V> list;
-    virtual void requestInit() {
-      m_map.clear();
-    }
-    virtual void requestShutdown() {
-      m_map.clear();
-    }
-    list& get() {
-      return m_map;
-    }
-  private:
-    list m_map;
+struct ZendRequestLocalMap final : HPHP::RequestEventHandler {
+  typedef std::unordered_map<K, V> list;
+  void requestInit() override { m_map.clear(); }
+  void requestShutdown() override { m_map.clear(); }
+  list& get() { return m_map; }
+private:
+  list m_map;
 };
 
 #endif // incl_HPHP_ZEND_REQUEST_LOCAL

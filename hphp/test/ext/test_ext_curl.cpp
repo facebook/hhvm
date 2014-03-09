@@ -57,17 +57,17 @@ static std::string get_request_uri() {
 static ServerPtr runServer() {
   for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
     try {
-      ServerPtr server = std::make_shared<LibEventServer>(
+      ServerPtr server = folly::make_unique<LibEventServer>(
           "127.0.0.1", s_server_port, 4);
       server->setRequestHandlerFactory<TestCurlRequestHandler>(0);
       server->start();
-      return server;
+      return std::move(server);
 
     } catch (const FailedToListenException& e) {
       if (s_server_port == PORT_MAX) throw;
     }
   }
-  return ServerPtr();
+  return std::move(ServerPtr());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ bool TestExtCurl::RunTests(const std::string &which) {
                          " return strlen($s2);"
                          "}");
 
-  ServerPtr server = runServer();
+  ServerPtr server = std::move(runServer());
 
   RUN_TEST(test_curl_init);
   RUN_TEST(test_curl_copy_handle);

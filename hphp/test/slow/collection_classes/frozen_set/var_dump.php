@@ -1,9 +1,9 @@
 <?hh
 
-// Test that the var_dump() of a FrozenSet is meaningful.
+// Test that the var_dump() of a ImmSet is meaningful.
 
 function main() {
-  var_dump(new FrozenSet(Vector {1, 2, 3}));
+  var_dump(new ImmSet(Vector {1, 2, 3}));
 }
 
 main();

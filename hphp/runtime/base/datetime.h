@@ -18,6 +18,9 @@
 #define incl_HPHP_DATETIME_H_
 
 #include "hphp/runtime/base/types.h"
+#include <memory>
+
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/smart-object.h"
 #include "hphp/runtime/base/timezone.h"
 #include "hphp/runtime/base/dateinterval.h"
@@ -293,40 +296,40 @@ public:
 
   // Error access
 private:
-  class LastErrors : public RequestEventHandler {
-    public:
-      virtual void requestInit() {
-        m_errors = nullptr;
+  struct LastErrors final : RequestEventHandler {
+    void requestInit() override {
+      m_errors = nullptr;
+    }
+    void requestShutdown() override {
+      if (m_errors) {
+        timelib_error_container_dtor(m_errors);
       }
-      virtual void requestShutdown() {
-        if (m_errors) {
-          timelib_error_container_dtor(m_errors);
-        }
+    }
+    void set(timelib_error_container *ec) {
+      requestShutdown();
+      m_errors = ec;
+    }
+    Array getLastWarnings() {
+      Array ret = Array::Create();
+      if (!m_errors) return ret;
+      for(int i = 0; i < m_errors->warning_count; i++) {
+        timelib_error_message *em = m_errors->warning_messages + i;
+        ret.set(em->position, String(em->message, CopyString));
       }
-      void set(timelib_error_container *ec) {
-        requestShutdown();
-        m_errors = ec;
+      return ret;
+    }
+    Array getLastErrors() {
+      Array ret = Array::Create();
+      if (!m_errors) return ret;
+      for(int i = 0; i < m_errors->error_count; i++) {
+        timelib_error_message *em = m_errors->error_messages + i;
+        ret.set(em->position, String(em->message, CopyString));
       }
-      Array getLastWarnings() {
-        Array ret = Array::Create();
-        if (!m_errors) return ret;
-        for(int i = 0; i < m_errors->warning_count; i++) {
-          timelib_error_message *em = m_errors->warning_messages + i;
-          ret.set(em->position, String(em->message, CopyString));
-        }
-        return ret;
-      }
-      Array getLastErrors() {
-        Array ret = Array::Create();
-        if (!m_errors) return ret;
-        for(int i = 0; i < m_errors->error_count; i++) {
-          timelib_error_message *em = m_errors->error_messages + i;
-          ret.set(em->position, String(em->message, CopyString));
-        }
-        return ret;
-      }
-    private:
-      timelib_error_container *m_errors;
+      return ret;
+    }
+
+  private:
+    timelib_error_container *m_errors;
   };
   DECLARE_STATIC_REQUEST_LOCAL(LastErrors, s_lastErrors);
 

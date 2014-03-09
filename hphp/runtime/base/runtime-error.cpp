@@ -19,13 +19,14 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Careful in these functions: they can be called when tl_regState is
- * REGSTATE_DIRTY.  VMExecutionContext::handleError is dirty-reg safe,
+ * REGSTATE_DIRTY.  ExecutionContext::handleError is dirty-reg safe,
  * but evaluate other functions that you might need here.
  */
 

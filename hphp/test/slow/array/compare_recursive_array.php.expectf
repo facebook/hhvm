@@ -1,0 +1,17 @@
+array(1) {
+  [0]=>
+  &array(1) {
+    [0]=>
+    *RECURSION*
+  }
+}
+array(1) {
+  [0]=>
+  &array(1) {
+    [0]=>
+    *RECURSION*
+  }
+}
+infinite recursion detected
+    #0 at [%s/compare_recursive_array.php:11]
+    #1 main(), called at [%s/compare_recursive_array.php:16]

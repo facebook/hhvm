@@ -840,18 +840,6 @@
             "value": 8192
         },
         {
-            "name": "GRAPHEME_EXTR_COUNT",
-            "value": 0
-        },
-        {
-            "name": "GRAPHEME_EXTR_MAXBYTES",
-            "value": 1
-        },
-        {
-            "name": "GRAPHEME_EXTR_MAXCHARS",
-            "value": 2
-        },
-        {
             "name": "HASH_HMAC",
             "value": 1
         },
@@ -1312,14 +1300,6 @@
             "value": 1
         },
         {
-            "name": "INTL_IDNA_VARIANT_2003",
-            "value": 0
-        },
-        {
-            "name": "INTL_IDNA_VARIANT_UTS46",
-            "value": 1
-        },
-        {
             "name": "INTL_MAX_LOCALE_LEN",
             "value": 80
         },
@@ -1510,6 +1490,22 @@
         {
             "name": "LIBXML_NOWARNING",
             "value": 64
+        },
+                {
+            "name": "ENT_HTML401",
+            "value": 0
+        },
+        {
+            "name": "ENT_XML1",
+            "value": 16
+        },
+        {
+            "name": "ENT_XHTML",
+            "value": 32
+        },
+        {
+            "name": "ENT_HTML5",
+            "value": 48
         },
         {
             "name": "LIBXML_NOXMLDECL",
@@ -3779,7 +3775,7 @@
         },
         {
             "name": "PHP_VERSION",
-            "value": "5.4.99-hiphop"
+            "value": "5.5.99-hiphop"
         },
         {
             "name": "PHP_MAJOR_VERSION",

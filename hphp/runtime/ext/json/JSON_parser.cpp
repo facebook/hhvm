@@ -28,6 +28,7 @@ SOFTWARE.
 
 
 #include "hphp/runtime/ext/json/JSON_parser.h"
+#include <vector>
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"

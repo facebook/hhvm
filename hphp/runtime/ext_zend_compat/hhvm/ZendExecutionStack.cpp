@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext_zend_compat/hhvm/ZendExecutionStack.h"
+#include <vector>
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 static __thread HPHP::RequestLocal<ZendExecutionStack> s_stack;

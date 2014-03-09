@@ -15,16 +15,35 @@
 */
 #include "hphp/hhbbc/analyze.h"
 
+#include <cstdint>
+#include <cstdio>
+#include <set>
+#include <algorithm>
+#include <string>
+#include <vector>
+
+#include "hphp/runtime/base/complex-types.h"
+
 #include "hphp/util/trace.h"
 
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
+#include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/cfg.h"
+#include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/class-util.h"
 
 namespace HPHP { namespace HHBBC {
 
 namespace {
 
 TRACE_SET_MOD(hhbbc);
+
+//////////////////////////////////////////////////////////////////////
+
+const StaticString s_86pinit("86pinit");
+const StaticString s_86sinit("86sinit");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -35,6 +54,7 @@ State entry_state(const Index& index,
   ret.initialized = true;
   ret.thisAvailable = index.lookup_this_available(ctx.func);
   ret.locals.resize(ctx.func->locals.size());
+  ret.iters.resize(ctx.func->iters.size());
 
   auto locId = uint32_t{0};
   for (; locId < ctx.func->params.size(); ++locId) {
@@ -134,18 +154,27 @@ FuncAnalysis do_analyze(const Index& index,
     incompleteQ.insert(rpoId(ctx.func->mainEntry));
   }
 
+  /*
+   * There are potentially infinitely growing types when we're using
+   * union_of to merge states, so occasonially we need to apply a
+   * widening operator.
+   *
+   * Currently this is done by having a straight-forward hueristic: if
+   * you visit a block too many times, we'll start doing all the
+   * merges with the widening operator until we've had a chance to
+   * visit the block again.  We must then continue iterating in case
+   * the actual fixed point is higher than the result of widening.
+   *
+   * Terminiation is guaranteed because the widening operator has only
+   * finite chains in the type lattice.
+   */
+  auto nonWideVisits = std::vector<uint32_t>(ctx.func->nextBlockId);
+
   // For debugging, count how many times basic blocks get interpreted.
   auto interp_counter = uint32_t{0};
 
   /*
    * Iterate until a fixed point.
-   *
-   * We know a fixed point must occur because types increase
-   * monotonically.
-   *
-   * We may visit a block up to as many times as there are state
-   * variables coming into the block (locals and eval stack slots),
-   * times the height of the type lattice.
    *
    * Each time a stateIn for a block changes, we re-insert the block's
    * rpo ID in incompleteQ.  Since incompleteQ is ordered, we'll
@@ -157,30 +186,40 @@ FuncAnalysis do_analyze(const Index& index,
     incompleteQ.erase(begin(incompleteQ));
     PropertiesInfo props(index, inputCtx, clsAnalysis);
 
+    if (nonWideVisits[blk->id]++ > options.analyzeFuncWideningLimit) {
+      nonWideVisits[blk->id] = 0;
+    }
+
     FTRACE(2, "block #{}\nin {}{}", blk->id,
       state_string(*ctx.func, ai.bdata[blk->id].stateIn),
       property_state_string(props));
     ++interp_counter;
 
     auto propagate = [&] (php::Block& target, const State& st) {
-      FTRACE(2, "     -> {}\n", target.id);
+      auto const needsWiden =
+        nonWideVisits[target.id] >= options.analyzeFuncWideningLimit;
+
+      FTRACE(2, "     {}-> {}\n", needsWiden ? "widening " : "", target.id);
       FTRACE(4, "target old {}",
         state_string(*ctx.func, ai.bdata[target.id].stateIn));
 
-      if (merge_into(ai.bdata[target.id].stateIn, st)) {
+      auto const changed =
+        needsWiden ? widen_into(ai.bdata[target.id].stateIn, st)
+                   : merge_into(ai.bdata[target.id].stateIn, st);
+      if (changed) {
         incompleteQ.insert(rpoId(&target));
       }
       FTRACE(4, "target new {}",
         state_string(*ctx.func, ai.bdata[target.id].stateIn));
     };
 
-    auto mergeReturn = [&] (Type type) {
-      ai.inferredReturn = union_of(ai.inferredReturn, type);
-    };
-
     auto stateOut = ai.bdata[blk->id].stateIn;
-    Interpreter interp { &index, ctx, props, blk, stateOut };
-    interp.run(propagate, mergeReturn);
+    auto interp   = Interp { index, ctx, props, blk, stateOut };
+    auto flags    = run(interp, propagate);
+    if (flags.returned) {
+      ai.inferredReturn = union_of(std::move(ai.inferredReturn),
+                                   std::move(*flags.returned));
+    }
   }
 
   /*
@@ -395,6 +434,18 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     }
   }
 
+  /*
+   * Similar to the function case in do_analyze, we have to handle the
+   * fact that there are infinitely growing chains in our type lattice
+   * under union_of.
+   *
+   * So if we've visited the whole class some number of times and
+   * still aren't at a fixed point, we'll set the property state to
+   * the result of widening the old state with the new state, and then
+   * reset the counter.  This guarantees eventual termination.
+   */
+  auto nonWideVisits = uint32_t{0};
+
   for (;;) {
     auto const previousProps   = clsAnalysis.privateProperties;
     auto const previousStatics = clsAnalysis.privateStatics;
@@ -446,6 +497,13 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       clsAnalysis.closures = std::move(closureResults);
       break;
     }
+
+    if (nonWideVisits++ > options.analyzeClassWideningLimit) {
+      auto const a = widen_into(clsAnalysis.privateProperties, previousProps);
+      auto const b = widen_into(clsAnalysis.privateStatics, previousStatics);
+      always_assert(a || b);
+      nonWideVisits = 0;
+    }
   }
 
   if (isHNIBuiltin) expand_hni_prop_types(clsAnalysis);
@@ -492,11 +550,11 @@ locally_propagated_states(const Index& index,
   std::vector<std::pair<State,StepFlags>> ret;
   ret.reserve(blk->hhbcs.size() + 1);
 
-  PropertiesInfo props(index, ctx, nullptr);
-  Interpreter interp { &index, ctx, props, blk, state };
+  PropertiesInfo props { index, ctx, nullptr };
+  auto interp = Interp { index, ctx, props, blk, state };
   for (auto& op : blk->hhbcs) {
     ret.emplace_back(state, StepFlags{});
-    ret.back().second = interp.step(op);
+    ret.back().second = step(interp, op);
   }
 
   ret.emplace_back(std::move(state), StepFlags{});

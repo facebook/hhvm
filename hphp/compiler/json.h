@@ -18,6 +18,10 @@
 #define incl_HPHP_JSON_H_
 
 #include "hphp/util/deprecated/base.h"
+#include <map>
+#include <memory>
+#include <set>
+#include <vector>
 #include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {

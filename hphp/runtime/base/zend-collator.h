@@ -31,9 +31,9 @@ namespace HPHP {
 #define COLLATOR_SORT_NUMERIC   2
 
 bool collator_sort(Variant &array, int sort_flags, bool ascending,
-                   UCollator *coll, intl_error *errcode);
+                   UCollator *coll, Intl::IntlError *errcode);
 bool collator_asort(Variant &array, int sort_flags, bool ascending,
-                    UCollator *coll, intl_error *errcode);
+                    UCollator *coll, Intl::IntlError *errcode);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

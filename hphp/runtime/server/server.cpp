@@ -23,29 +23,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-static std::vector<HPHP::ServerPtr> AllServers;
-static void on_kill(int sig) {
-  signal(sig, SIG_DFL);
-  for (unsigned int i = 0; i < AllServers.size(); i++) {
-    AllServers[i]->stop();
-  }
-  raise(sig);
-}
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool Server::StackTraceOnError = true;
-
-void Server::InstallStopSignalHandlers(ServerPtr server) {
-  if (AllServers.empty()) {
-    signal(SIGTERM, on_kill);
-    signal(SIGUSR1, on_kill);
-  }
-
-  AllServers.push_back(server);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 Server::Server(const std::string &address, int port, int threadCount)

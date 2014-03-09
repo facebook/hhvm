@@ -12,6 +12,18 @@ function bar() {
   print "bar $a\n";
 }
 
+function init_twice($x) {
+  if (!$x) {
+    static $a = 42;
+    $a--;
+    print "init0 $a\n";
+  } else {
+    static $a = 47;
+    $a++;
+    print "init1 $a\n";
+  }
+}
+
 class A {
   private function priv() {
     static $x = 0;
@@ -41,3 +53,9 @@ foo();
 bar();
 $a->baz();
 $b->baz();
+init_twice(0);
+init_twice(0);
+init_twice(0);
+init_twice(1);
+init_twice(1);
+init_twice(1);

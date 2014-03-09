@@ -17,6 +17,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <tbb/concurrent_hash_map.h>
+#include <vector>
 
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/array-init.h"

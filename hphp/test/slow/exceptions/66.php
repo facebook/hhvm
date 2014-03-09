@@ -21,5 +21,5 @@ class C {
 $obj = new C;
 $obj->f();
 echo "------------------------\n";
-Exception::setTraceOptions(true);
+Exception::setTraceOptions(DEBUG_BACKTRACE_PROVIDE_OBJECT);
 $obj->f();

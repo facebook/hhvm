@@ -15,6 +15,8 @@
 */
 
 #include "hphp/compiler/analysis/function_scope.h"
+#include <utility>
+#include <vector>
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
@@ -35,7 +37,6 @@
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/util/atomic.h"
-#include "hphp/util/util.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -954,15 +955,6 @@ std::vector<std::string> FunctionScope::getUserAttributeStringParams(
   return ret;
 }
 
-std::string FunctionScope::getId() const {
-  string name = CodeGenerator::FormatLabel(getOriginalName());
-  if (m_redeclaring < 0) {
-    return name;
-  }
-  return name + Option::IdPrefix +
-    boost::lexical_cast<std::string>(m_redeclaring);
-}
-
 std::string FunctionScope::getDocName() const {
   string name = getOriginalName();
   if (m_redeclaring < 0) {
@@ -1097,31 +1089,6 @@ void FunctionScope::getClosureUseVars(
       useVars.push_back(ParameterExpressionPtrIdxPair(param, i));
     }
   }
-}
-
-template <class U, class V>
-static U pair_first_elem(std::pair<U, V> p) { return p.first; }
-
-bool FunctionScope::needsAnonClosureClass(ParameterExpressionPtrVec &useVars) {
-  useVars.clear();
-  if (!isClosure()) return false;
-  ParameterExpressionPtrIdxPairVec useVars0;
-  getClosureUseVars(useVars0, !m_generator && !m_async);
-  useVars.resize(useVars0.size());
-  // C++ seems to be unable to infer the type here on pair_first_elem
-  transform(useVars0.begin(),
-            useVars0.end(),
-            useVars.begin(),
-            pair_first_elem<ParameterExpressionPtr, int>);
-  return useVars.size() > 0 || getVariables()->hasStaticLocals();
-}
-
-bool FunctionScope::needsAnonClosureClass(
-    ParameterExpressionPtrIdxPairVec &useVars) {
-  useVars.clear();
-  if (!isClosure()) return false;
-  getClosureUseVars(useVars, !m_generator && !m_async);
-  return useVars.size() > 0 || getVariables()->hasStaticLocals();
 }
 
 FunctionScope::StringToFunctionInfoPtrMap FunctionScope::s_refParamInfo;

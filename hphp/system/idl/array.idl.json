@@ -104,9 +104,9 @@
                     "desc": "The array to work on"
                 },
                 {
-                    "name": "upper",
-                    "type": "Boolean",
-                    "value": "false",
+                    "name": "case_",
+                    "type": "Int64",
+                    "value": "0",
                     "desc": "Either CASE_UPPER or CASE_LOWER (default)"
                 }
             ]
@@ -942,9 +942,9 @@
                     "desc": "The array."
                 },
                 {
-                    "name": "recursive",
-                    "type": "Boolean",
-                    "value": "false",
+                    "name": "mode",
+                    "type": "Int64",
+                    "value": "0",
                     "desc": "If the optional mode parameter is set to COUNT_RECURSIVE (or 1), count() will recursively count the array. This is particularly useful for counting all the elements of a multidimensional array. count() does not detect infinite recursion."
                 }
             ]
@@ -963,9 +963,9 @@
                     "type": "Variant"
                 },
                 {
-                    "name": "recursive",
-                    "type": "Boolean",
-                    "value": "false"
+                    "name": "mode",
+                    "type": "Int64",
+                    "value": "0"
                 }
             ]
         },

@@ -18,8 +18,12 @@
 
 #include <vector>
 #include <utility>
+#include <type_traits>
 
 #include <boost/mpl/has_xxx.hpp>
+#include <algorithm>
+
+#include "folly/Hash.h"
 
 #include "hphp/util/tiny-vector.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -64,12 +68,76 @@ struct MElem {
     int64_t immInt;
     borrowed_ptr<php::Local> immLoc;
   };
+
+  bool operator==(const MElem& o) const {
+    if (mcode != o.mcode) return false;
+    switch (mcode) {
+    case MEC:  /* fallthrough */
+    case MPC:  return true;
+    case MEL:  /* fallthrough */
+    case MPL:  return immLoc == o.immLoc;
+    case MET:  /* fallthrough */
+    case MPT:  return immStr == o.immStr;
+    case MEI:  return immInt == o.immInt;
+    case MW:   return true;
+    case NumMemberCodes:
+      break;
+    }
+    not_reached();
+  }
+
+  bool operator!=(const MElem& o) const {
+    return !(*this == o);
+  }
 };
 
 struct MVector {
   LocationCode lcode;
   borrowed_ptr<php::Local> locBase;
   std::vector<MElem> mcodes;
+
+  bool operator==(const MVector& o) const {
+    return lcode   == o.lcode &&
+           locBase == o.locBase &&
+           mcodes  == o.mcodes;
+  }
+
+  bool operator!=(const MVector& o) const {
+    return !(*this == o);
+  }
+};
+
+struct BCHashHelper {
+  static size_t hash(const MVector& vec) {
+    return vec.mcodes.size() | (static_cast<size_t>(vec.lcode) << 7);
+  }
+
+  static size_t hash(SString s) { return s->hash(); }
+
+  template<class T>
+  static size_t hash(const std::vector<T>& v) {
+    assert(!v.empty());
+    return v.size() && hash(v.front());
+  }
+
+  static size_t hash(std::pair<IterKind,borrowed_ptr<php::Iter>> kv) {
+    return std::hash<decltype(kv.second)>()(kv.second);
+  }
+
+  template<class T>
+  static typename std::enable_if<
+    std::is_enum<T>::value,
+    size_t
+  >::type hash(T t) {
+    using U = typename std::underlying_type<T>::type;
+    return std::hash<U>()(static_cast<U>(t));
+  }
+
+  template<class T>
+  static typename std::enable_if<
+    !std::is_enum<T>::value,
+    size_t
+  >::type hash(const T& t) { return std::hash<T>()(t); }
 };
 
 inline uint32_t numVecPops(const MVector& mvec) {
@@ -149,6 +217,32 @@ namespace bc {
 #define IMM_MEM_FOUR(x, y, z, l)   IMM_MEM(x, 1); IMM_MEM(y, 2); \
                                    IMM_MEM(z, 3); IMM_MEM(l, 4);
 
+#define IMM_EQ(which, n)          if (IMM_NAME_##which(n) !=  \
+                                      o.IMM_NAME_##which(n)) return false;
+#define IMM_EQ_NA
+#define IMM_EQ_ONE(x)             IMM_EQ(x, 1);
+#define IMM_EQ_TWO(x, y)          IMM_EQ(x, 1); IMM_EQ(y, 2);
+#define IMM_EQ_THREE(x, y, z)     IMM_EQ(x, 1); IMM_EQ(y, 2);  \
+                                  IMM_EQ(z, 3);
+#define IMM_EQ_FOUR(x, y, z, l)   IMM_EQ(x, 1); IMM_EQ(y, 2); \
+                                  IMM_EQ(z, 3); IMM_EQ(l, 4);
+
+#define IMM_HASH_DO(...)            folly::hash:: \
+                                      hash_combine_generic<BCHashHelper>( \
+                                        __VA_ARGS__)
+#define IMM_HASH(which, n)          IMM_NAME_##which(n)
+#define IMM_HASH_NA                 0
+#define IMM_HASH_ONE(x)             IMM_HASH_DO(IMM_HASH(x, 1))
+#define IMM_HASH_TWO(x, y)          IMM_HASH_DO(IMM_HASH(x, 1), \
+                                                IMM_HASH(y, 2))
+#define IMM_HASH_THREE(x, y, z)     IMM_HASH_DO(IMM_HASH(x, 1), \
+                                                IMM_HASH(y, 2), \
+                                                IMM_HASH(z, 3))
+#define IMM_HASH_FOUR(x, y, z, l)   IMM_HASH_DO(IMM_HASH(x, 1), \
+                                                IMM_HASH(y, 2), \
+                                                IMM_HASH(z, 3), \
+                                                IMM_HASH(l, 4))
+
 #define IMM_EXTRA_NA
 #define IMM_EXTRA_ONE(x)           IMM_EXTRA_##x
 #define IMM_EXTRA_TWO(x,y)         IMM_EXTRA_ONE(x)       IMM_EXTRA_ONE(y)
@@ -172,7 +266,6 @@ namespace bc {
                                      IMM_INIT(z, 3)
 #define IMM_INIT_FOUR(x, y, z, l)  : IMM_INIT(x, 1), IMM_INIT(y, 2), \
                                      IMM_INIT(z, 3), IMM_INIT(l, 4)
-
 
 #define POP_UV  if (i == 0) return Flavor::U
 #define POP_CV  if (i == 0) return Flavor::C
@@ -272,10 +365,24 @@ namespace bc {
     explicit opcode ( IMM_CTOR_##imms )         \
       IMM_INIT_##imms                           \
     {}                                          \
+                                                \
     IMM_MEM_##imms                              \
     IMM_EXTRA_##imms                            \
     POP_##inputs                                \
     PUSH_##outputs                              \
+                                                \
+    bool operator==(const opcode& o) const {    \
+      IMM_EQ_##imms                             \
+      return true;                              \
+    }                                           \
+                                                \
+    bool operator!=(const opcode& o) const {    \
+      return !(*this == o);                     \
+    }                                           \
+                                                \
+    size_t hash() const {                       \
+      return IMM_HASH_##imms;                   \
+    }                                           \
   };
 OPCODES
 #undef O
@@ -361,12 +468,26 @@ OPCODES
 #undef IMM_EXTRA_OA
 
 #undef IMM_MEM
-
 #undef IMM_MEM_NA
 #undef IMM_MEM_ONE
 #undef IMM_MEM_TWO
 #undef IMM_MEM_THREE
 #undef IMM_MEM_FOUR
+
+#undef IMM_EQ
+#undef IMM_EQ_NA
+#undef IMM_EQ_ONE
+#undef IMM_EQ_TWO
+#undef IMM_EQ_THREE
+#undef IMM_EQ_FOUR
+
+#undef IMM_HASH
+#undef IMM_HASH_DO
+#undef IMM_HASH_NA
+#undef IMM_HASH_ONE
+#undef IMM_HASH_TWO
+#undef IMM_HASH_THREE
+#undef IMM_HASH_FOUR
 
 #undef IMM_CTOR
 #undef IMM_CTOR_NA
@@ -486,6 +607,31 @@ private:
     }
   }
 };
+
+//////////////////////////////////////////////////////////////////////
+
+inline bool operator==(const Bytecode& a, const Bytecode& b) {
+  if (a.op != b.op) return false;
+#define O(opcode, ...) case Op::opcode: return a.opcode == b.opcode;
+  switch (a.op) { OPCODES }
+#undef O
+  not_reached();
+}
+
+inline bool operator!=(const Bytecode& a, const Bytecode& b) {
+  return !(a == b);
+}
+
+inline size_t hash(const Bytecode& b) {
+  auto hash = 14695981039346656037ULL;
+  auto o = static_cast<size_t>(b.op);
+  hash ^= o;
+#define O(opcode, ...) \
+  case Op::opcode: return folly::hash::hash_combine(b.opcode.hash(), hash);
+  switch (b.op) { OPCODES }
+#undef O
+  not_reached();
+}
 
 //////////////////////////////////////////////////////////////////////
 

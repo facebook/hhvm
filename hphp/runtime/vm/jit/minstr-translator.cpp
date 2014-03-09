@@ -16,6 +16,8 @@
 
 
 #include "hphp/runtime/base/hphp-array-defs.h"
+#include <algorithm>
+#include <vector>
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
@@ -23,7 +25,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/repo.h"
 
 // These files do ugly things with macros so include them last
@@ -114,15 +116,15 @@ void getBaseType(Opcode rawOp, bool predict,
       /* If the output type will be used as a prediction and not as fact, we
        * can be optimistic here. Assume no promotion for string bases and
        * promotion in other cases. */
-      baseType = baseType.isString() ? Type::Str : newBase;
-    } else if (baseType.isString() &&
+      baseType = baseType <= Type::Str ? Type::Str : newBase;
+    } else if (baseType <= Type::Str &&
                (rawOp == SetElem || rawOp == SetElemStk)) {
       /* If the base is known to be a string and the operation is exactly
        * SetElem, we're guaranteed that either the base will end as a
        * CountedStr or the instruction will throw an exception and side
        * exit. */
       baseType = Type::CountedStr;
-    } else if (baseType.isString() &&
+    } else if (baseType <= Type::Str &&
                (rawOp == SetNewElem || rawOp == SetNewElemStk)) {
       /* If the string base is empty, it will be promoted to an
        * array. Otherwise the base will be left alone and we'll fatal. */
@@ -150,7 +152,6 @@ void getBaseType(Opcode rawOp, bool predict,
 }
 
 void MInstrEffects::init(const Opcode rawOp, const Type origBase) {
-  assert(origBase != Type::None);
   baseType = origBase;
   always_assert(baseType.isPtr() ^ baseType.notPtr());
   auto const basePtr = baseType.isPtr();
@@ -195,52 +196,6 @@ int minstrBaseIdx(Opcode opc) {
 }
 int minstrBaseIdx(const IRInstruction* inst) {
   return minstrBaseIdx(inst->op());
-}
-
-// minstrKeyIdx returns the src index for inst's key operand.
-int minstrKeyIdx(Opcode opc) {
-  return opc == SetNewElem || opc == SetNewElemStk ? -1
-         : opc == SetNewElemArray || opc == SetNewElemArrayStk ? -1
-         : opc == SetWithRefNewElem || opc == SetWithRefNewElemStk ? -1
-         : opc == BindNewElem || opc == BindNewElem ? -1
-         : opc == ArraySet ? 2
-         : opc == SetOpProp || opc == SetOpPropStk ? 2
-         : opcodeHasFlags(opc, MInstrProp) ? 3
-         : opcodeHasFlags(opc, MInstrElem) ? 2
-         : bad_value<int>();
-}
-int minstrKeyIdx(const IRInstruction* inst) {
-  return minstrKeyIdx(inst->op());
-}
-
-// minstrValueIdx returns the src index for inst's value operand.
-int minstrValueIdx(Opcode opc) {
-  switch (opc) {
-    case VGetProp: case VGetPropStk:
-    case IncDecProp: case IncDecPropStk:
-    case PropDX: case PropDXStk:
-    case VGetElem: case VGetElemStk:
-    case UnsetElem: case UnsetElemStk:
-    case IncDecElem: case IncDecElemStk:
-    case ElemDX: case ElemDXStk:
-    case ElemUX: case ElemUXStk:
-      return -1;
-
-    case ArraySet: return 3;
-    case SetNewElem: case SetNewElemStk: return 1;
-    case SetNewElemArray: case SetNewElemArrayStk: return 1;
-    case SetWithRefNewElem: case SetWithRefNewElemStk: return 2;
-    case BindNewElem: case BindNewElemStk: return 1;
-    case SetOpProp: case SetOpPropStk: return 3;
-
-    default:
-      return opcodeHasFlags(opc, MInstrProp) ? 4
-           : opcodeHasFlags(opc, MInstrElem) ? 3
-           : bad_value<int>();
-  }
-}
-int minstrValueIdx(const IRInstruction* inst) {
-  return minstrValueIdx(inst->op());
 }
 
 HhbcTranslator::MInstrTranslator::MInstrTranslator(
@@ -304,7 +259,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::genMisPtr() {
   if (m_needMIS) {
     return gen(LdAddr, m_misBase, cns(kReservedRSPSpillSpace));
   } else {
-    return gen(DefConst, Type::PtrToCell, ConstData(nullptr));
+    return cns(Type::cns(nullptr, Type::PtrToUninit));
   }
 }
 
@@ -423,7 +378,7 @@ void HhbcTranslator::MInstrTranslator::emitMPre() {
 
   if (m_needMIS) {
     m_misBase = gen(DefMIStateBase);
-    SSATmp* uninit = m_irb.genDefUninit();
+    SSATmp* uninit = cns(Type::Uninit);
 
     if (nLogicalRatchets() > 0) {
       gen(StMem, m_misBase, cns(MISOFF(tvRef)), uninit);
@@ -541,13 +496,12 @@ SSATmp* HhbcTranslator::MInstrTranslator::getValAddr() {
   const Location& l = dl.location;
   if (l.space == Location::Local) {
     assert(!m_stackInputs.count(0));
-    return m_ht.ldLocAddr(l.offset, DataTypeGeneric); // teleported to container
+    return m_ht.ldLocAddr(l.offset, DataTypeSpecific);
   } else {
     assert(l.space == Location::Stack);
     assert(m_stackInputs.count(0));
     m_ht.spillStack();
-    return m_ht.ldStackAddr(m_stackInputs[0],
-                            DataTypeGeneric); // teleported to container
+    return m_ht.ldStackAddr(m_stackInputs[0], DataTypeSpecific);
   }
 }
 
@@ -616,13 +570,13 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
       if (mia & MIA_define) {
         // We care whether or not the local is Uninit, and
         // CountnessInit will tell us that.
-        m_irb.constrainLocal(base.location.offset, DataTypeCountnessInit,
+        m_irb.constrainLocal(base.location.offset, DataTypeSpecific,
                             "emitBaseLCR: Uninit base local");
         gen(
           StLoc,
           LocalId(base.location.offset),
           m_irb.fp(),
-          m_irb.genDefInitNull()
+          cns(Type::InitNull)
         );
         baseType = Type::InitNull;
       }
@@ -667,14 +621,14 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
     }
 
     if (base.location.space == Location::Local) {
-      m_base = m_ht.ldLocAddr(base.location.offset, DataTypeGeneric);
+      m_base = m_ht.ldLocAddr(base.location.offset, DataTypeSpecific);
     } else {
       assert(base.location.space == Location::Stack);
       // Make sure the stack is clean before getting a pointer to one of its
       // elements.
       m_ht.spillStack();
       assert(m_stackInputs.count(m_iInd));
-      m_base = m_ht.ldStackAddr(m_stackInputs[m_iInd], DataTypeGeneric);
+      m_base = m_ht.ldStackAddr(m_stackInputs[m_iInd], DataTypeSpecific);
     }
     assert(m_base->type().isPtr());
   }
@@ -798,7 +752,7 @@ static inline TypedValue* baseGImpl(TypedValue *key,
                                     MInstrState* mis) {
   TypedValue* base;
   StringData* name = prepareKey(key);
-  VarEnv* varEnv = g_vmContext->m_globalVarEnv;
+  VarEnv* varEnv = g_context->m_globalVarEnv;
   assert(varEnv != NULL);
   base = varEnv->lookup(name);
   if (base == NULL) {
@@ -1013,11 +967,11 @@ SSATmp* HhbcTranslator::MInstrTranslator::checkInitProp(
           StProp,
           baseAsObj,
           cns(propInfo.offset),
-          m_irb.genDefInitNull()
+          cns(Type::InitNull)
         );
         return propAddr;
       }
-      return cns((const TypedValue*)&init_null_variant);
+      return m_irb.genPtrToInitNull();
     }
   );
 }
@@ -1032,7 +986,7 @@ void HhbcTranslator::MInstrTranslator::emitPropSpecialized(const MInstrAttr mia,
   const bool doWarn   = mia & MIA_warn;
   const bool doDefine = mia & MIA_define || mia & MIA_unset;
 
-  SSATmp* initNull = cns((const TypedValue*)&init_null_variant);
+  SSATmp* initNull = m_irb.genPtrToInitNull();
 
   /*
    * Type-inference from hphpc only tells us that this is either an object of a
@@ -1291,7 +1245,7 @@ void HhbcTranslator::MInstrTranslator::emitRatchetRefs() {
       gen(StMem, m_misBase, cns(MISOFF(tvRef2)), tvRef);
 
       // Reset tvRef.
-      gen(StMem, m_misBase, cns(MISOFF(tvRef)), m_irb.genDefUninit());
+      gen(StMem, m_misBase, cns(MISOFF(tvRef)), cns(Type::Uninit));
 
       // Adjust base pointer.
       assert(m_base->type().isPtr());
@@ -1723,7 +1677,7 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* key) {
     [&] { // Taken:
       m_irb.hint(Block::Hint::Unlikely);
       gen(RaiseArrayIndexNotice, makeCatch(), key);
-      return m_irb.genDefInitNull();
+      return cns(Type::InitNull);
     }
   );
 }
@@ -1788,7 +1742,7 @@ void HhbcTranslator::MInstrTranslator::emitStringGet(SSATmp* key) {
 
 void HhbcTranslator::MInstrTranslator::emitVectorGet(SSATmp* key) {
   assert(key->isA(Type::Int));
-  if (key->isConst() && key->getValInt() < 0) {
+  if (key->isConst() && key->intVal() < 0) {
     PUNT(emitVectorGet);
   }
   SSATmp* size = gen(LdVectorSize, m_base);
@@ -1806,13 +1760,13 @@ void HhbcTranslator::MInstrTranslator::emitPairGet(SSATmp* key) {
   static_assert(sizeof(TypedValue) == 16,
                 "TypedValue size expected to be 16 bytes");
   if (key->isConst()) {
-    auto idx = key->getValInt();
+    auto idx = key->intVal();
     if (idx < 0 || idx > 1) {
       PUNT(emitPairGet);
     }
     // no reason to check bounds
     SSATmp* base = gen(LdPairBase, m_base);
-    auto index = cns(key->getValInt() << 4);
+    auto index = cns(key->intVal() << 4);
     m_result = gen(LdElem, base, index);
   } else {
     gen(CheckBounds, makeCatch(), key, cns(1));
@@ -2307,7 +2261,7 @@ void HhbcTranslator::MInstrTranslator::emitSetWithRefNewElem() {
 void HhbcTranslator::MInstrTranslator::emitVectorSet(
     SSATmp* key, SSATmp* value) {
   assert(key->isA(Type::Int));
-  if (key->isConst() && key->getValInt() < 0) {
+  if (key->isConst() && key->intVal() < 0) {
     PUNT(emitVectorSet); // will throw
   }
   SSATmp* size = gen(LdVectorSize, m_base);
@@ -2421,10 +2375,10 @@ void HhbcTranslator::MInstrTranslator::emitSetElem() {
     SSATmp* result = genStk(SetElem, makeCatchSet(), cns((TCA)opFunc),
                             m_base, key, value);
     auto t = result->type();
-    if (t.equals(Type::Nullptr)) {
+    if (t == Type::Nullptr) {
       // Base is not a string. Result is always value.
       m_result = value;
-    } else if (t.equals(Type::CountedStr)) {
+    } else if (t == Type::CountedStr) {
       // Base is a string. Stack result is a new string so we're responsible for
       // decreffing value.
       m_result = result;
@@ -2630,7 +2584,7 @@ void HhbcTranslator::MInstrTranslator::emitMPost() {
     switch (input.location.space) {
     case Location::Stack: {
       ++nStack;
-      auto input = getInput(i, DataTypeCountness); // just going to decref it
+      auto input = getInput(i, DataTypeSpecific);
       if (input->isA(Type::Gen)) {
         gen(DecRef, input);
         if (m_failedSetBlock) {

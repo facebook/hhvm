@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/trans-cfg.h"
+#include <algorithm>
 
 #include "folly/MapUtil.h"
 

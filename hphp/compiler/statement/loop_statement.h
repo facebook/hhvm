@@ -18,6 +18,7 @@
 #define incl_HPHP_LOOP_STATEMENT_H_
 
 #include "hphp/compiler/statement/statement.h"
+#include <set>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

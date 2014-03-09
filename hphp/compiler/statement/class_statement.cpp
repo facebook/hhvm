@@ -28,7 +28,7 @@
 #include "hphp/compiler/statement/class_variable.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/constant_table.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/compiler/statement/interface_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
 #include "hphp/compiler/statement/trait_require_statement.h"
@@ -36,6 +36,7 @@
 #include "hphp/compiler/option.h"
 #include <sstream>
 #include <algorithm>
+#include <vector>
 
 using namespace HPHP;
 
@@ -50,7 +51,7 @@ ClassStatement::ClassStatement
   : InterfaceStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassStatement),
                        name, base, docComment, stmt, attrList),
     m_type(type), m_ignored(false) {
-  m_parent = Util::toLower(parent);
+  m_parent = toLower(parent);
   m_originalParent = parent;
 }
 
@@ -82,7 +83,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   if (m_base) m_base->getOriginalStrings(bases);
 
   for (auto &b : bases) {
-    ar->parseOnDemandByClass(Util::toLower(b));
+    ar->parseOnDemandByClass(toLower(b));
   }
 
   vector<UserAttributePtr> attrs;

@@ -18,6 +18,7 @@
 #define incl_HPHP_SELECT_REWRITERS_H_
 
 #include "hphp/compiler/expression/expression.h"
+#include <vector>
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/query_expression.h"
 #include "hphp/compiler/expression/simple_query_clause.h"

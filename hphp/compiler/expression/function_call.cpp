@@ -15,7 +15,7 @@
 */
 
 #include "hphp/compiler/expression/function_call.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/analysis/code_error.h"
@@ -64,7 +64,7 @@ FunctionCall::FunctionCall
     m_name = c->getLiteralString();
   } else {
     m_origName = name;
-    m_name = Util::toLower(name);
+    m_name = toLower(name);
   }
   m_clsNameTemp = -1;
 }
@@ -191,10 +191,10 @@ void FunctionCall::checkParamTypeCodeErrors(AnalysisResultPtr ar) {
     }
     if (fmt) {
       string msg;
-      Util::string_printf
+      string_printf
         (msg, fmt,
          i + 1,
-         Util::escapeStringForCPP(m_funcScope->getOriginalName()).c_str(),
+         escapeStringForCPP(m_funcScope->getOriginalName()).c_str(),
          specType->toString().c_str(), ptype.c_str());
       Compiler::Error(Compiler::BadArgumentType,
                       shared_from_this(), msg);

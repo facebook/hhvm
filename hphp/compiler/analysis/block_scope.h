@@ -24,6 +24,11 @@
 #include "hphp/runtime/base/macros.h"
 
 #include <tbb/concurrent_hash_map.h>
+#include <list>
+#include <memory>
+#include <set>
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -171,7 +176,6 @@ public:
   bool is(KindOf kind) const { return kind == m_kind;}
   const std::string &getName() const { return m_name;}
   void setName(const std::string name) { m_name = name;}
-  virtual std::string getId() const;
   virtual bool isBuiltin() const { return false; }
   StatementPtr getStmt() const { return m_stmt;}
   VariableTableConstPtr getVariables() const { return m_variables;}

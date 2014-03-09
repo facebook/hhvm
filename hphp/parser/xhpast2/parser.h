@@ -19,10 +19,11 @@
 #include <stdexcept>
 #include <iostream>
 #include <cstdarg>
+#include <vector>
 #include "folly/Format.h"
 #include "folly/String.h"
 #include "hphp/parser/parser.h"
-#include "hphp/util/util.h"
+#include "hphp/util/string-vsnprintf.h"
 #include "astnode.hpp"
 
 #define HPHP_PARSER_NS XHPAST2

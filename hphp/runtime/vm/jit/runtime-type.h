@@ -18,6 +18,7 @@
 #define incl_HPHP_RUNTIME_TYPE_H_
 
 #include "hphp/util/safe-cast.h"
+#include <vector>
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/region-selection.h"

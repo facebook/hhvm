@@ -53,7 +53,8 @@ bool shouldIRInline(const Func* caller, const Func* callee,
  * bytecode.
  */
 struct IRTranslator {
-  IRTranslator(Offset bcOff, Offset spOff, const Func* curFunc);
+  IRTranslator(Offset bcOff, Offset spOff, bool inGenerator,
+               const Func* curFunc);
 
   void translateInstr(const NormalizedInstruction& i);
   void checkType(const JIT::Location& l, const JIT::RuntimeType& rtt,

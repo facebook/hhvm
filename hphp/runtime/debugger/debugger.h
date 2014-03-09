@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/program-functions.h"
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_queue.h>
+#include <set>
 
 namespace HPHP { namespace Eval {
 

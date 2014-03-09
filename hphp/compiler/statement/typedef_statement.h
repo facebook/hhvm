@@ -18,6 +18,7 @@
 #define incl_HPHP_COMPILER_TYPEDEF_STATEMENT_H_
 
 #include <string>
+#include <memory>
 
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/type_annotation.h"

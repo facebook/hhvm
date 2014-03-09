@@ -50,7 +50,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_openPhar.get());
 
     Variant ret;
-    g_vmContext->invokeFunc(
+    g_context->invokeFunc(
       ret.asTypedValue(),
       f,
       make_packed_array(filename),
@@ -94,7 +94,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
   virtual Directory* opendir(const String& path) {
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_opendir.get());
     Variant ret;
-    g_vmContext->invokeFunc(
+    g_context->invokeFunc(
       ret.asTypedValue(),
       f,
       make_packed_array(path),
@@ -113,7 +113,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
   Variant callStat(const String& path) {
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_stat.get());
     Variant ret;
-    g_vmContext->invokeFunc(
+    g_context->invokeFunc(
       ret.asTypedValue(),
       f,
       make_packed_array(path),

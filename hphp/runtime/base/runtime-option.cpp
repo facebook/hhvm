@@ -21,17 +21,22 @@
 
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <map>
+#include <memory>
+#include <set>
+#include <vector>
 
 #include "folly/String.h"
 
 #include "hphp/util/hdf.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/network.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"
 #include "hphp/util/file-cache.h"
 #include "hphp/util/log-file-flusher.h"
+#include "hphp/util/file-util.h"
 
 #include "hphp/parser/scanner.h"
 
@@ -346,20 +351,6 @@ int RuntimeOption::GetScannerType() {
   if (EnableXHP) type |= Scanner::AllowXHPSyntax;
   if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   return type;
-}
-
-// Initializers for Eval flags.
-static inline bool evalJitDefault() {
-  // --mode server or --mode daemon
-  // run long enough to justify JIT
-  if (RuntimeOption::ServerExecutionMode()) {
-    return true;
-  }
-
-  // JIT explicitly turned on via .hhvm-jit file
-  static const char* path = "/.hhvm-jit";
-  struct stat dummy;
-  return stat(path, &dummy) == 0;
 }
 
 static inline std::string regionSelectorDefault() {
@@ -801,13 +792,13 @@ void RuntimeOption::Load(Hdf &config,
     TLSDisableTLS1_2 = server["TLSDisableTLS1_2"].getBool(false);
     TLSClientCipherSpec = server["TLSClientCipherSpec"].getString();
 
-    string srcRoot = Util::normalizeDir(server["SourceRoot"].getString());
+    string srcRoot = FileUtil::normalizeDir(server["SourceRoot"].getString());
     if (!srcRoot.empty()) SourceRoot = srcRoot;
     FileCache::SourceRoot = SourceRoot;
 
     server["IncludeSearchPaths"].get(IncludeSearchPaths);
     for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {
-      IncludeSearchPaths[i] = Util::normalizeDir(IncludeSearchPaths[i]);
+      IncludeSearchPaths[i] = FileUtil::normalizeDir(IncludeSearchPaths[i]);
     }
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
@@ -819,7 +810,7 @@ void RuntimeOption::Load(Hdf &config,
     ErrorDocument500 = server["ErrorDocument500"].getString();
     normalizePath(ErrorDocument500);
     FatalErrorMessage = server["FatalErrorMessage"].getString();
-    FontPath = Util::normalizeDir(server["FontPath"].getString());
+    FontPath = FileUtil::normalizeDir(server["FontPath"].getString());
     EnableStaticContentFromDisk =
       server["EnableStaticContentFromDisk"].getBool(true);
     EnableOnDemandUncompress =
@@ -893,7 +884,6 @@ void RuntimeOption::Load(Hdf &config,
     UploadMaxFileSize =
       (upload["UploadMaxFileSize"].getInt32(100)) * (1LL << 20);
     UploadTmpDir = upload["UploadTmpDir"].getString("/tmp");
-    RuntimeOption::AllowedDirectories.push_back(UploadTmpDir);
     EnableFileUploads = upload["EnableFileUploads"].getBool(true);
     EnableUploadProgress = upload["EnableUploadProgress"].getBool();
     Rfc1867Freq = upload["Rfc1867Freq"].getInt32(256 * 1024);
@@ -1234,8 +1224,7 @@ void RuntimeOption::Load(Hdf &config,
   {
     Hdf sandbox = config["Sandbox"];
     SandboxMode = sandbox["SandboxMode"].getBool();
-    SandboxPattern = Util::format_pattern
-      (sandbox["Pattern"].getString(), true);
+    SandboxPattern = format_pattern(sandbox["Pattern"].getString(), true);
     SandboxHome = sandbox["Home"].getString();
     SandboxFallback = sandbox["Fallback"].getString();
     SandboxConfFile = sandbox["ConfFile"].getString();
@@ -1291,6 +1280,92 @@ void RuntimeOption::Load(Hdf &config,
 #endif
 
   refineStaticStringTableSize();
+
+  // Language and Misc Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY, "expose_php",
+                   &RuntimeOption::ExposeHPHP);
+
+  // Data Handling
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "post_max_size",
+                   IniSetting::SetAndGet<int64_t>(
+                     nullptr,
+                     []() {
+                       return VirtualHost::GetMaxPostSize();
+                     }
+                   ),
+                   &RuntimeOption::MaxPostSize);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "always_populate_raw_post_data",
+                   &RuntimeOption::AlwaysPopulateRawPostData);
+
+  // Paths and Directories
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "doc_root", &RuntimeOption::SourceRoot);
+
+  // FastCGI
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
+                   "pid", &RuntimeOption::PidFile);
+
+  // File Uploads
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "file_uploads", "true",
+                   &RuntimeOption::EnableFileUploads);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "upload_tmp_dir", &RuntimeOption::UploadTmpDir);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "upload_max_filesize",
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) {
+                       return ini_on_update(
+                         value, RuntimeOption::UploadMaxFileSize);
+                     },
+                     []() {
+                       int uploadMaxFilesize =
+                         VirtualHost::GetUploadMaxFileSize() / (1 << 20);
+                       return std::to_string(uploadMaxFilesize) + "M";
+                     }
+                   ));
+  // Filesystem and Streams Configuration Options
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "allow_url_fopen",
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) { return false; },
+                     []() { return "1"; }));
+
+  // HPHP specific
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.compiler_id",
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) { return false; },
+                     []() { return getHphpCompilerId(); }
+                   ));
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.compiler_version",
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) { return false; },
+                     []() { return getHphpCompilerVersion(); }
+                   ));
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hhvm.ext_zend_compat",
+                   IniSetting::SetAndGet<bool>(
+                     [](const bool& value) { return false; },
+                     nullptr
+                   ),
+                   &RuntimeOption::EnableZendCompat),
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.build_id",
+                   IniSetting::SetAndGet<std::string>(
+                     [](const std::string& value) { return false; },
+                     nullptr
+                   ),
+                   &RuntimeOption::BuildId);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "notice_frequency",
+                   &RuntimeOption::NoticeFrequency);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "warning_frequency",
+                   &RuntimeOption::WarningFrequency);
 
   Extension::LoadModules(config);
   if (overwrites) Loaded = true;

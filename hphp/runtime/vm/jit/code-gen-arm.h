@@ -17,24 +17,25 @@
 #define incl_HPHP_JIT_CODE_GEN_ARM_H
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
+#include <vector>
 
 #include "hphp/util/data-block.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP { namespace JIT { namespace ARM {
 
 struct CodeGenerator {
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
-                JIT::TranslatorX64* tx64, CodegenState& state)
+                JIT::MCGenerator* mcg, CodegenState& state)
       : m_unit(unit)
       , m_mainCode(mainCode)
       , m_stubsCode(stubsCode)
       , m_as(mainCode)
       , m_astubs(stubsCode)
-      , m_tx64(tx64)
+      , m_mcg(mcg)
       , m_state(state)
       , m_curInst(nullptr)
     {
@@ -127,7 +128,7 @@ struct CodeGenerator {
   CodeBlock&                  m_stubsCode;
   vixl::MacroAssembler        m_as;
   vixl::MacroAssembler        m_astubs;
-  TranslatorX64*              m_tx64;
+  MCGenerator*                m_mcg;
   CodegenState&               m_state;
   IRInstruction*              m_curInst;
 };

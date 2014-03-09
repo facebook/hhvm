@@ -16,23 +16,30 @@
 
 #include "hphp/runtime/vm/treadmill.h"
 
+#include <list>
+#include <atomic>
+#include <vector>
+#include <memory>
+#include <algorithm>
+
+#include <sys/time.h>
+
 #include <stdlib.h>
 #include <pthread.h>
 #include <stdio.h>
-#include <sys/time.h>
-
-#include <list>
 
 #include "hphp/util/trace.h"
 #include "hphp/util/rank.h"
 #include "hphp/runtime/base/macros.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP {  namespace Treadmill {
 
 TRACE_SET_MOD(treadmill);
 
 namespace {
+
+//////////////////////////////////////////////////////////////////////
 
 const int64_t ONE_SEC_IN_MICROSEC = 1000000;
 
@@ -41,6 +48,19 @@ const GenCount kIdleGenCount = 0; // not processing any requests.
 std::vector<GenCount> s_inflightRequests;
 GenCount s_latestCount = 0;
 std::atomic<GenCount> s_oldestRequestInFlight(0);
+
+/*
+ * We assign local, unique indexes to each thread, with hopes that
+ * they are densely packed.
+ *
+ * The plan here is that each thread starts with s_thisThreadIdx as
+ * -1.  And the first time a thread starts using the Treadmill it
+ * allocates a new thread id from s_nextThreadIdx with fetch_add.
+ */
+std::atomic<int64_t> s_nextThreadIdx{0};
+__thread int64_t s_thisThreadIdx{-1};
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * The next 2 functions should be used to manage the generation count/time
@@ -84,6 +104,9 @@ struct GenCountGuard {
     pthread_mutex_unlock(&s_genLock);
   }
 };
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 typedef std::list<std::unique_ptr<WorkItem>> PendingTriggers;
@@ -104,25 +127,33 @@ void WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem> gt) {
   }
 }
 
-void startRequest(int threadId) {
+void startRequest() {
+  if (UNLIKELY(s_thisThreadIdx == -1)) {
+    s_thisThreadIdx = s_nextThreadIdx.fetch_add(1);
+  }
+  auto const threadId = s_thisThreadIdx;
+
   GenCount startTime = getTime();
   {
     GenCountGuard g;
-    assert(threadId >= s_inflightRequests.size() ||
-           s_inflightRequests[threadId] == kIdleGenCount);
     if (threadId >= s_inflightRequests.size()) {
       s_inflightRequests.resize(threadId + 1, kIdleGenCount);
+    } else {
+      assert(s_inflightRequests[threadId] == kIdleGenCount);
     }
     s_inflightRequests[threadId] = correctTime(startTime);
-    TRACE(1, "tid %d start @gen %lu\n", threadId, s_inflightRequests[threadId]);
+    FTRACE(1, "tid {} start @gen {}\n", threadId,
+      s_inflightRequests[threadId]);
     if (s_oldestRequestInFlight.load(std::memory_order_relaxed) == 0) {
       s_oldestRequestInFlight = s_inflightRequests[threadId];
     }
   }
 }
 
-void finishRequest(int threadId) {
-  TRACE(1, "tid %d finish\n", threadId);
+void finishRequest() {
+  auto const threadId = s_thisThreadIdx;
+  assert(threadId != -1);
+  FTRACE(1, "tid {} finish\n", threadId);
   std::vector<std::unique_ptr<WorkItem>> toFire;
   {
     GenCountGuard g;

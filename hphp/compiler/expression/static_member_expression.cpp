@@ -22,7 +22,7 @@
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/hash.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/compiler/option.h"
@@ -326,7 +326,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
 
 unsigned StaticMemberExpression::getCanonHash() const {
   int64_t val = Expression::getCanonHash() +
-    hash_string(Util::toLower(m_className).c_str(), m_className.size());
+    hash_string(toLower(m_className).c_str(), m_className.size());
   return ~unsigned(val) ^ unsigned(val >> 32);
 }
 

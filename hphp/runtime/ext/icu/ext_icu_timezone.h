@@ -26,7 +26,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlTimeZone;
 
-class IntlTimeZone : public IntlResourceData {
+class IntlTimeZone : public IntlError {
  public:
   IntlTimeZone() {}
   IntlTimeZone(const IntlTimeZone&) = delete;
@@ -34,14 +34,18 @@ class IntlTimeZone : public IntlResourceData {
     setTimeZone(src.timezone()->clone());
     return *this;
   }
-  ~IntlTimeZone() override {
+  ~IntlTimeZone() {
     setTimeZone(nullptr);
   }
 
   static Object newInstance(icu::TimeZone *tz = nullptr, bool owned = true) {
-    auto obj = NewInstance(s_IntlTimeZone);
+    if (!c_IntlTimeZone) {
+      c_IntlTimeZone = Unit::lookupClass(s_IntlTimeZone.get());
+      assert(c_IntlTimeZone);
+    }
+    auto obj = ObjectData::newInstance(c_IntlTimeZone);
     if (tz) {
-      Native::data<IntlTimeZone>(obj.get())->setTimeZone(tz, owned);
+      Native::data<IntlTimeZone>(obj)->setTimeZone(tz, owned);
     }
     return obj;
   }
@@ -58,7 +62,7 @@ class IntlTimeZone : public IntlResourceData {
     m_owned = owned;
   }
 
-  bool isValid() const override {
+  bool isValid() const {
     return m_timezone;
   }
 
@@ -79,10 +83,12 @@ class IntlTimeZone : public IntlResourceData {
   icu::TimeZone* timezone() const { return m_timezone; }
 
   static icu::TimeZone* ParseArg(CVarRef arg, const String& funcname,
-                                 intl_error &err);
+                                 IntlError *err);
  private:
   icu::TimeZone *m_timezone = nullptr;
   bool m_owned = false;
+
+  static Class* c_IntlTimeZone;
 };
 
 /////////////////////////////////////////////////////////////////////////////

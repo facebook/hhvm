@@ -27,6 +27,9 @@
 #include <boost/filesystem.hpp>
 
 #include <unistd.h>
+#include <exception>
+#include <utility>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 
@@ -73,6 +76,9 @@ void parse_options(int argc, char** argv) {
     ("no-logging",
       po::bool_switch(&no_logging),
       "turn off logging")
+    ("extended-stats",
+      po::bool_switch(&options.extendedStats),
+      "Spend time to produce extra stats")
     ("parallel-num-threads",
       po::value(&parallel::num_threads)->default_value(defaultThreadCount),
       "Number of threads to use for parallelism")
@@ -82,6 +88,15 @@ void parse_options(int argc, char** argv) {
     ("interceptable",
       po::value(&interceptable)->composing(),
       "Add an interceptable function")
+    ;
+
+  // Some extra esoteric options that aren't exposed in --help for
+  // now.
+  po::options_description extended("Extended Options");
+  extended.add_options()
+    ("analyze-func-wlimit",  po::value(&options.analyzeFuncWideningLimit))
+    ("analyze-class-wlimit", po::value(&options.analyzeClassWideningLimit))
+    ("return-refine-limit",  po::value(&options.returnTypeRefineLimit))
     ;
 
   po::options_description oflags("Optimization Flags");
@@ -102,7 +117,7 @@ void parse_options(int argc, char** argv) {
     ;
 
   po::options_description all;
-  all.add(basic).add(oflags);
+  all.add(basic).add(extended).add(oflags);
 
   po::positional_options_description pd;
   pd.add("input", 1);

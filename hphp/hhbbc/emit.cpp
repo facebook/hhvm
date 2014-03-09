@@ -18,6 +18,9 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <map>
+#include <memory>
+#include <type_traits>
 
 #include "folly/gen/Base.h"
 #include "folly/Conv.h"

@@ -15,12 +15,15 @@
 */
 
 #include "hphp/runtime/vm/jit/ir-builder.h"
+#include <algorithm>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/util/assertions.h"
 
@@ -56,29 +59,17 @@ IRBuilder::~IRBuilder() {
  */
 bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
   if (!shouldConstrainGuards()) return false;
-  if (tmp && (tmp->isConst() || tmp->isA(Type::Cls))) return false;
+  if (tmp && (tmp->inst()->is(DefConst) || tmp->isA(Type::Cls))) return false;
 
   return true;
 }
 
-SSATmp* IRBuilder::genDefUninit() {
-  return gen(DefConst, Type::Uninit, ConstData(0));
-}
-
-SSATmp* IRBuilder::genDefInitNull() {
-  return gen(DefConst, Type::InitNull, ConstData(0));
-}
-
-SSATmp* IRBuilder::genDefNull() {
-  return gen(DefConst, Type::Null, ConstData(0));
-}
-
 SSATmp* IRBuilder::genPtrToInitNull() {
-  return gen(DefConst, Type::PtrToInitNull, ConstData(&init_null_variant));
+  return cns(Type::cns(&init_null_variant, Type::PtrToInitNull));
 }
 
 SSATmp* IRBuilder::genPtrToUninit() {
-  return gen(DefConst, Type::PtrToUninit, ConstData(&null_variant));
+  return cns(Type::cns(&null_variant, Type::PtrToUninit));
 }
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
@@ -163,7 +154,8 @@ std::vector<RegionDesc::TypePred> IRBuilder::getKnownTypes() const {
 
 SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   auto const locId = inst->extra<CheckLoc>()->locId;
-  Type typeParam = inst->typeParam();
+  Type typeParam   = inst->typeParam();
+  SSATmp* src      = inst->src(0);
 
   if (auto const prevValue = localValue(locId, DataTypeGeneric)) {
     return gen(CheckType, typeParam, inst->taken(), prevValue);
@@ -172,31 +164,24 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   auto const prevType = localType(locId, DataTypeSpecific);
 
   if (prevType <= typeParam) {
-    return inst->src(0);
-  } else {
-    //
-    // Normally, it doesn't make sense to be checking something that's
-    // deemed to fail.  Incompatible boxed types are ok though, since
-    // we don't track them precisely, but instead check them at every
-    // use.
-    //
-    // However, in JitPGO mode right now, this pathological case can
-    // happen, because profile counters are not accurate and we
-    // currently don't analyze Block post-conditions when picking its
-    // successors during region selection.  This can lead to
-    // incompatible types in blocks selected for the same region.
-    //
-    if (prevType.not(typeParam)) {
-      if (typeParam.isBoxed() && prevType.isBoxed()) {
-        // When both types are non-intersecting boxed types, we're just
-        // updating the inner type hint. This requires no runtime work.
-        constrainLocal(locId, DataTypeCountness, "preOptimizeCheckLoc");
-        return gen(AssertLoc, LocalId(locId), typeParam, inst->src(0));
-      } else {
-        assert(RuntimeOption::EvalJitPGO);
-        return gen(Jmp, inst->taken());
-      }
+    return src;
+  }
+
+  if (prevType.not(typeParam)) {
+    if (typeParam.isBoxed() && prevType.isBoxed()) {
+      /* When both types are non-intersecting boxed types, we're just
+       * updating the inner type hint. This requires no runtime work. */
+      constrainLocal(locId, DataTypeCountness, "preOptimizeCheckLoc");
+      return gen(AssertLoc, LocalId(locId), typeParam, src);
     }
+    /* This check will always fail. It's probably due to an incorrect
+     * prediction. Generate a Jmp, and return the source because
+     * following instructions may depend on the output of CheckLoc
+     * (they'll be DCEd later).  Note that we can't use convertToJmp
+     * because the return value isn't nullptr, so the original
+     * instruction won't be inserted into the stream. */
+    gen(Jmp, inst->taken());
+    return src;
   }
 
   return nullptr;
@@ -284,9 +269,7 @@ SSATmp* IRBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
   }
 
   if (!typeMightRelax()) {
-    inst->setTypeParam(
-      Type::mostRefined(knownType, inst->typeParam())
-    );
+    inst->setTypeParam(std::min(knownType, inst->typeParam()));
   }
 
   return nullptr;
@@ -302,7 +285,7 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   // If FrameState's type isn't as good as the type param, we're missing
   // information in the IR.
   assert(inst->typeParam() >= type);
-  inst->setTypeParam(Type::mostRefined(type, inst->typeParam()));
+  inst->setTypeParam(std::min(type, inst->typeParam()));
   return nullptr;
 }
 
@@ -310,7 +293,7 @@ SSATmp* IRBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
   auto const locId = inst->extra<LdLocAddr>()->locId;
   auto const type = localType(locId, DataTypeGeneric);
   assert(inst->typeParam().deref() >= type);
-  inst->setTypeParam(Type::mostRefined(type.ptr(), inst->typeParam()));
+  inst->setTypeParam(std::min(type.ptr(), inst->typeParam()));
   return nullptr;
 }
 
@@ -480,6 +463,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
  *     fall-through edge to the next block.
  */
 void IRBuilder::reoptimize() {
+  Timer _t("optimize_reoptimize");
   FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
   always_assert(m_savedBlocks.empty());
@@ -503,7 +487,7 @@ void IRBuilder::reoptimize() {
 
     auto nextBlock = block->next();
     auto backMarker = block->back().marker();
-    auto instructions = std::move(block->instrs());
+    auto instructions = block->moveInstrs();
     assert(block->empty());
     while (!instructions.empty()) {
       auto* inst = &instructions.front();
@@ -523,7 +507,7 @@ void IRBuilder::reoptimize() {
       }
 
       SSATmp* dst = inst->dst();
-      if (dst->type() != Type::None && dst != tmp) {
+      if (dst != tmp) {
         // The result of optimization has a different destination than the inst.
         // Generate a mov(tmp->dst) to get result into dst. If we get here then
         // assume the last instruction in the block isn't a guard. If it was,

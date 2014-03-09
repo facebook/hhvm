@@ -17,20 +17,12 @@
 #ifndef incl_HPHP_ARRAY_H_
 #define incl_HPHP_ARRAY_H_
 
-#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
-#error Directly including 'type-array.h' is prohibited. \
-       Include 'complex-types.h' instead.
-#endif
-
-#include <boost/static_assert.hpp>
-#include <algorithm>
-#include <vector>
-
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/runtime-error.h"
+
+#include <algorithm>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,13 +102,10 @@ public:
   {}
 
   // Move ctor
-  Array(Array&& src) : ArrayBase(std::move(src)) {
-    static_assert(sizeof(Array) == sizeof(ArrayBase), "Fix this.");
-  }
+  Array(Array&& src) : ArrayBase(std::move(src)) { }
 
   // Move assign
   Array& operator=(Array&& src) {
-    static_assert(sizeof(Array) == sizeof(ArrayBase), "Fix this.");
     ArrayBase::operator=(std::move(src));
     return *this;
   }
@@ -291,7 +280,7 @@ public:
   const Variant operator[](double  key) const = delete;
   const Variant operator[](const String& key) const;
   const Variant operator[](const Variant& key) const;
-  const Variant operator[](const char*) const = delete; // use CStrRef
+  const Variant operator[](const char*) const = delete; // use const String&
 
   /*
    * Get an lval reference to a newly created element.
@@ -437,9 +426,7 @@ public:
     return *ret;
   }
 
-  static void compileTimeAssertions() {
-    static_assert(offsetof(Array, m_px) == kExpectedMPxOffset, "");
-  }
+  static void compileTimeAssertions();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -470,9 +457,7 @@ protected:
   ArrayData* m_px;
 
 private:
-  static void compileTimeAssertions() {
-    static_assert(offsetof(ArrNR, m_px) == kExpectedMPxOffset, "");
-  }
+  static void compileTimeAssertions();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

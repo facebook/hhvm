@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/type-array.h"
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -43,6 +45,15 @@ void Array::setEvalScalar() const {
     ArrayData *ad = ArrayData::GetScalarArray(m_px);
     *thisPtr = ad;
   }
+}
+
+void Array::compileTimeAssertions() {
+  static_assert(sizeof(Array) == sizeof(ArrayBase), "Fix this.");
+  static_assert(offsetof(Array, m_px) == kExpectedMPxOffset, "");
+}
+
+void ArrNR::compileTimeAssertions() {
+  static_assert(offsetof(ArrNR, m_px) == kExpectedMPxOffset, "");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/test/ext/test_ext_server.h"
+#include <vector>
 #include "hphp/runtime/ext/ext_server.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-server.h"

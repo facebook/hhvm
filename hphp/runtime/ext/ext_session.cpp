@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <vector>
 
 #include "folly/String.h"
 
@@ -43,6 +44,7 @@
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
 
@@ -50,13 +52,12 @@ namespace HPHP {
 
 using std::string;
 
-static bool ini_on_update_save_handler(const std::string& value, void *p);
-static std::string ini_get_save_handler(void *p);
-static bool ini_on_update_serializer(const std::string& value, void *p);
-static std::string ini_get_serializer(void *p);
-static bool ini_on_update_trans_sid(const std::string& value, void *p);
-static std::string ini_get_trans_sid(void *p);
-static bool ini_on_update_save_dir(const std::string& value, void *p);
+static bool ini_on_update_save_handler(const std::string& value);
+static std::string ini_get_save_handler();
+static bool ini_on_update_serializer(const std::string& value);
+static std::string ini_get_serializer();
+static bool ini_on_update_trans_sid(const bool& value);
+static bool ini_on_update_save_dir(const std::string& value);
 static bool mod_is_open();
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -131,8 +132,7 @@ const int64_t k_PHP_SESSION_NONE     = Session::None;
 const int64_t k_PHP_SESSION_ACTIVE   = Session::Active;
 const StaticString s_session_ext_name("session");
 
-class SessionRequestData : public RequestEventHandler, public Session {
-public:
+struct SessionRequestData final : RequestEventHandler, Session {
   SessionRequestData() {}
 
   void destroy() {
@@ -141,84 +141,11 @@ public:
     m_ps_session_handler = nullptr;
   }
 
-  virtual void requestInit() {
+  void requestInit() override {
     destroy();
-
-    Extension* ext = Extension::GetExtension(s_session_ext_name);
-    assert(ext);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.save_path",               "",
-                     ini_on_update_save_dir,            ini_get_stdstring,
-                     &m_save_path);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.name",                    "PHPSESSID",
-                     &m_session_name);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.save_handler",            "files",
-                     ini_on_update_save_handler,        ini_get_save_handler);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.auto_start",              "0",
-                     &m_auto_start);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.gc_probability",          "1",
-                     &m_gc_probability);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.gc_divisor",              "100",
-                     &m_gc_divisor);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.gc_maxlifetime",          "1440",
-                     &m_gc_maxlifetime);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.serialize_handler",       "php",
-                     ini_on_update_serializer,          ini_get_serializer);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.cookie_lifetime",         "0",
-                     &m_cookie_lifetime);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.cookie_path",             "/",
-                     &m_cookie_path);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.cookie_domain",           "",
-                     &m_cookie_domain);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.cookie_secure",           "",
-                     &m_cookie_secure);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.cookie_httponly",         "",
-                     &m_cookie_httponly);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.use_cookies",             "1",
-                     &m_use_cookies);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.use_only_cookies",        "1",
-                     &m_use_only_cookies);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.referer_check",           "",
-                     &m_extern_referer_chk);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.entropy_file",            "",
-                     &m_entropy_file);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.entropy_length",          "0",
-                     &m_entropy_length);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.cache_limiter",           "nocache",
-                     &m_cache_limiter);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.cache_expire",            "180",
-                     &m_cache_expire);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.use_trans_sid",           "0",
-                     ini_on_update_trans_sid,           ini_get_trans_sid);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.hash_function",           "0",
-                     &m_hash_func);
-    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
-                     "session.hash_bits_per_character", "4",
-                     &m_hash_bits_per_character);
   }
 
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     // We don't actually want to do our requestShutdownImpl here---it
     // is run explicitly from the execution context, because it could
     // run user code.
@@ -428,7 +355,7 @@ void SystemlibSessionModule::lookupClass() {
   }
 
   if (LookupResult::MethodFoundWithThis !=
-      g_vmContext->lookupCtorMethod(m_ctor, cls)) {
+      g_context->lookupCtorMethod(m_ctor, cls)) {
     throw InvalidArgumentException(0, "Unable to call %s's constructor",
                                    m_classname);
   }
@@ -455,7 +382,7 @@ ObjectData* SystemlibSessionModule::getObject() {
   }
   s_obj->setObject(ObjectData::newInstance(m_cls));
   ObjectData *obj = s_obj->getObject();
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_ctor, obj);
+  g_context->invokeFuncFew(ret.asTypedValue(), m_ctor, obj);
 
   return obj;
 }
@@ -468,7 +395,7 @@ bool SystemlibSessionModule::open(const char *save_path,
   Variant sessionName = String(session_name, CopyString);
   Variant ret;
   TypedValue args[2] = { *savePath.asCell(), *sessionName.asCell() };
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_open, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_open, obj,
                              nullptr, 2, args);
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -487,7 +414,7 @@ bool SystemlibSessionModule::close() {
   }
 
   Variant ret;
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_close, obj);
+  g_context->invokeFuncFew(ret.asTypedValue(), m_close, obj);
   s_obj->destroy();
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -503,7 +430,7 @@ bool SystemlibSessionModule::read(const char *key, String &value) {
 
   Variant sessionKey = String(key, CopyString);
   Variant ret;
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_read, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_read, obj,
                              nullptr, 1, sessionKey.asCell());
 
   if (ret.isString()) {
@@ -522,7 +449,7 @@ bool SystemlibSessionModule::write(const char *key, const String& value) {
   Variant sessionVal = value;
   Variant ret;
   TypedValue args[2] = { *sessionKey.asCell(), *sessionVal.asCell() };
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_write, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_write, obj,
                              nullptr, 2, args);
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -538,7 +465,7 @@ bool SystemlibSessionModule::destroy(const char *key) {
 
   Variant sessionKey = String(key, CopyString);
   Variant ret;
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_destroy, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_destroy, obj,
                              nullptr, 1, sessionKey.asCell());
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -554,7 +481,7 @@ bool SystemlibSessionModule::gc(int maxlifetime, int *nrdels) {
 
   Variant maxLifeTime = maxlifetime;
   Variant ret;
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), m_gc, obj,
+  g_context->invokeFuncFew(ret.asTypedValue(), m_gc, obj,
                              nullptr, 1, maxLifeTime.asCell());
 
   if (ret.isInteger()) {
@@ -1164,41 +1091,40 @@ static bool mod_is_open() {
   return PS(mod_data) || PS(mod_user_implemented);
 }
 
-static bool ini_on_update_save_handler(const std::string& value, void *p) {
+static bool ini_on_update_save_handler(const std::string& value) {
   SESSION_CHECK_ACTIVE_STATE;
   PS(mod) = SessionModule::Find(value.c_str());
   return true;
 }
 
-static std::string ini_get_save_handler(void *p) {
-  return PS(mod)->getName();
+static std::string ini_get_save_handler() {
+  auto &mod = PS(mod);
+  if (mod == nullptr) {
+    return "";
+  }
+  return mod->getName();
 }
 
-static bool ini_on_update_serializer(const std::string& value, void *p) {
+static bool ini_on_update_serializer(const std::string& value) {
   SESSION_CHECK_ACTIVE_STATE;
   PS(serializer) = SessionSerializer::Find(value.data());
   return true;
 }
 
-static std::string ini_get_serializer(void *p) {
-  return PS(serializer)->getName();
+static std::string ini_get_serializer() {
+  auto &serializer = PS(serializer);
+  if (serializer == nullptr) {
+    return "";
+  }
+  return serializer->getName();
 }
 
-static bool ini_on_update_trans_sid(const std::string& value, void *p) {
+static bool ini_on_update_trans_sid(const bool& value) {
   SESSION_CHECK_ACTIVE_STATE;
-  if (!strncasecmp(value.data(), "on", sizeof("on"))) {
-    PS(use_trans_sid) = true;
-  } else {
-    ini_on_update_bool(value, &PS(use_trans_sid));
-  }
   return true;
 }
 
-static std::string ini_get_trans_sid(void *p) {
-  return std::to_string(PS(use_trans_sid));
-}
-
-static bool ini_on_update_save_dir(const std::string& value, void *p) {
+static bool ini_on_update_save_dir(const std::string& value) {
   if (value.find('\0') >= 0) {
     return false;
   }
@@ -1206,7 +1132,7 @@ static bool ini_on_update_save_dir(const std::string& value, void *p) {
   if (File::TranslatePath(path).empty()) {
     return false;
   }
-  return ini_on_update_stdstring(value, p);
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1932,6 +1858,95 @@ static class SessionExtension : public Extension {
     HHVM_ME(SessionHandler, hhwrite);
     HHVM_ME(SessionHandler, hhdestroy);
     HHVM_ME(SessionHandler, hhgc);
+  }
+
+  virtual void threadInit() {
+    Extension* ext = Extension::GetExtension(s_session_ext_name);
+    assert(ext);
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.save_path",               "",
+                     IniSetting::SetAndGet<std::string>(
+                       ini_on_update_save_dir, nullptr
+                     ),
+                     &PS(save_path));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.name",                    "PHPSESSID",
+                     &PS(session_name));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.save_handler",            "files",
+                     IniSetting::SetAndGet<std::string>(
+                       ini_on_update_save_handler, ini_get_save_handler
+                     ));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.auto_start",              "0",
+                     &PS(auto_start));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.gc_probability",          "1",
+                     &PS(gc_probability));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.gc_divisor",              "100",
+                     &PS(gc_divisor));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.gc_maxlifetime",          "1440",
+                     &PS(gc_maxlifetime));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.serialize_handler",       "php",
+                     IniSetting::SetAndGet<std::string>(
+                       ini_on_update_serializer, ini_get_serializer
+                     ));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.cookie_lifetime",         "0",
+                     &PS(cookie_lifetime));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.cookie_path",             "/",
+                     &PS(cookie_path));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.cookie_domain",           "",
+                     &PS(cookie_domain));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.cookie_secure",           "",
+                     &PS(cookie_secure));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.cookie_httponly",         "",
+                     &PS(cookie_httponly));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.use_cookies",             "1",
+                     &PS(use_cookies));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.use_only_cookies",        "1",
+                     &PS(use_only_cookies));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.referer_check",           "",
+                     &PS(extern_referer_chk));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.entropy_file",            "",
+                     &PS(entropy_file));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.entropy_length",          "0",
+                     &PS(entropy_length));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.cache_limiter",           "nocache",
+                     &PS(cache_limiter));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.cache_expire",            "180",
+                     &PS(cache_expire));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.use_trans_sid",           "0",
+                     IniSetting::SetAndGet<bool>(
+                       ini_on_update_trans_sid, nullptr
+                     ),
+                     &PS(use_trans_sid));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.hash_function",           "0",
+                     &PS(hash_func));
+    IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
+                     "session.hash_bits_per_character", "4",
+                     &PS(hash_bits_per_character));
+  }
+
+  virtual void requestInit() {
+    // warm up the session data
+    s_session->requestInit();
   }
 } s_session_extension;
 

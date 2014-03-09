@@ -91,36 +91,6 @@ array(4) {
 bool(true)
 int(0)
 int(1)
-int(2)
-int(3)
-array(4) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-  [3]=>
-  string(2) "22"
-}
-bool(true)
-int(0)
-int(1)
-int(2)
-int(3)
-array(4) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-  [3]=>
-  string(2) "22"
-}
-bool(true)
-int(0)
-int(1)
 array(2) {
   [0]=>
   int(22)

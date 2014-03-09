@@ -62,6 +62,7 @@ struct PropInfo;
 struct HhbcTranslator {
   HhbcTranslator(Offset startOffset,
                  uint32_t initialSpOffsetFromFp,
+                 bool inGenerator,
                  const Func* func);
 
   // Accessors.
@@ -103,7 +104,8 @@ struct HhbcTranslator {
   // Inlining-related functions.
   void beginInlining(unsigned numArgs,
                      const Func* target,
-                     Offset returnBcOffset);
+                     Offset returnBcOffset,
+                     Type retTypePred = Type::Gen);
   bool isInlining() const;
   int inliningDepth() const;
   void profileFunctionEntry(const char* category);
@@ -133,7 +135,7 @@ struct HhbcTranslator {
   void emitBareThis(int notice);
   void emitInitThisLoc(int32_t id);
   void emitArray(int arrayId);
-  void emitNewArrayReserve(int capacity);
+  void emitNewArray(int capacity);
   void emitNewPackedArray(int n);
   void emitNewStructArray(uint32_t n, StringData** keys);
   void emitNewCol(int capacity);
@@ -166,6 +168,7 @@ struct HhbcTranslator {
   void emitTrue();
   void emitFalse();
   void emitCGetL(int32_t id);
+  void emitFPassL(int32_t id);
   void emitPushL(uint32_t id);
   void emitCGetL2(int32_t id);
   void emitCGetS();
@@ -297,7 +300,7 @@ struct HhbcTranslator {
   void emitPredictTL(int32_t id, AssertTOp);
   void emitPredictTStk(int32_t offset, AssertTOp);
 
-  // binary arithmetic ops
+  // arithmetic ops
   void emitAdd();
   void emitSub();
   void emitMul();
@@ -559,7 +562,7 @@ private:
       PackedArray,
       // simple opcode on String
       String,
-      // simple opcode on Vector* (c_Vector* or c_FrozenVector*)
+      // simple opcode on Vector* (c_Vector* or c_ImmVector*)
       Vector,
       // simple opcode on Map* (c_Map*)
       Map,
@@ -751,12 +754,13 @@ public:
    * Accessors for the current function being compiled and its
    * class and unit.
    */
-  const Func* curFunc()   const { return m_bcStateStack.back().func; }
-  Class*      curClass()  const { return curFunc()->cls(); }
-  Unit*       curUnit()   const { return curFunc()->unit(); }
-  Offset      bcOff()     const { return m_bcStateStack.back().bcOff; }
-  SrcKey      curSrcKey() const { return SrcKey(curFunc(), bcOff()); }
-  size_t      spOffset()  const;
+  const Func* curFunc()     const { return m_bcStateStack.back().func; }
+  Class*      curClass()    const { return curFunc()->cls(); }
+  Unit*       curUnit()     const { return curFunc()->unit(); }
+  Offset      bcOff()       const { return m_bcStateStack.back().bcOff; }
+  SrcKey      curSrcKey()   const { return SrcKey(curFunc(), bcOff()); }
+  bool        inGenerator() const { return m_bcStateStack.back().inGenerator; }
+  size_t      spOffset()    const;
   Type        topType(uint32_t i, TypeConstraint c = DataTypeSpecific) const;
 
 private:
@@ -826,7 +830,6 @@ private:
   SSATmp* ldStackAddr(int32_t offset, TypeConstraint tc);
   void    extendStack(uint32_t index, Type type);
   void    replace(uint32_t index, SSATmp* tmp);
-  void    refineType(SSATmp* tmp, Type type);
 
   /*
    * Local instruction helpers.
@@ -850,12 +853,14 @@ private:
   // function we are in.  Goes in m_bcStateStack; we push and pop as
   // we deal with inlined calls.
   struct BcState {
-    explicit BcState(Offset bcOff, const Func* func)
+    explicit BcState(Offset bcOff, bool inGenerator, const Func* func)
       : bcOff(bcOff)
+      , inGenerator(inGenerator)
       , func(func)
     {}
 
     Offset bcOff;
+    bool inGenerator;
     const Func* func;
   };
 

@@ -110,9 +110,9 @@ public:
    * Encoding/decoding.
    */
   static String HtmlEncode(const String& input, QuoteStyle quoteStyle,
-                           const char *charset, bool nbsp);
+                           const char *charset, bool dEncode, bool htmlEnt);
   static String HtmlEncode(const String& input, const int64_t qsBitmask,
-                           const char *charset, bool nbsp);
+                           const char *charset, bool dEncode, bool htmlEnt);
   static String HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
                                 const char *charset, bool nbsp, Array extra);
   static String HtmlDecode(const String& input, QuoteStyle quoteStyle,

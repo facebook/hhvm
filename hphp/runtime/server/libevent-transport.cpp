@@ -18,7 +18,6 @@
 #include "hphp/runtime/server/libevent-server.h"
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {

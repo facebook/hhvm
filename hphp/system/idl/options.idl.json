@@ -481,7 +481,7 @@
             "flags": [
             ],
             "return": {
-                "type": "String",
+                "type": "Variant",
                 "desc": "Returns the value of the configuration option as a string on success, or an empty string on failure or for null values."
             },
             "args": [
@@ -539,7 +539,7 @@
             "flags": [
             ],
             "return": {
-                "type": "String",
+                "type": "Variant",
                 "desc": "Returns the old value on success, FALSE on failure."
             },
             "args": [
@@ -550,7 +550,7 @@
                 },
                 {
                     "name": "newvalue",
-                    "type": "String",
+                    "type": "Variant",
                     "desc": "The new value for the option."
                 }
             ]

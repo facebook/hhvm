@@ -25,6 +25,20 @@
 
 namespace HPHP {
 
+inline uintptr_t tlsBase() {
+  uintptr_t retval;
+#if defined(__x86_64__)
+  asm ("movq %%fs:0, %0" : "=r" (retval));
+#elif defined(__AARCH64EL__)
+  // mrs == "move register <-- system"
+  // tpidr_el0 == "thread process id register for exception level 0"
+  asm ("mrs %0, tpidr_el0" : "=r" (retval));
+#else
+# error How do you access thread-local storage on this machine?
+#endif
+  return retval;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // gcc >= 4.3.0 supports the '__thread' keyword for thread locals
 //

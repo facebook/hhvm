@@ -30,6 +30,7 @@
 #include <openssl/rand.h>
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
+#include <vector>
 
 namespace HPHP {
 

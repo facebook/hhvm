@@ -40,7 +40,7 @@ void process_env_variables(Variant &variables);
 /**
  * Reset all the ini settings from the config file
  */
-void process_ini_settings();
+void process_ini_settings(const std::string& name);
 
 /**
  * Inserting a variable into specified symbol table.

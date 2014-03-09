@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -57,19 +57,19 @@ ssize_t EventHook::CheckSurprise() {
 class ExecutingSetprofileCallbackGuard {
 public:
   ExecutingSetprofileCallbackGuard() {
-    g_vmContext->m_executingSetprofileCallback = true;
+    g_context->m_executingSetprofileCallback = true;
   }
 
   ~ExecutingSetprofileCallbackGuard() {
-    g_vmContext->m_executingSetprofileCallback = false;
+    g_context->m_executingSetprofileCallback = false;
   }
 };
 
 void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
   // Don't do anything if we are running the profiling function itself
   // or if we haven't set up a profiler.
-  if (g_vmContext->m_executingSetprofileCallback ||
-      g_vmContext->m_setprofileCallback.isNull()) {
+  if (g_context->m_executingSetprofileCallback ||
+      g_context->m_setprofileCallback.isNull()) {
     return;
   }
   // Don't profile 86ctor, since its an implementation detail,
@@ -89,22 +89,22 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
     frameinfo.set(s_args, hhvm_get_frame_args(ar, 0));
   } else {
     params.append(s_exit);
-    if (!g_vmContext->m_faults.empty()) {
-      Fault fault = g_vmContext->m_faults.back();
+    if (!g_context->m_faults.empty()) {
+      Fault fault = g_context->m_faults.back();
       if (fault.m_faultType == Fault::Type::UserException) {
         frameinfo.set(s_exception, fault.m_userException);
       }
     } else if (!ar->m_func->isCPPBuiltin() &&
-               !ar->m_func->isGenerator()) {
+               !ar->inGenerator()) {
       // TODO (#1131400) This is wrong for builtins
-      frameinfo.set(s_return, tvAsCVarRef(g_vmContext->m_stack.topTV()));
+      frameinfo.set(s_return, tvAsCVarRef(g_context->m_stack.topTV()));
     }
   }
 
   params.append(VarNR(ar->m_func->fullName()));
   params.append(frameinfo);
 
-  vm_call_user_func(g_vmContext->m_setprofileCallback, params);
+  vm_call_user_func(g_context->m_setprofileCallback, params);
 }
 
 static Array get_frame_args_with_ref(const ActRec* ar) {
@@ -141,7 +141,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
 
   JIT::VMRegAnchor _;
 
-  PC savePc = g_vmContext->m_pc;
+  PC savePc = g_context->m_pc;
 
   Variant doneFlag = true;
   Variant called_on;
@@ -164,20 +164,20 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   Variant ret = vm_call_user_func(h->asCArrRef()[0], intArgs);
   if (doneFlag.toBoolean()) {
     Offset pcOff;
-    ActRec* outer = g_vmContext->getPrevVMState(ar, &pcOff);
+    ActRec* outer = g_context->getPrevVMState(ar, &pcOff);
 
     frame_free_locals_inl_no_hook<true>(ar, ar->m_func->numLocals());
-    Stack& stack = g_vmContext->getStack();
+    Stack& stack = g_context->getStack();
     stack.top() = (Cell*)(ar + 1);
     cellDup(*ret.asCell(), *stack.allocTV());
 
-    g_vmContext->m_fp = outer;
-    g_vmContext->m_pc = outer ? outer->m_func->unit()->at(pcOff) : nullptr;
+    g_context->m_fp = outer;
+    g_context->m_pc = outer ? outer->m_func->unit()->at(pcOff) : nullptr;
 
     return false;
   }
-  g_vmContext->m_fp = ar;
-  g_vmContext->m_pc = savePc;
+  g_context->m_fp = ar;
+  g_context->m_pc = savePc;
 
   return true;
 }
@@ -227,7 +227,7 @@ bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
 }
 
 void EventHook::onFunctionExit(const ActRec* ar) {
-  auto const inlinedRip = JIT::tx64->uniqueStubs.retInlHelper;
+  auto const inlinedRip = JIT::tx->uniqueStubs.retInlHelper;
   if ((JIT::TCA)ar->m_savedRip == inlinedRip) {
     // Inlined calls normally skip the function enter and exit events. If we
     // side exit in an inlined callee, we want to make sure to skip the exit

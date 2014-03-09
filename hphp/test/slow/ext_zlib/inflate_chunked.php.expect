@@ -1,0 +1,15 @@
+Chunk 0: produced 844; eof: false
+Chunk 1: produced 984; eof: false
+Chunk 2: produced 1003; eof: false
+Chunk 3: produced 1038; eof: false
+Chunk 4: produced 1041; eof: false
+Chunk 5: produced 1043; eof: false
+Chunk 6: produced 1040; eof: false
+Chunk 7: produced 1040; eof: false
+Chunk 8: produced 1038; eof: false
+Chunk 9: produced 906; eof: true
+-----
+Input size: 9977
+Output size: 9977
+In MD5: 73f8802b7f98c4c0410287916f847fc7
+Out MD5: 73f8802b7f98c4c0410287916f847fc7

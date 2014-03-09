@@ -18,6 +18,7 @@
 #define incl_HPHP_MEMORY_PROFILE_H_
 
 #include "hphp/runtime/base/profile-dump.h"
+#include <map>
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/crash-reporter.h"

@@ -18,6 +18,7 @@
 #define incl_HPHP_LIVE_DICT_H_
 
 #include "hphp/compiler/analysis/dictionary.h"
+#include <map>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

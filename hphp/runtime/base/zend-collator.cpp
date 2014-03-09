@@ -554,10 +554,9 @@ static int collator_string_compare_descending(CVarRef v1, CVarRef v2,
 
 static bool collator_sort_internal(bool renumber, Variant &array,
                                    int sort_flags, bool ascending,
-                                   UCollator *coll, intl_error * errcode) {
+                                   UCollator *coll, Intl::IntlError *errcode) {
   assert(coll);
-  errcode->clear();
-  s_intl_error->m_error.clear();
+  errcode->clearError();
   Array temp = array.toArray();
   Array::PFUNC_CMP cmp_func;
 
@@ -578,12 +577,10 @@ static bool collator_sort_internal(bool renumber, Variant &array,
   }
 
   /* Convert strings in the specified array from UTF-8 to UTF-16. */
-  collator_convert_array_from_utf8_to_utf16(temp, &(errcode->code));
-  if (U_FAILURE(errcode->code)) {
-    errcode->custom_error_message =
-      "Error converting array from UTF-8 to UTF-16";
-    s_intl_error->m_error.code = errcode->code;
-    s_intl_error->m_error.custom_error_message = errcode->custom_error_message;
+  UErrorCode error = U_ZERO_ERROR;
+  collator_convert_array_from_utf8_to_utf16(temp, &error);
+  if (U_FAILURE(error)) {
+    errcode->setError(error, "Error converting array from UTF-8 to UTF-16");
     return false;
   }
 
@@ -591,14 +588,11 @@ static bool collator_sort_internal(bool renumber, Variant &array,
   temp.sort(cmp_func, false, renumber, coll);
 
   /* Convert strings in the specified array back to UTF-8. */
-  errcode->clear();
-  s_intl_error->m_error.clear();
-  collator_convert_array_from_utf16_to_utf8(temp, &(errcode->code));
-  if (U_FAILURE(errcode->code)) {
-    errcode->custom_error_message =
-      "Error converting array from UTF-16 to UTF-8";
-    s_intl_error->m_error.code = errcode->code;
-    s_intl_error->m_error.custom_error_message = errcode->custom_error_message;
+  errcode->clearError();
+  error = U_ZERO_ERROR;
+  collator_convert_array_from_utf16_to_utf8(temp, &error);
+  if (U_FAILURE(error)) {
+    errcode->setError(error, "Error converting array from UTF-16 to UTF-8");
     return false;
   }
   array = temp;
@@ -606,7 +600,7 @@ static bool collator_sort_internal(bool renumber, Variant &array,
 }
 
 bool collator_sort(Variant &array, int sort_flags, bool ascending,
-                   UCollator *coll, intl_error *errcode) {
+                   UCollator *coll, Intl::IntlError *errcode) {
   assert(coll);
   bool ret = collator_sort_internal(true, array, sort_flags, ascending, coll,
                                     errcode);
@@ -614,7 +608,7 @@ bool collator_sort(Variant &array, int sort_flags, bool ascending,
 }
 
 bool collator_asort(Variant &array, int sort_flags, bool ascending,
-                    UCollator *coll, intl_error *errcode) {
+                    UCollator *coll, Intl::IntlError *errcode) {
   assert(coll);
   bool ret = collator_sort_internal(false, array, sort_flags, ascending, coll,
                                     errcode);

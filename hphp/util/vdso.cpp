@@ -53,8 +53,9 @@ int Vdso::ClockGetTime(int clk_id, timespec *ts) {
 }
 
 ALWAYS_INLINE int64_t Vdso::clockGetTimeNS(int clk_id) {
-  if (m_clock_gettime_ns)
+  if (m_clock_gettime_ns) {
     return m_clock_gettime_ns(clk_id);
+  }
   return -1;
 }
 

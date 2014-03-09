@@ -174,6 +174,8 @@ String HHVM_FUNCTION(sql_regcase, const String& str) {
 
 const StaticString s_PCRE_VERSION("PCRE_VERSION");
 
+extern IMPLEMENT_THREAD_LOCAL(PCREglobals, s_pcre_globals);
+
 class PcreExtension : public Extension {
 public:
   PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET) {}
@@ -203,17 +205,15 @@ public:
     loadSystemlib();
   }
 
-  virtual void requestInit() {
+  virtual void threadInit() {
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "pcre.backtrack_limit",
                      std::to_string(RuntimeOption::PregBacktraceLimit).c_str(),
-                     ini_on_update_long, ini_get_long,
-                     &g_context->m_preg_backtrace_limit);
+                     &s_pcre_globals->m_preg_backtrace_limit);
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "pcre.recursion_limit",
                      std::to_string(RuntimeOption::PregRecursionLimit).c_str(),
-                     ini_on_update_long, ini_get_long,
-                     &g_context->m_preg_recursion_limit);
+                     &s_pcre_globals->m_preg_recursion_limit);
   }
 
 } s_pcre_extension;

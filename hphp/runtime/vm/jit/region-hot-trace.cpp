@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/trans-cfg.h"
+#include <limits>
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {

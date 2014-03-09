@@ -46,7 +46,7 @@ TypedValue* objOffsetGet(TypedValue& tvRef, ObjectData* base,
   static StringData* sd__offsetGet = makeStaticString("offsetGet");
   const Func* method = base->methodNamed(sd__offsetGet);
   assert(method != nullptr);
-  g_vmContext->invokeFuncFew(&tvRef, method, base, nullptr, 1, offset.asCell());
+  g_context->invokeFuncFew(&tvRef, method, base, nullptr, 1, offset.asCell());
   result = &tvRef;
   return result;
 }
@@ -60,7 +60,7 @@ static bool objOffsetExists(ObjectData* base, CVarRef offset) {
   assert(!base->isCollection());
   const Func* method = base->methodNamed(sd__offsetExists);
   assert(method != nullptr);
-  g_vmContext->invokeFuncFew(&tvResult, method, base, nullptr, 1,
+  g_context->invokeFuncFew(&tvResult, method, base, nullptr, 1,
                              offset.asCell());
   tvCastToBooleanInPlace(&tvResult);
   return bool(tvResult.m_data.num);
@@ -102,7 +102,7 @@ void objOffsetSet(ObjectData* base, CVarRef offset, TypedValue* val,
   TypedValue tvResult;
   tvWriteUninit(&tvResult);
   TypedValue args[2] = { *offset.asCell(), *tvToCell(val) };
-  g_vmContext->invokeFuncFew(&tvResult, method, base, nullptr, 2, args);
+  g_context->invokeFuncFew(&tvResult, method, base, nullptr, 2, args);
   tvRefcountedDecRef(&tvResult);
 }
 
@@ -115,7 +115,7 @@ void objOffsetUnset(ObjectData* base, CVarRef offset) {
   assert(method != nullptr);
   TypedValue tv;
   tvWriteUninit(&tv);
-  g_vmContext->invokeFuncFew(&tv, method, base, nullptr, 1, offset.asCell());
+  g_context->invokeFuncFew(&tv, method, base, nullptr, 1, offset.asCell());
   tvRefcountedDecRef(&tv);
 }
 

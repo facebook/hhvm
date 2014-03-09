@@ -168,7 +168,7 @@ function startDebuggerClient($debugPort, $input_path, &$pipes) {
   $config = ' --config '.$home.'/config/debugger-client.hdf';
   $logFileConfig = ' -vLog.File='."/tmp/hphpd_test_client$test_run_id.log";
   $repoConfig = " -vRepo.Central.Path=/tmp/hphpd_client$test_run_id.hhbc";
-  $debugConfig = ' --debug-config '.$home.'/config/hphpd.hdf';
+  $debugConfig = ' --debug-config '.$home.'/config/hphpd.ini';
 
   $cmd = $hhvm.' -m debug' . $host . $port . $user .
     $config . $logFileConfig . $repoConfig . $debugConfig .

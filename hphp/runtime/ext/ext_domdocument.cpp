@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_domdocument.h"
+#include <map>
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_string.h"
@@ -132,10 +133,10 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
  * error handler callbacks.
  */
 
-void php_libxml_ctx_error(void *ctx,
-                          const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
-void php_libxml_ctx_error(void *ctx,
-                          const char *msg, ...) {
+static void php_libxml_ctx_error(void *ctx,
+                                 const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
+static void php_libxml_ctx_error(void *ctx,
+                                 const char *msg, ...) {
   va_list args;
   va_start(args, msg);
   try {
@@ -144,10 +145,10 @@ void php_libxml_ctx_error(void *ctx,
   va_end(args);
 }
 
-void php_libxml_ctx_warning(void *ctx,
-                            const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
-void php_libxml_ctx_warning(void *ctx,
-                            const char *msg, ...) {
+static void php_libxml_ctx_warning(void *ctx,
+                                   const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
+static void php_libxml_ctx_warning(void *ctx,
+                                   const char *msg, ...) {
   va_list args;
   va_start(args, msg);
   try {
@@ -728,8 +729,9 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
   ctxt->recovery = recover;
   int old_error_reporting = 0;
   if (recover) {
-    old_error_reporting = g_context->getErrorReportingLevel();
-    g_context->setErrorReportingLevel(old_error_reporting | k_E_WARNING);
+    old_error_reporting = ThreadInfo::s_threadInfo.getNoCheck()->
+      m_reqInjectionData.getErrorReportingLevel();
+    IniSetting::Set("error_reporting", old_error_reporting | k_E_WARNING);
   }
 
   xmlParseDocument(ctxt);
@@ -737,7 +739,7 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
   if (ctxt->wellFormed || recover) {
     ret = ctxt->myDoc;
     if (ctxt->recovery) {
-      g_context->setErrorReportingLevel(old_error_reporting);
+      IniSetting::Set("error_reporting", old_error_reporting);
     }
     /* If loading from memory, set the base reference uri for the document */
     if (ret && ret->URL == NULL && ctxt->directory != NULL) {
@@ -1243,7 +1245,7 @@ static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
   }
   auto it = s_nodeMap->find(obj);
   if (it == s_nodeMap->end()) {
-    auto od = g_vmContext->createObjectOnly(clsname.get());
+    auto od = g_context->createObjectOnly(clsname.get());
     auto nodeobj = static_cast<c_DOMNode*>(od);
     auto inserted = s_nodeMap->insert(std::make_pair(obj, nodeobj));
     assert(inserted.second);

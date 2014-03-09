@@ -26,6 +26,8 @@
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/code_generator.h"
 #include <boost/graph/adjacency_list.hpp>
+#include <set>
+#include <vector>
 #include "hphp/compiler/json.h"
 #include "hphp/util/md5.h"
 

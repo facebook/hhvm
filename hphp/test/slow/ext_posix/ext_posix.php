@@ -65,7 +65,7 @@ VERIFY(posix_mknod($tmpnod, 0));
 VERIFY(posix_setpgid(0, 0));
 VERIFY(posix_setsid());
 
-VERIFY(strlen(posix_strerror(EPERM)));
+VERIFY(strlen(posix_strerror(1 /* EPERM */)));
 
 $ret = posix_times();
 VERIFY($ret != false);

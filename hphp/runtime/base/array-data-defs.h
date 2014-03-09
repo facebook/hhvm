@@ -18,6 +18,7 @@
 #define incl_HPHP_ARRAY_DEFS_H_
 
 #include "hphp/runtime/base/array-data.h"
+#include <algorithm>
 #include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {

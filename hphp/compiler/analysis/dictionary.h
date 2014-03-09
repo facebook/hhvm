@@ -18,6 +18,7 @@
 #define incl_HPHP_DICTIONARY_H_
 
 #include "hphp/compiler/hphp.h"
+#include <vector>
 #include "hphp/compiler/analysis/data_flow.h"
 
 namespace HPHP {

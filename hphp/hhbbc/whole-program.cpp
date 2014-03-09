@@ -17,6 +17,9 @@
 
 #include <vector>
 #include <algorithm>
+#include <atomic>
+#include <memory>
+#include <set>
 
 #include "folly/Memory.h"
 #include "folly/ScopeGuard.h"

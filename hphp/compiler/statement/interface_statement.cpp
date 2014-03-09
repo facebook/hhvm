@@ -15,6 +15,7 @@
 */
 
 #include "hphp/compiler/statement/interface_statement.h"
+#include <vector>
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/parameter_expression.h"
@@ -24,7 +25,7 @@
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/code_model_enums.h"
 #include "hphp/compiler/parser/parser.h"
@@ -42,7 +43,7 @@ InterfaceStatement::InterfaceStatement
   : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES),
     m_originalName(name), m_base(base),
     m_docComment(docComment), m_stmt(stmt), m_attrList(attrList) {
-  m_name = Util::toLower(name);
+  m_name = toLower(name);
   if (m_base) m_base->toLower();
 }
 
@@ -54,7 +55,7 @@ InterfaceStatement::InterfaceStatement
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(InterfaceStatement)),
     m_originalName(name), m_base(base),
     m_docComment(docComment), m_stmt(stmt), m_attrList(attrList) {
-  m_name = Util::toLower(name);
+  m_name = toLower(name);
   if (m_base) m_base->toLower();
 }
 
@@ -81,7 +82,7 @@ void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
   if (m_base) m_base->getOriginalStrings(bases);
 
   for (auto &b : bases) {
-    ar->parseOnDemandByClass(Util::toLower(b));
+    ar->parseOnDemandByClass(toLower(b));
   }
 
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());

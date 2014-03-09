@@ -39,6 +39,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"
+#include "hphp/util/file-util.h"
 
 #include <sys/types.h>
 #include <signal.h>
@@ -57,6 +58,18 @@ std::shared_ptr<HttpServer> HttpServer::Server;
 time_t HttpServer::StartTime;
 
 const int kNumProcessors = sysconf(_SC_NPROCESSORS_ONLN);
+
+static void on_kill(int sig) {
+  signal(sig, SIG_DFL);
+  // There is a small race condition here with HttpServer::reset in
+  // program-functions.cpp, but it can only happen if we get a signal while
+  // shutting down.  The fix is to add a lock to HttpServer::Server but it seems
+  // like overkill.
+  if (HttpServer::Server) {
+    HttpServer::Server->stopOnSignal();
+  }
+  raise(sig);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -85,14 +98,14 @@ HttpServer::HttpServer()
   options.m_serverFD = RuntimeOption::ServerPortFd;
   options.m_sslFD = RuntimeOption::SSLPortFd;
   options.m_takeoverFilename = RuntimeOption::TakeoverFilename;
-  m_pageServer = serverFactory->createServer(options);
+  m_pageServer = std::move(serverFactory->createServer(options));
   m_pageServer->addTakeoverListener(this);
 
   if (additionalThreads) {
     auto handlerFactory = std::make_shared<WarmupRequestHandlerFactory>(
-        m_pageServer, additionalThreads,
-        RuntimeOption::ServerWarmupThrottleRequestCount,
-        RuntimeOption::RequestTimeoutSeconds);
+      m_pageServer.get(), additionalThreads,
+      RuntimeOption::ServerWarmupThrottleRequestCount,
+      RuntimeOption::RequestTimeoutSeconds);
     m_pageServer->setRequestHandlerFactory([handlerFactory] {
       return handlerFactory->createHandler();
     });
@@ -109,19 +122,19 @@ HttpServer::HttpServer()
   ServerOptions admin_options
     (RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,
      RuntimeOption::AdminThreadCount);
-  m_adminServer = serverFactory->createServer(admin_options);
+  m_adminServer = std::move(serverFactory->createServer(admin_options));
   m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
     RuntimeOption::RequestTimeoutSeconds);
 
   for (unsigned int i = 0; i < RuntimeOption::SatelliteServerInfos.size();
        i++) {
     auto info = RuntimeOption::SatelliteServerInfos[i];
-    auto satellite = SatelliteServer::Create(info);
+    auto satellite(std::move(SatelliteServer::Create(info)));
     if (satellite) {
       if (info->getType() == SatelliteServer::Type::KindOfDanglingPageServer) {
-        m_danglings.push_back(satellite);
+        m_danglings.push_back(std::move(satellite));
       } else {
-        m_satellites.push_back(satellite);
+        m_satellites.push_back(std::move(satellite));
       }
     }
   }
@@ -130,15 +143,15 @@ HttpServer::HttpServer()
     std::shared_ptr<SatelliteServerInfo> xboxInfo(new XboxServerInfo());
     auto satellite = SatelliteServer::Create(xboxInfo);
     if (satellite) {
-      m_satellites.push_back(satellite);
+      m_satellites.push_back(std::move(satellite));
     }
   }
 
   StaticContentCache::TheCache.load();
   hphp_process_init();
 
-  Server::InstallStopSignalHandlers(m_pageServer);
-  Server::InstallStopSignalHandlers(m_adminServer);
+  signal(SIGTERM, on_kill);
+  signal(SIGUSR1, on_kill);
 
   if (!RuntimeOption::StartupDocument.empty()) {
     Hdf hdf;
@@ -388,6 +401,15 @@ void HttpServer::abortServers() {
   }
 }
 
+void HttpServer::stopOnSignal() {
+  if (m_pageServer) {
+    m_pageServer->stop();
+  }
+  if (m_adminServer) {
+    m_adminServer->stop();
+  }
+}
+
 void HttpServer::createPid() {
   if (!RuntimeOption::PidFile.empty()) {
     FILE * f = fopen(RuntimeOption::PidFile.c_str(), "w");
@@ -473,7 +495,7 @@ void HttpServer::checkMemory() {
 
 void HttpServer::getSatelliteStats(
     std::vector<std::pair<std::string, int>> *stats) {
-  for (auto i : m_satellites) {
+  for (const auto& i : m_satellites) {
     std::pair<std::string, int> active("satellite." + i->getName() + ".load",
                                        i->getActiveWorker());
     std::pair<std::string, int> queued("satellite." + i->getName() + ".queued",
@@ -535,7 +557,7 @@ bool HttpServer::startServer(bool pageServer) {
           std::string cmd = "bash -c '! fuser ";
           cmd += RuntimeOption::ServerFileSocket;
           cmd += "'";
-          if (Util::ssystem(cmd.c_str()) == 0) {
+          if (FileUtil::ssystem(cmd.c_str()) == 0) {
             unlink(RuntimeOption::ServerFileSocket.c_str());
           }
         }
@@ -594,7 +616,7 @@ bool HttpServer::startServer(bool pageServer) {
           std::string cmd = "lsof -t -i :";
           cmd += lexical_cast<std::string>(port);
           cmd += " | xargs kill -9";
-          Util::ssystem(cmd.c_str());
+          FileUtil::ssystem(cmd.c_str());
         }
         sleep(1);
       }

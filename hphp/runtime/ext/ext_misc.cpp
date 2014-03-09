@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_misc.h"
+#include <limits>
 
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -33,48 +34,43 @@
 
 namespace HPHP {
 
+IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_string);
+IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_comment);
+IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_keyword);
+IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_default);
+IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_html);
+
 static class MiscExtension : public Extension {
 public:
   MiscExtension() : Extension("misc", k_PHP_VERSION.c_str()) { }
-  void requestInit() {
+  void threadInit() {
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.string", "#DD0000",
-      ini_on_update_stdstring, ini_get_stdstring,
-      &m_misc_highlight_default_string
+      s_misc_highlight_default_string.get()
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.comment", "#FF8000",
-      ini_on_update_stdstring, ini_get_stdstring,
-      &m_misc_highlight_default_comment
+      s_misc_highlight_default_comment.get()
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.keyword", "#007700",
-      ini_on_update_stdstring, ini_get_stdstring,
-      &m_misc_highlight_default_keyword
+      s_misc_highlight_default_keyword.get()
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.default", "#0000BB",
-      ini_on_update_stdstring, ini_get_stdstring,
-      &m_misc_highlight_default_default
+      s_misc_highlight_default_default.get()
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.html", "#000000",
-      ini_on_update_stdstring, ini_get_stdstring,
-      &m_misc_highlight_default_html
+      s_misc_highlight_default_html.get()
     );
 
   }
-
-  std::string m_misc_highlight_default_string;
-  std::string m_misc_highlight_default_comment;
-  std::string m_misc_highlight_default_keyword;
-  std::string m_misc_highlight_default_default;
-  std::string m_misc_highlight_default_html;
 
 } s_misc_extension;
 
@@ -112,13 +108,13 @@ static Class* getClassByName(const char* name, int len) {
   Class* cls = nullptr;
   // translate "self" or "parent"
   if (len == 4 && !memcmp(name, "self", 4)) {
-    cls = g_vmContext->getContextClass();
+    cls = g_context->getContextClass();
     if (!cls) {
       throw FatalErrorException("Cannot access self:: "
                                 "when no class scope is active");
     }
   } else if (len == 6 && !memcmp(name, "parent", 6)) {
-    cls = g_vmContext->getParentContextClass();
+    cls = g_context->getParentContextClass();
     if (!cls) {
       throw FatalErrorException("Cannot access parent");
     }

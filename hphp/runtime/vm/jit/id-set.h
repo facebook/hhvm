@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_ID_SET_
 
 #include "hphp/runtime/base/memory-manager.h"
+#include <algorithm>
 #include "hphp/runtime/vm/jit/ir-unit.h"
 
 namespace HPHP { namespace JIT {

@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <boost/variant.hpp>
+#include <map>
 
 #include "folly/Optional.h"
 

@@ -23,7 +23,6 @@
 #include "thrift/lib/cpp/async/TAsyncTransport.h"
 #include "thrift/lib/cpp/async/TAsyncTimeout.h"
 #include "thrift/lib/cpp/transport/TSocketAddress.h"
-#include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
 #include "folly/MoveWrapper.h"
@@ -390,14 +389,13 @@ void FastCGITransport::onHeadersComplete() {
     }
   }
 
+  // Treat everything apart from GET and HEAD as a post to be like php-src.
   if (m_extendedMethod == "GET") {
     m_method = Method::GET;
-  } else if (m_extendedMethod == "POST") {
-    m_method = Method::POST;
   } else if (m_extendedMethod == "HEAD") {
     m_method = Method::HEAD;
   } else {
-    m_method = Method::Unknown;
+    m_method = Method::POST;
   }
 
   if (m_pathTranslated.empty()) {

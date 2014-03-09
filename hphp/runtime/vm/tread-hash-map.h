@@ -23,7 +23,6 @@
 #include <boost/utility/enable_if.hpp>
 #include <utility>
 #include "folly/Bits.h"
-#include "hphp/util/util.h"
 #include "hphp/util/atomic.h"
 
 namespace HPHP {

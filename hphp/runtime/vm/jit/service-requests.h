@@ -227,11 +227,13 @@ TCA emitServiceReq(CodeBlock& cb, SRFlags flags, ServiceRequest sr, Arg... a) {
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);
-  if (arch() == Arch::ARM) {
-    return ARM::emitServiceReqWork(cb, cb.frontier(), true, flags, sr, argv);
-  } else {
-    return X64::emitServiceReqWork(cb, cb.frontier(), true, flags, sr, argv);
+  switch (arch()) {
+    case Arch::X64:
+      return X64::emitServiceReqWork(cb, cb.frontier(), true, flags, sr, argv);
+    case Arch::ARM:
+      return ARM::emitServiceReqWork(cb, cb.frontier(), true, flags, sr, argv);
   }
+  not_reached();
 }
 
 template<typename... Arg>
@@ -249,11 +251,13 @@ TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);
-  if (arch() == Arch::ARM) {
-    return ARM::emitServiceReqWork(cb, start, false, SRFlags::None, sr, argv);
-  } else {
-    return X64::emitServiceReqWork(cb, start, false, SRFlags::None, sr, argv);
+  switch (arch()) {
+    case Arch::X64:
+      return X64::emitServiceReqWork(cb, start, false, SRFlags::None, sr, argv);
+    case Arch::ARM:
+      return ARM::emitServiceReqWork(cb, start, false, SRFlags::None, sr, argv);
   }
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////

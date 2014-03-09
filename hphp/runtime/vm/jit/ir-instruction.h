@@ -232,7 +232,6 @@ struct IRInstruction {
   Type       typeParam() const         { return m_typeParam.value(); }
   folly::Optional<Type> maybeTypeParam() const { return m_typeParam; }
   void       setTypeParam(Type t) {
-    assert(t != Type::None);
     m_typeParam.assign(t);
   }
   uint32_t   numSrcs()  const          { return m_numSrcs; }

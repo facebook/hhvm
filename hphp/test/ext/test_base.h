@@ -19,6 +19,7 @@
 
 #include <string>
 #include <assert.h>
+#include <exception>
 #include "hphp/compiler/hphp.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/test/ext/test.h"

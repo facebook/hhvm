@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #define ICONV_SUPPORTS_ERRNO 1
 #include <iconv.h>
@@ -99,21 +100,20 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset,
   }
 }
 
-class ICONVGlobals : public RequestEventHandler {
-public:
+struct ICONVGlobals final : RequestEventHandler {
   String input_encoding;
   String output_encoding;
   String internal_encoding;
 
   ICONVGlobals() {}
 
-  virtual void requestInit() {
+  void requestInit() override {
     input_encoding = "ISO-8859-1";
     output_encoding = "ISO-8859-1";
     internal_encoding = "ISO-8859-1";
   }
 
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     input_encoding.reset();
     output_encoding.reset();
     internal_encoding.reset();

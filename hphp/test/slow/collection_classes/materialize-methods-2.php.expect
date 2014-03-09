@@ -2,21 +2,43 @@ object(HH\Vector)#3 (1) {
   [0]=>
   string(3) "abc"
 }
-object(HH\Map)#4 (1) {
-  [123]=>
-  string(3) "abc"
-}
-object(HH\Set)#5 (1) {
-  string(3) "abc"
-}
-object(HH\Vector)#8 (1) {
+object(HH\ImmVector)#4 (1) {
   [0]=>
   string(3) "abc"
 }
-object(HH\Map)#12 (1) {
+object(HH\Map)#5 (1) {
   [123]=>
   string(3) "abc"
 }
-object(HH\Set)#16 (1) {
+object(HH\ImmMap)#6 (1) {
+  [123]=>
+  string(3) "abc"
+}
+object(HH\Set)#7 (1) {
+  string(3) "abc"
+}
+object(HH\ImmSet)#8 (1) {
+  string(3) "abc"
+}
+object(HH\Vector)#11 (1) {
+  [0]=>
+  string(3) "abc"
+}
+object(HH\ImmVector)#15 (1) {
+  [0]=>
+  string(3) "abc"
+}
+object(HH\Map)#19 (1) {
+  [123]=>
+  string(3) "abc"
+}
+object(HH\ImmMap)#23 (1) {
+  [123]=>
+  string(3) "abc"
+}
+object(HH\Set)#27 (1) {
+  string(3) "abc"
+}
+object(HH\ImmSet)#31 (1) {
   string(3) "abc"
 }

@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
@@ -51,53 +51,11 @@ SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
 #undef pinitSentinel
 #undef STRINGIZE_CLASS_NAME
 
-class VMClassInfoHook : public ClassInfoHook {
-public:
-  virtual Array getUserFunctions() const {
-    return g_vmContext->getUserFunctionsInfo();
-  }
-  virtual Array getClasses() const {
-    return Unit::getClassesInfo();
-  }
-  virtual Array getInterfaces() const {
-    return Unit::getInterfacesInfo();
-  }
-  virtual Array getTraits() const {
-    return Unit::getTraitsInfo();
-  }
-  virtual const ClassInfo::MethodInfo *findFunction(const String& name) const {
-    return g_vmContext->findFunctionInfo(name);
-  }
-  virtual const ClassInfo *findClassLike(const String& name) const {
-    const ClassInfo* ci;
-    if ((ci = g_vmContext->findClassInfo(name)) != nullptr
-        || (ci = g_vmContext->findInterfaceInfo(name)) != nullptr
-        || (ci = g_vmContext->findTraitInfo(name)) != nullptr) {
-      return ci;
-    }
-    return nullptr;
-  }
-  virtual const ClassInfo *findInterface(const String& name) const {
-    return g_vmContext->findInterfaceInfo(name);
-  }
-  virtual const ClassInfo* findTrait(const String& name) const {
-    return g_vmContext->findTraitInfo(name);
-  }
-  virtual const ClassInfo::ConstantInfo *
-  findConstant(const String& name) const {
-    return g_vmContext->findConstantInfo(name);
-  }
-};
-
-static VMClassInfoHook vm_class_info_hook;
-
 void ProcessInit() {
-  // Install VM's ClassInfoHook
-  ClassInfo::SetHook(&vm_class_info_hook);
-
-  // Create the global tx64 object
-  JIT::g_translator = JIT::tx64 = new JIT::TranslatorX64();
-  JIT::tx64->initUniqueStubs();
+  // Create the global mcg object
+  JIT::mcg = new JIT::MCGenerator();
+  JIT::tx = &JIT::mcg->tx();
+  JIT::mcg->initUniqueStubs();
 
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the

@@ -24,6 +24,8 @@
 #include <type_traits>
 #include <string>
 #include <atomic>
+#include <algorithm>
+#include <exception>
 
 #include "folly/ScopeGuard.h"
 
@@ -60,7 +62,12 @@ void for_each(const std::vector<Item>& inputs, Func func) {
     workers.push_back(std::thread([&] {
       try {
         hphp_session_init();
-        SCOPE_EXIT { hphp_session_exit(); };
+        auto const context = hphp_context_init();
+        SCOPE_EXIT {
+          hphp_context_exit(context, false /* psp */);
+          hphp_session_exit();
+          hphp_thread_exit();
+        };
 
         for (;;) {
           auto start = index.fetch_add(work_chunk);
@@ -109,7 +116,12 @@ map(const std::vector<Item>& inputs, Func func) {
     workers.push_back(std::thread([&] {
       try {
         hphp_session_init();
-        SCOPE_EXIT { hphp_session_exit(); };
+        auto const context = hphp_context_init();
+        SCOPE_EXIT {
+          hphp_context_exit(context, false /* psp */);
+          hphp_session_exit();
+          hphp_thread_exit();
+        };
 
         for (;;) {
           auto start = index.fetch_add(work_chunk);

@@ -15,8 +15,8 @@
 */
 
 #include "hphp/runtime/vm/jit/extra-data.h"
-
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP { namespace JIT {
 
@@ -30,7 +30,7 @@ std::string NewStructData::show() const {
   auto delim = "";
   for (uint32_t i = 0; i < numKeys; i++) {
     os << delim << "\"" <<
-       Util::escapeStringForCPP(keys[i]->data(), keys[i]->size()) <<
+       escapeStringForCPP(keys[i]->data(), keys[i]->size()) <<
        "\"";
     delim = ",";
   }

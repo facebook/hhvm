@@ -69,7 +69,7 @@ struct CodeCache {
 
   DataBlock& data() { return m_data; }
 
-  // Read-only access for TranslatorX64::dumpTCCode()
+  // Read-only access for MCGenerator::dumpTCCode()
   const CodeBlock& prof() const { return m_prof; }
 
 private:

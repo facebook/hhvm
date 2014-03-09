@@ -76,7 +76,7 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
          strcmp(valp + 5, "html")  == 0)) {
       // Apache adds character set for these two types
       val += "; charset=";
-      val += g_context->getDefaultCharset().toCppString();
+      val += IniSetting::Get("default_charset");
       valp = val.c_str();
     }
     transport->addHeader("Content-Type", valp);
@@ -333,7 +333,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     ServerStatsHelper ssh("input");
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
     Extension::RequestInitModules();
-    process_ini_settings();
+    process_ini_settings(RuntimeOption::IniFile);
 
     if (RuntimeOption::EnableDebugger) {
       Eval::DSandboxInfo sInfo = sourceRootInfo.getSandboxInfo();

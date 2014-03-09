@@ -147,7 +147,6 @@ above PHP-facing types.
   Type            HHVM representation
   ----            -------------------
   PtrToT          Exists for all T in Gen. Represents a TypedValue*
-  None            No value, KindOfInvalid
   Bottom          No value, {}. Subtype of every other type
   Top             Supertype of every other type
   Cls             Class*
@@ -456,9 +455,9 @@ D:Dbl     = MulDbl S0:Dbl S1:Dbl
 D:Int     = Mod    S0:Int S1:Int
 D:Dbl     = Sqrt   S0:Dbl
 D:Dbl     = DivDbl S0:Dbl S1:Dbl -> B
-D:Int     = BitAnd S0:Int S1:Int
-D:Int     = BitOr  S0:Int S1:Int
-D:Int     = BitXor S0:Int S1:Int
+D:Int     = AndInt S0:Int S1:Int
+D:Int     = OrInt  S0:Int S1:Int
+D:Int     = XorInt S0:Int S1:Int
 D:Int     = Shl    S0:Int S1:Int
 D:Int     = Shr    S0:Int S1:Int
 D:Dbl     = Floor  S0:Dbl
@@ -485,15 +484,11 @@ D:Dbl     = Ceil   S0:Dbl
   than their input respectively. Their use requires SSE 4.1, availability
   should be checked before they are emitted.
 
-D:Bool = LogicXor S0:Bool S1:Bool
+D:Bool = XorBool S0:Bool S1:Bool
 
   Logical XOR of the two sources. (Note that && and || do not have
   corresponding opcodes because they're handled at the bytecode level, to
   implement short-circuiting.)
-
-D:Bool = Not S0:Bool
-
-  Logical negation of the source.
 
 
 3. Type conversions
@@ -827,13 +822,7 @@ D:Func = LdClsCtor S0:Cls
   Loads into D the constructor of class S0. If the constructor cannot be called
   from the current context, raise an error.
 
-D:T = LdConst<T,value>
-
-  Load a constant value into D. This differs from DefConst in that D will be
-  allocated a register. It is currently used only for the GuardRefs
-  instruction.
-
-D:ConstT = DefConst<T,value>
+D:ConstT = DefConst<T>
 
   Define a constant value of type T. D is presumed to be globally available and
   the DefConst instruction will not actually appear in the IR instruction
@@ -945,14 +934,13 @@ D:Cctx = LdClsMethodCacheCls<clsName, methodName>
   is known to not be empty.
 
 D:{Func|Nullptr} =
-LookupClsMethodCache<clsName, methodName> S0:ConstNamedEntity*  S1:FramePtr
+LookupClsMethodCache<clsName, methodName, namedEntity> S0:FramePtr
 
   Lookup a function in the class method targetcache. The class name and method
-  name are clsName and methodName, respectively. S0 is the NamedEntity* for the
-  class, and S1 is the current vm frame pointer. Returns Nullptr if the method
-  cannot be found using a subset of the required lookup paths, indicating that
-  a more complete lookup path should be taken. May throw if the method does not
-  exist.
+  name are clsName and methodName, respectively. S0 is the current vm frame
+  pointer. Returns Nullptr if the method cannot be found using a subset of the
+  required lookup paths, indicating that a more complete lookup path should be
+  taken. May throw if the method does not exist.
 
 D:Func = LdClsMethod S0:Cls S1:ConstInt
 
@@ -1117,8 +1105,8 @@ D:Obj = Clone S0:Obj
 
 D:StkPtr = SpillFrame<numArgs,invName> S0:StkPtr
                                        S1:FramePtr
-                                       S2:{Func|Null}
-                                       S3:{Ctx|Class|Null}
+                                       S2:{Func|InitNull}
+                                       S3:{Ctx|Class|InitNull}
 
   Operands:
 
@@ -1679,16 +1667,6 @@ D:Bool = ThingExists<class|interface|trait> S0:Str
 15. Register allocation
 
 
-D:T = Spill S0:T
-D:T = Reload S0:T
-
-  Spill stores from S0's registers into the spill location assigned to D.
-  Reload loads from S0's spill slot into D's assigned registers.
-
-  Spill and Reload are SSA copies, equivalent to Mov.  The destination
-  will be the same value and type as the source.  Like all operations
-  in SSA, the definition of the source must dominate the operation.
-
 Shuffle<d...> S...
 
   Shuffle takes N source variables and N destination operands, and performs a
@@ -1858,24 +1836,29 @@ DbgAssertRetAddr
 18. Iterators
 
 
-D:Bool = IterInit S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt
-D:Bool = IterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
-D:Bool = WIterInit S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt
-D:Bool = WIterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
-D:Bool = MIterInit S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt
-D:Bool = MIterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
+D:Bool = IterInit <IterData> S0:{Arr|Obj} S1:FramePtr
+D:Bool = IterInitK <IterData> S0:{Arr|Obj} S1:FramePtr
+D:Bool = WIterInit <IterData> S0:{Arr|Obj} S1:FramePtr
+D:Bool = WIterInitK <IterData> S0:{Arr|Obj} S1:FramePtr
+D:Bool = MIterInit <IterData> S0:{Arr|Obj} S1:FramePtr
+D:Bool = MIterInitK <IterData> S0:{Arr|Obj} S1:FramePtr
 
-  Initializes the iterator variable whose index is given by S2. This
-  instruction creates the appropriate iterator for the array or object that S0
-  references, and rewinds the new iterator to its start. S3 and S4 are local
-  variable indices. S0 points to the stack frame containing the iterator and
-  local variables S2, S3, and S4.
+  <IterData> consists of three indices, iterId, keyId and valId. iterId is
+  the index of the iterator variable, keyId and valId are indices of local
+  variables.
+
+  Initializes the iterator variable whose index is given by iterId.
+  This instruction creates the appropriate iterator for the array or object that
+  S0 references, and rewinds the new iterator to its start. S0 points to the
+  stack frame containing the iterator and local variables with the indices
+  iterId, keyId and valId.
 
   If the new iterator is at its end (i.e., has no elements to iterate over),
   this instruction decrements the refcount of S0 and returns false; otheriwse,
   it stores a reference to S0 in the new iterator and returns true. If the
   iterator is not at its end, then this instruction stores the iterator's first
-  value (and key) into the local variable S3 (and S4, respectively).
+  value (and key) into the local variable with index valId (and keyId,
+  respectively).
 
   The IterInit and IterInitK instructions always copy the array element by
   value.
@@ -1889,21 +1872,24 @@ D:Bool = MIterInitK S0:{Arr|Obj} S1:FramePtr S2:ConstInt S3:ConstInt S4:ConstInt
   This instruction has the ConsumesRC property because it either decrements the
   reference count of s0 or stores a reference to S0 into the new iterator.
 
-D:Bool = IterNext S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = IterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
-D:Bool = WIterNext S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = WIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
-D:Bool = MIterNext S0:FramePtr S1:ConstInt S2:ConstInt
-D:Bool = MIterNextK S0:FramePtr S1:ConstInt S2:ConstInt S3:ConstInt
+D:Bool = IterNext <IterData> S0:FramePtr
+D:Bool = IterNextK <IterData> S0:FramePtr
+D:Bool = WIterNext <IterData> S0:FramePtr
+D:Bool = WIterNextK <IterData> S0:FramePtr
+D:Bool = MIterNext <IterData> S0:FramePtr
+D:Bool = MIterNextK <IterData> S0:FramePtr
 
-  Advances the iterator variable whose index is given by S1. S2 and S3 are
-  local variable indices. S0 points to the stack frame containing the iterator
-  and local variables S1, S2, and S3.
+  <IterData> consists of three indices, iterId, keyId and valId. iterId is
+  the index of the iterator variable, keyId and valId are indices of local
+  variables.  S0 points to the stack frame containing the iterator and local
+  variables with the indices iterId, keyId and valId.
+
+  Advances the iterator variable whose index is given by iterId.
 
   If the iterator has reached the end, this instruction frees the iterator
   variable and returns false; otherwise, it returns true. If the iterator has
   not reached its end, then this instruction stores the iterator's next value
-  (and key) into the local variable S3 (and S4, respectively).
+  (and key) into the local variable with index valId (and keyId, respectively).
 
   The IterInit and IterInitK instructions always copy the array element by
   value. The WIterInit and WIterInitK instructions copy referenced array
@@ -2223,7 +2209,7 @@ VectorHasFrozenCopy S0:Obj<Vector> -> B
 
 VectorDoCow S0:Obj<Vector>
 
-  Triggers a copy on write for a Vector that has a live FrozenVector sharing
+  Triggers a copy on write for a Vector that has a live ImmVector sharing
   the same copy of the elements.
 
 D:Obj = ColAddNewElemC S0:Obj S0:Cell

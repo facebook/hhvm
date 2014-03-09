@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/compiler/parser/parser.h"
+#include <vector>
 
 #include "hphp/compiler/type_annotation.h"
 #include "hphp/parser/hphp.tab.hpp"
@@ -95,6 +96,8 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/text-util.h"
+#include "hphp/util/string-vsnprintf.h"
 
 #include "hphp/runtime/base/file-repository.h"
 
@@ -811,6 +814,9 @@ void Parser::onClassClass(Token &out, Token &cls, Token &name,
       );
       return;
     }
+  }
+  if (cls->exp && !cls->exp->is(Expression::KindOfScalarExpression)) {
+    PARSE_ERROR("::class can only be used on scalars");
   }
   if (cls->same("self") || cls->same("parent") || cls->same("static")) {
     if (cls->same("self") && m_inTrait) {
@@ -2077,12 +2083,12 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
     (AliasEntry){"Collection", "HH\\Collection"},
     (AliasEntry){"Vector", "HH\\Vector"},
     (AliasEntry){"Set", "HH\\Set"},
-    (AliasEntry){"FrozenVector", "HH\\FrozenVector"},
-    (AliasEntry){"FrozenSet", "HH\\FrozenSet"},
+    (AliasEntry){"ImmVector", "HH\\ImmVector"},
+    (AliasEntry){"ImmSet", "HH\\ImmSet"},
     (AliasEntry){"Pair", "HH\\Pair"},
     (AliasEntry){"Map", "HH\\Map"},
     (AliasEntry){"StableMap", "HH\\Map"}, // Merging with Map
-    (AliasEntry){"FrozenMap", "HH\\FrozenMap"},
+    (AliasEntry){"ImmMap", "HH\\ImmMap"},
   };
 
   return aliases;

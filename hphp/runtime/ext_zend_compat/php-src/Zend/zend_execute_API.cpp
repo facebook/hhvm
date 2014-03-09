@@ -57,7 +57,7 @@ ZEND_API const char *get_active_function_name(TSRMLS_D) {
 }
 
 ZEND_API const char *get_active_class_name(const char **space TSRMLS_DC) {
-  HPHP::Class *cls = HPHP::liveClass();
+  auto const cls = HPHP::liveClass();
   if (!cls) {
     if (space) {
       *space = "";
@@ -71,11 +71,11 @@ ZEND_API const char *get_active_class_name(const char **space TSRMLS_DC) {
 }
 
 ZEND_API const char *zend_get_executed_filename(TSRMLS_D) {
-  return g_vmContext->getContainingFileName().data();
+  return HPHP::g_context->getContainingFileName().data();
 }
 
 ZEND_API uint zend_get_executed_lineno(TSRMLS_D) {
-  return g_vmContext->getLine();
+  return HPHP::g_context->getLine();
 }
 
 ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC) {
@@ -149,7 +149,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
     }
   }
   HPHP::TypedValue retval;
-  g_vmContext->invokeFunc(
+  HPHP::g_context->invokeFunc(
     &retval, f, ad_params.toArray(), obj, cls,
     nullptr, invName, HPHP::ExecutionContext::InvokeCuf
   );

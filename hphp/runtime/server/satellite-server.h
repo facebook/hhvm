@@ -41,7 +41,7 @@ public:
   const std::string &getName() const { return m_name;}
 
 public:
-  static std::shared_ptr<SatelliteServer>
+  static std::unique_ptr<SatelliteServer>
     Create(std::shared_ptr<SatelliteServerInfo> info);
 
   virtual ~SatelliteServer() {}

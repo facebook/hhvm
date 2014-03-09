@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include <limits>
 
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_array_wait_handle.h"

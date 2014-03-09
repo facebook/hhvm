@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_complete.h"
+#include <vector>
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
 
 namespace HPHP { namespace Eval {

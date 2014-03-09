@@ -43,10 +43,14 @@
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <map>
+#include <set>
+#include <utility>
+#include <vector>
 
 using namespace HPHP;
 using std::map;
@@ -122,18 +126,8 @@ const std::string &ClassScope::getOriginalName() const {
   return m_originalName;
 }
 
-// like getId(), but without the label formatting
 std::string ClassScope::getDocName() const {
   string name = getOriginalName();
-  if (m_redeclaring < 0) {
-    return name;
-  }
-  return name + Option::IdPrefix +
-    boost::lexical_cast<std::string>(m_redeclaring);
-}
-
-std::string ClassScope::getId() const {
-  string name = CodeGenerator::FormatLabel(getOriginalName());
   if (m_redeclaring < 0) {
     return name;
   }
@@ -272,7 +266,7 @@ void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen) {
     }
     bases.insert(base);
 
-    ClassScopePtrVec parents = ar->findClasses(Util::toLower(base));
+    ClassScopePtrVec parents = ar->findClasses(toLower(base));
     for (unsigned int j = 0; j < parents.size(); j++) {
       parents[j]->checkDerivation(ar, seen);
     }
@@ -595,8 +589,8 @@ void ClassScope::importTraitRequirements(AnalysisResultPtr ar,
 
 void ClassScope::applyTraitPrecRule(TraitPrecStatementPtr stmt) {
   assert(Option::WholeProgram);
-  const string methodName = Util::toLower(stmt->getMethodName());
-  const string selectedTraitName = Util::toLower(stmt->getTraitName());
+  const string methodName = toLower(stmt->getMethodName());
+  const string selectedTraitName = toLower(stmt->getTraitName());
   std::set<string> otherTraitNames;
   stmt->getOtherTraitNames(otherTraitNames);
 
@@ -679,9 +673,9 @@ void ClassScope::addTraitAlias(TraitAliasStatementPtr aliasStmt) {
 void ClassScope::applyTraitAliasRule(AnalysisResultPtr ar,
                                      TraitAliasStatementPtr stmt) {
   assert(Option::WholeProgram);
-  const string traitName = Util::toLower(stmt->getTraitName());
-  const string origMethName = Util::toLower(stmt->getMethodName());
-  const string newMethName = Util::toLower(stmt->getNewMethodName());
+  const string traitName = toLower(stmt->getTraitName());
+  const string origMethName = toLower(stmt->getMethodName());
+  const string newMethName = toLower(stmt->getNewMethodName());
 
   // Get the trait's "class"
   ClassScopePtr traitCls;
@@ -918,7 +912,7 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
         }
       }
       string sourceName = traitMethIter->m_ruleStmt ?
-        Util::toLower(((TraitAliasStatement*)traitMethIter->m_ruleStmt.get())->
+        toLower(((TraitAliasStatement*)traitMethIter->m_ruleStmt.get())->
                       getMethodName()) : iter->first;
       importedTraitMethods[sourceName] = MethodStatementPtr();
       importedTraitsWithOrigName.push_back(
@@ -930,7 +924,7 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     const string &sourceName = importedTraitsWithOrigName[i].first;
     const TraitMethod *traitMethod = importedTraitsWithOrigName[i].second;
     MethodStatementPtr newMeth = importTraitMethod(
-      *traitMethod, ar, Util::toLower(traitMethod->m_originalName),
+      *traitMethod, ar, toLower(traitMethod->m_originalName),
       importedTraitMethods);
     if (newMeth) {
       importedTraitMethods[sourceName] = newMeth;
@@ -1041,7 +1035,7 @@ FunctionScopePtr ClassScope::findFunction(AnalysisResultConstPtr ar,
                                           const std::string &name,
                                           bool recursive,
                                           bool exclIntfBase /* = false */) {
-  assert(Util::toLower(name) == name);
+  assert(toLower(name) == name);
   StringToFunctionScopePtrMap::const_iterator iter;
   iter = m_functions.find(name);
   if (iter != m_functions.end()) {

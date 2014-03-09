@@ -27,7 +27,7 @@ public:
 };
 
 ServerPtr LibEventServerFactory::createServer(const ServerOptions& options) {
-  return std::make_shared<LibEventServer>(options);
+  return folly::make_unique<LibEventServer>(options);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

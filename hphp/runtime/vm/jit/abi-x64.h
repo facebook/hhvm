@@ -19,7 +19,7 @@
  * tracelets.
  *
  * Most changes here will likely require corresponding changes in
- * __enterTCHelper and other parts of translator-x64.cpp and the IR
+ * __enterTCHelper and other parts of mc-generator.cpp and the IR
  * translator.
  */
 

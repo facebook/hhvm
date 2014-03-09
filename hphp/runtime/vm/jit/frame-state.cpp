@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/frame-state.h"
+#include <algorithm>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -131,7 +132,7 @@ void FrameState::update(const IRInstruction* inst) {
   case SpillStack: {
     m_spValue = inst->dst();
     // Push the spilled values but adjust for the popped values
-    int64_t stackAdjustment = inst->src(1)->getValInt();
+    int64_t stackAdjustment = inst->src(1)->intVal();
     m_spOffset -= stackAdjustment;
     m_spOffset += spillValueCells(inst);
     break;
@@ -191,7 +192,7 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
                                  LocalStateHook& hook) const {
   auto killIterLocals = [&](const std::initializer_list<uint32_t>& ids) {
     for (auto id : ids) {
-      hook.setLocalValue(inst->src(id)->getValInt(), nullptr);
+      hook.setLocalValue(id, nullptr);
     }
   };
 
@@ -244,25 +245,27 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
     case IterInitK:
     case WIterInitK:
       // kill the locals to which this instruction stores iter's key and value
-      killIterLocals({3, 4});
+      killIterLocals({inst->extra<IterData>()->keyId,
+                      inst->extra<IterData>()->valId});
       break;
 
     case IterInit:
     case WIterInit:
       // kill the local to which this instruction stores iter's value
-      killIterLocals({3});
+      killIterLocals({inst->extra<IterData>()->valId});
       break;
 
     case IterNextK:
     case WIterNextK:
       // kill the locals to which this instruction stores iter's key and value
-      killIterLocals({2, 3});
+      killIterLocals({inst->extra<IterData>()->keyId,
+                      inst->extra<IterData>()->valId});
       break;
 
     case IterNext:
     case WIterNext:
       // kill the local to which this instruction stores iter's value
-      killIterLocals({2});
+      killIterLocals({inst->extra<IterData>()->valId});
       break;
 
     case InterpOne:
@@ -641,7 +644,6 @@ SSATmp* FrameState::localTypeSource(uint32_t id) const {
 
 Type FrameState::localType(uint32_t id) const {
   always_assert(id < m_locals.size());
-  assert(m_locals[id].type != Type::None);
   return m_locals[id].type;
 }
 
@@ -662,7 +664,13 @@ void FrameState::refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {
            id, local.type, type);
     local.type = type;
   } else {
-    always_assert((local.type & type) != Type::Bottom);
+    auto const result = local.type & type;
+    always_assert_log(
+      result != Type::Bottom,
+      [&] {
+        return folly::format("Bad new type for local {}: {} & {} = {}",
+                             id, local.type, type, result).str();
+      });
     local.type = local.type & type;
   }
   local.typeSource = typeSource;

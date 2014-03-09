@@ -274,7 +274,7 @@ struct ElmUCompare {
         *acc.getValue(left).asCell(),
         *acc.getValue(right).asCell()
       };
-      g_vmContext->invokeFuncFew(ret.asTypedValue(), *ctx, 2, args);
+      g_context->invokeFuncFew(ret.asTypedValue(), *ctx, 2, args);
     }
     if (ret.isInteger()) {
       return ret.toInt64() < 0;
@@ -310,7 +310,7 @@ struct ElmUCompare {
         *acc.getValue(right).asCell(),
         *acc.getValue(left).asCell()
       };
-      g_vmContext->invokeFuncFew(ret2.asTypedValue(), *ctx, 2, args);
+      g_context->invokeFuncFew(ret2.asTypedValue(), *ctx, 2, args);
       if (ret2.isBoolean()) {
         return ret2.toBoolean();
       }

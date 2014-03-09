@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,8 +31,14 @@ class PlainFile : public File {
 public:
   DECLARE_RESOURCE_ALLOCATION(PlainFile);
 
-  explicit PlainFile(FILE *stream = nullptr, bool nonblocking = false);
-  explicit PlainFile(int fd, bool nonblocking = false);
+  explicit PlainFile(FILE *stream = nullptr,
+                     bool nonblocking = false,
+                     const String& wrapper_type = null_string,
+                     const String& stream_type = null_string);
+  explicit PlainFile(int fd,
+                     bool nonblocking = false,
+                     const String& wrapper = null_string,
+                     const String& stream_type = null_string);
   virtual ~PlainFile();
 
   // overriding ResourceData
@@ -55,7 +62,6 @@ public:
   virtual bool stat(struct stat *sb);
 
   FILE *getStream() { return m_stream;}
-  virtual const char *getStreamType() const { return "STDIO";}
 
 protected:
   FILE *m_stream;
@@ -82,10 +88,9 @@ public:
  * A request-local wrapper for the three standard files:
  * STDIN, STDOUT, and STDERR.
  */
-class BuiltinFiles : public RequestEventHandler {
-public:
-  virtual void requestInit();
-  virtual void requestShutdown();
+struct BuiltinFiles final : RequestEventHandler {
+  void requestInit() override;
+  void requestShutdown() override;
 
   static CVarRef GetSTDIN();
   static CVarRef GetSTDOUT();

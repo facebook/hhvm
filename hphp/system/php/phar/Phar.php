@@ -1026,7 +1026,7 @@ class Phar extends RecursiveDirectoryIterator
   }
 
   /**
-   * A poor man's Util::canonicalize in PHP
+   * A poor man's FileUtil::canonicalize in PHP
    */
   private static function resolveDotDots($pieces) {
     $starts_with_slash = false;

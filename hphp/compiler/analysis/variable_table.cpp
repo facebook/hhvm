@@ -15,6 +15,9 @@
 */
 
 #include "hphp/compiler/analysis/variable_table.h"
+#include <map>
+#include <set>
+#include <utility>
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/code_error.h"
@@ -30,34 +33,10 @@
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/runtime/base/class-info.h"
-#include "hphp/util/util.h"
 #include "hphp/parser/location.h"
 #include "hphp/parser/parser.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-// StaticGlobalInfo
-
-string VariableTable::StaticGlobalInfo::GetId
-(ClassScopePtr cls, FunctionScopePtr func,
- const string &name) {
-  assert(cls || func);
-
-  // format: <class>$$<func>$$name
-  string id;
-  if (cls) {
-    id += cls->getId();
-    id += Option::IdPrefix;
-  }
-  if (func) {
-    id += func->getId();
-    id += Option::IdPrefix;
-  }
-  id += name;
-
-  return id;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 VariableTable::VariableTable(BlockScope &blockScope)
@@ -210,17 +189,6 @@ bool VariableTable::needLocalCopy(const Symbol *sym) const {
      getAttribute(ContainsUnset));
 }
 
-
-bool VariableTable::needGlobalPointer() const {
-  return !isPseudoMainTable() &&
-    (m_hasGlobal ||
-     m_hasStatic ||
-     getAttribute(ContainsDynamicVariable) ||
-     getAttribute(ContainsExtract) ||
-     getAttribute(ContainsUnset) ||
-     getAttribute(NeedGlobalPointer));
-}
-
 bool VariableTable::isInherited(const string &name) const {
   const Symbol *sym = getSymbol(name);
   return !sym ||
@@ -300,22 +268,6 @@ void VariableTable::addStaticVariable(Symbol *sym,
 
   sym->setStatic();
   m_hasStatic = true;
-
-  FunctionScopeRawPtr funcScope = getFunctionScope();
-  if (funcScope && funcScope->isClosure()) {
-    // static variables for closures/closure generators are local to the
-    // function scope
-    m_staticLocalsVec.push_back(sym);
-  } else {
-    VariableTablePtr globalVariables = ar->getVariables();
-    StaticGlobalInfoPtr sgi(new StaticGlobalInfo());
-    sgi->sym = sym;
-    sgi->variables = this;
-    sgi->cls = getClassScope();
-    sgi->func = member ? FunctionScopeRawPtr() : getFunctionScope();
-
-    globalVariables->m_staticGlobalsVec.push_back(sgi);
-  }
 }
 
 void VariableTable::addStaticVariable(Symbol *sym,
@@ -330,17 +282,6 @@ void VariableTable::addStaticVariable(Symbol *sym,
 }
 
 void VariableTable::cleanupForError(AnalysisResultConstPtr ar) {
-  if (!m_hasStatic) return;
-
-  AnalysisResult::Locker lock(ar);
-  VariableTablePtr g = lock->getVariables();
-  ClassScopeRawPtr cls = getClassScope();
-
-  for (unsigned i = g->m_staticGlobalsVec.size(); i--; ) {
-    if (g->m_staticGlobalsVec[i]->cls == cls) {
-      g->m_staticGlobalsVec.erase(g->m_staticGlobalsVec.begin() + i);
-    }
-  }
 }
 
 bool VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
@@ -749,45 +690,6 @@ void VariableTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
       cg_printf(";\n");
     }
-  }
-}
-
-static bool by_location(const VariableTable::StaticGlobalInfoPtr &p1,
-                        const VariableTable::StaticGlobalInfoPtr &p2) {
-  ConstructRawPtr d1 = p1->sym->getDeclaration();
-  ConstructRawPtr d2 = p2->sym->getDeclaration();
-  if (!d1) return !!d2;
-  if (!d2) return false;
-  return d1->getLocation()->compare(d2->getLocation().get()) < 0;
-}
-
-void VariableTable::canonicalizeStaticGlobals() {
-  assert(m_staticGlobals.empty());
-
-  sort(m_staticGlobalsVec.begin(), m_staticGlobalsVec.end(), by_location);
-
-  for (unsigned int i = 0; i < m_staticGlobalsVec.size(); i++) {
-    StaticGlobalInfoPtr &sgi = m_staticGlobalsVec[i];
-    if (!sgi->sym->getDeclaration()) continue;
-    string id = StaticGlobalInfo::GetId(sgi->cls, sgi->func,
-                                        sgi->sym->getName());
-    assert(m_staticGlobals.find(id) == m_staticGlobals.end());
-    m_staticGlobals[id] = sgi;
-  }
-}
-
-// Make sure GlobalVariables::getRefByIdx has the correct indices
-void VariableTable::checkSystemGVOrder(SymbolSet &variants,
-                                       unsigned int max) {
-  always_assert(variants.size() >= max &&
-                BuiltinSymbols::NumGlobalNames());
-
-  unsigned int i = 0;
-  for (SymbolSet::const_iterator iterName = variants.begin();
-       iterName != variants.end(); ++iterName) {
-    string s = string("gvm_") + BuiltinSymbols::GlobalNames[i];
-    always_assert(s == iterName->c_str());
-    i++;
   }
 }
 

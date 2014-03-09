@@ -34,9 +34,9 @@ public:
 
 inline void evalCodeForCppExt(const String& code_str) {
   String prefixedCode = concat("<?php ", code_str);
-  Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
+  Unit* unit = g_context->compileEvalString(prefixedCode.get());
   TypedValue retVal;
-  g_vmContext->invokeUnit(&retVal, unit);
+  g_context->invokeUnit(&retVal, unit);
   tvRefcountedDecRef(&retVal);
 }
 

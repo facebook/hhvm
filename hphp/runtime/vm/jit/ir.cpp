@@ -67,6 +67,7 @@ namespace {
 #define DofS(n)   HasDest
 #define DUnbox(n) HasDest
 #define DBox(n)   HasDest
+#define DFilterS(n) HasDest
 #define DParam    HasDest
 #define DAllocObj HasDest
 #define DLdRef    HasDest
@@ -111,6 +112,7 @@ struct {
 #undef DofS
 #undef DUnbox
 #undef DBox
+#undef DFilterS
 #undef DParam
 #undef DAllocObj
 #undef DLdRef
@@ -153,7 +155,7 @@ const StringData* findClassName(SSATmp* cls) {
   assert(cls->isA(Type::Cls));
 
   if (cls->isConst()) {
-    return cls->getValClass()->preClass()->name();
+    return cls->clsVal()->preClass()->name();
   }
   // Try to get the class name from a LdCls
   IRInstruction* clsInst = cls->inst();
@@ -161,7 +163,7 @@ const StringData* findClassName(SSATmp* cls) {
     SSATmp* clsName = clsInst->src(0);
     assert(clsName->isA(Type::Str));
     if (clsName->isConst()) {
-      return clsName->getValStr();
+      return clsName->strVal();
     }
   }
   return nullptr;
@@ -445,4 +447,3 @@ int32_t spillValueCells(const IRInstruction* spillStack) {
 }
 
 }}
-

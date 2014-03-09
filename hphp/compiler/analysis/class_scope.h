@@ -18,6 +18,11 @@
 #define incl_HPHP_CLASS_SCOPE_H_
 
 #include "hphp/compiler/analysis/block_scope.h"
+#include <list>
+#include <map>
+#include <set>
+#include <utility>
+#include <vector>
 #include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/statement/class_statement.h"
 #include "hphp/compiler/statement/method_statement.h"
@@ -120,8 +125,6 @@ public:
   }
   const std::string &getOriginalName() const;
   std::string getDocName() const;
-
-  virtual std::string getId() const;
 
   void checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen);
   const std::string &getOriginalParent() const { return m_parent; }

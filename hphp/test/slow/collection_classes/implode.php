@@ -4,7 +4,7 @@ function main() {
   $arr = array('a', 'b', 'c');
 
   $v = Vector {'a', 'b', 'c'};
-  $sm = StableMap {0 => 'a', 1 => 'b', 2 => 'c'};
+  $m = Map {0 => 'a', 1 => 'b', 2 => 'c'};
   $s = Set {'a', 'b', 'c'};
 
   $arr_implode = implode(', ', $arr);
@@ -13,8 +13,8 @@ function main() {
   var_dump(implode($v, ', '));
   var_dump(implode(', ', $v) === $arr_implode);
 
-  var_dump(implode(', ', $sm));
-  var_dump(implode($sm, ', '));
+  var_dump(implode(', ', $m));
+  var_dump(implode($m, ', '));
   var_dump(implode(', ', $v) === $arr_implode);
 
   var_dump(join(', ', $v));

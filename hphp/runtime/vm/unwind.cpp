@@ -145,7 +145,7 @@ UnwindAction checkHandlers(const EHEnt* eh,
 void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
   auto const func = fp->m_func;
   auto const curOp = *reinterpret_cast<const Op*>(pc);
-  auto const unwindingGeneratorFrame = func->isGenerator();
+  auto const unwindingGeneratorFrame = fp->inGenerator();
   auto const unwindingReturningFrame = curOp == OpRetC || curOp == OpRetV;
   auto const prevFp = fp->arGetSfp();
   auto const soff = fp->m_soff;
@@ -219,7 +219,7 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
   if (prevFp == fp) return;
 
   assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
-         prevFp->m_func->isGenerator());
+         prevFp->inGenerator());
   auto const prevOff = soff + prevFp->m_func->base();
   pc = prevFp->m_func->unit()->at(prevOff);
   fp = prevFp;
@@ -252,8 +252,8 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
 }
 
 bool chainFaults(Fault& fault) {
-  always_assert(!g_vmContext->m_faults.empty());
-  auto& faults = g_vmContext->m_faults;
+  always_assert(!g_context->m_faults.empty());
+  auto& faults = g_context->m_faults;
   faults.pop_back();
   if (faults.empty()) {
     faults.push_back(fault);
@@ -325,7 +325,7 @@ UnwindAction unwind(ActRec*& fp,
        */
       always_assert(fault.m_raiseNesting == kInvalidNesting);
       // Nesting is set to the current VM nesting.
-      fault.m_raiseNesting = g_vmContext->m_nestedVMs.size();
+      fault.m_raiseNesting = g_context->m_nestedVMs.size();
       // Raise frame is set to the current frame
       fault.m_raiseFrame = fp;
       // Raise offset is set to the offset of the current PC.
@@ -369,7 +369,7 @@ UnwindAction unwind(ActRec*& fp,
           // change if we have a reentry during unwinding.  When we're
           // ready to resume, we need to replace the fault to reflect
           // any state changes we've made (handledCount, etc).
-          g_vmContext->m_faults.back() = fault;
+          g_context->m_faults.back() = fault;
           return UnwindAction::ResumeVM;
         case UnwindAction::Propagate:
           break;
@@ -395,7 +395,7 @@ UnwindAction unwind(ActRec*& fp,
     fault.m_raiseFrame = nullptr;
     fault.m_raiseOffset = kInvalidOffset;
     fault.m_handledCount = 0;
-    g_vmContext->m_faults.back() = fault;
+    g_context->m_faults.back() = fault;
 
     if (lastFrameForNesting) {
       FTRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");
@@ -412,8 +412,8 @@ const StaticString s_fb_enable_code_coverage("fb_enable_code_coverage");
 // Unwind the frame for a builtin.  Currently only used when switching
 // modes for hphpd_break and fb_enable_code_coverage.
 void unwindBuiltinFrame() {
-  auto& stack = g_vmContext->getStack();
-  auto& fp = g_vmContext->m_fp;
+  auto& stack = g_context->getStack();
+  auto& fp = g_context->m_fp;
 
   assert(fp->m_func->methInfo());
   assert(fp->m_func->name()->isame(s_hphpd_break.get()) ||
@@ -422,7 +422,7 @@ void unwindBuiltinFrame() {
   // Free any values that may be on the eval stack.  We know there
   // can't be FPI regions and it can't be a generator body because
   // it's a builtin frame.
-  auto const evalTop = reinterpret_cast<TypedValue*>(g_vmContext->getFP());
+  auto const evalTop = reinterpret_cast<TypedValue*>(g_context->getFP());
   while (stack.topTV() < evalTop) {
     stack.popTV();
   }
@@ -432,10 +432,10 @@ void unwindBuiltinFrame() {
 
   // Tear down the frame
   Offset pc = -1;
-  ActRec* sfp = g_vmContext->getPrevVMState(fp, &pc);
+  ActRec* sfp = g_context->getPrevVMState(fp, &pc);
   assert(pc != -1);
   fp = sfp;
-  g_vmContext->m_pc = fp->m_func->unit()->at(pc);
+  g_context->m_pc = fp->m_func->unit()->at(pc);
   stack.discardAR();
 }
 
@@ -443,7 +443,7 @@ void pushFault(Exception* e) {
   Fault f;
   f.m_faultType = Fault::Type::CppException;
   f.m_cppException = e;
-  g_vmContext->m_faults.push_back(f);
+  g_context->m_faults.push_back(f);
   FTRACE(1, "pushing new fault: {}\n", describeFault(f));
 }
 
@@ -452,16 +452,16 @@ void pushFault(const Object& o) {
   f.m_faultType = Fault::Type::UserException;
   f.m_userException = o.get();
   f.m_userException->incRefCount();
-  g_vmContext->m_faults.push_back(f);
+  g_context->m_faults.push_back(f);
   FTRACE(1, "pushing new fault: {}\n", describeFault(f));
 }
 
 UnwindAction enterUnwinder() {
-  auto fault = g_vmContext->m_faults.back();
+  auto fault = g_context->m_faults.back();
   return unwind(
-    g_vmContext->m_fp,      // by ref
-    g_vmContext->getStack(),// by ref
-    g_vmContext->m_pc,      // by ref
+    g_context->m_fp,      // by ref
+    g_context->getStack(),// by ref
+    g_context->m_pc,      // by ref
     fault
   );
 }
@@ -473,7 +473,7 @@ UnwindAction enterUnwinder() {
 UnwindAction exception_handler() noexcept {
   FTRACE(1, "unwind exception_handler\n");
 
-  g_vmContext->checkRegState();
+  g_context->checkRegState();
 
   try { throw; }
 
@@ -485,12 +485,12 @@ UnwindAction exception_handler() noexcept {
    * instead of pushing a new one.
    */
   catch (const VMPrepareUnwind&) {
-    Fault fault = g_vmContext->m_faults.back();
-    FTRACE(1, "unwind: restoring offset {}\n", g_vmContext->m_pc);
+    Fault fault = g_context->m_faults.back();
+    FTRACE(1, "unwind: restoring offset {}\n", g_context->m_pc);
     return unwind(
-      g_vmContext->m_fp,
-      g_vmContext->getStack(),
-      g_vmContext->m_pc,
+      g_context->m_fp,
+      g_context->getStack(),
+      g_context->m_pc,
       fault
     );
   }
@@ -506,7 +506,7 @@ UnwindAction exception_handler() noexcept {
 
   catch (VMSwitchModeBuiltin&) {
     unwindBuiltinFrame();
-    g_vmContext->getStack().pushNull(); // return value
+    g_context->getStack().pushNull(); // return value
     return UnwindAction::ResumeVM;
   }
 

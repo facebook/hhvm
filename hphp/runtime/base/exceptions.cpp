@@ -81,7 +81,7 @@ Array ExtendedException::getBackTrace() const {
  * If you wait too long, getFP() will be NULL.
  */
 void ExtendedException::computeBacktrace(bool skipFrame /* = false */) {
-  m_btp = g_vmContext->debugBacktrace(skipFrame, true).get();
+  m_btp = g_context->debugBacktrace(skipFrame, true).get();
 }
 
 InvalidArgumentException::InvalidArgumentException(int, const char *fmt, ...) {

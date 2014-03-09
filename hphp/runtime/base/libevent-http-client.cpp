@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/libevent-http-client.h"
+#include <map>
+#include <vector>
 
 #include "folly/Conv.h"
 

@@ -28,7 +28,7 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -42,7 +42,7 @@
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/apc-typed-value.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/stat-cache.h"
@@ -112,7 +112,8 @@ using std::string;
 
 using JIT::VMRegAnchor;
 using JIT::EagerVMRegAnchor;
-using JIT::tx64;
+using JIT::tx;
+using JIT::mcg;
 using JIT::tl_regState;
 using JIT::VMRegState;
 
@@ -152,7 +153,7 @@ Class* arGetContextClassImpl<true>(const ActRec* ar) {
   }
   if (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin()) {
     // Pseudomains inherit the context of their caller
-    VMExecutionContext* context = g_vmContext;
+    auto const context = g_context.getNoCheck();
     ar = context->getPrevVMState(ar);
     while (ar != nullptr &&
              (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin())) {
@@ -311,7 +312,7 @@ VarEnv* VarEnv::createLocalOnHeap(ActRec* fp) {
 }
 
 VarEnv* VarEnv::createGlobal() {
-  assert(!g_vmContext->m_globalVarEnv);
+  assert(!g_context->m_globalVarEnv);
 
   // Use smart_malloc instead of smartMallocSize since we need to use it above
   // and don't want to have to record which allocator was used to select the
@@ -321,7 +322,7 @@ VarEnv* VarEnv::createGlobal() {
 
   TRACE(3, "Creating VarEnv %p [global scope]\n", ret);
   ret->m_global = true;
-  g_vmContext->m_globalVarEnv = ret;
+  g_context->m_globalVarEnv = ret;
   return ret;
 }
 
@@ -344,7 +345,7 @@ void VarEnv::attach(ActRec* fp) {
            isGlobalScope() ? "global scope" : "local scope",
            int(fp->m_func->numNamedLocals()), fp);
   assert(m_depth == 0 || fp->arGetSfp() == m_cfp ||
-         (fp->arGetSfp() == fp && g_vmContext->isNested()));
+         (fp->arGetSfp() == fp && g_context->isNested()));
   m_cfp = fp;
   m_depth++;
 
@@ -398,7 +399,7 @@ void VarEnv::detach(ActRec* fp) {
     }
   }
 
-  VMExecutionContext* context = g_vmContext;
+  auto const context = g_context.getNoCheck();
   m_cfp = context->getPrevVMState(fp);
   m_depth--;
   if (m_depth == 0) {
@@ -635,13 +636,20 @@ static std::string toStringElm(const TypedValue* tv) {
     os << " ??? type " << tv->m_type << "\n";
     return os.str();
   }
-
-  assert(tv->m_type >= MinDataType && tv->m_type < MaxNumDataTypes);
-  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.pref->m_count <= 0) {
+  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.pref->m_count <= 0 &&
+      tv->m_data.pref->m_count != StaticValue) {
     // OK in the invoking frame when running a destructor.
     os << " ??? inner_count " << tv->m_data.pref->m_count << " ";
     return os.str();
   }
+
+  auto print_count = [&] {
+    if (tv->m_data.pref->m_count == StaticValue) {
+      os << ":c(static)";
+    } else {
+      os << ":c(" << tv->m_data.pref->m_count << ")";
+    }
+  };
 
   switch (tv->m_type) {
   case KindOfRef:
@@ -683,32 +691,32 @@ static std::string toStringElm(const TypedValue* tv) {
         len = 128;
         truncated = true;
       }
-      os << tv->m_data.pstr
-         << "c(" << tv->m_data.pstr->getCount() << ")"
-         << ":\""
-         << Util::escapeStringForCPP(tv->m_data.pstr->data(), len)
+      os << tv->m_data.pstr;
+      print_count();
+      os << ":\""
+         << escapeStringForCPP(tv->m_data.pstr->data(), len)
          << "\"" << (truncated ? "..." : "");
     }
     break;
   case KindOfArray:
     assert_refcount_realistic_nz(tv->m_data.parr->getCount());
-    os << tv->m_data.parr
-       << "c(" << tv->m_data.parr->getCount() << ")"
-       << ":Array";
-     break;
+    os << tv->m_data.parr;
+    print_count();
+    os << ":Array";
+    break;
   case KindOfObject:
     assert_refcount_realistic_nz(tv->m_data.pobj->getCount());
-    os << tv->m_data.pobj
-       << "c(" << tv->m_data.pobj->getCount() << ")"
-       << ":Object("
+    os << tv->m_data.pobj;
+    print_count();
+    os << ":Object("
        << tv->m_data.pobj->o_getClassName().get()->data()
        << ")";
     break;
   case KindOfResource:
     assert_refcount_realistic_nz(tv->m_data.pres->getCount());
-    os << tv->m_data.pres
-       << "c(" << tv->m_data.pres->getCount() << ")"
-       << ":Resource("
+    os << tv->m_data.pres;
+    print_count();
+    os << ":Resource("
        << const_cast<ResourceData*>(tv->m_data.pres)
             ->o_getClassName().get()->data()
        << ")";
@@ -755,7 +763,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
   {
     Offset prevPc = 0;
     TypedValue* prevStackTop = nullptr;
-    ActRec* prevFp = g_vmContext->getPrevVMState(fp, &prevPc, &prevStackTop);
+    ActRec* prevFp = g_context->getPrevVMState(fp, &prevPc, &prevStackTop);
     if (prevFp != nullptr) {
       toStringFrame(os, prevFp, prevPc, prevStackTop, prefix);
     }
@@ -860,16 +868,16 @@ bool Stack::wouldOverflow(int numCells) const {
 }
 
 TypedValue* Stack::frameStackBase(const ActRec* fp) {
+  assert(!fp->inGenerator());
   const Func* func = fp->m_func;
-  assert(!func->isGenerator());
   return (TypedValue*)((uintptr_t)fp
                        - (uintptr_t)(func->numLocals()) * sizeof(TypedValue)
                        - (uintptr_t)(func->numIterators() * sizeof(Iter)));
 }
 
 TypedValue* Stack::generatorStackBase(const ActRec* fp) {
-  assert(fp->m_func->isGenerator());
-  VMExecutionContext* context = g_vmContext;
+  assert(fp->inGenerator());
+  auto const context = g_context.getNoCheck();
   ActRec* sfp = fp->arGetSfp();
   if (sfp == fp) {
     // In the reentrant case, we can consult the savedVM state. We simply
@@ -890,7 +898,7 @@ TypedValue* Stack::generatorStackBase(const ActRec* fp) {
 
 using namespace HPHP;
 
-ActRec* VMExecutionContext::getOuterVMFrame(const ActRec* ar) {
+ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
   ActRec* prevFrame = (ActRec*)ar->m_savedRbp;
   if (LIKELY(((uintptr_t)prevFrame - s_stackLimit) >= s_stackSize)) {
     if (LIKELY(prevFrame != nullptr)) return prevFrame;
@@ -900,7 +908,7 @@ ActRec* VMExecutionContext::getOuterVMFrame(const ActRec* ar) {
   return nullptr;
 }
 
-Cell VMExecutionContext::lookupClsCns(const NamedEntity* ne,
+Cell ExecutionContext::lookupClsCns(const NamedEntity* ne,
                                       const StringData* cls,
                                       const StringData* cns) {
   Class* class_ = Unit::loadClass(ne, cls);
@@ -915,7 +923,7 @@ Cell VMExecutionContext::lookupClsCns(const NamedEntity* ne,
   return clsCns;
 }
 
-Cell VMExecutionContext::lookupClsCns(const StringData* cls,
+Cell ExecutionContext::lookupClsCns(const StringData* cls,
                                       const StringData* cns) {
   return lookupClsCns(Unit::GetNamedEntity(cls), cls, cns);
 }
@@ -943,7 +951,7 @@ Cell VMExecutionContext::lookupClsCns(const StringData* cls,
 
 const StaticString s_construct("__construct");
 
-const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
+const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
                                                 const StringData* methodName,
                                                 const Class* ctx,
                                                 CallType callType,
@@ -978,7 +986,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
   // If we found a protected or private method, we need to do some
   // accessibility checks.
   if ((method->attrs() & (AttrProtected|AttrPrivate)) &&
-      !g_vmContext->getDebuggerBypassCheck()) {
+      !g_context->debuggerSettings.bypassCheck) {
     Class* baseClass = method->baseCls();
     assert(baseClass);
     // If the context class is the same as the class that first
@@ -1063,7 +1071,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
   return nullptr;
 }
 
-LookupResult VMExecutionContext::lookupObjMethod(const Func*& f,
+LookupResult ExecutionContext::lookupObjMethod(const Func*& f,
                                                  const Class* cls,
                                                  const StringData* methodName,
                                                  const Class* ctx,
@@ -1087,7 +1095,7 @@ LookupResult VMExecutionContext::lookupObjMethod(const Func*& f,
 }
 
 LookupResult
-VMExecutionContext::lookupClsMethod(const Func*& f,
+ExecutionContext::lookupClsMethod(const Func*& f,
                                     const Class* cls,
                                     const StringData* methodName,
                                     ObjectData* obj,
@@ -1125,7 +1133,7 @@ VMExecutionContext::lookupClsMethod(const Func*& f,
   return LookupResult::MethodFoundNoThis;
 }
 
-LookupResult VMExecutionContext::lookupCtorMethod(const Func*& f,
+LookupResult ExecutionContext::lookupCtorMethod(const Func*& f,
                                                   const Class* cls,
                                                   bool raise /* = false */) {
   f = cls->getCtor();
@@ -1142,7 +1150,7 @@ LookupResult VMExecutionContext::lookupCtorMethod(const Func*& f,
   return LookupResult::MethodFoundWithThis;
 }
 
-ObjectData* VMExecutionContext::createObject(StringData* clsName,
+ObjectData* ExecutionContext::createObject(StringData* clsName,
                                              CVarRef params,
                                              bool init /* = true */) {
   Class* class_ = Unit::loadClass(clsName);
@@ -1173,16 +1181,16 @@ ObjectData* VMExecutionContext::createObject(StringData* clsName,
   return ret;
 }
 
-ObjectData* VMExecutionContext::createObjectOnly(StringData* clsName) {
+ObjectData* ExecutionContext::createObjectOnly(StringData* clsName) {
   return createObject(clsName, init_null_variant, false);
 }
 
-ActRec* VMExecutionContext::getStackFrame() {
+ActRec* ExecutionContext::getStackFrame() {
   VMRegAnchor _;
   return getFP();
 }
 
-ObjectData* VMExecutionContext::getThis() {
+ObjectData* ExecutionContext::getThis() {
   VMRegAnchor _;
   ActRec* fp = getFP();
   if (fp->skipFrame()) {
@@ -1195,7 +1203,7 @@ ObjectData* VMExecutionContext::getThis() {
   return nullptr;
 }
 
-Class* VMExecutionContext::getContextClass() {
+Class* ExecutionContext::getContextClass() {
   VMRegAnchor _;
   ActRec* ar = getFP();
   assert(ar != nullptr);
@@ -1206,14 +1214,14 @@ Class* VMExecutionContext::getContextClass() {
   return ar->m_func->cls();
 }
 
-Class* VMExecutionContext::getParentContextClass() {
+Class* ExecutionContext::getParentContextClass() {
   if (Class* ctx = getContextClass()) {
     return ctx->parent();
   }
   return nullptr;
 }
 
-const String& VMExecutionContext::getContainingFileName() {
+const String& ExecutionContext::getContainingFileName() {
   VMRegAnchor _;
   ActRec* ar = getFP();
   if (ar == nullptr) return empty_string;
@@ -1225,7 +1233,7 @@ const String& VMExecutionContext::getContainingFileName() {
   return unit->filepathRef();
 }
 
-int VMExecutionContext::getLine() {
+int ExecutionContext::getLine() {
   VMRegAnchor _;
   ActRec* ar = getFP();
   Unit* unit = ar ? ar->m_func->unit() : nullptr;
@@ -1238,7 +1246,7 @@ int VMExecutionContext::getLine() {
   return unit->getLineNumber(pc);
 }
 
-Array VMExecutionContext::getCallerInfo() {
+Array ExecutionContext::getCallerInfo() {
   VMRegAnchor _;
   Array result = Array::Create();
   ActRec* ar = getFP();
@@ -1271,7 +1279,7 @@ Array VMExecutionContext::getCallerInfo() {
   return result;
 }
 
-VarEnv* VMExecutionContext::getVarEnv(int frame) {
+VarEnv* ExecutionContext::getVarEnv(int frame) {
   VMRegAnchor _;
 
   ActRec* fp = getFP();
@@ -1291,7 +1299,7 @@ VarEnv* VMExecutionContext::getVarEnv(int frame) {
   return fp->m_varEnv;
 }
 
-void VMExecutionContext::setVar(StringData* name, TypedValue* v, bool ref) {
+void ExecutionContext::setVar(StringData* name, TypedValue* v, bool ref) {
   VMRegAnchor _;
   // setVar() should only be called after getVarEnv() has been called
   // to create a varEnv
@@ -1310,7 +1318,7 @@ void VMExecutionContext::setVar(StringData* name, TypedValue* v, bool ref) {
   }
 }
 
-Array VMExecutionContext::getLocalDefinedVariables(int frame) {
+Array ExecutionContext::getLocalDefinedVariables(int frame) {
   VMRegAnchor _;
   ActRec *fp = getFP();
   for (; frame > 0; --frame) {
@@ -1338,7 +1346,7 @@ Array VMExecutionContext::getLocalDefinedVariables(int frame) {
   return ret.toArray();
 }
 
-void VMExecutionContext::shuffleMagicArgs(ActRec* ar) {
+void ExecutionContext::shuffleMagicArgs(ActRec* ar) {
   // We need to put this where the first argument is
   StringData* invName = ar->getInvName();
   int nargs = ar->numArgs();
@@ -1392,7 +1400,7 @@ static inline void checkStack(Stack& stk, const Func* f) {
   }
 }
 
-bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
+bool ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
   bool raiseMissingArgumentWarnings = false;
@@ -1407,7 +1415,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
       shuffleMagicArgs(ar);
     } else if (ar->hasVarEnv()) {
       m_fp = ar;
-      if (!func->isGenerator()) {
+      if (!ar->inGenerator()) {
         assert(func->isPseudoMain());
         pushLocalsAndIterators(func);
         ar->m_varEnv->attach(ar);
@@ -1470,7 +1478,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
     func = ar->m_func;
   }
 
-  if (LIKELY(!func->isGenerator())) {
+  if (LIKELY(!ar->inGenerator())) {
     /*
      * we only get here from callAndResume
      * if we failed to get a translation for
@@ -1508,13 +1516,13 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
   return true;
 }
 
-void VMExecutionContext::syncGdbState() {
+void ExecutionContext::syncGdbState() {
   if (RuntimeOption::EvalJit && !RuntimeOption::EvalJitNoGdb) {
-    tx64->getDebugInfo()->debugSync();
+    mcg->getDebugInfo()->debugSync();
   }
 }
 
-void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
+void ExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
   assert(enterFnAr);
   Stats::inc(Stats::VMEnter);
   if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
@@ -1522,7 +1530,7 @@ void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
     JIT::TCA start = enterFnAr->m_func->getPrologue(na);
-    tx64->enterTCAtPrologue(enterFnAr, start);
+    mcg->enterTCAtPrologue(enterFnAr, start);
   } else {
     if (prepareFuncEntry(enterFnAr, m_pc)) {
       enterVMWork(enterFnAr);
@@ -1530,7 +1538,7 @@ void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
   }
 }
 
-void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
+void ExecutionContext::enterVMWork(ActRec* enterFnAr) {
   JIT::TCA start = nullptr;
   if (enterFnAr) {
     if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
@@ -1542,22 +1550,22 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
     (void) m_fp->unit()->offsetOf(m_pc); /* assert */
     if (enterFnAr) {
       assert(start);
-      tx64->enterTCAfterPrologue(start);
+      mcg->enterTCAfterPrologue(start);
     } else {
       SrcKey sk(m_fp->func(), m_pc);
-      tx64->enterTCAtSrcKey(sk);
+      mcg->enterTCAtSrcKey(sk);
     }
   } else {
     dispatch();
   }
 }
 
-void VMExecutionContext::enterVM(TypedValue* retval, ActRec* ar) {
+void ExecutionContext::enterVM(TypedValue* retval, ActRec* ar) {
   DEBUG_ONLY int faultDepth = m_faults.size();
   SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
 
   m_firstAR = ar;
-  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx64->uniqueStubs.callToExit);
+  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx->uniqueStubs.callToExit);
   assert(isReturnHelper(ar->m_savedRip));
 
   /*
@@ -1606,7 +1614,7 @@ resume:
    * level.
    */
 
-  if (g_vmContext->m_nestedVMs.empty()) {
+  if (g_context->m_nestedVMs.empty()) {
     m_fp = nullptr;
     m_pc = nullptr;
   }
@@ -1632,7 +1640,7 @@ resume:
   not_reached();
 }
 
-void VMExecutionContext::reenterVM(TypedValue* retval,
+void ExecutionContext::reenterVM(TypedValue* retval,
                                    ActRec* ar,
                                    TypedValue* savedSP) {
   ar->m_soff = 0;
@@ -1651,7 +1659,7 @@ void VMExecutionContext::reenterVM(TypedValue* retval,
   TRACE(1, "Reentry: exit fp %p pc %p\n", m_fp, m_pc);
 }
 
-void VMExecutionContext::invokeFunc(TypedValue* retval,
+void ExecutionContext::invokeFunc(TypedValue* retval,
                                     const Func* f,
                                     CVarRef args_,
                                     ObjectData* this_ /* = NULL */,
@@ -1817,7 +1825,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   }
 }
 
-void VMExecutionContext::invokeFuncCleanupHelper(TypedValue* retval,
+void ExecutionContext::invokeFuncCleanupHelper(TypedValue* retval,
                                                  ActRec* ar,
                                                  int numArgsPushed) {
   assert(retval && ar);
@@ -1839,7 +1847,7 @@ void VMExecutionContext::invokeFuncCleanupHelper(TypedValue* retval,
   tvWriteNull(retval);
 }
 
-void VMExecutionContext::invokeFuncFew(TypedValue* retval,
+void ExecutionContext::invokeFuncFew(TypedValue* retval,
                                        const Func* f,
                                        void* thisOrCls,
                                        StringData* invName,
@@ -1917,7 +1925,7 @@ void VMExecutionContext::invokeFuncFew(TypedValue* retval,
   }
 }
 
-void VMExecutionContext::invokeContFunc(const Func* f,
+void ExecutionContext::invokeContFunc(const Func* f,
                                         ObjectData* this_,
                                         Cell* param /* = NULL */) {
   assert(f);
@@ -1957,7 +1965,7 @@ void VMExecutionContext::invokeContFunc(const Func* f,
   assert(IS_NULL_TYPE(retval.m_type));
 }
 
-void VMExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
+void ExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
   Func* func = unit->getMain();
   invokeFunc(retval, func, init_null_variant, nullptr, nullptr,
              m_globalVarEnv, nullptr, InvokePseudoMain);
@@ -1971,7 +1979,7 @@ void VMExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
  * If there is no previous VM frame, this function returns NULL and does not
  * set prevPc and prevSp.
  */
-ActRec* VMExecutionContext::getPrevVMState(const ActRec* fp,
+ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
                                            Offset* prevPc /* = NULL */,
                                            TypedValue** prevSp /* = NULL */,
                                            bool* fromVMEntry /* = NULL */) {
@@ -1981,7 +1989,7 @@ ActRec* VMExecutionContext::getPrevVMState(const ActRec* fp,
   ActRec* prevFp = fp->arGetSfp();
   if (prevFp != fp) {
     if (prevSp) {
-      if (UNLIKELY(fp->m_func->isGenerator())) {
+      if (UNLIKELY(fp->inGenerator())) {
         *prevSp = (TypedValue*)prevFp - prevFp->m_func->numSlotsInFrame();
       } else {
         *prevSp = (TypedValue*)&fp[1];
@@ -2008,7 +2016,7 @@ ActRec* VMExecutionContext::getPrevVMState(const ActRec* fp,
   return prevFp;
 }
 
-Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
+Array ExecutionContext::debugBacktrace(bool skip /* = false */,
                                          bool withSelf /* = false */,
                                          bool withThis /* = false */,
                                          VMParserFrame*
@@ -2096,7 +2104,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
     auto const isReturning = curOp == OpRetC || curOp == OpRetV;
 
     // Builtins and generators don't have a file and line number
-    if (prevFp && !prevFp->m_func->isBuiltin() && !fp->m_func->isGenerator()) {
+    if (prevFp && !prevFp->m_func->isBuiltin() && !fp->inGenerator()) {
       auto const prevUnit = prevFp->m_func->unit();
       auto prevFile = prevUnit->filepath();
       if (prevFp->m_func->originalFilename()) {
@@ -2126,7 +2134,7 @@ Array VMExecutionContext::debugBacktrace(bool skip /* = false */,
 
     // check for include
     String funcname = const_cast<StringData*>(fp->m_func->name());
-    if (fp->m_func->isGenerator()) {
+    if (fp->inGenerator()) {
       // retrieve the original function name from the inner continuation
       funcname = frame_continuation(fp)->t_getorigfuncname();
     }
@@ -2216,13 +2224,13 @@ ClassInfoVM::~ClassInfoVM() {
   for (auto& c : m_constants)  delete c.second;
 }
 
-Array VMExecutionContext::getUserFunctionsInfo() {
+Array ExecutionContext::getUserFunctionsInfo() {
   // Return an array of all user-defined function names.  This method is used to
   // support get_defined_functions().
   return Unit::getUserFunctions();
 }
 
-const ClassInfo::MethodInfo* VMExecutionContext::findFunctionInfo(
+const ClassInfo::MethodInfo* ExecutionContext::findFunctionInfo(
   const String& name) {
   StringIMap<AtomicSmartPtr<MethodInfoVM> >::iterator it =
     m_functionInfos.find(name);
@@ -2240,7 +2248,7 @@ const ClassInfo::MethodInfo* VMExecutionContext::findFunctionInfo(
   }
 }
 
-const ClassInfo* VMExecutionContext::findClassInfo(const String& name) {
+const ClassInfo* ExecutionContext::findClassInfo(const String& name) {
   if (name->empty()) return nullptr;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >::iterator it =
     m_classInfos.find(name);
@@ -2262,7 +2270,7 @@ const ClassInfo* VMExecutionContext::findClassInfo(const String& name) {
   }
 }
 
-const ClassInfo* VMExecutionContext::findInterfaceInfo(const String& name) {
+const ClassInfo* ExecutionContext::findInterfaceInfo(const String& name) {
   StringIMap<AtomicSmartPtr<ClassInfoVM> >::iterator it =
     m_interfaceInfos.find(name);
   if (it == m_interfaceInfos.end()) {
@@ -2283,7 +2291,7 @@ const ClassInfo* VMExecutionContext::findInterfaceInfo(const String& name) {
   }
 }
 
-const ClassInfo* VMExecutionContext::findTraitInfo(const String& name) {
+const ClassInfo* ExecutionContext::findTraitInfo(const String& name) {
   StringIMap<AtomicSmartPtr<ClassInfoVM> >::iterator it =
     m_traitInfos.find(name);
   if (it != m_traitInfos.end()) {
@@ -2301,7 +2309,7 @@ const ClassInfo* VMExecutionContext::findTraitInfo(const String& name) {
   return classInfo.get();
 }
 
-const ClassInfo::ConstantInfo* VMExecutionContext::findConstantInfo(
+const ClassInfo::ConstantInfo* ExecutionContext::findConstantInfo(
     const String& name) {
   TypedValue* tv = Unit::lookupCns(name.get());
   if (tv == nullptr) {
@@ -2321,9 +2329,9 @@ const ClassInfo::ConstantInfo* VMExecutionContext::findConstantInfo(
   return ci;
 }
 
-HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
-                                                       const char* currentDir,
-                                                       bool* initial_opt) {
+HPHP::Eval::PhpFile* ExecutionContext::lookupPhpFile(StringData* path,
+                                                     const char* currentDir,
+                                                     bool* initial_opt) {
   bool init;
   bool &initial = initial_opt ? *initial_opt : init;
   initial = true;
@@ -2333,9 +2341,9 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
   if (spath.isNull()) return nullptr;
 
   // Check if this file has already been included.
-  EvaledFilesMap::const_iterator it = m_evaledFiles.find(spath.get());
+  auto it = m_evaledFiles.find(spath.get());
   HPHP::Eval::PhpFile* efile = nullptr;
-  if (it != m_evaledFiles.end()) {
+  if (it != end(m_evaledFiles)) {
     // We found it! Return the unit.
     efile = it->second;
     initial = false;
@@ -2391,7 +2399,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupPhpFile(StringData* path,
   return efile;
 }
 
-Unit* VMExecutionContext::evalInclude(StringData* path,
+Unit* ExecutionContext::evalInclude(StringData* path,
                                       const StringData* curUnitFilePath,
                                       bool* initial) {
   namespace fs = boost::filesystem;
@@ -2409,18 +2417,18 @@ Unit* VMExecutionContext::evalInclude(StringData* path,
   return nullptr;
 }
 
-HPHP::Unit* VMExecutionContext::evalIncludeRoot(
+HPHP::Unit* ExecutionContext::evalIncludeRoot(
   StringData* path, InclOpFlags flags, bool* initial) {
   HPHP::Eval::PhpFile* efile = lookupIncludeRoot(path, flags, initial);
   return efile ? efile->unit() : 0;
 }
 
-HPHP::Eval::PhpFile* VMExecutionContext::lookupIncludeRoot(StringData* path,
+HPHP::Eval::PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
                                                            InclOpFlags flags,
                                                            bool* initial,
                                                            Unit* unit) {
   String absPath;
-  if ((flags & InclOpRelative)) {
+  if (flags & InclOpFlags::Relative) {
     namespace fs = boost::filesystem;
     if (!unit) unit = getFP()->m_func->unit();
     fs::path currentUnit(unit->filepath()->data());
@@ -2430,7 +2438,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupIncludeRoot(StringData* path,
           path->data(),
           absPath->data());
   } else {
-    assert(flags & InclOpDocRoot);
+    assert(flags & InclOpFlags::DocRoot);
     absPath = SourceRootInfo::GetCurrentPhpRoot();
     TRACE(2, "lookupIncludeRoot(%s): docRoot -> %s\n",
           path->data(),
@@ -2439,8 +2447,8 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupIncludeRoot(StringData* path,
 
   absPath += StrNR(path);
 
-  EvaledFilesMap::const_iterator it = m_evaledFiles.find(absPath.get());
-  if (it != m_evaledFiles.end()) {
+  auto const it = m_evaledFiles.find(absPath.get());
+  if (it != end(m_evaledFiles)) {
     if (initial) *initial = false;
     return it->second;
   }
@@ -2455,7 +2463,7 @@ HPHP::Eval::PhpFile* VMExecutionContext::lookupIncludeRoot(StringData* path,
 
   return true iff the pseudomain needs to be executed.
 */
-bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
+bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   m_pc = pc;
   unit->merge();
   if (unit->isMergeOnly()) {
@@ -2479,7 +2487,6 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   }
   Func* func = unit->getMain(cls);
   assert(!func->isCPPBuiltin());
-  assert(!func->isGenerator());
   ar->m_func = func;
   ar->initNumArgs(0);
   assert(getFP());
@@ -2487,7 +2494,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   arSetSfp(ar, m_fp);
   ar->m_soff = uintptr_t(m_fp->m_func->unit()->offsetOf(pc) -
                          m_fp->m_func->base());
-  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx64->uniqueStubs.retHelper);
+  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx->uniqueStubs.retHelper);
   assert(isReturnHelper(ar->m_savedRip));
   pushLocalsAndIterators(func);
   if (!m_fp->hasVarEnv()) {
@@ -2511,7 +2518,7 @@ StaticString
   s_semicolon_curly("; }"),
   s_php_return("<?php return "),
   s_semicolon(";");
-CVarRef VMExecutionContext::getEvaledArg(const StringData* val,
+CVarRef ExecutionContext::getEvaledArg(const StringData* val,
                                          const String& namespacedName) {
   const String& key = *(String*)&val;
 
@@ -2532,7 +2539,7 @@ CVarRef VMExecutionContext::getEvaledArg(const StringData* val,
   assert(unit != nullptr);
   Variant v;
   // Default arg values are not currently allowed to depend on class context.
-  g_vmContext->invokeFunc((TypedValue*)&v, unit->getMain(),
+  g_context->invokeFunc((TypedValue*)&v, unit->getMain(),
                           init_null_variant, nullptr, nullptr, nullptr, nullptr,
                           InvokePseudoMain);
   Variant &lv = m_evaledArgs.lvalAt(key, AccessFlags::Key);
@@ -2540,19 +2547,19 @@ CVarRef VMExecutionContext::getEvaledArg(const StringData* val,
   return lv;
 }
 
-void VMExecutionContext::recordLastError(const Exception &e, int errnum) {
-  BaseExecutionContext::recordLastError(e, errnum);
+void ExecutionContext::recordLastError(const Exception &e, int errnum) {
+  m_lastError = String(e.getMessage());
+  m_lastErrorNum = errnum;
   m_lastErrorPath = getContainingFileName();
   m_lastErrorLine = getLine();
 }
-
 
 /*
  * Helper for function entry, including pseudo-main entry.
  */
 void
-VMExecutionContext::pushLocalsAndIterators(const Func* func,
-                                           int nparams /*= 0*/) {
+ExecutionContext::pushLocalsAndIterators(const Func* func,
+                                         int nparams /*= 0*/) {
   // Push locals.
   for (int i = nparams; i < func->numLocals(); i++) {
     m_stack.pushUninit();
@@ -2563,7 +2570,7 @@ VMExecutionContext::pushLocalsAndIterators(const Func* func,
   }
 }
 
-void VMExecutionContext::enqueueAPCHandle(APCHandle* handle) {
+void ExecutionContext::enqueueAPCHandle(APCHandle* handle) {
   assert(handle->getUncounted());
   assert(handle->getType() == KindOfString ||
          handle->getType() == KindOfArray);
@@ -2583,7 +2590,7 @@ public:
   }
 };
 
-void VMExecutionContext::manageAPCHandle() {
+void ExecutionContext::manageAPCHandle() {
   assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
   if (apcExtension::UseUncounted) {
     Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
@@ -2592,7 +2599,7 @@ void VMExecutionContext::manageAPCHandle() {
   }
 }
 
-void VMExecutionContext::destructObjects() {
+void ExecutionContext::destructObjects() {
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
     while (!m_liveBCObjs.empty()) {
       ObjectData* obj = *m_liveBCObjs.begin();
@@ -2611,7 +2618,7 @@ typedef RankedCHM<StringData*, HPHP::Unit*,
         StringDataHashCompare,
         RankEvaledUnits> EvaledUnitsMap;
 static EvaledUnitsMap s_evaledUnits;
-Unit* VMExecutionContext::compileEvalString(
+Unit* ExecutionContext::compileEvalString(
     StringData* code,
     const char* evalFilename /* = nullptr */) {
   EvaledUnitsMap::accessor acc;
@@ -2628,7 +2635,8 @@ Unit* VMExecutionContext::compileEvalString(
   return acc->second;
 }
 
-const String& VMExecutionContext::createFunction(const String& args, const String& code) {
+const String& ExecutionContext::createFunction(const String& args,
+                                               const String& code) {
   if (UNLIKELY(RuntimeOption::RepoAuthoritative)) {
     // Whole program optimizations need to assume they can see all the
     // code.
@@ -2677,7 +2685,7 @@ const String& VMExecutionContext::createFunction(const String& args, const Strin
   return lambda->nameRef();
 }
 
-bool VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
+bool ExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
                                          int frame) {
   assert(retval);
   // The code has "<?php" prepended already
@@ -2742,34 +2750,34 @@ bool VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
                this_, frameClass, varEnv, nullptr, InvokePseudoMain);
     failed = false;
   } catch (FatalErrorException &e) {
-    g_vmContext->write(s_fatal);
-    g_vmContext->write(" : ");
-    g_vmContext->write(e.getMessage().c_str());
-    g_vmContext->write("\n");
-    g_vmContext->write(ExtendedLogger::StringOfStackTrace(e.getBackTrace()));
+    g_context->write(s_fatal);
+    g_context->write(" : ");
+    g_context->write(e.getMessage().c_str());
+    g_context->write("\n");
+    g_context->write(ExtendedLogger::StringOfStackTrace(e.getBackTrace()));
   } catch (ExitException &e) {
-    g_vmContext->write(s_exit.data());
-    g_vmContext->write(" : ");
+    g_context->write(s_exit.data());
+    g_context->write(" : ");
     std::ostringstream os;
     os << ExitException::ExitCode;
-    g_vmContext->write(os.str());
+    g_context->write(os.str());
   } catch (Eval::DebuggerException &e) {
   } catch (Exception &e) {
-    g_vmContext->write(s_cppException.data());
-    g_vmContext->write(" : ");
-    g_vmContext->write(e.getMessage().c_str());
+    g_context->write(s_cppException.data());
+    g_context->write(" : ");
+    g_context->write(e.getMessage().c_str());
     ExtendedException* ee = dynamic_cast<ExtendedException*>(&e);
     if (ee) {
-      g_vmContext->write("\n");
-      g_vmContext->write(
+      g_context->write("\n");
+      g_context->write(
         ExtendedLogger::StringOfStackTrace(ee->getBackTrace()));
     }
   } catch (Object &e) {
-    g_vmContext->write(s_phpException.data());
-    g_vmContext->write(" : ");
-    g_vmContext->write(e->invokeToString().data());
+    g_context->write(s_phpException.data());
+    g_context->write(" : ");
+    g_context->write(e->invokeToString().data());
   } catch (...) {
-    g_vmContext->write(s_cppException.data());
+    g_context->write(s_cppException.data());
   }
 
   if (varEnv) {
@@ -2781,7 +2789,7 @@ bool VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   return failed;
 }
 
-void VMExecutionContext::enterDebuggerDummyEnv() {
+void ExecutionContext::enterDebuggerDummyEnv() {
   static Unit* s_debuggerDummy = compile_string("<?php?>", 7);
   // Ensure that the VM stack is completely empty (m_fp should be null)
   // and that we're not in a nested VM (reentrancy)
@@ -2791,10 +2799,11 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
   assert(m_stack.count() == 0);
   ActRec* ar = m_stack.allocA();
   ar->m_func = s_debuggerDummy->getMain();
+  ar->initNumArgs(0);
   ar->setThis(nullptr);
   ar->m_soff = 0;
   ar->m_savedRbp = 0;
-  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx64->uniqueStubs.callToExit);
+  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx->uniqueStubs.callToExit);
   assert(isReturnHelper(ar->m_savedRip));
   m_fp = ar;
   m_pc = s_debuggerDummy->entry();
@@ -2803,7 +2812,7 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
   m_globalVarEnv->attach(m_fp);
 }
 
-void VMExecutionContext::exitDebuggerDummyEnv() {
+void ExecutionContext::exitDebuggerDummyEnv() {
   assert(m_globalVarEnv);
   // Ensure that m_fp is valid
   assert(getFP() != nullptr);
@@ -2828,9 +2837,9 @@ void VMExecutionContext::exitDebuggerDummyEnv() {
 
 // Identifies the set of return helpers that we may set m_savedRip to in an
 // ActRec.
-bool VMExecutionContext::isReturnHelper(uintptr_t address) {
+bool ExecutionContext::isReturnHelper(uintptr_t address) {
   auto tcAddr = reinterpret_cast<JIT::TCA>(address);
-  auto& u = tx64->uniqueStubs;
+  auto& u = tx->uniqueStubs;
   return tcAddr == u.retHelper ||
          tcAddr == u.genRetHelper ||
          tcAddr == u.retInlHelper ||
@@ -2841,22 +2850,22 @@ bool VMExecutionContext::isReturnHelper(uintptr_t address) {
 // the appropriate RetFromInterpreted*Frame helper. This ensures that we don't
 // return into jitted code and gives the system the proper chance to interpret
 // blacklisted tracelets.
-void VMExecutionContext::preventReturnsToTC() {
+void ExecutionContext::preventReturnsToTC() {
   assert(isDebuggerAttached());
   if (RuntimeOption::EvalJit) {
     ActRec *ar = getFP();
     while (ar) {
       if (!isReturnHelper(ar->m_savedRip) &&
-          (tx64->isValidCodeAddress((JIT::TCA)ar->m_savedRip))) {
+          (mcg->isValidCodeAddress((JIT::TCA)ar->m_savedRip))) {
         TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
                  "func %s\n", ar, ar->m_savedRip,
                  ar->m_func->fullName()->data());
-        if (ar->m_func->isGenerator()) {
+        if (ar->inGenerator()) {
           ar->m_savedRip =
-            reinterpret_cast<uintptr_t>(tx64->uniqueStubs.genRetHelper);
+            reinterpret_cast<uintptr_t>(tx->uniqueStubs.genRetHelper);
         } else {
           ar->m_savedRip =
-            reinterpret_cast<uintptr_t>(tx64->uniqueStubs.retHelper);
+            reinterpret_cast<uintptr_t>(tx->uniqueStubs.retHelper);
         }
         assert(isReturnHelper(ar->m_savedRip));
       }
@@ -2917,8 +2926,8 @@ static inline void lookup_gbl(ActRec* fp,
                               TypedValue* key,
                               TypedValue*& val) {
   name = lookup_name(key);
-  assert(g_vmContext->m_globalVarEnv);
-  val = g_vmContext->m_globalVarEnv->lookup(name);
+  assert(g_context->m_globalVarEnv);
+  val = g_context->m_globalVarEnv->lookup(name);
 }
 
 static inline void lookupd_gbl(ActRec* fp,
@@ -2926,8 +2935,8 @@ static inline void lookupd_gbl(ActRec* fp,
                                TypedValue* key,
                                TypedValue*& val) {
   name = lookup_name(key);
-  assert(g_vmContext->m_globalVarEnv);
-  VarEnv* varEnv = g_vmContext->m_globalVarEnv;
+  assert(g_context->m_globalVarEnv);
+  VarEnv* varEnv = g_context->m_globalVarEnv;
   val = varEnv->lookup(name);
   if (val == nullptr) {
     TypedValue tv;
@@ -3054,8 +3063,8 @@ static inline void ratchetRefs(TypedValue*& result, TypedValue& tvRef,
 // to its final location.
 template <bool warn,
           bool saveResult,
-          VMExecutionContext::VectorLeaveCode mleave>
-OPTBLD_INLINE void VMExecutionContext::getHelperPre(
+          ExecutionContext::VectorLeaveCode mleave>
+OPTBLD_INLINE void ExecutionContext::getHelperPre(
     PC& pc,
     unsigned& ndiscard,
     TypedValue*& base,
@@ -3071,7 +3080,7 @@ OPTBLD_INLINE void VMExecutionContext::getHelperPre(
 
 #define GETHELPERPOST_ARGS ndiscard, tvRet, tvScratch, tvRef, tvRef2
 template <bool saveResult>
-OPTBLD_INLINE void VMExecutionContext::getHelperPost(
+OPTBLD_INLINE void ExecutionContext::getHelperPost(
     unsigned ndiscard, TypedValue*& tvRet, TypedValue& tvScratch,
     Variant& tvRef, Variant& tvRef2) {
   // Clean up all ndiscard elements on the stack.  Actually discard
@@ -3100,7 +3109,7 @@ OPTBLD_INLINE void VMExecutionContext::getHelperPost(
   pc, ndiscard, tvRet, base, tvScratch, tvLiteral, \
     tvRef, tvRef2, mcode, curMember
 OPTBLD_INLINE void
-VMExecutionContext::getHelper(PC& pc,
+ExecutionContext::getHelper(PC& pc,
                               unsigned& ndiscard,
                               TypedValue*& tvRet,
                               TypedValue*& base,
@@ -3120,9 +3129,9 @@ template <bool setMember,
           bool unset,
           bool reffy,
           unsigned mdepth, // extra args on stack for set (e.g. rhs)
-          VMExecutionContext::VectorLeaveCode mleave,
+          ExecutionContext::VectorLeaveCode mleave,
           bool saveResult>
-OPTBLD_INLINE bool VMExecutionContext::memberHelperPre(
+OPTBLD_INLINE bool ExecutionContext::memberHelperPre(
     PC& pc, unsigned& ndiscard, TypedValue*& base,
     TypedValue& tvScratch, TypedValue& tvLiteral,
     TypedValue& tvRef, TypedValue& tvRef2,
@@ -3374,8 +3383,8 @@ template <bool warn,
           bool unset,
           bool reffy,
           unsigned mdepth, // extra args on stack for set (e.g. rhs)
-          VMExecutionContext::VectorLeaveCode mleave>
-OPTBLD_INLINE bool VMExecutionContext::setHelperPre(
+          ExecutionContext::VectorLeaveCode mleave>
+OPTBLD_INLINE bool ExecutionContext::setHelperPre(
     PC& pc, unsigned& ndiscard, TypedValue*& base,
     TypedValue& tvScratch, TypedValue& tvLiteral,
     TypedValue& tvRef, TypedValue& tvRef2,
@@ -3386,7 +3395,7 @@ OPTBLD_INLINE bool VMExecutionContext::setHelperPre(
 
 #define SETHELPERPOST_ARGS ndiscard, tvRef, tvRef2
 template <unsigned mdepth>
-OPTBLD_INLINE void VMExecutionContext::setHelperPost(
+OPTBLD_INLINE void ExecutionContext::setHelperPost(
     unsigned ndiscard, Variant& tvRef, Variant& tvRef2) {
   // Clean up the stack.  Decref all the elements for the vector, but
   // leave the first mdepth (they are not part of the vector data).
@@ -3414,31 +3423,31 @@ OPTBLD_INLINE void VMExecutionContext::setHelperPost(
   m_stack.ndiscard(ndiscard);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopLowInvalid(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopLowInvalid(IOP_ARGS) {
   fprintf(stderr, "invalid bytecode executed\n");
   abort();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNop(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopNop(IOP_ARGS) {
   NEXT();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopPopA(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopPopA(IOP_ARGS) {
   NEXT();
   m_stack.popA();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopPopC(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopPopC(IOP_ARGS) {
   NEXT();
   m_stack.popC();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopPopV(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopPopV(IOP_ARGS) {
   NEXT();
   m_stack.popV();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopPopR(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopPopR(IOP_ARGS) {
   NEXT();
   if (m_stack.topTV()->m_type != KindOfRef) {
     m_stack.popC();
@@ -3447,22 +3456,22 @@ OPTBLD_INLINE void VMExecutionContext::iopPopR(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopDup(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopDup(IOP_ARGS) {
   NEXT();
   m_stack.dup();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBox(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBox(IOP_ARGS) {
   NEXT();
   m_stack.box();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopUnbox(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopUnbox(IOP_ARGS) {
   NEXT();
   m_stack.unbox();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBoxR(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBoxR(IOP_ARGS) {
   NEXT();
   TypedValue* tv = m_stack.topTV();
   if (tv->m_type != KindOfRef) {
@@ -3470,56 +3479,56 @@ OPTBLD_INLINE void VMExecutionContext::iopBoxR(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBoxRNop(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBoxRNop(IOP_ARGS) {
   NEXT();
   assert(refIsPlausible(*m_stack.topTV()));
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopUnboxR(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopUnboxR(IOP_ARGS) {
   NEXT();
   if (m_stack.topTV()->m_type == KindOfRef) {
     m_stack.unbox();
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopUnboxRNop(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopUnboxRNop(IOP_ARGS) {
   NEXT();
   assert(cellIsPlausible(*m_stack.topTV()));
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNull(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopNull(IOP_ARGS) {
   NEXT();
   m_stack.pushNull();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNullUninit(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopNullUninit(IOP_ARGS) {
   NEXT();
   m_stack.pushNullUninit();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopTrue(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopTrue(IOP_ARGS) {
   NEXT();
   m_stack.pushTrue();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFalse(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFalse(IOP_ARGS) {
   NEXT();
   m_stack.pushFalse();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFile(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFile(IOP_ARGS) {
   NEXT();
   const StringData* s = m_fp->m_func->unit()->filepath();
   m_stack.pushStaticString(const_cast<StringData*>(s));
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopDir(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopDir(IOP_ARGS) {
   NEXT();
   const StringData* s = m_fp->m_func->unit()->dirpath();
   m_stack.pushStaticString(const_cast<StringData*>(s));
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNameA(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopNameA(IOP_ARGS) {
   NEXT();
   auto const cls  = m_stack.topA();
   auto const name = cls->name();
@@ -3527,43 +3536,38 @@ OPTBLD_INLINE void VMExecutionContext::iopNameA(IOP_ARGS) {
   m_stack.pushStaticString(const_cast<StringData*>(name));
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopInt(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopInt(IOP_ARGS) {
   NEXT();
   DECODE(int64_t, i);
   m_stack.pushInt(i);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopDouble(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopDouble(IOP_ARGS) {
   NEXT();
   DECODE(double, d);
   m_stack.pushDouble(d);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopString(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopString(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(s);
   m_stack.pushStaticString(s);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopArray(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopArray(IOP_ARGS) {
   NEXT();
   DECODE(Id, id);
   ArrayData* a = m_fp->m_func->unit()->lookupArrayId(id);
   m_stack.pushStaticArray(a);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNewArray(IOP_ARGS) {
-  NEXT();
-  m_stack.pushArrayNoRc(HphpArray::MakeReserve(HphpArray::SmallSize));
-}
-
-OPTBLD_INLINE void VMExecutionContext::iopNewArrayReserve(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopNewArray(IOP_ARGS) {
   NEXT();
   DECODE_IVA(capacity);
   m_stack.pushArrayNoRc(HphpArray::MakeReserve(capacity));
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNewPackedArray(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopNewPackedArray(IOP_ARGS) {
   NEXT();
   DECODE_IVA(n);
   // This constructor moves values, no inc/decref is necessary.
@@ -3572,7 +3576,7 @@ OPTBLD_INLINE void VMExecutionContext::iopNewPackedArray(IOP_ARGS) {
   m_stack.pushArrayNoRc(a);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNewStructArray(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopNewStructArray(IOP_ARGS) {
   NEXT();
   DECODE(uint32_t, n); // number of keys and elements
   assert(n > 0 && n <= HphpArray::MaxMakeSize);
@@ -3587,7 +3591,7 @@ OPTBLD_INLINE void VMExecutionContext::iopNewStructArray(IOP_ARGS) {
   m_stack.pushArrayNoRc(a);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAddElemC(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAddElemC(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   Cell* c2 = m_stack.indC(1);
@@ -3604,7 +3608,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAddElemC(IOP_ARGS) {
   m_stack.popC();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAddElemV(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAddElemV(IOP_ARGS) {
   NEXT();
   Ref* r1 = m_stack.topV();
   Cell* c2 = m_stack.indC(1);
@@ -3621,7 +3625,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAddElemV(IOP_ARGS) {
   m_stack.popC();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAddNewElemC(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAddNewElemC(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   Cell* c2 = m_stack.indC(1);
@@ -3632,7 +3636,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAddNewElemC(IOP_ARGS) {
   m_stack.popC();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAddNewElemV(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAddNewElemV(IOP_ARGS) {
   NEXT();
   Ref* r1 = m_stack.topV();
   Cell* c2 = m_stack.indC(1);
@@ -3643,7 +3647,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAddNewElemV(IOP_ARGS) {
   m_stack.popV();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNewCol(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopNewCol(IOP_ARGS) {
   NEXT();
   DECODE_IVA(cType);
   DECODE_IVA(nElms);
@@ -3651,7 +3655,7 @@ OPTBLD_INLINE void VMExecutionContext::iopNewCol(IOP_ARGS) {
   m_stack.pushObject(obj);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopColAddNewElemC(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopColAddNewElemC(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   Cell* c2 = m_stack.indC(1);
@@ -3663,7 +3667,7 @@ OPTBLD_INLINE void VMExecutionContext::iopColAddNewElemC(IOP_ARGS) {
   m_stack.popC();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopColAddElemC(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopColAddElemC(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   Cell* c2 = m_stack.indC(1);
@@ -3677,7 +3681,7 @@ OPTBLD_INLINE void VMExecutionContext::iopColAddElemC(IOP_ARGS) {
   m_stack.popC();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCns(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCns(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(s);
   TypedValue* cns = Unit::loadCns(s);
@@ -3690,7 +3694,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCns(IOP_ARGS) {
   cellDup(*cns, *c1);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCnsE(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCnsE(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(s);
   TypedValue* cns = Unit::loadCns(s);
@@ -3701,7 +3705,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCnsE(IOP_ARGS) {
   cellDup(*cns, *c1);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCnsU(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCnsU(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(name);
   DECODE_LITSTR(fallback);
@@ -3722,14 +3726,14 @@ OPTBLD_INLINE void VMExecutionContext::iopCnsU(IOP_ARGS) {
   cellDup(*cns, *c1);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopDefCns(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopDefCns(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(s);
   bool result = Unit::defCns(s, m_stack.topTV());
   m_stack.replaceTV<KindOfBoolean>(result);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopClsCns(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopClsCns(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(clsCnsName);
 
@@ -3744,7 +3748,7 @@ OPTBLD_INLINE void VMExecutionContext::iopClsCns(IOP_ARGS) {
   cellDup(clsCns, *m_stack.topTV());
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopClsCnsD(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopClsCnsD(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(clsCnsName);
   DECODE(Id, classId);
@@ -3757,7 +3761,7 @@ OPTBLD_INLINE void VMExecutionContext::iopClsCnsD(IOP_ARGS) {
   cellDup(clsCns, *c1);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopConcat(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopConcat(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   Cell* c2 = m_stack.indC(1);
@@ -3772,13 +3776,13 @@ OPTBLD_INLINE void VMExecutionContext::iopConcat(IOP_ARGS) {
   m_stack.popC();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNot(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopNot(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   cellAsVariant(*c1) = !cellAsVariant(*c1).toBoolean();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAbs(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAbs(IOP_ARGS) {
   NEXT();
   auto c1 = m_stack.topC();
 
@@ -3786,7 +3790,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAbs(IOP_ARGS) {
 }
 
 template<class Op>
-OPTBLD_INLINE void VMExecutionContext::implCellBinOp(IOP_ARGS, Op op) {
+OPTBLD_INLINE void ExecutionContext::implCellBinOp(IOP_ARGS, Op op) {
   NEXT();
   auto const c1 = m_stack.topC();
   auto const c2 = m_stack.indC(1);
@@ -3797,7 +3801,7 @@ OPTBLD_INLINE void VMExecutionContext::implCellBinOp(IOP_ARGS, Op op) {
 }
 
 template<class Op>
-OPTBLD_INLINE void VMExecutionContext::implCellBinOpBool(IOP_ARGS, Op op) {
+OPTBLD_INLINE void ExecutionContext::implCellBinOpBool(IOP_ARGS, Op op) {
   NEXT();
   auto const c1 = m_stack.topC();
   auto const c2 = m_stack.indC(1);
@@ -3807,99 +3811,99 @@ OPTBLD_INLINE void VMExecutionContext::implCellBinOpBool(IOP_ARGS, Op op) {
   m_stack.popC();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAdd(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAdd(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellAdd);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSub(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSub(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellSub);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopMul(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopMul(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellMul);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopDiv(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopDiv(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellDiv);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopMod(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopMod(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellMod);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBitAnd(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBitAnd(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellBitAnd);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBitOr(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBitOr(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellBitOr);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBitXor(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBitXor(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellBitXor);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopXor(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopXor(IOP_ARGS) {
   implCellBinOpBool(IOP_PASS_ARGS, [&] (Cell c1, Cell c2) -> bool {
     return cellToBool(c1) ^ cellToBool(c2);
   });
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSame(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSame(IOP_ARGS) {
   implCellBinOpBool(IOP_PASS_ARGS, cellSame);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNSame(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopNSame(IOP_ARGS) {
   implCellBinOpBool(IOP_PASS_ARGS, [&] (Cell c1, Cell c2) {
     return !cellSame(c1, c2);
   });
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopEq(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopEq(IOP_ARGS) {
   implCellBinOpBool(IOP_PASS_ARGS, [&] (Cell c1, Cell c2) {
     return cellEqual(c1, c2);
   });
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNeq(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopNeq(IOP_ARGS) {
   implCellBinOpBool(IOP_PASS_ARGS, [&] (Cell c1, Cell c2) {
     return !cellEqual(c1, c2);
   });
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopLt(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopLt(IOP_ARGS) {
   implCellBinOpBool(IOP_PASS_ARGS, [&] (Cell c1, Cell c2) {
     return cellLess(c1, c2);
   });
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopLte(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopLte(IOP_ARGS) {
   implCellBinOpBool(IOP_PASS_ARGS, cellLessOrEqual);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopGt(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopGt(IOP_ARGS) {
   implCellBinOpBool(IOP_PASS_ARGS, [&] (Cell c1, Cell c2) {
     return cellGreater(c1, c2);
   });
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopGte(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopGte(IOP_ARGS) {
   implCellBinOpBool(IOP_PASS_ARGS, cellGreaterOrEqual);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopShl(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopShl(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, [&] (Cell c1, Cell c2) {
     return make_tv<KindOfInt64>(cellToInt(c1) << cellToInt(c2));
   });
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopShr(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopShr(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, [&] (Cell c1, Cell c2) {
     return make_tv<KindOfInt64>(cellToInt(c1) >> cellToInt(c2));
   });
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSqrt(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSqrt(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
 
@@ -3927,48 +3931,48 @@ OPTBLD_INLINE void VMExecutionContext::iopSqrt(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBitNot(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBitNot(IOP_ARGS) {
   NEXT();
   cellBitNot(*m_stack.topC());
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCastBool(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCastBool(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   tvCastToBooleanInPlace(c1);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCastInt(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCastInt(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   tvCastToInt64InPlace(c1);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCastDouble(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCastDouble(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   tvCastToDoubleInPlace(c1);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCastString(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCastString(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   tvCastToStringInPlace(c1);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCastArray(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCastArray(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   tvCastToArrayInPlace(c1);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCastObject(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCastObject(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   tvCastToObjectInPlace(c1);
 }
 
-OPTBLD_INLINE bool VMExecutionContext::cellInstanceOf(
+OPTBLD_INLINE bool ExecutionContext::cellInstanceOf(
   TypedValue* tv, const NamedEntity* ne) {
   assert(tv->m_type != KindOfRef);
   Class* cls = nullptr;
@@ -4009,7 +4013,7 @@ OPTBLD_INLINE bool VMExecutionContext::cellInstanceOf(
 }
 
 ALWAYS_INLINE
-bool VMExecutionContext::iopInstanceOfHelper(const StringData* str1, Cell* c2) {
+bool ExecutionContext::iopInstanceOfHelper(const StringData* str1, Cell* c2) {
   const NamedEntity* rhs = Unit::GetNamedEntity(str1, false);
   // Because of other codepaths, an un-normalized name might enter the
   // table without a Class* so we need to check if it's there.
@@ -4019,7 +4023,7 @@ bool VMExecutionContext::iopInstanceOfHelper(const StringData* str1, Cell* c2) {
   return false;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopInstanceOf(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopInstanceOf(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();   // c2 instanceof c1
   Cell* c2 = m_stack.indC(1);
@@ -4039,7 +4043,7 @@ OPTBLD_INLINE void VMExecutionContext::iopInstanceOf(IOP_ARGS) {
   m_stack.replaceC<KindOfBoolean>(r);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopInstanceOfD(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopInstanceOfD(IOP_ARGS) {
   NEXT();
   DECODE(Id, id);
   if (shouldProfile()) {
@@ -4051,14 +4055,14 @@ OPTBLD_INLINE void VMExecutionContext::iopInstanceOfD(IOP_ARGS) {
   m_stack.replaceC<KindOfBoolean>(r);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopPrint(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopPrint(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   echo(cellAsVariant(*c1).toString());
   m_stack.replaceC<KindOfInt64>(1);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopClone(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopClone(IOP_ARGS) {
   NEXT();
   TypedValue* tv = m_stack.topTV();
   if (tv->m_type != KindOfObject) {
@@ -4073,7 +4077,7 @@ OPTBLD_INLINE void VMExecutionContext::iopClone(IOP_ARGS) {
   tv->m_data.pobj = newobj;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopExit(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopExit(IOP_ARGS) {
   NEXT();
   int exitCode = 0;
   Cell* c1 = m_stack.topC();
@@ -4087,7 +4091,7 @@ OPTBLD_INLINE void VMExecutionContext::iopExit(IOP_ARGS) {
   throw ExitException(exitCode);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFatal(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFatal(IOP_ARGS) {
   NEXT();
   TypedValue* top = m_stack.topTV();
   std::string msg;
@@ -4110,27 +4114,27 @@ OPTBLD_INLINE void VMExecutionContext::iopFatal(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::jmpSurpriseCheck(Offset offset) {
+OPTBLD_INLINE void ExecutionContext::jmpSurpriseCheck(Offset offset) {
   if (offset <= 0 && UNLIKELY(checkConditionFlags())) {
     EventHook::CheckSurprise();
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopJmp(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopJmp(IOP_ARGS) {
   NEXT();
   DECODE_JMP(Offset, offset);
   jmpSurpriseCheck(offset);
   pc += offset - 1;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopJmpNS(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopJmpNS(IOP_ARGS) {
   NEXT();
   DECODE_JMP(Offset, offset);
   pc += offset - 1;
 }
 
 template<Op op>
-OPTBLD_INLINE void VMExecutionContext::jmpOpImpl(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::jmpOpImpl(IOP_ARGS) {
   static_assert(op == OpJmpZ || op == OpJmpNZ,
                 "jmpOpImpl should only be used by JmpZ and JmpNZ");
   NEXT();
@@ -4159,11 +4163,11 @@ OPTBLD_INLINE void VMExecutionContext::jmpOpImpl(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopJmpZ(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopJmpZ(IOP_ARGS) {
   jmpOpImpl<OpJmpZ>(IOP_PASS_ARGS);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopJmpNZ(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopJmpNZ(IOP_ARGS) {
   jmpOpImpl<OpJmpNZ>(IOP_PASS_ARGS);
 }
 
@@ -4183,7 +4187,7 @@ OPTBLD_INLINE void VMExecutionContext::iopJmpNZ(IOP_ARGS) {
   }                                                             \
 } while(0)
 
-OPTBLD_INLINE void VMExecutionContext::iopIterBreak(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIterBreak(IOP_ARGS) {
   PC savedPc = pc;
   NEXT();
   DECODE_ITER_LIST(iterTypeList, iterIdList, veclen);
@@ -4210,7 +4214,7 @@ static SwitchMatch doubleCheck(double d, int64_t& out) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSwitch(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSwitch(IOP_ARGS) {
   PC origPC = pc;
   NEXT();
   DECODE(int32_t, veclen);
@@ -4318,7 +4322,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSwitch(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSSwitch(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSSwitch(IOP_ARGS) {
   PC origPC = pc;
   NEXT();
   DECODE(int32_t, veclen);
@@ -4345,10 +4349,10 @@ OPTBLD_INLINE void VMExecutionContext::iopSSwitch(IOP_ARGS) {
   m_stack.popC();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopRetC(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopRetC(IOP_ARGS) {
   NEXT();
   uint soff = m_fp->m_soff;
-  assert(!m_fp->m_func->isGenerator());
+  assert(!m_fp->inGenerator());
 
   // Call the runtime helpers to free the local variables and iterators
   frame_free_locals_inl(m_fp, m_fp->m_func->numLocals());
@@ -4377,7 +4381,7 @@ OPTBLD_INLINE void VMExecutionContext::iopRetC(IOP_ARGS) {
       std::ostringstream os;
       os << toStringElm(m_stack.topTV());
       ONTRACE(1,
-              Trace::trace("Return %s from VMExecutionContext::dispatch("
+              Trace::trace("Return %s from ExecutionContext::dispatch("
                            "%p)\n", os.str().c_str(), m_fp));
     }
 #endif
@@ -4385,17 +4389,17 @@ OPTBLD_INLINE void VMExecutionContext::iopRetC(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopRetV(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopRetV(IOP_ARGS) {
   iopRetC(IOP_PASS_ARGS);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopUnwind(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopUnwind(IOP_ARGS) {
   assert(!m_faults.empty());
   assert(m_faults.back().m_raiseOffset != kInvalidOffset);
   throw VMPrepareUnwind();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopThrow(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopThrow(IOP_ARGS) {
   Cell* c1 = m_stack.topC();
   if (c1->m_type != KindOfObject ||
       !c1->m_data.pobj->instanceof(SystemLib::s_ExceptionClass)) {
@@ -4409,13 +4413,13 @@ OPTBLD_INLINE void VMExecutionContext::iopThrow(IOP_ARGS) {
   throw obj;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAGetC(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAGetC(IOP_ARGS) {
   NEXT();
   TypedValue* tv = m_stack.topTV();
   lookupClsRef(tv, tv, true);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAGetL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAGetL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   TypedValue* top = m_stack.allocTV();
@@ -4448,7 +4452,7 @@ static inline void cgetl_body(ActRec* fp,
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCGetL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCGetL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   Cell* to = m_stack.allocC();
@@ -4456,7 +4460,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCGetL(IOP_ARGS) {
   cgetl_body(m_fp, fr, to, local);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCGetL2(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCGetL2(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   TypedValue* oldTop = m_stack.topTV();
@@ -4467,7 +4471,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCGetL2(IOP_ARGS) {
   cgetl_body(m_fp, fr, to, local);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCGetL3(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCGetL3(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   TypedValue* oldTop = m_stack.topTV();
@@ -4479,7 +4483,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCGetL3(IOP_ARGS) {
   cgetl_body(m_fp, fr, to, local);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopPushL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopPushL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   TypedValue* locVal = frame_local(m_fp, local);
@@ -4491,7 +4495,7 @@ OPTBLD_INLINE void VMExecutionContext::iopPushL(IOP_ARGS) {
   locVal->m_type = KindOfUninit;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCGetN(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCGetN(IOP_ARGS) {
   NEXT();
   StringData* name;
   TypedValue* to = m_stack.topTV();
@@ -4508,7 +4512,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCGetN(IOP_ARGS) {
   decRefStr(name); // TODO(#1146727): leaks during exceptions
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCGetG(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCGetG(IOP_ARGS) {
   NEXT();
   StringData* name;
   TypedValue* to = m_stack.topTV();
@@ -4563,7 +4567,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCGetG(IOP_ARGS) {
   SPROP_OP_POSTLUDE                                       \
 } while (0)
 
-OPTBLD_INLINE void VMExecutionContext::iopCGetS(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCGetS(IOP_ARGS) {
   StringData* name;
   GETS(false);
   if (shouldProfile() && name && name->isStatic()) {
@@ -4572,7 +4576,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCGetS(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCGetM(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCGetM(IOP_ARGS) {
   PC oldPC = pc;
   NEXT();
   DECLARE_GETHELPER_ARGS
@@ -4596,7 +4600,7 @@ static inline void vgetl_body(TypedValue* fr, TypedValue* to) {
   refDup(*fr, *to);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopVGetL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopVGetL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   Ref* to = m_stack.allocV();
@@ -4604,7 +4608,7 @@ OPTBLD_INLINE void VMExecutionContext::iopVGetL(IOP_ARGS) {
   vgetl_body(fr, to);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopVGetN(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopVGetN(IOP_ARGS) {
   NEXT();
   StringData* name;
   TypedValue* to = m_stack.topTV();
@@ -4616,7 +4620,7 @@ OPTBLD_INLINE void VMExecutionContext::iopVGetN(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopVGetG(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopVGetG(IOP_ARGS) {
   NEXT();
   StringData* name;
   TypedValue* to = m_stack.topTV();
@@ -4628,13 +4632,13 @@ OPTBLD_INLINE void VMExecutionContext::iopVGetG(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopVGetS(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopVGetS(IOP_ARGS) {
   StringData* name;
   GETS(true);
 }
 #undef GETS
 
-OPTBLD_INLINE void VMExecutionContext::iopVGetM(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopVGetM(IOP_ARGS) {
   NEXT();
   DECLARE_SETHELPER_ARGS
   TypedValue* tv1 = m_stack.allocTV();
@@ -4652,7 +4656,7 @@ OPTBLD_INLINE void VMExecutionContext::iopVGetM(IOP_ARGS) {
   setHelperPost<1>(SETHELPERPOST_ARGS);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIssetN(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIssetN(IOP_ARGS) {
   NEXT();
   StringData* name;
   TypedValue* tv1 = m_stack.topTV();
@@ -4668,7 +4672,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetN(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIssetG(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIssetG(IOP_ARGS) {
   NEXT();
   StringData* name;
   TypedValue* tv1 = m_stack.topTV();
@@ -4684,7 +4688,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetG(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIssetS(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIssetS(IOP_ARGS) {
   StringData* name;
   SPROP_OP_PRELUDE
   bool e;
@@ -4700,7 +4704,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetS(IOP_ARGS) {
 }
 
 template <bool isEmpty>
-OPTBLD_INLINE void VMExecutionContext::isSetEmptyM(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::isSetEmptyM(IOP_ARGS) {
   NEXT();
   DECLARE_GETHELPER_ARGS
   getHelperPre<false, false, VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS);
@@ -4730,11 +4734,11 @@ OPTBLD_INLINE void VMExecutionContext::isSetEmptyM(IOP_ARGS) {
   tvRet->m_type = KindOfBoolean;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIssetM(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIssetM(IOP_ARGS) {
   isSetEmptyM<false>(IOP_PASS_ARGS);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIssetL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIssetL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   TypedValue* tv = frame_local(m_fp, local);
@@ -4758,7 +4762,7 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
   not_reached();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIsTypeL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIsTypeL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   DECODE_OA(IsTypeOp, op);
@@ -4771,7 +4775,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIsTypeL(IOP_ARGS) {
   topTv->m_type = KindOfBoolean;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIsTypeC(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIsTypeC(IOP_ARGS) {
   NEXT();
   DECODE_OA(IsTypeOp, op);
   TypedValue* topTv = m_stack.topTV();
@@ -4871,27 +4875,27 @@ OPTBLD_INLINE static void implAssertT(TypedValue* tv, AssertTOp op) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAssertTL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAssertTL(IOP_ARGS) {
   NEXT();
   DECODE_LA(localId);
   DECODE_OA(AssertTOp, op);
   implAssertT(frame_local(m_fp, localId), op);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAssertTStk(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAssertTStk(IOP_ARGS) {
   NEXT();
   DECODE_IVA(stkSlot);
   DECODE_OA(AssertTOp, op);
   implAssertT(m_stack.indTV(stkSlot), op);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopPredictTL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopPredictTL(IOP_ARGS) {
   NEXT();
   DECODE_LA(localId);
   DECODE_OA(AssertTOp, op);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopPredictTStk(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopPredictTStk(IOP_ARGS) {
   NEXT();
   DECODE_IVA(stkSlot);
   DECODE_OA(AssertTOp, op);
@@ -4934,7 +4938,7 @@ OPTBLD_INLINE static void implAssertObj(TypedValue* tv,
   not_reached();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAssertObjL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAssertObjL(IOP_ARGS) {
   NEXT();
   DECODE_LA(localId);
   DECODE(Id, strId);
@@ -4943,7 +4947,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAssertObjL(IOP_ARGS) {
   implAssertObj(frame_local(m_fp, localId), str, subop);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAssertObjStk(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAssertObjStk(IOP_ARGS) {
   NEXT();
   DECODE_IVA(stkSlot);
   DECODE(Id, strId);
@@ -4952,11 +4956,11 @@ OPTBLD_INLINE void VMExecutionContext::iopAssertObjStk(IOP_ARGS) {
   implAssertObj(m_stack.indTV(stkSlot), str, subop);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBreakTraceHint(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBreakTraceHint(IOP_ARGS) {
   NEXT();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopEmptyL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopEmptyL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   TypedValue* loc = frame_local(m_fp, local);
@@ -4964,7 +4968,7 @@ OPTBLD_INLINE void VMExecutionContext::iopEmptyL(IOP_ARGS) {
   m_stack.pushBool(e);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopEmptyN(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopEmptyN(IOP_ARGS) {
   NEXT();
   StringData* name;
   TypedValue* tv1 = m_stack.topTV();
@@ -4980,7 +4984,7 @@ OPTBLD_INLINE void VMExecutionContext::iopEmptyN(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopEmptyG(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopEmptyG(IOP_ARGS) {
   NEXT();
   StringData* name;
   TypedValue* tv1 = m_stack.topTV();
@@ -4996,7 +5000,7 @@ OPTBLD_INLINE void VMExecutionContext::iopEmptyG(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopEmptyS(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopEmptyS(IOP_ARGS) {
   StringData* name;
   SPROP_OP_PRELUDE
   bool e;
@@ -5011,11 +5015,11 @@ OPTBLD_INLINE void VMExecutionContext::iopEmptyS(IOP_ARGS) {
   SPROP_OP_POSTLUDE
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopEmptyM(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopEmptyM(IOP_ARGS) {
   isSetEmptyM<true>(IOP_PASS_ARGS);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAKExists(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAKExists(IOP_ARGS) {
   NEXT();
   TypedValue* arr = m_stack.topTV();
   TypedValue* key = arr + 1;
@@ -5024,7 +5028,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAKExists(IOP_ARGS) {
   m_stack.replaceTV<KindOfBoolean>(result);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIdx(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIdx(IOP_ARGS) {
   NEXT();
   TypedValue* def = m_stack.topTV();
   TypedValue* key = m_stack.indTV(1);
@@ -5037,7 +5041,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIdx(IOP_ARGS) {
   *arr = result;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopArrayIdx(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopArrayIdx(IOP_ARGS) {
   NEXT();
   TypedValue* def = m_stack.topTV();
   TypedValue* key = m_stack.indTV(1);
@@ -5051,7 +5055,7 @@ OPTBLD_INLINE void VMExecutionContext::iopArrayIdx(IOP_ARGS) {
   tvAsVariant(arr) = result;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSetL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSetL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   assert(local < m_fp->m_func->numLocals());
@@ -5060,7 +5064,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetL(IOP_ARGS) {
   tvSet(*fr, *to);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSetN(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSetN(IOP_ARGS) {
   NEXT();
   StringData* name;
   Cell* fr = m_stack.topC();
@@ -5074,7 +5078,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetN(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSetG(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSetG(IOP_ARGS) {
   NEXT();
   StringData* name;
   Cell* fr = m_stack.topC();
@@ -5088,7 +5092,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetG(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSetS(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSetS(IOP_ARGS) {
   NEXT();
   TypedValue* tv1 = m_stack.topTV();
   TypedValue* classref = m_stack.indTV(1);
@@ -5110,7 +5114,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetS(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSetM(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSetM(IOP_ARGS) {
   NEXT();
   DECLARE_SETHELPER_ARGS
   if (!setHelperPre<false, true, false, false, 1,
@@ -5147,7 +5151,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetM(IOP_ARGS) {
   setHelperPost<1>(SETHELPERPOST_ARGS);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSetWithRefLM(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSetWithRefLM(IOP_ARGS) {
   NEXT();
   DECLARE_SETHELPER_ARGS
   bool skip = setHelperPre<false, true, false, false, 0,
@@ -5160,7 +5164,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetWithRefLM(IOP_ARGS) {
   setHelperPost<0>(SETHELPERPOST_ARGS);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSetWithRefRM(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSetWithRefRM(IOP_ARGS) {
   NEXT();
   DECLARE_SETHELPER_ARGS
   bool skip = setHelperPre<false, true, false, false, 1,
@@ -5173,7 +5177,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetWithRefRM(IOP_ARGS) {
   m_stack.popTV();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSetOpL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSetOpL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   DECODE_OA(SetOpOp, op);
@@ -5184,7 +5188,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpL(IOP_ARGS) {
   cellDup(*to, *fr);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSetOpN(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSetOpN(IOP_ARGS) {
   NEXT();
   DECODE_OA(SetOpOp, op);
   StringData* name;
@@ -5202,7 +5206,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpN(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSetOpG(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSetOpG(IOP_ARGS) {
   NEXT();
   DECODE_OA(SetOpOp, op);
   StringData* name;
@@ -5220,7 +5224,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpG(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSetOpS(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSetOpS(IOP_ARGS) {
   NEXT();
   DECODE_OA(SetOpOp, op);
   Cell* fr = m_stack.topC();
@@ -5244,7 +5248,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpS(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSetOpM(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSetOpM(IOP_ARGS) {
   NEXT();
   DECODE_OA(SetOpOp, op);
   DECLARE_SETHELPER_ARGS
@@ -5284,7 +5288,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpM(IOP_ARGS) {
   setHelperPost<1>(SETHELPERPOST_ARGS);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIncDecL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIncDecL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   DECODE_OA(IncDecOp, op);
@@ -5294,7 +5298,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecL(IOP_ARGS) {
   IncDecBody<true>(op, fr, to);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIncDecN(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIncDecN(IOP_ARGS) {
   NEXT();
   DECODE_OA(IncDecOp, op);
   StringData* name;
@@ -5306,7 +5310,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecN(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIncDecG(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIncDecG(IOP_ARGS) {
   NEXT();
   DECODE_OA(IncDecOp, op);
   StringData* name;
@@ -5318,7 +5322,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecG(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIncDecS(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIncDecS(IOP_ARGS) {
   StringData* name;
   SPROP_OP_PRELUDE
   DECODE_OA(IncDecOp, op);
@@ -5333,7 +5337,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecS(IOP_ARGS) {
   SPROP_OP_POSTLUDE
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIncDecM(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIncDecM(IOP_ARGS) {
   NEXT();
   DECODE_OA(IncDecOp, op);
   DECLARE_SETHELPER_ARGS
@@ -5369,7 +5373,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecM(IOP_ARGS) {
   memcpy(c1, &to, sizeof(TypedValue));
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBindL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBindL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   Ref* fr = m_stack.topV();
@@ -5377,7 +5381,7 @@ OPTBLD_INLINE void VMExecutionContext::iopBindL(IOP_ARGS) {
   tvBind(fr, to);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBindN(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBindN(IOP_ARGS) {
   NEXT();
   StringData* name;
   TypedValue* fr = m_stack.topTV();
@@ -5391,7 +5395,7 @@ OPTBLD_INLINE void VMExecutionContext::iopBindN(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBindG(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBindG(IOP_ARGS) {
   NEXT();
   StringData* name;
   TypedValue* fr = m_stack.topTV();
@@ -5405,7 +5409,7 @@ OPTBLD_INLINE void VMExecutionContext::iopBindG(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBindS(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBindS(IOP_ARGS) {
   NEXT();
   TypedValue* fr = m_stack.topTV();
   TypedValue* classref = m_stack.indTV(1);
@@ -5427,7 +5431,7 @@ OPTBLD_INLINE void VMExecutionContext::iopBindS(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBindM(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBindM(IOP_ARGS) {
   NEXT();
   DECLARE_SETHELPER_ARGS
   TypedValue* tv1 = m_stack.topTV();
@@ -5439,7 +5443,7 @@ OPTBLD_INLINE void VMExecutionContext::iopBindM(IOP_ARGS) {
   setHelperPost<1>(SETHELPERPOST_ARGS);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopUnsetL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopUnsetL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
   assert(local < m_fp->m_func->numLocals());
@@ -5448,7 +5452,7 @@ OPTBLD_INLINE void VMExecutionContext::iopUnsetL(IOP_ARGS) {
   tvWriteUninit(tv);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopUnsetN(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopUnsetN(IOP_ARGS) {
   NEXT();
   StringData* name;
   TypedValue* tv1 = m_stack.topTV();
@@ -5463,7 +5467,7 @@ OPTBLD_INLINE void VMExecutionContext::iopUnsetN(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopUnsetG(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopUnsetG(IOP_ARGS) {
   NEXT();
   TypedValue* tv1 = m_stack.topTV();
   StringData* name = lookup_name(tv1);
@@ -5474,7 +5478,7 @@ OPTBLD_INLINE void VMExecutionContext::iopUnsetG(IOP_ARGS) {
   decRefStr(name);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopUnsetM(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopUnsetM(IOP_ARGS) {
   NEXT();
   DECLARE_SETHELPER_ARGS
   if (!setHelperPre<false, false, true, false, 0,
@@ -5499,7 +5503,7 @@ OPTBLD_INLINE void VMExecutionContext::iopUnsetM(IOP_ARGS) {
   setHelperPost<0>(SETHELPERPOST_ARGS);
 }
 
-OPTBLD_INLINE ActRec* VMExecutionContext::fPushFuncImpl(
+OPTBLD_INLINE ActRec* ExecutionContext::fPushFuncImpl(
     const Func* func,
     int numArgs) {
   DEBUGGER_IF(phpBreakpointEnabled(func->name()->data()));
@@ -5511,7 +5515,7 @@ OPTBLD_INLINE ActRec* VMExecutionContext::fPushFuncImpl(
   return ar;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushFunc(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushFunc(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   Cell* c1 = m_stack.topC();
@@ -5597,7 +5601,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushFunc(IOP_ARGS) {
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushFuncD(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushFuncD(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   DECODE(Id, id);
@@ -5611,7 +5615,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushFuncD(IOP_ARGS) {
   ar->setThis(nullptr);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushFuncU(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushFuncU(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   DECODE(Id, nsFunc);
@@ -5631,7 +5635,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushFuncU(IOP_ARGS) {
   ar->setThis(nullptr);
 }
 
-void VMExecutionContext::fPushObjMethodImpl(
+void ExecutionContext::fPushObjMethodImpl(
     Class* cls, StringData* name, ObjectData* obj, int numArgs) {
   const Func* f;
   LookupResult res = lookupObjMethod(f, cls, name,
@@ -5658,7 +5662,7 @@ void VMExecutionContext::fPushObjMethodImpl(
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushObjMethod(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushObjMethod(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   Cell* c1 = m_stack.topC(); // Method name.
@@ -5677,7 +5681,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushObjMethod(IOP_ARGS) {
   fPushObjMethodImpl(cls, name, obj, numArgs);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushObjMethodD(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushObjMethodD(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   DECODE_LITSTR(name);
@@ -5693,7 +5697,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushObjMethodD(IOP_ARGS) {
 }
 
 template<bool forwarding>
-void VMExecutionContext::pushClsMethodImpl(Class* cls,
+void ExecutionContext::pushClsMethodImpl(Class* cls,
                                            StringData* name,
                                            ObjectData* obj,
                                            int numArgs) {
@@ -5739,7 +5743,7 @@ void VMExecutionContext::pushClsMethodImpl(Class* cls,
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushClsMethod(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushClsMethod(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   Cell* c1 = m_stack.indC(1); // Method name.
@@ -5757,7 +5761,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushClsMethod(IOP_ARGS) {
   pushClsMethodImpl<false>(cls, name, obj, numArgs);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushClsMethodD(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushClsMethodD(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   DECODE_LITSTR(name);
@@ -5772,7 +5776,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushClsMethodD(IOP_ARGS) {
   pushClsMethodImpl<false>(cls, name, obj, numArgs);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushClsMethodF(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushClsMethodF(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   Cell* c1 = m_stack.indC(1); // Method name.
@@ -5790,7 +5794,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushClsMethodF(IOP_ARGS) {
   pushClsMethodImpl<true>(cls, name, obj, numArgs);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushCtor(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushCtor(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   TypedValue* tv = m_stack.topTV();
@@ -5814,12 +5818,12 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushCtor(IOP_ARGS) {
   arSetSfp(ar, m_fp);
   ar->m_func = f;
   ar->setThis(this_);
-  ar->initNumArgs(numArgs, true /* isFPushCtor */);
+  ar->initNumArgsFromFPushCtor(numArgs);
   arSetSfp(ar, m_fp);
   ar->setVarEnv(nullptr);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushCtorD(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushCtorD(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   DECODE(Id, id);
@@ -5845,11 +5849,11 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushCtorD(IOP_ARGS) {
   arSetSfp(ar, m_fp);
   ar->m_func = f;
   ar->setThis(this_);
-  ar->initNumArgs(numArgs, true /* isFPushCtor */);
+  ar->initNumArgsFromFPushCtor(numArgs);
   ar->setVarEnv(nullptr);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopDecodeCufIter(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopDecodeCufIter(IOP_ARGS) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -5887,7 +5891,7 @@ OPTBLD_INLINE void VMExecutionContext::iopDecodeCufIter(IOP_ARGS) {
   m_stack.popC();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushCufIter(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushCufIter(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   DECODE_IA(itId);
@@ -5909,10 +5913,10 @@ OPTBLD_INLINE void VMExecutionContext::iopFPushCufIter(IOP_ARGS) {
   } else {
     ar->setVarEnv(nullptr);
   }
-  ar->initNumArgs(numArgs, false /* isFPushCtor */);
+  ar->initNumArgs(numArgs);
 }
 
-OPTBLD_INLINE void VMExecutionContext::doFPushCuf(IOP_ARGS,
+OPTBLD_INLINE void ExecutionContext::doFPushCuf(IOP_ARGS,
                                                   bool forward, bool safe) {
   NEXT();
   DECODE_IVA(numArgs);
@@ -5950,7 +5954,7 @@ OPTBLD_INLINE void VMExecutionContext::doFPushCuf(IOP_ARGS,
   } else {
     ar->setThis(nullptr);
   }
-  ar->initNumArgs(numArgs, false /* isFPushCtor */);
+  ar->initNumArgs(numArgs);
   if (invName) {
     ar->setInvName(invName);
   } else {
@@ -5959,15 +5963,15 @@ OPTBLD_INLINE void VMExecutionContext::doFPushCuf(IOP_ARGS,
   tvRefcountedDecRef(&func);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushCuf(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushCuf(IOP_ARGS) {
   doFPushCuf(IOP_PASS_ARGS, false, false);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushCufF(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushCufF(IOP_ARGS) {
   doFPushCuf(IOP_PASS_ARGS, true, false);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPushCufSafe(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPushCufSafe(IOP_ARGS) {
   doFPushCuf(IOP_PASS_ARGS, false, true);
 }
 
@@ -5975,7 +5979,7 @@ static inline ActRec* arFromInstr(TypedValue* sp, const Op* pc) {
   return arFromSpOffset((ActRec*)sp, instrSpToArDelta(pc));
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPassC(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPassC(IOP_ARGS) {
   DEBUG_ONLY auto const ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(paramId);
@@ -5989,7 +5993,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassC(IOP_ARGS) {
   assert(paramId < ar->numArgs());                                            \
   const Func* func = ar->m_func;
 
-OPTBLD_INLINE void VMExecutionContext::iopFPassCW(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPassCW(IOP_ARGS) {
   FPASSC_CHECKED_PRELUDE
   if (func->mustBeRef(paramId)) {
     TRACE(1, "FPassCW: function %s(%d) param %d is by reference, "
@@ -6000,7 +6004,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassCW(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPassCE(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPassCE(IOP_ARGS) {
   FPASSC_CHECKED_PRELUDE
   if (func->mustBeRef(paramId)) {
     TRACE(1, "FPassCE: function %s(%d) param %d is by reference, "
@@ -6013,7 +6017,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassCE(IOP_ARGS) {
 
 #undef FPASSC_CHECKED_PRELUDE
 
-OPTBLD_INLINE void VMExecutionContext::iopFPassV(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPassV(IOP_ARGS) {
   ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(paramId);
@@ -6024,7 +6028,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassV(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPassVNop(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPassVNop(IOP_ARGS) {
   DEBUG_ONLY auto const ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(paramId);
@@ -6032,7 +6036,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassVNop(IOP_ARGS) {
   assert(ar->m_func->byRef(paramId));
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPassR(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPassR(IOP_ARGS) {
   ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(paramId);
@@ -6050,7 +6054,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassR(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPassL(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPassL(IOP_ARGS) {
   ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(paramId);
@@ -6065,7 +6069,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassL(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPassN(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPassN(IOP_ARGS) {
   ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   PC origPc = pc;
   NEXT();
@@ -6078,7 +6082,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassN(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPassG(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPassG(IOP_ARGS) {
   ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   PC origPc = pc;
   NEXT();
@@ -6091,7 +6095,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassG(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFPassS(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFPassS(IOP_ARGS) {
   ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   PC origPc = pc;
   NEXT();
@@ -6104,7 +6108,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassS(IOP_ARGS) {
   }
 }
 
-void VMExecutionContext::iopFPassM(IOP_ARGS) {
+void ExecutionContext::iopFPassM(IOP_ARGS) {
   ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(paramId);
@@ -6133,10 +6137,10 @@ void VMExecutionContext::iopFPassM(IOP_ARGS) {
   }
 }
 
-bool VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
+bool ExecutionContext::doFCall(ActRec* ar, PC& pc) {
   assert(getOuterVMFrame(ar) == m_fp);
   ar->m_savedRip =
-    reinterpret_cast<uintptr_t>(tx64->uniqueStubs.retHelper);
+    reinterpret_cast<uintptr_t>(tx->uniqueStubs.retHelper);
   assert(isReturnHelper(ar->m_savedRip));
   TRACE(3, "FCall: pc %p func %p base %d\n", m_pc,
         m_fp->m_func->unit()->entry(),
@@ -6151,7 +6155,7 @@ bool VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
   return false;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFCall(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFCall(IOP_ARGS) {
   ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(numArgs);
@@ -6163,7 +6167,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFCall(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFCallBuiltin(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFCallBuiltin(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   DECODE_IVA(numNonDefault);
@@ -6195,7 +6199,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFCallBuiltin(IOP_ARGS) {
   tvCopy(ret, *m_stack.allocTV());
 }
 
-bool VMExecutionContext::prepareArrayArgs(ActRec* ar, CVarRef arrayArgs) {
+bool ExecutionContext::prepareArrayArgs(ActRec* ar, CVarRef arrayArgs) {
   const auto& args = *arrayArgs.asCell();
   assert(isContainer(args));
   if (UNLIKELY(ar->hasInvName())) {
@@ -6291,7 +6295,7 @@ static void cleanupParamsAndActRec(Stack& stack,
   stack.popAR();
 }
 
-bool VMExecutionContext::doFCallArray(PC& pc) {
+bool ExecutionContext::doFCallArray(PC& pc) {
   ActRec* ar = (ActRec*)(m_stack.top() + 1);
   assert(ar->numArgs() == 1);
 
@@ -6315,9 +6319,9 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
     checkStack(m_stack, func);
 
     assert(ar->m_savedRbp == (uint64_t)m_fp);
-    assert(!ar->m_func->isGenerator());
+    assert(!ar->inGenerator());
     ar->m_savedRip =
-      reinterpret_cast<uintptr_t>(tx64->uniqueStubs.retHelper);
+      reinterpret_cast<uintptr_t>(tx->uniqueStubs.retHelper);
     assert(isReturnHelper(ar->m_savedRip));
     TRACE(3, "FCallArray: pc %p func %p base %d\n", m_pc,
           m_fp->unit()->entry(),
@@ -6340,8 +6344,8 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
   return true;
 }
 
-bool VMExecutionContext::doFCallArrayTC(PC pc) {
-  Util::assert_native_stack_aligned();
+bool ExecutionContext::doFCallArrayTC(PC pc) {
+  JIT::assert_native_stack_aligned();
   assert(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
   auto const ret = doFCallArray(pc);
@@ -6349,12 +6353,12 @@ bool VMExecutionContext::doFCallArrayTC(PC pc) {
   return ret;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFCallArray(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFCallArray(IOP_ARGS) {
   NEXT();
   (void)doFCallArray(pc);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCufSafeArray(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCufSafeArray(IOP_ARGS) {
   NEXT();
   Array ret;
   ret.append(tvAsVariant(m_stack.top() + 1));
@@ -6364,7 +6368,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCufSafeArray(IOP_ARGS) {
   tvAsVariant(m_stack.top()) = ret;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCufSafeReturn(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCufSafeReturn(IOP_ARGS) {
   NEXT();
   bool ok = cellToBool(*tvToCell(m_stack.top() + 1));
   tvRefcountedDecRef(m_stack.top() + 1);
@@ -6373,7 +6377,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCufSafeReturn(IOP_ARGS) {
   m_stack.ndiscard(2);
 }
 
-inline bool VMExecutionContext::initIterator(PC& pc, PC& origPc, Iter* it,
+inline bool ExecutionContext::initIterator(PC& pc, PC& origPc, Iter* it,
                                              Offset offset, Cell* c1) {
   bool hasElems = it->init(c1);
   if (!hasElems) {
@@ -6383,7 +6387,7 @@ inline bool VMExecutionContext::initIterator(PC& pc, PC& origPc, Iter* it,
   return hasElems;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIterInit(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIterInit(IOP_ARGS) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6397,7 +6401,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIterInit(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIterInitK(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIterInitK(IOP_ARGS) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6414,7 +6418,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIterInitK(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopWIterInit(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopWIterInit(IOP_ARGS) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6428,7 +6432,7 @@ OPTBLD_INLINE void VMExecutionContext::iopWIterInit(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopWIterInitK(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopWIterInitK(IOP_ARGS) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6446,7 +6450,7 @@ OPTBLD_INLINE void VMExecutionContext::iopWIterInitK(IOP_ARGS) {
 }
 
 
-inline bool VMExecutionContext::initIteratorM(PC& pc, PC& origPc, Iter* it,
+inline bool ExecutionContext::initIteratorM(PC& pc, PC& origPc, Iter* it,
                                               Offset offset, Ref* r1,
                                               TypedValue *val,
                                               TypedValue *key) {
@@ -6455,7 +6459,7 @@ inline bool VMExecutionContext::initIteratorM(PC& pc, PC& origPc, Iter* it,
   if (rtv->m_type == KindOfArray) {
     hasElems = new_miter_array_key(it, r1->m_data.pref, val, key);
   } else if (rtv->m_type == KindOfObject)  {
-    Class* ctx = arGetContextClass(g_vmContext->getFP());
+    Class* ctx = arGetContextClass(g_context->getFP());
     hasElems = new_miter_object(it, r1->m_data.pref, ctx, val, key);
   } else {
     hasElems = new_miter_other(it, r1->m_data.pref);
@@ -6469,7 +6473,7 @@ inline bool VMExecutionContext::initIteratorM(PC& pc, PC& origPc, Iter* it,
   return hasElems;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopMIterInit(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopMIterInit(IOP_ARGS) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6482,7 +6486,7 @@ OPTBLD_INLINE void VMExecutionContext::iopMIterInit(IOP_ARGS) {
   initIteratorM(pc, origPc, it, offset, r1, tv1, nullptr);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopMIterInitK(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopMIterInitK(IOP_ARGS) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6497,7 +6501,7 @@ OPTBLD_INLINE void VMExecutionContext::iopMIterInitK(IOP_ARGS) {
   initIteratorM(pc, origPc, it, offset, r1, tv1, tv2);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIterNext(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIterNext(IOP_ARGS) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6511,7 +6515,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIterNext(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIterNextK(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIterNextK(IOP_ARGS) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6528,7 +6532,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIterNextK(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopWIterNext(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopWIterNext(IOP_ARGS) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6542,7 +6546,7 @@ OPTBLD_INLINE void VMExecutionContext::iopWIterNext(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopWIterNextK(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopWIterNextK(IOP_ARGS) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6559,7 +6563,7 @@ OPTBLD_INLINE void VMExecutionContext::iopWIterNextK(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopMIterNext(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopMIterNext(IOP_ARGS) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6572,7 +6576,7 @@ OPTBLD_INLINE void VMExecutionContext::iopMIterNext(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopMIterNextK(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopMIterNextK(IOP_ARGS) {
   PC origPc = pc;
   NEXT();
   DECODE_IA(itId);
@@ -6587,51 +6591,51 @@ OPTBLD_INLINE void VMExecutionContext::iopMIterNextK(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIterFree(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIterFree(IOP_ARGS) {
   NEXT();
   DECODE_IA(itId);
   Iter* it = frame_iter(m_fp, itId);
   it->free();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopMIterFree(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopMIterFree(IOP_ARGS) {
   NEXT();
   DECODE_IA(itId);
   Iter* it = frame_iter(m_fp, itId);
   it->mfree();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCIterFree(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCIterFree(IOP_ARGS) {
   NEXT();
   DECODE_IA(itId);
   Iter* it = frame_iter(m_fp, itId);
   it->cfree();
 }
 
-OPTBLD_INLINE void inclOp(VMExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
+OPTBLD_INLINE void inclOp(ExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
   NEXT();
   Cell* c1 = ec->m_stack.topC();
   String path(prepareKey(c1));
   bool initial;
   TRACE(2, "inclOp %s %s %s %s \"%s\"\n",
-        flags & InclOpOnce ? "Once" : "",
-        flags & InclOpDocRoot ? "DocRoot" : "",
-        flags & InclOpRelative ? "Relative" : "",
-        flags & InclOpFatal ? "Fatal" : "",
+        flags & InclOpFlags::Once ? "Once" : "",
+        flags & InclOpFlags::DocRoot ? "DocRoot" : "",
+        flags & InclOpFlags::Relative ? "Relative" : "",
+        flags & InclOpFlags::Fatal ? "Fatal" : "",
         path->data());
 
-  Unit* u = flags & (InclOpDocRoot|InclOpRelative) ?
+  Unit* u = flags & (InclOpFlags::DocRoot|InclOpFlags::Relative) ?
     ec->evalIncludeRoot(path.get(), flags, &initial) :
     ec->evalInclude(path.get(), ec->m_fp->m_func->unit()->filepath(), &initial);
   ec->m_stack.popC();
   if (u == nullptr) {
-    ((flags & InclOpFatal) ?
+    ((flags & InclOpFlags::Fatal) ?
      (void (*)(const char *, ...))raise_error :
      (void (*)(const char *, ...))raise_warning)("File not found: %s",
                                                  path->data());
     ec->m_stack.pushFalse();
   } else {
-    if (!(flags & InclOpOnce) || initial) {
+    if (!(flags & InclOpFlags::Once) || initial) {
       ec->evalUnit(u, pc, EventHook::PseudoMain);
     } else {
       Stats::inc(Stats::PseudoMain_Guarded);
@@ -6640,27 +6644,28 @@ OPTBLD_INLINE void inclOp(VMExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIncl(IOP_ARGS) {
-  inclOp(this, IOP_PASS_ARGS, InclOpDefault);
+OPTBLD_INLINE void ExecutionContext::iopIncl(IOP_ARGS) {
+  inclOp(this, IOP_PASS_ARGS, InclOpFlags::Default);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopInclOnce(IOP_ARGS) {
-  inclOp(this, IOP_PASS_ARGS, InclOpOnce);
+OPTBLD_INLINE void ExecutionContext::iopInclOnce(IOP_ARGS) {
+  inclOp(this, IOP_PASS_ARGS, InclOpFlags::Once);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopReq(IOP_ARGS) {
-  inclOp(this, IOP_PASS_ARGS, InclOpFatal);
+OPTBLD_INLINE void ExecutionContext::iopReq(IOP_ARGS) {
+  inclOp(this, IOP_PASS_ARGS, InclOpFlags::Fatal);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopReqOnce(IOP_ARGS) {
-  inclOp(this, IOP_PASS_ARGS, InclOpFatal | InclOpOnce);
+OPTBLD_INLINE void ExecutionContext::iopReqOnce(IOP_ARGS) {
+  inclOp(this, IOP_PASS_ARGS, InclOpFlags::Fatal | InclOpFlags::Once);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopReqDoc(IOP_ARGS) {
-  inclOp(this, IOP_PASS_ARGS, InclOpFatal | InclOpOnce | InclOpDocRoot);
+OPTBLD_INLINE void ExecutionContext::iopReqDoc(IOP_ARGS) {
+  inclOp(this, IOP_PASS_ARGS,
+    InclOpFlags::Fatal | InclOpFlags::Once | InclOpFlags::DocRoot);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopEval(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopEval(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
 
@@ -6674,7 +6679,7 @@ OPTBLD_INLINE void VMExecutionContext::iopEval(IOP_ARGS) {
   String prefixedCode = concat("<?php ", code);
 
   auto evalFilename = std::string();
-  Util::string_printf(
+  string_printf(
     evalFilename,
     "%s(%d) : eval()'d code",
     getContainingFileName().data(),
@@ -6705,26 +6710,26 @@ OPTBLD_INLINE void VMExecutionContext::iopEval(IOP_ARGS) {
   evalUnit(unit, pc, EventHook::Eval);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopDefFunc(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopDefFunc(IOP_ARGS) {
   NEXT();
   DECODE_IVA(fid);
   Func* f = m_fp->m_func->unit()->lookupFuncId(fid);
   setCachedFunc(f, isDebuggerAttached());
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopDefCls(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopDefCls(IOP_ARGS) {
   NEXT();
   DECODE_IVA(cid);
   PreClass* c = m_fp->m_func->unit()->lookupPreClassId(cid);
   Unit::defClass(c);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNopDefCls(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopNopDefCls(IOP_ARGS) {
   NEXT();
   DECODE_IVA(cid);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopDefTypeAlias(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopDefTypeAlias(IOP_ARGS) {
   NEXT();
   DECODE_IVA(tid);
   m_fp->m_func->unit()->defTypeAlias(tid);
@@ -6736,14 +6741,14 @@ static inline void checkThis(ActRec* fp) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopThis(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopThis(IOP_ARGS) {
   NEXT();
   checkThis(m_fp);
   ObjectData* this_ = m_fp->getThis();
   m_stack.pushObject(this_);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopBareThis(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopBareThis(IOP_ARGS) {
   NEXT();
   DECODE_OA(BareThisOp, bto);
   if (m_fp->hasThis()) {
@@ -6761,12 +6766,12 @@ OPTBLD_INLINE void VMExecutionContext::iopBareThis(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCheckThis(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCheckThis(IOP_ARGS) {
   NEXT();
   checkThis(m_fp);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopInitThisLoc(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopInitThisLoc(IOP_ARGS) {
   NEXT();
   DECODE_IVA(id);
   TypedValue* thisLoc = frame_local(m_fp, id);
@@ -6803,7 +6808,7 @@ static inline RefData* lookupStatic(StringData* name,
   return refData.get();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopStaticLoc(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopStaticLoc(IOP_ARGS) {
   NEXT();
   DECODE_IVA(localId);
   DECODE_LITSTR(var);
@@ -6824,7 +6829,7 @@ OPTBLD_INLINE void VMExecutionContext::iopStaticLoc(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopStaticLocInit(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopStaticLocInit(IOP_ARGS) {
   NEXT();
   DECODE_IVA(localId);
   DECODE_LITSTR(var);
@@ -6843,7 +6848,7 @@ OPTBLD_INLINE void VMExecutionContext::iopStaticLocInit(IOP_ARGS) {
   m_stack.discard();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCatch(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCatch(IOP_ARGS) {
   NEXT();
   assert(m_faults.size() > 0);
   Fault fault = m_faults.back();
@@ -6853,7 +6858,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCatch(IOP_ARGS) {
   m_stack.pushObjectNoRc(fault.m_userException);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopLateBoundCls(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopLateBoundCls(IOP_ARGS) {
   NEXT();
   Class* cls = frameStaticClass(m_fp);
   if (!cls) {
@@ -6862,7 +6867,7 @@ OPTBLD_INLINE void VMExecutionContext::iopLateBoundCls(IOP_ARGS) {
   m_stack.pushClass(cls);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopVerifyParamType(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopVerifyParamType(IOP_ARGS) {
   SYNC(); // We might need m_pc to be updated to throw.
   NEXT();
 
@@ -6877,7 +6882,7 @@ OPTBLD_INLINE void VMExecutionContext::iopVerifyParamType(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::implVerifyRetType(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::implVerifyRetType(IOP_ARGS) {
   if (LIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
     NEXT();
     return;
@@ -6891,15 +6896,15 @@ OPTBLD_INLINE void VMExecutionContext::implVerifyRetType(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopVerifyRetTypeC(PC& pc) {
+OPTBLD_INLINE void ExecutionContext::iopVerifyRetTypeC(PC& pc) {
   implVerifyRetType(IOP_PASS_ARGS);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopVerifyRetTypeV(PC& pc) {
+OPTBLD_INLINE void ExecutionContext::iopVerifyRetTypeV(PC& pc) {
   implVerifyRetType(IOP_PASS_ARGS);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopNativeImpl(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopNativeImpl(IOP_ARGS) {
   NEXT();
   uint soff = m_fp->m_soff;
   BuiltinFunction func = m_fp->m_func->builtinFuncPtr();
@@ -6925,7 +6930,7 @@ OPTBLD_INLINE void VMExecutionContext::iopNativeImpl(IOP_ARGS) {
       std::ostringstream os;
       os << toStringElm(m_stack.topTV());
       ONTRACE(1,
-              Trace::trace("Return %s from VMExecutionContext::dispatch("
+              Trace::trace("Return %s from ExecutionContext::dispatch("
                            "%p)\n", os.str().c_str(), m_fp));
     }
 #endif
@@ -6933,12 +6938,12 @@ OPTBLD_INLINE void VMExecutionContext::iopNativeImpl(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopHighInvalid(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopHighInvalid(IOP_ARGS) {
   fprintf(stderr, "invalid bytecode executed\n");
   abort();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopSelf(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopSelf(IOP_ARGS) {
   NEXT();
   Class* clss = arGetContextClass(m_fp);
   if (!clss) {
@@ -6947,7 +6952,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSelf(IOP_ARGS) {
   m_stack.pushClass(clss);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopParent(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopParent(IOP_ARGS) {
   NEXT();
   Class* clss = arGetContextClass(m_fp);
   if (!clss) {
@@ -6960,7 +6965,7 @@ OPTBLD_INLINE void VMExecutionContext::iopParent(IOP_ARGS) {
   m_stack.pushClass(parent);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCreateCl(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCreateCl(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   DECODE_LITSTR(clsName);
@@ -6994,7 +6999,7 @@ static inline void setContVar(const Func* genFunc,
 
 const StaticString s_this("this");
 
-void VMExecutionContext::fillContinuationVars(ActRec* origFp,
+void ExecutionContext::fillContinuationVars(ActRec* origFp,
                                               const Func* origFunc,
                                               ActRec* genFp,
                                               const Func* genFunc) {
@@ -7038,7 +7043,7 @@ void VMExecutionContext::fillContinuationVars(ActRec* origFp,
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCreateCont(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   NEXT();
 
   const Func* origFunc = m_fp->m_func;
@@ -7062,7 +7067,7 @@ static inline c_Continuation* this_continuation(const ActRec* fp) {
   return static_cast<c_Continuation*>(obj);
 }
 
-void VMExecutionContext::iopContEnter(IOP_ARGS) {
+void ExecutionContext::iopContEnter(IOP_ARGS) {
   NEXT();
 
   // The stack must have one cell! Or else generatorStackBase() won't work!
@@ -7078,7 +7083,7 @@ void VMExecutionContext::iopContEnter(IOP_ARGS) {
   contAR->m_soff = m_fp->m_func->unit()->offsetOf(pc)
     - (uintptr_t)m_fp->m_func->base();
   contAR->m_savedRip =
-    reinterpret_cast<uintptr_t>(tx64->uniqueStubs.genRetHelper);
+    reinterpret_cast<uintptr_t>(tx->uniqueStubs.genRetHelper);
   assert(isReturnHelper(contAR->m_savedRip));
 
   m_fp = contAR;
@@ -7090,7 +7095,7 @@ void VMExecutionContext::iopContEnter(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopUnpackCont(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopUnpackCont(IOP_ARGS) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
 
@@ -7103,7 +7108,7 @@ OPTBLD_INLINE void VMExecutionContext::iopUnpackCont(IOP_ARGS) {
   label->m_data.num = cont->m_label;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopContSuspend(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopContSuspend(IOP_ARGS) {
   NEXT();
   DECODE_IVA(label);
   c_Continuation* cont = frame_continuation(m_fp);
@@ -7117,7 +7122,7 @@ OPTBLD_INLINE void VMExecutionContext::iopContSuspend(IOP_ARGS) {
   m_fp = prevFp;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopContSuspendK(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopContSuspendK(IOP_ARGS) {
   NEXT();
   DECODE_IVA(label);
   c_Continuation* cont = frame_continuation(m_fp);
@@ -7134,7 +7139,7 @@ OPTBLD_INLINE void VMExecutionContext::iopContSuspendK(IOP_ARGS) {
   m_fp = prevFp;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopContRetC(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopContRetC(IOP_ARGS) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
   cont->setDone();
@@ -7147,7 +7152,7 @@ OPTBLD_INLINE void VMExecutionContext::iopContRetC(IOP_ARGS) {
   m_fp = prevFp;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopContCheck(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopContCheck(IOP_ARGS) {
   NEXT();
   DECODE_IVA(check_started);
   c_Continuation* cont = this_continuation(m_fp);
@@ -7157,21 +7162,21 @@ OPTBLD_INLINE void VMExecutionContext::iopContCheck(IOP_ARGS) {
   cont->preNext();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopContRaise(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopContRaise(IOP_ARGS) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
   assert(cont->m_label);
   --cont->m_label;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopContValid(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopContValid(IOP_ARGS) {
   NEXT();
   TypedValue* tv = m_stack.allocTV();
   tvWriteUninit(tv);
   tvAsVariant(tv) = !this_continuation(m_fp)->done();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopContKey(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopContKey(IOP_ARGS) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
   cont->startedCheck();
@@ -7181,7 +7186,7 @@ OPTBLD_INLINE void VMExecutionContext::iopContKey(IOP_ARGS) {
   tvAsVariant(tv) = cont->m_key;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopContCurrent(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopContCurrent(IOP_ARGS) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
   cont->startedCheck();
@@ -7191,12 +7196,12 @@ OPTBLD_INLINE void VMExecutionContext::iopContCurrent(IOP_ARGS) {
   tvAsVariant(tv) = cont->m_value;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopContStopped(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopContStopped(IOP_ARGS) {
   NEXT();
   this_continuation(m_fp)->setStopped();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopContHandle(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopContHandle(IOP_ARGS) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
   cont->setDone();
@@ -7208,7 +7213,7 @@ OPTBLD_INLINE void VMExecutionContext::iopContHandle(IOP_ARGS) {
   throw exn.asObjRef();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAsyncAwait(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAsyncAwait(IOP_ARGS) {
   NEXT();
   auto const& c1 = *m_stack.topC();
   if (c1.m_type != KindOfObject ||
@@ -7225,7 +7230,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAsyncAwait(IOP_ARGS) {
   m_stack.pushFalse();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAsyncESuspend(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAsyncESuspend(IOP_ARGS) {
   NEXT();
   DECODE_IVA(label);
   DECODE_IVA(iters);
@@ -7260,7 +7265,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAsyncESuspend(IOP_ARGS) {
   ret->m_data.pobj = waitHandle;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAsyncWrapResult(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAsyncWrapResult(IOP_ARGS) {
   NEXT();
 
   auto const top = m_stack.topC();
@@ -7268,7 +7273,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAsyncWrapResult(IOP_ARGS) {
   top->m_type = KindOfObject;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopAsyncWrapException(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAsyncWrapException(IOP_ARGS) {
   NEXT();
 
   auto const top = m_stack.topC();
@@ -7280,24 +7285,24 @@ OPTBLD_INLINE void VMExecutionContext::iopAsyncWrapException(IOP_ARGS) {
 }
 
 template<class Op>
-OPTBLD_INLINE void VMExecutionContext::roundOpImpl(Op op) {
+OPTBLD_INLINE void ExecutionContext::roundOpImpl(Op op) {
   TypedValue* val = m_stack.topTV();
 
   tvCastToDoubleInPlace(val);
   val->m_data.dbl = op(val->m_data.dbl);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopFloor(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopFloor(IOP_ARGS) {
   NEXT();
   roundOpImpl(floor);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCeil(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCeil(IOP_ARGS) {
   NEXT();
   roundOpImpl(ceil);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCheckProp(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopCheckProp(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(propName);
 
@@ -7316,7 +7321,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCheckProp(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopInitProp(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopInitProp(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(propName);
   DECODE_OA(InitPropOp, propOp);
@@ -7347,7 +7352,7 @@ OPTBLD_INLINE void VMExecutionContext::iopInitProp(IOP_ARGS) {
   m_stack.popC();
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopStrlen(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopStrlen(IOP_ARGS) {
   NEXT();
   TypedValue* subj = m_stack.topTV();
   if (LIKELY(IS_STRING_TYPE(subj->m_type))) {
@@ -7361,14 +7366,14 @@ OPTBLD_INLINE void VMExecutionContext::iopStrlen(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopIncStat(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopIncStat(IOP_ARGS) {
   NEXT();
   DECODE_IVA(counter);
   DECODE_IVA(value);
   Stats::inc(Stats::StatCounter(counter), value);
 }
 
-void VMExecutionContext::classExistsImpl(IOP_ARGS, Attr typeAttr) {
+void ExecutionContext::classExistsImpl(IOP_ARGS, Attr typeAttr) {
   NEXT();
   TypedValue* aloadTV = m_stack.topTV();
   tvCastToBooleanInPlace(aloadTV);
@@ -7383,20 +7388,20 @@ void VMExecutionContext::classExistsImpl(IOP_ARGS, Attr typeAttr) {
   tvAsVariant(name) = Unit::classExists(name->m_data.pstr, autoload, typeAttr);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopClassExists(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopClassExists(IOP_ARGS) {
   classExistsImpl(IOP_PASS_ARGS, AttrNone);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopInterfaceExists(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopInterfaceExists(IOP_ARGS) {
   classExistsImpl(IOP_PASS_ARGS, AttrInterface);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopTraitExists(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopTraitExists(IOP_ARGS) {
   classExistsImpl(IOP_PASS_ARGS, AttrTrait);
 }
 
 string
-VMExecutionContext::prettyStack(const string& prefix) const {
+ExecutionContext::prettyStack(const string& prefix) const {
   if (!getFP()) {
     string s("__Halted");
     return s;
@@ -7411,20 +7416,20 @@ VMExecutionContext::prettyStack(const string& prefix) const {
   return begPrefix + "\n" + stack + endPrefix;
 }
 
-void VMExecutionContext::checkRegStateWork() const {
+void ExecutionContext::checkRegStateWork() const {
   assert(JIT::tl_regState == JIT::VMRegState::CLEAN);
 }
 
-void VMExecutionContext::DumpStack() {
-  string s = g_vmContext->prettyStack("");
+void ExecutionContext::DumpStack() {
+  string s = g_context->prettyStack("");
   fprintf(stderr, "%s\n", s.c_str());
 }
 
-void VMExecutionContext::DumpCurUnit(int skip) {
-  ActRec* fp = g_vmContext->getFP();
-  Offset pc = fp->m_func->unit() ? g_vmContext->pcOff() : 0;
+void ExecutionContext::DumpCurUnit(int skip) {
+  ActRec* fp = g_context->getFP();
+  Offset pc = fp->m_func->unit() ? g_context->pcOff() : 0;
   while (skip--) {
-    fp = g_vmContext->getPrevVMState(fp, &pc);
+    fp = g_context->getPrevVMState(fp, &pc);
   }
   if (fp == nullptr) {
     std::cout << "Don't have a valid fp\n";
@@ -7441,14 +7446,14 @@ void VMExecutionContext::DumpCurUnit(int skip) {
   std::cout << u->toString();
 }
 
-void VMExecutionContext::PrintTCCallerInfo() {
+void ExecutionContext::PrintTCCallerInfo() {
   VMRegAnchor _;
-  ActRec* fp = g_vmContext->getFP();
+  ActRec* fp = g_context->getFP();
   Unit* u = fp->m_func->unit();
   fprintf(stderr, "Called from TC address %p\n",
-          tx64->getTranslatedCaller());
+          mcg->getTranslatedCaller());
   std::cerr << u->filepath()->data() << ':'
-            << u->getLineNumber(u->offsetOf(g_vmContext->getPC())) << std::endl;
+            << u->getLineNumber(u->offsetOf(g_context->getPC())) << std::endl;
 }
 
 static inline void
@@ -7465,7 +7470,7 @@ condStackTraceSep(const char* pfx) {
           Trace::trace("%s\n", stack.c_str());)
 
 #define O(name, imm, pusph, pop, flags)                                       \
-void VMExecutionContext::op##name() {                                         \
+void ExecutionContext::op##name() {                                         \
   condStackTraceSep("op"#name" ");                                            \
   COND_STACKTRACE("op"#name" pre:  ");                                        \
   PC pc = m_pc;                                                               \
@@ -7494,7 +7499,7 @@ profileReturnValue(const DataType dt) {
 }
 
 template <int dispatchFlags>
-inline void VMExecutionContext::dispatchImpl(int numInstrs) {
+inline void ExecutionContext::dispatchImpl(int numInstrs) {
   static const bool limInstrs = dispatchFlags & LimitInstrs;
   static const bool breakOnCtlFlow = dispatchFlags & BreakOnCtlFlow;
   static const bool profile = dispatchFlags & Profile;
@@ -7588,7 +7593,7 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
 #undef DISPATCH
 }
 
-void VMExecutionContext::dispatch() {
+void ExecutionContext::dispatch() {
   if (shouldProfile()) {
     dispatchImpl<Profile>(0);
   } else {
@@ -7599,23 +7604,37 @@ void VMExecutionContext::dispatch() {
 // We are about to go back to translated code, check whether we should
 // stick with the interpreter. NB: if we've just executed a return
 // from pseudomain, then there's no PC and no more code to interpret.
-void VMExecutionContext::switchModeForDebugger() {
+void ExecutionContext::switchModeForDebugger() {
   if (DEBUGGER_FORCE_INTR && (getPC() != 0)) {
     throw VMSwitchMode();
   }
 }
 
-void VMExecutionContext::dispatchN(int numInstrs) {
+void ExecutionContext::dispatchN(int numInstrs) {
+  if (Trace::moduleEnabled(Trace::dispatchN)) {
+    auto cat = makeStaticString("dispatchN");
+    auto name = makeStaticString(
+      folly::format("{} ops @ {}",
+                    numInstrs, show(SrcKey(m_fp->m_func, m_pc))).str());
+    Stats::incStatGrouped(cat, name, 1);
+  }
+
   dispatchImpl<LimitInstrs | BreakOnCtlFlow>(numInstrs);
   switchModeForDebugger();
 }
 
-void VMExecutionContext::dispatchBB() {
+void ExecutionContext::dispatchBB() {
+  if (Trace::moduleEnabled(Trace::dispatchBB)) {
+    auto cat = makeStaticString("dispatchBB");
+    auto name = makeStaticString(show(SrcKey(m_fp->m_func, m_pc)));
+    Stats::incStatGrouped(cat, name, 1);
+  }
+
   dispatchImpl<BreakOnCtlFlow>(0);
   switchModeForDebugger();
 }
 
-void VMExecutionContext::recordCodeCoverage(PC pc) {
+void ExecutionContext::recordCodeCoverage(PC pc) {
   Unit* unit = getFP()->m_func->unit();
   assert(unit != nullptr);
   if (unit == SystemLib::s_nativeFuncUnit ||
@@ -7636,12 +7655,12 @@ void VMExecutionContext::recordCodeCoverage(PC pc) {
   }
 }
 
-void VMExecutionContext::resetCoverageCounters() {
+void ExecutionContext::resetCoverageCounters() {
   m_coverPrevLine = -1;
   m_coverPrevUnit = nullptr;
 }
 
-void VMExecutionContext::pushVMState(VMState &savedVM,
+void ExecutionContext::pushVMState(VMState &savedVM,
                                      const ActRec* reentryAR) {
   if (debug && savedVM.fp &&
       savedVM.fp->m_func &&
@@ -7660,7 +7679,7 @@ void VMExecutionContext::pushVMState(VMState &savedVM,
   m_nesting++;
 }
 
-void VMExecutionContext::popVMState() {
+void ExecutionContext::popVMState() {
   assert(m_nestedVMs.size() >= 1);
 
   VMState &savedVM = m_nestedVMs.back().m_savedState;
@@ -7688,7 +7707,7 @@ void VMExecutionContext::popVMState() {
   m_nesting--;
 }
 
-void VMExecutionContext::requestInit() {
+void ExecutionContext::requestInit() {
   assert(SystemLib::s_unit);
   assert(SystemLib::s_nativeFuncUnit);
   assert(SystemLib::s_nativeClassUnit);
@@ -7696,7 +7715,7 @@ void VMExecutionContext::requestInit() {
   EnvConstants::requestInit(smart_new<EnvConstants>());
   VarEnv::createGlobal();
   m_stack.requestInit();
-  tx64->requestInit();
+  mcg->requestInit();
 
   if (UNLIKELY(RuntimeOption::EvalJitEnableRenameFunction)) {
     SystemLib::s_unit->merge();
@@ -7724,12 +7743,12 @@ void VMExecutionContext::requestInit() {
 #endif
 }
 
-void VMExecutionContext::requestExit() {
+void ExecutionContext::requestExit() {
   MemoryProfile::finishProfiling();
 
   manageAPCHandle();
   syncGdbState();
-  tx64->requestExit();
+  mcg->requestExit();
   m_stack.requestExit();
   profileRequestEnd();
   EventHook::Disable();

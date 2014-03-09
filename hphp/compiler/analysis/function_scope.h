@@ -18,6 +18,10 @@
 #define incl_HPHP_FUNCTION_SCOPE_H_
 
 #include "hphp/compiler/expression/user_attribute.h"
+#include <list>
+#include <set>
+#include <utility>
+#include <vector>
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/json.h"
@@ -159,8 +163,6 @@ public:
   const std::string &name() const {
     return getName();
   }
-
-  virtual std::string getId() const;
 
   int getRedeclaringId() const {
     return m_redeclaring;
@@ -382,10 +384,6 @@ public:
 
   void getClosureUseVars(ParameterExpressionPtrIdxPairVec &useVars,
                          bool filterUsed = true);
-
-  bool needsAnonClosureClass(ParameterExpressionPtrVec &useVars);
-
-  bool needsAnonClosureClass(ParameterExpressionPtrIdxPairVec &useVars);
 
   void addCaller(BlockScopePtr caller, bool careAboutReturn = true);
   void addNewObjCaller(BlockScopePtr caller);

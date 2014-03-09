@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP { namespace JIT { namespace ARM {
 
@@ -32,7 +32,7 @@ namespace HPHP { namespace JIT { namespace ARM {
 namespace {
 
 void emitStackCheck(int funcDepth, Offset pc) {
-  vixl::MacroAssembler a { tx64->code.main() };
+  vixl::MacroAssembler a { mcg->code.main() };
   funcDepth += cellsToBytes(kStackCheckPadding);
 
   uint64_t stackMask = cellsToBytes(RuntimeOption::EvalVMStackElms) - 1;
@@ -40,7 +40,7 @@ void emitStackCheck(int funcDepth, Offset pc) {
   a.   Sub  (rAsm, rAsm, funcDepth + Stack::sSurprisePageSize, vixl::SetFlags);
   // This doesn't need to be smashable, but it is a long jump from mainCode to
   // stubs, so it can't be direct.
-  emitSmashableJump(tx64->code.main(), tx64->uniqueStubs.stackOverflowHelper,
+  emitSmashableJump(mcg->code.main(), tx->uniqueStubs.stackOverflowHelper,
                     CC_L);
 }
 
@@ -63,7 +63,7 @@ TCA emitFuncGuard(vixl::MacroAssembler& a, Func* func) {
     assert(a.isFrontierAligned(8));
   }
   a.   bind  (&redispatchStubAddr);
-  a.   dc64  (tx64->uniqueStubs.funcPrologueRedispatch);
+  a.   dc64  (tx->uniqueStubs.funcPrologueRedispatch);
   // The guarded Func* comes right before the end so that
   // funcPrologueToGuardImmPtr() is simple.
   a.   bind  (&funcAddr);
@@ -79,9 +79,9 @@ TCA emitFuncGuard(vixl::MacroAssembler& a, Func* func) {
 constexpr auto kLocalsToInitializeInline = 9;
 
 SrcKey emitPrologueWork(Func* func, int nPassed) {
-  vixl::MacroAssembler a { tx64->code.main() };
+  vixl::MacroAssembler a { mcg->code.main() };
 
-  if (tx64->mode() == TransProflogue) {
+  if (tx->mode() == TransProflogue) {
     not_implemented();
   }
 
@@ -239,7 +239,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
         a.  Mov  (argReg(1), numParams);
         a.  Mov  (argReg(2), i);
         auto fixupAddr = emitCall(a, CppCall(JIT::raiseMissingArgument));
-        tx64->fixupMap().recordFixup(fixupAddr, fixup);
+        mcg->fixupMap().recordFixup(fixupAddr, fixup);
         break;
       }
     }
@@ -248,8 +248,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(tx64->code.main(), tx64->code.stubs(), false,
-                              tx64->fixupMap(), fixup);
+  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.stubs(), false,
+                              mcg->fixupMap(), fixup);
 
   if (func->isClosureBody() && func->cls()) {
     int entry = nPassed <= numParams ? nPassed : numParams + 1;
@@ -258,7 +258,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     a.   Ldr   (rAsm, rAsm[Func::prologueTableOff() + sizeof(TCA)*entry]);
     a.   Br    (rAsm);
   } else {
-    emitBindJmp(tx64->code.main(), tx64->code.stubs(), funcBody);
+    emitBindJmp(mcg->code.main(), mcg->code.stubs(), funcBody);
   }
   return funcBody;
 }
@@ -319,12 +319,12 @@ int shuffleArgsForMagicCall(ActRec* ar) {
 //////////////////////////////////////////////////////////////////////
 
 TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
-  auto& mainCode = tx64->code.main();
-  auto& stubsCode = tx64->code.stubs();
+  auto& mainCode = mcg->code.main();
+  auto& stubsCode = mcg->code.stubs();
   vixl::MacroAssembler a { mainCode };
   vixl::MacroAssembler astubs { stubsCode };
   TCA start = mainCode.frontier();
-  a.   Ldr   (rAsm.W(), rVmFp[AROFF(m_numArgsAndCtorFlag)]);
+  a.   Ldr   (rAsm.W(), rVmFp[AROFF(m_numArgsAndGenCtorFlags)]);
   for (auto i = 0; i < dvs.size(); ++i) {
     a. Cmp   (rAsm.W(), dvs[i].first);
     emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second));
@@ -372,7 +372,7 @@ SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
     a.   Mov   (argReg(0), rStashedAR);
     auto fixupAddr = emitCall(a, CppCall(shuffleArgsForMagicCall));
     if (RuntimeOption::HHProfServerEnabled) {
-      tx64->fixupMap().recordFixup(
+      mcg->fixupMap().recordFixup(
         fixupAddr,
         Fixup(skFuncBody.offset() - func->base(), func->numSlotsInFrame())
       );

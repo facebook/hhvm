@@ -22,6 +22,8 @@
 #include <sstream>
 
 #include <boost/dynamic_bitset.hpp>
+#include <algorithm>
+#include <set>
 
 #include "folly/gen/Base.h"
 #include "folly/gen/String.h"
@@ -34,6 +36,7 @@
 #include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/cfg.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -277,10 +280,8 @@ struct DceVisitor : boost::static_visitor<void> {
   void operator()(const bc::File&)       { pushRemovable(); }
   void operator()(const bc::Dir&)        { pushRemovable(); }
   void operator()(const bc::NameA&)      { popCond(push()); }
-
-  void operator()(const bc::NewArray&)        { pushRemovable(); }
-  void operator()(const bc::NewArrayReserve&) { pushRemovable(); }
-  void operator()(const bc::NewCol&)          { pushRemovable(); }
+  void operator()(const bc::NewArray&)   { pushRemovable(); }
+  void operator()(const bc::NewCol&)     { pushRemovable(); }
 
   /*
    * Note that these instructions with popConds are relying on the

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/cfg.h"
+#include <algorithm>
 #include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/block.h"

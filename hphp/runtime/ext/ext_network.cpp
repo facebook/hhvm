@@ -32,6 +32,7 @@
 
 #if defined(__APPLE__)
 # include <arpa/nameser_compat.h>
+#include <vector>
 #endif
 
 #define MAXPACKET  8192 /* max packet size used internally by BIND */

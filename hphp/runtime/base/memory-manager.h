@@ -19,6 +19,7 @@
 
 #include <array>
 #include <vector>
+#include <utility>
 
 #include "folly/Memory.h"
 
@@ -216,6 +217,7 @@ struct MemoryManager {
    *
    * Pre: size > kMaxSmartSize
    */
+  template<bool callerSavesActualSize>
   std::pair<void*,size_t> smartMallocSizeBig(size_t size);
   void smartFreeSizeBig(void* vp, size_t size);
 
@@ -245,6 +247,7 @@ struct MemoryManager {
    */
   void* smartMallocSizeLogged(uint32_t size);
   void smartFreeSizeLogged(void* p, uint32_t size);
+  template<bool callerSavesActualSize>
   std::pair<void*,size_t> smartMallocSizeBigLogged(size_t size);
   void smartFreeSizeBigLogged(void* vp, size_t size);
   void* objMallocLogged(size_t size);
@@ -261,17 +264,19 @@ struct MemoryManager {
   /*
    * Release all the request-local allocations.  Zeros all the free
    * lists and may return some underlying storage to the system
-   * allocator.
+   * allocator. This also resets all internally-stored memory usage stats.
    *
    * This is called after sweep in the end-of-request path.
    */
   void resetAllocator();
 
   /*
-   * Reset all internally-stored memory usage stats.  Used between
-   * sessions.
+   * Reset all stats that are synchronzied externally from the memory manager.
+   * Used between sessions and to signal that external sync is now safe to
+   * begin (after shared structure initialization that should not be counted is
+   * complete.)
    */
-  void resetStats();
+  void resetExternalStats();
 
   /*
    * How much memory this thread has allocated or deallocated.
@@ -332,7 +337,6 @@ private:
   void* slabAlloc(size_t nbytes);
   char* newSlab(size_t nbytes);
   void* smartEnlist(SweepNode*);
-  void* smartMallocSlab(size_t padbytes);
   void* smartMallocBig(size_t nbytes);
   void* smartCallocBig(size_t nbytes);
   void  smartFreeBig(SweepNode*);
@@ -347,8 +351,10 @@ private:
   void refreshStatsHelperExceeded() const;
 #ifdef USE_JEMALLOC
   void refreshStatsHelperStop();
+  template<bool callerSavesActualSize>
   void* smartMallocSizeBigHelper(void*&, size_t&, size_t);
 #endif
+  void resetStatsImpl(bool isInternalCall);
   bool checkPreFree(DebugHeader*, size_t, size_t) const;
   template<class SizeT> static SizeT debugAddExtra(SizeT);
   template<class SizeT> static SizeT debugRemoveExtra(SizeT);
@@ -372,12 +378,13 @@ private:
 #ifdef USE_JEMALLOC
   uint64_t* m_allocated;
   uint64_t* m_deallocated;
-  int64_t m_delta;
-  int64_t m_prevAllocated;
+  uint64_t m_prevAllocated;
+  uint64_t m_prevDeallocated;
   size_t* m_cactive;
   mutable size_t m_cactiveLimit;
   static bool s_statsEnabled;
   static size_t s_cactiveLimitCeiling;
+  bool m_enableStatsSync;
 #endif
 
 private:

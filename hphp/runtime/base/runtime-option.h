@@ -24,6 +24,7 @@
 #include <set>
 
 #include <boost/container/flat_set.hpp>
+#include <memory>
 
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/functional.h"
@@ -363,7 +364,7 @@ public:
    */                                                                   \
   F(uint32_t, VMInitialGlobalTableSize,                                 \
     kEvalVMInitialGlobalTableSizeDefault)                               \
-  F(bool, Jit,                         evalJitDefault())                \
+  F(bool, Jit,                         true)                            \
   F(bool, SimulateARM,                 simulateARMDefault())            \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitAHotSize,             4 << 20)                         \

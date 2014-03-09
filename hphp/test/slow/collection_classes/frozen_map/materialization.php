@@ -1,6 +1,6 @@
 <?hh
 
-// Test FrozenMap's materialization methods.
+// Test ImmMap's materialization methods.
 
 function show_iter($iter) {
   $vs = new Vector($iter);
@@ -11,7 +11,7 @@ function show_iter($iter) {
 }
 
 function main() {
-  $fm = new FrozenMap(Map {"a" => 10, "b" => 30, 10 => 42});
+  $fm = new ImmMap(Map {"a" => 10, "b" => 30, 10 => 42});
 
   echo "\ntoArray...\n";
   $res = $fm->toArray();
@@ -33,9 +33,19 @@ function main() {
   var_dump($res instanceof Vector);
   show_iter($res);
 
-  echo "\ntoFrozenVector...\n";
-  $res = $fm->toFrozenVector();
-  var_dump($res instanceof FrozenVector);
+  echo "\ntoImmVector...\n";
+  $res = $fm->toImmVector();
+  var_dump($res instanceof ImmVector);
+  show_iter($res);
+
+  echo "\ntoMap...\n";
+  $res = $fm->toMap();
+  var_dump($res instanceof Map);
+  show_iter($res);
+
+  echo "\ntoImmMap...\n";
+  $res = $fm->toImmMap();
+  var_dump($res instanceof ImmMap);
   show_iter($res);
 
   echo "\ntoSet...\n";
@@ -43,16 +53,17 @@ function main() {
   var_dump($res instanceof Set);
   show_iter($res);
 
-  echo "\ntoFrozenSet...\n";
-  $res = $fm->toFrozenSet();
-  var_dump($res instanceof FrozenSet);
+  echo "\ntoImmSet...\n";
+  $res = $fm->toImmSet();
+  var_dump($res instanceof ImmSet);
   show_iter($res);
 
   echo "\ntoMap...\n";
   $res = $fm->toMap();
-  var_dump($res instanceof Map && $res == Map { "a" => 10, "b" => 30, 10 => 42 });
+  var_dump($res instanceof Map &&
+           $res == Map { "a" => 10, "b" => 30, 10 => 42 });
 
-  // TODO: add toFrozenMap() once it exists.
+  // TODO: add toImmMap() once it exists.
 }
 
 main();

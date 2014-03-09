@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/string-data.h"
 
 #include <cmath>
+#include <utility>
 
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -62,7 +63,7 @@ std::pair<StringData*,uint32_t> allocFlatForLen(uint32_t len) {
   }
 
   auto const cap = needed;
-  auto const ret = MM().smartMallocSizeBigLogged(cap);
+  auto const ret = MM().smartMallocSizeBigLogged<true>(cap);
   return std::make_pair(static_cast<StringData*>(ret.first),
                         static_cast<uint32_t>(ret.second));
 }

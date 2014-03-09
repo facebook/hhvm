@@ -19,6 +19,8 @@
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/lock.h"
 #include <stdio.h>
+#include <algorithm>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

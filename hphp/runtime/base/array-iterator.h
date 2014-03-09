@@ -31,8 +31,8 @@ class c_Vector;
 class BaseMap;
 class c_Set;
 class c_Pair;
-class c_FrozenVector;
-class c_FrozenSet;
+class c_ImmVector;
+class c_ImmSet;
 struct Iter;
 
 enum class IterNextIndex : uint16_t {
@@ -40,7 +40,7 @@ enum class IterNextIndex : uint16_t {
   ArrayMixed,
   Array,
   Vector,
-  FrozenVector,
+  ImmVector,
   Map,
   Set,
   Pair,
@@ -284,11 +284,11 @@ class ArrayIter {
 
   static void VectorInit(ArrayIter* iter, ObjectData* obj);
   static void MapInit(ArrayIter* iter, ObjectData* obj);
-  static void FrozenMapInit(ArrayIter* iter, ObjectData* obj);
+  static void ImmMapInit(ArrayIter* iter, ObjectData* obj);
   static void SetInit(ArrayIter* iter, ObjectData* obj);
   static void PairInit(ArrayIter* iter, ObjectData* obj);
-  static void FrozenVectorInit(ArrayIter* iter, ObjectData* obj);
-  static void FrozenSetInit(ArrayIter* iter, ObjectData* obj);
+  static void ImmVectorInit(ArrayIter* iter, ObjectData* obj);
+  static void ImmSetInit(ArrayIter* iter, ObjectData* obj);
   static void IteratorObjInit(ArrayIter* iter, ObjectData* obj);
 
   typedef void(*InitFuncPtr)(ArrayIter*,ObjectData*);
@@ -313,15 +313,15 @@ class ArrayIter {
     assert(hasCollection() && getCollectionType() == Collection::PairType);
     return (c_Pair*)((intptr_t)m_obj & ~1);
   }
-  c_FrozenVector* getFrozenVector() {
+  c_ImmVector* getImmVector() {
     assert(hasCollection() &&
-           getCollectionType() == Collection::FrozenVectorType);
+           getCollectionType() == Collection::ImmVectorType);
 
-    return (c_FrozenVector*)((intptr_t)m_obj & ~1);
+    return (c_ImmVector*)((intptr_t)m_obj & ~1);
   }
-  c_FrozenSet* getFrozenSet() {
-    assert(hasCollection() && getCollectionType() == Collection::FrozenSetType);
-    return (c_FrozenSet*)((intptr_t)m_obj & ~1);
+  c_ImmSet* getImmSet() {
+    assert(hasCollection() && getCollectionType() == Collection::ImmSetType);
+    return (c_ImmSet*)((intptr_t)m_obj & ~1);
   }
   Collection::Type getCollectionType() {
     ObjectData* obj = getObject();

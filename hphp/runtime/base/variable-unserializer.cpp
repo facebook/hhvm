@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/variable-unserializer.h"
+#include <algorithm>
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/base/array-iterator.h"

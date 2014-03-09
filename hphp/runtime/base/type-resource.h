@@ -23,6 +23,7 @@
 #endif
 
 #include "hphp/runtime/base/complex-types.h"
+#include <algorithm>
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/sweepable.h"
 

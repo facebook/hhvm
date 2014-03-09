@@ -18,6 +18,7 @@
 #define VARIANTCONTROLLER_H
 
 #include "hphp/runtime/base/base-includes.h"
+#include <algorithm>
 
 namespace HPHP {
 

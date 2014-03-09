@@ -1,9 +1,9 @@
 <?hh
 
-// Check that literal syntax works for FrozenSet.
+// Check that literal syntax works for ImmSet.
 
 function main() {
-  $fs = FrozenSet {1, 2, 3};
+  $fs = ImmSet {1, 2, 3};
   foreach (Vector {1, 2, 3} as $e) {
     var_dump($fs->contains($e));
   }

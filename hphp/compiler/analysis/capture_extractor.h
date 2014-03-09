@@ -18,6 +18,7 @@
 #define incl_HPHP_CAPTURE_EXTRACTOR_H_
 
 #include "hphp/compiler/expression/binary_op_expression.h"
+#include <vector>
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/join_clause.h"
 #include "hphp/compiler/expression/object_property_expression.h"

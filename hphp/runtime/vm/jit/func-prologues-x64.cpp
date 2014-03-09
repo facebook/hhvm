@@ -21,8 +21,8 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
-#include "hphp/runtime/vm/jit/translator-x64-internal.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 namespace HPHP { namespace JIT { namespace X64 {
@@ -30,7 +30,7 @@ namespace HPHP { namespace JIT { namespace X64 {
 //////////////////////////////////////////////////////////////////////
 
 
-TRACE_SET_MOD(tx64);
+TRACE_SET_MOD(mcg);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -44,7 +44,7 @@ void emitStackCheck(X64Assembler& a, int funcDepth, Offset pc) {
   a.    movq   (rVmSp, rAsm);  // copy to destroy
   a.    andq   (stackMask, rAsm);
   a.    subq   (funcDepth + Stack::sSurprisePageSize, rAsm);
-  a.    jl     (tx64->uniqueStubs.stackOverflowHelper);
+  a.    jl     (tx->uniqueStubs.stackOverflowHelper);
 }
 
 /*
@@ -101,7 +101,7 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
   } else {
     a.  cmpq   (func, rStashedAR[AROFF(m_func)]);
   }
-  a.    jnz    (tx64->uniqueStubs.funcPrologueRedispatch);
+  a.    jnz    (tx->uniqueStubs.funcPrologueRedispatch);
 
   assert(funcPrologueToGuard(a.frontier(), func) == aStart);
   assert(funcPrologueHasGuard(a.frontier(), func));
@@ -128,12 +128,12 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   assert(IMPLIES(func->isGenerator(), nPassed == numParams));
 
-  Asm a { tx64->code.main() };
+  Asm a { mcg->code.main() };
 
-  if (tx64->mode() == TransProflogue) {
+  if (tx->mode() == TransProflogue) {
     assert(func->shouldPGO());
-    TransID transId  = tx64->profData()->curTransID();
-    auto counterAddr = tx64->profData()->transCounterAddr(transId);
+    TransID transId  = tx->profData()->curTransID();
+    auto counterAddr = tx->profData()->transCounterAddr(transId);
     a.movq(counterAddr, rAsm);
     a.decq(rAsm[0]);
   }
@@ -293,7 +293,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
         a.  emitImmReg(numParams, argNumToRegName[1]);
         a.  emitImmReg(i, argNumToRegName[2]);
         emitCall(a, (TCA)raiseMissingArgument);
-        tx64->fixupMap().recordFixup(a.frontier(), fixup);
+        mcg->fixupMap().recordFixup(a.frontier(), fixup);
         break;
       }
     }
@@ -302,8 +302,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(tx64->code.main(), tx64->code.stubs(), false,
-                              tx64->fixupMap(), fixup);
+  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.stubs(), false,
+                              mcg->fixupMap(), fixup);
 
   if (func->isClosureBody() && func->cls()) {
     int entry = nPassed <= numParams ? nPassed : numParams + 1;
@@ -313,7 +313,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
                    rax);
     a.    jmp     (rax);
   } else {
-    emitBindJmp(tx64->code.main(), tx64->code.stubs(), funcBody);
+    emitBindJmp(mcg->code.main(), mcg->code.stubs(), funcBody);
   }
   return funcBody;
 }
@@ -323,19 +323,18 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 //////////////////////////////////////////////////////////////////////
 
 TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
-  auto& mainCode = tx64->code.main();
-  auto& stubsCode = tx64->code.stubs();
+  auto& mainCode = mcg->code.main();
+  auto& stubsCode = mcg->code.stubs();
   Asm a { mainCode };
   TCA start = mainCode.frontier();
   if (dvs.size() == 1) {
-    a.   cmp_imm32_disp_reg32(dvs[0].first,
-                              AROFF(m_numArgsAndCtorFlag), rVmFp);
+    a.  cmpl  (dvs[0].first, rVmFp[AROFF(m_numArgsAndGenCtorFlags)]);
     emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[0].second));
     emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
   } else {
-    a.   load_reg64_disp_reg32(rVmFp, AROFF(m_numArgsAndCtorFlag), reg::rax);
+    a.    loadl  (rVmFp[AROFF(m_numArgsAndGenCtorFlags)], reg::eax);
     for (unsigned i = 0; i < dvs.size(); i++) {
-      a.   cmp_imm32_reg32(dvs[i].first, reg::rax);
+      a.  cmpl   (dvs[i].first, reg::eax);
       emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second));
     }
     emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
@@ -345,7 +344,7 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
 
 SrcKey emitFuncPrologue(Func* func, int nPassed, TCA& start) {
   assert(!func->isMagic());
-  Asm a { tx64->code.main() };
+  Asm a { mcg->code.main() };
 
   start = emitFuncGuard(a, func);
   if (RuntimeOption::EvalJitTransCounters) emitTransCounterInc(a);
@@ -360,7 +359,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   using namespace reg;
   using MkPacked = HphpArray* (*)(uint32_t, const TypedValue*);
 
-  Asm a { tx64->code.main() };
+  Asm a { mcg->code.main() };
   Label not_magic_call;
   auto const rInvName = r13;
   assert(!kSpecialCrossTraceRegs.contains(r13));
@@ -418,7 +417,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
     callFixup = a.frontier();
   }
   if (nPassed != 2) {
-    a.  storel (2, rStashedAR[AROFF(m_numArgsAndCtorFlag)]);
+    a.  storel (2, rStashedAR[AROFF(m_numArgsAndGenCtorFlags)]);
   }
   if (debug) { // "assertion": the emitPrologueWork path fixes up rVmSp.
     a.  movq   (0, rVmSp);
@@ -447,7 +446,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   if (nPassed == 2) skFuncBody = skFor2Args;
 
   if (RuntimeOption::HHProfServerEnabled && callFixup) {
-    tx64->fixupMap().recordFixup(
+    mcg->fixupMap().recordFixup(
       callFixup,
       Fixup { skFuncBody.offset() - func->base(), func->numSlotsInFrame() }
     );

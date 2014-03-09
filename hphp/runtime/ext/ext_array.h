@@ -48,7 +48,7 @@ extern const int64_t k_UCOL_STRENGTH;
 extern const int64_t k_UCOL_HIRAGANA_QUATERNARY_MODE;
 extern const int64_t k_UCOL_NUMERIC_COLLATION;
 
-Variant f_array_change_key_case(CVarRef input, bool upper = false);
+Variant f_array_change_key_case(CVarRef input, int64_t case_ = 0);
 Variant f_array_chunk(CVarRef input, int size,
                       bool preserve_keys = false);
 Variant f_array_column(CVarRef arr, CVarRef val_key,
@@ -109,9 +109,9 @@ bool f_array_walk(VRefParam input, CVarRef funcname,
 Array f_compact(int _argc, CVarRef varname, CArrRef _argv = null_array);
 
 bool f_shuffle(VRefParam array);
-int64_t f_count(CVarRef var, bool recursive = false);
+int64_t f_count(CVarRef var, int64_t mode = 0);
 
-int64_t f_sizeof(CVarRef var, bool recursive = false);
+int64_t f_sizeof(CVarRef var, int64_t mode = 0);
 Variant f_each(VRefParam array);
 Variant f_current(VRefParam array);
 Variant f_pos(VRefParam array);

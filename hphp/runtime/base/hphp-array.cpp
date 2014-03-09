@@ -13,10 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
-#define INLINE_VARIANT_HELPER 1
-
 #include "hphp/runtime/base/hphp-array.h"
+
 #include <algorithm>
 #include <utility>
 
@@ -1116,7 +1114,14 @@ HphpArray* HphpArray::initWithRef(TypedValue& tv, const Variant& v) {
 
 ALWAYS_INLINE
 HphpArray* HphpArray::setVal(TypedValue& tv, const Variant& v) {
-  tvAsVariant(&tv).assignValHelper(v);
+  auto const src = v.asCell();
+  auto const dst = tvToCell(&tv);
+  cellSet(*src, *dst);
+  // TODO(#3888164): we should restructure things so we don't have to
+  // check KindOfUninit here.
+  if (UNLIKELY(src->m_type == KindOfUninit)) {
+    dst->m_type = KindOfNull;
+  }
   return this;
 }
 
@@ -1132,7 +1137,8 @@ ArrayData* HphpArray::zSetVal(TypedValue& tv, RefData* v) {
 
 ALWAYS_INLINE
 HphpArray* HphpArray::setRef(TypedValue& tv, const Variant& v) {
-  tvAsVariant(&tv).assignRefHelper(v);
+  auto const ref = v.asRef();
+  tvBind(ref, &tv);
   return this;
 }
 

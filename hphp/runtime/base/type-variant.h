@@ -93,7 +93,7 @@ class Variant : private TypedValue {
     tvDecRefHelper(t, uint64_t(num));
   }
 
-  // D462768 showed no gain from inlining, even just with INLINE_VARIANT_HELPER.
+  // D462768 showed no gain from inlining, even just into hphp-array.o
   ~Variant();
 
   void reset() {
@@ -211,20 +211,9 @@ class Variant : private TypedValue {
     ad->incRefCount();
   }
 
-#ifdef INLINE_VARIANT_HELPER
-  ALWAYS_INLINE
-  /* implicit */ Variant(const Variant& v) { constructValHelper(v); }
-  ALWAYS_INLINE
-  /* implicit */ Variant(CVarStrongBind v) { constructRefHelper(variant(v)); }
-  ALWAYS_INLINE
-  /* implicit */ Variant(CVarWithRefBind v) {
-    constructWithRefHelper(variant(v));
-  }
-#else
   /* implicit */ Variant(const Variant& v);
   /* implicit */ Variant(CVarStrongBind v);
   /* implicit */ Variant(CVarWithRefBind v);
-#endif
 
   /*
    * Move ctor
@@ -889,9 +878,6 @@ class Variant : private TypedValue {
     tvRefcountedDecRefHelper(stype, sdata.num);
   }
 
-#ifdef INLINE_VARIANT_HELPER
-public:
-#endif
   static ALWAYS_INLINE void PromoteToRef(const Variant& v) {
     assert(&v != &null_variant);
     if (v.m_type != KindOfRef) {
@@ -978,10 +964,6 @@ public:
   void constructWithRefHelper(const Variant& v) {
     setWithRefHelper(v, false);
   }
-
-#ifdef INLINE_VARIANT_HELPER
-private:
-#endif
 
  private:
   /**

@@ -692,11 +692,6 @@ class Variant : private TypedValue {
   void unserialize(VariableUnserializer *unserializer,
                    Uns::Mode mode = Uns::Mode::Value);
 
-  /**
-   * Get the wrapped APCHandle, if any.
-   */
-  APCHandle *getAPCHandle() const;
-
   template<typename T>
   Variant &lval(const T &key) {
     if (m_type == KindOfRef) {

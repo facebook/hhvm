@@ -769,53 +769,6 @@ const Variant& Variant::set(const Variant& key, const Variant& v) {
   return SetImpl<const Variant&>(this, key, v, false);
 }
 
-const Variant& Variant::append(const Variant& v) {
-  switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-    set(ArrayData::Create(v));
-    break;
-  case KindOfBoolean:
-    if (!toBoolean()) {
-      set(ArrayData::Create(v));
-    } else {
-      throw_bad_type_exception("[] operator not supported for this type");
-    }
-    break;
-  case KindOfArray:
-    {
-      ArrayData *escalated = m_data.parr->append(v, needCopyForSet(v));
-      if (escalated != m_data.parr) {
-        set(escalated);
-      }
-    }
-    break;
-  case KindOfRef:
-    m_data.pref->var()->append(v);
-    break;
-  case KindOfObject:
-    {
-      ObjectData* obj = m_data.pobj;
-      if (LIKELY(obj->isCollection())) {
-        collectionAppend(obj, cvarToCell(&v));
-      } else {
-        obj->o_invoke_few_args(s_offsetSet, 2, init_null_variant, v);
-      }
-      break;
-    }
-  case KindOfStaticString:
-  case KindOfString:
-    if (getStringData()->empty()) {
-      set(ArrayData::Create(v));
-      return v;
-    }
-    // fall through to throw
-  default:
-    throw_bad_type_exception("[] operator not supported for this type");
-  }
-  return v;
-}
-
 template <typename T>
 ALWAYS_INLINE
 const Variant& Variant::SetRefImpl(Variant *self, T key, const Variant& v, bool isKey) {
@@ -888,52 +841,6 @@ const Variant& Variant::setRef(const String& key, const Variant& v,
 
 const Variant& Variant::setRef(const Variant& key, const Variant& v) {
   return SetRefImpl<const Variant&>(this, key, v, false);
-}
-
-const Variant& Variant::appendRef(const Variant& v) {
-  switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-    set(ArrayData::CreateRef(v));
-    break;
-  case KindOfBoolean:
-    if (!toBoolean()) {
-      set(ArrayData::CreateRef(v));
-    } else {
-      throw_bad_type_exception("[] operator not supported for this type");
-    }
-    break;
-  case KindOfArray:
-    {
-      ArrayData *escalated = m_data.parr->appendRef(v, needCopyForSetRef(v));
-      if (escalated != m_data.parr) {
-        set(escalated);
-      }
-    }
-    break;
-  case KindOfRef:
-    m_data.pref->var()->appendRef(v);
-    break;
-  case KindOfObject:
-    {
-      ObjectData* obj = m_data.pobj;
-      if (LIKELY(obj->isCollection())) {
-        raise_error("Collection elements cannot be taken by reference");
-      } else {
-        obj->o_invoke_few_args(s_offsetSet, 2, uninit_null(), v);
-      }
-    }
-  case KindOfStaticString:
-  case KindOfString:
-    if (getStringData()->empty()) {
-      set(ArrayData::CreateRef(v));
-      return v;
-    }
-    // fall through to throw
-  default:
-    throw_bad_type_exception("[] operator not supported for this type");
-  }
-  return v;
 }
 
 void Variant::setEvalScalar() {

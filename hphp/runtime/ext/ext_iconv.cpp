@@ -1698,7 +1698,7 @@ Variant f_iconv_mime_decode_headers(const String& encoded_headers,
         if (!elem.is(KindOfArray)) {
           ret.set(header, make_packed_array(elem, value));
         } else {
-          elem.append(value);
+          elem.toArrRef().append(value);
           ret.set(header, elem);
         }
       } else {

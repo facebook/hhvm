@@ -764,7 +764,10 @@ Variant f_vsprintf(const String& format, const Array& args) {
   return String(output, len, AttachString);
 }
 
-Variant f_sscanf(int _argc, const String& str, const String& format, const Array& _argv /* = null_array */) {
+Variant f_sscanf(int _argc,
+                 const String& str,
+                 const String& format,
+                 const Array& _argv /* = null_array */) {
   Variant ret;
   int result;
   result = string_sscanf(str.c_str(), format.c_str(), _argv.size(), ret);

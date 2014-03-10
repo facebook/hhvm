@@ -213,16 +213,22 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       Array elemspec = elemvar.toArray();
       String format = fieldspec.rvalAt(PHPTransport::s_format,
                                        AccessFlags::None).toString();
+
       if (format.equal(PHPTransport::s_collection)) {
-        ret = NEWOBJ(c_Vector)();
+        auto const pvec = NEWOBJ(c_Vector)();
+        ret = pvec;
+        for (uint32_t s = 0; s < size; ++s) {
+          Variant value = binary_deserialize(type, transport, elemspec);
+          pvec->t_add(value);
+        }
       } else {
-        ret = Array::Create();
+        PackedArrayInit pai(size);
+        for (auto s = uint32_t{0}; s < size; ++s) {
+          pai.append(binary_deserialize(type, transport, elemspec));
+        }
+        ret = pai.toArray();
       }
 
-      for (uint32_t s = 0; s < size; ++s) {
-        Variant value = binary_deserialize(type, transport, elemspec);
-        ret.append(value);
-      }
       return ret;
     }
     case T_SET: { // array of key -> TRUE

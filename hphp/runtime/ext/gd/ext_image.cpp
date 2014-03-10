@@ -4465,11 +4465,9 @@ Variant f_iptcparse(const String& iptcblock) {
     }
 
     String skey((const char *)key, CopyString);
-    if (!ret.exists(skey)) {
-      ret.set(skey, Array());
-    }
-    ret.lvalAt(skey).append(String((const char *)(buffer+inx), len,
-                                   CopyString));
+    auto& lval = ret.lvalAt(skey);
+    forceToArray(lval).append(
+      String((const char *)(buffer+inx), len, CopyString));
     inx += len;
     tagsfound++;
   }

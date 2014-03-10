@@ -314,13 +314,17 @@ void IniSetting::ParserCallback::onSection(const std::string &name, void *arg) {
 void IniSetting::ParserCallback::onLabel(const std::string &name, void *arg) {
   // do nothing
 }
+
 void IniSetting::ParserCallback::onEntry(
     const std::string &key, const std::string &value, void *arg) {
   Variant *arr = (Variant*)arg;
   arr->set(String(key), String(value));
 }
+
 void IniSetting::ParserCallback::onPopEntry(
-    const std::string &key, const std::string &value, const std::string &offset,
+    const std::string &key,
+    const std::string &value,
+    const std::string &offset,
     void *arg) {
   Variant *arr = (Variant*)arg;
   forceToArray(*arr);
@@ -329,7 +333,7 @@ void IniSetting::ParserCallback::onPopEntry(
   if (!offset.empty()) {
     makeArray(hash, offset, value);
   } else {
-    hash.append(value);
+    hash.toArrRef().append(value);
   }
 }
 

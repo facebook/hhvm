@@ -858,14 +858,18 @@ class CompactReader {
         AccessFlags::None).toString();
       Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
-        ret = NEWOBJ(c_Vector)();
+        auto const pvec = NEWOBJ(c_Vector)();
+        ret = pvec;
+        for (uint32_t i = 0; i < size; i++) {
+          Variant value = readField(valueSpec, valueType);
+          pvec->t_add(value);
+        }
       } else {
-        ret = Array::Create();
-      }
-
-      for (uint32_t i = 0; i < size; i++) {
-        Variant value = readField(valueSpec, valueType);
-        ret.append(value);
+        PackedArrayInit pai(size);
+        for (auto i = uint32_t{0}; i < size; ++i) {
+          pai.append(readField(valueSpec, valueType));
+        }
+        ret = pai.toArray();
       }
 
       readCollectionEnd();

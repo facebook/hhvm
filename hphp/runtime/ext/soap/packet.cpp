@@ -14,11 +14,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/ext/soap/packet.h"
 
 #include "hphp/runtime/ext/ext_soap.h"
 #include <memory>
 #include "hphp/util/hash-map-typedefs.h"
-#include "hphp/runtime/ext/soap/packet.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -347,7 +347,7 @@ bool parse_packet_soap(c_SoapClient *obj, const char *buffer,
               tmp = master_to_zval(encodePtr(), val);
             }
           }
-          return_value.set(String(param->paramName), tmp);
+          return_value.toArrRef().set(String(param->paramName), tmp);
           param_count++;
         }
       }
@@ -365,16 +365,18 @@ bool parse_packet_soap(c_SoapClient *obj, const char *buffer,
             if (val->name) {
               String key((char*)val->name, CopyString);
               if (return_value.toCArrRef().exists(key)) {
-                return_value.toArrRef().lvalAt(key).append(tmp);
+                auto& lval = return_value.toArrRef().lvalAt(key);
+                if (!lval.isArray()) lval = lval.toArray();
+                lval.toArrRef().append(tmp);
               } else if (val->next && get_node(val->next, (char*)val->name)) {
                 Array arr = Array::Create();
                 arr.append(tmp);
-                return_value.set(key, arr);
+                return_value.toArrRef().set(key, arr);
               } else {
-                return_value.set(key, tmp);
+                return_value.toArrRef().set(key, tmp);
               }
             } else {
-              return_value.append(tmp);
+              return_value.toArrRef().append(tmp);
             }
             ++param_count;
           }

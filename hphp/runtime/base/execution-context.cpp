@@ -401,11 +401,11 @@ void ExecutionContext::resetCurrentBuffer() {
 // program executions
 
 void ExecutionContext::registerShutdownFunction(const Variant& function,
-                                                    Array arguments,
-                                                    ShutdownType type) {
+                                                Array arguments,
+                                                ShutdownType type) {
   Array callback = make_map_array(s_name, function, s_args, arguments);
-  Variant &funcs = m_shutdowns.lvalAt(type);
-  funcs.append(callback);
+  Variant& funcs = m_shutdowns.lvalAt(type);
+  forceToArray(funcs).append(callback);
 }
 
 Variant ExecutionContext::popShutdownFunction(ShutdownType type) {

@@ -1685,7 +1685,7 @@ static inline void fetch_value(sp_PDOStatement stmt, Variant &dest, int colno,
                                int *type_override) {
   PDOColumn *col = stmt->columns[colno].toResource().getTyped<PDOColumn>();
   int type = PDO_PARAM_TYPE(col->param_type);
-  int new_type =  type_override ? PDO_PARAM_TYPE(*type_override) : type;
+  int new_type = type_override ? PDO_PARAM_TYPE(*type_override) : type;
 
   stmt->getColumn(colno, dest);
 
@@ -1756,9 +1756,13 @@ static bool do_fetch_func_prepare(sp_PDOStatement stmt) {
 
 /* perform a fetch.  If do_bind is true, update any bound columns.
  * If return_value is not null, store values into it according to HOW. */
-static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
-                     PDOFetchType how, PDOFetchOrientation ori,
-                     long offset, Variant *return_all) {
+static bool do_fetch(sp_PDOStatement stmt,
+                     bool do_bind,
+                     Variant& ret,
+                     PDOFetchType how,
+                     PDOFetchOrientation ori,
+                     long offset,
+                     Variant *return_all) {
   if (how == PDO_FETCH_USE_DEFAULT) {
     how = stmt->default_fetch_type;
   }
@@ -1938,8 +1942,8 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
     }
     case PDO_FETCH_USE_DEFAULT:
     case PDO_FETCH_BOTH:
-      ret.set(name, val);
-      ret.append(val);
+      ret.toArrRef().set(name, val);
+      ret.toArrRef().append(val);
       break;
 
     case PDO_FETCH_NAMED: {
@@ -1953,7 +1957,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
           arr.append(val);
           ret.set(name, arr);
         } else {
-          curr_val.append(val);
+          curr_val.toArrRef().append(val);
         }
       } else {
         ret.set(name, val);
@@ -1961,7 +1965,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
       break;
     }
     case PDO_FETCH_NUM:
-      ret.append(val);
+      ret.toArrRef().append(val);
       break;
 
     case PDO_FETCH_OBJ:
@@ -2026,7 +2030,8 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
       return_all->set(grp_val, ret);
     } else {
       forceToArray(*return_all);
-      return_all->toArrRef().lvalAt(grp_val).append(ret);
+      auto& lval = return_all->toArrRef().lvalAt(grp_val);
+      forceToArray(lval).append(ret);
     }
   }
 
@@ -2885,11 +2890,13 @@ Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
                (how == PDO_FETCH_USE_DEFAULT &&
                 m_stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)) {
       while (do_fetch(m_stmt, true, data, (PDOFetchType)(how | flags),
-                      PDO_FETCH_ORI_NEXT, 0, return_all));
+                      PDO_FETCH_ORI_NEXT, 0, return_all)) {
+        continue;
+      }
     } else {
       return_value = Array::Create();
       do {
-        return_value.append(data);
+        return_value.toArrRef().append(data);
         data.unset();
       } while (do_fetch(m_stmt, true, data, (PDOFetchType)(how | flags),
                         PDO_FETCH_ORI_NEXT, 0, NULL));

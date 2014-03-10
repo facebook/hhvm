@@ -1229,12 +1229,12 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
               arr.append(el);
               el = arr;
             }
-            el.append(val);
+            el.toArrRef().append(val);
           } else {
-            any.set(name_str, val);
+            any.toArrRef().set(name_str, val);
           }
         } else {
-          any.append(val);
+          any.toArrRef().append(val);
         }
         name = NULL;
       }
@@ -1511,7 +1511,7 @@ static Variant to_zval_object_ex(encodeTypePtr type, xmlNodePtr data,
             prop = arr;
           }
           /* Add array element */
-          prop.append(tmpVal);
+          prop.toArrRef().append(tmpVal);
         }
       }
       trav = trav->next;
@@ -2108,9 +2108,9 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, const Variant& data_, int sty
     array_copy = Array::Create();
     for (ArrayIter iter(data.toObject().get()); iter; ++iter) {
       if (!iter.first().isNull() && iter.first().isString()) {
-        array_copy.set(iter.first(), iter.second());
+        array_copy.toArrRef().set(iter.first(), iter.second());
       } else {
-        array_copy.append(iter.second());
+        array_copy.toArrRef().append(iter.second());
       }
     }
     data = array_copy;

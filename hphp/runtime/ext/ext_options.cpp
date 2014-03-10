@@ -502,7 +502,8 @@ static int parse_opts(const char * opts, int opts_len, opt_struct **result) {
   return count;
 }
 
-Array f_getopt(const String& options, const Variant& longopts /* = null_variant */) {
+Array f_getopt(const String& options,
+               const Variant& longopts /* = null_variant */) {
   opt_struct *opts, *orig_opts;
   int len = parse_opts(options.data(), options.size(), &opts);
 
@@ -560,14 +561,20 @@ Array f_getopt(const String& options, const Variant& longopts /* = null_variant 
   }
   argv[index] = NULL;
 
-  Array ret = Array::Create();
-
   /* after our pointer arithmetic jump back to the first element */
   opts = orig_opts;
 
   int o;
   char *php_optarg = NULL;
   int php_optind = 1;
+
+  SCOPE_EXIT {
+    free_longopts(orig_opts);
+    free(orig_opts);
+    free(argv);
+  };
+
+  Array ret = Array::Create();
 
   Variant val;
   int optchr = 0;
@@ -614,7 +621,7 @@ Array f_getopt(const String& options, const Variant& longopts /* = null_variant 
         if (!e.isArray()) {
           ret.set(optname_int, make_packed_array(e, val));
         } else {
-          e.append(val);
+          e.toArrRef().append(val);
         }
       } else {
         ret.set(optname_int, val);
@@ -627,7 +634,7 @@ Array f_getopt(const String& options, const Variant& longopts /* = null_variant 
         if (!e.isArray()) {
           ret.set(key, make_packed_array(e, val));
         } else {
-          e.append(val);
+          e.toArrRef().append(val);
         }
       } else {
         ret.set(key, val);
@@ -637,9 +644,6 @@ Array f_getopt(const String& options, const Variant& longopts /* = null_variant 
     php_optarg = NULL;
   }
 
-  free_longopts(orig_opts);
-  free(orig_opts);
-  free(argv);
   return ret;
 }
 

@@ -183,7 +183,8 @@ Array TimeZone::GetAbbreviations() {
     } else {
       element.set(s_timezone_id, uninit_null());
     }
-    ret.lvalAt(String(entry->name)).append(element.create());
+    auto& val = ret.lvalAt(String(entry->name));
+    forceToArray(val).append(element.create());
   }
   return ret;
 }

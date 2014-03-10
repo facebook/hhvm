@@ -697,8 +697,6 @@ class Variant : private TypedValue {
   const Variant& set(const String& key, const Variant& v, bool isString = false);
   const Variant& set(const Variant& key, const Variant& v);
 
-  const Variant& append(const Variant& v);
-
   const Variant& setRef(int     key, const Variant& v) { return setRef((int64_t)key, v); }
   const Variant& setRef(int64_t   key, const Variant& v);
   const Variant& setRef(double  key, const Variant& v) = delete;
@@ -714,9 +712,6 @@ class Variant : private TypedValue {
     return setRef(key, variant(v), isString);
   }
   const Variant& set(const Variant& key, RefResult v) { return setRef(key, variant(v)); }
-
-  const Variant& appendRef(const Variant& v);
-  const Variant& append(RefResult v) { return appendRef(variant(v)); }
 
   /**
    * Low level access that should be restricted to internal use.
@@ -1051,8 +1046,6 @@ public:
   Object toObject() const { return m_var.toObject(); }
   Resource toResource() const { return m_var.toResource(); }
   ObjectData *getObjectData() const { return m_var.getObjectData(); }
-
-  const Variant& append(const Variant& v) const { return m_var.append(v); }
 
   bool isArray() const { return m_var.isArray(); }
   ArrNR toArrNR() const { return m_var.toArrNR(); }

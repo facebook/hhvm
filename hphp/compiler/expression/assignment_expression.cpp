@@ -266,7 +266,8 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
                 }
                 v.set(o, r);
               } else {
-                v.append(r);
+                if (!v.isArray()) break;
+                v.toArrRef().append(r);
               }
               g_context->setThrowAllErrors(false);
             } catch (...) {

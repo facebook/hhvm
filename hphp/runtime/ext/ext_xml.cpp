@@ -356,9 +356,10 @@ static void _xml_add_to_info(XmlParser *parser, char *name) {
   String nameStr(name, CopyString);
   forceToArray(parser->info);
   if (!parser->info.toCArrRef().exists(nameStr)) {
-    parser->info.set(nameStr, Array::Create());
+    parser->info.toArrRef().set(nameStr, Array::Create());
   }
-  parser->info.toArrRef().lvalAt(nameStr).append(parser->curtag);
+  auto& inner = parser->info.toArrRef().lvalAt(nameStr);
+  forceToArray(inner).append(parser->curtag);
   parser->curtag++;
 }
 
@@ -398,7 +399,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
         tag.set(s_tag, String(((char*)tag_name) + parser->toffset, CopyString));
         tag.set(s_type, s_close);
         tag.set(s_level, parser->level);
-        parser->data.append(tag.create());
+        parser->data.toArrRef().append(tag.create());
       }
       parser->lastwasopen = 0;
     }
@@ -485,7 +486,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           tag.set(s_value, String(decoded_value, AttachString));
           tag.set(s_type, s_cdata);
           tag.set(s_level, parser->level);
-          parser->data.append(tag);
+          parser->data.toArrRef().append(tag);
         }
       } else {
         free(decoded_value);
@@ -564,7 +565,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
       if (atcnt) {
         tag.set(s_attributes,atr);
       }
-      parser->data.append(tag);
+      parser->data.toArrRef().append(tag);
       parser->ctag.assignRef(parser->data.getArrayData()->endRef());
     }
 

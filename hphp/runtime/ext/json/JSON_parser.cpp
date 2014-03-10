@@ -488,8 +488,11 @@ void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
 
 StaticString s__empty_("_empty_");
 
-static void object_set(Variant &var, const String& key, const Variant& value,
-                       int assoc) {
+static void object_set(Variant &var,
+                       const String& key,
+                       const Variant& value,
+                       int assoc,
+                       bool collections) {
   if (!assoc) {
     // We know it is stdClass, and everything is public (and dynamic).
     if (key.empty()) {
@@ -498,12 +501,19 @@ static void object_set(Variant &var, const String& key, const Variant& value,
       var.getObjectData()->o_set(key, value);
     }
   } else {
-    var.set(key, value);
+    if (collections) {
+      auto keyTV = make_tv<KindOfString>(key.get());
+      collectionSet(var.getObjectData(), &keyTV, cvarToCell(&value));
+    } else {
+      forceToArray(var).set(key, value);
+    }
   }
 }
 
-static void attach_zval(json_parser *json, const String& key,
-                        int assoc) {
+static void attach_zval(json_parser *json,
+                        const String& key,
+                        int assoc,
+                        bool collections) {
   if (json->the_top < 1) {
     return;
   }
@@ -513,9 +523,13 @@ static void attach_zval(json_parser *json, const String& key,
   int up_mode = json->the_stack[json->the_top - 1];
 
   if (up_mode == MODE_ARRAY) {
-    root.append(child);
+    if (collections) {
+      collectionAppend(root.getObjectData(), child.asCell());
+    } else {
+      root.toArrRef().append(child);
+    }
   } else if (up_mode == MODE_OBJECT) {
-    object_set(root, key, child, assoc);
+    object_set(root, key, child, assoc, collections);
   }
 }
 
@@ -533,7 +547,7 @@ static void attach_zval(json_parser *json, const String& key,
  * It is implemented as a Pushdown Automaton; that means it is a finite state
  * machine with a stack.
  */
-bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
+bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
                  int depth, int64_t options) {
   int b;  /* the next character */
   int c;  /* the next character class */
@@ -543,9 +557,9 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
   int the_state = 0;
 
   /*<fb>*/
-  bool loose = options & k_JSON_FB_LOOSE;
-  bool stable_maps = options & k_JSON_FB_STABLE_MAPS;
-  bool collections = stable_maps || (options & k_JSON_FB_COLLECTIONS);
+  bool const loose = options & k_JSON_FB_LOOSE;
+  bool const stable_maps = options & k_JSON_FB_STABLE_MAPS;
+  bool const collections = stable_maps || (options & k_JSON_FB_COLLECTIONS);
   int qchr = 0;
   int const *byte_class;
   if (loose) {
@@ -625,7 +639,8 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
           empty }
         */
       case -9:
-        attach_zval(the_json, the_json->the_kstack[the_json->the_top], assoc);
+        attach_zval(the_json, the_json->the_kstack[the_json->the_top], assoc,
+          collections);
 
         if (!pop(the_json, MODE_KEY)) {
           return false;
@@ -690,12 +705,13 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
           Variant mval;
           json_create_zval(mval, *buf, type, options);
           Variant &top = the_json->the_zstack[the_json->the_top];
-          object_set(top, key->detach(), mval, assoc);
+          object_set(top, key->detach(), mval, assoc, collections);
           buf->clear();
           JSON_RESET_TYPE();
         }
 
-        attach_zval(the_json, the_json->the_kstack[the_json->the_top], assoc);
+        attach_zval(the_json, the_json->the_kstack[the_json->the_top],
+          assoc, collections);
 
         if (!pop(the_json, MODE_OBJECT)) {
           s_json_parser->error_code = JSON_ERROR_STATE_MISMATCH;
@@ -740,13 +756,18 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
                the_json->the_stack[the_json->the_top] == MODE_ARRAY) {
             Variant mval;
             json_create_zval(mval, *buf, type, options);
-            the_json->the_zstack[the_json->the_top].append(mval);
+            auto& top = the_json->the_zstack[the_json->the_top];
+            if (collections) {
+              collectionAppend(top.getObjectData(), mval.asCell());
+            } else {
+              top.toArrRef().append(mval);
+            }
             buf->clear();
             JSON_RESET_TYPE();
           }
 
           attach_zval(the_json, the_json->the_kstack[the_json->the_top],
-            assoc);
+            assoc, collections);
 
           if (!pop(the_json, MODE_ARRAY)) {
             s_json_parser->error_code = JSON_ERROR_STATE_MISMATCH;
@@ -799,14 +820,19 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
                 push(the_json, MODE_KEY)) {
               if (type != -1) {
                 Variant &top = the_json->the_zstack[the_json->the_top];
-                object_set(top, key->detach(), mval, assoc);
+                object_set(top, key->detach(), mval, assoc, collections);
               }
               the_state = 29;
             }
             break;
           case MODE_ARRAY:
             if (type != -1) {
-              the_json->the_zstack[the_json->the_top].append(mval);
+              auto& top = the_json->the_zstack[the_json->the_top];
+              if (collections) {
+                collectionAppend(top.getObjectData(), mval.asCell());
+              } else {
+                top.toArrRef().append(mval);
+              }
             }
             the_state = 28;
             break;

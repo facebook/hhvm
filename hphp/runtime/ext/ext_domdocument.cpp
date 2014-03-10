@@ -125,18 +125,8 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
     }
   }
 }
-
-/**
- * The error handler callbacks below are called from libxml code
- * that is compiled without frame pointers, so it's necessary to do
- * SYNC_VM_REGS_SCOPED() before calling libxml code that uses these
- * error handler callbacks.
- */
-
-static void php_libxml_ctx_error(void *ctx,
-                                 const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
-static void php_libxml_ctx_error(void *ctx,
-                                 const char *msg, ...) {
+void php_libxml_ctx_error(void *ctx,
+                          const char *msg, ...) {
   va_list args;
   va_start(args, msg);
   try {
@@ -145,10 +135,8 @@ static void php_libxml_ctx_error(void *ctx,
   va_end(args);
 }
 
-static void php_libxml_ctx_warning(void *ctx,
-                                   const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
-static void php_libxml_ctx_warning(void *ctx,
-                                   const char *msg, ...) {
+void php_libxml_ctx_warning(void *ctx,
+                            const char *msg, ...) {
   va_list args;
   va_start(args, msg);
   try {

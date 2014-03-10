@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 
@@ -39,6 +40,9 @@ IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_comment);
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_keyword);
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_default);
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_html);
+IMPLEMENT_THREAD_LOCAL(std::string, s_misc_display_errors);
+
+const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
 
 static class MiscExtension : public Extension {
 public:
@@ -69,7 +73,25 @@ public:
       "highlight.html", "#000000",
       s_misc_highlight_default_html.get()
     );
-
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_ALL,
+      "display_errors", "1",
+      IniSetting::SetAndGet<std::string>(
+        [](const std::string& value) {
+          if (value == s_1 || value == s_stdout) {
+            Logger::SetStandardOut(stdout);
+            return true;
+          }
+          if (value == s_2 || value == s_stderr) {
+            Logger::SetStandardOut(stderr);
+            return true;
+          }
+          return false;
+        },
+        nullptr
+      ),
+      s_misc_display_errors.get()
+    );
   }
 
 } s_misc_extension;

@@ -1073,7 +1073,7 @@ class TraceProfiler : public Profiler {
   }
 
   bool ensureTraceSpace() {
-    bool track_realloc = FALSE;
+    bool track_realloc = false;
     if (m_traceBufferFilled) {
       m_overflowCalls++;
       return false;
@@ -1097,7 +1097,7 @@ class TraceProfiler : public Profiler {
                      m_traceBuffer[m_nextTraceEntry++]);
         return false;
       }
-      track_realloc = TRUE;
+      track_realloc = true;
     }
     if (track_realloc) {
       collectStats("(trace buffer realloc)", false,

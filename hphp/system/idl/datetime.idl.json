@@ -1032,6 +1032,9 @@
                 "NoDefaultSweep",
                 "IsCppSerializable"
             ],
+            "ifaces": [
+                "DateTimeInterface"
+            ],
             "footer": "\n private:\n  SmartObject<DateTime> m_dt;\n public:\n  virtual ObjectData *clone();",
             "funcs": [
                 {
@@ -1107,7 +1110,7 @@
                     ],
                     "return": {
                         "type": "Object",
-                        "desc": "Returns a DateIntervalobject representing the distance between two times"
+                        "desc": "Returns a DateInterval object representing the distance between two times"
                     },
                     "args": [
                         {

@@ -226,7 +226,7 @@ public:
 
   std::string desc(const char *indent);
   void load(Hdf node);
-  void save(Hdf node);
+  void save(std::ostream &stream, int key);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

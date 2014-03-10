@@ -18,6 +18,7 @@
 #define incl_HPHP_TRANSLATOR_INLINE_H_
 
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-helpers.h"
 #include <boost/noncopyable.hpp>
 #include "hphp/runtime/base/execution-context.h"
 
@@ -80,7 +81,7 @@ struct VMRegAnchor : private boost::noncopyable {
   VMRegAnchor() {
     assert_native_stack_aligned();
     m_old = tl_regState;
-    g_translator->sync();
+    translatorSync();
   }
   explicit VMRegAnchor(ActRec* ar) {
     // Some C++ entry points have an ActRec prepared from after a call

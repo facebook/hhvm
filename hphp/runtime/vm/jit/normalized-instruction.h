@@ -46,9 +46,6 @@ class NormalizedInstruction {
                      // *not* the function whose body the NI belongs to.
                      // Note that for an FPush* may be set to the (statically
                      // known Func* that /this/ instruction is pushing)
-  const StringData* funcName;
-    // For FCall's, an opaque identifier that is either null, or uniquely
-    // identifies the (functionName, -arity) pair of this call site.
   const Unit* m_unit;
 
   std::vector<DynLocation*> inputs;

@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP { namespace JIT { namespace ARM {
 
@@ -106,7 +106,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
   astubs.  Mov  (argReg(0), rVmFp);
 
   auto fixupAddr =
-    emitCallWithinTC(astubs, tx64->uniqueStubs.functionEnterHelper);
+    emitCallWithinTC(astubs, tx->uniqueStubs.functionEnterHelper);
   if (inTracelet) {
     fixupMap.recordSyncPoint(fixupAddr,
                              fixup.m_pcOffset, fixup.m_spOffset);
@@ -141,12 +141,12 @@ void emitEagerVMRegSave(vixl::MacroAssembler& a, RegSaveFlags flags) {
 //////////////////////////////////////////////////////////////////////
 
 void emitTransCounterInc(vixl::MacroAssembler& a) {
-  if (!tx64->isTransDBEnabled()) return;
+  if (!tx->isTransDBEnabled()) return;
 
   // TODO(#3057328): this is not thread-safe. This should be a "load-exclusive,
   // increment, store-exclusive, loop" sequence, but vixl doesn't yet support
   // the exclusive-access instructions.
-  a.   Mov   (rAsm, tx64->getTransCounterAddr());
+  a.   Mov   (rAsm, tx->getTransCounterAddr());
   a.   Ldr   (rAsm2, rAsm[0]);
   a.   Add   (rAsm2, rAsm2, 1);
   a.   Str   (rAsm2, rAsm[0]);

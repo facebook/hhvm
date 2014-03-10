@@ -634,7 +634,7 @@ Type allocObjReturn(const IRInstruction* inst) {
   }
   if (inst->op() == AllocObj) {
     return inst->src(0)->isConst()
-      ? Type::Obj.specialize(inst->src(0)->getValClass())
+      ? Type::Obj.specialize(inst->src(0)->clsVal())
       : Type::Obj;
   }
   always_assert(0);

@@ -44,6 +44,11 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// Global systemlib extensions implemented entirely in PHP
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(redis, NO_EXTENSION_VERSION_YET);
+
+///////////////////////////////////////////////////////////////////////////////
 
 typedef std::map<std::string, Extension*, stdltistr> ExtensionMap;
 static ExtensionMap *s_registered_extensions = NULL;

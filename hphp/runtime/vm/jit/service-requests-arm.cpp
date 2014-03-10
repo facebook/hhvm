@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP { namespace JIT { namespace ARM {
 
@@ -40,12 +40,12 @@ void emitBindJ(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
     emitSmashableJump(cb, toSmash, cc);
   }
 
-  tx64->setJmpTransID(toSmash);
+  mcg->setJmpTransID(toSmash);
 
   TCA sr = (req == JIT::REQ_BIND_JMP
-            ? emitEphemeralServiceReq(tx64->code.stubs(), tx64->getFreeStub(),
+            ? emitEphemeralServiceReq(mcg->code.stubs(), mcg->getFreeStub(),
                                       req, toSmash, dest.offset())
-            : emitServiceReq(tx64->code.stubs(), req, toSmash, dest.offset()));
+            : emitServiceReq(mcg->code.stubs(), req, toSmash, dest.offset()));
 
   MacroAssembler a { cb };
   if (cb.base() == stubs.base()) {
@@ -144,7 +144,7 @@ int32_t emitNativeImpl(CodeBlock& cb, const Func* func) {
 
   MacroAssembler a { cb };
   a.  Mov  (argReg(0), rVmFp);
-  if (tx64->fixupMap().eagerRecord(func)) {
+  if (mcg->fixupMap().eagerRecord(func)) {
     a.Mov  (rAsm, func->getEntry());
     a.Str  (rAsm, rGContextReg[offsetof(ExecutionContext, m_pc)]);
     a.Str  (rVmFp, rGContextReg[offsetof(ExecutionContext, m_fp)]);
@@ -155,7 +155,7 @@ int32_t emitNativeImpl(CodeBlock& cb, const Func* func) {
 
   Offset pcOffset = 0;
   Offset stackOff = func->numLocals();
-  tx64->fixupMap().recordSyncPoint(syncPoint, pcOffset, stackOff);
+  mcg->fixupMap().recordSyncPoint(syncPoint, pcOffset, stackOff);
 
   int nLocalCells = func->numSlotsInFrame();
   a.  Ldr  (rVmFp, rVmFp[AROFF(m_savedRbp)]);
@@ -176,7 +176,7 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
     a.    Str  (rAsm, rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]);
 
     emitRegGetsRegPlusImm(a, rVmFp, rVmSp, cellsToBytes(numArgs));
-    emitCheckSurpriseFlagsEnter(mainCode, stubsCode, true, tx64->fixupMap(),
+    emitCheckSurpriseFlagsEnter(mainCode, stubsCode, true, mcg->fixupMap(),
                                 Fixup(0, numArgs));
     // rVmSp is already correctly adjusted, because there's no locals other than
     // the arguments passed.
@@ -195,7 +195,7 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
   MacroAssembler a { mainCode };
   emitRegGetsRegPlusImm(a, rStashedAR, rVmSp, cellsToBytes(numArgs));
 
-  ReqBindCall* req = tx64->globalData().alloc<ReqBindCall>();
+  ReqBindCall* req = mcg->globalData().alloc<ReqBindCall>();
 
   auto toSmash = mainCode.frontier();
   emitSmashableCall(mainCode, stubsCode.frontier());

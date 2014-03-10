@@ -76,6 +76,9 @@ Variant HHVM_FUNCTION(gzgetss, CResRef zp, int64_t length = 0,
 Variant HHVM_FUNCTION(gzpassthru, CResRef zp);
 Variant HHVM_FUNCTION(gzwrite, CResRef zp, const String& str,
                                int64_t length = 0);
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #endif // incl_HPHP_EXT_ZLIB_H_

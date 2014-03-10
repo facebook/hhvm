@@ -65,23 +65,23 @@ int SSATmp::numWords() const {
   return typeNeededWords(type());
 }
 
-Variant SSATmp::getValVariant() const {
+Variant SSATmp::variantVal() const {
   switch (type().toDataType()) {
   case KindOfUninit:
     return uninit_null();
   case KindOfNull:
     return init_null();
   case KindOfBoolean:
-    return getValBool();
+    return boolVal();
   case KindOfInt64:
-    return getValInt();
+    return intVal();
   case KindOfDouble:
-    return getValDbl();
+    return dblVal();
   case KindOfString:
   case KindOfStaticString:
-    return Variant(getValStr());
+    return Variant(strVal());
   case KindOfArray:
-    return const_cast<ArrayData*>(getValArr());
+    return const_cast<ArrayData*>(arrVal());
   default:
     always_assert(false);
   }

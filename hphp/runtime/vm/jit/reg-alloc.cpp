@@ -57,18 +57,36 @@ PhysReg forceAlloc(const SSATmp& tmp) {
            opc == CoerceStk ||
            opc == SideExitGuardStk  ||
            MInstrEffects::supported(opc));
-    return arch() == Arch::X64 ? X64::rVmSp : ARM::rVmSp;
+    switch (arch()) {
+      case Arch::X64:
+        return X64::rVmSp;
+      case Arch::ARM:
+        return ARM::rVmSp;
+    }
+    not_reached();
   }
 
   // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
   // we have a pointer to an AR that is not in rVmFp.
   if (opc != LdContActRec && opc != LdAFWHActRec && tmp.isA(Type::FramePtr)) {
-    return arch() == Arch::X64 ? X64::rVmFp : ARM::rVmFp;
+    switch (arch()) {
+      case Arch::X64:
+        return X64::rVmFp;
+      case Arch::ARM:
+        return ARM::rVmFp;
+    }
+    not_reached();
   }
 
   if (opc == DefMIStateBase) {
     assert(tmp.isA(Type::PtrToCell));
-    return arch() == Arch::X64 ? PhysReg(reg::rsp) : PhysReg(vixl::sp);
+    switch (arch()) {
+      case Arch::X64:
+        return PhysReg(reg::rsp);
+      case Arch::ARM:
+        return PhysReg(vixl::sp);
+    }
+    not_reached();
   }
   return InvalidReg;
 }
@@ -160,7 +178,7 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
   // place of an immediate zero. TODO #3827905
   switch (inst.op()) {
   case GuardRefs:
-    if (i == 1) return inst.src(2)->getValInt() == 0; // nParams
+    if (i == 1) return inst.src(2)->intVal() == 0; // nParams
     if (i == 3) { // mask64
       return vixl::Assembler::IsImmLogical(cint, vixl::kXRegSize);
     }
@@ -214,7 +232,7 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
   cint = type.hasRawVal() ? type.rawVal() : 0;
   switch (inst.op()) {
   case GuardRefs:
-    if (i == 1) return inst.src(2)->getValInt() == 0; // nParams
+    if (i == 1) return inst.src(2)->intVal() == 0; // nParams
     if (i == 3) return isU32(cint); // mask64
     if (i == 4) return isU32(cint); // vals64
     break;
@@ -274,6 +292,16 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
       if (type <= Type::Bool) return true;
       if (type <= Type::Int) return okCmp(cint);
     }
+    break;
+  case SubInt:
+    if (i == 0) return cint == 0 && !inst.src(1)->isConst(); // 0-X
+    if (i == 1) return !inst.src(0)->isConst() && isI32(cint); // X-C
+    break;
+  case Shl: case Shr:
+    if (i == 1) return true; // shift amount
+    break;
+  case XorBool:
+    if (i == 1) return isI32(cint);
     break;
   default:
     break;
@@ -434,15 +462,25 @@ Constraint srcConstraint(const IRInstruction& inst, unsigned i) {
   auto r = forceAlloc(*inst.src(i));
   if (r != InvalidReg) return r;
   if (mustUseConst(inst, i)) return Constraint::IMM;
-  return arch() == Arch::X64 ? X64::srcConstraint(inst, i) :
-         ARM::srcConstraint(inst, i);
+  switch (arch()) {
+    case Arch::X64:
+      return X64::srcConstraint(inst, i);
+    case Arch::ARM:
+      return ARM::srcConstraint(inst, i);
+  }
+  not_reached();
 }
 
 Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
   auto r = forceAlloc(*inst.dst(i));
   if (r != InvalidReg) return r;
-  return arch() == Arch::X64 ? X64::dstConstraint(inst, i) :
-         ARM::dstConstraint(inst, i);
+  switch (arch()) {
+    case Arch::X64:
+      return X64::dstConstraint(inst, i);
+    case Arch::ARM:
+      return ARM::dstConstraint(inst, i);
+  }
+  not_reached();
 }
 
 }}

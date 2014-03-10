@@ -1377,7 +1377,16 @@ RegAllocInfo allocateRegs(IRUnit& unit) {
   Timer _t("regalloc");
 
   RegAllocInfo regs(unit);
-  XLS xls(unit, regs, arch() == Arch::ARM ? arm_abi : x64_abi);
+  Abi abi;
+  switch (arch()) {
+    case Arch::X64:
+      abi = x64_abi;
+      break;
+    case Arch::ARM:
+      abi = arm_abi;
+      break;
+  }
+  XLS xls(unit, regs, abi);
   xls.allocate();
   if (dumpIREnabled()) {
     dumpTrace(kRegAllocLevel, unit, " after extended alloc ", &regs,

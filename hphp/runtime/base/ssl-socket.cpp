@@ -336,6 +336,7 @@ SSLSocket *SSLSocket::Create(const HostURL &hosturl, double timeout) {
 }
 
 bool SSLSocket::close() {
+  invokeFiltersOnClose();
   return closeImpl();
 }
 

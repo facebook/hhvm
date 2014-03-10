@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
 namespace HPHP { namespace JIT { namespace ARM {
@@ -29,12 +29,12 @@ namespace {
 using namespace vixl;
 
 void emitCallToExit(UniqueStubs& us) {
-  MacroAssembler a { tx64->code.main() };
+  MacroAssembler a { mcg->code.main() };
 
   a.   Nop   ();
   us.callToExit = a.frontier();
   emitServiceReq(
-    tx64->code.main(),
+    mcg->code.main(),
     SRFlags::Align | SRFlags::JmpInsteadOfRet,
     REQ_EXIT
   );
@@ -43,7 +43,7 @@ void emitCallToExit(UniqueStubs& us) {
 }
 
 void emitReturnHelpers(UniqueStubs& us) {
-  MacroAssembler a { tx64->code.main() };
+  MacroAssembler a { mcg->code.main() };
 
   us.retHelper = a.frontier();
   a.   Brk   (0);
@@ -60,7 +60,7 @@ void emitReturnHelpers(UniqueStubs& us) {
 }
 
 void emitResumeHelpers(UniqueStubs& us) {
-  MacroAssembler a { tx64->code.main() };
+  MacroAssembler a { mcg->code.main() };
 
   auto const fpOff = offsetof(ExecutionContext, m_fp);
   auto const spOff = offsetof(ExecutionContext, m_stack) +
@@ -72,14 +72,14 @@ void emitResumeHelpers(UniqueStubs& us) {
   a.   Ldr   (rVmFp, rGContextReg[fpOff]);
   a.   Ldr   (rVmSp, rGContextReg[spOff]);
 
-  emitServiceReq(tx64->code.main(), REQ_RESUME);
+  emitServiceReq(mcg->code.main(), REQ_RESUME);
 
   us.add("resumeHelper", us.resumeHelper);
   us.add("resumeHelperRet", us.resumeHelperRet);
 }
 
 void emitStackOverflowHelper(UniqueStubs& us) {
-  MacroAssembler a { tx64->code.stubs() };
+  MacroAssembler a { mcg->code.stubs() };
 
   us.stackOverflowHelper = a.frontier();
   a.  Ldr  (rAsm, rVmFp[AROFF(m_func)]);
@@ -90,14 +90,14 @@ void emitStackOverflowHelper(UniqueStubs& us) {
   a.  Add  (argReg(0).W(), rAsm.W(), rAsm2.W());
 
   emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
-  emitServiceReq(tx64->code.stubs(), REQ_STACK_OVERFLOW);
+  emitServiceReq(mcg->code.stubs(), REQ_STACK_OVERFLOW);
 
   us.add("stackOverflowHelper", us.stackOverflowHelper);
 }
 
 
 void emitDefClsHelper(UniqueStubs& us) {
-  MacroAssembler a { tx64->code.main() };
+  MacroAssembler a { mcg->code.main() };
 
   us.defClsHelper = a.frontier();
   a.   Brk   (0);
@@ -106,7 +106,7 @@ void emitDefClsHelper(UniqueStubs& us) {
 }
 
 void emitFreeLocalsHelpers(UniqueStubs& us) {
-  MacroAssembler a { tx64->code.main() };
+  MacroAssembler a { mcg->code.main() };
 
   us.freeManyLocalsHelper = a.frontier();
   a.   Brk   (0);
@@ -115,7 +115,7 @@ void emitFreeLocalsHelpers(UniqueStubs& us) {
 }
 
 void emitFuncPrologueRedispatch(UniqueStubs& us) {
-  MacroAssembler a { tx64->code.main() };
+  MacroAssembler a { mcg->code.main() };
   vixl::Label actualDispatch;
   vixl::Label numParamsCheck;
 
@@ -159,7 +159,7 @@ void emitFuncPrologueRedispatch(UniqueStubs& us) {
 }
 
 void emitFCallArrayHelper(UniqueStubs& us) {
-  MacroAssembler a { tx64->code.main() };
+  MacroAssembler a { mcg->code.main() };
 
   us.fcallArrayHelper = a.frontier();
   a.   Brk   (0);
@@ -169,7 +169,7 @@ void emitFCallArrayHelper(UniqueStubs& us) {
 
 void emitFCallHelperThunk(UniqueStubs& us) {
   TCA (*helper)(ActRec*, void*) = &fcallHelper;
-  MacroAssembler a { tx64->code.main() };
+  MacroAssembler a { mcg->code.main() };
 
   us.fcallHelperThunk = a.frontier();
   vixl::Label popAndXchg, jmpRet;
@@ -205,7 +205,7 @@ void emitFCallHelperThunk(UniqueStubs& us) {
 
 void emitFuncBodyHelperThunk(UniqueStubs& us) {
   TCA (*helper)(ActRec*, void*) = &funcBodyHelper;
-  MacroAssembler a { tx64->code.main() };
+  MacroAssembler a { mcg->code.main() };
 
   us.funcBodyHelperThunk = a.frontier();
   a.   Mov   (argReg(0), rVmFp);
@@ -221,7 +221,7 @@ void emitFuncBodyHelperThunk(UniqueStubs& us) {
 
 void emitFunctionEnterHelper(UniqueStubs& us) {
   bool (*helper)(const ActRec*, int) = &EventHook::onFunctionEnter;
-  MacroAssembler a { tx64->code.main() };
+  MacroAssembler a { mcg->code.main() };
 
   us.functionEnterHelper = a.frontier();
 

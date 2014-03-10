@@ -33,6 +33,11 @@
     commit: 735cffd3982c6e8cdebe292d5db39d077f65890f
     install_root: assetic
     test_root: assetic
+    clowns:
+      # Depends on the result of a google API, which has changed since the
+      # release of 1.1.2; test is fixed in master, but we want to test
+      # latest stable
+      - assetic/tests/Assetic/Test/Filter/GoogleClosure/CompilerApiFilterTest.php
   codeigniter:
     url: https://github.com/EllisLab/CodeIgniter.git
     # Stable is 2.1.4, but need develop since we have pull requests
@@ -79,13 +84,6 @@
     commit: 11e964157a6a2c6128a0546673ad5e99ac1a62cd
     install_root: idiorm
     test_root: idiorm
-  jackalope-jackrabbit:
-    url: https://github.com/jackalope/jackalope-jackrabbit.git
-    bootstrap_file: ./bin/jackrabbit.sh
-    branch: 1.1.1
-    commit: b4744acbceb7ad70484ec4e4d2391df4a5a533fc
-    install_root: jackalope-jackrabbit
-    test_root: jackalope-jackrabbit
   joomla:
     url: https://github.com/joomla/joomla-framework.git
     # Stable is 2.4.2, but need master since we have pull requests.
@@ -114,6 +112,10 @@
     commit: 07d6712836c4520963e78b9fda14b14d13ff000c
     install_root: joomla-cms
     test_root: joomla-cms
+    clowns:
+      - joomla-cms/tests/unit/suites/libraries/cms/pagination/JPaginationTest.php
+      - joomla-cms/tests/unit/suites/libraries/cms/toolbar/button/JToolbarButtonHelpTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/twitter/JTwitterTest.php
   klein:
     url: https://github.com/chriso/klein.php.git
     branch: v2.0.2
@@ -140,8 +142,8 @@
     # Bad test data in wikimedia/mediawiki-core at the moment
     url: https://github.com/fredemmott/mediawiki-core.git
     # When we move back to mediawiki-core, stable branch is wmf/1.22wmf22
-    branch: fix-old-dates
-    commit: 10a7426639664a9222e430d6775e68b299e657f4
+    branch: hhvm-fix
+    commit: 7b44088a86b09fab2b3dc6e31348c602335f2dd5
     install_root: mediawiki-core
     test_root: mediawiki-core/tests/phpunit
     test_file_regex: /.*(\Test.*\.php)$/
@@ -260,9 +262,8 @@
     config_file: phpmyadmin/phpunit.xml.nocoverage
   phpunit:
     url: https://github.com/sebastianbergmann/phpunit.git
-    # 4.0 (formerly 3.8) becomes the latest stable branch on March 17, 2014. Use it.
-    branch: "4.0"
-    commit: 875303ab790427a4c0316cbb4457e52d608747f9
+    branch: "4.0.3"
+    commit: "6a0c2db"
     install_root: phpunit
     test_root: phpunit
   ratchet:
@@ -310,6 +311,13 @@
     commit: 1fb5784662f438d7d96a541e305e28b812e2eeed
     install_root: twig
     test_root: twig
+  vfsstream:
+    url: https://github.com/mikey179/vfsStream.git
+    branch: v1.2.0
+    commit: 063fb10633f10c5ccbcac26227e94f46d9336f90
+    install_root: vfsstream
+    test_root: vfsstream
+    config_file: vfsstream/phpunit.xml.dist
   yii:
     url: https://github.com/yiisoft/yii.git
     branch: master

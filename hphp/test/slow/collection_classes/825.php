@@ -6,7 +6,7 @@ $vec1 = Vector {
 foreach ($vec1->items() as $x) {
   var_dump($x);
 }
-$mp1 = StableMap {
+$mp1 = Map {
 'a' => 1, 2 => 'b', 'z' => 9}
 ;
 foreach ($mp1->items() as $t) {
@@ -16,7 +16,7 @@ var_dump(new Vector($mp1->items()));
 echo "------------------------\n";
 $vec2 = Vector::fromItems($mp1->items());
 var_dump($vec2);
-$mp2 = StableMap::fromItems($mp1->items());
+$mp2 = Map::fromItems($mp1->items());
 var_dump($mp2);
 echo "------------------------\n";
 $tuples = Vector {
@@ -28,5 +28,5 @@ Pair {
 'z', 9}
 }
 ;
-$mp3 = StableMap::fromItems($tuples);
+$mp3 = Map::fromItems($tuples);
 var_dump($mp3);

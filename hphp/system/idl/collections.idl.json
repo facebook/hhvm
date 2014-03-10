@@ -1136,31 +1136,6 @@
                           "type": "Variant"
                       }
                   ]
-              },
-              {
-                  "name": "slice",
-                  "flags": [
-                      "IsStatic"
-                  ],
-                  "desc": "Returns a ImmVector built from the specified slice of values from the specified ImmVector.",
-                  "return": {
-                      "type": "Object"
-                  },
-                  "args": [
-                      {
-                          "name": "vec",
-                          "type": "Variant"
-                      },
-                      {
-                          "name": "offset",
-                          "type": "Variant"
-                      },
-                      {
-                          "name": "len",
-                          "type": "Variant",
-                          "value": "null"
-                      }
-                  ]
               }
             ]
         },

@@ -32,12 +32,12 @@
  * level associated with it;  Enable tracing a module by setting the TRACE
  * environment variable to a comma-separated list of module:level pairs. E.g.:
  *
- * env TRACE=tx64:1,bcinterp:3,tmp0:1 ./hhvm/hhvm ...
+ * env TRACE=mcg:1,bcinterp:3,tmp0:1 ./hhvm/hhvm ...
  *
  * In a source file, select the compilation unit's module by calling the
  * TRACE_SET_MODE macro. E.g.,
  *
- *   TRACE_SET_MOD(tx64);
+ *   TRACE_SET_MOD(mcg);
  *
  *   ...
  *   TRACE(0, "See this for any trace-enabled build: %d\n", foo);
@@ -65,7 +65,7 @@
  * Example:
  *
  *   {
- *     Trace::Bump bumper{Trace::tx64, 2};
+ *     Trace::Bump bumper{Trace::mcg, 2};
  *     FTRACE(1, "asd\n");  // only fires at level >= 3
  *   }
  *   FTRACE(1, "asd\n");    // back to normal
@@ -74,7 +74,7 @@
  * There is also support for conditionally bumping in the bumper:
  *
  *   {
- *     Trace::Bump bumper{Trace::tx64, 2, somePredicate(foo)};
+ *     Trace::Bump bumper{Trace::mcg, 2, somePredicate(foo)};
  *     // Only bumped if somePredicate(foo) returned true.
  *   }
  *
@@ -89,8 +89,8 @@ namespace Trace {
       TM(tprefix)     /* Meta: prefix with string */          \
       TM(traceAsync)  /* Meta: lazy writes to disk */ \
       TM(trans)       \
-      TM(tx64)        \
-      TM(tx64stats)   \
+      TM(mcg)        \
+      TM(mcgstats)   \
       TM(ringbuffer)  \
       TM(ustubs)      \
       TM(unwind)      \

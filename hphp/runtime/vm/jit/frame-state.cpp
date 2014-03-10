@@ -132,7 +132,7 @@ void FrameState::update(const IRInstruction* inst) {
   case SpillStack: {
     m_spValue = inst->dst();
     // Push the spilled values but adjust for the popped values
-    int64_t stackAdjustment = inst->src(1)->getValInt();
+    int64_t stackAdjustment = inst->src(1)->intVal();
     m_spOffset -= stackAdjustment;
     m_spOffset += spillValueCells(inst);
     break;

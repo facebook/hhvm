@@ -56,8 +56,8 @@ extern const char *s_stderr_color;
 
 void get_supported_colors(std::vector<std::string> &names);
 
-const char *get_color_by_name(const char *name);
-const char *get_bgcolor_by_name(const char *name);
+const char *get_color_by_name(const std::string &name);
+const char *get_bgcolor_by_name(const std::string &name);
 std::string add_bgcolor(const char *color, const char *bgcolor);
 
 ///////////////////////////////////////////////////////////////////////////////

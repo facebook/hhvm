@@ -38,7 +38,7 @@
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/verifier/check.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/func-inline.h"
@@ -917,8 +917,8 @@ void Unit::initialMerge() {
               break;
             case UnitMergeKindReqDoc: {
               StringData* s = (StringData*)((char*)obj - (int)k);
-              HPHP::Eval::PhpFile* efile =
-                g_context->lookupIncludeRoot(s, InclOpDocRoot, nullptr, this);
+              auto const efile = g_context->lookupIncludeRoot(s,
+                InclOpFlags::DocRoot, nullptr, this);
               assert(efile);
               Unit* unit = efile->unit();
               unit->initialMerge();

@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/url-file.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include <memory>
 
 namespace HPHP {

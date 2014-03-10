@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/vm/debugger-hook.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/debugger/break_point.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_proxy.h"
@@ -27,7 +27,8 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debuggerflow);
-using JIT::tx64;
+using JIT::tx;
+using JIT::mcg;
 
 // Hook called from the bytecode interpreter before every opcode executed while
 // a debugger is attached. The debugger may choose to hold the thread below
@@ -108,10 +109,10 @@ static void blacklistRangesInJit(const Unit* unit,
        it != offsets.end(); ++it) {
     for (PC pc = unit->at(it->m_base); pc < unit->at(it->m_past);
          pc += instrLen((Op*)pc)) {
-      tx64->addDbgBLPC(pc);
+      tx->addDbgBLPC(pc);
     }
   }
-  if (!tx64->addDbgGuards(unit)) {
+  if (!mcg->addDbgGuards(unit)) {
     Logger::Warning("Failed to set breakpoints in Jitted code");
   }
   // In this case, we may be setting a breakpoint in a tracelet which could
@@ -172,9 +173,9 @@ static void addBreakPointFuncEntry(const Func* f) {
         f->fullName()->data(), f->unit(), f->base(), pc);
   getBreakPointFilter()->addPC(pc);
   if (RuntimeOption::EvalJit) {
-    if (tx64->addDbgBLPC(pc)) {
+    if (tx->addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
-      if (!tx64->addDbgGuard(f, f->base())) {
+      if (!mcg->addDbgGuard(f, f->base())) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
     }
@@ -249,9 +250,9 @@ void phpAddBreakPoint(const Unit* unit, Offset offset) {
   PC pc = unit->at(offset);
   getBreakPointFilter()->addPC(pc);
   if (RuntimeOption::EvalJit) {
-    if (tx64->addDbgBLPC(pc)) {
+    if (tx->addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
-      if (!tx64->addDbgGuards(unit)) {
+      if (!mcg->addDbgGuards(unit)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
       // In this case, we may be setting a breakpoint in a tracelet which could

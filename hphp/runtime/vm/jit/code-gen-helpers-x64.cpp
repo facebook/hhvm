@@ -26,8 +26,8 @@
 #include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
-#include "hphp/runtime/vm/jit/translator-x64-internal.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/ir.h"
 
@@ -46,7 +46,7 @@ TRACE_SET_MOD(hhir);
  * codegen, unless you're directly dealing with an instruction that
  * does near-end-of-tracelet glue.  (Or also we sometimes use them
  * just for some static_assertions relating to calls to helpers from
- * tx64 that hardcode these registers.)
+ * mcg that hardcode these registers.)
  */
 
 /*
@@ -54,19 +54,21 @@ TRACE_SET_MOD(hhir);
  */
 void moveToAlign(CodeBlock& cb,
                  const size_t align /* =kJmpTargetAlign */) {
-  // TODO(2967396) implement properly, move function
-  if (arch() == Arch::ARM) return;
-
-  X64Assembler a { cb };
-  assert(folly::isPowTwo(align));
-  size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
-  if (leftInBlock == align) return;
-  if (leftInBlock > 2) {
-    a.ud2();
-    leftInBlock -= 2;
-  }
-  if (leftInBlock > 0) {
-    a.emitInt3s(leftInBlock);
+  switch (arch()) {
+    case Arch::X64: {
+      X64Assembler a { cb };
+      assert(folly::isPowTwo(align));
+      size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
+      if (leftInBlock == align) return;
+      if (leftInBlock > 2) {
+        a.ud2();
+        leftInBlock -= 2;
+      }
+      break;
+    }
+    case Arch::ARM:
+      // TODO(2967396) implement properly, move function
+      break;
   }
 }
 
@@ -166,9 +168,9 @@ struct IfCountNotStatic {
 
 
 void emitTransCounterInc(Asm& a) {
-  if (!tx64->isTransDBEnabled()) return;
+  if (!tx->isTransDBEnabled()) return;
 
-  a.    movq (tx64->getTransCounterAddr(), rAsm);
+  a.    movq (tx->getTransCounterAddr(), rAsm);
   a.    lock ();
   a.    incq (*rAsm);
 }
@@ -195,8 +197,7 @@ void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype) {
 void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
   { // if RC
     IfRefCounted irc(as, base, disp);
-    as.   load_reg64_disp_reg64(base, disp + TVOFF(m_data),
-                                tmpReg);
+    as.   loadq  (base[disp + TVOFF(m_data)], tmpReg);
     { // if !static
       IfCountNotStatic ins(as, tmpReg);
       as. incl(tmpReg[FAST_REFCOUNT_OFFSET]);
@@ -231,11 +232,11 @@ void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg) {
     } else {                             // GP => XMM
       // This generates a movq x86 instruction, which zero extends
       // the 64-bit value in srcReg into a 128-bit XMM register
-      as. mov_reg64_xmm(srcReg, dstReg);
+      as. movq_rx(srcReg, dstReg);
     }
   } else {
     if (dstReg.isGP()) {                 // XMM => GP
-      as. mov_xmm_reg64(srcReg, dstReg);
+      as. movq_xr(srcReg, dstReg);
     } else {                             // XMM => XMM
       // This copies all 128 bits in XMM,
       // thus avoiding partial register stalls
@@ -266,7 +267,7 @@ void emitCall(Asm& a, TCA dest) {
   if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
     a.    call(dest);
   } else {
-    a.    call(tx64->getNativeTrampoline(dest));
+    a.    call(mcg->getNativeTrampoline(dest));
   }
 }
 
@@ -309,17 +310,22 @@ void emitRB(X64Assembler& a,
 }
 
 void emitTraceCall(CodeBlock& cb, int64_t pcOff) {
-  // TODO(2967396) implement properly, move function
-  if (arch() == Arch::ARM) return;
-
-  Asm as { cb };
-  // call to a trace function
-  as.mov_imm64_reg((int64_t)as.frontier(), reg::rcx);
-  as.mov_reg64_reg64(rVmFp, reg::rdi);
-  as.mov_reg64_reg64(rVmSp, reg::rsi);
-  as.mov_imm64_reg(pcOff, reg::rdx);
-  // do the call; may use a trampoline
-  emitCall(as, (TCA)traceCallback);
+  switch (arch()) {
+    case Arch::X64: {
+      Asm a { cb };
+      // call to a trace function
+      a.    movq   (a.frontier(), rcx);
+      a.    movq   (rVmFp, rdi);
+      a.    movq   (rVmSp, rsi);
+      a.    movq   (pcOff, rdx);
+      // do the call; may use a trampoline
+      emitCall(a, reinterpret_cast<TCA>(traceCallback));
+      break;
+    }
+    case Arch::ARM:
+      // TODO(2967396) implement properly, move function
+      break;
+  }
 }
 
 void emitTestSurpriseFlags(Asm& a) {
@@ -338,7 +344,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
   a.  jnz  (stubsCode.frontier());
 
   astubs.  movq  (rVmFp, argNumToRegName[0]);
-  emitCall(astubs, tx64->uniqueStubs.functionEnterHelper);
+  emitCall(astubs, tx->uniqueStubs.functionEnterHelper);
   if (inTracelet) {
     fixupMap.recordSyncPoint(stubsCode.frontier(),
                              fixup.m_pcOffset, fixup.m_spOffset);
@@ -368,8 +374,8 @@ void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
   } else if (d0.isSIMD() && s0.isGP() && s1.isGP()) {
     // move 2 gpr to 1 xmm
     assert(d0 != rCgXMM0); // xmm0 is reserved for scratch
-    as.   mov_reg64_xmm(s0, d0);
-    as.   mov_reg64_xmm(s1, rCgXMM0);
+    as.   movq_rx(s0, d0);
+    as.   movq_rx(s1, rCgXMM0);
     as.   unpcklpd(rCgXMM0, d0); // s1 -> d0[1]
   } else {
     if (d0 != InvalidReg) emitMovRegReg(as, s0, d0); // d0 != s1

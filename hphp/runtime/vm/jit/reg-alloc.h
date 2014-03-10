@@ -27,7 +27,7 @@ namespace HPHP {  namespace JIT {
 class IRUnit;
 
 // This value must be consistent with the number of pre-allocated
-// bytes for spill locations in __enterTCHelper in translator-x64.cpp.
+// bytes for spill locations in __enterTCHelper in mc-generator.cpp.
 // Be careful when changing this value.
 const size_t NumPreAllocatedSpillLocs = kReservedRSPSpillSpace /
                                         sizeof(uint64_t);

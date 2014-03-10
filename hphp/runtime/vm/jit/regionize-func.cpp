@@ -213,15 +213,15 @@ static bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
  *      2.2) select a region starting at this node and mark nodes/arcs as
  *           covered appropriately
  */
-void regionizeFunc(const Func*         func,
-                   JIT::TranslatorX64* tx64,
-                   RegionVec&          regions) {
+void regionizeFunc(const Func*       func,
+                   JIT::MCGenerator* mcg,
+                   RegionVec&        regions) {
   Timer _t("regionizeFunc");
-
   assert(RuntimeOption::EvalJitPGO);
   FuncId funcId = func->getFuncId();
-  ProfData* profData = tx64->profData();
-  TransCFG cfg(funcId, profData, tx64->getSrcDB(), tx64->getJmpToTransIDMap());
+  ProfData* profData = mcg->tx().profData();
+  TransCFG cfg(funcId, profData, mcg->tx().getSrcDB(),
+               mcg->getJmpToTransIDMap());
 
   if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
     auto dotFileName = folly::to<std::string>(

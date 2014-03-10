@@ -64,7 +64,7 @@ static Variant doIdnTranslate2003(const String& domain, int64_t options,
       break;
     }
     ret.releaseBuffer(0);
-    ret.getBuffer(len);
+    retBuffer = ret.getBuffer(len);
   }
   ret.releaseBuffer(len);
 

@@ -231,12 +231,10 @@ O(DivDbl,                       D(Dbl), S(Dbl) S(Dbl),                   B|C) \
 O(Mod,                          D(Int), S(Int) S(Int),                     C) \
 O(Sqrt,                         D(Dbl), S(Dbl),                            C) \
 O(AbsDbl,                       D(Dbl), S(Dbl),                            C) \
-O(BitAnd,                       D(Int), S(Int) S(Int),                     C) \
-O(BitOr,                        D(Int), S(Int) S(Int),                     C) \
-O(BitXor,                       D(Int), S(Int) S(Int),                     C) \
-O(BitNot,                       D(Int), S(Int),                            C) \
-O(LogicXor,                    D(Bool), S(Bool) S(Bool),                   C) \
-O(Not,                         D(Bool), S(Bool),                           C) \
+O(AndInt,                       D(Int), S(Int) S(Int),                     C) \
+O(OrInt,                        D(Int), S(Int) S(Int),                     C) \
+O(XorInt,                       D(Int), S(Int) S(Int),                     C) \
+O(XorBool,                     D(Bool), S(Bool) S(Bool),                   C) \
 O(Shl,                          D(Int), S(Int) S(Int),                     C) \
 O(Shr,                          D(Int), S(Int) S(Int),                     C) \
                                                                               \
@@ -597,8 +595,6 @@ O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                       E|N|Er) \
 O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                     T|E|N|Er) \
-O(Spill,                       DofS(0), SUnk,                             NF) \
-O(Reload,                      DofS(0), SUnk,                             NF) \
 O(Shuffle,                          ND, SUnk,                             NF) \
 O(CreateContFunc,               D(Obj), NA,                          E|N|PRc) \
 O(CreateContMeth,               D(Obj), S(Ctx),                      E|N|PRc) \

@@ -353,20 +353,6 @@ int RuntimeOption::GetScannerType() {
   return type;
 }
 
-// Initializers for Eval flags.
-static inline bool evalJitDefault() {
-  // --mode server or --mode daemon
-  // run long enough to justify JIT
-  if (RuntimeOption::ServerExecutionMode()) {
-    return true;
-  }
-
-  // JIT explicitly turned on via .hhvm-jit file
-  static const char* path = "/.hhvm-jit";
-  struct stat dummy;
-  return stat(path, &dummy) == 0;
-}
-
 static inline std::string regionSelectorDefault() {
 #ifdef HHVM_REGION_SELECTOR_TRACELET
   return "tracelet";

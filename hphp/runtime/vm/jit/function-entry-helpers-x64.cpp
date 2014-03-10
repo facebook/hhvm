@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
@@ -50,7 +50,7 @@ static void setupAfterPrologue(ActRec* fp, void* sp) {
 TCA fcallHelper(ActRec* ar, void* sp) {
   try {
     TCA tca =
-      tx64->getFuncPrologue((Func*)ar->m_func, ar->numArgs(), ar);
+      mcg->getFuncPrologue((Func*)ar->m_func, ar->numArgs(), ar);
     if (tca) {
       return tca;
     }
@@ -65,7 +65,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
       uint64_t rip = ar->m_savedRip;
       if (g_context->doFCall(ar, g_context->m_pc)) {
         ar->m_savedRip = rip;
-        return tx64->uniqueStubs.resumeHelperRet;
+        return tx->uniqueStubs.resumeHelperRet;
       }
       // We've been asked to skip the function body
       // (fb_intercept). frame, stack and pc have
@@ -75,7 +75,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
     }
     setupAfterPrologue(ar, sp);
     assert(ar == g_context->m_fp);
-    return tx64->uniqueStubs.resumeHelper;
+    return tx->uniqueStubs.resumeHelper;
   } catch (...) {
     /*
       The return address is set to __fcallHelperThunk,
@@ -104,10 +104,10 @@ TCA funcBodyHelper(ActRec* fp, void* sp) {
   tl_regState = VMRegState::CLEAN;
   Func* func = const_cast<Func*>(fp->m_func);
 
-  TCA tca = tx64->getCallArrayPrologue(func);
+  TCA tca = mcg->getCallArrayPrologue(func);
 
   if (!tca) {
-    tca = tx64->uniqueStubs.resumeHelper;
+    tca = tx->uniqueStubs.resumeHelper;
   }
   tl_regState = VMRegState::DIRTY;
   return tca;

@@ -49,6 +49,7 @@ bool OutputFile::open(const String& filename, const String& mode) {
 }
 
 bool OutputFile::close() {
+  invokeFiltersOnClose();
   return closeImpl();
 }
 

@@ -1,11 +1,11 @@
 bool(true)
-array(312) {
+array(253) {
   ["""]=>
   string(6) "&quot;"
   ["&"]=>
   string(5) "&amp;"
   ["'"]=>
-  string(5) "&#39;"
+  string(6) "&#039;"
   ["<"]=>
   string(4) "&lt;"
   [">"]=>
@@ -408,24 +408,12 @@ array(312) {
   string(6) "&dArr;"
   ["⇔"]=>
   string(6) "&hArr;"
-  ["⇕"]=>
-  string(6) "&vArr;"
-  ["⇚"]=>
-  string(7) "&lAarr;"
-  ["⇛"]=>
-  string(7) "&rAarr;"
-  ["⇝"]=>
-  string(7) "&rarrw;"
   ["∀"]=>
   string(8) "&forall;"
-  ["∁"]=>
-  string(6) "&comp;"
   ["∂"]=>
   string(6) "&part;"
   ["∃"]=>
   string(7) "&exist;"
-  ["∄"]=>
-  string(8) "&nexist;"
   ["∅"]=>
   string(7) "&empty;"
   ["∇"]=>
@@ -434,54 +422,24 @@ array(312) {
   string(6) "&isin;"
   ["∉"]=>
   string(7) "&notin;"
-  ["∊"]=>
-  string(7) "&epsis;"
   ["∋"]=>
   string(4) "&ni;"
-  ["∌"]=>
-  string(7) "&notni;"
-  ["∍"]=>
-  string(7) "&bepsi;"
   ["∏"]=>
   string(6) "&prod;"
-  ["∐"]=>
-  string(8) "&coprod;"
   ["∑"]=>
   string(5) "&sum;"
   ["−"]=>
   string(7) "&minus;"
-  ["∓"]=>
-  string(8) "&mnplus;"
-  ["∔"]=>
-  string(8) "&plusdo;"
-  ["∖"]=>
-  string(7) "&setmn;"
   ["∗"]=>
   string(8) "&lowast;"
-  ["∘"]=>
-  string(8) "&compfn;"
   ["√"]=>
   string(7) "&radic;"
   ["∝"]=>
   string(6) "&prop;"
   ["∞"]=>
   string(7) "&infin;"
-  ["∟"]=>
-  string(7) "&ang90;"
   ["∠"]=>
   string(5) "&ang;"
-  ["∡"]=>
-  string(8) "&angmsd;"
-  ["∢"]=>
-  string(8) "&angsph;"
-  ["∣"]=>
-  string(5) "&mid;"
-  ["∤"]=>
-  string(6) "&nmid;"
-  ["∥"]=>
-  string(5) "&par;"
-  ["∦"]=>
-  string(6) "&npar;"
   ["∧"]=>
   string(5) "&and;"
   ["∨"]=>
@@ -492,42 +450,14 @@ array(312) {
   string(5) "&cup;"
   ["∫"]=>
   string(5) "&int;"
-  ["∮"]=>
-  string(8) "&conint;"
   ["∴"]=>
   string(8) "&there4;"
-  ["∵"]=>
-  string(8) "&becaus;"
   ["∼"]=>
   string(5) "&sim;"
-  ["∽"]=>
-  string(6) "&bsim;"
-  ["≀"]=>
-  string(8) "&wreath;"
-  ["≁"]=>
-  string(6) "&nsim;"
-  ["≃"]=>
-  string(6) "&sime;"
-  ["≄"]=>
-  string(7) "&nsime;"
   ["≅"]=>
   string(6) "&cong;"
-  ["≇"]=>
-  string(7) "&ncong;"
   ["≈"]=>
   string(7) "&asymp;"
-  ["≉"]=>
-  string(5) "&nap;"
-  ["≊"]=>
-  string(5) "&ape;"
-  ["≌"]=>
-  string(7) "&bcong;"
-  ["≍"]=>
-  string(7) "&asymp;"
-  ["≎"]=>
-  string(6) "&bump;"
-  ["≏"]=>
-  string(7) "&bumpe;"
   ["≠"]=>
   string(4) "&ne;"
   ["≡"]=>
@@ -536,60 +466,12 @@ array(312) {
   string(4) "&le;"
   ["≥"]=>
   string(4) "&ge;"
-  ["≦"]=>
-  string(4) "&lE;"
-  ["≧"]=>
-  string(4) "&gE;"
-  ["≨"]=>
-  string(5) "&lnE;"
-  ["≩"]=>
-  string(5) "&gnE;"
-  ["≪"]=>
-  string(4) "&Lt;"
-  ["≫"]=>
-  string(4) "&Gt;"
-  ["≬"]=>
-  string(7) "&twixt;"
-  ["≮"]=>
-  string(5) "&nlt;"
-  ["≯"]=>
-  string(5) "&ngt;"
-  ["≰"]=>
-  string(6) "&nles;"
-  ["≱"]=>
-  string(6) "&nges;"
-  ["≲"]=>
-  string(6) "&lsim;"
-  ["≳"]=>
-  string(6) "&gsim;"
-  ["≶"]=>
-  string(4) "&lg;"
-  ["≷"]=>
-  string(4) "&gl;"
-  ["≺"]=>
-  string(4) "&pr;"
-  ["≻"]=>
-  string(4) "&sc;"
-  ["≼"]=>
-  string(7) "&cupre;"
-  ["≽"]=>
-  string(7) "&sscue;"
-  ["≾"]=>
-  string(7) "&prsim;"
-  ["≿"]=>
-  string(7) "&scsim;"
-  ["⊀"]=>
-  string(5) "&npr;"
-  ["⊁"]=>
-  string(5) "&nsc;"
   ["⊂"]=>
   string(5) "&sub;"
   ["⊃"]=>
   string(5) "&sup;"
   ["⊄"]=>
   string(6) "&nsub;"
-  ["⊅"]=>
-  string(6) "&nsup;"
   ["⊆"]=>
   string(6) "&sube;"
   ["⊇"]=>

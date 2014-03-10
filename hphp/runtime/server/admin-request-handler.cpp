@@ -41,7 +41,7 @@
 #include "hphp/runtime/base/shared-store-base.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/timer.h"
@@ -588,9 +588,9 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     HPHP::Server* server = HttpServer::Server->getPageServer();
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
-    auto* tx = JIT::tx64;
+    auto* mCGenerator = JIT::mcg;
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
-    tx->code.forEachBlock([&](const char* name, const CodeBlock& a) {
+    mCGenerator->code.forEachBlock([&](const char* name, const CodeBlock& a) {
       auto isMain = strncmp(name, "main", 4) == 0;
       appendStat(folly::format("tc-{}size",
                                isMain ? "" : name).str(),
@@ -828,11 +828,11 @@ typedef std::map<int, PCInfo> InfoMap;
 bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
-    transport->sendString(JIT::tx64->getUsage());
+    transport->sendString(JIT::mcg->getUsage());
     return true;
   }
   if (cmd == "vm-tcaddr") {
-    transport->sendString(JIT::tx64->getTCAddrs());
+    transport->sendString(JIT::mcg->getTCAddrs());
     return true;
   }
   if (cmd == "vm-namedentities") {

@@ -28,7 +28,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/file-repository.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/func-inline.h"
 #include "hphp/system/systemlib.h"
@@ -39,7 +39,8 @@
 namespace HPHP {
 
 TRACE_SET_MOD(hhbc);
-using JIT::tx64;
+using JIT::tx;
+using JIT::mcg;
 
 const StringData* Func::s___call = makeStaticString("__call");
 const StringData* Func::s___callStatic =
@@ -139,7 +140,7 @@ void Func::setFullName() {
 }
 
 void Func::resetPrologue(int numParams) {
-  auto const& stubs = tx64->uniqueStubs;
+  auto const& stubs = tx->uniqueStubs;
   m_prologueTable[numParams] = stubs.fcallHelperThunk;
 }
 
@@ -149,7 +150,7 @@ void Func::initPrologues(int numParams) {
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
                                          : kNumFixedPrologues;
 
-  if (tx64 == nullptr) {
+  if (tx == nullptr) {
     m_funcBody = nullptr;
     for (int i = 0; i < numPrologues; i++) {
       m_prologueTable[i] = nullptr;
@@ -157,7 +158,7 @@ void Func::initPrologues(int numParams) {
     return;
   }
 
-  auto const& stubs = tx64->uniqueStubs;
+  auto const& stubs = tx->uniqueStubs;
 
   m_funcBody = stubs.funcBodyHelperThunk;
 
@@ -259,9 +260,9 @@ Func::~Func() {
   int numPrologues =
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
                                          : kNumFixedPrologues;
-  if (tx64 != nullptr) {
-    tx64->smashPrologueGuards((TCA *)m_prologueTable,
-                              numPrologues, this);
+  if (mcg != nullptr) {
+    mcg->smashPrologueGuards((TCA *)m_prologueTable,
+                             numPrologues, this);
   }
 #ifdef DEBUG
   validate();

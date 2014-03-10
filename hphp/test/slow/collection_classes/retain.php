@@ -28,25 +28,5 @@ function main() {
   echo "========\n";
   var_dump($x === $y);
   print_keyed_iterable($y);
-
-  echo "******** StableMap ********\n";
-
-  $x = StableMap {'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4,};
-  $y = $x->retain(function ($v) {
-      echo "callback($v)\n";
-      return true;
-    });
-  echo "========\n";
-  var_dump($x === $y);
-  print_keyed_iterable($y);
-  echo "========\n";
-  $x = StableMap {'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4,};
-  $y = $x->retain(function ($v) {
-      echo "callback($v)\n";
-      return (bool)($v % 2);
-    });
-  echo "========\n";
-  var_dump($x === $y);
-  print_keyed_iterable($y);
 }
 main();

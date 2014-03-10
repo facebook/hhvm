@@ -31,7 +31,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/base/stats.h"
 
 #include "hphp/runtime/vm/jit/check.h"
@@ -130,7 +130,7 @@ void IRTranslator::assertType(const JIT::Location& l,
 
   switch (l.space) {
     case Location::Stack: {
-      // tx64LocPhysicalOffset returns positive offsets for stack values,
+      // locPhysicalOffset returns positive offsets for stack values,
       // relative to rVmSp
       uint32_t stackOffset = locPhysicalOffset(l);
       m_hhbcTrans.assertTypeStack(stackOffset, Type(rtt));
@@ -176,15 +176,13 @@ IRTranslator::translateDiv(const NormalizedInstruction& i) {
 void
 IRTranslator::translateBinaryArithOp(const NormalizedInstruction& i) {
   switch (i.op()) {
-#define CASE(OpBc) case Op::OpBc: HHIR_EMIT(OpBc);
-    CASE(Add)
-    CASE(Sub)
-    CASE(Mul)
-    CASE(BitAnd)
-    CASE(BitOr)
-    CASE(BitXor)
-#undef CASE
-    default: break;
+  case Op::Add:    HHIR_EMIT(Add);
+  case Op::Sub:    HHIR_EMIT(Sub);
+  case Op::Mul:    HHIR_EMIT(Mul);
+  case Op::BitAnd: HHIR_EMIT(BitAnd);
+  case Op::BitOr:  HHIR_EMIT(BitOr);
+  case Op::BitXor: HHIR_EMIT(BitXor);
+  default: break;
   }
   not_reached();
 }
@@ -788,7 +786,7 @@ void IRTranslator::translateFPassL(const NormalizedInstruction& ni) {
   if (ni.preppedByRef) {
     HHIR_EMIT(VGetL, locId);
   } else {
-    HHIR_EMIT(CGetL, locId);
+    HHIR_EMIT(FPassL, locId);
   }
 }
 
@@ -1608,7 +1606,7 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   FTRACE(1, "\n{:-^60}\n", folly::format("translating {} with stack:\n{}",
                                          ni.toString(), ht.showStack()));
   // When profiling, we disable type predictions to avoid side exits
-  assert(JIT::tx64->mode() != TransProfile || !ni.outputPredicted);
+  assert(JIT::tx->mode() != TransProfile || !ni.outputPredicted);
 
   if (ni.guardedThis) {
     // Task #2067635: This should really generate an AssertThis

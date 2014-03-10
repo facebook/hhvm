@@ -230,6 +230,7 @@ bool f_trigger_error(const String& error_msg,
                        ExecutionContext::ErrorThrowMode::Never,
                        "HipHop Deprecated: ");
   } else {
+    raise_warning("Invalid error type specified");
     return false;
   }
   return true;

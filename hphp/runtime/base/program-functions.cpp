@@ -106,7 +106,8 @@ void (*g_vmProcessInit)();
 
 struct ProgramOptions {
   string     mode;
-  string     config;
+  std::vector<std::string>
+             config;
   std::vector<std::string>
              confStrings;
   int        port;
@@ -192,14 +193,14 @@ void process_env_variables(Variant &variables) {
   }
 }
 
-void process_ini_settings() {
-  if (RuntimeOption::IniFile.empty()) {
+void process_ini_settings(const std::string& name) {
+  if (name.empty()) {
     return;
   }
-  std::ifstream ifs(RuntimeOption::IniFile);
+  std::ifstream ifs(name);
   const std::string str((std::istreambuf_iterator<char>(ifs)),
                         std::istreambuf_iterator<char>());
-  auto settings = IniSetting::FromStringAsMap(str, RuntimeOption::IniFile);
+  auto settings = IniSetting::FromStringAsMap(str, name);
 
   for (auto& item : settings.items()) {
     IniSetting::Set(item.first.data(), item.second, IniSetting::FollyDynamic());
@@ -600,7 +601,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
 
   Extension::RequestInitModules();
-  process_ini_settings();
+  process_ini_settings(RuntimeOption::IniFile);
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
@@ -1008,7 +1009,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("repo-schema", "display the repository schema id")
     ("mode,m", value<string>(&po.mode)->default_value("run"),
      "run | debug (d) | server (s) | daemon | replay | translate (t)")
-    ("config,c", value<string>(&po.config),
+    ("config,c", value<vector<string> >(&po.config)->composing(),
      "load specified config file")
     ("config-value,v", value<std::vector<std::string>>(&po.confStrings)->composing(),
      "individual configuration string in a format of name=value, where "
@@ -1127,7 +1128,7 @@ static int execute_program_impl(int argc, char** argv) {
       auto default_config_file = "/etc/hhvm/config.hdf";
       if (access(default_config_file, R_OK) != -1) {
         Logger::Verbose("Using default config file: %s", default_config_file);
-        po.config = default_config_file;
+        po.config.push_back(default_config_file);
       }
     }
   } catch (error &e) {
@@ -1182,8 +1183,8 @@ static int execute_program_impl(int argc, char** argv) {
   pcre_init();
 
   Hdf config;
-  if (!po.config.empty()) {
-    config.open(po.config);
+  for (auto& c : po.config) {
+    config.open(c);
   }
   RuntimeOption::Load(config, &po.confStrings);
   vector<string> badnodes;

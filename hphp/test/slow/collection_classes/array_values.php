@@ -18,7 +18,6 @@ function f($x) {
 function main() {
   $vector = Vector {11, 22, 33, '22'};
   $map = Map {'a' => 11, 'b' => 22, 'c' => 33, 'd' => '22'};
-  $smap = StableMap {'a' => 11, 'b' => 22, 'c' => 33, 'd' => '22'};
   $set = Set {11, 22, 33, '22'};
   $pair = Pair {22, '22'};
 
@@ -26,8 +25,6 @@ function main() {
   f($vector->toValuesArray());
   f(array_values($map));
   f($map->toValuesArray());
-  f(array_values($smap));
-  f($smap->toValuesArray());
   f(array_values($set));
   f($set->toValuesArray());
   f(array_values($pair));

@@ -625,6 +625,14 @@ void group(ISS& env,
   setLoc(env, cgetl.loc1, negate ? was_false : was_true);
 }
 
+void group(ISS& env,
+           const bc::CGetL& cgetl,
+           const bc::FPushObjMethodD& fpush) {
+  auto const obj = locAsCell(env, cgetl.loc1);
+  impl(env, cgetl, fpush);
+  if (!is_specialized_obj(obj)) setLoc(env, cgetl.loc1, TObj);
+}
+
 void in(ISS& env, const bc::Switch& op) {
   popC(env);
   forEachTakenEdge(op, [&] (php::Block& blk) {
@@ -1939,6 +1947,9 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
         return group(env, it, it[0].CGetL, it[1].InstanceOfD, it[2].JmpNZ);
       default: break;
       }
+      break;
+    case Op::FPushObjMethodD:
+      return group(env, it, it[0].CGetL, it[1].FPushObjMethodD);
     default: break;
     }
     break;

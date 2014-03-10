@@ -97,6 +97,7 @@ bool Socket::open(const String& filename, const String& mode) {
 }
 
 bool Socket::close() {
+  invokeFiltersOnClose();
   return closeImpl();
 }
 

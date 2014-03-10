@@ -155,7 +155,7 @@ const StringData* findClassName(SSATmp* cls) {
   assert(cls->isA(Type::Cls));
 
   if (cls->isConst()) {
-    return cls->getValClass()->preClass()->name();
+    return cls->clsVal()->preClass()->name();
   }
   // Try to get the class name from a LdCls
   IRInstruction* clsInst = cls->inst();
@@ -163,7 +163,7 @@ const StringData* findClassName(SSATmp* cls) {
     SSATmp* clsName = clsInst->src(0);
     assert(clsName->isA(Type::Str));
     if (clsName->isConst()) {
-      return clsName->getValStr();
+      return clsName->strVal();
     }
   }
   return nullptr;

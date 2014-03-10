@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/sort-helpers.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_intl.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
@@ -258,6 +257,61 @@ BaseVector::php_filter(CVarRef callback, MakeArgs makeArgs) {
     }
   }
   return nv;
+}
+
+Object c_Vector::ti_slice(CVarRef vec, CVarRef offset,
+                          CVarRef len /* = uninit_null() */) {
+  ObjectData* obj;
+  if (!vec.isObject() ||
+      (obj = vec.getObjectData())->getVMClass() != c_Vector::classof()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter 1 must be an instance of Vector"));
+    throw e;
+  }
+  if (!offset.isInteger()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter 2 must be an integer"));
+    throw e;
+  }
+  if (!len.isNull() && !len.isInteger()) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+               "Parameter 3 must be null or an integer"));
+    throw e;
+  }
+  auto* target = NEWOBJ(c_Vector)();
+  Object ret = target;
+  auto* v = static_cast<c_Vector*>(obj);
+  int64_t sz = v->m_size;
+  int64_t startPos = offset.toInt64();
+  if (UNLIKELY(uint64_t(startPos) >= uint64_t(sz))) {
+    if (startPos >= 0) {
+      assert(startPos >= sz);
+      return ret;
+    }
+    startPos = std::max<int64_t>(sz + startPos, 0);
+  }
+  int64_t endPos;
+  if (len.isInteger()) {
+    int64_t intLen = len.toInt64();
+    if (LIKELY(intLen >= 0)) {
+      endPos = startPos + std::min<int64_t>(intLen, sz - startPos);
+    } else {
+      endPos = sz + intLen;
+    }
+  } else {
+    endPos = sz;
+  }
+  if (startPos >= endPos) {
+    return ret;
+  }
+  uint targetSize = endPos - startPos;
+  target->reserve(targetSize);
+  target->m_size = targetSize;
+  auto* data = target->m_data;
+  for (uint i = 0; i < targetSize; ++i, ++startPos) {
+    cellDup(v->m_data[startPos], data[i]);
+  }
+  return ret;
 }
 
 void BaseVector::zip(BaseVector* bvec, CVarRef iterable) {
@@ -962,11 +1016,6 @@ Object c_Vector::ti_fromarray(CVarRef arr) {
   return ret;
 }
 
-Object c_Vector::ti_slice(CVarRef vec, CVarRef offset,
-                          CVarRef len /* = null */) {
-  return BaseVector::slice<c_Vector>("Vector", vec, offset, len);
-}
-
 void c_Vector::throwOOB(int64_t key) {
   throwIntOOB(key, true);
 }
@@ -1233,11 +1282,6 @@ Object c_ImmVector::t_keys() {
   Object obj = vec;
   BaseVector::keys(vec);
   return obj;
-}
-
-Object c_ImmVector::ti_slice(CVarRef vec, CVarRef offset,
-                                CVarRef len /* = null */) {
-  return BaseVector::slice<c_ImmVector>("ImmVector", vec, offset, len);
 }
 
 // Others

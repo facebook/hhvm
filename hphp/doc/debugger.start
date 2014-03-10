@@ -149,7 +149,7 @@ When files are modified, simply reload them by
 5. Colors and Configuration
 
 By default, it will use emacs colors for dark background. To change
-them, run debugger at least once, then look for ~/.hphpd.hdf file.
+them, run debugger at least once, then look for ~/.hphpd.ini file.
 Replace "Code" node with,
 
   Color {

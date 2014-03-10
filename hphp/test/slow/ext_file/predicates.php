@@ -21,14 +21,3 @@ var_dump(is_dir($tempfile));
 rmdir($tempfile);
 clearstatcache();
 var_dump(is_dir($tempfile));
-var_dump(is_writable($tempfile));
-var_dump(is_readable($tempfile));
-var_dump(is_executable($tempfile));
-
-$tempfile = tempnam(getcwd(), 'vmextfiletest');
-$relativetempfile = './' . basename($tempfile);
-unlink($tempfile);
-mkdir($tempfile);
-var_dump(is_dir($relativetempfile));
-rmdir($tempfile);
-var_dump(is_dir($relativetempfile));

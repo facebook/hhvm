@@ -56,7 +56,7 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/pendq.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -78,7 +78,6 @@ using HPHP::JIT::Type;
 using HPHP::JIT::HhbcTranslator;
 
 static __thread BiasedCoin *dbgTranslateCoin;
-Translator* g_translator;
 Lease Translator::s_writeLease;
 
 struct TraceletContext {
@@ -165,6 +164,9 @@ int locPhysicalOffset(Location l, const Func* f) {
   int iterInflator = l.space == Location::Iter ? kNumIterCells : 1;
   return -((l.offset + 1) * iterInflator + localsToSkip);
 }
+
+// The global Translator object.
+Translator* tx;
 
 RuntimeType Translator::liveType(Location l,
                                  const Unit& u,
@@ -2024,7 +2026,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
 
 void getInputs(SrcKey startSk, NormalizedInstruction& inst, InputInfos& infos,
                const Func* func, const LocalTypeFn& localType) {
-  // TranslatorX64 expected top of stack to be index -1, with indexes growing
+  // MCGenerator expected top of stack to be index -1, with indexes growing
   // down from there. hhir defines top of stack to be index 0, with indexes
   // growing up from there. To compensate we start with a stack offset of 1 and
   // negate the index of any stack input after the call to getInputs.
@@ -2140,7 +2142,7 @@ void getInputsImpl(SrcKey startSk,
     // hopes of avoiding further specialization. The localCount constraint
     // is an unfortunate consequence of the current generic machinery not
     // working for 0 locals.
-    if (tx64->numTranslations(startSk) >= kTooPolyRet && localCount > 0) {
+    if (mcg->numTranslations(startSk) >= kTooPolyRet && localCount > 0) {
       return false;
     }
     int numRefCounted = 0;
@@ -2636,7 +2638,7 @@ RuntimeType TraceletContext::currentType(const Location& l) const {
   if (!dl) {
     assert(!m_deletedSet.count(l));
     assert(!m_changeSet.count(l));
-    return tx64->liveType(l, *liveUnit());
+    return tx->liveType(l, *liveUnit());
   }
   return (*dl)->rtt;
 }
@@ -2660,13 +2662,11 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
         m_resolvedDeps[l] = dl;
       }
     } else {
-      const bool specialize =
-        (tx64->mode() == TransLive    && (RuntimeOption::EvalHHBCRelaxGuards ||
-                                          RuntimeOption::EvalHHIRRelaxGuards))
-        ||
-        (tx64->mode() == TransProfile &&  RuntimeOption::EvalHHIRRelaxGuards);
+      const bool specialize = tx->mode() == TransLive &&
+        (RuntimeOption::EvalHHBCRelaxGuards ||
+         RuntimeOption::EvalHHIRRelaxGuards);
 
-      RuntimeType rtt = tx64->liveType(l, *liveUnit(), specialize);
+      RuntimeType rtt = tx->liveType(l, *liveUnit(), specialize);
       assert(rtt.isIter() || !rtt.isVagueValue());
       // Allocate a new DynLocation to represent this and store it in the
       // current map.
@@ -4347,7 +4347,7 @@ Translator::translateRegion(const RegionDesc& region,
   irGenTimer.end();
 
   try {
-    traceCodeGen();
+    translatorTraceCodeGen();
     if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
   } catch (const JIT::FailedCodeGen& exn) {
     SrcKey sk{exn.vmFunc, exn.bcOff};

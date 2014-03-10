@@ -33,7 +33,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 // Include last to localize effects to this file
 #include "hphp/util/assert-throw.h"
@@ -650,7 +650,7 @@ void HhbcTranslator::emitColAddElemC() {
   }
 
   auto* catchBlock = makeCatch();
-  auto const val = popC(DataTypeGeneric);
+  auto const val = popC();
   auto const key = popC();
   auto const coll = popC();
   push(gen(ColAddElemC, catchBlock, coll, key, val));
@@ -830,6 +830,11 @@ void HhbcTranslator::emitCGetL(int32_t id) {
   pushIncRef(ldLocInnerWarn(id, exit, cat));
 }
 
+void HhbcTranslator::emitFPassL(int32_t id) {
+  auto exit = makeExit();
+  pushIncRef(ldLocInnerWarn(id, exit, DataTypeSpecific));
+}
+
 void HhbcTranslator::emitPushL(uint32_t id) {
   assertTypeLocal(id, Type::InitCell);
   auto* locVal = ldLoc(id, DataTypeGeneric);
@@ -936,9 +941,9 @@ SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, SSATmp* src) {
   AOP(Mul, MulInt, MulDbl) \
 
 #define BINARY_BITOP  \
-  BOP(BitAnd)         \
-  BOP(BitOr)          \
-  BOP(BitXor)         \
+  BOP(BitAnd, AndInt) \
+  BOP(BitOr,  OrInt)  \
+  BOP(BitXor, XorInt) \
 
 static bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   auto checkArith = [](Type ty) {
@@ -953,7 +958,7 @@ static bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
     case Op::OP: return checkArith(t1) && checkArith(t2);
   BINARY_ARITH
   #undef AOP
-  #define BOP(OP) \
+  #define BOP(OP, OPI) \
     case Op::OP: return checkBitOp(t1) && checkBitOp(t2);
   BINARY_BITOP
   #undef BOP
@@ -981,7 +986,7 @@ Opcode dblArithOp(Op op) {
 
 Opcode bitOp(Op op) {
   switch (op) {
-    #define BOP(OP) case Op::OP: return OP;
+    #define BOP(OP, OPI) case Op::OP: return OPI;
     BINARY_BITOP
     #undef BOP
     default: not_reached();
@@ -990,7 +995,7 @@ Opcode bitOp(Op op) {
 
 bool isBitOp(Op op) {
   switch (op) {
-    #define BOP(OP) case Op::OP: return true;
+    #define BOP(OP, OPI) case Op::OP: return true;
     BINARY_BITOP
     #undef BOP
     default: return false;
@@ -1087,7 +1092,7 @@ void HhbcTranslator::classExistsImpl(ClassKind kind) {
   if (!tCls->isA(Type::Str) ||
       !tAutoload->isConst() ||
       !tAutoload->isA(Type::Bool) ||
-      !tAutoload->getValBool()) {
+      !tAutoload->boolVal()) {
     return emitInterpOne(Type::Bool, 2);
   }
 
@@ -1134,7 +1139,7 @@ void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
     return cachedBox;
   }();
   gen(IncRef, box);
-  auto const oldValue = ldLoc(locId, DataTypeGeneric);
+  auto const oldValue = ldLoc(locId, DataTypeSpecific);
   gen(StLoc, LocalId(locId), m_irb->fp(), box);
   gen(DecRef, oldValue);
   // We don't need to decref value---it's a bytecode invariant that
@@ -1468,7 +1473,7 @@ void HhbcTranslator::emitCreateCont() {
     // uninit so that we don't need to change refcounts. We pass
     // DataTypeGeneric to ldLoc because we're just teleporting the value.
     gen(StMem, contAR, cns(-cellsToBytes(i + 1)),
-        ldLoc(i, DataTypeGeneric));
+        ldLoc(i, DataTypeSpecific));
     gen(StLoc, LocalId(i), m_irb->fp(), cns(Type::Uninit));
   }
   if (fillThis) {
@@ -1557,7 +1562,7 @@ void HhbcTranslator::emitContSuspend(int64_t labelId) {
 void HhbcTranslator::emitContSuspendK(int64_t labelId) {
   emitContSuspendImpl(labelId);
 
-  auto const newKey = popC(DataTypeGeneric);
+  auto const newKey = popC();
   auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());
   gen(StContArKey, m_irb->fp(), newKey);
   gen(DecRef, oldKey);
@@ -1665,7 +1670,7 @@ void HhbcTranslator::emitAsyncAwait() {
   );
 
   push(toPush);
-  push(gen(Not, gen(ConvIntToBool, state)));
+  push(gen(EqInt, state, cns(kSucceeded)));
 }
 
 void HhbcTranslator::emitAsyncESuspend(int64_t label, int numIters) {
@@ -1713,7 +1718,7 @@ void HhbcTranslator::emitAsyncESuspend(int64_t label, int numIters) {
     // object and set the local to uninit so that we don't need to
     // change refcounts.
     gen(StMem, asyncAR, cns(-cellsToBytes(i + 1)),
-        ldLoc(i, DataTypeGeneric));
+        ldLoc(i, DataTypeSpecific));
     gen(StLoc, LocalId(i), m_irb->fp(), cns(Type::Uninit));
   }
 
@@ -1750,7 +1755,7 @@ void HhbcTranslator::emitStrlen() {
     SSATmp* input = popC();
     if (input->isConst()) {
       // static string; fold its strlen operation
-      push(cns(input->getValStr()->size()));
+      push(cns(input->strVal()->size()));
     } else {
       push(gen(LdRaw, Type::Int, input, cns(RawMemSlot::StrLen)));
       gen(DecRef, input);
@@ -1789,9 +1794,9 @@ void HhbcTranslator::emitIdx() {
 // that is where this function will be used and make more sense. It's only
 // called once now.
 void HhbcTranslator::emitIdxCommon(Opcode opc, Block* catchBlock) {
-  SSATmp* def = popC(DataTypeGeneric); // def is just pushed back on the stack
-  SSATmp* key = popC(DataTypeGeneric);
-  SSATmp* arr = popC(DataTypeGeneric);
+  SSATmp* def = popC(DataTypeSpecific);
+  SSATmp* key = popC(DataTypeSpecific);
+  SSATmp* arr = popC(DataTypeSpecific);
   push(gen(opc, catchBlock, arr, key, def));
   gen(DecRef, arr);
   gen(DecRef, key);
@@ -1882,7 +1887,7 @@ void HhbcTranslator::emitIssetL(int32_t id) {
 void HhbcTranslator::emitEmptyL(int32_t id) {
   auto const exit = makeExit();
   auto const ld = ldLocInner(id, exit, DataTypeSpecific);
-  push(gen(Not, gen(ConvCellToBool, ld)));
+  push(gen(XorBool, gen(ConvCellToBool, ld), cns(true)));
 }
 
 void HhbcTranslator::emitIsTypeC(DataType t) {
@@ -2148,10 +2153,10 @@ static const Func* findCuf(Op op,
   invName = nullptr;
 
   const StringData* str =
-    callable->isA(Type::Str) && callable->isConst() ? callable->getValStr()
+    callable->isA(Type::Str) && callable->isConst() ? callable->strVal()
                                                     : nullptr;
   const ArrayData* arr =
-    callable->isA(Type::Arr) && callable->isConst() ? callable->getValArr()
+    callable->isA(Type::Arr) && callable->isConst() ? callable->arrVal()
                                                     : nullptr;
 
   StringData* sclass = nullptr;
@@ -2221,7 +2226,7 @@ bool HhbcTranslator::emitFPushCufArray(SSATmp* callable, int32_t numParams) {
 
   auto callableSize = callableInst->src(0);
   if (!callableSize->isConst() ||
-      callableSize->getValInt() != 2) {
+      callableSize->intVal() != 2) {
     return false;
   }
 
@@ -2230,7 +2235,7 @@ bool HhbcTranslator::emitFPushCufArray(SSATmp* callable, int32_t numParams) {
   if (!method || !object) return false;
 
   if (!method->isConst(Type::Str) ||
-      strstr(method->getValStr()->data(), "::") != nullptr) {
+      strstr(method->strVal()->data(), "::") != nullptr) {
     return false;
   }
 
@@ -2247,7 +2252,7 @@ bool HhbcTranslator::emitFPushCufArray(SSATmp* callable, int32_t numParams) {
 
   gen(IncRef, object);
   emitFPushObjMethodCommon(object,
-                           method->getValStr(),
+                           method->strVal(),
                            numParams,
                            false /* shouldFatal */,
                            callable);
@@ -2834,7 +2839,7 @@ void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
     auto res =
       g_context->lookupClsMethod(func,
                                    cls,
-                                   methVal->getValStr(),
+                                   methVal->strVal(),
                                    nullptr,
                                    cls,
                                    false);
@@ -2872,8 +2877,8 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
     PUNT(FPushClsMethodF-unknownClassOrMethod);
   }
 
-  auto const cls = classTmp->getValClass();
-  auto const methName = methodTmp->getValStr();
+  auto const cls = classTmp->clsVal();
+  auto const methName = methodTmp->strVal();
 
   bool magicCall = false;
   const Func* func = lookupImmutableMethod(cls, methName, magicCall,
@@ -3519,10 +3524,10 @@ RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
   assert(IMPLIES(val, val->type().equals(t)));
   if (val && val->isConst()) {
     // RuntimeType holds constant Bool, Int, Str, and Cls.
-    if (val->isA(Type::Bool)) return RuntimeType(val->getValBool());
-    if (val->isA(Type::Int))  return RuntimeType(val->getValInt());
-    if (val->isA(Type::Str))  return RuntimeType(val->getValStr());
-    if (val->isA(Type::Cls))  return RuntimeType(val->getValClass());
+    if (val->isA(Type::Bool)) return RuntimeType(val->boolVal());
+    if (val->isA(Type::Int))  return RuntimeType(val->intVal());
+    if (val->isA(Type::Str))  return RuntimeType(val->strVal());
+    if (val->isA(Type::Cls))  return RuntimeType(val->clsVal());
   }
 
   return t.toRuntimeType();
@@ -3952,7 +3957,7 @@ void HhbcTranslator::emitBindMem(SSATmp* ptr, SSATmp* src) {
 
 void HhbcTranslator::emitEmptyMem(SSATmp* ptr) {
   SSATmp* ld = gen(LdMem, Type::Cell, gen(UnboxPtr, ptr), cns(0));
-  push(gen(Not, gen(ConvCellToBool, ld)));
+  push(gen(XorBool, gen(ConvCellToBool, ld), cns(true)));
 }
 
 void HhbcTranslator::destroyName(SSATmp* name) {
@@ -3975,14 +3980,14 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
    */
   bool const useSpropCache = [&] {
     if (!ssaName->isConst()) return false;
-    auto const propName = ssaName->getValStr();
+    auto const propName = ssaName->strVal();
     auto const clsName  = findClassName(ssaCls);
     if (clsName && curClass() && curClass()->name()->isame(clsName)) {
       return true;
     }
 
     if (!ssaCls->isConst()) return false;
-    auto const cls = ssaCls->getValClass();
+    auto const cls = ssaCls->clsVal();
     if (!classIsPersistentOrCtxParent(cls)) return false;
 
     // TODO(#3575370): we should only check for 86sinit
@@ -3999,8 +4004,8 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
         !Repo::get().global().UsedHHBBC) {
       return RepoAuthType{};
     }
-    auto const slot = ssaCls->getValClass()->lookupSProp(ssaName->getValStr());
-    return ssaCls->getValClass()->staticPropRepoAuthType(slot);
+    auto const slot = ssaCls->clsVal()->lookupSProp(ssaName->strVal());
+    return ssaCls->clsVal()->staticPropRepoAuthType(slot);
   }();
 
   auto const ptrTy = convertToType(repoTy).ptr();
@@ -4117,7 +4122,7 @@ void HhbcTranslator::emitEmptyS() {
     [&] (SSATmp* ptr) {
       auto const unbox = gen(UnboxPtr, ptr);
       auto const val   = gen(LdMem, unbox->type().deref(), unbox, cns(0));
-      return gen(Not, gen(ConvCellToBool, val));
+      return gen(XorBool, gen(ConvCellToBool, val), cns(true));
     },
     [&] { // Taken: LdClsPropAddr* branched because it isn't defined
       return cns(true);
@@ -4193,7 +4198,7 @@ void HhbcTranslator::emitEmptyG() {
     [&] (SSATmp* ptr) { // Next: global exists
       auto const unboxed = gen(UnboxPtr, ptr);
       auto const val     = gen(LdMem, Type::Cell, unboxed, cns(0));
-      return gen(Not, gen(ConvCellToBool, val));
+      return gen(XorBool, gen(ConvCellToBool, val), cns(true));
     },
     [&] { // Taken: global doesn't exist
       return cns(true);
@@ -4235,7 +4240,7 @@ void HhbcTranslator::emitBinaryArith(Op op) {
 
 void HhbcTranslator::emitNot() {
   SSATmp* src = popC();
-  push(gen(Not, gen(ConvCellToBool, src)));
+  push(gen(XorBool, gen(ConvCellToBool, src), cns(true)));
   gen(DecRef, src);
 }
 
@@ -4409,7 +4414,7 @@ void HhbcTranslator::emitAbs() {
   if (value->isA(Type::Int)) {
     // compute integer absolute value ((src>>63) ^ src) - (src>>63)
     auto t1 = gen(Shr, value, cns(63));
-    auto t2 = gen(BitXor, t1, value);
+    auto t2 = gen(XorInt, t1, value);
     push(gen(SubInt, t2, t1));
     return;
   }
@@ -4433,7 +4438,7 @@ void HhbcTranslator::emitAbs() {
 BINARY_ARITH
 #undef AOP
 
-#define BOP(OP) \
+#define BOP(OP, OPI) \
   void HhbcTranslator::emit ## OP() { emitBinaryBitOp(Op::OP); }
 BINARY_BITOP
 #undef BOP
@@ -4461,10 +4466,10 @@ void HhbcTranslator::emitDiv() {
     if (divisor->isConst()) {
       int64_t divisorVal;
       if (divisor->isA(Type::Int)) {
-        divisorVal = divisor->getValInt();
+        divisorVal = divisor->intVal();
       } else {
         assert(divisor->isA(Type::Bool));
-        divisorVal = divisor->getValBool();
+        divisorVal = divisor->boolVal();
       }
 
       if (divisorVal == 0) {
@@ -4479,10 +4484,10 @@ void HhbcTranslator::emitDiv() {
       if (dividend->isConst()) {
         int64_t dividendVal;
         if (dividend->isA(Type::Int)) {
-          dividendVal = dividend->getValInt();
+          dividendVal = dividend->intVal();
         } else {
           assert(dividend->isA(Type::Bool));
-          dividendVal = dividend->getValBool();
+          dividendVal = dividend->boolVal();
         }
         popC();
         popC();
@@ -4552,9 +4557,9 @@ void HhbcTranslator::emitMod() {
   if (tr->isConst()) {
     // This whole block only exists so m_irb->cond doesn't get mad when one
     // of the branches gets optimized out due to constant folding.
-    if (tr->getValInt() == -1LL) {
+    if (tr->intVal() == -1LL) {
       push(cns(0));
-    } else if (tr->getValInt() == 0) {
+    } else if (tr->intVal() == 0) {
       // mod by zero is undefined. don't emit opmod for it because
       // this could cause issues in simplifier/codegen
       // this should never get reached anyway, we just need to dump
@@ -4604,13 +4609,13 @@ void HhbcTranslator::emitBitNot() {
   auto const srcType = topC()->type();
   if (srcType <= Type::Int) {
     auto const src = popC();
-    push(gen(BitNot, src));
+    push(gen(XorInt, src, cns(-1)));
     return;
   }
 
   if (srcType <= Type::Dbl) {
     auto const src = gen(ConvDblToInt, popC());
-    push(gen(BitNot, src));
+    push(gen(XorInt, src, cns(-1)));
     return;
   }
 
@@ -4625,7 +4630,7 @@ void HhbcTranslator::emitXor() {
   SSATmp* btl = popC();
   SSATmp* tr = gen(ConvCellToBool, btr);
   SSATmp* tl = gen(ConvCellToBool, btl);
-  push(gen(ConvCellToBool, gen(LogicXor, tl, tr)));
+  push(gen(XorBool, tl, tr));
   gen(DecRef, btl);
   gen(DecRef, btr);
 }
@@ -5507,7 +5512,7 @@ void HhbcTranslator::checkStrictlyInteger(
     keyType = KeyType::Str;
     if (key->isConst()) {
       int64_t i;
-      if (key->getValStr()->isStrictlyInteger(i)) {
+      if (key->strVal()->isStrictlyInteger(i)) {
         keyType = KeyType::Int;
         key = cns(i);
       }

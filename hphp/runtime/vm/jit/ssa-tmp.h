@@ -47,17 +47,17 @@ public:
    *
    * Pre: inst() && isConst()
    */
-  bool               getValBool() const      { return type().boolVal(); }
-  int64_t            getValInt() const       { return type().intVal(); }
-  int64_t            getValRawInt() const    { return type().rawVal(); }
-  double             getValDbl() const       { return type().dblVal(); }
-  const StringData*  getValStr() const       { return type().strVal(); }
-  const ArrayData*   getValArr() const       { return type().arrVal(); }
-  const Func*        getValFunc() const      { return type().funcVal(); }
-  const Class*       getValClass() const     { return type().clsVal(); }
-  RDS::Handle        getValRDSHandle() const { return type().rdsHandleVal(); }
-  TCA                getValTCA() const       { return type().tcaVal(); }
-  Variant            getValVariant() const;
+  bool               boolVal() const      { return type().boolVal(); }
+  int64_t            intVal() const       { return type().intVal(); }
+  uint64_t           rawVal() const       { return type().rawVal(); }
+  double             dblVal() const       { return type().dblVal(); }
+  const StringData*  strVal() const       { return type().strVal(); }
+  const ArrayData*   arrVal() const       { return type().arrVal(); }
+  const Func*        funcVal() const      { return type().funcVal(); }
+  const Class*       clsVal() const       { return type().clsVal(); }
+  RDS::Handle        rdsHandleVal() const { return type().rdsHandleVal(); }
+  TCA                tcaVal() const       { return type().tcaVal(); }
+  Variant            variantVal() const;
 
   /*
    * Returns: Type::subtypeOf(type(), tag).

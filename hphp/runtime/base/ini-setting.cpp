@@ -79,11 +79,72 @@ static std::string dynamic_to_std_string(const folly::dynamic& v) {
   not_reached();
 }
 
+/**
+ * I was going to make this a constructor for Variant, but both folly::dynamic
+ * and Variant have so many overrides that everything becomes ambiguous.
+ **/
+static Variant dynamic_to_variant(const folly::dynamic& v) {
+  switch (v.type()) {
+    case folly::dynamic::Type::NULLT:
+      return init_null_variant;
+    case folly::dynamic::Type::BOOL:
+      return v.asBool();
+    case folly::dynamic::Type::DOUBLE:
+      return v.asDouble();
+    case folly::dynamic::Type::INT64:
+      return v.asInt();
+    case folly::dynamic::Type::STRING:
+      return v.data();
+    case folly::dynamic::Type::ARRAY:
+    case folly::dynamic::Type::OBJECT:
+      ArrayInit ret(v.size());
+      for (auto& item : v.items()) {
+        ret.add(dynamic_to_variant(item.first),
+                dynamic_to_variant(item.second));
+      }
+      return ret.toArray();
+  }
+  not_reached();
+}
+
+static folly::dynamic variant_to_dynamic(const Variant& v) {
+  switch (v.getType()) {
+    case KindOfUninit:
+    case KindOfNull:
+    default:
+      return nullptr;
+    case KindOfBoolean:
+      return v.toBoolean();
+    case KindOfDouble:
+      return v.toDouble();
+    case KindOfInt64:
+      return v.toInt64();
+    case KindOfString:
+    case KindOfStaticString:
+      return v.toString().data();
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+      folly::dynamic ret = folly::dynamic::object;
+      for (ArrayIter iter(v.toArray()); iter; ++iter) {
+        ret.insert(variant_to_dynamic(iter.first()),
+                   variant_to_dynamic(iter.second()));
+      }
+      return ret;
+  }
+  not_reached();
+}
+
 #define INI_ASSERT_STR(v) \
   if (value.isArray() || value.isObject()) { \
     return false; \
   } \
   auto str = dynamic_to_std_string(v);
+
+#define INI_ASSERT_ARR(v) \
+  if (!value.isArray() && !value.isObject()) { \
+    return false; \
+  }
 
 bool ini_on_update(const folly::dynamic& value, bool& p) {
   INI_ASSERT_STR(value);
@@ -173,6 +234,20 @@ bool ini_on_update(const folly::dynamic& value, String& p) {
   return true;
 }
 
+bool ini_on_update(const folly::dynamic& value, Array& p) {
+  INI_ASSERT_ARR(value);
+  p = dynamic_to_variant(value).toArray();
+  return true;
+}
+
+bool ini_on_update(const folly::dynamic& value, std::set<std::string>& p) {
+  INI_ASSERT_ARR(value);
+  for (auto& v : value.values()) {
+    p.insert(v.data());
+  }
+  return true;
+}
+
 folly::dynamic ini_get(bool& p) {
   return p ? "1" : "";
 }
@@ -211,6 +286,23 @@ folly::dynamic ini_get(std::string& p) {
 
 folly::dynamic ini_get(String& p) {
   return p.data();
+}
+
+folly::dynamic ini_get(Array& p) {
+  folly::dynamic ret = folly::dynamic::object;
+  for (ArrayIter iter(p); iter; ++iter) {
+    ret.insert(variant_to_dynamic(iter.first()),
+               variant_to_dynamic(iter.second()));
+  }
+  return ret;
+}
+
+folly::dynamic ini_get(std::set<std::string>& p) {
+  folly::dynamic ret = folly::dynamic::object;
+  for (auto& s : p) {
+    ret.push_back(s);
+  }
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -492,16 +584,23 @@ void IniSetting::Unbind(const char *name) {
   s_user_callbacks->erase(name);
 }
 
-bool IniSetting::Get(const std::string& name, folly::dynamic& value) {
+static IniCallbackData* get_callback(const std::string& name) {
   CallbackMap::iterator iter = s_system_ini_callbacks.find(name.data());
   if (iter == s_system_ini_callbacks.end()) {
     iter = s_user_callbacks->find(name.data());
     if (iter == s_user_callbacks->end()) {
-      return false;
+      return nullptr;
     }
   }
+  return &iter->second;
+}
 
-  value = iter->second.getCallback();
+bool IniSetting::Get(const std::string& name, folly::dynamic& value) {
+  auto cb = get_callback(name);
+  if (!cb) {
+    return false;
+  }
+  value = cb->getCallback();
   return true;
 }
 
@@ -519,62 +618,6 @@ bool IniSetting::Get(const String& name, String& value) {
   return ret;
 }
 
-/**
- * I was going to make this a constructor for Variant, but both folly::dynamic
- * and Variant have so many overrides that everything becomes ambiguous.
- **/
-static Variant dynamic_to_variant(const folly::dynamic& v) {
-  switch (v.type()) {
-    case folly::dynamic::Type::NULLT:
-      return init_null_variant;
-    case folly::dynamic::Type::BOOL:
-      return v.asBool();
-    case folly::dynamic::Type::DOUBLE:
-      return v.asDouble();
-    case folly::dynamic::Type::INT64:
-      return v.asInt();
-    case folly::dynamic::Type::STRING:
-      return v.data();
-    case folly::dynamic::Type::ARRAY:
-    case folly::dynamic::Type::OBJECT:
-      ArrayInit ret(v.size());
-      for (auto& item : v.items()) {
-        ret.add(dynamic_to_variant(item.first),
-                dynamic_to_variant(item.second));
-      }
-      return ret.toArray();
-  }
-  not_reached();
-}
-
-static folly::dynamic variant_to_dynamic(const Variant& v) {
-  switch (v.getType()) {
-    case KindOfUninit:
-    case KindOfNull:
-    default:
-      return nullptr;
-    case KindOfBoolean:
-      return v.toBoolean();
-    case KindOfDouble:
-      return v.toDouble();
-    case KindOfInt64:
-      return v.toInt64();
-    case KindOfStaticString:
-    case KindOfString:
-      return v.toString().data();
-    case KindOfArray:
-    case KindOfObject:
-    case KindOfResource:
-      folly::dynamic ret = folly::dynamic::object;
-      for (ArrayIter iter(v.toArray()); iter; ++iter) {
-        ret.insert(variant_to_dynamic(iter.first()),
-                   variant_to_dynamic(iter.second()));
-      }
-      return ret;
-  }
-  not_reached();
-}
-
 bool IniSetting::Get(const String& name, Variant& value) {
   folly::dynamic b = nullptr;
   auto ret = Get(name.toCppString(), b);
@@ -590,13 +633,11 @@ std::string IniSetting::Get(const std::string& name) {
 
 static bool ini_set(const std::string& name, const folly::dynamic& value,
                     IniSetting::Mode mode) {
-  CallbackMap::iterator iter = s_user_callbacks->find(name.data());
-  if (iter != s_user_callbacks->end()) {
-    if ((iter->second.mode & mode) && iter->second.updateCallback) {
-      return iter->second.updateCallback(value);
-    }
+  auto cb = get_callback(name);
+  if (!cb || !(cb->mode & mode)) {
+    return false;
   }
-  return false;
+  return cb->updateCallback(value);
 }
 
 bool IniSetting::Set(const std::string& name, const folly::dynamic& value,

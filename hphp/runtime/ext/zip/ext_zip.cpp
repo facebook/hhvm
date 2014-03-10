@@ -215,7 +215,7 @@ class ZipDirectory: public SweepableResourceData {
     bool noError = true;
     if (isValid()) {
       if (zip_close(m_zip) != 0) {
-        _zip_free(m_zip);
+        zip_discard(m_zip);
         noError = false;
       }
       m_zip = nullptr;
@@ -497,6 +497,7 @@ static bool HHVM_METHOD(ZipArchive, addEmptyDir, const String& dirname) {
     return false;
   }
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -522,6 +523,7 @@ static bool addFile(zip* zipStruct, const char* source, const char* dest,
     }
   }
 
+  zip_error_clear(zipStruct);
   return true;
 }
 
@@ -570,6 +572,7 @@ static bool HHVM_METHOD(ZipArchive, addFromString, const String& localname,
     }
   }
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -671,6 +674,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, const Array& optio
     }
   }
 
+  zip_error_clear(zipStruct);
   return true;
 }
 
@@ -716,6 +720,7 @@ static bool HHVM_METHOD(ZipArchive, deleteIndex, int64_t index) {
     return false;
   }
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -734,6 +739,7 @@ static bool HHVM_METHOD(ZipArchive, deleteName, const String& name) {
     return false;
   }
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -829,6 +835,7 @@ static bool HHVM_METHOD(ZipArchive, extractTo, const String& destination,
     }
   }
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -1028,6 +1035,7 @@ static Variant HHVM_METHOD(ZipArchive, open, const String& filename,
   setVariable(this_, "zipDir", Resource(zipDir));
   setVariable(this_, "filename", filename);
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -1043,6 +1051,7 @@ static bool HHVM_METHOD(ZipArchive, renameIndex, int64_t index,
     return false;
   }
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -1062,6 +1071,7 @@ static bool HHVM_METHOD(ZipArchive, renameName, const String& name,
     return false;
   }
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -1075,6 +1085,7 @@ static bool HHVM_METHOD(ZipArchive, setArchiveComment, const String& comment) {
     return false;
   }
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -1093,6 +1104,8 @@ static bool HHVM_METHOD(ZipArchive, setCommentIndex, int64_t index,
                            comment.length()) != 0 ) {
     return false;
   }
+
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -1110,6 +1123,8 @@ static bool HHVM_METHOD(ZipArchive, setCommentName, const String& name,
                            comment.length()) != 0 ) {
     return false;
   }
+
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -1170,6 +1185,7 @@ static bool HHVM_METHOD(ZipArchive, unchangeAll) {
     return false;
   }
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -1182,6 +1198,7 @@ static bool HHVM_METHOD(ZipArchive, unchangeArchive) {
     return false;
   }
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -1195,6 +1212,7 @@ static bool HHVM_METHOD(ZipArchive, unchangeIndex, int64_t index) {
     return false;
   }
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -1213,6 +1231,7 @@ static bool HHVM_METHOD(ZipArchive, unchangeName, const String& name) {
     return false;
   }
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 
@@ -1277,6 +1296,7 @@ static bool HHVM_FUNCTION(zip_entry_open, const Resource& zip, const Resource& z
   FAIL_IF_INVALID_ZIPDIRECTORY(zip_entry_open, zipDir);
   FAIL_IF_INVALID_ZIPENTRY(zip_entry_open, zipEntry);
 
+  zip_error_clear(zipDir->getZip());
   return true;
 }
 

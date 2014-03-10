@@ -1,6 +1,6 @@
 /*
-  zip_source_close.c -- close zip_source (stop reading)
-  Copyright (C) 2009 Dieter Baron and Thomas Klausner
+  zip_add_entry.c -- create and init struct zip_entry
+  Copyright (C) 1999-2012 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -32,21 +32,34 @@
 */
 
 
+#include <stdlib.h>
+
 #include "zipint.h"
 
 
-void
-zip_source_close(struct zip_source *src)
-{
-    if (!src->is_open)
-	return;
+/* NOTE: Signed due to -1 on error.  See zip_add.c for more details. */
 
-    if (src->src == NULL)
-	(void)src->cb.f(src->ud, NULL, 0, ZIP_SOURCE_CLOSE);
-    else {
-	(void)src->cb.l(src->src, src->ud, NULL, 0, ZIP_SOURCE_CLOSE);
-	zip_source_close(src->src);
+zip_int64_t
+_zip_add_entry(struct zip *za)
+{
+    zip_uint64_t idx;
+
+    if (za->nentry+1 >= za->nentry_alloc) {
+	struct zip_entry *rentries;
+	zip_uint64_t nalloc = za->nentry_alloc + 16;
+        /* TODO check for overflow */
+	rentries = (struct zip_entry *)realloc(za->entry, sizeof(struct zip_entry) * (size_t)nalloc);
+	if (!rentries) {
+	    _zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
+	    return -1;
+	}
+	za->entry = rentries;
+	za->nentry_alloc = nalloc;
     }
-    
-    src->is_open = 0;
+
+    idx = za->nentry++;
+
+    _zip_entry_init(za->entry+idx);
+
+    return (zip_int64_t)idx;
 }

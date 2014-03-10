@@ -1,6 +1,6 @@
 /*
-  zip_source_close.c -- close zip_source (stop reading)
-  Copyright (C) 2009 Dieter Baron and Thomas Klausner
+  zip_dir_add.c -- add directory
+  Copyright (C) 1999-2013 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -32,21 +32,62 @@
 */
 
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "zipint.h"
 
 
-void
-zip_source_close(struct zip_source *src)
-{
-    if (!src->is_open)
-	return;
+/* NOTE: Signed due to -1 on error.  See zip_add.c for more details. */
 
-    if (src->src == NULL)
-	(void)src->cb.f(src->ud, NULL, 0, ZIP_SOURCE_CLOSE);
-    else {
-	(void)src->cb.l(src->src, src->ud, NULL, 0, ZIP_SOURCE_CLOSE);
-	zip_source_close(src->src);
+ZIP_EXTERN zip_int64_t
+zip_dir_add(struct zip *za, const char *name, zip_flags_t flags)
+{
+    size_t len;
+    zip_int64_t idx;
+    char *s;
+    struct zip_source *source;
+
+    if (ZIP_IS_RDONLY(za)) {
+	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
+	return -1;
     }
-    
-    src->is_open = 0;
+
+    if (name == NULL) {
+	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	return -1;
+    }
+
+    s = NULL;
+    len = strlen(name);
+
+    if (name[len-1] != '/') {
+	if ((s=(char *)malloc(len+2)) == NULL) {
+	    _zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
+	    return -1;
+	}
+	strcpy(s, name);
+	s[len] = '/';
+	s[len+1] = '\0';
+    }
+
+    if ((source=zip_source_buffer(za, NULL, 0, 0)) == NULL) {
+	free(s);
+	return -1;
+    }
+	
+    idx = _zip_file_replace(za, ZIP_UINT64_MAX, s ? s : name, source, flags);
+
+    free(s);
+
+    if (idx < 0)
+	zip_source_free(source);
+    else {
+	if (zip_file_set_external_attributes(za, (zip_uint64_t)idx, 0, ZIP_OPSYS_DEFAULT, ZIP_EXT_ATTRIB_DEFAULT_DIR) < 0) {
+	    zip_delete(za, (zip_uint64_t)idx);
+	    return -1;
+	}
+    }
+
+    return idx;
 }

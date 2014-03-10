@@ -1,6 +1,6 @@
 /*
-  zip_source_close.c -- close zip_source (stop reading)
-  Copyright (C) 2009 Dieter Baron and Thomas Klausner
+  zip_file_get_external_attributes.c -- get opsys/external attributes
+  Copyright (C) 2013 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -31,22 +31,21 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 #include "zipint.h"
 
-
-void
-zip_source_close(struct zip_source *src)
+int
+zip_file_get_external_attributes(struct zip *za, zip_uint64_t idx, zip_flags_t flags, zip_uint8_t *opsys, zip_uint32_t *attributes)
 {
-    if (!src->is_open)
-	return;
+    struct zip_dirent *de;
 
-    if (src->src == NULL)
-	(void)src->cb.f(src->ud, NULL, 0, ZIP_SOURCE_CLOSE);
-    else {
-	(void)src->cb.l(src->src, src->ud, NULL, 0, ZIP_SOURCE_CLOSE);
-	zip_source_close(src->src);
-    }
-    
-    src->is_open = 0;
+    if ((de=_zip_get_dirent(za, idx, flags, NULL)) == NULL)
+	return -1;
+
+    if (opsys)
+	*opsys = (de->version_madeby >> 8) & 0xff;
+
+    if (attributes)
+	*attributes = de->ext_attrib;
+
+    return 0;
 }

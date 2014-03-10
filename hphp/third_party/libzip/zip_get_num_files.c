@@ -31,17 +31,17 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
+#define _ZIP_COMPILING_DEPRECATED
 #include "zipint.h"
 
-
 
-ZIP_EXTERN(int)
+ZIP_EXTERN int
 zip_get_num_files(struct zip *za)
 {
     if (za == NULL)
 	return -1;
 
-    return za->nentry;
+    /* TODO: check for overflow */
+    return (int)za->nentry;
 }

@@ -31,17 +31,28 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include "zipint.h"
 
-
 
-ZIP_EXTERN(struct zip *)
-zip_fdopen(int fd_orig, int flags, int *zep)
+ZIP_EXTERN struct zip *
+zip_fdopen(int fd_orig, int _flags, int *zep)
 {
     int fd;
     FILE *fp;
+    unsigned int flags;
+
+    if (_flags < 0) {
+        if (zep)
+            *zep = ZIP_ER_INVAL;
+        return  NULL;
+    }
+    flags = (unsigned int)_flags;
+        
+    if (flags & ZIP_TRUNCATE) {
+	*zep = ZIP_ER_INVAL;
+	return NULL;
+    }
 
     /* We dup() here to avoid messing with the passed in fd.
        We could not restore it to the original state in case of error. */
@@ -58,5 +69,5 @@ zip_fdopen(int fd_orig, int flags, int *zep)
     }
 
     close(fd_orig);
-    return _zip_open(NULL, fp, flags, ZIP_AFL_RDONLY, zep);
+    return _zip_open(NULL, fp, flags, zep);
 }

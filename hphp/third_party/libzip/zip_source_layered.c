@@ -31,15 +31,13 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include <stdlib.h>
 
 #include "zipint.h"
 
-
 
-ZIP_EXTERN(struct zip_source *)
+struct zip_source *
 zip_source_layered(struct zip *za, struct zip_source *src,
 		   zip_source_layered_callback cb, void *ud)
 {

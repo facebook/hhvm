@@ -1,5 +1,5 @@
 /*
-  zip_set_name.c -- rename helper function
+  zip_file_replace.c -- replace file via callback function
   Copyright (C) 1999-2012 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
@@ -32,84 +32,77 @@
 */
 
 
-#include <stdlib.h>
-#include <string.h>
-
 #include "zipint.h"
 
 
-int
-_zip_set_name(struct zip *za, zip_uint64_t idx, const char *name, zip_flags_t flags)
+ZIP_EXTERN int
+zip_file_replace(struct zip *za, zip_uint64_t idx, struct zip_source *source, zip_flags_t flags)
 {
-    struct zip_entry *e;
-    struct zip_string *str;
-    int changed;
-    zip_int64_t i;
-
-    if (idx >= za->nentry) {
+    if (idx >= za->nentry || source == NULL) {
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return -1;
     }
 
+    if (_zip_file_replace(za, idx, NULL, source, flags) == -1)
+	return -1;
+
+    return 0;
+}
+
+
+
+/* NOTE: Signed due to -1 on error.  See zip_add.c for more details. */
+
+zip_int64_t
+_zip_file_replace(struct zip *za, zip_uint64_t idx, const char *name, struct zip_source *source, zip_flags_t flags)
+{
+    zip_uint64_t za_nentry_prev;
+    
     if (ZIP_IS_RDONLY(za)) {
 	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
 	return -1;
     }
 
-    if (name && strlen(name) > 0) {
-        /* TODO: check for string too long */
-	if ((str=_zip_string_new((const zip_uint8_t *)name, (zip_uint16_t)strlen(name), flags, &za->error)) == NULL)
-	    return -1;
-	if ((flags & ZIP_FL_ENCODING_ALL) == ZIP_FL_ENC_GUESS && _zip_guess_encoding(str, ZIP_ENCODING_UNKNOWN) == ZIP_ENCODING_UTF8_GUESSED)
-	    str->encoding = ZIP_ENCODING_UTF8_KNOWN;
-    }
-    else
-	str = NULL;
+    za_nentry_prev = za->nentry;
+    if (idx == ZIP_UINT64_MAX) {
+	zip_int64_t i = -1;
+	
+	if (flags & ZIP_FL_OVERWRITE)
+	    i = _zip_name_locate(za, name, flags, NULL);
 
-    /* TODO: encoding flags needed for CP437? */
-    if ((i=_zip_name_locate(za, name, 0, NULL)) >= 0 && (zip_uint64_t)i != idx) {
-	_zip_string_free(str);
-	_zip_error_set(&za->error, ZIP_ER_EXISTS, 0);
+	if (i == -1) {
+	    /* create and use new entry, used by zip_add */
+	    if ((i=_zip_add_entry(za)) < 0)
+		return -1;
+	}
+	idx = (zip_uint64_t)i;
+    }
+    
+    if (name && _zip_set_name(za, idx, name, flags) != 0) {
+	if (za->nentry != za_nentry_prev) {
+	    _zip_entry_finalize(za->entry+idx);
+	    za->nentry = za_nentry_prev;
+	}
 	return -1;
     }
 
-    /* no effective name change */
-    if (i>=0 && (zip_uint64_t)i == idx) {
-	_zip_string_free(str);
-	return 0;
-    }
+    /* does not change any name related data, so we can do it here;
+     * needed for a double add of the same file name */
+    _zip_unchange_data(za->entry+idx);
 
-    e = za->entry+idx;
-
-    if (e->changes) {
-	_zip_string_free(e->changes->filename);
-	e->changes->filename = NULL;
-	e->changes->changed &= ~ZIP_DIRENT_FILENAME;
-    }
-
-    if (e->orig)
-	changed = !_zip_string_equal(e->orig->filename, str);
-    else
-	changed = 1;
-	
-    if (changed) {
-        if (e->changes == NULL) {
-            if ((e->changes=_zip_dirent_clone(e->orig)) == NULL) {
+    if (za->entry[idx].orig != NULL && (za->entry[idx].changes == NULL || (za->entry[idx].changes->changed & ZIP_DIRENT_COMP_METHOD) == 0)) {
+        if (za->entry[idx].changes == NULL) {
+            if ((za->entry[idx].changes=_zip_dirent_clone(za->entry[idx].orig)) == NULL) {
                 _zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
-		_zip_string_free(str);
                 return -1;
             }
         }
-        e->changes->filename = str;
-        e->changes->changed |= ZIP_DIRENT_FILENAME;
-    }
-    else {
-	_zip_string_free(str);
-	if (e->changes && e->changes->changed == 0) {
-	    _zip_dirent_free(e->changes);
-	    e->changes = NULL;
-	}
-    }
 
-    return 0;
+        za->entry[idx].changes->comp_method = ZIP_CM_REPLACED_DEFAULT;
+        za->entry[idx].changes->changed |= ZIP_DIRENT_COMP_METHOD;
+    }
+	
+    za->entry[idx].source = source;
+
+    return (zip_int64_t)idx;
 }

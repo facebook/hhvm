@@ -1,6 +1,6 @@
 /*
-  zip_source_buffer.c -- create zip data source from buffer
-  Copyright (C) 1999-2009 Dieter Baron and Thomas Klausner
+  zip_source_window.c -- return part of lower source
+  Copyright (C) 2012-2013 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -37,122 +37,111 @@
 
 #include "zipint.h"
 
-struct read_data {
-    const char *buf, *data, *end;
-    time_t mtime;
-    int freep;
+struct window {
+    zip_uint64_t skip;
+    zip_uint64_t len;
+    zip_uint64_t left;
+    int e[2];
 };
 
-static zip_int64_t read_data(void *, void *, zip_uint64_t, enum zip_source_cmd);
+static zip_int64_t window_read(struct zip_source *, void *, void *,
+			       zip_uint64_t, enum zip_source_cmd);
 
 
-ZIP_EXTERN struct zip_source *
-zip_source_buffer(struct zip *za, const void *data, zip_uint64_t len, int freep)
+struct zip_source *
+zip_source_window(struct zip *za, struct zip_source *src, zip_uint64_t start, zip_uint64_t len)
 {
-    struct read_data *f;
-    struct zip_source *zs;
+    struct window *ctx;
 
-    if (za == NULL)
-	return NULL;
-
-    if (data == NULL && len > 0) {
+    if (src == NULL) {
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return NULL;
     }
 
-    if ((f=(struct read_data *)malloc(sizeof(*f))) == NULL) {
+    if ((ctx=(struct window *)malloc(sizeof(*ctx))) == NULL) {
 	_zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
 	return NULL;
     }
 
-    f->data = (const char *)data;
-    f->end = ((const char *)data)+len;
-    f->freep = freep;
-    f->mtime = time(NULL);
-    
-    if ((zs=zip_source_function(za, read_data, f)) == NULL) {
-	free(f);
-	return NULL;
-    }
+    ctx->skip = start;
+    ctx->len = len;
+    ctx->left = len;
 
-    return zs;
+    return zip_source_layered(za, src, window_read, ctx);
 }
 
 
 static zip_int64_t
-read_data(void *state, void *data, zip_uint64_t len, enum zip_source_cmd cmd)
+window_read(struct zip_source *src, void *_ctx, void *data,
+	    zip_uint64_t len, enum zip_source_cmd cmd)
 {
-    struct read_data *z;
-    char *buf;
-    zip_uint64_t n;
+    struct window *ctx;
+    zip_int64_t ret;
+    zip_uint64_t n, i;
+    char b[8192];
 
-    z = (struct read_data *)state;
-    buf = (char *)data;
+    ctx = (struct window *)_ctx;
 
     switch (cmd) {
     case ZIP_SOURCE_OPEN:
-	z->buf = z->data;
-	return 0;
-	
-    case ZIP_SOURCE_READ:
-	n = (zip_uint64_t)(z->end - z->buf);
-	if (n > len)
-	    n = len;
-
-	if (n) {
-	    memcpy(buf, z->buf, n);
-	    z->buf += n;
+	for (n=0; n<ctx->skip; n+=(zip_uint64_t)ret) {
+	    i = (ctx->skip-n > sizeof(b) ? sizeof(b) : ctx->skip-n);
+	    if ((ret=zip_source_read(src, b, i)) < 0)
+		return ZIP_SOURCE_ERR_LOWER;
+	    if (ret==0) {
+		ctx->e[0] = ZIP_ER_EOF;
+		ctx->e[1] = 0;
+		return -1;
+	    }
 	}
+	return 0;
 
-	return (zip_int64_t)n;
+    case ZIP_SOURCE_READ:
+	if (len > ctx->left)
+	    len = ctx->left;
 	
+	if (len == 0)
+	    return 0;
+
+	if ((ret=zip_source_read(src, data, len)) < 0)
+	    return ZIP_SOURCE_ERR_LOWER;
+
+	ctx->left -= (zip_uint64_t)ret;
+
+        if (ret == 0) {
+	    if (ctx->left > 0) {
+		ctx->e[0] = ZIP_ER_EOF;
+		ctx->e[1] = 0;
+		return -1;
+	    }
+	}
+	return ret;
+
     case ZIP_SOURCE_CLOSE:
 	return 0;
 
     case ZIP_SOURCE_STAT:
-        {
+	{
 	    struct zip_stat *st;
-	    
-	    if (len < sizeof(*st))
-		return -1;
 
 	    st = (struct zip_stat *)data;
 
-	    zip_stat_init(st);
-	    st->mtime = z->mtime;
-	    st->size = (zip_uint64_t)(z->end - z->data);
-	    st->comp_size = st->size;
-	    st->comp_method = ZIP_CM_STORE;
-	    st->encryption_method = ZIP_EM_NONE;
-	    st->valid = ZIP_STAT_MTIME|ZIP_STAT_SIZE|ZIP_STAT_COMP_SIZE
-		|ZIP_STAT_COMP_METHOD|ZIP_STAT_ENCRYPTION_METHOD;
-	    
-	    return sizeof(*st);
+	    st->size = ctx->len;
+	    st->valid |= ZIP_STAT_SIZE;
+	    st->valid &= ~(ZIP_STAT_CRC|ZIP_STAT_COMP_SIZE);
 	}
-
+	return 0;
+	
     case ZIP_SOURCE_ERROR:
-	{
-	    int *e;
-
-	    if (len < sizeof(int)*2)
-		return -1;
-
-	    e = (int *)data;
-	    e[0] = e[1] = 0;
-	}
-	return sizeof(int)*2;
+	memcpy(data, ctx->e, sizeof(ctx->e));
+	return 0;
 
     case ZIP_SOURCE_FREE:
-	if (z->freep) {
-	    free((void *)z->data);
-	    z->data = NULL;
-	}
-	free(z);
+	free(ctx);
 	return 0;
 
     default:
-	;
+	return -1;
     }
-
-    return -1;
+    
 }

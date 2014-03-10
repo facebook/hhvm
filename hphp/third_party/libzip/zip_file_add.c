@@ -1,6 +1,6 @@
 /*
-  zip_entry_new.c -- create and init struct zip_entry
-  Copyright (C) 1999-2009 Dieter Baron and Thomas Klausner
+  zip_file_add.c -- add file via callback function
+  Copyright (C) 1999-2012 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -31,51 +31,23 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
-
-#include <stdlib.h>
 
 #include "zipint.h"
 
-
+/*
+  NOTE: Return type is signed so we can return -1 on error.
+        The index can not be larger than ZIP_INT64_MAX since the size
+        of the central directory cannot be larger than
+        ZIP_UINT64_MAX, and each entry is larger than 2 bytes.
+*/
 
-struct zip_entry *
-_zip_entry_new(struct zip *za)
+ZIP_EXTERN zip_int64_t
+zip_file_add(struct zip *za, const char *name, struct zip_source *source, zip_flags_t flags)
 {
-    struct zip_entry *ze;
-    if (!za) {
-	ze = (struct zip_entry *)malloc(sizeof(struct zip_entry));
-	if (!ze) {
-	    return NULL;
-	}
+    if (name == NULL || source == NULL) {
+	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	return -1;
     }
-    else {
-	if (za->nentry+1 >= za->nentry_alloc) {
-	    struct zip_entry *rentries;
-	    za->nentry_alloc += 16;
-	    rentries = (struct zip_entry *)realloc(za->entry,
-						   sizeof(struct zip_entry)
-						   * za->nentry_alloc);
-	    if (!rentries) {
-		_zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
-		return NULL;
-	    }
-	    za->entry = rentries;
-	}
-	ze = za->entry+za->nentry;
-    }
-
-    ze->state = ZIP_ST_UNCHANGED;
-
-    ze->ch_filename = NULL;
-    ze->ch_extra = NULL;
-    ze->ch_extra_len = -1;
-    ze->ch_comment = NULL;
-    ze->ch_comment_len = -1;
-    ze->source = NULL;
-
-    if (za)
-	za->nentry++;
-
-    return ze;
+	
+    return _zip_file_replace(za, ZIP_UINT64_MAX, name, source, flags);
 }

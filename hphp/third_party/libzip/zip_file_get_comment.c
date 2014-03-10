@@ -1,6 +1,6 @@
 /*
-  zip_source_close.c -- close zip_source (stop reading)
-  Copyright (C) 2009 Dieter Baron and Thomas Klausner
+  zip_file_get_comment.c -- get file comment
+  Copyright (C) 2006-2012 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -34,19 +34,23 @@
 
 #include "zipint.h"
 
+/* lenp is 32 bit because converted comment can be longer than ZIP_UINT16_MAX */
 
-void
-zip_source_close(struct zip_source *src)
+ZIP_EXTERN const char *
+zip_file_get_comment(struct zip *za, zip_uint64_t idx, zip_uint32_t *lenp, zip_flags_t flags)
 {
-    if (!src->is_open)
-	return;
+    struct zip_dirent *de;
+    zip_uint32_t len;
+    const zip_uint8_t *str;
 
-    if (src->src == NULL)
-	(void)src->cb.f(src->ud, NULL, 0, ZIP_SOURCE_CLOSE);
-    else {
-	(void)src->cb.l(src->src, src->ud, NULL, 0, ZIP_SOURCE_CLOSE);
-	zip_source_close(src->src);
-    }
-    
-    src->is_open = 0;
+    if ((de=_zip_get_dirent(za, idx, flags, NULL)) == NULL)
+	return NULL;
+
+    if ((str=_zip_string_get(de->comment, &len, flags, &za->error)) == NULL)
+	return NULL;
+
+    if (lenp)
+	*lenp = len;
+
+    return (const char *)str;
 }

@@ -1,6 +1,6 @@
 /*
-  zip_set_file_extra.c -- set extra field for file in archive
-  Copyright (C) 2006-2010 Dieter Baron and Thomas Klausner
+  zip_file_set_external_attributes.c -- set external attributes for entry
+  Copyright (C) 2013 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
-
+ 
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,42 +31,53 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
-
-#include <stdlib.h>
-
 #include "zipint.h"
 
-
-
-ZIP_EXTERN(int)
-zip_set_file_extra(struct zip *za, zip_uint64_t idx,
-		   const char *extra, int len)
+int
+zip_file_set_external_attributes(struct zip *za, zip_uint64_t idx, zip_flags_t flags, zip_uint8_t opsys, zip_uint32_t attributes)
 {
-    char *tmpext;
+    struct zip_entry *e;
+    int changed;
+    zip_uint8_t unchanged_opsys;
+    zip_uint32_t unchanged_attributes;
 
-    if (idx >= za->nentry
-	|| len < 0 || len > MAXEXTLEN
-	|| (len > 0 && extra == NULL)) {
-	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+    if (_zip_get_dirent(za, idx, 0, NULL) == NULL)
 	return -1;
-    }
 
     if (ZIP_IS_RDONLY(za)) {
 	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
 	return -1;
     }
 
-    if (len > 0) {
-	if ((tmpext=(char *)_zip_memdup(extra, len, &za->error)) == NULL)
-	    return -1;
-    }
-    else
-	tmpext = NULL;
+    e = za->entry+idx;
 
-    free(za->entry[idx].ch_extra);
-    za->entry[idx].ch_extra = tmpext;
-    za->entry[idx].ch_extra_len = len;
+    unchanged_opsys = e->orig ? e->orig->version_madeby>>8 : ZIP_OPSYS_DEFAULT;
+    unchanged_attributes = e->orig ? e->orig->ext_attrib : ZIP_EXT_ATTRIB_DEFAULT;
+
+    changed = (opsys != unchanged_opsys || attributes != unchanged_attributes);
+
+    if (changed) {
+        if (e->changes == NULL) {
+            if ((e->changes=_zip_dirent_clone(e->orig)) == NULL) {
+                _zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
+                return -1;
+            }
+        }
+        e->changes->version_madeby = (zip_uint16_t)(opsys << 8) | (e->changes->version_madeby & 0xff);
+	e->changes->ext_attrib = attributes;
+        e->changes->changed |= ZIP_DIRENT_ATTRIBUTES;
+    }
+    else if (e->changes) {
+	e->changes->changed &= ~ZIP_DIRENT_ATTRIBUTES;
+	if (e->changes->changed == 0) {
+	    _zip_dirent_free(e->changes);
+	    e->changes = NULL;
+	}
+	else {
+	    e->changes->version_madeby = (zip_uint16_t)(unchanged_opsys << 8) | (e->changes->version_madeby & 0xff);
+	    e->changes->ext_attrib = unchanged_attributes;
+	}
+    }
 
     return 0;
 }

@@ -303,22 +303,48 @@ IRInstruction* frameRoot(IRInstruction* fpInst) {
 //////////////////////////////////////////////////////////////////////
 
 template<class... Args> SSATmp* Simplifier::cns(Args&&... cns) {
-  return m_irb.cns(std::forward<Args>(cns)...);
+  return m_irb.unit().cns(std::forward<Args>(cns)...);
 }
 
 template<class... Args> SSATmp* Simplifier::gen(Opcode op, Args&&... args) {
   assert(!m_insts.empty());
-  return m_irb.gen(op, m_insts.top()->marker(), std::forward<Args>(args)...);
+  return gen(op, m_insts.top()->marker(), std::forward<Args>(args)...);
 }
 
 template<class... Args> SSATmp* Simplifier::gen(Opcode op, BCMarker marker,
                                                 Args&&... args) {
-  return m_irb.gen(op, marker, std::forward<Args>(args)...);
+  return makeInstruction(
+    [this] (IRInstruction* inst) -> SSATmp* {
+      auto newDest = simplifyWork(inst);
+
+      if (inst->op() == Nop) {
+        return nullptr;
+      }
+
+      if (newDest) {
+        return newDest;
+      } else {
+        assert(inst->isTransient());
+        inst = m_irb.unit().cloneInstruction(inst);
+        this->m_newInsts.push_back(inst);
+
+        return inst->dst(0);
+      }
+    },
+    op,
+    marker,
+    std::forward<Args>(args)...
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* Simplifier::simplify(IRInstruction* inst) {
+Simplifier::Result Simplifier::simplify(IRInstruction* inst) {
+  SSATmp* newDst = simplifyWork(inst);
+  return Result{std::move(m_newInsts), newDst};
+}
+
+SSATmp* Simplifier::simplifyWork(IRInstruction* inst) {
   m_insts.push(inst);
   SCOPE_EXIT {
     assert(m_insts.top() == inst);
@@ -330,135 +356,137 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
 
   Opcode opc = inst->op();
   switch (opc) {
-  case AbsDbl:    return simplifyAbsDbl(inst);
+    case AbsDbl:    return simplifyAbsDbl(inst);
 
-  case AddInt:    return simplifyAddInt(src1, src2);
-  case SubInt:    return simplifySubInt(src1, src2);
-  case MulInt:    return simplifyMulInt(src1, src2);
-  case AddDbl:    return simplifyAddDbl(src1, src2);
-  case SubDbl:    return simplifySubDbl(src1, src2);
-  case MulDbl:    return simplifyMulDbl(src1, src2);
+    case AddInt:    return simplifyAddInt(src1, src2);
+    case SubInt:    return simplifySubInt(src1, src2);
+    case MulInt:    return simplifyMulInt(src1, src2);
+    case AddDbl:    return simplifyAddDbl(src1, src2);
+    case SubDbl:    return simplifySubDbl(src1, src2);
+    case MulDbl:    return simplifyMulDbl(src1, src2);
 
-  case AddIntO:   return simplifyAddIntO(src1, src2);
-  case SubIntO:   return simplifySubIntO(src1, src2);
-  case MulIntO:   return simplifyMulIntO(src1, src2);
+    case AddIntO:   return simplifyAddIntO(src1, src2);
+    case SubIntO:   return simplifySubIntO(src1, src2);
+    case MulIntO:   return simplifyMulIntO(src1, src2);
 
-  case DivDbl:    return simplifyDivDbl(inst);
-  case Mod:       return simplifyMod(src1, src2);
-  case AndInt:    return simplifyAndInt(src1, src2);
-  case OrInt:     return simplifyOrInt(src1, src2);
-  case XorInt:    return simplifyXorInt(src1, src2);
-  case XorBool:   return simplifyXorBool(src1, src2);
-  case Shl:       return simplifyShl(inst);
-  case Shr:       return simplifyShr(inst);
+    case DivDbl:    return simplifyDivDbl(inst);
+    case Mod:       return simplifyMod(src1, src2);
+    case AndInt:    return simplifyAndInt(src1, src2);
+    case OrInt:     return simplifyOrInt(src1, src2);
+    case XorInt:    return simplifyXorInt(src1, src2);
+    case XorBool:   return simplifyXorBool(src1, src2);
+    case Shl:       return simplifyShl(inst);
+    case Shr:       return simplifyShr(inst);
 
-  case Gt:
-  case Gte:
-  case Lt:
-  case Lte:
-  case Eq:
-  case Neq:
-  case GtInt:
-  case GteInt:
-  case LtInt:
-  case LteInt:
-  case EqInt:
-  case NeqInt:
-  case Same:
-  case NSame:
-    return simplifyCmp(opc, inst, src1, src2);
+    case Gt:
+    case Gte:
+    case Lt:
+    case Lte:
+    case Eq:
+    case Neq:
+    case GtInt:
+    case GteInt:
+    case LtInt:
+    case LteInt:
+    case EqInt:
+    case NeqInt:
+    case Same:
+    case NSame:
+      return simplifyCmp(opc, inst, src1, src2);
 
-  case ConcatCellCell: return simplifyConcatCellCell(inst);
-  case ConcatStrStr:  return simplifyConcatStrStr(src1, src2);
-  case Mov:           return simplifyMov(src1);
-  case ConvBoolToArr: return simplifyConvToArr(inst);
-  case ConvDblToArr:  return simplifyConvToArr(inst);
-  case ConvIntToArr:  return simplifyConvToArr(inst);
-  case ConvStrToArr:  return simplifyConvToArr(inst);
-  case ConvArrToBool: return simplifyConvArrToBool(inst);
-  case ConvDblToBool: return simplifyConvDblToBool(inst);
-  case ConvIntToBool: return simplifyConvIntToBool(inst);
-  case ConvStrToBool: return simplifyConvStrToBool(inst);
-  case ConvArrToDbl:  return simplifyConvArrToDbl(inst);
-  case ConvBoolToDbl: return simplifyConvBoolToDbl(inst);
-  case ConvIntToDbl:  return simplifyConvIntToDbl(inst);
-  case ConvStrToDbl:  return simplifyConvStrToDbl(inst);
-  case ConvArrToInt:  return simplifyConvArrToInt(inst);
-  case ConvBoolToInt: return simplifyConvBoolToInt(inst);
-  case ConvDblToInt:  return simplifyConvDblToInt(inst);
-  case ConvStrToInt:  return simplifyConvStrToInt(inst);
-  case ConvBoolToStr: return simplifyConvBoolToStr(inst);
-  case ConvDblToStr:  return simplifyConvDblToStr(inst);
-  case ConvIntToStr:  return simplifyConvIntToStr(inst);
-  case ConvCellToBool:return simplifyConvCellToBool(inst);
-  case ConvCellToStr: return simplifyConvCellToStr(inst);
-  case ConvCellToInt: return simplifyConvCellToInt(inst);
-  case ConvCellToDbl: return simplifyConvCellToDbl(inst);
-  case Floor:         return simplifyFloor(inst);
-  case Ceil:          return simplifyCeil(inst);
-  case Unbox:         return simplifyUnbox(inst);
-  case UnboxPtr:      return simplifyUnboxPtr(inst);
-  case BoxPtr:        return simplifyBoxPtr(inst);
-  case IsType:
-  case IsNType:       return simplifyIsType(inst);
-  case IsScalarType:  return simplifyIsScalarType(inst);
-  case CheckInit:     return simplifyCheckInit(inst);
+    case ConcatCellCell: return simplifyConcatCellCell(inst);
+    case ConcatStrStr:  return simplifyConcatStrStr(src1, src2);
+    case Mov:           return simplifyMov(src1);
+    case ConvBoolToArr: return simplifyConvToArr(inst);
+    case ConvDblToArr:  return simplifyConvToArr(inst);
+    case ConvIntToArr:  return simplifyConvToArr(inst);
+    case ConvStrToArr:  return simplifyConvToArr(inst);
+    case ConvArrToBool: return simplifyConvArrToBool(inst);
+    case ConvDblToBool: return simplifyConvDblToBool(inst);
+    case ConvIntToBool: return simplifyConvIntToBool(inst);
+    case ConvStrToBool: return simplifyConvStrToBool(inst);
+    case ConvArrToDbl:  return simplifyConvArrToDbl(inst);
+    case ConvBoolToDbl: return simplifyConvBoolToDbl(inst);
+    case ConvIntToDbl:  return simplifyConvIntToDbl(inst);
+    case ConvStrToDbl:  return simplifyConvStrToDbl(inst);
+    case ConvArrToInt:  return simplifyConvArrToInt(inst);
+    case ConvBoolToInt: return simplifyConvBoolToInt(inst);
+    case ConvDblToInt:  return simplifyConvDblToInt(inst);
+    case ConvStrToInt:  return simplifyConvStrToInt(inst);
+    case ConvBoolToStr: return simplifyConvBoolToStr(inst);
+    case ConvDblToStr:  return simplifyConvDblToStr(inst);
+    case ConvIntToStr:  return simplifyConvIntToStr(inst);
+    case ConvCellToBool:return simplifyConvCellToBool(inst);
+    case ConvCellToStr: return simplifyConvCellToStr(inst);
+    case ConvCellToInt: return simplifyConvCellToInt(inst);
+    case ConvCellToDbl: return simplifyConvCellToDbl(inst);
+    case Floor:         return simplifyFloor(inst);
+    case Ceil:          return simplifyCeil(inst);
+    case Unbox:         return simplifyUnbox(inst);
+    case UnboxPtr:      return simplifyUnboxPtr(inst);
+    case BoxPtr:        return simplifyBoxPtr(inst);
+    case IsType:
+    case IsNType:       return simplifyIsType(inst);
+    case IsScalarType:  return simplifyIsScalarType(inst);
+    case CheckInit:     return simplifyCheckInit(inst);
 
-  case JmpZero:
-  case JmpNZero:
-    return simplifyCondJmp(inst);
+    case JmpZero:
+    case JmpNZero:
+      return simplifyCondJmp(inst);
 
-  case JmpGt:
-  case JmpGte:
-  case JmpLt:
-  case JmpLte:
-  case JmpEq:
-  case JmpNeq:
-  case JmpGtInt:
-  case JmpGteInt:
-  case JmpLtInt:
-  case JmpLteInt:
-  case JmpEqInt:
-  case JmpNeqInt:
-  case JmpSame:
-  case JmpNSame:
-    return simplifyQueryJmp(inst);
+    case JmpGt:
+    case JmpGte:
+    case JmpLt:
+    case JmpLte:
+    case JmpEq:
+    case JmpNeq:
+    case JmpGtInt:
+    case JmpGteInt:
+    case JmpLtInt:
+    case JmpLteInt:
+    case JmpEqInt:
+    case JmpNeqInt:
+    case JmpSame:
+    case JmpNSame:
+      return simplifyQueryJmp(inst);
 
-  case DecRef:
-  case DecRefNZ:     return simplifyDecRef(inst);
-  case IncRef:       return simplifyIncRef(inst);
-  case IncRefCtx:    return simplifyIncRefCtx(inst);
-  case CheckType:    return simplifyCheckType(inst);
-  case AssertType:   return simplifyAssertType(inst);
-  case CheckStk:     return simplifyCheckStk(inst);
-  case AssertNonNull:return simplifyAssertNonNull(inst);
+    case DecRef:
+    case DecRefNZ:     return simplifyDecRef(inst);
+    case IncRef:       return simplifyIncRef(inst);
+    case IncRefCtx:    return simplifyIncRefCtx(inst);
+    case CheckType:    return simplifyCheckType(inst);
+    case AssertType:   return simplifyAssertType(inst);
+    case CheckStk:     return simplifyCheckStk(inst);
+    case AssertNonNull:return simplifyAssertNonNull(inst);
 
-  case LdCls:        return simplifyLdCls(inst);
-  case LdCtx:        return simplifyLdCtx(inst);
-  case LdClsCtx:     return simplifyLdClsCtx(inst);
-  case GetCtxFwdCall:return simplifyGetCtxFwdCall(inst);
-  case ConvClsToCctx: return simplifyConvClsToCctx(inst);
+    case LdCls:        return simplifyLdCls(inst);
+    case LdCtx:        return simplifyLdCtx(inst);
+    case LdClsCtx:     return simplifyLdClsCtx(inst);
+    case GetCtxFwdCall:return simplifyGetCtxFwdCall(inst);
+    case ConvClsToCctx: return simplifyConvClsToCctx(inst);
 
-  case SpillStack:   return simplifySpillStack(inst);
-  case CastStk:      return simplifyCastStk(inst);
-  case CoerceStk:    return simplifyCoerceStk(inst);
-  case AssertStk:    return simplifyAssertStk(inst);
-  case LdStack:      return simplifyLdStack(inst);
-  case TakeStack:    return simplifyTakeStack(inst);
-  case LdStackAddr:  return simplifyLdStackAddr(inst);
-  case DecRefStack:  return simplifyDecRefStack(inst);
-  case DecRefLoc:    return simplifyDecRefLoc(inst);
-  case LdLoc:        return simplifyLdLoc(inst);
+    case SpillStack:   return simplifySpillStack(inst);
+    case CastStk:      return simplifyCastStk(inst);
+    case CoerceStk:    return simplifyCoerceStk(inst);
+    case AssertStk:    return simplifyAssertStk(inst);
+    case LdStack:      return simplifyLdStack(inst);
+    case TakeStack:    return simplifyTakeStack(inst);
+    case LdStackAddr:  return simplifyLdStackAddr(inst);
+    case DecRefStack:  return simplifyDecRefStack(inst);
+    case DecRefLoc:    return simplifyDecRefLoc(inst);
+    case LdLoc:        return simplifyLdLoc(inst);
 
-  case ExitOnVarEnv: return simplifyExitOnVarEnv(inst);
+    case ExitOnVarEnv: return simplifyExitOnVarEnv(inst);
 
-  case CheckPackedArrayBounds: return simplifyCheckPackedArrayBounds(inst);
-  case LdPackedArrayElem:      return simplifyLdPackedArrayElem(inst);
+    case CheckPackedArrayBounds: return simplifyCheckPackedArrayBounds(inst);
+    case LdPackedArrayElem:      return simplifyLdPackedArrayElem(inst);
 
-  default:
-    return nullptr;
+    default:
+      return nullptr;
   }
 }
+
+//////////////////////////////////////////////////////////////////////
 
 SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
   auto const sp           = inst->src(0);

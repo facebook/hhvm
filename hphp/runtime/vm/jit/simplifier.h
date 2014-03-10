@@ -51,6 +51,17 @@ struct Simplifier {
   explicit Simplifier(IRBuilder& irb) : m_irb(irb) {}
 
   /*
+   * In general, the simplifier transforms one instruction into zero or more
+   * instructions. The pair represents the zero or more instructions to replace
+   * the input with, plus the SSATmp* to use instead of the input instruction's
+   * dst (if any).
+   */
+  struct Result {
+    smart::vector<IRInstruction*> instrs;
+    SSATmp* dst;
+  };
+
+  /*
    * Simplify performs a number of optimizations.
    *
    * In many cases this may involve returning a SSATmp* that should be
@@ -59,13 +70,15 @@ struct Simplifier {
    * instruction should still be used (but the call to simplify may
    * have changed it, also).
    */
-  SSATmp* simplify(IRInstruction*);
+  Result simplify(IRInstruction*);
 
   using ConstraintFunc = std::function<void(TypeConstraint)>;
   SSATmp* simplifyAssertTypeOp(IRInstruction* inst, Type prevType,
                                ConstraintFunc cf) const;
 
 private:
+  SSATmp* simplifyWork(IRInstruction*);
+
   SSATmp* simplifyMov(SSATmp* src);
   SSATmp* simplifyNot(SSATmp* src);
   SSATmp* simplifyAbsDbl(IRInstruction* inst);
@@ -193,6 +206,7 @@ private:
   // m_insts.top(). This has to be a stack instead of just a pointer
   // because simplify is reentrant.
   smart::stack<const IRInstruction*> m_insts;
+  smart::vector<IRInstruction*> m_newInsts;
 };
 
 //////////////////////////////////////////////////////////////////////

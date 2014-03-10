@@ -359,6 +359,12 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Performs simplification and CSE on the passed-in instruction. If it returns
+ * null, that means you should use the passed-in instruction. If it returns
+ * non-null, that means you should use the return value, and that you don't need
+ * to append any instructions.
+ */
 SSATmp* IRBuilder::optimizeWork(IRInstruction* inst,
                                 const folly::Optional<IdomVector>& idoms) {
   // Since some of these optimizations inspect tracked state, we don't
@@ -389,7 +395,13 @@ SSATmp* IRBuilder::optimizeWork(IRInstruction* inst,
   SSATmp* result = nullptr;
 
   if (m_enableSimplification) {
-    result = m_simplifier.simplify(inst);
+    auto simpResult = m_simplifier.simplify(inst);
+    result = simpResult.dst;
+
+    for (auto* newInst : simpResult.instrs) {
+      appendInstruction(newInst);
+    }
+
     if (result) {
       inst = result->inst();
       if (inst->producesReference(0)) {

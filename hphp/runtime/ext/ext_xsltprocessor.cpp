@@ -263,7 +263,7 @@ bool c_XSLTProcessor::t_hasexsltsupport() {
   return true;
 }
 
-void c_XSLTProcessor::t_importstylesheet(CObjRef stylesheet) {
+void c_XSLTProcessor::t_importstylesheet(const Object& stylesheet) {
   xmlDocPtr doc = nullptr;
 
   if (stylesheet.instanceof(c_DOMDocument::classof())) {
@@ -308,7 +308,8 @@ bool c_XSLTProcessor::t_removeparameter(const String& namespaceURI,
   return false;
 }
 
-void c_XSLTProcessor::t_registerphpfunctions(CVarRef funcs /*=null_variant */) {
+void c_XSLTProcessor::t_registerphpfunctions(
+    const Variant& funcs /*=null_variant */) {
   if (funcs.isNull()) {
     // Register all available PHP functions.
     m_registerPhpFunctions = 1;
@@ -333,8 +334,8 @@ void c_XSLTProcessor::t_registerphpfunctions(CVarRef funcs /*=null_variant */) {
 }
 
 bool c_XSLTProcessor::t_setparameter(const String& namespaceURI,
-                                     CVarRef localName,
-                                     CVarRef value /*=null_variant */) {
+                                     const Variant& localName,
+                                     const Variant& value /*=null_variant */) {
   // namespaceURI argument is unused in Zend PHP XSL extension.
   if (localName.isString() && value.isString()) {
     if (m_params.exists(localName)) {
@@ -394,7 +395,7 @@ bool c_XSLTProcessor::t_setprofiling(const String& filename) {
   return false;
 }
 
-Variant c_XSLTProcessor::t_transformtodoc(CObjRef doc) {
+Variant c_XSLTProcessor::t_transformtodoc(const Object& doc) {
   if (doc.instanceof(c_DOMNode::classof())) {
     c_DOMNode *domnode = doc.getTyped<c_DOMNode>();
     m_doc = xmlCopyDoc((xmlDocPtr)domnode->m_node, /*recursive*/ 1);
@@ -409,7 +410,8 @@ Variant c_XSLTProcessor::t_transformtodoc(CObjRef doc) {
   return false;
 }
 
-Variant c_XSLTProcessor::t_transformtouri(CObjRef doc, const String& uri) {
+Variant c_XSLTProcessor::t_transformtouri(const Object& doc,
+                                          const String& uri) {
   if (doc.instanceof(c_DOMDocument::classof())) {
     c_DOMDocument *domdoc = doc.getTyped<c_DOMDocument>();
     m_doc = xmlCopyDoc ((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);
@@ -441,7 +443,7 @@ Variant c_XSLTProcessor::t_transformtouri(CObjRef doc, const String& uri) {
   return false;
 }
 
-Variant c_XSLTProcessor::t_transformtoxml(CObjRef doc) {
+Variant c_XSLTProcessor::t_transformtoxml(const Object& doc) {
   if (doc.instanceof(c_DOMDocument::classof())) {
     c_DOMDocument *domdoc = doc.getTyped<c_DOMDocument>();
     m_doc = xmlCopyDoc ((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);

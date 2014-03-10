@@ -40,18 +40,18 @@ class c_XSLTProcessor : public ExtObjectData, public Sweepable {
                                  const String& localName);
   public: int64_t t_getsecurityprefs();
   public: bool t_hasexsltsupport();
-  public: void t_importstylesheet(CObjRef stylesheet);
-  public: void t_registerphpfunctions(CVarRef funcs = null_variant);
+  public: void t_importstylesheet(const Object& stylesheet);
+  public: void t_registerphpfunctions(const Variant& funcs = null_variant);
   public: bool t_removeparameter(const String& namespaceURI,
                                  const String& localName);
   public: bool t_setparameter(const String& namespaceURI,
-                              CVarRef localName,
-                              CVarRef value = null_variant);
+                              const Variant& localName,
+                              const Variant& value = null_variant);
   public: bool t_setprofiling(const String& filename);
   public: int64_t t_setsecurityprefs(int64_t securityPrefs);
-  public: Variant t_transformtodoc(CObjRef doc);
-  public: Variant t_transformtouri(CObjRef doc, const String& uri);
-  public: Variant t_transformtoxml(CObjRef doc);
+  public: Variant t_transformtodoc(const Object& doc);
+  public: Variant t_transformtouri(const Object& doc, const String& uri);
+  public: Variant t_transformtoxml(const Object& doc);
 
   public:
     xsltStylesheetPtr m_stylesheet;

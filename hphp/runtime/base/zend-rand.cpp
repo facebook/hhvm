@@ -215,7 +215,7 @@ int64_t math_mt_rand(int64_t min /* = 0 */, int64_t max /* = RAND_MAX */) {
  * is equal to the product of both primes.
  */
 
-#define MODMULT(a, b, c, m, s) q = s/a;s=b*(s-a*q)-c*q;if(s<0)s+=m
+#define MODMULT(a, b, c, m, s) q = s/a;s=b*(s-a*q)-c*q;if (s<0)s+=m
 
 static void lcg_seed() {
   RandData *data = s_rand_data.getNoCheck();

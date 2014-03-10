@@ -1220,7 +1220,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       double now = my_time();
       multipart_event_end *data = (multipart_event_end *)event_data;
       rfc1867ApcData->bytes_processed = data->post_bytes_processed;
-      if(now>rfc1867ApcData->start_time) {
+      if (now>rfc1867ApcData->start_time) {
         rfc1867ApcData->rate =
           8.0*rfc1867ApcData->bytes_processed/(now-rfc1867ApcData->start_time);
       } else {

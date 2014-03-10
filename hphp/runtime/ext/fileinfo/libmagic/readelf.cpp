@@ -1166,7 +1166,7 @@ file_tryelf(struct magic_set *ms, int fd, const unsigned char *buf,
   /*
    * If we cannot seek, it must be a pipe, socket or fifo.
    */
-  if((FINFO_LSEEK_FUNC(fd, (off_t)0, SEEK_SET) == (off_t)-1) && (errno == ESPIPE))
+  if ((FINFO_LSEEK_FUNC(fd, (off_t)0, SEEK_SET) == (off_t)-1) && (errno == ESPIPE))
     fd = file_pipe2file(ms, fd, buf, nbytes);
 
   if (fstat(fd, &st) == -1) {

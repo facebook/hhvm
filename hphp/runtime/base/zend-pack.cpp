@@ -305,7 +305,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
       v = val.data();
       slen = val.size();
       outputpos--;
-      if(arg > slen) {
+      if (arg > slen) {
         throw_invalid_argument
           ("Type %c: not enough characters in string", code);
         arg = slen;

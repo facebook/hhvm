@@ -614,7 +614,7 @@ Variant c_XMLReader::t_expand(const Object& basenode /* = null */) {
       return false;
     } else {
       xmlNodePtr nodec = xmlDocCopyNode(node, docp, 1);
-      if(nodec == nullptr) {
+      if (nodec == nullptr) {
         raise_notice("Cannot expand this node type");
         return false;
       } else {

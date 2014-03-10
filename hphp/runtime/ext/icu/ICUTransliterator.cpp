@@ -29,7 +29,7 @@ bool ICUTransliterator::set(const UnicodeString& transformId) {
         parseError,
         uStatus_));
 
-  if(!translitPtr_ || U_FAILURE(uStatus_)) {
+  if (!translitPtr_ || U_FAILURE(uStatus_)) {
     Logger::Error("Error code: %s : Failed to initialize transliterator.",
                   u_errorName(uStatus_));
     return false;

@@ -1770,7 +1770,7 @@ static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf,
 }
 
 static void _php_image_output_ctxfree(struct gdIOCtx *ctx) {
-  if(ctx) {
+  if (ctx) {
     IM_FREE(ctx);
   }
 }
@@ -1813,7 +1813,7 @@ static bool _php_image_output_ctx(const Resource& image, const String& filename,
 
   switch(image_type) {
   case PHP_GDIMG_CONVERT_WBM:
-    if(q<0||q>255) {
+    if (q<0||q>255) {
       raise_warning("Invalid threshold value '%d'. "
                       "It must be between 0 and 255", q);
     }
@@ -1827,7 +1827,7 @@ static bool _php_image_output_ctx(const Resource& image, const String& filename,
   case PHP_GDIMG_TYPE_WBM:
     if (q == -1) { // argc < 3
       for(i=0; i < gdImageColorsTotal(im); i++) {
-        if(!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) break;
+        if (!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) break;
       }
       q = i;
     }
@@ -7737,7 +7737,7 @@ Variant f_exif_read_data(const String& filename,
     /* sections_str DOES start with , and SPACES are NOT allowed in names */
     s = sections_str;
     while(*++s) {
-      if(*s==' ') {
+      if (*s==' ') {
         *s = ',';
       }
     }
@@ -7791,18 +7791,18 @@ Variant f_exif_read_data(const String& filename,
   if (ImageInfo.FocalLength) {
     exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "FocalLength",
                      "%4.1Fmm", ImageInfo.FocalLength);
-    if(ImageInfo.CCDWidth) {
+    if (ImageInfo.CCDWidth) {
       exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "35mmFocalLength",
                        "%dmm",
                        (int)(ImageInfo.FocalLength/ImageInfo.CCDWidth*35+0.5));
     }
   }
-  if(ImageInfo.CCDWidth) {
+  if (ImageInfo.CCDWidth) {
     exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "CCDWidth",
                      "%dmm", (int)ImageInfo.CCDWidth);
   }
-  if(ImageInfo.ExposureTime>0) {
-    if(ImageInfo.ExposureTime <= 0.5) {
+  if (ImageInfo.ExposureTime>0) {
+    if (ImageInfo.ExposureTime <= 0.5) {
       exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "ExposureTime",
                        "%0.3F s (1/%d)", ImageInfo.ExposureTime,
                        (int)(0.5 + 1/ImageInfo.ExposureTime));
@@ -7811,12 +7811,12 @@ Variant f_exif_read_data(const String& filename,
                        "%0.3F s", ImageInfo.ExposureTime);
     }
   }
-  if(ImageInfo.ApertureFNumber) {
+  if (ImageInfo.ApertureFNumber) {
     exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "ApertureFNumber",
                      "f/%.1F", ImageInfo.ApertureFNumber);
   }
-  if(ImageInfo.Distance) {
-    if(ImageInfo.Distance<0) {
+  if (ImageInfo.Distance) {
+    if (ImageInfo.Distance<0) {
       exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "FocusDistance",
                        "Infinite");
     } else {

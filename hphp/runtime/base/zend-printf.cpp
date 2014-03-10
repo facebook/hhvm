@@ -622,7 +622,7 @@ inline static void appendint(char **buffer, int *pos, int *size, long number,
   }
 
   /* Can't right-pad 0's on integers */
-  if(alignment==0 && padding=='0') padding=' ';
+  if (alignment==0 && padding=='0') padding=' ';
 
   numbuf[i] = '\0';
 

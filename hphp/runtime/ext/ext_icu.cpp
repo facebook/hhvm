@@ -317,7 +317,7 @@ Array f_icu_tokenize(const String& text) {
     normalizeToken(*iter);
     const UnicodeString& word = iter->value;
     // Ignore spaces and empty strings.
-    if(!s_spaceMatcher->matches(word) && word.length() > 0) {
+    if (!s_spaceMatcher->matches(word) && word.length() > 0) {
       ret.set(i++, String(icuStringToUTF8(word)));
     }
   }

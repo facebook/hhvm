@@ -914,7 +914,7 @@ void rfc1867PostHandler(Transport *transport,
         continue;
       }
 
-      if(strlen(filename) == 0) {
+      if (strlen(filename) == 0) {
         Logger::Verbose("No file uploaded");
         cancel_upload = UPLOAD_ERROR_D;
       }
@@ -977,7 +977,7 @@ void rfc1867PostHandler(Transport *transport,
                         "file %s", strlen(filename) > 0 ? filename : "");
         cancel_upload = UPLOAD_ERROR_C;
       }
-      if(strlen(filename) > 0 && total_bytes == 0 && !cancel_upload) {
+      if (strlen(filename) > 0 && total_bytes == 0 && !cancel_upload) {
         Logger::Verbose("Uploaded file size 0 - file [%s=%s] not saved",
                         param, filename);
         cancel_upload = 5;

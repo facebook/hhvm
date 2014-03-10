@@ -462,7 +462,7 @@ void mail_free_foblist(FOBJECTLIST **foblist, FOBJECTLIST **tail) {
   for (cur=*foblist, next=cur->next; cur; cur=next) {
     next = cur->next;
 
-    if(cur->text.data)
+    if (cur->text.data)
       fs_give((void **)&(cur->text.data));
 
     fs_give((void **)&cur);

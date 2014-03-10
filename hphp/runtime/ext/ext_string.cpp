@@ -1450,7 +1450,7 @@ void f_parse_str(const String& str, VRefParam arr /* = null */) {
 
   HttpProtocol::DecodeParameters(result, str.data(), str.size());
 
-  if(!arr.isReferenced()) {
+  if (!arr.isReferenced()) {
     f_extract(result.toArray());
     return;
   }

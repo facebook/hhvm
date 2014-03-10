@@ -758,14 +758,14 @@ Array HHVM_FUNCTION(hphp_get_closure_info, CObjRef closure) {
   Array mi = HHVM_FN(hphp_get_method_info)(closure->o_getClassName(), s___invoke);
   auto const cls = get_cls(closure);
   auto const nameRef = cls->nameRef();
+  auto const backSlash = nameRef.rfind('\\'); 
   static const char c_prefix[] = "Closure$";
 
-  // Closures in global scope begin with '$' after the prefix
-  if (nameRef->data()[8] == '$') {
+  if (backSlash == -1) {
     mi.set(s_name, s_closure_in_braces);
   } else {
     String namespaceName(nameRef->data() + sizeof c_prefix - 1,
-                         nameRef.rfind('\\') + 1 - sizeof c_prefix + 1,
+                         backSlash + 1 - sizeof c_prefix + 1,
                          CopyString);
     mi.set(s_name, namespaceName + s_closure_in_braces);
   }

@@ -34,6 +34,10 @@ const Object Object::s_nullObject = Object();
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Object::compileTimeAssertions() {
+  static_assert(sizeof(Object) == sizeof(ObjectBase), "Fix this.");
+}
+
 void ObjNR::compileTimeAssertions() {
   static_assert(offsetof(ObjNR, m_px) == kExpectedMPxOffset, "");
 }
@@ -55,6 +59,10 @@ MutableArrayIter Object::begin(Variant *key, Variant &val,
 
 Array Object::toArray() const {
   return m_px ? m_px->o_toArray() : Array();
+}
+
+String Object::toString() const {
+  return m_px ? m_px->invokeToString() : String();
 }
 
 int64_t Object::toInt64ForCompare() const {
@@ -143,6 +151,10 @@ Variant Object::o_setRef(const String& propName, const Variant& val,
 Variant Object::o_set(const String& propName, RefResult val,
                       const String& context /* = null_string */) {
   return o_setRef(propName, variant(val), context);
+}
+
+const char* Object::classname_cstr() const {
+  return m_px->o_getClassName().c_str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

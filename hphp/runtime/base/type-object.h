@@ -19,8 +19,8 @@
 
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/smart-ptr.h"
-#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/types.h"
 
 #include <algorithm>
 
@@ -58,18 +58,15 @@ public:
   /* implicit */ Object(const Object& src) : ObjectBase(src.m_px) { }
 
   // Move ctor
-  Object(Object&& src) : ObjectBase(std::move(src)) {
-    static_assert(sizeof(Object) == sizeof(ObjectBase), "Fix this.");
-  }
+  Object(Object&& src) : ObjectBase(std::move(src)) { }
+
   // Regular assign
   Object& operator=(const Object& src) {
-    static_assert(sizeof(Object) == sizeof(ObjectBase), "Fix this.");
     ObjectBase::operator=(src);
     return *this;
   }
   // Move assign
   Object& operator=(Object&& src) {
-    static_assert(sizeof(Object) == sizeof(ObjectBase), "Fix this.");
     ObjectBase::operator=(std::move(src));
     return *this;
   }
@@ -115,7 +112,7 @@ public:
     }
     if (!cur->instanceof(T::classof())) {
       if (!badTypeOkay) {
-        throw InvalidObjectTypeException(m_px->o_getClassName().c_str());
+        throw InvalidObjectTypeException(classname_cstr());
       }
       return nullptr;
     }
@@ -147,7 +144,7 @@ public:
   int     toInt32  () const { return m_px ? m_px->o_toInt64() : 0;}
   int64_t toInt64  () const { return m_px ? m_px->o_toInt64() : 0;}
   double  toDouble () const { return m_px ? m_px->o_toDouble() : 0;}
-  String  toString () const { return m_px ? m_px->invokeToString() : String();}
+  String  toString () const;
   Array   toArray  () const;
 
   int64_t toInt64ForCompare() const;
@@ -192,6 +189,10 @@ public:
     return o;
   }
 
+private:
+  static void compileTimeAssertions();
+
+  const char* classname_cstr() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

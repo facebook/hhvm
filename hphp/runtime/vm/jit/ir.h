@@ -478,7 +478,14 @@ O(LdSwitchStrIndex,             D(Int), S(Str) S(Int) S(Int),          CRc|N) \
 O(LdSwitchObjIndex,             D(Int), S(Obj) S(Int) S(Int),       CRc|N|Er) \
 O(JmpSwitchDest,                    ND, S(Int),                          T|E) \
 O(AllocObj,                  DAllocObj, S(Cls),                         Er|N) \
-O(AllocObjFast,              DAllocObj, NA,                                N) \
+                                                                              \
+O(ConstructInstance,         DAllocObj, NA,                             Er|N) \
+O(InitProps,                        ND, NA,                           E|Er|N) \
+O(InitSProps,                       ND, NA,                           E|Er|N) \
+O(NewInstanceRaw,            DAllocObj, NA,                                N) \
+O(InitObjProps,                     ND, S(Obj),                          E|N) \
+O(CustomInstanceInit,        DAllocObj, S(Obj),                         Er|N) \
+                                                                              \
 O(LdClsCtor,                   D(Func), S(Cls),                       C|Er|N) \
 O(StClosureFunc,                    ND, S(Obj),                            E) \
 O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \

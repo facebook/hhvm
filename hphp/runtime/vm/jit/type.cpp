@@ -629,15 +629,19 @@ Type thisReturn(const IRInstruction* inst) {
 }
 
 Type allocObjReturn(const IRInstruction* inst) {
-  if (inst->op() == AllocObjFast) {
-    return Type::Obj.specialize(inst->extra<AllocObjFast>()->cls);
+  switch (inst->op()) {
+    case ConstructInstance:
+      return Type::Obj.specialize(inst->extra<ConstructInstance>()->cls);
+    case NewInstanceRaw:
+      return Type::Obj.specialize(inst->extra<NewInstanceRaw>()->cls);
+    case CustomInstanceInit:
+    case AllocObj:
+      return inst->src(0)->isConst()
+        ? Type::Obj.specialize(inst->src(0)->clsVal())
+        : Type::Obj;
+    default:
+      always_assert(false && "Invalid opcode returning AllocObj");
   }
-  if (inst->op() == AllocObj) {
-    return inst->src(0)->isConst()
-      ? Type::Obj.specialize(inst->src(0)->clsVal())
-      : Type::Obj;
-  }
-  always_assert(0);
 }
 
 }

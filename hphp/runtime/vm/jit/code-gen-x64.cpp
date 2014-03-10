@@ -288,6 +288,7 @@ CALL_OPCODE(NewPackedArray)
 CALL_OPCODE(NewCol)
 CALL_OPCODE(Clone)
 CALL_OPCODE(AllocObj)
+CALL_OPCODE(CustomInstanceInit)
 CALL_OPCODE(LdClsCtor)
 CALL_OPCODE(LookupClsMethod)
 CALL_OPCODE(LookupClsRDSHandle)
@@ -3502,8 +3503,6 @@ void CodeGenerator::emitInitObjProps(PhysReg dstReg,
   }
 
   // Use memcpy for large numbers of properties.
-  m_as.push(dstReg);
-  m_as.subq(8, reg::rsp);
   auto args = argGroup()
     .addr(dstReg, sizeof(ObjectData) + cls->builtinODTailSize())
     .imm(int64_t(&cls->declPropInit()[0]))
@@ -3513,72 +3512,65 @@ void CodeGenerator::emitInitObjProps(PhysReg dstReg,
                kVoidDest,
                SyncOptions::kNoSyncPoint,
                args);
-  m_as.addq(8, reg::rsp);
-  m_as.pop(dstReg);
 }
 
-void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
-  auto const cls    = inst->extra<AllocObjFast>()->cls;
+void CodeGenerator::cgConstructInstance(IRInstruction* inst) {
+  auto const cls    = inst->extra<ConstructInstance>()->cls;
   auto const dstReg = dstLoc(0).reg();
+  cgCallHelper(m_as,
+               CppCall(cls->instanceCtor()),
+               callDest(dstReg),
+               SyncOptions::kSyncPoint,
+               argGroup().immPtr(cls));
+}
 
-  // If it's an extension class with a custom instance initializer,
-  // that init function does all the work.
-  if (cls->instanceCtor()) {
-    cgCallHelper(m_as,
-                 CppCall(cls->instanceCtor()),
-                 callDest(dstReg),
-                 SyncOptions::kSyncPoint,
-                 argGroup()
-                   .immPtr(cls)
-    );
-    return;
-  }
+void CodeGenerator::cgInitProps(IRInstruction* inst) {
+  auto const cls    = inst->extra<InitProps>()->cls;
+  m_as.cmpq(0, rVmTl[cls->propHandle()]);
+  unlikelyIfBlock(CC_Z, [&] (Asm& a) {
+      cgCallHelper(a,
+                   CppCall(getMethodPtr(&Class::initProps)),
+                   kVoidDest,
+                   SyncOptions::kSyncPoint,
+                   argGroup().imm((uint64_t)cls));
+    });
+}
 
-  // First, make sure our property init vectors are all set up
-  bool props = cls->pinitVec().size() > 0;
-  bool sprops = cls->numStaticProperties() > 0;
-  assert((props || sprops) == cls->needInitialization());
-  if (cls->needInitialization()) {
-    if (props) {
-      cls->initPropHandle();
-      m_as.cmpq(0, rVmTl[cls->propHandle()]);
-      unlikelyIfBlock(CC_Z, [&] (Asm& a) {
-          cgCallHelper(a,
-                       CppCall(getMethodPtr(&Class::initProps)),
-                       kVoidDest,
-                       SyncOptions::kSyncPoint,
-                       argGroup().imm((uint64_t)cls));
-      });
-    }
-    if (sprops) {
-      cls->initSPropHandle();
-      m_as.cmpq(0, rVmTl[cls->sPropHandle()]);
-      unlikelyIfBlock(CC_Z, [&] (Asm& a) {
-          cgCallHelper(a,
-                       CppCall(getMethodPtr(&Class::initSProps)),
-                       kVoidDest,
-                       SyncOptions::kSyncPoint,
-                       argGroup().imm((uint64_t)cls));
-      });
-    }
-  }
+void CodeGenerator::cgInitSProps(IRInstruction* inst) {
+  auto const cls    = inst->extra<InitSProps>()->cls;
+  m_as.cmpq(0, rVmTl[cls->sPropHandle()]);
+  unlikelyIfBlock(CC_Z, [&] (Asm& a) {
+      cgCallHelper(a,
+                   CppCall(getMethodPtr(&Class::initSProps)),
+                   kVoidDest,
+                   SyncOptions::kSyncPoint,
+                   argGroup().imm((uint64_t)cls));
+    });
+}
 
-  // Next, allocate the object
+void CodeGenerator::cgNewInstanceRaw(IRInstruction* inst) {
+  auto const cls    = inst->extra<NewInstanceRaw>()->cls;
+  auto const dstReg = dstLoc(0).reg();
   size_t size = ObjectData::sizeForNProps(cls->numDeclProperties());
   cgCallHelper(m_as,
                size <= kMaxSmartSize
-                 ? CppCall(getMethodPtr(&ObjectData::newInstanceRaw))
-                 : CppCall(getMethodPtr(&ObjectData::newInstanceRawBig)),
+               ? CppCall(getMethodPtr(&ObjectData::newInstanceRaw))
+               : CppCall(getMethodPtr(&ObjectData::newInstanceRawBig)),
                callDest(dstReg),
                SyncOptions::kSyncPoint,
                argGroup().imm((uint64_t)cls).imm(size));
+}
+
+void CodeGenerator::cgInitObjProps(IRInstruction* inst) {
+  auto const cls    = inst->extra<InitObjProps>()->cls;
+  auto const srcReg = srcLoc(0).reg();
 
   // Set the attributes, if any
   int odAttrs = cls->getODAttrs();
   if (odAttrs) {
     // o_attribute is 16 bits but the fact that we're or-ing a mask makes it ok
     assert(!(odAttrs & 0xffff0000));
-    m_as.orq(odAttrs, dstReg[ObjectData::attributeOff()]);
+    m_as.orq(odAttrs, srcReg[ObjectData::attributeOff()]);
   }
 
   // Initialize the properties
@@ -3586,20 +3578,17 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
   if (nProps > 0) {
     if (cls->pinitVec().size() == 0) {
       // Fast case: copy from a known address in the Class
-      emitInitObjProps(dstReg, cls, nProps);
+      emitInitObjProps(srcReg, cls, nProps);
     } else {
       // Slower case: we have to load the src address from the targetcache
       auto rPropData = m_rScratch;
-      // Save the destination register.
-      m_as.push(dstReg);
-      m_as.subq(8, reg::rsp);
       // Load the Class's propInitVec from the targetcache
       m_as.loadq(rVmTl[cls->propHandle()], rPropData);
       // propData holds the PropInitVec. We want &(*propData)[0]
       m_as.loadq(rPropData[Class::PropInitVec::dataOff()], rPropData);
       if (!cls->hasDeepInitProps()) {
         auto args = argGroup()
-          .addr(dstReg, sizeof(ObjectData) + cls->builtinODTailSize())
+          .addr(srcReg, sizeof(ObjectData) + cls->builtinODTailSize())
           .reg(rPropData)
           .imm(cellsToBytes(nProps));
         cgCallHelper(m_as,
@@ -3609,7 +3598,7 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
                      args);
       } else {
         auto args = argGroup()
-          .addr(dstReg, sizeof(ObjectData) + cls->builtinODTailSize())
+          .addr(srcReg, sizeof(ObjectData) + cls->builtinODTailSize())
           .reg(rPropData)
           .imm(nProps);
         cgCallHelper(m_as,
@@ -3618,18 +3607,7 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
                      SyncOptions::kNoSyncPoint,
                      args);
       }
-      // Restore the destination register
-      m_as.addq(8, reg::rsp);
-      m_as.pop(dstReg);
     }
-  }
-  if (cls->callsCustomInstanceInit()) {
-    // callCustomInstanceInit returns the instance in rax
-    cgCallHelper(m_as,
-                 CppCall(getMethodPtr(&ObjectData::callCustomInstanceInit)),
-                 callDest(dstReg),
-                 SyncOptions::kSyncPoint,
-                 argGroup().reg(dstReg));
   }
 }
 

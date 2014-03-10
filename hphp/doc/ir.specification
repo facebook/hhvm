@@ -1064,6 +1064,31 @@ D:Obj = AllocObj S1:Cls
 
   Allocates a new object of class S1.
 
+InitProps<class> -> B
+
+  Calls the property initializer function (86pinit) for class.  May throw.
+
+InitSProps<class> -> B
+
+  Calls the static property initializer function (86sinit) for class. May
+  throw.
+
+D:Obj = NewInstanceRaw<class>
+
+  Allocates an instance of class.
+
+InitObjProps<class> S0:Obj
+
+  Initializes properties of object S0.
+
+D:Obj = ConstructInstance<class>
+
+  Call the custom instance constructor of an extension class.
+
+D:Obj = CustomInstanceInit S0:Obj
+
+  Call the custom instance initializer of object S0.
+
 D:Obj = AllocObjFast<class>
 
   Allocate a new object of the specified class, which must be persistent and

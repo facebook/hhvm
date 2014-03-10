@@ -2425,6 +2425,42 @@ static bool canInstantiateClass(const Class* cls) {
     !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait));
 }
 
+SSATmp* HhbcTranslator::emitAllocObjFast(const Class* cls) {
+  // If it's an extension class with a custom instance initializer,
+  // that init function does all the work.
+  if (cls->instanceCtor()) {
+    return gen(ConstructInstance, makeCatch(), ClassData(cls));
+  }
+
+  // First, make sure our property init vectors are all set up
+  bool props = cls->pinitVec().size() > 0;
+  bool sprops = cls->numStaticProperties() > 0;
+  assert((props || sprops) == cls->needInitialization());
+  if (cls->needInitialization()) {
+    if (props) {
+      cls->initPropHandle();
+      gen(InitProps, makeCatch(), ClassData(cls));
+    }
+    if (sprops) {
+      cls->initSPropHandle();
+      gen(InitSProps, makeCatch(), ClassData(cls));
+    }
+  }
+
+  // Next, allocate the object
+  auto const ssaObj = gen(NewInstanceRaw, ClassData(cls));
+
+  // Initialize the properties
+  gen(InitObjProps, ClassData(cls), ssaObj);
+
+  // Call a custom initializer if one exists
+  if (cls->callsCustomInstanceInit()) {
+    return gen(CustomInstanceInit, ssaObj);
+  }
+
+  return ssaObj;
+}
+
 void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   const StringData* className = lookupStringId(classNameStrId);
 
@@ -2455,7 +2491,7 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
     persistentCls ? cns(cls)
                   : gen(LdClsCached, makeCatch(), cns(className));
   auto const obj =
-    fastAlloc ? gen(AllocObjFast, ClassData(cls))
+    fastAlloc ? emitAllocObjFast(cls)
               : gen(AllocObj, makeCatch(), ssaCls);
   gen(IncRef, obj);
   emitFPushCtorCommon(ssaCls, obj, func, numParams);
@@ -2483,7 +2519,7 @@ void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
   // EnableObjDestructCall is on.
   auto const closure =
     RuntimeOption::EnableObjDestructCall ? gen(AllocObj, makeCatch(), cns(cls))
-                                         : gen(AllocObjFast, ClassData(cls));
+                                         : emitAllocObjFast(cls);
   gen(IncRef, closure);
 
   auto const ctx = [&]{

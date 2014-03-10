@@ -191,6 +191,8 @@ static CallMap s_callMap {
                            {{SSA, 0}, {TV, 1}, {TV, 2}}},
     {AllocObj,           newInstance, DSSA, SSync,
                            {{SSA, 0}}},
+    {CustomInstanceInit, method(&ObjectData::callCustomInstanceInit),
+                           DSSA, SSync, {{SSA, 0}}},
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
                            {{SSA, 0}}},
     {LookupClsRDSHandle, lookupClsRDSHandle, DSSA, SNone, {{SSA, 0}}},

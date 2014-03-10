@@ -228,10 +228,10 @@ string(%d) "Class [ <user> class B ] {
   }
 
   - Properties [4] {
+    Property [ <default> private $p0 ]
     Property [ <default> protected $p1 ]
     Property [ <default> public $p2 ]
     Property [ <default> public $p3 ]
-    Property [ <default> private $p0 ]
   }
 
   - Methods [6] {

@@ -31,6 +31,9 @@
 
 #include <deque>
 #include <utility>
+#include <map>
+#include <set>
+#include <vector>
 
 namespace HPHP {
 
@@ -669,6 +672,7 @@ private:
   std::set<std::string,stdltistr> m_hoistables;
   LocationPtr m_tempLoc;
   std::vector<Label> m_yieldLabels;
+  std::unordered_set<std::string> m_staticEmitted;
 
   // The stack of all Regions that this EmitterVisitor is currently inside
   std::vector<RegionPtr> m_regions;

@@ -654,7 +654,7 @@ testb %sil, (%rcx,%rsi,8)
 TEST(Asm, CMov) {
   TestDataBlock db(10 << 24);
   Asm a { db };
-  a.   test_reg64_reg64(rax, rax);
+  a.   testq  (rax, rax);
   a.   cload_reg64_disp_reg64(CC_Z, rax, 0, rax);
   a.   cload_reg64_disp_reg32(CC_Z, rax, 0, rax);
   expect_asm(a, R"(

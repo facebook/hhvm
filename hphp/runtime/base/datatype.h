@@ -234,7 +234,7 @@ inline DataType getDataTypeValue(unsigned index) {
   }
 }
 
-// These are used in type_variant.cpp and translator-x64.cpp
+// These are used in type_variant.cpp and mc-generator.cpp
 const unsigned int kShiftDataTypeToDestrIndex = 4;
 const unsigned int kDestrTableSize = 6;
 

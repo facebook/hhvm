@@ -20,6 +20,7 @@
 #include <cassert>
 
 #include <boost/variant.hpp>
+#include <memory>
 
 #include "hphp/util/trace.h"
 #include "hphp/util/match.h"
@@ -214,9 +215,9 @@ private:
   T* m_p;
 };
 
-template<class T>
-copy_ptr<T> make_copy_ptr(T&& t) {
-  return copy_ptr<T>(new T(std::forward<T>(t)));
+template<class T, class... Args>
+copy_ptr<T> make_copy_ptr(Args&&... t) {
+  return copy_ptr<T>(new T(std::forward<Args>(t)...));
 }
 
 //////////////////////////////////////////////////////////////////////

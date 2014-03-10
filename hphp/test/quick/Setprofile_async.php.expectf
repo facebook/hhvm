@@ -1,0 +1,126 @@
+** exit fb_setprofile
+** enter genFoo
+** enter error_log
+In genFoo
+** exit error_log
+** enter var_dump
+int(42)
+** exit var_dump
+** enter genBar
+** enter error_log
+In genBar
+** exit error_log
+** enter var_dump
+int(43)
+** exit var_dump
+** enter RescheduleWaitHandle::create
+** exit RescheduleWaitHandle::create
+** enter WaitHandle::getWaitHandle
+** exit WaitHandle::getWaitHandle
+** exit genBar
+** enter genBar
+** enter error_log
+In genBar
+** exit error_log
+** enter var_dump
+int(44)
+** exit var_dump
+** enter RescheduleWaitHandle::create
+** exit RescheduleWaitHandle::create
+** enter WaitHandle::getWaitHandle
+** exit WaitHandle::getWaitHandle
+** exit genBar
+** enter gen2
+** enter error_log
+In gen2
+** exit error_log
+** enter RescheduleWaitHandle::create
+** exit RescheduleWaitHandle::create
+** enter WaitHandle::getWaitHandle
+** exit WaitHandle::getWaitHandle
+** exit gen2
+** enter GenArrayWaitHandle::create
+** exit GenArrayWaitHandle::create
+** enter WaitHandle::getWaitHandle
+** exit WaitHandle::getWaitHandle
+** exit genFoo
+** enter WaitHandle::join
+** enter Exception::__init__
+** enter Exception::initTrace
+** enter Exception::getTraceOptions
+** exit Exception::getTraceOptions
+** enter debug_backtrace
+** exit debug_backtrace
+** enter array_shift
+** exit array_shift
+** enter strcasecmp
+** exit strcasecmp
+** enter strcasecmp
+** exit strcasecmp
+** enter array_shift
+** exit array_shift
+** enter strcasecmp
+** exit strcasecmp
+** enter strcasecmp
+** exit strcasecmp
+** exit Exception::initTrace
+** exit Exception::__init__
+** enter Exception::__construct
+** exit Exception::__construct
+** enter Continuation::send
+** enter genBar$continuation
+** enter error_log
+Finished in genBar
+** exit error_log
+** exit genBar$continuation
+** exit Continuation::send
+** enter Continuation::send
+** enter genBar$continuation
+** enter error_log
+Finished in genBar
+** exit error_log
+** exit genBar$continuation
+** exit Continuation::send
+** enter Continuation::send
+** enter gen2$continuation
+** enter gen1
+** enter error_log
+In gen1
+** exit error_log
+** enter error_log
+Finished in gen1
+** exit error_log
+** enter RescheduleWaitHandle::create
+** exit RescheduleWaitHandle::create
+** enter WaitHandle::getWaitHandle
+** exit WaitHandle::getWaitHandle
+** exit gen1
+** enter WaitHandle::join
+** enter Continuation::send
+** enter gen1$continuation
+** exit gen1$continuation
+** exit Continuation::send
+** exit WaitHandle::join
+** enter error_log
+Finished in gen2
+** exit error_log
+** exit gen2$continuation
+** exit Continuation::send
+** enter Continuation::send
+** enter genFoo$continuation
+** enter var_dump
+int(45)
+** exit var_dump
+** enter var_dump
+int(46)
+** exit var_dump
+** enter error_log
+Finished in genFoo
+** exit error_log
+** exit genFoo$continuation
+** exit Continuation::send
+** exit WaitHandle::join
+** enter var_dump
+int(91)
+** exit var_dump
+** enter fb_setprofile

@@ -18,6 +18,9 @@
 #define incl_HPHP_OPTION_H_
 
 #include "hphp/util/hdf.h"
+#include <map>
+#include <set>
+#include <vector>
 #include "hphp/util/string-bag.h"
 #include "hphp/util/deprecated/base.h"
 #include "hphp/util/deprecated/declare-boost-types.h"
@@ -158,7 +161,6 @@ public:
    * A somewhat unique prefix for system identifiers.
    */
   static std::string IdPrefix;
-  static std::string LabelEscape;
   static std::string LambdaPrefix;
   static std::string Tab;
 
@@ -166,7 +168,6 @@ public:
    * Name resolution helpers.
    */
   static const char *UserFilePrefix;
-  static const char *ClassHeaderPrefix;
 
   /**
    * Turn it off for cleaner unit tests.

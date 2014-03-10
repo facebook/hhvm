@@ -1,3 +1,26 @@
+Next
+  - JIT default on in command line mode
+
+"Fifty Cent" 3-Mar-2014
+  - Array parameter type constraints implicitly cast collections to arrays
+  - Fix issues with feof and fwrite
+  - Fix issues with sleep and inaccessible properties
+  - Dump a jemalloc pprod dump when a request hits OOM
+  - Make method_exists work with interface inheritance
+  - Fix crash in preg_replace with /e
+  - Support filename and content type in Curl uploads
+  - MySQLi fixes
+  - Handle relative paths in is_dir
+  - Add string conversion for array_fill_keys
+  - Implement various Imagick functionality
+  - Implement CUROPT_PROGRESSFUNCTION
+  - Implement PHP 5.6 __debugInfo() magic method
+  - Raise warnings when return type annotations mismatch
+  - Fix nested ArrayObject assignment
+  - Switch many ini settings to thread-time binding
+  - Clean up memory stat tracking
+  - Immutable collections are now prefixed with Imm instead of Fixed/Frozen
+  - Clean up type parameter for CheckType-related IR opcodes
   - Remove legacy linear-scan register allocator and Eval.HHIRXls option
 
 "Eminem" 18-Feb-2014

@@ -18,6 +18,7 @@
 #define incl_HPHP_COMPILER_PARSER_H_
 
 #include <functional>
+#include <vector>
 
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/parser/parser.h"

@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace JIT {
 
@@ -69,6 +70,8 @@ bool typeSufficientlyGeneric(Type t) {
  * can specialize code earlier and avoid generic operations.
  */
 void optimizePredictions(IRUnit& unit) {
+  Timer _t("optimize_predictionOpts");
+
   FTRACE(5, "PredOpts:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "PredOpts:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
@@ -91,7 +94,7 @@ void optimizePredictions(IRUnit& unit) {
   auto optLdMem = [&] (IRInstruction* checkType) -> bool {
     auto const ldMem = checkType->src(0)->inst();
     if (ldMem->op() != LdMem) return false;
-    if (ldMem->src(1)->getValInt() != 0) return false;
+    if (ldMem->src(1)->intVal() != 0) return false;
     if (!typeSufficientlyGeneric(ldMem->typeParam())) return false;
 
     FTRACE(5, "candidate: {}\n", ldMem->toString());

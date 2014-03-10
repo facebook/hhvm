@@ -17,8 +17,6 @@
 #include "hphp/util/bitops.h"
 #include <gtest/gtest.h>
 
-#include "hphp/util/util.h"
-
 namespace HPHP {
 
 TEST(BitopsTest, FfsNonzero) {

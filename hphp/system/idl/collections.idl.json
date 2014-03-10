@@ -351,10 +351,32 @@
                     ]
                 },
                 {
+                    "name": "immutable",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "toMap",
                     "flags": [
                     ],
                     "desc": "Returns a Map built from the keys and values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toImmMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmMap built from the keys and values of this Vector.",
                     "return": {
                         "type": "Object"
                     },
@@ -689,6 +711,7 @@
           "ifaces": [
             "ConstVector"
           ],
+          "desc": "An immutable ordered collection where values are keyed using integers 0 thru n-1 in order.",
           "flags": [
             "IsFinal",
             "IsCppSerializable",
@@ -982,7 +1005,7 @@
                   "name": "toImmVector",
                   "flags": [
                   ],
-                  "desc": "Returns a copy of this ImmVector.",
+                  "desc": "Returns an immutable version of this collection.",
                   "return": {
                       "type": "Object"
                   },
@@ -994,6 +1017,17 @@
                   "flags": [
                   ],
                   "desc": "Returns a Map built from the keys and values of this ImmVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "toImmMap",
+                  "flags": [
+                  ],
+                  "desc": "Returns a ImmMap built from the keys and values of this ImmVector.",
                   "return": {
                       "type": "Object"
                   },
@@ -1016,6 +1050,17 @@
                  "flags": [
                  ],
                   "desc": "Returns a ImmSet built from the values of this ImmVector.",
+                 "return": {
+                     "type": "Object"
+                 },
+                 "args": [
+                 ]
+             },
+             {
+                 "name": "immutable",
+                 "flags": [
+                 ],
+                 "desc": "Returns an immutable version of this collection.",
                  "return": {
                      "type": "Object"
                  },
@@ -1089,31 +1134,6 @@
                       {
                           "name": "search_value",
                           "type": "Variant"
-                      }
-                  ]
-              },
-              {
-                  "name": "slice",
-                  "flags": [
-                      "IsStatic"
-                  ],
-                  "desc": "Returns a ImmVector built from the specified slice of values from the specified ImmVector.",
-                  "return": {
-                      "type": "Object"
-                  },
-                  "args": [
-                      {
-                          "name": "vec",
-                          "type": "Variant"
-                      },
-                      {
-                          "name": "offset",
-                          "type": "Variant"
-                      },
-                      {
-                          "name": "len",
-                          "type": "Variant",
-                          "value": "null"
                       }
                   ]
               }
@@ -1503,6 +1523,17 @@
                     ]
                 },
                 {
+                    "name": "toImmMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmMap built from the keys and values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "toSet",
                     "flags": [
                     ],
@@ -1518,6 +1549,17 @@
                     "flags": [
                     ],
                      "desc": "Returns a ImmSet built from the values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "immutable",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
                     "return": {
                         "type": "Object"
                     },
@@ -1798,7 +1840,7 @@
             "ifaces": [
                 "ConstMap"
             ],
-            "desc": "An immutable dictionary-style collection.",
+            "desc": "An immutable ordered dictionary-style collection.",
             "flags": [
                 "IsFinal",
                 "IsCppSerializable",
@@ -1992,6 +2034,17 @@
                     ]
                 },
                 {
+                    "name": "toImmMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "toSet",
                     "flags": [
                     ],
@@ -2007,6 +2060,17 @@
                     "flags": [
                     ],
                      "desc": "Returns a ImmSet built from the values of this ImmMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "immutable",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
                     "return": {
                         "type": "Object"
                     },
@@ -2321,7 +2385,7 @@
             "ifaces": [
                 "MutableSet"
             ],
-            "desc": "An unordered set-style collection.",
+            "desc": "An ordered set-style collection.",
             "flags": [
                 "IsFinal",
                 "IsCppSerializable",
@@ -2520,6 +2584,17 @@
                     ],
                      "desc": "Returns a ImmSet built from the values of this Set.",
                      "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "immutable",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
+                    "return": {
                         "type": "Object"
                     },
                     "args": [
@@ -2755,7 +2830,7 @@
             "ifaces": [
                 "ConstSet"
             ],
-            "desc": "An unordered immutable set-style collection.",
+            "desc": "An immutable ordered set-style collection.",
             "flags": [
                 "IsFinal",
                 "IsCppSerializable",
@@ -2896,7 +2971,18 @@
                     "name": "toImmSet",
                     "flags": [
                     ],
-                    "desc": "Returns a copy of this ImmSet.",
+                    "desc": "Returns an immutable version of this collection.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "immutable",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
                     "return": {
                         "type": "Object"
                     },
@@ -3168,7 +3254,7 @@
             "ifaces": [
                 "ConstVector"
             ],
-            "desc": "An ordered fixed-sized container.",
+            "desc": "An immutable ordered fixed-sized container.",
             "flags": [
                 "IsFinal",
                 "IsCppSerializable",
@@ -3308,6 +3394,17 @@
                     ]
                 },
                 {
+                    "name": "toImmMap",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmMap built from the keys and values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "toSet",
                     "flags": [
                     ],
@@ -3323,6 +3420,17 @@
                    "flags": [
                    ],
                     "desc": "Returns a ImmSet built from the values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "immutable",
+                    "flags": [
+                    ],
+                    "desc": "Returns an immutable version of this collection.",
                     "return": {
                         "type": "Object"
                     },

@@ -47,7 +47,7 @@ template<class EDType, class MemberType>
 Arg extra(MemberType EDType::*ptr) {
   auto fun = [ptr] (const IRInstruction* inst) {
     auto const extra = inst->extra<EDType>();
-    return constToBits(extra->*ptr);
+    return Type::cns(extra->*ptr).rawVal();
   };
   return Arg(fun);
 }

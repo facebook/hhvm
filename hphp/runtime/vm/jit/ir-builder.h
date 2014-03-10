@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_IRBUILDER_H_
 
 #include <boost/scoped_ptr.hpp>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 #include "folly/Optional.h"
@@ -218,20 +219,12 @@ struct IRBuilder {
   //////////////////////////////////////////////////////////////////////
   // constants
 
-  SSATmp* genDefUninit();
-  SSATmp* genDefInitNull();
-  SSATmp* genDefNull();
   SSATmp* genPtrToInitNull();
   SSATmp* genPtrToUninit();
 
   template<class... Args>
   SSATmp* cns(Args&&... args) {
     return m_unit.cns(std::forward<Args>(args)...);
-  }
-
-  template<typename T>
-  SSATmp* genLdConst(T val) {
-    return gen(LdConst, typeForConst(val), ConstData(val));
   }
 
   //////////////////////////////////////////////////////////////////////

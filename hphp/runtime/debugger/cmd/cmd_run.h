@@ -18,6 +18,8 @@
 #define incl_HPHP_EVAL_DEBUGGER_CMD_RUN_H_
 
 #include "hphp/runtime/debugger/debugger_command.h"
+#include <memory>
+#include <vector>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

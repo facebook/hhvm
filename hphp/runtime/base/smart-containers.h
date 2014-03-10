@@ -28,6 +28,10 @@
 #include <vector>
 
 #include <boost/container/flat_map.hpp>
+#include <limits>
+#include <list>
+#include <set>
+#include <utility>
 
 #include "hphp/runtime/base/memory-manager.h"
 

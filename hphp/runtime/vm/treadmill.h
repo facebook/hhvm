@@ -34,8 +34,8 @@ namespace Treadmill {
  *
  * The work item will be called from base rank.
  */
-void startRequest(int threadId);
-void finishRequest(int threadId);
+void startRequest();
+void finishRequest();
 
 /*
  * Returns the oldest start time in seconds of all requests in flight.
@@ -57,7 +57,7 @@ typedef int64_t GenCount;
 class WorkItem {
  protected:
   GenCount m_gen;
-  friend void finishRequest(int threadId);
+  friend void finishRequest();
 
  public:
   WorkItem();

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/url-file.h"
+#include <vector>
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/runtime-error.h"

@@ -18,6 +18,7 @@
 #define incl_HPHP_CONSTRUCT_H_
 
 #include "hphp/compiler/json.h"
+#include <memory>
 #include "hphp/compiler/code_generator.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/block_scope.h"

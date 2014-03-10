@@ -37,7 +37,7 @@ one_array:
           CGetL $func
           DecodeCufIter 0 bad_func
 .try_fault kill_iter_0 {
-            NewArray
+            NewArray 3  # HphpArray::SmallSize
             SetL $res
             PopC
 

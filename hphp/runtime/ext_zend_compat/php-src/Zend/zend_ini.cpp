@@ -39,19 +39,17 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int modu
   assert(extension);
 
 	while (p->name) {
-    auto updateCallback = [](const HPHP::String& value, void *p) -> bool {
-      zend_ini_entry *entry = static_cast<zend_ini_entry*>(p);
+    auto updateCallback = [p](const std::string& value) -> bool {
       // TODO Who is supposed to free this?
       char* data = estrndup(value.data(), value.size());
-      auto ret = entry->on_modify(
-        entry, data, value.size(),
-        entry->mh_arg1, entry->mh_arg2, entry->mh_arg3, ZEND_INI_STAGE_STARTUP
+      auto ret = p->on_modify(
+        const_cast<zend_ini_entry*>(p), data, value.size(),
+        p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP
       );
       return ret;
     };
-    auto getCallback = [](void *p) {
-      zend_ini_entry *entry = static_cast<zend_ini_entry*>(p);
-      return std::string(entry->value, entry->value_length);
+    auto getCallback = [p]() {
+      return std::string(p->value, p->value_length);
     };
     HPHP::IniSetting::Mode mode =
       p->modifiable == ZEND_INI_USER   ? HPHP::IniSetting::Mode::PHP_INI_USER :
@@ -61,8 +59,7 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int modu
     HPHP::IniSetting::Bind(
         extension, mode,
         p->name, p->value,
-        updateCallback, getCallback,
-        const_cast<zend_ini_entry*>(p));
+        HPHP::IniSetting::SetAndGet<std::string>(updateCallback, getCallback));
 		p++;
 	}
 	return SUCCESS;

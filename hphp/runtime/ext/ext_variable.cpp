@@ -189,7 +189,7 @@ Variant f_unserialize(const String& str, CArrRef class_whitelist /* = empty_arra
 // variable table
 
 Array f_get_defined_vars() {
-  VarEnv* v = g_vmContext->getVarEnv();
+  VarEnv* v = g_context->getVarEnv();
   if (v) {
     return v->getDefinedVariables();
   } else {
@@ -213,7 +213,7 @@ int64_t f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
   bool reference = extract_type & EXTR_REFS;
   extract_type &= ~EXTR_REFS;
 
-  VarEnv* v = g_vmContext->getVarEnv();
+  VarEnv* v = g_context->getVarEnv();
   if (!v) return 0;
   int count = 0;
   for (ArrayIter iter(var_array); iter; ++iter) {
@@ -257,7 +257,7 @@ int64_t f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
     if (!is_valid_var_name(nameData->data(), nameData->size())) {
       continue;
     }
-    g_vmContext->setVar(nameData, iter.nvSecond(), reference);
+    g_context->setVar(nameData, iter.nvSecond(), reference);
     count++;
   }
   return count;

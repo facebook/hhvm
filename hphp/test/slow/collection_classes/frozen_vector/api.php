@@ -21,10 +21,6 @@ function main() {
   // linearSearch()
   var_dump($fv->linearSearch(2));
   var_dump($fv->linearSearch(10));
-
-  // slice
-  var_dump(ImmVector::slice($fv, 1, 2));
-  var_dump(ImmVector::slice($fv, 3, 0));
 }
 
 main();

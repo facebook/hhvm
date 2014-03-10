@@ -25,6 +25,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "hphp/vixl/a64/simulator-a64.h"
+#include "hphp/util/thread-local.h"
 #include "folly/Format.h"
 #include <math.h>
 
@@ -116,6 +117,7 @@ Simulator::~Simulator() {
 void Simulator::Run() {
   while (pc_ != kEndOfSimAddress) {
     ExecuteInstruction();
+    ++instr_count_;
   }
 }
 
@@ -932,6 +934,7 @@ uint64_t Simulator::MemoryRead(const uint8_t* address, unsigned num_bytes) {
   assert((num_bytes > 0) && (num_bytes <= sizeof(uint64_t)));
   uint64_t read = 0;
   memcpy(&read, address, num_bytes);
+  ++load_count_;
   return read;
 }
 
@@ -972,6 +975,7 @@ void Simulator::MemoryWrite(uint8_t* address,
   assert(address != nullptr);
   assert((num_bytes > 0) && (num_bytes <= sizeof(uint64_t)));
   memcpy(address, &value, num_bytes);
+  ++store_count_;
 }
 
 
@@ -2013,6 +2017,7 @@ void Simulator::VisitSystem(Instruction* instr) {
         switch (instr->ImmSystemRegister()) {
           case NZCV: set_xreg(instr->Rt(), nzcv().RawValue()); break;
           case FPCR: set_xreg(instr->Rt(), fpcr().RawValue()); break;
+          case TPIDR_EL0: set_xreg(instr->Rt(), HPHP::tlsBase()); break;
           default: not_implemented();
         }
         break;

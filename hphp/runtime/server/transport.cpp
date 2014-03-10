@@ -27,7 +27,7 @@
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/ext/ext_openssl.h"
 #include "hphp/util/compression.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/compatibility.h"
@@ -294,7 +294,7 @@ void Transport::getSplitParam(const char *name,
                               Method method /* = Method::GET */) {
   std::string param = getParam(name, method);
   if (!param.empty()) {
-    Util::split(delimiter, param.c_str(), values);
+    split(delimiter, param.c_str(), values);
   }
 }
 
@@ -341,12 +341,12 @@ void Transport::addHeaderNoLock(const char *name, const char *value) {
 
   if (!m_firstHeaderSet) {
     m_firstHeaderSet = true;
-    m_firstHeaderFile = g_vmContext->getContainingFileName().data();
-    m_firstHeaderLine = g_vmContext->getLine();
+    m_firstHeaderFile = g_context->getContainingFileName().data();
+    m_firstHeaderLine = g_context->getLine();
   }
 
   std::string svalue = value;
-  Util::replaceAll(svalue, "\n", "");
+  replaceAll(svalue, "\n", "");
   m_responseHeaders[name].push_back(svalue);
 
   if (strcasecmp(name, "Location") == 0 && m_responseCode != 201 &&
@@ -635,7 +635,7 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
   if (m_responseHeaders.find("Content-Type") == m_responseHeaders.end() &&
       m_responseCode != 304) {
     std::string contentType = "text/html; charset="
-                              + IniSetting::Get("default_set");
+                              + IniSetting::Get("default_charset");
     addHeaderImpl("Content-Type", contentType.c_str());
   }
 

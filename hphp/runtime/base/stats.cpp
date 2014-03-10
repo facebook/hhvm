@@ -15,9 +15,13 @@
 */
 
 #include "hphp/runtime/base/stats.h"
+#include <algorithm>
+#include <atomic>
+#include <utility>
+#include <vector>
 
 #include "hphp/util/data-block.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP {
 namespace Stats {
@@ -71,36 +75,41 @@ void dump() {
 
   typedef std::pair<const char*, uint64_t> StatPair;
   for (auto const& group : *tl_stat_groups) {
-    std::ostringstream stats;
+    std::string stats;
     auto const& map = group.second;
-    uint64_t total = 0, accum = 0;;
+    uint64_t total = 0, accum = 0;
+    size_t nameWidth = 0;
 
     std::vector<StatPair> rows(map.begin(), map.end());
-    std::for_each(rows.begin(), rows.end(),
-                  [&](const StatPair& p) { total += p.second; });
+    for (auto const& p : rows) {
+      nameWidth = std::max(nameWidth, strlen(p.first));
+      total += p.second;
+    }
     auto gt = [](const StatPair& a, const StatPair& b) {
       return a.second > b.second;
     };
     std::sort(rows.begin(), rows.end(), gt);
 
-    stats << folly::format("{:-^80}\n",
-                           folly::format(" group {} ",
-                                         group.first, url))
-          << folly::format("{:>45}   {:>9} {:>8} {:>8}\n",
-                           "name", "count", "% total", "accum %");
+    folly::format(&stats, "{:-^80}\n",
+                  folly::format(" group {} ",group.first, url));
+    folly::format(&stats,
+                  folly::format("{{:>{}}}   {{:>9}} {{:>8}} {{:>8}}\n",
+                                nameWidth + 2).str(),
+                  "name", "count", "% total", "accum %");
 
     static const auto maxGroupEnv = getenv("HHVM_STATS_GROUPMAX");
     static const auto maxGroup = maxGroupEnv ? atoi(maxGroupEnv) : INT_MAX;
 
     int counter = 0;
+    auto const fmt = folly::format("{{:>{}}} : {{:9}} {{:8.2%}} {{:8.2%}}\n",
+                                   nameWidth + 2).str();
     for (auto const& row : rows) {
       accum += row.second;
-      stats << folly::format("{:>70} {} {:9} {:8.2%} {:8.2%}\n",
-                             row.first, ':', row.second,
-                             (double)row.second / total, (double)accum / total);
+      folly::format(&stats, fmt, row.first, row.second,
+                    (double)row.second / total, (double)accum / total);
       if (++counter >= maxGroup) break;
     }
-    FTRACE(0, "{}\n", stats.str());
+    FTRACE(0, "{}\n", stats);
   }
 }
 

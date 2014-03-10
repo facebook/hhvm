@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/system/constants.h"
+#include "hphp/util/file-util.h"
 #include <memory>
 
 namespace HPHP {
@@ -83,11 +84,11 @@ Directory* FileStreamWrapper::opendir(const String& path) {
 int FileStreamWrapper::rename(const String& oldname, const String& newname) {
   int ret =
     RuntimeOption::UseDirectCopy ?
-      Util::directRename(File::TranslatePath(oldname).data(),
-                         File::TranslatePath(newname).data())
+      FileUtil::directRename(File::TranslatePath(oldname).data(),
+                             File::TranslatePath(newname).data())
                                  :
-      Util::rename(File::TranslatePath(oldname).data(),
-                   File::TranslatePath(newname).data());
+      FileUtil::rename(File::TranslatePath(oldname).data(),
+                       File::TranslatePath(newname).data());
   return ret;
 }
 

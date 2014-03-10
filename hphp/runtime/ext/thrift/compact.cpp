@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/ext_thrift.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #include <stack>
 #include <utility>
@@ -146,20 +147,19 @@ enum TError {
   ERR_BAD_VERSION = 4
 };
 
-class CompactRequestData : public RequestEventHandler {
-  public:
-    CompactRequestData() : version(VERSION) { }
-    void clear() { version = VERSION; }
+struct CompactRequestData final : RequestEventHandler {
+  CompactRequestData() : version(VERSION) { }
+  void clear() { version = VERSION; }
 
-    virtual void requestInit() {
-      clear();
-    }
+  void requestInit() override {
+    clear();
+  }
 
-    virtual void requestShutdown() {
-      clear();
-    }
+  void requestShutdown() override {
+    clear();
+  }
 
-    uint8_t version;
+  uint8_t version;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(CompactRequestData, s_compact_request_data);
 

@@ -8,7 +8,7 @@
 }
 
 .function main() {
-  NewArray
+  NewArray 3
   String "asd"
   AddNewElemC
   SetL $foo

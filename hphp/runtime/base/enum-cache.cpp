@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/enum-cache.h"
+#include <memory>
 
 namespace HPHP {
 

@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debug/gdb-jit.h"
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include "hphp/runtime/base/execution-context.h"
 
@@ -39,7 +39,7 @@ void* DebugInfo::pidMapOverlayStart;
 void* DebugInfo::pidMapOverlayEnd;
 
 DebugInfo* DebugInfo::Get() {
-  return tx64->getDebugInfo();
+  return mcg->getDebugInfo();
 }
 
 DebugInfo::DebugInfo() {

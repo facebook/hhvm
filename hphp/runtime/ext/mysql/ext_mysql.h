@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/base-includes.h"
 #include "mysql.h"
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/persistent-resource-store.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR
@@ -42,7 +43,7 @@ public:
     return SupportInfo;
   }
   virtual void debuggerInfo(InfoVec &info) {
-    int count = g_persistentObjects->getMap("mysql::persistent_conns").size();
+    int count = g_persistentResources->getMap("mysql::persistent_conns").size();
     Add(info, "Persistent", FormatNumber("%" PRId64, count));
 
     AddServerStats(info, "sql.conn"       );

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/socket.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -27,16 +28,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SocketData : public RequestEventHandler {
-public:
+struct SocketData final : RequestEventHandler {
   SocketData() : m_lastErrno(0) {}
   void clear() { m_lastErrno = 0; }
-  virtual void requestInit() {
-    clear();
-  }
-  virtual void requestShutdown() {
-    clear();
-  }
+  void requestInit() override { clear(); }
+  void requestShutdown() override { clear(); }
   int m_lastErrno;
 };
 
@@ -59,9 +55,8 @@ Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
 
   struct timeval tv;
   if (timeout <= 0) {
-    auto defaultTimeout = ThreadInfo::s_threadInfo.getNoCheck()->
+    tv.tv_sec = ThreadInfo::s_threadInfo.getNoCheck()->
       m_reqInjectionData.getSocketDefaultTimeout();
-    tv.tv_sec = defaultTimeout;
     tv.tv_usec = 0;
   } else {
     tv.tv_sec = (int)timeout;
@@ -102,6 +97,7 @@ bool Socket::open(const String& filename, const String& mode) {
 }
 
 bool Socket::close() {
+  invokeFiltersOnClose();
   return closeImpl();
 }
 

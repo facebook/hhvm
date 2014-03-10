@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP {
 namespace JIT {
@@ -105,6 +106,8 @@ static void insertAsserts(IRUnit& unit) {
 }
 
 void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
+  Timer _t("optimize");
+
   auto finishPass = [&](const char* msg) {
     dumpTrace(6, unit, folly::format("after {}", msg).str().c_str());
     assert(checkCfg(unit));
@@ -126,9 +129,26 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   };
 
   if (RuntimeOption::EvalHHIRRelaxGuards) {
-    auto const simpleRelax = kind == TransProfile;
-    auto changed = relaxGuards(unit, *irBuilder.guards(), simpleRelax);
-    if (changed) finishPass("guard relaxation");
+    /*
+     * In TransProfile mode, we can only relax the guards in tracelet
+     * region mode.  If the region came from analyze() and we relax the
+     * guards here, then the RegionDesc's TypePreds in ProfData won't
+     * accurately reflect the generated guards.  This can result in a
+     * TransOptimze region to be formed with types that are incompatible,
+     * e.g.:
+     *    B1: TypePred: Loc0: Bool      // but this gets relaxed to Uncounted
+     *        PostCond: Loc0: Uncounted // post-conds are accurate
+     *    B2: TypePred: Loc0: Int       // this will always fail
+     */
+    const bool relax = kind != TransProfile ||
+                       RuntimeOption::EvalJitRegionSelector == "tracelet";
+    if (relax) {
+      Timer _t("optimize_relaxGuards");
+      const bool simple = kind == TransProfile &&
+                          RuntimeOption::EvalJitRegionSelector == "tracelet";
+      auto changed = relaxGuards(unit, *irBuilder.guards(), simple);
+      if (changed) finishPass("guard relaxation");
+    }
   }
 
   if (RuntimeOption::EvalHHIRRefcountOpts) {

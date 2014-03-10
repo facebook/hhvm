@@ -18,6 +18,7 @@
 #define incl_HPHP_CONSTANT_TABLE_H_
 
 #include "hphp/compiler/analysis/symbol_table.h"
+#include <vector>
 #include "hphp/compiler/analysis/block_scope.h"
 
 namespace HPHP {

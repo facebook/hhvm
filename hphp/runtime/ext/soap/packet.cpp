@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_soap.h"
+#include <memory>
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/runtime/ext/soap/packet.h"
 

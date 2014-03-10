@@ -1,0 +1,3 @@
+<?php
+
+if (0 == memory_get_allocation()) exit("skip: jemalloc stats are not being tracked.");

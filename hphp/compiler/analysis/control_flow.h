@@ -20,6 +20,9 @@
 #include <boost/graph/properties.hpp>
 #include <boost/graph/adjacency_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <list>
+#include <utility>
+#include <vector>
 
 #include "hphp/compiler/hphp.h"
 

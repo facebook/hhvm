@@ -42,6 +42,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 #if !defined(_NSIG) && defined(NSIG)
 # define _NSIG NSIG
@@ -97,8 +98,8 @@ static bool check_cmd(const char *cmd) {
       }
     }
     if (!allow) {
-      String file = g_vmContext->getContainingFileName();
-      int line = g_vmContext->getLine();
+      String file = g_context->getContainingFileName();
+      int line = g_context->getLine();
       Logger::Warning("Command %s is not in the whitelist, called at %s:%d",
                       cmd_tmp, file.data(), line);
       if (!RuntimeOption::WhitelistExecWarningOnly) {
@@ -268,18 +269,17 @@ static Sigfunc *php_signal(int signo, Sigfunc *func, bool restart) {
 }
 
 /* Our custom signal handler that calls the appropriate php_function */
-class SignalHandlers : public RequestEventHandler {
-public:
+struct SignalHandlers final : RequestEventHandler {
   SignalHandlers() {
     memset(signaled, 0, sizeof(signaled));
     pthread_sigmask(SIG_SETMASK, NULL, &oldSet);
   }
-  virtual void requestInit() {
+  void requestInit() override {
     handlers.reset();
     // restore the old signal mask, thus unblock those that should be
     pthread_sigmask(SIG_SETMASK, &oldSet, NULL);
   }
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     // block all signals
     sigset_t set;
     sigfillset(&set);

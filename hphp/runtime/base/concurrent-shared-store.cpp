@@ -23,6 +23,8 @@
 #include "hphp/util/timer.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include <mutex>
+#include <set>
+#include <vector>
 
 using std::set;
 

@@ -27,6 +27,8 @@
 
 #ifdef HAVE_LIBDL
 # include <dlfcn.h>
+#include <map>
+#include <vector>
 # ifndef RTLD_LAZY
 #  define RTLD_LAZY 1
 # endif
@@ -41,6 +43,11 @@
 #endif
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+// Global systemlib extensions implemented entirely in PHP
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(redis, NO_EXTENSION_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef std::map<std::string, Extension*, stdltistr> ExtensionMap;

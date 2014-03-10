@@ -18,6 +18,7 @@
 #define incl_HPHP_BUILTIN_FUNCTIONS_H_
 
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/intercept.h"
@@ -38,6 +39,7 @@
  * and wiping it out.
  */
 # include <sys/param.h>
+#include <algorithm>
 # ifdef isset
 #  undef isset
 # endif
@@ -341,7 +343,7 @@ bool function_exists(const String& function_name);
  * For autoload support
  */
 
-class AutoloadHandler : public RequestEventHandler {
+class AutoloadHandler final : public RequestEventHandler {
   enum Result {
     Failure,
     Success,

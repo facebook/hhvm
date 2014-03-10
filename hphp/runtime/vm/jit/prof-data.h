@@ -18,6 +18,8 @@
 #define incl_HPHP_PROF_TRANS_DATA_H_
 
 #include <vector>
+#include <memory>
+#include <unordered_map>
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/func.h"
@@ -67,7 +69,7 @@ typedef std::vector<TCA> PrologueCallersVec;
  * their main entry points, prologues optionally have a guard entry
  * point that checks that we're in the right function before falling
  * through to the main prologue entry (see
- * TranslatorX64::emitFuncGuard).  We need to keep track of both kinds
+ * MCGenerator::emitFuncGuard).  We need to keep track of both kinds
  * of callers for each prologue, so that we can smash them
  * appropriately when regenerating prologues.
  */

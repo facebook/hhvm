@@ -1,0 +1,8 @@
+bool(true)
+---testWrite---
+string(8) "ABCDabcd"
+---testSimpleRead---
+string(8) "ABCDabcd"
+---testStagedRead---
+string(4) "ABCD"
+string(4) "abcd"

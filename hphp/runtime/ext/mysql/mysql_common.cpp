@@ -21,6 +21,8 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <poll.h>
+#include <algorithm>
+#include <vector>
 
 #include "folly/ScopeGuard.h"
 #include "folly/String.h"
@@ -28,6 +30,7 @@
 #include "hphp/util/network.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/db-mysql.h"
+#include "hphp/util/text-util.h"
 
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/request-local.h"
@@ -40,6 +43,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/persistent-resource-store.h"
 
 namespace HPHP {
 
@@ -147,7 +151,7 @@ MySQL *MySQL::GetCachedImpl(const char *name, const String& host, int port,
                             const String& socket, const String& username,
                             const String& password, int client_flags) {
   String key = GetHash(host, port, socket, username, password, client_flags);
-  return dynamic_cast<MySQL*>(g_persistentObjects->get(name, key.data()));
+  return dynamic_cast<MySQL*>(g_persistentResources->get(name, key.data()));
 }
 
 void MySQL::SetCachedImpl(const char *name, const String& host, int port,
@@ -155,7 +159,7 @@ void MySQL::SetCachedImpl(const char *name, const String& host, int port,
                           const String& password, int client_flags,
                           MySQL *conn) {
   String key = GetHash(host, port, socket, username, password, client_flags);
-  g_persistentObjects->set(name, key.data(), conn);
+  g_persistentResources->set(name, key.data(), conn);
 }
 
 MySQL *MySQL::GetDefaultConn() {
@@ -1162,7 +1166,7 @@ Variant MySQLStmt::result_metadata() {
   Object obj = ObjectData::newInstance(cls);
 
   TypedValue ret;
-  g_vmContext->invokeFunc(&ret, cls->getCtor(), args, obj.get());
+  g_context->invokeFunc(&ret, cls->getCtor(), args, obj.get());
   tvRefcountedDecRef(&ret);
 
   return obj;
@@ -1315,8 +1319,8 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
                         q, ref(matches));
     int size = matches.toArray().size();
     if (size > 2) {
-      string verb = Util::toLower(matches[size - 2].toString().data());
-      string table = Util::toLower(matches[size - 1].toString().data());
+      string verb = toLower(matches[size - 2].toString().data());
+      string table = toLower(matches[size - 1].toString().data());
       if (!table.empty() && table[0] == '`') {
         table = table.substr(1, table.length() - 2);
       }
@@ -1342,7 +1346,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
                           query, ref(matches));
       size = matches.toArray().size();
       if (size == 2) {
-        string verb = Util::toLower(matches[1].toString().data());
+        string verb = toLower(matches[1].toString().data());
         rconn->m_xaction_count = ((verb == "begin") ? 1 : 0);
         ServerStats::Log(string("sql.query.") + verb, 1);
         if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {

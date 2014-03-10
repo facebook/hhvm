@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/util/stack-trace.h"
 
 // #define ENABLE_SIMPLE_COUNTER 1
@@ -28,12 +29,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SimpleCounter : public RequestEventHandler {
-public:
+struct SimpleCounter final : RequestEventHandler {
   SimpleCounter() { }
 
-  virtual void requestInit();
-  virtual void requestShutdown();
+  void requestInit() override;
+  void requestShutdown() override;
 
   static void Count(const std::string &name);
 

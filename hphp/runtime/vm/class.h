@@ -465,6 +465,7 @@ struct Class : AtomicCountable {
     RepoAuthType m_repoAuthType;
 
     const StringData* m_docComment;
+    int m_idx;
   };
 
   struct SProp {
@@ -475,6 +476,7 @@ struct Class : AtomicCountable {
     Class* m_class; // Most derived class that declared this property.
     TypedValue m_val; // Used if (m_class == this).
     RepoAuthType m_repoAuthType;
+    int m_idx;
   };
 
   struct Const {
@@ -924,28 +926,38 @@ public:
     return m_nativeDataInfo;
   }
 
+  Class* m_nextClass{nullptr}; // used by Unit
 private:
+  /*
+   * NOTE: Fields ordered by usage frequency.
+   * Do not re-order for cosmetic reasons.
 
-  PreClassPtr m_preClass;
-  ClassPtr m_parent;
+   * Cold ones first, then reverse order of hotness
+   * (because m_classVec is relatively hot, and must be last)
+   */
+
+  /* Objects with the <<__NativeData("T")>> UA are allocated with
+   * extra space prior to the ObjectData structure itself.
+   */
+  const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
   std::unique_ptr<ClassPtr[]> m_declInterfaces;
-  size_t m_numDeclInterfaces;
-  InterfaceMap m_interfaces;
 
+  TraitAliasVec m_traitAliases;
+
+  Slot m_traitsBeginIdx{0};
+  Slot m_traitsEndIdx{0};
+  mutable RDS::Link<Array> m_nonScalarConstantCache{RDS::kInvalidHandle};
+  size_t m_numDeclInterfaces{0};
+
+  Func* m_toString;
   // Note: In RepoAuthoritative mode, we rely on trait flattening in the
   // compile phase to import the contents of traits. As a result,
   // m_usedTraits is empty.
   std::vector<ClassPtr> m_usedTraits;
-  TraitAliasVec m_traitAliases;
-
-  MethodMap m_methods;
-
-  Slot m_traitsBeginIdx;
-  Slot m_traitsEndIdx;
-  Func* m_ctor;
-  Func* m_dtor;
-  Func* m_toString;
-  Func* m_invoke;    // __invoke, iff non-static (or closure)
+  ConstMap m_constants;
+  ClassPtr m_parent;
+  int32_t m_declPropNumAccessible;
+  mutable RDS::Link<Class*> m_cachedClass{RDS::kInvalidHandle};
 
   // Vector of 86pinit() methods that need to be called to complete instance
   // property initialization, and a pointer to a 86sinit() method that needs to
@@ -955,32 +967,27 @@ private:
   //
   // + An instance of this class is created.
   // + A static property of this class is accessed.
-  InitVec m_pinitVec;
   InitVec m_sinitVec;
-
-  const ClassInfo* m_clsInfo;
-
-  unsigned m_needInitialization : 1;      // requires initialization,
-                                          // due to [ps]init or simply
-                                          // having static members
-  unsigned m_hasInitMethods : 1;          // any __[ps]init() methods?
-  unsigned m_callsCustomInstanceInit : 1; // should we always call __init__
-                                          // on new instances?
-  unsigned m_hasDeepInitProps : 1;
-  unsigned m_attrCopy : 28;               // cache of m_preClass->attrs().
-  int32_t m_ODAttrs;
-
-  uint32_t m_builtinODTailSize{0};
-  int32_t m_declPropNumAccessible;
-  unsigned m_classVecLen;
-  mutable RDS::Link<Class*> m_cachedClass; // can this be const Class*?
-  mutable RDS::Link<PropInitVec*> m_propDataCache;
-  mutable RDS::Link<TypedValue*> m_propSDataCache;
-  mutable RDS::Link<Array> m_nonScalarConstantCache;
+  const ClassInfo* m_clsInfo{nullptr};
+  Func* m_invoke;    // __invoke, iff non-static (or closure)
+  Func* m_ctor;
+  PropInitVec m_declPropInit;
+  InitVec m_pinitVec;
+  SPropMap m_staticProperties;
   BuiltinCtorFunction m_instanceCtor{nullptr};
+  mutable RDS::Link<PropInitVec*> m_propDataCache{RDS::kInvalidHandle};
+  uint32_t m_builtinODTailSize{0};
+  PreClassPtr m_preClass;
+  InterfaceMap m_interfaces;
+  // Bitmap of parent classes and implemented interfaces. Each bit
+  // corresponds to a commonly used class name, determined during the
+  // profiling warmup requests.
+  InstanceBits::BitSet m_instanceBits;
   BuiltinDtorFunction m_instanceDtor{nullptr};
-  ConstMap m_constants;
-
+  Func* m_dtor;
+  MethodMap m_methods;
+  mutable RDS::Link<TypedValue*> m_propSDataCache{RDS::kInvalidHandle};
+  unsigned m_classVecLen;
   /*
    * Each ObjectData is created with enough trailing space to directly store
    * the vector of declared properties. To look up a property by name and
@@ -992,22 +999,17 @@ private:
    * contains initialization information.
    */
   PropMap m_declProperties;
-  PropInitVec m_declPropInit;
-  SPropMap m_staticProperties;
 
-public:
-  Class* m_nextClass; // used by Unit
+  int32_t m_ODAttrs;
+  unsigned m_needInitialization : 1;      // requires initialization,
+                                          // due to [ps]init or simply
+                                          // having static members
+  unsigned m_hasInitMethods : 1;          // any __[ps]init() methods?
+  unsigned m_callsCustomInstanceInit : 1; // should we always call __init__
+                                          // on new instances?
+  unsigned m_hasDeepInitProps : 1;
+  unsigned m_attrCopy : 28;               // cache of m_preClass->attrs().
 
-private:
-  /* Objects with the <<__NativeData("T")>> UA are allocated with
-   * extra space prior to the ObjectData structure itself.
-   */
-  const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
-
-  // Bitmap of parent classes and implemented interfaces. Each bit
-  // corresponds to a commonly used class name, determined during the
-  // profiling warmup requests.
-  InstanceBits::BitSet m_instanceBits;
   // Vector of Class pointers that encodes the inheritance hierarchy,
   // including this Class as the last element.
   Class* m_classVec[1]; // Dynamically sized; must come last.

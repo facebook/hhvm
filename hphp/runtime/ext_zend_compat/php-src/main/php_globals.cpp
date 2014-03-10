@@ -29,8 +29,9 @@ zval** PG_http_globals() {
 }
 
 static bool bool_ini_get(const char* str) {
-  HPHP::String unused;
-  return HPHP::IniSetting::Get(str, unused);
+  HPHP::String ret;
+  HPHP::IniSetting::Get(str, ret);
+  return ret.toBoolean();
 }
 
 zend_bool PG_html_errors() { return bool_ini_get("html_errors"); }
@@ -48,7 +49,7 @@ _arg_separators PG_arg_separator() {
 int64_t PG_memory_limit() {
   HPHP::String ret;
   HPHP::IniSetting::Get("memory_limit", ret);
-  return ret->toInt64();
+  return ret.toInt64();
 }
 
 char* PG_docref_root() { return nullptr; }

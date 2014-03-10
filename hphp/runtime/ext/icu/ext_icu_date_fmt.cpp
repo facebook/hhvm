@@ -47,22 +47,22 @@ void IntlDateFormatter::setDateFormatter(const String& locale,
   bool calOwned = false;
   const icu::Calendar *cal = IntlCalendar::ParseArg(calendar, loc,
                                                     "datefm_create",
-                                                    s_intl_error->m_error,
+                                                    s_intl_error.get(),
                                                     calType, calOwned);
   if (!cal) { return; }
   SCOPE_EXIT { if (cal && calOwned) delete cal; };
 
   const icu::TimeZone *tz = IntlTimeZone::ParseArg(timezone,
                                                    "datefmt_create",
-                                                   s_intl_error->m_error);
+                                                   s_intl_error.get());
   if (!tz) { return; }
   SCOPE_EXIT { if (tz && !isValid()) delete tz; };
 
   UErrorCode error = U_ZERO_ERROR;
-  String pat(u16(pattern, error));
+  icu::UnicodeString pat(u16(pattern, error));
   if (U_FAILURE(error)) {
-    s_intl_error->set(error, "datefmt_create: "
-                             "error converting pattern to UTF-16");
+    s_intl_error->setError(error, "datefmt_create: "
+                                  "error converting pattern to UTF-16");
     return;
   }
 
@@ -70,14 +70,14 @@ void IntlDateFormatter::setDateFormatter(const String& locale,
   if (m_date_fmt) {
     udat_close(m_date_fmt);
   }
-  m_date_fmt = udat_open(pat.empty()?(UDateFormatStyle)timetype:UDAT_IGNORE,
-                         pat.empty()?(UDateFormatStyle)datetype:UDAT_IGNORE,
+  m_date_fmt = udat_open(pat.isEmpty()?(UDateFormatStyle)timetype:UDAT_IGNORE,
+                         pat.isEmpty()?(UDateFormatStyle)datetype:UDAT_IGNORE,
                          locale.c_str(), nullptr, 0,
-                         (UChar*)pat.c_str(), pat.size() / sizeof(UChar),
+                         pat.getBuffer(), pat.length(),
                          &error);
   if (U_FAILURE(error)) {
-    s_intl_error->set(error, "datefmt_create: date "
-                             "formatter creation failed");
+    s_intl_error->setError(error, "datefmt_create: date "
+                                  "formatter creation failed");
     return;
   }
 
@@ -99,9 +99,9 @@ void IntlDateFormatter::setDateFormatter(const String& locale,
 
 void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   if (!orig || !orig->datefmt()) {
-    s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                      "Cannot clone unconstructed IntlDateFormatter");
-    throwException("%s", s_intl_error->getErrorMessage().c_str());
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "Cannot clone unconstructed IntlDateFormatter");
+    throwException("%s", s_intl_error->getErrorMessage(false).c_str());
   }
   if (m_date_fmt) {
     udat_close(m_date_fmt);
@@ -109,7 +109,7 @@ void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   UErrorCode error = U_ZERO_ERROR;
   m_date_fmt = udat_clone(orig->datefmt(), &error);
   if (U_FAILURE(error)) {
-    s_intl_error->set(error, "datefmt_clone: date formatter clone failed");
+    s_intl_error->setError(error, "datefmt_clone: date formatter clone failed");
     throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
 }
@@ -205,14 +205,14 @@ static String HHVM_METHOD(IntlDateFormatter, format, CVarRef value) {
     return null_string;
   }
   error = U_ZERO_ERROR;
-  String ret((len + 1) * sizeof(UChar), ReserveString);
-  udat_format(data->datefmt(), ts, (UChar*)ret->mutableData(),
-              ret->capacity() / sizeof(UChar), nullptr, &error);
+  icu::UnicodeString ret;
+  auto *buffer = ret.getBuffer(len + 1);
+  udat_format(data->datefmt(), ts, buffer, len + 1, nullptr, &error);
   if (U_FAILURE(error)) {
     data->setError(error);
     return null_string;
   }
-  ret->setSize(len * sizeof(UChar));
+  ret.releaseBuffer(len);
   String out(u8(ret, error));
   if (U_FAILURE(error)) {
     data->setError(error);
@@ -266,16 +266,16 @@ static String HHVM_METHOD(IntlDateFormatter, getPattern) {
   DATFMT_GET(data, this_, null_string);
   UErrorCode error = U_ZERO_ERROR;
   int32_t len = udat_toPattern(data->datefmt(), false, nullptr, 0, &error);
-  String buf((len+1) * sizeof(UChar), ReserveString);
+  icu::UnicodeString tmp;
+  auto buf = tmp.getBuffer(len + 1);
   error = U_ZERO_ERROR;
-  udat_toPattern(data->datefmt(), false, (UChar*)buf->mutableData(),
-                 buf->capacity() / sizeof(UChar), &error);
+  udat_toPattern(data->datefmt(), false, buf, len + 1, &error);
   if (U_FAILURE(error)) {
     data->setError(error, "Error getting formatter pattern");
     return null_string;
   }
-  buf->setSize(len * sizeof(UChar));
-  String ret(u8(buf, error));
+  tmp.releaseBuffer(len);
+  String ret(u8(tmp, error));
   if (U_FAILURE(error)) {
     data->setError(error);
     return null_string;
@@ -346,7 +346,7 @@ static Variant HHVM_METHOD(IntlDateFormatter, localtime,
   }
 
   UErrorCode error = U_ZERO_ERROR;
-  String uValue(u16(value, error));
+  icu::UnicodeString uValue(u16(value, error));
   if (U_FAILURE(error)) {
     data->setError(error, "Error converting timezone to UTF-16");
     return false;
@@ -355,7 +355,7 @@ static Variant HHVM_METHOD(IntlDateFormatter, localtime,
   error = U_ZERO_ERROR;
   UCalendar *cal = const_cast<UCalendar*>(udat_getCalendar(data->datefmt()));
   udat_parseCalendar(data->datefmt(), cal,
-                     (UChar*)uValue.c_str(), uValue.size() / sizeof(UChar),
+                     uValue.getBuffer(), uValue.length(),
                      &parse_pos, &error);
 
   Array ret = Array::Create();
@@ -390,20 +390,21 @@ static Variant HHVM_METHOD(IntlDateFormatter, localtime,
 static Variant HHVM_METHOD(IntlDateFormatter, parse,
                            const String& value, VRefParam position) {
   DATFMT_GET(data, this_, 0);
+  data->clearError();
   int32_t pos = position.toInt64();
   if (pos > value.size()) {
     return false;
   }
 
   UErrorCode error = U_ZERO_ERROR;
-  String str(u16(value, error));
+  icu::UnicodeString str(u16(value, error));
   if (U_FAILURE(error)) {
     data->setError(error, "Error converting timezone to UTF-16");
     return false;
   }
   error = U_ZERO_ERROR;
   UDate timestamp = udat_parse(data->datefmt(),
-                               (UChar*)str.c_str(), str.size() / sizeof(UChar),
+                               str.getBuffer(), str.length(),
                                &pos, &error);
   position = (int64_t)pos;
   if (U_FAILURE(error)) {
@@ -434,22 +435,20 @@ static bool HHVM_METHOD(IntlDateFormatter, setPattern,
                         const String& pattern) {
   DATFMT_GET(data, this_, false);
   UErrorCode error = U_ZERO_ERROR;
-  String pat(u16(pattern, error));
+  icu::UnicodeString pat(u16(pattern, error));
   if (U_FAILURE(error)) {
     data->setError(error, "Error converting pattern to UTF-16");
     return false;
   }
   udat_applyPattern(data->datefmt(), (UBool)false,
-                    (UChar*)pat.c_str(), pat.size() / sizeof(UChar));
+                    pat.getBuffer(), pat.length());
   return true;
 }
 
 static bool HHVM_METHOD(IntlDateFormatter, setTimeZone, CVarRef zone) {
   DATFMT_GET(data, this_, false);
-  intl_error err;
   icu::TimeZone *tz = IntlTimeZone::ParseArg(zone, "datefmt_set_timezone",
-                                             err);
-  data->setError(err);
+                                             data);
   if (tz == nullptr) {
     return false;
   }

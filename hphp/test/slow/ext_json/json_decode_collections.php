@@ -1,162 +1,5 @@
 <?hh
 
-$tests = array(
-  // Scalar types tests from HHJsonDecodeTest.php
-  array(
-    'input' => 'null',
-    'options' => 0,
-    'expected' => null,
-  ),
-  array(
-    'input' => '0',
-    'options' => JSON_FB_LOOSE | JSON_FB_STABLE_MAPS,
-    'expected' => 0,
-  ),
-  array(
-    'input' => '"0"',
-    'options' => JSON_FB_COLLECTIONS,
-    'expected' => '0',
-  ),
-  array(
-    'input' => 'true',
-    'options' => JSON_FB_LOOSE,
-    'expected' => true,
-  ),
-  // Parse Errors tests from HHJsonDecodeTest.php
-  array(
-    'input' => '',
-    'options' => JSON_FB_LOOSE | JSON_FB_STABLE_MAPS,
-    'expected' => null,
-  ),
-  array(
-    'input' => '{[}',
-    'options' => JSON_FB_LOOSE | JSON_FB_STABLE_MAPS,
-    'expected' => null,
-  ),
-  array(
-    'input' => '[:(]',
-    'options' => JSON_FB_LOOSE | JSON_FB_STABLE_MAPS,
-    'expected' => null,
-  ),
-  array(
-    'input' => 'xxx',
-    'options' => JSON_FB_LOOSE | JSON_FB_STABLE_MAPS,
-    'expected' => null,
-  ),
-  array(
-    'input' => 'a {',
-    'options' => JSON_FB_LOOSE | JSON_FB_STABLE_MAPS,
-    'expected' => null,
-  ),
-  // Nested StableMap
-  array(
-    'input' =>  '{1:2,3:4,0:[],}',
-    'options' => JSON_FB_LOOSE | JSON_FB_STABLE_MAPS,
-    'expected' => StableMap {'1' => 2, '3' => 4, '0' => Vector {}},
-  ),
-  // StableMaps checks from HHJsonDecodeTest.php
-  array(
-    'input' => '{}',
-    'options' => JSON_FB_STABLE_MAPS,
-    'expected' => StableMap {},
-  ),
-  array(
-    'input' => '{"0": 1, "a": "b"}',
-    'options' => JSON_FB_COLLECTIONS | JSON_FB_STABLE_MAPS,
-    'expected' => StableMap {'0' => 1, 'a' => 'b'},
-  ),
-  array(
-    'input' => '{"3": 4, "2": 5, "1": 6}',
-    'options' => JSON_FB_STABLE_MAPS,
-    'expected' => StableMap {'3' => 4, '2' => 5, '1' => 6},
-  ),
-  // Vectors/Maps - some basic tests
-  array(
-    'input' => '[1,2]',
-    'options' => JSON_FB_COLLECTIONS,
-    'expected' => Vector {1, 2},
-  ),
-  array(
-    'input' => '{}',
-    'options' => JSON_FB_COLLECTIONS,
-    'expected' => Map {},
-  ),
-  array(
-    'input' => '{"{" : "}"}',
-    'options' => JSON_FB_COLLECTIONS,
-    'expected' => Map {'{' => '}'},
-  ),
-  array(
-    'input' => '{"0": 1, "a": "b", "[]": null, "#": false}',
-    'options' => JSON_FB_COLLECTIONS,
-    'expected' => Map {'a' => 'b', '0' => 1, '[]' => null, '#' => false},
-  ),
-  // Collections tests from HHJsonDecodeTest.php
-  array(
-    'input' => '[]',
-    'options' => JSON_FB_COLLECTIONS,
-    'expected' => Vector {},
-  ),
-  array(
-    'input' => '[null, 0, "0", true]',
-    'options' => JSON_FB_COLLECTIONS,
-    'expected' => Vector {null, 0, '0', true},
-  ),
-  // LooseModeCollections from HHJsonDecodeTest.phpi
-  // Single-quoted strings
-  array(
-    'input' => '[\'value\']',
-    'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
-    'expected' => Vector {'value'},
-  ),
-  // Unquoted keys
-  array(
-    'input' => '{key: "value"}',
-    'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
-    'expected' => Map {'key' => 'value'},
-  ),
-  // Boolean keys
-  array(
-    'input' => '{true: "value"}',
-    'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
-    'expected' => Map {'true' => 'value'},
-  ),
-  // Null keys
-  array(
-    'input' => '{null: "value"}',
-    'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
-    'expected' => Map {'null' => 'value'},
-  ),
-  // Nested collections
-  array(
-    'input' =>  '[2,"4",{0:[]}]',
-    'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
-    'expected' => Vector {2, '4', Map {'0' => Vector {}}},
-  ),
-  array(
-    'input' => '{"vec": [], "map": {}}',
-    'options' => JSON_FB_COLLECTIONS,
-    'expected' => Map {'vec' => Vector {}, 'map' => Map {}},
-  ),
-  array(
-    'input' => '{"vec" : [{"z" : []}], "map" : {"a" : {"]" : "["}}}',
-    'options' => JSON_FB_COLLECTIONS,
-    'expected' => Map {
-      'vec' => Vector {
-        Map {
-          'z' => Vector {
-          },
-        },
-      },
-      'map' => Map {
-        'a' => Map {
-          ']' => '[',
-        },
-      },
-    },
-  ),
-);
-
 function report($msg, $obj1, $obj2) {
   echo "$msg\nShould be\n";
   var_dump($obj1);
@@ -177,7 +20,7 @@ function is_equal($obj1, $obj2) {
     report("Incorrect type", $type1, $type2);
     return false;
   }
-  if ($type1 !== "HH\Vector" && $type1 !== "HH\Map" && $type1 !== "StableMap") {
+  if ($type1 !== "HH\Vector" && $type1 !== "HH\Map") {
     return $obj1 === $obj2;
   }
   $n1 = count($obj1);
@@ -214,11 +57,156 @@ function is_equal($obj1, $obj2) {
   return true;
 }
 
-foreach ($tests as $test) {
-  $output = json_decode($test['input'], true, 512, $test['options']);
-  if (!is_equal($output, $test['expected'])) {
-    report("", $output, $test['expected']);
-    break;
+function main() {
+  $tests = array(
+    // Scalar types tests from HHJsonDecodeTest.php
+    array(
+      'input' => 'null',
+      'options' => 0,
+      'expected' => null,
+    ),
+    array(
+      'input' => '0',
+      'options' => JSON_FB_LOOSE,
+      'expected' => 0,
+    ),
+    array(
+      'input' => '"0"',
+      'options' => JSON_FB_COLLECTIONS,
+      'expected' => '0',
+    ),
+    array(
+      'input' => 'true',
+      'options' => JSON_FB_LOOSE,
+      'expected' => true,
+    ),
+    // Parse Errors tests from HHJsonDecodeTest.php
+    array(
+      'input' => '',
+      'options' => JSON_FB_LOOSE,
+      'expected' => null,
+    ),
+    array(
+      'input' => '{[}',
+      'options' => JSON_FB_LOOSE,
+      'expected' => null,
+    ),
+    array(
+      'input' => '[:(]',
+      'options' => JSON_FB_LOOSE,
+      'expected' => null,
+    ),
+    array(
+      'input' => 'xxx',
+      'options' => JSON_FB_LOOSE,
+      'expected' => null,
+    ),
+    array(
+      'input' => 'a {',
+      'options' => JSON_FB_LOOSE,
+      'expected' => null,
+    ),
+    // Maps checks from HHJsonDecodeTest.php
+    array(
+      'input' => '{"0": 1, "a": "b"}',
+      'options' => JSON_FB_COLLECTIONS,
+      'expected' => Map {'0' => 1, 'a' => 'b'},
+    ),
+    // Vectors/Maps - some basic tests
+    array(
+      'input' => '[1,2]',
+      'options' => JSON_FB_COLLECTIONS,
+      'expected' => Vector {1, 2},
+    ),
+    array(
+      'input' => '{}',
+      'options' => JSON_FB_COLLECTIONS,
+      'expected' => Map {},
+    ),
+    array(
+      'input' => '{"{" : "}"}',
+      'options' => JSON_FB_COLLECTIONS,
+      'expected' => Map {'{' => '}'},
+    ),
+    array(
+      'input' => '{"0": 1, "a": "b", "[]": null, "#": false}',
+      'options' => JSON_FB_COLLECTIONS,
+      'expected' => Map {'a' => 'b', '0' => 1, '[]' => null, '#' => false},
+    ),
+    // Collections tests from HHJsonDecodeTest.php
+    array(
+      'input' => '[]',
+      'options' => JSON_FB_COLLECTIONS,
+      'expected' => Vector {},
+    ),
+    array(
+      'input' => '[null, 0, "0", true]',
+      'options' => JSON_FB_COLLECTIONS,
+      'expected' => Vector {null, 0, '0', true},
+    ),
+    // LooseModeCollections from HHJsonDecodeTest.phpi
+    // Single-quoted strings
+    array(
+      'input' => '[\'value\']',
+      'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
+      'expected' => Vector {'value'},
+    ),
+    // Unquoted keys
+    array(
+      'input' => '{key: "value"}',
+      'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
+      'expected' => Map {'key' => 'value'},
+    ),
+    // Boolean keys
+    array(
+      'input' => '{true: "value"}',
+      'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
+      'expected' => Map {'true' => 'value'},
+    ),
+    // Null keys
+    array(
+      'input' => '{null: "value"}',
+      'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
+      'expected' => Map {'null' => 'value'},
+    ),
+    // Nested collections
+    array(
+      'input' =>  '[2,"4",{0:[]}]',
+      'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
+      'expected' => Vector {2, '4', Map {'0' => Vector {}}},
+    ),
+    array(
+      'input' => '{"vec": [], "map": {}}',
+      'options' => JSON_FB_COLLECTIONS,
+      'expected' => Map {'vec' => Vector {}, 'map' => Map {}},
+    ),
+    array(
+      'input' => '{"vec" : [{"z" : []}], "map" : {"a" : {"]" : "["}}}',
+      'options' => JSON_FB_COLLECTIONS,
+      'expected' => Map {
+        'vec' => Vector {
+          Map {
+            'z' => Vector {
+            },
+          },
+        },
+        'map' => Map {
+          'a' => Map {
+            ']' => '[',
+          },
+        },
+      },
+    ),
+  );
+  foreach ($tests as $test) {
+    $output = json_decode($test['input'], true, 512, $test['options']);
+    if (!is_equal($output, $test['expected'])) {
+      report("", $output, $test['expected']);
+      break;
+    }
   }
+  echo "Done\n";
 }
+
+main();
 

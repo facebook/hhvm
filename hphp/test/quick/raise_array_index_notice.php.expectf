@@ -1,0 +1,15 @@
+0
+1
+2
+3
+Caught the rain
+0
+1
+2
+3
+HipHop Fatal error: Uncaught exception 'Exception' with message '' in %s/raise_array_index_notice.php:5
+Stack trace:
+#0 %s/raise_array_index_notice.php(16): errorHandler()
+#1 %s/raise_array_index_notice.php(26): rain()
+#2 %s/raise_array_index_notice.php(30): main()
+#3 {main}

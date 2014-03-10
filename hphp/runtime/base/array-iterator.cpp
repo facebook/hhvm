@@ -811,7 +811,7 @@ bool Iter::init(TypedValue* c1) {
       if (isIterator) {
         (void) new (&arr()) ArrayIter(obj.detach(), ArrayIter::noInc);
       } else {
-        Class* ctx = arGetContextClass(g_vmContext->getFP());
+        Class* ctx = arGetContextClass(g_context->getFP());
         const String& ctxStr = ctx ? ctx->nameRef() : null_string;
         Array iterArray(obj->o_toIterArray(ctxStr));
         ArrayData* ad = iterArray.get();

@@ -132,7 +132,7 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
 void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   if (m_printLevel > 0) {
-    g_context->setDebuggerPrintLevel(m_printLevel);
+    g_context->debuggerSettings.printLevel = m_printLevel;
   }
   {
     String sdata;
@@ -140,7 +140,7 @@ void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
     thrift.write(sdata);
   }
   if (m_printLevel > 0) {
-    g_context->setDebuggerPrintLevel(-1);
+    g_context->debuggerSettings.printLevel = -1;
   }
   thrift.write(m_output);
   thrift.write(m_frame);
@@ -345,9 +345,9 @@ void CmdPrint::onClient(DebuggerClient &client) {
 // NB: unlike most other commands, the client expects that more interrupts
 // can occur while we're doing the server-side work for a print.
 bool CmdPrint::onServer(DebuggerProxy &proxy) {
-  PCFilter* locSave = g_vmContext->m_lastLocFilter;
-  g_vmContext->m_lastLocFilter = new PCFilter();
-  g_vmContext->setDebuggerBypassCheck(m_bypassAccessCheck);
+  PCFilter* locSave = g_context->m_lastLocFilter;
+  g_context->m_lastLocFilter = new PCFilter();
+  g_context->debuggerSettings.bypassCheck = m_bypassAccessCheck;
   {
     EvalBreakControl eval(m_noBreak);
     bool failed;
@@ -358,9 +358,9 @@ bool CmdPrint::onServer(DebuggerProxy &proxy) {
                        (!proxy.isLocal() ? DebuggerProxy::ExecutePHPFlagsLog :
                         DebuggerProxy::ExecutePHPFlagsNone));
   }
-  g_vmContext->setDebuggerBypassCheck(false);
-  delete g_vmContext->m_lastLocFilter;
-  g_vmContext->m_lastLocFilter = locSave;
+  g_context->debuggerSettings.bypassCheck = false;
+  delete g_context->m_lastLocFilter;
+  g_context->m_lastLocFilter = locSave;
   return proxy.sendToClient(this);
 }
 

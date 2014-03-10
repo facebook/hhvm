@@ -21,6 +21,10 @@
 #include <vector>
 #include <algorithm>
 #include <memory>
+#include <deque>
+#include <exception>
+#include <set>
+#include <utility>
 
 #include "folly/MapUtil.h"
 #include "folly/Memory.h"
@@ -93,7 +97,6 @@
 
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -3180,14 +3183,16 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           StringData* name = makeStaticString(sv->getName());
           Id local = m_curFunc->lookupVarId(name);
 
-          Func::SVInfo svInfo;
-          svInfo.name = name;
-          std::ostringstream os;
-          CodeGenerator cg(&os, CodeGenerator::PickledPHP);
-          AnalysisResultPtr ar(new AnalysisResult());
-          value->outputPHP(cg, ar);
-          svInfo.phpCode = makeStaticString(os.str());
-          m_curFunc->addStaticVar(svInfo);
+          if (m_staticEmitted.insert(sv->getName()).second) {
+            Func::SVInfo svInfo;
+            svInfo.name = name;
+            std::ostringstream os;
+            CodeGenerator cg(&os, CodeGenerator::PickledPHP);
+            AnalysisResultPtr ar(new AnalysisResult());
+            value->outputPHP(cg, ar);
+            svInfo.phpCode = makeStaticString(os.str());
+            m_curFunc->addStaticVar(svInfo);
+          }
 
           if (value->isScalar()) {
             visit(value);
@@ -3612,9 +3617,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               }
             }
             if (capacityHint != -1) {
-              e.NewArrayReserve(capacityHint);
+              e.NewArray(capacityHint);
             } else {
-              e.NewArray();
+              e.NewArray(HphpArray::SmallSize);
             }
             visit(ex);
           }
@@ -8380,6 +8385,7 @@ void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe) {
   copyOverCatchAndFaultRegions(fe);
   copyOverFPIRegions(fe);
   m_yieldLabels.clear();
+  m_staticEmitted.clear();
   Offset past = e.getUnitEmitter().bcPos();
   fe->finish(past, false);
   e.getUnitEmitter().recordFunction(fe);

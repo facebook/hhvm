@@ -24,10 +24,12 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/runtime/base/zend-printf.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/hash.h"
 #include <boost/format.hpp>
 #include <boost/scoped_array.hpp>
+#include <algorithm>
+#include <vector>
 
 using namespace HPHP;
 
@@ -235,28 +237,9 @@ void CodeGenerator::printDocComment(const std::string comment) {
   printf("\n");
 }
 
-std::string CodeGenerator::FormatLabel(const std::string &name) {
-  string ret;
-  ret.reserve(name.size());
-  for (size_t i = 0; i < name.size(); i++) {
-    unsigned char ch = name[i];
-    if ((ch >= 'a' && ch <= 'z') ||
-        (ch >= 'A' && ch <= 'Z') ||
-        (ch >= '0' && ch <= '9') || ch == '_') {
-      ret += ch;
-    } else {
-      char buf[10];
-      snprintf(buf, sizeof(buf), "%s%02X", Option::LabelEscape.c_str(),
-               (int)ch);
-      ret += buf;
-    }
-  }
-  return ret;
-}
-
 std::string CodeGenerator::EscapeLabel(const std::string &name,
                                        bool *binary /* = NULL */) {
-  return Util::escapeStringForCPP(name, binary);
+  return escapeStringForCPP(name, binary);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -615,5 +598,3 @@ void CodeGenerator::printLocation(LocationPtr location) {
   printValue(location->char1);
   printObjectFooter();
 }
-
-

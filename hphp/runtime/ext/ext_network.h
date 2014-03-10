@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_NETWORK_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/util/network.h"
 #include <syslog.h>
 

@@ -25,8 +25,10 @@ namespace HPHP {
 // constructor and destructor
 
 const StaticString s_php_output("php://output");
+const StaticString s_php("PHP");
+const StaticString s_output("Output");
 
-OutputFile::OutputFile(const String& filename) {
+OutputFile::OutputFile(const String& filename): File(true, s_php, s_output) {
   if (filename != s_php_output) {
     throw FatalErrorException("not a php://output file ");
   }
@@ -47,6 +49,7 @@ bool OutputFile::open(const String& filename, const String& mode) {
 }
 
 bool OutputFile::close() {
+  invokeFiltersOnClose();
   return closeImpl();
 }
 

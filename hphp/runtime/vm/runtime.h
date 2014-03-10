@@ -194,7 +194,7 @@ newInstance(Class* cls) {
   assert(cls);
   auto* inst = ObjectData::newInstance(cls);
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
-    g_vmContext->m_liveBCObjs.insert(inst);
+    g_context->m_liveBCObjs.insert(inst);
   }
   return inst;
 }

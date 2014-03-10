@@ -17,6 +17,7 @@
 
 #include <chrono>
 #include <random>
+#include <algorithm>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/cfg.h"

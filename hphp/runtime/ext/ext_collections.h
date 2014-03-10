@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_COLLECTION_H_
 
 #include "hphp/runtime/base/base-includes.h"
+#include <limits>
 #include "hphp/system/systemlib.h"
 
 #define DECLARE_COLLECTION_MAGIC_METHODS()           \
@@ -36,7 +37,8 @@
 
 #define DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS()  \
   DECLARE_ITERABLE_MATERIALIZE_METHODS();            \
-  Object t_tomap()
+  Object t_tomap();                                  \
+  Object t_toimmmap()
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,78 +103,6 @@ class BaseVector : public ExtCollectionObjectData {
   Array tokeysarray();
   Array tovaluesarray();
   int64_t linearsearch(CVarRef search_value);
-
-  template<class T>
-  static Object slice(const char* vecType, CVarRef vec, CVarRef offset,
-                      CVarRef len = uninit_null()) {
-
-    std::string notVecMsg = std::string("vec must be an instance of ") +
-      std::string(vecType);
-
-    if (!vec.isObject()) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(notVecMsg));
-      throw e;
-    }
-    ObjectData* obj = vec.getObjectData();
-    if (obj->getVMClass() != T::classof()) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(notVecMsg));
-      throw e;
-    }
-    if (!offset.isInteger()) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-                 "Parameter offset must be an integer"));
-      throw e;
-    }
-    if (!len.isNull() && !len.isInteger()) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-                 "Parameter len must be null or an integer"));
-      throw e;
-    }
-    T* target;
-    Object ret = target = NEWOBJ(T)();
-    auto v = static_cast<T*>(obj);
-    int64_t sz = v->m_size;
-    int64_t startPos = offset.toInt64();
-    if (UNLIKELY(uint64_t(startPos) >= uint64_t(sz))) {
-      if (startPos >= 0) {
-        return ret;
-      }
-      startPos += sz;
-      if (startPos < 0) {
-        startPos = 0;
-      }
-    }
-    int64_t endPos;
-    if (len.isInteger()) {
-      int64_t intLen = len.toInt64();
-      if (LIKELY(intLen > 0)) {
-        endPos = startPos + intLen;
-        if (endPos > sz) {
-          endPos = sz;
-        }
-      } else {
-        if (intLen == 0) {
-          return ret;
-        }
-        endPos = sz + intLen;
-        if (endPos <= startPos) {
-          return ret;
-        }
-      }
-    } else {
-      endPos = sz;
-    }
-    assert(startPos < endPos);
-    uint targetSize = endPos - startPos;
-    TypedValue* data;
-    target->m_capacity = target->m_size = targetSize;
-    target->m_data = data =
-      (TypedValue*)MM().objMallocLogged(targetSize * sizeof(TypedValue));
-    for (uint i = 0; i < targetSize; ++i, ++startPos) {
-      cellDup(v->m_data[startPos], data[i]);
-    }
-    return ret;
-  }
 
   template<class TVector>
   typename std::enable_if<
@@ -253,8 +183,8 @@ class BaseVector : public ExtCollectionObjectData {
   static size_t sizeOffset() { return offsetof(BaseVector, m_size); }
   static size_t dataOffset() { return offsetof(BaseVector, m_data); }
 
-  static size_t frozenCopyOffset() {
-    return offsetof(BaseVector, m_frozenCopy);
+  static size_t immCopyOffset() {
+    return offsetof(BaseVector, m_immCopy);
   }
 
   void addFront(TypedValue* val);
@@ -290,11 +220,11 @@ class BaseVector : public ExtCollectionObjectData {
    * we might need to to trigger COW.
    */
   void mutate() {
-    if (!m_frozenCopy.isNull()) cow();
+    if (!m_immCopy.isNull()) cow();
   }
 
   /**
-   * Copy-On-Write the buffer and reset the frozen copy.
+   * Copy-On-Write the buffer and reset the immutable copy.
    */
   void cow();
 
@@ -309,7 +239,7 @@ class BaseVector : public ExtCollectionObjectData {
   uint m_capacity;
   int32_t m_version;
   // A pointer to a ImmVector which with it shares the buffer.
-  Object m_frozenCopy;
+  Object m_immCopy;
 
  private:
 
@@ -389,6 +319,7 @@ class c_Vector : public BaseVector {
                         CVarRef len = uninit_null()) {
     return ti_slice(vec, offset, len);
   }
+  Object t_immutable();
 
   static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 
@@ -428,7 +359,7 @@ class c_Vector : public BaseVector {
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc);
 
-  void initFvFields(c_ImmVector* fv);
+  Object getImmutableCopy();
   int64_t checkRequestedCapacity(CVarRef sz);
 
   // Friends
@@ -511,6 +442,8 @@ public:
 
   static Object ti_slice(CVarRef vec, CVarRef offset,
                          CVarRef len = uninit_null());
+
+  Object t_immutable();
 
   static c_ImmVector* Clone(ObjectData* obj) {
     return BaseVector::Clone<c_ImmVector>(obj);
@@ -1006,6 +939,7 @@ class c_Map : public BaseMap {
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
+  Object t_immutable();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1048,6 +982,7 @@ class c_ImmMap : public BaseMap {
   Object t_zip(CVarRef iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
+  Object t_immutable();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1513,6 +1448,7 @@ class c_Set : public BaseSet {
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
   static Object ti_fromarrays(int _argc, CArrRef _argv = null_array);
+  Object t_immutable();
 
  public:
 
@@ -1560,6 +1496,8 @@ class c_ImmSet : public BaseSet {
   // Static methods.
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarrays(int _argc, CArrRef _argv = null_array);
+
+  Object t_immutable();
 
  public:
   explicit c_ImmSet(Class* cls = c_ImmSet::classof());
@@ -1634,6 +1572,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
+  Object t_immutable();
 
   static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 

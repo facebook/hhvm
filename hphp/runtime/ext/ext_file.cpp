@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/base/zend-scanf.h"
@@ -36,8 +35,8 @@
 #include "hphp/runtime/base/directory.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/util.h"
 #include "hphp/util/process.h"
+#include "hphp/util/file-util.h"
 #include "folly/String.h"
 #include <dirent.h>
 #include <glob.h>
@@ -52,6 +51,7 @@
 #include <grp.h>
 #include <pwd.h>
 #include <fnmatch.h>
+#include <vector>
 
 #define CHECK_HANDLE_BASE(handle, f, ret)               \
   File *f = handle.getTyped<File>(true, true);          \
@@ -120,21 +120,9 @@ static int accessSyscall(
 static int statSyscall(
     const String& path,
     struct stat* buf,
-    bool useFileCache = false,
-    bool isRelative = false) {
+    bool useFileCache = false) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  auto canUseFileCache = useFileCache && dynamic_cast<FileStreamWrapper*>(w);
-  if (isRelative) {
-    std::string realpath = StatCache::realpath(path.data());
-    // realpath will return an empty string for nonexistent files
-    if (realpath.empty()) {
-      return ENOENT;
-    }
-    auto translatedPath = canUseFileCache ?
-      File::TranslatePathWithFileCache(path) : File::TranslatePath(path);
-    return ::stat(translatedPath.data(), buf);
-  }
-  if (canUseFileCache) {
+  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
     return ::stat(File::TranslatePathWithFileCache(path).data(), buf);
   }
   return w->stat(path, buf);
@@ -615,7 +603,7 @@ Variant f_parse_ini_file(const String& filename,
   String translated = File::TranslatePath(filename);
   if (translated.empty() || !f_file_exists(translated)) {
     if (filename[0] != '/') {
-      String cfd = g_vmContext->getContainingFileName();
+      String cfd = g_context->getContainingFileName();
       if (!cfd.empty()) {
         int npos = cfd.rfind('/');
         if (npos >= 0) {
@@ -837,8 +825,7 @@ bool f_is_dir(const String& filename) {
   }
 
   struct stat sb;
-  String path = isRelative ? cwd + String::FromChar('/') + filename : filename;
-  CHECK_SYSTEM(statSyscall(path, &sb, false, isRelative));
+  CHECK_SYSTEM(statSyscall(filename, &sb));
   return (sb.st_mode & S_IFMT) == S_IFDIR;
 }
 
@@ -1125,10 +1112,10 @@ bool f_copy(const String& source, const String& dest,
   } else {
     int ret =
       RuntimeOption::UseDirectCopy ?
-      Util::directCopy(File::TranslatePath(source).data(),
+      FileUtil::directCopy(File::TranslatePath(source).data(),
           File::TranslatePath(dest).data())
       :
-      Util::copy(File::TranslatePath(source).data(),
+      FileUtil::copy(File::TranslatePath(source).data(),
           File::TranslatePath(dest).data());
     return (ret == 0);
   }
@@ -1246,7 +1233,7 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
   }
   int nret = glob(work_pattern.data(), flags & GLOB_FLAGMASK, NULL, &globbuf);
   if (nret == GLOB_NOMATCH || !globbuf.gl_pathc || !globbuf.gl_pathv) {
-    if (RuntimeOption::SafeFileAccess) {
+    if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess()) {
       if (!f_is_dir(work_pattern)) {
         return false;
       }
@@ -1342,7 +1329,7 @@ bool f_rmdir(const String& dirname, CVarRef context /* = null */) {
 
 String f_dirname(const String& path) {
   char *buf = strndup(path.data(), path.size());
-  int len = Util::dirname_helper(buf, path.size());
+  int len = FileUtil::dirname_helper(buf, path.size());
   return String(buf, len, AttachString);
 }
 

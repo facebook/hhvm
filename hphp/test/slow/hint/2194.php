@@ -14,14 +14,14 @@ function f2() {
   $a = Vector {
 11, 22}
 ;
-  $b = StableMap {
+  $b = Map {
 'a' => 33, 'b' => 44}
 ;
   $a->addAll($b);
   var_dump($a);
 }
 function f3() {
-  $a = StableMap {
+  $a = Map {
 'a' => 11, 'b' => 22}
 ;
   $b = Vector {
@@ -35,10 +35,10 @@ Pair {
   var_dump($a);
 }
 function f4() {
-  $a = StableMap {
+  $a = Map {
 'a' => 11, 'b' => 22}
 ;
-  $b = StableMap {
+  $b = Map {
 'c' => Pair {
 'e', 33}
 , 'd' => Pair {

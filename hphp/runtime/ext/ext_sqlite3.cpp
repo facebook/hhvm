@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_sqlite3.h"
-#include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

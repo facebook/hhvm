@@ -24,6 +24,7 @@
 #include <list>
 
 #include <boost/variant.hpp>
+#include <utility>
 
 #include "hphp/util/md5.h"
 #include "hphp/runtime/base/complex-types.h"

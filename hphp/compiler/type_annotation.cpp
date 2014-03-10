@@ -15,7 +15,8 @@
 */
 
 #include "hphp/compiler/type_annotation.h"
-#include "hphp/util/util.h"
+#include <vector>
+#include "hphp/util/text-util.h"
 
 namespace HPHP {
 
@@ -133,8 +134,8 @@ void TypeAnnotation::xhpTypeName(std::string &name) const {
     name += m_name;
   }
   // un-mangle back
-  Util::replaceAll(name, "__", ":");
-  Util::replaceAll(name, "_", "-");
+  replaceAll(name, "__", ":");
+  replaceAll(name, "_", "-");
 }
 
 void TypeAnnotation::tupleTypeName(std::string &name) const {

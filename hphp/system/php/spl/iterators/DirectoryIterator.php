@@ -138,7 +138,9 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator {
    * @return     mixed   TRUE if the entry is . or .., otherwise FALSE
    */
   public function isDot() {
-    return $this->getFilename() == '.' || $this->getFilename() == '..';
+    return $this->getPathname() !== false && (
+      $this->getFilename() == '.' || $this->getFilename() == '..'
+    );
   }
 
   private function readDir() {

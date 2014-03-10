@@ -15,6 +15,8 @@
 */
 
 #include "hphp/compiler/statement/method_statement.h"
+#include <map>
+#include <set>
 #include "hphp/compiler/statement/return_statement.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/statement/try_statement.h"
@@ -48,7 +50,7 @@
 #include "hphp/runtime/base/complex-types.h"
 
 #include "hphp/parser/parser.h"
-#include "hphp/util/util.h"
+#include "hphp/util/text-util.h"
 
 using namespace HPHP;
 using std::map;
@@ -68,7 +70,7 @@ MethodStatement::MethodStatement
     m_originalName(name), m_params(params),
     m_retTypeAnnotation(retTypeAnnotation), m_stmt(stmt),
     m_docComment(docComment), m_attrList(attrList) {
-  m_name = Util::toLower(name);
+  m_name = toLower(name);
   checkParameters();
 }
 
@@ -84,7 +86,7 @@ MethodStatement::MethodStatement
     m_originalName(name), m_params(params),
     m_retTypeAnnotation(retTypeAnnotation), m_stmt(stmt),
     m_docComment(docComment), m_attrList(attrList) {
-  m_name = Util::toLower(name);
+  m_name = toLower(name);
   checkParameters();
 }
 

@@ -18,6 +18,10 @@
 #define incl_HPHP_SWITCH_STATEMENT_H_
 
 #include "hphp/compiler/statement/statement.h"
+#include <map>
+#include <memory>
+#include <utility>
+#include <vector>
 #include "hphp/compiler/statement/case_statement.h"
 
 namespace HPHP {

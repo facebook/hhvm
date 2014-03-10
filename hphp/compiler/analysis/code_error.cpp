@@ -15,6 +15,8 @@
 */
 
 #include "hphp/compiler/analysis/code_error.h"
+#include <map>
+#include <vector>
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/construct.h"

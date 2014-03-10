@@ -82,7 +82,7 @@ object(HH\Pair)#17 (2) {
   int(3)
 }
 ...
-StableMap
+array
 ...
 object(HH\Pair)#19 (2) {
   [0]=>
@@ -92,32 +92,11 @@ object(HH\Pair)#19 (2) {
 }
 object(HH\Pair)#20 (2) {
   [0]=>
-  int(10)
+  int(1)
   [1]=>
   int(2)
 }
 object(HH\Pair)#21 (2) {
-  [0]=>
-  int(40)
-  [1]=>
-  int(3)
-}
-...
-array
-...
-object(HH\Pair)#23 (2) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-}
-object(HH\Pair)#24 (2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-}
-object(HH\Pair)#25 (2) {
   [0]=>
   int(2)
   [1]=>

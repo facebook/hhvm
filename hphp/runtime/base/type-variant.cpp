@@ -355,16 +355,6 @@ IMPLEMENT_PTR_SET(ResourceData, pres, KindOfResource)
 
 #undef IMPLEMENT_PTR_SET
 
-void Variant::init(ObjectData *v) {
-  if (v) {
-    m_type = KindOfObject;
-    m_data.pobj = v;
-    v->incRefCount();
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
 int Variant::getRefCount() const {
   switch (m_type) {
   case KindOfString:  return m_data.pstr->getCount();
@@ -634,16 +624,6 @@ ObjectData *Variant::getArrayAccess() const {
     throw InvalidOperandException("not ArrayAccess objects");
   }
   return obj;
-}
-
-void Variant::callOffsetUnset(const Variant& key) {
-  assert(getType() == KindOfObject);
-  ObjectData* obj = getObjectData();
-  if (LIKELY(obj->isCollection())) {
-    collectionUnset(obj, cvarToCell(&key));
-  } else {
-    getArrayAccess()->o_invoke_few_args(s_offsetUnset, 1, key);
-  }
 }
 
 template <typename T>
@@ -989,11 +969,6 @@ void Variant::setEvalScalar() {
   default:
     break;
   }
-}
-
-void Variant::setToDefaultObject() {
-  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
-  set(Object(SystemLib::AllocStdClassObject()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

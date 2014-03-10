@@ -780,11 +780,8 @@ class Variant : private TypedValue {
   }
 
   ObjectData *getArrayAccess() const;
-  void callOffsetUnset(const Variant& key);
   int64_t getNumData() const { return m_data.num; }
   void setEvalScalar();
-
-  void setToDefaultObject();
 
   /*
    * Access this Variant as a TypedValue. Does not unbox refs, etc.
@@ -847,9 +844,6 @@ class Variant : private TypedValue {
   const Variant& set(const SmartResource<T> &v) {
     return set(v.get());
   }
-
-  // only called from constructor
-  void init(ObjectData *v);
 
   static ALWAYS_INLINE
   void AssignValHelper(Variant *self, const Variant *other) {

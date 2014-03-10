@@ -904,11 +904,9 @@ void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
   }
 
   if (src->isA(Type::Null)) {
+    push(inc && pre ? cns(1) : src);
     if (inc) {
-      push(cns(1));
       stLoc(id, exit, cns(1));
-    } else {
-      push(src);
     }
     return;
   }

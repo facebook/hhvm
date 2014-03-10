@@ -463,7 +463,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
  *     fall-through edge to the next block.
  */
 void IRBuilder::reoptimize() {
-  Timer _t("optimize_reoptimize");
+  Timer _t(Timer::optimize_reoptimize);
   FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
   always_assert(m_savedBlocks.empty());

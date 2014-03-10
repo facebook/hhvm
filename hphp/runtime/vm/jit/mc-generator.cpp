@@ -1818,7 +1818,7 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
 
 void
 MCGenerator::translateWork(const TranslArgs& args) {
-  Timer _t("translate");
+  Timer _t(Timer::translate);
   auto sk = args.m_sk;
   std::unique_ptr<Tracelet> tp;
 
@@ -2051,7 +2051,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
 Translator::TranslateResult
 MCGenerator::translateTracelet(Tracelet& t) {
-  Timer _t("translateTracelet");
+  Timer _t(Timer::translateTracelet);
 
   FTRACE(2, "attempting to translate tracelet:\n{}\n", t.toString());
   assert(!Translator::liveFrameIsPseudoMain());
@@ -2109,7 +2109,7 @@ MCGenerator::translateTracelet(Tracelet& t) {
       ht.profileSmallFunctionShape(traceletShape(t));
     }();
 
-    Timer irGenTimer("translateTracelet_irGeneration");
+    Timer irGenTimer(Timer::translateTracelet_irGeneration);
     Unit::MetaHandle metaHand;
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
@@ -2348,7 +2348,7 @@ MCGenerator::getPerfCounters(Array& ret) {
   for (auto const& pair : Timer::Counters()) {
     if (pair.second.total == 0 && pair.second.count == 0) continue;
 
-    ret.set(String("jit_time_" + pair.first), pair.second.total);
+    ret.set(String("jit_time_") + pair.first, pair.second.total);
   }
 }
 

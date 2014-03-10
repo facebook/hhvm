@@ -457,7 +457,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
 // Publicly exported functions:
 
 void eliminateDeadCode(IRUnit& unit) {
-  Timer _t("optimize_dce");
+  Timer _t(Timer::optimize_dce);
 
   // kill unreachable code and remove any traces that are now empty
   BlockList blocks = prepareBlocks(unit);

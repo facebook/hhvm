@@ -537,7 +537,7 @@ void RegionFormer::recordDependencies() {
   auto const doRelax = RuntimeOption::EvalHHIRRelaxGuards;
   bool changed = false;
   if (doRelax) {
-    Timer _t("selectTracelet_relaxGuards");
+    Timer _t(Timer::selectTracelet_relaxGuards);
     changed = relaxGuards(unit, *m_ht.irBuilder().guards(), m_profiling);
   }
 
@@ -566,7 +566,7 @@ void RegionFormer::recordDependencies() {
  */
 RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
                              bool profiling) {
-  Timer _t("selectTracelet");
+  Timer _t(Timer::selectTracelet);
   InterpSet interp;
   RegionDescPtr region;
   uint32_t tries = 1;

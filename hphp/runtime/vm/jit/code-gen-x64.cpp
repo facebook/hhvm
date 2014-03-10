@@ -6207,7 +6207,7 @@ void genCode(CodeBlock& main, CodeBlock& stubs, IRUnit& unit,
              std::vector<TransBCMapping>* bcMap,
              JIT::MCGenerator* mcg,
              const RegAllocInfo& regs) {
-  Timer _t("codeGen");
+  Timer _t(Timer::codeGen);
 
   if (dumpIREnabled()) {
     AsmInfo ai(unit);

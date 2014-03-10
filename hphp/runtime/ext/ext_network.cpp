@@ -101,28 +101,15 @@ private:
 IMPLEMENT_THREAD_LOCAL(ResolverInit, ResolverInit::s_res);
 
 Variant f_gethostname() {
-  struct addrinfo hints, *res;
-  char h_name[NI_MAXHOST];
-  int error;
-  String canon_hname;
+  char h_name[HOST_NAME_MAX];
 
-  error = gethostname(h_name, NI_MAXHOST);
-  if (error) {
+  if (gethostname(h_name, HOST_NAME_MAX) != 0) {
+    raise_warning(
+        "gethostname() failed with errorno=%d: %s", errno, strerror(errno));
     return false;
   }
 
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_flags = AI_CANONNAME;
-
-  error = getaddrinfo(h_name, NULL, &hints, &res);
-  if (error) {
-    return String(h_name, CopyString);
-  }
-
-  canon_hname = String(res->ai_canonname, CopyString);
-  freeaddrinfo(res);
-  return canon_hname;
+  return String(h_name, CopyString);
 }
 
 Variant f_gethostbyaddr(const String& ip_address) {

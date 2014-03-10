@@ -161,7 +161,7 @@ function match_arg_type(string $php, string $cpp): bool {
      $php = substr($php, 1);
   }
   if ($php[0] == '?') {
-    $expected = 'CVarRef';
+    $expected = 'const Variant&';
   } else {
     switch (strtolower($php)) {
       case 'bool':
@@ -183,27 +183,27 @@ function match_arg_type(string $php, string $cpp): bool {
         $expected = 'const String&';
         break;
       case 'array':
-        $expected = 'CArrRef';
+        $expected = 'const Array&';
         break;
       case 'resource':
-        $expected = 'CResRef';
+        $expected = 'const Resource&';
         break;
       case 'mixed':
       case 'callable':
-        $expected = 'CVarRef';
+        $expected = 'const Variant&';
         break;
       case 'actrec':
         $expected = 'ActRec*';
         break;
       case 'object':
       default:
-        $expected = 'CObjRef';
+        $expected = 'const Object&';
         break;
     }
   }
   // References must be a variant type
   if ($php[strlen($php)-1] == '&') {
-    if ($expected != 'CVarRef') {
+    if ($expected != 'const Variant&') {
       return false;
     } else {
       $expected = 'VRefParam';

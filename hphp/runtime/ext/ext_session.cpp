@@ -1108,9 +1108,9 @@ static std::string ini_get_save_handler() {
 static bool ini_on_update_serializer(const std::string& value) {
   SESSION_CHECK_ACTIVE_STATE;
   SessionSerializer *serializer = SessionSerializer::Find(value.data());
-  if(serializer == nullptr){
-    raise_warning("ini_set(): Cannot find serialization handler '%s'"
-                  ,value.data());
+  if (serializer == nullptr){
+    raise_warning("ini_set(): Cannot find serialization handler '%s'",
+                  value.data());
     return false;   
   }
   PS(serializer) = serializer;

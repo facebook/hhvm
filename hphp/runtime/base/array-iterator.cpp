@@ -1047,7 +1047,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     }
     // We did not transfer ownership of the array to an iterator, so we need
     // to decRef the array.
-    if (UNLIKELY(arr->getCount() == 1)) {
+    if (UNLIKELY(arr->hasExactlyOneRef())) {
       goto cold;
     }
     arr->decRefCount();
@@ -1088,7 +1088,7 @@ int64_t new_iter_array_key(Iter* dest, ArrayData* ad,
     }
     // We did not transfer ownership of the array to an iterator, so we need
     // to decRef the array.
-    if (UNLIKELY(arr->getCount() == 1)) {
+    if (UNLIKELY(arr->hasExactlyOneRef())) {
       goto cold;
     }
     arr->decRefCount();
@@ -1305,7 +1305,7 @@ int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 
 static NEVER_INLINE
 int64_t iter_next_free_arr(Iter* iter, HphpArray* arr) {
-  assert(arr->getCount() == 1);
+  assert(arr->hasExactlyOneRef());
   if (arr->isPacked()) {
     HphpArray::ReleasePacked(arr);
   } else {
@@ -1320,7 +1320,7 @@ int64_t iter_next_free_arr(Iter* iter, HphpArray* arr) {
 
 NEVER_INLINE
 static int64_t iter_next_free_apc_array(Iter* iter, APCLocalArray* arr) {
-  assert(arr->getCount() == 1);
+  assert(arr->hasExactlyOneRef());
   APCLocalArray::Release(arr);
   if (debug) {
     iter->arr().setIterType(ArrayIter::TypeUndefined);
@@ -1339,7 +1339,7 @@ static int64_t iter_next_apc_array(Iter* iter,
   auto const arr = static_cast<APCLocalArray*>(ad);
   ssize_t const pos = arr->iterAdvanceImpl(arrIter->getPos());
   if (UNLIKELY(pos == ArrayData::invalid_index)) {
-    if (UNLIKELY(arr->getCount() == 1)) {
+    if (UNLIKELY(arr->hasExactlyOneRef())) {
       return iter_next_free_apc_array(iter, arr);
     }
     arr->decRefCount();
@@ -1387,7 +1387,7 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
     ssize_t pos = arrIter->getPos();
     do {
       if (size_t(++pos) >= size_t(arr->iterLimit())) {
-        if (UNLIKELY(arr->getCount() == 1)) {
+        if (UNLIKELY(arr->hasExactlyOneRef())) {
           return iter_next_free_arr(iter, arr);
         }
         arr->decRefCount();
@@ -1439,7 +1439,7 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     do {
       ++pos;
       if (size_t(pos) >= size_t(arr->iterLimit())) {
-        if (UNLIKELY(arr->getCount() == 1)) {
+        if (UNLIKELY(arr->hasExactlyOneRef())) {
           return iter_next_free_arr(iter, arr);
         }
         arr->decRefCount();
@@ -1605,7 +1605,7 @@ int64_t iterNextArrayGeneric(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
 
   do {
     if (size_t(++pos) >= size_t(arr->iterLimit())) {
-      if (UNLIKELY(arr->getCount() == 1)) {
+      if (UNLIKELY(arr->hasExactlyOneRef())) {
         return iter_next_free_arr(it, arr);
       }
       arr->decRefCount();

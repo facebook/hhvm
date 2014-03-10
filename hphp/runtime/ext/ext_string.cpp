@@ -79,7 +79,7 @@ String stringForEachFast(const String& str, Op action) {
     return str;
   }
 
-  if (str.get()->getCount() == 1) {
+  if (str.get()->hasExactlyOneRef()) {
     return stringForEach<true>(str.size(), str.get(), action);
   }
 
@@ -312,7 +312,7 @@ String f_str_shuffle(const String& str) {
     return str;
   }
 
-  String ret = str.get()->getCount() == 1 ? str : String(str, CopyString);
+  String ret = str.get()->hasExactlyOneRef() ? str : String(str, CopyString);
   char* buf  = ret.get()->mutableData();
   int left   = ret.size();
 
@@ -330,7 +330,7 @@ String f_str_shuffle(const String& str) {
 String f_strrev(const String& str) {
   auto len = str.size();
 
-  if (str.get()->getCount() == 1) {
+  if (str.get()->hasExactlyOneRef()) {
     char* sdata = str.get()->mutableData();
     for (int i = 0; i < len / 2; ++i) {
       char temp = sdata[i];
@@ -367,7 +367,7 @@ String stringToCaseFirst(const String& str, OpTo tocase, OpIs iscase) {
     return str;
   }
 
-  if (str.get()->getCount() == 1) {
+  if (str.get()->hasExactlyOneRef()) {
     char* sdata = str.get()->mutableData();
     sdata[0] = tocase(sdata[0]);
     return str;
@@ -418,7 +418,7 @@ String stringTrim(const String& str, const String& charlist) {
     for (; end >= start && flags[(unsigned char)str[end]]; --end) {}
   }
 
-  if (str.get()->getCount() == 1) {
+  if (str.get()->hasExactlyOneRef()) {
     int slen = end - start + 1;
     if (start) {
       char* sdata = str.get()->mutableData();

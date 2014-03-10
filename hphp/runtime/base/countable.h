@@ -132,6 +132,11 @@ inline void assert_refcount_realistic_ns_nz(int32_t count) {
     return (uint32_t)m_count > 1;                                       \
   }                                                                     \
                                                                         \
+  bool hasExactlyOneRef() const {                                       \
+    assert_refcount_realistic(m_count);                                 \
+    return (uint32_t)m_count == 1;                                      \
+  }                                                                     \
+                                                                        \
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \
     assert_refcount_realistic(m_count);                                 \
@@ -176,6 +181,11 @@ inline void assert_refcount_realistic_ns_nz(int32_t count) {
   bool hasMultipleRefs() const {                        \
     assert_refcount_realistic_ns(m_count);              \
     return m_count > 1;                                 \
+  }                                                     \
+                                                        \
+  bool hasExactlyOneRef() const {                       \
+    assert_refcount_realistic(m_count);                 \
+    return m_count == 1;                                \
   }                                                     \
                                                         \
   void incRefCount() const {                            \

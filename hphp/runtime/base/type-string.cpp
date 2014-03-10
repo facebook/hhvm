@@ -279,7 +279,7 @@ String &String::operator+=(litstr s) {
     if (empty()) {
       m_px = StringData::Make(s, CopyString);
       m_px->setRefCount(1);
-    } else if (m_px->getCount() == 1) {
+    } else if (m_px->hasExactlyOneRef()) {
       auto const tmp = m_px->append(StringSlice(s, strlen(s)));
       if (UNLIKELY(tmp != m_px)) StringBase::operator=(tmp);
     } else {
@@ -296,7 +296,7 @@ String &String::operator+=(const String& str) {
   if (!str.empty()) {
     if (empty()) {
       StringBase::operator=(str.m_px);
-    } else if (m_px->getCount() == 1) {
+    } else if (m_px->hasExactlyOneRef()) {
       auto tmp = m_px->append(str.slice());
       if (UNLIKELY(tmp != m_px)) StringBase::operator=(tmp);
     } else {
@@ -313,7 +313,7 @@ String& String::operator+=(const StringSlice& slice) {
   if (slice.size() == 0) {
     return *this;
   }
-  if (m_px && m_px->getCount() == 1) {
+  if (m_px && m_px->hasExactlyOneRef()) {
     auto const tmp = m_px->append(slice);
     if (UNLIKELY(tmp != m_px)) StringBase::operator=(tmp);
     return *this;

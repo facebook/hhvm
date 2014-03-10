@@ -49,7 +49,9 @@ void c_GenArrayWaitHandle::t___construct() {
 }
 
 void c_GenArrayWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
+  if (!callback.isNull() &&
+      (!callback.isObject() ||
+       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set GenArrayWaitHandle::onCreate: on_create_cb not a closure"));
     throw e;

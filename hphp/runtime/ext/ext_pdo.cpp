@@ -1878,7 +1878,8 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
     }
 
     ret = stmt->fetch.into;
-    if (ret.instanceof(SystemLib::s_stdclassClass)) {
+    if (ret.isObject() &&
+        ret.getObjectData()->instanceof(SystemLib::s_stdclassClass)) {
       how = PDO_FETCH_OBJ;
     }
     break;

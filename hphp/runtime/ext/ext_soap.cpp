@@ -1834,7 +1834,8 @@ bool f_use_soap_error_handler(bool handler /* = true */) {
 }
 
 bool f_is_soap_fault(const Variant& fault) {
-  return fault.instanceof(SystemLib::s_SoapFaultClass);
+  return fault.isObject() &&
+    fault.getObjectData()->instanceof(SystemLib::s_SoapFaultClass);
 }
 
 int64_t f__soap_active_version() {

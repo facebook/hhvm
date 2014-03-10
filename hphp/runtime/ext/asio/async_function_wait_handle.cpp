@@ -41,7 +41,9 @@ void c_AsyncFunctionWaitHandle::t___construct() {
 }
 
 void c_AsyncFunctionWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
+  if (!callback.isNull() &&
+      (!callback.isObject() ||
+       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set AsyncFunctionWaitHandle::onStart: on_start_cb not a closure"));
     throw e;
@@ -50,7 +52,9 @@ void c_AsyncFunctionWaitHandle::ti_setoncreatecallback(const Variant& callback) 
 }
 
 void c_AsyncFunctionWaitHandle::ti_setonawaitcallback(const Variant& callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
+  if (!callback.isNull() &&
+      (!callback.isObject() ||
+       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set AsyncFunctionWaitHandle::onAwait: on_await_cb not a closure"));
     throw e;
@@ -59,7 +63,9 @@ void c_AsyncFunctionWaitHandle::ti_setonawaitcallback(const Variant& callback) {
 }
 
 void c_AsyncFunctionWaitHandle::ti_setonsuccesscallback(const Variant& callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
+  if (!callback.isNull() &&
+      (!callback.isObject() ||
+       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set AsyncFunctionWaitHandle::onSuccess: on_success_cb not a closure"));
     throw e;
@@ -68,7 +74,9 @@ void c_AsyncFunctionWaitHandle::ti_setonsuccesscallback(const Variant& callback)
 }
 
 void c_AsyncFunctionWaitHandle::ti_setonfailcallback(const Variant& callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
+  if (!callback.isNull() &&
+      (!callback.isObject() ||
+       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set AsyncFunctionWaitHandle::onFail: on_fail_cb not a closure"));
     throw e;

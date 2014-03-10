@@ -1011,7 +1011,7 @@ bool BreakPointInfo::checkExceptionOrError(const Variant& e) {
       return Match(m_class.c_str(), m_class.size(),
                    e.toObject()->o_getClassName().data(), true, false);
     }
-    return e.instanceof(m_class.c_str());
+    return e.getObjectData()->o_instanceof(m_class.c_str());
   }
   return Match(m_class.c_str(), m_class.size(), ErrorClassName, m_regex,
                false);

@@ -48,7 +48,9 @@ void c_GenMapWaitHandle::t___construct() {
 }
 
 void c_GenMapWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
+  if (!callback.isNull() &&
+      (!callback.isObject() ||
+       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set GenMapWaitHandle::onCreate: on_create_cb not a closure"));
     throw e;
@@ -57,7 +59,9 @@ void c_GenMapWaitHandle::ti_setoncreatecallback(const Variant& callback) {
 }
 
 Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
-  if (UNLIKELY(!dependencies.instanceof(c_Map::classof()))) {
+  if (UNLIKELY(!dependencies.isObject() ||
+      dependencies.getObjectData()->getCollectionType() !=
+        Collection::MapType)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Expected dependencies to be an instance of Map"));
     throw e;

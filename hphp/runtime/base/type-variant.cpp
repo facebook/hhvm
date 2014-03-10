@@ -442,28 +442,6 @@ bool Variant::isResource() const {
   return (cell->m_type == KindOfResource);
 }
 
-bool Variant::instanceof(const String& s) const {
-  if (m_type == KindOfObject) {
-    assert(m_data.pobj);
-    return m_data.pobj->o_instanceof(s);
-  }
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->instanceof(s);
-  }
-  return false;
-}
-
-bool Variant::instanceof(Class* cls) const {
-  if (m_type == KindOfObject) {
-    assert(m_data.pobj);
-    return m_data.pobj->instanceof(cls);
-  }
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->instanceof(cls);
-  }
-  return false;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {

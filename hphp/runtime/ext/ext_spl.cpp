@@ -211,7 +211,8 @@ Variant f_class_uses(const Variant& obj, bool autoload /* = true */) {
 }
 
 Object get_traversable_object_iterator(const Variant& obj) {
-  if (!obj.instanceof(SystemLib::s_TraversableClass)) {
+  if (!obj.isObject() ||
+      !obj.getObjectData()->instanceof(SystemLib::s_TraversableClass)) {
     raise_error("Argument must implement interface Traversable");
   }
 
@@ -220,7 +221,8 @@ Object get_traversable_object_iterator(const Variant& obj) {
     ->iterableObject(isIteratorAggregate, true);
 
   if (!isIteratorAggregate) {
-    if (obj.instanceof(SystemLib::s_IteratorAggregateClass)) {
+    if (!obj.getObjectData()->instanceof(
+        SystemLib::s_IteratorAggregateClass)) {
       raise_error("Objects returned by getIterator() must be traversable or "
                   "implement interface Iterator");
     } else {

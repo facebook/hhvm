@@ -487,8 +487,6 @@ class Variant : private TypedValue {
     return (m_type & kNotConstantValueTypeMask) == 0;
   }
   bool isResource() const;
-  bool instanceof(const String& s) const;
-  bool instanceof(Class* cls) const;
 
   /**
    * Whether or not there are at least two variables that are strongly bound.

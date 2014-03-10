@@ -22,6 +22,8 @@
 #include <atomic>
 #include <string>
 #include <stack>
+#include <cassert>
+#include <stddef.h>
 
 namespace HPHP {
 

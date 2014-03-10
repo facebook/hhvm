@@ -67,7 +67,7 @@ inline ptrdiff_t unwinderTvOff() {
  * Meant to work like __cxxabiv1::__is_dependent_exception
  * See libstdc++-v3/libsupc++/unwind-cxx.h in GCC
  */
-static inline bool isDependentException(_Unwind_Exception_Class c)
+static inline bool isDependentException(uint64_t c)
 {
   return (c & 1);
 }

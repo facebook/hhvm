@@ -5,7 +5,6 @@ class Guzzle extends Framework {
   public function __construct(string $name) {
     $tc = get_runtime_build().' '.__DIR__.
       '/../framework_downloads/guzzle/vendor/bin/phpunit';
-    var_dump($tc);
     parent::__construct($name, $tc, null, null, true, TestFindModes::TOKEN);
   }
 }

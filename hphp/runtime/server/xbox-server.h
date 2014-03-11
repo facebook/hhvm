@@ -41,7 +41,9 @@ public:
   /**
    * Send/PostMessage paradigm for local and remote RPC.
    */
-  static bool SendMessage(const String& message, Variant &ret, int timeout_ms,
+  static bool SendMessage(const String& message,
+                          Array& ret,
+                          int timeout_ms,
                           const String& host = "localhost");
   static bool PostMessage(const String& message, const String& host = "localhost");
 

@@ -139,9 +139,14 @@ void f_pagelet_server_flush() {
 ///////////////////////////////////////////////////////////////////////////////
 // xbox
 
-bool f_xbox_send_message(const String& msg, VRefParam ret, int64_t timeout_ms,
+bool f_xbox_send_message(const String& msg,
+                         VRefParam retRef,
+                         int64_t timeout_ms,
                          const String& host /* = "localhost" */) {
-  return XboxServer::SendMessage(msg, ret, timeout_ms, host);
+  Array ret;
+  auto b = XboxServer::SendMessage(msg, ret, timeout_ms, host);
+  retRef = ret;
+  return b;
 }
 
 bool f_xbox_post_message(const String& msg, const String& host /* = "localhost" */) {

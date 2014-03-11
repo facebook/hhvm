@@ -45,6 +45,7 @@ let builtins =
   "  public function valid(): bool;"^
   "}"^
   "final class Pair<Tk, Tv> {public function isEmpty(): bool {}}"^
+  "interface Stringish {public function __toString(): string {}}"^
   "interface XHPChild {}"^
   "interface ConstVector<Tv> {}"^
   "interface ConstMap<Tk, Tv> {}"^

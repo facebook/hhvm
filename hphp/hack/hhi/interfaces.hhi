@@ -240,3 +240,11 @@ interface JsonSerializable {
  * subinterface.
  */
 interface XHPChild {}
+
+/**
+ * Stringish is a type that matches strings as well as string-convertible
+ * objects: that is, objects that provide the __toString method
+ */
+interface Stringish {
+  public function __toString();
+}

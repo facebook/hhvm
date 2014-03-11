@@ -26,7 +26,7 @@
 class TestExtMysql : public TestCppExt {
  public:
   virtual bool RunTests(const std::string &which);
-
+#if 0
   bool test_mysql_connect();
   bool test_mysql_pconnect();
   bool test_mysql_set_charset();
@@ -81,6 +81,7 @@ class TestExtMysql : public TestCppExt {
   bool test_mysql_field_len();
   bool test_mysql_field_type();
   bool test_mysql_field_flags();
+#endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////

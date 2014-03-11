@@ -333,8 +333,8 @@ bool MySQL::reconnect(const String& host, int port, const String& socket,
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-MySQLResult *php_mysql_extract_result(const Variant& result) {
-  MySQLResult *res = result.toResource().getTyped<MySQLResult>
+MySQLResult *php_mysql_extract_result(const Resource& result) {
+  MySQLResult *res = result.getTyped<MySQLResult>
     (!RuntimeOption::ThrowBadTypeExceptions,
      !RuntimeOption::ThrowBadTypeExceptions);
   if (res == nullptr || res->isInvalid()) {
@@ -390,7 +390,7 @@ const char *php_mysql_get_field_name(int field_type) {
   return "unknown";
 }
 
-Variant php_mysql_field_info(const Variant& result, int field, int entry_type) {
+Variant php_mysql_field_info(const Resource& result, int field, int entry_type) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res == NULL) return false;
 
@@ -1495,7 +1495,7 @@ Variant php_mysql_do_query_and_get_result(const String& query, const Variant& li
 ///////////////////////////////////////////////////////////////////////////////
 // row operations
 
-Variant php_mysql_fetch_hash(const Variant& result, int result_type) {
+Variant php_mysql_fetch_hash(const Resource& result, int result_type) {
   if ((result_type & PHP_MYSQL_BOTH) == 0) {
     throw_invalid_argument("result_type: %d", result_type);
     return false;

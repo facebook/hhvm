@@ -4224,6 +4224,7 @@ Translator::translateRegion(const RegionDesc& region,
         // conditional control flow ops, e.g., IterNext, etc.
         inst.includeBothPaths = [&] {
           if (!RuntimeOption::EvalHHIRBytecodeControlFlow) return false;
+          if (inst.breaksTracelet) return false;
           Offset takenOffset = inst.offset() + inst.imm[0].u_BA;
           Offset fallthruOffset = inst.offset() + instrLen((Op*)(inst.pc()));
           bool takenIncluded = false;

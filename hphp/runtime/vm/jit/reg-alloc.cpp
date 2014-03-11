@@ -97,7 +97,7 @@ namespace {
 // be a const; i.e. it was declared with C(T) instead of S(T).
 struct ConstSrcTable {
   auto static constexpr MaxSrc = 8;
-  bool table[int(Nop)+1][8];
+  bool table[kNumOpcodes][MaxSrc];
   ConstSrcTable() {
     int op = 0;
     int i;

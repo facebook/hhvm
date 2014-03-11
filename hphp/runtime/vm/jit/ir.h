@@ -828,12 +828,11 @@ O(ArrayIdx,                    D(Cell), C(TCA)                                \
 O(GenericIdx,                  D(Cell), S(Cell)                               \
                                           S(Cell)                             \
                                           S(Cell),                E|N|PRc|Er) \
+O(Nop,                              ND, NA,                               NF) \
 O(DbgAssertRefCount,                ND, S(Counted,StaticStr,StaticArr),  N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
 O(DbgAssertType,                    ND, S(Cell),                           E) \
 O(DbgAssertRetAddr,                 ND, NA,                                E) \
-O(Nop,                              ND, NA,                               NF) \
-/* END. Nop must be the last opcode. */
 
 enum class Opcode : uint16_t {
 #define O(name, ...) name,
@@ -842,6 +841,10 @@ enum class Opcode : uint16_t {
 };
 #define O(name, ...) UNUSED auto constexpr name = Opcode::name;
   IR_OPCODES
+#undef O
+
+#define O(...) +1
+size_t constexpr kNumOpcodes = IR_OPCODES;
 #undef O
 
 /*

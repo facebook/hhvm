@@ -42,7 +42,8 @@ bool parse_packet_soap(c_SoapClient *obj, const char *buffer,
   int soap_version = SOAP_1_1;
   sdlSoapBindingFunctionHeaderMap *hdrs = NULL;
 
-  return_value.reset();
+  assert(return_value.asTypedValue()->m_type == KindOfUninit);
+  return_value.asTypedValue()->m_type = KindOfNull;
 
   /* Response for one-way opearation */
   if (buffer_size == 0) {
@@ -275,7 +276,7 @@ bool parse_packet_soap(c_SoapClient *obj, const char *buffer,
       sdlParamPtr h_param, param;
       xmlNodePtr val = NULL;
       const char *name, *ns = NULL;
-      Variant tmp;
+      Variant tmp(Variant::NullInit{});
       sdlSoapBindingFunctionPtr fnb =
         (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
       int res_count;
@@ -333,7 +334,6 @@ bool parse_packet_soap(c_SoapClient *obj, const char *buffer,
 
           if (!val) {
             /* TODO: may be "nil" is not OK? */
-            tmp.reset();
 /*
             add_soap_fault(obj, "Client", "Can't find response data");
             xmlFreeDoc(response);

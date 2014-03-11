@@ -205,15 +205,6 @@ Variant::Variant(RefData *r) {
   }
 }
 
-Variant::Variant(RefData *r, NoInc) {
-  m_type = KindOfRef;
-  if (r) {
-    m_data.pref = r;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
 // the version of the high frequency function that is not inlined
 Variant::Variant(const Variant& v) {
   constructValHelper(v);
@@ -293,10 +284,10 @@ Variant &Variant::setWithRef(const Variant& v) {
       m_data.pref->var()->name(argName);                                \
       returnStmt;                                                       \
     } else {                                                            \
-      RefData* d = m_data.pref;                                         \
-      DataType t = m_type;                                              \
+      auto const d = m_data.num;                                        \
+      auto const t = m_type;                                            \
       setOp;                                                            \
-      destructData(d, t);                                               \
+      tvDecRefHelper(t, d);                                             \
     }                                                                   \
     returnStmt;                                                         \
   }
@@ -327,11 +318,11 @@ IMPLEMENT_SET(const StaticString&,
       self->setNull();                                                  \
     } else {                                                            \
       v->incRefCount();                                                 \
-      RefData* d = self->m_data.pref;                                   \
-      DataType t = self->m_type;                                        \
+      auto const d = self->m_data.num;                                  \
+      auto const t = self->m_type;                                      \
       self->m_type = dtype;                                             \
       self->m_data.member = v;                                          \
-      if (IS_REFCOUNTED_TYPE(t)) destructData(d, t);                    \
+      tvRefcountedDecRefHelper(t, d);                                   \
     }                                                                   \
     return *this;                                                       \
   }

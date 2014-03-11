@@ -195,13 +195,13 @@ static void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 #define FIND_XML_NULL(xml, v)                                   \
   {                                                             \
     if (!xml) {                                                 \
-      v.reset();                                                \
+      v = Variant();                                            \
       return v;                                                 \
     }                                                           \
     if (xml->properties) {                                      \
       xmlAttrPtr n = get_attribute(xml->properties, "nil");     \
       if (n) {                                                  \
-        v.reset();                                              \
+        v = Variant();                                          \
         return v;                                               \
       }                                                         \
     }                                                           \

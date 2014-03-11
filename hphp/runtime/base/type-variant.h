@@ -64,48 +64,15 @@ namespace HPHP {
  *
  */
 
-class Variant : private TypedValue {
- public:
-  friend class Array;
-  friend class VariantVectorBase;
-  friend class c_Vector;
-  friend class c_Map;
-
-  /**
-   * setUninitNull occurs frequently; use this version where possible.
-   */
-  inline void setUninitNull() {
-    m_type = KindOfUninit;
-    assert(!isInitialized());
-  }
-
-  Variant() {
-    setUninitNull();
-  }
-
+struct Variant : private TypedValue {
   enum class NullInit {};
-  explicit Variant(NullInit) { m_type = KindOfNull; }
   enum class NoInit {};
+  enum class ArrayInitCtor {};
+
+  Variant() { m_type = KindOfUninit; }
+  explicit Variant(NullInit) { m_type = KindOfNull; }
   explicit Variant(NoInit) {}
-  enum NoInc { noInc = 0 };
 
-  static ALWAYS_INLINE void destructData(RefData* num, DataType t) {
-    tvDecRefHelper(t, uint64_t(num));
-  }
-
-  // D462768 showed no gain from inlining, even just into hphp-array.o
-  ~Variant();
-
-  void reset() {
-    // only for special memory sweeping!
-    m_type = KindOfNull;
-  }
-
-  /**
-   * Constructors. We can't really use template<T> here, since that will make
-   * Variant being able to take many other external types, messing up those
-   * operator overloads.
-   */
   /* implicit */ Variant(bool    v) { m_type = KindOfBoolean; m_data.num = v; }
   /* implicit */ Variant(int     v) { m_type = KindOfInt64; m_data.num = v; }
   // The following two overloads will accept int64_t whether it's
@@ -134,10 +101,67 @@ class Variant : private TypedValue {
   /* implicit */ Variant(ObjectData *v);
   /* implicit */ Variant(ResourceData *v);
   /* implicit */ Variant(RefData *r);
-  /* implicit */ Variant(RefData *r, NoInc);
+
+  /* implicit */ Variant(CVarStrongBind v);
+  /* implicit */ Variant(CVarWithRefBind v);
+
+  /*
+   * Creation constructor from ArrayInit that avoids a null check.
+   */
+  explicit Variant(ArrayData* ad, ArrayInitCtor) {
+    m_type = KindOfArray;
+    m_data.parr = ad;
+    ad->incRefCount();
+  }
 
   // for static strings only
   explicit Variant(const StringData *v);
+
+  // These are prohibited, but declared just to prevent accidentally
+  // calling the bool constructor just because we had a pointer to
+  // const.
+  /* implicit */ Variant(const ArrayData *v) = delete;
+  /* implicit */ Variant(const ObjectData *v) = delete;
+  /* implicit */ Variant(const ResourceData *v) = delete;
+  /* implicit */ Variant(const RefData *v) = delete;
+  /* implicit */ Variant(const TypedValue *v) = delete;
+  /* implicit */ Variant(TypedValue *v) = delete;
+  /* implicit */ Variant(const /* implicit */ Variant *v) = delete;
+  /* implicit */ Variant(/* implicit */ Variant *v) = delete;
+
+  //////////////////////////////////////////////////////////////////////
+
+  /*
+   * Copy constructor and copy assignment do not semantically make
+   * copies: they unbox refs and turn uninits to null.
+   */
+
+  Variant(const Variant& v);
+
+  Variant& operator=(const Variant& v) {
+    return assign(v);
+  }
+
+  /*
+   * Move ctors
+   *
+   * Note: not semantically moves.  Like our "copy constructor", these
+   * unbox refs and turn uninits to null.
+   */
+
+  Variant(Variant&& v) {
+    if (UNLIKELY(v.m_type == KindOfRef)) {
+      // We can't avoid the refcounting when it's a ref.  Do basically
+      // what a copy would have done.
+      moveRefHelper(std::move(v));
+      return;
+    }
+
+    assert(this != &v);
+    m_type = v.m_type != KindOfUninit ? v.m_type : KindOfNull;
+    m_data = v.m_data;
+    v.m_type = KindOfNull;
+  }
 
   // Move ctor for strings
   /* implicit */ Variant(String&& v) {
@@ -189,62 +213,15 @@ class Variant : private TypedValue {
     }
   }
 
-  // These are prohibited, but declared just to prevent accidentally
-  // calling the bool constructor just because we had a pointer to
-  // const.
-  /* implicit */ Variant(const ArrayData *v) = delete;
-  /* implicit */ Variant(const ObjectData *v) = delete;
-  /* implicit */ Variant(const ResourceData *v) = delete;
-  /* implicit */ Variant(const RefData *v) = delete;
-  /* implicit */ Variant(const TypedValue *v) = delete;
-  /* implicit */ Variant(TypedValue *v) = delete;
-  /* implicit */ Variant(const /* implicit */ Variant *v) = delete;
-  /* implicit */ Variant(/* implicit */ Variant *v) = delete;
-
-  /*
-   * Creation constructor from ArrayInit that avoids a null check.
-   */
-  enum class ArrayInitCtor { Tag };
-  explicit Variant(ArrayData* ad, ArrayInitCtor) {
-    m_type = KindOfArray;
-    m_data.parr = ad;
-    ad->incRefCount();
-  }
-
-  /* implicit */ Variant(const Variant& v);
-  /* implicit */ Variant(CVarStrongBind v);
-  /* implicit */ Variant(CVarWithRefBind v);
-
-  /*
-   * Move ctor
-   *
-   * Note: not semantically a move constructor.  Like our "copy
-   * constructor", unboxes refs and turns uninits to null.
-   */
-  Variant(Variant&& v) {
-    if (UNLIKELY(v.m_type == KindOfRef)) {
-      // We can't avoid the refcounting when it's a ref.  Do basically
-      // what a copy would have done.
-      moveRefHelper(std::move(v));
-      return;
-    }
-
-    assert(this != &v);
-    m_type = v.m_type != KindOfUninit ? v.m_type : KindOfNull;
-    m_data = v.m_data;
-    v.reset();
-  }
-
   /*
    * Move assign
    *
-   * Note: not semantically a move assignment operator.  Like our
-   * "copy asignment operator", unboxes refs and turns uninits to
-   * null.
+   * Note: not semantically moves.  Like our "copies", these unbox
+   * refs and turn uninits to null.
    */
   Variant& operator=(Variant &&rhs) {
-    // a = std::move(a), ILLEGAL per C++11 17.6.4.9
-    assert(this != &rhs);
+    assert(this != &rhs); // TODO(#2484130): we end up as null on a
+                          // self move-assign; decide if this is ok.
     if (rhs.m_type == KindOfRef) return *this = *rhs.m_data.pref->var();
 
     Variant& lhs = m_type == KindOfRef ? *m_data.pref->var() : *this;
@@ -256,22 +233,35 @@ class Variant : private TypedValue {
     lhs.m_data = rhs.m_data;
     lhs.m_type = rhs.m_type == KindOfUninit ? KindOfNull : rhs.m_type;
 
-    rhs.reset();
+    rhs.m_type = KindOfNull;
     return *this;
   }
 
- private:
-  friend class VarNR;
+  // D462768 showed no gain from inlining, even just into hphp-array.o
+  ~Variant();
+
+  //////////////////////////////////////////////////////////////////////
+
+  /*
+   * During sweeping, smart resources are not allowed to be decref'd
+   * or manipulated.  This function is used to cause a Variant to go
+   * into a state where its destructor will have no effects on the
+   * request local heap, in cases where sweepable objects can't
+   * organize things to avoid running Variant destructors.
+   */
+  void releaseForSweep() { m_type = KindOfNull; }
+
+  //////////////////////////////////////////////////////////////////////
 
  public:
   /**
    * Break bindings and set to null.
    */
   void unset() {
-    RefData* d = m_data.pref;
-    DataType t = m_type;
+    auto const d = m_data.num;
+    auto const t = m_type;
     m_type = KindOfUninit;
-    if (IS_REFCOUNTED_TYPE(t)) destructData(d, t);
+    tvRefcountedDecRefHelper(t, d);
   }
 
   /**
@@ -285,12 +275,7 @@ class Variant : private TypedValue {
    * In order to correctly copy circular arrays, even if v is the only
    * strong reference to arr, we still keep the reference.
    */
-  Variant &setWithRef(const Variant& v);
-
-  /**
-   * Fast accessors that can be used by generated code when type inference can
-   * prove that m_type will have a certain value at a given point in time
-   */
+  Variant& setWithRef(const Variant& v);
 
 ///////////////////////////////////////////////////////////////////////////////
 // int64
@@ -520,9 +505,6 @@ class Variant : private TypedValue {
   Variant &assignVal(const Variant& v) { return assign(v); }
   Variant &assignRef(const Variant& v);
 
-  Variant &operator=(const Variant& v) {
-    return assign(v);
-  }
   Variant &operator=(RefResult v) { return assignRef(variant(v)); }
   Variant &operator=(CVarStrongBind v) { return assignRef(variant(v)); }
   Variant &operator=(CVarWithRefBind v) { return setWithRef(variant(v)); }
@@ -853,11 +835,11 @@ class Variant : private TypedValue {
     PromoteToRef(v);
     RefData* r = v.m_data.pref;
     r->incRefCount(); // in case destruct() triggers deletion of v
-    RefData* d = m_data.pref;
-    DataType t = m_type;
+    auto const d = m_data.num;
+    auto const t = m_type;
     m_type = KindOfRef;
     m_data.pref = r;
-    if (IS_REFCOUNTED_TYPE(t)) destructData(d, t);
+    tvRefcountedDecRefHelper(t, d);
   }
 
 public:
@@ -892,7 +874,7 @@ public:
       m_data.pstr->incRefCount();
     }
     decRefRef(v.m_data.pref);
-    v.reset();
+    v.m_type = KindOfNull;
   }
 
   ALWAYS_INLINE
@@ -901,19 +883,20 @@ public:
 
     assert(this != &v);
 
-    const Variant& rhs = v.m_type == KindOfRef && !v.m_data.pref->isReferenced()
-      ? *v.m_data.pref->var() : v;
+    const Variant& rhs =
+      v.m_type == KindOfRef && !v.m_data.pref->isReferenced()
+        ? *v.m_data.pref->var() : v;
     if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
       assert(rhs.m_data.pstr);
       rhs.m_data.pstr->incRefCount();
     }
 
-    RefData* d = m_data.pref;
-    DataType t = m_type;
+    auto const d = m_data.num;
+    auto const t = m_type;
     m_type = rhs.m_type;
     if (m_type == KindOfUninit) m_type = KindOfNull; // drop uninit
     m_data.num = rhs.m_data.num;
-    if (destroy) destructData(d, t);
+    if (destroy) tvRefcountedDecRefHelper(t, d);
   }
 
   ALWAYS_INLINE
@@ -1046,7 +1029,7 @@ public:
 
   VarNR(const VarNR &v) : TypedValueAux(v) {}
 
-  explicit VarNR() { asVariant()->setUninitNull(); }
+  explicit VarNR() { asVariant()->asTypedValue()->m_type = KindOfUninit; }
 
   ~VarNR() { if (debug) checkRefCount(); }
 

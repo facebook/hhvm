@@ -313,7 +313,7 @@ static Variant php_xml_parser_create_impl(const String& encoding_param,
 
   parser->target_encoding = encoding;
   parser->case_folding = 1;
-  parser->object.reset();
+  parser->object.asTypedValue()->m_type = KindOfNull;
   parser->isparsing = 0;
 
   XML_SetUserData(parser->parser, parser);

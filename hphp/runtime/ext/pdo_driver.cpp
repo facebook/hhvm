@@ -82,7 +82,7 @@ void PDOConnection::persistentSave() {
   String serialized = f_serialize(def_stmt_ctor_args);
   serialized_def_stmt_ctor_args = std::string(serialized.data(),
     serialized.size());
-  def_stmt_ctor_args.reset();
+  def_stmt_ctor_args.releaseForSweep(); // we're called from requestShutdown
 }
 
 void PDOConnection::persistentRestore() {

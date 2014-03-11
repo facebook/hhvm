@@ -51,7 +51,7 @@ struct InterceptRequestData final : RequestEventHandler {
     m_use_allowed_functions = false;
     m_allowed_functions.clear();
     m_renamed_functions.clear();
-    m_global_handler.reset();
+    m_global_handler.releaseForSweep();
     m_intercept_handlers.clear();
   }
 
@@ -92,7 +92,7 @@ bool register_intercept(const String& name, const Variant& callback, const Varia
   StringIMap<Variant> &handlers = s_intercept_data->m_intercept_handlers;
   if (!callback.toBoolean()) {
     if (name.empty()) {
-      s_intercept_data->m_global_handler.reset();
+      s_intercept_data->m_global_handler = Variant();
       handlers.clear();
     } else {
       handlers.erase(name);

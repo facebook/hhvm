@@ -767,7 +767,7 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64_t mod
   _argc = _argv.size() + 1;
 
   if (stmt->default_fetch_type == PDO_FETCH_INTO) {
-    stmt->fetch.into.reset();
+    stmt->fetch.into = Variant();
   }
   stmt->default_fetch_type = PDO_FETCH_BOTH;
 
@@ -838,7 +838,7 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64_t mod
     }
 
     if (retval) {
-      stmt->fetch.ctor_args.reset();
+      stmt->fetch.ctor_args = Variant();
       if (_argc == 3) {
         if (!_argv[1].isNull() && !_argv[1].isArray()) {
           pdo_raise_impl_error(stmt->dbh, stmt, "HY000",
@@ -1673,8 +1673,7 @@ static bool really_register_bound_param(PDOBoundParam *param,
       } else {
         hash.remove(param->paramno);
       }
-      /* param->parameter is freed by hash dtor */
-      param->parameter.reset();
+      param->parameter = Variant();
       return false;
     }
   }
@@ -1730,7 +1729,7 @@ static bool do_fetch_common(sp_PDOStatement stmt, PDOFetchOrientation ori,
       PDOBoundParam *param =
         iter.second().toResource().getTyped<PDOBoundParam>();
       if (param->paramno >= 0) {
-        param->parameter.reset();
+        param->parameter = Variant();
         /* set new value */
         fetch_value(stmt, param->parameter, param->paramno,
                     (int *)&param->param_type);
@@ -2069,7 +2068,7 @@ static int register_bound_param(const Variant& paramno, VRefParam param, int64_t
   }
 
   if (!really_register_bound_param(p.get(), stmt, is_param)) {
-    p->parameter.reset();
+    p->parameter = Variant();
     return false;
   }
   return true;
@@ -2648,7 +2647,6 @@ c_PDOStatement::c_PDOStatement(Class* cb) :
 
 c_PDOStatement::~c_PDOStatement() {
   m_stmt.reset();
-  m_row.reset();
 }
 
 Variant c_PDOStatement::t_execute(const Array& params /* = null_array */) {

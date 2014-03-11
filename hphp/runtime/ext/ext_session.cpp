@@ -1794,7 +1794,7 @@ Variant f_session_unset() {
     return false;
   }
   GlobalVariables *g = get_global_variables();
-  g->getRef(s__SESSION).reset();
+  g->getRef(s__SESSION) = Variant();
   return uninit_null();
 }
 

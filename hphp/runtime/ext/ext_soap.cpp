@@ -2526,15 +2526,15 @@ Variant c_SoapClient::t___soapcall(const String& name, const Array& args,
   };
 
   if (m_trace) {
-    m_last_request.reset();
-    m_last_response.reset();
+    m_last_request = Variant();
+    m_last_response = Variant();
   }
 
   if (location.empty()) {
     location = m_location;
   }
 
-  m_soap_fault.reset();
+  m_soap_fault = Variant();
 
   SoapServiceScope sss(this);
   Variant return_value;

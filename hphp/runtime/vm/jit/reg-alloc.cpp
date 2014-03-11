@@ -147,8 +147,6 @@ bool mustUseConst(const IRInstruction& inst, int i) {
   case LdAddr: return check(i == 1); // offset
   case Call: return check(i == 1); // returnBcOffset
   case CallBuiltin: return check(i == 0); // f
-  case LdRaw: return check(i == 1); // offset
-  case StRaw: return check(i == 1); // offset
   default: break;
   }
   return check(g_const_table.mustBeConst(int(inst.op()), i));

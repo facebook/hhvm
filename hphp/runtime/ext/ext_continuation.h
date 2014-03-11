@@ -35,7 +35,7 @@ FORWARD_DECLARE_CLASS(Continuation);
 struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   DECLARE_CLASS_NO_ALLOCATION(Continuation)
 
-  static constexpr uint startedOffset() {
+  static constexpr ptrdiff_t startedOff() {
     return offsetof(c_Continuation, o_subclassData);
   }
   bool started() const { return o_subclassData.u8[0]; }
@@ -45,9 +45,10 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     Running = 1,
     Done    = 2
   };
-  static constexpr uint stateOffset() {
+  static constexpr ptrdiff_t stateOff() {
     return offsetof(c_Continuation, o_subclassData) + 1;
   }
+
   bool done() const { return o_subclassData.u8[1] & ContState::Done; }
   void setDone() { o_subclassData.u8[1]  =  ContState::Done; }
 

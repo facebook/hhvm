@@ -737,6 +737,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define ND        assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin  return builtinReturn(inst);
 #define DSubtract(n, t) return inst->src(n)->type() - t;
+#define DLdRaw    return inst->extra<RawMemData>()->info().type;
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -762,6 +763,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef ND
 #undef DBuiltin
 #undef DSubtract
+#undef DLdRaw
 
 }
 
@@ -894,19 +896,6 @@ void assertOperandTypes(const IRInstruction* inst) {
     }
   };
 
-  auto checkCustom = [&] {
-    switch (inst->op()) {
-      case LdRaw:
-      case StRaw: {
-        auto s1 = inst->src(1); // field kind
-        check(s1->isConst() && s1->isA(Type::Int), Type::Int, nullptr);
-        break;
-      }
-      default:
-        break;
-    }
-  };
-
 #define IRT(name, ...) UNUSED static const Type name = Type::name;
   IR_TYPES
 #undef IRT
@@ -923,7 +912,7 @@ void assertOperandTypes(const IRInstruction* inst) {
                        "constant " #type);          \
                   ++curSrc;
 #define CStr     C(StaticStr)
-#define SUnk     return checkCustom();
+#define SUnk     return;
 #define SSpills  checkSpills();
 #define ND
 #define DMulti
@@ -946,6 +935,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define DLdRef      requireTypeParam();
 #define DAllocObj
 #define DThis
+#define DLdRaw
 
 #define O(opcode, dstinfo, srcinfo, flags)      \
   case opcode: dstinfo srcinfo countCheck(); return;
@@ -979,6 +969,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DAllocObj
 #undef DLdRef
 #undef DThis
+#undef DLdRaw
 
 }
 

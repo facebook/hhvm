@@ -747,9 +747,65 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
     }
   }
 
-  auto const howTo = doRegMoves(moves, rCgGP);
+  // Store any arguments past the initial 6 to the stack. This has to happen
+  // before the shuffles below in case the shuffles would clobber any of the
+  // srcRegs here.
+  for (int i = args.numStackArgs() - 1; i >= 0; --i) {
+    auto& arg = args.stk(i);
+    auto srcReg = arg.srcReg();
+    assert(arg.dstReg() == InvalidReg);
+    switch (arg.kind()) {
+      case ArgDesc::Kind::Reg:
+        if (arg.isZeroExtend()) {
+          a.  movzbl(rbyte(srcReg), r32(rCgGP));
+          a.  push(rCgGP);
+        } else {
+          if (srcReg.isSIMD()) {
+            emitMovRegReg(a, srcReg, rCgGP);
+            a.push(rCgGP);
+          } else {
+            a.push(srcReg);
+          }
+        }
+        break;
+
+      case ArgDesc::Kind::TypeReg:
+        static_assert(kTypeWordOffset == 0 || kTypeWordOffset == 1,
+                      "kTypeWordOffset value not supported");
+        assert(srcReg.isGP());
+        // x86 stacks grow down, so push higher offset items first
+        if (kTypeWordOffset == 0) {
+          a.  pushl(eax); // 4 bytes of garbage overlapping m_aux
+          a.  pushl(r32(srcReg));
+        } else {
+          // 4 bytes of garbage:
+          a.  pushl(eax);
+          // get the type in the right place in rCgGP before pushing it
+          a.  movb (rbyte(srcReg), rbyte(rCgGP));
+          a.  shll (CHAR_BIT, r32(rCgGP));
+          a.  pushl(r32(rCgGP));
+        }
+        break;
+
+      case ArgDesc::Kind::Imm:
+        a.    emitImmReg(arg.imm(), rCgGP);
+        a.    push(rCgGP);
+        break;
+
+      case ArgDesc::Kind::Addr:
+        not_implemented();
+
+      case ArgDesc::Kind::None:
+        a.    push(rax);
+        if (RuntimeOption::EvalHHIRGenerateAsserts) {
+          a.  storeq(0xbadbadbadbadbad, *rsp);
+        }
+        break;
+    }
+  }
 
   // Execute the plan
+  auto const howTo = doRegMoves(moves, rCgGP);
   for (auto& how : howTo) {
     if (how.m_kind == MoveInfo::Kind::Move) {
       if (how.m_reg2 == rCgGP) {
@@ -813,60 +869,6 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
     }
   }
 
-  // Store any remaining arguments to the stack
-  for (int i = args.numStackArgs() - 1; i >= 0; --i) {
-    auto& arg = args.stk(i);
-    auto srcReg = arg.srcReg();
-    assert(arg.dstReg() == InvalidReg);
-    switch (arg.kind()) {
-      case ArgDesc::Kind::Reg:
-        if (arg.isZeroExtend()) {
-          a.  movzbl(rbyte(srcReg), r32(rCgGP));
-          a.  push(rCgGP);
-        } else {
-          if (srcReg.isSIMD()) {
-            emitMovRegReg(a, srcReg, rCgGP);
-            a.push(rCgGP);
-          } else {
-            a.push(srcReg);
-          }
-        }
-        break;
-
-      case ArgDesc::Kind::TypeReg:
-        static_assert(kTypeWordOffset == 0 || kTypeWordOffset == 1,
-                      "kTypeWordOffset value not supported");
-        assert(srcReg.isGP());
-        // x86 stacks grow down, so push higher offset items first
-        if (kTypeWordOffset == 0) {
-          a.  pushl(eax); // 4 bytes of garbage overlapping m_aux
-          a.  pushl(r32(srcReg));
-        } else {
-          // 4 bytes of garbage:
-          a.  pushl(eax);
-          // get the type in the right place in rCgGP before pushing it
-          a.  movb (rbyte(srcReg), rbyte(rCgGP));
-          a.  shll (CHAR_BIT, r32(rCgGP));
-          a.  pushl(r32(rCgGP));
-        }
-        break;
-
-      case ArgDesc::Kind::Imm:
-        a.    emitImmReg(arg.imm(), rCgGP);
-        a.    push(rCgGP);
-        break;
-
-      case ArgDesc::Kind::Addr:
-        not_implemented();
-
-      case ArgDesc::Kind::None:
-        a.    push(rax);
-        if (RuntimeOption::EvalHHIRGenerateAsserts) {
-          a.  storeq(0xbadbadbadbadbad, *rsp);
-        }
-        break;
-    }
-  }
   return args.numStackArgs() * sizeof(int64_t);
 }
 
@@ -3905,58 +3907,6 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   m_as.loadq(baseReg[offset->intVal() + AROFF(m_func)], dstReg);
 }
 
-void CodeGenerator::cgLdRaw(IRInstruction* inst) {
-  PhysReg destReg = dstLoc(0).reg();
-  Reg64 addrReg = srcLoc(0).reg();
-  int64_t kind = inst->src(1)->intVal();
-
-  RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
-  int ldSize = slot.size();
-  int64_t off = slot.offset();
-  if (ldSize == sz::qword) {
-    m_as.loadq (addrReg[off], destReg);
-  } else if (ldSize == sz::dword) {
-    m_as.loadl (addrReg[off], r32(destReg));
-  } else {
-    assert(ldSize == sz::byte);
-    m_as.loadzbl (addrReg[off], r32(destReg));
-  }
-}
-
-void CodeGenerator::cgStRaw(IRInstruction* inst) {
-  auto baseReg = srcLoc(0).reg();
-  int64_t kind = inst->src(1)->intVal();
-  SSATmp* value = inst->src(2);
-
-  RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
-  assert(value->type() <= slot.type());
-  int stSize = slot.size();
-  int64_t off = slot.offset();
-  auto dest = baseReg[off];
-
-  auto valueReg = srcLoc(2).reg();
-  if (valueReg == InvalidReg) {
-    auto val = value->rawVal();
-    if (stSize == sz::qword) {
-      m_as.storeq(val, dest);
-    } else if (stSize == sz::dword) {
-      m_as.storel(val, dest);
-    } else {
-      assert(stSize == sz::byte);
-      m_as.storeb(val, dest);
-    }
-  } else {
-    if (stSize == sz::qword) {
-      m_as.storeq(r64(valueReg), dest);
-    } else if (stSize == sz::dword) {
-      m_as.storel(r32(valueReg), dest);
-    } else {
-      assert(stSize == sz::byte);
-      m_as.storeb(rbyte(valueReg), dest);
-    }
-  }
-}
-
 void CodeGenerator::cgLdStaticLocCached(IRInstruction* inst) {
   auto const extra = inst->extra<LdStaticLocCached>();
   auto const link  = RDS::bindStaticLocal(extra->func, extra->name);
@@ -4200,9 +4150,9 @@ void CodeGenerator::cgStringIsset(IRInstruction* inst) {
   auto idxReg = srcLoc(1).reg();
   auto dstReg = dstLoc(0).reg();
   if (idxReg == InvalidReg) {
-    m_as.cmpl(inst->src(1)->intVal(), strReg[StringData::sizeOffset()]);
+    m_as.cmpl(inst->src(1)->intVal(), strReg[StringData::sizeOff()]);
   } else {
-    m_as.cmpl(r32(idxReg), strReg[StringData::sizeOffset()]);
+    m_as.cmpl(r32(idxReg), strReg[StringData::sizeOff()]);
   }
   m_as.setnbe(rbyte(dstReg));
 }
@@ -5532,8 +5482,8 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   auto contReg = srcLoc(0).reg();
 
-  const Offset startedOffset = c_Continuation::startedOffset();
-  const Offset stateOffset = c_Continuation::stateOffset();
+  const Offset startedOffset = c_Continuation::startedOff();
+  const Offset stateOffset = c_Continuation::stateOff();
   // Check done and running at the same time
   m_as.testb(0x3, contReg[stateOffset]);
   emitFwdJcc(CC_NZ, inst->taken());
@@ -5545,7 +5495,7 @@ void CodeGenerator::cgContPreNext(IRInstruction* inst) {
 
 void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
   auto contReg = srcLoc(0).reg();
-  auto startedOffset = c_Continuation::startedOffset();
+  auto startedOffset = c_Continuation::startedOff();
 
   m_as.testb(0x1, contReg[startedOffset]);
   emitFwdJcc(CC_Z, inst->taken());
@@ -5555,7 +5505,7 @@ void CodeGenerator::cgContSetRunning(IRInstruction* inst) {
   auto contReg = srcLoc(0).reg();
   bool running = inst->src(1)->boolVal();
 
-  const Offset stateOffset = c_Continuation::stateOffset();
+  const Offset stateOffset = c_Continuation::stateOff();
   if (running) {
     m_as.storeb(0x1, contReg[stateOffset]);
   } else {
@@ -5567,7 +5517,7 @@ void CodeGenerator::cgContValid(IRInstruction* inst) {
   auto contReg = srcLoc(0).reg();
   auto destReg = dstLoc(0).reg();
 
-  m_as.loadzbl(contReg[c_Continuation::stateOffset()], r32(destReg));
+  m_as.loadzbl(contReg[c_Continuation::stateOff()], r32(destReg));
   m_as.shrl(0x1, r32(destReg));
   m_as.xorb(0x1, rbyte(destReg));
 }
@@ -5607,46 +5557,57 @@ void CodeGenerator::cgLdContActRec(IRInstruction* inst) {
   m_as.lea (base[offset], dest) ;
 }
 
-void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
-  auto destReg     = dstLoc(0).reg();
-  auto contArReg   = srcLoc(0).reg();
-  int64_t kind     = inst->src(1)->intVal();
-  RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
+void CodeGenerator::emitLdRaw(IRInstruction* inst, size_t extraOff) {
+  auto destReg = dstLoc(0).reg();
+  auto offset  = inst->extra<RawMemData>()->info().offset;
+  auto src     = srcLoc(0).reg()[offset + extraOff];
 
-  int64_t off = slot.offset() - c_Continuation::getArOffset();
-  switch (slot.size()) {
-    case sz::byte:  m_as.loadzbl(contArReg[off], r32(destReg)); break;
-    case sz::dword: m_as.loadl(contArReg[off], r32(destReg)); break;
-    case sz::qword: m_as.loadq(contArReg[off], destReg); break;
+  switch (inst->extra<RawMemData>()->info().size) {
+    case sz::byte:  m_as.loadzbl(src, r32(destReg)); break;
+    case sz::dword: m_as.loadl(src, r32(destReg)); break;
+    case sz::qword: m_as.loadq(src, destReg); break;
     default:        not_implemented();
   }
 }
 
-void CodeGenerator::cgStContArRaw(IRInstruction* inst) {
-  auto contArReg   = srcLoc(0).reg();
-  int64_t kind     = inst->src(1)->intVal();
-  SSATmp* value    = inst->src(2);
-  auto valueReg = srcLoc(2).reg();
-  RawMemSlot& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
+void CodeGenerator::cgLdRaw(IRInstruction* inst) {
+  emitLdRaw(inst, 0);
+}
 
-  assert(value->type() <= slot.type());
-  int64_t off = slot.offset() - c_Continuation::getArOffset();
+void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
+  emitLdRaw(inst, -c_Continuation::getArOffset());
+}
 
-  if (value->isConst()) {
-    switch (slot.size()) {
-      case sz::byte:  m_as.storeb(value->rawVal(), contArReg[off]); break;
-      case sz::dword: m_as.storel(value->rawVal(), contArReg[off]); break;
-      case sz::qword: m_as.storeq(value->rawVal(), contArReg[off]); break;
+void CodeGenerator::emitStRaw(IRInstruction* inst, size_t extraOff) {
+  auto offset = inst->extra<RawMemData>()->info().offset;
+  auto dest   = srcLoc(0).reg()[offset + extraOff];
+  auto size   = inst->extra<RawMemData>()->info().size;
+
+  auto const valueReg = srcLoc(1).reg();
+  if (valueReg == InvalidReg) {
+    auto const val = inst->src(0)->rawVal();
+    switch (size) {
+      case sz::byte:  m_as.storeb(val, dest); break;
+      case sz::dword: m_as.storel(val, dest); break;
+      case sz::qword: m_as.storeq(val, dest); break;
       default:        not_implemented();
     }
   } else {
-    switch (slot.size()) {
-      case sz::byte:  m_as.storeb(rbyte(valueReg), contArReg[off]); break;
-      case sz::dword: m_as.storel(r32(valueReg), contArReg[off]); break;
-      case sz::qword: m_as.storeq(r64(valueReg), contArReg[off]); break;
+    switch (size) {
+      case sz::byte:  m_as.storeb(rbyte(valueReg), dest); break;
+      case sz::dword: m_as.storel(r32(valueReg), dest); break;
+      case sz::qword: m_as.storeq(r64(valueReg), dest); break;
       default:        not_implemented();
     }
   }
+}
+
+void CodeGenerator::cgStRaw(IRInstruction* inst) {
+  emitStRaw(inst, 0);
+}
+
+void CodeGenerator::cgStContArRaw(IRInstruction* inst) {
+  emitStRaw(inst, -c_Continuation::getArOffset());
 }
 
 void CodeGenerator::cgLdContArValue(IRInstruction* inst) {

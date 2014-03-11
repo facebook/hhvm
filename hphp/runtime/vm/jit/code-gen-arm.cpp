@@ -19,6 +19,7 @@
 
 #include "folly/Optional.h"
 
+#include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
@@ -1708,56 +1709,25 @@ void CodeGenerator::cgLdStack(IRInstruction* inst) {
   emitLoad(inst->dst()->type(), dstLoc(0), srcReg, offset);
 }
 
-void CodeGenerator::cgLdRaw(IRInstruction* inst) {
-  auto* addr   = inst->src(0);
-  auto* offset = inst->src(1);
+void CodeGenerator::emitLdRaw(IRInstruction* inst, size_t extraOff) {
   auto destReg = x2a(dstLoc(0).reg());
-  auto addrReg = x2a(srcLoc(0).reg());
-  auto offsetLoc = srcLoc(1);
+  auto offset  = inst->extra<RawMemData>()->info().offset;
+  auto src     = x2a(srcLoc(0).reg())[offset + extraOff];
 
-  if (addr->isConst()) {
-    not_implemented();
-  }
-
-  if (offset->isConst()) {
-    auto kind   = offset->intVal();
-    auto& slot  = RawMemSlot::Get(RawMemSlot::Kind(kind));
-    auto ldSize = slot.size();
-    auto offs   = slot.offset();
-
-    switch (ldSize) {
-      case sz::qword:
-        m_as.  Ldr  (destReg, addrReg[offs]);
-        break;
-      case sz::dword:
-        m_as.  Ldr  (destReg.W(), addrReg[offs]);
-        break;
-      case sz::byte:
-        // Ldrb zero-extends
-        m_as.  Ldrb (destReg.W(), addrReg[offs]);
-        break;
-      default: not_reached();
-    }
-  } else {
-    auto offsetReg = x2a(offsetLoc.reg());
-    assert(inst->dst()->type().nativeSize() == sz::qword);
-    m_as.  Ldr  (destReg, addrReg[offsetReg]);
+  switch (inst->extra<RawMemData>()->info().size) {
+    case sz::byte:  m_as.  Ldrb  (destReg.W(), src); break;
+    case sz::dword: m_as.  Ldr   (destReg.W(), src); break;
+    case sz::qword: m_as.  Ldr   (destReg, src); break;
+    default:        not_implemented();
   }
 }
 
-void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
-  auto destReg     = x2a(dstLoc(0).reg());
-  auto contArReg   = x2a(srcLoc(0).reg());
-  auto kind        = inst->src(1)->intVal();
-  auto const& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
+void CodeGenerator::cgLdRaw(IRInstruction* inst) {
+  emitLdRaw(inst, 0);
+}
 
-  auto off = slot.offset() - c_Continuation::getArOffset();
-  switch (slot.size()) {
-    case sz::byte:  m_as.  Ldrb  (destReg.W(), contArReg[off]); break;
-    case sz::dword: m_as.  Ldr   (destReg.W(), contArReg[off]); break;
-    case sz::qword: m_as.  Ldr   (destReg, contArReg[off]); break;
-    default:        not_implemented();
-  }
+void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
+  emitLdRaw(inst, -c_Continuation::getArOffset());
 }
 
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {

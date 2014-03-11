@@ -315,6 +315,8 @@ private:
   void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int64_t adjustment);
   void emitConvBoolOrIntToDbl(IRInstruction* inst);
   void cgLdClsMethodCacheCommon(IRInstruction* inst, Offset offset);
+  void emitLdRaw(IRInstruction* inst, size_t extraOff);
+  void emitStRaw(IRInstruction* inst, size_t extraOff);
 
   /*
    * Generate an if-block that branches around some unlikely code, handling

@@ -1530,9 +1530,7 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
   SSATmp* cont = gen(LdThis, m_irb->fp());
   SSATmp* contAR = gen(LdContActRec, Type::FramePtr, cont);
 
-  SSATmp* funcBody = gen(
-    LdRaw, Type::TCA, cont, cns(RawMemSlot::ContEntry)
-  );
+  SSATmp* funcBody = gen(LdRaw, RawMemData{RawMemData::ContEntry}, cont);
 
   // The top of the stack will be consumed by the callee, so discard
   // it without decreffing.
@@ -1559,7 +1557,7 @@ void HhbcTranslator::emitContReturnControl() {
 }
 
 void HhbcTranslator::emitUnpackCont() {
-  push(gen(LdContArRaw, Type::Int, m_irb->fp(), cns(RawMemSlot::ContLabel)));
+  push(gen(LdContArRaw, RawMemData{RawMemData::ContLabel}, m_irb->fp()));
 }
 
 void HhbcTranslator::emitContSuspendImpl(int64_t labelId) {
@@ -1569,7 +1567,8 @@ void HhbcTranslator::emitContSuspendImpl(int64_t labelId) {
   gen(DecRef, oldValue);
 
   // set m_label = labelId;
-  gen(StContArRaw, m_irb->fp(), cns(RawMemSlot::ContLabel), cns(labelId));
+  gen(StContArRaw, RawMemData{RawMemData::ContLabel}, m_irb->fp(),
+      cns(labelId));
 }
 
 void HhbcTranslator::emitContSuspend(int64_t labelId) {
@@ -1578,10 +1577,10 @@ void HhbcTranslator::emitContSuspend(int64_t labelId) {
   // take a fast path if this generator has no yield k => v;
   if (curFunc()->isPairGenerator()) {
     // this needs optimization
-    auto const idx = gen(LdContArRaw, Type::Int,
-                         m_irb->fp(), cns(RawMemSlot::ContIndex));
+    auto const idx =
+      gen(LdContArRaw, RawMemData{RawMemData::ContIndex}, m_irb->fp());
     auto const newIdx = gen(AddInt, idx, cns(1));
-    gen(StContArRaw, m_irb->fp(), cns(RawMemSlot::ContIndex), newIdx);
+    gen(StContArRaw, RawMemData{RawMemData::ContIndex}, m_irb->fp(), newIdx);
 
     auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());
     gen(StContArKey, m_irb->fp(), newIdx);
@@ -1614,7 +1613,7 @@ void HhbcTranslator::emitContSuspendK(int64_t labelId) {
 
 void HhbcTranslator::emitContRetC() {
   // set state to done
-  gen(StContArRaw, m_irb->fp(), cns(RawMemSlot::ContState),
+  gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
       cns(c_Continuation::Done));
 
   // set m_value = popC();
@@ -1638,9 +1637,9 @@ void HhbcTranslator::emitContCheck(bool checkStarted) {
 void HhbcTranslator::emitContRaise() {
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_irb->fp());
-  SSATmp* label = gen(LdRaw, Type::Int, cont, cns(RawMemSlot::ContLabel));
+  SSATmp* label = gen(LdRaw, RawMemData{RawMemData::ContLabel}, cont);
   label = gen(SubInt, label, cns(1));
-  gen(StRaw, cont, cns(RawMemSlot::ContLabel), label);
+  gen(StRaw, RawMemData{RawMemData::ContLabel}, cont, label);
 }
 
 void HhbcTranslator::emitContValid() {
@@ -1793,7 +1792,7 @@ void HhbcTranslator::emitStrlen() {
       // static string; fold its strlen operation
       push(cns(input->strVal()->size()));
     } else {
-      push(gen(LdRaw, Type::Int, input, cns(RawMemSlot::StrLen)));
+      push(gen(LdRaw, RawMemData{RawMemData::StrLen}, input));
       gen(DecRef, input);
     }
   } else if (inType <= Type::Null) {
@@ -3632,15 +3631,14 @@ void HhbcTranslator::guardRefs(int64_t entryArDelta,
     if (mask64 == 0) {
       continue;
     }
-    uint64_t vals64 = packBitVec(vals, i);
 
     if (i == 0) {
       nParams = cns(64);
     } else if (i == 64) {
-      nParams = gen(
-        LdRaw, Type::Int, funcPtr, cns(RawMemSlot::FuncNumParams)
-      );
+      nParams = gen(LdRaw, RawMemData{RawMemData::FuncNumParams}, funcPtr);
     }
+
+    uint64_t vals64 = packBitVec(vals, i);
     gen(
       GuardRefs,
       funcPtr,

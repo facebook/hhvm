@@ -103,6 +103,7 @@ struct CodeGenerator {
                  ptrdiff_t offset,
                  SSATmp* src, PhysLoc srcLoc,
                  bool genStoreType = true);
+  void emitLdRaw(IRInstruction* inst, size_t extraOff);
 
   Address cgInst(IRInstruction* inst);
 

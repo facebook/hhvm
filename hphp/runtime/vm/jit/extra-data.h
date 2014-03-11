@@ -726,6 +726,38 @@ struct NewStructData : IRExtraData {
   std::string show() const;
 };
 
+struct RawMemData : IRExtraData {
+# define RAW_MEM_DATA_TYPES                     \
+  RAW_TYPE(ContLabel)                           \
+  RAW_TYPE(ContIndex)                           \
+  RAW_TYPE(ContState)                           \
+  RAW_TYPE(ContEntry)                           \
+  RAW_TYPE(StrLen)                              \
+  RAW_TYPE(FuncNumParams)                       \
+
+  enum Type : uint8_t {
+#   define RAW_TYPE(name) name,
+    RAW_MEM_DATA_TYPES
+#   undef RAW_TYPE
+  };
+# define RAW_TYPE(name) +1
+  static constexpr size_t kNumTypes = RAW_MEM_DATA_TYPES;
+# undef RAW_TYPE
+
+  struct Info {
+    const int64_t offset;
+    const int size;
+    const JIT::Type type;
+  };
+
+  explicit RawMemData(Type t) : type(t) {}
+
+  Type type;
+
+  const Info& info() const;
+  std::string show() const;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -856,6 +888,10 @@ X(RBTrace,                      RBTraceData);
 X(Shuffle,                      ShuffleData);
 X(ThingExists,                  ClassKindData);
 X(NewStructArray,               NewStructData);
+X(LdRaw,                        RawMemData);
+X(StRaw,                        RawMemData);
+X(LdContArRaw,                  RawMemData);
+X(StContArRaw,                  RawMemData);
 
 #undef X
 

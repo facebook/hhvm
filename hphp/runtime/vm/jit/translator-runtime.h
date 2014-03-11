@@ -55,7 +55,6 @@ struct MInstrState {
   TypedValue tvRef2;
   TypedValue tvResult;
   TypedValue tvVal;
-  Class* ctx;
 } __attribute__((aligned(16)));
 static_assert(offsetof(MInstrState, tvScratch) % 16 == 0,
               "MInstrState members require 16-byte alignment for SSE");

@@ -71,6 +71,13 @@
     test_root: drupal/core
     clowns:
       - drupal/core/modules/views/tests/Drupal/views/Tests/ViewsDataHelperTest.php
+  ezpublish-kernel:
+    url: https://github.com/ezsystems/ezpublish-kernel.git
+    # awaiting hhvm 2.5.0 on travis before merging + currently exposes issues in hhvm
+    branch: hhvmfailtesting
+    commit: 07f6f6e58d41cc985e786b94c72c1c1eeb3b6f0a
+    install_root: ezpublish-kernel
+    test_root: ezpublish-kernel
   facebookphpsdk:
     url: https://github.com/facebook/facebook-php-sdk.git
     branch: v3.2.3

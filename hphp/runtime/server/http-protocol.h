@@ -33,8 +33,7 @@ struct HttpProtocol {
   static void PrepareSystemVariables(Transport *transport,
                                      const RequestURI &r,
                                      const SourceRootInfo &sri);
-  static void StartRequest();
-  static void PrepareRequestVariables(Variant& request,
+  static void PrepareRequestVariables(Array& request,
                                       Array& get,
                                       Array& post,
                                       Variant& raw_post,
@@ -50,26 +49,11 @@ struct HttpProtocol {
                                    Transport *transport);
   static bool PrepareCookieVariable(Array& cookie,
                                     Transport *transport);
-  static void PrepareServerVariable(Variant& server,
+  static void PrepareServerVariable(Array& server,
                                     Transport *transport,
                                     const RequestURI &r,
                                     const SourceRootInfo &sri,
                                     const VirtualHost *vhost);
-  static void CopyHeaderVariables(Variant& server,
-                                  const HeaderMap& headers);
-  static void CopyTransportParams(Variant& server,
-                               Transport *transport);
-  static void CopyServerInfo(Variant& server,
-                             Transport *transport,
-                             const VirtualHost *vhost);
-  static void CopyRemoteInfo(Variant& server,
-                             Transport *transport);
-  static void CopyAuthInfo(Variant& server,
-                           Transport *transport);
-  static void CopyPathInfo(Variant& server,
-                           Transport *transport,
-                           const RequestURI &r,
-                           const VirtualHost *vhost);
 
   static bool ProxyRequest(Transport *transport, bool force,
                            const std::string &url, int &code,

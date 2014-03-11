@@ -34,7 +34,7 @@ public:
 
   ~SourceRootInfo();
 
-  void setServerVariables(Variant &server) const;
+  void setServerVariables(Array& server) const;
   std::string path() const;
 
   bool sandboxOn() const {

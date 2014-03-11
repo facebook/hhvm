@@ -200,7 +200,7 @@ void SourceRootInfo::handleError(Transport *t) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void SourceRootInfo::setServerVariables(Variant &server) const {
+void SourceRootInfo::setServerVariables(Array& server) const {
   if (!sandboxOn()) return;
   for (auto it = RuntimeOption::SandboxServerVariables.begin();
        it != RuntimeOption::SandboxServerVariables.end();
@@ -210,7 +210,7 @@ void SourceRootInfo::setServerVariables(Variant &server) const {
   }
 
   if (!m_serverVars.empty()) {
-    cellAddEq(*server.asCell(), make_tv<KindOfArray>(m_serverVars.get()));
+    server += m_serverVars;
   }
 }
 

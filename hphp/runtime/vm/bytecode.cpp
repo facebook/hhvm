@@ -1563,6 +1563,9 @@ void ExecutionContext::enterVMWork(ActRec* enterFnAr) {
 }
 
 void ExecutionContext::enterVM(TypedValue* retval, ActRec* ar) {
+  assert(ar->m_soff == 0);
+  assert(ar->m_savedRbp == 0);
+
   DEBUG_ONLY int faultDepth = m_faults.size();
   SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
 
@@ -1617,11 +1620,6 @@ resume:
    * level.
    */
 
-  if (g_context->m_nestedVMs.empty()) {
-    m_fp = nullptr;
-    m_pc = nullptr;
-  }
-
   assert(m_faults.size() > 0);
   Fault fault = m_faults.back();
   m_faults.pop_back();
@@ -1641,25 +1639,6 @@ resume:
   }
 
   not_reached();
-}
-
-void ExecutionContext::reenterVM(TypedValue* retval,
-                                   ActRec* ar,
-                                   TypedValue* savedSP) {
-  ar->m_soff = 0;
-  ar->m_savedRbp = 0;
-  VMState savedVM = { getPC(), getFP(), m_firstAR, savedSP };
-  TRACE(3, "savedVM: %p %p %p %p\n", m_pc, m_fp, m_firstAR, savedSP);
-  pushVMState(savedVM);
-  assert(m_nestedVMs.size() >= 1);
-  try {
-    enterVM(retval, ar);
-    popVMState();
-  } catch (...) {
-    popVMState();
-    throw;
-  }
-  TRACE(1, "Reentry: exit fp %p pc %p\n", m_fp, m_pc);
 }
 
 void ExecutionContext::invokeFunc(TypedValue* retval,
@@ -1820,12 +1799,10 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
     }
   }
 
-  if (m_fp) {
-    reenterVM(retval, ar, savedSP);
-  } else {
-    assert(m_nestedVMs.size() == 0);
-    enterVM(retval, ar);
-  }
+  pushVMState(savedSP);
+  SCOPE_EXIT { popVMState(); };
+
+  enterVM(retval, ar);
 }
 
 void ExecutionContext::invokeFuncCleanupHelper(TypedValue* retval,
@@ -1920,12 +1897,10 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
     }
   }
 
-  if (m_fp) {
-    reenterVM(retval, ar, savedSP);
-  } else {
-    assert(m_nestedVMs.size() == 0);
-    enterVM(retval, ar);
-  }
+  pushVMState(savedSP);
+  SCOPE_EXIT { popVMState(); };
+
+  enterVM(retval, ar);
 }
 
 void ExecutionContext::invokeContFunc(const Func* f,
@@ -1962,8 +1937,11 @@ void ExecutionContext::invokeContFunc(const Func* f,
     cellDup(*param, *m_stack.allocC());
   }
 
+  pushVMState(savedSP);
+  SCOPE_EXIT { popVMState(); };
+
   TypedValue retval;
-  reenterVM(&retval, ar, savedSP);
+  enterVM(&retval, ar);
   // Codegen for generator functions guarantees that they will return null
   assert(IS_NULL_TYPE(retval.m_type));
 }
@@ -7666,7 +7644,16 @@ void ExecutionContext::resetCoverageCounters() {
   m_coverPrevUnit = nullptr;
 }
 
-void ExecutionContext::pushVMState(VMState &savedVM) {
+void ExecutionContext::pushVMState(Cell* savedSP) {
+  if (UNLIKELY(!m_fp)) {
+    // first entry
+    assert(m_nestedVMs.size() == 0);
+    return;
+  }
+
+  VMState savedVM = { getPC(), getFP(), m_firstAR, savedSP };
+  TRACE(3, "savedVM: %p %p %p %p\n", m_pc, m_fp, m_firstAR, savedSP);
+
   if (debug && savedVM.fp &&
       savedVM.fp->m_func &&
       savedVM.fp->m_func->unit()) {
@@ -7685,6 +7672,14 @@ void ExecutionContext::pushVMState(VMState &savedVM) {
 }
 
 void ExecutionContext::popVMState() {
+  if (UNLIKELY(m_nestedVMs.empty())) {
+    // last exit
+    m_fp = nullptr;
+    m_pc = nullptr;
+    m_firstAR = nullptr;
+    return;
+  }
+
   assert(m_nestedVMs.size() >= 1);
 
   VMState &savedVM = m_nestedVMs.back();
@@ -7710,6 +7705,8 @@ void ExecutionContext::popVMState() {
 
   m_nestedVMs.pop_back();
   m_nesting--;
+
+  TRACE(1, "Reentry: exit fp %p pc %p\n", m_fp, m_pc);
 }
 
 void ExecutionContext::requestInit() {

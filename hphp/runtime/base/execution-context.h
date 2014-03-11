@@ -567,7 +567,7 @@ public:
 
   int m_nesting;
   bool isNested() { return m_nesting != 0; }
-  void pushVMState(VMState &savedVM);
+  void pushVMState(Cell* savedSP);
   void popVMState();
 
   ActRec* getPrevVMState(const ActRec* fp,
@@ -597,7 +597,6 @@ private:
   void enterVMWork(ActRec* enterFnAr);
   void enterVMPrologue(ActRec* enterFnAr);
   void enterVM(TypedValue* retval, ActRec* ar);
-  void reenterVM(TypedValue* retval, ActRec* ar, TypedValue* savedSP);
   void doFPushCuf(IOP_ARGS, bool forward, bool safe);
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,

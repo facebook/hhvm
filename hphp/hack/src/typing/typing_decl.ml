@@ -298,9 +298,10 @@ and class_decl c =
 
 and class_decl_ c =
   let is_abstract = class_is_abstract c in
-  let env = Typing_env.empty (Pos.filename (fst c.c_name)) in
+  let cls_pos, cls_name = c.c_name in
+  let env = Typing_env.empty (Pos.filename cls_pos) in
   let env = Env.set_mode env c.c_mode in
-  let class_dep = Dep.Class (snd c.c_name) in
+  let class_dep = Dep.Class cls_name in
   let env = Env.set_root env class_dep in
   let env, inherited = Typing_inherit.make env c in
   let cvars = inherited.Typing_inherit.ih_cvars in
@@ -320,6 +321,15 @@ and class_decl_ c =
   let parent_cstr = inherited.Typing_inherit.ih_cstr in
   let env, cstr = constructor_decl env parent_cstr c in
   let impl = c.c_extends @ c.c_implements @ c.c_uses in
+  let impl = match SMap.get "__toString" m with
+    | Some {ce_type = (_, Tfun ft)} when cls_name <> "Stringish" ->
+      (* HHVM implicitly adds Stringish interface for every class/iface/trait
+       * with a __toString method; "string" also implements this interface *)
+      let pos = ft.ft_pos in
+      let h = (pos, Nast.Happly ((pos, "Stringish"), [])) in
+      h :: impl
+    | _ -> impl
+  in
   let self = Typing.get_self_from_c env c in
   let env, impl_dimpl =
     lfold (Typing.get_implements ~with_checks:false ~this:self) env impl in

@@ -126,10 +126,8 @@ and sub_type env ty1 ty2 =
       (match class_ with
         | None ->
           (match env.Env.genv.Env.mode with
-            | Ast.Mstrict ->
-              raise Ignore
-            | Ast.Mpartial | Ast.Mdecl ->
-              env
+            | Ast.Mstrict -> raise Ignore
+            | Ast.Mpartial | Ast.Mdecl -> env
           )
         | Some class_ ->
           let subtype_req_ancestor =
@@ -222,6 +220,7 @@ and sub_type env ty1 ty2 =
               env
           )
       )
+  | (_, Tapply ((_, "Stringish"), _)), (_, Tprim Nast.Tstring) -> env
   | (_, Tapply ((_, "XHPChild"), _)), (_, Tarray _) -> env
   | (_, Tapply ((_, "XHPChild"), _)), (_, Tprim Nast.Tint) -> env
   | (_, Tapply ((_, "XHPChild"), _)), (_, Tprim Nast.Tfloat) -> env
@@ -282,7 +281,8 @@ and sub_string p env ty2 =
       | None when Env.is_strict env ->
           raise Ignore
       | None -> env
-      | Some tc when SMap.mem "__toString" tc.tc_methods -> env
+      | Some {tc_name = "Stringish"} -> env
+      | Some tc when SMap.mem "Stringish" tc.tc_ancestors -> env
       | _ when !is_silent_mode -> env
       | Some _ -> error_l [
           p, "You cannot use this object as a string";

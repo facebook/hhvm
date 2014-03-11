@@ -138,6 +138,7 @@ namespace Trace {
       TM(datablock)   \
       TM(jittime)     \
       TM(xenon)       \
+      TM(xls)         \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
       TM(stress_txInterpSeed)   \

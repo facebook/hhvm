@@ -4360,7 +4360,7 @@ void CodeGenerator::cgStElem(IRInstruction* inst) {
   auto srcValue = inst->src(2);
   auto idx = inst->src(1);
   auto idxReg = srcLoc(1).reg();
-  if (idx->isConst()) {
+  if (idxReg == InvalidReg) {
     cgStore(baseReg[idx->intVal()], srcValue, srcLoc(2), Width::Full);
   } else {
     cgStore(baseReg[idxReg], srcValue, srcLoc(2), Width::Full);

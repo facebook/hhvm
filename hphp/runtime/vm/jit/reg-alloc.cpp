@@ -233,7 +233,10 @@ namespace X64 {
 // using any scratch registers.
 bool okStore(int64_t c) { return true; }
 
-bool okCmp(int64_t c) { return isI32(c); }
+// return true if cgCallHelper and ArgGroup accept c as immediate.
+// passing large immediates as args on the stack will implicitly
+// clobber rCgGP (R11).
+bool okArg(int64_t c) { return true/*isI32(c)*/; }
 
 // return true if CodeGenerator supports this operand as an
 // immediate value.
@@ -261,7 +264,32 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     break;
   case SpillFrame:
     if (i == 2) return true; // func
-    if (i == 3) return type <= Type::Cls; // objOrCls
+    if (i == 3 && type <= Type::Cls) return true; // objOrCls is Cls
+    if (i == 3 && type <= Type::InitNull) return true; // objOrCls is null
+    break;
+  case StRetVal:
+    if (i == 1) return okStore(cint); // value->cgStore
+    break;
+  case StaticLocInitCached:
+    if (i == 1) return okStore(cint); // value->cgStore
+    break;
+  case StContArRaw:
+    if (i == 2) return okStore(cint); // value->x64-store-imm
+    break;
+  case StContArValue:
+    if (i == 1) return okStore(cint); // value->cgStore
+    break;
+  case LdGblAddr:
+    if (i == 0) return okArg(cint); // name passed to ArgGroup.ssa
+    break;
+  case StElem:
+    if (i == 1) return isI32(cint); // idx used as d32 imm offset
+    break;
+  case LdElem:
+    if (i == 1) return isI32(cint); // byte offset used in MemoryRef
+    break;
+  case StRef:
+    if (i == 1) return okStore(cint);
     break;
   case Call:
     if (i == 2) return true; // func
@@ -287,8 +315,12 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     // TODO: #3634984 ... but it needs a scratch register
     return true;
   case LdClsPropAddrOrNull:
+    if (i == 0) return okArg(cint); // cls -> ArgGroup.ssa().
+    if (i == 1) return okArg(cint); // prop -> ArgGroup.ssa().
+    break;
   case LdClsPropAddrOrRaise:
-    if (i == 0) return true; // cls -> ArgGroup.ssa().
+    if (i == 0) return okArg(cint); // cls -> ArgGroup.ssa().
+    if (i == 1) return okArg(cint); // prop -> ArgGroup.ssa().
     break;
   case Same: case NSame:
   case Eq:   case EqX:
@@ -332,7 +364,13 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
   case JmpLtInt:  case SideExitJmpLtInt:  case ReqBindJmpLtInt:
   case JmpLteInt: case SideExitJmpLteInt: case ReqBindJmpLteInt:
     // cases in emitCompareInt()
-    if (i == 1) return okCmp(cint);
+    if (i == 1) return isI32(cint);
+    break;
+  case AddInt:
+  case AndInt:
+  case OrInt:
+  case XorInt:
+    if (i == 1) return !inst.src(0)->isConst() && isI32(cint); // X op C
     break;
   case SubInt:
     if (i == 0) return cint == 0 && !inst.src(1)->isConst(); // 0-X
@@ -347,22 +385,27 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
   case Mov:
     return true; // x64 can mov a 64-bit imm into a register.
   case StringIsset:
-    if (i == 1) return okCmp(cint);
+    if (i == 1) return isI32(cint);
     break;
   case CheckPackedArrayBounds:
-    if (i == 1) return okCmp(cint); // idx
+    if (i == 1) return isI32(cint); // idx
+    break;
+  case AKExists:
+    // both args are passed to cgCallHelper
+    if (i == 0) return okArg(cint);
+    if (i == 1) return okArg(cint);
     break;
   case CheckBounds:
     if (i == 0) { // idx
-      return !inst.src(1)->isConst() && okCmp(cint) && cint >= 0;
+      return !inst.src(1)->isConst() && isI32(cint) && cint >= 0;
     }
     if (i == 1) { // size
-      return !inst.src(0)->isConst() && okCmp(cint) && cint >= 0;
+      return !inst.src(0)->isConst() && isI32(cint) && cint >= 0;
     }
     break;
   case VerifyParamCls:
   case VerifyRetCls:
-    if (i == 1) return okCmp(cint); // constraint class ptr
+    if (i == 1) return isI32(cint); // constraint class ptr
     break;
   case FunctionExitSurpriseHook:
     if (i == 1) return okStore(cint); // return value

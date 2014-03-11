@@ -44,6 +44,7 @@
 //  - #3099647 support loops
 
 namespace HPHP { namespace JIT {
+TRACE_SET_MOD(xls);
 namespace {
 using namespace reg;
 struct Interval;
@@ -184,6 +185,12 @@ private:
   smart::vector<Interval*> m_inactive;
   StateVector<Block,std::pair<IRInstruction*,IRInstruction*>> m_edgeCopies;
   unsigned m_frontier { 0 }; // debug_only to detect backtracking
+  unsigned m_orig { 0 };
+  unsigned m_final { 0 };
+  unsigned m_copies { 0 };
+  unsigned m_spills { 0 };
+  unsigned m_reloads { 0 };
+  unsigned m_ldconst { 0 };
 };
 
 const uint32_t kMaxPos = UINT32_MAX; // "infinity" use position
@@ -524,6 +531,9 @@ void XLS::buildIntervals() {
         auto constraint = srcConstraint(inst, i);
         if (constraint == Constraint::IMM) continue;
         if (s->isConst() && (constraint & Constraint::IMM)) continue;
+        if (s->isConst()) {
+          TRACE(1, "xls-const-src %s %u\n", opcodeName(inst.op()), i);
+        }
         auto need = s->numWords();
         if (need == 0) continue; //XXX problematic for InitNull|UninitNull
         if (constraint.reg() != InvalidReg) {
@@ -618,6 +628,7 @@ void XLS::assignSpill(Interval* ivl) {
       leader->spill.setSlot(1, m_nextSpill++);
     }
     if (m_nextSpill > NumPreAllocatedSpillLocs) {
+      TRACE(1,"xls-punt TooManySpills\n");
       PUNT(LinearScan_TooManySpills);
     }
   }
@@ -871,6 +882,7 @@ void XLS::spill(Interval* ivl) {
   if (first_use <= ivl->end()) {
     auto split_pos = nearestSplitBefore(first_use);
     if (split_pos <= ivl->start()) {
+      TRACE(1,"xls-punt RegSpill\n");
       PUNT(RegSpill); // cannot split before first_use
     }
     enqueue(ivl->split(split_pos));
@@ -940,6 +952,7 @@ void XLS::walkIntervals() {
   // fill the pending queue with nonempty intervals in order of start position
   for (auto ivl : m_intervals) {
     if (!ivl) continue;
+    m_orig++;
     if (isDefConst(ivl)) {
       spill(ivl);
     } else {
@@ -1011,6 +1024,10 @@ void XLS::insertCopy(Block* b, Block::iterator pos, IRInstruction* &shuffle,
   shuffle_regs.src(i) = rs;
   auto inst_pos = m_posns[*pos];
   m_posns[shuffle] = pos->op() == Shuffle ? inst_pos : inst_pos - 1;
+  if (src->isConst()) m_ldconst++;
+  else if (rd.spilled()) m_spills++;
+  else if (rs.spilled()) m_reloads++;
+  else m_copies++;
 }
 
 // Insert a spill-store Shuffle after the instruction that defines ivl->tmp.
@@ -1058,8 +1075,10 @@ void XLS::resolveSplits() {
   if (dumpIREnabled(kRegAllocLevel)) dumpIntervals();
   for (auto i1 : m_intervals) {
     if (!i1) continue;
+    m_final++;
     if (i1->spill.spilled()) insertSpill(i1);
     for (auto i2 = i1->next; i2; i1 = i2, i2 = i2->next) {
+      m_final++;
       auto pos = i2->start();
       if (i1->end() != pos) continue; // spans lifetime hole
       if (i1->loc == i2->loc) continue; // no copy necessary
@@ -1202,6 +1221,8 @@ void XLS::allocate() {
   assignLocations();
   resolveSplits();
   resolveEdges();
+  TRACE(1, "orig %u final %u copies %u spills %u reloads %u ldconst %u\n",
+           m_orig, m_final, m_copies, m_spills, m_reloads, m_ldconst);
   assert(checkRegisters(m_unit, m_regs));
 }
 

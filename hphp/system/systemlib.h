@@ -43,6 +43,8 @@ namespace Eval {
   x(Directory)                                  \
   x(SplFileInfo)                                \
   x(SplFileObject)                              \
+  x(DateTimeInterface)                          \
+  x(DateTimeImmutable)                          \
   x(DOMDocument)                                \
   x(DOMException)                               \
   x(PDOException)                               \

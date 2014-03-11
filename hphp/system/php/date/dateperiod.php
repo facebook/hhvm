@@ -14,7 +14,7 @@ class DatePeriod implements Iterator {
     $iterKey = 0;
 
   public function __construct(
-    DateTime $start,
+    DateTimeInterface $start,
     DateInterval $interval = null,
     mixed $end = null,
     int $options = null) {
@@ -59,7 +59,8 @@ class DatePeriod implements Iterator {
 
   function next() {
     if ($this->valid()) {
-      $this->current->add($this->interval);
+      // Assign in case it's a DateTimeImmutable
+      $this->current = $this->current->add($this->interval);
       $this->iterKey++;
     }
   }

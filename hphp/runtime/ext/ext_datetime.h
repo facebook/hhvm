@@ -74,6 +74,10 @@ class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
 
   int64_t gettimestamp() const;
 
+  // Helper for getting a timestamp from a DateTime or DateTimeInterface
+  public: static int64_t GetTimestamp(const Object& obj);
+  public: static int64_t GetTimestamp(const ObjectData* od);
+
   // Helper for DateTime -> c_DateTime conversion
   public: static Object wrap(SmartResource<DateTime> dt) {
     c_DateTime *cdt = NEWOBJ(c_DateTime)();
@@ -83,19 +87,13 @@ class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
   }
 
   // Helper for c_DateTime -> DateTime conversion
-  public: static SmartResource<DateTime> unwrap(const Object& datetime) {
-    SmartObject<c_DateTime> cdt = datetime.getTyped<c_DateTime>(true);
-    if (cdt.get() == NULL)
-      return SmartResource<DateTime>();
-    return cdt->m_dt;
-  }
+  public: static SmartResource<DateTime> unwrap(const Object& datetime);
 
  private:
   SmartResource<DateTime> m_dt;
  public:
   static c_DateTime* Clone(ObjectData* obj);
 };
-
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTimeZone
 
@@ -256,25 +254,18 @@ Variant f_date_create_from_format(const String& format,
 Variant f_date_create(const String& time = null_string,
                       const Object& timezone = null_object);
 void f_date_date_set(const Object& object, int year, int month, int day);
-Object f_date_diff(const Object& datetime,
-                   const Object& datetime2,
-                   bool absolute = false);
 void f_date_isodate_set(const Object& object, int year, int week,
                         int day = 1);
-String f_date_format(const Object& object, const String& format);
 Array f_date_get_last_errors();
 Object f_date_interval_create_from_date_string(const String& time);
 String f_date_interval_format(const Object& interval, const String& format_spec);
 void f_date_modify(const Object& object, const String& modify);
-int64_t f_date_offset_get(const Object& object);
 Variant f_date_parse(const String& date);
 void f_date_time_set(const Object& object, int hour, int minute,
                      int second = 0);
-int64_t f_date_timestamp_get(const Object& datetime);
-Object f_date_timestamp_set(const Object& datetime, int64_t timestamp);
-Variant f_date_timezone_get(const Object& object);
-void f_date_timezone_set(const Object& object, const Object& timezone);
-Object f_date_sub(const Object& datetime, const Object& interval);
+Object f_date_timestamp_set(const Object&  datetime, int64_t timestamp);
+void f_date_timezone_set(const Object&  object, const Object&  timezone);
+Object f_date_sub(const Object&  datetime, const Object&  interval);
 
 ///////////////////////////////////////////////////////////////////////////////
 // sun

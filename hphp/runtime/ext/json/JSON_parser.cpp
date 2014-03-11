@@ -525,7 +525,6 @@ static void attach_zval(json_parser *json, const String& key,
     to = tmp;                       \
   } while(0);
 #define JSON_RESET_TYPE() do { type = -1; } while(0);
-#define JSON(x) the_json->x
 
 /**
  * The JSON_parser takes a UTF-8 encoded string and determines if it is a
@@ -563,17 +562,17 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
   int type = -1;
   unsigned short utf16 = 0;
 
-  JSON(depth) = depth;
+  the_json->depth = depth;
   // Since the stack is maintainined on a per request basis, for performance
   // reasons, it only makes sense to expand if necessary and cycles are wasted
   // contracting. Calls with a depth other than default should be rare.
-  if (depth > JSON(the_stack).size()) {
-    JSON(the_stack).resize(depth);
-    JSON(the_zstack).resize(depth);
-    JSON(the_kstack).resize(depth);
+  if (depth > the_json->the_stack.size()) {
+    the_json->the_stack.resize(depth);
+    the_json->the_zstack.resize(depth);
+    the_json->the_kstack.resize(depth);
   }
 
-  JSON(the_mark) = JSON(the_top) = -1;
+  the_json->the_mark = the_json->the_top = -1;
   push(the_json, MODE_DONE);
 
   UTF8To16Decoder decoder(p, length, loose);
@@ -626,7 +625,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
           empty }
         */
       case -9:
-        attach_zval(the_json, JSON(the_kstack)[JSON(the_top)], assoc);
+        attach_zval(the_json, the_json->the_kstack[the_json->the_top], assoc);
 
         if (!pop(the_json, MODE_KEY)) {
           return false;
@@ -643,9 +642,9 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
         }
 
         the_state = 1;
-        if (JSON(the_top) > 0) {
-          Variant &top = JSON(the_zstack)[JSON(the_top)];
-          if (JSON(the_top) == 1) {
+        if (the_json->the_top > 0) {
+          Variant &top = the_json->the_zstack[the_json->the_top];
+          if (the_json->the_top == 1) {
             top.assignRef(z);
           } else {
             top.unset();
@@ -664,7 +663,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
           /*<fb>*/
           }
           /*</fb>*/
-          JSON(the_kstack)[JSON(the_top)] = key->detach();
+          the_json->the_kstack[the_json->the_top] = key->detach();
           JSON_RESET_TYPE();
         }
         break;
@@ -687,16 +686,16 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
         /*** END Facebook: json_utf8_loose ***/
 
         if (type != -1 &&
-            JSON(the_stack)[JSON(the_top)] == MODE_OBJECT) {
+            the_json->the_stack[the_json->the_top] == MODE_OBJECT) {
           Variant mval;
           json_create_zval(mval, *buf, type, options);
-          Variant &top = JSON(the_zstack)[JSON(the_top)];
+          Variant &top = the_json->the_zstack[the_json->the_top];
           object_set(top, key->detach(), mval, assoc);
           buf->clear();
           JSON_RESET_TYPE();
         }
 
-        attach_zval(the_json, JSON(the_kstack)[JSON(the_top)], assoc);
+        attach_zval(the_json, the_json->the_kstack[the_json->the_top], assoc);
 
         if (!pop(the_json, MODE_OBJECT)) {
           s_json_parser->error_code = JSON_ERROR_STATE_MISMATCH;
@@ -714,9 +713,9 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
         }
         the_state = 2;
 
-        if (JSON(the_top) > 0) {
-          Variant &top = JSON(the_zstack)[JSON(the_top)];
-          if (JSON(the_top) == 1) {
+        if (the_json->the_top > 0) {
+          Variant &top = the_json->the_zstack[the_json->the_top];
+          if (the_json->the_top == 1) {
             top.assignRef(z);
           } else {
             top.unset();
@@ -728,7 +727,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
             top = Array::Create();
           }
           /*</fb>*/
-          JSON(the_kstack)[JSON(the_top)] = key->detach();
+          the_json->the_kstack[the_json->the_top] = key->detach();
           JSON_RESET_TYPE();
         }
         break;
@@ -738,15 +737,16 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
       case -5:
         {
           if (type != -1 &&
-               JSON(the_stack)[JSON(the_top)] == MODE_ARRAY) {
+               the_json->the_stack[the_json->the_top] == MODE_ARRAY) {
             Variant mval;
             json_create_zval(mval, *buf, type, options);
-            JSON(the_zstack)[JSON(the_top)].append(mval);
+            the_json->the_zstack[the_json->the_top].append(mval);
             buf->clear();
             JSON_RESET_TYPE();
           }
 
-          attach_zval(the_json, JSON(the_kstack[JSON(the_top)]), assoc);
+          attach_zval(the_json, the_json->the_kstack[the_json->the_top],
+            assoc);
 
           if (!pop(the_json, MODE_ARRAY)) {
             s_json_parser->error_code = JSON_ERROR_STATE_MISMATCH;
@@ -759,7 +759,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
           "
         */
       case -4:
-        switch (JSON(the_stack)[JSON(the_top)]) {
+        switch (the_json->the_stack[the_json->the_top]) {
         case MODE_KEY:
           the_state = 27;
           SWAP_BUFFERS(buf, key);
@@ -788,17 +788,17 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
         {
           Variant mval;
           if (type != -1 &&
-              (JSON(the_stack)[JSON(the_top)] == MODE_OBJECT ||
-               JSON(the_stack)[JSON(the_top)] == MODE_ARRAY)) {
+              (the_json->the_stack[the_json->the_top] == MODE_OBJECT ||
+               the_json->the_stack[the_json->the_top] == MODE_ARRAY)) {
             json_create_zval(mval, *buf, type, options);
           }
 
-          switch (JSON(the_stack)[JSON(the_top)]) {
+          switch (the_json->the_stack[the_json->the_top]) {
           case MODE_OBJECT:
             if (pop(the_json, MODE_OBJECT) &&
                 push(the_json, MODE_KEY)) {
               if (type != -1) {
-                Variant &top = JSON(the_zstack)[JSON(the_top)];
+                Variant &top = the_json->the_zstack[the_json->the_top];
                 object_set(top, key->detach(), mval, assoc);
               }
               the_state = 29;
@@ -806,7 +806,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
             break;
           case MODE_ARRAY:
             if (type != -1) {
-              JSON(the_zstack)[JSON(the_top)].append(mval);
+              the_json->the_zstack[the_json->the_top].append(mval);
             }
             the_state = 28;
             break;
@@ -824,7 +824,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
           : (after unquoted string)
         */
       case -10:
-        if (JSON(the_stack)[JSON(the_top)] == MODE_KEY) {
+        if (the_json->the_stack[the_json->the_top] == MODE_KEY) {
           the_state = 27;
           SWAP_BUFFERS(buf, key);
           JSON_RESET_TYPE();

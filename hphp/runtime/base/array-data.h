@@ -17,98 +17,60 @@
 #ifndef incl_HPHP_ARRAY_DATA_H_
 #define incl_HPHP_ARRAY_DATA_H_
 
+#include <climits>
+#include <vector>
+
+#include "folly/Likely.h"
+
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/macros.h"
-#include <climits>
-#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class APCHandle;
+struct APCHandle;
 struct TypedValue;
-class HphpArray;
 
-/**
- * Base class/interface for all types of specialized array data.
- */
-class ArrayData {
- public:
-  enum class AllocationMode : bool { smart, nonSmart };
-
-  // enum of possible array types, so we can guard nonvirtual
-  // fast paths in runtime code.  This is intentionally not
-  // an enum class, to avoid boilerplate when:
+struct ArrayData {
+  // Runtime type tag of possible array types.  This is intentionally
+  // not an enum class, since we're using it pretty much as raw bits
+  // (these tag values are not private), which avoids boilerplate
+  // when:
   //  - doing relational comparisons
   //  - using kind as an index
-  //  - maybe doing bitops in the future
+  //  - doing bit ops when storing in the union'd words below
   enum ArrayKind : uint8_t {
     kPackedKind,  // HphpArray with keys in range [0..size)
     kMixedKind,   // HphpArray arbitrary int or string keys, maybe holes
     kSharedKind,  // SharedArray
     kNvtwKind,    // NameValueTableWrapper
     kProxyKind,   // ProxyArray
-    kNumKinds // insert new values before kNumKinds.
+    kNumKinds     // insert new values before kNumKinds.
   };
 
-  static const ssize_t invalid_index = -1;
+  static constexpr ssize_t invalid_index = -1;
 
- protected:
-   /*
-    * NOTE: HphpArray no longer calls these constructors.  If you
-    * change them, change the HphpArray::Make functions as
-    * appropriate.
-    */
-
+protected:
+  /*
+   * NOTE: HphpArray no longer calls this constructor.  If you change
+   * it, change the HphpArray::Make functions as appropriate.
+   */
   explicit ArrayData(ArrayKind kind)
     : m_kind(kind)
-    , m_allocMode(AllocationMode::smart)
     , m_size(-1)
     , m_pos(0)
-    , m_count(0)
-    , m_strongIterators(nullptr)
-  {}
-
-  explicit ArrayData(ArrayKind kind, AllocationMode m)
-    : m_kind(kind)
-    , m_allocMode(m)
-    , m_size(-1)
-    , m_pos(0)
-    , m_count(0)
-    , m_strongIterators(nullptr)
-  {}
-
-  ArrayData(ArrayKind kind, AllocationMode m, uint size)
-    : m_kind(kind)
-    , m_allocMode(m)
-    , m_size(size)
-    , m_pos(size ? 0 : ArrayData::invalid_index)
-    , m_count(0)
-    , m_strongIterators(nullptr)
-  {}
-
-  ArrayData(const ArrayData *src, ArrayKind kind,
-            AllocationMode m = AllocationMode::smart)
-    : m_kind(src->m_kind)
-    , m_allocMode(m)
-    , m_pos(src->m_pos)
     , m_count(0)
     , m_strongIterators(nullptr)
   {}
 
   /*
-   * NOTE: HphpArray no longer calls the destructor or destroy() here.
-   * If you need to add logic, revisit HphpArray::Release{,Packed}.
+   * NOTE: HphpArray no longer calls this destructor.  If you need to
+   * add logic, revisit HphpArray::Release{,Packed}.
    */
-
-  void destroy() {
-    // If there are any strong iterators pointing to this array, they need
-    // to be invalidated.
+  ~ArrayData() {
     if (UNLIKELY(m_strongIterators != nullptr)) freeStrongIterators();
   }
-
-  ~ArrayData() { destroy(); }
 
 public:
   IMPLEMENT_COUNTABLE_METHODS
@@ -128,20 +90,10 @@ public:
    */
   Object toObject() const;
 
-  /**
-   * Array interface functions.
-   *
-   * 1. For functions that return ArrayData pointers, these are the ones that
-   *    can potentially escalate into a different ArrayData type. Return this
-   *    if no escalation is needed.
-   *
-   * 2. All functions with a "key" parameter are type-specialized.
-   */
-
-  /**
-   * For SmartAllocator.
-   *
-   *   NB: *Not* virtual. ArrayData knows about its only subclasses.
+  /*
+   * Called to return an ArrayData to the smart allocator.  This is
+   * normally called when the reference count goes to zero (e.g. via a
+   * helper like decRefArr).
    */
   void release();
 
@@ -462,14 +414,7 @@ public:
 
   void onSetEvalScalar();
 
-  /**
-   * Serialize this array. We could have made this virtual function to ask
-   * sub-classes to implement it specifically, but since this is not a critical
-   * function to optimize, we implement it in a generic way in this base class.
-   * Then all the sudden we find out all Zend HashTable functions are similar
-   * to implementing array functions in this base class than utilizing a type
-   * specialized implementation, which is normally more optimized.
-   */
+  // TODO(#3903818): move serialization out of ArrayData, Variant, etc.
   void serialize(VariableSerializer *serializer,
                  bool skipNestCheck = false) const;
 
@@ -514,7 +459,7 @@ public:
   static const char* kindToString(ArrayKind kind);
 
 public: // for heap profiler
-  void getChildren(std::vector<TypedValue *> &out);
+  void getChildren(std::vector<TypedValue*>& out);
 
 private:
   void serializeImpl(VariableSerializer *serializer) const;
@@ -550,11 +495,11 @@ protected:
   union {
     struct {
       ArrayKind m_kind;
-      AllocationMode m_allocMode;
-      UNUSED uint16_t m_forSubClasses; // unused space that subclasses may use
+      UNUSED uint8_t m_unused0;
+      UNUSED uint16_t m_unused1;
       uint32_t m_size;
     };
-    uint64_t m_kindModeAndSize;
+    uint64_t m_kindAndSize;
   };
   union {
     struct {

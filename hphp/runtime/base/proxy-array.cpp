@@ -44,21 +44,15 @@ ArrayData* ProxyArray::innerArr(const ArrayData* ad) {
 
 ProxyArray* ProxyArray::Make(ArrayData* ad) {
   auto ret = static_cast<ProxyArray*>(MM().objMallocLogged(sizeof(ProxyArray)));
-  ret->m_kindModeAndSize = static_cast<uint64_t>(-1) << 32 |
-                           static_cast<uint32_t>(AllocationMode::smart) << 8 |
-                           kProxyKind;
-  ret->m_posAndCount     = uint64_t{1} << 32 |
-                           static_cast<uint32_t>(ArrayData::invalid_index);
+  ret->m_size            = -1;
+  ret->m_kind            = kProxyKind;
+  ret->m_pos             = ArrayData::invalid_index;
+  ret->m_count           = 1;
   ret->m_strongIterators = nullptr;
 
   ad->incRefCount();
   ret->m_ad = ad;
 
-  assert(ret->m_kind == kProxyKind);
-  assert(ret->m_allocMode == AllocationMode::smart);
-  assert(ret->m_size == -1);
-  assert(ret->m_pos == ArrayData::invalid_index);
-  assert(ret->m_count == 1);
   return ret;
 }
 

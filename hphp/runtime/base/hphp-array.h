@@ -366,13 +366,15 @@ private:
   static void getElmKey(const Elm& e, TypedValue* out);
 
 private:
+  enum class AllocMode : bool { Smart, NonSmart };
+
   template<class CopyElem>
   static HphpArray* CopyPacked(const HphpArray& other,
-                               AllocationMode,
+                               AllocMode,
                                CopyElem);
   template<class CopyKeyValue>
   static HphpArray* CopyMixed(const HphpArray& other,
-                              AllocationMode,
+                              AllocMode,
                               CopyKeyValue);
   static HphpArray* CopyReserve(const HphpArray* src, size_t expectedSize);
 

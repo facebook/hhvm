@@ -44,32 +44,6 @@ TRACE_SET_MOD(runtime);
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Allocation of HphpArray buffers works like this: the smallest buffer
- * size is allocated inline in HphpArray.  Larger buffer sizes are smart
- * allocated or malloc-allocated depending on whether the array itself
- * was smart-allocated or not.  (nonSmartCopy() is used to create static
- * arrays).  HphpArray::m_allocMode tracks the state as it progresses:
- *
- *   kInline -> kSmart, or
- *           -> kMalloc
- *
- * Hashtables never shrink, so the allocMode Never goes backwards.
- * If an array is pre-sized, we might skip directly to kSmart or kMalloc.
- * If an array is created via nonSmartCopy(), we skip kSmart.
- * Since kMalloc is only used for static arrays, and static arrays are
- * never swept, we don't need any sweep method.
- *
- * For kInline, we use space in HphpArray defined as InlineSlots, which
- * has enough room for slots and the hashtable.  The next few larger array
- * sizes use the inline space for just the hashtable, with slots allocated
- * separately.  Even larger tables allocate the hashtable and slots
- * contiguously.
- */
-
-//=============================================================================
-// Static members.
-
 std::aligned_storage<
   sizeof(HphpArray) +
     sizeof(HphpArray::Elm) * HphpArray::SmallSize,
@@ -84,7 +58,6 @@ struct HphpArray::EmptyArrayInitializer {
 
     auto const ad = static_cast<HphpArray*>(vpEmpty);
     ad->m_kind            = kPackedKind;
-    ad->m_allocMode       = AllocationMode::smart;
     ad->m_size            = 0;
     ad->m_pos             = ArrayData::invalid_index;
     ad->m_count           = 0;
@@ -175,8 +148,7 @@ HphpArray* HphpArray::MakeReserve(uint32_t capacity) {
   auto const mask  = cmret.second;
   auto const ad    = smartAllocArray(cap, mask);
 
-  ad->m_kindModeAndSize = static_cast<uint32_t>(AllocationMode::smart) << 8 |
-                            kPackedKind; // 0
+  ad->m_kindAndSize     = kPackedKind; // zero's size
   ad->m_posAndCount     = uint64_t{1} << 32 |
                            static_cast<uint32_t>(ArrayData::invalid_index);
   ad->m_strongIterators = nullptr;
@@ -184,7 +156,6 @@ HphpArray* HphpArray::MakeReserve(uint32_t capacity) {
   ad->m_tableMask       = mask;
 
   assert(ad->m_kind == kPackedKind);
-  assert(ad->m_allocMode == AllocationMode::smart);
   assert(ad->m_size == 0);
   assert(ad->m_pos == ArrayData::invalid_index);
   assert(ad->m_count == 1);
@@ -203,9 +174,7 @@ HphpArray* HphpArray::MakePacked(uint32_t size, const TypedValue* values) {
   auto const ad    = smartAllocArray(cap, mask);
 
   auto const shiftedSize = uint64_t{size} << 32;
-  ad->m_kindModeAndSize  = shiftedSize |
-                            static_cast<uint32_t>(AllocationMode::smart) << 8 |
-                            kPackedKind;
+  ad->m_kindAndSize      = shiftedSize | kPackedKind;
   ad->m_posAndCount      = uint64_t{1} << 32;
   ad->m_strongIterators  = nullptr;
   ad->m_capAndUsed       = shiftedSize | cap;
@@ -223,7 +192,6 @@ HphpArray* HphpArray::MakePacked(uint32_t size, const TypedValue* values) {
   }
 
   assert(ad->m_kind == kPackedKind);
-  assert(ad->m_allocMode == AllocationMode::smart);
   assert(ad->m_size == size);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 1);
@@ -243,9 +211,7 @@ HphpArray* HphpArray::MakeStruct(uint32_t size, StringData** keys,
   auto const ad    = smartAllocArray(cap, mask);
 
   auto const shiftedSize = uint64_t{size} << 32;
-  ad->m_kindModeAndSize  = shiftedSize |
-                            static_cast<uint32_t>(AllocationMode::smart) << 8 |
-                            kMixedKind;
+  ad->m_kindAndSize      = shiftedSize | kMixedKind;
   ad->m_posAndCount      = uint64_t{1} << 32;
   ad->m_strongIterators  = nullptr;
   ad->m_capAndUsed       = shiftedSize | cap;
@@ -273,7 +239,6 @@ HphpArray* HphpArray::MakeStruct(uint32_t size, StringData** keys,
   ad->m_hLoad = size;
 
   assert(ad->m_kind == kMixedKind);
-  assert(ad->m_allocMode == AllocationMode::smart);
   assert(ad->m_size == size);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 1);
@@ -288,19 +253,17 @@ HphpArray* HphpArray::MakeStruct(uint32_t size, StringData** keys,
 template<class CopyElem>
 ALWAYS_INLINE
 HphpArray* HphpArray::CopyPacked(const HphpArray& other,
-                                 AllocationMode mode,
+                                 AllocMode mode,
                                  CopyElem copyElem) {
   assert(other.isPacked());
 
   auto const cap  = other.m_cap;
   auto const mask = other.m_tableMask;
-  auto const ad = mode == AllocationMode::smart
+  auto const ad = mode == AllocMode::Smart
     ? smartAllocArray(cap, mask)
     : mallocArray(cap, mask);
 
-  ad->m_kindModeAndSize = uint64_t{other.m_size} << 32 |
-                           static_cast<uint32_t>(mode) << 8 |
-                           kPackedKind;
+  ad->m_kindAndSize     = uint64_t{other.m_size} << 32 | kPackedKind;
   ad->m_posAndCount     = static_cast<uint32_t>(other.m_pos);
   ad->m_strongIterators = nullptr;
   ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
@@ -315,7 +278,6 @@ HphpArray* HphpArray::CopyPacked(const HphpArray& other,
   }
 
   assert(ad->m_kind == kPackedKind);
-  assert(ad->m_allocMode == mode);
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
   assert(ad->m_count == 0);
@@ -330,19 +292,17 @@ HphpArray* HphpArray::CopyPacked(const HphpArray& other,
 template<class CopyKeyValue>
 ALWAYS_INLINE
 HphpArray* HphpArray::CopyMixed(const HphpArray& other,
-                                AllocationMode mode,
+                                AllocMode mode,
                                 CopyKeyValue copyKeyValue) {
   assert(other.m_kind == kMixedKind);
 
   auto const cap  = other.m_cap;
   auto const mask = other.m_tableMask;
-  auto const ad = mode == AllocationMode::smart
+  auto const ad = mode == AllocMode::Smart
     ? smartAllocArray(cap, mask)
     : mallocArray(cap, mask);
 
-  ad->m_kindModeAndSize = uint64_t{other.m_size} << 32 |
-                           static_cast<uint32_t>(mode) << 8 |
-                           kMixedKind;
+  ad->m_kindAndSize     = uint64_t{other.m_size} << 32 | kMixedKind;
   ad->m_posAndCount     = static_cast<uint32_t>(other.m_pos);
   ad->m_strongIterators = nullptr;
   ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
@@ -374,7 +334,6 @@ HphpArray* HphpArray::CopyMixed(const HphpArray& other,
   }
 
   assert(ad->m_kind == other.m_kind);
-  assert(ad->m_allocMode == mode);
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
   assert(ad->m_count == 0);
@@ -390,11 +349,11 @@ NEVER_INLINE ArrayData* HphpArray::NonSmartCopy(const ArrayData* in) {
   auto a = asHphpArray(in);
   assert(a->checkInvariants());
   return a->isPacked()
-    ? CopyPacked(*a, AllocationMode::nonSmart,
+    ? CopyPacked(*a, AllocMode::NonSmart,
         [&](const TypedValue* fr, TypedValue* to, const ArrayData* container) {
           tvDupFlattenVars(fr, to, container);
         })
-    : CopyMixed(*a, AllocationMode::nonSmart,
+    : CopyMixed(*a, AllocMode::NonSmart,
         [&](const Elm& from, Elm& to, const ArrayData* container) {
           to.key = from.key;
           to.data.hash() = from.data.hash();
@@ -406,7 +365,7 @@ NEVER_INLINE ArrayData* HphpArray::NonSmartCopy(const ArrayData* in) {
 
 NEVER_INLINE HphpArray* HphpArray::copyPacked() const {
   assert(checkInvariants());
-  return CopyPacked(*this, AllocationMode::smart,
+  return CopyPacked(*this, AllocMode::Smart,
       [&](const TypedValue* fr, TypedValue* to, const ArrayData* container) {
         tvDupFlattenVars(fr, to, container);
       });
@@ -414,7 +373,7 @@ NEVER_INLINE HphpArray* HphpArray::copyPacked() const {
 
 NEVER_INLINE HphpArray* HphpArray::copyMixed() const {
   assert(checkInvariants());
-  return CopyMixed(*this, AllocationMode::smart,
+  return CopyMixed(*this, AllocMode::Smart,
       [&](const Elm& from, Elm& to, const ArrayData* container) {
         to.key = from.key;
         to.data.hash() = from.data.hash();
@@ -503,7 +462,7 @@ HphpArray* HphpArray::MakeUncounted(ArrayData* array) {
   auto a = asHphpArray(array);
   assert(a->checkInvariants());
   if (array->isVectorData()) {
-    auto packed = CopyPacked(*a, AllocationMode::nonSmart,
+    auto packed = CopyPacked(*a, AllocMode::NonSmart,
         [&](const TypedValue* fr, TypedValue* to, const ArrayData* container) {
           tvCopy(*CreateVarForUncountedArray(tvAsCVarRef(fr)).asTypedValue(),
                  *to);
@@ -511,7 +470,7 @@ HphpArray* HphpArray::MakeUncounted(ArrayData* array) {
     packed->setUncounted();
     return packed;
   }
-  auto mixed = CopyMixed(*a, AllocationMode::nonSmart,
+  auto mixed = CopyMixed(*a, AllocMode::NonSmart,
       [&](const Elm& fr, Elm& to, const ArrayData* container) {
         to.data.hash() = fr.data.hash();
         if (to.hasStrKey()) {
@@ -1214,7 +1173,6 @@ NEVER_INLINE HphpArray* HphpArray::resize() {
 
 HphpArray* HphpArray::Grow(HphpArray* old) {
   assert(!old->isPacked());
-  assert(old->m_allocMode == AllocationMode::smart);
   assert(old->m_tableMask <= 0x7fffffffU);
 
   DEBUG_ONLY auto oldPos = old->m_pos;
@@ -1229,9 +1187,7 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
   auto const oldUsed        = old->m_used;
   auto const oldStrongIters = old->m_strongIterators;
 
-  ad->m_kindModeAndSize = uint64_t{oldSize} << 32 |
-                            static_cast<uint16_t>(AllocationMode::smart) << 8 |
-                            kMixedKind;
+  ad->m_kindAndSize     = uint64_t{oldSize} << 32 | kMixedKind;
   ad->m_posAndCount     = oldPosUnsigned;
   ad->m_strongIterators = oldStrongIters; // could be nullptr
   ad->m_capAndUsed      = uint64_t{oldUsed} << 32 | cap;
@@ -1262,7 +1218,6 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
   old->m_used = -uint32_t{1};
 
   assert(old->isZombie());
-  assert(ad->m_allocMode == AllocationMode::smart);
   assert(ad->m_kind == kMixedKind);
   assert(ad->m_size == oldSize);
   assert(ad->m_count == 0);
@@ -1277,7 +1232,6 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
 NEVER_INLINE
 HphpArray* HphpArray::GrowPacked(HphpArray* old) {
   assert(old->isPacked());
-  assert(old->m_allocMode == AllocationMode::smart);
   assert(old->m_cap == old->m_used);
 
   DEBUG_ONLY auto const oldSize = old->m_size;
@@ -1289,12 +1243,12 @@ HphpArray* HphpArray::GrowPacked(HphpArray* old) {
   auto const mask       = oldMask * 2 + 1;
   auto const ad         = smartAllocArray(cap, mask);
 
-  auto const oldUsed            = old->m_used;
-  auto const oldKindModeAndSize = old->m_kindModeAndSize;
-  auto const oldPosUnsigned     = uint64_t{static_cast<uint32_t>(old->m_pos)};
-  auto const oldStrongIters     = old->m_strongIterators;
+  auto const oldUsed        = old->m_used;
+  auto const oldKindAndSize = old->m_kindAndSize;
+  auto const oldPosUnsigned = uint64_t{static_cast<uint32_t>(old->m_pos)};
+  auto const oldStrongIters = old->m_strongIterators;
 
-  ad->m_kindModeAndSize = oldKindModeAndSize;
+  ad->m_kindAndSize     = oldKindAndSize;
   ad->m_posAndCount     = oldPosUnsigned;
   ad->m_strongIterators = oldStrongIters; // could be nullptr
   ad->m_capAndUsed      = uint64_t{oldUsed} << 32 | cap;
@@ -1316,7 +1270,6 @@ HphpArray* HphpArray::GrowPacked(HphpArray* old) {
 
   assert(old->isZombie());
   assert(ad->m_kind == kPackedKind);
-  assert(ad->m_allocMode == AllocationMode::smart);
   assert(ad->m_pos == oldPos);
   assert(ad->m_count == 0);
   assert(ad->m_used == oldUsed);
@@ -2063,9 +2016,7 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
   auto const oldNextKI      = oldPacked ? oldSize : src->m_nextKI;
   auto const oldUsed        = src->m_used;
 
-  ad->m_kindModeAndSize = uint64_t{oldSize} << 32 |
-                            static_cast<uint32_t>(AllocationMode::smart) << 8 |
-                            kMixedKind;
+  ad->m_kindAndSize     = uint64_t{oldSize} << 32 | kMixedKind;
   ad->m_posAndCount     = uint64_t{1} << 32 | oldPosUnsigned;
   ad->m_strongIterators = nullptr;
   ad->m_cap             = cap;
@@ -2135,7 +2086,6 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
   ad->m_used = i;
 
   assert(ad->m_kind == kMixedKind);
-  assert(ad->m_allocMode == AllocationMode::smart);
   assert(ad->m_size == oldSize);
   assert(ad->m_count == 1);
   assert(ad->m_cap == cap);

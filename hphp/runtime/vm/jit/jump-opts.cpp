@@ -222,19 +222,29 @@ void optimizeSideExitJcc(IRUnit& unit, IRInstruction* inst, Block* exitBlock) {
   block->push_back(unit.gen(Jmp, inst->marker(), next));
 }
 
-// Return true if this block ends with a trivial Jmp: a Jmp that does
-// not pass arguments, and whose target's only predecessor is b.
+// Return true if this block ends with a trivial Jmp: a Jmp
+// whose target's only predecessor is b.
 bool isTrivialJmp(IRInstruction* branch, Block* taken) {
-  return branch->op() == Jmp && branch->numSrcs() == 0 &&
-         taken->numPreds() == 1;
+  return branch->op() == Jmp && taken->numPreds() == 1;
 }
 
 // Coalesce two blocks joined by a trivial jump by moving the second block's
 // instructions to the first block and deleting the jump.  If the second block
 // starts with BeginCatch or DefLabel, they will also be deleted.
-void eliminateJmp(Block* lastBlock, IRInstruction* jmp, Block* target) {
+void eliminateJmp(Block* lastBlock, IRInstruction* jmp, Block* target,
+                  IRUnit& unit) {
   assert(isTrivialJmp(jmp, target));
   auto lastInst = lastBlock->iteratorTo(jmp); // iterator to last instruction
+  if (jmp->numSrcs() != 0) {
+    auto& defLabel = target->front();
+    assert(defLabel.numDsts() == jmp->numSrcs());
+    for (auto i = 0; i < jmp->numSrcs(); i++) {
+      lastBlock->insert(lastInst++,
+                        unit.genWithDst(defLabel.dst(i), Mov,
+                                        jmp->marker(), jmp->src(i)));
+    }
+  }
+  lastInst = lastBlock->iteratorTo(jmp); // iterator to last instruction
   lastBlock->splice(lastInst, target, target->skipHeader(), target->end());
   jmp->setTaken(nullptr); // unlink edge
   lastBlock->erase(lastInst); // delete the jmp
@@ -262,7 +272,7 @@ void optimizeJumps(IRUnit& unit) {
     auto branch = &b->back();
     auto taken = branch->taken();
     if (isTrivialJmp(branch, taken)) {
-      eliminateJmp(b, branch, taken);
+      eliminateJmp(b, branch, taken, unit);
     }
   });
 }

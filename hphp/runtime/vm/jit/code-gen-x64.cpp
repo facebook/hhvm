@@ -1031,8 +1031,13 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
 }
 
 void CodeGenerator::cgMov(IRInstruction* inst) {
-  // TODO: t2082361: handle Gen & Cell
-  assert(!srcLoc(0).hasReg(1));
+  always_assert(inst->src(0)->numWords() == inst->dst(0)->numWords());
+  if (srcLoc(0).hasReg(1)) {
+    assert(srcLoc(0).reg() != InvalidReg);
+    shuffle2(m_as, srcLoc(0).reg(), srcLoc(0).reg(1),
+             dstLoc(0).reg(), dstLoc(0).reg(1));
+    return;
+  }
   auto sreg = srcLoc(0).reg();
   auto dreg = dstLoc(0).reg();
   if (sreg == InvalidReg) {

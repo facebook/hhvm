@@ -47,7 +47,7 @@ TEST(JumpOpts, eliminateTrivial) {
     EXPECT_TRUE(entry->isExit());
   }
 
-  // Jumps with arguments are not eliminated
+  // Jumps with arguments are also eliminated
   {
     IRUnit unit{0};
 
@@ -57,14 +57,14 @@ TEST(JumpOpts, eliminateTrivial) {
     auto value = unit.gen(Conjure, marker, Type::Gen);
     entry->push_back(value);
     entry->push_back(unit.gen(Jmp, marker, second, value->dst()));
-    second->push_back(unit.gen(DefLabel, marker));
+    second->push_back(unit.defLabel(1, marker));
     second->push_back(unit.gen(Halt, marker));
 
     optimizeJumps(unit);
 
-    EXPECT_EQ(2, entry->instrs().size());
-    EXPECT_EQ(2, second->instrs().size());
-    EXPECT_MATCH(entry->back(), Jmp, second);
+    EXPECT_EQ(3, entry->instrs().size());
+    EXPECT_MATCH(entry->back(), Halt);
+    EXPECT_TRUE(entry->isExit());
   }
 
   // Jumps to blocks with other predecessors are not eliminated

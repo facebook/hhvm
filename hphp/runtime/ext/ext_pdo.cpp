@@ -611,6 +611,10 @@ static bool valid_statement_class(sp_PDOConnection dbh, const Variant& opt,
     return false;
   }
   clsname = opt[0].toString();
+  if (clsname == String("PDOStatement")) {
+    ctor_args = Variant(Array());
+    return true;
+  }
   if (!f_is_subclass_of(clsname, "PDOStatement")) {
     pdo_raise_impl_error
       (dbh, nullptr, "HY000",

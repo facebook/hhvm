@@ -1408,9 +1408,11 @@ void Class::setConstants() {
   }
 
   // Copy in interface constants.
-  for (auto& di : declInterfaces()) {
-    for (Slot slot = 0; slot < di->m_constants.size(); ++slot) {
-      auto const iConst = di->m_constants[slot];
+  for (int i = 0, size = m_interfaces.size(); i < size; ++i) {
+    const Class* iface = m_interfaces[i];
+
+    for (Slot slot = 0; slot < iface->m_constants.size(); ++slot) {
+      auto const iConst = iface->m_constants[slot];
 
       // If you're inheriting a constant with the same name as an
       // existing one, they must originate from the same place.

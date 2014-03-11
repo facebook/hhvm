@@ -1562,7 +1562,7 @@ void ExecutionContext::enterVMWork(ActRec* enterFnAr) {
   }
 }
 
-void ExecutionContext::enterVM(TypedValue* retval, ActRec* ar) {
+void ExecutionContext::enterVM(ActRec* ar) {
   assert(ar->m_soff == 0);
   assert(ar->m_savedRbp == 0);
 
@@ -1602,8 +1602,6 @@ resume:
 
     // Everything succeeded with no exception---return to the previous
     // VM nesting level.
-    *retval = *m_stack.topTV();
-    m_stack.discard();
     return;
 
   } catch (...) {
@@ -1802,7 +1800,10 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
   pushVMState(savedSP);
   SCOPE_EXIT { popVMState(); };
 
-  enterVM(retval, ar);
+  enterVM(ar);
+
+  tvCopy(*m_stack.topTV(), *retval);
+  m_stack.discard();
 }
 
 void ExecutionContext::invokeFuncCleanupHelper(TypedValue* retval,
@@ -1900,7 +1901,10 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
   pushVMState(savedSP);
   SCOPE_EXIT { popVMState(); };
 
-  enterVM(retval, ar);
+  enterVM(ar);
+
+  tvCopy(*m_stack.topTV(), *retval);
+  m_stack.discard();
 }
 
 void ExecutionContext::invokeContFunc(const Func* f,
@@ -1940,10 +1944,11 @@ void ExecutionContext::invokeContFunc(const Func* f,
   pushVMState(savedSP);
   SCOPE_EXIT { popVMState(); };
 
-  TypedValue retval;
-  enterVM(&retval, ar);
+  enterVM(ar);
+
   // Codegen for generator functions guarantees that they will return null
-  assert(IS_NULL_TYPE(retval.m_type));
+  assert(IS_NULL_TYPE(m_stack.topTV()->m_type));
+  m_stack.discard();
 }
 
 void ExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {

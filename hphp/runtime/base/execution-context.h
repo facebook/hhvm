@@ -596,7 +596,7 @@ public:
 private:
   void enterVMWork(ActRec* enterFnAr);
   void enterVMPrologue(ActRec* enterFnAr);
-  void enterVM(TypedValue* retval, ActRec* ar);
+  void enterVM(ActRec* ar);
   void doFPushCuf(IOP_ARGS, bool forward, bool safe);
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,

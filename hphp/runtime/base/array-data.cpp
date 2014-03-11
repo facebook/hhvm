@@ -716,36 +716,6 @@ const char* ArrayData::kindToString(ArrayKind kind) {
   return names[kind];
 }
 
-void ArrayData::dump() {
-  std::string out; dump(out); fwrite(out.c_str(), out.size(), 1, stdout);
-}
-
-void ArrayData::dump(std::string &out) {
-  VariableSerializer vs(VariableSerializer::Type::VarDump);
-  String ret(vs.serialize(Array(this), true));
-  out += "ArrayData(";
-  out += boost::lexical_cast<std::string>(m_count);
-  out += "): ";
-  out += std::string(ret.data(), ret.size());
-}
-
-void ArrayData::dump(std::ostream &out) {
-  unsigned int i = 0;
-  for (ArrayIter iter(this); iter; ++iter, i++) {
-    VariableSerializer vs(VariableSerializer::Type::Serialize);
-    Variant key(iter.first());
-    out << i << " #### " << key.toString().toCppString() << " #### ";
-    Variant val(iter.second());
-    try {
-      String valS(vs.serialize(val, true));
-      out << valS.toCppString();
-    } catch (const Exception &e) {
-      out << "Exception: " << e.what();
-    }
-    out << std::endl;
-  }
-}
-
 void ArrayData::getChildren(std::vector<TypedValue *> &out) {
   if (isSharedArray()) {
     APCLocalArray *sm = static_cast<APCLocalArray *>(this);

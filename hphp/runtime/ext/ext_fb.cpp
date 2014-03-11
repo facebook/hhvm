@@ -1212,40 +1212,14 @@ String f_fb_lazy_realpath(const String& filename) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// const index functions
-
-static Array const_data;
-
-Variant f_fb_const_fetch(const Variant& key) {
-  String k = key.toString();
-  if (ArrayData* ad = const_data.get()) {
-    auto& v = ad->get(k, /*error*/false);
-    if (&v != &null_variant) {
-      return v;
-    }
-  }
-  return Variant(false);
-}
 
 void const_load_set(const String& key, const Variant& value) {
-  const_data.set(key, value, true);
+  // legacy entry point, no longer used.
 }
 
 EXTERNALLY_VISIBLE
 void const_load() {
-  // after all loading
-  const_load_set("zend_array_size", const_data.size());
-  const_data.setEvalScalar();
-}
-
-bool const_dump(const char *filename) {
-  std::ofstream out(filename);
-  if (out.fail()) {
-    return false;
-  }
-  const_data->dump(out);
-  out.close();
-  return true;
+  // legacy entry point, no longer used.
 }
 
 ///////////////////////////////////////////////////////////////////////////////

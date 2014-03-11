@@ -718,12 +718,6 @@ class Variant : private TypedValue {
    */
   APCHandle *getAPCHandle() const;
 
-  /*
-   * Print information about a variant to stdout.  For debugging
-   * purposes.
-   */
-  void dump() const;
-
   /**
    * Offset functions
    */

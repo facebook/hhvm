@@ -60,7 +60,6 @@ Array f_fb_parallel_query(
   const Array& sql_map, int max_thread = 50, bool combine_result = true,
   bool retry_query_on_fail = true, int connect_timeout = -1,
   int read_timeout = -1, bool timeout_in_ms = false);
-Variant f_fb_const_fetch(const Variant& key);
 bool f_fb_output_compression(bool new_value);
 void f_fb_set_exit_callback(const Variant& function);
 int64_t f_fb_get_last_flush_size();

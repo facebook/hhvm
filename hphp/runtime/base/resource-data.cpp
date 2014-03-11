@@ -63,10 +63,6 @@ Array ResourceData::o_toArray() const {
   return empty_array;
 }
 
-void ResourceData::dump() const {
-  o_toArray().dump();
-}
-
 const StaticString s_Unknown("Unknown");
 
 const String& ResourceData::o_getClassName() const {

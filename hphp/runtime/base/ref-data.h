@@ -105,9 +105,6 @@ struct RefData {
 
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
 
-  // Memory allocator methods
-  void dump() const;
-
   const TypedValue* tv() const {
     assert(m_magic == Magic::kMagic);
     return &m_tv;

@@ -71,7 +71,6 @@ testing and some alternative PHP implementation.
 - fb_rename_function
 - fb_get_code_coverage
 - fb_utf8ize
-- fb_const_fetch
 - fb_enable_code_coverage
 - fb_disable_code_coverage
 

@@ -1940,12 +1940,6 @@ void Variant::unserialize(VariableUnserializer *uns,
   }
 }
 
-void Variant::dump() const {
-  VariableSerializer vs(VariableSerializer::Type::VarDump);
-  String ret(vs.serialize(*this, true));
-  printf("Variant: %s", ret.c_str());
-}
-
 VarNR::VarNR(const String& v) {
   init(KindOfString);
   StringData *s = v.get();

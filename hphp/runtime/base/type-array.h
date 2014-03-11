@@ -388,7 +388,6 @@ public:
    */
   void serialize(VariableSerializer* serializer, bool isObject = false) const;
   void unserialize(VariableUnserializer* uns);
-  void dump();
   void setEvalScalar() const;
 
  private:

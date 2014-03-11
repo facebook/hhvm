@@ -418,10 +418,6 @@ public:
   void serialize(VariableSerializer *serializer,
                  bool skipNestCheck = false) const;
 
-  void dump();
-  void dump(std::string &out);
-  void dump(std::ostream &os);
-
   /**
    * Comparisons.
    */

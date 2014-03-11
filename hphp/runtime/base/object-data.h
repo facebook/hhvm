@@ -302,7 +302,6 @@ class ObjectData {
 
   void serialize(VariableSerializer* serializer) const;
   void serializeImpl(VariableSerializer* serializer) const;
-  void dump() const;
   ObjectData* clone();
 
   Variant offsetGet(Variant key);

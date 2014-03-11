@@ -77,7 +77,6 @@ class ResourceData {
 
   void serialize(VariableSerializer* serializer) const;
   void serializeImpl(VariableSerializer* serializer) const;
-  void dump() const;
 
  private:
   static void compileTimeAssertions();

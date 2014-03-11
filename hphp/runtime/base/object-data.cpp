@@ -859,10 +859,6 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   }
 }
 
-void ObjectData::dump() const {
-  o_toArray().dump();
-}
-
 ObjectData* ObjectData::clone() {
   if (getAttribute(HasClone) && getAttribute(IsCppBuiltin)) {
     if (isCollection()) {

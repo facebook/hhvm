@@ -760,14 +760,6 @@ void Array::unserialize(VariableUnserializer *uns) {
   }
 }
 
-void Array::dump() {
-  if (m_px) {
-    m_px->dump();
-  } else {
-    printf("(null)\n");
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // sorting
 

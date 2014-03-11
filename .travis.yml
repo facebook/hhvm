@@ -26,12 +26,15 @@ env:
   - TEST_RUN_MODE="-m jit zend -I /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
   - TEST_RUN_MODE="-m jit zend -E /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/'
   - TEST_RUN_MODE="-m jit -r quick"
-  - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[a-df-nw-x].*/"
-  - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[eo-q].*/"
-  - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[r-vy-z].*/"
+  - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[a-bdf-h].*/"
+  - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[ci-nw-x].*/"
+  - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[eo-p].*/"
+  - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[q-vy-zA-Z0-9].*/"
   - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/(ext\/[a-e]).*/"
-  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/(ext\/[f-ru-zA-Z0-9]|[Z]).*/"
-  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/(ext\/[s-t]|[t]).*/"
+  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/(ext\/[f-l]).*/"
+  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/(ext\/[m-ru-zA-Z0-9]|[Z]).*/"
+  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/ext\/[s-t].*/"
+  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/t.*/"
   - TEST_RUN_MODE="-m interp quick"
   - TEST_RUN_MODE="-m interp slow -I /^hphp\/test\/slow\/[a-df-nw-x].*/"
   - TEST_RUN_MODE="-m interp slow -E /^hphp\/test\/slow\/[a-df-nw-x].*/"
@@ -40,10 +43,14 @@ env:
   - TEST_RUN_MODE="-m interp -r quick"
   - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/[a-df-nw-x].*/"
   - TEST_RUN_MODE="-m interp -r slow -E /^hphp\/test\/slow\/[a-df-nw-x].*/"
+  - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/[eo-p].*/"
+  - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/[q-vy-zA-Z0-9].*/"
   - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/(ext\/[a-i]).*/"
-  - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/(ext\/[j-ru-zA-Z0-9]|[Z]).*/"
-  - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/(ext\/[s-t]|[t]).*/"
-
+  - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/(ext\/[j-m]).*/"
+  - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/(ext\/[n-ru-zA-Z0-9]|[Z]).*/"
+  - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/ext\/[s-t].*/"
+  - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/t.*/"
+    
 script: time PHP_CURL_HTTP_REMOTE_SERVER="http://localhost:8444" hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
 
 notifications:

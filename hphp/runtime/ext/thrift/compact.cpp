@@ -833,14 +833,18 @@ class CompactReader {
       Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
         ret = NEWOBJ(c_Map)();
+        for (uint32_t i = 0; i < size; i++) {
+          Variant key = readField(keySpec, keyType);
+          Variant value = readField(valueSpec, valueType);
+          collectionSet(ret.getObjectData(), key.asCell(), value.asCell());
+        }
       } else {
         ret = Array::Create();
-      }
-
-      for (uint32_t i = 0; i < size; i++) {
-        Variant key = readField(keySpec, keyType);
-        Variant value = readField(valueSpec, valueType);
-        ret.set(key, value);
+        for (uint32_t i = 0; i < size; i++) {
+          Variant key = readField(keySpec, keyType);
+          Variant value = readField(valueSpec, valueType);
+          ret.toArrRef().set(key, value);
+        }
       }
 
       readCollectionEnd();
@@ -896,12 +900,12 @@ class CompactReader {
 
         ret = Variant(set_ret);
       } else {
-        ret = Array::Create();
-
+        ArrayInit ainit(size);
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(valueSpec, valueType);
-          ret.set(value, true);
+          ainit.set(value, true);
         }
+        ret = ainit.toArray();
       }
 
 

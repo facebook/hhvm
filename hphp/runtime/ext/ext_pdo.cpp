@@ -1927,16 +1927,16 @@ static bool do_fetch(sp_PDOStatement stmt,
 
     switch (how) {
     case PDO_FETCH_ASSOC:
-      ret.set(name, val);
+      ret.toArrRef().set(name, val);
       break;
 
     case PDO_FETCH_KEY_PAIR: {
       Variant tmp;
       fetch_value(stmt, tmp, ++i, NULL);
       if (return_all) {
-        return_all->set(val, tmp);
+        return_all->toArrRef().set(val, tmp);
       } else {
-        ret.set(val, tmp);
+        ret.toArrRef().set(val, tmp);
       }
       return true;
     }
@@ -1955,12 +1955,12 @@ static bool do_fetch(sp_PDOStatement stmt,
           Array arr = Array::Create();
           arr.append(curr_val);
           arr.append(val);
-          ret.set(name, arr);
+          ret.toArray().set(name, arr);
         } else {
           curr_val.toArrRef().append(val);
         }
       } else {
-        ret.set(name, val);
+        ret.toArrRef().set(name, val);
       }
       break;
     }
@@ -1993,7 +1993,10 @@ static bool do_fetch(sp_PDOStatement stmt,
       break;
 
     case PDO_FETCH_FUNC:
-      stmt->fetch.values.set(idx, val);
+      if (!stmt->fetch.values.isArray()) {
+        stmt->fetch.values = Variant(Array::Create());
+      }
+      stmt->fetch.values.toArrRef().set(idx, val);
       break;
 
     default:
@@ -2027,9 +2030,8 @@ static bool do_fetch(sp_PDOStatement stmt,
 
   if (return_all) {
     if ((flags & PDO_FETCH_UNIQUE) == PDO_FETCH_UNIQUE) {
-      return_all->set(grp_val, ret);
+      return_all->toArrRef().set(grp_val, ret);
     } else {
-      forceToArray(*return_all);
       auto& lval = return_all->toArrRef().lvalAt(grp_val);
       forceToArray(lval).append(ret);
     }

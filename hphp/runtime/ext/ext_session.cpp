@@ -1005,7 +1005,9 @@ public:
         VariableUnserializer vu(p, endptr,
                                 VariableUnserializer::Type::Serialize);
         try {
-          g->getRef(s__SESSION).set(key, vu.unserialize());
+          auto& sess = g->getRef(s__SESSION);
+          if (!sess.isArray()) sess = Variant(Array::Create());
+          sess.toArrRef().set(key, vu.unserialize());
           p = vu.head();
         } catch (Exception &e) {
         }
@@ -1066,7 +1068,9 @@ public:
         VariableUnserializer vu(q, endptr,
                                 VariableUnserializer::Type::Serialize);
         try {
-          g->getRef(s__SESSION).set(key, vu.unserialize());
+          auto& sess = g->getRef(s__SESSION);
+          if (!sess.isArray()) sess = Variant(Array::Create());
+          sess.toArrRef().set(key, vu.unserialize());
           q = vu.head();
         } catch (Exception &e) {
         }

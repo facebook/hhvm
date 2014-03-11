@@ -1298,12 +1298,13 @@ bool f_openssl_pkcs12_read(const String& pkcs12, VRefParam certs, const String& 
     STACK_OF(X509) *ca = NULL;
     if (PKCS12_parse(p12, pass.data(), &pkey, &cert, &ca)) {
       vcerts = Array::Create();
+
       BIO *bio_out = BIO_new(BIO_s_mem());
       if (PEM_write_bio_X509(bio_out, cert)) {
         BUF_MEM *bio_buf;
         BIO_get_mem_ptr(bio_out, &bio_buf);
-        vcerts.set(s_cert, String((char*)bio_buf->data, bio_buf->length,
-                                  CopyString));
+        vcerts.toArrRef().set(s_cert,
+          String((char*)bio_buf->data, bio_buf->length, CopyString));
       }
       BIO_free(bio_out);
 
@@ -1311,8 +1312,8 @@ bool f_openssl_pkcs12_read(const String& pkcs12, VRefParam certs, const String& 
       if (PEM_write_bio_PrivateKey(bio_out, pkey, NULL, NULL, 0, 0, NULL)) {
         BUF_MEM *bio_buf;
         BIO_get_mem_ptr(bio_out, &bio_buf);
-        vcerts.set(s_pkey, String((char*)bio_buf->data, bio_buf->length,
-                                  CopyString));
+        vcerts.toArrRef().set(s_pkey,
+          String((char*)bio_buf->data, bio_buf->length, CopyString));
       }
       BIO_free(bio_out);
 
@@ -1330,7 +1331,7 @@ bool f_openssl_pkcs12_read(const String& pkcs12, VRefParam certs, const String& 
       }
       if (ca) {
         sk_X509_free(ca);
-        vcerts.set(s_extracerts, extracerts);
+        vcerts.toArrRef().set(s_extracerts, extracerts);
       }
       ret = true;
       PKCS12_free(p12);

@@ -194,14 +194,18 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
                                        AccessFlags::None).toString();
       if (format.equal(PHPTransport::s_collection)) {
         ret = NEWOBJ(c_Map)();
+        for (uint32_t s = 0; s < size; ++s) {
+          Variant key = binary_deserialize(types[0], transport, keyspec);
+          Variant value = binary_deserialize(types[1], transport, valspec);
+          collectionSet(ret.getObjectData(), key.asCell(), value.asCell());
+        }
       } else {
         ret = Array::Create();
-      }
-
-      for (uint32_t s = 0; s < size; ++s) {
-        Variant key = binary_deserialize(types[0], transport, keyspec);
-        Variant value = binary_deserialize(types[1], transport, valspec);
-        ret.set(key, value);
+        for (uint32_t s = 0; s < size; ++s) {
+          Variant key = binary_deserialize(types[0], transport, keyspec);
+          Variant value = binary_deserialize(types[1], transport, valspec);
+          ret.toArrRef().set(key, value);
+        }
       }
       return ret; // return_value already populated
     }
@@ -257,17 +261,16 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
 
         ret = Variant(set_ret);
       } else {
-        ret = Array::Create();
-
+        ArrayInit init(size);
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(type, transport, elemspec);
-
           if (key.isInteger()) {
-            ret.set(key, true);
+            init.set(key, true);
           } else {
-            ret.set(key.toString(), true);
+            init.set(key.toString(), true);
           }
         }
+        ret = init.toArray();
       }
       return ret;
     }

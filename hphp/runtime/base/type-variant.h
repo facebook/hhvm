@@ -682,37 +682,6 @@ class Variant : private TypedValue {
   static Variant &lvalInvalid();
   static Variant &lvalBlackHole();
 
-  template <typename T>
-  ALWAYS_INLINE static const Variant& SetImpl(Variant *self, T key, const Variant& v,
-                                       bool isKey);
-
-  template <typename T>
-  ALWAYS_INLINE static const Variant& SetRefImpl(Variant *self, T key, const Variant& v,
-                                          bool isKey);
-
-  const Variant& set(int     key, const Variant& v) { return set((int64_t)key, v); }
-  const Variant& set(int64_t   key, const Variant& v);
-  const Variant& set(double  key, const Variant& v) = delete;
-  const Variant& set(litstr  key, const Variant& v, bool isString = false) = delete;
-  const Variant& set(const String& key, const Variant& v, bool isString = false);
-  const Variant& set(const Variant& key, const Variant& v);
-
-  const Variant& setRef(int     key, const Variant& v) { return setRef((int64_t)key, v); }
-  const Variant& setRef(int64_t   key, const Variant& v);
-  const Variant& setRef(double  key, const Variant& v) = delete;
-  const Variant& setRef(litstr  key, const Variant& v, bool isString = false) = delete;
-  const Variant& setRef(const String& key, const Variant& v, bool isString = false);
-  const Variant& setRef(const Variant& key, const Variant& v);
-
-  const Variant& set(int     key, RefResult v) { return setRef(key, variant(v)); }
-  const Variant& set(int64_t   key, RefResult v) { return setRef(key, variant(v)); }
-  const Variant& set(double  key, RefResult v) = delete;
-  const Variant& set(litstr  key, RefResult v, bool isString = false) = delete;
-  const Variant& set(const String& key, RefResult v, bool isString = false) {
-    return setRef(key, variant(v), isString);
-  }
-  const Variant& set(const Variant& key, RefResult v) { return setRef(key, variant(v)); }
-
   /**
    * Low level access that should be restricted to internal use.
    */
@@ -952,35 +921,7 @@ public:
     setWithRefHelper(v, false);
   }
 
- private:
-  /**
-   * Checks whether the LHS array needs to be copied for a *one-level*
-   * array set, e.g., "$a[] = $v" or "$a['x'] = $v".
-   *
-   * Note:
-   *  (1) The semantics is equivalent to having a temporary variable
-   * holding to RHS value, i.e., "$tmp = $v; $a[] = $tmp". This is NOT
-   * exactly the same as PHP 5.3, where "$a = &$b; $a = array(); $a = $b;"
-   * creates a recursive array, although the final assignment is not
-   * strong-binding.
-   *  (2) It does NOT work with multi-level array set, i.e., "$a[][] = $v".
-   * The compiler needs to generate a real temporary.
-   */
-  bool needCopyForSet(const Variant& v) {
-    assert(m_type == KindOfArray);
-    if (m_data.parr->hasMultipleRefs()) return true;
-    if (v.m_type == KindOfArray) return m_data.parr == v.m_data.parr;
-    if (v.m_type == KindOfRef) {
-      return m_data.parr == v.m_data.pref->var()->m_data.parr;
-    }
-    return false;
-  }
-
-  bool needCopyForSetRef(const Variant& v) {
-    assert(m_type == KindOfArray);
-    return m_data.parr->hasMultipleRefs();
-  }
-
+private:
   bool   toBooleanHelper() const;
   int64_t  toInt64Helper(int base = 10) const;
   double toDoubleHelper() const;

@@ -207,7 +207,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
 
     GlobalVariables *g = get_global_variables();
-    g->getRef(s__ENV).set(s_HPHP_RPC, 1);
+    g->getRef(s__ENV).toArrRef().set(s_HPHP_RPC, 1);
   }
 
   bool isFile = rpcFunc.rfind('.') != std::string::npos;

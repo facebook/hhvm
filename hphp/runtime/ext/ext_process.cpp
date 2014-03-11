@@ -781,7 +781,7 @@ static Variant post_proc_open(const String& cmd, Variant &pipes,
     Resource f = items[i].dupParent();
     if (!f.isNull()) {
       proc->pipes.append(f);
-      pipes.set(items[i].index, f);
+      pipes.toArrRef().set(items[i].index, f);
     }
   }
   return Resource(proc);

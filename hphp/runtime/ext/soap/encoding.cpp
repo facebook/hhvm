@@ -2439,12 +2439,12 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
       Variant *ar = &ret;
       while (i < dimension-1) {
         if (!ar->toArrRef().exists(pos[i])) {
-          ar->set(pos[i], Array::Create());
+          ar->toArrRef().set(pos[i], Array::Create());
         }
         ar = &ar->toArrRef().lvalAt(pos[i]);
         i++;
       }
-      ar->set(pos[i], tmpVal);
+      ar->toArrRef().set(pos[i], tmpVal);
 
       /* Increment position */
       i = dimension;
@@ -2520,13 +2520,13 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, const Variant& data, int style,
 }
 
 static Variant to_zval_map(encodeTypePtr type, xmlNodePtr data) {
-  Variant ret, key, value;
+  Variant key, value;
+  Array ret;
   xmlNodePtr trav, item, xmlKey, xmlValue;
 
   FIND_XML_NULL(data, ret);
 
   if (data && data->children) {
-    ret = Array::Create();
     trav = data->children;
 
     FOREACHNODE(trav, "item", item) {

@@ -78,17 +78,6 @@ const StaticString
   s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name");
 
 ///////////////////////////////////////////////////////////////////////////////
-// local helpers
-
-static int64_t ToKey(int64_t i) { return i; }
-static int64_t ToKey(double d) {
-  return d > std::numeric_limits<uint64_t>::max() ? 0u : uint64_t(d);
-}
-static VarNR ToKey(const String& s) { return s.toKey(); }
-static VarNR ToKey(const Variant& v) { return v.toKey(); }
-
-///////////////////////////////////////////////////////////////////////////////
-// private implementations
 
 Variant::Variant(litstr  v) {
   m_type = KindOfString;
@@ -599,7 +588,12 @@ VarNR Variant::toKey() const {
   case KindOfInt64:
     return VarNR(m_data.num);
   case KindOfDouble:
-    return VarNR(ToKey(m_data.dbl));
+    {
+      auto val = m_data.dbl > std::numeric_limits<uint64_t>::max()
+        ? 0u
+        : uint64_t(m_data.dbl);
+      return VarNR(val);
+    }
   case KindOfObject:
     break;
   case KindOfResource:
@@ -668,179 +662,6 @@ Variant &Variant::lvalBlackHole() {
   Variant &bh = get_env_constants()->__lvalProxy;
   bh.unset();
   return bh;
-}
-
-template <typename T>
-ALWAYS_INLINE
-const Variant& Variant::SetImpl(Variant *self, T key, const Variant& v, bool isKey) {
-  retry:
-  if (LIKELY(self->m_type == KindOfArray)) {
-    ArrayData *escalated;
-    if (LvalHelper<T>::CheckParams && isKey) {
-      escalated = self->m_data.parr->set(key, v, self->needCopyForSet(v));
-    } else {
-      typename LvalHelper<T>::KeyType k(ToKey(key));
-      if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
-      escalated = self->m_data.parr->set(k, v, self->needCopyForSet(v));
-    }
-    if (escalated != self->m_data.parr) {
-      self->set(escalated);
-    }
-    return v;
-  }
-  switch (self->m_type) {
-  case KindOfBoolean:
-    if (self->m_data.num) {
-      throw_bad_type_exception("not array objects");
-      break;
-    }
-    /* Fall through */
-  case KindOfUninit:
-  case KindOfNull:
-  create:
-    if (LvalHelper<T>::CheckParams && isKey) {
-      self->set(ArrayData::Create(key, v));
-    } else {
-      typename LvalHelper<T>::KeyType k(ToKey(key));
-      if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
-      self->set(ArrayData::Create(k, v));
-    }
-    break;
-  case KindOfRef:
-    self = self->m_data.pref->var();
-    goto retry;
-  case KindOfStaticString:
-  case KindOfString: {
-    auto const s = self->m_data.pstr;
-    if (s->empty()) goto create;
-
-    auto const es = [&]() -> StringData* {
-      auto const offset = HPHP::toInt64(key);
-      auto const r = s->slice();
-      if (offset < 0) return s;
-      if (r.len == 0) throw OffsetOutOfRangeException();
-
-      String str = v.toString();
-      auto const ch = str.empty() ? 0 : str.data()[0];
-      if (offset < r.len && !s->hasMultipleRefs()) {
-        return s->modifyChar(offset, ch);
-      }
-      if (offset > RuntimeOption::StringOffsetLimit) {
-        throw OffsetOutOfRangeException();
-      }
-      uint32_t newlen = offset + 1;
-      auto const sd = StringData::Make(newlen);
-      auto const mslice = sd->bufferSlice();
-      memcpy(mslice.ptr, r.ptr, r.len);
-      memset(mslice.ptr + r.len, ' ', newlen - r.len);
-      mslice.ptr[offset] = ch;
-      sd->setSize(newlen);
-      return sd;
-    }();
-    if (es != s) self->set(es);
-    break;
-  }
-  case KindOfObject: {
-    ObjectData* obj = self->getObjectData();
-    if (obj->isCollection()) {
-      collectionOffsetSet(obj, key, v);
-    } else {
-      self->getArrayAccess()->o_invoke_few_args(s_offsetSet, 2, key, v);
-    }
-    break;
-  }
-  default:
-    throw_bad_type_exception("not array objects");
-    break;
-  }
-  return v;
-}
-
-const Variant& Variant::set(int64_t key, const Variant& v) {
-  return SetImpl(this, key, v, false);
-}
-
-const Variant& Variant::set(const String& key, const Variant& v,
-                     bool isString /* = false */) {
-  return SetImpl<const String&>(this, key, v, isString);
-}
-
-const Variant& Variant::set(const Variant& key, const Variant& v) {
-  return SetImpl<const Variant&>(this, key, v, false);
-}
-
-template <typename T>
-ALWAYS_INLINE
-const Variant& Variant::SetRefImpl(Variant *self, T key, const Variant& v, bool isKey) {
-  retry:
-  if (LIKELY(self->m_type == KindOfArray)) {
-    ArrayData *escalated;
-    if (LvalHelper<T>::CheckParams && isKey) {
-      escalated = self->m_data.parr->setRef(key, v, self->needCopyForSetRef(v));
-    } else {
-      typename LvalHelper<T>::KeyType k(ToKey(key));
-      if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
-      escalated = self->m_data.parr->setRef(k, v, self->needCopyForSetRef(v));
-    }
-    if (escalated != self->m_data.parr) {
-      self->set(escalated);
-    }
-    return v;
-  }
-  switch (self->m_type) {
-  case KindOfBoolean:
-    if (self->m_data.num) {
-      throw_bad_type_exception("not array objects");
-      break;
-    }
-    /* Fall through */
-  case KindOfUninit:
-  case KindOfNull:
-  create:
-    if (LvalHelper<T>::CheckParams && isKey) {
-      self->set(ArrayData::CreateRef(key, v));
-    } else {
-      typename LvalHelper<T>::KeyType k(ToKey(key));
-      if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
-      self->set(ArrayData::CreateRef(k, v));
-    }
-    break;
-  case KindOfRef:
-    self = self->m_data.pref->var();
-    goto retry;
-  case KindOfStaticString:
-  case KindOfString: {
-    if (self->m_data.pstr->empty()) {
-      goto create;
-    }
-    throw_bad_type_exception("binding assignment to stringoffset");
-    break;
-  }
-  case KindOfObject: {
-    if (self->m_data.pobj->isCollection()) {
-      raise_error("An element of a collection cannot be taken by reference");
-    }
-    self->getArrayAccess()->o_invoke_few_args(s_offsetSet, 2, key, v);
-    break;
-  }
-  default:
-    throw_bad_type_exception("not array objects");
-    break;
-  }
-  return v;
-}
-
-const Variant& Variant::setRef(int64_t key, const Variant& v) {
-  return SetRefImpl(this, key, v, false);
-}
-
-const Variant& Variant::setRef(const String& key, const Variant& v,
-                        bool isString /* = false */) {
-  return SetRefImpl<const String&>(this, key, v, isString);
-}
-
-const Variant& Variant::setRef(const Variant& key, const Variant& v) {
-  return SetRefImpl<const Variant&>(this, key, v, false);
 }
 
 void Variant::setEvalScalar() {

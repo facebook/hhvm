@@ -16,8 +16,12 @@
 */
 
 #include "hphp/runtime/ext/ext_soap.h"
+
 #include <map>
 #include <memory>
+
+#include "folly/ScopeGuard.h"
+
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/base/class-info.h"
@@ -2480,7 +2484,7 @@ Variant c_SoapClient::t___call(Variant name, Variant args) {
 Variant c_SoapClient::t___soapcall(const String& name, const Array& args,
                                    const Array& options /* = null_array */,
                                    const Variant& input_headers /* = null_variant */,
-                                   VRefParam output_headers /* = null */) {
+                                   VRefParam output_headers_ref /* = null */) {
   SoapClientScope ss(this);
 
   String location, soap_action, uri;
@@ -2516,7 +2520,10 @@ Variant c_SoapClient::t___soapcall(const String& name, const Array& args,
     soap_headers.merge(m_default_headers.toArray());
   }
 
-  output_headers = Array::Create();
+  Array output_headers;
+  SCOPE_EXIT {
+    output_headers_ref = output_headers;
+  };
 
   if (m_trace) {
     m_last_request.reset();

@@ -51,6 +51,11 @@ folly::dynamic ini_get(Array& p);
 folly::dynamic ini_get(std::set<std::string>& p);
 
 class IniSetting {
+  struct CallbackData {
+    Variant active_section;
+    Variant arr;
+  };
+
 public:
   static const Extension* CORE;
   enum ScannerMode {
@@ -78,10 +83,6 @@ public:
   };
   class SectionParserCallback : public ParserCallback {
   public:
-    struct CallbackData {
-      Variant active_section;
-      Variant arr;
-    };
     virtual void onSection(const std::string &name, void *arg);
     virtual void onLabel(const std::string &name, void *arg);
     virtual void onEntry(const std::string &key, const std::string &value,

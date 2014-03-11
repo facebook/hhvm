@@ -318,7 +318,8 @@ void IniSetting::ParserCallback::onLabel(const std::string &name, void *arg) {
 void IniSetting::ParserCallback::onEntry(
     const std::string &key, const std::string &value, void *arg) {
   Variant *arr = (Variant*)arg;
-  arr->set(String(key), String(value));
+  if (!arr->isArray()) *arr = Variant(Array::Create());
+  arr->toArrRef().set(String(key), String(value));
 }
 
 void IniSetting::ParserCallback::onPopEntry(
@@ -352,13 +353,13 @@ void IniSetting::ParserCallback::makeArray(Variant &hash,
     if (last) {
       newval = Variant(value);
     } else {
-      if (val.toArray().exists(index)) {
-        newval = val.toArray().rvalAt(index);
+      if (val.toArrRef().exists(index)) {
+        newval = val.toArrRef().rvalAt(index);
       } else {
         newval = Variant(Array::Create());
       }
     }
-    val.setRef(index, newval);
+    val.toArrRef().setRef(index, newval);
     if (!last) {
       val = strongBind(newval);
       p += index.size() + 1;
@@ -408,11 +409,12 @@ void IniSetting::ParserCallback::onOp(
 
 void IniSetting::SectionParserCallback::onSection(
     const std::string &name, void *arg) {
-  CallbackData *data = (CallbackData*)arg;
+  auto const data = (CallbackData*)arg;
   data->active_section.unset(); // break ref() from previous section
   data->active_section = Array::Create();
-  data->arr.set(String(name), ref(data->active_section));
+  data->arr.toArrRef().setRef(String(name), data->active_section);
 }
+
 Variant* IniSetting::SectionParserCallback::activeArray(CallbackData* data) {
   if (!data->active_section.isNull()) {
     return &data->active_section;
@@ -420,15 +422,18 @@ Variant* IniSetting::SectionParserCallback::activeArray(CallbackData* data) {
     return &data->arr;
   }
 }
+
 void IniSetting::SectionParserCallback::onLabel(const std::string &name,
                                                 void *arg) {
   IniSetting::ParserCallback::onLabel(name, activeArray((CallbackData*)arg));
 }
+
 void IniSetting::SectionParserCallback::onEntry(
     const std::string &key, const std::string &value, void *arg) {
   IniSetting::ParserCallback::onEntry(key, value,
                                       activeArray((CallbackData*)arg));
 }
+
 void IniSetting::SectionParserCallback::onPopEntry(
     const std::string &key, const std::string &value, const std::string &offset,
     void *arg) {
@@ -450,9 +455,11 @@ void IniSetting::SystemParserCallback::onEntry(
   auto& arr = *(IniSetting::Map*)arg;
   arr[key] = value;
 }
-void IniSetting::SystemParserCallback::onPopEntry(
-    const std::string &key, const std::string &value, const std::string &offset,
-    void *arg) {
+
+void IniSetting::SystemParserCallback::onPopEntry(const std::string& key,
+                                                  const std::string& value,
+                                                  const std::string& offset,
+                                                  void* arg) {
   assert(!key.empty());
   auto& arr = *(IniSetting::Map*)arg;
   auto* ptr = arr.get_ptr(key);
@@ -473,6 +480,7 @@ void IniSetting::SystemParserCallback::onPopEntry(
     (*ptr)[std::to_string(max)] = value;
   }
 }
+
 void IniSetting::SystemParserCallback::makeArray(Map &hash,
                                                  const std::string &offset,
                                                  const std::string &value) {
@@ -517,7 +525,7 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
   auto ini_cpp = ini.toCppString();
   auto filename_cpp = filename.toCppString();
   if (process_sections) {
-    SectionParserCallback::CallbackData data;
+    CallbackData data;
     SectionParserCallback cb;
     data.arr = Array::Create();
     if (zend_parse_ini_string(ini_cpp, filename_cpp, scanner_mode, cb, &data)) {

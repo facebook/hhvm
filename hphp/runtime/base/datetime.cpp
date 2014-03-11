@@ -454,6 +454,7 @@ void DateTime::internalModify(timelib_rel_time *rel,
   m_time->have_relative = have_relative;
 #ifdef TIMELIB_HAVE_INTERVAL
   m_time->relative.have_weekday_relative = rel->have_weekday_relative;
+  m_time->relative.weekday_behavior = rel->weekday_behavior;
 #endif
   m_time->sse_uptodate = 0;
   update();

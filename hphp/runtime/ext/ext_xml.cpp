@@ -392,7 +392,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
 
     if (!parser->data.isNull()) {
       if (parser->lastwasopen) {
-        parser->ctag.set(s_type, s_complete);
+        parser->ctag.toArrRef().set(s_type, s_complete);
       } else {
         ArrayInit tag(3);
         _xml_add_to_info(parser,((char*)tag_name) + parser->toffset);
@@ -453,14 +453,15 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
         if (parser->lastwasopen) {
           String myval;
           // check if value exists, if yes append to that
-          if (parser->ctag.toArray().exists(s_value))
-          {
+          if (parser->ctag.toArrRef().exists(s_value)) {
             myval = parser->ctag.toArray().rvalAt(s_value).toString();
             myval += String(decoded_value, decoded_len, AttachString);
-            parser->ctag.set(s_value, myval);
+            parser->ctag.toArrRef().set(s_value, myval);
           } else {
-            parser->ctag.set(s_value,
-                             String(decoded_value,decoded_len,AttachString));
+            parser->ctag.toArrRef().set(
+              s_value,
+              String(decoded_value,decoded_len,AttachString)
+            );
           }
         } else {
           Array tag;
@@ -468,13 +469,13 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           String myval;
           String mytype;
           curtag.assignRef(parser->data.getArrayData()->endRef());
-          if (curtag.toArray().exists(s_type)) {
-            mytype = curtag.toArray().rvalAt(s_type).toString();
+          if (curtag.toArrRef().exists(s_type)) {
+            mytype = curtag.toArrRef().rvalAt(s_type).toString();
             if (!strcmp(mytype.data(), "cdata") &&
-                curtag.toArray().exists(s_value)) {
-              myval = curtag.toArray().rvalAt(s_value).toString();
+                curtag.toArrRef().exists(s_value)) {
+              myval = curtag.toArrRef().rvalAt(s_value).toString();
               myval += String(decoded_value, decoded_len, AttachString);
-              curtag.set(s_value, myval);
+              curtag.toArrRef().set(s_value, myval);
               return;
             }
           }
@@ -526,8 +527,10 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         char* val = xml_utf8_decode(attributes[1],
                                     strlen((const char*)attributes[1]),
                                     &val_len, parser->target_encoding);
-        args.lvalAt(2).set(String(att, AttachString),
-                           String(val, val_len, AttachString));
+        args.lvalAt(2).toArrRef().set(
+          String(att, AttachString),
+          String(val, val_len, AttachString)
+        );
         attributes += 2;
       }
 

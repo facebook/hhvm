@@ -562,19 +562,12 @@ public:
   void preventReturnsToTC();
   void destructObjects();
   int m_lambdaCounter;
-  struct ReentryRecord {
-    VMState m_savedState;
-    const ActRec* m_entryFP;
-    ReentryRecord(const VMState &s, const ActRec* entryFP) :
-        m_savedState(s), m_entryFP(entryFP) { }
-    ReentryRecord() {}
-  };
-  typedef TinyVector<ReentryRecord, 32> NestedVMVec;
+  typedef TinyVector<VMState, 32> NestedVMVec;
   NestedVMVec m_nestedVMs;
 
   int m_nesting;
   bool isNested() { return m_nesting != 0; }
-  void pushVMState(VMState &savedVM, const ActRec* reentryAR);
+  void pushVMState(VMState &savedVM);
   void popVMState();
 
   ActRec* getPrevVMState(const ActRec* fp,

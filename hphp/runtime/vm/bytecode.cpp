@@ -887,7 +887,7 @@ TypedValue* Stack::generatorStackBase(const ActRec* fp) {
     // In the reentrant case, we can consult the savedVM state. We simply
     // use the top of stack of the previous VM frame (since the ActRec,
     // locals, and iters for this frame do not reside on the VM stack).
-    return context->m_nestedVMs.back().m_savedState.sp;
+    return context->m_nestedVMs.back().sp;
   }
   // In the non-reentrant case, we know generators are always called from a
   // function with an empty stack. So we find the caller's FP, compensate for
@@ -908,7 +908,7 @@ ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
     if (LIKELY(prevFrame != nullptr)) return prevFrame;
   }
 
-  if (LIKELY(!m_nestedVMs.empty())) return m_nestedVMs.back().m_savedState.fp;
+  if (LIKELY(!m_nestedVMs.empty())) return m_nestedVMs.back().fp;
   return nullptr;
 }
 
@@ -1650,7 +1650,7 @@ void ExecutionContext::reenterVM(TypedValue* retval,
   ar->m_savedRbp = 0;
   VMState savedVM = { getPC(), getFP(), m_firstAR, savedSP };
   TRACE(3, "savedVM: %p %p %p %p\n", m_pc, m_fp, m_firstAR, savedSP);
-  pushVMState(savedVM, ar);
+  pushVMState(savedVM);
   assert(m_nestedVMs.size() >= 1);
   try {
     enterVM(retval, ar);
@@ -2005,11 +2005,12 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   // Linear search from end of m_nestedVMs. In practice, we're probably
   // looking for something recently pushed.
   int i = m_nestedVMs.size() - 1;
-  for (; i >= 0; --i) {
-    if (m_nestedVMs[i].m_entryFP == fp) break;
+  ActRec* firstAR = m_firstAR;
+  while (i >= 0 && firstAR != fp) {
+    firstAR = m_nestedVMs[i--].firstAR;
   }
   if (i == -1) return nullptr;
-  const VMState& vmstate = m_nestedVMs[i].m_savedState;
+  const VMState& vmstate = m_nestedVMs[i];
   prevFp = vmstate.fp;
   assert(prevFp);
   assert(prevFp->m_func->unit());
@@ -7665,8 +7666,7 @@ void ExecutionContext::resetCoverageCounters() {
   m_coverPrevUnit = nullptr;
 }
 
-void ExecutionContext::pushVMState(VMState &savedVM,
-                                     const ActRec* reentryAR) {
+void ExecutionContext::pushVMState(VMState &savedVM) {
   if (debug && savedVM.fp &&
       savedVM.fp->m_func &&
       savedVM.fp->m_func->unit()) {
@@ -7680,14 +7680,14 @@ void ExecutionContext::pushVMState(VMState &savedVM,
           func->unit()->offsetOf(savedVM.pc),
           savedVM.fp);
   }
-  m_nestedVMs.push_back(ReentryRecord(savedVM, reentryAR));
+  m_nestedVMs.push_back(savedVM);
   m_nesting++;
 }
 
 void ExecutionContext::popVMState() {
   assert(m_nestedVMs.size() >= 1);
 
-  VMState &savedVM = m_nestedVMs.back().m_savedState;
+  VMState &savedVM = m_nestedVMs.back();
   m_pc = savedVM.pc;
   m_fp = savedVM.fp;
   m_firstAR = savedVM.firstAR;

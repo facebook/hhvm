@@ -61,6 +61,7 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(dom, 20031129);
 // defined in ext_simplexml.cpp
 extern bool libxml_use_internal_error();
 extern void libxml_add_error(const std::string &msg);
+extern xmlNodePtr simplexml_export_node(c_SimpleXMLElement* sxe);
 
 static void php_libxml_internal_error_handler(int error_type, void *ctx,
                                               const char *fmt,
@@ -5821,7 +5822,7 @@ Variant f_dom_xpath_register_php_functions(const Variant& obj,
 Variant f_dom_import_simplexml(const Object& node) {
 
   c_SimpleXMLElement *elem = node.getTyped<c_SimpleXMLElement>();
-  xmlNodePtr nodep = elem->node;
+  xmlNodePtr nodep = simplexml_export_node(elem);
 
   if (nodep && (nodep->type == XML_ELEMENT_NODE ||
                 nodep->type == XML_ATTRIBUTE_NODE)) {

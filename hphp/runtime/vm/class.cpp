@@ -2026,6 +2026,8 @@ void Class::addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const {
   }
 }
 
+const StaticString s_Stringish("Stringish");
+
 void Class::setInterfaces() {
   InterfaceMap::Builder interfacesBuilder;
   if (m_parent.get() != nullptr) {
@@ -2070,6 +2072,18 @@ void Class::setInterfaces() {
     m_declInterfaces.get());
 
   addInterfacesFromUsedTraits(interfacesBuilder);
+
+  if (m_toString) {
+    auto const present = interfacesBuilder.find(s_Stringish.get());
+    if (present == interfacesBuilder.end()
+        && (!(attrs() & AttrInterface) ||
+            !m_preClass->name()->isame(s_Stringish.get()))) {
+      Class* stringish = Unit::lookupClass(s_Stringish.get());
+      assert(stringish != nullptr);
+      assert((stringish->attrs() & AttrInterface));
+      interfacesBuilder.add(stringish->name(), stringish);
+    }
+  }
 
   m_interfaces.create(interfacesBuilder);
   checkInterfaceMethods();

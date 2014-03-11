@@ -388,7 +388,7 @@ bool parse_packet_soap(c_SoapClient *obj, const char *buffer,
 
   if (return_value.isArray()) {
     if (param_count == 0) {
-      return_value.reset();
+      return_value = Variant();
     } else if (param_count == 1) {
       Array arr = return_value.toArray();
       ArrayIter iter(arr);

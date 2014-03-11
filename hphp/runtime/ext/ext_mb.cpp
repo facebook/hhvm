@@ -1997,7 +1997,7 @@ typedef struct _php_mb_encoding_handler_info_t {
 } php_mb_encoding_handler_info_t;
 
 static mbfl_no_encoding _php_mb_encoding_handler_ex
-(const php_mb_encoding_handler_info_t *info, Variant &arg, char *res) {
+(const php_mb_encoding_handler_info_t *info, Array& arg, char *res) {
   char *var, *val;
   const char *s1, *s2;
   char *strtok_buf = NULL, **val_list = NULL;
@@ -2170,9 +2170,11 @@ bool f_mb_parse_str(const String& encoded_string,
   info.from_language          = MBSTRG(current_language);
 
   char *encstr = strndup(encoded_string.data(), encoded_string.size());
+  Array resultArr;
   mbfl_no_encoding detected =
-    _php_mb_encoding_handler_ex(&info, result, encstr);
+    _php_mb_encoding_handler_ex(&info, resultArr, encstr);
   free(encstr);
+  result = resultArr;
 
   MBSTRG(http_input_identify) = detected;
   return detected != mbfl_no_encoding_invalid;

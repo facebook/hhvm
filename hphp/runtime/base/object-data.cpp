@@ -1619,8 +1619,9 @@ template void ObjectData::incDecProp<false>(TypedValue&,
 void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
   auto propVal = getProp(ctx, key, visible, accessible, unset);
-  if (visible && accessible) {
-    Slot propInd = declPropInd(propVal);
+  Slot propInd = declPropInd(propVal);
+
+  if (visible && accessible && !unset) {
     if (propInd != kInvalidSlot) {
       // Declared property.
       tvSetIgnoreRef(*null_variant.asTypedValue(), *propVal);
@@ -1632,14 +1633,19 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
     return;
   }
 
-  assert(!accessible);
+  bool tryUnset = getAttribute(UseUnset);
+
+  if (propInd != kInvalidSlot && !accessible && !tryUnset) {
+    // defined property that is not accessible
+    raise_error("Cannot unset inaccessible property");
+  }
+
   TypedValue ignored;
-  if (!getAttribute(UseUnset) || !invokeUnset(&ignored, key)) {
+  if (!tryUnset || !invokeUnset(&ignored, key)) {
     if (UNLIKELY(!*key->data())) {
       throw_invalid_property_name(StrNR(key));
-    } else if (visible) {
-      raise_error("Cannot unset inaccessible property");
     }
+
     return;
   }
   tvRefcountedDecRef(&ignored);

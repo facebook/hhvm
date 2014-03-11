@@ -40,8 +40,9 @@ env:
   - TEST_RUN_MODE="-m interp -r quick"
   - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/[a-df-nw-x].*/"
   - TEST_RUN_MODE="-m interp -r slow -E /^hphp\/test\/slow\/[a-df-nw-x].*/"
-  - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
-  - TEST_RUN_MODE="-m interp -r zend -E /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
+  - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/(ext\/[a-i]).*/"
+  - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/(ext\/[j-ru-zA-Z0-9]|[Z]).*/"
+  - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/(ext\/[s-t]|[t]).*/"
 
 script: time PHP_CURL_HTTP_REMOTE_SERVER="http://localhost:8444" hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
 

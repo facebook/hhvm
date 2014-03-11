@@ -14,11 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/tv-helpers.h"
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/dummy-resource.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/base/runtime-error.h"
 
 #include "hphp/system/systemlib.h"
 

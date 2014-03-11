@@ -17,11 +17,11 @@
 #ifndef incl_HPHP_TV_HELPERS_H_
 #define incl_HPHP_TV_HELPERS_H_
 
-#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
-#error Directly including 'tv_helpers.h' is prohibited. \
-       Include 'complex_types.h' instead.
-#endif
-
+#include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/resource-data.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
 
 namespace HPHP {

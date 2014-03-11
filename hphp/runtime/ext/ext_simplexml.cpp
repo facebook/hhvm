@@ -1804,6 +1804,8 @@ static Object create_libxmlerror(xmlError &error) {
   return ret;
 }
 
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(libxml, NO_EXTENSION_VERSION_YET);
+
 Variant f_libxml_get_errors() {
   xmlErrorVec* error_list = &s_libxml_errors->m_errors;
   Array ret = Array::Create();
@@ -1826,17 +1828,15 @@ void f_libxml_clear_errors() {
   s_libxml_errors->m_errors.reset();
 }
 
-bool f_libxml_use_internal_errors(const Variant& use_errors /* = null_variant */) {
+bool f_libxml_use_internal_errors(bool use_errors) {
   bool ret = (xmlStructuredError == libxml_error_handler);
-  if (!use_errors.isNull()) {
-    if (!use_errors.toBoolean()) {
-      xmlSetStructuredErrorFunc(nullptr, nullptr);
-      s_libxml_errors->m_use_error = false;
-      s_libxml_errors->m_errors.reset();
-    } else {
-      xmlSetStructuredErrorFunc(nullptr, libxml_error_handler);
-      s_libxml_errors->m_use_error = true;
-    }
+  if (!use_errors) {
+    xmlSetStructuredErrorFunc(nullptr, nullptr);
+    s_libxml_errors->m_use_error = false;
+    s_libxml_errors->m_errors.reset();
+  } else {
+    xmlSetStructuredErrorFunc(nullptr, libxml_error_handler);
+    s_libxml_errors->m_use_error = true;
   }
   return ret;
 }

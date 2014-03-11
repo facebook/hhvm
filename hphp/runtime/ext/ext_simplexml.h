@@ -34,7 +34,7 @@ Variant f_simplexml_load_file(const String& filename, const String& class_name =
 Variant f_libxml_get_errors();
 Variant f_libxml_get_last_error();
 void f_libxml_clear_errors();
-bool f_libxml_use_internal_errors(const Variant& use_errors = null_variant);
+bool f_libxml_use_internal_errors(bool use_errors = false);
 bool f_libxml_disable_entity_loader(bool disable = true);
 
 ///////////////////////////////////////////////////////////////////////////////

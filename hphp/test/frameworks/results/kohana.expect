@@ -1,3 +1,45 @@
+Kohana_ApcTest::test_decrement with data set #0
+E
+Kohana_ApcTest::test_decrement with data set #1
+E
+Kohana_ApcTest::test_decrement with data set #2
+E
+Kohana_ApcTest::test_decrement with data set #3
+E
+Kohana_ApcTest::test_delete
+E
+Kohana_ApcTest::test_delete_all
+E
+Kohana_ApcTest::test_increment with data set #0
+E
+Kohana_ApcTest::test_increment with data set #1
+E
+Kohana_ApcTest::test_increment with data set #2
+E
+Kohana_ApcTest::test_increment with data set #3
+E
+Kohana_ApcTest::test_set_get with data set #0
+E
+Kohana_ApcTest::test_set_get with data set #1
+E
+Kohana_ApcTest::test_set_get with data set #10
+E
+Kohana_ApcTest::test_set_get with data set #2
+E
+Kohana_ApcTest::test_set_get with data set #3
+E
+Kohana_ApcTest::test_set_get with data set #4
+E
+Kohana_ApcTest::test_set_get with data set #5
+E
+Kohana_ApcTest::test_set_get with data set #6
+E
+Kohana_ApcTest::test_set_get with data set #7
+E
+Kohana_ApcTest::test_set_get with data set #8
+E
+Kohana_ApcTest::test_set_get with data set #9
+E
 Kohana_ArrTest::test_callback with data set #0
 .
 Kohana_ArrTest::test_callback with data set #1
@@ -150,8 +192,108 @@ Kohana_ArrTest::test_unshift with data set #0
 .
 Kohana_ArrTest::test_unshift with data set #1
 .
+Kohana_CacheArithmeticMemcacheTest::test_decrement with data set #0
+S
+Kohana_CacheArithmeticMemcacheTest::test_decrement with data set #1
+S
+Kohana_CacheArithmeticMemcacheTest::test_decrement with data set #2
+S
+Kohana_CacheArithmeticMemcacheTest::test_decrement with data set #3
+S
+Kohana_CacheArithmeticMemcacheTest::test_delete
+S
+Kohana_CacheArithmeticMemcacheTest::test_delete_all
+S
+Kohana_CacheArithmeticMemcacheTest::test_increment with data set #0
+S
+Kohana_CacheArithmeticMemcacheTest::test_increment with data set #1
+S
+Kohana_CacheArithmeticMemcacheTest::test_increment with data set #2
+S
+Kohana_CacheArithmeticMemcacheTest::test_increment with data set #3
+S
+Kohana_CacheArithmeticMemcacheTest::test_multiple_set
+S
+Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #0
+S
+Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #1
+S
+Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #10
+S
+Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #2
+S
+Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #3
+S
+Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #4
+S
+Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #5
+S
+Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #6
+S
+Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #7
+S
+Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #8
+S
+Kohana_CacheArithmeticMemcacheTest::test_set_get with data set #9
+S
+Kohana_CacheTest::test_cloning_fails
+S
+Kohana_CacheTest::test_config with data set #0
+.
+Kohana_CacheTest::test_config with data set #1
+.
+Kohana_CacheTest::test_config with data set #2
+.
+Kohana_CacheTest::test_config with data set #3
+.
 Kohana_CacheTest::test_instance with data set #0
-FATAL
+.
+Kohana_CacheTest::test_sanitize_id with data set #0
+.
+Kohana_CacheTest::test_sanitize_id with data set #1
+.
+Kohana_CacheTest::test_sanitize_id with data set #2
+.
+Kohana_CacheTest::test_sanitize_id with data set #3
+.
+Kohana_CacheTest::test_sanitize_id with data set #4
+.
+Kohana_CacheTest::test_sanitize_id with data set #5
+.
+Kohana_Cache_FileTest::test_delete
+S
+Kohana_Cache_FileTest::test_delete_all
+S
+Kohana_Cache_FileTest::test_ignore_delete_file
+S
+Kohana_Cache_FileTest::test_set_get with data set #0
+S
+Kohana_Cache_FileTest::test_set_get with data set #1
+S
+Kohana_Cache_FileTest::test_set_get with data set #10
+S
+Kohana_Cache_FileTest::test_set_get with data set #2
+S
+Kohana_Cache_FileTest::test_set_get with data set #3
+S
+Kohana_Cache_FileTest::test_set_get with data set #4
+S
+Kohana_Cache_FileTest::test_set_get with data set #5
+S
+Kohana_Cache_FileTest::test_set_get with data set #6
+S
+Kohana_Cache_FileTest::test_set_get with data set #7
+S
+Kohana_Cache_FileTest::test_set_get with data set #8
+S
+Kohana_Cache_FileTest::test_set_get with data set #9
+S
+Kohana_Cache_FileTest::test_utf8 with data set #0
+S
+Kohana_Cache_FileTest::test_utf8 with data set #1
+S
+Kohana_Cache_FileTest::test_utf8 with data set #2
+S
 Kohana_ConfigTest::test_attach_adds_reader_and_returns_this
 .
 Kohana_ConfigTest::test_attach_adds_reader_to_front_of_queue
@@ -576,6 +718,8 @@ Kohana_ExceptionTest::test_constructor with data set #9
 .
 Kohana_ExceptionTest::test_text with data set #0
 .
+Kohana_FeedTest::test_create with data set #0
+.
 Kohana_FeedTest::test_parse with data set #0
 S
 Kohana_FileTest::test_mime with data set #0
@@ -883,7 +1027,7 @@ Kohana_I18nTest::test_lang with data set #0
 Kohana_I18nTest::test_lang with data set #1
 .
 Kohana_ImageTest::test_save_without_extension
-FATAL
+.
 Kohana_InflectorTest::test_camelize with data set #0
 .
 Kohana_InflectorTest::test_camelize with data set #1
@@ -971,7 +1115,61 @@ Kohana_InflectorTest::test_uncountable with data set #3
 Kohana_InflectorTest::test_uncountable with data set #4
 .
 Kohana_KodocTest::test_parse_basic with data set #0
-FATAL
+.
+Kohana_KodocTest::test_parse_basic with data set #1
+.
+Kohana_KodocTest::test_parse_basic with data set #2
+.
+Kohana_KodocTest::test_parse_basic with data set #3
+.
+Kohana_KodocTest::test_parse_basic with data set #4
+.
+Kohana_KodocTest::test_parse_basic with data set #5
+.
+Kohana_KodocTest::test_parse_basic with data set #6
+.
+Kohana_KodocTest::test_parse_basic with data set #7
+.
+Kohana_KodocTest::test_parse_basic with data set #8
+.
+Kohana_KodocTest::test_parse_basic with data set #9
+.
+Kohana_KodocTest::test_parse_tags with data set #0
+.
+Kohana_KodocTest::test_parse_tags with data set #1
+.
+Kohana_KodocTest::test_parse_tags with data set #10
+.
+Kohana_KodocTest::test_parse_tags with data set #11
+.
+Kohana_KodocTest::test_parse_tags with data set #12
+.
+Kohana_KodocTest::test_parse_tags with data set #2
+.
+Kohana_KodocTest::test_parse_tags with data set #3
+.
+Kohana_KodocTest::test_parse_tags with data set #4
+.
+Kohana_KodocTest::test_parse_tags with data set #5
+.
+Kohana_KodocTest::test_parse_tags with data set #6
+.
+Kohana_KodocTest::test_parse_tags with data set #7
+.
+Kohana_KodocTest::test_parse_tags with data set #8
+.
+Kohana_KodocTest::test_parse_tags with data set #9
+.
+Kohana_KodocTest::test_transparent_classes with data set #0
+.
+Kohana_KodocTest::test_transparent_classes with data set #1
+.
+Kohana_KodocTest::test_transparent_classes with data set #2
+.
+Kohana_KodocTest::test_transparent_classes with data set #3
+.
+Kohana_KodocTest::test_transparent_classes with data set #4
+.
 Kohana_LogTest::test_attach_attaches_log_writer_and_returns_this
 .
 Kohana_LogTest::test_attach_attaches_log_writer_min_max_and_returns_this
@@ -1144,10 +1342,32 @@ Kohana_Request_ClientTest::test_triggers_header_callbacks with data set #3
 .
 Kohana_Request_ClientTest::test_triggers_header_callbacks with data set #4
 .
+Kohana_Request_Client_CacheTest::test_cache_hit
+.
 Kohana_Request_Client_CacheTest::test_cache_miss
-FATAL
+.
 Kohana_Request_Client_CacheTest::test_cache_not_called_with_no_cache
-E
+.
+Kohana_Request_Client_CacheTest::test_cache_save
+.
+Kohana_Request_Client_CacheTest::test_set_cache with data set #0
+.
+Kohana_Request_Client_CacheTest::test_set_cache with data set #1
+.
+Kohana_Request_Client_CacheTest::test_set_cache with data set #2
+.
+Kohana_Request_Client_CacheTest::test_set_cache with data set #3
+.
+Kohana_Request_Client_CacheTest::test_set_cache with data set #4
+.
+Kohana_Request_Client_CacheTest::test_set_cache with data set #5
+.
+Kohana_Request_Client_CacheTest::test_set_cache with data set #6
+.
+Kohana_Request_Client_CacheTest::test_set_cache with data set #7
+.
+Kohana_Request_Client_CacheTest::test_set_cache with data set #8
+.
 Kohana_Request_Client_ExternalTest::test_execute with data set #0
 .
 Kohana_Request_Client_ExternalTest::test_execute with data set #1
@@ -1268,6 +1488,32 @@ Kohana_SessionTest::test_regenerate_tells_driver_to_regenerate
 .
 Kohana_SessionTest::test_set_adds_and_modifies_to_session_data
 .
+Kohana_SqliteTest::test_delete
+I
+Kohana_SqliteTest::test_delete_all
+I
+Kohana_SqliteTest::test_set_get with data set #0
+I
+Kohana_SqliteTest::test_set_get with data set #1
+I
+Kohana_SqliteTest::test_set_get with data set #10
+I
+Kohana_SqliteTest::test_set_get with data set #2
+I
+Kohana_SqliteTest::test_set_get with data set #3
+I
+Kohana_SqliteTest::test_set_get with data set #4
+I
+Kohana_SqliteTest::test_set_get with data set #5
+I
+Kohana_SqliteTest::test_set_get with data set #6
+I
+Kohana_SqliteTest::test_set_get with data set #7
+I
+Kohana_SqliteTest::test_set_get with data set #8
+I
+Kohana_SqliteTest::test_set_get with data set #9
+I
 Kohana_TextTest::test_alternate_alternates_between_parameters
 .
 Kohana_TextTest::test_alternate_resets_when_called_with_no_params_and_returns_empty_string
@@ -2184,7 +2430,45 @@ Kohana_ViewTest::test_instantiate with data set #1
 .
 Kohana_ViewTest::test_instantiate with data set #2
 .
+Kohana_WincacheTest::test_delete
+S
+Kohana_WincacheTest::test_delete_all
+S
+Kohana_WincacheTest::test_set_get with data set #0
+S
+Kohana_WincacheTest::test_set_get with data set #1
+S
+Kohana_WincacheTest::test_set_get with data set #10
+S
+Kohana_WincacheTest::test_set_get with data set #2
+S
+Kohana_WincacheTest::test_set_get with data set #3
+S
+Kohana_WincacheTest::test_set_get with data set #4
+S
+Kohana_WincacheTest::test_set_get with data set #5
+S
+Kohana_WincacheTest::test_set_get with data set #6
+S
+Kohana_WincacheTest::test_set_get with data set #7
+S
+Kohana_WincacheTest::test_set_get with data set #8
+S
+Kohana_WincacheTest::test_set_get with data set #9
+S
+Minion_TaskTest::test_convert_class_to_task with data set #0
+.
 Minion_TaskTest::test_convert_task_to_class_name with data set #0
-FATAL
+.
+Minion_TaskTest::test_convert_task_to_class_name with data set #1
+.
+Minion_TaskTest::test_convert_task_to_class_name with data set #2
+.
 Userguide_ControllerTest::test_file_finds_markdown_files with data set #0
-FATAL
+.
+Userguide_ControllerTest::test_file_finds_markdown_files with data set #1
+.
+Userguide_ControllerTest::test_file_finds_markdown_files with data set #2
+.
+Userguide_ControllerTest::test_file_finds_markdown_files with data set #3
+.

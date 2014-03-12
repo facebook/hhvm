@@ -1084,15 +1084,6 @@ void FuncEmitter::addUserAttribute(const StringData* name, TypedValue tv) {
   m_userAttributes[name] = tv;
 }
 
-int FuncEmitter::parseUserAttributes(Attr &attrs) const {
-  int ret = Native::AttrNone;
-
-  ret = ret | parseNativeAttributes(attrs);
-  ret = ret | parseHipHopAttributes(attrs);
-
-  return ret;
-}
-
 /* <<__Native>> user attribute causes systemlib declarations
  * to hook internal (C++) implementation of funcs/methods
  *
@@ -1132,20 +1123,6 @@ int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
     }
   }
   return ret;
-}
-
-/* <<__HipHopSpecific>> user attribute marks funcs/methods as HipHop specific
- * for reflection.
- */
-static const StaticString s_hiphopspecific("__HipHopSpecific");
-
-int FuncEmitter::parseHipHopAttributes(Attr &attrs) const {
-  auto it = m_userAttributes.find(s_hiphopspecific.get());
-  if (it != m_userAttributes.end()) {
-    attrs = attrs | AttrHPHPSpecific;
-  }
-
-  return Native::AttrNone;
 }
 
 void FuncEmitter::commit(RepoTxn& txn) const {

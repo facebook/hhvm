@@ -241,6 +241,7 @@ struct Func {
     return strncmp("86", methName->data(), 2) == 0;
   }
   bool isNoInjection() const { return bool(m_attrs & AttrNoInjection); }
+  bool isFoldable() const { return bool(m_attrs & AttrIsFoldable); }
 
   bool mayHaveThis() const {
     return isPseudoMain() || (isMethod() && !isStatic());
@@ -734,9 +735,11 @@ public:
   const UserAttributeMap& getUserAttributes() const {
     return m_userAttributes;
   }
-  int parseUserAttributes(Attr &attrs) const;
+  bool hasUserAttribute(const StringData* name) const {
+    auto it = m_userAttributes.find(name);
+    return it != m_userAttributes.end();
+  }
   int parseNativeAttributes(Attr &attrs) const;
-  int parseHipHopAttributes(Attr &attrs) const;
 
   void commit(RepoTxn& txn) const;
   Func* create(Unit& unit, PreClass* preClass = nullptr) const;

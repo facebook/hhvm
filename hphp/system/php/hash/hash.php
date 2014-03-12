@@ -15,7 +15,7 @@
  *                  returned.
  *                  On error, FALSE is returned.
  */
-<<__Native>>
+<<__Native,__IsFoldable>>
 function hash(string $algo, string $data,
               bool $raw_output = false): mixed;
 
@@ -25,7 +25,7 @@ function hash(string $algo, string $data,
  * @return array - A numerically indexed array containing the list of
  *                  supported hashing algorithms.
  */
-<<__Native>>
+<<__Native,__IsFoldable>>
 function hash_algos(): array<string>;
 
 /**
@@ -79,6 +79,7 @@ function hash_final(resource $context, bool $raw_output = false): string;
  *                  returned.
  *                  On error, FALSE is returned.
  */
+<<__IsFoldable>>
 function hash_hmac(?string $algo = null,
                    ?mixed $data = null,
                    ?string $key = null,

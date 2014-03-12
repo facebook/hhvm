@@ -6414,6 +6414,25 @@ static Attr buildAttrs(ModifierExpressionPtr mod, bool isRef = false) {
   return Attr(attrs);
 }
 
+/*
+ * <<__HipHopSpecific>> user attribute marks funcs/methods as HipHop specific
+ * for reflection.
+ * <<__IsFoldable>> Function has no side-effects and may be called at
+ * compile time with constant input to get deterministic output.
+ */
+const StaticString
+  s_HipHopSpecific("__HipHopSpecific"),
+  s_IsFoldable("__IsFoldable");
+
+static void parseUserAttributes(FuncEmitter* fe, Attr& attrs) {
+  if (fe->hasUserAttribute(s_HipHopSpecific.get())) {
+    attrs = attrs | AttrHPHPSpecific;
+  }
+  if (fe->hasUserAttribute(s_IsFoldable.get())) {
+    attrs = attrs | AttrIsFoldable;
+  }
+}
+
 static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
                              bool top, bool allowOverride) {
   FunctionScopePtr funcScope = meth->getFunctionScope();
@@ -6481,6 +6500,7 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
     attrs = attrs | AttrPublic;
   }
 
+  parseUserAttributes(fe, attrs);
   return attrs;
 }
 
@@ -6693,6 +6713,7 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
       attributes = attributes | AttrAllowOverride;
     }
   }
+  parseUserAttributes(fe, attributes);
 
   const Location* sLoc = meth->getLocation().get();
   fe->setLocation(sLoc->line0, sLoc->line1);
@@ -6712,7 +6733,7 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
 
   if (!nif) {
     bif = Native::unimplementedWrapper;
-  } else if (fe->parseUserAttributes(attributes) & Native::AttrActRec) {
+  } else if (fe->parseNativeAttributes(attributes) & Native::AttrActRec) {
     // Call this native function with a raw ActRec*
     // rather than pulling out args for normal func calling
     bif = nif;

@@ -804,7 +804,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
     }
   }
 
-  if (!m_classScope && !m_funcScope->isUserFunction()) {
+  if (!m_classScope) {
     if (m_type == FunType::Unknown && m_funcScope->isFoldable()) {
       Array arr;
       if (m_params) {

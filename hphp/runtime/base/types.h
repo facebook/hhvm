@@ -389,6 +389,7 @@ enum Attr {
   AttrNative        = (1 << 23), //                     X    //
   AttrVMEntry       = (1 << 24), //                     X    //
   AttrHPHPSpecific  = (1 << 25), //                     X    //
+  AttrIsFoldable    = (1 << 26), //                     X    //
 };
 
 inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }

@@ -42,8 +42,6 @@ using HPHP::ScopedMem;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern void const_load();
-
 typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
 
 void apcExtension::moduleLoad(Hdf config) {
@@ -433,6 +431,11 @@ public:
   void onThreadExit() {}
 };
 
+EXTERNALLY_VISIBLE
+void const_load() {
+  // legacy entry point, in the process of migrating away.
+}
+
 static size_t s_const_map_size = 0;
 
 EXTERNALLY_VISIBLE
@@ -447,19 +450,17 @@ void apc_load(int thread) {
       // this had better never happen...
 
       // Fill out a cache_info to prevent g++ from optimizing out
-      // the calls to const_load_impl*
+      // the calls to apc_load_impl*
       cache_info info;
       info.a_name = "dummy";
       info.use_const = true;
 
       const_load();
-      const_load_impl(&info, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
       const_load_impl_compressed(&info,
                                  NULL, NULL, NULL,
                                  NULL, NULL, NULL,
                                  NULL, NULL, NULL, NULL,
                                  NULL, NULL, NULL, NULL);
-      apc_load_impl(&info, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
       apc_load_impl_compressed(&info,
                                NULL, NULL, NULL,
                                NULL, NULL, NULL,
@@ -527,238 +528,6 @@ size_t get_const_map_size() {
   return s_const_map_size;
 }
 
-//define in ext_fb.cpp
-extern void const_load_set(const String& key, const Variant& value);
-
-///////////////////////////////////////////////////////////////////////////////
-// Constant and APC priming with uncompressed data
-// Note (qixin): this is going to be deprecated by the compressed version.
-
-static int count_items(const char **p, int step) {
-  int count = 0;
-  for (const char **k = p; *k; k += step) {
-    count++;
-  }
-  return count;
-}
-
-EXTERNALLY_VISIBLE
-void const_load_impl(struct cache_info *info,
-                     const char **int_keys, long long *int_values,
-                     const char **char_keys, char *char_values,
-                     const char **strings, const char **objects,
-                     const char **thrifts, const char **others) {
-  if (!apcExtension::EnableConstLoad || !info || !info->use_const) return;
-  {
-    int count = count_items(int_keys, 2);
-    if (count) {
-      const char **k = int_keys;
-      long long* v = int_values;
-      for (int i = 0; i < count; i++, k += 2) {
-        String key(*k, (int)(int64_t)*(k+1), CopyString);
-        int64_t value = *v++;
-        const_load_set(key, value);
-      }
-    }
-  }
-  {
-    int count = count_items(char_keys, 2);
-    if (count) {
-      const char **k = char_keys;
-      char *v = char_values;
-      for (int i = 0; i < count; i++, k += 2) {
-        String key(*k, (int)(int64_t)*(k+1), CopyString);
-        Variant value;
-        switch (*v++) {
-        case 0: value = false; break;
-        case 1: value = true; break;
-        case 2: value = uninit_null(); break;
-        default:
-          throw Exception("bad apc archive, unknown char type");
-        }
-        const_load_set(key, value);
-      }
-    }
-  }
-  {
-    int count = count_items(strings, 4);
-    if (count) {
-      const char **p = strings;
-      for (int i = 0; i < count; i++, p += 4) {
-        String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        const_load_set(key, value);
-      }
-    }
-  }
-  // unserialize_from_string object is extremely slow here;
-  // currently turned off: no objects in haste_maps.
-  if (false) {
-    int count = count_items(objects, 4);
-    if (count) {
-      const char **p = objects;
-      for (int i = 0; i < count; i++, p += 4) {
-        String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        const_load_set(key, unserialize_from_string(value));
-      }
-    }
-  }
-  {
-    int count = count_items(thrifts, 4);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **p = thrifts;
-      for (int i = 0; i < count; i++, p += 4) {
-        String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        Variant success;
-        Variant v = f_fb_unserialize(value, ref(success));
-        if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_unserialize failed");
-        }
-        const_load_set(key, v);
-      }
-    }
-  }
-  {//Would we use others[]?
-    int count = count_items(others, 4);
-    if (count) {
-      const char **p = others;
-      for (int i = 0; i < count; i++, p += 4) {
-        String key(*p, (int)(int64_t)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        Variant v = unserialize_from_string(value);
-        if (same(v, false)) {
-          throw Exception("bad apc archive, unserialize_from_string failed");
-        }
-        const_load_set(key, v);
-      }
-    }
-  }
-}
-
-EXTERNALLY_VISIBLE
-void apc_load_impl(struct cache_info *info,
-                   const char **int_keys, long long *int_values,
-                   const char **char_keys, char *char_values,
-                   const char **strings, const char **objects,
-                   const char **thrifts, const char **others) {
-  if (!apcExtension::ForceConstLoadToAPC) {
-    if (apcExtension::EnableConstLoad && info && info->use_const) return;
-  }
-  auto& s = s_apc_store[0];
-  {
-    int count = count_items(int_keys, 2);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **k = int_keys;
-      long long*v = int_values;
-      for (int i = 0; i < count; i++, k += 2) {
-        auto& item = vars[i];
-        item.key = *k;
-        item.len = (int)(int64_t)*(k+1);
-        s.constructPrime(*v++, item);
-      }
-      s.prime(vars);
-    }
-  }
-  {
-    int count = count_items(char_keys, 2);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **k = char_keys;
-      char *v = char_values;
-      for (int i = 0; i < count; i++, k += 2) {
-        auto& item = vars[i];
-        item.key = *k;
-        item.len = (int)(int64_t)*(k+1);
-        switch (*v++) {
-        case 0: s.constructPrime(false, item); break;
-        case 1: s.constructPrime(true , item); break;
-        case 2: s.constructPrime(uninit_null() , item); break;
-        default:
-          throw Exception("bad apc archive, unknown char type");
-        }
-      }
-      s.prime(vars);
-    }
-  }
-  {
-    int count = count_items(strings, 4);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **p = strings;
-      for (int i = 0; i < count; i++, p += 4) {
-        auto& item = vars[i];
-        item.key = *p;
-        item.len = (int)(int64_t)*(p+1);
-        // Strings would be copied into APC anyway.
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        s.constructPrime(value, item, false);
-      }
-      s.prime(vars);
-    }
-  }
-  {
-    int count = count_items(objects, 4);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **p = objects;
-      for (int i = 0; i < count; i++, p += 4) {
-        auto& item = vars[i];
-        item.key = *p;
-        item.len = (int)(int64_t)*(p+1);
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        s.constructPrime(value, item, true);
-      }
-      s.prime(vars);
-    }
-  }
-  {
-    int count = count_items(thrifts, 4);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **p = thrifts;
-      for (int i = 0; i < count; i++, p += 4) {
-        auto& item = vars[i];
-        item.key = *p;
-        item.len = (int)(int64_t)*(p+1);
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        Variant success;
-        Variant v = f_fb_unserialize(value, ref(success));
-        if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_unserialize failed");
-        }
-        s.constructPrime(v, item);
-      }
-      s.prime(vars);
-    }
-  }
-  {
-    int count = count_items(others, 4);
-    if (count) {
-      std::vector<KeyValuePair> vars(count);
-      const char **p = others;
-      for (int i = 0; i < count; i++, p += 4) {
-        auto& item = vars[i];
-        item.key = *p;
-        item.len = (int)(int64_t)*(p+1);
-
-        String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
-        Variant v = unserialize_from_string(value);
-        if (same(v, false)) {
-          // we can't possibly get here if it was a boolean "false" that's
-          // supposed to be serialized as a char
-          throw Exception("bad apc archive, unserialize_from_string failed");
-        }
-        s.constructPrime(v, item);
-      }
-      s.prime(vars);
-    }
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Constant and APC priming with compressed data
 
@@ -771,133 +540,11 @@ void const_load_impl_compressed
      int *object_lens, const char *objects,
      int *thrift_lens, const char *thrifts,
      int *other_lens, const char *others) {
-  if (!apcExtension::EnableConstLoad || !info || !info->use_const) return;
-  {
-    int count = int_lens[0];
-    int len = int_lens[1];
-    if (count) {
-      char *keys = gzdecode(int_keys, len);
-      if (keys == NULL) throw Exception("bad compressed const archive.");
-      ScopedMem holder(keys);
-      const char *k = keys;
-      long long* v = int_values;
-      for (int i = 0; i < count; i++) {
-        String key(k, int_lens[i + 2], CopyString);
-        int64_t value = *v++;
-        const_load_set(key, value);
-        k += int_lens[i + 2] + 1;
-      }
-      assert((k - keys) == len);
-    }
-  }
-  {
-    int count = char_lens[0];
-    int len = char_lens[1];
-    if (count) {
-      char *keys = gzdecode(char_keys, len);
-      if (keys == NULL) throw Exception("bad compressed const archive.");
-      ScopedMem holder(keys);
-      const char *k = keys;
-      char *v = char_values;
-      for (int i = 0; i < count; i++) {
-        String key(k, char_lens[i + 2], CopyString);
-        Variant value;
-        switch (*v++) {
-        case 0: value = false; break;
-        case 1: value = true; break;
-        case 2: value = uninit_null(); break;
-        default:
-          throw Exception("bad const archive, unknown char type");
-        }
-        const_load_set(key, value);
-        k += char_lens[i + 2] + 1;
-      }
-      assert((k - keys) == len);
-    }
-  }
-  {
-    int count = string_lens[0] / 2;
-    int len = string_lens[1];
-    if (count) {
-      char *decoded = gzdecode(strings, len);
-      if (decoded == NULL) throw Exception("bad compressed const archive.");
-      ScopedMem holder(decoded);
-      const char *p = decoded;
-      for (int i = 0; i < count; i++) {
-        String key(p, string_lens[i + i + 2], CopyString);
-        p += string_lens[i + i + 2] + 1;
-        String value(p, string_lens[i + i + 3], CopyString);
-        const_load_set(key, value);
-        p += string_lens[i + i + 3] + 1;
-      }
-      assert((p - decoded) == len);
-    }
-  }
-  // unserialize_from_string object is extremely slow here;
-  // currently turned off: no objects in haste_maps.
-  if (false) {
-    int count = object_lens[0] / 2;
-    int len = object_lens[1];
-    if (count) {
-      char *decoded = gzdecode(objects, len);
-      if (decoded == NULL) throw Exception("bad compressed const archive.");
-      ScopedMem holder(decoded);
-      const char *p = decoded;
-      for (int i = 0; i < count; i++) {
-        String key(p, object_lens[i + i + 2], CopyString);
-        p += object_lens[i + i + 2] + 1;
-        String value(p, object_lens[i + i + 3], CopyString);
-        const_load_set(key, unserialize_from_string(value));
-        p += object_lens[i + i + 3] + 1;
-      }
-      assert((p - decoded) == len);
-    }
-  }
-  {
-    int count = thrift_lens[0] / 2;
-    int len = thrift_lens[1];
-    if (count) {
-      char *decoded = gzdecode(thrifts, len);
-      if (decoded == NULL) throw Exception("bad compressed const archive.");
-      ScopedMem holder(decoded);
-      const char *p = decoded;
-      for (int i = 0; i < count; i++) {
-        String key(p, thrift_lens[i + i + 2], CopyString);
-        p += thrift_lens[i + i + 2] + 1;
-        String value(p, thrift_lens[i + i + 3], CopyString);
-        Variant success;
-        Variant v = f_fb_unserialize(value, ref(success));
-        if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_unserialize failed");
-        }
-        const_load_set(key, v);
-        p += thrift_lens[i + i + 3] + 1;
-      }
-      assert((p - decoded) == len);
-    }
-  }
-  {//Would we use others[]?
-    int count = other_lens[0] / 2;
-    int len = other_lens[1];
-    if (count) {
-      char *decoded = gzdecode(others, len);
-      if (decoded == NULL) throw Exception("bad compressed const archive.");
-      ScopedMem holder(decoded);
-      const char *p = decoded;
-      for (int i = 0; i < count; i++) {
-        String key(p, other_lens[i + i + 2], CopyString);
-        p += other_lens[i + i + 2] + 1;
-        String value(p, other_lens[i + i + 3], CopyString);
-        Variant v = unserialize_from_string(value);
-        if (same(v, false)) {
-          throw Exception("bad apc archive, unserialize_from_string failed");
-        }
-        const_load_set(key, v);
-        p += other_lens[i + i + 3] + 1;
-      }
-      assert((p - decoded) == len);
-    }
-  }
+  /*
+   * Disabled, but we must keep providing the function for now so
+   * apc_prime.so's built with newer hhvms work with older hhvms.
+   */
+  return;
 }
 
 EXTERNALLY_VISIBLE

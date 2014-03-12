@@ -1213,14 +1213,4 @@ String f_fb_lazy_realpath(const String& filename) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void const_load_set(const String& key, const Variant& value) {
-  // legacy entry point, no longer used.
-}
-
-EXTERNALLY_VISIBLE
-void const_load() {
-  // legacy entry point, no longer used.
-}
-
-///////////////////////////////////////////////////////////////////////////////
 }

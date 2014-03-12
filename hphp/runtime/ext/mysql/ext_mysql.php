@@ -76,7 +76,7 @@ function mysql_close(?resource $link_identifier = NULL): bool;
  *
  * @return resource - Returns a MySQL link identifier on success.
  */
-<<__Native>>
+<<__Native("ActRec")>>
 function mysql_connect(string $server = "",
                        string $username = "",
                        string $password = "",
@@ -85,7 +85,7 @@ function mysql_connect(string $server = "",
                        int $connect_timeout_ms = -1,
                        int $query_timeout_ms = -1): mixed;
 
-<<__Native, __HipHopSpecific>>
+<<__Native("ActRec"), __HipHopSpecific>>
 function mysql_connect_with_db(string $server = "",
                                string $username = "",
                                string $password = "",
@@ -663,7 +663,7 @@ function mysql_num_rows(resource $result): mixed;
  * @return resource - Returns a MySQL persistent link identifier on
  *   success, or FALSE on failure.
  */
-<<__Native>>
+<<__Native("ActRec")>>
 function mysql_pconnect(string $server = '',
                         string $username = '',
                         string $password = '',
@@ -671,7 +671,7 @@ function mysql_pconnect(string $server = '',
                         int $connect_timeout_ms = -1,
                         int $query_timeout_ms = -1): mixed;
 
-<<__Native, __HipHopSpecific>>
+<<__Native("ActRec"), __HipHopSpecific>>
 function mysql_pconnect_with_db(string $server = '',
                                 string $username = '',
                                 string $password = '',

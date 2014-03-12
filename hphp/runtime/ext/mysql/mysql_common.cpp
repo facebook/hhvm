@@ -1224,7 +1224,7 @@ static bool php_mysql_read_rows(MYSQL *mysql, const Variant& result) {
   unsigned char *cp;
   unsigned int fields = mysql->field_count;
   NET *net = &mysql->net;
-  MySQLResult *res = php_mysql_extract_result(result);
+  MySQLResult *res = php_mysql_extract_result(result.toResource());
 
   if ((pkt_len = cli_safe_read(mysql)) == packet_error) {
     return false;

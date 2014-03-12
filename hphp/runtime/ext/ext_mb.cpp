@@ -2195,7 +2195,8 @@ Variant f_mb_preferred_mime_name(const String& encoding) {
   return String(preferred_name, CopyString);
 }
 
-static Variant php_mb_substr(const String& str, int from, int len,
+static Variant php_mb_substr(const String& str, int from,
+                             const Variant& vlen,
                              const String& encoding, bool substr) {
   mbfl_string string;
   mbfl_string_init(&string);
@@ -2218,7 +2219,8 @@ static Variant php_mb_substr(const String& str, int from, int len,
   } else {
     size = str.size();
   }
-  if (len == 0x7FFFFFFF) {
+  int len = vlen.toInt64();
+  if (vlen.isNull() || len == 0x7FFFFFFF) {
     len = size;
   }
 
@@ -2262,12 +2264,14 @@ static Variant php_mb_substr(const String& str, int from, int len,
   return false;
 }
 
-Variant f_mb_substr(const String& str, int start, int length /* = 0x7FFFFFFF */,
+Variant f_mb_substr(const String& str, int start,
+                    const Variant& length /*= uninit_null() */,
                     const String& encoding /* = null_string */) {
   return php_mb_substr(str, start, length, encoding, true);
 }
 
-Variant f_mb_strcut(const String& str, int start, int length /* = 0x7FFFFFFF */,
+Variant f_mb_strcut(const String& str, int start,
+                    const Variant& length /*= uninit_null() */,
                     const String& encoding /* = null_string */) {
   return php_mb_substr(str, start, length, encoding, false);
 }

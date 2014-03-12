@@ -63,7 +63,7 @@ Variant f_mb_regex_encoding(const String& encoding = null_string);
 String f_mb_regex_set_options(const String& options = null_string);
 bool f_mb_send_mail(const String& to, const String& subject, const String& message, const String& headers = null_string, const String& extra_cmd = null_string);
 Variant f_mb_split(const String& pattern, const String& str, int count = -1);
-Variant f_mb_strcut(const String& str, int start, int length = 0x7FFFFFFF, const String& encoding = null_string);
+Variant f_mb_strcut(const String& str, int start, const Variant& length = uninit_null(), const String& encoding = null_string);
 Variant f_mb_strimwidth(const String& str, int start, int width, const String& trimmarker = null_string, const String& encoding = null_string);
 Variant f_mb_stripos(const String& haystack, const String& needle, int offset = 0, const String& encoding = null_string);
 Variant f_mb_stristr(const String& haystack, const String& needle, bool part = false, const String& encoding = null_string);
@@ -79,7 +79,7 @@ Variant f_mb_strtoupper(const String& str, const String& encoding = null_string)
 Variant f_mb_strwidth(const String& str, const String& encoding = null_string);
 Variant f_mb_substitute_character(const Variant& substrchar = null_variant);
 Variant f_mb_substr_count(const String& haystack, const String& needle, const String& encoding = null_string);
-Variant f_mb_substr(const String& str, int start, int length = 0x7FFFFFFF, const String& encoding = null_string);
+Variant f_mb_substr(const String& str, int start, const Variant& length = uninit_null(), const String& encoding = null_string);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

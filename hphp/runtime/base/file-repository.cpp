@@ -511,9 +511,20 @@ void FileRepository::deleteOrphanedUnits() {
 struct ResolveIncludeContext {
   String path; // translated path of the file
   struct stat* s; // stat for the file
+  bool allow_dir; // return true for dirs?
 };
 
 const StaticString s_file_url("file://");
+
+static bool findFile(const StringData *path, struct stat *s, bool allow_dir) {
+  auto ret = HPHP::Eval::FileRepository::findFile(path, s);
+  if (S_ISDIR(s->st_mode) && allow_dir) {
+    // The call explicitly populates the struct for dirs, but returns false for
+    // them because it is geared toward file includes.
+    return true;
+  }
+  return ret;
+}
 
 static bool findFileWrapper(const String& file, void* ctx) {
   ResolveIncludeContext* context = (ResolveIncludeContext*)ctx;
@@ -536,16 +547,14 @@ static bool findFileWrapper(const String& file, void* ctx) {
   // whether the file is in an allowed directory.
   String translatedPath = File::TranslatePathKeepRelative(file);
   if (file[0] != '/') {
-    if (HPHP::Eval::FileRepository::findFile(translatedPath.get(),
-                                             context->s)) {
+    if (findFile(translatedPath.get(), context->s, context->allow_dir)) {
       context->path = translatedPath;
       return true;
     }
     return false;
   }
   if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
-    if (HPHP::Eval::FileRepository::findFile(translatedPath.get(),
-                                             context->s)) {
+    if (findFile(translatedPath.get(), context->s, context->allow_dir)) {
       context->path = translatedPath;
       return true;
     }
@@ -558,8 +567,7 @@ static bool findFileWrapper(const String& file, void* ctx) {
     }
   }
   String rel_path(FileUtil::relativePath(server_root, translatedPath.data()));
-  if (HPHP::Eval::FileRepository::findFile(rel_path.get(),
-                                           context->s)) {
+  if (findFile(rel_path.get(), context->s, context->allow_dir)) {
     context->path = rel_path;
     return true;
   }
@@ -567,11 +575,11 @@ static bool findFileWrapper(const String& file, void* ctx) {
 }
 
 String resolveVmInclude(StringData* path, const char* currentDir,
-                        struct stat *s) {
+                        struct stat *s, bool allow_dir /* = false */) {
   ResolveIncludeContext ctx;
   ctx.s = s;
-  resolve_include(path, currentDir, findFileWrapper,
-                  (void*)&ctx);
+  ctx.allow_dir = allow_dir;
+  resolve_include(path, currentDir, findFileWrapper, (void*)&ctx);
   // If resolve_include() could not find the file, return NULL
   return ctx.path;
 }

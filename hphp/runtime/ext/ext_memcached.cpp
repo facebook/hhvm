@@ -630,7 +630,7 @@ memcached_return_t doServerListCallback(const memcached_st *ptr,
 }
 
 Array c_Memcached::t_getserverlist() {
-  Array returnValue;
+  Array returnValue = Array::Create();
   memcached_server_function callbacks[] = { doServerListCallback };
   memcached_server_cursor(&m_impl->memcached, callbacks, &returnValue, 1);
   return returnValue;

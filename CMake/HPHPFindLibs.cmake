@@ -449,6 +449,7 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${CURL_LIBRARIES})
 	target_link_libraries(${target} ${LIBGLOG_LIBRARY})
 	target_link_libraries(${target} ${LIBMAGICKWAND_LIBRARIES})
+	target_link_libraries(${target} ${LIBMAGICKCORE_LIBRARIES})
 
 if (LibXed_LIBRARY)
 	target_link_libraries(${target} ${LibXed_LIBRARY})

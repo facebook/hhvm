@@ -18,7 +18,7 @@ object(stdClass)#1 (1) {
   ["prop"]=>
   string(1) "A"
 }
-HipHop Warning: Cannot access property on non-object in %s on line 17
+HipHop Notice: Cannot access property on non-object in %s on line 17
 string(1) " "
-HipHop Warning: Cannot access property on non-object in %s on line 17
+HipHop Notice: Cannot access property on non-object in %s on line 17
 string(1) " "

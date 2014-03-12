@@ -1664,7 +1664,7 @@ inline DataType propPreNull(TypedValue& tvScratch, TypedValue*& result) {
   tvWriteNull(&tvScratch);
   result = &tvScratch;
   if (warn) {
-    raise_warning("Cannot access property on non-object");
+    raise_notice("Cannot access property on non-object");
   }
   return KindOfNull;
 }
@@ -1801,7 +1801,7 @@ inline bool IssetEmptyProp(Class* ctx, TypedValue* base, TypedValue* key) {
 
 template <bool setResult>
 inline void SetPropNull(Cell* val) {
-  raise_warning("Cannot access property on non-object");
+  raise_notice("Cannot access property on non-object");
   if (setResult) {
     tvRefcountedDecRefCell(val);
     tvWriteNull(val);

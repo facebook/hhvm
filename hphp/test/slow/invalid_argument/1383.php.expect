@@ -1,6 +1,6 @@
 int(4096)
 string(74) "Argument 1 passed to x::__construct() must be an instance of y, null given"
-int(2)
+int(8)
 string(36) "Cannot access property on non-object"
 NULL
 object(x)#1 (0) {

@@ -107,7 +107,7 @@ bool Object::more(CObjRef v2) const {
 }
 
 static Variant warn_non_object() {
-  raise_warning("Cannot access property on non-object");
+  raise_notice("Cannot access property on non-object");
   return uninit_null();
 }
 

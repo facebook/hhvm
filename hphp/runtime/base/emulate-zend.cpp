@@ -63,6 +63,12 @@ int emulate_zend(int argc, char** argv) {
       newargv.push_back(argv[cnt++]);
       continue;
     }
+    if (strcmp(argv[cnt], "-a") == 0) {
+      need_file = false;
+      newargv.push_back("-a");
+      cnt++;
+      continue;
+    }
     if (strcmp(argv[cnt], "-l") == 0 || strcmp(argv[cnt], "--lint") == 0) {
       cnt++;
       lint = true;

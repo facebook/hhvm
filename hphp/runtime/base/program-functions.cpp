@@ -1009,6 +1009,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("repo-schema", "display the repository schema id")
     ("mode,m", value<string>(&po.mode)->default_value("run"),
      "run | debug (d) | server (s) | daemon | replay | translate (t)")
+    ("interactive,a", "Shortcut for --mode debug") // -a is from PHP5
     ("config,c", value<vector<string> >(&po.config)->composing(),
      "load specified config file")
     ("config-value,v", value<std::vector<std::string>>(&po.confStrings)->composing(),
@@ -1110,6 +1111,9 @@ static int execute_program_impl(int argc, char** argv) {
     // Process the options
     store(opts, vm);
     notify(vm);
+    if (vm.count("interactive") /* or -a */) {
+      po.mode = "debug";
+    }
     if (po.mode == "d") po.mode = "debug";
     if (po.mode == "s") po.mode = "server";
     if (po.mode == "t") po.mode = "translate";

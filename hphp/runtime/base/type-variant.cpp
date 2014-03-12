@@ -531,7 +531,7 @@ Object Variant::toObjectHelper() const {
       obj->o_set(s_scalar, *this, false);
       return obj;
     }
-  case KindOfArray:   return m_data.parr->toObject();
+  case KindOfArray:   return ObjectData::FromArray(m_data.parr);
   case KindOfObject:  return m_data.pobj;
   default:
     assert(false);

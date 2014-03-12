@@ -85,11 +85,6 @@ public:
   static ArrayData *CreateRef(const Variant& value);
   static ArrayData *CreateRef(const Variant& name, const Variant& value);
 
-  /**
-   * Type conversion functions. All other types are handled inside Array class.
-   */
-  Object toObject() const;
-
   /*
    * Called to return an ArrayData to the smart allocator.  This is
    * normally called when the reference count goes to zero (e.g. via a

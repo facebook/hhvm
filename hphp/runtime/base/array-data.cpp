@@ -388,10 +388,6 @@ ArrayData *ArrayData::NonSmartCopy(const ArrayData*) {
 ///////////////////////////////////////////////////////////////////////////////
 // reads
 
-Object ArrayData::toObject() const {
-  return ObjectData::FromArray(const_cast<ArrayData*>(this));
-}
-
 int ArrayData::compare(const ArrayData *v2) const {
   assert(v2);
 

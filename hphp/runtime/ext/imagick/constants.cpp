@@ -25,6 +25,12 @@ const StaticString
   // coord
   s_x("x"),
   s_y("y"),
+  // size
+  s_columns("columns"),
+  s_rows("rows"),
+  // geometry
+  s_width("width"),
+  s_height("height"),
   // affine
   s_sx("sx"),
   s_rx("rx"),
@@ -40,6 +46,57 @@ const StaticString
   s_hue("hue"),
   s_saturation("saturation"),
   s_luminosity("luminosity"),
+  // extrema
+  s_min("min"),
+  s_max("max"),
+  // channel extrema/range
+  s_minima("minima"),
+  s_maxima("maxima"),
+  // channel kurtosis
+  s_kurtosis("kurtosis"),
+  s_skewness("skewness"),
+  // channel mean
+  s_mean("mean"),
+  s_standardDeviation("standardDeviation"),
+  // other channel statistics
+  s_depth("depth"),
+  // quantum depth
+  s_quantumDepthLong("quantumDepthLong"),
+  s_quantumDepthString("quantumDepthString"),
+  // quantum range
+  s_quantumRangeLong("quantumRangeLong"),
+  s_quantumRangeString("quantumRangeString"),
+  // version
+  s_versionNumber("versionNumber"),
+  s_versionString("versionString"),
+  // identify
+  s_imageName("imageName"),
+  s_mimetype("mimetype"),
+  s_geometry("geometry"),
+  s_resolution("resolution"),
+  s_signature("signature"),
+  s_rawOutput("rawOutput"),
+  s_format("format"),
+  s_units("units"),
+  s_type("type"),
+  s_colorSpace("colorSpace"),
+  s_fileSize("fileSize"),
+  s_compression("compression"),
+  // font metrics
+  s_characterWidth("characterWidth"),
+  s_characterHeight("characterHeight"),
+  s_ascender("ascender"),
+  s_descender("descender"),
+  s_textWidth("textWidth"),
+  s_textHeight("textHeight"),
+  s_maxHorizontalAdvance("maxHorizontalAdvance"),
+  s_x1("x1"),
+  s_y1("y1"),
+  s_x2("x2"),
+  s_y2("y2"),
+  s_originX("originX"),
+  s_originY("originY"),
+  s_boundingBox("boundingBox"),
   // class name
   s_Imagick("Imagick"),
   s_ImagickDraw("ImagickDraw"),

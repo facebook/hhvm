@@ -7,7 +7,8 @@ try {
   $im->tintImage("red", 0.5);
   echo "Casting color and opacity succeeded\n";
 } catch (Exception $e) {
-  echo "Casting color and opacity failed: " , $e->getMessage() . PHP_EOL;
+  echo "Casting color and opacity failed: ",
+    $e->getMessage() . PHP_EOL;
 }
 
 try {
@@ -17,7 +18,8 @@ try {
   $im->tintImage($pixel, $pixel);
   echo "Setting color and opacity without cast succeeded\n";
 } catch (Exception $e) {
-  echo "Setting color and opacity without cast failed: " , $e->getMessage() . PHP_EOL;
+  echo "Setting color and opacity without cast failed: ",
+    $e->getMessage() . PHP_EOL;
 }
 
 ?>

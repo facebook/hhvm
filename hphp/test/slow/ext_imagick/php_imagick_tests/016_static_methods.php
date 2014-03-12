@@ -11,9 +11,3 @@ echo gettype ($im->queryFonts ()) . PHP_EOL;
 echo 'success';
 
 ?>
---EXPECT--
-array
-array
-array
-array
-success

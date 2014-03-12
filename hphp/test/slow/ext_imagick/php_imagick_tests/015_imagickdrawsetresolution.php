@@ -4,7 +4,7 @@ $im = new Imagick();
 $im->newImage(1000,1000, "white","png");
 
 $draw = new ImagickDraw();
-$draw->setFont (dirname (__FILE__) . '/anonymous_pro_minus.ttf');
+$draw->setFont(__DIR__.'/anonymous_pro_minus.ttf');
 $draw->setFontSize(72);
 
 $draw->setResolution(10, 10);
@@ -18,6 +18,3 @@ var_dump($small['textWidth'] < $large['textWidth']);
 echo "OK\n";
 
 ?>
---EXPECT--
-bool(true)
-OK

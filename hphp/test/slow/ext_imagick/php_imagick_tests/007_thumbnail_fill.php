@@ -16,6 +16,3 @@ if ($color->isPixelSimilar("pink", 0))
 else
   var_dump ($color->getColorAsString());
 ?>
---EXPECT--
-Similar
-Similar

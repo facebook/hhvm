@@ -10,6 +10,3 @@ $cloned->setImageFormat ('png');
 var_dump ($cloned->getImageLength ());
 
 ?>
---EXPECT--
-int(9673)
-int(0)

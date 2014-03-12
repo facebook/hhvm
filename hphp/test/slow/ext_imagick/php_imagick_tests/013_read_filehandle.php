@@ -16,5 +16,3 @@ unlink($file);
 echo 'success';
 
 ?>
---EXPECT--
-success

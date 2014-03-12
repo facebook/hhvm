@@ -18,7 +18,6 @@
 #ifndef incl_HPHP_EXT_IMAGICK_H_
 #define incl_HPHP_EXT_IMAGICK_H_
 
-#include <utility>
 #include <vector>
 
 #include <wand/MagickWand.h>
@@ -53,7 +52,7 @@ class ImagickExtension : public Extension {
 // PHP Exceptions and Classes
 #define IMAGICK_DEFINE_CLASS(CLS) \
   class CLS { \
-  public: \
+   public: \
     static Object allocObject() { \
       if (cls == nullptr) { \
         initClass(); \
@@ -71,7 +70,7 @@ class ImagickExtension : public Extension {
       return ret; \
     } \
     \
-  private: \
+   private: \
     static void initClass() { \
       cls = Unit::lookupClass(StringData::Make(#CLS)); \
     } \
@@ -111,13 +110,14 @@ template<typename Wand>
 class WandResource : public SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(WandResource<Wand>);
 
-public:
+ public:
   explicit WandResource(Wand* wand, bool owner) :
-    m_wand(wand), m_owner(owner) {
+      m_wand(wand), m_owner(owner) {
   }
 
-  explicit WandResource(std::pair<Wand*, bool> args) :
-    WandResource(args.first, args.second) {
+  WandResource(WandResource<Wand> &&res) :
+      m_wand(res.m_wand), m_owner(res.m_owner) {
+    res.releaseWand();
   }
 
   ~WandResource() {
@@ -139,7 +139,12 @@ public:
     return m_wand;
   }
 
-private:
+  Wand* releaseWand() {
+    m_owner = false;
+    return m_wand;
+  }
+
+ private:
   Wand* m_wand;
   bool m_owner;
 };
@@ -241,23 +246,39 @@ WandResource<PixelIterator>* getPixelIteratorResource(const Object& obj) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Common Helper
-ALWAYS_INLINE
-void raiseDeprecated(const char* className, const char* methodName) {
-  raise_message(ErrorConstants::ErrorModes::PHP_DEPRECATED,
-                "%s::%s method is deprecated and it's use should be avoided",
-                className, methodName);
-}
+// IO
+bool isMagickPseudoFormat(const String& path, char mode = '*');
 
-ALWAYS_INLINE
+using ImagickFileOp =
+  std::function<MagickBooleanType(MagickWand*, const char*)>;
+using ImagickHandleOp =
+  std::function<MagickBooleanType(MagickWand*, FILE*)>;
+
+void imagickReadOp(MagickWand* wand,
+                   const String& path,
+                   const ImagickFileOp& op);
+
+void imagickWriteOp(MagickWand* wand,
+                    const String& path,
+                    const ImagickFileOp& op);
+
+void imagickReadOp(MagickWand* wand,
+                   const Resource& res,
+                   const ImagickHandleOp& op);
+
+void imagickWriteOp(MagickWand* wand,
+                    const Resource& res,
+                    const String& format,
+                    const ImagickHandleOp& op);
+
+//////////////////////////////////////////////////////////////////////////////
+// Common Helper
+void raiseDeprecated(const char* className, const char* methodName);
+
 void raiseDeprecated(const char* className,
                      const char* methodName,
                      const char* newClass,
-                     const char* newMethod) {
-  raise_message(ErrorConstants::ErrorModes::PHP_DEPRECATED,
-                "%s::%s is deprecated. %s::%s should be used instead",
-                className, methodName, newClass, newMethod);
-}
+                     const char* newMethod);
 
 template<typename T>
 ALWAYS_INLINE
@@ -268,15 +289,18 @@ void freeMagickMemory(T* &resource) {
   }
 }
 
+String convertMagickString(char* &&str);
+
+String convertMagickData(size_t size, unsigned char* &data);
+
+template<typename T>
 ALWAYS_INLINE
-String convertMagickString(char* &&str) {
-  if (str == nullptr) {
-    return null_string;
-  } else {
-    String ret(str);
-    freeMagickMemory(str);
-    return ret;
+Array convertArray(size_t num, const T* arr) {
+  PackedArrayInit ret(num);
+  for (size_t i = 0; i < num; ++i) {
+    ret.appendWithRef(arr[i]);
   }
+  return ret.create();
 }
 
 template<typename T>
@@ -285,12 +309,9 @@ Array convertMagickArray(size_t num, T* &arr) {
   if (arr == nullptr) {
     return null_array;
   } else {
-    PackedArrayInit ret(num);
-    for (size_t i = 0; i < num; ++i) {
-      ret.appendWithRef(arr[i]);
-    }
+    Array ret = convertArray(num, arr);
     freeMagickMemory(arr);
-    return ret.create();
+    return ret;
   }
 }
 
@@ -308,6 +329,8 @@ std::vector<PointInfo> toPointInfoArray(const Array& coordinates);
 
 //////////////////////////////////////////////////////////////////////////////
 // Imagick Helper
+Object createImagick(MagickWand* wand, bool owner);
+
 Array magickQueryFonts(const char* pattern = "*");
 
 Array magickQueryFormats(const char* pattern = "*");
@@ -320,7 +343,18 @@ Object createImagickPixel(PixelWand* wand, bool owner);
 
 Array createImagickPixelArray(size_t num, PixelWand* wands[], bool owner);
 
-std::pair<PixelWand*, bool> buildPixelWand(const Variant& color);
+WandResource<PixelWand> newPixelWand();
+
+WandResource<PixelWand> buildColorWand(const Variant& color);
+
+WandResource<PixelWand> buildOpacityWand(const Variant& opacity);
+
+//////////////////////////////////////////////////////////////////////////////
+// ImagickPixel Helper
+Object createPixelIterator(const Object& magick);
+
+Object createPixelRegionIterator(const Object& magick,
+    int64_t x, int64_t y, int64_t columns, int64_t rows);
 
 //////////////////////////////////////////////////////////////////////////////
 // Init Module

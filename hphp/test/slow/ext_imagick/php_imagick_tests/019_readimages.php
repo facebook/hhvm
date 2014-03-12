@@ -35,8 +35,3 @@ try {
 }
 
 ?>
---EXPECT--
-OK
-OK
-OK
-Third OK

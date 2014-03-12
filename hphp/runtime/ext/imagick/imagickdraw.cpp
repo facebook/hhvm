@@ -99,16 +99,13 @@ static bool HHVM_METHOD(ImagickDraw, clear) {
   return true;
 }
 
-static Object HHVM_METHOD(ImagickDraw, __clone) {
+static void HHVM_METHOD(ImagickDraw, __clone) {
   auto wand = getDrawingWandResource(this_);
-  raiseDeprecated(s_ImagickDraw.c_str(), "clone");
   auto newWand = CloneDrawingWand(wand->getWand());
   if (newWand == nullptr) {
     IMAGICKDRAW_THROW("Failed to allocate DrawingWand structure");
   } else {
-    auto ret = ImagickDraw::allocObject();
-    setWandResource(s_ImagickDraw, ret, newWand);
-    return ret;
+    setWandResource(s_ImagickDraw, this_, newWand);
   }
 }
 
@@ -133,7 +130,7 @@ static TypedValue* HHVM_MN(ImagickDraw, composite)(ActRec* ar_) {
   double y;
   double width;
   double height;
-  Object compositeWand;
+  ObjectData* compositeWand;
 
   if (!parseArgs(ar_, "lddddo",
       &compose, &x, &y, &width, &height, &compositeWand)) {
@@ -141,7 +138,8 @@ static TypedValue* HHVM_MN(ImagickDraw, composite)(ActRec* ar_) {
   }
 
   auto wand = getDrawingWandResource(this_);
-  auto magick = getMagickWandResource(compositeWand);
+  Object compositeWandObj(compositeWand);
+  auto magick = getMagickWandResource(compositeWandObj);
   auto status = DrawComposite(wand->getWand(), (CompositeOperator)compose,
                               x, y, width, height, magick->getWand());
   if (status == MagickFalse) {
@@ -703,7 +701,7 @@ static bool HHVM_METHOD(ImagickDraw, setFillAlpha, double opacity) {
 static bool HHVM_METHOD(ImagickDraw, setFillColor,
     const Variant& fill_pixel) {
   auto wand = getDrawingWandResource(this_);
-  WandResource<PixelWand> pixel(buildPixelWand(fill_pixel));
+  WandResource<PixelWand> pixel(buildColorWand(fill_pixel));
   DrawSetFillColor(wand->getWand(), pixel.getWand());
   return true;
 }
@@ -798,6 +796,22 @@ static bool HHVM_METHOD(ImagickDraw, setGravity, int64_t gravity) {
   return true;
 }
 
+static bool HHVM_METHOD(ImagickDraw, setResolution,
+    double x, double y) {
+  auto wand = getDrawingWandResource(this_);
+  std::ostringstream density;
+  density << x << "x" << y;
+
+  auto drawInfo = PeekDrawingWand(wand->getWand());
+  drawInfo->density = AcquireString(density.str().c_str());
+  auto drawWand = DrawAllocateWand(drawInfo, nullptr);
+  if (drawWand == nullptr) {
+    IMAGICKDRAW_THROW("Failed to allocate new DrawingWand structure");
+  }
+  setWandResource(s_ImagickDraw, this_, drawWand);
+  return true;
+}
+
 static bool HHVM_METHOD(ImagickDraw, setStrokeAlpha, double opacity) {
   auto wand = getDrawingWandResource(this_);
   DrawSetStrokeOpacity(wand->getWand(), opacity);
@@ -814,7 +828,7 @@ static bool HHVM_METHOD(ImagickDraw, setStrokeAntialias,
 static bool HHVM_METHOD(ImagickDraw, setStrokeColor,
     const Variant& stroke_pixel) {
   auto wand = getDrawingWandResource(this_);
-  WandResource<PixelWand> pixel(buildPixelWand(stroke_pixel));
+  WandResource<PixelWand> pixel(buildColorWand(stroke_pixel));
   DrawSetStrokeColor(wand->getWand(), pixel.getWand());
   return true;
 }
@@ -910,7 +924,7 @@ static bool HHVM_METHOD(ImagickDraw, setTextEncoding,
 static bool HHVM_METHOD(ImagickDraw, setTextUnderColor,
     const Variant& under_color) {
   auto wand = getDrawingWandResource(this_);
-  WandResource<PixelWand> pixel(buildPixelWand(under_color));
+  WandResource<PixelWand> pixel(buildColorWand(under_color));
   DrawSetTextUnderColor(wand->getWand(), pixel.getWand());
   return true;
 }
@@ -1049,6 +1063,7 @@ void loadImagickDrawClass() {
   HHVM_ME(ImagickDraw, setFontStyle);
   HHVM_ME(ImagickDraw, setFontWeight);
   HHVM_ME(ImagickDraw, setGravity);
+  HHVM_ME(ImagickDraw, setResolution);
   HHVM_ME(ImagickDraw, setStrokeAlpha);
   HHVM_ME(ImagickDraw, setStrokeAntialias);
   HHVM_ME(ImagickDraw, setStrokeColor);

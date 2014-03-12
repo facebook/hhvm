@@ -883,14 +883,17 @@ private:
                           MethodToTraitListMap& importMethToTraitMap);
   void applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
                            MethodToTraitListMap& importMethToTraitMap);
-  void importTraitProps(PropMap::Builder& curPropMap,
+  void importTraitProps(int idxOffset,
+                        PropMap::Builder& curPropMap,
                         SPropMap::Builder& curSPropMap);
   void importTraitInstanceProp(Class*      trait,
                                Prop&       traitProp,
                                TypedValue& traitPropVal,
+                               const int idxOffset,
                                PropMap::Builder& curPropMap);
   void importTraitStaticProp(Class*   trait,
                              SProp&   traitProp,
+                             const int idxOffset,
                              PropMap::Builder& curPropMap,
                              SPropMap::Builder& curSPropMap);
   void addTraitAlias(const StringData* traitName,

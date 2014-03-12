@@ -1485,6 +1485,7 @@ void Class::setProperties() {
   PropMap::Builder curPropMap;
   SPropMap::Builder curSPropMap;
   m_hasDeepInitProps = false;
+  Slot traitOffset = 0;
 
   if (m_parent.get() != nullptr) {
     // m_hasDeepInitProps indicates if there are properties that require
@@ -1493,25 +1494,8 @@ void Class::setProperties() {
     // happen if a derived class redeclares a public or protected property
     // from an ancestor class. We still get correct behavior in these cases,
     // so it works out okay.
-    auto const numParentDeclProperties = m_parent->m_declProperties.size();
-    auto const numParentStaticProperties = m_parent->m_staticProperties.size();
-    int idxOffset = 0;
-    if (0 < numParentDeclProperties &&
-        idxOffset <
-          m_parent->
-            m_declProperties[numParentDeclProperties - 1].m_idx + 1) {
-      idxOffset =
-        m_parent->m_declProperties[numParentDeclProperties - 1].m_idx + 1;
-    }
-    if (0 < numParentStaticProperties &&
-        idxOffset <
-          m_parent->
-            m_staticProperties[numParentStaticProperties - 1].m_idx + 1) {
-      idxOffset =
-        m_parent->m_staticProperties[numParentStaticProperties - 1].m_idx + 1;
-    }
     m_hasDeepInitProps = m_parent->m_hasDeepInitProps;
-    for (Slot slot = 0; slot < numParentDeclProperties; ++slot) {
+    for (Slot slot = 0; slot < m_parent->m_declProperties.size(); ++slot) {
       const Prop& parentProp = m_parent->m_declProperties[slot];
 
       // Copy parent's declared property.  Protected properties may be
@@ -1526,7 +1510,14 @@ void Class::setProperties() {
       prop.m_typeConstraint = parentProp.m_typeConstraint;
       prop.m_name = parentProp.m_name;
       prop.m_repoAuthType = parentProp.m_repoAuthType;
-      prop.m_idx = parentProp.m_idx - idxOffset;
+      // Temporarily assign parent properties' indexes to their additive
+      // inverses minus one. After assigning current properties' indexes,
+      // we will use these negative indexes to assign new indexes to
+      // parent properties that haven't been overlayed.
+      prop.m_idx = -parentProp.m_idx - 1;
+      if (traitOffset < -prop.m_idx) {
+        traitOffset = -prop.m_idx;
+      }
       if (!(parentProp.m_attrs & AttrPrivate)) {
         curPropMap.add(prop.m_name, prop);
       } else {
@@ -1535,7 +1526,7 @@ void Class::setProperties() {
       }
     }
     m_declPropInit = m_parent->m_declPropInit;
-    for (Slot slot = 0; slot < numParentStaticProperties; ++slot) {
+    for (Slot slot = 0; slot < m_parent->m_staticProperties.size(); ++slot) {
       const SProp& parentProp = m_parent->m_staticProperties[slot];
       if (parentProp.m_attrs & AttrPrivate) continue;
 
@@ -1546,9 +1537,21 @@ void Class::setProperties() {
       sProp.m_typeConstraint = parentProp.m_typeConstraint;
       sProp.m_docComment = parentProp.m_docComment;
       sProp.m_class = parentProp.m_class;
-      sProp.m_idx = parentProp.m_idx - idxOffset;
+      sProp.m_idx = -parentProp.m_idx - 1;
+      if (traitOffset < -sProp.m_idx) {
+        traitOffset = -sProp.m_idx;
+      }
       tvWriteUninit(&sProp.m_val);
       curSPropMap.add(sProp.m_name, sProp);
+    }
+  }
+
+  Slot traitIdx = m_preClass->numProperties();
+  if (RuntimeOption::RepoAuthoritative) {
+    for (auto const& traitName : m_preClass->usedTraits()) {
+      Class* classPtr = Unit::loadClass(traitName);
+      traitIdx -= classPtr->m_declProperties.size() +
+                  classPtr->m_staticProperties.size();
     }
   }
 
@@ -1602,7 +1605,11 @@ void Class::setProperties() {
         prop.m_typeConstraint = preProp->typeConstraint();
         prop.m_docComment = preProp->docComment();
         prop.m_repoAuthType = preProp->repoAuthType();
-        prop.m_idx = slot;
+        if (slot < traitIdx) {
+          prop.m_idx = slot;
+        } else {
+          prop.m_idx = slot + m_preClass->numProperties() + traitOffset;
+        }
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());
@@ -1618,6 +1625,11 @@ void Class::setProperties() {
                  AttrProtected);
           prop.m_class = this;
           prop.m_docComment = preProp->docComment();
+          if (slot < traitIdx) {
+            prop.m_idx = slot;
+          } else {
+            prop.m_idx = slot + m_preClass->numProperties() + traitOffset;
+          }
           const TypedValue& tv = m_preClass->lookupProp(preProp->name())->val();
           TypedValueAux& tvaux = m_declPropInit[it2->second];
           tvaux.m_data = tv.m_data;
@@ -1636,7 +1648,11 @@ void Class::setProperties() {
         prop.m_class = this;
         prop.m_docComment = preProp->docComment();
         prop.m_repoAuthType = preProp->repoAuthType();
-        prop.m_idx = slot;
+        if (slot < traitIdx) {
+          prop.m_idx = slot;
+        } else {
+          prop.m_idx = slot + m_preClass->numProperties() + traitOffset;
+        }
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());
@@ -1658,6 +1674,11 @@ void Class::setProperties() {
             prop.m_attrs = Attr(prop.m_attrs ^ (AttrProtected|AttrPublic));
             prop.m_typeConstraint = preProp->typeConstraint();
           }
+          if (slot < traitIdx) {
+            prop.m_idx = slot;
+          } else {
+            prop.m_idx = slot + m_preClass->numProperties() + traitOffset;
+          }
           const TypedValue& tv = m_preClass->lookupProp(preProp->name())->val();
           TypedValueAux& tvaux = m_declPropInit[it2->second];
           tvaux.m_data = tv.m_data;
@@ -1676,7 +1697,11 @@ void Class::setProperties() {
         prop.m_class = this;
         prop.m_docComment = preProp->docComment();
         prop.m_repoAuthType = preProp->repoAuthType();
-        prop.m_idx = slot;
+        if (slot < traitIdx) {
+          prop.m_idx = slot;
+        } else {
+          prop.m_idx = slot + m_preClass->numProperties() + traitOffset;
+        }
         curPropMap.add(preProp->name(), prop);
         m_declPropInit.push_back(m_preClass->lookupProp(preProp->name())
                                  ->val());
@@ -1721,7 +1746,6 @@ void Class::setProperties() {
         SProp sProp;
         sProp.m_name = preProp->name();
         sPropInd = curSPropMap.size();
-        sProp.m_idx = slot;
         curSPropMap.add(sProp.m_name, sProp);
       }
       // Finish initializing.
@@ -1732,10 +1756,39 @@ void Class::setProperties() {
       sProp.m_class          = this;
       sProp.m_val            = m_preClass->lookupProp(preProp->name())->val();
       sProp.m_repoAuthType   = preProp->repoAuthType();
+      if (slot < traitIdx) {
+        sProp.m_idx = slot;
+      } else {
+        sProp.m_idx = slot + m_preClass->numProperties() + traitOffset;
+      }
     }
   }
 
-  importTraitProps(curPropMap, curSPropMap);
+  // After assigning indexes for current properties, we reassign indexes to
+  // parent properties that haven't been overlayed to make sure that they
+  // are greater than those of current properties.
+  int idxOffset = m_preClass->numProperties() - 1;
+  int curIdx = idxOffset;
+  for (Slot slot = 0; slot < curPropMap.size(); ++slot) {
+    Prop& prop = curPropMap[slot];
+    if (prop.m_idx < 0) {
+      prop.m_idx = idxOffset - prop.m_idx;
+      if (curIdx < prop.m_idx) {
+        curIdx = prop.m_idx;
+      }
+    }
+  }
+  for (Slot slot = 0; slot < curSPropMap.size(); ++slot) {
+    SProp& sProp = curSPropMap[slot];
+    if (sProp.m_idx < 0) {
+      sProp.m_idx = idxOffset - sProp.m_idx;
+      if (curIdx < sProp.m_idx) {
+        curIdx = sProp.m_idx;
+      }
+    }
+  }
+
+  importTraitProps(curIdx + 1, curPropMap, curSPropMap);
 
   m_declProperties.create(curPropMap);
   m_staticProperties.create(curSPropMap);
@@ -1760,6 +1813,7 @@ bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
 void Class::importTraitInstanceProp(Class*      trait,
                                     Prop&       traitProp,
                                     TypedValue& traitPropVal,
+                                    const int idxOffset,
                                     PropMap::Builder& curPropMap) {
   PropMap::Builder::iterator prevIt = curPropMap.find(traitProp.m_name);
 
@@ -1776,6 +1830,7 @@ void Class::importTraitInstanceProp(Class*      trait,
     if (prop.m_attrs & AttrDeepInit) {
       m_hasDeepInitProps = true;
     }
+    prop.m_idx += idxOffset;
     curPropMap.add(prop.m_name, prop);
     m_declPropInit.push_back(traitPropVal);
   } else {
@@ -1792,6 +1847,7 @@ void Class::importTraitInstanceProp(Class*      trait,
 
 void Class::importTraitStaticProp(Class*   trait,
                                   SProp&   traitProp,
+                                  const int idxOffset,
                                   PropMap::Builder& curPropMap,
                                   SPropMap::Builder& curSPropMap) {
   // Check if prop already declared as non-static
@@ -1805,6 +1861,7 @@ void Class::importTraitStaticProp(Class*   trait,
     // New prop, go ahead and add it
     SProp prop = traitProp;
     prop.m_class = this; // set current class as the first declaring prop
+    prop.m_idx += idxOffset;
     curSPropMap.add(prop.m_name, prop);
   } else {
     // Redeclared prop, make sure it matches previous declaration
@@ -1830,7 +1887,8 @@ void Class::importTraitStaticProp(Class*   trait,
   }
 }
 
-void Class::importTraitProps(PropMap::Builder& curPropMap,
+void Class::importTraitProps(int idxOffset,
+                             PropMap::Builder& curPropMap,
                              SPropMap::Builder& curSPropMap) {
   if (attrs() & AttrNoExpandTrait) return;
   for (auto& t : m_usedTraits) {
@@ -1838,18 +1896,21 @@ void Class::importTraitProps(PropMap::Builder& curPropMap,
 
     // instance properties
     for (Slot p = 0; p < trait->m_declProperties.size(); p++) {
-      Prop&       traitProp    = trait->m_declProperties[p];
+      Prop& traitProp          = trait->m_declProperties[p];
       TypedValue& traitPropVal = trait->m_declPropInit[p];
-      importTraitInstanceProp(trait, traitProp, traitPropVal,
+      importTraitInstanceProp(trait, traitProp, traitPropVal, idxOffset,
                               curPropMap);
     }
 
     // static properties
     for (Slot p = 0; p < trait->m_staticProperties.size(); ++p) {
       SProp& traitProp = trait->m_staticProperties[p];
-      importTraitStaticProp(trait, traitProp, curPropMap,
+      importTraitStaticProp(trait, traitProp, idxOffset, curPropMap,
                             curSPropMap);
     }
+
+    idxOffset += trait->m_declProperties.size() +
+                 trait->m_staticProperties.size();
   }
 }
 

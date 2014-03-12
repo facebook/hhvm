@@ -104,11 +104,7 @@ inline String u8(const icu::UnicodeString& u16, UErrorCode& error) {
 
 class IntlExtension : public Extension {
  public:
-  // Some apps/frameworks get confused by a claim that
-  // the intl extension is loaded, yet not all the classes exist
-  // Lie for now by using another name.  Change it when intl
-  // coverage is complete
-  IntlExtension() : Extension("intl.not-done", "1.1.0") {}
+  IntlExtension() : Extension("intl", "1.1.0") {}
 
   void moduleInit() override {
     bindConstants();
@@ -128,6 +124,7 @@ class IntlExtension : public Extension {
     initMessageFormatter();
     initNormalizer();
     initResourceBundle();
+    initTransliterator();
   }
 
   void threadInit() override {
@@ -153,6 +150,7 @@ class IntlExtension : public Extension {
   void initMessageFormatter();
   void initNormalizer();
   void initResourceBundle();
+  void initTransliterator();
 };
 
 } // namespace Intl

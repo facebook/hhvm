@@ -370,23 +370,24 @@ const Func* Class::getDeclaredCtor() const {
 }
 
 /*
- * Check whether a Class from a previous request is available to be defined.
- * The caller should check that it has the same preClass that is being defined.
- * Being available means that the parent, the interfaces and the traits are
- * already defined (or become defined via autoload, if tryAutoload is true).
+ * Check whether a Class from a previous request is available to be
+ * defined.  The caller should check that it has the same preClass that is
+ * being defined.  Being available means that the parent, the interfaces
+ * and the traits are already defined (or become defined via autoload, if
+ * tryAutoload is true).
  *
  * returns Avail::True - if it is available
  *         Avail::Fail - if it is impossible to define the class at this point
  *         Avail::False- if this particular Class* cant be defined at this point
  *
- * Note that Fail means that at least one of the parent, interfaces and traits
- * was not defined at all, while False means that at least one was defined but
- * did not correspond to this Class*
+ * Note that Fail means that at least one of the parent, interfaces and
+ * traits was not defined at all, while False means that at least one was
+ * defined but did not correspond to this Class*
  *
- * The parent parameter is used for two purposes: first it avoids looking up the
- * active parent class for each potential Class*; and second its used on
- * Fail to return the problem class so the caller can report the error
- * correctly.
+ * The parent parameter is used for two purposes: first it avoids looking
+ * up the active parent class for each potential Class*; and second its
+ * used on Fail to return the problem class so the caller can report the
+ * error correctly.
  */
 Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
   if (Class *ourParent = m_parent.get()) {
@@ -2013,7 +2014,7 @@ void Class::checkInterfaceMethods() {
  */
 void Class::addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const {
 
-  for (auto const& trait : m_usedTraits) {
+  for (auto const& trait: m_usedTraits) {
     int numIfcs = trait->m_interfaces.size();
 
     for (int i = 0; i < numIfcs; i++) {
@@ -2282,17 +2283,24 @@ void Class::getClassInfo(ClassInfoVM* ci) {
                      ? m_preClass->docComment()->data() : "";
 
   // Parent class.
-  if (m_parent.get()) {
-    ci->m_parentClass = m_parent->name()->data();
-  } else {
-    ci->m_parentClass = "";
-  }
+  ci->m_parentClass = (m_parent.get()) ? m_parent->name()->data() : "";
 
   // Interfaces.
-  for (auto& di : declInterfaces()) {
-    ci->m_interfacesVec.push_back(di->name()->data());
-    ci->m_interfaces.insert(di->name()->data());
+  for (auto const& ifaceName: m_preClass->interfaces()) {
+    ci->m_interfacesVec.push_back(ifaceName->data());
+    ci->m_interfaces.insert(ifaceName->data());
   }
+  if (m_interfaces.size() > m_preClass->interfaces().size()) {
+    for (int i = 0; i < m_interfaces.size(); ++i) {
+      auto const& ifaceName = m_interfaces[i]->name();
+
+      if (ci->m_interfaces.find(ifaceName->data()) == ci->m_interfaces.end()) {
+        ci->m_interfacesVec.push_back(ifaceName->data());
+        ci->m_interfaces.insert(ifaceName->data());
+      }
+    }
+  }
+  assert(ci->m_interfaces.size() == ci->m_interfacesVec.size());
 
   // Used traits.
   for (auto const& traitName : m_preClass->usedTraits()) {

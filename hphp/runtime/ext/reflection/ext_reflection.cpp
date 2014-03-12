@@ -947,8 +947,15 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
   // interfaces
   {
     Array arr = Array::Create();
-    for (auto const& interface : cls->declInterfaces()) {
+    for (auto const& interface: cls->declInterfaces()) {
       arr.set(interface->nameRef(), VarNR(1));
+    }
+    auto const& allIfaces = cls->allInterfaces();
+    if (allIfaces.size() > cls->declInterfaces().size()) {
+      for (int i = 0; i < allIfaces.size(); ++i) {
+        auto const& interface = allIfaces[i];
+        arr.set(interface->nameRef(), VarNR(1));
+      }
     }
     ret.set(s_interfaces, VarNR(arr));
   }

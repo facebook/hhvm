@@ -609,7 +609,7 @@ private:
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
-  bool prepareFuncEntry(ActRec* ar, PC& pc);
+  void prepareFuncEntry(ActRec* ar, PC& pc);
   bool prepareArrayArgs(ActRec* ar, const Variant& arrayArgs);
   void recordCodeCoverage(PC pc);
   bool isReturnHelper(uintptr_t address);

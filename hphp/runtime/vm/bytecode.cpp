@@ -1404,7 +1404,7 @@ static inline void checkStack(Stack& stk, const Func* f) {
   }
 }
 
-bool ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
+void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
   bool raiseMissingArgumentWarnings = false;
@@ -1426,7 +1426,7 @@ bool ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
       }
       pc = func->getEntry();
       // Nothing more to do; get out
-      return true;
+      return;
     } else {
       assert(ar->hasExtraArgs());
       assert(func->numParams() < ar->numArgs());
@@ -1517,7 +1517,6 @@ bool ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
       }
     }
   }
-  return true;
 }
 
 void ExecutionContext::syncGdbState() {
@@ -1536,9 +1535,8 @@ void ExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
     JIT::TCA start = enterFnAr->m_func->getPrologue(na);
     mcg->enterTCAtPrologue(enterFnAr, start);
   } else {
-    if (prepareFuncEntry(enterFnAr, m_pc)) {
-      enterVMWork(enterFnAr);
-    }
+    prepareFuncEntry(enterFnAr, m_pc);
+    enterVMWork(enterFnAr);
   }
 }
 
@@ -1591,7 +1589,8 @@ resume:
       first = false;
       if (m_fp && !ar->m_varEnv) {
         enterVMPrologue(ar);
-      } else if (prepareFuncEntry(ar, m_pc)) {
+      } else {
+        prepareFuncEntry(ar, m_pc);
         enterVMWork(ar);
       }
     } else {
@@ -6339,9 +6338,7 @@ bool ExecutionContext::doFCallArray(PC& pc) {
     if (UNLIKELY(!prepareArrayArgs(ar, args))) return false;
   }
 
-  if (UNLIKELY(!(prepareFuncEntry(ar, pc)))) {
-    return false;
-  }
+  prepareFuncEntry(ar, pc);
   SYNC();
   if (UNLIKELY(!EventHook::FunctionEnter(ar, EventHook::NormalFunc))) {
     pc = m_pc;

@@ -1095,6 +1095,12 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
   auto const src2OpReg   = convertReg(src2Reg);
   auto const rOpScratch  = convertReg(m_rScratch);
 
+  auto opWithScratch = [&]() {
+    (a.*movInstr)(src1OpReg, rOpScratch);
+    (a.*instrRR) (src2OpReg, rOpScratch);
+    (a.*movInstr)(rOpScratch, dstOpReg);
+  };
+
   // Two registers.
   if (src1Reg != InvalidReg && src2Reg != InvalidReg) {
     if (dstReg == src1Reg) {
@@ -1103,9 +1109,7 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst,
       if (commutative) {
         (a.*instrRR) (src1OpReg, dstOpReg);
       } else {
-        (a.*movInstr)(src1OpReg, rOpScratch);
-        (a.*instrRR) (src2OpReg, rOpScratch);
-        (a.*movInstr)(rOpScratch, dstOpReg);
+        opWithScratch();
       }
     } else {
       emitMovRegReg(a, src1Reg, dstReg);
@@ -1169,6 +1173,24 @@ void CodeGenerator::cgBinaryDblOp(IRInstruction* inst,
   (m_as.*fpInstr)(srcReg2, resReg);
 
   emitMovRegReg(m_as, resReg, dstReg);
+}
+
+void CodeGenerator::cgAddIntO(IRInstruction* inst) {
+  cgAddInt(inst);
+  assert(inst->taken() != nullptr);
+  emitFwdJcc(m_as, CC_O, inst->taken());
+}
+
+void CodeGenerator::cgSubIntO(IRInstruction* inst) {
+  cgSubInt(inst);
+  assert(inst->taken() != nullptr);
+  emitFwdJcc(m_as, CC_O, inst->taken());
+}
+
+void CodeGenerator::cgMulIntO(IRInstruction* inst) {
+  cgMulInt(inst);
+  assert(inst->taken() != nullptr);
+  emitFwdJcc(m_as, CC_O, inst->taken());
 }
 
 /*

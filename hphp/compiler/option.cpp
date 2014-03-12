@@ -120,6 +120,7 @@ bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
 bool Option::EnableXHP = false;
+bool Option::IntsOverflowToInts = false;
 int Option::ParserThreadCount = 0;
 
 int Option::GetScannerType() {
@@ -247,6 +248,9 @@ void Option::Load(Hdf &config) {
   EnableHipHopExperimentalSyntax =
     config["EnableHipHopExperimentalSyntax"].getBool();
   EnableShortTags = config["EnableShortTags"].getBool(true);
+
+  IntsOverflowToInts =
+    config["Hack"]["Lang"]["IntsOverflowToInts"].getBool(EnableHipHopSyntax);
 
   EnableAspTags = config["EnableAspTags"].getBool();
 

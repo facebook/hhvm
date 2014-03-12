@@ -488,6 +488,9 @@ PUNT_OPCODE(IncProfCounter)
 PUNT_OPCODE(ArrayIdx)
 PUNT_OPCODE(GenericIdx)
 PUNT_OPCODE(DbgAssertType)
+PUNT_OPCODE(AddIntO)
+PUNT_OPCODE(SubIntO)
+PUNT_OPCODE(MulIntO)
 
 #undef PUNT_OPCODE
 
@@ -933,7 +936,7 @@ static void shuffleArgs(vixl::MacroAssembler& a,
       auto dstReg = x2a(args[i].dstReg());
       if (kind == ArgDesc::Kind::Imm) {
         a.  Mov  (dstReg, args[i].imm().q());
-      } else if (kind == ArgDesc::Kind::Reg) {
+      } else if (kind == ArgDesc::Kind::Reg || kind == ArgDesc::Kind::TypeReg) {
         // Should have already been done
       } else {
         not_implemented();

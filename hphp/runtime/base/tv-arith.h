@@ -45,6 +45,14 @@ TypedNum cellSub(Cell, Cell);
 TypedNum cellMul(Cell, Cell);
 
 /*
+ * Same as their corresponding non-O functions, but will cast their sources to
+ * doubles instead of doing integer overflow.
+ */
+Cell cellAddO(Cell, Cell);
+TypedNum cellSubO(Cell, Cell);
+TypedNum cellMulO(Cell, Cell);
+
+/*
  * PHP operators / and %.
  *
  * The operators return numbers unless the second argument converts to
@@ -88,6 +96,14 @@ void cellSubEq(Cell& c1, Cell);
 void cellMulEq(Cell& c1, Cell);
 
 /*
+ * Same as their corresponding non-O functions, but will cast their sources to
+ * doubles instead of doing integer overflow.
+ */
+void cellAddEqO(Cell& c1, Cell c2);
+void cellSubEqO(Cell& c1, Cell c2);
+void cellMulEqO(Cell& c1, Cell c2);
+
+/*
  * PHP operators /= and %=.
  *
  * Mutates the first argument in place, by combining the second
@@ -122,6 +138,8 @@ void cellBitXorEq(Cell& c1, Cell);
 void cellInc(Cell&);
 void cellDec(Cell&);
 
+void cellIncO(Cell&);
+void cellDecO(Cell&);
 
 /*
  * PHP unary operator ~.

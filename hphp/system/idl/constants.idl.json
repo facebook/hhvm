@@ -5490,6 +5490,10 @@
             "type": "Int64"
         },
         {
+            "name": "T_ONUMBER",
+            "type": "Int64"
+        },
+        {
             "name": "T_OPEN_TAG",
             "type": "Int64"
         },

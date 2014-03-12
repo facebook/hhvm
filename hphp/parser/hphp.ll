@@ -638,45 +638,51 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{LNUM} {
         errno = 0;
-        long ret = strtoll(yytext, NULL, 0);
-        if (errno == ERANGE || ret < 0) {
-                _scanner->error("Dec number is too big: %s", yytext);
+        strtoll(yytext, NULL, 0);
+        if (errno == ERANGE) {
                 if (_scanner->isHHFile()) {
+                        _scanner->error("Dec number is too big: %s", yytext);
                         RETTOKEN(T_HH_ERROR);
                 }
+                RETTOKEN(T_ONUMBER);
+        } else {
+                RETTOKEN(T_LNUMBER);
         }
-        RETTOKEN(T_LNUMBER);
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{HNUM} {
         errno = 0;
-        long ret = strtoull(yytext, NULL, 16);
-        if (errno == ERANGE || ret < 0) {
-                _scanner->error("Hex number is too big: %s", yytext);
+        strtoull(yytext, NULL, 16);
+        if (errno == ERANGE) {
                 if (_scanner->isHHFile()) {
+                        _scanner->error("Hex number is too big: %s", yytext);
                         RETTOKEN(T_HH_ERROR);
                 }
+                RETTOKEN(T_ONUMBER);
+        } else {
+                RETTOKEN(T_LNUMBER);
         }
-        RETTOKEN(T_LNUMBER);
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{BNUM} {
         errno = 0;
-        long ret = strtoull(yytext + 2 /* skip over 0b */, NULL, 2);
-        if (errno == ERANGE || ret < 0) {
+        strtoull(yytext + 2 /* skip over 0b */, NULL, 2);
+        if (errno == ERANGE) {
                 _scanner->error("Bin number is too big: %s", yytext);
                 if (_scanner->isHHFile()) {
                         RETTOKEN(T_HH_ERROR);
                 }
+                RETTOKEN(T_ONUMBER);
+        } else {
+                RETTOKEN(T_LNUMBER);
         }
-        RETTOKEN(T_LNUMBER);
 }
 
 
 <ST_VAR_OFFSET>0|([1-9][0-9]*) { /* Offset could be treated as a long */
         errno = 0;
-        long ret = strtoll(yytext, NULL, 0);
-        if (ret == LLONG_MAX && errno == ERANGE) {
+        strtoll(yytext, NULL, 0);
+        if (errno == ERANGE) {
                 _scanner->error("Offset number is too big: %s", yytext);
                 if (_scanner->isHHFile()) {
                         RETTOKEN(T_HH_ERROR);

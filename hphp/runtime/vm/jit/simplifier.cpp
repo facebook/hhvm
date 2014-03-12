@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/util/overflow.h"
 
 namespace HPHP {
 namespace JIT {
@@ -336,6 +337,10 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case AddDbl:    return simplifyAddDbl(src1, src2);
   case SubDbl:    return simplifySubDbl(src1, src2);
   case MulDbl:    return simplifyMulDbl(src1, src2);
+
+  case AddIntO:   return simplifyAddIntO(src1, src2);
+  case SubIntO:   return simplifySubIntO(src1, src2);
+  case MulIntO:   return simplifyMulIntO(src1, src2);
 
   case DivDbl:    return simplifyDivDbl(inst);
   case Mod:       return simplifyMod(src1, src2);
@@ -806,6 +811,15 @@ SSATmp* Simplifier::simplifyAddInt(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
+SSATmp* Simplifier::simplifyAddIntO(SSATmp* src1, SSATmp* src2) {
+  if (src1->isConst() && src2->isConst()) {
+    int64_t a = src1->intVal();
+    int64_t b = src2->intVal();
+    return add_overflow(a, b) ? cns(double(a) + double(b)) : cns(a + b);
+  }
+  return nullptr;
+}
+
 SSATmp* Simplifier::simplifySubInt(SSATmp* src1, SSATmp* src2) {
   auto sub = std::minus<int64_t>();
   if (auto simp = simplifyConst(src1, src2, sub)) return simp;
@@ -829,6 +843,15 @@ SSATmp* Simplifier::simplifySubInt(SSATmp* src1, SSATmp* src2) {
   if (inst2->op() == SubInt) {
     SSATmp* src = inst2->src(0);
     if (src->isConst(0)) return gen(AddInt, src1, inst2->src(1));
+  }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifySubIntO(SSATmp* src1, SSATmp* src2) {
+  if (src1->isConst() && src2->isConst()) {
+    int64_t a = src1->intVal();
+    int64_t b = src2->intVal();
+    return sub_overflow(a, b) ? cns(double(a) - double(b)) : cns(a - b);
   }
   return nullptr;
 }
@@ -892,6 +915,15 @@ SSATmp* Simplifier::simplifySubDbl(SSATmp* src1, SSATmp* src2) {
 SSATmp* Simplifier::simplifyMulDbl(SSATmp* src1, SSATmp* src2) {
   auto mul = std::multiplies<double>();
   if (auto simp = simplifyConst(src1, src2, mul)) return simp;
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyMulIntO(SSATmp* src1, SSATmp* src2) {
+  if (src1->isConst() && src2->isConst()) {
+    int64_t a = src1->intVal();
+    int64_t b = src2->intVal();
+    return mul_overflow(a, b) ? cns(double(a) * double(b)) : cns(a * b);
+  }
   return nullptr;
 }
 

@@ -889,7 +889,7 @@ void HhbcTranslator::emitSetL(int32_t id) {
   pushStLoc(id, exit, src);
 }
 
-void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
+void HhbcTranslator::emitIncDecL(bool pre, bool inc, bool over, uint32_t id) {
   auto const exit = makeExit();
   auto const src = ldLocInnerWarn(id, exit, DataTypeSpecific);
 
@@ -915,28 +915,52 @@ void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
     PUNT(IncDecL);
   }
 
-  auto const res = emitIncDec(pre, inc, src);
+  auto const res = emitIncDec(pre, inc, over, src);
   stLoc(id, exit, res);
 }
 
 // only handles integer or double inc/dec
-SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, SSATmp* src) {
+SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, bool over, SSATmp* src) {
   assert(src->isA(Type::Int) || src->isA(Type::Dbl));
 
-  auto op =
-    src->isA(Type::Int) ? (inc ? AddInt : SubInt) : (inc ? AddDbl : SubDbl);
+  Opcode op;
+
+  if (src->isA(Type::Dbl)) {
+    op = inc ? AddDbl : SubDbl;
+  } else if (!over) {
+    op = inc ? AddInt : SubInt;
+  } else {
+    op = inc ? AddIntO : SubIntO;
+  }
 
   SSATmp* one = src->isA(Type::Int) ? cns(1) : cns(1.0);
-  SSATmp* res = gen(op, src, one);
+  SSATmp* res = nullptr;
+
+  if (op == AddIntO || op == SubIntO) {
+    auto spills = peekSpillValues();
+    auto const exit = makeExitImpl(
+      bcOff(),
+      ExitFlag::Interp,
+      spills,
+      CustomExit{}
+    );
+    res = gen(op, exit, src, one);
+  } else {
+    res = gen(op, src, one);
+  }
+
   // no incref necessary on push since result is an int
   push(pre ? res : src);
   return res;
 }
 
-#define BINARY_ARITH       \
-  AOP(Add, AddInt, AddDbl) \
-  AOP(Sub, SubInt, SubDbl) \
-  AOP(Mul, MulInt, MulDbl) \
+#define BINARY_ARITH          \
+  AOP(Add, AddInt, AddDbl)    \
+  AOP(Sub, SubInt, SubDbl)    \
+  AOP(Mul, MulInt, MulDbl)    \
+  AOP(AddO, AddIntO, AddDbl)  \
+  AOP(SubO, SubIntO, SubDbl)  \
+  AOP(MulO, MulIntO, MulDbl)  \
 
 #define BINARY_BITOP  \
   BOP(BitAnd, AndInt) \
@@ -1029,8 +1053,8 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
    * Handle array addition first because we don't want to bother with
    * boxed locals.
    */
-  if (subOp == Op::Add &&
-      (m_irb->localType(id, DataTypeSpecific) <= Type::Arr) &&
+  bool isAdd = (subOp == Op::Add || subOp == Op::AddO);
+  if (isAdd && (m_irb->localType(id, DataTypeSpecific) <= Type::Arr) &&
       topC()->isA(Type::Arr)) {
     /*
      * ArrayAdd decrefs its sources and returns a new array with
@@ -1074,7 +1098,21 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
     } else {
       opc = promoteBinaryDoubles(subOp, loc, val);
     }
-    auto const result = gen(opc, loc, val);
+
+    SSATmp* result = nullptr;
+    if (opc == AddIntO || opc == SubIntO || opc == MulIntO) {
+      auto spillValues = peekSpillValues();
+      spillValues.push_back(val);
+      auto const exit = makeExitImpl(
+        bcOff(),
+        ExitFlag::Interp,
+        spillValues,
+        CustomExit{}
+      );
+      result = gen(opc, exit, loc, val);
+    } else {
+      result = gen(opc, loc, val);
+    }
     pushStLoc(id, nullptr, result);
     return;
   }
@@ -4266,10 +4304,25 @@ void HhbcTranslator::emitBinaryArith(Op op) {
     return;
   }
 
+  auto spillValues = peekSpillValues();
   SSATmp* src2 = promoteBool(popC());
   SSATmp* src1 = promoteBool(popC());
   Opcode opc = promoteBinaryDoubles(op, src1, src2);
-  push(gen(opc, src1, src2));
+
+  if (opc == AddIntO || opc == SubIntO || opc == MulIntO) {
+    assert(src1->isA(Type::Int) && src2->isA(Type::Int));
+
+    auto const exit = makeExitImpl(
+      bcOff(),
+      ExitFlag::Interp,
+      spillValues,
+      CustomExit{}
+    );
+
+    push(gen(opc, exit, src1, src2));
+  } else {
+    push(gen(opc, src1, src2));
+  }
 }
 
 void HhbcTranslator::emitNot() {
@@ -4711,6 +4764,13 @@ Type arithOpResult(Type t1, Type t2) {
   return Type::Int;
 }
 
+Type arithOpOverResult(Type t1, Type t2) {
+  if (t1 <= Type::Int && t2 <= Type::Int) {
+    return Type::Int | Type::Dbl;
+  }
+  return arithOpResult(t1, t2);
+}
+
 Type bitOpResult(Type t1, Type t2) {
   if (!t1.isKnownDataType() || !t2.isKnownDataType()) {
     return Type::Cell;
@@ -4726,6 +4786,9 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
   case SetOpOp::PlusEqual:
   case SetOpOp::MinusEqual:
   case SetOpOp::MulEqual:    return arithOpResult(locType.unbox(), valType);
+  case SetOpOp::PlusEqualO:
+  case SetOpOp::MinusEqualO:
+  case SetOpOp::MulEqualO:   return arithOpOverResult(locType.unbox(), valType);
   case SetOpOp::ConcatEqual: return Type::Str;
   case SetOpOp::DivEqual:
   case SetOpOp::ModEqual:    return Type::Cell;
@@ -4803,14 +4866,17 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
     case OutFInputR:     not_reached();
 
     case OutArith:       return arithOpResult(topType(0), topType(1));
+    case OutArithO:      return arithOpOverResult(topType(0), topType(1));
     case OutBitOp:
       return bitOpResult(topType(0),
                          inst.op() == HPHP::OpBitNot ? Type::Bottom
                                                      : topType(1));
     case OutSetOp:      return setOpResult(localType(), topType(0),
                                            SetOpOp(inst.imm[1].u_OA));
-    case OutIncDec:     return localType().unbox() <= Type::Int ? Type::Int
-                                                                : Type::Cell;
+    case OutIncDec: {
+      auto ty = localType().unbox();
+      return ty <= Type::Dbl ? ty : Type::Cell;
+    }
     case OutStrlen:     return topType(0) <= Type::Str ? Type::Int : Type::Cell;
     case OutClassRef:   return Type::Cls;
     case OutFPushCufSafe: return folly::none;

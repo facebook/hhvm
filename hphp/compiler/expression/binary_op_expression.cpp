@@ -532,6 +532,10 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
         }
       }
       Variant result;
+      auto add = RuntimeOption::IntsOverflowToInts ? cellAdd : cellAddO;
+      auto sub = RuntimeOption::IntsOverflowToInts ? cellSub : cellSubO;
+      auto mul = RuntimeOption::IntsOverflowToInts ? cellMul : cellMulO;
+
       switch (m_op) {
         case T_LOGICAL_XOR:
           result = static_cast<bool>(v1.toBoolean() ^ v2.toBoolean());
@@ -576,13 +580,13 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           result = cellGreaterOrEqual(*v1.asCell(), *v2.asCell());
           break;
         case '+':
-          *result.asCell() = cellAdd(*v1.asCell(), *v2.asCell());
+          *result.asCell() = add(*v1.asCell(), *v2.asCell());
           break;
         case '-':
-          *result.asCell() = cellSub(*v1.asCell(), *v2.asCell());
+          *result.asCell() = sub(*v1.asCell(), *v2.asCell());
           break;
         case '*':
-          *result.asCell() = cellMul(*v1.asCell(), *v2.asCell());
+          *result.asCell() = mul(*v1.asCell(), *v2.asCell());
           break;
         case '/':
           if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {

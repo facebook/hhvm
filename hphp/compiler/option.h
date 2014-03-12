@@ -226,6 +226,7 @@ public:
   static bool EnableShortTags;
   static bool EnableAspTags;
   static bool EnableXHP;
+  static bool IntsOverflowToInts;
   static int ParserThreadCount;
 
   static int GetScannerType();

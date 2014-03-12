@@ -68,6 +68,9 @@ void SETOP_BODY_CELL(Cell* lhs, SetOpOp op, Cell* rhs) {
     cellCastToInt64InPlace(lhs);
     lhs->m_data.num >>= cellToInt(*rhs);
     return;
+  case SetOpOp::PlusEqualO:     cellAddEqO(*lhs, *rhs); return;
+  case SetOpOp::MinusEqualO:    cellSubEqO(*lhs, *rhs); return;
+  case SetOpOp::MulEqualO:      cellMulEqO(*lhs, *rhs); return;
   }
   not_reached();
 }

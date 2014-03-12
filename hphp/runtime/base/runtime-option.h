@@ -346,6 +346,7 @@ public:
   static bool TimeoutsUseWallTime;
   static bool CheckFlushOnUserClose;
   static bool EvalAuthoritativeMode;
+  static bool IntsOverflowToInts;
 
   static int GetScannerType();
 

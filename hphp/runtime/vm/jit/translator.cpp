@@ -339,7 +339,13 @@ static const InferenceRule ArithRules[] = {
   { 0, KindOfInt64 },
 };
 
-static const int NumArithRules = sizeof(ArithRules) / sizeof(InferenceRule);
+static const InferenceRule ArithORules[] = {
+  // Same rules as ArithRules, but default to KindOfAny
+  { DoubleMask, KindOfDouble },
+  { ArrayMask, KindOfArray },
+  { StringMask | AnyMask, KindOfAny },
+  { 0, KindOfAny },
+};
 
 /**
  * Returns the type of the output of a bitwise operator on the two
@@ -725,15 +731,24 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
   DynLocation locLocation(inputs[kLocIdx]->location,
                           inputs[kLocIdx]->rtt.unbox());
   assert(inputs[kLocIdx]->location.isLocal());
+  bool isOverflow = true;
+
   switch (op) {
   case SetOpOp::PlusEqual:
   case SetOpOp::MinusEqual:
   case SetOpOp::MulEqual: {
-    // Same as OutArith, except we have to fiddle with inputs a bit.
+    isOverflow = false;
+    // fallthrough
+  }
+  case SetOpOp::PlusEqualO:
+  case SetOpOp::MinusEqualO:
+  case SetOpOp::MulEqualO: {
+    // Same as OutArith[O], except we have to fiddle with inputs a bit.
     std::vector<DynLocation*> arithInputs;
     arithInputs.push_back(&locLocation);
     arithInputs.push_back(inputs[kValIdx]);
-    return RuntimeType(inferType(ArithRules, arithInputs));
+    auto rules = isOverflow ? ArithORules : ArithRules;
+    return RuntimeType(inferType(rules, arithInputs));
   }
   case SetOpOp::ConcatEqual: return RuntimeType(KindOfString);
   case SetOpOp::DivEqual:
@@ -846,6 +861,9 @@ getDynLocType(const SrcKey startSk,
 
     case OutArith: {
       return RuntimeType(inferType(ArithRules, inputs));
+    }
+    case OutArithO: {
+      return RuntimeType(inferType(ArithORules, inputs));
     }
 
     case OutSameAsInput: {
@@ -1022,6 +1040,10 @@ static const struct {
   { OpAdd,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpSub,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpMul,         {StackTop2,        Stack1,       OutArith,         -1 }},
+  /* Arithmetic ops that overflow ints to floats */
+  { OpAddO,        {StackTop2,        Stack1,       OutArithO,        -1 }},
+  { OpSubO,        {StackTop2,        Stack1,       OutArithO,        -1 }},
+  { OpMulO,        {StackTop2,        Stack1,       OutArithO,        -1 }},
   /* Div and mod might return boolean false. Sigh. */
   { OpDiv,         {StackTop2,        Stack1,       OutPred,          -1 }},
   { OpMod,         {StackTop2,        Stack1,       OutPred,          -1 }},
@@ -2226,6 +2248,7 @@ bool outputDependsOnInput(const Op instr) {
     case OutFInputL:
     case OutFInputR:
     case OutArith:
+    case OutArithO:
     case OutBitOp:
     case OutSetOp:
     case OutIncDec:

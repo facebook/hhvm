@@ -3812,6 +3812,18 @@ OPTBLD_INLINE void ExecutionContext::iopMul(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellMul);
 }
 
+OPTBLD_INLINE void ExecutionContext::iopAddO(IOP_ARGS) {
+  implCellBinOp(IOP_PASS_ARGS, cellAddO);
+}
+
+OPTBLD_INLINE void ExecutionContext::iopSubO(IOP_ARGS) {
+  implCellBinOp(IOP_PASS_ARGS, cellSubO);
+}
+
+OPTBLD_INLINE void ExecutionContext::iopMulO(IOP_ARGS) {
+  implCellBinOp(IOP_PASS_ARGS, cellMulO);
+}
+
 OPTBLD_INLINE void ExecutionContext::iopDiv(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellDiv);
 }
@@ -5330,8 +5342,7 @@ OPTBLD_INLINE void ExecutionContext::iopIncDecM(IOP_ARGS) {
   NEXT();
   DECODE_OA(IncDecOp, op);
   DECLARE_SETHELPER_ARGS
-  TypedValue to;
-  tvWriteUninit(&to);
+  TypedValue to = make_tv<KindOfUninit>();
   if (!setHelperPre<MoreWarnings, true, false, false, 0,
       VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS)) {
     if (mcode == MW) {

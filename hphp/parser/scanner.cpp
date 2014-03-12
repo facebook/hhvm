@@ -321,6 +321,7 @@ void Scanner::parseApproxParamDefVal(TokenStore::iterator& pos) {
         break;
       case T_LNUMBER:
       case T_DNUMBER:
+      case T_ONUMBER:
       case T_CONSTANT_ENCAPSED_STRING:
       case T_START_HEREDOC:
       case T_ENCAPSED_AND_WHITESPACE:

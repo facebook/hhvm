@@ -75,6 +75,9 @@ private:
   SSATmp* simplifyAddDbl(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifySubDbl(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyMulDbl(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyAddIntO(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifySubIntO(SSATmp* src1, SSATmp* src2);
+  SSATmp* simplifyMulIntO(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyMod(SSATmp* src1, SSATmp* src2);
   SSATmp* simplifyDivDbl(IRInstruction* inst);
   SSATmp* simplifyAndInt(SSATmp* src1, SSATmp* src2);

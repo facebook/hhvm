@@ -3694,23 +3694,27 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           case T_DEC: {
             auto const cop = [&] {
               if (op == T_INC) {
-                if (u->getFront()) {
-                  return IncDecOp::PreInc;
+                if (RuntimeOption::IntsOverflowToInts) {
+                  return u->getFront() ? IncDecOp::PreInc : IncDecOp::PostInc;
                 }
-                return IncDecOp::PostInc;
+                return u->getFront() ? IncDecOp::PreIncO : IncDecOp::PostIncO;
               }
-              if (u->getFront()) {
-                return IncDecOp::PreDec;
+              if (RuntimeOption::IntsOverflowToInts) {
+                return u->getFront() ? IncDecOp::PreDec : IncDecOp::PostDec;
               }
-              return IncDecOp::PostDec;
+              return u->getFront() ? IncDecOp::PreDecO : IncDecOp::PostDecO;
             }();
             emitIncDec(e, cop);
             break;
           }
           case T_EMPTY: emitEmpty(e); break;
           case T_CLONE: e.Clone(); break;
-          case '+': e.Add(); break;
-          case '-': e.Sub(); break;
+          case '+':
+            RuntimeOption::IntsOverflowToInts ? e.Add() : e.AddO();
+            break;
+          case '-':
+            RuntimeOption::IntsOverflowToInts ? e.Sub() : e.SubO();
+            break;
           case '!': e.Not(); break;
           case '~': e.BitNot(); break;
           case '(': break;
@@ -3929,9 +3933,15 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           case '&': e.BitAnd(); break;
           case '^': e.BitXor(); break;
           case '.': e.Concat(); break;
-          case '+': e.Add(); break;
-          case '-': e.Sub(); break;
-          case '*': e.Mul(); break;
+          case '+':
+            RuntimeOption::IntsOverflowToInts ? e.Add() : e.AddO();
+            break;
+          case '-':
+            RuntimeOption::IntsOverflowToInts ? e.Sub() : e.SubO();
+            break;
+          case '*':
+            RuntimeOption::IntsOverflowToInts ? e.Mul() : e.MulO();
+            break;
           case '/': e.Div(); break;
           case '%': e.Mod(); break;
           case T_SL: e.Shl(); break;
@@ -5818,11 +5828,18 @@ void EmitterVisitor::emitSet(Emitter& e) {
 void EmitterVisitor::emitSetOp(Emitter& e, int tokenOp) {
   if (checkIfStackEmpty("SetOp*")) return;
 
+  auto ifIntOverflow = [](SetOpOp trueVal, SetOpOp falseVal) {
+    return RuntimeOption::IntsOverflowToInts ? trueVal : falseVal;
+  };
+
   auto const op = [&] {
     switch (tokenOp) {
-    case T_PLUS_EQUAL:   return SetOpOp::PlusEqual;
-    case T_MINUS_EQUAL:  return SetOpOp::MinusEqual;
-    case T_MUL_EQUAL:    return SetOpOp::MulEqual;
+    case T_PLUS_EQUAL:
+      return ifIntOverflow(SetOpOp::PlusEqual, SetOpOp::PlusEqualO);
+    case T_MINUS_EQUAL:
+      return ifIntOverflow(SetOpOp::MinusEqual, SetOpOp::MinusEqualO);
+    case T_MUL_EQUAL:
+      return ifIntOverflow(SetOpOp::MulEqual, SetOpOp::MulEqualO);
     case T_DIV_EQUAL:    return SetOpOp::DivEqual;
     case T_CONCAT_EQUAL: return SetOpOp::ConcatEqual;
     case T_MOD_EQUAL:    return SetOpOp::ModEqual;
@@ -8428,8 +8445,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
         tvVal.m_data.num = 0;
         tvVal.m_type = KindOfNull;
       } else if (ce->isBoolean()) {
-        tvVal.m_data.num = ce->getBooleanValue() ? 1 : 0;
-        tvVal.m_type = KindOfBoolean;
+        tvVal = make_tv<KindOfBoolean>(ce->getBooleanValue());
       } else if (ce->isScalar()) {
         ce->getScalarValue(tvAsVariant(&tvVal));
       } else {
@@ -8442,20 +8458,17 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
       const std::string* s;
       if (sval->getString(s)) {
         StringData* sd = makeStaticString(*s);
-        tvVal.m_data.pstr = sd;
-        tvVal.m_type = KindOfString;
+        tvVal = make_tv<KindOfString>(sd);
         break;
       }
       int64_t i;
       if (sval->getInt(i)) {
-        tvVal.m_data.num = i;
-        tvVal.m_type = KindOfInt64;
+        tvVal = make_tv<KindOfInt64>(i);
         break;
       }
       double d;
       if (sval->getDouble(d)) {
-        tvVal.m_data.dbl = d;
-        tvVal.m_type = KindOfDouble;
+        tvVal = make_tv<KindOfDouble>(d);
         break;
       }
       assert(false);
@@ -9186,6 +9199,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     for (auto& i : RuntimeOption::DynamicInvokeFunctions) {
       Option::DynamicInvokeFunctions.insert(i);
     }
+    Option::IntsOverflowToInts = RuntimeOption::IntsOverflowToInts;
     Option::RecordErrors = false;
     Option::ParseTimeOpts = false;
     Option::WholeProgram = false;

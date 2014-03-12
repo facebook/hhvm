@@ -350,6 +350,9 @@ void in(ISS& env, const bc::Mod& op)    { arithImpl(env, op, typeMod); }
 void in(ISS& env, const bc::BitAnd& op) { arithImpl(env, op, typeBitAnd); }
 void in(ISS& env, const bc::BitOr& op)  { arithImpl(env, op, typeBitOr); }
 void in(ISS& env, const bc::BitXor& op) { arithImpl(env, op, typeBitXor); }
+void in(ISS& env, const bc::AddO& op)   { arithImpl(env, op, typeAddO); }
+void in(ISS& env, const bc::SubO& op)   { arithImpl(env, op, typeSubO); }
+void in(ISS& env, const bc::MulO& op)   { arithImpl(env, op, typeMulO); }
 
 template<class Op, class Fun>
 void shiftImpl(ISS& env, const Op& op, Fun fop) {
@@ -1059,20 +1062,20 @@ void in(ISS& env, const bc::IncDecL& op) {
     return push(env, TInitCell);
   }
 
-  auto const subop = op.subop;
-  auto const pre = subop == IncDecOp::PreInc || subop == IncDecOp::PreDec;
-  auto const inc = subop == IncDecOp::PreInc || subop == IncDecOp::PostInc;
+  auto const pre = isPre(op.subop);
+  auto const inc = isInc(op.subop);
+  auto const over = isIncDecO(op.subop);
 
   if (!pre) push(env, loc);
 
   // We can't constprop with this eval_cell, because of the effects
   // on locals.
-  auto resultTy = eval_cell([inc,val] {
+  auto resultTy = eval_cell([inc,over,val] {
     auto c = *val;
     if (inc) {
-      cellInc(c);
+      (over ? cellIncO : cellInc)(c);
     } else {
-      cellDec(c);
+      (over ? cellDecO : cellDec)(c);
     }
     return c;
   });

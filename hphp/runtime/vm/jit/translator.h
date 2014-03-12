@@ -730,6 +730,7 @@ enum OutTypeConstraints {
   OutFInputR,           // Like FInputL, but for R's on the stack.
 
   OutArith,             // For Add, Sub, Mul
+  OutArithO,            // For AddO, SubO, MulO
   OutBitOp,             // For BitAnd, BitOr, BitXor
   OutSetOp,             // For SetOpL
   OutIncDec,            // For IncDecL

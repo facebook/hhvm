@@ -344,6 +344,7 @@ bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
+bool RuntimeOption::IntsOverflowToInts = false;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -1161,6 +1162,11 @@ void RuntimeOption::Load(Hdf &config,
       DebuggerDefaultRpcAuth = debugger["RPC.DefaultAuth"].getString();
       DebuggerRpcHostDomain = debugger["RPC.HostDomain"].getString();
       DebuggerDefaultRpcTimeout = debugger["RPC.DefaultTimeout"].getInt32(30);
+    }
+    {
+      Hdf lang = config["Hack"]["Lang"];
+      IntsOverflowToInts =
+        lang["IntsOverflowToInts"].getBool(EnableHipHopSyntax);
     }
     {
       Hdf repo = config["Repo"];

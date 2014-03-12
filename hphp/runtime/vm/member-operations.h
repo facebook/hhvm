@@ -1236,31 +1236,46 @@ void incDecBodySlow(IncDecOp op, TypedValue* fr, TypedValue* to) {
 
   assert(cellIsPlausible(*fr));
 
+  auto dup = [&]() { if (setResult) cellDup(*fr, *to); };
+
   switch (op) {
   case IncDecOp::PreInc:
     cellInc(*fr);
-    if (setResult) {
-      cellDup(*fr, *to);
-    }
+    dup();
     return;
   case IncDecOp::PostInc:
-    if (setResult) {
-      cellDup(*fr, *to);
-    }
+    dup();
     cellInc(*fr);
     return;
   case IncDecOp::PreDec:
     cellDec(*fr);
-    if (setResult) {
-      cellDup(*fr, *to);
-    }
+    dup();
     return;
   case IncDecOp::PostDec:
-    if (setResult) {
-      cellDup(*fr, *to);
-    }
+    dup();
     cellDec(*fr);
     return;
+  default: break;
+  }
+
+  switch (op) {
+  case IncDecOp::PreIncO:
+    cellIncO(*fr);
+    dup();
+    return;
+  case IncDecOp::PostIncO:
+    dup();
+    cellIncO(*fr);
+    return;
+  case IncDecOp::PreDecO:
+    cellDecO(*fr);
+    dup();
+    return;
+  case IncDecOp::PostDecO:
+    dup();
+    cellDecO(*fr);
+    return;
+  default: break;
   }
   not_reached();
 }
@@ -1271,31 +1286,48 @@ inline void IncDecBody(IncDecOp op, TypedValue* fr, TypedValue* to) {
     return incDecBodySlow<setResult>(op, fr, to);
   }
 
+  auto copy = [&]() { if (setResult) cellCopy(*fr, *to); };
+
+  // fast cases, assuming integers overflow to ints
   switch (op) {
   case IncDecOp::PreInc:
     ++fr->m_data.num;
-    if (setResult) {
-      cellCopy(*fr, *to);
-    }
+    copy();
     return;
   case IncDecOp::PostInc:
-    if (setResult) {
-      cellCopy(*fr, *to);
-    }
+    copy();
     ++fr->m_data.num;
     return;
   case IncDecOp::PreDec:
     --fr->m_data.num;
-    if (setResult) {
-      cellCopy(*fr, *to);
-    }
+    copy();
     return;
   case IncDecOp::PostDec:
-    if (setResult) {
-      cellCopy(*fr, *to);
-    }
+    copy();
     --fr->m_data.num;
     return;
+  default: break;
+  }
+
+  // slow case, where integers can overflow to floats
+  switch (op) {
+  case IncDecOp::PreIncO:
+    cellIncO(*fr);
+    copy();
+    return;
+  case IncDecOp::PostIncO:
+    copy();
+    cellIncO(*fr);
+    return;
+  case IncDecOp::PreDecO:
+    cellDecO(*fr);
+    copy();
+    return;
+  case IncDecOp::PostDecO:
+    copy();
+    cellDecO(*fr);
+    return;
+  default: break;
   }
   not_reached();
 }

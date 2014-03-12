@@ -56,6 +56,7 @@
   CASE(Concat) \
   CASE(Abs) \
   CASE(Add) \
+  CASE(AddO) \
   CASE(Xor) \
   CASE(Not) \
   CASE(Mod) \
@@ -225,6 +226,8 @@
   case Op::BitXor:                                \
   case Op::Sub:                                   \
   case Op::Mul:                                   \
+  case Op::SubO:                                  \
+  case Op::MulO:                                  \
     func(BinaryArithOp, i)                        \
   case Op::Same:                                  \
   case Op::NSame:                                 \

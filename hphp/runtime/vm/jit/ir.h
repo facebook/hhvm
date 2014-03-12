@@ -238,6 +238,10 @@ O(XorBool,                     D(Bool), S(Bool) S(Bool),                   C) \
 O(Shl,                          D(Int), S(Int) S(Int),                     C) \
 O(Shr,                          D(Int), S(Int) S(Int),                     C) \
                                                                               \
+O(AddIntO,                      D(Int), S(Int) S(Int),                   B|C) \
+O(SubIntO,                      D(Int), S(Int) S(Int),                   B|C) \
+O(MulIntO,                      D(Int), S(Int) S(Int),                   B|C) \
+                                                                              \
 O(ConvBoolToArr,                D(Arr), S(Bool),                     C|N|PRc) \
 O(ConvDblToArr,                 D(Arr), S(Dbl),                      C|N|PRc) \
 O(ConvIntToArr,                 D(Arr), S(Int),                      C|N|PRc) \
@@ -399,7 +403,7 @@ O(VectorHasFrozenCopy,              ND, S(Obj),                            B) \
 O(VectorDoCow,                      ND, S(Obj),                          N|E) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr,Func),        P) \
 O(Unbox,                     DUnbox(0), S(Gen),                            B) \
-O(Box,                         DBox(0), S(Init),                 E|N|CRc|PRc) \
+O(Box,                         DBox(0), S(Gen),                  E|N|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
 O(BoxPtr,            D(PtrToBoxedCell), S(PtrToGen),                       N) \
 O(LdVectorBase,           D(PtrToCell), S(Obj),                            E) \

@@ -130,6 +130,7 @@ void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
 }
 
 RefData* boxValue(TypedValue tv) {
+  if (tv.m_type == KindOfUninit) tv = make_tv<KindOfNull>();
   return RefData::Make(tv);
 }
 

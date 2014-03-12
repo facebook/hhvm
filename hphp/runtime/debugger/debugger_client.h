@@ -335,6 +335,7 @@ private:
   std::set<std::string> m_tutorialVisited;
   bool m_scriptMode; // Is this client being scripted by a test?
   bool m_neverSaveConfig; // So that tests can avoid clobbering the config file
+  bool m_neverSaveConfigOverride;
 
   DECLARE_DBG_CLIENT_SETTING
 

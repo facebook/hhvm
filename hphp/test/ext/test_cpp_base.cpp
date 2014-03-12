@@ -21,11 +21,9 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/base/shared-store-base.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/ip-block-map.h"
-#include "hphp/test/ext/test_mysql_info.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_string.h"
 

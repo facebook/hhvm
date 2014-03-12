@@ -5478,6 +5478,8 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
   gen(StRef, oldLoc, newVal);
   if (doRefCount) {
     gen(DecRef, innerCell);
+    m_irb->constrainValue(oldLoc, TypeConstraint(DataTypeCountness, Type::Gen,
+                                                 DataTypeCountness));
   }
 
   return newVal;

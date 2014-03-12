@@ -154,7 +154,6 @@ StringBag Option::OptionStrings;
 
 bool Option::GenerateDocComments = true;
 
-void (*Option::m_hookHandler)(Hdf &config);
 bool (*Option::PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr file);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -283,8 +282,6 @@ void Option::Load(Hdf &config) {
 
   // Temporary, during file-cache migration.
   FileCache::UseNewCache   = config["UseNewCache"].getBool(false);
-
-  if (m_hookHandler) m_hookHandler(config);
 
   OnLoad();
 }

@@ -261,10 +261,6 @@ public:
   static bool RecordErrors;
   static std::string DocJson; // filename to dump doc JSON to
 
-  static void setHookHandler(void (*hookHandler)(Hdf &config)) {
-    m_hookHandler = hookHandler;
-  }
-
   static bool (*PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr fs);
 private:
   static StringBag OptionStrings;
@@ -277,8 +273,6 @@ private:
   static bool IsDynamic(const std::string &name,
                         const std::vector<std::string> &prefixes,
                         const std::vector<std::string> &postfixes);
-
-  static void (*m_hookHandler)(Hdf &config);
 };
 
 //////////////////////////////////////////////////////////////////////

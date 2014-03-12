@@ -36,10 +36,11 @@ class Kohana extends Framework {
     verbose("Creating a phpunit.xml for running the Kohana tests.\n",
             Options::$verbose);
     $phpunit_xml = <<<XML
-<phpunit bootstrap="./modules/unittest/bootstrap.php">
+<phpunit bootstrap="./modules/unittest/bootstrap_all_modules.php">
 <testsuites>
   <testsuite name="Kohana">
-    <directory>./</directory>
+    <directory>./system</directory>
+    <directory>./modules</directory>
   </testsuite>
 </testsuites>
 </phpunit>

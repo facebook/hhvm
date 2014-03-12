@@ -1045,8 +1045,6 @@ static int execute_program_impl(int argc, char** argv) {
      "lint specified file")
     ("show,w", value<string>(&po.show),
      "output specified file and do nothing else")
-    ("parse", value<string>(&po.parse),
-     "parse specified file and dump the AST")
     ("temp-file",
      "file specified is temporary and removed after execution")
     ("count", value<int>(&po.count)->default_value(1),
@@ -1298,11 +1296,6 @@ static int execute_program_impl(int argc, char** argv) {
     }
     Logger::Info("No syntax errors detected in %s", po.lint.c_str());
     return 0;
-  }
-
-  if (!po.parse.empty()) {
-    Logger::Error("The 'parse' command line option is not supported\n\n");
-    return 1;
   }
 
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {

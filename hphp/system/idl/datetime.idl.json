@@ -1410,6 +1410,16 @@
                     },
                     "args": [
                     ]
+                },
+                {
+                    "name": "__debugInfo",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
                 }
             ],
             "consts": [

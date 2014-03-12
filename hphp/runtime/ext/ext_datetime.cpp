@@ -289,6 +289,20 @@ void c_DateTime::t___wakeup() {
   unsetProp(getVMClass(), s__date_time.get());
 }
 
+const StaticString
+  s_date("date"),
+  s_timezone_type("timezone_type"),
+  s_timezone("timezone"),
+  s_ISOformat("Y-m-d H:i:s");
+
+Array c_DateTime::t___debuginfo() {
+  ArrayInit ret(3);
+  ret.set(s_date, t_format(s_ISOformat));
+  ret.set(s_timezone_type, m_dt->zoneType());
+  ret.set(s_timezone, m_dt->timezone()->name());
+  return ret.create();
+}
+
 c_DateTime* c_DateTime::Clone(ObjectData* obj) {
   c_DateTime* dt = static_cast<c_DateTime*>(obj->cloneImpl());
   dt->m_dt = static_cast<c_DateTime*>(obj)->m_dt->cloneDateTime();

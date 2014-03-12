@@ -71,6 +71,7 @@ class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
   public: Object t_sub(const Object& interval);
   public: void t___wakeup();
   public: Array t___sleep();
+  public: Array t___debuginfo();
 
   int64_t gettimestamp() const;
 

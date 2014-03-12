@@ -17,22 +17,19 @@
 #ifndef incl_HPHP_VARIANT_H_
 #define incl_HPHP_VARIANT_H_
 
-#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
-#error Directly including 'type_variant.h' is prohibited. \
-       Include 'complex_types.h' instead.
-#endif
-
-#include <type_traits>
-#include <algorithm>
-
-#include "hphp/util/trace.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/type-object.h"
-#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-object.h"
+#include "hphp/runtime/base/type-resource.h"
+#include "hphp/runtime/base/type-string.h"
+
+#include <algorithm>
+#include <type_traits>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

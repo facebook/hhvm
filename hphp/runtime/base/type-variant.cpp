@@ -13,28 +13,37 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#include "hphp/runtime/base/type-variant.h"
+
+#include "hphp/parser/hphp.tab.hpp"
+
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/dummy-resource.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-string.h"
+
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/ext_variable.h"
+
+#include "hphp/runtime/vm/runtime.h"
+
+#include "hphp/system/systemlib.h"
+
+#include "hphp/util/abi-cxx.h"
+#include "hphp/util/logger.h"
+
 #include <limits>
 #include <utility>
 #include <vector>
-#include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/ext/ext_variable.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/dummy-resource.h"
-#include "hphp/parser/hphp.tab.hpp"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/system/systemlib.h"
-#include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/base/tv-arith.h"
-#include "hphp/util/abi-cxx.h"
-#include "hphp/util/logger.h"
 
 namespace HPHP {
 

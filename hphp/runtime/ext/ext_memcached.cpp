@@ -879,6 +879,11 @@ bool c_Memcached::t_setoption(int option, const Variant& value) {
 
   default:
     {
+      if ((option < 0) || (option >= MEMCACHED_BEHAVIOR_MAX)) {
+        raise_warning("error setting memcached option");
+        return false;
+      }
+
       // Assume that it's a libmemcached behavior option
       uint64_t lValue = value.toInt64();
       if (memcached_behavior_set(&m_impl->memcached,

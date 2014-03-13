@@ -46,6 +46,9 @@
     commit: ac8ac6a90812d3d2c880efe00c2293aef6fd8030
     install_root: codeigniter
     test_root: codeigniter/tests
+    clowns:
+      # Errors + fails with PHP5
+      - codeigniter/tests/codeigniter/core/URI_test.php
   composer:
     url: https://github.com/composer/composer.git
     # master is the only available branch

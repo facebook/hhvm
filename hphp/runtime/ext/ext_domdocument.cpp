@@ -798,66 +798,6 @@ static Variant dom_load_html(c_DOMDocument *domdoc, const String& source,
   return domdoc;
 }
 
-static bool _dom_document_relaxNG_validate(c_DOMDocument *domdoc,
-                                           const String& source, int type) {
-  xmlRelaxNGParserCtxtPtr parser;
-  xmlRelaxNGPtr           sptr;
-  xmlRelaxNGValidCtxtPtr  vptr;
-  int                     is_valid;
-
-  if (source.empty()) {
-    raise_warning("Invalid Schema source");
-    return false;
-  }
-
-  xmlDocPtr docp = (xmlDocPtr)domdoc->m_node;
-
-  switch (type) {
-  case DOM_LOAD_FILE:
-    {
-      String valid_file = _dom_get_valid_file_path(source.data());
-      if (valid_file.empty()) {
-        raise_warning("Invalid RelaxNG file source");
-        return false;
-      }
-      parser = xmlRelaxNGNewParserCtxt(valid_file.data());
-    }
-    break;
-  case DOM_LOAD_STRING:
-    parser = xmlRelaxNGNewMemParserCtxt(source.data(), source.size());
-    /* If loading from memory, we need to set the base directory for
-       the document. but it is not apparent how to do that for schema's */
-    break;
-  default:
-    return false;
-  }
-
-  xmlRelaxNGSetParserErrors
-    (parser, (xmlRelaxNGValidityErrorFunc) php_libxml_ctx_error,
-     (xmlRelaxNGValidityWarningFunc) php_libxml_ctx_error, nullptr);
-  sptr = xmlRelaxNGParse(parser);
-  xmlRelaxNGFreeParserCtxt(parser);
-  if (!sptr) {
-    raise_warning("Invalid RelaxNG");
-    return false;
-  }
-
-  vptr = xmlRelaxNGNewValidCtxt(sptr);
-  if (!vptr) {
-    xmlRelaxNGFree(sptr);
-    raise_error("Invalid RelaxNG Validation Context");
-    return false;
-  }
-
-  xmlRelaxNGSetValidErrors(vptr, php_libxml_ctx_error,
-                           php_libxml_ctx_error, nullptr);
-  is_valid = xmlRelaxNGValidateDoc(vptr, docp);
-  xmlRelaxNGFree(sptr);
-  xmlRelaxNGFreeValidCtxt(vptr);
-
-  return is_valid == 0;
-}
-
 static bool _dom_document_schema_validate(c_DOMDocument * domdoc,
                                           const String& source, int type) {
   xmlDocPtr docp = (xmlDocPtr)domdoc->m_node;
@@ -3443,16 +3383,6 @@ bool c_DOMDocument::t_registernodeclass(const String& baseclass,
   return true;
 }
 
-bool c_DOMDocument::t_relaxngvalidate(const String& filename) {
-  SYNC_VM_REGS_SCOPED();
-  return _dom_document_relaxNG_validate(this, filename, DOM_LOAD_FILE);
-}
-
-bool c_DOMDocument::t_relaxngvalidatesource(const String& source) {
-  SYNC_VM_REGS_SCOPED();
-  return _dom_document_relaxNG_validate(this, source, DOM_LOAD_STRING);
-}
-
 Variant c_DOMDocument::t_save(const String& file, int64_t options /* = 0 */) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0, saveempty = 0;
@@ -5543,17 +5473,6 @@ Variant f_dom_document_schema_validate_file(const Variant& obj,
 Variant f_dom_document_schema_validate_xml(const Variant& obj, const String& source) {
   DOM_GET_OBJ(Document);
   return pobj->t_schemavalidatesource(source);
-}
-
-Variant f_dom_document_relaxng_validate_file(const Variant& obj,
-                                             const String& filename) {
-  DOM_GET_OBJ(Document);
-  return pobj->t_relaxngvalidate(filename);
-}
-
-Variant f_dom_document_relaxng_validate_xml(const Variant& obj, const String& source) {
-  DOM_GET_OBJ(Document);
-  return pobj->t_relaxngvalidatesource(source);
 }
 
 Variant f_dom_node_insert_before(const Variant& obj, const Object& newnode,

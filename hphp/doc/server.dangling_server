@@ -18,11 +18,3 @@ the local dangling server with URL, headers and POST data of current request,
 and update current response's headers and output buffer with what it gets. It
 will return false, if it failed to contact the dangling server that may have
 shut down eventually.
-
-Similarly, an old server can call dangling_server_proxy_new_request(), if it
-knows which servers will surely get new version of the software first:
-
-  if (dangling_server_proxy_new_request($host)) {
-    exit;
-  }
-  // otherwise, do something about it

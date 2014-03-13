@@ -38,7 +38,6 @@ enum PageletStatusType {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool f_dangling_server_proxy_old_request();
-bool f_dangling_server_proxy_new_request(const String& host);
 bool f_pagelet_server_is_enabled();
 Resource f_pagelet_server_task_start(const String& url, const Array& headers = null_array, const String& post_data = null_string, const Array& files = null_array);
 int64_t f_pagelet_server_task_status(const Resource& task);

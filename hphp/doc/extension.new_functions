@@ -35,7 +35,6 @@ testing and some alternative PHP implementation.
 - fb_parallel_query
 - fb_crossall_query
 
-- dangling_server_proxy_old_request
 - dangling_server_proxy_new_request
 
 - pagelet_server_is_enabled

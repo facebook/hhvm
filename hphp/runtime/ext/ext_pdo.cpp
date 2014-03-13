@@ -1992,10 +1992,7 @@ static bool do_fetch(sp_PDOStatement stmt,
       break;
 
     case PDO_FETCH_FUNC:
-      if (!stmt->fetch.values.isArray()) {
-        stmt->fetch.values = Variant(Array::Create());
-      }
-      stmt->fetch.values.toArrRef().set(idx, val);
+      forceToArray(stmt->fetch.values).set(idx, val);
       break;
 
     default:

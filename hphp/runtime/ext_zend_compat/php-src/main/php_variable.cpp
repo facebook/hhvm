@@ -31,7 +31,6 @@
 SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data) {
   assert(arg == PARSE_STRING);
   auto& var = HPHP::tvAsVariant(destArray->tv());
-  if (!var.isArray()) var = HPHP::Variant(HPHP::Array::Create());
-  auto& varArr = var.asArrRef();
+  auto& varArr = HPHP::forceToArray(var);
   HPHP::HttpProtocol::DecodeParameters(varArr, str, strlen(str));
 }

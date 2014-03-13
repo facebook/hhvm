@@ -94,7 +94,7 @@ void DummySandbox::run() {
             "PHP files may not be loaded properly.\n";
         } else {
           auto& server = g->getRef(s__SERVER);
-          if (!server.isArray()) server = Array::Create();
+          forceToArray(server);
           sri.setServerVariables(server.toArrRef());
         }
         Debugger::RegisterSandbox(sandbox);

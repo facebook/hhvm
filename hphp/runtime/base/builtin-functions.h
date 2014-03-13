@@ -194,6 +194,8 @@ Object create_object(const String& s, const Array &params, bool init = true);
 
 /**
  * Argument count handling.
+ *   - When level is 3, it's from system class member functions; HH mode will
+ *     warn, PHP mode will not.
  *   - When level is 2, it's from constructors that turn these into fatals
  *   - When level is 1, it's from system funcs that turn both into warnings
  *   - When level is 0, it's from user funcs that turn missing arg in warnings

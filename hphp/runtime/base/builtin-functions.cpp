@@ -620,7 +620,7 @@ void throw_missing_arguments_nr(const char *fn, int expected, int got,
     } else {
       raise_error(Strings::MISSING_ARGUMENTS, fn, expected, got);
     }
-  } else {
+  } else if ((level == 3 && RuntimeOption::EnableHipHopSyntax) || level != 3) {
     if (expected == 1) {
       raise_warning(Strings::MISSING_ARGUMENT, fn, got);
     } else {
@@ -637,7 +637,8 @@ void throw_toomany_arguments_nr(const char *fn, int num, int level /* = 0 */,
   }
   if (level == 2 || RuntimeOption::ThrowTooManyArguments) {
     raise_error("Too many arguments for %s(), expected %d", fn, num);
-  } else if (level == 1 || RuntimeOption::WarnTooManyArguments) {
+  } else if (level == 1 || RuntimeOption::WarnTooManyArguments ||
+            (level == 3 && RuntimeOption::EnableHipHopSyntax)) {
     raise_warning("Too many arguments for %s(), expected %d", fn, num);
   }
 }

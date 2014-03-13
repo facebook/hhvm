@@ -53,7 +53,7 @@ struct Func {
     // construct a dummy ParamInfo
     ParamInfo()
       : m_builtinType(KindOfInvalid), m_funcletOff(InvalidAbsoluteOffset),
-        m_phpCode(nullptr), m_userType(nullptr) {
+        m_phpCode(nullptr), m_variadic(false), m_userType(nullptr) {
       tvWriteUninit(&m_defVal);
     }
 
@@ -64,6 +64,7 @@ struct Func {
         (m_defVal)
         (m_phpCode)
         (m_typeConstraint)
+        (m_variadic)
         (m_userAttributes)
         (m_userType)
         ;
@@ -86,6 +87,9 @@ struct Func {
     }
     void setDefaultValue(const TypedValue& defVal) { m_defVal = defVal; }
     const TypedValue& defaultValue() const { return m_defVal; }
+
+    void setVariadic(const bool isVariadic) { m_variadic = isVariadic; }
+    bool isVariadic() const { return m_variadic; }
 
     void setPhpCode(const StringData* phpCode) { m_phpCode = phpCode; }
     const StringData* phpCode() const { return m_phpCode; }
@@ -110,12 +114,13 @@ struct Func {
     }
 
   private:
-    DataType m_builtinType;     // typehint for builtins
+    DataType m_builtinType; // typehint for builtins
     Offset m_funcletOff; // If no default: InvalidAbsoluteOffset.
     TypedValue m_defVal; // Set to uninit null if there is no default value
                          // or if there is a non-scalar default value.
     const StringData* m_phpCode; // eval'able PHP code.
     TypeConstraint m_typeConstraint;
+    bool m_variadic;
 
     UserAttributeMap m_userAttributes;
     // the type the user typed in source code, contains type parameters and all

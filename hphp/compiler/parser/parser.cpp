@@ -1075,6 +1075,11 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
                 &modifiers, ret, ref, &name, params, stmt, attr, reloc);
 }
 
+void Parser::onVariadicParam(Token &out, Token *params,
+                             Token &type, Token &var,
+                             bool ref, Token *attr, Token *modifier) {
+}
+
 void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
                      bool ref, Token *defValue, Token *attr, Token *modifier) {
   ExpressionPtr expList;

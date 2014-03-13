@@ -38,7 +38,8 @@ ParameterExpression::ParameterExpression(
      bool ref,
      TokenID modifier,
      ExpressionPtr defaultValue,
-     ExpressionPtr attributeList)
+     ExpressionPtr attributeList,
+     bool variadic)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ParameterExpression))
   , m_originalType(type)
   , m_name(name)
@@ -47,6 +48,7 @@ ParameterExpression::ParameterExpression(
   , m_modifier(modifier)
   , m_defaultValue(defaultValue)
   , m_attributeList(attributeList)
+  , m_variadic(variadic)
 {
   m_type = toLower(type ? type->vanillaName() : "");
   if (m_defaultValue) {

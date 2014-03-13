@@ -19,7 +19,6 @@ $expected_exceptions = array(
   'T_XHP_REQUIRED' => true,
   'T_XHP_TAG_LT' => true,
   'T_XHP_TAG_GT' => true,
-  'T_VARARG' => true,
   'T_HH_ERROR' => true,
   'T_FINALLY' => true,
   'T_TYPELIST_LT' => true,

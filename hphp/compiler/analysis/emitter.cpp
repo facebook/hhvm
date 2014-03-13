@@ -6798,6 +6798,7 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
     }
 
     pi.setRef(par->isRef());
+    pi.setVariadic(par->isVariadic());
     fe->appendParam(parName, pi);
   }
 }
@@ -7065,10 +7066,8 @@ void EmitterVisitor::emitPostponedCinits() {
     StringData* methDoc = empty_string.get();
     const Location* sLoc = p.m_is->getLocation().get();
     p.m_fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, false, methDoc);
-    static const StringData* s_constName =
-      makeStaticString("constName");
-    p.m_fe->appendParam(s_constName,
-                        FuncEmitter::ParamInfo());
+    static const StringData* s_constName = makeStaticString("constName");
+    p.m_fe->appendParam(s_constName, FuncEmitter::ParamInfo());
 
     Emitter e(p.m_is, m_ue, *this);
     FuncFinisher ff(this, e, p.m_fe);

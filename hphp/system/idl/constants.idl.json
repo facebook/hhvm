@@ -5550,6 +5550,10 @@
             "type": "Int64"
         },
         {
+            "name": "T_ELLIPSIS",
+            "type": "Int64"
+        },
+        {
             "name": "UNKNOWN_TYPE",
             "value": 999998
         },

@@ -291,6 +291,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"class"                { RETTOKEN(T_CLASS);}
 <ST_IN_SCRIPTING>"interface"            { RETTOKEN(T_INTERFACE);}
 <ST_IN_SCRIPTING>"trait"                { RETTOKEN(T_TRAIT);}
+<ST_IN_SCRIPTING>"..."                  { RETTOKEN(T_ELLIPSIS);}
 <ST_IN_SCRIPTING>"insteadof"            { RETTOKEN(T_INSTEADOF);}
 <ST_IN_SCRIPTING>"extends"              { RETTOKEN(T_EXTENDS);}
 <ST_IN_SCRIPTING>"implements"           { RETTOKEN(T_IMPLEMENTS);}
@@ -482,14 +483,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_LOOKING_FOR_COLON>":" {
   BEGIN(ST_IN_SCRIPTING);
   RETSTEP(':');
-}
-
-<ST_IN_SCRIPTING>"..." {
-  if (!_scanner->isHHSyntaxEnabled()) {
-    yyless(1);
-    RETSTEP('.');
-  }
-  RETTOKEN(T_VARARG);
 }
 
 <ST_IN_SCRIPTING>">>" {

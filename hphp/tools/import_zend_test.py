@@ -216,6 +216,7 @@ bad_tests = (
     '/ext/sockets/tests/socket_write_params.php',
     '/ext/curl/tests/bug52202.php',
     '/ext/sockets/tests/socket_read_params.php',
+    '/ext/curl/tests/bug52202.php',
     '/ext/standard/tests/network/bug20134.php',
     '/ext/pcre/tests/preg_match_all_edit_basic.php',
     '/ext/standard/tests/general_functions/bug39322.php',

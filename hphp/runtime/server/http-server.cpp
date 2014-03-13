@@ -522,6 +522,8 @@ bool HttpServer::startServer(bool pageServer) {
       }
       return true;
     } catch (FailedToListenException &e) {
+      if (RuntimeOption::ServerExitOnBindFail) return false;
+
       if (i == 0) {
         Logger::Info("shutting down old HPHP server by /stop command");
       }

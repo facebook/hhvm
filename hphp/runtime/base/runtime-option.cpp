@@ -130,6 +130,7 @@ bool RuntimeOption::ServerStatCache = false;
 std::vector<std::string> RuntimeOption::ServerWarmupRequests;
 boost::container::flat_set<std::string>
 RuntimeOption::ServerHighPriorityEndPoints;
+bool RuntimeOption::ServerExitOnBindFail;
 int RuntimeOption::PageletServerThreadCount = 0;
 bool RuntimeOption::PageletServerThreadRoundRobin = false;
 int RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds = 0;
@@ -737,6 +738,7 @@ void RuntimeOption::Load(Hdf &config,
     ServerStatCache = server["StatCache"].getBool(false);
     server["WarmupRequests"].get(ServerWarmupRequests);
     server["HighPriorityEndPoints"].get(ServerHighPriorityEndPoints);
+    ServerExitOnBindFail = server["ExitOnBindFail"].getBool(false);
 
     RequestTimeoutSeconds = server["RequestTimeoutSeconds"].getInt32(0);
     PspTimeoutSeconds = server["PspTimeoutSeconds"].getInt32(0);

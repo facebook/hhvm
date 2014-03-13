@@ -424,8 +424,11 @@ public:
   int compare(const ArrayData *v2) const;
   bool equal(const ArrayData *v2, bool strict) const;
 
-  void setPosition(ssize_t p) { m_pos = p; }
-  ssize_t getPosition() const { return m_pos; }
+  void setPosition(int32_t p) {
+    assert(m_pos == p || !isStatic());
+    m_pos = p;
+  }
+  int32_t getPosition() const { return m_pos; }
 
   ArrayData *escalate() const;
 

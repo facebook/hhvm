@@ -565,13 +565,13 @@ ArrayData* ArrayData::ZAppend(ArrayData* ad, RefData* v) {
 // Default implementation of position-based iterations.
 
 Variant ArrayData::reset() {
-  m_pos = iter_begin();
+  setPosition(iter_begin());
   return m_pos != invalid_index ? getValue(m_pos) : Variant(false);
 }
 
 Variant ArrayData::prev() {
   if (m_pos != invalid_index) {
-    m_pos = iter_rewind(m_pos);
+    setPosition(iter_rewind(m_pos));
     if (m_pos != invalid_index) {
       return getValue(m_pos);
     }
@@ -581,7 +581,7 @@ Variant ArrayData::prev() {
 
 Variant ArrayData::next() {
   if (m_pos != invalid_index) {
-    m_pos = iter_advance(m_pos);
+    setPosition(iter_advance(m_pos));
     if (m_pos != invalid_index) {
       return getValue(m_pos);
     }
@@ -590,7 +590,7 @@ Variant ArrayData::next() {
 }
 
 Variant ArrayData::end() {
-  m_pos = iter_end();
+  setPosition(iter_end());
   return m_pos != invalid_index ? getValue(m_pos) : Variant(false);
 }
 
@@ -619,7 +619,7 @@ Variant ArrayData::each() {
     ret.set(s_value, value);
     ret.set(0, key);
     ret.set(s_key, key);
-    m_pos = iter_advance(m_pos);
+    setPosition(iter_advance(m_pos));
     return ret.toVariant();
   }
   return Variant(false);

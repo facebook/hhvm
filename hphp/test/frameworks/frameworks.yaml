@@ -336,6 +336,9 @@
     install_root: vfsstream
     test_root: vfsstream
     config_file: vfsstream/phpunit.xml.dist
+    blacklist:
+      # Intermittently hangs, takes > 24h
+      - vfsstream/src/test/php/org/bovigo/vfs/vfsStreamWrapperWithoutRootTestCase.php
   yii:
     url: https://github.com/yiisoft/yii.git
     branch: master

@@ -19,10 +19,14 @@ if (LIBMAGICKWAND_LIBRARIES AND LIBMAGICKWAND_INCLUDE_DIRS)
 endif (LIBMAGICKWAND_LIBRARIES AND LIBMAGICKWAND_INCLUDE_DIRS)
 
 set (ImageMagick_FIND_QUIETLY TRUE)
-find_package(ImageMagick COMPONENTS MagickWand)
-if (ImageMagick_MagickWand_INCLUDE_DIR AND ImageMagick_MagickWand_LIBRARY)
+find_package(ImageMagick COMPONENTS MagickWand MagickCore)
+if (ImageMagick_MagickWand_FOUND)
   set (LIBMAGICKWAND_INCLUDE_DIRS ${ImageMagick_MagickWand_INCLUDE_DIR} CACHE STRING "")
   set (LIBMAGICKWAND_LIBRARIES ${ImageMagick_MagickWand_LIBRARY} CACHE STRING "")
+endif ()
+if (ImageMagick_MagickCore_FOUND)
+  set (LIBMAGICKCORE_INCLUDE_DIRS ${ImageMagick_MagickCore_INCLUDE_DIR} CACHE STRING "")
+  set (LIBMAGICKCORE_LIBRARIES ${ImageMagick_MagickCore_LIBRARY} CACHE STRING "")
 endif ()
 
 find_path (LIBMAGICKWAND_INCLUDE_DIRS

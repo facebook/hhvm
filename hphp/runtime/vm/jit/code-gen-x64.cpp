@@ -1857,7 +1857,6 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
     return;
   }
   assert(src->isA(Type::Gen));
-  assert(!src->isConst());
 
   PhysReg typeSrcReg = loc.reg(1); // type register
   if (typeSrcReg == InvalidReg) {

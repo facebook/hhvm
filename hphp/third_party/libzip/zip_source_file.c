@@ -31,16 +31,14 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include <errno.h>
 #include <stdio.h>
 
 #include "zipint.h"
 
-
 
-ZIP_EXTERN(struct zip_source *)
+ZIP_EXTERN struct zip_source *
 zip_source_file(struct zip *za, const char *fname, zip_uint64_t start,
 		zip_int64_t len)
 {

@@ -28,7 +28,7 @@ const StaticString
 Class* IntlCalendar::c_IntlCalendar = nullptr;
 
 const icu::Calendar*
-IntlCalendar::ParseArg(CVarRef cal, const icu::Locale &locale,
+IntlCalendar::ParseArg(const Variant& cal, const icu::Locale &locale,
                        const String &funcname, IntlError* err,
                        int64_t &calType, bool &calOwned) {
   icu::Calendar *ret = nullptr;
@@ -128,7 +128,7 @@ static bool HHVM_METHOD(IntlCalendar, add, int64_t field, int64_t amount) {
   return true;
 }
 
-static bool intlcal_compare(CObjRef this_, CObjRef that_,
+static bool intlcal_compare(const Object& this_, const Object& that_,
   UBool (icu::Calendar::*func)(const icu::Calendar&, UErrorCode&) const) {
   CAL_FETCH(obj1, this_, false);
   CAL_FETCH(obj2, that_, false);
@@ -141,15 +141,15 @@ static bool intlcal_compare(CObjRef this_, CObjRef that_,
   return res;
 }
 
-static bool HHVM_METHOD(IntlCalendar, after, CObjRef other) {
+static bool HHVM_METHOD(IntlCalendar, after, const Object& other) {
   return intlcal_compare(this_, other, &icu::Calendar::after);
 }
 
-static bool HHVM_METHOD(IntlCalendar, before, CObjRef other) {
+static bool HHVM_METHOD(IntlCalendar, before, const Object& other) {
   return intlcal_compare(this_, other, &icu::Calendar::before);
 }
 
-static bool HHVM_METHOD(IntlCalendar, clear, CVarRef field) {
+static bool HHVM_METHOD(IntlCalendar, clear, const Variant& field) {
   CAL_FETCH(data, this_, false);
   if (field.isNull()) {
     data->calendar()->clear();
@@ -160,7 +160,7 @@ static bool HHVM_METHOD(IntlCalendar, clear, CVarRef field) {
 }
 
 static Object HHVM_STATIC_METHOD(IntlCalendar, createInstance,
-                                 CVarRef timeZone, const String& locale) {
+                                 const Variant& timeZone, const String& locale) {
   icu::TimeZone *tz =
     IntlTimeZone::ParseArg(timeZone, "intlcal_create_instance",
                            s_intl_error.get());
@@ -180,12 +180,12 @@ static Object HHVM_STATIC_METHOD(IntlCalendar, createInstance,
   return IntlCalendar::newInstance(cal);
 }
 
-static bool HHVM_METHOD(IntlCalendar, equals, CObjRef other) {
+static bool HHVM_METHOD(IntlCalendar, equals, const Object& other) {
   return intlcal_compare(this_, other, &icu::Calendar::equals);
 }
 
 static Variant HHVM_METHOD(IntlCalendar, fieldDifference,
-                           CVarRef when, int64_t field) {
+                           const Variant& when, int64_t field) {
   CAL_FETCH(data, this_, false);
   CAL_CHECK_FIELD(field, "intlcal_field_difference");
   UErrorCode error = U_ZERO_ERROR;
@@ -199,7 +199,7 @@ static Variant HHVM_METHOD(IntlCalendar, fieldDifference,
   return ret;
 }
 
-static Variant intlcal_field_method(CObjRef obj, int64_t field,
+static Variant intlcal_field_method(const Object& obj, int64_t field,
        int32_t (icu::Calendar::*func)(UCalendarDateFields, UErrorCode&) const,
        const char *method_name) {
   CAL_FETCH(data, obj, false);
@@ -213,7 +213,7 @@ static Variant intlcal_field_method(CObjRef obj, int64_t field,
   return ret;
 }
 
-static Variant intlcal_field_method(CObjRef obj, int64_t field,
+static Variant intlcal_field_method(const Object& obj, int64_t field,
        int32_t (icu::Calendar::*func)(UCalendarDateFields) const,
        const char *method_name) {
   CAL_FETCH(data, obj, false);
@@ -356,7 +356,7 @@ static bool HHVM_METHOD(IntlCalendar, inDaylightTime) {
   return ret;
 }
 
-static bool HHVM_METHOD(IntlCalendar, isEquivalentTo, CObjRef other) {
+static bool HHVM_METHOD(IntlCalendar, isEquivalentTo, const Object& other) {
   CAL_FETCH(obj1, this_, false);
   CAL_FETCH(obj2, other, false);
   return obj1->calendar()->isEquivalentTo(*obj2->calendar());
@@ -373,7 +373,7 @@ static bool HHVM_METHOD(IntlCalendar, _isSet, int64_t field) {
   return data->calendar()->isSet((UCalendarDateFields)field);
 }
 
-static bool HHVM_METHOD(IntlCalendar, roll, int64_t field, CVarRef value) {
+static bool HHVM_METHOD(IntlCalendar, roll, int64_t field, const Variant& value) {
   CAL_FETCH(data, this_, false);
   CAL_CHECK_FIELD(field, "intlcal_roll");
   UErrorCode error = U_ZERO_ERROR;
@@ -392,7 +392,7 @@ static bool HHVM_METHOD(IntlCalendar, roll, int64_t field, CVarRef value) {
 }
 
 // TODO: Switch to AcrRec API once it lands
-static bool HHVM_METHOD(IntlCalendar, __set_array, CArrRef args) {
+static bool HHVM_METHOD(IntlCalendar, __set_array, const Array& args) {
   assert(args.size() == 6);
   CAL_FETCH(data, this_, false);
 
@@ -483,7 +483,7 @@ static bool HHVM_METHOD(IntlCalendar, setMinimalDaysInFirstWeek,
   return true;
 }
 
-static bool HHVM_METHOD(IntlCalendar, setTime, CVarRef date) {
+static bool HHVM_METHOD(IntlCalendar, setTime, const Variant& date) {
   CAL_FETCH(data, this_, false);
   UErrorCode error = U_ZERO_ERROR;
   data->calendar()->setTime((UDate)date.toDouble(), error);
@@ -494,7 +494,7 @@ static bool HHVM_METHOD(IntlCalendar, setTime, CVarRef date) {
   return true;
 }
 
-static bool HHVM_METHOD(IntlCalendar, setTimeZone, CVarRef timeZone) {
+static bool HHVM_METHOD(IntlCalendar, setTimeZone, const Variant& timeZone) {
   CAL_FETCH(data, this_, false);
   auto tz = IntlTimeZone::ParseArg(timeZone, "intlcal_set_time_zone",
                                    data);
@@ -563,7 +563,7 @@ static Variant HHVM_METHOD(IntlCalendar, getWeekendTransition,
   return ret;
 }
 
-static bool HHVM_METHOD(IntlCalendar, isWeekend, CVarRef date) {
+static bool HHVM_METHOD(IntlCalendar, isWeekend, const Variant& date) {
   CAL_FETCH(data, this_, false);
   if (date.isNull()) {
     return data->calendar()->isWeekend();
@@ -618,7 +618,7 @@ static bool HHVM_METHOD(IntlCalendar, setSkippedWallTimeOption,
 // IntlGregorianCalendar
 
 static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
-                        CArrRef args) {
+                        const Array& args) {
   assert(args.size() == 6);
 
   int32_t numargs;

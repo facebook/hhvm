@@ -24,46 +24,46 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // type testing
 
-bool f_is_bool(CVarRef v);
-bool f_is_int(CVarRef v);
-bool f_is_integer(CVarRef v);
-bool f_is_long(CVarRef v);
-bool f_is_double(CVarRef v);
-bool f_is_float(CVarRef v);
-bool f_is_numeric(CVarRef v);
-bool f_is_real(CVarRef v);
-bool f_is_string(CVarRef v);
-bool f_is_scalar(CVarRef v);
-bool f_is_array(CVarRef v);
-bool f_is_object(CVarRef v);
-bool f_is_resource(CVarRef v);
-bool f_is_null(CVarRef v);
+bool f_is_bool(const Variant& v);
+bool f_is_int(const Variant& v);
+bool f_is_integer(const Variant& v);
+bool f_is_long(const Variant& v);
+bool f_is_double(const Variant& v);
+bool f_is_float(const Variant& v);
+bool f_is_numeric(const Variant& v);
+bool f_is_real(const Variant& v);
+bool f_is_string(const Variant& v);
+bool f_is_scalar(const Variant& v);
+bool f_is_array(const Variant& v);
+bool f_is_object(const Variant& v);
+bool f_is_resource(const Variant& v);
+bool f_is_null(const Variant& v);
 
-String f_gettype(CVarRef v);
-String f_get_resource_type(CResRef handle);
+String f_gettype(const Variant& v);
+String f_get_resource_type(const Resource& handle);
 
 ///////////////////////////////////////////////////////////////////////////////
 // type conversion
 
-bool f_boolval(CVarRef v);
-int64_t f_intval(CVarRef v, int64_t base = 10);
-double f_doubleval(CVarRef v);
-double f_floatval(CVarRef v);
-String f_strval(CVarRef v);
+bool f_boolval(const Variant& v);
+int64_t f_intval(const Variant& v, int64_t base = 10);
+double f_doubleval(const Variant& v);
+double f_floatval(const Variant& v);
+String f_strval(const Variant& v);
 
 bool f_settype(VRefParam var, const String& type);
 
 ///////////////////////////////////////////////////////////////////////////////
 // input/output
 
-Variant f_print_r(CVarRef expression, bool ret = false);
-Variant f_var_export(CVarRef expression, bool ret = false);
-void f_var_dump(CVarRef v);
-void f_var_dump(int _argc, CVarRef expression, CArrRef _argv = null_array);
-void f_debug_zval_dump(CVarRef variable);
-String f_serialize(CVarRef value);
+Variant f_print_r(const Variant& expression, bool ret = false);
+Variant f_var_export(const Variant& expression, bool ret = false);
+void f_var_dump(const Variant& v);
+void f_var_dump(int _argc, const Variant& expression, const Array& _argv = null_array);
+void f_debug_zval_dump(const Variant& variable);
+String f_serialize(const Variant& value);
 Variant f_unserialize(const String& str,
-                      CArrRef class_whitelist = empty_array);
+                      const Array& class_whitelist = empty_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 // variable table
@@ -81,7 +81,7 @@ bool f_import_request_variables(const String& types, const String& prefix = "");
 #define EXTR_IF_EXISTS          6
 #define EXTR_REFS               0x100
 
-int64_t f_extract(CArrRef var_array, int extract_type = EXTR_OVERWRITE,
+int64_t f_extract(const Array& var_array, int extract_type = EXTR_OVERWRITE,
                   const String& prefix = "");
 
 ///////////////////////////////////////////////////////////////////////////////

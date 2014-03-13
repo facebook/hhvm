@@ -47,10 +47,10 @@ class TestBase {
   bool CountSkip();
 
   bool VerifySame(const char *exp1, const char *exp2,
-                  CVarRef v1, CVarRef v2);
+                  const Variant& v1, const Variant& v2);
   bool VerifyClose(const char *exp1, const char *exp2,
                    double v1, double v2);
-  bool array_value_exists(CVarRef var, CVarRef value);
+  bool array_value_exists(const Variant& var, const Variant& value);
 
   static char error_buffer[];
 

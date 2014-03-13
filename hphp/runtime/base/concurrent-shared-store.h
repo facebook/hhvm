@@ -97,7 +97,7 @@ struct ConcurrentTableSharedStore {
 
   int size() const { return m_vars.size(); }
   bool get(const String& key, Variant &value);
-  bool store(const String& key, CVarRef val, int64_t ttl,
+  bool store(const String& key, const Variant& val, int64_t ttl,
                      bool overwrite = true, bool limit_ttl = true);
   int64_t inc(const String& key, int64_t step, bool &found);
   bool cas(const String& key, int64_t old, int64_t val);
@@ -107,7 +107,7 @@ struct ConcurrentTableSharedStore {
 
   void prime(const std::vector<KeyValuePair> &vars);
   bool constructPrime(const String& v, KeyValuePair& item, bool serialized);
-  bool constructPrime(CVarRef v, KeyValuePair& item);
+  bool constructPrime(const Variant& v, KeyValuePair& item);
   void primeDone();
 
   // debug support
@@ -164,7 +164,7 @@ private:
   };
 
 private:
-  APCHandle* construct(CVarRef v) {
+  APCHandle* construct(const Variant& v) {
     return APCHandle::Create(v, false);
   }
 
@@ -182,7 +182,7 @@ private:
   void addToExpirationQueue(const char* key, int64_t etime);
 
   bool handleUpdate(const String& key, APCHandle* svar);
-  bool handlePromoteObj(const String& key, APCHandle* svar, CVarRef valye);
+  bool handlePromoteObj(const String& key, APCHandle* svar, const Variant& valye);
   APCHandle* unserialize(const String& key, const StoreValue* sval);
 
 private:

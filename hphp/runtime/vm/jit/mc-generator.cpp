@@ -1507,7 +1507,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
       const FPIEnt* fe = liveFunc()->findPrecedingFPI(
         liveUnit()->offsetOf(vmpc()));
       vmpc() = liveUnit()->at(fe->m_fcallOff);
-      assert(isFCallStar(toOp(*vmpc())));
+      assert(isFCallStar(*reinterpret_cast<const Op*>(vmpc())));
       raise_error("Stack overflow");
       NOT_REACHED();
     } else {
@@ -1602,8 +1602,8 @@ interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {                 \
   SKTRACE(5, SrcKey(liveFunc(), vmpc()), "%40s %p %p\n",                \
           "interpOne" #opcode " before (fp,sp)",                        \
           vmfp(), vmsp());                                              \
-  assert(toOp(*vmpc()) == Op::opcode);                                  \
-  auto const ec = g_context.getNoCheck();                             \
+  assert(*reinterpret_cast<const Op*>(vmpc()) == Op::opcode);           \
+  auto const ec = g_context.getNoCheck();                               \
   Stats::inc(Stats::Instr_InterpOne ## opcode);                         \
   if (Trace::moduleEnabled(Trace::interpOne, 1)) {                      \
     static const StringData* cat = makeStaticString("interpOne");       \
@@ -2381,8 +2381,10 @@ void MCGenerator::recordGdbTranslation(SrcKey sk,
     if (!RuntimeOption::EvalJitNoGdb) {
       m_debugInfo.recordTracelet(rangeFrom(cb, start, &cb == &code.stubs()),
                                  srcFunc,
-                                 srcFunc->unit() ?
-                                   srcFunc->unit()->at(sk.offset()) : nullptr,
+                                 reinterpret_cast<const Op*>(
+                                   srcFunc->unit() ?
+                                     srcFunc->unit()->at(sk.offset()) : nullptr
+                                 ),
                                  exit, inPrologue);
     }
     if (RuntimeOption::EvalPerfPidMap) {

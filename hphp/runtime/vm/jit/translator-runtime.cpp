@@ -39,7 +39,7 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
                                  StringData* name,
                                  bool& inited) {
   assert(closure->instanceof(c_Closure::classof()));
-  String str(StringData::Make(s_staticPrefix->slice(), name->slice()));
+  String str(StringData::Make(s_staticPrefix.slice(), name->slice()));
   auto const cls = closure->getVMClass();
   auto const slot = cls->lookupDeclProp(str.get());
   assert(slot != kInvalidSlot);
@@ -384,7 +384,7 @@ int64_t ak_exist_string_obj(ObjectData* obj, StringData* key) {
   if (obj->isCollection()) {
     return collectionOffsetContains(obj, key);
   }
-  CArrRef arr = obj->o_toArray();
+  const Array& arr = obj->o_toArray();
   int64_t res = ak_exist_string_impl(arr.get(), key);
   return res;
 }
@@ -393,7 +393,7 @@ int64_t ak_exist_int_obj(ObjectData* obj, int64_t key) {
   if (obj->isCollection()) {
     return collectionOffsetContains(obj, key);
   }
-  CArrRef arr = obj->o_toArray();
+  const Array& arr = obj->o_toArray();
   bool res = arr.get()->exists(key);
   return res;
 }
@@ -818,7 +818,7 @@ const Func* lookupUnknownFunc(const StringData* name) {
   JIT::VMRegAnchor _;
   auto const func = Unit::loadFunc(name);
   if (UNLIKELY(!func)) {
-    raise_error("Undefined function: %s", name->data());
+    raise_error("Call to undefined function %s()", name->data());
   }
   return func;
 }

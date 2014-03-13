@@ -207,7 +207,7 @@ void process_ini_settings(const std::string& name) {
   }
 }
 
-void register_variable(Variant &variables, char *name, CVarRef value,
+void register_variable(Variant &variables, char *name, const Variant& value,
                        bool overwrite /* = true */) {
   // ignore leading spaces in the variable name
   char *var = name;
@@ -1637,7 +1637,7 @@ bool hphp_invoke_simple(const std::string &filename,
 }
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
-                 bool func, CArrRef funcParams, VRefParam funcRet,
+                 bool func, const Array& funcParams, VRefParam funcRet,
                  const string &reqInitFunc, const string &reqInitDoc,
                  bool &error, string &errorMsg,
                  bool once /* = true */, bool warmupOnly /* = false */,

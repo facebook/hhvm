@@ -39,7 +39,7 @@ APCHandle *Variant::getAPCHandle() const {
   return nullptr;
 }
 
-APCHandle* APCHandle::Create(CVarRef source,
+APCHandle* APCHandle::Create(const Variant& source,
                              bool serialized,
                              bool inner /* = false */,
                              bool unserializeObj /* = false*/) {
@@ -55,7 +55,7 @@ APCHandle* APCHandle::Create(CVarRef source,
   return CreateSharedType(source, serialized, inner, unserializeObj);
 }
 
-APCHandle* APCHandle::CreateSharedType(CVarRef source,
+APCHandle* APCHandle::CreateSharedType(const Variant& source,
                                        bool serialized,
                                        bool inner,
                                        bool unserializeObj) {
@@ -226,7 +226,7 @@ void DataWalker::traverseData(ArrayData* data,
   }
 
   for (ArrayIter iter(data); iter; ++iter) {
-    CVarRef var = iter.secondRef();
+    const Variant& var = iter.secondRef();
 
     if (var.isReferenced()) {
       Variant *pvar = var.getRefData();

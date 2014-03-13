@@ -223,7 +223,7 @@ bool TestCppBase::TestArray() {
   {
     Variant arr = make_map_array("n1", "v1", "n2", "v2");
     arr.escalate();
-    for (ArrayIter iter = arr.begin(arr, true); !iter->end(); iter->next()){
+    for (ArrayIter iter = arr.begin(arr, true); !iter->end(); iter->next()) {
       arr.lvalAt(iter->first()).reset();
     }
     VS(arr, Array::Create());
@@ -241,7 +241,7 @@ bool TestCppBase::TestArray() {
     VERIFY(arr0.toInt32() == 0);
     VERIFY(arr0.toInt64() == 0);
     VERIFY(arr0.toDouble() == 0.0);
-    VERIFY(arr0.toString()->empty());
+    VERIFY(arr0.toString().empty());
 
     Array arr1 = Array::Create("test");
     VERIFY(arr1.toBoolean() == true);

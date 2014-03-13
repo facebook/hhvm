@@ -256,7 +256,7 @@ inline bool string_validate_base(int base) {
 char *string_hex2bin(const char *input, int &len);
 Variant string_base_to_numeric(const char *s, int len, int base);
 char *string_long_to_base(unsigned long value, int base);
-char *string_numeric_to_base(CVarRef value, int base);
+char *string_numeric_to_base(const Variant& value, int base);
 
 /**
  * Translates characters in str_from into characters in str_to one by one,

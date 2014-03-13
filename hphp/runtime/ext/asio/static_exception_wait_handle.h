@@ -44,7 +44,7 @@ class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
   }
 
   void t___construct();
-  static Object ti_create(CObjRef exception);
+  static Object ti_create(const Object& exception);
 
  public:
   static c_StaticExceptionWaitHandle* Create(ObjectData* exception);

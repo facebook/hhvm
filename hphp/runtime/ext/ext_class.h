@@ -31,28 +31,28 @@ bool f_class_alias(const String& original, const String& alias,
 bool f_class_exists(const String& class_name, bool autoload = true);
 bool f_interface_exists(const String& interface_name, bool autoload = true);
 bool f_trait_exists(const String& trait_name, bool autoload = true);
-Array f_get_class_methods(CVarRef class_or_object);
+Array f_get_class_methods(const Variant& class_or_object);
 Variant f_get_class_vars(const String& class_name);
 Array f_get_class_constants(const String& class_name);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_get_class(CVarRef object = null_variant);
-Variant f_get_parent_class(CVarRef object = null_variant);
-bool f_is_a(CVarRef class_or_object, const String& class_name,
+Variant f_get_class(const Variant& object = null_variant);
+Variant f_get_parent_class(const Variant& object = null_variant);
+bool f_is_a(const Variant& class_or_object, const String& class_name,
             bool allow_string = false);
-bool f_is_subclass_of(CVarRef class_or_object, const String& class_name,
+bool f_is_subclass_of(const Variant& class_or_object, const String& class_name,
                       bool allow_string = true);
-bool f_method_exists(CVarRef class_or_object, const String& method_name);
-Variant f_property_exists(CVarRef class_or_object, const String& property);
-Variant f_get_object_vars(CObjRef object);
+bool f_method_exists(const Variant& class_or_object, const String& method_name);
+Variant f_property_exists(const Variant& class_or_object, const String& property);
+Variant f_get_object_vars(const Object& object);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_call_user_method_array(const String& method_name, VRefParam obj,
-                                 CVarRef paramarr);
+                                 const Variant& paramarr);
 Variant f_call_user_method(int _argc, const String& method_name, VRefParam obj,
-                           CArrRef _argv = null_array);
+                           const Array& _argv = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

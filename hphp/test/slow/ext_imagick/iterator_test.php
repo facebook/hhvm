@@ -14,7 +14,7 @@ function row_dump($row, $pixels) {
   }
 }
 
-$magick = new Imagick(dirname(__FILE__).'/facebook.png');
+$magick = new Imagick(__DIR__.'/facebook.png');
 
 $iterators = array(
   ImagickPixelIterator::getPixelIterator($magick),

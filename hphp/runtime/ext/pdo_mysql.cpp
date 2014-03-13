@@ -49,19 +49,19 @@ class PDOMySqlConnection : public PDOConnection {
 public:
   PDOMySqlConnection();
   virtual ~PDOMySqlConnection();
-  virtual bool create(CArrRef options);
+  virtual bool create(const Array& options);
 
   int handleError(const char *file, int line, PDOMySqlStatement *stmt = NULL);
 
   virtual bool support(SupportedMethod method);
   virtual bool closer();
-  virtual bool preparer(const String& sql, sp_PDOStatement *stmt, CVarRef options);
+  virtual bool preparer(const String& sql, sp_PDOStatement *stmt, const Variant& options);
   virtual int64_t doer(const String& sql);
   virtual bool quoter(const String& input, String &quoted, PDOParamType paramtype);
   virtual bool begin();
   virtual bool commit();
   virtual bool rollback();
-  virtual bool setAttribute(int64_t attr, CVarRef value);
+  virtual bool setAttribute(int64_t attr, const Variant& value);
   virtual String lastId(const char *name);
   virtual bool fetchErr(PDOStatement *stmt, Array &info);
   virtual int getAttribute(int64_t attr, Variant &value);
@@ -88,7 +88,7 @@ public:
   PDOMySqlStatement(PDOMySqlConnection *conn, MYSQL *server);
   virtual ~PDOMySqlStatement();
 
-  bool create(const String& sql, CArrRef options);
+  bool create(const String& sql, const Array& options);
 
   virtual bool support(SupportedMethod method);
   virtual bool executer();
@@ -207,14 +207,14 @@ static int php_pdo_parse_data_source(const char *data_source,
   return n_matches;
 }
 
-static long pdo_attr_lval(CArrRef options, int opt, long defaultValue) {
+static long pdo_attr_lval(const Array& options, int opt, long defaultValue) {
   if (options.exists(opt)) {
     return options[opt].toInt64();
   }
   return defaultValue;
 }
 
-static String pdo_attr_strval(CArrRef options, int opt, const char *def) {
+static String pdo_attr_strval(const Array& options, int opt, const char *def) {
   if (options.exists(opt)) {
     return options[opt].toString();
   }
@@ -240,7 +240,7 @@ PDOMySqlConnection::~PDOMySqlConnection() {
   }
 }
 
-bool PDOMySqlConnection::create(CArrRef options) {
+bool PDOMySqlConnection::create(const Array& options) {
   int i, ret = 0;
   char *host = NULL, *unix_socket = NULL;
   unsigned int port = 3306;
@@ -474,7 +474,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
 }
 
 bool PDOMySqlConnection::preparer(const String& sql, sp_PDOStatement *stmt,
-                                  CVarRef options) {
+                                  const Variant& options) {
   PDOMySqlStatement *s = NEWOBJ(PDOMySqlStatement)(this, m_server);
   *stmt = s;
 
@@ -546,7 +546,7 @@ bool PDOMySqlConnection::rollback() {
   return mysql_rollback(m_server) >= 0;
 }
 
-bool PDOMySqlConnection::setAttribute(int64_t attr, CVarRef value) {
+bool PDOMySqlConnection::setAttribute(int64_t attr, const Variant& value) {
   switch (attr) {
   case PDO_ATTR_AUTOCOMMIT:
     /* ignore if the new value equals the old one */
@@ -861,7 +861,7 @@ void PDOMySqlStatement::sweep() {
   }
 }
 
-bool PDOMySqlStatement::create(const String& sql, CArrRef options) {
+bool PDOMySqlStatement::create(const String& sql, const Array& options) {
   supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 
   String nsql;

@@ -1,5 +1,6 @@
 Next
   - JIT default on in command line mode
+  - gethostname() just returns what the syscall returns (Zend compat)
 
 "Fifty Cent" 3-Mar-2014
   - Array parameter type constraints implicitly cast collections to arrays

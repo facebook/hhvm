@@ -1,5 +1,5 @@
 <?php
-$im = new Imagick(dirname(__FILE__) . '/php.gif');
+$im = new Imagick(__DIR__ . '/php.gif');
 var_dump($im->getImageLength());
 
 // Both should return filesize in bytes.

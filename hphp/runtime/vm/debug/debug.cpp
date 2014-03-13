@@ -194,7 +194,7 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
 }
 
 void DebugInfo::recordTracelet(TCRange range, const Func* func,
-    const Opcode *instr, bool exit, bool inPrologue) {
+    const Op* instr, bool exit, bool inPrologue) {
   if (range.isAstubs()) {
     m_astubsDwarfInfo.addTracelet(range, nullptr, func, instr, exit, inPrologue);
   } else {

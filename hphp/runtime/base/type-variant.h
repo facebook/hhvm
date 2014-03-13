@@ -132,9 +132,9 @@ class Variant : private TypedValue {
   }
 
   /* implicit */ Variant(const String& v);
-  /* implicit */ Variant(CArrRef v);
-  /* implicit */ Variant(CObjRef v);
-  /* implicit */ Variant(CResRef v);
+  /* implicit */ Variant(const Array& v);
+  /* implicit */ Variant(const Object& v);
+  /* implicit */ Variant(const Resource& v);
   /* implicit */ Variant(StringData *v);
   /* implicit */ Variant(ArrayData *v);
   /* implicit */ Variant(ObjectData *v);
@@ -219,7 +219,7 @@ class Variant : private TypedValue {
 
 #ifdef INLINE_VARIANT_HELPER
   ALWAYS_INLINE
-  /* implicit */ Variant(CVarRef v) { constructValHelper(v); }
+  /* implicit */ Variant(const Variant& v) { constructValHelper(v); }
   ALWAYS_INLINE
   /* implicit */ Variant(CVarStrongBind v) { constructRefHelper(variant(v)); }
   ALWAYS_INLINE
@@ -227,7 +227,7 @@ class Variant : private TypedValue {
     constructWithRefHelper(variant(v));
   }
 #else
-  /* implicit */ Variant(CVarRef v);
+  /* implicit */ Variant(const Variant& v);
   /* implicit */ Variant(CVarStrongBind v);
   /* implicit */ Variant(CVarWithRefBind v);
 #endif
@@ -302,7 +302,7 @@ class Variant : private TypedValue {
    * In order to correctly copy circular arrays, even if v is the only
    * strong reference to arr, we still keep the reference.
    */
-  Variant &setWithRef(CVarRef v);
+  Variant &setWithRef(const Variant& v);
 
   /**
    * Fast accessors that can be used by generated code when type inference can
@@ -545,11 +545,11 @@ class Variant : private TypedValue {
   /**
    * Operators
    */
-  Variant &assign(CVarRef v);
-  Variant &assignVal(CVarRef v) { return assign(v); }
-  Variant &assignRef(CVarRef v);
+  Variant &assign(const Variant& v);
+  Variant &assignVal(const Variant& v) { return assign(v); }
+  Variant &assignRef(const Variant& v);
 
-  Variant &operator=(CVarRef v) {
+  Variant &operator=(const Variant& v) {
     return assign(v);
   }
   Variant &operator=(RefResult v) { return assignRef(variant(v)); }
@@ -566,42 +566,42 @@ class Variant : private TypedValue {
   }
 
   Variant  operator +  () const = delete;
-  Variant &operator += (CVarRef v) = delete;
+  Variant &operator += (const Variant& v) = delete;
   Variant &operator += (int     n) = delete;
   Variant &operator += (int64_t   n) = delete;
   Variant &operator += (double  n)  = delete;
 
   Variant  operator -  () const = delete;
-  Variant  operator -  (CVarRef v) const = delete;
-  Variant &operator -= (CVarRef v) = delete;
+  Variant  operator -  (const Variant& v) const = delete;
+  Variant &operator -= (const Variant& v) = delete;
   Variant &operator -= (int     n) = delete;
   Variant &operator -= (int64_t   n) = delete;
   Variant &operator -= (double  n) = delete;
 
-  Variant  operator *  (CVarRef v) const = delete;
-  Variant &operator *= (CVarRef v) = delete;
+  Variant  operator *  (const Variant& v) const = delete;
+  Variant &operator *= (const Variant& v) = delete;
   Variant &operator *= (int     n) = delete;
   Variant &operator *= (int64_t   n) = delete;
   Variant &operator *= (double  n) = delete;
 
-  Variant  operator /  (CVarRef v) const = delete;
-  Variant &operator /= (CVarRef v) = delete;
+  Variant  operator /  (const Variant& v) const = delete;
+  Variant &operator /= (const Variant& v) = delete;
   Variant &operator /= (int     n) = delete;
   Variant &operator /= (int64_t   n) = delete;
   Variant &operator /= (double  n) = delete;
 
-  int64_t    operator %  (CVarRef v) const = delete;
-  Variant &operator %= (CVarRef v) = delete;
+  int64_t    operator %  (const Variant& v) const = delete;
+  Variant &operator %= (const Variant& v) = delete;
   Variant &operator %= (int     n) = delete;
   Variant &operator %= (int64_t   n) = delete;
   Variant &operator %= (double  n) = delete;
 
-  Variant  operator |  (CVarRef v) const = delete;
-  Variant &operator |= (CVarRef v) = delete;
-  Variant  operator &  (CVarRef v) const = delete;
-  Variant &operator &= (CVarRef v) = delete;
-  Variant  operator ^  (CVarRef v) const = delete;
-  Variant &operator ^= (CVarRef v) = delete;
+  Variant  operator |  (const Variant& v) const = delete;
+  Variant &operator |= (const Variant& v) = delete;
+  Variant  operator &  (const Variant& v) const = delete;
+  Variant &operator &= (const Variant& v) = delete;
+  Variant  operator ^  (const Variant& v) const = delete;
+  Variant &operator ^= (const Variant& v) = delete;
   Variant &operator <<=(int64_t n) = delete;
   Variant &operator >>=(int64_t n) = delete;
 
@@ -743,31 +743,31 @@ class Variant : private TypedValue {
   Variant rvalAt(double offset, ACCESSPARAMS_DECL) const = delete;
   Variant rvalAt(litstr offset, ACCESSPARAMS_DECL) const = delete;
   Variant rvalAt(const String& offset, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(CVarRef offset, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(const Variant& offset, ACCESSPARAMS_DECL) const;
 
   // for when we know its an array or null
   template <typename T>
-  CVarRef rvalAtRefHelper(T offset, ACCESSPARAMS_DECL) const;
-  CVarRef rvalAtRef(int offset, ACCESSPARAMS_DECL) const {
+  const Variant& rvalAtRefHelper(T offset, ACCESSPARAMS_DECL) const;
+  const Variant& rvalAtRef(int offset, ACCESSPARAMS_DECL) const {
     return rvalAtRefHelper((int64_t)offset, flags);
   }
-  CVarRef rvalAtRef(double offset, ACCESSPARAMS_DECL) const = delete;
-  CVarRef rvalAtRef(int64_t offset, ACCESSPARAMS_DECL) const {
+  const Variant& rvalAtRef(double offset, ACCESSPARAMS_DECL) const = delete;
+  const Variant& rvalAtRef(int64_t offset, ACCESSPARAMS_DECL) const {
     return rvalAtRefHelper(offset, flags);
   }
-  CVarRef rvalAtRef(const String& offset, ACCESSPARAMS_DECL) const {
+  const Variant& rvalAtRef(const String& offset, ACCESSPARAMS_DECL) const {
     return rvalAtRefHelper<const String&>(offset, flags);
   }
-  CVarRef rvalAtRef(CVarRef offset, ACCESSPARAMS_DECL) const {
-    return rvalAtRefHelper<CVarRef>(offset, flags);
+  const Variant& rvalAtRef(const Variant& offset, ACCESSPARAMS_DECL) const {
+    return rvalAtRefHelper<const Variant&>(offset, flags);
   }
   const Variant operator[](int     key) const { return rvalAt(key);}
   const Variant operator[](int64_t   key) const { return rvalAt(key);}
   const Variant operator[](double  key) const = delete;
   const Variant operator[](const String& key) const { return rvalAt(key);}
-  const Variant operator[](CArrRef key) const { return rvalAt(key);}
-  const Variant operator[](CObjRef key) const { return rvalAt(key);}
-  const Variant operator[](CVarRef key) const { return rvalAt(key);}
+  const Variant operator[](const Array& key) const { return rvalAt(key);}
+  const Variant operator[](const Object& key) const { return rvalAt(key);}
+  const Variant operator[](const Variant& key) const { return rvalAt(key);}
   const Variant operator[](const char*) const = delete;
 
   template<typename T>
@@ -795,50 +795,50 @@ class Variant : private TypedValue {
   Variant &lvalAt(double  key, ACCESSPARAMS_DECL) = delete;
   Variant &lvalAt(litstr  key, ACCESSPARAMS_DECL) = delete;
   Variant &lvalAt(const String& key, ACCESSPARAMS_DECL);
-  Variant &lvalAt(CVarRef key, ACCESSPARAMS_DECL);
+  Variant &lvalAt(const Variant& key, ACCESSPARAMS_DECL);
 
   Variant &lvalRef(int     key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(int64_t   key, Variant& tmp, ACCESSPARAMS_DECL);
   Variant &lvalRef(double  key, Variant& tmp, ACCESSPARAMS_DECL) = delete;
   Variant &lvalRef(litstr  key, Variant& tmp, ACCESSPARAMS_DECL) = delete;
   Variant &lvalRef(const String& key, Variant& tmp, ACCESSPARAMS_DECL);
-  Variant &lvalRef(CVarRef key, Variant& tmp, ACCESSPARAMS_DECL);
+  Variant &lvalRef(const Variant& key, Variant& tmp, ACCESSPARAMS_DECL);
 
   template <typename T>
-  ALWAYS_INLINE static CVarRef SetImpl(Variant *self, T key, CVarRef v,
+  ALWAYS_INLINE static const Variant& SetImpl(Variant *self, T key, const Variant& v,
                                        bool isKey);
 
   template <typename T>
-  ALWAYS_INLINE static CVarRef SetRefImpl(Variant *self, T key, CVarRef v,
+  ALWAYS_INLINE static const Variant& SetRefImpl(Variant *self, T key, const Variant& v,
                                           bool isKey);
 
-  CVarRef set(int     key, CVarRef v) { return set((int64_t)key, v); }
-  CVarRef set(int64_t   key, CVarRef v);
-  CVarRef set(double  key, CVarRef v) = delete;
-  CVarRef set(litstr  key, CVarRef v, bool isString = false) = delete;
-  CVarRef set(const String& key, CVarRef v, bool isString = false);
-  CVarRef set(CVarRef key, CVarRef v);
+  const Variant& set(int     key, const Variant& v) { return set((int64_t)key, v); }
+  const Variant& set(int64_t   key, const Variant& v);
+  const Variant& set(double  key, const Variant& v) = delete;
+  const Variant& set(litstr  key, const Variant& v, bool isString = false) = delete;
+  const Variant& set(const String& key, const Variant& v, bool isString = false);
+  const Variant& set(const Variant& key, const Variant& v);
 
-  CVarRef append(CVarRef v);
+  const Variant& append(const Variant& v);
 
-  CVarRef setRef(int     key, CVarRef v) { return setRef((int64_t)key, v); }
-  CVarRef setRef(int64_t   key, CVarRef v);
-  CVarRef setRef(double  key, CVarRef v) = delete;
-  CVarRef setRef(litstr  key, CVarRef v, bool isString = false) = delete;
-  CVarRef setRef(const String& key, CVarRef v, bool isString = false);
-  CVarRef setRef(CVarRef key, CVarRef v);
+  const Variant& setRef(int     key, const Variant& v) { return setRef((int64_t)key, v); }
+  const Variant& setRef(int64_t   key, const Variant& v);
+  const Variant& setRef(double  key, const Variant& v) = delete;
+  const Variant& setRef(litstr  key, const Variant& v, bool isString = false) = delete;
+  const Variant& setRef(const String& key, const Variant& v, bool isString = false);
+  const Variant& setRef(const Variant& key, const Variant& v);
 
-  CVarRef set(int     key, RefResult v) { return setRef(key, variant(v)); }
-  CVarRef set(int64_t   key, RefResult v) { return setRef(key, variant(v)); }
-  CVarRef set(double  key, RefResult v) = delete;
-  CVarRef set(litstr  key, RefResult v, bool isString = false) = delete;
-  CVarRef set(const String& key, RefResult v, bool isString = false) {
+  const Variant& set(int     key, RefResult v) { return setRef(key, variant(v)); }
+  const Variant& set(int64_t   key, RefResult v) { return setRef(key, variant(v)); }
+  const Variant& set(double  key, RefResult v) = delete;
+  const Variant& set(litstr  key, RefResult v, bool isString = false) = delete;
+  const Variant& set(const String& key, RefResult v, bool isString = false) {
     return setRef(key, variant(v), isString);
   }
-  CVarRef set(CVarRef key, RefResult v) { return setRef(key, variant(v)); }
+  const Variant& set(const Variant& key, RefResult v) { return setRef(key, variant(v)); }
 
-  CVarRef appendRef(CVarRef v);
-  CVarRef append(RefResult v) { return appendRef(variant(v)); }
+  const Variant& appendRef(const Variant& v);
+  const Variant& append(RefResult v) { return appendRef(variant(v)); }
 
   void remove(int     key) { removeImpl((int64_t)key);}
   void remove(int64_t   key) { removeImpl(key);}
@@ -847,14 +847,14 @@ class Variant : private TypedValue {
   void remove(const String& key, bool isString = false) {
     removeImpl(key, isString);
   }
-  void remove(CVarRef key);
+  void remove(const Variant& key);
 
   /**
    * More array operations.
    */
   Variant pop();
   Variant dequeue();
-  void prepend(CVarRef v);
+  void prepend(const Variant& v);
 
   /**
    * For C++ library users to write "var.cast<c_MyClass>()->mf_func()".
@@ -926,7 +926,7 @@ class Variant : private TypedValue {
   }
 
   ObjectData *getArrayAccess() const;
-  void callOffsetUnset(CVarRef key);
+  void callOffsetUnset(const Variant& key);
   int64_t getNumData() const { return m_data.num; }
   void setEvalScalar();
 
@@ -963,39 +963,39 @@ class Variant : private TypedValue {
 
   void removeImpl(double key) = delete;
   void removeImpl(int64_t key);
-  void removeImpl(CVarRef key, bool isString = false);
+  void removeImpl(const Variant& key, bool isString = false);
   void removeImpl(const String& key, bool isString = false);
 
-  CVarRef set(bool    v);
-  CVarRef set(int     v);
-  CVarRef set(int64_t   v);
-  CVarRef set(double  v);
-  CVarRef set(litstr  v) = delete;
-  CVarRef set(const std::string & v) {
+  const Variant& set(bool    v);
+  const Variant& set(int     v);
+  const Variant& set(int64_t   v);
+  const Variant& set(double  v);
+  const Variant& set(litstr  v) = delete;
+  const Variant& set(const std::string & v) {
     return set(String(v));
   }
-  CVarRef set(StringData  *v);
-  CVarRef set(ArrayData   *v);
-  CVarRef set(ObjectData  *v);
-  CVarRef set(ResourceData  *v);
-  CVarRef set(const StringData  *v) = delete;
-  CVarRef set(const ArrayData   *v) = delete;
-  CVarRef set(const ObjectData  *v) = delete;
-  CVarRef set(const ResourceData  *v) = delete;
+  const Variant& set(StringData  *v);
+  const Variant& set(ArrayData   *v);
+  const Variant& set(ObjectData  *v);
+  const Variant& set(ResourceData  *v);
+  const Variant& set(const StringData  *v) = delete;
+  const Variant& set(const ArrayData   *v) = delete;
+  const Variant& set(const ObjectData  *v) = delete;
+  const Variant& set(const ResourceData  *v) = delete;
 
-  CVarRef set(const String& v) { return set(v.get()); }
-  CVarRef set(const StaticString & v);
-  CVarRef set(CArrRef v) { return set(v.get()); }
-  CVarRef set(CObjRef v) { return set(v.get()); }
-  CVarRef set(CResRef v) { return set(v.get()); }
+  const Variant& set(const String& v) { return set(v.get()); }
+  const Variant& set(const StaticString & v);
+  const Variant& set(const Array& v) { return set(v.get()); }
+  const Variant& set(const Object& v) { return set(v.get()); }
+  const Variant& set(const Resource& v) { return set(v.get()); }
 
   template<typename T>
-  CVarRef set(const SmartObject<T> &v) {
+  const Variant& set(const SmartObject<T> &v) {
     return set(v.get());
   }
 
   template<typename T>
-  CVarRef set(const SmartResource<T> &v) {
+  const Variant& set(const SmartResource<T> &v) {
     return set(v.get());
   }
 
@@ -1030,7 +1030,7 @@ class Variant : private TypedValue {
 #ifdef INLINE_VARIANT_HELPER
 public:
 #endif
-  static ALWAYS_INLINE void PromoteToRef(CVarRef v) {
+  static ALWAYS_INLINE void PromoteToRef(const Variant& v) {
     assert(&v != &null_variant);
     if (v.m_type != KindOfRef) {
       auto const ref = RefData::Make(*v.asTypedValue());
@@ -1039,11 +1039,11 @@ public:
     }
   }
 
-  ALWAYS_INLINE void assignValHelper(CVarRef v) {
+  ALWAYS_INLINE void assignValHelper(const Variant& v) {
     AssignValHelper(this, &v);
   }
 
-  ALWAYS_INLINE void assignRefHelper(CVarRef v) {
+  ALWAYS_INLINE void assignRefHelper(const Variant& v) {
     assert(tvIsPlausible(*this) && tvIsPlausible(v));
 
     PromoteToRef(v);
@@ -1057,7 +1057,7 @@ public:
   }
 
 public:
-  ALWAYS_INLINE void constructRefHelper(CVarRef v) {
+  ALWAYS_INLINE void constructRefHelper(const Variant& v) {
     assert(tvIsPlausible(v));
     PromoteToRef(v);
     v.m_data.pref->incRefCount();
@@ -1065,7 +1065,7 @@ public:
     m_type = KindOfRef;
   }
 
-  ALWAYS_INLINE void constructValHelper(CVarRef v) {
+  ALWAYS_INLINE void constructValHelper(const Variant& v) {
     assert(tvIsPlausible(v));
 
     const Variant *other =
@@ -1092,12 +1092,12 @@ public:
   }
 
   ALWAYS_INLINE
-  void setWithRefHelper(CVarRef v, bool destroy) {
+  void setWithRefHelper(const Variant& v, bool destroy) {
     assert(tvIsPlausible(*this) && tvIsPlausible(v));
 
     assert(this != &v);
 
-    CVarRef rhs = v.m_type == KindOfRef && !v.m_data.pref->isReferenced()
+    const Variant& rhs = v.m_type == KindOfRef && !v.m_data.pref->isReferenced()
       ? *v.m_data.pref->var() : v;
     if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
       assert(rhs.m_data.pstr);
@@ -1113,7 +1113,7 @@ public:
   }
 
   ALWAYS_INLINE
-  void constructWithRefHelper(CVarRef v) {
+  void constructWithRefHelper(const Variant& v) {
     setWithRefHelper(v, false);
   }
 
@@ -1142,7 +1142,7 @@ private:
    *  (2) It does NOT work with multi-level array set, i.e., "$a[][] = $v".
    * The compiler needs to generate a real temporary.
    */
-  bool needCopyForSet(CVarRef v) {
+  bool needCopyForSet(const Variant& v) {
     assert(m_type == KindOfArray);
     if (m_data.parr->hasMultipleRefs()) return true;
     if (v.m_type == KindOfArray) return m_data.parr == v.m_data.parr;
@@ -1152,7 +1152,7 @@ private:
     return false;
   }
 
-  bool needCopyForSetRef(CVarRef v) {
+  bool needCopyForSetRef(const Variant& v) {
     assert(m_type == KindOfArray);
     return m_data.parr->hasMultipleRefs();
   }
@@ -1172,7 +1172,7 @@ Variant operator+(const Variant & lhs, const Variant & rhs) = delete;
 
 class RefResultValue {
 public:
-  CVarRef get() const { return m_var; }
+  const Variant& get() const { return m_var; }
 private:
   Variant m_var;
 };
@@ -1223,11 +1223,11 @@ public:
   Resource toResource() const { return m_var.toResource(); }
   ObjectData *getObjectData() const { return m_var.getObjectData(); }
 
-  CVarRef append(CVarRef v) const { return m_var.append(v); }
+  const Variant& append(const Variant& v) const { return m_var.append(v); }
 
   Variant pop() const { return m_var.pop(); }
   Variant dequeue() const { return m_var.dequeue(); }
-  void prepend(CVarRef v) const { m_var.prepend(v); }
+  void prepend(const Variant& v) const { m_var.prepend(v); }
 
   bool isArray() const { return m_var.isArray(); }
   ArrNR toArrNR() const { return m_var.toArrNR(); }
@@ -1236,11 +1236,11 @@ private:
   mutable Variant m_var;
 };
 
-inline VRefParamValue vref(CVarRef v) {
+inline VRefParamValue vref(const Variant& v) {
   return VRefParamValue(strongBind(v));
 }
 
-inline VRefParam directRef(CVarRef v) {
+inline VRefParam directRef(const Variant& v) {
   return *(VRefParamValue*)&v;
 }
 
@@ -1274,8 +1274,8 @@ public:
   }
 
   explicit VarNR(const String& v);
-  explicit VarNR(CArrRef v);
-  explicit VarNR(CObjRef v);
+  explicit VarNR(const Array& v);
+  explicit VarNR(const Object& v);
   explicit VarNR(StringData *v);
   explicit VarNR(const StringData *v) {
     assert(v && v->isStatic());
@@ -1291,7 +1291,7 @@ public:
 
   ~VarNR() { if (debug) checkRefCount(); }
 
-  operator CVarRef() const { return *asVariant(); }
+  operator const Variant&() const { return *asVariant(); }
 
   bool isNull() const {
     return asVariant()->isNull();
@@ -1349,11 +1349,11 @@ inline const Variant Array::operator[](const String& key) const {
   return rvalAt(key);
 }
 
-inline const Variant Array::operator[](CVarRef key) const {
+inline const Variant Array::operator[](const Variant& key) const {
   return rvalAt(key);
 }
 
-inline void Array::setWithRef(CVarRef k, CVarRef v,
+inline void Array::setWithRef(const Variant& k, const Variant& v,
                               bool isKey /* = false */) {
   lvalAt(k, isKey ? AccessFlags::Key : AccessFlags::None).setWithRef(v);
 }
@@ -1372,7 +1372,7 @@ inline Variant &concat_assign(Variant &v1, litstr s2) = delete;
 inline Variant &concat_assign(Variant &v1, const String& s2) {
   if (v1.getType() == KindOfString) {
     auto& str = v1.asStrRef();
-    if (str->getCount() == 1) {
+    if (str.get()->hasExactlyOneRef()) {
       str += StringSlice{s2.data(), static_cast<uint32_t>(s2.size())};
       return v1;
     }

@@ -477,11 +477,11 @@ bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
   //
   // Decode enough of pseudomain to determine whether it contains a
   // compile-time fatal, and if so, extract the error message and line number.
-  const Opcode* entry = getMain()->getEntry();
-  const Opcode* pc = entry;
+  auto entry = reinterpret_cast<const Op*>(getMain()->getEntry());
+  auto pc = entry;
   // String <id>; Fatal;
   // ^^^^^^
-  if (toOp(*pc) != OpString) {
+  if (*pc != Op::String) {
     return false;
   }
   pc++;
@@ -491,7 +491,7 @@ bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
   pc += sizeof(Id);
   // String <id>; Fatal;
   //              ^^^^^
-  if (toOp(*pc) != OpFatal) {
+  if (*pc != Op::Fatal) {
     return false;
   }
   msg = lookupLitstrId(id);
@@ -504,7 +504,7 @@ bool Unit::parseFatal(const StringData*& msg, int& line) const {
     return false;
   }
 
-  const Opcode* pc = getMain()->getEntry();
+  auto pc = getMain()->getEntry();
 
   // two opcodes + String's ID
   pc += sizeof(Id) + 2;
@@ -538,7 +538,8 @@ class FrameRestore {
       tmp.m_savedRbp = (uint64_t)fp;
       tmp.m_savedRip = 0;
       tmp.m_func = preClass->unit()->getMain();
-      tmp.m_soff = !fp ? 0
+      tmp.m_soff = !fp
+        ? 0
         : fp->m_func->unit()->offsetOf(pc) - fp->m_func->base();
       tmp.setThis(nullptr);
       tmp.m_varEnv = 0;
@@ -1634,9 +1635,11 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
   int prevLineNum = -1;
   MetaHandle metaHand;
   while (it < &m_bc[stopOffset]) {
-    assert(funcIt == funcMap.end() || funcIt->first >= offsetOf(it));
+    assert(funcIt == funcMap.end() ||
+      funcIt->first >= offsetOf(it));
     if (opts.showFuncs) {
-      if (funcIt != funcMap.end() && funcIt->first == offsetOf(it)) {
+      if (funcIt != funcMap.end() &&
+          funcIt->first == offsetOf(it)) {
         out.put('\n');
         funcIt->second->prettyPrint(out);
         ++funcIt;

@@ -49,7 +49,7 @@ void FileinfoResource::sweep() {
 
 static Variant HHVM_FUNCTION(finfo_open,
     int64_t options,
-    CVarRef magic_file) {
+    const Variant& magic_file) {
   auto magic = magic_open(options);
   if (magic == nullptr) {
     raise_warning("Invalid mode '%" PRId64 "'.", options);
@@ -71,7 +71,7 @@ static Variant HHVM_FUNCTION(finfo_open,
   return NEWOBJ(FileinfoResource)(magic);
 }
 
-static bool HHVM_FUNCTION(finfo_close, CResRef finfo) {
+static bool HHVM_FUNCTION(finfo_close, const Resource& finfo) {
   auto res = finfo.getTyped<FileinfoResource>();
   if (!res) {
     return false;
@@ -80,7 +80,7 @@ static bool HHVM_FUNCTION(finfo_close, CResRef finfo) {
   return true;
 }
 
-static bool HHVM_FUNCTION(finfo_set_flags, CResRef finfo, int64_t options) {
+static bool HHVM_FUNCTION(finfo_set_flags, const Resource& finfo, int64_t options) {
   auto magic = finfo.getTyped<FileinfoResource>()->getMagic();
   if (magic_setflags(magic, options) == -1) {
     raise_warning(
@@ -99,8 +99,8 @@ static bool HHVM_FUNCTION(finfo_set_flags, CResRef finfo, int64_t options) {
 #define FILEINFO_MODE_FILE 2
 
 static Variant php_finfo_get_type(
-    const CResRef& object, const Variant& what,
-    int64_t options, CVarRef context, int mode, int mimetype_emu)
+    const Resource& object, const Variant& what,
+    int64_t options, const Variant& context, int mode, int mimetype_emu)
 {
   String ret_val;
   String buffer;
@@ -217,8 +217,8 @@ clean:
 }
 
 static String HHVM_FUNCTION(finfo_buffer,
-    CResRef finfo, CVarRef string,
-    int64_t options, CVarRef context) {
+    const Resource& finfo, const Variant& string,
+    int64_t options, const Variant& context) {
 
   String s;
   if (!string.isNull()) {
@@ -230,8 +230,8 @@ static String HHVM_FUNCTION(finfo_buffer,
 }
 
 static String HHVM_FUNCTION(finfo_file,
-    CResRef finfo, CVarRef file_name,
-    int64_t options, CVarRef context) {
+    const Resource& finfo, const Variant& file_name,
+    int64_t options, const Variant& context) {
 
   String fn;
   if (!file_name.isNull()) {

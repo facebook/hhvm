@@ -101,28 +101,15 @@ private:
 IMPLEMENT_THREAD_LOCAL(ResolverInit, ResolverInit::s_res);
 
 Variant f_gethostname() {
-  struct addrinfo hints, *res;
-  char h_name[NI_MAXHOST];
-  int error;
-  String canon_hname;
+  char h_name[HOST_NAME_MAX];
 
-  error = gethostname(h_name, NI_MAXHOST);
-  if (error) {
+  if (gethostname(h_name, HOST_NAME_MAX) != 0) {
+    raise_warning(
+        "gethostname() failed with errorno=%d: %s", errno, strerror(errno));
     return false;
   }
 
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_flags = AI_CANONNAME;
-
-  error = getaddrinfo(h_name, NULL, &hints, &res);
-  if (error) {
-    return String(h_name, CopyString);
-  }
-
-  canon_hname = String(res->ai_canonname, CopyString);
-  freeaddrinfo(res);
-  return canon_hname;
+  return String(h_name, CopyString);
 }
 
 Variant f_gethostbyaddr(const String& ip_address) {
@@ -893,15 +880,15 @@ bool f_getmxrr(const String& hostname, VRefParam mxhosts,
  * f_fsockopen() and f_pfsockopen() are implemented in ext_socket.cpp.
  */
 
-Variant f_socket_get_status(CResRef stream) {
+Variant f_socket_get_status(const Resource& stream) {
   return f_stream_get_meta_data(stream);
 }
 
-bool f_socket_set_blocking(CResRef stream, int mode) {
+bool f_socket_set_blocking(const Resource& stream, int mode) {
   return f_stream_set_blocking(stream, mode);
 }
 
-bool f_socket_set_timeout(CResRef stream, int seconds,
+bool f_socket_set_timeout(const Resource& stream, int seconds,
                           int microseconds /* = 0 */) {
   return f_stream_set_timeout(stream, seconds, microseconds);
 }
@@ -927,11 +914,11 @@ void f_header(const String& str, bool replace /* = true */,
   }
 
   Transport *transport = g_context->getTransport();
-  if (transport && header->size()) {
-    const char *header_line = header->data();
+  if (transport && header.size()) {
+    const char *header_line = header.data();
 
     // handle single line of status code
-    if (header->size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) {
+    if (header.size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) {
       int code = 200;
       const char *reason = nullptr;
       for (const char *ptr = header_line; *ptr; ptr++) {
@@ -1024,7 +1011,7 @@ bool f_headers_sent(VRefParam file /* = null */, VRefParam line /* = null */) {
   return false;
 }
 
-bool f_header_register_callback(CVarRef callback) {
+bool f_header_register_callback(const Variant& callback) {
   Transport *transport = g_context->getTransport();
   if (!transport) {
     // fail if there is no transport

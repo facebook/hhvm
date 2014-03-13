@@ -167,7 +167,7 @@ void tokenizeString(
   const BreakIterator* ptrBreakIterator,
   const icu::UnicodeString& ustr) {
 
-  if(strRules == NULL) return;
+  if (strRules == NULL) return;
   // icu::RuleBasedBreakIterator is stateful -- it cannot be used by
   // multiple threads simultaneously without causing data corruption and
   // crashes.

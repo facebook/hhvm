@@ -69,7 +69,7 @@ struct Options {
    * Each time we visit `foo', we'll discover a slightly smaller return
    * type, in a downward-moving sequence that would never terminate:
    *
-   *   InitCell, CArr(x:InitCell), CArr(x:CArr(x:InitCell)), ...
+   *   InitCell, CArrN(x:InitCell), CArrN(x:CArrN(x:InitCell)), ...
    */
   uint32_t returnTypeRefineLimit = 15;
 

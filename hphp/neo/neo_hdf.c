@@ -548,7 +548,7 @@ void _merge_attr (HDF_ATTR *dest, HDF_ATTR *src)
 {
   HDF_ATTR *da, *ld;
   HDF_ATTR *sa, *ls;
-  BOOL found;
+  char found;
 
   sa = src;
   ls = src;

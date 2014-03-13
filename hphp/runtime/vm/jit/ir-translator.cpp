@@ -1569,7 +1569,7 @@ IRTranslator::passPredictedAndInferredTypes(const NormalizedInstruction& i) {
     // that the type is not ref-counted.  This avoid both generating a
     // type check and dec-refing the value.
     if (i.outputPredictionStatic && isPop(i.next->op()) &&
-        !jitType.isCounted()) {
+        !jitType.maybeCounted()) {
       TRACE(1, "irPassPredictedAndInferredTypes: output inferred as %s\n",
             jitType.toString().c_str());
       m_hhbcTrans.assertTypeStack(0, JIT::Type::Uncounted);

@@ -389,12 +389,12 @@ Resource XboxServer::TaskStart(const String& msg, const String& reqInitDoc /* = 
   return Resource();
 }
 
-bool XboxServer::TaskStatus(CResRef task) {
+bool XboxServer::TaskStatus(const Resource& task) {
   XboxTask *ptask = task.getTyped<XboxTask>();
   return ptask->getJob()->isDone();
 }
 
-int XboxServer::TaskResult(CResRef task, int timeout_ms, Variant &ret) {
+int XboxServer::TaskResult(const Resource& task, int timeout_ms, Variant &ret) {
   XboxTask *ptask = task.getTyped<XboxTask>();
   return TaskResult(ptask->getJob(), timeout_ms, ret);
 }

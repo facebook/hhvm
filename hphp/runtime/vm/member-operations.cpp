@@ -37,7 +37,7 @@ void objArrayAccess(ObjectData* base) {
 }
 
 TypedValue* objOffsetGet(TypedValue& tvRef, ObjectData* base,
-                         CVarRef offset, bool validate /* = true */) {
+                         const Variant& offset, bool validate /* = true */) {
   if (validate) {
     objArrayAccess(base);
   }
@@ -51,7 +51,7 @@ TypedValue* objOffsetGet(TypedValue& tvRef, ObjectData* base,
   return result;
 }
 
-static bool objOffsetExists(ObjectData* base, CVarRef offset) {
+static bool objOffsetExists(ObjectData* base, const Variant& offset) {
   objArrayAccess(base);
   TypedValue tvResult;
   tvWriteUninit(&tvResult);
@@ -66,12 +66,12 @@ static bool objOffsetExists(ObjectData* base, CVarRef offset) {
   return bool(tvResult.m_data.num);
 }
 
-bool objOffsetIsset(TypedValue& tvRef, ObjectData* base, CVarRef offset,
+bool objOffsetIsset(TypedValue& tvRef, ObjectData* base, const Variant& offset,
                     bool validate /* = true */) {
   return objOffsetExists(base, offset);
 }
 
-bool objOffsetEmpty(TypedValue& tvRef, ObjectData* base, CVarRef offset,
+bool objOffsetEmpty(TypedValue& tvRef, ObjectData* base, const Variant& offset,
                     bool validate /* = true */) {
   if (!objOffsetExists(base, offset)) {
     return true;
@@ -90,7 +90,7 @@ void objOffsetAppend(ObjectData* base, TypedValue* val,
   objOffsetSet(base, init_null_variant, val, false);
 }
 
-void objOffsetSet(ObjectData* base, CVarRef offset, TypedValue* val,
+void objOffsetSet(ObjectData* base, const Variant& offset, TypedValue* val,
                   bool validate /* = true */) {
   if (validate) {
     objArrayAccess(base);
@@ -106,7 +106,7 @@ void objOffsetSet(ObjectData* base, CVarRef offset, TypedValue* val,
   tvRefcountedDecRef(&tvResult);
 }
 
-void objOffsetUnset(ObjectData* base, CVarRef offset) {
+void objOffsetUnset(ObjectData* base, const Variant& offset) {
   objArrayAccess(base);
   static StringData* sd__offsetUnset
     = makeStaticString("offsetUnset");

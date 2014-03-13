@@ -54,8 +54,8 @@ struct VariantController {
   static const String& asString(const VariantType& obj) {
     return obj.toCStrRef();
   }
-  static CArrRef asMap(const VariantType& obj) { return obj.toCArrRef(); }
-  static CArrRef asVector(const VariantType& obj) { return obj.toCArrRef(); }
+  static const Array& asMap(const VariantType& obj) { return obj.toCArrRef(); }
+  static const Array& asVector(const VariantType& obj) { return obj.toCArrRef(); }
 
   // variant creators
   static VariantType createNull() { return null_variant; }
@@ -78,11 +78,11 @@ struct VariantController {
   static MapType getStaticEmptyMap() {
     return HphpArray::GetStaticEmptyArray();
   }
-  static HPHP::serialize::Type mapKeyType(CVarRef k) {
+  static HPHP::serialize::Type mapKeyType(const Variant& k) {
     return type(k);
   }
-  static int64_t mapKeyAsInt64(CVarRef k) { return k.toInt64(); }
-  static const String& mapKeyAsString(CVarRef k) {
+  static int64_t mapKeyAsInt64(const Variant& k) { return k.toInt64(); }
+  static const String& mapKeyAsString(const Variant& k) {
     return k.toCStrRef();
   }
   template <typename Key>

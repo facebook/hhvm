@@ -63,7 +63,7 @@ APCHandle* APCObject::Construct(ObjectData* objectData) {
   for (ArrayIter it(odProps); !it.end(); it.next()) {
     Variant key(it.first());
     assert(key.isString());
-    CVarRef value = it.secondRef();
+    const Variant& value = it.secondRef();
     APCHandle *val = nullptr;
     if (!value.isNull()) {
       val = APCHandle::Create(value, false, true, true);
@@ -71,7 +71,7 @@ APCHandle* APCObject::Construct(ObjectData* objectData) {
 
     const String& keySD = key.asCStrRef();
 
-    if (!keySD->empty() && *keySD->data() == '\0') {
+    if (!keySD.empty() && *keySD.data() == '\0') {
       int32_t subLen = keySD.find('\0', 1) + 1;
       String cls = keySD.substr(1, subLen - 2);
       if (cls.size() == 1 && cls[0] == '*') {
@@ -119,7 +119,7 @@ void APCObject::Delete(APCHandle* handle) {
 
 //////////////////////////////////////////////////////////////////////
 
-APCHandle* APCObject::MakeAPCObject(APCHandle* obj, CVarRef value) {
+APCHandle* APCObject::MakeAPCObject(APCHandle* obj, const Variant& value) {
   if (!value.is(KindOfObject) || obj->getObjAttempted()) {
     return nullptr;
   }

@@ -56,7 +56,7 @@ public:
   static String TranslatePathWithFileCache(const String& filename);
   static String TranslateCommand(const String& cmd);
   static Variant Open(const String& filename, const String& mode,
-                      int options = 0, CVarRef context = uninit_null());
+                      int options = 0, const Variant& context = uninit_null());
 
   static bool IsVirtualDirectory(const String& filename);
   static bool IsPlainFilePath(const String& filename);
@@ -164,6 +164,7 @@ public:
   void appendWriteFilter(Resource &filter);
   void prependReadFilter(Resource &filter);
   void prependWriteFilter(Resource &filter);
+  bool removeFilter(Resource &filter);
 
   int64_t bufferedLen() { return m_writepos - m_readpos; }
 
@@ -187,12 +188,12 @@ public:
   /**
    * Write to file with specified format and arguments.
    */
-  int64_t printf(const String& format, CArrRef args);
+  int64_t printf(const String& format, const Array& args);
 
   /**
    * Write one line of csv record.
    */
-  int64_t writeCSV(CArrRef fields, char delimiter = ',', char enclosure = '"');
+  int64_t writeCSV(const Array& fields, char delimiter = ',', char enclosure = '"');
 
   /**
    * Read one line of csv record.

@@ -31,16 +31,14 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include <stdlib.h>
 #include <string.h>
 
 #include "zipint.h"
 
-
 
-ZIP_EXTERN(int)
+ZIP_EXTERN int
 zip_set_default_password(struct zip *za, const char *passwd)
 {
     if (za == NULL)

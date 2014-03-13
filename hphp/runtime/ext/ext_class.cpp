@@ -36,7 +36,7 @@ static inline const String& ctxClassName() {
   return ctx ? ctx->nameRef() : empty_string;
 }
 
-static const Class* get_cls(CVarRef class_or_object) {
+static const Class* get_cls(const Variant& class_or_object) {
   Class* cls = nullptr;
   if (class_or_object.is(KindOfObject)) {
     ObjectData* obj = class_or_object.toCObjRef().get();
@@ -70,7 +70,7 @@ bool f_class_alias(const String& original,
     autoload ? Unit::loadClass(original.get())
              : Unit::lookupClass(original.get());
   if (!origClass) {
-    raise_warning("Class %s not found", original->data());
+    raise_warning("Class %s not found", original.data());
     return false;
   }
   return Unit::aliasClass(origClass, alias.get());
@@ -242,7 +242,7 @@ Variant f_get_class_vars(const String& className) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_get_class(CVarRef object /* = null_variant */) {
+Variant f_get_class(const Variant& object /* = null_variant */) {
   if (object.isNull()) {
     // No arg passed.
     String ret;
@@ -262,7 +262,7 @@ Variant f_get_class(CVarRef object /* = null_variant */) {
   return object.toObject()->o_getClassName();
 }
 
-Variant f_get_parent_class(CVarRef object /* = null_variant */) {
+Variant f_get_parent_class(const Variant& object /* = null_variant */) {
   if (!object.isInitialized()) {
     CallerFrame cf;
     Class* cls = arGetContextClass(cf());
@@ -291,7 +291,7 @@ Variant f_get_parent_class(CVarRef object /* = null_variant */) {
   return false;
 }
 
-static bool is_a_impl(CVarRef class_or_object, const String& class_name,
+static bool is_a_impl(const Variant& class_or_object, const String& class_name,
                       bool allow_string, bool subclass_only) {
   if (class_or_object.isString() && !allow_string) {
     return false;
@@ -307,17 +307,17 @@ static bool is_a_impl(CVarRef class_or_object, const String& class_name,
   return cls->classof(other);
 }
 
-bool f_is_a(CVarRef class_or_object, const String& class_name,
+bool f_is_a(const Variant& class_or_object, const String& class_name,
             bool allow_string /* = false */) {
   return is_a_impl(class_or_object, class_name, allow_string, false);
 }
 
-bool f_is_subclass_of(CVarRef class_or_object, const String& class_name,
+bool f_is_subclass_of(const Variant& class_or_object, const String& class_name,
                       bool allow_string /* = true */) {
   return is_a_impl(class_or_object, class_name, allow_string, true);
 }
 
-bool f_method_exists(CVarRef class_or_object, const String& method_name) {
+bool f_method_exists(const Variant& class_or_object, const String& method_name) {
   const Class* cls = get_cls(class_or_object);
   if (!cls) return false;
   if (cls->lookupMethod(method_name.get()) != NULL) return true;
@@ -330,7 +330,7 @@ bool f_method_exists(CVarRef class_or_object, const String& method_name) {
   return false;
 }
 
-Variant f_property_exists(CVarRef class_or_object, const String& property) {
+Variant f_property_exists(const Variant& class_or_object, const String& property) {
   Class* cls = nullptr;
   ObjectData* obj = nullptr;
   if (class_or_object.isObject()) {
@@ -362,19 +362,19 @@ Variant f_property_exists(CVarRef class_or_object, const String& property) {
   return (propInd != kInvalidSlot);
 }
 
-Variant f_get_object_vars(CObjRef object) {
+Variant f_get_object_vars(const Object& object) {
   return object->o_toIterArray(ctxClassName());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_call_user_method_array(const String& method_name, VRefParam obj,
-                                 CVarRef paramarr) {
+                                 const Variant& paramarr) {
   return obj.toObject()->o_invoke(method_name, paramarr);
 }
 
 Variant f_call_user_method(int _argc, const String& method_name, VRefParam obj,
-                           CArrRef _argv /* = null_array */) {
+                           const Array& _argv /* = null_array */) {
   return obj.toObject()->o_invoke(method_name, _argv);
 }
 

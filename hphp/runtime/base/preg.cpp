@@ -481,7 +481,7 @@ static void pcre_handle_exec_error(int pcre_code) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant preg_grep(const String& pattern, CArrRef input, int flags /* = 0 */) {
+Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */) {
   const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
   if (pce == nullptr) {
     return false;
@@ -783,7 +783,7 @@ Variant preg_match_all(const String& pattern, const String& subject,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static String preg_do_repl_func(CVarRef function, const String& subject,
+static String preg_do_repl_func(const Variant& function, const String& subject,
                                 int* offsets, char** subpat_names, int count) {
   Array subpats = Array::Create();
   for (int i = 0; i < count; i++) {
@@ -840,7 +840,7 @@ static bool preg_get_backref(const char **str, int *backref) {
 }
 
 static Variant php_pcre_replace(const String& pattern, const String& subject,
-                                CVarRef replace_var, bool callable,
+                                const Variant& replace_var, bool callable,
                                 int limit, int *replace_count) {
   const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
   if (pce == nullptr) {
@@ -848,7 +848,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
   }
   bool eval = pce->preg_options & PREG_REPLACE_EVAL;
   if (eval) {
-    if (RuntimeOption::RepoAuthoritative) {
+    if (RuntimeOption::EvalAuthoritativeMode) {
       throw Exception(
         "You can't use eval in RepoAuthoritative mode. It breaks all sorts of "
         "assumptions we use for speed. Switch to using preg_replace_callback()."
@@ -1156,7 +1156,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
   }
 }
 
-static Variant php_replace_in_subject(CVarRef regex, CVarRef replace,
+static Variant php_replace_in_subject(const Variant& regex, const Variant& replace,
                                       String subject, int limit, bool callable,
                                       int *replace_count) {
   if (!regex.is(KindOfArray)) {
@@ -1221,8 +1221,8 @@ static Variant php_replace_in_subject(CVarRef regex, CVarRef replace,
   return subject;
 }
 
-Variant preg_replace_impl(CVarRef pattern, CVarRef replacement,
-                          CVarRef subject, int limit, Variant &count,
+Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
+                          const Variant& subject, int limit, Variant &count,
                           bool is_callable, bool is_filter) {
   assert(!(is_callable && is_filter));
   if (!is_callable &&
@@ -1267,24 +1267,24 @@ Variant preg_replace_impl(CVarRef pattern, CVarRef replacement,
   return return_value;
 }
 
-int preg_replace(Variant &result, CVarRef pattern, CVarRef replacement,
-                 CVarRef subject, int limit /* = -1 */) {
+int preg_replace(Variant &result, const Variant& pattern, const Variant& replacement,
+                 const Variant& subject, int limit /* = -1 */) {
   Variant count;
   result = preg_replace_impl(pattern, replacement, subject,
                              limit, count, false, false);
   return count.toInt32();
 }
 
-int preg_replace_callback(Variant &result, CVarRef pattern, CVarRef callback,
-                          CVarRef subject, int limit /* = -1 */) {
+int preg_replace_callback(Variant &result, const Variant& pattern, const Variant& callback,
+                          const Variant& subject, int limit /* = -1 */) {
   Variant count;
   result = preg_replace_impl(pattern, callback, subject,
                              limit, count, true, false);
   return count.toInt32();
 }
 
-int preg_filter(Variant &result, CVarRef pattern, CVarRef replacement,
-                CVarRef subject, int limit /* = -1 */) {
+int preg_filter(Variant &result, const Variant& pattern, const Variant& replacement,
+                const Variant& subject, int limit /* = -1 */) {
   Variant count;
   result = preg_replace_impl(pattern, replacement, subject,
                              limit, count, false, true);

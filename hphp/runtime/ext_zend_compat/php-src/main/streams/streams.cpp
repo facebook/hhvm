@@ -214,6 +214,6 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
   if (!s) {
     return nullptr;
   }
-  memcpy(ent, s->data(), s->size());
+  memcpy(ent, s.data(), s.size());
   return ent;
 }

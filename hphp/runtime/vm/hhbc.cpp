@@ -797,7 +797,7 @@ MemberCode parseMemberCode(const char* s) {
 
 std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   std::stringstream out;
-  const Op* iStart = it;
+  PC iStart = reinterpret_cast<PC>(it);
   Op op = *it;
   ++it;
   switch (op) {
@@ -899,7 +899,7 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
     }                                           \
     Offset o = readData<Offset>(it);            \
     if (u != nullptr) {                         \
-      if (iStart + o == (Op*)u->entry() - 1) {  \
+      if (iStart + o == u->entry() - 1) {       \
         out << "Invalid";                       \
       } else {                                  \
         out << u->offsetOf(iStart + o);         \

@@ -96,7 +96,7 @@ FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
               regs.m_fp->m_func->name()->data(),
               regs.m_fp, regs.m_sp, regs.m_pc);
         ec->m_fp = const_cast<ActRec*>(regs.m_fp);
-        ec->m_pc = regs.m_pc;
+        ec->m_pc = reinterpret_cast<PC>(regs.m_pc);
         vmsp() = regs.m_sp;
         return;
       }
@@ -159,7 +159,7 @@ FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
           regs.m_fp->m_func->name()->data(),
           regs.m_fp, regs.m_sp, regs.m_pc);
     ec->m_fp = const_cast<ActRec*>(regs.m_fp);
-    ec->m_pc = regs.m_pc;
+    ec->m_pc = reinterpret_cast<PC>(regs.m_pc);
     vmsp() = regs.m_sp;
     return;
   }

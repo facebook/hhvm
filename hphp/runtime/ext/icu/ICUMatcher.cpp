@@ -22,7 +22,7 @@ namespace HPHP {
 
 bool ICUMatcher::set(const UnicodeString& pattern) {
   matcherPtr_.reset(new icu::RegexMatcher(pattern, 0, uStatus_));
-  if(U_FAILURE(uStatus_)) {
+  if (U_FAILURE(uStatus_)) {
     Logger::Error("Error code: %s : Failed to create regex matcher.",
                   u_errorName(uStatus_));
     return false;

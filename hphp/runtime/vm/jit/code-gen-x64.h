@@ -261,9 +261,7 @@ private:
 private:
   PhysReg selectScratchReg(IRInstruction* inst);
   void emitLoadImm(Asm& as, int64_t val, PhysReg dstReg);
-  PhysReg prepXMMReg(const SSATmp* tmp,
-                     Asm& as,
-                     const PhysLoc&,
+  PhysReg prepXMMReg(Asm& as, const SSATmp* src, const PhysLoc& srcLoc,
                      RegXMM rXMMScratch);
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>

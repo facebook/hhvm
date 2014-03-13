@@ -64,7 +64,7 @@ static void recordActRecPush(const SrcKey sk,
   assert(name->isStatic());
   assert(sk.offset() == fpi->m_fpushOff);
   auto const fcall = SrcKey { sk.func(), fpi->m_fcallOff };
-  assert(isFCallStar(toOp(*unit->at(fcall.offset()))));
+  assert(isFCallStar(*reinterpret_cast<const Op*>(unit->at(fcall.offset()))));
   if (clsName) {
     const Class* cls = Unit::lookupUniqueClass(clsName);
     bool magic = false;

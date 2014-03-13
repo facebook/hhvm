@@ -334,7 +334,7 @@ bool f_posix_initgroups(const String& name, int base_group_id) {
   return !initgroups(name.data(), base_group_id);
 }
 
-static int php_posix_get_fd(CVarRef fd) {
+static int php_posix_get_fd(const Variant& fd) {
   int nfd;
   if (fd.isResource()) {
     File *f = fd.toResource().getTyped<File>();
@@ -348,7 +348,7 @@ static int php_posix_get_fd(CVarRef fd) {
   return nfd;
 }
 
-bool f_posix_isatty(CVarRef fd) {
+bool f_posix_isatty(const Variant& fd) {
   return isatty(php_posix_get_fd(fd));
 }
 
@@ -431,7 +431,7 @@ Variant f_posix_times() {
   return ret.create();
 }
 
-Variant f_posix_ttyname(CVarRef fd) {
+Variant f_posix_ttyname(const Variant& fd) {
   int ttyname_maxlen = sysconf(_SC_TTY_NAME_MAX);
   if (ttyname_maxlen <= 0) {
     return false;

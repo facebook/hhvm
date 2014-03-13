@@ -21,7 +21,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static bool ctype(CVarRef v, int (*iswhat)(int)) {
+static bool ctype(const Variant& v, int (*iswhat)(int)) {
   if (v.isInteger()) {
     int64_t n = v.toInt64();
     if (n <= 255 && n >= 0) {
@@ -54,47 +54,47 @@ static bool ctype(CVarRef v, int (*iswhat)(int)) {
 // Use lambdas wrapping the ctype.h functions because of linker weirdness on
 // OS X Mavericks.
 
-bool HHVM_FUNCTION(ctype_alnum, CVarRef text) {
+bool HHVM_FUNCTION(ctype_alnum, const Variant& text) {
   return ctype(text, [] (int i) -> int { return isalnum(i); });
 }
 
-bool HHVM_FUNCTION(ctype_alpha, CVarRef text) {
+bool HHVM_FUNCTION(ctype_alpha, const Variant& text) {
   return ctype(text, [] (int i) -> int { return isalpha(i); });
 }
 
-bool HHVM_FUNCTION(ctype_cntrl, CVarRef text) {
+bool HHVM_FUNCTION(ctype_cntrl, const Variant& text) {
   return ctype(text, [] (int i) -> int { return iscntrl(i); });
 }
 
-bool HHVM_FUNCTION(ctype_digit, CVarRef text) {
+bool HHVM_FUNCTION(ctype_digit, const Variant& text) {
   return ctype(text, [] (int i) -> int { return isdigit(i); });
 }
 
-bool HHVM_FUNCTION(ctype_graph, CVarRef text) {
+bool HHVM_FUNCTION(ctype_graph, const Variant& text) {
   return ctype(text, [] (int i) -> int { return isgraph(i); });
 }
 
-bool HHVM_FUNCTION(ctype_lower, CVarRef text) {
+bool HHVM_FUNCTION(ctype_lower, const Variant& text) {
   return ctype(text, [] (int i) -> int { return islower(i); });
 }
 
-bool HHVM_FUNCTION(ctype_print, CVarRef text) {
+bool HHVM_FUNCTION(ctype_print, const Variant& text) {
   return ctype(text, [] (int i) -> int { return isprint(i); });
 }
 
-bool HHVM_FUNCTION(ctype_punct, CVarRef text) {
+bool HHVM_FUNCTION(ctype_punct, const Variant& text) {
   return ctype(text, [] (int i) -> int { return ispunct(i); });
 }
 
-bool HHVM_FUNCTION(ctype_space, CVarRef text) {
+bool HHVM_FUNCTION(ctype_space, const Variant& text) {
   return ctype(text, [] (int i) -> int { return isspace(i); });
 }
 
-bool HHVM_FUNCTION(ctype_upper, CVarRef text) {
+bool HHVM_FUNCTION(ctype_upper, const Variant& text) {
   return ctype(text, [] (int i) -> int { return isupper(i); });
 }
 
-bool HHVM_FUNCTION(ctype_xdigit, CVarRef text) {
+bool HHVM_FUNCTION(ctype_xdigit, const Variant& text) {
   return ctype(text, [] (int i) -> int { return isxdigit(i); });
 }
 

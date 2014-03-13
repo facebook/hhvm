@@ -101,7 +101,7 @@ Variant f_mysql_pconnect_with_db(const String& server /* = null_string */,
 }
 
 bool f_mysql_set_timeout(int query_timeout_ms /* = -1 */,
-                         CVarRef link_identifier /* = null */) {
+                         const Variant& link_identifier /* = null */) {
   MySQL::SetDefaultReadTimeout(query_timeout_ms);
   return true;
 }
@@ -114,7 +114,7 @@ String f_mysql_escape_string(const String& unescaped_string) {
 }
 
 Variant f_mysql_real_escape_string(const String& unescaped_string,
-                                   CVarRef link_identifier /* = null */) {
+                                   const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (conn) {
     char *new_str = (char *)malloc(unescaped_string.size() * 2 + 1);
@@ -130,26 +130,26 @@ String f_mysql_get_client_info() {
   return String(mysql_get_client_info(), CopyString);
 }
 Variant f_mysql_set_charset(const String& charset,
-                                   CVarRef link_identifier /* = uninit_null() */) {
+                                   const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return uninit_null();
   return !mysql_set_character_set(conn, charset.data());
 }
-Variant f_mysql_ping(CVarRef link_identifier /* = uninit_null() */) {
+Variant f_mysql_ping(const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return uninit_null();
   return !mysql_ping(conn);
 }
-Variant f_mysql_client_encoding(CVarRef link_identifier /* = uninit_null() */) {
+Variant f_mysql_client_encoding(const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return String(mysql_character_set_name(conn), CopyString);
 }
-Variant f_mysql_close(CVarRef link_identifier /* = uninit_null() */) {
+Variant f_mysql_close(const Variant& link_identifier /* = uninit_null() */) {
   return MySQL::CloseConn(link_identifier);
 }
 
-Variant f_mysql_errno(CVarRef link_identifier /* = null */) {
+Variant f_mysql_errno(const Variant& link_identifier /* = null */) {
   MySQL *mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
@@ -165,7 +165,7 @@ Variant f_mysql_errno(CVarRef link_identifier /* = null */) {
   return false;
 }
 
-Variant f_mysql_error(CVarRef link_identifier /* = null */) {
+Variant f_mysql_error(const Variant& link_identifier /* = null */) {
   MySQL *mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
@@ -181,7 +181,7 @@ Variant f_mysql_error(CVarRef link_identifier /* = null */) {
   return false;
 }
 
-Variant f_mysql_warning_count(CVarRef link_identifier /* = null */) {
+Variant f_mysql_warning_count(const Variant& link_identifier /* = null */) {
   MySQL *mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
@@ -194,58 +194,58 @@ Variant f_mysql_warning_count(CVarRef link_identifier /* = null */) {
   return false;
 }
 
-Variant f_mysql_get_host_info(CVarRef link_identifier /* = uninit_null() */) {
+Variant f_mysql_get_host_info(const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return String(mysql_get_host_info(conn), CopyString);
 }
-Variant f_mysql_get_proto_info(CVarRef link_identifier /* = uninit_null() */) {
+Variant f_mysql_get_proto_info(const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return (int64_t)mysql_get_proto_info(conn);
 }
-Variant f_mysql_get_server_info(CVarRef link_identifier /* = uninit_null() */) {
+Variant f_mysql_get_server_info(const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return String(mysql_get_server_info(conn), CopyString);
 }
-Variant f_mysql_info(CVarRef link_identifier /* = uninit_null() */) {
+Variant f_mysql_info(const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return String(mysql_info(conn), CopyString);
 }
-Variant f_mysql_insert_id(CVarRef link_identifier /* = uninit_null() */) {
+Variant f_mysql_insert_id(const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return static_cast<int64_t>(mysql_insert_id(conn));
 }
-Variant f_mysql_stat(CVarRef link_identifier /* = uninit_null() */) {
+Variant f_mysql_stat(const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return String(mysql_stat(conn), CopyString);
 }
-Variant f_mysql_thread_id(CVarRef link_identifier /* = uninit_null() */) {
+Variant f_mysql_thread_id(const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return (int64_t)mysql_thread_id(conn);
 }
 Variant f_mysql_create_db(const String& db,
-                                 CVarRef link_identifier /* = uninit_null() */) {
+                                 const Variant& link_identifier /* = uninit_null() */) {
   throw NotSupportedException
     (__func__, "Deprecated. Use mysql_query(CREATE DATABASE) instead.");
 }
 Variant f_mysql_select_db(const String& db,
-                                 CVarRef link_identifier /* = uninit_null() */) {
+                                 const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return mysql_select_db(conn, db.data()) == 0;
 }
 Variant f_mysql_drop_db(const String& db,
-                               CVarRef link_identifier /* = uninit_null() */) {
+                               const Variant& link_identifier /* = uninit_null() */) {
   throw NotSupportedException
     (__func__, "Deprecated. Use mysql_query(DROP DATABASE) instead.");
 }
-Variant f_mysql_affected_rows(CVarRef link_identifier /* = uninit_null() */) {
+Variant f_mysql_affected_rows(const Variant& link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return static_cast<int64_t>(mysql_affected_rows(conn));
@@ -254,11 +254,11 @@ Variant f_mysql_affected_rows(CVarRef link_identifier /* = uninit_null() */) {
 ///////////////////////////////////////////////////////////////////////////////
 // query functions
 
-Variant f_mysql_query(const String& query, CVarRef link_identifier /* = null */) {
+Variant f_mysql_query(const String& query, const Variant& link_identifier /* = null */) {
   return php_mysql_do_query_and_get_result(query, link_identifier, true, false);
 }
 
-Variant f_mysql_multi_query(const String& query, CVarRef link_identifier /* = null */) {
+Variant f_mysql_multi_query(const String& query, const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (conn == nullptr) {
     return false;
@@ -284,7 +284,7 @@ Variant f_mysql_multi_query(const String& query, CVarRef link_identifier /* = nu
   return true;
 }
 
-int f_mysql_next_result(CVarRef link_identifier /* = null */) {
+int f_mysql_next_result(const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (conn == nullptr) {
     return 2006 /* CR_SERVER_GONE_ERROR */;
@@ -297,7 +297,7 @@ int f_mysql_next_result(CVarRef link_identifier /* = null */) {
   return mysql_next_result(conn);
 }
 
-bool f_mysql_more_results(CVarRef link_identifier /* = null */) {
+bool f_mysql_more_results(const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (conn == nullptr) {
     return false;
@@ -305,7 +305,7 @@ bool f_mysql_more_results(CVarRef link_identifier /* = null */) {
   return mysql_more_results(conn);
 }
 
-Variant f_mysql_fetch_result(CVarRef link_identifier /* = null */) {
+Variant f_mysql_fetch_result(const Variant& link_identifier /* = null */) {
     MYSQL *conn = MySQL::GetConn(link_identifier);
     if (conn == nullptr) {
       return false;
@@ -326,17 +326,17 @@ Variant f_mysql_fetch_result(CVarRef link_identifier /* = null */) {
 }
 
 Variant f_mysql_unbuffered_query(const String& query,
-                                 CVarRef link_identifier /* = null */) {
+                                 const Variant& link_identifier /* = null */) {
   return php_mysql_do_query_and_get_result(query, link_identifier, false, false);
 }
 
 Variant f_mysql_db_query(const String& database, const String& query,
-                         CVarRef link_identifier /* = uninit_null() */) {
+                         const Variant& link_identifier /* = uninit_null() */) {
   throw NotSupportedException
     (__func__, "Deprecated. Use mysql_query() instead.");
 }
 
-Variant f_mysql_list_dbs(CVarRef link_identifier /* = null */) {
+Variant f_mysql_list_dbs(const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   MYSQL_RES *res = mysql_list_dbs(conn, NULL);
@@ -348,7 +348,7 @@ Variant f_mysql_list_dbs(CVarRef link_identifier /* = null */) {
 }
 
 Variant f_mysql_list_tables(const String& database,
-                            CVarRef link_identifier /* = null */) {
+                            const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   if (mysql_select_db(conn, database.data())) {
@@ -363,13 +363,13 @@ Variant f_mysql_list_tables(const String& database,
 }
 
 Variant f_mysql_list_fields(const String& database_name, const String& table_name,
-                            CVarRef link_identifier /* = uninit_null() */) {
+                            const Variant& link_identifier /* = uninit_null() */) {
   throw NotSupportedException
     (__func__, "Deprecated. Use mysql_query(SHOW COLUMNS FROM table "
      "[LIKE 'name']) instead.");
 }
 
-Variant f_mysql_list_processes(CVarRef link_identifier /* = null */) {
+Variant f_mysql_list_processes(const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   MYSQL_RES *res = mysql_list_processes(conn);
@@ -396,7 +396,7 @@ Variant f_mysql_async_connect_start(const String& server /* = null_string */,
                               0, false, true, 0, 0);
 }
 
-bool f_mysql_async_connect_completed(CVarRef link_identifier) {
+bool f_mysql_async_connect_completed(const Variant& link_identifier) {
   MySQL* mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
@@ -417,7 +417,7 @@ bool f_mysql_async_connect_completed(CVarRef link_identifier) {
   return status == NET_ASYNC_COMPLETE;
 }
 
-bool f_mysql_async_query_start(const String& query, CVarRef link_identifier) {
+bool f_mysql_async_query_start(const String& query, const Variant& link_identifier) {
   MYSQL* conn = MySQL::GetConn(link_identifier);
   if (!conn) {
     return false;
@@ -437,7 +437,7 @@ bool f_mysql_async_query_start(const String& query, CVarRef link_identifier) {
   return ret.toBooleanVal();
 }
 
-Variant f_mysql_async_query_result(CVarRef link_identifier) {
+Variant f_mysql_async_query_result(const Variant& link_identifier) {
   MySQL* mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
@@ -472,14 +472,14 @@ Variant f_mysql_async_query_result(CVarRef link_identifier) {
   return ret;
 }
 
-bool f_mysql_async_query_completed(CVarRef result) {
+bool f_mysql_async_query_completed(const Variant& result) {
   MySQLResult *res = result.toResource().getTyped<MySQLResult>
     (!RuntimeOption::ThrowBadTypeExceptions,
      !RuntimeOption::ThrowBadTypeExceptions);
   return !res || res->get() == NULL;
 }
 
-Variant f_mysql_async_fetch_array(CVarRef result, int result_type /* = 1 */) {
+Variant f_mysql_async_fetch_array(const Variant& result, int result_type /* = 1 */) {
   if ((result_type & PHP_MYSQL_BOTH) == 0) {
     throw_invalid_argument("result_type: %d", result_type);
     return false;
@@ -550,7 +550,7 @@ Variant f_mysql_async_fetch_array(CVarRef result, int result_type /* = 1 */) {
 // loop with other IO operations such as memcache ops, thrift calls,
 // etc.  That said, this function is reasonably efficient for most use
 // cases.
-Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
+Variant f_mysql_async_wait_actionable(const Variant& items, double timeout) {
   size_t count = items.toArray().size();
   if (count == 0 || timeout < 0) {
     return Array::Create();
@@ -626,7 +626,7 @@ Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
   return ret;
 }
 
-int64_t f_mysql_async_status(CVarRef link_identifier) {
+int64_t f_mysql_async_status(const Variant& link_identifier) {
   MySQL *mySQL = MySQL::Get(link_identifier);
   if (!mySQL || !mySQL->get()) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
@@ -645,31 +645,31 @@ Variant f_mysql_async_connect_start(const String& server,
   throw NotImplementedException(__func__);
 }
 
-bool f_mysql_async_connect_completed(CVarRef link_identifier) {
+bool f_mysql_async_connect_completed(const Variant& link_identifier) {
   throw NotImplementedException(__func__);
 }
 
-bool f_mysql_async_query_start(const String& query, CVarRef link_identifier) {
+bool f_mysql_async_query_start(const String& query, const Variant& link_identifier) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_mysql_async_query_result(CVarRef link_identifier) {
+Variant f_mysql_async_query_result(const Variant& link_identifier) {
   throw NotImplementedException(__func__);
 }
 
-bool f_mysql_async_query_completed(CVarRef result) {
+bool f_mysql_async_query_completed(const Variant& result) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_mysql_async_fetch_array(CVarRef result, int result_type /* = 1 */) {
+Variant f_mysql_async_fetch_array(const Variant& result, int result_type /* = 1 */) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_mysql_async_wait_actionable(CVarRef items, double timeout) {
+Variant f_mysql_async_wait_actionable(const Variant& items, double timeout) {
   throw NotImplementedException(__func__);
 }
 
-int64_t f_mysql_async_status(CVarRef link_identifier) {
+int64_t f_mysql_async_status(const Variant& link_identifier) {
   throw NotImplementedException(__func__);
 }
 
@@ -678,28 +678,28 @@ int64_t f_mysql_async_status(CVarRef link_identifier) {
 ///////////////////////////////////////////////////////////////////////////////
 // row operations
 
-bool f_mysql_data_seek(CVarRef result, int row) {
+bool f_mysql_data_seek(const Variant& result, int row) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res == NULL) return false;
 
   return res->seekRow(row);
 }
 
-Variant f_mysql_fetch_row(CVarRef result) {
+Variant f_mysql_fetch_row(const Variant& result) {
   return php_mysql_fetch_hash(result, PHP_MYSQL_NUM);
 }
 
-Variant f_mysql_fetch_assoc(CVarRef result) {
+Variant f_mysql_fetch_assoc(const Variant& result) {
   return php_mysql_fetch_hash(result, PHP_MYSQL_ASSOC);
 }
 
-Variant f_mysql_fetch_array(CVarRef result, int result_type /* = 3 */) {
+Variant f_mysql_fetch_array(const Variant& result, int result_type /* = 3 */) {
   return php_mysql_fetch_hash(result, result_type);
 }
 
-Variant f_mysql_fetch_object(CVarRef result,
+Variant f_mysql_fetch_object(const Variant& result,
                              const String& class_name /* = "stdClass" */,
-                             CArrRef params /* = null */) {
+                             const Array& params /* = null */) {
   Variant properties = php_mysql_fetch_hash(result, PHP_MYSQL_ASSOC);
   if (!same(properties, false)) {
     Object obj = create_object(class_name, params);
@@ -710,7 +710,7 @@ Variant f_mysql_fetch_object(CVarRef result,
   return false;
 }
 
-Variant f_mysql_fetch_lengths(CVarRef result) {
+Variant f_mysql_fetch_lengths(const Variant& result) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res == NULL) return false;
 
@@ -745,8 +745,8 @@ Variant f_mysql_fetch_lengths(CVarRef result) {
   return ret;
 }
 
-Variant f_mysql_result(CVarRef result, int row,
-                       CVarRef field /* = null_variant */) {
+Variant f_mysql_result(const Variant& result, int row,
+                       const Variant& field /* = null_variant */) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res == NULL) return false;
 
@@ -837,15 +837,15 @@ Variant f_mysql_result(CVarRef result, int row,
 // result functions
 
 
-Variant f_mysql_db_name(CVarRef result, int row,
-                        CVarRef field /* = null_variant */) {
+Variant f_mysql_db_name(const Variant& result, int row,
+                        const Variant& field /* = null_variant */) {
   return f_mysql_result(result, row, field);
 }
-Variant f_mysql_tablename(CVarRef result, int i) {
+Variant f_mysql_tablename(const Variant& result, int i) {
   return f_mysql_result(result, i);
 }
 
-Variant f_mysql_num_fields(CVarRef result) {
+Variant f_mysql_num_fields(const Variant& result) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res) {
     return res->getFieldCount();
@@ -853,7 +853,7 @@ Variant f_mysql_num_fields(CVarRef result) {
   return false;
 }
 
-Variant f_mysql_num_rows(CVarRef result) {
+Variant f_mysql_num_rows(const Variant& result) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res) {
     return res->getRowCount();
@@ -861,7 +861,7 @@ Variant f_mysql_num_rows(CVarRef result) {
   return false;
 }
 
-Variant f_mysql_free_result(CVarRef result) {
+Variant f_mysql_free_result(const Variant& result) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res) {
     res->close();
@@ -873,7 +873,7 @@ Variant f_mysql_free_result(CVarRef result) {
 ///////////////////////////////////////////////////////////////////////////////
 // field info
 
-Variant f_mysql_fetch_field(CVarRef result, int field /* = -1 */) {
+Variant f_mysql_fetch_field(const Variant& result, int field /* = -1 */) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res == NULL) return false;
 
@@ -900,25 +900,25 @@ Variant f_mysql_fetch_field(CVarRef result, int field /* = -1 */) {
   return obj;
 }
 
-bool f_mysql_field_seek(CVarRef result, int field /* = 0 */) {
+bool f_mysql_field_seek(const Variant& result, int field /* = 0 */) {
   MySQLResult *res = php_mysql_extract_result(result);
   if (res == NULL) return false;
   return res->seekField(field);
 }
 
-Variant f_mysql_field_name(CVarRef result, int field /* = 0 */) {
+Variant f_mysql_field_name(const Variant& result, int field /* = 0 */) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_NAME);
 }
-Variant f_mysql_field_table(CVarRef result, int field /* = 0 */) {
+Variant f_mysql_field_table(const Variant& result, int field /* = 0 */) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_TABLE);
 }
-Variant f_mysql_field_len(CVarRef result, int field /* = 0 */) {
+Variant f_mysql_field_len(const Variant& result, int field /* = 0 */) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_LEN);
 }
-Variant f_mysql_field_type(CVarRef result, int field /* = 0 */) {
+Variant f_mysql_field_type(const Variant& result, int field /* = 0 */) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_TYPE);
 }
-Variant f_mysql_field_flags(CVarRef result, int field /* = 0 */) {
+Variant f_mysql_field_flags(const Variant& result, int field /* = 0 */) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_FLAGS);
 }
 

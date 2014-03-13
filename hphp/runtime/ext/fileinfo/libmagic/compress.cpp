@@ -335,12 +335,12 @@ uncompressgzipped(struct magic_set *ms, const unsigned char *old,
       data_start++;
     data_start++;
   }
-  if(flg & FCOMMENT) {
+  if (flg & FCOMMENT) {
     while(data_start < n && old[data_start])
       data_start++;
     data_start++;
   }
-  if(flg & FHCRC)
+  if (flg & FHCRC)
     data_start += 2;
 
   if (data_start >= n)

@@ -49,19 +49,19 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static StreamContext* get_stream_context(CVarRef stream_or_context);
+static StreamContext* get_stream_context(const Variant& stream_or_context);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_stream_context_create(CArrRef options /* = null_array */,
-                                CArrRef params /* = null_array */) {
+Variant f_stream_context_create(const Array& options /* = null_array */,
+                                const Array& params /* = null_array */) {
   if (!options.isNull() && !StreamContext::validateOptions(options)) {
     return false;
   }
   return Resource(NEWOBJ(StreamContext)(options, params));
 }
 
-Variant f_stream_context_get_options(CResRef stream_or_context) {
+Variant f_stream_context_get_options(const Resource& stream_or_context) {
   StreamContext* context = get_stream_context(stream_or_context);
   if (!context) {
     raise_warning("Invalid stream/context parameter");
@@ -71,7 +71,7 @@ Variant f_stream_context_get_options(CResRef stream_or_context) {
 }
 
 bool f_stream_context_set_option0(StreamContext* context,
-                                  CArrRef options) {
+                                  const Array& options) {
   if (!StreamContext::validateOptions(options)) {
     raise_warning("options should have the form "
                   "[\"wrappername\"][\"optionname\"] = $value");
@@ -84,15 +84,15 @@ bool f_stream_context_set_option0(StreamContext* context,
 bool f_stream_context_set_option1(StreamContext* context,
                                   const String& wrapper,
                                   const String& option,
-                                  CVarRef value) {
+                                  const Variant& value) {
   context->setOption(wrapper, option, value);
   return true;
 }
 
-bool f_stream_context_set_option(CVarRef stream_or_context,
-                                 CVarRef wrapper_or_options,
-                                 CVarRef option /* = null_variant */,
-                                 CVarRef value /* = null_variant */) {
+bool f_stream_context_set_option(const Variant& stream_or_context,
+                                 const Variant& wrapper_or_options,
+                                 const Variant& option /* = null_variant */,
+                                 const Variant& value /* = null_variant */) {
   StreamContext* context = get_stream_context(stream_or_context);
   if (!context) {
     raise_warning("Invalid stream/context parameter");
@@ -114,7 +114,7 @@ bool f_stream_context_set_option(CVarRef stream_or_context,
   }
 }
 
-Variant f_stream_context_get_default(CArrRef options /* = null_array */) {
+Variant f_stream_context_get_default(const Array& options /* = null_array */) {
   Resource &resource = g_context->getStreamContext();
   if (resource.isNull()) {
     resource = Resource(NEWOBJ(StreamContext)(Array::Create(),
@@ -128,11 +128,11 @@ Variant f_stream_context_get_default(CArrRef options /* = null_array */) {
   return resource;
 }
 
-Variant f_stream_context_set_default(CArrRef options) {
+Variant f_stream_context_set_default(const Array& options) {
   return f_stream_context_get_default(options);
 }
 
-Variant f_stream_context_get_params(CResRef stream_or_context) {
+Variant f_stream_context_get_params(const Resource& stream_or_context) {
   StreamContext* context = get_stream_context(stream_or_context);
   if (!context) {
     raise_warning("Invalid stream/context parameter");
@@ -141,8 +141,8 @@ Variant f_stream_context_get_params(CResRef stream_or_context) {
   return context->getParams();
 }
 
-bool f_stream_context_set_params(CResRef stream_or_context,
-                                 CArrRef params) {
+bool f_stream_context_set_params(const Resource& stream_or_context,
+                                 const Array& params) {
   StreamContext* context = get_stream_context(stream_or_context);
   if (!context || !StreamContext::validateParams(params)) {
     raise_warning("Invalid stream/context parameter");
@@ -152,7 +152,7 @@ bool f_stream_context_set_params(CResRef stream_or_context,
   return true;
 }
 
-Variant f_stream_copy_to_stream(CResRef source, CResRef dest,
+Variant f_stream_copy_to_stream(const Resource& source, const Resource& dest,
                                 int maxlength /* = -1 */,
                                 int offset /* = 0 */) {
   if (maxlength == 0) return 0;
@@ -190,7 +190,7 @@ Variant f_stream_copy_to_stream(CResRef source, CResRef dest,
   return cbytes;
 }
 
-Variant f_stream_get_contents(CResRef handle, int maxlen /* = -1 */,
+Variant f_stream_get_contents(const Resource& handle, int maxlen /* = -1 */,
                               int offset /* = -1 */) {
   if (maxlen < -1) {
     throw_invalid_argument("maxlen: %d", maxlen);
@@ -226,13 +226,13 @@ Variant f_stream_get_contents(CResRef handle, int maxlen /* = -1 */,
   return ret;
 }
 
-Variant f_stream_get_line(CResRef handle, int length /* = 0 */,
+Variant f_stream_get_line(const Resource& handle, int length /* = 0 */,
                           const String& ending /* = null_string */) {
   File *file = handle.getTyped<File>();
   return file->readRecord(ending, length);
 }
 
-Variant f_stream_get_meta_data(CResRef stream) {
+Variant f_stream_get_meta_data(const Resource& stream) {
   File *f = stream.getTyped<File>(true, true);
   if (f) return f->getMetaData();
   return false;
@@ -243,7 +243,7 @@ Array f_stream_get_transports() {
 }
 
 Variant f_stream_resolve_include_path(const String& filename,
-                                     CResRef context /* = null_object */) {
+                                     const Resource& context /* = null_object */) {
   struct stat s;
   String ret = Eval::resolveVmInclude(filename.get(), "", &s);
   if (ret.isNull()) {
@@ -253,11 +253,11 @@ Variant f_stream_resolve_include_path(const String& filename,
 }
 
 Variant f_stream_select(VRefParam read, VRefParam write, VRefParam except,
-                        CVarRef vtv_sec, int tv_usec /* = 0 */) {
+                        const Variant& vtv_sec, int tv_usec /* = 0 */) {
   return f_socket_select(ref(read), ref(write), ref(except), vtv_sec, tv_usec);
 }
 
-bool f_stream_set_blocking(CResRef stream, int mode) {
+bool f_stream_set_blocking(const Resource& stream, int mode) {
   File *file = stream.getTyped<File>();
   int flags = fcntl(file->fd(), F_GETFL, 0);
   if (mode) {
@@ -272,7 +272,7 @@ const StaticString
   s_sec("sec"),
   s_usec("usec");
 
-bool f_stream_set_timeout(CResRef stream, int seconds,
+bool f_stream_set_timeout(const Resource& stream, int seconds,
                           int microseconds /* = 0 */) {
   if (stream.getTyped<Socket>(false, true)) {
     return f_socket_set_option
@@ -282,7 +282,7 @@ bool f_stream_set_timeout(CResRef stream, int seconds,
   return false;
 }
 
-int64_t f_stream_set_write_buffer(CResRef stream, int buffer) {
+int64_t f_stream_set_write_buffer(const Resource& stream, int buffer) {
   PlainFile *plain_file = stream.getTyped<PlainFile>(false, true);
   if (!plain_file) {
     return -1;
@@ -304,7 +304,7 @@ int64_t f_stream_set_write_buffer(CResRef stream, int buffer) {
   }
 }
 
-int64_t f_set_file_buffer(CResRef stream, int buffer) {
+int64_t f_set_file_buffer(const Resource& stream, int buffer) {
   return f_stream_set_write_buffer(stream, buffer);
 }
 
@@ -315,7 +315,7 @@ Array f_stream_get_wrappers() {
   return Stream::enumWrappers();
 }
 
-bool f_stream_is_local(CVarRef stream_or_url) {
+bool f_stream_is_local(const Variant& stream_or_url) {
   if (stream_or_url.isString()) {
     auto wrapper = Stream::getWrapperFromURI(stream_or_url.asCStrRef());
     return wrapper->m_isLocal;
@@ -366,7 +366,7 @@ bool f_stream_wrapper_unregister(const String& protocol) {
 ///////////////////////////////////////////////////////////////////////////////
 // stream socket functions
 
-static Socket *socket_accept_impl(CResRef socket, struct sockaddr *addr,
+static Socket *socket_accept_impl(const Resource& socket, struct sockaddr *addr,
                                   socklen_t *addrlen) {
   Socket *sock = socket.getTyped<Socket>();
   Socket *new_sock = new Socket(accept(sock->fd(), addr, addrlen),
@@ -434,7 +434,7 @@ static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
   return String();
 }
 
-Variant f_stream_socket_accept(CResRef server_socket,
+Variant f_stream_socket_accept(const Resource& server_socket,
                                double timeout /* = -1.0 */,
                                VRefParam peername /* = null */) {
   Socket *sock = server_socket.getTyped<Socket>();
@@ -468,7 +468,7 @@ Variant f_stream_socket_server(const String& local_socket,
                                VRefParam errnum /* = null */,
                                VRefParam errstr /* = null */,
                                int flags /* = 0 */,
-                               CResRef context /* = null_object */) {
+                               const Resource& context /* = null_object */) {
   HostURL hosturl(static_cast<const std::string>(local_socket));
   return socket_server_impl(hosturl, flags, errnum, errstr);
 }
@@ -478,12 +478,12 @@ Variant f_stream_socket_client(const String& remote_socket,
                                VRefParam errstr /* = null */,
                                double timeout /* = -1.0 */,
                                int flags /* = 0 */,
-                               CResRef context /* = null_object */) {
+                               const Resource& context /* = null_object */) {
   HostURL hosturl(static_cast<const std::string>(remote_socket));
   return sockopen_impl(hosturl, errnum, errstr, timeout, false);
 }
 
-Variant f_stream_socket_get_name(CResRef handle, bool want_peer) {
+Variant f_stream_socket_get_name(const Resource& handle, bool want_peer) {
   Variant address, port;
   bool ret;
   if (want_peer) {
@@ -505,7 +505,7 @@ Variant f_stream_socket_pair(int domain, int type, int protocol) {
   return fd;
 }
 
-Variant f_stream_socket_recvfrom(CResRef socket, int length,
+Variant f_stream_socket_recvfrom(const Resource& socket, int length,
                                  int flags /* = 0 */,
                                  VRefParam address /* = null_string */) {
   Variant ret, host, port;
@@ -523,7 +523,7 @@ Variant f_stream_socket_recvfrom(CResRef socket, int length,
   return false;
 }
 
-Variant f_stream_socket_sendto(CResRef socket, const String& data,
+Variant f_stream_socket_sendto(const Resource& socket, const String& data,
                                int flags /* = 0 */,
                                const String& address /* = null_string */) {
   String host; int port;
@@ -541,15 +541,15 @@ Variant f_stream_socket_sendto(CResRef socket, const String& data,
   return f_socket_sendto(socket, data, data.size(), flags, host, port);
 }
 
-bool f_stream_socket_shutdown(CResRef stream, int how) {
+bool f_stream_socket_shutdown(const Resource& stream, int how) {
   return f_socket_shutdown(stream, how);
 }
 
-static StreamContext* get_stream_context(CVarRef stream_or_context) {
+static StreamContext* get_stream_context(const Variant& stream_or_context) {
   if (!stream_or_context.isResource()) {
     return nullptr;
   }
-  CResRef resource = stream_or_context.asCResRef();
+  const Resource& resource = stream_or_context.asCResRef();
   StreamContext* context = resource.getTyped<StreamContext>(true, true);
   if (context != nullptr) {
     return context;
@@ -567,16 +567,16 @@ static StreamContext* get_stream_context(CVarRef stream_or_context) {
   return nullptr;
 }
 
-bool StreamContext::validateOptions(CVarRef options) {
+bool StreamContext::validateOptions(const Variant& options) {
   if (options.isNull() || !options.isArray()) {
     return false;
   }
-  CArrRef arr = options.toArray();
+  const Array& arr = options.toArray();
   for (ArrayIter it(arr); it; ++it) {
     if (!it.first().isString() || !it.second().isArray()) {
       return false;
     }
-    CArrRef opts = it.second().toArray();
+    const Array& opts = it.second().toArray();
     for (ArrayIter it2(opts); it2; ++it2) {
       if (!it2.first().isString()) {
         return false;
@@ -586,7 +586,7 @@ bool StreamContext::validateOptions(CVarRef options) {
   return true;
 }
 
-void StreamContext::mergeOptions(CArrRef options) {
+void StreamContext::mergeOptions(const Array& options) {
   if (m_options.isNull()) {
     m_options = Array::Create();
   }
@@ -606,7 +606,7 @@ void StreamContext::mergeOptions(CArrRef options) {
 
 void StreamContext::setOption(const String& wrapper,
                                const String& option,
-                               CVarRef value) {
+                               const Variant& value) {
   if (m_options.isNull()) {
     m_options = Array::Create();
   }
@@ -625,11 +625,11 @@ Array StreamContext::getOptions() const {
   return m_options;
 }
 
-bool StreamContext::validateParams(CVarRef params) {
+bool StreamContext::validateParams(const Variant& params) {
   if (params.isNull() || !params.isArray()) {
     return false;
   }
-  CArrRef arr = params.toArray();
+  const Array& arr = params.toArray();
   const String& options_key = String::FromCStr("options");
   for (ArrayIter it(arr); it; ++it) {
     if (!it.first().isString()) {
@@ -644,7 +644,7 @@ bool StreamContext::validateParams(CVarRef params) {
   return true;
 }
 
-void StreamContext::mergeParams(CArrRef params) {
+void StreamContext::mergeParams(const Array& params) {
   if (m_params.isNull()) {
     m_params = Array::Create();
   }
@@ -679,6 +679,7 @@ class StreamExtension : public Extension {
     HHVM_FE(stream_filter_register);
     HHVM_FE(stream_filter_append);
     HHVM_FE(stream_filter_prepend);
+    HHVM_FE(stream_filter_remove);
     HHVM_FE(stream_bucket_make_writeable);
     HHVM_FE(stream_bucket_append);
     HHVM_FE(stream_bucket_prepend);

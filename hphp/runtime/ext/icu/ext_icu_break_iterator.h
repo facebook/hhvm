@@ -79,7 +79,7 @@ class IntlBreakIterator : public IntlError {
 
   bool setText(const String& str) {
     assert(isValid());
-    m_text = str->toCppString();
+    m_text = str.toCppString();
     UErrorCode error = U_ZERO_ERROR;
     m_uText = utext_openUTF8(m_uText, m_text.c_str(), m_text.size(), &error);
     if (U_FAILURE(error)) {

@@ -904,11 +904,9 @@ void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
   }
 
   if (src->isA(Type::Null)) {
+    push(inc && pre ? cns(1) : src);
     if (inc) {
-      push(cns(1));
       stLoc(id, exit, cns(1));
-    } else {
-      push(src);
     }
     return;
   }
@@ -2174,8 +2172,8 @@ static const Func* findCuf(Op op,
     sname = makeStaticString(name.substr(pos + 2).get());
   } else if (arr) {
     if (arr->size() != 2) return nullptr;
-    CVarRef e0 = arr->get(int64_t(0), false);
-    CVarRef e1 = arr->get(int64_t(1), false);
+    const Variant& e0 = arr->get(int64_t(0), false);
+    const Variant& e1 = arr->get(int64_t(1), false);
     if (!e0.isString() || !e1.isString()) return nullptr;
     sclass = e0.getStringData();
     sname = e1.getStringData();
@@ -2425,6 +2423,42 @@ static bool canInstantiateClass(const Class* cls) {
     !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait));
 }
 
+SSATmp* HhbcTranslator::emitAllocObjFast(const Class* cls) {
+  // If it's an extension class with a custom instance initializer,
+  // that init function does all the work.
+  if (cls->instanceCtor()) {
+    return gen(ConstructInstance, makeCatch(), ClassData(cls));
+  }
+
+  // First, make sure our property init vectors are all set up
+  bool props = cls->pinitVec().size() > 0;
+  bool sprops = cls->numStaticProperties() > 0;
+  assert((props || sprops) == cls->needInitialization());
+  if (cls->needInitialization()) {
+    if (props) {
+      cls->initPropHandle();
+      gen(InitProps, makeCatch(), ClassData(cls));
+    }
+    if (sprops) {
+      cls->initSPropHandle();
+      gen(InitSProps, makeCatch(), ClassData(cls));
+    }
+  }
+
+  // Next, allocate the object
+  auto const ssaObj = gen(NewInstanceRaw, ClassData(cls));
+
+  // Initialize the properties
+  gen(InitObjProps, ClassData(cls), ssaObj);
+
+  // Call a custom initializer if one exists
+  if (cls->callsCustomInstanceInit()) {
+    return gen(CustomInstanceInit, ssaObj);
+  }
+
+  return ssaObj;
+}
+
 void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   const StringData* className = lookupStringId(classNameStrId);
 
@@ -2455,7 +2489,7 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
     persistentCls ? cns(cls)
                   : gen(LdClsCached, makeCatch(), cns(className));
   auto const obj =
-    fastAlloc ? gen(AllocObjFast, ClassData(cls))
+    fastAlloc ? emitAllocObjFast(cls)
               : gen(AllocObj, makeCatch(), ssaCls);
   gen(IncRef, obj);
   emitFPushCtorCommon(ssaCls, obj, func, numParams);
@@ -2483,7 +2517,7 @@ void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
   // EnableObjDestructCall is on.
   auto const closure =
     RuntimeOption::EnableObjDestructCall ? gen(AllocObj, makeCatch(), cns(cls))
-                                         : gen(AllocObjFast, ClassData(cls));
+                                         : emitAllocObjFast(cls);
   gen(IncRef, closure);
 
   auto const ctx = [&]{
@@ -5234,14 +5268,14 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
   if (flag == ExitFlag::Interp) {
     auto interpSk = SrcKey {curFunc(), targetBcOff};
     auto pc = curUnit()->at(targetBcOff);
-    auto changesPC = opcodeChangesPC(toOp(*pc));
+    auto changesPC = opcodeChangesPC(*reinterpret_cast<const Op*>(pc));
     auto interpOp = changesPC ? InterpOneCF : InterpOne;
 
     InterpOneData idata;
     idata.bcOff = targetBcOff;
     idata.cellsPopped = getStackPopped(pc);
     idata.cellsPushed = getStackPushed(pc);
-    idata.opcode = toOp(*pc);
+    idata.opcode = *reinterpret_cast<const Op*>(pc);
 
     // This is deliberately ignoring anything the opcode might output on the
     // stack -- this Unit is about to end.

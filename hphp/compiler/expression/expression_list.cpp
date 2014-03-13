@@ -241,7 +241,7 @@ void ExpressionList::stripConcat() {
       BinaryOpExpressionPtr b
         (static_pointer_cast<BinaryOpExpression>(e));
       if (b->getOp() == '.') {
-        if(!b->getExp1()->isArray() && !b->getExp2()->isArray()) {
+        if (!b->getExp1()->isArray() && !b->getExp2()->isArray()) {
           e = b->getExp1();
           el.insertElement(b->getExp2(), i + 1);
           continue;
@@ -510,7 +510,7 @@ unsigned int ExpressionList::checkLitstrKeys() const {
     if (!ret) return 0;
     if (!value.isString()) return 0;
     String str = value.toString();
-    if (str->isInteger()) return 0;
+    if (str.isInteger()) return 0;
     string s(str.data(), str.size());
     keys.insert(s);
   }

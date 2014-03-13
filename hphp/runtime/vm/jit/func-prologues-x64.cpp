@@ -272,7 +272,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     }
   }
 
-  const HPHP::Opcode* destPC = func->unit()->entry() + entryOffset;
+  auto destPC = func->unit()->entry() + entryOffset;
   SrcKey funcBody(func, destPC);
 
   // Move rVmSp to the right place: just past all locals

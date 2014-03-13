@@ -904,8 +904,8 @@
                 },
                 {
                     "name": "length",
-                    "type": "Int32",
-                    "value": "0x7FFFFFFF",
+                    "type": "Variant",
+                    "value": "null",
                     "desc": "The string being decoded."
                 },
                 {
@@ -1387,8 +1387,8 @@
                 },
                 {
                     "name": "length",
-                    "type": "Int32",
-                    "value": "0x7FFFFFFF",
+                    "type": "Variant",
+                    "value": "null",
                     "desc": "The maximum length of the returned string."
                 },
                 {

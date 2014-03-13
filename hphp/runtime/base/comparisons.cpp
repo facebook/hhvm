@@ -23,11 +23,11 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 // Variant
 
-bool same(CVarRef v1, bool v2) {
+bool same(const Variant& v1, bool v2) {
   return v1.isBoolean() && v2 == v1.getBoolean();
 }
 
-bool same(CVarRef v1, int64_t v2) {
+bool same(const Variant& v1, int64_t v2) {
   auto const cell = v1.asCell();
   switch (cell->m_type) {
   case KindOfInt64:
@@ -38,11 +38,11 @@ bool same(CVarRef v1, int64_t v2) {
   return false;
 }
 
-bool same(CVarRef v1, double d) {
+bool same(const Variant& v1, double d) {
   return v1.isDouble() && v1.getDouble() == d;
 }
 
-bool same(CVarRef v1, const StringData* v2) {
+bool same(const Variant& v1, const StringData* v2) {
   bool null1 = v1.isNull();
   bool null2 = (v2 == nullptr);
   if (null1 && null2) return true;
@@ -52,12 +52,12 @@ bool same(CVarRef v1, const StringData* v2) {
   return sdata == v2 || v2->same(sdata);
 }
 
-bool same(CVarRef v1, const String& v2) {
+bool same(const Variant& v1, const String& v2) {
   const StringData* sd = v2.get();
   return same(v1, sd);
 }
 
-bool same(CVarRef v1, CArrRef v2) {
+bool same(const Variant& v1, const Array& v2) {
   bool null1 = v1.isNull();
   bool null2 = v2.isNull();
   if (null1 && null2) return true;
@@ -67,7 +67,7 @@ bool same(CVarRef v1, CArrRef v2) {
   return v2->equal(ad, true);
 }
 
-bool same(CVarRef v1, CObjRef v2) {
+bool same(const Variant& v1, const Object& v2) {
   bool null1 = v1.isNull();
   bool null2 = v2.isNull();
   if (null1 && null2) return true;
@@ -77,7 +77,7 @@ bool same(CVarRef v1, CObjRef v2) {
   return od == v2.get();
 }
 
-bool same(CVarRef v1, CResRef v2) {
+bool same(const Variant& v1, const Resource& v2) {
   bool null1 = v1.isNull();
   bool null2 = v2.isNull();
   if (null1 && null2) return true;

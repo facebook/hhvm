@@ -88,7 +88,7 @@ inline String localeOrDefault(const String& str) {
   return str.empty() ? GetDefaultLocale() : str;
 }
 bool SetDefaultLocale(const String& locale);
-double VariantToMilliseconds(CVarRef arg);
+double VariantToMilliseconds(const Variant& arg);
 
 // Common encoding conversions UTF8<->UTF16
 icu::UnicodeString u16(const char* u8, int32_t u8_len, UErrorCode &error,
@@ -127,6 +127,7 @@ class IntlExtension : public Extension {
     initCollator();
     initMessageFormatter();
     initNormalizer();
+    initResourceBundle();
   }
 
   void threadInit() override {
@@ -151,6 +152,7 @@ class IntlExtension : public Extension {
   void initCollator();
   void initMessageFormatter();
   void initNormalizer();
+  void initResourceBundle();
 };
 
 } // namespace Intl

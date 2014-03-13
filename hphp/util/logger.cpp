@@ -117,7 +117,11 @@ void Logger::Log(LogLevelType level, const std::string &msg,
 }
 
 FILE *Logger::GetStandardOut(LogLevelType level) {
-  return stderr;
+  return s_logger->m_standardOut;
+}
+
+void Logger::SetStandardOut(FILE* file) {
+  s_logger->m_standardOut = file;
 }
 
 int Logger::GetSyslogLevel(LogLevelType level) {

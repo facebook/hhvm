@@ -6810,7 +6810,7 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
 
 void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
                                            ExpressionListPtr params,
-                                           bool builtin /*= false */){
+                                           bool builtin /*= false */) {
   int numParam = params ? params->getCount() : 0;
   for (int i = 0; i < numParam; i++) {
     ParameterExpressionPtr par(
@@ -9136,7 +9136,7 @@ String hphp_compiler_serialize_code_model_for(String code, String prefix) {
     );
     std::ostringstream serialized;
     CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel);
-    cg.setAstClassPrefix(prefix->data());
+    cg.setAstClassPrefix(prefix.data());
     block->outputCodeModel(cg);
     std::string r(serialized.str().c_str(), serialized.str().length());
     return r;

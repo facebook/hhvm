@@ -40,12 +40,12 @@ public:
   static void Verbose(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
 
   // Log additional injected stacktrace.
-  static void Log(LogLevelType level, CArrRef stackTrace, bool escape = true,
+  static void Log(LogLevelType level, const Array& stackTrace, bool escape = true,
                   bool escapeMore = false);
 
   // Convenience functions for stringifying.
-  static std::string StringOfFrame(CArrRef frame, int i, bool escape = false);
-  static std::string StringOfStackTrace(CArrRef stackTrace);
+  static std::string StringOfFrame(const Array& frame, int i, bool escape = false);
+  static std::string StringOfStackTrace(const Array& stackTrace);
 
 protected:
   virtual void log(LogLevelType level, const char *type, const Exception &e,
@@ -55,7 +55,7 @@ protected:
                    bool escape = true, bool escapeMore = false);
 
 private:
-  static void PrintStackTrace(FILE *f, CArrRef stackTrace,
+  static void PrintStackTrace(FILE *f, const Array& stackTrace,
                               bool escape = false, bool escapeMore = false);
 };
 

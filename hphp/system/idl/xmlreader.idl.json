@@ -371,6 +371,21 @@
                             "type": "String"
                         }
                     ]
+                },
+                {
+                    "name": "expand",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "basenode",
+                            "type": "Object",
+                            "value": "null_object"
+                        }
+                    ]
                 }
             ],
             "consts": [

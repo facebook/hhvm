@@ -14,15 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/complex-types.h"
-#include <algorithm>
-#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/type-string.h"
+
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
+
+#include <algorithm>
 
 namespace HPHP {
 
@@ -216,15 +218,15 @@ int String::rfind(const String& s, int pos /* = 0 */,
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions: cannot inline these due to dependencies
 
-String String::rvalAt(CArrRef key) const {
+String String::rvalAt(const Array& key) const {
   return rvalAtImpl(key.toInt32());
 }
 
-String String::rvalAt(CObjRef key) const {
+String String::rvalAt(const Object& key) const {
   return rvalAtImpl(key.toInt32());
 }
 
-String String::rvalAt(CVarRef key) const {
+String String::rvalAt(const Variant& key) const {
   return rvalAtImpl(key.toInt32());
 }
 
@@ -265,7 +267,7 @@ String &String::operator=(const String& str) {
   return *this;
 }
 
-String &String::operator=(CVarRef var) {
+String &String::operator=(const Variant& var) {
   return operator=(var.toString());
 }
 
@@ -277,7 +279,7 @@ String &String::operator+=(litstr s) {
     if (empty()) {
       m_px = StringData::Make(s, CopyString);
       m_px->setRefCount(1);
-    } else if (m_px->getCount() == 1) {
+    } else if (m_px->hasExactlyOneRef()) {
       auto const tmp = m_px->append(StringSlice(s, strlen(s)));
       if (UNLIKELY(tmp != m_px)) StringBase::operator=(tmp);
     } else {
@@ -294,7 +296,7 @@ String &String::operator+=(const String& str) {
   if (!str.empty()) {
     if (empty()) {
       StringBase::operator=(str.m_px);
-    } else if (m_px->getCount() == 1) {
+    } else if (m_px->hasExactlyOneRef()) {
       auto tmp = m_px->append(str.slice());
       if (UNLIKELY(tmp != m_px)) StringBase::operator=(tmp);
     } else {
@@ -311,7 +313,7 @@ String& String::operator+=(const StringSlice& slice) {
   if (slice.size() == 0) {
     return *this;
   }
-  if (m_px && m_px->getCount() == 1) {
+  if (m_px && m_px->hasExactlyOneRef()) {
     auto const tmp = m_px->append(slice);
     if (UNLIKELY(tmp != m_px)) StringBase::operator=(tmp);
     return *this;
@@ -386,15 +388,15 @@ bool String::same(const String& v2) const {
   return HPHP::same(m_px, v2);
 }
 
-bool String::same(CArrRef v2) const {
+bool String::same(const Array& v2) const {
   return HPHP::same(m_px, v2);
 }
 
-bool String::same(CObjRef v2) const {
+bool String::same(const Object& v2) const {
   return HPHP::same(m_px, v2);
 }
 
-bool String::same(CResRef v2) const {
+bool String::same(const Resource& v2) const {
   return HPHP::same(m_px, v2);
 }
 
@@ -406,15 +408,15 @@ bool String::equal(const String& v2) const {
   return HPHP::equal(m_px, v2);
 }
 
-bool String::equal(CArrRef v2) const {
+bool String::equal(const Array& v2) const {
   return HPHP::equal(m_px, v2);
 }
 
-bool String::equal(CObjRef v2) const {
+bool String::equal(const Object& v2) const {
   return HPHP::equal(m_px, v2);
 }
 
-bool String::equal(CResRef v2) const {
+bool String::equal(const Resource& v2) const {
   return HPHP::equal(m_px, v2);
 }
 
@@ -426,15 +428,15 @@ bool String::less(const String& v2) const {
   return HPHP::less(m_px, v2);
 }
 
-bool String::less(CArrRef v2) const {
+bool String::less(const Array& v2) const {
   return HPHP::less(m_px, v2);
 }
 
-bool String::less(CObjRef v2) const {
+bool String::less(const Object& v2) const {
   return HPHP::less(m_px, v2);
 }
 
-bool String::less(CResRef v2) const {
+bool String::less(const Resource& v2) const {
   return HPHP::less(m_px, v2);
 }
 
@@ -446,15 +448,15 @@ bool String::more(const String& v2) const {
   return HPHP::more(m_px, v2);
 }
 
-bool String::more(CArrRef v2) const {
+bool String::more(const Array& v2) const {
   return HPHP::more(m_px, v2);
 }
 
-bool String::more(CObjRef v2) const {
+bool String::more(const Object& v2) const {
   return HPHP::more(m_px, v2);
 }
 
-bool String::more(CResRef v2) const {
+bool String::more(const Resource& v2) const {
   return HPHP::more(m_px, v2);
 }
 
@@ -477,19 +479,19 @@ bool String::operator<(const String& v) const {
   return HPHP::less(m_px, v);
 }
 
-bool String::operator==(CVarRef v) const {
+bool String::operator==(const Variant& v) const {
   return HPHP::equal(m_px, v);
 }
 
-bool String::operator!=(CVarRef v) const {
+bool String::operator!=(const Variant& v) const {
   return !HPHP::equal(m_px, v);
 }
 
-bool String::operator>(CVarRef v) const {
+bool String::operator>(const Variant& v) const {
   return HPHP::more(m_px, v);
 }
 
-bool String::operator<(CVarRef v) const {
+bool String::operator<(const Variant& v) const {
   return HPHP::less(m_px, v);
 }
 

@@ -36,6 +36,7 @@
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/ext_file.h"
@@ -55,7 +56,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // build environment pair list
-static char **build_envp(CArrRef envs, std::vector<String> &senvs) {
+static char **build_envp(const Array& envs, std::vector<String> &senvs) {
   char **envp = NULL;
   int size = envs.size();
   if (size) {
@@ -124,8 +125,8 @@ int64_t f_pcntl_alarm(int seconds) {
   return alarm(seconds);
 }
 
-void f_pcntl_exec(const String& path, CArrRef args /* = null_array */,
-                  CArrRef envs /* = null_array */) {
+void f_pcntl_exec(const String& path, const Array& args /* = null_array */,
+                  const Array& envs /* = null_array */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(path.data())) {
     return;
   }
@@ -337,7 +338,7 @@ bool f_pcntl_signal_dispatch() {
   return true;
 }
 
-bool f_pcntl_signal(int signo, CVarRef handler,
+bool f_pcntl_signal(int signo, const Variant& handler,
                     bool restart_syscalls /* = true */) {
   /* Special long value case for SIG_DFL and SIG_IGN */
   if (handler.isInteger()) {
@@ -693,7 +694,7 @@ Mutex DescriptorItem::s_mutex(false);
 const StaticString s_pipe("pipe");
 const StaticString s_file("file");
 
-static bool pre_proc_open(CArrRef descriptorspec,
+static bool pre_proc_open(const Array& descriptorspec,
                           std::vector<DescriptorItem> &items) {
   /* walk the descriptor spec and set up files/pipes */
   items.resize(descriptorspec.size());
@@ -755,7 +756,7 @@ static bool pre_proc_open(CArrRef descriptorspec,
 }
 
 static Variant post_proc_open(const String& cmd, Variant &pipes,
-                              CVarRef env, std::vector<DescriptorItem> &items,
+                              const Variant& env, std::vector<DescriptorItem> &items,
                               pid_t child) {
   if (child < 0) {
     /* failed to fork() */
@@ -786,10 +787,10 @@ static Variant post_proc_open(const String& cmd, Variant &pipes,
   return Resource(proc);
 }
 
-Variant f_proc_open(const String& cmd, CArrRef descriptorspec, VRefParam pipes,
+Variant f_proc_open(const String& cmd, const Array& descriptorspec, VRefParam pipes,
                     const String& cwd /* = null_string */,
-                    CVarRef env /* = null_variant */,
-                    CVarRef other_options /* = null_variant */) {
+                    const Variant& env /* = null_variant */,
+                    const Variant& other_options /* = null_variant */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(cmd.data())) {
     return false;
   }
@@ -894,12 +895,12 @@ Variant f_proc_open(const String& cmd, CArrRef descriptorspec, VRefParam pipes,
   _exit(127);
 }
 
-bool f_proc_terminate(CResRef process, int signal /* = 0 */) {
+bool f_proc_terminate(const Resource& process, int signal /* = 0 */) {
   ChildProcess *proc = process.getTyped<ChildProcess>();
   return kill(proc->child, signal <= 0 ? SIGTERM : signal) == 0;
 }
 
-int64_t f_proc_close(CResRef process) {
+int64_t f_proc_close(const Resource& process) {
   return process.getTyped<ChildProcess>()->close();
 }
 
@@ -913,7 +914,7 @@ const StaticString
   s_termsig("termsig"),
   s_stopsig("stopsig");
 
-Array f_proc_get_status(CResRef process) {
+Array f_proc_get_status(const Resource& process) {
   ChildProcess *proc = process.getTyped<ChildProcess>();
 
   errno = 0;
@@ -965,10 +966,14 @@ bool f_proc_nice(int increment) {
 ///////////////////////////////////////////////////////////////////////////////
 // string functions
 
+const StaticString s_twosinglequotes("''");
+
 String f_escapeshellarg(const String& arg) {
   if (!arg.empty()) {
     char *ret = string_escape_shell_arg(arg.c_str());
     return String(ret, AttachString);
+  } else if (!RuntimeOption::EnableHipHopSyntax) {
+    return String(s_twosinglequotes);
   }
   return arg;
 }

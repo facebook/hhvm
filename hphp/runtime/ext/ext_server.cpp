@@ -24,6 +24,7 @@
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/server/rpc-request-handler.h"
 
 #define DANGLING_HEADER "HPHP_DANGLING"
@@ -118,9 +119,9 @@ bool f_pagelet_server_is_enabled() {
 const StaticString s_Host("Host");
 
 Resource f_pagelet_server_task_start(const String& url,
-                                     CArrRef headers /* = null_array */,
+                                     const Array& headers /* = null_array */,
                                      const String& post_data /* = null_string */,
-                                     CArrRef files /* = null_array */) {
+                                     const Array& files /* = null_array */) {
   String remote_host;
   Transport *transport = g_context->getTransport();
   int timeout = ThreadInfo::s_threadInfo->m_reqInjectionData.getRemainingTime();
@@ -137,11 +138,11 @@ Resource f_pagelet_server_task_start(const String& url,
                                   post_data, files, timeout);
 }
 
-int64_t f_pagelet_server_task_status(CResRef task) {
+int64_t f_pagelet_server_task_status(const Resource& task) {
   return PageletServer::TaskStatus(task);
 }
 
-String f_pagelet_server_task_result(CResRef task, VRefParam headers,
+String f_pagelet_server_task_result(const Resource& task, VRefParam headers,
                                     VRefParam code,
                                     int64_t timeout_ms /* = 0 */) {
   Array rheaders;
@@ -184,11 +185,11 @@ Resource f_xbox_task_start(const String& message) {
   return XboxServer::TaskStart(message);
 }
 
-bool f_xbox_task_status(CResRef task) {
+bool f_xbox_task_status(const Resource& task) {
   return XboxServer::TaskStatus(task);
 }
 
-int64_t f_xbox_task_result(CResRef task, int64_t timeout_ms, VRefParam ret) {
+int64_t f_xbox_task_result(const Resource& task, int64_t timeout_ms, VRefParam ret) {
   return XboxServer::TaskResult(task, timeout_ms, ret);
 }
 

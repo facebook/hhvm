@@ -1,0 +1,22 @@
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+OK, no file created
+
+Deprecated: XSLTProcessor::transformToXml(): The xsl.security_prefs php.ini option is deprecated; use XsltProcessor->setSecurityPrefs() instead in %s on line %d
+OK, file exists
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+OK, no file created
+
+Deprecated: XSLTProcessor::transformToXml(): The xsl.security_prefs php.ini option is deprecated; use XsltProcessor->setSecurityPrefs() instead in %s on line %d
+HipHop Notice: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+OK, no file created
+OK, file exists

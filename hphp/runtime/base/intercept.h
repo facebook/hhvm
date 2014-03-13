@@ -30,7 +30,7 @@ namespace HPHP {
  * instead. If it returns FALSE, continues execution. Otherwise, return its
  * return.
  */
-bool register_intercept(const String& name, CVarRef callback, CVarRef data);
+bool register_intercept(const String& name, const Variant& callback, const Variant& data);
 
 /**
  * Check to see if it is actually intercepted for current request.
@@ -40,7 +40,7 @@ Variant *get_intercept_handler(const String& name, char* flag);
 /**
  * Call intercept handler with original parameters.
  */
-bool handle_intercept(CVarRef handler, const String& name, CArrRef params,
+bool handle_intercept(const Variant& handler, const String& name, const Array& params,
                       Variant &ret);
 
 /**

@@ -52,7 +52,7 @@ struct ArrayInit {
     if (m_data) m_data->release();
   }
 
-  ArrayInit& set(CVarRef v) {
+  ArrayInit& set(const Variant& v) {
     performOp([&]{ return m_data->append(v, false); });
     return *this;
   }
@@ -64,21 +64,21 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& setRef(CVarRef v) {
+  ArrayInit& setRef(const Variant& v) {
     performOp([&]{ return m_data->appendRef(v, false); });
     return *this;
   }
 
-  ArrayInit& set(int64_t name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& set(int64_t name, const Variant& v, bool keyConverted = false) {
     performOp([&]{ return m_data->set(name, v, false); });
     return *this;
   }
 
   // set(const char*) deprecated.  Use set(CStrRef) with a StaticString,
   // if you have a literal, or String otherwise.
-  ArrayInit& set(const char*, CVarRef v, bool keyConverted = false) = delete;
+  ArrayInit& set(const char*, const Variant& v, bool keyConverted = false) = delete;
 
-  ArrayInit& set(const String& name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& set(const String& name, const Variant& v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->set(name, v, false); });
     } else if (!name.isNull()) {
@@ -87,7 +87,7 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& set(CVarRef name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& set(const Variant& name, const Variant& v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->set(name, v, false); });
     } else {
@@ -100,7 +100,7 @@ struct ArrayInit {
   }
 
   template<typename T>
-  ArrayInit& set(const T &name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& set(const T &name, const Variant& v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->set(name, v, false); });
     } else {
@@ -123,7 +123,7 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& set(CVarRef name, RefResult v, bool keyConverted = false) {
+  ArrayInit& set(const Variant& name, RefResult v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->setRef(name, variant(v), false); });
     } else {
@@ -148,12 +148,12 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& add(int64_t name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& add(int64_t name, const Variant& v, bool keyConverted = false) {
     performOp([&]{ return m_data->add(name, v, false); });
     return *this;
   }
 
-  ArrayInit& add(const String& name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& add(const String& name, const Variant& v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->add(name, v, false); });
     } else if (!name.isNull()) {
@@ -162,7 +162,7 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& add(CVarRef name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& add(const Variant& name, const Variant& v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->add(name, v, false); });
     } else {
@@ -175,7 +175,7 @@ struct ArrayInit {
   }
 
   template<typename T>
-  ArrayInit& add(const T &name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& add(const T &name, const Variant& v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->add(name, v, false); });
     } else {
@@ -187,12 +187,12 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& setRef(int64_t name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& setRef(int64_t name, const Variant& v, bool keyConverted = false) {
     performOp([&]{ return m_data->setRef(name, v, false); });
     return *this;
   }
 
-  ArrayInit& setRef(const String& name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& setRef(const String& name, const Variant& v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
@@ -201,7 +201,7 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& setRef(CVarRef name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& setRef(const Variant& name, const Variant& v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
@@ -214,7 +214,7 @@ struct ArrayInit {
   }
 
   template<typename T>
-  ArrayInit& setRef(const T &name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& setRef(const T &name, const Variant& v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
@@ -309,7 +309,7 @@ public:
   /*
    * Append a new element to the packed array.
    */
-  PackedArrayInit& append(CVarRef v) {
+  PackedArrayInit& append(const Variant& v) {
     performOp([&]{ return HphpArray::AppendPacked(m_vec, v, false); });
     return *this;
   }
@@ -320,7 +320,7 @@ public:
    *
    * Post: v.getRawType() == KindOfRef
    */
-  PackedArrayInit& appendRef(CVarRef v) {
+  PackedArrayInit& appendRef(const Variant& v) {
     performOp([&]{ return HphpArray::AppendRefPacked(m_vec, v, false); });
     return *this;
   }
@@ -331,7 +331,7 @@ public:
    * be KindOfRef and share the same RefData.  Otherwise, the new
    * element is split.
    */
-  PackedArrayInit& appendWithRef(CVarRef v) {
+  PackedArrayInit& appendWithRef(const Variant& v) {
     performOp([&]{ return HphpArray::AppendWithRefPacked(m_vec, v, false); });
     return *this;
   }

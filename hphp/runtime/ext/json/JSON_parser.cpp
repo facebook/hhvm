@@ -488,7 +488,7 @@ void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
 
 StaticString s__empty_("_empty_");
 
-static void object_set(Variant &var, const String& key, CVarRef value,
+static void object_set(Variant &var, const String& key, const Variant& value,
                        int assoc) {
   if (!assoc) {
     // We know it is stdClass, and everything is public (and dynamic).

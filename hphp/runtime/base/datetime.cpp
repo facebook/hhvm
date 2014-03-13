@@ -454,6 +454,7 @@ void DateTime::internalModify(timelib_rel_time *rel,
   m_time->have_relative = have_relative;
 #ifdef TIMELIB_HAVE_INTERVAL
   m_time->relative.have_weekday_relative = rel->have_weekday_relative;
+  m_time->relative.weekday_behavior = rel->weekday_behavior;
 #endif
   m_time->sse_uptodate = 0;
   update();
@@ -566,6 +567,19 @@ String DateTime::rfcFormat(const String& format) const {
   StringBuffer s;
   bool rfc_colon = false;
   bool error;
+
+  // Used if m_time->zone_type = TIMELIB_ZONETYPE_OFFSET
+  bool offset_zone = m_time->zone_type == TIMELIB_ZONETYPE_OFFSET;
+  timelib_time_offset *offset = timelib_time_offset_ctor();
+  offset->offset = (m_time->z) * -60;
+  offset->leap_secs = 0;
+  offset->is_dst = 0;
+  offset->abbr = (char *) malloc(9);
+  snprintf(offset->abbr, 9, "GMT%c%02d%02d",
+    !utc() ? ((offset->offset < 0) ? '-' : '+') : '+',
+    !utc() ? abs(offset->offset / 3600) : 0,
+    !utc() ? abs((offset->offset % 3600) / 60) : 0 );
+
   for (int i = 0; i < format.size(); i++) {
     switch (format.charAt(i)) {
     case 'd': s.printf("%02d", day()); break;
@@ -610,8 +624,20 @@ String DateTime::rfcFormat(const String& format) const {
                  rfc_colon ? ":" : "", abs((offset % 3600) / 60));
       }
       break;
-    case 'T': s.append(utc() ? "GMT" : m_time->tz_abbr); break;
-    case 'e': s.append(utc() ? "UTC" : m_tz->name()); break;
+    case 'T':
+      s.append(utc() ? "GMT" : (offset_zone ? offset->abbr : m_time->tz_abbr) );
+      break;
+    case 'e':
+      {
+        char buffer[10] = {0};
+        snprintf(buffer, 9, "%c%02d:%02d",
+          ((offset->offset < 0) ? '-' : '+'),
+          abs(offset->offset / 3600),
+          abs((offset->offset % 3600) / 60) );
+
+        s.append(utc() ? "UTC" : (offset_zone ? buffer : m_tz->name()));
+      }
+      break;
     case 'Z': s.append(utc() ? 0 : this->offset()); break;
     case 'c':
       if (utc()) {

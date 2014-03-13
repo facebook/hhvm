@@ -52,7 +52,7 @@ void process_ini_settings(const std::string& name);
  * cookie name for the same path and we should not overwrite more
  * specific cookies with the less specific ones.
  */
-void register_variable(Variant &variables, char *name, CVarRef value,
+void register_variable(Variant &variables, char *name, const Variant& value,
                        bool overwrite = true);
 
 String canonicalize_path(const String& path, const char* root, int rootLen);
@@ -77,7 +77,7 @@ void hphp_session_init();
 ExecutionContext* hphp_context_init();
 bool hphp_invoke_simple(const std::string &filename, bool warmupOnly = false);
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
-                 bool func, CArrRef funcParams, VRefParam funcRet,
+                 bool func, const Array& funcParams, VRefParam funcRet,
                  const std::string &reqInitFunc, const std::string &reqInitDoc,
                  bool &error, std::string &errorMsg,
                  bool once = true, bool warmupOnly = false,

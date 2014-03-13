@@ -1372,16 +1372,16 @@ int64_t countOperands(uint64_t mask) {
 }
 
 int64_t getStackPopped(PC pc) {
-  auto op = toOp(*pc);
+  auto const op = *reinterpret_cast<const Op*>(pc);
   switch (op) {
-    case OpFCall:        return getImm((Op*)pc, 0).u_IVA + kNumActRecCells;
-    case OpFCallArray:   return kNumActRecCells + 1;
+    case Op::FCall:        return getImm((Op*)pc, 0).u_IVA + kNumActRecCells;
+    case Op::FCallArray:   return kNumActRecCells + 1;
 
-    case OpFCallBuiltin:
-    case OpNewPackedArray:
-    case OpCreateCl:     return getImm((Op*)pc, 0).u_IVA;
+    case Op::FCallBuiltin:
+    case Op::NewPackedArray:
+    case Op::CreateCl:     return getImm((Op*)pc, 0).u_IVA;
 
-    case OpNewStructArray: return getImmVector((Op*)pc).size();
+    case Op::NewStructArray: return getImmVector((Op*)pc).size();
 
     default:             break;
   }
@@ -1401,7 +1401,7 @@ int64_t getStackPopped(PC pc) {
 }
 
 int64_t getStackPushed(PC pc) {
-  return countOperands(getInstrInfo(toOp(*pc)).out);
+  return countOperands(getInstrInfo(*reinterpret_cast<const Op*>(pc)).out);
 }
 
 int getStackDelta(const NormalizedInstruction& ni) {
@@ -2747,9 +2747,9 @@ void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
     SrcKey src = sk;
     const Unit* unit = ni->m_unit;
     src.advance(unit);
-    Op next = toOp(*unit->at(src.offset()));
-    if (next == OpInstanceOfD
-          || (next == OpIsTypeC &&
+    Op next = *reinterpret_cast<const Op*>(unit->at(src.offset()));
+    if (next == Op::InstanceOfD
+          || (next == Op::IsTypeC &&
               ni->imm[0].u_OA == static_cast<uint8_t>(IsTypeOp::Null))) {
       ni->outStack->rtt = RuntimeType(KindOfObject);
     }
@@ -2759,9 +2759,9 @@ void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
 
 static bool isPop(const NormalizedInstruction* instr) {
   auto opc = instr->op();
-  return (opc == OpPopC ||
-          opc == OpPopV ||
-          opc == OpPopR);
+  return (opc == Op::PopC ||
+          opc == Op::PopV ||
+          opc == Op::PopR);
 }
 
 GuardType::GuardType(DataType outer, DataType inner)
@@ -3872,8 +3872,9 @@ Translator::isSrcKeyInBL(const SrcKey& sk) {
   if (m_dbgBLSrcKey.find(sk) != m_dbgBLSrcKey.end()) {
     return true;
   }
-  for (PC pc = unit->at(sk.offset()); !opcodeBreaksBB(toOp(*pc));
-       pc += instrLen((Op*)pc)) {
+  for (PC pc = unit->at(sk.offset());
+      !opcodeBreaksBB(*reinterpret_cast<const Op*>(pc));
+      pc += instrLen((Op*)pc)) {
     if (m_dbgBLPC.checkPC(pc)) {
       m_dbgBLSrcKey.insert(sk);
       return true;
@@ -3904,7 +3905,7 @@ void populateImmediates(NormalizedInstruction& inst) {
   for (int i = 0; i < numImmediates(inst.op()); i++) {
     inst.imm[i] = getImm((Op*)inst.pc(), i);
   }
-  if (hasImmVector(toOp(*inst.pc()))) {
+  if (hasImmVector(*reinterpret_cast<const Op*>(inst.pc()))) {
     inst.immVec = getImmVector((Op*)inst.pc());
   }
   if (inst.op() == OpFCallArray) {
@@ -4223,6 +4224,7 @@ Translator::translateRegion(const RegionDesc& region,
         // conditional control flow ops, e.g., IterNext, etc.
         inst.includeBothPaths = [&] {
           if (!RuntimeOption::EvalHHIRBytecodeControlFlow) return false;
+          if (inst.breaksTracelet) return false;
           Offset takenOffset = inst.offset() + inst.imm[0].u_BA;
           Offset fallthruOffset = inst.offset() + instrLen((Op*)(inst.pc()));
           bool takenIncluded = false;

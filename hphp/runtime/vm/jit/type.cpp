@@ -629,15 +629,19 @@ Type thisReturn(const IRInstruction* inst) {
 }
 
 Type allocObjReturn(const IRInstruction* inst) {
-  if (inst->op() == AllocObjFast) {
-    return Type::Obj.specialize(inst->extra<AllocObjFast>()->cls);
+  switch (inst->op()) {
+    case ConstructInstance:
+      return Type::Obj.specialize(inst->extra<ConstructInstance>()->cls);
+    case NewInstanceRaw:
+      return Type::Obj.specialize(inst->extra<NewInstanceRaw>()->cls);
+    case CustomInstanceInit:
+    case AllocObj:
+      return inst->src(0)->isConst()
+        ? Type::Obj.specialize(inst->src(0)->clsVal())
+        : Type::Obj;
+    default:
+      always_assert(false && "Invalid opcode returning AllocObj");
   }
-  if (inst->op() == AllocObj) {
-    return inst->src(0)->isConst()
-      ? Type::Obj.specialize(inst->src(0)->clsVal())
-      : Type::Obj;
-  }
-  always_assert(0);
 }
 
 }
@@ -890,6 +894,19 @@ void assertOperandTypes(const IRInstruction* inst) {
     }
   };
 
+  auto checkCustom = [&] {
+    switch (inst->op()) {
+      case LdRaw:
+      case StRaw: {
+        auto s1 = inst->src(1); // field kind
+        check(s1->isConst() && s1->isA(Type::Int), Type::Int, nullptr);
+        break;
+      }
+      default:
+        break;
+    }
+  };
+
 #define IRT(name, ...) UNUSED static const Type name = Type::name;
   IR_TYPES
 #undef IRT
@@ -906,7 +923,7 @@ void assertOperandTypes(const IRInstruction* inst) {
                        "constant " #type);          \
                   ++curSrc;
 #define CStr     C(StaticStr)
-#define SUnk     return;
+#define SUnk     return checkCustom();
 #define SSpills  checkSpills();
 #define ND
 #define DMulti
@@ -941,7 +958,6 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef O
 
 #undef NA
-#undef SAny
 #undef S
 #undef C
 #undef CStr

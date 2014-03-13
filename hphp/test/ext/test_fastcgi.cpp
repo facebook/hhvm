@@ -90,7 +90,7 @@ bool TestMessage::bodyFromStr(const String& input) {
   return true;
 }
 
-bool TestMessage::fromJson(CVarRef json) {
+bool TestMessage::fromJson(const Variant& json) {
   if (!json.isArray()) {
     printf("Invalid format of a message\n");
     return false;
@@ -164,7 +164,7 @@ bool TestMessage::fromJson(CVarRef json) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool TestMessageExchange::fromJson(CVarRef json) {
+bool TestMessageExchange::fromJson(const Variant& json) {
   if (json.isNull()) {
     printf("Not a valid JSON\n");
     return false;

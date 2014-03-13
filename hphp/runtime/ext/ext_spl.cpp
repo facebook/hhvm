@@ -125,7 +125,7 @@ static bool s_inited = false;
 static int64_t s_hash_mask_handle = 0;
 static Mutex s_mutex;
 
-String f_spl_object_hash(CObjRef obj) {
+String f_spl_object_hash(const Object& obj) {
   if (!s_inited) {
     Lock lock(s_mutex);
     if (!s_inited) {
@@ -144,13 +144,13 @@ String f_spl_object_hash(CObjRef obj) {
   return String(buf, CopyString);
 }
 
-int64_t f_hphp_object_pointer(CObjRef obj) { return (int64_t)obj.get();}
+int64_t f_hphp_object_pointer(const Object& obj) { return (int64_t)obj.get();}
 
 Variant f_hphp_get_this() {
   return g_context->getThis();
 }
 
-Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {
+Variant f_class_implements(const Variant& obj, bool autoload /* = true */) {
   Class* cls;
   if (obj.isString()) {
     cls = Unit::getClass(obj.getStringData(), autoload);
@@ -170,7 +170,7 @@ Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {
   return ret;
 }
 
-Variant f_class_parents(CVarRef obj, bool autoload /* = true */) {
+Variant f_class_parents(const Variant& obj, bool autoload /* = true */) {
   Class* cls;
   if (obj.isString()) {
     cls = Unit::getClass(obj.getStringData(), autoload);
@@ -190,7 +190,7 @@ Variant f_class_parents(CVarRef obj, bool autoload /* = true */) {
   return ret;
 }
 
-Variant f_class_uses(CVarRef obj, bool autoload /* = true */) {
+Variant f_class_uses(const Variant& obj, bool autoload /* = true */) {
   Class* cls;
   if (obj.isString()) {
     cls = Unit::getClass(obj.getStringData(), autoload);
@@ -210,7 +210,7 @@ Variant f_class_uses(CVarRef obj, bool autoload /* = true */) {
   return ret;
 }
 
-Object get_traversable_object_iterator(CVarRef obj) {
+Object get_traversable_object_iterator(const Variant& obj) {
   if (!obj.instanceof(SystemLib::s_TraversableClass)) {
     raise_error("Argument must implement interface Traversable");
   }
@@ -227,7 +227,7 @@ Object get_traversable_object_iterator(CVarRef obj) {
       raise_error(
         "Class %s must implement interface Traversable as part of either "
         "Iterator or IteratorAggregate",
-        obj.toObject()->o_getClassName()->data()
+        obj.toObject()->o_getClassName().data()
       );
     }
   }
@@ -235,8 +235,8 @@ Object get_traversable_object_iterator(CVarRef obj) {
   return itObj;
 }
 
-Variant f_iterator_apply(CVarRef obj, CVarRef func,
-                         CArrRef params /* = null_array */) {
+Variant f_iterator_apply(const Variant& obj, const Variant& func,
+                         const Array& params /* = null_array */) {
   Object pobj = get_traversable_object_iterator(obj);
   pobj->o_invoke_few_args(s_rewind, 0);
   int64_t count = 0;
@@ -250,7 +250,7 @@ Variant f_iterator_apply(CVarRef obj, CVarRef func,
   return count;
 }
 
-Variant f_iterator_count(CVarRef obj) {
+Variant f_iterator_count(const Variant& obj) {
   Object pobj = get_traversable_object_iterator(obj);
   pobj->o_invoke_few_args(s_rewind, 0);
   int64_t count = 0;
@@ -261,7 +261,7 @@ Variant f_iterator_count(CVarRef obj) {
   return count;
 }
 
-Variant f_iterator_to_array(CVarRef obj, bool use_keys /* = true */) {
+Variant f_iterator_to_array(const Variant& obj, bool use_keys /* = true */) {
   Object pobj = get_traversable_object_iterator(obj);
   Array ret(Array::Create());
 
@@ -279,7 +279,7 @@ Variant f_iterator_to_array(CVarRef obj, bool use_keys /* = true */) {
   return ret;
 }
 
-bool f_spl_autoload_register(CVarRef autoload_function /* = null_variant */,
+bool f_spl_autoload_register(const Variant& autoload_function /* = null_variant */,
                              bool throws /* = true */,
                              bool prepend /* = false */) {
   if (same(autoload_function, s_spl_autoload_call)) {
@@ -289,7 +289,7 @@ bool f_spl_autoload_register(CVarRef autoload_function /* = null_variant */,
     }
     return false;
   }
-  CVarRef func = autoload_function.isNull() ?
+  const Variant& func = autoload_function.isNull() ?
                  s_spl_autoload : autoload_function;
   bool res = AutoloadHandler::s_instance->addHandler(func, prepend);
   if (!res && throws) {
@@ -298,7 +298,7 @@ bool f_spl_autoload_register(CVarRef autoload_function /* = null_variant */,
   return res;
 }
 
-bool f_spl_autoload_unregister(CVarRef autoload_function) {
+bool f_spl_autoload_unregister(const Variant& autoload_function) {
   if (same(autoload_function, s_spl_autoload_call)) {
     AutoloadHandler::s_instance->removeAllHandlers();
   } else {
@@ -308,7 +308,7 @@ bool f_spl_autoload_unregister(CVarRef autoload_function) {
 }
 
 Variant f_spl_autoload_functions() {
-  CArrRef handlers = AutoloadHandler::s_instance->getHandlers();
+  const Array& handlers = AutoloadHandler::s_instance->getHandlers();
   if (handlers.isNull())
     return false;
   else

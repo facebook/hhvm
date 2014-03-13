@@ -61,6 +61,12 @@ namespace {
   X(Arr)                                        \
   X(SArr)                                       \
   X(CArr)                                       \
+  X(ArrE)                                       \
+  X(ArrN)                                       \
+  X(SArrN)                                      \
+  X(SArrE)                                      \
+  X(CArrN)                                      \
+  X(CArrE)                                      \
   X(Null)                                       \
   X(Bottom)
 

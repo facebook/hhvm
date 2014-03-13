@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/indexed-string-map.h"

@@ -32,6 +32,7 @@
 #include "folly/Unicode.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/zend/html-table.h"
+#include "hphp/runtime/base/container-functions.h"
 
 namespace HPHP {
 
@@ -68,7 +69,7 @@ String stringForEach(uint32_t len, const String& str, Op action) {
     *dst = action(*src);
   }
 
-  if (!mutate) ret->setSize(len);
+  if (!mutate) ret.get()->setSize(len);
   return ret;
 }
 
@@ -78,15 +79,15 @@ String stringForEachFast(const String& str, Op action) {
     return str;
   }
 
-  if (str->getCount() == 1) {
-    return stringForEach<true>(str.size(), str, action);
+  if (str.get()->hasExactlyOneRef()) {
+    return stringForEach<true>(str.size(), str.get(), action);
   }
 
-  return stringForEach<false>(str.size(), str, action);
+  return stringForEach<false>(str.size(), str.get(), action);
 }
 
 String f_addcslashes(const String& str, const String& charlist) {
-  if (str.empty() || (!charlist.isNull() && charlist->empty())) {
+  if (str.empty() || (!charlist.isNull() && charlist.empty())) {
     return str;
   }
 
@@ -311,9 +312,9 @@ String f_str_shuffle(const String& str) {
     return str;
   }
 
-  String ret = str->getCount() == 1 ? str : String(str, CopyString);
-  char* buf  = ret->mutableData();
-  int left   = ret->size();
+  String ret = str.get()->hasExactlyOneRef() ? str : String(str, CopyString);
+  char* buf  = ret.get()->mutableData();
+  int left   = ret.size();
 
   while (--left) {
     int idx = f_rand(0, left);
@@ -329,8 +330,8 @@ String f_str_shuffle(const String& str) {
 String f_strrev(const String& str) {
   auto len = str.size();
 
-  if (str->getCount() == 1) {
-    char* sdata = str->mutableData();
+  if (str.get()->hasExactlyOneRef()) {
+    char* sdata = str.get()->mutableData();
     for (int i = 0; i < len / 2; ++i) {
       char temp = sdata[i];
       sdata[i] = sdata[len - i - 1];
@@ -342,13 +343,13 @@ String f_strrev(const String& str) {
   String ret(len, ReserveString);
 
   const char* data = str.data();
-  char* dest = ret->mutableData();
+  char* dest = ret.get()->mutableData();
 
   for (int i = 0; i < len; ++i) {
     dest[i] = data[len - i - 1];
   }
 
-  ret->setSize(len);
+  ret.setSize(len);
   return ret;
 }
 
@@ -366,14 +367,14 @@ String stringToCaseFirst(const String& str, OpTo tocase, OpIs iscase) {
     return str;
   }
 
-  if (str->getCount() == 1) {
-    char* sdata = str->mutableData();
+  if (str.get()->hasExactlyOneRef()) {
+    char* sdata = str.get()->mutableData();
     sdata[0] = tocase(sdata[0]);
     return str;
   }
 
   String ret(str, CopyString);
-  char* first = ret->mutableData();
+  char* first = ret.get()->mutableData();
 
   *first = tocase(*first);
   return ret;
@@ -417,13 +418,13 @@ String stringTrim(const String& str, const String& charlist) {
     for (; end >= start && flags[(unsigned char)str[end]]; --end) {}
   }
 
-  if (str->getCount() == 1) {
+  if (str.get()->hasExactlyOneRef()) {
     int slen = end - start + 1;
     if (start) {
-      char* sdata = str->mutableData();
+      char* sdata = str.get()->mutableData();
       for (int idx = 0; start < len;) sdata[idx++] = sdata[start++];
     }
-    str->setSize(slen);
+    str.get()->setSize(slen);
     return str;
   }
 
@@ -450,7 +451,7 @@ Variant f_explode(const String& delimiter, const String& str, int limit /* = 0x7
   return StringUtil::Explode(str, delimiter, limit);
 }
 
-String f_implode(CVarRef arg1, CVarRef arg2 /* = null_variant */) {
+String f_implode(const Variant& arg1, const Variant& arg2 /* = null_variant */) {
   Array items;
   String delim;
   if (isContainer(arg1)) {
@@ -466,7 +467,7 @@ String f_implode(CVarRef arg1, CVarRef arg2 /* = null_variant */) {
   return StringUtil::Implode(items, delim);
 }
 
-String f_join(CVarRef glue, CVarRef pieces /* = null_variant */) {
+String f_join(const Variant& glue, const Variant& pieces /* = null_variant */) {
   return f_implode(glue, pieces);
 }
 
@@ -495,7 +496,7 @@ struct TokenizerData final : RequestEventHandler {
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(TokenizerData, s_tokenizer_data);
 
-Variant f_strtok(const String& str, CVarRef token /* = null_variant */) {
+Variant f_strtok(const String& str, const Variant& token /* = null_variant */) {
   String stoken;
   if (!token.isNull()) {
     s_tokenizer_data->str = str;
@@ -543,7 +544,7 @@ Variant f_strtok(const String& str, CVarRef token /* = null_variant */) {
 }
 
 static
-Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
+Variant str_replace(const Variant& search, const Variant& replace, const String& subject,
                     int &count, bool caseSensitive) {
   count = 0;
   if (search.is(KindOfArray)) {
@@ -585,7 +586,7 @@ Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
                         caseSensitive);
 }
 
-static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
+static Variant str_replace(const Variant& search, const Variant& replace, const Variant& subject,
                            int &count, bool caseSensitive) {
   count = 0;
   if (subject.is(KindOfArray)) {
@@ -609,7 +610,7 @@ static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                      caseSensitive);
 }
 
-Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
+Variant f_str_replace(const Variant& search, const Variant& replace, const Variant& subject,
                       VRefParam count /* = null */) {
   int nCount = 0;
   Variant ret = str_replace(search, replace, subject, nCount, true);
@@ -617,7 +618,7 @@ Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
   return ret;
 }
 
-Variant f_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject,
+Variant f_str_ireplace(const Variant& search, const Variant& replace, const Variant& subject,
                        VRefParam count /* = null */) {
   int nCount = 0;
   Variant ret = str_replace(search, replace, subject, nCount, false);
@@ -625,8 +626,8 @@ Variant f_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject,
   return ret;
 }
 
-Variant f_substr_replace(CVarRef str, CVarRef replacement, CVarRef start,
-                         CVarRef length /* = 0x7FFFFFFF */) {
+Variant f_substr_replace(const Variant& str, const Variant& replacement, const Variant& start,
+                         const Variant& length /* = 0x7FFFFFFF */) {
   if (!str.is(KindOfArray)) {
     String repl;
     if (replacement.is(KindOfArray)) {
@@ -717,8 +718,8 @@ String f_str_repeat(const String& input, int multiplier) {
   if (input.size() == 1) {
     String ret(input.size() * multiplier, ReserveString);
 
-    memset(ret->mutableData(), *input->data(), multiplier);
-    ret->setSize(multiplier);
+    memset(ret.get()->mutableData(), *input.data(), multiplier);
+    ret.get()->setSize(multiplier);
     return ret;
   }
 
@@ -733,7 +734,7 @@ String f_str_repeat(const String& input, int multiplier) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_printf(int _argc, const String& format, CArrRef _argv /* = null_array */) {
+Variant f_printf(int _argc, const String& format, const Array& _argv /* = null_array */) {
   int len = 0; char *output = string_printf(format.data(), format.size(),
                                             _argv, &len);
   if (output == NULL) return false;
@@ -741,7 +742,7 @@ Variant f_printf(int _argc, const String& format, CArrRef _argv /* = null_array 
   return len;
 }
 
-Variant f_vprintf(const String& format, CArrRef args) {
+Variant f_vprintf(const String& format, const Array& args) {
   int len = 0; char *output = string_printf(format.data(), format.size(),
                                             args, &len);
   if (output == NULL) return false;
@@ -749,21 +750,21 @@ Variant f_vprintf(const String& format, CArrRef args) {
   return len;
 }
 
-Variant f_sprintf(int _argc, const String& format, CArrRef _argv /* = null_array */) {
+Variant f_sprintf(int _argc, const String& format, const Array& _argv /* = null_array */) {
   int len = 0;
   char *output = string_printf(format.data(), format.size(), _argv, &len);
   if (output == NULL) return false;
   return String(output, len, AttachString);
 }
 
-Variant f_vsprintf(const String& format, CArrRef args) {
+Variant f_vsprintf(const String& format, const Array& args) {
   int len = 0;
   char *output = string_printf(format.data(), format.size(), args, &len);
   if (output == NULL) return false;
   return String(output, len, AttachString);
 }
 
-Variant f_sscanf(int _argc, const String& str, const String& format, CArrRef _argv /* = null_array */) {
+Variant f_sscanf(int _argc, const String& str, const String& format, const Array& _argv /* = null_array */) {
   Variant ret;
   int result;
   result = string_sscanf(str.c_str(), format.c_str(), _argv.size(), ret);
@@ -797,8 +798,8 @@ Variant f_money_format(const String& format, double number) {
 }
 
 String f_number_format(double number, int decimals /* = 0 */,
-                       CVarRef dec_point /* = "." */,
-                       CVarRef thousands_sep /* = "," */) {
+                       const Variant& dec_point /* = "." */,
+                       const Variant& thousands_sep /* = "," */) {
   char ch_dec_point = '.';
   if (!dec_point.isNull()) {
     const String& s = dec_point.toString();
@@ -894,7 +895,7 @@ Variant f_substr_compare(const String& main_str, const String& str, int offset,
   return string_ncmp(s1 + offset, str.data(), cmp_len);
 }
 
-Variant f_strstr(const String& haystack, CVarRef needle,
+Variant f_strstr(const String& haystack, const Variant& needle,
                  bool before_needle /* = false */) {
   Variant ret = f_strpos(haystack, needle);
   if (same(ret, false)) {
@@ -907,7 +908,7 @@ Variant f_strstr(const String& haystack, CVarRef needle,
   }
 }
 
-Variant f_stristr(const String& haystack, CVarRef needle) {
+Variant f_stristr(const String& haystack, const Variant& needle) {
   Variant ret = f_stripos(haystack, needle);
   if (same(ret, false)) {
     return false;
@@ -927,11 +928,11 @@ Variant f_strpbrk(const String& haystack, const String& char_list) {
   return false;
 }
 
-Variant f_strchr(const String& haystack, CVarRef needle) {
+Variant f_strchr(const String& haystack, const Variant& needle) {
   return f_strstr(haystack, needle);
 }
 
-Variant f_strpos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
+Variant f_strpos(const String& haystack, const Variant& needle, int offset /* = 0 */) {
   if (offset < 0 || offset > haystack.size()) {
     raise_warning("Offset not contained in string");
     return false;
@@ -951,7 +952,7 @@ Variant f_strpos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
   return false;
 }
 
-Variant f_stripos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
+Variant f_stripos(const String& haystack, const Variant& needle, int offset /* = 0 */) {
   if (offset < 0 || offset > haystack.size()) {
     raise_warning("Offset not contained in string");
     return false;
@@ -968,7 +969,7 @@ Variant f_stripos(const String& haystack, CVarRef needle, int offset /* = 0 */) 
 
 static bool is_valid_strrpos_args(
     const String& haystack,
-    CVarRef needle,
+    const Variant& needle,
     int offset) {
   if (haystack.size() == 0) {
     return false;
@@ -983,7 +984,7 @@ static bool is_valid_strrpos_args(
   return true;
 }
 
-Variant f_strrchr(const String& haystack, CVarRef needle) {
+Variant f_strrchr(const String& haystack, const Variant& needle) {
   if (haystack.size() == 0) {
     return false;
   }
@@ -998,7 +999,7 @@ Variant f_strrchr(const String& haystack, CVarRef needle) {
   return haystack.substr(pos);
 }
 
-Variant f_strrpos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
+Variant f_strrpos(const String& haystack, const Variant& needle, int offset /* = 0 */) {
   if (!is_valid_strrpos_args(haystack, needle, offset)) {
     return false;
   }
@@ -1012,7 +1013,7 @@ Variant f_strrpos(const String& haystack, CVarRef needle, int offset /* = 0 */) 
   return false;
 }
 
-Variant f_strripos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
+Variant f_strripos(const String& haystack, const Variant& needle, int offset /* = 0 */) {
   if (!is_valid_strrpos_args(haystack, needle, offset)) {
     return false;
   }
@@ -1093,7 +1094,7 @@ Variant f_strcspn(const String& str1, const String& str2, int start /* = 0 */,
   return length;
 }
 
-Variant f_strlen(CVarRef vstr) {
+Variant f_strlen(const Variant& vstr) {
   auto const cell = vstr.asCell();
   switch (cell->m_type) {
   case KindOfString:
@@ -1337,7 +1338,7 @@ String f_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
 
 String f_fb_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
                              const String& charset /* = "ISO-8859-1" */,
-                             CArrRef extra /* = Array() */) {
+                             const Array& extra /* = Array() */) {
   return StringUtil::HtmlEncodeExtra(str, StringUtil::toQuoteStyle(flags),
                                      charset.data(), false, extra);
 }
@@ -1383,7 +1384,7 @@ String f_sha1(const String& str, bool raw_output /* = false */) {
   return StringUtil::SHA1(str, raw_output);
 }
 
-Variant f_strtr(const String& str, CVarRef from, CVarRef to /* = null_variant */) {
+Variant f_strtr(const String& str, const Variant& from, const Variant& to /* = null_variant */) {
   if (str.empty()) {
     return str;
   }
@@ -1449,7 +1450,7 @@ void f_parse_str(const String& str, VRefParam arr /* = null */) {
 
   HttpProtocol::DecodeParameters(result, str.data(), str.size());
 
-  if(!arr.isReferenced()) {
+  if (!arr.isReferenced()) {
     f_extract(result.toArray());
     return;
   }
@@ -1457,7 +1458,7 @@ void f_parse_str(const String& str, VRefParam arr /* = null */) {
   arr = result.toArray();
 }
 
-Variant f_setlocale(int _argc, int category, CVarRef locale, CArrRef _argv /* = null_array */) {
+Variant f_setlocale(int _argc, int category, const Variant& locale, const Array& _argv /* = null_array */) {
   Array argv = _argv;
   if (locale.is(KindOfArray)) {
     if (!argv.empty()) throw_invalid_argument("locale: not string)");

@@ -43,8 +43,8 @@ class c_GenVectorWaitHandle : public c_BlockableWaitHandle {
   ~c_GenVectorWaitHandle() {}
 
   void t___construct();
-  static void ti_setoncreatecallback(CVarRef callback);
-  static Object ti_create(CVarRef dependencies);
+  static void ti_setoncreatecallback(const Variant& callback);
+  static Object ti_create(const Variant& dependencies);
 
  public:
   String getName();
@@ -55,7 +55,7 @@ class c_GenVectorWaitHandle : public c_BlockableWaitHandle {
   void enterContextImpl(context_idx_t ctx_idx);
 
  private:
-  void initialize(CObjRef exception, c_Vector* deps,
+  void initialize(const Object& exception, c_Vector* deps,
                   int64_t iter_pos, c_WaitableWaitHandle* child);
 
   Object m_exception;

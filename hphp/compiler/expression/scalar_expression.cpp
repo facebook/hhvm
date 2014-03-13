@@ -59,7 +59,7 @@ ScalarExpression::ScalarExpression
 
 ScalarExpression::ScalarExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- CVarRef value, bool quoted /* = true */)
+ const Variant& value, bool quoted /* = true */)
     : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ScalarExpression)),
       m_quoted(quoted) {
   if (!value.isNull()) {
@@ -84,7 +84,7 @@ ScalarExpression::ScalarExpression
     assert(false);
   }
   const String& s = value.toString();
-  m_value = string(s->data(), s->size());
+  m_value = s.toCppString();
   if (m_type == T_DNUMBER && m_value.find_first_of(".eE", 0) == string::npos) {
     m_value += ".";
   }

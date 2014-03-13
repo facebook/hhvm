@@ -331,7 +331,7 @@ public:
   }
   const std::string &getResponseInfo() const { return m_responseCodeInfo; }
   bool headersSent() { return m_headerSent;}
-  bool setHeaderCallback(CVarRef callback);
+  bool setHeaderCallback(const Variant& callback);
 private:
   void sendRawLocked(void *data, int size, int code = 200,
                      bool compressed = false, bool chunked = false,

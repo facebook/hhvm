@@ -122,25 +122,25 @@ class c_PDO : public ExtObjectData {
   public: void t___construct(const String& dsn,
                              const String& username = null_string,
                              const String& password = null_string,
-                             CArrRef options = null_array);
+                             const Array& options = null_array);
   public: Variant t_prepare(const String& statement,
-                            CArrRef options = null_array);
+                            const Array& options = null_array);
   public: bool t_begintransaction();
   public: bool t_commit();
   public: bool t_rollback();
-  public: bool t_setattribute(int64_t attribute, CVarRef value);
+  public: bool t_setattribute(int64_t attribute, const Variant& value);
   public: Variant t_getattribute(int64_t attribute);
   public: Variant t_exec(const String& query);
   public: Variant t_lastinsertid(const String& seqname = null_string);
   public: Variant t_errorcode();
   public: Array t_errorinfo();
-  public: Variant t_query(int _argc, const String& sql, CArrRef _argv);
+  public: Variant t_query(int _argc, const String& sql, const Array& _argv);
   public: Variant t_quote(const String& str,
                           int64_t paramtype = q_PDO$$PARAM_STR);
-  public: bool t_sqlitecreatefunction(const String& name, CVarRef callback,
+  public: bool t_sqlitecreatefunction(const String& name, const Variant& callback,
                                       int64_t argcount = -1);
-  public: bool t_sqlitecreateaggregate(const String& name, CVarRef step,
-                                       CVarRef final, int64_t argcount = -1);
+  public: bool t_sqlitecreateaggregate(const String& name, const Variant& step,
+                                       const Variant& final, int64_t argcount = -1);
   public: Variant t___wakeup();
   public: Variant t___sleep();
   public: static Array ti_getavailabledrivers();
@@ -159,35 +159,35 @@ class c_PDOStatement : public ExtObjectData {
   // need to implement
   public: c_PDOStatement(Class* cls = c_PDOStatement::classof());
   public: ~c_PDOStatement();
-  public: Variant t_execute(CArrRef params = null_array);
+  public: Variant t_execute(const Array& params = null_array);
   public: Variant t_fetch(int64_t how = 0,
                           int64_t orientation = q_PDO$$FETCH_ORI_NEXT,
                           int64_t offset = 0);
   public: Variant t_fetchobject(const String& class_name = null_string,
-                                CVarRef ctor_args = uninit_null());
+                                const Variant& ctor_args = uninit_null());
   public: Variant t_fetchcolumn(int64_t column_numner = 0);
   public: Variant t_fetchall(int64_t how = 0,
-                             CVarRef class_name = uninit_null(),
-                             CVarRef ctor_args = uninit_null());
-  public: bool t_bindvalue(CVarRef paramno, CVarRef param,
+                             const Variant& class_name = uninit_null(),
+                             const Variant& ctor_args = uninit_null());
+  public: bool t_bindvalue(const Variant& paramno, const Variant& param,
                            int64_t type = q_PDO$$PARAM_STR);
-  public: bool t_bindparam(CVarRef paramno, VRefParam param,
+  public: bool t_bindparam(const Variant& paramno, VRefParam param,
                            int64_t type = q_PDO$$PARAM_STR,
                            int64_t max_value_len = 0,
-                           CVarRef driver_params = uninit_null());
-  public: bool t_bindcolumn(CVarRef paramno, VRefParam param,
+                           const Variant& driver_params = uninit_null());
+  public: bool t_bindcolumn(const Variant& paramno, VRefParam param,
                             int64_t type = q_PDO$$PARAM_STR,
                             int64_t max_value_len = 0,
-                            CVarRef driver_params = uninit_null());
+                            const Variant& driver_params = uninit_null());
   public: int64_t t_rowcount();
   public: Variant t_errorcode();
   public: Array t_errorinfo();
-  public: Variant t_setattribute(int64_t attribute, CVarRef value);
+  public: Variant t_setattribute(int64_t attribute, const Variant& value);
   public: Variant t_getattribute(int64_t attribute);
   public: int64_t t_columncount();
   public: Variant t_getcolumnmeta(int64_t column);
   public: bool t_setfetchmode(int _argc, int64_t mode,
-                              CArrRef _argv = null_array);
+                              const Array& _argv = null_array);
   public: bool t_nextrowset();
   public: bool t_closecursor();
   public: Variant t_debugdumpparams();

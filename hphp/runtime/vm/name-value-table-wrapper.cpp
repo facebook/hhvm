@@ -62,7 +62,7 @@ void NameValueTableWrapper::NvGetKey(const ArrayData* ad, TypedValue* out,
   }
 }
 
-CVarRef NameValueTableWrapper::GetValueRef(const ArrayData* ad, ssize_t pos) {
+const Variant& NameValueTableWrapper::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asNVTW(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);
   return iter.valid() ? tvAsCVarRef(iter.curVal()) : null_variant;
@@ -114,24 +114,24 @@ NameValueTableWrapper::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
 }
 
 ArrayData* NameValueTableWrapper::SetInt(ArrayData* ad, int64_t k,
-                                         CVarRef v, bool copy) {
+                                         const Variant& v, bool copy) {
   return SetStr(ad, String(k).get(), v, copy);
 }
 
 ArrayData* NameValueTableWrapper::SetStr(ArrayData* ad, StringData* k,
-                                         CVarRef v, bool copy) {
+                                         const Variant& v, bool copy) {
   auto a = asNVTW(ad);
   tvAsVariant(a->m_tab->lookupAdd(k)).assignVal(v);
   return a;
 }
 
 ArrayData* NameValueTableWrapper::SetRefInt(ArrayData* ad, int64_t k,
-                                            CVarRef v, bool copy) {
+                                            const Variant& v, bool copy) {
   return asNVTW(ad)->setRef(String(k).get(), v, copy);
 }
 
 ArrayData* NameValueTableWrapper::SetRefStr(ArrayData* ad, StringData* k,
-                                            CVarRef v, bool copy) {
+                                            const Variant& v, bool copy) {
   auto a = asNVTW(ad);
   tvAsVariant(a->m_tab->lookupAdd(k)).assignRef(v);
   return a;
@@ -157,17 +157,17 @@ NameValueTableWrapper::RemoveStr(ArrayData* ad, const StringData* k,
  */
 
 ArrayData*
-NameValueTableWrapper::Append(ArrayData*, CVarRef v, bool copy) {
+NameValueTableWrapper::Append(ArrayData*, const Variant& v, bool copy) {
   throw NotImplementedException("append on $GLOBALS");
 }
 
 ArrayData*
-NameValueTableWrapper::AppendRef(ArrayData*, CVarRef v, bool copy) {
+NameValueTableWrapper::AppendRef(ArrayData*, const Variant& v, bool copy) {
   throw NotImplementedException("appendRef on $GLOBALS");
 }
 
 ArrayData*
-NameValueTableWrapper::AppendWithRef(ArrayData*, CVarRef v, bool copy) {
+NameValueTableWrapper::AppendWithRef(ArrayData*, const Variant& v, bool copy) {
   throw NotImplementedException("appendWithRef on $GLOBALS");
 }
 
@@ -182,7 +182,7 @@ NameValueTableWrapper::Merge(ArrayData*, const ArrayData* elems) {
 }
 
 ArrayData*
-NameValueTableWrapper::Prepend(ArrayData*, CVarRef v, bool copy) {
+NameValueTableWrapper::Prepend(ArrayData*, const Variant& v, bool copy) {
   throw NotImplementedException("prepend on $GLOBALS");
 }
 
@@ -251,13 +251,13 @@ ArrayData* NameValueTableWrapper::EscalateForSort(ArrayData* ad) {
 void NameValueTableWrapper::Ksort(ArrayData*, int sort_flags, bool ascending) {}
 void NameValueTableWrapper::Sort(ArrayData*, int sort_flags, bool ascending) {}
 void NameValueTableWrapper::Asort(ArrayData*, int sort_flags, bool ascending) {}
-bool NameValueTableWrapper::Uksort(ArrayData*, CVarRef cmp_function) {
+bool NameValueTableWrapper::Uksort(ArrayData*, const Variant& cmp_function) {
   return true;
 }
-bool NameValueTableWrapper::Usort(ArrayData*, CVarRef cmp_function) {
+bool NameValueTableWrapper::Usort(ArrayData*, const Variant& cmp_function) {
   return true;
 }
-bool NameValueTableWrapper::Uasort(ArrayData*, CVarRef cmp_function) {
+bool NameValueTableWrapper::Uasort(ArrayData*, const Variant& cmp_function) {
   return true;
 }
 

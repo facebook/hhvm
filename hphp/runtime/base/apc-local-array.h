@@ -59,7 +59,7 @@ public:
 
   // these using directives ensure the full set of overloaded functions
   // are visible in this class, to avoid triggering implicit conversions
-  // from a CVarRef key to int64.
+  // from a const Variant& key to int64.
   using ArrayData::exists;
   using ArrayData::lval;
   using ArrayData::lvalNew;
@@ -72,8 +72,8 @@ public:
     return m_arr->getKey(pos);
   }
 
-  CVarRef getValueRef(ssize_t pos) const;
-  static CVarRef GetValueRef(const ArrayData* ad, ssize_t pos) {
+  const Variant& getValueRef(ssize_t pos) const;
+  static const Variant& GetValueRef(const ArrayData* ad, ssize_t pos) {
     return asSharedArray(ad)->getValueRef(pos);
   }
 
@@ -86,10 +86,10 @@ public:
                             bool copy);
   static ArrayData* LvalNew(ArrayData*, Variant *&ret, bool copy);
 
-  static ArrayData* SetInt(ArrayData*, int64_t k, CVarRef v, bool copy);
-  static ArrayData* SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
-  static ArrayData* SetRefInt(ArrayData*, int64_t k, CVarRef v, bool copy);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k, CVarRef v, bool copy);
+  static ArrayData* SetInt(ArrayData*, int64_t k, const Variant& v, bool copy);
+  static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v, bool copy);
+  static ArrayData* SetRefInt(ArrayData*, int64_t k, const Variant& v, bool copy);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k, const Variant& v, bool copy);
 
   static ArrayData *RemoveInt(ArrayData* ad, int64_t k, bool copy);
   static ArrayData *RemoveStr(ArrayData* ad, const StringData* k, bool copy);
@@ -98,12 +98,12 @@ public:
   /**
    * Copy (escalate) the SharedArray without triggering local cache.
    */
-  static ArrayData* Append(ArrayData* a, CVarRef v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, CVarRef v, bool copy);
-  static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
+  static ArrayData* Append(ArrayData* a, const Variant& v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData *elems);
   static ArrayData* Merge(ArrayData*, const ArrayData *elems);
-  static ArrayData* Prepend(ArrayData*, CVarRef v, bool copy);
+  static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
 
   /**
    * Non-Variant methods that override ArrayData

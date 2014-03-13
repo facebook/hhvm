@@ -44,17 +44,17 @@ Variant f_xmlwriter_open_uri(const String& uri) {
   return false;
 }
 
-bool f_xmlwriter_set_indent_string(CObjRef xmlwriter, const String& indentstring) {
+bool f_xmlwriter_set_indent_string(const Object& xmlwriter, const String& indentstring) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_setindentstring(indentstring);
 }
 
-bool f_xmlwriter_set_indent(CObjRef xmlwriter, bool indent) {
+bool f_xmlwriter_set_indent(const Object& xmlwriter, bool indent) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_setindent(indent);
 }
 
-bool f_xmlwriter_start_document(CObjRef xmlwriter,
+bool f_xmlwriter_start_document(const Object& xmlwriter,
                                 const String& version /* = "1.0" */,
                                 const String& encoding /* = null_string */,
                                 const String& standalone /* = null_string */) {
@@ -62,137 +62,139 @@ bool f_xmlwriter_start_document(CObjRef xmlwriter,
     t_startdocument(version, encoding, standalone);
 }
 
-bool f_xmlwriter_start_element(CObjRef xmlwriter, const String& name) {
+bool f_xmlwriter_start_element(const Object& xmlwriter, const String& name) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_startelement(name);
 }
 
-bool f_xmlwriter_start_element_ns(CObjRef xmlwriter, const CVarRef prefix,
-                                  const String& name, const String& uri) {
+bool f_xmlwriter_start_element_ns(const Object& xmlwriter,
+                                  const Variant& prefix,
+                                  const String& name,
+                                  const String& uri) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_startelementns(prefix, name, uri);
 }
 
-bool f_xmlwriter_write_element_ns(CObjRef xmlwriter, const String& prefix,
+bool f_xmlwriter_write_element_ns(const Object& xmlwriter, const String& prefix,
                                   const String& name, const String& uri,
                                   const String& content /* = null_string */) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_writeelementns(prefix, name, uri, content);
 }
 
-bool f_xmlwriter_write_element(CObjRef xmlwriter, const String& name,
+bool f_xmlwriter_write_element(const Object& xmlwriter, const String& name,
                                const String& content /* = null_string */) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_writeelement(name, content);
 }
 
-bool f_xmlwriter_end_element(CObjRef xmlwriter) {
+bool f_xmlwriter_end_element(const Object& xmlwriter) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_endelement();
 }
 
-bool f_xmlwriter_full_end_element(CObjRef xmlwriter) {
+bool f_xmlwriter_full_end_element(const Object& xmlwriter) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_fullendelement();
 }
 
-bool f_xmlwriter_start_attribute_ns(CObjRef xmlwriter, const String& prefix,
+bool f_xmlwriter_start_attribute_ns(const Object& xmlwriter, const String& prefix,
                                     const String& name, const String& uri) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_startattributens(prefix, name, uri);
 }
 
-bool f_xmlwriter_start_attribute(CObjRef xmlwriter, const String& name) {
+bool f_xmlwriter_start_attribute(const Object& xmlwriter, const String& name) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_startattribute(name);
 }
 
-bool f_xmlwriter_write_attribute_ns(CObjRef xmlwriter, const String& prefix,
+bool f_xmlwriter_write_attribute_ns(const Object& xmlwriter, const String& prefix,
                                     const String& name, const String& uri,
                                     const String& content) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_writeattributens(prefix, name, uri, content);
 }
 
-bool f_xmlwriter_write_attribute(CObjRef xmlwriter, const String& name,
+bool f_xmlwriter_write_attribute(const Object& xmlwriter, const String& name,
                                  const String& value) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_writeattribute(name, value);
 }
 
-bool f_xmlwriter_end_attribute(CObjRef xmlwriter) {
+bool f_xmlwriter_end_attribute(const Object& xmlwriter) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_endattribute();
 }
 
-bool f_xmlwriter_start_cdata(CObjRef xmlwriter) {
+bool f_xmlwriter_start_cdata(const Object& xmlwriter) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_startcdata();
 }
 
-bool f_xmlwriter_write_cdata(CObjRef xmlwriter, const String& content) {
+bool f_xmlwriter_write_cdata(const Object& xmlwriter, const String& content) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_writecdata(content);
 }
 
-bool f_xmlwriter_end_cdata(CObjRef xmlwriter) {
+bool f_xmlwriter_end_cdata(const Object& xmlwriter) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_endcdata();
 }
 
-bool f_xmlwriter_start_comment(CObjRef xmlwriter) {
+bool f_xmlwriter_start_comment(const Object& xmlwriter) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_startcomment();
 }
 
-bool f_xmlwriter_write_comment(CObjRef xmlwriter, const String& content) {
+bool f_xmlwriter_write_comment(const Object& xmlwriter, const String& content) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_writecomment(content);
 }
 
-bool f_xmlwriter_end_comment(CObjRef xmlwriter) {
+bool f_xmlwriter_end_comment(const Object& xmlwriter) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_endcomment();
 }
 
-bool f_xmlwriter_end_document(CObjRef xmlwriter) {
+bool f_xmlwriter_end_document(const Object& xmlwriter) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_enddocument();
 }
 
-bool f_xmlwriter_start_pi(CObjRef xmlwriter, const String& target) {
+bool f_xmlwriter_start_pi(const Object& xmlwriter, const String& target) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_startpi(target);
 }
 
-bool f_xmlwriter_write_pi(CObjRef xmlwriter, const String& target, const String& content) {
+bool f_xmlwriter_write_pi(const Object& xmlwriter, const String& target, const String& content) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_writepi(target, content);
 }
 
-bool f_xmlwriter_end_pi(CObjRef xmlwriter) {
+bool f_xmlwriter_end_pi(const Object& xmlwriter) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_endpi();
 }
 
-bool f_xmlwriter_text(CObjRef xmlwriter, const String& content) {
+bool f_xmlwriter_text(const Object& xmlwriter, const String& content) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_text(content);
 }
 
-bool f_xmlwriter_write_raw(CObjRef xmlwriter, const String& content) {
+bool f_xmlwriter_write_raw(const Object& xmlwriter, const String& content) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_writeraw(content);
 }
 
-bool f_xmlwriter_start_dtd(CObjRef xmlwriter, const String& qualifiedname,
+bool f_xmlwriter_start_dtd(const Object& xmlwriter, const String& qualifiedname,
                            const String& publicid /* = null_string */,
                            const String& systemid /* = null_string */) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_startdtd(qualifiedname, publicid, systemid);
 }
 
-bool f_xmlwriter_write_dtd(CObjRef xmlwriter, const String& name,
+bool f_xmlwriter_write_dtd(const Object& xmlwriter, const String& name,
                            const String& publicid /* = null_string */,
                            const String& systemid /* = null_string */,
                            const String& subset /* = null_string */) {
@@ -200,45 +202,45 @@ bool f_xmlwriter_write_dtd(CObjRef xmlwriter, const String& name,
     t_writedtd(name, publicid, systemid, subset);
 }
 
-bool f_xmlwriter_start_dtd_element(CObjRef xmlwriter, const String& qualifiedname) {
+bool f_xmlwriter_start_dtd_element(const Object& xmlwriter, const String& qualifiedname) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_startdtdelement(qualifiedname);
 }
 
-bool f_xmlwriter_write_dtd_element(CObjRef xmlwriter, const String& name,
+bool f_xmlwriter_write_dtd_element(const Object& xmlwriter, const String& name,
                                    const String& content) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_writedtdelement(name, content);
 }
 
-bool f_xmlwriter_end_dtd_element(CObjRef xmlwriter) {
+bool f_xmlwriter_end_dtd_element(const Object& xmlwriter) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_enddtdelement();
 }
 
-bool f_xmlwriter_start_dtd_attlist(CObjRef xmlwriter, const String& name) {
+bool f_xmlwriter_start_dtd_attlist(const Object& xmlwriter, const String& name) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_startdtdattlist(name);
 }
 
-bool f_xmlwriter_write_dtd_attlist(CObjRef xmlwriter, const String& name,
+bool f_xmlwriter_write_dtd_attlist(const Object& xmlwriter, const String& name,
                                    const String& content) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_writedtdattlist(name, content);
 }
 
-bool f_xmlwriter_end_dtd_attlist(CObjRef xmlwriter) {
+bool f_xmlwriter_end_dtd_attlist(const Object& xmlwriter) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_enddtdattlist();
 }
 
-bool f_xmlwriter_start_dtd_entity(CObjRef xmlwriter, const String& name,
+bool f_xmlwriter_start_dtd_entity(const Object& xmlwriter, const String& name,
                                   bool isparam) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_startdtdentity(name, isparam);
 }
 
-bool f_xmlwriter_write_dtd_entity(CObjRef xmlwriter, const String& name,
+bool f_xmlwriter_write_dtd_entity(const Object& xmlwriter, const String& name,
                                   const String& content, bool pe /* = false */,
                                   const String& publicid /* = null_string */,
                                   const String& systemid /* = null_string */,
@@ -247,22 +249,22 @@ bool f_xmlwriter_write_dtd_entity(CObjRef xmlwriter, const String& name,
     t_writedtdentity(name, content);
 }
 
-bool f_xmlwriter_end_dtd_entity(CObjRef xmlwriter) {
+bool f_xmlwriter_end_dtd_entity(const Object& xmlwriter) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_enddtdentity();
 }
 
-bool f_xmlwriter_end_dtd(CObjRef xmlwriter) {
+bool f_xmlwriter_end_dtd(const Object& xmlwriter) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_enddtd();
 }
 
-Variant f_xmlwriter_flush(CObjRef xmlwriter, bool empty /* = true */) {
+Variant f_xmlwriter_flush(const Object& xmlwriter, bool empty /* = true */) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_flush(empty);
 }
 
-String f_xmlwriter_output_memory(CObjRef xmlwriter, bool flush /* = true */) {
+String f_xmlwriter_output_memory(const Object& xmlwriter, bool flush /* = true */) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_outputmemory(flush);
 }
@@ -378,7 +380,7 @@ bool c_XMLWriter::t_startelement(const String& name) {
   return ret != -1;
 }
 
-bool c_XMLWriter::t_startelementns(const CVarRef prefix, const String& name,
+bool c_XMLWriter::t_startelementns(const Variant& prefix, const String& name,
                                    const String& uri) {
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid element name: %s", name.data());
@@ -387,7 +389,7 @@ bool c_XMLWriter::t_startelementns(const CVarRef prefix, const String& name,
   int ret = -1;
   if (m_ptr) {
     // To be consistent with Zend PHP, we need to make a distinction between
-    // null strings and empty strings for the prefix. We use CVarRef above
+    // null strings and empty strings for the prefix. We use const Variant& above
     // because null strings are coerced to empty strings automatically.
     xmlChar * prefixData = prefix.isNull()
       ? nullptr : (xmlChar *)prefix.toString().data();

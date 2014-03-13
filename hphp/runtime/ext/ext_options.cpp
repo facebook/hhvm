@@ -67,7 +67,7 @@ struct OptionData final : RequestEventHandler {
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(OptionData, s_option_data);
 
-Variant f_assert_options(int what, CVarRef value /* = null_variant */) {
+Variant f_assert_options(int what, const Variant& value /* = null_variant */) {
   if (what == k_ASSERT_ACTIVE) {
     int oldValue = s_option_data->assertActive;
     if (!value.isNull()) s_option_data->assertActive = value.toInt64();
@@ -132,7 +132,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
   return tvAsVariant(&retVal);
 }
 
-Variant f_assert(CVarRef assertion) {
+Variant f_assert(const Variant& assertion) {
   if (!s_option_data->assertActive) return true;
 
   JIT::CallerFrame cf;
@@ -141,7 +141,7 @@ Variant f_assert(CVarRef assertion) {
 
   auto const passed = [&]() -> bool {
     if (assertion.isString()) {
-      if (RuntimeOption::RepoAuthoritative) {
+      if (RuntimeOption::EvalAuthoritativeMode) {
         // We could support this with compile-time string literals,
         // but it's not yet implemented.
         throw NotSupportedException(__func__,
@@ -502,7 +502,7 @@ static int parse_opts(const char * opts, int opts_len, opt_struct **result) {
   return count;
 }
 
-Array f_getopt(const String& options, CVarRef longopts /* = null_variant */) {
+Array f_getopt(const String& options, const Variant& longopts /* = null_variant */) {
   opt_struct *opts, *orig_opts;
   int len = parse_opts(options.data(), options.size(), &opts);
 

@@ -45,7 +45,7 @@ ArrayIter::ArrayIter(const ArrayData* data) {
   arrInit(data);
 }
 
-ArrayIter::ArrayIter(CArrRef array) {
+ArrayIter::ArrayIter(const Array& array) {
   arrInit(array.get());
 }
 
@@ -59,7 +59,7 @@ ArrayIter::ArrayIter(ObjectData* obj, NoInc)
   objInit<false>(obj);
 }
 
-ArrayIter::ArrayIter(CObjRef obj)
+ArrayIter::ArrayIter(const Object& obj)
   : m_pos(ArrayData::invalid_index) {
   objInit<true>(obj.get());
 }
@@ -68,7 +68,7 @@ ArrayIter::ArrayIter(const Cell& c) {
   cellInit(c);
 }
 
-ArrayIter::ArrayIter(CVarRef v) {
+ArrayIter::ArrayIter(const Variant& v) {
   cellInit(*v.asCell());
 }
 
@@ -413,7 +413,7 @@ Variant ArrayIter::second() {
   return obj->o_invoke_few_args(s_current, 0);
 }
 
-CVarRef ArrayIter::secondRef() {
+const Variant& ArrayIter::secondRef() {
   if (!hasArrayData()) {
     throw FatalErrorException("taking reference on iterator objects");
   }
@@ -424,7 +424,7 @@ CVarRef ArrayIter::secondRef() {
   return ad->getValueRef(m_pos);
 }
 
-CVarRef ArrayIter::secondRefPlus() {
+const Variant& ArrayIter::secondRefPlus() {
   if (LIKELY(hasArrayData())) {
     assert(m_pos != ArrayData::invalid_index);
     const ArrayData* ad = getArrayData();
@@ -1047,7 +1047,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     }
     // We did not transfer ownership of the array to an iterator, so we need
     // to decRef the array.
-    if (UNLIKELY(arr->getCount() == 1)) {
+    if (UNLIKELY(arr->hasExactlyOneRef())) {
       goto cold;
     }
     arr->decRefCount();
@@ -1088,7 +1088,7 @@ int64_t new_iter_array_key(Iter* dest, ArrayData* ad,
     }
     // We did not transfer ownership of the array to an iterator, so we need
     // to decRef the array.
-    if (UNLIKELY(arr->getCount() == 1)) {
+    if (UNLIKELY(arr->hasExactlyOneRef())) {
       goto cold;
     }
     arr->decRefCount();
@@ -1305,7 +1305,7 @@ int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 
 static NEVER_INLINE
 int64_t iter_next_free_arr(Iter* iter, HphpArray* arr) {
-  assert(arr->getCount() == 1);
+  assert(arr->hasExactlyOneRef());
   if (arr->isPacked()) {
     HphpArray::ReleasePacked(arr);
   } else {
@@ -1320,7 +1320,7 @@ int64_t iter_next_free_arr(Iter* iter, HphpArray* arr) {
 
 NEVER_INLINE
 static int64_t iter_next_free_apc_array(Iter* iter, APCLocalArray* arr) {
-  assert(arr->getCount() == 1);
+  assert(arr->hasExactlyOneRef());
   APCLocalArray::Release(arr);
   if (debug) {
     iter->arr().setIterType(ArrayIter::TypeUndefined);
@@ -1339,7 +1339,7 @@ static int64_t iter_next_apc_array(Iter* iter,
   auto const arr = static_cast<APCLocalArray*>(ad);
   ssize_t const pos = arr->iterAdvanceImpl(arrIter->getPos());
   if (UNLIKELY(pos == ArrayData::invalid_index)) {
-    if (UNLIKELY(arr->getCount() == 1)) {
+    if (UNLIKELY(arr->hasExactlyOneRef())) {
       return iter_next_free_apc_array(iter, arr);
     }
     arr->decRefCount();
@@ -1387,7 +1387,7 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
     ssize_t pos = arrIter->getPos();
     do {
       if (size_t(++pos) >= size_t(arr->iterLimit())) {
-        if (UNLIKELY(arr->getCount() == 1)) {
+        if (UNLIKELY(arr->hasExactlyOneRef())) {
           return iter_next_free_arr(iter, arr);
         }
         arr->decRefCount();
@@ -1439,7 +1439,7 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     do {
       ++pos;
       if (size_t(pos) >= size_t(arr->iterLimit())) {
-        if (UNLIKELY(arr->getCount() == 1)) {
+        if (UNLIKELY(arr->hasExactlyOneRef())) {
           return iter_next_free_arr(iter, arr);
         }
         arr->decRefCount();
@@ -1559,7 +1559,7 @@ int64_t miter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   return 1LL;
 }
 
-ArrayIter getContainerIter(CVarRef v) {
+ArrayIter getContainerIter(const Variant& v) {
   auto c = v.asCell();
   if (c->m_type == KindOfArray) {
     ArrayData* a = c->m_data.parr;
@@ -1572,7 +1572,7 @@ ArrayIter getContainerIter(CVarRef v) {
   throw_param_is_not_container();
 }
 
-ArrayIter getContainerIter(CVarRef v, size_t& sz) {
+ArrayIter getContainerIter(const Variant& v, size_t& sz) {
   auto c = v.asCell();
   if (c->m_type == KindOfArray) {
     auto a = c->m_data.parr;
@@ -1582,7 +1582,7 @@ ArrayIter getContainerIter(CVarRef v, size_t& sz) {
   if (c->m_type == KindOfObject) {
     auto o = c->m_data.pobj;
     if (o->isCollection()) {
-      sz = o->getCollectionSize();
+      sz = getCollectionSize(o);
       return ArrayIter(o);
     }
   }
@@ -1605,7 +1605,7 @@ int64_t iterNextArrayGeneric(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
 
   do {
     if (size_t(++pos) >= size_t(arr->iterLimit())) {
-      if (UNLIKELY(arr->getCount() == 1)) {
+      if (UNLIKELY(arr->hasExactlyOneRef())) {
         return iter_next_free_arr(it, arr);
       }
       arr->decRefCount();

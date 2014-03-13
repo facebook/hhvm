@@ -25,10 +25,29 @@ using CUCString = const unsigned char*;
 
 //////////////////////////////////////////////////////////////////////////////
 // class ImagickDraw
-static bool HHVM_METHOD(ImagickDraw, affine, CArrRef affine) {
+ALWAYS_INLINE
+static void getAffineMatrixElement(
+    const Array& array, const String& key, double& ret) {
+  const Variant& value = array.rvalAtRef(key);
+  if (value.isNull()) {
+    IMAGICKDRAW_THROW(
+      "AffineMatrix must contain keys: sx, rx, ry, sy, tx and ty");
+  } else {
+    ret = value.toDouble();
+  }
+}
+
+static bool HHVM_METHOD(ImagickDraw, affine, const Array& affine) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  AffineMatrix affineMatrix;
+  getAffineMatrixElement(affine, s_sx, affineMatrix.sx);
+  getAffineMatrixElement(affine, s_rx, affineMatrix.rx);
+  getAffineMatrixElement(affine, s_ry, affineMatrix.ry);
+  getAffineMatrixElement(affine, s_sy, affineMatrix.sy);
+  getAffineMatrixElement(affine, s_tx, affineMatrix.tx);
+  getAffineMatrixElement(affine, s_ty, affineMatrix.ty);
+  DrawAffine(wand->getWand(), &affineMatrix);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, annotation,
@@ -38,18 +57,33 @@ static bool HHVM_METHOD(ImagickDraw, annotation,
   return true;
 }
 
-static bool HHVM_METHOD(ImagickDraw, arc,
-    double sx, double sy, double ex, double ey, double sd, double ed) {
+static TypedValue* HHVM_MN(ImagickDraw, arc)(ActRec* ar_) {
+  Object this_ = ar_->m_this;
+  double sx;
+  double sy;
+  double ex;
+  double ey;
+  double sd;
+  double ed;
+
+  if (!parseArgs(ar_, "dddddd", &sx, &sy, &ex, &ey, &sd, &ed)) {
+    return arReturn(ar_, false);
+  }
+
   auto wand = getDrawingWandResource(this_);
   DrawArc(wand->getWand(), sx, sy, ex, ey, sd, ed);
-  return true;
+  return arReturn(ar_, true);
 }
 
 static bool HHVM_METHOD(ImagickDraw, bezier,
-    CArrRef coordinates) {
+    const Array& coordinates) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto points = toPointInfoArray(coordinates);
+  if (points.empty()) {
+    IMAGICKDRAW_THROW("Unable to read coordinate array");
+  }
+  DrawBezier(wand->getWand(), points.size(), points.data());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, circle,
@@ -92,12 +126,28 @@ static bool HHVM_METHOD(ImagickDraw, comment,
   return true;
 }
 
-static bool HHVM_METHOD(ImagickDraw, composite,
-    int64_t compose, double x, double y,
-    double width, double height, CObjRef compositeWand) {
+static TypedValue* HHVM_MN(ImagickDraw, composite)(ActRec* ar_) {
+  Object this_ = ar_->m_this;
+  int64_t compose;
+  double x;
+  double y;
+  double width;
+  double height;
+  Object compositeWand;
+
+  if (!parseArgs(ar_, "lddddo",
+      &compose, &x, &y, &width, &height, &compositeWand)) {
+    return arReturn(ar_, false);
+  }
+
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto magick = getMagickWandResource(compositeWand);
+  auto status = DrawComposite(wand->getWand(), (CompositeOperator)compose,
+                              x, y, width, height, magick->getWand());
+  if (status == MagickFalse) {
+    IMAGICKDRAW_THROW("Compositing image failed");
+  }
+  return arReturn(ar_, true);
 }
 
 static void HHVM_METHOD(ImagickDraw, __construct) {
@@ -113,11 +163,22 @@ static bool HHVM_METHOD(ImagickDraw, destroy) {
   return HHVM_MN(ImagickDraw, clear)(this_);
 }
 
-static bool HHVM_METHOD(ImagickDraw, ellipse,
-    double ox, double oy, double rx, double ry, double start, double end) {
+static TypedValue* HHVM_MN(ImagickDraw, ellipse)(ActRec* ar_) {
+  Object this_ = ar_->m_this;
+  double ox;
+  double oy;
+  double rx;
+  double ry;
+  double start;
+  double end;
+
+  if (!parseArgs(ar_, "dddddd", &ox, &oy, &rx, &ry, &start, &end)) {
+    return arReturn(ar_, false);
+  }
+
   auto wand = getDrawingWandResource(this_);
   DrawEllipse(wand->getWand(), ox, oy, rx, ry, start, end);
-  return true;
+  return arReturn(ar_, true);
 }
 
 static String HHVM_METHOD(ImagickDraw, getClipPath) {
@@ -127,661 +188,767 @@ static String HHVM_METHOD(ImagickDraw, getClipPath) {
 
 static int64_t HHVM_METHOD(ImagickDraw, getClipRule) {
   auto wand = getDrawingWandResource(this_);
-
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetClipRule(wand->getWand());
 }
 
 static int64_t HHVM_METHOD(ImagickDraw, getClipUnits) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetClipUnits(wand->getWand());
 }
 
 static Object HHVM_METHOD(ImagickDraw, getFillColor) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto pixel = NewPixelWand();
+  DrawGetFillColor(wand->getWand(), pixel);
+  return createImagickPixel(pixel, true);
 }
 
 static double HHVM_METHOD(ImagickDraw, getFillOpacity) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetFillOpacity(wand->getWand());
 }
 
 static int64_t HHVM_METHOD(ImagickDraw, getFillRule) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetFillRule(wand->getWand());
 }
 
 static String HHVM_METHOD(ImagickDraw, getFont) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return convertMagickString(DrawGetFont(wand->getWand()));
 }
 
 static String HHVM_METHOD(ImagickDraw, getFontFamily) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return convertMagickString(DrawGetFontFamily(wand->getWand()));
 }
 
 static double HHVM_METHOD(ImagickDraw, getFontSize) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetFontSize(wand->getWand());
+}
+
+static int HHVM_METHOD(ImagickDraw, getFontStretch) {
+  auto wand = getDrawingWandResource(this_);
+  return DrawGetFontStretch(wand->getWand());
 }
 
 static int64_t HHVM_METHOD(ImagickDraw, getFontStyle) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetFontStyle(wand->getWand());
 }
 
 static int64_t HHVM_METHOD(ImagickDraw, getFontWeight) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetFontWeight(wand->getWand());
 }
 
 static int64_t HHVM_METHOD(ImagickDraw, getGravity) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetGravity(wand->getWand());
 }
 
 static bool HHVM_METHOD(ImagickDraw, getStrokeAntialias) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetStrokeAntialias(wand->getWand()) != MagickFalse;
 }
 
 static Object HHVM_METHOD(ImagickDraw, getStrokeColor) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto pixel = NewPixelWand();
+  DrawGetStrokeColor(wand->getWand(), pixel);
+  return createImagickPixel(pixel, true);
 }
 
 static Array HHVM_METHOD(ImagickDraw, getStrokeDashArray) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  size_t num;
+  double* arr = DrawGetStrokeDashArray(wand->getWand(), &num);
+  return convertMagickArray(num, arr);
 }
 
 static double HHVM_METHOD(ImagickDraw, getStrokeDashOffset) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetStrokeDashOffset(wand->getWand());
 }
 
 static int64_t HHVM_METHOD(ImagickDraw, getStrokeLineCap) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetStrokeLineCap(wand->getWand());
 }
 
 static int64_t HHVM_METHOD(ImagickDraw, getStrokeLineJoin) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetStrokeLineJoin(wand->getWand());
 }
 
 static int64_t HHVM_METHOD(ImagickDraw, getStrokeMiterLimit) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetStrokeMiterLimit(wand->getWand());
 }
 
 static double HHVM_METHOD(ImagickDraw, getStrokeOpacity) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetStrokeOpacity(wand->getWand());
 }
 
 static double HHVM_METHOD(ImagickDraw, getStrokeWidth) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetStrokeWidth(wand->getWand());
 }
 
 static int64_t HHVM_METHOD(ImagickDraw, getTextAlignment) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetTextAlignment(wand->getWand());
 }
 
 static bool HHVM_METHOD(ImagickDraw, getTextAntialias) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetTextAntialias(wand->getWand()) != MagickFalse;
 }
 
 static int64_t HHVM_METHOD(ImagickDraw, getTextDecoration) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return DrawGetTextDecoration(wand->getWand());
 }
 
 static String HHVM_METHOD(ImagickDraw, getTextEncoding) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return convertMagickString(DrawGetTextEncoding(wand->getWand()));
 }
 
 static Object HHVM_METHOD(ImagickDraw, getTextUnderColor) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto pixel = NewPixelWand();
+  DrawGetTextUnderColor(wand->getWand(), pixel);
+  return createImagickPixel(pixel, true);
 }
 
 static String HHVM_METHOD(ImagickDraw, getVectorGraphics) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  return convertMagickString(DrawGetVectorGraphics(wand->getWand()));
 }
 
 static bool HHVM_METHOD(ImagickDraw, line,
     double sx, double sy, double ex, double ey) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawLine(wand->getWand(), sx, sy, ex, ey);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, matte,
     double x, double y, int64_t paintMethod) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawMatte(wand->getWand(), x, y, (PaintMethod)paintMethod);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathClose) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathClose(wand->getWand());
+  return true;
 }
 
-static bool HHVM_METHOD(ImagickDraw, pathCurveToAbsolute,
-    double x1, double y1, double x2, double y2, double x, double y) {
+static TypedValue* HHVM_MN(ImagickDraw, pathCurveToAbsolute)(ActRec* ar_) {
+  Object this_ = ar_->m_this;
+  double x1;
+  double y1;
+  double x2;
+  double y2;
+  double x;
+  double y;
+
+  if (!parseArgs(ar_, "dddddd", &x1, &y1, &x2, &y2, &x, &y)) {
+    return arReturn(ar_, false);
+  }
+
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathCurveToAbsolute(wand->getWand(), x1, y1, x2, y2, x, y);
+  return arReturn(ar_, true);
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathCurveToQuadraticBezierAbsolute,
     double x1, double y1, double x, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathCurveToQuadraticBezierAbsolute(wand->getWand(), x1, y1, x, y);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathCurveToQuadraticBezierRelative,
     double x1, double y1, double x, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathCurveToQuadraticBezierRelative(wand->getWand(), x1, y1, x, y);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathCurveToQuadraticBezierSmoothAbsolute,
     double x, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathCurveToQuadraticBezierSmoothAbsolute(wand->getWand(), x, y);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathCurveToQuadraticBezierSmoothRelative,
     double x, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathCurveToQuadraticBezierSmoothRelative(wand->getWand(), x, y);
+  return true;
 }
 
-static bool HHVM_METHOD(ImagickDraw, pathCurveToRelative,
-    double x1, double y1, double x2, double y2, double x, double y) {
+static TypedValue* HHVM_MN(ImagickDraw, pathCurveToRelative)(ActRec* ar_) {
+  Object this_ = ar_->m_this;
+  double x1;
+  double y1;
+  double x2;
+  double y2;
+  double x;
+  double y;
+
+  if (!parseArgs(ar_, "dddddd", &x1, &y1, &x2, &y2, &x, &y)) {
+    return arReturn(ar_, false);
+  }
+
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathCurveToRelative(wand->getWand(), x1, y1, x2, y2, x, y);
+  return arReturn(ar_, true);
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathCurveToSmoothAbsolute,
     double x2, double y2, double x, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathCurveToSmoothAbsolute(wand->getWand(), x2, y2, x, y);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathCurveToSmoothRelative,
     double x2, double y2, double x, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathCurveToSmoothRelative(wand->getWand(), x2, y2, x, y);
+  return true;
 }
 
-static bool HHVM_METHOD(ImagickDraw, pathEllipticArcAbsolute,
-    double rx, double ry, double x_axis_rotation,
-    bool large_arc_flag, bool sweep_flag, double x, double y) {
+static TypedValue* HHVM_MN(ImagickDraw, pathEllipticArcAbsolute)(ActRec* ar_) {
+  Object this_ = ar_->m_this;
+  double rx;
+  double ry;
+  double x_axis_rotation;
+  bool large_arc_flag;
+  bool sweep_flag;
+  double x;
+  double y;
+
+  if (!parseArgs(ar_, "dddbbdd",
+      &rx, &ry, &x_axis_rotation, &large_arc_flag, &sweep_flag, &x, &y)) {
+    return arReturn(ar_, false);
+  }
+
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathEllipticArcAbsolute(wand->getWand(), rx, ry, x_axis_rotation,
+    toMagickBool(large_arc_flag), toMagickBool(sweep_flag), x, y);
+  return arReturn(ar_, true);
 }
 
-static bool HHVM_METHOD(ImagickDraw, pathEllipticArcRelative,
-    double rx, double ry, double x_axis_rotation,
-    bool large_arc_flag, bool sweep_flag, double x, double y) {
+static TypedValue* HHVM_MN(ImagickDraw, pathEllipticArcRelative)(ActRec* ar_) {
+  Object this_ = ar_->m_this;
+  double rx;
+  double ry;
+  double x_axis_rotation;
+  bool large_arc_flag;
+  bool sweep_flag;
+  double x;
+  double y;
+
+  if (!parseArgs(ar_, "dddbbdd",
+      &rx, &ry, &x_axis_rotation, &large_arc_flag, &sweep_flag, &x, &y)) {
+    return arReturn(ar_, false);
+  }
+
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathEllipticArcRelative(wand->getWand(), rx, ry, x_axis_rotation,
+    toMagickBool(large_arc_flag), toMagickBool(sweep_flag), x, y);
+  return arReturn(ar_, true);
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathFinish) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathFinish(wand->getWand());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathLineToAbsolute,
     double x, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathLineToAbsolute(wand->getWand(), x, y);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathLineToHorizontalAbsolute, double x) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathLineToHorizontalAbsolute(wand->getWand(), x);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathLineToHorizontalRelative, double x) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathLineToHorizontalRelative(wand->getWand(), x);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathLineToRelative,
     double x, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathLineToRelative(wand->getWand(), x, y);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathLineToVerticalAbsolute, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathLineToVerticalAbsolute(wand->getWand(), y);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathLineToVerticalRelative, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathLineToVerticalRelative(wand->getWand(), y);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathMoveToAbsolute,
     double x, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathMoveToAbsolute(wand->getWand(), x, y);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathMoveToRelative,
     double x, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathMoveToRelative(wand->getWand(), x, y);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathStart) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPathStart(wand->getWand());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, point,
     double x, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPoint(wand->getWand(), x, y);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, polygon,
-    CArrRef coordinates) {
+    const Array& coordinates) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto points = toPointInfoArray(coordinates);
+  if (points.empty()) {
+    IMAGICKDRAW_THROW("Unable to read coordinate array");
+  }
+  DrawPolygon(wand->getWand(), points.size(), points.data());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, polyline,
-    CArrRef coordinates) {
+    const Array& coordinates) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto points = toPointInfoArray(coordinates);
+  if (points.empty()) {
+    IMAGICKDRAW_THROW("Unable to read coordinate array");
+  }
+  DrawPolyline(wand->getWand(), points.size(), points.data());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pop) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto status = PopDrawingWand(wand->getWand());
+  if (status == MagickFalse) {
+    IMAGICKDRAW_THROW("Unable to pop the current ImagickDraw object");
+  }
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, popClipPath) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPopClipPath(wand->getWand());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, popDefs) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPopDefs(wand->getWand());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, popPattern) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto status = DrawPopPattern(wand->getWand());
+  if (status == MagickFalse) {
+    IMAGICKDRAW_THROW("Unable to terminate the pattern definition");
+  }
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, push) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto status = PushDrawingWand(wand->getWand());
+  if (status == MagickFalse) {
+    IMAGICKDRAW_THROW("Unable to push the current ImagickDraw object");
+  }
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pushClipPath,
     const String& clip_mask_id) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPushClipPath(wand->getWand(), clip_mask_id.c_str());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pushDefs) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPushDefs(wand->getWand());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pushPattern,
     const String& pattern_id, double x, double y, double width, double height) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawPushPattern(wand->getWand(), pattern_id.c_str(), x, y, width, height);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, rectangle,
     double x1, double y1, double x2, double y2) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawRectangle(wand->getWand(), x1, y1, x2, y2);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, render) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto status = withMagickLocaleFix([&wand]{
+    return DrawRender(wand->getWand());
+  });
+  if (status == MagickFalse) {
+    IMAGICKDRAW_THROW("Unable to render the drawing commands");
+  }
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, rotate, double degrees) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawRotate(wand->getWand(), degrees);
+  return true;
 }
 
-static bool HHVM_METHOD(ImagickDraw, roundRectangle,
-    double x1, double y1, double x2, double y2, double rx, double ry) {
+static TypedValue* HHVM_MN(ImagickDraw, roundRectangle)(ActRec* ar_) {
+  Object this_ = ar_->m_this;
+  double x1;
+  double y1;
+  double x2;
+  double y2;
+  double rx;
+  double ry;
+
+  if (!parseArgs(ar_, "dddddd", &x1, &y1, &x2, &y2, &rx, &ry)) {
+    return arReturn(ar_, false);
+  }
+
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawRoundRectangle(wand->getWand(), x1, y1, x2, y2, rx, ry);
+  return arReturn(ar_, true);
 }
 
 static bool HHVM_METHOD(ImagickDraw, scale,
     double x, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawScale(wand->getWand(), x, y);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setClipPath,
     const String& clip_mask) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto status = DrawSetClipPath(wand->getWand(), clip_mask.c_str());
+  if (status == MagickFalse) {
+    IMAGICKDRAW_THROW("Unable to set clipping path");
+  }
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setClipRule,
     int64_t fill_rule) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetClipRule(wand->getWand(), (FillRule)fill_rule);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setClipUnits,
     int64_t clip_units) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetClipUnits(wand->getWand(), (ClipPathUnits)clip_units);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFillAlpha, double opacity) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetFillOpacity(wand->getWand(), opacity);
+  throw true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFillColor,
-    CObjRef fill_pixel) {
+    const Variant& fill_pixel) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  WandResource<PixelWand> pixel(buildPixelWand(fill_pixel));
+  DrawSetFillColor(wand->getWand(), pixel.getWand());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFillOpacity,
     double fillOpacity) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetFillOpacity(wand->getWand(), fillOpacity);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFillPatternURL,
     const String& fill_url) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto status = DrawSetFillPatternURL(wand->getWand(), fill_url.c_str());
+  if (status == MagickFalse) {
+    IMAGICKDRAW_THROW("Unable to set fill pattern URL");
+  }
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFillRule,
     int64_t fill_rule) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetFillRule(wand->getWand(), (FillRule)fill_rule);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFont,
     const String& font_name) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  if (font_name.empty()) {
+    IMAGICKDRAW_THROW("Can not set empty font");
+  }
+  auto font = magickResolveFont(font_name);
+  if (font.isNull()) {
+    IMAGICKDRAW_THROW("Unable to set font, file path expansion failed");
+  }
+  auto status = DrawSetFont(wand->getWand(), font.c_str());
+  if (status == MagickFalse) {
+    IMAGICKDRAW_THROW("Unable to set font");
+  }
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFontFamily,
     const String& font_family) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  if (font_family.empty()) {
+    IMAGICKDRAW_THROW("Can not set empty font family");
+  }
+  auto status = DrawSetFontFamily(wand->getWand(), font_family.c_str());
+  if (status == MagickFalse) {
+    IMAGICKDRAW_THROW("Unable to set font family");
+  }
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFontSize, double pointsize) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetFontSize(wand->getWand(), pointsize);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFontStretch,
     int64_t fontStretch) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetFontStretch(wand->getWand(), (StretchType)fontStretch);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFontStyle, int64_t style) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetFontStyle(wand->getWand(), (StyleType)style);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setFontWeight,
     int64_t font_weight) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  if (100 <= font_weight && font_weight <= 900) {
+    DrawSetFontWeight(wand->getWand(), font_weight);
+    return true;
+  } else {
+    IMAGICKDRAW_THROW("Font weight valid range is 100-900");
+  }
 }
 
 static bool HHVM_METHOD(ImagickDraw, setGravity, int64_t gravity) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetGravity(wand->getWand(), (GravityType)gravity);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokeAlpha, double opacity) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetStrokeOpacity(wand->getWand(), opacity);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokeAntialias,
     bool stroke_antialias) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetStrokeAntialias(wand->getWand(), toMagickBool(stroke_antialias));
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokeColor,
-    CObjRef stroke_pixel) {
+    const Variant& stroke_pixel) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  WandResource<PixelWand> pixel(buildPixelWand(stroke_pixel));
+  DrawSetStrokeColor(wand->getWand(), pixel.getWand());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokeDashArray,
-    CArrRef dashArray) {
+    const Array& dashArray) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto dashes = toDoubleArray(dashArray);
+  if (dashes.empty()) {
+    IMAGICKDRAW_THROW("Cannot read stroke dash array parameter");
+  }
+  DrawSetStrokeDashArray(wand->getWand(), dashes.size(), dashes.data());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokeDashOffset,
     double dash_offset) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetStrokeDashOffset(wand->getWand(), dash_offset);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokeLineCap, int64_t linecap) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetStrokeLineCap(wand->getWand(), (LineCap)linecap);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokeLineJoin, int64_t linejoin) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetStrokeLineJoin(wand->getWand(), (LineJoin)linejoin);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokeMiterLimit,
     int64_t miterlimit) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetStrokeMiterLimit(wand->getWand(), miterlimit);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokeOpacity,
     double stroke_opacity) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetStrokeOpacity(wand->getWand(), stroke_opacity);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokePatternURL,
     const String& stroke_url) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto status = DrawSetStrokePatternURL(wand->getWand(), stroke_url.c_str());
+  if (status == MagickFalse) {
+    IMAGICKDRAW_THROW("Unable to set stroke pattern URL");
+  }
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setStrokeWidth,
     double stroke_width) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetStrokeWidth(wand->getWand(), stroke_width);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setTextAlignment,
     int64_t alignment) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetTextAlignment(wand->getWand(), (AlignType)alignment);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setTextAntialias, bool antiAlias) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetTextAntialias(wand->getWand(), toMagickBool(antiAlias));
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setTextDecoration,
     int64_t decoration) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetTextDecoration(wand->getWand(), (DecorationType)decoration);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setTextEncoding,
     const String& encoding) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetTextEncoding(wand->getWand(), encoding.c_str());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setTextUnderColor,
-    CObjRef under_color) {
+    const Variant& under_color) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  WandResource<PixelWand> pixel(buildPixelWand(under_color));
+  DrawSetTextUnderColor(wand->getWand(), pixel.getWand());
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setVectorGraphics,
     const String& xml) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  auto status = DrawSetVectorGraphics(wand->getWand(), xml.c_str());
+  if (status == MagickFalse) {
+    IMAGICKDRAW_THROW("Unable to set the vector graphics");
+  }
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, setViewbox,
     int64_t x1, int64_t y1, int64_t x2, int64_t y2) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSetViewbox(wand->getWand(), x1, y1, x2, y2);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, skewX, double degrees) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSkewX(wand->getWand(), degrees);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, skewY, double degrees) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawSkewY(wand->getWand(), degrees);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, translate,
     double x, double y) {
   auto wand = getDrawingWandResource(this_);
-  (void)wand;
-  throw NotImplementedException("Not Implemented");
+  DrawTranslate(wand->getWand(), x, y);
+  return true;
 }
 
 #undef IMAGICKDRAW_THROW
@@ -809,6 +976,7 @@ void loadImagickDrawClass() {
   HHVM_ME(ImagickDraw, getFont);
   HHVM_ME(ImagickDraw, getFontFamily);
   HHVM_ME(ImagickDraw, getFontSize);
+  HHVM_ME(ImagickDraw, getFontStretch);
   HHVM_ME(ImagickDraw, getFontStyle);
   HHVM_ME(ImagickDraw, getFontWeight);
   HHVM_ME(ImagickDraw, getGravity);

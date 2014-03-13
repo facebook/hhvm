@@ -288,7 +288,7 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void CmdInfo::PrintDocComments(StringBuffer &sb, CArrRef info) {
+void CmdInfo::PrintDocComments(StringBuffer &sb, const Array& info) {
   if (info[s_doc].isString()) {
     String doc = info[s_doc].toString();
     int space1 = 0; // best guess
@@ -307,7 +307,7 @@ void CmdInfo::PrintDocComments(StringBuffer &sb, CArrRef info) {
 }
 
 void CmdInfo::PrintHeader(DebuggerClient &client, StringBuffer &sb,
-                          CArrRef info) {
+                          const Array& info) {
   if (!info[s_internal].toBoolean()) {
     String file = info[s_file].toString();
     int line1 = info[s_line1].toInt32();
@@ -330,7 +330,7 @@ void CmdInfo::PrintHeader(DebuggerClient &client, StringBuffer &sb,
   PrintDocComments(sb, info);
 }
 
-String CmdInfo::GetParams(CArrRef params, bool varg,
+String CmdInfo::GetParams(const Array& params, bool varg,
                           bool detailed /* = false */) {
   StringBuffer args;
   for (ArrayIter iter(params); iter; ++iter) {
@@ -375,14 +375,14 @@ String CmdInfo::GetParams(CArrRef params, bool varg,
   return args.detach();
 }
 
-String CmdInfo::GetModifier(CArrRef info, const String& name) {
+String CmdInfo::GetModifier(const Array& info, const String& name) {
   if (info[name].toBoolean()) {
     return name + " ";
   }
   return empty_string;
 }
 
-String CmdInfo::FindSubSymbol(CArrRef symbols, const std::string &symbol) {
+String CmdInfo::FindSubSymbol(const Array& symbols, const std::string &symbol) {
   for (ArrayIter iter(symbols); iter; ++iter) {
     String key = iter.first().toString();
     if (strcasecmp(key.data(), symbol.c_str()) == 0) {
@@ -392,7 +392,7 @@ String CmdInfo::FindSubSymbol(CArrRef symbols, const std::string &symbol) {
   return String();
 }
 
-bool CmdInfo::TryConstant(StringBuffer &sb, CArrRef info,
+bool CmdInfo::TryConstant(StringBuffer &sb, const Array& info,
                           const std::string &subsymbol) {
   String key = FindSubSymbol(info[s_constants].toArray(), subsymbol);
   if (!key.isNull()) {
@@ -404,7 +404,7 @@ bool CmdInfo::TryConstant(StringBuffer &sb, CArrRef info,
   return false;
 }
 
-bool CmdInfo::TryProperty(StringBuffer &sb, CArrRef info,
+bool CmdInfo::TryProperty(StringBuffer &sb, const Array& info,
                           const std::string &subsymbol) {
   String key = FindSubSymbol(info[s_properties].toArray(),
                              subsymbol[0] == '$' ?
@@ -432,7 +432,7 @@ bool CmdInfo::TryProperty(StringBuffer &sb, CArrRef info,
   return false;
 }
 
-bool CmdInfo::TryMethod(DebuggerClient &client, StringBuffer &sb, CArrRef info,
+bool CmdInfo::TryMethod(DebuggerClient &client, StringBuffer &sb, const Array& info,
                         std::string subsymbol) {
   if (subsymbol.size() > 2 && subsymbol.substr(subsymbol.size() - 2) == "()") {
     subsymbol = subsymbol.substr(0, subsymbol.size() - 2);
@@ -462,7 +462,7 @@ bool CmdInfo::TryMethod(DebuggerClient &client, StringBuffer &sb, CArrRef info,
   return false;
 }
 
-String CmdInfo::GetParam(CArrRef params, int index) {
+String CmdInfo::GetParam(const Array& params, int index) {
   StringBuffer param;
   Array arg = params[index].toArray();
   if (arg[s_ref].toBoolean()) {
@@ -473,7 +473,7 @@ String CmdInfo::GetParam(CArrRef params, int index) {
   return param.detach();
 }
 
-String CmdInfo::GetTypeProfilingInfo(CArrRef profilingArray, CArrRef params) {
+String CmdInfo::GetTypeProfilingInfo(const Array& profilingArray, const Array& params) {
   StringBuffer profile;
   int index = 0;
   StringBuffer args;
@@ -504,7 +504,7 @@ String CmdInfo::GetTypeProfilingInfo(CArrRef profilingArray, CArrRef params) {
   return profile.detach();
 }
 
-void CmdInfo::PrintInfo(DebuggerClient &client, StringBuffer &sb, CArrRef info,
+void CmdInfo::PrintInfo(DebuggerClient &client, StringBuffer &sb, const Array& info,
                         const std::string &subsymbol) {
   if (info.exists(s_params)) {
     PrintHeader(client, sb, info);

@@ -32,6 +32,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
 #include "hphp/runtime/base/proxy-array.h"
+#include "hphp/runtime/base/thread-info.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -343,7 +344,7 @@ bool ArrayData::IsValidKey(const String& k) {
   return IsValidKey(k.get());
 }
 
-bool ArrayData::IsValidKey(CVarRef k) {
+bool ArrayData::IsValidKey(const Variant& k) {
   return k.isInteger() ||
          (k.isString() && IsValidKey(k.getStringData()));
 }
@@ -354,26 +355,26 @@ ArrayData *ArrayData::Create() {
   return ArrayInit((ssize_t)0).create();
 }
 
-ArrayData *ArrayData::Create(CVarRef value) {
+ArrayData *ArrayData::Create(const Variant& value) {
   ArrayInit init(1);
   init.set(value);
   return init.create();
 }
 
-ArrayData *ArrayData::Create(CVarRef name, CVarRef value) {
+ArrayData *ArrayData::Create(const Variant& name, const Variant& value) {
   ArrayInit init(1);
   // There is no toKey() call on name.
   init.set(name, value, true);
   return init.create();
 }
 
-ArrayData *ArrayData::CreateRef(CVarRef value) {
+ArrayData *ArrayData::CreateRef(const Variant& value) {
   ArrayInit init(1);
   init.setRef(value);
   return init.create();
 }
 
-ArrayData *ArrayData::CreateRef(CVarRef name, CVarRef value) {
+ArrayData *ArrayData::CreateRef(const Variant& name, const Variant& value) {
   ArrayInit init(1);
   // There is no toKey() call on name.
   init.setRef(name, value, true);
@@ -513,7 +514,7 @@ void ArrayData::freeStrongIterators() {
   setStrongIterators(nullptr);
 }
 
-CVarRef ArrayData::endRef() {
+const Variant& ArrayData::endRef() {
   if (m_pos != invalid_index) {
     return getValueRef(iter_end());
   }
@@ -532,15 +533,15 @@ void ArrayData::Asort(ArrayData*, int sort_flags, bool ascending) {
   throw FatalErrorException("Unimplemented ArrayData::asort");
 }
 
-bool ArrayData::Uksort(ArrayData*, CVarRef cmp_function) {
+bool ArrayData::Uksort(ArrayData*, const Variant& cmp_function) {
   throw FatalErrorException("Unimplemented ArrayData::uksort");
 }
 
-bool ArrayData::Usort(ArrayData*, CVarRef cmp_function) {
+bool ArrayData::Usort(ArrayData*, const Variant& cmp_function) {
   throw FatalErrorException("Unimplemented ArrayData::usort");
 }
 
-bool ArrayData::Uasort(ArrayData*, CVarRef cmp_function) {
+bool ArrayData::Uasort(ArrayData*, const Variant& cmp_function) {
   throw FatalErrorException("Unimplemented ArrayData::uasort");
 }
 
@@ -657,39 +658,39 @@ void ArrayData::serialize(VariableSerializer *serializer,
   }
 }
 
-CVarRef ArrayData::get(CVarRef k, bool error) const {
+const Variant& ArrayData::get(const Variant& k, bool error) const {
   assert(IsValidKey(k));
   auto const cell = k.asCell();
   return isIntKey(cell) ? get(getIntKey(cell), error)
                         : get(getStringKey(cell), error);
 }
 
-CVarRef ArrayData::getNotFound(int64_t k) {
+const Variant& ArrayData::getNotFound(int64_t k) {
   raise_notice("Undefined index: %" PRId64, k);
   return null_variant;
 }
 
-CVarRef ArrayData::getNotFound(const StringData* k) {
+const Variant& ArrayData::getNotFound(const StringData* k) {
   raise_notice("Undefined index: %s", k->data());
   return null_variant;
 }
 
-CVarRef ArrayData::getNotFound(int64_t k, bool error) const {
+const Variant& ArrayData::getNotFound(int64_t k, bool error) const {
   return error && m_kind != kNvtwKind ? getNotFound(k) :
          null_variant;
 }
 
-CVarRef ArrayData::getNotFound(const StringData* k, bool error) const {
+const Variant& ArrayData::getNotFound(const StringData* k, bool error) const {
   return error && m_kind != kNvtwKind ? getNotFound(k) :
          null_variant;
 }
 
-CVarRef ArrayData::getNotFound(const String& k) {
+const Variant& ArrayData::getNotFound(const String& k) {
   raise_notice("Undefined index: %s", k.data());
   return null_variant;
 }
 
-CVarRef ArrayData::getNotFound(CVarRef k) {
+const Variant& ArrayData::getNotFound(const Variant& k) {
   raise_notice("Undefined index: %s", k.toString().data());
   return null_variant;
 }

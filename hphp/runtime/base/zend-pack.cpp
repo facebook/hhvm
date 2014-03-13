@@ -98,7 +98,7 @@ ZendPack::ZendPack() {
   }
 }
 
-void ZendPack::pack(CVarRef val, int size, int *map, char *output) {
+void ZendPack::pack(const Variant& val, int size, int *map, char *output) {
   int32_t n = val.toInt32();
   char *v = (char*)&n;
   for (int i = 0; i < size; i++) {
@@ -106,7 +106,7 @@ void ZendPack::pack(CVarRef val, int size, int *map, char *output) {
   }
 }
 
-Variant ZendPack::pack(const String& fmt, CArrRef argv) {
+Variant ZendPack::pack(const String& fmt, const Array& argv) {
   /* Preprocess format into formatcodes and formatargs */
   std::vector<char> formatcodes;
   std::vector<int> formatargs;
@@ -305,7 +305,7 @@ Variant ZendPack::pack(const String& fmt, CArrRef argv) {
       v = val.data();
       slen = val.size();
       outputpos--;
-      if(arg > slen) {
+      if (arg > slen) {
         throw_invalid_argument
           ("Type %c: not enough characters in string", code);
         arg = slen;

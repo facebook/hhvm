@@ -36,6 +36,17 @@ enum IMAGCIK_COLOR {
 };
 
 extern const StaticString
+  // coord
+  s_x,
+  s_y,
+  // affine
+  s_sx,
+  s_rx,
+  s_ry,
+  s_sy,
+  s_tx,
+  s_ty,
+  // color
   s_r,
   s_g,
   s_b,
@@ -43,6 +54,7 @@ extern const StaticString
   s_hue,
   s_saturation,
   s_luminosity,
+  // class name
   s_Imagick,
   s_ImagickDraw,
   s_ImagickPixel,

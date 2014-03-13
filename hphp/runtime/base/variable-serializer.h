@@ -60,12 +60,12 @@ public:
   /**
    * Top level entry function called by f_ functions.
    */
-  String serialize(CVarRef v, bool ret);
-  String serializeValue(CVarRef v, bool limit);
+  String serialize(const Variant& v, bool ret);
+  String serializeValue(const Variant& v, bool limit);
 
   // Serialize with limit size of output, always return the serialized string.
   // It does not work with Serialize, JSON, APCSerialize, DebuggerSerialize.
-  String serializeWithLimit(CVarRef v, int limit);
+  String serializeWithLimit(const Variant& v, int limit);
 
   /**
    * Type specialized output functions.
@@ -78,8 +78,8 @@ public:
   void write(double  v);
   void write(const char *v, int len = -1, bool isArrayKey = false);
   void write(const String& v);
-  void write(CObjRef v);
-  void write(CVarRef v, bool isArrayKey = false);
+  void write(const Object& v);
+  void write(const Variant& v, bool isArrayKey = false);
 
   void writeNull();
   // what to write if recursive level is over limit?
@@ -88,8 +88,8 @@ public:
 
   void writeArrayHeader(int size, bool isVectorData);
   void writeArrayKey(Variant key);
-  void writeArrayValue(CVarRef value);
-  void writeCollectionKey(CVarRef key);
+  void writeArrayValue(const Variant& value);
+  void writeCollectionKey(const Variant& key);
   void writeCollectionKeylessPrefix();
   void writeArrayFooter();
   void writeSerializableObject(const String& clsname, const String& serialized);

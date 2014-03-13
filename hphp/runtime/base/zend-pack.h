@@ -37,7 +37,7 @@ public:
    * to the format argument. pack() idea stolen from Perl (implemented formats
    * behave the same as there).
    */
-  Variant pack(const String& fmt, CArrRef argv);
+  Variant pack(const String& fmt, const Array& argv);
 
   /**
    * Unpack binary string into named array elements according to format
@@ -76,7 +76,7 @@ private:
   int big_endian_int32_map[4];
   int little_endian_int32_map[4];
 
-  void pack(CVarRef val, int size, int *map, char *output);
+  void pack(const Variant& val, int size, int *map, char *output);
   int32_t unpack(const char *data, int size, int issigned, int *map);
 };
 

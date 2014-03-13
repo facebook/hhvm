@@ -41,13 +41,13 @@ public:
    */
   VariableUnserializer(const char *str, size_t len, Type type,
                        bool allowUnknownSerializableClass = false,
-                       CArrRef class_whitelist = null_array)
+                       const Array& class_whitelist = null_array)
       : m_type(type), m_buf(str), m_end(str + len),
         m_unknownSerializable(allowUnknownSerializableClass),
         m_classWhiteList(class_whitelist) {}
   VariableUnserializer(const char *str, const char *end, Type type,
                        bool allowUnknownSerializableClass = false,
-                       CArrRef class_whitelist = null_array)
+                       const Array& class_whitelist = null_array)
       : m_type(type), m_buf(str), m_end(end),
         m_unknownSerializable(allowUnknownSerializableClass),
         m_classWhiteList(class_whitelist) {}
@@ -134,7 +134,7 @@ public:
   smart::vector<RefInfo> m_refs;
   smart::list<Variant> m_vars;
   bool m_unknownSerializable;
-  CArrRef m_classWhiteList;    // classes allowed to be unserialized
+  const Array& m_classWhiteList;    // classes allowed to be unserialized
 
   void check() {
     if (m_buf >= m_end) {

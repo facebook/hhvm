@@ -24,12 +24,8 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////////
 // class ImagickPixelIterator
 ALWAYS_INLINE
-static void initPixelIterator(CObjRef this_, CObjRef magick) {
+static void initPixelIterator(const Object& this_, const Object& magick) {
   auto wand = getMagickWandResource(magick);
-  if (wand == nullptr || wand->getWand() == nullptr) {
-    IMAGICKPIXELITERATOR_THROW("Invalid Imagick object passed");
-  }
-
   auto it = NewPixelIterator(wand->getWand());
   if (it == nullptr) {
     IMAGICKPIXELITERATOR_THROW("Can not allocate ImagickPixelIterator");
@@ -39,13 +35,9 @@ static void initPixelIterator(CObjRef this_, CObjRef magick) {
 }
 
 ALWAYS_INLINE
-static void initPixelRegioniIerator(CObjRef this_, CObjRef magick,
+static void initPixelRegionIterator(const Object& this_, const Object& magick,
     int64_t x, int64_t y, int64_t columns, int64_t rows) {
   auto wand = getMagickWandResource(magick);
-  if (wand == nullptr || wand->getWand() == nullptr) {
-    IMAGICKPIXELITERATOR_THROW("Invalid Imagick object passed");
-  }
-
   auto it = NewPixelRegionIterator(wand->getWand(), x, y, columns, rows);
   if (it == nullptr) {
     IMAGICKPIXELITERATOR_THROW("Can not allocate ImagickPixelIterator");
@@ -55,16 +47,16 @@ static void initPixelRegioniIerator(CObjRef this_, CObjRef magick,
 }
 
 static Object HHVM_STATIC_METHOD(ImagickPixelIterator, getPixelIterator,
-    CObjRef magick) {
+    const Object& magick) {
   Object ret = ImagickPixelIterator::allocObject();
   initPixelIterator(ret, magick);
   return ret;
 }
 
 static Object HHVM_STATIC_METHOD(ImagickPixelIterator, getPixelRegionIterator,
-    CObjRef magick, int64_t x, int64_t y, int64_t columns, int64_t rows) {
+    const Object& magick, int64_t x, int64_t y, int64_t columns, int64_t rows) {
   Object ret = ImagickPixelIterator::allocObject();
-  initPixelRegioniIerator(ret, magick, x, y, columns, rows);
+  initPixelRegionIterator(ret, magick, x, y, columns, rows);
   return ret;
 }
 
@@ -74,7 +66,7 @@ static bool HHVM_METHOD(ImagickPixelIterator, clear) {
   return true;
 }
 
-static void HHVM_METHOD(ImagickPixelIterator, __construct, CObjRef magick) {
+static void HHVM_METHOD(ImagickPixelIterator, __construct, const Object& magick) {
   initPixelIterator(this_, magick);
 }
 
@@ -109,7 +101,7 @@ static Array HHVM_METHOD(ImagickPixelIterator, getPreviousIteratorRow) {
 }
 
 static bool HHVM_METHOD(ImagickPixelIterator, newPixelIterator,
-    CObjRef magick) {
+    const Object& magick) {
   raiseDeprecated(s_ImagickPixelIterator.c_str(), "newPixelIterator",
                   s_ImagickPixelIterator.c_str(), "getPixelIterator");
   initPixelIterator(this_, magick);
@@ -117,10 +109,10 @@ static bool HHVM_METHOD(ImagickPixelIterator, newPixelIterator,
 }
 
 static bool HHVM_METHOD(ImagickPixelIterator, newPixelRegionIterator,
-    CObjRef magick, int64_t x, int64_t y, int64_t columns, int64_t rows) {
+    const Object& magick, int64_t x, int64_t y, int64_t columns, int64_t rows) {
   raiseDeprecated(s_ImagickPixelIterator.c_str(), "newPixelRegionIterator",
                   s_ImagickPixelIterator.c_str(), "getPixelRegionIterator");
-  initPixelRegioniIerator(this_, magick, x, y, columns, rows);
+  initPixelRegionIterator(this_, magick, x, y, columns, rows);
   return true;
 }
 
@@ -157,6 +149,28 @@ static bool HHVM_METHOD(ImagickPixelIterator, syncIterator) {
   return true;
 }
 
+static Array HHVM_METHOD(ImagickPixelIterator, current) {
+  return HHVM_MN(ImagickPixelIterator, getCurrentIteratorRow)(this_);
+}
+
+static int HHVM_METHOD(ImagickPixelIterator, key) {
+  return HHVM_MN(ImagickPixelIterator, getIteratorRow)(this_);
+}
+
+static void HHVM_METHOD(ImagickPixelIterator, next) {
+  HHVM_MN(ImagickPixelIterator, getNextIteratorRow)(this_);
+}
+
+static void HHVM_METHOD(ImagickPixelIterator, rewind) {
+  HHVM_MN(ImagickPixelIterator, resetIterator)(this_);
+}
+
+static bool HHVM_METHOD(ImagickPixelIterator, valid) {
+  auto it = getPixelIteratorResource(this_);
+  auto row = PixelGetIteratorRow(it->getWand());
+  return PixelSetIteratorRow(it->getWand(), row) != MagickFalse;
+}
+
 #undef IMAGICKPIXELITERATOR_THROW
 
 void loadImagickPixelIteratorClass() {
@@ -176,6 +190,12 @@ void loadImagickPixelIteratorClass() {
   HHVM_ME(ImagickPixelIterator, setIteratorLastRow);
   HHVM_ME(ImagickPixelIterator, setIteratorRow);
   HHVM_ME(ImagickPixelIterator, syncIterator);
+  // Iterator interface
+  HHVM_ME(ImagickPixelIterator, current);
+  HHVM_ME(ImagickPixelIterator, key);
+  HHVM_ME(ImagickPixelIterator, next);
+  HHVM_ME(ImagickPixelIterator, rewind);
+  HHVM_ME(ImagickPixelIterator, valid);
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -17,13 +17,16 @@
 #ifndef incl_HPHP_SERVERSTATS_H_
 #define incl_HPHP_SERVERSTATS_H_
 
-#include "hphp/util/lock.h"
-#include "hphp/util/thread-local.h"
+#include <set>
+
 #include <curl/curl.h>
 #include <time.h>
+
+#include "hphp/util/lock.h"
+#include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/shared-string.h"
 #include "hphp/runtime/base/types.h"
-#include <set>
+#include "hphp/runtime/base/execution-profiler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

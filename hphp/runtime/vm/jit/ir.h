@@ -478,7 +478,14 @@ O(LdSwitchStrIndex,             D(Int), S(Str) S(Int) S(Int),          CRc|N) \
 O(LdSwitchObjIndex,             D(Int), S(Obj) S(Int) S(Int),       CRc|N|Er) \
 O(JmpSwitchDest,                    ND, S(Int),                          T|E) \
 O(AllocObj,                  DAllocObj, S(Cls),                         Er|N) \
-O(AllocObjFast,              DAllocObj, NA,                                N) \
+                                                                              \
+O(ConstructInstance,         DAllocObj, NA,                             Er|N) \
+O(InitProps,                        ND, NA,                           E|Er|N) \
+O(InitSProps,                       ND, NA,                           E|Er|N) \
+O(NewInstanceRaw,            DAllocObj, NA,                                N) \
+O(InitObjProps,                     ND, S(Obj),                          E|N) \
+O(CustomInstanceInit,        DAllocObj, S(Obj),                         Er|N) \
+                                                                              \
 O(LdClsCtor,                   D(Func), S(Cls),                       C|Er|N) \
 O(StClosureFunc,                    ND, S(Obj),                            E) \
 O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \
@@ -821,12 +828,11 @@ O(ArrayIdx,                    D(Cell), C(TCA)                                \
 O(GenericIdx,                  D(Cell), S(Cell)                               \
                                           S(Cell)                             \
                                           S(Cell),                E|N|PRc|Er) \
+O(Nop,                              ND, NA,                               NF) \
 O(DbgAssertRefCount,                ND, S(Counted,StaticStr,StaticArr),  N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
 O(DbgAssertType,                    ND, S(Cell),                           E) \
 O(DbgAssertRetAddr,                 ND, NA,                                E) \
-O(Nop,                              ND, NA,                               NF) \
-/* END. Nop must be the last opcode. */
 
 enum class Opcode : uint16_t {
 #define O(name, ...) name,
@@ -835,6 +841,10 @@ enum class Opcode : uint16_t {
 };
 #define O(name, ...) UNUSED auto constexpr name = Opcode::name;
   IR_OPCODES
+#undef O
+
+#define O(...) +1
+size_t constexpr kNumOpcodes = IR_OPCODES;
 #undef O
 
 /*

@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 #include "folly/String.h"
 #include "hphp/util/file-util.h"
@@ -139,7 +140,7 @@ bool File::IsPlainFilePath(const String& filename) {
 
 Variant File::Open(const String& filename, const String& mode,
                    int options /* = 0 */,
-                   CVarRef context /* = null */) {
+                   const Variant& context /* = null */) {
   Stream::Wrapper *wrapper = Stream::getWrapperFromURI(filename);
   Resource rcontext =
     context.isNull() ? g_context->getStreamContext() : context.toResource();
@@ -458,23 +459,41 @@ bool File::stat(struct stat *sb) {
 }
 
 void File::appendReadFilter(Resource& resource) {
-  assert(resource.getTyped<StreamFilter>());
+  assert(resource.is<StreamFilter>());
   m_readFilters.push_back(resource);
 }
 
 void File::appendWriteFilter(Resource& resource) {
-  assert(resource.getTyped<StreamFilter>());
+  assert(resource.is<StreamFilter>());
   m_writeFilters.push_back(resource);
 }
 
 void File::prependReadFilter(Resource& resource) {
-  assert(resource.getTyped<StreamFilter>());
+  assert(resource.is<StreamFilter>());
   m_readFilters.push_front(resource);
 }
 
 void File::prependWriteFilter(Resource& resource) {
-  assert(resource.getTyped<StreamFilter>());
+  assert(resource.is<StreamFilter>());
   m_writeFilters.push_front(resource);
+}
+
+bool File::removeFilter(Resource& resource) {
+  assert(resource.is<StreamFilter>());
+  ResourceData* rd = resource.get();
+  for (auto it = m_readFilters.begin(); it != m_readFilters.end(); ++it) {
+    if (it->get() == rd) {
+      m_readFilters.erase(it);
+      return true;
+    }
+  }
+  for (auto it = m_writeFilters.begin(); it != m_writeFilters.end(); ++it) {
+    if (it->get() == rd) {
+      m_writeFilters.erase(it);
+      return true;
+    }
+  }
+  return false;
 }
 
 const StaticString
@@ -676,7 +695,7 @@ int64_t File::print() {
   return total;
 }
 
-int64_t File::printf(const String& format, CArrRef args) {
+int64_t File::printf(const String& format, const Array& args) {
   int len = 0;
   char *output = string_printf(format.data(), format.size(), args, &len);
   return write(String(output, len, AttachString));
@@ -685,7 +704,7 @@ int64_t File::printf(const String& format, CArrRef args) {
 ///////////////////////////////////////////////////////////////////////////////
 // csv functions
 
-int64_t File::writeCSV(CArrRef fields, char delimiter_char /* = ',' */,
+int64_t File::writeCSV(const Array& fields, char delimiter_char /* = ',' */,
                      char enclosure_char /* = '"' */) {
   int line = 0;
   int count = fields.size();

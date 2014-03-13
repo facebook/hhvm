@@ -108,7 +108,7 @@ concat_ss(StringData* v1, StringData* v2) {
 
   auto const newV1 = v1->append(v2->slice());
   if (UNLIKELY(newV1 != v1)) {
-    assert(v1->getCount() == 1);
+    assert(v1->hasExactlyOneRef());
     v1->release();
     newV1->incRefCount();
     return newV1;
@@ -149,7 +149,7 @@ StringData* concat_si(StringData* v1, int64_t v2) {
 
   auto const newV1 = v1->append(s2);
   if (UNLIKELY(newV1 != v1)) {
-    assert(v1->getCount() == 1);
+    assert(v1->hasExactlyOneRef());
     v1->release();
     newV1->incRefCount();
     return newV1;

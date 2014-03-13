@@ -7727,6 +7727,15 @@ void ExecutionContext::popVMState() {
   TRACE(1, "Reentry: exit fp %p pc %p\n", m_fp, m_pc);
 }
 
+static void threadLogger(const char* header, const char* msg,
+                         const char* ending, void* data) {
+  auto* ec = static_cast<ExecutionContext*>(data);
+  ec->write(header);
+  ec->write(msg);
+  ec->write(ending);
+  ec->flush();
+}
+
 void ExecutionContext::requestInit() {
   assert(SystemLib::s_unit);
   assert(SystemLib::s_nativeFuncUnit);
@@ -7761,6 +7770,8 @@ void ExecutionContext::requestInit() {
   assert(cls);
   assert(cls == SystemLib::s_stdclassClass);
 #endif
+
+  if (Logger::UseRequestLog) Logger::SetThreadHook(&threadLogger, this);
 }
 
 void ExecutionContext::requestExit() {
@@ -7778,6 +7789,8 @@ void ExecutionContext::requestExit() {
     VarEnv::destroy(m_globalVarEnv);
     m_globalVarEnv = 0;
   }
+
+  if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr, nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

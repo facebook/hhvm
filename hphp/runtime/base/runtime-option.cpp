@@ -74,7 +74,6 @@ bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::InjectedStackTrace = true;
 int RuntimeOption::InjectedStackTraceLimit = -1;
 bool RuntimeOption::NoSilencer = false;
-bool RuntimeOption::EnableApplicationLog = true;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
 bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
 int RuntimeOption::RuntimeErrorReportingLevel =
@@ -620,6 +619,7 @@ void RuntimeOption::Load(Hdf &config,
     Logger::UseSyslog = logger["UseSyslog"].getBool(false);
     Logger::UseLogFile = logger["UseLogFile"].getBool(true);
     Logger::UseCronolog = logger["UseCronolog"].getBool(false);
+    Logger::UseRequestLog = logger["UseRequestLog"].getBool(false);
     if (Logger::UseLogFile) {
       LogFile = logger["File"].getString();
       if (!RuntimeOption::ServerExecutionMode()) {
@@ -636,7 +636,6 @@ void RuntimeOption::Load(Hdf &config,
     AlwaysLogUnhandledExceptions =
       logger["AlwaysLogUnhandledExceptions"].getBool(true);
     NoSilencer = logger["NoSilencer"].getBool();
-    EnableApplicationLog = logger["ApplicationLog"].getBool(true);
     RuntimeErrorReportingLevel =
       logger["RuntimeErrorReportingLevel"]
         .getInt32(static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL));

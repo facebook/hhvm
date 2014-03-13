@@ -26,9 +26,6 @@
 #include "zend_compile.h"
 #include "zend_build.h"
 
-#ifdef HHVM
-#include "hphp/runtime/ext/extension.h"
-#endif
 
 #define INIT_FUNC_ARGS    int type, int module_number TSRMLS_DC
 #define INIT_FUNC_ARGS_PASSTHRU  type, module_number TSRMLS_CC
@@ -75,15 +72,7 @@ typedef struct _zend_module_entry zend_module_entry;
 typedef struct _zend_module_dep zend_module_dep;
 
 #ifdef HHVM
-class ZendExtension : public HPHP::Extension {
-private:
-  zend_module_entry *getEntry();
-public:
-  /* implicit */ ZendExtension(const char* name);
-  virtual void moduleInit() override;
-  virtual void moduleShutdown() override;
-  static ZendExtension* GetByModuleNumber(int module_number);
-};
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-extension.h"
 #endif
 
 struct _zend_module_entry {
@@ -122,34 +111,7 @@ struct _zend_module_entry {
 };
 
 #ifdef HHVM
-inline void ZendExtension::moduleInit() {
-  if (!HPHP::RuntimeOption::EnableZendCompat) {
-    return;
-  }
-  zend_module_entry* entry = getEntry();
-  if (entry->globals_ctor) {
-    entry->globals_ctor(entry->globals_ptr);
-  }
-  if (entry->module_startup_func) {
-    entry->module_startup_func(1, entry->module_number);
-  }
-}
-inline void ZendExtension::moduleShutdown() {
-  if (!HPHP::RuntimeOption::EnableZendCompat) {
-    return;
-  }
-  zend_module_entry* entry = getEntry();
-  if (entry->module_shutdown_func) {
-    entry->module_shutdown_func(1, 1);
-  }
-  if (entry->globals_dtor) {
-    entry->globals_dtor(entry->globals_ptr);
-  }
-}
-inline zend_module_entry *ZendExtension::getEntry() {
-  enum { offset = offsetof(struct _zend_module_entry, name) };
-  return (zend_module_entry*)(((char*)this) - offset);
-}
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-extension-inline.h"
 #endif
 
 #define MODULE_DEP_REQUIRED    1
@@ -181,6 +143,8 @@ int module_registry_request_startup(zend_module_entry *module TSRMLS_DC);
 int module_registry_unload_temp(const zend_module_entry *module TSRMLS_DC);
 
 #define ZEND_MODULE_DTOR (void (*)(void *)) module_destructor
+
+
 #endif
 
 /*

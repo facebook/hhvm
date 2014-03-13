@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-extension.h"
 #include "folly/AtomicHashMap.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_modules.h"
 
@@ -46,3 +47,4 @@ ZendExtension* ZendExtension::GetByModuleNumber(int module_number) {
   }
   return nullptr;
 }
+

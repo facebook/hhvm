@@ -108,8 +108,24 @@
                 "type": "Variant"
             },
             "args": []
+		},
+        {
+            "name": "ezc_realpath",
+            "desc": "Return the resolved path",
+            "flags": [
+                "ZendCompat",
+                "NeedsActRec"
+            ],
+            "return": {
+                "type": "Variant"
+			},
+            "args": [
+                {
+                    "name": "path",
+                    "type": "Variant"
+                }
+            ]
         }
-
     ],
     "classes": [
     ]

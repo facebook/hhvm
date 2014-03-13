@@ -20,6 +20,9 @@
 #define YYSTYPE std::string
 
 #include "hphp/runtime/base/complex-types.h"
+
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/ini-parser/zend-ini.h"
@@ -140,6 +143,9 @@ bool zend_parse_ini_string(const std::string &str, const std::string &filename,
                            int scanner_mode,
                            IniSetting::ParserCallback &callback,
                            void *arg) {
+  if (boost::ends_with(filename, ".hdf")) {
+    return false;
+  }
   zend_ini_scan(str, scanner_mode, filename, callback, arg);
   bool ret = (ini_parse() == 0);
   zend_ini_scan_cleanup();

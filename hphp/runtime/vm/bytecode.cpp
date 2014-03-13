@@ -6183,6 +6183,25 @@ OPTBLD_INLINE void ExecutionContext::iopFCall(IOP_ARGS) {
   }
 }
 
+OPTBLD_INLINE void ExecutionContext::iopFCallD(IOP_ARGS) {
+  auto const ar = arFromInstr(m_stack.top(), reinterpret_cast<const Op*>(pc));
+  NEXT();
+  DECODE_IVA(numArgs);
+  DECODE_LITSTR(clsName);
+  DECODE_LITSTR(funcName);
+  (void) clsName;
+  (void) funcName;
+  if (!RuntimeOption::EvalJitEnableRenameFunction) {
+    assert(ar->m_func->name()->isame(funcName));
+  }
+  assert(numArgs == ar->numArgs());
+  checkStack(m_stack, ar->m_func);
+  doFCall(ar, pc);
+  if (RuntimeOption::EvalRuntimeTypeProfile) {
+    profileAllArguments(ar);
+  }
+}
+
 OPTBLD_INLINE void ExecutionContext::iopFCallBuiltin(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);

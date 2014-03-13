@@ -667,6 +667,7 @@ enum class BareThisOp : uint8_t {
   O(FPassS,          ONE(IVA),         TWO(AV,CV),      ONE(FV),    FF) \
   O(FPassM,          TWO(IVA,MA),      MMANY,           ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
+  O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    CF) \
   O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
@@ -1025,10 +1026,10 @@ inline bool isFPush(Op opcode) {
 
 inline bool isFCallStar(Op opcode) {
   switch (opcode) {
-    case OpFCall:
-    case OpFCallArray:
+    case Op::FCall:
+    case Op::FCallD:
+    case Op::FCallArray:
       return true;
-
     default:
       return false;
   }

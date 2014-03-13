@@ -36,16 +36,34 @@ struct ClassAnalysis;
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * Types of a FPI regions.  (What sort of function call is being
+ * made.)
+ */
+enum class FPIKind {
+  Unknown,     // Nothing is known.
+  CallableArr, // May be an ObjMeth or a ClsMeth.
+  Func,        // Definitely a non-member function.
+  Ctor,        // Definitely a constructor for an object.
+  ObjMeth,     // Definitely a method on an object (possibly __call).
+  ClsMeth,     // Definitely a static method on a class (possibly__callStatic).
+  ObjInvoke,   // Closure invoke or __invoke on an object.
+};
+
+/*
  * Information about a pre-live ActRec.  Part of state tracked in
  * State.
  */
 struct ActRec {
-  explicit ActRec(FPIKind kind, folly::Optional<res::Func> f = folly::none)
+  explicit ActRec(FPIKind kind,
+                  folly::Optional<res::Class> c = folly::none,
+                  folly::Optional<res::Func> f = folly::none)
     : kind(kind)
-    , func(f)
+    , cls(std::move(c))
+    , func(std::move(f))
   {}
 
   FPIKind kind;
+  folly::Optional<res::Class> cls;
   folly::Optional<res::Func> func;
 };
 

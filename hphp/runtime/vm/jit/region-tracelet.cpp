@@ -347,7 +347,11 @@ void RegionFormer::addInstruction() {
 }
 
 bool RegionFormer::tryInline() {
-  if (!RuntimeOption::RepoAuthoritative || m_inst.op() != OpFCall) return false;
+  if (!RuntimeOption::RepoAuthoritative ||
+      m_inst.op() != Op::FCall ||
+      m_inst.op() != Op::FCallD) {
+    return false;
+  }
 
   auto refuse = [this](const std::string& str) {
     FTRACE(2, "selectTracelet not inlining {}: {}\n",
@@ -397,7 +401,7 @@ bool RegionFormer::tryInline() {
         if (sk == m_sk) return false;
 
         auto op = sk.op();
-        if (isFCallStar(op) || op == OpFCallBuiltin) return true;
+        if (isFCallStar(op) || op == Op::FCallBuiltin) return true;
         sk.advance();
       }
     }

@@ -1100,8 +1100,8 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
     // If func has changed after an FCall, we've started an inlined call. This
     // will have to change when we support inlining recursive calls.
     if (func != iter.sk().func()) {
-      assert(isRet(op) || op == OpFCall);
-      if (op == OpFCall) {
+      assert(isRet(op) || op == Op::FCall || op == Op::FCallD);
+      if (op == Op::FCall || op == Op::FCallD) {
         funcs.push_back(iter.sk().func());
         int totalDepth = 0;
         for (auto* f : funcs) {
@@ -1129,7 +1129,7 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
       }
     }
 
-    if (op == OpFCallArray) return refuse("FCallArray");
+    if (op == Op::FCallArray) return refuse("FCallArray");
 
     // These opcodes don't indicate any additional work in the callee,
     // so they shouldn't count toward the inlining cost.
@@ -1237,6 +1237,10 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
 
   HHIR_EMIT(FCall, numArgs, returnBcOffset, i.funcd,
             JIT::callDestroysLocals(i, m_hhbcTrans.curFunc()));
+}
+
+void IRTranslator::translateFCallD(const NormalizedInstruction& i) {
+  translateFCall(i);
 }
 
 void

@@ -122,6 +122,7 @@
   CASE(CheckThis) \
   CASE(InitThisLoc) \
   CASE(FCall) \
+  CASE(FCallD) \
   CASE(FCallArray) \
   CASE(FCallBuiltin) \
   CASE(VerifyParamType) \

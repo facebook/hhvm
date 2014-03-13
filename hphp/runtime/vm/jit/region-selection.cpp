@@ -305,7 +305,7 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
     }
 
     if (ni->calleeTrace && !ni->calleeTrace->m_inliningFailed) {
-      assert(ni->op() == OpFCall);
+      assert(ni->op() == Op::FCall || ni->op() == Op::FCallD);
       assert(ni->funcd == ni->calleeTrace->func());
       // This should be translated as an inlined call. Insert the blocks of the
       // callee in the region.

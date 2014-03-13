@@ -60,6 +60,7 @@ namespace {
 
 const StaticString s_Exception("Exception");
 const StaticString s_Continuation("Continuation");
+const StaticString s_empty("");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1207,7 +1208,7 @@ void in(ISS& env, const bc::UnsetG& op) {
 
 void in(ISS& env, const bc::FPushFuncD& op) {
   auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
-  fpiPush(env, ActRec { FPIKind::Func, rfunc });
+  fpiPush(env, ActRec { FPIKind::Func, folly::none, rfunc });
 }
 
 void in(ISS& env, const bc::FPushFunc& op) {
@@ -1233,8 +1234,11 @@ void in(ISS& env, const bc::FPushFuncU& op) {
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
   auto const obj = popC(env);
+  folly::Optional<res::Class> rcls;
+  if (obj.strictSubtypeOf(TObj)) rcls = dcls_of(objcls(obj)).cls;
   fpiPush(env, ActRec {
     FPIKind::ObjMeth,
+    rcls,
     obj.subtypeOf(TObj)
       ? env.index.resolve_method(env.ctx, objcls(obj), op.str2)
       : folly::none
@@ -1258,7 +1262,7 @@ void in(ISS& env, const bc::FPushClsMethodD& op) {
   auto const rfun =
     rcls ? env.index.resolve_method(env.ctx, clsExact(*rcls), op.str2)
          : folly::none;
-  fpiPush(env, ActRec { FPIKind::ClsMeth, rfun });
+  fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun });
 }
 
 void in(ISS& env, const bc::FPushClsMethod& op) {
@@ -1269,7 +1273,9 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
     v2 && v2->m_type == KindOfStaticString
       ? env.index.resolve_method(env.ctx, t1, v2->m_data.pstr)
       : folly::none;
-  fpiPush(env, ActRec { FPIKind::ClsMeth, rfunc });
+  folly::Optional<res::Class> rcls;
+  if (t1.strictSubtypeOf(TCls)) rcls = dcls_of(t1).cls;
+  fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc });
 }
 
 void in(ISS& env, const bc::FPushClsMethodF& op) {
@@ -1283,7 +1289,7 @@ void in(ISS& env, const bc::FPushCtorD& op) {
   push(env, rcls ? objExact(*rcls) : TObj);
   auto const rfunc =
     rcls ? env.index.resolve_ctor(env.ctx, *rcls) : folly::none;
-  fpiPush(env, ActRec { FPIKind::Ctor, rfunc });
+  fpiPush(env, ActRec { FPIKind::Ctor, rcls, rfunc });
 }
 
 void in(ISS& env, const bc::FPushCtor& op) {
@@ -1450,6 +1456,43 @@ void in(ISS& env, const bc::FPassM& op) {
 }
 
 void in(ISS& env, const bc::FCall& op) {
+  auto const ar = fpiTop(env);
+  if (ar.func) {
+    switch (ar.kind) {
+    case FPIKind::Unknown:
+    case FPIKind::CallableArr:
+    case FPIKind::ObjInvoke:
+      not_reached();
+    case FPIKind::Func:
+      return reduce(
+        env,
+        bc::FCallD { op.arg1, s_empty.get(), ar.func->name() }
+      );
+    case FPIKind::Ctor:
+    case FPIKind::ObjMeth:
+    case FPIKind::ClsMeth:
+      /*
+       * If we have a resolved func and it's a class method (or
+       * ctor), we currently must also have a resolved class.  This
+       * could change later, but this code will need to be revisited
+       * in that case, so assert.
+       */
+      always_assert(ar.cls.hasValue() &&
+        "resolved func without a resolved class");
+      return reduce(
+        env,
+        bc::FCallD { op.arg1, ar.cls->name(), ar.func->name() }
+      );
+    }
+  }
+
+  for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
+  fpiPop(env);
+  specialFunctionEffects(env, ar);
+  push(env, TInitGen);
+}
+
+void in(ISS& env, const bc::FCallD& op) {
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
   auto const ar = fpiPop(env);
   specialFunctionEffects(env, ar);

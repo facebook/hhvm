@@ -251,13 +251,13 @@ ActRec fpiPop(ISS& env) {
   return ret;
 }
 
-const ActRec& fpiTop(ISS& env) {
+ActRec fpiTop(ISS& env) {
   assert(!env.state.fpiStack.empty());
   return env.state.fpiStack.back();
 }
 
 PrepKind prepKind(ISS& env, uint32_t paramId) {
-  auto& ar = fpiTop(env);
+  auto ar = fpiTop(env);
   if (ar.func) return env.index.lookup_param_prep(env.ctx, *ar.func, paramId);
   return PrepKind::Unknown;
 }

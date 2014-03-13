@@ -1224,6 +1224,7 @@ static const struct {
    * runtime stack are outside the boundaries of the tracelet abstraction.
    */
   { OpFCall,       {FStack,           Stack1,       OutPred,           0 }},
+  { OpFCallD,      {FStack,           Stack1,       OutPred,           0 }},
   { OpFCallArray,  {FStack,           Stack1,       OutPred,
                                                    -(int)kNumActRecCells }},
   // TODO: output type is known
@@ -1397,6 +1398,7 @@ int64_t getStackPopped(PC pc) {
   auto const op = *reinterpret_cast<const Op*>(pc);
   switch (op) {
     case Op::FCall:        return getImm((Op*)pc, 0).u_IVA + kNumActRecCells;
+    case Op::FCallD:       return getImm((Op*)pc, 0).u_IVA + kNumActRecCells;
     case Op::FCallArray:   return kNumActRecCells + 1;
 
     case Op::FCallBuiltin:
@@ -1431,17 +1433,19 @@ int getStackDelta(const NormalizedInstruction& ni) {
   initInstrInfo();
   auto op = ni.op();
   switch (op) {
-    case OpFCall: {
-      int numArgs = ni.imm[0].u_IVA;
-      return 1 - numArgs - kNumActRecCells;
-    }
+    case Op::FCall:
+    case Op::FCallD:
+      {
+        int numArgs = ni.imm[0].u_IVA;
+        return 1 - numArgs - kNumActRecCells;
+      }
 
-    case OpFCallBuiltin:
-    case OpNewPackedArray:
-    case OpCreateCl:
+    case Op::FCallBuiltin:
+    case Op::NewPackedArray:
+    case Op::CreateCl:
       return 1 - ni.imm[0].u_IVA;
 
-    case OpNewStructArray:
+    case Op::NewStructArray:
       return 1 - ni.immVec.numStackValues();
 
     default:
@@ -2997,6 +3001,7 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
       return DataTypeCountness;
 
     case OpFCall:
+    case OpFCallD:
       // Note: instead of pessimizing calls that may be inlined with
       // DataTypeSpecific, we could apply the operand constraints of
       // the callee in constrainDep.
@@ -3785,7 +3790,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       annotate(ni);
     }
 
-    if (ni->op() == OpFCall) {
+    if (ni->op() == Op::FCall || ni->op() == Op::FCallD) {
       analyzeCallee(tas, t, ni);
     }
 
@@ -4313,7 +4318,8 @@ Translator::translateRegion(const RegionDesc& region,
       // the FCall and instead set up HhbcTranslator for inlining. Blocks from
       // the callee will be next in the region.
       if (i == block->length() - 1 &&
-          inst.op() == OpFCall && block->inlinedCallee()) {
+          (inst.op() == Op::FCall || inst.op() == Op::FCallD) &&
+          block->inlinedCallee()) {
         auto const* callee = block->inlinedCallee();
         FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
                "and stack:\n{}\n",
@@ -4707,6 +4713,9 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
       }
     } else if (!(func->attrs() & AttrNoOverride && !func->hasStaticLocals()) &&
                !(cls->preClass()->attrs() & AttrNoOverride)) {
+      // Even if a func has AttrNoOverride, if it has static locals it
+      // is cloned into subclasses (to give them different copies of
+      // the static locals), so we need to skip this.
       func = nullptr;
     }
   }

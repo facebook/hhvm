@@ -244,7 +244,10 @@ std::string show(const ActRec& a) {
   return folly::to<std::string>(
     "ActRec { ",
     fpiKindStr(a.kind),
-    a.func ? (": " + show(*a.func)) : std::string{},
+    a.cls || a.func ? ": " : "",
+    a.cls ? show(*a.cls) : "",
+    a.cls && a.func ? "::" : "",
+    a.func ? show(*a.func) : "",
     " }"
   );
 }

@@ -366,20 +366,22 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define PUSH_INS_1(x)          push(1);
 #define PUSH_INS_2(x)          push(1);
 
-#define O(opcode, imms, inputs, outputs, flags)               \
-    auto emit_##opcode = [&] (const bc::opcode& data) {       \
-      if (Op::opcode == Op::DefCls)    defcls();              \
-      if (Op::opcode == Op::NopDefCls) nopdefcls();           \
-      if (isRet(Op::opcode))           ret_assert();          \
-      ue.emitOp(Op::opcode);                                  \
-      POP_##inputs                                            \
-      PUSH_##outputs                                          \
-      IMM_##imms                                              \
-      if (isFPush(Op::opcode))     fpush();                   \
-      if (isFCallStar(Op::opcode)) fcall();                   \
-      if (flags & TF) currentStackDepth = 0;                  \
-      if (Op::opcode == Op::FCall) ret.containsCalls = true;  \
-      emit_srcloc();                                          \
+#define O(opcode, imms, inputs, outputs, flags)                   \
+    auto emit_##opcode = [&] (const bc::opcode& data) {           \
+      if (Op::opcode == Op::DefCls)    defcls();                  \
+      if (Op::opcode == Op::NopDefCls) nopdefcls();               \
+      if (isRet(Op::opcode))           ret_assert();              \
+      ue.emitOp(Op::opcode);                                      \
+      POP_##inputs                                                \
+      PUSH_##outputs                                              \
+      IMM_##imms                                                  \
+      if (isFPush(Op::opcode))     fpush();                       \
+      if (isFCallStar(Op::opcode)) fcall();                       \
+      if (flags & TF) currentStackDepth = 0;                      \
+      if (Op::opcode == Op::FCall || Op::opcode == Op::FCallD) {  \
+        ret.containsCalls = true;                                 \
+      }                                                           \
+      emit_srcloc();                                              \
     };
 
     OPCODES

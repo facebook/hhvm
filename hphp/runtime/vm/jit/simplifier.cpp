@@ -64,6 +64,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
 
   case PassSP:
   case ExceptionBarrier:
+  case Mov:
     return getStackValue(inst->src(0), index);
 
   case SideExitGuardStk:

@@ -1261,6 +1261,16 @@
                     },
                     "args": [
                     ]
+                },
+                {
+                    "name": "__debugInfo",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
                 }
             ],
             "consts": [
@@ -1407,16 +1417,6 @@
                     "return": {
                         "type": "VariantMap",
                         "desc": "Returns array on success or FALSE on failure."
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "__debugInfo",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": "VariantMap"
                     },
                     "args": [
                     ]

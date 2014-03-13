@@ -30,13 +30,6 @@ bool f_is_callable(const Variant& v, bool syntax = false,
 Variant f_call_user_func(
   int _argc, const Variant& function, const Array& _argv = null_array);
 Variant f_call_user_func_array(const Variant& function, const Variant& params);
-String f_call_user_func_serialized(const String& input);
-Variant f_call_user_func_array_rpc(
-  const String& host, int port, const String& auth, int timeout,
-  const Variant& function, const Array& params);
-Variant f_call_user_func_rpc(
-  int _argc, const String& host, int port, const String& auth, int timeout,
-  const Variant& function, const Array& _argv = null_array);
 Variant f_forward_static_call_array(const Variant& function, const Array& params);
 Variant f_forward_static_call(
   int _argc, const Variant& function, const Array& _argv = null_array);

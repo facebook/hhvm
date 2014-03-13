@@ -61,9 +61,6 @@ testing and some alternative PHP implementation.
 - call_user_func_async
 - check_user_func_async
 - end_user_func_async
-- call_user_func_array_rpc
-- call_user_func_rpc
-- call_user_func_serialized
 - fb_call_user_func_array_safe
 - fb_call_user_func_safe
 - fb_call_user_func_safe_return

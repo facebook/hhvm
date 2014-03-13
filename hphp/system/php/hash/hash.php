@@ -236,3 +236,79 @@ function hash_update_stream(mixed $context, mixed $handle,
  */
 <<__Native>>
 function hash_copy(resource $context): resource;
+
+/**
+ * hash_pbkdf2 - http://php.net/function.hash-pbkdf2.php
+ * RFC 2898 - http://www.ietf.org/rfc/rfc2898.txt
+ *
+ * @param string $algo     - Name of selected hashing algorithm
+ *                           (i.e. "md5", "sha256", "haval160,4", etc..)
+ * @param string $password - The password to use for the derivation.
+ * @param string $salt     - The salt to use for the derivation. This value
+ *                           should be generated randomly.
+ * @param int $iterations  - The number of internal iterations to perform
+ *                           for the derivation.
+ * @param int $length      - The length of the output string. If raw_output is
+ *                           TRUE this corresponds to the byte-length of the
+ *                           derived key, if raw_output is FALSE this
+ *                           corresponds to twice the byte-length of the
+ *                           derived key (as every byte of the key is returned
+ *                           as two hexits).
+ *                           If 0 is passed, the entire output of the supplied
+ *                           algorithm is used.
+ * @param bool $raw_output - When set to TRUE, outputs raw binary data.
+ *                           FALSE outputs lowercase hexits.
+ *
+ * @return string - A string containing the derived key as lowercase hexits
+ *                  unless raw_output is set to TRUE in which case the raw
+ *                  binary representation of the derived key is returned.
+ */
+function hash_pbkdf2($algo, $password, $salt, $iterations, $length = 0,
+                     $raw_output = false): mixed {
+  $args = func_num_args();
+  if ($args < 4) {
+    error_log("hash_pbkdf2() expects at least 4 parameters, ".$args." given");
+    return NULL;
+  } else if ($args > 6) {
+    error_log("hash_pbkdf2() expects at most 6 parameters, ".$args." given");
+    return NULL;
+  }
+
+  $algo = strtolower($algo);
+  if (!in_array($algo, hash_algos())) {
+    error_log("hash_pbkdf2(): Unknown hashing algorithm: ".$algo);
+    return false;
+  }
+
+  if ($iterations <= 0) {
+    error_log("hash_pbkdf2(): Iterations must be a positive ".
+              "integer: ".$iterations);
+    return false;
+  }
+
+  if ($length < 0) {
+    error_log("hash_pbkdf2(): Length must be greater than or ".
+              "equal to 0: ".$length);
+    return false;
+  }
+
+  $result = "";
+  $hash_length = strlen(hash($algo, "", true));
+  $key_blocks = ceil($length / $hash_length);
+  for ($i = 1; $i <= $key_blocks; $i++) {
+    // Note: $i encoded with most siginificant octet first.
+    $xor = hash_hmac($algo, $salt.pack("N", $i), $password, true);
+    $prev = $xor;
+    for ($j = 1; $j < $iterations; $j++) {
+      $prev = hash_hmac($algo, $prev, $password, true);
+      $xor ^= $prev;
+    }
+    $result .= $xor;
+  }
+
+  if ($raw_output) {
+    return substr($result, 0, $length);
+  } else {
+    return substr(bin2hex($result), 0, $length);
+  }
+}

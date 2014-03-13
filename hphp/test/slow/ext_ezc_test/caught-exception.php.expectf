@@ -1,0 +1,5 @@
+object(Exception)#%d (%d) {
+  ["message":protected]=>
+  string(4) "test"
+%a
+}

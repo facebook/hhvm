@@ -29,8 +29,33 @@
 #include "php.h"
 #include "spprintf.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/ZendExceptionStore.h"
 
-static zend_class_entry *default_exception_ce;
+ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
+
+void zend_exception_set_previous(zval *exception, zval *add_previous TSRMLS_DC)
+{
+  zval *previous;
+
+  if (exception == add_previous || !add_previous || !exception) {
+    return;
+  }
+  zend_class_entry *default_exception_ce = zend_exception_get_default(TSRMLS_C);
+  if (Z_TYPE_P(add_previous) != IS_OBJECT && !instanceof_function(Z_OBJCE_P(add_previous), default_exception_ce TSRMLS_CC)) {
+    zend_error(E_ERROR, "Cannot set non exception as previous exception");
+    return;
+  }
+  while (exception && exception != add_previous && Z_OBJ_HANDLE_P(exception) != Z_OBJ_HANDLE_P(add_previous)) {
+    previous = zend_read_property(default_exception_ce, exception, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
+    if (Z_TYPE_P(previous) == IS_NULL) {
+      zend_update_property(default_exception_ce, exception, "previous", sizeof("previous")-1, add_previous TSRMLS_CC);
+      Z_DELREF_P(add_previous);
+      return;
+    }
+    exception = previous;
+  }
+}
 
 ZEND_API void zend_clear_exception(TSRMLS_D) /* {{{ */
 {
@@ -43,45 +68,23 @@ ZEND_API void zend_clear_exception(TSRMLS_D) /* {{{ */
 	}
 	zval_ptr_dtor(&EG(exception));
 	EG(exception) = NULL;
+	// don't rethrow
+	ZendExceptionStore::getInstance().clear();
 }
 /* }}} */
 
-static zend_object_value zend_default_exception_new_ex(zend_class_entry *class_type, int skip_top_traces TSRMLS_DC) /* {{{ */
-{
-  zend_object *object;
-
-  zend_object_value ret = zend_objects_new(&object, class_type TSRMLS_CC);
-
-  object_properties_init(object, class_type);
-
-  return ret;
-}
-
-const static zend_function_entry default_exception_functions[] = {
-};
-
-static zend_object_value zend_default_exception_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
-{
-  return zend_default_exception_new_ex(class_type, 0 TSRMLS_CC);
-}
-
 void zend_register_default_exception(TSRMLS_D) {
-  zend_class_entry ce;
-
-  INIT_CLASS_ENTRY(ce, "Exception", default_exception_functions);
-  default_exception_ce = zend_register_internal_class(&ce TSRMLS_CC);
-  default_exception_ce->create_object = zend_default_exception_new;
 }
 
 ZEND_API zend_class_entry *zend_exception_get_default(TSRMLS_D) {
-  // TODO figure out how to do this once
-  zend_register_default_exception();
-  return default_exception_ce;
+  // TODO request-local cache to avoid hashtable lookup
+  return zend_hphp_class_to_class_entry(HPHP::SystemLib::s_ExceptionClass);
 }
 
 ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC) /* {{{ */
 {
   zend_class_entry *exception_ce;
+  zend_class_entry *default_exception_ce = zend_exception_get_default(TSRMLS_C);
 
   if (exception == NULL || Z_TYPE_P(exception) != IS_OBJECT) {
     zend_error(E_ERROR, "Need to supply an object when throwing an exception");
@@ -98,13 +101,20 @@ ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC) /* {{{ */
 
 void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 {
-  throw HPHP::Object(Z_OBJVAL_P(exception));
+  if (exception != NULL) {
+    zend_exception_set_previous(exception, EG(exception) TSRMLS_CC);
+    EG(exception) = exception;
+  }
+  if (EG(exception) != NULL) {
+    ZendExceptionStore::getInstance().set(HPHP::Object(Z_OBJVAL_P(EG(exception))));
+  }
 }
 /* }}} */
 
 ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC) /* {{{ */
 {
 	zval *ex;
+	zend_class_entry *default_exception_ce = zend_exception_get_default(TSRMLS_C);
 
 	MAKE_STD_ZVAL(ex);
 	if (exception_ce) {

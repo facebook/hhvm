@@ -52,13 +52,9 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 // current maximum object identifier
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(int, ObjectData::os_max_id);
+__thread int ObjectData::os_max_id;
 
 TRACE_SET_MOD(runtime);
-
-int ObjectData::GetMaxId() {
-  return *(ObjectData::os_max_id.getCheck());
-}
 
 const StaticString
   s_offsetGet("offsetGet"),
@@ -994,7 +990,7 @@ static void freeDynPropArray(ObjectData* inst) {
 }
 
 ObjectData::~ObjectData() {
-  int& pmax = *os_max_id;
+  int& pmax = os_max_id;
   if (o_id && o_id == pmax) {
     --pmax;
   }

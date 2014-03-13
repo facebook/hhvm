@@ -73,16 +73,18 @@ class ObjectData {
   };
 
  private:
-  static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_id);
+  static __thread int os_max_id;
 
  public:
+  static void resetMaxId() { os_max_id = 0; }
+
   explicit ObjectData(Class* cls)
     : m_cls(cls)
     , o_attribute(0)
     , m_count(0)
   {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
-    o_id = ++(*os_max_id);
+    o_id = ++os_max_id;
     instanceInit(cls);
   }
 
@@ -93,7 +95,7 @@ class ObjectData {
     , m_count(0)
   {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
-    o_id = ++(*os_max_id);
+    o_id = ++os_max_id;
     instanceInit(cls);
   }
 
@@ -105,7 +107,7 @@ class ObjectData {
     , m_count(0)
   {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
-    o_id = ++(*os_max_id);
+    o_id = ++os_max_id;
   }
 
   // Disallow copy construction and assignemt
@@ -311,8 +313,6 @@ class ObjectData {
   Variant invokeSleep();
   Variant invokeToDebugDisplay();
   Variant invokeWakeup();
-
-  static int GetMaxId();
 
   /**
    * Used by the ext_zend_compat layer.

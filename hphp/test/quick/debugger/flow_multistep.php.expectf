@@ -41,7 +41,7 @@ C2 destructor
 C1 oh hai
 C1 destructor!
 C2 destructor done
-object(C1)#3 (1) {
+object(C1)#1 (1) {
   ["x":"C1":private]=>
   int(0)
 }
@@ -78,7 +78,7 @@ C2 destructor
 C1 oh hai
 C1 destructor!
 C2 destructor done
-object(C1)#5 (1) {
+object(C1)#1 (1) {
   ["x":"C1":private]=>
   int(0)
 }
@@ -115,7 +115,7 @@ C2 destructor
 C1 oh hai
 C1 destructor!
 C2 destructor done
-object(C1)#7 (1) {
+object(C1)#1 (1) {
   ["x":"C1":private]=>
   int(0)
 }
@@ -176,7 +176,7 @@ Break at main() on line 54 of %s/flow_multistep.php
   55   $d = $c1;
 
 out
-object(C1)#9 (1) {
+object(C1)#1 (1) {
   ["x":"C1":private]=>
   int(0)
 }
@@ -229,7 +229,7 @@ Break at main() on line 55 of %s/flow_multistep.php
   56   $c1 = null;
 
 continue
-object(C1)#11 (1) {
+object(C1)#1 (1) {
   ["x":"C1":private]=>
   int(0)
 }

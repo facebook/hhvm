@@ -7744,6 +7744,8 @@ void ExecutionContext::requestInit() {
   EnvConstants::requestInit(smart_new<EnvConstants>());
   VarEnv::createGlobal();
   m_stack.requestInit();
+  ObjectData::resetMaxId();
+  ResourceData::resetMaxId();
   mcg->requestInit();
 
   if (UNLIKELY(RuntimeOption::EvalJitEnableRenameFunction)) {

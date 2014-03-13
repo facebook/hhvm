@@ -52,8 +52,6 @@ InitFiniNode::InitFiniNode(void(*f)(), When init) {
 
 void init_thread_locals(void *arg /* = NULL */) {
   Sweepable::InitSweepableList();
-  ObjectData::GetMaxId();
-  ResourceData::GetMaxResourceId();
   ServerStats::GetLogger();
   zend_get_bigint_data();
   zend_get_rand_data();

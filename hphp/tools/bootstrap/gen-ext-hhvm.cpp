@@ -701,11 +701,13 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
     } else {
       if (func.minNumParams() == 0) {
         cpp << in << "throw_toomany_arguments_nr(\"" << func.getPrettyName()
-            << "\", " << func.numParams() << ", 1, rv);\n";
+            << "\", " << func.numParams() << ", " << (func.usesThis() ? 3 : 1)
+            << ", rv);\n";
       } else {
         cpp << in << "throw_wrong_arguments_nr(\"" << func.getPrettyName()
             << "\", count, " << func.minNumParams() << ", "
-            << func.numParams() << ", 1, rv);\n";
+            << func.numParams() << ", " << (func.usesThis() ? 3 : 1)
+            << ", rv);\n";
       }
     }
     in += 2;

@@ -149,6 +149,7 @@ bool RuntimeOption::ServerEvilShutdown = true;
 int RuntimeOption::ServerDanglingWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownListenNoWork = -1;
+std::vector<std::string> RuntimeOption::ServerNextProtocols;
 int RuntimeOption::GzipCompressionLevel = 3;
 std::string RuntimeOption::ForceCompressionURL;
 std::string RuntimeOption::ForceCompressionCookie;
@@ -753,6 +754,7 @@ void RuntimeOption::Load(Hdf &config,
     ServerDanglingWait = server["DanglingWait"].getInt16(0);
     ServerShutdownListenWait = server["ShutdownListenWait"].getInt16(0);
     ServerShutdownListenNoWork = server["ShutdownListenNoWork"].getInt16(-1);
+    server["SSLNextProtocols"].get(ServerNextProtocols);
     if (ServerGracefulShutdownWait < ServerDanglingWait) {
       ServerGracefulShutdownWait = ServerDanglingWait;
     }

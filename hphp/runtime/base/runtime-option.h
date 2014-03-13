@@ -146,6 +146,7 @@ public:
   static bool ServerEvilShutdown;
   static int ServerShutdownListenWait;
   static int ServerShutdownListenNoWork;
+  static std::vector<std::string> ServerNextProtocols;
   static int GzipCompressionLevel;
   static std::string ForceCompressionURL;
   static std::string ForceCompressionCookie;

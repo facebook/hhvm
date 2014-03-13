@@ -34,6 +34,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+static class FunctionExtension : public Extension {
+ public:
+  FunctionExtension() : Extension("function", NO_EXTENSION_VERSION_YET) {}
+  virtual void moduleInit() {
+    HHVM_NAMED_FE(__SystemLib\\func_slice_args, HHVM_FN(func_slice_args));
+    loadSystemlib();
+  }
+} s_function_extension;
+
 using HPHP::JIT::CallerFrame;
 using HPHP::JIT::EagerCallerFrame;
 using std::string;
@@ -273,7 +282,7 @@ Variant f_func_get_args() {
   FUNC_GET_ARGS_IMPL(0);
 }
 
-Variant f_hphp_func_slice_args(int offset) {
+Variant HHVM_FUNCTION(func_slice_args, int offset) {
   if (offset < 0) {
     offset = 0;
   }

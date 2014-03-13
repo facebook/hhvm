@@ -4301,7 +4301,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             if (innerCall->isCallToFunction("func_get_args") &&
                 (!innerParams || innerParams->getCount() == 0)) {
               params->removeElement(0);
-              emitFuncCall(e, innerCall, "hphp_func_slice_args", params);
+              emitFuncCall(e, innerCall, "__SystemLib\\func_slice_args", params);
               return true;
             }
           }

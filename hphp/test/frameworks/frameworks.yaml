@@ -28,9 +28,11 @@
 # Unless otherwise specfied, "branch" will be the latest stable release
 # of a framework
   assetic:
-    url: https://github.com/kriswallsmith/assetic.git
-    branch: v1.1.2
-    commit: 735cffd3982c6e8cdebe292d5db39d077f65890f
+    url: https://github.com/fredemmott/assetic.git
+    # Flakey test in v1.1.2 - PR up for master, this branch is the test fix
+    # cherry-picked onto 1.1.2
+    branch: filesystemcachetest-1.1.2
+    commit: 0e5b07185cb82a347ffb700e8bd2415b9ac49a91
     install_root: assetic
     test_root: assetic
     clowns:

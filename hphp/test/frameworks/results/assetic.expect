@@ -198,9 +198,9 @@ Assetic\Test\Cache\ExpiringCacheTest::testRemove
 .
 Assetic\Test\Cache\ExpiringCacheTest::testSetLifetime
 .
-Assetic\Test\Cache\FilesystemCacheTest::testCache
-.
 Assetic\Test\Cache\FilesystemCacheTest::testSetCreatesDir
+.
+Assetic\Test\Cache\FilesystemCacheTest::testWithExistingDir
 .
 Assetic\Test\Extension\Twig\AsseticExtensionTest::testAbsolutePath
 .

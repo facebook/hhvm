@@ -152,6 +152,74 @@ std::vector<RegionDesc::TypePred> IRBuilder::getKnownTypes() const {
 
 //////////////////////////////////////////////////////////////////////
 
+SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
+                                           Type oldType,
+                                           ConstraintFunc constrain) {
+  auto const newType = inst->typeParam();
+  if (oldType.not(newType)) {
+    // If both types are boxed this is ok and even expected as a means to
+    // update the hint for the inner type.
+    if (oldType.isBoxed() && newType.isBoxed()) return nullptr;
+
+    // We got external information (probably from static analysis) that
+    // conflicts with what we've built up so far. There's no reasonable way to
+    // continue here: we can't properly fatal the request because we can't make
+    // a catch trace or SpillStack without HhbcTranslator, we can't punt on
+    // just this instruction because we might not be in the initial translation
+    // phase, and we can't just plow on forward since we'll probably generate
+    // malformed IR. Since this case is very rare, just punt on the whole trace
+    // so it gets interpreted.
+    TRACE_PUNT("Invalid AssertTypeOp");
+  }
+
+  // Asserting in these situations doesn't add any information.
+  if (oldType <= Type::Cls || newType == Type::Gen) return inst->src(0);
+
+  // We're asserting a strict subtype of the old type, so keep the assert
+  // around.
+  if (newType < oldType) return nullptr;
+
+  // oldType is at least as good as the new type. Kill this assert op but
+  // preserve the type we were asserting in case the source type gets relaxed
+  // past it.
+  if (newType >= oldType) {
+    constrain({DataTypeGeneric, newType});
+    return inst->src(0);
+  }
+
+  // Now we're left with cases where neither type is a subtype of the other but
+  // they have some nonzero intersection. We want to end up asserting the
+  // intersection, but we have to constrain the input to avoid reintroducing
+  // types that were removed from the original typeParam.
+  auto const intersect = newType & oldType;
+  inst->setTypeParam(intersect);
+
+  TypeConstraint tc;
+  if (intersect != newType) {
+    auto increment = [](DataTypeCategory& cat) {
+      always_assert(cat != DataTypeSpecialized);
+      cat = static_cast<DataTypeCategory>(static_cast<uint8_t>(cat) + 1);
+    };
+
+    Type relaxed;
+    // Find the most general constraint that doesn't modify the type being
+    // asserted.
+    while ((relaxed = newType & relaxType(oldType, tc)) != intersect) {
+      if (tc.category > DataTypeGeneric &&
+          relaxed.maybeBoxed() && intersect.maybeBoxed() &&
+          (relaxed & Type::Cell) == (intersect & Type::Cell)) {
+        // If the inner type is why we failed, constrain that a level.
+        increment(tc.innerCat);
+      } else {
+        increment(tc.category);
+      }
+    }
+  }
+  constrain(tc);
+
+  return nullptr;
+}
+
 SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   auto const locId = inst->extra<CheckLoc>()->locId;
   Type typeParam   = inst->typeParam();
@@ -194,9 +262,28 @@ SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
     return gen(AssertType, inst->typeParam(), prevValue);
   }
 
-  return m_simplifier.simplifyAssertTypeOp(
+  return preOptimizeAssertTypeOp(
     inst, localType(locId, DataTypeGeneric), [&](TypeConstraint tc) {
       constrainLocal(locId, tc, "preOptimizeAssertLoc");
+    }
+  );
+}
+
+SSATmp* IRBuilder::preOptimizeAssertType(IRInstruction* inst) {
+  auto const src = inst->src(0);
+
+  return preOptimizeAssertTypeOp(inst, src->type(), [&](TypeConstraint tc) {
+    constrainValue(src, tc);
+  });
+}
+
+SSATmp* IRBuilder::preOptimizeAssertStk(IRInstruction* inst) {
+  auto const idx = inst->extra<AssertStk>()->offset;
+  auto const info = getStackValue(inst->src(0), idx);
+
+  return preOptimizeAssertTypeOp(inst, info.knownType,
+    [&](TypeConstraint tc) {
+      constrainStack(inst->src(0), idx, tc);
     }
   );
 }
@@ -343,6 +430,8 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   switch (inst->op()) {
     X(CheckLoc);
     X(AssertLoc);
+    X(AssertStk);
+    X(AssertType);
     X(LdThis);
     X(LdCtx);
     X(DecRefThis);
@@ -360,23 +449,59 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Performs simplification and CSE on the passed-in instruction. If it returns
- * null, that means you should use the passed-in instruction. If it returns
- * non-null, that means you should use the return value, and that you don't need
- * to append any instructions.
+ * Performs simplification and CSE on the input instruction. If the input
+ * instruction has a dest, this will return an SSATmp that represents the same
+ * value as dst(0) of the input instruction. If the input instruction has no
+ * dest, this will return nullptr.
+ *
+ * The caller never needs to clone or append; all this has been done.
  */
-SSATmp* IRBuilder::optimizeWork(IRInstruction* inst,
+SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
+                                CloneFlag doClone,
                                 const folly::Optional<IdomVector>& idoms) {
-  // Since some of these optimizations inspect tracked state, we don't
-  // perform any of them on non-main traces.
-  if (m_savedBlocks.size() > 0) return nullptr;
-
   static DEBUG_ONLY __thread int instNest = 0;
   if (debug) ++instNest;
   SCOPE_EXIT { if (debug) --instNest; };
   DEBUG_ONLY auto indent = [&] { return std::string(instNest * 2, ' '); };
 
-  FTRACE(1, "optimizing {}{}\n", indent(), inst->toString());
+  auto doCse = [&] (IRInstruction* cseInput) -> SSATmp* {
+    if (m_state.enableCse() && cseInput->canCSE()) {
+      SSATmp* cseResult = m_state.cseLookup(cseInput, idoms);
+      if (cseResult) {
+        // Found a dominating instruction that can be used instead of input
+        FTRACE(1, "  {}cse found: {}\n",
+               indent(), cseResult->inst()->toString());
+
+        assert(!cseInput->consumesReferences());
+        if (cseInput->producesReference(0)) {
+          // Replace with an IncRef
+          FTRACE(1, "  {}cse of refcount-producing instruction\n", indent());
+          gen(IncRef, cseResult);
+        }
+        return cseResult;
+      }
+    }
+    return nullptr;
+  };
+
+  auto cloneAndAppendOriginal = [&] () -> SSATmp* {
+    if (inst->op() == Nop) return nullptr;
+    if (auto cseResult = doCse(inst)) {
+      return cseResult;
+    }
+    if (doClone == CloneFlag::Yes) {
+      inst = m_unit.cloneInstruction(inst);
+    }
+    appendInstruction(inst);
+    return inst->dst(0);
+  };
+
+  // Since some of these optimizations inspect tracked state, we don't
+  // perform any of them on non-main traces.
+  if (m_savedBlocks.size() > 0) return cloneAndAppendOriginal();
+
+  // copy propagation on inst source operands
+  copyProp(inst);
 
   // First pass of IRBuilder optimizations try to replace an
   // instruction based on tracked state before we do anything else.
@@ -387,69 +512,52 @@ SSATmp* IRBuilder::optimizeWork(IRInstruction* inst,
            indent(), preOpt->inst()->toString());
     return preOpt;
   }
-  if (inst->op() == Nop) return nullptr;
+  if (inst->op() == Nop) return cloneAndAppendOriginal();
 
-  // copy propagation on inst source operands
-  copyProp(inst);
+  if (!m_enableSimplification) {
+    return cloneAndAppendOriginal();
+  }
 
-  SSATmp* result = nullptr;
+  auto simpResult = m_simplifier.simplify(inst);
 
-  if (m_enableSimplification) {
-    auto simpResult = m_simplifier.simplify(inst);
-    result = simpResult.dst;
+  // These are the possible outputs:
+  //
+  // ([], nullptr): no optimization possible. Use original inst.
+  //
+  // ([], non-nullptr): passing through a src. Don't CSE.
+  //
+  // ([X, ...], Y): throw away input instruction, append 'X, ...' (CSEing
+  //                as we go), return Y.
 
+  if (!simpResult.instrs.empty()) {
+    // New instructions were generated. Append the new ones, filtering out Nops.
     for (auto* newInst : simpResult.instrs) {
-      appendInstruction(newInst);
-    }
+      assert(!newInst->isTransient());
+      if (newInst->op() == Nop) continue;
 
-    if (result) {
-      inst = result->inst();
-      if (inst->producesReference(0)) {
-        // This effectively prevents CSE from kicking in below, which
-        // would replace the instruction with an IncRef.  That is
-        // correct if the simplifier morphed the instruction, but it's
-        // incorrect if the simplifier returned one of original
-        // instruction sources.  We currently have no way to
-        // distinguish the two cases, so we prevent CSE completely for
-        // now.
-        return result;
+      auto cseResult = doCse(newInst);
+      if (cseResult) {
+        appendInstruction(m_unit.mov(newInst->dst(), cseResult, newInst->marker()));
+      } else {
+        appendInstruction(newInst);
       }
     }
+
+    return simpResult.dst;
   }
 
-  if (m_state.enableCse() && inst->canCSE()) {
-    SSATmp* cseResult = m_state.cseLookup(inst, idoms);
-    if (cseResult) {
-      // Found a dominating instruction that can be used instead of inst
-      FTRACE(1, "  {}cse found: {}\n",
-             indent(), cseResult->inst()->toString());
+  // No new instructions were generated. Either simplification didn't do
+  // anything, or we're using some other instruction's dst instead of our own.
 
-      assert(!inst->consumesReferences());
-      if (inst->producesReference(0)) {
-        // Replace with an IncRef
-        FTRACE(1, "  {}cse of refcount-producing instruction\n", indent());
-        gen(IncRef, cseResult);
-      }
-      return cseResult;
-    }
+  if (simpResult.dst) {
+    // We're using some other instruction's output. Don't append anything, and
+    // don't do any CSE.
+    assert(simpResult.dst->inst() != inst);
+    return simpResult.dst;
   }
 
-  return result;
-}
-
-SSATmp* IRBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
-  if (auto const tmp = optimizeWork(inst, folly::none)) {
-    return tmp;
-  }
-  // Couldn't CSE or simplify the instruction; clone it and append.
-  if (inst->op() != Nop) {
-    if (doClone == CloneFlag::Yes) inst = m_unit.cloneInstruction(inst);
-    appendInstruction(inst);
-    // returns nullptr if instruction has no dest, returns the first
-    // (possibly only) dest otherwise
-    return inst->dst(0);
-  }
-  return nullptr;
+  // No simplification happened.
+  return cloneAndAppendOriginal();
 }
 
 /*
@@ -514,24 +622,20 @@ void IRBuilder::reoptimize() {
       assert(inst->marker().valid());
       setMarker(inst->marker());
 
-      auto const tmp = optimizeWork(inst, idoms); // Can generate new instrs!
-      if (!tmp) {
-        // Could not optimize; keep the old instruction
-        appendInstruction(inst);
-        continue;
-      }
+      auto const tmp = optimizeInst(inst, CloneFlag::No, idoms);
+      SSATmp* dst = inst->dst(0);
 
-      SSATmp* dst = inst->dst();
       if (dst != tmp) {
         // The result of optimization has a different destination than the inst.
         // Generate a mov(tmp->dst) to get result into dst. If we get here then
         // assume the last instruction in the block isn't a guard. If it was,
         // we would have to insert the mov on the fall-through edge.
+        assert(inst->op() != DefLabel);
         assert(block->empty() || !block->back().isBlockEnd());
         appendInstruction(m_unit.mov(dst, tmp, inst->marker()));
       }
 
-      if (inst->isBlockEnd()) {
+      if (inst->block() == nullptr && inst->isBlockEnd()) {
         // We're not re-adding the block-end instruction. Unset its edges.
         inst->setTaken(nullptr);
         inst->setNext(nullptr);

@@ -315,13 +315,13 @@ template<class... Args> SSATmp* Simplifier::gen(Opcode op, BCMarker marker,
                                                 Args&&... args) {
   return makeInstruction(
     [this] (IRInstruction* inst) -> SSATmp* {
+      auto prevNewCount = m_newInsts.size();
       auto newDest = simplifyWork(inst);
 
-      if (inst->op() == Nop) {
-        return nullptr;
-      }
-
-      if (newDest) {
+      // If any simplification happened to this instruction, drop it. We have to
+      // check that nothing was added to m_newInsts because that's the only way
+      // we can tell simplification happened to a no-dest instruction.
+      if (newDest || m_newInsts.size() != prevNewCount) {
         return newDest;
       } else {
         assert(inst->isTransient());
@@ -339,12 +339,12 @@ template<class... Args> SSATmp* Simplifier::gen(Opcode op, BCMarker marker,
 
 //////////////////////////////////////////////////////////////////////
 
-Simplifier::Result Simplifier::simplify(IRInstruction* inst) {
+Simplifier::Result Simplifier::simplify(const IRInstruction* inst) {
   SSATmp* newDst = simplifyWork(inst);
   return Result{std::move(m_newInsts), newDst};
 }
 
-SSATmp* Simplifier::simplifyWork(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
   m_insts.push(inst);
   SCOPE_EXIT {
     assert(m_insts.top() == inst);
@@ -455,7 +455,6 @@ SSATmp* Simplifier::simplifyWork(IRInstruction* inst) {
     case IncRef:       return simplifyIncRef(inst);
     case IncRefCtx:    return simplifyIncRefCtx(inst);
     case CheckType:    return simplifyCheckType(inst);
-    case AssertType:   return simplifyAssertType(inst);
     case CheckStk:     return simplifyCheckStk(inst);
     case AssertNonNull:return simplifyAssertNonNull(inst);
 
@@ -468,7 +467,6 @@ SSATmp* Simplifier::simplifyWork(IRInstruction* inst) {
     case SpillStack:   return simplifySpillStack(inst);
     case CastStk:      return simplifyCastStk(inst);
     case CoerceStk:    return simplifyCoerceStk(inst);
-    case AssertStk:    return simplifyAssertStk(inst);
     case LdStack:      return simplifyLdStack(inst);
     case TakeStack:    return simplifyTakeStack(inst);
     case LdStackAddr:  return simplifyLdStackAddr(inst);
@@ -488,7 +486,7 @@ SSATmp* Simplifier::simplifyWork(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
+SSATmp* Simplifier::simplifySpillStack(const IRInstruction* inst) {
   auto const sp           = inst->src(0);
   auto const spDeficit    = inst->src(1)->intVal();
   auto const numSpillSrcs = inst->srcs().subpiece(2).size();
@@ -502,15 +500,15 @@ SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
 
 // We never inline functions that could have a VarEnv, so an
 // ExitOnVarEnv that has a frame based on DefInlineFP can be removed.
-SSATmp* Simplifier::simplifyExitOnVarEnv(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyExitOnVarEnv(const IRInstruction* inst) {
   auto const frameInst = inst->src(0)->inst();
   if (frameInst->op() == DefInlineFP) {
-    inst->convertToNop();
+    return gen(Nop);
   }
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyLdCtx(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyLdCtx(const IRInstruction* inst) {
   auto const func = inst->extra<LdCtx>()->func;
   if (func->isStatic()) {
     // ActRec->m_cls of a static function is always a valid class pointer with
@@ -520,7 +518,7 @@ SSATmp* Simplifier::simplifyLdCtx(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyLdClsCtx(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyLdClsCtx(const IRInstruction* inst) {
   SSATmp*  ctx = inst->src(0);
   Type ctxType = ctx->type();
   if (ctxType <= Type::Obj) {
@@ -533,7 +531,7 @@ SSATmp* Simplifier::simplifyLdClsCtx(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyGetCtxFwdCall(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyGetCtxFwdCall(const IRInstruction* inst) {
   SSATmp*  srcCtx = inst->src(0);
   if (srcCtx->isA(Type::Cctx)) {
     return srcCtx;
@@ -541,14 +539,14 @@ SSATmp* Simplifier::simplifyGetCtxFwdCall(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvClsToCctx(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvClsToCctx(const IRInstruction* inst) {
   auto* srcInst = inst->src(0)->inst();
   if (srcInst->is(LdClsCctx)) return srcInst->src(0);
 
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyLdCls(const IRInstruction* inst) {
   SSATmp* clsName = inst->src(0);
   if (clsName->isConst()) {
     const Class* cls = Unit::lookupClass(clsName->strVal());
@@ -570,7 +568,7 @@ SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyCheckType(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   auto const oldType = src->type();
   auto const newType = inst->typeParam();
@@ -608,15 +606,7 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyAssertType(IRInstruction* inst) {
-  auto const src = inst->src(0);
-
-  return simplifyAssertTypeOp(inst, src->type(), [&](TypeConstraint tc) {
-    m_irb.constrainValue(src, tc);
-  });
-}
-
-SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyCheckStk(const IRInstruction* inst) {
   auto const newType = inst->typeParam();
   auto sp = inst->src(0);
   auto offset = inst->extra<CheckStk>()->offset;
@@ -655,7 +645,7 @@ SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyQueryJmp(const IRInstruction* inst) {
   SSATmp* src1 = inst->src(0);
   SSATmp* src2 = inst->src(1);
   Opcode opc = inst->op();
@@ -664,21 +654,14 @@ SSATmp* Simplifier::simplifyQueryJmp(IRInstruction* inst) {
   if (!newCmp) return nullptr;
 
   // Become an equivalent conditional jump and reuse that logic.
-  m_irb.unit().replace(
-    inst,
-    JmpNZero,
-    inst->taken(),
-    newCmp
-  );
-
-  return simplifyCondJmp(inst);
+  return gen(JmpNZero, inst->taken(), newCmp);
 }
 
 SSATmp* Simplifier::simplifyMov(SSATmp* src) {
   return src;
 }
 
-SSATmp* Simplifier::simplifyAbsDbl(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyAbsDbl(const IRInstruction* inst) {
   auto src = inst->src(0);
 
   if (src->isConst()) {
@@ -977,7 +960,7 @@ SSATmp* Simplifier::simplifyMod(SSATmp* src1, SSATmp* src2) {
   return src2Val == min ? src1 : nullptr;
 }
 
-SSATmp* Simplifier::simplifyDivDbl(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyDivDbl(const IRInstruction* inst) {
   auto src1 = inst->src(0);
   auto src2 = inst->src(1);
 
@@ -1138,7 +1121,7 @@ SSATmp* Simplifier::simplifyShift(SSATmp* src1, SSATmp* src2, Oper op) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyShl(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyShl(const IRInstruction* inst) {
   auto src1 = inst->src(0);
   auto src2 = inst->src(1);
 
@@ -1146,7 +1129,7 @@ SSATmp* Simplifier::simplifyShl(IRInstruction* inst) {
                        return a << b; });
 }
 
-SSATmp* Simplifier::simplifyShr(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyShr(const IRInstruction* inst) {
   auto src1 = inst->src(0);
   auto src2 = inst->src(1);
 
@@ -1176,7 +1159,7 @@ static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   }
 }
 
-SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
+SSATmp* Simplifier::simplifyCmp(Opcode opName, const IRInstruction* inst,
                                 SSATmp* src1, SSATmp* src2) {
   auto newInst = [inst, this](Opcode op, SSATmp* src1, SSATmp* src2) {
     return gen(op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
@@ -1427,7 +1410,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyIsType(const IRInstruction* inst) {
   bool trueSense = inst->op() == IsType;
   auto type      = inst->typeParam();
   auto src       = inst->src(0);
@@ -1461,7 +1444,7 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyIsScalarType(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyIsScalarType(const IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   if (src->type().isKnownDataType()) {
     if (src->isA(Type::Int | Type::Dbl | Type::Str | Type::Bool)) {
@@ -1473,7 +1456,7 @@ SSATmp* Simplifier::simplifyIsScalarType(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConcatCellCell(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConcatCellCell(const IRInstruction* inst) {
   SSATmp* src1 = inst->src(0);
   SSATmp* src2 = inst->src(1);
   auto catchBlock = inst->taken();
@@ -1536,7 +1519,7 @@ SSATmp* Simplifier::simplifyConcatStrStr(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvToArr(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvToArr(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     Array arr = Array::Create(src->variantVal());
@@ -1545,7 +1528,7 @@ SSATmp* Simplifier::simplifyConvToArr(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvArrToBool(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvArrToBool(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     if (src->arrVal()->empty()) {
@@ -1556,7 +1539,7 @@ SSATmp* Simplifier::simplifyConvArrToBool(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvDblToBool(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvDblToBool(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     return cns(bool(src->dblVal()));
@@ -1565,7 +1548,7 @@ SSATmp* Simplifier::simplifyConvDblToBool(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvIntToBool(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvIntToBool(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     return cns(bool(src->intVal()));
@@ -1573,7 +1556,7 @@ SSATmp* Simplifier::simplifyConvIntToBool(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvStrToBool(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvStrToBool(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     // only the strings "", and "0" convert to false, all other strings
@@ -1584,7 +1567,7 @@ SSATmp* Simplifier::simplifyConvStrToBool(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvArrToDbl(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvArrToDbl(const IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   if (src->isConst()) {
     if (src->arrVal()->empty()) {
@@ -1594,7 +1577,7 @@ SSATmp* Simplifier::simplifyConvArrToDbl(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvBoolToDbl(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvBoolToDbl(const IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   if (src->isConst()) {
     return cns(double(src->boolVal()));
@@ -1602,7 +1585,7 @@ SSATmp* Simplifier::simplifyConvBoolToDbl(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvIntToDbl(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvIntToDbl(const IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   if (src->isConst()) {
     return cns(double(src->intVal()));
@@ -1613,7 +1596,7 @@ SSATmp* Simplifier::simplifyConvIntToDbl(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvStrToDbl(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvStrToDbl(const IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   if (src->isConst()) {
     const StringData *str = src->strVal();
@@ -1630,7 +1613,7 @@ SSATmp* Simplifier::simplifyConvStrToDbl(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvArrToInt(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvArrToInt(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     if (src->arrVal()->empty()) {
@@ -1641,7 +1624,7 @@ SSATmp* Simplifier::simplifyConvArrToInt(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvBoolToInt(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvBoolToInt(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     return cns(int(src->boolVal()));
@@ -1649,7 +1632,7 @@ SSATmp* Simplifier::simplifyConvBoolToInt(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvDblToInt(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvDblToInt(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     return cns(toInt64(src->dblVal()));
@@ -1657,7 +1640,7 @@ SSATmp* Simplifier::simplifyConvDblToInt(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvStrToInt(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvStrToInt(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     const StringData *str = src->strVal();
@@ -1674,7 +1657,7 @@ SSATmp* Simplifier::simplifyConvStrToInt(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvBoolToStr(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvBoolToStr(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     if (src->boolVal()) {
@@ -1685,7 +1668,7 @@ SSATmp* Simplifier::simplifyConvBoolToStr(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvDblToStr(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvDblToStr(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     String dblStr(buildStringData(src->dblVal()));
@@ -1694,7 +1677,7 @@ SSATmp* Simplifier::simplifyConvDblToStr(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvIntToStr(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvIntToStr(const IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   if (src->isConst()) {
     return cns(
@@ -1704,7 +1687,7 @@ SSATmp* Simplifier::simplifyConvIntToStr(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvCellToBool(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvCellToBool(const IRInstruction* inst) {
   auto const src     = inst->src(0);
   auto const srcType = src->type();
 
@@ -1730,7 +1713,7 @@ SSATmp* Simplifier::simplifyConvCellToBool(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvCellToStr(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvCellToStr(const IRInstruction* inst) {
   auto const src        = inst->src(0);
   auto const srcType    = src->type();
   auto const catchTrace = inst->taken();
@@ -1754,7 +1737,7 @@ SSATmp* Simplifier::simplifyConvCellToStr(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvCellToInt(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvCellToInt(const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
 
@@ -1770,7 +1753,7 @@ SSATmp* Simplifier::simplifyConvCellToInt(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvCellToDbl(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyConvCellToDbl(const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
 
@@ -1787,7 +1770,7 @@ SSATmp* Simplifier::simplifyConvCellToDbl(IRInstruction* inst) {
 }
 
 template<class Oper>
-SSATmp* Simplifier::simplifyRoundCommon(IRInstruction* inst, Oper op) {
+SSATmp* Simplifier::simplifyRoundCommon(const IRInstruction* inst, Oper op) {
   auto const src  = inst->src(0);
 
   if (src->isConst()) {
@@ -1802,15 +1785,15 @@ SSATmp* Simplifier::simplifyRoundCommon(IRInstruction* inst, Oper op) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyFloor(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyFloor(const IRInstruction* inst) {
   return simplifyRoundCommon(inst, floor);
 }
 
-SSATmp* Simplifier::simplifyCeil(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyCeil(const IRInstruction* inst) {
   return simplifyRoundCommon(inst, ceil);
 }
 
-SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyUnbox(const IRInstruction* inst) {
   auto* src = inst->src(0);
   auto type = outputType(inst);
 
@@ -1827,56 +1810,56 @@ SSATmp* Simplifier::simplifyUnbox(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyUnboxPtr(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyUnboxPtr(const IRInstruction* inst) {
   if (inst->src(0)->isA(Type::PtrToCell)) {
     return inst->src(0);
   }
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyBoxPtr(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyBoxPtr(const IRInstruction* inst) {
   if (inst->src(0)->isA(Type::PtrToBoxedCell)) {
     return inst->src(0);
   }
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyCheckInit(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyCheckInit(const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
   assert(srcType.notPtr());
   assert(inst->taken());
-  if (srcType.not(Type::Uninit)) inst->convertToNop();
+  if (srcType.not(Type::Uninit)) return gen(Nop);
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyDecRef(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyDecRef(const IRInstruction* inst) {
   auto src = inst->src(0);
   if (!m_irb.typeMightRelax(src) && !isRefCounted(src)) {
-    inst->convertToNop();
+    return gen(Nop);
   }
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyIncRef(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyIncRef(const IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   if (!m_irb.typeMightRelax(src) && !isRefCounted(src)) {
-    inst->convertToNop();
+    return gen(Nop);
   }
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyIncRefCtx(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyIncRefCtx(const IRInstruction* inst) {
   auto* ctx = inst->src(0);
   if (ctx->isA(Type::Obj)) {
-    inst->setOpcode(IncRef);
+    return gen(IncRef, ctx);
   } else if (!m_irb.typeMightRelax(ctx) && ctx->type().notCounted()) {
-    inst->convertToNop();
+    return gen(Nop);
   }
 
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyCondJmp(const IRInstruction* inst) {
   SSATmp* const src            = inst->src(0);
   IRInstruction* const srcInst = src->inst();
   const Opcode srcOpcode       = srcInst->op();
@@ -1894,13 +1877,13 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
       val = !val;
     }
     if (val) {
-      inst->convertToJmp();
+      return gen(Jmp, inst->taken());
     } else {
       if (!RuntimeOption::EvalHHIRBytecodeControlFlow) {
         // We need explicit jumps to keep state tracking happy while
         // building IR with bytecode control flow.  These can be
         // removed in a later pass.
-        inst->convertToNop();
+        return gen(Nop);
       }
     }
     return nullptr;
@@ -1908,9 +1891,11 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
 
   // Pull negations into the jump.
   if (srcOpcode == XorBool && srcInst->src(1)->isConst(true)) {
-    inst->setOpcode(inst->op() == JmpZero ? JmpNZero : JmpZero);
-    inst->setSrc(0, srcInst->src(0));
-    return nullptr;
+    return gen(
+      inst->op() == JmpZero ? JmpNZero : JmpZero,
+      inst->taken(),
+      srcInst->src(0)
+    );
   }
 
   /*
@@ -1925,7 +1910,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
 
   // If the source is conversion of an int or pointer to boolean, we
   // can test the int/ptr value directly.
-  auto isConvIntOrPtrToBool = [&](IRInstruction* instr) {
+  auto isConvIntOrPtrToBool = [&](const IRInstruction* instr) {
     switch (instr->op()) {
     case ConvIntToBool:
       return true;
@@ -1938,8 +1923,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
   };
   if (isConvIntOrPtrToBool(srcInst)) {
     // We can just check the int or ptr directly. Borrow the Conv's src.
-    inst->setSrc(0, srcInst->src(0));
-    return nullptr;
+    return gen(inst->op(), inst->taken(), srcInst->src(0));
   }
 
   auto canCompareFused = [&]() {
@@ -1958,49 +1942,34 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
                             ? negateQueryOp(srcOpcode) : srcOpcode);
     SrcRange ssas = srcInst->srcs();
 
-    m_irb.unit().replace(
-      inst,
-      opc,
-      inst->maybeTypeParam(),
-      std::make_pair(ssas.size(), ssas.begin())
-    );
+    return gen(opc, inst->maybeTypeParam(), inst->taken(),
+               std::make_pair(ssas.size(), ssas.begin()));
   }
 
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyCastStk(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyCastStk(const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<CastStk>()->offset);
   if (info.knownType <= inst->typeParam()) {
     // No need to cast---the type was as good or better.
-    inst->convertToNop();
+    return gen(Nop);
   }
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyCoerceStk(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyCoerceStk(const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<CoerceStk>()->offset);
   if (info.knownType <= inst->typeParam()) {
     // No need to cast---the type was as good or better.
-    inst->convertToNop();
+    return gen(Nop);
   }
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyAssertStk(IRInstruction* inst) {
-  auto const idx = inst->extra<AssertStk>()->offset;
-  auto const info = getStackValue(inst->src(0), idx);
-
-  return simplifyAssertTypeOp(inst, info.knownType,
-    [&](TypeConstraint tc) {
-      m_irb.constrainStack(inst->src(0), idx, tc);
-    }
-  );
-}
-
-SSATmp* Simplifier::simplifyLdStack(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyLdStack(const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<LdStack>()->offset);
 
@@ -2020,71 +1989,96 @@ SSATmp* Simplifier::simplifyLdStack(IRInstruction* inst) {
     }
     return info.value;
   }
-  inst->setTypeParam(std::min(inst->typeParam(), info.knownType));
-  return nullptr;
-}
 
-SSATmp* Simplifier::simplifyTakeStack(IRInstruction* inst) {
-  if (inst->src(0)->type().notCounted() &&
-      !m_irb.typeMightRelax(inst->src(0))) {
-    inst->convertToNop();
+  if (info.knownType < inst->typeParam()) {
+    return gen(
+      LdStack,
+      *inst->extra<LdStack>(),
+      info.knownType,
+      inst->src(0)
+    );
   }
 
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyDecRefLoc(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyTakeStack(const IRInstruction* inst) {
+  if (inst->src(0)->type().notCounted() &&
+      !m_irb.typeMightRelax(inst->src(0))) {
+    return gen(Nop);
+  }
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyDecRefLoc(const IRInstruction* inst) {
   auto const localValue = m_irb.localValue(inst->extra<DecRefLoc>()->locId,
                                           DataTypeGeneric);
   if (!m_irb.typeMightRelax(localValue) && inst->typeParam().notCounted()) {
-    inst->convertToNop();
+    return gen(Nop);
   }
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyLdLoc(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyLdLoc(const IRInstruction* inst) {
   // Ideally we'd replace LdLoc<Null,...> with a constant value of that type,
   // but that prevents the guard relaxation code from tracing the source of
   // values.
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyLdStackAddr(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyLdStackAddr(const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<StackOffset>()->offset);
-  inst->setTypeParam(std::min(inst->typeParam(), info.knownType.ptr()));
+  // NB: strict subtype relation. Non-strict results in infinite recursion.
+  if (info.knownType.ptr() < inst->typeParam()) {
+    return gen(
+      LdStackAddr,
+      *inst->extra<StackOffset>(),
+      info.knownType.ptr(),
+      inst->src(0)
+    );
+  }
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyDecRefStack(const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<StackOffset>()->offset);
   if (info.value && !info.spansCall) {
     if (info.value->type().maybeCounted() || m_irb.typeMightRelax(info.value)) {
       gen(TakeStack, info.value);
     }
-    inst->convertToNop();
     return gen(DecRef, info.value);
   }
   if (m_irb.typeMightRelax(info.value)) {
     return nullptr;
   }
 
-  inst->setTypeParam(std::min(inst->typeParam(), info.knownType));
+  // NB: strict subtype relation. Non-strict results in infinite recursion.
+  if (info.knownType < inst->typeParam()) {
+    return gen(
+      DecRefStack,
+      *inst->extra<StackOffset>(),
+      info.knownType,
+      inst->src(0)
+    );
+  }
+
   if (inst->typeParam().notCounted()) {
-    inst->convertToNop();
+    return gen(Nop);
   }
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyAssertNonNull(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyAssertNonNull(const IRInstruction* inst) {
   if (inst->src(0)->type().not(Type::Nullptr)) {
     return inst->src(0);
   }
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyCheckPackedArrayBounds(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyCheckPackedArrayBounds(const IRInstruction* inst) {
   auto* array = inst->src(0);
   auto* idx = inst->src(1);
 
@@ -2093,10 +2087,10 @@ SSATmp* Simplifier::simplifyCheckPackedArrayBounds(IRInstruction* inst) {
     if (idxVal >= 0xffffffffull) {
       // ArrayData can't hold more than 2^32 - 1 elements, so this is always
       // going to fail.
-      inst->convertToJmp();
+      return gen(Jmp, inst->taken());
     } else if (array->isConst()) {
       if (idxVal >= array->arrVal()->size()) {
-        inst->convertToJmp();
+        return gen(Jmp, inst->taken());
       } else {
         // We should convert inst to a nop here but that exposes t3626113
       }
@@ -2106,7 +2100,7 @@ SSATmp* Simplifier::simplifyCheckPackedArrayBounds(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyLdPackedArrayElem(IRInstruction* inst) {
+SSATmp* Simplifier::simplifyLdPackedArrayElem(const IRInstruction* inst) {
   auto* arrayTmp = inst->src(0);
   auto* idxTmp   = inst->src(1);
   if (arrayTmp->isConst() && idxTmp->isConst()) {
@@ -2119,74 +2113,6 @@ SSATmp* Simplifier::simplifyLdPackedArrayElem(IRInstruction* inst) {
     if (value->m_type == KindOfRef) value = value->m_data.pref->tv();
     return cns(*value);
   }
-
-  return nullptr;
-}
-
-SSATmp* Simplifier::simplifyAssertTypeOp(IRInstruction* inst, Type oldType,
-                                         ConstraintFunc constrain) const {
-  auto const newType = inst->typeParam();
-
-  if (oldType.not(newType)) {
-    // If both types are boxed this is ok and even expected as a means to
-    // update the hint for the inner type.
-    if (oldType.isBoxed() && newType.isBoxed()) return nullptr;
-
-    // We got external information (probably from static analysis) that
-    // conflicts with what we've built up so far. There's no reasonable way to
-    // continue here: we can't properly fatal the request because we can't make
-    // a catch trace or SpillStack without HhbcTranslator, we can't punt on
-    // just this instruction because we might not be in the initial translation
-    // phase, and we can't just plow on forward since we'll probably generate
-    // malformed IR. Since this case is very rare, just punt on the whole trace
-    // so it gets interpreted.
-    TRACE_PUNT("Invalid AssertTypeOp");
-  }
-
-  // Asserting in these situations doesn't add any information.
-  if (oldType <= Type::Cls || newType == Type::Gen) return inst->src(0);
-
-  // We're asserting a strict subtype of the old type, so keep the assert
-  // around.
-  if (newType < oldType) return nullptr;
-
-  // oldType is at least as good as the new type. Kill this assert op but
-  // preserve the type we were asserting in case the source type gets relaxed
-  // past it.
-  if (newType >= oldType) {
-    constrain({DataTypeGeneric, newType});
-    return inst->src(0);
-  }
-
-  // Now we're left with cases where neither type is a subtype of the other but
-  // they have some nonzero intersection. We want to end up asserting the
-  // intersection, but we have to constrain the input to avoid reintroducing
-  // types that were removed from the original typeParam.
-  auto const intersect = newType & oldType;
-  inst->setTypeParam(intersect);
-
-  TypeConstraint tc;
-  if (intersect != newType) {
-    auto increment = [](DataTypeCategory& cat) {
-      always_assert(cat != DataTypeSpecialized);
-      cat = static_cast<DataTypeCategory>(static_cast<uint8_t>(cat) + 1);
-    };
-
-    Type relaxed;
-    // Find the most general constraint that doesn't modify the type being
-    // asserted.
-    while ((relaxed = newType & relaxType(oldType, tc)) != intersect) {
-      if (tc.category > DataTypeGeneric &&
-          relaxed.maybeBoxed() && intersect.maybeBoxed() &&
-          (relaxed & Type::Cell) == (intersect & Type::Cell)) {
-        // If the inner type is why we failed, constrain that a level.
-        increment(tc.innerCat);
-      } else {
-        increment(tc.category);
-      }
-    }
-  }
-  constrain(tc);
 
   return nullptr;
 }

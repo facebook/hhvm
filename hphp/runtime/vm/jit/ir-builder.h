@@ -200,7 +200,7 @@ struct IRBuilder {
   SSATmp* gen(Opcode op, BCMarker marker, Args&&... args) {
     return makeInstruction(
       [this] (IRInstruction* inst) {
-        return optimizeInst(inst, CloneFlag::Yes);
+        return optimizeInst(inst, CloneFlag::Yes, folly::none);
       },
       op,
       marker,
@@ -213,7 +213,7 @@ struct IRBuilder {
    * optimization passes and updating tracked state.
    */
   SSATmp* add(IRInstruction* inst) {
-    return optimizeInst(inst, CloneFlag::No);
+    return optimizeInst(inst, CloneFlag::No, folly::none);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -356,8 +356,12 @@ private:
   };
 
 private:
+  using ConstraintFunc = std::function<void(TypeConstraint)>;
+  SSATmp*   preOptimizeAssertTypeOp(IRInstruction*, Type, ConstraintFunc);
   SSATmp*   preOptimizeCheckLoc(IRInstruction*);
   SSATmp*   preOptimizeAssertLoc(IRInstruction*);
+  SSATmp*   preOptimizeAssertStk(IRInstruction*);
+  SSATmp*   preOptimizeAssertType(IRInstruction*);
   SSATmp*   preOptimizeLdThis(IRInstruction*);
   SSATmp*   preOptimizeLdCtx(IRInstruction*);
   SSATmp*   preOptimizeDecRefThis(IRInstruction*);
@@ -367,11 +371,10 @@ private:
   SSATmp*   preOptimizeStLoc(IRInstruction*);
   SSATmp*   preOptimize(IRInstruction* inst);
 
-  SSATmp*   optimizeWork(IRInstruction* inst,
-                         const folly::Optional<IdomVector>&);
-
   enum class CloneFlag { Yes, No };
-  SSATmp*   optimizeInst(IRInstruction* inst, CloneFlag doclone);
+  SSATmp*   optimizeInst(IRInstruction* inst,
+                         CloneFlag doClone,
+                         const folly::Optional<IdomVector>& idoms);
 
 private:
   void      appendInstruction(IRInstruction* inst);

@@ -117,7 +117,7 @@ static const std::unordered_map<fbstring, FuncFlags> g_flagsMap =
   {"NoDefaultSweep",                 NoDefaultSweep},
   {"IsSystem",                       IsSystem},
   {"IsTrait",                        IsTrait},
-  {"NeedsActRec",                    NeedsActRec},
+  {"NoFCallBuiltin",                 NoFCallBuiltin},
 };
 
 static const std::unordered_set<fbstring> g_knownStringConstants =

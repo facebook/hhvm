@@ -38,7 +38,7 @@ static bool ustring_from_char(icu::UnicodeString& ret,
   return true;
 }
 
-icu::TimeZone* IntlTimeZone::ParseArg(CVarRef arg,
+icu::TimeZone* IntlTimeZone::ParseArg(const Variant& arg,
                                       const String& funcname,
                                       IntlError* err) {
   String tzstr;
@@ -118,7 +118,7 @@ static Object HHVM_STATIC_METHOD(IntlTimeZone, createDefault) {
 }
 
 static Variant HHVM_STATIC_METHOD(IntlTimeZone, createEnumeration,
-                                  CVarRef countryRawOffset) {
+                                  const Variant& countryRawOffset) {
   icu::StringEnumeration *se = nullptr;
 
   if (countryRawOffset.isNull()) {
@@ -288,7 +288,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getTZDataVersion) {
   return String(tzdv, CopyString);
 }
 
-static bool HHVM_METHOD(IntlTimeZone, hasSameRules, CObjRef otherTimeZone) {
+static bool HHVM_METHOD(IntlTimeZone, hasSameRules, const Object& otherTimeZone) {
   TZ_GET(obj1, this_, false);
   TZ_GET(obj2, otherTimeZone, false);
   return obj1->timezone()->hasSameRules(*obj2->timezone());
@@ -306,7 +306,7 @@ static bool HHVM_METHOD(IntlTimeZone, useDaylightTime) {
 static Variant HHVM_STATIC_METHOD(IntlTimeZone, createTimeZoneIDEnumeration,
                                   int64_t zoneType,
                                   const String& region,
-                                  CVarRef offset) {
+                                  const Variant& offset) {
   if (zoneType != UCAL_ZONE_TYPE_ANY &&
       zoneType != UCAL_ZONE_TYPE_CANONICAL &&
       zoneType != UCAL_ZONE_TYPE_CANONICAL_LOCATION) {

@@ -514,6 +514,66 @@
                     ]
                 },
                 {
+                    "name": "take",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector containing the first n values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "n",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "takeWhile",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector containing the values of this Vector up to but not including the first value that produces false when passed to the specified callback.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "skip",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector containing all the values except the first n of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "n",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "skipWhile",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector containing the values of this Vector excluding the first values that produces true when passed to the specified callback.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "fn",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "reverse",
                     "flags": [
                     ],
@@ -894,6 +954,66 @@
                   "args": [
                       {
                           "name": "iterable",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "take",
+                  "flags": [
+                  ],
+                  "desc": "Returns a ImmVector containing the first n values of this ImmVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "n",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "takeWhile",
+                  "flags": [
+                  ],
+                  "desc": "Returns a ImmVector containing the values of this ImmVector up to but not including the first value that produces false when passed to the specified callback.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "callback",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "skip",
+                  "flags": [
+                  ],
+                  "desc": "Returns a ImmVector containing all values except the first n of this ImmVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "n",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "skipWhile",
+                  "flags": [
+                  ],
+                  "desc": "Returns a ImmVector containing the values of this ImmVector excluding the first values that produces true when passed to the specified callback.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "fn",
                           "type": "Variant"
                       }
                   ]
@@ -1730,6 +1850,66 @@
                     ]
                 },
                 {
+                    "name": "take",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map containing the first n key/value pairs of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "n",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "takeWhile",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map containing the key/value pairs of this Map up to but not including the first value that produces false when passed to the specified callback.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "skip",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map containing all key/value pairs except the first n of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "n",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "skipWhile",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map containing the key/value pairs of this Map excluding the first values that produces true when passed to the specified callback.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "fn",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "__toString",
                     "return": {
                         "type": "String"
@@ -2211,6 +2391,66 @@
                     ]
                 },
                 {
+                    "name": "take",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmMap containing the first n key/value pairs of this ImmMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "n",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "takeWhile",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmMap containing the key/value pairs of this ImmMap up to but not including the first value that produces false when passed to the specified callback.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "skip",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmMap containing all key/value pairs except the first n of this ImmMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "n",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "skipWhile",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmMap containing the key/value pairs of this ImmMap excluding the first values that produces true when passed to the specified callback.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "fn",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "__toString",
                     "return": {
                         "type": "String"
@@ -2679,6 +2919,66 @@
                     ]
                 },
                 {
+                    "name": "take",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set containing the first n values of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "n",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "takeWhile",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set containing the values of this Set up to but not including the first value that produces false when passed to the specified callback.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "skip",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set containing all values except the first n of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "n",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "skipWhile",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set containing all the values of this Set excluding the first values that produces true when passed to the specified callback.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "fn",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "removeAll",
                     "flags": [
                     ],
@@ -3063,6 +3363,66 @@
                     "args": [
                         {
                             "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "take",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmSet containing the first n values of this ImmSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "n",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "takeWhile",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmSet containing the values of this ImmSet up to but not including the first value that produces false when passed to the specified callback.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "skip",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmSet containing all values except the first n of this ImmSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "n",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "skipWhile",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmSet containing all the values of this ImmSet excluding the first values that produces true when passed to the specified callback.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "fn",
                             "type": "Variant"
                         }
                     ]
@@ -3541,6 +3901,66 @@
                     "args": [
                         {
                             "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "take",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector containing the first n values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "n",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "takeWhile",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector containing the values of this Pair up to but not including the first value that produces false when passed to the specified callback.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "skip",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector containing all values except the first n of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "n",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "skipWhile",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector containing all the values of this Pair excluding the first values that produces true when passed to the specified callback.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "fn",
                             "type": "Variant"
                         }
                     ]

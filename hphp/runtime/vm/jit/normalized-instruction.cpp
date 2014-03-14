@@ -61,16 +61,16 @@ NormalizedInstruction::~NormalizedInstruction() { }
  *   Helpers for recovering context of this instruction.
  */
 Op NormalizedInstruction::op() const {
-  return toOp(*pc());
+  return *reinterpret_cast<const Op*>(pc());
 }
 
 Op NormalizedInstruction::mInstrOp() const {
-  Op opcode = op();
+  auto const opcode = op();
 #define MII(instr, a, b, i, v, d) case Op##instr##M: return opcode;
   switch (opcode) {
     MINSTRS
-  case OpFPassM:
-    return preppedByRef ? OpVGetM : OpCGetM;
+  case Op::FPassM:
+    return preppedByRef ? Op::VGetM : Op::CGetM;
   default:
     not_reached();
   }

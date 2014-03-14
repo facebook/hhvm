@@ -82,17 +82,34 @@ Type typeAdd(Type t1, Type t2) {
   return TInitCell;
 }
 
-Type typeSub(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellSub))     return *t;
+Type typeAddO(Type t1, Type t2) {
+  if (auto t = eval_const(t1, t2, cellAddO))    return *t;
+  if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt)) return TNum;
+  if (auto t = usual_arith_conversions(t1, t2)) return *t;
+  if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr)) return TArr;
+  return TInitCell;
+}
+
+template <class CellOp>
+Type typeSubMulImpl(Type t1, Type t2, CellOp op) {
+  if (auto t = eval_const(t1, t2, op))          return *t;
   if (auto t = usual_arith_conversions(t1, t2)) return *t;
   return TInitCell;
 }
 
-Type typeMul(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellMul))     return *t;
+template <class CellOp>
+Type typeSubMulImplO(Type t1, Type t2, CellOp op) {
+  if (auto t = eval_const(t1, t2, op))          return *t;
+  if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt)) return TNum;
   if (auto t = usual_arith_conversions(t1, t2)) return *t;
   return TInitCell;
 }
+
+Type typeSub(Type t1, Type t2)  { return typeSubMulImpl(t1, t2, cellSub); }
+Type typeMul(Type t1, Type t2)  { return typeSubMulImpl(t1, t2, cellMul); }
+
+Type typeSubO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, cellSubO); }
+Type typeMulO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, cellMulO); }
 
 Type typeDiv(Type t1, Type t2) {
   if (auto t = eval_const_divmod(t1, t2, cellDiv)) return *t;

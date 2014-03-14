@@ -179,6 +179,9 @@ IRTranslator::translateBinaryArithOp(const NormalizedInstruction& i) {
   case Op::Add:    HHIR_EMIT(Add);
   case Op::Sub:    HHIR_EMIT(Sub);
   case Op::Mul:    HHIR_EMIT(Mul);
+  case Op::AddO:   HHIR_EMIT(AddO);
+  case Op::SubO:   HHIR_EMIT(SubO);
+  case Op::MulO:   HHIR_EMIT(MulO);
   case Op::BitAnd: HHIR_EMIT(BitAnd);
   case Op::BitOr:  HHIR_EMIT(BitOr);
   case Op::BitXor: HHIR_EMIT(BitXor);
@@ -500,6 +503,17 @@ IRTranslator::translateAdd(const NormalizedInstruction& i) {
     HHIR_EMIT(ArrayAdd);
   } else {
     HHIR_EMIT(Add);
+  }
+}
+
+void
+IRTranslator::translateAddO(const NormalizedInstruction& i) {
+  auto leftType = m_hhbcTrans.topType(1);
+  auto rightType = m_hhbcTrans.topType(0);
+  if (leftType <= Type::Arr && rightType <= Type::Arr) {
+    HHIR_EMIT(ArrayAdd);
+  } else {
+    HHIR_EMIT(AddO);
   }
 }
 
@@ -860,6 +874,9 @@ IRTranslator::translateSetOpL(const NormalizedInstruction& i) {
     case SetOpOp::PlusEqual:   return Op::Add;
     case SetOpOp::MinusEqual:  return Op::Sub;
     case SetOpOp::MulEqual:    return Op::Mul;
+    case SetOpOp::PlusEqualO:  return Op::AddO;
+    case SetOpOp::MinusEqualO: return Op::SubO;
+    case SetOpOp::MulEqualO:   return Op::MulO;
     case SetOpOp::DivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
     case SetOpOp::ConcatEqual: return Op::Concat;
     case SetOpOp::ModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
@@ -876,12 +893,8 @@ IRTranslator::translateSetOpL(const NormalizedInstruction& i) {
 
 void
 IRTranslator::translateIncDecL(const NormalizedInstruction& i) {
-  const IncDecOp oplet = static_cast<IncDecOp>(i.imm[1].u_OA);
-  bool post = (oplet == IncDecOp::PostInc || oplet == IncDecOp::PostDec);
-  bool pre  = !post;
-  bool inc  = (oplet == IncDecOp::PostInc || oplet == IncDecOp::PreInc);
-
-  HHIR_EMIT(IncDecL, pre, inc, i.imm[0].u_LA);
+  auto const op = static_cast<IncDecOp>(i.imm[1].u_OA);
+  HHIR_EMIT(IncDecL, isPre(op), isInc(op), isIncDecO(op), i.imm[0].u_LA);
 }
 
 void
@@ -1569,7 +1582,7 @@ IRTranslator::passPredictedAndInferredTypes(const NormalizedInstruction& i) {
     // that the type is not ref-counted.  This avoid both generating a
     // type check and dec-refing the value.
     if (i.outputPredictionStatic && isPop(i.next->op()) &&
-        !jitType.isCounted()) {
+        !jitType.maybeCounted()) {
       TRACE(1, "irPassPredictedAndInferredTypes: output inferred as %s\n",
             jitType.toString().c_str());
       m_hhbcTrans.assertTypeStack(0, JIT::Type::Uncounted);

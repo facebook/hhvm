@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
@@ -882,14 +883,17 @@ private:
                           MethodToTraitListMap& importMethToTraitMap);
   void applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
                            MethodToTraitListMap& importMethToTraitMap);
-  void importTraitProps(PropMap::Builder& curPropMap,
+  void importTraitProps(int idxOffset,
+                        PropMap::Builder& curPropMap,
                         SPropMap::Builder& curSPropMap);
   void importTraitInstanceProp(Class*      trait,
                                Prop&       traitProp,
                                TypedValue& traitPropVal,
+                               const int idxOffset,
                                PropMap::Builder& curPropMap);
   void importTraitStaticProp(Class*   trait,
                              SProp&   traitProp,
+                             const int idxOffset,
                              PropMap::Builder& curPropMap,
                              SPropMap::Builder& curSPropMap);
   void addTraitAlias(const StringData* traitName,

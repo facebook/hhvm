@@ -17,21 +17,12 @@
 #ifndef incl_HPHP_ARRAY_H_
 #define incl_HPHP_ARRAY_H_
 
-#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
-#error Directly including 'type-array.h' is prohibited. \
-       Include 'complex-types.h' instead.
-#endif
-
-#include <boost/static_assert.hpp>
-#include <algorithm>
-#include <vector>
-
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/runtime-error.h"
+
+#include <algorithm>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,8 +52,8 @@ public:
    * different than those copying constructors that also take one value.
    */
   static Array Create() { return ArrayData::Create(); }
-  static Array Create(CVarRef value) { return ArrayData::Create(value); }
-  static Array Create(CVarRef key, CVarRef value);
+  static Array Create(const Variant& value) { return ArrayData::Create(value); }
+  static Array Create(const Variant& key, const Variant& value);
 
 public:
   Array() {}
@@ -99,7 +90,7 @@ public:
    * with that single value (then one should use Array::Create() functions).
    */
   /* implicit */ Array(ArrayData* data) : ArrayBase(data) { }
-  /* implicit */ Array(CArrRef arr) : ArrayBase(arr.m_px) { }
+  /* implicit */ Array(const Array& arr) : ArrayBase(arr.m_px) { }
 
   /*
    * Special constructor for use from ArrayInit that creates an Array
@@ -111,13 +102,10 @@ public:
   {}
 
   // Move ctor
-  Array(Array&& src) : ArrayBase(std::move(src)) {
-    static_assert(sizeof(Array) == sizeof(ArrayBase), "Fix this.");
-  }
+  Array(Array&& src) : ArrayBase(std::move(src)) { }
 
   // Move assign
   Array& operator=(Array&& src) {
-    static_assert(sizeof(Array) == sizeof(ArrayBase), "Fix this.");
     ArrayBase::operator=(std::move(src));
     return *this;
   }
@@ -143,14 +131,14 @@ public:
    * Operators
    */
   Array& operator =  (ArrayData* data);
-  Array& operator =  (CArrRef v);
-  Array& operator =  (CVarRef v);
+  Array& operator =  (const Array& v);
+  Array& operator =  (const Variant& v);
   Array  operator +  (ArrayData* data) const;
-  Array  operator +  (CArrRef v) const;
-  Array  operator +  (CVarRef v) const = delete;
+  Array  operator +  (const Array& v) const;
+  Array  operator +  (const Variant& v) const = delete;
   Array& operator += (ArrayData* data);
-  Array& operator += (CArrRef v);
-  Array& operator += (CVarRef v);
+  Array& operator += (const Array& v);
+  Array& operator += (const Variant& v);
 
   // Move assignment
   Array& operator =  (Variant&& v);
@@ -163,8 +151,8 @@ public:
    * both by_key and by_value, both keys and values have to match to be
    * excluded.
    */
-  typedef int (*PFUNC_CMP)(CVarRef v1, CVarRef v2, const void* data);
-  Array diff(CVarRef array, bool by_key, bool by_value,
+  typedef int (*PFUNC_CMP)(const Variant& v1, const Variant& v2, const void* data);
+  Array diff(const Variant& array, bool by_key, bool by_value,
              PFUNC_CMP key_cmp_function = nullptr,
              const void* key_data = nullptr,
              PFUNC_CMP value_cmp_function = nullptr,
@@ -178,7 +166,7 @@ public:
    * both by_key and by_value, both keys and values have to match to be
    * included.
    */
-  Array intersect(CVarRef array, bool by_key, bool by_value,
+  Array intersect(const Variant& array, bool by_key, bool by_value,
                   PFUNC_CMP key_cmp_function = nullptr,
                   const void* key_data = nullptr,
                   PFUNC_CMP value_cmp_function = nullptr,
@@ -201,27 +189,27 @@ public:
    * Slice: Taking a slice. When "preserve_keys" is true, a vector will turn
    * into numerically keyed map.
    */
-  Array& merge(CArrRef arr);
+  Array& merge(const Array& arr);
 
   /*
    * Sorting.
    */
-  static int SortRegularAscending(CVarRef v1, CVarRef v2, const void* data);
-  static int SortNumericAscending(CVarRef v1, CVarRef v2, const void* data);
-  static int SortStringAscending(CVarRef v1, CVarRef v2, const void* data);
-  static int SortStringAscendingCase(CVarRef v1, CVarRef v2, const void* data);
-  static int SortLocaleStringAscending(CVarRef v1, CVarRef v2,
+  static int SortRegularAscending(const Variant& v1, const Variant& v2, const void* data);
+  static int SortNumericAscending(const Variant& v1, const Variant& v2, const void* data);
+  static int SortStringAscending(const Variant& v1, const Variant& v2, const void* data);
+  static int SortStringAscendingCase(const Variant& v1, const Variant& v2, const void* data);
+  static int SortLocaleStringAscending(const Variant& v1, const Variant& v2,
                                        const void* data);
 
-  static int SortRegularDescending(CVarRef v1, CVarRef v2, const void* data);
-  static int SortNumericDescending(CVarRef v1, CVarRef v2, const void* data);
-  static int SortStringDescending(CVarRef v1, CVarRef v2, const void* data);
-  static int SortStringDescendingCase(CVarRef v1, CVarRef v2, const void* data);
-  static int SortLocaleStringDescending(CVarRef v1, CVarRef v2,
+  static int SortRegularDescending(const Variant& v1, const Variant& v2, const void* data);
+  static int SortNumericDescending(const Variant& v1, const Variant& v2, const void* data);
+  static int SortStringDescending(const Variant& v1, const Variant& v2, const void* data);
+  static int SortStringDescendingCase(const Variant& v1, const Variant& v2, const void* data);
+  static int SortLocaleStringDescending(const Variant& v1, const Variant& v2,
                                         const void* data);
 
-  static int SortNatural(CVarRef v1, CVarRef v2, const void* data);
-  static int SortNaturalCase(CVarRef v1, CVarRef v2, const void* data);
+  static int SortNatural(const Variant& v1, const Variant& v2, const void* data);
+  static int SortNaturalCase(const Variant& v1, const Variant& v2, const void* data);
 
   void sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
             const void* data = nullptr);
@@ -239,7 +227,7 @@ public:
   };
   static bool MultiSort(std::vector<SortData>& data, bool renumber);
 
-  static void SortImpl(std::vector<int>& indices, CArrRef source,
+  static void SortImpl(std::vector<int>& indices, const Array& source,
                        Array::SortData& opaque,
                        Array::PFUNC_CMP cmp_func,
                        bool by_key, const void* data = nullptr);
@@ -253,26 +241,21 @@ public:
   int     toInt32  () const { return (m_px && !m_px->empty()) ? 1 : 0; }
   int64_t toInt64  () const { return (m_px && !m_px->empty()) ? 1 : 0; }
   double  toDouble () const { return (m_px && !m_px->empty()) ? 1.0 : 0.0; }
-  String  toString () const {
-    if (m_px) {
-      raise_notice("Array to string conversion");
-    }
-    return m_px ? "Array" : "";
-  }
+  String  toString () const;
 
   /*
    * Comparisons
    */
-  bool same (CArrRef v2) const;
-  bool same (CObjRef v2) const;
-  bool equal(CArrRef v2) const;
-  bool equal(CObjRef v2) const;
-  bool less (CArrRef v2, bool flip = false) const;
-  bool less (CObjRef v2) const;
-  bool less (CVarRef v2) const;
-  bool more (CArrRef v2, bool flip = true) const;
-  bool more (CObjRef v2) const;
-  bool more (CVarRef v2) const;
+  bool same (const Array& v2) const;
+  bool same (const Object& v2) const;
+  bool equal(const Array& v2) const;
+  bool equal(const Object& v2) const;
+  bool less (const Array& v2, bool flip = false) const;
+  bool less (const Object& v2) const;
+  bool less (const Variant& v2) const;
+  bool more (const Array& v2, bool flip = true) const;
+  bool more (const Object& v2) const;
+  bool more (const Variant& v2) const;
 
   /*
    * Offset
@@ -281,23 +264,23 @@ public:
   Variant rvalAt(int64_t key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(double  key, ACCESSPARAMS_DECL) const = delete;
   Variant rvalAt(const String& key, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(CVarRef key, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(const Variant& key, ACCESSPARAMS_DECL) const;
 
   /*
    * To get offset for temporary usage
    */
-  CVarRef rvalAtRef(int     key, ACCESSPARAMS_DECL) const;
-  CVarRef rvalAtRef(int64_t key, ACCESSPARAMS_DECL) const;
-  CVarRef rvalAtRef(double  key, ACCESSPARAMS_DECL) const = delete;
-  CVarRef rvalAtRef(CVarRef key, ACCESSPARAMS_DECL) const;
-  CVarRef rvalAtRef(const String& key, ACCESSPARAMS_DECL) const;
+  const Variant& rvalAtRef(int     key, ACCESSPARAMS_DECL) const;
+  const Variant& rvalAtRef(int64_t key, ACCESSPARAMS_DECL) const;
+  const Variant& rvalAtRef(double  key, ACCESSPARAMS_DECL) const = delete;
+  const Variant& rvalAtRef(const Variant& key, ACCESSPARAMS_DECL) const;
+  const Variant& rvalAtRef(const String& key, ACCESSPARAMS_DECL) const;
 
   const Variant operator[](int     key) const;
   const Variant operator[](int64_t key) const;
   const Variant operator[](double  key) const = delete;
   const Variant operator[](const String& key) const;
-  const Variant operator[](CVarRef key) const;
-  const Variant operator[](const char*) const = delete; // use CStrRef
+  const Variant operator[](const Variant& key) const;
+  const Variant operator[](const char*) const = delete; // use const String&
 
   /*
    * Get an lval reference to a newly created element.
@@ -315,16 +298,16 @@ public:
   }
   Variant& lvalAt(double key, ACCESSPARAMS_DECL) = delete;
   Variant& lvalAt(const String& key, ACCESSPARAMS_DECL);
-  Variant& lvalAt(CVarRef key, ACCESSPARAMS_DECL);
+  Variant& lvalAt(const Variant& key, ACCESSPARAMS_DECL);
 
   /*
    * Set an element to a value.
    */
-  void set(int     key, CVarRef v) { set(int64_t(key), v); }
-  void set(int64_t key, CVarRef v);
-  void set(double  key, CVarRef v) = delete;
-  void set(const String& key, CVarRef v, bool isKey = false);
-  void set(CVarRef key, CVarRef v, bool isKey = false);
+  void set(int     key, const Variant& v) { set(int64_t(key), v); }
+  void set(int64_t key, const Variant& v);
+  void set(double  key, const Variant& v) = delete;
+  void set(const String& key, const Variant& v, bool isKey = false);
+  void set(const Variant& key, const Variant& v, bool isKey = false);
 
   void set(char    key, RefResult v) { setRef(key,variant(v)); }
   void set(short   key, RefResult v) { setRef(key,variant(v)); }
@@ -334,29 +317,29 @@ public:
   void set(const String& key, RefResult v, bool isKey = false) {
     return setRef(key, variant(v), isKey);
   }
-  void set(CVarRef key, RefResult v, bool isKey = false) {
+  void set(const Variant& key, RefResult v, bool isKey = false) {
     return setRef(key, variant(v), isKey);
   }
 
   /*
    * Set an element to a reference.
    */
-  void setRef(int     key, CVarRef v) { setRef(int64_t(key), v); }
-  void setRef(int64_t key, CVarRef v);
-  void setRef(double  key, CVarRef v) = delete;
-  void setRef(const String& key, CVarRef v, bool isKey = false);
-  void setRef(CVarRef key, CVarRef v, bool isKey = false);
+  void setRef(int     key, const Variant& v) { setRef(int64_t(key), v); }
+  void setRef(int64_t key, const Variant& v);
+  void setRef(double  key, const Variant& v) = delete;
+  void setRef(const String& key, const Variant& v, bool isKey = false);
+  void setRef(const Variant& key, const Variant& v, bool isKey = false);
 
-  void setWithRef(CVarRef key, CVarRef v, bool isKey = false);
+  void setWithRef(const Variant& key, const Variant& v, bool isKey = false);
 
   /*
    * Add an element.
    */
-  void add(int     key, CVarRef v) { add(int64_t(key), v); }
-  void add(int64_t key, CVarRef v);
-  void add(double  key, CVarRef v) = delete;
-  void add(const String& key, CVarRef v, bool isKey = false);
-  void add(CVarRef key, CVarRef v, bool isKey = false);
+  void add(int     key, const Variant& v) { add(int64_t(key), v); }
+  void add(int64_t key, const Variant& v);
+  void add(double  key, const Variant& v) = delete;
+  void add(const String& key, const Variant& v, bool isKey = false);
+  void add(const Variant& key, const Variant& v, bool isKey = false);
 
   /*
    * Membership functions.
@@ -367,7 +350,7 @@ public:
   bool exists(int64_t key) const { return existsImpl(key); }
   bool exists(double  key) const = delete;
   bool exists(const String& key, bool isKey = false) const;
-  bool exists(CVarRef key, bool isKey = false) const;
+  bool exists(const Variant& key, bool isKey = false) const;
 
   /*
    * Remove an element.
@@ -378,7 +361,7 @@ public:
   void remove(int64_t key) { removeImpl(key); }
   void remove(double  key) = delete;
   void remove(const String& key, bool isString = false);
-  void remove(CVarRef key);
+  void remove(const Variant& key);
 
   /*
    * Remove all elements.
@@ -388,36 +371,35 @@ public:
   /*
    * Append an element.
    */
-  CVarRef append(CVarRef v);
-  CVarRef append(RefResult v) { return appendRef(variant(v)); }
-  CVarRef appendRef(CVarRef v);
-  CVarRef appendWithRef(CVarRef v);
+  const Variant& append(const Variant& v);
+  const Variant& append(RefResult v) { return appendRef(variant(v)); }
+  const Variant& appendRef(const Variant& v);
+  const Variant& appendWithRef(const Variant& v);
 
   /*
    * Stack/queue-like functions.
    */
   Variant pop();
   Variant dequeue();
-  void prepend(CVarRef v);
+  void prepend(const Variant& v);
 
   /*
    * Input/Output
    */
   void serialize(VariableSerializer* serializer, bool isObject = false) const;
   void unserialize(VariableUnserializer* uns);
-  void dump();
   void setEvalScalar() const;
 
  private:
   Array& plusImpl(ArrayData* data);
   Array& mergeImpl(ArrayData* data);
-  Array diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
+  Array diffImpl(const Array& array, bool by_key, bool by_value, bool match,
                  PFUNC_CMP key_cmp_function, const void* key_data,
                  PFUNC_CMP value_cmp_function, const void* value_data) const;
 
-  template<typename T> void setImpl(const T& key, CVarRef v);
-  template<typename T> void setRefImpl(const T& key, CVarRef v);
-  template<typename T> void addImpl(const T& key, CVarRef v);
+  template<typename T> void setImpl(const T& key, const Variant& v);
+  template<typename T> void setRefImpl(const T& key, const Variant& v);
+  template<typename T> void addImpl(const T& key, const Variant& v);
 
   template<typename T>
   bool existsImpl(const T& key) const {
@@ -443,9 +425,7 @@ public:
     return *ret;
   }
 
-  static void compileTimeAssertions() {
-    static_assert(offsetof(Array, m_px) == kExpectedMPxOffset, "");
-  }
+  static void compileTimeAssertions();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -460,7 +440,7 @@ struct ArrNR {
     m_px = a.m_px;
   }
 
-  operator CArrRef() const { return asArray(); }
+  operator const Array&() const { return asArray(); }
 
   Array& asArray() {
     return *reinterpret_cast<Array*>(this); // XXX
@@ -476,9 +456,7 @@ protected:
   ArrayData* m_px;
 
 private:
-  static void compileTimeAssertions() {
-    static_assert(offsetof(ArrNR, m_px) == kExpectedMPxOffset, "");
-  }
+  static void compileTimeAssertions();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

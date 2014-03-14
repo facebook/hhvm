@@ -4,6 +4,13 @@
 * Run the test suites in various configurations.
 */
 
+function get_expect_file($test, $type, $options) {
+  if (isset($options['repo']) && file_exists("$test.$type-repo")) {
+      return "$test.$type-repo";
+  }
+  return "$test.$type";
+}
+
 function usage() {
   global $argv;
   return "usage: $argv[0] [-m jit|interp] [-r] <test/directories>";
@@ -608,16 +615,18 @@ function run_one_config($options, $test, $hhvm, $hhvm_env) {
   }
 
   if (file_exists("$test.expect")) {
+    $file = get_expect_file($test, 'expect', $options);
     $diff_cmds = "--text -u";
     file_put_contents("$test.expect-trimmed",
-                      trim(file_get_contents("$test.expect")));
+                      trim(file_get_contents($file)));
     exec("diff --text -u $test.expect-trimmed $test.out > $test.diff 2>&1",
          $_, $status);
     // unix 0 == success
     unlink("$test.expect-trimmed");
     return !$status;
   } else if (file_exists("$test.expectf")) {
-    $wanted_re = trim(file_get_contents("$test.expectf"));
+    $file = get_expect_file($test, 'expectf', $options);
+    $wanted_re = trim(file_get_contents($file));
 
     // do preg_quote, but miss out any %r delimited sections
     $temp = "";
@@ -693,7 +702,8 @@ function run_one_config($options, $test, $hhvm, $hhvm_env) {
     return preg_match("/^$wanted_re\$/s", $output);
 
   } else if (file_exists("$test.expectregex")) {
-    $wanted_re = trim(file_get_contents("$test.expectregex"));
+    $file = get_expect_file($test, 'expectregex', $options);
+    $wanted_re = trim(file_get_contents($file));
 
     # a poor man's aide for debugging
     shell_exec("diff --text -u $test.expectregex $test.out > $test.diff 2>&1");

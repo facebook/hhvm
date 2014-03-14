@@ -22,6 +22,23 @@
 namespace HPHP {
 
 const StaticString
+  // coord
+  s_x("x"),
+  s_y("y"),
+  // size
+  s_columns("columns"),
+  s_rows("rows"),
+  // geometry
+  s_width("width"),
+  s_height("height"),
+  // affine
+  s_sx("sx"),
+  s_rx("rx"),
+  s_ry("ry"),
+  s_sy("sy"),
+  s_tx("tx"),
+  s_ty("ty"),
+  // color
   s_r("r"),
   s_g("g"),
   s_b("b"),
@@ -29,6 +46,58 @@ const StaticString
   s_hue("hue"),
   s_saturation("saturation"),
   s_luminosity("luminosity"),
+  // extrema
+  s_min("min"),
+  s_max("max"),
+  // channel extrema/range
+  s_minima("minima"),
+  s_maxima("maxima"),
+  // channel kurtosis
+  s_kurtosis("kurtosis"),
+  s_skewness("skewness"),
+  // channel mean
+  s_mean("mean"),
+  s_standardDeviation("standardDeviation"),
+  // other channel statistics
+  s_depth("depth"),
+  // quantum depth
+  s_quantumDepthLong("quantumDepthLong"),
+  s_quantumDepthString("quantumDepthString"),
+  // quantum range
+  s_quantumRangeLong("quantumRangeLong"),
+  s_quantumRangeString("quantumRangeString"),
+  // version
+  s_versionNumber("versionNumber"),
+  s_versionString("versionString"),
+  // identify
+  s_imageName("imageName"),
+  s_mimetype("mimetype"),
+  s_geometry("geometry"),
+  s_resolution("resolution"),
+  s_signature("signature"),
+  s_rawOutput("rawOutput"),
+  s_format("format"),
+  s_units("units"),
+  s_type("type"),
+  s_colorSpace("colorSpace"),
+  s_fileSize("fileSize"),
+  s_compression("compression"),
+  // font metrics
+  s_characterWidth("characterWidth"),
+  s_characterHeight("characterHeight"),
+  s_ascender("ascender"),
+  s_descender("descender"),
+  s_textWidth("textWidth"),
+  s_textHeight("textHeight"),
+  s_maxHorizontalAdvance("maxHorizontalAdvance"),
+  s_x1("x1"),
+  s_y1("y1"),
+  s_x2("x2"),
+  s_y2("y2"),
+  s_originX("originX"),
+  s_originY("originY"),
+  s_boundingBox("boundingBox"),
+  // class name
   s_Imagick("Imagick"),
   s_ImagickDraw("ImagickDraw"),
   s_ImagickPixel("ImagickPixel"),
@@ -109,7 +178,6 @@ static const StaticString
   s_COMPOSITE_SUBTRACT("COMPOSITE_SUBTRACT"),
   s_COMPOSITE_THRESHOLD("COMPOSITE_THRESHOLD"),
   s_COMPOSITE_XOR("COMPOSITE_XOR"),
-
   s_COMPOSITE_CHANGEMASK("COMPOSITE_CHANGEMASK"),
   s_COMPOSITE_LINEARLIGHT("COMPOSITE_LINEARLIGHT"),
   s_COMPOSITE_DIVIDE("COMPOSITE_DIVIDE"),
@@ -123,12 +191,14 @@ static const StaticString
   s_COMPOSITE_MATHEMATICS("COMPOSITE_MATHEMATICS"),
   s_COMPOSITE_MODULUSADD("COMPOSITE_MODULUSADD"),
   s_COMPOSITE_MODULUSSUBTRACT("COMPOSITE_MODULUSSUBTRACT"),
+#if MagickLibVersion >= 0x670
   s_COMPOSITE_MINUSDST("COMPOSITE_MINUSDST"),
   s_COMPOSITE_DIVIDEDST("COMPOSITE_DIVIDEDST"),
   s_COMPOSITE_DIVIDESRC("COMPOSITE_DIVIDESRC"),
   s_COMPOSITE_MINUSSRC("COMPOSITE_MINUSSRC"),
   s_COMPOSITE_DARKENINTENSITY("COMPOSITE_DARKENINTENSITY"),
   s_COMPOSITE_LIGHTENINTENSITY("COMPOSITE_LIGHTENINTENSITY"),
+#endif
 
   // MONTAGEMODE constants
   s_MONTAGEMODE_FRAME("MONTAGEMODE_FRAME"),
@@ -158,7 +228,6 @@ static const StaticString
   s_FILTER_LANCZOS("FILTER_LANCZOS"),
   s_FILTER_BESSEL("FILTER_BESSEL"),
   s_FILTER_SINC("FILTER_SINC"),
-
   s_FILTER_KAISER("FILTER_KAISER"),
   s_FILTER_WELSH("FILTER_WELSH"),
   s_FILTER_PARZEN("FILTER_PARZEN"),
@@ -194,7 +263,6 @@ static const StaticString
   s_IMGTYPE_COLORSEPARATION("IMGTYPE_COLORSEPARATION"),
   s_IMGTYPE_COLORSEPARATIONMATTE("IMGTYPE_COLORSEPARATIONMATTE"),
   s_IMGTYPE_OPTIMIZE("IMGTYPE_OPTIMIZE"),
-
   s_IMGTYPE_PALETTEBILEVELMATTE("IMGTYPE_PALETTEBILEVELMATTE"),
 
   // RESOLUTION constants
@@ -217,15 +285,16 @@ static const StaticString
   s_COMPRESSION_DXT1("COMPRESSION_DXT1"),
   s_COMPRESSION_DXT3("COMPRESSION_DXT3"),
   s_COMPRESSION_DXT5("COMPRESSION_DXT5"),
-
   s_COMPRESSION_ZIPS("COMPRESSION_ZIPS"),
   s_COMPRESSION_PIZ("COMPRESSION_PIZ"),
   s_COMPRESSION_PXR24("COMPRESSION_PXR24"),
   s_COMPRESSION_B44("COMPRESSION_B44"),
   s_COMPRESSION_B44A("COMPRESSION_B44A"),
   s_COMPRESSION_LZMA("COMPRESSION_LZMA"),
+#if MagickLibVersion >= 0x670
   s_COMPRESSION_JBIG1("COMPRESSION_JBIG1"),
   s_COMPRESSION_JBIG2("COMPRESSION_JBIG2"),
+#endif
 
   // PAINT constants
   s_PAINT_POINT("PAINT_POINT"),
@@ -293,11 +362,12 @@ static const StaticString
   s_CHANNEL_INDEX("CHANNEL_INDEX"),
   s_CHANNEL_ALL("CHANNEL_ALL"),
   s_CHANNEL_DEFAULT("CHANNEL_DEFAULT"),
-
   s_CHANNEL_TRUEALPHA("CHANNEL_TRUEALPHA"),
   s_CHANNEL_RGBS("CHANNEL_RGBS"),
   s_CHANNEL_SYNC("CHANNEL_SYNC"),
+#if MagickLibVersion >= 0x670
   s_CHANNEL_COMPOSITES("CHANNEL_COMPOSITES"),
+#endif
 
   // METRIC constants
   s_METRIC_UNDEFINED("METRIC_UNDEFINED"),
@@ -344,7 +414,6 @@ static const StaticString
   s_EVALUATE_COSINE("EVALUATE_COSINE"),
   s_EVALUATE_SINE("EVALUATE_SINE"),
   s_EVALUATE_ADDMODULUS("EVALUATE_ADDMODULUS"),
-
   s_EVALUATE_MEAN("EVALUATE_MEAN"),
   s_EVALUATE_ABS("EVALUATE_ABS"),
   s_EVALUATE_EXPONENTIAL("EVALUATE_EXPONENTIAL"),
@@ -375,7 +444,6 @@ static const StaticString
   s_COLORSPACE_REC709LUMA("COLORSPACE_REC709LUMA"),
   s_COLORSPACE_LOG("COLORSPACE_LOG"),
   s_COLORSPACE_CMY("COLORSPACE_CMY"),
-
 #if MagickLibVersion >= 0x679
   s_COLORSPACE_LUV("COLORSPACE_LUV"),
   s_COLORSPACE_HCL("COLORSPACE_HCL"),
@@ -408,7 +476,6 @@ static const StaticString
   s_VIRTUALPIXELMETHOD_WHITE("VIRTUALPIXELMETHOD_WHITE"),
   s_VIRTUALPIXELMETHOD_HORIZONTALTILE("VIRTUALPIXELMETHOD_HORIZONTALTILE"),
   s_VIRTUALPIXELMETHOD_VERTICALTILE("VIRTUALPIXELMETHOD_VERTICALTILE"),
-
   s_VIRTUALPIXELMETHOD_HORIZONTALTILEEDGE(
     "VIRTUALPIXELMETHOD_HORIZONTALTILEEDGE"),
   s_VIRTUALPIXELMETHOD_VERTICALTILEEDGE("VIRTUALPIXELMETHOD_VERTICALTILEEDGE"),
@@ -514,7 +581,6 @@ static const StaticString
   s_LAYERMETHOD_MERGE("LAYERMETHOD_MERGE"),
   s_LAYERMETHOD_FLATTEN("LAYERMETHOD_FLATTEN"),
   s_LAYERMETHOD_MOSAIC("LAYERMETHOD_MOSAIC"),
-
   s_LAYERMETHOD_TRIMBOUNDS("LAYERMETHOD_TRIMBOUNDS"),
 
   // ORIENTATION constants
@@ -544,10 +610,11 @@ static const StaticString
   s_DISTORTION_BARRELINVERSE("DISTORTION_BARRELINVERSE"),
   s_DISTORTION_SHEPARDS("DISTORTION_SHEPARDS"),
   s_DISTORTION_SENTINEL("DISTORTION_SENTINEL"),
-
   s_DISTORTION_BILINEARFORWARD("DISTORTION_BILINEARFORWARD"),
   s_DISTORTION_BILINEARREVERSE("DISTORTION_BILINEARREVERSE"),
+#if MagickLibVersion >= 0x670
   s_DISTORTION_RESIZE("DISTORTION_RESIZE"),
+#endif
 #if MagickLibVersion >= 0x671
   s_DISTORTION_CYLINDER2PLANE("DISTORTION_CYLINDER2PLANE"),
   s_DISTORTION_PLANE2CYLINDER("DISTORTION_PLANE2CYLINDER"),
@@ -581,7 +648,6 @@ static const StaticString
   s_FUNCTION_UNDEFINED("FUNCTION_UNDEFINED"),
   s_FUNCTION_POLYNOMIAL("FUNCTION_POLYNOMIAL"),
   s_FUNCTION_SINUSOID("FUNCTION_SINUSOID"),
-
   s_FUNCTION_ARCSIN("FUNCTION_ARCSIN"),
   s_FUNCTION_ARCTAN("FUNCTION_ARCTAN"),
 
@@ -680,7 +746,6 @@ void loadImagickConstants() {
   registerImagickConstants(s_COMPOSITE_SUBTRACT, SubtractCompositeOp);
   registerImagickConstants(s_COMPOSITE_THRESHOLD, ThresholdCompositeOp);
   registerImagickConstants(s_COMPOSITE_XOR, XorCompositeOp);
-
   registerImagickConstants(s_COMPOSITE_CHANGEMASK, ChangeMaskCompositeOp);
   registerImagickConstants(s_COMPOSITE_LINEARLIGHT, LinearLightCompositeOp);
   registerImagickConstants(s_COMPOSITE_DIVIDE, DivideCompositeOp);
@@ -695,6 +760,7 @@ void loadImagickConstants() {
   registerImagickConstants(s_COMPOSITE_MODULUSADD, ModulusAddCompositeOp);
   registerImagickConstants(s_COMPOSITE_MODULUSSUBTRACT,
                            ModulusSubtractCompositeOp);
+#if MagickLibVersion >= 0x670
   registerImagickConstants(s_COMPOSITE_MINUSDST, MinusDstCompositeOp);
   registerImagickConstants(s_COMPOSITE_DIVIDEDST, DivideDstCompositeOp);
   registerImagickConstants(s_COMPOSITE_DIVIDESRC, DivideSrcCompositeOp);
@@ -703,6 +769,7 @@ void loadImagickConstants() {
                            DarkenIntensityCompositeOp);
   registerImagickConstants(s_COMPOSITE_LIGHTENINTENSITY,
                            LightenIntensityCompositeOp);
+#endif
 
   // MONTAGEMODE constants
   registerImagickConstants(s_MONTAGEMODE_FRAME, FrameMode);
@@ -732,7 +799,6 @@ void loadImagickConstants() {
   registerImagickConstants(s_FILTER_LANCZOS, LanczosFilter);
   registerImagickConstants(s_FILTER_BESSEL, BesselFilter);
   registerImagickConstants(s_FILTER_SINC, SincFilter);
-
   registerImagickConstants(s_FILTER_KAISER, KaiserFilter);
   registerImagickConstants(s_FILTER_WELSH, WelshFilter);
   registerImagickConstants(s_FILTER_PARZEN, ParzenFilter);
@@ -769,13 +835,13 @@ void loadImagickConstants() {
   registerImagickConstants(s_IMGTYPE_COLORSEPARATIONMATTE,
                            ColorSeparationMatteType);
   registerImagickConstants(s_IMGTYPE_OPTIMIZE, OptimizeType);
-
   registerImagickConstants(s_IMGTYPE_PALETTEBILEVELMATTE,
                            PaletteBilevelMatteType);
 
   // RESOLUTION constants
   registerImagickConstants(s_RESOLUTION_UNDEFINED, UndefinedResolution);
-  registerImagickConstants(s_RESOLUTION_PIXELSPERINCH, PixelsPerInchResolution);
+  registerImagickConstants(s_RESOLUTION_PIXELSPERINCH,
+                           PixelsPerInchResolution);
   registerImagickConstants(s_RESOLUTION_PIXELSPERCENTIMETER,
                            PixelsPerCentimeterResolution);
 
@@ -787,22 +853,24 @@ void loadImagickConstants() {
   registerImagickConstants(s_COMPRESSION_GROUP4, Group4Compression);
   registerImagickConstants(s_COMPRESSION_JPEG, JPEGCompression);
   registerImagickConstants(s_COMPRESSION_JPEG2000, JPEG2000Compression);
-  registerImagickConstants(s_COMPRESSION_LOSSLESSJPEG, LosslessJPEGCompression);
+  registerImagickConstants(s_COMPRESSION_LOSSLESSJPEG,
+                           LosslessJPEGCompression);
   registerImagickConstants(s_COMPRESSION_LZW, LZWCompression);
   registerImagickConstants(s_COMPRESSION_RLE, RLECompression);
   registerImagickConstants(s_COMPRESSION_ZIP, ZipCompression);
   registerImagickConstants(s_COMPRESSION_DXT1, DXT1Compression);
   registerImagickConstants(s_COMPRESSION_DXT3, DXT3Compression);
   registerImagickConstants(s_COMPRESSION_DXT5, DXT5Compression);
-
   registerImagickConstants(s_COMPRESSION_ZIPS, ZipSCompression);
   registerImagickConstants(s_COMPRESSION_PIZ, PizCompression);
   registerImagickConstants(s_COMPRESSION_PXR24, Pxr24Compression);
   registerImagickConstants(s_COMPRESSION_B44, B44Compression);
   registerImagickConstants(s_COMPRESSION_B44A, B44ACompression);
   registerImagickConstants(s_COMPRESSION_LZMA, LZMACompression);
+#if MagickLibVersion >= 0x670
   registerImagickConstants(s_COMPRESSION_JBIG1, JBIG1Compression);
   registerImagickConstants(s_COMPRESSION_JBIG2, JBIG2Compression);
+#endif
 
   // PAINT constants
   registerImagickConstants(s_PAINT_POINT, PointMethod);
@@ -871,17 +939,20 @@ void loadImagickConstants() {
   registerImagickConstants(s_CHANNEL_INDEX, IndexChannel);
   registerImagickConstants(s_CHANNEL_ALL, AllChannels);
   registerImagickConstants(s_CHANNEL_DEFAULT, DefaultChannels);
-
   registerImagickConstants(s_CHANNEL_TRUEALPHA, TrueAlphaChannel);
   registerImagickConstants(s_CHANNEL_RGBS, RGBChannels);
   registerImagickConstants(s_CHANNEL_SYNC, SyncChannels);
+#if MagickLibVersion >= 0x670
   registerImagickConstants(s_CHANNEL_COMPOSITES, CompositeChannels);
+#endif
 
   // METRIC constants
   registerImagickConstants(s_METRIC_UNDEFINED, UndefinedMetric);
-  registerImagickConstants(s_METRIC_MEANABSOLUTEERROR, MeanAbsoluteErrorMetric);
+  registerImagickConstants(s_METRIC_MEANABSOLUTEERROR,
+                           MeanAbsoluteErrorMetric);
   registerImagickConstants(s_METRIC_MEANSQUAREERROR, MeanSquaredErrorMetric);
-  registerImagickConstants(s_METRIC_PEAKABSOLUTEERROR, PeakAbsoluteErrorMetric);
+  registerImagickConstants(s_METRIC_PEAKABSOLUTEERROR,
+                           PeakAbsoluteErrorMetric);
   registerImagickConstants(s_METRIC_PEAKSIGNALTONOISERATIO,
                            PeakSignalToNoiseRatioMetric);
   registerImagickConstants(s_METRIC_ROOTMEANSQUAREDERROR,
@@ -932,10 +1003,10 @@ void loadImagickConstants() {
   registerImagickConstants(s_EVALUATE_COSINE, CosineEvaluateOperator);
   registerImagickConstants(s_EVALUATE_SINE, SineEvaluateOperator);
   registerImagickConstants(s_EVALUATE_ADDMODULUS, AddModulusEvaluateOperator);
-
   registerImagickConstants(s_EVALUATE_MEAN, MeanEvaluateOperator);
   registerImagickConstants(s_EVALUATE_ABS, AbsEvaluateOperator);
-  registerImagickConstants(s_EVALUATE_EXPONENTIAL, ExponentialEvaluateOperator);
+  registerImagickConstants(s_EVALUATE_EXPONENTIAL,
+                           ExponentialEvaluateOperator);
   registerImagickConstants(s_EVALUATE_MEDIAN, MedianEvaluateOperator);
 #if MagickLibVersion >= 0x676
   registerImagickConstants(s_EVALUATE_SUM, SumEvaluateOperator);
@@ -963,7 +1034,6 @@ void loadImagickConstants() {
   registerImagickConstants(s_COLORSPACE_REC709LUMA, Rec709LumaColorspace);
   registerImagickConstants(s_COLORSPACE_LOG, LogColorspace);
   registerImagickConstants(s_COLORSPACE_CMY, CMYColorspace);
-
 #if MagickLibVersion >= 0x679
   registerImagickConstants(s_COLORSPACE_LUV, LuvColorspace);
   registerImagickConstants(s_COLORSPACE_HCL, HCLColorspace);
@@ -996,14 +1066,15 @@ void loadImagickConstants() {
   registerImagickConstants(s_VIRTUALPIXELMETHOD_TRANSPARENT,
                            TransparentVirtualPixelMethod);
   registerImagickConstants(s_VIRTUALPIXELMETHOD_MASK, MaskVirtualPixelMethod);
-  registerImagickConstants(s_VIRTUALPIXELMETHOD_BLACK, BlackVirtualPixelMethod);
+  registerImagickConstants(s_VIRTUALPIXELMETHOD_BLACK,
+                           BlackVirtualPixelMethod);
   registerImagickConstants(s_VIRTUALPIXELMETHOD_GRAY, GrayVirtualPixelMethod);
-  registerImagickConstants(s_VIRTUALPIXELMETHOD_WHITE, WhiteVirtualPixelMethod);
+  registerImagickConstants(s_VIRTUALPIXELMETHOD_WHITE,
+                           WhiteVirtualPixelMethod);
   registerImagickConstants(s_VIRTUALPIXELMETHOD_HORIZONTALTILE,
                            HorizontalTileVirtualPixelMethod);
   registerImagickConstants(s_VIRTUALPIXELMETHOD_VERTICALTILE,
                            VerticalTileVirtualPixelMethod);
-
   registerImagickConstants(s_VIRTUALPIXELMETHOD_HORIZONTALTILEEDGE,
                            HorizontalTileEdgeVirtualPixelMethod);
   registerImagickConstants(s_VIRTUALPIXELMETHOD_VERTICALTILEEDGE,
@@ -1111,7 +1182,6 @@ void loadImagickConstants() {
   registerImagickConstants(s_LAYERMETHOD_MERGE, MergeLayer);
   registerImagickConstants(s_LAYERMETHOD_FLATTEN, FlattenLayer);
   registerImagickConstants(s_LAYERMETHOD_MOSAIC, MosaicLayer);
-
   registerImagickConstants(s_LAYERMETHOD_TRIMBOUNDS, TrimBoundsLayer);
 
   // ORIENTATION constants
@@ -1141,15 +1211,17 @@ void loadImagickConstants() {
   registerImagickConstants(s_DISTORTION_POLAR, PolarDistortion);
   registerImagickConstants(s_DISTORTION_DEPOLAR, DePolarDistortion);
   registerImagickConstants(s_DISTORTION_BARREL, BarrelDistortion);
-  registerImagickConstants(s_DISTORTION_BARRELINVERSE, BarrelInverseDistortion);
+  registerImagickConstants(s_DISTORTION_BARRELINVERSE,
+                           BarrelInverseDistortion);
   registerImagickConstants(s_DISTORTION_SHEPARDS, ShepardsDistortion);
   registerImagickConstants(s_DISTORTION_SENTINEL, SentinelDistortion);
-
   registerImagickConstants(s_DISTORTION_BILINEARFORWARD,
                            BilinearForwardDistortion);
   registerImagickConstants(s_DISTORTION_BILINEARREVERSE,
                            BilinearReverseDistortion);
+#if MagickLibVersion >= 0x670
   registerImagickConstants(s_DISTORTION_RESIZE, ResizeDistortion);
+#endif
 #if MagickLibVersion >= 0x671
   registerImagickConstants(s_DISTORTION_CYLINDER2PLANE,
                            Cylinder2PlaneDistortion);
@@ -1167,7 +1239,8 @@ void loadImagickConstants() {
   registerImagickConstants(s_ALPHACHANNEL_EXTRACT, ExtractAlphaChannel);
   registerImagickConstants(s_ALPHACHANNEL_OPAQUE, OpaqueAlphaChannel);
   registerImagickConstants(s_ALPHACHANNEL_SHAPE, ShapeAlphaChannel);
-  registerImagickConstants(s_ALPHACHANNEL_TRANSPARENT, TransparentAlphaChannel);
+  registerImagickConstants(s_ALPHACHANNEL_TRANSPARENT,
+                           TransparentAlphaChannel);
 #if MagickLibVersion >= 0x680
   registerImagickConstants(s_ALPHACHANNEL_FLATTEN, FlattenAlphaChannel);
   registerImagickConstants(s_ALPHACHANNEL_REMOVE, RemoveAlphaChannel);
@@ -1191,12 +1264,12 @@ void loadImagickConstants() {
   registerImagickConstants(s_FUNCTION_UNDEFINED, UndefinedFunction);
   registerImagickConstants(s_FUNCTION_POLYNOMIAL, PolynomialFunction);
   registerImagickConstants(s_FUNCTION_SINUSOID, SinusoidFunction);
-
   registerImagickConstants(s_FUNCTION_ARCSIN, ArcsinFunction);
   registerImagickConstants(s_FUNCTION_ARCTAN, ArctanFunction);
 
   // INTERPOLATE constants
-  registerImagickConstants(s_INTERPOLATE_UNDEFINED, UndefinedInterpolatePixel);
+  registerImagickConstants(s_INTERPOLATE_UNDEFINED,
+                           UndefinedInterpolatePixel);
   registerImagickConstants(s_INTERPOLATE_AVERAGE, AverageInterpolatePixel);
   registerImagickConstants(s_INTERPOLATE_BICUBIC, BicubicInterpolatePixel);
   registerImagickConstants(s_INTERPOLATE_BILINEAR, BilinearInterpolatePixel);

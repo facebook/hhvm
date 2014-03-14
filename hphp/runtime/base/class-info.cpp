@@ -205,10 +205,10 @@ ClassInfo::ConstantInfo::ConstantInfo() :
     valueLen(0), callback(nullptr), deferred(true) {
 }
 
-CVarRef ClassInfo::ConstantInfo::getDeferredValue() const {
+const Variant& ClassInfo::ConstantInfo::getDeferredValue() const {
   assert(deferred);
   if (callback) {
-    CVarRef (*f)()=(CVarRef(*)())callback;
+    const Variant& (*f)()=(const Variant&(*)())callback;
     return (*f)();
   }
   EnvConstants* g = get_env_constants();
@@ -231,14 +231,14 @@ Variant ClassInfo::ConstantInfo::getValue() const {
   return value;
 }
 
-void ClassInfo::ConstantInfo::setValue(CVarRef value) {
+void ClassInfo::ConstantInfo::setValue(const Variant& value) {
   VariableSerializer vs(VariableSerializer::Type::Serialize);
   String s = vs.serialize(value, true);
   svalue = std::string(s.data(), s.size());
   deferred = false;
 }
 
-void ClassInfo::ConstantInfo::setStaticValue(CVarRef v) {
+void ClassInfo::ConstantInfo::setStaticValue(const Variant& v) {
   value = v;
   value.setEvalScalar();
   deferred = false;
@@ -279,7 +279,7 @@ Variant ClassInfo::UserAttributeInfo::getValue() const {
   return value;
 }
 
-void ClassInfo::UserAttributeInfo::setStaticValue(CVarRef v) {
+void ClassInfo::UserAttributeInfo::setStaticValue(const Variant& v) {
   value = v;
   value.setEvalScalar();
 }
@@ -330,7 +330,7 @@ bool ClassInfo::GetClassMethods(MethodVec &ret, const ClassInfo *classInfo) {
   return true;
 }
 
-void ClassInfo::GetClassSymbolNames(CArrRef names, bool interface, bool trait,
+void ClassInfo::GetClassSymbolNames(const Array& names, bool interface, bool trait,
                                     std::vector<String> &classes,
                                     std::vector<String> *clsMethods,
                                     std::vector<String> *clsProperties,

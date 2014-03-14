@@ -481,6 +481,13 @@ void IniSetting::SystemParserCallback::makeArray(Map &hash,
 }
 void IniSetting::SystemParserCallback::onConstant(std::string &result,
                                                   const std::string &name) {
+  if (MemoryManager::TlsWrapper::isNull()) {
+    // We can't load constants before the memory manger is up, so lets just
+    // pretend they are strings I guess
+    result = name;
+    return;
+  }
+
   if (f_defined(name, false)) {
     result = f_constant(name).toString().toCppString();
   } else {

@@ -44,7 +44,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
     , m_offset(off)
   {}
 
-  SrcKey(const Func* f, const Opcode* i)
+  SrcKey(const Func* f, PC i)
     : m_funcId(f->getFuncId())
     , m_offset(f->unit()->offsetOf(i))
   {}

@@ -1,0 +1,6 @@
+<?php
+// FB build has inverse endianess, only test this on OSS build
+$data = 'The quick brown fox jumped over the lazy dog.';
+if (hash("adler32", $data) == '5e10f17b') {
+  echo 'skip';
+}

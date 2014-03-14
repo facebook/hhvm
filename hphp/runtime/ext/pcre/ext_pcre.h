@@ -24,10 +24,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // pcre
 
-Variant HHVM_FUNCTION(preg_filter, CVarRef pattern, CVarRef replacement,
-                                   CVarRef subject, int limit = -1,
+Variant HHVM_FUNCTION(preg_filter, const Variant& pattern, const Variant& replacement,
+                                   const Variant& subject, int limit = -1,
                                    VRefParam count = uninit_null());
-Variant HHVM_FUNCTION(preg_grep, const String& pattern, CArrRef input,
+Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Array& input,
                                  int flags = 0);
 Variant HHVM_FUNCTION(preg_match, const String& pattern, const String& subject,
                       VRefParam matches = uninit_null(), int flags = 0,
@@ -36,16 +36,16 @@ Variant HHVM_FUNCTION(preg_match_all, const String& pattern,
                         const String& subject,
                         VRefParam matches = uninit_null(),
                         int flags = 0, int offset = 0);
-Variant HHVM_FUNCTION(preg_replace, CVarRef pattern, CVarRef replacement,
-                                    CVarRef subject, int limit = -1,
+Variant HHVM_FUNCTION(preg_replace, const Variant& pattern, const Variant& replacement,
+                                    const Variant& subject, int limit = -1,
                                     VRefParam count = uninit_null());
-Variant HHVM_FUNCTION(preg_replace_callback, CVarRef pattern, CVarRef callback,
-                                CVarRef subject, int limit = -1,
+Variant HHVM_FUNCTION(preg_replace_callback, const Variant& pattern, const Variant& callback,
+                                const Variant& subject, int limit = -1,
                                 VRefParam count = uninit_null());
 Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
                                   int limit = -1, int flags = 0);
 String HHVM_FUNCTION(preg_quote, const String& str,
-                                 CVarRef = null_string);
+                                 const Variant& = null_string);
 int64_t HHVM_FUNCTION(preg_last_error);
 
 ///////////////////////////////////////////////////////////////////////////////

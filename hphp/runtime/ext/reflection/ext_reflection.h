@@ -24,24 +24,24 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Array HHVM_FUNCTION(hphp_get_extension_info, const String& name);
-Array HHVM_FUNCTION(hphp_get_method_info, CVarRef cls, const String& name);
-Array HHVM_FUNCTION(hphp_get_closure_info, CObjRef closure);
-Array HHVM_FUNCTION(hphp_get_class_info, CVarRef name);
+Array HHVM_FUNCTION(hphp_get_method_info, const Variant& cls, const String& name);
+Array HHVM_FUNCTION(hphp_get_closure_info, const Object& closure);
+Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name);
 Array HHVM_FUNCTION(hphp_get_function_info, const String& name);
-Variant HHVM_FUNCTION(hphp_invoke, const String& name, CVarRef params);
-Variant HHVM_FUNCTION(hphp_invoke_method, CVarRef obj, const String& cls,
-                                          const String& name, CVarRef params);
-Object HHVM_FUNCTION(hphp_create_object, const String& name, CVarRef params);
+Variant HHVM_FUNCTION(hphp_invoke, const String& name, const Variant& params);
+Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj, const String& cls,
+                                          const String& name, const Variant& params);
+Object HHVM_FUNCTION(hphp_create_object, const String& name, const Variant& params);
 Object HHVM_FUNCTION(hphp_create_object_without_constructor,
                       const String& name);
-Variant HHVM_FUNCTION(hphp_get_property, CObjRef obj, const String& cls,
+Variant HHVM_FUNCTION(hphp_get_property, const Object& obj, const String& cls,
                                          const String& prop);
-void HHVM_FUNCTION(hphp_set_property, CObjRef obj, const String& cls,
-                                      const String& prop, CVarRef value);
+void HHVM_FUNCTION(hphp_set_property, const Object& obj, const String& cls,
+                                      const String& prop, const Variant& value);
 Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
                                                 const String& prop, bool force);
 void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
-                                             const String& prop, CVarRef value,
+                                             const String& prop, const Variant& value,
                                              bool force);
 String HHVM_FUNCTION(hphp_get_original_class_name, const String& name);
 bool HHVM_FUNCTION(hphp_scalar_typehints_enabled);
@@ -49,7 +49,7 @@ bool HHVM_FUNCTION(hphp_scalar_typehints_enabled);
 class Reflection {
  public:
   static HPHP::Class* s_ReflectionExceptionClass;
-  static ObjectData* AllocReflectionExceptionObject(CVarRef message);
+  static ObjectData* AllocReflectionExceptionObject(const Variant& message);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

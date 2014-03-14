@@ -584,6 +584,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
     case T_STRING:
     case T_LNUMBER:
     case T_DNUMBER:
+    case T_ONUMBER:
     case T_LINE:
     case T_COMPILER_HALT_OFFSET:
     case T_FUNC_C:

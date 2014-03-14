@@ -1,5 +1,10 @@
-%S%wNULL
-%S%wNULL
-%S%wNULL
-%S%wNULL
-%S%wNULL
+HipHop Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 6
+NULL
+HipHop Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 10
+NULL
+HipHop Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 10
+NULL
+HipHop Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 15
+NULL
+HipHop Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 24
+NULL

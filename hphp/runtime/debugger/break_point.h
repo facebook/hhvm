@@ -65,7 +65,7 @@ enum InterruptType : int8_t {
 // grabbing source data out of the corresponding Unit.
 class InterruptSite {
 public:
-  InterruptSite(bool hardBreakPoint, CVarRef e);
+  InterruptSite(bool hardBreakPoint, const Variant& e);
 
   const InterruptSite *getCallingSite() const;
   const char *getFile() const { return m_file.data(); }
@@ -82,7 +82,7 @@ public:
 
   // Optionally provided by VM, could be an exception object, a string, or null
   // depending on the context.
-  CVarRef getError() { return m_error; }
+  const Variant& getError() { return m_error; }
 
   std::string &url() const { return m_url; }
   std::string desc() const;
@@ -95,7 +95,7 @@ public:
   bool funcEntry() const { return m_funcEntry; }
 
 private:
-  InterruptSite(ActRec* fp, Offset offset, CVarRef error);
+  InterruptSite(ActRec* fp, Offset offset, const Variant& error);
   void Initialize(ActRec *fp);
 
   Variant m_error;
@@ -257,7 +257,7 @@ private:
   int32_t parseFileLocation(const std::string &str, int32_t offset);
   bool parseLines(const std::string &token);
 
-  bool checkExceptionOrError(CVarRef e);
+  bool checkExceptionOrError(const Variant& e);
   bool checkUrl(std::string &url);
   bool checkLines(int line);
   bool checkStack(InterruptSite &site);

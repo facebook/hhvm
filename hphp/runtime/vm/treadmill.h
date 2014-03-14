@@ -20,19 +20,14 @@
 #include <stdint.h>
 #include <memory>
 
-namespace HPHP {
+namespace HPHP { namespace Treadmill {
 
-class Class;
-class Typedef;
-
-namespace Treadmill {
+//////////////////////////////////////////////////////////////////////
 
 /*
- * The Treadmill allows us to defer work until all currently-outstanding
- * requests have finished. We hook request start and finish. To defer
- * work, inherit from WorkItem and call Treadmill::WorkItem::enqueue.
- *
- * The work item will be called from base rank.
+ * The Treadmill allows us to defer work until all currently
+ * outstanding requests have finished.  We hook request start and
+ * finish to know when these events happen.
  */
 void startRequest();
 void finishRequest();
@@ -52,27 +47,22 @@ int64_t getOldestStartTime();
  */
 void deferredFree(void*);
 
-typedef int64_t GenCount;
+/*
+ * Schedule a function to run on the next appropriate treadmill round.
+ *
+ * The function will be called from the base mutex rank.
+ *
+ * Note: the function passed here escapes (naturally).  If you use a
+ * lambda here, copy things into the lambda by value.
+ *
+ * Important: f() must not throw an exception.
+ */
+template<class F> void enqueue(F&& f);
 
-class WorkItem {
- protected:
-  GenCount m_gen;
-  friend void finishRequest();
-
- public:
-  WorkItem();
-  virtual ~WorkItem() { }
-  virtual void operator()() = 0; // doesn't throw.
-  static void enqueue(std::unique_ptr<WorkItem> gt);
-};
-
-class FreeMemoryTrigger : public WorkItem {
-  void* m_ptr;
- public:
-  explicit FreeMemoryTrigger(void* ptr);
-  virtual void operator()();
-};
+//////////////////////////////////////////////////////////////////////
 
 }}
+
+#include "hphp/runtime/vm/treadmill-inl.h"
 
 #endif

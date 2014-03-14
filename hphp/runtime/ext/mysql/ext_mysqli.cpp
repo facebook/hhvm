@@ -95,20 +95,17 @@ static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
 
   if (type_size < 1) {
     raise_warning("Invalid type or no types specified");
-    ar->m_r = *Variant(false).asTypedValue();
-    return &ar->m_r;
+    return arReturn(ar, false);
   }
   if (type_size != ar->numArgs() - 1 - start_index) {
     raise_warning("Number of elements in type definition string doesn't match "
                   "number of bind variables");
-    ar->m_r = *Variant(false).asTypedValue();
-    return &ar->m_r;
+    return arReturn(ar, false);
   }
   if (type_size != obj->o_get(s_param_count.get()).toInt64()) {
     raise_warning("Number of variables doesn't match number of parameters in "
                   "prepared statement");
-    ar->m_r = *Variant(false).asTypedValue();
-    return &ar->m_r;
+    return arReturn(ar, false);
   }
 
   std::vector<Variant*> vars;
@@ -117,14 +114,12 @@ static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
     if (t != 'i' && t != 'd' && t != 's' && t != 'b') {
       raise_warning("Undefined fieldtype %c (parameter %d)", types[i],
                     i + 2 + start_index);
-      ar->m_r = *Variant(false).asTypedValue();
-      return &ar->m_r;
+      return arReturn(ar, false);
     }
     vars.push_back(&getArg<KindOfRef>(ar, i + 1 + start_index));
   }
 
-  ar->m_r = *Variant(getStmt(obj)->bind_param(types, vars)).asTypedValue();
-  return &ar->m_r;
+  return arReturn(ar, getStmt(obj)->bind_param(types, vars));
 }
 
 static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
@@ -133,8 +128,7 @@ static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
   if (ar->numArgs() - start_index != fields) {
     raise_warning("Number of bind variables doesn't match number of fields in "
                   "prepared statement");
-    ar->m_r = *Variant(false).asTypedValue();
-    return &ar->m_r;
+    return arReturn(ar, false);
   }
 
   std::vector<Variant*> vars;
@@ -142,8 +136,7 @@ static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
     vars.push_back(&getArg<KindOfRef>(ar, i));
   }
 
-  ar->m_r = *Variant(getStmt(obj)->bind_result(vars)).asTypedValue();
-  return &ar->m_r;
+  return arReturn(ar, getStmt(obj)->bind_result(vars));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -360,7 +353,7 @@ static DataType get_option_value_type(int64_t option) {
   not_reached();
 }
 
-static Variant HHVM_METHOD(mysqli, options, int64_t option, CVarRef value) {
+static Variant HHVM_METHOD(mysqli, options, int64_t option, const Variant& value) {
   auto conn = get_connection(this_);
   VALIDATE_CONN(conn, MySQLState::INITED)
 
@@ -422,7 +415,7 @@ static Variant HHVM_METHOD(mysqli, refresh, int64_t options) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 //
-//static bool HHVM_METHOD(mysqli, set_local_infile_handler, CObjRef read_func) {
+//static bool HHVM_METHOD(mysqli, set_local_infile_handler, const Object& read_func) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 
@@ -450,7 +443,7 @@ static Variant HHVM_METHOD(mysqli, ssl_set, const Variant& key,
 //}
 //
 //static bool HHVM_METHOD(mysqli_driver, embedded_server_start, bool start,
-//                        CArrRef arguments, CArrRef groups) {
+//                        const Array& arguments, const Array& groups) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 
@@ -618,7 +611,7 @@ static int64_t HHVM_FUNCTION(mysqli_get_client_version) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 //
-//static void HHVM_FUNCTION(mysqli_set_local_infile_default, CObjRef link) {
+//static void HHVM_FUNCTION(mysqli_set_local_infile_default, const Object& link) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 

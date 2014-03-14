@@ -31,13 +31,11 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include "zipint.h"
 
-
 
-ZIP_EXTERN(zip_int64_t)
+ZIP_EXTERN zip_int64_t
 zip_fread(struct zip_file *zf, void *outbuf, zip_uint64_t toread)
 {
     zip_int64_t n;

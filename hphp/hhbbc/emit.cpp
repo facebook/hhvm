@@ -877,7 +877,7 @@ void emit_class(EmitUnitState& state,
 std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
                                        const php::Unit& unit) {
   auto const is_systemlib = is_systemlib_part(unit);
-  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib};
+  Trace::Bump bumper{Trace::hhbbc_emit, kSystemLibBump, is_systemlib};
 
   auto ue = folly::make_unique<UnitEmitter>(unit.md5);
   FTRACE(1, "  unit {}\n", unit.filename->data());

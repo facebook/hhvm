@@ -67,7 +67,7 @@ protected:
   bool m_front;
 
 private:
-  bool preCompute(CVarRef value, Variant &result);
+  bool preCompute(const Variant& value, Variant &result);
   void setExistContext();
   static void SetExpTypeForExistsContext(AnalysisResultPtr ar,
                                          ExpressionPtr e, bool allowPrimitives);

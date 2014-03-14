@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/types.h"
 
 #define PHP_INPUT_FILTER_PARAM_DECL const String& value, long flags, \
-                                    CVarRef option_array
+                                    const Variant& option_array
 
 #define RETURN_VALIDATION_FAILED    \
   if (flags & k_FILTER_NULL_ON_FAILURE) {   \
@@ -54,7 +54,7 @@
   var_name##_len = 0;                                    \
   if (option_array.isArray() &&                          \
       !option_array.toArray().empty()) {                 \
-    CArrRef option_array_arr = option_array.toArray();   \
+    const Array& option_array_arr = option_array.toArray();   \
     if (option_array_arr.exists(option_name)) {          \
       Variant option_val(option_array_arr[option_name]); \
       if (option_val.isString()) {                       \
@@ -70,7 +70,7 @@
   var_name##_set = 0;                                    \
   if (option_array.isArray() &&                          \
       !option_array.toArray().empty()) {                 \
-    CArrRef option_array_arr = option_array.toArray();   \
+    const Array& option_array_arr = option_array.toArray();   \
     if (option_array_arr.exists(option_name)) {          \
       Variant option_val(option_array_arr[option_name]); \
       if (option_val.isInteger()) {                      \

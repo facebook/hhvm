@@ -81,7 +81,7 @@ void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   if (depth == 0) {
     PC pc = g_context->getPC();
     // Step over PopR following a call
-    if (toOp(*pc) == OpPopR) {
+    if (*reinterpret_cast<const Op*>(pc) == Op::PopR) {
       m_skippingOverPopR = true;
       m_needsVMInterrupt = true;
     } else {

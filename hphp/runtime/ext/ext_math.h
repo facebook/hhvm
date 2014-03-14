@@ -49,17 +49,17 @@ extern const int64_t k_PHP_ROUND_HALF_ODD;
 
 double f_pi();
 
-Variant f_min(int _argc, CVarRef value, CArrRef _argv = null_array);
-Variant f_max(int _argc, CVarRef value, CArrRef _argv = null_array);
-Variant f_abs(CVarRef number);
+Variant f_min(int _argc, const Variant& value, const Array& _argv = null_array);
+Variant f_max(int _argc, const Variant& value, const Array& _argv = null_array);
+Variant f_abs(const Variant& number);
 
 bool f_is_finite(double val);
 bool f_is_infinite(double val);
 bool f_is_nan(double val);
 
-Variant f_ceil(CVarRef number);
-Variant f_floor(CVarRef number);
-Variant f_round(CVarRef val, int64_t precision = 0,
+Variant f_ceil(const Variant& number);
+Variant f_floor(const Variant& number);
+Variant f_round(const Variant& val, int64_t precision = 0,
                 int64_t mode = PHP_ROUND_HALF_UP);
 
 double f_deg2rad(double number);
@@ -73,7 +73,7 @@ Variant f_bindec(const String& binary_string);
 Variant f_hexdec(const String& hex_string);
 Variant f_octdec(const String& octal_string);
 Variant f_base_convert(const String& number, int64_t frombase, int64_t tobase);
-Variant f_pow(CVarRef base, CVarRef exp);
+Variant f_pow(const Variant& base, const Variant& exp);
 double f_exp(double arg);
 double f_expm1(double arg);
 double f_log10(double arg);
@@ -99,10 +99,10 @@ double f_fmod(double x, double y);
 double f_sqrt(double arg);
 
 int64_t f_getrandmax();
-void f_srand(CVarRef seed = null_variant);
+void f_srand(const Variant& seed = null_variant);
 int64_t f_rand(int64_t min = 0, int64_t max = RAND_MAX);
 int64_t f_mt_getrandmax();
-void f_mt_srand(CVarRef seed = null_variant);
+void f_mt_srand(const Variant& seed = null_variant);
 int64_t f_mt_rand(int64_t min = 0, int64_t max = RAND_MAX);
 double f_lcg_value();
 

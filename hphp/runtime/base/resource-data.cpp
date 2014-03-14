@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/types.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -55,12 +55,12 @@ ResourceData::~ResourceData() {
   o_id = -1;
 }
 
-Array ResourceData::o_toArray() const {
-  return empty_array;
+String ResourceData::o_toString() const {
+  return String("Resource id #") + String(o_id);
 }
 
-void ResourceData::dump() const {
-  o_toArray().dump();
+Array ResourceData::o_toArray() const {
+  return empty_array;
 }
 
 const StaticString s_Unknown("Unknown");
@@ -94,6 +94,10 @@ void ResourceData::serialize(VariableSerializer* serializer) const {
     serializeImpl(serializer);
   }
   serializer->decNestedLevel((void*)this);
+}
+
+void ResourceData::compileTimeAssertions() {
+  static_assert(offsetof(ResourceData, m_count) == FAST_REFCOUNT_OFFSET, "");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

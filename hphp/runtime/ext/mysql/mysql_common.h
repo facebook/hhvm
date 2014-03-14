@@ -42,9 +42,9 @@ public:
   /**
    * Operations on a resource object.
    */
-  static MYSQL *GetConn(CVarRef link_identifier, MySQL **rconn = NULL);
-  static MySQL *Get(CVarRef link_identifier);
-  static bool CloseConn(CVarRef link_identifier);
+  static MYSQL *GetConn(const Variant& link_identifier, MySQL **rconn = NULL);
+  static MySQL *Get(const Variant& link_identifier);
+  static bool CloseConn(const Variant& link_identifier);
 
   /**
    * Default settings.
@@ -333,7 +333,7 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 // helper
 
-MySQLResult *php_mysql_extract_result(CVarRef result);
+MySQLResult *php_mysql_extract_result(const Variant& result);
 
 
 enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };
@@ -343,7 +343,7 @@ enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };
 #define PHP_MYSQL_FIELD_TYPE  4
 #define PHP_MYSQL_FIELD_FLAGS 5
 
-Variant php_mysql_field_info(CVarRef result, int field, int entry_type);
+Variant php_mysql_field_info(const Variant& result, int field, int entry_type);
 Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
                                      String username, String password,
                                      String database, int client_flags,
@@ -358,17 +358,17 @@ Variant php_mysql_do_connect(const String& server, const String& username,
                              int query_timeout_ms);
 
 enum MySQLQueryReturn { FAIL = 0, OK = 1, OK_FETCH_RESULT = 2 };
-MySQLQueryReturn php_mysql_do_query(const String& query, CVarRef link_id,
+MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
                                     bool async_mode);
-Variant php_mysql_get_result(CVarRef link_id, bool use_store);
-Variant php_mysql_do_query_and_get_result(const String& query, CVarRef link_id,
+Variant php_mysql_get_result(const Variant& link_id, bool use_store);
+Variant php_mysql_do_query_and_get_result(const String& query, const Variant& link_id,
                                           bool use_store, bool async_mode);
 
 #define PHP_MYSQL_ASSOC  1 << 0
 #define PHP_MYSQL_NUM    1 << 1
 #define PHP_MYSQL_BOTH   (PHP_MYSQL_ASSOC|PHP_MYSQL_NUM)
 
-Variant php_mysql_fetch_hash(CVarRef result, int result_type);
+Variant php_mysql_fetch_hash(const Variant& result, int result_type);
 
 Variant mysql_makevalue(const String& data, MYSQL_FIELD *mysql_field);
 Variant mysql_makevalue(const String& data, enum_field_types field_type);

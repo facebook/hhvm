@@ -591,8 +591,9 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %left T_ELSEIF
 %left T_ELSE
 %left T_ENDIF
-%token T_LNUMBER
-%token T_DNUMBER
+%token T_LNUMBER  /* long */
+%token T_DNUMBER  /* double */
+%token T_ONUMBER  /* overflowed decimal, might get parsed as long or double */
 %token T_STRING
 %token T_STRING_VARNAME
 %token T_VARIABLE
@@ -2143,6 +2144,7 @@ ctor_arguments:
 common_scalar:
     T_LNUMBER                          { _p->onScalar($$, T_LNUMBER,  $1);}
   | T_DNUMBER                          { _p->onScalar($$, T_DNUMBER,  $1);}
+  | T_ONUMBER                          { _p->onScalar($$, T_ONUMBER,  $1);}
   | T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
                                          T_CONSTANT_ENCAPSED_STRING,  $1);}
   | T_LINE                             { _p->onScalar($$, T_LINE,     $1);}
@@ -2229,6 +2231,7 @@ non_empty_static_array_pair_list:
 common_scalar_ae:
     T_LNUMBER                          { _p->onScalar($$, T_LNUMBER,  $1);}
   | T_DNUMBER                          { _p->onScalar($$, T_DNUMBER,  $1);}
+  | T_ONUMBER                          { _p->onScalar($$, T_ONUMBER,  $1);}
   | T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
                                          T_CONSTANT_ENCAPSED_STRING,  $1);}
   | T_START_HEREDOC
@@ -2240,6 +2243,7 @@ common_scalar_ae:
 static_numeric_scalar_ae:
     T_LNUMBER                          { _p->onScalar($$,T_LNUMBER,$1);}
   | T_DNUMBER                          { _p->onScalar($$,T_DNUMBER,$1);}
+  | T_ONUMBER                          { _p->onScalar($$,T_ONUMBER,$1);}
   | ident                              { constant_ae(_p,$$,$1);}
 ;
 static_scalar_ae:

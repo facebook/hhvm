@@ -220,7 +220,7 @@ class IntlDateFormatter {
    */
   <<__Native>>
   public function parse(string $value,
-                        mixed &$position): mixed;
+                        mixed &$position = null): mixed;
 
   /**
    * Sets the calendar type used by the formatter
@@ -529,7 +529,7 @@ function datefmt_localtime(IntlDateFormatter $fmt,
  */
 function datefmt_parse(IntlDateFormatter $fmt,
                        $value,
-                       &$position): mixed {
+                       &$position = null): mixed {
   return $fmt->parse($value, $position);
 }
 

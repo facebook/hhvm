@@ -181,7 +181,7 @@ out:
   /* Third, try to get magic file relative to dll location */
   dllpath = malloc(sizeof(*dllpath) * (MAX_PATH + 1));
   dllpath[MAX_PATH] = 0;  /* just in case long path gets truncated and not null terminated */
-  if (GetModuleFileNameA(NULL, dllpath, MAX_PATH)){
+  if (GetModuleFileNameA(NULL, dllpath, MAX_PATH)) {
     PathRemoveFileSpecA(dllpath);
     if (strlen(dllpath) > 3 &&
         stricmp(&dllpath[strlen(dllpath) - 3], "bin") == 0) {

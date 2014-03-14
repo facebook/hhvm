@@ -465,42 +465,6 @@
             ]
         },
         {
-            "name": "dom_document_relaxng_validate_file",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant"
-            },
-            "args": [
-                {
-                    "name": "obj",
-                    "type": "Variant"
-                },
-                {
-                    "name": "filename",
-                    "type": "String"
-                }
-            ]
-        },
-        {
-            "name": "dom_document_relaxng_validate_xml",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant"
-            },
-            "args": [
-                {
-                    "name": "obj",
-                    "type": "Variant"
-                },
-                {
-                    "name": "source",
-                    "type": "String"
-                }
-            ]
-        },
-        {
             "name": "dom_node_insert_before",
             "flags": [
             ],
@@ -2680,40 +2644,6 @@
                     ]
                 },
                 {
-                    "name": "relaxNGValidate",
-                    "desc": null,
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": "Boolean",
-                        "desc": "Returns TRUE on success or FALSE on failure."
-                    },
-                    "args": [
-                        {
-                            "name": "filename",
-                            "type": "String",
-                            "desc": "The RNG file."
-                        }
-                    ]
-                },
-                {
-                    "name": "relaxNGValidateSource",
-                    "desc": null,
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": "Boolean",
-                        "desc": "Returns TRUE on success or FALSE on failure."
-                    },
-                    "args": [
-                        {
-                            "name": "source",
-                            "type": "String",
-                            "desc": "A string containing the RNG schema."
-                        }
-                    ]
-                },
-                {
                     "name": "save",
                     "desc": "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
                     "flags": [
@@ -3697,6 +3627,28 @@
                             "name": "name",
                             "type": "Variant"
                         }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "DOMNameSpaceNode",
+            "parent": "DOMNode",
+            "desc": "",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
                     ]
                 }
             ],

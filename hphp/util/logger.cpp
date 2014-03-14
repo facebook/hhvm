@@ -48,6 +48,7 @@ IMPLEMENT_LOGLEVEL(Verbose);
 
 bool Logger::UseSyslog = false;
 bool Logger::UseLogFile = true;
+bool Logger::UseRequestLog = false;
 bool Logger::UseCronolog = false;
 bool Logger::IsPipeOutput = false;
 FILE *Logger::Output = nullptr;
@@ -117,7 +118,11 @@ void Logger::Log(LogLevelType level, const std::string &msg,
 }
 
 FILE *Logger::GetStandardOut(LogLevelType level) {
-  return stderr;
+  return s_logger->m_standardOut;
+}
+
+void Logger::SetStandardOut(FILE* file) {
+  s_logger->m_standardOut = file;
 }
 
 int Logger::GetSyslogLevel(LogLevelType level) {
@@ -154,8 +159,8 @@ void Logger::log(LogLevelType level, const std::string &msg,
   if (UseSyslog) {
     syslog(GetSyslogLevel(level), "%s", msg.c_str());
   }
-  FILE *stdf = GetStandardOut(level);
   if (UseLogFile) {
+    FILE *stdf = GetStandardOut(level);
     FILE *f;
     if (UseCronolog) {
       f = cronOutput.getOutputFile();

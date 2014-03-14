@@ -217,8 +217,10 @@ auto const primitives = {
   TDbl,
   TSStr,
   TCStr,
-  TSArr,
-  TCArr,
+  TSArrE,
+  TCArrE,
+  TSArrN,
+  TCArrN,
   TObj,
   TRes,
   TCls,
@@ -235,6 +237,10 @@ auto const optionals = {
   TOptSStr,
   TOptCStr,
   TOptStr,
+  TOptSArrE,
+  TOptCArrE,
+  TOptSArrN,
+  TOptCArrN,
   TOptSArr,
   TOptCArr,
   TOptArr,
@@ -251,6 +257,10 @@ auto const non_opt_unions = {
   TBool,
   TNum,
   TStr,
+  TArrE,
+  TArrN,
+  TSArr,
+  TCArr,
   TArr,
   TInitPrim,
   TPrim,
@@ -396,7 +406,10 @@ TEST(Type, Relations) {
   // union_of is commutative
   for (auto& t1 : all_with_waithandles(index)) {
     for (auto& t2 : all_with_waithandles(index)) {
-      EXPECT_TRUE(union_of(t1, t2) == union_of(t2, t1));
+      EXPECT_TRUE(union_of(t1, t2) == union_of(t2, t1))
+        << "   " << show(t1) << ' ' << show(t2)
+        << "\n   union_of(t1, t2): " << show(union_of(t1, t2))
+        << "\n   union_of(t2, t1): " << show(union_of(t2, t1));
     }
   }
 }
@@ -1676,6 +1689,9 @@ TEST(Type, ArrPackedN) {
   EXPECT_TRUE(s2.couldBe(sn3));
   EXPECT_TRUE(s2.couldBe(sn1));
   EXPECT_FALSE(s2.couldBe(sn2));
+
+  EXPECT_EQ(union_of(carr_packedn(TInt), sarr_packedn(TInt)),
+            arr_packedn(TInt));
 }
 
 TEST(Type, ArrStruct) {
@@ -1855,6 +1871,105 @@ TEST(Type, WideningAlreadyStable) {
   for (auto& t : specialized_array_examples()) {
     EXPECT_EQ(widening_union(t, t), t);
   }
+}
+
+TEST(Type, EmptyArray) {
+  {
+    auto const possible_e = union_of(arr_packedn(TInt), aempty());
+    EXPECT_TRUE(possible_e.couldBe(aempty()));
+    EXPECT_TRUE(possible_e.couldBe(arr_packedn(TInt)));
+    EXPECT_EQ(array_elem(possible_e, ival(0)), opt(TInt));
+  }
+
+  {
+    auto const possible_e = union_of(arr_packed({TInt, TInt}), aempty());
+    EXPECT_TRUE(possible_e.couldBe(aempty()));
+    EXPECT_TRUE(possible_e.couldBe(arr_packed({TInt, TInt})));
+    EXPECT_FALSE(possible_e.couldBe(arr_packed({TInt, TInt, TInt})));
+    EXPECT_FALSE(possible_e.subtypeOf(arr_packedn(TInt)));
+    EXPECT_EQ(array_elem(possible_e, ival(0)), opt(TInt));
+    EXPECT_EQ(array_elem(possible_e, ival(1)), opt(TInt));
+  }
+
+  {
+    auto const estat = union_of(sarr_packedn(TInt), aempty());
+    EXPECT_TRUE(estat.couldBe(aempty()));
+    EXPECT_TRUE(estat.couldBe(sarr_packedn(TInt)));
+    EXPECT_FALSE(estat.subtypeOf(sarr_packedn(TInt)));
+    EXPECT_FALSE(estat.subtypeOf(TCArr));
+    EXPECT_FALSE(estat.couldBe(TCArr));
+    EXPECT_FALSE(estat.subtypeOf(TSArrE));
+    EXPECT_TRUE(estat.couldBe(TSArrE));
+  }
+
+  EXPECT_EQ(array_newelem(aempty(), ival(142)), arr_packed({ival(142)}));
+}
+
+TEST(Type, BasicArrays) {
+  EXPECT_TRUE(TSArr.subtypeOf(TArr));
+  EXPECT_TRUE(TCArr.subtypeOf(TArr));
+  EXPECT_TRUE(TArrE.subtypeOf(TArr));
+  EXPECT_TRUE(TArrN.subtypeOf(TArr));
+  EXPECT_TRUE(TSArrE.subtypeOf(TArr));
+  EXPECT_TRUE(TSArrN.subtypeOf(TArr));
+  EXPECT_TRUE(TCArrE.subtypeOf(TArr));
+  EXPECT_TRUE(TCArrN.subtypeOf(TArr));
+
+  EXPECT_EQ(union_of(TSArr, TCArr), TArr);
+  EXPECT_EQ(union_of(TSArrE, TCArrE), TArrE);
+  EXPECT_EQ(union_of(TSArrN, TCArrN), TArrN);
+  EXPECT_EQ(union_of(TArrN, TArrE), TArr);
+
+  EXPECT_EQ(union_of(TSArrN, TCArrE), TArr);
+  EXPECT_EQ(union_of(TSArrE, TCArrN), TArr);
+  EXPECT_EQ(union_of(TOptCArrN, TSArrE), TOptArr);
+
+  EXPECT_EQ(union_of(TOptSArr, TCArr), TOptArr);
+  EXPECT_EQ(union_of(TOptSArrE, TCArrE), TOptArrE);
+  EXPECT_EQ(union_of(TOptSArrN, TCArrN), TOptArrN);
+  EXPECT_EQ(union_of(TOptArrN, TArrE), TOptArr);
+
+  EXPECT_EQ(union_of(TOptSArrN, TOptCArrE), TOptArr);
+  EXPECT_EQ(union_of(TOptSArrN, TOptCArrE), TOptArr);
+
+  EXPECT_EQ(union_of(TOptSArr, TOptCArr), TOptArr);
+  EXPECT_EQ(union_of(TOptSArrE, TOptCArrE), TOptArrE);
+  EXPECT_EQ(union_of(TOptSArrN, TOptCArrN), TOptArrN);
+  EXPECT_EQ(union_of(TOptArrN, TOptArrE), TOptArr);
+
+  EXPECT_EQ(union_of(TOptSArrN, TOptCArrE), TOptArr);
+  EXPECT_EQ(union_of(TOptSArrN, TOptCArrE), TOptArr);
+
+  EXPECT_EQ(union_of(TSArr, TInitNull), TOptSArr);
+  EXPECT_EQ(union_of(TSArrE, TInitNull), TOptSArrE);
+  EXPECT_EQ(union_of(TSArrN, TInitNull), TOptSArrN);
+  EXPECT_EQ(union_of(TCArr, TInitNull), TOptCArr);
+  EXPECT_EQ(union_of(TCArrE, TInitNull), TOptCArrE);
+  EXPECT_EQ(union_of(TCArrN, TInitNull), TOptCArrN);
+  EXPECT_EQ(union_of(TArr, TInitNull), TOptArr);
+  EXPECT_EQ(union_of(TArrE, TInitNull), TOptArrE);
+  EXPECT_EQ(union_of(TArrN, TInitNull), TOptArrN);
+}
+
+/*
+ * These are tests for some unrepresentable bit combos.  If we ever
+ * add predefined bits for things like TSArrE|TCArrN these will fail
+ * and need to be revisted.
+ */
+TEST(Type, ArrBitCombos) {
+  auto const u1 = union_of(sarr_packedn(TInt), TCArrE);
+  EXPECT_TRUE(u1.couldBe(TArrE));
+  EXPECT_TRUE(u1.couldBe(TSArrE));
+  EXPECT_TRUE(u1.couldBe(TCArrE));
+  EXPECT_TRUE(u1.couldBe(sarr_packedn(TInt)));
+  EXPECT_EQ(array_elem(u1, ival(0)), TOptInt);
+
+  auto const u2 = union_of(TSArrE, carr_packedn(TInt));
+  EXPECT_TRUE(u2.couldBe(TArrE));
+  EXPECT_TRUE(u2.couldBe(TSArrE));
+  EXPECT_TRUE(u2.couldBe(TCArrE));
+  EXPECT_TRUE(u2.couldBe(arr_packedn(TInt)));
+  EXPECT_EQ(array_elem(u2, ival(0)), TOptInt);
 }
 
 //////////////////////////////////////////////////////////////////////

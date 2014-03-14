@@ -250,17 +250,17 @@ void HphpArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
     return true;                                                \
   } while (0)
 
-bool HphpArray::Uksort(ArrayData* ad, CVarRef cmp_function) {
+bool HphpArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
   auto a = asHphpArray(ad);
   USER_SORT_BODY(KeyAccessor, false);
 }
 
-bool HphpArray::Usort(ArrayData* ad, CVarRef cmp_function) {
+bool HphpArray::Usort(ArrayData* ad, const Variant& cmp_function) {
   auto a = asHphpArray(ad);
   USER_SORT_BODY(ValAccessor, true);
 }
 
-bool HphpArray::Uasort(ArrayData* ad, CVarRef cmp_function) {
+bool HphpArray::Uasort(ArrayData* ad, const Variant& cmp_function) {
   auto a = asHphpArray(ad);
   USER_SORT_BODY(ValAccessor, false);
 }

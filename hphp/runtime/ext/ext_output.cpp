@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 
-bool f_ob_start(CVarRef callback /* = uninit_null() */,
+bool f_ob_start(const Variant& callback /* = uninit_null() */,
                 int chunk_size /* = 0 */, bool erase /* = true */) {
   // ignoring chunk_size and erase
 

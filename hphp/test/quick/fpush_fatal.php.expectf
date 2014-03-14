@@ -1,1 +1,1 @@
-HipHop Fatal error: Undefined function: asdasdasd in %s on line 6
+HipHop Fatal error: Call to undefined function asdasdasd() in %s on line 6

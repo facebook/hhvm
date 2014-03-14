@@ -26,7 +26,7 @@ namespace HPHP {
 /**
  * How PHP formats a string. Called by ext/ext_string.cpp.
  */
-char *string_printf(const char *format, int len, CArrRef args, int *outlen);
+char *string_printf(const char *format, int len, const Array& args, int *outlen);
 
 // XXX: vspprintf and spprintf have slightly different semantics and flags than
 // C99 printf (because PHP) so we can't annotate them with ATTRIBUTE_PRINTF

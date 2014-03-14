@@ -166,47 +166,6 @@
             ]
         },
         {
-            "name": "date_diff",
-            "flags": [
-            ],
-            "return": {
-                "type": "Object"
-            },
-            "args": [
-                {
-                    "name": "datetime",
-                    "type": "Object"
-                },
-                {
-                    "name": "datetime2",
-                    "type": "Object"
-                },
-                {
-                    "name": "absolute",
-                    "type": "Boolean",
-                    "value": "false"
-                }
-            ]
-        },
-        {
-            "name": "date_format",
-            "flags": [
-            ],
-            "return": {
-                "type": "String"
-            },
-            "args": [
-                {
-                    "name": "object",
-                    "type": "Object"
-                },
-                {
-                    "name": "format",
-                    "type": "String"
-                }
-            ]
-        },
-        {
             "name": "date_get_last_errors",
             "flags": [
             ],
@@ -290,20 +249,6 @@
                 {
                     "name": "modify",
                     "type": "String"
-                }
-            ]
-        },
-        {
-            "name": "date_offset_get",
-            "flags": [
-            ],
-            "return": {
-                "type": "Int64"
-            },
-            "args": [
-                {
-                    "name": "object",
-                    "type": "Object"
                 }
             ]
         },
@@ -491,20 +436,6 @@
             ]
         },
         {
-            "name": "date_timestamp_get",
-            "flags": [
-            ],
-            "return": {
-                "type": "Int64"
-            },
-            "args": [
-                {
-                    "name": "datetime",
-                    "type": "Object"
-                }
-            ]
-        },
-        {
             "name": "date_timestamp_set",
             "flags": [
             ],
@@ -519,20 +450,6 @@
                 {
                     "name": "timestamp",
                     "type": "Int64"
-                }
-            ]
-        },
-        {
-            "name": "date_timezone_get",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant"
-            },
-            "args": [
-                {
-                    "name": "object",
-                    "type": "Object"
                 }
             ]
         },
@@ -968,24 +885,6 @@
             ]
         },
         {
-            "name": "timezone_offset_get",
-            "flags": [
-            ],
-            "return": {
-                "type": "Int64"
-            },
-            "args": [
-                {
-                    "name": "object",
-                    "type": "Object"
-                },
-                {
-                    "name": "dt",
-                    "type": "Object"
-                }
-            ]
-        },
-        {
             "name": "timezone_open",
             "flags": [
             ],
@@ -1359,6 +1258,16 @@
                     ],
                     "return": {
                         "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__debugInfo",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "VariantMap"
                     },
                     "args": [
                     ]

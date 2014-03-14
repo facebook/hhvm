@@ -135,7 +135,7 @@ const StaticString s_http_response_header("http_response_header");
 const StaticString s_omitted("...(omitted)");
 
 
-void CmdVariable::PrintVariables(DebuggerClient &client, CArrRef variables,
+void CmdVariable::PrintVariables(DebuggerClient &client, const Array& variables,
                                  int frame, const String& text, int version) {
   bool global = frame == -1; // I.e. we were called from CmdGlobal, or the
   //client's current frame is the global frame, according to OnServer

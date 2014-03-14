@@ -48,7 +48,7 @@
             "desc": "Sends an ALLO command to the remote FTP server to allocate space for a file to be uploaded.\n\nMany FTP servers do not support this command. These servers may return a failure code (FALSE) indicating the command is not supported or a success code (TRUE) to indicate that pre-allocation is not necessary and the client should continue as though the operation were successful. Because of this, it may be best to reserve this function for servers which explicitly require preallocation.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -78,7 +78,7 @@
             "desc": "Changes to the parent directory.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -97,7 +97,7 @@
             "desc": "Changes the current directory to the specified one.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -121,7 +121,7 @@
             "desc": "Sets the permissions on the specified remote file to mode.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -150,7 +150,7 @@
             "desc": "ftp_close() closes the given link identifier and releases the resource.\n\nAfter calling this function, you can no longer use the FTP connection and must create a new one with ftp_connect().",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -169,7 +169,7 @@
             "desc": "ftp_connect() opens an FTP connection to the specified host.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -198,7 +198,7 @@
             "desc": "ftp_delete() deletes the file specified by path from the FTP server.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -222,7 +222,7 @@
             "desc": "Sends a SITE EXEC command request to the FTP server.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -246,7 +246,7 @@
             "desc": "ftp_fget() retrieves remote_file from the FTP server, and writes it to the given file pointer.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -285,7 +285,7 @@
             "desc": "ftp_fput() uploads the data from a file pointer to a remote file on the FTP server.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -324,7 +324,7 @@
             "desc": "This function returns the value for the requested option from the specified FTP connection.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -348,7 +348,7 @@
             "desc": "ftp_get() retrieves a remote file from the FTP server, and saves it into a local file.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -387,7 +387,7 @@
             "desc": "Logs in to the given FTP stream.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -416,7 +416,7 @@
             "desc": "ftp_mdtm() gets the last modified time for a remote file.\n\nNot all servers support this feature!\n\nftp_mdtm() does not work with directories.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -440,7 +440,7 @@
             "desc": "Creates the specified directory on the FTP server.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -464,7 +464,7 @@
             "desc": "Continues retrieving\/sending a file non-blocking.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -483,7 +483,7 @@
             "desc": "ftp_nb_fget() retrieves a remote file from the FTP server.\n\nThe difference between this function and ftp_fget() is that this function retrieves the file asynchronously, so your program can perform other operations while the file is being downloaded.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -522,7 +522,7 @@
             "desc": "ftp_nb_fput() uploads the data from a file pointer to a remote file on the FTP server.\n\nThe difference between this function and the ftp_fput() is that this function uploads the file asynchronously, so your program can perform other operations while the file is being uploaded.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -561,7 +561,7 @@
             "desc": "ftp_nb_get() retrieves a remote file from the FTP server, and saves it into a local file.\n\nThe difference between this function and ftp_get() is that this function retrieves the file asynchronously, so your program can perform other operations while the file is being downloaded.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -600,7 +600,7 @@
             "desc": "ftp_nb_put() stores a local file on the FTP server.\n\nThe difference between this function and the ftp_put() is that this function uploads the file asynchronously, so your program can perform other operations while the file is being uploaded.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -639,7 +639,7 @@
             "desc": null,
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -663,7 +663,7 @@
             "desc": "ftp_pasv() turns on or off passive mode. In passive mode, data connections are initiated by the client, rather than by the server. It may be needed if the client is behind firewall.\n\nPlease note that ftp_pasv() can only be called after a successfull login or otherwise it will fail.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -687,7 +687,7 @@
             "desc": "ftp_put() stores a local file on the FTP server.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -726,7 +726,7 @@
             "desc": "",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -745,7 +745,7 @@
             "desc": null,
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -759,7 +759,7 @@
             "desc": "Sends an arbitrary command to the FTP server.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -783,7 +783,7 @@
             "desc": "ftp_rawlist() executes the FTP LIST command, and returns the result as an array.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -812,7 +812,7 @@
             "desc": "ftp_rename() renames a file or a directory on the FTP server.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -841,7 +841,7 @@
             "desc": "Removes the specified directory on the FTP server.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -865,7 +865,7 @@
             "desc": "This function controls various runtime options for the specified FTP stream.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -894,7 +894,7 @@
             "desc": "ftp_site() sends the given SITE command to the FTP server.\n\nSITE commands are not standardized, and vary from server to server. They are useful for handling such things as file permissions and group membership.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -918,7 +918,7 @@
             "desc": "ftp_size() returns the size of the given file in bytes.\n\nNot all servers support this feature.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -942,7 +942,7 @@
             "desc": "ftp_ssl_connect() opens an explicit SSL-FTP connection to the specified host. Why this function may not exist\n\nftp_ssl_connect() is only available if both the ftp module and the OpenSSL support is built statically into php, this means that on Windows this function will be undefined in the official PHP builds. To make this function available on Windows you must compile your own PHP binaries.\n\nftp_ssl_connect() is not intended for use with sFTP. To use sFTP with PHP, please see ssh2_sftp().",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -971,7 +971,7 @@
             "desc": "Returns the system type identifier of the remote FTP server.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",

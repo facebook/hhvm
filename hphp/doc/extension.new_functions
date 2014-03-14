@@ -35,7 +35,6 @@ testing and some alternative PHP implementation.
 - fb_parallel_query
 - fb_crossall_query
 
-- dangling_server_proxy_old_request
 - dangling_server_proxy_new_request
 
 - pagelet_server_is_enabled
@@ -50,20 +49,10 @@ testing and some alternative PHP implementation.
 - xbox_task_status
 - xbox_task_result
 
-- evhttp_set_cache
-- evhttp_get
-- evhttp_post
-- evhttp_async_get
-- evhttp_async_post
-- evhttp_recv
-
 - call_user_func_array_async
 - call_user_func_async
 - check_user_func_async
 - end_user_func_async
-- call_user_func_array_rpc
-- call_user_func_rpc
-- call_user_func_serialized
 - fb_call_user_func_array_safe
 - fb_call_user_func_safe
 - fb_call_user_func_safe_return
@@ -74,7 +63,6 @@ testing and some alternative PHP implementation.
 - fb_rename_function
 - fb_get_code_coverage
 - fb_utf8ize
-- fb_const_fetch
 - fb_enable_code_coverage
 - fb_disable_code_coverage
 

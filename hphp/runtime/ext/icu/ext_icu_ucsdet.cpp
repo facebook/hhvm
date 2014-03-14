@@ -15,13 +15,13 @@ const StaticString s_EncodingDetector("EncodingDetector");
 
 static void HHVM_METHOD(EncodingDetector, setText, const String& text) {
   FETCH_DET(data, this_);
-  data->setText(text->toCppString());
+  data->setText(text.toCppString());
 }
 
 static void HHVM_METHOD(EncodingDetector, setDeclaredEncoding,
                         const String& declaredEncoding) {
   FETCH_DET(data, this_);
-  data->setDeclaredEncoding(declaredEncoding->toCppString());
+  data->setDeclaredEncoding(declaredEncoding.toCppString());
 }
 
 static Object HHVM_METHOD(EncodingDetector, detect) {

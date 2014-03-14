@@ -97,7 +97,7 @@ static Variant get_value(sqlite3_value *argv) {
   return value;
 }
 
-static void sqlite3_do_callback(sqlite3_context *context, CVarRef callback,
+static void sqlite3_do_callback(sqlite3_context *context, const Variant& callback,
                                 int argc, sqlite3_value **argv, bool is_agg) {
   Array params = Array::Create();
   php_sqlite3_agg_context *agg_context = NULL;
@@ -377,7 +377,7 @@ Variant c_SQLite3::t_querysingle(const String& sql, bool entire_row /* = false *
   return false;
 }
 
-bool c_SQLite3::t_createfunction(const String& name, CVarRef callback,
+bool c_SQLite3::t_createfunction(const String& name, const Variant& callback,
                                  int64_t argcount /* = -1 */) {
   validate();
   if (name.empty()) {
@@ -401,7 +401,7 @@ bool c_SQLite3::t_createfunction(const String& name, CVarRef callback,
   return false;
 }
 
-bool c_SQLite3::t_createaggregate(const String& name, CVarRef step, CVarRef final,
+bool c_SQLite3::t_createaggregate(const String& name, const Variant& step, const Variant& final,
                                   int64_t argcount /* = -1 */) {
   validate();
   if (name.empty()) {
@@ -449,7 +449,7 @@ c_SQLite3Stmt::~c_SQLite3Stmt() {
   }
 }
 
-void c_SQLite3Stmt::t___construct(CObjRef dbobject, const String& statement) {
+void c_SQLite3Stmt::t___construct(const Object& dbobject, const String& statement) {
   if (!statement.empty()) {
     c_SQLite3 *db = dbobject.getTyped<c_SQLite3>();
     db->validate();
@@ -504,7 +504,7 @@ bool c_SQLite3Stmt::t_clear() {
   return true;
 }
 
-bool c_SQLite3Stmt::t_bindparam(CVarRef name, VRefParam parameter,
+bool c_SQLite3Stmt::t_bindparam(const Variant& name, VRefParam parameter,
                                 int64_t type /* = k_SQLITE3_TEXT */) {
   auto param = std::make_shared<BoundParam>();
   param->type = type;
@@ -528,7 +528,7 @@ bool c_SQLite3Stmt::t_bindparam(CVarRef name, VRefParam parameter,
   return true;
 }
 
-bool c_SQLite3Stmt::t_bindvalue(CVarRef name, CVarRef parameter,
+bool c_SQLite3Stmt::t_bindvalue(const Variant& name, const Variant& parameter,
                                 int64_t type /* = k_SQLITE3_TEXT */) {
   Variant v = parameter;
   return t_bindparam(name, v, type);

@@ -1040,21 +1040,23 @@ MCGenerator::checkRefs(SrcKey sk,
   }
 }
 
-class FreeRequestStubTrigger : public Treadmill::WorkItem {
+namespace {
+class FreeRequestStubTrigger {
   TCA m_stub;
  public:
   explicit FreeRequestStubTrigger(TCA stub) : m_stub(stub) {
     TRACE(3, "FreeStubTrigger @ %p, stub %p\n", this, m_stub);
   }
-  virtual void operator()() {
+  void operator()() {
     TRACE(3, "FreeStubTrigger: Firing @ %p , stub %p\n", this, m_stub);
     if (mcg->freeRequestStub(m_stub) != true) {
       // If we can't free the stub, enqueue again to retry.
       TRACE(3, "FreeStubTrigger: write lease failed, requeueing %p\n", m_stub);
-      enqueue(std::unique_ptr<WorkItem>(new FreeRequestStubTrigger(m_stub)));
+      Treadmill::enqueue(FreeRequestStubTrigger(m_stub));
     }
   }
 };
+}
 
 #ifdef DEBUG
 
@@ -1507,7 +1509,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
       const FPIEnt* fe = liveFunc()->findPrecedingFPI(
         liveUnit()->offsetOf(vmpc()));
       vmpc() = liveUnit()->at(fe->m_fcallOff);
-      assert(isFCallStar(toOp(*vmpc())));
+      assert(isFCallStar(*reinterpret_cast<const Op*>(vmpc())));
       raise_error("Stack overflow");
       NOT_REACHED();
     } else {
@@ -1525,8 +1527,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
   }
 
   if (smashed && info.stubAddr) {
-    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
-                                    new FreeRequestStubTrigger(info.stubAddr)));
+    Treadmill::enqueue(FreeRequestStubTrigger(info.stubAddr));
   }
 
   return true;
@@ -1602,8 +1603,8 @@ interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {                 \
   SKTRACE(5, SrcKey(liveFunc(), vmpc()), "%40s %p %p\n",                \
           "interpOne" #opcode " before (fp,sp)",                        \
           vmfp(), vmsp());                                              \
-  assert(toOp(*vmpc()) == Op::opcode);                                  \
-  auto const ec = g_context.getNoCheck();                             \
+  assert(*reinterpret_cast<const Op*>(vmpc()) == Op::opcode);           \
+  auto const ec = g_context.getNoCheck();                               \
   Stats::inc(Stats::Instr_InterpOne ## opcode);                         \
   if (Trace::moduleEnabled(Trace::interpOne, 1)) {                      \
     static const StringData* cat = makeStaticString("interpOne");       \
@@ -1818,7 +1819,7 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
 
 void
 MCGenerator::translateWork(const TranslArgs& args) {
-  Timer _t("translate");
+  Timer _t(Timer::translate);
   auto sk = args.m_sk;
   std::unique_ptr<Tracelet> tp;
 
@@ -2051,7 +2052,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
 Translator::TranslateResult
 MCGenerator::translateTracelet(Tracelet& t) {
-  Timer _t("translateTracelet");
+  Timer _t(Timer::translateTracelet);
 
   FTRACE(2, "attempting to translate tracelet:\n{}\n", t.toString());
   assert(!Translator::liveFrameIsPseudoMain());
@@ -2109,7 +2110,7 @@ MCGenerator::translateTracelet(Tracelet& t) {
       ht.profileSmallFunctionShape(traceletShape(t));
     }();
 
-    Timer irGenTimer("translateTracelet_irGeneration");
+    Timer irGenTimer(Timer::translateTracelet_irGeneration);
     Unit::MetaHandle metaHand;
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
@@ -2348,7 +2349,7 @@ MCGenerator::getPerfCounters(Array& ret) {
   for (auto const& pair : Timer::Counters()) {
     if (pair.second.total == 0 && pair.second.count == 0) continue;
 
-    ret.set(String("jit_time_" + pair.first), pair.second.total);
+    ret.set(String("jit_time_") + pair.first, pair.second.total);
   }
 }
 
@@ -2381,8 +2382,10 @@ void MCGenerator::recordGdbTranslation(SrcKey sk,
     if (!RuntimeOption::EvalJitNoGdb) {
       m_debugInfo.recordTracelet(rangeFrom(cb, start, &cb == &code.stubs()),
                                  srcFunc,
-                                 srcFunc->unit() ?
-                                   srcFunc->unit()->at(sk.offset()) : nullptr,
+                                 reinterpret_cast<const Op*>(
+                                   srcFunc->unit() ?
+                                     srcFunc->unit()->at(sk.offset()) : nullptr
+                                 ),
                                  exit, inPrologue);
     }
     if (RuntimeOption::EvalPerfPidMap) {

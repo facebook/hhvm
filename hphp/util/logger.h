@@ -41,8 +41,11 @@ public:
     LogVerbose
   };
 
+  Logger(): m_standardOut(stderr) {}
+
   static bool UseSyslog;
   static bool UseLogFile;
+  static bool UseRequestLog;
   static bool IsPipeOutput;
   static bool UseCronolog;
   static FILE *Output;
@@ -87,6 +90,9 @@ public:
 
   static char *EscapeString(const std::string &msg);
 
+  static FILE *GetStandardOut(LogLevelType level);
+  static void SetStandardOut(FILE*);
+
   virtual ~Logger() { }
 
 protected:
@@ -114,7 +120,6 @@ protected:
     return Logger::UseLogFile || Logger::UseSyslog;
   }
 
-  static FILE *GetStandardOut(LogLevelType level);
   static int GetSyslogLevel(LogLevelType level);
 
   /**
@@ -134,6 +139,7 @@ protected:
 private:
   static Logger *s_logger;
 
+  FILE* m_standardOut;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

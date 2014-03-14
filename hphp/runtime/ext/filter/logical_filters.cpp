@@ -406,7 +406,7 @@ Variant php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) {
     char *s = url.host;
 
     /* First char of hostname must be alphanumeric */
-    if(!isalnum((int)*(unsigned char *)s)) {
+    if (!isalnum((int)*(unsigned char *)s)) {
       goto bad_url;
     }
 

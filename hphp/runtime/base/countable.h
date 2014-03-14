@@ -23,6 +23,8 @@
 #include <cassert>
 #include <atomic>
 
+#include "hphp/runtime/base/memory-manager.h"
+
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/trace.h"
@@ -56,6 +58,16 @@ static_assert((uint32_t)UncountedValue & (1uL << UncountedBitPos),
               "Check UncountedValue and UncountedBitPos");
 static_assert((uint32_t)StaticValue & (1uL << UncountedBitPos),
               "Check StaticValue and UncountedBitPos");
+
+/*
+ * All Refcounted types have their m_count field at the same offset
+ * in the object. This offset is chosen to allow a RefData's count
+ * field to pack after a TypedValue.
+ *
+ * Other refcounted types (ArrayData, StringData, and ObjectData)
+ * have small fields that are packed into the same space.
+ */
+const size_t FAST_REFCOUNT_OFFSET = 12;
 
 /*
  * Real count values should always be less than or equal to
@@ -120,6 +132,11 @@ inline void assert_refcount_realistic_ns_nz(int32_t count) {
     return (uint32_t)m_count > 1;                                       \
   }                                                                     \
                                                                         \
+  bool hasExactlyOneRef() const {                                       \
+    assert_refcount_realistic(m_count);                                 \
+    return (uint32_t)m_count == 1;                                      \
+  }                                                                     \
+                                                                        \
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \
     assert_refcount_realistic(m_count);                                 \
@@ -164,6 +181,11 @@ inline void assert_refcount_realistic_ns_nz(int32_t count) {
   bool hasMultipleRefs() const {                        \
     assert_refcount_realistic_ns(m_count);              \
     return m_count > 1;                                 \
+  }                                                     \
+                                                        \
+  bool hasExactlyOneRef() const {                       \
+    assert_refcount_realistic(m_count);                 \
+    return m_count == 1;                                \
   }                                                     \
                                                         \
   void incRefCount() const {                            \

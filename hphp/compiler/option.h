@@ -137,7 +137,7 @@ public:
   static std::vector<std::string> DynamicMethodPostfixes;
   static std::vector<std::string> DynamicClassPrefixes;
   static std::vector<std::string> DynamicClassPostfixes;
-  static std::set<std::string> DynamicInvokeFunctions;
+  static std::set<std::string, stdltistr> DynamicInvokeFunctions;
   static std::set<std::string> VolatileClasses;
   static std::map<std::string,std::string> AutoloadClassMap;
   static std::map<std::string,std::string> AutoloadFuncMap;
@@ -226,6 +226,7 @@ public:
   static bool EnableShortTags;
   static bool EnableAspTags;
   static bool EnableXHP;
+  static bool IntsOverflowToInts;
   static int ParserThreadCount;
 
   static int GetScannerType();
@@ -261,10 +262,6 @@ public:
   static bool RecordErrors;
   static std::string DocJson; // filename to dump doc JSON to
 
-  static void setHookHandler(void (*hookHandler)(Hdf &config)) {
-    m_hookHandler = hookHandler;
-  }
-
   static bool (*PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr fs);
 private:
   static StringBag OptionStrings;
@@ -277,8 +274,6 @@ private:
   static bool IsDynamic(const std::string &name,
                         const std::vector<std::string> &prefixes,
                         const std::vector<std::string> &postfixes);
-
-  static void (*m_hookHandler)(Hdf &config);
 };
 
 //////////////////////////////////////////////////////////////////////

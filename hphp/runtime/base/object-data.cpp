@@ -14,32 +14,38 @@
    +----------------------------------------------------------------------+
 */
 
-#include "folly/Hash.h"
-#include <vector>
-#include "folly/ScopeGuard.h"
+#include "hphp/runtime/base/object-data.h"
 
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/memory-profile.h"
-#include "hphp/runtime/base/smart-containers.h"
-#include "hphp/util/lock.h"
 #include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/memory-profile.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/variable-serializer.h"
+
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_datetime.h"
 #include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
+
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+
 #include "hphp/system/systemlib.h"
+
+#include "folly/Hash.h"
+#include "folly/ScopeGuard.h"
+
+#include <vector>
 
 namespace HPHP {
 
@@ -330,21 +336,21 @@ ALWAYS_INLINE Variant ObjectData::o_setImpl(const String& propName, T v,
   return variant(v);
 }
 
-Variant ObjectData::o_set(const String& propName, CVarRef v) {
-  return o_setImpl<CVarRef>(propName, v, null_string);
+Variant ObjectData::o_set(const String& propName, const Variant& v) {
+  return o_setImpl<const Variant&>(propName, v, null_string);
 }
 
 Variant ObjectData::o_set(const String& propName, RefResult v) {
   return o_setRef(propName, variant(v), null_string);
 }
 
-Variant ObjectData::o_setRef(const String& propName, CVarRef v) {
+Variant ObjectData::o_setRef(const String& propName, const Variant& v) {
   return o_setImpl<RefResult>(propName, ref(v), null_string);
 }
 
-Variant ObjectData::o_set(const String& propName, CVarRef v,
+Variant ObjectData::o_set(const String& propName, const Variant& v,
                           const String& context) {
-  return o_setImpl<CVarRef>(propName, v, context);
+  return o_setImpl<const Variant&>(propName, v, context);
 }
 
 Variant ObjectData::o_set(const String& propName, RefResult v,
@@ -352,12 +358,12 @@ Variant ObjectData::o_set(const String& propName, RefResult v,
   return o_setRef(propName, variant(v), context);
 }
 
-Variant ObjectData::o_setRef(const String& propName, CVarRef v,
+Variant ObjectData::o_setRef(const String& propName, const Variant& v,
                              const String& context) {
   return o_setImpl<RefResult>(propName, ref(v), context);
 }
 
-void ObjectData::o_setArray(CArrRef properties) {
+void ObjectData::o_setArray(const Array& properties) {
   for (ArrayIter iter(properties); iter; ++iter) {
     String k = iter.first().toString();
     Class* ctx = nullptr;
@@ -380,7 +386,7 @@ void ObjectData::o_setArray(CArrRef properties) {
       k = k.substr(subLen);
     }
 
-    CVarRef secondRef = iter.secondRef();
+    const Variant& secondRef = iter.secondRef();
     setProp(ctx, k.get(), (TypedValue*)(&secondRef),
             secondRef.isReferenced());
   }
@@ -566,7 +572,7 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
   return true;
 }
 
-Variant ObjectData::o_invoke(const String& s, CVarRef params,
+Variant ObjectData::o_invoke(const String& s, const Variant& params,
                              bool fatal /* = true */) {
   CallCtx ctx;
   if (!decode_invoke(s, this, fatal, ctx) ||
@@ -851,10 +857,6 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       properties.serialize(serializer, true);
     }
   }
-}
-
-void ObjectData::dump() const {
-  o_toArray().dump();
 }
 
 ObjectData* ObjectData::clone() {
@@ -1613,8 +1615,9 @@ template void ObjectData::incDecProp<false>(TypedValue&,
 void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
   auto propVal = getProp(ctx, key, visible, accessible, unset);
-  if (visible && accessible) {
-    Slot propInd = declPropInd(propVal);
+  Slot propInd = declPropInd(propVal);
+
+  if (visible && accessible && !unset) {
     if (propInd != kInvalidSlot) {
       // Declared property.
       tvSetIgnoreRef(*null_variant.asTypedValue(), *propVal);
@@ -1626,14 +1629,19 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
     return;
   }
 
-  assert(!accessible);
+  bool tryUnset = getAttribute(UseUnset);
+
+  if (propInd != kInvalidSlot && !accessible && !tryUnset) {
+    // defined property that is not accessible
+    raise_error("Cannot unset inaccessible property");
+  }
+
   TypedValue ignored;
-  if (!getAttribute(UseUnset) || !invokeUnset(&ignored, key)) {
+  if (!tryUnset || !invokeUnset(&ignored, key)) {
     if (UNLIKELY(!*key->data())) {
       throw_invalid_property_name(StrNR(key));
-    } else if (visible) {
-      raise_error("Cannot unset inaccessible property");
     }
+
     return;
   }
   tvRefcountedDecRef(&ignored);
@@ -1823,6 +1831,28 @@ RefData* ObjectData::zGetProp(Class* ctx, const StringData* key,
     tvBox(tv);
   }
   return tv->m_data.pref;
+}
+
+bool ObjectData::hasDynProps() const {
+  return getAttribute(HasDynPropArr) && dynPropArray().size() != 0;
+}
+
+void ObjectData::getChildren(std::vector<TypedValue*>& out) {
+  Slot nProps = m_cls->numDeclProperties();
+  for (Slot i = 0; i < nProps; ++i) {
+    out.push_back(&propVec()[i]);
+  }
+  if (UNLIKELY(getAttribute(HasDynPropArr))) {
+    dynPropArray()->getChildren(out);
+  }
+}
+
+const char* ObjectData::classname_cstr() const {
+  return o_getClassName().data();
+}
+
+void ObjectData::compileTimeAssertions() {
+  static_assert(offsetof(ObjectData, m_count) == FAST_REFCOUNT_OFFSET, "");
 }
 
 } // HPHP

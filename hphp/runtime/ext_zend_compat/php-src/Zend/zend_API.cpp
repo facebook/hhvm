@@ -34,7 +34,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 ZEND_API const char *zend_get_type_by_const(int type) {
-  return HPHP::getDataTypeString((HPHP::DataType)type)->data();
+  return HPHP::getDataTypeString((HPHP::DataType)type).data();
 }
 
 ZEND_API const char *zend_zval_type_name(const zval *arg) {

@@ -1107,7 +1107,13 @@ static std::string ini_get_save_handler() {
 
 static bool ini_on_update_serializer(const std::string& value) {
   SESSION_CHECK_ACTIVE_STATE;
-  PS(serializer) = SessionSerializer::Find(value.data());
+  SessionSerializer *serializer = SessionSerializer::Find(value.data());
+  if (serializer == nullptr) {
+    raise_warning("ini_set(): Cannot find serialization handler '%s'",
+                  value.data());
+    return false;
+  }
+  PS(serializer) = serializer;
   return true;
 }
 
@@ -1453,8 +1459,8 @@ int64_t f_session_status() {
 void f_session_set_cookie_params(int64_t lifetime,
                                  const String& path /* = null_string */,
                                  const String& domain /* = null_string */,
-                                 CVarRef secure /* = null */,
-                                 CVarRef httponly /* = null */) {
+                                 const Variant& secure /* = null */,
+                                 const Variant& httponly /* = null */) {
   if (PS(use_cookies)) {
     f_ini_set("session.cookie_lifetime", lifetime);
     if (!path.isNull()) {
@@ -1520,7 +1526,7 @@ Variant f_session_module_name(const String& newname /* = null_string */) {
   return oldname;
 }
 
-bool f_hphp_session_set_save_handler(CObjRef sessionhandler,
+bool f_hphp_session_set_save_handler(const Object& sessionhandler,
     bool register_shutdown /* = true */) {
 
   if (PS(mod) &&
@@ -1793,8 +1799,8 @@ void f_session_commit() {
   f_session_write_close();
 }
 
-bool f_session_register(int _argc, CVarRef var_names,
-                        CArrRef _argv /* = null_array */) {
+bool f_session_register(int _argc, const Variant& var_names,
+                        const Array& _argv /* = null_array */) {
   throw NotSupportedException
     (__func__, "Deprecated as of PHP 5.3.0 and REMOVED as of PHP 6.0.0. "
      "Relying on this feature is highly discouraged.");
@@ -1815,7 +1821,7 @@ bool f_session_is_registered(const String& varname) {
 static bool HHVM_METHOD(SessionHandler, hhopen,
                         const String& save_path, const String& session_id) {
   return PS(default_mod) &&
-    PS(default_mod)->open(save_path->data(), session_id->data());
+    PS(default_mod)->open(save_path.data(), session_id.data());
 }
 
 static bool HHVM_METHOD(SessionHandler, hhclose) {
@@ -1834,11 +1840,11 @@ static String HHVM_METHOD(SessionHandler, hhread, const String& session_id) {
 static bool HHVM_METHOD(SessionHandler, hhwrite,
                         const String& session_id, const String& session_data) {
   return PS(default_mod) &&
-    PS(default_mod)->write(session_id->data(), session_data->data());
+    PS(default_mod)->write(session_id.data(), session_data.data());
 }
 
 static bool HHVM_METHOD(SessionHandler, hhdestroy, const String& session_id) {
-  return PS(default_mod) && PS(default_mod)->destroy(session_id->data());
+  return PS(default_mod) && PS(default_mod)->destroy(session_id.data());
 }
 
 static bool HHVM_METHOD(SessionHandler, hhgc, int maxlifetime) {

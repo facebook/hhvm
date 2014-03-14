@@ -26,20 +26,20 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Array f_spl_classes();
-String f_spl_object_hash(CObjRef obj);
-int64_t f_hphp_object_pointer(CObjRef obj);
+String f_spl_object_hash(const Object& obj);
+int64_t f_hphp_object_pointer(const Object& obj);
 Variant f_hphp_get_this();
-Variant f_class_implements(CVarRef obj, bool autoload = true);
-Variant f_class_parents(CVarRef obj, bool autoload = true);
-Variant f_class_uses(CVarRef obj, bool autoload = true);
-Variant f_iterator_apply(CVarRef obj, CVarRef func, CArrRef params = null_array);
-Variant f_iterator_count(CVarRef obj);
-Variant f_iterator_to_array(CVarRef obj, bool use_keys = true);
+Variant f_class_implements(const Variant& obj, bool autoload = true);
+Variant f_class_parents(const Variant& obj, bool autoload = true);
+Variant f_class_uses(const Variant& obj, bool autoload = true);
+Variant f_iterator_apply(const Variant& obj, const Variant& func, const Array& params = null_array);
+Variant f_iterator_count(const Variant& obj);
+Variant f_iterator_to_array(const Variant& obj, bool use_keys = true);
 void f_spl_autoload_call(const String& class_name);
 String f_spl_autoload_extensions(const String& file_extensions = null_string);
 Variant f_spl_autoload_functions();
-bool f_spl_autoload_register(CVarRef autoload_function = null_variant, bool throws = true, bool prepend = false);
-bool f_spl_autoload_unregister(CVarRef autoload_function);
+bool f_spl_autoload_register(const Variant& autoload_function = null_variant, bool throws = true, bool prepend = false);
+bool f_spl_autoload_unregister(const Variant& autoload_function);
 void f_spl_autoload(const String& class_name, const String& file_extensions = null_string);
 
 ///////////////////////////////////////////////////////////////////////////////

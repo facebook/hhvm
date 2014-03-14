@@ -50,7 +50,7 @@ bool TestBase::CountSkip() {
 }
 
 bool TestBase::VerifySame(const char *exp1, const char *exp2,
-                          CVarRef v1, CVarRef v2) {
+                          const Variant& v1, const Variant& v2) {
   if (!same(v1, v2)) {
     g_context->obEndAll();
     printf("%s = \n", exp1); f_var_dump(v1);
@@ -72,7 +72,7 @@ bool TestBase::VerifyClose(const char *exp1, const char *exp2,
   return true;
 }
 
-bool TestBase::array_value_exists(CVarRef var, CVarRef value) {
+bool TestBase::array_value_exists(const Variant& var, const Variant& value) {
   bool found = !same(f_array_search(value, var.toArray()), false);
   if (!found) {
     f_var_dump(var);

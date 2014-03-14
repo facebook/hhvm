@@ -194,7 +194,7 @@ static sdlParamPtr get_param(sdlFunction *function, const char *param_name,
   return sdlParamPtr();
 }
 
-static xmlNodePtr serialize_zval(CVarRef val, sdlParamPtr param,
+static xmlNodePtr serialize_zval(const Variant& val, sdlParamPtr param,
                                  const char *paramName, int style,
                                  xmlNodePtr parent) {
   xmlNodePtr xmlParam;
@@ -249,7 +249,7 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param, Variant value,
 static xmlDocPtr serialize_function_call
 (c_SoapClient *client, std::shared_ptr<sdlFunction> function,
   const char *function_name,
-  const char *uri, CArrRef arguments, CArrRef soap_headers) {
+  const char *uri, const Array& arguments, const Array& soap_headers) {
   xmlNodePtr envelope = NULL, body, method = NULL, head = NULL;
   xmlNsPtr ns = NULL;
   int style, use;
@@ -1176,7 +1176,7 @@ static xmlDocPtr serialize_response_call(
     std::shared_ptr<sdlFunction> function,
     const char *function_name,
     const char *uri, Variant &ret,
-    CArrRef headers, int version) {
+    const Array& headers, int version) {
   xmlNodePtr envelope = NULL, body, param;
   xmlNsPtr ns = NULL;
   int use = SOAP_LITERAL;
@@ -1832,7 +1832,7 @@ bool f_use_soap_error_handler(bool handler /* = true */) {
   return old;
 }
 
-bool f_is_soap_fault(CVarRef fault) {
+bool f_is_soap_fault(const Variant& fault) {
   return fault.instanceof(SystemLib::s_SoapFaultClass);
 }
 
@@ -1886,8 +1886,8 @@ const StaticString
   s_user_agent("user_agent"),
   s_soapaction("soapaction");
 
-void c_SoapServer::t___construct(CVarRef wsdl,
-                                 CArrRef options /* = null_array */) {
+void c_SoapServer::t___construct(const Variant& wsdl,
+                                 const Array& options /* = null_array */) {
   USE_SOAP_GLOBAL;
   SoapServerScope ss(this);
 
@@ -1981,7 +1981,7 @@ void c_SoapServer::t___construct(CVarRef wsdl,
 }
 
 void c_SoapServer::t_setclass(int _argc, const String& name,
-                              CArrRef _argv /* = null_array */) {
+                              const Array& _argv /* = null_array */) {
   SoapServerScope ss(this);
   if (f_class_exists(name, true)) {
     m_type = SOAP_CLASS;
@@ -1993,13 +1993,13 @@ void c_SoapServer::t_setclass(int _argc, const String& name,
   }
 }
 
-void c_SoapServer::t_setobject(CObjRef obj) {
+void c_SoapServer::t_setobject(const Object& obj) {
   SoapServerScope ss(this);
   m_type = SOAP_OBJECT;
   m_soap_object = obj;
 }
 
-void c_SoapServer::t_addfunction(CVarRef func) {
+void c_SoapServer::t_addfunction(const Variant& func) {
   SoapServerScope ss(this);
 
   Array funcs;
@@ -2072,7 +2072,7 @@ static bool valid_function(c_SoapServer *server, Object &soap_obj,
   } else if (!server->m_soap_functions.ft.empty()) {
     return server->m_soap_functions.ft.exists(f_strtolower(fn_name));
   }
-  HPHP::Func* f = cls->lookupMethod(fn_name.get());
+  HPHP::Func* f = cls ? cls->lookupMethod(fn_name.get()) : nullptr;
   return (f && f->isPublic());
 }
 
@@ -2306,16 +2306,16 @@ void c_SoapServer::t_setpersistence(int64_t mode) {
   }
 }
 
-void c_SoapServer::t_fault(CVarRef code, const String& fault,
+void c_SoapServer::t_fault(const Variant& code, const String& fault,
                            const String& actor /* = null_string */,
-                           CVarRef detail /* = null */,
+                           const Variant& detail /* = null */,
                            const String& name /* = null_string */) {
   SoapServerScope ss(this);
   Object obj(SystemLib::AllocSoapFaultObject(code, fault, actor, detail, name));
   send_soap_server_fault(std::shared_ptr<sdlFunction>(), obj, NULL);
 }
 
-void c_SoapServer::t_addsoapheader(CObjRef fault) {
+void c_SoapServer::t_addsoapheader(const Object& fault) {
   SoapServerScope ss(this);
   soapHeader *p = NEWOBJ(soapHeader)();
   Resource obj(p);
@@ -2351,8 +2351,8 @@ c_SoapClient::c_SoapClient(Class* cb) :
 c_SoapClient::~c_SoapClient() {
 }
 
-void c_SoapClient::t___construct(CVarRef wsdl,
-                                 CArrRef options /* = null_array */) {
+void c_SoapClient::t___construct(const Variant& wsdl,
+                                 const Array& options /* = null_array */) {
   USE_SOAP_GLOBAL;
   SoapClientScope ss(this);
 
@@ -2474,9 +2474,9 @@ Variant c_SoapClient::t___call(Variant name, Variant args) {
   return t___soapcall(name.toString(), args.toArray());
 }
 
-Variant c_SoapClient::t___soapcall(const String& name, CArrRef args,
-                                   CArrRef options /* = null_array */,
-                                   CVarRef input_headers /* = null_variant */,
+Variant c_SoapClient::t___soapcall(const String& name, const Array& args,
+                                   const Array& options /* = null_array */,
+                                   const Variant& input_headers /* = null_variant */,
                                    VRefParam output_headers /* = null */) {
   SoapClientScope ss(this);
 
@@ -2783,13 +2783,13 @@ Variant c_SoapClient::t___setcookie(const String& name,
   return uninit_null();
 }
 
-Variant c_SoapClient::t___setlocation(const String& new_location /* = null_string */){
+Variant c_SoapClient::t___setlocation(const String& new_location /* = null_string */) {
   Variant ret = m_location;
   m_location = new_location;
   return ret;
 }
 
-bool c_SoapClient::t___setsoapheaders(CVarRef headers /* = null_variant */) {
+bool c_SoapClient::t___setsoapheaders(const Variant& headers /* = null_variant */) {
   if (headers.isNull()) {
     m_default_headers = uninit_null();
   } else if (headers.isArray()) {
@@ -2813,7 +2813,7 @@ c_SoapVar::c_SoapVar(Class* cb) : ExtObjectData(cb) {
 c_SoapVar::~c_SoapVar() {
 }
 
-void c_SoapVar::t___construct(CVarRef data, CVarRef type,
+void c_SoapVar::t___construct(const Variant& data, const Variant& type,
                               const String& type_name /* = null_string */,
                               const String& type_namespace /* = null_string */,
                               const String& node_name /* = null_string */,
@@ -2848,7 +2848,7 @@ c_SoapParam::c_SoapParam(Class* cb) : ExtObjectData(cb) {
 c_SoapParam::~c_SoapParam() {
 }
 
-void c_SoapParam::t___construct(CVarRef data, const String& name) {
+void c_SoapParam::t___construct(const Variant& data, const String& name) {
   if (name.empty()) {
     raise_warning("Invalid parameter name");
     return;
@@ -2868,9 +2868,9 @@ c_SoapHeader::~c_SoapHeader() {
 }
 
 void c_SoapHeader::t___construct(const String& ns, const String& name,
-                                 CVarRef data /* = null */,
+                                 const Variant& data /* = null */,
                                  bool mustunderstand /* = false */,
-                                 CVarRef actor /* = null */) {
+                                 const Variant& actor /* = null */) {
   if (ns.empty()) {
     raise_warning("Invalid namespace");
     return;

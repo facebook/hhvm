@@ -14,12 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/type-object.h"
+
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/variable-serializer.h"
+
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_datetime.h"
 
@@ -30,6 +33,14 @@ namespace HPHP {
 const Object Object::s_nullObject = Object();
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void Object::compileTimeAssertions() {
+  static_assert(sizeof(Object) == sizeof(ObjectBase), "Fix this.");
+}
+
+void ObjNR::compileTimeAssertions() {
+  static_assert(offsetof(ObjNR, m_px) == kExpectedMPxOffset, "");
+}
 
 Object::~Object() {
   // force it out of line
@@ -50,6 +61,10 @@ Array Object::toArray() const {
   return m_px ? m_px->o_toArray() : Array();
 }
 
+String Object::toString() const {
+  return m_px ? m_px->invokeToString() : String();
+}
+
 int64_t Object::toInt64ForCompare() const {
   check_collection_compare(m_px);
   return toInt64();
@@ -60,7 +75,7 @@ double Object::toDoubleForCompare() const {
   return toDouble();
 }
 
-bool Object::equal(CObjRef v2) const {
+bool Object::equal(const Object& v2) const {
   if (m_px == v2.get()) {
     return true;
   }
@@ -81,27 +96,27 @@ bool Object::equal(CObjRef v2) const {
     v2->o_getArray(ar2, false);
     return ar1->equal(ar2.get(), false);
   }
-  if (UNLIKELY(m_px->instanceof(c_DateTime::classof()))) {
-    return getTyped<c_DateTime>()->gettimestamp() ==
-        v2.getTyped<c_DateTime>()->gettimestamp();
+  if (UNLIKELY(m_px->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+    return c_DateTime::GetTimestamp(*this) ==
+        c_DateTime::GetTimestamp(v2);
   }
   return toArray().equal(v2.toArray());
 }
 
-bool Object::less(CObjRef v2) const {
+bool Object::less(const Object& v2) const {
   check_collection_compare(m_px, v2.get());
-  if (UNLIKELY(m_px->instanceof(c_DateTime::classof()))) {
-    return getTyped<c_DateTime>()->gettimestamp() <
-        v2.getTyped<c_DateTime>()->gettimestamp();
+  if (UNLIKELY(m_px->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+    return c_DateTime::GetTimestamp(*this) <
+        c_DateTime::GetTimestamp(v2);
   }
   return m_px != v2.m_px && toArray().less(v2.toArray());
 }
 
-bool Object::more(CObjRef v2) const {
+bool Object::more(const Object& v2) const {
   check_collection_compare(m_px, v2.get());
-  if (UNLIKELY(m_px->instanceof(c_DateTime::classof()))) {
-    return getTyped<c_DateTime>()->gettimestamp() >
-        v2.getTyped<c_DateTime>()->gettimestamp();
+  if (UNLIKELY(m_px->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+    return c_DateTime::GetTimestamp(*this) >
+        c_DateTime::GetTimestamp(v2);
   }
   return m_px != v2.m_px && toArray().more(v2.toArray());
 }
@@ -117,7 +132,7 @@ Variant Object::o_get(const String& propName, bool error /* = true */,
   return m_px->o_get(propName, error, context);
 }
 
-Variant Object::o_set(const String& propName, CVarRef val,
+Variant Object::o_set(const String& propName, const Variant& val,
                       const String& context /* = null_string */) {
   if (!m_px) {
     setToDefaultObject();
@@ -125,7 +140,7 @@ Variant Object::o_set(const String& propName, CVarRef val,
   return m_px->o_set(propName, val, context);
 }
 
-Variant Object::o_setRef(const String& propName, CVarRef val,
+Variant Object::o_setRef(const String& propName, const Variant& val,
                          const String& context /* = null_string */) {
   if (!m_px) {
     setToDefaultObject();
@@ -136,6 +151,10 @@ Variant Object::o_setRef(const String& propName, CVarRef val,
 Variant Object::o_set(const String& propName, RefResult val,
                       const String& context /* = null_string */) {
   return o_setRef(propName, variant(val), context);
+}
+
+const char* Object::classname_cstr() const {
+  return m_px->o_getClassName().c_str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

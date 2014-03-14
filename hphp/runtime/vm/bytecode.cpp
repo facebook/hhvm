@@ -19,6 +19,14 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cinttypes>
+
+#include <boost/format.hpp>
+
+#include <libgen.h>
+#include <sys/mman.h>
 
 #include "folly/String.h"
 
@@ -80,20 +88,12 @@
 #include "hphp/runtime/base/tracer.h"
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/container-functions.h"
 
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
-
-#include <iostream>
-#include <iomanip>
-#include <boost/format.hpp>
-
-#include <cinttypes>
-
-#include <libgen.h>
-#include <sys/mman.h>
 
 namespace HPHP {
 
@@ -232,6 +232,10 @@ static inline Class* frameStaticClass(ActRec* fp) {
   } else {
     return nullptr;
   }
+}
+
+static Offset pcOff(const ExecutionContext* env) {
+  return env->getFP()->m_func->unit()->offsetOf(env->m_pc);
 }
 
 //=============================================================================
@@ -846,8 +850,8 @@ string Stack::toString(const ActRec* fp, int offset,
   auto func = fp->func();
   os << prefix << "=== Stack at "
      << unit->filepath()->data() << ":"
-     << unit->getLineNumber(unit->offsetOf(vmpc())) << " func "
-     << func->fullName()->data() << " ===\n";
+     << unit->getLineNumber(unit->offsetOf(vmpc()))
+     << " func " << func->fullName()->data() << " ===\n";
 
   toStringFrame(os, fp, offset, m_top, prefix);
 
@@ -883,7 +887,7 @@ TypedValue* Stack::generatorStackBase(const ActRec* fp) {
     // In the reentrant case, we can consult the savedVM state. We simply
     // use the top of stack of the previous VM frame (since the ActRec,
     // locals, and iters for this frame do not reside on the VM stack).
-    return context->m_nestedVMs.back().m_savedState.sp;
+    return context->m_nestedVMs.back().sp;
   }
   // In the non-reentrant case, we know generators are always called from a
   // function with an empty stack. So we find the caller's FP, compensate for
@@ -904,7 +908,7 @@ ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
     if (LIKELY(prevFrame != nullptr)) return prevFrame;
   }
 
-  if (LIKELY(!m_nestedVMs.empty())) return m_nestedVMs.back().m_savedState.fp;
+  if (LIKELY(!m_nestedVMs.empty())) return m_nestedVMs.back().fp;
   return nullptr;
 }
 
@@ -1151,7 +1155,7 @@ LookupResult ExecutionContext::lookupCtorMethod(const Func*& f,
 }
 
 ObjectData* ExecutionContext::createObject(StringData* clsName,
-                                             CVarRef params,
+                                             const Variant& params,
                                              bool init /* = true */) {
   Class* class_ = Unit::loadClass(clsName);
   if (class_ == nullptr) {
@@ -1237,7 +1241,7 @@ int ExecutionContext::getLine() {
   VMRegAnchor _;
   ActRec* ar = getFP();
   Unit* unit = ar ? ar->m_func->unit() : nullptr;
-  Offset pc = unit ? pcOff() : 0;
+  Offset pc = unit ? pcOff(this) : 0;
   if (ar == nullptr) return -1;
   if (ar->skipFrame()) {
     ar = getPrevVMState(ar, &pc);
@@ -1400,7 +1404,7 @@ static inline void checkStack(Stack& stk, const Func* f) {
   }
 }
 
-bool ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
+void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
   bool raiseMissingArgumentWarnings = false;
@@ -1422,7 +1426,7 @@ bool ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
       }
       pc = func->getEntry();
       // Nothing more to do; get out
-      return true;
+      return;
     } else {
       assert(ar->hasExtraArgs());
       assert(func->numParams() < ar->numArgs());
@@ -1513,7 +1517,6 @@ bool ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
       }
     }
   }
-  return true;
 }
 
 void ExecutionContext::syncGdbState() {
@@ -1532,9 +1535,8 @@ void ExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
     JIT::TCA start = enterFnAr->m_func->getPrologue(na);
     mcg->enterTCAtPrologue(enterFnAr, start);
   } else {
-    if (prepareFuncEntry(enterFnAr, m_pc)) {
-      enterVMWork(enterFnAr);
-    }
+    prepareFuncEntry(enterFnAr, m_pc);
+    enterVMWork(enterFnAr);
   }
 }
 
@@ -1560,7 +1562,10 @@ void ExecutionContext::enterVMWork(ActRec* enterFnAr) {
   }
 }
 
-void ExecutionContext::enterVM(TypedValue* retval, ActRec* ar) {
+void ExecutionContext::enterVM(ActRec* ar) {
+  assert(ar->m_soff == 0);
+  assert(ar->m_savedRbp == 0);
+
   DEBUG_ONLY int faultDepth = m_faults.size();
   SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
 
@@ -1587,7 +1592,8 @@ resume:
       first = false;
       if (m_fp && !ar->m_varEnv) {
         enterVMPrologue(ar);
-      } else if (prepareFuncEntry(ar, m_pc)) {
+      } else {
+        prepareFuncEntry(ar, m_pc);
         enterVMWork(ar);
       }
     } else {
@@ -1596,8 +1602,6 @@ resume:
 
     // Everything succeeded with no exception---return to the previous
     // VM nesting level.
-    *retval = *m_stack.topTV();
-    m_stack.discard();
     return;
 
   } catch (...) {
@@ -1613,11 +1617,6 @@ resume:
    * Here we have to propagate an exception out of this VM's nesting
    * level.
    */
-
-  if (g_context->m_nestedVMs.empty()) {
-    m_fp = nullptr;
-    m_pc = nullptr;
-  }
 
   assert(m_faults.size() > 0);
   Fault fault = m_faults.back();
@@ -1640,28 +1639,9 @@ resume:
   not_reached();
 }
 
-void ExecutionContext::reenterVM(TypedValue* retval,
-                                   ActRec* ar,
-                                   TypedValue* savedSP) {
-  ar->m_soff = 0;
-  ar->m_savedRbp = 0;
-  VMState savedVM = { getPC(), getFP(), m_firstAR, savedSP };
-  TRACE(3, "savedVM: %p %p %p %p\n", m_pc, m_fp, m_firstAR, savedSP);
-  pushVMState(savedVM, ar);
-  assert(m_nestedVMs.size() >= 1);
-  try {
-    enterVM(retval, ar);
-    popVMState();
-  } catch (...) {
-    popVMState();
-    throw;
-  }
-  TRACE(1, "Reentry: exit fp %p pc %p\n", m_fp, m_pc);
-}
-
 void ExecutionContext::invokeFunc(TypedValue* retval,
                                     const Func* f,
-                                    CVarRef args_,
+                                    const Variant& args_,
                                     ObjectData* this_ /* = NULL */,
                                     Class* cls /* = NULL */,
                                     VarEnv* varEnv /* = NULL */,
@@ -1817,12 +1797,13 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
     }
   }
 
-  if (m_fp) {
-    reenterVM(retval, ar, savedSP);
-  } else {
-    assert(m_nestedVMs.size() == 0);
-    enterVM(retval, ar);
-  }
+  pushVMState(savedSP);
+  SCOPE_EXIT { popVMState(); };
+
+  enterVM(ar);
+
+  tvCopy(*m_stack.topTV(), *retval);
+  m_stack.discard();
 }
 
 void ExecutionContext::invokeFuncCleanupHelper(TypedValue* retval,
@@ -1917,12 +1898,13 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
     }
   }
 
-  if (m_fp) {
-    reenterVM(retval, ar, savedSP);
-  } else {
-    assert(m_nestedVMs.size() == 0);
-    enterVM(retval, ar);
-  }
+  pushVMState(savedSP);
+  SCOPE_EXIT { popVMState(); };
+
+  enterVM(ar);
+
+  tvCopy(*m_stack.topTV(), *retval);
+  m_stack.discard();
 }
 
 void ExecutionContext::invokeContFunc(const Func* f,
@@ -1959,10 +1941,14 @@ void ExecutionContext::invokeContFunc(const Func* f,
     cellDup(*param, *m_stack.allocC());
   }
 
-  TypedValue retval;
-  reenterVM(&retval, ar, savedSP);
+  pushVMState(savedSP);
+  SCOPE_EXIT { popVMState(); };
+
+  enterVM(ar);
+
   // Codegen for generator functions guarantees that they will return null
-  assert(IS_NULL_TYPE(retval.m_type));
+  assert(IS_NULL_TYPE(m_stack.topTV()->m_type));
+  m_stack.discard();
 }
 
 void ExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
@@ -2002,16 +1988,19 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   // Linear search from end of m_nestedVMs. In practice, we're probably
   // looking for something recently pushed.
   int i = m_nestedVMs.size() - 1;
-  for (; i >= 0; --i) {
-    if (m_nestedVMs[i].m_entryFP == fp) break;
+  ActRec* firstAR = m_firstAR;
+  while (i >= 0 && firstAR != fp) {
+    firstAR = m_nestedVMs[i--].firstAR;
   }
   if (i == -1) return nullptr;
-  const VMState& vmstate = m_nestedVMs[i].m_savedState;
+  const VMState& vmstate = m_nestedVMs[i];
   prevFp = vmstate.fp;
   assert(prevFp);
   assert(prevFp->m_func->unit());
   if (prevSp) *prevSp = vmstate.sp;
-  if (prevPc) *prevPc = prevFp->m_func->unit()->offsetOf(vmstate.pc);
+  if (prevPc) {
+    *prevPc = prevFp->m_func->unit()->offsetOf(vmstate.pc);
+  }
   if (fromVMEntry) *fromVMEntry = true;
   return prevFp;
 }
@@ -2100,8 +2089,8 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
     ArrayInit frame(7);
 
     auto const curUnit = fp->m_func->unit();
-    auto const curOp = toOp(*curUnit->at(pc));
-    auto const isReturning = curOp == OpRetC || curOp == OpRetV;
+    auto const curOp = *reinterpret_cast<const Op*>(curUnit->at(pc));
+    auto const isReturning = curOp == Op::RetC || curOp == Op::RetV;
 
     // Builtins and generators don't have a file and line number
     if (prevFp && !prevFp->m_func->isBuiltin() && !fp->inGenerator()) {
@@ -2122,7 +2111,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
       // already do the right thing. The emitter associates object access with
       // the subsequent expression and this would be difficult to modify.
       auto const opAtPrevPc =
-        toOp(*reinterpret_cast<const Opcode*>(prevUnit->at(prevPc)));
+        *reinterpret_cast<const Op*>(prevUnit->at(prevPc));
       Offset pcAdjust = 0;
       if (opAtPrevPc == OpPopR || opAtPrevPc == OpUnboxR) {
         pcAdjust = 1;
@@ -2146,7 +2135,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
     }
 
     // check for pseudomain
-    if (funcname->empty()) {
+    if (funcname.empty()) {
       if (!prevFp) continue;
       funcname = s_include;
     }
@@ -2249,7 +2238,7 @@ const ClassInfo::MethodInfo* ExecutionContext::findFunctionInfo(
 }
 
 const ClassInfo* ExecutionContext::findClassInfo(const String& name) {
-  if (name->empty()) return nullptr;
+  if (name.empty()) return nullptr;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >::iterator it =
     m_classInfos.find(name);
   if (it == m_classInfos.end()) {
@@ -2436,13 +2425,13 @@ HPHP::Eval::PhpFile* ExecutionContext::lookupIncludeRoot(StringData* path,
     absPath = currentDir.string() + '/';
     TRACE(2, "lookupIncludeRoot(%s): relative -> %s\n",
           path->data(),
-          absPath->data());
+          absPath.data());
   } else {
     assert(flags & InclOpFlags::DocRoot);
     absPath = SourceRootInfo::GetCurrentPhpRoot();
     TRACE(2, "lookupIncludeRoot(%s): docRoot -> %s\n",
           path->data(),
-          absPath->data());
+          absPath.data());
   }
 
   absPath += StrNR(path);
@@ -2492,8 +2481,8 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   assert(getFP());
   assert(!m_fp->hasInvName());
   arSetSfp(ar, m_fp);
-  ar->m_soff = uintptr_t(m_fp->m_func->unit()->offsetOf(pc) -
-                         m_fp->m_func->base());
+  ar->m_soff = uintptr_t(
+    m_fp->m_func->unit()->offsetOf(pc) - m_fp->m_func->base());
   ar->m_savedRip = reinterpret_cast<uintptr_t>(tx->uniqueStubs.retHelper);
   assert(isReturnHelper(ar->m_savedRip));
   pushLocalsAndIterators(func);
@@ -2518,12 +2507,12 @@ StaticString
   s_semicolon_curly("; }"),
   s_php_return("<?php return "),
   s_semicolon(";");
-CVarRef ExecutionContext::getEvaledArg(const StringData* val,
+const Variant& ExecutionContext::getEvaledArg(const StringData* val,
                                          const String& namespacedName) {
   const String& key = *(String*)&val;
 
   if (m_evaledArgs.get()) {
-    CVarRef arg = m_evaledArgs.get()->get(key);
+    const Variant& arg = m_evaledArgs.get()->get(key);
     if (&arg != &null_variant) return arg;
   }
 
@@ -2578,23 +2567,25 @@ void ExecutionContext::enqueueAPCHandle(APCHandle* handle) {
 }
 
 // Treadmill solution for the SharedVariant memory management
-class FreedAPCHandle : public Treadmill::WorkItem {
+namespace {
+class FreedAPCHandle {
   std::vector<APCHandle*> m_apcHandles;
 public:
   explicit FreedAPCHandle(std::vector<APCHandle*>&& shandles)
-      : m_apcHandles(std::move(shandles)) {}
-  virtual void operator()() {
-    for (auto handle: m_apcHandles) {
+    : m_apcHandles(std::move(shandles))
+  {}
+  void operator()() {
+    for (auto handle : m_apcHandles) {
       APCTypedValue::fromHandle(handle)->deleteUncounted();
     }
   }
 };
+}
 
 void ExecutionContext::manageAPCHandle() {
   assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
   if (apcExtension::UseUncounted) {
-    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
-                                  new FreedAPCHandle(std::move(m_apcHandles))));
+    Treadmill::enqueue(FreedAPCHandle(std::move(m_apcHandles)));
     m_apcHandles.clear();
   }
 }
@@ -2637,7 +2628,7 @@ Unit* ExecutionContext::compileEvalString(
 
 const String& ExecutionContext::createFunction(const String& args,
                                                const String& code) {
-  if (UNLIKELY(RuntimeOption::RepoAuthoritative)) {
+  if (UNLIKELY(RuntimeOption::EvalAuthoritativeMode)) {
     // Whole program optimizations need to assume they can see all the
     // code.
     raise_error("You can't use create_function in RepoAuthoritative mode; "
@@ -3823,6 +3814,18 @@ OPTBLD_INLINE void ExecutionContext::iopMul(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellMul);
 }
 
+OPTBLD_INLINE void ExecutionContext::iopAddO(IOP_ARGS) {
+  implCellBinOp(IOP_PASS_ARGS, cellAddO);
+}
+
+OPTBLD_INLINE void ExecutionContext::iopSubO(IOP_ARGS) {
+  implCellBinOp(IOP_PASS_ARGS, cellSubO);
+}
+
+OPTBLD_INLINE void ExecutionContext::iopMulO(IOP_ARGS) {
+  implCellBinOp(IOP_PASS_ARGS, cellMulO);
+}
+
 OPTBLD_INLINE void ExecutionContext::iopDiv(IOP_ARGS) {
   implCellBinOp(IOP_PASS_ARGS, cellDiv);
 }
@@ -4584,7 +4587,7 @@ OPTBLD_INLINE void ExecutionContext::iopCGetM(IOP_ARGS) {
   if (tvRet->m_type == KindOfRef) {
     tvUnbox(tvRet);
   }
-  assert(hasImmVector(toOp(*oldPC)));
+  assert(hasImmVector(*reinterpret_cast<const Op*>(oldPC)));
   const ImmVector& immVec = ImmVector::createFromStream(oldPC + 1);
   StringData* name;
   MemberCode mc;
@@ -5341,8 +5344,7 @@ OPTBLD_INLINE void ExecutionContext::iopIncDecM(IOP_ARGS) {
   NEXT();
   DECODE_OA(IncDecOp, op);
   DECLARE_SETHELPER_ARGS
-  TypedValue to;
-  tvWriteUninit(&to);
+  TypedValue to = make_tv<KindOfUninit>();
   if (!setHelperPre<MoreWarnings, true, false, false, 0,
       VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS)) {
     if (mcode == MW) {
@@ -5528,7 +5530,7 @@ OPTBLD_INLINE void ExecutionContext::iopFPushFunc(IOP_ARGS) {
     StringData* origSd = c1->m_data.pstr;
     func = Unit::loadFunc(origSd);
     if (func == nullptr) {
-      raise_error("Undefined function: %s", c1->m_data.pstr->data());
+      raise_error("Call to undefined function %s()", c1->m_data.pstr->data());
     }
 
     m_stack.discard();
@@ -5608,7 +5610,7 @@ OPTBLD_INLINE void ExecutionContext::iopFPushFuncD(IOP_ARGS) {
   const NamedEntityPair nep = m_fp->m_func->unit()->lookupNamedEntityPairId(id);
   Func* func = Unit::loadFunc(nep.second, nep.first);
   if (func == nullptr) {
-    raise_error("Undefined function: %s",
+    raise_error("Call to undefined function %s()",
                 m_fp->m_func->unit()->lookupLitstrId(id)->data());
   }
   ActRec* ar = fPushFuncImpl(func, numArgs);
@@ -6147,7 +6149,7 @@ bool ExecutionContext::doFCall(ActRec* ar, PC& pc) {
         int(m_fp->m_func->base()));
   ar->m_soff = m_fp->m_func->unit()->offsetOf(pc)
     - (uintptr_t)m_fp->m_func->base();
-  assert(pcOff() >= m_fp->m_func->base());
+  assert(pcOff(this) >= m_fp->m_func->base());
   prepareFuncEntry(ar, pc);
   SYNC();
   if (EventHook::FunctionEnter(ar, EventHook::NormalFunc)) return true;
@@ -6175,7 +6177,7 @@ OPTBLD_INLINE void ExecutionContext::iopFCallBuiltin(IOP_ARGS) {
   const NamedEntity* ne = m_fp->m_func->unit()->lookupNamedEntityId(id);
   Func* func = Unit::lookupFunc(ne);
   if (func == nullptr) {
-    raise_error("Undefined function: %s",
+    raise_error("Call to undefined function %s()",
                 m_fp->m_func->unit()->lookupLitstrId(id)->data());
   }
   TypedValue* args = m_stack.indTV(numArgs-1);
@@ -6199,7 +6201,7 @@ OPTBLD_INLINE void ExecutionContext::iopFCallBuiltin(IOP_ARGS) {
   tvCopy(ret, *m_stack.allocTV());
 }
 
-bool ExecutionContext::prepareArrayArgs(ActRec* ar, CVarRef arrayArgs) {
+bool ExecutionContext::prepareArrayArgs(ActRec* ar, const Variant& arrayArgs) {
   const auto& args = *arrayArgs.asCell();
   assert(isContainer(args));
   if (UNLIKELY(ar->hasInvName())) {
@@ -6328,14 +6330,12 @@ bool ExecutionContext::doFCallArray(PC& pc) {
           int(m_fp->m_func->base()));
     ar->m_soff = m_fp->unit()->offsetOf(pc)
       - (uintptr_t)m_fp->m_func->base();
-    assert(pcOff() > m_fp->m_func->base());
+    assert(pcOff(this) > m_fp->m_func->base());
 
     if (UNLIKELY(!prepareArrayArgs(ar, args))) return false;
   }
 
-  if (UNLIKELY(!(prepareFuncEntry(ar, pc)))) {
-    return false;
-  }
+  prepareFuncEntry(ar, pc);
   SYNC();
   if (UNLIKELY(!EventHook::FunctionEnter(ar, EventHook::NormalFunc))) {
     pc = m_pc;
@@ -6622,7 +6622,7 @@ OPTBLD_INLINE void inclOp(ExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
         flags & InclOpFlags::DocRoot ? "DocRoot" : "",
         flags & InclOpFlags::Relative ? "Relative" : "",
         flags & InclOpFlags::Fatal ? "Fatal" : "",
-        path->data());
+        path.data());
 
   Unit* u = flags & (InclOpFlags::DocRoot|InclOpFlags::Relative) ?
     ec->evalIncludeRoot(path.get(), flags, &initial) :
@@ -6632,7 +6632,7 @@ OPTBLD_INLINE void inclOp(ExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
     ((flags & InclOpFlags::Fatal) ?
      (void (*)(const char *, ...))raise_error :
      (void (*)(const char *, ...))raise_warning)("File not found: %s",
-                                                 path->data());
+                                                 path.data());
     ec->m_stack.pushFalse();
   } else {
     if (!(flags & InclOpFlags::Once) || initial) {
@@ -6669,7 +6669,7 @@ OPTBLD_INLINE void ExecutionContext::iopEval(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
 
-  if (UNLIKELY(RuntimeOption::RepoAuthoritative)) {
+  if (UNLIKELY(RuntimeOption::EvalAuthoritativeMode)) {
     // Ahead of time whole program optimizations need to assume it can
     // see all the code, or it really can't do much.
     raise_error("You can't use eval in RepoAuthoritative mode");
@@ -7080,8 +7080,8 @@ void ExecutionContext::iopContEnter(IOP_ARGS) {
   ActRec* contAR = cont->actRec();
   arSetSfp(contAR, m_fp);
 
-  contAR->m_soff = m_fp->m_func->unit()->offsetOf(pc)
-    - (uintptr_t)m_fp->m_func->base();
+  contAR->m_soff = m_fp->m_func->unit()->offsetOf(pc) -
+    (uintptr_t)m_fp->m_func->base();
   contAR->m_savedRip =
     reinterpret_cast<uintptr_t>(tx->uniqueStubs.genRetHelper);
   assert(isReturnHelper(contAR->m_savedRip));
@@ -7407,7 +7407,7 @@ ExecutionContext::prettyStack(const string& prefix) const {
     return s;
   }
   int offset = (m_fp->m_func->unit() != nullptr)
-               ? pcOff()
+               ? pcOff(this)
                : 0;
   string begPrefix = prefix + "__";
   string midPrefix = prefix + "|| ";
@@ -7427,7 +7427,7 @@ void ExecutionContext::DumpStack() {
 
 void ExecutionContext::DumpCurUnit(int skip) {
   ActRec* fp = g_context->getFP();
-  Offset pc = fp->m_func->unit() ? g_context->pcOff() : 0;
+  Offset pc = fp->m_func->unit() ? pcOff(g_context.getNoCheck()) : 0;
   while (skip--) {
     fp = g_context->getPrevVMState(fp, &pc);
   }
@@ -7453,7 +7453,7 @@ void ExecutionContext::PrintTCCallerInfo() {
   fprintf(stderr, "Called from TC address %p\n",
           mcg->getTranslatedCaller());
   std::cerr << u->filepath()->data() << ':'
-            << u->getLineNumber(u->offsetOf(g_context->getPC())) << std::endl;
+            << u->getLineNumber(u->offsetOf(g_context->getPC())) << '\n';
 }
 
 static inline void
@@ -7469,21 +7469,23 @@ condStackTraceSep(const char* pfx) {
           string stack = prettyStack(pfx);                                    \
           Trace::trace("%s\n", stack.c_str());)
 
-#define O(name, imm, pusph, pop, flags)                                       \
-void ExecutionContext::op##name() {                                         \
-  condStackTraceSep("op"#name" ");                                            \
-  COND_STACKTRACE("op"#name" pre:  ");                                        \
-  PC pc = m_pc;                                                               \
-  assert(toOp(*pc) == Op##name);                                              \
-  ONTRACE(1,                                                                  \
-          int offset = m_fp->m_func->unit()->offsetOf(pc);                    \
-          Trace::trace("op"#name" offset: %d\n", offset));                    \
-  iop##name(IOP_PASS_ARGS);                                                   \
-  SYNC();                                                                     \
-  COND_STACKTRACE("op"#name" post: ");                                        \
-  condStackTraceSep("op"#name" ");                                            \
+#define O(name, imm, pusph, pop, flags)                     \
+void ExecutionContext::op##name() {                         \
+  condStackTraceSep("op"#name" ");                          \
+  COND_STACKTRACE("op"#name" pre:  ");                      \
+  PC pc = m_pc;                                             \
+  assert(*reinterpret_cast<const Op*>(pc) == Op##name);     \
+  ONTRACE(1,                                                \
+          auto offset = m_fp->m_func->unit()->offsetOf(pc); \
+          Trace::trace("op"#name" offset: %d\n", offset));  \
+  iop##name(IOP_PASS_ARGS);                                 \
+  SYNC();                                                   \
+  COND_STACKTRACE("op"#name" post: ");                      \
+  condStackTraceSep("op"#name" ");                          \
 }
+
 OPCODES
+
 #undef O
 #undef NEXT
 #undef DECODE_JMP
@@ -7551,10 +7553,10 @@ inline void ExecutionContext::dispatchImpl(int numInstrs) {
                            m_fp));                                      \
       return;                                                           \
     }                                                                   \
-    Op op = toOp(*pc);                                                  \
+    Op op = *reinterpret_cast<const Op*>(pc);                           \
     COND_STACKTRACE("dispatch:                    ");                   \
     ONTRACE(1,                                                          \
-            Trace::trace("dispatch: %d: %s\n", pcOff(),                 \
+            Trace::trace("dispatch: %d: %s\n", pcOff(this),             \
                          nametab[uint8_t(op)]));                        \
     if (profile && (op == OpRetC || op == OpRetV)) {                    \
       const_cast<Func*>(liveFunc())->incProfCounter();                  \
@@ -7642,7 +7644,7 @@ void ExecutionContext::recordCodeCoverage(PC pc) {
       unit == SystemLib::s_hhas_unit) {
     return;
   }
-  int line = unit->getLineNumber(pcOff());
+  int line = unit->getLineNumber(pcOff(this));
   assert(line != -1);
 
   if (unit != m_coverPrevUnit || line != m_coverPrevLine) {
@@ -7660,8 +7662,16 @@ void ExecutionContext::resetCoverageCounters() {
   m_coverPrevUnit = nullptr;
 }
 
-void ExecutionContext::pushVMState(VMState &savedVM,
-                                     const ActRec* reentryAR) {
+void ExecutionContext::pushVMState(Cell* savedSP) {
+  if (UNLIKELY(!m_fp)) {
+    // first entry
+    assert(m_nestedVMs.size() == 0);
+    return;
+  }
+
+  VMState savedVM = { getPC(), getFP(), m_firstAR, savedSP };
+  TRACE(3, "savedVM: %p %p %p %p\n", m_pc, m_fp, m_firstAR, savedSP);
+
   if (debug && savedVM.fp &&
       savedVM.fp->m_func &&
       savedVM.fp->m_func->unit()) {
@@ -7675,14 +7685,22 @@ void ExecutionContext::pushVMState(VMState &savedVM,
           func->unit()->offsetOf(savedVM.pc),
           savedVM.fp);
   }
-  m_nestedVMs.push_back(ReentryRecord(savedVM, reentryAR));
+  m_nestedVMs.push_back(savedVM);
   m_nesting++;
 }
 
 void ExecutionContext::popVMState() {
+  if (UNLIKELY(m_nestedVMs.empty())) {
+    // last exit
+    m_fp = nullptr;
+    m_pc = nullptr;
+    m_firstAR = nullptr;
+    return;
+  }
+
   assert(m_nestedVMs.size() >= 1);
 
-  VMState &savedVM = m_nestedVMs.back().m_savedState;
+  VMState &savedVM = m_nestedVMs.back();
   m_pc = savedVM.pc;
   m_fp = savedVM.fp;
   m_firstAR = savedVM.firstAR;
@@ -7705,6 +7723,17 @@ void ExecutionContext::popVMState() {
 
   m_nestedVMs.pop_back();
   m_nesting--;
+
+  TRACE(1, "Reentry: exit fp %p pc %p\n", m_fp, m_pc);
+}
+
+static void threadLogger(const char* header, const char* msg,
+                         const char* ending, void* data) {
+  auto* ec = static_cast<ExecutionContext*>(data);
+  ec->write(header);
+  ec->write(msg);
+  ec->write(ending);
+  ec->flush();
 }
 
 void ExecutionContext::requestInit() {
@@ -7741,6 +7770,8 @@ void ExecutionContext::requestInit() {
   assert(cls);
   assert(cls == SystemLib::s_stdclassClass);
 #endif
+
+  if (Logger::UseRequestLog) Logger::SetThreadHook(&threadLogger, this);
 }
 
 void ExecutionContext::requestExit() {
@@ -7758,6 +7789,8 @@ void ExecutionContext::requestExit() {
     VarEnv::destroy(m_globalVarEnv);
     m_globalVarEnv = 0;
   }
+
+  if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr, nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

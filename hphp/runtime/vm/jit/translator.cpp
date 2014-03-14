@@ -339,7 +339,13 @@ static const InferenceRule ArithRules[] = {
   { 0, KindOfInt64 },
 };
 
-static const int NumArithRules = sizeof(ArithRules) / sizeof(InferenceRule);
+static const InferenceRule ArithORules[] = {
+  // Same rules as ArithRules, but default to KindOfAny
+  { DoubleMask, KindOfDouble },
+  { ArrayMask, KindOfArray },
+  { StringMask | AnyMask, KindOfAny },
+  { 0, KindOfAny },
+};
 
 /**
  * Returns the type of the output of a bitwise operator on the two
@@ -725,15 +731,24 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
   DynLocation locLocation(inputs[kLocIdx]->location,
                           inputs[kLocIdx]->rtt.unbox());
   assert(inputs[kLocIdx]->location.isLocal());
+  bool isOverflow = true;
+
   switch (op) {
   case SetOpOp::PlusEqual:
   case SetOpOp::MinusEqual:
   case SetOpOp::MulEqual: {
-    // Same as OutArith, except we have to fiddle with inputs a bit.
+    isOverflow = false;
+    // fallthrough
+  }
+  case SetOpOp::PlusEqualO:
+  case SetOpOp::MinusEqualO:
+  case SetOpOp::MulEqualO: {
+    // Same as OutArith[O], except we have to fiddle with inputs a bit.
     std::vector<DynLocation*> arithInputs;
     arithInputs.push_back(&locLocation);
     arithInputs.push_back(inputs[kValIdx]);
-    return RuntimeType(inferType(ArithRules, arithInputs));
+    auto rules = isOverflow ? ArithORules : ArithRules;
+    return RuntimeType(inferType(rules, arithInputs));
   }
   case SetOpOp::ConcatEqual: return RuntimeType(KindOfString);
   case SetOpOp::DivEqual:
@@ -846,6 +861,9 @@ getDynLocType(const SrcKey startSk,
 
     case OutArith: {
       return RuntimeType(inferType(ArithRules, inputs));
+    }
+    case OutArithO: {
+      return RuntimeType(inferType(ArithORules, inputs));
     }
 
     case OutSameAsInput: {
@@ -1022,6 +1040,10 @@ static const struct {
   { OpAdd,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpSub,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpMul,         {StackTop2,        Stack1,       OutArith,         -1 }},
+  /* Arithmetic ops that overflow ints to floats */
+  { OpAddO,        {StackTop2,        Stack1,       OutArithO,        -1 }},
+  { OpSubO,        {StackTop2,        Stack1,       OutArithO,        -1 }},
+  { OpMulO,        {StackTop2,        Stack1,       OutArithO,        -1 }},
   /* Div and mod might return boolean false. Sigh. */
   { OpDiv,         {StackTop2,        Stack1,       OutPred,          -1 }},
   { OpMod,         {StackTop2,        Stack1,       OutPred,          -1 }},
@@ -1372,16 +1394,16 @@ int64_t countOperands(uint64_t mask) {
 }
 
 int64_t getStackPopped(PC pc) {
-  auto op = toOp(*pc);
+  auto const op = *reinterpret_cast<const Op*>(pc);
   switch (op) {
-    case OpFCall:        return getImm((Op*)pc, 0).u_IVA + kNumActRecCells;
-    case OpFCallArray:   return kNumActRecCells + 1;
+    case Op::FCall:        return getImm((Op*)pc, 0).u_IVA + kNumActRecCells;
+    case Op::FCallArray:   return kNumActRecCells + 1;
 
-    case OpFCallBuiltin:
-    case OpNewPackedArray:
-    case OpCreateCl:     return getImm((Op*)pc, 0).u_IVA;
+    case Op::FCallBuiltin:
+    case Op::NewPackedArray:
+    case Op::CreateCl:     return getImm((Op*)pc, 0).u_IVA;
 
-    case OpNewStructArray: return getImmVector((Op*)pc).size();
+    case Op::NewStructArray: return getImmVector((Op*)pc).size();
 
     default:             break;
   }
@@ -1401,7 +1423,7 @@ int64_t getStackPopped(PC pc) {
 }
 
 int64_t getStackPushed(PC pc) {
-  return countOperands(getInstrInfo(toOp(*pc)).out);
+  return countOperands(getInstrInfo(*reinterpret_cast<const Op*>(pc)).out);
 }
 
 int getStackDelta(const NormalizedInstruction& ni) {
@@ -2226,6 +2248,7 @@ bool outputDependsOnInput(const Op instr) {
     case OutFInputL:
     case OutFInputR:
     case OutArith:
+    case OutArithO:
     case OutBitOp:
     case OutSetOp:
     case OutIncDec:
@@ -2747,9 +2770,9 @@ void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
     SrcKey src = sk;
     const Unit* unit = ni->m_unit;
     src.advance(unit);
-    Op next = toOp(*unit->at(src.offset()));
-    if (next == OpInstanceOfD
-          || (next == OpIsTypeC &&
+    Op next = *reinterpret_cast<const Op*>(unit->at(src.offset()));
+    if (next == Op::InstanceOfD
+          || (next == Op::IsTypeC &&
               ni->imm[0].u_OA == static_cast<uint8_t>(IsTypeOp::Null))) {
       ni->outStack->rtt = RuntimeType(KindOfObject);
     }
@@ -2759,9 +2782,9 @@ void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
 
 static bool isPop(const NormalizedInstruction* instr) {
   auto opc = instr->op();
-  return (opc == OpPopC ||
-          opc == OpPopV ||
-          opc == OpPopR);
+  return (opc == Op::PopC ||
+          opc == Op::PopV ||
+          opc == Op::PopR);
 }
 
 GuardType::GuardType(DataType outer, DataType inner)
@@ -3557,7 +3580,7 @@ bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
  */
 std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
                                               const TypeMap& initialTypes) {
-  Timer _t("analyze");
+  Timer _t(Timer::analyze);
 
   std::unique_ptr<Tracelet> retval(new Tracelet());
   auto func = sk.func();
@@ -3872,8 +3895,9 @@ Translator::isSrcKeyInBL(const SrcKey& sk) {
   if (m_dbgBLSrcKey.find(sk) != m_dbgBLSrcKey.end()) {
     return true;
   }
-  for (PC pc = unit->at(sk.offset()); !opcodeBreaksBB(toOp(*pc));
-       pc += instrLen((Op*)pc)) {
+  for (PC pc = unit->at(sk.offset());
+      !opcodeBreaksBB(*reinterpret_cast<const Op*>(pc));
+      pc += instrLen((Op*)pc)) {
     if (m_dbgBLPC.checkPC(pc)) {
       m_dbgBLSrcKey.insert(sk);
       return true;
@@ -3904,7 +3928,7 @@ void populateImmediates(NormalizedInstruction& inst) {
   for (int i = 0; i < numImmediates(inst.op()); i++) {
     inst.imm[i] = getImm((Op*)inst.pc(), i);
   }
-  if (hasImmVector(toOp(*inst.pc()))) {
+  if (hasImmVector(*reinterpret_cast<const Op*>(inst.pc()))) {
     inst.immVec = getImmVector((Op*)inst.pc());
   }
   if (inst.op() == OpFCallArray) {
@@ -4124,7 +4148,7 @@ void Translator::traceFree() {
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             RegionBlacklist& toInterp) {
-  Timer _t("translateRegion");
+  Timer _t(Timer::translateRegion);
 
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
@@ -4132,7 +4156,7 @@ Translator::translateRegion(const RegionDesc& region,
   const SrcKey startSk = region.blocks.front()->start();
   auto profilingFunc = false;
 
-  Timer irGenTimer("translateRegion_irGeneration");
+  Timer irGenTimer(Timer::translateRegion_irGeneration);
   for (auto b = 0; b < region.blocks.size(); b++) {
     auto const& block = region.blocks[b];
     Unit::MetaHandle metaHand;
@@ -4223,6 +4247,7 @@ Translator::translateRegion(const RegionDesc& region,
         // conditional control flow ops, e.g., IterNext, etc.
         inst.includeBothPaths = [&] {
           if (!RuntimeOption::EvalHHIRBytecodeControlFlow) return false;
+          if (inst.breaksTracelet) return false;
           Offset takenOffset = inst.offset() + inst.imm[0].u_BA;
           Offset fallthruOffset = inst.offset() + instrLen((Op*)(inst.pc()));
           bool takenIncluded = false;

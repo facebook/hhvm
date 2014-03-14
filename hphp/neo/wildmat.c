@@ -39,6 +39,7 @@
 #include "cs_config.h"
 
 #include <ctype.h>
+#include "neo_bool.h"
 #include "neo_misc.h"
 
 #define ABORT -1

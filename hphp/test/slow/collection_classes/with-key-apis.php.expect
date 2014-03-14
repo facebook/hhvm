@@ -57,7 +57,7 @@ c => 3
 callback(0, 1)
 callback(1, 2)
 ========
-HH\Vector[
+HH\ImmVector[
 0 => 101
 1 => 102
 ]
@@ -65,7 +65,7 @@ HH\Vector[
 callback(0, 1)
 callback(1, 2)
 ========
-HH\Vector[
+HH\ImmVector[
 0 => 1
 ]
 

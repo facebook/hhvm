@@ -88,7 +88,7 @@ inline String localeOrDefault(const String& str) {
   return str.empty() ? GetDefaultLocale() : str;
 }
 bool SetDefaultLocale(const String& locale);
-double VariantToMilliseconds(CVarRef arg);
+double VariantToMilliseconds(const Variant& arg);
 
 // Common encoding conversions UTF8<->UTF16
 icu::UnicodeString u16(const char* u8, int32_t u8_len, UErrorCode &error,
@@ -104,11 +104,7 @@ inline String u8(const icu::UnicodeString& u16, UErrorCode& error) {
 
 class IntlExtension : public Extension {
  public:
-  // Some apps/frameworks get confused by a claim that
-  // the intl extension is loaded, yet not all the classes exist
-  // Lie for now by using another name.  Change it when intl
-  // coverage is complete
-  IntlExtension() : Extension("intl.not-done", "1.1.0") {}
+  IntlExtension() : Extension("intl", "1.1.0") {}
 
   void moduleInit() override {
     bindConstants();
@@ -127,6 +123,8 @@ class IntlExtension : public Extension {
     initCollator();
     initMessageFormatter();
     initNormalizer();
+    initResourceBundle();
+    initTransliterator();
   }
 
   void threadInit() override {
@@ -151,6 +149,8 @@ class IntlExtension : public Extension {
   void initCollator();
   void initMessageFormatter();
   void initNormalizer();
+  void initResourceBundle();
+  void initTransliterator();
 };
 
 } // namespace Intl

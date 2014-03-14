@@ -802,6 +802,7 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
   RuntimeOption::EnableZendCompat = Option::EnableZendCompat;
   RuntimeOption::EvalJitEnableRenameFunction = Option::JitEnableRenameFunction;
+  RuntimeOption::IntsOverflowToInts = Option::IntsOverflowToInts;
 
   // Turn off commits, because we don't want systemlib to get included
   RuntimeOption::RepoCommit = false;

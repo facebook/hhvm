@@ -437,7 +437,7 @@ static php_iconv_err_t _php_iconv_strlen(unsigned int *pretval,
 
 static php_iconv_err_t _php_iconv_substr(StringBuffer &pretval,
                                          const char *str, size_t nbytes,
-                                         int offset, int len, const char *enc){
+                                         int offset, int len, const char *enc) {
   char buf[GENERIC_SUPERSET_NBYTES];
   php_iconv_err_t err = PHP_ICONV_ERR_SUCCESS;
   iconv_t cd1, cd2;
@@ -1273,7 +1273,7 @@ const StaticString
   s_line_break_chars("line-break-chars");
 
 Variant f_iconv_mime_encode(const String& field_name, const String& field_value,
-                            CVarRef preferences /* = null_variant */) {
+                            const Variant& preferences /* = null_variant */) {
   php_iconv_enc_scheme_t scheme_id = PHP_ICONV_ENC_SCHEME_BASE64;
   String in_charset;
   String out_charset;

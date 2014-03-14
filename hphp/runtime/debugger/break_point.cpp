@@ -82,7 +82,7 @@ std::string InterruptSite::desc() const {
   return ret;
 }
 
-InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
+InterruptSite::InterruptSite(bool hardBreakPoint, const Variant& error)
     : m_error(error), m_activationRecord(nullptr),
       m_callingSite(nullptr), m_class(nullptr),
       m_file((StringData*)nullptr),
@@ -114,7 +114,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
 
 // Only used to look for callers by function name. No need to
 // to retrieve source line information for this kind of site.
-InterruptSite::InterruptSite(ActRec *fp, Offset offset, CVarRef error)
+InterruptSite::InterruptSite(ActRec *fp, Offset offset, const Variant& error)
   : m_error(error), m_activationRecord(nullptr),
     m_callingSite(nullptr), m_class(nullptr),
     m_file((StringData*)nullptr),
@@ -1003,7 +1003,7 @@ bool BreakPointInfo::Match(const char *haystack, int haystack_len,
   return HPHP::same(r, 1);
 }
 
-bool BreakPointInfo::checkExceptionOrError(CVarRef e) {
+bool BreakPointInfo::checkExceptionOrError(const Variant& e) {
   TRACE(2, "BreakPointInfo::checkException\n");
   assert(!e.isNull());
   if (e.isObject()) {

@@ -480,11 +480,12 @@ void PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets,
     TRACE(3, "\toffsets [%d, %d)\n", range->m_base, range->m_past);
     for (PC pc = unit->at(range->m_base); pc < unit->at(range->m_past);
          pc += instrLen((Op*)pc)) {
-      if (isOpcodeAllowed(toOp(*pc))) {
+      if (isOpcodeAllowed(*reinterpret_cast<const Op*>(pc))) {
         TRACE(3, "\t\tpc %p\n", pc);
         addPC(pc);
       } else {
-        TRACE(3, "\t\tpc %p -- skipping (offset %d)\n", pc, unit->offsetOf(pc));
+        TRACE(3, "\t\tpc %p -- skipping (offset %d)\n", pc,
+          unit->offsetOf(pc));
       }
     }
   }

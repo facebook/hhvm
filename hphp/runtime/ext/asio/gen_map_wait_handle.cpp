@@ -47,7 +47,7 @@ void c_GenMapWaitHandle::t___construct() {
   throw e;
 }
 
-void c_GenMapWaitHandle::ti_setoncreatecallback(CVarRef callback) {
+void c_GenMapWaitHandle::ti_setoncreatecallback(const Variant& callback) {
   if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set GenMapWaitHandle::onCreate: on_create_cb not a closure"));
@@ -56,7 +56,7 @@ void c_GenMapWaitHandle::ti_setoncreatecallback(CVarRef callback) {
   AsioSession::Get()->setOnGenMapCreateCallback(callback.getObjectDataOrNull());
 }
 
-Object c_GenMapWaitHandle::ti_create(CVarRef dependencies) {
+Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
   if (UNLIKELY(!dependencies.instanceof(c_Map::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Expected dependencies to be an instance of Map"));
@@ -113,7 +113,7 @@ Object c_GenMapWaitHandle::ti_create(CVarRef dependencies) {
   }
 }
 
-void c_GenMapWaitHandle::initialize(CObjRef exception, c_Map* deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
+void c_GenMapWaitHandle::initialize(const Object& exception, c_Map* deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;

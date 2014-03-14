@@ -277,9 +277,9 @@ public:
   void read(Array   &data);
   void read(Object  &data);
   void read(Variant &data);
-  void write(CArrRef data);
-  void write(CObjRef data);
-  void write(CVarRef data);
+  void write(const Array& data);
+  void write(const Object& data);
+  void write(const Variant& data);
 
   void skip(int8_t type);
 

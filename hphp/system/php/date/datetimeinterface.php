@@ -12,5 +12,4 @@ interface DateTimeInterface {
   public function getOffset();
   public function getTimestamp();
   public function getTimezone();
-  public function __wakeup();
 }

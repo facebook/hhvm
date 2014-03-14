@@ -1879,7 +1879,7 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 	alphablending_bak = im->alphaBlendingFlag;	
 	im->alphaBlendingFlag = 0;
 
-	if (nc==gdTiled){
+	if (nc==gdTiled) {
 		_gdImageFillTiled(im,x,y,nc);
 		im->alphaBlendingFlag = alphablending_bak;
 		return;
@@ -2924,7 +2924,7 @@ void gdImageAlphaBlending (gdImagePtr im, int alphaBlendingArg)
 
 void gdImageAntialias (gdImagePtr im, int antialias)
 {
-	if (im->trueColor){
+	if (im->trueColor) {
 		im->antialias = antialias;
 	}
 }

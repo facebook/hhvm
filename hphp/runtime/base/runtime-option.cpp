@@ -74,7 +74,6 @@ bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::InjectedStackTrace = true;
 int RuntimeOption::InjectedStackTraceLimit = -1;
 bool RuntimeOption::NoSilencer = false;
-bool RuntimeOption::EnableApplicationLog = true;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
 bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
 int RuntimeOption::RuntimeErrorReportingLevel =
@@ -130,6 +129,7 @@ bool RuntimeOption::ServerStatCache = false;
 std::vector<std::string> RuntimeOption::ServerWarmupRequests;
 boost::container::flat_set<std::string>
 RuntimeOption::ServerHighPriorityEndPoints;
+bool RuntimeOption::ServerExitOnBindFail;
 int RuntimeOption::PageletServerThreadCount = 0;
 bool RuntimeOption::PageletServerThreadRoundRobin = false;
 int RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds = 0;
@@ -149,6 +149,7 @@ bool RuntimeOption::ServerEvilShutdown = true;
 int RuntimeOption::ServerDanglingWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownListenNoWork = -1;
+std::vector<std::string> RuntimeOption::ServerNextProtocols;
 int RuntimeOption::GzipCompressionLevel = 3;
 std::string RuntimeOption::ForceCompressionURL;
 std::string RuntimeOption::ForceCompressionCookie;
@@ -343,6 +344,8 @@ bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
+bool RuntimeOption::EvalAuthoritativeMode = false;
+bool RuntimeOption::IntsOverflowToInts = false;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -616,6 +619,7 @@ void RuntimeOption::Load(Hdf &config,
     Logger::UseSyslog = logger["UseSyslog"].getBool(false);
     Logger::UseLogFile = logger["UseLogFile"].getBool(true);
     Logger::UseCronolog = logger["UseCronolog"].getBool(false);
+    Logger::UseRequestLog = logger["UseRequestLog"].getBool(false);
     if (Logger::UseLogFile) {
       LogFile = logger["File"].getString();
       if (!RuntimeOption::ServerExecutionMode()) {
@@ -632,7 +636,6 @@ void RuntimeOption::Load(Hdf &config,
     AlwaysLogUnhandledExceptions =
       logger["AlwaysLogUnhandledExceptions"].getBool(true);
     NoSilencer = logger["NoSilencer"].getBool();
-    EnableApplicationLog = logger["ApplicationLog"].getBool(true);
     RuntimeErrorReportingLevel =
       logger["RuntimeErrorReportingLevel"]
         .getInt32(static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL));
@@ -734,6 +737,7 @@ void RuntimeOption::Load(Hdf &config,
     ServerStatCache = server["StatCache"].getBool(false);
     server["WarmupRequests"].get(ServerWarmupRequests);
     server["HighPriorityEndPoints"].get(ServerHighPriorityEndPoints);
+    ServerExitOnBindFail = server["ExitOnBindFail"].getBool(false);
 
     RequestTimeoutSeconds = server["RequestTimeoutSeconds"].getInt32(0);
     PspTimeoutSeconds = server["PspTimeoutSeconds"].getInt32(0);
@@ -751,6 +755,7 @@ void RuntimeOption::Load(Hdf &config,
     ServerDanglingWait = server["DanglingWait"].getInt16(0);
     ServerShutdownListenWait = server["ShutdownListenWait"].getInt16(0);
     ServerShutdownListenNoWork = server["ShutdownListenNoWork"].getInt16(-1);
+    server["SSLNextProtocols"].get(ServerNextProtocols);
     if (ServerGracefulShutdownWait < ServerDanglingWait) {
       ServerGracefulShutdownWait = ServerDanglingWait;
     }
@@ -1162,6 +1167,11 @@ void RuntimeOption::Load(Hdf &config,
       DebuggerDefaultRpcTimeout = debugger["RPC.DefaultTimeout"].getInt32(30);
     }
     {
+      Hdf lang = config["Hack"]["Lang"];
+      IntsOverflowToInts =
+        lang["IntsOverflowToInts"].getBool(EnableHipHopSyntax);
+    }
+    {
       Hdf repo = config["Repo"];
       {
         Hdf repoLocal = repo["Local"];
@@ -1220,6 +1230,8 @@ void RuntimeOption::Load(Hdf &config,
     // NB: after we know the value of RepoAuthoritative.
     EnableArgsInBacktraces =
       eval["EnableArgsInBacktraces"].getBool(!RepoAuthoritative);
+    EvalAuthoritativeMode =
+      eval["AuthoritativeMode"].getBool(false) || RepoAuthoritative;
   }
   {
     Hdf sandbox = config["Sandbox"];

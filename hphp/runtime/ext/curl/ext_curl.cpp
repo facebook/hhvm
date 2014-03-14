@@ -303,7 +303,7 @@ public:
     return String();
   }
 
-  bool setOption(long option, CVarRef value) {
+  bool setOption(long option, const Variant& value) {
     if (m_cp == nullptr) {
       return false;
     }
@@ -670,7 +670,7 @@ public:
     return 0;
   }
 
-  Variant do_callback(CVarRef cb, CArrRef args) {
+  Variant do_callback(const Variant& cb, const Array& args) {
     assert(!m_exception);
     try {
       return vm_call_user_func(cb, args);
@@ -928,7 +928,7 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
     return false;                                                           \
   }                                                                         \
 
-Variant HHVM_FUNCTION(curl_init, CVarRef url /* = null_string */) {
+Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
   if (url.isNull()) {
     return NEWOBJ(CurlResource)(null_string);
   } else {
@@ -936,7 +936,7 @@ Variant HHVM_FUNCTION(curl_init, CVarRef url /* = null_string */) {
   }
 }
 
-Variant HHVM_FUNCTION(curl_copy_handle, CResRef ch) {
+Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch) {
   CHECK_RESOURCE(curl);
   return NEWOBJ(CurlResource)(curl);
 }
@@ -978,12 +978,12 @@ Variant HHVM_FUNCTION(curl_version, int uversion /* = k_CURLVERSION_NOW */) {
   return ret.create();
 }
 
-bool HHVM_FUNCTION(curl_setopt, CResRef ch, int option, CVarRef value) {
+bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int option, const Variant& value) {
   CHECK_RESOURCE(curl);
   return curl->setOption(option, value);
 }
 
-bool HHVM_FUNCTION(curl_setopt_array, CResRef ch, CArrRef options) {
+bool HHVM_FUNCTION(curl_setopt_array, const Resource& ch, const Array& options) {
   CHECK_RESOURCE(curl);
   for (ArrayIter iter(options); iter; ++iter) {
     if (!curl->setOption(iter.first().toInt32(), iter.second())) {
@@ -993,12 +993,12 @@ bool HHVM_FUNCTION(curl_setopt_array, CResRef ch, CArrRef options) {
   return true;
 }
 
-Variant HHVM_FUNCTION(fb_curl_getopt, CResRef ch, int64_t opt /* = 0 */) {
+Variant HHVM_FUNCTION(fb_curl_getopt, const Resource& ch, int64_t opt /* = 0 */) {
   CHECK_RESOURCE(curl);
   return curl->getOption(opt);
 }
 
-Variant HHVM_FUNCTION(curl_exec, CResRef ch) {
+Variant HHVM_FUNCTION(curl_exec, const Resource& ch) {
   CHECK_RESOURCE(curl);
   return curl->execute();
 }
@@ -1027,7 +1027,7 @@ const StaticString
   s_redirect_time("redirect_time"),
   s_request_header("request_header");
 
-Variant HHVM_FUNCTION(curl_getinfo, CResRef ch, int opt /* = 0 */) {
+Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
   CHECK_RESOURCE(curl);
   CURL *cp = curl->get();
 
@@ -1175,17 +1175,17 @@ Variant HHVM_FUNCTION(curl_getinfo, CResRef ch, int opt /* = 0 */) {
   return uninit_null();
 }
 
-Variant HHVM_FUNCTION(curl_errno, CResRef ch) {
+Variant HHVM_FUNCTION(curl_errno, const Resource& ch) {
   CHECK_RESOURCE(curl);
   return curl->getError();
 }
 
-Variant HHVM_FUNCTION(curl_error, CResRef ch) {
+Variant HHVM_FUNCTION(curl_error, const Resource& ch) {
   CHECK_RESOURCE(curl);
   return curl->getErrorString();
 }
 
-Variant HHVM_FUNCTION(curl_close, CResRef ch) {
+Variant HHVM_FUNCTION(curl_close, const Resource& ch) {
   CHECK_RESOURCE(curl);
   curl->close();
   return uninit_null();
@@ -1217,7 +1217,7 @@ public:
     }
   }
 
-  void add(CResRef ch) {
+  void add(const Resource& ch) {
     m_easyh.append(ch);
   }
 
@@ -1299,21 +1299,21 @@ Resource HHVM_FUNCTION(curl_multi_init) {
   return NEWOBJ(CurlMultiResource)();
 }
 
-Variant HHVM_FUNCTION(curl_multi_add_handle, CResRef mh, CResRef ch) {
+Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
   CurlResource *curle = ch.getTyped<CurlResource>();
   curlm->add(ch);
   return curl_multi_add_handle(curlm->get(), curle->get());
 }
 
-Variant HHVM_FUNCTION(curl_multi_remove_handle, CResRef mh, CResRef ch) {
+Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh, const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
   CurlResource *curle = ch.getTyped<CurlResource>();
   curlm->remove(curle);
   return curl_multi_remove_handle(curlm->get(), curle->get());
 }
 
-Variant HHVM_FUNCTION(curl_multi_exec, CResRef mh, VRefParam still_running) {
+Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, VRefParam still_running) {
   CHECK_MULTI_RESOURCE(curlm);
   int running = 0;
   IOStatusHelper io("curl_multi_exec");
@@ -1370,7 +1370,7 @@ static void hphp_curl_multi_select(CURLM *mh, int timeout_ms, int *ret) {
 #define curl_multi_select_func curl_multi_select
 #endif
 
-Variant HHVM_FUNCTION(curl_multi_select, CResRef mh,
+Variant HHVM_FUNCTION(curl_multi_select, const Resource& mh,
                                          double timeout /* = 1.0 */) {
   CHECK_MULTI_RESOURCE(curlm);
   int ret;
@@ -1380,7 +1380,7 @@ Variant HHVM_FUNCTION(curl_multi_select, CResRef mh,
   return ret;
 }
 
-Variant HHVM_FUNCTION(curl_multi_getcontent, CResRef ch) {
+Variant HHVM_FUNCTION(curl_multi_getcontent, const Resource& ch) {
   CHECK_RESOURCE(curl);
   return curl->getContents();
 }
@@ -1396,7 +1396,7 @@ Array curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
   return ret;
 }
 
-Variant HHVM_FUNCTION(fb_curl_multi_fdset, CResRef mh,
+Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
                               VRefParam read_fd_set,
                               VRefParam write_fd_set,
                               VRefParam exc_fd_set,
@@ -1424,11 +1424,9 @@ Variant HHVM_FUNCTION(fb_curl_multi_fdset, CResRef mh,
 const StaticString
   s_msg("msg"),
   s_result("result"),
-  s_handle("handle"),
-  s_headers("headers"),
-  s_requests("requests");
+  s_handle("handle");
 
-Variant HHVM_FUNCTION(curl_multi_info_read, CResRef mh,
+Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
                                VRefParam msgs_in_queue /* = null */) {
   CHECK_MULTI_RESOURCE(curlm);
 
@@ -1450,189 +1448,13 @@ Variant HHVM_FUNCTION(curl_multi_info_read, CResRef mh,
   return ret;
 }
 
-Variant HHVM_FUNCTION(curl_multi_close, CResRef mh) {
+Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh) {
   CHECK_MULTI_RESOURCE(curlm);
   curlm->close();
   return uninit_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// evhttp functions
-
-class LibEventHttpHandle : public SweepableResourceData {
-public:
-  DECLARE_RESOURCE_ALLOCATION(LibEventHttpHandle)
-
-  CLASSNAME_IS("LibEventHttp");
-  // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
-
-  explicit LibEventHttpHandle(LibEventHttpClientPtr client) : m_client(client) {
-  }
-
-  ~LibEventHttpHandle() {
-    if (m_client) {
-      m_client->release();
-    }
-  }
-
-  LibEventHttpClientPtr m_client;
-};
-IMPLEMENT_OBJECT_ALLOCATION(LibEventHttpHandle)
-
-static LibEventHttpClientPtr prepare_client
-(const String& url, const String& data, CVarRef headers, int timeout,
- bool async, bool post) {
-  std::string sUrl = url.data();
-  if (sUrl.size() < 7 || sUrl.substr(0, 7) != "http://") {
-    raise_warning("Invalid URL: %s", sUrl.c_str());
-    return LibEventHttpClientPtr();
-  }
-
-  // parsing server address
-  size_t pos = sUrl.find('/', 7);
-  string path;
-  if (pos == std::string::npos) {
-    pos = sUrl.length();
-    path = "/";
-  } else if (pos == 7) {
-    raise_warning("Invalid URL: %s", sUrl.c_str());
-    return LibEventHttpClientPtr();
-  } else {
-    path = sUrl.substr(pos);
-  }
-  string address = sUrl.substr(7, pos - 7);
-
-  // parsing server port
-  pos = address.find(':');
-  int port = 80;
-  if (pos != string::npos) {
-    if (pos < address.length() - 1) {
-      string sport = address.substr(pos + 1, address.length() - pos - 1);
-      port = atoi(sport.c_str());
-    }
-    address = address.substr(0, pos);
-  }
-
-  LibEventHttpClientPtr client = LibEventHttpClient::Get(address, port);
-  if (!client) {
-    return client;
-  }
-
-  std::vector<std::string> sheaders;
-  for (ArrayIter iter(headers); iter; ++iter) {
-    sheaders.push_back(iter.second().toString().data());
-  }
-  if (!client->send(path.c_str(), sheaders, timeout, async,
-                    post ? (void*)data.data() : nullptr,
-                    post ? data.size() : 0)) {
-    return LibEventHttpClientPtr();
-  }
-  return client;
-}
-
-const StaticString
-  s_code("code"),
-  s_response("response");
-
-static Array prepare_response(LibEventHttpClientPtr client) {
-  int len = 0;
-  char *res = client->recv(len); // block on return
-
-  ArrayInit ret(4);
-  ret.set(s_code, client->getCode());
-  ret.set(s_response, String(res, len, AttachString));
-
-  Array headers = Array::Create();
-  const vector<string> &responseHeaders = client->getResponseHeaders();
-  for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-    headers.append(String(responseHeaders[i]));
-  }
-  ret.set(s_headers, headers);
-  ret.set(s_requests, client->getRequests());
-  return ret.create();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void HHVM_FUNCTION(evhttp_set_cache, const String& address, int max_conn,
-                        int port /* = 80 */) {
-  if (RuntimeOption::ServerHttpSafeMode) {
-    throw_fatal("evhttp_set_cache is disabled");
-  }
-  LibEventHttpClient::SetCache(address.data(), port, max_conn);
-}
-
-Variant HHVM_FUNCTION(evhttp_get, const String& url,
-                                  CVarRef headers /* = null_array */,
-                                  int timeout /* = 5 */) {
-  if (RuntimeOption::ServerHttpSafeMode) {
-    throw_fatal("evhttp_set_cache is disabled");
-  }
-  LibEventHttpClientPtr client = prepare_client(url, "", headers, timeout,
-                                                false, false);
-  if (client) {
-    Variant ret = prepare_response(client);
-    client->release();
-    return ret;
-  }
-  return false;
-}
-
-Variant HHVM_FUNCTION(evhttp_post, const String& url, const String& data,
-                      CVarRef headers /* = null_array */,
-                      int timeout /* = 5 */) {
-  if (RuntimeOption::ServerHttpSafeMode) {
-    throw_fatal("evhttp_post is disabled");
-  }
-  LibEventHttpClientPtr client = prepare_client(url, data, headers, timeout,
-                                                false, true);
-  if (client) {
-    Variant ret = prepare_response(client);
-    client->release();
-    return ret;
-  }
-  return false;
-}
-
-Variant HHVM_FUNCTION(evhttp_async_get, const String& url,
-                           CVarRef headers /* = null_array */,
-                           int timeout /* = 5 */) {
-  if (RuntimeOption::ServerHttpSafeMode) {
-    throw_fatal("evhttp_async_get is disabled");
-  }
-  LibEventHttpClientPtr client = prepare_client(url, "", headers, timeout,
-                                                true, false);
-  if (client) {
-    return Resource(NEWOBJ(LibEventHttpHandle)(client));
-  }
-  return false;
-}
-
-Variant HHVM_FUNCTION(evhttp_async_post, const String& url, const String& data,
-                            CVarRef headers /* = null_array */,
-                            int timeout /* = 5 */) {
-  if (RuntimeOption::ServerHttpSafeMode) {
-    throw_fatal("evhttp_async_post is disabled");
-  }
-  LibEventHttpClientPtr client = prepare_client(url, data, headers, timeout,
-                                                true, true);
-  if (client) {
-    return Resource(NEWOBJ(LibEventHttpHandle)(client));
-  }
-  return false;
-}
-
-Variant HHVM_FUNCTION(evhttp_recv, CResRef handle) {
-  if (RuntimeOption::ServerHttpSafeMode) {
-    throw_fatal("evhttp_recv is disabled");
-  }
-  LibEventHttpHandle *obj = handle.getTyped<LibEventHttpHandle>();
-  if (obj->m_client) {
-    return prepare_response(obj->m_client);
-  }
-  return false;
-}
 
 #if LIBCURL_VERSION_NUM >= 0x071500
 const int64_t k_CURLINFO_LOCAL_PORT = CURLINFO_LOCAL_PORT;
@@ -2901,12 +2723,6 @@ class CurlExtension : public Extension {
     HHVM_FE(fb_curl_multi_fdset);
     HHVM_FE(curl_multi_info_read);
     HHVM_FE(curl_multi_close);
-    HHVM_FE(evhttp_set_cache);
-    HHVM_FE(evhttp_get);
-    HHVM_FE(evhttp_post);
-    HHVM_FE(evhttp_async_get);
-    HHVM_FE(evhttp_async_post);
-    HHVM_FE(evhttp_recv);
 
     loadSystemlib();
   }

@@ -36,7 +36,7 @@ PDODriver::PDODriver(const char *name) : m_name(name) {
 
 PDOConnection *PDODriver::createConnection(const String& datasource,
                                            const String& username,
-                                           const String& password, CArrRef options) {
+                                           const String& password, const Array& options) {
   PDOConnection *conn = createConnectionObject();
   conn->data_source = std::string(datasource.data(), datasource.size());
   conn->username = std::string(username.data(), username.size());
@@ -101,7 +101,7 @@ bool PDOConnection::closer() {
 }
 
 bool PDOConnection::preparer(const String& sql, sp_PDOStatement *stmt,
-                             CVarRef options) {
+                             const Variant& options) {
   throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
@@ -132,7 +132,7 @@ bool PDOConnection::rollback() {
   return false;
 }
 
-bool PDOConnection::setAttribute(int64_t attr, CVarRef value) {
+bool PDOConnection::setAttribute(int64_t attr, const Variant& value) {
   throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }
@@ -240,7 +240,7 @@ bool PDOStatement::paramHook(PDOBoundParam *param, PDOParamEvent event_type) {
   return false;
 }
 
-bool PDOStatement::setAttribute(int64_t attr, CVarRef value) {
+bool PDOStatement::setAttribute(int64_t attr, const Variant& value) {
   throw_pdo_exception(uninit_null(), uninit_null(), "This driver doesn't support %s", __func__);
   return false;
 }

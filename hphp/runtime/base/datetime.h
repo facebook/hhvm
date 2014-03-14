@@ -245,6 +245,7 @@ public:
   int minute() const { return m_time->i;}
   int second() const { return m_time->s;}
   double fraction() const { return m_time->f;}
+  int zoneType() const { return m_time->zone_type;}
   int beat() const;    // Swatch Beat a.k.a. Internet Time
   int dow() const;     // day of week
   int doy() const;     // day of year

@@ -92,9 +92,9 @@ struct BuiltinFiles final : RequestEventHandler {
   void requestInit() override;
   void requestShutdown() override;
 
-  static CVarRef GetSTDIN();
-  static CVarRef GetSTDOUT();
-  static CVarRef GetSTDERR();
+  static const Variant& GetSTDIN();
+  static const Variant& GetSTDOUT();
+  static const Variant& GetSTDERR();
 
 private:
   Variant m_stdin;

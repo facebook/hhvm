@@ -57,8 +57,8 @@ void GraphBuilder::createBlocks() {
   for (InstrRange i = funcInstrs(m_func); !i.empty(); ) {
     PC pc = i.popFront();
     if (isCF(pc) && !i.empty()) createBlock(i.front());
-    if (isSwitch(*pc)) {
-      foreachSwitchTarget((Op*)pc, [&](Offset& o) {
+    if (isSwitch(*reinterpret_cast<const Op*>(pc))) {
+      foreachSwitchTarget(reinterpret_cast<const Op*>(pc), [&](Offset& o) {
         createBlock(pc + o);
       });
     } else {
@@ -80,7 +80,7 @@ void GraphBuilder::linkBlocks() {
     PC pc = i.popFront();
     block->last = pc;
     if (isCF(pc)) {
-      if (isSwitch(*pc)) {
+      if (isSwitch(*reinterpret_cast<const Op*>(pc))) {
         int i = 0;
         foreachSwitchTarget((Op*)pc, [&](Offset& o) {
           succs(block)[i++] = at(pc + o);

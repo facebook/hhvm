@@ -26,6 +26,11 @@ function cleanupSqliteTestTable($tmp_sqllite) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class MyStatement extends PDOStatement {
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 VERIFY(count(pdo_drivers()) > 0);
 
 createSqliteTestTable($tmp_sqllite);
@@ -99,8 +104,22 @@ try {
 
   }
 
-  unset($dbh);
   unset($vstmt);
+
+  //Test setAttribute with ATTR_STATEMENT_CLASS. Set it to our own class
+  var_dump($dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('MyStatement')));
+  $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
+  var_dump(get_class($vstmt));
+  unset($vstmt);
+
+  //Then reset to PDOStatement. Zend allows the class name to be explicitly set
+  //to PDOStatement.
+  var_dump($dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS,
+                              array('PDOStatement')));
+  $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
+  var_dump(get_class($vstmt));
+
+  unset($dbh);
 
 } catch (Exception $e) {
   VS($e, null);

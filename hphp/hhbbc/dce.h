@@ -42,6 +42,16 @@ void local_dce(const Index&, Context, borrowed_ptr<php::Block>, const State&);
  */
 void global_dce(const Index&, const FuncAnalysis&);
 
+/*
+ * Assist in removing blocks that aren't reachable by removing
+ * conditional jumps that are never taken.  Conditional jumps that are
+ * always taken are turned into unconditional jumps in first_pass.
+ *
+ * If options.RemoveDeadBlocks is off, this function just replaces
+ * blocks we believe are unreachable with fatal opcodes.
+ */
+void remove_unreachable_blocks(const Index&, const FuncAnalysis&);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

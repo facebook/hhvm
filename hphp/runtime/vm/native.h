@@ -86,11 +86,11 @@
  * These macros only differ in the following ways:
  * - They accept a classname in addition to the function name
  * - The registered name of the function is "ClassName->FunctionName"
- * - Prototypes include a prepended CObjRef parameter (named this_)
+ * - Prototypes include a prepended const Object& parameter (named this_)
  */
 #define HHVM_MN(cn,fn) c_ ## cn ## _ni_ ## fn
 #define HHVM_METHOD(cn, fn, ...) \
-        HHVM_MN(cn,fn)(CObjRef this_, ##__VA_ARGS__)
+        HHVM_MN(cn,fn)(const Object& this_, ##__VA_ARGS__)
 #define HHVM_NAMED_ME(cn,fn,mimpl) Native::registerBuiltinFunction(\
                           makeStaticString(#cn "->" #fn), \
                           mimpl)
@@ -152,7 +152,7 @@ TypedValue* functionWrapper(ActRec* ar);
  * Method version of nativeFunctionWrapper() above.
  *
  * Also prepends a calling context:
- *   CObjRef for instance methods
+ *   const Object& for instance methods
  *   Class* for static methods
  */
 TypedValue* methodWrapper(ActRec* ar);

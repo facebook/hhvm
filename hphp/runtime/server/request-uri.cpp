@@ -40,7 +40,7 @@ RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
     m_forbidden = false; // put down forbidden flag since we are redirecting
     if (!RuntimeOption::ErrorDocument404.empty()) {
       String redirectURL(RuntimeOption::ErrorDocument404);
-      if (!m_queryString->empty()) {
+      if (!m_queryString.empty()) {
         if (redirectURL.find('?') == -1) {
           redirectURL += "?";
         } else {

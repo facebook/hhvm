@@ -96,7 +96,7 @@
             "desc": "Generate a YAML representation of the provided data in the filename.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -138,7 +138,7 @@
             "desc": "Generate a YAML representation of the provided data.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -175,7 +175,7 @@
             "desc": "Convert all or part of a YAML document stream read from a file to a PHP variable.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -213,7 +213,7 @@
             "desc": "Convert all or part of a YAML document stream read from a URL to a PHP variable.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -251,7 +251,7 @@
             "desc": "Convert all or part of a YAML document stream to a PHP variable.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",

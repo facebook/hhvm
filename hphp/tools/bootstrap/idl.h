@@ -61,7 +61,7 @@ enum FuncFlags {
   IsSystem                      = (1 << 28),
   IsTrait                       = (1 << 29),
   ZendParamModeFalse            = (1 << 30),
-  NeedsActRec                   = (1 << 31),
+  NoFCallBuiltin                = (1 << 31),
 };
 
 #define VarArgsMask (VariableArguments | \

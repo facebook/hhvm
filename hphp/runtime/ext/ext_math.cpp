@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/base/zend-multiply.h"
+#include "hphp/runtime/base/container-functions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,7 +30,7 @@ const int64_t k_PHP_ROUND_HALF_ODD =  PHP_ROUND_HALF_ODD;
 
 double f_pi() { return k_M_PI;}
 
-Variant f_min(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
+Variant f_min(int _argc, const Variant& value, const Array& _argv /* = null_array */) {
   if (_argv.empty()) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {
@@ -61,7 +62,7 @@ Variant f_min(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
   return ret;
 }
 
-Variant f_max(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
+Variant f_max(int _argc, const Variant& value, const Array& _argv /* = null_array */) {
   if (_argv.empty()) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {
@@ -94,7 +95,7 @@ Variant f_max(int _argc, CVarRef value, CArrRef _argv /* = null_array */) {
 }
 
 /* Logic based on zend_operators.c::convert_scalar_to_number() */
-static DataType zend_convert_scalar_to_number(CVarRef num,
+static DataType zend_convert_scalar_to_number(const Variant& num,
                                               int64_t &ival,
                                               double &dval) {
   DataType dt = num.toNumeric(ival, dval, true);
@@ -114,7 +115,7 @@ static DataType zend_convert_scalar_to_number(CVarRef num,
   return num.getType();
 }
 
-Variant f_abs(CVarRef number) {
+Variant f_abs(const Variant& number) {
   int64_t ival;
   double dval;
   DataType k = zend_convert_scalar_to_number(number, ival, dval);
@@ -131,7 +132,7 @@ bool f_is_finite(double val) { return finite(val);}
 bool f_is_infinite(double val) { return isinf(val);}
 bool f_is_nan(double val) { return isnan(val);}
 
-Variant f_ceil(CVarRef number) {
+Variant f_ceil(const Variant& number) {
   int64_t ival;
   double dval;
   DataType k = zend_convert_scalar_to_number(number, ival, dval);
@@ -143,7 +144,7 @@ Variant f_ceil(CVarRef number) {
   return ceil(dval);
 }
 
-Variant f_floor(CVarRef number) {
+Variant f_floor(const Variant& number) {
   int64_t ival;
   double dval;
   DataType k = zend_convert_scalar_to_number(number, ival, dval);
@@ -155,7 +156,7 @@ Variant f_floor(CVarRef number) {
   return floor(dval);
 }
 
-Variant f_round(CVarRef val, int64_t precision /* = 0 */,
+Variant f_round(const Variant& val, int64_t precision /* = 0 */,
                 int64_t mode /* = PHP_ROUND_HALF_UP */) {
   int64_t ival;
   double dval;
@@ -208,7 +209,7 @@ Variant f_base_convert(const String& number, int64_t frombase, int64_t tobase) {
   return String(string_numeric_to_base(v, tobase), AttachString);
 }
 
-Variant f_pow(CVarRef base, CVarRef exp) {
+Variant f_pow(const Variant& base, const Variant& exp) {
   int64_t bint, eint;
   double bdbl, edbl;
   DataType bt = base.toNumeric(bint, bdbl, true);
@@ -277,7 +278,7 @@ int64_t f_getrandmax() { return RAND_MAX;}
 
 static bool s_rand_is_seeded = false;
 
-void f_srand(CVarRef seed /* = null_variant */) {
+void f_srand(const Variant& seed /* = null_variant */) {
   s_rand_is_seeded = true;
   if (seed.isNull()) {
     return srand(math_generate_seed());
@@ -304,7 +305,7 @@ int64_t f_rand(int64_t min /* = 0 */, int64_t max /* = RAND_MAX */) {
 
 int64_t f_mt_getrandmax() { return MT_RAND_MAX;}
 
-void f_mt_srand(CVarRef seed /* = null_variant */) {
+void f_mt_srand(const Variant& seed /* = null_variant */) {
   if (seed.isNull()) {
     return math_mt_srand(math_generate_seed());
   }

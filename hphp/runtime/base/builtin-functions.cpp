@@ -44,6 +44,8 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/file-util.h"
 #include "hphp/util/string-vsnprintf.h"
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/request-injection-data.h"
 
 #include <limits>
 #include <algorithm>
@@ -76,7 +78,7 @@ const StaticString
 
 typedef smart::unique_ptr<CufIter> SmartCufIterPtr;
 
-bool array_is_valid_callback(CArrRef arr) {
+bool array_is_valid_callback(const Array& arr) {
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
   }
@@ -92,7 +94,7 @@ bool array_is_valid_callback(CArrRef arr) {
 }
 
 const HPHP::Func*
-vm_decode_function(CVarRef function,
+vm_decode_function(const Variant& function,
                    ActRec* ar,
                    bool forwarding,
                    ObjectData*& this_,
@@ -138,21 +140,21 @@ vm_decode_function(CVarRef function,
       Variant elem0 = arr.rvalAt(int64_t(0));
       if (elem0.isString()) {
         String sclass = elem0.toString();
-        if (sclass->isame(s_self.get())) {
+        if (sclass.get()->isame(s_self.get())) {
           if (ctx) {
             cls = ctx;
           }
           if (!nameContainsClass) {
             forwarding = true;
           }
-        } else if (sclass->isame(s_parent.get())) {
+        } else if (sclass.get()->isame(s_parent.get())) {
           if (ctx && ctx->parent()) {
             cls = ctx->parent();
           }
           if (!nameContainsClass) {
             forwarding = true;
           }
-        } else if (sclass->isame(s_static.get())) {
+        } else if (sclass.get()->isame(s_static.get())) {
           if (ar) {
             if (ar->hasThis()) {
               cls = ar->getThis()->getVMClass();
@@ -163,10 +165,10 @@ vm_decode_function(CVarRef function,
         } else {
           if (warn && nameContainsClass) {
             String nameClass = name.substr(0, pos);
-            if (nameClass->isame(s_self.get())   ||
-                nameClass->isame(s_static.get())) {
+            if (nameClass.get()->isame(s_self.get())   ||
+                nameClass.get()->isame(s_static.get())) {
               raise_warning("behavior of call_user_func(array('%s', '%s')) "
-                            "is undefined", sclass->data(), name->data());
+                            "is undefined", sclass.data(), name.data());
             }
           }
           cls = Unit::loadClass(sclass.get());
@@ -188,7 +190,7 @@ vm_decode_function(CVarRef function,
     if (nameContainsClass) {
       String c = name.substr(0, pos);
       name = name.substr(pos + 2);
-      if (c->isame(s_self.get())) {
+      if (c.get()->isame(s_self.get())) {
         if (cls) {
           cc = cls;
         } else if (ctx) {
@@ -197,7 +199,7 @@ vm_decode_function(CVarRef function,
         if (!this_) {
           forwarding = true;
         }
-      } else if (c->isame(s_parent.get())) {
+      } else if (c.get()->isame(s_parent.get())) {
         if (cls) {
           cc = cls->parent();
         } else if (ctx && ctx->parent()) {
@@ -206,7 +208,7 @@ vm_decode_function(CVarRef function,
         if (!this_) {
           forwarding = true;
         }
-      } else if (c->isame(s_static.get())) {
+      } else if (c.get()->isame(s_static.get())) {
         if (ar) {
           if (ar->hasThis()) {
             cc = ar->getThis()->getVMClass();
@@ -244,7 +246,7 @@ vm_decode_function(CVarRef function,
       if (!f) {
         if (warn) {
           throw_invalid_argument("function: method '%s' not found",
-                                 name->data());
+                                 name.data());
         }
         return nullptr;
       }
@@ -289,7 +291,7 @@ vm_decode_function(CVarRef function,
           // Bail out if we couldn't find the method or __call
           if (warn) {
             throw_invalid_argument("function: method '%s' not found",
-                                   name->data());
+                                   name.data());
           }
           return nullptr;
         }
@@ -340,7 +342,7 @@ vm_decode_function(CVarRef function,
   return nullptr;
 }
 
-Variant vm_call_user_func(CVarRef function, CVarRef params,
+Variant vm_call_user_func(const Variant& function, const Variant& params,
                           bool forwarding /* = false */) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
@@ -360,7 +362,7 @@ Variant vm_call_user_func(CVarRef function, CVarRef params,
 /*
  * Helper method from converting between a PHP function and a CufIter.
  */
-static bool vm_decode_function_cufiter(CVarRef function,
+static bool vm_decode_function_cufiter(const Variant& function,
                                        SmartCufIterPtr& cufIter) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
@@ -390,7 +392,7 @@ static bool vm_decode_function_cufiter(CVarRef function,
  * Wraps calling an (autoload) PHP function from a CufIter.
  */
 static Variant vm_call_user_func_cufiter(const CufIter& cufIter,
-                                         CArrRef params) {
+                                         const Array& params) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
   StringData* invName = cufIter.name();
@@ -412,7 +414,7 @@ static Variant vm_call_user_func_cufiter(const CufIter& cufIter,
   return ret;
 }
 
-Variant invoke(const String& function, CVarRef params,
+Variant invoke(const String& function, const Variant& params,
                strhash_t hash /* = -1 */, bool tryInterp /* = true */,
                bool fatal /* = true */) {
   Func* func = Unit::loadFunc(function.get());
@@ -424,14 +426,14 @@ Variant invoke(const String& function, CVarRef params,
   return invoke_failed(function.c_str(), fatal);
 }
 
-Variant invoke(const char *function, CVarRef params, strhash_t hash /* = -1 */,
+Variant invoke(const char *function, const Variant& params, strhash_t hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   String funcName(function, CopyString);
   return invoke(funcName, params, hash, tryInterp, fatal);
 }
 
 Variant invoke_static_method(const String& s, const String& method,
-                             CVarRef params, bool fatal /* = true */) {
+                             const Variant& params, bool fatal /* = true */) {
   HPHP::Class* class_ = Unit::lookupClass(s.get());
   if (class_ == nullptr) {
     o_invoke_failed(s.data(), method.data(), fatal);
@@ -448,7 +450,7 @@ Variant invoke_static_method(const String& s, const String& method,
   return ret;
 }
 
-Variant invoke_failed(CVarRef func,
+Variant invoke_failed(const Variant& func,
                       bool fatal /* = true */) {
   if (func.isObject()) {
     return o_invoke_failed(
@@ -564,7 +566,7 @@ Object create_object_only(const String& s) {
   return g_context->createObjectOnly(s.get());
 }
 
-Object create_object(const String& s, CArrRef params, bool init /* = true */) {
+Object create_object(const String& s, const Array& params, bool init /* = true */) {
   return g_context->createObject(s.get(), params, init);
 }
 
@@ -769,7 +771,7 @@ void throw_call_non_object(const char *methodName) {
   throw FatalErrorException(msg.c_str());
 }
 
-String f_serialize(CVarRef value) {
+String f_serialize(const Variant& value) {
   switch (value.getType()) {
   case KindOfUninit:
   case KindOfNull:
@@ -814,7 +816,7 @@ String f_serialize(CVarRef value) {
 
 Variant unserialize_ex(const char* str, int len,
                        VariableUnserializer::Type type,
-                       CArrRef class_whitelist /* = null_array */) {
+                       const Array& class_whitelist /* = null_array */) {
   if (str == nullptr || len <= 0) {
     return false;
   }
@@ -835,7 +837,7 @@ Variant unserialize_ex(const char* str, int len,
 
 Variant unserialize_ex(const String& str,
                        VariableUnserializer::Type type,
-                       CArrRef class_whitelist /* = null_array */) {
+                       const Array& class_whitelist /* = null_array */) {
   return unserialize_ex(str.data(), str.size(), type, class_whitelist);
 }
 
@@ -947,7 +949,7 @@ static bool include_impl_invoke_context(const String& file, void* ctx) {
  */
 String resolve_include(const String& file, const char* currentDir,
                        bool (*tryFile)(const String& file, void*), void* ctx) {
-  const char* c_file = file->data();
+  const char* c_file = file.data();
 
   if (!File::IsPlainFilePath(file)) {
     // URIs don't have an include path
@@ -1036,7 +1038,7 @@ static Variant include_impl(const String& file, bool once,
   if (can_path.isNull()) {
     // Failure
     if (raiseNotice) {
-      raise_notice("Tried to invoke %s but file not found.", file->data());
+      raise_notice("Tried to invoke %s but file not found.", file.data());
     }
     if (required) {
       String ms = "Required file that does not exist: ";
@@ -1082,7 +1084,7 @@ void AutoloadHandler::requestShutdown() {
   // m_handlers will be re-initialized by the next requestInit
 }
 
-bool AutoloadHandler::setMap(CArrRef map, const String& root) {
+bool AutoloadHandler::setMap(const Array& map, const String& root) {
   this->m_map = map;
   this->m_map_root = root;
   return true;
@@ -1110,11 +1112,11 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& name,
                                                      const T &checkExists) {
   assert(!m_map.isNull());
   while (true) {
-    CVarRef &type_map = m_map.get()->get(kind);
+    const Variant& type_map = m_map.get()->get(kind);
     auto const typeMapCell = type_map.asCell();
     if (typeMapCell->m_type != KindOfArray) return Failure;
     String canonicalName = toLower ? f_strtolower(name) : name;
-    CVarRef &file = typeMapCell->m_data.parr->get(canonicalName);
+    const Variant& file = typeMapCell->m_data.parr->get(canonicalName);
     bool ok = false;
     if (file.isString()) {
       String fName = file.toCStrRef().get();
@@ -1143,7 +1145,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& name,
     if (ok && checkExists(name)) {
       return Success;
     }
-    CVarRef &func = m_map.get()->get(s_failure);
+    const Variant& func = m_map.get()->get(s_failure);
     if (func.isNull()) return Failure;
     // can throw, otherwise
     //  - true means the map was updated. try again
@@ -1291,7 +1293,7 @@ bool AutoloadHandler::CompareBundles::operator()(
   return lhs.func() == rhs.func();
 }
 
-bool AutoloadHandler::addHandler(CVarRef handler, bool prepend) {
+bool AutoloadHandler::addHandler(const Variant& handler, bool prepend) {
   SmartCufIterPtr cufIter = nullptr;
   if (!vm_decode_function_cufiter(handler, cufIter)) {
     return false;
@@ -1320,7 +1322,7 @@ bool AutoloadHandler::isRunning() {
   return !m_loading.empty();
 }
 
-void AutoloadHandler::removeHandler(CVarRef handler) {
+void AutoloadHandler::removeHandler(const Variant& handler) {
   SmartCufIterPtr cufIter = nullptr;
   if (!vm_decode_function_cufiter(handler, cufIter)) {
     return;
@@ -1349,7 +1351,7 @@ bool function_exists(const String& function_name) {
 ///////////////////////////////////////////////////////////////////////////////
 // debugger and code coverage instrumentation
 
-void throw_exception(CObjRef e) {
+void throw_exception(const Object& e) {
   if (!e.instanceof(SystemLib::s_ExceptionClass)) {
     raise_error("Exceptions must be valid objects derived from the "
                 "Exception base class");

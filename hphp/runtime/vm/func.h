@@ -241,6 +241,7 @@ struct Func {
     return strncmp("86", methName->data(), 2) == 0;
   }
   bool isNoInjection() const { return bool(m_attrs & AttrNoInjection); }
+  bool isFoldable() const { return bool(m_attrs & AttrIsFoldable); }
 
   bool mayHaveThis() const {
     return isPseudoMain() || (isMethod() && !isStatic());
@@ -269,7 +270,7 @@ struct Func {
     return shared()->m_id;
   }
   Offset base() const { return shared()->m_base; }
-  const inline Opcode* getEntry() const {
+  PC getEntry() const {
     return m_unit->entry() + shared()->m_base;
   }
   Offset past() const { return shared()->m_past; }
@@ -461,7 +462,9 @@ struct Func {
   }
 
 public: // Offset accessors for the translator.
-#define X(f) static ptrdiff_t f##Off() { return offsetof(Func, m_##f); }
+#define X(f) static constexpr ptrdiff_t f##Off() {      \
+    return offsetof(Func, m_##f);                       \
+  }
   X(attrs);
   X(unit);
   X(cls);
@@ -734,9 +737,11 @@ public:
   const UserAttributeMap& getUserAttributes() const {
     return m_userAttributes;
   }
-  int parseUserAttributes(Attr &attrs) const;
+  bool hasUserAttribute(const StringData* name) const {
+    auto it = m_userAttributes.find(name);
+    return it != m_userAttributes.end();
+  }
   int parseNativeAttributes(Attr &attrs) const;
-  int parseHipHopAttributes(Attr &attrs) const;
 
   void commit(RepoTxn& txn) const;
   Func* create(Unit& unit, PreClass* preClass = nullptr) const;

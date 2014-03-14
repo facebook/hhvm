@@ -290,12 +290,25 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
   auto const givenType = describe_actual_type(tv);
   // Handle return type constraint failures
   if (id == ReturnId) {
-    raise_warning(
-      "Value returned from %s() must be of type %s, %s given",
-      func->fullName()->data(),
-      tn->data(),
-      givenType
-    );
+    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()) {
+      raise_typehint_error(
+        folly::format(
+          "Value returned from {}() must be of type {}, {} given",
+          func->fullName()->data(),
+          tn->data(),
+          givenType
+        ).str()
+      );
+    } else {
+      raise_debugging(
+        folly::format(
+          "Value returned from {}() must be of type {}, {} given",
+          func->fullName()->data(),
+          tn->data(),
+          givenType
+        ).str()
+      );
+    }
     return;
   }
   // Handle implicit collection->array conversion for array parameter type

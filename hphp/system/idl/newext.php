@@ -21,7 +21,7 @@ function get_func_info($func, $clsname = 'function') {
     'desc' => idx($info, 'desc'),
     'flags' => array(
       'ZendCompat',
-      'NeedsActRec',
+      'NoFCallBuiltin',
     ),
     'return' => array(
       'type' => 'Variant',

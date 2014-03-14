@@ -35,11 +35,11 @@ bool f_error_log(
   const String& message, int message_type = 0,
   const String& destination = null_string,
   const String& extra_headers = null_string);
-int64_t f_error_reporting(CVarRef level = uninit_null());
+int64_t f_error_reporting(const Variant& level = uninit_null());
 bool f_restore_error_handler();
 bool f_restore_exception_handler();
-Variant f_set_error_handler(CVarRef error_handler, int error_types = k_E_ALL);
-Variant f_set_exception_handler(CVarRef exception_handler);
+Variant f_set_error_handler(const Variant& error_handler, int error_types = k_E_ALL);
+Variant f_set_exception_handler(const Variant& exception_handler);
 void f_hphp_set_error_page(const String& page);
 void f_hphp_throw_fatal_error(const String& error_msg);
 void f_hphp_clear_unflushed();

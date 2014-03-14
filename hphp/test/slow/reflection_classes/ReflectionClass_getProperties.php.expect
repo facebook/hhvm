@@ -110,3 +110,137 @@ array(6) {
   [5]=>
   string(20) "publicStaticProperty"
 }
+array(12) {
+  [0]=>
+  string(11) "cls1Private"
+  [1]=>
+  string(13) "cls1Protected"
+  [2]=>
+  string(10) "cls1Public"
+  [3]=>
+  string(17) "cls1PrivateStatic"
+  [4]=>
+  string(19) "cls1ProtectedStatic"
+  [5]=>
+  string(16) "cls1PublicStatic"
+  [6]=>
+  string(9) "t1Private"
+  [7]=>
+  string(11) "t1Protected"
+  [8]=>
+  string(8) "t1Public"
+  [9]=>
+  string(15) "t1PrivateStatic"
+  [10]=>
+  string(17) "t1ProtectedStatic"
+  [11]=>
+  string(14) "t1PublicStatic"
+}
+array(22) {
+  [0]=>
+  string(11) "cls1Private"
+  [1]=>
+  string(13) "cls1Protected"
+  [2]=>
+  string(10) "cls1Public"
+  [3]=>
+  string(9) "t1Private"
+  [4]=>
+  string(11) "t1Protected"
+  [5]=>
+  string(8) "t1Public"
+  [6]=>
+  string(11) "cls2Private"
+  [7]=>
+  string(13) "cls2Protected"
+  [8]=>
+  string(10) "cls2Public"
+  [9]=>
+  string(17) "cls2PrivateStatic"
+  [10]=>
+  string(19) "cls2ProtectedStatic"
+  [11]=>
+  string(16) "cls2PublicStatic"
+  [12]=>
+  string(19) "cls1ProtectedStatic"
+  [13]=>
+  string(16) "cls1PublicStatic"
+  [14]=>
+  string(17) "t1ProtectedStatic"
+  [15]=>
+  string(14) "t1PublicStatic"
+  [16]=>
+  string(15) "t2PrivateStatic"
+  [17]=>
+  string(17) "t2ProtectedStatic"
+  [18]=>
+  string(14) "t2PublicStatic"
+  [19]=>
+  string(9) "t2Private"
+  [20]=>
+  string(11) "t2Protected"
+  [21]=>
+  string(8) "t2Public"
+}
+array(30) {
+  [0]=>
+  string(17) "cls2PrivateStatic"
+  [1]=>
+  string(19) "cls2ProtectedStatic"
+  [2]=>
+  string(16) "cls2PublicStatic"
+  [3]=>
+  string(15) "t2PrivateStatic"
+  [4]=>
+  string(17) "t2ProtectedStatic"
+  [5]=>
+  string(14) "t2PublicStatic"
+  [6]=>
+  string(11) "cls3Private"
+  [7]=>
+  string(13) "cls3Protected"
+  [8]=>
+  string(10) "cls3Public"
+  [9]=>
+  string(17) "cls3PrivateStatic"
+  [10]=>
+  string(19) "cls3ProtectedStatic"
+  [11]=>
+  string(16) "cls3PublicStatic"
+  [12]=>
+  string(13) "cls1Protected"
+  [13]=>
+  string(10) "cls1Public"
+  [14]=>
+  string(11) "t1Protected"
+  [15]=>
+  string(8) "t1Public"
+  [16]=>
+  string(13) "cls2Protected"
+  [17]=>
+  string(10) "cls2Public"
+  [18]=>
+  string(19) "cls1ProtectedStatic"
+  [19]=>
+  string(16) "cls1PublicStatic"
+  [20]=>
+  string(17) "t1ProtectedStatic"
+  [21]=>
+  string(14) "t1PublicStatic"
+  [22]=>
+  string(11) "t2Protected"
+  [23]=>
+  string(8) "t2Public"
+  [24]=>
+  string(9) "t3Private"
+  [25]=>
+  string(11) "t3Protected"
+  [26]=>
+  string(8) "t3Public"
+  [27]=>
+  string(15) "t3PrivateStatic"
+  [28]=>
+  string(17) "t3ProtectedStatic"
+  [29]=>
+  string(14) "t3PublicStatic"
+}

@@ -40,7 +40,7 @@ void c_AsyncFunctionWaitHandle::t___construct() {
   throw e;
 }
 
-void c_AsyncFunctionWaitHandle::ti_setoncreatecallback(CVarRef callback) {
+void c_AsyncFunctionWaitHandle::ti_setoncreatecallback(const Variant& callback) {
   if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set AsyncFunctionWaitHandle::onStart: on_start_cb not a closure"));
@@ -49,7 +49,7 @@ void c_AsyncFunctionWaitHandle::ti_setoncreatecallback(CVarRef callback) {
   AsioSession::Get()->setOnAsyncFunctionCreateCallback(callback.getObjectDataOrNull());
 }
 
-void c_AsyncFunctionWaitHandle::ti_setonawaitcallback(CVarRef callback) {
+void c_AsyncFunctionWaitHandle::ti_setonawaitcallback(const Variant& callback) {
   if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set AsyncFunctionWaitHandle::onAwait: on_await_cb not a closure"));
@@ -58,7 +58,7 @@ void c_AsyncFunctionWaitHandle::ti_setonawaitcallback(CVarRef callback) {
   AsioSession::Get()->setOnAsyncFunctionAwaitCallback(callback.getObjectDataOrNull());
 }
 
-void c_AsyncFunctionWaitHandle::ti_setonsuccesscallback(CVarRef callback) {
+void c_AsyncFunctionWaitHandle::ti_setonsuccesscallback(const Variant& callback) {
   if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set AsyncFunctionWaitHandle::onSuccess: on_success_cb not a closure"));
@@ -67,7 +67,7 @@ void c_AsyncFunctionWaitHandle::ti_setonsuccesscallback(CVarRef callback) {
   AsioSession::Get()->setOnAsyncFunctionSuccessCallback(callback.getObjectDataOrNull());
 }
 
-void c_AsyncFunctionWaitHandle::ti_setonfailcallback(CVarRef callback) {
+void c_AsyncFunctionWaitHandle::ti_setonfailcallback(const Variant& callback) {
   if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set AsyncFunctionWaitHandle::onFail: on_fail_cb not a closure"));
@@ -80,7 +80,7 @@ Object c_AsyncFunctionWaitHandle::t_getprivdata() {
   return m_privData;
 }
 
-void c_AsyncFunctionWaitHandle::t_setprivdata(CObjRef data) {
+void c_AsyncFunctionWaitHandle::t_setprivdata(const Object& data) {
   m_privData = data;
 }
 
@@ -247,7 +247,7 @@ void c_AsyncFunctionWaitHandle::markAsSucceeded(const Cell& result) {
   m_child = nullptr;
 }
 
-void c_AsyncFunctionWaitHandle::markAsFailed(CObjRef exception) {
+void c_AsyncFunctionWaitHandle::markAsFailed(const Object& exception) {
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnAsyncFunctionFailCallback())) {
     session->onAsyncFunctionFail(this, exception);

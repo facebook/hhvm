@@ -30,7 +30,7 @@ class UrlFile : public MemFile {
 public:
   DECLARE_RESOURCE_ALLOCATION(UrlFile);
 
-  explicit UrlFile(const char *method = "GET", CArrRef headers = null_array,
+  explicit UrlFile(const char *method = "GET", const Array& headers = null_array,
                    const String& postData = null_string, int maxRedirect = 20,
                    int timeout = -1);
 

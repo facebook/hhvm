@@ -28,7 +28,13 @@ TRACE_SET_MOD(jittime);
 
 namespace HPHP { namespace JIT {
 
-static __thread Timer::CounterMap* s_counters;
+static __thread Timer::Counter s_counters[Timer::kNumTimers];
+
+static const struct { const char* str; Timer::Name name; } s_names[] = {
+# define TIMER_NAME(name) {#name, Timer::name},
+  JIT_TIMERS
+# undef TIMER_NAME
+};
 
 static int64_t getCPUTimeNanos() {
 #ifdef CLOCK_THREAD_CPUTIME_ID
@@ -44,7 +50,7 @@ static int64_t getCPUTimeNanos() {
 #endif
 }
 
-Timer::Timer(const std::string& name)
+Timer::Timer(Name name)
   : m_name(name)
   , m_start(getCPUTimeNanos())
   , m_finished(false)
@@ -61,27 +67,26 @@ void Timer::end() {
   auto const finish = getCPUTimeNanos();
   auto const elapsed = finish - m_start;
 
-  auto& counter = (*s_counters)[m_name];
+  auto& counter = s_counters[m_name];
   counter.total += elapsed;
   ++counter.count;
   m_finished = true;
 }
 
-const Timer::CounterMap& Timer::Counters() {
-  assert(s_counters);
-  return *s_counters;
+Timer::CounterVec Timer::Counters() {
+  CounterVec ret;
+  for (auto& pair : s_names) {
+    ret.emplace_back(pair.str, s_counters[pair.name]);
+  }
+  return ret;
 }
 
 void Timer::RequestInit() {
-  assert(!s_counters);
-  s_counters = new CounterMap();
+  memset(&s_counters, 0, sizeof(s_counters));
 }
 
 void Timer::RequestExit() {
   Dump();
-  assert(s_counters);
-  delete s_counters;
-  s_counters = nullptr;
 }
 
 void Timer::Dump() {
@@ -90,28 +95,26 @@ void Timer::Dump() {
 }
 
 std::string Timer::Show() {
-  std::string ret;
-
-  if (Counters().empty()) return ret;
-
-  auto const url = g_context->getRequestUrl(75);
-  folly::format(&ret, "\nJIT timers for {}\n", url);
-
   auto const header = "{:<40} | {:>15} {:>15} {:>15}\n";
   auto const row    = "{:<40} | {:>15} {:>13,}us {:>13,}ns\n";
-  folly::format(&ret, header, "name", "count", "total time", "average time");
-  folly::format(&ret, "{:-^40}-+{:-^48}\n", "", "");
 
-  std::map<std::string, Counter> sorted(s_counters->begin(), s_counters->end());
-  for (auto const& pair : sorted) {
-    auto& name = pair.first;
-    auto& counter = pair.second;
+  std::string rows;
+  for (auto& pair : s_names) {
+    auto* name = pair.str;
+    auto& counter = s_counters[pair.name];
+    if (counter.total == 0 && counter.count == 0) continue;
 
-    folly::format(&ret, row, name, counter.count, counter.total / 1000,
+    folly::format(&rows, row, name, counter.count, counter.total / 1000,
                   counter.mean());
   }
 
-  ret += '\n';
+  if (rows.empty()) return rows;
+
+  std::string ret;
+  auto const url = g_context->getRequestUrl(75);
+  folly::format(&ret, "\nJIT timers for {}\n", url);
+  folly::format(&ret, header, "name", "count", "total time", "average time");
+  folly::format(&ret, "{:-^40}-+{:-^48}\n{}\n", "", "", rows);
   return ret;
 }
 

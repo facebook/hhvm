@@ -136,7 +136,7 @@
             "desc": "Generates a Signature Base String according to pecl\/oauth.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -165,7 +165,7 @@
             "desc": "Encodes a URI to RFC 3986.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -193,7 +193,7 @@
                     "desc": "Creates a new OAuth object",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": null
@@ -228,7 +228,7 @@
                     "desc": "The destructor. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -242,7 +242,7 @@
                     "desc": "Turns off verbose request information (off by default). Alternatively, the debug property can be set to a FALSE value to turn debug off.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -256,7 +256,7 @@
                     "desc": "Disable redirects from being followed automatically, thus allowing the request to be manually redirected. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -270,7 +270,7 @@
                     "desc": "Turns off the usual SSL peer certificate and host checks, this is not for production environments. Alternatively, the sslChecks member can be set to FALSE to turn SSL checks off.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -284,7 +284,7 @@
                     "desc": "Turns on verbose request information useful for debugging, the debug information is stored in the debugInfo member. Alternatively, the debug member can be set to a non-FALSE value to turn debug on.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -298,7 +298,7 @@
                     "desc": "Follow and sign redirects automatically, which is enabled by default. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -312,7 +312,7 @@
                     "desc": "Turns on the usual SSL peer certificate and host checks (enabled by default). Alternatively, the sslChecks member can be set to a non-FALSE value to turn SSL checks off.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -326,7 +326,7 @@
                     "desc": "Fetch a resource.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -360,7 +360,7 @@
                     "desc": "Generate a signature based on the final HTTP method, URL and a string\/array of parameters.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -389,7 +389,7 @@
                     "desc": "Fetch an access token, secret and any additional response parameters from the service provider.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -418,7 +418,7 @@
                     "desc": "Gets the Certificate Authority information, which includes the ca_path and ca_info set by OAuth::setCaPath(). Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -432,7 +432,7 @@
                     "desc": "Get the raw response of the most recent request.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -446,7 +446,7 @@
                     "desc": "Get headers for last response.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -460,7 +460,7 @@
                     "desc": "Get HTTP information about the last response.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -474,7 +474,7 @@
                     "desc": "Generate OAuth header string signature based on the final HTTP method, URL and a string\/array of parameters",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -503,7 +503,7 @@
                     "desc": "Fetch a request token, secret and any additional response parameters from the service provider.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -534,7 +534,7 @@
                     "desc": "Set where the OAuth parameters should be passed.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -553,7 +553,7 @@
                     "desc": "Sets the Certificate Authority (CA), both for path and info. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -577,7 +577,7 @@
                     "desc": "Sets the nonce for all subsequent requests.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -596,7 +596,7 @@
                     "desc": "Sets the Request Engine, that will be sending the HTTP requests. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -615,7 +615,7 @@
                     "desc": "Sets the RSA certificate. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -634,7 +634,7 @@
                     "desc": "Tweak specific SSL checks for requests. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -653,7 +653,7 @@
                     "desc": "Sets the OAuth timestamp for subsequent requests. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -672,7 +672,7 @@
                     "desc": "Set the token and secret for subsequent requests.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -696,7 +696,7 @@
                     "desc": "Sets the OAuth version for subsequent requests",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -724,7 +724,7 @@
                     "desc": "Add required oauth provider parameters. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -743,7 +743,7 @@
                     "desc": "Calls the registered consumer handler callback function, which is set with OAuthProvider::consumerHandler(). Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -757,7 +757,7 @@
                     "desc": "Calls the registered timestamp handler callback function, which is set with OAuthProvider::timestampNonceHandler(). Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -771,7 +771,7 @@
                     "desc": "Calls the registered token handler callback function, which is set with OAuthProvider::tokenHandler(). Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -785,7 +785,7 @@
                     "desc": "Checks an OAuth request. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -809,7 +809,7 @@
                     "desc": "Initiates a new OAuthProvider object. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -828,7 +828,7 @@
                     "desc": "Sets the consumer handler callback, which will later be called with OAuthProvider::callConsumerHandler(). Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -847,7 +847,7 @@
                     "desc": "Generates a string of pseudo-random bytes.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -871,7 +871,7 @@
                     "desc": "The 2-legged flow, or request signing. It does not require a token. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -890,7 +890,7 @@
                     "desc": "Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -909,7 +909,7 @@
                     "desc": "Removes a required parameter. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -928,7 +928,7 @@
                     "desc": "Pass in a problem as an OAuthException, with possible problems listed in the OAuth constants section. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -947,7 +947,7 @@
                     "desc": "Sets a parameter. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -971,7 +971,7 @@
                     "desc": "Sets the request tokens path. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -990,7 +990,7 @@
                     "desc": "Sets the timestamp nonce handler callback, which will later be called with OAuthProvider::callTimestampNonceHandler(). Errors related to timestamp\/nonce are thrown to this callback. Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1009,7 +1009,7 @@
                     "desc": "Sets the token handler callback, which will later be called with OAuthProvider::callTokenHandler(). Warning: This function is currently not documented; only its argument list is available.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1038,7 +1038,7 @@
                     "desc": "",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": null

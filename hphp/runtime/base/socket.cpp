@@ -13,17 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/socket.h"
+
+#include <fcntl.h>
+#include <poll.h>
+
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/util/logger.h"
-#include <fcntl.h>
-#include <poll.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

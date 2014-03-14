@@ -244,9 +244,10 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
     if (!checkImmediates(name, (Op*)i.front())) return false;
     PC pc = i.popFront();
     m_instrs.set(offset(pc) - m_func->base());
-    if (isSwitch(toOp(*pc)) ||
+    if (isSwitch(*reinterpret_cast<const Op*>(pc)) ||
         instrJumpTarget((Op*)bc, offset(pc)) != InvalidAbsoluteOffset) {
-      if (toOp(*pc) == OpSwitch && getImm((Op*)pc, 2).u_IVA != 0) {
+      if (*reinterpret_cast<const Op*>(pc) == OpSwitch &&
+          getImm((Op*)pc, 2).u_IVA != 0) {
         int64_t switchBase = getImm((Op*)pc, 1).u_I64A;
         int32_t len = getImmVector((Op*)pc).size();
         if (len <= 2) {
@@ -256,8 +257,8 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
         if (switchBase > std::numeric_limits<int64_t>::max() - len + 2) {
           error("Overflow in Switch bounds [%d:%d]\n", base, past);
         }
-      } else if (toOp(*pc) == OpSSwitch) {
-        foreachSwitchString((Opcode*)pc, [&](Id& id) {
+      } else if (*reinterpret_cast<const Op*>(pc) == Op::SSwitch) {
+        foreachSwitchString(reinterpret_cast<const Op*>(pc), [&](Id& id) {
           ok &= checkString(pc, id);
         });
       }
@@ -288,7 +289,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
   // within this region.
   for (Range<BranchList> i(branches); !i.empty();) {
     PC branch = i.popFront();
-    if (isSwitch(*branch)) {
+    if (isSwitch(*reinterpret_cast<const Op*>(branch))) {
       foreachSwitchTarget((Op*)branch, [&](Offset& o) {
         // TODO(#2464197): dce breaks switch for verify
         if (offset(branch + o) != -1) {
@@ -672,48 +673,48 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef ONE
   #undef NOV
   };
-  switch (toOp(*pc)) {
-  case OpCGetM:     // ONE(LA),      MMANY, ONE(CV)
-  case OpVGetM:     // ONE(LA),      MMANY, ONE(VV)
-  case OpIssetM:    // ONE(LA),      MMANY, ONE(CV)
-  case OpEmptyM:    // ONE(LA),      MMANY, ONE(CV)
-  case OpUnsetM:    // ONE(LA),      MMANY, NOV
-  case OpFPassM:    // TWO(IVA,LA),  MMANY, ONE(FV)
-  case OpIncDecM:   // TWO(OA,LA),   MMANY, ONE(CV)
+  switch (*reinterpret_cast<const Op*>(pc)) {
+  case Op::CGetM:     // ONE(LA),      MMANY, ONE(CV)
+  case Op::VGetM:     // ONE(LA),      MMANY, ONE(VV)
+  case Op::IssetM:    // ONE(LA),      MMANY, ONE(CV)
+  case Op::EmptyM:    // ONE(LA),      MMANY, ONE(CV)
+  case Op::UnsetM:    // ONE(LA),      MMANY, NOV
+  case Op::FPassM:    // TWO(IVA,LA),  MMANY, ONE(FV)
+  case Op::IncDecM:   // TWO(OA,LA),   MMANY, ONE(CV)
     return vectorSig(pc, NOV);
-  case OpBindM:     // ONE(LA),    V_MMANY, ONE(VV)
+  case Op::BindM:     // ONE(LA),    V_MMANY, ONE(VV)
     return vectorSig(pc, VV);
-  case OpSetM:      // ONE(LA),    C_MMANY, ONE(CV)
-  case OpSetOpM:    // TWO(OA,LA), C_MMANY, ONE(CV)
+  case Op::SetM:      // ONE(LA),    C_MMANY, ONE(CV)
+  case Op::SetOpM:    // TWO(OA,LA), C_MMANY, ONE(CV)
     return vectorSig(pc, CV);
-  case OpSetWithRefLM://TWO(MA, HA), MMANY, NOV
+  case Op::SetWithRefLM://TWO(MA, HA), MMANY, NOV
     return vectorSig(pc, NOV);
-  case OpSetWithRefRM://ONE(MA),   R_MMANY, NOV
+  case Op::SetWithRefRM://ONE(MA),   R_MMANY, NOV
     return vectorSig(pc, RV);
-  case OpFCall:     // ONE(IVA),     FMANY,   ONE(RV)
-  case OpFCallArray:// NA,           ONE(FV), ONE(RV)
+  case Op::FCall:     // ONE(IVA),     FMANY,   ONE(RV)
+  case Op::FCallArray:// NA,           ONE(FV), ONE(RV)
     for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
     }
     return m_tmp_sig;
-  case OpFCallBuiltin: //TWO(IVA, SA), CVUMANY,  ONE(RV)
+  case Op::FCallBuiltin: //TWO(IVA, SA), CVUMANY,  ONE(RV)
     for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
       m_tmp_sig[i] = CVUV;
     }
     return m_tmp_sig;
-  case OpCreateCl:  // TWO(IVA,SA),  CVMANY,   ONE(CV)
+  case Op::CreateCl:  // TWO(IVA,SA),  CVMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
       m_tmp_sig[i] = CVV;
     }
     return m_tmp_sig;
-  case OpNewPackedArray:  // ONE(IVA),     CMANY,   ONE(CV)
-  case OpNewStructArray:  // ONE(VSA),     SMANY,   ONE(CV)
+  case Op::NewPackedArray:  // ONE(IVA),     CMANY,   ONE(CV)
+  case Op::NewStructArray:  // ONE(VSA),     SMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
       m_tmp_sig[i] = CV;
     }
     return m_tmp_sig;
   default:
-    return &inputSigs[uint8_t(toOp(*pc))][0];
+    return &inputSigs[uint8_t(*pc)][0];
   }
 }
 
@@ -730,7 +731,7 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
 }
 
 bool FuncChecker::checkTerminal(State* cur, PC pc) {
-  if (isRet(pc) || toOp(*pc) == OpUnwind) {
+  if (isRet(pc) || *reinterpret_cast<const Op*>(pc) == Op::Unwind) {
     if (cur->stklen != 0) {
       error("stack depth must equal 0 after Ret* and Unwind; got %d\n",
              cur->stklen);
@@ -747,9 +748,10 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
   }
   bool ok = true;
   FpiState& fpi = cur->fpi[cur->fpilen - 1];
-  if (isFCallStar(toOp(*pc))) {
+  if (isFCallStar(*reinterpret_cast<const Op*>(pc))) {
     --cur->fpilen;
-    int call_params = toOp(*pc) == OpFCall ? getImmIva(pc) : 1;
+    int call_params = *reinterpret_cast<const Op*>(pc) == Op::FCall
+      ? getImmIva(pc) : 1;
     int push_params = getImmIva(at(fpi.fpush));
     if (call_params != push_params) {
       error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
@@ -796,11 +798,11 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
   assert(isIter(pc));
   int id = getImmIva(pc);
   bool ok = true;
-  auto op = toOp(*pc);
-  if (op == OpIterInit || op == OpIterInitK ||
-      op == OpWIterInit || op == OpWIterInitK ||
-      op == OpMIterInit || op == OpMIterInitK ||
-      op == OpDecodeCufIter) {
+  auto op = *reinterpret_cast<const Op*>(pc);
+  if (op == Op::IterInit || op == Op::IterInitK ||
+      op == Op::WIterInit || op == Op::WIterInitK ||
+      op == Op::MIterInit || op == Op::MIterInitK ||
+      op == Op::DecodeCufIter) {
     if (cur->iters[id]) {
       error(
         "IterInit* or MIterInit* <%d> trying to double-initialize\n", id);
@@ -812,9 +814,9 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
       //error("Cannot access un-initialized iter %d\n", id);
       //ok = false;
     }
-    if (op == OpIterFree ||
-        op == OpMIterFree ||
-        op == OpCIterFree) {
+    if (op == Op::IterFree ||
+        op == Op::MIterFree ||
+        op == Op::CIterFree) {
       cur->iters[id] = false;
     }
   }
@@ -865,7 +867,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     }
     memmove(&cur->stk[index + 1], &cur->stk[index],
            (info.pos + 1) * sizeof(*cur->stk));
-    cur->stk[index] = outputSigs[uint8_t(toOp(*pc))][0];
+    cur->stk[index] = outputSigs[uint8_t(*reinterpret_cast<const Op*>(pc))][0];
     cur->stklen++;
   } else {
     int pushes = info.numPushes;
@@ -873,8 +875,8 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     FlavorDesc *outs = &cur->stk[cur->stklen];
     cur->stklen += pushes;
     for (int i = 0; i < pushes; ++i)
-      outs[i] = outputSigs[uint8_t(toOp(*pc))][i];
-    if (isFPush(toOp(*pc))) {
+      outs[i] = outputSigs[uint8_t(*reinterpret_cast<const Op*>(pc))][i];
+    if (isFPush(*reinterpret_cast<const Op*>(pc))) {
       if (cur->fpilen >= maxFpi()) {
         error("%s", "more FPush* instructions than FPI regions\n");
         return false;

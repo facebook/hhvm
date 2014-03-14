@@ -31,7 +31,7 @@ const StaticString s_http_response_header("http_response_header");
 ///////////////////////////////////////////////////////////////////////////////
 
 UrlFile::UrlFile(const char *method /* = "GET" */,
-                 CArrRef headers /* = null_array */,
+                 const Array& headers /* = null_array */,
                  const String& postData /* = null_string */,
                  int maxRedirect /* = 20 */,
                  int timeout /* = -1 */) {
@@ -95,13 +95,12 @@ bool UrlFile::open(const String& input_url, const String& mode) {
                      m_response, pHeaders, &responseHeaders);
   }
 
-  GlobalVariables *g = get_global_variables();
-  Variant &r = g->getRef(s_http_response_header);
-  r = Array::Create();
+  m_responseHeaders = Array();
   for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-    r.append(responseHeaders[i]);
+    m_responseHeaders.append(responseHeaders[i]);
   }
-  m_responseHeaders = r;
+  GlobalVariables *g = get_global_variables();
+  g->set(s_http_response_header, Variant(m_responseHeaders), /*copy=*/ true);
 
   if (code == 200) {
     m_name = (std::string) url;

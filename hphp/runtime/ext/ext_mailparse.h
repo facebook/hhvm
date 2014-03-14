@@ -29,23 +29,23 @@ bool f_mail(
   const String& additional_parameters = null_string);
 int64_t f_ezmlm_hash(const String& addr);
 Resource f_mailparse_msg_create();
-bool f_mailparse_msg_free(CResRef mimemail);
+bool f_mailparse_msg_free(const Resource& mimemail);
 Variant f_mailparse_msg_parse_file(const String& filename);
-bool f_mailparse_msg_parse(CResRef mimemail, const String& data);
+bool f_mailparse_msg_parse(const Resource& mimemail, const String& data);
 Variant f_mailparse_msg_extract_part_file(
-  CResRef mimemail, CVarRef filename, CVarRef callbackfunc = "");
+  const Resource& mimemail, const Variant& filename, const Variant& callbackfunc = "");
 Variant f_mailparse_msg_extract_whole_part_file(
-  CResRef mimemail, CVarRef filename, CVarRef callbackfunc = "");
+  const Resource& mimemail, const Variant& filename, const Variant& callbackfunc = "");
 Variant f_mailparse_msg_extract_part(
-  CResRef mimemail, CVarRef msgbody, CVarRef callbackfunc = "");
-Array f_mailparse_msg_get_part_data(CResRef mimemail);
-Variant f_mailparse_msg_get_part(CResRef mimemail, const String& mimesection);
-Array f_mailparse_msg_get_structure(CResRef mimemail);
+  const Resource& mimemail, const Variant& msgbody, const Variant& callbackfunc = "");
+Array f_mailparse_msg_get_part_data(const Resource& mimemail);
+Variant f_mailparse_msg_get_part(const Resource& mimemail, const String& mimesection);
+Array f_mailparse_msg_get_structure(const Resource& mimemail);
 Array f_mailparse_rfc822_parse_addresses(const String& addresses);
 bool f_mailparse_stream_encode(
-  CResRef sourcefp, CResRef destfp, const String& encoding);
-Variant f_mailparse_uudecode_all(CResRef fp);
-Variant f_mailparse_determine_best_xfer_encoding(CResRef fp);
+  const Resource& sourcefp, const Resource& destfp, const String& encoding);
+Variant f_mailparse_uudecode_all(const Resource& fp);
+Variant f_mailparse_determine_best_xfer_encoding(const Resource& fp);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

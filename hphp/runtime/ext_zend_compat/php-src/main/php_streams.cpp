@@ -13,9 +13,9 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
     } else {
       s = src->hphp_file->read(maxlen);
     }
-    *buf = (char*) emalloc(s->size());
-    memcpy(*buf, s->data(), s->size());
-    return s->size();
+    *buf = (char*) emalloc(s.size());
+    memcpy(*buf, s.data(), s.size());
+    return s.size();
 }
 
 PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err TSRMLS_DC) {

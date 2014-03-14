@@ -588,7 +588,7 @@ Variant MimePart::getPartData() {
     php_rfc822_tokenize_free(toks);
   }
 
-  auto copyHeader = [&](CVarRef key) {
+  auto copyHeader = [&](const Variant& key) {
     if (m_headers.exists(key)) ret.set(key, m_headers[key]);
   };
   copyHeader(s_content_description);
@@ -903,7 +903,7 @@ void MimePart::UpdatePositions(MimePart *part, int newendpos,
   }
 }
 
-Variant MimePart::extract(CVarRef filename, CVarRef callbackfunc, int decode,
+Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, int decode,
                           bool isfile) {
   /* filename can be a filename or a stream */
   Resource file;

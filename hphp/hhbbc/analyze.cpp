@@ -199,6 +199,15 @@ FuncAnalysis do_analyze(const Index& index,
       auto const needsWiden =
         nonWideVisits[target.id] >= options.analyzeFuncWideningLimit;
 
+      // We haven't optimized the widening operator much, because it
+      // doesn't happen in practice right now.  We want to know when
+      // it starts happening:
+      if (needsWiden) {
+        std::fprintf(stderr, "widening in %s on %s\n",
+          ctx.unit->filename->data(),
+          ctx.func->name->data());
+      }
+
       FTRACE(2, "     {}-> {}\n", needsWiden ? "widening " : "", target.id);
       FTRACE(4, "target old {}",
         state_string(*ctx.func, ai.bdata[target.id].stateIn));
@@ -252,8 +261,8 @@ FuncAnalysis do_analyze(const Index& index,
       ).str();
     }
     ret += sep + bsep;
-    ret += folly::format(
-      "Inferred return type: {}\n", show(ai.inferredReturn)).str();
+    folly::format(&ret,
+      "Inferred return type: {}\n", show(ai.inferredReturn));
     ret += bsep;
     return ret;
   }());
@@ -431,6 +440,15 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       assert(!clsAnalysis.privateStatics[prop.name].subtypeOf(TBottom));
     } else {
       assert(!clsAnalysis.privateProperties[prop.name].subtypeOf(TBottom));
+    }
+  }
+
+  // TODO(#3696042): We don't have support for static properties with
+  // specialized array types in the minstr functions yet, so if we
+  // have one after 86sinit, throw it away.
+  for (auto& kv : clsAnalysis.privateStatics) {
+    if (is_specialized_array(kv.second)) {
+      kv.second = union_of(kv.second, TArr);
     }
   }
 

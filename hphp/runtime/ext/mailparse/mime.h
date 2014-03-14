@@ -51,7 +51,7 @@ public:
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   bool parse(const char *buf, int bufsize);
-  Variant extract(CVarRef filename, CVarRef callbackfunc, int decode,
+  Variant extract(const Variant& filename, const Variant& callbackfunc, int decode,
                   bool isfile);
   Variant getPartData();
   Array getStructure();

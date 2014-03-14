@@ -207,7 +207,7 @@ void process_ini_settings(const std::string& name) {
   }
 }
 
-void register_variable(Variant &variables, char *name, CVarRef value,
+void register_variable(Variant &variables, char *name, const Variant& value,
                        bool overwrite /* = true */) {
   // ignore leading spaces in the variable name
   char *var = name;
@@ -1009,6 +1009,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("repo-schema", "display the repository schema id")
     ("mode,m", value<string>(&po.mode)->default_value("run"),
      "run | debug (d) | server (s) | daemon | replay | translate (t)")
+    ("interactive,a", "Shortcut for --mode debug") // -a is from PHP5
     ("config,c", value<vector<string> >(&po.config)->composing(),
      "load specified config file")
     ("config-value,v", value<std::vector<std::string>>(&po.confStrings)->composing(),
@@ -1045,8 +1046,6 @@ static int execute_program_impl(int argc, char** argv) {
      "lint specified file")
     ("show,w", value<string>(&po.show),
      "output specified file and do nothing else")
-    ("parse", value<string>(&po.parse),
-     "parse specified file and dump the AST")
     ("temp-file",
      "file specified is temporary and removed after execution")
     ("count", value<int>(&po.count)->default_value(1),
@@ -1112,6 +1111,9 @@ static int execute_program_impl(int argc, char** argv) {
     // Process the options
     store(opts, vm);
     notify(vm);
+    if (vm.count("interactive") /* or -a */) {
+      po.mode = "debug";
+    }
     if (po.mode == "d") po.mode = "debug";
     if (po.mode == "s") po.mode = "server";
     if (po.mode == "t") po.mode = "translate";
@@ -1298,11 +1300,6 @@ static int execute_program_impl(int argc, char** argv) {
     }
     Logger::Info("No syntax errors detected in %s", po.lint.c_str());
     return 0;
-  }
-
-  if (!po.parse.empty()) {
-    Logger::Error("The 'parse' command line option is not supported\n\n");
-    return 1;
   }
 
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {
@@ -1637,7 +1634,7 @@ bool hphp_invoke_simple(const std::string &filename,
 }
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
-                 bool func, CArrRef funcParams, VRefParam funcRet,
+                 bool func, const Array& funcParams, VRefParam funcRet,
                  const string &reqInitFunc, const string &reqInitDoc,
                  bool &error, string &errorMsg,
                  bool once /* = true */, bool warmupOnly /* = false */,

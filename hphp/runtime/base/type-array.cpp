@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/type-array.h"
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -45,10 +47,19 @@ void Array::setEvalScalar() const {
   }
 }
 
+void Array::compileTimeAssertions() {
+  static_assert(sizeof(Array) == sizeof(ArrayBase), "Fix this.");
+  static_assert(offsetof(Array, m_px) == kExpectedMPxOffset, "");
+}
+
+void ArrNR::compileTimeAssertions() {
+  static_assert(offsetof(ArrNR, m_px) == kExpectedMPxOffset, "");
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // constructors
 
-Array Array::Create(CVarRef name, CVarRef var) {
+Array Array::Create(const Variant& name, const Variant& var) {
   return ArrayData::Create(name.isString() ? name.toKey() : name, var);
 }
 
@@ -62,12 +73,12 @@ Array &Array::operator=(ArrayData *data) {
   return *this;
 }
 
-Array &Array::operator=(CArrRef arr) {
+Array &Array::operator=(const Array& arr) {
   ArrayBase::operator=(arr.m_px);
   return *this;
 }
 
-Array &Array::operator=(CVarRef var) {
+Array &Array::operator=(const Variant& var) {
   return operator=(var.toArray());
 }
 
@@ -77,7 +88,7 @@ Array &Array::operator =  (Variant&& v) {
     m_px = v.m_data.parr;
     v.reset();
   } else {
-    *this = const_cast<CVarRef>(v);
+    *this = const_cast<const Variant&>(v);
   }
   return *this;
 }
@@ -86,7 +97,7 @@ Array Array::operator+(ArrayData *data) const {
   return Array(m_px).plusImpl(data);
 }
 
-Array Array::operator+(CArrRef arr) const {
+Array Array::operator+(const Array& arr) const {
   return Array(m_px).plusImpl(arr.m_px);
 }
 
@@ -94,18 +105,18 @@ Array &Array::operator+=(ArrayData *data) {
   return plusImpl(data);
 }
 
-Array &Array::operator+=(CVarRef var) {
+Array &Array::operator+=(const Variant& var) {
   if (var.getType() != KindOfArray) {
     throw BadArrayMergeException();
   }
   return operator+=(var.getArrayData());
 }
 
-Array &Array::operator+=(CArrRef arr) {
+Array &Array::operator+=(const Array& arr) {
   return plusImpl(arr.m_px);
 }
 
-Array Array::diff(CVarRef array, bool by_key, bool by_value,
+Array Array::diff(const Variant& array, bool by_key, bool by_value,
                   PFUNC_CMP key_cmp_function /* = NULL */,
                   const void *key_data /* = NULL */,
                   PFUNC_CMP value_cmp_function /* = NULL */,
@@ -119,7 +130,7 @@ Array Array::diff(CVarRef array, bool by_key, bool by_value,
                   value_cmp_function, value_data);
 }
 
-Array Array::intersect(CVarRef array, bool by_key, bool by_value,
+Array Array::intersect(const Variant& array, bool by_key, bool by_value,
                        PFUNC_CMP key_cmp_function /* = NULL */,
                        const void *key_data /* = NULL */,
                        PFUNC_CMP value_cmp_function /* = NULL */,
@@ -133,11 +144,11 @@ Array Array::intersect(CVarRef array, bool by_key, bool by_value,
                   value_cmp_function, value_data);
 }
 
-static int CompareAsStrings(CVarRef v1, CVarRef v2, const void *data) {
+static int CompareAsStrings(const Variant& v1, const Variant& v2, const void *data) {
   return HPHP::same(HPHP::toString(v1), HPHP::toString(v2)) ? 0 : -1;
 }
 
-Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
+Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match,
                       PFUNC_CMP key_cmp_function,
                       const void *key_data,
                       PFUNC_CMP value_cmp_function,
@@ -156,7 +167,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
     // Fast case
     for (ArrayIter iter(*this); iter; ++iter) {
       Variant key(iter.first());
-      CVarRef value(iter.secondRef());
+      const Variant& value(iter.secondRef());
       bool found = false;
       if (array->exists(key)) {
         if (by_value) {
@@ -222,7 +233,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
     if (min < max) { // found
       // if checking both, check value
       if (by_key && by_value) {
-        CVarRef val(iter.secondRef());
+        const Variant& val(iter.secondRef());
         // Have to look up and down for matches
         for (int i = mid; i < max; i++) {
           ssize_t pos = opaque1.positions[perm1[i]];
@@ -264,7 +275,13 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
 ///////////////////////////////////////////////////////////////////////////////
 // manipulations
 
-Array &Array::merge(CArrRef arr) {
+String Array::toString() const {
+  if (m_px == nullptr) return "";
+  raise_notice("Array to string conversion");
+  return "Array";
+}
+
+Array &Array::merge(const Array& arr) {
   return mergeImpl(arr.m_px);
 }
 
@@ -300,7 +317,7 @@ Array &Array::mergeImpl(ArrayData *data) {
 ///////////////////////////////////////////////////////////////////////////////
 // comparisons
 
-bool Array::same(CArrRef v2) const {
+bool Array::same(const Array& v2) const {
   if (m_px == nullptr && v2.get() == nullptr) return true;
   if (m_px && v2.get()) {
     return m_px->equal(v2.get(), true);
@@ -308,25 +325,25 @@ bool Array::same(CArrRef v2) const {
   return false;
 }
 
-bool Array::same(CObjRef v2) const {
+bool Array::same(const Object& v2) const {
   return false;
 }
 
-bool Array::equal(CArrRef v2) const {
+bool Array::equal(const Array& v2) const {
   if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::equal(toBoolean(), v2.toBoolean());
   }
   return m_px->equal(v2.get(), false);
 }
 
-bool Array::equal(CObjRef v2) const {
+bool Array::equal(const Object& v2) const {
   if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::equal(toBoolean(), v2.toBoolean());
   }
   return false;
 }
 
-bool Array::less(CArrRef v2, bool flip /* = false */) const {
+bool Array::less(const Array& v2, bool flip /* = false */) const {
   if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
@@ -336,7 +353,7 @@ bool Array::less(CArrRef v2, bool flip /* = false */) const {
   return m_px->compare(v2.get()) < 0;
 }
 
-bool Array::less(CObjRef v2) const {
+bool Array::less(const Object& v2) const {
   if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
@@ -344,7 +361,7 @@ bool Array::less(CObjRef v2) const {
   return true;
 }
 
-bool Array::less(CVarRef v2) const {
+bool Array::less(const Variant& v2) const {
   if (m_px == nullptr || v2.isNull()) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
@@ -354,7 +371,7 @@ bool Array::less(CVarRef v2) const {
   return HPHP::more(v2, *this);
 }
 
-bool Array::more(CArrRef v2, bool flip /* = true */) const {
+bool Array::more(const Array& v2, bool flip /* = true */) const {
   if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
@@ -364,7 +381,7 @@ bool Array::more(CArrRef v2, bool flip /* = true */) const {
   return m_px->compare(v2.get()) > 0;
 }
 
-bool Array::more(CObjRef v2) const {
+bool Array::more(const Object& v2) const {
   if (m_px == nullptr || v2.get() == nullptr) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
@@ -372,7 +389,7 @@ bool Array::more(CObjRef v2) const {
   return false;
 }
 
-bool Array::more(CVarRef v2) const {
+bool Array::more(const Variant& v2) const {
   if (m_px == nullptr || v2.isNull()) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
@@ -401,7 +418,7 @@ Variant Array::rvalAt(int key, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-CVarRef Array::rvalAtRef(int key, ACCESSPARAMS_IMPL) const {
+const Variant& Array::rvalAtRef(int key, ACCESSPARAMS_IMPL) const {
   if (m_px) return m_px->get((int64_t)key, flags & AccessFlags::Error);
   return null_variant;
 }
@@ -411,18 +428,18 @@ Variant Array::rvalAt(int64_t key, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-CVarRef Array::rvalAtRef(int64_t key, ACCESSPARAMS_IMPL) const {
+const Variant& Array::rvalAtRef(int64_t key, ACCESSPARAMS_IMPL) const {
   if (m_px) return m_px->get(key, flags & AccessFlags::Error);
   return null_variant;
 }
 
-CVarRef Array::rvalAtRef(const String& key, ACCESSPARAMS_IMPL) const {
+const Variant& Array::rvalAtRef(const String& key, ACCESSPARAMS_IMPL) const {
   if (m_px) {
     bool error = flags & AccessFlags::Error;
     if (flags & AccessFlags::Key) return m_px->get(key, error);
     if (key.isNull()) return m_px->get(empty_string, error);
     int64_t n;
-    if (!key->isStrictlyInteger(n)) {
+    if (!key.get()->isStrictlyInteger(n)) {
       return m_px->get(key, error);
     } else {
       return m_px->get(n, error);
@@ -435,7 +452,7 @@ Variant Array::rvalAt(const String& key, ACCESSPARAMS_IMPL) const {
   return Array::rvalAtRef(key, flags);
 }
 
-CVarRef Array::rvalAtRef(CVarRef key, ACCESSPARAMS_IMPL) const {
+const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
   if (!m_px) return null_variant;
   switch (key.m_type) {
   case KindOfUninit:
@@ -473,7 +490,7 @@ CVarRef Array::rvalAtRef(CVarRef key, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-Variant Array::rvalAt(CVarRef key, ACCESSPARAMS_IMPL) const {
+Variant Array::rvalAt(const Variant& key, ACCESSPARAMS_IMPL) const {
   return Array::rvalAtRef(key, flags);
 }
 
@@ -492,7 +509,7 @@ Variant &Array::lvalAt(const String& key, ACCESSPARAMS_IMPL) {
   return lvalAtImpl(key.toKey(), flags);
 }
 
-Variant &Array::lvalAt(CVarRef key, ACCESSPARAMS_IMPL) {
+Variant &Array::lvalAt(const Variant& key, ACCESSPARAMS_IMPL) {
   if (flags & AccessFlags::Key) return lvalAtImpl(key, flags);
   VarNR k(key.toKey());
   if (!k.isNull()) {
@@ -503,7 +520,7 @@ Variant &Array::lvalAt(CVarRef key, ACCESSPARAMS_IMPL) {
 
 template<typename T>
 ALWAYS_INLINE
-void Array::setImpl(const T &key, CVarRef v) {
+void Array::setImpl(const T &key, const Variant& v) {
   if (!m_px) {
     ArrayData *data = ArrayData::Create(key, v);
     ArrayBase::operator=(data);
@@ -515,7 +532,7 @@ void Array::setImpl(const T &key, CVarRef v) {
 
 template<typename T>
 ALWAYS_INLINE
-void Array::setRefImpl(const T &key, CVarRef v) {
+void Array::setRefImpl(const T &key, const Variant& v) {
   if (!m_px) {
     ArrayData *data = ArrayData::CreateRef(key, v);
     ArrayBase::operator=(data);
@@ -528,7 +545,7 @@ void Array::setRefImpl(const T &key, CVarRef v) {
 
 template<typename T>
 ALWAYS_INLINE
-void Array::addImpl(const T &key, CVarRef v) {
+void Array::addImpl(const T &key, const Variant& v) {
   if (!m_px) {
     ArrayData *data = ArrayData::Create(key, v);
     ArrayBase::operator=(data);
@@ -538,48 +555,48 @@ void Array::addImpl(const T &key, CVarRef v) {
   }
 }
 
-void Array::set(int64_t key, CVarRef v) {
+void Array::set(int64_t key, const Variant& v) {
   setImpl(key, v);
 }
 
-void Array::set(const String& key, CVarRef v, bool isKey /* = false */) {
+void Array::set(const String& key, const Variant& v, bool isKey /* = false */) {
   if (isKey) return setImpl(key, v);
   setImpl(key.toKey(), v);
 }
 
-void Array::set(CVarRef key, CVarRef v, bool isKey /* = false */) {
+void Array::set(const Variant& key, const Variant& v, bool isKey /* = false */) {
   if (key.getRawType() == KindOfInt64) return setImpl(key.getNumData(), v);
   if (isKey) return setImpl(key, v);
   VarNR k(key.toKey());
   if (!k.isNull()) setImpl(k, v);
 }
 
-void Array::setRef(int64_t key, CVarRef v) {
+void Array::setRef(int64_t key, const Variant& v) {
   setRefImpl(key, v);
 }
 
-void Array::setRef(const String& key, CVarRef v, bool isKey /* = false */) {
+void Array::setRef(const String& key, const Variant& v, bool isKey /* = false */) {
   if (isKey) return setRefImpl(key, v);
   setRefImpl(key.toKey(), v);
 }
 
-void Array::setRef(CVarRef key, CVarRef v, bool isKey /* = false */) {
+void Array::setRef(const Variant& key, const Variant& v, bool isKey /* = false */) {
   if (key.getRawType() == KindOfInt64) return setRefImpl(key.getNumData(), v);
   if (isKey) return setRefImpl(key, v);
   VarNR k(key.toKey());
   if (!k.isNull()) setRefImpl<Variant>(k, v);
 }
 
-void Array::add(int64_t key, CVarRef v) {
+void Array::add(int64_t key, const Variant& v) {
   addImpl(key, v);
 }
 
-void Array::add(const String& key, CVarRef v, bool isKey /* = false */) {
+void Array::add(const String& key, const Variant& v, bool isKey /* = false */) {
   if (isKey) return addImpl(key, v);
   addImpl(key.toKey(), v);
 }
 
-void Array::add(CVarRef key, CVarRef v, bool isKey /* = false */) {
+void Array::add(const Variant& key, const Variant& v, bool isKey /* = false */) {
   if (key.getRawType() == KindOfInt64) return addImpl(key.getNumData(), v);
   if (isKey) return addImpl(key, v);
   VarNR k(key.toKey());
@@ -602,7 +619,7 @@ bool Array::exists(const String& key, bool isKey /* = false */) const {
   return existsImpl(key.toKey());
 }
 
-bool Array::exists(CVarRef key, bool isKey /* = false */) const {
+bool Array::exists(const Variant& key, bool isKey /* = false */) const {
   switch(key.getType()) {
   case KindOfBoolean:
   case KindOfInt64:
@@ -626,7 +643,7 @@ void Array::remove(const String& key, bool isString /* = false */) {
   }
 }
 
-void Array::remove(CVarRef key) {
+void Array::remove(const Variant& key) {
   switch(key.getType()) {
   case KindOfBoolean:
   case KindOfInt64:
@@ -641,7 +658,7 @@ void Array::remove(CVarRef key) {
   }
 }
 
-CVarRef Array::append(CVarRef v) {
+const Variant& Array::append(const Variant& v) {
   if (!m_px) {
     ArrayBase::operator=(ArrayData::Create(v));
   } else {
@@ -651,7 +668,7 @@ CVarRef Array::append(CVarRef v) {
   return v;
 }
 
-CVarRef Array::appendRef(CVarRef v) {
+const Variant& Array::appendRef(const Variant& v) {
   if (!m_px) {
     ArrayBase::operator=(ArrayData::CreateRef(v));
   } else {
@@ -661,7 +678,7 @@ CVarRef Array::appendRef(CVarRef v) {
   return v;
 }
 
-CVarRef Array::appendWithRef(CVarRef v) {
+const Variant& Array::appendWithRef(const Variant& v) {
   if (!m_px) ArrayBase::operator=(ArrayData::Create());
   ArrayData *escalated = m_px->appendWithRef(v, (m_px->hasMultipleRefs()));
   if (escalated != m_px) ArrayBase::operator=(escalated);
@@ -688,7 +705,7 @@ Variant Array::dequeue() {
   return null_variant;
 }
 
-void Array::prepend(CVarRef v) {
+void Array::prepend(const Variant& v) {
   if (!m_px) operator=(Create());
   assert(m_px);
   ArrayData *newarr = m_px->prepend(v, (m_px->hasMultipleRefs()));
@@ -743,14 +760,6 @@ void Array::unserialize(VariableUnserializer *uns) {
   }
 }
 
-void Array::dump() {
-  if (m_px) {
-    m_px->dump();
-  } else {
-    printf("(null)\n");
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // sorting
 
@@ -794,7 +803,7 @@ static int multi_compare_func(const void *n1, const void *n2, const void *op) {
   return 0;
 }
 
-void Array::SortImpl(std::vector<int> &indices, CArrRef source,
+void Array::SortImpl(std::vector<int> &indices, const Array& source,
                      Array::SortData &opaque, Array::PFUNC_CMP cmp_func,
                      bool by_key, const void *data /* = NULL */) {
   assert(cmp_func);
@@ -856,7 +865,7 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
     }
 
     opaque.positions.reserve(size);
-    CArrRef arr = *opaque.array;
+    const Array& arr = *opaque.array;
     if (!arr.empty()) {
       for (ssize_t pos = arr->iter_begin(); pos != ArrayData::invalid_index;
            pos = arr->iter_advance(pos)) {
@@ -877,7 +886,7 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
 
   for (unsigned int k = 0; k < data.size(); k++) {
     SortData &opaque = data[k];
-    CArrRef arr = *opaque.array;
+    const Array& arr = *opaque.array;
 
     Array sorted;
     for (int i = 0; i < count; i++) {
@@ -896,25 +905,25 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
   return true;
 }
 
-int Array::SortRegularAscending(CVarRef v1, CVarRef v2, const void *data) {
+int Array::SortRegularAscending(const Variant& v1, const Variant& v2, const void *data) {
   if (HPHP::less(v1, v2)) return -1;
   if (tvEqual(*v1.asTypedValue(), *v2.asTypedValue())) return 0;
   return 1;
 }
-int Array::SortRegularDescending(CVarRef v1, CVarRef v2, const void *data) {
+int Array::SortRegularDescending(const Variant& v1, const Variant& v2, const void *data) {
   if (HPHP::less(v1, v2)) return 1;
   if (tvEqual(*v1.asTypedValue(), *v2.asTypedValue())) return 0;
   return -1;
 }
 
-int Array::SortNumericAscending(CVarRef v1, CVarRef v2, const void *data) {
+int Array::SortNumericAscending(const Variant& v1, const Variant& v2, const void *data) {
   double d1 = v1.toDouble();
   double d2 = v2.toDouble();
   if (d1 < d2) return -1;
   if (d1 == d2) return 0;
   return 1;
 }
-int Array::SortNumericDescending(CVarRef v1, CVarRef v2, const void *data) {
+int Array::SortNumericDescending(const Variant& v1, const Variant& v2, const void *data) {
   double d1 = v1.toDouble();
   double d2 = v2.toDouble();
   if (d1 < d2) return 1;
@@ -922,31 +931,31 @@ int Array::SortNumericDescending(CVarRef v1, CVarRef v2, const void *data) {
   return -1;
 }
 
-int Array::SortStringAscending(CVarRef v1, CVarRef v2, const void *data) {
+int Array::SortStringAscending(const Variant& v1, const Variant& v2, const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_strcmp(s1.data(), s1.size(), s2.data(), s2.size());
 }
 
-int Array::SortStringAscendingCase(CVarRef v1, CVarRef v2, const void *data) {
+int Array::SortStringAscendingCase(const Variant& v1, const Variant& v2, const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
 }
 
-int Array::SortStringDescending(CVarRef v1, CVarRef v2, const void *data) {
+int Array::SortStringDescending(const Variant& v1, const Variant& v2, const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_strcmp(s2.data(), s2.size(), s1.data(), s1.size());
 }
 
-int Array::SortStringDescendingCase(CVarRef v1, CVarRef v2, const void *data) {
+int Array::SortStringDescendingCase(const Variant& v1, const Variant& v2, const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return bstrcasecmp(s2.data(), s2.size(), s1.data(), s1.size());
 }
 
-int Array::SortLocaleStringAscending(CVarRef v1, CVarRef v2,
+int Array::SortLocaleStringAscending(const Variant& v1, const Variant& v2,
                                      const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
@@ -954,7 +963,7 @@ int Array::SortLocaleStringAscending(CVarRef v1, CVarRef v2,
   return strcoll(s1.data(), s2.data());
 }
 
-int Array::SortLocaleStringDescending(CVarRef v1, CVarRef v2,
+int Array::SortLocaleStringDescending(const Variant& v1, const Variant& v2,
                                       const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
@@ -962,13 +971,13 @@ int Array::SortLocaleStringDescending(CVarRef v1, CVarRef v2,
   return strcoll(s2.data(), s1.data());
 }
 
-int Array::SortNatural(CVarRef v1, CVarRef v2, const void *data) {
+int Array::SortNatural(const Variant& v1, const Variant& v2, const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_natural_cmp(s1.data(), s1.size(), s2.data(), s2.size(), 0);
 }
 
-int Array::SortNaturalCase(CVarRef v1, CVarRef v2, const void *data) {
+int Array::SortNaturalCase(const Variant& v1, const Variant& v2, const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
   return string_natural_cmp(s1.data(), s1.size(), s2.data(), s2.size(), 1);

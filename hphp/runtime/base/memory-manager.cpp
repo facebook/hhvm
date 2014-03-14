@@ -20,6 +20,7 @@
 #include <limits>
 
 #include "hphp/runtime/base/sweepable.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"

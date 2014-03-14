@@ -312,14 +312,14 @@ Variant HHVM_FUNCTION(hash_init, const String& algo,
   return Resource(hash);
 }
 
-bool HHVM_FUNCTION(hash_update, CResRef context, const String& data) {
+bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data) {
   HashContext *hash = context.getTyped<HashContext>();
   hash->ops->hash_update(hash->context, (unsigned char *)data.data(),
                          data.size());
   return true;
 }
 
-String HHVM_FUNCTION(hash_final, CResRef context,
+String HHVM_FUNCTION(hash_final, const Resource& context,
                                  bool raw_output /* = false */) {
   HashContext *hash = context.getTyped<HashContext>();
 
@@ -340,7 +340,7 @@ String HHVM_FUNCTION(hash_final, CResRef context,
   return f_bin2hex(raw);
 }
 
-Resource HHVM_FUNCTION(hash_copy, CResRef context) {
+Resource HHVM_FUNCTION(hash_copy, const Resource& context) {
   HashContext *oldhash = context.getTyped<HashContext>();
   auto const hash = new HashContext(oldhash);
   return Resource(hash);

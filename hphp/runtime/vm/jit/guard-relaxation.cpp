@@ -195,7 +195,7 @@ Type relaxInner(Type t, TypeConstraint tc) {
  * DataTypeGeneric. Returns true iff any changes were made to the trace.
  */
 bool relaxGuards(IRUnit& unit, const GuardConstraints& guards, bool simple) {
-  Timer _t("optimize_relaxGuards");
+  Timer _t(Timer::optimize_relaxGuards);
 
   splitCriticalEdges(unit);
   auto blocks = rpoSortCfg(unit);

@@ -20,6 +20,7 @@
 #include <functional>
 
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/base/thread-info.h"
 
 namespace HPHP {
 namespace Eval{

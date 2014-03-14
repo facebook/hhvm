@@ -66,12 +66,24 @@ function get_meta_tags(string $filename,
  * @param string $arg_separator  - arg_separator.output is used to separate
  *                                 arguments, unless this parameter is
  *                                 specified, and is then used.
+ * @param int $nec_type          - By default, PHP_QUERY_RFC1738. If enc_type is
+                                   PHP_QUERY_RFC1738, then encoding is performed
+                                   per RFC 1738 and the
+                                   application/x-www-form-urlencoded media type,
+                                   which implies that spaces are encoded as plus
+                                   (+) signs. If enc_type is PHP_QUERY_RFC3986,
+                                   then encoding is performed according to RFC
+                                   3986, and spaces will be percent encoded
+                                   (%20).
  *
  * @return string - Returns a URL-encoded string.
  */
 <<__Native>>
-function http_build_query(mixed $query_data, string $numeric_prefix = "",
-                          string $arg_separator = ""): mixed;
+function http_build_query(
+  mixed $query_data,
+  string $numeric_prefix = "",
+  string $arg_separator = "",
+  int $enc_type = PHP_QUERY_RFC1738): mixed;
 
 /**
  * Parse a URL and return its components

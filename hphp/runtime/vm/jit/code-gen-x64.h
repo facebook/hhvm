@@ -261,9 +261,7 @@ private:
 private:
   PhysReg selectScratchReg(IRInstruction* inst);
   void emitLoadImm(Asm& as, int64_t val, PhysReg dstReg);
-  PhysReg prepXMMReg(const SSATmp* tmp,
-                     Asm& as,
-                     const PhysLoc&,
+  PhysReg prepXMMReg(Asm& as, const SSATmp* src, const PhysLoc& srcLoc,
                      RegXMM rXMMScratch);
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
@@ -317,6 +315,8 @@ private:
   void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int64_t adjustment);
   void emitConvBoolOrIntToDbl(IRInstruction* inst);
   void cgLdClsMethodCacheCommon(IRInstruction* inst, Offset offset);
+  void emitLdRaw(IRInstruction* inst, size_t extraOff);
+  void emitStRaw(IRInstruction* inst, size_t extraOff);
 
   /*
    * Generate an if-block that branches around some unlikely code, handling

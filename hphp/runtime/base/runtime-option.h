@@ -74,7 +74,6 @@ public:
   static bool InjectedStackTrace;
   static int InjectedStackTraceLimit; // limit the size of the backtrace
   static bool NoSilencer;
-  static bool EnableApplicationLog;
   static bool CallUserHandlerOnFatals;
   static bool ThrowExceptionOnBadMethodCall;
   static int RuntimeErrorReportingLevel;
@@ -127,6 +126,7 @@ public:
   static bool ServerStatCache;
   static std::vector<std::string> ServerWarmupRequests;
   static boost::container::flat_set<std::string> ServerHighPriorityEndPoints;
+  static bool ServerExitOnBindFail;
   static int PageletServerThreadCount;
   static bool PageletServerThreadRoundRobin;
   static int PageletServerThreadDropCacheTimeoutSeconds;
@@ -146,6 +146,7 @@ public:
   static bool ServerEvilShutdown;
   static int ServerShutdownListenWait;
   static int ServerShutdownListenNoWork;
+  static std::vector<std::string> ServerNextProtocols;
   static int GzipCompressionLevel;
   static std::string ForceCompressionURL;
   static std::string ForceCompressionCookie;
@@ -345,6 +346,8 @@ public:
   static bool EnableZendCompat;
   static bool TimeoutsUseWallTime;
   static bool CheckFlushOnUserClose;
+  static bool EvalAuthoritativeMode;
+  static bool IntsOverflowToInts;
 
   static int GetScannerType();
 
@@ -374,7 +377,13 @@ public:
   F(uint64_t, JitAStubsSize,           64 << 20)                        \
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
   F(bool, AllowHhas,                   false)                           \
-  F(bool, CheckReturnTypeHints,        false)                           \
+  /* CheckReturnTypeHints:
+     0 - no checks or enforcement
+     1 - raises E_WARNING if regular type hint or soft type hint fails
+     2 - raises E_RECOVERABLE_ERROR if regular type hint fails, raises
+         E_WARNING if soft type hint fails; note that in repo mode the
+         error handler is not allowed to resume on recoverable errors */ \
+  F(int32_t, CheckReturnTypeHints,     0)                               \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \

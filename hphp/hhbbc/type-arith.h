@@ -47,6 +47,9 @@ Type typeSub(Type, Type);
 Type typeMul(Type, Type);
 Type typeDiv(Type, Type);
 Type typeMod(Type, Type);
+Type typeAddO(Type, Type);
+Type typeSubO(Type, Type);
+Type typeMulO(Type, Type);
 
 /*
  * Bitwise operations on types.  Computes effects on types as for the

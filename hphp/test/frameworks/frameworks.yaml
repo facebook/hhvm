@@ -46,6 +46,9 @@
     commit: ac8ac6a90812d3d2c880efe00c2293aef6fd8030
     install_root: codeigniter
     test_root: codeigniter/tests
+    clowns:
+      # Errors + fails with PHP5
+      - codeigniter/tests/codeigniter/core/URI_test.php
   composer:
     url: https://github.com/composer/composer.git
     # master is the only available branch
@@ -78,6 +81,15 @@
     install_root: facebook-php-sdk
     test_root: facebook-php-sdk
     test_file_regex: /.*(tests\.php)$/
+  guzzle:
+    url: https://github.com/guzzle/guzzle.git
+    branch: v3.8.1
+    commit: 4de0618a01b34aa1c8c33a3f13f396dcd3882eba
+    install_root: guzzle
+    test_root: guzzle
+    blacklist:
+      # Will fatal until facebook/hhvm#1859 is fixed
+      - guzzle/tests/Guzzle/Tests/Http/Curl/CurlHandleTest.php
   idiorm:
     url: https://github.com/j4mie/idiorm.git
     branch: v1.4.1
@@ -115,13 +127,22 @@
     clowns:
       - joomla-cms/tests/unit/suites/libraries/cms/pagination/JPaginationTest.php
       - joomla-cms/tests/unit/suites/libraries/cms/toolbar/button/JToolbarButtonHelpTest.php
+      - joomla-cms/tests/unit/suites/libraries/cms/html/JHtmlIconsTest.php
+      - joomla-cms/tests/unit/suites/libraries/legacy/categories/JCategoryNodeTest.php
       - joomla-cms/tests/unit/suites/libraries/joomla/twitter/JTwitterTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/document/opensearch/JDocumentOpensearchTest.php
   klein:
     url: https://github.com/chriso/klein.php.git
     branch: v2.0.2
     commit: 6e1f228ce82333b437402dafad049713eb3eeac6
     install_root: klein
     test_root: klein
+  kohana:
+    url: https://github.com/kohana/kohana.git
+    branch: "3.3/develop"
+    commit: 61e12755bf9eb32af82808b26d58ccb73cf2a971
+    install_root: kohana
+    test_root: kohana
   laravel:
     url: https://github.com/laravel/framework.git
     # Use the 4.1 branch instead of the 4.1.x tag because of pull request
@@ -275,8 +296,8 @@
     test_root: ratchet
   reactphp:
     url: https://github.com/reactphp/react.git
-    branch: v0.3.3
-    commit: 210c11a6041cfa2ce1701a4870b69475d9081265
+    branch: v0.4.0
+    commit: 3a5d12166b38d059a96c232d809332e7f3e60d9d
     install_root: reactphp
     test_root: reactphp
   silverstripe:
@@ -318,6 +339,9 @@
     install_root: vfsstream
     test_root: vfsstream
     config_file: vfsstream/phpunit.xml.dist
+    blacklist:
+      # Intermittently hangs, takes > 24h
+      - vfsstream/src/test/php/org/bovigo/vfs/vfsStreamWrapperWithoutRootTestCase.php
   yii:
     url: https://github.com/yiisoft/yii.git
     branch: master

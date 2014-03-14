@@ -78,7 +78,6 @@ no_import = (
     '/ext/tokenizer',
     '/ext/wddx',
     '/ext/xmlrpc',
-    '/ext/xsl',
     '/sapi',
 
     # conscious decision not to match these
@@ -182,6 +181,15 @@ bad_tests = (
     # flaky: t3552849
     '/ext/session',
 
+    # XSL
+    '/ext/xsl/tests/bug49634.php',
+    '/ext/xsl/tests/bug54446_with_ini.php',
+    '/ext/xsl/tests/xsl-phpinfo.php',
+    '/ext/xsl/tests/xslt008.php',
+    '/ext/xsl/tests/xslt009.php',
+    '/ext/xsl/tests/xsltprocessor_getParameter-wrongparam.php',
+    '/ext/xsl/tests/xsltprocessor_removeParameter-wrongparams.php',
+
     # flaky: t3619770
     '/ext/zlib/tests/gzfile_basic.php',
     '/ext/zlib/tests/readgzfile_basic.php',
@@ -205,6 +213,7 @@ bad_tests = (
     '/ext/standard/tests/file/copy_variation8.php',
 
     # flaky: t3851970
+    '/ext/standard/tests/network/bug20134.php',
     '/ext/pcre/tests/preg_match_all_edit_basic.php',
     '/ext/standard/tests/general_functions/bug39322.php',
     '/ext/standard/tests/misc/time_sleep_until_basic.php',
@@ -337,6 +346,31 @@ norepo_tests = (
     '/ext/standard/tests/url/rawurlencode_variation_001.php',
     '/ext/standard/tests/url/urldecode_variation_001.php',
     '/ext/standard/tests/url/urlencode_variation_001.php',
+    '/ext/xsl/tests/bug48221.php.norepo',
+    '/ext/xsl/tests/bug54446.php.norepo',
+    '/ext/xsl/tests/xslt001.php.norepo',
+    '/ext/xsl/tests/xslt002.php.norepo',
+    '/ext/xsl/tests/xslt003.php.norepo',
+    '/ext/xsl/tests/xslt004.php.norepo',
+    '/ext/xsl/tests/xslt005.php.norepo',
+    '/ext/xsl/tests/xslt006.php.norepo',
+    '/ext/xsl/tests/xslt007.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_getParameter-invalidparam.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_getParameter.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-allfuncs.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-array-multiple.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-array-notallowed.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-array.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-funcnostring.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-funcundef.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-null.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-string-multiple.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-string-notallowed.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-string.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_removeParameter-invalidparam.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_removeParameter.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_setparameter-errorquote.php.norepo',
+    '/ext/xsl/tests/xsltprocessor_setparameter-nostring.php.norepo',
     '/ext/zip/tests/bug53579.php',
     '/ext/zip/tests/bug64342_1.php',
     '/ext/zip/tests/bug7658.php',
@@ -397,6 +431,38 @@ norepo_tests = (
     '/tests/lang/018.php',
     '/tests/lang/bug21961.php',
     '/tests/lang/foreachLoop.012.php',
+
+    # XSL: 'include "prepare.inc"' makes repo mode fail.
+    '/ext/xsl/tests/bug48221.php',
+    '/ext/xsl/tests/bug54446.php',
+    '/ext/xsl/tests/bug54446_with_ini.php',
+    '/ext/xsl/tests/xslt001.php',
+    '/ext/xsl/tests/xslt002.php',
+    '/ext/xsl/tests/xslt003.php',
+    '/ext/xsl/tests/xslt004.php',
+    '/ext/xsl/tests/xslt005.php',
+    '/ext/xsl/tests/xslt006.php',
+    '/ext/xsl/tests/xslt007.php',
+    '/ext/xsl/tests/xslt008.php',
+    '/ext/xsl/tests/xslt009.php',
+    '/ext/xsl/tests/xsltprocessor_getParameter-invalidparam.php',
+    '/ext/xsl/tests/xsltprocessor_getParameter.php',
+    '/ext/xsl/tests/xsltprocessor_getParameter-wrongparam.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-allfuncs.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-array-multiple.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-array-notallowed.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-array.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-funcnostring.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-funcundef.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-null.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-string-multiple.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-string-notallowed.php',
+    '/ext/xsl/tests/xsltprocessor_registerPHPFunctions-string.php',
+    '/ext/xsl/tests/xsltprocessor_removeParameter-invalidparam.php',
+    '/ext/xsl/tests/xsltprocessor_removeParameter.php',
+    '/ext/xsl/tests/xsltprocessor_removeParameter-wrongparams.php',
+    '/ext/xsl/tests/xsltprocessor_setparameter-errorquote.php',
+    '/ext/xsl/tests/xsltprocessor_setparameter-nostring.php',
 
     # These tests use create_function, which is basically eval.
     '/Zend/tests/anonymous_func_001.php',
@@ -648,6 +714,24 @@ other_files = (
     '/ext/xmlreader/tests/relaxNG.rng',
     '/ext/xmlreader/tests/relaxNG2.rng',
     '/ext/xmlreader/tests/relaxNG3.rng',
+    '/ext/xsl/tests/area_list.xsl',
+    '/ext/xsl/tests/area_name.xml',
+    '/ext/xsl/tests/bug49634.xml',
+    '/ext/xsl/tests/documentxpath.xsl',
+    '/ext/xsl/tests/exslt.xml',
+    '/ext/xsl/tests/exslt.xsl',
+    '/ext/xsl/tests/phpfunc-nostring.xsl',
+    '/ext/xsl/tests/phpfunc-undef.xsl',
+    '/ext/xsl/tests/phpfunc.xsl',
+    '/ext/xsl/tests/prepare.inc',
+    '/ext/xsl/tests/skipif.inc',
+    '/ext/xsl/tests/streamsinclude.xsl',
+    '/ext/xsl/tests/xslt011.xml',
+    '/ext/xsl/tests/xslt011.xsl',
+    '/ext/xsl/tests/xslt012.xsl',
+    '/ext/xsl/tests/xslt.xml',
+    '/ext/xsl/tests/xslt.xsl',
+    '/ext/xsl/tests/xslt.xsl.gz',
     '/ext/zlib/tests/004.txt.gz',
     '/ext/zlib/tests/data.inc',
     '/ext/zlib/tests/reading_include_path.inc',
@@ -892,20 +976,12 @@ def walk(filename, dest_subdir):
 
     # If you put an exception in here, please send a pull request upstream to
     # php-src. Then when it gets merged kill your hack.
-    if '/Zend/tests/bug60771.php' in full_dest_filename:
-        test = test.replace("?>", "unlink('test.php');\n?>")
-    if '/ext/standard/tests/file/bug44805.php' in full_dest_filename:
-        test = test.replace("1)) {\n\tunlink($file2", "2)) {\n\tunlink($file2")
-    if '/ext/bz2/tests/bug51997.php' in full_dest_filename:
-        test = test.replace("testfile.bz2", "bug51997.bz2")
     if '/ext/ldap/tests/ldap_control_paged_results_variation1.php' in full_dest_filename:
         exp = exp.replace("resource(6)", "resource(%d)")
         file(full_dest_filename + '.expectf', 'w').write(exp)
     if '/ext/ldap/tests/ldap_control_paged_results_variation2.php' in full_dest_filename:
         exp = exp.replace("resource(6)", "resource(%d)")
         file(full_dest_filename + '.expectf', 'w').write(exp)
-    if '/ext/bz2/tests/with_files.php' in full_dest_filename:
-        test = test.replace("testfile.bz2", "with_files.bz2")
     if ('/ext/standard/tests/math/pow.php' in full_dest_filename) or \
        ('/ext/standard/tests/math/abs.php' in full_dest_filename):
         # HHVM handles int->double promotion differently than Zend
@@ -915,111 +991,20 @@ def walk(filename, dest_subdir):
         test = test.replace("0x7FFFFFFF", "(double)0x7FFFFFFF")
         test = test.replace("is_int(LONG_MIN  )", "is_float(LONG_MIN  )")
         test = test.replace("is_int(LONG_MAX  )", "is_float(LONG_MAX  )")
-    if '/ext/xmlreader/tests/003.php' in full_dest_filename:
-        test = test.replace("_002.xml", "_003.xml")
-    if '/ext/xmlreader/tests/004.php' in full_dest_filename:
-        test = test.replace("_002.xml", "_004.xml")
-    if '/ext/standard/tests/file/bug45181.php' in full_dest_filename:
-        test = test.replace('rmdir("bug45181_x");',
-                'chdir("..");\nrmdir("bug45181_x");')
-    if '/ext/standard/tests/file/bug53848.php' in full_dest_filename:
-        test = test.replace('bug39538.csv', 'bug53848.csv')
-    if '/ext/zlib/tests/bug61139.php' in full_dest_filename:
-        test += "\nunlink('someFile');\n?>"
-    if '/ext/zlib/tests/gzseek_variation7.php' in full_dest_filename:
-        test = test.replace('temp3.txt.gz', 'gzseek_variation7.gz')
-    if '/ext/zlib/tests/gzseek_basic2.php' in full_dest_filename:
-        test = test.replace('temp3.txt.gz', 'gzseek_basic2.gz')
-    if '/ext/zlib/tests/gzseek_variation1.php' in full_dest_filename:
-        test = test.replace('temp3.txt.gz', 'gzseek_variation1.gz')
-    if '/ext/zlib/tests/gzseek_variation4.php' in full_dest_filename:
-        test = test.replace('temp3.txt.gz', 'gzseek_variation4.gz')
-    if '/ext/zlib/tests/gzseek_variation5.php' in full_dest_filename:
-        test = test.replace('temp3.txt.gz', 'gzseek_variation5.gz')
     if '/ext/standard/tests/strings/vfprintf_' in full_dest_filename:
         test = test.replace('dump.txt', dest_filename + '.txt')
         test = test.replace('vfprintf_test.txt', dest_filename + '.txt')
     if '/ext/standard/tests/strings/fprintf_' in full_dest_filename:
         test = test.replace('dump.txt', dest_filename + '.txt')
-    if '/ext/standard/tests/file/touch_basic.php' in full_dest_filename:
-        test = test.replace('touch.dat', 'touch_basic.dat')
-    if '/ext/standard/tests/file/touch_variation2.php' in full_dest_filename:
-        test = test.replace('touch.dat', 'touch_variation2.dat')
-    if '/ext/standard/tests/file/file_put_contents_variation9.php' in full_dest_filename:
-        test = test.replace('fileGetContentsVar9', 'filePutContentsVar9')
-    if '/ext/standard/tests/network/tcp4loop.php' in full_dest_filename:
-        test = test.replace('31337', '31338')
-    if '/ext/standard/tests/file/fpassthru_variation.php' in full_dest_filename:
-        test = test.replace('passthru.tmp', 'fpassthru_variation.tmp')
-    if '/ext/spl/tests/SplFileInfo_getPerms_basic.php' in full_dest_filename:
-        test = test.replace('test_file_ptfi', 'SplFileInfo_getPerms_basic.txt')
-    if '/ext/spl/tests/SplFileInfo_getInode_basic.php' in full_dest_filename:
-        test = test.replace('test_file_ptfi', 'SplFileInfo_getInode_basic.txt')
-    if '/ext/standard/tests/file/mkdir-001.php' in full_dest_filename:
-        test = test.replace('testdir', 'mkdir-001')
-    if '/ext/standard/tests/file/mkdir-002.php' in full_dest_filename:
-        test = test.replace('testdir', 'mkdir-002')
-    if '/ext/standard/tests/file/mkdir-003.php' in full_dest_filename:
-        test = test.replace('testdir', 'mkdir-003')
     if '/ext/standard/tests/file/filesize_variation3-win32.php' in full_dest_filename:
         test = test.replace('filesize_variation3', 'filesize_variation3-win32')
-    if '/ext/hash/tests/hash_file_basic.php' in full_dest_filename:
-        test = test.replace('hash_file_example.txt', 'hash_file_basic_example.txt')
-    if '/ext/hash/tests/hash_file_error.php' in full_dest_filename:
-        test = test.replace('hash_file_example.txt', 'hash_file_error_example.txt')
-    if '/ext/zlib/tests/gzopen_basic2.php' in full_dest_filename:
-        test = test.replace('temp.txt.gz', 'gzopen_basic2.gz')
-    if '/ext/zlib/tests/gzwrite_error.php' in full_dest_filename:
-        test = test.replace('temp.txt.gz', 'gzwrite_error.gz')
-    if '/ext/zlib/tests/gzwrite_error2.php' in full_dest_filename:
-        test = test.replace('temp.txt.gz', 'gzwrite_error2.gz')
-    if '/ext/zlib/tests/zlib_wrapper_fflush_basic.php' in full_dest_filename:
-        test = test.replace('temp.txt.gz', 'zlib_wrapper_fflush_basic.gz')
-    if '/ext/zlib/tests/zlib_wrapper_ftruncate_basic.php' in full_dest_filename:
-        test = test.replace('temp.txt.gz', 'zlib_wrapper_ftruncate_basic.gz')
-    if '/ext/zlib/tests/gzeof_variation1.php' in full_dest_filename:
-        test = test.replace('temp.txt.gz', 'gzeof_variation1.gz')
-    if '/ext/zlib/tests/gzputs_basic.php' in full_dest_filename:
-        test = test.replace('temp.txt.gz', 'gzputs_basic.gz')
-    if '/ext/zlib/tests/gzread_variation1.php' in full_dest_filename:
-        test = test.replace('temp.txt.gz', 'gzread_variation1.gz')
-    if '/ext/zlib/tests/gzwrite_basic.php' in full_dest_filename:
-        test = test.replace('temp.txt.gz', 'gzwrite_basic.gz')
     if '/ext/spl/tests/bug42364.php' in full_dest_filename:
         test = test.replace('dirname(__FILE__)', '__DIR__."/../../../../../sample_dir/"')
-    if '/ext/standard/tests/file/lchgrp_basic.php' in full_dest_filename:
-        test = test.replace('symlink.txt', 'lchgrp_basic_symlink.txt')
-    if '/ext/standard/tests/file/tempnam_variation5.php' in full_dest_filename:
-        test = test.replace('tempnam_variation6', 'tempnam_variation5')
-    if '/ext/standard/tests/general_functions/bug41445_1.php' in full_dest_filename:
-        test = test.replace('bug41445.ini', 'bug41445_1.ini')
     if '/ext/standard/tests/file/bug24482.php' in full_dest_filename:
         test = test.replace('"*"', '__DIR__."/../../../../../../sample_dir/*"')
         test = test.replace('opendir(".")', 'opendir(__DIR__."/../../../../../../sample_dir/")')
         test = test.replace('is_dir($file)', 'is_dir(__DIR__."/../../../../../../sample_dir/".$file)')
-    if '/ext/spl/tests/SplFileObject_fgetcsv_' in full_dest_filename:
-        test = test.replace('SplFileObject__fgetcsv.csv',
-            os.path.basename(full_dest_filename).replace('.php', '.csv'))
-    if '/ext/spl/tests/SplFileObject_' in full_dest_filename:
-        new_path = os.path.basename(full_dest_filename).replace('.php', '.csv')
-        test = test.replace('testdata.csv', new_path)
-        test = test.replace('csv_control_data.csv', new_path)
-    if '/ext/spl/tests/SplFileObject_rewind_error001.php' in full_dest_filename:
-        test = test.replace("?>", "unlink('SplFileObject_rewind_error001.csv');\n?>")
-    if '/ext/zlib/tests/gzfile_basic.php' in full_dest_filename:
-        test = test.replace("plainfile.txt.gz", "gzfile_basic.txt.gz")
-    if '/ext/zlib/tests/gzfile_basic2.php' in full_dest_filename:
-        test = test.replace("plainfile.txt", "gzfile_basic2.txt")
-    if '/ext/standard/tests/network/fsockopen_variation1.php' in full_dest_filename:
-        test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
-        test = test.replace("31337'", "'.$port")
-    if '/ext/standard/tests/network/shutdown.php' in full_dest_filename:
-        test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
-        test = test.replace("31337'", "'.$port")
     if '/ext/standard/tests/file/fgets_socket_variation1.php' in full_dest_filename:
-        test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
-        test = test.replace("31337'", "'.$port")
-    if '/ext/standard/tests/file/fread_socket_variation1.php' in full_dest_filename:
         test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
         test = test.replace("31337'", "'.$port")
     if '/ext/standard/tests/file/fputcsv.php' in full_dest_filename:
@@ -1027,9 +1012,6 @@ def walk(filename, dest_subdir):
     if '/ext/spl/tests/SplFileObject_fputcsv_' in full_dest_filename:
         test = test.replace('SplFileObject_fputcsv.csv',
             os.path.basename(full_dest_filename).replace('.php', '.csv'))
-    if '/ext/ftp/tests/ftp_' in full_dest_filename:
-        test = test.replace('localfile.txt',
-            os.path.basename(full_dest_filename).replace('.php', '.txt'))
     if '/ext/zip/tests/oo_getnameindex.php' in full_dest_filename:
         test = test.replace('__tmp_oo_rename.zip', '__tmp_oo_rename2.zip')
         test = test.replace('var_dump($zip->getNameIndex(3));',

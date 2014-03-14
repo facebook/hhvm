@@ -31,7 +31,7 @@ class DebugInfo {
 
   void recordTracelet(TCRange range,
                       const Func* func,
-                      const Opcode *instr, bool exit,
+                      const Op* instr, bool exit,
                       bool inPrologue);
   void recordStub(TCRange range,
                   const char* name);

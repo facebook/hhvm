@@ -51,11 +51,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_unreachable("static analysis error: supposedly "
-                                 "unreachable code was reached");
-
-//////////////////////////////////////////////////////////////////////
-
 folly::Optional<AssertTOp> assertTOpFor(Type t) {
 #define ASSERTT_OP(y) \
   if (t.subtypeOf(T##y)) return AssertTOp::y;
@@ -357,19 +352,21 @@ void first_pass(const Index& index,
     }
 
     if (options.RemoveDeadBlocks && flags.tookBranch) {
+      always_assert(!flags.wasPEI);
       switch (op.op) {
-      case Op::JmpNZ:  blk->fallthrough = op.JmpNZ.target; break;
-      case Op::JmpZ:   blk->fallthrough = op.JmpZ.target;  break;
+      case Op::JmpNZ:     blk->fallthrough = op.JmpNZ.target;     break;
+      case Op::JmpZ:      blk->fallthrough = op.JmpZ.target;      break;
+      case Op::IterInit:  blk->fallthrough = op.IterInit.target;  break;
+      case Op::IterInitK: blk->fallthrough = op.IterInitK.target; break;
       default:
         // No support for switch, etc, right now.
         always_assert(0 && "unsupported tookBranch case");
       }
       /*
        * We need to pop the cell that was on the stack for the
-       * conditional jump.  Note: this also conceptually needs to
-       * execute any side effects a conversion to bool can have.
-       * (Currently that is none.)  (TODO: could insert the bool conv
-       * and let DCE remove it.)
+       * conditional jump.  Note: for jumps this also conceptually
+       * needs to execute any side effects a conversion to bool can
+       * have.  (Currently that is none.)
        */
       gen(bc::PopC {});
       continue;
@@ -415,7 +412,7 @@ void visit_blocks(const char* what,
 
 //////////////////////////////////////////////////////////////////////
 
-void do_optimize(const Index& index, const FuncAnalysis& ainfo) {
+void do_optimize(const Index& index, FuncAnalysis ainfo) {
   FTRACE(2, "{:-^70}\n", "Optimize Func");
 
   visit_blocks("first pass", index, ainfo, first_pass);
@@ -423,25 +420,8 @@ void do_optimize(const Index& index, const FuncAnalysis& ainfo) {
   /*
    * Note, it's useful to do dead block removal before DCE, so it can
    * remove code relating to the branch to the dead block.
-   *
-   * If we didn't remove jumps to dead blocks, we replace all
-   * supposedly unreachable blocks with fatal instructions.
-   *
-   * TODO(#3751005): removedeadblocks doesn't remove the contents of
-   * the blocks which it should.
    */
-  if (!options.RemoveDeadBlocks) {
-    for (auto& blk : ainfo.rpoBlocks) {
-      auto const& state = ainfo.bdata[blk->id].stateIn;
-      if (state.initialized) continue;
-      auto const srcLoc = blk->hhbcs.front().srcLoc;
-      blk->hhbcs = {
-        bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
-        bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
-      };
-      blk->fallthrough = nullptr;
-    }
-  }
+  remove_unreachable_blocks(index, ainfo);
 
   if (options.LocalDCE) {
     visit_blocks("local DCE", index, ainfo, local_dce);
@@ -449,18 +429,18 @@ void do_optimize(const Index& index, const FuncAnalysis& ainfo) {
   if (options.GlobalDCE) {
     global_dce(index, ainfo);
     assert(check(*ainfo.ctx.func));
-  }
-
-  if (options.InsertAssertions) {
     /*
      * Global DCE can change types of locals across blocks.  See
      * dce.cpp for an explanation.
      *
-     * We need to perform a final type analysis before we insert type
-     * assertions.
+     * We need to perform a final type analysis before we do anything
+     * else.
      */
-    auto const ainfo2 = analyze_func(index, ainfo.ctx);
-    visit_blocks("insert assertions", index, ainfo2, insert_assertions);
+    ainfo = analyze_func(index, ainfo.ctx);
+  }
+
+  if (options.InsertAssertions) {
+    visit_blocks("insert assertions", index, ainfo, insert_assertions);
   }
 }
 
@@ -470,10 +450,10 @@ void do_optimize(const Index& index, const FuncAnalysis& ainfo) {
 
 //////////////////////////////////////////////////////////////////////
 
-void optimize_func(const Index& index, const FuncAnalysis& ainfo) {
+void optimize_func(const Index& index, FuncAnalysis ainfo) {
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
     is_systemlib_part(*ainfo.ctx.unit)};
-  do_optimize(index, ainfo);
+  do_optimize(index, std::move(ainfo));
 }
 
 //////////////////////////////////////////////////////////////////////

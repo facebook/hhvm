@@ -106,7 +106,7 @@ static void insertAsserts(IRUnit& unit) {
 }
 
 void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
-  Timer _t("optimize");
+  Timer _t(Timer::optimize);
 
   auto finishPass = [&](const char* msg) {
     dumpTrace(6, unit, folly::format("after {}", msg).str().c_str());
@@ -143,7 +143,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     const bool relax = kind != TransProfile ||
                        RuntimeOption::EvalJitRegionSelector == "tracelet";
     if (relax) {
-      Timer _t("optimize_relaxGuards");
+      Timer _t(Timer::optimize_relaxGuards);
       const bool simple = kind == TransProfile &&
                           RuntimeOption::EvalJitRegionSelector == "tracelet";
       auto changed = relaxGuards(unit, *irBuilder.guards(), simple);

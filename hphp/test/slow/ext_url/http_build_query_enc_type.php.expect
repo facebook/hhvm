@@ -1,0 +1,5 @@
+int(1)
+int(2)
+string(17) "foo+bar=herp+derp"
+string(21) "foo%20bar=herp%20derp"
+string(17) "foo+bar=herp+derp"

@@ -40,12 +40,12 @@ inline bool toBoolean(const String& v) { return toBoolean(v.get());}
 inline bool toBoolean(const ArrayData *v) {
   return v && !v->empty();
 }
-inline bool toBoolean(CArrRef v) { return toBoolean(v.get());}
+inline bool toBoolean(const Array& v) { return toBoolean(v.get());}
 inline bool toBoolean(const ObjectData *v) {
   return v ? v->o_toBoolean() : false;
 }
-inline bool toBoolean(CObjRef v) { return toBoolean(v.get());}
-inline bool toBoolean(CVarRef v) { return v.toBoolean();}
+inline bool toBoolean(const Object& v) { return toBoolean(v.get());}
+inline bool toBoolean(const Variant& v) { return v.toBoolean();}
 
 inline int toInt32(bool    v) { return v ? 1 : 0;}
 inline int toInt32(char    v) { return v;}
@@ -57,10 +57,10 @@ inline int toInt32(litstr  v) = delete;
 inline int toInt32(const StringData *v) { return v ? v->toInt32() : 0;}
 inline int toInt32(const String& v) { return toInt32(v.get());}
 inline int toInt32(const ArrayData *v) { return (v && !v->empty()) ? 1 : 0;}
-inline int toInt32(CArrRef v) { return toInt32(v.get());}
+inline int toInt32(const Array& v) { return toInt32(v.get());}
 inline int toInt32(const ObjectData *v) { return v ? v->o_toInt64() : 0;}
-inline int toInt32(CObjRef v) { return toInt32(v.get());}
-inline int toInt32(CVarRef v) { return v.toInt32();}
+inline int toInt32(const Object& v) { return toInt32(v.get());}
+inline int toInt32(const Variant& v) { return v.toInt32();}
 
 inline int64_t toInt64(bool    v) { return v ? 1 : 0;}
 inline int64_t toInt64(char    v) { return v;}
@@ -79,10 +79,10 @@ inline int64_t toInt64(litstr  v) = delete;
 inline int64_t toInt64(const StringData *v) { return v ? v->toInt64() : 0;}
 inline int64_t toInt64(const String& v) { return toInt64(v.get());}
 inline int64_t toInt64(const ArrayData *v) { return (v && !v->empty()) ? 1 : 0;}
-inline int64_t toInt64(CArrRef v) { return toInt64(v.get());}
+inline int64_t toInt64(const Array& v) { return toInt64(v.get());}
 inline int64_t toInt64(const ObjectData *v) { return v ? v->o_toInt64() : 0;}
-inline int64_t toInt64(CObjRef v) { return toInt64(v.get());}
-inline int64_t toInt64(CVarRef v) { return v.toInt64();}
+inline int64_t toInt64(const Object& v) { return toInt64(v.get());}
+inline int64_t toInt64(const Variant& v) { return v.toInt64();}
 
 inline double toDouble(bool    v) { return v ? 1 : 0;}
 inline double toDouble(char    v) { return v;}
@@ -96,10 +96,10 @@ inline double toDouble(const String& v) { return toDouble(v.get());}
 inline double toDouble(const ArrayData *v) {
   return (v && !v->empty()) ? 1.0 : 0.0;
 }
-inline double toDouble(CArrRef v) { return toDouble(v.get());}
+inline double toDouble(const Array& v) { return toDouble(v.get());}
 inline double toDouble(const ObjectData *v) { return v ? v->o_toDouble() : 0;}
-inline double toDouble(CObjRef v) { return toDouble(v.get());}
-inline double toDouble(CVarRef v) { return v.toDouble();}
+inline double toDouble(const Object& v) { return toDouble(v.get());}
+inline double toDouble(const Variant& v) { return v.toDouble();}
 
 inline String toString(bool    v) { return v ? "1" : "";}
 inline String toString(char    v) { return (int64_t)v;}
@@ -116,12 +116,12 @@ inline String toString(const ArrayData *v) {
   }
   return v ? "Array" : "";
 }
-inline String toString(CArrRef v) { return toString(v.get());}
+inline String toString(const Array& v) { return toString(v.get());}
 inline String toString(ObjectData *v) {
   return v ? v->invokeToString() : String("");
 }
-inline String toString(CObjRef v) { return toString(v.get());}
-inline String toString(CVarRef v) { return v.toString();}
+inline String toString(const Object& v) { return toString(v.get());}
+inline String toString(const Variant& v) { return v.toString();}
 
 inline Array toArray(bool    v) { return Array::Create(v);}
 inline Array toArray(char    v) { return Array::Create(v);}
@@ -135,12 +135,12 @@ inline Array toArray(StringData *v) {
 }
 inline Array toArray(const String& v) { return toArray(v.get());}
 inline Array toArray(ArrayData *v) { return v ? Array(v) : Array::Create();}
-inline Array toArray(CArrRef v) { return toArray(v.get());}
+inline Array toArray(const Array& v) { return toArray(v.get());}
 inline Array toArray(const ObjectData *v) {
   return v ? v->o_toArray() : Array::Create();
 }
-inline Array toArray(CObjRef v) { return toArray(v.get());}
-inline Array toArray(CVarRef v) { return v.toArray();}
+inline Array toArray(const Object& v) { return toArray(v.get());}
+inline Array toArray(const Variant& v) { return v.toArray();}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

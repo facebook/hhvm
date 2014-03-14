@@ -59,6 +59,3 @@ function getallheaders(): array<string, string>;
 
 <<__Native, __HipHopSpecific>>
 function apache_get_config(): array<string, mixed>;
-
-<<__Native, __HipHopSpecific>>
-function apache_get_scoreboard(): array<string, array<int, int>>;

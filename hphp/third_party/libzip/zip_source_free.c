@@ -31,15 +31,13 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include <stdlib.h>
 
 #include "zipint.h"
 
-
 
-ZIP_EXTERN(void)
+ZIP_EXTERN void
 zip_source_free(struct zip_source *src)
 {
     if (src == NULL)

@@ -61,7 +61,7 @@ class ArrayDirectory : public Directory {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ArrayDirectory);
 
-  explicit ArrayDirectory(CArrRef a) : m_it(a) {}
+  explicit ArrayDirectory(const Array& a) : m_it(a) {}
 
   virtual void close() {}
   virtual Variant read();

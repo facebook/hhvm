@@ -1297,6 +1297,13 @@ inline RefData::~RefData() {
 
 //////////////////////////////////////////////////////////////////////
 
+inline Array& forceToArray(Variant& var) {
+  if (!var.isArray()) var = Variant(Array::Create());
+  return var.toArrRef();
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 #endif // incl_HPHP_VARIANT_H_

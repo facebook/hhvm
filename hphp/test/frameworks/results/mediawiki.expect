@@ -753,97 +753,97 @@ S
 CdbTest::testMediaWikiTestCaseParentSetupCalled
 S
 CleanUpTest::testAllBytes
-.
+F
 CleanUpTest::testAscii
-.
+F
 CleanUpTest::testBomRegression
-.
+F
 CleanUpTest::testChunkRegression
-.
+F
 CleanUpTest::testDoubleBytes
-.
+F
 CleanUpTest::testForbiddenRegression
-.
+F
 CleanUpTest::testHangulRegression
-.
+F
 CleanUpTest::testInterposeRegression
-.
+F
 CleanUpTest::testLatin
-.
+F
 CleanUpTest::testLatinNormal
-.
+F
 CleanUpTest::testMediaWikiTestCaseParentSetupCalled
 .
 CleanUpTest::testNull
-.
+F
 CleanUpTest::testOverlongRegression
-.
+F
 CleanUpTest::testSurrogateRegression
-.
+F
 CleanUpTest::testTripleBytes
-.
+F
 CollationTest::testGetFirstLetter with data set #0
-S
+.
 CollationTest::testGetFirstLetter with data set #1
-S
+.
 CollationTest::testGetFirstLetter with data set #10
-S
+.
 CollationTest::testGetFirstLetter with data set #11
-S
+.
 CollationTest::testGetFirstLetter with data set #12
-S
+.
 CollationTest::testGetFirstLetter with data set #13
-S
+.
 CollationTest::testGetFirstLetter with data set #14
-S
+.
 CollationTest::testGetFirstLetter with data set #15
-S
+.
 CollationTest::testGetFirstLetter with data set #16
-S
+.
 CollationTest::testGetFirstLetter with data set #2
-S
+.
 CollationTest::testGetFirstLetter with data set #3
-S
+.
 CollationTest::testGetFirstLetter with data set #4
-S
+.
 CollationTest::testGetFirstLetter with data set #5
-S
+.
 CollationTest::testGetFirstLetter with data set #6
-S
+.
 CollationTest::testGetFirstLetter with data set #7
-S
+.
 CollationTest::testGetFirstLetter with data set #8
-S
+.
 CollationTest::testGetFirstLetter with data set #9
-S
+.
 CollationTest::testIsPrefix with data set #0
-S
+.
 CollationTest::testIsPrefix with data set #1
-S
+.
 CollationTest::testIsPrefix with data set #2
-S
+.
 CollationTest::testIsPrefix with data set #3
-S
+.
 CollationTest::testIsPrefix with data set #4
-S
+.
 CollationTest::testIsPrefix with data set #5
-S
+.
 CollationTest::testIsPrefix with data set #6
-S
+.
 CollationTest::testIsPrefix with data set #7
-S
+.
 CollationTest::testIsPrefix with data set #8
-S
+.
 CollationTest::testMediaWikiTestCaseParentSetupCalled
-S
+.
 CollationTest::testNotIsPrefix with data set #0
-S
+.
 CollationTest::testNotIsPrefix with data set #1
-S
+.
 CollationTest::testNotIsPrefix with data set #2
-S
+.
 CollationTest::testNotIsPrefix with data set #3
-S
+.
 DatabaseMysqlBaseTest::testAddIdentifierQuotes with data set #0
 .
 DatabaseMysqlBaseTest::testAddIdentifierQuotes with data set #1
@@ -6535,11 +6535,11 @@ ORMTableTest::testMediaWikiTestCaseParentSetupCalled
 ORMTableTest::testSingleton
 .
 OutputPageTest::testHandheld
-.
+F
 OutputPageTest::testMediaWikiTestCaseParentSetupCalled
 .
 OutputPageTest::testPrintRequests
-.
+F
 OutputPageTest::testScreenRequests
 .
 PNGHandlerTest::testGetImageArea with data set #0

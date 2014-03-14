@@ -109,7 +109,7 @@ class Collator {
    *   keys can be compared directly instead of strings.
    */
   <<__Native>>
-  public function getSortKey(string $str): string;
+  public function getSortKey(string $str): mixed;
 
   /**
    * Get current collation strength

@@ -209,6 +209,7 @@ function match_arg_type(string $php, string $cpp): bool {
       $expected = 'VRefParam';
     }
   }
+  $cpp = trim($cpp);
   // Special case for ints
   if ($cpp == 'int') {
     $cpp = 'int64_t';

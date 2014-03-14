@@ -70,6 +70,9 @@ Variant f_dom_document_save_html_file(const Variant& obj, const String& file);
 Variant f_dom_document_schema_validate_file(
   const Variant& obj, const String& filename);
 Variant f_dom_document_schema_validate_xml(const Variant& obj, const String& source);
+Variant f_dom_document_relaxng_validate_file(
+  const Variant& obj, const String& filename);
+Variant f_dom_document_relaxng_validate_xml(const Variant& obj, const String& source);
 Variant f_dom_node_insert_before(
   const Variant& obj, const Object& newnode, const Object& refnode = Object());
 Variant f_dom_node_replace_child(
@@ -353,6 +356,8 @@ class c_DOMDocument : public c_DOMNode, public Sweepable {
   public: void t_normalizedocument();
   public: bool t_registernodeclass(
     const String& baseclass, const String& extendedclass);
+  public: bool t_relaxngvalidate(const String& filename);
+  public: bool t_relaxngvalidatesource(const String& source);
   public: Variant t_save(const String& file, int64_t options = 0);
   public: Variant t_savehtml(const Object& node = null_object);
   public: Variant t_savehtmlfile(const String& file);

@@ -465,6 +465,42 @@
             ]
         },
         {
+            "name": "dom_document_relaxng_validate_file",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "filename",
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "dom_document_relaxng_validate_xml",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "obj",
+                    "type": "Variant"
+                },
+                {
+                    "name": "source",
+                    "type": "String"
+                }
+            ]
+        },
+        {
             "name": "dom_node_insert_before",
             "flags": [
             ],
@@ -2640,6 +2676,40 @@
                             "name": "extendedclass",
                             "type": "String",
                             "desc": "Your extended class name. If NULL is provided, any previously registered class extending baseclass will be removed."
+                        }
+                    ]
+                },
+                {
+                    "name": "relaxNGValidate",
+                    "desc": null,
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String",
+                            "desc": "The RNG file."
+                        }
+                    ]
+                },
+                {
+                    "name": "relaxNGValidateSource",
+                    "desc": null,
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE on success or FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "source",
+                            "type": "String",
+                            "desc": "A string containing the RNG schema."
                         }
                     ]
                 },

@@ -99,6 +99,11 @@ Array f_apc_sma_info(bool limited = false);
 void apc_load(int thread);
 
 // needed by generated apc archive .cpp files
+void apc_load_impl(struct cache_info *info,
+                   const char **int_keys, long long *int_values,
+                   const char **char_keys, char *char_values,
+                   const char **strings, const char **objects,
+                   const char **thrifts, const char **others);
 void apc_load_impl_compressed(
   struct cache_info *info,
   int *int_lens, const char *int_keys, long long *int_values,
@@ -126,6 +131,12 @@ public:
 // file uploading progress support
 int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
                          unsigned int event, void *event_data, void **extra);
+
+void const_load_impl(struct cache_info *info,
+                     const char **int_keys, long long *int_values,
+                     const char **char_keys, char *char_values,
+                     const char **strings, const char **objects,
+                     const char **thrifts, const char **others);
 
 void const_load_impl_compressed(
   struct cache_info *info,

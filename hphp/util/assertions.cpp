@@ -13,17 +13,23 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/util/assertions.h"
+
+#include "folly/Format.h"
 
 namespace HPHP {
 
 static AssertFailLogger s_logger;
 
-// In builds without NDEBUG, we don't have __assert_fail from the GNU
-// library, so we implement it here for always_assert().
-void impl_assert_fail(const char* e, const char* file,
-                      unsigned int line, const char* func) {
-  fprintf(stderr, "%s:%d: %s: assertion `%s' failed.", file, line, func, e);
+void assert_fail(const char* e, const char* file,
+                 unsigned int line, const char* func) {
+  auto const msg = folly::format("{}:{}: {}: assertion `{}' failed.",
+                                 file, line, func, e).str();
+  fprintf(stderr, "%s\n", msg.c_str());
+  if (s_logger) {
+    s_logger("Failed Assertion", msg);
+  }
   std::abort();
 }
 

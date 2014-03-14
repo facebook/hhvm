@@ -73,29 +73,12 @@ T bad_value() {
 #define ASSERT_NOT_IMPLEMENTED assert_not_implemented
 #define NOT_IMPLEMENTED        not_implemented
 
-/*
- * Assertion-like checks that should remain on even in a production
- * build.
- */
-
 namespace HPHP {
 
-void assert_fail(const char*, const char*,
-                 unsigned int, const char*) __attribute__((noreturn));
-inline void assert_fail(const char* e,
-                        const char* file,
-                        unsigned int line,
-                        const char* func) {
-#if !defined(NDEBUG) && defined(_GNU_SOURCE) && defined(__linux__)
-  __assert_fail(e, file, line, func);
-#else
-  extern void impl_assert_fail(const char*,
-                               const char*,
-                               unsigned int,
-                               const char*) __attribute__((noreturn));
-  impl_assert_fail(e, file, line, func);
-#endif
-}
+void assert_fail(const char* exp,
+                 const char* file,
+                 unsigned int line,
+                 const char* func) __attribute__((noreturn));
 
 void assert_fail_log(const char* title, const std::string& msg);
 typedef std::function<void(const char*, const std::string&)> AssertFailLogger;
@@ -160,14 +143,17 @@ class FailedAssertion : public std::exception {
 #define always_assert_throw_log(e, l)           \
   assert_log_impl(e, assert_throw_fail_impl(e), l)
 
+#undef assert
 #ifndef NDEBUG
+#define assert(e) always_assert(e)
 #define assert_log(e, l) always_assert_log(e, l)
 #define assert_throw(e) always_assert_throw(e)
 #define assert_throw_log(e, l) always_assert_throw_log(e, l)
 #else
-#define assert_log(e, l)
-#define assert_throw(e)
-#define assert_throw_log(e, l)
+#define assert(e) static_cast<void>(0)
+#define assert_log(e, l) static_cast<void>(0)
+#define assert_throw(e) static_cast<void>(0)
+#define assert_throw_log(e, l) static_cast<void>(0)
 #endif
 
 const bool do_assert =

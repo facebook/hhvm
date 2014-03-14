@@ -16,11 +16,11 @@
 
 #include "hphp/tools/bootstrap/idl.h"
 
+#include <algorithm>
 #include <fstream>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <algorithm>
-#include <string>
 
 #include "folly/Format.h"
 #include "folly/json.h"
@@ -31,7 +31,18 @@
 #define INT64_TYPE "long"
 #endif
 
-namespace HPHP { namespace IDL {
+namespace HPHP {
+
+/* Our assert() macro uses a function that ends up in a library we don't want
+ * to link this against, so provide our own simple implementation of
+ * assert_fail. */
+void assert_fail(const char* e, const char* file,
+                 unsigned int line, const char* func) {
+  fprintf(stderr, "%s:%u: %s: assertion `%s' failed.", file, line, func, e);
+  std::abort();
+}
+
+namespace IDL {
 /////////////////////////////////////////////////////////////////////////////
 
 static const std::unordered_map<fbstring, DataType> g_kindOfMap =

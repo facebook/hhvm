@@ -487,14 +487,8 @@ std::string func_flag_list(const FuncInfo& finfo) {
   auto const func = finfo.func;
   std::vector<std::string> flags;
 
-  if (auto name = func->getGeneratorBodyName()) {
-    flags.push_back(
-        folly::format("hasGeneratorBody(\"{}\")", name->toCppString()).str()
-    );
-  }
   if (func->isGenerator()) flags.push_back("isGenerator");
   if (func->isAsync()) flags.push_back("isAsync");
-  if (func->isGeneratorFromClosure()) flags.push_back("isGeneratorFromClosure");
   if (func->isClosureBody()) flags.push_back("isClosureBody");
   if (func->isPairGenerator()) flags.push_back("isPairGenerator");
 

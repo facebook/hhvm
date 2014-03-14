@@ -909,7 +909,6 @@ class UnitEmitter {
                 int line1, int line2, Offset base, Offset past,
                 const StringData* name, Attr attrs, bool top,
                 const StringData* docComment, int numParams,
-                bool needsGeneratorOrigFunc,
                 bool needsNextClonedClosure);
   Unit* create();
   void returnSeen() { m_returnSeen = true; }

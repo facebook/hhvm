@@ -605,6 +605,7 @@ opcodeControlFlowInfo(const Op instr) {
     case Op::FCallD:
     case Op::FCallArray:
     case Op::ContEnter:
+    case Op::ContRaise:
     case Op::Incl:
     case Op::InclOnce:
     case Op::Req:

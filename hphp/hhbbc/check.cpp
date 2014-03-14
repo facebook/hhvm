@@ -193,30 +193,12 @@ bool check(const php::Func& f) {
    * revisited here if they aren't true anymore.
    */
   if (f.isClosureBody)          assert(!f.top);
-  if (f.isAsync)                assert(f.isGeneratorBody ||
-                                       f.innerGeneratorFunc);
-  if (f.isPairGenerator)        assert(f.isGeneratorBody);
-  if (f.isGeneratorBody)        assert(f.outerGeneratorFunc);
+  if (f.isPairGenerator)        assert(f.isGenerator);
 
   if (f.isClosureBody) {
     assert(f.cls &&
            f.cls->parentName &&
            f.cls->parentName->isame(s_Closure.get()));
-  }
-
-  if (f.isGeneratorFromClosure) {
-    assert(f.isGeneratorBody);
-    // Inner generator functions from closures don't live on any
-    // class.
-    assert(f.cls == nullptr);
-  }
-
-  assert(!(f.outerGeneratorFunc && f.innerGeneratorFunc));
-  if (f.outerGeneratorFunc) {
-    assert(f.outerGeneratorFunc->innerGeneratorFunc == &f);
-  }
-  if (f.innerGeneratorFunc) {
-    assert(f.innerGeneratorFunc->outerGeneratorFunc == &f);
   }
 
   boost::dynamic_bitset<> seenId(f.nextBlockId);

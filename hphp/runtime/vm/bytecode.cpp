@@ -1957,11 +1957,11 @@ void ExecutionContext::resumeAsyncFunc(c_Continuation& cont,
   SCOPE_EXIT { popVMState(); };
 
   try {
-    enterVM(ar, ar->func()->getEntry());
+    enterVM(ar, ar->func()->unit()->at(cont.offset()));
     cont.setStopped();
   } catch (...) {
     cont.setDone();
-    cont.m_value.setNull();
+    cellSet(make_tv<KindOfNull>(), cont.m_value);
     throw;
   }
 }
@@ -1978,19 +1978,15 @@ void ExecutionContext::resumeAsyncFuncThrow(c_Continuation& cont,
   ar->m_soff = 0;
   ar->m_savedRbp = 0;
 
-  Cell* savedSP = m_stack.top();
-  tvWriteObject(exception, m_stack.allocTV());
-  --cont.m_label;
-
-  pushVMState(savedSP);
+  pushVMState(m_stack.top());
   SCOPE_EXIT { popVMState(); };
 
   try {
-    enterVM(ar, ar->func()->getEntry());
+    enterVM(ar, ar->func()->unit()->at(cont.offset()), exception);
     cont.setStopped();
   } catch (...) {
     cont.setDone();
-    cont.m_value.setNull();
+    cellSet(make_tv<KindOfNull>(), cont.m_value);
     throw;
   }
 }
@@ -6869,13 +6865,6 @@ static inline RefData* lookupStatic(StringData* name,
     return lookupStaticFromClosure(
       frame_local(fp, func->numParams())->m_data.pobj, name, inited);
   }
-  if (UNLIKELY(func->isGeneratorFromClosure())) {
-    return lookupStaticFromClosure(
-      frame_local(fp, func->getGeneratorOrigFunc()->numParams())->m_data.pobj,
-      name,
-      inited
-    );
-  }
 
   auto const refData = RDS::bindStaticLocal(func, name);
   inited = !refData->isUninitializedInRDS();
@@ -7051,11 +7040,11 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCl(IOP_ARGS) {
   m_stack.pushObject(cl);
 }
 
-static inline void setContVar(const Func* genFunc,
+static inline void setContVar(const Func* func,
                               const StringData* name,
                               TypedValue* src,
                               ActRec* genFp) {
-  Id destId = genFunc->lookupVarId(name);
+  Id destId = func->lookupVarId(name);
   if (destId != kInvalidId) {
     // Copy the value of the local to the cont object and set the
     // local to uninit so that we don't need to change refcounts.
@@ -7063,9 +7052,6 @@ static inline void setContVar(const Func* genFunc,
     tvWriteUninit(src);
   } else {
     if (!genFp->hasVarEnv()) {
-      // We pass skipInsert to this VarEnv because it's going to exist
-      // independent of the chain; i.e. we can't stack-allocate it. We link it
-      // into the chain in UnpackCont, and take it out in ContSuspend.
       genFp->setVarEnv(VarEnv::createLocalOnHeap(genFp));
     }
     genFp->getVarEnv()->setWithRef(name, src);
@@ -7074,10 +7060,9 @@ static inline void setContVar(const Func* genFunc,
 
 const StaticString s_this("this");
 
-void ExecutionContext::fillContinuationVars(ActRec* origFp,
-                                              const Func* origFunc,
-                                              ActRec* genFp,
-                                              const Func* genFunc) {
+void ExecutionContext::fillContinuationVars(const Func* func,
+                                              ActRec* origFp,
+                                              ActRec* genFp) {
   // For functions that contain only named locals, the variable
   // environment is saved and restored by teleporting the values (and
   // their references) between the evaluation stack and the local
@@ -7085,6 +7070,7 @@ void ExecutionContext::fillContinuationVars(ActRec* origFp,
   // VarEnv are saved and restored from m_vars as usual.
   static const StringData* thisStr = s_this.get();
   bool skipThis;
+  Id firstLocal;
   if (origFp->hasVarEnv()) {
     // This is currently never executed but it will be needed for eager
     // execution of async functions - should be revisited later.
@@ -7092,26 +7078,28 @@ void ExecutionContext::fillContinuationVars(ActRec* origFp,
     Stats::inc(Stats::Cont_CreateVerySlow);
     Array definedVariables = origFp->getVarEnv()->getDefinedVariables();
     skipThis = definedVariables.exists(s_this, true);
+    firstLocal = func->numNamedLocals();
 
     for (ArrayIter iter(definedVariables); !iter.end(); iter.next()) {
-      setContVar(genFunc, iter.first().getStringData(),
+      setContVar(func, iter.first().getStringData(),
         const_cast<TypedValue*>(iter.secondRef().asTypedValue()), genFp);
     }
   } else {
-    skipThis = origFunc->lookupVarId(thisStr) != kInvalidId;
-    for (Id i = 0; i < origFunc->numNamedLocals(); ++i) {
-      assert(i == genFunc->lookupVarId(origFunc->localVarName(i)));
-      TypedValue* src = frame_local(origFp, i);
-      tvCopy(*src, *frame_local(genFp, i));
-      tvWriteUninit(src);
-    }
+    skipThis = func->lookupVarId(thisStr) != kInvalidId;
+    firstLocal = 0;
+  }
+
+  for (Id i = firstLocal; i < func->numLocals(); ++i) {
+    TypedValue* src = frame_local(origFp, i);
+    tvCopy(*src, *frame_local(genFp, i));
+    tvWriteUninit(src);
   }
 
   // If $this is used as a local inside the body and is not provided
   // by our containing environment, just prefill it here instead of
   // using InitThisLoc inside the body
   if (!skipThis && origFp->hasThis()) {
-    Id id = genFunc->lookupVarId(thisStr);
+    Id id = func->lookupVarId(thisStr);
     if (id != kInvalidId) {
       tvAsVariant(frame_local(genFp, id)) = origFp->getThis();
     }
@@ -7120,16 +7108,16 @@ void ExecutionContext::fillContinuationVars(ActRec* origFp,
 
 OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   NEXT();
+  DECODE(Offset, offset);
 
-  const Func* origFunc = m_fp->m_func;
-  const Func* genFunc = origFunc->getGeneratorBody();
-  assert(genFunc != nullptr);
+  const Func* func = m_fp->m_func;
+  offset += func->unit()->offsetOf(m_pc);
 
-  c_Continuation* cont = static_cast<c_Continuation*>(origFunc->isMethod()
-    ? c_Continuation::CreateMeth(genFunc, m_fp->getThisOrClass())
-    : c_Continuation::CreateFunc(genFunc));
+  c_Continuation* cont = static_cast<c_Continuation*>(func->isMethod()
+    ? c_Continuation::CreateMeth(func, m_fp->getThisOrClass(), offset)
+    : c_Continuation::CreateFunc(func, offset));
 
-  fillContinuationVars(m_fp, origFunc, cont->actRec(), genFunc);
+  fillContinuationVars(func, m_fp, cont->actRec());
 
   TypedValue* ret = m_stack.allocTV();
   ret->m_type = KindOfObject;
@@ -7142,7 +7130,7 @@ static inline c_Continuation* this_continuation(const ActRec* fp) {
   return static_cast<c_Continuation*>(obj);
 }
 
-void ExecutionContext::iopContEnter(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
   NEXT();
 
   // The stack must have one cell! Or else generatorStackBase() won't work!
@@ -7162,33 +7150,36 @@ void ExecutionContext::iopContEnter(IOP_ARGS) {
   assert(isReturnHelper(contAR->m_savedRip));
 
   m_fp = contAR;
-  pc = contAR->m_func->getEntry();
-  SYNC();
 
-  if (UNLIKELY(!EventHook::FunctionEnter(contAR, EventHook::NormalFunc))) {
+  assert(contAR->func()->contains(cont->m_offset));
+  pc = contAR->func()->unit()->at(cont->m_offset);
+  SYNC();
+}
+
+OPTBLD_INLINE void ExecutionContext::iopContEnter(IOP_ARGS) {
+  contEnterImpl(IOP_PASS_ARGS);
+
+  if (UNLIKELY(!EventHook::FunctionEnter(m_fp, EventHook::NormalFunc))) {
     pc = m_pc;
   }
 }
 
-OPTBLD_INLINE void ExecutionContext::iopUnpackCont(IOP_ARGS) {
-  NEXT();
-  c_Continuation* cont = frame_continuation(m_fp);
+OPTBLD_INLINE void ExecutionContext::iopContRaise(IOP_ARGS) {
+  contEnterImpl(IOP_PASS_ARGS);
 
-  // check sanity of received value
-  assert(tvIsPlausible(*m_stack.topC()));
-
-  // Return the label in a stack cell
-  TypedValue* label = m_stack.allocTV();
-  label->m_type = KindOfInt64;
-  label->m_data.num = cont->m_label;
+  if (UNLIKELY(!EventHook::FunctionEnter(m_fp, EventHook::NormalFunc))) {
+    pc = m_pc;
+  } else {
+    iopThrow(IOP_PASS_ARGS);
+  }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContSuspend(IOP_ARGS) {
   NEXT();
-  DECODE_IVA(label);
-  c_Continuation* cont = frame_continuation(m_fp);
 
-  cont->c_Continuation::t_update(label, tvAsCVarRef(m_stack.topTV()));
+  auto cont = frame_continuation(m_fp);
+  auto offset = m_fp->func()->unit()->offsetOf(pc);
+  cont->suspend(offset, *m_stack.topC());
   m_stack.popTV();
 
   EventHook::FunctionExit(m_fp);
@@ -7204,12 +7195,10 @@ OPTBLD_INLINE void ExecutionContext::iopContSuspend(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopContSuspendK(IOP_ARGS) {
   NEXT();
-  DECODE_IVA(label);
-  c_Continuation* cont = frame_continuation(m_fp);
 
-  TypedValue* val = m_stack.topTV();
-  cont->c_Continuation::t_update_key(label, tvAsCVarRef(m_stack.indTV(1)),
-                                     tvAsCVarRef(val));
+  auto cont = frame_continuation(m_fp);
+  auto offset = m_fp->func()->unit()->offsetOf(pc);
+  cont->suspend(offset, *m_stack.indC(1), *m_stack.topC());
   m_stack.popTV();
   m_stack.popTV();
 
@@ -7223,7 +7212,7 @@ OPTBLD_INLINE void ExecutionContext::iopContRetC(IOP_ARGS) {
   NEXT();
   c_Continuation* cont = frame_continuation(m_fp);
   cont->setDone();
-  tvSetIgnoreRef(*m_stack.topC(), *cont->m_value.asTypedValue());
+  tvSetIgnoreRef(*m_stack.topC(), cont->m_value);
   m_stack.popC();
 
   EventHook::FunctionExit(m_fp);
@@ -7247,13 +7236,6 @@ OPTBLD_INLINE void ExecutionContext::iopContCheck(IOP_ARGS) {
   cont->preNext();
 }
 
-OPTBLD_INLINE void ExecutionContext::iopContRaise(IOP_ARGS) {
-  NEXT();
-  c_Continuation* cont = this_continuation(m_fp);
-  assert(cont->m_label);
-  --cont->m_label;
-}
-
 OPTBLD_INLINE void ExecutionContext::iopContValid(IOP_ARGS) {
   NEXT();
   TypedValue* tv = m_stack.allocTV();
@@ -7265,20 +7247,14 @@ OPTBLD_INLINE void ExecutionContext::iopContKey(IOP_ARGS) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
   cont->startedCheck();
-
-  TypedValue* tv = m_stack.allocTV();
-  tvWriteUninit(tv);
-  tvAsVariant(tv) = cont->m_key;
+  cellDup(cont->m_key, *m_stack.allocC());
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContCurrent(IOP_ARGS) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
   cont->startedCheck();
-
-  TypedValue* tv = m_stack.allocTV();
-  tvWriteUninit(tv);
-  tvAsVariant(tv) = cont->m_value;
+  cellDup(cont->m_value, *m_stack.allocC());
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContStopped(IOP_ARGS) {
@@ -7290,7 +7266,7 @@ OPTBLD_INLINE void ExecutionContext::iopContHandle(IOP_ARGS) {
   NEXT();
   c_Continuation* cont = this_continuation(m_fp);
   cont->setDone();
-  cont->m_value.setNull();
+  cellSet(make_tv<KindOfNull>(), cont->m_value);
 
   Variant exn = tvAsVariant(m_stack.topTV());
   m_stack.popC();
@@ -7317,12 +7293,11 @@ OPTBLD_INLINE void ExecutionContext::iopAsyncAwait(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopAsyncESuspend(IOP_ARGS) {
   NEXT();
-  DECODE_IVA(label);
+  DECODE(Offset, offset);
   DECODE_IVA(iters);
 
-  const Func* origFunc = m_fp->m_func;
-  const Func* genFunc = origFunc->getGeneratorBody();
-  assert(genFunc != nullptr);
+  const Func* func = m_fp->m_func;
+  offset += func->unit()->offsetOf(m_pc);
 
   Cell* value = m_stack.topC();
   assert(value->m_type == KindOfObject);
@@ -7331,14 +7306,14 @@ OPTBLD_INLINE void ExecutionContext::iopAsyncESuspend(IOP_ARGS) {
   auto child = static_cast<c_WaitableWaitHandle*>(value->m_data.pobj);
   assert(!child->isFinished());
 
-  auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(origFunc->isMethod()
-    ? c_AsyncFunctionWaitHandle::CreateMeth(genFunc, m_fp->getThisOrClass(),
-                                            label, child)
-    : c_AsyncFunctionWaitHandle::CreateFunc(genFunc, label, child));
+  auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(func->isMethod()
+    ? c_AsyncFunctionWaitHandle::CreateMeth(func, m_fp->getThisOrClass(),
+                                            offset, child)
+    : c_AsyncFunctionWaitHandle::CreateFunc(func, offset, child));
 
   m_stack.discard();
 
-  fillContinuationVars(m_fp, origFunc, waitHandle->getActRec(), genFunc);
+  fillContinuationVars(func, m_fp, waitHandle->getActRec());
 
   // copy the state of all the iterators at once
   memcpy(frame_iter(waitHandle->getActRec(), iters-1),
@@ -7348,6 +7323,10 @@ OPTBLD_INLINE void ExecutionContext::iopAsyncESuspend(IOP_ARGS) {
   TypedValue* ret = m_stack.allocTV();
   ret->m_type = KindOfObject;
   ret->m_data.pobj = waitHandle;
+}
+
+OPTBLD_INLINE void ExecutionContext::iopAsyncResume(IOP_ARGS) {
+  NEXT();
 }
 
 OPTBLD_INLINE void ExecutionContext::iopAsyncWrapResult(IOP_ARGS) {

@@ -521,8 +521,7 @@ O(StRaw,                            ND, S(Obj) S(Int),                     E) \
 O(StElem,                           ND, S(PtrToCell)                          \
                                           S(Int)                              \
                                           S(Cell),                     E|CRc) \
-O(IterCopy,                         ND, S(FramePtr) S(Int)                    \
-                                        S(PtrToGen) S(Int),                E) \
+O(IterCopy,                         ND, S(FramePtr) S(PtrToGen) S(Int),    E) \
 O(LdStaticLocCached,      D(BoxedCell), NA,                               NF) \
 O(CheckStaticLocInit,               ND, S(BoxedCell),                      B) \
 O(ClosureStaticLocInit,   D(BoxedCell), CStr                                  \
@@ -607,8 +606,8 @@ O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
 O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                     T|E|N|Er) \
 O(Shuffle,                          ND, SUnk,                             NF) \
-O(CreateContFunc,               D(Obj), NA,                          E|N|PRc) \
-O(CreateContMeth,               D(Obj), S(Ctx),                      E|N|PRc) \
+O(CreateContFunc,               D(Obj), C(Int),                      E|N|PRc) \
+O(CreateContMeth,               D(Obj), S(Ctx) C(Int),               E|N|PRc) \
 O(ContEnter,                        ND, S(FramePtr)                           \
                                           S(TCA) C(Int) S(FramePtr),       E) \
 O(ContPreNext,                      ND, S(Obj),                          B|E) \

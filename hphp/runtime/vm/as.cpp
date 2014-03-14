@@ -1577,14 +1577,8 @@ void parse_function_flags(AsmState& as) {
     if (as.in.peek() == '{') break;
     if (!as.in.readword(flag)) break;
 
-    if (flag == "hasGeneratorBody") {
-      as.in.expectWs('(');
-      as.fe->setGeneratorBodyName(read_litstr(as));
-      as.in.expectWs(')');
-    } else if (flag == "isGenerator") {
+    if (flag == "isGenerator") {
       as.fe->setIsGenerator(true);
-    } else if (flag == "isGeneratorFromClosure") {
-      as.fe->setIsGeneratorFromClosure(true);
     } else if (flag == "isAsync") {
       as.fe->setIsAsync(true);
     } else if (flag == "isClosureBody") {

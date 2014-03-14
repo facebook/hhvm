@@ -41,10 +41,9 @@ std::string NewStructData::show() const {
 
 const RawMemData::Info& RawMemData::info() const {
   static const Info infos[] = {
-    {CONTOFF(m_label),           sz::dword, JIT::Type::Int},
+    {CONTOFF(m_offset),          sz::dword, JIT::Type::Int},
     {CONTOFF(m_index),           sz::qword, JIT::Type::Int},
     {c_Continuation::stateOff(), sz::byte,  JIT::Type::Int},
-    {CONTOFF(m_entry),           sz::qword, JIT::Type::TCA},
     {StringData::sizeOff(),      sz::dword, JIT::Type::Int},
     {Func::numParamsOff(),       sz::dword, JIT::Type::Int},
   };

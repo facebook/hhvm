@@ -1315,12 +1315,11 @@ static const struct {
 
   { OpCreateCont,  {None,             Stack1|Local, OutObject,         1 }},
   { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
-  { OpUnpackCont,  {None,             StackTop2,    OutInt64,          2 }},
-  { OpContSuspend, {Stack1,           None,         OutNone,          -1 }},
-  { OpContSuspendK,{StackTop2,        None,         OutNone,          -2 }},
+  { OpContRaise,   {Stack1,           None,         OutNone,          -1 }},
+  { OpContSuspend, {Stack1,           Stack1,       OutUnknown,        0 }},
+  { OpContSuspendK,{StackTop2,        Stack1,       OutUnknown,       -1 }},
   { OpContRetC,    {Stack1,           None,         OutNone,          -1 }},
   { OpContCheck,   {None,             None,         OutNone,           0 }},
-  { OpContRaise,   {None,             None,         OutNone,           0 }},
   { OpContValid,   {None,             Stack1,       OutBoolean,        1 }},
   { OpContKey,     {None,             Stack1,       OutUnknown,        1 }},
   { OpContCurrent, {None,             Stack1,       OutUnknown,        1 }},
@@ -1332,6 +1331,7 @@ static const struct {
   { OpAsyncAwait,  {Stack1,           StackTop2,    OutAsyncAwait,     1 }},
   { OpAsyncESuspend,
                    {Stack1,           Stack1|Local, OutObject,         0 }},
+  { OpAsyncResume, {None,             None,         OutNone,           0 }},
   { OpAsyncWrapResult,
                    {Stack1,           Stack1,       OutObject,         0 }},
   { OpAsyncWrapException,
@@ -2994,6 +2994,7 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
 
     case OpPushL:
     case OpContEnter:
+    case OpContRaise:
       return DataTypeGeneric;
 
     case OpRetC:

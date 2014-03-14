@@ -248,17 +248,18 @@ static CallMap s_callMap {
 
     /* Continuation support helpers */
     {CreateContFunc,     &c_Continuation::CreateFunc, DSSA, SNone,
-                          { extra(&CreateContData::genFunc) }},
-    {CreateContMeth,     &c_Continuation::CreateMeth, DSSA, SNone,
-                          { extra(&CreateContData::genFunc),
+                          { extra(&CreateContData::func),
                             {SSA, 0} }},
+    {CreateContMeth,     &c_Continuation::CreateMeth, DSSA, SNone,
+                          { extra(&CreateContData::func),
+                            {SSA, 0}, {SSA, 1} }},
 
     /* Async function support helpers */
     {CreateAFWHFunc,     &c_AsyncFunctionWaitHandle::CreateFunc, DSSA, SSync,
-                          { extra(&CreateContData::genFunc),
+                          { extra(&CreateContData::func),
                             {SSA, 0}, {SSA, 1} }},
     {CreateAFWHMeth,     &c_AsyncFunctionWaitHandle::CreateMeth, DSSA, SSync,
-                          { extra(&CreateContData::genFunc),
+                          { extra(&CreateContData::func),
                             {SSA, 0}, {SSA, 1}, {SSA, 2} }},
     {CreateSRWH,         &c_StaticResultWaitHandle::CreateFromVM, DSSA, SNone,
                           { {TV, 0} }},

@@ -166,18 +166,10 @@ std::string show(const Func& func) {
 
 #define X(what) if (func.what) folly::toAppend(#what "\n", &ret)
   X(isClosureBody);
-  X(isGeneratorFromClosure);
-  X(isPairGenerator);
-  X(isGeneratorBody);
   X(isAsync);
+  X(isGenerator);
+  X(isPairGenerator);
 #undef X
-
-  if (auto const f = func.innerGeneratorFunc) {
-    ret += folly::format("innerGeneratorFunc: {}\n", f->name->data()).str();
-  }
-  if (auto const f = func.outerGeneratorFunc) {
-    ret += folly::format("outerGeneratorFunc: {}\n", f->name->data()).str();
-  }
 
   ret += folly::format("digraph {} {{\n  node [shape=box];\n{}}}\n",
     func.name->data(), indent(2, dot_cfg(func))).str();

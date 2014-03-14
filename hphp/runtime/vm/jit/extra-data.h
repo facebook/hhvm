@@ -591,14 +591,14 @@ struct InterpOneData : IRExtraData {
  * Create{Cont,AFWH}{Func,Meth}.
  */
 struct CreateContData : IRExtraData {
-  explicit CreateContData(const Func* genFunc) : genFunc(genFunc) {}
+  explicit CreateContData(const Func* func) : func(func) {}
 
   std::string show() const {
-    auto name = genFunc->getGeneratorOrigFunc()->fullName()->data();
+    auto name = func->fullName()->data();
     return folly::to<std::string>(name, "()");
   }
 
-  const Func* genFunc;
+  const Func* func;
 };
 
 /*
@@ -728,10 +728,9 @@ struct NewStructData : IRExtraData {
 
 struct RawMemData : IRExtraData {
 # define RAW_MEM_DATA_TYPES                     \
-  RAW_TYPE(ContLabel)                           \
+  RAW_TYPE(ContOffset)                          \
   RAW_TYPE(ContIndex)                           \
   RAW_TYPE(ContState)                           \
-  RAW_TYPE(ContEntry)                           \
   RAW_TYPE(StrLen)                              \
   RAW_TYPE(FuncNumParams)                       \
 

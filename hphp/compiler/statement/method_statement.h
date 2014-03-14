@@ -123,8 +123,6 @@ public:
   void setHasCallToGetArgs(bool f) { m_hasCallToGetArgs = f; }
   bool hasCallToGetArgs() const { return m_hasCallToGetArgs; }
 
-  std::string getGeneratorName() const;
-
 private:
   void checkParameters();
 

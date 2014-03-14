@@ -298,7 +298,6 @@ void HhbcTranslator::beginInlining(unsigned numParams,
                                    Type retTypePred) {
   assert(!m_fpiStack.empty() &&
     "Inlining does not support calls with the FPush* in a different Tracelet");
-  assert(!target->isGenerator() && "Generator stack handling not implemented");
   assert(returnBcOffset >= 0 && "returnBcOffset before beginning of caller");
   assert(curFunc()->base() + returnBcOffset < curFunc()->past() &&
          "returnBcOffset past end of caller");
@@ -1160,7 +1159,7 @@ void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
   // Closures and generators from closures don't satisfy the "one static per
   // source location" rule that the inline fastpath requires
   auto const box = [&]{
-    if (curFunc()->isClosureBody() || curFunc()->isGeneratorFromClosure()) {
+    if (curFunc()->isClosureBody()) {
       return gen(ClosureStaticLocInit, cns(name), m_irb->fp(), value);
     }
 
@@ -1188,7 +1187,7 @@ void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
 void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
   auto const name = lookupStringId(litStrId);
 
-  if (curFunc()->isClosureBody() || curFunc()->isGeneratorFromClosure()) {
+  if (curFunc()->isClosureBody()) {
     auto const box = gen(
       ClosureStaticLocInit, cns(name), m_irb->fp(), cns(Type::InitNull)
     );
@@ -1481,33 +1480,31 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
   gen(Jmp, makeExit(offset));
 }
 
-void HhbcTranslator::emitCreateCont() {
+void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   gen(ExitOnVarEnv, makeExitSlow(), m_irb->fp());
 
-  auto const origFunc = curFunc();
-  auto const genFunc = origFunc->getGeneratorBody();
-
-  auto const cont = origFunc->isMethod()
+  auto const cont = curFunc()->isMethod()
     ? gen(
         CreateContMeth,
-        CreateContData { genFunc },
-        gen(LdCtx, FuncData(curFunc()), m_irb->fp())
+        CreateContData { curFunc() },
+        gen(LdCtx, FuncData(curFunc()), m_irb->fp()),
+        cns(resumeOffset)
       )
     : gen(
         CreateContFunc,
-        CreateContData { genFunc }
+        CreateContData { curFunc() },
+        cns(resumeOffset)
       );
 
   static auto const thisStr = makeStaticString("this");
   Id thisId = kInvalidId;
-  const bool fillThis = origFunc->isMethod() &&
-    !origFunc->isStatic() &&
-    ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
-    (origFunc->lookupVarId(thisStr) == kInvalidId);
+  const bool fillThis = curFunc()->isMethod() &&
+    !curFunc()->isStatic() &&
+    ((thisId = curFunc()->lookupVarId(thisStr)) != kInvalidId) &&
+    (curFunc()->lookupVarId(thisStr) == kInvalidId);
 
   SSATmp* contAR = gen(LdContActRec, Type::PtrToGen, cont);
-  for (int i = 0; i < origFunc->numNamedLocals(); ++i) {
-    assert(i == genFunc->lookupVarId(origFunc->localVarName(i)));
+  for (int i = 0; i < curFunc()->numLocals(); ++i) {
     // Copy the value of the local to the cont object and set the local to
     // uninit so that we don't need to change refcounts. We pass
     // DataTypeGeneric to ldLoc because we're just teleporting the value.
@@ -1525,29 +1522,6 @@ void HhbcTranslator::emitCreateCont() {
   push(cont);
 }
 
-void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
-  // make sure the value to be sent is on the actual stack
-  spillStack();
-
-  assert(curClass());
-  SSATmp* cont = gen(LdThis, m_irb->fp());
-  SSATmp* contAR = gen(LdContActRec, Type::FramePtr, cont);
-
-  SSATmp* funcBody = gen(LdRaw, RawMemData{RawMemData::ContEntry}, cont);
-
-  // The top of the stack will be consumed by the callee, so discard
-  // it without decreffing.
-  popC(DataTypeGeneric);
-
-  gen(
-    ContEnter,
-    contAR,
-    funcBody,
-    cns(returnBcOffset),
-    m_irb->fp()
-  );
-}
-
 void HhbcTranslator::emitContReturnControl() {
   auto const sp = spillStack();
   emitRetSurpriseCheck(cns(Type::InitNull), true);
@@ -1559,23 +1533,19 @@ void HhbcTranslator::emitContReturnControl() {
   m_hasExit = true;
 }
 
-void HhbcTranslator::emitUnpackCont() {
-  push(gen(LdContArRaw, RawMemData{RawMemData::ContLabel}, m_irb->fp()));
-}
-
-void HhbcTranslator::emitContSuspendImpl(int64_t labelId) {
+void HhbcTranslator::emitContSuspendImpl(Offset resumeOffset) {
   // set m_value = popC();
   auto const oldValue = gen(LdContArValue, Type::Cell, m_irb->fp());
   gen(StContArValue, m_irb->fp(), popC(DataTypeGeneric)); // teleporting value
   gen(DecRef, oldValue);
 
-  // set m_label = labelId;
-  gen(StContArRaw, RawMemData{RawMemData::ContLabel}, m_irb->fp(),
-      cns(labelId));
+  // set m_offset = offset;
+  gen(StContArRaw, RawMemData{RawMemData::ContOffset}, m_irb->fp(),
+      cns(resumeOffset));
 }
 
-void HhbcTranslator::emitContSuspend(int64_t labelId) {
-  emitContSuspendImpl(labelId);
+void HhbcTranslator::emitContSuspend(Offset resumeOffset) {
+  emitContSuspendImpl(resumeOffset);
 
   // take a fast path if this generator has no yield k => v;
   if (curFunc()->isPairGenerator()) {
@@ -1597,8 +1567,8 @@ void HhbcTranslator::emitContSuspend(int64_t labelId) {
   emitContReturnControl();
 }
 
-void HhbcTranslator::emitContSuspendK(int64_t labelId) {
-  emitContSuspendImpl(labelId);
+void HhbcTranslator::emitContSuspendK(Offset resumeOffset) {
+  emitContSuspendImpl(resumeOffset);
 
   auto const newKey = popC();
   auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());
@@ -1635,14 +1605,6 @@ void HhbcTranslator::emitContCheck(bool checkStarted) {
     gen(ContStartedCheck, makeExitSlow(), cont);
   }
   gen(ContPreNext, makeExitSlow(), cont);
-}
-
-void HhbcTranslator::emitContRaise() {
-  assert(curClass());
-  SSATmp* cont = gen(LdThis, m_irb->fp());
-  SSATmp* label = gen(LdRaw, RawMemData{RawMemData::ContLabel}, cont);
-  label = gen(SubInt, label, cns(1));
-  gen(StRaw, RawMemData{RawMemData::ContLabel}, cont, label);
 }
 
 void HhbcTranslator::emitContValid() {
@@ -1711,7 +1673,7 @@ void HhbcTranslator::emitAsyncAwait() {
   push(gen(EqInt, state, cns(kSucceeded)));
 }
 
-void HhbcTranslator::emitAsyncESuspend(int64_t label, int numIters) {
+void HhbcTranslator::emitAsyncESuspend(Offset resumeOffset, int numIters) {
   auto const exitSlow = makeExitSlow();
   auto const catchBlock = makeCatch();
   auto const child = popC();
@@ -1719,36 +1681,32 @@ void HhbcTranslator::emitAsyncESuspend(int64_t label, int numIters) {
 
   gen(ExitOnVarEnv, exitSlow, m_irb->fp());
 
-  auto const origFunc = curFunc();
-  auto const genFunc = origFunc->getGeneratorBody();
-
-  auto const waitHandle = origFunc->isMethod()
+  auto const waitHandle = curFunc()->isMethod()
     ? gen(
         CreateAFWHMeth,
         catchBlock,
-        CreateContData { genFunc },
+        CreateContData { curFunc() },
         gen(LdCtx, FuncData(curFunc()), m_irb->fp()),
-        cns(label),
+        cns(resumeOffset),
         child
       )
     : gen(
         CreateAFWHFunc,
         catchBlock,
-        CreateContData { genFunc },
-        cns(label),
+        CreateContData { curFunc() },
+        cns(resumeOffset),
         child
       );
 
   static auto const thisStr = makeStaticString("this");
   Id thisId = kInvalidId;
-  const bool fillThis = origFunc->isMethod() &&
-    !origFunc->isStatic() &&
-    ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
-    (origFunc->lookupVarId(thisStr) == kInvalidId);
+  const bool fillThis = curFunc()->isMethod() &&
+    !curFunc()->isStatic() &&
+    ((thisId = curFunc()->lookupVarId(thisStr)) != kInvalidId) &&
+    (curFunc()->lookupVarId(thisStr) == kInvalidId);
 
   SSATmp* asyncAR = gen(LdAFWHActRec, Type::PtrToGen, waitHandle);
-  for (int i = 0; i < origFunc->numNamedLocals(); ++i) {
-    assert(i == genFunc->lookupVarId(origFunc->localVarName(i)));
+  for (int i = 0; i < curFunc()->numLocals(); ++i) {
     // We must generate an AssertLoc because we don't have tracelet
     // guards on the object type in these outer generator functions.
     gen(AssertLoc, Type::Gen, LocalId(i), m_irb->fp());
@@ -1761,11 +1719,12 @@ void HhbcTranslator::emitAsyncESuspend(int64_t label, int numIters) {
   }
 
   for (int i = 0; i < numIters; ++i) {
-    gen(IterCopy,
-        m_irb->fp(),
-        cns(origFunc->numLocals() * sizeof(TypedValue) + (i+1) * sizeof(Iter)),
-        asyncAR,
-        cns(genFunc->numLocals() * sizeof(TypedValue) + (i+1) * sizeof(Iter)));
+    gen(
+      IterCopy,
+      m_irb->fp(),
+      asyncAR,
+      cns(curFunc()->numLocals() * sizeof(TypedValue) + (i+1) * sizeof(Iter))
+    );
   }
 
   if (fillThis) {

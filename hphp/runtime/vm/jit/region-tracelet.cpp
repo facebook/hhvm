@@ -433,7 +433,6 @@ bool RegionFormer::tryInline() {
 
   // Set up the region context, mapping stack slots in the caller to locals in
   // the callee.
-  assert(!callee->isGenerator());
   RegionContext ctx;
   ctx.func = callee;
   ctx.bcOffset = callee->base();

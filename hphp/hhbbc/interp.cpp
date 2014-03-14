@@ -1822,48 +1822,37 @@ void in(ISS& env, const bc::CreateCl& op) {
   push(env, TObj);
 }
 
-void in(ISS& env, const bc::CreateCont&) {
-  killLocals(env);
-  if (env.ctx.func->isClosureBody) {
-    // Generator closures create functions *outside* the class that
-    // the closure is in, and we haven't hooked that up to be part
-    // of the class-at-a-time analysis.  So we need to kill
-    // everything on $this/self.
-    killThisProps(env);
-    killSelfProps(env);
-  }
+void in(ISS& env, const bc::CreateCont& op) {
+  // Resume point of this Continuation.
+  push(env, TInitNull);
+  env.propagate(*op.target, env.state);
+  popC(env);
+
+  // Normal execution flow.
+  unsetLocals(env);
   push(env, objExact(env.index.builtin_class(s_Continuation.get())));
 }
 
 void in(ISS& env, const bc::ContEnter&) { popC(env); }
-
-void in(ISS& env, const bc::UnpackCont&) {
-  readUnknownLocals(env);
-  push(env, TInitCell);
-  push(env, TInt);
-}
+void in(ISS& env, const bc::ContRaise&) { popC(env); }
 
 void in(ISS& env, const bc::ContSuspend&) {
-  readUnknownLocals(env);
   popC(env);
-  doRet(env, TInitGen);
+  push(env, TInitCell);
 }
 
 void in(ISS& env, const bc::ContSuspendK&) {
-  readUnknownLocals(env);
   popC(env);
   popC(env);
-  doRet(env, TInitGen);
+  push(env, TInitCell);
 }
 
 void in(ISS& env, const bc::ContRetC&) {
-  readUnknownLocals(env);
   popC(env);
-  doRet(env, TInitGen);
+  doRet(env, TBottom);
 }
 
 void in(ISS& env, const bc::ContCheck&)   {}
-void in(ISS& env, const bc::ContRaise&)   {}
 void in(ISS& env, const bc::ContValid&)   { push(env, TBool); }
 void in(ISS& env, const bc::ContKey&)     { push(env, TInitCell); }
 void in(ISS& env, const bc::ContCurrent&) { push(env, TInitCell); }
@@ -1882,18 +1871,39 @@ void in(ISS& env, const bc::AsyncWrapResult&) {
   push(env, wait_handle(env.index, t));
 }
 
-void in(ISS& env, const bc::AsyncESuspend&) {
+void in(ISS& env, const bc::AsyncESuspend& op) {
+  auto const t = popC(env);
+
+  // Resume point of this async function.
+  if (!is_specialized_wait_handle(t) || is_opt(t)) {
+    // Uninferred garbage?
+    push(env, TInitCell);
+    env.propagate(*op.target, env.state);
+    popC(env);
+  } else {
+    auto const inner = wait_handle_inner(t);
+    if (!inner.subtypeOf(TBottom)) {
+      // A wait handle not known to always throw?
+      push(env, inner);
+      env.propagate(*op.target, env.state);
+      popC(env);
+    }
+  }
+
   /*
    * A suspended async function WaitHandle must end up returning
-   * whatever type we infer the eager function will return, so we
-   * don't want it to influence that type.  Using WaitH<Bottom>
-   * handles this, but note that it relies on the rule that the only
-   * thing you can do with the output of this opcode is pass it to
-   * RetC.
+   * whatever type we infer the eagerly executed part of the function
+   * will return, so we don't want it to influence that type.  Using
+   * WaitH<Bottom> handles this, but note that it relies on the rule
+   * that the only thing you can do with the output of this opcode
+   * is pass it to RetC.
    */
-  unsetNamedLocals(env);
-  popC(env);
+  unsetLocals(env);
   push(env, wait_handle(env.index, TBottom));
+}
+
+void in(ISS& env, const bc::AsyncResume&)  {
+  // Can throw, async function can resume here with an exception.
 }
 
 void in(ISS& env, const bc::AsyncWrapException&) {

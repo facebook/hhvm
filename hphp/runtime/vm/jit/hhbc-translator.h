@@ -387,16 +387,13 @@ struct HhbcTranslator {
   void emitVerifyParamType(uint32_t paramId);
 
   // continuations
-  void emitCreateCont();
-  void emitContEnter(int32_t returnBcOffset);
-  void emitUnpackCont();
+  void emitCreateCont(Offset resumeOffset);
   void emitContReturnControl();
-  void emitContSuspendImpl(int64_t labelId);
-  void emitContSuspend(int64_t labelId);
-  void emitContSuspendK(int64_t labelId);
+  void emitContSuspendImpl(Offset resumeOffset);
+  void emitContSuspend(Offset resumeOffset);
+  void emitContSuspendK(Offset resumeOffset);
   void emitContRetC();
   void emitContCheck(bool checkStarted);
-  void emitContRaise();
   void emitContValid();
   void emitContKey();
   void emitContCurrent();
@@ -404,7 +401,7 @@ struct HhbcTranslator {
 
   // async functions
   void emitAsyncAwait();
-  void emitAsyncESuspend(int64_t labelId, int iters);
+  void emitAsyncESuspend(Offset resumeOffset, int iters);
   void emitAsyncWrapResult();
   void emitAsyncWrapException();
 

@@ -127,8 +127,6 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   Offset entryOffset = func->getEntryForNumArgs(nPassed);
 
-  assert(IMPLIES(func->isGenerator(), nPassed == numParams));
-
   Asm a { mcg->code.main() };
 
   if (tx->mode() == TransProflogue) {
@@ -230,12 +228,10 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   // We're in the callee frame; initialize locals. Unroll the loop all
   // the way if there are a modest number of locals to update;
-  // otherwise, do it in a compact loop. If we're in a generator body,
-  // named locals will be initialized by UnpackCont so we can leave
-  // them alone here.
+  // otherwise, do it in a compact loop.
   int numUninitLocals = func->numLocals() - numLocals;
   assert(numUninitLocals >= 0);
-  if (numUninitLocals > 0 && !func->isGenerator()) {
+  if (numUninitLocals > 0) {
 
     // If there are too many locals, then emitting a loop to initialize locals
     // is more compact, rather than emitting a slew of movs inline.
@@ -278,11 +274,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   // Move rVmSp to the right place: just past all locals
   int frameCells = func->numSlotsInFrame();
-  if (func->isGenerator()) {
-    frameCells = 1;
-  } else {
-    emitLea(a, rVmFp[-cellsToBytes(frameCells)], rVmSp);
-  }
+  emitLea(a, rVmFp[-cellsToBytes(frameCells)], rVmSp);
 
   Fixup fixup(funcBody.offset() - func->base(), frameCells);
 

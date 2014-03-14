@@ -85,41 +85,6 @@ struct ParseUnitState {
     string_data_hash,
     string_data_isame
   > createClMap;
-
-  /*
-   * Generators come as two functions, "inner" and "outer".  Part of
-   * our representation requires that we have the two linked uniquely
-   * by pointer.  (See representation.h.)
-   *
-   * However, hhbc metadata only loosely connects these with the
-   * "outer" function having a name to the inner function.  The
-   * context this name should be looked up in depends on what type of
-   * generator it was---if it is a method, but not a generator from a
-   * closure, it'll be on the class that contains the "outer"
-   * function.  These get linked together as part of parse_class.
-   *
-   * In the other cases, we need to link them after the whole unit has
-   * been viewed, with information tracked here.
-   *
-   * Invariant: we are assuming that generator bodies that aren't on
-   * classes have unique names within a unit (this is asserted as we
-   * add to this map).  This should not be hard to maintain, but
-   * there's nowhere to document this invariant in
-   * bytecode.specification right now, which doesn't specify how
-   * generators work.
-   *
-   * Right now, multiple definitions of non-top-level generator
-   * functions simply don't work (see #2906383), so this is definitely
-   * true.  If we fix that task, we will need to ensure it doesn't
-   * break this invariant.
-   */
-  std::vector<std::pair<borrowed_ptr<php::Func>,SString>> generatorsToLink;
-  std::unordered_map<
-    SString,
-    borrowed_ptr<php::Func>,
-    string_data_hash,
-    string_data_isame
-  > innerGenerators;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -152,6 +117,10 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     auto const pc = reinterpret_cast<const Op*>(bc + offset);
     auto const nextOff = offset + instrLen(pc);
     auto const atLast = nextOff == fe.past();
+
+    if (instrIsInitialSuspend(*pc) && !atLast) {
+      markBlock(nextOff);
+    }
 
     if (instrIsNonCallControlFlow(*pc) && !atLast) {
       markBlock(nextOff);
@@ -784,29 +753,9 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
 
   ret->top                    = fe.top();
   ret->isClosureBody          = fe.isClosureBody();
-  ret->isGeneratorBody        = fe.isGenerator();
-  ret->isGeneratorFromClosure = fe.isGeneratorFromClosure();
-  ret->isPairGenerator        = fe.isPairGenerator();
   ret->isAsync                = fe.isAsync();
-  ret->innerGeneratorFunc     = nullptr;
-  ret->outerGeneratorFunc     = nullptr;
-
-  /*
-   * Generators that aren't inside classes (includes generators from
-   * closures) end up with inner generator bodies living as free
-   * functions, not on a class.  We track them here to link them after
-   * we've finished parsing the whole unit.  parse_methods handles the
-   * within-class generator linking cases.
-   */
-  if (auto const innerName = fe.getGeneratorBodyName()) {
-    if (!ret->cls || ret->isClosureBody) {
-      puState.generatorsToLink.emplace_back(borrow(ret), innerName);
-    }
-  }
-  if (ret->isGeneratorBody && !cls) {
-    always_assert(!puState.innerGenerators.count(ret->name));
-    puState.innerGenerators[ret->name] = borrow(ret);
-  }
+  ret->isGenerator            = fe.isGenerator();
+  ret->isPairGenerator        = fe.isPairGenerator();
 
   /*
    * HNI-style native functions get some extra information.
@@ -826,38 +775,9 @@ void parse_methods(ParseUnitState& puState,
                    borrowed_ptr<php::Class> ret,
                    borrowed_ptr<php::Unit> unit,
                    const PreClassEmitter& pce) {
-  std::unordered_map<
-    SString,
-    borrowed_ptr<php::Func>,
-    string_data_hash,
-    string_data_isame
-  > innerGenerators;
-  std::vector<std::pair<borrowed_ptr<php::Func>,SString>> generatorsToLink;
-
   for (auto& me : pce.methods()) {
     auto f = parse_func(puState, unit, ret, *me);
-
-    if (f->isGeneratorBody) {
-      always_assert(!innerGenerators.count(f->name));
-      innerGenerators[f->name] = borrow(f);
-    }
-    if (me->getGeneratorBodyName() && !f->isClosureBody) {
-      generatorsToLink.emplace_back(borrow(f), me->getGeneratorBodyName());
-    }
-
     ret->methods.push_back(std::move(f));
-  }
-
-  for (auto kv : generatorsToLink) {
-    auto const it = innerGenerators.find(kv.second);
-    assert(it != end(innerGenerators));
-    auto const outer = kv.first;
-    auto const inner = it->second;
-    assert(inner->isGeneratorBody);
-    assert(!inner->innerGeneratorFunc && !inner->outerGeneratorFunc);
-    assert(!outer->innerGeneratorFunc && !outer->outerGeneratorFunc);
-    inner->outerGeneratorFunc = outer;
-    outer->innerGeneratorFunc = inner;
   }
 }
 
@@ -938,15 +858,7 @@ find_closure_context(const ParseUnitState& puState,
     }
     return cls;
   }
-
-  // If the creating function wasn't in a class, either we have a
-  // closure with no lexical class context, or a CreateCl site for a
-  // generator body that is not part of the class.  If it's a
-  // generator from a closure, this could still result in a closure
-  // context.
-  return !createClFunc->isGeneratorBody
-    ? nullptr
-    : find_closure_context(puState, createClFunc->outerGeneratorFunc);
+  return nullptr;
 }
 
 void assign_closure_context(const ParseUnitState& puState,
@@ -981,29 +893,6 @@ void assign_closure_context(const ParseUnitState& puState,
 
 void find_additional_metadata(const ParseUnitState& puState,
                               borrowed_ptr<php::Unit> unit) {
-  /*
-   * Before we can assign closure contexts, we need to finish linking
-   * all inner-and-outer generators to each other for a few cases to
-   * work.
-   *
-   * Essentially these cases boil down to the fact that a closure in a
-   * class context that is also a generator (including async function
-   * closures) has a generator body that is not part of any class.
-   * The links need to be there so find_context can chase the
-   * non-class-member "inner" generatorFromClosure function to its
-   * outer generator function (__invoke on the Closure subclass), and
-   * from there to the actual class that is the closure class context.
-   */
-  for (auto kv : puState.generatorsToLink) {
-    auto const outer = kv.first;
-    always_assert(puState.innerGenerators.count(kv.second));
-    auto const inner = puState.innerGenerators.find(kv.second)->second;
-    assert(!inner->outerGeneratorFunc && !inner->innerGeneratorFunc);
-    assert(!outer->outerGeneratorFunc && !outer->innerGeneratorFunc);
-    inner->outerGeneratorFunc = outer;
-    outer->innerGeneratorFunc = inner;
-  }
-
   for (auto& c : unit->classes) {
     if (!c->parentName || !c->parentName->isame(s_Closure.get())) {
       continue;

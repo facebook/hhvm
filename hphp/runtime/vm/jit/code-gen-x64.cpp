@@ -5786,12 +5786,11 @@ void CodeGenerator::cgMIterNextCommon(IRInstruction* inst) {
 
 void CodeGenerator::cgIterCopy(IRInstruction* inst) {
   auto fromReg = srcLoc(0).reg();
-  auto fromOffset = inst->src(1)->intVal();
-  auto toReg = srcLoc(2).reg();
-  auto toOffset = inst->src(3)->intVal();
+  auto toReg = srcLoc(1).reg();
+  auto offset = inst->src(2)->intVal();
   for (int i = 0; i < sizeof(Iter); i += 8) {
-    m_as.loadq(fromReg[-fromOffset+i], m_rScratch);
-    m_as.storeq(m_rScratch, toReg[-toOffset+i]);
+    m_as.loadq(fromReg[-offset+i], m_rScratch);
+    m_as.storeq(m_rScratch, toReg[-offset+i]);
   }
 }
 

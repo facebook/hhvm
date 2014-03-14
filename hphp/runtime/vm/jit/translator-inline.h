@@ -92,10 +92,8 @@ struct VMRegAnchor : private boost::noncopyable {
 
     auto prevAr = g_context->getOuterVMFrame(ar);
     const Func* prevF = prevAr->m_func;
-    assert(!ar->inGenerator() || !ar->func()->isAsync());
-    vmsp() = ar->inGenerator() ?
-      Stack::generatorStackBase(ar) - 1 :
-      (TypedValue*)ar - ar->numArgs();
+    assert(!ar->inGenerator());
+    vmsp() = (TypedValue*)ar - ar->numArgs();
     assert(g_context->m_stack.isValidAddress((uintptr_t)vmsp()));
     vmpc() = prevF->unit()->at(prevF->base() + ar->m_soff);
     vmfp() = (TypedValue*)prevAr;

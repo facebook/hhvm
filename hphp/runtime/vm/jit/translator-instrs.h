@@ -156,18 +156,18 @@
   CASE(CreateCl) \
   CASE(CreateCont) \
   CASE(ContEnter) \
-  CASE(UnpackCont) \
+  CASE(ContRaise) \
   CASE(ContSuspend) \
   CASE(ContSuspendK) \
   CASE(ContRetC) \
   CASE(ContCheck) \
-  CASE(ContRaise) \
   CASE(ContValid) \
   CASE(ContKey) \
   CASE(ContCurrent) \
   CASE(ContStopped) \
   CASE(AsyncAwait) \
   CASE(AsyncESuspend) \
+  CASE(AsyncResume) \
   CASE(AsyncWrapResult) \
   CASE(AsyncWrapException) \
   CASE(Strlen) \

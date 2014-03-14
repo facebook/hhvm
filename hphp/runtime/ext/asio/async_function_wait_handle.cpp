@@ -111,7 +111,7 @@ void checkCreateErrors(c_WaitableWaitHandle* child) {
 
 ObjectData*
 c_AsyncFunctionWaitHandle::CreateFunc(const Func* genFunc,
-                                      int32_t label,
+                                      Offset offset,
                                       ObjectData* child) {
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
   auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
@@ -119,17 +119,17 @@ c_AsyncFunctionWaitHandle::CreateFunc(const Func* genFunc,
 
   checkCreateErrors(child_wh);
 
-  auto cont = c_Continuation::CreateFunc(genFunc);
+  auto cont = c_Continuation::CreateFunc(genFunc, offset);
   auto wait_handle = NEWOBJ(c_AsyncFunctionWaitHandle)();
   wait_handle->incRefCount();
-  wait_handle->initialize(static_cast<c_Continuation*>(cont), label, child_wh);
+  wait_handle->initialize(static_cast<c_Continuation*>(cont), child_wh);
   return wait_handle;
 }
 
 ObjectData*
 c_AsyncFunctionWaitHandle::CreateMeth(const Func* genFunc,
                                       void* objOrCls,
-                                      int32_t label,
+                                      Offset offset,
                                       ObjectData* child) {
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
   auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
@@ -137,19 +137,17 @@ c_AsyncFunctionWaitHandle::CreateMeth(const Func* genFunc,
 
   checkCreateErrors(child_wh);
 
-  auto cont = c_Continuation::CreateMeth(genFunc, objOrCls);
+  auto cont = c_Continuation::CreateMeth(genFunc, objOrCls, offset);
   auto wait_handle = NEWOBJ(c_AsyncFunctionWaitHandle)();
   wait_handle->incRefCount();
-  wait_handle->initialize(static_cast<c_Continuation*>(cont), label, child_wh);
+  wait_handle->initialize(static_cast<c_Continuation*>(cont), child_wh);
   return wait_handle;
 }
 
 void c_AsyncFunctionWaitHandle::initialize(c_Continuation* continuation,
-                                           int32_t label,
                                            c_WaitableWaitHandle* child) {
   auto session = AsioSession::Get();
 
-  continuation->m_label = label;
   continuation->start();
 
   m_continuation = continuation;
@@ -191,16 +189,16 @@ void c_AsyncFunctionWaitHandle::run() {
   retry:
     // continuation finished, retrieve result from its m_value
     if (m_continuation->done()) {
-      markAsSucceeded(*m_continuation->m_value.asCell());
+      markAsSucceeded(m_continuation->m_value);
       return;
     }
 
     // save child
-    Cell* value = tvAssertCell(m_continuation->m_value.asTypedValue());
-    assert(value->m_type == KindOfObject);
-    assert(value->m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
+    Cell& value = m_continuation->m_value;
+    assert(value.m_type == KindOfObject);
+    assert(value.m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
 
-    m_child = static_cast<c_WaitableWaitHandle*>(value->m_data.pobj);
+    m_child = static_cast<c_WaitableWaitHandle*>(value.m_data.pobj);
     assert(!m_child->isFinished());
 
     // import child into the current context, detect cross-context cycles
@@ -378,14 +376,14 @@ String c_AsyncFunctionWaitHandle::getFileName() {
 // Get the next execution offset
 Offset c_AsyncFunctionWaitHandle::getNextExecutionOffset() {
   if (m_continuation.isNull()) return InvalidAbsoluteOffset;
-  return m_continuation->getNextExecutionOffset();
+  return m_continuation->offset();
 }
 
 // Get the line number on which execution will proceed when execution resumes.
 int c_AsyncFunctionWaitHandle::getLineNumber() {
   if (m_continuation.isNull()) return -1;
   auto const unit = m_continuation->actRec()->m_func->unit();
-  return unit->getLineNumber(m_continuation->getNextExecutionOffset());
+  return unit->getLineNumber(m_continuation->offset());
 }
 
 ActRec* c_AsyncFunctionWaitHandle::getActRec() {

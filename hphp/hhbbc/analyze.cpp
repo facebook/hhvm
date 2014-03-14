@@ -78,20 +78,16 @@ State entry_state(const Index& index,
 
   for (; locId < ctx.func->locals.size(); ++locId) {
     /*
-     * Generators and closures don't (necessarily) start with the
-     * frame locals uninitialized.
+     * Closures don't (necessarily) start with the frame locals
+     * uninitialized.
      *
      * Ideas:
-     *
-     *  - maybe we can do better for generators by adding edges from
-     *    the yields to the top of the generator
      *
      *  - for closures, since they are all unique to their creation
      *    sites and in the same unit, looking at the CreateCl could
      *    tell the types of used vars, even in single unit mode.
      */
-    ret.locals[locId] =
-      ctx.func->isGeneratorBody || ctx.func->isClosureBody ? TGen : TUninit;
+    ret.locals[locId] = ctx.func->isClosureBody ? TGen : TUninit;
   }
 
   return ret;
@@ -480,15 +476,6 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     // Analyze every method in the class until we reach a fixed point
     // on the private property states.
     for (auto& f : ctx.cls->methods) {
-      if (f->isAsync && f->isGeneratorBody) {
-        /*
-         * Inner-bodies of async functions don't need to have their
-         * inner body analyzed for class analysis, because it is
-         * required to do the same thing as the eager-execution
-         * version.
-         */
-        continue;
-      }
       if (f->name->isame(s_86pinit.get()) ||
           f->name->isame(s_86sinit.get())) {
         continue;

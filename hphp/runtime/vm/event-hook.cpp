@@ -140,6 +140,9 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   const Func* func = ar->m_func;
   if (LIKELY(func->maybeIntercepted() == 0)) return true;
 
+  // Intercept only original generator / async function calls, not resumption.
+  if (ar->inGenerator()) return true;
+
   Variant *h = get_intercept_handler(func->fullNameRef(),
                                      &func->maybeIntercepted());
   if (!h) return true;

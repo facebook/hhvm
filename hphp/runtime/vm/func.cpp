@@ -200,7 +200,6 @@ void Func::init(int numParams) {
 
 void* Func::allocFuncMem(
   const StringData* name, int numParams,
-  bool needsGeneratorOrigFunc,
   bool needsNextClonedClosure,
   bool lowMem) {
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
@@ -208,9 +207,7 @@ void* Func::allocFuncMem(
     maxNumPrologues > kNumFixedPrologues ?
     maxNumPrologues - kNumFixedPrologues :
     0;
-  int numExtraFuncPtrs =
-    (int) needsGeneratorOrigFunc +
-    (int) needsNextClonedClosure;
+  int numExtraFuncPtrs = (int) needsNextClonedClosure;
   size_t funcSize =
     sizeof(Func) +
     numExtraPrologues * sizeof(unsigned char*) +
@@ -219,15 +216,12 @@ void* Func::allocFuncMem(
   void* mem = lowMem ? low_malloc(funcSize) : malloc(funcSize);
 
   /**
-   * The Func object can have optional generatorOrigFunc and nextClonedClosure
-   * pointers to Func in front of the actual object. The layout is as follows:
+   * The Func object can have optional nextClonedClosure pointer to Func
+   * in front of the actual object. The layout is as follows:
    *
    *               +--------------------------------+ low address
    *               |  nextClonedClosure (optional)  |
-   *               |  in closures and closure gens  |
-   *               +--------------------------------+
-   *               |  generatorOrigFunc (optional)  |
-   *               |  in generator bodies           |
+   *               |  in closures                   |
    *               +--------------------------------+ Func* address
    *               |  Func object                   |
    *               +--------------------------------+ high address
@@ -279,9 +273,8 @@ void Func::destroy(Func* func) {
    */
   bool lowMem = !func->preClass() || func->m_cls;
   void* mem = func;
-  if (func->isClosureBody() || func->isGeneratorFromClosure()) {
+  if (func->isClosureBody()) {
     Func** startOfFunc = ((Func**) mem) - 1; // move back by a pointer
-    if (func->isGenerator()) --startOfFunc;  // one more if in generator
     mem = startOfFunc;
     if (Func* f = *startOfFunc) {
       /*
@@ -293,8 +286,6 @@ void Func::destroy(Func* func) {
       f->initPrologues(f->m_numParams);
       Func::destroy(f);
     }
-  } else if (func->isGenerator()) {
-    mem = ((Func**)mem) - 1;
   }
   func->~Func();
   if (lowMem) {
@@ -308,8 +299,7 @@ Func* Func::clone(Class* cls) const {
   Func* f = new (allocFuncMem(
                    m_name,
                    m_numParams,
-                   isGenerator(),
-                   isClosureBody() || isGeneratorFromClosure(),
+                   isClosureBody(),
                    cls || !preClass())) Func(*this);
 
   f->initPrologues(m_numParams);
@@ -734,9 +724,8 @@ Func::SharedData::SharedData(PreClass* preClass, Id id,
     m_past(past), m_line1(line1), m_line2(line2),
     m_info(nullptr), m_refBitPtr(0), m_builtinFuncPtr(nullptr),
     m_docComment(docComment), m_top(top), m_isClosureBody(false),
-    m_isGenerator(false), m_isGeneratorFromClosure(false),
-    m_isPairGenerator(false), m_isGenerated(false), m_isAsync(false),
-    m_generatorBodyName(nullptr), m_originalFilename(nullptr) {
+    m_isAsync(false), m_isGenerator(false), m_isPairGenerator(false),
+    m_isGenerated(false), m_originalFilename(nullptr) {
 }
 
 Func::SharedData::~SharedData() {
@@ -745,21 +734,6 @@ Func::SharedData::~SharedData() {
 
 void Func::SharedData::atomicRelease() {
   delete this;
-}
-
-const Func* Func::getGeneratorBody() const {
-  const Func* genFunc;
-  if (isMethod() && !isClosureBody()) {
-    genFunc = cls()->lookupMethod(getGeneratorBodyName());
-  } else {
-    genFunc = Unit::lookupFunc(getGeneratorBodyName());
-    if (isMethod() && isClosureBody()) {
-      genFunc = genFunc->cloneAndSetClass(cls());
-    }
-  }
-
-  const_cast<Func*>(genFunc)->setGeneratorOrigFunc(this);
-  return genFunc;
 }
 
 bool Func::isEntry(Offset offset) const {
@@ -795,6 +769,16 @@ Offset Func::getEntryForNumArgs(int numArgsPassed) const {
 
 bool Func::shouldPGO() const {
   if (!RuntimeOption::EvalJitPGO) return false;
+
+  // Async function and generator bodies consist of two types of basic
+  // blocks. One type is executed in non-generator mode (eager execution),
+  // other in generator mode (resumed execution). Translator may emit
+  // the same opcodes in a different way based on the execution mode.
+  // This currently breaks region-based retranslation, as the information
+  // about the current execution mode is lost.
+  //
+  // TODO(#3880036): remove this once SrcKey contains execution mode bit
+  if (isAsync() || isGenerator()) return false;
 
   // Cloned closures use the func prologue tables to hold the
   // addresses of the DV funclets, and not real prologues.  The
@@ -836,14 +820,12 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_returnType(KindOfInvalid)
   , m_top(false)
   , m_isClosureBody(false)
+  , m_isAsync(false)
   , m_isGenerator(false)
-  , m_isGeneratorFromClosure(false)
   , m_isPairGenerator(false)
   , m_containsCalls(false)
-  , m_isAsync(false)
   , m_info(nullptr)
   , m_builtinFuncPtr(nullptr)
-  , m_generatorBodyName(nullptr)
   , m_originalFilename(nullptr)
 {}
 
@@ -864,14 +846,12 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_returnType(KindOfInvalid)
   , m_top(false)
   , m_isClosureBody(false)
+  , m_isAsync(false)
   , m_isGenerator(false)
-  , m_isGeneratorFromClosure(false)
   , m_isPairGenerator(false)
   , m_containsCalls(false)
-  , m_isAsync(false)
   , m_info(nullptr)
   , m_builtinFuncPtr(nullptr)
-  , m_generatorBodyName(nullptr)
   , m_originalFilename(nullptr)
 {}
 
@@ -1144,7 +1124,7 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(m_name->data()[0]) ||
-    ParserBase::IsClosureName(m_name->toCppString()) || m_isGenerator;
+    ParserBase::IsClosureName(m_name->toCppString());
 
   Attr attrs = m_attrs;
   if (preClass && preClass->attrs() & AttrInterface) {
@@ -1158,8 +1138,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (RuntimeOption::EvalJitEnableRenameFunction &&
       !m_name->empty() &&
       !Func::isSpecial(m_name) &&
-      !m_isClosureBody &&
-      !m_isGenerator) {
+      !m_isClosureBody) {
     // intercepted functions need to pass all args through
     // to the interceptee
     attrs = attrs | AttrMayUseVV;
@@ -1170,9 +1149,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   assert(!m_pce == !preClass);
   Func* f = m_ue.newFunc(this, unit, m_id, preClass, m_line1, m_line2, m_base,
                          m_past, m_name, attrs, m_top, m_docComment,
-                         m_params.size(),
-                         m_isGenerator,
-                         m_isClosureBody | m_isGeneratorFromClosure);
+                         m_params.size(), m_isClosureBody);
 
   f->shared()->m_info = m_info;
   f->shared()->m_returnType = m_returnType;
@@ -1202,18 +1179,16 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_ehtab = m_ehtab;
   f->shared()->m_fpitab = m_fpitab;
   f->shared()->m_isClosureBody = m_isClosureBody;
+  f->shared()->m_isAsync = m_isAsync;
   f->shared()->m_isGenerator = m_isGenerator;
-  f->shared()->m_isGeneratorFromClosure = m_isGeneratorFromClosure;
   f->shared()->m_isPairGenerator = m_isPairGenerator;
   f->shared()->m_userAttributes = m_userAttributes;
   f->shared()->m_builtinFuncPtr = m_builtinFuncPtr;
   f->shared()->m_nativeFuncPtr = m_nativeFuncPtr;
-  f->shared()->m_generatorBodyName = m_generatorBodyName;
   f->shared()->m_retTypeConstraint = m_retTypeConstraint;
   f->shared()->m_retUserType = m_retUserType;
   f->shared()->m_originalFilename = m_originalFilename;
   f->shared()->m_isGenerated = isGenerated;
-  f->shared()->m_isAsync = m_isAsync;
 
   if (attrs & AttrNative) {
     auto nif = Native::GetBuiltinFunction(m_name,
@@ -1317,11 +1292,10 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_numIterators)
     (m_maxStackCells)
     (m_isClosureBody)
+    (m_isAsync)
     (m_isGenerator)
-    (m_isGeneratorFromClosure)
     (m_isPairGenerator)
     (m_containsCalls)
-    (m_isAsync)
 
     (m_params)
     (m_localNames)
@@ -1329,7 +1303,6 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_ehtab)
     (m_fpitab)
     (m_userAttributes)
-    (m_generatorBodyName)
     (m_retTypeConstraint)
     (m_retUserType)
     (m_originalFilename)

@@ -2017,7 +2017,8 @@ void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
 EmitterVisitor::EmittedClosures EmitterVisitor::s_emittedClosures;
 
 EmitterVisitor::EmitterVisitor(UnitEmitter& ue)
-  : m_ue(ue), m_curFunc(ue.getMain()), m_evalStackIsUnknown(false),
+  : m_ue(ue), m_curFunc(ue.getMain()),
+    m_inGenerator(false), m_evalStackIsUnknown(false),
     m_actualStackHighWater(0), m_fdescHighWater(0), m_stateLocal(-1),
     m_retLocal(-1) {
   m_prevOpcode = OpLowInvalid;
@@ -3144,7 +3145,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         assert(m_evalStack.size() == 1);
 
         // continuations and resumed async functions
-        if (m_curFunc->isGenerator()) {
+        if (m_inGenerator) {
           assert(retSym == StackSym::C);
           emitIterFreeForReturn(e);
           e.ContRetC();
@@ -3499,34 +3500,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Statement::KindOfFunctionStatement: {
         MethodStatementPtr m(static_pointer_cast<MethodStatement>(node));
         // Only called for fn defs not on the top level
+        assert(!node->getClassScope()); // Handled directly by emitClass().
         StringData* nName = makeStaticString(m->getOriginalName());
-        if (m->getFunctionScope()->isGenerator() ||
-            m->getFunctionScope()->isAsync()) {
-          if (m->getFileScope() != m_file) {
-            // the generator's definition is in another file typically
-            // because it was defined in a trait that got inlined into
-            // a class in this file. Nothing to do - it will be output
-            // with its own file.
-            return false;
-          }
-
-          /*
-           * Hack: when a generator is declared at non-top level, we
-           * currently just take whatever the first one we saw was.
-           *
-           * FIXME/TODO(#2906383).
-           */
-          if (!m_nonTopGeneratorEmitted.insert(m->getOriginalName()).second) {
-            return false;
-          }
-
-          postponeMeth(m, nullptr, true);
-        } else {
-          assert(!node->getClassScope()); // Handled directly by emitClass().
-          FuncEmitter* fe = m_ue.newFuncEmitter(nName);
-          e.DefFunc(fe->id());
-          postponeMeth(m, fe, false);
-        }
+        FuncEmitter* fe = m_ue.newFuncEmitter(nName);
+        e.DefFunc(fe->id());
+        postponeMeth(m, fe, false);
         return false;
       }
 
@@ -4255,8 +4233,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               return true;
             }
           }
-        } else if (call->isCallToFunction("func_num_args") &&
-                   m_curFunc->isGenerator()) {
+        } else if (call->isCallToFunction("func_num_args") && m_inGenerator) {
           static const StringData* s_count =
             makeStaticString("count");
 
@@ -4266,13 +4243,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.FCallBuiltin(2, 1, s_count);
           e.UnboxRNop();
           return true;
-        } else if (call->isCallToFunction("func_get_args") &&
-                   m_curFunc->isGenerator()) {
+        } else if (call->isCallToFunction("func_get_args") && m_inGenerator) {
           emitVirtualLocal(m_curFunc->lookupVarId(s_continuationVarArgsLocal));
           emitConvertToCell(e);
           return true;
-        } else if (call->isCallToFunction("func_get_arg") &&
-                   m_curFunc->isGenerator()) {
+        } else if (call->isCallToFunction("func_get_arg") && m_inGenerator) {
           if (!params || params->getCount() == 0) {
             e.Null();
             return true;
@@ -4286,8 +4261,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.False();
           e.ArrayIdx();
           return true;
-        } else if (call->isCallToFunction("array_slice") &&
-                   !m_curFunc->isGenerator() &&
+        } else if (call->isCallToFunction("array_slice") && !m_inGenerator &&
                    params && params->getCount() == 2 &&
                    !Option::JitEnableRenameFunction) {
           ExpressionPtr p0 = (*params)[0];
@@ -4892,7 +4866,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
         }
 
-        if (m_curFunc->isAsync() && m_curFunc->isGenerator()) {
+        if (m_curFunc->isAsync() && m_inGenerator) {
           // Closure definition in the body of async function. The closure
           // body was already emitted, so we just create the object here.
           assert(ce->getClosureClassName());
@@ -4976,32 +4950,14 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         visit(y->getValueExpression());
         emitConvertToCell(e);
 
-        // calculate labels:
-        // each continuation is allotted two labels,
-        // one for exception handling and one for normal
-        // control flow. both labels are encoded in the
-        // label number stored in the expression.
-        int64_t normalLabel = 2 * y->label().id();
-        int64_t exceptLabel = normalLabel - 1;
-
-        // suspend continuation and set the return label
+        // suspend continuation
         if (keyExp) {
           assert(m_evalStack.size() == 2);
-          e.ContSuspendK(normalLabel);
+          e.ContSuspendK();
         } else {
           assert(m_evalStack.size() == 1);
-          e.ContSuspend(normalLabel);
+          e.ContSuspend();
         }
-
-        // emit return label for raise()
-        m_yieldLabels[exceptLabel].set(e);
-
-        // throw received exception on the stack
-        assert(m_evalStack.size() == 1);
-        e.Throw();
-
-        // emit return label for next()/send()
-        m_yieldLabels[normalLabel].set(e);
 
         // continue with the received result on the stack
         assert(m_evalStack.size() == 1);
@@ -5014,29 +4970,27 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         assert(m_evalStack.size() == 0);
 
-        // evaluate expression passed to await
-        auto const expr    = await->getExpression();
-        auto const exprLoc = emitVisitAndSetUnnamedL(e, expr);
-
         // If we know statically that it's a subtype of WaitHandle, we
         // don't need to make a call.
         bool const isKnownWaitHandle = [&] {
+          auto const expr = await->getExpression();
           auto const ar = expr->getScope()->getContainingProgram();
           auto const type = expr->getActualType();
           return type && Type::SubType(ar, type,
                            Type::GetType(Type::KindOfObject, "WaitHandle"));
         }();
 
-        Label awaitNull;
-        Label skipSuspend;
+        Label resume;
+
+        // evaluate expression passed to await
+        visit(await->getExpression());
+        emitConvertToCell(e);
 
         // if expr is null, just continue
-        emitVirtualLocal(exprLoc);
+        e.Dup();
         emitIsType(e, IsTypeOp::Null);
-        e.JmpNZ(awaitNull);
+        e.JmpNZ(resume);
 
-        emitVirtualLocal(exprLoc);
-        emitPushL(e);
         if (!isKnownWaitHandle) {
           emitConstMethodCallNoParams(e, "getWaitHandle");
         }
@@ -5045,36 +4999,21 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         // TODO(#3197024): if isKnownWaitHandle, we should put an
         // AssertObjStk so the AsyncAwait type check can be avoided.
         e.AsyncAwait();
-        e.JmpNZ(skipSuspend);
+        e.JmpNZ(resume);
 
         // Suspend if it is not finished.
-        int64_t normalLabel = 2 * await->label().id();
-        int64_t exceptLabel = normalLabel - 1;
-        if (m_curFunc->isGenerator()) {
-          // suspend continuation
-          e.ContSuspend(normalLabel);
-          m_yieldLabels[exceptLabel].set(e);
-          e.Throw();
+        if (m_inGenerator) {
+          // Suspend resumed execution.
+          e.ContSuspend();
+          m_awaitLabels[await].set(e);
+          e.AsyncResume();
         } else {
-          // Create new continuation and return its wait handle.
-          e.AsyncESuspend(normalLabel, m_pendingIters.size());
+          // Suspend eagerly executed async function.
+          e.AsyncESuspend(m_awaitLabels[await], m_pendingIters.size());
           e.RetC();
         }
 
-        awaitNull.set(e);
-        // We know the unnamed local is Null, because we just tested
-        // it.  There's no need to unset it again---if it gets
-        // reallocated, it's ok that it's KindOfNull instead of
-        // KindOfUninit.
-        e.Null();
-
-        m_curFunc->freeUnnamedLocal(exprLoc);
-
-        // resume here next time
-        if (m_curFunc->isGenerator()) {
-          m_yieldLabels[normalLabel].set(e);
-        }
-        skipSuspend.set(e);
+        resume.set(e);
         return true;
       }
       case Expression::KindOfQueryExpression: {
@@ -6104,32 +6043,6 @@ void EmitterVisitor::emitClsIfSPropBase(Emitter& e) {
                   m_evalStack.get(m_evalStack.size() - 1) | StackSym::M);
 }
 
-void EmitterVisitor::emitContinuationSwitch(Emitter& e, int ncase) {
-  // There's an implicit fall-through "label 0" case in the switch
-  // statement generated by the parser, so ncase is equal to the
-  // number of yields in the body of the php function, which is one
-  // less than the number of __yield__ labels.
-  if (ncase == 0) {
-    // fall-through to the label 0
-    e.UnpackCont();
-    e.PopC();
-    e.PopC();
-    return;
-  }
-
-  // make sure the labels are available
-  m_yieldLabels.resize(2 * ncase + 1);
-
-  std::vector<Label*> targets(2 * ncase + 1);
-  for (int i = 0; i <= 2 * ncase; ++i) {
-    targets[i] = &m_yieldLabels[i];
-  }
-  e.UnpackCont();
-  e.Switch(targets, 0, 0);
-  m_yieldLabels[0].set(e);
-  e.PopC();
-}
-
 DataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
                                        SwitchState& state) {
   auto& caseMap = state.cases;
@@ -6463,9 +6376,8 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
     attrs = attrs | AttrAllowOverride;
   }
 
-  // if hasCallToGetArgs() or if mayUseVV and is not 'create generator' function
-  if (meth->hasCallToGetArgs() || (funcScope->mayUseVV() &&
-        (!funcScope->isGenerator() || fe->isGenerator()))) {
+  // if hasCallToGetArgs() or if mayUseVV
+  if (meth->hasCallToGetArgs() || funcScope->mayUseVV()) {
     attrs = attrs | AttrMayUseVV;
   }
 
@@ -6482,8 +6394,7 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
       attrs = attrs | AttrUnique;
       if (top &&
           (!funcScope->isVolatile() ||
-           funcScope->isPersistent() ||
-           fe->isGenerator())) {
+           funcScope->isPersistent())) {
         attrs = attrs | AttrPersistent;
       }
     }
@@ -6612,31 +6523,17 @@ void EmitterVisitor::emitPostponedMeths() {
 
     auto funcScope = meth->getFunctionScope();
     if (funcScope->isGenerator()) {
-      // emit the outer 'create generator' function
+      // emit the generator
       m_curFunc = fe;
+      fe->setIsGenerator(true);
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
-      emitGeneratorCreate(meth);
-
-      // emit the generator body
-      auto const bodyFe = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
-      fe->setGeneratorBodyName(bodyFe->name());
-      m_curFunc = bodyFe;
-      emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
-      emitGeneratorBody(meth);
+      emitGeneratorMethod(meth);
     } else if (funcScope->isAsync()) {
       // emit the outer function (which creates continuation if blocked)
       m_curFunc = fe;
       fe->setIsAsync(true);
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitAsyncMethod(meth);
-
-      // emit the generator body
-      auto const bodyFe = createFuncEmitterForGeneratorBody(meth, fe, top_fes);
-      fe->setGeneratorBodyName(bodyFe->name());
-      m_curFunc = bodyFe;
-      m_curFunc->setIsAsync(true);
-      emitMethodMetadata(meth, p.m_closureUseVars, m_curFunc->top());
-      emitGeneratorBody(meth);
     } else {
       m_curFunc = fe;
       if (funcScope->isNative()) {
@@ -6787,7 +6684,7 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
   }
 
   // assign ids to 0Closure and use parameters (closures)
-  if (fe->isClosureBody() || fe->isGeneratorFromClosure()) {
+  if (fe->isClosureBody()) {
     fe->allocVarId(makeStaticString("0Closure"));
 
     for (auto& useVar : *useVars) {
@@ -6802,27 +6699,22 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
     fe->allocVarId(s_continuationVarArgsLocal);
   }
 
-  // assign ids to local variables (not in 'create generator' method)
-  if (!meth->getFunctionScope()->isGenerator() ||
-      fe->isGenerator()) {
-    assignLocalVariableIds(meth->getFunctionScope());
-  }
+  // assign ids to local variables
+  assignLocalVariableIds(meth->getFunctionScope());
 
-  if (!fe->isGenerator()) {
-    // add parameter info
-    fillFuncEmitterParams(fe, meth->getParams());
+  // add parameter info
+  fillFuncEmitterParams(fe, meth->getParams());
 
-    // copy declared return type (hack)
-    fe->setReturnUserType(makeStaticString(meth->getReturnTypeConstraint()));
+  // copy declared return type (hack)
+  fe->setReturnUserType(makeStaticString(meth->getReturnTypeConstraint()));
 
-    auto annot = meth->retTypeAnnotation();
-    // Ideally we should handle the void case in TypeConstraint::check. This
-    // should however get done in a different diff, since it could impact
-    // perf in a negative way (#3145038)
-    if (annot && !annot->isVoid() && !annot->isThis()) {
-      fe->setReturnTypeConstraint(
-        determine_type_constraint_from_annot(annot, true));
-    }
+  auto annot = meth->retTypeAnnotation();
+  // Ideally we should handle the void case in TypeConstraint::check. This
+  // should however get done in a different diff, since it could impact
+  // perf in a negative way (#3145038)
+  if (annot && !annot->isVoid() && !annot->isThis()) {
+    fe->setReturnTypeConstraint(
+      determine_type_constraint_from_annot(annot, true));
   }
 
   // add the original filename for flattened traits
@@ -6842,9 +6734,7 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
            top,
            methDoc);
 
-  if ((!meth->getFunctionScope()->isGenerator() ||
-       fe->isGenerator()) &&
-      meth->getFunctionScope()->needsFinallyLocals()) {
+  if (meth->getFunctionScope()->needsFinallyLocals()) {
     assignFinallyVariableIds();
   }
 }
@@ -6928,9 +6818,7 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
 void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   FunctionScopePtr funcScope = meth->getFunctionScope();
 
-  if (funcScope->needsLocalThis() &&
-      !funcScope->isStatic() &&
-      !funcScope->isGenerator()) {
+  if (funcScope->needsLocalThis() && !funcScope->isStatic()) {
     assert(!m_curFunc->top());
     static const StringData* thisStr = makeStaticString("this");
     Id thisId = m_curFunc->lookupVarId(thisStr);
@@ -6978,7 +6866,6 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   }
 
   FuncFinisher ff(this, e, m_curFunc);
-
   emitMethodDVInitializers(e, meth, topOfBody);
 }
 
@@ -6992,7 +6879,7 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
   emitMethodPrologue(e, meth);
   emitSetFuncGetArgs(e);
 
-  // emit method body
+  // emit method body executed in eager-execution mode
   Offset start = m_ue.bcPos();
   visit(meth->getStmts());
   assert(m_evalStack.size() == 0);
@@ -7004,7 +6891,7 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
     e.RetC();
   }
 
-  // wrap the whole body into a try-catch block
+  // wrap the whole eagerly executed body into a try-catch block
   Offset end = m_ue.bcPos();
   CatchRegion* r = new CatchRegion(start, end);
   m_catchRegions.push_back(r);
@@ -7019,84 +6906,67 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
   e.AsyncWrapException();
   e.RetC();
 
-  FuncFinisher ff(this, e, m_curFunc);
+  // emit method body executed in resumed mode
+  {
+    SCOPE_EXIT {
+      assert(m_inGenerator);
+      m_inGenerator = false;
+    };
+    assert(!m_inGenerator);
+    m_inGenerator = true;
 
+    visit(meth->getStmts());
+    assert(m_evalStack.size() == 0);
+
+    // if the current position is reachable, emit code to return null
+    if (currentPositionIsReachable()) {
+      e.Null();
+      e.ContRetC();
+    }
+  }
+
+  FuncFinisher ff(this, e, m_curFunc);
   emitMethodDVInitializers(e, meth, topOfBody);
 }
 
-FuncEmitter* EmitterVisitor::createFuncEmitterForGeneratorBody(
-                               MethodStatementPtr meth,
-                               FuncEmitter* fe,
-                               vector<FuncEmitter*>& top_fes) {
-  FuncEmitter* genFe;
-  auto genName = meth->getGeneratorName();
-  if (fe->isMethod() && !fe->isClosureBody()) {
-    genFe = m_ue.newMethodEmitter(
-      makeStaticString(genName), fe->pce());
-    bool UNUSED added = fe->pce()->addMethod(genFe);
-    assert(added);
-  } else {
-    auto& emitCount = m_generatorEmitted[genName];
-    ++emitCount;
-    if (emitCount > 1) {
-      /*
-       * Generator body already emitted.  This can happen because of
-       * repo-mode trait flattening.
-       *
-       * In order to preserve the bytecode invariant that every inner
-       * generator function is uniquely identified to an outer
-       * generator function, we need to bump a counter on the names in
-       * this case (similar to what we do for closure class names).
-       */
-      genName = folly::format("{}_{}", genName, emitCount).str();
-    }
+void EmitterVisitor::emitGeneratorMethod(MethodStatementPtr meth) {
+  auto region = createRegion(meth, Region::Kind::FuncBody);
+  enterRegion(region);
+  SCOPE_EXIT { leaveRegion(region); };
 
-    genFe = new FuncEmitter(m_ue, -1, -1, makeStaticString(genName));
-    top_fes.push_back(genFe);
-    genFe->setTop(true);
-  }
-  genFe->setIsGeneratorFromClosure(fe->isClosureBody());
-  genFe->setIsGenerator(true);
-  return genFe;
-}
-
-void EmitterVisitor::emitGeneratorCreate(MethodStatementPtr meth) {
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
   emitMethodPrologue(e, meth);
   emitSetFuncGetArgs(e);
 
   // emit code to create generator object
-  e.CreateCont();
+  Label topOfResumedBody;
+  e.CreateCont(topOfResumedBody);
   e.RetC();
 
-  FuncFinisher ff(this, e, m_curFunc);
+  // emit generator body
+  {
+    SCOPE_EXIT {
+      assert(m_inGenerator);
+      m_inGenerator = false;
+    };
+    assert(!m_inGenerator);
+    m_inGenerator = true;
 
-  emitMethodDVInitializers(e, meth, topOfBody);
-}
+    topOfResumedBody.set(e);
+    e.PopC();
+    visit(meth->getStmts());
+    assert(m_evalStack.size() == 0);
 
-void EmitterVisitor::emitGeneratorBody(MethodStatementPtr meth) {
-  auto region = createRegion(meth, Region::Kind::FuncBody);
-  enterRegion(region);
-  SCOPE_EXIT { leaveRegion(region); };
-
-  Emitter e(meth, m_ue, *this);
-
-  // emit continuation unpack and the big switch
-  int yieldLabelCount = meth->getFunctionScope()->getYieldLabelCount();
-  emitContinuationSwitch(e, yieldLabelCount);
-
-  // emit method body
-  visit(meth->getStmts());
-  assert(m_evalStack.size() == 0);
-
-  // emit code to return null
-  if (currentPositionIsReachable()) {
-    e.Null();
-    e.ContRetC();
+    // if the current position is reachable, emit code to return null
+    if (currentPositionIsReachable()) {
+      e.Null();
+      e.ContRetC();
+    }
   }
 
   FuncFinisher ff(this, e, m_curFunc);
+  emitMethodDVInitializers(e, meth, topOfBody);
 }
 
 void EmitterVisitor::emitSetFuncGetArgs(Emitter& e) {
@@ -8301,7 +8171,7 @@ Funclet* EmitterVisitor::addFunclet(StatementPtr stmt, Thunklet* body) {
 }
 
 Funclet* EmitterVisitor::addFunclet(Thunklet* body) {
-  m_funclets.push_back(new Funclet(body));
+  m_funclets.push_back(new Funclet(body, m_inGenerator));
   return m_funclets.back();
 }
 
@@ -8320,6 +8190,8 @@ void EmitterVisitor::emitFunclets(Emitter& e) {
   // description for more details.
   for (int i = 0; i < m_funclets.size(); ++i) {
     Funclet* f = m_funclets[i];
+    SCOPE_EXIT { m_inGenerator = false; };
+    m_inGenerator = f->m_inGenerator;
     f->m_entry.set(e);
     f->m_body->emit(e);
     delete f->m_body;
@@ -8426,7 +8298,7 @@ void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe) {
   saveMaxStackCells(fe);
   copyOverCatchAndFaultRegions(fe);
   copyOverFPIRegions(fe);
-  m_yieldLabels.clear();
+  m_awaitLabels.clear();
   m_staticEmitted.clear();
   Offset past = e.getUnitEmitter().bcPos();
   fe->finish(past, false);
@@ -8713,18 +8585,20 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
       switch(m) {
         case METH_NEXT:
           ue.emitOp(OpNull);
+          ue.emitOp(OpContEnter);
           break;
-        case METH_RAISE:
-          ue.emitOp(OpContRaise);
-          // intentional fallthrough to push the exception on the stack
         case METH_SEND:
           ue.emitOp(OpPushL); ue.emitIVA(0);
+          ue.emitOp(OpContEnter);
+          break;
+        case METH_RAISE:
+          ue.emitOp(OpPushL); ue.emitIVA(0);
+          ue.emitOp(OpContRaise);
           break;
         default:
           not_reached();
       }
 
-      ue.emitOp(OpContEnter);
       ue.emitOp(OpContStopped);
       ue.emitOp(OpNull);
       ue.emitOp(OpRetC);

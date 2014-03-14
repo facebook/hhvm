@@ -382,8 +382,8 @@ public:
   void requestInit();
   void requestExit();
 
-  static void fillContinuationVars(
-    ActRec* origFp, const Func* origFunc, ActRec* genFp, const Func* genFunc);
+  static void fillContinuationVars(const Func* func, ActRec* origFp,
+                                   ActRec* genFp);
   void pushLocalsAndIterators(const Func* f, int nparams = 0);
   void enqueueAPCHandle(APCHandle* handle);
 
@@ -448,6 +448,7 @@ private:
 OPCODES
 #undef O
 
+  void contEnterImpl(IOP_ARGS);
   void classExistsImpl(IOP_ARGS, Attr typeAttr);
   void fPushObjMethodImpl(
       Class* cls, StringData* name, ObjectData* obj, int numArgs);

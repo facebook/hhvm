@@ -116,11 +116,9 @@ void unsetUnknownLocal(ISS& env) {
   for (auto& l : env.state.locals) l = union_of(l, TUninit);
 }
 
-void unsetNamedLocals(ISS& env) {
+void unsetLocals(ISS& env) {
   for (auto i = size_t{0}; i < env.state.locals.size(); ++i) {
-    if (env.ctx.func->locals[i]->name) {
-      env.state.locals[i] = TUninit;
-    }
+    env.state.locals[i] = TUninit;
   }
 }
 

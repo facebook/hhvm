@@ -367,11 +367,8 @@ void VerifyRetTypeFail(TypedValue tv) {
 
 RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
   auto const func = fp->m_func;
-  assert(func->isClosureBody() || func->isGeneratorFromClosure());
-  auto const closureLoc =
-    LIKELY(func->isClosureBody())
-      ? frame_local(fp, func->numParams())
-      : frame_local(fp, func->getGeneratorOrigFunc()->numParams());
+  assert(func->isClosureBody());
+  auto const closureLoc = frame_local(fp, func->numParams());
 
   bool inited;
   auto const refData = lookupStaticFromClosure(

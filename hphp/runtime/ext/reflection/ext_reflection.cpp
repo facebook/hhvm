@@ -551,12 +551,8 @@ static void set_function_info(Array &ret, const Func* func) {
   }
 
   ret.set(s_is_async, func->isAsync());
-
-  // closure info
   ret.set(s_is_closure, func->isClosureBody());
-  // Interestingly this isn't the same as calling isGenerator() because calling
-  // isGenerator() on the outside function for a generator returns false.
-  ret.set(s_is_generator, func->hasGeneratorAsBody());
+  ret.set(s_is_generator, func->isGenerator());
 }
 
 static void set_type_profiling_info(Array& info, const Class* cls,

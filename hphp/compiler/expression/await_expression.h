@@ -18,7 +18,6 @@
 #define incl_HPHP_AWAIT_EXPRESSION_H_
 
 #include "hphp/compiler/expression/expression.h"
-#include "hphp/compiler/expression/generation_label.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,11 +32,9 @@ public:
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   ExpressionPtr getExpression() { return m_exp; }
-  GenerationLabel& label() { return m_label; }
 
 private:
   ExpressionPtr m_exp;
-  GenerationLabel m_label;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

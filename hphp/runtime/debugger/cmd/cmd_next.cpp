@@ -217,7 +217,7 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
     }
     removeLocationFilter();
     return;
-  } else if (fp->m_func->hasGeneratorAsBody() && (op == OpAsyncESuspend)) {
+  } else if (op == OpAsyncESuspend) {
     // We need to step over this opcode, then grab the continuation
     // and setup continuation stepping like we do for OpContSuspend.
     TRACE(2, "CmdNext: encountered create async\n");
@@ -246,11 +246,9 @@ void CmdNext::setupStepCont(ActRec* fp, PC pc) {
   DEBUG_ONLY auto ops = reinterpret_cast<const Op*>(pc);
   assert(ops[0] == OpContSuspend || ops[0] == OpContSuspendK);
   ++pc;
-  int32_t label = decodeVariableSizeImm(&pc);
-  c_Continuation* cont = frame_continuation(fp);
-  Offset nextInst = cont->getExecutionOffset(label);
+  Offset nextInst = fp->func()->unit()->offsetOf(pc);
   assert(nextInst != InvalidAbsoluteOffset);
-  m_stepContTag = cont->actRec();
+  m_stepContTag = fp;
   TRACE(2, "CmdNext: patch for cont step at '%s' offset %d\n",
         fp->m_func->fullName()->data(), nextInst);
   m_stepCont = StepDestination(fp->m_func->unit(), nextInst);

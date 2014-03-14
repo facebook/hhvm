@@ -641,28 +641,23 @@ void IRTranslator::translateDup(const NormalizedInstruction& ni) {
 }
 
 void IRTranslator::translateCreateCont(const NormalizedInstruction& i) {
-  HHIR_EMIT(CreateCont);
+  HHIR_EMIT(CreateCont, i.offset() + i.imm[0].u_BA);
 }
 
 void IRTranslator::translateContEnter(const NormalizedInstruction& i) {
-  auto after = i.nextSk().offset();
-
-  const Func* srcFunc = m_hhbcTrans.curFunc();
-  int32_t callOffsetInUnit = after - srcFunc->base();
-
-  HHIR_EMIT(ContEnter, callOffsetInUnit);
+  HHIR_UNIMPLEMENTED(ContEnter);
 }
 
-void IRTranslator::translateUnpackCont(const NormalizedInstruction& i) {
-  HHIR_EMIT(UnpackCont);
+void IRTranslator::translateContRaise(const NormalizedInstruction& i) {
+  HHIR_UNIMPLEMENTED(ContRaise);
 }
 
 void IRTranslator::translateContSuspend(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContSuspend, i.imm[0].u_IVA);
+  HHIR_EMIT(ContSuspend, i.nextSk().offset());
 }
 
 void IRTranslator::translateContSuspendK(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContSuspendK, i.imm[0].u_IVA);
+  HHIR_EMIT(ContSuspendK, i.nextSk().offset());
 }
 
 void IRTranslator::translateContRetC(const NormalizedInstruction& i) {
@@ -671,10 +666,6 @@ void IRTranslator::translateContRetC(const NormalizedInstruction& i) {
 
 void IRTranslator::translateContCheck(const NormalizedInstruction& i) {
   HHIR_EMIT(ContCheck, i.imm[0].u_IVA);
-}
-
-void IRTranslator::translateContRaise(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContRaise);
 }
 
 void IRTranslator::translateContValid(const NormalizedInstruction& i) {
@@ -698,7 +689,11 @@ void IRTranslator::translateAsyncAwait(const NormalizedInstruction&) {
 }
 
 void IRTranslator::translateAsyncESuspend(const NormalizedInstruction& i) {
-  HHIR_EMIT(AsyncESuspend, i.imm[0].u_IVA, i.imm[1].u_IVA);
+  HHIR_EMIT(AsyncESuspend, i.offset() + i.imm[0].u_BA, i.imm[1].u_IVA);
+}
+
+void IRTranslator::translateAsyncResume(const NormalizedInstruction& i) {
+  HHIR_EMIT(Nop);
 }
 
 void IRTranslator::translateAsyncWrapResult(const NormalizedInstruction& i) {

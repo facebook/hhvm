@@ -449,7 +449,8 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
                                    SystemLib::s_ArrayObjectClass->nameRef());
     // ArrayObject should have the 'storage' property...
     assert(storage != nullptr);
-    return ElemDArray<false /* warn */, keyType>(storage->asTypedValue(), key);
+    return ElemDArray<false /* warn */,
+                      KeyType::Any>(storage->asTypedValue(), key);
   }
   return objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
 }

@@ -313,22 +313,13 @@ Variant f_fpassthru(const Resource& handle) {
   return f->print();
 }
 
-Variant f_fwrite(CResRef handle, const String& data,
+Variant f_fwrite(const Resource &handle, const String& data,
                  int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
   int64_t ret = f->write(data, length);
-  if (ret < 0) {
-<<<<<<< HEAD
-    std::ostringstream message;
-    message << "fwrite(): send of " << data->size() << " bytes failed with " \
-               "errno=" << errno << " " << folly::errnoStr(errno).c_str();
-    g_context->handleError(message.str(), k_E_NOTICE, true,
-                       ExecutionContext::ErrorThrowMode::Never,
-                       "HipHop Notice: ");
-=======
+  if (ret < 0l) {
     raise_notice("fwrite(): send of %d bytes failed with errno=%d %s", 
-                 data->size(), errno, folly::errnoStr(errno).c_str());
->>>>>>> fd431e6... Used raise_notice instead of hardcoding.
+                 data.size(), errno, folly::errnoStr(errno).c_str());
     ret = 0;
   }
   return ret;

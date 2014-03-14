@@ -236,7 +236,7 @@ function get_runtime_build(bool $with_jit = true,
       $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
       $build .= $repo_args.
         " --config ".__DIR__."/config.hdf".
-        " -v Server.IniFile=".__DIR__."/php.ini";
+        " --config ".__DIR__."/php.ini";
     }
     if ($with_jit) {
       $build .= " -v Eval.Jit=true";

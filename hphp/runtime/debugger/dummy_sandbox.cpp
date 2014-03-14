@@ -59,7 +59,7 @@ struct CLISession : private boost::noncopyable {
   CLISession() {
     TRACE(2, "CLISession::CLISession\n");
     char *argv[] = {"", nullptr};
-    execute_command_line_begin(1, argv, 0);
+    execute_command_line_begin(1, argv, 0, {});
   }
   ~CLISession() {
     TRACE(2, "CLISession::~CLISession\n");

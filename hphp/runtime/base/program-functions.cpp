@@ -529,7 +529,8 @@ void handle_destructor_exception(const char* situation) {
   }
 }
 
-void execute_command_line_begin(int argc, char **argv, int xhprof) {
+void execute_command_line_begin(int argc, char **argv, int xhprof,
+                                const std::vector<std::string>& config) {
   StackTraceNoHeap::AddExtraLogging("ThreadType", "CLI");
   string args;
   for (int i = 0; i < argc; i++) {
@@ -614,7 +615,9 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
 
   Extension::RequestInitModules();
-  process_ini_settings(RuntimeOption::IniFile);
+  for (auto& c : config) {
+    process_ini_settings(c);
+  }
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
@@ -1140,7 +1143,7 @@ static int execute_program_impl(int argc, char** argv) {
       return -1;
     }
     if (po.config.empty()) {
-      auto default_config_file = "/etc/hhvm/config.hdf";
+      auto default_config_file = "/etc/hhvm/php.ini";
       if (access(default_config_file, R_OK) != -1) {
         Logger::Verbose("Using default config file: %s", default_config_file);
         po.config.push_back(default_config_file);
@@ -1199,7 +1202,7 @@ static int execute_program_impl(int argc, char** argv) {
 
   Hdf config;
   for (auto& c : po.config) {
-    config.open(c);
+    config.append(c);
   }
   RuntimeOption::Load(config, &po.confStrings);
   vector<string> badnodes;
@@ -1357,7 +1360,8 @@ static int execute_program_impl(int argc, char** argv) {
       ret = 0;
       while (true) {
         try {
-          execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
+          execute_command_line_begin(new_argc, new_argv,
+                                     po.xhprofFlags, po.config);
           // Set the proxy for this thread to be the localProxy we just
           // created. If we're script debugging, this will be the proxy that
           // does all of our work. If we're remote debugging, this proxy will
@@ -1389,7 +1393,8 @@ static int execute_program_impl(int argc, char** argv) {
     } else {
       ret = 0;
       for (int i = 0; i < po.count; i++) {
-        execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
+        execute_command_line_begin(new_argc, new_argv,
+                                   po.xhprofFlags, po.config);
         ret = 255;
         if (hphp_invoke_simple(file)) {
           ret = ExitException::ExitCode;

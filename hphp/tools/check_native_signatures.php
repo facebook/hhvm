@@ -83,7 +83,7 @@ function parse_cpp_functions(string $file):
 
   // Don't handle methods yet, so function can't be indented
   static $function_regex =
-            "#^(\S+) +HHVM_FUNCTION\(([^,)]+)(?:, *)?([^)]*)\)#m";
+            "#^(?:static )?(\S+) +HHVM_FUNCTION\(([^,)]+)(?:, *)?([^)]*)\)#m";
 
   $functions = Map {};
 

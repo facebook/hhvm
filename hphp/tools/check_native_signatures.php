@@ -53,17 +53,22 @@ function parse_php_functions(string $file):
         $argTypes = Vector {};
         if ($argList) {
           $args = preg_split('/\s*,\s*/', $argList);
-          foreach($args as $arg) {
-            $type = preg_split('/\s*\$/', $arg)[0];
-            $type = explode('<', $type, 2)[0];
-            if ($type == '...') {
-              // Special case varargs
-              $vargTypes = Vector {'int'};
-              $vargTypes->addAll($argTypes);
-              $vargTypes[] = 'array';
-              $argTypes = $vargTypes;
-            } else {
-              $argTypes[] = $type;
+          if (count($args) > 5) {
+            $retType = 'actrec';
+            $argTypes = Vector {'actrec'};
+          } else {
+            foreach($args as $arg) {
+              $type = preg_split('/\s*\$/', $arg)[0];
+              $type = explode('<', $type, 2)[0];
+              if ($type == '...') {
+                // Special case varargs
+                $vargTypes = Vector {'int'};
+                $vargTypes->addAll($argTypes);
+                $vargTypes[] = 'array';
+                $argTypes = $vargTypes;
+              } else {
+                $argTypes[] = $type;
+              }
             }
           }
         }

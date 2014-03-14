@@ -49,13 +49,6 @@ testing and some alternative PHP implementation.
 - xbox_task_status
 - xbox_task_result
 
-- evhttp_set_cache
-- evhttp_get
-- evhttp_post
-- evhttp_async_get
-- evhttp_async_post
-- evhttp_recv
-
 - call_user_func_array_async
 - call_user_func_async
 - check_user_func_async

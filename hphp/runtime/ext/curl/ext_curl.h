@@ -290,17 +290,6 @@ Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
 Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
                                VRefParam msgs_in_queue = null_object);
 Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh);
-void HHVM_FUNCTION(evhttp_set_cache, const String& address, int max_conn,
-                        int port = 80);
-Variant HHVM_FUNCTION(evhttp_get, const String& url,
-                                const Variant& headers = null_array, int timeout = 5);
-Variant HHVM_FUNCTION(evhttp_post, const String& url, const String& data,
-                      const Variant& headers = null_array, int timeout = 5);
-Variant HHVM_FUNCTION(evhttp_async_get, const String& url,
-                           const Variant& headers = null_array, int timeout = 5);
-Variant HHVM_FUNCTION(evhttp_async_post, const String& url, const String& data,
-                            const Variant& headers = null_array, int timeout = 5);
-Variant HHVM_FUNCTION(evhttp_recv, const Resource& handle);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

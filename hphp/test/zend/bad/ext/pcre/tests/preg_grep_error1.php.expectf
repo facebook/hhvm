@@ -1,23 +1,28 @@
 *** Testing preg_grep() : error conditions ***
 
 Arg value is abcdef
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value is /[a-zA-Z]
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value is [a-zA-Z]/
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value is /[a-zA-Z]/F
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value is Array
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Arg value is /[a-zA-Z]/
@@ -27,6 +32,7 @@ array(2) {
   [2]=>
   string(4) "test"
 }
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

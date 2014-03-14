@@ -1,7 +1,8 @@
 *** Testing linkinfo() and is_link() on deleted link ***
 bool(true)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 int(-1)
 bool(false)
 Done

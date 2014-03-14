@@ -146,6 +146,7 @@ bool(false)
 not found
 bool(false)
 not found 2
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

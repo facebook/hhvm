@@ -19,4 +19,5 @@ int(2)
 ===typehint===
 object(foo)#%d (0) {
 }
-HipHop Fatal error: %s
+
+Fatal error: %s

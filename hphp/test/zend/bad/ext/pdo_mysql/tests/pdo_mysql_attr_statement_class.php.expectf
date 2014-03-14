@@ -2,12 +2,18 @@ array(1) {
   [0]=>
   %unicode|string%(12) "PDOStatement"
 }
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 array(2) {
   [0]=>
   %unicode|string%(12) "mystatement4"
@@ -35,4 +41,5 @@ array(1) {
     %unicode|string%(1) "a"
   }
 }
-HipHop Fatal error: %s
+
+Fatal error: %s

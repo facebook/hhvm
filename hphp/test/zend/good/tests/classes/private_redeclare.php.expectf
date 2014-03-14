@@ -2,4 +2,5 @@ base
 test
 derived
 base
-HipHop Fatal error: %s
+
+Fatal error: %s

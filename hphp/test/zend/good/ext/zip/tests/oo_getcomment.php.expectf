@@ -1,5 +1,7 @@
 Zip archive comment
 foo comment
-foo commentHipHop Notice: %s
+foo comment
+Notice: %s
 
-HipHop Warning: %s
+
+Warning: %s

@@ -8,7 +8,8 @@ array(2) {
   int(100)
 }
 -- Iteration 2 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 3 --
 array(5) {
@@ -24,31 +25,40 @@ array(5) {
   int(100)
 }
 -- Iteration 4 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 7 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 8 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 9 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 13 --
 array(1) {
@@ -56,7 +66,8 @@ array(1) {
   int(100)
 }
 -- Iteration 14 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 15 --
 array(1) {
@@ -64,27 +75,35 @@ array(1) {
   int(100)
 }
 -- Iteration 16 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 17 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 18 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 19 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 21 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 22 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 23 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

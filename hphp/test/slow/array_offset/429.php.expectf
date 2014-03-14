@@ -12,11 +12,15 @@ string(1) "4"
 string(1) "2"
 string(1) "3"
 string(1) "5"
-HipHop Notice: Undefined index: 01 in %s/test/slow/array_offset/429.php on line 14
+
+Notice: Undefined index: 01 in %s/test/slow/array_offset/429.php on line 14
 string(0) ""
-HipHop Notice: Undefined index: 007 in %s/test/slow/array_offset/429.php on line 15
+
+Notice: Undefined index: 007 in %s/test/slow/array_offset/429.php on line 15
 string(0) ""
-HipHop Notice: Undefined index: 08 in %s/test/slow/array_offset/429.php on line 16
+
+Notice: Undefined index: 08 in %s/test/slow/array_offset/429.php on line 16
 string(0) ""
-HipHop Notice: Undefined index: 0xa in %s/test/slow/array_offset/429.php on line 17
+
+Notice: Undefined index: 0xa in %s/test/slow/array_offset/429.php on line 17
 string(0) ""

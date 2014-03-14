@@ -1,52 +1,71 @@
 *** Testing rename() with obscure files ***
 -- testing '-1' --
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- testing '1' --
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- testing '' --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
-bool(false)
--- testing '' --
-HipHop Warning: %s
-bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- testing '' --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
+bool(false)
+-- testing '' --
+
+Warning: %s
+bool(false)
+
+Warning: %s
 bool(false)
 -- testing ' ' --
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- testing '%s' --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)
 -- testing 'Array' --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)
 -- testing '/no/such/file/dir' --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- testing 'php/php' --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 *** Done ***

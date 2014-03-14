@@ -1,1 +1,2 @@
-HipHop Notice: Undefined index: test_cache_26 in %s/test/slow/array_offset/418.php on line 4
+
+Notice: Undefined index: test_cache_26 in %s/test/slow/array_offset/418.php on line 4

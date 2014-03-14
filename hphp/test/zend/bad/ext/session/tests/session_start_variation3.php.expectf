@@ -9,6 +9,7 @@ bool(true)
 NULL
 bool(true)
 NULL
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

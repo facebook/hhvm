@@ -1,2 +1,3 @@
-HipHop Notice: Undefined variable: this in %s on line 5
+
+Notice: Undefined variable: this in %s on line 5
 bool(false)

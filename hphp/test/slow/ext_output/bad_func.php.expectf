@@ -1,4 +1,5 @@
-HipHop Warning: Invalid argument: function: method 'bad_func' not found in %s/test/slow/ext_output/bad_func.php on line 3
+
+Warning: Invalid argument: function: method 'bad_func' not found in %s/test/slow/ext_output/bad_func.php on line 3
 bool(false)
 string(11) "this prints"
 bool(false)

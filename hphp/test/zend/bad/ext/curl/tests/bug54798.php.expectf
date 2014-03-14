@@ -1,11 +1,15 @@
-HipHop Warning: %s
+
+Warning: %s
 * About to connect() %a
 * Closing connection #%d
 Ok for CURLOPT_STDERR
-HipHop Warning: %s
+
+Warning: %s
 Ok for CURLOPT_WRITEHEADER
-HipHop Warning: %s
+
+Warning: %s
 %a
 Ok for CURLOPT_FILE
-HipHop Warning: %s
+
+Warning: %s
 Ok for CURLOPT_INFILE

@@ -1,5 +1,7 @@
 bool(true)
 bool(true)
 bool(true)
-HipHop Notice: %s
-HipHop Fatal error: %s
+
+Notice: %s
+
+Fatal error: %s

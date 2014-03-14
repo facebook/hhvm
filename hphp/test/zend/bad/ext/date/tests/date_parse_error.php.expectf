@@ -1,11 +1,13 @@
 *** Testing date_parse() : error conditions ***
 
 -- Testing date_parse() function with zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing date_parse() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing date_parse() function with unexpected characters in $date argument --

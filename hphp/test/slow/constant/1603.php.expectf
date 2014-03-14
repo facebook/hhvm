@@ -1,3 +1,4 @@
 bool(true)
-HipHop Notice: Constant foo already defined in %s/test/slow/constant/1603.php on line 4
+
+Notice: Constant foo already defined in %s/test/slow/constant/1603.php on line 4
 bool(false)

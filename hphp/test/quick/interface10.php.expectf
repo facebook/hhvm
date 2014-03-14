@@ -1,2 +1,3 @@
 Test begin
-HipHop Fatal error: Declaration of C::a() must be compatible with that of I::a() in %s on line 8
+
+Fatal error: Declaration of C::a() must be compatible with that of I::a() in %s on line 8

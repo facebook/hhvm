@@ -1,7 +1,9 @@
 *** Testing is_readable(): error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 *** Testing is_readable() on non-existent file ***

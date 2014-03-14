@@ -4,18 +4,22 @@ bool(true)
 
 *** Testing rmdir() on a non-empty directory ***
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 *** Testing mkdir() and rmdir() for binary safe functionality ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 *** Testing mkdir() with miscelleneous input ***
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
 Done

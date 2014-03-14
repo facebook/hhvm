@@ -17,4 +17,5 @@ string(3) "abc"
 string(3) "a C"
 string(5) "Array"
 string(5) "Array"
-HipHop Fatal error: Object of class D could not be converted to string in %s on line 7
+
+Fatal error: Object of class D could not be converted to string in %s on line 7

@@ -6697,7 +6697,7 @@ OPTBLD_INLINE void ExecutionContext::iopEval(IOP_ARGS) {
       // manual call to Logger instead of logError as we need to use
       // evalFileName and line as the exception doesn't track the eval()
       Logger::Error(
-        "HipHop Fatal error: %s in %s on line %d",
+        "\nFatal error: %s in %s on line %d",
         msg->data(),
         evalFilename.c_str(),
         line

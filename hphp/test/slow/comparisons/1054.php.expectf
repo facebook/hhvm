@@ -1,14 +1,22 @@
-HipHop Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 4
-HipHop Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 4
+
+Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 4
+
+Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 4
 bool(true)
-HipHop Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 5
-HipHop Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 5
+
+Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 5
+
+Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 5
 bool(true)
-HipHop Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 6
+
+Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 6
 bool(true)
-HipHop Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 7
+
+Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 7
 bool(true)
-HipHop Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 8
+
+Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 8
 bool(true)
-HipHop Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 9
+
+Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 9
 bool(true)

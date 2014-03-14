@@ -1,10 +1,12 @@
 *** Testing end() : error conditions ***
 
 -- Testing end() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing end() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

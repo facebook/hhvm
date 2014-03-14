@@ -2,7 +2,8 @@ object(Foo)#1 (1) {
   ["x":"Foo":private]=>
   NULL
 }
-HipHop Warning: Creating default object from empty value in %s/slow/hhbbc/minstr_004.php on line 7
+
+Warning: Creating default object from empty value in %s/slow/hhbbc/minstr_004.php on line 7
 object(stdClass)#2 (1) {
   ["x"]=>
   int(12)

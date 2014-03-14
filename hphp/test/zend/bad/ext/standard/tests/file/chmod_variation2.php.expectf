@@ -5,7 +5,8 @@ bool(true)
 
 chmod() on a path containing .. with invalid directories
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 777
 

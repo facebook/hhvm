@@ -1,1 +1,2 @@
-HipHop Fatal error: 'break' operator with non-constant operand is no longer supported in %s/test/slow/break_statement/badexp.php on line 6
+
+Fatal error: 'break' operator with non-constant operand is no longer supported in %s/test/slow/break_statement/badexp.php on line 6

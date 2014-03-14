@@ -191,5 +191,7 @@ IO      FINE: getting reply
 IO      FINE: getting cursor header
 IO      FINE: getting cursor body
 ---
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s

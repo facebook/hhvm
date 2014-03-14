@@ -1,3 +1,5 @@
-HipHop Warning: foo() expects exactly 1 parameter, 0 given in %s/test/slow/hhbbc/jmp_local_009.php on line 6
-HipHop Notice: Undefined variable: x in %s/test/slow/hhbbc/jmp_local_009.php on line 6
+
+Warning: foo() expects exactly 1 parameter, 0 given in %s/test/slow/hhbbc/jmp_local_009.php on line 6
+
+Notice: Undefined variable: x in %s/test/slow/hhbbc/jmp_local_009.php on line 6
 string(4) "asd2"

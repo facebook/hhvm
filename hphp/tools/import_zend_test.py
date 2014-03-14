@@ -883,13 +883,13 @@ def walk(filename, dest_subdir):
                 match_rest_of_line = '.+'
 
             exp = re.sub(r'Fatal\\? error\\?:.*',
-                    'HipHop Fatal error: '+match_rest_of_line, exp)
+                    '\nFatal error: '+match_rest_of_line, exp)
             exp = re.sub(r'Catchable\\? fatal\\? error\\?:.*',
-                    'HipHop Fatal error: '+match_rest_of_line, exp)
+                    '\nFatal error: '+match_rest_of_line, exp)
             exp = re.sub(r'Warning\\?:.*',
-                    'HipHop Warning: '+match_rest_of_line, exp)
+                    '\nWarning: '+match_rest_of_line, exp)
             exp = re.sub(r'Notice\\?:.*',
-                    'HipHop Notice: '+match_rest_of_line, exp)
+                    '\nNotice: '+match_rest_of_line, exp)
 
             sections[key] = exp
 

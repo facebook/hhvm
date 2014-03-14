@@ -154,4 +154,5 @@ Array
 (
     [1] => 1
 )
-HipHop Fatal error: %s
+
+Fatal error: %s

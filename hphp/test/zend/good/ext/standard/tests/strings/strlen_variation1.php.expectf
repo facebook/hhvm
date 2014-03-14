@@ -16,13 +16,16 @@ int(5)
 -- Iteration 8 --
 int(12)
 -- Iteration 9 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 12 --
 int(1)
@@ -39,7 +42,8 @@ int(0)
 -- Iteration 18 --
 int(13)
 -- Iteration 19 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 20 --
 int(0)

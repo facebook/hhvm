@@ -2,7 +2,9 @@ object(Foo)#1 (1) {
   ["bar"]=>
   string(3) "bat"
 }
-HipHop Notice: %s
+
+Notice: %s
 int(1)
-HipHop Notice: %s
+
+Notice: %s
 float(1)

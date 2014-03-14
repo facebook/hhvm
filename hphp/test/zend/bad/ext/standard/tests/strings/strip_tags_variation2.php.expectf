@@ -18,19 +18,24 @@ string(10) "helloworld"
 -- Iteration 9 --
 string(10) "helloworld"
 -- Iteration 10 --
-HipHop Notice: %s
+
+Notice: %s
 string(10) "helloworld"
 -- Iteration 11 --
-HipHop Notice: %s
+
+Notice: %s
 string(10) "helloworld"
 -- Iteration 12 --
-HipHop Notice: %s
+
+Notice: %s
 string(10) "helloworld"
 -- Iteration 13 --
-HipHop Notice: %s
+
+Notice: %s
 string(10) "helloworld"
 -- Iteration 14 --
-HipHop Notice: %s
+
+Notice: %s
 string(10) "helloworld"
 -- Iteration 15 --
 string(10) "helloworld"

@@ -1,10 +1,12 @@
 *** Testing trait_exists() : error conditions ***
 
 -- Testing trait_exists() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing trait_exists() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

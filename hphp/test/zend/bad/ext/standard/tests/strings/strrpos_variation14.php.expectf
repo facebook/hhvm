@@ -4,26 +4,32 @@ int(6)
 -- Iteration 2 --
 int(6)
 -- Iteration 3 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 4 --
 int(6)
 -- Iteration 5 --
 int(6)
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 7 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 8 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 9 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 11 --
 int(6)
@@ -34,20 +40,24 @@ int(6)
 -- Iteration 14 --
 int(6)
 -- Iteration 15 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 16 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 17 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 18 --
 int(6)
 -- Iteration 19 --
 int(6)
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 21 --
 int(6)

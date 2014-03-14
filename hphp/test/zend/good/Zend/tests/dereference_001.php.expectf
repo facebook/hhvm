@@ -1,5 +1,6 @@
 int(5)
-HipHop Notice: %s
+
+Notice: %s
 NULL
 int(1)
 string(1) "b"

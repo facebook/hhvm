@@ -13,4 +13,5 @@ object(b)#1 (2) {
   string(9) "new value"
 }
 string(17) "I am private in a"
-HipHop Fatal error: Cannot access private property a::$prop in %s on line 5
+
+Fatal error: Cannot access private property a::$prop in %s on line 5

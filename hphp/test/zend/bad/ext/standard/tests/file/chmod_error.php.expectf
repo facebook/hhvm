@@ -1,12 +1,15 @@
 *** Testing chmod() : error conditions ***
 
 -- Testing chmod() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing chmod() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

@@ -1,7 +1,8 @@
 This is a
 This is b
 This is b/c
-HipHop Warning: %s
+
+Warning: %s
 ===AFTER===
 This is a
 This is b

@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 object(stdClass)#%d (13) {
   [%u|b%"name"]=>
@@ -87,10 +88,12 @@ object(stdClass)#%d (13) {
   int(0)
 }
 int(2)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
 object(stdClass)#%d (13) {
@@ -121,6 +124,7 @@ object(stdClass)#%d (13) {
   [%u|b%"decimals"]=>
   int(0)
 }
-HipHop Warning: %s
+
+Warning: %s
 NULL
 done!

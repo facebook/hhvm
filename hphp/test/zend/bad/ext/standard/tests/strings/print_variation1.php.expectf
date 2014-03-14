@@ -24,15 +24,18 @@ int(1)
 101234567000
 int(1)
 -- Iteration 9 --
-HipHop Notice: %s
+
+Notice: %s
 Array
 int(1)
 -- Iteration 10 --
-HipHop Notice: %s
+
+Notice: %s
 Array
 int(1)
 -- Iteration 11 --
-HipHop Notice: %s
+
+Notice: %s
 Array
 int(1)
 -- Iteration 12 --

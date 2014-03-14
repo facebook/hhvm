@@ -29,10 +29,13 @@ sqlstate
 id
 
 Magic, magic properties:
-HipHop Warning: %s
+
+Warning: %s
  in %s on line %d
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 stmt->affected_rows = ''
 stmt->affected_rows = '1'
 stmt->errno = '0'
@@ -52,5 +55,6 @@ stmt->unknown = ''
 stmt->unknown = '13'
 
 Prepare using the constructor:
-HipHop Warning: %s
+
+Warning: %s
 done!

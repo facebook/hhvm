@@ -3,10 +3,13 @@ is_file=bool(false)
 is_dir=bool(false)
 is_readable=bool(false)
 
-filesize=HipHop Warning: %s
+filesize=
+Warning: %s
 bool(false)
-filetype=HipHop Warning: %s
+filetype=
+Warning: %s
 bool(false)
-fileatime=HipHop Warning: %s
+fileatime=
+Warning: %s
 bool(false)
 ===DONE===

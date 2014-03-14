@@ -1,5 +1,6 @@
 -- (1)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 array(0) {
 }
@@ -37,9 +38,11 @@ array(1) {
   string(0) ""
 }
 -- (5)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
 array(1) {

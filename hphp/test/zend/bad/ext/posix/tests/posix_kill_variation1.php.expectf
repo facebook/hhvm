@@ -1,6 +1,8 @@
 *** Testing posix_kill() : usage variations ***
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 
 Arg value 10.5 
 bool(false)
@@ -16,30 +18,40 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
@@ -61,19 +73,23 @@ Arg value
 bool(false)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value string 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value string 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
@@ -81,4 +97,5 @@ bool(false)
 
 Arg value  
 bool(false)
-HipHop Fatal error: %s
+
+Fatal error: %s

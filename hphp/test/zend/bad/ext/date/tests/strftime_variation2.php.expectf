@@ -10,19 +10,23 @@ string(20) "Jan 01 1970 05:29:50"
 string(20) "Jan 01 1970 05:30:00"
 
 --empty array--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --int indexed array--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --associative array--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --nested arrays--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --uppercase NULL--
@@ -44,35 +48,43 @@ string(20) "Jan 01 1970 05:30:01"
 string(20) "Jan 01 1970 05:30:00"
 
 --empty string DQ--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --empty string SQ--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --string DQ--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --string SQ--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --mixed case string--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --heredoc--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --instance of classWithToString--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --instance of classWithoutToString--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --undefined var--

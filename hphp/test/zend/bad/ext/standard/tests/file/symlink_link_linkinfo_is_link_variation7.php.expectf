@@ -1,15 +1,18 @@
 *** Create soft link to file and then to itself ***
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 *** Create soft link to directory and then to itself ***
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 *** Create hard link to file and then to itself ***
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

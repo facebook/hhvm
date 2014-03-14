@@ -1,8 +1,13 @@
-HipHop Warning: %s
+
+Warning: %s
  in %s on line %d
-HipHop Warning: %s
+
+Warning: %s
  in %s on line %d
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 done!

@@ -1,6 +1,8 @@
 *** Testing crc32() : with unexpected values for str argument ***
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 
 -- Iteration 1 --
 int(-186917087)
@@ -30,23 +32,28 @@ int(1376932222)
 int(-2036403827)
 
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 13 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 14 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 15 --
@@ -83,6 +90,7 @@ int(0)
 int(0)
 
 -- Iteration 26 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

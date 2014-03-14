@@ -1,10 +1,12 @@
 *** Testing mail() : error conditions ***
 
 -- Testing mail() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing mail() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

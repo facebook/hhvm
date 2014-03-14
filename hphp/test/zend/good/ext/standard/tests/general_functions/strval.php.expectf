@@ -125,16 +125,20 @@ string(14) "Resource id #%d"
 -- Iteration 3 --
 string(14) "Resource id #%d"
 -- Iteration 4 --
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
 -- Iteration 5 --
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
 -- Iteration 6 --
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
 -- Iteration 7 --
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
 -- Iteration 8 --
 string(0) ""
@@ -146,8 +150,10 @@ string(0) ""
 string(0) ""
 
 *** Testing error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

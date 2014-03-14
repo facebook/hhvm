@@ -24,4 +24,5 @@ object(C)#%d (1) {
 }
 
 Unset a private property, and attempt to recreate at global scope (expecting failure):
-HipHop Fatal error: %s
+
+Fatal error: %s

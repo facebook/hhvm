@@ -1,4 +1,5 @@
 this is a protected method.
 this is a private method.
 foo
-HipHop Fatal error: %s
+
+Fatal error: %s

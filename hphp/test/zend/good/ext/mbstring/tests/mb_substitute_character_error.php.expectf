@@ -1,6 +1,7 @@
 *** Testing mb_substitute_character() : error conditions ***
 
 -- Testing mb_substitute_character() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

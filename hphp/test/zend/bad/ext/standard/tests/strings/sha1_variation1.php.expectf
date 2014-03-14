@@ -18,19 +18,24 @@ string(40) "681b45cae882ad795afd54ccc2a04ad58e056b83"
 -- Iteration 9 --
 string(40) "1b390cd54a0c0d4f27fa7adf23e3c45536e9f37c"
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 13 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 14 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 15 --
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
@@ -55,6 +60,7 @@ string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 -- Iteration 25 --
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 -- Iteration 26 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

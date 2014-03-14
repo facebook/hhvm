@@ -1,10 +1,12 @@
 *** Testing ctype_space() : error conditions ***
 
 -- Testing ctype_space() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing ctype_space() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

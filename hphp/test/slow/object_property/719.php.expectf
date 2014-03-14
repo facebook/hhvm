@@ -5,7 +5,8 @@ int(5)
 int(6)
 int(7)
 int(8)
-HipHop Warning: Creating default object from empty value in %s/test/slow/object_property/719.php on line 32
+
+Warning: Creating default object from empty value in %s/test/slow/object_property/719.php on line 32
 int(6)
 int(7)
 int(8)

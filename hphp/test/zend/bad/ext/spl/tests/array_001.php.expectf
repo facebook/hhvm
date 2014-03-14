@@ -40,12 +40,16 @@ object(ArrayObject)#%d (1) {
   }
 }
 int(0)
-HipHop Notice: %s
+
+Notice: %s
 NULL
-HipHop Notice: %s
+
+Notice: %s
 NULL
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {

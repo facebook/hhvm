@@ -31,10 +31,12 @@ array(5) {
 }
 
 -- Testing usort() with language construct as 'cmp_function' --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing usort() with language construct as 'cmp_function' --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

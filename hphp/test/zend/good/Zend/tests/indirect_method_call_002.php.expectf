@@ -2,4 +2,5 @@ string(3) "foo"
 string(7) "testing"
 string(3) "foo"
 NULL
-HipHop Fatal error: %s
+
+Fatal error: %s

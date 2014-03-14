@@ -1,10 +1,12 @@
 *** Testing gethostbynamel() : error conditions ***
 
 -- Testing gethostbynamel() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing gethostbynamel() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

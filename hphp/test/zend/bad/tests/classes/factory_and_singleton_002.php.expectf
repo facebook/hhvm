@@ -14,4 +14,5 @@ Destruct y
 int(1)
 int(1)
 Done
-HipHop Warning: %s
+
+Warning: %s

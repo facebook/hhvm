@@ -1,4 +1,5 @@
-HipHop Strict Warning: Only variables should be passed by reference in %s on line 10
+
+Strict Warning: Only variables should be passed by reference in %s on line 10
 array(1) {
   [0]=>
   int(20)

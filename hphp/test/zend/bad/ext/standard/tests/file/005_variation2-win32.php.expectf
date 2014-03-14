@@ -17,26 +17,34 @@
 -- inode change time is => 
 
 -- File ' ' --
--- File access time is => HipHop Warning: %s
+-- File access time is => 
+Warning: %s
 
--- File modification time is => HipHop Warning: %s
+-- File modification time is => 
+Warning: %s
 
--- inode change time is => HipHop Warning: %s
+-- inode change time is => 
+Warning: %s
 
 
 -- File '|' --
--- File access time is => HipHop Warning: %s
+-- File access time is => 
+Warning: %s
 
--- File modification time is => HipHop Warning: %s
+-- File modification time is => 
+Warning: %s
 
--- inode change time is => HipHop Warning: %s
+-- inode change time is => 
+Warning: %s
 
 
 *** testing touch ***bool(false)
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

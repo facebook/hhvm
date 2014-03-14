@@ -2,7 +2,8 @@ int(0)
 int(0)
 string(12) "U_ZERO_ERROR"
 string(12) "U_ZERO_ERROR"
-HipHop Warning: %s
+
+Warning: %s
 int(1)
 int(1)
 string(81) "intlcal_field_difference: Call to ICU method has failed: U_ILLEGAL_ARGUMENT_ERROR"

@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 In A::__call(test1, array(1,a))
 object(B)#1 (0) {
 }

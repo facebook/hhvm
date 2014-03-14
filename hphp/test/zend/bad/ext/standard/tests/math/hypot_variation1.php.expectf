@@ -49,31 +49,38 @@ float(5.0990195135928)
 float(5)
 
 -- Iteration 17 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 18 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 19 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 21 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 22 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 23 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 24 --
@@ -83,6 +90,7 @@ float(5)
 float(5)
 
 -- Iteration 26 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===Done===

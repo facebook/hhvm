@@ -2,7 +2,9 @@ array(1) {
   ["1"]=>
   string(3) "foo"
 }
-HipHop Notice: Unable to unserialize: [a:1:{d:1;s:3:"foo";}]. Invalid key. in %s/test/slow/serialization/1545.php on line 4
+
+Notice: Unable to unserialize: [a:1:{d:1;s:3:"foo";}]. Invalid key. in %s/test/slow/serialization/1545.php on line 4
 bool(false)
-HipHop Notice: Unable to unserialize: [a:1:{a:1:{i:0;i:1;}}]. Invalid key. in %s/test/slow/serialization/1545.php on line 5
+
+Notice: Unable to unserialize: [a:1:{a:1:{i:0;i:1;}}]. Invalid key. in %s/test/slow/serialization/1545.php on line 5
 bool(false)

@@ -1,6 +1,7 @@
 *** Testing str_split() : different intger values for 'split_length' ***
 -- Iteration 1 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 2 --
 array(42) {
@@ -90,7 +91,8 @@ array(42) {
   string(1) "t"
 }
 -- Iteration 3 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 4 --
 array(1) {
@@ -115,6 +117,7 @@ array(1) {
   string(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 8 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

@@ -13,7 +13,8 @@ int(0)
  goes to: defaultstring(3) "foo"
  goes to: 0object(M)#1 (0) {
 }
- goes to: HipHop Notice: Object of class M could not be converted to int in %s/test/slow/switch_statement/1754.php on line 112
+ goes to: 
+Notice: Object of class M could not be converted to int in %s/test/slow/switch_statement/1754.php on line 112
 1string(1) "0"
  goes to: 0string(0) ""
  goes to: 0string(4) "jazz"

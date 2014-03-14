@@ -1,46 +1,56 @@
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===0===
 int(0)
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 NULL
 ===1===
 object(stdClass)#%d (0) {
 }
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===2===
 object(MyFoo)#%d (0) {
 }
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 NULL
 ===3===
 NULL
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 NULL
 ===4===
 int(2)
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 NULL
 ===5===
 string(3) "foo"
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 NULL
 ===6===
 int(3)
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 NULL
 ===FILL===
 ===0===
@@ -50,9 +60,11 @@ int(0)
 ===1===
 object(stdClass)#1 (0) {
 }
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===2===
 object(MyFoo)#2 (0) {
@@ -62,7 +74,8 @@ int(1)
 ===3===
 NULL
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 NULL
 ===4===
 int(2)
@@ -75,6 +88,7 @@ int(1)
 ===6===
 int(3)
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 NULL
 ===DONE===

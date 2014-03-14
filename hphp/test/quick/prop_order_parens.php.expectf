@@ -4,14 +4,19 @@ int(200)
 int(250)
 int(300)
 int(350)
-HipHop Notice: Array to string conversion in %s on line 40
-HipHop Notice: Undefined property: C::$Array in %s on line 40
+
+Notice: Array to string conversion in %s on line 40
+
+Notice: Undefined property: C::$Array in %s on line 40
 NULL
 int(450)
 int(500)
 int(550)
-HipHop Notice: Array to string conversion in %s on line 50
-HipHop Notice: Undefined property: C::$Array in %s on line 50
-HipHop Warning: Cannot access property on non-object in %s on line 50
+
+Notice: Array to string conversion in %s on line 50
+
+Notice: Undefined property: C::$Array in %s on line 50
+
+Warning: Cannot access property on non-object in %s on line 50
 NULL
 int(650)

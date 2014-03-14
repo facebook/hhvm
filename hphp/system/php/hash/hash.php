@@ -269,19 +269,19 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
                      bool $raw_output = false): mixed {
   $algo = strtolower($algo);
   if (!in_array($algo, hash_algos())) {
-    error_log("HipHop Warning: hash_pbkdf2(): Unknown hashing algorithm: ".
+    error_log("\nWarning: hash_pbkdf2(): Unknown hashing algorithm: ".
               $algo);
     return false;
   }
 
   if ($iterations <= 0) {
-    error_log("HipHop Warning: hash_pbkdf2(): Iterations must be a positive".
+    error_log("\nWarning: hash_pbkdf2(): Iterations must be a positive".
               " integer: ".$iterations);
     return false;
   }
 
   if ($length < 0) {
-    error_log("HipHop Warning: hash_pbkdf2(): Length must be greater than or ".
+    error_log("\nWarning: hash_pbkdf2(): Length must be greater than or ".
               "equal to 0: ".$length);
     return false;
   }

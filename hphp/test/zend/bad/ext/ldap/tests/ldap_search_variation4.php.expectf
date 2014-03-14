@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 resource(%d) of type (ldap result)
 array(2) {
   ["count"]=>

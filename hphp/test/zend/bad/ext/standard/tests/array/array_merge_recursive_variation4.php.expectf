@@ -1,6 +1,8 @@
 *** Testing array_merge_recursive() : assoc. array with diff. keys to $arr1 argument ***
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 -- Iteration 1 --
 -- With default argument --
 array(2) {

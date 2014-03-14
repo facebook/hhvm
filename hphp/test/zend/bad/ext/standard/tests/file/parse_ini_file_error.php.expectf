@@ -1,14 +1,17 @@
 *** Testing parse_ini_file() : error conditions ***
 
 -- Testing parse_ini_file() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing parse_ini_file() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing parse_ini_file() function with a non-existent file --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

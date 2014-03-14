@@ -1,3 +1,4 @@
-HipHop Warning: Invalid operand type was used: Invalid type used as key in %s/slow/hhbbc/minstr_001.php on line 5
+
+Warning: Invalid operand type was used: Invalid type used as key in %s/slow/hhbbc/minstr_001.php on line 5
 array(0) {
 }

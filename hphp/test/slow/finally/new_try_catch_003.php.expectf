@@ -65,7 +65,8 @@
 2
 2
 6
-HipHop Fatal error: Uncaught exception 'Exception' with message '7' in %s/test/slow/finally/new_try_catch_003.php:17
+
+Fatal error: Uncaught exception 'Exception' with message '7' in %s/test/slow/finally/new_try_catch_003.php:17
 Stack trace:
 #0 %s/test/slow/finally/new_try_catch_003.php(%s): blah()
 #1 {main}

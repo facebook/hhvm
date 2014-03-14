@@ -45,13 +45,16 @@ array(1) {
   string(12) "101234567000"
 }
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 13 --
 array(1) {
@@ -91,7 +94,8 @@ array(2) {
   string(6) "object"
 }
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 21 --
 array(1) {

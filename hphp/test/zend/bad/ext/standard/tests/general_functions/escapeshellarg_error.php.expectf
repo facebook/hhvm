@@ -1,22 +1,27 @@
 *** Testing escapeshellarg() : error conditions ***
 
 -- Testing escapeshellarg() function with no arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing escapeshellarg() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing escapeshellarg() function with a object supplied for argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing escapeshellarg() function with a resource supplied for argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing escapeshellarg() function with a array supplied for argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===Done===

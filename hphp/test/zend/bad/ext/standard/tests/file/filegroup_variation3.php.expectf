@@ -2,23 +2,28 @@
 - Iteration 1 -
 int(%d)
 - Iteration 2 -
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 - Iteration 3 -
 int(%d)
 - Iteration 4 -
 int(%d)
 - Iteration 5 -
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 - Iteration 6 -
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 - Iteration 7 -
-HipHop Warning: %s
+
+Warning: %s
 NULL
 - Iteration 8 -
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 *** Done ***

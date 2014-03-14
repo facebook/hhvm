@@ -1,2 +1,4 @@
-HipHop Notice: Undefined variable: b in %s on line 4
-HipHop Notice: Undefined variable: a in %s on line 11
+
+Notice: Undefined variable: b in %s on line 4
+
+Notice: Undefined variable: a in %s on line 11

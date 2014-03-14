@@ -1,7 +1,8 @@
 <!DOCTYPE %s>
 %a</html>bool(true)
 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 --
 <!DOCTYPE %s>

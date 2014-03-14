@@ -1,1 +1,2 @@
-HipHop Fatal error: Argument 1 to t() must be of type ?X, int given in %s/slow/hack_mode/2206.php on line 4
+
+Fatal error: Argument 1 to t() must be of type ?X, int given in %s/slow/hack_mode/2206.php on line 4

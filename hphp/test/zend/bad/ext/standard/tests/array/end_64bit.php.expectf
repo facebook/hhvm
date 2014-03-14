@@ -89,13 +89,17 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 *** Testing error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(false)
 Done

@@ -1,9 +1,11 @@
 *** Testing setlocale() : error conditions ***
 
--- Testing setlocale() function with Zero arguments --HipHop Warning: %s
+-- Testing setlocale() function with Zero arguments --
+Warning: %s
 NULL
 
--- Testing setlocale() function with One argument, 'category' = LC_ALL --HipHop Warning: %s
+-- Testing setlocale() function with One argument, 'category' = LC_ALL --
+Warning: %s
 NULL
 
 -- Testing setlocale() function with invalid locale array, 'category' = LC_ALL --
@@ -15,7 +17,8 @@ bool(false)
 -- Testing setlocale() function with invalid category --
 
 Deprecated: setlocale(): Passing locale category name as string is deprecated. Use the LC_* -constants instead in %s on line %d
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Done

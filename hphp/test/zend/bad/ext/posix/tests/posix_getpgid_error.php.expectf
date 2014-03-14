@@ -1,11 +1,13 @@
 *** Testing posix_getpgid() : error conditions ***
 
 -- Testing posix_getpgid() function no arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing posix_getpgid() with one extra argument --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing posix_getpgid() with negative pid  --

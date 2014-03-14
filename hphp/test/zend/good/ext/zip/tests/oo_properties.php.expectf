@@ -4,7 +4,8 @@ zip->status (0):
 zip->numFiles (4):
 	empty(): 0
 	isset(): 1
-HipHop Notice: %s
+
+Notice: %s
 zip->bogus (0):
 	empty(): 1
 	isset(): 0

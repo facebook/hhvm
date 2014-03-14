@@ -1,1 +1,2 @@
-HipHop Fatal error: Argument 1 passed to woot() must be an instance of Point, null given in %s on line 10
+
+Fatal error: Argument 1 passed to woot() must be an instance of Point, null given in %s on line 10

@@ -1,4 +1,6 @@
 PHP Testfest 2008
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)

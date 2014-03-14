@@ -1,33 +1,43 @@
 *** Testing file_get_contents() : variation ***
 -- Iteration 0 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 1 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 2 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 3 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 4 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 7 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 8 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 9 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 *** Done ***

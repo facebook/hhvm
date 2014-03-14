@@ -1,23 +1,31 @@
 bool(true)
 string(%d) "%ssymlink.dat"
 int(%d)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 int(-1)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(%d)
 Done

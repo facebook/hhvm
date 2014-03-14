@@ -1,6 +1,7 @@
 *** Testing get_html_translation_table() : error conditions ***
 
 -- Testing get_html_translation_table() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

@@ -1,5 +1,6 @@
 1
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 %s(%d): foo(1, 5)
 #1 {main}

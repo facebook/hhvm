@@ -1,14 +1,23 @@
-HipHop Notice: %s
-HipHop Warning: %s
-HipHop Notice: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Notice: %s
+
+Warning: %s
+
+Notice: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 
 Strict Standards: Non-static method bar::barfoo() should not be called statically in %sbug32647.php on line %d
-HipHop Warning: %s
+
+Warning: %s
 foo!
 
 Strict Standards: Non-static method bar::barfoo() should not be called statically in Unknown on line 0

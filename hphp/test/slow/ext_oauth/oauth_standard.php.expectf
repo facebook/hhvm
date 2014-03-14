@@ -1,8 +1,10 @@
 -- empty params --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- one param --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- empty consumer key and secret --
 EXCEPTION -1: The consumer key cannot be empty
@@ -16,7 +18,8 @@ OAuth[debug=1,sslChecks=3,debugInfo=]
 -- disable debug --
 OAuth[debug=0,sslChecks=3,debugInfo=]
 -- set version without parameters --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- set version with boolean --
 bool(true)

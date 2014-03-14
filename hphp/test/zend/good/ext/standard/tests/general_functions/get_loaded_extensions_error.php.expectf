@@ -1,6 +1,7 @@
 *** Testing get_loaded_extensions() : error conditions ***
 
 -- Testing get_loaded_extensions() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

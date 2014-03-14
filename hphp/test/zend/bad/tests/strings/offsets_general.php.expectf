@@ -2,13 +2,15 @@ string(1) "f"
 string(1) "o"
 bool(true)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 string(1) "f"
 bool(false)
 string(1) "f"
 string(1) "o"
 bool(true)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 string(1) "f"
 bool(false)

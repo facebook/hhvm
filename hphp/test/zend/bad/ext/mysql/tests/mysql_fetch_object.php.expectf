@@ -15,10 +15,14 @@ object(mysql_fetch_object_test)#%d (4) {
   [%u|b%"label"]=>
   %unicode|string%(1) "b"
 }
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Notice: %s
-HipHop Notice: %s
+
+Warning: %s
+
+Warning: %s
+
+Notice: %s
+
+Notice: %s
 object(mysql_fetch_object_construct)#%d (4) {
   [%u|b%"a"]=>
   NULL
@@ -29,8 +33,10 @@ object(mysql_fetch_object_construct)#%d (4) {
   [%u|b%"label"]=>
   %unicode|string%(1) "c"
 }
-HipHop Warning: %s
-HipHop Notice: %s
+
+Warning: %s
+
+Notice: %s
 object(mysql_fetch_object_construct)#%d (4) {
   [%u|b%"a"]=>
   %unicode|string%(1) "a"
@@ -56,6 +62,8 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Fatal error: %s
+
+Fatal error: %s

@@ -1,7 +1,9 @@
-HipHop Notice: %s
+
+Notice: %s
 
 Attempt to access various kinds of class constants:
-HipHop Notice: %s
+
+Notice: %s
 string(9) "UNDEFINED"
 int(1)
 float(1.5)
@@ -23,4 +25,5 @@ string(6) "hello2"
 string(6) "hello2"
 
 Expecting fatal error:
-HipHop Fatal error: %s
+
+Fatal error: %s

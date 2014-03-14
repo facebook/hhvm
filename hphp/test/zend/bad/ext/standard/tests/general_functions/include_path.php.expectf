@@ -1,10 +1,13 @@
 string(1) "."
-HipHop Warning: %s
+
+Warning: %s
 NULL
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 string(1) "."
 string(1) "."
@@ -19,7 +22,8 @@ bool(false)
 string(1) "."
 NULL
 string(1) "."
-HipHop Warning: %s
+
+Warning: %s
 NULL
 string(1) "."
 NULL

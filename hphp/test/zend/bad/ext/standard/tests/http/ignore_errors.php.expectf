@@ -11,7 +11,8 @@ string(48) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
 
 "
-HipHop Warning: %s
+
+Warning: %s
  in %s on line %d
 bool(false)
 string(48) "GET /foo/bar HTTP/1.0

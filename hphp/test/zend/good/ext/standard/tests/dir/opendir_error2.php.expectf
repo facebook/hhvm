@@ -1,10 +1,12 @@
 *** Testing opendir() : error conditions ***
 
 -- Pass a non-existent absolute path: --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Pass a non-existent relative path: --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

@@ -2,5 +2,6 @@
 1
 
 %s: Function MongoDB::authenticate() is deprecated in %s on line %d
-HipHop Warning: %s
+
+Warning: %s
 0

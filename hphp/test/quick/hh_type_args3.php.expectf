@@ -1,1 +1,2 @@
-HipHop Fatal error: Argument 1 passed to Foo::test5() must be an instance of d, string given in %s on line 15
+
+Fatal error: Argument 1 passed to Foo::test5() must be an instance of d, string given in %s on line 15

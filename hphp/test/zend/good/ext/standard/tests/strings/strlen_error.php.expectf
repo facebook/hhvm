@@ -1,9 +1,11 @@
 *** Testing strlen() : unexpected number of arguments ***
 -- Testing strlen() function with no arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing strlen() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

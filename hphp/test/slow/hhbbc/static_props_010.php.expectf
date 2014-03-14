@@ -1,2 +1,3 @@
 bool(true)
-HipHop Warning: Cannot access property on non-object in %s/test/slow/hhbbc/static_props_010.php on line 11
+
+Warning: Cannot access property on non-object in %s/test/slow/hhbbc/static_props_010.php on line 11

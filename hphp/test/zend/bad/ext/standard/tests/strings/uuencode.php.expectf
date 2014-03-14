@@ -1,6 +1,8 @@
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
 bool(false)
@@ -13,6 +15,7 @@ string(36) "6;F]T('9E<GD@<V]P:&ES=&EC871E9```
 `
 "
 string(22) "not very sophisticated"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

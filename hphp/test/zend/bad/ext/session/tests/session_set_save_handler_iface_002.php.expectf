@@ -1,5 +1,6 @@
 *** Testing session_set_save_handler() function: interface wrong ***
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 good handler writing

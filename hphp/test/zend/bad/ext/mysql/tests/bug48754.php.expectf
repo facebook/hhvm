@@ -4,7 +4,8 @@ Deprecated: mysql_connect(): The mysql extension is deprecated and will be remov
 Expect same thread id for $link and default conn: bool(true)
 resource(%d) of type (mysql link)
 resource(%d) of type (Unknown)
-HipHop Warning: %s
+
+Warning: %s
 
 Closing default link
 
@@ -19,7 +20,8 @@ Explicit resource and pconnect
 Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 resource(%d) of type (mysql link persistent)
 resource(%d) of type (Unknown)
-HipHop Warning: %s
+
+Warning: %s
 
 Default link and pconnect
 

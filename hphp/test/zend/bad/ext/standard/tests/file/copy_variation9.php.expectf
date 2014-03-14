@@ -8,7 +8,8 @@ int(1500)
 
 -- Without write permissions --
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
 int(1500)

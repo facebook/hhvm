@@ -1,7 +1,8 @@
 Creating Table
 bool(true)
 Creating Same Table Again
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Dropping database
 bool(true)

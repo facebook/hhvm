@@ -4,7 +4,9 @@ This is b/c
 ===AFTER===
 This is a
 This is b
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 
 ===DONE===

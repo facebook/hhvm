@@ -27,26 +27,34 @@ array(6) {
   string(5) "today"
 }
 int(6)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 string(55) "Hello friend, you're  
     looking          good today!"
 int(5)
 int(6)
 int(5)
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 int(7)
 array(5) {
@@ -87,9 +95,11 @@ array(5) {
   [4]=>
   string(3) "foo"
 }
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 array(7) {
   [0]=>
@@ -145,9 +155,11 @@ array(5) {
   [15]=>
   string(3) "foo"
 }
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 array(7) {
   [0]=>

@@ -1,25 +1,31 @@
 int(%d)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 int(%i)
 int(%d)
 int(%d)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 int(%i)
 int(%d)
 NULL
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 NULL
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 int(%d)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 int(%d)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

@@ -1,4 +1,5 @@
 string(6) "secret"
 string(6) "public"
 string(6) "secret"
-HipHop Fatal error: %s
+
+Fatal error: %s

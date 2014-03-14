@@ -10,7 +10,8 @@ int(1)
 int(2)
 int(3)
 int(0)
-HipHop Fatal error: Uncaught exception 'RuntimeException' with message 'Iterators' LIFO/FIFO modes for SplStack/SplQueue objects are frozen' in :
+
+Fatal error: Uncaught exception 'RuntimeException' with message 'Iterators' LIFO/FIFO modes for SplStack/SplQueue objects are frozen' in :
 Stack trace:
 #0 %s/test/slow/ext_spl_datastructures/queue_iteration.php(5): SplQueue->setIteratorMode()
 #1 %s/test/slow/ext_spl_datastructures/queue_iteration.php(21): iterate_queue_with_mode()

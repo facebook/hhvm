@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 array(11) {
   [0]=>
   string(14) "ANSI_X3.4-1968"

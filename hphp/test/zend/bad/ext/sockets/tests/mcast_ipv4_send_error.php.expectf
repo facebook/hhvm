@@ -7,7 +7,8 @@ bool(true)
 int(0)
 
 Setting IP_MULTICAST_TTL with 256
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(1)
 
@@ -16,6 +17,7 @@ bool(true)
 int(254)
 
 Setting IP_MULTICAST_TTL with -1
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(254)

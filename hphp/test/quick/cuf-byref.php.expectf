@@ -1,4 +1,5 @@
-HipHop Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 6
+
+Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 6
 int(1)
 array(1) {
   [0]=>
@@ -8,7 +9,8 @@ array(1) {
   [0]=>
   int(1)
 }
-HipHop Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 8
+
+Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 8
 int(1)
 array(1) {
   [0]=>
@@ -18,7 +20,8 @@ array(1) {
   [0]=>
   int(1)
 }
-HipHop Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 10
+
+Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 10
 int(1)
 array(1) {
   [0]=>
@@ -28,7 +31,8 @@ array(1) {
   [0]=>
   int(1)
 }
-HipHop Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 12
+
+Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 12
 int(1)
 array(1) {
   [0]=>

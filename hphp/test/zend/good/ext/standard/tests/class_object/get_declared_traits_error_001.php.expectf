@@ -1,6 +1,7 @@
 *** Testing get_declared_traits() : error conditions ***
 
 -- Testing get_declared_traits() function with one argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

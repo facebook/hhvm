@@ -42,7 +42,8 @@ unserializer(autoload_not_available)
 Try __autoload()
 do_autoload(autoload_not_available)
 do_autoload(autoload_not_available)
-HipHop Warning: %s
+
+Warning: %s
 object(__PHP_Incomplete_Class)#%d (1) {
   ["__PHP_Incomplete_Class_Name"]=>
   string(22) "autoload_not_available"

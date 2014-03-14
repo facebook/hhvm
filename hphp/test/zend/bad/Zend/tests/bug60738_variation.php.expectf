@@ -1,7 +1,8 @@
 NULL
 object(Closure)#1 (0) {
 }
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 {main}
   thrown in %s on line %d

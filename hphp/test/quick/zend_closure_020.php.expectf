@@ -9,4 +9,5 @@ object(foo)#1 (2) {
 }
 bool(true)
 bool(true)
-HipHop Fatal error: Cannot access private property foo::$test in %s on line 19
+
+Fatal error: Cannot access private property foo::$test in %s on line 19

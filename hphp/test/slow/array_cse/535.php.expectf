@@ -12,13 +12,17 @@ array(1) {
 string(1) "b"
 string(1) "a"
 string(1) "b"
-HipHop Warning: Out of bounds in %s/test/slow/array_cse/535.php on line 10
+
+Warning: Out of bounds in %s/test/slow/array_cse/535.php on line 10
 string(0) ""
-HipHop Warning: Out of bounds in %s/test/slow/array_cse/535.php on line 11
+
+Warning: Out of bounds in %s/test/slow/array_cse/535.php on line 11
 string(0) ""
-HipHop Warning: Out of bounds in %s/test/slow/array_cse/535.php on line 12
+
+Warning: Out of bounds in %s/test/slow/array_cse/535.php on line 12
 string(0) ""
 string(1) "b"
-HipHop Warning: Out of bounds in %s/test/slow/array_cse/535.php on line 11
+
+Warning: Out of bounds in %s/test/slow/array_cse/535.php on line 11
 string(0) ""
 string(1) "b"

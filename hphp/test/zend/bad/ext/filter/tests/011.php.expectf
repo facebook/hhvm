@@ -1,18 +1,23 @@
 string(4) "test"
 string(18) "http://example.com"
 string(27) "&#60;b&#62;test&#60;/b&#62;"
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 string(6) "string"
 float(12345.7)
 string(29) "&#60;p&#62;string&#60;/p&#62;"
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

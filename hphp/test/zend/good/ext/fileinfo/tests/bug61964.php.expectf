@@ -2,13 +2,21 @@ bool(false)
 resource(%d) of type (file_info)
 resource(%d) of type (file_info)
 bool(false)
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Warning: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Warning: %s
 DONE: testing dir with files
 ===DONE===

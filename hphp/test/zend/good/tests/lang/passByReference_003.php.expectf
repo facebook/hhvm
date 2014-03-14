@@ -1,11 +1,13 @@
 Passing undefined by value
-HipHop Notice: %s
+
+Notice: %s
 
 Inside passbyVal call:
 NULL
 
 After call
-HipHop Notice: %s
+
+Notice: %s
 NULL
 
 Passing undefined by reference

@@ -8,7 +8,8 @@ second
 first
 autoload_first
 autoload_second
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 [internal function]: autoload_first('ThisClassDoesNo...')
 #1 [internal function]: spl_autoload_call('ThisClassDoesNo...')

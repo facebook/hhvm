@@ -1,2 +1,3 @@
-HipHop Notice: Undefined index: 3 in %s/test/slow/array/201.php on line 4
+
+Notice: Undefined index: 3 in %s/test/slow/array/201.php on line 4
 NULL

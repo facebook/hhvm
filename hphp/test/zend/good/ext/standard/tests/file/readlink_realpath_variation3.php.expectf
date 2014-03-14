@@ -2,27 +2,33 @@
 
 *** Testing readlink() and realpath() with linkname as empty string, NULL and single space ***
 -- Iteration1 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 %s
 -- Iteration2 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 %s
 -- Iteration3 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(%d) "%s"
 -- Iteration4 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(%d) "%s"
 -- Iteration5 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(%d) "%s"
 -- Iteration6 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(%d) "%s"
 Done

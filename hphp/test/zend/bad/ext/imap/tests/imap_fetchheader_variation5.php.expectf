@@ -3,17 +3,20 @@ Create a temporary mailbox and add 3 msgs
 .. mailbox '{%s}%s' created
 
 -- $msg_no is 0 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 
 -- $msg_no is 4 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 
 -- $msg_no is 1,3 --
-HipHop Notice: %s
+
+Notice: %s
 %unicode|string%(%d) "From: foo@anywhere.com
 Subject: Test msg 1
 To: %s
@@ -23,7 +26,8 @@ Content-Type: MULTIPART/mixed; BOUNDARY="%s"
 "
 
 -- $msg_no is 1:3 --
-HipHop Notice: %s
+
+Notice: %s
 %unicode|string%(%d) "From: foo@anywhere.com
 Subject: Test msg 1
 To: %s

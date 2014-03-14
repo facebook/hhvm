@@ -2,6 +2,7 @@
 %unicode|string%(%d) "phar://%sphar_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 Unknown file format specified
 ===DONE===

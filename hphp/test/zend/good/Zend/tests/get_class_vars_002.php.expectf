@@ -10,8 +10,10 @@ array(3) {
   ["cc"]=>
   int(6)
 }
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(1)
 NULL
 NULL

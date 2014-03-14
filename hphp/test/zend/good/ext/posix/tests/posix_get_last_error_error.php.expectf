@@ -1,6 +1,7 @@
 *** Testing posix_get_last_error() : error conditions ***
 
 -- Testing posix_get_last_error() function with one argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

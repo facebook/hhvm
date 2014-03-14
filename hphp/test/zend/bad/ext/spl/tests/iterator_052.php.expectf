@@ -75,7 +75,8 @@ array(3) {
   array(0) {
   }
 }
-HipHop Notice: %s
+
+Notice: %s
 bool(true)
 int(5)
 array(3) {
@@ -202,7 +203,8 @@ array(2) {
   array(0) {
   }
 }
-HipHop Notice: %s
+
+Notice: %s
 bool(true)
 int(5)
 array(2) {

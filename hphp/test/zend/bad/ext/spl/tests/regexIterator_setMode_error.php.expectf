@@ -1,4 +1,5 @@
 int(0)
 string(14) "Illegal mode 7"
 int(0)
-HipHop Warning: %s
+
+Warning: %s

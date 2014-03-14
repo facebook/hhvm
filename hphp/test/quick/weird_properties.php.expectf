@@ -1,6 +1,9 @@
-HipHop Warning: Creating default object from empty value in %s on line 4
-HipHop Notice: Undefined property: stdClass::$0 in %s on line 6
 
-HipHop Notice: Undefined property: stdClass::$0 in %s on line 6
+Warning: Creating default object from empty value in %s on line 4
+
+Notice: Undefined property: stdClass::$0 in %s on line 6
+
+
+Notice: Undefined property: stdClass::$0 in %s on line 6
 
 done

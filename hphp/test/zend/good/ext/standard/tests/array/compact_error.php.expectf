@@ -1,6 +1,7 @@
 *** Testing compact() : error conditions ***
 
 -- Testing compact() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

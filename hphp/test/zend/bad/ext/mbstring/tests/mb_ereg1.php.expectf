@@ -7,7 +7,8 @@ array(3) {
   [2]=>
   int(3)
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(3) {
   [0]=>
@@ -17,7 +18,8 @@ array(3) {
   [2]=>
   string(0) ""
 }
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 array(3) {
   [0]=>
@@ -28,7 +30,8 @@ array(3) {
   [2]=>
   string(0) ""
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(3) {
   [0]=>

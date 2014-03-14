@@ -2,13 +2,15 @@
 
 -- File Resource opened with fopen() --
 resource(%d) of type (stream)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 resource(%d) of type (stream)
 
 -- Directory Resource opened with opendir() --
 resource(%d) of type (stream)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 resource(%d) of type (stream)
 ===DONE===

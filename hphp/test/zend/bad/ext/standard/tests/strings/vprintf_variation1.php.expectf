@@ -37,27 +37,32 @@ int(13)
 int(3)
 
  -- Iteration 10 --
-HipHop Notice: %s
+
+Notice: %s
 Array
 int(5)
 
  -- Iteration 11 --
-HipHop Notice: %s
+
+Notice: %s
 Array
 int(5)
 
  -- Iteration 12 --
-HipHop Notice: %s
+
+Notice: %s
 Array
 int(5)
 
  -- Iteration 13 --
-HipHop Notice: %s
+
+Notice: %s
 Array
 int(5)
 
  -- Iteration 14 --
-HipHop Notice: %s
+
+Notice: %s
 Array
 int(5)
 

@@ -4,4 +4,5 @@ int(-3)
 int(-2)
 int(122)
 int(-1257)
-HipHop Fatal error: Unsupported operand type for ~ in %s on line 6
+
+Fatal error: Unsupported operand type for ~ in %s on line 6

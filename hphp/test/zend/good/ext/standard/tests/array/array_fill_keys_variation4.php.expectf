@@ -32,7 +32,8 @@ array(1) {
 }
 
 -- Testing array_fill_keys() function with unset var --
-HipHop Notice: %s
+
+Notice: %s
 array(1) {
   ["one"]=>
   NULL

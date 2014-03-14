@@ -3,27 +3,33 @@
 *** Testing for error conditions ***
 
 -- No filename --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- invalid filename --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Scalar value as filename --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- NULL as filename --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- More than valid number of arguments ( valid is 2) --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Hexadecimal Output for Empty file as Argument --

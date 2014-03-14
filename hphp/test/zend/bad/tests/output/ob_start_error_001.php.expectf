@@ -1,16 +1,21 @@
 - Too many arguments
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 - Arg 1 wrong type
-HipHop Warning: %s
-HipHop Notice: %s
+
+Warning: %s
+
+Notice: %s
 bool(false)
 
 - Arg 2 wrong type
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 - Arg 3 wrong type
-HipHop Warning: %s
+
+Warning: %s
 NULL

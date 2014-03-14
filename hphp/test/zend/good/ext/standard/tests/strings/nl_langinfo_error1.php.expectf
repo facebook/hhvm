@@ -1,10 +1,12 @@
 *** Testing nl_langinfo() : error conditions ***
 
 -- Testing nl_langinfo() function with no arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing nl_langinfo() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

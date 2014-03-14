@@ -280,6 +280,7 @@ array(12) {
   ["is_localtime"]=>
   bool(false)
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

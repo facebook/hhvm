@@ -40,5 +40,6 @@ array(15) {
   [%u|b%"-02"]=>
   %unicode|string%(1) "f"
 }
-HipHop Warning: %s
+
+Warning: %s
 done!

@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 blah
 <?php
 readfile("foo/" . basename(__FILE__));
@@ -20,5 +21,6 @@ readfile("foob", true);
 readfile("./hi", 0, $context);
 readfile("../oops");
 ?>
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

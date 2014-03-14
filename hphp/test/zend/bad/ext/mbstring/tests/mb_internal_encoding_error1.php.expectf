@@ -1,6 +1,7 @@
 *** Testing mb_internal_encoding() : error conditions ***
 
 -- Testing mb_internal_encoding() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

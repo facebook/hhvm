@@ -1,7 +1,9 @@
 string(2) "f1"
 f1 called
-HipHop Warning: %s
+
+Warning: %s
 string(2) "f1"
 string(2) "f2"
 f2 called
-HipHop Warning: %s
+
+Warning: %s

@@ -1,10 +1,12 @@
 *** Testing interface_exists() : error conditions ***
 
 -- Testing interface_exists() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing interface_exists() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

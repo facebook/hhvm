@@ -37,27 +37,35 @@ string(3) "0.5"
 string(3) "0.5"
 
 --empty array--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --int indexed array--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --associative array--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --nested arrays--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --uppercase NULL--
@@ -97,9 +105,11 @@ string(53) "CFridayam0808 AM 2008b8UTC2008-08-08T08:08:08+00:0031"
 string(%d) "%s"
 
 --instance of classWithoutToString--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 --undefined var--

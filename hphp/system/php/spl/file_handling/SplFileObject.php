@@ -632,7 +632,7 @@ class SplFileObject extends SplFileInfo
 
   private function checkCsvParameter($value, $name) {
     if (!is_string($value) || strlen($value) != 1) {
-      error_log('HipHop Warning: '.$name.' must be a character');
+      error_log("\nWarning: ".$name.' must be a character');
       return false;
     }
     return true;

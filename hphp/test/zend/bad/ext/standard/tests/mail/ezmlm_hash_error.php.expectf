@@ -1,22 +1,27 @@
 *** Testing ezmlm_hash() : error conditions ***
 
 -- Testing ezmlm_hash() function with fewer than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing ezmlm_hash() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing ezmlm_hash() function with invalid input - ARRAY --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing ezmlm_hash() function with invalid input - OBJECT without 'cast_object' method --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing ezmlm_hash() function with invalid input - RESOURCE --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

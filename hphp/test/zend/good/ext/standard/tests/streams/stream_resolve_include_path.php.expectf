@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(false)
 string(%d) "%stest_path%sfile"

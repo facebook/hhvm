@@ -6,7 +6,8 @@ array(1) {
   [1]=>
   string(5) "str%c%c"
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(1) {
   [1]=>

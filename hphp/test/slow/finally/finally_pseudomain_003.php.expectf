@@ -13,7 +13,8 @@
 13
 14
 15
-HipHop Fatal error: Uncaught exception 'A' with message 'bla!' in %s/test/slow/finally/finally_pseudomain_003.php:26
+
+Fatal error: Uncaught exception 'A' with message 'bla!' in %s/test/slow/finally/finally_pseudomain_003.php:26
 Stack trace:
 #0 {main}
 

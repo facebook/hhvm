@@ -1,5 +1,7 @@
-HipHop Warning: File not supported in %s/test/slow/ext_image/1794.php on line 4
-HipHop Warning: File not supported in %s/test/slow/ext_image/1794.php on line 8
+
+Warning: File not supported in %s/test/slow/ext_image/1794.php on line 4
+
+Warning: File not supported in %s/test/slow/ext_image/1794.php on line 8
 Array
 (
     [FileName] => simpletext.jpg
@@ -23,7 +25,8 @@ Array
         )
 
 )
-HipHop Warning: File not supported in %s/test/slow/ext_image/1794.php on line 16
+
+Warning: File not supported in %s/test/slow/ext_image/1794.php on line 16
 Array
 (
     [FileName] => test1pix.jpg

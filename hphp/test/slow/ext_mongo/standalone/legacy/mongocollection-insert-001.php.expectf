@@ -671,9 +671,15 @@ IO      FINE: getting reply
 IO      FINE: getting cursor header
 IO      FINE: getting cursor body
 MongoCursorException: 0, %s:%d: need to login
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s

@@ -55,7 +55,8 @@ object(stdClass)#%d (13) {
   int(0)
 }
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   [%u|b%"_default_test"]=>
   %unicode|string%(1) "2"

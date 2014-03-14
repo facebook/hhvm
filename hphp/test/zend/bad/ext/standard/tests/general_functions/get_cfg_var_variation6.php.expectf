@@ -1,4 +1,5 @@
 *** Test substituting argument 1 with object values ***
 string(1) "0"
-HipHop Warning: %s
+
+Warning: %s
 NULL

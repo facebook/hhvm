@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 object(mysqli)#%d (%d) {
   [%u|b%"affected_rows"]=>
   NULL
@@ -39,5 +40,6 @@ object(mysqli)#%d (%d) {
   [%u|b%"warning_count"]=>
   NULL
 }
-HipHop Warning: %s
+
+Warning: %s
 done!

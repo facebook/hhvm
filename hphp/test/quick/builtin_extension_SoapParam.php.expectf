@@ -1,5 +1,6 @@
 SoapParam
-HipHop Warning: SoapParam::__construct() expects exactly 2 parameters, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+
+Warning: SoapParam::__construct() expects exactly 2 parameters, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(SoapParam)#1 (0) {
 }
 string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"SoapParam";}"
@@ -13,7 +14,8 @@ array(1) {
 }
 ================
 A_SoapParam
-HipHop Warning: SoapParam::__construct() expects exactly 2 parameters, 0 given in %s/test/quick/builtin_extensions.inc on line 23
+
+Warning: SoapParam::__construct() expects exactly 2 parameters, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_SoapParam)#3 (1) {
   ["___x"]=>
   NULL

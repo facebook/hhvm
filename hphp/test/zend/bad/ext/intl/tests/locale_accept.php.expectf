@@ -1,5 +1,7 @@
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 Accepting en-us,en;q=0.5: en_US
 Accepting da, en-gb;q=0.8, en;q=0.7: da
 Accepting zh, en-us;q=0.8, en;q=0.7: zh

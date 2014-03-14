@@ -1,7 +1,8 @@
 object(A)#1 (0) {
 }
 bool(true)
-HipHop Notice: Object of class A could not be converted to int in %s/test/slow/object/641.php on line 8
+
+Notice: Object of class A could not be converted to int in %s/test/slow/object/641.php on line 8
 int(1)
 array(0) {
 }

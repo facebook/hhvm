@@ -2,19 +2,26 @@ object(A)#1 (1) {
   ["c":"A":private]=>
   int(1)
 }
-HipHop Notice: Undefined variable: this in %s on line 13
+
+Notice: Undefined variable: this in %s on line 13
 NULL
-HipHop Notice: Undefined variable: this in %s on line 8
+
+Notice: Undefined variable: this in %s on line 8
 NULL
-HipHop Notice: Undefined variable: this in %s on line 13
+
+Notice: Undefined variable: this in %s on line 13
 NULL
-HipHop Notice: Undefined variable: this in %s on line 20
+
+Notice: Undefined variable: this in %s on line 20
 NULL
-HipHop Notice: Undefined variable: this in %s on line 25
+
+Notice: Undefined variable: this in %s on line 25
 NULL
-HipHop Notice: Undefined variable: this in %s on line 20
+
+Notice: Undefined variable: this in %s on line 20
 NULL
-HipHop Notice: Undefined variable: this in %s on line 25
+
+Notice: Undefined variable: this in %s on line 25
 NULL
 array(3) {
   [0]=>

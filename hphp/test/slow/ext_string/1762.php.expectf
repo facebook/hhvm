@@ -1,24 +1,36 @@
-HipHop Warning: Invalid argument: delimiter: (empty) in %s/test/slow/ext_string/1762.php on line 3
+
+Warning: Invalid argument: delimiter: (empty) in %s/test/slow/ext_string/1762.php on line 3
 bool(false)
-HipHop Warning: Invalid argument: The length of each segment must be greater than zero in %s/test/slow/ext_string/1762.php on line 5
+
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/test/slow/ext_string/1762.php on line 5
 bool(false)
-HipHop Warning: Invalid argument: chunklen: (non-positive) in %s/test/slow/ext_string/1762.php on line 6
+
+Warning: Invalid argument: chunklen: (non-positive) in %s/test/slow/ext_string/1762.php on line 6
 bool(false)
-HipHop Warning: Invalid argument: char_list: (empty) in %s/test/slow/ext_string/1762.php on line 7
+
+Warning: Invalid argument: char_list: (empty) in %s/test/slow/ext_string/1762.php on line 7
 bool(false)
-HipHop Warning: Invalid argument: needle: (empty) in %s/test/slow/ext_string/1762.php on line 8
+
+Warning: Invalid argument: needle: (empty) in %s/test/slow/ext_string/1762.php on line 8
 bool(false)
-HipHop Warning: Invalid argument: offset: (out of range) in %s/test/slow/ext_string/1762.php on line 9
+
+Warning: Invalid argument: offset: (out of range) in %s/test/slow/ext_string/1762.php on line 9
 bool(false)
-HipHop Warning: Invalid argument: length: (out of range) in %s/test/slow/ext_string/1762.php on line 10
+
+Warning: Invalid argument: length: (out of range) in %s/test/slow/ext_string/1762.php on line 10
 bool(false)
-HipHop Warning: Invalid argument: length: (out of range) in %s/test/slow/ext_string/1762.php on line 11
+
+Warning: Invalid argument: length: (out of range) in %s/test/slow/ext_string/1762.php on line 11
 bool(false)
-HipHop Warning: Invalid argument: mode: 100 in %s/test/slow/ext_string/1762.php on line 12
+
+Warning: Invalid argument: mode: 100 in %s/test/slow/ext_string/1762.php on line 12
 bool(false)
-HipHop Warning: Invalid argument: format: 100 in %s/test/slow/ext_string/1762.php on line 13
+
+Warning: Invalid argument: format: 100 in %s/test/slow/ext_string/1762.php on line 13
 bool(false)
-HipHop Warning: Invalid argument: 2nd argument: (not array) in %s/test/slow/ext_string/1762.php on line 14
+
+Warning: Invalid argument: 2nd argument: (not array) in %s/test/slow/ext_string/1762.php on line 14
 bool(false)
-HipHop Warning: Invalid operand type was used: %s in %s/test/slow/ext_string/1762.php on line 15
+
+Warning: Invalid operand type was used: %s in %s/test/slow/ext_string/1762.php on line 15
 NULL

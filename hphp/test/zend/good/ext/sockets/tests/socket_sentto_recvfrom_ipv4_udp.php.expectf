@@ -1,5 +1,8 @@
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 Received Ping! from remote address 127.0.0.1 and remote port 1223

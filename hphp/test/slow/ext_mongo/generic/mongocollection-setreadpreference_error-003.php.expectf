@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   ["type"]=>
   string(7) "primary"

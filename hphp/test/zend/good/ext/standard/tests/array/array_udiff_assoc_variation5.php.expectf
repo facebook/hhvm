@@ -7,7 +7,8 @@ array(1) {
 }
 
 -- comparison function taking too many parameters --
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   [0]=>
   int(1)

@@ -15,10 +15,12 @@ FT_UID valid
 FT_UID valid
 
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 FT_UID not valid
 
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 FT_UID not valid
 ===DONE===

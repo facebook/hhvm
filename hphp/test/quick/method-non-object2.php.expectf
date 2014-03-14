@@ -1,3 +1,4 @@
-HipHop Fatal error: Uncaught exception 'BadMethodCallException' with message 'Call to a member function bar() on a non-object' in %s/test/quick/method-non-object2.php:5
+
+Fatal error: Uncaught exception 'BadMethodCallException' with message 'Call to a member function bar() on a non-object' in %s/test/quick/method-non-object2.php:5
 Stack trace:
 #0 {main}

@@ -14,7 +14,8 @@
 14
 15
 16
-HipHop Fatal error: Uncaught exception 'B' with message '17' in %s/test/slow/finally/new_try_catch_008.php:47
+
+Fatal error: Uncaught exception 'B' with message '17' in %s/test/slow/finally/new_try_catch_008.php:47
 Stack trace:
 #0 %s/test/slow/finally/new_try_catch_008.php(64): blah()
 #1 {main}

@@ -4,7 +4,8 @@ INSERT into table
 bool(true)
 Prepare query
 Reset query
-HipHop Warning: %s
+
+Warning: %s
 Closing database
 bool(true)
 Done

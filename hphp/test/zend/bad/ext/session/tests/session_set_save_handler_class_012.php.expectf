@@ -1,13 +1,17 @@
 *** Testing session_set_save_handler() : incorrect arguments for existing handler open ***
 Open 
-HipHop Warning: %s
+
+Warning: %s
 Read %s
-HipHop Warning: %s
+
+Warning: %s
 string(%d) "%s"
 string(5) "files"
 string(4) "user"
 int(2)
 array(0) {
 }
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s

@@ -13,11 +13,13 @@ Data written correctly
 Data written correctly
 
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 No data written
 
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 No data written
 
 -- Iteration 7 --
@@ -33,7 +35,8 @@ Data written correctly
 Data written correctly
 
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 No data written
 
 -- Iteration 12 --

@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(1) {
   [0]=>
@@ -9,7 +10,8 @@ array(1) {
     string(1) "2"
   }
 }
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 array(1) {
   [0]=>

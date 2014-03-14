@@ -1,4 +1,5 @@
-HipHop Warning: get_class() called without object from outside a class
+
+Warning: get_class() called without object from outside a class
 array(1) {
   [0]=>
   bool(false)
@@ -7,7 +8,8 @@ array(1) {
   [0]=>
   bool(false)
 }
-HipHop Warning: Too many arguments for get_called_class(), expected 0
+
+Warning: Too many arguments for get_called_class(), expected 0
 array(1) {
   [0]=>
   NULL
@@ -16,12 +18,14 @@ array(1) {
   [0]=>
   string(12) "func_get_arg"
 }
-HipHop Warning: Too many arguments for func_get_args(), expected 0
+
+Warning: Too many arguments for func_get_args(), expected 0
 array(1) {
   [0]=>
   NULL
 }
-HipHop Warning: Too many arguments for func_num_args(), expected 0
+
+Warning: Too many arguments for func_num_args(), expected 0
 array(1) {
   [0]=>
   NULL

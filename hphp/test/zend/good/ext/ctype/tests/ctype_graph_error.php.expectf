@@ -1,10 +1,12 @@
 *** Testing ctype_graph() : error conditions ***
 
 -- Testing ctype_graph() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing ctype_graph() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

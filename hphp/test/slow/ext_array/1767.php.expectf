@@ -1,11 +1,15 @@
-HipHop Warning: Invalid argument: num: [non-positive] in %s/test/slow/ext_array/1767.php on line 3
+
+Warning: Invalid argument: num: [non-positive] in %s/test/slow/ext_array/1767.php on line 3
 bool(false)
-HipHop Warning: array_combine(): Both parameters should have an equal number of elements in %s/test/slow/ext_array/1767.php on line 4
+
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/test/slow/ext_array/1767.php on line 4
 bool(false)
 array(0) {
 }
-HipHop Warning: array_chunk() expects exactly 2 parameters, 1 given in %s/test/slow/ext_array/1767.php on line 6
+
+Warning: array_chunk() expects exactly 2 parameters, 1 given in %s/test/slow/ext_array/1767.php on line 6
 NULL
-HipHop Warning: array_chunk() expects exactly 2 parameters, 1 given in %s/test/slow/ext_array/1767.php on line 7
+
+Warning: array_chunk() expects exactly 2 parameters, 1 given in %s/test/slow/ext_array/1767.php on line 7
 NULL
 bool(true)

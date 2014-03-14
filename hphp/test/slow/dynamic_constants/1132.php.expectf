@@ -1,5 +1,6 @@
 bool(false)
-HipHop Notice: Use of undefined constant TEST - assumed 'TEST' in %s/test/slow/dynamic_constants/1132.php on line 4
+
+Notice: Use of undefined constant TEST - assumed 'TEST' in %s/test/slow/dynamic_constants/1132.php on line 4
 string(4) "TEST"
 bool(true)
 int(13)

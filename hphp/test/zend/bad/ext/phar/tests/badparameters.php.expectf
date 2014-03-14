@@ -1,39 +1,61 @@
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 Cannot write out phar archive, phar is read-only
 Entry oops does not exist and cannot be deleted
 %sfiles/frontcontroller10.phar
 Cannot write out phar archive, phar is read-only
 A Phar alias cannot be set in a plain tar archive
-HipHop Warning: %s
+
+Warning: %s
 Cannot change stub, phar is read-only
 A Phar stub cannot be set in a plain tar archive
-HipHop Warning: %s
+
+Warning: %s
 A Phar stub cannot be set in a plain tar archive
-HipHop Warning: %s
+
+Warning: %s
 Cannot change stub: phar.readonly=1
 Cannot set signature algorithm, phar is read-only
-HipHop Warning: %s
+
+Warning: %s
 Cannot compress phar archive, phar is read-only
-HipHop Warning: %s
+
+Warning: %s
 Phar is readonly, cannot change compression
-HipHop Warning: %s
+
+Warning: %s
 Cannot copy "a" to "b", phar is read-only
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 Write operations disabled by the php.ini setting phar.readonly
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 Write operations disabled by the php.ini setting phar.readonly
-HipHop Warning: %s
+
+Warning: %s
 Write operations disabled by the php.ini setting phar.readonly
 ===DONE===

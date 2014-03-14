@@ -1,10 +1,12 @@
 *** Testing dirname() : error conditions ***
 
 -- Testing dirname() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing dirname() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

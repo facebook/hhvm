@@ -1,4 +1,5 @@
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 [internal function]: foo->__destruct()
 #1 %sgc_030.php(%d): gc_collect_cycles()

@@ -1,6 +1,7 @@
 *** Testing get_class() : error conditions ***
 
 -- Testing get_class() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

@@ -221,11 +221,11 @@ bool f_trigger_error(const String& error_msg,
   } else if (error_type == k_E_USER_WARNING) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::ErrorThrowMode::Never,
-                       "HipHop Warning: ");
+                       "\nWarning: ");
   } else if (error_type == k_E_USER_NOTICE) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::ErrorThrowMode::Never,
-                       "HipHop Notice: ");
+                       "\nNotice: ");
   } else if (error_type == k_E_USER_DEPRECATED) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::ErrorThrowMode::Never,

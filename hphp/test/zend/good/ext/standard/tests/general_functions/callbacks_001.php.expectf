@@ -20,5 +20,6 @@ O
 $this|O::who
 O
 $this|B::who
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

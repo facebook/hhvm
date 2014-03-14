@@ -1,5 +1,6 @@
 Error handler called (Undefined variable: undefined)
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 %sbug61767.php(%d): {closure}(%s, 'Undefined varia...', '%s', %d, Array)
 #1 {main}

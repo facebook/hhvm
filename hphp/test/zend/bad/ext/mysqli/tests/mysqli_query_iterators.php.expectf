@@ -48,7 +48,8 @@ array(1) {
   ["id"]=>
   string(1) "6"
 }
-HipHop Warning: %s
+
+Warning: %s
 --- Testing USE_RESULT ---
 array(1) {
   ["id"]=>
@@ -75,7 +76,8 @@ array(1) {
   string(1) "6"
 }
 ======
-HipHop Warning: %s
+
+Warning: %s
 --- Testing STORE_RESULT ---
 array(1) {
   ["id"]=>

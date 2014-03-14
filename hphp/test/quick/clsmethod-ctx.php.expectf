@@ -1,2 +1,3 @@
 Private in a
-HipHop Fatal error: Call to private method a::priv from anonymous context in %s on line 15
+
+Fatal error: Call to private method a::priv from anonymous context in %s on line 15

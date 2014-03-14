@@ -2,18 +2,24 @@
 -- 3rd or 4th arg as string --
 int(1)
 int(1)
-HipHop Notice: %s
+
+Notice: %s
 int(2)
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(2)
 
 -- 3rd or 4th arg as NULL --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 int(0)
 int(2)

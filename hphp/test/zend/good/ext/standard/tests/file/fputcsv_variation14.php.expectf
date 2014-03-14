@@ -1,216 +1,270 @@
 *** Testing fputcsv() : with enclosure & delimiter of two chars and file opened in read mode ***
 
 -- file opened in r --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rb --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rt --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rb --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rt --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rb --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rt --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rb --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rt --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rb --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rt --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rb --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rt --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rb --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rt --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rb --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rt --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rb --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in rt --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 int(0)
 int(0)
 bool(false)

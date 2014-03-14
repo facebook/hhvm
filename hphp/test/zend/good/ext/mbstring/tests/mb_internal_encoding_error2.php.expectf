@@ -1,4 +1,5 @@
 *** Testing mb_internal_encoding() : error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

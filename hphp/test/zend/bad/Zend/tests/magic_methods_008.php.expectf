@@ -1,2 +1,4 @@
-HipHop Warning: %s
-HipHop Fatal error: %s
+
+Warning: %s
+
+Fatal error: %s

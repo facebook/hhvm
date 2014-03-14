@@ -12,7 +12,8 @@ bool(false)
 bool(true)
 bool(false)
 
-HipHop Warning: %s
+
+Warning: %s
 After binding, with same-class instance for the bound one
 bool(false)
 bool(true)

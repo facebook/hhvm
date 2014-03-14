@@ -38,7 +38,7 @@
 
 #define LOG_PARSE_ERROR(file, line, fmt, args...)     \
   HPHP::Logger::Error(                                \
-    "HipHop Fatal error: " fmt " in %s on line %d",   \
+    "\nFatal error: " fmt " in %s on line %d",   \
     ##args,                                           \
     (file),                                           \
     (line)                                            \

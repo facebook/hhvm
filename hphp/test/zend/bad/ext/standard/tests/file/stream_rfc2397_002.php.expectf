@@ -15,7 +15,8 @@ array(7) {
   bool(false)
 }
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 NULL
 array(7) {
@@ -35,13 +36,16 @@ array(7) {
   bool(true)
 }
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 NULL
 array(8) {
@@ -63,7 +67,8 @@ array(8) {
   bool(false)
 }
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 NULL
 array(9) {
@@ -87,7 +92,8 @@ array(9) {
   bool(false)
 }
 string(3) "bar"
-HipHop Warning: %s
+
+Warning: %s
 NULL
 NULL
 array(9) {
@@ -111,7 +117,8 @@ array(9) {
   bool(true)
 }
 string(3) "bar"
-HipHop Warning: %s
+
+Warning: %s
 NULL
 NULL
 array(10) {

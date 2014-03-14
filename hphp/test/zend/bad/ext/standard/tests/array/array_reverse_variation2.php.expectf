@@ -135,19 +135,24 @@ array(6) {
   string(5) "green"
 }
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 13 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 14 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 15 --
 array(6) {
@@ -270,7 +275,8 @@ array(6) {
   string(5) "green"
 }
 -- Iteration 23 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 24 --
 array(6) {
@@ -303,6 +309,7 @@ array(6) {
   string(5) "green"
 }
 -- Iteration 26 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

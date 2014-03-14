@@ -1,4 +1,5 @@
-HipHop Warning: REGEXERR: php_pcre_replace/%d: err=-8(PCRE_ERROR_MATCHLIMIT), pattern='/b.*b/', subject='baaba%s', repl='', limits=(1000000, 100000), extra=(0, -1, 0, 0) in %s on line 4
+
+Warning: REGEXERR: php_pcre_replace/%d: err=-8(PCRE_ERROR_MATCHLIMIT), pattern='/b.*b/', subject='baaba%s', repl='', limits=(1000000, 100000), extra=(0, -1, 0, 0) in %s on line 4
 int(2)
 int(0)
 bool(true)

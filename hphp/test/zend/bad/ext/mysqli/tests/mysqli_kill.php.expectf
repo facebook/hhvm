@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 %unicode|string%(%d) "%s"
 bool(false)
 object(mysqli)#%d (%d) {
@@ -51,10 +52,12 @@ object(mysqli)#%d (%d) {
   [%u|b%"warning_count"]=>
   int(0)
 }
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   [%u|b%"id"]=>
   %unicode|string%(1) "1"
 }
-HipHop Warning: %s
+
+Warning: %s
 done!

@@ -1,18 +1,23 @@
 *** Testing timezone_name_get() : error conditions ***
 
 -- Testing timezone_name_get() function with zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing date_timezone_set() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing timezone_name_get() function with an invalid values for $object argument --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

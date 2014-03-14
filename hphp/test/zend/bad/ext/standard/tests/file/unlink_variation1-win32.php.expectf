@@ -7,7 +7,8 @@ bool(true)
 
 -- Unlinking file without write permission, its dir having default permission --
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
 bool(false)

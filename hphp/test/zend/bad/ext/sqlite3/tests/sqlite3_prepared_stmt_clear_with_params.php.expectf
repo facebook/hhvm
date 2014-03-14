@@ -2,7 +2,8 @@ Creating Table
 INSERT into table
 bool(true)
 SELECTING results
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Closing database
 bool(true)

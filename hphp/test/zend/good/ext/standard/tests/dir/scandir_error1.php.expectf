@@ -1,10 +1,12 @@
 *** Testing scandir() : error conditions ***
 
 -- Testing scandir() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing scandir() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

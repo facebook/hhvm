@@ -1,10 +1,12 @@
 *** Testing exif_tagname() : error conditions ***
 
 -- Testing exif_tagname() function with no arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing exif_tagname() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===Done===

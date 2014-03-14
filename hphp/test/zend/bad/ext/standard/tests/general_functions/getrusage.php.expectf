@@ -1,6 +1,7 @@
 string(5) "array"
 string(5) "array"
 string(5) "array"
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

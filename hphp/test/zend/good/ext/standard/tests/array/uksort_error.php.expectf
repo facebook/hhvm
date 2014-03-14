@@ -1,14 +1,17 @@
 *** Testing uksort() : error conditions ***
 
 -- Testing uksort() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing uksort() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing uksort() function with zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

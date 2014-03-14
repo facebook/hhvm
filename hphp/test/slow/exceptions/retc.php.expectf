@@ -1,7 +1,11 @@
-HipHop Warning: Destructor raised a fatal error: Class already declared: Obj
+
+Warning: Destructor raised a fatal error: Class already declared: Obj
  in %s/test/slow/exceptions/retc.php on line 14
-HipHop Warning: Destructor raised a fatal error: Class already declared: Obj
+
+Warning: Destructor raised a fatal error: Class already declared: Obj
  in %s/test/slow/exceptions/retc.php on line 22
-HipHop Warning: Destructor raised a fatal error: Class already declared: Obj
+
+Warning: Destructor raised a fatal error: Class already declared: Obj
  in %s/test/slow/exceptions/retc.php on line 22
-HipHop Fatal error: Class already declared: Obj in %s/test/slow/exceptions/retc.php on line 6
+
+Fatal error: Class already declared: Obj in %s/test/slow/exceptions/retc.php on line 6

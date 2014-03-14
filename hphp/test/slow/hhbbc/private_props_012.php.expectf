@@ -1,3 +1,4 @@
-HipHop Warning: Creating default object from empty value in %s/slow/hhbbc/private_props_012.php on line 8
+
+Warning: Creating default object from empty value in %s/slow/hhbbc/private_props_012.php on line 8
 NULL
 string(6) "string"

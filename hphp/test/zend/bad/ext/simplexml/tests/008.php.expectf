@@ -8,6 +8,8 @@ array(1) {
 }
 array(0) {
 }
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)

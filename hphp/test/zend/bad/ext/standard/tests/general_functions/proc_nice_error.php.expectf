@@ -1,5 +1,7 @@
 *** Test by calling method or function with incorrect numbers of arguments ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)

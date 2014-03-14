@@ -21,7 +21,8 @@
 21
 22
 23
-HipHop Fatal error: Uncaught exception 'A' with message 'bla!' in %s/test/slow/finally/new_try_catch_012.php:41
+
+Fatal error: Uncaught exception 'A' with message 'bla!' in %s/test/slow/finally/new_try_catch_012.php:41
 Stack trace:
 #0 %s/test/slow/finally/new_try_catch_012.php(%s): blah()
 #1 {main}

@@ -1,3 +1,4 @@
 int(%d)
 int(%d)
-HipHop Warning: %s
+
+Warning: %s

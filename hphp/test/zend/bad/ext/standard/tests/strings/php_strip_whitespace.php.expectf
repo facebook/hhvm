@@ -1,6 +1,8 @@
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 string(0) ""
 string(18) "/* test comment */"
 string(9) "<?php  ?>"

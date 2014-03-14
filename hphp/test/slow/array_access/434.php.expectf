@@ -1,7 +1,9 @@
 string(3) "f()"
-offsetGetHipHop Notice: Undefined property: A::$foo in %s/test/slow/array_access/434.php on line 11
+offsetGet
+Notice: Undefined property: A::$foo in %s/test/slow/array_access/434.php on line 11
 string(3) "f()"
-offsetGetHipHop Notice: Undefined property: A::$bar in %s/test/slow/array_access/434.php on line 11
+offsetGet
+Notice: Undefined property: A::$bar in %s/test/slow/array_access/434.php on line 11
 string(3) "f()"
 offsetGetstring(3) "f()"
 offsetGetstring(3) "f()"

@@ -69,9 +69,11 @@ array(2) {
   int(2)
 }
 -- with empty string --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- with empty array --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

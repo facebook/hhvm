@@ -3,7 +3,8 @@ object(PharFileInfo)#%d (0) {
 }
 string(5) "extra"
 ===UNLINK===
-HipHop Warning: %s
+
+Warning: %s
 object(PharFileInfo)#%d (0) {
 }
 string(5) "extra"

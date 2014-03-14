@@ -1,9 +1,17 @@
-HipHop Notice: %s
-HipHop Warning: %s
-HipHop Notice: %s
-HipHop Warning: %s
-HipHop Notice: %s
-HipHop Warning: %s
-HipHop Notice: %s
-HipHop Warning: %s
+
+Notice: %s
+
+Warning: %s
+
+Notice: %s
+
+Warning: %s
+
+Notice: %s
+
+Warning: %s
+
+Notice: %s
+
+Warning: %s
 CURL2

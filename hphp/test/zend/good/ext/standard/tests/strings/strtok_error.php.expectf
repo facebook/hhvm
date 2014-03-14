@@ -1,11 +1,13 @@
 *** Testing strtok() : error conditions ***
 
 -- Testing strtok() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing strtok() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 string(13) "sample string"
 

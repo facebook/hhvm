@@ -1,6 +1,8 @@
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(1) {
   ["key"]=>
@@ -10,7 +12,9 @@ array(1) {
   ["key"]=>
   string(26) "space and tab before value"
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)

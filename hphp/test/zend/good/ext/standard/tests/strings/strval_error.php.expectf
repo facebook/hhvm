@@ -1,12 +1,15 @@
 *** Testing strval() : error conditions ***
 
 -- Testing strval() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing strval() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing strval() function with object which has not toString() method  --
-HipHop Fatal error: %s
+
+Fatal error: %s

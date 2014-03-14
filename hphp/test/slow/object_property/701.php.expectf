@@ -1,9 +1,14 @@
-HipHop Warning: Cannot access property on non-object in %s/test/slow/object_property/701.php on line 4
+
+Warning: Cannot access property on non-object in %s/test/slow/object_property/701.php on line 4
 NULL
-HipHop Warning: Cannot access property on non-object in %s/test/slow/object_property/701.php on line 4
+
+Warning: Cannot access property on non-object in %s/test/slow/object_property/701.php on line 4
 NULL
-HipHop Warning: Cannot access property on non-object in %s/test/slow/object_property/701.php on line 4
+
+Warning: Cannot access property on non-object in %s/test/slow/object_property/701.php on line 4
 NULL
-HipHop Warning: Cannot access property on non-object in %s/test/slow/object_property/701.php on line 4
+
+Warning: Cannot access property on non-object in %s/test/slow/object_property/701.php on line 4
 NULL
-HipHop Fatal error: Cannot access empty property in %s/test/slow/object_property/701.php on line 4
+
+Fatal error: Cannot access empty property in %s/test/slow/object_property/701.php on line 4

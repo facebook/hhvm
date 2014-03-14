@@ -1,4 +1,5 @@
-HipHop Notice: Use of undefined constant fl_array - assumed 'fl_array' in %s/test/slow/ext_preg/ext_preg.php on line 18
+
+Notice: Use of undefined constant fl_array - assumed 'fl_array' in %s/test/slow/ext_preg/ext_preg.php on line 18
 bool(true)
 bool(true)
 bool(true)
@@ -18,20 +19,25 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/ext_preg.php on line 198
+
+Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/ext_preg.php on line 198
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/ext_preg.php on line 202
+
+Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/ext_preg.php on line 202
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/ext_preg.php on line 205
+
+Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/ext_preg.php on line 205
 bool(true)
 bool(true)
-HipHop Warning: Parameter mismatch, pattern is a string while replacement is an array in %s/test/slow/ext_preg/ext_preg.php on line 208
+
+Warning: Parameter mismatch, pattern is a string while replacement is an array in %s/test/slow/ext_preg/ext_preg.php on line 208
 bool(true)
-HipHop Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/ext_preg.php on line 209
+
+Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/ext_preg.php on line 209
 bool(true)
 bool(true)
 bool(true)

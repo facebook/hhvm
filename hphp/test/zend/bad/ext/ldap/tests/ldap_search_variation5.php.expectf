@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 resource(%d) of type (ldap result)
 array(2) {
   ["count"]=>
@@ -18,7 +19,8 @@ array(2) {
     string(28) "cn=userA,dc=my-domain,dc=com"
   }
 }
-HipHop Warning: %s
+
+Warning: %s
 resource(%d) of type (ldap result)
 array(2) {
   ["count"]=>
@@ -38,7 +40,8 @@ array(2) {
     string(28) "cn=userA,dc=my-domain,dc=com"
   }
 }
-HipHop Warning: %s
+
+Warning: %s
 resource(%d) of type (ldap result)
 array(2) {
   ["count"]=>

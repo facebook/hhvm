@@ -1,14 +1,17 @@
 *** Testing vsprintf() : error conditions ***
 
 -- Testing vsprintf() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing vsprintf() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- testing vsprintf() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

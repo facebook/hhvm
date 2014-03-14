@@ -1,1 +1,2 @@
-HipHop Fatal error: $this is null in %s/test/quick/this-type.php on line 4
+
+Fatal error: $this is null in %s/test/quick/this-type.php on line 4

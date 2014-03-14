@@ -1,2 +1,4 @@
-HipHop Warning: Class c not found in %s/test/slow/zend/class_alias2.php on line 15
-HipHop Warning: Class e not found in %s/test/slow/zend/class_alias2.php on line 18
+
+Warning: Class c not found in %s/test/slow/zend/class_alias2.php on line 15
+
+Warning: Class e not found in %s/test/slow/zend/class_alias2.php on line 18

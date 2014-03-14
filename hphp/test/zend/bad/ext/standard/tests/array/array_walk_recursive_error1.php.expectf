@@ -1,11 +1,14 @@
 *** Testing array_walk_recursive() : error conditions ***
 -- Testing array_walk_recursive() function with zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Testing array_walk_recursive() function with one argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Testing array_walk_recursive() function with non existent callback function  --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

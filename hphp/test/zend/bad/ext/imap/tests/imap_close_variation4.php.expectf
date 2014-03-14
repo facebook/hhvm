@@ -11,14 +11,17 @@ bool(true)
 CL_EXPUNGE was set
 
 -- Iteration 3 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 4 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

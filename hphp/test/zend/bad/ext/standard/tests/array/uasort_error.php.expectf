@@ -1,17 +1,22 @@
 *** Testing uasort() : error conditions ***
 -- Testing uasort() function with Zero argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Testing uasort() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Testing uasort() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Testing uasort() function with non-existent compare function --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Testing uasort() function with non-existent compare function and extra argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

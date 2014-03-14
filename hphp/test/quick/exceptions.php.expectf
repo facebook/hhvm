@@ -25,7 +25,8 @@ string(%d) "#0 %s/test/quick/exceptions.php(91): c()
 #4 {main}"
 bar 3
 caught 3
-HipHop Fatal error: Uncaught exception 'Ex3' with message '' in %s/test/quick/exceptions.php:21
+
+Fatal error: Uncaught exception 'Ex3' with message '' in %s/test/quick/exceptions.php:21
 Stack trace:
 #0 %s/test/quick/exceptions.php(28): bar()
 #1 %s/test/quick/exceptions.php(35): foo2()

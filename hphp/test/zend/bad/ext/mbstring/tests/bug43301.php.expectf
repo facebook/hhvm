@@ -1,3 +1,4 @@
 Parse error: syntax error, unexpected %s, expecting %s or '$' in %sbug43301.php(%d) : mbregex replace on line %d
-HipHop Fatal error: %s
+
+Fatal error: %s
 $1 in %sbug43301.php on line %d

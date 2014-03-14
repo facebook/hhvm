@@ -1,2 +1,3 @@
-HipHop Warning: Division by zero in %s on line 8
+
+Warning: Division by zero in %s on line 8
 bool(false)

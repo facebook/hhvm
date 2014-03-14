@@ -2,7 +2,8 @@ object(A)#1 (1) {
   ["a"]=>
   int(2)
 }
-HipHop Notice: Undefined property: A::$b in %s/test/slow/object/649.php on line 11
+
+Notice: Undefined property: A::$b in %s/test/slow/object/649.php on line 11
 NULL
 object(B)#2 (2) {
   ["b"]=>

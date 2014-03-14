@@ -1,6 +1,7 @@
 *** Testing mb_strrichr() : error conditions ***
 
 -- Testing mb_strrichr() with unknown encoding --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

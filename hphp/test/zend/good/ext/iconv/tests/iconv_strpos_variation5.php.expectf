@@ -2,10 +2,12 @@
 
 **-- Offset is: -10 --**
 -- ASCII String --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 --Multibyte String --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 **-- Offset is: 0 --**

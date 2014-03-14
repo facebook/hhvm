@@ -1,5 +1,6 @@
 bool(true)
-HipHop Warning: No such file or directory in %s/test/slow/ext_openssl/ext_openssl.php on line 18
+
+Warning: No such file or directory in %s/test/slow/ext_openssl/ext_openssl.php on line 18
 bool(true)
 bool(true)
 bool(true)
@@ -8,13 +9,20 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: dn: 0 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
-HipHop Warning: dn: 1 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
-HipHop Warning: dn: 2 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
-HipHop Warning: dn: 3 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
-HipHop Warning: dn: 4 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
-HipHop Warning: dn: 5 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
-HipHop Warning: dn: 6 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
+
+Warning: dn: 0 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
+
+Warning: dn: 1 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
+
+Warning: dn: 2 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
+
+Warning: dn: 3 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
+
+Warning: dn: 4 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
+
+Warning: dn: 5 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
+
+Warning: dn: 6 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line 54
 bool(true)
 bool(true)
 bool(true)
@@ -24,7 +32,8 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: No such file or directory in %s/test/slow/ext_openssl/ext_openssl.php on line 88
+
+Warning: No such file or directory in %s/test/slow/ext_openssl/ext_openssl.php on line 88
 bool(true)
 bool(true)
 bool(true)
@@ -36,11 +45,13 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: No such file or directory in %s/test/slow/ext_openssl/ext_openssl.php on line 130
+
+Warning: No such file or directory in %s/test/slow/ext_openssl/ext_openssl.php on line 130
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: No such file or directory in %s/test/slow/ext_openssl/ext_openssl.php on line 142
+
+Warning: No such file or directory in %s/test/slow/ext_openssl/ext_openssl.php on line 142
 bool(true)
 bool(true)
 bool(true)
@@ -93,7 +104,8 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: No such file or directory in %s/test/slow/ext_openssl/ext_openssl.php on line 277
+
+Warning: No such file or directory in %s/test/slow/ext_openssl/ext_openssl.php on line 277
 bool(true)
 bool(true)
 bool(true)

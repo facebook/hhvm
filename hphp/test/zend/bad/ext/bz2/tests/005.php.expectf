@@ -1,13 +1,16 @@
-HipHop Warning: %s
+
+Warning: %s
 NULL
 string(%d) "BZ%a"
 int(-2)
 int(-2)
 int(-2)
 int(-2)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(-5)
 int(-5)

@@ -11,4 +11,5 @@ array(0) {
 Indexish
 array(0) {
 }
-HipHop Fatal error: Argument 1 passed to ifoo() must be an instance of IFoo, array given in %s on line 20
+
+Fatal error: Argument 1 passed to ifoo() must be an instance of IFoo, array given in %s on line 20

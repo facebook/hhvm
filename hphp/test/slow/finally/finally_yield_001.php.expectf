@@ -1,1 +1,2 @@
-HipHop Fatal error: Yield expression inside a finally block is not supported in %s/test/slow/finally/finally_yield_001.php on line 12
+
+Fatal error: Yield expression inside a finally block is not supported in %s/test/slow/finally/finally_yield_001.php on line 12

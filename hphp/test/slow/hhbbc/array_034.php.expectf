@@ -1,4 +1,5 @@
-HipHop Notice: Undefined index: z in %s/slow/hhbbc/array_034.php on line 10
+
+Notice: Undefined index: z in %s/slow/hhbbc/array_034.php on line 10
 bool(false)
 bool(true)
 bool(true)

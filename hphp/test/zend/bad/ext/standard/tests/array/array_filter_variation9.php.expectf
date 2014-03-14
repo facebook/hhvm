@@ -31,8 +31,10 @@ array(8) {
   [7]=>
   NULL
 }
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

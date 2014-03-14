@@ -1,8 +1,10 @@
-*** Test copy() function: Trying to create a copy of non-existing source in existing destination ***HipHop Warning: %s
+*** Test copy() function: Trying to create a copy of non-existing source in existing destination ***
+Warning: %s
 bool(false)
 bool(false)
 
-*** Test copy() function: Trying to create copy of an existing source in non-existing destination ***HipHop Warning: %s
+*** Test copy() function: Trying to create copy of an existing source in non-existing destination ***
+Warning: %s
 bool(false)
 bool(false)
 int(1500)

@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
  in %s on line %d
 object(stdClass)#5 (13) {
   [%u|b%"name"]=>
@@ -28,5 +29,6 @@ object(stdClass)#5 (13) {
   [%u|b%"decimals"]=>
   int(0)
 }
-HipHop Warning: %s
+
+Warning: %s
 done!

@@ -1,6 +1,7 @@
 string(16) "bob, example.com"
 string(23) "bob, users, example.com"
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

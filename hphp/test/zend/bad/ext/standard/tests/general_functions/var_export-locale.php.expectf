@@ -738,8 +738,10 @@ string(4) "NULL"
 
 
 *** Testing error conditions ***
-HipHop Warning: %s
-NULLHipHop Warning: %s
+
+Warning: %s
+NULL
+Warning: %s
 NULL
 
 Done

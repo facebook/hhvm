@@ -28,19 +28,23 @@ bool(false)
 bool(false)
 
 --empty array--
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 --int indexed array--
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 --associative array--
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 --nested arrays--
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 --uppercase NULL--
@@ -71,7 +75,8 @@ bool(false)
 bool(false)
 
 --instance of classWithoutToString--
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 --undefined var--

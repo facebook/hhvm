@@ -1,10 +1,12 @@
 *** Testing DateTimeZone::getOffset() : error conditions ***
 
 -- Testing DateTimeZone::getOffset() function with zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing DateTimeZone::getOffset() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

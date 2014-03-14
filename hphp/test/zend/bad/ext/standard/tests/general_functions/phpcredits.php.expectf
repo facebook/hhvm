@@ -24,7 +24,8 @@ PHP Quality Assurance Team
 %wWebsites and Infrastructure team%w
 %a
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 --
 PHP Credits

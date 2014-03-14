@@ -4,14 +4,20 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
 *** Finished testing open_basedir configuration [error_log] ***

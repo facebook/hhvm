@@ -1,10 +1,12 @@
 *** Testing finfo_buffer() : error conditions ***
 
 -- Testing finfo_buffer() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing finfo_buffer() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

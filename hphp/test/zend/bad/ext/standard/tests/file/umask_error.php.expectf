@@ -1,4 +1,5 @@
 *** Testing umask() : error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

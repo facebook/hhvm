@@ -185,11 +185,14 @@ string(0) ""
 string(0) ""
 
 -- Iteration 24 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 string(0) ""
 string(0) ""

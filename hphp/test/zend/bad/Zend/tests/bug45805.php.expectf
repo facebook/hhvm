@@ -1,4 +1,5 @@
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 %sbug45805.php(%d): PHPUnit_Util_ErrorHandler::handleError(2048, 'Only variables ...', '%s', %d, Array)
 #1 [internal function]: B->foo()

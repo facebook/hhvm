@@ -1,1 +1,2 @@
-HipHop Fatal error: 'continue' operator accepts only positive numbers in %s/test/slow/continue_statement/zero.php on line 5
+
+Fatal error: 'continue' operator accepts only positive numbers in %s/test/slow/continue_statement/zero.php on line 5

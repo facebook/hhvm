@@ -1,19 +1,26 @@
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
-HipHop Notice: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Notice: %s
+
+Warning: %s
+
+Warning: %s
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 string(1) "1"
 string(3) "heh"
 string(1) "3"
 NULL
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 string(1) "1"
 string(3) "heh"
 string(1) "3"
@@ -31,7 +38,8 @@ array(1) {
   string(2) "ar"
 }
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 string(1) "1"
 string(3) "heh"
 string(1) "3"

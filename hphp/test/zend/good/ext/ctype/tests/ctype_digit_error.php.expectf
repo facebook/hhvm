@@ -1,10 +1,12 @@
 *** Testing ctype_digit() : error conditions ***
 
 -- Testing ctype_digit() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing ctype_digit() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

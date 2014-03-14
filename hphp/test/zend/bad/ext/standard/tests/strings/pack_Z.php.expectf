@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 string(0) ""
 string(5) "foo%c%c"
 string(4) "foo%c"

@@ -1,6 +1,8 @@
-[callback:1]Attempt to flush unerasable buffer - should fail...HipHop Notice: %s
+[callback:1]Attempt to flush unerasable buffer - should fail...
+Notice: %s
 bool(false)
-string(%d) "Attempt to flush unerasable buffer - should fail...HipHop Notice: %s
+string(%d) "Attempt to flush unerasable buffer - should fail...
+Notice: %s
 bool(false)
 "
 Done

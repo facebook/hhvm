@@ -18,7 +18,8 @@ array(4) {
   [">"]=>
   string(4) "&gt;"
 }
-HipHop Warning: get_html_translation_table(): charset `5' not supported, assuming utf-8 in %s/get-html-trans-table-bad.php on line %d
+
+Warning: get_html_translation_table(): charset `5' not supported, assuming utf-8 in %s/get-html-trans-table-bad.php on line %d
 array(4) {
   ["""]=>
   string(6) "&quot;"

@@ -1,10 +1,12 @@
 *** Testing opendir() : usage variations ***
 
 -- After restricting 1st level parent directory --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- After restricting parent directory --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

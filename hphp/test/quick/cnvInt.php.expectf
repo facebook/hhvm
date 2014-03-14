@@ -5,7 +5,8 @@ int(9007199254740992)
 int(1)
 int(0)
 int(1)
-HipHop Notice: Object of class C could not be converted to int in %s on line 4
+
+Notice: Object of class C could not be converted to int in %s on line 4
 int(1)
 int(0)
 int(0)
@@ -15,7 +16,8 @@ int(1)
 int(0)
 int(1)
 int(0)
-HipHop Notice: Object of class C could not be converted to int in %s on line 50
+
+Notice: Object of class C could not be converted to int in %s on line 50
 int(1)
 int(0)
 int(1)

@@ -4,7 +4,8 @@
 resource(%d) of type (stream)
 
 -- Try to close the file pointer using closedir() --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Check file pointer: --

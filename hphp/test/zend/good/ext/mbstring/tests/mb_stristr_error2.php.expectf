@@ -1,6 +1,7 @@
 *** Testing mb_stristr() : error conditions ***
 
 -- Testing mb_stristr() with unknown encoding --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

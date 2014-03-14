@@ -46,7 +46,8 @@ object(C)#3 (2) {
   ["y"]=>
   int(1)
 }
-HipHop Notice: Undefined property: D::$y in %s on line 187
+
+Notice: Undefined property: D::$y in %s on line 187
 NULL
 NULL
 object(D)#4 (2) {

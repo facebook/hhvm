@@ -2,4 +2,5 @@ C1::foo
 C2::foo
 C3::foo
 B4::foo
-HipHop Fatal error: Call to private method A5::__construct from context B5 in %s on line 89
+
+Fatal error: Call to private method A5::__construct from context B5 in %s on line 89

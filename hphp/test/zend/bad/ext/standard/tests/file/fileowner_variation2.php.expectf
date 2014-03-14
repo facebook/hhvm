@@ -1,18 +1,24 @@
 *** Testing Invalid file types ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
-bool(false)
-bool(false)
-HipHop Warning: %s
-bool(false)
+
+Warning: %s
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
+bool(false)
+bool(false)
+bool(false)
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 *** Done ***

@@ -1,11 +1,14 @@
 *** Testing strtr() : error conditions ***
 
--- Testing strtr() function with Zero arguments --HipHop Warning: %s
+-- Testing strtr() function with Zero arguments --
+Warning: %s
 NULL
 
--- Testing strtr() function with less than expected no. of arguments --HipHop Warning: %s
+-- Testing strtr() function with less than expected no. of arguments --
+Warning: %s
 NULL
 
--- Testing strtr() function with more than expected no. of arguments --HipHop Warning: %s
+-- Testing strtr() function with more than expected no. of arguments --
+Warning: %s
 NULL
 Done

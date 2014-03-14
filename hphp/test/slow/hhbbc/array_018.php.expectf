@@ -1,4 +1,5 @@
-HipHop Warning: Creating default object from empty value in %s/slow/hhbbc/array_018.php on line 7
+
+Warning: Creating default object from empty value in %s/slow/hhbbc/array_018.php on line 7
 object(stdClass)#1 (1) {
   ["hahaha"]=>
   string(4) "yeah"

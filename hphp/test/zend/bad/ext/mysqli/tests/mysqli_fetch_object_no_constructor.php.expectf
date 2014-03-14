@@ -10,4 +10,5 @@ Exception with mysqli. Note that at all other places we throws errors but no exc
 Exception: Class mysqli_fetch_object_test does not have a constructor hence you cannot use ctor_params
 
 Fatal error with PHP (but no exception!):
-HipHop Fatal error: %s
+
+Fatal error: %s

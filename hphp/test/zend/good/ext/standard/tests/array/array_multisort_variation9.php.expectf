@@ -1,9 +1,14 @@
 *** Testing array_multisort() : usage variation  - test sort order of all types***
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
 bool(true)
 array(10) {
   ["float -10.5"]=>

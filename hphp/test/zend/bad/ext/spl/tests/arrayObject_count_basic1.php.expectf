@@ -7,7 +7,8 @@ int(99)
 int(2)
 int(99)
 int(1)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ==ArrayIterator==
 int(99)
@@ -18,5 +19,6 @@ int(99)
 int(2)
 int(99)
 int(1)
-HipHop Warning: %s
+
+Warning: %s
 NULL

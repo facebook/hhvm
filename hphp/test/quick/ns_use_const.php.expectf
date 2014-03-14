@@ -1,2 +1,3 @@
-HipHop Notice: Use of undefined constant C - assumed 'C' in %s on line 7
+
+Notice: Use of undefined constant C - assumed 'C' in %s on line 7
 string(1) "C"

@@ -29,14 +29,16 @@ array(1) {
 }
 
 $a->b
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   [0]=>
   string(8) "original"
 }
 
 $a->b->c
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   [0]=>
   string(8) "original"
@@ -55,7 +57,8 @@ array(1) {
 }
 
 $a->b[0]->c
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   [0]=>
   string(8) "original"
@@ -74,7 +77,8 @@ array(1) {
 }
 
 C::$a[0]->b
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   [0]=>
   string(8) "original"

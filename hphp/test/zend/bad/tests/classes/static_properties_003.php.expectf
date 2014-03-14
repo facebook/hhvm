@@ -4,7 +4,8 @@ bool(false)
 Strict Standards: Accessing static property C::$x as non static in %s on line 11
 
 Strict Standards: Accessing static property C::$x as non static in %s on line 12
-HipHop Notice: %s
+
+Notice: %s
 
 Strict Standards: Accessing static property C::$x as non static in %s on line 13
 

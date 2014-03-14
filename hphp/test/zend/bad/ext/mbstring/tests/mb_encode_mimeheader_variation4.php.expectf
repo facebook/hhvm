@@ -70,6 +70,7 @@ string(113) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr
 string(113) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?= =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
 
 -- Iteration 24 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

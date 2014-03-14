@@ -1,1 +1,2 @@
-HipHop Fatal error: Default value for parameter a0 with type Int64 needs to have the same type as the type hint C in %s on line 4
+
+Fatal error: Default value for parameter a0 with type Int64 needs to have the same type as the type hint C in %s on line 4

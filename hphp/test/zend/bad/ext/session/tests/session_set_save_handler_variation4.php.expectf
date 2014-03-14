@@ -26,6 +26,7 @@ array(3) {
   int(1234567890)
 }
 Destroy [%s,%s]
-HipHop Warning: %s
+
+Warning: %s
 Close [%s,PHPSESSID]
 bool(true)

@@ -4,7 +4,8 @@ int(0)
 int(0)
 MyRecursiveArrayIterator::hasChildren()
 MyRecursiveArrayIterator::getChildren()
-HipHop Notice: %s
+
+Notice: %s
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(10)
@@ -13,7 +14,8 @@ int(2)
 int(2)
 MyRecursiveArrayIterator::hasChildren()
 MyRecursiveArrayIterator::getChildren()
-HipHop Notice: %s
+
+Notice: %s
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(30)
@@ -36,7 +38,8 @@ int(0)
 int(0)
 MyRecursiveArrayIterator::hasChildren()
 MyRecursiveArrayIterator::getChildren()
-HipHop Notice: %s
+
+Notice: %s
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(10)
@@ -45,7 +48,8 @@ int(2)
 int(2)
 MyRecursiveArrayIterator::hasChildren()
 MyRecursiveArrayIterator::getChildren()
-HipHop Notice: %s
+
+Notice: %s
 MyRecursiveArrayIterator::hasChildren()
 int(0)
 int(30)

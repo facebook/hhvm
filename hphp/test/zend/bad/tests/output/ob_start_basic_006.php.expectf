@@ -1,30 +1,40 @@
 ---> Test arrays: 
-HipHop Warning: %s
-HipHop Notice: %s
+
+Warning: %s
+
+Notice: %s
 bool(false)
 Array
 (
 )
-HipHop Warning: %s
-HipHop Notice: %s
+
+Warning: %s
+
+Notice: %s
 bool(false)
 Array
 (
 )
-HipHop Warning: %s
-HipHop Notice: %s
+
+Warning: %s
+
+Notice: %s
 bool(false)
 Array
 (
 )
-HipHop Warning: %s
-HipHop Notice: %s
+
+Warning: %s
+
+Notice: %s
 bool(false)
 Array
 (
 )
-HipHop Warning: %s
-HipHop Notice: %s
+
+Warning: %s
+
+Notice: %s
 bool(false)
 Array
 (
@@ -41,8 +51,10 @@ Array
     [0] => C::h
 )
 
-HipHop Warning: %s
-HipHop Notice: %s
+
+Warning: %s
+
+Notice: %s
 bool(false)
 Array
 (

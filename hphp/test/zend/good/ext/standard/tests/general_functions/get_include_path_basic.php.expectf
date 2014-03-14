@@ -3,6 +3,7 @@ string(1) "."
 PASSED
 
 Error cases:
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

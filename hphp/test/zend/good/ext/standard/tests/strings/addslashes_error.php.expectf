@@ -1,11 +1,13 @@
 *** Testing addslashes() : error conditions ***
 
 -- Testing addslashes() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing addslashes() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 string(15) ""hello"\"world""
 Done

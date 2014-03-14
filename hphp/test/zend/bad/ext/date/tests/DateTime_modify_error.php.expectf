@@ -1,10 +1,12 @@
 *** Testing DateTime::modify() : error conditions ***
 
 -- Testing DateTime::modify() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing DateTime::modify() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

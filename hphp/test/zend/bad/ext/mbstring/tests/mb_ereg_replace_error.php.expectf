@@ -1,10 +1,12 @@
 *** Testing mb_ereg_replace() : error conditions ***
 
 -- Testing mb_ereg_replace() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing mb_ereg_replace() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

@@ -3,7 +3,8 @@ Size of source before copy operation => int(300)
 Size of destination before copy operation => int(%d)
 
 -- Now applying copy() operation --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
 bool(true)

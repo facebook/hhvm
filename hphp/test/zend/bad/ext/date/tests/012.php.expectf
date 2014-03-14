@@ -7,7 +7,8 @@ object(DateTime)#1 (3) {
   string(3) "UTC"
 }
 string(19) "2006/01/23 00:00:00"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(19) "2006/01/23 00:00:00"
 object(DateTime)#1 (3) {
@@ -28,7 +29,8 @@ object(DateTime)#1 (3) {
   string(3) "UTC"
 }
 string(19) "2007/12/10 00:00:00"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(19) "2007/12/10 00:00:00"
 Done

@@ -1,14 +1,17 @@
 *** Testing array_product() : error conditions ***
 
 -- Testing array_product() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing array_product() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing array_product() function incorrect argument type --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

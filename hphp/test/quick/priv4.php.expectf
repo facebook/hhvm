@@ -2,4 +2,5 @@ D1::foo true
 D2::foo false
 D3::foo false
 D4::foo false
-HipHop Fatal error: Call to private method X5::foo from context D5 in %s on line 76
+
+Fatal error: Call to private method X5::foo from context D5 in %s on line 76

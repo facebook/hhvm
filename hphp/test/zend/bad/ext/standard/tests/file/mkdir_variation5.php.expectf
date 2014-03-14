@@ -6,9 +6,11 @@ Directory created
 -- creating mkdirVar5.tmp/../mkdirVar5.tmp/aSubDir --
 Directory created
 -- creating mkdirVar5.tmp/../BADDIR/aSubDir --
-HipHop Warning: %s
+
+Warning: %s
 -- creating BADDIR/aSubDir --
-HipHop Warning: %s
+
+Warning: %s
 -- creating %s/mkdirVar5.tmp/aSubDir --
 Directory created
 -- creating %s/./mkdirVar5.tmp/aSubDir --
@@ -16,7 +18,8 @@ Directory created
 -- creating %s/mkdirVar5.tmp/../mkdirVar5.tmp/aSubDir --
 Directory created
 -- creating %s/BADDIR/aSubDir --
-HipHop Warning: %s
+
+Warning: %s
 -- creating mkdirVar5.tmp/aSubDir/ --
 Directory created
 -- creating %s/mkdirVar5.tmp/aSubDir/ --

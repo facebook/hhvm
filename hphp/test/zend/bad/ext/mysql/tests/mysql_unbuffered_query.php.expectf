@@ -6,6 +6,8 @@ array(1) {
 bool(true)
 resource(%d) of type (mysql result)
 int(0)
-HipHop Notice: %s
-HipHop Warning: %s
+
+Notice: %s
+
+Warning: %s
 done!

@@ -1,1 +1,2 @@
-HipHop Fatal error: Cannot re-assign $this in %s/test/slow/reassign_this/1494.php on line 6
+
+Fatal error: Cannot re-assign $this in %s/test/slow/reassign_this/1494.php on line 6

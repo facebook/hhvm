@@ -1,7 +1,9 @@
 Too many arguments
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Too few arguments
-HipHop Warning: %s
+
+Warning: %s
 NULL

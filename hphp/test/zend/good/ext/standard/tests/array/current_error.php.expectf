@@ -1,10 +1,12 @@
 *** Testing current() : error conditions ***
 
 -- Testing current() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing current() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

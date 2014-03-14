@@ -1,6 +1,8 @@
-HipHop Warning: %s
+
+Warning: %s
 NULL
 resource(%d) of type (Hash Context)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

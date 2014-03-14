@@ -1,1 +1,2 @@
-HipHop Warning: password_hash(): Invalid bcrypt cost parameter specified: 3
+
+Warning: password_hash(): Invalid bcrypt cost parameter specified: 3

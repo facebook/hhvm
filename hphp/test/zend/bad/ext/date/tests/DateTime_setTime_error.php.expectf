@@ -1,14 +1,17 @@
 *** Testing DateTime::setTime() : error conditions ***
 
 -- Testing DateTime::setTime() function with zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing DateTime::setTime() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing DateTime::setTime() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

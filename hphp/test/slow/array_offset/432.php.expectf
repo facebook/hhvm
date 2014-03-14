@@ -4,7 +4,8 @@ array(2) {
   [9223372036854775807]=>
   int(2)
 }
-HipHop Warning: Cannot add element to the array as the next element is already occupied in %s/test/slow/array_offset/432.php on line 10
+
+Warning: Cannot add element to the array as the next element is already occupied in %s/test/slow/array_offset/432.php on line 10
 array(2) {
   [9223372036854775806]=>
   int(1)

@@ -1,64 +1,90 @@
 test_filter0
 bool(true)
 test filtering of buffered data
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 test filtering of non buffered data
-HipHop Warning: %s
+
+Warning: %s
 test_filter1
 bool(true)
 test filtering of buffered data
-HipHop Warning: %s
+
+Warning: %s
 test filtering of non buffered data
 test_filter2
 bool(true)
 test filtering of buffered data
-HipHop Warning: %s
+
+Warning: %s
 test filtering of non buffered data
 test_filter3
 bool(true)
 test filtering of buffered data
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 test filtering of non buffered data
-HipHop Warning: %s
+
+Warning: %s
 test_filter4
 bool(true)
 test filtering of buffered data
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 test filtering of non buffered data
-HipHop Warning: %s
+
+Warning: %s
 test append / read / remove
 test_filter0
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 test_filter1
-HipHop Warning: %s
+
+Warning: %s
 test_filter2
-HipHop Warning: %s
+
+Warning: %s
 test_filter3
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 test_filter4
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 test append all / read / remove all
 test_filter0
 test_filter1
 test_filter2
 test_filter3
 test_filter4
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 test append all / read / close
 test_filter0
 test_filter1
 test_filter2
 test_filter3
 test_filter4
-HipHop Warning: %s
+
+Warning: %s

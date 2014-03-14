@@ -6,12 +6,14 @@ string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
 ============================================================================
 ============================================================================
-HipHop Warning: %s
+
+Warning: %s
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
 ============================================================================
 ============================================================================
-HipHop Warning: %s
+
+Warning: %s
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
 ===DONE===

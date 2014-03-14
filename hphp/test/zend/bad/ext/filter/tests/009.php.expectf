@@ -3,9 +3,11 @@ int(513)
 int(518)
 int(257)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

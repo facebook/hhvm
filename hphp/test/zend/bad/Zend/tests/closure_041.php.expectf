@@ -16,14 +16,17 @@ scoped to A: bool(true)
 bound: no
 scoped to A: bool(true)
 bound: no
-HipHop Warning: %s
+
+Warning: %s
 After binding, with same-class instance for the bound ones
-HipHop Warning: %s
+
+Warning: %s
 scoped to A: bool(false)
 bound: no
 scoped to A: bool(false)
 bound: A (should be scoped to dummy class)
-HipHop Warning: %s
+
+Warning: %s
 scoped to A: bool(true)
 bound: no
 scoped to A: bool(true)

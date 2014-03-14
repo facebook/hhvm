@@ -1,3 +1,4 @@
-HipHop Notice: Undefined variable: static_var in %s/test/slow/static_statement/1404.php on line 3
+
+Notice: Undefined variable: static_var in %s/test/slow/static_statement/1404.php on line 3
 
 4

@@ -1,1 +1,2 @@
-HipHop Fatal error: syntax error, unexpected ',', expecting '&' or T_VARIABLE in %s on line 2
+
+Fatal error: syntax error, unexpected ',', expecting '&' or T_VARIABLE in %s on line 2

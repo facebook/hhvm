@@ -1,10 +1,12 @@
 *** Testing iconv_substr() : error conditions ***
 
 -- Testing iconv_substr() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing iconv_substr() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

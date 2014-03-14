@@ -655,13 +655,18 @@ array(7) {
   float(12.34)
 }
 
-*** Testing error conditions ***HipHop Warning: %s
+*** Testing error conditions ***
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Notice: %s
-HipHop Warning: %s
+
+Notice: %s
+
+Warning: %s
 NULL
 Done

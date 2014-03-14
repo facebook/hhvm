@@ -1,8 +1,10 @@
 *** Testing expm1() : error conditions ***
 
 -- Testing expm1() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 
 -- Testing expm1() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 ===Done===

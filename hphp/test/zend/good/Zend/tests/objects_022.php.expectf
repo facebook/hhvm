@@ -4,4 +4,5 @@ object(bar)#%d (0) {
 }
 object(baz)#%d (0) {
 }
-HipHop Fatal error: %s
+
+Fatal error: %s

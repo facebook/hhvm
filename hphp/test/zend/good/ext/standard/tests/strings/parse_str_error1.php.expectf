@@ -1,8 +1,10 @@
 *** Testing parse_str() : error conditions ***
 
 -- Testing htmlentities() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 
 -- Testing htmlentities() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

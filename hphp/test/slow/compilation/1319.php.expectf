@@ -1,1 +1,2 @@
-HipHop Fatal error: Cannot pass parameter 1 by reference in %s/test/slow/compilation/1319.php on line 9
+
+Fatal error: Cannot pass parameter 1 by reference in %s/test/slow/compilation/1319.php on line 9

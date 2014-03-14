@@ -1,10 +1,12 @@
 1) bail
-HipHop Warning: %s
+
+Warning: %s
 2) be quiet
 %s(%d) "%s"
 int(200%d)
 3) bail
-HipHop Warning: %s
+
+Warning: %s
 4) be quiet
 %s(%d) "%s"
 int(200%d)

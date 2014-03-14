@@ -1,37 +1,49 @@
 *** Testing error conditions ***
 -- Testing fgets() with zero argument --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Testing fgets() with more than expected number of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Testing fgets() with invalid length arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
 -- Testing fgets() with invalid arguments --
 -- Iteration 1 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 2 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 3 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 4 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
--- Testing fgets() with closed/unset file handle --HipHop Warning: %s
+-- Testing fgets() with closed/unset file handle --
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

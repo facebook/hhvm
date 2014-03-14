@@ -1,3 +1,4 @@
 int(2)
-HipHop Notice: Constant Y already defined in %s/test/slow/intercept/1199.php on line 8
+
+Notice: Constant Y already defined in %s/test/slow/intercept/1199.php on line 8
 int(3)

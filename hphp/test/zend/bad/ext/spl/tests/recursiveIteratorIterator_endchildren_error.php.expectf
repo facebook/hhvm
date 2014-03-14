@@ -3,7 +3,8 @@
 ===NEXT LOOP===
 1
 2
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 [internal function]: MyRecursiveIteratorIterator->endchildren()
 #1 %s: RecursiveIteratorIterator->next()

@@ -1,7 +1,8 @@
 *** Testing array_fill_keys() : parameter variations ***
 
 -- Testing array_fill_keys() function with both wrong arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing array_fill_keys() function with unusual second arguments --
@@ -13,6 +14,7 @@ array(2) {
 }
 
 -- Testing array_fill_keys() function with mixed array --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

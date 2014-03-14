@@ -10,7 +10,8 @@ bool(false)
 NULL
 null: NULL
 NULL: NULL
-SID: HipHop Notice: Use of undefined constant SID - assumed 'SID' in %s/test/quick/constants-SID.php on line 11
+SID: 
+Notice: Use of undefined constant SID - assumed 'SID' in %s/test/quick/constants-SID.php on line 11
 string(3) "SID"
 End f(1)
 Begin f(2)

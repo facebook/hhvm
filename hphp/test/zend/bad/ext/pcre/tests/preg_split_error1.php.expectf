@@ -1,23 +1,28 @@
 *** Testing preg_split() : error conditions ***
 
 Arg value is abcdef
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value is /[a-zA-Z]
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value is [a-zA-Z]/
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value is /[a-zA-Z]/F
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value is Array
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value is /[a-zA-Z]/
@@ -29,5 +34,6 @@ array(3) {
   [2]=>
   string(4) " 5 6"
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)

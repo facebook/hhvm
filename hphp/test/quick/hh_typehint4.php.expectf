@@ -1,1 +1,2 @@
-HipHop Fatal error: Argument 1 to foo() must be of type ?array, stdClass given in %s/quick/hh_typehint4.php on line 3
+
+Fatal error: Argument 1 to foo() must be of type ?array, stdClass given in %s/quick/hh_typehint4.php on line 3

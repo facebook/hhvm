@@ -1,10 +1,12 @@
 *** Testing class_exists() : error conditions ***
 
 -- Testing class_exists() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing class_exists() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

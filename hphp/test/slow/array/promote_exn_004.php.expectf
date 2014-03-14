@@ -1,5 +1,6 @@
 ----
-HipHop Warning: Invalid operand type was used: Invalid type used as key in %s/slow/array/promote_exn_004.php on line 10
+
+Warning: Invalid operand type was used: Invalid type used as key in %s/slow/array/promote_exn_004.php on line 10
 array(0) {
 }
 ----

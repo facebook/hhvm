@@ -1,6 +1,8 @@
 *** Testing is_a() : usage variations ***
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 
 Arg value 0
 bool(false)

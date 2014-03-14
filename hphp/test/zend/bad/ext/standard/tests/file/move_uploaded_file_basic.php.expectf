@@ -9,7 +9,9 @@ bool(false)
 Valid move to existing file
 bool(true)
 Wrong parameters
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL

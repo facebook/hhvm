@@ -1,14 +1,17 @@
 *** Testing get_headers() : error conditions ***
 
 -- Testing get_headers() function with format argument as type string --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing get_headers() function with format argument as type array --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing get_headers() function with format argument as type object --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

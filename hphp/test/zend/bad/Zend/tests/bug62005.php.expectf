@@ -1,5 +1,7 @@
-HipHop Warning: %s
-HipHop Notice: %s
+
+Warning: %s
+
+Notice: %s
 stdClass Object
 (
     [energy] => 2

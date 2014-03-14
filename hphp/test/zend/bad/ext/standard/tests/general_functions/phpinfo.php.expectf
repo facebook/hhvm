@@ -45,7 +45,8 @@ PHP License
 %A
 bool(true)
 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 --
 phpinfo()

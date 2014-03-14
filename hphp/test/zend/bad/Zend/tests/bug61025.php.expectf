@@ -1,3 +1,6 @@
-HipHop Warning: %s
-HipHop Warning: %s
-BarHipHop Fatal error: %s
+
+Warning: %s
+
+Warning: %s
+Bar
+Fatal error: %s

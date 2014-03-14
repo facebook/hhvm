@@ -6,9 +6,12 @@
 6	YYYY	array('b' => 1) !== '1'	
 7	YYYY	array('b' => 1) !== '0'	
 8	YYYY	array('b' => 1) !== '-1'	
-9	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/952.php on line 126
-YHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/952.php on line 130
-YHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/952.php on line 133
+9	
+Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/952.php on line 126
+Y
+Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/952.php on line 130
+Y
+Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/952.php on line 133
 YY	array('b' => 1) !== nullptr	
 10	YYYY	array('b' => 1) !== array()	
 11	YYYY	array('b' => 1) !== array(1)	

@@ -1,18 +1,21 @@
 a
 NULL
 b
-HipHop Warning: %s
+
+Warning: %s
 NULL
 c
 bool(false)
 %s(0) ""
 [005]
-HipHop Warning: %s
+
+Warning: %s
 NULL
 d
 bool(false)
 %s(0) ""
 [007]
-HipHop Warning: %s
+
+Warning: %s
 NULL
 done!

@@ -18,4 +18,5 @@ closure
 static closure
 %ANULL
 About to fail:
-HipHop Fatal error: Function name must be a string in %s on line 41
+
+Fatal error: Function name must be a string in %s on line 41

@@ -2,7 +2,8 @@ string(%d) "%sextfile.php"
 <?php
 var_dump(__FILE__);
 ?>
-HipHop Warning: %s
+
+Warning: %s
 
 oops
 string(%d) "phar://%sextfile.php"

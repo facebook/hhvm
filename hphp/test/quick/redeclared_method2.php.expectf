@@ -1,1 +1,2 @@
-HipHop Fatal error: Cannot make static method I::foo() non-static in class C in %s on line 5
+
+Fatal error: Cannot make static method I::foo() non-static in class C in %s on line 5

@@ -1,14 +1,17 @@
 *** Testing preg_match_all() : error conditions ***
 
 -- Testing preg_match_all() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing preg_match_all() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing preg_match_all() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

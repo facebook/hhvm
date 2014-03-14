@@ -1,9 +1,11 @@
 string(19) "%d-%d-%d %d:%d:%d"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 DateTime::__construct(): Failed to parse time string (1am todax) at position 4 (t): The timezone could not be found in the database
 string(3) "UTC"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 DateTimeZone::__construct(): Unknown or bad timezone (GottaFindThisOne)
 DONE

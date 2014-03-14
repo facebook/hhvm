@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 ---> Invoke __call via simple method call.
 NULL
 Exception caught OK; continuing.

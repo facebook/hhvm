@@ -1,7 +1,9 @@
 string(5) "array"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(0) {
 }
@@ -33,6 +35,7 @@ array(2) {
 }
 array(0) {
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

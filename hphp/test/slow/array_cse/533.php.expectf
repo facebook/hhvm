@@ -1,15 +1,19 @@
 NULL
 int(0)
-HipHop Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 4
+
+Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 4
 NULL
-HipHop Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 5
+
+Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 5
 string(1) "a"
 HIstring(1) "a"
 HINULL
 int(0)
-HipHop Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 8
+
+Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 8
 NULL
-HipHop Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 9
+
+Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 9
 string(1) "a"
 HIstring(1) "a"
 HI

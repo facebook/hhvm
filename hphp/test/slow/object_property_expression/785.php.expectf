@@ -1,6 +1,9 @@
-HipHop Warning: Creating default object from empty value in %s/test/slow/object_property_expression/785.php on line 5
-HipHop Warning: Creating default object from empty value in %s/test/slow/object_property_expression/785.php on line 5
-HipHop Warning: Creating default object from empty value in %s/test/slow/object_property_expression/785.php on line 5
+
+Warning: Creating default object from empty value in %s/test/slow/object_property_expression/785.php on line 5
+
+Warning: Creating default object from empty value in %s/test/slow/object_property_expression/785.php on line 5
+
+Warning: Creating default object from empty value in %s/test/slow/object_property_expression/785.php on line 5
 object(stdClass)#2 (1) {
   ["prop"]=>
   object(stdClass)#3 (1) {

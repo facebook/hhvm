@@ -11,6 +11,7 @@ custom decimal:
 bool(false)
 float(1.234)
 float(1.234)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)

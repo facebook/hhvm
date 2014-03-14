@@ -1,17 +1,23 @@
-HipHop Warning: %s
+
+Warning: %s
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
-HipHop Warning: %s
+
+Warning: %s
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
-HipHop Warning: %s
+
+Warning: %s
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
-HipHop Warning: %s
+
+Warning: %s
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
-HipHop Warning: %s
+
+Warning: %s
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
-HipHop Warning: %s
+
+Warning: %s
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'

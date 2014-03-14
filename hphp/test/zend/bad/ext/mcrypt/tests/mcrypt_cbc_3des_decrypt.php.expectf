@@ -20,7 +20,8 @@ string(32) "736563726574206d6573736167650000"
 key length=26
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-HipHop Warning: %s
+
+Warning: %s
 string(32) "736563726574206d6573736167650000"
 
 --- testing different iv lengths
@@ -28,7 +29,8 @@ string(32) "736563726574206d6573736167650000"
 iv length=4
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-HipHop Warning: %s
+
+Warning: %s
 string(32) "736563726574206d6573736167650000"
 
 iv length=8
@@ -39,6 +41,7 @@ string(32) "736563726574206d6573736167650000"
 iv length=9
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
-HipHop Warning: %s
+
+Warning: %s
 string(32) "736563726574206d6573736167650000"
 ===DONE===

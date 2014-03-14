@@ -1,10 +1,12 @@
 *** Testing DateTime::setTimezone () : error conditions ***
 
 -- Testing DateTime::setTimezone () function with zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing DateTime::setTimezone () function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

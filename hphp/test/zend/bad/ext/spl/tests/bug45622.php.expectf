@@ -8,7 +8,8 @@ bool(true)
 
 --> Remove the array element and try access again:
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 NULL
 
 --> Re-add the real property:

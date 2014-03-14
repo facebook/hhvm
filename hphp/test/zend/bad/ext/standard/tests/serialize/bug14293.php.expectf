@@ -1,5 +1,6 @@
 __sleep called
-HipHop Notice: %s
+
+Notice: %s
 O:1:"t":2:{s:1:"a";s:5:"hello";s:1:"b";N;}
 object(t)#%d (2) {
   ["a"]=>

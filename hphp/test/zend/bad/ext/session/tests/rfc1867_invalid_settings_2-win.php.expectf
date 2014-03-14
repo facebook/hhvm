@@ -1,3 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 string(2) "1%"
-PHP HipHop Warning: %s
+PHP 
+Warning: %s

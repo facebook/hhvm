@@ -1,4 +1,5 @@
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 %s(%d): DirectoryIterator->__construct('?/abc')
 #1 {main}

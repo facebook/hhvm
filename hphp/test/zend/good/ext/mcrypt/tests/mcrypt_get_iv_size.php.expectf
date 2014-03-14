@@ -1,5 +1,6 @@
 int(32)
 int(8)
 int(0)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)

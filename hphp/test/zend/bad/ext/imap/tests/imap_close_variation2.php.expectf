@@ -7,7 +7,8 @@ bool(true)
 CL_EXPUNGE was not set, 3 msgs in mailbox
 
 -- Iteration 2 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 3 --
@@ -15,19 +16,23 @@ bool(true)
 CL_EXPUNGE was set
 
 -- Iteration 4 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 7 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 8 --
@@ -47,7 +52,8 @@ bool(true)
 CL_EXPUNGE was not set, 3 msgs in mailbox
 
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 13 --
@@ -55,7 +61,8 @@ bool(true)
 CL_EXPUNGE was not set, 3 msgs in mailbox
 
 -- Iteration 14 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 15 --
@@ -63,17 +70,20 @@ bool(true)
 CL_EXPUNGE was not set, 3 msgs in mailbox
 
 -- Iteration 16 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 CL_EXPUNGE was not set, 3 msgs in mailbox
 
 -- Iteration 17 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 CL_EXPUNGE was not set, 3 msgs in mailbox
 
 -- Iteration 18 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 CL_EXPUNGE was not set, 3 msgs in mailbox
 

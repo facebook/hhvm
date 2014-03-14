@@ -29,22 +29,26 @@ string(5) "array"
 int(1)
 
 -- empty array --
-HipHop Warning: %s
+
+Warning: %s
 string(7) "boolean"
 int(1)
 
 -- int indexed array --
-HipHop Warning: %s
+
+Warning: %s
 string(7) "boolean"
 int(1)
 
 -- associative array --
-HipHop Warning: %s
+
+Warning: %s
 string(7) "boolean"
 int(1)
 
 -- nested arrays --
-HipHop Warning: %s
+
+Warning: %s
 string(7) "boolean"
 int(1)
 
@@ -73,42 +77,50 @@ string(5) "array"
 int(1)
 
 -- empty string DQ --
-HipHop Warning: %s
+
+Warning: %s
 string(7) "boolean"
 int(1)
 
 -- empty string SQ --
-HipHop Warning: %s
+
+Warning: %s
 string(7) "boolean"
 int(1)
 
 -- string DQ --
-HipHop Warning: %s
+
+Warning: %s
 string(7) "boolean"
 int(1)
 
 -- string SQ --
-HipHop Warning: %s
+
+Warning: %s
 string(7) "boolean"
 int(1)
 
 -- mixed case string --
-HipHop Warning: %s
+
+Warning: %s
 string(7) "boolean"
 int(1)
 
 -- heredoc --
-HipHop Warning: %s
+
+Warning: %s
 string(7) "boolean"
 int(1)
 
 -- instance of classWithToString --
-HipHop Warning: %s
+
+Warning: %s
 string(7) "boolean"
 int(1)
 
 -- instance of classWithoutToString --
-HipHop Warning: %s
+
+Warning: %s
 string(7) "boolean"
 int(1)
 
@@ -121,7 +133,8 @@ string(5) "array"
 int(1)
 
 -- resource --
-HipHop Warning: %s
+
+Warning: %s
 string(7) "boolean"
 int(1)
 ===DONE===

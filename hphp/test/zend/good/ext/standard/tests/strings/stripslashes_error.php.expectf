@@ -1,11 +1,13 @@
 *** Testing stripslashes() : error conditions ***
 
 -- Testing stripslashes() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing stripslashes() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 string(18) "\"hello\"\"world\""
 Done

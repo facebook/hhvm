@@ -1,39 +1,48 @@
 *** Testing iconv_strlen() : usage variations ***
 
 -- Iteration 1 --
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 
 -- Iteration 2 --
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 
 -- Iteration 3 --
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 
 -- Iteration 4 --
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 
 -- Iteration 5 --
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 
 -- Iteration 6 --
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 
 -- Iteration 7 --
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 
 -- Iteration 8 --
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 
 -- Iteration 9 --
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 
 -- Iteration 10 --
@@ -43,14 +52,16 @@ int(12)
 int(12)
 
 -- Iteration 12 --
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 
 -- Iteration 13 --
 int(12)
 
 -- Iteration 14 --
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 
 -- Iteration 15 --
@@ -81,6 +92,7 @@ int(12)
 int(12)
 
 -- Iteration 24 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

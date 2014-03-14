@@ -1,4 +1,6 @@
-HipHop Notice: Use of undefined constant MUST_PREPARE - assumed 'MUST_PREPARE' in %s on line 20
+
+Notice: Use of undefined constant MUST_PREPARE - assumed 'MUST_PREPARE' in %s on line 20
 ok
-HipHop Notice: Use of undefined constant MUST_PREPARE - assumed 'MUST_PREPARE' in %s on line 49
+
+Notice: Use of undefined constant MUST_PREPARE - assumed 'MUST_PREPARE' in %s on line 49
 ok

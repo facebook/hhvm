@@ -1,3 +1,4 @@
 OverridingIsSilent1 __construct
 OverridingIsSilent2 OverridingIsSilent2
-HipHop Fatal error: %s
+
+Fatal error: %s

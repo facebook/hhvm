@@ -5,11 +5,15 @@ float(1)
 float(0)
 float(0)
 float(3.8729833462074)
-HipHop Warning: sqrt() expects parameter 1 to be double, string given in %s on line 10
+
+Warning: sqrt() expects parameter 1 to be double, string given in %s on line 10
 NULL
-HipHop Warning: sqrt() expects parameter 1 to be double, object given in %s on line 11
+
+Warning: sqrt() expects parameter 1 to be double, object given in %s on line 11
 NULL
-HipHop Warning: sqrt() expects parameter 1 to be double, array given in %s on line 12
+
+Warning: sqrt() expects parameter 1 to be double, array given in %s on line 12
 NULL
-HipHop Warning: sqrt() expects parameter 1 to be double, array given in %s on line 13
+
+Warning: sqrt() expects parameter 1 to be double, array given in %s on line 13
 NULL

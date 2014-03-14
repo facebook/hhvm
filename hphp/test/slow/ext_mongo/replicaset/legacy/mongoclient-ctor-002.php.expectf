@@ -1,6 +1,8 @@
 %s: Mongo::__construct(): The 'timeout' option is deprecated. Please use 'connectTimeoutMS' instead in %s on line %d
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(5) {
   ["replicaSet"]=>
   string(%d) "%s"

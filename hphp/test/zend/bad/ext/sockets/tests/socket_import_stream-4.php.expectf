@@ -14,20 +14,26 @@ stream_set_blocking 1
 
 
 close stream
-stream_set_blocking HipHop Warning: %s
+stream_set_blocking 
+Warning: %s
 
-socket_set_block HipHop Warning: %s
+socket_set_block 
+Warning: %s
 
-socket_get_option HipHop Warning: %s
+socket_get_option 
+Warning: %s
 
 
 
 close socket
-stream_set_blocking HipHop Warning: %s
+stream_set_blocking 
+Warning: %s
 
-socket_set_block HipHop Warning: %s
+socket_set_block 
+Warning: %s
 
-socket_get_option HipHop Warning: %s
+socket_get_option 
+Warning: %s
 
 
 Done.

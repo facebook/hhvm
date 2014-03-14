@@ -1,2 +1,3 @@
-3HipHop Warning: Cannot use a scalar value as an array in %s on line 4
+3
+Warning: Cannot use a scalar value as an array in %s on line 4
 int(3)

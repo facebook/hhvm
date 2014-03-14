@@ -1,2 +1,4 @@
-HipHop Warning: foo() expects exactly 1 parameter, 0 given in %s/test/quick/hh_typehint5.php on line 6
-HipHop Fatal error: Argument 1 to foo() must be of type ?Bar, null given in %s/test/quick/hh_typehint5.php on line 6
+
+Warning: foo() expects exactly 1 parameter, 0 given in %s/test/quick/hh_typehint5.php on line 6
+
+Fatal error: Argument 1 to foo() must be of type ?Bar, null given in %s/test/quick/hh_typehint5.php on line 6

@@ -3,4 +3,5 @@ ok
 
 Strict Standards: Non-static method foo::aa() should not be called statically in %s on line %d
 ok
-HipHop Fatal error: %s
+
+Fatal error: %s

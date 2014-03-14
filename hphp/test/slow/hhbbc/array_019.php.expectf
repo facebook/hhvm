@@ -1,5 +1,7 @@
-HipHop Warning: Cannot access property on non-object in %s/slow/hhbbc/array_019.php on line 8
-HipHop Warning: Cannot access property on non-object in %s/slow/hhbbc/array_019.php on line 9
+
+Warning: Cannot access property on non-object in %s/slow/hhbbc/array_019.php on line 8
+
+Warning: Cannot access property on non-object in %s/slow/hhbbc/array_019.php on line 9
 NULL
 array(1) {
   ["x"]=>
@@ -8,7 +10,8 @@ array(1) {
     int(2)
   }
 }
-HipHop Warning: Creating default object from empty value in %s/slow/hhbbc/array_019.php on line 8
+
+Warning: Creating default object from empty value in %s/slow/hhbbc/array_019.php on line 8
 int(42)
 array(1) {
   ["x"]=>

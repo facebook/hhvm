@@ -1,6 +1,7 @@
 *** Testing session_start() : variation ***
 string(%d) "%s"
-HipHop Notice: %s
+
+Notice: %s
 bool(true)
 string(%d) "%s"
 bool(true)

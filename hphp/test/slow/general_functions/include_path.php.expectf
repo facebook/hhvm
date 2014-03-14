@@ -1,10 +1,13 @@
 string(1) "."
-HipHop Warning: Too many arguments for get_include_path(), expected 0 in %s/test/slow/general_functions/include_path.php on line 9
+
+Warning: Too many arguments for get_include_path(), expected 0 in %s/test/slow/general_functions/include_path.php on line 9
 NULL
 NULL
-HipHop Warning: Too many arguments for restore_include_path(), expected 0 in %s/test/slow/general_functions/include_path.php on line 12
+
+Warning: Too many arguments for restore_include_path(), expected 0 in %s/test/slow/general_functions/include_path.php on line 12
 NULL
-HipHop Warning: set_include_path() expects exactly 1 parameter, 0 given in %s/test/slow/general_functions/include_path.php on line 15
+
+Warning: set_include_path() expects exactly 1 parameter, 0 given in %s/test/slow/general_functions/include_path.php on line 15
 NULL
 string(1) "."
 string(1) "."

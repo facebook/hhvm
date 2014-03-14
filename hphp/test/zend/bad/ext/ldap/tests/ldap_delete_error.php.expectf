@@ -1,14 +1,19 @@
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(17) "Invalid DN syntax"
 int(34)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(14) "No such object"
 int(32)

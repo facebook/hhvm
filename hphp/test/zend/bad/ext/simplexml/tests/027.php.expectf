@@ -14,7 +14,8 @@
   <person gender="male">Joe
   </person>
 </people>
-HipHop Warning: %s
+
+Warning: %s
 <people>
   <person gender="female">Jane
   </person>

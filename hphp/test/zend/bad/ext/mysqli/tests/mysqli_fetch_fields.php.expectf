@@ -54,5 +54,6 @@ object(stdClass)#%d (13) {
   [%u|b%"decimals"]=>
   int(0)
 }
-HipHop Warning: %s
+
+Warning: %s
 done!

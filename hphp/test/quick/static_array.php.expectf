@@ -169,7 +169,8 @@ array(2) {
     int(0)
   }
 }
-HipHop Warning: Invalid operand type was used: Invalid type used as key in %s on line 88
+
+Warning: Invalid operand type was used: Invalid type used as key in %s on line 88
 array(0) {
 }
 array(1) {

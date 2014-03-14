@@ -1,3 +1,4 @@
 object(Leaf)#%d (0) {
 }
-HipHop Fatal error: %s
+
+Fatal error: %s

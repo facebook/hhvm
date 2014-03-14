@@ -1,9 +1,15 @@
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 [011] Access denied for user '%s'@'%s' (using password: YES)
 [014] Access denied for user '%s'@'%s' (using password: YES)
 done!

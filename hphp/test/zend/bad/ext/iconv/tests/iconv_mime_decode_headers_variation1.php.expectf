@@ -93,6 +93,7 @@ array(0) {
 }
 
 -- Iteration 24 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

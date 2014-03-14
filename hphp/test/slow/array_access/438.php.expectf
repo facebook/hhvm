@@ -1,4 +1,5 @@
-HipHop Warning: Creating default object from empty value in %s/test/slow/array_access/438.php on line 6
+
+Warning: Creating default object from empty value in %s/test/slow/array_access/438.php on line 6
 array(1) {
   [0]=>
   object(stdClass)#1 (1) {

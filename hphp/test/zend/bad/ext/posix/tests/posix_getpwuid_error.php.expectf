@@ -1,11 +1,13 @@
 *** Testing posix_getpwuid() : error conditions ***
 
 -- Testing posix_getpwuid() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing posix_getpwuid() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing posix_getpwuid() function negative uid --

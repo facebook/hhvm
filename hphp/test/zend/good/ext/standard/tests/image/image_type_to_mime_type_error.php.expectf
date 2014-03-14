@@ -1,10 +1,12 @@
 *** Testing image_type_to_mime_type() : error conditions ***
 
 -- Testing image_type_to_mime_type() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing image_type_to_mime_type() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

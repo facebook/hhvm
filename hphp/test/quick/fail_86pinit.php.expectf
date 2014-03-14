@@ -1,4 +1,5 @@
-HipHop Fatal error: Class undefined: Y in %s on line 5
+
+Fatal error: Class undefined: Y in %s on line 5
 array(6) {
   [0]=>
   int(16777217)

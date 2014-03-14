@@ -1,5 +1,6 @@
 Deprecated: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in %s on line %d
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
 ===DONE===

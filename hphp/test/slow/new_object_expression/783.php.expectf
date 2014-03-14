@@ -1,12 +1,23 @@
-HipHop Warning: test() expects exactly 1 parameter, 0 given in %s/test/slow/new_object_expression/783.php on line 12
-HipHop Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
-HipHop Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
-HipHop Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
-HipHop Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
-HipHop Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
-HipHop Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
-HipHop Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
-HipHop Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
-HipHop Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
-HipHop Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
+
+Warning: test() expects exactly 1 parameter, 0 given in %s/test/slow/new_object_expression/783.php on line 12
+
+Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
+
+Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
+
+Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
+
+Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
+
+Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
+
+Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
+
+Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
+
+Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
+
+Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
+
+Notice: Undefined variable: e in %s/test/slow/new_object_expression/783.php on line 16
 string(83) "foohellobarhellobarhellobarhellobarhellobarhellobarhellobarhellobarhellobarhellobar"

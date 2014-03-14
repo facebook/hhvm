@@ -1,4 +1,5 @@
 bool(true)
 bool(false)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s

@@ -1,1 +1,2 @@
-HipHop Fatal error: Call to undefined function eval() in %s on line 5
+
+Fatal error: Call to undefined function eval() in %s on line 5

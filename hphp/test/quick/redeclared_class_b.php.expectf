@@ -1,2 +1,3 @@
 string(5) "hello"
-HipHop Fatal error: Class already declared: X in %s on line 2
+
+Fatal error: Class already declared: X in %s on line 2

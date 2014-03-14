@@ -1,15 +1,19 @@
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(1) {
   [%u|b%"test"]=>
   %unicode|string%(0) ""
 }
-HipHop Warning: %s
+
+Warning: %s
  in %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
  in %s
 bool(false)
 array(1) {

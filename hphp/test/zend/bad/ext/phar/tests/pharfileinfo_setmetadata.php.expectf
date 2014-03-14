@@ -2,5 +2,6 @@ Phar entry is a temporary directory (not an actual entry in the archive), cannot
 Phar entry is a temporary directory (not an actual entry in the archive), cannot delete metadata
 Write operations disabled by the php.ini setting phar.readonly
 Write operations disabled by the php.ini setting phar.readonly
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

@@ -9,7 +9,8 @@ bool(true)
 string(1) "	"
 bool(true)
 string(1) "	"
-HipHop Warning: %s
+
+Warning: %s
 string(1) "	"
 bool(true)
 string(1) "	"

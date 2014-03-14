@@ -42,7 +42,8 @@ int(10)
 
 bool(true)
 -- Anonymous function with one more argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Anonymous function with null argument --
 1

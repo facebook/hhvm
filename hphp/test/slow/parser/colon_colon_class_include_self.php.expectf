@@ -1,1 +1,2 @@
-HipHop Fatal error: Cannot access self::class when no class scope is active in %s/slow/parser/colon_colon_class_include_self.inc on line 2
+
+Fatal error: Cannot access self::class when no class scope is active in %s/slow/parser/colon_colon_class_include_self.inc on line 2

@@ -1,1 +1,2 @@
-HipHop Fatal error: You can't use eval in RepoAuthoritative mode in %s/test/slow/authmode/eval_repo.php on line %d
+
+Fatal error: You can't use eval in RepoAuthoritative mode in %s/test/slow/authmode/eval_repo.php on line %d

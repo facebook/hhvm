@@ -1,6 +1,7 @@
 *** Testing str_split() : different intger values for 'split_length' with heredoc 'str' ***
 -- Iteration 1 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 2 --
 array(30) {
@@ -66,7 +67,8 @@ array(30) {
   string(1) "."
 }
 -- Iteration 3 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 4 --
 array(1) {
@@ -91,6 +93,7 @@ array(1) {
   string(30) "string with 123,escape char 	."
 }
 -- Iteration 8 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

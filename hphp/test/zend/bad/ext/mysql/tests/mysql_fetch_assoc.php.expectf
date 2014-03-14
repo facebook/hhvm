@@ -21,7 +21,8 @@ array(5) {
   [%u|b%"e"]=>
   %unicode|string%(1) "1"
 }
-HipHop Warning: %s
+
+Warning: %s
 
 Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [010]

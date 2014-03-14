@@ -55,5 +55,6 @@ object(stdClass)#%d (13) {
   int(0)
 }
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 done!

@@ -1,4 +1,5 @@
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 %s(%d): impl->__get('counter')
 #1 %s(%d): impl->__construct()

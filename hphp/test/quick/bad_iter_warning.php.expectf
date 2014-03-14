@@ -1,8 +1,10 @@
 start iter loop
-HipHop Warning: Invalid argument supplied for foreach() in %s on line 8
+
+Warning: Invalid argument supplied for foreach() in %s on line 8
 end iter loop
 start witer loop
-HipHop Warning: Invalid argument supplied for foreach() in %s on line 14
+
+Warning: Invalid argument supplied for foreach() in %s on line 14
 end witer loop
 start miter loop
 end of miter loop

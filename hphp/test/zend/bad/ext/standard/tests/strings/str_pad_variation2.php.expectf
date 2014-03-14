@@ -14,13 +14,16 @@ string(11) "Test string"
 -- Iteration 7 --
 string(1012) "Test string                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         "
 -- Iteration 8 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 9 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
 string(11) "Test string"
@@ -35,10 +38,12 @@ string(11) "Test string"
 -- Iteration 16 --
 string(11) "Test string"
 -- Iteration 17 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 18 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 19 --
 string(11) "Test string"

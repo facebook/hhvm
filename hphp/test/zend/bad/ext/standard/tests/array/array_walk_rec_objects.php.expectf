@@ -8,5 +8,6 @@
 %unicode|string%(14) "test_protected"
 %unicode|string%(7) "var_pub"
 %unicode|string%(11) "test_public"
-HipHop Warning: %s
+
+Warning: %s
 Done

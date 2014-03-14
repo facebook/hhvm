@@ -1,1 +1,2 @@
-HipHop Fatal error: syntax error, unexpected T_STRING, expecting T_CATCH or T_FINALLY in %s
+
+Fatal error: syntax error, unexpected T_STRING, expecting T_CATCH or T_FINALLY in %s

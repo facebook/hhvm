@@ -1,6 +1,8 @@
 *** Testing pathinfo() for error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

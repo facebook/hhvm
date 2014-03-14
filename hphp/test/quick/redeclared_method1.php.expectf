@@ -1,1 +1,2 @@
-HipHop Fatal error: Access level to C::foo() must be public (as in interface I) in %s on line 5
+
+Fatal error: Access level to C::foo() must be public (as in interface I) in %s on line 5

@@ -171,7 +171,8 @@ array(3) {
 }
 
 -- Iteration 18 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 19 --
@@ -205,7 +206,8 @@ array(3) {
 }
 
 -- Iteration 22 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 23 --

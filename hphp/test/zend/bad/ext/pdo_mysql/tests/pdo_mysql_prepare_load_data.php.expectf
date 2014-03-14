@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 [004] [0] array (
   0 => 'HY000',
   1 => %d,

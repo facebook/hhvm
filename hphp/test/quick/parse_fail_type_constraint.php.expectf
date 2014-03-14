@@ -1,1 +1,2 @@
-HipHop Fatal error: syntax error, unexpected T_AS, expecting '=' in %s on line 4
+
+Fatal error: syntax error, unexpected T_AS, expecting '=' in %s on line 4

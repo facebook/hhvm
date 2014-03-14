@@ -21,7 +21,10 @@ adler32(raw): 0f8c02f9
 md5(raw): 8bddf39dd1c566c27acc7fa85ec36acf
 sha256(raw): 9135286ca4c84dec711e4b831f6cd39e672e5ff93d011321274eb76733cc1e40
 Error cases:
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 ===Done===

@@ -10,6 +10,7 @@ float(0)
 float(1)
 float(0)
 float(%d)
-HipHop Notice: %s
+
+Notice: %s
 float(1)
 Done

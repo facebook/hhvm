@@ -1,11 +1,13 @@
 *** Testing hebrev() : error conditions ***
 
 -- Testing hebrev() function with no arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing hebrev() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
  
 ===DONE===

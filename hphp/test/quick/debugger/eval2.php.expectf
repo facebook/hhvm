@@ -14,7 +14,8 @@ Breakpoint 1 reached at foo() on line 3 of %s/eval2.php
 1
 c
 = $x
-HipHop Notice: Undefined variable: x
+
+Notice: Undefined variable: x
 null
 $_ = "don't want to see this"
 = throwSomething()

@@ -12,4 +12,5 @@ NULL
 NULL
 [E_RECOVERABLE_ERROR] Argument 3 passed to mysqli_fetch_object() must be of the type array, string given in %s on line %d
 Parameter ctor_params must be an array
-HipHop Fatal error: %s
+
+Fatal error: %s

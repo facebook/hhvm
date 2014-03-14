@@ -8,6 +8,7 @@ array(2) {
 }
 [005]
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 done!

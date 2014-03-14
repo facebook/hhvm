@@ -1,16 +1,22 @@
 int(1)
 int(2)
 int(20)
-HipHop Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 0 given
+
+Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 0 given
 int(42)
-HipHop Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 1 given
+
+Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 1 given
 int(42)
 int(4)
-HipHop Warning: ReflectionProperty::setValue() expects parameter 1 to be object, integer given
+
+Warning: ReflectionProperty::setValue() expects parameter 1 to be object, integer given
 int(4)
-HipHop Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 0 given
+
+Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 0 given
 NULL
-HipHop Warning: ReflectionProperty::getValue() expects parameter 1 to be object, string given
+
+Warning: ReflectionProperty::getValue() expects parameter 1 to be object, string given
 NULL
-HipHop Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 2 given
+
+Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 2 given
 NULL

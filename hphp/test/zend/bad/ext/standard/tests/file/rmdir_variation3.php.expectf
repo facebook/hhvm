@@ -6,9 +6,11 @@ Directory removed
 -- removing rmdirVar3.tmp/../rmdirVar3.tmp/aSubDir --
 Directory removed
 -- removing rmdirVar3.tmp/../BADDIR/aSubDir --
-HipHop Warning: %s
+
+Warning: %s
 -- removing BADDIR/aSubDir --
-HipHop Warning: %s
+
+Warning: %s
 -- removing %s/rmdirVar3.tmp/aSubDir --
 Directory removed
 -- removing %s/./rmdirVar3.tmp/aSubDir --
@@ -16,7 +18,8 @@ Directory removed
 -- removing %s/rmdirVar3.tmp/../rmdirVar3.tmp/aSubDir --
 Directory removed
 -- removing %s/BADDIR/aSubDir --
-HipHop Warning: %s
+
+Warning: %s
 -- removing rmdirVar3.tmp/aSubDir/ --
 Directory removed
 -- removing %s/rmdirVar3.tmp/aSubDir/ --

@@ -1,4 +1,5 @@
 unicode(%d) "%s017U.phar.php"
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 phar url "phar://hio" is unknown in %s017U.php on line %d

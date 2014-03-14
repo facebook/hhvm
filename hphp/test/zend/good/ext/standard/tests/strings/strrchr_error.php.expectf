@@ -1,11 +1,14 @@
 *** Testing strrchr() function: error conditions ***
 
--- Testing strrchr() function with Zero arguments --HipHop Warning: %s
+-- Testing strrchr() function with Zero arguments --
+Warning: %s
 NULL
 
--- Testing strrchr() function with less than expected no. of arguments --HipHop Warning: %s
+-- Testing strrchr() function with less than expected no. of arguments --
+Warning: %s
 NULL
 
--- Testing strrchr() function with more than expected no. of arguments --HipHop Warning: %s
+-- Testing strrchr() function with more than expected no. of arguments --
+Warning: %s
 NULL
 *** Done ***

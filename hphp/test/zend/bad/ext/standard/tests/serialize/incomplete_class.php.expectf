@@ -1,8 +1,11 @@
 object(__PHP_Incomplete_Class)#%d (0) {
 }
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 NULL
-HipHop Notice: %s
+
+Notice: %s
 NULL
 Done

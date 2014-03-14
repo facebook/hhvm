@@ -1,1 +1,2 @@
-HipHop Fatal error: Class C contains abstract method (bar) and must therefore be declared abstract or implement the remaining methods in %s on line %d
+
+Fatal error: Class C contains abstract method (bar) and must therefore be declared abstract or implement the remaining methods in %s on line %d

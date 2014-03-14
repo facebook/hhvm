@@ -6,6 +6,7 @@ bool(false)
 [010]
 1
 2
-HipHop Warning: %s
+
+Warning: %s
 NULL
 done!

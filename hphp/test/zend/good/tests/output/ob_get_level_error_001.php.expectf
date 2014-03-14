@@ -1,6 +1,7 @@
 *** Testing ob_get_level() : error conditions ***
 
 -- Testing ob_get_level() function with one argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

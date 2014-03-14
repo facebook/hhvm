@@ -1,4 +1,5 @@
 %unicode|string%(%d) "Table 'няма_такава_таблица' doesn't exist"
-HipHop Warning: %s
+
+Warning: %s
 NULL
 done!

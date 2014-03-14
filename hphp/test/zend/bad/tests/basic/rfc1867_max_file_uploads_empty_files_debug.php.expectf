@@ -1,6 +1,9 @@
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Warning: %s
+
+Notice: %s
+
+Notice: %s
+
+Warning: %s
 array(4) {
   ["file2"]=>
   array(5) {

@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 string(50) "'Something\', 1 as one, 2 as two  FROM dual; -- f'"
 string(50) "'Something'', 1 as one, 2 as two  FROM dual; -- f'"
 string(50) "'Something'', 1 as one, 2 as two  FROM dual; -- f'"

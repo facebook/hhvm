@@ -26,7 +26,8 @@ array(1) {
   [0]=>
   &int(1)
 }
-HipHop Warning: Parameter 1 to bar() expected to be a reference, value given in %s on line 13
+
+Warning: Parameter 1 to bar() expected to be a reference, value given in %s on line 13
 int(1)
 array(1) {
   [0]=>
@@ -36,9 +37,11 @@ array(1) {
   [0]=>
   int(1)
 }
-HipHop Warning: Invalid argument: function: method 'baz' not found in %s on line 18
+
+Warning: Invalid argument: function: method 'baz' not found in %s on line 18
 NULL
-HipHop Warning: Invalid argument: function: method 'baz' not found in %s on line 19
+
+Warning: Invalid argument: function: method 'baz' not found in %s on line 19
 NULL
 array(2) {
   [0]=>

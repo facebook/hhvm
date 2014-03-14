@@ -1,3 +1,4 @@
 string(130) "transliterator_transliterate: Neither "start" nor the "end" arguments can exceed the number of UTF-16 code units (in this case, 1)"
-HipHop Notice: %s
+
+Notice: %s
 bool(false)

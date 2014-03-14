@@ -1,2 +1,3 @@
 Strict Standards: Redefining already defined constructor for class foo in %s on line %d
-HipHop Fatal error: %s
+
+Fatal error: %s

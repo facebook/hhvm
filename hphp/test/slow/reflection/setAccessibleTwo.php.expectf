@@ -1,2 +1,4 @@
-HipHop Notice: Undefined property: A::$b in %s/test/slow/reflection/setAccessibleTwo.php on line 14
-HipHop Fatal error: Invalid access to class C's property d in %s/test/slow/reflection/setAccessibleTwo.php on line 19
+
+Notice: Undefined property: A::$b in %s/test/slow/reflection/setAccessibleTwo.php on line 14
+
+Fatal error: Invalid access to class C's property d in %s/test/slow/reflection/setAccessibleTwo.php on line 19

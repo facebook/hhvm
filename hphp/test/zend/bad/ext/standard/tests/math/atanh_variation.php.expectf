@@ -7,10 +7,12 @@ float(NAN)
 float(NAN)
 float(NAN)
 float(NAN)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 float(NAN)
-HipHop Notice: %s
+
+Notice: %s
 float(NAN)
 float(0)
 float(INF)

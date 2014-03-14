@@ -15,8 +15,10 @@ Testing with option value:float(1)
 imap_fetch_overview() returns an object
 
 Testing with option value:int(%d)
-HipHop Warning: %s
+
+Warning: %s
 
 Testing with option value:int(-%d)
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

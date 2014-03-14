@@ -698,7 +698,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
   }
   // need to silence even with the AlwaysLogUnhandledExceptions flag set
   if (!silenced && RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e,
+    Logger::Log(Logger::LogError, "\nFatal error: ", e,
                 file.c_str(), line);
   }
   bool handled = false;
@@ -706,7 +706,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !silenced && !RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e,
+    Logger::Log(Logger::LogError, "\nFatal error: ", e,
                 file.c_str(), line);
   }
   return handled;
@@ -715,7 +715,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
 bool ExecutionContext::onUnhandledException(Object e) {
   String err = e.toString();
   if (RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Error("HipHop Fatal error: Uncaught %s", err.data());
+    Logger::Error("\nFatal error: Uncaught %s", err.data());
   }
 
   if (e.instanceof(SystemLib::s_ExceptionClass)) {
@@ -734,7 +734,7 @@ bool ExecutionContext::onUnhandledException(Object e) {
   m_lastError = err;
 
   if (!RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Error("HipHop Fatal error: Uncaught %s", err.data());
+    Logger::Error("\nFatal error: Uncaught %s", err.data());
   }
   return false;
 }

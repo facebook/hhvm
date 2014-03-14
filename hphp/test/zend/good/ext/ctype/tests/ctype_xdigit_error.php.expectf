@@ -1,10 +1,12 @@
 *** Testing ctype_xdigit() : error conditions ***
 
 -- Testing ctype_xdigit() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing ctype_xdigit() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

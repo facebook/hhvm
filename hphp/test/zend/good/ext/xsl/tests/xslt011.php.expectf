@@ -1,5 +1,6 @@
 Test 11: php:function Support
-HipHop Warning: %s
+
+Warning: %s
 <?xml version="1.0"?>
 foobar - secondArg
 foobar - 

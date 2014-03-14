@@ -1,8 +1,10 @@
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(%d)
 int(0)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(%d)
 int(0)

@@ -1,7 +1,10 @@
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)
 <code><span style="color: #000000">
 <span style="color: #0000BB">&lt;?php&nbsp;</span><span style="color: #007700">echo&nbsp;</span><span style="color: #DD0000">"test"</span><span style="color: #007700">;&nbsp;</span><span style="color: #0000BB">?&gt;</span>

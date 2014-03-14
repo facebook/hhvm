@@ -153,11 +153,6 @@ void ProcessInit() {
 
 #undef INIT_SYSTEMLIB_CLASS_FIELD
 
-  SystemLib::s_continuationSendFunc =
-    SystemLib::s_ContinuationClass->lookupMethod(makeStaticString("send"));
-  SystemLib::s_continuationRaiseFunc =
-    SystemLib::s_ContinuationClass->lookupMethod(makeStaticString("raise"));
-
   // Retrieve all of the class pointers
   for (long long i = 0; i < hhbc_ext_class_count; ++i) {
     const HhbcExtClassInfo* info = hhbc_ext_classes + i;

@@ -220,28 +220,6 @@ c_Continuation *c_Continuation::Clone(ObjectData* obj) {
   return cont;
 }
 
-namespace {
-  DEBUG_ONLY StaticString s_send("send");
-  DEBUG_ONLY StaticString s_raise("raise");
-}
-
-void c_Continuation::call_send(Cell& v) {
-  assert(SystemLib::s_continuationSendFunc ==
-         getVMClass()->lookupMethod(s_send.get()));
-  g_context->invokeContFunc(SystemLib::s_continuationSendFunc, this, &v);
-}
-
-void c_Continuation::call_raise(ObjectData* e) {
-  assert(SystemLib::s_continuationRaiseFunc ==
-         getVMClass()->lookupMethod(s_raise.get()));
-  assert(e);
-  assert(e->instanceof(SystemLib::s_ExceptionClass));
-  Cell arg;
-  arg.m_type = KindOfObject;
-  arg.m_data.pobj = e;
-  g_context->invokeContFunc(SystemLib::s_continuationRaiseFunc, this, &arg);
-}
-
 // Compute the bytecode offset at which execution will resume assuming
 // the given label.
 Offset c_Continuation::getExecutionOffset(int32_t label) const {

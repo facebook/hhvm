@@ -81,8 +81,6 @@ class SystemLib {
 #undef DECLARE_SYSTEMLIB_CLASS
 
   static HPHP::Func* s_nullFunc;
-  static HPHP::Func* s_continuationSendFunc;
-  static HPHP::Func* s_continuationRaiseFunc;
 
   static ObjectData* AllocStdClassObject();
   static ObjectData* AllocPinitSentinel();

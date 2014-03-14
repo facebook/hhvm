@@ -67,21 +67,16 @@ In gen2
 ** exit Exception::__init__
 ** enter Exception::__construct
 ** exit Exception::__construct
-** enter Continuation::send
 ** enter genBar$continuation
 ** enter error_log
 Finished in genBar
 ** exit error_log
 ** exit genBar$continuation
-** exit Continuation::send
-** enter Continuation::send
 ** enter genBar$continuation
 ** enter error_log
 Finished in genBar
 ** exit error_log
 ** exit genBar$continuation
-** exit Continuation::send
-** enter Continuation::send
 ** enter gen2$continuation
 ** enter gen1
 ** enter error_log
@@ -96,17 +91,13 @@ Finished in gen1
 ** exit WaitHandle::getWaitHandle
 ** exit gen1
 ** enter WaitHandle::join
-** enter Continuation::send
 ** enter gen1$continuation
 ** exit gen1$continuation
-** exit Continuation::send
 ** exit WaitHandle::join
 ** enter error_log
 Finished in gen2
 ** exit error_log
 ** exit gen2$continuation
-** exit Continuation::send
-** enter Continuation::send
 ** enter genFoo$continuation
 ** enter var_dump
 int(45)
@@ -118,7 +109,6 @@ int(46)
 Finished in genFoo
 ** exit error_log
 ** exit genFoo$continuation
-** exit Continuation::send
 ** exit WaitHandle::join
 ** enter var_dump
 int(91)

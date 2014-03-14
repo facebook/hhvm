@@ -111,7 +111,6 @@ bool RuntimeOption::RepoAuthoritative = false;
 using std::string;
 
 using JIT::VMRegAnchor;
-using JIT::EagerVMRegAnchor;
 using JIT::tx;
 using JIT::mcg;
 using JIT::tl_regState;
@@ -1525,6 +1524,26 @@ void ExecutionContext::syncGdbState() {
   }
 }
 
+void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr, PC pc,
+                                          ObjectData* exception) {
+  assert(enterFnAr);
+  assert(enterFnAr->inGenerator());
+  assert(pc);
+
+  m_fp = enterFnAr;
+  m_pc = pc;
+  if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
+  assert(m_fp->func()->contains(m_pc));
+
+  if (!exception) {
+    enterVMAtCurPC();
+  } else {
+    assert(exception->instanceof(SystemLib::s_ExceptionClass));
+    Object e(exception);
+    throw e;
+  }
+}
+
 void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr) {
   assert(enterFnAr);
   assert(!enterFnAr->inGenerator());
@@ -1569,7 +1588,15 @@ void ExecutionContext::enterVMAtCurPC() {
   }
 }
 
-void ExecutionContext::enterVM(ActRec* ar) {
+/**
+ * Enter VM and invoke a function or resume an async function. The 'ar'
+ * argument points to an ActRec of the invoked/resumed function. When
+ * an async function is resumed, a 'pc' pointing to the resume location
+ * inside the async function must be provided. Optionally, the resumed
+ * async function will throw an 'exception' upon entering VM if passed.
+ */
+void ExecutionContext::enterVM(ActRec* ar, PC pc, ObjectData* exception) {
+  assert(ar);
   assert(ar->m_soff == 0);
   assert(ar->m_savedRbp == 0);
 
@@ -1597,7 +1624,11 @@ resume:
   try {
     if (first) {
       first = false;
-      enterVMAtFunc(ar);
+      if (!pc) {
+        enterVMAtFunc(ar);
+      } else {
+        enterVMAtAsyncFunc(ar, pc, exception);
+      }
     } else {
       enterVMAtCurPC();
     }
@@ -1909,48 +1940,59 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
   m_stack.discard();
 }
 
-void ExecutionContext::invokeContFunc(const Func* f,
-                                        ObjectData* this_,
-                                        Cell* param /* = NULL */) {
-  assert(f);
-  assert(this_);
+void ExecutionContext::resumeAsyncFunc(c_Continuation& cont,
+                                       Cell& awaitResult) {
+  assert(tl_regState == VMRegState::CLEAN);
+  SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
-  EagerVMRegAnchor _;
-
-  this_->incRefCount();
+  ActRec* ar = cont.actRec();
+  checkStack(m_stack, ar->func());
+  ar->m_soff = 0;
+  ar->m_savedRbp = 0;
 
   Cell* savedSP = m_stack.top();
-
-  assert(kStackCheckReenterPadding - kNumActRecCells >= 1);
-  if (f->attrs() & AttrPhpLeafFn) {
-    // Check both the native stack and VM stack for overflow
-    checkStack(m_stack, f);
-  } else {
-    // invokeContFunc() must always check the native stack for overflow
-    // no matter what
-    checkNativeStack();
-  }
-
-  ActRec* ar = m_stack.allocA();
-  ar->m_savedRbp = 0;
-  ar->m_func = f;
-  ar->m_soff = 0;
-  ar->initNumArgs(param != nullptr ? 1 : 0);
-  ar->setThis(this_);
-  ar->setVarEnv(nullptr);
-
-  if (param != nullptr) {
-    cellDup(*param, *m_stack.allocC());
-  }
+  cellDup(awaitResult, *m_stack.allocC());
 
   pushVMState(savedSP);
   SCOPE_EXIT { popVMState(); };
 
-  enterVM(ar);
+  try {
+    enterVM(ar, ar->func()->getEntry());
+    cont.setStopped();
+  } catch (...) {
+    cont.setDone();
+    cont.m_value.setNull();
+    throw;
+  }
+}
 
-  // Codegen for generator functions guarantees that they will return null
-  assert(IS_NULL_TYPE(m_stack.topTV()->m_type));
-  m_stack.discard();
+void ExecutionContext::resumeAsyncFuncThrow(c_Continuation& cont,
+                                            ObjectData* exception) {
+  assert(exception);
+  assert(exception->instanceof(SystemLib::s_ExceptionClass));
+  assert(tl_regState == VMRegState::CLEAN);
+  SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
+
+  ActRec* ar = cont.actRec();
+  checkStack(m_stack, ar->func());
+  ar->m_soff = 0;
+  ar->m_savedRbp = 0;
+
+  Cell* savedSP = m_stack.top();
+  tvWriteObject(exception, m_stack.allocTV());
+  --cont.m_label;
+
+  pushVMState(savedSP);
+  SCOPE_EXIT { popVMState(); };
+
+  try {
+    enterVM(ar, ar->func()->getEntry());
+    cont.setStopped();
+  } catch (...) {
+    cont.setDone();
+    cont.m_value.setNull();
+    throw;
+  }
 }
 
 void ExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
@@ -7151,8 +7193,13 @@ OPTBLD_INLINE void ExecutionContext::iopContSuspend(IOP_ARGS) {
 
   EventHook::FunctionExit(m_fp);
   ActRec* prevFp = m_fp->arGetSfp();
-  pc = prevFp->m_func->getEntry() + m_fp->m_soff;
-  m_fp = prevFp;
+  if (prevFp == m_fp) {
+    pc = nullptr;
+    m_fp = nullptr;
+  } else {
+    pc = prevFp->m_func->getEntry() + m_fp->m_soff;
+    m_fp = prevFp;
+  }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContSuspendK(IOP_ARGS) {
@@ -7181,8 +7228,13 @@ OPTBLD_INLINE void ExecutionContext::iopContRetC(IOP_ARGS) {
 
   EventHook::FunctionExit(m_fp);
   ActRec* prevFp = m_fp->arGetSfp();
-  pc = prevFp->m_func->getEntry() + m_fp->m_soff;
-  m_fp = prevFp;
+  if (prevFp == m_fp) {
+    pc = nullptr;
+    m_fp = nullptr;
+  } else {
+    pc = prevFp->m_func->getEntry() + m_fp->m_soff;
+    m_fp = prevFp;
+  }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContCheck(IOP_ARGS) {
@@ -7617,9 +7669,13 @@ inline void ExecutionContext::dispatchImpl(int numInstrs) {
       isCtlFlow = instrIsControlFlow(Op::name);               \
       Stats::incOp(Op::name);                                 \
     }                                                         \
-    const Op op = Op::name;                                   \
-    if (op == OpRetC || op == OpRetV || op == OpNativeImpl) { \
-      if (UNLIKELY(!pc)) { m_fp = 0; return; }                \
+    if (UNLIKELY(!pc)) {                                      \
+      DEBUG_ONLY const Op op = Op::name;                      \
+      assert(op == OpRetC || op == OpRetV ||                  \
+             op == OpContSuspend || op == OpContSuspendK ||   \
+             op == OpContRetC || op == OpNativeImpl);         \
+      m_fp = 0;                                               \
+      return;                                                 \
     }                                                         \
     DISPATCH();                                               \
   }

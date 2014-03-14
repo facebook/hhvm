@@ -177,11 +177,12 @@ void c_AsyncFunctionWaitHandle::run() {
 
     // iterate continuation
     if (LIKELY(m_child->isSucceeded())) {
-      // child succeeded, pass the result to the continuation
-      m_continuation->call_send(m_child->getResult());
+      // child succeeded, pass the result to the async function
+      g_context->resumeAsyncFunc(*m_continuation.get(), m_child->getResult());
     } else if (m_child->isFailed()) {
       // child failed, raise the exception inside continuation
-      m_continuation->call_raise(m_child->getException());
+      g_context->resumeAsyncFuncThrow(*m_continuation.get(),
+                                      m_child->getException());
     } else {
       throw FatalErrorException(
           "Invariant violation: child neither succeeded nor failed");
@@ -206,14 +207,14 @@ void c_AsyncFunctionWaitHandle::run() {
     try {
       m_child->enterContext(getContextIdx());
     } catch (Object& e) {
-      m_continuation->call_raise(e.get());
+      g_context->resumeAsyncFuncThrow(*m_continuation.get(), e.get());
       goto retry;
     }
 
     // detect cycles
     if (UNLIKELY(isDescendantOf(m_child.get()))) {
       Object e(createCycleException(m_child.get()));
-      m_continuation->call_raise(e.get());
+      g_context->resumeAsyncFuncThrow(*m_continuation.get(), e.get());
       goto retry;
     }
 

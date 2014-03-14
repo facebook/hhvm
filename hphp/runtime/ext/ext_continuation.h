@@ -151,9 +151,6 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
            sizeof(ActRec);
   }
 
-  void call_send(Cell& v);
-  void call_raise(ObjectData* e);
-
   inline void preNext() {
     if (done()) {
       throw_exception(Object(SystemLib::AllocExceptionObject(

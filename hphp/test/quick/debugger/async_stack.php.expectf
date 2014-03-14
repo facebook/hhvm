@@ -52,10 +52,9 @@ switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:24
 #1  genBar ()
-#2  Continuation::send (null)
-#3  WaitHandle::join ()
+#2  WaitHandle::join ()
     at %s/async_stack.php:46
-#4  main (42)
+#3  main (42)
     at %s/async_stack.php:50
 wa
 Fetching async stacktrace...
@@ -77,10 +76,9 @@ switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:24
 #1  genBar ()
-#2  Continuation::send (null)
-#3  WaitHandle::join ()
+#2  WaitHandle::join ()
     at %s/async_stack.php:46
-#4  main (42)
+#3  main (42)
     at %s/async_stack.php:50
 wa
 Fetching async stacktrace...
@@ -102,10 +100,9 @@ switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:15
 #1  gen2 ()
-#2  Continuation::send (null)
-#3  WaitHandle::join ()
+#2  WaitHandle::join ()
     at %s/async_stack.php:46
-#4  main (42)
+#3  main (42)
     at %s/async_stack.php:50
 wa
 Fetching async stacktrace...
@@ -130,10 +127,9 @@ switching stack contexts (async->sync) resetting stack state
 #1  gen1 (45)
     at %s/async_stack.php:15
 #2  gen2 ()
-#3  Continuation::send (null)
-#4  WaitHandle::join ()
+#3  WaitHandle::join ()
     at %s/async_stack.php:46
-#5  main (42)
+#4  main (42)
     at %s/async_stack.php:50
 w a
 Fetching async stacktrace...
@@ -154,14 +150,12 @@ switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:8
 #1  gen1 ()
-#2  Continuation::send (null)
-#3  WaitHandle::join ()
+#2  WaitHandle::join ()
     at %s/async_stack.php:15
-#4  gen2 ()
-#5  Continuation::send (null)
-#6  WaitHandle::join ()
+#3  gen2 ()
+#4  WaitHandle::join ()
     at %s/async_stack.php:46
-#7  main (42)
+#5  main (42)
     at %s/async_stack.php:50
 wa
 Fetching async stacktrace...

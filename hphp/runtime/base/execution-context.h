@@ -594,9 +594,10 @@ public:
   int getLastErrorLine() const { return m_lastErrorLine; }
 
 private:
+  void enterVMAtAsyncFunc(ActRec* enterFnAr, PC pc, ObjectData* exception);
   void enterVMAtFunc(ActRec* enterFnAr);
   void enterVMAtCurPC();
-  void enterVM(ActRec* ar);
+  void enterVM(ActRec* ar, PC pc = nullptr, ObjectData* exception = nullptr);
   void doFPushCuf(IOP_ARGS, bool forward, bool safe);
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,
@@ -659,9 +660,9 @@ public:
                   ctx.cls ? (char*)ctx.cls + 1 : nullptr,
                   ctx.invName, argc, argv);
   }
-  void invokeContFunc(const Func* f,
-                      ObjectData* this_,
-                      Cell* param = nullptr);
+  void resumeAsyncFunc(c_Continuation& cont, Cell& awaitResult);
+  void resumeAsyncFuncThrow(c_Continuation& cont, ObjectData* exception);
+
   // VM ClassInfo support
   StringIMap<AtomicSmartPtr<MethodInfoVM> > m_functionInfos;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_classInfos;

@@ -474,6 +474,9 @@ void IRBuilder::reoptimize() {
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_state.enableCse() && !m_enableSimplification) return;
   setConstrainGuards(false);
+  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+    m_state.setBuilding(false);
+  }
 
   auto blocksIds = rpoSortCfgWithIds(m_unit);
   auto const idoms = findDominators(m_unit, blocksIds);
@@ -819,7 +822,7 @@ bool IRBuilder::blockExists(Offset offset) {
 bool IRBuilder::blockIsIncompatible(Offset offset) {
   if (m_offsetSeen.count(offset)) return true;
   auto it = m_offsetToBlockMap.find(offset);
-  if (it == m_offsetToBlockMap.end()) return true;
+  if (it == m_offsetToBlockMap.end()) return false;
   auto* block = it->second;
   if (!it->second->empty()) return true;
   return !m_state.compatible(block);

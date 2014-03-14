@@ -2020,7 +2020,8 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
   // TODO(t3730079): This block is probably redundant with the
   // fallthrough logic in translateRegion.  Try removing the guards
   // against conditional jumps there as well as this.
-  if (bothPaths && m_irb->blockIsIncompatible(next)) {
+  if (RuntimeOption::EvalHHIRBytecodeControlFlow
+      && m_irb->blockIsIncompatible(next)) {
     gen(Jmp, makeExit(next));
   }
 }

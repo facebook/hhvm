@@ -201,8 +201,8 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   if (attrs & ClassInfo::ContextSensitive) {
     f->setContextSensitive(true);
   }
-  if (attrs & ClassInfo::NeedsActRec) {
-    f->setNeedsActRec();
+  if (attrs & ClassInfo::NoFCallBuiltin) {
+    f->setNoFCallBuiltin();
   }
   if ((attrs & ClassInfo::AllowOverride) && !isMethod) {
     f->setAllowOverride();

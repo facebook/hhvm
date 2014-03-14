@@ -1091,6 +1091,8 @@ void FuncEmitter::addUserAttribute(const StringData* name, TypedValue tv) {
  *  "ActRec": The internal function takes a fixed prototype
  *      TypedValue* funcname(ActRec *ar);
  *      Note that systemlib declaration must still be hack annotated
+ *  "NoFCallBuiltin": Prevent FCallBuiltin optimization
+ *      Effectively forces functions to generate an ActRec
  *  "NoInjection": Do not include this frame in backtraces
  *
  *  e.g.   <<__Native("ActRec")>> function foo():mixed;
@@ -1098,6 +1100,7 @@ void FuncEmitter::addUserAttribute(const StringData* name, TypedValue tv) {
 static const StaticString
   s_native("__Native"),
   s_actrec("ActRec"),
+  s_nofcallbuiltin("NoFCallBuiltin"),
   s_variadicbyref("VariadicByRef"),
   s_noinjection("NoInjection");
 
@@ -1115,6 +1118,8 @@ int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
       if (userAttrStrVal.get()->isame(s_actrec.get())) {
         ret = ret | Native::AttrActRec;
         attrs = attrs | AttrMayUseVV;
+      } else if (userAttrStrVal.get()->isame(s_nofcallbuiltin.get())) {
+        attrs = attrs | AttrNoFCallBuiltin;
       } else if (userAttrStrVal.get()->isame(s_variadicbyref.get())) {
         attrs = attrs | AttrVariadicByRef;
       } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
@@ -1244,6 +1249,9 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
   }
   if (info->attribute & ClassInfo::NoInjection) {
     attrs = attrs | AttrNoInjection;
+  }
+  if (info->attribute & ClassInfo::NoFCallBuiltin) {
+    attrs = attrs | AttrNoFCallBuiltin;
   }
   if (pce()) {
     if (info->attribute & ClassInfo::IsStatic) {

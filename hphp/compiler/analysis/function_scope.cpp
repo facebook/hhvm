@@ -363,8 +363,8 @@ bool FunctionScope::isMixedVariableArgument() const {
   return res;
 }
 
-bool FunctionScope::needsActRec() const {
-  bool res = (m_attribute & FileScope::NeedsActRec);
+bool FunctionScope::noFCallBuiltin() const {
+  bool res = (m_attribute & FileScope::NoFCallBuiltin);
   return res;
 }
 
@@ -440,8 +440,8 @@ void FunctionScope::setIsFoldable() {
   m_attribute |= FileScope::IsFoldable;
 }
 
-void FunctionScope::setNeedsActRec() {
-  m_attribute |= FileScope::NeedsActRec;
+void FunctionScope::setNoFCallBuiltin() {
+  m_attribute |= FileScope::NoFCallBuiltin;
 }
 
 void FunctionScope::setHelperFunction() {

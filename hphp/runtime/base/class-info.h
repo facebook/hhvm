@@ -80,7 +80,7 @@ public:
 
     IsTrait                = (1 << 29), //    x
     ZendParamModeFalse     = (1 << 30), //                  x      x
-    NeedsActRec            = (1u << 31),//                  x      x
+    NoFCallBuiltin         = (1u << 31),//                  x      x
   };
 
   class ConstantInfo {

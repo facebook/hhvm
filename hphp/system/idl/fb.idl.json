@@ -412,7 +412,7 @@
             "desc": "Enables code coverage. The coverage information is cleared.",
             "flags": [
                 "HipHopSpecific",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": null

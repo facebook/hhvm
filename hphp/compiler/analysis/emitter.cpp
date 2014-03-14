@@ -7434,6 +7434,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   }
   Func* f = Unit::lookupFunc(makeStaticString(name));
   if (!f ||
+      (f->attrs() & AttrNoFCallBuiltin) ||
       !f->nativeFuncPtr() ||
       (f->numParams() > kMaxBuiltinArgs) ||
       (numParams > f->numParams()) ||
@@ -7442,14 +7443,14 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   if (f->methInfo()) {
     // IDL style builtin
     const ClassInfo::MethodInfo* info = f->methInfo();
-    if (info->attribute & (ClassInfo::NeedsActRec |
+    if (info->attribute & (ClassInfo::NoFCallBuiltin |
                            ClassInfo::VariableArguments |
                            ClassInfo::RefVariableArguments |
                            ClassInfo::MixedVariableArguments)) {
       return nullptr;
     }
   } else if (!(f->attrs() & AttrNative)) {
-    // HNI only enables Variable args via NeedsActRec which in turn
+    // HNI only enables Variable args via ActRec which in turn
     // is captured by the f->nativeFuncPtr() == nullptr,
     // so there's nothing additional to check in the HNI case
     return nullptr;

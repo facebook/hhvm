@@ -8,7 +8,7 @@
             "desc": "This function is very beta and entirely useless for 99% of users. It is only useful if you're doing something weird, such as writing your own driver on top of the PHP driver.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -27,7 +27,7 @@
             "desc": "This function is very beta and entirely useless for 99% of users. It is only useful if you're doing something weird, such as writing your own driver on top of the PHP driver.",
             "flags": [
                 "ZendCompat",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Variant",
@@ -83,7 +83,7 @@
                     "desc": "The MongoClient::close() method forcefully closes a connection to the database, even if persistent connections are being used. You should never have to do this under normal circumstances.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -102,7 +102,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -116,7 +116,7 @@
                     "desc": "If no parameters are passed, this connects to \"localhost:27017\" (or whatever was specified in php.ini for mongo.default_host and mongo.default_port).\n\nserver should have the form:\n\n\n\nThe connection string always starts with mongodb:\/\/, to indicate it is a connection string in this form. username and password are specified, the constructor will attempt to authenticate the connection with the database before returning. Username and password are optional and must be followed by an @, if specified.\n\nAt least one host must be given (port optional, always defaulting to 27017) and as many hosts as desired may be connected to. Host names are comma-separated and the constructor will return successfully if it connected to at least one host. If it could not connect to any of the hosts, it will throw a MongoConnectionException. Please see the Replica Sets section for information on how to connect to Replica Sets.\n\nIf you specified a username and password, you may specify a database to authenticate with. If db is not specified, \"admin\" will be used.\n\nAn optional query string may be used to specify extra options. The same options are supported through the options array as well, and are therefore redescribed there. See the examples below on how to set those options.\n\nOne part of the options governs how the driver reads from secondary nodes in a replica set environment. Extra information on how these read preferences work is available as well through the read preferences documentation page.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -140,7 +140,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -159,7 +159,7 @@
                     "desc": "This is the cleanest way of getting a database. If the database name has any special characters, MongoClient::selectDB() will need to be used; however, this should be sufficient for most cases.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -179,7 +179,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -193,7 +193,7 @@
                     "desc": "This method is only useful with a connection to a replica set. It returns the status of all of the hosts in the set. Without a replica set, it will just return an array with one element containing the host that you are connected to.\n\nSee the query section of this manual for information on distributing reads to secondaries.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -207,7 +207,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -221,7 +221,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -235,7 +235,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -259,7 +259,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -278,7 +278,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -302,7 +302,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -337,7 +337,7 @@
                     "desc": "This method causes its connection to be authenticated. If authentication is enabled for the database server (it's not, by default), you need to log in before the database will allow you to do anything.\n\nIn general, you should use the authenticate built into MongoClient::__construct() in preference to this method. If you authenticate on connection and the connection drops and reconnects during your session, you'll be reauthenticated. If you manually authenticated using this method and the connection drops, you'll have to call this method again once you're reconnected.\n\nThis method is identical to running:\n\n\n\nOnce a connection has been authenticated, it can only be un-authenticated by using the \"logout\" database command:",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -361,7 +361,7 @@
                     "desc": "Almost everything that is not a CRUD operation can be done with a database command. Need to know the database version? There's a command for that. Need to do aggregation? There's a command for that. Need to turn up logging? You get the idea.\n\nThis method is identical to:",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -385,7 +385,7 @@
                     "desc": "This method is not meant to be called directly. The preferred way to create an instance of MongoDB is through MongoClient::__get() or MongoClient::selectDB().\n\nIf you're ignoring the previous paragraph and want to call it directly you can do so:\n\n\n\nBut don't. Isn't this much nicer:",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -409,7 +409,7 @@
                     "desc": "This method is used to create capped collections and other collections requiring special options. It is identical to running:\n\nSee MongoDB::command() for more information about database commands.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -448,7 +448,7 @@
                     "desc": "This method is a flexible interface for creating database refrences (see MongoDBRef).",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -472,7 +472,7 @@
                     "desc": "This drops the database currently being used.\n\nThis is identical to running:",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -486,7 +486,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -505,7 +505,7 @@
                     "desc": "The Mongo database server runs a JavaScript engine. This method allows you to run arbitary JavaScript on the database. This can be useful if you want touch a number of collections lightly, or process some results on the database side to reduce the amount that has to be sent to the client.\n\nRunning JavaScript in the database takes a write lock, meaning it blocks other operations. Make sure you consider this before running a long script.\n\nThis is a wrapper for a database command. This method is basically:\n\n\n\nMongoDB implies a return statement if you have a single statement on a single line. This can cause some unintuitive behavior. For example, this returns \"foo\":\n\n\n\nHowever, these return NULL:\n\n\n\nTo avoid surprising behavior, it is best not to depend on MongoDB to decide what to return, but to explicitly state a return value. In the examples above, we can change them to:\n\n\n\nNow the first statement will return \"foo\" and the second statement will return a count of the \"foo\" collection.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -529,7 +529,7 @@
                     "desc": "This method is not very useful for normal MongoDB use. It forces a database error to occur. This means that MongoDB::lastError() will return a generic database error after running this command.\n\nThis command is identical to running:",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -543,7 +543,7 @@
                     "desc": "This is the easiest way of getting a collection from a database object. If a collection name contains strange characters, you may have to use MongoDB::selectCollection() instead.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -562,7 +562,7 @@
                     "desc": "Returns an array of all the collection names for the given database.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -581,7 +581,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -600,7 +600,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -619,7 +619,7 @@
                     "desc": "This returns the current database profiling level.\n\nThe database profiler tracks query execution times. If you turn it on (say, using MongoDB::setProfilingLevel() or the shell), you can see how many queries took longer than a given number of milliseconds or the timing for all queries.\n\nNote that profiling slows down queries, so it is better to use in development or testing than in a time-sensitive application.\n\nThis function is equivalent to running:",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -633,7 +633,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -647,7 +647,7 @@
                     "desc": "See the query section of this manual for information on distributing reads to secondaries.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -661,7 +661,7 @@
                     "desc": "This method is equivalent to:",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -675,7 +675,7 @@
                     "desc": "Gets a list of all the collections in the database and returns them as an array of MongoCollection objects.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -694,7 +694,7 @@
                     "desc": "MongoDB::lastError() is usually preferred to this. This method returns the last database error that occurred and how many operations ago it occurred. It is mostly deprecated.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -708,7 +708,7 @@
                     "desc": "This creates a fresh copy of all database data. It will remove any corrupt data and compact and large stretches of free space it finds. This is a very slow operation on a large database.\n\nThis is usually run from the shell or the command line, not the driver.\n\nIt is equivalent to the function:",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -732,7 +732,7 @@
                     "desc": "This method is not used in normal operations. It resets the database error tracker (which can be incremented with MongoDB::forceError(), also not normally used).\n\nIt is equivalent to running:",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -746,7 +746,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -765,7 +765,7 @@
                     "desc": "This changes the current database profiling level.\n\nThis function is equivalent to running:\n\n\n\nThe options for level are 0 (off), 1 (queries > 100ms), and 2 (all queries). If you would like to profile queries that take longer than another time period, use the database command and pass it a second option, the number of milliseconds. For example, to profile all queries that take longer than one second, run:\n\n\n\nProfiled queries will appear in the system.profile collection of this database.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -784,7 +784,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -808,7 +808,7 @@
                     "desc": "See the query section of this manual for information on distributing reads to secondaries.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -827,7 +827,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -876,7 +876,7 @@
                     "desc": "The MongoDB aggregation framework provides a means to calculate aggregated values without having to use MapReduce. While MapReduce is powerful, it is often more difficult than necessary for many simple aggregation tasks, such as totaling or averaging field values.\n\nThis method accepts either a variable amount of pipeline operators, or a single array of operators constituting the pipeline.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec",
+                        "NoFCallBuiltin",
                         "VariableArguments"
                     ],
                     "return": {
@@ -901,7 +901,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -926,7 +926,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -950,7 +950,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -979,7 +979,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -998,7 +998,7 @@
                     "desc": "This method is identical to:\n\n\n\nEach index, when created, is given a unique name. This is generally user-set (with MongoCollection::ensureIndex()'s \"name\" option) or generated by the driver from a combination of key names and directions. This name is then used by MongoCollection::deleteIndex() to remove the function.\n\nUnfortunately, the MongoCollection::ensureIndex() generates slightly different names than the shell and, due to backwards compatibility issues, MongoCollection::deleteIndex() cannot delete custom-named indexes as well. Thus, the best way to delete indexes created in the shell or with custom names is to directly call the deleteIndexes database command.\n\nThus, if you named an index \"superfast query\", you could only delete it with the PHP driver by running:\n\n\n\nTo find what an index is named, you can query the system.indexes collection of a database and look for the name field.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1017,7 +1017,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1031,7 +1031,7 @@
                     "desc": "The distinct command returns a list of distinct values for the given key across a collection.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1055,7 +1055,7 @@
                     "desc": "Drops this collection and deletes its indices.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1069,7 +1069,7 @@
                     "desc": "This method creates an index on the collection and the specified fields. The key specification can either be just a single field name as string, or an array containing one or more field names with their sort direction.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1093,7 +1093,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1117,7 +1117,7 @@
                     "desc": "The findAndModify command atomically modifies and returns a single document. By default, the returned document does not include the modifications made on the update. To return the document with the modifications made on the update, use the new option.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1151,7 +1151,7 @@
                     "desc": "As opposed to MongoCollection::find(), this method will return only the first result from the result set, and not a MongoCursor that can be iterated over.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1175,7 +1175,7 @@
                     "desc": "A concise syntax for getting a collection with a dot-separated name. If a collection name contains strange characters, you may have to use MongoDB::selectCollection() instead.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1194,7 +1194,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1213,7 +1213,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1227,7 +1227,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1241,7 +1241,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1255,7 +1255,7 @@
                     "desc": "See the query section of this manual for information on distributing reads to secondaries.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1269,7 +1269,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1303,7 +1303,7 @@
                     "desc": "All strings sent to the database must be UTF-8. If a string is not UTF-8, a MongoException will be thrown. To insert (or query for) a non-UTF-8 string, use MongoBinData.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1327,7 +1327,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1351,7 +1351,7 @@
                     "desc": "If the object is from the database, update the existing database object, otherwise insert this object.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1375,7 +1375,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1399,7 +1399,7 @@
                     "desc": "See the query section of this manual for information on distributing reads to secondaries.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1419,7 +1419,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1438,7 +1438,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1452,7 +1452,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1481,7 +1481,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1537,7 +1537,7 @@
                     "desc": "This is an advanced function and should not be used unless you know what you're doing.\n\nA query can optionally be nested in a \"query\" field if other options, such as a sort or hint, are given. For instance, adding a sort causes the query to become a subfield of a bigger query object, like:\n\n\n\nThis method is for adding a top-level field to a query. It makes the query a subobject (if it isn't already) and adds the key\/value pair of your chosing to the top level. Warning\n\nIt cannot be used to add extra criteria to a query on the fly. For instance, this will not work:\n\nThis does not query for a user named \"joe\" with an age of 20.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1561,7 +1561,7 @@
                     "desc": "This method is to be used with tailable cursors. If we are at the end of the data, block for a while rather than returning no data. After a timeout period, we do return as normal.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1580,7 +1580,7 @@
                     "desc": "A cursor typically fetches a batch of result objects and store them locally. This method sets the batchSize value to configure the amount of documents retrieved from the server in one data packet. However, it will never return more documents than fit in the max batch size limit (usually 4MB).",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1599,7 +1599,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1633,7 +1633,7 @@
                     "desc": "This method does not affect the state of the cursor: if you haven't queried yet, you can still apply limits, skips, etc. If you have started iterating through results, it will not move the current position of the cursor. If you have exhasted the cursor, it will not reset it.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1652,7 +1652,7 @@
                     "desc": "This returns NULL until MongoCursor::next() is called.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1666,7 +1666,7 @@
                     "desc": "The database sends responses in batches of documents, up to 4MB of documents per response. This method checks if the database has more batches or if the result set has been exhausted.\n\nA cursor being \"dead\" does not mean that MongoCursor::hasNext() will return FALSE, it only means that the database is done sending results to the client. The client should continue iterating through results until MongoCursor::hasNext() is FALSE.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1680,7 +1680,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1694,7 +1694,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1708,7 +1708,7 @@
                     "desc": "Fields are specified by \"fieldname\" : bool. TRUE indicates that a field should be returned, FALSE indicates that it should not be returned. You can also use 1 and 0 instead of TRUE and FALSE.\n\nThus, to return only the \"summary\" field, one could say:\n\n\n\nTo return all fields except the \"hidden\" field:",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1727,7 +1727,7 @@
                     "desc": "This is identical to the function:",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1741,7 +1741,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1755,7 +1755,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1769,7 +1769,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1788,7 +1788,7 @@
                     "desc": "After remaining idle on the server for some amount of time, cursors, by default, \"die.\" This is generally the behavior one wants. The database cleans up a cursor once all of its results have been sent to the client, but if the client doesn't request all of the results, the cursor will languish there, taking up resources. Thus, after a few minutes, the cursor \"times out\" and the database assumes the client has gotten everything it needs and cleans up its the cursor's resources.\n\nIf, for some reason, you need a cursor to hang around for a long time, you can prevent the database from cleaning it up by using this method. However, if you make a cursor immortal, you need to iterate through all of its results (or at least until MongoCursor::dead() returns TRUE) or the cursor will hang around the database forever, taking up resources.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1807,7 +1807,7 @@
                     "desc": "This can be called before or after the query.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1821,7 +1821,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1835,7 +1835,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1854,7 +1854,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1868,7 +1868,7 @@
                     "desc": "This option allows mongos to send partial query results if a shard is unreachable. This is only applicable when running a sharded MongoDB cluster and connecting to a mongos.\n\nIf a shard goes down and a query needs to be sent to that shard, mongos will return the results (if any) from shards it already contacted, then an error message that it could not reach the shard (a MongoCursorException in PHP). If you would like to get whatever results mongos can provide and no exception, you can use this method. Note that this means that you won't have an indication that a shard is down in your query response.\n\nThis has no effect on the query if all shards are reachable. This flag was implemented in MongoDB version 1.7.5, so will only work with that version and higher.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1887,7 +1887,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1901,7 +1901,7 @@
                     "desc": "This is identical to the function:",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1915,7 +1915,7 @@
                     "desc": "The MongoCursor class has several methods for setting flags on the query object. This method is available in case the MongoDB wire protocol has acquired a new flag, and the driver has not been updated with a method for this new flag. In all other cases, the method should be used. See the \"See also\" section for available methods.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1939,7 +1939,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1963,7 +1963,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -1982,7 +1982,7 @@
                     "desc": "Calling this will make the driver route reads to secondaries if: You are using a replica set and You created a MongoClient instance using the option \"replicaSet\" => \"setName\" and There is a healthy secondary that can be reached by the driver. You can check which server was used for this query by calling MongoCursor::info() after running the query. It's server field will show which server the query was sent to.\n\nNote that you should use this function even if you do not use the automatic routing to secondaries. If you connect directly to a secondary in a replica set, you still need to call this function, which basically tells the database that you are aware that you might be getting older data and you're okay with that. If you do not call this, you'll get \"not master\" errors when you try to query.\n\nThis method will override the static class variable MongoCursor::$slaveOkay. It will also override Mongo::setSlaveOkay(), MongoDB::setSlaveOkay() and MongoCollection::setSlaveOkay().",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2001,7 +2001,7 @@
                     "desc": "Use snapshot mode for the query. Snapshot mode assures no duplicates are returned, or objects missed, which were present at both the start and end of the query's execution (if an object is new during the query, or deleted during the query, it may or may not be returned, even with snapshot mode).\n\nNote that short query responses (less than 1MB) are always effectively snapshotted.\n\nCurrently, snapshot mode may not be used with sorting or explicit hints.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2015,7 +2015,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2034,7 +2034,7 @@
                     "desc": "Mongo has a feature known as tailable cursors which are similar to the Unix \"tail -f\" command.\n\nTailable means cursor is not closed when the last data is retrieved. Rather, the cursor marks the final object's position. you can resume using the cursor later, from where it was located, if more data were received.\n\nLike any \"latent cursor\", the cursor may become invalid at some point -- for example if that final object it references were deleted. Thus, you should be prepared to requery if the cursor is MongoCursor::dead().",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2053,7 +2053,7 @@
                     "desc": "A timeout can be set at any time and will affect subsequent queries on the cursor, including fetching more results from the database.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2072,7 +2072,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2095,7 +2095,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2115,7 +2115,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2129,7 +2129,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2143,7 +2143,7 @@
                     "desc": "Extracts the pid from the Mongo ID",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2157,7 +2157,7 @@
                     "desc": "This returns the same thing as running time() when the id is created.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2172,7 +2172,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2191,7 +2191,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2214,7 +2214,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2238,7 +2238,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2273,7 +2273,7 @@
                     "desc": "Creates a new date. If no parameters are given, the current time is used.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2297,7 +2297,7 @@
                     "desc": "Returns a string representation of this date, similar to the representation returned by microtime().",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2320,7 +2320,7 @@
                     "desc": "Creates a new regular expression.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2339,7 +2339,7 @@
                     "desc": "Returns a string representation of this regular expression.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2362,7 +2362,7 @@
                     "desc": "Creates a new binary data object.\n\nThere are five types of binary data currently recognized by the BSON spec: function (0x01), byte array (0x02), UUID (0x03), MD5 (0x05), and user defined (0x80). The default type is byte array (0x02). There is no particular difference in how the driver or server interpret different types, so by and large they are irrelevant for now. Any number (between 0 and 255) could be used for type, if the user is willing to assume the risk that the database might eventually do something with binary data based on type.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2386,7 +2386,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2442,7 +2442,7 @@
                     "desc": "Creates a new 32-bit number with the given value.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2461,7 +2461,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2484,7 +2484,7 @@
                     "desc": "Creates a new 64-bit number with the given value.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2503,7 +2503,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2527,7 +2527,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2557,7 +2557,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2582,7 +2582,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2640,7 +2640,7 @@
                     "desc": "Creates a new timestamp. If no parameters are given, the current time is used and the increment is automatically provided. The increment is set to 0 when the module is loaded and is incremented every time this constructor is called (without the $inc parameter passed in).",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2664,7 +2664,7 @@
                     "desc": "Returns the \"sec\" field of this timestamp.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2688,7 +2688,7 @@
                     "desc": "Files as stored across two collections, the first containing file meta information, the second containing chunks of the actual file. By default, fs.files and fs.chunks are the collection names used.\n\nUse one argument to specify a prefix other than \"fs\": $fs = new MongoGridFS($db, \"myfiles\"); uses myfiles.files and myfiles.chunks collections.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2702,7 +2702,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2721,7 +2721,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2735,7 +2735,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2759,7 +2759,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2778,7 +2778,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2797,7 +2797,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2821,7 +2821,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2845,7 +2845,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2874,7 +2874,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2903,7 +2903,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2936,7 +2936,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2960,7 +2960,7 @@
                     "desc": "Warning: this will load the file into memory. If the file is bigger than your memory, this will cause problems!",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2974,7 +2974,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -2988,7 +2988,7 @@
                     "desc": "This method returns a stream resource that can be used with all file functions in PHP that deal with reading files. The contents of the file are pulled out of MongoDB on the fly, so that the whole file does not have to be loaded into memory first.\n\nAt most two GridFSFile chunks will be loaded in memory.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3002,7 +3002,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3016,7 +3016,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3045,7 +3045,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3084,7 +3084,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3098,7 +3098,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3140,7 +3140,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3155,7 +3155,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3170,7 +3170,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3185,7 +3185,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3215,7 +3215,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3234,7 +3234,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3308,7 +3308,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3322,7 +3322,7 @@
                     "desc": "Returns an array of information about all connection pools.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3337,7 +3337,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3366,7 +3366,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3380,7 +3380,7 @@
                     "desc": "This method overwrites the MongoClient constructor and turns off acknowledged writes.\n\nPlease see MongoClient::__construct() for description of the parameters.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3405,7 +3405,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3419,7 +3419,7 @@
                     "desc": "This finds the address of the secondary currently being used for reads. It is a read-only method: it does not change anything about the internal state of the object.\n\nWhen you create a connection to the database, the driver will not immediately decide on a secondary to use. Thus, after you connect, this function will return NULL even if there are secondaries available. When you first do a query with slaveOkay set, at that point the driver will choose a secondary for this connection. At that point, this function will return the chosen secondary.\n\nSee the query section of this manual for information on distributing reads to secondaries.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3433,7 +3433,7 @@
                     "desc": "See the query section of this manual for information on distributing reads to secondaries.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3447,7 +3447,7 @@
                     "desc": null,
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3462,7 +3462,7 @@
                     "flags": [
                         "IsStatic",
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3481,7 +3481,7 @@
                     "desc": "See the query section of this manual for information on distributing reads to secondaries.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3500,7 +3500,7 @@
                     "desc": "This choses a random secondary for a connection to read from. It is called automatically by the driver and should not need to be used. It calls MongoClient::getHosts() (to refresh the status of hosts) and Mongo::getSlave() (to get the return value).\n\nSee the query section of this manual for information on distributing reads to secondaries.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3568,7 +3568,7 @@
                     "desc": "Retrieves the full error result document.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",
@@ -3592,7 +3592,7 @@
                     "desc": "Returns the hostname of the server the query was sent too.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",

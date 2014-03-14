@@ -21,6 +21,8 @@
 #include <string>
 #include <set>
 
+#include "hphp/util/functional.h"
+
 namespace HPHP { struct UnitEmitter; }
 namespace HPHP { namespace HHBBC {
 
@@ -41,7 +43,7 @@ struct Options {
    * Functions that aren't named in this list may be optimized with
    * the assumption they aren't intercepted, in whole_program mode.
    */
-  std::set<std::string> InterceptableFunctions;
+  std::set<std::string, stdltistr> InterceptableFunctions;
 
   //////////////////////////////////////////////////////////////////////
 

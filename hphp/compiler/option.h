@@ -137,7 +137,7 @@ public:
   static std::vector<std::string> DynamicMethodPostfixes;
   static std::vector<std::string> DynamicClassPrefixes;
   static std::vector<std::string> DynamicClassPostfixes;
-  static std::set<std::string> DynamicInvokeFunctions;
+  static std::set<std::string, stdltistr> DynamicInvokeFunctions;
   static std::set<std::string> VolatileClasses;
   static std::map<std::string,std::string> AutoloadClassMap;
   static std::map<std::string,std::string> AutoloadFuncMap;

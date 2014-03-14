@@ -72,7 +72,7 @@ vector<string> Option::DynamicMethodPrefixes;
 vector<string> Option::DynamicMethodPostfixes;
 vector<string> Option::DynamicClassPrefixes;
 vector<string> Option::DynamicClassPostfixes;
-set<string> Option::DynamicInvokeFunctions;
+set<string, stdltistr> Option::DynamicInvokeFunctions;
 set<string> Option::VolatileClasses;
 map<string,string> Option::AutoloadClassMap;
 map<string,string> Option::AutoloadFuncMap;

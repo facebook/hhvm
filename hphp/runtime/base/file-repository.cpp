@@ -507,6 +507,7 @@ struct ResolveIncludeContext {
 const StaticString s_file_url("file://");
 
 static bool findFile(const StringData *path, struct stat *s, bool allow_dir) {
+  s->st_mode = 0;
   auto ret = HPHP::Eval::FileRepository::findFile(path, s);
   if (S_ISDIR(s->st_mode) && allow_dir) {
     // The call explicitly populates the struct for dirs, but returns false for

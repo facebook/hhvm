@@ -480,7 +480,7 @@ static void set_function_info(Array &ret, const Func* func) {
           // exceptions here.
           const Variant& v = g_context->getEvaledArg(
             fpi.phpCode(),
-            func->cls() ? func->cls()->nameRef() : func->nameRef() 
+            func->cls() ? func->cls()->nameRef() : func->nameRef()
           );
           param.set(s_default, v);
         }
@@ -762,7 +762,7 @@ Array HHVM_FUNCTION(hphp_get_closure_info, const Object& closure) {
   if (backSlash == -1) {
     mi.set(s_name, s_closure_in_braces);
   } else {
-    String namespaceName(nameRef->data() + sizeof c_prefix - 1,
+    String namespaceName(nameRef.data() + sizeof c_prefix - 1,
                          backSlash + 1 - sizeof c_prefix + 1,
                          CopyString);
     mi.set(s_name, namespaceName + s_closure_in_braces);

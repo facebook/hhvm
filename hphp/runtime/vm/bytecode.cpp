@@ -2868,7 +2868,7 @@ void ExecutionContext::preventReturnsToTC() {
 }
 
 static inline StringData* lookup_name(TypedValue* key) {
-  return prepareKey(key);
+  return prepareKey(*key);
 }
 
 static inline void lookup_var(ActRec* fp,
@@ -3299,18 +3299,18 @@ OPTBLD_INLINE bool ExecutionContext::memberHelperPre(
     case MET:
     case MEI:
       if (unset) {
-        result = ElemU(tvScratch, tvRef, base, curMember);
+        result = ElemU(tvScratch, tvRef, base, *curMember);
       } else if (define) {
-        result = ElemD<warn,reffy>(tvScratch, tvRef, base, curMember);
+        result = ElemD<warn,reffy>(tvScratch, tvRef, base, *curMember);
       } else {
-        result = Elem<warn>(tvScratch, tvRef, base, curMember);
+        result = Elem<warn>(tvScratch, tvRef, base, *curMember);
       }
       break;
     case MPL:
     case MPC:
     case MPT:
       result = Prop<warn, define, unset>(tvScratch, tvRef, ctx, base,
-                                         curMember);
+                                         *curMember);
       break;
     case MW:
       if (setMember) {
@@ -4722,14 +4722,14 @@ OPTBLD_INLINE void ExecutionContext::isSetEmptyM(IOP_ARGS) {
   case MET:
   case MEI: {
     isSetEmptyResult = IssetEmptyElem<isEmpty>(tvScratch, *tvRef.asTypedValue(),
-        base, curMember);
+        base, *curMember);
     break;
   }
   case MPL:
   case MPC:
   case MPT: {
     Class* ctx = arGetContextClass(m_fp);
-    isSetEmptyResult = IssetEmptyProp<isEmpty>(ctx, base, curMember);
+    isSetEmptyResult = IssetEmptyProp<isEmpty>(ctx, base, *curMember);
     break;
   }
   default: assert(false);
@@ -5134,7 +5134,7 @@ OPTBLD_INLINE void ExecutionContext::iopSetM(IOP_ARGS) {
       case MEC:
       case MET:
       case MEI: {
-        StringData* result = SetElem<true>(base, curMember, c1);
+        StringData* result = SetElem<true>(base, *curMember, c1);
         if (result) {
           tvRefcountedDecRefCell(c1);
           c1->m_type = KindOfString;
@@ -5146,7 +5146,7 @@ OPTBLD_INLINE void ExecutionContext::iopSetM(IOP_ARGS) {
       case MPC:
       case MPT: {
         Class* ctx = arGetContextClass(m_fp);
-        SetProp<true>(ctx, base, curMember, c1);
+        SetProp<true>(ctx, base, *curMember, c1);
         break;
       }
       default: assert(false);
@@ -5271,14 +5271,14 @@ OPTBLD_INLINE void ExecutionContext::iopSetOpM(IOP_ARGS) {
       case MET:
       case MEI:
         result = SetOpElem(tvScratch, *tvRef.asTypedValue(), op, base,
-            curMember, rhs);
+            *curMember, rhs);
         break;
       case MPL:
       case MPC:
       case MPT: {
         Class *ctx = arGetContextClass(m_fp);
         result = SetOpProp(tvScratch, *tvRef.asTypedValue(), ctx, op, base,
-            curMember, rhs);
+                           *curMember, rhs);
         break;
       }
       default:
@@ -5358,14 +5358,14 @@ OPTBLD_INLINE void ExecutionContext::iopIncDecM(IOP_ARGS) {
       case MET:
       case MEI:
         IncDecElem<true>(tvScratch, *tvRef.asTypedValue(), op, base,
-            curMember, to);
+            *curMember, to);
         break;
       case MPL:
       case MPC:
       case MPT: {
         Class* ctx = arGetContextClass(m_fp);
         IncDecProp<true>(tvScratch, *tvRef.asTypedValue(), ctx, op, base,
-            curMember, to);
+                         *curMember, to);
         break;
       }
       default: assert(false);
@@ -5492,13 +5492,13 @@ OPTBLD_INLINE void ExecutionContext::iopUnsetM(IOP_ARGS) {
     case MEC:
     case MET:
     case MEI:
-      UnsetElem(base, curMember);
+      UnsetElem(base, *curMember);
       break;
     case MPL:
     case MPC:
     case MPT: {
       Class* ctx = arGetContextClass(m_fp);
-      UnsetProp(ctx, base, curMember);
+      UnsetProp(ctx, base, *curMember);
       break;
     }
     default: assert(false);
@@ -6648,7 +6648,7 @@ OPTBLD_INLINE void ExecutionContext::iopCIterFree(IOP_ARGS) {
 OPTBLD_INLINE void inclOp(ExecutionContext *ec, IOP_ARGS, InclOpFlags flags) {
   NEXT();
   Cell* c1 = ec->m_stack.topC();
-  String path(prepareKey(c1));
+  String path(prepareKey(*c1));
   bool initial;
   TRACE(2, "inclOp %s %s %s %s \"%s\"\n",
         flags & InclOpFlags::Once ? "Once" : "",
@@ -6708,7 +6708,7 @@ OPTBLD_INLINE void ExecutionContext::iopEval(IOP_ARGS) {
     raise_error("You can't use eval in RepoAuthoritative mode");
   }
 
-  String code(prepareKey(c1));
+  String code(prepareKey(*c1));
   String prefixedCode = concat("<?php ", code);
 
   auto evalFilename = std::string();

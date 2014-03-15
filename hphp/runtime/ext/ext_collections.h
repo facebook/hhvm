@@ -168,7 +168,7 @@ class BaseVector : public ExtCollectionObjectData {
   }
 
   template <bool throwOnMiss>
-  static TypedValue* OffsetAt(ObjectData* obj, TypedValue* key);
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
@@ -384,8 +384,9 @@ class c_Vector : public BaseVector {
     return BaseVector::Clone<c_Vector>(obj);
   }
 
-  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
-  static void OffsetUnset(ObjectData* obj, TypedValue* key);
+  static void OffsetSet(ObjectData* obj, const TypedValue* key,
+                        TypedValue* val);
+  static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type) {
@@ -684,12 +685,13 @@ class BaseMap : public ExtCollectionObjectData {
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
   template <bool throwOnMiss>
-  static TypedValue* OffsetAt(ObjectData* obj, TypedValue* key);
-  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
+  static void OffsetSet(ObjectData* obj, const TypedValue* key,
+                        TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
-  static void OffsetUnset(ObjectData* obj, TypedValue* key);
+  static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
   enum EqualityFlavor { OrderMatters, OrderIrrelevant };
 
@@ -1372,12 +1374,13 @@ class BaseSet : public ExtCollectionObjectData {
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
 
-  static TypedValue* OffsetAt(ObjectData* obj, TypedValue* key);
-  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
+  static void OffsetSet(ObjectData* obj, const TypedValue* key,
+                        TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
-  static void OffsetUnset(ObjectData* obj, TypedValue* key);
+  static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
@@ -1723,12 +1726,13 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   static c_Pair* Clone(ObjectData* obj);
   static Array ToArray(const ObjectData* obj);
   template <bool throwOnMiss>
-  static TypedValue* OffsetAt(ObjectData* obj, TypedValue* key);
-  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
+  static void OffsetSet(ObjectData* obj, const TypedValue* key,
+                        TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
-  static void OffsetUnset(ObjectData* obj, TypedValue* key);
+  static void OffsetUnset(ObjectData* obj, const TypedValue* key);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
@@ -1794,14 +1798,14 @@ class c_PairIterator : public ExtObjectData {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedValue* collectionAt(ObjectData* obj, TypedValue* key);
+TypedValue* collectionAt(ObjectData* obj, const TypedValue* key);
 TypedValue* collectionGet(ObjectData* obj, TypedValue* key);
-void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val);
+void collectionSet(ObjectData* obj, const TypedValue* key, TypedValue* val);
 // used for collection literal syntax only
 void collectionInitSet(ObjectData* obj, TypedValue* key, TypedValue* val);
 bool collectionIsset(ObjectData* obj, TypedValue* key);
 bool collectionEmpty(ObjectData* obj, TypedValue* key);
-void collectionUnset(ObjectData* obj, TypedValue* key);
+void collectionUnset(ObjectData* obj, const TypedValue* key);
 void collectionAppend(ObjectData* obj, TypedValue* val);
 // used for collection literal syntax only
 void collectionInitAppend(ObjectData* obj, TypedValue* val);

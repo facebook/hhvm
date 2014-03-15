@@ -546,7 +546,7 @@ bool BaseVector::OffsetContains(ObjectData* obj, TypedValue* key) {
 }
 
 template <bool throwOnMiss>
-TypedValue* BaseVector::OffsetAt(ObjectData* obj, TypedValue* key) {
+TypedValue* BaseVector::OffsetAt(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto vec = static_cast<BaseVector*>(obj);
   if (key->m_type == KindOfInt64) {
@@ -1250,7 +1250,8 @@ bool c_Vector::usort(const Variant& cmp_function) {
   return true;
 }
 
-void c_Vector::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
+void c_Vector::OffsetSet(ObjectData* obj, const TypedValue* key,
+                         TypedValue* val) {
   assert(key->m_type != KindOfRef);
   assert(val->m_type != KindOfRef);
   auto vec = static_cast<c_Vector*>(obj);
@@ -1261,7 +1262,7 @@ void c_Vector::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   throwBadKeyType();
 }
 
-void c_Vector::OffsetUnset(ObjectData* obj, TypedValue* key) {
+void c_Vector::OffsetUnset(ObjectData* obj, const TypedValue* key) {
   Object e(SystemLib::AllocRuntimeExceptionObject(
     "Cannot unset an element of a Vector"));
   throw e;
@@ -3186,7 +3187,7 @@ bool BaseMap::uksort(const Variant& cmp_function) {
 #undef USER_SORT_BODY
 
 template <bool throwOnMiss>
-TypedValue* BaseMap::OffsetAt(ObjectData* obj, TypedValue* key) {
+TypedValue* BaseMap::OffsetAt(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto mp = static_cast<BaseMap*>(obj);
   if (key->m_type == KindOfInt64) {
@@ -3201,7 +3202,8 @@ TypedValue* BaseMap::OffsetAt(ObjectData* obj, TypedValue* key) {
   return nullptr;
 }
 
-void BaseMap::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
+void BaseMap::OffsetSet(ObjectData* obj, const TypedValue* key,
+                        TypedValue* val) {
   assert(key->m_type != KindOfRef);
   assert(val->m_type != KindOfRef);
   auto mp = static_cast<BaseMap*>(obj);
@@ -3259,7 +3261,7 @@ bool BaseMap::OffsetContains(ObjectData* obj, TypedValue* key) {
   }
 }
 
-void BaseMap::OffsetUnset(ObjectData* obj, TypedValue* key) {
+void BaseMap::OffsetUnset(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto mp = static_cast<BaseMap*>(obj);
   if (key->m_type == KindOfInt64) {
@@ -3739,11 +3741,12 @@ bool BaseSet::ToBool(const ObjectData* obj) {
   return static_cast<const BaseSet*>(obj)->toBoolImpl();
 }
 
-TypedValue* BaseSet::OffsetAt(ObjectData* obj, TypedValue* key) {
+TypedValue* BaseSet::OffsetAt(ObjectData* obj, const TypedValue* key) {
   BaseSet::throwNoIndexAccess();
 }
 
-void BaseSet::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
+void BaseSet::OffsetSet(ObjectData* obj, const TypedValue* key,
+                        TypedValue* val) {
   BaseSet::throwNoIndexAccess();
 }
 
@@ -3759,7 +3762,7 @@ bool BaseSet::OffsetContains(ObjectData* obj, TypedValue* key) {
   BaseSet::throwNoIndexAccess();
 }
 
-void BaseSet::OffsetUnset(ObjectData* obj, TypedValue* key) {
+void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
   BaseSet::throwNoIndexAccess();
 }
 
@@ -5213,7 +5216,7 @@ Array c_Pair::ToArray(const ObjectData* obj) {
 }
 
 template <bool throwOnMiss>
-TypedValue* c_Pair::OffsetAt(ObjectData* obj, TypedValue* key) {
+TypedValue* c_Pair::OffsetAt(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto pair = static_cast<c_Pair*>(obj);
   assert(pair->isFullyConstructed());
@@ -5225,7 +5228,8 @@ TypedValue* c_Pair::OffsetAt(ObjectData* obj, TypedValue* key) {
   return nullptr;
 }
 
-void c_Pair::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
+void c_Pair::OffsetSet(ObjectData* obj, const TypedValue* key,
+                       TypedValue* val) {
   assert(static_cast<c_Pair*>(obj)->isFullyConstructed());
   Object e(SystemLib::AllocRuntimeExceptionObject(
     "Cannot assign to an element of a Pair"));
@@ -5272,7 +5276,7 @@ bool c_Pair::OffsetContains(ObjectData* obj, TypedValue* key) {
   }
 }
 
-void c_Pair::OffsetUnset(ObjectData* obj, TypedValue* key) {
+void c_Pair::OffsetUnset(ObjectData* obj, const TypedValue* key) {
   assert(static_cast<c_Pair*>(obj)->isFullyConstructed());
   Object e(SystemLib::AllocRuntimeExceptionObject(
     "Cannot unset an element of a Pair"));
@@ -5634,7 +5638,8 @@ static void collectionThrowHelper(ErrMsgType errType,
 ///////////////////////////////////////////////////////////////////////////////
 
 template <bool throwOnMiss>
-static inline TypedValue* collectionAtImpl(ObjectData* obj, TypedValue* key) {
+static inline TypedValue* collectionAtImpl(ObjectData* obj,
+                                           const TypedValue* key) {
   assert(key->m_type != KindOfRef);
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
@@ -5655,7 +5660,7 @@ static inline TypedValue* collectionAtImpl(ObjectData* obj, TypedValue* key) {
   return nullptr;
 }
 
-TypedValue* collectionAt(ObjectData* obj, TypedValue* key) {
+TypedValue* collectionAt(ObjectData* obj, const TypedValue* key) {
   return collectionAtImpl<true>(obj, key);
 }
 
@@ -5672,7 +5677,7 @@ void collectionInitSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   BaseMap::OffsetSet(obj, key, val);
 }
 
-void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
+void collectionSet(ObjectData* obj, const TypedValue* key, TypedValue* val) {
   assert(key->m_type != KindOfRef);
   assert(val->m_type != KindOfRef);
   assert(val->m_type != KindOfUninit);
@@ -5745,7 +5750,7 @@ bool collectionEmpty(ObjectData* obj, TypedValue* key) {
   not_reached();
 }
 
-void collectionUnset(ObjectData* obj, TypedValue* key) {
+void collectionUnset(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
   switch (obj->getCollectionType()) {
     case Collection::VectorType:

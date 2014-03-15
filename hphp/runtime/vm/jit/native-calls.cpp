@@ -375,10 +375,10 @@ ArgGroup CallInfo::toArgGroup(const RegAllocInfo& regs,
       argGroup.typedValue(arg.ival);
       break;
     case ArgType::MemberKeyS:
-      argGroup.vectorKeyS(arg.ival);
+      argGroup.memberKeyS(arg.ival);
       break;
     case ArgType::MemberKeyIS:
-      argGroup.vectorKeyIS(arg.ival);
+      argGroup.memberKeyIS(arg.ival);
       break;
     case ArgType::ExtraImm:
       argGroup.imm(arg.extraFunc(inst));

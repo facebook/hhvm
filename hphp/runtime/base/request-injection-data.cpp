@@ -45,6 +45,21 @@ RequestInjectionData::~RequestInjectionData() {
 }
 
 void RequestInjectionData::threadInit() {
+  // phpinfo
+  {
+    auto setAndGet = IniSetting::SetAndGet<int64_t>(
+      [this](const int64_t &limit) {
+        setTimeout(limit);
+        return true;
+      },
+      [this] { return getTimeout(); }
+    );
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                     "max_execution_time", setAndGet);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                     "maximum_execution_time", setAndGet);
+  }
+
   // Resource Limits
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "memory_limit",
                    IniSetting::SetAndGet<std::string>(

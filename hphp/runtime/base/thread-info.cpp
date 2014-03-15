@@ -48,17 +48,6 @@ __thread char* ThreadInfo::t_stackbase = 0;
 
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
-static int64_t ini_get_max_execution_time() {
-  return ThreadInfo::s_threadInfo.getNoCheck()->
-    m_reqInjectionData.getTimeout();
-}
-
-static bool ini_on_update_max_execution_time(const int64_t &limit) {
-  ThreadInfo::s_threadInfo.getNoCheck()->
-    m_reqInjectionData.setTimeout(limit);
-  return true;
-}
-
 ThreadInfo::ThreadInfo()
     : m_stacklimit(0), m_executing(Idling) {
   assert(!t_stackbase);
@@ -117,17 +106,6 @@ void ThreadInfo::onSessionInit() {
     m_stacklimit = (char *)s_stackLimit + StackSlack;
     assert(uintptr_t(m_stacklimit) < s_stackLimit + s_stackSize);
   }
-
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "max_execution_time",
-                   IniSetting::SetAndGet<int64_t>(
-                     ini_on_update_max_execution_time,
-                     ini_get_max_execution_time));
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "maximum_execution_time",
-                   IniSetting::SetAndGet<int64_t>(
-                     ini_on_update_max_execution_time,
-                     ini_get_max_execution_time));
 }
 
 void ThreadInfo::clearPendingException() {
@@ -143,7 +121,10 @@ void ThreadInfo::setPendingException(Exception* e) {
 }
 
 void ThreadInfo::onSessionExit() {
+  // Clear any timeout handlers to they don't fire when the request has already
+  // been destroyed
   m_reqInjectionData.setTimeout(0);
+
   m_reqInjectionData.reset();
   RDS::requestExit();
 }

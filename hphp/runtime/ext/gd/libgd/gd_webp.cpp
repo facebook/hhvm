@@ -42,7 +42,7 @@ gdImagePtr gdImageCreateFromWebpPtr (int size, void *data)
 	unsigned char   *V = NULL;
 	gdImagePtr im;
 
-	ret = WebPDecode(data, size, &Y, &U, &V, &width, &height);
+	ret = WebPDecode((const uint8*) data, size, &Y, &U, &V, &width, &height);
 	if (ret != webp_success) {
 		if (Y) free(Y);
 		if (U) free(U);
@@ -72,7 +72,7 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 	gdImagePtr im;
 
 	do {
-		temp = gdRealloc(filedata, size+GD_WEBP_ALLOC_STEP);
+		temp = (unsigned uint8*) gdRealloc(filedata, size+GD_WEBP_ALLOC_STEP);
 		if (temp) {
 			filedata = temp;
 			read = temp + size;
@@ -167,10 +167,8 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization)
 {
 	int width = im->sx;
 	int height = im->sy;
-	int colors = im->colorsTotal;
-	int *open = im->open;
 
-	int  yuv_width, yuv_height, yuv_nbytes, ret;
+	int yuv_width, yuv_height, yuv_nbytes, ret;
 	int vp8_quality;
 	unsigned char *Y = NULL,
 				  *U = NULL,

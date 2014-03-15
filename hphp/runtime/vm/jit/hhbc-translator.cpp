@@ -4075,8 +4075,17 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
         !Repo::get().global().UsedHHBBC) {
       return RepoAuthType{};
     }
-    auto const slot = ssaCls->clsVal()->lookupSProp(ssaName->strVal());
-    return ssaCls->clsVal()->staticPropRepoAuthType(slot);
+    auto const cls = [&]() -> const Class* {
+      if (ssaCls->isConst()) return ssaCls->clsVal();
+      if (auto const name = findClassName(ssaCls)) {
+        auto const cls = Unit::lookupUniqueClass(name);
+        if (cls && classIsUnique(cls)) return cls;
+      }
+      return nullptr;
+    }();
+    if (!cls) return RepoAuthType{};
+    auto const slot = cls->lookupSProp(ssaName->strVal());
+    return cls->staticPropRepoAuthType(slot);
   }();
 
   auto const ptrTy = convertToType(repoTy).ptr();

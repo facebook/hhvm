@@ -274,6 +274,12 @@ struct Func {
     return m_unit->entry() + shared()->m_base;
   }
   Offset past() const { return shared()->m_past; }
+  bool contains(PC pc) const {
+    return contains(Offset(pc - unit()->entry()));
+  }
+  bool contains(Offset offset) const {
+    return offset >= base() && offset < past();
+  }
   int line1() const { return shared()->m_line1; }
   int line2() const { return shared()->m_line2; }
   DataType returnType() const { return shared()->m_returnType; }

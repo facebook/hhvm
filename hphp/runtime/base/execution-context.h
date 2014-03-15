@@ -594,8 +594,8 @@ public:
   int getLastErrorLine() const { return m_lastErrorLine; }
 
 private:
-  void enterVMWork(ActRec* enterFnAr);
-  void enterVMPrologue(ActRec* enterFnAr);
+  void enterVMAtFunc(ActRec* enterFnAr);
+  void enterVMAtCurPC();
   void enterVM(ActRec* ar);
   void doFPushCuf(IOP_ARGS, bool forward, bool safe);
   template <bool forwarding>

@@ -296,9 +296,12 @@ public:
     enterTC(nullptr, &sk);
   }
   void enterTCAtPrologue(ActRec *ar, TCA start) {
+    assert(ar);
+    assert(start);
     enterTC(start, ar);
   }
   void enterTCAfterPrologue(TCA start) {
+    assert(start);
     enterTC(start, nullptr);
   }
 

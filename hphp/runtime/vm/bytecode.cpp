@@ -1525,38 +1525,45 @@ void ExecutionContext::syncGdbState() {
   }
 }
 
-void ExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
+void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr) {
   assert(enterFnAr);
+  assert(!enterFnAr->inGenerator());
   Stats::inc(Stats::VMEnter);
-  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
+
+  bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
+  bool useJitPrologue = useJit && m_fp && !enterFnAr->m_varEnv;
+
+  if (LIKELY(useJitPrologue)) {
     int np = enterFnAr->m_func->numParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
     JIT::TCA start = enterFnAr->m_func->getPrologue(na);
     mcg->enterTCAtPrologue(enterFnAr, start);
+    return;
+  }
+
+  prepareFuncEntry(enterFnAr, m_pc);
+  if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
+  checkStack(m_stack, enterFnAr->m_func);
+  assert(m_fp->func()->contains(m_pc));
+
+  if (useJit) {
+    JIT::TCA start = enterFnAr->m_func->getFuncBody();
+    mcg->enterTCAfterPrologue(start);
   } else {
-    prepareFuncEntry(enterFnAr, m_pc);
-    enterVMWork(enterFnAr);
+    dispatch();
   }
 }
 
-void ExecutionContext::enterVMWork(ActRec* enterFnAr) {
-  JIT::TCA start = nullptr;
-  if (enterFnAr) {
-    if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
-    checkStack(m_stack, enterFnAr->m_func);
-    start = enterFnAr->m_func->getFuncBody();
-  }
+void ExecutionContext::enterVMAtCurPC() {
+  assert(m_fp);
+  assert(m_pc);
+  assert(m_fp->func()->contains(m_pc));
   Stats::inc(Stats::VMEnter);
+
   if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
-    (void) m_fp->unit()->offsetOf(m_pc); /* assert */
-    if (enterFnAr) {
-      assert(start);
-      mcg->enterTCAfterPrologue(start);
-    } else {
-      SrcKey sk(m_fp->func(), m_pc);
-      mcg->enterTCAtSrcKey(sk);
-    }
+    SrcKey sk(m_fp->func(), m_pc);
+    mcg->enterTCAtSrcKey(sk);
   } else {
     dispatch();
   }
@@ -1590,14 +1597,9 @@ resume:
   try {
     if (first) {
       first = false;
-      if (m_fp && !ar->m_varEnv) {
-        enterVMPrologue(ar);
-      } else {
-        prepareFuncEntry(ar, m_pc);
-        enterVMWork(ar);
-      }
+      enterVMAtFunc(ar);
     } else {
-      enterVMWork(0);
+      enterVMAtCurPC();
     }
 
     // Everything succeeded with no exception---return to the previous

@@ -17,15 +17,11 @@
 #ifndef incl_HPHP_RESOURCE_H_
 #define incl_HPHP_RESOURCE_H_
 
-#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
-#error Directly including 'type_resource.h' is prohibited. \
-       Include 'complex_types.h' instead.
-#endif
-
-#include "hphp/runtime/base/complex-types.h"
-#include <algorithm>
 #include "hphp/runtime/base/resource-data.h"
+#include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/sweepable.h"
+
+#include <algorithm>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -55,21 +51,18 @@ public:
    * Constructors
    */
   /* implicit */ Resource(ResourceData *data) : ResourceBase(data) { }
-  /* implicit */ Resource(CResRef src) : ResourceBase(src.m_px) { }
+  /* implicit */ Resource(const Resource& src) : ResourceBase(src.m_px) { }
 
   // Move ctor
-  Resource(Resource&& src) : ResourceBase(std::move(src)) {
-    static_assert(sizeof(Resource) == sizeof(ResourceBase), "Fix this.");
-  }
+  Resource(Resource&& src) : ResourceBase(std::move(src)) { }
+
   // Regular assign
   Resource& operator=(const Resource& src) {
-    static_assert(sizeof(Resource) == sizeof(ResourceBase), "Fix this.");
     ResourceBase::operator=(src);
     return *this;
   }
   // Move assign
   Resource& operator=(Resource&& src) {
-    static_assert(sizeof(Resource) == sizeof(ResourceBase), "Fix this.");
     ResourceBase::operator=(std::move(src));
     return *this;
   }
@@ -97,7 +90,7 @@ public:
    * from ResourceData.
    */
   template<typename T>
-  T *getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
+  T* getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
     static_assert(std::is_base_of<ResourceData, T>::value, "");
 
     ResourceData *cur = m_px;
@@ -110,7 +103,7 @@ public:
     T *px = dynamic_cast<T*>(cur);
     if (!px) {
       if (!badTypeOkay) {
-        throw InvalidObjectTypeException(m_px->o_getClassName().c_str());
+        throw InvalidObjectTypeException(classname_cstr());
       }
       return nullptr;
     }
@@ -139,16 +132,16 @@ public:
   int    toInt32  () const { return m_px ? m_px->o_toInt64() : 0;}
   int64_t toInt64 () const { return m_px ? m_px->o_toInt64() : 0;}
   double toDouble () const { return m_px ? m_px->o_toDouble() : 0;}
-  String toString () const { return m_px ? m_px->o_toString() : String(); }
+  String toString () const;
   Array  toArray  () const;
 
   /**
    * Comparisons
    */
-  bool same (CResRef v2) const { return m_px == v2.get();}
-  bool equal(CResRef v2) const { return m_px == v2.get();}
-  bool less (CResRef v2) const { return toInt64() < v2.toInt64();}
-  bool more (CResRef v2) const { return toInt64() > v2.toInt64();}
+  bool same (const Resource& v2) const { return m_px == v2.get();}
+  bool equal(const Resource& v2) const { return m_px == v2.get();}
+  bool less (const Resource& v2) const { return toInt64() < v2.toInt64();}
+  bool more (const Resource& v2) const { return toInt64() > v2.toInt64();}
 
   // Transfer ownership of our reference to this resource.
   ResourceData *detach() {
@@ -156,6 +149,10 @@ public:
     m_px = nullptr;
     return ret;
   }
+private:
+  static void compileTimeAssertions();
+
+  const char* classname_cstr() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

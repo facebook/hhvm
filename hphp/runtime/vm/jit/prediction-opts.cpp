@@ -70,7 +70,7 @@ bool typeSufficientlyGeneric(Type t) {
  * can specialize code earlier and avoid generic operations.
  */
 void optimizePredictions(IRUnit& unit) {
-  Timer _t("optimize_predictionOpts");
+  Timer _t(Timer::optimize_predictionOpts);
 
   FTRACE(5, "PredOpts:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "PredOpts:^^^^^^^^^^^^^^^^^^^^^\n"); };
@@ -136,10 +136,11 @@ void optimizePredictions(IRUnit& unit) {
 
     /*
      * Specialize the LdMem left on the main trace after cloning the
-     * generic version to the exit.  We'll reflowTypes after we're
+     * generic version to the exit---give it the type the old
+     * CheckType would've produced.  We'll reflowTypes after we're
      * done with all of this to get everything downstream specialized.
      */
-    ldMem->setTypeParam(checkType->typeParam());
+    ldMem->setTypeParam(outputType(checkType));
 
     /*
      * Replace the old CheckType with a Mov from the result of the

@@ -30,8 +30,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // compositions
 
-Variant ArrayUtil::Splice(CArrRef input, int offset, int64_t length /* = 0 */,
-                          CVarRef replacement /* = null_variant */,
+Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 */,
+                          const Variant& replacement /* = null_variant */,
                           Array *removed /* = NULL */) {
   int num_in = input.size();
   if (offset > num_in) {
@@ -51,7 +51,7 @@ Variant ArrayUtil::Splice(CArrRef input, int offset, int64_t length /* = 0 */,
   ArrayIter iter(input);
   for (; pos < offset && iter; ++pos, ++iter) {
     Variant key(iter.first());
-    CVarRef v = iter.secondRef();
+    const Variant& v = iter.secondRef();
     if (key.isNumeric()) {
       out_hash.appendWithRef(v);
     } else {
@@ -62,7 +62,7 @@ Variant ArrayUtil::Splice(CArrRef input, int offset, int64_t length /* = 0 */,
   for (; pos < offset + length && iter; ++pos, ++iter) {
     if (removed) {
       Variant key(iter.first());
-      CVarRef v = iter.secondRef();
+      const Variant& v = iter.secondRef();
       if (key.isNumeric()) {
         removed->appendWithRef(v);
       } else {
@@ -74,14 +74,14 @@ Variant ArrayUtil::Splice(CArrRef input, int offset, int64_t length /* = 0 */,
   Array arr = replacement.toArray();
   if (!arr.empty()) {
     for (ArrayIter iter(arr); iter; ++iter) {
-      CVarRef v = iter.secondRef();
+      const Variant& v = iter.secondRef();
       out_hash.appendWithRef(v);
     }
   }
 
   for (; iter; ++iter) {
     Variant key(iter.first());
-    CVarRef v = iter.secondRef();
+    const Variant& v = iter.secondRef();
     if (key.isNumeric()) {
       out_hash.appendWithRef(v);
     } else {
@@ -92,7 +92,7 @@ Variant ArrayUtil::Splice(CArrRef input, int offset, int64_t length /* = 0 */,
   return out_hash;
 }
 
-Variant ArrayUtil::Pad(CArrRef input, CVarRef pad_value, int pad_size,
+Variant ArrayUtil::Pad(const Array& input, const Variant& pad_value, int pad_size,
                        bool pad_right /* = true */) {
   int input_size = input.size();
   if (input_size >= pad_size) {
@@ -202,11 +202,11 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
 ///////////////////////////////////////////////////////////////////////////////
 // information and calculations
 
-DataType ArrayUtil::Sum(CArrRef input, int64_t *isum, double *dsum) {
+DataType ArrayUtil::Sum(const Array& input, int64_t *isum, double *dsum) {
   int64_t i = 0;
   ArrayIter iter(input);
   for (; iter; ++iter) {
-    CVarRef entry(iter.secondRef());
+    const Variant& entry(iter.secondRef());
     switch (entry.getType()) {
     case KindOfDouble: {
       goto DOUBLE;
@@ -240,7 +240,7 @@ DataType ArrayUtil::Sum(CArrRef input, int64_t *isum, double *dsum) {
 DOUBLE:
   double d = i;
   for (; iter; ++iter) {
-    CVarRef entry(iter.secondRef());
+    const Variant& entry(iter.secondRef());
     if (!entry.is(KindOfArray) && !entry.is(KindOfObject) &&
         !entry.is(KindOfResource)) {
       d += entry.toDouble();
@@ -250,11 +250,11 @@ DOUBLE:
   return KindOfDouble;
 }
 
-DataType ArrayUtil::Product(CArrRef input, int64_t *iprod, double *dprod) {
+DataType ArrayUtil::Product(const Array& input, int64_t *iprod, double *dprod) {
   int64_t i = 1;
   ArrayIter iter(input);
   for (; iter; ++iter) {
-    CVarRef entry(iter.secondRef());
+    const Variant& entry(iter.secondRef());
     switch (entry.getType()) {
     case KindOfDouble: {
       goto DOUBLE;
@@ -288,7 +288,7 @@ DataType ArrayUtil::Product(CArrRef input, int64_t *iprod, double *dprod) {
 DOUBLE:
   double d = i;
   for (; iter; ++iter) {
-    CVarRef entry(iter.secondRef());
+    const Variant& entry(iter.secondRef());
     if (!entry.is(KindOfArray) && !entry.is(KindOfObject) &&
         !entry.is(KindOfResource)) {
       d *= entry.toDouble();
@@ -298,10 +298,10 @@ DOUBLE:
   return KindOfDouble;
 }
 
-Variant ArrayUtil::CountValues(CArrRef input) {
+Variant ArrayUtil::CountValues(const Array& input) {
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    CVarRef entry(iter.secondRef());
+    const Variant& entry(iter.secondRef());
     if (entry.isInteger() || entry.isString()) {
       if (!ret.exists(entry)) {
         ret.set(entry, 1);
@@ -318,7 +318,7 @@ Variant ArrayUtil::CountValues(CArrRef input) {
 ///////////////////////////////////////////////////////////////////////////////
 // manipulations
 
-Variant ArrayUtil::ChangeKeyCase(CArrRef input, bool lower) {
+Variant ArrayUtil::ChangeKeyCase(const Array& input, bool lower) {
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
     Variant key(iter.first());
@@ -335,7 +335,7 @@ Variant ArrayUtil::ChangeKeyCase(CArrRef input, bool lower) {
   return ret;
 }
 
-Variant ArrayUtil::Reverse(CArrRef input, bool preserve_keys /* = false */) {
+Variant ArrayUtil::Reverse(const Array& input, bool preserve_keys /* = false */) {
   if (input.empty()) {
     return input;
   }
@@ -368,7 +368,7 @@ static void php_array_data_shuffle(std::vector<ssize_t> &indices) {
   }
 }
 
-Variant ArrayUtil::Shuffle(CArrRef input) {
+Variant ArrayUtil::Shuffle(const Array& input) {
   int count = input.size();
   if (count == 0) {
     return input;
@@ -390,7 +390,7 @@ Variant ArrayUtil::Shuffle(CArrRef input) {
   return ret;
 }
 
-Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
+Variant ArrayUtil::RandomKeys(const Array& input, int num_req /* = 1 */) {
   int count = input.size();
   if (num_req <= 0 || num_req > count) {
     raise_warning("Second argument has to be between 1 and the "
@@ -428,11 +428,11 @@ Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
   return ret;
 }
 
-Variant ArrayUtil::StringUnique(CArrRef input) {
+Variant ArrayUtil::StringUnique(const Array& input) {
   Array seenValues;
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    CVarRef entry(iter.secondRef());
+    const Variant& entry(iter.secondRef());
     String str(entry.toString());
     if (!seenValues.exists(str)) {
       seenValues.set(str, 1);
@@ -442,11 +442,11 @@ Variant ArrayUtil::StringUnique(CArrRef input) {
   return ret;
 }
 
-Variant ArrayUtil::NumericUnique(CArrRef input) {
+Variant ArrayUtil::NumericUnique(const Array& input) {
   std::set<double> seenValues;
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    CVarRef entry(iter.secondRef());
+    const Variant& entry(iter.secondRef());
     double value = entry.toDouble();
     std::pair<std::set<double>::iterator, bool> res =
       seenValues.insert(value);
@@ -457,7 +457,7 @@ Variant ArrayUtil::NumericUnique(CArrRef input) {
   return ret;
 }
 
-Variant ArrayUtil::RegularSortUnique(CArrRef input) {
+Variant ArrayUtil::RegularSortUnique(const Array& input) {
   /* The output of this function in PHP strictly depends on the implementation
    * of the sort function and on whether values that compare as equal end
    * up in contiguous positions in the sorted array (which is not really
@@ -502,7 +502,7 @@ Variant ArrayUtil::RegularSortUnique(CArrRef input) {
 void ArrayUtil::Walk(VRefParam input, PFUNC_WALK walk_function,
                      const void *data, bool recursive /* = false */,
                      PointerSet *seen /* = NULL */,
-                     CVarRef userdata /* = null_variant */) {
+                     const Variant& userdata /* = null_variant */) {
   assert(walk_function);
 
   Variant k;
@@ -530,9 +530,9 @@ void ArrayUtil::Walk(VRefParam input, PFUNC_WALK walk_function,
   }
 }
 
-Variant ArrayUtil::Reduce(CArrRef input, PFUNC_REDUCE reduce_function,
+Variant ArrayUtil::Reduce(const Array& input, PFUNC_REDUCE reduce_function,
                           const void *data,
-                          CVarRef initial /* = null_variant */) {
+                          const Variant& initial /* = null_variant */) {
   Variant result(initial);
   for (ArrayIter iter(input); iter; ++iter) {
     result = reduce_function(result, iter.second(), data);

@@ -35,7 +35,7 @@ FORWARD_DECLARE_CLASS(Continuation);
 struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   DECLARE_CLASS_NO_ALLOCATION(Continuation)
 
-  static constexpr uint startedOffset() {
+  static constexpr ptrdiff_t startedOff() {
     return offsetof(c_Continuation, o_subclassData);
   }
   bool started() const { return o_subclassData.u8[0]; }
@@ -45,9 +45,10 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     Running = 1,
     Done    = 2
   };
-  static constexpr uint stateOffset() {
+  static constexpr ptrdiff_t stateOff() {
     return offsetof(c_Continuation, o_subclassData) + 1;
   }
+
   bool done() const { return o_subclassData.u8[1] & ContState::Done; }
   void setDone() { o_subclassData.u8[1]  =  ContState::Done; }
 
@@ -56,8 +57,8 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   void setStopped() { o_subclassData.u8[1] &= ~ContState::Running; }
 
   void t___construct();
-  void t_update(int64_t label, CVarRef value);
-  void t_update_key(int64_t label, CVarRef value, CVarRef key);
+  void t_update(int64_t label, const Variant& value);
+  void t_update_key(int64_t label, const Variant& value, const Variant& key);
   Object t_getwaithandle();
   int64_t t_getlabel();
   Variant t_current();
@@ -65,8 +66,8 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   void t_next();
   void t_rewind();
   bool t_valid();
-  void t_send(CVarRef v);
-  void t_raise(CVarRef v);
+  void t_send(const Variant& v);
+  void t_raise(const Variant& v);
   String t_getorigfuncname();
   String t_getcalledclass();
 

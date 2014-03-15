@@ -340,6 +340,7 @@ static void get_color(int tokid, int prev, int next,
     COLOR_ENTRY(T_INC,                      None        );
     COLOR_ENTRY(T_LNUMBER,                  None        );
     COLOR_ENTRY(T_DNUMBER,                  None        );
+    COLOR_ENTRY(T_ONUMBER,                  None        );
     COLOR_ENTRY(T_STRING,                   None        );
     COLOR_ENTRY(T_STRING_VARNAME,           Variable    );
     COLOR_ENTRY(T_VARIABLE,                 Variable    );

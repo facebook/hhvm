@@ -82,18 +82,18 @@ static inline int unserializeImpl(const String& sdata, Variant& data) {
   return DebuggerWireHelpers::NoError;
 }
 
-int DebuggerWireHelpers::WireSerialize(CArrRef data, String& sdata) {
-  TRACE(7, "DebuggerWireHelpers::WireSerialize(CArrRef data,\n");
+int DebuggerWireHelpers::WireSerialize(const Array& data, String& sdata) {
+  TRACE(7, "DebuggerWireHelpers::WireSerialize(const Array& data,\n");
   return serializeImpl(data, sdata);
 }
 
-int DebuggerWireHelpers::WireSerialize(CObjRef data, String& sdata) {
-  TRACE(7, "DebuggerWireHelpers::WireSerialize(CObjRef data,\n");
+int DebuggerWireHelpers::WireSerialize(const Object& data, String& sdata) {
+  TRACE(7, "DebuggerWireHelpers::WireSerialize(const Object& data,\n");
   return serializeImpl(data, sdata);
 }
 
-int DebuggerWireHelpers::WireSerialize(CVarRef data, String& sdata) {
-  TRACE(7, "DebuggerWireHelpers::WireSerialize(CVarRef data,\n");
+int DebuggerWireHelpers::WireSerialize(const Variant& data, String& sdata) {
+  TRACE(7, "DebuggerWireHelpers::WireSerialize(const Variant& data,\n");
   return serializeImpl(data, sdata);
 }
 

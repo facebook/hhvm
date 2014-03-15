@@ -408,7 +408,7 @@ static const char php_sig_jp2[12] =
    (char)0x0d, (char)0x0a, (char)0x87, (char)0x0a};
 static const char php_sig_iff[4] = {'F','O','R','M'};
 
-static struct gfxinfo *php_handle_gif(CResRef stream) {
+static struct gfxinfo *php_handle_gif(const Resource& stream) {
   struct gfxinfo *result = NULL;
   String dim;
   const unsigned char *s;
@@ -426,7 +426,7 @@ static struct gfxinfo *php_handle_gif(CResRef stream) {
   return result;
 }
 
-static struct gfxinfo *php_handle_psd (CResRef stream) {
+static struct gfxinfo *php_handle_psd (const Resource& stream) {
   struct gfxinfo *result = NULL;
   String dim;
   const unsigned char *s;
@@ -449,7 +449,7 @@ static struct gfxinfo *php_handle_psd (CResRef stream) {
   return result;
 }
 
-static struct gfxinfo *php_handle_bmp (CResRef stream) {
+static struct gfxinfo *php_handle_bmp (const Resource& stream) {
   struct gfxinfo *result = NULL;
   String dim;
   const unsigned char *s;
@@ -507,7 +507,7 @@ static unsigned long int php_swf_get_bits(unsigned char* buffer,
 }
 
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
-static struct gfxinfo *php_handle_swc(CResRef stream) {
+static struct gfxinfo *php_handle_swc(const Resource& stream) {
   struct gfxinfo *result = NULL;
 
   long bits;
@@ -588,7 +588,7 @@ static struct gfxinfo *php_handle_swc(CResRef stream) {
 }
 #endif
 
-static struct gfxinfo *php_handle_swf(CResRef stream) {
+static struct gfxinfo *php_handle_swf(const Resource& stream) {
   struct gfxinfo *result = NULL;
   long bits;
   unsigned char *a;
@@ -610,7 +610,7 @@ static struct gfxinfo *php_handle_swf(CResRef stream) {
   return result;
 }
 
-static struct gfxinfo *php_handle_png(CResRef stream) {
+static struct gfxinfo *php_handle_png(const Resource& stream) {
   struct gfxinfo *result = NULL;
   String dim;
   const unsigned char *s;
@@ -684,7 +684,7 @@ static struct gfxinfo *php_handle_png(CResRef stream) {
 
 #define M_EXIF  0xE1      /* Exif Attribute Information               */
 
-static unsigned short php_read2(CResRef stream) {
+static unsigned short php_read2(const Resource& stream) {
   unsigned char *a;
   String str = toString(f_fread(stream, 2));
   /* just return 0 if we hit the end-of-file */
@@ -693,7 +693,7 @@ static unsigned short php_read2(CResRef stream) {
   return (((unsigned short)a[0]) << 8) + ((unsigned short)a[1]);
 }
 
-static unsigned int php_next_marker(CResRef stream, int last_marker,
+static unsigned int php_next_marker(const Resource& stream, int last_marker,
                                     int comment_correction, int ff_read) {
   int a=0, marker;
 
@@ -744,7 +744,7 @@ static unsigned int php_next_marker(CResRef stream, int last_marker,
   return (unsigned int)marker;
 }
 
-static int php_skip_variable(CResRef stream) {
+static int php_skip_variable(const Resource& stream) {
   off_t length = (unsigned int)php_read2(stream);
 
   if (length < 2) {
@@ -755,7 +755,7 @@ static int php_skip_variable(CResRef stream) {
   return 1;
 }
 
-static int php_read_APP(CResRef stream, unsigned int marker, Variant &info) {
+static int php_read_APP(const Resource& stream, unsigned int marker, Variant &info) {
   unsigned short length;
   Variant buffer;
   unsigned char markername[16];
@@ -782,7 +782,7 @@ static int php_read_APP(CResRef stream, unsigned int marker, Variant &info) {
   return 1;
 }
 
-static struct gfxinfo *php_handle_jpeg(CResRef stream, Variant &info) {
+static struct gfxinfo *php_handle_jpeg(const Resource& stream, Variant &info) {
   struct gfxinfo *result = NULL;
   unsigned int marker = M_PSEUDO;
   unsigned short length, ff_read=1;
@@ -874,7 +874,7 @@ static struct gfxinfo *php_handle_jpeg(CResRef stream, Variant &info) {
   return result; /* perhaps image broken -> no info but size */
 }
 
-static unsigned short php_read4(CResRef stream) {
+static unsigned short php_read4(const Resource& stream) {
   unsigned char *a;
   String str = toString(f_fread(stream, 4));
   /* just return 0 if we hit the end-of-file */
@@ -910,7 +910,7 @@ static unsigned short php_read4(CResRef stream) {
 #define JPEG2000_MARKER_COM 0x64 /* Comment */
 
 /* Main loop to parse JPEG2000 raw codestream structure */
-static struct gfxinfo *php_handle_jpc(CResRef stream) {
+static struct gfxinfo *php_handle_jpc(const Resource& stream) {
   struct gfxinfo *result = NULL;
   int highest_bit_depth, bit_depth;
   unsigned char first_marker_id;
@@ -981,7 +981,7 @@ static struct gfxinfo *php_handle_jpc(CResRef stream) {
 }
 
 /* main loop to parse JPEG 2000 JP2 wrapper format structure */
-static struct gfxinfo *php_handle_jp2(CResRef stream) {
+static struct gfxinfo *php_handle_jp2(const Resource& stream) {
   struct gfxinfo *result = NULL;
   unsigned int box_length;
   unsigned int box_type;
@@ -1144,7 +1144,7 @@ static unsigned php_ifd_get32u(void *Long, int motorola_intel) {
 }
 
 /* main loop to parse TIFF structure */
-static struct gfxinfo *php_handle_tiff(CResRef stream, int motorola_intel) {
+static struct gfxinfo *php_handle_tiff(const Resource& stream, int motorola_intel) {
   struct gfxinfo *result = NULL;
   int i, num_entries;
   unsigned char *dir_entry;
@@ -1216,7 +1216,7 @@ static struct gfxinfo *php_handle_tiff(CResRef stream, int motorola_intel) {
   return NULL;
 }
 
-static struct gfxinfo *php_handle_iff(CResRef stream) {
+static struct gfxinfo *php_handle_iff(const Resource& stream) {
   struct gfxinfo * result;
   String str;
   char *a;
@@ -1274,7 +1274,7 @@ static struct gfxinfo *php_handle_iff(CResRef stream) {
  * int Number of columns
  * int Number of rows
  */
-static int php_get_wbmp(CResRef stream, struct gfxinfo **result, int check) {
+static int php_get_wbmp(const Resource& stream, struct gfxinfo **result, int check) {
   int i, width = 0, height = 0;
 
   if (!f_rewind(stream)) {
@@ -1327,7 +1327,7 @@ static int php_get_wbmp(CResRef stream, struct gfxinfo **result, int check) {
   return IMAGE_FILETYPE_WBMP;
 }
 
-static struct gfxinfo *php_handle_wbmp(CResRef stream) {
+static struct gfxinfo *php_handle_wbmp(const Resource& stream) {
   struct gfxinfo *result =
    (struct gfxinfo *)IM_CALLOC(1, sizeof(struct gfxinfo));
   CHECK_ALLOC_R(result, (sizeof(struct gfxinfo)), NULL);
@@ -1340,7 +1340,7 @@ static struct gfxinfo *php_handle_wbmp(CResRef stream) {
   return result;
 }
 
-static int php_get_xbm(CResRef stream, struct gfxinfo **result) {
+static int php_get_xbm(const Resource& stream, struct gfxinfo **result) {
   String fline;
   char *iname;
   char *type;
@@ -1394,7 +1394,7 @@ static int php_get_xbm(CResRef stream, struct gfxinfo **result) {
   return 0;
 }
 
-static struct gfxinfo *php_handle_xbm(CResRef stream) {
+static struct gfxinfo *php_handle_xbm(const Resource& stream) {
   struct gfxinfo *result;
   php_get_xbm(stream, &result);
   return result;
@@ -1436,7 +1436,7 @@ static char *php_image_type_to_mime_type(int image_type) {
 }
 
 /* detect filetype from first bytes */
-static int php_getimagetype(CResRef stream) {
+static int php_getimagetype(const Resource& stream) {
   File *file = stream.getTyped<File>();
   String fileType;
   String data;
@@ -1770,11 +1770,11 @@ static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf,
 }
 
 static void _php_image_output_ctxfree(struct gdIOCtx *ctx) {
-  if(ctx) {
+  if (ctx) {
     IM_FREE(ctx);
   }
 }
-static bool _php_image_output_ctx(CResRef image, const String& filename,
+static bool _php_image_output_ctx(const Resource& image, const String& filename,
                                   int quality, int basefilter,
                                   int image_type, char *tn,
                                   void (*func_p)()) {
@@ -1813,7 +1813,7 @@ static bool _php_image_output_ctx(CResRef image, const String& filename,
 
   switch(image_type) {
   case PHP_GDIMG_CONVERT_WBM:
-    if(q<0||q>255) {
+    if (q<0||q>255) {
       raise_warning("Invalid threshold value '%d'. "
                       "It must be between 0 and 255", q);
     }
@@ -1827,7 +1827,7 @@ static bool _php_image_output_ctx(CResRef image, const String& filename,
   case PHP_GDIMG_TYPE_WBM:
     if (q == -1) { // argc < 3
       for(i=0; i < gdImageColorsTotal(im); i++) {
-        if(!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) break;
+        if (!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) break;
       }
       q = i;
     }
@@ -2095,7 +2095,7 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
 #endif /* HAVE_GD_WBMP */
 
 // For quality and type, -1 means that the argument does not exist
-static bool _php_image_output(CResRef image, const String& filename,
+static bool _php_image_output(const Resource& image, const String& filename,
                               int quality, int type, int image_type, char *tn,
                               void (*func_p)()) {
   gdImagePtr im = image.getTyped<Image>()->get();
@@ -2144,7 +2144,7 @@ static bool _php_image_output(CResRef image, const String& filename,
       break;
 #if HAVE_LIBGD20
     case PHP_GDIMG_TYPE_GD:
-      if (im->trueColor){
+      if (im->trueColor) {
         gdImageTrueColorToPalette(im,1,256);
       }
       // gdImageGd
@@ -2536,7 +2536,7 @@ static void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y,
  * arg = 2  ImageString
  * arg = 3  ImageStringUp
  */
-static bool php_imagechar(CResRef image, int size, int x, int y,
+static bool php_imagechar(const Resource& image, int size, int x, int y,
                           const String& c, int color, int mode) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -2574,7 +2574,7 @@ static bool php_imagechar(CResRef image, int size, int x, int y,
 
 /* arg = 0  normal polygon
    arg = 1  filled polygon */
-static bool php_imagepolygon(CResRef image, CArrRef points, int num_points,
+static bool php_imagepolygon(const Resource& image, const Array& points, int num_points,
                              int color, int filled) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -2738,15 +2738,15 @@ static int php_imagefontsize(int size, int arg) {
 #ifdef ENABLE_GD_TTF
 
 static Variant php_imagettftext_common(int mode, int extended,
-                                       CVarRef arg1,
-                                       CVarRef arg2,
-                                       CVarRef arg3,
-                                       CVarRef arg4,
-                                       CVarRef arg5 = null_variant,
-                                       CVarRef arg6 = null_variant,
-                                       CVarRef arg7 = null_variant,
-                                       CVarRef arg8 = null_variant,
-                                       CVarRef arg9 = null_variant) {
+                                       const Variant& arg1,
+                                       const Variant& arg2,
+                                       const Variant& arg3,
+                                       const Variant& arg4,
+                                       const Variant& arg5 = null_variant,
+                                       const Variant& arg6 = null_variant,
+                                       const Variant& arg7 = null_variant,
+                                       const Variant& arg8 = null_variant,
+                                       const Variant& arg9 = null_variant) {
   gdImagePtr im=NULL;
   long col = -1, x = -1, y = -1;
   int brect[8];
@@ -3043,7 +3043,7 @@ Variant f_imageloadfont(const String& file) {
 #endif
 }
 
-bool f_imagesetstyle(CResRef image, CArrRef style) {
+bool f_imagesetstyle(const Resource& image, const Array& style) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   int *stylearr;
@@ -3076,13 +3076,13 @@ Variant f_imagecreatetruecolor(int width, int height) {
   return Resource(new Image(im));
 }
 
-bool f_imageistruecolor(CResRef image) {
+bool f_imageistruecolor(const Resource& image) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   return im->trueColor;
 }
 
-Variant f_imagetruecolortopalette(CResRef image, bool dither, int ncolors) {
+Variant f_imagetruecolortopalette(const Resource& image, bool dither, int ncolors) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
 
@@ -3094,7 +3094,7 @@ Variant f_imagetruecolortopalette(CResRef image, bool dither, int ncolors) {
   return true;
 }
 
-Variant f_imagecolormatch(CResRef image1, CResRef image2) {
+Variant f_imagecolormatch(const Resource& image1, const Resource& image2) {
   gdImagePtr im1 = image1.getTyped<Image>()->get();
   if (!im1) return false;
   gdImagePtr im2 = image2.getTyped<Image>()->get();
@@ -3120,14 +3120,14 @@ Variant f_imagecolormatch(CResRef image1, CResRef image2) {
   return true;
 }
 
-bool f_imagesetthickness(CResRef image, int thickness) {
+bool f_imagesetthickness(const Resource& image, int thickness) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   gdImageSetThickness(im, thickness);
   return true;
 }
 
-bool f_imagefilledellipse(CResRef image, int cx, int cy,
+bool f_imagefilledellipse(const Resource& image, int cx, int cy,
                           int width, int height, int color) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -3135,7 +3135,7 @@ bool f_imagefilledellipse(CResRef image, int cx, int cy,
   return true;
 }
 
-bool f_imagefilledarc(CResRef image, int cx, int cy, int width, int height,
+bool f_imagefilledarc(const Resource& image, int cx, int cy, int width, int height,
                       int start, int end, int color, int style) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -3145,28 +3145,28 @@ bool f_imagefilledarc(CResRef image, int cx, int cy, int width, int height,
   return true;
 }
 
-bool f_imagealphablending(CResRef image, bool blendmode) {
+bool f_imagealphablending(const Resource& image, bool blendmode) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   gdImageAlphaBlending(im, blendmode);
   return true;
 }
 
-bool f_imagesavealpha(CResRef image, bool saveflag) {
+bool f_imagesavealpha(const Resource& image, bool saveflag) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   gdImageSaveAlpha(im, saveflag);
   return true;
 }
 
-bool f_imagelayereffect(CResRef image, int effect) {
+bool f_imagelayereffect(const Resource& image, int effect) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   gdImageAlphaBlending(im, effect);
   return true;
 }
 
-Variant f_imagecolorallocatealpha(CResRef image, int red, int green, int blue,
+Variant f_imagecolorallocatealpha(const Resource& image, int red, int green, int blue,
                                   int alpha) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -3177,28 +3177,28 @@ Variant f_imagecolorallocatealpha(CResRef image, int red, int green, int blue,
   return ct;
 }
 
-Variant f_imagecolorresolvealpha(CResRef image, int red, int green, int blue,
+Variant f_imagecolorresolvealpha(const Resource& image, int red, int green, int blue,
                                  int alpha) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   return gdImageColorResolveAlpha(im, red, green, blue, alpha);
 }
 
-Variant f_imagecolorclosestalpha(CResRef image, int red, int green, int blue,
+Variant f_imagecolorclosestalpha(const Resource& image, int red, int green, int blue,
                                  int alpha) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   return gdImageColorClosestAlpha(im, red, green, blue, alpha);
 }
 
-Variant f_imagecolorexactalpha(CResRef image, int red, int green, int blue,
+Variant f_imagecolorexactalpha(const Resource& image, int red, int green, int blue,
                                int alpha) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   return gdImageColorExactAlpha(im, red, green, blue, alpha);
 }
 
-bool f_imagecopyresampled(CResRef dst_im, CResRef src_im,
+bool f_imagecopyresampled(const Resource& dst_im, const Resource& src_im,
                           int dst_x, int dst_y, int src_x, int src_y,
                           int dst_w, int dst_h, int src_w, int src_h) {
   gdImagePtr im_src = src_im.getTyped<Image>()->get();
@@ -3226,7 +3226,7 @@ Variant f_imagegrabscreen() {
 #endif
 }
 
-Variant f_imagerotate(CResRef source_image, double angle, int bgd_color,
+Variant f_imagerotate(const Resource& source_image, double angle, int bgd_color,
                      int ignore_transparent /* = 0 */) {
   gdImagePtr im_src = source_image.getTyped<Image>()->get();
   if (!im_src) return false;
@@ -3236,7 +3236,7 @@ Variant f_imagerotate(CResRef source_image, double angle, int bgd_color,
   return Resource(new Image(im_dst));
 }
 
-bool f_imagesettile(CResRef image, CResRef tile) {
+bool f_imagesettile(const Resource& image, const Resource& tile) {
 #if HAVE_GD_IMAGESETTILE
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -3249,7 +3249,7 @@ bool f_imagesettile(CResRef image, CResRef tile) {
 #endif
 }
 
-bool f_imagesetbrush(CResRef image, CResRef brush) {
+bool f_imagesetbrush(const Resource& image, const Resource& brush) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   gdImagePtr tile = brush.getTyped<Image>()->get();
@@ -3476,12 +3476,12 @@ Variant f_imagecreatefromgd2part(const String& filename,
   return Resource(new Image(im));
 }
 
-bool f_imagexbm(CResRef image, const String& filename /* = null_string */,
+bool f_imagexbm(const Resource& image, const String& filename /* = null_string */,
                 int foreground /* = -1 */) {
   throw NotSupportedException(__func__, "gdImageXbmCtx does not exist");
 }
 
-bool f_imagegif(CResRef image, const String& filename /* = null_string */) {
+bool f_imagegif(const Resource& image, const String& filename /* = null_string */) {
 #ifdef HAVE_GD_GIF_CTX
   return _php_image_output_ctx(image, filename, -1, -1,
                                PHP_GDIMG_TYPE_GIF, "GIF",
@@ -3493,7 +3493,7 @@ bool f_imagegif(CResRef image, const String& filename /* = null_string */) {
 #endif
 }
 
-bool f_imagepng(CResRef image, const String& filename /* = null_string */,
+bool f_imagepng(const Resource& image, const String& filename /* = null_string */,
                 int quality /* = -1 */, int filters /* = -1 */) {
 #ifdef HAVE_GD_PNG
 #ifdef USE_GD_IOCTX
@@ -3510,7 +3510,7 @@ bool f_imagepng(CResRef image, const String& filename /* = null_string */,
 #endif
 }
 
-bool f_imagejpeg(CResRef image, const String& filename /* = null_string */,
+bool f_imagejpeg(const Resource& image, const String& filename /* = null_string */,
                  int quality /* = -1 */) {
 #ifdef HAVE_GD_JPG
 #ifdef USE_GD_IOCTX
@@ -3527,7 +3527,7 @@ bool f_imagejpeg(CResRef image, const String& filename /* = null_string */,
 #endif
 }
 
-bool f_imagewbmp(CResRef image, const String& filename /* = null_string */,
+bool f_imagewbmp(const Resource& image, const String& filename /* = null_string */,
                  int foreground /* = -1 */) {
 #ifdef USE_GD_IOCTX
   return _php_image_output_ctx(image, filename, foreground, -1,
@@ -3540,19 +3540,19 @@ bool f_imagewbmp(CResRef image, const String& filename /* = null_string */,
 #endif
 }
 
-bool f_imagegd(CResRef image, const String& filename /* = null_string */) {
+bool f_imagegd(const Resource& image, const String& filename /* = null_string */) {
   return _php_image_output(image, filename, -1, -1, PHP_GDIMG_TYPE_GD, "GD",
                            (void (*)())gdImageGd);
 }
 
-bool f_imagegd2(CResRef image, const String& filename /* = null_string */,
+bool f_imagegd2(const Resource& image, const String& filename /* = null_string */,
                 int chunk_size /* = 0 */, int type /* = 0 */) {
   return _php_image_output(image, filename, chunk_size, type,
                            PHP_GDIMG_TYPE_GD2, "GD2",
                            (void (*)())gdImageGd2);
 }
 
-bool f_imagedestroy(CResRef image) {
+bool f_imagedestroy(const Resource& image) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   gdImageDestroy(im);
@@ -3560,7 +3560,7 @@ bool f_imagedestroy(CResRef image) {
   return true;
 }
 
-Variant f_imagecolorallocate(CResRef image, int red, int green, int blue) {
+Variant f_imagecolorallocate(const Resource& image, int red, int green, int blue) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   int ct = gdImageColorAllocate(im, red, green, blue);
@@ -3570,7 +3570,7 @@ Variant f_imagecolorallocate(CResRef image, int red, int green, int blue) {
   return ct;
 }
 
-void f_imagepalettecopy(CResRef destination, CResRef source) {
+void f_imagepalettecopy(const Resource& destination, const Resource& source) {
 /*
   gdImagePtr dstim = destination.getTyped<Image>()->get();
   if (!dstim) return false;
@@ -3581,7 +3581,7 @@ void f_imagepalettecopy(CResRef destination, CResRef source) {
 */
 }
 
-Variant f_imagecolorat(CResRef image, int x, int y) {
+Variant f_imagecolorat(const Resource& image, int x, int y) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
 #if HAVE_LIBGD20
@@ -3609,19 +3609,19 @@ Variant f_imagecolorat(CResRef image, int x, int y) {
 #endif
 }
 
-Variant f_imagecolorclosest(CResRef image, int red, int green, int blue) {
+Variant f_imagecolorclosest(const Resource& image, int red, int green, int blue) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   return gdImageColorClosest(im, red, green, blue);
 }
 
-Variant f_imagecolorclosesthwb(CResRef image, int red, int green, int blue) {
+Variant f_imagecolorclosesthwb(const Resource& image, int red, int green, int blue) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   return gdImageColorClosestHWB(im, red, green, blue);
 }
 
-bool f_imagecolordeallocate(CResRef image, int color) {
+bool f_imagecolordeallocate(const Resource& image, int color) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
 #if HAVE_LIBGD20
@@ -3639,19 +3639,19 @@ bool f_imagecolordeallocate(CResRef image, int color) {
   }
 }
 
-Variant f_imagecolorresolve(CResRef image, int red, int green, int blue) {
+Variant f_imagecolorresolve(const Resource& image, int red, int green, int blue) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   return gdImageColorResolve(im, red, green, blue);
 }
 
-Variant f_imagecolorexact(CResRef image, int red, int green, int blue) {
+Variant f_imagecolorexact(const Resource& image, int red, int green, int blue) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   return gdImageColorExact(im, red, green, blue);
 }
 
-Variant f_imagecolorset(CResRef image, int index,
+Variant f_imagecolorset(const Resource& image, int index,
                         int red, int green, int blue) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -3671,7 +3671,7 @@ const StaticString
   s_blue("blue"),
   s_alpha("alpha");
 
-Variant f_imagecolorsforindex(CResRef image, int index) {
+Variant f_imagecolorsforindex(const Resource& image, int index) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
 #if HAVE_LIBGD20
@@ -3698,7 +3698,7 @@ Variant f_imagecolorsforindex(CResRef image, int index) {
   return false;
 }
 
-bool f_imagegammacorrect(CResRef image, double inputgamma,
+bool f_imagegammacorrect(const Resource& image, double inputgamma,
                          double outputgamma) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -3733,14 +3733,14 @@ bool f_imagegammacorrect(CResRef image, double inputgamma,
   return true;
 }
 
-bool f_imagesetpixel(CResRef image, int x, int y, int color) {
+bool f_imagesetpixel(const Resource& image, int x, int y, int color) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   gdImageSetPixel(im, x, y, color);
   return true;
 }
 
-bool f_imageline(CResRef image, int x1, int y1, int x2, int y2, int color) {
+bool f_imageline(const Resource& image, int x1, int y1, int x2, int y2, int color) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   color = SetupAntiAliasedColor(im, color);
@@ -3748,7 +3748,7 @@ bool f_imageline(CResRef image, int x1, int y1, int x2, int y2, int color) {
   return true;
 }
 
-bool f_imagedashedline(CResRef image, int x1, int y1, int x2, int y2,
+bool f_imagedashedline(const Resource& image, int x1, int y1, int x2, int y2,
                        int color) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -3756,7 +3756,7 @@ bool f_imagedashedline(CResRef image, int x1, int y1, int x2, int y2,
   return true;
 }
 
-bool f_imagerectangle(CResRef image, int x1, int y1,
+bool f_imagerectangle(const Resource& image, int x1, int y1,
                       int x2, int y2, int color) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -3764,7 +3764,7 @@ bool f_imagerectangle(CResRef image, int x1, int y1,
   return true;
 }
 
-bool f_imagefilledrectangle(CResRef image, int x1, int y1,
+bool f_imagefilledrectangle(const Resource& image, int x1, int y1,
                             int x2, int y2, int color) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -3772,7 +3772,7 @@ bool f_imagefilledrectangle(CResRef image, int x1, int y1,
   return true;
 }
 
-bool f_imagearc(CResRef image, int cx, int cy, int width, int height,
+bool f_imagearc(const Resource& image, int cx, int cy, int width, int height,
                 int start, int end, int color) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -3783,7 +3783,7 @@ bool f_imagearc(CResRef image, int cx, int cy, int width, int height,
   return true;
 }
 
-bool f_imageellipse(CResRef image, int cx, int cy, int width, int height,
+bool f_imageellipse(const Resource& image, int cx, int cy, int width, int height,
                     int color) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -3792,7 +3792,7 @@ bool f_imageellipse(CResRef image, int cx, int cy, int width, int height,
   return true;
 }
 
-bool f_imagefilltoborder(CResRef image, int x, int y,
+bool f_imagefilltoborder(const Resource& image, int x, int y,
                          int border, int color) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -3800,20 +3800,20 @@ bool f_imagefilltoborder(CResRef image, int x, int y,
   return true;
 }
 
-bool f_imagefill(CResRef image, int x, int y, int color) {
+bool f_imagefill(const Resource& image, int x, int y, int color) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   gdImageFill(im, x, y, color);
   return true;
 }
 
-Variant f_imagecolorstotal(CResRef image) {
+Variant f_imagecolorstotal(const Resource& image) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   return (gdImageColorsTotal(im));
 }
 
-Variant f_imagecolortransparent(CResRef image, int color /* = -1 */) {
+Variant f_imagecolortransparent(const Resource& image, int color /* = -1 */) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   if (color != -1) {
@@ -3823,7 +3823,7 @@ Variant f_imagecolortransparent(CResRef image, int color /* = -1 */) {
   return gdImageGetTransparent(im);
 }
 
-Variant f_imageinterlace(CResRef image, int interlace /* = 0 */) {
+Variant f_imageinterlace(const Resource& image, int interlace /* = 0 */) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   if (interlace != 0) {
@@ -3833,12 +3833,12 @@ Variant f_imageinterlace(CResRef image, int interlace /* = 0 */) {
   return gdImageGetInterlaced(im);
 }
 
-bool f_imagepolygon(CResRef image, CArrRef points,
+bool f_imagepolygon(const Resource& image, const Array& points,
                     int num_points, int color) {
   return php_imagepolygon(image, points, num_points, color, 0);
 }
 
-bool f_imagefilledpolygon(CResRef image, CArrRef points, int num_points,
+bool f_imagefilledpolygon(const Resource& image, const Array& points, int num_points,
                           int color) {
   return php_imagepolygon(image, points, num_points, color, 1);
 }
@@ -3851,27 +3851,27 @@ int64_t f_imagefontheight(int font) {
   return php_imagefontsize(font, 1);
 }
 
-bool f_imagechar(CResRef image, int font, int x, int y,
+bool f_imagechar(const Resource& image, int font, int x, int y,
                  const String& c, int color) {
   return php_imagechar(image, font, x, y, c, color, 0);
 }
 
-bool f_imagecharup(CResRef image, int font, int x, int y,
+bool f_imagecharup(const Resource& image, int font, int x, int y,
                    const String& c, int color) {
   return php_imagechar(image, font, x, y, c, color, 1);
 }
 
-bool f_imagestring(CResRef image, int font, int x, int y,
+bool f_imagestring(const Resource& image, int font, int x, int y,
                    const String& str, int color) {
   return php_imagechar(image, font, x, y, str, color, 2);
 }
 
-bool f_imagestringup(CResRef image, int font, int x, int y,
+bool f_imagestringup(const Resource& image, int font, int x, int y,
                      const String& str, int color) {
   return php_imagechar(image, font, x, y, str, color, 3);
 }
 
-bool f_imagecopy(CResRef dst_im, CResRef src_im, int dst_x, int dst_y,
+bool f_imagecopy(const Resource& dst_im, const Resource& src_im, int dst_x, int dst_y,
                  int src_x, int src_y, int src_w, int src_h) {
   gdImagePtr im_src = src_im.getTyped<Image>()->get();
   if (!im_src) return false;
@@ -3881,7 +3881,7 @@ bool f_imagecopy(CResRef dst_im, CResRef src_im, int dst_x, int dst_y,
   return true;
 }
 
-bool f_imagecopymerge(CResRef dst_im, CResRef src_im,
+bool f_imagecopymerge(const Resource& dst_im, const Resource& src_im,
                       int dst_x, int dst_y, int src_x, int src_y,
                       int src_w, int src_h, int pct) {
   gdImagePtr im_src = src_im.getTyped<Image>()->get();
@@ -3897,7 +3897,7 @@ bool f_imagecopymerge(CResRef dst_im, CResRef src_im,
 #endif
 }
 
-bool f_imagecopymergegray(CResRef dst_im, CResRef src_im,
+bool f_imagecopymergegray(const Resource& dst_im, const Resource& src_im,
                           int dst_x, int dst_y,
                           int src_x, int src_y,
                           int src_w, int src_h, int pct) {
@@ -3910,7 +3910,7 @@ bool f_imagecopymergegray(CResRef dst_im, CResRef src_im,
   return true;
 }
 
-bool f_imagecopyresized(CResRef dst_im, CResRef src_im,
+bool f_imagecopyresized(const Resource& dst_im, const Resource& src_im,
                         int dst_x, int dst_y, int src_x, int src_y,
                         int dst_w, int dst_h, int src_w, int src_h) {
   gdImagePtr im_src = src_im.getTyped<Image>()->get();
@@ -3927,20 +3927,20 @@ bool f_imagecopyresized(CResRef dst_im, CResRef src_im,
   return true;
 }
 
-Variant f_imagesx(CResRef image) {
+Variant f_imagesx(const Resource& image) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   return gdImageSX(im);
 }
 
-Variant f_imagesy(CResRef image) {
+Variant f_imagesy(const Resource& image) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   return gdImageSY(im);
 }
 
 Variant f_imageftbbox(double size, double angle, const String& font_file,
-                    const String& text, CArrRef extrainfo /* = null */) {
+                    const String& text, const Array& extrainfo /* = null */) {
 #if defined(ENABLE_GD_TTF) && HAVE_LIBGD20 && \
     HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
   return php_imagettftext_common(TTFTEXT_BBOX, 1,
@@ -3952,9 +3952,9 @@ Variant f_imageftbbox(double size, double angle, const String& font_file,
 #endif
 }
 
-Variant f_imagefttext(CResRef image, double size, double angle,
+Variant f_imagefttext(const Resource& image, double size, double angle,
                     int x, int y, int col, const String& font_file,
-                    const String& text, CArrRef extrainfo /* = null */) {
+                    const String& text, const Array& extrainfo /* = null */) {
 #if defined(ENABLE_GD_TTF) && HAVE_LIBGD20 && \
   HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
   return php_imagettftext_common(TTFTEXT_DRAW, 1,
@@ -3977,7 +3977,7 @@ Variant f_imagettfbbox(double size, double angle,
 #endif
 }
 
-Variant f_imagettftext(CResRef image, double size, double angle,
+Variant f_imagettftext(const Resource& image, double size, double angle,
                      int x, int y, int color,
                      const String& fontfile, const String& text) {
 #ifdef ENABLE_GD_TTF
@@ -3997,7 +3997,7 @@ Resource f_imagepsloadfont(const String& filename) {
 #endif
 }
 
-bool f_imagepsfreefont(CResRef fontindex) {
+bool f_imagepsfreefont(const Resource& fontindex) {
 #ifdef HAVE_LIBT1
   #error config error: HAVE_LIBT1 defined!
 #else
@@ -4005,7 +4005,7 @@ bool f_imagepsfreefont(CResRef fontindex) {
 #endif
 }
 
-bool f_imagepsencodefont(CResRef font_index, const String& encodingfile) {
+bool f_imagepsencodefont(const Resource& font_index, const String& encodingfile) {
 #ifdef HAVE_LIBT1
   #error config error: HAVE_LIBT1 defined!
 #else
@@ -4021,7 +4021,7 @@ bool f_imagepsextendfont(int font_index, double extend) {
 #endif
 }
 
-bool f_imagepsslantfont(CResRef font_index, double slant) {
+bool f_imagepsslantfont(const Resource& font_index, double slant) {
 #ifdef HAVE_LIBT1
   #error config error: HAVE_LIBT1 defined!
 #else
@@ -4029,7 +4029,7 @@ bool f_imagepsslantfont(CResRef font_index, double slant) {
 #endif
 }
 
-Array f_imagepstext(CResRef image, const String& text, CResRef font, int size,
+Array f_imagepstext(const Resource& image, const String& text, const Resource& font, int size,
                     int foreground, int background, int x, int y,
                     int space /* = 0 */, int tightness /* = 0 */,
                     double angle /* = 0.0 */,
@@ -4050,7 +4050,7 @@ Array f_imagepsbbox(const String& text, int font, int size, int space /* = 0 */,
 #endif
 }
 
-bool f_image2wbmp(CResRef image, const String& filename /* = null_string */,
+bool f_image2wbmp(const Resource& image, const String& filename /* = null_string */,
                   int threshold /* = -1 */) {
 #ifdef HAVE_GD_WBMP
   return _php_image_output(image, filename, threshold, -1,
@@ -4177,7 +4177,7 @@ static int hphp_gdImageConvolution(gdImagePtr src, float filter[3][3],
   return 1;
 }
 
-bool f_imageconvolution(CResRef image, CArrRef matrix,
+bool f_imageconvolution(const Resource& image, const Array& matrix,
                         double div, double offset) {
   gdImagePtr im_src = image.getTyped<Image>()->get();
   if (!im_src) return false;
@@ -4215,7 +4215,7 @@ bool f_imageconvolution(CResRef image, CArrRef matrix,
   }
 }
 
-bool f_imageantialias(CResRef image, bool on) {
+bool f_imageantialias(const Resource& image, bool on) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   SetAntiAliased(im, on);
@@ -4425,7 +4425,7 @@ Variant f_iptcparse(const String& iptcblock) {
   buffer = (unsigned char *)iptcblock.c_str();
   while (inx < str_len) { /* find 1st tag */
     if ((buffer[inx] == 0x1c) &&
-        ((buffer[inx+1] == 0x01) || (buffer[inx+1] == 0x02))){
+        ((buffer[inx+1] == 0x01) || (buffer[inx+1] == 0x02))) {
       break;
     } else {
       inx++;
@@ -7737,7 +7737,7 @@ Variant f_exif_read_data(const String& filename,
     /* sections_str DOES start with , and SPACES are NOT allowed in names */
     s = sections_str;
     while(*++s) {
-      if(*s==' ') {
+      if (*s==' ') {
         *s = ',';
       }
     }
@@ -7791,18 +7791,18 @@ Variant f_exif_read_data(const String& filename,
   if (ImageInfo.FocalLength) {
     exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "FocalLength",
                      "%4.1Fmm", ImageInfo.FocalLength);
-    if(ImageInfo.CCDWidth) {
+    if (ImageInfo.CCDWidth) {
       exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "35mmFocalLength",
                        "%dmm",
                        (int)(ImageInfo.FocalLength/ImageInfo.CCDWidth*35+0.5));
     }
   }
-  if(ImageInfo.CCDWidth) {
+  if (ImageInfo.CCDWidth) {
     exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "CCDWidth",
                      "%dmm", (int)ImageInfo.CCDWidth);
   }
-  if(ImageInfo.ExposureTime>0) {
-    if(ImageInfo.ExposureTime <= 0.5) {
+  if (ImageInfo.ExposureTime>0) {
+    if (ImageInfo.ExposureTime <= 0.5) {
       exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "ExposureTime",
                        "%0.3F s (1/%d)", ImageInfo.ExposureTime,
                        (int)(0.5 + 1/ImageInfo.ExposureTime));
@@ -7811,12 +7811,12 @@ Variant f_exif_read_data(const String& filename,
                        "%0.3F s", ImageInfo.ExposureTime);
     }
   }
-  if(ImageInfo.ApertureFNumber) {
+  if (ImageInfo.ApertureFNumber) {
     exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "ApertureFNumber",
                      "f/%.1F", ImageInfo.ApertureFNumber);
   }
-  if(ImageInfo.Distance) {
-    if(ImageInfo.Distance<0) {
+  if (ImageInfo.Distance) {
+    if (ImageInfo.Distance<0) {
       exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "FocusDistance",
                        "Infinite");
     } else {

@@ -18,7 +18,7 @@ class PHPUnitPatterns {
   //    .HipHop Warning
   // That last example happened in Magento
   static string $status_code_pattern =
-  "/^[\.SFEI]$|^[\.SFEI](HipHop)|^[\.SFEI][ \t]*[0-9]* \/ [0-9]* \([ 0-9]*%\)/";
+  "/^[\.SFEI]$|^S+$|^[\.SFEI](HipHop)|^[\.SFEI][ \t]*[0-9]* \/ [0-9]* \([ 0-9]*%\)/";
 
   // Don't want to parse any more test names after the Time line in the
   // results. Any test names after that line are probably detailed error
@@ -41,7 +41,7 @@ class PHPUnitPatterns {
                 "/.*(\.phpt|Test[\d]*\.php|test[\d]*\.php)$/";
 
   static string $tests_ok_skipped_inc_pattern =
-               "/^OK, but incomplete or skipped tests!/";
+               "/^OK, but incomplete, skipped, or risky tests!/";
   static string $num_errors_failures_pattern =
                "/^There (was|were) \d+ (failure|error)[s]?\:/";
   static string $num_skips_inc_pattern =

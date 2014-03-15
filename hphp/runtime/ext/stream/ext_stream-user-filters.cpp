@@ -48,10 +48,10 @@ class StreamUserFilters : public RequestEventHandler {
     return true;
   }
 
-  Variant prepend(CResRef stream,
+  Variant prepend(const Resource& stream,
                  const String& filtername,
-                 CVarRef readwrite,
-                 CVarRef params) {
+                 const Variant& readwrite,
+                 const Variant& params) {
     return appendOrPrependFilter(stream,
                                  filtername,
                                  readwrite,
@@ -59,10 +59,10 @@ class StreamUserFilters : public RequestEventHandler {
                                  /* append = */ false);
   }
 
-  Variant append(CResRef stream,
+  Variant append(const Resource& stream,
                  const String& filtername,
-                 CVarRef readwrite,
-                 CVarRef params) {
+                 const Variant& readwrite,
+                 const Variant& params) {
     return appendOrPrependFilter(stream,
                                  filtername,
                                  readwrite,
@@ -76,10 +76,10 @@ class StreamUserFilters : public RequestEventHandler {
 
   virtual void requestShutdown() {}
 private:
-  Variant appendOrPrependFilter(CResRef stream,
+  Variant appendOrPrependFilter(const Resource& stream,
                  const String& filtername,
-                 CVarRef readwrite,
-                 CVarRef params,
+                 const Variant& readwrite,
+                 const Variant& params,
                  bool append) {
     const char* func_name =
       append ? "stream_filter_append()" : "stream_filter_prepend()";
@@ -87,7 +87,7 @@ private:
     if (!m_registeredFilters.exists(filtername)) {
       raise_warning("%s: unable to locate filter \"%s\"",
                     func_name,
-                    filtername->data());
+                    filtername.data());
       return false;
     }
 
@@ -152,7 +152,7 @@ private:
   Resource createInstance(const char* php_func,
                           const Resource& stream,
                           const String& filter,
-                          CVarRef params) {
+                          const Variant& params) {
     auto class_name = m_registeredFilters.rvalAt(filter).asCStrRef();
     Class* class_ = Unit::lookupClass(class_name.get());
     Object obj = null_object;
@@ -175,19 +175,19 @@ private:
       raise_warning("%s: user-filter \"%s\" requires class \"%s\", but that "
                     "class " "is not defined",
                     php_func,
-                    filter->data(),
-                    class_name->data());
+                    filter.data(),
+                    class_name.data());
       // Fall through, as to match Zend, the warning below should also be raised
     }
 
     if (obj.isNull()) {
       raise_warning("%s: unable to create or locate filter \"%s\"",
                     php_func,
-                    filter->data());
+                    filter.data());
       return null_resource;
     }
 
-    return Resource(NEWOBJ(StreamFilter)(obj));
+    return Resource(NEWOBJ(StreamFilter)(obj, stream));
   }
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(StreamUserFilters, s_stream_user_filters);
@@ -213,6 +213,18 @@ void StreamFilter::invokeOnClose() {
   m_filter->o_invoke(s_onClose, Array::Create());
 }
 
+bool StreamFilter::remove() {
+  if (m_stream.isNull()) {
+    return false;
+  }
+  auto file = m_stream.getTyped<File>();
+  assert(file);
+  Resource rthis(this);
+  auto ret = file->removeFilter(rthis);
+  m_stream = null_resource;
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // BucketBrigade
 
@@ -224,11 +236,11 @@ BucketBrigade::BucketBrigade(const String& data) {
   appendBucket(bucket);
 }
 
-void BucketBrigade::appendBucket(CObjRef bucket) {
+void BucketBrigade::appendBucket(const Object& bucket) {
   m_buckets.push_back(bucket);
 }
 
-void BucketBrigade::prependBucket(CObjRef bucket) {
+void BucketBrigade::prependBucket(const Object& bucket) {
   m_buckets.push_front(bucket);
 }
 
@@ -266,10 +278,10 @@ Array HHVM_FUNCTION(stream_get_filters) {
 }
 
 Variant HHVM_FUNCTION(stream_filter_append,
-                      CResRef stream,
+                      const Resource& stream,
                       const String& filtername,
-                      CVarRef readwrite,
-                      CVarRef params) {
+                      const Variant& readwrite,
+                      const Variant& params) {
   return s_stream_user_filters.get()->append(stream,
                                              filtername,
                                              readwrite,
@@ -277,30 +289,36 @@ Variant HHVM_FUNCTION(stream_filter_append,
 }
 
 Variant HHVM_FUNCTION(stream_filter_prepend,
-                      CResRef stream,
+                      const Resource& stream,
                       const String& filtername,
-                      CVarRef readwrite,
-                      CVarRef params) {
+                      const Variant& readwrite,
+                      const Variant& params) {
   return s_stream_user_filters.get()->prepend(stream,
                                               filtername,
                                               readwrite,
                                               params);
 }
 
-Variant HHVM_FUNCTION(stream_bucket_make_writeable, CResRef bb_res) {
+bool HHVM_FUNCTION(stream_filter_remove, const Resource& resource) {
+  auto filter = resource.getTyped<StreamFilter>();
+  assert(filter);
+  return filter->remove();
+}
+
+Variant HHVM_FUNCTION(stream_bucket_make_writeable, const Resource& bb_res) {
   auto brigade = bb_res.getTyped<BucketBrigade>();
   assert(brigade);
   auto ret = brigade->popFront();
   return ret;
 }
 
-void HHVM_FUNCTION(stream_bucket_append, CResRef bb_res, CObjRef bucket) {
+void HHVM_FUNCTION(stream_bucket_append, const Resource& bb_res, const Object& bucket) {
   auto brigade = bb_res.getTyped<BucketBrigade>();
   assert(brigade);
   brigade->appendBucket(bucket);
 }
 
-void HHVM_FUNCTION(stream_bucket_prepend, CResRef bb_res, CObjRef bucket) {
+void HHVM_FUNCTION(stream_bucket_prepend, const Resource& bb_res, const Object& bucket) {
   auto brigade = bb_res.getTyped<BucketBrigade>();
   assert(brigade);
   brigade->prependBucket(bucket);

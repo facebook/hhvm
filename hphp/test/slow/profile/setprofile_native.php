@@ -16,10 +16,10 @@ $x = false;
 echo("x="); var_dump($x);
 
 $algos="none";
-echo("starting call to hash_algos\n");
+echo("starting call to hash_init\n");
 if (true) {
-  $algos = hash_algos();
+  $hash = hash_init('md5');
 }
-echo("algos="); var_dump($algos);
+echo("hash="); var_dump($hash);
 
 echo("DONE!\n");

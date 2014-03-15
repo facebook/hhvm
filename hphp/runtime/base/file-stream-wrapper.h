@@ -35,7 +35,7 @@ class FileStreamWrapper : public Stream::Wrapper {
  public:
   static MemFile* openFromCache(const String& filename, const String& mode);
   virtual File* open(const String& filename, const String& mode,
-                     int options, CVarRef context);
+                     int options, const Variant& context);
   virtual int access(const String& path, int mode) {
     return ::access(File::TranslatePath(path).data(), mode);
   }

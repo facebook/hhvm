@@ -72,14 +72,14 @@ c_Continuation::~c_Continuation() {
 
 void c_Continuation::t___construct() {}
 
-void c_Continuation::t_update(int64_t label, CVarRef value) {
+void c_Continuation::t_update(int64_t label, const Variant& value) {
   m_label = label;
   assert(m_label == label); // check m_label for truncation
   m_value.assignVal(value);
   m_key = ++m_index;
 }
 
-void c_Continuation::t_update_key(int64_t label, CVarRef key, CVarRef value) {
+void c_Continuation::t_update_key(int64_t label, const Variant& key, const Variant& value) {
   m_label = label;
   assert(m_label == label); // check m_label for truncation
   m_key.assignVal(key);
@@ -122,11 +122,11 @@ bool c_Continuation::t_valid() {
   return !done();
 }
 
-void c_Continuation::t_send(CVarRef v) {
+void c_Continuation::t_send(const Variant& v) {
   const_assert(false);
 }
 
-void c_Continuation::t_raise(CVarRef v) {
+void c_Continuation::t_raise(const Variant& v) {
   const_assert(false);
 }
 
@@ -247,15 +247,15 @@ void c_Continuation::call_raise(ObjectData* e) {
 Offset c_Continuation::getExecutionOffset(int32_t label) const {
   auto func = actRec()->m_func;
   PC funcBase = func->unit()->entry() + func->base();
-  assert(toOp(*funcBase) == OpUnpackCont); // One byte
+  assert(*reinterpret_cast<const Op*>(funcBase) == Op::UnpackCont); // One byte
   PC switchOffset = funcBase + 1;
-  assert(toOp(*switchOffset) == OpSwitch);
+  assert(*reinterpret_cast<const Op*>(switchOffset) == Op::Switch);
   // The Switch opcode is one byte for the opcode itself, plus four
   // bytes for the jmp table size, then the jump table.
-  if (label >= *(int32_t*)(switchOffset + 1)) {
+  if (label >= *(int32_t*)(switchOffset + 1) /* XXX */) {
     return InvalidAbsoluteOffset;
   }
-  Offset* jmpTable = (Offset*)(switchOffset + 5);
+  Offset* jmpTable = (Offset*)(switchOffset + 5) /* XXX */;
   Offset relOff = jmpTable[label];
   return func->base() + relOff + 1;
 }

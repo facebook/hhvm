@@ -35,3 +35,8 @@ var_dump(postInc(true));
 var_dump(preInc(true));
 var_dump(postDec(true));
 var_dump(preDec(true));
+
+var_dump(postInc(null));
+var_dump(preInc(null));
+var_dump(postDec(null));
+var_dump(preDec(null));

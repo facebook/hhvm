@@ -34,7 +34,7 @@ struct FuncAnalysis;
  * php::Func, but it won't modify the top-level meta-data in the
  * php::Func itself.
  */
-void optimize_func(const Index&, const FuncAnalysis&);
+void optimize_func(const Index&, FuncAnalysis);
 
 //////////////////////////////////////////////////////////////////////
 

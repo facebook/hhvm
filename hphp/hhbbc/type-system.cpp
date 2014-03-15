@@ -44,10 +44,46 @@ bool mayHaveData(trep bits) {
   case BSStr:    case BObj:    case BInt:    case BDbl:
   case BOptSStr: case BOptObj: case BOptInt: case BOptDbl:
   case BCls:
-  case BArr:    case BSArr:    case BCArr:
-  case BOptArr: case BOptSArr: case BOptCArr:
+  case BArr:     case BSArr:     case BCArr:
+  case BArrN:    case BSArrN:    case BCArrN:
+  case BOptArr:  case BOptSArr:  case BOptCArr:
+  case BOptArrN: case BOptSArrN: case BOptCArrN:
     return true;
-  default:
+
+  case BBottom:
+  case BUninit:
+  case BInitNull:
+  case BFalse:
+  case BTrue:
+  case BCStr:
+  case BSArrE:
+  case BCArrE:
+  case BRes:
+  case BRef:
+  case BNull:
+  case BNum:
+  case BBool:
+  case BStr:
+  case BArrE:
+  case BInitPrim:
+  case BPrim:
+  case BInitUnc:
+  case BUnc:
+  case BOptTrue:
+  case BOptFalse:
+  case BOptBool:
+  case BOptNum:
+  case BOptCStr:
+  case BOptStr:
+  case BOptSArrE:
+  case BOptCArrE:
+  case BOptArrE:
+  case BOptRes:
+  case BInitCell:
+  case BCell:
+  case BInitGen:
+  case BGen:
+  case BTop:
     break;
   }
   return false;
@@ -82,8 +118,10 @@ bool isPredefined(trep bits) {
   case BDbl:
   case BSStr:
   case BCStr:
-  case BSArr:
-  case BCArr:
+  case BSArrE:
+  case BCArrE:
+  case BSArrN:
+  case BCArrN:
   case BObj:
   case BRes:
   case BCls:
@@ -92,6 +130,10 @@ bool isPredefined(trep bits) {
   case BNum:
   case BBool:
   case BStr:
+  case BSArr:
+  case BCArr:
+  case BArrE:
+  case BArrN:
   case BArr:
   case BInitPrim:
   case BPrim:
@@ -106,8 +148,14 @@ bool isPredefined(trep bits) {
   case BOptSStr:
   case BOptCStr:
   case BOptStr:
+  case BOptSArrN:
+  case BOptCArrN:
+  case BOptSArrE:
+  case BOptCArrE:
   case BOptSArr:
   case BOptCArr:
+  case BOptArrE:
+  case BOptArrN:
   case BOptArr:
   case BOptObj:
   case BOptRes:
@@ -136,8 +184,10 @@ bool canBeOptional(trep bits) {
   case BDbl:
   case BSStr:
   case BCStr:
-  case BSArr:
-  case BCArr:
+  case BSArrE:
+  case BSArrN:
+  case BCArrE:
+  case BCArrN:
   case BObj:
   case BRes:
     return true;
@@ -146,6 +196,10 @@ bool canBeOptional(trep bits) {
   case BNum:
   case BBool:
   case BStr:
+  case BSArr:
+  case BCArr:
+  case BArrE:
+  case BArrN:
   case BArr:
     return true;
 
@@ -162,8 +216,14 @@ bool canBeOptional(trep bits) {
   case BOptSStr:
   case BOptCStr:
   case BOptStr:
+  case BOptSArrE:
+  case BOptCArrE:
+  case BOptSArrN:
+  case BOptCArrN:
   case BOptSArr:
   case BOptCArr:
+  case BOptArrN:
+  case BOptArrE:
   case BOptArr:
   case BOptObj:
   case BOptRes:
@@ -183,6 +243,29 @@ bool canBeOptional(trep bits) {
   not_reached();
 }
 
+/*
+ * Combine array bits.  Our type system currently avoids arbitrary
+ * unions (see rationale above), so we don't have predefined types
+ * like CArr|SArrN, or SArrN|CArrE.  This function checks a few cases
+ * to ensure combining array type bits leaves it predefined.
+ */
+trep combine_arr_bits(trep a, trep b) {
+  assert((a & BArr) == a || (a & BOptArr) == a);
+  assert((b & BArr) == b || (b & BOptArr) == b);
+  auto const combined = static_cast<trep>(a | b);
+  auto const arr_part = combined & BArr;
+  // 2 bit cases:
+  if (arr_part == (BSArrN|BCArrE)) return static_cast<trep>(combined|BArr);
+  if (arr_part == (BSArrE|BCArrN)) return static_cast<trep>(combined|BArr);
+  // 3 bit cases:
+  if (arr_part == (BArrN|BCArrE)) return static_cast<trep>(combined|BArr);
+  if (arr_part == (BArrN|BSArrE)) return static_cast<trep>(combined|BArr);
+  if (arr_part == (BArrE|BCArrN)) return static_cast<trep>(combined|BArr);
+  if (arr_part == (BArrE|BSArrN)) return static_cast<trep>(combined|BArr);
+  assert(isPredefined(combined));
+  return combined;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -192,13 +275,10 @@ bool canBeOptional(trep bits) {
  * When they return folly::none it is not a conservative thing: it
  * implies the array is definitely not packed, packedN, struct-like,
  * etc (we use this to return false in couldBe).
- *
- * This also means they should check for the empty array and return
- * none in that case to add some false cases for couldBe.
  */
 
 folly::Optional<DArrPacked> toDArrPacked(SArray ar) {
-  if (!ar->size()) return folly::none;
+  assert(!ar->empty());
 
   std::vector<Type> elems;
   auto idx = size_t{0};
@@ -215,7 +295,7 @@ folly::Optional<DArrPacked> toDArrPacked(SArray ar) {
 }
 
 folly::Optional<DArrPackedN> toDArrPackedN(SArray ar) {
-  if (!ar->size()) return folly::none;
+  assert(!ar->empty());
 
   auto t = TBottom;
   auto idx = size_t{0};
@@ -230,7 +310,7 @@ folly::Optional<DArrPackedN> toDArrPackedN(SArray ar) {
 }
 
 folly::Optional<DArrStruct> toDArrStruct(SArray ar) {
-  if (!ar->size()) return folly::none;
+  assert(!ar->empty());
 
   auto map = StructMap{};
   for (ArrayIter iter(ar); iter; ++iter) {
@@ -242,8 +322,8 @@ folly::Optional<DArrStruct> toDArrStruct(SArray ar) {
   return DArrStruct { std::move(map) };
 }
 
-folly::Optional<DArrMapN> toDArrMapN(SArray ar) {
-  if (!ar->size()) return folly::none;
+DArrMapN toDArrMapN(SArray ar) {
+  assert(!ar->empty());
 
   auto k = TBottom;
   auto v = TBottom;
@@ -417,7 +497,7 @@ struct DisjointCouldBeImpl {
 
   bool operator()(const DArrMapN& a, SArray b) const {
     auto const p = toDArrMapN(b);
-    return p && p->key.couldBe(a.key) && p->val.couldBe(a.val);
+    return p.key.couldBe(a.key) && p.val.couldBe(a.val);
   }
 
   bool operator()(const DArrPacked& a, const DArrPackedN& b) const {
@@ -450,8 +530,10 @@ struct DisjointCouldBeImpl {
   }
 };
 
-// The countedness of the arrays is handled outside of this function,
-// so it's ok to just return TArr from all of these here.
+// The countedness or possible-emptiness of the arrays is handled
+// outside of this function, so it's ok to just return TArr from all
+// of these here.
+
 struct ArrUnionImpl {
   using result_type = Type;
 
@@ -478,6 +560,14 @@ struct ArrUnionImpl {
       return arr_mapn(TSStr, std::move(all));
     };
 
+    /*
+     * With the current meaning of structs, if the keys are different,
+     * we can't do anything better than going to a map type.  The
+     * reason for this is that our struct types currently are implying
+     * the presense of all the keys in the struct (it might be worth
+     * adding some more types for struct subtyping to handle this
+     * better.)
+     */
     if (a.map.size() != b.map.size()) return to_map();
 
     auto retStruct = StructMap{};
@@ -492,22 +582,29 @@ struct ArrUnionImpl {
 
   Type operator()(SArray a, SArray b) const {
     assert(a != b); // Should've been handled earlier in union_of.
-    auto const p1 = toDArrPacked(a);
-    auto const p2 = toDArrPacked(b);
-    if (p1 && p2) {
-      return (*this)(*p1, *p2);
-    }
-    if (p1) {
-      if (auto const p2n = toDArrPackedN(b)) {
-        return (*this)(*p1, *p2n);
+    {
+      auto const p1 = toDArrPacked(a);
+      auto const p2 = toDArrPacked(b);
+      if (p1 && p2) {
+        return (*this)(*p1, *p2);
+      }
+      if (p1) {
+        if (auto const p2n = toDArrPackedN(b)) {
+          return (*this)(*p1, *p2n);
+        }
+      }
+      if (p2) {
+        if (auto const p1n = toDArrPackedN(a)) {
+          return (*this)(*p2, *p1n);
+        }
       }
     }
-    if (p2) {
-      if (auto const p1n = toDArrPackedN(a)) {
-        return (*this)(*p2, *p1n);
-      }
+    {
+      auto const s1 = toDArrStruct(a);
+      auto const s2 = toDArrStruct(b);
+      if (s1 && s2) return (*this)(*s1, *s2);
     }
-    return TArr;
+    return (*this)(toDArrMapN(a), b);
   }
 
   Type operator()(const DArrPacked& a, SArray b) const {
@@ -530,13 +627,7 @@ struct ArrUnionImpl {
 
   Type operator()(const DArrMapN& a, SArray b) const {
     auto const p = toDArrMapN(b);
-    if (!p) {
-      // We could return an array type that knows it can't contain
-      // refs (but could be an empty array), but we don't have one
-      // yet.
-      return TArr;
-    }
-    return arr_mapn(union_of(a.key, p->key), union_of(a.val, p->val));
+    return arr_mapn(union_of(a.key, p.key), union_of(a.val, p.val));
   }
 
   Type operator()(const DArrPacked& a, const DArrStruct& b) const {
@@ -620,7 +711,7 @@ struct DisjointSubtype {
 
   bool operator()(SArray a, const DArrMapN& b) const {
     auto const p = toDArrMapN(a);
-    return p && p->key.subtypeOf(b.key) && p->val.subtypeOf(b.val);
+    return p.key.subtypeOf(b.key) && p.val.subtypeOf(b.val);
   }
 
   bool operator()(const DArrPacked& a, const DArrPackedN& b) const {
@@ -986,7 +1077,7 @@ bool Type::couldBeData(const Type& o) const {
   not_reached();
 }
 
-bool Type::operator==(Type o) const {
+bool Type::operator==(const Type& o) const {
   assert(checkInvariants());
   assert(o.checkInvariants());
   if (m_bits != o.m_bits) return false;
@@ -1095,7 +1186,6 @@ bool Type::checkInvariants() const {
   switch (m_dataTag) {
   case DataTag::None:   break;
   case DataTag::Str:    assert(m_data.sval->isStatic()); break;
-  case DataTag::ArrVal: assert(m_data.aval->isStatic()); break;
   case DataTag::Dbl:    break;
   case DataTag::Int:    break;
   case DataTag::Cls:    break;
@@ -1103,6 +1193,10 @@ bool Type::checkInvariants() const {
     if (auto t = m_data.dobj.whType.get()) {
       t->checkInvariants();
     }
+    break;
+  case DataTag::ArrVal:
+    assert(m_data.aval->isStatic());
+    assert(!m_data.aval->empty());
     break;
   case DataTag::ArrPacked:
     assert(!m_data.apacked->elems.empty());
@@ -1168,14 +1262,16 @@ Type dval(double val) {
 
 Type aval(SArray val) {
   assert(val->isStatic());
-  auto r        = Type { BSArr };
+  if (val->empty()) return aempty();
+  auto r        = Type { BSArrN };
   r.m_data.aval = val;
   r.m_dataTag   = DataTag::ArrVal;
   return r;
 }
 
-Type aempty() { return aval(HphpArray::GetStaticEmptyArray()); }
-Type sempty() { return sval(s_empty.get()); }
+Type aempty()         { return Type { BSArrE }; }
+Type sempty()         { return sval(s_empty.get()); }
+Type counted_aempty() { return Type { BCArrE }; }
 
 Type subObj(res::Class val) {
   auto r = Type { BObj };
@@ -1232,7 +1328,7 @@ bool is_specialized_array(const Type& t) {
 
 Type arr_packed(std::vector<Type> elems) {
   assert(!elems.empty());
-  auto r = Type { BArr };
+  auto r = Type { BArrN };
   new (&r.m_data.apacked) copy_ptr<DArrPacked>(
     make_copy_ptr<DArrPacked>(std::move(elems))
   );
@@ -1242,18 +1338,18 @@ Type arr_packed(std::vector<Type> elems) {
 
 Type sarr_packed(std::vector<Type> elems) {
   auto t = arr_packed(std::move(elems));
-  t.m_bits = BSArr;
+  t.m_bits = BSArrN;
   return t;
 }
 
 Type carr_packed(std::vector<Type> elems) {
   auto t = arr_packed(std::move(elems));
-  t.m_bits = BCArr;
+  t.m_bits = BCArrN;
   return t;
 }
 
 Type arr_packedn(Type t) {
-  auto r = Type { BArr };
+  auto r = Type { BArrN };
   new (&r.m_data.apackedn) copy_ptr<DArrPackedN>(
     make_copy_ptr<DArrPackedN>(std::move(t))
   );
@@ -1263,19 +1359,19 @@ Type arr_packedn(Type t) {
 
 Type sarr_packedn(Type t) {
   auto r = arr_packedn(std::move(t));
-  r.m_bits = BSArr;
+  r.m_bits = BSArrN;
   return r;
 }
 
 Type carr_packedn(Type t) {
   auto r = arr_packedn(std::move(t));
-  r.m_bits = BCArr;
+  r.m_bits = BCArrN;
   return r;
 }
 
 Type arr_struct(StructMap m) {
   assert(!m.empty());
-  auto r = Type { BArr };
+  auto r = Type { BArrN };
   new (&r.m_data.astruct) copy_ptr<DArrStruct>(
     make_copy_ptr<DArrStruct>(std::move(m))
   );
@@ -1285,18 +1381,18 @@ Type arr_struct(StructMap m) {
 
 Type sarr_struct(StructMap m) {
   auto r = arr_struct(std::move(m));
-  r.m_bits = BSArr;
+  r.m_bits = BSArrN;
   return r;
 }
 
 Type carr_struct(StructMap m) {
   auto r = arr_struct(std::move(m));
-  r.m_bits = BCArr;
+  r.m_bits = BCArrN;
   return r;
 }
 
 Type arr_mapn(Type k, Type v) {
-  auto r = Type { BArr };
+  auto r = Type { BArrN };
   new (&r.m_data.amapn) copy_ptr<DArrMapN>(
     make_copy_ptr<DArrMapN>(std::move(k), std::move(v))
   );
@@ -1306,13 +1402,13 @@ Type arr_mapn(Type k, Type v) {
 
 Type sarr_mapn(Type k, Type v) {
   auto r = arr_mapn(k, v);
-  r.m_bits = BSArr;
+  r.m_bits = BSArrN;
   return r;
 }
 
 Type carr_mapn(Type k, Type v) {
   auto r = arr_mapn(std::move(k), std::move(v));
-  r.m_bits = BCArr;
+  r.m_bits = BCArrN;
   return r;
 }
 
@@ -1361,6 +1457,10 @@ folly::Optional<Cell> tv(Type t) {
   case BInitNull:    return make_tv<KindOfNull>();
   case BTrue:        return make_tv<KindOfBoolean>(true);
   case BFalse:       return make_tv<KindOfBoolean>(false);
+  case BCArrE:       /* fallthrough */
+  case BSArrE:       return make_tv<KindOfArray>(
+                       HphpArray::GetStaticEmptyArray()
+                     );
   default:
     if (is_opt(t)) {
       break;
@@ -1369,13 +1469,16 @@ folly::Optional<Cell> tv(Type t) {
     case DataTag::Int:    return make_tv<KindOfInt64>(t.m_data.ival);
     case DataTag::Dbl:    return make_tv<KindOfDouble>(t.m_data.dval);
     case DataTag::Str:    return make_tv<KindOfStaticString>(t.m_data.sval);
-    case DataTag::ArrVal: return make_tv<KindOfArray>(
-                            const_cast<ArrayData*>(t.m_data.aval)
-                          );
+    case DataTag::ArrVal:
+      if ((t.m_bits & BArrN) == t.m_bits) {
+        return make_tv<KindOfArray>(const_cast<ArrayData*>(t.m_data.aval));
+      }
+      break;
     case DataTag::ArrStruct:
     case DataTag::ArrPacked:
       // TODO(#3696042): we could materialize a static array here if
-      // we check if a whole specialized array is constants.
+      // we check if a whole specialized array is constants, and if it
+      // can't be empty.
       break;
     case DataTag::ArrPackedN:
     case DataTag::ArrMapN:
@@ -1495,7 +1598,7 @@ Type Type::unionArr(const Type& a, const Type& b) {
   assert(is_specialized_array(b));
 
   auto ret = Type{};
-  auto const newBits = static_cast<trep>(a.m_bits | b.m_bits);
+  auto const newBits = combine_arr_bits(a.m_bits, b.m_bits);
 
   if (a.m_dataTag != b.m_dataTag) {
     ret = a.disjointDataFn(b, ArrUnion{});
@@ -1590,11 +1693,29 @@ Type union_of(Type a, Type b) {
     return t ? subCls(*t) : TCls;
   }
 
-  if (is_specialized_array(a) && is_specialized_array(b)) {
-    DEBUG_ONLY auto const shouldBeOpt = is_opt(a) || is_opt(b);
-    auto const t = Type::unionArr(a, b);
-    if (shouldBeOpt) assert(is_opt(t));
-    return t;
+  if (is_specialized_array(a)) {
+    if (is_specialized_array(b)) {
+      DEBUG_ONLY auto const shouldBeOpt = is_opt(a) || is_opt(b);
+      auto const t = Type::unionArr(a, b);
+      if (shouldBeOpt) assert(is_opt(t));
+      return t;
+    }
+    if (b.subtypeOf(TOptArrE)) {
+      // Keep a's data.
+      a.m_bits = combine_arr_bits(a.m_bits, b.m_bits);
+      return a;
+    }
+    if (b.subtypeOf(TOptArr)) {
+      // We can't keep a's data, since it contains unknown non-empty
+      // arrays.  (If it were specialized we'd be in the unionArr
+      // path, which handles trying to keep as much data as we can.)
+      return Type { combine_arr_bits(a.m_bits, b.m_bits) };
+    }
+  } else {
+    if (is_specialized_array(b)) {
+      // Flip args and do the above.
+      return union_of(b, a);
+    }
   }
 
 #define X(y) if (a.subtypeOf(y) && b.subtypeOf(y)) return y;
@@ -1604,6 +1725,8 @@ Type union_of(Type a, Type b) {
   X(TCStr)
   X(TSArr)
   X(TCArr)
+  X(TArrE)
+  X(TArrN)
   X(TObj)
   X(TCls)
   X(TNull)
@@ -1620,12 +1743,16 @@ Type union_of(Type a, Type b) {
   if (a == TInitNull && canBeOptional(b.m_bits)) return opt(b);
   if (b == TInitNull && canBeOptional(a.m_bits)) return opt(a);
 
-  // A few optional unions still need to be checked despite the above
-  // (e.g. if we are merging TOptTrue and TOptFalse, we want TOptBool,
-  // but neither was TInitNull).
+  // Optional types where the non-Null part is already a union need to
+  // be manually tried (e.g. if we are merging TOptTrue and TOptFalse,
+  // we want TOptBool).
   X(TOptBool)
   X(TOptNum)
   X(TOptStr)
+  X(TOptArrN)
+  X(TOptArrE)
+  X(TOptSArr)
+  X(TOptCArr)
   X(TOptArr)
 
   X(TInitPrim)
@@ -1650,8 +1777,9 @@ Type widening_union(const Type& a, const Type& b) {
     return union_of(a, b);
   }
 
-  // This is overly conservative, but works for now.
-  auto const newBits = static_cast<trep>(a.m_bits | b.m_bits);
+  // This (throwing away the data) is overly conservative, but works
+  // for now.
+  auto const newBits = combine_arr_bits(a.m_bits, b.m_bits);
   return Type { newBits };
 }
 
@@ -1665,6 +1793,8 @@ Type stack_flav(Type a) {
 }
 
 Type loosen_statics(Type a) {
+  // TODO(#3696042): this should be modified to keep specialized array
+  // information, including whether the array is possibly empty.
   if (a.couldBe(TSStr)) a = union_of(a, TStr);
   if (a.couldBe(TSArr)) a = union_of(a, TArr);
   return a;
@@ -1787,70 +1917,74 @@ ArrKey disect_key(const Type& keyTy) {
 Type array_elem(const Type& arr, const Type& undisectedKey) {
   assert(arr.subtypeOf(TArr));
 
-  auto unboxed = [&] (Type t) {
-    return t.subtypeOf(TInitCell) ? t : TInitCell;
-  };
-
   auto const key = disect_key(undisectedKey);
-  switch (arr.m_dataTag) {
-  case DataTag::Str:
-  case DataTag::Obj:
-  case DataTag::Int:
-  case DataTag::Dbl:
-  case DataTag::Cls:
+  auto ty = [&] {
+    switch (arr.m_dataTag) {
+    case DataTag::Str:
+    case DataTag::Obj:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Cls:
+      not_reached();
+
+    case DataTag::None:
+      return arr.subtypeOf(TSArr) ? TInitUnc : TInitCell;
+
+    case DataTag::ArrVal:
+      if (key.i) {
+        if (auto const r = arr.m_data.aval->nvGet(*key.i)) {
+          return from_cell(*r);
+        }
+        return TInitNull;
+      }
+      if (key.s) {
+        if (auto const r = arr.m_data.aval->nvGet(*key.s)) {
+          return from_cell(*r);
+        }
+        return TInitNull;
+      }
+      return arr.subtypeOf(TSArr) ? TInitUnc : TInitCell;
+
+    /*
+     * In the following cases, note that if you get an elem out of an
+     * array that doesn't exist, php semantics are to return null (after
+     * a warning).  So in cases where we don't know the key statically
+     * we need to union TInitNull into the result.
+     */
+
+    case DataTag::ArrPacked:
+      if (!key.i) {
+        return union_of(packed_values(*arr.m_data.apacked), TInitNull);
+      }
+      if (*key.i >= 0 && *key.i < arr.m_data.apacked->elems.size()) {
+        return arr.m_data.apacked->elems[*key.i];
+      }
+      return TInitNull;
+
+    case DataTag::ArrPackedN:
+      return union_of(arr.m_data.apackedn->type, TInitNull);
+
+    case DataTag::ArrStruct:
+      if (key.s) {
+        auto it = arr.m_data.astruct->map.find(*key.s);
+        return it != end(arr.m_data.astruct->map)
+          ? it->second
+          : TInitNull;
+      }
+      return union_of(struct_values(*arr.m_data.astruct), TInitNull);
+
+    case DataTag::ArrMapN:
+      return union_of(arr.m_data.amapn->val, TInitNull);
+    }
     not_reached();
+  }();
 
-  case DataTag::None:
-    return arr.subtypeOf(TSArr) ? TInitUnc : TInitCell;
-
-  case DataTag::ArrVal:
-    if (key.i) {
-      if (auto const r = arr.m_data.aval->nvGet(*key.i)) {
-        return from_cell(*r);
-      }
-      return TInitNull;
-    }
-    if (key.s) {
-      if (auto const r = arr.m_data.aval->nvGet(*key.s)) {
-        return from_cell(*r);
-      }
-      return TInitNull;
-    }
-    return arr.subtypeOf(TSArr) ? TInitUnc : TInitCell;
-
-  /*
-   * In the following cases, note that if you get an elem out of an
-   * array that doesn't exist, php semantics are to return null (after
-   * a warning).  So in cases where we don't know the key statically
-   * we need to union TInitNull into the result.
-   */
-
-  case DataTag::ArrPacked:
-    if (!key.i) {
-      return unboxed(union_of(packed_values(*arr.m_data.apacked), TInitNull));
-    }
-    if (*key.i >= 0 && *key.i < arr.m_data.apacked->elems.size()) {
-      return unboxed(arr.m_data.apacked->elems[*key.i]);
-    }
-    return TInitNull;
-
-  case DataTag::ArrPackedN:
-    return unboxed(union_of(arr.m_data.apackedn->type, TInitNull));
-
-  case DataTag::ArrStruct:
-    if (key.s) {
-      auto it = arr.m_data.astruct->map.find(*key.s);
-      return it != end(arr.m_data.astruct->map)
-        ? unboxed(it->second)
-        : TInitNull;
-    }
-    return unboxed(union_of(struct_values(*arr.m_data.astruct), TInitNull));
-
-  case DataTag::ArrMapN:
-    return unboxed(union_of(arr.m_data.amapn->val, TInitNull));
+  if (!ty.subtypeOf(TInitCell)) {
+    ty = TInitCell;
+  } else if (arr.couldBe(TArrE)) {
+    ty = union_of(std::move(ty), TInitNull);
   }
-
-  not_reached();
+  return ty;
 }
 
 /*
@@ -1861,6 +1995,10 @@ Type array_elem(const Type& arr, const Type& undisectedKey) {
  * To be able to assume it is actually counted it if used to be
  * static, we need to add code checking for keys that are one of the
  * "illegal offset type" of keys.
+ *
+ * A similar issue applies if you want to take out emptiness when a
+ * set occurs.  If the key could be an illegal key type, the array may
+ * remain empty.
  */
 
 Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
@@ -1873,11 +2011,24 @@ Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
          "You probably don't want to put Ref types into arrays ...");
 
   auto ensure_counted = [&] {
-    arr.m_bits = static_cast<trep>(arr.m_bits | BCArr);
+    arr.m_bits = combine_arr_bits(arr.m_bits, BCArr);
   };
   auto set = [&] (Type& t) { if (t.subtypeOf(TInitCell)) t = val; };
 
   auto const key = disect_key(undisectedKey);
+
+  if (arr.subtypeOf(TArrE)) {
+    if (key.s && !key.i) {
+      auto map = StructMap{};
+      map[*key.s] = val;
+      return arr_struct(std::move(map));
+    }
+    if (key.i && *key.i == 0) return arr_packed({val});
+    // Keeping the ArrE for now just because we need to check the
+    // key.type is not an invalid key (array or object).
+    return union_of(arr_mapn(key.type, val), arr);
+  }
+
   switch (arr.m_dataTag) {
   case DataTag::Str:
   case DataTag::Obj:
@@ -1891,15 +2042,6 @@ Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
     return arr;
 
   case DataTag::ArrVal:
-    if (!arr.m_data.aval->size()) {
-      if (key.s && !key.i) {
-        auto map = StructMap{};
-        map[*key.s] = val;
-        return arr_struct(std::move(map));
-      }
-      if (key.i && *key.i == 0) return arr_packed({val});
-      return arr_mapn(key.type, val);
-    }
     if (auto d = toDArrStruct(arr.m_data.aval)) {
       return array_set(arr_struct(std::move(d->map)), undisectedKey, val);
     }
@@ -1909,10 +2051,10 @@ Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
     if (auto d = toDArrPackedN(arr.m_data.aval)) {
       return array_set(arr_packedn(d->type), undisectedKey, val);
     }
-    if (auto d = toDArrMapN(arr.m_data.aval)) {
-      return array_set(arr_mapn(d->key, d->val), undisectedKey, val);
+    {
+      auto d = toDArrMapN(arr.m_data.aval);
+      return array_set(arr_mapn(d.key, d.val), undisectedKey, val);
     }
-    return TArr;
 
   case DataTag::ArrPacked:
     ensure_counted();
@@ -1961,6 +2103,9 @@ std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val) {
   always_assert(!val.subtypeOf(TRef) &&
          "You probably don't want to put Ref types into arrays ...");
 
+  // Inserting in an empty array creates a packed array of size one.
+  if (arr.subtypeOf(TArrE)) return { arr_packed({val}), ival(0) };
+
   switch (arr.m_dataTag) {
   case DataTag::Str:
   case DataTag::Obj:
@@ -1970,10 +2115,9 @@ std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val) {
     not_reached();
 
   case DataTag::None:
-    return { TArr, TInt };
+    return { TArrN, TInt };
 
   case DataTag::ArrVal:
-    if (!arr.m_data.aval->size()) return { carr_packed({val}), ival(0) };
     if (auto d = toDArrStruct(arr.m_data.aval)) {
       return array_newelem_key(arr_struct(std::move(d->map)), val);
     }
@@ -1983,10 +2127,10 @@ std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val) {
     if (auto d = toDArrPackedN(arr.m_data.aval)) {
       return array_newelem_key(arr_packedn(d->type), val);
     }
-    if (auto d = toDArrMapN(arr.m_data.aval)) {
-      return array_newelem_key(arr_mapn(d->key, d->val), val);
+    {
+      auto d = toDArrMapN(arr.m_data.aval);
+      return array_newelem_key(arr_mapn(d.key, d.val), val);
     }
-    return { TArr, TInt };
 
   case DataTag::ArrPacked:
     {
@@ -2021,6 +2165,10 @@ std::pair<Type,Type> iter_types(const Type& iterable) {
     return { TInitCell, TInitCell };
   }
 
+  // Note: we don't need to handle possible emptiness explicitly,
+  // because if the array was empty we won't ever pull anything out
+  // while iterating.
+
   switch (iterable.m_dataTag) {
   case DataTag::None:
     if (iterable.subtypeOf(TSArr)) {
@@ -2034,10 +2182,10 @@ std::pair<Type,Type> iter_types(const Type& iterable) {
   case DataTag::Cls:
     always_assert(0);
   case DataTag::ArrVal:
-    if (auto const mn = toDArrMapN(iterable.m_data.aval)) {
-      return { mn->key, mn->val };
+    {
+      auto const mn = toDArrMapN(iterable.m_data.aval);
+      return { mn.key, mn.val };
     }
-    return { TInitUnc, TInitUnc };
   case DataTag::ArrPacked:
     return { TInt, packed_values(*iterable.m_data.apacked) };
   case DataTag::ArrPackedN:

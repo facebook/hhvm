@@ -222,19 +222,22 @@ void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
+bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {
   bool ret = true;
   try {
     g_context->setThrowAllErrors(true);
+    auto add = RuntimeOption::IntsOverflowToInts ? cellAdd : cellAddO;
+    auto sub = RuntimeOption::IntsOverflowToInts ? cellSub : cellSubO;
+
     switch(m_op) {
       case '!':
         result = (!toBoolean(value)); break;
       case '+':
-        cellSet(cellAdd(make_tv<KindOfInt64>(0), *value.asCell()),
+        cellSet(add(make_tv<KindOfInt64>(0), *value.asCell()),
                 *result.asCell());
         break;
       case '-':
-        cellSet(cellSub(make_tv<KindOfInt64>(0), *value.asCell()),
+        cellSet(sub(make_tv<KindOfInt64>(0), *value.asCell()),
                 *result.asCell());
         break;
       case '~':

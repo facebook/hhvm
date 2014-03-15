@@ -36,7 +36,7 @@ inline Object ibi_create(const char *funcname,
 /////////////////////////////////////////////////////////////////////////////
 
 static Object HHVM_STATIC_METHOD(IntlBreakIterator, createCharacterInstance,
-                                 CVarRef locale) {
+                                 const Variant& locale) {
   return ibi_create("breakiter_create_character_instance",
                     &BreakIterator::createCharacterInstance,
                     localeOrDefault(locale.toString()));
@@ -47,28 +47,28 @@ static Object HHVM_STATIC_METHOD(IntlBreakIterator, createCodePointInstance) {
 }
 
 static Object HHVM_STATIC_METHOD(IntlBreakIterator, createLineInstance,
-                                 CVarRef locale) {
+                                 const Variant& locale) {
   return ibi_create("breakiter_create_line_instance",
                     &BreakIterator::createLineInstance,
                     localeOrDefault(locale.toString()));
 }
 
 static Object HHVM_STATIC_METHOD(IntlBreakIterator, createSentenceInstance,
-                                 CVarRef locale) {
+                                 const Variant& locale) {
   return ibi_create("breakiter_create_sentence_instance",
                     &BreakIterator::createSentenceInstance,
                     localeOrDefault(locale.toString()));
 }
 
 static Object HHVM_STATIC_METHOD(IntlBreakIterator, createTitleInstance,
-                                 CVarRef locale) {
+                                 const Variant& locale) {
   return ibi_create("breakiter_create_title_instance",
                     &BreakIterator::createTitleInstance,
                     localeOrDefault(locale.toString()));
 }
 
 static Object HHVM_STATIC_METHOD(IntlBreakIterator, createWordInstance,
-                                 CVarRef locale) {
+                                 const Variant& locale) {
   return ibi_create("breakiter_create_word_instance",
                     &BreakIterator::createWordInstance,
                     localeOrDefault(locale.toString()));
@@ -173,7 +173,7 @@ static Variant HHVM_METHOD(IntlBreakIterator, last) {
   return ret;
 }
 
-static Variant HHVM_METHOD(IntlBreakIterator, next, CVarRef offset) {
+static Variant HHVM_METHOD(IntlBreakIterator, next, const Variant& offset) {
   FETCH_BI(data, this_, false);
   if (offset.isNull()) {
     int64_t ret = data->breakIterator()->next();

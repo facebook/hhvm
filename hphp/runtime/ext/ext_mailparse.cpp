@@ -136,7 +136,7 @@ Resource f_mailparse_msg_create() {
   return NEWOBJ(MimePart)();
 }
 
-bool f_mailparse_msg_free(CResRef mimemail) {
+bool f_mailparse_msg_free(const Resource& mimemail) {
   return true;
 }
 
@@ -158,36 +158,36 @@ Variant f_mailparse_msg_parse_file(const String& filename) {
   return ret;
 }
 
-bool f_mailparse_msg_parse(CResRef mimemail, const String& data) {
+bool f_mailparse_msg_parse(const Resource& mimemail, const String& data) {
   return mimemail.getTyped<MimePart>()->parse(data.data(), data.size());
 }
 
-Variant f_mailparse_msg_extract_part_file(CResRef mimemail, CVarRef filename,
-                                          CVarRef callbackfunc /* = "" */) {
+Variant f_mailparse_msg_extract_part_file(const Resource& mimemail, const Variant& filename,
+                                          const Variant& callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(filename, callbackfunc,
             MimePart::Decode8Bit | MimePart::DecodeNoHeaders, true);
 }
 
-Variant f_mailparse_msg_extract_whole_part_file(CResRef mimemail,
-                                                CVarRef filename,
-                                                CVarRef callbackfunc /* = "" */) {
+Variant f_mailparse_msg_extract_whole_part_file(const Resource& mimemail,
+                                                const Variant& filename,
+                                                const Variant& callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(filename, callbackfunc, MimePart::DecodeNone, true);
 }
 
-Variant f_mailparse_msg_extract_part(CResRef mimemail, CVarRef msgbody,
-                                     CVarRef callbackfunc /* = "" */) {
+Variant f_mailparse_msg_extract_part(const Resource& mimemail, const Variant& msgbody,
+                                     const Variant& callbackfunc /* = "" */) {
   return mimemail.getTyped<MimePart>()->
     extract(msgbody, callbackfunc,
             MimePart::Decode8Bit | MimePart::DecodeNoHeaders, false);
 }
 
-Array f_mailparse_msg_get_part_data(CResRef mimemail) {
+Array f_mailparse_msg_get_part_data(const Resource& mimemail) {
   return mimemail.getTyped<MimePart>()->getPartData().toArray();
 }
 
-Variant f_mailparse_msg_get_part(CResRef mimemail, const String& mimesection) {
+Variant f_mailparse_msg_get_part(const Resource& mimemail, const String& mimesection) {
   Resource part =
     mimemail.getTyped<MimePart>()->findByName(mimesection.c_str());
   if (part.isNull()) {
@@ -197,7 +197,7 @@ Variant f_mailparse_msg_get_part(CResRef mimemail, const String& mimesection) {
   return part;
 }
 
-Array f_mailparse_msg_get_structure(CResRef mimemail) {
+Array f_mailparse_msg_get_structure(const Resource& mimemail) {
   return mimemail.getTyped<MimePart>()->getStructure();
 }
 
@@ -239,7 +239,7 @@ static int mailparse_stream_flush(void *stream) {
   return ((File*)stream)->flush() ? 1 : 0;
 }
 
-bool f_mailparse_stream_encode(CResRef sourcefp, CResRef destfp,
+bool f_mailparse_stream_encode(const Resource& sourcefp, const Resource& destfp,
                                const String& encoding) {
   File *srcstream = sourcefp.getTyped<File>(true, true);
   File *deststream = destfp.getTyped<File>(true, true);
@@ -355,7 +355,7 @@ const StaticString
   s_filename("filename"),
   s_origfilename("origfilename");
 
-Variant f_mailparse_uudecode_all(CResRef fp) {
+Variant f_mailparse_uudecode_all(const Resource& fp) {
   File *instream = fp.getTyped<File>();
   instream->rewind();
 
@@ -418,7 +418,7 @@ Variant f_mailparse_uudecode_all(CResRef fp) {
   return return_value;
 }
 
-Variant f_mailparse_determine_best_xfer_encoding(CResRef fp) {
+Variant f_mailparse_determine_best_xfer_encoding(const Resource& fp) {
   File *stream = fp.getTyped<File>();
   stream->rewind();
 

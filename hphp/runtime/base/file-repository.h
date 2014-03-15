@@ -193,7 +193,7 @@ private:
 };
 
 String resolveVmInclude(StringData* path, const char* currentDir,
-                        struct stat *s);
+                        struct stat *s, bool allow_dir = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

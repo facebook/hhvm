@@ -18,6 +18,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <onigposix.h>
+#include "neo_bool.h"
 #include "neo_misc.h"
 #include "neo_err.h"
 #include "neo_str.h"

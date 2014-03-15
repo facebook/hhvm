@@ -110,6 +110,7 @@ function find_all_files(string $pattern, string $root_dir,
   foreach ($sit as $fileinfo) {
     if (preg_match($pattern, $fileinfo->getFileName()) === 1 &&
         preg_match($exclude_file_pattern, $fileinfo->getFileName()) === 0 &&
+        strstr($fileinfo->getPath(), '/vendor/') === false &&
         !$exclude_dirs->contains(dirname($fileinfo->getPath()))) {
       $files[] = $fileinfo->getPathName();
     }
@@ -133,6 +134,7 @@ function find_all_files_containing_text(string $text,
   foreach ($sit as $fileinfo) {
     if (strpos(file_get_contents($fileinfo->getPathName()), $text) !== false &&
         preg_match($exclude_file_pattern, $fileinfo->getFileName()) === 0 &&
+        strstr($file_info->getPath(), '/vendor/') === false &&
         !$exclude_dirs->contains(dirname($fileinfo->getPath()))) {
       $files[] = $fileinfo->getPathName();
     }

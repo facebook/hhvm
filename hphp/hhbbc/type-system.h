@@ -100,43 +100,66 @@ struct Type;
  *       T from its join() method (or AsyncAwait), or else throw an
  *       exception.
  *
- * "Specialized" array types:
+ * Array types:
  *
- *   Types for arrays come in static and counted flavors (replace Arr
- *   with SArr or CArr below).  Both static and counted arrays are
- *   subtypes of the corresponding Arr type (which has unknown
- *   countedness).  Arrays with partially known structure have
- *   additional information in parenthesis, which is probably best
- *   explained by some examples:
+ *   Arrays are divided along two dimensions: counted or uncounted,
+ *   and empty or non-empty.  Unions of either are allowed.  The
+ *   naming convention is {S,C,}Arr{N,E,}, where leaving out either
+ *   bit means it's unknown along that dimension.  All arrays are
+ *   subtypes of the Arr type.  The lattice here looks like this:
  *
- *     SArr(Bool,Int)
+ *                         Arr
+ *                          |
+ *                  +----+--+--+---+
+ *                  |    |     |   |
+ *                  |  SArr   CArr |
+ *                  |   |      |   |
+ *              +-------+---------------+
+ *              |   |          |   |    |
+ *              |  ArrN  +-----+  ArrE  |
+ *              | /   \  |     | /   \  |
+ *             SArrN  CArrN   CArrE  SArrE
  *
- *         Static two-element array with contiguous integer keys,
- *         containing a Bool and an Int with unknown values.
+ *   "Specialized" array types may be found as subtypes of any of the
+ *   above types except SArrE and CArrE, or of optional versions of
+ *   the above types (e.g. as a subtype of ?ArrN).  The information
+ *   about additional structure is dispayed in parenthesis, and
+ *   probably best explained by some examples:
  *
- *     CArr([Bool])
+ *     SArrN(Bool,Int)
  *
- *         Reference counted array with contiguous integer keys
- *         (unknown size), values all are subtypes of Bool.
+ *         Tuple-like static two-element array, with integer keys 0
+ *         and 1, containing a Bool and an Int with unknown values.
  *
- *     Arr(x:Int,y:Int)
+ *     Arr(Int,Dbl)
+ *
+ *         An array of unknown countedness that is either empty, or a
+ *         tuple-like array with two elements of types Int and Dbl.
+ *
+ *     CArrN([Bool])
+ *
+ *         Non-empty reference counted array with contiguous
+ *         zero-based integer keys, unknown size, values all are
+ *         subtypes of Bool.
+ *
+ *     ArrN(x:Int,y:Int)
  *
  *         Struct-like array with known fields "x" and "y" that have
  *         Int values, and no other fields.  Struct-like arrays always
  *         have known string keys, and the type contains only those
- *         array values with exactly the given key set.  Order of the
- *         array elements is not tracked in the type system.
+ *         array values with exactly the given key set.  The order of
+ *         the array elements is not tracked in this type system.
  *
  *     Arr([SStr:InitCell])
  *
- *         Map-like array with unknown keys, but all non-reference
- *         counted strings, and all values InitCell.  In this case the
- *         array itself may or may not be static.
+ *         Possibly empty map-like array with unknown keys, but all
+ *         non-reference counted strings, all values InitCell.  In
+ *         this case the array itself may or may not be static.
  *
  *         Note that struct-like arrays will be subtypes of map-like
  *         arrays with string keys.
  *
- *     Arr([Int:InitPrim])
+ *     ArrN([Int:InitPrim])
  *
  *         Map-like array with only integer keys (not-necessarily
  *         contiguous) and values that are all subtypes of InitPrim.
@@ -146,13 +169,10 @@ struct Type;
  *     Arr([InitCell:InitCell])
  *
  *         Map-like array with either integer or string keys, and
- *         InitCell values. TODO(#3774082): we should have a Str|Int
- *         type.
+ *         InitCell values, or empty.  Essentially this is the most
+ *         generic array that can't contain php references.
  *
- *   Importantly: all the above specialized array types imply the
- *   array is non-empty.  (Later we may make a bit for the empty array
- *   so it has its own type and may be unioned with these types.)
- *
+ *  TODO(#3774082): we should have a Str|Int type.
  */
 
 //////////////////////////////////////////////////////////////////////
@@ -166,20 +186,26 @@ enum trep : uint32_t {
   BTrue     = 1 << 3,
   BInt      = 1 << 4,
   BDbl      = 1 << 5,
-  BSStr     = 1 << 6, // static string
-  BCStr     = 1 << 7, // counted string
-  BSArr     = 1 << 8, // static array
-  BCArr     = 1 << 9, // counted array
-  BObj      = 1 << 10,
-  BRes      = 1 << 11,
-  BCls      = 1 << 12,
-  BRef      = 1 << 13,
+  BSStr     = 1 << 6,  // static string
+  BCStr     = 1 << 7,  // counted string
+  BSArrE    = 1 << 8,  // static empty array
+  BCArrE    = 1 << 9,  // counted empty array
+  BSArrN    = 1 << 10, // static non-empty array
+  BCArrN    = 1 << 11, // counted non-empty array
+  BObj      = 1 << 12,
+  BRes      = 1 << 13,
+  BCls      = 1 << 14,
+  BRef      = 1 << 15,
 
   BNull     = BUninit | BInitNull,
   BBool     = BFalse | BTrue,
   BNum      = BInt | BDbl,
   BStr      = BSStr | BCStr,
-  BArr      = BSArr | BCArr,             // may have value / data
+  BSArr     = BSArrE | BSArrN,
+  BCArr     = BCArrE | BCArrN,
+  BArrE     = BSArrE | BCArrE,
+  BArrN     = BSArrN | BCArrN,   // may have value / data
+  BArr      = BArrE | BArrN,
 
   // Nullable types.
   BOptTrue     = BInitNull | BTrue,
@@ -191,8 +217,14 @@ enum trep : uint32_t {
   BOptSStr     = BInitNull | BSStr,      // may have value
   BOptCStr     = BInitNull | BCStr,
   BOptStr      = BInitNull | BStr,
+  BOptSArrE    = BInitNull | BSArrE,
+  BOptCArrE    = BInitNull | BCArrE,
+  BOptSArrN    = BInitNull | BSArrN,     // may have value / data
+  BOptCArrN    = BInitNull | BCArrN,     // may have value / data
   BOptSArr     = BInitNull | BSArr,      // may have value / data
   BOptCArr     = BInitNull | BCArr,      // may have value / data
+  BOptArrE     = BInitNull | BArrE,      // may have value / data
+  BOptArrN     = BInitNull | BArrN,      // may have value / data
   BOptArr      = BInitNull | BArr,       // may have value / data
   BOptObj      = BInitNull | BObj,       // may have data
   BOptRes      = BInitNull | BRes,
@@ -280,8 +312,8 @@ struct Type {
   /*
    * Exact equality or inequality of types.
    */
-  bool operator==(Type o) const;
-  bool operator!=(Type o) const { return !(*this == o); }
+  bool operator==(const Type& o) const;
+  bool operator!=(const Type& o) const { return !(*this == o); }
 
   /*
    * Returns true if this type is definitely going to be a subtype or a strict
@@ -437,8 +469,10 @@ X(Int)
 X(Dbl)
 X(SStr)
 X(CStr)
-X(SArr)
-X(CArr)
+X(SArrE)
+X(CArrE)
+X(SArrN)
+X(CArrN)
 X(Obj)
 X(Res)
 X(Cls)
@@ -448,6 +482,10 @@ X(Null)
 X(Bool)
 X(Num)
 X(Str)
+X(SArr)
+X(CArr)
+X(ArrE)
+X(ArrN)
 X(Arr)
 X(InitPrim)
 X(Prim)
@@ -463,8 +501,14 @@ X(OptNum)
 X(OptSStr)
 X(OptCStr)
 X(OptStr)
+X(OptSArrE)
+X(OptCArrE)
+X(OptSArrN)
+X(OptCArrN)
 X(OptSArr)
 X(OptCArr)
+X(OptArrE)
+X(OptArrN)
 X(OptArr)
 X(OptObj)
 X(OptRes)
@@ -501,10 +545,15 @@ Type dval(double);
 Type aval(SArray);
 
 /*
- * Create empty array or string types.
+ * Create static empty array or string types.
  */
 Type sempty();
 Type aempty();
+
+/*
+ * Create a reference counted empty array.
+ */
+Type counted_aempty();
 
 /*
  * Create types for objects or classes with some known constraint on

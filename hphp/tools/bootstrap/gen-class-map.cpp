@@ -185,7 +185,7 @@ static void outputConstants(const char *outputfn,
                         AllowIntercept|NoProfile|ContextSensitive|\
                         HipHopSpecific|VariableArguments|\
                         RefVariableArguments|MixedVariableArguments|\
-                        NeedsActRec|FunctionIsFoldable|\
+                        NoFCallBuiltin|FunctionIsFoldable|\
                         NoInjection|NoEffect|HasOptFunction|ZendParamModeNull|\
                         ZendParamModeFalse|ZendCompat)
 

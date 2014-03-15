@@ -40,7 +40,7 @@ public:
   bool parseZeroArg(DebuggerClient &client);
   void parseOneArg(DebuggerClient &client, std::string &subsymbol);
   Array getInfo() { return m_info; }
-  static String FindSubSymbol(CArrRef symbols, const std::string &symbol);
+  static String FindSubSymbol(const Array& symbols, const std::string &symbol);
 
 protected:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
@@ -60,23 +60,23 @@ private:
   Array  m_info;
   DebuggerClient::LiveListsPtr m_acLiveLists;
 
-  static String GetParams(CArrRef params, bool varg, bool detailed = false);
-  static String GetParam(CArrRef params, int index);
-  static String GetModifier(CArrRef info, const String&);
-  static String GetTypeProfilingInfo(CArrRef profilingArray, CArrRef params);
+  static String GetParams(const Array& params, bool varg, bool detailed = false);
+  static String GetParam(const Array& params, int index);
+  static String GetModifier(const Array& info, const String&);
+  static String GetTypeProfilingInfo(const Array& profilingArray, const Array& params);
 
-  static bool TryConstant(StringBuffer &sb, CArrRef info,
+  static bool TryConstant(StringBuffer &sb, const Array& info,
                           const std::string &subsymbol);
-  static bool TryProperty(StringBuffer &sb, CArrRef info,
+  static bool TryProperty(StringBuffer &sb, const Array& info,
                           const std::string &subsymbol);
   static bool TryMethod(DebuggerClient &client, StringBuffer &sb,
-                        CArrRef info, std::string subsymbol);
+                        const Array& info, std::string subsymbol);
 
-  static void PrintDocComments(StringBuffer &sb, CArrRef info);
-  static void PrintInfo(DebuggerClient &client, StringBuffer &sb, CArrRef info,
+  static void PrintDocComments(StringBuffer &sb, const Array& info);
+  static void PrintInfo(DebuggerClient &client, StringBuffer &sb, const Array& info,
                         const std::string &subsymbol);
   static void PrintHeader(DebuggerClient &client, StringBuffer &sb,
-                          CArrRef info);
+                          const Array& info);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

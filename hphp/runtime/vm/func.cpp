@@ -662,7 +662,7 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
           // that access of undefined class constants can cause the eval() to
           // fatal. Zend lets such fatals propagate, so don't bother catching
           // exceptions here.
-          CVarRef v = g_context->getEvaledArg(
+          const Variant& v = g_context->getEvaledArg(
             fpi.phpCode(),
             cls() ? cls()->nameRef() : nameRef()
           );
@@ -1084,15 +1084,6 @@ void FuncEmitter::addUserAttribute(const StringData* name, TypedValue tv) {
   m_userAttributes[name] = tv;
 }
 
-int FuncEmitter::parseUserAttributes(Attr &attrs) const {
-  int ret = Native::AttrNone;
-
-  ret = ret | parseNativeAttributes(attrs);
-  ret = ret | parseHipHopAttributes(attrs);
-
-  return ret;
-}
-
 /* <<__Native>> user attribute causes systemlib declarations
  * to hook internal (C++) implementation of funcs/methods
  *
@@ -1100,6 +1091,8 @@ int FuncEmitter::parseUserAttributes(Attr &attrs) const {
  *  "ActRec": The internal function takes a fixed prototype
  *      TypedValue* funcname(ActRec *ar);
  *      Note that systemlib declaration must still be hack annotated
+ *  "NoFCallBuiltin": Prevent FCallBuiltin optimization
+ *      Effectively forces functions to generate an ActRec
  *  "NoInjection": Do not include this frame in backtraces
  *
  *  e.g.   <<__Native("ActRec")>> function foo():mixed;
@@ -1107,6 +1100,7 @@ int FuncEmitter::parseUserAttributes(Attr &attrs) const {
 static const StaticString
   s_native("__Native"),
   s_actrec("ActRec"),
+  s_nofcallbuiltin("NoFCallBuiltin"),
   s_variadicbyref("VariadicByRef"),
   s_noinjection("NoInjection");
 
@@ -1121,31 +1115,19 @@ int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
     Variant userAttrVal = it.second();
     if (userAttrVal.isString()) {
       String userAttrStrVal = userAttrVal.toString();
-      if (userAttrStrVal->isame(s_actrec.get())) {
+      if (userAttrStrVal.get()->isame(s_actrec.get())) {
         ret = ret | Native::AttrActRec;
         attrs = attrs | AttrMayUseVV;
-      } else if (userAttrStrVal->isame(s_variadicbyref.get())) {
+      } else if (userAttrStrVal.get()->isame(s_nofcallbuiltin.get())) {
+        attrs = attrs | AttrNoFCallBuiltin;
+      } else if (userAttrStrVal.get()->isame(s_variadicbyref.get())) {
         attrs = attrs | AttrVariadicByRef;
-      } else if (userAttrStrVal->isame(s_noinjection.get())) {
+      } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
         attrs = attrs | AttrNoInjection;
       }
     }
   }
   return ret;
-}
-
-/* <<__HipHopSpecific>> user attribute marks funcs/methods as HipHop specific
- * for reflection.
- */
-static const StaticString s_hiphopspecific("__HipHopSpecific");
-
-int FuncEmitter::parseHipHopAttributes(Attr &attrs) const {
-  auto it = m_userAttributes.find(s_hiphopspecific.get());
-  if (it != m_userAttributes.end()) {
-    attrs = attrs | AttrHPHPSpecific;
-  }
-
-  return Native::AttrNone;
 }
 
 void FuncEmitter::commit(RepoTxn& txn) const {
@@ -1267,6 +1249,9 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
   }
   if (info->attribute & ClassInfo::NoInjection) {
     attrs = attrs | AttrNoInjection;
+  }
+  if (info->attribute & ClassInfo::NoFCallBuiltin) {
+    attrs = attrs | AttrNoFCallBuiltin;
   }
   if (pce()) {
     if (info->attribute & ClassInfo::IsStatic) {

@@ -1141,45 +1141,17 @@ class ReflectionClass implements Reflector {
     }
   }
 
-  private function mergeProperties() {
-    $properties = array();
-    $properties_idx = 0;
-    $old_properties = $this->info['properties'];
-    $old_properties_keys = array_keys($old_properties);
-    $old_properties_idx = 0;
-    // The info['private_properties_offsets'] array stores the offsets where
-    // each private property will reside in the final array. Here, for each
-    // private properties, we first append all the properties before it into
-    // the array, and then append the private property itself.
-    foreach ($this->info['private_properties'] as $prop_name => $prop_info) {
-      $offset = $this->info['private_properties_offsets'][$prop_name];
-      while ($properties_idx < $offset) {
-        $key = $old_properties_keys[$old_properties_idx];
-        $properties += array($key => $old_properties[$key]);
-        ++$properties_idx;
-        ++$old_properties_idx;
-      }
-      $properties += array($prop_name => $prop_info);
-      ++$properties_idx;
-    }
-    // After putting all the private properties in place, we append all the
-    // remaining properties.
-    $count = count($old_properties);
-    while ($old_properties_idx < $count) {
-      $key = $old_properties_keys[$old_properties_idx];
-      $properties += array($key => $old_properties[$key]);
-      ++$old_properties_idx;
-    }
-    $this->info['properties'] = $properties;
-  }
-
   private function getInfo() {
     if (!$this->info) {
       $this->info = self::fetch_recur($this->obj ?: $this->name);
-      // We store private properties in a separate info['private_properties']
-      // array, so when they are accessible, we merge them to the
-      // info['properties'] array.
-      $this->mergeProperties();
+      $this->info['properties'] += $this->info['private_properties'];
+      if (!$this->info['reorder_parent_properties']) {
+        $this->info['properties_index'] +=
+          $this->info['private_properties_index'];
+        $index = array_values($this->info['properties_index']);
+        array_multisort($index, $this->info['properties'],
+                        $this->info['properties_index']);
+      }
     }
     return $this->info;
   }
@@ -1206,7 +1178,7 @@ class ReflectionClass implements Reflector {
       $p = self::fetch_recur($parent);
       if (isset($p['interface'])) {
         $info['interfaces'][$parent] = 1;
-      } else {
+      } elseif ($info['reorder_parent_properties']) {
         // To match Zend, parent properties should come after
         // child properties in ReflectionProperty order.
         // First, clone the $info['properties'] array for foreach so we don't

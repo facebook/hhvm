@@ -17,18 +17,14 @@
 #ifndef incl_HPHP_STRING_H_
 #define incl_HPHP_STRING_H_
 
-#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
-#error Directly including 'type-string.h' is prohibited. \
-       Include 'complex-types.h' instead.
-#endif
-
-#include "hphp/util/assertions.h"
-#include <algorithm>
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/util/assertions.h"
+
+#include <algorithm>
 
 namespace HPHP {
 
@@ -102,12 +98,6 @@ public:
 
   StringData* get() const { return m_px; }
   void reset() { StringBase::reset(); }
-
-  // Deliberately doesn't throw_null_pointer_exception as a perf
-  // optimization.
-  StringData* operator->() const {
-    return m_px;
-  }
 
   // Transfer ownership of our reference to this StringData.
   StringData* detach() {
@@ -281,7 +271,7 @@ public:
   String &operator =  (StringData *data);
   String &operator =  (litstr  v);
   String &operator =  (const String& v);
-  String &operator =  (CVarRef v);
+  String &operator =  (const Variant& v);
   String &operator =  (const std::string &s);
   // These should be members, but g++ doesn't yet support the rvalue
   // reference notation on lhs (http://goo.gl/LuCTo).
@@ -324,12 +314,12 @@ public:
   bool operator <= (const String& v) const = delete;
   bool operator >  (const String& v) const;
   bool operator <  (const String& v) const;
-  bool operator == (CVarRef v) const;
-  bool operator != (CVarRef v) const;
-  bool operator >= (CVarRef v) const = delete;
-  bool operator <= (CVarRef v) const = delete;
-  bool operator >  (CVarRef v) const;
-  bool operator <  (CVarRef v) const;
+  bool operator == (const Variant& v) const;
+  bool operator != (const Variant& v) const;
+  bool operator >= (const Variant& v) const = delete;
+  bool operator <= (const Variant& v) const = delete;
+  bool operator >  (const Variant& v) const;
+  bool operator <  (const Variant& v) const;
 
   /**
    * Type conversions
@@ -349,27 +339,27 @@ public:
   bool same (litstr  v2) const = delete;
   bool same (const StringData *v2) const;
   bool same (const String& v2) const;
-  bool same (CArrRef v2) const;
-  bool same (CObjRef v2) const;
-  bool same (CResRef v2) const;
+  bool same (const Array& v2) const;
+  bool same (const Object& v2) const;
+  bool same (const Resource& v2) const;
   bool equal(litstr  v2) const = delete;
   bool equal(const StringData *v2) const;
   bool equal(const String& v2) const;
-  bool equal(CArrRef v2) const;
-  bool equal(CObjRef v2) const;
-  bool equal(CResRef v2) const;
+  bool equal(const Array& v2) const;
+  bool equal(const Object& v2) const;
+  bool equal(const Resource& v2) const;
   bool less (litstr  v2) const = delete;
   bool less (const StringData *v2) const;
   bool less (const String& v2) const;
-  bool less (CArrRef v2) const;
-  bool less (CObjRef v2) const;
-  bool less (CResRef v2) const;
+  bool less (const Array& v2) const;
+  bool less (const Object& v2) const;
+  bool less (const Resource& v2) const;
   bool more (litstr  v2) const = delete;
   bool more (const StringData *v2) const;
   bool more (const String& v2) const;
-  bool more (CArrRef v2) const;
-  bool more (CObjRef v2) const;
-  bool more (CResRef v2) const;
+  bool more (const Array& v2) const;
+  bool more (const Object& v2) const;
+  bool more (const Resource& v2) const;
 
   /**
    * Offset
@@ -386,9 +376,9 @@ public:
     return rvalAtImpl(key ? key->toInt32() : 0);
   }
   String rvalAt(const String& key) const { return rvalAtImpl(key.toInt32());}
-  String rvalAt(CArrRef key) const;
-  String rvalAt(CObjRef key) const;
-  String rvalAt(CVarRef key) const;
+  String rvalAt(const Array& key) const;
+  String rvalAt(const Object& key) const;
+  String rvalAt(const Variant& key) const;
 
   /**
    * Returns one character at specified position.
@@ -445,19 +435,19 @@ typedef hphp_hash_set<const StringData*, string_data_hash, string_data_same>
 
 struct hphp_string_hash {
   size_t operator()(const String& s) const {
-    return s->hash();
+    return s.get()->hash();
   }
 };
 
 struct hphp_string_same {
   bool operator()(const String& s1, const String& s2) const {
-    return s1->same(s2.get());
+    return s1.get()->same(s2.get());
   }
 };
 
 struct hphp_string_isame {
   bool operator()(const String& s1, const String& s2) const {
-    return s1->isame(s2.get());
+    return s1.get()->isame(s2.get());
   }
 };
 

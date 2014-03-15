@@ -35,7 +35,7 @@ public:
   bool processNumericTypes();
   bool mapArgs(std::vector<icu::Formattable>& types,
                std::vector<icu::UnicodeString>& names,
-               CArrRef args);
+               const Array& args);
   bool isValid() const {
     return m_formatter;
   }

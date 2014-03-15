@@ -95,7 +95,7 @@ class Runner {
             // e.g.
             // PHPUnit 3.7.28 by Sebastian Bergmann.
             // The Xdebug extension is not loaded. No code coverage will be gen
-            // HipHop Fatal error: Undefined function: mysqli_report
+            // HipHop Fatal error: Call to undefined function mysqli_report
             $line = remove_string_from_text($line, __DIR__, "");
             $this->fatal_information .= PHP_EOL.$this->name.
               PHP_EOL.$line.PHP_EOL.PHP_EOL.

@@ -215,7 +215,7 @@ void ExecutionContext::obProtect(bool on) {
   m_protectedLevel = on ? m_buffers.size() : 0;
 }
 
-void ExecutionContext::obStart(CVarRef handler /* = null */) {
+void ExecutionContext::obStart(const Variant& handler /* = null */) {
   OutputBuffer *ob = new OutputBuffer();
   ob->handler = handler;
   m_buffers.push_back(ob);
@@ -400,7 +400,7 @@ void ExecutionContext::resetCurrentBuffer() {
 ///////////////////////////////////////////////////////////////////////////////
 // program executions
 
-void ExecutionContext::registerShutdownFunction(CVarRef function,
+void ExecutionContext::registerShutdownFunction(const Variant& function,
                                                     Array arguments,
                                                     ShutdownType type) {
   Array callback = make_map_array(s_name, function, s_args, arguments);
@@ -416,7 +416,7 @@ Variant ExecutionContext::popShutdownFunction(ShutdownType type) {
   return funcs.pop();
 }
 
-Variant ExecutionContext::pushUserErrorHandler(CVarRef function,
+Variant ExecutionContext::pushUserErrorHandler(const Variant& function,
                                                    int error_types) {
   Variant ret;
   if (!m_userErrorHandlers.empty()) {
@@ -426,7 +426,7 @@ Variant ExecutionContext::pushUserErrorHandler(CVarRef function,
   return ret;
 }
 
-Variant ExecutionContext::pushUserExceptionHandler(CVarRef function) {
+Variant ExecutionContext::pushUserExceptionHandler(const Variant& function) {
   Variant ret;
   if (!m_userExceptionHandlers.empty()) {
     ret = m_userExceptionHandlers.back();
@@ -481,7 +481,7 @@ void ExecutionContext::onRequestShutdown() {
   m_requestEventHandlerSet.clear();
 }
 
-void ExecutionContext::executeFunctions(CArrRef funcs) {
+void ExecutionContext::executeFunctions(const Array& funcs) {
   ThreadInfo::s_threadInfo->m_reqInjectionData.resetTimer(
     RuntimeOption::PspTimeoutSeconds);
 

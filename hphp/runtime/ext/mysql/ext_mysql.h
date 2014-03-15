@@ -124,113 +124,113 @@ Variant f_mysql_async_connect_start(const String& server = null_string,
                                     const String& username = null_string,
                                     const String& password = null_string,
                                     const String& database = null_string);
-bool f_mysql_async_connect_completed(CVarRef link_identifier);
-bool f_mysql_async_query_start(const String& query, CVarRef link_identifier);
-Variant f_mysql_async_query_result(CVarRef link_identifier);
-bool f_mysql_async_query_completed(CVarRef result);
-Variant f_mysql_async_fetch_array(CVarRef result, int result_type = 1);
-Variant f_mysql_async_wait_actionable(CVarRef items, double timeout);
-int64_t f_mysql_async_status(CVarRef link_identifier);
+bool f_mysql_async_connect_completed(const Variant& link_identifier);
+bool f_mysql_async_query_start(const String& query, const Variant& link_identifier);
+Variant f_mysql_async_query_result(const Variant& link_identifier);
+bool f_mysql_async_query_completed(const Variant& result);
+Variant f_mysql_async_fetch_array(const Variant& result, int result_type = 1);
+Variant f_mysql_async_wait_actionable(const Variant& items, double timeout);
+int64_t f_mysql_async_status(const Variant& link_identifier);
 
 String f_mysql_escape_string(const String& unescaped_string);
 
 Variant f_mysql_real_escape_string(const String& unescaped_string,
-                                   CVarRef link_identifier = uninit_null());
+                                   const Variant& link_identifier = uninit_null());
 
 String f_mysql_get_client_info();
 Variant f_mysql_set_charset(const String& charset,
-                                   CVarRef link_identifier = uninit_null());
-Variant f_mysql_ping(CVarRef link_identifier = uninit_null());
-Variant f_mysql_client_encoding(CVarRef link_identifier = uninit_null());
-Variant f_mysql_close(CVarRef link_identifier = uninit_null());
+                                   const Variant& link_identifier = uninit_null());
+Variant f_mysql_ping(const Variant& link_identifier = uninit_null());
+Variant f_mysql_client_encoding(const Variant& link_identifier = uninit_null());
+Variant f_mysql_close(const Variant& link_identifier = uninit_null());
 
-Variant f_mysql_errno(CVarRef link_identifier = uninit_null());
+Variant f_mysql_errno(const Variant& link_identifier = uninit_null());
 
-Variant f_mysql_error(CVarRef link_identifier = uninit_null());
+Variant f_mysql_error(const Variant& link_identifier = uninit_null());
 
-Variant f_mysql_warning_count(CVarRef link_identifier = uninit_null());
+Variant f_mysql_warning_count(const Variant& link_identifier = uninit_null());
 
-Variant f_mysql_get_host_info(CVarRef link_identifier = uninit_null());
-Variant f_mysql_get_proto_info(CVarRef link_identifier = uninit_null());
-Variant f_mysql_get_server_info(CVarRef link_identifier = uninit_null());
-Variant f_mysql_info(CVarRef link_identifier = uninit_null());
-Variant f_mysql_insert_id(CVarRef link_identifier = uninit_null());
-Variant f_mysql_stat(CVarRef link_identifier = uninit_null());
-Variant f_mysql_thread_id(CVarRef link_identifier = uninit_null());
+Variant f_mysql_get_host_info(const Variant& link_identifier = uninit_null());
+Variant f_mysql_get_proto_info(const Variant& link_identifier = uninit_null());
+Variant f_mysql_get_server_info(const Variant& link_identifier = uninit_null());
+Variant f_mysql_info(const Variant& link_identifier = uninit_null());
+Variant f_mysql_insert_id(const Variant& link_identifier = uninit_null());
+Variant f_mysql_stat(const Variant& link_identifier = uninit_null());
+Variant f_mysql_thread_id(const Variant& link_identifier = uninit_null());
 Variant f_mysql_create_db(const String& db,
-                                 CVarRef link_identifier = uninit_null());
+                                 const Variant& link_identifier = uninit_null());
 Variant f_mysql_select_db(const String& db,
-                                 CVarRef link_identifier = uninit_null());
+                                 const Variant& link_identifier = uninit_null());
 Variant f_mysql_drop_db(const String& db,
-                               CVarRef link_identifier = uninit_null());
-Variant f_mysql_affected_rows(CVarRef link_identifier = uninit_null());
+                               const Variant& link_identifier = uninit_null());
+Variant f_mysql_affected_rows(const Variant& link_identifier = uninit_null());
 
 ///////////////////////////////////////////////////////////////////////////////
 // query functions
 
 bool f_mysql_set_timeout(int query_timeout_ms = -1,
-                         CVarRef link_identifier = uninit_null());
+                         const Variant& link_identifier = uninit_null());
 
-Variant f_mysql_query(const String& query, CVarRef link_identifier = uninit_null());
-Variant f_mysql_multi_query(const String& query, CVarRef link_identifier = uninit_null());
+Variant f_mysql_query(const String& query, const Variant& link_identifier = uninit_null());
+Variant f_mysql_multi_query(const String& query, const Variant& link_identifier = uninit_null());
 
-int f_mysql_next_result(CVarRef link_identifier = uninit_null());
+int f_mysql_next_result(const Variant& link_identifier = uninit_null());
 
-bool f_mysql_more_results(CVarRef link_identifier = uninit_null());
+bool f_mysql_more_results(const Variant& link_identifier = uninit_null());
 
-Variant f_mysql_fetch_result(CVarRef link_identifier = uninit_null());
+Variant f_mysql_fetch_result(const Variant& link_identifier = uninit_null());
 
 Variant f_mysql_unbuffered_query(const String& query,
-                                 CVarRef link_identifier = uninit_null());
+                                 const Variant& link_identifier = uninit_null());
 Variant f_mysql_db_query(const String& database, const String& query,
-                         CVarRef link_identifier = uninit_null());
-Variant f_mysql_list_dbs(CVarRef link_identifier = uninit_null());
+                         const Variant& link_identifier = uninit_null());
+Variant f_mysql_list_dbs(const Variant& link_identifier = uninit_null());
 
 Variant f_mysql_list_tables(const String& database,
-                            CVarRef link_identifier = uninit_null());
+                            const Variant& link_identifier = uninit_null());
 Variant f_mysql_list_fields(const String& database_name, const String& table_name,
-                            CVarRef link_identifier = uninit_null());
-Variant f_mysql_list_processes(CVarRef link_identifier = uninit_null());
+                            const Variant& link_identifier = uninit_null());
+Variant f_mysql_list_processes(const Variant& link_identifier = uninit_null());
 
 ///////////////////////////////////////////////////////////////////////////////
 // row operations
 
-bool f_mysql_data_seek(CVarRef result, int row);
+bool f_mysql_data_seek(const Variant& result, int row);
 
-Variant f_mysql_fetch_row(CVarRef result);
+Variant f_mysql_fetch_row(const Variant& result);
 
-Variant f_mysql_fetch_assoc(CVarRef result);
+Variant f_mysql_fetch_assoc(const Variant& result);
 
-Variant f_mysql_fetch_array(CVarRef result, int result_type = 3);
+Variant f_mysql_fetch_array(const Variant& result, int result_type = 3);
 
-Variant f_mysql_fetch_lengths(CVarRef result);
+Variant f_mysql_fetch_lengths(const Variant& result);
 
-Variant f_mysql_fetch_object(CVarRef result, const String& class_name = "stdClass",
-                             CArrRef params = uninit_null().toArray());
+Variant f_mysql_fetch_object(const Variant& result, const String& class_name = "stdClass",
+                             const Array& params = uninit_null().toArray());
 
-Variant f_mysql_result(CVarRef result, int row, CVarRef field = null_variant);
+Variant f_mysql_result(const Variant& result, int row, const Variant& field = null_variant);
 
 ///////////////////////////////////////////////////////////////////////////////
 // result functions
 
-Variant f_mysql_db_name(CVarRef result, int row,
-                               CVarRef field = null_variant);
-Variant f_mysql_tablename(CVarRef result, int i);
+Variant f_mysql_db_name(const Variant& result, int row,
+                               const Variant& field = null_variant);
+Variant f_mysql_tablename(const Variant& result, int i);
 
-Variant f_mysql_num_fields(CVarRef result);
-Variant f_mysql_num_rows(CVarRef result);
-Variant f_mysql_free_result(CVarRef result);
+Variant f_mysql_num_fields(const Variant& result);
+Variant f_mysql_num_rows(const Variant& result);
+Variant f_mysql_free_result(const Variant& result);
 
 ///////////////////////////////////////////////////////////////////////////////
 // field info
 
-Variant f_mysql_fetch_field(CVarRef result, int field = -1);
-bool f_mysql_field_seek(CVarRef result, int field = 0);
-Variant f_mysql_field_name(CVarRef result, int field = 0);
-Variant f_mysql_field_table(CVarRef result, int field = 0);
-Variant f_mysql_field_len(CVarRef result, int field = 0);
-Variant f_mysql_field_type(CVarRef result, int field = 0);
-Variant f_mysql_field_flags(CVarRef result, int field = 0);
+Variant f_mysql_fetch_field(const Variant& result, int field = -1);
+bool f_mysql_field_seek(const Variant& result, int field = 0);
+Variant f_mysql_field_name(const Variant& result, int field = 0);
+Variant f_mysql_field_table(const Variant& result, int field = 0);
+Variant f_mysql_field_len(const Variant& result, int field = 0);
+Variant f_mysql_field_type(const Variant& result, int field = 0);
+Variant f_mysql_field_flags(const Variant& result, int field = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 extern const int64_t k_ASYNC_OP_INVALID;

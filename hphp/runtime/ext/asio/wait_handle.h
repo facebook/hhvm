@@ -62,7 +62,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   ~c_WaitHandle() {}
 
   void t___construct();
-  static void ti_setonjoincallback(CVarRef callback);
+  static void ti_setonjoincallback(const Variant& callback);
   Object t_getwaithandle();
   void t_import();
   Variant t_join();

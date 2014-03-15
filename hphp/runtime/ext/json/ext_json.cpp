@@ -67,7 +67,7 @@ String HHVM_FUNCTION(json_last_error_msg) {
   return json_get_last_error_msg();
 }
 
-String HHVM_FUNCTION(json_encode, CVarRef value, int64_t options /* = 0 */,
+String HHVM_FUNCTION(json_encode, const Variant& value, int64_t options /* = 0 */,
                                   int64_t depth /* = 512 */) {
 
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
@@ -77,7 +77,7 @@ String HHVM_FUNCTION(json_encode, CVarRef value, int64_t options /* = 0 */,
 }
 
 Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
-                      int64_t depth /* = 512 */, int64_t options /* = 0 */){
+                      int64_t depth /* = 512 */, int64_t options /* = 0 */) {
 
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
 
@@ -112,7 +112,7 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
 
   int64_t p;
   double d;
-  DataType type = json->isNumericWithVal(p, d, 0);
+  DataType type = json.get()->isNumericWithVal(p, d, 0);
   if (type == KindOfInt64) {
     json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
     return p;

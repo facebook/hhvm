@@ -1,1 +1,1 @@
-HipHop Fatal error: Undefined function: \\A\f in %s/test/slow/namespace/dynamic_extra_slash_func.php on line 10
+HipHop Fatal error: Call to undefined function \\A\f() in %s/test/slow/namespace/dynamic_extra_slash_func.php on line 10

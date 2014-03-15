@@ -260,7 +260,7 @@ inline bool setTimeZones(MessageFormatter* data) {
 
 bool MessageFormatter::mapArgs(std::vector<icu::Formattable>& types,
                                std::vector<icu::UnicodeString>& names,
-                               CArrRef args) {
+                               const Array& args) {
   int32_t count = args.size(), arg_num = 0;
   types.resize(count);
   names.resize(count);
@@ -342,7 +342,7 @@ string_val:
   return true;
 }
 
-static Variant HHVM_METHOD(MessageFormatter, format, CArrRef args) {
+static Variant HHVM_METHOD(MessageFormatter, format, const Array& args) {
   FETCH_MFMT(data, this_);
   std::vector<icu::Formattable> arg_types;
   std::vector<icu::UnicodeString> arg_names;

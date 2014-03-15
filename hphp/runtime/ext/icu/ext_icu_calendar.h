@@ -71,7 +71,7 @@ class IntlCalendar : public IntlError {
     return dynamic_cast<icu::GregorianCalendar*>(m_cal);
   }
 
-  static const icu::Calendar* ParseArg(CVarRef cal, const icu::Locale &locale,
+  static const icu::Calendar* ParseArg(const Variant& cal, const icu::Locale &locale,
                                        const String &funcname, IntlError *err,
                                        int64_t &calType, bool &calOwned);
  protected:

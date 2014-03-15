@@ -1,0 +1,32 @@
+object(DateTime)#1 (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(3) "GMT"
+}
+object(DateTime)#1 (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(3) "GMT"
+}
+object(DateTime)#1 (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(3) "GMT"
+}
+object(DateTime)#2 (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(3) "GMT"
+}

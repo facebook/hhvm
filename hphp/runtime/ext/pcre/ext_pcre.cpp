@@ -30,7 +30,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(preg_grep, const String& pattern, CArrRef input,
+Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Array& input,
                                  int flags /* = 0 */) {
   return preg_grep(pattern, input, flags);
 }
@@ -62,15 +62,15 @@ Variant HHVM_FUNCTION(preg_match_all, const String& pattern,
 ///////////////////////////////////////////////////////////////////////////////
 
 
-Variant HHVM_FUNCTION(preg_replace, CVarRef pattern, CVarRef replacement,
-                                    CVarRef subject, int limit /* = -1 */,
+Variant HHVM_FUNCTION(preg_replace, const Variant& pattern, const Variant& replacement,
+                                    const Variant& subject, int limit /* = -1 */,
                                     VRefParam count /* = null */) {
   return preg_replace_impl(pattern, replacement, subject,
                            limit, count, false, false);
 }
 
-Variant HHVM_FUNCTION(preg_replace_callback, CVarRef pattern, CVarRef callback,
-                                             CVarRef subject,
+Variant HHVM_FUNCTION(preg_replace_callback, const Variant& pattern, const Variant& callback,
+                                             const Variant& subject,
                                              int limit /* = -1 */,
                                              VRefParam count /* = null */) {
   if (!f_is_callable(callback)) {
@@ -82,8 +82,8 @@ Variant HHVM_FUNCTION(preg_replace_callback, CVarRef pattern, CVarRef callback,
                            limit, count, true, false);
 }
 
-Variant HHVM_FUNCTION(preg_filter, CVarRef pattern, CVarRef callback,
-                                   CVarRef subject, int limit /* = -1 */,
+Variant HHVM_FUNCTION(preg_filter, const Variant& pattern, const Variant& callback,
+                                   const Variant& subject, int limit /* = -1 */,
                                    VRefParam count /* = null */) {
   return preg_replace_impl(pattern, callback, subject,
                            limit, count, false, true);
@@ -99,7 +99,7 @@ Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
 ///////////////////////////////////////////////////////////////////////////////
 
 String HHVM_FUNCTION(preg_quote, const String& str,
-                                 CVarRef delimiter /* = null_string */) {
+                                 const Variant& delimiter /* = null_string */) {
   if (delimiter.isNull()) {
     return preg_quote(str, null_string);
   } else {

@@ -1,0 +1,2 @@
+string(6) "stderr"
+HipHop Notice: Should see in %s/hphp/test/slow/error_handler/display_errors_stderr.php on line 6

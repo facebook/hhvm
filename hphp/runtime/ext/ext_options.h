@@ -24,8 +24,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_assert_options(int what, CVarRef value = null_variant);
-Variant f_assert(CVarRef assertion);
+Variant f_assert_options(int what, const Variant& value = null_variant);
+Variant f_assert(const Variant& assertion);
 int64_t f_dl(const String& library);
 bool f_extension_loaded(const String& name);
 Array f_get_loaded_extensions(bool zend_extensions = false);
@@ -46,7 +46,7 @@ int64_t f_getmygid();
 Variant f_getmyinode();
 int64_t f_getmypid();
 int64_t f_getmyuid();
-Array f_getopt(const String& options, CVarRef longopts = null_variant);
+Array f_getopt(const String& options, const Variant& longopts = null_variant);
 Array f_getrusage(int who = 0);
 bool f_clock_getres(int clk_id, VRefParam sec, VRefParam nsec);
 bool f_clock_gettime(int clk_id, VRefParam sec, VRefParam nsec);

@@ -15,7 +15,7 @@
             "name": "debug_backtrace",
             "desc": "debug_backtrace() generates a PHP backtrace.",
             "flags": [
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "StringVec",
@@ -40,7 +40,7 @@
             "name": "debug_print_backtrace",
             "desc": "debug_print_backtrace() prints a PHP backtrace. It prints the function calls, included\/required files and eval()ed stuff.\nThis function has no parameters.",
             "flags": [
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": null,
@@ -253,7 +253,7 @@
             "name": "trigger_error",
             "desc": "Used to trigger a user error condition, it can be used by in conjunction with the built-in error handler, or with a user defined function that has been set as the new error handler (set_error_handler()).\n\nThis function is useful when you need to generate a particular response to an exception at runtime.",
             "flags": [
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": "Boolean",

@@ -21,6 +21,8 @@
 #include <string>
 #include <set>
 
+#include "hphp/util/functional.h"
+
 namespace HPHP { struct UnitEmitter; }
 namespace HPHP { namespace HHBBC {
 
@@ -41,7 +43,7 @@ struct Options {
    * Functions that aren't named in this list may be optimized with
    * the assumption they aren't intercepted, in whole_program mode.
    */
-  std::set<std::string> InterceptableFunctions;
+  std::set<std::string, stdltistr> InterceptableFunctions;
 
   //////////////////////////////////////////////////////////////////////
 
@@ -69,7 +71,7 @@ struct Options {
    * Each time we visit `foo', we'll discover a slightly smaller return
    * type, in a downward-moving sequence that would never terminate:
    *
-   *   InitCell, CArr(x:InitCell), CArr(x:CArr(x:InitCell)), ...
+   *   InitCell, CArrN(x:InitCell), CArrN(x:CArrN(x:InitCell)), ...
    */
   uint32_t returnTypeRefineLimit = 15;
 
@@ -92,7 +94,7 @@ struct Options {
    * be dead.  When false, dead blocks are replaced with Fatal
    * bytecodes.
    */
-  bool RemoveDeadBlocks = false;
+  bool RemoveDeadBlocks = true;
 
   /*
    * Whether to propagate constant values by replacing instructions

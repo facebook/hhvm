@@ -33,7 +33,7 @@
 namespace HPHP {
 
 template<class T>
-static T* safe_get_typed(CResRef res)
+static T* safe_get_typed(const Resource& res)
 {
   if (!res.is<T>() || (res.get() == nullptr)) {
     raise_warning("supplied argument is not a valid ODBC resource");
@@ -767,7 +767,7 @@ bool ODBCLink::end_transaction(const bool is_commit)
 ///////////////////////////////////////////////////////////////////////////////
 
 
-bool HHVM_FUNCTION(odbc_set_autocommit, CResRef link, bool on_off)
+bool HHVM_FUNCTION(odbc_set_autocommit, const Resource& link, bool on_off)
 {
   ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
   if (odbc_link == nullptr)
@@ -775,7 +775,7 @@ bool HHVM_FUNCTION(odbc_set_autocommit, CResRef link, bool on_off)
   return odbc_link->set_autocommit(on_off);
 }
 
-bool HHVM_FUNCTION(odbc_get_autocommit, CResRef link)
+bool HHVM_FUNCTION(odbc_get_autocommit, const Resource& link)
 {
   ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
   if (odbc_link == nullptr)
@@ -783,7 +783,7 @@ bool HHVM_FUNCTION(odbc_get_autocommit, CResRef link)
   return odbc_link->get_autocommit();
 }
 
-bool HHVM_FUNCTION(odbc_commit, CResRef link)
+bool HHVM_FUNCTION(odbc_commit, const Resource& link)
 {
   ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
   if (odbc_link == nullptr)
@@ -803,24 +803,24 @@ Variant HHVM_FUNCTION(odbc_connect, const String& dsn, const String& username,
   return ret;
 }
 
-void HHVM_FUNCTION(odbc_close, CResRef link)
+void HHVM_FUNCTION(odbc_close, const Resource& link)
 {
   ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
   if (odbc_link != nullptr)
     odbc_link->close();
 }
 
-const String HHVM_FUNCTION(odbc_error, CResRef link)
+const String HHVM_FUNCTION(odbc_error, const Resource& link)
 {
   return String::FromCStr((char*)ODBCContext::get_last_error_code());
 }
 
-const String HHVM_FUNCTION(odbc_errormsg, CResRef link)
+const String HHVM_FUNCTION(odbc_errormsg, const Resource& link)
 {
   return String::FromCStr((char*)ODBCContext::get_last_error_msg());
 }
 
-Variant HHVM_FUNCTION(odbc_exec, CResRef link, const String& query)
+Variant HHVM_FUNCTION(odbc_exec, const Resource& link, const String& query)
 {
   ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
   if (odbc_link == nullptr)
@@ -828,7 +828,7 @@ Variant HHVM_FUNCTION(odbc_exec, CResRef link, const String& query)
   return odbc_link->exec(query);
 }
 
-bool HHVM_FUNCTION(odbc_execute, CResRef result, const CArrRef params)
+bool HHVM_FUNCTION(odbc_execute, const Resource& result, const Array& params)
 {
   ODBCCursor *odbc_result = safe_get_typed<ODBCCursor>(result);
   if (odbc_result == nullptr)
@@ -836,7 +836,7 @@ bool HHVM_FUNCTION(odbc_execute, CResRef result, const CArrRef params)
   return odbc_result->exec_prepared_query(params);
 }
 
-Variant HHVM_FUNCTION(odbc_fetch_array, CResRef cursor)
+Variant HHVM_FUNCTION(odbc_fetch_array, const Resource& cursor)
 {
   ODBCCursor *odbc_cursor = safe_get_typed<ODBCCursor>(cursor);
   if (odbc_cursor == nullptr)
@@ -844,7 +844,7 @@ Variant HHVM_FUNCTION(odbc_fetch_array, CResRef cursor)
   return odbc_cursor->fetch();
 }
 
-int64_t HHVM_FUNCTION(odbc_num_rows, CResRef cursor)
+int64_t HHVM_FUNCTION(odbc_num_rows, const Resource& cursor)
 {
   ODBCCursor *odbc_cursor = safe_get_typed<ODBCCursor>(cursor);
   if (odbc_cursor == nullptr)
@@ -852,7 +852,7 @@ int64_t HHVM_FUNCTION(odbc_num_rows, CResRef cursor)
   return odbc_cursor->num_rows();
 }
 
-Variant HHVM_FUNCTION(odbc_prepare, CResRef link, const String& query)
+Variant HHVM_FUNCTION(odbc_prepare, const Resource& link, const String& query)
 {
   ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
   if (odbc_link == nullptr)
@@ -860,7 +860,7 @@ Variant HHVM_FUNCTION(odbc_prepare, CResRef link, const String& query)
   return odbc_link->prepare(query);
 }
 
-bool HHVM_FUNCTION(odbc_rollback, CResRef link)
+bool HHVM_FUNCTION(odbc_rollback, const Resource& link)
 {
   ODBCLink *odbc_link = safe_get_typed<ODBCLink>(link);
   if (odbc_link == nullptr)

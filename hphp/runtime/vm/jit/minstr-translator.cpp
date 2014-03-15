@@ -1495,10 +1495,11 @@ void HhbcTranslator::MInstrTranslator::emitSetProp() {
 #undef HELPER_TABLE
 
 template <bool isObj>
-static inline TypedValue setOpPropImpl(TypedValue* base, TypedValue keyVal,
+static inline TypedValue setOpPropImpl(Class* ctx, TypedValue* base,
+                                       TypedValue keyVal,
                                        Cell val, MInstrState* mis, SetOpOp op) {
   TypedValue* result = HPHP::SetOpProp<isObj>(
-    mis->tvScratch, mis->tvRef, mis->ctx, op, base, &keyVal, &val);
+    mis->tvScratch, mis->tvRef, ctx, op, base, &keyVal, &val);
 
   Cell ret;
   cellDup(*tvToCell(result), ret);
@@ -1511,9 +1512,9 @@ static inline TypedValue setOpPropImpl(TypedValue* base, TypedValue keyVal,
   m(setOpPropCO,    true)
 
 #define SETOP(nm, ...)                                                 \
-TypedValue nm(TypedValue* base, TypedValue key,                        \
+TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,            \
               Cell val, MInstrState* mis, SetOpOp op) {                \
-  return setOpPropImpl<__VA_ARGS__>(base, key, val, mis, op);          \
+  return setOpPropImpl<__VA_ARGS__>(ctx, base, key, val, mis, op);     \
 }
 namespace MInstrHelpers {
 HELPER_TABLE(SETOP)
@@ -1527,19 +1528,19 @@ void HhbcTranslator::MInstrTranslator::emitSetOpProp() {
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue,
                                Cell, MInstrState*, SetOpOp);
   BUILD_OPTAB(m_base->isA(Type::Obj));
-  m_irb.gen(StRaw, m_misBase, cns(RawMemSlot::MisCtx), CTX());
   m_result = genStk(SetOpProp, makeCatch(), cns((TCA)opFunc),
-                    m_base, key, value, genMisPtr(), cns(op));
+                    CTX(), m_base, key, value, genMisPtr(), cns(op));
 }
 #undef HELPER_TABLE
 
 template <bool isObj>
-static inline TypedValue incDecPropImpl(TypedValue* base, TypedValue keyVal,
+static inline TypedValue incDecPropImpl(Class* ctx, TypedValue* base,
+                                        TypedValue keyVal,
                                         MInstrState* mis, IncDecOp op) {
   TypedValue result;
   result.m_type = KindOfUninit;
   HPHP::IncDecProp<true, isObj>(
-    mis->tvScratch, mis->tvRef, mis->ctx, op, base, &keyVal, result);
+    mis->tvScratch, mis->tvRef, ctx, op, base, &keyVal, result);
   assert(result.m_type != KindOfRef);
   return result;
 }
@@ -1551,9 +1552,9 @@ static inline TypedValue incDecPropImpl(TypedValue* base, TypedValue keyVal,
   m(incDecPropCO,   true)
 
 #define INCDEC(nm, ...)                                                 \
-TypedValue nm(TypedValue* base, TypedValue key,                         \
+TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,             \
               MInstrState* mis, IncDecOp op) {                          \
-  return incDecPropImpl<__VA_ARGS__>(base, key, mis, op);               \
+  return incDecPropImpl<__VA_ARGS__>(ctx, base, key, mis, op);          \
 }
 namespace MInstrHelpers {
 HELPER_TABLE(INCDEC)
@@ -1566,9 +1567,8 @@ void HhbcTranslator::MInstrTranslator::emitIncDecProp() {
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue,
                                MInstrState*, IncDecOp);
   BUILD_OPTAB(m_base->isA(Type::Obj));
-  m_irb.gen(StRaw, m_misBase, cns(RawMemSlot::MisCtx), CTX());
   m_result = genStk(IncDecProp, makeCatch(), cns((TCA)opFunc),
-                    m_base, key, genMisPtr(), cns(op));
+                    CTX(), m_base, key, genMisPtr(), cns(op));
 }
 #undef HELPER_TABLE
 
@@ -2103,21 +2103,21 @@ void HhbcTranslator::MInstrTranslator::emitEmptyElem() {
 }
 
 static inline ArrayData* checkedSet(ArrayData* a, StringData* key,
-                                    CVarRef value, bool copy) {
+                                    const Variant& value, bool copy) {
   int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i)) ? a->set(i, value, copy)
                                              : a->set(key, value, copy);
 }
 
 static inline ArrayData* checkedSet(ArrayData* a, int64_t key,
-                                    CVarRef value, bool copy) {
+                                    const Variant& value, bool copy) {
   not_reached();
 }
 
 template<KeyType keyType, bool checkForInt, bool setRef>
 static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
     ArrayData* a, typename KeyTypeTraits<keyType>::rawType key,
-    CVarRef value, RefData* ref) {
+    const Variant& value, RefData* ref) {
   static_assert(keyType != KeyType::Any,
                 "KeyType::Any is not supported in arraySetMImpl");
   const bool copy = a->hasMultipleRefs();

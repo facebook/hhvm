@@ -6,6 +6,12 @@ Eval {
   EnableZendCompat = true
 }
 
+Hack {
+  Lang {
+    IntsOverflowToInts = true
+  }
+}
+
 MySQL {
   ReadTimeout = 5000
 }

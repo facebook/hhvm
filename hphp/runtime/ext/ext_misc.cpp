@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 
@@ -39,6 +40,9 @@ IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_comment);
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_keyword);
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_default);
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_html);
+IMPLEMENT_THREAD_LOCAL(std::string, s_misc_display_errors);
+
+const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
 
 static class MiscExtension : public Extension {
 public:
@@ -69,7 +73,25 @@ public:
       "highlight.html", "#000000",
       s_misc_highlight_default_html.get()
     );
-
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_ALL,
+      "display_errors", "1",
+      IniSetting::SetAndGet<std::string>(
+        [](const std::string& value) {
+          if (value == s_1 || value == s_stdout) {
+            Logger::SetStandardOut(stdout);
+            return true;
+          }
+          if (value == s_2 || value == s_stderr) {
+            Logger::SetStandardOut(stderr);
+            return true;
+          }
+          return false;
+        },
+        nullptr
+      ),
+      s_misc_display_errors.get()
+    );
   }
 
 } s_misc_extension;
@@ -166,7 +188,7 @@ Variant f_constant(const String& name) {
   return uninit_null();
 }
 
-bool f_define(const String& name, CVarRef value,
+bool f_define(const String& name, const Variant& value,
               bool case_insensitive /* = false */) {
   if (case_insensitive) {
     raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
@@ -196,11 +218,11 @@ bool f_defined(const String& name, bool autoload /* = true */) {
   }
 }
 
-Variant f_die(CVarRef status /* = null_variant */) {
+Variant f_die(const Variant& status /* = null_variant */) {
   return f_exit(status);
 }
 
-Variant f_exit(CVarRef status /* = null_variant */) {
+Variant f_exit(const Variant& status /* = null_variant */) {
   if (status.isString()) {
     echo(status.toString());
     throw ExitException(0);
@@ -216,7 +238,7 @@ int64_t f_ignore_user_abort(bool setting /* = false */) {
   return 0;
 }
 
-Variant f_pack(int _argc, const String& format, CArrRef _argv /* = null_array */) {
+Variant f_pack(int _argc, const String& format, const Array& _argv /* = null_array */) {
   return ZendPack().pack(format, _argv);
 }
 
@@ -341,15 +363,19 @@ String f_uniqid(const String& prefix /* = null_string */,
   int sec = (int)tv.tv_sec;
   int usec = (int)(tv.tv_usec % 0x100000);
 
-  char uniqid[256];
+  String uniqid(prefix.size() + 64, ReserveString);
+  auto ptr = uniqid.bufferSlice().ptr;
+  auto capacity = uniqid.get()->capacity();
+  int64_t len;
   if (more_entropy) {
-    snprintf(uniqid, sizeof(uniqid), "%s%08x%05x%.8F",
-             prefix.c_str(), sec, usec, math_combined_lcg() * 10);
+    len = snprintf(ptr, capacity, "%s%08x%05x%.8F",
+                   prefix.c_str(), sec, usec, math_combined_lcg() * 10);
   } else {
-    snprintf(uniqid, sizeof(uniqid), "%s%08x%05x",
-             prefix.c_str(), sec, usec);
+    len = snprintf(ptr, capacity, "%s%08x%05x",
+                   prefix.c_str(), sec, usec);
   }
-  return String(uniqid, CopyString);
+  uniqid.setSize(len);
+  return uniqid;
 }
 
 Variant f_unpack(const String& format, const String& data) {
@@ -540,7 +566,8 @@ const int UserTokenId_T_LAMBDA_OP = 427;
 const int UserTokenId_T_LAMBDA_CP = 428;
 const int UserTokenId_T_UNRESOLVED_OP = 429;
 const int UserTokenId_T_CALLABLE = 430;
-const int MaxUserTokenId = 431; // Marker, not a real user token ID
+const int UserTokenId_T_ONUMBER = 431;
+const int MaxUserTokenId = 432; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP
@@ -617,7 +644,7 @@ String f_token_name(int64_t token) {
   return "UNKNOWN";
 }
 
-String f_hphp_to_string(CVarRef v) {
+String f_hphp_to_string(const Variant& v) {
   return v.toString();
 }
 

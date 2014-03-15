@@ -412,7 +412,7 @@
             "desc": "Enables code coverage. The coverage information is cleared.",
             "flags": [
                 "HipHopSpecific",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": null
@@ -600,24 +600,6 @@
                     "type": "Boolean",
                     "value": "false",
                     "desc": "Whether connect_timeout or read_timeout are in seconds or milli-seconds."
-                }
-            ]
-        },
-        {
-            "name": "fb_const_fetch",
-            "desc": "Fetches a constant string from a special store that's compiled into the executable. This is faster than apc_fetch(), which needs locking between different threads. This store is immutable and loaded once with strings that are never changed. Therefore, no locking is needed when accessed by different threads.",
-            "flags": [
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "The value that was stored."
-            },
-            "args": [
-                {
-                    "name": "key",
-                    "type": "Variant",
-                    "desc": "The key for locating the value."
                 }
             ]
         },

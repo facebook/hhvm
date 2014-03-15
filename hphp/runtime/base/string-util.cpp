@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/container-functions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -115,7 +116,7 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
   return ret;
 }
 
-String StringUtil::Implode(CVarRef items, const String& delim) {
+String StringUtil::Implode(const Variant& items, const String& delim) {
   if (!isContainer(items)) {
     throw_param_is_not_container();
   }

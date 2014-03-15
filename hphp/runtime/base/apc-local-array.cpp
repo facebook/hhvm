@@ -28,7 +28,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-CVarRef APCLocalArray::getValueRef(ssize_t pos) const {
+const Variant& APCLocalArray::getValueRef(ssize_t pos) const {
   APCHandle *sv = m_arr->getValue(pos);
   DataType t = sv->getType();
   if (!IS_REFCOUNTED_TYPE(t)) {
@@ -140,25 +140,25 @@ ArrayData *APCLocalArray::LvalNew(ArrayData* ad, Variant *&ret, bool copy) {
 }
 
 ArrayData*
-APCLocalArray::SetInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+APCLocalArray::SetInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->set(k, v, false));
 }
 
 ArrayData*
-APCLocalArray::SetStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+APCLocalArray::SetStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->set(k, v, false));
 }
 
 ArrayData*
-APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->setRef(k, v, false));
 }
 
 ArrayData*
-APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->setRef(k, v, false));
 }
@@ -178,19 +178,19 @@ ArrayData* APCLocalArray::Copy(const ArrayData* ad) {
   return Escalate(ad);
 }
 
-ArrayData *APCLocalArray::Append(ArrayData* ad, CVarRef v, bool copy) {
+ArrayData *APCLocalArray::Append(ArrayData* ad, const Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->append(v, false));
 }
 
 ArrayData*
-APCLocalArray::AppendRef(ArrayData* ad, CVarRef v, bool copy) {
+APCLocalArray::AppendRef(ArrayData* ad, const Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->appendRef(v, false));
 }
 
 ArrayData*
-APCLocalArray::AppendWithRef(ArrayData* ad, CVarRef v, bool copy) {
+APCLocalArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->appendWithRef(v, false));
 }
@@ -205,7 +205,7 @@ ArrayData* APCLocalArray::Merge(ArrayData* ad, const ArrayData *elems) {
   return escalated->merge(elems);
 }
 
-ArrayData *APCLocalArray::Prepend(ArrayData* ad, CVarRef v, bool copy) {
+ArrayData *APCLocalArray::Prepend(ArrayData* ad, const Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->prepend(v, false));
 }

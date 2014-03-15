@@ -33,11 +33,11 @@ extern const int64_t k_PHP_SESSION_NONE;
 extern const int64_t k_PHP_SESSION_ACTIVE;
 
 int64_t f_session_status();
-void f_session_set_cookie_params(int64_t lifetime, const String& path = null_string, const String& domain = null_string, CVarRef secure = uninit_null(), CVarRef httponly = uninit_null());
+void f_session_set_cookie_params(int64_t lifetime, const String& path = null_string, const String& domain = null_string, const Variant& secure = uninit_null(), const Variant& httponly = uninit_null());
 Array f_session_get_cookie_params();
 String f_session_name(const String& newname = null_string);
 Variant f_session_module_name(const String& newname = null_string);
-bool f_session_set_save_handler(CObjRef sessionhandler, bool register_shutdown = true);
+bool f_session_set_save_handler(const Object& sessionhandler, bool register_shutdown = true);
 String f_session_save_path(const String& newname = null_string);
 String f_session_id(const String& newid = null_string);
 bool f_session_regenerate_id(bool delete_old_session = false);
@@ -50,7 +50,7 @@ bool f_session_destroy();
 Variant f_session_unset();
 void f_session_write_close();
 void f_session_commit();
-bool f_session_register(int _argc, CVarRef var_names, CArrRef _argv = null_array);
+bool f_session_register(int _argc, const Variant& var_names, const Array& _argv = null_array);
 bool f_session_unregister(const String& varname);
 bool f_session_is_registered(const String& varname);
 

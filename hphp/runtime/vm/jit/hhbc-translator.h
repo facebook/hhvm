@@ -193,9 +193,8 @@ struct HhbcTranslator {
   // The subOp param can be one of either
   // Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor
   void emitSetOpL(Op subOp, uint32_t id);
-  // the pre & inc params encode the 4 possible sub opcodes:
-  // PreInc, PostInc, PreDec, PostDec
-  void emitIncDecL(bool pre, bool inc, uint32_t id);
+  // the pre, inc, and over params encode the 8 possible sub opcodes
+  void emitIncDecL(bool pre, bool inc, bool over, uint32_t id);
   void emitPopA();
   void emitPopC();
   void emitPopV();
@@ -246,6 +245,7 @@ struct HhbcTranslator {
                                 bool shouldFatal,
                                 SSATmp* extraSpill = nullptr);
   void emitFPushClsMethodF(int32_t numParams);
+  SSATmp* emitAllocObjFast(const Class* cls);
   void emitFPushCtorD(int32_t numParams, int32_t classNameStrId);
   void emitFPushCtor(int32_t numParams);
   void emitFPushCtorCommon(SSATmp* cls,
@@ -314,6 +314,9 @@ struct HhbcTranslator {
   void emitSqrt();
   void emitShl();
   void emitShr();
+  void emitAddO();
+  void emitSubO();
+  void emitMulO();
 
   // boolean ops
   void emitXor();
@@ -664,7 +667,7 @@ private:
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
   void emitJmpHelper(int32_t taken, int32_t next, bool negate,
                      bool bothPaths, SSATmp* src);
-  SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);
+  SSATmp* emitIncDec(bool pre, bool inc, bool over, SSATmp* src);
   template<class Lambda>
   SSATmp* emitIterInitCommon(int offset, Lambda genFunc, bool invertCond);
   BCMarker makeMarker(Offset bcOff);

@@ -379,7 +379,7 @@ char *php_rfc822_recombine_tokens(php_rfc822_tokenized_t *toks,
 
   ret = (char*)malloc(len);
 
-  for (i = first_token, len = 0; i < upper; i++, last_was_atom = this_is_atom){
+  for (i = first_token, len = 0; i < upper; i++, last_was_atom = this_is_atom) {
     const char *tokvalue;
     int toklen;
 

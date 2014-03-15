@@ -164,7 +164,7 @@ void CmdWhere::removeArgs() {
   static StaticString s_args("args");
   Array smallST;
   for (ArrayIter iter(m_stacktrace); iter; ++iter) {
-    CArrRef frame(iter.secondRef().toArray());
+    const Array& frame(iter.secondRef().toArray());
     Array smallFrame;
     for (ArrayIter iter2(frame); iter2; ++iter2) {
       if (equal(iter2.first(), s_args)) {

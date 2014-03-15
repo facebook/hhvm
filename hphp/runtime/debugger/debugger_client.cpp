@@ -367,7 +367,7 @@ bool DebuggerClient::IsValidNumber(const std::string &arg) {
   return true;
 }
 
-String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */,
+String DebuggerClient::FormatVariable(const Variant& v, int maxlen /* = 80 */,
                                       char format /* = 'd' */) {
   TRACE(2, "DebuggerClient::FormatVariable\n");
   String value;
@@ -2061,7 +2061,7 @@ void DebuggerClient::addWatch(const char *fmt, const std::string &php) {
   m_watches.push_back(watch);
 }
 
-void DebuggerClient::setStackTrace(CArrRef stacktrace, bool isAsync) {
+void DebuggerClient::setStackTrace(const Array& stacktrace, bool isAsync) {
   TRACE(2, "DebuggerClient::setStackTrace\n");
   m_stacktrace = stacktrace;
   //when we set a new stack we need to reset the frame position
@@ -2085,7 +2085,7 @@ void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
   if (m_frame < 0) {
     m_frame = 0;
   }
-  CArrRef frame = m_stacktrace[m_frame].toArray();
+  const Array& frame = m_stacktrace[m_frame].toArray();
   if (!frame.isNull()) {
     String file = frame[s_file].toString();
     int line = frame[s_line].toInt32();
@@ -2112,7 +2112,7 @@ const StaticString
   s_id("id"),
   s_ancestors("ancestors");
 
-void DebuggerClient::printFrame(int index, CArrRef frame) {
+void DebuggerClient::printFrame(int index, const Array& frame) {
   TRACE(2, "DebuggerClient::printFrame\n");
   StringBuffer args;
   for (ArrayIter iter(frame[s_args].toArray()); iter; ++iter) {
@@ -2283,8 +2283,10 @@ void DebuggerClient::usageLogEvent(const std::string &eventName,
 
 void DebuggerClient::loadConfig() {
   TRACE(2, "DebuggerClient::loadConfig\n");
+  bool usedHomeDirConfig = false;
   if (m_configFileName.empty()) {
     m_configFileName = Process::GetHomeDirectory() + ConfigFileName;
+    usedHomeDirConfig = true;
   }
 
   // make sure file exists
@@ -2300,7 +2302,10 @@ void DebuggerClient::loadConfig() {
 
   Hdf config;
   try {
-    config.open(Process::GetHomeDirectory() + LegacyConfigFileName);
+    if (usedHomeDirConfig) {
+      config.open(Process::GetHomeDirectory() + LegacyConfigFileName);
+      needToWriteFile = true;
+    }
   } catch (const HdfException &e) {
     // Good, they have migrated already
   }
@@ -2310,7 +2315,7 @@ void DebuggerClient::loadConfig() {
                          "hhvm." #name, __VA_ARGS__)
   IniSetting::s_pretendExtensionsHaveNotBeenLoaded = true;
 
-  m_neverSaveConfig = true; // Prevent saving config while reading it
+  m_neverSaveConfigOverride = true; // Prevent saving config while reading it
 
   s_use_utf8 = config["UTF8"].getBool(true);
   config["UTF8"] = s_use_utf8; // for starter
@@ -2429,16 +2434,16 @@ void DebuggerClient::loadConfig() {
   m_zendExe = config["ZendExecutable"].getString("php");
   BIND(zend_executable, &m_zendExe);
 
-  auto neverSaveConfig = config["NeverSaveConfig"].getBool(false);
+  m_neverSaveConfig = config["NeverSaveConfig"].getBool(false);
   BIND(never_save_config, &m_neverSaveConfig);
 
   IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;
 
   process_ini_settings(m_configFileName);
 
-  // Set this super late since we want all the IniSetting calls to not save the
-  // config accidentally
-  m_neverSaveConfig = m_neverSaveConfig || neverSaveConfig;
+  // Do this after the ini processing so we don't accidentally save the config
+  // when we change one of the options
+  m_neverSaveConfigOverride = false;
 
   if (needToWriteFile && !m_neverSaveConfig) {
     saveConfig(); // so to generate a starter for people
@@ -2448,7 +2453,7 @@ void DebuggerClient::loadConfig() {
 
 void DebuggerClient::saveConfig() {
   TRACE(2, "DebuggerClient::saveConfig\n");
-  if (m_neverSaveConfig) return;
+  if (m_neverSaveConfig || m_neverSaveConfigOverride) return;
   if (m_configFileName.empty()) {
     // we are not touching a file that was not successfully loaded earlier
     return;

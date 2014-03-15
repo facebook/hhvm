@@ -1210,7 +1210,7 @@ static gdImagePtr gdImageScaleBilinearTC(gdImagePtr im, const unsigned int new_w
 	gdImagePtr new_img;
 
 	new_img = gdImageCreateTrueColor(new_width, new_height);
-	if (!new_img){
+	if (!new_img) {
 		return NULL;
 	}
 

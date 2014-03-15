@@ -44,7 +44,7 @@ class PDOSqliteConnection : public PDOConnection {
 public:
   PDOSqliteConnection();
   virtual ~PDOSqliteConnection();
-  virtual bool create(CArrRef options);
+  virtual bool create(const Array& options);
   virtual void sweep();
 
   int handleError(const char *file, int line, PDOStatement *stmt = nullptr);
@@ -53,7 +53,7 @@ public:
   virtual bool closer();
   virtual bool preparer(const String& sql,
                         sp_PDOStatement* stmt,
-                        CVarRef options);
+                        const Variant& options);
   virtual int64_t doer(const String& sql);
   virtual bool quoter(const String& input,
                       String& quoted,
@@ -61,13 +61,13 @@ public:
   virtual bool begin();
   virtual bool commit();
   virtual bool rollback();
-  virtual bool setAttribute(int64_t attr, CVarRef value);
+  virtual bool setAttribute(int64_t attr, const Variant& value);
   virtual String lastId(const char *name);
   virtual bool fetchErr(PDOStatement *stmt, Array &info);
   virtual int getAttribute(int64_t attr, Variant &value);
   virtual void persistentShutdown();
 
-  bool createFunction(const String& name, CVarRef callback, int argcount);
+  bool createFunction(const String& name, const Variant& callback, int argcount);
 
 private:
   sqlite3 *m_db;

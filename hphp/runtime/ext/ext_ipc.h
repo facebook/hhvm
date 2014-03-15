@@ -28,24 +28,24 @@ int64_t f_ftok(const String& pathname, const String& proj);
 
 Variant f_msg_get_queue(int64_t key, int64_t perms = 0666);
 bool f_msg_queue_exists(int64_t key);
-bool f_msg_send(CResRef queue, int64_t msgtype, CVarRef message,
+bool f_msg_send(const Resource& queue, int64_t msgtype, const Variant& message,
                 bool serialize = true, bool blocking = true,
                 VRefParam errorcode = uninit_null());
-bool f_msg_receive(CResRef queue, int64_t desiredmsgtype, VRefParam msgtype,
+bool f_msg_receive(const Resource& queue, int64_t desiredmsgtype, VRefParam msgtype,
                    int64_t maxsize, VRefParam message, bool unserialize = true,
                    int64_t flags = 0, VRefParam errorcode = uninit_null());
-bool f_msg_remove_queue(CResRef queue);
-bool f_msg_set_queue(CResRef queue, CArrRef data);
-Array f_msg_stat_queue(CResRef queue);
+bool f_msg_remove_queue(const Resource& queue);
+bool f_msg_set_queue(const Resource& queue, const Array& data);
+Array f_msg_stat_queue(const Resource& queue);
 
 ///////////////////////////////////////////////////////////////////////////////
 // semaphore
 
-bool f_sem_acquire(CResRef sem_identifier);
+bool f_sem_acquire(const Resource& sem_identifier);
 Variant f_sem_get(int64_t key, int64_t max_acquire = 1, int64_t perm = 0666,
                   bool auto_release = true);
-bool f_sem_release(CResRef sem_identifier);
-bool f_sem_remove(CResRef sem_identifier);
+bool f_sem_release(const Resource& sem_identifier);
+bool f_sem_remove(const Resource& sem_identifier);
 
 ///////////////////////////////////////////////////////////////////////////////
 // shared memory
@@ -55,7 +55,7 @@ bool f_shm_detach(int64_t shm_identifier);
 bool f_shm_remove(int64_t shm_identifier);
 Variant f_shm_get_var(int64_t shm_identifier, int64_t variable_key);
 bool f_shm_has_var(int64_t shm_identifier, int64_t variable_key);
-bool f_shm_put_var(int64_t shm_identifier, int64_t variable_key, CVarRef variable);
+bool f_shm_put_var(int64_t shm_identifier, int64_t variable_key, const Variant& variable);
 bool f_shm_remove_var(int64_t shm_identifier, int64_t variable_key);
 
 ///////////////////////////////////////////////////////////////////////////////

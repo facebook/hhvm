@@ -61,7 +61,7 @@ const StaticString
   s_Closure__invoke("Closure::__invoke"),
   s_colon2("::");
 
-bool f_is_callable(CVarRef v, bool syntax /* = false */,
+bool f_is_callable(const Variant& v, bool syntax /* = false */,
                    VRefParam name /* = null */) {
   bool ret = true;
   if (LIKELY(!syntax)) {
@@ -87,13 +87,13 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
   }
 
   if (tv_func->m_type == KindOfArray) {
-    CArrRef arr = tv_func->m_data.parr;
-    CVarRef clsname = arr.rvalAtRef(int64_t(0));
-    CVarRef mthname = arr.rvalAtRef(int64_t(1));
+    const Array& arr = tv_func->m_data.parr;
+    const Variant& clsname = arr.rvalAtRef(int64_t(0));
+    const Variant& mthname = arr.rvalAtRef(int64_t(1));
     if (arr.size() != 2 ||
         &clsname == &null_variant ||
         &mthname == &null_variant) {
-      name = v.toString();
+      name = String("Array");
       return false;
     }
 
@@ -134,117 +134,33 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
   return false;
 }
 
-Variant f_call_user_func(int _argc, CVarRef function,
-                         CArrRef _argv /* = null_array */) {
+Variant f_call_user_func(int _argc, const Variant& function,
+                         const Array& _argv /* = null_array */) {
   return vm_call_user_func(function, _argv);
 }
 
-Variant f_call_user_func_array(CVarRef function, CVarRef params) {
+Variant f_call_user_func_array(const Variant& function, const Variant& params) {
   return vm_call_user_func(function, params);
 }
 
-Variant f_check_user_func_async(CVarRef handles, int timeout /* = -1 */) {
+Variant f_check_user_func_async(const Variant& handles, int timeout /* = -1 */) {
   raise_error("%s is no longer supported", __func__);
   return uninit_null();
 }
 
-Variant f_end_user_func_async(CObjRef handle,
+Variant f_end_user_func_async(const Object& handle,
                               int default_strategy /*= k_GLOBAL_STATE_IGNORE*/,
-                              CVarRef additional_strategies /* = null */) {
+                              const Variant& additional_strategies /* = null */) {
   raise_error("%s is no longer supported", __func__);
   return uninit_null();
 }
 
-const StaticString
-  s_func("func"),
-  s_args("args"),
-  s_exception("exception"),
-  s_ret("ret");
-
-String f_call_user_func_serialized(const String& input) {
-  Variant out;
-  try {
-    Variant in = unserialize_from_string(input);
-    out.set(s_ret, vm_call_user_func(in[s_func], in[s_args].toArray()));
-  } catch (Object &e) {
-    out.set(s_exception, e);
-  }
-  return f_serialize(out);
-}
-
-Variant f_call_user_func_array_rpc(const String& host, int port,
-                                   const String& auth,
-                                   int timeout, CVarRef function,
-                                   CArrRef params) {
-  return f_call_user_func_rpc(0, host, port, auth, timeout, function, params);
-}
-
-Variant f_call_user_func_rpc(int _argc, const String& host, int port,
-                             const String& auth,
-                             int timeout, CVarRef function,
-                             CArrRef _argv /* = null_array */) {
-  std::string shost = host.data();
-  if (!RuntimeOption::DebuggerRpcHostDomain.empty()) {
-    unsigned int pos = shost.find(RuntimeOption::DebuggerRpcHostDomain);
-    if (pos != shost.length() - RuntimeOption::DebuggerRpcHostDomain.size()) {
-      shost += RuntimeOption::DebuggerRpcHostDomain;
-    }
-  }
-
-  std::string url = "http://";
-  url += shost;
-  url += ":";
-  url += boost::lexical_cast<std::string>(port);
-  url += "/call_user_func_serialized?auth=";
-  url += auth.data();
-
-  Array blob = make_map_array(s_func, function, s_args, _argv);
-  String message = f_serialize(blob);
-
-  std::vector<string> headers;
-  LibEventHttpClientPtr http = LibEventHttpClient::Get(shost, port);
-  if (!http->send(url, headers, timeout < 0 ? 0 : timeout, false,
-                  message.data(), message.size())) {
-    raise_error("Unable to send RPC request");
-    return false;
-  }
-
-  int code = http->getCode();
-  if (code <= 0) {
-    raise_error("Server timed out or unable to find specified URL: %s",
-                url.c_str());
-    return false;
-  }
-
-  int len = 0;
-  char *response = http->recv(len);
-  String sresponse(response, len, AttachString);
-  if (code != 200) {
-    raise_error("Internal server error: %d %s", code,
-                HttpProtocol::GetReasonString(code));
-    return false;
-  }
-
-  // This double decoding can be avoided by modifying RPC server to directly
-  // take PHP serialization format.
-  Variant res = unserialize_from_string(HHVM_FN(json_decode)(sresponse));
-  if (!res.isArray()) {
-    raise_error("Internal protocol error");
-    return false;
-  }
-
-  if (res.toArray().exists(s_exception)) {
-    throw res[s_exception];
-  }
-  return res[s_ret];
-}
-
-Variant f_forward_static_call_array(CVarRef function, CArrRef params) {
+Variant f_forward_static_call_array(const Variant& function, const Array& params) {
   return f_forward_static_call(0, function, params);
 }
 
-Variant f_forward_static_call(int _argc, CVarRef function,
-                              CArrRef _argv /* = null_array */) {
+Variant f_forward_static_call(int _argc, const Variant& function,
+                              const Array& _argv /* = null_array */) {
   // Setting the bound parameter to true tells vm_call_user_func()
   // propogate the current late bound class
   return vm_call_user_func(function, _argv, true);
@@ -381,17 +297,17 @@ int64_t f_func_num_args() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_register_postsend_function(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
+void f_register_postsend_function(int _argc, const Variant& function, const Array& _argv /* = null_array */) {
   g_context->registerShutdownFunction(function, _argv,
                                       ExecutionContext::PostSend);
 }
 
-void f_register_shutdown_function(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
+void f_register_shutdown_function(int _argc, const Variant& function, const Array& _argv /* = null_array */) {
   g_context->registerShutdownFunction(function, _argv,
                                       ExecutionContext::ShutDown);
 }
 
-void f_register_cleanup_function(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
+void f_register_cleanup_function(int _argc, const Variant& function, const Array& _argv /* = null_array */) {
   g_context->registerShutdownFunction(function, _argv,
                                       ExecutionContext::CleanUp);
 }

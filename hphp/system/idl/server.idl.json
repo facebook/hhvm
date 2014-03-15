@@ -29,24 +29,6 @@
             ]
         },
         {
-            "name": "dangling_server_proxy_new_request",
-            "desc": "When I'm still running an old version of the server software and I'm getting an HTTP request that's newer, proxy it to a specified host that already has the new version of the software running. Please read server documentation for more details.",
-            "flags": [
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "Boolean",
-                "desc": "TRUE if successful, FALSE otherwise."
-            },
-            "args": [
-                {
-                    "name": "host",
-                    "type": "String",
-                    "desc": "The machine to proxy to."
-                }
-            ]
-        },
-        {
             "name": "pagelet_server_is_enabled",
             "desc": "Whether pagelet server is enabled or not. Please read server documentation for what a pagelet server is.",
             "flags": [

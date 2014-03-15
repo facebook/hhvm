@@ -692,7 +692,7 @@ bool Expression::isUnquotedScalar() const {
 ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstPtr ar,
                                                BlockScopePtr scope,
                                                LocationPtr loc,
-                                               CVarRef value) {
+                                               const Variant& value) {
   if (value.isArray()) {
     ExpressionListPtr el(new ExpressionList(scope, loc,
                                             ExpressionList::ListKindParam));

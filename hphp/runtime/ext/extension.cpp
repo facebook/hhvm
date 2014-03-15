@@ -400,7 +400,7 @@ bool parseArgs(ActRec *ar, const char *format, ...) {
       break;
     }
 
-    bool check_null = (format[1] == '!');
+    bool check_null = (format[0] == '!');
     TypedValue *tv = getArg(ar, arg++);
 
     switch (c) {

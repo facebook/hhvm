@@ -114,7 +114,7 @@ public:
 protected:
   PHPTransport() {}
 
-  void construct_with_zval(CObjRef _p, size_t _buffer_size) {
+  void construct_with_zval(const Object& _p, size_t _buffer_size) {
     buffer = reinterpret_cast<char*>(malloc(_buffer_size));
     buffer_ptr = buffer;
     buffer_used = 0;
@@ -138,7 +138,7 @@ protected:
 
 class PHPOutputTransport : public PHPTransport {
 public:
-  explicit PHPOutputTransport(CObjRef _p, size_t _buffer_size = 8192) {
+  explicit PHPOutputTransport(const Object& _p, size_t _buffer_size = 8192) {
     construct_with_zval(_p, _buffer_size);
   }
 

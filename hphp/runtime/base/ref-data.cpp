@@ -13,15 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/complex-types.h"
+
+#include "hphp/runtime/base/ref-data.h"
+
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 namespace HPHP {
 
-void RefData::dump() const {
-  VariableSerializer vs(VariableSerializer::Type::VarDump);
-  String ret(vs.serialize(tvAsCVarRef(&m_tv), true));
-  printf("RefData: %s", ret.c_str());
+void RefData::compileTimeAsserts() {
+  static_assert(offsetof(RefData, m_count) == FAST_REFCOUNT_OFFSET, "");
+  static_assert(sizeof(RefData::m_count) == TypedValueAux::auxSize, "");
+  static_assert(sizeof(DataType) == 1, "required for m_cow/z packing");
 }
 
 }

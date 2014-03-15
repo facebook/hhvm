@@ -31,6 +31,8 @@ extern const int64_t k_PHP_URL_PASS;
 extern const int64_t k_PHP_URL_PATH;
 extern const int64_t k_PHP_URL_QUERY;
 extern const int64_t k_PHP_URL_FRAGMENT;
+extern const int64_t k_PHP_QUERY_RFC1738;
+extern const int64_t k_PHP_QUERY_RFC3986;
 
 Variant HHVM_FUNCTION(base64_decode, const String& data,
                                      bool strict /* = false */);
@@ -40,9 +42,10 @@ Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */);
 Array HHVM_FUNCTION(get_meta_tags, const String& filename,
                                    bool use_include_path /* = false */);
 
-Variant HHVM_FUNCTION(http_build_query, CVarRef formdata,
+Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
                            const String& numeric_prefix /* = null_string */,
-                           const String& arg_separator /* = null_string */);
+                           const String& arg_separator /* = null_string */,
+                           int enc_type = k_PHP_QUERY_RFC1738);
 Variant HHVM_FUNCTION(parse_url, const String& url,
                                  int64_t component /* = -1 */);
 

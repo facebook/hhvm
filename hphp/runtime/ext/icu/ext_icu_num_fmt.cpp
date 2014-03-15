@@ -274,7 +274,7 @@ static Variant doFormat(NumberFormatter *obj, double val) {
   return ret;
 }
 
-static Variant HHVM_METHOD(NumberFormatter, format, CVarRef value,
+static Variant HHVM_METHOD(NumberFormatter, format, const Variant& value,
                           int64_t type) {
   NUMFMT_GET(obj, this_, false);
   Variant num(value); // De-const
@@ -491,7 +491,7 @@ static Variant HHVM_METHOD(NumberFormatter, parse,
 }
 
 static bool HHVM_METHOD(NumberFormatter, setAttribute,
-                        int64_t attr, CVarRef value) {
+                        int64_t attr, const Variant& value) {
   NUMFMT_GET(obj, this_, false);
   switch (attr) {
     case UNUM(PARSE_INT_ONLY):

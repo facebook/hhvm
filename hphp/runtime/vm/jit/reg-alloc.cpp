@@ -97,7 +97,7 @@ namespace {
 // be a const; i.e. it was declared with C(T) instead of S(T).
 struct ConstSrcTable {
   auto static constexpr MaxSrc = 8;
-  bool table[int(Nop)+1][8];
+  bool table[kNumOpcodes][MaxSrc];
   ConstSrcTable() {
     int op = 0;
     int i;
@@ -147,7 +147,6 @@ bool mustUseConst(const IRInstruction& inst, int i) {
   case LdAddr: return check(i == 1); // offset
   case Call: return check(i == 1); // returnBcOffset
   case CallBuiltin: return check(i == 0); // f
-  case StRaw: return check(i == 1); // offset
   default: break;
   }
   return check(g_const_table.mustBeConst(int(inst.op()), i));
@@ -263,7 +262,7 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     if (i == 2) return okStore(cint); // value
     break;
   case StRaw:
-    if (i == 2) return true; // but, uses scratch register for big imms
+    if (i == 2) return okStore(cint); // value
     break;
   case Jmp:
   case Shuffle:
@@ -275,23 +274,48 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     if (i == 0) return true; // cls -> ArgGroup.ssa().
     break;
   case Same: case NSame:
-  case Eq:   case EqX:  case EqInt:
-  case Neq:  case NeqX: case NeqInt:
-  case Lt:   case LtX:  case LtInt:
-  case Gt:   case GtX:  case GtInt:
-  case Lte:  case LteX: case LteInt:
-  case Gte:  case GteX: case GteInt:
+  case Eq:   case EqX:
+  case Neq:  case NeqX:
+  case Lt:   case LtX:
+  case Gt:   case GtX:
+  case Lte:  case LteX:
+  case Gte:  case GteX:
+    if (i == 1) {
+      // cases in cgCmpHelper()
+      auto type0 = inst.src(0)->type();
+      if (type0 <= Type::Str && type <= Type::Str) return true; // call
+      if (type0 <= Type::Bool && type <= Type::Bool) return true;
+      if (type0 <= Type::Obj && type <= Type::Int) return true;
+      if (type0 <= Type::Arr && type <= Type::Arr) return true;
+    }
+    break;
+  case JmpEq:  case SideExitJmpEq:  case ReqBindJmpEq:
+  case JmpNeq: case SideExitJmpNeq: case ReqBindJmpNeq:
+  case JmpGt:  case SideExitJmpGt:  case ReqBindJmpGt:
+  case JmpGte: case SideExitJmpGte: case ReqBindJmpGte:
+  case JmpLt:  case SideExitJmpLt:  case ReqBindJmpLt:
+  case JmpLte: case SideExitJmpLte: case ReqBindJmpLte:
+    if (i == 1) {
+      // cases in emitCompare()
+      auto type0 = inst.src(0)->type();
+      if (type0 <= Type::Bool && type <= Type::Bool) return true;
+      if (type0 <= Type::Cls && type <= Type::Cls) return isI32(cint);
+    }
+    break;
+  case EqInt:
+  case NeqInt:
+  case LtInt:
+  case GtInt:
+  case LteInt:
+  case GteInt:
   case JmpEqInt:  case SideExitJmpEqInt:  case ReqBindJmpEqInt:
   case JmpNeqInt: case SideExitJmpNeqInt: case ReqBindJmpNeqInt:
   case JmpGtInt:  case SideExitJmpGtInt:  case ReqBindJmpGtInt:
   case JmpGteInt: case SideExitJmpGteInt: case ReqBindJmpGteInt:
   case JmpLtInt:  case SideExitJmpLtInt:  case ReqBindJmpLtInt:
   case JmpLteInt: case SideExitJmpLteInt: case ReqBindJmpLteInt:
-    if (i == 1) {
-      if (type <= Type::Str) return true; // rhs -> ArgGroup.ssa()
-      if (type <= Type::Bool) return true;
-      if (type <= Type::Int) return okCmp(cint);
-    }
+    // cases in emitCompareInt()
+    if (i == 1) return okCmp(cint);
     break;
   case SubInt:
     if (i == 0) return cint == 0 && !inst.src(1)->isConst(); // 0-X
@@ -302,6 +326,14 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     break;
   case XorBool:
     if (i == 1) return isI32(cint);
+    break;
+  case Mov:
+    return true; // x64 can mov a 64-bit imm into a register.
+  case StringIsset:
+    if (i == 1) return okCmp(cint);
+    break;
+  case CheckPackedArrayBounds:
+    if (i == 1) return okCmp(cint); // idx
     break;
   default:
     break;

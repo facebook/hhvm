@@ -35,36 +35,36 @@ extern const int64_t k_STREAM_URL_STAT_QUIET;
 
 Variant f_fopen(
   const String& filename, const String& mode, bool use_include_path = false,
-  CVarRef context = uninit_null());
+  const Variant& context = uninit_null());
 Variant f_popen(const String& command, const String& mode);
-bool f_fclose(CResRef handle);
-Variant f_pclose(CResRef handle);
-Variant f_fseek(CResRef handle, int64_t offset, int64_t whence = k_SEEK_SET);
-bool f_rewind(CResRef handle);
-Variant f_ftell(CResRef handle);
-bool f_feof(CResRef handle);
-Variant f_fstat(CResRef handle);
-Variant f_fread(CResRef handle, int64_t length);
-Variant f_fgetc(CResRef handle);
-Variant f_fgets(CResRef handle, int64_t length = 0);
-Variant f_fgetss(CResRef handle, int64_t length = 0,
+bool f_fclose(const Resource& handle);
+Variant f_pclose(const Resource& handle);
+Variant f_fseek(const Resource& handle, int64_t offset, int64_t whence = k_SEEK_SET);
+bool f_rewind(const Resource& handle);
+Variant f_ftell(const Resource& handle);
+bool f_feof(const Resource& handle);
+Variant f_fstat(const Resource& handle);
+Variant f_fread(const Resource& handle, int64_t length);
+Variant f_fgetc(const Resource& handle);
+Variant f_fgets(const Resource& handle, int64_t length = 0);
+Variant f_fgetss(const Resource& handle, int64_t length = 0,
                 const String& allowable_tags = null_string);
 Variant f_fscanf(
-  int _argc, CResRef handle, const String& format, CArrRef _argv = null_array);
-Variant f_fpassthru(CResRef handle);
-Variant f_fwrite(CResRef handle, const String& data, int64_t length = 0);
-Variant f_fputs(CResRef handle, const String& data, int64_t length = 0);
+  int _argc, const Resource& handle, const String& format, const Array& _argv = null_array);
+Variant f_fpassthru(const Resource& handle);
+Variant f_fwrite(const Resource& handle, const String& data, int64_t length = 0);
+Variant f_fputs(const Resource& handle, const String& data, int64_t length = 0);
 Variant f_fprintf(
-  int _argc, CResRef handle, const String& format, CArrRef _argv = null_array);
-Variant f_vfprintf(CResRef handle, const String& format, CArrRef args);
-bool f_fflush(CResRef handle);
-bool f_ftruncate(CResRef handle, int64_t size);
+  int _argc, const Resource& handle, const String& format, const Array& _argv = null_array);
+Variant f_vfprintf(const Resource& handle, const String& format, const Array& args);
+bool f_fflush(const Resource& handle);
+bool f_ftruncate(const Resource& handle, int64_t size);
 bool f_flock(
-  CResRef handle, int operation, VRefParam wouldblock = uninit_null());
-Variant f_fputcsv(CResRef handle, CArrRef fields, const String& delimiter = ",",
+  const Resource& handle, int operation, VRefParam wouldblock = uninit_null());
+Variant f_fputcsv(const Resource& handle, const Array& fields, const String& delimiter = ",",
                   const String& enclosure = "\"");
 Variant f_fgetcsv(
-  CResRef handle, int64_t length = 0, const String& delimiter = ",",
+  const Resource& handle, int64_t length = 0, const String& delimiter = ",",
   const String& enclosure = "\"", const String& escape = "\\");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,14 +72,14 @@ Variant f_fgetcsv(
 
 Variant f_file_get_contents(
   const String& filename, bool use_include_path = false,
-  CVarRef context = uninit_null(),
+  const Variant& context = uninit_null(),
   int64_t offset = -1, int64_t maxlen = -1);
-Variant f_file_put_contents(const String& filename, CVarRef data, int flags = 0,
-                            CVarRef context = uninit_null());
+Variant f_file_put_contents(const String& filename, const Variant& data, int flags = 0,
+                            const Variant& context = uninit_null());
 Variant f_file(
-  const String& filename, int flags = 0, CVarRef context = uninit_null());
+  const String& filename, int flags = 0, const Variant& context = uninit_null());
 Variant f_readfile(const String& filename, bool use_include_path = false,
-                   CVarRef context = uninit_null());
+                   const Variant& context = uninit_null());
 bool f_move_uploaded_file(const String& filename, const String& destination);
 Variant f_parse_ini_file(const String& filename, bool process_sections = false,
                          int scanner_mode = k_INI_SCANNER_NORMAL);
@@ -92,18 +92,18 @@ Variant f_sha1_file(const String& filename, bool raw_output = false);
 // shell commands
 
 bool f_chmod(const String& filename, int64_t mode);
-bool f_chown(const String& filename, CVarRef user);
-bool f_lchown(const String& filename, CVarRef user);
-bool f_chgrp(const String& filename, CVarRef group);
-bool f_lchgrp(const String& filename, CVarRef group);
+bool f_chown(const String& filename, const Variant& user);
+bool f_lchown(const String& filename, const Variant& user);
+bool f_chgrp(const String& filename, const Variant& group);
+bool f_lchgrp(const String& filename, const Variant& group);
 bool f_touch(const String& filename, int64_t mtime = 0, int64_t atime = 0);
 bool f_copy(
-  const String& source, const String& dest, CVarRef context = uninit_null());
+  const String& source, const String& dest, const Variant& context = uninit_null());
 bool f_rename(
   const String& oldname, const String& newname,
-  CVarRef context = uninit_null());
-int64_t f_umask(CVarRef mask = null_variant);
-bool f_unlink(const String& filename, CVarRef context = uninit_null());
+  const Variant& context = uninit_null());
+int64_t f_umask(const Variant& mask = null_variant);
+bool f_unlink(const String& filename, const Variant& context = uninit_null());
 bool f_link(const String& target, const String& link);
 bool f_symlink(const String& target, const String& link);
 String f_basename(const String& path, const String& suffix = null_string);
@@ -151,19 +151,19 @@ Variant f_disk_total_space(const String& directory);
 
 bool f_mkdir(
   const String& pathname, int64_t mode = 0777, bool recursive = false,
-  CVarRef context = uninit_null());
-bool f_rmdir(const String& dirname, CVarRef context = uninit_null());
+  const Variant& context = uninit_null());
+bool f_rmdir(const String& dirname, const Variant& context = uninit_null());
 String f_dirname(const String& path);
 Variant f_getcwd();
 bool f_chdir(const String& directory);
 bool f_chroot(const String& directory);
 Variant f_dir(const String& directory);
-Variant f_opendir(const String& path, CVarRef context = uninit_null());
-Variant f_readdir(CResRef dir_handle = null_resource);
-void f_rewinddir(CResRef dir_handle = null_resource);
+Variant f_opendir(const String& path, const Variant& context = uninit_null());
+Variant f_readdir(const Resource& dir_handle = null_resource);
+void f_rewinddir(const Resource& dir_handle = null_resource);
 Variant f_scandir(const String& directory, bool descending = false,
-                  CVarRef context = uninit_null());
-void f_closedir(CResRef dir_handle = null_resource);
+                  const Variant& context = uninit_null());
+void f_closedir(const Resource& dir_handle = null_resource);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

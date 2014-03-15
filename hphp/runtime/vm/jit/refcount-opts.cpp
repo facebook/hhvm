@@ -827,6 +827,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
       consumeAllFrames();
     } else if (m_inst->is(GenericRetDecRefs, NativeImpl)) {
       consumeAllLocals();
+    } else if (m_inst->is(DecRefLoc)) {
+      consumeLocal(m_inst->extra<DecRefLoc>()->locId);
     } else {
       // All other instructions take the generic path.
       consumeInputs();
@@ -1710,7 +1712,7 @@ void eliminateTakeStacks(const BlockList& blocks) {
  * refcount of each object has not changed.
  */
 void optimizeRefcounts(IRUnit& unit) noexcept {
-  Timer _t("optimize_refcountOpts");
+  Timer _t(Timer::optimize_refcountOpts);
   FTRACE(2, "vvvvvvvvvv refcount opts vvvvvvvvvv\n");
   auto const changed = splitCriticalEdges(unit);
   if (changed) {

@@ -41,7 +41,7 @@ bool check_option(const char *option) {
   return false;
 }
 
-int emulate_zend(int argc, char** argv){
+int emulate_zend(int argc, char** argv) {
   std::vector<std::string> newargv;
 
   newargv.push_back(argv[0]);
@@ -61,6 +61,12 @@ int emulate_zend(int argc, char** argv){
   while (cnt < argc) {
     if (check_option(argv[cnt])) {
       newargv.push_back(argv[cnt++]);
+      continue;
+    }
+    if (strcmp(argv[cnt], "-a") == 0) {
+      need_file = false;
+      newargv.push_back("-a");
+      cnt++;
       continue;
     }
     if (strcmp(argv[cnt], "-l") == 0 || strcmp(argv[cnt], "--lint") == 0) {

@@ -44,7 +44,7 @@ MemFile* FileStreamWrapper::openFromCache(const String& filename,
 }
 
 File* FileStreamWrapper::open(const String& filename, const String& mode,
-                              int options, CVarRef context) {
+                              int options, const Variant& context) {
   String fname =
     !strncmp(filename.data(), "file://", sizeof("file://") - 1)
     ? filename.substr(sizeof("file://") - 1) : filename;

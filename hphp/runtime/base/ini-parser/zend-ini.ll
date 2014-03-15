@@ -448,13 +448,10 @@ void zend_ini_on_op(std::string &result, char type, const std::string& op1,
 }
 
 void ini_error(const char *msg) {
-  StringBuffer smsg;
   if (!SCNG(filename).empty()) {
-    smsg.printf("%s in %s on line %d\n", msg, SCNG(filename).data(),
-                SCNG(lineno));
+    Logger::Warning("%s in %s on line %d\n",
+                    msg, SCNG(filename).data(), SCNG(lineno));
   } else {
-    smsg.append("Invalid configuration directive\n");
+    Logger::Warning("Invalid configuration directive\n");
   }
-
-  Logger::Warning("%s", smsg.data());
 }

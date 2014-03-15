@@ -222,8 +222,8 @@ public:
   /*
    * If this is a builtin function and does not need an ActRec
    */
-  bool needsActRec() const;
-  void setNeedsActRec();
+  bool noFCallBuiltin() const;
+  void setNoFCallBuiltin();
 
   /*
    * If this is a builtin (C++ or PHP) and can be redefined

@@ -363,8 +363,8 @@ bool FunctionScope::isMixedVariableArgument() const {
   return res;
 }
 
-bool FunctionScope::needsActRec() const {
-  bool res = (m_attribute & FileScope::NeedsActRec);
+bool FunctionScope::noFCallBuiltin() const {
+  bool res = (m_attribute & FileScope::NoFCallBuiltin);
   return res;
 }
 
@@ -427,15 +427,21 @@ void FunctionScope::setNoEffect() {
 }
 
 bool FunctionScope::isFoldable() const {
-  return m_attribute & FileScope::IsFoldable;
+  if (m_attribute & FileScope::IsFoldable) {
+    // IDL based builtins
+    return true;
+  }
+  // Systemlib (PHP&HNI) builtins
+  auto f = Unit::lookupFunc(String(getName()).get());
+  return f && f->isFoldable();
 }
 
 void FunctionScope::setIsFoldable() {
   m_attribute |= FileScope::IsFoldable;
 }
 
-void FunctionScope::setNeedsActRec() {
-  m_attribute |= FileScope::NeedsActRec;
+void FunctionScope::setNoFCallBuiltin() {
+  m_attribute |= FileScope::NoFCallBuiltin;
 }
 
 void FunctionScope::setHelperFunction() {

@@ -1453,6 +1453,7 @@ struct Parser : ParserBase {
         OnScalarEI *ei = dynamic_cast<OnScalarEI*>(node->extra);
         switch (ei->type) {
           case T_DNUMBER:
+          case T_ONUMBER:
           case T_LNUMBER: {
             n->type = n_NUMERIC_SCALAR;
             break;

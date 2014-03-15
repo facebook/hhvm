@@ -293,7 +293,7 @@ void BuiltinFiles::requestShutdown() {
   m_stderr.reset();
 }
 
-CVarRef BuiltinFiles::GetSTDIN() {
+const Variant& BuiltinFiles::GetSTDIN() {
   if (g_builtin_files->m_stdin.isNull()) {
     BuiltinFile *f = NEWOBJ(BuiltinFile)(stdin);
     g_builtin_files->m_stdin = f;
@@ -303,7 +303,7 @@ CVarRef BuiltinFiles::GetSTDIN() {
   return g_builtin_files->m_stdin;
 }
 
-CVarRef BuiltinFiles::GetSTDOUT() {
+const Variant& BuiltinFiles::GetSTDOUT() {
   if (g_builtin_files->m_stdout.isNull()) {
     BuiltinFile *f = NEWOBJ(BuiltinFile)(stdout);
     g_builtin_files->m_stdout = f;
@@ -313,7 +313,7 @@ CVarRef BuiltinFiles::GetSTDOUT() {
   return g_builtin_files->m_stdout;
 }
 
-CVarRef BuiltinFiles::GetSTDERR() {
+const Variant& BuiltinFiles::GetSTDERR() {
   if (g_builtin_files->m_stderr.isNull()) {
     BuiltinFile *f = NEWOBJ(BuiltinFile)(stderr);
     g_builtin_files->m_stderr = f;

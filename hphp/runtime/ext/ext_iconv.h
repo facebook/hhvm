@@ -25,7 +25,7 @@ namespace HPHP {
 
 Variant f_iconv_mime_encode(
   const String& field_name, const String& field_value,
-  CVarRef preferences = null_variant);
+  const Variant& preferences = null_variant);
 Variant f_iconv_mime_decode(
   const String& encoded_string, int mode = 0,
   const String& charset = null_string);

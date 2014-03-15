@@ -31,7 +31,7 @@ void c_WaitHandle::t___construct() {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
 }
 
-void c_WaitHandle::ti_setonjoincallback(CVarRef callback) {
+void c_WaitHandle::ti_setonjoincallback(const Variant& callback) {
   if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set WaitHandle::onJoin: on_join_cb not a closure"));

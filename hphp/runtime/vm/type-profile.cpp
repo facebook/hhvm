@@ -300,9 +300,4 @@ PredVal predictType(TypeProfileKey key) {
   return std::make_pair(pred, maxProb);
 }
 
-bool isProfileOpcode(const PC& pc) {
-  auto const op = toOp(*pc);
-  return op == OpRetC || op == OpCGetM;
-}
-
 }

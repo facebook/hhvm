@@ -220,7 +220,7 @@ bool SharedStoreFileStorage::addFile() {
 #elif defined(__APPLE__)
   fstore_t store = { F_ALLOCATECONTIG, F_PEOFPOSMODE, 0, m_chunkSize };
   int ret = fcntl(fd, F_PREALLOCATE, &store);
-  if(ret == -1) {
+  if (ret == -1) {
     store.fst_flags = F_ALLOCATEALL;
     ret = fcntl(fd, F_PREALLOCATE, &store);
     if (ret == -1) {

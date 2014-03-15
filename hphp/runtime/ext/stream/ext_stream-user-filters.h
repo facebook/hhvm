@@ -34,8 +34,8 @@ public:
   BucketBrigade() { };
   explicit BucketBrigade(const String& data);
 
-  void prependBucket(CObjRef bucket);
-  void appendBucket(CObjRef bucket);
+  void prependBucket(const Object& bucket);
+  void appendBucket(const Object& bucket);
   Object popFront();
 
   String createString();
@@ -52,12 +52,15 @@ public:
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
-  explicit StreamFilter(CObjRef filter): m_filter(filter) { }
+  explicit StreamFilter(const Object& filter, const Resource& stream):
+      m_filter(filter), m_stream(stream) { }
 
   int64_t invokeFilter(Resource in, Resource out, bool closing);
   void invokeOnClose();
+  bool remove();
 private:
   Object m_filter;
+  Resource m_stream;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,22 +70,24 @@ bool HHVM_FUNCTION(stream_filter_register,
                    const String& classname);
 Array HHVM_FUNCTION(stream_get_filters);
 Variant HHVM_FUNCTION(stream_filter_append,
-                      CResRef stream,
+                      const Resource& stream,
                       const String& filtername,
-                      CVarRef readwrite,
-                      CVarRef params);
+                      const Variant& readwrite,
+                      const Variant& params);
 Variant HHVM_FUNCTION(stream_filter_prepend,
-                      CResRef stream,
+                      const Resource& stream,
                       const String& filtername,
-                      CVarRef readwrite,
-                      CVarRef params);
-Variant HHVM_FUNCTION(stream_bucket_make_writeable, CResRef bucket_brigade);
+                      const Variant& readwrite,
+                      const Variant& params);
+bool HHVM_FUNCTION(stream_filter_remove,
+                   const Resource& filter);
+Variant HHVM_FUNCTION(stream_bucket_make_writeable, const Resource& bucket_brigade);
 void HHVM_FUNCTION(stream_bucket_append,
-                   CResRef bucket_brigade,
-                   CObjRef bucket);
+                   const Resource& bucket_brigade,
+                   const Object& bucket);
 void HHVM_FUNCTION(stream_bucket_prepend,
-                   CResRef bucket_brigade,
-                   CObjRef bucket);
+                   const Resource& bucket_brigade,
+                   const Object& bucket);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

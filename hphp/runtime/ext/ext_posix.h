@@ -96,7 +96,7 @@ int64_t f_posix_getuid();
 
 bool f_posix_initgroups(const String& name, int base_group_id);
 
-bool f_posix_isatty(CVarRef fd);
+bool f_posix_isatty(const Variant& fd);
 
 bool f_posix_kill(int pid, int sig);
 
@@ -120,7 +120,7 @@ String f_posix_strerror(int errnum);
 
 Variant f_posix_times();
 
-Variant f_posix_ttyname(CVarRef fd);
+Variant f_posix_ttyname(const Variant& fd);
 
 Variant f_posix_uname();
 

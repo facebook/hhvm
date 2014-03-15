@@ -96,16 +96,6 @@ Array HHVM_FUNCTION(apache_get_config) {
   return ret.create();
 }
 
-Array HHVM_FUNCTION(apache_get_scoreboard) {
-  Array child_status;
-  for (int i = 0; i < RuntimeOption::ServerThreadCount; i++) {
-    child_status.set(i, 2);
-  }
-  ArrayInit ret(1);
-  ret.set(s_child_status, child_status);
-  return ret.create();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 class ApacheExtension : public Extension {
@@ -118,7 +108,6 @@ class ApacheExtension : public Extension {
     HHVM_FE(apache_setenv);
     HHVM_FE(getallheaders);
     HHVM_FE(apache_get_config);
-    HHVM_FE(apache_get_scoreboard);
 
     loadSystemlib();
   }

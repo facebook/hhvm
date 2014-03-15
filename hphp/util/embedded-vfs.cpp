@@ -264,7 +264,7 @@ int sqlite3_embedded_initialize(const char* zOrigVfsName, int makeDefault) {
 }
 
 int sqlite3_embedded_shutdown() {
-  if( gEmbedded.isInitialized==0 ) return SQLITE_MISUSE;
+  if ( gEmbedded.isInitialized==0 ) return SQLITE_MISUSE;
   gEmbedded.isInitialized = 0;
   sqlite3_mutex_free(gEmbedded.pMutex);
   sqlite3_vfs_unregister(&gEmbedded.sThisVfs);

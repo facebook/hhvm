@@ -1,0 +1,15 @@
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+NULL
+bool(true)
+bool(true)
+NULL
+bool(true)
+string(2) "10"
+NULL
+Redis Exception: Invalid set options: nx and xx may not be specified at the same time

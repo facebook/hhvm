@@ -144,7 +144,7 @@ bool apcExtension::EnableCLI = true;
 static apcExtension s_apc_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
-Variant f_apc_store(CVarRef key_or_array, CVarRef var /* = null_variant */,
+Variant f_apc_store(const Variant& key_or_array, const Variant& var /* = null_variant */,
                     int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
@@ -185,7 +185,7 @@ Variant f_apc_store(CVarRef key_or_array, CVarRef var /* = null_variant */,
  * Stores the key in a similar fashion as "priming" would do (no TTL limit).
  * Using this function is equivalent to adding your key to apc_prime.so.
  */
-bool f_apc_store_as_primed_do_not_use(const String& key, CVarRef var,
+bool f_apc_store_as_primed_do_not_use(const String& key, const Variant& var,
                                       int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
@@ -197,7 +197,7 @@ bool f_apc_store_as_primed_do_not_use(const String& key, CVarRef var,
   return s_apc_store[cache_id].store(key, var, 0, true, false);
 }
 
-Variant f_apc_add(CVarRef key_or_array, CVarRef var /* = null_variant */,
+Variant f_apc_add(const Variant& key_or_array, const Variant& var /* = null_variant */,
                   int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
@@ -234,7 +234,7 @@ Variant f_apc_add(CVarRef key_or_array, CVarRef var /* = null_variant */,
   return s_apc_store[cache_id].store(strKey, var, ttl, false);
 }
 
-Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
+Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */,
                     int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
@@ -274,7 +274,7 @@ Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,
   return v;
 }
 
-Variant f_apc_delete(CVarRef key, int64_t cache_id /* = 0 */) {
+Variant f_apc_delete(const Variant& key, int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -351,7 +351,7 @@ bool f_apc_cas(const String& key, int64_t old_cas, int64_t new_cas,
   return s_apc_store[cache_id].cas(key, old_cas, new_cas);
 }
 
-Variant f_apc_exists(CVarRef key, int64_t cache_id /* = 0 */) {
+Variant f_apc_exists(const Variant& key, int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -528,7 +528,7 @@ size_t get_const_map_size() {
 }
 
 //define in ext_fb.cpp
-extern void const_load_set(const String& key, CVarRef value);
+extern void const_load_set(const String& key, const Variant& value);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constant and APC priming with uncompressed data
@@ -1220,7 +1220,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       double now = my_time();
       multipart_event_end *data = (multipart_event_end *)event_data;
       rfc1867ApcData->bytes_processed = data->post_bytes_processed;
-      if(now>rfc1867ApcData->start_time) {
+      if (now>rfc1867ApcData->start_time) {
         rfc1867ApcData->rate =
           8.0*rfc1867ApcData->bytes_processed/(now-rfc1867ApcData->start_time);
       } else {
@@ -1246,7 +1246,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(CVarRef value) {
+String apc_serialize(const Variant& value) {
   VariableSerializer::Type sType =
     apcExtension::EnableApcSerialize ?
       VariableSerializer::Type::APCSerialize :
@@ -1306,7 +1306,7 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
       String v;
       v.unserialize(uns);
       assert(!v.isNull());
-      if (v->isStatic()) {
+      if (v.get()->isStatic()) {
         union {
           char pointer[8];
           StringData *sd;

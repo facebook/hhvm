@@ -67,7 +67,7 @@ FatalErrorException::FatalErrorException(int, const char *msg, ...) {
 }
 
 FatalErrorException::FatalErrorException(const std::string &msg,
-                                         CArrRef backtrace) {
+                                         const Array& backtrace) {
   m_msg = msg;
   m_btp = backtrace.get();
 }

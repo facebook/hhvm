@@ -72,7 +72,7 @@ void moveToAlign(CodeBlock& cb,
   }
 }
 
-void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc) {
+void emitEagerSyncPoint(Asm& as, const Op* pc) {
   static COff spOff = offsetof(ExecutionContext, m_stack) +
     Stack::topOfStackOffset();
   static COff fpOff = offsetof(ExecutionContext, m_fp);

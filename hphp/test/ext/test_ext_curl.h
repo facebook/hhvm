@@ -45,13 +45,6 @@ class TestExtCurl : public TestCppExt {
   bool test_curl_multi_getcontent();
   bool test_curl_multi_info_read();
   bool test_curl_multi_close();
-  bool test_evhttp_set_cache();
-  bool test_evhttp_get();
-  bool test_evhttp_post();
-  bool test_evhttp_post_gzip();
-  bool test_evhttp_async_get();
-  bool test_evhttp_async_post();
-  bool test_evhttp_recv();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

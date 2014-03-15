@@ -629,15 +629,19 @@ Type thisReturn(const IRInstruction* inst) {
 }
 
 Type allocObjReturn(const IRInstruction* inst) {
-  if (inst->op() == AllocObjFast) {
-    return Type::Obj.specialize(inst->extra<AllocObjFast>()->cls);
+  switch (inst->op()) {
+    case ConstructInstance:
+      return Type::Obj.specialize(inst->extra<ConstructInstance>()->cls);
+    case NewInstanceRaw:
+      return Type::Obj.specialize(inst->extra<NewInstanceRaw>()->cls);
+    case CustomInstanceInit:
+    case AllocObj:
+      return inst->src(0)->isConst()
+        ? Type::Obj.specialize(inst->src(0)->clsVal())
+        : Type::Obj;
+    default:
+      always_assert(false && "Invalid opcode returning AllocObj");
   }
-  if (inst->op() == AllocObj) {
-    return inst->src(0)->isConst()
-      ? Type::Obj.specialize(inst->src(0)->clsVal())
-      : Type::Obj;
-  }
-  always_assert(0);
 }
 
 }
@@ -733,6 +737,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define ND        assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin  return builtinReturn(inst);
 #define DSubtract(n, t) return inst->src(n)->type() - t;
+#define DLdRaw    return inst->extra<RawMemData>()->info().type;
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -758,6 +763,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef ND
 #undef DBuiltin
 #undef DSubtract
+#undef DLdRaw
 
 }
 
@@ -929,6 +935,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define DLdRef      requireTypeParam();
 #define DAllocObj
 #define DThis
+#define DLdRaw
 
 #define O(opcode, dstinfo, srcinfo, flags)      \
   case opcode: dstinfo srcinfo countCheck(); return;
@@ -941,7 +948,6 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef O
 
 #undef NA
-#undef SAny
 #undef S
 #undef C
 #undef CStr
@@ -963,6 +969,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DAllocObj
 #undef DLdRef
 #undef DThis
+#undef DLdRaw
 
 }
 

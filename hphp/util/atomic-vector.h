@@ -83,7 +83,7 @@ AtomicVector<Value>::AtomicVector(size_t size, const Value& def)
   assert(size > 0 && "size must be nonzero");
 
   for (size_t i = 0; i < size; ++i) {
-    m_vals[i] = def;
+    new (&m_vals[i]) std::atomic<Value>(def);
   }
 }
 

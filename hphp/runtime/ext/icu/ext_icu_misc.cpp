@@ -98,16 +98,17 @@ static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
   SCOPE_EXIT{ uidna_close(idna); };
   String result(255, ReserveString); // 255 == max length possible
   int32_t len;
+  auto capacity = result.get()->capacity();
   if (toUtf8) {
     len = uidna_nameToUnicodeUTF8(idna, domain.c_str(), domain.size(),
-                                  result.bufferSlice().ptr, result->capacity(),
+                                  result.bufferSlice().ptr, capacity,
                                   &info, &error);
   } else {
     len = uidna_nameToASCII_UTF8(idna, domain.c_str(), domain.size(),
-                                 result.bufferSlice().ptr, result->capacity(),
+                                 result.bufferSlice().ptr, capacity,
                                  &info, &error);
   }
-  if (len > result->capacity()) {
+  if (len > capacity) {
     s_intl_error->setError(U_INTERNAL_PROGRAM_ERROR);
     return false;
   }

@@ -22,7 +22,7 @@ namespace HPHP {
 
 StaticString s_call("__call");
 
-UserFSNode::UserFSNode(Class *cls, CVarRef context /*= null */) {
+UserFSNode::UserFSNode(Class *cls, const Variant& context /*= null */) {
   JIT::VMRegAnchor _;
   const Func *ctor;
   m_cls = cls;
@@ -41,7 +41,7 @@ UserFSNode::UserFSNode(Class *cls, CVarRef context /*= null */) {
 }
 
 Variant UserFSNode::invoke(const Func *func, const String& name,
-                           CArrRef args, bool &invoked) {
+                           const Array& args, bool &invoked) {
   JIT::VMRegAnchor _;
 
   // Assume failure

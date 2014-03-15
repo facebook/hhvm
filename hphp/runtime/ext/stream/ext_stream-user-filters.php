@@ -22,6 +22,11 @@ function stream_filter_prepend(
   ?mixed $params = null
 ): mixed;
 
+<<__Native>>
+function stream_filter_remove(
+  resource $stream_filter
+): bool;
+
 /* Zend documentation inconsistency:
  * - stream_bucket_make_writeable returns a bucket object
  * - you pass this to stream_bucket_append or similar

@@ -33,7 +33,7 @@ public:
                    int type, const std::string &value,
                    const std::string &translated, bool quoted = false);
   ScalarExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                   CVarRef value, bool quoted = true);
+                   const Variant& value, bool quoted = true);
 
   // change case to lower so to make it case insensitive
   void toLower(bool funcCall = false);

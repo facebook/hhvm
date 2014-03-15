@@ -855,22 +855,10 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
 ///////////////////////////////////////////////////////////////////////////////
 // Dump cache content
 
-extern bool const_dump(const char *filename);
 bool (*file_dump)(const char *filename) = nullptr;
 
 bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
                                                  Transport *transport) {
-  if (cmd == "dump-const") {
-    if (!apcExtension::Enable ||
-        !apcExtension::EnableConstLoad ||
-        apcExtension::PrimeLibrary.empty()) {
-      transport->sendString("No Constant Cache\n");
-      return true;
-    }
-    const_dump("/tmp/const_map_dump");
-    transport->sendString("Done");
-    return true;
-  }
   if (cmd == "dump-apc") {
     if (!apcExtension::Enable) {
       transport->sendString("No APC\n");

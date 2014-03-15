@@ -68,6 +68,9 @@ void SETOP_BODY_CELL(Cell* lhs, SetOpOp op, Cell* rhs) {
     cellCastToInt64InPlace(lhs);
     lhs->m_data.num >>= cellToInt(*rhs);
     return;
+  case SetOpOp::PlusEqualO:     cellAddEqO(*lhs, *rhs); return;
+  case SetOpOp::MinusEqualO:    cellSubEqO(*lhs, *rhs); return;
+  case SetOpOp::MulEqualO:      cellMulEqO(*lhs, *rhs); return;
   }
   not_reached();
 }
@@ -459,6 +462,11 @@ inline void arSetSfp(ActRec* ar, const ActRec* sfp) {
   static_assert(sizeof(ActRec*) <= sizeof(uint64_t),
                 "ActRec* must be <= 64 bits");
   ar->m_savedRbp = (uint64_t)sfp;
+}
+
+inline TypedValue* arReturn(ActRec* ar, const Variant& value) {
+  ar->m_r = *value.asTypedValue();
+  return &ar->m_r;
 }
 
 template <bool crossBuiltin> Class* arGetContextClassImpl(const ActRec* ar);

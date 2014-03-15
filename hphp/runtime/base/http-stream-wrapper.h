@@ -31,7 +31,7 @@ class HttpStreamWrapper : public Stream::Wrapper {
     m_isLocal = false;
   }
   virtual File* open(const String& filename, const String& mode,
-                     int options, CVarRef context);
+                     int options, const Variant& context);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

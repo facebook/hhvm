@@ -36,7 +36,7 @@ const StaticString
   s_User_Agent("User-Agent");
 
 File* HttpStreamWrapper::open(const String& filename, const String& mode,
-                              int options, CVarRef context) {
+                              int options, const Variant& context) {
   if (RuntimeOption::ServerHttpSafeMode) {
     return nullptr;
   }

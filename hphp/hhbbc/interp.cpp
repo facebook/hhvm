@@ -350,6 +350,9 @@ void in(ISS& env, const bc::Mod& op)    { arithImpl(env, op, typeMod); }
 void in(ISS& env, const bc::BitAnd& op) { arithImpl(env, op, typeBitAnd); }
 void in(ISS& env, const bc::BitOr& op)  { arithImpl(env, op, typeBitOr); }
 void in(ISS& env, const bc::BitXor& op) { arithImpl(env, op, typeBitXor); }
+void in(ISS& env, const bc::AddO& op)   { arithImpl(env, op, typeAddO); }
+void in(ISS& env, const bc::SubO& op)   { arithImpl(env, op, typeSubO); }
+void in(ISS& env, const bc::MulO& op)   { arithImpl(env, op, typeMulO); }
 
 template<class Op, class Fun>
 void shiftImpl(ISS& env, const Op& op, Fun fop) {
@@ -389,8 +392,7 @@ void in(ISS& env, const bc::BitNot& op) {
 template<bool Negate>
 void sameImpl(ISS& env) {
   nothrow(env);
-  // TODO(#3783145): should constprop this
-
+  constprop(env);
   auto const t1 = popC(env);
   auto const t2 = popC(env);
   auto const v1 = tv(t1);
@@ -444,10 +446,10 @@ void in(ISS& env, const bc::Xor&) {
 
 void castBoolImpl(ISS& env, bool negate) {
   nothrow(env);
+  constprop(env);
   auto const t = popC(env);
   auto const v = tv(t);
   if (v) {
-    constprop(env);
     return push(env, eval_cell([&] {
       return make_tv<KindOfBoolean>(cellToBool(*v) != negate);
     }));
@@ -455,15 +457,24 @@ void castBoolImpl(ISS& env, bool negate) {
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::Not&)      { castBoolImpl(env, true); }
-void in(ISS& env, const bc::CastBool&) { castBoolImpl(env, false); }
+void in(ISS& env, const bc::Not&) {
+  castBoolImpl(env, true);
+}
+
+void in(ISS& env, const bc::CastBool&) {
+  auto const t = topC(env);
+  if (t.subtypeOf(TBool)) return reduce(env, bc::Nop {});
+  castBoolImpl(env, false);
+}
 
 void in(ISS& env, const bc::CastInt&) {
-  auto const t = popC(env);
-  if (!t.couldBe(TObj) && !t.couldBe(TRes)) nothrow(env);
-  auto const v = tv(t);
-  if (v) {
-    constprop(env);
+  constprop(env);
+  auto const t = topC(env);
+  if (t.subtypeOf(TInt)) return reduce(env, bc::Nop {});
+  popC(env);
+  // Objects can raise a warning about converting to int.
+  if (!t.couldBe(TObj)) nothrow(env);
+  if (auto const v = tv(t)) {
     return push(env, eval_cell([&] {
       return make_tv<KindOfInt64>(cellToInt(*v));
     }));
@@ -471,18 +482,27 @@ void in(ISS& env, const bc::CastInt&) {
   push(env, TInt);
 }
 
-void in(ISS& env, const bc::CastDouble&) { popC(env); push(env, TDbl); }
-void in(ISS& env, const bc::CastString&) { popC(env); push(env, TStr); }
-void in(ISS& env, const bc::CastArray&)  { popC(env); push(env, TArr); }
-void in(ISS& env, const bc::CastObject&) { popC(env); push(env, TObj); }
+void castImpl(ISS& env, Type target) {
+  auto const t = topC(env);
+  if (t.subtypeOf(target)) return reduce(env, bc::Nop {});
+  constprop(env);
+  // TODO(#3875556): constant evaluate conversions when we can.
+  popC(env);
+  push(env, target);
+}
+
+void in(ISS& env, const bc::CastDouble&) { castImpl(env, TDbl); }
+void in(ISS& env, const bc::CastString&) { castImpl(env, TStr); }
+void in(ISS& env, const bc::CastArray&)  { castImpl(env, TArr); }
+void in(ISS& env, const bc::CastObject&) { castImpl(env, TObj); }
 
 void in(ISS& env, const bc::Print& op) { popC(env); push(env, ival(1)); }
 
 void in(ISS& env, const bc::Clone& op) {
   auto const val = popC(env);
   push(env, val.subtypeOf(TObj) ? val :
-       is_opt(val)         ? unopt(val) :
-       TObj);
+            is_opt(val)         ? unopt(val) :
+            TObj);
 }
 
 void in(ISS& env, const bc::Exit&)  { popC(env); push(env, TInitNull); }
@@ -630,7 +650,11 @@ void group(ISS& env,
            const bc::FPushObjMethodD& fpush) {
   auto const obj = locAsCell(env, cgetl.loc1);
   impl(env, cgetl, fpush);
-  if (!is_specialized_obj(obj)) setLoc(env, cgetl.loc1, TObj);
+  if (!is_specialized_obj(obj)) {
+    setLoc(env, cgetl.loc1, TObj);
+  } else if (is_opt(obj)) {
+    setLoc(env, cgetl.loc1, unopt(obj));
+  }
 }
 
 void in(ISS& env, const bc::Switch& op) {
@@ -1038,20 +1062,20 @@ void in(ISS& env, const bc::IncDecL& op) {
     return push(env, TInitCell);
   }
 
-  auto const subop = op.subop;
-  auto const pre = subop == IncDecOp::PreInc || subop == IncDecOp::PreDec;
-  auto const inc = subop == IncDecOp::PreInc || subop == IncDecOp::PostInc;
+  auto const pre = isPre(op.subop);
+  auto const inc = isInc(op.subop);
+  auto const over = isIncDecO(op.subop);
 
   if (!pre) push(env, loc);
 
   // We can't constprop with this eval_cell, because of the effects
   // on locals.
-  auto resultTy = eval_cell([inc,val] {
+  auto resultTy = eval_cell([inc,over,val] {
     auto c = *val;
     if (inc) {
-      cellInc(c);
+      (over ? cellIncO : cellInc)(c);
     } else {
-      cellDec(c);
+      (over ? cellDecO : cellDec)(c);
     }
     return c;
   });
@@ -1481,6 +1505,11 @@ void in(ISS& env, const bc::IterInit& op) {
   // below.
   freeIter(env, op.iter1);
   env.propagate(*op.target, env.state);
+  if (t1.subtypeOf(TArrE)) {
+    nothrow(env);
+    nofallthrough(env);
+    return;
+  }
   auto ity = iter_types(t1);
   setLoc(env, op.loc3, ity.second);
   setIter(env, op.iter1, TrackedIter { std::move(ity) });
@@ -1496,6 +1525,11 @@ void in(ISS& env, const bc::IterInitK& op) {
   auto const t1 = popC(env);
   freeIter(env, op.iter1);
   env.propagate(*op.target, env.state);
+  if (t1.subtypeOf(TArrE)) {
+    nothrow(env);
+    nofallthrough(env);
+    return;
+  }
   auto ity = iter_types(t1);
   setLoc(env, op.loc3, ity.second);
   setLoc(env, op.loc4, ity.first);
@@ -1526,13 +1560,17 @@ void in(ISS& env, const bc::WIterInitK& op) {
 }
 
 void in(ISS& env, const bc::IterNext& op) {
+  auto const curLoc3 = locRaw(env, op.loc3);
+
   match<void>(
     env.state.iters[op.iter1->id],
     [&] (UnknownIter)           { setLoc(env, op.loc3, TInitCell); },
     [&] (const TrackedIter& ti) { setLoc(env, op.loc3, ti.kv.second); }
   );
   env.propagate(*op.target, env.state);
+
   freeIter(env, op.iter1);
+  setLocRaw(env, op.loc3, curLoc3);
 }
 
 void in(ISS& env, const bc::MIterNext& op) {
@@ -1541,6 +1579,9 @@ void in(ISS& env, const bc::MIterNext& op) {
 }
 
 void in(ISS& env, const bc::IterNextK& op) {
+  auto const curLoc3 = locRaw(env, op.loc3);
+  auto const curLoc4 = locRaw(env, op.loc4);
+
   match<void>(
     env.state.iters[op.iter1->id],
     [&] (UnknownIter) {
@@ -1553,7 +1594,10 @@ void in(ISS& env, const bc::IterNextK& op) {
     }
   );
   env.propagate(*op.target, env.state);
+
   freeIter(env, op.iter1);
+  setLocRaw(env, op.loc3, curLoc3);
+  setLocRaw(env, op.loc4, curLoc4);
 }
 
 void in(ISS& env, const bc::MIterNextK& op) {
@@ -1983,18 +2027,16 @@ template<class Iterator>
 StepFlags interpOps(Interp& interp,
                     Iterator& iter, Iterator stop,
                     PropagateFn propagate) {
-  auto propagateThrow = [&] (const State& state) {
-    for (auto& factored : interp.blk->factoredExits) {
-      propagate(*factored, without_stacks(state));
-    }
-  };
-
   auto flags = StepFlags{};
   ISS env { interp, flags, propagate };
 
-  // Make a copy of the state (except stacks) in case we need to
-  // propagate across factored exits (if it's a PEI).
-  auto const stateBefore = without_stacks(interp.state);
+  // If there are factored edges, make a copy of the state (except
+  // stacks) in case we need to propagate across factored exits (if
+  // it's a PEI).
+  auto const stateBefore = interp.blk->factoredExits.empty()
+    ? State{}
+    : without_stacks(interp.state);
+
   auto const numPushed   = iter->numPush();
   interpStep(env, iter, stop);
   if (flags.wasPEI) {
@@ -2010,7 +2052,9 @@ StepFlags interpOps(Interp& interp,
       FTRACE(2, "   nothrow (due to constprop)\n");
     } else {
       FTRACE(2, "   PEI.\n");
-      propagateThrow(stateBefore);
+      for (auto& factored : interp.blk->factoredExits) {
+        propagate(*factored, stateBefore);
+      }
     }
   }
   return flags;

@@ -44,32 +44,6 @@ TRACE_SET_MOD(runtime);
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Allocation of HphpArray buffers works like this: the smallest buffer
- * size is allocated inline in HphpArray.  Larger buffer sizes are smart
- * allocated or malloc-allocated depending on whether the array itself
- * was smart-allocated or not.  (nonSmartCopy() is used to create static
- * arrays).  HphpArray::m_allocMode tracks the state as it progresses:
- *
- *   kInline -> kSmart, or
- *           -> kMalloc
- *
- * Hashtables never shrink, so the allocMode Never goes backwards.
- * If an array is pre-sized, we might skip directly to kSmart or kMalloc.
- * If an array is created via nonSmartCopy(), we skip kSmart.
- * Since kMalloc is only used for static arrays, and static arrays are
- * never swept, we don't need any sweep method.
- *
- * For kInline, we use space in HphpArray defined as InlineSlots, which
- * has enough room for slots and the hashtable.  The next few larger array
- * sizes use the inline space for just the hashtable, with slots allocated
- * separately.  Even larger tables allocate the hashtable and slots
- * contiguously.
- */
-
-//=============================================================================
-// Static members.
-
 std::aligned_storage<
   sizeof(HphpArray) +
     sizeof(HphpArray::Elm) * HphpArray::SmallSize,
@@ -84,7 +58,6 @@ struct HphpArray::EmptyArrayInitializer {
 
     auto const ad = static_cast<HphpArray*>(vpEmpty);
     ad->m_kind            = kPackedKind;
-    ad->m_allocMode       = AllocationMode::smart;
     ad->m_size            = 0;
     ad->m_pos             = ArrayData::invalid_index;
     ad->m_count           = 0;
@@ -175,8 +148,7 @@ HphpArray* HphpArray::MakeReserve(uint32_t capacity) {
   auto const mask  = cmret.second;
   auto const ad    = smartAllocArray(cap, mask);
 
-  ad->m_kindModeAndSize = static_cast<uint32_t>(AllocationMode::smart) << 8 |
-                            kPackedKind; // 0
+  ad->m_kindAndSize     = kPackedKind; // zero's size
   ad->m_posAndCount     = uint64_t{1} << 32 |
                            static_cast<uint32_t>(ArrayData::invalid_index);
   ad->m_strongIterators = nullptr;
@@ -184,7 +156,6 @@ HphpArray* HphpArray::MakeReserve(uint32_t capacity) {
   ad->m_tableMask       = mask;
 
   assert(ad->m_kind == kPackedKind);
-  assert(ad->m_allocMode == AllocationMode::smart);
   assert(ad->m_size == 0);
   assert(ad->m_pos == ArrayData::invalid_index);
   assert(ad->m_count == 1);
@@ -203,9 +174,7 @@ HphpArray* HphpArray::MakePacked(uint32_t size, const TypedValue* values) {
   auto const ad    = smartAllocArray(cap, mask);
 
   auto const shiftedSize = uint64_t{size} << 32;
-  ad->m_kindModeAndSize  = shiftedSize |
-                            static_cast<uint32_t>(AllocationMode::smart) << 8 |
-                            kPackedKind;
+  ad->m_kindAndSize      = shiftedSize | kPackedKind;
   ad->m_posAndCount      = uint64_t{1} << 32;
   ad->m_strongIterators  = nullptr;
   ad->m_capAndUsed       = shiftedSize | cap;
@@ -223,7 +192,6 @@ HphpArray* HphpArray::MakePacked(uint32_t size, const TypedValue* values) {
   }
 
   assert(ad->m_kind == kPackedKind);
-  assert(ad->m_allocMode == AllocationMode::smart);
   assert(ad->m_size == size);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 1);
@@ -243,9 +211,7 @@ HphpArray* HphpArray::MakeStruct(uint32_t size, StringData** keys,
   auto const ad    = smartAllocArray(cap, mask);
 
   auto const shiftedSize = uint64_t{size} << 32;
-  ad->m_kindModeAndSize  = shiftedSize |
-                            static_cast<uint32_t>(AllocationMode::smart) << 8 |
-                            kMixedKind;
+  ad->m_kindAndSize      = shiftedSize | kMixedKind;
   ad->m_posAndCount      = uint64_t{1} << 32;
   ad->m_strongIterators  = nullptr;
   ad->m_capAndUsed       = shiftedSize | cap;
@@ -273,7 +239,6 @@ HphpArray* HphpArray::MakeStruct(uint32_t size, StringData** keys,
   ad->m_hLoad = size;
 
   assert(ad->m_kind == kMixedKind);
-  assert(ad->m_allocMode == AllocationMode::smart);
   assert(ad->m_size == size);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 1);
@@ -288,19 +253,17 @@ HphpArray* HphpArray::MakeStruct(uint32_t size, StringData** keys,
 template<class CopyElem>
 ALWAYS_INLINE
 HphpArray* HphpArray::CopyPacked(const HphpArray& other,
-                                 AllocationMode mode,
+                                 AllocMode mode,
                                  CopyElem copyElem) {
   assert(other.isPacked());
 
   auto const cap  = other.m_cap;
   auto const mask = other.m_tableMask;
-  auto const ad = mode == AllocationMode::smart
+  auto const ad = mode == AllocMode::Smart
     ? smartAllocArray(cap, mask)
     : mallocArray(cap, mask);
 
-  ad->m_kindModeAndSize = uint64_t{other.m_size} << 32 |
-                           static_cast<uint32_t>(mode) << 8 |
-                           kPackedKind;
+  ad->m_kindAndSize     = uint64_t{other.m_size} << 32 | kPackedKind;
   ad->m_posAndCount     = static_cast<uint32_t>(other.m_pos);
   ad->m_strongIterators = nullptr;
   ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
@@ -315,7 +278,6 @@ HphpArray* HphpArray::CopyPacked(const HphpArray& other,
   }
 
   assert(ad->m_kind == kPackedKind);
-  assert(ad->m_allocMode == mode);
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
   assert(ad->m_count == 0);
@@ -330,19 +292,17 @@ HphpArray* HphpArray::CopyPacked(const HphpArray& other,
 template<class CopyKeyValue>
 ALWAYS_INLINE
 HphpArray* HphpArray::CopyMixed(const HphpArray& other,
-                                AllocationMode mode,
+                                AllocMode mode,
                                 CopyKeyValue copyKeyValue) {
   assert(other.m_kind == kMixedKind);
 
   auto const cap  = other.m_cap;
   auto const mask = other.m_tableMask;
-  auto const ad = mode == AllocationMode::smart
+  auto const ad = mode == AllocMode::Smart
     ? smartAllocArray(cap, mask)
     : mallocArray(cap, mask);
 
-  ad->m_kindModeAndSize = uint64_t{other.m_size} << 32 |
-                           static_cast<uint32_t>(mode) << 8 |
-                           kMixedKind;
+  ad->m_kindAndSize     = uint64_t{other.m_size} << 32 | kMixedKind;
   ad->m_posAndCount     = static_cast<uint32_t>(other.m_pos);
   ad->m_strongIterators = nullptr;
   ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
@@ -374,7 +334,6 @@ HphpArray* HphpArray::CopyMixed(const HphpArray& other,
   }
 
   assert(ad->m_kind == other.m_kind);
-  assert(ad->m_allocMode == mode);
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
   assert(ad->m_count == 0);
@@ -390,11 +349,11 @@ NEVER_INLINE ArrayData* HphpArray::NonSmartCopy(const ArrayData* in) {
   auto a = asHphpArray(in);
   assert(a->checkInvariants());
   return a->isPacked()
-    ? CopyPacked(*a, AllocationMode::nonSmart,
+    ? CopyPacked(*a, AllocMode::NonSmart,
         [&](const TypedValue* fr, TypedValue* to, const ArrayData* container) {
           tvDupFlattenVars(fr, to, container);
         })
-    : CopyMixed(*a, AllocationMode::nonSmart,
+    : CopyMixed(*a, AllocMode::NonSmart,
         [&](const Elm& from, Elm& to, const ArrayData* container) {
           to.key = from.key;
           to.data.hash() = from.data.hash();
@@ -406,7 +365,7 @@ NEVER_INLINE ArrayData* HphpArray::NonSmartCopy(const ArrayData* in) {
 
 NEVER_INLINE HphpArray* HphpArray::copyPacked() const {
   assert(checkInvariants());
-  return CopyPacked(*this, AllocationMode::smart,
+  return CopyPacked(*this, AllocMode::Smart,
       [&](const TypedValue* fr, TypedValue* to, const ArrayData* container) {
         tvDupFlattenVars(fr, to, container);
       });
@@ -414,7 +373,7 @@ NEVER_INLINE HphpArray* HphpArray::copyPacked() const {
 
 NEVER_INLINE HphpArray* HphpArray::copyMixed() const {
   assert(checkInvariants());
-  return CopyMixed(*this, AllocationMode::smart,
+  return CopyMixed(*this, AllocMode::Smart,
       [&](const Elm& from, Elm& to, const ArrayData* container) {
         to.key = from.key;
         to.data.hash() = from.data.hash();
@@ -467,7 +426,7 @@ HphpArray* HphpArray::copyMixedAndResizeIfNeededSlow() const {
 
 namespace {
 
-Variant CreateVarForUncountedArray(CVarRef source) {
+Variant CreateVarForUncountedArray(const Variant& source) {
   auto type = source.getType(); // this gets rid of the ref, if it was one
   switch (type) {
     case KindOfBoolean:
@@ -503,7 +462,7 @@ HphpArray* HphpArray::MakeUncounted(ArrayData* array) {
   auto a = asHphpArray(array);
   assert(a->checkInvariants());
   if (array->isVectorData()) {
-    auto packed = CopyPacked(*a, AllocationMode::nonSmart,
+    auto packed = CopyPacked(*a, AllocMode::NonSmart,
         [&](const TypedValue* fr, TypedValue* to, const ArrayData* container) {
           tvCopy(*CreateVarForUncountedArray(tvAsCVarRef(fr)).asTypedValue(),
                  *to);
@@ -511,7 +470,7 @@ HphpArray* HphpArray::MakeUncounted(ArrayData* array) {
     packed->setUncounted();
     return packed;
   }
-  auto mixed = CopyMixed(*a, AllocationMode::nonSmart,
+  auto mixed = CopyMixed(*a, AllocMode::NonSmart,
       [&](const Elm& fr, Elm& to, const ArrayData* container) {
         to.data.hash() = fr.data.hash();
         if (to.hasStrKey()) {
@@ -816,7 +775,7 @@ ssize_t HphpArray::IterRewind(const ArrayData* ad, ssize_t pos) {
   return a->prevElm(a->data(), pos);
 }
 
-CVarRef HphpArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+const Variant& HphpArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asHphpArray(ad);
   assert(a->checkInvariants());
   assert(pos != invalid_index);
@@ -1117,7 +1076,7 @@ ALWAYS_INLINE TypedValue& HphpArray::allocNextElm(uint32_t i) {
 }
 
 ALWAYS_INLINE
-HphpArray* HphpArray::initVal(TypedValue& tv, CVarRef v) {
+HphpArray* HphpArray::initVal(TypedValue& tv, const Variant& v) {
   tvAsUninitializedVariant(&tv).constructValHelper(v);
   return this;
 }
@@ -1130,7 +1089,7 @@ ArrayData* HphpArray::zInitVal(TypedValue& tv, RefData* v) {
 }
 
 ALWAYS_INLINE
-HphpArray* HphpArray::initRef(TypedValue& tv, CVarRef v) {
+HphpArray* HphpArray::initRef(TypedValue& tv, const Variant& v) {
   tvAsUninitializedVariant(&tv).constructRefHelper(v);
   return this;
 }
@@ -1149,14 +1108,14 @@ HphpArray* HphpArray::initLval(TypedValue& tv, Variant*& ret) {
 }
 
 ALWAYS_INLINE
-HphpArray* HphpArray::initWithRef(TypedValue& tv, CVarRef v) {
+HphpArray* HphpArray::initWithRef(TypedValue& tv, const Variant& v) {
   tvWriteNull(&tv);
   tvAsVariant(&tv).setWithRef(v);
   return this;
 }
 
 ALWAYS_INLINE
-HphpArray* HphpArray::setVal(TypedValue& tv, CVarRef v) {
+HphpArray* HphpArray::setVal(TypedValue& tv, const Variant& v) {
   tvAsVariant(&tv).assignValHelper(v);
   return this;
 }
@@ -1172,7 +1131,7 @@ ArrayData* HphpArray::zSetVal(TypedValue& tv, RefData* v) {
 }
 
 ALWAYS_INLINE
-HphpArray* HphpArray::setRef(TypedValue& tv, CVarRef v) {
+HphpArray* HphpArray::setRef(TypedValue& tv, const Variant& v) {
   tvAsVariant(&tv).assignRefHelper(v);
   return this;
 }
@@ -1214,7 +1173,6 @@ NEVER_INLINE HphpArray* HphpArray::resize() {
 
 HphpArray* HphpArray::Grow(HphpArray* old) {
   assert(!old->isPacked());
-  assert(old->m_allocMode == AllocationMode::smart);
   assert(old->m_tableMask <= 0x7fffffffU);
 
   DEBUG_ONLY auto oldPos = old->m_pos;
@@ -1229,9 +1187,7 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
   auto const oldUsed        = old->m_used;
   auto const oldStrongIters = old->m_strongIterators;
 
-  ad->m_kindModeAndSize = uint64_t{oldSize} << 32 |
-                            static_cast<uint16_t>(AllocationMode::smart) << 8 |
-                            kMixedKind;
+  ad->m_kindAndSize     = uint64_t{oldSize} << 32 | kMixedKind;
   ad->m_posAndCount     = oldPosUnsigned;
   ad->m_strongIterators = oldStrongIters; // could be nullptr
   ad->m_capAndUsed      = uint64_t{oldUsed} << 32 | cap;
@@ -1262,7 +1218,6 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
   old->m_used = -uint32_t{1};
 
   assert(old->isZombie());
-  assert(ad->m_allocMode == AllocationMode::smart);
   assert(ad->m_kind == kMixedKind);
   assert(ad->m_size == oldSize);
   assert(ad->m_count == 0);
@@ -1277,7 +1232,6 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
 NEVER_INLINE
 HphpArray* HphpArray::GrowPacked(HphpArray* old) {
   assert(old->isPacked());
-  assert(old->m_allocMode == AllocationMode::smart);
   assert(old->m_cap == old->m_used);
 
   DEBUG_ONLY auto const oldSize = old->m_size;
@@ -1289,12 +1243,12 @@ HphpArray* HphpArray::GrowPacked(HphpArray* old) {
   auto const mask       = oldMask * 2 + 1;
   auto const ad         = smartAllocArray(cap, mask);
 
-  auto const oldUsed            = old->m_used;
-  auto const oldKindModeAndSize = old->m_kindModeAndSize;
-  auto const oldPosUnsigned     = uint64_t{static_cast<uint32_t>(old->m_pos)};
-  auto const oldStrongIters     = old->m_strongIterators;
+  auto const oldUsed        = old->m_used;
+  auto const oldKindAndSize = old->m_kindAndSize;
+  auto const oldPosUnsigned = uint64_t{static_cast<uint32_t>(old->m_pos)};
+  auto const oldStrongIters = old->m_strongIterators;
 
-  ad->m_kindModeAndSize = oldKindModeAndSize;
+  ad->m_kindAndSize     = oldKindAndSize;
   ad->m_posAndCount     = oldPosUnsigned;
   ad->m_strongIterators = oldStrongIters; // could be nullptr
   ad->m_capAndUsed      = uint64_t{oldUsed} << 32 | cap;
@@ -1316,7 +1270,6 @@ HphpArray* HphpArray::GrowPacked(HphpArray* old) {
 
   assert(old->isZombie());
   assert(ad->m_kind == kPackedKind);
-  assert(ad->m_allocMode == AllocationMode::smart);
   assert(ad->m_pos == oldPos);
   assert(ad->m_count == 0);
   assert(ad->m_used == oldUsed);
@@ -1415,7 +1368,7 @@ void HphpArray::compact(bool renumber /* = false */) {
   }
 }
 
-bool HphpArray::nextInsert(CVarRef data) {
+bool HphpArray::nextInsert(const Variant& data) {
   assert(m_nextKI >= 0);
   assert(!isPacked());
   assert(!isFull());
@@ -1434,7 +1387,7 @@ bool HphpArray::nextInsert(CVarRef data) {
   return true;
 }
 
-ArrayData* HphpArray::nextInsertRef(CVarRef data) {
+ArrayData* HphpArray::nextInsertRef(const Variant& data) {
   assert(!isPacked());
   assert(!isFull());
   assert(m_nextKI >= 0);
@@ -1450,7 +1403,7 @@ ArrayData* HphpArray::nextInsertRef(CVarRef data) {
   return initRef(e.data, data);
 }
 
-ArrayData* HphpArray::nextInsertWithRef(CVarRef data) {
+ArrayData* HphpArray::nextInsertWithRef(const Variant& data) {
   assert(!isFull());
 
   int64_t ki = m_nextKI;
@@ -1473,7 +1426,7 @@ ArrayData* HphpArray::addLvalImpl(K k, Variant*& ret) {
   return getLval(p.tv, ret);
 }
 
-inline ArrayData* HphpArray::addVal(int64_t ki, CVarRef data) {
+inline ArrayData* HphpArray::addVal(int64_t ki, const Variant& data) {
   assert(!exists(ki));
   assert(!isPacked());
   assert(!isFull());
@@ -1484,7 +1437,7 @@ inline ArrayData* HphpArray::addVal(int64_t ki, CVarRef data) {
   return initVal(e.data, data);
 }
 
-inline ArrayData* HphpArray::addVal(StringData* key, CVarRef data) {
+inline ArrayData* HphpArray::addVal(StringData* key, const Variant& data) {
   assert(!exists(key));
   assert(!isPacked());
   assert(!isFull());
@@ -1496,7 +1449,7 @@ inline ArrayData* HphpArray::addVal(StringData* key, CVarRef data) {
 }
 
 template <class K> ALWAYS_INLINE
-ArrayData* HphpArray::update(K k, CVarRef data) {
+ArrayData* HphpArray::update(K k, const Variant& data) {
   assert(!isPacked());
   assert(!isFull());
   auto p = insert(k);
@@ -1507,7 +1460,7 @@ ArrayData* HphpArray::update(K k, CVarRef data) {
 }
 
 template <class K>
-ArrayData* HphpArray::updateRef(K k, CVarRef data) {
+ArrayData* HphpArray::updateRef(K k, const Variant& data) {
   assert(!isPacked());
   assert(!isFull());
   auto p = insert(k);
@@ -1630,7 +1583,7 @@ ArrayData* HphpArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
 }
 
 ArrayData*
-HphpArray::SetIntPacked(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+HphpArray::SetIntPacked(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
   auto a = asPacked(ad);
 
   if (size_t(k) < a->m_size) {
@@ -1652,7 +1605,7 @@ HphpArray::SetIntPacked(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
   return a->addVal(k, v);
 }
 
-ArrayData* HphpArray::SetInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+ArrayData* HphpArray::SetInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -1660,7 +1613,7 @@ ArrayData* HphpArray::SetInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
 }
 
 ArrayData*
-HphpArray::SetStrPacked(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+HphpArray::SetStrPacked(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
   auto a = asPacked(ad);
   if (copy) a = a->copyPacked();
   // must convert to mixed, but call addVal() since key doesn't exist.
@@ -1670,7 +1623,7 @@ HphpArray::SetStrPacked(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
 }
 
 ArrayData*
-HphpArray::SetStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+HphpArray::SetStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -1678,7 +1631,7 @@ HphpArray::SetStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
 }
 
 ArrayData*
-HphpArray::SetRefIntPacked(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+HphpArray::SetRefIntPacked(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
   auto a = asPacked(ad);
 
   if (size_t(k) < a->m_size) {
@@ -1700,7 +1653,7 @@ HphpArray::SetRefIntPacked(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
 }
 
 ArrayData*
-HphpArray::SetRefInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+HphpArray::SetRefInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -1708,7 +1661,7 @@ HphpArray::SetRefInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
 }
 
 ArrayData*
-HphpArray::SetRefStrPacked(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+HphpArray::SetRefStrPacked(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
   auto a = asPacked(ad);
   if (copy) a = a->copyPacked();
   // todo t2606310: key can't exist.  use add/findForNewInsert
@@ -1718,7 +1671,7 @@ HphpArray::SetRefStrPacked(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
 }
 
 ArrayData*
-HphpArray::SetRefStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+HphpArray::SetRefStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -1726,7 +1679,7 @@ HphpArray::SetRefStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
 }
 
 ArrayData*
-HphpArray::AddIntPacked(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+HphpArray::AddIntPacked(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
   assert(!ad->exists(k));
   auto a = asPacked(ad);
 
@@ -1743,7 +1696,7 @@ HphpArray::AddIntPacked(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
 }
 
 ArrayData*
-HphpArray::AddInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
+HphpArray::AddInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
   assert(!ad->exists(k));
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
@@ -1752,7 +1705,7 @@ HphpArray::AddInt(ArrayData* ad, int64_t k, CVarRef v, bool copy) {
 }
 
 ArrayData*
-HphpArray::AddStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
+HphpArray::AddStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
   assert(!ad->exists(k));
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
@@ -1949,7 +1902,7 @@ void HphpArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
   getElmKey(a->data()[pos], out);
 }
 
-ArrayData* HphpArray::AppendPacked(ArrayData* ad, CVarRef v, bool copy) {
+ArrayData* HphpArray::AppendPacked(ArrayData* ad, const Variant& v, bool copy) {
   auto a = asPacked(ad);
   a = copy ? a->copyPackedAndResizeIfNeeded()
            : a->resizePackedIfNeeded();
@@ -1957,7 +1910,7 @@ ArrayData* HphpArray::AppendPacked(ArrayData* ad, CVarRef v, bool copy) {
   return a->initVal(tv, v);
 }
 
-ArrayData* HphpArray::Append(ArrayData* ad, CVarRef v, bool copy) {
+ArrayData* HphpArray::Append(ArrayData* ad, const Variant& v, bool copy) {
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
@@ -2005,7 +1958,7 @@ ArrayData* HphpArray::AddNewElemC(ArrayData* ad, TypedValue value) {
   return genericAddNewElemC(ad, value);
 }
 
-ArrayData* HphpArray::AppendRefPacked(ArrayData* ad, CVarRef v, bool copy) {
+ArrayData* HphpArray::AppendRefPacked(ArrayData* ad, const Variant& v, bool copy) {
   auto a = asPacked(ad);
   a = copy ? a->copyPackedAndResizeIfNeeded()
            : a->resizePackedIfNeeded();
@@ -2013,7 +1966,7 @@ ArrayData* HphpArray::AppendRefPacked(ArrayData* ad, CVarRef v, bool copy) {
   return a->initRef(tv, v);
 }
 
-ArrayData* HphpArray::AppendRef(ArrayData* ad, CVarRef v, bool copy) {
+ArrayData* HphpArray::AppendRef(ArrayData* ad, const Variant& v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -2030,7 +1983,7 @@ ArrayData* HphpArray::AppendRef(ArrayData* ad, CVarRef v, bool copy) {
   return a->nextInsertRef(v);
 }
 
-ArrayData *HphpArray::AppendWithRefPacked(ArrayData* ad, CVarRef v, bool copy) {
+ArrayData *HphpArray::AppendWithRefPacked(ArrayData* ad, const Variant& v, bool copy) {
   auto a = asPacked(ad);
   a = copy ? a->copyPackedAndResizeIfNeeded()
            : a->resizePackedIfNeeded();
@@ -2038,7 +1991,7 @@ ArrayData *HphpArray::AppendWithRefPacked(ArrayData* ad, CVarRef v, bool copy) {
   return a->initWithRef(tv, v);
 }
 
-ArrayData *HphpArray::AppendWithRef(ArrayData* ad, CVarRef v, bool copy) {
+ArrayData *HphpArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -2063,9 +2016,7 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
   auto const oldNextKI      = oldPacked ? oldSize : src->m_nextKI;
   auto const oldUsed        = src->m_used;
 
-  ad->m_kindModeAndSize = uint64_t{oldSize} << 32 |
-                            static_cast<uint32_t>(AllocationMode::smart) << 8 |
-                            kMixedKind;
+  ad->m_kindAndSize     = uint64_t{oldSize} << 32 | kMixedKind;
   ad->m_posAndCount     = uint64_t{1} << 32 | oldPosUnsigned;
   ad->m_strongIterators = nullptr;
   ad->m_cap             = cap;
@@ -2135,7 +2086,6 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
   ad->m_used = i;
 
   assert(ad->m_kind == kMixedKind);
-  assert(ad->m_allocMode == AllocationMode::smart);
   assert(ad->m_size == oldSize);
   assert(ad->m_count == 1);
   assert(ad->m_cap == cap);
@@ -2155,7 +2105,7 @@ ArrayData* HphpArray::ArrayPlusEqGeneric(ArrayData* ad,
                                          size_t neededSize) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
-    CVarRef value = it.secondRef();
+    const Variant& value = it.secondRef();
 
     if (UNLIKELY(ret->isFull())) {
       assert(ret == ad);
@@ -2223,7 +2173,7 @@ ArrayData* HphpArray::ArrayMergeGeneric(HphpArray* ret,
                                         const ArrayData* elems) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
-    CVarRef value = it.secondRef();
+    const Variant& value = it.secondRef();
     if (key.asTypedValue()->m_type == KindOfInt64) {
       ret->nextInsertWithRef(value);
     } else {
@@ -2363,7 +2313,7 @@ ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
   return a;
 }
 
-ArrayData* HphpArray::PrependPacked(ArrayData* ad, CVarRef v, bool copy) {
+ArrayData* HphpArray::PrependPacked(ArrayData* ad, const Variant& v, bool copy) {
   auto a = asPacked(ad);
   if (a->hasMultipleRefs()) a = a->copyPackedAndResizeIfNeeded();
   // To conform to PHP behavior, we invalidate all strong iterators when an
@@ -2381,7 +2331,7 @@ ArrayData* HphpArray::PrependPacked(ArrayData* ad, CVarRef v, bool copy) {
   return a;
 }
 
-ArrayData* HphpArray::Prepend(ArrayData* ad, CVarRef v, bool copy) {
+ArrayData* HphpArray::Prepend(ArrayData* ad, const Variant& v, bool copy) {
   auto a = asMixed(ad);
   if (a->hasMultipleRefs()) a = a->copyMixedAndResizeIfNeeded();
 

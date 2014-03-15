@@ -19,6 +19,28 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
+
+#define JIT_TIMERS                              \
+  TIMER_NAME(analyze)                           \
+  TIMER_NAME(codeGen)                           \
+  TIMER_NAME(optimize)                          \
+  TIMER_NAME(optimize_dce)                      \
+  TIMER_NAME(optimize_jumpOpts)                 \
+  TIMER_NAME(optimize_predictionOpts)           \
+  TIMER_NAME(optimize_realxGuards)              \
+  TIMER_NAME(optimize_refcountOpts)             \
+  TIMER_NAME(optimize_relaxGuards)              \
+  TIMER_NAME(optimize_reoptimize)               \
+  TIMER_NAME(regalloc)                          \
+  TIMER_NAME(regionizeFunc)                     \
+  TIMER_NAME(selectTracelet)                    \
+  TIMER_NAME(selectTracelet_relaxGuards)        \
+  TIMER_NAME(translate)                         \
+  TIMER_NAME(translateRegion)                   \
+  TIMER_NAME(translateRegion_irGeneration)      \
+  TIMER_NAME(translateTracelet)                 \
+  TIMER_NAME(translateTracelet_irGeneration)    \
 
 namespace HPHP { namespace JIT {
 
@@ -37,6 +59,16 @@ namespace HPHP { namespace JIT {
  * Show() may be used to get a text representation of the current counters.
  */
 struct Timer {
+  enum Name : uint8_t {
+#   define TIMER_NAME(name) name,
+    JIT_TIMERS
+#   undef TIMER_NAME
+  };
+
+# define TIMER_NAME(name) + 1
+  static size_t constexpr kNumTimers = JIT_TIMERS;
+# undef TIMER_NAME
+
   struct Counter {
     int64_t total; // total CPU time, in nanoseconds
     int64_t count; // number of entries for this counter
@@ -45,21 +77,21 @@ struct Timer {
       return total / count;
     }
   };
-  typedef std::unordered_map<std::string, Counter> CounterMap;
 
-  explicit Timer(const std::string& name);
+  explicit Timer(Name name);
   ~Timer();
 
   void end();
 
-  static const CounterMap& Counters();
+  typedef std::vector<std::pair<const char*, Counter>> CounterVec;
+  static CounterVec Counters();
   static void RequestInit();
   static void RequestExit();
   static void Dump();
   static std::string Show();
 
  private:
-  const std::string m_name;
+  Name m_name;
   int64_t m_start;
   bool m_finished;
 };

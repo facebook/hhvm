@@ -30,50 +30,50 @@ namespace HPHP {
 
 Variant f_xmlwriter_open_memory();
 Variant f_xmlwriter_open_uri(const String& uri);
-bool f_xmlwriter_set_indent_string(CObjRef xmlwriter,
+bool f_xmlwriter_set_indent_string(const Object& xmlwriter,
                                    const String& indentstring);
-bool f_xmlwriter_set_indent(CObjRef xmlwriter, bool indent);
-bool f_xmlwriter_start_document(CObjRef xmlwriter,
+bool f_xmlwriter_set_indent(const Object& xmlwriter, bool indent);
+bool f_xmlwriter_start_document(const Object& xmlwriter,
                                 const String& version = "1.0",
                                 const String& encoding = null_string,
                                 const String& standalone = null_string);
-bool f_xmlwriter_start_element(CObjRef xmlwriter, const String& name);
-bool f_xmlwriter_start_element_ns(CObjRef xmlwriter, const CVarRef prefix, const String& name, const String& uri);
-bool f_xmlwriter_write_element_ns(CObjRef xmlwriter, const String& prefix, const String& name, const String& uri, const String& content = null_string);
-bool f_xmlwriter_write_element(CObjRef xmlwriter, const String& name, const String& content = null_string);
-bool f_xmlwriter_end_element(CObjRef xmlwriter);
-bool f_xmlwriter_full_end_element(CObjRef xmlwriter);
-bool f_xmlwriter_start_attribute_ns(CObjRef xmlwriter, const String& prefix, const String& name, const String& uri);
-bool f_xmlwriter_start_attribute(CObjRef xmlwriter, const String& name);
-bool f_xmlwriter_write_attribute_ns(CObjRef xmlwriter, const String& prefix, const String& name, const String& uri, const String& content);
-bool f_xmlwriter_write_attribute(CObjRef xmlwriter, const String& name, const String& value);
-bool f_xmlwriter_end_attribute(CObjRef xmlwriter);
-bool f_xmlwriter_start_cdata(CObjRef xmlwriter);
-bool f_xmlwriter_write_cdata(CObjRef xmlwriter, const String& content);
-bool f_xmlwriter_end_cdata(CObjRef xmlwriter);
-bool f_xmlwriter_start_comment(CObjRef xmlwriter);
-bool f_xmlwriter_write_comment(CObjRef xmlwriter, const String& content);
-bool f_xmlwriter_end_comment(CObjRef xmlwriter);
-bool f_xmlwriter_end_document(CObjRef xmlwriter);
-bool f_xmlwriter_start_pi(CObjRef xmlwriter, const String& target);
-bool f_xmlwriter_write_pi(CObjRef xmlwriter, const String& target, const String& content);
-bool f_xmlwriter_end_pi(CObjRef xmlwriter);
-bool f_xmlwriter_text(CObjRef xmlwriter, const String& content);
-bool f_xmlwriter_write_raw(CObjRef xmlwriter, const String& content);
-bool f_xmlwriter_start_dtd(CObjRef xmlwriter, const String& qualifiedname, const String& publicid = null_string, const String& systemid = null_string);
-bool f_xmlwriter_write_dtd(CObjRef xmlwriter, const String& name, const String& publicid = null_string, const String& systemid = null_string, const String& subset = null_string);
-bool f_xmlwriter_start_dtd_element(CObjRef xmlwriter, const String& qualifiedname);
-bool f_xmlwriter_write_dtd_element(CObjRef xmlwriter, const String& name, const String& content);
-bool f_xmlwriter_end_dtd_element(CObjRef xmlwriter);
-bool f_xmlwriter_start_dtd_attlist(CObjRef xmlwriter, const String& name);
-bool f_xmlwriter_write_dtd_attlist(CObjRef xmlwriter, const String& name, const String& content);
-bool f_xmlwriter_end_dtd_attlist(CObjRef xmlwriter);
-bool f_xmlwriter_start_dtd_entity(CObjRef xmlwriter, const String& name, bool isparam);
-bool f_xmlwriter_write_dtd_entity(CObjRef xmlwriter, const String& name, const String& content, bool pe = false, const String& publicid = null_string, const String& systemid = null_string, const String& ndataid = null_string);
-bool f_xmlwriter_end_dtd_entity(CObjRef xmlwriter);
-bool f_xmlwriter_end_dtd(CObjRef xmlwriter);
-Variant f_xmlwriter_flush(CObjRef xmlwriter, bool empty = true);
-String f_xmlwriter_output_memory(CObjRef xmlwriter, bool flush = true);
+bool f_xmlwriter_start_element(const Object& xmlwriter, const String& name);
+bool f_xmlwriter_start_element_ns(const Object& xmlwriter, const Variant& prefix, const String& name, const String& uri);
+bool f_xmlwriter_write_element_ns(const Object& xmlwriter, const String& prefix, const String& name, const String& uri, const String& content = null_string);
+bool f_xmlwriter_write_element(const Object& xmlwriter, const String& name, const String& content = null_string);
+bool f_xmlwriter_end_element(const Object& xmlwriter);
+bool f_xmlwriter_full_end_element(const Object& xmlwriter);
+bool f_xmlwriter_start_attribute_ns(const Object& xmlwriter, const String& prefix, const String& name, const String& uri);
+bool f_xmlwriter_start_attribute(const Object& xmlwriter, const String& name);
+bool f_xmlwriter_write_attribute_ns(const Object& xmlwriter, const String& prefix, const String& name, const String& uri, const String& content);
+bool f_xmlwriter_write_attribute(const Object& xmlwriter, const String& name, const String& value);
+bool f_xmlwriter_end_attribute(const Object& xmlwriter);
+bool f_xmlwriter_start_cdata(const Object& xmlwriter);
+bool f_xmlwriter_write_cdata(const Object& xmlwriter, const String& content);
+bool f_xmlwriter_end_cdata(const Object& xmlwriter);
+bool f_xmlwriter_start_comment(const Object& xmlwriter);
+bool f_xmlwriter_write_comment(const Object& xmlwriter, const String& content);
+bool f_xmlwriter_end_comment(const Object& xmlwriter);
+bool f_xmlwriter_end_document(const Object& xmlwriter);
+bool f_xmlwriter_start_pi(const Object& xmlwriter, const String& target);
+bool f_xmlwriter_write_pi(const Object& xmlwriter, const String& target, const String& content);
+bool f_xmlwriter_end_pi(const Object& xmlwriter);
+bool f_xmlwriter_text(const Object& xmlwriter, const String& content);
+bool f_xmlwriter_write_raw(const Object& xmlwriter, const String& content);
+bool f_xmlwriter_start_dtd(const Object& xmlwriter, const String& qualifiedname, const String& publicid = null_string, const String& systemid = null_string);
+bool f_xmlwriter_write_dtd(const Object& xmlwriter, const String& name, const String& publicid = null_string, const String& systemid = null_string, const String& subset = null_string);
+bool f_xmlwriter_start_dtd_element(const Object& xmlwriter, const String& qualifiedname);
+bool f_xmlwriter_write_dtd_element(const Object& xmlwriter, const String& name, const String& content);
+bool f_xmlwriter_end_dtd_element(const Object& xmlwriter);
+bool f_xmlwriter_start_dtd_attlist(const Object& xmlwriter, const String& name);
+bool f_xmlwriter_write_dtd_attlist(const Object& xmlwriter, const String& name, const String& content);
+bool f_xmlwriter_end_dtd_attlist(const Object& xmlwriter);
+bool f_xmlwriter_start_dtd_entity(const Object& xmlwriter, const String& name, bool isparam);
+bool f_xmlwriter_write_dtd_entity(const Object& xmlwriter, const String& name, const String& content, bool pe = false, const String& publicid = null_string, const String& systemid = null_string, const String& ndataid = null_string);
+bool f_xmlwriter_end_dtd_entity(const Object& xmlwriter);
+bool f_xmlwriter_end_dtd(const Object& xmlwriter);
+Variant f_xmlwriter_flush(const Object& xmlwriter, bool empty = true);
+String f_xmlwriter_output_memory(const Object& xmlwriter, bool flush = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class XMLWriter
@@ -92,7 +92,7 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
   public: bool t_setindent(bool indent);
   public: bool t_startdocument(const String& version = "1.0", const String& encoding = null_string, const String& standalone = null_string);
   public: bool t_startelement(const String& name);
-  public: bool t_startelementns(const CVarRef prefix, const String& name, const String& uri);
+  public: bool t_startelementns(const Variant& prefix, const String& name, const String& uri);
   public: bool t_writeelementns(const String& prefix, const String& name, const String& uri, const String& content = null_string);
   public: bool t_writeelement(const String& name, const String& content = null_string);
   public: bool t_endelement();

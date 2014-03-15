@@ -85,7 +85,7 @@ const String GetDefaultLocale() {
 }
 
 bool SetDefaultLocale(const String& locale) {
-  s_default_locale->m_defaultLocale = locale->toCppString();
+  s_default_locale->m_defaultLocale = locale.toCppString();
   return true;
 }
 
@@ -155,7 +155,7 @@ String u8(const UChar *u16, int32_t u16_len, UErrorCode &error) {
     return null_string;
   }
   String ret(outlen + 1, ReserveString);
-  char *out = ret->mutableData();
+  char *out = ret.get()->mutableData();
   error = U_ZERO_ERROR;
   u_strToUTF8(out, outlen + 1, &outlen, u16, u16_len, &error);
   if (U_FAILURE(error)) {
@@ -165,7 +165,7 @@ String u8(const UChar *u16, int32_t u16_len, UErrorCode &error) {
   return ret;
 }
 
-double VariantToMilliseconds(CVarRef arg) {
+double VariantToMilliseconds(const Variant& arg) {
   if (arg.isNumeric(true)) {
     return U_MILLIS_PER_SECOND * arg.toDouble();
   }

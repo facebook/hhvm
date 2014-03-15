@@ -622,7 +622,7 @@ inline static void appendint(char **buffer, int *pos, int *size, long number,
   }
 
   /* Can't right-pad 0's on integers */
-  if(alignment==0 && padding=='0') padding=' ';
+  if (alignment==0 && padding=='0') padding=' ';
 
   numbuf[i] = '\0';
 
@@ -800,7 +800,7 @@ inline static int getnumber(const char *buffer, int *pos) {
  *  "x"   integer argument is printed as lowercase hexadecimal
  *  "X"   integer argument is printed as uppercase hexadecimal
  */
-char *string_printf(const char *format, int len, CArrRef args, int *outlen) {
+char *string_printf(const char *format, int len, const Array& args, int *outlen) {
   Array vargs = args;
   if (!vargs.isNull() && !vargs->isVectorData()) {
     vargs = Array::Create();

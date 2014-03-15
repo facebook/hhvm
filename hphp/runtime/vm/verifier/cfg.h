@@ -81,23 +81,49 @@ struct Graph {
 };
 
 inline bool isTF(PC pc) {
-  return (instrFlags(toOp(*pc)) & TF) != 0;
+  return (instrFlags(*reinterpret_cast<const Op*>(pc)) & TF) != 0;
 }
 
 inline bool isCF(PC pc) {
-  return instrIsNonCallControlFlow(toOp(*pc));
+  return instrIsNonCallControlFlow(*reinterpret_cast<const Op*>(pc));
 }
 
 inline bool isFF(PC pc) {
-  return instrReadsCurrentFpi(toOp(*pc));
+  return instrReadsCurrentFpi(*reinterpret_cast<const Op*>(pc));
 }
 
 inline bool isRet(PC pc) {
-  return isTF(pc) && toOp(*pc) >= OpRetC && toOp(*pc) <= OpRetV;
+  return isTF(pc) &&
+    (*reinterpret_cast<const Op*>(pc) == Op::RetC ||
+     *reinterpret_cast<const Op*>(pc) == Op::RetV);
 }
 
 inline bool isIter(PC pc) {
-  return toOp(*pc) >= OpIterInit && toOp(*pc) <= OpCIterFree;
+  switch (*reinterpret_cast<const Op*>(pc)) {
+  case Op::IterInit:
+  case Op::MIterInit:
+  case Op::WIterInit:
+  case Op::IterInitK:
+  case Op::MIterInitK:
+  case Op::WIterInitK:
+  case Op::IterNext:
+  case Op::MIterNext:
+  case Op::WIterNext:
+  case Op::IterNextK:
+  case Op::MIterNextK:
+  case Op::WIterNextK:
+  case Op::DecodeCufIter:
+  case Op::IterFree:
+  case Op::MIterFree:
+  case Op::CIterFree:
+    return true;
+  default:
+    break;
+  }
+  // TODO(#3882518): this function omits IterBreak, and it's unclear
+  // whether it is supposed to.  (It used to be implemented using
+  // ordered comparisons on the opcode enum, so it might be a mistake.
+  return false;
 }
 
 inline int getImmIva(PC pc) {
@@ -130,7 +156,9 @@ class GraphBuilder {
   Block* createBlock(PC pc);
   Block* createBlock(Offset off) { return createBlock(m_unit->at(off)); }
   Block* at(PC addr);
-  Offset offset(PC addr) { return m_unit->offsetOf(addr); }
+  Offset offset(PC addr) const {
+    return m_unit->offsetOf(addr);
+  }
   void addEdge(Block* from, EdgeKind k, Block* target);
   Block** succs(Block* b);
   Block** exns(Block* b);

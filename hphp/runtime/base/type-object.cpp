@@ -46,17 +46,6 @@ Object::~Object() {
   // force it out of line
 }
 
-ArrayIter Object::begin(const String& context /* = null_string */) const {
-  if (!m_px) throw_null_pointer_exception();
-  return m_px->begin(context);
-}
-
-MutableArrayIter Object::begin(Variant *key, Variant &val,
-                               const String& context /*= null_string*/) const {
-  if (!m_px) throw_null_pointer_exception();
-  return m_px->begin(key, val, context);
-}
-
 Array Object::toArray() const {
   return m_px ? m_px->o_toArray() : Array();
 }

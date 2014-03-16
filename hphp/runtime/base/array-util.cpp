@@ -503,7 +503,20 @@ namespace {
 
 MutableArrayIter iter_begin(Variant& var, Variant* key, Variant& val) {
   if (var.is(KindOfObject)) {
-    return var.getObjectData()->begin(key, val, null_string);
+    auto const odata = var.getObjectData();
+
+    bool isIterable;
+    if (odata->isCollection()) {
+      raise_error("Collection elements cannot be taken by reference");
+    }
+    Object iterable = odata->iterableObject(isIterable);
+    if (isIterable) {
+      throw FatalErrorException("An iterator cannot be used with "
+                                "foreach by reference");
+    }
+    Array properties = iterable->o_toIterArray(null_string, true);
+    ArrayData* arr = properties.detach();
+    return MutableArrayIter(arr, key, val);
   }
   return MutableArrayIter(&var, key, val);
 }

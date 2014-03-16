@@ -196,35 +196,6 @@ Object ObjectData::iterableObject(bool& isIterable,
   return obj;
 }
 
-ArrayIter ObjectData::begin(const String& context /* = null_string */) {
-  bool isIterable;
-  if (isCollection()) {
-    return ArrayIter(this);
-  }
-  Object iterable = iterableObject(isIterable);
-  if (isIterable) {
-    return ArrayIter(iterable.detach(), ArrayIter::noInc);
-  } else {
-    return ArrayIter(iterable->o_toIterArray(context));
-  }
-}
-
-MutableArrayIter ObjectData::begin(Variant* key, Variant& val,
-                                   const String& context /* = null_string */) {
-  bool isIterable;
-  if (isCollection()) {
-    raise_error("Collection elements cannot be taken by reference");
-  }
-  Object iterable = iterableObject(isIterable);
-  if (isIterable) {
-    throw FatalErrorException("An iterator cannot be used with "
-                              "foreach by reference");
-  }
-  Array properties = iterable->o_toIterArray(context, true);
-  ArrayData* arr = properties.detach();
-  return MutableArrayIter(arr, key, val);
-}
-
 Array& ObjectData::dynPropArray() const {
   assert(getAttribute(HasDynPropArr));
   assert(g_context->dynPropTable.count(this));

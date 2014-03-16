@@ -1919,7 +1919,7 @@ BaseMap::php_differenceByKey(const Variant& it) {
     }
     return ret;
   }
-  for (ArrayIter iter = obj->begin(); iter; ++iter) {
+  for (ArrayIter iter(obj); iter; ++iter) {
     Variant k = iter.first();
     if (k.isInteger()) {
       target->remove(k.toInt64());

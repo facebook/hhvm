@@ -228,9 +228,6 @@ class ObjectData {
   ObjectData* clearNoDestruct() { clearAttribute(NoDestructor); return this; }
 
   Object iterableObject(bool& isIterable, bool mayImplementIterator = true);
-  ArrayIter begin(const String& context = null_string);
-  MutableArrayIter begin(Variant* key, Variant& val,
-                         const String& context = null_string);
 
   /**
    * o_instanceof() can be used for both classes and interfaces.

@@ -90,10 +90,6 @@ public:
   template <class T> const T& cast() const {
     return *static_cast<const T*>(this);
   }
-  ArrayIter begin(const String& context = null_string) const;
-
-  MutableArrayIter begin(Variant *key, Variant &val,
-                         const String& context = null_string) const;
 
   /**
    * getTyped() and is() are intended for use with C++ classes that derive

@@ -637,7 +637,7 @@ String DateTime::rfcFormat(const String& format) const {
         } else {
           auto offset = m_time->z * -60;
           char abbr[7] = {0};
-          snprintf(abbr, 9, "%c%02d:%02d",
+          snprintf(abbr, 7, "%c%02d:%02d",
             ((offset < 0) ? '-' : '+'),
             abs(offset / 3600),
             abs((offset % 3600) / 60) );

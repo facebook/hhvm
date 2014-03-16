@@ -122,6 +122,25 @@ void setNewElemArray(TypedValue* base, Cell val) {
   HPHP::SetNewElemArray(base, &val);
 }
 
+TypedValue setOpElem(TypedValue* base, TypedValue key,
+                     Cell val, MInstrState* mis, SetOpOp op) {
+  TypedValue* result =
+    HPHP::SetOpElem(mis->tvScratch, mis->tvRef, op, base, key, &val);
+
+  Cell ret;
+  cellDup(*tvToCell(result), ret);
+  return ret;
+}
+
+TypedValue incDecElem(TypedValue* base, TypedValue key,
+                      MInstrState* mis, IncDecOp op) {
+  TypedValue result;
+  HPHP::IncDecElem<true>(
+    mis->tvScratch, mis->tvRef, op, base, key, result);
+  assert(result.m_type != KindOfRef);
+  return result;
+}
+
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
   base = HPHP::NewElem(mis->tvScratch, mis->tvRef, base);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {

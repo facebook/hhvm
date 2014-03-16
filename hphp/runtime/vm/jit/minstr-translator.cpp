@@ -189,7 +189,8 @@ int minstrBaseIdx(Opcode opc) {
          : opc == SetNewElemArray || opc == SetNewElemArrayStk ? 0
          : opc == BindNewElem || opc == BindNewElemStk ? 0
          : opc == ArraySet ? 1
-         : opc == SetOpProp || opc == SetOpPropStk ? 1
+         : opc == SetOpElem || opc == SetOpElemStk ? 0
+         : opc == IncDecElem || opc == IncDecElemStk ? 0
          : opcodeHasFlags(opc, MInstrProp) ? 2
          : opcodeHasFlags(opc, MInstrElem) ? 1
          : bad_value<int>();
@@ -2380,79 +2381,17 @@ void HhbcTranslator::MInstrTranslator::emitSetElem() {
 }
 #undef HELPER_TABLE
 
-template <SetOpOp op>
-static inline TypedValue setOpElemImpl(TypedValue* base, TypedValue key,
-                                       Cell val, MInstrState* mis) {
-  TypedValue* result =
-    HPHP::SetOpElem(mis->tvScratch, mis->tvRef, op, base, key, &val);
-
-  Cell ret;
-  cellDup(*tvToCell(result), ret);
-  return ret;
-}
-
-#define OPELEM_TABLE(m, nm, pfx, op)            \
-  /* name          op */                        \
-  m(nm##op##ElemC, pfx op)
-
-#define HELPER_TABLE(m, op) OPELEM_TABLE(m, setOp, SetOpOp::, op)
-#define SETOP(nm, ...)                                                  \
-TypedValue nm(TypedValue* base, TypedValue key, Cell val,               \
-                     MInstrState* mis) {                                \
-  return setOpElemImpl<__VA_ARGS__>(base, key, val, mis);               \
-}
-#define SETOP_OP(op, bcOp) HELPER_TABLE(SETOP, op)
-namespace MInstrHelpers {
-SETOP_OPS
-}
-#undef SETOP_OP
-#undef SETOP
-
 void HhbcTranslator::MInstrTranslator::emitSetOpElem() {
-  SetOpOp op = SetOpOp(m_ni.imm[0].u_OA);
-  SSATmp* key = getKey();
-  typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, Cell, MInstrState*);
-# define SETOP_OP(op, bcOp) HELPER_TABLE(FILL_ROW, op)
-  BUILD_OPTAB_ARG(SETOP_OPS, op);
-# undef SETOP_OP
-  m_result = genStk(SetOpElem, makeCatch(), cns((TCA)opFunc),
-                    m_base, key, getValue(), genMisPtr());
+  SetOpOp op = static_cast<SetOpOp>(m_ni.imm[0].u_OA);
+  m_result = genStk(SetOpElem, makeCatch(),
+                    m_base, getKey(), getValue(), genMisPtr(), cns(op));
 }
-#undef HELPER_TABLE
-
-template <IncDecOp op>
-static inline TypedValue incDecElemImpl(TypedValue* base, TypedValue key,
-                                        MInstrState* mis) {
-  TypedValue result;
-  HPHP::IncDecElem<true>(
-    mis->tvScratch, mis->tvRef, op, base, key, result);
-  assert(result.m_type != KindOfRef);
-  return result;
-}
-
-#define HELPER_TABLE(m, op) OPELEM_TABLE(m, incDec, IncDecOp::, op)
-#define INCDEC(nm, ...)                                                 \
-TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) {     \
-  return incDecElemImpl<__VA_ARGS__>(base, key, mis);                   \
-}
-#define INCDEC_OP(op) HELPER_TABLE(INCDEC, op)
-namespace MInstrHelpers {
-INCDEC_OPS
-}
-#undef INCDEC_OP
-#undef INCDEC
 
 void HhbcTranslator::MInstrTranslator::emitIncDecElem() {
   IncDecOp op = static_cast<IncDecOp>(m_ni.imm[0].u_OA);
-  SSATmp* key = getKey();
-  typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
-# define INCDEC_OP(op) HELPER_TABLE(FILL_ROW, op)
-  BUILD_OPTAB_ARG(INCDEC_OPS, op);
-# undef INCDEC_OP
-  m_result = genStk(IncDecElem, makeCatch(), cns((TCA)opFunc),
-                    m_base, key, genMisPtr());
+  m_result = genStk(IncDecElem, makeCatch(),
+                    m_base, getKey(), genMisPtr(), cns(op));
 }
-#undef HELPER_TABLE
 
 namespace MInstrHelpers {
 void bindElemC(TypedValue* base, TypedValue key, RefData* val,

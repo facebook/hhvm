@@ -778,17 +778,15 @@ O_STK(SetWithRefElem,               ND, C(TCA)                                \
 O_STK(UnsetElem,                    ND, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell),              MElem|E|N|Er) \
-O_STK(SetOpElem,               D(Cell), C(TCA)                                \
-                                          S(PtrToGen)                         \
+O_STK(SetOpElem,               D(Cell), S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(Cell)                             \
-                                          S(PtrToCell),                       \
-                                                            MElem|E|N|PRc|Er) \
-O_STK(IncDecElem,              D(Cell), C(TCA)                                \
-                                          S(PtrToGen)                         \
+                                          S(PtrToCell)                        \
+                                          C(Int),           MElem|E|N|PRc|Er) \
+O_STK(IncDecElem,              D(Cell), S(PtrToGen)                           \
                                           S(Cell)                             \
-                                          S(PtrToCell),                       \
-                                                            MElem|E|N|PRc|Er) \
+                                          S(PtrToCell)                        \
+                                          C(Int),           MElem|E|N|PRc|Er) \
 O_STK(SetNewElem,                   ND, S(PtrToGen)                           \
                                           S(Cell),              MElem|E|N|Er) \
 O_STK(SetNewElemArray,              ND, S(PtrToArr)                           \

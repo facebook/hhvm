@@ -680,67 +680,6 @@ ArrayData* FullPos::reregister() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// MutableArrayIter
-
-MutableArrayIter::MutableArrayIter(RefData* ref,
-                                   Variant* key,
-                                   Variant& val) {
-  m_ref = nullptr;
-  m_key = key;
-  m_valp = &val;
-  setRef(ref);
-  assert(getRef());
-  escalateCheck();
-  ArrayData* data = cowCheck();
-  if (!data) return;
-  data->reset();
-  data->newFullPos(*this);
-  setResetFlag(true);
-  data->next();
-  assert(getContainer() == data);
-}
-
-MutableArrayIter::MutableArrayIter(ArrayData* data,
-                                   Variant* key,
-                                   Variant& val) {
-  m_ref = nullptr;
-  m_key = key;
-  m_valp = &val;
-  if (!data) return;
-  setAd(data);
-  escalateCheck();
-  data = cowCheck();
-  data->reset();
-  data->newFullPos(*this);
-  setResetFlag(true);
-  data->next();
-  assert(getContainer() == data);
-}
-
-MutableArrayIter::~MutableArrayIter() {
-  // free the iterator
-  ArrayData* container = getContainer();
-  if (container) {
-    container->freeFullPos(*this);
-    assert(getContainer() == nullptr);
-  }
-  // unprotect the data
-  if (hasAd()) decRefArr(getAd());
-}
-
-bool MutableArrayIter::advance() {
-  if (!this->FullPos::advance()) return false;
-  ArrayData* data = getArray();
-  assert(data);
-  assert(!getResetFlag());
-  assert(getContainer() == data);
-  assert(data->validFullPos(*this));
-  m_valp->assignRef(data->getValueRef(m_pos));
-  if (m_key) m_key->assignVal(data->getKey(m_pos));
-  return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // MArrayIter
 
 MArrayIter::MArrayIter(RefData* ref) {

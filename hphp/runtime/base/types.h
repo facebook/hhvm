@@ -64,10 +64,6 @@ class StringData;
 class ArrayData;
 class ObjectData;
 class ResourceData;
-
-class ArrayIter;
-class MutableArrayIter;
-
 class FullPos;
 
 class VariableSerializer;

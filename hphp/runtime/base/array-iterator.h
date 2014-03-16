@@ -369,10 +369,11 @@ class ArrayIter {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * FullPos provides the necessary functionality for supporting "foreach by
- * reference" (also called "strong foreach"). Note that the runtime does not
- * use FullPos directly, but instead uses two classes derived from FullPos
- * (MutableArrayIter and MArrayIter).
+ * FullPos provides the necessary functionality for supporting
+ * "foreach by reference" (also called "strong foreach"). Note that
+ * the runtime does not use FullPos directly, but instead uses a class
+ * derived from FullPos (MArrayIter).  (This separation is
+ * historical---there used to be another subclass.)
  *
  * In the common case, a FullPos is bound to a variable (m_var) when it is
  * initialized. m_var points to an inner cell which points to the array to
@@ -523,23 +524,6 @@ class FullPosRange {
   void popFront() { assert(!empty()); m_fpos = m_fpos->getNext(); }
  private:
   FullPos* m_fpos;
-};
-
-/**
- * MutableArrayIter is used internally within the HipHop runtime in several
- * places. Ideally, we should phase it out and use MArrayIter instead.
- */
-class MutableArrayIter : public FullPos {
- public:
-  MutableArrayIter(RefData* ref, Variant* key, Variant& val);
-  MutableArrayIter(ArrayData* data, Variant* key, Variant& val);
-  ~MutableArrayIter();
-
-  bool advance();
-
- private:
-  Variant* m_key;
-  Variant* m_valp;
 };
 
 /**

@@ -29,9 +29,6 @@ namespace HPHP {
 
 #define null_object Object::s_nullObject
 
-class ArrayIter;
-class MutableArrayIter;
-
 /**
  * Object type wrapping around ObjectData to implement reference count.
  */

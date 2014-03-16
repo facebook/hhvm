@@ -33,9 +33,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ArrayIter;
-class MutableArrayIter;
-
 class HphpArray;
 struct TypedValue;
 class PreClass;

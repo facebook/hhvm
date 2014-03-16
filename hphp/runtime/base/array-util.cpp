@@ -19,6 +19,8 @@
 #include <set>
 #include <utility>
 
+#include "folly/Optional.h"
+
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -499,28 +501,25 @@ Variant ArrayUtil::RegularSortUnique(const Array& input) {
 ///////////////////////////////////////////////////////////////////////////////
 // iterations
 
-namespace {
-
-MutableArrayIter iter_begin(Variant& var, Variant* key, Variant& val) {
-  if (var.is(KindOfObject)) {
-    auto const odata = var.getObjectData();
-
-    bool isIterable;
-    if (odata->isCollection()) {
-      raise_error("Collection elements cannot be taken by reference");
-    }
-    Object iterable = odata->iterableObject(isIterable);
-    if (isIterable) {
-      throw FatalErrorException("An iterator cannot be used with "
-                                "foreach by reference");
-    }
-    Array properties = iterable->o_toIterArray(null_string, true);
-    ArrayData* arr = properties.detach();
-    return MutableArrayIter(arr, key, val);
+static void create_miter_for_walk(folly::Optional<MArrayIter>& miter,
+                                  Variant& var) {
+  if (!var.is(KindOfObject)) {
+    miter.emplace(var.asRef()->m_data.pref);
+    return;
   }
-  return MutableArrayIter(var.asRef()->m_data.pref, key, val);
-}
 
+  auto const odata = var.getObjectData();
+  if (odata->isCollection()) {
+    raise_error("Collection elements cannot be taken by reference");
+  }
+  bool isIterable;
+  Object iterable = odata->iterableObject(isIterable);
+  if (isIterable) {
+    throw FatalErrorException("An iterator cannot be used with "
+                              "foreach by reference");
+  }
+  Array properties = iterable->o_toIterArray(null_string, true);
+  miter.emplace(properties.detach());
 }
 
 void ArrayUtil::Walk(VRefParam input, PFUNC_WALK walk_function,
@@ -529,9 +528,16 @@ void ArrayUtil::Walk(VRefParam input, PFUNC_WALK walk_function,
                      const Variant& userdata /* = null_variant */) {
   assert(walk_function);
 
+  // The Optional is just to avoid copy constructing MArrayIter.
+  folly::Optional<MArrayIter> miter;
+  create_miter_for_walk(miter, input);
+  assert(miter.hasValue());
+
   Variant k;
   Variant v;
-  for (MutableArrayIter iter = iter_begin(input, &k, v); iter.advance(); ) {
+  while (miter->advance()) {
+    k = miter->key();
+    v.assignRef(miter->val());
     if (recursive && v.is(KindOfArray)) {
       assert(seen);
       ArrayData *arr = v.getArrayData();

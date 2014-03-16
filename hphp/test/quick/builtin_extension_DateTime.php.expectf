@@ -7,7 +7,7 @@ object(DateTime)#2 (3) {
   ["timezone"]=>
   string(%d) "%s"
 }
-string(70) "O:8:"DateTime":1:{s:10:"_date_time";s:25:"2012-06-23T11:00:00-07:00";}"
+string(70) "O:8:"DateTime":1:{s:10:"_date_time";s:25:"2012-06-23T11:00:00%c%d%d:00";}"
 object(DateTime)#3 (3) {
   ["date"]=>
   string(19) "%s"
@@ -66,7 +66,7 @@ object(A_DateTime)#5 (3) {
   ["timezone"]=>
   string(%d) "%s"
 }
-string(73) "O:10:"A_DateTime":1:{s:10:"_date_time";s:25:"2012-06-23T11:00:00-07:00";}"
+string(73) "O:10:"A_DateTime":1:{s:10:"_date_time";s:25:"2012-06-23T11:00:00%c%d%d:00";}"
 object(A_DateTime)#6 (3) {
   ["date"]=>
   string(19) "%s"

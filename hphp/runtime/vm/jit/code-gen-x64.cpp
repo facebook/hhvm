@@ -5724,8 +5724,7 @@ void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
     cgCallHelper(m_as, CppCall(new_miter_object), callDest(inst),
                  SyncOptions::kSyncPointAdjustOne, args);
   } else {
-    cgCallHelper(m_as, CppCall(new_miter_other), callDest(inst),
-                 SyncOptions::kSyncPoint, args);
+    CG_PUNT(MArrayIter-Unknown);
   }
 }
 

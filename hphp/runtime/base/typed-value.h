@@ -43,15 +43,15 @@ struct TypedValue;
  * when the type is known beforehand.
  */
 union Value {
-  int64_t     num;    // KindOfInt64, KindOfBool (must be zero-extended)
-  double      dbl;    // KindOfDouble
-  StringData *pstr;   // KindOfString, KindOfStaticString
-  ArrayData  *parr;   // KindOfArray
-  ObjectData *pobj;   // KindOfObject
-  ResourceData *pres; // KindOfResource
-  Class      *pcls;   // only in vm stack, no type tag.
-  RefData    *pref;   // KindOfRef
-  TypedValue *pind;   // only for KindOfIndirect
+  int64_t       num;    // KindOfInt64, KindOfBool (must be zero-extended)
+  double        dbl;    // KindOfDouble
+  StringData*   pstr;   // KindOfString, KindOfStaticString
+  ArrayData*    parr;   // KindOfArray
+  ObjectData*   pobj;   // KindOfObject
+  ResourceData* pres;   // KindOfResource
+  Class*        pcls;   // only in vm stack, no type tag.
+  RefData*      pref;   // KindOfRef
+  TypedValue*   pind;   // only for KindOfIndirect
 };
 
 enum VarNrFlag { NR_FLAG = 1<<29 };

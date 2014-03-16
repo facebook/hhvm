@@ -17,12 +17,14 @@
 #ifndef incl_HPHP_SORT_HELPERS_H_
 #define incl_HPHP_SORT_HELPERS_H_
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/sort-flags.h"
+
 #include "hphp/util/safesort.h"
 
 namespace HPHP {

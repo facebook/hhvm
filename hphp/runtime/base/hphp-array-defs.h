@@ -18,8 +18,9 @@
 #define incl_HPHP_HPHP_ARRAY_DEFS_H_
 
 #include "hphp/runtime/base/hphp-array.h"
-#include "hphp/util/stacktrace-profiler.h"
 #include "hphp/runtime/base/array-iterator.h"
+
+#include "hphp/util/stacktrace-profiler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

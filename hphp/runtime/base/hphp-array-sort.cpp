@@ -15,11 +15,13 @@
 */
 
 #include "hphp/runtime/base/hphp-array.h"
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/sort-helpers.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/sort-helpers.h"
+#include "hphp/runtime/base/tv-helpers.h"
+
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 // inline methods of HphpArray

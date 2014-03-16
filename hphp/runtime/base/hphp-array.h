@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_HPHP_ARRAY_H_
 #define incl_HPHP_HPHP_ARRAY_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ class HphpArray : public ArrayData {
   // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
   // So 2 gives 0.5 load factor, 4 gives 0.75 load factor, 8 gives
   // 0.875 load factor. Use powers of 2 to enable shift-divide.
-  static const uint LoadScale = 4;
+  static const uint32_t LoadScale = 4;
 
 public:
   /*

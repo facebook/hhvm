@@ -253,8 +253,8 @@ public:
   static void ReleaseUncounted(ArrayData*);
 
   // overrides ArrayData
-  static bool ValidFullPos(const ArrayData*, const FullPos &fp);
-  static bool AdvanceFullPos(ArrayData*, FullPos& fp);
+  static bool ValidMArrayIter(const ArrayData*, const MArrayIter &fp);
+  static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
 
   HphpArray* copyImpl() const;
   HphpArray* copyPacked() const;
@@ -461,7 +461,7 @@ private:
   template <class K> ArrayData* zSetImpl(K k, RefData* data);
   ArrayData* zAppendImpl(RefData* data);
 
-  void adjustFullPos(ssize_t pos);
+  void adjustMArrayIter(ssize_t pos);
   void erase(ssize_t pos);
 
   HphpArray* copyImpl(HphpArray* target) const;

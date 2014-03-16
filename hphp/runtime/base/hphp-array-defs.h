@@ -202,7 +202,7 @@ inline size_t HphpArray::computeDataSize(uint32_t tableMask) {
 }
 
 inline void ArrayData::moveStrongIterators(ArrayData* dest, ArrayData* src) {
-  for (FullPosRange r(src->strongIterators()); !r.empty(); r.popFront()) {
+  for (MArrayIterRange r(src->strongIterators()); !r.empty(); r.popFront()) {
     r.front()->setContainer(dest);
   }
   dest->m_strongIterators = src->m_strongIterators;

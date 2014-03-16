@@ -64,7 +64,7 @@ class StringData;
 class ArrayData;
 class ObjectData;
 class ResourceData;
-class FullPos;
+class MArrayIter;
 
 class VariableSerializer;
 class VariableUnserializer;

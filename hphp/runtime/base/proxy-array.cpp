@@ -264,12 +264,12 @@ ssize_t ProxyArray::IterRewind(const ArrayData* ad, ssize_t prev) {
 }
 
 bool
-ProxyArray::ValidFullPos(const ArrayData* ad, const FullPos & fp) {
-  return innerArr(ad)->validFullPos(fp);
+ProxyArray::ValidMArrayIter(const ArrayData* ad, const MArrayIter & fp) {
+  return innerArr(ad)->validMArrayIter(fp);
 }
 
-bool ProxyArray::AdvanceFullPos(ArrayData* ad, FullPos& fp) {
-  return innerArr(ad)->advanceFullPos(fp);
+bool ProxyArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
+  return innerArr(ad)->advanceMArrayIter(fp);
 }
 
 ArrayData* ProxyArray::EscalateForSort(ArrayData* ad) {

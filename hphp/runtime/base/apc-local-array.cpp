@@ -273,12 +273,12 @@ ssize_t APCLocalArray::IterRewind(const ArrayData* ad, ssize_t prev) {
   return next >= 0 ? next : invalid_index;
 }
 
-bool APCLocalArray::ValidFullPos(const ArrayData* ad, const FullPos& fp) {
+bool APCLocalArray::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
   assert(fp.getContainer() == ad);
   return false;
 }
 
-bool APCLocalArray::AdvanceFullPos(ArrayData* ad, FullPos& fp) {
+bool APCLocalArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   return false;
 }
 

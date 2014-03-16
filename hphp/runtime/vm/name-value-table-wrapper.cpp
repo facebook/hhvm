@@ -212,7 +212,8 @@ ssize_t NameValueTableWrapper::IterRewind(const ArrayData* ad, ssize_t prev) {
 }
 
 bool
-NameValueTableWrapper::ValidFullPos(const ArrayData* ad, const FullPos & fp) {
+NameValueTableWrapper::ValidMArrayIter(const ArrayData* ad,
+                                       const MArrayIter & fp) {
   assert(fp.getContainer() == ad);
   auto a = asNVTW(ad);
   if (fp.getResetFlag()) return false;
@@ -221,7 +222,7 @@ NameValueTableWrapper::ValidFullPos(const ArrayData* ad, const FullPos & fp) {
   return iter.valid();
 }
 
-bool NameValueTableWrapper::AdvanceFullPos(ArrayData* ad, FullPos& fp) {
+bool NameValueTableWrapper::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   auto a = asNVTW(ad);
   bool reset = fp.getResetFlag();
   NameValueTable::Iterator iter = reset ?

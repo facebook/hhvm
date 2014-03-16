@@ -639,7 +639,7 @@ HphpArray* HphpArray::packedToMixed() {
  * Zombie state:
  *
  *   m_used == UINT32_MAX
- *   no FullPos's are pointing to this array
+ *   no MArrayIter's are pointing to this array
  *
  * Non-zombie:
  *
@@ -1319,7 +1319,7 @@ void HphpArray::compact(bool renumber /* = false */) {
     mPos.key = nullptr;
   }
   TinyVector<ElmKey, 3> siKeys;
-  for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
+  for (MArrayIterRange r(strongIterators()); !r.empty(); r.popFront()) {
     auto ei = r.front()->m_pos;
     if (ei != invalid_index) {
       auto& e = data()[ei];
@@ -1363,8 +1363,8 @@ void HphpArray::compact(bool renumber /* = false */) {
   }
   // Update strong iterators, now that compaction is complete.
   int key = 0;
-  for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
-    FullPos* fp = r.front();
+  for (MArrayIterRange r(strongIterators()); !r.empty(); r.popFront()) {
+    MArrayIter* fp = r.front();
     if (fp->m_pos != invalid_index) {
       auto& k = siKeys[key];
       key++;
@@ -1756,10 +1756,10 @@ HphpArray::ZAppend(ArrayData* ad, RefData* v) {
 // Delete.
 
 NEVER_INLINE
-void HphpArray::adjustFullPos(ssize_t pos) {
+void HphpArray::adjustMArrayIter(ssize_t pos) {
   ssize_t eIPrev = Tombstone;
-  for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
-    FullPos* fp = r.front();
+  for (MArrayIterRange r(strongIterators()); !r.empty(); r.popFront()) {
+    MArrayIter* fp = r.front();
     if (fp->m_pos == pos) {
       if (eIPrev == Tombstone) {
         // eIPrev will actually be used, so properly initialize it with the
@@ -1779,7 +1779,7 @@ void HphpArray::erase(ssize_t pos) {
   assert(validPos(pos));
 
   // move strong iterators to the previous element
-  if (strongIterators()) adjustFullPos(pos);
+  if (strongIterators()) adjustMArrayIter(pos);
 
   // If the internal pointer points to this element, advance it.
   Elm* elms = data();
@@ -2241,7 +2241,7 @@ ArrayData* HphpArray::PopPacked(ArrayData* ad, Variant& value) {
     auto i = a->m_size - 1;
     auto& tv = a->data()[i].data;
     value = tvAsCVarRef(&tv);
-    if (a->strongIterators()) a->adjustFullPos(i);
+    if (a->strongIterators()) a->adjustMArrayIter(i);
     auto oldType = tv.m_type;
     auto oldDatum = tv.m_data.num;
     a->m_size = a->m_used = i;
@@ -2406,13 +2406,13 @@ void HphpArray::OnSetEvalScalar(ArrayData* ad) {
   }
 }
 
-bool HphpArray::ValidFullPos(const ArrayData* ad, const FullPos &fp) {
+bool HphpArray::ValidMArrayIter(const ArrayData* ad, const MArrayIter &fp) {
   assert(fp.getContainer() == asHphpArray(ad));
   if (fp.getResetFlag()) return false;
   return fp.m_pos != invalid_index;
 }
 
-bool HphpArray::AdvanceFullPos(ArrayData* ad, FullPos& fp) {
+bool HphpArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   auto a = asHphpArray(ad);
   Elm* elms = a->data();
   if (fp.getResetFlag()) {

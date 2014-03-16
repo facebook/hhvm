@@ -17,11 +17,11 @@
 #ifndef incl_HPHP_ARRAY_ITERATOR_H_
 #define incl_HPHP_ARRAY_ITERATOR_H_
 
+#include "hphp/util/min-max-macros.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/hphp-array.h"
-#include "hphp/util/min-max-macros.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -368,48 +368,81 @@ class ArrayIter {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * FullPos provides the necessary functionality for supporting
- * "foreach by reference" (also called "strong foreach"). Note that
- * the runtime does not use FullPos directly, but instead uses a class
- * derived from FullPos (MArrayIter).  (This separation is
- * historical---there used to be another subclass.)
+/*
+ * MArrayIter provides the necessary functionality for supporting
+ * "foreach by reference" (also called "strong foreach").
  *
- * In the common case, a FullPos is bound to a variable (m_var) when it is
- * initialized. m_var points to an inner cell which points to the array to
- * iterate over. For certain use cases, a FullPos is instead bound directly to
- * an array which m_data points to.
+ * In the common case, a MArrayIter is bound to a RefData when it is
+ * initialized.  When iterating objects with foreach by reference, a
+ * MArrayIter may instead be bound directly to an array which m_data
+ * points to.  (This is because the array is created as a temporary.)
  *
- * Foreach by reference is a pain. Iteration needs to be robust in the face of
- * two challenges: (1) the case where an element is unset during iteration, and
- * (2) the case where user code modifies the inner cell to be a different array
- * or a non-array value. In such cases, we should never crash and ideally when
- * an element is unset we should be able to keep track of where we are in the
- * array.
+ * Foreach by reference is a pain. Iteration needs to be robust in the
+ * face of two challenges: (1) the case where an element is unset
+ * during iteration, and (2) the case where user code modifies the
+ * inner cell to be a different array or a non-array value. In such
+ * cases, we should never crash and ideally when an element is unset
+ * we should be able to keep track of where we are in the array.
  *
- * FullPos works by "registering" itself with the array being iterated over.
- * The array maintains a linked list of the FullPos's actively iterating over
- * it. When an element is unset, the FullPos's that were pointing to that
- * element are moved back one position before the element is unset. Note that
- * it is possible for an iterator to point to the position before the first
- * element (this is what the "reset" flag is for). This dance allows FullPos to
- * keep track of where it is in the array even when elements are unset.
+ * MArrayIter works by "registering" itself with the array being
+ * iterated over.  The array maintains a linked list of the
+ * MArrayIter's actively iterating over it. When an element is unset,
+ * the MArrayIter's that were pointing to that element are moved back
+ * one position before the element is unset. Note that it is possible
+ * for an iterator to point to the position before the first element
+ * (this is what the "reset" flag is for). This dance allows
+ * MArrayIter to keep track of where it is in the array even when
+ * elements are unset.
  *
- * FullPos has also has a m_container field to keep track of which array it has
- * "registered" itself with. By comparing the array pointed to by m_var with
- * the array pointed to by m_container, FullPos can detect if user code has
- * modified the inner cell to be a different array or a non-array value. When
- * this happens, the FullPos unregisters itself with the old array (pointed to
- * by m_container) and registers itself with the new array (pointed to
- * by m_var->m_data.parr) and resumes iteration at the position pointed to by
- * the new array's internal cursor (ArrayData::m_pos). If m_var points to a
- * non-array value, iteration terminates.
+ * MArrayIter has also has a m_container field to keep track of which
+ * array it has "registered" itself with. By comparing the array
+ * pointed to by m_var with the array pointed to by m_container,
+ * MArrayIter can detect if user code has modified the inner cell to
+ * be a different array or a non-array value. When this happens, the
+ * MArrayIter unregisters itself with the old array (pointed to by
+ * m_container) and registers itself with the new array (pointed to by
+ * m_var->m_data.parr) and resumes iteration at the position pointed
+ * to by the new array's internal cursor (ArrayData::m_pos). If m_var
+ * points to a non-array value, iteration terminates.
  */
-class FullPos {
- protected:
-  FullPos() : m_pos(0), m_container(NULL), m_next(NULL) {}
+struct MArrayIter {
+  MArrayIter()
+    : m_data(nullptr)
+    , m_pos(0)
+    , m_container(nullptr)
+    , m_next(nullptr)
+  {}
 
- public:
+  explicit MArrayIter(RefData* ref);
+  explicit MArrayIter(ArrayData* data);
+  ~MArrayIter();
+
+  MArrayIter(const MArrayIter&) = delete;
+  MArrayIter& operator=(const MArrayIter&) = delete;
+
+  /*
+   * It is only safe to call key() and val() if all of the following
+   * conditions are met:
+   *  1) The calls to key() and/or val() are immediately preceded by
+   *     a call to advance(), prepare(), or end().
+   *  2) The iterator points to a valid position in the array.
+   */
+  Variant key() {
+    ArrayData* data = getArray();
+    assert(data && data == getContainer());
+    assert(!getResetFlag() && data->validMArrayIter(*this));
+    return data->getKey(m_pos);
+  }
+
+  const Variant& val() {
+    ArrayData* data = getArray();
+    assert(data && data == getContainer());
+    assert(!data->hasMultipleRefs() || data->noCopyOnWrite());
+    assert(!getResetFlag());
+    assert(data->validMArrayIter(*this));
+    return data->getValueRef(m_pos);
+  }
+
   void release() { delete this; }
 
   // Returns true if the iterator points past the last element (or if
@@ -452,10 +485,10 @@ class FullPos {
   void setContainer(ArrayData* arr) {
     m_container = arr;
   }
-  FullPos* getNext() const {
-    return (FullPos*)(m_resetBits & ~1);
+  MArrayIter* getNext() const {
+    return (MArrayIter*)(m_resetBits & ~1);
   }
-  void setNext(FullPos* fp) {
+  void setNext(MArrayIter* fp) {
     assert((intptr_t(fp) & 1) == 0);
     m_resetBits = intptr_t(fp) | intptr_t(getResetFlag());
   }
@@ -466,17 +499,19 @@ class FullPos {
     m_resetBits = intptr_t(getNext()) | intptr_t(reset);
   }
 
- protected:
+private:
   ArrayData* getData() const {
     assert(hasRef());
     return m_ref->tv()->m_type == KindOfArray
       ? m_ref->tv()->m_data.parr
       : nullptr;
   }
+
   ArrayData* cowCheck();
   void escalateCheck();
   ArrayData* reregister();
 
+private:
   /*
    * m_ref/m_data are used to keep track of the array that we're
    * supposed to be iterating over. The low bit is used to indicate
@@ -484,82 +519,45 @@ class FullPos {
    *
    * Mutable array iteration usually iterates over m_ref---the m_data
    * case here occurs is when we've converted an object to an array
-   * before iterating it (and this FullPos object actually owns a
+   * before iterating it (and this MArrayIter object actually owns a
    * temporary array).
    */
   union {
     RefData* m_ref;
     ArrayData* m_data;
   };
- public:
+public:
   // m_pos is an opaque value used by the array implementation to track the
   // current position in the array.
   ssize_t m_pos;
- private:
+private:
   // m_container keeps track of which array we're "registered" with. Normally
   // getArray() and m_container refer to the same array. However, the two may
   // differ in cases where user code has modified the inner cell to be a
   // different array or non-array value.
   ArrayData* m_container;
-  // m_next is used so that multiple FullPos's iterating over the same array
+  // m_next is used so that multiple MArrayIter's iterating over the same array
   // can be chained together into a singly linked list. The low bit of m_next
   // is used to track the state of the "reset" flag.
   union {
-    FullPos* m_next;
+    MArrayIter* m_next;
     intptr_t m_resetBits;
   };
 };
 
-/**
- * Range which visits each entry in a list of FullPos. Removing the
+/*
+ * Range which visits each entry in a list of MArrayIter. Removing the
  * front element will crash but removing an already-visited element
  * or future element will work.
  */
-class FullPosRange {
- public:
-  explicit FullPosRange(FullPos* list) : m_fpos(list) {}
-  FullPosRange(const FullPosRange& other) : m_fpos(other.m_fpos) {}
+struct MArrayIterRange {
+  explicit MArrayIterRange(MArrayIter* list) : m_fpos(list) {}
+  MArrayIterRange(const MArrayIterRange& other) : m_fpos(other.m_fpos) {}
   bool empty() const { return m_fpos == 0; }
-  FullPos* front() const { assert(!empty()); return m_fpos; }
+  MArrayIter* front() const { assert(!empty()); return m_fpos; }
   void popFront() { assert(!empty()); m_fpos = m_fpos->getNext(); }
- private:
-  FullPos* m_fpos;
-};
-
-/**
- * MArrayIter is used by the VM to handle the MIter* instructions
- */
-class MArrayIter : public FullPos {
- public:
-  MArrayIter() { m_data = NULL; }
-  explicit MArrayIter(RefData* ref);
-  explicit MArrayIter(ArrayData* data);
-  ~MArrayIter();
-
-  /**
-   * It is only safe to call key() and val() if all of the following
-   * conditions are met:
-   *  1) The calls to key() and/or val() are immediately preceded by
-   *     a call to advance(), prepare(), or end().
-   *  2) The iterator points to a valid position in the array.
-   */
-  Variant key() {
-    ArrayData* data = getArray();
-    assert(data && data == getContainer());
-    assert(!getResetFlag() && data->validFullPos(*this));
-    return data->getKey(m_pos);
-  }
-
-  const Variant& val() {
-    ArrayData* data = getArray();
-    assert(data && data == getContainer());
-    assert(!data->hasMultipleRefs() || data->noCopyOnWrite());
-    assert(!getResetFlag());
-    assert(data->validFullPos(*this));
-    return data->getValueRef(m_pos);
-  }
-
-  friend struct Iter;
+private:
+  MArrayIter* m_fpos;
 };
 
 class CufIter {

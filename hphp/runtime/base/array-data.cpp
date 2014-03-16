@@ -197,16 +197,16 @@ extern const ArrayFunctions g_array_funcs = {
     &APCLocalArray::IterRewind,
     &NameValueTableWrapper::IterRewind,
     &ProxyArray::IterRewind },
-  // validFullPos
-  { &HphpArray::ValidFullPos, &HphpArray::ValidFullPos,
-    &APCLocalArray::ValidFullPos,
-    &NameValueTableWrapper::ValidFullPos,
-    &ProxyArray::ValidFullPos },
-  // advanceFullPos
-  { &HphpArray::AdvanceFullPos, &HphpArray::AdvanceFullPos,
-    &APCLocalArray::AdvanceFullPos,
-    &NameValueTableWrapper::AdvanceFullPos,
-    &ProxyArray::AdvanceFullPos },
+  // validMArrayIter
+  { &HphpArray::ValidMArrayIter, &HphpArray::ValidMArrayIter,
+    &APCLocalArray::ValidMArrayIter,
+    &NameValueTableWrapper::ValidMArrayIter,
+    &ProxyArray::ValidMArrayIter },
+  // advanceMArrayIter
+  { &HphpArray::AdvanceMArrayIter, &HphpArray::AdvanceMArrayIter,
+    &APCLocalArray::AdvanceMArrayIter,
+    &NameValueTableWrapper::AdvanceMArrayIter,
+    &ProxyArray::AdvanceMArrayIter },
   // escalateForSort
   { &HphpArray::EscalateForSort, &HphpArray::EscalateForSort,
     &APCLocalArray::EscalateForSort,
@@ -474,7 +474,7 @@ ArrayData *ArrayData::Dequeue(ArrayData* a, Variant &value) {
 ///////////////////////////////////////////////////////////////////////////////
 // MutableArrayIter related functions
 
-void ArrayData::newFullPos(FullPos &fp) {
+void ArrayData::newMArrayIter(MArrayIter &fp) {
   assert(!fp.getContainer());
   fp.setContainer(this);
   fp.setNext(strongIterators());
@@ -482,10 +482,10 @@ void ArrayData::newFullPos(FullPos &fp) {
   fp.m_pos = m_pos;
 }
 
-void ArrayData::freeFullPos(FullPos &fp) {
+void ArrayData::freeMArrayIter(MArrayIter &fp) {
   assert(strongIterators() && fp.getContainer() == this);
   // search for fp in our list, then remove it. Usually its the first one.
-  FullPos* p = strongIterators();
+  MArrayIter* p = strongIterators();
   if (p == &fp) {
     setStrongIterators(p->getNext());
     fp.setContainer(nullptr);
@@ -504,7 +504,7 @@ void ArrayData::freeFullPos(FullPos &fp) {
 }
 
 void ArrayData::freeStrongIterators() {
-  for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
+  for (MArrayIterRange r(strongIterators()); !r.empty(); r.popFront()) {
     r.front()->setContainer(nullptr);
   }
   setStrongIterators(nullptr);

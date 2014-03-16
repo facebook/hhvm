@@ -280,10 +280,10 @@ public:
   /**
    * Mutable iteration APIs
    *
-   * The following six methods are used for mutable iteration. For all methods
-   * except newFullPos(), it is the caller's responsibility to ensure that the
-   * specified FullPos 'fp' is registered with this array and hasn't already
-   * been freed.
+   * The following six methods are used for mutable iteration. For all
+   * methods except newMArrayIter(), it is the caller's responsibility
+   * to ensure that the specified MArrayIter 'fp' is registered with
+   * this array and hasn't already been freed.
    */
 
   /**
@@ -293,33 +293,33 @@ public:
    * array keeps track of all mutable iterators that have registered with it.
    *
    * A mutable iterator remains live until one of the following happens:
-   *   (1) The mutable iterator is freed by calling the freeFullPos() method.
+   *   (1) The mutable iterator is freed by calling the freeMArrayIter() method.
    *   (2) The array's refcount drops to 0 and the array frees all mutable
    *       iterators that were registered with it.
    *   (3) Some other kind of "invalidation" event happens to the array that
    *       causes it to free all mutable iterators that were registered with
    *       it (ex. array_shift() is called on the array).
    */
-  void newFullPos(FullPos &fp);
+  void newMArrayIter(MArrayIter &fp);
 
   /**
    * Frees a mutable iterator that was registered with this array.
    */
-  void freeFullPos(FullPos &fp);
+  void freeMArrayIter(MArrayIter &fp);
 
   /**
    * Checks if a mutable iterator points to a valid element within this array.
    * This will return false if the iterator points past the last element, or
    * if the iterator points before the first element.
    */
-  bool validFullPos(const FullPos& fp) const;
+  bool validMArrayIter(const MArrayIter& fp) const;
 
   /**
    * Advances the mutable iterator to the next element in the array. Returns
    * false if the iterator has moved past the last element, otherwise returns
    * true.
    */
-  bool advanceFullPos(FullPos& fp);
+  bool advanceMArrayIter(MArrayIter& fp);
 
   const Variant& endRef();
 
@@ -464,10 +464,10 @@ private:
 protected:
   void freeStrongIterators();
   static void moveStrongIterators(ArrayData* dest, ArrayData* src);
-  FullPos* strongIterators() const {
+  MArrayIter* strongIterators() const {
     return m_strongIterators;
   }
-  void setStrongIterators(FullPos* p) {
+  void setStrongIterators(MArrayIter* p) {
     m_strongIterators = p;
   }
   // error-handling helpers
@@ -502,7 +502,7 @@ protected:
     };
     uint64_t m_posAndCount;   // be careful, m_pos is signed
   };
-  FullPos* m_strongIterators; // head of linked list
+  MArrayIter* m_strongIterators; // head of linked list
 };
 
 /*
@@ -541,8 +541,8 @@ struct ArrayFunctions {
   ssize_t (*iterEnd[NK])(const ArrayData*);
   ssize_t (*iterAdvance[NK])(const ArrayData*, ssize_t pos);
   ssize_t (*iterRewind[NK])(const ArrayData*, ssize_t pos);
-  bool (*validFullPos[NK])(const ArrayData*, const FullPos&);
-  bool (*advanceFullPos[NK])(ArrayData*, FullPos&);
+  bool (*validMArrayIter[NK])(const ArrayData*, const MArrayIter&);
+  bool (*advanceMArrayIter[NK])(ArrayData*, MArrayIter&);
   ArrayData* (*escalateForSort[NK])(ArrayData*);
   void (*ksort[NK])(ArrayData* ad, int sort_flags, bool ascending);
   void (*sort[NK])(ArrayData* ad, int sort_flags, bool ascending);

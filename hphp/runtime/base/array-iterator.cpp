@@ -576,41 +576,41 @@ RefData* ArrayIter::zSecond() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// FullPos
+// MArrayIter
 
-bool FullPos::end() const {
-  return !const_cast<FullPos*>(this)->prepare();
+bool MArrayIter::end() const {
+  return !const_cast<MArrayIter*>(this)->prepare();
 }
 
-bool FullPos::advance() {
+bool MArrayIter::advance() {
   ArrayData* data = getArray();
   ArrayData* container = getContainer();
   if (!data) {
     if (container) {
-      container->freeFullPos(*this);
+      container->freeMArrayIter(*this);
     }
     setResetFlag(false);
     return false;
   }
   if (container == data) {
-    return cowCheck()->advanceFullPos(*this);
+    return cowCheck()->advanceMArrayIter(*this);
   }
   data = reregister();
   assert(data && data == getContainer());
   assert(!getResetFlag());
-  if (!data->validFullPos(*this)) return false;
+  if (!data->validMArrayIter(*this)) return false;
   // To conform to PHP behavior, we need to set the internal
   // cursor to point to the next element.
   data->next();
   return true;
 }
 
-bool FullPos::prepare() {
+bool MArrayIter::prepare() {
   ArrayData* data = getArray();
   ArrayData* container = getContainer();
   if (!data) {
     if (container) {
-      container->freeFullPos(*this);
+      container->freeMArrayIter(*this);
     }
     setResetFlag(false);
     return false;
@@ -618,10 +618,10 @@ bool FullPos::prepare() {
   if (container != data) {
     data = reregister();
   }
-  return data->validFullPos(*this);
+  return data->validMArrayIter(*this);
 }
 
-void FullPos::escalateCheck() {
+void MArrayIter::escalateCheck() {
   if (hasRef()) {
     auto const data = getData();
     if (!data) return;
@@ -642,7 +642,7 @@ void FullPos::escalateCheck() {
   }
 }
 
-ArrayData* FullPos::cowCheck() {
+ArrayData* MArrayIter::cowCheck() {
   if (hasRef()) {
     auto data = getData();
     if (!data) return nullptr;
@@ -665,24 +665,27 @@ ArrayData* FullPos::cowCheck() {
   return data;
 }
 
-ArrayData* FullPos::reregister() {
+ArrayData* MArrayIter::reregister() {
   ArrayData* container = getContainer();
   assert(getArray() != nullptr && container != getArray());
   if (container != nullptr) {
-    container->freeFullPos(*this);
+    container->freeMArrayIter(*this);
   }
   setResetFlag(false);
   assert(getContainer() == nullptr);
   escalateCheck();
   ArrayData* data = cowCheck();
-  data->newFullPos(*this);
+  data->newMArrayIter(*this);
   return data;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// MArrayIter
+//////////////////////////////////////////////////////////////////////
 
-MArrayIter::MArrayIter(RefData* ref) {
+MArrayIter::MArrayIter(RefData* ref)
+  : m_pos(0)
+  , m_container(nullptr)
+  , m_next(nullptr)
+{
   ref->incRefCount();
   setRef(ref);
   assert(hasRef());
@@ -690,21 +693,25 @@ MArrayIter::MArrayIter(RefData* ref) {
   auto const data = cowCheck();
   if (!data) return;
   data->reset();
-  data->newFullPos(*this);
+  data->newMArrayIter(*this);
   setResetFlag(true);
   data->next();
   assert(getContainer() == data);
 }
 
-MArrayIter::MArrayIter(ArrayData *data) {
-  m_ref = nullptr;
+MArrayIter::MArrayIter(ArrayData* data)
+  : m_ref(nullptr)
+  , m_pos(0)
+  , m_container(nullptr)
+  , m_next(nullptr)
+{
   if (!data) return;
   assert(!data->isStatic());
   setAd(data);
   escalateCheck();
   data = cowCheck();
   data->reset();
-  data->newFullPos(*this);
+  data->newMArrayIter(*this);
   setResetFlag(true);
   data->next();
   assert(getContainer() == data);
@@ -713,7 +720,7 @@ MArrayIter::MArrayIter(ArrayData *data) {
 MArrayIter::~MArrayIter() {
   auto const container = getContainer();
   if (container) {
-    container->freeFullPos(*this);
+    container->freeMArrayIter(*this);
     assert(getContainer() == nullptr);
   }
   if (hasRef()) {

@@ -105,14 +105,18 @@ struct RefData {
 
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
 
-  const TypedValue* tv() const {
+  /*
+   * Note, despite the name, this can never return a non-Cell.
+   */
+  const Cell* tv() const {
     assert(m_magic == Magic::kMagic);
     return &m_tv;
   }
-  TypedValue* tv() {
+  Cell* tv() {
     assert(m_magic == Magic::kMagic);
     return &m_tv;
   }
+
   const Variant* var() const { return (const Variant*)tv(); }
   Variant* var() { return reinterpret_cast<Variant*>(tv()); }
 
@@ -127,13 +131,6 @@ struct RefData {
 
   void assertValid() const {
     assert(m_magic == Magic::kMagic);
-  }
-
-  // TODO: t2221110: get rid of this hack.
-  static RefData* refDataFromVariantIfYouDare(const Variant* var) {
-    RefData* ref = reinterpret_cast<RefData*>(uintptr_t(var) - tvOffset());
-    ref->assertValid();
-    return ref;
   }
 
   int32_t getRealCount() const {

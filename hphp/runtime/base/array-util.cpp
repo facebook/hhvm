@@ -518,7 +518,7 @@ MutableArrayIter iter_begin(Variant& var, Variant* key, Variant& val) {
     ArrayData* arr = properties.detach();
     return MutableArrayIter(arr, key, val);
   }
-  return MutableArrayIter(&var, key, val);
+  return MutableArrayIter(var.asRef()->m_data.pref, key, val);
 }
 
 }

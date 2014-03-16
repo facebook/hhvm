@@ -622,43 +622,45 @@ bool FullPos::prepare() {
 }
 
 void FullPos::escalateCheck() {
-  ArrayData* data;
-  if (hasVar()) {
-    data = getData();
+  if (hasRef()) {
+    auto const data = getData();
     if (!data) return;
-    ArrayData* esc = data->escalate();
+    auto const esc = data->escalate();
     if (data != esc) {
-      *const_cast<Variant*>(getVar()) = esc;
+      cellSet(make_tv<KindOfArray>(esc), *getRef()->tv());
     }
-  } else {
-    assert(hasAd());
-    data = getAd();
-    ArrayData* esc = data->escalate();
-    if (data != esc) {
-      esc->incRefCount();
-      decRefArr(data);
-      setAd(esc);
-    }
+    return;
+  }
+
+  assert(hasAd());
+  auto const data = getAd();
+  auto const esc = data->escalate();
+  if (data != esc) {
+    esc->incRefCount();
+    decRefArr(data);
+    setAd(esc);
   }
 }
 
 ArrayData* FullPos::cowCheck() {
-  ArrayData* data;
-  if (hasVar()) {
-    data = getData();
+  if (hasRef()) {
+    auto data = getData();
     if (!data) return nullptr;
     if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
-      *const_cast<Variant*>(getVar()) = data = data->copyWithStrongIterators();
+      data = data->copyWithStrongIterators();
+      cellSet(make_tv<KindOfArray>(data), *getRef()->tv());
     }
-  } else {
-    assert(hasAd());
-    data = getAd();
-    if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
-      ArrayData* copied = data->copyWithStrongIterators();
-      copied->incRefCount();
-      decRefArr(data);
-      setAd(data = copied);
-    }
+    return data;
+  }
+
+  assert(hasAd());
+  auto const data = getAd();
+  if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
+    ArrayData* copied = data->copyWithStrongIterators();
+    copied->incRefCount();
+    decRefArr(data);
+    setAd(copied);
+    return copied;
   }
   return data;
 }
@@ -680,13 +682,14 @@ ArrayData* FullPos::reregister() {
 ///////////////////////////////////////////////////////////////////////////////
 // MutableArrayIter
 
-MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
-                                   Variant &val) {
-  m_var = nullptr;
+MutableArrayIter::MutableArrayIter(RefData* ref,
+                                   Variant* key,
+                                   Variant& val) {
+  m_ref = nullptr;
   m_key = key;
   m_valp = &val;
-  setVar(var);
-  assert(getVar());
+  setRef(ref);
+  assert(getRef());
   escalateCheck();
   ArrayData* data = cowCheck();
   if (!data) return;
@@ -697,9 +700,10 @@ MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
   assert(getContainer() == data);
 }
 
-MutableArrayIter::MutableArrayIter(ArrayData *data, Variant *key,
-                                   Variant &val) {
-  m_var = nullptr;
+MutableArrayIter::MutableArrayIter(ArrayData* data,
+                                   Variant* key,
+                                   Variant& val) {
+  m_ref = nullptr;
   m_key = key;
   m_valp = &val;
   if (!data) return;
@@ -739,13 +743,12 @@ bool MutableArrayIter::advance() {
 ///////////////////////////////////////////////////////////////////////////////
 // MArrayIter
 
-MArrayIter::MArrayIter(const RefData* ref) {
-  m_var = nullptr;
+MArrayIter::MArrayIter(RefData* ref) {
   ref->incRefCount();
-  setVar(ref->var());
-  assert(hasVar());
+  setRef(ref);
+  assert(hasRef());
   escalateCheck();
-  ArrayData* data = cowCheck();
+  auto const data = cowCheck();
   if (!data) return;
   data->reset();
   data->newFullPos(*this);
@@ -755,7 +758,7 @@ MArrayIter::MArrayIter(const RefData* ref) {
 }
 
 MArrayIter::MArrayIter(ArrayData *data) {
-  m_var = nullptr;
+  m_ref = nullptr;
   if (!data) return;
   assert(!data->isStatic());
   setAd(data);
@@ -769,16 +772,13 @@ MArrayIter::MArrayIter(ArrayData *data) {
 }
 
 MArrayIter::~MArrayIter() {
-  // free the iterator
-  ArrayData* container = getContainer();
+  auto const container = getContainer();
   if (container) {
     container->freeFullPos(*this);
     assert(getContainer() == nullptr);
   }
-  // unprotect the data
-  if (hasVar()) {
-    RefData* ref = RefData::refDataFromVariantIfYouDare(getVar());
-    decRefRef(ref);
+  if (hasRef()) {
+    decRefRef(getRef());
   } else if (hasAd()) {
     decRefArr(getAd());
   }

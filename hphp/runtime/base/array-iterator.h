@@ -422,25 +422,25 @@ class FullPos {
   bool prepare();
 
   ArrayData* getArray() const {
-    return hasVar() ? getData() : getAd();
+    return hasRef() ? getData() : getAd();
   }
 
-  bool hasVar() const {
-    return m_var && !(intptr_t(m_var) & 3LL);
+  bool hasRef() const {
+    return m_ref && !(intptr_t(m_ref) & 1LL);
   }
   bool hasAd() const {
     return bool(intptr_t(m_data) & 1LL);
   }
-  const Variant* getVar() const {
-    assert(hasVar());
-    return m_var;
+  RefData* getRef() const {
+    assert(hasRef());
+    return m_ref;
   }
   ArrayData* getAd() const {
     assert(hasAd());
     return (ArrayData*)(intptr_t(m_data) & ~1LL);
   }
-  void setVar(const Variant* val) {
-    m_var = val;
+  void setRef(RefData* ref) {
+    m_ref = ref;
   }
   void setAd(ArrayData* val) {
     m_data = (ArrayData*)(intptr_t(val) | 1LL);
@@ -467,19 +467,27 @@ class FullPos {
 
  protected:
   ArrayData* getData() const {
-    assert(hasVar());
-    return m_var->is(KindOfArray) ? m_var->getArrayData() : nullptr;
+    assert(hasRef());
+    return m_ref->tv()->m_type == KindOfArray
+      ? m_ref->tv()->m_data.parr
+      : nullptr;
   }
   ArrayData* cowCheck();
   void escalateCheck();
   ArrayData* reregister();
 
-  // m_var/m_data are used to keep track of the array that were are supposed
-  // to be iterating over. The low bit is used to indicate whether we are using
-  // m_var or m_data. A helper function getArray() is provided to retrieve the
-  // array that this FullPos is supposed to be iterating over.
+  /*
+   * m_ref/m_data are used to keep track of the array that we're
+   * supposed to be iterating over. The low bit is used to indicate
+   * whether we are using m_ref or m_data.
+   *
+   * Mutable array iteration usually iterates over m_ref---the m_data
+   * case here occurs is when we've converted an object to an array
+   * before iterating it (and this FullPos object actually owns a
+   * temporary array).
+   */
   union {
-    const Variant* m_var;
+    RefData* m_ref;
     ArrayData* m_data;
   };
  public:
@@ -523,7 +531,7 @@ class FullPosRange {
  */
 class MutableArrayIter : public FullPos {
  public:
-  MutableArrayIter(const Variant* var, Variant* key, Variant& val);
+  MutableArrayIter(RefData* ref, Variant* key, Variant& val);
   MutableArrayIter(ArrayData* data, Variant* key, Variant& val);
   ~MutableArrayIter();
 
@@ -540,7 +548,7 @@ class MutableArrayIter : public FullPos {
 class MArrayIter : public FullPos {
  public:
   MArrayIter() { m_data = NULL; }
-  explicit MArrayIter(const RefData* ref);
+  explicit MArrayIter(RefData* ref);
   explicit MArrayIter(ArrayData* data);
   ~MArrayIter();
 
@@ -557,6 +565,7 @@ class MArrayIter : public FullPos {
     assert(!getResetFlag() && data->validFullPos(*this));
     return data->getKey(m_pos);
   }
+
   const Variant& val() {
     ArrayData* data = getArray();
     assert(data && data == getContainer());

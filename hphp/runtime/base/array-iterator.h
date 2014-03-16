@@ -607,11 +607,6 @@ private:
   } m_u;
 } __attribute__ ((aligned(16)));
 
-bool interp_init_iterator(Iter* it, TypedValue* c1);
-bool interp_init_iterator_m(Iter* it, TypedValue* v1);
-bool interp_iter_next(Iter* it);
-bool interp_iter_next_m(Iter* it);
-
 int64_t new_iter_array(Iter* dest, ArrayData* arr, TypedValue* val);
 template <bool withRef>
 int64_t new_iter_array_key(Iter* dest, ArrayData* arr, TypedValue* val,

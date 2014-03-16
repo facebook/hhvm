@@ -13,16 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/hphp-array-defs.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/runtime-error.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+NameValueTableWrapper::~NameValueTableWrapper() {}
 
 inline NameValueTableWrapper* NameValueTableWrapper::asNVTW(ArrayData* ad) {
   assert(ad->kind() == kNvtwKind);

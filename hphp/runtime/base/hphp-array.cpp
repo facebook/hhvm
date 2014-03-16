@@ -36,8 +36,8 @@
 #include <algorithm>
 #include <utility>
 
-// inline methods of HphpArray
 #include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/array-iterator-defs.h"
 
 namespace HPHP {
 
@@ -62,7 +62,6 @@ struct HphpArray::EmptyArrayInitializer {
     ad->m_size            = 0;
     ad->m_pos             = ArrayData::invalid_index;
     ad->m_count           = 0;
-    ad->m_strongIterators = nullptr;
     ad->m_used            = 0;
     ad->m_tableMask       = SmallHashSize - 1;
 
@@ -152,7 +151,6 @@ HphpArray* HphpArray::MakeReserve(uint32_t capacity) {
   ad->m_kindAndSize     = kPackedKind; // zero's size
   ad->m_posAndCount     = uint64_t{1} << 32 |
                            static_cast<uint32_t>(ArrayData::invalid_index);
-  ad->m_strongIterators = nullptr;
   ad->m_capAndUsed      = cap;
   ad->m_tableMask       = mask;
 
@@ -177,7 +175,6 @@ HphpArray* HphpArray::MakePacked(uint32_t size, const TypedValue* values) {
   auto const shiftedSize = uint64_t{size} << 32;
   ad->m_kindAndSize      = shiftedSize | kPackedKind;
   ad->m_posAndCount      = uint64_t{1} << 32;
-  ad->m_strongIterators  = nullptr;
   ad->m_capAndUsed       = shiftedSize | cap;
   ad->m_tableMask        = mask;
 
@@ -214,7 +211,6 @@ HphpArray* HphpArray::MakeStruct(uint32_t size, StringData** keys,
   auto const shiftedSize = uint64_t{size} << 32;
   ad->m_kindAndSize      = shiftedSize | kMixedKind;
   ad->m_posAndCount      = uint64_t{1} << 32;
-  ad->m_strongIterators  = nullptr;
   ad->m_capAndUsed       = shiftedSize | cap;
   ad->m_tableMask        = mask;
   ad->m_nextKI           = 0;
@@ -266,7 +262,6 @@ HphpArray* HphpArray::CopyPacked(const HphpArray& other,
 
   ad->m_kindAndSize     = uint64_t{other.m_size} << 32 | kPackedKind;
   ad->m_posAndCount     = static_cast<uint32_t>(other.m_pos);
-  ad->m_strongIterators = nullptr;
   ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
   ad->m_tableMask       = mask;
 
@@ -305,7 +300,6 @@ HphpArray* HphpArray::CopyMixed(const HphpArray& other,
 
   ad->m_kindAndSize     = uint64_t{other.m_size} << 32 | kMixedKind;
   ad->m_posAndCount     = static_cast<uint32_t>(other.m_pos);
-  ad->m_strongIterators = nullptr;
   ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
   ad->m_maskAndLoad     = uint64_t{other.m_hLoad} << 32 | mask;
   ad->m_nextKI          = other.m_nextKI;
@@ -506,10 +500,8 @@ void HphpArray::ReleasePacked(ArrayData* in) {
       tvRefcountedDecRef(ptr->data);
     }
 
-    auto fullPos = ad->m_strongIterators;
-    while (UNLIKELY(fullPos != nullptr)) {
-      fullPos->setContainer(nullptr);
-      fullPos = fullPos->getNext();
+    if (UNLIKELY(strong_iterators_exist())) {
+      free_strong_iterators(ad);
     }
   }
 
@@ -533,10 +525,8 @@ void HphpArray::Release(ArrayData* in) {
       tvRefcountedDecRef(&ptr->data);
     }
 
-    auto fullPos = ad->m_strongIterators;
-    while (UNLIKELY(fullPos != nullptr)) {
-      fullPos->setContainer(nullptr);
-      fullPos = fullPos->getNext();
+    if (UNLIKELY(strong_iterators_exist())) {
+      free_strong_iterators(ad);
     }
   }
 
@@ -579,10 +569,8 @@ void HphpArray::ReleaseUncounted(ArrayData* in) {
       }
     }
 
-    auto fullPos = ad->m_strongIterators;
-    while (UNLIKELY(fullPos != nullptr)) {
-      fullPos->setContainer(nullptr);
-      fullPos = fullPos->getNext();
+    if (UNLIKELY(strong_iterators_exist())) {
+      free_strong_iterators(ad);
     }
   }
 
@@ -663,7 +651,7 @@ HphpArray* HphpArray::packedToMixed() {
  */
 bool HphpArray::checkInvariants() const {
   static_assert(sizeof(Elm) == 24, "");
-  static_assert(sizeof(ArrayData) == 3 * sizeof(uint64_t), "");
+  static_assert(sizeof(ArrayData) == 2 * sizeof(uint64_t), "");
   static_assert(
     sizeof(HphpArray) == sizeof(ArrayData) + 3 * sizeof(uint64_t),
     "Performance is sensitive to sizeof(HphpArray)."
@@ -1194,21 +1182,16 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
   auto const oldSize        = old->m_size;
   auto const oldPosUnsigned = static_cast<uint32_t>(old->m_pos);
   auto const oldUsed        = old->m_used;
-  auto const oldStrongIters = old->m_strongIterators;
 
   ad->m_kindAndSize     = uint64_t{oldSize} << 32 | kMixedKind;
   ad->m_posAndCount     = oldPosUnsigned;
-  ad->m_strongIterators = oldStrongIters; // could be nullptr
   ad->m_capAndUsed      = uint64_t{oldUsed} << 32 | cap;
   ad->m_maskAndLoad     = uint64_t{oldSize} << 32 | mask;
   ad->m_nextKI          = old->m_nextKI;
   auto table            = reinterpret_cast<int32_t*>(ad->data() + cap);
 
-  // Migrate all strong iterators to the new array.
-  auto si = oldStrongIters;
-  while (UNLIKELY(si != nullptr)) {
-    si->setContainer(ad);
-    si = si->getNext();
+  if (UNLIKELY(strong_iterators_exist())) {
+    move_strong_iterators(ad, old);
   }
 
   // Copy the old element array, and initialize the hashtable to all empty.
@@ -1255,19 +1238,14 @@ HphpArray* HphpArray::GrowPacked(HphpArray* old) {
   auto const oldUsed        = old->m_used;
   auto const oldKindAndSize = old->m_kindAndSize;
   auto const oldPosUnsigned = uint64_t{static_cast<uint32_t>(old->m_pos)};
-  auto const oldStrongIters = old->m_strongIterators;
 
   ad->m_kindAndSize     = oldKindAndSize;
   ad->m_posAndCount     = oldPosUnsigned;
-  ad->m_strongIterators = oldStrongIters; // could be nullptr
   ad->m_capAndUsed      = uint64_t{oldUsed} << 32 | cap;
   ad->m_tableMask       = mask;
 
-  // Migrate all strong iterators to the new array.
-  auto si = oldStrongIters;
-  while (UNLIKELY(si != nullptr)) {
-    si->setContainer(ad);
-    si = si->getNext();
+  if (UNLIKELY(strong_iterators_exist())) {
+    move_strong_iterators(ad, old);
   }
 
   // Steal the old array payload.
@@ -1289,18 +1267,18 @@ HphpArray* HphpArray::GrowPacked(HphpArray* old) {
 }
 
 namespace {
-  struct ElmKey {
-    ElmKey() {}
-    ElmKey(int32_t hash, StringData* key) {
-      this->hash = hash;
-      this->key = key;
-    }
-    int32_t hash;
-    union {
-      StringData* key;
-      int64_t ikey;
-    };
+struct ElmKey {
+  ElmKey() {}
+  ElmKey(int32_t hash, StringData* key)
+    : hash(hash)
+    , key(key)
+  {}
+  int32_t hash;
+  union {
+    StringData* key;
+    int64_t ikey;
   };
+};
 }
 
 void HphpArray::compact(bool renumber /* = false */) {
@@ -1318,14 +1296,20 @@ void HphpArray::compact(bool renumber /* = false */) {
     mPos.hash = 0;
     mPos.key = nullptr;
   }
-  TinyVector<ElmKey, 3> siKeys;
-  for (MArrayIterRange r(strongIterators()); !r.empty(); r.popFront()) {
-    auto ei = r.front()->m_pos;
-    if (ei != invalid_index) {
-      auto& e = data()[ei];
-      siKeys.push_back(ElmKey(e.hash(), e.key));
-    }
+
+  TinyVector<ElmKey,3> siKeys;
+  auto const checkingStrongIterators = strong_iterators_exist();
+  if (UNLIKELY(checkingStrongIterators)) {
+    for_each_strong_iterator([&] (const MIterTable::Ent& miEnt) {
+      if (miEnt.array != this) return;
+      auto const ei = miEnt.iter->m_pos;
+      if (ei != invalid_index) {
+        auto& e = data()[ei];
+        siKeys.push_back(ElmKey(e.hash(), e.key));
+      }
+    });
   }
+
   if (renumber) {
     m_nextKI = 0;
   }
@@ -1361,20 +1345,23 @@ void HphpArray::compact(bool renumber /* = false */) {
       m_pos = ssize_t(find(mPos.ikey));
     }
   }
+
   // Update strong iterators, now that compaction is complete.
+  if (LIKELY(!checkingStrongIterators)) return;
+
   int key = 0;
-  for (MArrayIterRange r(strongIterators()); !r.empty(); r.popFront()) {
-    MArrayIter* fp = r.front();
-    if (fp->m_pos != invalid_index) {
-      auto& k = siKeys[key];
-      key++;
-      if (k.hash) { // string key
-        fp->m_pos = ssize_t(find(k.key, k.hash));
-      } else { // int key
-        fp->m_pos = ssize_t(find(k.ikey));
-      }
+  for_each_strong_iterator([&] (MIterTable::Ent& miEnt) {
+    if (miEnt.array != this) return;
+    auto const iter = miEnt.iter;
+    if (iter->m_pos == invalid_index) return;
+    auto& k = siKeys[key];
+    key++;
+    if (k.hash) { // string key
+      iter->m_pos = ssize_t(find(k.key, k.hash));
+    } else { // int key
+      iter->m_pos = ssize_t(find(k.ikey));
     }
-  }
+  });
 }
 
 bool HphpArray::nextInsert(const Variant& data) {
@@ -1758,9 +1745,10 @@ HphpArray::ZAppend(ArrayData* ad, RefData* v) {
 NEVER_INLINE
 void HphpArray::adjustMArrayIter(ssize_t pos) {
   ssize_t eIPrev = Tombstone;
-  for (MArrayIterRange r(strongIterators()); !r.empty(); r.popFront()) {
-    MArrayIter* fp = r.front();
-    if (fp->m_pos == pos) {
+  for_each_strong_iterator([&] (MIterTable::Ent& miEnt) {
+    if (miEnt.array != this) return;
+    auto const iter = miEnt.iter;
+    if (iter->m_pos == pos) {
       if (eIPrev == Tombstone) {
         // eIPrev will actually be used, so properly initialize it with the
         // previous element before pos, or invalid_index if pos is the first
@@ -1768,18 +1756,18 @@ void HphpArray::adjustMArrayIter(ssize_t pos) {
         eIPrev = prevElm(data(), pos);
       }
       if (eIPrev == Empty) {
-        fp->setResetFlag(true);
+        iter->setResetFlag(true);
       }
-      fp->m_pos = eIPrev;
+      iter->m_pos = eIPrev;
     }
-  }
+  });
 }
 
 void HphpArray::erase(ssize_t pos) {
   assert(validPos(pos));
 
   // move strong iterators to the previous element
-  if (strongIterators()) adjustMArrayIter(pos);
+  if (UNLIKELY(strong_iterators_exist())) adjustMArrayIter(pos);
 
   // If the internal pointer points to this element, advance it.
   Elm* elms = data();
@@ -1860,7 +1848,9 @@ ArrayData* HphpArray::Copy(const ArrayData* ad) {
 ArrayData* HphpArray::CopyWithStrongIterators(const ArrayData* ad) {
   auto a = asHphpArray(ad);
   auto copied = a->copyImpl();
-  moveStrongIterators(copied, const_cast<HphpArray*>(a));
+  if (LIKELY(strong_iterators_exist())) {
+    move_strong_iterators(copied, const_cast<HphpArray*>(a));
+  }
   return copied;
 }
 
@@ -2027,7 +2017,6 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
 
   ad->m_kindAndSize     = uint64_t{oldSize} << 32 | kMixedKind;
   ad->m_posAndCount     = uint64_t{1} << 32 | oldPosUnsigned;
-  ad->m_strongIterators = nullptr;
   ad->m_cap             = cap;
   ad->m_maskAndLoad     = uint64_t{oldSize} << 32 | mask;
   ad->m_nextKI          = oldNextKI;
@@ -2241,7 +2230,9 @@ ArrayData* HphpArray::PopPacked(ArrayData* ad, Variant& value) {
     auto i = a->m_size - 1;
     auto& tv = a->data()[i].data;
     value = tvAsCVarRef(&tv);
-    if (a->strongIterators()) a->adjustMArrayIter(i);
+    if (UNLIKELY(strong_iterators_exist())) {
+      a->adjustMArrayIter(i);
+    }
     auto oldType = tv.m_type;
     auto oldDatum = tv.m_data.num;
     a->m_size = a->m_used = i;
@@ -2276,12 +2267,14 @@ ArrayData* HphpArray::Pop(ArrayData* ad, Variant& value) {
   return a;
 }
 
-ArrayData* HphpArray::DequeuePacked(ArrayData* ad, Variant& value) {
-  auto a = asPacked(ad);
+ArrayData* HphpArray::DequeuePacked(ArrayData* adInput, Variant& value) {
+  auto a = asPacked(adInput);
   if (a->hasMultipleRefs()) a = a->copyPacked();
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
-  a->freeStrongIterators();
+  if (UNLIKELY(strong_iterators_exist())) {
+    free_strong_iterators(a);
+  }
   auto elms = a->data();
   if (a->m_size > 0) {
     auto n = a->m_size - 1;
@@ -2297,12 +2290,14 @@ ArrayData* HphpArray::DequeuePacked(ArrayData* ad, Variant& value) {
   return a;
 }
 
-ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
-  auto a = asMixed(ad);
+ArrayData* HphpArray::Dequeue(ArrayData* adInput, Variant& value) {
+  auto a = asMixed(adInput);
   if (a->hasMultipleRefs()) a = a->copyMixed();
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
-  a->freeStrongIterators();
+  if (UNLIKELY(strong_iterators_exist())) {
+    free_strong_iterators(a);
+  }
   auto elms = a->data();
   ssize_t pos = a->nextElm(elms, invalid_index);
   if (validPos(pos)) {
@@ -2322,12 +2317,16 @@ ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
   return a;
 }
 
-ArrayData* HphpArray::PrependPacked(ArrayData* ad, const Variant& v, bool copy) {
-  auto a = asPacked(ad);
+ArrayData* HphpArray::PrependPacked(ArrayData* adInput,
+                                    const Variant& v,
+                                    bool copy) {
+  auto a = asPacked(adInput);
   if (a->hasMultipleRefs()) a = a->copyPackedAndResizeIfNeeded();
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is added to the beginning of the array.
-  a->freeStrongIterators();
+  if (UNLIKELY(strong_iterators_exist())) {
+    free_strong_iterators(a);
+  }
   size_t n = a->m_size;
   if (n > 0) {
     if (n == a->m_cap) a = GrowPacked(a);
@@ -2340,13 +2339,17 @@ ArrayData* HphpArray::PrependPacked(ArrayData* ad, const Variant& v, bool copy) 
   return a;
 }
 
-ArrayData* HphpArray::Prepend(ArrayData* ad, const Variant& v, bool copy) {
-  auto a = asMixed(ad);
+ArrayData* HphpArray::Prepend(ArrayData* adInput,
+                              const Variant& v,
+                              bool copy) {
+  auto a = asMixed(adInput);
   if (a->hasMultipleRefs()) a = a->copyMixedAndResizeIfNeeded();
 
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is added to the beginning of the array.
-  a->freeStrongIterators();
+  if (UNLIKELY(strong_iterators_exist())) {
+    free_strong_iterators(a);
+  }
 
   auto elms = a->data();
   if (a->m_used == 0 || !isTombstone(elms[0].data.m_type)) {

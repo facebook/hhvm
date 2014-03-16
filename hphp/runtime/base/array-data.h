@@ -61,16 +61,16 @@ protected:
     , m_size(-1)
     , m_pos(0)
     , m_count(0)
-    , m_strongIterators(nullptr)
   {}
 
   /*
    * NOTE: HphpArray no longer calls this destructor.  If you need to
    * add logic, revisit HphpArray::Release{,Packed}.
+   *
+   * Include hphp-array-defs.h if you need the definition of this
+   * destructor.  It is inline only.
    */
-  ~ArrayData() {
-    if (UNLIKELY(m_strongIterators != nullptr)) freeStrongIterators();
-  }
+  ~ArrayData();
 
 public:
   IMPLEMENT_COUNTABLE_METHODS
@@ -277,47 +277,20 @@ public:
   ssize_t iter_advance(ssize_t prev) const;
   ssize_t iter_rewind(ssize_t prev) const;
 
-  /**
-   * Mutable iteration APIs
-   *
-   * The following six methods are used for mutable iteration. For all
-   * methods except newMArrayIter(), it is the caller's responsibility
-   * to ensure that the specified MArrayIter 'fp' is registered with
-   * this array and hasn't already been freed.
-   */
-
-  /**
-   * Create a new mutable iterator and register it with this array (the mutable
-   * iterator will be stored in 'fp'). The new iterator will point to whatever
-   * element the array's internal cursor currently points to. Note that the
-   * array keeps track of all mutable iterators that have registered with it.
-   *
-   * A mutable iterator remains live until one of the following happens:
-   *   (1) The mutable iterator is freed by calling the freeMArrayIter() method.
-   *   (2) The array's refcount drops to 0 and the array frees all mutable
-   *       iterators that were registered with it.
-   *   (3) Some other kind of "invalidation" event happens to the array that
-   *       causes it to free all mutable iterators that were registered with
-   *       it (ex. array_shift() is called on the array).
-   */
-  void newMArrayIter(MArrayIter &fp);
-
-  /**
-   * Frees a mutable iterator that was registered with this array.
-   */
-  void freeMArrayIter(MArrayIter &fp);
-
-  /**
-   * Checks if a mutable iterator points to a valid element within this array.
-   * This will return false if the iterator points past the last element, or
-   * if the iterator points before the first element.
+  /*
+   * Checks if a mutable iterator points to a valid element within
+   * this array.  The iterator must be associated with this array (see
+   * array-iterator.cpp).  This will return false if the iterator
+   * points past the last element, or if the iterator points before
+   * the first element.
    */
   bool validMArrayIter(const MArrayIter& fp) const;
 
-  /**
-   * Advances the mutable iterator to the next element in the array. Returns
-   * false if the iterator has moved past the last element, otherwise returns
-   * true.
+  /*
+   * Advances the mutable iterator to the next element in the array.
+   * The iterator must be associated with this array (see
+   * array-iterator.cpp).  Returns false if the iterator has moved
+   * past the last element, otherwise returns true.
    */
   bool advanceMArrayIter(MArrayIter& fp);
 
@@ -462,14 +435,6 @@ private:
   }
 
 protected:
-  void freeStrongIterators();
-  static void moveStrongIterators(ArrayData* dest, ArrayData* src);
-  MArrayIter* strongIterators() const {
-    return m_strongIterators;
-  }
-  void setStrongIterators(MArrayIter* p) {
-    m_strongIterators = p;
-  }
   // error-handling helpers
   static const Variant& getNotFound(int64_t k);
   static const Variant& getNotFound(const StringData* k);
@@ -502,7 +467,6 @@ protected:
     };
     uint64_t m_posAndCount;   // be careful, m_pos is signed
   };
-  MArrayIter* m_strongIterators; // head of linked list
 };
 
 /*

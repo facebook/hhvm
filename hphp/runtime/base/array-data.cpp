@@ -38,7 +38,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 static_assert(
-  sizeof(ArrayData) == 24,
+  sizeof(ArrayData) == 16,
   "Performance is sensitive to sizeof(ArrayData)."
   " Make sure you changed it with good reason and then update this assert.");
 
@@ -471,44 +471,7 @@ ArrayData *ArrayData::Dequeue(ArrayData* a, Variant &value) {
   return a;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// MutableArrayIter related functions
-
-void ArrayData::newMArrayIter(MArrayIter &fp) {
-  assert(!fp.getContainer());
-  fp.setContainer(this);
-  fp.setNext(strongIterators());
-  setStrongIterators(&fp);
-  fp.m_pos = m_pos;
-}
-
-void ArrayData::freeMArrayIter(MArrayIter &fp) {
-  assert(strongIterators() && fp.getContainer() == this);
-  // search for fp in our list, then remove it. Usually its the first one.
-  MArrayIter* p = strongIterators();
-  if (p == &fp) {
-    setStrongIterators(p->getNext());
-    fp.setContainer(nullptr);
-    return;
-  }
-  for (; p->getNext(); p = p->getNext()) {
-    if (p->getNext() == &fp) {
-      p->setNext(p->getNext()->getNext());
-      fp.setContainer(nullptr);
-      return;
-    }
-  }
-  // If the strong iterator list was empty or if fp could not be
-  // found in the strong iterator list, then we are in a bad state
-  assert(false);
-}
-
-void ArrayData::freeStrongIterators() {
-  for (MArrayIterRange r(strongIterators()); !r.empty(); r.popFront()) {
-    r.front()->setContainer(nullptr);
-  }
-  setStrongIterators(nullptr);
-}
+//////////////////////////////////////////////////////////////////////
 
 const Variant& ArrayData::endRef() {
   if (m_pos != invalid_index) {

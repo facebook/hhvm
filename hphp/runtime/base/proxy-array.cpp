@@ -48,7 +48,6 @@ ProxyArray* ProxyArray::Make(ArrayData* ad) {
   ret->m_kind            = kProxyKind;
   ret->m_pos             = ArrayData::invalid_index;
   ret->m_count           = 1;
-  ret->m_strongIterators = nullptr;
 
   ad->incRefCount();
   ret->m_ad = ad;

@@ -17,10 +17,15 @@
 #ifndef incl_HPHP_ARRAY_ITERATOR_H_
 #define incl_HPHP_ARRAY_ITERATOR_H_
 
+#include <array>
+#include <cstdint>
+
+#include "hphp/util/tls-pod-bag.h"
 #include "hphp/util/min-max-macros.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/base/hphp-array.h"
 
 namespace HPHP {
@@ -377,40 +382,43 @@ class ArrayIter {
  * MArrayIter may instead be bound directly to an array which m_data
  * points to.  (This is because the array is created as a temporary.)
  *
- * Foreach by reference is a pain. Iteration needs to be robust in the
- * face of two challenges: (1) the case where an element is unset
+ * Foreach by reference is a pain.  Iteration needs to be robust in
+ * the face of two challenges: (1) the case where an element is unset
  * during iteration, and (2) the case where user code modifies the
- * inner cell to be a different array or a non-array value. In such
+ * RefData to be a different array or a non-array value.  In such
  * cases, we should never crash and ideally when an element is unset
  * we should be able to keep track of where we are in the array.
  *
  * MArrayIter works by "registering" itself with the array being
- * iterated over.  The array maintains a linked list of the
- * MArrayIter's actively iterating over it. When an element is unset,
- * the MArrayIter's that were pointing to that element are moved back
- * one position before the element is unset. Note that it is possible
- * for an iterator to point to the position before the first element
- * (this is what the "reset" flag is for). This dance allows
- * MArrayIter to keep track of where it is in the array even when
- * elements are unset.
+ * iterated over, in a way that any array can find out all active
+ * MArrayIters associated with it (if any).  See tl_miter_table below.
+ *
+ * Using this association, when an array mutation occurs, if there are
+ * active MArrayIters the array will update them to ensure they behave
+ * coherently.  For example, if an element is unset, the MArrayIter's
+ * that were pointing to that element are moved to point to the
+ * element before the element being unset.
+ *
+ * Note that it is possible for an iterator to point to the position
+ * before the first element (this is what the "reset" flag is for).
  *
  * MArrayIter has also has a m_container field to keep track of which
- * array it has "registered" itself with. By comparing the array
- * pointed to by m_var with the array pointed to by m_container,
+ * array it has "registered" itself with.  By comparing the array
+ * pointed to through m_ref with the array pointed to by m_container,
  * MArrayIter can detect if user code has modified the inner cell to
- * be a different array or a non-array value. When this happens, the
+ * be a different array or a non-array value.  When this happens, the
  * MArrayIter unregisters itself with the old array (pointed to by
  * m_container) and registers itself with the new array (pointed to by
- * m_var->m_data.parr) and resumes iteration at the position pointed
- * to by the new array's internal cursor (ArrayData::m_pos). If m_var
- * points to a non-array value, iteration terminates.
+ * m_ref->tv().m_data.parr) and resumes iteration at the position
+ * pointed to by the new array's internal cursor (ArrayData::m_pos).
+ * If m_ref points to a non-array value, iteration terminates.
  */
 struct MArrayIter {
   MArrayIter()
     : m_data(nullptr)
     , m_pos(0)
     , m_container(nullptr)
-    , m_next(nullptr)
+    , m_resetFlag(false)
   {}
 
   explicit MArrayIter(RefData* ref);
@@ -485,19 +493,9 @@ struct MArrayIter {
   void setContainer(ArrayData* arr) {
     m_container = arr;
   }
-  MArrayIter* getNext() const {
-    return (MArrayIter*)(m_resetBits & ~1);
-  }
-  void setNext(MArrayIter* fp) {
-    assert((intptr_t(fp) & 1) == 0);
-    m_resetBits = intptr_t(fp) | intptr_t(getResetFlag());
-  }
-  bool getResetFlag() const {
-    return m_resetBits & 1;
-  }
-  void setResetFlag(bool reset) {
-    m_resetBits = intptr_t(getNext()) | intptr_t(reset);
-  }
+
+  bool getResetFlag() const { return m_resetFlag; }
+  void setResetFlag(bool reset) { m_resetFlag = reset; }
 
 private:
   ArrayData* getData() const {
@@ -536,29 +534,66 @@ private:
   // differ in cases where user code has modified the inner cell to be a
   // different array or non-array value.
   ArrayData* m_container;
-  // m_next is used so that multiple MArrayIter's iterating over the same array
-  // can be chained together into a singly linked list. The low bit of m_next
-  // is used to track the state of the "reset" flag.
-  union {
-    MArrayIter* m_next;
-    intptr_t m_resetBits;
-  };
+  // The m_resetFlag is used to indicate a mutable array iterator is
+  // "before the first" position in the array.
+  uint32_t m_unused;
+  uint32_t m_resetFlag;
 };
 
+//////////////////////////////////////////////////////////////////////
+
 /*
- * Range which visits each entry in a list of MArrayIter. Removing the
- * front element will crash but removing an already-visited element
- * or future element will work.
+ * Active mutable iterators are associated with their corresponding
+ * arrays using a table in thread local storage.  The iterators
+ * themselves can find their registered container using their
+ * m_container pointer, but arrays must linearly search this table to
+ * go the other direction.
+ *
+ * This scheme is optimized for the overwhelmingly common case that
+ * there are no active mutable array iterations in the whole request.
+ * When there are active mutable iterators, it is also overwhelmingly
+ * the case that there is only one, and on real applications exceeding
+ * 4 or 5 simultaneously is apparently rare.
+ *
+ * This table has the following semantics:
+ *
+ *   o If there are any 'active' MArrayIters (i.e. ones that are
+ *     actually associated with arrays), one of them will be present
+ *     in the first Ent slot in this table.  This is so that any array
+ *     can check that there are no active MArrayIters just by
+ *     comparing the first slot of this table with null.  (See
+ *     strong_iterators_exist().)
+ *
+ *   o Secondly we expect that we essentially never exceed a small
+ *     number iterators (outside of code specifically designed to
+ *     stress mutable array iteration).  We've chosen 7 preallocated
+ *     slots because it fills out two cache lines, and we've observed
+ *     4 or 5 occasionally in some real programs.  If there are
+ *     actually more live than 7, we allocate additional space and
+ *     point to it with 'extras'.
+ *
+ *   o The entries in this table (including 'extras') are not
+ *     guaranteed to be contiguous.  Empty entries may be present in
+ *     the middle, and there is no ordering.
+ *
+ *   o If an entry has a non-null array pointer, it must have a
+ *     non-null iter pointer.  Checking either one for null are both
+ *     valid ways to check if a slot is empty.
  */
-struct MArrayIterRange {
-  explicit MArrayIterRange(MArrayIter* list) : m_fpos(list) {}
-  MArrayIterRange(const MArrayIterRange& other) : m_fpos(other.m_fpos) {}
-  bool empty() const { return m_fpos == 0; }
-  MArrayIter* front() const { assert(!empty()); return m_fpos; }
-  void popFront() { assert(!empty()); m_fpos = m_fpos->getNext(); }
-private:
-  MArrayIter* m_fpos;
+struct MIterTable {
+  struct Ent { ArrayData* array; MArrayIter* iter; };
+
+  std::array<Ent,7> ents;
+  // Slow path: we expect this `extras' list to rarely be allocated.
+  TlsPodBag<Ent,smart::Allocator<Ent>> extras;
 };
+static_assert(sizeof(MIterTable) == 2*64, "");
+extern __thread MIterTable tl_miter_table;
+
+void free_strong_iterators(ArrayData*);
+void move_strong_iterators(ArrayData* dest, ArrayData* src);
+
+//////////////////////////////////////////////////////////////////////
 
 class CufIter {
  public:
@@ -606,6 +641,8 @@ private:
     CufIter cufiter;
   } m_u;
 } __attribute__ ((aligned(16)));
+
+//////////////////////////////////////////////////////////////////////
 
 int64_t new_iter_array(Iter* dest, ArrayData* arr, TypedValue* val);
 template <bool withRef>

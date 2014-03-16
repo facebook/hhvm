@@ -19,11 +19,18 @@
 
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/array-iterator-defs.h"
 
 #include "hphp/util/stacktrace-profiler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+inline ArrayData::~ArrayData() {
+  if (UNLIKELY(strong_iterators_exist())) {
+    free_strong_iterators(this);
+  }
+}
 
 inline void HphpArray::initHash(int32_t* hash, size_t tableSize) {
   wordfill(hash, Empty, tableSize);
@@ -199,14 +206,6 @@ inline size_t HphpArray::computeMaxElms(uint32_t tableMask) {
 inline size_t HphpArray::computeDataSize(uint32_t tableMask) {
   return (tableMask + 1) * sizeof(int32_t) +
          computeMaxElms(tableMask) * sizeof(Elm);
-}
-
-inline void ArrayData::moveStrongIterators(ArrayData* dest, ArrayData* src) {
-  for (MArrayIterRange r(src->strongIterators()); !r.empty(); r.popFront()) {
-    r.front()->setContainer(dest);
-  }
-  dest->m_strongIterators = src->m_strongIterators;
-  src->m_strongIterators = 0;
 }
 
 //////////////////////////////////////////////////////////////////////

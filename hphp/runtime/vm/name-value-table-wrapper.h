@@ -57,6 +57,7 @@ struct NameValueTableWrapper : public ArrayData {
     : ArrayData(kNvtwKind)
     , m_tab(tab)
   {}
+  ~NameValueTableWrapper();
 
 public: // ArrayData implementation
   static void Release(ArrayData*) {}

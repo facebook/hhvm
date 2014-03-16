@@ -313,10 +313,15 @@ Variant f_fpassthru(const Resource& handle) {
   return f->print();
 }
 
-Variant f_fwrite(const Resource& handle, const String& data, int64_t length /* = 0 */) {
+Variant f_fwrite(const Resource &handle, const String& data,
+                 int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
   int64_t ret = f->write(data, length);
-  if (ret < 0) ret = 0;
+  if (ret < 0l) {
+    raise_notice("fwrite(): send of %d bytes failed with errno=%d %s", 
+                 data.size(), errno, folly::errnoStr(errno).c_str());
+    ret = 0;
+  }
   return ret;
 }
 

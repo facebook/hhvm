@@ -1,7 +1,10 @@
-.function array_filter($arr = no_args, $func = start("""null"""), $res = start) {
+.function array_filter($arr = no_args, $func = start("""null"""), $res = start("""null""")) {
           .numiters 2;
 
-# if we get here, a value was supplied for $res
+# if we get here, a value was supplied for $res. NULL is OK.
+          IssetL $func
+          JmpZ start
+
           String "array_filter() expects at most 2 parameters"
           Jmp warning
 no_args:  String "array_filter() expects at least 1 parameter, 0 given"

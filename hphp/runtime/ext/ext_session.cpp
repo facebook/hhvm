@@ -1131,13 +1131,14 @@ static bool ini_on_update_trans_sid(const bool& value) {
 }
 
 static bool ini_on_update_save_dir(const std::string& value) {
-  if (value.find('\0') >= 0) {
+  if (value.find('\0') != std::string::npos) {
     return false;
   }
   const char *path = value.data() + value.rfind(';') + 1;
   if (File::TranslatePath(path).empty()) {
     return false;
   }
+  PS(save_path) = path;
   return true;
 }
 

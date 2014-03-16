@@ -24,7 +24,7 @@ env:
   - TEST_RUN_MODE="-m jit slow -I /^hphp\/test\/slow\/[a-df-nw-x].*/"
   - TEST_RUN_MODE="-m jit slow -E /^hphp\/test\/slow\/[a-df-nw-x].*/"
   - TEST_RUN_MODE="-m jit zend -I /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
-  - TEST_RUN_MODE="-m jit zend -E /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/'
+  - TEST_RUN_MODE="-m jit zend -E /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
   - TEST_RUN_MODE="-m jit -r quick"
   - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[a-b].*/"
   - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[df-h].*/"

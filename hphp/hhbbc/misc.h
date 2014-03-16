@@ -121,36 +121,6 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Sum of SString or a borrowed_ptr<T>.
- */
-template<class T>
-struct SStringOr {
-  explicit SStringOr(SString s)
-    : bits(reinterpret_cast<uintptr_t>(s) | 0x1)
-  {}
-
-  explicit SStringOr(borrowed_ptr<T> t)
-    : bits(reinterpret_cast<uintptr_t>(t))
-  {}
-
-  SString str() const {
-    return isStr() ? reinterpret_cast<SString>(bits & ~0x1) : nullptr;
-  }
-
-  borrowed_ptr<T> other() const {
-    return isStr() ? nullptr : reinterpret_cast<T*>(bits);
-  }
-
-private:
-  bool isStr() const { return bits & 0x1; }
-
-private:
-  uintptr_t bits;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-/*
  * A smart pointer that does deep copies when you copy construct it.
  */
 template<class T>

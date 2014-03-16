@@ -273,7 +273,8 @@ struct ClassInfo {
 
 namespace res {
 
-Class::Class(borrowed_ptr<const Index> idx, SStringOr<ClassInfo> val)
+Class::Class(borrowed_ptr<const Index> idx,
+             Either<SString,borrowed_ptr<ClassInfo>> val)
   : index(idx)
   , val(val)
 {}
@@ -281,16 +282,15 @@ Class::Class(borrowed_ptr<const Index> idx, SStringOr<ClassInfo> val)
 // Class type operations here are very conservative for now.
 
 bool Class::same(const Class& o) const {
-  if (auto s = val.str()) return s == o.val.str();
-  return val.other() == o.val.other();
+  return val == o.val;
 }
 
 bool Class::subtypeOf(const Class& o) const {
-  auto s1 = val.str();
-  auto s2 = o.val.str();
+  auto s1 = val.left();
+  auto s2 = o.val.left();
   if (s1 || s2) return s1 == s2;
-  auto c1 = val.other();
-  auto c2 = o.val.other();
+  auto c1 = val.right();
+  auto c2 = o.val.right();
   if (c1->baseList.size() >= c2->baseList.size()) {
     return c1->baseList[c2->baseList.size() - 1] == c2;
   }
@@ -299,10 +299,10 @@ bool Class::subtypeOf(const Class& o) const {
 
 bool Class::couldBe(const Class& o) const {
   // If either types are not unique return true
-  if (val.str() || o.val.str()) return true;
+  if (val.left() || o.val.left()) return true;
 
-  auto c1 = val.other();
-  auto c2 = o.val.other();
+  auto c1 = val.right();
+  auto c2 = o.val.right();
   // if one or the other is an interface return true for now.
   // TODO(#3621433): better interface stuff
   if (c1->cls->attrs & AttrInterface || c2->cls->attrs & AttrInterface) {
@@ -319,17 +319,25 @@ bool Class::couldBe(const Class& o) const {
 }
 
 SString Class::name() const {
-  return val.str() ? val.str() : val.other()->cls->name;
+  return val.match(
+    [] (SString s) { return s; },
+    [] (borrowed_ptr<ClassInfo> ci) { return ci->cls->name; }
+  );
 }
 
 bool Class::couldBeOverriden() const {
-  return val.str() ? true : !(val.other()->cls->attrs & AttrNoOverride);
+  return val.match(
+    [] (SString) { return true; },
+    [] (borrowed_ptr<ClassInfo> cinfo) {
+      return !(cinfo->cls->attrs & AttrNoOverride);
+    }
+  );
 }
 
 folly::Optional<Class> Class::commonAncestor(const Class& o) const {
-  if (val.str() || o.val.str()) return folly::none;
-  auto const c1 = val.other();
-  auto const c2 = o.val.other();
+  if (val.left() || o.val.left()) return folly::none;
+  auto const c1 = val.right();
+  auto const c2 = o.val.right();
   // Walk the arrays of base classes until they match. For common ancestors
   // to exist they must be on both sides of the baseList at the same positions
   ClassInfo* ancestor = nullptr;
@@ -343,14 +351,18 @@ folly::Optional<Class> Class::commonAncestor(const Class& o) const {
   if (ancestor == nullptr) {
     return folly::none;
   }
-  return res::Class { index, SStringOr<ClassInfo>(ancestor) };
+  return res::Class { index, ancestor };
 }
 
 std::string show(const Class& c) {
-  if (auto s = c.val.str()) return s->data();
-  return folly::format(
-    "{}*", c.val.other()->cls->name->data()
-  ).str();
+  return c.val.match(
+    [] (SString s) -> std::string {
+      return s->data();
+    },
+    [] (borrowed_ptr<ClassInfo> cinfo) {
+      return folly::format("{}*", cinfo->cls->name->data()).str();
+    }
+  );
 }
 
 Func::Func(borrowed_ptr<const Index> idx, Rep val)
@@ -951,7 +963,7 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
     // aliases aren't allowed everywhere we're doing resolve_class
     // calls.)
     if (!m_data->typeAliases.count(clsName)) {
-      return res::Class { this, SStringOr<ClassInfo>(clsName) };
+      return res::Class { this, clsName };
     }
     return folly::none;
   };
@@ -985,7 +997,7 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
         }
         assert(0);
       }
-      return res::Class { this, SStringOr<ClassInfo>(cinfo) };
+      return res::Class { this, cinfo };
     }
     break;
   }
@@ -1008,8 +1020,8 @@ res::Class Index::builtin_class(SString name) const {
       name->data());
     std::abort();
   }
-  assert(rcls->val.other() &&
-    (rcls->val.other()->cls->attrs & AttrBuiltin));
+  assert(rcls->val.right() &&
+    (rcls->val.right()->cls->attrs & AttrBuiltin));
   return *rcls;
 }
 
@@ -1021,7 +1033,7 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
   }
 
   auto const dcls  = dcls_of(clsType);
-  auto const cinfo = dcls.cls.val.other();
+  auto const cinfo = dcls.cls.val.right();
 
   if (!cinfo) return folly::none;
 
@@ -1054,7 +1066,7 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
 
 folly::Optional<res::Func> Index::resolve_ctor(Context ctx,
                                                res::Class rcls) const {
-  auto const cinfo = rcls.val.other();
+  auto const cinfo = rcls.val.right();
   if (!cinfo || !cinfo->ctor) return folly::none;
   return do_resolve(cinfo->ctor);
 }
@@ -1135,8 +1147,8 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
 Type Index::lookup_class_constant(Context ctx,
                                   res::Class rcls,
                                   SString cnsName) const {
-  if (rcls.val.str()) return TInitUnc;
-  auto const cinfo = rcls.val.other();
+  if (rcls.val.left()) return TInitUnc;
+  auto const cinfo = rcls.val.right();
 
   auto const it = cinfo->clsConstants.find(cnsName);
   if (it != end(cinfo->clsConstants)) {

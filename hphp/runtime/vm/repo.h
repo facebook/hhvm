@@ -192,7 +192,7 @@ public:
   void disconnect();
   void initCentral();
   std::string insertSchema(const char* path);
-  bool openCentral(const char* repoPath);
+  bool openCentral(const char* repoPath, std::string& errorMsg);
   void initLocal();
   void attachLocal(const char* repoPath, bool isWritable);
   void pragmas(int repoId);

@@ -665,10 +665,11 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
     }
     try {
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
+      Array dummyContext = Array::Create();
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_packed_array(errnum, String(e.getMessage()), errfile,
-                                errline, "", backtrace)),
+                     errline, dummyContext, backtrace)),
                 false)) {
         return true;
       }

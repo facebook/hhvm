@@ -851,8 +851,11 @@ void HhbcTranslator::emitCGetL2(int32_t id) {
 }
 
 void HhbcTranslator::emitVGetL(int32_t id) {
-  auto value = ldLoc(id, DataTypeSpecific);
-  if (!value->type().isBoxed()) {
+  auto value = ldLoc(id, DataTypeCountnessInit);
+  auto const t = value->type();
+  always_assert(t.isBoxed() || t.notBoxed());
+
+  if (t.notBoxed()) {
     if (value->isA(Type::Uninit)) {
       value = cns(Type::InitNull);
     }

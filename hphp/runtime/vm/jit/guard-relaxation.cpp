@@ -210,10 +210,13 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& guards, bool simple) {
       FTRACE(2, "relaxGuards processing {} with constraint {}\n",
              inst, constraint);
 
-      if (simple && constraint.category > DataTypeGeneric &&
-          constraint.category < DataTypeSpecific) {
-        constraint.category = DataTypeSpecific;
-      }
+      auto simplifyCategory = [simple](DataTypeCategory& cat) {
+        if (simple && cat > DataTypeGeneric && cat < DataTypeSpecific) {
+          cat = DataTypeSpecific;
+        }
+      };
+      simplifyCategory(constraint.category);
+      simplifyCategory(constraint.innerCat);
 
       auto const oldType = inst.typeParam();
       auto newType = relaxType(oldType, constraint);

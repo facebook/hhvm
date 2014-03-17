@@ -621,9 +621,9 @@ String DateTime::rfcFormat(const String& format) const {
           auto offset = m_time->z * -60;
           char abbr[9] = {0};
           snprintf(abbr, 9, "GMT%c%02d%02d",
-            !utc() ? ((offset < 0) ? '-' : '+') : '+',
-            !utc() ? abs(offset / 3600) : 0,
-            !utc() ? abs((offset % 3600) / 60) : 0 );
+            ((offset < 0) ? '-' : '+'),
+            abs(offset / 3600),
+            abs((offset % 3600) / 60));
           s.append(abbr);
         }
       }
@@ -640,7 +640,7 @@ String DateTime::rfcFormat(const String& format) const {
           snprintf(abbr, 7, "%c%02d:%02d",
             ((offset < 0) ? '-' : '+'),
             abs(offset / 3600),
-            abs((offset % 3600) / 60) );
+            abs((offset % 3600) / 60));
           s.append(abbr);
         }
       }

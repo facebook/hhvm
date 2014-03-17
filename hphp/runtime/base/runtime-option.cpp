@@ -606,6 +606,41 @@ void RuntimeOption::Load(Hdf &config,
     } else if (logger["Level"] == "Verbose") {
       Logger::LogLevel = Logger::LogVerbose;
     }
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.log.level", IniSetting::SetAndGet<std::string>(
+      [](const std::string& value) {
+        if (value == "None") {
+          Logger::LogLevel = Logger::LogNone;
+        } else if (value == "Error") {
+          Logger::LogLevel = Logger::LogError;
+        } else if (value == "Warning") {
+          Logger::LogLevel = Logger::LogWarning;
+        } else if (value == "Info") {
+          Logger::LogLevel = Logger::LogInfo;
+        } else if (value == "Verbose") {
+          Logger::LogLevel = Logger::LogVerbose;
+        } else {
+          return false;
+        }
+        return true;
+      },
+      []() {
+        switch (Logger::LogLevel) {
+          case Logger::LogNone:
+            return "None";
+          case Logger::LogError:
+            return "Error";
+          case Logger::LogWarning:
+            return "Warning";
+          case Logger::LogInfo:
+            return "Info";
+          case Logger::LogVerbose:
+            return "Verbose";
+        }
+        return "";
+      }
+    ));
+
     Logger::LogHeader = logger["Header"].getBool();
     bool logInjectedStackTrace = logger["InjectedStackTrace"].getBool();
     if (logInjectedStackTrace) {
@@ -618,6 +653,8 @@ void RuntimeOption::Load(Hdf &config,
 
     Logger::UseSyslog = logger["UseSyslog"].getBool(false);
     Logger::UseLogFile = logger["UseLogFile"].getBool(true);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.log.use_log_file", &Logger::UseLogFile);
     Logger::UseCronolog = logger["UseCronolog"].getBool(false);
     Logger::UseRequestLog = logger["UseRequestLog"].getBool(false);
     if (Logger::UseLogFile) {
@@ -628,6 +665,19 @@ void RuntimeOption::Load(Hdf &config,
       if (LogFile[0] == '|') Logger::IsPipeOutput = true;
       LogFileSymLink = logger["SymLink"].getString();
     }
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.log.file", IniSetting::SetAndGet<std::string>(
+      [](const std::string& value) {
+        LogFile = value;
+        if (!RuntimeOption::ServerExecutionMode()) {
+          LogFile.clear();
+        }
+        if (LogFile[0] == '|') Logger::IsPipeOutput = true;
+        return true;
+      }, []() {
+        return LogFile;
+      }
+    ));
     LogFileFlusher::DropCacheChunkSize =
       logger["DropCacheChunkSize"].getInt32(1 << 20);
     AlwaysEscapeLog = logger["AlwaysEscapeLog"].getBool(false);
@@ -710,10 +760,14 @@ void RuntimeOption::Load(Hdf &config,
     Host = server["Host"].getString();
     DefaultServerNameSuffix = server["DefaultServerNameSuffix"].getString();
     ServerType = server["Type"].getString(ServerType);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.server.type", &ServerType);
     ServerIP = server["IP"].getString();
     ServerFileSocket = server["FileSocket"].getString();
     ServerPrimaryIP = GetPrimaryIP();
     ServerPort = server["Port"].getUInt16(80);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.server.port", &ServerPort);
     ServerBacklog = server["Backlog"].getInt16(128);
     ServerConnectionLimit = server["ConnectionLimit"].getInt16(0);
     ServerThreadCount = server["ThreadCount"].getInt32(50);
@@ -809,6 +863,8 @@ void RuntimeOption::Load(Hdf &config,
 
     FileCache = server["FileCache"].getString();
     DefaultDocument = server["DefaultDocument"].getString();
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.server.default_document", &DefaultDocument);
     ErrorDocument404 = server["ErrorDocument404"].getString();
     normalizePath(ErrorDocument404);
     ForbiddenAs404 = server["ForbiddenAs404"].getBool();
@@ -1206,6 +1262,8 @@ void RuntimeOption::Load(Hdf &config,
         Hdf repoCentral = repo["Central"];
         // Repo.Central.Path.
         RepoCentralPath = repoCentral["Path"].getString();
+        IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                         "hhvm.repo.central.path", &RepoCentralPath);
       }
       {
         Hdf repoEval = repo["Eval"];

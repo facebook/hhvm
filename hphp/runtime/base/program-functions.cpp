@@ -201,7 +201,8 @@ void process_ini_settings(const std::string& name) {
   auto settings = IniSetting::FromStringAsMap(str, name);
 
   for (auto& item : settings.items()) {
-    IniSetting::Set(item.first.data(), item.second, IniSetting::FollyDynamic());
+    IniSetting::Set(item.first.data(), item.second,
+                    IniSetting::FollyDynamic());
   }
 }
 

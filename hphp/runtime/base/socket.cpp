@@ -49,9 +49,10 @@ Socket::Socket()
 }
 
 Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
-               int port /* = 0 */, double timeout /* = 0 */)
-  : File(true), m_port(port), m_type(type), m_error(0),
-    m_timeout(0), m_timedOut(false), m_bytesSent(0) {
+               int port /* = 0 */, double timeout /* = 0 */,
+               const StaticString& streamType /* = empty_string */)
+  : File(true, null_string, streamType.get()), m_port(port), m_type(type),
+    m_error(0), m_timeout(0), m_timedOut(false), m_bytesSent(0) {
   if (address) m_address = address;
   m_fd = sockfd;
 

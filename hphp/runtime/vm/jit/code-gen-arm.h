@@ -70,6 +70,11 @@ struct CodeGenerator {
 
   void emitJumpToBlock(CodeBlock& cb, Block* target, ConditionCode cc);
 
+  void emitCompareInt(IRInstruction* inst);
+  void emitCompareIntAndSet(IRInstruction* inst,
+                            vixl::Condition cond);
+
+
   CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
   CallDest callDest(const IRInstruction*) const;
   CallDest callDestTV(const IRInstruction*) const;

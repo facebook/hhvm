@@ -153,6 +153,8 @@ bool mustUseConst(const IRInstruction& inst, int i) {
 }
 }
 
+bool isI32(int64_t c) { return c == int32_t(c); }
+bool isU32(int64_t c) { return c == uint32_t(c); }
 namespace ARM {
 
 // Return true if the CodeGenerator method for this instruction can
@@ -185,6 +187,20 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
       return vixl::Assembler::IsImmArithmetic(cint);
     }
     break;
+  case AddInt:
+  case SubInt:
+  case EqInt:
+  case NeqInt:
+  case LtInt:
+  case GtInt:
+  case LteInt:
+  case GteInt:
+    if (i == 1) {
+      return vixl::Assembler::IsImmArithmetic(cint);
+    }
+    break;
+
+  //TODO: t3944093 add constraints for existing arm codegen
   default:
     break;
   }
@@ -207,8 +223,6 @@ Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
 
 namespace X64 {
 
-bool isI32(int64_t c) { return c == int32_t(c); }
-bool isU32(int64_t c) { return c == uint32_t(c); }
 bool okStore(int64_t c) { return isI32(c); }
 bool okCmp(int64_t c) { return isI32(c); }
 

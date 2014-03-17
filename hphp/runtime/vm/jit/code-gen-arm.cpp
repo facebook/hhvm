@@ -162,12 +162,6 @@ PUNT_OPCODE(GteX)
 PUNT_OPCODE(LteX)
 PUNT_OPCODE(EqX)
 PUNT_OPCODE(NeqX)
-PUNT_OPCODE(LtInt)
-PUNT_OPCODE(GtInt)
-PUNT_OPCODE(GteInt)
-PUNT_OPCODE(LteInt)
-PUNT_OPCODE(EqInt)
-PUNT_OPCODE(NeqInt)
 PUNT_OPCODE(Same)
 PUNT_OPCODE(NSame)
 PUNT_OPCODE(Floor)
@@ -817,6 +811,53 @@ void CodeGenerator::cgShr(IRInstruction* inst) {
   // TODO: t3870154 add shift-by-immediate support to vixl
   m_as. asrv(x2a(dstReg), x2a(srcRegL), x2a(srcRegR));
 }
+//////////////////////////////////////////////////////////////////////
+// Comparison Operations
+
+void CodeGenerator::emitCompareIntAndSet(IRInstruction *inst,
+                                         vixl::Condition cond) {
+  auto dstReg = dstLoc(0).reg();
+  emitCompareInt(inst);
+  m_as. Cset(x2a(dstReg),cond);
+}
+
+void CodeGenerator::emitCompareInt(IRInstruction* inst) {
+  auto srcRegL = srcLoc(0).reg();
+  auto srcRegR = srcLoc(1).reg();
+
+  if (srcRegR != InvalidReg) {
+    m_as. Cmp(x2a(srcRegL), x2a(srcRegR));
+  } else {
+    m_as. Cmp(x2a(srcRegL), inst->src(1)->intVal());
+  }
+}
+
+void CodeGenerator::cgLtInt(IRInstruction* inst) {
+  emitCompareIntAndSet(inst,vixl::Condition::lt);
+}
+
+void CodeGenerator::cgGtInt(IRInstruction* inst) {
+  emitCompareIntAndSet(inst,vixl::Condition::gt);
+}
+
+
+void CodeGenerator::cgGteInt(IRInstruction* inst) {
+  emitCompareIntAndSet(inst,vixl::Condition::ge);
+}
+
+void CodeGenerator::cgLteInt(IRInstruction* inst) {
+  emitCompareIntAndSet(inst,vixl::Condition::le);
+}
+
+
+void CodeGenerator::cgEqInt(IRInstruction* inst) {
+  emitCompareIntAndSet(inst,vixl::Condition::eq);
+}
+
+void CodeGenerator::cgNeqInt(IRInstruction* inst) {
+  emitCompareIntAndSet(inst,vixl::Condition::ne);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgShuffle(IRInstruction* inst) {

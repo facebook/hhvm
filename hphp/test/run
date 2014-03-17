@@ -935,7 +935,7 @@ function print_failure($argv, $results, $options) {
   }
   asort($failed);
   print "\n".count($failed)." tests failed\n";
-  print "(╯°□°）╯︵ ┻━┻)\n";
+  print "(╯°□°）╯︵ ┻━┻\n";
 
   print make_header("See the diffs:").
     implode("\n", array_map(

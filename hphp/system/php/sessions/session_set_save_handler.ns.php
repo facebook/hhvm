@@ -1,6 +1,8 @@
 <?php
 
-class _SessionForwardingHandler implements SessionHandlerInterface {
+namespace __SystemLib {
+
+class SessionForwardingHandler implements \SessionHandlerInterface {
   private $open;
   private $close;
   private $read;
@@ -60,14 +62,20 @@ class _SessionForwardingHandler implements SessionHandlerInterface {
   }
 }
 
+}
+
+namespace {
+
 function session_set_save_handler(
     $open,
     $close = null, $read = null, $write = null, $destroy = null, $gc = null) {
   if ($open instanceof SessionHandlerInterface) {
-    return hphp_session_set_save_handler($open, $close);
+    return \__SystemLib\session_set_save_handler($open, $close);
   }
-  return hphp_session_set_save_handler(
-    new _SessionForwardingHandler($open, $close, $read, $write, $destroy, $gc),
+  return \__SystemLib\session_set_save_handler(
+    new \__SystemLib\SessionForwardingHandler($open, $close, $read, $write, $destroy, $gc),
     false
   );
+}
+
 }

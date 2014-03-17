@@ -105,23 +105,6 @@
             ]
         },
         {
-            "name": "hphp_session_set_save_handler",
-            "return": {
-                "type": "Boolean"
-            },
-            "args": [
-                {
-                    "name": "sessionhandler",
-                    "type": "Object"
-                },
-                {
-                    "name": "register_shutdown",
-                    "type": "Boolean",
-                    "value": "true"
-                }
-            ]
-        },
-        {
             "name": "session_save_path",
             "desc": "session_save_path() returns the path of the current directory used to save session data.",
             "flags": [

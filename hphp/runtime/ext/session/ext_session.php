@@ -1,4 +1,15 @@
-<?php
+<?hh
+
+namespace __SystemLib {
+
+<<__Native>>
+function session_set_save_handler(
+  \SessionHandlerInterface $sessionhandler,
+  \bool $register_shutdown = true) : \bool;
+
+}
+
+namespace {
 
 /**
  * http://php.net/class.SessionHandler
@@ -54,4 +65,6 @@ class SessionHandler implements SessionHandlerInterface {
   public function gc($maxlifetime) {
     return $this->hhgc($maxlifetime);
   }
+}
+
 }

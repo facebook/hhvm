@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_session.h"
+#include "hphp/runtime/ext/session/ext_session.h"
 
 #include <string>
 
@@ -1528,7 +1528,8 @@ Variant f_session_module_name(const String& newname /* = null_string */) {
   return oldname;
 }
 
-bool f_hphp_session_set_save_handler(const Object& sessionhandler,
+bool HHVM_FUNCTION(session_set_save_handler, 
+    const Object& sessionhandler,
     bool register_shutdown /* = true */) {
 
   if (PS(mod) &&
@@ -1865,13 +1866,17 @@ static bool HHVM_METHOD(SessionHandler, hhgc, int maxlifetime) {
 static class SessionExtension : public Extension {
  public:
   SessionExtension() : Extension("session", NO_EXTENSION_VERSION_YET) { }
-  virtual void moduleLoad(Hdf config) {
+  virtual void moduleInit() {
     HHVM_ME(SessionHandler, hhopen);
     HHVM_ME(SessionHandler, hhclose);
     HHVM_ME(SessionHandler, hhread);
     HHVM_ME(SessionHandler, hhwrite);
     HHVM_ME(SessionHandler, hhdestroy);
     HHVM_ME(SessionHandler, hhgc);
+    HHVM_NAMED_FE(__SystemLib\\session_set_save_handler,
+                  HHVM_FN(session_set_save_handler)
+    );
+    loadSystemlib();
   }
 
   virtual void threadInit() {

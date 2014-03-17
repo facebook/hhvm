@@ -24,6 +24,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+void VariableUnserializer::set(const char *buf, const char *end) {
+  m_buf = buf;
+  m_end = end;
+}
+
 Variant VariableUnserializer::unserialize() {
   Variant v;
   v.unserialize(this);

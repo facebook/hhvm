@@ -52,6 +52,7 @@ public:
         m_unknownSerializable(allowUnknownSerializableClass),
         m_classWhiteList(class_whitelist) {}
 
+  void set(const char *buf, const char *end);
   Type getType() const { return m_type;}
   bool allowUnknownSerializableClass() const { return m_unknownSerializable;}
   bool isWhitelistedClass(const String& cls_name) const;

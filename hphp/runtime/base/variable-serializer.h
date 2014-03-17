@@ -60,7 +60,7 @@ public:
   /**
    * Top level entry function called by f_ functions.
    */
-  String serialize(const Variant& v, bool ret);
+  String serialize(const Variant& v, bool ret, bool keepCount = false);
   String serializeValue(const Variant& v, bool limit);
 
   // Serialize with limit size of output, always return the serialized string.

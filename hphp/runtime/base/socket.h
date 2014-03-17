@@ -93,6 +93,8 @@ protected:
 
   bool closeImpl();
   bool waitForData();
+private:
+  void inferStreamType();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

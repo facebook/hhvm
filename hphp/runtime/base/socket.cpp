@@ -71,6 +71,11 @@ Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
   s_socket_data->m_lastErrno = errno;
   setTimeout(tv);
   m_isLocal = (type == AF_UNIX);
+
+  // Attempt to infer stream type only if it was not explicitly specified.
+  if (empty_string == streamType) {
+    inferStreamType();
+  }
 }
 
 Socket::~Socket() {
@@ -238,6 +243,37 @@ Array Socket::getMetaData() {
 
 int64_t Socket::tell() {
   return m_bytesSent;
+}
+
+// Tries to infer stream type based on getsockopt() values.
+// If no conclusive match can be found, leaves m_streamType
+// as its default value of empty_string.
+void Socket::inferStreamType() {
+  int result, type;
+  socklen_t len = sizeof(type);
+  result = getsockopt(m_fd, SOL_SOCKET, SO_TYPE, &type, &len);
+  if (result != 0) {
+    // getsockopt error.
+    // Nothing to do here because the default stream type is empty_string.
+    return;
+  }
+
+  if (m_type == AF_INET || m_type == AF_INET6) {
+    if (type == SOCK_STREAM) {
+      m_streamType = StaticString("tcp_socket").get();
+    } else if (type == SOCK_DGRAM) {
+      m_streamType = StaticString("udp_socket").get();
+    }
+  } else if (m_type == AF_UNIX) {
+    if (type == SOCK_STREAM) {
+      m_streamType = StaticString("unix_socket").get();
+    } else if (type == SOCK_DGRAM) {
+      m_streamType = StaticString("udg_socket").get();
+    }
+  }
+
+  // Nothing to do in default case because the default stream type is
+  // empty_string.
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -28,7 +28,7 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_datetime.h"
-#include "hphp/runtime/ext/ext_debugger.h"
+#include "hphp/runtime/ext/debugger/ext_debugger.h"
 #include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/ext/ext_fb.h"

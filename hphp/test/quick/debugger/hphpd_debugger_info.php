@@ -4,7 +4,7 @@
 function main() {
   $attached = hphp_debugger_attached();
   var_dump($attached);
-  $info = hphp_get_debugger_info();
+  $info = \__SystemLib\debugger_get_info();
   var_dump($info);
 }
 

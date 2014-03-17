@@ -35,20 +35,6 @@
             },
             "args": [
             ]
-        },
-        {
-            "name": "hphp_get_debugger_info",
-            "desc": "Determine if a debugger is attached to this process and configured to debug this thread, and return information about the attached debugger.",
-            "flags": [
-                "HipHopSpecific",
-                "NoFCallBuiltin"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "An array of information about the debugger as array('clientIP' => {ip address of client}, 'clientPort' => {port of the client}). If no debugger is attached, an empty array is returned. If a script is being debugged within hphpd, the ip address and port will be null."
-            },
-            "args": [
-            ]
         }
     ],
     "classes": [

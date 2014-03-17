@@ -38,6 +38,7 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -973,6 +974,7 @@ public:
   virtual String encode() {
     StringBuffer buf;
     GlobalVariables *g = get_global_variables();
+    VariableSerializer vs(VariableSerializer::Type::Serialize);
     for (ArrayIter iter(g->get(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();
       if (key.isString()) {
@@ -980,7 +982,7 @@ public:
         if (skey.size() <= PS_BIN_MAX) {
           buf.append((unsigned char)skey.size());
           buf.append(skey);
-          buf.append(f_serialize(iter.second()));
+          buf.append(vs.serialize(iter.second(), true, true));
         }
       } else {
         raise_notice("Skipping numeric key %" PRId64, key.toInt64());
@@ -992,6 +994,8 @@ public:
   virtual bool decode(const String& value) {
     const char *endptr = value.data() + value.size();
     GlobalVariables *g = get_global_variables();
+    VariableUnserializer vu(nullptr, nullptr,
+                            VariableUnserializer::Type::Serialize);
     for (const char *p = value.data(); p < endptr; ) {
       int namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
       if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
@@ -1002,8 +1006,7 @@ public:
       String key(p + 1, namelen, CopyString);
       p += namelen + 1;
       if (has_value) {
-        VariableUnserializer vu(p, endptr,
-                                VariableUnserializer::Type::Serialize);
+        vu.set(p, endptr);
         try {
           auto& sess = g->getRef(s__SESSION);
           forceToArray(sess).set(key, vu.unserialize());
@@ -1027,6 +1030,7 @@ public:
   virtual String encode() {
     StringBuffer buf;
     GlobalVariables *g = get_global_variables();
+    VariableSerializer vs(VariableSerializer::Type::Serialize);
     for (ArrayIter iter(g->get(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();
       if (key.isString()) {
@@ -1036,7 +1040,7 @@ public:
           return String();
         }
         buf.append(PS_DELIMITER);
-        buf.append(f_serialize(iter.second()));
+        buf.append(vs.serialize(iter.second(), true, true));
       } else {
         raise_notice("Skipping numeric key %" PRId64, key.toInt64());
       }
@@ -1048,6 +1052,8 @@ public:
     const char *p = value.data();
     const char *endptr = value.data() + value.size();
     GlobalVariables *g = get_global_variables();
+    VariableUnserializer vu(nullptr, nullptr,
+                            VariableUnserializer::Type::Serialize);
     while (p < endptr) {
       const char *q = p;
       while (*q != PS_DELIMITER) {
@@ -1064,8 +1070,7 @@ public:
       String key(p, q - p, CopyString);
       q++;
       if (has_value) {
-        VariableUnserializer vu(q, endptr,
-                                VariableUnserializer::Type::Serialize);
+        vu.set(q, endptr);
         try {
           auto& sess = g->getRef(s__SESSION);
           forceToArray(sess).set(key, vu.unserialize());

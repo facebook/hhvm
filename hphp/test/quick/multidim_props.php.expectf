@@ -12,16 +12,16 @@ object(A)#1 (2) {
 }
 NULL
 HipHop Notice: Undefined property: A::$x in %s on line 14
-HipHop Warning: Cannot access property on non-object in %s on line 14
-HipHop Warning: Cannot access property on non-object in %s on line 14
-HipHop Warning: Cannot access property on non-object in %s on line 14
-HipHop Warning: Cannot access property on non-object in %s on line 14
+HipHop Notice: Cannot access property on non-object in %s on line 14
+HipHop Notice: Cannot access property on non-object in %s on line 14
+HipHop Notice: Cannot access property on non-object in %s on line 14
+HipHop Notice: Cannot access property on non-object in %s on line 14
 NULL
 HipHop Notice: Undefined property: A::$x in %s on line 16
-HipHop Warning: Cannot access property on non-object in %s on line 16
-HipHop Warning: Cannot access property on non-object in %s on line 16
-HipHop Warning: Cannot access property on non-object in %s on line 16
-HipHop Warning: Cannot access property on non-object in %s on line 16
+HipHop Notice: Cannot access property on non-object in %s on line 16
+HipHop Notice: Cannot access property on non-object in %s on line 16
+HipHop Notice: Cannot access property on non-object in %s on line 16
+HipHop Notice: Cannot access property on non-object in %s on line 16
 NULL
 NULL
 object(A)#1 (2) {
@@ -38,15 +38,15 @@ object(A)#1 (2) {
 }
 NULL
 HipHop Notice: Undefined property: A::$x in %s on line 14
-HipHop Warning: Cannot access property on non-object in %s on line 14
-HipHop Warning: Cannot access property on non-object in %s on line 14
-HipHop Warning: Cannot access property on non-object in %s on line 14
-HipHop Warning: Cannot access property on non-object in %s on line 14
+HipHop Notice: Cannot access property on non-object in %s on line 14
+HipHop Notice: Cannot access property on non-object in %s on line 14
+HipHop Notice: Cannot access property on non-object in %s on line 14
+HipHop Notice: Cannot access property on non-object in %s on line 14
 NULL
 HipHop Notice: Undefined property: A::$x in %s on line 16
-HipHop Warning: Cannot access property on non-object in %s on line 16
-HipHop Warning: Cannot access property on non-object in %s on line 16
-HipHop Warning: Cannot access property on non-object in %s on line 16
-HipHop Warning: Cannot access property on non-object in %s on line 16
+HipHop Notice: Cannot access property on non-object in %s on line 16
+HipHop Notice: Cannot access property on non-object in %s on line 16
+HipHop Notice: Cannot access property on non-object in %s on line 16
+HipHop Notice: Cannot access property on non-object in %s on line 16
 NULL
 NULL

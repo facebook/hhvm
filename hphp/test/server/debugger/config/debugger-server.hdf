@@ -21,7 +21,7 @@ Eval {
 
 Sandbox {
   SandboxMode = true
-  ConfFile = sandbox_conf
+  ConfFile = sandbox_conf.hdf
   # only match hphpd.<user>.sth.sth, not any requests
   Pattern = hphpd\.([a-z0-9_-]+)\.[a-z0-9_-]+\.[a-z0-9_-]+
 }

@@ -131,7 +131,7 @@ void Hdf::open(const char *filename) {
 
 void Hdf::append(const char *filename) {
   assert(filename && *filename);
-  if (boost::ends_with(filename, ".ini")) {
+  if (!boost::ends_with(filename, ".hdf")) {
     return;
   }
   CheckNeoError(hdf_read_file(getRaw(), (char*)filename));

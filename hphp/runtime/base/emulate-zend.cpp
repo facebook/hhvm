@@ -168,9 +168,8 @@ int emulate_zend(int argc, char** argv) {
   }
 
   if (ini_fd != -1) {
-    std::string arg("-c ");
-    arg += ini_path;
-    newargv.push_back(arg);
+    newargv.push_back("-c");
+    newargv.push_back(ini_path);
   }
 
   if (cnt < argc && strcmp(argv[cnt], "--") == 0) cnt++;

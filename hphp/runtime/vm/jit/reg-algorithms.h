@@ -33,18 +33,26 @@ struct CycleInfo {
 struct MoveInfo {
   enum class Kind { Move, Xchg };
 
-  MoveInfo(Kind kind, PhysReg reg1, PhysReg reg2):
-    m_kind(kind), m_reg1(reg1), m_reg2(reg2) {}
+  MoveInfo(Kind kind, PhysReg s, PhysReg d):
+    m_kind(kind), m_src(s), m_dst(d) {}
 
   Kind m_kind;
-  PhysReg m_reg1, m_reg2;
+  PhysReg m_src, m_dst;
 };
 
 
 bool cycleHasSIMDReg(const CycleInfo& cycle,
                      PhysReg::Map<PhysReg>& moves);
-smart::vector<MoveInfo> doRegMoves(PhysReg::Map<PhysReg>& moves,
-                                   PhysReg rTmp);
+
+// Compute a sequence of moves and swaps that will fill the dest registers in
+// the moves map with their correct source values, even if some sources are
+// also destinations. The moves map provides one source for each dest.  rTmp
+// will be used when necessary to break copy-cycles, so it is illegal to
+// specify a source for rTmp (rTmp cannot be a desination).  However, it
+// is legal for rTmp to be a source for some other destination. Since rTmp
+// cannot be a destination, it cannot be in a copy-cycle, so its value will
+// be read before we deal with cycles.
+smart::vector<MoveInfo> doRegMoves(PhysReg::Map<PhysReg>& moves, PhysReg rTmp);
 
 }}
 

@@ -691,6 +691,11 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
     }
   }
 
+  // The caller may be using rCgGP directly, or indirectly via m_rScratch.
+  // Carefully avoid using any Assembler macro-instruction that would
+  // clobber rAsm.
+  auto rTmp = rAsm;
+
   // Store any arguments past the initial 6 to the stack. This has to happen
   // before the shuffles below in case the shuffles would clobber any of the
   // srcRegs here.
@@ -700,13 +705,14 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
     assert(arg.dstReg() == InvalidReg);
     switch (arg.kind()) {
       case ArgDesc::Kind::Reg:
+        always_assert(srcReg != rTmp);
         if (arg.isZeroExtend()) {
-          a.  movzbl(rbyte(srcReg), r32(rCgGP));
-          a.  push(rCgGP);
+          a.  movzbl(rbyte(srcReg), r32(rTmp));
+          a.  push(rTmp);
         } else {
           if (srcReg.isSIMD()) {
-            emitMovRegReg(a, srcReg, rCgGP);
-            a.push(rCgGP);
+            emitMovRegReg(a, srcReg, rTmp);
+            a.push(rTmp);
           } else {
             a.push(srcReg);
           }
@@ -716,24 +722,24 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
       case ArgDesc::Kind::TypeReg:
         static_assert(kTypeWordOffset == 0 || kTypeWordOffset == 1,
                       "kTypeWordOffset value not supported");
+        always_assert(srcReg != rTmp);
         assert(srcReg.isGP());
         // x86 stacks grow down, so push higher offset items first
         if (kTypeWordOffset == 0) {
-          a.  pushl(eax); // 4 bytes of garbage overlapping m_aux
-          a.  pushl(r32(srcReg));
+          a.  push (srcReg);
         } else {
           // 4 bytes of garbage:
           a.  pushl(eax);
-          // get the type in the right place in rCgGP before pushing it
-          a.  movb (rbyte(srcReg), rbyte(rCgGP));
-          a.  shll (CHAR_BIT, r32(rCgGP));
-          a.  pushl(r32(rCgGP));
+          // get the type in the right place in rTmp before pushing it
+          a.  movb (rbyte(srcReg), rbyte(rTmp));
+          a.  shll (CHAR_BIT, r32(rTmp));
+          a.  pushl(r32(rTmp));
         }
         break;
 
       case ArgDesc::Kind::Imm:
-        a.    emitImmReg(arg.imm(), rCgGP);
-        a.    push(rCgGP);
+        a.    emitImmReg(arg.imm(), rTmp);
+        a.    push(rTmp);
         break;
 
       case ArgDesc::Kind::Addr:
@@ -749,41 +755,45 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
   }
 
   // Execute the plan
-  auto const howTo = doRegMoves(moves, rCgGP);
+  auto const howTo = doRegMoves(moves, rTmp);
   for (auto& how : howTo) {
-    if (how.m_kind == MoveInfo::Kind::Move) {
-      if (how.m_reg2 == rCgGP) {
-        emitMovRegReg(a, how.m_reg1, how.m_reg2);
-      } else {
-        ArgDesc* argDesc = argDescs[how.m_reg2];
-        if (argDesc == nullptr) {
-          // when no ArgDesc is available is a straight reg to reg swap
-          emitMovRegReg(a, how.m_reg1, how.m_reg2);
+    switch (how.m_kind) {
+      case MoveInfo::Kind::Move: {
+        if (how.m_dst == rTmp) {
+          emitMovRegReg(a, how.m_src, how.m_dst);
         } else {
-          ArgDesc::Kind kind = argDesc->kind();
-          if (kind == ArgDesc::Kind::Reg || kind == ArgDesc::Kind::TypeReg) {
-            if (argDesc->isZeroExtend()) {
-              assert(how.m_reg1.isGP());
-              assert(how.m_reg2.isGP());
-              a. movzbl (rbyte(how.m_reg1), r32(how.m_reg2));
-            } else {
-              emitMovRegReg(a, how.m_reg1, how.m_reg2);
-            }
+          ArgDesc* argDesc = argDescs[how.m_dst];
+          if (argDesc == nullptr) {
+            // when no ArgDesc is available is a straight reg to reg copy
+            emitMovRegReg(a, how.m_src, how.m_dst);
           } else {
-            assert(kind == ArgDesc::Kind::Addr);
-            assert(how.m_reg1.isGP());
-            assert(how.m_reg2.isGP());
-            a. lea (how.m_reg1[argDesc->imm().q()], how.m_reg2);
-          }
-          if (kind != ArgDesc::Kind::TypeReg) {
-            argDesc->markDone();
+            ArgDesc::Kind kind = argDesc->kind();
+            if (kind == ArgDesc::Kind::Reg || kind == ArgDesc::Kind::TypeReg) {
+              if (argDesc->isZeroExtend()) {
+                assert(how.m_src.isGP());
+                assert(how.m_dst.isGP());
+                a. movzbl (rbyte(how.m_src), r32(how.m_dst));
+              } else {
+                emitMovRegReg(a, how.m_src, how.m_dst);
+              }
+            } else {
+              assert(kind == ArgDesc::Kind::Addr);
+              assert(how.m_src.isGP());
+              assert(how.m_dst.isGP());
+              a. lea (how.m_src[argDesc->imm().q()], how.m_dst);
+            }
+            if (kind != ArgDesc::Kind::TypeReg) {
+              argDesc->markDone();
+            }
           }
         }
+        break;
       }
-    } else {
-      assert(how.m_reg1.isGP());
-      assert(how.m_reg2.isGP());
-      a.    xchgq  (how.m_reg1, how.m_reg2);
+    case MoveInfo::Kind::Xchg:
+      assert(how.m_src.isGP());
+      assert(how.m_dst.isGP());
+      a.    xchgq  (how.m_src, how.m_dst);
+      break;
     }
   }
 
@@ -2775,18 +2785,23 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
       if (s1 != InvalidReg) moves[d1] = s1;
     }
   }
-  // Compute a serial order of moves and swaps
-  auto howTo = doRegMoves(moves, rCgGP);
+  // Compute a serial order of moves and swaps.  We can use m_rScratch
+  // here since cgShuffle is a standalone HHIR instruction, and sometimes
+  // its a low-numbered register.
+  auto rTmp = m_rScratch;
+  auto howTo = doRegMoves(moves, rTmp);
   for (auto& how : howTo) {
     if (how.m_kind == MoveInfo::Kind::Move) {
-      emitMovRegReg(m_as, how.m_reg1, how.m_reg2);
+      emitMovRegReg(m_as, how.m_src, how.m_dst);
     } else {
       // do swap - only support GPRs
-      assert(how.m_reg1.isGP() && how.m_reg2.isGP());
-      m_as.xchgq(how.m_reg1, how.m_reg2);
+      assert(how.m_src.isGP() && how.m_dst.isGP());
+      m_as.xchgq(how.m_src, how.m_dst);
     }
   }
-  // now do reg<-mem loads and reg<-imm moves
+  // now do reg<-mem loads and reg<-imm moves. We have already
+  // dealt with stores, moves, and swaps, so all rTmp is available
+  // even if it originally contained a value.
   for (uint32_t i = 0, n = inst->numSrcs(); i < n; ++i) {
     auto src = inst->src(i);
     auto rs = srcLoc(i);
@@ -2805,12 +2820,13 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
       if (src->type().needsValueReg() ||
           RuntimeOption::EvalHHIRGenerateAsserts) {
         if (r.isGP()) {
+          // never needs scratch register
           m_as.emitImmReg(imm, r);
         } else {
           // load imm -> simd.  We could do this without a scratch
           // using a pc-relative load.
-          m_as.emitImmReg(imm, rCgGP);
-          emitMovRegReg(m_as, rCgGP, r);
+          m_as.emitImmReg(imm, rTmp);
+          emitMovRegReg(m_as, rTmp, r);
         }
       }
     }

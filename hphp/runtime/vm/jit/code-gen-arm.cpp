@@ -618,9 +618,9 @@ void CodeGenerator::cgAssertType(IRInstruction* inst) {
   auto howTo = doRegMoves(moves, rAsm);
   for (auto& how : howTo) {
     if (how.m_kind == MoveInfo::Kind::Move) {
-      m_as.  Mov  (x2a(how.m_reg2), x2a(how.m_reg1));
+      m_as.  Mov  (x2a(how.m_dst), x2a(how.m_src));
     } else {
-      emitXorSwap(m_as, x2a(how.m_reg2), x2a(how.m_reg1));
+      emitXorSwap(m_as, x2a(how.m_dst), x2a(how.m_src));
     }
   }
 }
@@ -883,9 +883,9 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
   auto howTo = doRegMoves(moves, rAsm);
   for (auto& how : howTo) {
     if (how.m_kind == MoveInfo::Kind::Move) {
-      emitRegGetsRegPlusImm(m_as, x2a(how.m_reg2), x2a(how.m_reg1), 0);
+      emitRegGetsRegPlusImm(m_as, x2a(how.m_dst), x2a(how.m_src), 0);
     } else {
-      emitXorSwap(m_as, x2a(how.m_reg1), x2a(how.m_reg2));
+      emitXorSwap(m_as, x2a(how.m_src), x2a(how.m_dst));
     }
   }
 
@@ -948,10 +948,10 @@ static void shuffleArgs(vixl::MacroAssembler& a,
   auto const howTo = doRegMoves(moves, rAsm);
 
   for (auto& how : howTo) {
-    auto srcReg = x2a(how.m_reg1);
-    auto dstReg = x2a(how.m_reg2);
+    auto srcReg = x2a(how.m_src);
+    auto dstReg = x2a(how.m_dst);
     if (how.m_kind == MoveInfo::Kind::Move) {
-      auto* argDesc = argDescs[how.m_reg2];
+      auto* argDesc = argDescs[how.m_dst];
       if (argDesc) {
         auto kind = argDesc->kind();
         if (kind == ArgDesc::Kind::Addr) {

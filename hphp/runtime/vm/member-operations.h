@@ -103,7 +103,9 @@ inline TypedValue initScratchKey(StringData* key) {
 
 /* keyAsValue transforms a key into a value suitable for indexing into an
  * Array. */
-inline const Variant& keyAsValue(TypedValue key) { return tvAsCVarRef(&key); }
+inline const Variant& keyAsValue(TypedValue& key) {
+  return tvAsCVarRef(&key);
+}
 inline int64_t keyAsValue(int64_t key)           { return key; }
 inline StrNR keyAsValue(StringData* key)         { return StrNR(key); }
 
@@ -289,7 +291,7 @@ inline TypedValue* ElemObject(TypedValue& tvRef, TypedValue* base,
 /**
  * $result = $base[$key];
  */
-template <bool warn, KeyType keyType = KeyType::Any>
+template <bool warn, KeyType keyType>
 NEVER_INLINE TypedValue* ElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
                                   TypedValue* base, key_type<keyType> key) {
   DataType type;
@@ -346,7 +348,7 @@ inline TypedValue* ElemDArrayPre<KeyType::Any>(Array& base, TypedValue key) {
 /**
  * ElemD when base is an Array
  */
-template <bool warn, KeyType keyType = KeyType::Any>
+template <bool warn, KeyType keyType>
 inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
   auto& baseArr = tvAsVariant(base).asArrRef();
   bool defined = !warn || baseArr.exists(keyAsValue(key));
@@ -908,7 +910,7 @@ inline void SetElemArray(TypedValue* base, key_type<keyType> key,
  * SetOpElem(), because doing so avoids a dup operation that SetOpElem() can't
  * get around.
  */
-template <bool setResult, KeyType keyType = KeyType::Any>
+template <bool setResult, KeyType keyType>
 NEVER_INLINE
 StringData* SetElemSlow(TypedValue* base, key_type<keyType> key, Cell* value) {
   DataType type;
@@ -1383,7 +1385,7 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfArray: {
-    TypedValue* result = ElemDArray<MoreWarnings>(base, key);
+    TypedValue* result = ElemDArray<MoreWarnings, KeyType::Any>(base, key);
     IncDecBody<setResult>(op, result, &dest);
     break;
   }
@@ -1525,7 +1527,7 @@ inline void UnsetElemArray(TypedValue* base, key_type<keyType> key) {
 /**
  * unset($base[$member])
  */
-template <KeyType keyType = KeyType::Any>
+template <KeyType keyType>
 NEVER_INLINE
 void UnsetElemSlow(TypedValue* base, key_type<keyType> key) {
   DataType type;
@@ -1652,7 +1654,7 @@ inline bool IssetEmptyElemArray(TypedValue* base, key_type<keyType> key) {
 /**
  * isset/empty($base[$key])
  */
-template <bool useEmpty, KeyType keyType = KeyType::Any>
+template <bool useEmpty, KeyType keyType>
 NEVER_INLINE
 bool IssetEmptyElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
                         TypedValue* base, key_type<keyType> key) {

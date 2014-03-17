@@ -127,7 +127,7 @@ struct RefData {
     not_reached();
 #endif
   }
-  static constexpr ptrdiff_t tvOffset() { return offsetof(RefData, m_tv); }
+  static constexpr int tvOffset() { return offsetof(RefData, m_tv); }
 
   void assertValid() const {
     assert(m_magic == Magic::kMagic);

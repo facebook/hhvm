@@ -59,8 +59,8 @@ public:
     Reg,     // Normal register
     TypeReg, // TypedValue's m_type field. Might need arch-specific
              // mangling before call depending on TypedValue's layout.
-    Imm,     // Immediate
-    Addr,    // Address
+    Imm,     // 64-bit Immediate
+    Addr,    // Address (register plus 32-bit displacement)
     None,    // Nothing: register will contain garbage
   };
 
@@ -68,19 +68,29 @@ public:
   PhysReg srcReg() const { return m_srcReg; }
   Kind kind() const { return m_kind; }
   void setDstReg(PhysReg reg) { m_dstReg = reg; }
-  Immed imm() const { return m_imm; }
-  bool isZeroExtend() const {return m_zeroExtend;}
+  Immed64 imm() const { assert(m_kind == Kind::Imm); return m_imm64; }
+  Immed disp() const { assert(m_kind == Kind::Addr); return m_disp32; }
+  bool isZeroExtend() const { return m_zeroExtend; }
   bool done() const { return m_done; }
   void markDone() { m_done = true; }
 
 private: // These should be created using ArgGroup.
   friend struct ArgGroup;
 
-  explicit ArgDesc(Kind kind, PhysReg srcReg, Immed immVal)
+  explicit ArgDesc(Kind kind, Immed64 imm)
+    : m_kind(kind)
+    , m_srcReg(InvalidReg)
+    , m_dstReg(reg::noreg)
+    , m_imm64(imm)
+    , m_zeroExtend(false)
+    , m_done(false)
+  {}
+
+  explicit ArgDesc(Kind kind, PhysReg srcReg, Immed disp)
     : m_kind(kind)
     , m_srcReg(srcReg)
     , m_dstReg(reg::noreg)
-    , m_imm(immVal)
+    , m_disp32(disp)
     , m_zeroExtend(false)
     , m_done(false)
   {}
@@ -91,7 +101,10 @@ private:
   Kind m_kind;
   PhysReg m_srcReg;
   PhysReg m_dstReg;
-  Immed m_imm;
+  union {
+    Immed64 m_imm64; // 64-bit plain immediate
+    Immed m_disp32;  // 32-bit displacement
+  };
   bool m_zeroExtend;
   bool m_done;
 };
@@ -132,8 +145,8 @@ struct ArgGroup {
     return m_stkArgs[i];
   }
 
-  ArgGroup& imm(uintptr_t imm) {
-    push_arg(ArgDesc(ArgDesc::Kind::Imm, InvalidReg, imm));
+  ArgGroup& imm(Immed64 imm) {
+    push_arg(ArgDesc(ArgDesc::Kind::Imm, imm));
     return *this;
   }
 
@@ -148,7 +161,7 @@ struct ArgGroup {
     return *this;
   }
 
-  ArgGroup& addr(PhysReg base, intptr_t off) {
+  ArgGroup& addr(PhysReg base, Immed off) {
     push_arg(ArgDesc(ArgDesc::Kind::Addr, base, off));
     return *this;
   }

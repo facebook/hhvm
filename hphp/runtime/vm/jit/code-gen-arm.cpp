@@ -673,7 +673,7 @@ void CodeGenerator::emitDecRefStaticType(Type type,
 }
 
 void CodeGenerator::emitDecRefDynamicType(vixl::Register baseReg,
-                                          ptrdiff_t offset) {
+                                          int offset) {
   // Make sure both temp registers are still available
   assert(!baseReg.Is(rAsm));
   assert(!baseReg.Is(rAsm2));
@@ -712,7 +712,7 @@ void CodeGenerator::emitDecRefDynamicType(vixl::Register baseReg,
 
 void CodeGenerator::emitDecRefMem(Type type,
                                   vixl::Register baseReg,
-                                  ptrdiff_t offset) {
+                                  int offset) {
   if (type.needsReg()) {
     emitDecRefDynamicType(baseReg, offset);
   } else if (type.maybeCounted()) {
@@ -974,7 +974,7 @@ static void shuffleArgs(vixl::MacroAssembler& a,
       if (argDesc) {
         auto kind = argDesc->kind();
         if (kind == ArgDesc::Kind::Addr) {
-          emitRegGetsRegPlusImm(a, dstReg, srcReg, argDesc->imm().q());
+          emitRegGetsRegPlusImm(a, dstReg, srcReg, argDesc->disp().l());
         } else {
           if (argDesc->isZeroExtend()) {
             // "Unsigned eXTend Byte". The dest reg is a 32-bit reg but this
@@ -1538,7 +1538,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   auto numArgs = args.size();
 
   DataType funcReturnType = func->returnType();
-  ptrdiff_t returnOffset = MISOFF(tvBuiltinReturn);
+  int returnOffset = MISOFF(tvBuiltinReturn);
 
   if (FixupMap::eagerRecord(func)) {
     // Save VM registers

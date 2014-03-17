@@ -744,7 +744,7 @@ struct RawMemData : IRExtraData {
 # undef RAW_TYPE
 
   struct Info {
-    const int64_t offset;
+    const int offset;
     const int size;
     const JIT::Type type;
   };

@@ -55,7 +55,7 @@ StoreImmPatcher::StoreImmPatcher(CodeBlock& cb, uint64_t initial,
   X64Assembler as { cb };
   m_is32 = deltaFits(initial, sz::dword);
   if (m_is32) {
-    as.storeq(initial, r64(base)[offset]);
+    as.storeq(int32_t(initial), r64(base)[offset]);
     m_addr = cb.frontier() - 4;
   } else {
     as.movq(initial, r64(reg));
@@ -248,9 +248,9 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   }
   emitEagerVMRegSave(as, RegSaveFlags::SaveFP);
   if (persist) {
-    as.  emitImmReg(0, JIT::reg::rAsm);
+    as.  emitImmReg(0, JIT::X64::rAsm);
   } else {
-    as.  emitImmReg((uint64_t)start, JIT::reg::rAsm);
+    as.  emitImmReg((uint64_t)start, JIT::X64::rAsm);
   }
   TRACE(3, ")\n");
   as.    emitImmReg(req, JIT::reg::rdi);
@@ -326,8 +326,8 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
 
   Asm a { mainCode };
   if (debug) {
-    a.    storeq (kUninitializedRIP,
-                  rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]);
+    auto off = cellsToBytes(numArgs) + AROFF(m_savedRip);
+    emitImmStoreq(a, kUninitializedRIP, rVmSp[off]);
   }
   // Stash callee's rVmFp into rStashedAR for the callee's prologue
   emitLea(a, rVmSp[cellsToBytes(numArgs)], rStashedAR);

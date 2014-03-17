@@ -235,8 +235,8 @@ inline DataType getDataTypeValue(unsigned index) {
 }
 
 // These are used in type_variant.cpp and mc-generator.cpp
-const unsigned int kShiftDataTypeToDestrIndex = 4;
-const unsigned int kDestrTableSize = 6;
+const int kShiftDataTypeToDestrIndex = 4;
+const int kDestrTableSize = 6;
 
 #define TYPE_TO_DESTR_IDX(t) ((t) >> kShiftDataTypeToDestrIndex)
 

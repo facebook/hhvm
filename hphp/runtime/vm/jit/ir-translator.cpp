@@ -59,9 +59,6 @@ static const bool debug = true;
 static const bool debug = false;
 #endif
 
-#define TVOFF(nm) offsetof(TypedValue, nm)
-#define AROFF(nm) offsetof(ActRec, nm)
-
 #define HHIR_EMIT(op, ...)                      \
   do {                                          \
     m_hhbcTrans.emit ## op(__VA_ARGS__);        \

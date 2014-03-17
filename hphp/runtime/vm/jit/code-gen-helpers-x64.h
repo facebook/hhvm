@@ -65,6 +65,18 @@ void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg);
 void emitCall(Asm& as, TCA dest);
 void emitCall(Asm& as, CppCall call);
 
+// store imm to the 8-byte memory location at ref. Warning: don't use this
+// if you wanted an atomic store; large imms cause two stores.
+template<class Ref>
+void emitImmStoreq(Asm& as, Immed64 imm, Ref ref) {
+  if (imm.fits(sz::dword)) {
+    as.storeq(imm.l(), ref); // sign-extend to 64-bit then storeq
+  } else {
+    as.storel(int32_t(imm.q()), ref);
+    as.storel(int32_t(imm.q() >> 32), Ref(ref.r + 4));
+  }
+}
+
 void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
 
 void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,

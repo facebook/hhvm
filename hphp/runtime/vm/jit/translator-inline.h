@@ -22,9 +22,6 @@
 #include <boost/noncopyable.hpp>
 #include "hphp/runtime/base/execution-context.h"
 
-#define TVOFF(nm) offsetof(TypedValue, nm)
-#define AROFF(nm) offsetof(ActRec, nm)
-
 /*
  * Because of a circular dependence with ExecutionContext, these
  * translation-related helpers cannot live in translator.h.
@@ -62,11 +59,11 @@ inline bool isNativeImplCall(const Func* funcd, int numArgs) {
   return funcd && funcd->methInfo() && numArgs == funcd->numParams();
 }
 
-inline ptrdiff_t cellsToBytes(int nCells) {
-  return nCells * sizeof(Cell);
+inline int cellsToBytes(int nCells) {
+  return safe_cast<int32_t>(nCells * ssize_t(sizeof(Cell)));
 }
 
-inline int64_t localOffset(int64_t locId) {
+inline int localOffset(int locId) {
   return -cellsToBytes(locId + 1);
 }
 

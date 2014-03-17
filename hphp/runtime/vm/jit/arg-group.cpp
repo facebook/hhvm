@@ -22,14 +22,14 @@ namespace HPHP {  namespace JIT {
 TRACE_SET_MOD(hhir);
 
 ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val)
-  : m_imm(-1), m_zeroExtend(false), m_done(false) {
+  : m_zeroExtend(false), m_done(false) {
   if (tmp->isConst()) {
     // tmp is a constant
     m_srcReg = InvalidReg;
     if (val) {
-      m_imm = tmp->type() <= Type::Null ? 0 : tmp->rawVal();
+      m_imm64 = tmp->type() <= Type::Null ? 0 : tmp->rawVal();
     } else {
-      m_imm = toDataTypeForCall(tmp->type());
+      m_imm64 = toDataTypeForCall(tmp->type());
     }
     m_kind = Kind::Imm;
     return;
@@ -37,7 +37,6 @@ ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val)
   if (val) {
     assert(loc.reg(0) != InvalidReg);
     m_srcReg = loc.reg(0);
-    m_imm = 0;
     m_kind = Kind::Reg;
     // zero extend any boolean value that we pass to the helper in case
     // the helper expects it (e.g., as TypedValue)
@@ -47,7 +46,6 @@ ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val)
   if (tmp->numWords() > 1) {
     assert(loc.reg(1) != InvalidReg);
     m_srcReg = loc.reg(1);
-    m_imm = 0;
     // Since val is false then we're passing tmp's type. TypeReg lets
     // CodeGenerator know that the value might require some massaging
     // to be in the right format for the call.
@@ -56,7 +54,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val)
   }
   // arg is the (constant) type of a known-typed value.
   m_srcReg = InvalidReg;
-  m_imm = toDataTypeForCall(tmp->type());
+  m_imm64 = toDataTypeForCall(tmp->type());
   m_kind = Kind::Imm;
 }
 

@@ -223,7 +223,10 @@ Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
 
 namespace X64 {
 
-bool okStore(int64_t c) { return isI32(c); }
+// okStore is true if cgStore can take c as an immediate without
+// using any scratch registers.
+bool okStore(int64_t c) { return true; }
+
 bool okCmp(int64_t c) { return isI32(c); }
 
 // return true if CodeGenerator supports this operand as an
@@ -348,6 +351,18 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     break;
   case CheckPackedArrayBounds:
     if (i == 1) return okCmp(cint); // idx
+    break;
+  case CheckBounds:
+    if (i == 0) { // idx
+      return !inst.src(1)->isConst() && okCmp(cint) && cint >= 0;
+    }
+    if (i == 1) { // size
+      return !inst.src(0)->isConst() && okCmp(cint) && cint >= 0;
+    }
+    break;
+  case VerifyParamCls:
+  case VerifyRetCls:
+    if (i == 1) return okCmp(cint); // constraint class ptr
     break;
   default:
     break;

@@ -145,7 +145,7 @@ private:
                      void (Asm::*instrIR)(Immed, Reg64),
                      void (Asm::*instrR)(Reg64));
 
-  void cgVerifyClsWork(IRInstruction* inst);
+  void emitVerifyCls(IRInstruction* inst);
 
   void emitGetCtxFwdCallWithThis(PhysReg ctxReg,
                                  bool    staticCallee);
@@ -236,7 +236,7 @@ private:
   int iterOffset(uint32_t id);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
 
-  void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int64_t adjustment);
+  void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int adjustment);
   void emitConvBoolOrIntToDbl(IRInstruction* inst);
   void cgLdClsMethodCacheCommon(IRInstruction* inst, Offset offset);
   void emitLdRaw(IRInstruction* inst, size_t extraOff);

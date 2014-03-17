@@ -144,7 +144,7 @@ inline int maxFCallBuiltinArgs() {
   if (UNLIKELY(RuntimeOption::EvalSimulateARM)) {
     return kMaxFCallBuiltinArgsARM;
   }
-  return 5; // kMaxBuiltinArgsNoDouble;
+  return kMaxBuiltinArgsNoDouble;
 #endif
 }
 

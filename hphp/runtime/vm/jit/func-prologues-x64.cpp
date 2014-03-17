@@ -41,7 +41,7 @@ void emitStackCheck(X64Assembler& a, int funcDepth, Offset pc) {
   using namespace reg;
   funcDepth += kStackCheckPadding * sizeof(Cell);
 
-  uint64_t stackMask = cellsToBytes(RuntimeOption::EvalVMStackElms) - 1;
+  int stackMask = cellsToBytes(RuntimeOption::EvalVMStackElms) - 1;
   a.    movq   (rVmSp, rAsm);  // copy to destroy
   a.    andq   (stackMask, rAsm);
   a.    subq   (funcDepth + Stack::sSurprisePageSize, rAsm);
@@ -68,12 +68,13 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
 
   const int kAlign = kX64CacheLineSize;
   const int kAlignMask = kAlign - 1;
+  auto funcImm = Immed64(func);
   int loBits = uintptr_t(a.frontier()) & kAlignMask;
   int delta, size;
 
   // Ensure the immediate is safely smashable
   // the immediate must not cross a qword boundary,
-  if (!deltaFits((intptr_t)func, sz::dword)) {
+  if (!funcImm.fits(sz::dword)) {
     size = 8;
     delta = loBits + kFuncMovImm;
   } else {
@@ -87,7 +88,7 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
   }
 
   TCA aStart DEBUG_ONLY = a.frontier();
-  if (!deltaFits((intptr_t)func, sz::dword)) {
+  if (!funcImm.fits(sz::dword)) {
     a.  loadq  (rStashedAR[AROFF(m_func)], rax);
     /*
       Although func doesnt fit in a signed 32-bit immediate, it may still
@@ -100,7 +101,7 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
     ((uint64_t*)a.frontier())[-1] = uintptr_t(func);
     a.  cmpq   (rax, rdx);
   } else {
-    a.  cmpq   (func, rStashedAR[AROFF(m_func)]);
+    a.  cmpq   (funcImm.l(), rStashedAR[AROFF(m_func)]);
   }
   a.    jnz    (tx->uniqueStubs.funcPrologueRedispatch);
 
@@ -164,7 +165,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       // This should be an unusual case, so optimize for code density
       // rather than execution speed; i.e., don't unroll the loop.
       TCA loopTop = a.frontier();
-      a.    subq   (sizeof(Cell), rVmSp);
+      a.    subq   (int(sizeof(Cell)), rVmSp);
       a.    incl   (eax);
       emitStoreUninitNull(a, 0, rVmSp);
       a.    cmpl   (numParams, eax);
@@ -252,7 +253,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       // } while(++loopReg != loopEnd);
 
       emitStoreTVType(a, edx, rVmFp[loopReg]);
-      a.  addq   (sizeof(Cell), loopReg);
+      a.  addq   (int(sizeof(Cell)), loopReg);
       a.  cmpq   (loopEnd, loopReg);
       a.  jcc8   (CC_NE, topOfLoop);
     } else {
@@ -427,7 +428,8 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   a.    storeq (rInvName, strTV[TVOFF(m_data)]);
   emitStoreTVType(a, KindOfArray, arrayTV[TVOFF(m_type)]);
   if (nPassed == 0) {
-    a.  storeq (HphpArray::GetStaticEmptyArray(), arrayTV[TVOFF(m_data)]);
+    emitImmStoreq(a, HphpArray::GetStaticEmptyArray(),
+                  arrayTV[TVOFF(m_data)]);
   } else {
     a.  storeq (rax, arrayTV[TVOFF(m_data)]);
   }

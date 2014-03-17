@@ -172,6 +172,7 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   auto const rFinished = r15;
   auto const rType     = esi;
   auto const rData     = rdi;
+  int const tvSize     = sizeof(TypedValue);
 
   Asm a { mcg->code.main() };
   moveToAlign(mcg->code.main(), kNonFallthroughAlign);
@@ -207,7 +208,7 @@ asm_label(a, doRelease);
   // kNumFreeLocalsHelpers.
 asm_label(a, loopHead);
   emitDecLocal();
-  a.    addq   (sizeof(TypedValue), rIter);
+  a.    addq   (tvSize, rIter);
   a.    cmpq   (rIter, rFinished);
   a.    jnz8   (loopHead);
 
@@ -215,11 +216,11 @@ asm_label(a, loopHead);
     uniqueStubs.freeLocalsHelpers[kNumFreeLocalsHelpers - i - 1] = a.frontier();
     emitDecLocal();
     if (i != kNumFreeLocalsHelpers - 1) {
-      a.addq   (sizeof(TypedValue), rIter);
+      a.addq   (tvSize, rIter);
     }
   }
 
-  a.    addq   (AROFF(m_r) + sizeof(TypedValue), rVmSp);
+  a.    addq   (AROFF(m_r) + tvSize, rVmSp);
   a.    ret    ();
 
   uniqueStubs.add("freeLocalsHelpers", uniqueStubs.freeManyLocalsHelper);

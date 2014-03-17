@@ -93,9 +93,9 @@ struct CodeGenerator {
                     SyncOptions sync,
                     ArgGroup& args);
 
-  void emitDecRefDynamicType(vixl::Register baseReg, ptrdiff_t offset);
+  void emitDecRefDynamicType(vixl::Register baseReg, int offset);
   void emitDecRefStaticType(Type type, vixl::Register reg);
-  void emitDecRefMem(Type type, vixl::Register baseReg, ptrdiff_t offset);
+  void emitDecRefMem(Type type, vixl::Register baseReg, int offset);
 
   template<class Loc, class JmpFn>
   void emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,

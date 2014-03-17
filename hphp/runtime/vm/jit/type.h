@@ -839,8 +839,8 @@ struct TypeConstraint {
   Type assertedType;
 };
 
-const size_t kTypeWordOffset = (offsetof(TypedValue, m_type) % 8);
-const size_t kTypeShiftBits = kTypeWordOffset * CHAR_BIT;
+const int kTypeWordOffset = offsetof(TypedValue, m_type) % 8;
+const int kTypeShiftBits = kTypeWordOffset * CHAR_BIT;
 
 // left shift an immediate DataType, for type, to the correct position
 // within one of the registers used to pass a TypedValue by value.

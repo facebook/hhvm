@@ -607,6 +607,29 @@ ssize_t check_request_surprise(ThreadInfo *info) {
   return flags;
 }
 
+void throw_missing_min_arguments_nr(const char *fn, int expected, int got,
+                                   int level /* = 0 */,
+                                   TypedValue *rv /* = nullptr */) {
+  if (rv != nullptr) {
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
+  if (level == 2 || RuntimeOption::ThrowMissingArguments) {
+    if (expected == 1) {
+      raise_error(Strings::MISSING_MIN_ARGUMENT, fn, got);
+    } else {
+      raise_error(Strings::MISSING_MIN_ARGUMENTS, fn, expected, got);
+    }
+  } else {
+    if (expected == 1) {
+      raise_warning(Strings::MISSING_MIN_ARGUMENT, fn, got);
+    } else {
+      raise_warning(Strings::MISSING_MIN_ARGUMENTS, fn, expected, got);
+    }
+  }
+}
+
+
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
                                 int level /* = 0 */,
                                 TypedValue *rv /* = nullptr */) {
@@ -648,6 +671,10 @@ void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
   if (rv != nullptr) {
     rv->m_data.num = 0LL;
     rv->m_type = KindOfNull;
+  }
+  if (cmin >= 0 && count < cmin && cmin != cmax) {
+    throw_missing_min_arguments_nr(fn, cmin, count, level);
+    return;
   }
   if (cmin >= 0 && count < cmin) {
     throw_missing_arguments_nr(fn, cmin, count, level);

@@ -431,10 +431,10 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type,
       }
 
       if (bigint) {
-        if (options & k_JSON_BIGINT_AS_STRING) {
-          z = buf.detach();
-        } else {
-          z = strtod(p, NULL);
+        z = buf.detach();
+        if (!(options & k_JSON_BIGINT_AS_STRING)) {
+          // See KindOfDouble (below)
+          z = z.toDouble();
         }
       } else {
         z = int64_t(strtoll(buf.data(), nullptr, 10));
@@ -442,7 +442,16 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type,
     }
     break;
   case KindOfDouble:
-    z = buf.data() ? strtod(buf.data(), NULL) : 0.0;
+    // Can't use strtod() here since it's locale dependent
+    // JSON specifies using a '.' for decimal separators
+    // regardless of locale.
+    // Fallback on Variant's toDouble() machinery.
+    if (buf.data()) {
+      z = buf.detach();
+      z = z.toDouble();
+    } else {
+      z = 0.0;
+    }
     break;
   case KindOfString:
     z = buf.detach();

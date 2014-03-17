@@ -36,17 +36,24 @@ Variant HHVM_FUNCTION(apache_note, const String& note_name,
   return false;
 }
 
+static Array get_headers(HeaderMap& headers) {
+  Array ret;
+  for (auto& iter : headers) {
+    const auto& values = iter.second;
+    if (!values.size()) {
+      continue;
+    }
+    ret.set(String(iter.first), String(values.back()));
+  }
+  return ret;
+}
+
 Array HHVM_FUNCTION(apache_request_headers) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     HeaderMap headers;
     transport->getHeaders(headers);
-    Array ret;
-    for (auto iter = headers.begin(); iter != headers.end(); ++iter) {
-      const auto& values = iter->second;
-      ret.set(String(iter->first), String(values.back()));
-    }
-    return ret;
+    return get_headers(headers);
   }
   return Array();
 }
@@ -56,12 +63,7 @@ Array HHVM_FUNCTION(apache_response_headers) {
   if (transport) {
     HeaderMap headers;
     transport->getResponseHeaders(headers);
-    Array ret;
-    for (auto iter = headers.begin(); iter != headers.end(); ++iter) {
-      const auto& values = iter->second;
-      ret.set(String(iter->first), String(values.back()));
-    }
-    return ret;
+    return get_headers(headers);
   }
   return Array();
 }

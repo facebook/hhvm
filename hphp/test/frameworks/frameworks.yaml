@@ -285,8 +285,8 @@
     config_file: phpmyadmin/phpunit.xml.nocoverage
   phpunit:
     url: https://github.com/sebastianbergmann/phpunit.git
-    branch: "4.0.3"
-    commit: "6a0c2db"
+    branch: 4.0.9
+    commit: c7e9e4b1253142acda4cb86a7686db412684fe04
     install_root: phpunit
     test_root: phpunit
   ratchet:

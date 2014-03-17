@@ -1,3 +1,7 @@
+CountTest::testCount
+.
+CountTest::testCountDoesNotChangeIteratorKey
+.
 Extensions_RepeatedTestTest::testRepeatedMoreThanOnce
 .
 Extensions_RepeatedTestTest::testRepeatedNegative

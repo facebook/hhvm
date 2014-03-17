@@ -101,7 +101,7 @@ void QueryExpression::doRewrites(AnalysisResultPtr ar,
   // into a query (unless already cached).
   std::ostringstream serialized;
   CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel);
-  cg.setAstClassPrefix("HH\\CodeModel\\");
+  cg.setAstClassPrefix("Code");
   qe->outputCodeModel(cg);
   std::string s(serialized.str().c_str(), serialized.str().length());
   m_querystr = makeStaticString(s);
@@ -153,8 +153,9 @@ ClosureExpressionPtr QueryExpression::clientSideRewrite(AnalysisResultPtr ar,
   // Create a function statement for the lambda:
 
   // First create a formal parameter list, consisting of a single
-  // parameter that will receive an array from the query provider
-  // with an element for each server-side expression of this select clause.
+  // parameter that will receive an object from the query provider
+  // with a property for each table column that is referenced in the
+  // expression of this select clause.
   TypeAnnotationPtr type;
   bool hhType = true;
   std::string paramName = "__query_result_row__";
@@ -190,8 +191,6 @@ ClosureExpressionPtr QueryExpression::clientSideRewrite(AnalysisResultPtr ar,
   FunctionScopePtr funcScope
     (new FunctionScope(ar, false, name, func, false, 1, 1,
                        nullptr, attr, docComment, fileScope, uattrs));
-  funcScope->setParamCounts(ar, 1, 1);
-  FunctionScope::RecordFunctionInfo(name, funcScope);
   fileScope->addFunction(ar, funcScope);
   func->resetScope(funcScope, true);
   funcScope->setOuterScope(fileScope);

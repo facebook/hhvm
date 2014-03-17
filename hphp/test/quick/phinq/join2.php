@@ -9,11 +9,10 @@ class C {
 function into() { return (new C())->join(2); }
 
 $customers = new Queryable();
-$orders = new Queryable();
 
 $q = from $c in $customers
      join $o in $orders on $c->CustomerID equals $o->CustomerID into $co
-     let $n = q_count($co)
+     let $n = count($co)
      where $n >= 10
      select Map {"Name" => $c->Name, "OrderCount" => $n };
 

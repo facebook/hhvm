@@ -16,14 +16,10 @@
 
 #include "hphp/compiler/analysis/select_rewriters.h"
 #include "hphp/compiler/expression/join_clause.h"
-#include "hphp/compiler/expression/array_element_expression.h"
-#include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/expression/object_property_expression.h"
-#include "hphp/compiler/expression/qop_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/expression/simple_variable.h"
-#include "hphp/compiler/expression/unary_op_expression.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -154,135 +150,76 @@ void SelectRewriter::rewriteSelect(SelectClausePtr sc) {
 }
 
 /**
- * Constructs an expression that is a reference __query_result_row__[i]
- * where i is the index of expr in m_selectedColumns.
+ * Constructs an expression that is a reference to a property named
+ * columnName that lives in an object that is passed as the actual
+ * value of parameter __query_result_row__.
  */
-ExpressionPtr SelectRewriter::getResultColumn(ExpressionPtr expr) {
-  assert(expr != nullptr);
-  auto scope = expr->getScope();
-  auto location = expr->getLocation();
-
+ObjectPropertyExpressionPtr getResultColumn(
+  ExpressionPtr expr, std::string columnName) {
   SimpleVariablePtr obj(
-    new SimpleVariable(scope, location, "__query_result_row__")
+    new SimpleVariable(expr->getScope(),
+        expr->getLocation(), "__query_result_row__")
   );
-  ScalarExpressionPtr offset(
-    new ScalarExpression(scope, location, m_columnIndex++)
+  ScalarExpressionPtr propName(
+    new ScalarExpression(expr->getScope(),
+    expr->getLocation(), columnName)
   );
-  ArrayElementExpressionPtr ae(
-    new ArrayElementExpression(scope, location, obj, offset)
+  ObjectPropertyExpressionPtr result(
+    new ObjectPropertyExpression(expr->getScope(),
+        expr->getLocation(), obj, propName)
   );
-  return ae;
-}
-
-bool SelectRewriter::isServerSideExpression(ExpressionPtr ep) {
-  assert(ep != nullptr);
-  switch (ep->getKindOf()) {
-    case Expression::KindOfSimpleVariable: {
-      return this->isTableName(static_pointer_cast<SimpleVariable>(ep));
-    }
-    case Expression::KindOfObjectPropertyExpression: {
-      auto ope = static_pointer_cast<ObjectPropertyExpression>(ep);
-      auto obj = ope->getObject();
-      auto prop = ope->getProperty();
-      return this->isTableName(obj) && this->isColumnName(prop);
-    }
-    case Expression::KindOfSimpleFunctionCall: {
-      auto sfc = static_pointer_cast<SimpleFunctionCall>(ep);
-      if (sfc->hadBackslash() ||
-        (sfc->getClass() != nullptr && !sfc->getClassName().empty())) {
-        return false;
-      }
-      auto func_name = sfc->getName();
-      return func_name.compare(0, 2, "q_") == 0;
-    }
-    case Expression::KindOfUnaryOpExpression: {
-      auto uop = static_pointer_cast<UnaryOpExpression>(ep);
-      if (!uop->getFront()) return false;
-      switch (uop->getOp()) {
-        case '+':
-        case '-':
-        case '!':
-        case '~': {
-          auto expr = uop->getExpression();
-          return this->isServerSideExpression(expr);
-        }
-        default:
-          return false;
-      }
-    }
-    case Expression::KindOfBinaryOpExpression: {
-      auto bop = static_pointer_cast<BinaryOpExpression>(ep);
-      switch (bop->getOp()) {
-        case '+':
-        case '-':
-        case '*':
-        case '/':
-        case '%':
-        case '&':
-        case '|':
-        case '^':
-        case T_IS_IDENTICAL:
-        case T_IS_EQUAL:
-        case '>':
-        case '<':
-        case T_IS_GREATER_OR_EQUAL:
-        case T_IS_SMALLER_OR_EQUAL:
-        case T_IS_NOT_IDENTICAL:
-        case T_IS_NOT_EQUAL:
-        case T_BOOLEAN_OR:
-        case T_BOOLEAN_AND:
-        case T_LOGICAL_OR:
-        case T_LOGICAL_AND:
-        case T_LOGICAL_XOR:
-        case '.': {
-          auto expr1 = bop->getExp1();
-          auto expr2 = bop->getExp2();
-          return this->isServerSideExpression(expr1) &&
-            this->isServerSideExpression(expr2);
-        }
-        default:
-          return false;
-      }
-    }
-    case Expression::KindOfQOpExpression: {
-      auto qop = static_pointer_cast<QOpExpression>(ep);
-      auto condition = qop->getCondition();
-      auto yes = qop->getYes();
-      auto no = qop->getNo();
-      return this->isServerSideExpression(condition) &&
-        this->isServerSideExpression(no) &&
-        (yes == nullptr || this->isServerSideExpression(yes));
-    }
-    default:
-      return false;
-  }
+  return result;
 }
 
 /**
- * Rewrites the expression by replacing all subexpressions that are to be
- * evaluated by the query server, with expressions of the form
- * __query_result_row__[i] where i is the index of ep in m_selectedColumns.
+ * Rewrites the expression by replacing all expression of the type
+ * x or x->prop, where x is the name of a query local and prop is a simple
+ * string, with expressions of the type __query_result_row__->x and
+ * __query_result_row__->x::prop.
  */
 void SelectRewriter::rewriteClientSide(ExpressionPtr ep) {
   assert(ep != nullptr);
-  if (ep->getKindOf() == Expression::KindOfSelectClause) {
-    m_columnIndex = 0;
-  }
   int nkid = ep->getKidCount();
   for (int i = 0; i < nkid; i++) {
     auto kid = dynamic_pointer_cast<Expression>(ep->getNthKid(i));
     if (kid == nullptr) continue;
-    if (this->isServerSideExpression(kid)) {
-      ep->setNthKid(i, this->getResultColumn(kid));
-    } else {
-      this->rewriteClientSide(kid);
+    switch (kid->getKindOf()) {
+      case Expression::KindOfSimpleVariable: {
+        auto sv = static_pointer_cast<SimpleVariable>(kid);
+        if (this->isTableName(sv)) {
+          ep->setNthKid(i, getResultColumn(sv, sv->getName()));
+        } else {
+          this->rewriteClientSide(kid);
+        }
+        break;
+      }
+      case Expression::KindOfObjectPropertyExpression: {
+        auto ope = static_pointer_cast<ObjectPropertyExpression>(kid);
+        auto obj = ope->getObject();
+        auto prop = ope->getProperty();
+        if (this->isTableName(obj) && this->isColumnName(prop)) {
+          auto svar = static_pointer_cast<SimpleVariable>(obj);
+          auto scalar = static_pointer_cast<ScalarExpression>(prop);
+          auto qualName = svar->getName() +
+            "::" + scalar->getOriginalLiteralString();
+          ep->setNthKid(i, getResultColumn(ope, qualName));
+        } else {
+          this->rewriteClientSide(kid);
+        }
+        break;
+      }
+      default: {
+        this->rewriteClientSide(kid);
+        break;
+      }
     }
   }
 }
 
 /**
- * Traverses the expression and adds every occurrence of a subexpression
- * that are to be evaluated by the query server to the m_selectedColumns list.
+ * Traverses the expression and adds every occurrence of a subexpression of
+ * form x or x->prop, where x is the name of a query local and prop is a simple
+ * string, to the m_selectedColumns list.
  */
 void SelectRewriter::collectSelectedColumns(ExpressionPtr ep) {
   assert(ep != nullptr);
@@ -290,10 +227,27 @@ void SelectRewriter::collectSelectedColumns(ExpressionPtr ep) {
   for (int i = 0; i < nkid; i++) {
     auto kid = dynamic_pointer_cast<Expression>(ep->getNthKid(i));
     if (kid == nullptr) continue;
-    if (this->isServerSideExpression(kid)) {
-      m_selectedColumns->addElement(kid);
-    } else {
-      this->collectSelectedColumns(kid);
+    switch (kid->getKindOf()) {
+      case Expression::KindOfSimpleVariable: {
+        if (this->isTableName(kid)) {
+          m_selectedColumns->addElement(kid);
+        }
+        break;
+      }
+      case Expression::KindOfObjectPropertyExpression: {
+        auto ope = static_pointer_cast<ObjectPropertyExpression>(kid);
+        if (this->isTableName(ope->getObject()) &&
+            this->isColumnName(ope->getProperty())) {
+          m_selectedColumns->addElement(ope);
+        } else {
+          this->collectSelectedColumns(kid);
+        }
+        break;
+      }
+      default: {
+        this->collectSelectedColumns(kid);
+        break;
+      }
     }
   }
 }

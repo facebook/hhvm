@@ -54,13 +54,11 @@ ExpressionPtr CaptureExtractor::rewrite(ExpressionPtr ep) {
       return rewriteSimpleClause(static_pointer_cast<SimpleQueryClause>(ep));
     }
     case Expression::KindOfGroupClause:
+    case Expression::KindOfJoinClause:
     case Expression::KindOfOrderbyClause:
     case Expression::KindOfOrdering: {
       // leave these alone. they are query specific and not parameterizable.
       return ep;
-    }
-    case Expression::KindOfJoinClause: {
-      return rewriteJoinClause(static_pointer_cast<JoinClause>(ep));
     }
     case Expression::KindOfObjectPropertyExpression: {
       return rewriteObjectProperty(
@@ -79,9 +77,6 @@ ExpressionPtr CaptureExtractor::rewrite(ExpressionPtr ep) {
     }
     case Expression::KindOfBinaryOpExpression: {
       return rewriteBinary(static_pointer_cast<BinaryOpExpression>(ep));
-    }
-    case Expression::KindOfQOpExpression: {
-      return rewriteConditional(static_pointer_cast<QOpExpression>(ep));
     }
     case Expression::KindOfSimpleVariable: {
       return rewriteSimpleVariable(static_pointer_cast<SimpleVariable>(ep));
@@ -118,8 +113,11 @@ SimpleVariablePtr CaptureExtractor::newQueryParamRef(ExpressionPtr ae) {
 }
 
 /**
- * If the function name starts with q_ then pass the function
- * call to the query processor, after extracting the argument expressions.
+ * If one or more of the arguments of the function call depend on query only
+ * state (query local but not a query parameter reference), then rewrite
+ * all of the arguments to be query local and return the rewritten
+ * function call (the query processor has to either figure out a way to call
+ * the function or must cause a runtime error when faced with the call).
  * Otherwise, rewrite the call as a query parameter reference.
  */
 ExpressionPtr CaptureExtractor::rewriteCall(SimpleFunctionCallPtr sfc) {
@@ -128,14 +126,15 @@ ExpressionPtr CaptureExtractor::rewriteCall(SimpleFunctionCallPtr sfc) {
     (sfc->getClass() != nullptr && !sfc->getClassName().empty())) {
     return newQueryParamRef(sfc);
   }
-  auto func_name = sfc->getName();
-  if (func_name.compare(0, 2, "q_") != 0) {
-    return newQueryParamRef(sfc);
-  }
-
   auto args = sfc->getParams();
   auto pc = args == nullptr ? 0 : args->getCount();
-  if (pc == 0) return sfc;
+  bool isQueryCall = false;
+  for (int i = 0; i < pc; i++) {
+    auto arg = (*args)[i];
+    assert(arg != nullptr);
+    isQueryCall |= this->dependsOnQueryOnlyState(arg);
+  }
+  if (!isQueryCall) return newQueryParamRef(sfc);
   ExpressionListPtr newArgs(
     new ExpressionList(args->getScope(), args->getLocation())
   );
@@ -176,31 +175,6 @@ bool CaptureExtractor::dependsOnQueryOnlyState(ExpressionPtr e) {
     if (dependsOnQueryOnlyState(ei)) return true;
   }
   return false;
-}
-
-/**
- * Rewrite the operands of this expression. The query processor is expected
- * to deal with it.
- */
-QOpExpressionPtr CaptureExtractor::rewriteConditional(QOpExpressionPtr ce) {
-  assert(ce != nullptr);
-  auto condition = ce->getCondition();
-  auto yes = ce->getYes();
-  auto no = ce->getNo();
-
-  auto newCondition = rewrite(condition);
-  auto newYes = yes == nullptr ? nullptr : rewrite(yes);
-  auto newNo = rewrite(no);
-
-  if (condition == newCondition && yes == newYes && no == newNo) {
-    return ce;
-  }
-
-  QOpExpressionPtr result(
-    new QOpExpression(ce->getScope(), ce->getLocation(),
-        newCondition, newYes, newNo)
-  );
-  return result;
 }
 
 /**
@@ -313,16 +287,6 @@ SimpleQueryClausePtr CaptureExtractor::rewriteSimpleClause(
 }
 
 /*
- * The collection of a join clause has to become a query parameter
- */
-JoinClausePtr CaptureExtractor::rewriteJoinClause(JoinClausePtr jc) {
-  auto coll = newQueryParamRef(jc->getColl());
-  auto rjc = static_pointer_cast<JoinClause>(jc->clone());
-  rjc->setColl(coll);
-  return rjc;
-}
-
-/*
  * If the object expression is query local, that is, if it is a simple variable
  * referring to a name declared in a query clause, or itself a query local
  * object expression, then if keep this expression as is. If not, then
@@ -406,7 +370,6 @@ ExpressionPtr CaptureExtractor::rewriteBinary(BinaryOpExpressionPtr be) {
     case T_BOOLEAN_AND:
     case T_LOGICAL_OR:
     case T_LOGICAL_AND:
-    case T_LOGICAL_XOR:
     case '.':
       break; // Could be something the query processor can handle
 

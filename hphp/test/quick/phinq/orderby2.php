@@ -16,6 +16,6 @@ $q2 = from $o in $orders
      orderby $o->Customer->Name, $o->Total
      select $o;
 
-foreach ($q2 as $e) {
+foreach ($q as $e) {
   print_result($e);
 }

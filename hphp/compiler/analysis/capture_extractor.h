@@ -20,9 +20,7 @@
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include <vector>
 #include "hphp/compiler/expression/expression.h"
-#include "hphp/compiler/expression/join_clause.h"
 #include "hphp/compiler/expression/object_property_expression.h"
-#include "hphp/compiler/expression/qop_expression.h"
 #include "hphp/compiler/expression/query_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/expression/simple_query_clause.h"
@@ -58,8 +56,6 @@ private:
   ExpressionPtr rewriteObjectProperty(ObjectPropertyExpressionPtr ope);
   QueryExpressionPtr rewriteQuery(QueryExpressionPtr qe);
   SimpleQueryClausePtr rewriteSimpleClause(SimpleQueryClausePtr sc);
-  JoinClausePtr rewriteJoinClause(JoinClausePtr jc);
-  QOpExpressionPtr rewriteConditional(QOpExpressionPtr ce);
   SimpleVariablePtr rewriteSimpleVariable(SimpleVariablePtr sv);
   ExpressionPtr rewriteUnary(UnaryOpExpressionPtr ue);
 

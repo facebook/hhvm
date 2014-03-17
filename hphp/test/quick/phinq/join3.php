@@ -3,9 +3,6 @@
 include "queryable.inc";
 
 $customers = new Queryable();
-$orders = new Queryable();
-$details = new Queryable();
-$products = new Queryable();
 
 $q = from $c in $customers
      join $o in $orders on $c->CustomerID equals $o->CustomerID
@@ -16,13 +13,3 @@ $q = from $c in $customers
 foreach ($q as $e) {
   print_result($e);
 }
-
-$q =
-  from $c in $customers join $o in $orders join $details join $p in $products
-  select tuple($c->Name, $o->OrderDate, $p->ProductName);
-
-foreach ($q as $e) {
-  print_result($e);
-}
-
-

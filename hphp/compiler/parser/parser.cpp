@@ -1944,13 +1944,10 @@ void Parser::onWhereClause(Token &out, Token &expr) {
   out->exp = NEW_EXP(WhereClause, expr.exp);
 }
 
-void Parser::onJoinClause(Token &out, Token *var, Token &coll,
-  Token *left, Token *right) {
-  out->exp = NEW_EXP(JoinClause,
-                     var == nullptr ? "" : var->text(), coll.exp,
-                     left == nullptr ? nullptr : left->exp,
-                     right == nullptr ? nullptr : right->exp,
-                     "");
+void Parser::onJoinClause(Token &out, Token &var, Token &coll,
+  Token &left, Token &right) {
+  out->exp = NEW_EXP(JoinClause, var.text(), coll.exp,
+                     left.exp, right.exp, "");
 }
 
 void Parser::onJoinIntoClause(Token &out, Token &var, Token &coll,

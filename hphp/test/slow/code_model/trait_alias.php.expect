@@ -1,7 +1,0 @@
-<?php
-
-class A {
-  use T
-    foo as bar;
-    foo::u as y;
-}

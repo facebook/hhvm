@@ -37,12 +37,8 @@ ExpressionPtr JoinClause::clone() {
   Expression::deepCopy(exp);
   exp->m_var = m_var;
   exp->m_coll = Clone(m_coll);
-  if (m_left != nullptr) {
-    exp->m_left = Clone(m_left);
-  }
-  if (m_right != nullptr) {
-    exp->m_right = Clone(m_right);
-  }
+  exp->m_left = Clone(m_left);
+  exp->m_right = Clone(m_right);
   exp->m_group = m_group;
   return exp;
 }
@@ -55,8 +51,8 @@ ExpressionPtr JoinClause::clone() {
 
 void JoinClause::analyzeProgram(AnalysisResultPtr ar) {
   m_coll->analyzeProgram(ar);
-  if (m_left != nullptr) m_left->analyzeProgram(ar);
-  if (m_right != nullptr) m_right->analyzeProgram(ar);
+  m_left->analyzeProgram(ar);
+  m_right->analyzeProgram(ar);
 }
 
 ConstructPtr JoinClause::getNthKid(int n) const {
@@ -75,10 +71,7 @@ ConstructPtr JoinClause::getNthKid(int n) const {
 }
 
 int JoinClause::getKidCount() const {
-  int count = 1;
-  if (m_left != nullptr) count++;
-  if (m_right != nullptr) count++;
-  return count;
+  return 3;
 }
 
 void JoinClause::setNthKid(int n, ConstructPtr cp) {
@@ -100,34 +93,25 @@ void JoinClause::setNthKid(int n, ConstructPtr cp) {
 TypePtr JoinClause::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                   bool coerce) {
   m_coll->inferAndCheck(ar, Type::Some, false);
-  if (m_left != nullptr) m_left->inferAndCheck(ar, Type::Some, false);
-  if (m_right != nullptr) m_right->inferAndCheck(ar, Type::Some, false);
+  m_left->inferAndCheck(ar, Type::Some, false);
+  m_right->inferAndCheck(ar, Type::Some, false);
   return Type::Object;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void JoinClause::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 2;
-  if (!m_var.empty()) numProps++;
-  if (m_left != nullptr) numProps++;
-  if (m_right != nullptr) numProps++;
+  auto numProps = 5;
   if (!m_group.empty()) numProps++;
   cg.printObjectHeader("JoinClause", numProps);
-  if (!m_var.empty()) {
-    cg.printPropertyHeader("identifier");
-    cg.printValue(m_var);
-  }
+  cg.printPropertyHeader("identifier");
+  cg.printValue(m_var);
   cg.printPropertyHeader("collection");
   m_coll->outputCodeModel(cg);
-  if (m_left != nullptr) {
-    cg.printPropertyHeader("left");
-    m_left->outputCodeModel(cg);
-  }
-  if (m_right != nullptr) {
-    cg.printPropertyHeader("right");
-    m_right->outputCodeModel(cg);
-  }
+  cg.printPropertyHeader("left");
+  m_left->outputCodeModel(cg);
+  cg.printPropertyHeader("right");
+  m_right->outputCodeModel(cg);
   if (!m_group.empty()) {
     cg.printPropertyHeader("group");
     cg.printValue(m_group);
@@ -141,20 +125,12 @@ void JoinClause::outputCodeModel(CodeGenerator &cg) {
 // code generation functions
 
 void JoinClause::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (m_var.empty()) {
-    cg_printf("join ");
-  } else {
-    cg_printf("join %s in ", m_var.c_str());
-  }
+  cg_printf("join %s in ", m_var.c_str());
   m_coll->outputPHP(cg, ar);
-  if (m_left != nullptr) {
-    cg_printf(" on ");
-    m_left->outputPHP(cg, ar);
-  }
-  if (m_right != nullptr) {
-    cg_printf(" equals ");
-    m_right->outputPHP(cg, ar);
-  }
+  cg_printf(" on ");
+  m_left->outputPHP(cg, ar);
+  cg_printf(" equals ");
+  m_right->outputPHP(cg, ar);
   if (!m_group.empty()) {
     cg_printf(" into %s", m_group.c_str());
   }

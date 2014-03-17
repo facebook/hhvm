@@ -260,7 +260,13 @@ void Socket::inferStreamType() {
 
   if (m_type == AF_INET || m_type == AF_INET6) {
     if (type == SOCK_STREAM) {
-      m_streamType = StaticString("tcp_socket").get();
+      if (RuntimeOption::EnableHipHopSyntax) {
+        m_streamType = StaticString("tcp_socket").get();
+      } else {
+        // Note: PHP returns "tcp_socket/ssl" for this query,
+        // even though the socket is clearly not an SSL socket.
+        m_streamType = StaticString("tcp_socket/ssl").get();
+      }
     } else if (type == SOCK_DGRAM) {
       m_streamType = StaticString("udp_socket").get();
     }

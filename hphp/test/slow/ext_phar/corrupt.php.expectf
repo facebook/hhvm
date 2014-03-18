@@ -1,0 +1,8 @@
+
+Fatal error: Uncaught exception 'PharException' with message 'phar has a broken signature' in :
+Stack trace:
+#0 (): Phar->parsePhar()
+#1 (): Phar->__construct()
+#2 %s/composer-corrupt%s(13): Phar::mapPhar()
+#3 %s/test/slow/ext_phar/corrupt.php(16): include()
+#4 {main}

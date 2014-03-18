@@ -179,7 +179,8 @@ int LibEventServer::getAcceptSocket() {
         return -1;
       }
     } else {
-      Logger::Error("Fail to bind port %d", m_port);
+      Logger::Error("Fail to bind port %d: %d %s",
+                    m_port, errno, folly::errnoStr(errno).c_str());
       return -1;
     }
   }

@@ -553,7 +553,7 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
     cookie += encoded_value ? encoded_value : "";
     if (expire > 0) {
       if (expire > 253402300799LL) {
-        raise_warning("Expiry date cannot have a year greater then 9999");
+        raise_warning("Expiry date cannot have a year greater than 9999");
         return false;
       }
       cookie += "; expires=";

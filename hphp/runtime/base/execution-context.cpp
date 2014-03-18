@@ -142,8 +142,9 @@ String ExecutionContext::getMimeType() const {
     if (pos != String::npos) {
       mimetype = mimetype.substr(0, pos);
     }
-  } else if (m_transport && m_transport->sendDefaultContentType()) {
-    mimetype = m_transport->getDefaultContentType();
+  } else if (m_transport && m_transport->getUseDefaultContentType()) {
+    mimetype =
+        ThreadInfo::s_threadInfo->m_reqInjectionData.getDefaultMimeType();
   }
   return mimetype;
 }
@@ -165,7 +166,7 @@ void ExecutionContext::setContentType(const String& mimetype,
     contentType += "charset=";
     contentType += charset;
     m_transport->addHeader("Content-Type", contentType.c_str());
-    m_transport->setDefaultContentType(false);
+    m_transport->setUseDefaultContentType(false);
   }
 }
 

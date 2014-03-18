@@ -128,7 +128,6 @@ define('AllowOverride',                  1 <<  8);
 define('IsStatic',                       1 <<  9);
 define('IsCppAbstract',                  1 << 10);
 define('IsReference',                    1 << 11);
-define('IsConstructor',                  1 << 12);
 define('IsNothing',                      1 << 13);
 define('ZendCompat',                     1 << 14);
 define('IsCppSerializable',              1 << 15);

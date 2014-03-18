@@ -610,13 +610,6 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
     if (!(attr & ClassInfo::IsProtected || attr & ClassInfo::IsPrivate)) {
       attr |= ClassInfo::IsPublic;
     }
-    if (preClass() &&
-        (!strcasecmp(m_name->data(), "__construct") ||
-         (!(preClass()->attrs() & AttrTrait) &&
-          !strcasecmp(m_name->data(), preClass()->name()->data()) &&
-          !preClass()->hasMethod(String("__construct").get())))) {
-      attr |= ClassInfo::IsConstructor;
-    }
     if (attr == 0) attr = ClassInfo::IsNothing;
     mi->attribute = (ClassInfo::Attribute)attr;
     mi->name = m_name->data();

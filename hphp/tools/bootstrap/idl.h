@@ -42,7 +42,6 @@ enum FuncFlags {
   IsStatic                      = (1 <<  9),
   IsCppAbstract                 = (1 << 10),
   IsReference                   = (1 << 11),
-  IsConstructor                 = (1 << 12),
   IsNothing                     = (1 << 13),
   ZendCompat                    = (1 << 14),
   IsCppSerializable             = (1 << 15),

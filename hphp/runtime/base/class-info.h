@@ -54,7 +54,7 @@ public:
     HasCall                = IsPublic,  //    x
     AllowOverride          = IsPrivate, //                  x
     IsReference            = (1 << 11), //                  x      x     x
-    IsConstructor          = (1 << 12), //                         x
+    // Unused              = (1 << 12),
 
     // need a non-zero number for const char * maps
     IsNothing              = (1 << 13),

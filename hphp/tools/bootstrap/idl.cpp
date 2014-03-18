@@ -100,7 +100,6 @@ static const std::unordered_map<fbstring, FuncFlags> g_flagsMap =
   {"IsStatic",                       IsStatic},
   {"IsCppAbstract",                  IsCppAbstract},
   {"IsReference",                    IsReference},
-  {"IsConstructor",                  IsConstructor},
   {"IsNothing",                      IsNothing},
   {"IsCppSerializable",              IsCppSerializable},
   {"HipHopSpecific",                 HipHopSpecific},

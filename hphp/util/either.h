@@ -17,6 +17,7 @@
 #define incl_HPHP_EITHER_H_
 
 #include <cstdint>
+#include <cstddef>
 #include <type_traits>
 
 namespace HPHP {
@@ -49,12 +50,20 @@ namespace HPHP {
 template<class L, class R>
 struct Either {
   /*
-   * The default constructor creates an either that isNull.
+   * The default constructor creates an Either that isNull.
    *
    * Post: left() == nullptr && right() == nullptr
    *       isNull()
    */
   Either() : bits{0} {}
+
+  /*
+   * Create an Either that isNull.
+   *
+   * Post: left() == nullptr && right() == nullptr
+   *       isNull()
+   */
+  /* implicit */ Either(std::nullptr_t) : bits{0} {}
 
   /*
    * Create an Either in the left mode.

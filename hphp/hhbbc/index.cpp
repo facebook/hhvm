@@ -1178,6 +1178,7 @@ Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
 }
 
 bool Index::lookup_this_available(borrowed_ptr<const php::Func> f) const {
+  G g(m_data->funcInfoLock);
   auto it = m_data->funcInfo.find(f);
   return it != end(m_data->funcInfo) ? it->second.thisAvailable : false;
 }

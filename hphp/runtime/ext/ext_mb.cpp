@@ -2170,7 +2170,7 @@ bool f_mb_parse_str(const String& encoded_string,
   info.from_language          = MBSTRG(current_language);
 
   char *encstr = strndup(encoded_string.data(), encoded_string.size());
-  Array resultArr;
+  Array resultArr = Array::Create();
   mbfl_no_encoding detected =
     _php_mb_encoding_handler_ex(&info, resultArr, encstr);
   free(encstr);

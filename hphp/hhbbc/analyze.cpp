@@ -305,10 +305,11 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
     std::fprintf(
       stderr,
       "HNI class %s::%s inferred property type (%s) doesn't "
-        "match annotation\n",
+        "match annotation (%s)\n",
       clsAnalysis.ctx.cls->name->data(),
       prop.name->data(),
-      show(it->second).c_str()
+      show(it->second).c_str(),
+      show(hniTy).c_str()
     );
     always_assert(!"HNI property type annotation was wrong");
   };
@@ -370,9 +371,14 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     if (isHNIBuiltin) {
       auto const hniTy = from_hni_constraint(prop.typeConstraint);
       if (!cellTy.subtypeOf(hniTy)) {
-        std::fprintf(stderr, "hni %s::%s has impossible type\n",
+        std::fprintf(stderr, "hni %s::%s has impossible type. "
+                     "The annotation says it is type (%s) "
+                     "but the default value is type (%s).\n",
                      ctx.cls->name->data(),
-                     prop.name->data());
+                     prop.name->data(),
+                     show(hniTy).c_str(),
+                     show(cellTy).c_str()
+                     );
         always_assert(0 && "HNI systemlib has invalid type annotations");
       }
     }

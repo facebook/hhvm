@@ -2011,7 +2011,13 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
                                    bool bothPaths,
                                    SSATmp* src) {
   spillStack();
-
+  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+    // Before jumping to a merge point we have to ensure that the
+    // stack pointer is sync'ed.  Without an ExceptionBarrier the
+    // SpillStack can be removed by DCE (especially since merge points
+    // start with a DefSP to block SP-chain walking).
+    exceptionBarrier();
+  }
   auto const target  = (!bothPaths
                         || m_irb->blockIsIncompatible(taken))
     ? makeExit(taken)

@@ -747,7 +747,7 @@ class Imagick implements Countable, Iterator {
    *
    * @return array - Returns an array containing the pixels values.
    */
-  <<__Native("ActRec")>>
+  <<__Native>>
   public function exportImagePixels(int $x,
                                     int $y,
                                     int $width,
@@ -1830,7 +1830,7 @@ class Imagick implements Countable, Iterator {
    *
    * @return bool -
    */
-  <<__Native("ActRec")>>
+  <<__Native>>
   public function importImagePixels(int $x,
                                     int $y,
                                     int $width,

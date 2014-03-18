@@ -872,20 +872,10 @@ static vector<typename StorageTypeCPPType<T>::T> exportImagePixels(
   return ret;
 }
 
-static TypedValue* HHVM_MN(Imagick, exportImagePixels)(ActRec* ar_) {
-  Object this_ = ar_->m_this;
-  int64_t x;
-  int64_t y;
-  int64_t width;
-  int64_t height;
-  StringData* map_;
-  int64_t storage_;
-
-  if (!parseArgs(ar_, "llllsl", &x, &y, &width, &height, &map_, &storage_)) {
-    return arReturn(ar_, false);
-  }
-  String map(map_);
-
+static Array HHVM_METHOD(Imagick, exportImagePixels,
+                         int64_t x, int64_t y,
+                         int64_t width, int64_t height,
+                         const String& map, int64_t storage_) {
   auto wand = getMagickWandResource(this_);
   ensurePageIsValid(x, y, width, height);
   ensureChannelMapIsValid(map);
@@ -893,7 +883,7 @@ static TypedValue* HHVM_MN(Imagick, exportImagePixels)(ActRec* ar_) {
 
   if (storage == DoublePixel) {
     auto ret = exportImagePixels<DoublePixel>(wand, x, y, width, height, map);
-    return arReturn(ar_, convertArray(ret.size(), ret.data()));
+    return convertArray(ret.size(), ret.data());
   } else {
     vector<int64_t> ret;
     if (storage == CharPixel) {
@@ -903,7 +893,7 @@ static TypedValue* HHVM_MN(Imagick, exportImagePixels)(ActRec* ar_) {
       auto tmp = exportImagePixels<LongPixel>(wand, x, y, width, height, map);
       ret.assign(tmp.begin(), tmp.end());
     }
-    return arReturn(ar_, convertArray(ret.size(), ret.data()));
+    return convertArray(ret.size(), ret.data());
   }
 }
 
@@ -1889,23 +1879,10 @@ static void importImagePixels(WandResource<MagickWand>* wand,
   }
 }
 
-static TypedValue* HHVM_MN(Imagick, importImagePixels)(ActRec* ar_) {
-  Object this_ = ar_->m_this;
-  int64_t x;
-  int64_t y;
-  int64_t width;
-  int64_t height;
-  StringData* map_;
-  int64_t storage_;
-  ArrayData* pixels_;
-
-  if (!parseArgs(ar_, "llllsla",
-    &x, &y, &width, &height, &map_, &storage_, &pixels_)) {
-    return arReturn(ar_, false);
-  }
-  String map(map_);
-  Array pixels(pixels_);
-
+static bool HHVM_METHOD(Imagick, importImagePixels,
+                        int64_t x, int64_t y, int64_t width, int64_t height,
+                        const String& map, int64_t storage_,
+                        const Array& pixels) {
   auto wand = getMagickWandResource(this_);
   ensurePageIsValid(x, y, width, height);
   ensureChannelMapIsValid(map);
@@ -1927,7 +1904,7 @@ static TypedValue* HHVM_MN(Imagick, importImagePixels)(ActRec* ar_) {
   } else {
     not_reached();
   }
-  return arReturn(ar_, true);
+  return true;
 }
 
 static bool HHVM_METHOD(Imagick, labelImage, const String& label) {
@@ -2217,7 +2194,6 @@ static bool HHVM_METHOD(Imagick, orderedPosterizeImage,
 
 static TypedValue* HHVM_MN(Imagick, paintFloodfillImage)(ActRec* ar_) {
   raiseDeprecated(s_Imagick.c_str(), "paintFloodfillImage");
-
   Object this_ = ar_->m_this;
   TypedValue* fill_;
   double fuzz;

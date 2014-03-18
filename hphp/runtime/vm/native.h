@@ -116,6 +116,12 @@
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 
+// Maximum number of args for a native using double params
+constexpr int kMaxBuiltinArgs = 5;
+
+// Maximum number of args for a native using only int-like params
+constexpr int kMaxBuiltinArgsNoDouble = 15;
+
 enum Attr {
   AttrNone = 0,
   AttrActRec = 1 << 0,

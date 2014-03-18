@@ -83,9 +83,6 @@ void SETOP_BODY(TypedValue* lhs, SetOpOp op, Cell* rhs) {
 class Func;
 struct ActRec;
 
-// max number of arguments for direct call to builtin
-const int kMaxBuiltinArgs = 5;
-
 struct ExtraArgs : private boost::noncopyable {
   /*
    * Allocate an ExtraArgs structure, with arguments copied from the

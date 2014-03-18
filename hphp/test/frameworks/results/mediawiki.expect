@@ -6528,12 +6528,6 @@ MessageTest::testMessageParamSubstitution
 .
 MessageTest::testMessageParams
 .
-ORMTableTest::testIgnoreErrorsOverride
-E
-ORMTableTest::testMediaWikiTestCaseParentSetupCalled
-.
-ORMTableTest::testSingleton
-.
 OutputPageTest::testHandheld
 .
 OutputPageTest::testMediaWikiTestCaseParentSetupCalled
@@ -8740,8 +8734,6 @@ TagHookTest::testTagHooks with data set #3
 .
 TagHookTest::testTagHooks with data set #4
 .
-TestORMRowTest::testMediaWikiTestCaseParentSetupCalled
-E
 TestSample::testCheckMainPageTitleIsConsideredLocal
 .
 TestSample::testCreateBasicListOfTitles with data set #0

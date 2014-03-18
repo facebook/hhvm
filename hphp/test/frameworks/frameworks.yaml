@@ -162,11 +162,12 @@
     install_root: magento2
     test_root: magento2/dev/tests/unit
   mediawiki:
-    # Bad test data in wikimedia/mediawiki-core at the moment
+    # - Bad test data in wikimedia/mediawiki-core at the moment
+    # - Some tests have @group database set incorrectly, so are ran anyway
     url: https://github.com/fredemmott/mediawiki-core.git
     # When we move back to mediawiki-core, stable branch is wmf/1.22wmf22
     branch: hhvm-fix
-    commit: 7b44088a86b09fab2b3dc6e31348c602335f2dd5
+    commit: f5e7ff5
     install_root: mediawiki-core
     test_root: mediawiki-core/tests/phpunit
     test_file_regex: /.*(\Test.*\.php)$/

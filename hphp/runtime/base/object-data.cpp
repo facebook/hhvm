@@ -39,6 +39,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/repo.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -1059,34 +1060,44 @@ Slot ObjectData::declPropInd(TypedValue* prop) const {
 TypedValue* ObjectData::getProp(Class* ctx, const StringData* key,
                                 bool& visible, bool& accessible,
                                 bool& unset) {
-  TypedValue* prop = nullptr;
   unset = false;
+
   Slot propInd = m_cls->getDeclPropIndex(ctx, key, accessible);
   visible = (propInd != kInvalidSlot);
-  if (propInd != kInvalidSlot) {
+  if (LIKELY(propInd != kInvalidSlot)) {
     // We found a visible property, but it might not be accessible.
     // No need to check if there is a dynamic property with this name.
-    prop = &propVec()[propInd];
+    auto const prop = &propVec()[propInd];
     if (prop->m_type == KindOfUninit) {
       unset = true;
     }
-  } else {
-    assert(!visible && !accessible);
-    // We could not find a visible declared property. We need to check
-    // for a dynamic property with this name.
-    if (UNLIKELY(getAttribute(HasDynPropArr))) {
-      prop = dynPropArray()->nvGet(key);
-      if (prop) {
-        // Returned a non-declared property, we know that it is
-        // visible and accessible (since all dynamic properties are),
-        // and we know it is not unset (since unset dynamic properties
-        // don't appear in the dynamic property array).
-        visible = true;
-        accessible = true;
+
+    if (debug) {
+      if (RuntimeOption::RepoAuthoritative && Repo::get().global().UsedHHBBC) {
+        auto const repoTy = m_cls->declPropRepoAuthType(propInd);
+        always_assert(tvMatchesRepoAuthType(*prop, repoTy));
       }
     }
+
+    return prop;
   }
-  return prop;
+
+  // We could not find a visible declared property. We need to check
+  // for a dynamic property with this name.
+  assert(!visible && !accessible);
+  if (UNLIKELY(getAttribute(HasDynPropArr))) {
+    if (auto const prop = dynPropArray()->nvGet(key)) {
+      // Returned a non-declared property, we know that it is
+      // visible and accessible (since all dynamic properties are),
+      // and we know it is not unset (since unset dynamic properties
+      // don't appear in the dynamic property array).
+      visible = true;
+      accessible = true;
+      return prop;
+    }
+  }
+
+  return nullptr;
 }
 
 const TypedValue* ObjectData::getProp(Class* ctx, const StringData* key,

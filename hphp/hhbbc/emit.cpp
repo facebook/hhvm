@@ -34,6 +34,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/index.h"
 
 namespace HPHP { namespace HHBBC {
@@ -848,6 +849,8 @@ void emit_class(EmitUnitState& state,
   auto const privateStatics = state.index.lookup_private_statics(&cls);
   for (auto& prop : cls.properties) {
     auto const repoTy = [&] (const PropState& ps) {
+      // TODO(#3599292): we don't currently infer closure use var types.
+      if (is_closure(cls)) return RepoAuthType{};
       auto it = ps.find(prop.name);
       return it == end(ps) ? RepoAuthType{} : make_repo_type(ue, it->second);
     };

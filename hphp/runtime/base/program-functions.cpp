@@ -1205,6 +1205,10 @@ static int execute_program_impl(int argc, char** argv) {
     config.append(c);
   }
   RuntimeOption::Load(config, &po.confStrings);
+  for (auto& c : po.config) {
+    process_ini_settings(c);
+  }
+
   vector<string> badnodes;
   config.lint(badnodes);
   for (unsigned int i = 0; i < badnodes.size(); i++) {

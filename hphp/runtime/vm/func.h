@@ -17,15 +17,18 @@
 #ifndef incl_HPHP_VM_FUNC_H_
 #define incl_HPHP_VM_FUNC_H_
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/vm/type-constraint.h"
-#include "hphp/runtime/vm/repo-helpers.h"
-#include "hphp/runtime/vm/indexed-string-map.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/type-string.h"
+
+#include "hphp/runtime/vm/indexed-string-map.h"
+#include "hphp/runtime/vm/repo-helpers.h"
+#include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/vm/unit.h"
+
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 
@@ -38,7 +41,7 @@ class PreClassEmitter;
 /*
  * Vector of pairs (param number, offset of corresponding DV funclet).
  */
-typedef std::vector<std::pair<int,Offset> > DVFuncletsVec;
+typedef std::vector<std::pair<int,Offset>> DVFuncletsVec;
 
 /*
  * Metadata about a php function or object method.

@@ -18,7 +18,9 @@
 #ifndef incl_HPHP_DUMMY_RESOURCE_H_
 #define incl_HPHP_DUMMY_RESOURCE_H_
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/resource-data.h"
+#include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

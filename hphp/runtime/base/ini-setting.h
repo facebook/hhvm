@@ -17,13 +17,21 @@
 #ifndef incl_HPHP_INI_SETTING_H_
 #define incl_HPHP_INI_SETTING_H_
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-variant.h"
+
 #include "folly/dynamic.h"
+
+#include <cstdint>
+#include <functional>
+#include <set>
+#include <string>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class Array;
 class Extension;
+class String;
 
 bool ini_on_update(const folly::dynamic& value, bool& p);
 bool ini_on_update(const folly::dynamic& value, double& p);

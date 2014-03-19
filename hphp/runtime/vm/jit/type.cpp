@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/type.h"
+
 #include "folly/Conv.h"
-#include <vector>
 #include "folly/Format.h"
 #include "folly/MapUtil.h"
 #include "folly/gen/Base.h"
@@ -29,6 +30,7 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
+#include <vector>
 
 namespace HPHP {  namespace JIT {
 

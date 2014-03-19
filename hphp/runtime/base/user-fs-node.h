@@ -17,20 +17,23 @@
 #ifndef HPHP_USER_FS_NODE_H
 #define HPHP_USER_FS_NODE_H
 
-#include "hphp/runtime/base/directory.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/base/type-object.h"
+#include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
 
+class Array;
+struct Func;
+struct Class;
+
 class UserFSNode {
 public:
-  explicit UserFSNode(Class *cls, const Variant& context = uninit_null());
+  explicit UserFSNode(Class* cls, const Variant& context = uninit_null());
 
 protected:
-  Variant invoke(const Func *func, const String& name, const Array& args,
-                 bool &invoked);
-  Variant invoke(const Func *func, const String& name, const Array& args) {
+  Variant invoke(const Func* func, const String& name, const Array& args,
+                 bool& invoked);
+  Variant invoke(const Func* func, const String& name, const Array& args) {
     bool invoked;
     return invoke(func, name, args, invoked);
   }

@@ -13,28 +13,30 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/func.h"
 
-#include <iostream>
-#include <boost/scoped_ptr.hpp>
+#include "hphp/parser/parser.h"
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/util/atomic-vector.h"
-#include "hphp/util/trace.h"
-#include "hphp/util/debug.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/file-repository.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/strings.h"
+
 #include "hphp/runtime/vm/blob-helper.h"
-#include "hphp/runtime/vm/func-inline.h"
-#include "hphp/system/systemlib.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/native.h"
-#include "hphp/parser/parser.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/runtime.h"
+
+#include "hphp/runtime/vm/jit/mc-generator.h"
+
+#include "hphp/system/systemlib.h"
+
+#include "hphp/util/atomic-vector.h"
+#include "hphp/util/debug.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
 

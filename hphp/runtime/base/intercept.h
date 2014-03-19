@@ -16,11 +16,11 @@
 #ifndef incl_HPHP_INTERCEPT_H_
 #define incl_HPHP_INTERCEPT_H_
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/util/functional.h"
-
 namespace HPHP {
+
+class Array;
+class String;
+struct Variant;
 
 ///////////////////////////////////////////////////////////////////////////////
 // fb_intercept()
@@ -35,18 +35,18 @@ bool register_intercept(const String& name, const Variant& callback, const Varia
 /**
  * Check to see if it is actually intercepted for current request.
  */
-Variant *get_intercept_handler(const String& name, char* flag);
+Variant* get_intercept_handler(const String& name, char* flag);
 
 /**
  * Call intercept handler with original parameters.
  */
 bool handle_intercept(const Variant& handler, const String& name, const Array& params,
-                      Variant &ret);
+                      Variant& ret);
 
 /**
  * Removes a previously registered flag.
  */
-void unregister_intercept_flag(const String& name, char *flag);
+void unregister_intercept_flag(const String& name, char* flag);
 
 ///////////////////////////////////////////////////////////////////////////////
 // fb_rename_function()

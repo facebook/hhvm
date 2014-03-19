@@ -16,12 +16,11 @@
 #ifndef incl_HPHP_DEBUGGABLE_H_
 #define incl_HPHP_DEBUGGABLE_H_
 
+#include "hphp/runtime/base/type-string.h"
+
+#include <string>
 #include <utility>
 #include <vector>
-#include <string>
-
-#include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,15 +37,15 @@ public:
     SupportVerb = 4,
   };
 
-  typedef std::pair<const char *, std::string> InfoEntry;
+  typedef std::pair<const char*, std::string> InfoEntry;
   typedef std::vector<InfoEntry> InfoVec;
 
 public:
-  static void Add(InfoVec &out, const char *name, const std::string &value);
-  static void AddServerStats(InfoVec &out, const char *name,
-                             const char *statsName = nullptr);
+  static void Add(InfoVec& out, const char* name, const std::string& value);
+  static void AddServerStats(InfoVec& out, const char* name,
+                             const char* statsName = nullptr);
 
-  static std::string FormatNumber(const char *fmt, int64_t n);
+  static std::string FormatNumber(const char* fmt, int64_t n);
   static std::string FormatSize(int64_t size);
   static std::string FormatTime(int64_t milliSeconds);
 
@@ -64,7 +63,7 @@ public:
   /**
    * Fill up vector with summary information.
    */
-  virtual void debuggerInfo(InfoVec &info) {
+  virtual void debuggerInfo(InfoVec& info) {
   }
 
   /**
@@ -77,8 +76,8 @@ public:
   /**
    * Execute a debugger action.
    */
-  virtual String debuggerVerb(const std::string &verb,
-                              const std::vector<std::string> &args) {
+  virtual String debuggerVerb(const std::string& verb,
+                              const std::vector<std::string>& args) {
     return String();
   }
 };

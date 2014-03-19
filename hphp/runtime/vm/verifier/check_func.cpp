@@ -14,16 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <iomanip>
-#include <list>
-#include <cstdio>
-#include <limits>
-#include <iostream>
-
 #include "hphp/runtime/vm/verifier/check.h"
+
+#include "hphp/runtime/base/hphp-array.h"
+
 #include "hphp/runtime/vm/verifier/cfg.h"
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/runtime/vm/verifier/pretty.h"
+
+#include <cstdio>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
 
 namespace HPHP {
 namespace Verifier {

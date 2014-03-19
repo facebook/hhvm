@@ -17,13 +17,16 @@
 #ifndef incl_HPHP_CPP_BASE_EXCEPTIONS_H_
 #define incl_HPHP_CPP_BASE_EXCEPTIONS_H_
 
-#include <string>
+#include "hphp/runtime/base/types.h"
+
+#include "hphp/util/exception.h"
+
+#include "folly/String.h"
 
 #include <boost/intrusive_ptr.hpp>
 
-#include "hphp/util/exception.h"
-#include "hphp/runtime/base/types.h"
-#include "folly/String.h"
+#include <string>
+
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

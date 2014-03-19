@@ -17,17 +17,19 @@
 #ifndef incl_HPHP_JIT_TYPE_H_
 #define incl_HPHP_JIT_TYPE_H_
 
-#include <cstdint>
-#include <cstring>
+#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/type-array.h"
 
-#include "folly/Optional.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/util/data-block.h"
 
-#include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/jit/types.h"
+#include "folly/Optional.h"
+
+#include <cstdint>
+#include <cstring>
 
 namespace HPHP {
 struct Func;

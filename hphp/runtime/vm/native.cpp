@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/native.h"
+
 #include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP { namespace Native {

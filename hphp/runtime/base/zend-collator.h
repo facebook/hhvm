@@ -18,22 +18,23 @@
 #ifndef incl_HPHP_ZEND_COLLATOR_H_
 #define incl_HPHP_ZEND_COLLATOR_H_
 
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/icu/icu.h"
+
 #include <unicode/coll.h> // icu
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct Variant;
+
 #define COLLATOR_SORT_REGULAR   0
 #define COLLATOR_SORT_STRING    1
 #define COLLATOR_SORT_NUMERIC   2
 
-bool collator_sort(Variant &array, int sort_flags, bool ascending,
-                   UCollator *coll, Intl::IntlError *errcode);
-bool collator_asort(Variant &array, int sort_flags, bool ascending,
-                    UCollator *coll, Intl::IntlError *errcode);
+bool collator_sort(Variant& array, int sort_flags, bool ascending,
+                   UCollator* coll, Intl::IntlError* errcode);
+bool collator_asort(Variant& array, int sort_flags, bool ascending,
+                    UCollator* coll, Intl::IntlError* errcode);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

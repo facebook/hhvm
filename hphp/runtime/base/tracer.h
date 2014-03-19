@@ -17,12 +17,16 @@
 #ifndef incl_HPHP_TRACER_H
 #define incl_HPHP_TRACER_H
 
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/typed-value.h"
+
+#include "hphp/util/trace.h"
+
 #include <functional>
 #include <queue>
 #include <set>
 #include <vector>
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/util/trace.h"
 
 namespace HPHP {
 

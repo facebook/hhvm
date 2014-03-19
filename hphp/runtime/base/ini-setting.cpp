@@ -16,21 +16,23 @@
 
 #include "hphp/runtime/base/ini-setting.h"
 
-#define __STDC_LIMIT_MACROS
-#include <stdint.h>
-#include <boost/range/join.hpp>
-#include <map>
-
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/ini-parser/zend-ini.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-strtod.h"
+
+#include "hphp/runtime/base/ini-parser/zend-ini.h"
+
 #include "hphp/runtime/ext/ext_misc.h"
 #include "hphp/runtime/ext/extension.h"
+
 #include "hphp/util/lock.h"
+
+#define __STDC_LIMIT_MACROS
+#include <cstdint>
+#include <boost/range/join.hpp>
+#include <map>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

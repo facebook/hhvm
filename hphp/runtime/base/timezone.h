@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_TIMEZONE_H_
 #define incl_HPHP_TIMEZONE_H_
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/resource-data.h"
+#include "hphp/runtime/base/type-string.h"
 
 extern "C" {
 #include <timelib.h>
@@ -27,6 +27,9 @@ extern "C" {
 }
 
 namespace HPHP {
+
+class Array;
+template <typename T> class SmartResource;
 
 typedef std::shared_ptr<timelib_tzinfo> TimeZoneInfo;
 typedef std::map<std::string, TimeZoneInfo> MapStringToTimeZoneInfo;

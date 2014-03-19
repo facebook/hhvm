@@ -15,16 +15,19 @@
 */
 
 #include "hphp/runtime/base/user-fs-node.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
+
 #include "hphp/runtime/ext/ext_function.h"
+
+#include "hphp/runtime/vm/jit/translator-inline.h"
+
 
 namespace HPHP {
 
 StaticString s_call("__call");
 
-UserFSNode::UserFSNode(Class *cls, const Variant& context /*= null */) {
+UserFSNode::UserFSNode(Class* cls, const Variant& context /*= null */) {
   JIT::VMRegAnchor _;
-  const Func *ctor;
+  const Func* ctor;
   m_cls = cls;
   if (LookupResult::MethodFoundWithThis !=
       g_context->lookupCtorMethod(ctor, m_cls)) {
@@ -40,8 +43,8 @@ UserFSNode::UserFSNode(Class *cls, const Variant& context /*= null */) {
   m_Call = lookupMethod(s_call.get());
 }
 
-Variant UserFSNode::invoke(const Func *func, const String& name,
-                           const Array& args, bool &invoked) {
+Variant UserFSNode::invoke(const Func* func, const String& name,
+                           const Array& args, bool& invoked) {
   JIT::VMRegAnchor _;
 
   // Assume failure
@@ -106,7 +109,7 @@ Variant UserFSNode::invoke(const Func *func, const String& name,
 }
 
 const Func* UserFSNode::lookupMethod(const StringData* name) {
-  const Func *f = m_cls->lookupMethod(name);
+  const Func* f = m_cls->lookupMethod(name);
   if (!f) return nullptr;
 
   if (f->attrs() & AttrStatic) {

@@ -13,20 +13,22 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/base/array-util.h"
 
-#include <vector>
-#include <set>
-#include <utility>
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/string-util.h"
+
+#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 #include "folly/Optional.h"
 
-#include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include <set>
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

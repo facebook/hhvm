@@ -20,9 +20,10 @@ extern "C" {
 #include <timelib.h>
 }
 
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/datetime.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

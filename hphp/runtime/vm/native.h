@@ -16,9 +16,18 @@
 #ifndef _incl_HPHP_RUNTIME_VM_NATIVE_H
 #define _incl_HPHP_RUNTIME_VM_NATIVE_H
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/typed-value.h"
+
 #include "hphp/runtime/vm/func.h"
+
 #include <type_traits>
+
+namespace HPHP {
+struct ActRec;
+struct Class;
+class Object;
+};
 
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> global functions.

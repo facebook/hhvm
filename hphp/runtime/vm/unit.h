@@ -17,19 +17,23 @@
 #ifndef incl_HPHP_VM_UNIT_H_
 #define incl_HPHP_VM_UNIT_H_
 
-#include <memory>
+#include "hphp/parser/location.h"
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-string.h"
+
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/named-entity.h"
-#include "hphp/runtime/base/hphp-array.h"
-#include "hphp/util/range.h"
-#include "hphp/parser/location.h"
-#include "hphp/util/md5.h"
-#include "hphp/util/tiny-vector.h"
+#include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/type-alias.h"
+
+#include "hphp/util/md5.h"
+#include "hphp/util/range.h"
+#include "hphp/util/tiny-vector.h"
+
+#include <memory>
 
 namespace HPHP {
 // Forward declarations.

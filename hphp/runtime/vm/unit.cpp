@@ -14,37 +14,44 @@
    +----------------------------------------------------------------------+
 */
 
-#include <sys/mman.h>
+#include "hphp/runtime/vm/unit.h"
 
-#include <iostream>
-#include <iomanip>
-#include <tbb/concurrent_unordered_map.h>
-#include <boost/algorithm/string.hpp>
+#include "hphp/compiler/option.h"
+
+#include "hphp/parser/parser.h"
+
+#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/strings.h"
+
+#include "hphp/runtime/ext/ext_variable.h"
+
+#include "hphp/runtime/vm/blob-helper.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/disas.h"
+#include "hphp/runtime/vm/func-inline.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/treadmill.h"
+
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+
+#include "hphp/runtime/vm/verifier/check.h"
+
+#include "hphp/util/atomic.h"
+#include "hphp/util/file-util.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/read-only-arena.h"
 
 #include "folly/Memory.h"
 #include "folly/ScopeGuard.h"
 
-#include "hphp/compiler/option.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/atomic.h"
-#include "hphp/util/read-only-arena.h"
-#include "hphp/util/file-util.h"
-#include "hphp/parser/parser.h"
-
-#include "hphp/runtime/ext/ext_variable.h"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/blob-helper.h"
-#include "hphp/runtime/vm/disas.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/verifier/check.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/vm/func-inline.h"
-#include "hphp/runtime/base/file-repository.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/treadmill.h"
+#include <boost/algorithm/string.hpp>
+#include <sys/mman.h>
+#include <tbb/concurrent_unordered_map.h>
+#include <iostream>
+#include <iomanip>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

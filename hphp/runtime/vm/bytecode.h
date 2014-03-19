@@ -17,20 +17,22 @@
 #ifndef incl_HPHP_VM_BYTECODE_H_
 #define incl_HPHP_VM_BYTECODE_H_
 
-#include <type_traits>
-
-#include "hphp/util/arena.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/tv-arith.h"
-#include "hphp/runtime/base/tv-conversions.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-util.h"
+#include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/base/tv-conversions.h"
+#include "hphp/runtime/base/tv-helpers.h"
+
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/name-value-table.h"
+#include "hphp/runtime/vm/unit.h"
+
+#include "hphp/util/arena.h"
+
+#include <type_traits>
 
 namespace HPHP {
 
@@ -568,7 +570,7 @@ private:
 
 public:
   static const int sSurprisePageSize;
-  static const uint sMinStackElms;
+  static const unsigned sMinStackElms;
   static void ValidateStackSize();
   Stack();
   ~Stack();

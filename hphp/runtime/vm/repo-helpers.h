@@ -17,18 +17,22 @@
 #ifndef incl_HPHP_VM_REPO_HELPERS_H_
 #define incl_HPHP_VM_REPO_HELPERS_H_
 
-#include <boost/noncopyable.hpp>
-#include <sqlite3.h>
+#include "hphp/runtime/base/types.h"
 
 #include "hphp/util/md5.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/util/portability.h"
+
+#include <boost/noncopyable.hpp>
+#include <sqlite3.h>
 
 namespace HPHP {
 
 // Forward declaration.
-class Repo;
-class BlobEncoder;
 class BlobDecoder;
+class BlobEncoder;
+struct StringData;
+struct TypedValue;
+class Repo;
 
 enum RepoId {
   RepoIdInvalid = -1,

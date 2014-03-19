@@ -15,30 +15,33 @@
 */
 
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/type-conversions.h"
+
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/zend-printf.h"
+#include "hphp/runtime/base/zend-string.h"
+
+#include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
+
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/virtual-host.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/array-init.h"
+
+#include "hphp/util/file-util.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/zend-printf.h"
-#include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/stream-wrapper-registry.h"
-#include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
+
 #include "folly/String.h"
-#include "hphp/util/file-util.h"
 
 #include <algorithm>
 #include <sys/file.h>
-#include <algorithm>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -127,11 +130,9 @@ String File::TranslateCommand(const String& cmd) {
 }
 
 bool File::IsVirtualDirectory(const String& filename) {
-  if (StaticContentCache::TheFileCache &&
-      StaticContentCache::TheFileCache->dirExists(filename.data(), false)) {
-    return true;
-  }
-  return false;
+  return
+    StaticContentCache::TheFileCache &&
+    StaticContentCache::TheFileCache->dirExists(filename.data(), false);
 }
 
 bool File::IsPlainFilePath(const String& filename) {

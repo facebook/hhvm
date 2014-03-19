@@ -17,13 +17,17 @@
 #ifndef incl_HPHP_DIRECTORY_H_
 #define incl_HPHP_DIRECTORY_H_
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/resource-data.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-string.h"
 
 #include <dirent.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+class Variant;
 
 class Directory : public SweepableResourceData {
 public:

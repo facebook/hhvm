@@ -16,15 +16,18 @@
 #ifndef incl_HPHP_TYPE_CONSTRAINT_H_
 #define incl_HPHP_TYPE_CONSTRAINT_H_
 
-#include <string>
-#include <functional>
-
-#include "hphp/runtime/base/types.h"
-#include "hphp/util/functional.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/type-profile.h"
 
-namespace HPHP { struct Func; }
+#include "hphp/util/functional.h"
+
+#include <functional>
+#include <string>
+
+namespace HPHP {
+struct Func;
+struct StringData;
+}
 
 namespace HPHP {
 

@@ -348,8 +348,7 @@ void RegionFormer::addInstruction() {
 
 bool RegionFormer::tryInline() {
   if (!RuntimeOption::RepoAuthoritative ||
-      m_inst.op() != Op::FCall ||
-      m_inst.op() != Op::FCallD) {
+      (m_inst.op() != Op::FCall && m_inst.op() != Op::FCallD)) {
     return false;
   }
 

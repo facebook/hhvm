@@ -1,4 +1,4 @@
-<?hh
+<?php
 function tuple($x) {
   echo "Inside tuple\n";
 }

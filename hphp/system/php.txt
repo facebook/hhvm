@@ -83,6 +83,9 @@ hphp/system/php/hash/furchash.php
 hphp/system/php/hash/hash.php
 hphp/system/php/hash/hphp_murmurhash.php
 hphp/system/php/lang/ErrorException.php
+hphp/system/php/lang/fun.ns.php
+hphp/system/php/lang/invariant.ns.php
+hphp/system/php/lang/tuple.ns.php
 hphp/system/php/misc/highlight.php
 hphp/system/php/misc/php_strip_whitespace.php
 hphp/system/php/password/password.php

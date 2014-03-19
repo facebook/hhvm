@@ -1,0 +1,5 @@
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'nope' in :
+Stack trace:
+#0 (): HH\invariant_violation()
+#1 %s/test/slow/lang/invariant.php(8): HH\invariant()
+#2 {main}

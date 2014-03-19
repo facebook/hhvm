@@ -313,9 +313,11 @@
     install_root: silverstripe
     test_root: silverstripe
   slim:
-    url: https://github.com/codeguy/Slim
-    branch: "2.4.2"
-    commit: 3a2ac723f17b5d81607287ff28575d38b9fbc70e
+    url: https://github.com/fredemmott/Slim
+    # This branch makes a test less flakey
+    # PR: https://github.com/codeguy/Slim/pull/796
+    branch: "v2.4.2-derace-testExpiresAsString"
+    commit: b86f11706b80972e3239c8ab0f24382b3b8dcf52
     install_root: slim
     test_root: slim
   symfony:

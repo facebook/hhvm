@@ -542,4 +542,7 @@ endif()
         target_link_libraries(${target} ${LIBDWARF_LIBRARIES})
         target_link_libraries(${target} ${LIBELF_LIBRARIES})
 
+	if (ZEND_COMPAT_LINK_LIBRARIES)
+		target_link_libraries(${target} ${ZEND_COMPAT_LINK_LIBRARIES})
+	endif()
 endmacro()

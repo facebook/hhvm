@@ -199,7 +199,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
   }
 }
 
-ZEND_API zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC)
+ZEND_API zend_class_entry *zend_fetch_class_by_name(
+    const char *class_name, uint class_name_len,
+    const zend_literal *key, int fetch_type TSRMLS_DC)
 {
   bool use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
 
@@ -210,7 +212,8 @@ ZEND_API zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint
   if (!class_name || !class_name_len) {
     return NULL;
   }
-  HPHP::StringData * sd = HPHP::StringData::Make(class_name, class_name_len, HPHP::CopyString);
+  HPHP::StringData * sd = HPHP::StringData::Make(
+      class_name, class_name_len, HPHP::CopyString);
   HPHP::Class * cls = HPHP::Unit::getClass(sd, use_autoload);
   if (cls == nullptr) {
     if (use_autoload) {

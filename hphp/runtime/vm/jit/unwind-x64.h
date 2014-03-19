@@ -96,7 +96,8 @@ inline const std::type_info& typeInfoFromUnwindException(
   if (isDependentException(exceptionObj->exception_class)) {
     // like __cxxabiv1::__get_refcounted_exception_header_from_obj()
     constexpr size_t sizeOfRefcountedException = 128;
-    char * obj = reinterpret_cast<char*>(exceptionFromUnwindException(exceptionObj));
+    char * obj = reinterpret_cast<char*>(
+        exceptionFromUnwindException(exceptionObj));
     char * header = obj - sizeOfRefcountedException;
     // Dereference the exc field, the type_info* is the first field inside that
     constexpr size_t excOffset = 16;

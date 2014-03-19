@@ -42,14 +42,21 @@ void zend_exception_set_previous(zval *exception, zval *add_previous TSRMLS_DC)
     return;
   }
   zend_class_entry *default_exception_ce = zend_exception_get_default(TSRMLS_C);
-  if (Z_TYPE_P(add_previous) != IS_OBJECT && !instanceof_function(Z_OBJCE_P(add_previous), default_exception_ce TSRMLS_CC)) {
+  if (Z_TYPE_P(add_previous) != IS_OBJECT
+      && !instanceof_function(
+        Z_OBJCE_P(add_previous), default_exception_ce TSRMLS_CC)) {
     zend_error(E_ERROR, "Cannot set non exception as previous exception");
     return;
   }
-  while (exception && exception != add_previous && Z_OBJ_HANDLE_P(exception) != Z_OBJ_HANDLE_P(add_previous)) {
-    previous = zend_read_property(default_exception_ce, exception, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
+  while (exception
+      && exception != add_previous
+      && Z_OBJ_HANDLE_P(exception) != Z_OBJ_HANDLE_P(add_previous))
+  {
+    previous = zend_read_property(default_exception_ce, exception,
+        "previous", sizeof("previous")-1, 1 TSRMLS_CC);
     if (Z_TYPE_P(previous) == IS_NULL) {
-      zend_update_property(default_exception_ce, exception, "previous", sizeof("previous")-1, add_previous TSRMLS_CC);
+      zend_update_property(default_exception_ce, exception,
+          "previous", sizeof("previous")-1, add_previous TSRMLS_CC);
       Z_DELREF_P(add_previous);
       return;
     }
@@ -59,17 +66,17 @@ void zend_exception_set_previous(zval *exception, zval *add_previous TSRMLS_DC)
 
 ZEND_API void zend_clear_exception(TSRMLS_D) /* {{{ */
 {
-	if (EG(prev_exception)) {
-		zval_ptr_dtor(&EG(prev_exception));
-		EG(prev_exception) = NULL;
-	}
-	if (!EG(exception)) {
-		return;
-	}
-	zval_ptr_dtor(&EG(exception));
-	EG(exception) = NULL;
-	// don't rethrow
-	ZendExceptionStore::getInstance().clear();
+  if (EG(prev_exception)) {
+    zval_ptr_dtor(&EG(prev_exception));
+    EG(prev_exception) = NULL;
+  }
+  if (!EG(exception)) {
+    return;
+  }
+  zval_ptr_dtor(&EG(exception));
+  EG(exception) = NULL;
+  // don't rethrow
+  ZendExceptionStore::getInstance().clear();
 }
 /* }}} */
 
@@ -92,8 +99,11 @@ ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC) /* {{{ */
 
   exception_ce = Z_OBJCE_P(exception);
 
-  if (!exception_ce || !instanceof_function(exception_ce, default_exception_ce TSRMLS_CC)) {
-    zend_error(E_ERROR, "Exceptions must be valid objects derived from the Exception base class");
+  if (!exception_ce
+      || !instanceof_function(exception_ce, default_exception_ce TSRMLS_CC))
+  {
+    zend_error(E_ERROR,
+        "Exceptions must be valid objects derived from the Exception base class");
   }
   zend_throw_exception_internal(exception TSRMLS_CC);
 }
@@ -111,46 +121,51 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC) /* {{{ */
+ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce,
+    char *message, long code TSRMLS_DC) /* {{{ */
 {
-	zval *ex;
-	zend_class_entry *default_exception_ce = zend_exception_get_default(TSRMLS_C);
+  zval *ex;
+  zend_class_entry *default_exception_ce = zend_exception_get_default(TSRMLS_C);
 
-	MAKE_STD_ZVAL(ex);
-	if (exception_ce) {
-		if (!instanceof_function(exception_ce, default_exception_ce TSRMLS_CC)) {
-			zend_error(E_NOTICE, "Exceptions must be derived from the Exception base class");
-			exception_ce = default_exception_ce;
-		}
-	} else {
-		exception_ce = default_exception_ce;
-	}
-	object_init_ex(ex, exception_ce);
+  MAKE_STD_ZVAL(ex);
+  if (exception_ce) {
+    if (!instanceof_function(exception_ce, default_exception_ce TSRMLS_CC)) {
+      zend_error(E_NOTICE,
+          "Exceptions must be derived from the Exception base class");
+      exception_ce = default_exception_ce;
+    }
+  } else {
+    exception_ce = default_exception_ce;
+  }
+  object_init_ex(ex, exception_ce);
 
 
-	if (message) {
-		zend_update_property_string(default_exception_ce, ex, "message", sizeof("message")-1, message TSRMLS_CC);
-	}
-	if (code) {
-		zend_update_property_long(default_exception_ce, ex, "code", sizeof("code")-1, code TSRMLS_CC);
-	}
+  if (message) {
+    zend_update_property_string(default_exception_ce, ex,
+        "message", sizeof("message")-1, message TSRMLS_CC);
+  }
+  if (code) {
+    zend_update_property_long(default_exception_ce, ex,
+        "code", sizeof("code")-1, code TSRMLS_CC);
+  }
 
-	zend_throw_exception_internal(ex TSRMLS_CC);
-	return ex;
+  zend_throw_exception_internal(ex TSRMLS_CC);
+  return ex;
 }
 /* }}} */
 
-ZEND_API zval * zend_throw_exception_ex(zend_class_entry *exception_ce, long code TSRMLS_DC, char *format, ...) /* {{{ */
+ZEND_API zval * zend_throw_exception_ex(zend_class_entry *exception_ce,
+    long code TSRMLS_DC, char *format, ...) /* {{{ */
 {
-	va_list arg;
-	char *message;
-	zval *zexception;
+  va_list arg;
+  char *message;
+  zval *zexception;
 
-	va_start(arg, format);
-	vspprintf(&message, 0, format, arg);
-	va_end(arg);
-	zexception = zend_throw_exception(exception_ce, message, code TSRMLS_CC);
-	efree(message);
-	return zexception;
+  va_start(arg, format);
+  vspprintf(&message, 0, format, arg);
+  va_end(arg);
+  zexception = zend_throw_exception(exception_ce, message, code TSRMLS_CC);
+  efree(message);
+  return zexception;
 }
 /* }}} */

@@ -1098,7 +1098,10 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
   fcc->calling_scope = NULL;
   fcc->object_ptr = NULL;
 
-  bool b = f_is_callable(tvAsVariant(callable->tv()), check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY, HPHP::ref(name));
+  bool b = f_is_callable(
+      tvAsVariant(callable->tv()),
+      check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY,
+      HPHP::ref(name));
   if (b) {
     if (callable_name) {
       HPHP::StringData *sd = name.getStringData();

@@ -8,11 +8,11 @@ extern zend_module_entry ezc_test_module_entry;
 #define PHP_EZC_TEST_VERSION "0.1.0"
 
 #ifdef PHP_WIN32
-#	define PHP_EZC_TEST_API __declspec(dllexport)
+#  define PHP_EZC_TEST_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
-#	define PHP_EZC_TEST_API __attribute__ ((visibility("default")))
+#  define PHP_EZC_TEST_API __attribute__ ((visibility("default")))
 #else
-#	define PHP_EZC_TEST_API
+#  define PHP_EZC_TEST_API
 #endif
 
 #ifdef ZTS
@@ -20,10 +20,10 @@ extern zend_module_entry ezc_test_module_entry;
 #endif
 
 ZEND_BEGIN_MODULE_GLOBALS(ezc_test)
-	long  ini_integer;
-	char *ini_string;
-	int init;
-	zval * user_global;
+  long  ini_integer;
+  char *ini_string;
+  int init;
+  zval * user_global;
 ZEND_END_MODULE_GLOBALS(ezc_test)
 
 #ifdef ZTS
@@ -32,7 +32,7 @@ ZEND_END_MODULE_GLOBALS(ezc_test)
 #define EZC_TEST_G(v) (ezc_test_globals.v)
 #endif
 
-#endif	/* PHP_EZC_TEST_H */
+#endif  /* PHP_EZC_TEST_H */
 
 
 /*

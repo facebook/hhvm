@@ -763,6 +763,8 @@ void RuntimeOption::Load(Hdf &config,
                      "hhvm.server.type", &ServerType);
     ServerIP = server["IP"].getString();
     ServerFileSocket = server["FileSocket"].getString();
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.server.file_socket", &ServerFileSocket);
     ServerPrimaryIP = GetPrimaryIP();
     ServerPort = server["Port"].getUInt16(80);
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,

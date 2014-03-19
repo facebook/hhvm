@@ -735,7 +735,6 @@ enum class BareThisOp : uint8_t {
   O(AsyncESuspend,   TWO(BA,IVA),      ONE(CV),         ONE(CV),    NF) \
   O(AsyncResume,     NA,               NOV,             NOV,        NF) \
   O(AsyncWrapResult, NA,               ONE(CV),         ONE(CV),    NF) \
-  O(AsyncWrapException, NA,            ONE(CV),         ONE(CV),    NF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(Abs,             NA,               ONE(CV),         ONE(CV),    NF) \

@@ -1334,8 +1334,6 @@ static const struct {
   { OpAsyncResume, {None,             None,         OutNone,           0 }},
   { OpAsyncWrapResult,
                    {Stack1,           Stack1,       OutObject,         0 }},
-  { OpAsyncWrapException,
-                   {Stack1,           Stack1,       OutObject,         0 }},
 };
 
 static hphp_hash_map<Op, InstrInfo> instrInfo;

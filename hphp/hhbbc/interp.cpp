@@ -1907,13 +1907,6 @@ void in(ISS& env, const bc::AsyncResume&)  {
   // Can throw, async function can resume here with an exception.
 }
 
-void in(ISS& env, const bc::AsyncWrapException&) {
-  // A wait handle which always throws when you join it is
-  // represented as a WaitH<Bottom>.
-  popC(env);
-  push(env, wait_handle(env.index, TBottom));
-}
-
 void in(ISS& env, const bc::Strlen&) {
   auto const t1 = popC(env);
   auto const v1 = tv(t1);

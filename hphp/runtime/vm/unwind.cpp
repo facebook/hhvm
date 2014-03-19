@@ -21,6 +21,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/unit.h"
@@ -225,6 +226,42 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
   fp = prevFp;
 }
 
+void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc, ObjectData* e) {
+  auto const func = fp->m_func;
+  auto const prevFp = fp->arGetSfp();
+  auto const soff = fp->m_soff;
+  assert(!fp->inGenerator());
+  assert(func->isAsync());
+  assert(*reinterpret_cast<const Op*>(pc) != OpRetC);
+
+  FTRACE(1, "tearDownAsyncFrame: {} ({})\n  fp {} prevFp {}\n",
+         func->fullName()->data(),
+         func->unit()->filepath()->data(),
+         implicit_cast<void*>(fp),
+         implicit_cast<void*>(prevFp));
+
+  try {
+    frame_free_locals_unwind(fp, func->numLocals());
+  } catch (...) {}
+
+  stack.ndiscard(func->numSlotsInFrame());
+  stack.ret();
+  assert(stack.topTV() == &fp->m_r);
+  tvWriteObject(c_StaticExceptionWaitHandle::Create(e), &fp->m_r);
+  e->decRefCount();
+
+  if (UNLIKELY(prevFp == fp)) {
+    pc = 0;
+    return;
+  }
+
+  assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
+         prevFp->inGenerator());
+  auto const prevOff = soff + prevFp->m_func->base();
+  pc = prevFp->m_func->unit()->at(prevOff);
+  fp = prevFp;
+}
+
 void chainFaultObjects(ObjectData* top, ObjectData* prev) {
   static const StaticString nProp("previous");
   bool visible, accessible, unset;
@@ -293,6 +330,11 @@ bool chainFaults(Fault& fault) {
  *   - Check if the faultOffset that raised the exception is inside a
  *     protected region, if so, if it can handle the Fault resume the
  *     VM at the handler.
+ *
+ *   - Check if we are handling user exception in an eagerly executed
+ *     async function. If so, pop its frame, wrap the exception into
+ *     StaticExceptionWaitHandle object, leave it on the stack as
+ *     a return value from the async function and resume VM.
  *
  *   - Failing any of the above, pop the frame for the current
  *     function.  If the current function was the last frame in the
@@ -373,6 +415,8 @@ UnwindAction unwind(ActRec*& fp,
           return UnwindAction::ResumeVM;
         case UnwindAction::Propagate:
           break;
+        case UnwindAction::Return:
+          not_reached();
         }
       }
       // If we came here, it means that no further EHs were found for
@@ -381,6 +425,15 @@ UnwindAction unwind(ActRec*& fp,
       // one (if it exists). This is because the current exception
       // escapes the exception handler where it was thrown.
     } while (chainFaults(fault));
+
+    // If in an eagerly executed async function, wrap the user exception
+    // into a StaticExceptionWaitHandle and return it to the caller.
+    if (fp->m_func->isAsync() && !fp->inGenerator() &&
+        fault.m_faultType == Fault::Type::UserException) {
+      tearDownEagerAsyncFrame(fp, stack, pc, fault.m_userException);
+      g_context->m_faults.pop_back();
+      return pc ? UnwindAction::ResumeVM : UnwindAction::Return;
+    }
 
     // We found no more handlers in this frame, so the nested fault
     // count starts over for the caller frame.

@@ -403,7 +403,6 @@ struct HhbcTranslator {
   void emitAsyncAwait();
   void emitAsyncESuspend(Offset resumeOffset, int iters);
   void emitAsyncWrapResult();
-  void emitAsyncWrapException();
 
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force);

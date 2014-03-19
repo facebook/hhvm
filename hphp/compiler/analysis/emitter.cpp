@@ -6880,7 +6880,6 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
   emitSetFuncGetArgs(e);
 
   // emit method body executed in eager-execution mode
-  Offset start = m_ue.bcPos();
   visit(meth->getStmts());
   assert(m_evalStack.size() == 0);
 
@@ -6890,21 +6889,6 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
     e.AsyncWrapResult();
     e.RetC();
   }
-
-  // wrap the whole eagerly executed body into a try-catch block
-  Offset end = m_ue.bcPos();
-  CatchRegion* r = new CatchRegion(start, end);
-  m_catchRegions.push_back(r);
-
-  Label* label = new Label(e);
-  StringData* excLit = makeStaticString("Exception");
-  r->m_names.insert(excLit);
-  r->m_catchLabels.push_back(std::pair<StringData*, Label*>(excLit, label));
-
-  // catch block
-  e.Catch();
-  e.AsyncWrapException();
-  e.RetC();
 
   // emit method body executed in resumed mode
   {

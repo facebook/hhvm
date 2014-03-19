@@ -227,6 +227,17 @@ FuncAnalysis do_analyze(const Index& index,
     }
   }
 
+  /**
+   * We start inference of async functions with WaitH<TBottom>, which is
+   * what we return for async functions that always throw. This won't
+   * affect inferred return type for other async functions, as union
+   * of WaitH<TBottom> and WaitH<T> is WaitH<T>.
+   */
+  if (ctx.func->isAsync) {
+    ai.inferredReturn = union_of(std::move(ai.inferredReturn),
+                                 wait_handle(index, TBottom));
+  }
+
   /*
    * If inferredReturn is TBottom, the callee didn't execute a return
    * at all.  (E.g. it unconditionally throws, or is an abstract

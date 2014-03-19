@@ -1741,10 +1741,6 @@ void HhbcTranslator::emitAsyncWrapResult() {
   push(gen(CreateSRWH, popC()));
 }
 
-void HhbcTranslator::emitAsyncWrapException() {
-  push(gen(CreateSEWH, pop(Type::Obj)));
-}
-
 void HhbcTranslator::emitStrlen() {
   Type inType = topC()->type();
 

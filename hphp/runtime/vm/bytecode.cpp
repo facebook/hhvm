@@ -1621,11 +1621,14 @@ resume:
 
   } catch (...) {
     always_assert(JIT::tl_regState == JIT::VMRegState::CLEAN);
-    auto const action = exception_handler();
-    if (action == UnwindAction::ResumeVM) {
-      goto resume;
+    switch (exception_handler()) {
+      case UnwindAction::Propagate:
+        break;
+      case UnwindAction::ResumeVM:
+        goto resume;
+      case UnwindAction::Return:
+        return;
     }
-    always_assert(action == UnwindAction::Propagate);
   }
 
   /*
@@ -7310,17 +7313,6 @@ OPTBLD_INLINE void ExecutionContext::iopAsyncWrapResult(IOP_ARGS) {
 
   auto const top = m_stack.topC();
   top->m_data.pobj = c_StaticResultWaitHandle::CreateFromVM(*top);
-  top->m_type = KindOfObject;
-}
-
-OPTBLD_INLINE void ExecutionContext::iopAsyncWrapException(IOP_ARGS) {
-  NEXT();
-
-  auto const top = m_stack.topC();
-  auto const topObj = top->m_data.pobj;
-  assert(top->m_type == KindOfObject);
-  assert(topObj->instanceof(SystemLib::s_ExceptionClass));
-  top->m_data.pobj = c_StaticExceptionWaitHandle::CreateFromVM(topObj);
   top->m_type = KindOfObject;
 }
 

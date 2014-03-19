@@ -169,7 +169,6 @@
   CASE(AsyncESuspend) \
   CASE(AsyncResume) \
   CASE(AsyncWrapResult) \
-  CASE(AsyncWrapException) \
   CASE(Strlen) \
   CASE(IncStat) \
   CASE(Idx) \

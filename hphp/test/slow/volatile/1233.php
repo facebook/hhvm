@@ -1,6 +1,13 @@
 <?php
 
-var_dump(fb_autoload_map(           array('function' => array(),                 'constant' => array(),                 'failure' => 'failure'),           ''));
+var_dump(HH\autoload_set_paths(
+  array(
+    'function' => array(),
+    'constant' => array(),
+    'failure' => 'failure'
+  ),
+  ''
+));
 function failure($kind, $name) {
   if ($kind == 'constant' && $name == 'bar') define('bar', 'baz');
   var_dump($kind, $name);

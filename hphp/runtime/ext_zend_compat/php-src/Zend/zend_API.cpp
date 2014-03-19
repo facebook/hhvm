@@ -1080,12 +1080,16 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 {
   HPHP::Variant name;
   int callable_name_len_local;
+  zend_fcall_info_cache fcc_local;
 
   if (callable_name) {
     *callable_name = NULL;
   }
   if (callable_name_len == NULL) {
     callable_name_len = &callable_name_len_local;
+  }
+  if (fcc == NULL) {
+    fcc = &fcc_local;
   }
   fcc->initialized = 0;
   fcc->calling_scope = NULL;

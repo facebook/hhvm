@@ -293,6 +293,9 @@
     commit: 88be49f61a70700c2e0cd21b01d29bcb53698f7d
     install_root: proxymanager
     test_root: proxymanager
+    # include phpt and phpunit tests, exclude performance tests
+    test_name_regex: '/([A-Za-z0-9\-_\/\.]+\.phpt)|([_a-zA-Z0-9\\]*(?!PerformanceTest)*::[_a-zA-Z0-9]*( with data set (".*?"|#[0-9]+))?)/'
+    config_file: proxymanager/phpunit.xml.dist
   ratchet:
     url: https://github.com/cboden/Ratchet.git
     # "stable" might be 0.3, but master seems reasonable to test against

@@ -85,6 +85,10 @@ bool Object::equal(const Object& v2) const {
   if (m_px->isCollection()) {
     return collectionEquals(m_px, v2.get());
   }
+  if (UNLIKELY(m_px->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
+    return c_DateTime::GetTimestamp(*this) ==
+        c_DateTime::GetTimestamp(v2);
+  }
   if (v2.get()->getVMClass() != m_px->getVMClass()) {
     return false;
   }
@@ -95,10 +99,6 @@ bool Object::equal(const Object& v2) const {
     m_px->o_getArray(ar1, false);
     v2->o_getArray(ar2, false);
     return ar1->equal(ar2.get(), false);
-  }
-  if (UNLIKELY(m_px->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-    return c_DateTime::GetTimestamp(*this) ==
-        c_DateTime::GetTimestamp(v2);
   }
   return toArray().equal(v2.toArray());
 }

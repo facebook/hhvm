@@ -279,11 +279,15 @@
       - phpbb3/tests/lint_test.php
   phpmyadmin:
     url: https://github.com/phpmyadmin/phpmyadmin.git
-    branch: RELEASE_4_1_7
-    commit: 775d4f1e6fe8da3dfb5e8b4e6063d2c0d345e52f
+    # Stable is RELEASE_4_1_9 but we have many pull requests in master
+    # https://github.com/phpmyadmin/phpmyadmin/pull/1061 and also #1068, #1067
+    # #1063, #1062, #1060, #1055, #1046, #1037, #1035, #1034, #1032
+    branch: master
+    commit: 568c2cbe3aab44c274dec6a3e7160db62d9d8821
     install_root: phpmyadmin
     test_root: phpmyadmin
-    config_file: phpmyadmin/phpunit.xml.nocoverage
+    # Larger timeout, no code coverage, no selenium testing
+    config_file: phpmyadmin/phpunit.xml.hhvm
   phpunit:
     url: https://github.com/sebastianbergmann/phpunit.git
     branch: 4.0.9

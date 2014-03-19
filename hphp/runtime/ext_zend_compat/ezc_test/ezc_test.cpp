@@ -136,14 +136,14 @@ PHP_FUNCTION(ezc_call)
   zend_fcall_info_cache fci_cache;
 
   if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "f*",
-			  &fci, &fci_cache, &fci.params, &fci.param_count) == FAILURE) {
+        &fci, &fci_cache, &fci.params, &fci.param_count) == FAILURE) {
     return;
   }
 
   fci.retval_ptr_ptr = &retval_ptr;
 
   if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS
-		  && fci.retval_ptr_ptr && *fci.retval_ptr_ptr) {
+      && fci.retval_ptr_ptr && *fci.retval_ptr_ptr) {
     COPY_PZVAL_TO_ZVAL(*return_value, *fci.retval_ptr_ptr);
   }
 
@@ -163,13 +163,13 @@ PHP_FUNCTION(ezc_try_call)
   zend_fcall_info_cache fci_cache;
 
   if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "f*",
-			  &fci, &fci_cache, &fci.params, &fci.param_count) == FAILURE) {
+        &fci, &fci_cache, &fci.params, &fci.param_count) == FAILURE) {
     return;
   }
   fci.retval_ptr_ptr = &retval_ptr;
 
   if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS
-		  && fci.retval_ptr_ptr && *fci.retval_ptr_ptr) {
+      && fci.retval_ptr_ptr && *fci.retval_ptr_ptr) {
     if (EG(exception)) {
       /* Unlikely for a function to return a value despite throwing an
        * exception, but if it did, I suppose we would have to clean up
@@ -200,15 +200,15 @@ PHP_FUNCTION(ezc_throw)
   zend_class_entry *ce;
 
   if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
-			  &class_name, &class_name_length) == FAILURE) {
+        &class_name, &class_name_length) == FAILURE) {
     RETURN_FALSE;
   }
 
-  ce = zend_fetch_class_by_name(
-		  class_name, class_name_length, NULL, ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
+  ce = zend_fetch_class_by_name(class_name, class_name_length, NULL,
+      ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
   if (!ce) {
     php_error_docref(NULL TSRMLS_CC, E_WARNING, "no such class \"%s\"",
-			class_name);
+        class_name);
     RETURN_FALSE;
   }
   zend_throw_exception(ce, "ezc_throw", 0 TSRMLS_CC);
@@ -244,28 +244,28 @@ PHP_FUNCTION(ezc_throw_nonstd)
  */
 PHP_FUNCTION(ezc_realpath)
 {
-	char *filename;
-	int filename_len;
-	char resolved_path_buff[MAXPATHLEN];
+  char *filename;
+  int filename_len;
+  char resolved_path_buff[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
-		return;
-	}
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
+    return;
+  }
 
-	if (VCWD_REALPATH(filename, resolved_path_buff)) {
-		if (php_check_open_basedir(resolved_path_buff TSRMLS_CC)) {
-			RETURN_FALSE;
-		}
+  if (VCWD_REALPATH(filename, resolved_path_buff)) {
+    if (php_check_open_basedir(resolved_path_buff TSRMLS_CC)) {
+      RETURN_FALSE;
+    }
 
 #ifdef ZTS
-		if (VCWD_ACCESS(resolved_path_buff, F_OK)) {
-			RETURN_FALSE;
-		}
+    if (VCWD_ACCESS(resolved_path_buff, F_OK)) {
+      RETURN_FALSE;
+    }
 #endif
-		RETURN_STRING(resolved_path_buff, 1);
-	} else {
-		RETURN_FALSE;
-	}
+    RETURN_STRING(resolved_path_buff, 1);
+  } else {
+    RETURN_FALSE;
+  }
 }
 /* }}} */
 /* {{{ arginfo */
@@ -299,7 +299,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_ezc_throw_nonstd, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_ezc_realpath, 0)
-	ZEND_ARG_INFO(0, path)
+  ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
 /* }}} */
@@ -312,9 +312,9 @@ const zend_function_entry ezc_test_functions[] = {
   PHP_FE(ezc_call, arginfo_ezc_call)
   PHP_FE(ezc_try_call, arginfo_ezc_try_call)
   PHP_FE(ezc_throw, arginfo_ezc_throw)
-	PHP_FE(ezc_throw_std, arginfo_ezc_throw_std)
-	PHP_FE(ezc_throw_nonstd, arginfo_ezc_throw_nonstd)
-	PHP_FE(ezc_realpath, arginfo_ezc_realpath)
+  PHP_FE(ezc_throw_std, arginfo_ezc_throw_std)
+  PHP_FE(ezc_throw_nonstd, arginfo_ezc_throw_nonstd)
+  PHP_FE(ezc_realpath, arginfo_ezc_realpath)
   PHP_FE_END
 };
 /* }}} */

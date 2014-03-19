@@ -385,6 +385,14 @@ static inline bool hhirRefcountOptsDefault() {
   return !RuntimeOption::EvalSimulateARM;
 }
 
+static inline bool evalJitDefault() {
+#ifdef __APPLE__
+  return false;
+#else
+  return true;
+#endif
+}
+
 static inline bool simulateARMDefault() {
 #ifdef HHVM_SIMULATE_ARM_BY_DEFAULT
   return true;

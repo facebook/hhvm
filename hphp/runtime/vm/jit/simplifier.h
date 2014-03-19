@@ -48,7 +48,7 @@ class IRBuilder;
  * other pass.
  */
 struct Simplifier {
-  explicit Simplifier(IRBuilder& irb) : m_irb(irb) {}
+  explicit Simplifier(const IRBuilder& irb) : m_irb(irb) {}
 
   /*
    * In general, the simplifier transforms one instruction into zero or more
@@ -140,8 +140,6 @@ private:
   SSATmp* simplifyDecRef(const IRInstruction* inst);
   SSATmp* simplifyIncRef(const IRInstruction* inst);
   SSATmp* simplifyIncRefCtx(const IRInstruction* inst);
-  SSATmp* simplifyCheckType(const IRInstruction* inst);
-  SSATmp* simplifyCheckStk(const IRInstruction* inst);
   SSATmp* simplifyLdCls(const IRInstruction* inst);
   SSATmp* simplifyLdClsPropAddr(const IRInstruction*);
   SSATmp* simplifyLdCtx(const IRInstruction*);
@@ -160,7 +158,6 @@ private:
   SSATmp* simplifyTakeStack(const IRInstruction*);
   SSATmp* simplifyLdStackAddr(const IRInstruction*);
   SSATmp* simplifyDecRefStack(const IRInstruction*);
-  SSATmp* simplifyDecRefLoc(const IRInstruction*);
   SSATmp* simplifyLdLoc(const IRInstruction*);
   SSATmp* simplifyAssertNonNull(const IRInstruction*);
 
@@ -195,7 +192,7 @@ private: // IRBuilder forwarders
   template<class... Args> SSATmp* gen(Opcode op, BCMarker marker, Args&&...);
 
 private:
-  IRBuilder& m_irb;
+  const IRBuilder& m_irb;
 
   // The current instruction being simplified is always at
   // m_insts.top(). This has to be a stack instead of just a pointer

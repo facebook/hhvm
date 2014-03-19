@@ -81,7 +81,7 @@ struct IRBuilder {
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
   bool typeMightRelax(SSATmp* val = nullptr) const;
 
-  IRUnit& unit() { return m_unit; }
+  IRUnit& unit() const { return m_unit; }
   FrameState& state() { return m_state; }
   const Func* curFunc() const { return m_state.func(); }
   int32_t spOffset() { return m_state.spOffset(); }
@@ -358,6 +358,8 @@ private:
 private:
   using ConstraintFunc = std::function<void(TypeConstraint)>;
   SSATmp*   preOptimizeAssertTypeOp(IRInstruction*, Type, ConstraintFunc);
+  SSATmp*   preOptimizeCheckType(IRInstruction*);
+  SSATmp*   preOptimizeCheckStk(IRInstruction*);
   SSATmp*   preOptimizeCheckLoc(IRInstruction*);
   SSATmp*   preOptimizeAssertLoc(IRInstruction*);
   SSATmp*   preOptimizeAssertStk(IRInstruction*);

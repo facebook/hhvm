@@ -220,6 +220,83 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
   return nullptr;
 }
 
+SSATmp* IRBuilder::preOptimizeCheckType(IRInstruction* inst) {
+  SSATmp* src  = inst->src(0);
+  auto const oldType = src->type();
+  auto const newType = inst->typeParam();
+
+  if (oldType.not(newType)) {
+    if (oldType.isBoxed() && newType.isBoxed()) {
+      /* This CheckType serves to update the inner type hint for a boxed
+       * value, which requires no runtime work.  This depends on the type being
+       * boxed, and constraining it with DataTypeCountness will do it.  */
+      constrainValue(src, DataTypeCountness);
+      return gen(AssertType, newType, src);
+    }
+    /* This check will always fail. It's probably due to an incorrect
+     * prediction. Generate a Jmp, and return src because
+     * following instructions may depend on the output of CheckType
+     * (they'll be DCEd later). Note that we can't use convertToJmp
+     * because the return value isn't nullptr, so the original
+     * instruction won't be inserted into the stream. */
+    gen(Jmp, inst->taken());
+    return src;
+  }
+
+  if (newType >= oldType) {
+    /*
+     * The type of the src is the same or more refined than type, so the guard
+     * is unnecessary.
+     */
+    return src;
+  }
+  if (newType < oldType) {
+    assert(!src->isConst());
+    return nullptr;
+  }
+
+  return nullptr;
+}
+
+SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
+  auto const newType = inst->typeParam();
+  auto sp = inst->src(0);
+  auto offset = inst->extra<CheckStk>()->offset;
+
+  auto stkVal = getStackValue(sp, offset);
+  auto const oldType = stkVal.knownType;
+
+  if (newType < oldType) {
+    // The new type is strictly better than the old type.
+    return nullptr;
+  }
+
+  if (newType >= oldType) {
+    // The new type isn't better than the old type.
+    return sp;
+  }
+
+  if (newType.not(oldType)) {
+    if (oldType.isBoxed() && newType.isBoxed()) {
+      /* This CheckStk serves to update the inner type hint for a boxed
+       * value, which requires no runtime work. This depends on the type being
+       * boxed, and constraining it with DataTypeCountness will do it.  */
+      constrainStack(sp, offset, DataTypeCountness);
+      return gen(AssertStk, newType, sp);
+    }
+    /* This check will always fail. It's probably due to an incorrect
+     * prediction. Generate a Jmp, and return the source because
+     * following instructions may depend on the output of CheckStk
+     * (they'll be DCEd later).  Note that we can't use convertToJmp
+     * because the return value isn't nullptr, so the original
+     * instruction won't be inserted into the stream. */
+    gen(Jmp, inst->taken());
+    return sp;
+  }
+
+  return nullptr;
+}
+
 SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   auto const locId = inst->extra<CheckLoc>()->locId;
   Type typeParam   = inst->typeParam();
@@ -428,6 +505,8 @@ SSATmp* IRBuilder::preOptimizeStLoc(IRInstruction* inst) {
 SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst)
   switch (inst->op()) {
+    X(CheckType);
+    X(CheckStk);
     X(CheckLoc);
     X(AssertLoc);
     X(AssertStk);

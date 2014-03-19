@@ -437,27 +437,40 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
                        dynamic_pointer_cast<ExpressionList>(params->exp),
                        clsExp);
   } else {
-    const string &s = name.text();
+    string funcName = name.text();
     // strip out namespaces for func_get_args and friends check
-    size_t lastBackslash = s.find_last_of(NAMESPACE_SEP);
+    size_t lastBackslash = funcName.find_last_of(NAMESPACE_SEP);
     const string stripped = lastBackslash == string::npos
-                            ? s
-                            : s.substr(lastBackslash+1);
-    auto useStripped = false;
+                            ? funcName
+                            : funcName.substr(lastBackslash+1);
     if (stripped == "func_num_args" ||
         stripped == "func_get_args" ||
         stripped == "func_get_arg") {
-      useStripped = true;
+      funcName = stripped;
       if (m_hasCallToGetArgs.size() > 0) {
         m_hasCallToGetArgs.back() = true;
+      }
+    }
+
+    if (isAutoAliasOn()) {
+      // Auto import a few functions from the HH namespace
+      if (stripped == "fun" ||
+          stripped == "meth_caller" ||
+          stripped == "class_meth" ||
+          stripped == "inst_meth" ||
+          stripped == "invariant_callback_register" ||
+          stripped == "invariant" ||
+          stripped == "invariant_violation" ||
+          stripped == "tuple"
+      ) {
+        funcName = "HH\\" + stripped;
       }
     }
 
     SimpleFunctionCallPtr call
       (new RealSimpleFunctionCall
        (BlockScopePtr(), getLocation(),
-        useStripped ? stripped : name->text(),
-        name->num() & 2,
+        funcName, name->num() & 2,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
     if (m_scanner.isHHSyntaxEnabled() && !(name->num() & 2)) {
       // If the function name is without any backslashes or
@@ -2087,6 +2100,8 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
     (AliasEntry){"Map", "HH\\Map"},
     (AliasEntry){"StableMap", "HH\\Map"}, // Merging with Map
     (AliasEntry){"ImmMap", "HH\\ImmMap"},
+    (AliasEntry){"InvariantException",
+                 "HH\\InvariantException"},
   };
 
   return aliases;

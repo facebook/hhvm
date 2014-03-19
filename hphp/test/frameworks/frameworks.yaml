@@ -264,6 +264,7 @@
       - pear-core/tests/PEAR_PackageFile_v2_Validator/test_extbinrelease.phpt
       - pear-core/tests/PEAR_PackageFile_v2_Validator/test_extsrcrelease.phpt
       - pear-core/tests/PEAR_PackageFile_v2_Validator/test_phprelease.phpt
+      - pear-core/tests/PEAR_RunTest/bug16057.phpt
       - pear-core/tests/System/find_test.phpt
       - pear-core/tests/System/test_which.phpt
       - pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents.phpt

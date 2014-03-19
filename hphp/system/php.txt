@@ -86,6 +86,7 @@ hphp/system/php/lang/ErrorException.php
 hphp/system/php/lang/fun.ns.php
 hphp/system/php/lang/invariant.ns.php
 hphp/system/php/lang/tuple.ns.php
+hphp/system/php/misc/fb_autoload_map.php
 hphp/system/php/misc/highlight.php
 hphp/system/php/misc/php_strip_whitespace.php
 hphp/system/php/password/password.php

@@ -209,29 +209,6 @@
             ]
         },
         {
-            "name": "fb_autoload_map",
-            "desc": "Specify a map containing an array with four optional elements. 'class', 'function', 'constant', and 'failure'. The first three entries are maps from names to the file where that entity is defined. An attempt to access an undefined class\/function\/constant will look it up in the appropriate map, and if found, include that file. If the entity is still not defined, it will call the 'failure' entry.",
-            "flags": [
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "Boolean",
-                "desc": "TRUE if successful, FALSE otherwise."
-            },
-            "args": [
-                {
-                    "name": "map",
-                    "type": "Variant",
-                    "desc": "The autoload map."
-                },
-                {
-                    "name": "root",
-                    "type": "String",
-                    "desc": "Root to be prepended to all paths in the map."
-                }
-            ]
-        },
-        {
             "name": "fb_utf8ize",
             "desc": "Sanitize a string to make sure it's legal UTF-8 by stripping off any characters that are not properly encoded.",
             "flags": [

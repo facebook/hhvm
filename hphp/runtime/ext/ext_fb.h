@@ -33,7 +33,6 @@ bool f_fb_intercept(const String& name, const Variant& handler,
                     const Variant& data = null_variant);
 bool f_fb_rename_function(const String& orig_func_name,
                           const String& new_func_name);
-bool f_fb_autoload_map(const Variant& map, const String& root);
 bool f_fb_utf8ize(VRefParam input);
 int64_t f_fb_utf8_strlen_deprecated(const String& input);
 int64_t f_fb_utf8_strlen(const String& input);

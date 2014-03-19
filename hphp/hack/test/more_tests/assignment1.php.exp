@@ -1,0 +1,4 @@
+File "assignment1.php", line 14, characters 14-22:
+You are trying to access the member getLength but this is not an object, it is an array
+File "assignment1.php", line 13, characters 10-14:
+Check this out

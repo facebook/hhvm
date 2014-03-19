@@ -1,0 +1,6 @@
+File "foreach_vector.php", line 22, characters 10-13:
+Typing error
+File "foreach_vector.php", line 22, characters 10-13:
+This is a num (int/float) because this is used in an arithmetic operation
+File "foreach_vector.php", line 2, characters 286-287:
+It is incompatible with an object of type Foo

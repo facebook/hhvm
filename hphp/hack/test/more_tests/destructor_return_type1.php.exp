@@ -1,0 +1,2 @@
+File "destructor_return_type1.php", line 13, characters 19-28:
+Destructor return type must be void or elided.

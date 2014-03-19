@@ -1,0 +1,4 @@
+File "array_tuple.php", line 18, characters 5-33:
+Invalid assignment
+File "array_tuple.php", line 15, characters 18-22:
+This array has heterogeneous elements, you should use a tuple instead

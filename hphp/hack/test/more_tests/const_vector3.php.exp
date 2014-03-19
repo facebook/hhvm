@@ -1,0 +1,4 @@
+File "const_vector3.php", line 13, characters 3-6:
+an object of type ConstVector does not allow array append
+File "const_vector3.php", line 12, characters 14-24:
+You might want to check this out

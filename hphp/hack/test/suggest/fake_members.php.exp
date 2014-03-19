@@ -1,0 +1,6 @@
+No errors
+File: fake_members.php, line: 13, kind: Kmember:x, type: int
+File: fake_members.php, line: 26, kind: Kmember:x, type: int
+File: fake_members.php, line: 41, kind: Kmember:x, type: int
+File: fake_members.php, line: 52, kind: Kmember:$x, type: ?int
+File: fake_members.php, line: 65, kind: Kmember:$x, type: ?int

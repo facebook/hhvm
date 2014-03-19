@@ -1,0 +1,6 @@
+File "async_function_implicit_return_wrong_type3.php", line 14, characters 10-10:
+Invalid return type
+File "async_function_implicit_return_wrong_type3.php", line 14, characters 53-61:
+This is an object of type Awaitable
+File "async_function_implicit_return_wrong_type3.php", line 14, characters 10-10:
+It is incompatible with void because this function implicitly returns void

@@ -1,0 +1,6 @@
+File "async_function_explicit_return_type_error.php", line 13, characters 10-11:
+Invalid return type
+File "async_function_explicit_return_type_error.php", line 12, characters 30-30:
+This is a value of generic type T
+File "async_function_explicit_return_type_error.php", line 13, characters 3-8:
+It is incompatible with an object of type Awaitable

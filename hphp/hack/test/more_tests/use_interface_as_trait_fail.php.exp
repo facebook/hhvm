@@ -1,0 +1,2 @@
+File "use_interface_as_trait_fail.php", line 14, characters 7-7:
+A is not a trait. It is an interface.

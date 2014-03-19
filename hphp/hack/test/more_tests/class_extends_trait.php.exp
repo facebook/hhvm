@@ -1,0 +1,4 @@
+File "class_extends_trait.php", line 14, characters 7-7:
+a class cannot extend a trait
+File "class_extends_trait.php", line 14, characters 17-17:
+This is a trait

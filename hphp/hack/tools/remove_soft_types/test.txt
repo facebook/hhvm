@@ -1,0 +1,4 @@
+Warning: Argument 1 to C::f() must be of type @array, null given in test.php on line 5
+Warning: Argument 1 to g() must be of type @string, null given in test.php on line 8
+Warning: Value returned from h() must be of type @Vector<int>, string given in test.php on line 13
+Warning: Argument 1 to xhp_foo__bar__hello_world::i() must be of type @int, string given in test.php on line 18

@@ -1,0 +1,4 @@
+File "map_array_append.php", line 13, characters 3-8:
+an object of type Map does not allow array append
+File "map_array_append.php", line 12, characters 14-16:
+You might want to check this out

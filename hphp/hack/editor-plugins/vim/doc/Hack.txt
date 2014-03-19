@@ -1,0 +1,179 @@
+*Hack.txt*  Hack for HipHop Integration
+
+                                                            *hack* *hack.vim*
+
+                                                For Vim version 7.0 or newer
+
+                               By Srecko Toroman
+                              toroman@facebook.com
+
+                               Reference Manual ~
+
+                                                                 *hack-toc*
+
+1. Description                                                 |hack-intro|
+2. Quickfix                                                 |hack-quickfix|
+3. Autocomplete                                             |hack-omnifunc|
+
+==============================================================================
+1. Description                                                 *hack-intro*
+
+HackForHipHop adds static typing to HPHP, and many other cool things. With
+the development of Hack Client (hh_client), all those cool things became
+easily portable to all developer environments, including Vim!
+
+Things which we can do with HackPHP (<?hh files), and we couldn't do before
+are:
+
+Error handling, using the |quickfix| window, such as:
+- Type checking - e.g. this function expects an int, but you're passing a
+  string! We support this in Vim plugin.
+- Syntax errors - say you forget to add a ; somewhere. You don't need to run
+  your script to detect it.
+- Stuff like, you forgot to implement an abstract method!
+
+Auto-complete, using VIM's OmniComplete, such as:
+- Type $this-> <C-x> <C-o> (without spaces) and get a context/type aware
+  auto complete.
+- Type $ <C-x> <C-o> and get a list of local variables.
+
+Having a good, smart IDE is invaluable to some developers. Some people
+don't care. For those who do - this plugin will transform your PHP writing
+experience to the whole new level. Enjoy.
+
+==============================================================================
+2.                                                       *hack-quickfix*
+
+Hack invokes the hh_client ~/www command each time you save a php file. If
+there are any errors, they will be opened in the quickfix window.
+
+       NOTE: Disabling the "check on save"
+       ----------------------------------------------------------
+      | To disable the automatic check, add this to your .vimrc  |
+      |                                                          |
+      |   let g:fb_hack_on = 0                                   |
+      |                                                          |
+      | Use :HackMake to run the checker manually.               |
+       ----------------------------------------------------------
+
+Lets try this simple example. Make a new file X.php in www folder, like
+this:
+
+:new ~/www/X.php
+i                                               # Go to insert mode.
+
+  <?hh
+
+  class X {
+    private ?int $optionalInteger; // optional = can be null
+
+    public function getValue(): int {
+      return $this->optionalInteger;
+    }
+
+  }
+
+<CTRL-C>                                       # Exit insert mode.
+
+Save the file with :w. The quickfix window will open with following errors:
+
+  /home/storoman/X.php|7 col 12 error  33|  Invalid return type
+  /home/storoman/X.php|6 col 31 error  33|  This is an int
+  /home/storoman/X.php|4 col 11 error  14|  It is incompatible with a nullable type
+
+The reasoning for this error is that getValue() claims to return int, while
+in fact it returns int or a null. Vim plugin has correctly parsed the output
+of hh_client, and now you can "walk" the error list using ":cn" and ":cp"
+commands. You can close the list with ":ccl", but it's better not to do that,
+ever. After you've fixed the problem, the quickfix window will disappear
+automatically. So lets do that instead.
+
+First line in the quickfix window should be higlighted. It has the file, line
+and column information in it. Type ":cc" to jump to that location.
+
+    return $this->optionalInteger;
+           ^ :cc will position the cursor here. The selected error line in the
+           quickfix window says "Invalid return type".
+
+Now type ":cn" to go to the next error location.
+
+  public function getValue(): int {
+                              ^ now the cursor points here. The error line
+                              says "This is an int"
+
+Do ":cn" for the last time.
+
+  private ?int $optionalInteger; // optional = can be null
+          ^ error: "It is incompatible with a nullable type".
+
+That's a very visual and intuitive explanation of the problem. Your function
+claims to return int, but instead it returns ?int. How will you fix this is
+up to you. Perhaps $optionalInteger doesn't need to be optional. Perhaps
+getValue() needs to return ?int. Or perhaps you expect optionalInteger
+always to be initialized when getValue is called! Use nullthrows in that
+case, like this:
+
+    return nullthrows($this->optionalInteger);
+
+Save the file with ":w". The quickfix window should be hidden now. Congrats!
+You've fixed all errors in your code, and now you can move on, until you
+break something again.
+
+To learn more about how to manipulate the quickfix window, check the
+":help quickfix" command.
+
+Pro tip: Install vim-unimpaired from ~tpope. If you already have vim-pathogen,
+just do
+
+  cd ~/.vim/bundle
+  git clone git://github.com/tpope/vim-unimpaired.git
+
+This will map :cp and :cn to [q and ]q, in a addition to adding many other
+"next" and "previous" mappings. It is much easier to do ]q quickly, than to
+type :cn.
+
+==============================================================================
+3.                                                       *hack-omnifunc*
+
+The autocomplete a.k.a. omnifunc, intellisense, is very easy to use, too.
+Lets write our previous example again, without the return statement
+
+  <?hh
+
+  class X {
+    private ?int $optionalInteger; // optional = can be null
+
+    public function getValue(): int {
+      return nullthrows($this->{cursor}
+    }
+
+  }
+
+Position your cursor at the $ location, and from the INSERT mode, press:
+
+  <CTRL-x><CTRL-o>
+
+That should open up a quickfix list with:
+
+  getValue        f (function(): int)
+  optionalInteger v ?int
+
+Depending on the value of "completeopt" variable, the first choice in the
+menu will be automatically selected. To learn more about how this works,
+do ":help cot" and then figure out which suits your needs best. Then place
+something like this in your .vimrc:
+
+  set completeopt=longest,menuone,preview
+
+No matter what your completeopt is, you can always use <C-n> and <C-p> to
+move through the list. Press <C-n> until you get the "optionalInteger"
+suggestion, and then just keep typing ");", to close the nullthrows()
+function and end the statement.
+
+
+NOTE: What you read above is how Vim should behave assuming you don't have
+any extra autocomplete plugins, like SuperTab. If you do, then autocomplete
+may work differently. I suggest you to try them, and figure out what suits
+your needs best.
+
+==============================================================================

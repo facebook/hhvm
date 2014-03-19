@@ -1,0 +1,6 @@
+File "typing_fail_string1.php", line 14, characters 3-11:
+Invalid index type for this array
+File "typing_fail_string1.php", line 14, characters 6-10:
+This is a string
+File "typing_fail_string1.php", line 14, characters 6-10:
+It is incompatible with an int because this is used as an index

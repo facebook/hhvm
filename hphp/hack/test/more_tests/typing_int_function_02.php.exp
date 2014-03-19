@@ -1,0 +1,6 @@
+File "typing_int_function_02.php", line 16, characters 6-8:
+Invalid argument
+File "typing_int_function_02.php", line 12, characters 13-15:
+This is an int
+File "typing_int_function_02.php", line 16, characters 6-8:
+It is incompatible with a float

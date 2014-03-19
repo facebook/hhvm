@@ -1,0 +1,6 @@
+File "continuation_null.php", line 13, characters 9-12:
+Some values passed to yield are incompatible
+File "continuation_null.php", line 12, characters 30-33:
+This is void
+File "continuation_null.php", line 13, characters 9-12:
+It is incompatible with a nullable type

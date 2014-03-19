@@ -1,0 +1,19 @@
+<?hh
+
+class Test {
+  protected $a;
+  protected $b;
+
+  private $x;   
+  private $y;    
+  private $z;
+
+  public /* whee! */ $c1; // hi test
+    // foo
+  public $c2; /* quux */ 
+  public $c3;
+  // bar
+
+  public $c4;
+    /* I love this variable! */ public $c5;
+}

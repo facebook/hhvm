@@ -1,0 +1,6 @@
+File "awaitable_yield_result_error.php", line 13, characters 10-13:
+Invalid return type
+File "awaitable_yield_result_error.php", line 12, characters 23-26:
+This is void
+File "awaitable_yield_result_error.php", line 13, characters 3-8:
+It is incompatible with an object of type Awaitable

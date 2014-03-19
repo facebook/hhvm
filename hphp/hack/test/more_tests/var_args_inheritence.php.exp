@@ -1,0 +1,10 @@
+File "var_args_inheritence.php", line 16, characters 7-7:
+This object is of type B
+File "var_args_inheritence.php", line 16, characters 17-17:
+It is incompatible with this object of type A
+because some of their methods are incompatible.
+Read the following to see why:
+File "var_args_inheritence.php", line 17, characters 19-20:
+Too few arguments
+File "var_args_inheritence.php", line 13, characters 19-20:
+Because of this definition

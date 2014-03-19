@@ -1,0 +1,6 @@
+File "index_type_error_message_vector.php", line 14, characters 3-9:
+Invalid index type for this Vector
+File "index_type_error_message_vector.php", line 14, characters 6-8:
+This is a string
+File "index_type_error_message_vector.php", line 14, characters 6-8:
+It is incompatible with an int. Only int can be used to index into a Vector.

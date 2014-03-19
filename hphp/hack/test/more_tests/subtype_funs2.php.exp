@@ -1,0 +1,6 @@
+File "subtype_funs2.php", line 15, characters 5-17:
+Invalid assignment
+File "subtype_funs2.php", line 13, characters 24-26:
+This is an int
+File "subtype_funs2.php", line 14, characters 44-48:
+It is incompatible with a mixed value

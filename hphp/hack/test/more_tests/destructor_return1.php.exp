@@ -1,0 +1,6 @@
+File "destructor_return1.php", line 14, characters 12-16:
+Invalid return type
+File "destructor_return1.php", line 13, characters 19-28:
+This is void
+File "destructor_return1.php", line 14, characters 12-16:
+It is incompatible with a string

@@ -1,0 +1,12 @@
+File "DynamicYield_final3.php", line 25, characters 7-7:
+This object is of type B
+File "DynamicYield_final3.php", line 25, characters 17-17:
+It is incompatible with this object of type A
+because some of their methods are incompatible.
+Read the following to see why:
+File "DynamicYield_final3.php", line 20, characters 53-55:
+This is an int
+File "DynamicYield_final3.php", line 20, characters 31-38:
+DynamicYield implicitly defines getFoo() from the definition of yieldFoo()
+File "DynamicYield_final3.php", line 26, characters 29-34:
+It is incompatible with a string

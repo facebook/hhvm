@@ -1,0 +1,2 @@
+File "class_01.php", line 13, characters 19-21:
+This is a dangerous method name, if you want to define a constructor, use __construct

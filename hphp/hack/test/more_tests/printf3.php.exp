@@ -1,0 +1,4 @@
+File "printf3.php", line 19, characters 5-8:
+I don't understand the format string %s in %s
+File "printf3.php", line 15, characters 25-25:
+You can add a new format specifier by adding format_s() to X

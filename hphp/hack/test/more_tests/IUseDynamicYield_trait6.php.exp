@@ -1,0 +1,4 @@
+File "IUseDynamicYield_trait6.php", line 23, characters 33-45:
+The method genOtherStuff is undefined in an object of type TFoo
+File "IUseDynamicYield_trait6.php", line 19, characters 7-10:
+Check this out

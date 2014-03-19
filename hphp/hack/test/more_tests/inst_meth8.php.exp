@@ -1,0 +1,6 @@
+File "inst_meth8.php", line 19, characters 22-25:
+The method f1 is undefined in an object of type A
+File "inst_meth8.php", line 18, characters 14-14:
+Check this out
+File "inst_meth8.php", line 13, characters 26-27:
+The closest thing is f1 but it's a static method

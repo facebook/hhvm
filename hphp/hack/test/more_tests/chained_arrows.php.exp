@@ -1,0 +1,6 @@
+File "chained_arrows.php", line 18, characters 10-32:
+Invalid return type
+File "chained_arrows.php", line 17, characters 18-21:
+This is a bool
+File "chained_arrows.php", line 14, characters 26-28:
+It is incompatible with an int

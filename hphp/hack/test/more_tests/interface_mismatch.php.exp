@@ -1,0 +1,12 @@
+File "interface_mismatch.php", line 16, characters 7-9:
+This object is of type Foo
+File "interface_mismatch.php", line 16, characters 22-25:
+It is incompatible with this object of type IFoo
+because some of their methods are incompatible.
+Read the following to see why:
+File "interface_mismatch.php", line 16, characters 7-9:
+This object doesn't implement the method whatever
+File "interface_mismatch.php", line 16, characters 22-25:
+Which is required by this interface
+File "interface_mismatch.php", line 13, characters 19-26:
+As defined here

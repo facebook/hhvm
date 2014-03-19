@@ -1,0 +1,2 @@
+File "type__toString2.php", line 13, characters 22-31:
+__toString must have public visibility and cannot be static

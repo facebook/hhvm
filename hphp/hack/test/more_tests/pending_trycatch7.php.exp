@@ -1,0 +1,4 @@
+File "pending_trycatch7.php", line 22, characters 10-11:
+The variable $x is defined
+File "pending_trycatch7.php", line 15, characters 7-8:
+But in a different scope

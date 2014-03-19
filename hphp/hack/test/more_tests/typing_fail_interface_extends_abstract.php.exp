@@ -1,0 +1,4 @@
+File "typing_fail_interface_extends_abstract.php", line 15, characters 11-11:
+an interface cannot extend an abstract class
+File "typing_fail_interface_extends_abstract.php", line 15, characters 21-21:
+This is an abstract class

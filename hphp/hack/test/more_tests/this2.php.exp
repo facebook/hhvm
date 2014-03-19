@@ -1,0 +1,10 @@
+File "this2.php", line 14, characters 12-18:
+Invalid return type
+File "this2.php", line 13, characters 26-29:
+This is an object of type X (compatible with the type 'this')
+File "this2.php", line 14, characters 12-18:
+It is incompatible with an object of type X
+File "this2.php", line 12, characters 7-7:
+Since X is not final
+File "this2.php", line 13, characters 26-29:
+this might not be a X

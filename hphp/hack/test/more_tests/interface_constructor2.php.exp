@@ -1,0 +1,10 @@
+File "interface_constructor2.php", line 16, characters 7-7:
+This object is of type A
+File "interface_constructor2.php", line 16, characters 20-22:
+It is incompatible with this object of type Foo
+because some of their methods are incompatible.
+Read the following to see why:
+File "interface_constructor2.php", line 13, characters 31-33:
+This is an int
+File "interface_constructor2.php", line 17, characters 31-34:
+It is incompatible with a bool

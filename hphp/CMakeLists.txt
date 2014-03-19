@@ -36,17 +36,18 @@ if(ENABLE_FASTCGI)
 	add_subdirectory(third_party/thrift)
 endif()
 
-add_subdirectory(vixl)
+add_subdirectory(compiler)
+add_subdirectory(hack)
+add_subdirectory(hhbbc)
 add_subdirectory(neo)
 add_subdirectory(parser)
-add_subdirectory(zend)
-add_subdirectory(util)
 
-add_subdirectory(hhbbc)
-add_subdirectory(compiler)
 add_subdirectory(runtime)
 add_subdirectory(runtime/ext_hhvm)
 add_subdirectory(system)
+add_subdirectory(util)
+add_subdirectory(vixl)
+add_subdirectory(zend)
 
 add_subdirectory(hhvm)
 

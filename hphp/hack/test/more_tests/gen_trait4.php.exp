@@ -1,0 +1,8 @@
+File "gen_trait4.php", line 27, characters 18-19:
+Invalid argument
+File "gen_trait4.php", line 25, characters 18-24:
+This is an object of type B
+File "gen_trait4.php", line 26, characters 5-17:
+It was implicitely typed as an object of type B during this operation
+File "gen_trait4.php", line 18, characters 30-30:
+It is incompatible with an object of type A

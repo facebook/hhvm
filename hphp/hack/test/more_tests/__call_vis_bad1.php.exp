@@ -1,0 +1,2 @@
+File "__call_vis_bad1.php", line 19, characters 23-28:
+This is a protected member, you cannot access it

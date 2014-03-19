@@ -1,0 +1,4 @@
+File "const_vector2.php", line 13, characters 3-7:
+You cannot mutate this
+File "const_vector2.php", line 12, characters 14-24:
+This is an object of type ConstVector

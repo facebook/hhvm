@@ -1,0 +1,2 @@
+File "incorrect_comment.php", line 1, characters 9-12:
+Incorrect comment; possible values include strict, decl, partial or empty

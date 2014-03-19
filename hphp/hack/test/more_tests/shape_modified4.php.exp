@@ -1,0 +1,6 @@
+File "shape_modified4.php", line 19, characters 10-11:
+Invalid return type
+File "shape_modified4.php", line 15, characters 8-12:
+The field 'y' is missing
+File "shape_modified4.php", line 14, characters 27-34:
+The field 'y' is defined

@@ -1,0 +1,6 @@
+File "constraint_gen_fail1.php", line 17, characters 3-17:
+Invalid assignment
+File "constraint_gen_fail1.php", line 16, characters 29-29:
+This is a value of generic type T
+File "constraint_gen_fail1.php", line 17, characters 11-17:
+It is incompatible with an object of type A

@@ -1,0 +1,6 @@
+File "try_catch_bad2.php", line 17, characters 12-13:
+Invalid return type
+File "try_catch_bad2.php", line 12, characters 17-19:
+This is an int
+File "try_catch_bad2.php", line 15, characters 10-16:
+It is incompatible with a string

@@ -1,0 +1,6 @@
+File "DynamicYield8.php", line 20, characters 19-26:
+When using DynamicYield, yield*() methods should have type Awaitable
+File "DynamicYield8.php", line 20, characters 19-26:
+This is an object of type Awaitable
+File "DynamicYield8.php", line 20, characters 31-40:
+It is incompatible with a nullable type

@@ -1,0 +1,6 @@
+File "for_loop.php", line 21, characters 10-13:
+Invalid return type
+File "for_loop.php", line 14, characters 20-20:
+This is an object of type A
+File "for_loop.php", line 15, characters 10-13:
+It is incompatible with a nullable type

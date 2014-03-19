@@ -1,0 +1,2 @@
+File "if_parse_nobraces.php", line 20, characters 40-40:
+The body of a conditional or loop must be wrapped in braces.

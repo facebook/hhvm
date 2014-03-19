@@ -1,0 +1,4 @@
+File "IUseDynamicYield_trait8.php", line 28, characters 7-9:
+This class must provide an implementation for the abstract method genOtherStuff
+File "IUseDynamicYield_trait8.php", line 20, characters 28-42:
+The abstract method genOtherStuff is defined here

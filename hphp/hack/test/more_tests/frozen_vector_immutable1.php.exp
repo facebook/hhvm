@@ -1,0 +1,4 @@
+File "frozen_vector_immutable1.php", line 16, characters 3-7:
+an object of type ImmVector does not allow array append
+File "frozen_vector_immutable1.php", line 15, characters 9-27:
+You might want to check this out

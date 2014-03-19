@@ -1,0 +1,2 @@
+File "typing_fail_missing_ret_type.php", line 13, characters 19-19:
+Was expecting a return type hint

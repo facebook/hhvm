@@ -1,0 +1,2 @@
+File "destructor_argument.php", line 13, characters 19-28:
+Destructor must not have any parameters.

@@ -1,0 +1,4 @@
+File "DynamicYield_call1.php", line 22, characters 23-28:
+The method getBar is undefined in an object of type Foo
+File "DynamicYield_call1.php", line 22, characters 15-17:
+Check this out

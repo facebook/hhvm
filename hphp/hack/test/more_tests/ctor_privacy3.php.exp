@@ -1,0 +1,2 @@
+File "ctor_privacy3.php", line 20, characters 12-20:
+Cannot access this protected member, you don't extend Foo

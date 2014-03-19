@@ -1,0 +1,6 @@
+File "async_function_implicit_return_wrong_type2.php", line 12, characters 16-16:
+Invalid return type
+File "async_function_implicit_return_wrong_type2.php", line 12, characters 31-33:
+This is an int
+File "async_function_implicit_return_wrong_type2.php", line 12, characters 16-16:
+It is incompatible with a nullable type because this async function implicitly returns Awaitable<void>

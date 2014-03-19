@@ -1,0 +1,6 @@
+File "michal.php", line 11, characters 5-25:
+Invalid assignment
+File "michal.php", line 5, characters 11-16:
+This is a string
+File "michal.php", line 11, characters 18-25:
+It is incompatible with an object of type Vector

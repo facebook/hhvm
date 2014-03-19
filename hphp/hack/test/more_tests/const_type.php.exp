@@ -1,0 +1,6 @@
+File "const_type.php", line 13, characters 13-17:
+Wrong type hint
+File "const_type.php", line 13, characters 9-11:
+This is an int
+File "const_type.php", line 13, characters 21-23:
+It is incompatible with a string

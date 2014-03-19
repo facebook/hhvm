@@ -1,0 +1,6 @@
+File "while_continue.php", line 20, characters 10-11:
+Invalid return type
+File "while_continue.php", line 12, characters 18-20:
+This is an int
+File "while_continue.php", line 13, characters 8-11:
+It is incompatible with a nullable type

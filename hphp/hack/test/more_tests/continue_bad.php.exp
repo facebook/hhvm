@@ -1,0 +1,2 @@
+File "continue_bad.php", line 16, characters 18-18:
+Yeah...we're not going to support continue/break N. It makes static analysis tricky and it's not really essential

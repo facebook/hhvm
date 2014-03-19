@@ -1,0 +1,6 @@
+No errors
+File: array.php, line: 12, kind: Kreturn, type: array<string, int>
+File: array.php, line: 18, kind: Kreturn, type: Awaitable<array<string, int>>
+File: array.php, line: 24, kind: Kreturn, type: array<int>
+File: array.php, line: 28, kind: Kreturn, type: array
+File: array.php, line: 35, kind: Kreturn, type: array

@@ -1,0 +1,2 @@
+File "this_tparam_static.php", line 13, characters 19-22:
+The type "this" can only be used as a return type, to instantiate a covariant type variable, or as a private non-static member variable

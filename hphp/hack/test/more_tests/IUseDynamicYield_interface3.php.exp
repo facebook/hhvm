@@ -1,0 +1,4 @@
+File "IUseDynamicYield_interface3.php", line 36, characters 23-30:
+The method genStuff is undefined in an object of type IFoo
+File "IUseDynamicYield_interface3.php", line 30, characters 22-25:
+Check this out

@@ -1,0 +1,6 @@
+File "lambda12.php", line 18, characters 12-12:
+Invalid return type
+File "lambda12.php", line 12, characters 24-26:
+This is an int
+File "lambda12.php", line 14, characters 30-34:
+It is incompatible with a float

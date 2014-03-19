@@ -1,0 +1,6 @@
+File "functional_anon_fun.php", line 22, characters 10-36:
+Invalid return type
+File "functional_anon_fun.php", line 19, characters 21-23:
+This is an int
+File "functional_anon_fun.php", line 14, characters 30-33:
+It is incompatible with void

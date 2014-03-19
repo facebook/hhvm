@@ -1,0 +1,6 @@
+File "functional_generator.php", line 30, characters 9-9:
+Some values passed to yield are incompatible
+File "functional_generator.php", line 29, characters 20-25:
+This is an object of type Stream
+File "functional_generator.php", line 30, characters 3-9:
+It is incompatible with an object of type Continuation

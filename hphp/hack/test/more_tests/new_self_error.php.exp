@@ -1,0 +1,2 @@
+File "new_self_error.php", line 14, characters 3-12:
+Can't use new self() outside of a class

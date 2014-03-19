@@ -1,0 +1,4 @@
+File "DynamicYield2.php", line 27, characters 19-31:
+The method getSomeString is undefined in an object of type Bar
+File "DynamicYield2.php", line 25, characters 7-9:
+Check this out

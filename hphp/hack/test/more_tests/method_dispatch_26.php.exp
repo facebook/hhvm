@@ -1,0 +1,6 @@
+File "method_dispatch_26.php", line 29, characters 9-10:
+The method f2 is undefined in an object of type A
+File "method_dispatch_26.php", line 28, characters 25-25:
+Check this out
+File "method_dispatch_26.php", line 19, characters 26-27:
+The closest thing is f2 but it's a static method

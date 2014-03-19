@@ -1,0 +1,2 @@
+File "invalid_variable_name_fail.php", line 12, characters 1-1:
+A valid variable name starts with a letter or underscore,followed by any number of letters, numbers, or underscores

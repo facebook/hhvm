@@ -1,0 +1,6 @@
+File "typing_fail_bug.php", line 18, characters 5-8:
+Invalid argument
+File "typing_fail_bug.php", line 21, characters 12-17:
+This is a string
+File "typing_fail_bug.php", line 14, characters 12-12:
+It is incompatible with an int

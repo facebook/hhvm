@@ -1,0 +1,6 @@
+File "pair-literal-2.php", line 12, characters 10-24:
+Invalid return type
+File "pair-literal-2.php", line 11, characters 20-25:
+This is a string
+File "pair-literal-2.php", line 12, characters 16-16:
+It is incompatible with an int

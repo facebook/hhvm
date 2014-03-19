@@ -1,0 +1,2 @@
+File "typing_fail_static_generic2.php", line 14, characters 12-13:
+This static variable cannot use the parameter T.

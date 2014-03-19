@@ -1,0 +1,10 @@
+File "constraint_gen_fail3.php", line 23, characters 7-7:
+This object is of type U
+File "constraint_gen_fail3.php", line 23, characters 20-20:
+It is incompatible with this object of type L
+because some of their methods are incompatible.
+Read the following to see why:
+File "constraint_gen_fail3.php", line 20, characters 27-27:
+This is an object of type A
+File "constraint_gen_fail3.php", line 24, characters 27-27:
+It is incompatible with a value of generic type T

@@ -1,0 +1,6 @@
+File "integrate_if1.php", line 24, characters 7-8:
+Invalid argument
+File "integrate_if1.php", line 12, characters 12-14:
+This is an int
+File "integrate_if1.php", line 18, characters 12-16:
+It is incompatible with a bool

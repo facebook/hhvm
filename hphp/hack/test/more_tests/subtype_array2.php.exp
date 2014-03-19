@@ -1,0 +1,6 @@
+File "subtype_array2.php", line 21, characters 11-12:
+Invalid argument
+File "subtype_array2.php", line 16, characters 24-27:
+This is a bool
+File "subtype_array2.php", line 12, characters 27-29:
+It is incompatible with an int

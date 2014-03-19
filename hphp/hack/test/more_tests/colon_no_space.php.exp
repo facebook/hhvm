@@ -1,0 +1,6 @@
+File "colon_no_space.php", line 12, characters 29-33:
+Invalid return type
+File "colon_no_space.php", line 12, characters 16-18:
+This is an int
+File "colon_no_space.php", line 12, characters 29-33:
+It is incompatible with a bool

@@ -1,0 +1,6 @@
+File "list_array2.php", line 14, characters 10-11:
+Invalid return type
+File "list_array2.php", line 12, characters 34-36:
+This is an int
+File "list_array2.php", line 12, characters 22-26:
+It is incompatible with a float

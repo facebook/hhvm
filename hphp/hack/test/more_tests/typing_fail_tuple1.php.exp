@@ -1,0 +1,6 @@
+File "typing_fail_tuple1.php", line 13, characters 10-23:
+Invalid return type
+File "typing_fail_tuple1.php", line 12, characters 15-24:
+This tuple has 2 elements
+File "typing_fail_tuple1.php", line 13, characters 10-23:
+This one has 3 elements

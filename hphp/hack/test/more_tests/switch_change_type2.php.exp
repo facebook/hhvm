@@ -1,0 +1,6 @@
+File "switch_change_type2.php", line 22, characters 14-15:
+Invalid argument
+File "switch_change_type2.php", line 12, characters 12-14:
+This is an int
+File "switch_change_type2.php", line 12, characters 21-24:
+It is incompatible with a bool

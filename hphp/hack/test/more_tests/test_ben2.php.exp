@@ -1,0 +1,6 @@
+File "test_ben2.php", line 16, characters 10-11:
+Invalid return type
+File "test_ben2.php", line 12, characters 25-28:
+This is a bool
+File "test_ben2.php", line 12, characters 14-18:
+It is incompatible with a mixed value

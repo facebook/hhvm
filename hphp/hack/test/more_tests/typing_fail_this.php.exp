@@ -1,0 +1,4 @@
+File "typing_fail_this.php", line 53, characters 12-12:
+The member l is undefined in an object of type MyDoubleList
+File "typing_fail_this.php", line 46, characters 7-18:
+Check this out

@@ -1,0 +1,6 @@
+File "test_consts1.php", line 17, characters 10-13:
+Invalid return type
+File "test_consts1.php", line 16, characters 17-20:
+This is a bool
+File "test_consts1.php", line 13, characters 13-18:
+It is incompatible with a string

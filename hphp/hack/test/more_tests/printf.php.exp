@@ -1,0 +1,6 @@
+File "printf.php", line 27, characters 16-18:
+Invalid argument
+File "printf.php", line 27, characters 5-13:
+This is a string because of the %s format specifier
+File "printf.php", line 27, characters 16-18:
+It is incompatible with a float

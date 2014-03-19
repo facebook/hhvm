@@ -1,0 +1,4 @@
+File "pending_switch10.php", line 31, characters 10-11:
+The variable $x is defined
+File "pending_switch10.php", line 23, characters 11-12:
+But in a different scope

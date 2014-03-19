@@ -1,0 +1,6 @@
+File "suggest_method_name4.php", line 18, characters 7-14:
+The method mymethod is undefined in an object of type X
+File "suggest_method_name4.php", line 17, characters 12-12:
+Check this out
+File "suggest_method_name4.php", line 13, characters 26-33:
+The closest thing is myMethod but it's a static method

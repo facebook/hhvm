@@ -1,0 +1,4 @@
+<?php
+
+function foo() {
+}

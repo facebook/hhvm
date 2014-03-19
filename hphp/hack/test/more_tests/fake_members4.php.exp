@@ -1,0 +1,11 @@
+~lostintersect(~lostoption(Tint))
+File "fake_members4.php", line 24, characters 12-19:
+Invalid return type
+File "fake_members4.php", line 18, characters 27-29:
+This is an int
+File "fake_members4.php", line 16, characters 11-14:
+It is incompatible with a nullable type
+File "fake_members4.php", line 22, characters 5-18:
+All the local information about the member x has been invalidated during this call.
+This is a limitation of the type-checker, use a local if that's the problem.
+

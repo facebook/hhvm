@@ -1,0 +1,4 @@
+File "undefined_method.php", line 21, characters 9-12:
+The method blah is undefined in an object of type I1
+File "undefined_method.php", line 15, characters 32-33:
+Check this out

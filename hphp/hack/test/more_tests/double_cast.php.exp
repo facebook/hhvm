@@ -1,0 +1,2 @@
+File "double_cast.php", line 13, characters 17-17:
+Invalid Hack type. Using "double" in Hack is considered an error. Use "float" instead. They are equivalent data types and the codebase remains consistent.

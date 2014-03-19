@@ -1,0 +1,6 @@
+File "traversable_foreach3.php", line 13, characters 12-13:
+Invalid foreach
+File "traversable_foreach3.php", line 13, characters 12-13:
+This is an object of type KeyedTraversable because this is used in a foreach statement
+File "traversable_foreach3.php", line 12, characters 15-25:
+It is incompatible with an object of type Traversable

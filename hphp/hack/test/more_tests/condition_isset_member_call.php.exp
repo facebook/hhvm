@@ -1,0 +1,10 @@
+File "condition_isset_member_call.php", line 22, characters 14-21:
+Invalid return type
+File "condition_isset_member_call.php", line 19, characters 26-28:
+This is an int
+File "condition_isset_member_call.php", line 13, characters 11-14:
+It is incompatible with a nullable type
+File "condition_isset_member_call.php", line 21, characters 7-20:
+All the local information about the member x has been invalidated during this call.
+This is a limitation of the type-checker, use a local if that's the problem.
+

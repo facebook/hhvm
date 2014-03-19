@@ -1,0 +1,4 @@
+<?hh
+
+const X = shape();
+

@@ -1,0 +1,6 @@
+File "typedef_as5.php--file1.php", line 17, characters 9-19:
+Invalid constraint on newtype
+File "typedef_as5.php--file1.php", line 17, characters 24-24:
+This is an object of type Y
+File "typedef_as5.php--file1.php", line 17, characters 28-31:
+It is incompatible with an object of type Duck

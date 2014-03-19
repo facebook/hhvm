@@ -1,0 +1,4 @@
+File "override_attr_09.php", line 17, characters 7-8:
+Method C1::foo is should be an override per the declaring trait; no non-private parent definition found or overridden parent is defined in non-<?hh code
+File "override_attr_09.php", line 14, characters 26-28:
+Declaration of foo() is here

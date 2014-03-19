@@ -1,0 +1,2 @@
+File "heredoc_bad_identifier.php", line 12, characters 9-9:
+Expected heredoc or nowdoc identifier

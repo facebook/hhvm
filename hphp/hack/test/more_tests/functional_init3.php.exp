@@ -1,0 +1,2 @@
+File "functional_init3.php", line 22, characters 23-23:
+Read access to $this->x before initialization

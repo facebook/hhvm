@@ -1,0 +1,4 @@
+File "null_container.php", line 13, characters 10-21:
+You are trying to access an element of this container but the container could be null. 
+File "null_container.php", line 12, characters 14-17:
+This is what makes me believe it can be null

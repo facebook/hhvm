@@ -1,0 +1,6 @@
+File "gen9.php", line 25, characters 10-11:
+Invalid return type
+File "gen9.php", line 23, characters 39-40:
+This is a value of generic type T3
+File "gen9.php", line 21, characters 15-17:
+It is incompatible with an int

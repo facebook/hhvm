@@ -1,0 +1,4 @@
+File "inst_meth2.php", line 13, characters 22-25:
+You are trying to access the member f1 but this is not an object, it is a string
+File "inst_meth2.php", line 12, characters 14-19:
+Check this out

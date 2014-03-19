@@ -1,0 +1,2 @@
+File "typing_fail_magic1.php", line 18, characters 7-11:
+Don't call __set it's one of these magic things we want to avoid

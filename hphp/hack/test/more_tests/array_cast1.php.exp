@@ -1,0 +1,2 @@
+File "array_cast1.php", line 4, characters 8-16:
+(array) cast forbidden in strict mode; arrays with unspecified key and value types are not allowed

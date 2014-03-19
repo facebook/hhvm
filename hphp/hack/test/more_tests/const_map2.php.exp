@@ -1,0 +1,4 @@
+File "const_map2.php", line 13, characters 3-11:
+You cannot mutate this
+File "const_map2.php", line 12, characters 14-21:
+This is an object of type ConstMap

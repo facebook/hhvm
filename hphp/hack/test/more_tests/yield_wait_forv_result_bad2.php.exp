@@ -1,0 +1,6 @@
+File "yield_wait_forv_result_bad2.php", line 13, characters 16-35:
+await can only operate on an Awaitable
+File "yield_wait_forv_result_bad2.php", line 13, characters 16-35:
+This is an object of type Awaitable
+File "yield_wait_forv_result_bad2.php", line 13, characters 27-27:
+It is incompatible with an int

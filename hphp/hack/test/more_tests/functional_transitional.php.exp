@@ -1,0 +1,4 @@
+File "functional_transitional.php", line 14, characters 14-14:
+You are trying to access the member f but this is not an object, it is a tuple
+File "functional_transitional.php", line 13, characters 8-18:
+Check this out

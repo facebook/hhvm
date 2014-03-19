@@ -1,0 +1,2 @@
+File "trait_private_bad4.php", line 24, characters 21-23:
+This is a protected member, you cannot access it using the trait's name (did you mean to use static:: or self::?)

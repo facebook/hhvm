@@ -1,0 +1,15 @@
+These refactoring and conversion tools are based on pfff instead of the core
+hh_server code due to pfff's superior support for parsing, modifying, and then
+unparsing PHP code. However, this makes them more annoying to build.
+
+To install:
+
+1) Install OPAM (http://opam.ocaml.org/doc/Quick_Install.html)
+   Don't forget to run "opam init"
+   Don't forget to run "eval `opam config env`"
+2) Install pfff (opam install pfff)
+3) For each tool you want:
+   cd $TOOL
+   make clean && make depend && make
+3) Binaries are installed at hack/bin/tools, where hack is the directory for
+   this repo

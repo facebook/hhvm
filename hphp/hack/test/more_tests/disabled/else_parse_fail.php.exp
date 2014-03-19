@@ -1,0 +1,2 @@
+File "else_parse_fail.php", line 23, characters 16-16:
+The body of a conditional or loop must be wrapped in braces.

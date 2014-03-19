@@ -1,0 +1,6 @@
+File "erling_loop2.php", line 26, characters 10-16:
+Invalid return type
+File "erling_loop2.php", line 16, characters 18-20:
+This is an int
+File "erling_loop2.php", line 24, characters 15-21:
+It is incompatible with a string

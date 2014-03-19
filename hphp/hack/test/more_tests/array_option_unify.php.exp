@@ -1,0 +1,6 @@
+File "array_option_unify.php", line 12, characters 16-18:
+Invalid return type
+File "array_option_unify.php", line 12, characters 33-37:
+This is an array
+File "array_option_unify.php", line 12, characters 16-18:
+It is incompatible with a nullable type because this async function implicitly returns Awaitable<void>

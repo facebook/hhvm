@@ -1,0 +1,6 @@
+File "test_inter4.php", line 18, characters 10-11:
+Invalid return type
+File "test_inter4.php", line 16, characters 24-24:
+This is an object of type I
+File "test_inter4.php", line 17, characters 16-22:
+It is incompatible with an object of type A

@@ -1,0 +1,6 @@
+File "meth_caller4.php", line 22, characters 10-16:
+Invalid return type
+File "meth_caller4.php", line 16, characters 36-38:
+This is an int
+File "meth_caller4.php", line 19, characters 30-33:
+It is incompatible with a bool

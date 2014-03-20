@@ -658,6 +658,14 @@ void CodeGenerator::cgSideExitJmpLteInt(IRInstruction* i) { cgExitJccInt(i); }
 void CodeGenerator::cgSideExitJmpEqInt(IRInstruction* i)  { cgExitJccInt(i); }
 void CodeGenerator::cgSideExitJmpNeqInt(IRInstruction* i) { cgExitJccInt(i); }
 
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgConjure(IRInstruction* inst) {
+  always_assert(false);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /**
  * Once the arg sources and dests are all assigned; emit moves and exchanges to
  * put all the args in desired registers. Any arguments that don't fit in

@@ -570,6 +570,12 @@ void CodeGenerator::recordHostCallSyncPoint(vixl::MacroAssembler& as,
 
 //////////////////////////////////////////////////////////////////////
 
+void CodeGenerator::cgConjure(IRInstruction* inst) {
+  always_assert(false);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void CodeGenerator::cgJmp(IRInstruction* inst) {
   emitJumpToBlock(m_mcg->code.main(), inst->taken(), CC_None);
 }

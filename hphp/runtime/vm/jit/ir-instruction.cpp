@@ -441,6 +441,7 @@ std::string BCMarker::show() const {
 }
 
 bool BCMarker::valid() const {
+  if (reinterpret_cast<uintptr_t>(func) == 1) return true;
   return
     func != nullptr &&
     bcOff >= func->base() && bcOff < func->past() &&

@@ -834,6 +834,11 @@ D:ConstT = DefConst<T>
   the DefConst instruction will not actually appear in the IR instruction
   stream.
 
+D:T = Conjure<T>
+
+  Define a value of type T. This is meant to be used in tests, to create a
+  non-constant value as an opaque input to other instructions.
+
 D:Cls = LdCls S0:Str S1:ConstCls
 
   Loads the class named S0 in the context of the class S1. Invokes autoload and

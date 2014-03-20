@@ -101,7 +101,7 @@ void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   if (!orig || !orig->datefmt()) {
     s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
                            "Cannot clone unconstructed IntlDateFormatter");
-    throwException("%s", s_intl_error->getErrorMessage(false).c_str());
+    throw getException("%s", s_intl_error->getErrorMessage(false).c_str());
   }
   if (m_date_fmt) {
     udat_close(m_date_fmt);
@@ -110,7 +110,7 @@ void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   m_date_fmt = udat_clone(orig->datefmt(), &error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "datefmt_clone: date formatter clone failed");
-    throwException("%s", s_intl_error->getErrorMessage().c_str());
+    throw getException("%s", s_intl_error->getErrorMessage().c_str());
   }
 }
 

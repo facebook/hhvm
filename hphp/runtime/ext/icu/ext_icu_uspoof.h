@@ -23,7 +23,7 @@ class SpoofChecker : public IntlError {
                      &error);
 
     if (U_FAILURE(error)) {
-      throwException("Could not open spoof checker, error %d (%s)",
+      throw getException("Could not open spoof checker, error %d (%s)",
                      error, u_errorName(error));
     }
   }
@@ -33,7 +33,7 @@ class SpoofChecker : public IntlError {
     UErrorCode error = U_ZERO_ERROR;
     m_checker = uspoof_clone(src.m_checker, &error);
     if (U_FAILURE(error)) {
-      throwException("Could not clone spoof checker, error %d (%s)",
+      throw getException("Could not clone spoof checker, error %d (%s)",
                      error, u_errorName(error));
     }
     return *this;

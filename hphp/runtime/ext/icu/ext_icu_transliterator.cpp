@@ -8,8 +8,7 @@ Class* Transliterator::c_Transliterator = nullptr;
 #define FETCH_TRANS(data, obj) \
   auto data = Transliterator::Get(obj); \
   if (!data) { \
-    s_intl_error->throwException("Uninitialized Message Formatter"); \
-    not_reached(); \
+    throw s_intl_error->getException("Uninitialized Message Formatter"); \
   }
 
 

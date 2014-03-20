@@ -21,7 +21,8 @@ class Collator : public IntlError {
     UErrorCode error = U_ZERO_ERROR;
     m_collator = ucol_safeClone(src.m_collator, stack, &stack_size, &error);
     if (U_FAILURE(error)) {
-      throwException("Something went wrong cloning Collator: %d", (int)error);
+      throw getException("Something went wrong cloning Collator: %d",
+                         (int)error);
     }
     return *this;
   }

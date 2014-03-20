@@ -106,4 +106,7 @@ inline void php_error_docref(const char *docref, int type,
 // Double definition with libjpeg, which can affect PCH builds
 #undef MAXJSAMPLE
 
+// And double definition with libxml2
+#undef ESC
+
 #endif // incl_HPHP_LIBGD_COMPAT_H_

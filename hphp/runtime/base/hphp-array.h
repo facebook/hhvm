@@ -64,25 +64,31 @@ public:
     // data.m_type == KindOfInvalid if this is an empty slot in the
     // array (e.g. after a key is deleted).
     TypedValueAux data;
+
     bool hasStrKey() const {
       return data.hash() != 0;
     }
+
     bool hasIntKey() const {
       return data.hash() == 0;
     }
+
     int32_t hash() const {
       return data.hash();
     }
+
     void setStaticKey(StringData* k, strhash_t h) {
       assert(k->isStatic());
       key = k;
       data.hash() = h | STRHASH_MSB;
     }
+
     void setStrKey(StringData* k, strhash_t h) {
       key = k;
       data.hash() = h | STRHASH_MSB;
       k->incRefCount();
     }
+
     void setIntKey(int64_t k) {
       ikey = k;
       data.hash() = 0;
@@ -138,7 +144,7 @@ public:
    * used for initial empty arrays (COW will cause it to escalate to a
    * request-local array if it is modified).
    */
-  static HphpArray* GetStaticEmptyArray();
+  static ArrayData* GetStaticEmptyArray();
 
   // This behaves the same as iter_begin except that it assumes
   // this array is not empty and its not virtual.
@@ -168,7 +174,6 @@ public:
 
   // overrides ArrayData
   static bool IsVectorData(const ArrayData*);
-  static bool IsVectorDataPacked(const ArrayData*);
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterAdvance(const ArrayData*, ssize_t pos);
@@ -178,7 +183,6 @@ public:
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
   static bool ExistsIntPacked(const ArrayData*, int64_t k);
-  static bool ExistsStrPacked(const ArrayData*, const StringData* k);
 
   // implements ArrayData
   static ArrayData* LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
@@ -344,15 +348,12 @@ public:
   static size_t computeDataSize(uint32_t tableMask);
 
 private:
-  friend class ArrayInit;
+  friend struct ArrayInit;
   friend struct MemoryProfile;
-  struct EmptyArrayInitializer;
+  friend struct EmptyArray;
   enum class ClonePacked {};
   enum class CloneMixed {};
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
-
-private:
-  static EmptyArrayInitializer s_arrayInitializer;
 
 private:
   // Safe downcast helpers
@@ -555,16 +556,15 @@ private:
 };
 
 extern std::aligned_storage<
-  sizeof(HphpArray) +
-    sizeof(HphpArray::Elm) * HphpArray::SmallSize,
-  alignof(HphpArray)
+  sizeof(ArrayData),
+  alignof(ArrayData)
 >::type s_theEmptyArray;
 
 //=============================================================================
 
-inline HphpArray* HphpArray::GetStaticEmptyArray() {
+inline ArrayData* HphpArray::GetStaticEmptyArray() {
   void* vp = &s_theEmptyArray;
-  return static_cast<HphpArray*>(vp);
+  return static_cast<ArrayData*>(vp);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -810,6 +810,7 @@ Variant f_array_splice(VRefParam input, int offset,
   input = ArrayUtil::Splice(arr_input, offset, len, replacement, &ret);
   return ret;
 }
+
 Variant f_array_sum(const Variant& array) {
   getCheckedArray(array);
   int64_t i;

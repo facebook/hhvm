@@ -1,0 +1,30 @@
+array(2) {
+  [42]=>
+  int(2)
+  [43]=>
+  int(3)
+}
+array(2) {
+  [42]=>
+  array(1) {
+    [42]=>
+    int(2)
+  }
+  [43]=>
+  int(3)
+}
+
+Warning: Cannot add element to the array as the next element is already occupied in %s on line 16
+array(1) {
+  [9223372036854775807]=>
+  int(2)
+}
+
+Warning: Cannot add element to the array as the next element is already occupied in %s on line 21
+array(1) {
+  [9223372036854775807]=>
+  array(1) {
+    [42]=>
+    int(2)
+  }
+}

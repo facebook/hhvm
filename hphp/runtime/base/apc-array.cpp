@@ -43,8 +43,11 @@ APCHandle* APCArray::MakeShared(ArrayData* arr,
       handle->setSerializedArray();
       handle->mustCache();
       return handle;
-    } else if (apcExtension::UseUncounted &&
-               !features.hasObjectOrResource()) {
+    }
+
+    if (apcExtension::UseUncounted &&
+        !features.hasObjectOrResource() &&
+        !arr->empty()) {
       return APCTypedValue::MakeSharedArray(arr);
     }
   }

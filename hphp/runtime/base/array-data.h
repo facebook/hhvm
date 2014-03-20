@@ -44,6 +44,7 @@ struct ArrayData {
     kPackedKind,  // HphpArray with keys in range [0..size)
     kMixedKind,   // HphpArray arbitrary int or string keys, maybe holes
     kSharedKind,  // SharedArray
+    kEmptyKind,   // The singleton static empty array
     kNvtwKind,    // NameValueTableWrapper
     kProxyKind,   // ProxyArray
     kNumKinds     // insert new values before kNumKinds.

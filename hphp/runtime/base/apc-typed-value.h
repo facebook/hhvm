@@ -89,13 +89,13 @@ public:
     return m_data.dbl;
   }
 
-  StringData *getStringData() const {
+  StringData* getStringData() const {
     assert(m_handle.is(KindOfStaticString) ||
            (m_handle.getUncounted() && m_handle.is(KindOfString)));
     return m_data.str;
   }
 
-  ArrayData *getArrayData() const {
+  ArrayData* getArrayData() const {
     assert(m_handle.getUncounted() && m_handle.is(KindOfArray));
     return m_data.arr;
   }

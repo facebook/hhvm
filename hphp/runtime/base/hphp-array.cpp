@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -45,90 +46,7 @@ TRACE_SET_MOD(runtime);
 
 //////////////////////////////////////////////////////////////////////
 
-std::aligned_storage<
-  sizeof(HphpArray) +
-    sizeof(HphpArray::Elm) * HphpArray::SmallSize,
-    // No need for space for the hash because the empty array is
-    // kPackedKind.
-  alignof(HphpArray)
->::type s_theEmptyArray;
-
-struct HphpArray::EmptyArrayInitializer {
-  EmptyArrayInitializer() {
-    void* vpEmpty = &s_theEmptyArray;
-
-    auto const ad = static_cast<HphpArray*>(vpEmpty);
-    ad->m_kind            = kPackedKind;
-    ad->m_size            = 0;
-    ad->m_pos             = ArrayData::invalid_index;
-    ad->m_count           = 0;
-    ad->m_used            = 0;
-    ad->m_tableMask       = SmallHashSize - 1;
-
-    ad->m_cap  = SmallSize;
-
-    ad->setStatic();
-
-    assert(ad->checkInvariants());
-  }
-};
-HphpArray::EmptyArrayInitializer HphpArray::s_arrayInitializer;
-
-//=============================================================================
-// Helpers.
-
 namespace {
-
-ALWAYS_INLINE
-uint32_t computeMaskFromNumElms(uint32_t n) {
-  assert(n <= 0x7fffffffU);
-  auto lgSize = HphpArray::MinLgTableSize;
-  auto maxElms = HphpArray::SmallSize;
-  assert(lgSize >= 2);
-
-  // Note: it's tempting to convert this loop into something involving
-  // x64 bsr and a shift.  Naive attempts currently actually add more
-  // branches, because we need to initially check whether `n' is less
-  // than SmallSize, and after finding the next power of two we need a
-  // branch to see if it was big enough for the desired load factor.
-  // This is probably still worth revisiting (e.g., MakeReserve could
-  // have a precondition that n is at least SmallSize).
-  while (maxElms < n) {
-    ++lgSize;
-    maxElms <<= 1;
-  }
-  assert(lgSize <= 32);
-
-  // return 2^lgSize - 1
-  return ((size_t(1U)) << lgSize) - 1;
-  static_assert(HphpArray::MinLgTableSize >= 2,
-                "lower limit for 0.75 load factor");
-}
-
-ALWAYS_INLINE
-std::pair<uint32_t,uint32_t> computeCapAndMask(uint32_t minimumMaxElms) {
-  auto const mask = computeMaskFromNumElms(minimumMaxElms);
-  auto const cap  = HphpArray::computeMaxElms(mask);
-  return std::make_pair(cap, mask);
-}
-
-ALWAYS_INLINE
-size_t computeAllocBytes(uint32_t cap, uint32_t mask) {
-  auto const tabSize    = mask + 1;
-  auto const tabBytes   = tabSize * sizeof(int32_t);
-  auto const dataBytes  = cap * sizeof(HphpArray::Elm);
-  return sizeof(HphpArray) + tabBytes + dataBytes;
-}
-
-ALWAYS_INLINE
-HphpArray* smartAllocArray(uint32_t cap, uint32_t mask) {
-  /*
-   * Note: we're currently still allocating the memory for the hash
-   * for a packed array even if we aren't going to use it yet.
-   */
-  auto const allocBytes = computeAllocBytes(cap, mask);
-  return static_cast<HphpArray*>(MM().objMallocLogged(allocBytes));
-}
 
 ALWAYS_INLINE
 HphpArray* mallocArray(uint32_t cap, uint32_t mask) {
@@ -138,8 +56,7 @@ HphpArray* mallocArray(uint32_t cap, uint32_t mask) {
 
 }
 
-//=============================================================================
-// Construction
+//////////////////////////////////////////////////////////////////////
 
 NEVER_INLINE
 HphpArray* HphpArray::MakeReserve(uint32_t capacity) {
@@ -442,8 +359,12 @@ Variant CreateVarForUncountedArray(const Variant& source) {
       return StringData::MakeUncounted(source.getStringData()->slice());
     }
 
-    case KindOfArray:
-      return HphpArray::MakeUncounted(source.getArrayData());
+    case KindOfArray: {
+      auto const ad = source.getArrayData();
+      return ad == HphpArray::GetStaticEmptyArray()
+        ? ad
+        : HphpArray::MakeUncounted(ad);
+    }
 
     default:
       assert(false); // type not allowed
@@ -699,12 +620,6 @@ bool HphpArray::checkInvariants() const {
     break;
   }
 
-  if (this == GetStaticEmptyArray()) {
-    assert(m_size == 0);
-    assert(m_used == 0);
-    assert(isPacked());
-    assert(m_pos == invalid_index);
-  }
   return true;
 }
 
@@ -771,10 +686,6 @@ const Variant& HphpArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto& e = a->data()[pos];
   assert(!isTombstone(e.data.m_type));
   return tvAsCVarRef(&e.data);
-}
-
-bool HphpArray::IsVectorDataPacked(const ArrayData*) {
-  return true;
 }
 
 bool HphpArray::IsVectorData(const ArrayData* ad) {
@@ -1015,11 +926,6 @@ bool HphpArray::ExistsIntPacked(const ArrayData* ad, int64_t k) {
 bool HphpArray::ExistsInt(const ArrayData* ad, int64_t k) {
   auto a = asMixed(ad);
   return validPos(a->find(k));
-}
-
-bool HphpArray::ExistsStrPacked(const ArrayData* ad, const StringData* k) {
-  assert(asPacked(ad));
-  return false;
 }
 
 bool HphpArray::ExistsStr(const ArrayData* ad, const StringData* k) {
@@ -2409,7 +2315,7 @@ void HphpArray::OnSetEvalScalar(ArrayData* ad) {
   }
 }
 
-bool HphpArray::ValidMArrayIter(const ArrayData* ad, const MArrayIter &fp) {
+bool HphpArray::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
   assert(fp.getContainer() == asHphpArray(ad));
   if (fp.getResetFlag()) return false;
   return fp.m_pos != invalid_index;

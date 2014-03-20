@@ -39,7 +39,7 @@ final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * Create an empty ImmMap (if no parameters are passed) or create
    * an ImmMap from an KeyedTraversable (if one parameter is passed).
    */
-  public function __construct(?KeyedTraversable<Tk, Tv> $it);
+  public function __construct(?KeyedTraversable<Tk, Tv> $it = null);
 
   /**
    * Returns an array containing the key/value pairs from this ImmMap
@@ -103,6 +103,11 @@ final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    */
   public function contains(Tk $k): bool;
   public function containsKey(Tk $k): bool;
+
+  /**
+   * Returns a new Map with the keys in this Map not in $$iterable
+   */
+  public function differenceByKey(KeyedTraversable<Tk, Tv> $iterable): Map<Tk, Tv>;
 
   /**
    * Returns an iterator that points to beginning of this ImmMap.

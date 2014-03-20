@@ -1,3 +1,6 @@
+NEXT
+  - Allow direct arg passing with up to 15 params (7 if at least one is a double)
+
 "Ghostface Killah" 17-Mar-2014
   - Remove "HipHop" from error messages
   - Add __IsFoldable user attribute for const-foldable functions

@@ -7306,7 +7306,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   if (!f ||
       (f->attrs() & AttrNoFCallBuiltin) ||
       !f->nativeFuncPtr() ||
-      (f->numParams() > Native::kMaxBuiltinArgs) ||
+      (f->numParams() > Native::kMaxBuiltinArgsNoDouble) ||
       (numParams > f->numParams()) ||
       (f->returnType() == KindOfDouble)) return nullptr;
 

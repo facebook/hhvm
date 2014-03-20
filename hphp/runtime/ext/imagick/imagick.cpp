@@ -931,23 +931,10 @@ static bool HHVM_METHOD(Imagick, flipImage) {
   return true;
 }
 
-static TypedValue* HHVM_MN(Imagick, floodFillPaintImage)(ActRec* ar_) {
-  Object this_ = ar_->m_this;
-  TypedValue* fill_;
-  double fuzz;
-  TypedValue* target_;
-  int64_t x;
-  int64_t y;
-  bool invert;
-  int64_t channel = DefaultChannels;
-
-  if (!parseArgs(ar_, "vdvllb|l",
-    &fill_, &fuzz, &target_, &x, &y, &invert, &channel)) {
-    return arReturn(ar_, false);
-  }
-  Variant fill = tvAsVariant(fill_);
-  Variant target = tvAsVariant(target_);
-
+static bool HHVM_METHOD(Imagick, floodFillPaintImage,
+                        const Variant& fill, double fuzz,
+                        const Variant& target, int64_t x, int64_t y,
+                        bool invert, int64_t channel /*=Default*/) {
   auto wand = getMagickWandResource(this_);
   auto fillPixel = buildColorWand(fill);
   auto targetPixel = buildColorWand(target);
@@ -957,7 +944,7 @@ static TypedValue* HHVM_MN(Imagick, floodFillPaintImage)(ActRec* ar_) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to floodfill paint image");
   }
-  return arReturn(ar_, true);
+  return true;
 }
 
 static bool HHVM_METHOD(Imagick, flopImage) {
@@ -2192,23 +2179,11 @@ static bool HHVM_METHOD(Imagick, orderedPosterizeImage,
   return true;
 }
 
-static TypedValue* HHVM_MN(Imagick, paintFloodfillImage)(ActRec* ar_) {
+static bool HHVM_METHOD(Imagick, paintFloodfillImage,
+                        const Variant& fill, double fuzz,
+                        const Variant& bordercolor,
+                        int64_t x, int64_t y, int64_t channel) {
   raiseDeprecated(s_Imagick.c_str(), "paintFloodfillImage");
-  Object this_ = ar_->m_this;
-  TypedValue* fill_;
-  double fuzz;
-  TypedValue* bordercolor_;
-  int64_t x;
-  int64_t y;
-  int64_t channel = AllChannels;
-
-  if (!parseArgs(ar_, "vdvll|l",
-    &fill_, &fuzz, &bordercolor_, &x, &y, &channel)) {
-    return arReturn(ar_, false);
-  }
-  Variant fill = tvAsVariant(fill_);
-  Variant bordercolor= tvAsVariant(bordercolor_);
-
   auto wand = getMagickWandResource(this_);
   auto fillPixel = buildColorWand(fill);
   auto borderPixel = bordercolor.isNull()
@@ -2223,7 +2198,7 @@ static TypedValue* HHVM_MN(Imagick, paintFloodfillImage)(ActRec* ar_) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to paint floodfill image");
   }
-  return arReturn(ar_, true);
+  return true;
 }
 
 static bool HHVM_METHOD(Imagick, paintOpaqueImage,

@@ -803,7 +803,7 @@ class Imagick implements Countable, Iterator {
    *
    * @return bool -
    */
-  <<__Native("ActRec")>>
+  <<__Native>>
   function floodFillPaintImage(mixed $fill,
                                float $fuzz,
                                mixed $target,
@@ -2192,7 +2192,7 @@ class Imagick implements Countable, Iterator {
    *
    * @return bool -
    */
-  <<__Native("ActRec")>>
+  <<__Native>>
   function paintFloodfillImage(mixed $fill,
                                float $fuzz,
                                mixed $bordercolor,
@@ -3881,7 +3881,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native("ActRec")>>
+  <<__Native>>
   function arc(float $sx,
                float $sy,
                float $ex,
@@ -3972,7 +3972,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native("ActRec")>>
+  <<__Native>>
   function composite(int $compose,
                      float $x,
                      float $y,
@@ -4008,7 +4008,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native("ActRec")>>
+  <<__Native>>
   function ellipse(float $ox,
                    float $oy,
                    float $rx,
@@ -4311,7 +4311,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native("ActRec")>>
+  <<__Native>>
   function pathCurveToAbsolute(float $x1,
                                float $y1,
                                float $x2,
@@ -4387,7 +4387,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native("ActRec")>>
+  <<__Native>>
   function pathCurveToRelative(float $x1,
                                float $y1,
                                float $x2,
@@ -4440,7 +4440,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native("ActRec")>>
+  <<__Native>>
   function pathEllipticArcAbsolute(float $rx,
                                    float $ry,
                                    float $x_axis_rotation,
@@ -4462,7 +4462,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native("ActRec")>>
+  <<__Native>>
   function pathEllipticArcRelative(float $rx,
                                    float $ry,
                                    float $x_axis_rotation,
@@ -4734,7 +4734,7 @@ class ImagickDraw {
    *
    * @return bool -
    */
-  <<__Native("ActRec")>>
+  <<__Native>>
   function roundRectangle(float $x1,
                           float $y1,
                           float $x2,

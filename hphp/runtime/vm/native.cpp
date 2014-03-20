@@ -101,7 +101,7 @@ template<class Ret, size_t CurArg> struct NativeFuncCaller<Ret,0,CurArg> {
 #define NFC(n, rettype, func, ...) \
  case n: return NativeFuncCaller<rettype,n,0>::call(func, __VA_ARGS__);
 
-static_assert(kMaxBuiltinArgs == 5,
+static_assert(kMaxBuiltinArgs == 7,
  "makeNativeCall needs updates for kMaxBuiltinArgs");
 
 #define NFC_CALL(numargs, rettype, func, ...) \
@@ -109,6 +109,7 @@ static_assert(kMaxBuiltinArgs == 5,
   NFC(0, rettype, func, __VA_ARGS__) NFC(1, rettype, func, __VA_ARGS__) \
   NFC(2, rettype, func, __VA_ARGS__) NFC(3, rettype, func, __VA_ARGS__) \
   NFC(4, rettype, func, __VA_ARGS__) NFC(5, rettype, func, __VA_ARGS__) \
+  NFC(6, rettype, func, __VA_ARGS__) NFC(7, rettype, func, __VA_ARGS__) \
   default: assert(false); \
  }
 

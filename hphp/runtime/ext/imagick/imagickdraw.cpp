@@ -57,22 +57,12 @@ static bool HHVM_METHOD(ImagickDraw, annotation,
   return true;
 }
 
-static TypedValue* HHVM_MN(ImagickDraw, arc)(ActRec* ar_) {
-  Object this_ = ar_->m_this;
-  double sx;
-  double sy;
-  double ex;
-  double ey;
-  double sd;
-  double ed;
-
-  if (!parseArgs(ar_, "dddddd", &sx, &sy, &ex, &ey, &sd, &ed)) {
-    return arReturn(ar_, false);
-  }
-
+static bool HHVM_METHOD(ImagickDraw, arc, double sx, double sy,
+                                          double ex, double ey,
+                                          double sd, double ed) {
   auto wand = getDrawingWandResource(this_);
   DrawArc(wand->getWand(), sx, sy, ex, ey, sd, ed);
-  return arReturn(ar_, true);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, bezier,
@@ -123,20 +113,10 @@ static bool HHVM_METHOD(ImagickDraw, comment,
   return true;
 }
 
-static TypedValue* HHVM_MN(ImagickDraw, composite)(ActRec* ar_) {
-  Object this_ = ar_->m_this;
-  int64_t compose;
-  double x;
-  double y;
-  double width;
-  double height;
-  ObjectData* compositeWand;
-
-  if (!parseArgs(ar_, "lddddo",
-      &compose, &x, &y, &width, &height, &compositeWand)) {
-    return arReturn(ar_, false);
-  }
-
+static bool HHVM_METHOD(ImagickDraw, composite,
+                        int64_t compose,
+                        double x, double y, double width, double height,
+                        const Object compositeWand) {
   auto wand = getDrawingWandResource(this_);
   Object compositeWandObj(compositeWand);
   auto magick = getMagickWandResource(compositeWandObj);
@@ -145,7 +125,7 @@ static TypedValue* HHVM_MN(ImagickDraw, composite)(ActRec* ar_) {
   if (status == MagickFalse) {
     IMAGICKDRAW_THROW("Compositing image failed");
   }
-  return arReturn(ar_, true);
+  return true;
 }
 
 static void HHVM_METHOD(ImagickDraw, __construct) {
@@ -161,22 +141,12 @@ static bool HHVM_METHOD(ImagickDraw, destroy) {
   return HHVM_MN(ImagickDraw, clear)(this_);
 }
 
-static TypedValue* HHVM_MN(ImagickDraw, ellipse)(ActRec* ar_) {
-  Object this_ = ar_->m_this;
-  double ox;
-  double oy;
-  double rx;
-  double ry;
-  double start;
-  double end;
-
-  if (!parseArgs(ar_, "dddddd", &ox, &oy, &rx, &ry, &start, &end)) {
-    return arReturn(ar_, false);
-  }
-
+static bool HHVM_METHOD(ImagickDraw, ellipse,
+                        double ox, double oy, double rx, double ry,
+                        double start, double end) {
   auto wand = getDrawingWandResource(this_);
   DrawEllipse(wand->getWand(), ox, oy, rx, ry, start, end);
-  return arReturn(ar_, true);
+  return true;
 }
 
 static String HHVM_METHOD(ImagickDraw, getClipPath) {
@@ -347,22 +317,12 @@ static bool HHVM_METHOD(ImagickDraw, pathClose) {
   return true;
 }
 
-static TypedValue* HHVM_MN(ImagickDraw, pathCurveToAbsolute)(ActRec* ar_) {
-  Object this_ = ar_->m_this;
-  double x1;
-  double y1;
-  double x2;
-  double y2;
-  double x;
-  double y;
-
-  if (!parseArgs(ar_, "dddddd", &x1, &y1, &x2, &y2, &x, &y)) {
-    return arReturn(ar_, false);
-  }
-
+static bool HHVM_METHOD(ImagickDraw, pathCurveToAbsolute,
+                        double x1, double y1, double x2, double y2,
+                        double x, double y) {
   auto wand = getDrawingWandResource(this_);
   DrawPathCurveToAbsolute(wand->getWand(), x1, y1, x2, y2, x, y);
-  return arReturn(ar_, true);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathCurveToQuadraticBezierAbsolute,
@@ -393,22 +353,12 @@ static bool HHVM_METHOD(ImagickDraw, pathCurveToQuadraticBezierSmoothRelative,
   return true;
 }
 
-static TypedValue* HHVM_MN(ImagickDraw, pathCurveToRelative)(ActRec* ar_) {
-  Object this_ = ar_->m_this;
-  double x1;
-  double y1;
-  double x2;
-  double y2;
-  double x;
-  double y;
-
-  if (!parseArgs(ar_, "dddddd", &x1, &y1, &x2, &y2, &x, &y)) {
-    return arReturn(ar_, false);
-  }
-
+static bool HHVM_METHOD(ImagickDraw, pathCurveToRelative,
+                        double x1, double y1, double x2, double y2,
+                        double x, double y) {
   auto wand = getDrawingWandResource(this_);
   DrawPathCurveToRelative(wand->getWand(), x1, y1, x2, y2, x, y);
-  return arReturn(ar_, true);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathCurveToSmoothAbsolute,
@@ -425,46 +375,24 @@ static bool HHVM_METHOD(ImagickDraw, pathCurveToSmoothRelative,
   return true;
 }
 
-static TypedValue* HHVM_MN(ImagickDraw, pathEllipticArcAbsolute)(ActRec* ar_) {
-  Object this_ = ar_->m_this;
-  double rx;
-  double ry;
-  double x_axis_rotation;
-  bool large_arc_flag;
-  bool sweep_flag;
-  double x;
-  double y;
-
-  if (!parseArgs(ar_, "dddbbdd",
-      &rx, &ry, &x_axis_rotation, &large_arc_flag, &sweep_flag, &x, &y)) {
-    return arReturn(ar_, false);
-  }
-
+static bool HHVM_METHOD(ImagickDraw, pathEllipticArcAbsolute,
+                        double rx, double ry, double x_axis_rotation,
+                        bool large_arc_flag, bool sweep_flag,
+                        double x, double y) {
   auto wand = getDrawingWandResource(this_);
   DrawPathEllipticArcAbsolute(wand->getWand(), rx, ry, x_axis_rotation,
     toMagickBool(large_arc_flag), toMagickBool(sweep_flag), x, y);
-  return arReturn(ar_, true);
+  return true;
 }
 
-static TypedValue* HHVM_MN(ImagickDraw, pathEllipticArcRelative)(ActRec* ar_) {
-  Object this_ = ar_->m_this;
-  double rx;
-  double ry;
-  double x_axis_rotation;
-  bool large_arc_flag;
-  bool sweep_flag;
-  double x;
-  double y;
-
-  if (!parseArgs(ar_, "dddbbdd",
-      &rx, &ry, &x_axis_rotation, &large_arc_flag, &sweep_flag, &x, &y)) {
-    return arReturn(ar_, false);
-  }
-
+static bool HHVM_METHOD(ImagickDraw, pathEllipticArcRelative,
+                        double rx, double ry, double x_axis_rotation,
+                        bool large_arc_flag, bool sweep_flag,
+                        double x, double y) {
   auto wand = getDrawingWandResource(this_);
   DrawPathEllipticArcRelative(wand->getWand(), rx, ry, x_axis_rotation,
     toMagickBool(large_arc_flag), toMagickBool(sweep_flag), x, y);
-  return arReturn(ar_, true);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, pathFinish) {
@@ -643,22 +571,12 @@ static bool HHVM_METHOD(ImagickDraw, rotate, double degrees) {
   return true;
 }
 
-static TypedValue* HHVM_MN(ImagickDraw, roundRectangle)(ActRec* ar_) {
-  Object this_ = ar_->m_this;
-  double x1;
-  double y1;
-  double x2;
-  double y2;
-  double rx;
-  double ry;
-
-  if (!parseArgs(ar_, "dddddd", &x1, &y1, &x2, &y2, &rx, &ry)) {
-    return arReturn(ar_, false);
-  }
-
+static bool HHVM_METHOD(ImagickDraw, roundRectangle,
+                        double x1, double y1, double x2, double y2,
+                        double rx, double ry) {
   auto wand = getDrawingWandResource(this_);
   DrawRoundRectangle(wand->getWand(), x1, y1, x2, y2, rx, ry);
-  return arReturn(ar_, true);
+  return true;
 }
 
 static bool HHVM_METHOD(ImagickDraw, scale,

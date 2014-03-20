@@ -22,6 +22,9 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include <expat.h>
 
+#define XML_MAXLEVEL 255
+// XXX this should be dynamic
+
 namespace HPHP {
 
 IMPLEMENT_DEFAULT_EXTENSION_VERSION(xml, NO_EXTENSION_VERSION_YET);
@@ -83,7 +86,7 @@ void XmlParser::cleanupImpl() {
   }
   if (ltags) {
     int inx;
-    for (inx = 0; inx < level; inx++)
+    for (inx = 0; (inx < level) && (inx < XML_MAXLEVEL); inx++)
       free(ltags[inx]);
     free(ltags);
     ltags = NULL;
@@ -114,8 +117,6 @@ enum php_xml_option {
 static XML_Char * xml_globals_default_encoding = (XML_Char*)"UTF-8";
 // for xml_parse_into_struct
 
-#define XML_MAXLEVEL 255
-// XXX this should be dynamic
 
 #define XML(v) (xml_globals_ ## v)
 
@@ -406,7 +407,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
 
     free(tag_name);
 
-    if (parser->ltags) {
+    if ((parser->ltags) && (parser->level <= XML_MAXLEVEL)) {
       free(parser->ltags[parser->level-1]);
     }
 
@@ -479,15 +480,19 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
               return;
             }
           }
-          tag = Array::Create();
-          _xml_add_to_info(parser, parser->ltags[parser->level-1] +
-                           parser->toffset);
-          tag.set(s_tag, String(parser->ltags[parser->level-1] +
-                                parser->toffset, CopyString));
-          tag.set(s_value, String(decoded_value, AttachString));
-          tag.set(s_type, s_cdata);
-          tag.set(s_level, parser->level);
-          parser->data.toArrRef().append(tag);
+          if (parser->level <= XML_MAXLEVEL) {
+            tag = Array::Create();
+            _xml_add_to_info(parser, parser->ltags[parser->level-1] +
+                             parser->toffset);
+            tag.set(s_tag, String(parser->ltags[parser->level-1] +
+                                  parser->toffset, CopyString));
+            tag.set(s_value, String(decoded_value, AttachString));
+            tag.set(s_type, s_cdata);
+            tag.set(s_level, parser->level);
+            parser->data.toArrRef().append(tag);
+          } else if (parser->level == (XML_MAXLEVEL + 1)) {
+            raise_warning("Maximum depth exceeded - Results truncated");
+          }
         }
       } else {
         free(decoded_value);
@@ -538,38 +543,43 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
     }
 
     if (!parser->data.isNull()) {
-      Array tag, atr;
-      int atcnt = 0;
-      tag = Array::Create();
-      atr = Array::Create();
+      if (parser->level <= XML_MAXLEVEL) {
+        Array tag, atr;
+        int atcnt = 0;
+        tag = Array::Create();
+        atr = Array::Create();
 
-      _xml_add_to_info(parser,((char *) tag_name) + parser->toffset);
+        _xml_add_to_info(parser,((char *) tag_name) + parser->toffset);
 
-      tag.set(s_tag,String(((char *)tag_name)+parser->toffset,CopyString));
-      tag.set(s_type, s_open);
-      tag.set(s_level, parser->level);
+        tag.set(s_tag,String(((char *)tag_name)+parser->toffset,CopyString));
+        tag.set(s_type, s_open);
+        tag.set(s_level, parser->level);
 
-      parser->ltags[parser->level-1] = strdup(tag_name);
-      parser->lastwasopen = 1;
+        parser->ltags[parser->level-1] = strdup(tag_name);
+        parser->lastwasopen = 1;
 
-      attributes = (const XML_Char **) attrs;
+        attributes = (const XML_Char **) attrs;
 
-      while (attributes && *attributes) {
-        char* att = _xml_decode_tag(parser, (const char*)attributes[0]);
-        int val_len;
-        char* val = xml_utf8_decode(attributes[1],
-                                    strlen((const char*)attributes[1]),
-                                    &val_len, parser->target_encoding);
-        atr.set(String(att, AttachString), String(val, val_len, AttachString));
-        atcnt++;
-        attributes += 2;
+        while (attributes && *attributes) {
+          char* att = _xml_decode_tag(parser, (const char*)attributes[0]);
+          int val_len;
+          char* val = xml_utf8_decode(attributes[1],
+                                      strlen((const char*)attributes[1]),
+                                      &val_len, parser->target_encoding);
+          atr.set(String(att, AttachString),
+                  String(val, val_len, AttachString));
+          atcnt++;
+          attributes += 2;
+        }
+
+        if (atcnt) {
+          tag.set(s_attributes,atr);
+        }
+        parser->data.toArrRef().append(tag);
+        parser->ctag.assignRef(parser->data.getArrayData()->endRef());
+      } else if (parser->level == (XML_MAXLEVEL + 1)) {
+        raise_warning("Maximum depth exceeded - Results truncated");
       }
-
-      if (atcnt) {
-        tag.set(s_attributes,atr);
-      }
-      parser->data.toArrRef().append(tag);
-      parser->ctag.assignRef(parser->data.getArrayData()->endRef());
     }
 
     free(tag_name);

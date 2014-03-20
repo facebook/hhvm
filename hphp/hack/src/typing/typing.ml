@@ -705,8 +705,10 @@ and expr_ is_lvalue env (p, e) =
       let env = string2 env idl in
       env, (Reason.Rwitness p, Tprim Tstring)
   | Fun_id x ->
+      auto_complete_id x;
       fun_type_of_id env x
   | Id (cst_pos, cst_name) ->
+      auto_complete_id (cst_pos, cst_name);
       (match Env.get_gconst env cst_name with
       | None when Env.is_strict env ->
           error cst_pos "Unbound global constant (Typing)"
@@ -1396,6 +1398,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
       end
   | Fun_id x
   | Id x ->
+      auto_complete_id x;
       let env, fty = fun_type_of_id env x in
       let env, fty = Env.expand_type env fty in
       let env, fty = Inst.instantiate_fun env fty el in
@@ -1407,23 +1410,22 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
       call p env fty el
 
 and fun_type_of_id env x =
+  Find_refs.process_find_refs None (snd x) (fst x);
+  let env, fty = Env.get_fun env (snd x) in
+  let env, fty =
+    match fty with
+    | None -> unbound_name env x
+    | Some fty ->
+        let env, fty = Inst.instantiate_ft env fty in
+        env, (Reason.Rwitness fty.ft_pos, Tfun fty)
+  in
+  env, fty
+
+and auto_complete_id x =
   if is_auto_complete (snd x)
   then begin
       argument_global_type := Some Acid;
-      auto_complete_for_global := snd x;
-      env, (Reason.Rnone, Tany)
-  end
-  else begin
-    Find_refs.process_find_refs None (snd x) (fst x);
-    let env, fty = Env.get_fun env (snd x) in
-    let env, fty =
-      match fty with
-      | None -> unbound_name env x
-      | Some fty ->
-          let env, fty = Inst.instantiate_ft env fty in
-          env, (Reason.Rwitness fty.ft_pos, Tfun fty)
-    in
-    env, fty
+      auto_complete_for_global := snd x
   end
 
 (* Checking that the user explicitely made a copy *)

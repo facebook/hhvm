@@ -35,11 +35,13 @@ find_path (LIBMAGICKWAND_INCLUDE_DIRS
     PATHS
       /usr/include/ImageMagick
       /usr/local/include/ImageMagick
-    ENV CPATH)
+      "${CMAKE_PREFIX_PATH}/include/ImageMagick-6"
+      ENV CPATH)
 
 find_library (LIBMAGICKWAND_LIBRARIES
     NAMES
       MagickWand
+      MagickWand-6.Q16
     PATHS
       /usr/lib
       /usr/local/lib
@@ -49,6 +51,7 @@ find_library (LIBMAGICKWAND_LIBRARIES
 find_library (LIBMAGICKCORE_LIBRARIES
     NAMES
       MagickCore
+      MagickCore-6.Q16
     PATHS
       /usr/lib
       /usr/local/lib

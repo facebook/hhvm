@@ -21,7 +21,7 @@ val make_error : (Pos.t * string) list -> error
 val error_code_to_string : int -> string
 
 val fixme_format : Pos.t -> unit
-val alok : Pos.t * string -> unit
+val typeparam_alok : Pos.t * string -> unit
 val unexpected_eof : Pos.t -> unit
 val missing_field : Pos.t -> Pos.t -> string -> unit
 val generic_class_var : Pos.t -> unit
@@ -88,6 +88,7 @@ val format_string :
   Pos.t -> string -> string -> Pos.t -> string -> string -> unit
 val expected_literal_string : Pos.t -> unit
 val generic_array_strict : Pos.t -> unit
+val strict_members_not_known : Pos.t -> string -> unit
 val nullable_void : Pos.t -> unit
 val tuple_syntax : Pos.t -> unit
 val class_arity : Pos.t -> string -> int -> unit

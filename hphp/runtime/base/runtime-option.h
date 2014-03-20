@@ -414,14 +414,14 @@ public:
                                                                         \
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, JitTransCounters,            false)                           \
-  F(bool, HHIRBytecodeControlFlow,     false)                           \
+  F(bool, HHIRBytecodeControlFlow,     hhirBytecodeControlFlowDefault())\
   F(bool, HHIRCse,                     true)                            \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRJumpOpts,                true)                            \
   F(bool, HHIRRefcountOpts,            hhirRefcountOptsDefault())       \
   F(bool, HHIRRefcountOptsAlwaysSink,  false)                           \
-  F(bool, HHIRExtraOptPass,            true)                            \
+  F(bool, HHIRExtraOptPass,            hhirExtraOptPassDefault())       \
   F(uint32_t, HHIRNumFreeRegs,         64)                              \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
   F(uint32_t, HHIRInliningMaxCost,     13)                              \

@@ -367,6 +367,19 @@ static inline std::string regionSelectorDefault() {
 #endif
 }
 
+static inline bool hhirBytecodeControlFlowDefault() {
+#ifdef HHVM_BYTECODE_CONTROL_FLOW
+  return true;
+#else
+  return false;
+#endif
+}
+
+static inline bool hhirExtraOptPassDefault() {
+  // TODO(t3728931)
+  return !RuntimeOption::EvalHHIRBytecodeControlFlow;
+}
+
 static inline bool pgoDefault() {
   // TODO(3496304)
   return !RuntimeOption::EvalSimulateARM;
@@ -382,7 +395,9 @@ static inline bool hhbcRelaxGuardsDefault() {
 
 static inline bool hhirRefcountOptsDefault() {
   // TODO(t3091846)
-  return !RuntimeOption::EvalSimulateARM;
+  // TODO(t3728863)
+  return !RuntimeOption::EvalSimulateARM &&
+    !RuntimeOption::EvalHHIRBytecodeControlFlow;
 }
 
 static inline bool evalJitDefault() {

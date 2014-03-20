@@ -1,0 +1,7 @@
+No errors
+File: namespace.php, line: 6, kind: Kreturn, type: \TestNS\C
+File: namespace.php, line: 10, kind: Kreturn, type: \TestNS\C
+File: namespace.php, line: 18, kind: Kreturn, type: \TestNS2\D
+File: namespace.php, line: 22, kind: Kreturn, type: \TestNS\C
+File: namespace.php, line: 30, kind: Kreturn, type: \TestNS\C
+File: namespace.php, line: 40, kind: Kreturn, type: \Foo\Bar\C

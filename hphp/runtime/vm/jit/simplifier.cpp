@@ -1513,20 +1513,8 @@ SSATmp* Simplifier::simplifyConvIntToDbl(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyConvStrToDbl(const IRInstruction* inst) {
-  SSATmp* src = inst->src(0);
-  if (src->isConst()) {
-    const StringData *str = src->strVal();
-    int64_t lval;
-    double dval;
-    DataType ret = str->isNumericWithVal(lval, dval, 1);
-    if (ret == KindOfInt64) {
-      dval = (double)lval;
-    } else if (ret != KindOfDouble) {
-      dval = 0.0;
-    }
-    return cns(dval);
-  }
-  return nullptr;
+  auto const src = inst->src(0);
+  return src->isConst() ? cns(src->strVal()->toDouble()) : nullptr;
 }
 
 SSATmp* Simplifier::simplifyConvArrToInt(const IRInstruction* inst) {
@@ -1557,20 +1545,8 @@ SSATmp* Simplifier::simplifyConvDblToInt(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyConvStrToInt(const IRInstruction* inst) {
-  SSATmp* src  = inst->src(0);
-  if (src->isConst()) {
-    const StringData *str = src->strVal();
-    int64_t lval;
-    double dval;
-    DataType ret = str->isNumericWithVal(lval, dval, 1);
-    if (ret == KindOfDouble) {
-      lval = (int64_t)dval;
-    } else if (ret != KindOfInt64) {
-      lval = 0;
-    }
-    return cns(lval);
-  }
-  return nullptr;
+  auto const src = inst->src(0);
+  return src->isConst() ? cns(src->strVal()->toInt64()) : nullptr;
 }
 
 SSATmp* Simplifier::simplifyConvBoolToStr(const IRInstruction* inst) {

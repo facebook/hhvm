@@ -61,7 +61,6 @@
 #define RGB_BLUE	2
 
 #define JSAMPLE unsigned char
-#undef MAXJSAMPLE
 #define MAXJSAMPLE (gdMaxColors-1)
 #define BITS_IN_JSAMPLE 8
 

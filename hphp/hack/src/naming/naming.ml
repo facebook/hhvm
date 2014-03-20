@@ -719,7 +719,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
   let hint = hint ~allow_this in
   let params = (fst env).type_params in
   if   is_alok_type_name id && not (SMap.mem x params)
-  then Errors.alok id;
+  then Errors.typeparam_alok id;
   if   is_static_var && SMap.mem x params
   then Errors.generic_class_var (fst id);
   (* some common Xhp screw ups *)

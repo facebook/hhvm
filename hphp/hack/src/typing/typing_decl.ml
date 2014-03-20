@@ -48,6 +48,11 @@ let report_class_ready class_name =
 let remove_classes class_set =
   ClassStatus.remove_batch class_set
 
+(* For somewhat silly historical reasons having to do with the lack of
+ * .hhi's for fairly core XHP classes, we unfortunately mark all XHP
+ * classes as not having their members fully known *)
+let xhp_is_not_strict = true
+
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
  * For example, a class cannot extend an interface, an interface cannot
@@ -453,7 +458,12 @@ and class_decl c =
   in
   let env, m = if dy_check then DynamicYield.decl env m else env, m in
   let ext_strict = List.fold_left (trait_exists env) ext_strict c.c_uses in
-  let ext_strict = not c.c_is_xhp && ext_strict in
+  let not_strict_because_xhp = xhp_is_not_strict && c.c_is_xhp in
+  if not ext_strict && not not_strict_because_xhp && (Env.is_strict env) then
+    let p, name = c.c_name in
+    Errors.strict_members_not_known p name
+  else ();
+  let ext_strict = if not_strict_because_xhp then false else ext_strict in
   let self_dimpl = if is_abstract then impl else SMap.empty in
   let dimpl =
     if is_abstract

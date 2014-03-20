@@ -242,7 +242,6 @@ static Offset pcOff(const ExecutionContext* env) {
 
 VarEnv::VarEnv()
   : m_depth(0)
-  , m_malloced(false)
   , m_global(false)
   , m_cfp(0)
 {
@@ -258,7 +257,6 @@ VarEnv::VarEnv()
 VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
   : m_extraArgs(eArgs)
   , m_depth(1)
-  , m_malloced(false)
   , m_global(false)
   , m_cfp(fp)
 {
@@ -299,18 +297,10 @@ size_t VarEnv::getObjectSz(ActRec* fp) {
   return sizeof(VarEnv) + sizeof(TypedValue*) * fp->m_func->numNamedLocals();
 }
 
-VarEnv* VarEnv::createLocalOnStack(ActRec* fp) {
+VarEnv* VarEnv::createLocal(ActRec* fp) {
   void* mem = smart_malloc(getObjectSz(fp));
   VarEnv* ret = new (mem) VarEnv(fp, fp->getExtraArgs());
   TRACE(3, "Creating lazily attached VarEnv %p on stack\n", mem);
-  return ret;
-}
-
-VarEnv* VarEnv::createLocalOnHeap(ActRec* fp) {
-  void* mem = malloc(getObjectSz(fp));
-  VarEnv* ret = new (mem) VarEnv(fp, fp->getExtraArgs());
-  TRACE(3, "Creating lazily attached VarEnv %p on heap\n", mem);
-  ret->m_malloced = true;
   return ret;
 }
 
@@ -330,16 +320,8 @@ VarEnv* VarEnv::createGlobal() {
 }
 
 void VarEnv::destroy(VarEnv* ve) {
-  bool malloced = ve->m_malloced;
-  bool global = ve->isGlobalScope();
   ve->~VarEnv();
-  if (LIKELY(!malloced)) {
-    if (LIKELY(!global)) {
-      smart_free(ve);
-    }
-  } else {
-    free(ve);
-  }
+  smart_free(ve);
 }
 
 void VarEnv::attach(ActRec* fp) {
@@ -1297,7 +1279,7 @@ VarEnv* ExecutionContext::getVarEnv(int frame) {
   if (!fp) return nullptr;
   assert(!fp->hasInvName());
   if (!fp->hasVarEnv()) {
-    fp->setVarEnv(VarEnv::createLocalOnStack(fp));
+    fp->setVarEnv(VarEnv::createLocal(fp));
   }
   return fp->m_varEnv;
 }
@@ -2527,7 +2509,7 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   assert(isReturnHelper(ar->m_savedRip));
   pushLocalsAndIterators(func);
   if (!m_fp->hasVarEnv()) {
-    m_fp->setVarEnv(VarEnv::createLocalOnStack(m_fp));
+    m_fp->setVarEnv(VarEnv::createLocal(m_fp));
   }
   ar->m_varEnv = m_fp->m_varEnv;
   ar->m_varEnv->attach(ar);
@@ -2745,7 +2727,7 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
       fp = prevFp;
     }
     if (!fp->hasVarEnv()) {
-      fp->setVarEnv(VarEnv::createLocalOnHeap(fp));
+      fp->setVarEnv(VarEnv::createLocal(fp));
     }
     varEnv = fp->m_varEnv;
     cfpSave = varEnv->getCfp();
@@ -2940,7 +2922,7 @@ static inline void lookupd_var(ActRec* fp,
   } else {
     assert(!fp->hasInvName());
     if (!fp->hasVarEnv()) {
-      fp->setVarEnv(VarEnv::createLocalOnStack(fp));
+      fp->setVarEnv(VarEnv::createLocal(fp));
     }
     val = fp->m_varEnv->lookup(name);
     if (val == nullptr) {
@@ -7052,7 +7034,7 @@ static inline void setContVar(const Func* func,
     tvWriteUninit(src);
   } else {
     if (!genFp->hasVarEnv()) {
-      genFp->setVarEnv(VarEnv::createLocalOnHeap(genFp));
+      genFp->setVarEnv(VarEnv::createLocal(genFp));
     }
     genFp->getVarEnv()->setWithRef(name, src);
   }

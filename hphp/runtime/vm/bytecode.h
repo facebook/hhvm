@@ -145,7 +145,6 @@ class VarEnv {
  private:
   ExtraArgs* m_extraArgs;
   uint16_t m_depth;
-  bool m_malloced;
   bool m_global;
   ActRec* m_cfp;
   // TODO remove vector (#1099580).  Note: trying changing this to a
@@ -173,8 +172,7 @@ class VarEnv {
    * (because we're about to attach a callee frame using attach()) but
    * don't actually have one.
    */
-  static VarEnv* createLocalOnStack(ActRec* fp);
-  static VarEnv* createLocalOnHeap(ActRec* fp);
+  static VarEnv* createLocal(ActRec* fp);
 
   // Allocate a global VarEnv.  Initially not attached to any frame.
   static VarEnv* createGlobal();

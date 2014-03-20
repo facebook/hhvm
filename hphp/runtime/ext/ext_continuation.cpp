@@ -158,9 +158,7 @@ void c_Continuation::dupContVar(const StringData* name, TypedValue* src) {
     tvDupFlattenVars(src, frame_local(fp, destId));
   } else {
     if (!fp->hasVarEnv()) {
-      // This VarEnv may potentially outlive the most recently stack-allocated
-      // VarEnv, so we need to heap allocate it.
-      fp->setVarEnv(VarEnv::createLocalOnHeap(fp));
+      fp->setVarEnv(VarEnv::createLocal(fp));
     }
     fp->getVarEnv()->setWithRef(name, src);
   }

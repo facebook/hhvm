@@ -158,7 +158,9 @@ Variant File::Open(const String& filename, const String& mode,
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-File::File(bool nonblocking, const String& wrapper, const String& stream_type)
+File::File(bool nonblocking /* = true */,
+           const String& wrapper /* = null_string */,
+           const String& stream_type /* = empty_string */)
   : m_isLocal(false), m_fd(-1), m_closed(false), m_nonblocking(nonblocking),
     m_writepos(0), m_readpos(0), m_position(0), m_eof(false),
     m_wrapperType(wrapper.get()), m_streamType(stream_type.get()),

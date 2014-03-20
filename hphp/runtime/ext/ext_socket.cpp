@@ -364,6 +364,9 @@ Variant f_socket_create_listen(int port, int backlog /* = 128 */) {
   return ret;
 }
 
+const StaticString
+  s_socktype_generic("generic_socket");
+
 bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd) {
   check_socket_parameters(domain, type);
 
@@ -375,8 +378,10 @@ bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd) {
   }
 
   Array ret;
-  ret.set(0, Resource(new Socket(fds_array[0], domain)));
-  ret.set(1, Resource(new Socket(fds_array[1], domain)));
+  ret.set(0, Resource(new Socket(fds_array[0], domain, nullptr, 0, 0.0,
+                                 s_socktype_generic)));
+  ret.set(1, Resource(new Socket(fds_array[1], domain, nullptr, 0, 0.0,
+                                 s_socktype_generic)));
   fd = ret;
   return true;
 }

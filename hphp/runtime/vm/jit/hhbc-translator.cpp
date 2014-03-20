@@ -5531,9 +5531,12 @@ SSATmp* HhbcTranslator::pushStLoc(uint32_t id, Block* exit, SSATmp* newVal) {
   const bool doRefCount = true;
   SSATmp* ret = stLocImpl(id, exit, newVal, doRefCount);
 
-  // Approximately mimic hhbc guard relaxation.
+  // Approximately mimic hhbc guard relaxation.  When RefcountOpts are
+  // enabled a SetL followed by a PopC will not touch the refcount,
+  // since the IncRef will be cancelled by the DecRef.
   auto outputPopped = curSrcKey().advanced().op() == OpPopC &&
-    m_irb->localType(id, DataTypeGeneric).notBoxed();
+    m_irb->localType(id, DataTypeGeneric).notBoxed() &&
+    RuntimeOption::EvalHHIRRefcountOpts;
   return pushIncRef(ret, outputPopped ? DataTypeGeneric : DataTypeCountness);
 }
 

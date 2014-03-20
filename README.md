@@ -4,8 +4,8 @@ HHVM (aka the HipHop Virtual Machine) is an open-source virtual machine designed
 
 HHVM should be used together with a FastCGI-based webserver, and work is in progress to make HHVM work smoothly with Apache. HHVM can also be run as a standalone webserver (i.e. without the Apache webserver and the "modphp" extension).
 
-HHVM page: http://hhvm.com
-Hack page: http://hacklang.org
+* HHVM page: http://hhvm.com
+* Hack page: http://hacklang.org
 
 ## FAQ
 

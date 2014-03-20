@@ -133,6 +133,7 @@
       - joomla-cms/tests/unit/suites/libraries/legacy/categories/JCategoryNodeTest.php
       - joomla-cms/tests/unit/suites/libraries/joomla/twitter/JTwitterTest.php
       - joomla-cms/tests/unit/suites/libraries/joomla/document/opensearch/JDocumentOpensearchTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/cache/storage/JCacheStorageMainTest.php
   klein:
     url: https://github.com/chriso/klein.php.git
     branch: v2.0.2

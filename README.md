@@ -2,7 +2,7 @@
 
 HHVM (aka the HipHop Virtual Machine) is an open-source virtual machine designed for executing programs written in [Hack](http://hacklang.org) and PHP. HHVM uses a just-in-time compilation approach to achieve superior performance while maintaining the flexibility that PHP developers are accustomed to. To date, HHVM (and its predecessor HPHPc before it) has realized over a 9x increase in web request throughput and over a 5x reduction in memory consumption for Facebook compared with the PHP 5.2 engine + APC.
 
-HHVM should be used together with a FastCGI-based webserver, and work is in progress to make HHVM work smoothly with Apache. HHVM can also be run as a standalone webserver (i.e. without the Apache webserver and the "modphp" extension).
+HHVM should be used together with a FastCGI-based webserver like [ngingx](https://github.com/facebook/hhvm/wiki/FastCGI#making-it-work-with-nginx) or [apache](https://github.com/facebook/hhvm/wiki/FastCGI#making-it-work-with-apache).
 
 * HHVM page: http://hhvm.com
 * Hack page: http://hacklang.org
@@ -21,14 +21,12 @@ You can install a [prebuilt package](https://github.com/facebook/hhvm/wiki#insta
 
 You can run standalone programs just by passing them to hhvm: `hhvm my_script.php`.
 
-HHVM bundles in a webserver. So if you want to run on port 80 in the current directory:
-
-```
-sudo hhvm -m server
-```
-
-For anything more complicated, you'll want to make a [config.hdf](https://github.com/facebook/hhvm/wiki/Runtime-options#server) and run `sudo hhvm -m server -c config.hdf`.
-
+If you want to host a website: 
+* Install your favorite webserver
+* Install our [package](https://github.com/facebook/hhvm/wiki#installing-pre-built-packages-for-hhvm)
+* Start your webserver
+* Run `sudo /etc/init.d/hhvm start`
+* Visit your site at http://.../index.php
 
 ## Contributing
 

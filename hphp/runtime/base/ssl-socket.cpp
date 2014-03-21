@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "folly/String.h"
 #include <poll.h>
+#include <sys/time.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

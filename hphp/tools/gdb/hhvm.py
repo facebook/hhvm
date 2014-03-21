@@ -62,9 +62,18 @@ class StringDataPrinter:
     def to_string(self):
         return "Str: '%s'" % string_data_val(self.val)
 
+class _BaseIterator:
+    """
+    Base iterator for Python 2 compatibility (in Python 3, next() is renamed
+    to __next__()). See http://legacy.python.org/dev/peps/pep-3114/
+    """
+    def next(self):
+        return self.__next__()
+
 class ArrayDataPrinter:
     RECOGNIZE = '^HPHP::(ArrayData|HphpArray)$'
-    class _iterator:
+
+    class _iterator(_BaseIterator):
         def __init__(self, kind, begin, end):
             self.kind = kind
             self.cur = begin
@@ -74,7 +83,7 @@ class ArrayDataPrinter:
         def __iter__(self):
             return self
 
-        def next(self):
+        def __next__(self):
             if self.cur == self.end:
                 raise StopIteration
             elt = self.cur
@@ -127,7 +136,8 @@ objectDataCount = 100
 
 class ObjectDataPrinter:
     RECOGNIZE = '^HPHP::(ObjectData|Instance)$'
-    class _iterator:
+
+    class _iterator(_BaseIterator):
         def __init__(self, val, cls, begin, end):
             self.cur = begin
             self.end = end
@@ -139,7 +149,7 @@ class ObjectDataPrinter:
         def __iter__(self):
             return self
 
-        def next(self):
+        def __next__(self):
             if self.cur == self.end:
                 raise StopIteration
 
@@ -176,7 +186,8 @@ class ObjectDataPrinter:
 
 class SmartPtrPrinter:
     RECOGNIZE = '^HPHP::((Static)?String|Array|Object|SmartPtr<.*>)$'
-    class _iterator:
+
+    class _iterator(_BaseIterator):
         def __init__(self, begin, end):
             self.cur = begin
             self.end = end
@@ -184,7 +195,7 @@ class SmartPtrPrinter:
         def __iter__(self):
             return self
 
-        def next(self):
+        def __next__(self):
             if self.cur == self.end:
                 raise StopIteration
             key = self.cur
@@ -243,8 +254,8 @@ printer_classes = [
     ResourceDataPrinter,
     ClassPrinter,
 ]
-type_printers = dict((re.compile(cls.RECOGNIZE), cls)
-                     for cls in printer_classes)
+type_printers = {(re.compile(cls.RECOGNIZE), cls)
+                     for cls in printer_classes}
 
 def lookup_function(val):
     type = val.type
@@ -261,7 +272,7 @@ def lookup_function(val):
     # Iterate over local dict of types to determine if a printer is
     # registered for that type.  Return an instantiation of the
     # printer if found.
-    for recognizer_regex, func in type_printers.iteritems():
+    for recognizer_regex, func in type_printers:
         if recognizer_regex.search(typename):
             return func(val)
 

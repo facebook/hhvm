@@ -118,27 +118,7 @@ public:
     m_read.method  = PHP_CURL_DIRECT;
     m_write_header.method = PHP_CURL_IGNORE;
 
-    curl_easy_setopt(m_cp, CURLOPT_NOPROGRESS,        1);
-    curl_easy_setopt(m_cp, CURLOPT_VERBOSE,           0);
-    curl_easy_setopt(m_cp, CURLOPT_ERRORBUFFER,       m_error_str);
-    curl_easy_setopt(m_cp, CURLOPT_WRITEFUNCTION,     curl_write);
-    curl_easy_setopt(m_cp, CURLOPT_FILE,              (void*)this);
-    curl_easy_setopt(m_cp, CURLOPT_READFUNCTION,      curl_read);
-    curl_easy_setopt(m_cp, CURLOPT_INFILE,            (void*)this);
-    curl_easy_setopt(m_cp, CURLOPT_HEADERFUNCTION,    curl_write_header);
-    curl_easy_setopt(m_cp, CURLOPT_WRITEHEADER,       (void*)this);
-    curl_easy_setopt(m_cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 0); // for thread-safe
-    curl_easy_setopt(m_cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
-    curl_easy_setopt(m_cp, CURLOPT_MAXREDIRS, 20); // no infinite redirects
-    curl_easy_setopt(m_cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
-    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_FUNCTION,
-                     CurlResource::ssl_ctx_callback);
-    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_DATA, (void*)this);
-
-    curl_easy_setopt(m_cp, CURLOPT_TIMEOUT,
-                     RuntimeOption::HttpDefaultTimeout);
-    curl_easy_setopt(m_cp, CURLOPT_CONNECTTIMEOUT,
-                     RuntimeOption::HttpDefaultTimeout);
+    reset();
 
     if (!url.empty()) {
 #if LIBCURL_VERSION_NUM >= 0x071100
@@ -177,10 +157,7 @@ public:
     m_read.callback = src->m_read.callback;
     m_write_header.callback = src->m_write_header.callback;
 
-    curl_easy_setopt(m_cp, CURLOPT_ERRORBUFFER,       m_error_str);
-    curl_easy_setopt(m_cp, CURLOPT_FILE,              (void*)this);
-    curl_easy_setopt(m_cp, CURLOPT_INFILE,            (void*)this);
-    curl_easy_setopt(m_cp, CURLOPT_WRITEHEADER,       (void*)this);
+    reset();
 
     m_to_free = src->m_to_free;
     m_emptyPost = src->m_emptyPost;
@@ -239,6 +216,32 @@ public:
       return e;
     }
     return nullptr;
+  }
+
+  void reset() {
+    curl_easy_reset(m_cp);
+
+    curl_easy_setopt(m_cp, CURLOPT_NOPROGRESS,        1);
+    curl_easy_setopt(m_cp, CURLOPT_VERBOSE,           0);
+    curl_easy_setopt(m_cp, CURLOPT_ERRORBUFFER,       m_error_str);
+    curl_easy_setopt(m_cp, CURLOPT_WRITEFUNCTION,     curl_write);
+    curl_easy_setopt(m_cp, CURLOPT_FILE,              (void*)this);
+    curl_easy_setopt(m_cp, CURLOPT_READFUNCTION,      curl_read);
+    curl_easy_setopt(m_cp, CURLOPT_INFILE,            (void*)this);
+    curl_easy_setopt(m_cp, CURLOPT_HEADERFUNCTION,    curl_write_header);
+    curl_easy_setopt(m_cp, CURLOPT_WRITEHEADER,       (void*)this);
+    curl_easy_setopt(m_cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 0); // for thread-safe
+    curl_easy_setopt(m_cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
+    curl_easy_setopt(m_cp, CURLOPT_MAXREDIRS, 20); // no infinite redirects
+    curl_easy_setopt(m_cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
+    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_FUNCTION,
+                     CurlResource::ssl_ctx_callback);
+    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_DATA, (void*)this);
+
+    curl_easy_setopt(m_cp, CURLOPT_TIMEOUT,
+                     RuntimeOption::HttpDefaultTimeout);
+    curl_easy_setopt(m_cp, CURLOPT_CONNECTTIMEOUT,
+                     RuntimeOption::HttpDefaultTimeout);
   }
 
   Variant execute() {
@@ -928,6 +931,13 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
     return false;                                                           \
   }                                                                         \
 
+#define CHECK_RESOURCE_RETURN_VOID(curl)                                    \
+  CurlResource *curl = ch.getTyped<CurlResource>(true, true);               \
+  if (curl == nullptr) {                                                    \
+    raise_warning("supplied argument is not a valid cURL handle resource"); \
+    return;                                                                 \
+  }                                                                         \
+
 Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
   if (url.isNull()) {
     return NEWOBJ(CurlResource)(null_string);
@@ -1189,6 +1199,11 @@ Variant HHVM_FUNCTION(curl_close, const Resource& ch) {
   CHECK_RESOURCE(curl);
   curl->close();
   return uninit_null();
+}
+
+void HHVM_FUNCTION(curl_reset, const Resource& ch) {
+  CHECK_RESOURCE_RETURN_VOID(curl);
+  curl->reset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2714,6 +2729,7 @@ class CurlExtension : public Extension {
     HHVM_FE(curl_errno);
     HHVM_FE(curl_error);
     HHVM_FE(curl_close);
+    HHVM_FE(curl_reset);
     HHVM_FE(curl_multi_init);
     HHVM_FE(curl_multi_add_handle);
     HHVM_FE(curl_multi_remove_handle);

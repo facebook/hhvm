@@ -267,6 +267,9 @@ function curl_setopt(resource $ch,
 <<__Native>>
 function curl_version(int $age = CURLVERSION_NOW): mixed;
 
+<<__Native>>
+function curl_reset(resource $ch): void;
+
 /**
  * Gets options on the given cURL session handle.
  *

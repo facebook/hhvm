@@ -100,7 +100,7 @@ private:
   };
 
 public:
-  CLASSNAME_IS("cURL handle")
+  CLASSNAME_IS("curl")
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
@@ -1212,7 +1212,7 @@ class CurlMultiResource : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(CurlMultiResource)
 
-  CLASSNAME_IS("cURL Multi Handle")
+  CLASSNAME_IS("curl_multi")
   // overriding ResourceData
   const String& o_getClassNameHook() const { return classnameof(); }
 

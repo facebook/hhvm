@@ -76,6 +76,12 @@ ServerFactoryPtr ServerFactoryRegistry::getFactory(const std::string &name) {
   Lock lock(m_lock);
   auto it = m_factories.find(name);
   if (it == m_factories.end()) {
+    if (name == "libevent") {
+      throw ServerException(
+        "HHVM no longer supports the built-in webserver as of 3.0.0. Please "
+        "use your own webserver (nginx or apache) talking to HHVM over "
+        "fastcgi. https://github.com/facebook/hhvm/wiki/FastCGI");
+    }
     throw ServerException("no factory for server type \"%s\"", name.c_str());
   }
   return it->second;

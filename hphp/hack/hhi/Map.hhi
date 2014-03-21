@@ -73,7 +73,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public function toVector(): Vector<Tv>;
   public function toImmVector(): ImmVector<Tv>;
   public function toMap(): Map<Tk, Tv>;
-  public function toImmMap(): ImmMap<int, Tv>;
+  public function toImmMap(): ImmMap<Tk, Tv>;
   public function toSet(): Set<Tv>;
   public function toImmSet(): ImmSet<Tv>;
   public function lazy(): KeyedIterable<Tk, Tv>;
@@ -143,6 +143,11 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    */
   public function remove(Tk $k): Map<Tk, Tv>;
   public function removeKey(Tk $k): Map<Tk, Tv>;
+
+  /**
+   * Returns a new Map with the keys in this Map not in $iterable
+   */
+  public function differenceByKey(KeyedTraversable<Tk, Tv> $iterable): Map<Tk, Tv>;
 
   /**
    * Returns an iterator that points to beginning of this Map.

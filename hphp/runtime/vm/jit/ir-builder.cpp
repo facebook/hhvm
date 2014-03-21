@@ -726,6 +726,12 @@ void IRBuilder::reoptimize() {
       // to a nop). Replace it with a jump to the next block.
       appendInstruction(m_unit.gen(Jmp, backMarker, nextBlock));
     }
+    assert(block->back().isBlockEnd());
+    if (!block->back().isTerminal() && !block->next()) {
+      // We converted the block-end instruction to a different one.
+      // Set its next block appropriately.
+      block->back().setNext(nextBlock);
+    }
 
     m_state.finishBlock(block);
   }

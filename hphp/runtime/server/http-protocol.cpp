@@ -511,7 +511,7 @@ static void CopyServerInfo(Array& server,
   server.set(s_SERVER_ADDR, transport->getServerAddr());
   server.set(s_SERVER_NAME, hostName);
   server.set(s_SERVER_PORT, transport->getServerPort());
-  server.set(s_SERVER_SOFTWARE, s_HPHP);
+  server.set(s_SERVER_SOFTWARE, transport->getServerSoftware());
   server.set(s_SERVER_PROTOCOL, "HTTP/" + transport->getHTTPVersion());
   server.set(s_SERVER_ADMIN, empty_string);
   server.set(s_SERVER_SIGNATURE, empty_string);

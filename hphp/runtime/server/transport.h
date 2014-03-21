@@ -135,6 +135,9 @@ public:
   virtual uint16_t getServerPort() {
     return RuntimeOption::ServerPort;
   };
+  virtual const char *getServerSoftware() {
+    return "HPHP";
+  };
 
   /**
    * POST request's data.

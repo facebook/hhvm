@@ -54,6 +54,7 @@ public:
   virtual const char *getServerName() override;
   virtual const char *getServerAddr() override;
   virtual uint16_t getServerPort() override;
+  virtual const char* getServerSoftware() override;
 
   virtual const void *getPostData(int &size) override;
   virtual bool hasMorePostData() override;
@@ -121,6 +122,7 @@ private:
   uint16_t m_remotePort;
   std::string m_serverName;
   std::string m_serverAddr;
+  std::string m_serverSoftware;
   uint16_t m_serverPort;
   Method m_method;
   std::string m_extendedMethod;

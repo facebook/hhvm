@@ -128,6 +128,7 @@ flood error logs.
     Host = www.default_domain.com
     IP = 0.0.0.0
     Port = 80
+    Type = libevent | fastcgi
     ThreadCount = 50
     ThreadRoundRobin = false   # last thread serves next
     ThreadDropCacheTimeoutSeconds = 0

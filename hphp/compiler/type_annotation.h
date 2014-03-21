@@ -103,14 +103,11 @@ public:
     return ret;
   }
 
-  /*
-   * Return whether this TypeAnnotation is equal to the "mixed" type.
-   */
-  bool isMixed() const { return !m_name.compare("mixed"); }
+  bool isMixed() const { return !strcasecmp(m_name.c_str(), "HH\\mixed"); }
 
-  bool isVoid() const { return !m_name.compare("void"); }
+  bool isVoid() const { return !strcasecmp(m_name.c_str(), "void"); }
 
-  bool isThis() const { return !m_name.compare("this"); }
+  bool isThis() const { return !strcasecmp(m_name.c_str(), "this"); }
 
   /*
    * Returns whether this TypeAnnotation is "simple"---as described

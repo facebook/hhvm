@@ -2,7 +2,7 @@ array(6) {
   [0]=>
   int(4096)
   [1]=>
-  string(72) "Argument 1 passed to main() must be an instance of integer, double given"
+  string(67) "Argument 1 passed to main() must be an instance of int, float given"
   [2]=>
   string(%d) "%s"
   [3]=>

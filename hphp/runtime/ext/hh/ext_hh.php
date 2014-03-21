@@ -27,8 +27,8 @@ namespace HH {
  */
 <<__Native>>
 function autoload_set_paths(
-  \mixed $map,
-  \string $root,
-): \bool;
+  mixed $map,
+  string $root,
+): bool;
 
 }

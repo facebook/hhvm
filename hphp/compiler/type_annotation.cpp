@@ -39,7 +39,8 @@ std::string TypeAnnotation::vanillaName() const {
   if (m_nullable || m_soft || m_typevar || m_function) {
     return "";
   }
-  if (!m_name.compare("mixed") || !m_name.compare("this")) {
+  if (!strcasecmp(m_name.c_str(), "HH\\mixed") ||
+      !strcasecmp(m_name.c_str(), "this")) {
     return "";
   }
   return m_name;
@@ -73,22 +74,23 @@ DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
     return KindOfObject;
   }
   if (m_typeArgs) {
-    return !m_name.compare("array") ? KindOfArray : KindOfObject;
+    return !strcasecmp(m_name.c_str(), "array") ? KindOfArray : KindOfObject;
   }
   if (!expectedType && (m_nullable || m_soft)) {
     return KindOfUnknown;
   }
-  if (!m_name.compare("null") || !m_name.compare("void")) {
+  if (!strcasecmp(m_name.c_str(), "null") ||
+      !strcasecmp(m_name.c_str(), "void")) {
     return KindOfNull;
   }
-  if (!m_name.compare("bool"))     return KindOfBoolean;
-  if (!m_name.compare("int"))      return KindOfInt64;
-  if (!m_name.compare("float"))    return KindOfDouble;
-  if (!m_name.compare("num"))      return KindOfUnknown;
-  if (!m_name.compare("string"))   return KindOfString;
-  if (!m_name.compare("array"))    return KindOfArray;
-  if (!m_name.compare("resource")) return KindOfResource;
-  if (!m_name.compare("mixed"))    return KindOfUnknown;
+  if (!strcasecmp(m_name.c_str(), "HH\\bool"))     return KindOfBoolean;
+  if (!strcasecmp(m_name.c_str(), "HH\\int"))      return KindOfInt64;
+  if (!strcasecmp(m_name.c_str(), "HH\\float"))    return KindOfDouble;
+  if (!strcasecmp(m_name.c_str(), "HH\\num"))      return KindOfUnknown;
+  if (!strcasecmp(m_name.c_str(), "HH\\string"))   return KindOfString;
+  if (!strcasecmp(m_name.c_str(), "array"))        return KindOfArray;
+  if (!strcasecmp(m_name.c_str(), "HH\\resource")) return KindOfResource;
+  if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return KindOfUnknown;
 
   return KindOfObject;
 }

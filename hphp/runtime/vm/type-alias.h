@@ -52,7 +52,7 @@ struct TypeAlias {
  * validate parameter type hints for a type alias at runtime.
  */
 struct TypeAliasReq {
-  DataType kind;          // may be KindOfAny for "mixed"
+  DataType kind;          // may be KindOfAny for "HH\\mixed"
   bool nullable;          // for option types, like ?Foo
   Class* klass;           // nullptr if kind != KindOfObject
   const StringData* name; // needed for error messages; nullptr if not defined

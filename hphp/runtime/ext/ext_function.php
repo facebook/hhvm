@@ -8,6 +8,6 @@ namespace __SystemLib {
  * directly.
  */
 <<__Native>>
-function func_slice_args(\int $offset) : \mixed;
+function func_slice_args(int $offset) : mixed;
 
 }

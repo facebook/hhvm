@@ -32,12 +32,12 @@ function stream_bucket_new(resource $stream, string $buffer) {
 
 namespace __SystemLib {
   class StreamFilterBucket {
-    public \string $data;
-    public \int $dataLen;
+    public string $data;
+    public int $dataLen;
 
     public function __construct(
-      \string $data,
-      \int $dataLen = 0,
+      string $data,
+      int $dataLen = 0,
     ) {
       if ($dataLen <= 0) {
         $dataLen = strlen($data);

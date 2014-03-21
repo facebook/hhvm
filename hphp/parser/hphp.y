@@ -188,68 +188,79 @@ static void xhp_tag(Parser *_p, Token &out, Token &label, Token &body) {
 static void xhp_attribute(Parser *_p, Token &out, Token &type, Token &label,
                           Token &def, Token &req) {
   /**
-   * The basic builtin types "bool", "int", "double", and "string" all map to
-   * T_STRING in the parser, and the parser always uses type code 5 for
-   * T_STRING. However, XHP uses different type codes for these basic builtin
-   * types, so we need to fix up the type code here to make XHP happy.
+   * The bool, int, float, and string typenames are not given any special
+   * treatment by the parser and are treated the same as regular class names
+   * (which initially gets marked as type code 5). However, XHP wants to use
+   * different type codes for bool, int, float, and string, so we need to fix
+   * up the type code here to make XHP happy.
    */
-  if (type.num() == 5 && type.text().size() >= 3 && type.text().size() <= 7) {
-    switch (type.text()[0]) {
-      case 'b':
-        if ((type.text().size() == 4 &&
-             strcasecmp(type.text().c_str(), "bool") == 0) ||
-            (type.text().size() == 7 &&
-             strcasecmp(type.text().c_str(), "boolean") == 0)) {
-          type.reset();
-          type.setNum(2);
-        }
-        break;
-      case 'd':
-        if (type.text().size() == 6 &&
-            strcasecmp(type.text().c_str(), "double") == 0) {
-          type.reset();
-          type.setNum(8);
-        }
-        break;
-      case 'f':
-        if (type.text().size() == 5 &&
-            strcasecmp(type.text().c_str(), "float") == 0) {
-          type.reset();
-          type.setNum(8);
-        }
-        break;
-      case 'i':
-        if ((type.text().size() == 3 &&
-             strcasecmp(type.text().c_str(), "int") == 0) ||
-            (type.text().size() == 7 &&
-             strcasecmp(type.text().c_str(), "integer") == 0)) {
-          type.reset();
-          type.setNum(3);
-        }
-        break;
-      case 'm':
-        if ((type.text().size() == 5 &&
-             strcasecmp(type.text().c_str(), "mixed") == 0)) {
-          type.reset();
-          type.setNum(6);
-        }
-        break;
-      case 'r':
-        if (type.text().size() == 4 &&
-            strcasecmp(type.text().c_str(), "real") == 0) {
-          type.reset();
-          type.setNum(8);
-        }
-        break;
-      case 's':
-        if (type.text().size() == 6 &&
-            strcasecmp(type.text().c_str(), "string") == 0) {
-          type.reset();
-          type.setNum(1);
-        }
-        break;
-      default:
-        break;
+  if (type.num() == 5) {
+    auto* str = type.text().c_str();
+    if (_p->scanner().isHHSyntaxEnabled()) {
+      switch (type.text().size()) {
+        case 6:
+          if (!strcasecmp(str, "HH\\int")) {
+            type.reset(); type.setNum(3);
+          }
+          break;
+        case 7:
+          if (!strcasecmp(str, "HH\\bool")) {
+            type.reset(); type.setNum(2);
+          }
+          break;
+        case 8:
+          if (!strcasecmp(str, "HH\\float")) {
+            type.reset(); type.setNum(8);
+          } else if (!strcasecmp(str, "HH\\mixed")) {
+            type.reset(); type.setNum(6);
+          }
+          break;
+        case 9:
+          if (!strcasecmp(str, "HH\\string")) {
+            type.reset(); type.setNum(1);
+          }
+          break;
+        default:
+          break;
+      }
+    } else {
+      switch (type.text().size()) {
+        case 3:
+          if (!strcasecmp(str, "int")) {
+            type.reset(); type.setNum(3);
+          }
+          break;
+        case 4:
+          if (!strcasecmp(str, "bool")) {
+            type.reset(); type.setNum(2);
+          } else if (!strcasecmp(str, "real")) {
+            type.reset(); type.setNum(8);
+          }
+          break;
+        case 5:
+          if (!strcasecmp(str, "float")) {
+            type.reset(); type.setNum(8);
+          } else if (!strcasecmp(str, "mixed")) {
+            type.reset(); type.setNum(6);
+          }
+          break;
+        case 6:
+          if (!strcasecmp(str, "string")) {
+            type.reset(); type.setNum(1);
+          } else if (!strcasecmp(str, "double")) {
+            type.reset(); type.setNum(8);
+          }
+          break;
+        case 7:
+          if (!strcasecmp(str, "integer")) {
+            type.reset(); type.setNum(3);
+          } else if (!strcasecmp(str, "boolean")) {
+            type.reset(); type.setNum(2);
+          }
+          break;
+        default:
+          break;
+      }
     }
   }
 

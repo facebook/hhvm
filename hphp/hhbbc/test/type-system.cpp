@@ -1398,14 +1398,14 @@ TEST(Type, WaitH) {
 }
 
 TEST(Type, FromHNIConstraint) {
-  EXPECT_EQ(from_hni_constraint(makeStaticString("?resource")), TOptRes);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("resource")), TRes);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("bool")), TBool);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("?bool")), TOptBool);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("int")), TInt);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("float")), TDbl);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("?float")), TOptDbl);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("mixed")), TInitGen);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\resource")), TOptRes);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\resource")), TRes);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\bool")), TBool);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\bool")), TOptBool);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\int")), TInt);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\float")), TDbl);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\float")), TOptDbl);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\mixed")), TInitGen);
 
   // These are conservative, but we're testing them that way.  If we
   // make the function better later we'll remove the tests.

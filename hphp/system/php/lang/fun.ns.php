@@ -3,9 +3,9 @@
 namespace __SystemLib {
   // systemlib can't have closures, so we get this...
   final class MethCallerHelper {
-    private ?\string $class;
-    private ?\string $method;
-    public function __construct(\string $class, \string $method) {
+    private ?string $class;
+    private ?string $method;
+    public function __construct(string $class, string $method) {
       $this->class = $class;
       $this->method = $method;
     }
@@ -26,7 +26,7 @@ namespace HH {
  *
  * The argument of fun() must always be a constant string.
  */
-function fun(\string $s) /* interpreted by the type checker as
+function fun(string $s) /* interpreted by the type checker as
                            (function(<hack figures this>): <and this>) */ {
   return $s;
 }
@@ -48,7 +48,7 @@ function fun(\string $s) /* interpreted by the type checker as
  *
  * Both arguments must be constant strings.
  */
-function meth_caller(\string $class, \string $method) {
+function meth_caller(string $class, string $method) {
   return new \__SystemLib\MethCallerHelper($class, $method);
 }
 
@@ -65,7 +65,7 @@ function meth_caller(\string $class, \string $method) {
  *   $data = Vector { 1, 2, 3 };
  *   $data->filter(class_meth('C', 'isOdd'));
  */
-function class_meth(\string $class, \string $method)
+function class_meth(string $class, string $method)
   /* : (function(<hack figures this>): <and this>) */ {
   return array($class, $method);
 }
@@ -85,7 +85,7 @@ function class_meth(\string $class, \string $method)
  *     }
  *   }
  */
-function inst_meth($instance, \string $method)
+function inst_meth($instance, string $method)
   /* : (function(<hack figures this>): <and this>) */ {
   invariant(is_object($instance), 'expecting an object');
   return array($instance, $method);

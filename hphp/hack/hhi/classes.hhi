@@ -119,3 +119,9 @@ class RescheduleWaitHandle extends WaitableWaitHandle<void> {
   static public function create(int $queue, int $priority)
     : RescheduleWaitHandle<void> { }
 }
+
+class SessionScopedWaitHandle<T> extends WaitableWaitHandle<T> {}
+
+class SleepWaitHandle<T> extends SessionScopedWaitHandle<T> {
+  static public function create(int $usecs): SleepWaitHandle<T> {}
+}

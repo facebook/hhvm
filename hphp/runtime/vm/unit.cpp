@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -96,16 +97,6 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
   return mem;
 }
 
-static bool needsNSNormalization(const StringData* name) {
-  return name->data()[0] == '\\' && name->data()[1] != '\\';
-}
-
-static String normalizeNS(const StringData* name) {
-  assert(needsNSNormalization(name));
-  assert(name->data()[name->size()] == 0);
-  return String(name->data() + 1, name->size() - 1, CopyString);
-}
-
 Mutex Unit::s_classesMutex;
 /*
  * We hold onto references to elements of this map. If we use a different
@@ -147,7 +138,7 @@ NamedEntity* Unit::GetNamedEntity(const StringData* str,
   NamedEntityMap::iterator it = s_namedDataMap->find(str);
   if (LIKELY(it != s_namedDataMap->end())) return &it->second;
   if (needsNSNormalization(str)) {
-    auto normStr = normalizeNS(str);
+    auto normStr = normalizeNS(StrNR(str).asString());
     if (normalizedStr) {
       *normalizedStr = normStr;
     }
@@ -808,14 +799,12 @@ Class* Unit::loadClass(const NamedEntity* ne,
   if (LIKELY((cls = ne->getCachedClass()) != nullptr)) {
     return cls;
   }
-  JIT::VMRegAnchor _;
-  AutoloadHandler::s_instance->invokeHandler(
-    StrNR(const_cast<StringData*>(name)));
-  return Unit::lookupClass(ne);
+  return loadMissingClass(ne, name);
 }
 
 Class* Unit::loadMissingClass(const NamedEntity* ne,
-                              const StringData *name) {
+                              const StringData* name) {
+  JIT::VMRegAnchor _;
   AutoloadHandler::s_instance->invokeHandler(
     StrNR(const_cast<StringData*>(name)));
   return Unit::lookupClass(ne);
@@ -999,7 +988,7 @@ TypedValue* Unit::loadCns(const StringData* cnsName) {
   if (LIKELY(tv != nullptr)) return tv;
 
   if (needsNSNormalization(cnsName)) {
-    return loadCns(normalizeNS(cnsName).get());
+    return loadCns(normalizeNS(cnsName));
   }
 
   if (!AutoloadHandler::s_instance->autoloadConstant(

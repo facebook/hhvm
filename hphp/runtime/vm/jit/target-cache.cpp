@@ -127,15 +127,10 @@ const Class* ClassCache::lookup(RDS::Handle handle, StringData* name) {
   const StringData* pairSd = pair->m_key;
   if (!stringMatches(pairSd, name)) {
     TRACE(1, "ClassCache miss: %s\n", name->data());
-    const NamedEntity *ne = Unit::GetNamedEntity(name);
-    Class *c = Unit::lookupClass(ne);
+    Class* c = Unit::loadClass(name);
     if (UNLIKELY(!c)) {
-      c = Unit::loadMissingClass(ne, name);
-      if (UNLIKELY(!c)) {
-        raise_error(Strings::UNKNOWN_CLASS, name->data());
-      }
+      raise_error(Strings::UNKNOWN_CLASS, name->data());
     }
-
     if (pair->m_key) decRefStr(pair->m_key);
     pair->m_key = name;
     name->incRefCount();

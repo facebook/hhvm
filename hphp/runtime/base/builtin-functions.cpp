@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
 #include "folly/Format.h"
@@ -1045,11 +1046,16 @@ class ConstantExistsChecker {
 };
 
 template <class T>
-AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& name,
+AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
                                                      const String& kind,
                                                      bool toLower,
                                                      const T &checkExists) {
   assert(!m_map.isNull());
+
+  // always normalize name before autoloading
+  assert(clsName.get()->isStatic());
+  const String& name = normalizeNS(clsName);
+
   while (true) {
     const Variant& type_map = m_map.get()->get(kind);
     auto const typeMapCell = type_map.asCell();
@@ -1125,12 +1131,12 @@ bool AutoloadHandler::autoloadType(const String& name) {
  * false otherwise. When this function returns true, it is the caller's
  * responsibility to check if the given class or interface exists.
  */
-bool AutoloadHandler::invokeHandler(const String& className,
+bool AutoloadHandler::invokeHandler(const String& clsName,
                                     bool forceSplStack /* = false */) {
 
-  if (className.empty()) {
-    return false;
-  }
+  if (clsName.empty()) return false;
+
+  const String& className = normalizeNS(clsName);
 
   if (!m_map.isNull()) {
     ClassExistsChecker ce;

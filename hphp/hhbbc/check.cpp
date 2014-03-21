@@ -21,6 +21,8 @@
 
 #include "folly/gen/Base.h"
 
+#include "hphp/runtime/vm/unit-util.h"
+
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/cfg.h"

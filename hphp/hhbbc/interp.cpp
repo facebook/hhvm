@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/runtime/ext/ext_math.h" // f_abs
 

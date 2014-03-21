@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"

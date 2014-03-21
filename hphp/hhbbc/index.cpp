@@ -37,6 +37,7 @@
 
 #include "hphp/util/match.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/representation.h"

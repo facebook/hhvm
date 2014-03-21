@@ -473,6 +473,16 @@ and ignore_toplevel ~attr acc env terminate =
               L.back env.lb;
               let def = toplevel_word ~attr env "function" in
               ignore_toplevel ~attr:SMap.empty (def @ acc) env terminate
+          (* function &foo(...), we still want them in decl mode *)
+          | Tamp ->
+            (match L.token env.lb with
+            | Tword ->
+                L.back env.lb;
+                let def = toplevel_word ~attr env "function" in
+                ignore_toplevel ~attr:SMap.empty (def @ acc) env terminate
+            | _ ->
+              ignore_toplevel ~attr acc env terminate
+            )
           | _ ->
               ignore_toplevel ~attr acc env terminate
           )

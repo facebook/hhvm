@@ -1,0 +1,4 @@
+<?hh //strict
+
+function &foo() {
+}

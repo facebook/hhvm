@@ -4001,7 +4001,7 @@ JFeedEntryTest::testRemoveLink
 JFeedEntryTest::testSetAuthor
 .
 JFeedFactoryTest::testGetFeed
-E
+.
 JFeedFactoryTest::testGetFeedBad
 S
 JFeedFactoryTest::testGetFeedIdn
@@ -4121,7 +4121,7 @@ JFeedParserTest::testMoveToNextElement
 JFeedParserTest::testMoveToNextElementByName
 .
 JFeedParserTest::testParse
-E
+.
 JFeedParserTest::testProcessElementWithElement
 .
 JFeedParserTest::testProcessElementWithEntry

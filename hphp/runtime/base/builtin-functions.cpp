@@ -1053,7 +1053,6 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
   assert(!m_map.isNull());
 
   // always normalize name before autoloading
-  assert(clsName.get()->isStatic());
   const String& name = normalizeNS(clsName);
 
   while (true) {

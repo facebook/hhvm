@@ -1420,6 +1420,8 @@ void RuntimeOption::Load(Hdf &config,
                      []() { return "1"; }));
 
   // HPHP specific
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
+                   "hhvm.eval.jit", &EvalJit);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.compiler_id",
                    IniSetting::SetAndGet<std::string>(

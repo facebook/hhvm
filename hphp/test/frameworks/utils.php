@@ -198,7 +198,7 @@ function get_subclasses_of(string $parent): Vector {
   return $result;
 }
 
-function get_runtime_build(bool $with_jit = true,
+function get_runtime_build(bool $with_jit = false,
                            bool $use_php = false): string {
   $build = "";
 
@@ -240,6 +240,8 @@ function get_runtime_build(bool $with_jit = true,
     }
     if ($with_jit) {
       $build .= " -v Eval.Jit=true";
+    } else {
+      $build .= " -v Eval.Jit=false";
     }
   }
   return $build;

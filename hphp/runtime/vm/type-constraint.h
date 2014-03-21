@@ -185,6 +185,8 @@ struct TypeConstraint {
     return name;
   }
 
+  std::string displayName(const Func* func = nullptr) const;
+
   /*
    * Returns: whether two TypeConstraints are compatible, in the sense
    * required for PHP inheritance where a method with parameter

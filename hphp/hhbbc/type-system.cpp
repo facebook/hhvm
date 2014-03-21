@@ -1577,14 +1577,14 @@ Type from_hni_constraint(SString s) {
     ++p;
   }
 
-  if (!strcmp(p, "resource")) return union_of(ret, TRes);
-  if (!strcmp(p, "bool"))     return union_of(ret, TBool);
-  if (!strcmp(p, "int"))      return union_of(ret, TInt);
-  if (!strcmp(p, "float"))    return union_of(ret, TDbl);
-  if (!strcmp(p, "num"))      return union_of(ret, TNum);
-  if (!strcmp(p, "string"))   return union_of(ret, TStr);
-  if (!strcmp(p, "array"))    return union_of(ret, TArr);
-  if (!strcmp(p, "mixed"))    return TInitGen;
+  if (!strcasecmp(p, "HH\\resource")) return union_of(ret, TRes);
+  if (!strcasecmp(p, "HH\\bool"))     return union_of(ret, TBool);
+  if (!strcasecmp(p, "HH\\int"))      return union_of(ret, TInt);
+  if (!strcasecmp(p, "HH\\float"))    return union_of(ret, TDbl);
+  if (!strcasecmp(p, "HH\\num"))      return union_of(ret, TNum);
+  if (!strcasecmp(p, "HH\\string"))   return union_of(ret, TStr);
+  if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
+  if (!strcasecmp(p, "HH\\mixed"))    return TInitGen;
 
   // It might be an object, or we might want to support type aliases
   // in HNI at some point.  For now just be conservative.

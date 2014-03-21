@@ -5,7 +5,7 @@ namespace __SystemLib {
 <<__Native>>
 function session_set_save_handler(
   \SessionHandlerInterface $sessionhandler,
-  \bool $register_shutdown = true) : \bool;
+  bool $register_shutdown = true) : bool;
 
 }
 

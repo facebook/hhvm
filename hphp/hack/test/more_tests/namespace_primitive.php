@@ -9,6 +9,6 @@
  *
  */
 
-function f(): \string {
+function f(): string {
   return 'This is silly but necessary until #3232737 is completed.';
 }

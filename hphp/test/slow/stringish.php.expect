@@ -63,10 +63,10 @@ false, false, int(10)
 Handled 4096: Argument 1 passed to f2() must be an instance of Stringish, int given
 false, false, int(10)
 
-Handled 4096: Argument 1 to f1() must be of type ?Stringish, double given
+Handled 4096: Argument 1 to f1() must be of type ?Stringish, float given
 false, false, float(-4.2)
 
-Handled 4096: Argument 1 passed to f2() must be an instance of Stringish, double given
+Handled 4096: Argument 1 passed to f2() must be an instance of Stringish, float given
 false, false, float(-4.2)
 
 

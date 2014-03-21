@@ -7545,14 +7545,10 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
     td->annot->stripNullable().isFunction()  ? KindOfAny :
     td->annot->stripNullable().isMixed()     ? KindOfAny :
     !strcasecmp(valueStr.c_str(), "array")   ? KindOfArray :
-    !strcasecmp(valueStr.c_str(), "int")     ? KindOfInt64 :
-    !strcasecmp(valueStr.c_str(), "integer") ? KindOfInt64 :
-    !strcasecmp(valueStr.c_str(), "bool")    ? KindOfBoolean :
-    !strcasecmp(valueStr.c_str(), "boolean") ? KindOfBoolean :
-    !strcasecmp(valueStr.c_str(), "string")  ? KindOfString :
-    !strcasecmp(valueStr.c_str(), "real")    ? KindOfDouble :
-    !strcasecmp(valueStr.c_str(), "float")   ? KindOfDouble :
-    !strcasecmp(valueStr.c_str(), "double")  ? KindOfDouble :
+    !strcasecmp(valueStr.c_str(), "HH\\int") ? KindOfInt64 :
+    !strcasecmp(valueStr.c_str(), "HH\\bool") ? KindOfBoolean :
+    !strcasecmp(valueStr.c_str(), "HH\\string") ? KindOfString :
+    !strcasecmp(valueStr.c_str(), "HH\\float") ? KindOfDouble :
     KindOfObject;
 
   // We have to merge the strings as litstrs to ensure namedentity

@@ -239,14 +239,10 @@ class ReflectionParameter implements Reflector {
     $ltype = strtolower($this->info['type']);
     if (hphp_scalar_typehints_enabled()) {
       $nonClassTypehints = array(
-        'bool' => 1,
-        'boolean' => 1,
-        'int' => 1,
-        'integer' => 1,
-        'real' => 1,
-        'double' => 1,
-        'float' => 1,
-        'string' => 1,
+        'HH\bool' => 1,
+        'HH\int' => 1,
+        'HH\float' => 1,
+        'HH\string' => 1,
         'array' => 1
       );
       if (isset($nonClassTypehints[$ltype])) {
@@ -258,16 +254,27 @@ class ReflectionParameter implements Reflector {
     return new ReflectionClass($this->info['type']);
   }
 
+  private static function stripHHPrefix($str) {
+    if (!is_string($str)) return $str;
+    return str_ireplace(
+      array('HH\\bool', 'HH\\int', 'HH\\float', 'HH\\string', 'HH\\num',
+            'HH\\resource'),
+      array('bool',     'int',     'float',     'string',     'num',
+            'resource'),
+      $str
+    );
+  }
+
   public function getTypehintText() {
     if (isset($this->info['type'])) {
-      return $this->info['type'];
+      return self::stripHHPrefix($this->info['type']);
     }
     return '';
   }
 
   public function getTypeText() {
     if (isset($this->info['type_hint'])) {
-      return $this->info['type_hint'];
+      return self::stripHHPrefix($this->info['type_hint']);
     }
     return '';
   }
@@ -735,9 +742,20 @@ class ReflectionFunctionAbstract {
     return $count;
   }
 
+  private static function stripHHPrefix($str) {
+    if (!is_string($str)) return $str;
+    return str_ireplace(
+      array('HH\\bool', 'HH\\int', 'HH\\float', 'HH\\string', 'HH\\num',
+            'HH\\resource'),
+      array('bool',     'int',     'float',     'string',     'num',
+            'resource'),
+      $str
+    );
+  }
+
   public function getReturnTypeText() {
     if (isset($this->info['return_type'])) {
-      return $this->info['return_type'];
+      return self::stripHHPrefix($this->info['return_type']);
     }
     return '';
   }
@@ -2253,9 +2271,20 @@ class ReflectionProperty implements Reflector {
     return $this->info['doc'];
   }
 
+  private static function stripHHPrefix($str) {
+    if (!is_string($str)) return $str;
+    return str_ireplace(
+      array('HH\\bool', 'HH\\int', 'HH\\float', 'HH\\string', 'HH\\num',
+            'HH\\resource'),
+      array('bool',     'int',     'float',     'string',     'num',
+            'resource'),
+      $str
+    );
+  }
+
   public function getTypeText() {
     if (isset($this->info['type'])) {
-      return $this->info['type'];
+      return self::stripHHPrefix($this->info['type']);
     }
     return '';
   }

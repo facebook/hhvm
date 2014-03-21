@@ -46,6 +46,10 @@ Application_Octetstream_Hex_Test::testGetMIMEType
 .
 Application_Octetstream_Hex_Test::testGetName
 .
+Environment_Test::testMySQL
+S
+Environment_Test::testPhpVersion
+.
 Image_JPEG_Inline_Test::testApplyTransformation
 .
 Image_JPEG_Inline_Test::testGetInfo
@@ -241,7 +245,7 @@ PMA_AuthenticationConfig_Test::testAuth
 PMA_AuthenticationConfig_Test::testAuthCheck
 .
 PMA_AuthenticationConfig_Test::testAuthFails
-T
+.
 PMA_AuthenticationConfig_Test::testAuthSetUser
 .
 PMA_AuthenticationCookie_Test::testAuth
@@ -2264,6 +2268,8 @@ PMA_LangName_Test::testLangName with data set #2
 .
 PMA_Languages_Test::testGettext with data set #0
 .
+PMA_Languages_Test::testGettext with data set #1
+.
 PMA_List_Database_Test::testCheckHideDatabase
 .
 PMA_List_Database_Test::testEmpty
@@ -2399,6 +2405,164 @@ PMA_MultSubmits_Test::testPMAGetQueryFromSelected
 PMA_MultSubmits_Test::testPMAGetQueryStrFromSelected
 .
 PMA_MultSubmits_Test::testPMAGetUrlParams
+.
+PMA_MySQL_Charsets_Test::testGenerateCharsetDropdownBox
+.
+PMA_MySQL_Charsets_Test::testGenerateCharsetQueryPart with data set #0
+S
+PMA_MySQL_Charsets_Test::testGenerateCharsetQueryPart with data set #1
+S
+PMA_MySQL_Charsets_Test::testGenerateCharsetQueryPart with data set #2
+S
+PMA_MySQL_Charsets_Test::testGenerateCharsetQueryPart with data set #3
+S
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #0
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #1
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #10
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #11
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #12
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #13
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #14
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #15
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #16
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #17
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #18
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #19
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #2
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #20
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #21
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #22
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #23
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #24
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #25
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #26
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #27
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #28
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #29
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #3
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #30
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #31
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #32
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #33
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #34
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #35
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #36
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #37
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #38
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #39
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #4
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #40
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #41
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #42
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #43
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #44
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #45
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #46
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #47
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #48
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #49
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #5
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #50
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #51
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #52
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #53
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #54
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #55
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #56
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #57
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #58
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #59
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #6
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #60
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #61
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #62
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #63
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #64
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #65
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #66
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #67
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #68
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #69
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #7
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #70
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #71
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #8
+.
+PMA_MySQL_Charsets_Test::testGetCollationDescr with data set #9
+.
+PMA_MySQL_Charsets_Test::testGetDbCollation
+S
+PMA_MySQL_Charsets_Test::testGetServerCollation
 .
 PMA_NavigationTest::testGetItemUnhideDialog
 .
@@ -3014,6 +3178,12 @@ PMA_ShowDocu_Test::testShowDocu
 .
 PMA_ShowPHPDocu_Test::testShowPHPDocu
 .
+PMA_SqlQueryForm_Test::testPMAGetHtmlForSqlQueryForm
+.
+PMA_SqlQueryForm_Test::testPMAGetHtmlForSqlQueryFormInsert
+.
+PMA_SqlQueryForm_Test::testPMAGetHtmlForSqlQueryFormUpload
+.
 PMA_StorageEngineTest::testGetComment
 .
 PMA_StorageEngineTest::testGetEngine
@@ -3454,6 +3624,52 @@ PMA_TableSearch_Test::testGetZoomResultsForm
 .
 PMA_TableSearch_Test::testReplace
 .
+PMA_Table_Runkit_Test::testAnalyzeStructure
+.
+PMA_Table_Runkit_Test::testConstruct
+.
+PMA_Table_Runkit_Test::testCountRecords
+.
+PMA_Table_Runkit_Test::testCreate
+.
+PMA_Table_Runkit_Test::testDuplicateInfo
+.
+PMA_Table_Runkit_Test::testGenerateAlter
+.
+PMA_Table_Runkit_Test::testGenerateFieldSpec
+.
+PMA_Table_Runkit_Test::testGetColumns
+.
+PMA_Table_Runkit_Test::testGetIndexedColumns
+.
+PMA_Table_Runkit_Test::testGetLastErrorAndMessage
+.
+PMA_Table_Runkit_Test::testGetName
+.
+PMA_Table_Runkit_Test::testGetUniqueColumns
+.
+PMA_Table_Runkit_Test::testIsMerge
+.
+PMA_Table_Runkit_Test::testIsUpdatableView
+.
+PMA_Table_Runkit_Test::testIsView
+.
+PMA_Table_Runkit_Test::testMoveCopy
+.
+PMA_Table_Runkit_Test::testRename
+.
+PMA_Table_Runkit_Test::testSetAndGet
+.
+PMA_Table_Runkit_Test::testSetUiProp
+.
+PMA_Table_Runkit_Test::testValidateName with data set #0
+.
+PMA_Table_Runkit_Test::testValidateName with data set #1
+.
+PMA_Table_Runkit_Test::testValidateName with data set #2
+.
+PMA_Table_Runkit_Test::testValidateName with data set #3
+.
 PMA_Table_Test::testAnalyzeStructure
 .
 PMA_Table_Test::testConstruct
@@ -3509,6 +3725,60 @@ PMA_TblChartTest::testPMAGetHtmlForPmaTokenAndUrlQuery
 PMA_TblChartTest::testPMAGetHtmlForStackedOption
 .
 PMA_TblChartTest::testPMAGetHtmlForTableChartDisplay
+.
+PMA_TblColumnsDefinitionFormTest::testGetColumnMetaForDefault
+.
+PMA_TblColumnsDefinitionFormTest::testGetFormParamsForOldColumn
+I
+PMA_TblColumnsDefinitionFormTest::testGetFormsParameters
+.
+PMA_TblColumnsDefinitionFormTest::testGetHeaderCells
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForBrowserTransformation
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForColumnAttribute
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForColumnAutoIncrement
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForColumnCollation
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForColumnComment
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForColumnDefault
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForColumnIndexes
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForColumnLength
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForColumnName
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForColumnNull
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForColumnType
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForFooter
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForIndexTypeOption
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForMoveColumn
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForTableConfigurations
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForTableCreateOrAddField
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForTableFieldDefinitions
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForTableNameAndNoOfColumns
+.
+PMA_TblColumnsDefinitionFormTest::testGetHtmlForTransformationOption
+.
+PMA_TblColumnsDefinitionFormTest::testGetMoveColumns
+.
+PMA_TblColumnsDefinitionFormTest::testGetRowDataForRegeneration
+.
+PMA_TblColumnsDefinitionFormTest::testGetSubmitPropertiesForRegeneration
+.
+PMA_TblColumnsDefinitionFormTest::testHandleRegeneration
 .
 PMA_TblGisVisualizaionTest::testPMAGetHtmlForColumn
 .
@@ -4007,7 +4277,7 @@ PMA_WarnMissingExtension_Test::testMissingExtensionFatal
 PMA_WarnMissingExtension_Test::testMissingExtensionFatalWithExtra
 .
 PMA_WhichCrlf_Test::testWhichCrlf
-.
+I
 PMA_ZipExtension_Test::testFindFileFromZipArchive with data set #0
 .
 PMA_ZipExtension_Test::testGetNoOfFilesInZip

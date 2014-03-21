@@ -61,6 +61,7 @@
 #define RGB_BLUE	2
 
 #define JSAMPLE unsigned char
+#undef MAXJSAMPLE
 #define MAXJSAMPLE (gdMaxColors-1)
 #define BITS_IN_JSAMPLE 8
 
@@ -1506,6 +1507,7 @@ pass2_fs_dither (j_decompress_ptr cinfo,
 	    register int pixcode = *cachep - 1;
 	    *outptr = (JSAMPLE) pixcode;
 	    /* Compute representation error for this pixel */
+#undef GETJSAMPLE
 #define GETJSAMPLE
 	    cur0 -= GETJSAMPLE (colormap0[pixcode]);
 	    cur1 -= GETJSAMPLE (colormap1[pixcode]);

@@ -52,6 +52,7 @@
 #define EUCSTR    "eucJP"
 #define SJISSTR   "SJIS"
 
+#undef ESC
 #define ESC 27
 #define SS2 142
 

@@ -34,8 +34,7 @@ import vim, os, sys
 sys.path.append(os.path.abspath(os.path.dirname(vim.eval('s:vim_script_filename'))))
 
 import hackcolor
-path = vim.eval('a:path')
-hackcolor.HackColorMode(path).main()
+hackcolor.HackColorMode(vim.eval('a:path')).main()
 endpython
 endfun
 

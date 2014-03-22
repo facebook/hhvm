@@ -131,7 +131,9 @@ void Hdf::open(const char *filename) {
 
 void Hdf::append(const char *filename) {
   assert(filename && *filename);
-  if (!boost::ends_with(filename, ".hdf")) {
+  // /tmp/php-iniXXXXX is created by emulate_zend
+  if (boost::ends_with(filename, ".ini") ||
+      boost::contains(filename, "php-ini")) {
     return;
   }
   CheckNeoError(hdf_read_file(getRaw(), (char*)filename));

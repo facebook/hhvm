@@ -143,7 +143,10 @@ bool zend_parse_ini_string(const std::string &str, const std::string &filename,
                            int scanner_mode,
                            IniSetting::ParserCallback &callback,
                            void *arg) {
-  if (boost::ends_with(filename, ".hdf")) {
+  // Assume hdf for backwards compatibility unless it's obviously an ini file.
+  // php-ini comes from mktemp() in emulate_zend.
+  if (!filename.empty() && !(boost::ends_with(filename, ".ini")
+      || boost::contains(filename, "php-ini"))) {
     return false;
   }
   zend_ini_scan(str, scanner_mode, filename, callback, arg);

@@ -104,12 +104,12 @@ public:
   }
 
   /*
-   * Allocate a new, empty, request-local HphpArray in packed mode,
-   * with enough space reserved for `capacity' members.
+   * Allocate a new, empty, request-local array in packed mode, with
+   * enough space reserved for `capacity' members.
    *
    * The returned array is already incref'd.
    */
-  static HphpArray* MakeReserve(uint32_t capacity);
+  static ArrayData* MakeReserve(uint32_t capacity);
 
   /*
    * Allocate a packed HphpArray.  This is an array in packed
@@ -182,24 +182,15 @@ public:
   // implements ArrayData
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
-  static bool ExistsIntPacked(const ArrayData*, int64_t k);
 
   // implements ArrayData
   static ArrayData* LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
                             bool copy);
   static ArrayData* LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
                             bool copy);
-  static ArrayData* LvalIntPacked(ArrayData* ad, int64_t k, Variant*& ret,
-                                  bool copy);
-  static ArrayData* LvalStrPacked(ArrayData* ad, StringData* k, Variant*& ret,
-                                  bool copy);
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
-  static ArrayData* LvalNewPacked(ArrayData*, Variant*& ret, bool copy);
 
   // implements ArrayData
-  static ArrayData* SetIntPacked(ArrayData*, int64_t k, const Variant& v, bool copy);
-  static ArrayData* SetStrPacked(ArrayData*, StringData* k, const Variant& v,
-                                 bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, const Variant& v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v, bool copy);
 
@@ -212,47 +203,30 @@ public:
                               bool copy);
   static ArrayData* SetRefStr(ArrayData* ad, StringData* k, const Variant& v,
                               bool copy);
-  static ArrayData* SetRefIntPacked(ArrayData* ad, int64_t k, const Variant& v,
-                                    bool copy);
-  static ArrayData* SetRefStrPacked(ArrayData* ad, StringData* k, const Variant& v,
-                                    bool copy);
 
   // overrides ArrayData
   static ArrayData* AddInt(ArrayData*, int64_t k, const Variant& v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, const Variant& v, bool copy);
-  static ArrayData* AddIntPacked(ArrayData*, int64_t k, const Variant& v, bool copy);
 
   // implements ArrayData
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
-  static ArrayData* RemoveIntPacked(ArrayData*, int64_t k, bool copy);
-  static ArrayData* RemoveStrPacked(ArrayData*, const StringData* k, bool copy);
 
   // overrides ArrayData
   static ArrayData* Copy(const ArrayData*);
-  static ArrayData* CopyPacked(const ArrayData*);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* NonSmartCopy(const ArrayData*);
 
-  static ArrayData* AppendPacked(ArrayData*, const Variant& v, bool copy);
   static ArrayData* Append(ArrayData*, const Variant& v, bool copy);
   static ArrayData* AppendRef(ArrayData*, const Variant& v, bool copy);
-  static ArrayData* AppendRefPacked(ArrayData*, const Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
-  static ArrayData* AppendWithRefPacked(ArrayData*, const Variant& v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
-  static ArrayData* PopPacked(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
-  static ArrayData* DequeuePacked(ArrayData*, Variant& value);
-  static ArrayData* PrependPacked(ArrayData*, const Variant& v, bool copy);
   static void Renumber(ArrayData*);
-  static void RenumberPacked(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
-  static void OnSetEvalScalarPacked(ArrayData*);
-  static void ReleasePacked(ArrayData*);
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);
 
@@ -275,11 +249,8 @@ public:
 
   // nvGet returns a pointer to the value if the specified key is in the
   // array, NULL otherwise.
-  static TypedValue* NvGetIntPacked(const ArrayData*, int64_t ki);
-  static TypedValue* NvGetStrPacked(const ArrayData*, const StringData* k);
   static TypedValue* NvGetInt(const ArrayData*, int64_t ki);
   static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
-  static void NvGetKeyPacked(const ArrayData*, TypedValue* out, ssize_t pos);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
 
   /**
@@ -290,12 +261,6 @@ public:
    * be stored in the array, this helper decref's it.
    */
   static ArrayData* AddNewElemC(ArrayData* a, TypedValue value);
-
-  /*
-   * Inline helpers to be called directly from the TC
-   */
-  static TypedValue GetCellIntPacked(const ArrayData* ad, int64_t ki);
-  static uint64_t IssetIntPacked(const ArrayData* ad, int64_t ki);
 
   /*
    * Sorting routines.
@@ -341,8 +306,6 @@ public:
   void getArrayElm(ssize_t pos, TypedValue* out) const;
   bool isTombstone(ssize_t pos) const;
 
-  static bool validPos(ssize_t pos);
-  static bool validPos(int32_t pos);
   size_t hashSize() const;
   static size_t computeMaxElms(uint32_t tableMask);
   static size_t computeDataSize(uint32_t tableMask);
@@ -351,14 +314,15 @@ private:
   friend struct ArrayInit;
   friend struct MemoryProfile;
   friend struct EmptyArray;
+  friend struct PackedArray;
   enum class ClonePacked {};
   enum class CloneMixed {};
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
 private:
   // Safe downcast helpers
-  static HphpArray* asPacked(ArrayData* ad);
-  static const HphpArray* asPacked(const ArrayData* ad);
+  friend HphpArray* asPacked(ArrayData* ad);
+  friend const HphpArray* asPacked(const ArrayData* ad);
   static HphpArray* asMixed(ArrayData* ad);
   static const HphpArray* asMixed(const ArrayData* ad);
   static HphpArray* asHphpArray(ArrayData* ad);

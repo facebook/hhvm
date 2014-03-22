@@ -24,12 +24,43 @@
 #include "hphp/util/stacktrace-profiler.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
+
+inline HphpArray* asPacked(ArrayData* ad) {
+  assert(ad->kind() == ArrayData::kPackedKind);
+  auto a = static_cast<HphpArray*>(ad);
+  assert(a->checkInvariants());
+  return a;
+}
+
+inline const HphpArray* asPacked(const ArrayData* ad) {
+  assert(ad->kind() == ArrayData::kPackedKind);
+  auto a = static_cast<const HphpArray*>(ad);
+  assert(a->checkInvariants());
+  return a;
+}
 
 inline ArrayData::~ArrayData() {
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(this);
   }
+}
+
+inline bool validPos(ssize_t pos) {
+  return pos >= 0;
+}
+
+inline bool validPos(int32_t pos) {
+  return pos >= 0;
+}
+
+ALWAYS_INLINE
+bool HphpArray::isFull() const {
+  assert(!isPacked());
+  assert(m_used <= m_cap);
+  assert(m_hLoad <= m_cap);
+  return m_used == m_cap || m_hLoad == m_cap;
 }
 
 inline void HphpArray::initHash(int32_t* hash, size_t tableSize) {
@@ -119,6 +150,19 @@ void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut) const {
   cellDup(*cur, *valOut);
 }
 
+ALWAYS_INLINE
+HphpArray::Elm& HphpArray::allocElm(int32_t* ei) {
+  assert(!validPos(*ei) && !isFull());
+  assert(m_size != 0 || m_used == 0);
+  ++m_size;
+  m_hLoad += (*ei == Empty);
+  size_t i = m_used;
+  (*ei) = i;
+  m_used = i + 1;
+  if (m_pos == invalid_index) m_pos = i;
+  return data()[i];
+}
+
 inline HphpArray* HphpArray::asHphpArray(ArrayData* ad) {
   assert(ad->isHphpArray());
   auto a = static_cast<HphpArray*>(ad);
@@ -128,20 +172,6 @@ inline HphpArray* HphpArray::asHphpArray(ArrayData* ad) {
 
 inline const HphpArray* HphpArray::asHphpArray(const ArrayData* ad) {
   assert(ad->isHphpArray());
-  auto a = static_cast<const HphpArray*>(ad);
-  assert(a->checkInvariants());
-  return a;
-}
-
-inline HphpArray* HphpArray::asPacked(ArrayData* ad) {
-  assert(ad->kind() == kPackedKind);
-  auto a = static_cast<HphpArray*>(ad);
-  assert(a->checkInvariants());
-  return a;
-}
-
-inline const HphpArray* HphpArray::asPacked(const ArrayData* ad) {
-  assert(ad->kind() == kPackedKind);
   auto a = static_cast<const HphpArray*>(ad);
   assert(a->checkInvariants());
   return a;
@@ -165,36 +195,6 @@ inline HphpArray* HphpArray::copyImpl() const {
   return isPacked() ? copyPacked() : copyMixed();
 }
 
-inline TypedValue
-HphpArray::GetCellIntPacked(const ArrayData* ad, int64_t ki) {
-  auto a = asPacked(ad);
-  if (LIKELY(size_t(ki) < a->m_size)) {
-    TypedValue* ret = &a->data()[ki].data;
-    ret = tvToCell(ret);
-    tvRefcountedIncRef(ret);
-    return *ret;
-  }
-  Variant v = getNotFound(ki);
-  return *v.asTypedValue();
-}
-
-inline uint64_t
-HphpArray::IssetIntPacked(const ArrayData* ad, int64_t ki) {
-  auto a = asPacked(ad);
-  return (size_t(ki) < a->m_size) &&
-         (a->data()[ki].data.m_type != KindOfNull);
-}
-
-inline bool HphpArray::validPos(ssize_t pos) {
-  return pos >= 0;
-  static_assert(ssize_t(Empty) == ssize_t(-1), "");
-}
-
-inline bool HphpArray::validPos(int32_t pos) {
-  return pos >= 0;
-  static_assert(Empty == -1, "");
-}
-
 inline size_t HphpArray::hashSize() const {
   return m_tableMask + 1;
 }
@@ -206,6 +206,55 @@ inline size_t HphpArray::computeMaxElms(uint32_t tableMask) {
 inline size_t HphpArray::computeDataSize(uint32_t tableMask) {
   return (tableMask + 1) * sizeof(int32_t) +
          computeMaxElms(tableMask) * sizeof(Elm);
+}
+
+inline ArrayData* HphpArray::addVal(int64_t ki, const Variant& data) {
+  assert(!exists(ki));
+  assert(!isPacked());
+  assert(!isFull());
+  auto ei = findForNewInsert(ki);
+  auto& e = allocElm(ei);
+  e.setIntKey(ki);
+  if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
+  // TODO(#3888164): constructValHelper is making KindOfUninit checks.
+  tvAsUninitializedVariant(&e.data).constructValHelper(data);
+  return this;
+}
+
+inline ArrayData* HphpArray::addVal(StringData* key, const Variant& data) {
+  assert(!exists(key));
+  assert(!isPacked());
+  assert(!isFull());
+  strhash_t h = key->hash();
+  auto ei = findForNewInsert(h);
+  auto& e = allocElm(ei);
+  e.setStrKey(key, h);
+  // TODO(#3888164): constructValHelper is making KindOfUninit checks.
+  tvAsUninitializedVariant(&e.data).constructValHelper(data);
+  return this;
+}
+
+template <class K>
+ArrayData* HphpArray::updateRef(K k, const Variant& data) {
+  assert(!isPacked());
+  assert(!isFull());
+  auto p = insert(k);
+  if (p.found) {
+    tvBind(data.asRef(), &p.tv);
+    return this;
+  }
+  tvAsUninitializedVariant(&p.tv).constructRefHelper(data);
+  return this;
+}
+
+template <class K>
+ArrayData* HphpArray::addLvalImpl(K k, Variant*& ret) {
+  assert(!isPacked());
+  assert(!isFull());
+  auto p = insert(k);
+  if (!p.found) tvWriteNull(&p.tv);
+  ret = &tvAsVariant(&p.tv);
+  return this;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -296,6 +345,52 @@ HphpArray* smartAllocArray(uint32_t cap, uint32_t mask) {
    */
   auto const allocBytes = computeAllocBytes(cap, mask);
   return static_cast<HphpArray*>(MM().objMallocLogged(allocBytes));
+}
+
+ALWAYS_INLINE
+HphpArray* mallocArray(uint32_t cap, uint32_t mask) {
+  auto const allocBytes = computeAllocBytes(cap, mask);
+  return static_cast<HphpArray*>(std::malloc(allocBytes));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// for internal use by nonSmartCopy() and copyPacked()
+template<class CopyElem>
+ALWAYS_INLINE
+HphpArray* HphpArray::CopyPacked(const HphpArray& other,
+                                 AllocMode mode,
+                                 CopyElem copyElem) {
+  assert(other.isPacked());
+
+  auto const cap  = other.m_cap;
+  auto const mask = other.m_tableMask;
+  auto const ad = mode == AllocMode::Smart
+    ? smartAllocArray(cap, mask)
+    : mallocArray(cap, mask);
+
+  ad->m_kindAndSize     = uint64_t{other.m_size} << 32 | kPackedKind;
+  ad->m_posAndCount     = static_cast<uint32_t>(other.m_pos);
+  ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
+  ad->m_tableMask       = mask;
+
+  auto const targetElms = reinterpret_cast<Elm*>(ad + 1);
+
+  // Copy the elements and bump up refcounts as needed.
+  auto const elms = other.data();
+  for (uint32_t i = 0, limit = ad->m_used; i < limit; ++i) {
+    copyElem(&elms[i].data, &targetElms[i].data, &other);
+  }
+
+  assert(ad->m_kind == kPackedKind);
+  assert(ad->m_size == other.m_size);
+  assert(ad->m_pos == other.m_pos);
+  assert(ad->m_count == 0);
+  assert(ad->m_used == other.m_used);
+  assert(ad->m_cap == cap);
+  assert(ad->m_tableMask == mask);
+  assert(ad->checkInvariants());
+  return ad;
 }
 
 //////////////////////////////////////////////////////////////////////

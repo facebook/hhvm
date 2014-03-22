@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -1398,7 +1399,7 @@ static NEVER_INLINE
 int64_t iter_next_free_arr(Iter* iter, HphpArray* arr) {
   assert(arr->hasExactlyOneRef());
   if (arr->isPacked()) {
-    HphpArray::ReleasePacked(arr);
+    PackedArray::Release(arr);
   } else {
     assert(arr->isHphpArray());
     HphpArray::Release(arr);

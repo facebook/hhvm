@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/packed-array.h"
 
 namespace HPHP {
 
@@ -766,8 +767,8 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
       return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
     }
 
-    auto const elem0 = tvToCell(HphpArray::NvGetIntPacked(arr, 0));
-    auto const elem1 = tvToCell(HphpArray::NvGetIntPacked(arr, 1));
+    auto const elem0 = tvToCell(PackedArray::NvGetInt(arr, 0));
+    auto const elem1 = tvToCell(PackedArray::NvGetInt(arr, 1));
 
     if (UNLIKELY(elem0->m_type != KindOfObject ||
                  !IS_STRING_TYPE(elem1->m_type))) {

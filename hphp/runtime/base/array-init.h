@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/packed-array.h"
 
 namespace HPHP {
 
@@ -310,7 +311,7 @@ public:
    * Append a new element to the packed array.
    */
   PackedArrayInit& append(const Variant& v) {
-    performOp([&]{ return HphpArray::AppendPacked(m_vec, v, false); });
+    performOp([&]{ return PackedArray::Append(m_vec, v, false); });
     return *this;
   }
 
@@ -321,7 +322,7 @@ public:
    * Post: v.getRawType() == KindOfRef
    */
   PackedArrayInit& appendRef(const Variant& v) {
-    performOp([&]{ return HphpArray::AppendRefPacked(m_vec, v, false); });
+    performOp([&]{ return PackedArray::AppendRef(m_vec, v, false); });
     return *this;
   }
 
@@ -332,7 +333,7 @@ public:
    * element is split.
    */
   PackedArrayInit& appendWithRef(const Variant& v) {
-    performOp([&]{ return HphpArray::AppendWithRefPacked(m_vec, v, false); });
+    performOp([&]{ return PackedArray::AppendWithRef(m_vec, v, false); });
     return *this;
   }
 
@@ -369,7 +370,7 @@ private:
   }
 
 private:
-  HphpArray* m_vec;
+  ArrayData* m_vec;
 #ifdef DEBUG
   size_t m_addCount;
   size_t m_expectedCount;

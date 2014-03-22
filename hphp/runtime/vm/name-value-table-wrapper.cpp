@@ -112,7 +112,7 @@ NameValueTableWrapper::LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
 
 ArrayData*
 NameValueTableWrapper::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
-  ret = &Variant::lvalBlackHole();
+  ret = &lvalBlackHole();
   return ad;
 }
 

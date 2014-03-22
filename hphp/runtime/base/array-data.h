@@ -214,7 +214,7 @@ public:
    * available integer key. Return this if escalation is not needed, or an
    * escalated array data. Note that adding a new element with the next
    * available integer key may fail, in which case ret is set to point to
-   * the lval blackhole (see Variant::lvalBlackHole() for details).
+   * the lval blackhole (see lvalBlackHole() for details).
    */
   ArrayData *lvalNew(Variant *&ret, bool copy);
 

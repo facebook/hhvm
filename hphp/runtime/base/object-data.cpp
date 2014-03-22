@@ -1513,7 +1513,7 @@ void ObjectData::incDecProp(TypedValue& tvRef,
   auto propVal = getProp(ctx, key, visible, accessible, unset);
 
   if (visible && accessible) {
-    auto tvResult = make_tv<KindOfUninit>();
+    auto tvResult = make_tv<KindOfNull>();
     if (unset && getAttribute(UseGet) && invokeGet(&tvResult, key)) {
       IncDecBody<setResult>(op, &tvResult, &dest);
       TypedValue ignored;
@@ -1526,6 +1526,11 @@ void ObjectData::incDecProp(TypedValue& tvRef,
       return;
     }
 
+    if (unset) {
+      tvWriteNull(propVal);
+    } else {
+      propVal = tvToCell(propVal);
+    }
     IncDecBody<setResult>(op, propVal, &dest);
     return;
   }

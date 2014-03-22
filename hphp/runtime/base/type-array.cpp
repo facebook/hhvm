@@ -517,7 +517,7 @@ Variant &Array::lvalAt(const Variant& key, ACCESSPARAMS_IMPL) {
   if (!k.isNull()) {
     return lvalAtImpl(k, flags);
   }
-  return Variant::lvalBlackHole();
+  return lvalBlackHole();
 }
 
 template<typename T>

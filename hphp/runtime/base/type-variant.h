@@ -661,9 +661,6 @@ struct Variant : private TypedValue {
   void unserialize(VariableUnserializer *unserializer,
                    Uns::Mode mode = Uns::Mode::Value);
 
-  static Variant &lvalInvalid();
-  static Variant &lvalBlackHole();
-
   /**
    * Low level access that should be restricted to internal use.
    */
@@ -1075,6 +1072,15 @@ private:
     assert(false);
   }
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * The lvalBlackHole is used in array operations when a NewElem can't
+ * create a new slot.  (Basically if the next integer key in an array
+ * is already at the maximum integer.)
+ */
+Variant& lvalBlackHole();
 
 ///////////////////////////////////////////////////////////////////////////////
 // breaking circular dependencies

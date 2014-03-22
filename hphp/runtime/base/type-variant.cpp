@@ -643,14 +643,9 @@ public:
   static const bool CheckParams = true;
 };
 
-Variant &Variant::lvalInvalid() {
-  throw_bad_type_exception("not array objects");
-  return lvalBlackHole();
-}
-
-Variant &Variant::lvalBlackHole() {
-  Variant &bh = get_env_constants()->__lvalProxy;
-  bh.unset();
+Variant& lvalBlackHole() {
+  auto& bh = get_env_constants()->lvalProxy;
+  bh = uninit_null();
   return bh;
 }
 

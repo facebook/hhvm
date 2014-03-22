@@ -159,14 +159,16 @@ ALWAYS_INLINE void opPre(TypedValue*& base, DataType& type) {
 
 inline TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
   TypedValue* result = base->nvGet(key);
-  return result ? result : const_cast<TypedValue*>(null_variant.asTypedValue());
+  return result ? result
+                : const_cast<TypedValue*>(null_variant.asTypedValue());
 }
 
 inline TypedValue* ElemArrayPre(ArrayData* base, StringData* key) {
   int64_t n;
   TypedValue* result = !key->isStrictlyInteger(n) ? base->nvGet(key) :
                        base->nvGet(n);
-  return result ? result : const_cast<TypedValue*>(null_variant.asTypedValue());
+  return result ? result
+                : const_cast<TypedValue*>(null_variant.asTypedValue());
 }
 
 inline TypedValue* ElemArrayPre(ArrayData* base, TypedValue key) {
@@ -1220,23 +1222,9 @@ inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
 
 template <bool setResult>
 NEVER_INLINE
-void incDecBodySlow(IncDecOp op, TypedValue* fr, TypedValue* to) {
-  if (fr->m_type == KindOfUninit) {
-    ActRec* fp = g_context->m_fp;
-    size_t pind = reinterpret_cast<TypedValue*>(fp) - fr - 1;
-    if (pind < size_t(fp->m_func->numNamedLocals())) {
-      // Only raise a warning if fr points to a local variable
-      raise_notice(Strings::UNDEFINED_VARIABLE,
-                   fp->m_func->localVarName(pind)->data());
-    }
-    // Convert uninit null to null so that we don't write out an uninit null
-    // to the eval stack for PostInc and PostDec.
-    fr->m_type = KindOfNull;
-  } else {
-    fr = tvToCell(fr);
-  }
-
+void incDecBodySlow(IncDecOp op, Cell* fr, TypedValue* to) {
   assert(cellIsPlausible(*fr));
+  assert(fr->m_type != KindOfUninit);
 
   auto dup = [&]() { if (setResult) cellDup(*fr, *to); };
 
@@ -1283,7 +1271,9 @@ void incDecBodySlow(IncDecOp op, TypedValue* fr, TypedValue* to) {
 }
 
 template <bool setResult>
-inline void IncDecBody(IncDecOp op, TypedValue* fr, TypedValue* to) {
+inline void IncDecBody(IncDecOp op, Cell* fr, TypedValue* to) {
+  assert(cellIsPlausible(*fr));
+
   if (UNLIKELY(fr->m_type != KindOfInt64)) {
     return incDecBodySlow<setResult>(op, fr, to);
   }
@@ -1344,6 +1334,7 @@ inline void IncDecElemEmptyish(IncDecOp op, TypedValue* base,
     raise_notice(Strings::UNDEFINED_INDEX,
                  tvAsCVarRef(&key).toString().data());
   }
+  assert(result->m_type == KindOfNull);
   IncDecBody<setResult>(op, result, &dest);
 }
 template <bool setResult>
@@ -1388,15 +1379,17 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   case KindOfArray: {
     TypedValue* result = ElemDArray<MoreWarnings, KeyType::Any>(base, key);
-    IncDecBody<setResult>(op, result, &dest);
+    IncDecBody<setResult>(op, tvToCell(result), &dest);
     break;
   }
   case KindOfObject: {
     TypedValue* result;
     if (LIKELY(base->m_data.pobj->isCollection())) {
       result = collectionAtRw(base->m_data.pobj, &key);
+      assert(cellIsPlausible(*result));
     } else {
       result = objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(key));
+      result = tvToCell(result);
     }
     IncDecBody<setResult>(op, result, &dest);
     break;
@@ -1411,8 +1404,10 @@ inline void IncDecNewElemEmptyish(IncDecOp op, TypedValue* base,
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt();
   tvAsVariant(base) = a;
+  assert(result->m_type == KindOfNull);
   IncDecBody<setResult>(op, result, &dest);
 }
+
 template <bool setResult>
 inline void IncDecNewElemNumberish(TypedValue& dest) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
@@ -1420,6 +1415,7 @@ inline void IncDecNewElemNumberish(TypedValue& dest) {
     tvWriteNull(&dest);
   }
 }
+
 template <bool setResult>
 inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
                           IncDecOp op, TypedValue* base,
@@ -1455,7 +1451,8 @@ inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   case KindOfArray: {
     TypedValue* result = (TypedValue*)&tvAsVariant(base).asArrRef().lvalAt();
-    IncDecBody<setResult>(op, result, &dest);
+    assert(result->m_type == KindOfNull);
+    IncDecBody<setResult>(op, tvToCell(result), &dest);
     break;
   }
   case KindOfObject: {
@@ -1465,7 +1462,7 @@ inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
       result = nullptr;
     } else {
       result = objOffsetGet(tvRef, instanceFromTv(base), init_null_variant);
-      IncDecBody<setResult>(op, result, &dest);
+      IncDecBody<setResult>(op, tvToCell(result), &dest);
     }
     break;
   }
@@ -2009,14 +2006,14 @@ inline void IncDecPropStdclass(IncDecOp op, TypedValue* base,
   TypedValue tv;
   tvWriteNull(&tv);
   if (setResult) {
-    IncDecBody<true>(op, (&tv), &dest);
+    IncDecBody<true>(op, &tv, &dest);
     obj->setProp(nullptr, keySD, &dest);
   } else {
     // The caller doesn't actually want the result set, but we have to do so in
     // order to call obj->setProp().
     TypedValue tDest;
     tvWriteUninit(&tDest);
-    IncDecBody<true>(op, (&tv), &tDest);
+    IncDecBody<true>(op, &tv, &tDest);
     obj->setProp(nullptr, keySD, &tDest);
     assert(!IS_REFCOUNTED_TYPE(tDest.m_type));
   }

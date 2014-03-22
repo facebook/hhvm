@@ -825,21 +825,7 @@ void miNewElem(MIS& env) {
   }
 
   if (env.base.type.subtypeOf(TArr)) {
-    /*
-     * Inside of an array, this appears to create a TUninit and let
-     * the next operation turn it into a real null (or stdClass or
-     * whatever).  The lvalBlackhole case explicitly unsets the
-     * blackhole before making it the base.
-     *
-     * We're representing it as TNull because it doesn't really seem
-     * like we should be using Uninit in these cases (it would be
-     * nice if Elem dims didn't have to have KindOfUninit in their
-     * switches), and a wider type is never wrong.
-     *
-     * TODO(#3821136): the KindOfUninits should never be visible, so
-     * this almost certainly can be TInitNull.
-     */
-    moveBase(env, Base { TNull, BaseLoc::PostElem, env.base.type });
+    moveBase(env, Base { TInitNull, BaseLoc::PostElem, env.base.type });
     return;
   }
 

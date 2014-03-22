@@ -1458,7 +1458,7 @@ ArrayData* HphpArray::LvalNewPacked(ArrayData* ad, Variant*& ret, bool copy) {
   a = copy ? a->copyPackedAndResizeIfNeeded()
            : a->resizePackedIfNeeded();
   auto& tv = a->allocNextElm(a->m_size);
-  tvWriteUninit(&tv);  // TODO(#2942090)
+  tvWriteNull(&tv);
   ret = &tvAsVariant(&tv);
   return a;
 }
@@ -1468,7 +1468,7 @@ ArrayData* HphpArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
                   "already occupied");
-    ret = &Variant::lvalBlackHole();
+    ret = &lvalBlackHole();
     return a;
   }
 
@@ -1476,7 +1476,7 @@ ArrayData* HphpArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
            : a->resizeIfNeeded();
 
   if (UNLIKELY(!a->nextInsert(uninit_null()))) {
-    ret = &Variant::lvalBlackHole();
+    ret = &lvalBlackHole();
     return a;
   }
 

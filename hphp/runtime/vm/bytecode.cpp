@@ -5317,6 +5317,12 @@ OPTBLD_INLINE void ExecutionContext::iopIncDecL(IOP_ARGS) {
   TypedValue* to = m_stack.allocTV();
   tvWriteUninit(to);
   TypedValue* fr = frame_local(m_fp, local);
+  if (UNLIKELY(fr->m_type == KindOfUninit)) {
+    raise_undefined_local(m_fp, local);
+    tvWriteNull(fr);
+  } else {
+    fr = tvToCell(fr);
+  }
   IncDecBody<true>(op, fr, to);
 }
 
@@ -5328,7 +5334,7 @@ OPTBLD_INLINE void ExecutionContext::iopIncDecN(IOP_ARGS) {
   TypedValue* local = nullptr;
   lookupd_var(m_fp, name, nameCell, local);
   assert(local != nullptr);
-  IncDecBody<true>(op, local, nameCell);
+  IncDecBody<true>(op, tvToCell(local), nameCell);
   decRefStr(name);
 }
 
@@ -5340,7 +5346,7 @@ OPTBLD_INLINE void ExecutionContext::iopIncDecG(IOP_ARGS) {
   TypedValue* gbl = nullptr;
   lookupd_gbl(m_fp, name, nameCell, gbl);
   assert(gbl != nullptr);
-  IncDecBody<true>(op, gbl, nameCell);
+  IncDecBody<true>(op, tvToCell(gbl), nameCell);
   decRefStr(name);
 }
 
@@ -5354,7 +5360,7 @@ OPTBLD_INLINE void ExecutionContext::iopIncDecS(IOP_ARGS) {
                 name->data());
   }
   tvRefcountedDecRefCell(nameCell);
-  IncDecBody<true>(op, val, output);
+  IncDecBody<true>(op, tvToCell(val), output);
   m_stack.discard();
   SPROP_OP_POSTLUDE
 }

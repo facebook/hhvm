@@ -1180,8 +1180,8 @@ static Array HHVM_METHOD(Imagick, getImageChannelExtrema, int64_t channel) {
     IMAGICK_THROW("Unable to get image channel extrema");
   }
   return make_map_array(
-    s_minima, minima,
-    s_maxima, maxima);
+    s_minima, (int64_t)minima,
+    s_maxima, (int64_t)maxima);
 }
 
 static Array HHVM_METHOD(Imagick, getImageChannelKurtosis, int64_t channel) {
@@ -1238,7 +1238,7 @@ static Array HHVM_METHOD(Imagick, getImageChannelStatistics) {
         s_minima, stat[channel].minima,
         s_maxima, stat[channel].maxima,
         s_standardDeviation, stat[channel].standard_deviation,
-        s_depth, stat[channel].depth));
+        s_depth, (int64_t)stat[channel].depth));
   }
   freeMagickMemory(stat);
   return ret.create();
@@ -1325,8 +1325,8 @@ static Array HHVM_METHOD(Imagick, getImageExtrema) {
     IMAGICK_THROW("Unable to get image extrema");
   }
   return make_map_array(
-    s_min, min,
-    s_max, max);
+    s_min, (int64_t)min,
+    s_max, (int64_t)max);
 }
 
 static String HHVM_METHOD(Imagick, getImageFilename) {
@@ -1450,10 +1450,10 @@ static Array HHVM_METHOD(Imagick, getImagePage) {
     IMAGICK_THROW("Unable to get image page");
   }
   return make_map_array(
-    s_width, width,
-    s_height, height,
-    s_x, x,
-    s_y, y);
+    s_width, (int64_t)width,
+    s_height, (int64_t)height,
+    s_x, (int64_t)x,
+    s_y, (int64_t)y);
 }
 
 static Object HHVM_METHOD(Imagick, getImagePixelColor,
@@ -1685,10 +1685,10 @@ static Array HHVM_METHOD(Imagick, getPage) {
     IMAGICK_THROW("Unable to get page");
   }
   return make_map_array(
-    s_width, width,
-    s_height, height,
-    s_x, x,
-    s_y, y);
+    s_width, (int64_t)width,
+    s_height, (int64_t)height,
+    s_x, (int64_t)x,
+    s_y, (int64_t)y);
 }
 
 static Object HHVM_METHOD(Imagick, getPixelIterator) {
@@ -1709,7 +1709,7 @@ static Array HHVM_STATIC_METHOD(Imagick, getQuantumDepth) {
   size_t depth;
   const char* quantumDepth = MagickGetQuantumDepth(&depth);
   return make_map_array(
-    s_quantumDepthLong, depth,
+    s_quantumDepthLong, (int64_t)depth,
     s_quantumDepthString, quantumDepth);
 }
 
@@ -1717,7 +1717,7 @@ static Array HHVM_STATIC_METHOD(Imagick, getQuantumRange) {
   size_t range;
   const char* quantumRange = MagickGetQuantumRange(&range);
   return make_map_array(
-    s_quantumRangeLong, range,
+    s_quantumRangeLong, (int64_t)range,
     s_quantumRangeString, quantumRange);
 }
 
@@ -1750,8 +1750,8 @@ static Array HHVM_METHOD(Imagick, getSize) {
     IMAGICK_THROW("Unable to get size");
   }
   return make_map_array(
-    s_columns, columns,
-    s_rows, rows);
+    s_columns, (int64_t)columns,
+    s_rows, (int64_t)rows);
 }
 
 static int64_t HHVM_METHOD(Imagick, getSizeOffset) {
@@ -1768,7 +1768,7 @@ static Array HHVM_STATIC_METHOD(Imagick, getVersion) {
   size_t version;
   const char* versionStr = MagickGetVersion(&version);
   return make_map_array(
-    s_versionNumber, version,
+    s_versionNumber, (int64_t)version,
     s_versionString, versionStr);
 }
 

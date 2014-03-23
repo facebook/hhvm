@@ -1,10 +1,17 @@
 <?php
 
 function main() {
-  $tcp_server = stream_socket_server("tcp://127.0.0.1:50000",
-      $errno, $errstr);
-  $udp_server = stream_socket_server("udp://127.0.0.1:50001",
-      $errno, $errstr, STREAM_SERVER_BIND);
+  $tryport = 50000;
+  while ($tryport++ < 51000) {
+    $tcp_server = stream_socket_server("tcp://127.0.0.1:{$tryport}",
+        $errno, $errstr);
+    if ($tcp_server) break;
+  }
+  while ($tryport++ < 51000) {
+    $udp_server = stream_socket_server("udp://127.0.0.1:{$tryport}",
+        $errno, $errstr, STREAM_SERVER_BIND);
+    if ($udp_server) break;
+  }
 
   // Unix socket tests disabled because HHVM does not currently
   // support Unix sockets.

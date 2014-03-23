@@ -743,7 +743,9 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
         break;
 
       case ArgDesc::Kind::Addr:
-        not_implemented();
+        a.    lea (arg.srcReg()[arg.imm().l()], rTmp);
+        a.    push(rTmp);
+        break;
 
       case ArgDesc::Kind::None:
         a.    push(rax);

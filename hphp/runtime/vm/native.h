@@ -131,6 +131,22 @@ constexpr int kMaxBuiltinArgs = 7;
 // Maximum number of args for a native using only int-like params
 constexpr int kMaxBuiltinArgsNoDouble = 15;
 
+// t#3982283 - Our ARM code gen doesn't support stack args yet.
+// In fact, it only supports six of the eight register args.
+// Put a hard limit of five to account for the return register for now.
+constexpr int kMaxFCallBuiltinArgsARM = 5;
+
+inline int maxFCallBuiltinArgs() {
+#ifdef __AARCH64EL__
+  return kMaxFCallBuiltinArgsARM;
+#else
+  if (UNLIKELY(RuntimeOption::EvalSimulateARM)) {
+    return kMaxFCallBuiltinArgsARM;
+  }
+  return kMaxBuiltinArgsNoDouble;
+#endif
+}
+
 enum Attr {
   AttrNone = 0,
   AttrActRec = 1 << 0,

@@ -1,4 +1,4 @@
-<?php
+<?php // uses RenameFunction to ensure that all arguments are retained
 
 class A {
   static function foo() {

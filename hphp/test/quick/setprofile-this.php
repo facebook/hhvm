@@ -1,5 +1,5 @@
 <?php
-// Copyright 2004-present Facebook. All Rights Reserved.
+// Test uses RenameFunction to ensure that all arguments are retained
 
 trait logger {
   public function __construct() {

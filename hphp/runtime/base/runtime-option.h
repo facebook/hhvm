@@ -409,6 +409,8 @@ public:
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitStressLease,              false)                           \
   F(bool, JitKeepDbgFiles,             false)                           \
+  /* despite the unfortunate name, this enables function renaming and
+   * interception in the interpreter as well as the jit */              \
   F(bool, JitEnableRenameFunction,     false)                           \
   F(bool, JitUseVtuneAPI,              false)                           \
                                                                         \

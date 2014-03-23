@@ -200,14 +200,14 @@ void rename_function(const String& old_name, const String& new_name) {
     not_reached();
   }
 
-  if (!(func->attrs() & AttrDynamicInvoke)) {
-    // When EvalJitEnableRenameFunction is false, the translator may wire
-    // non-DynamicInvoke Func*'s into the TC. Don't rename functions.
-    if (RuntimeOption::EvalJit && !RuntimeOption::EvalJitEnableRenameFunction) {
-      raise_error("You must explicitly enable fb_rename_function in the JIT "
-                  "(-v Eval.JitEnableRenameFunction=true)");
-    }
+  if (!RuntimeOption::EvalJitEnableRenameFunction) {
+    raise_error("fb_rename_function must be explicitly enabled"
+                "(-v Eval.JitEnableRenameFunction=true)");
   }
+
+  // When EvalJitEnableRenameFunction is false, the translator may wire
+  // non-DynamicInvoke Func*'s into the TC. Don't rename functions.
+  // if (!(func->attrs() & AttrDynamicInvoke)) { ... }
 
   Func *fnew = Unit::lookupFunc(newNe);
   if (fnew && fnew != func) {

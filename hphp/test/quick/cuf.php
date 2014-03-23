@@ -1,6 +1,10 @@
 <?php
 error_reporting(-1);
 
+// FIXME: This test enables rename function, which has an impact on how
+// function dispatch and entry are treated. Without this option, behavior
+// differs between jit and non-jit code.
+
 class A {
   public function meth() {
     echo __CLASS__ . ' ' . get_called_class() .

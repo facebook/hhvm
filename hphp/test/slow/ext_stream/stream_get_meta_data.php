@@ -3,12 +3,12 @@
 function main() {
   $tryport = 50000;
   while ($tryport++ < 51000) {
-    $tcp_server = stream_socket_server("tcp://127.0.0.1:{$tryport}",
+    $tcp_server = @stream_socket_server("tcp://127.0.0.1:{$tryport}",
         $errno, $errstr);
     if ($tcp_server) break;
   }
   while ($tryport++ < 51000) {
-    $udp_server = stream_socket_server("udp://127.0.0.1:{$tryport}",
+    $udp_server = @stream_socket_server("udp://127.0.0.1:{$tryport}",
         $errno, $errstr, STREAM_SERVER_BIND);
     if ($udp_server) break;
   }

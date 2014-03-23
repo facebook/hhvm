@@ -602,9 +602,10 @@ public:
 
 private:
   void enterVMAtAsyncFunc(ActRec* enterFnAr, PC pc, ObjectData* exception);
-  void enterVMAtFunc(ActRec* enterFnAr);
+  void enterVMAtFunc(ActRec* enterFnAr, bool stackTrimmed);
   void enterVMAtCurPC();
-  void enterVM(ActRec* ar, PC pc = nullptr, ObjectData* exception = nullptr);
+  void enterVM(ActRec* ar, bool stackTrimmed,
+               PC pc = nullptr, ObjectData* exception = nullptr);
   void doFPushCuf(IOP_ARGS, bool forward, bool safe);
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,
@@ -643,9 +644,6 @@ public:
     invokeFunc(retval, ctx.func, args_, ctx.this_, ctx.cls, varEnv,
                ctx.invName);
   }
-  void invokeFuncCleanupHelper(TypedValue* retval,
-                               ActRec* ar,
-                               int numArgsPushed);
   void invokeFuncFew(TypedValue* retval,
                      const Func* f,
                      void* thisOrCls,

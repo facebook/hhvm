@@ -1386,8 +1386,32 @@ static inline void checkStack(Stack& stk, const Func* f) {
   }
 }
 
-static inline bool prepareArrayArgs(ActRec* ar, const Variant& arrayArgs,
-                                    Stack& stack) {
+// This helper is meant to be called if an exception or invalidation takes
+// place in the process of function entry; the ActRec ar is on the stack
+// but is not (yet) the current (executing) frame and is followed by a
+// number of params
+static NEVER_INLINE void cleanupParamsAndActRec(Stack& stack,
+                                                ActRec* ar,
+                                                ExtraArgs* extraArgs,
+                                                int* numParams) {
+  assert(stack.top() + (numParams != nullptr ? (*numParams) :
+                        extraArgs != nullptr ? ar->m_func->numParams() :
+                        ar->numArgs())
+         == (void*)ar);
+  if (extraArgs) {
+    const int numExtra = ar->numArgs() - ar->m_func->numNonVariadicParams();
+    ExtraArgs::deallocate(extraArgs, numExtra);
+  }
+  while (stack.top() != (void*)ar) {
+    stack.popTV();
+  }
+  stack.popAR();
+}
+
+static bool prepareArrayArgs(ActRec* ar, const Variant& arrayArgs,
+                             Stack& stack,
+                             bool doCufRefParamChecks,
+                             TypedValue* retval) {
   assert(stack.top() == (void*) ar);
   const Func* f = ar->m_func;
   assert(f);
@@ -1432,22 +1456,25 @@ static inline bool prepareArrayArgs(ActRec* ar, const Variant& arrayArgs,
                       from->m_data.pref->m_count >= 2)) {
       refDup(*from, *to);
     } else {
-      try {
-        raise_warning("Parameter %d to %s() expected to be a reference, "
-                      "value given", i + 1, f->fullName()->data());
-      } catch (...) {
-        // If the user error handler throws an exception, discard the
-        // uninitialized value(s) at the top of the eval stack so that the
-        // unwinder doesn't choke
-        stack.discard();
-        throw;
-      }
-      if (skipCufOnInvalidParams) {
-        stack.discard();
-        while (i--) { stack.popTV(); }
-        stack.popAR();
-        stack.pushNull(); // return value
-        return false;
+      if (doCufRefParamChecks) {
+        try {
+          raise_warning("Parameter %d to %s() expected to be a reference, "
+                        "value given", i + 1, f->fullName()->data());
+        } catch (...) {
+          // If the user error handler throws an exception, discard the
+          // uninitialized value(s) at the top of the eval stack so that the
+          // unwinder doesn't choke
+          stack.discard();
+          cleanupParamsAndActRec(stack, ar, nullptr, &i);
+          if (retval) { tvWriteNull(retval); }
+          throw;
+        }
+        if (skipCufOnInvalidParams) {
+          stack.discard();
+          cleanupParamsAndActRec(stack, ar, nullptr, &i);
+          if (retval) { tvWriteNull(retval); }
+          return false;
+        }
       }
       cellDup(*tvToCell(from), *to);
     }
@@ -1644,13 +1671,19 @@ void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr, PC pc,
   }
 }
 
-void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr) {
+void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr, bool stackTrimmed) {
   assert(enterFnAr);
   assert(!enterFnAr->inGenerator());
   Stats::inc(Stats::VMEnter);
 
   bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
-  bool useJitPrologue = useJit && m_fp && !enterFnAr->m_varEnv;
+  bool useJitPrologue = useJit && m_fp
+    && !enterFnAr->m_varEnv
+    && !stackTrimmed;
+  // The jit prologues only know how to do limited amounts of work; cannot
+  // be used for magic call/pseudo-main/extra-args already determined or
+  // ... or if the stack args have been explicitly been prepared (e.g. via
+  // entry as part of invoke func).
 
   if (LIKELY(useJitPrologue)) {
     int np = enterFnAr->m_func->numNonVariadicParams();
@@ -1661,7 +1694,7 @@ void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr) {
     return;
   }
 
-  prepareFuncEntry(enterFnAr, m_pc, /* stack trimmed */ false);
+  prepareFuncEntry(enterFnAr, m_pc, stackTrimmed);
   if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(m_stack, enterFnAr->m_func);
   assert(m_fp->func()->contains(m_pc));
@@ -1695,10 +1728,12 @@ void ExecutionContext::enterVMAtCurPC() {
  * inside the async function must be provided. Optionally, the resumed
  * async function will throw an 'exception' upon entering VM if passed.
  */
-void ExecutionContext::enterVM(ActRec* ar, PC pc, ObjectData* exception) {
+void ExecutionContext::enterVM(ActRec* ar, bool stackTrimmed,
+                               PC pc, ObjectData* exception) {
   assert(ar);
   assert(ar->m_soff == 0);
   assert(ar->m_savedRbp == 0);
+  assert(!(pc && stackTrimmed));
 
   DEBUG_ONLY int faultDepth = m_faults.size();
   SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
@@ -1725,7 +1760,7 @@ resume:
     if (first) {
       first = false;
       if (!pc) {
-        enterVMAtFunc(ar);
+        enterVMAtFunc(ar, stackTrimmed);
       } else {
         enterVMAtAsyncFunc(ar, pc, exception);
       }
@@ -1776,13 +1811,13 @@ resume:
 }
 
 void ExecutionContext::invokeFunc(TypedValue* retval,
-                                    const Func* f,
-                                    const Variant& args_,
-                                    ObjectData* this_ /* = NULL */,
-                                    Class* cls /* = NULL */,
-                                    VarEnv* varEnv /* = NULL */,
-                                    StringData* invName /* = NULL */,
-                                    InvokeFlags flags /* = InvokeNormal */) {
+                                  const Func* f,
+                                  const Variant& args_,
+                                  ObjectData* this_ /* = NULL */,
+                                  Class* cls /* = NULL */,
+                                  VarEnv* varEnv /* = NULL */,
+                                  StringData* invName /* = NULL */,
+                                  InvokeFlags flags /* = InvokeNormal */) {
   assert(retval);
   assert(f);
   // If f is a regular function, this_ and cls must be NULL
@@ -1802,8 +1837,6 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
   assert(!varEnv || cellIsNull(&args) || !getContainerSize(args));
 
   VMRegAnchor _;
-
-  bool isMagicCall = (invName != nullptr);
 
   if (this_ != nullptr) {
     this_->incRefCount();
@@ -1843,12 +1876,12 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
     ar->setThis(nullptr);
   }
   auto numPassedArgs = cellIsNull(&args) ? 0 : getContainerSize(args);
-  if (isMagicCall) {
-    ar->initNumArgs(2);
+  if (invName) {
+    ar->setInvName(invName);
   } else {
-    ar->initNumArgs(numPassedArgs);
+    ar->setVarEnv(varEnv);
   }
-  ar->setVarEnv(varEnv);
+  ar->initNumArgs(numPassedArgs);
 
 #ifdef HPHP_TRACE
   if (m_fp == nullptr) {
@@ -1861,115 +1894,32 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
   }
 #endif
 
-  if (isMagicCall) {
-    // Put the method name into the location of the first parameter. We
-    // are transferring ownership, so no need to incRef/decRef here.
-    m_stack.pushStringNoRc(invName);
-    // Put array of arguments into the location of the second parameter
-    if (args.m_type == KindOfArray && args.m_data.parr->isVectorData()) {
-      m_stack.pushArray(args.m_data.parr);
-    } else if (!numPassedArgs) {
-      m_stack.pushArrayNoRc(empty_array.get());
-    } else {
-      assert(!cellIsNull(&args));
-      PackedArrayInit ai(numPassedArgs);
-      for (ArrayIter iter(args); iter; ++iter) {
-        ai.appendWithRef(iter.secondRefPlus());
-      }
-      m_stack.pushArray(ai.create());
-    }
-  } else if (!cellIsNull(&args)) {
-    const int numParams = f->numParams();
-    const int numExtraArgs = numPassedArgs - numParams;
-    ExtraArgs* extraArgs = nullptr;
-    if (numExtraArgs > 0 && (f->attrs() & AttrMayUseVV)) {
-      extraArgs = ExtraArgs::allocateUninit(numExtraArgs);
-      ar->setExtraArgs(extraArgs);
-    }
-    int paramId = 0;
-    for (ArrayIter iter(args); iter; ++iter, ++paramId) {
-      const TypedValue* from = iter.secondRefPlus().asTypedValue();
-      TypedValue* to;
-      if (LIKELY(paramId < numParams)) {
-        to = m_stack.allocTV();
-      } else {
-        if (!(f->attrs() & AttrMayUseVV)) {
-          // Discard extra arguments, since the function cannot
-          // possibly use them.
-          assert(extraArgs == nullptr);
-          ar->setNumArgs(numParams);
-          break;
-        }
-        assert(extraArgs != nullptr && numExtraArgs > 0);
-        // VarEnv expects the extra args to be in "reverse" order
-        // (i.e. the last extra arg has the lowest address)
-        to = extraArgs->getExtraArg(paramId - numParams);
-      }
-      if (LIKELY(!f->byRef(paramId))) {
-        cellDup(*tvToCell(from), *to);
-      } else if (from->m_type == KindOfRef && from->m_data.pref->m_count >= 2) {
-        refDup(*from, *to);
-      } else {
-        if (flags & InvokeCuf) {
-          try {
-            raise_warning("Parameter %d to %s() expected to be "
-                          "a reference, value given",
-                          paramId + 1, f->fullName()->data());
-          } catch (...) {
-            // If an exception is thrown by the user error handler,
-            // we need to clean up the stack
-            m_stack.discard();
-            invokeFuncCleanupHelper(retval, ar, paramId);
-            throw;
-          }
-          if (skipCufOnInvalidParams) {
-            m_stack.discard();
-            invokeFuncCleanupHelper(retval, ar, paramId);
-            return;
-          }
-        }
-        cellDup(*tvToCell(from), *to);
-      }
+  if (!varEnv) {
+    auto prepResult = prepareArrayArgs(
+      ar, cellIsNull(&args) ? Variant(empty_array) : args_,
+      m_stack, (flags & InvokeCuf), retval
+    );
+    if (UNLIKELY(!prepResult)) {
+      assert(KindOfNull == retval->m_type);
+      return;
     }
   }
 
   pushVMState(savedSP);
   SCOPE_EXIT { popVMState(); };
 
-  enterVM(ar);
+  enterVM(ar, /* stack trimmed */ !varEnv);
 
   tvCopy(*m_stack.topTV(), *retval);
   m_stack.discard();
 }
 
-void ExecutionContext::invokeFuncCleanupHelper(TypedValue* retval,
-                                               ActRec* ar,
-                                               int numArgsPushed) {
-  assert(retval && ar);
-  const int numFormalParams = ar->m_func->numParams(); // FIXME: invokeFunc
-  ExtraArgs* extraArgs = ar->hasExtraArgs() ? ar->getExtraArgs() : nullptr;
-
-  if (extraArgs) {
-    int n =
-      numArgsPushed > numFormalParams ? numArgsPushed - numFormalParams : 0;
-    ExtraArgs::deallocate(extraArgs, n);
-    ar->m_varEnv = nullptr;
-    numArgsPushed -= n;
-  }
-  while (numArgsPushed > 0) {
-    m_stack.popTV();
-    numArgsPushed--;
-  }
-  m_stack.popAR();
-  tvWriteNull(retval);
-}
-
 void ExecutionContext::invokeFuncFew(TypedValue* retval,
-                                       const Func* f,
-                                       void* thisOrCls,
-                                       StringData* invName,
-                                       int argc,
-                                       const TypedValue* argv) {
+                                     const Func* f,
+                                     void* thisOrCls,
+                                     StringData* invName,
+                                     int argc,
+                                     const TypedValue* argv) {
   assert(retval);
   assert(f);
   // If this is a regular function, this_ and cls must be NULL
@@ -2037,7 +1987,7 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
   pushVMState(savedSP);
   SCOPE_EXIT { popVMState(); };
 
-  enterVM(ar);
+  enterVM(ar, /* stack trimmed */ false);
 
   tvCopy(*m_stack.topTV(), *retval);
   m_stack.discard();
@@ -2060,7 +2010,8 @@ void ExecutionContext::resumeAsyncFunc(c_Continuation& cont,
   SCOPE_EXIT { popVMState(); };
 
   try {
-    enterVM(ar, ar->func()->unit()->at(cont.offset()));
+    enterVM(ar, /* stack trimmed */ false,
+            ar->func()->unit()->at(cont.offset()));
     cont.setStopped();
   } catch (...) {
     cont.setDone();
@@ -2085,7 +2036,8 @@ void ExecutionContext::resumeAsyncFuncThrow(c_Continuation& cont,
   SCOPE_EXIT { popVMState(); };
 
   try {
-    enterVM(ar, ar->func()->unit()->at(cont.offset()), exception);
+    enterVM(ar, /*stack trimmed*/ false,
+            ar->func()->unit()->at(cont.offset()), exception);
     cont.setStopped();
   } catch (...) {
     cont.setDone();
@@ -6429,22 +6381,6 @@ OPTBLD_INLINE void ExecutionContext::iopFCallBuiltin(IOP_ARGS) {
   tvCopy(ret, *m_stack.allocTV());
 }
 
-static void cleanupParamsAndActRec(Stack& stack,
-                                   ActRec* ar,
-                                   ExtraArgs* extraArgs) {
-  assert(stack.top() + (extraArgs ?
-                        ar->m_func->numParams() :
-                        ar->numArgs()) == (void*)ar);
-  if (extraArgs) {
-    const int numExtra = ar->numArgs() - ar->m_func->numNonVariadicParams();
-    ExtraArgs::deallocate(extraArgs, numExtra);
-  }
-  while (stack.top() != (void*)ar) {
-    stack.popTV();
-  }
-  stack.popAR();
-}
-
 bool ExecutionContext::doFCallArray(PC& pc) {
   ActRec* ar = (ActRec*)(m_stack.top() + 1);
   assert(ar->numArgs() == 1);
@@ -6455,7 +6391,7 @@ bool ExecutionContext::doFCallArray(PC& pc) {
     // this is what we /should/ do, but our code base depends
     // on the broken behavior of casting the second arg to an
     // array.
-    cleanupParamsAndActRec(m_stack, ar, nullptr);
+    cleanupParamsAndActRec(m_stack, ar, nullptr, nullptr);
     m_stack.pushNull();
     raise_warning("call_user_func_array() expects parameter 2 to be array");
     return false;
@@ -6480,8 +6416,12 @@ bool ExecutionContext::doFCallArray(PC& pc) {
       - (uintptr_t)m_fp->m_func->base();
     assert(pcOff(this) > m_fp->m_func->base());
 
-    auto prepResult = prepareArrayArgs(ar, args, m_stack);
-    if (UNLIKELY(!prepResult)) return false;
+    auto prepResult = prepareArrayArgs(ar, args, m_stack,
+                                       /* ref param checks */ true, nullptr);
+    if (UNLIKELY(!prepResult)) {
+      m_stack.pushNull(); // return value is null if args are invalid
+      return false;
+    }
   }
 
   prepareFuncEntry(ar, pc, /* stack trimmed */ true);

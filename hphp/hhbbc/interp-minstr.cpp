@@ -1119,7 +1119,7 @@ void miFinalBindElem(MIS& env) {
   handleInThisElemD(env);
   handleInSelfElemD(env);
   handleBaseElemD(env);
-  pessimisticFinalElemD(env, key, TInitCell);
+  pessimisticFinalElemD(env, key, TInitGen);
   push(env, TRef);
 }
 

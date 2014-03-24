@@ -2235,12 +2235,6 @@ ClassInfoVM::~ClassInfoVM() {
   for (auto& c : m_constants)  delete c.second;
 }
 
-Array ExecutionContext::getUserFunctionsInfo() {
-  // Return an array of all user-defined function names.  This method is used to
-  // support get_defined_functions().
-  return Unit::getUserFunctions();
-}
-
 const ClassInfo::MethodInfo* ExecutionContext::findFunctionInfo(
   const String& name) {
   StringIMap<AtomicSmartPtr<MethodInfoVM> >::iterator it =

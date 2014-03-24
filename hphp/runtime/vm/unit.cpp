@@ -199,7 +199,7 @@ UnitMergeInfo* UnitMergeInfo::alloc(size_t size) {
   return mi;
 }
 
-Array Unit::getUserFunctions() {
+Array Unit::getFunctions(bool system) {
   // Return an array of all defined functions.  This method is used
   // to support get_defined_functions().
   Array a = Array::Create();
@@ -207,7 +207,7 @@ Array Unit::getUserFunctions() {
     for (NamedEntityMap::const_iterator it = s_namedDataMap->begin();
          it != s_namedDataMap->end(); ++it) {
       Func* func_ = it->second.getCachedFunc();
-      if (!func_ || func_->isBuiltin() || func_->isGenerated()) {
+      if (!func_ || (system ^ func_->isBuiltin()) || func_->isGenerated()) {
         continue;
       }
       a.append(func_->nameRef());

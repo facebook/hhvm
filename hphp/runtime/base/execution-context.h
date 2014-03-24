@@ -671,7 +671,6 @@ public:
   StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_classInfos;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_interfaceInfos;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_traitInfos;
-  Array getUserFunctionsInfo();
   Array getConstantsInfo();
   const ClassInfo::MethodInfo* findFunctionInfo(const String& name);
   const ClassInfo* findClassInfo(const String& name);

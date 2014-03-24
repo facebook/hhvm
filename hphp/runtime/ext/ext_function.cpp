@@ -52,8 +52,8 @@ const StaticString
   s_user("user");
 
 Array f_get_defined_functions() {
-  return make_map_array(s_internal, ClassInfo::GetSystemFunctions(),
-                     s_user, ClassInfo::GetUserFunctions());
+  return make_map_array(s_internal, Unit::getSystemFunctions(),
+                        s_user, Unit::getUserFunctions());
 }
 
 bool f_function_exists(const String& function_name,

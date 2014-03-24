@@ -2051,7 +2051,7 @@ Variant c_SoapServer::t_getfunctions() {
   } else if (m_type == SOAP_CLASS) {
     class_name = m_soap_class.name;
   } else if (m_soap_functions.functions_all) {
-    return ClassInfo::GetSystemFunctions() + ClassInfo::GetUserFunctions();
+    return Unit::getSystemFunctions() + Unit::getUserFunctions();
   } else if (!m_soap_functions.ft.empty()) {
     return f_array_keys(m_soap_functions.ftOriginal);
   }

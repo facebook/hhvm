@@ -37,33 +37,6 @@ bool ClassInfo::s_loaded = false;
 ClassInfo *ClassInfo::s_systemFuncs = nullptr;
 ClassInfo::ClassMap ClassInfo::s_class_like;
 
-Array ClassInfo::GetSystemFunctions() {
-  assert(s_loaded);
-
-  Array ret = Array::Create();
-  if (s_systemFuncs) {
-    const MethodVec &methods = s_systemFuncs->getMethodsVec();
-    for (unsigned i = 0; i < methods.size(); i++) {
-      ret.append(methods[i]->name);
-    }
-  }
-  return ret;
-}
-
-Array ClassInfo::GetUserFunctions() {
-  assert(s_loaded);
-
-  Array ret = Array::Create();
-  Array dyn = g_context->getUserFunctionsInfo();
-  if (!dyn.isNull()) {
-    ret.merge(dyn);
-    // De-dup values, then renumber (for aesthetics).
-    ret = ArrayUtil::StringUnique(ret).toArrRef();
-    ret->renumber();
-  }
-  return ret;
-}
-
 const ClassInfo::MethodInfo *ClassInfo::FindSystemFunction(const String& name) {
   assert(!name.isNull());
   assert(s_loaded);
@@ -420,8 +393,8 @@ void ClassInfo::GetSymbolNames(std::vector<String> &classes,
     constSize = clsConstants->size();
   }
 
-  Array funcs1 = ClassInfo::GetSystemFunctions();
-  Array funcs2 = ClassInfo::GetUserFunctions();
+  Array funcs1 = Unit::getSystemFunctions();
+  Array funcs2 = Unit::getUserFunctions();
   functions.reserve(funcs1.size() + funcs2.size());
   for (ArrayIter iter(funcs1); iter; ++iter) {
     functions.push_back(iter.second().toString());

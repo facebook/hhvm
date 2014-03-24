@@ -186,16 +186,6 @@ public:
   static void Load();
 
   /**
-   * Return a list of PHP library functions.
-   */
-  static Array GetSystemFunctions();
-
-  /**
-   * Return a list of user defined functions.
-   */
-  static Array GetUserFunctions();
-
-  /**
    * Locate one function.
    */
   static const MethodInfo *FindSystemFunction(const String& name);

@@ -36,7 +36,7 @@ IRBuilder::IRBuilder(Offset initialBcOffset,
                      IRUnit& unit,
                      const Func* func)
   : m_unit(unit)
-  , m_simplifier(*this)
+  , m_simplifier(unit)
   , m_state(unit, initialSpOffsetFromFp, func)
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
@@ -597,7 +597,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
     return cloneAndAppendOriginal();
   }
 
-  auto simpResult = m_simplifier.simplify(inst);
+  auto simpResult = m_simplifier.simplify(inst, shouldConstrainGuards());
 
   // These are the possible outputs:
   //
@@ -616,7 +616,8 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
 
       auto cseResult = doCse(newInst);
       if (cseResult) {
-        appendInstruction(m_unit.mov(newInst->dst(), cseResult, newInst->marker()));
+        appendInstruction(m_unit.mov(newInst->dst(), cseResult,
+                                     newInst->marker()));
       } else {
         appendInstruction(newInst);
       }

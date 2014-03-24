@@ -299,7 +299,7 @@ IRInstruction* frameRoot(IRInstruction* fpInst) {
 //////////////////////////////////////////////////////////////////////
 
 template<class... Args> SSATmp* Simplifier::cns(Args&&... cns) {
-  return m_irb.unit().cns(std::forward<Args>(cns)...);
+  return m_unit.cns(std::forward<Args>(cns)...);
 }
 
 template<class... Args> SSATmp* Simplifier::gen(Opcode op, Args&&... args) {
@@ -321,7 +321,7 @@ template<class... Args> SSATmp* Simplifier::gen(Opcode op, BCMarker marker,
         return newDest;
       } else {
         assert(inst->isTransient());
-        inst = m_irb.unit().cloneInstruction(inst);
+        inst = m_unit.cloneInstruction(inst);
         this->m_newInsts.push_back(inst);
 
         return inst->dst(0);
@@ -335,7 +335,10 @@ template<class... Args> SSATmp* Simplifier::gen(Opcode op, BCMarker marker,
 
 //////////////////////////////////////////////////////////////////////
 
-Simplifier::Result Simplifier::simplify(const IRInstruction* inst) {
+Simplifier::Result Simplifier::simplify(const IRInstruction* inst,
+                                        bool typesMightRelax) {
+  m_typesMightRelax = typesMightRelax;
+
   SSATmp* newDst = simplifyWork(inst);
   return Result{std::move(m_newInsts), newDst};
 }
@@ -1332,7 +1335,7 @@ SSATmp* Simplifier::simplifyIsType(const IRInstruction* inst) {
   auto src       = inst->src(0);
   auto srcType   = src->type();
 
-  if (m_irb.typeMightRelax(src)) return nullptr;
+  if (typeMightRelax(src)) return nullptr;
 
   // The comparisons below won't work for these cases covered by this
   // assert, and we currently don't generate these types.
@@ -1726,7 +1729,7 @@ SSATmp* Simplifier::simplifyCheckInit(const IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyDecRef(const IRInstruction* inst) {
   auto src = inst->src(0);
-  if (!m_irb.typeMightRelax(src) && !isRefCounted(src)) {
+  if (!typeMightRelax(src) && !isRefCounted(src)) {
     return gen(Nop);
   }
   return nullptr;
@@ -1734,7 +1737,7 @@ SSATmp* Simplifier::simplifyDecRef(const IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyIncRef(const IRInstruction* inst) {
   SSATmp* src = inst->src(0);
-  if (!m_irb.typeMightRelax(src) && !isRefCounted(src)) {
+  if (!typeMightRelax(src) && !isRefCounted(src)) {
     return gen(Nop);
   }
   return nullptr;
@@ -1744,7 +1747,7 @@ SSATmp* Simplifier::simplifyIncRefCtx(const IRInstruction* inst) {
   auto* ctx = inst->src(0);
   if (ctx->isA(Type::Obj)) {
     return gen(IncRef, ctx);
-  } else if (!m_irb.typeMightRelax(ctx) && ctx->type().notCounted()) {
+  } else if (!typeMightRelax(ctx) && ctx->type().notCounted()) {
     return gen(Nop);
   }
 
@@ -1876,7 +1879,7 @@ SSATmp* Simplifier::simplifyLdStack(const IRInstruction* inst) {
     // value that isn't from another raw load, we need to leave something in
     // its place to preserve that information.
     if (!value->inst()->isRawLoad() &&
-        (value->type().maybeCounted() || m_irb.typeMightRelax(info.value))) {
+        (value->type().maybeCounted() || typeMightRelax(info.value))) {
       gen(TakeStack, info.value);
     }
     return info.value;
@@ -1896,7 +1899,7 @@ SSATmp* Simplifier::simplifyLdStack(const IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyTakeStack(const IRInstruction* inst) {
   if (inst->src(0)->type().notCounted() &&
-      !m_irb.typeMightRelax(inst->src(0))) {
+      !typeMightRelax(inst->src(0))) {
     return gen(Nop);
   }
 
@@ -1929,12 +1932,12 @@ SSATmp* Simplifier::simplifyDecRefStack(const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<StackOffset>()->offset);
   if (info.value && !info.spansCall) {
-    if (info.value->type().maybeCounted() || m_irb.typeMightRelax(info.value)) {
+    if (info.value->type().maybeCounted() || typeMightRelax(info.value)) {
       gen(TakeStack, info.value);
     }
     return gen(DecRef, info.value);
   }
-  if (m_irb.typeMightRelax(info.value)) {
+  if (typeMightRelax(info.value)) {
     return nullptr;
   }
 
@@ -1998,6 +2001,14 @@ SSATmp* Simplifier::simplifyLdPackedArrayElem(const IRInstruction* inst) {
   }
 
   return nullptr;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+bool Simplifier::typeMightRelax(SSATmp* tmp) const {
+  if (!m_typesMightRelax) return false;
+  if (tmp && (tmp->inst()->is(DefConst) || tmp->isA(Type::Cls))) return false;
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////

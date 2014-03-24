@@ -25,10 +25,6 @@ namespace HPHP {  namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
-class IRBuilder;
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * Module that handles state-independent optimizations.
  *
@@ -37,9 +33,8 @@ class IRBuilder;
  * can be modified in place or replaced with new instructions as
  * needed.
  *
- * The Simplifier recursively invokes IRBuilder, which can call
- * back into it.  It's used both during our initial gen-time
- * optimizations and in the IRBuilder::reoptimize pass.
+ * The Simplifier recursively invokes itself, so that all instructions
+ * returned from simplify() have been fully simplified themselves.
  *
  * The line of separation between these two modules is essentially
  * about who needs to know about tracked state.  If an optimization is
@@ -48,7 +43,10 @@ class IRBuilder;
  * other pass.
  */
 struct Simplifier {
-  explicit Simplifier(const IRBuilder& irb) : m_irb(irb) {}
+  explicit Simplifier(IRUnit& unit) : m_unit(unit) {}
+
+  Simplifier(const Simplifier&) = delete;
+  Simplifier& operator=(const Simplifier&) = delete;
 
   /*
    * In general, the simplifier transforms one instruction into zero or more
@@ -70,8 +68,7 @@ struct Simplifier {
    * instruction should still be used (but the call to simplify may
    * have changed it, also).
    */
-  Result simplify(const IRInstruction*);
-
+  Result simplify(const IRInstruction*, bool typesMightRelax);
 
 private:
   SSATmp* simplifyWork(const IRInstruction*);
@@ -186,13 +183,16 @@ private:
   SSATmp* simplifyCheckPackedArrayBounds(const IRInstruction*);
   SSATmp* simplifyLdPackedArrayElem(const IRInstruction*);
 
-private: // IRBuilder forwarders
+  bool typeMightRelax(SSATmp* src) const;
+
+private: // makeInstruction forwarders
   template<class... Args> SSATmp* cns(Args&&...);
   template<class... Args> SSATmp* gen(Opcode op, Args&&...);
   template<class... Args> SSATmp* gen(Opcode op, BCMarker marker, Args&&...);
 
 private:
-  const IRBuilder& m_irb;
+  IRUnit& m_unit;
+  bool m_typesMightRelax;
 
   // The current instruction being simplified is always at
   // m_insts.top(). This has to be a stack instead of just a pointer

@@ -1572,9 +1572,14 @@ String f_session_save_path(const String& newname /* = null_string */) {
 
 String f_session_id(const String& newid /* = null_string */) {
   String ret = PS(id);
+  if (ret.isNull()) {
+    ret = empty_string;
+  }
+
   if (!newid.isNull()) {
     PS(id) = newid;
   }
+  
   return ret;
 }
 

@@ -48,6 +48,7 @@
 #include "hphp/util/repo-schema.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/util/stacktrace-profiler.h"
 
 namespace HPHP {
 
@@ -185,6 +186,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/dump-file-repo:  dump file repository to /tmp/file_repo_dump\n"
 
         "/pcre-cache-size: get pcre cache map size\n"
+        "/start-stacktrace-profiler: set enable_stacktrace_profiler to true\n"
 
 #ifdef GOOGLE_CPU_PROFILER
         "/prof-cpu-on:     turn on CPU profiler\n"
@@ -344,6 +346,12 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       std::ostringstream size;
       size << preg_pcre_cache_size() << endl;
       transport->sendString(size.str());
+      break;
+    }
+
+    if (cmd == "start-stacktrace-profiler") {
+      enable_stacktrace_profiler = true;
+      transport->sendString("OK\n");
       break;
     }
 

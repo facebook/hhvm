@@ -1283,7 +1283,7 @@ void ExecutionContext::shuffleMagicArgs(ActRec* ar) {
   auto argArray = Array::attach(
     nargs ? HphpArray::MakePacked(
               nargs, reinterpret_cast<TypedValue*>(ar) - nargs)
-          : HphpArray::MakeReserve(0)
+          : HphpArray::GetStaticEmptyArray()
   );
 
   // Remove the arguments from the stack; they were moved into the

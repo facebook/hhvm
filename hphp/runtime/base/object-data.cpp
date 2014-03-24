@@ -207,7 +207,7 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
 
   assert(!g_context->dynPropTable.count(this));
   auto& arr = g_context->dynPropTable[this].arr();
-  arr = Array::attach(HphpArray::MakeReserve(numDynamic));
+  arr = Array::attach(HphpArray::MakeReserveMixed(numDynamic));
   setAttribute(HasDynPropArr);
   return arr;
 }
@@ -436,7 +436,7 @@ Array ObjectData::o_toIterArray(const String& context,
     dynProps = &dynPropArray();
     size += dynProps->size();
   }
-  Array retArray { Array::attach(HphpArray::MakeReserve(size)) };
+  Array retArray { Array::attach(HphpArray::MakeReserveMixed(size)) };
 
   Class* ctx = nullptr;
   if (!context.empty()) {

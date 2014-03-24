@@ -112,6 +112,14 @@ public:
   static ArrayData* MakeReserve(uint32_t capacity);
 
   /*
+   * Allocate a new, empty, request-local array in mixed mode, with
+   * enough space reserved for `capacity' members.
+   *
+   * The returned array is already incref'd.
+   */
+  static ArrayData* MakeReserveMixed(uint32_t capacity);
+
+  /*
    * Allocate a packed HphpArray.  This is an array in packed
    * mode, containing `size' values, in the reverse order of the
    * `values' array.

@@ -27,7 +27,7 @@ ArrayInit::ArrayInit(size_t n, Map)
   , m_expectedCount(n)
 #endif
 {
-  m_data = HphpArray::MakeReserve(n);
+  m_data = HphpArray::MakeReserveMixed(n);
   m_data->setRefCount(0);
 }
 

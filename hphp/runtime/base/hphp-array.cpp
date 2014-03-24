@@ -46,7 +46,6 @@ TRACE_SET_MOD(runtime);
 
 //////////////////////////////////////////////////////////////////////
 
-NEVER_INLINE
 ArrayData* HphpArray::MakeReserve(uint32_t capacity) {
   auto const cmret = computeCapAndMask(capacity);
   auto const cap   = cmret.first;
@@ -65,6 +64,36 @@ ArrayData* HphpArray::MakeReserve(uint32_t capacity) {
   assert(ad->m_count == 1);
   assert(ad->m_cap == cap);
   assert(ad->m_used == 0);
+  assert(ad->checkInvariants());
+  return ad;
+}
+
+ArrayData* HphpArray::MakeReserveMixed(uint32_t capacity) {
+  auto const cmret = computeCapAndMask(capacity);
+  auto const cap   = cmret.first;
+  auto const mask  = cmret.second;
+  auto const ad    = smartAllocArray(cap, mask);
+
+  ad->m_kindAndSize = kMixedKind; // zero's size
+  ad->m_posAndCount = uint64_t{1} << 32 |
+                        static_cast<uint32_t>(ArrayData::invalid_index);
+  ad->m_capAndUsed  = cap;
+  ad->m_maskAndLoad = mask;
+  ad->m_nextKI      = 0;
+
+  auto const data = reinterpret_cast<Elm*>(ad + 1);
+  auto const hash = reinterpret_cast<int32_t*>(data + cap);
+  wordfill(hash, Empty, mask + 1);
+
+  assert(ad->m_kind == kMixedKind);
+  assert(ad->m_size == 0);
+  assert(ad->m_pos == ArrayData::invalid_index);
+  assert(ad->m_count == 1);
+  assert(ad->m_cap == cap);
+  assert(ad->m_used == 0);
+  assert(ad->m_nextKI == 0);
+  assert(ad->m_hLoad == 0);
+  assert(ad->m_tableMask == mask);
   assert(ad->checkInvariants());
   return ad;
 }

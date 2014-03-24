@@ -451,13 +451,13 @@ const StaticString s_idx("idx");
 TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
   static auto func = Unit::loadFunc(s_idx.get());
   assert(func != nullptr);
-  Array args = PackedArrayInit(3)
-                         .append(tvAsVariant(&obj))
-                         .append(tvAsVariant(&key))
-                         .append(tvAsVariant(&def))
-                         .toArray();
+  TypedValue args[] = {
+    obj,
+    key,
+    def
+  };
   TypedValue ret;
-  g_context->invokeFunc(&ret, func, args);
+  g_context->invokeFuncFew(&ret, func, nullptr, nullptr, 3, &args[0]);
   return ret;
 }
 

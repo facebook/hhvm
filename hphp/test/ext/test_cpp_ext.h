@@ -18,7 +18,6 @@
 #define incl_HPHP_TEST_CPP_EXT_H_
 
 #include "hphp/test/ext/test_cpp_base.h"
-#include "hphp/runtime/ext/ext_variable.h" // we frequently need to call f_var_dump()
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/ext/ext_misc.h"
 

@@ -580,38 +580,6 @@
             "value": 0
         },
         {
-            "name": "EXTR_IF_EXISTS",
-            "value": 6
-        },
-        {
-            "name": "EXTR_OVERWRITE",
-            "value": 0
-        },
-        {
-            "name": "EXTR_PREFIX_ALL",
-            "value": 3
-        },
-        {
-            "name": "EXTR_PREFIX_IF_EXISTS",
-            "value": 5
-        },
-        {
-            "name": "EXTR_PREFIX_INVALID",
-            "value": 4
-        },
-        {
-            "name": "EXTR_PREFIX_SAME",
-            "value": 2
-        },
-        {
-            "name": "EXTR_REFS",
-            "value": 256
-        },
-        {
-            "name": "EXTR_SKIP",
-            "value": 1
-        },
-        {
             "name": "E_ALL",
             "value": 30719
         },

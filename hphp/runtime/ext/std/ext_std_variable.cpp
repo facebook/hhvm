@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -36,24 +36,34 @@ const StaticString
   s_array("array"),
   s_null("null");
 
-String f_gettype(const Variant& v) {
+String HHVM_FUNCTION(gettype, const Variant& v) {
   if (v.getType() == KindOfResource && v.getResourceData()->isInvalid()) {
     return s_unknown_type;
   }
   return getDataTypeString(v.getType());
 }
 
-String f_get_resource_type(const Resource& handle) {
+String HHVM_FUNCTION(get_resource_type, const Resource& handle) {
   return handle->o_getResourceName();
 }
 
-int64_t f_intval(const Variant& v, int64_t base /* = 10 */) { return v.toInt64(base);}
-double f_doubleval(const Variant& v) { return v.toDouble();}
-double f_floatval(const Variant& v) { return v.toDouble();}
-String f_strval(const Variant& v) { return v.toString();}
-bool f_boolval(const Variant& v) { return v.toBoolean();}
+bool HHVM_FUNCTION(boolval, const Variant& v) {
+  return v.toBoolean();
+}
 
-bool f_settype(VRefParam var, const String& type) {
+int64_t HHVM_FUNCTION(intval, const Variant& v, int64_t base /* = 10 */) {
+  return v.toInt64(base);
+}
+
+double HHVM_FUNCTION(floatval, const Variant& v) {
+  return v.toDouble();
+}
+
+String HHVM_FUNCTION(strval, const Variant& v) {
+  return v.toString();
+}
+
+bool HHVM_FUNCTION(settype, VRefParam var, const String& type) {
   if      (type == s_boolean) var = var.toBoolean();
   else if (type == s_bool   ) var = var.toBoolean();
   else if (type == s_integer) var = var.toInt64();
@@ -67,66 +77,51 @@ bool f_settype(VRefParam var, const String& type) {
   return true;
 }
 
-bool f_is_bool(const Variant& v) {
+bool HHVM_FUNCTION(is_null, const Variant& v) {
+  return is_null(v);
+}
+
+bool HHVM_FUNCTION(is_bool, const Variant& v) {
   return is_bool(v);
 }
 
-bool f_is_int(const Variant& v) {
+bool HHVM_FUNCTION(is_int, const Variant& v) {
   return is_int(v);
 }
 
-bool f_is_integer(const Variant& v) {
-  return is_int(v);
-}
-
-bool f_is_long(const Variant& v) {
-  return is_int(v);
-}
-
-bool f_is_double(const Variant& v) {
+bool HHVM_FUNCTION(is_float, const Variant& v) {
   return is_double(v);
 }
 
-bool f_is_float(const Variant& v) {
-  return is_double(v);
-}
-
-bool f_is_numeric(const Variant& v) {
+bool HHVM_FUNCTION(is_numeric, const Variant& v) {
   return v.isNumeric(true);
 }
 
-bool f_is_real(const Variant& v) {
-  return is_double(v);
-}
-
-bool f_is_string(const Variant& v) {
+bool HHVM_FUNCTION(is_string, const Variant& v) {
   return is_string(v);
 }
 
-bool f_is_scalar(const Variant& v) {
+bool HHVM_FUNCTION(is_scalar, const Variant& v) {
   return v.isScalar();
 }
 
-bool f_is_array(const Variant& v) {
+bool HHVM_FUNCTION(is_array, const Variant& v) {
   return is_array(v);
 }
 
-bool f_is_object(const Variant& v) {
+bool HHVM_FUNCTION(is_object, const Variant& v) {
   return is_object(v);
 }
 
-bool f_is_resource(const Variant& v) {
+bool HHVM_FUNCTION(is_resource, const Variant& v) {
   return (v.getType() == KindOfResource && !v.getResourceData()->isInvalid());
-}
-
-bool f_is_null(const Variant& v) {
-  return is_null(v);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // input/output
 
-Variant f_print_r(const Variant& expression, bool ret /* = false */) {
+Variant HHVM_FUNCTION(print_r, const Variant& expression,
+                               bool ret /* = false */) {
   Variant res;
   try {
     VariableSerializer vs(VariableSerializer::Type::PrintR);
@@ -143,7 +138,8 @@ Variant f_print_r(const Variant& expression, bool ret /* = false */) {
   return res;
 }
 
-Variant f_var_export(const Variant& expression, bool ret /* = false */) {
+Variant HHVM_FUNCTION(var_export, const Variant& expression,
+                                  bool ret /* = false */) {
   Variant res;
   try {
     VariableSerializer vs(VariableSerializer::Type::VarExport);
@@ -176,19 +172,63 @@ void f_var_dump(int _argc, const Variant& expression,
   }
 }
 
-void f_debug_zval_dump(const Variant& variable) {
+void HHVM_FUNCTION(debug_zval_dump, const Variant& variable) {
   VariableSerializer vs(VariableSerializer::Type::DebugDump);
   vs.serialize(variable, false);
 }
 
-Variant f_unserialize(const String& str, const Array& class_whitelist /* = empty_array */) {
+String HHVM_FUNCTION(serialize, const Variant& value) {
+  switch (value.getType()) {
+  case KindOfUninit:
+  case KindOfNull:
+    return "N;";
+  case KindOfBoolean:
+    return value.getBoolean() ? "b:1;" : "b:0;";
+  case KindOfInt64: {
+    StringBuffer sb;
+    sb.append("i:");
+    sb.append(value.getInt64());
+    sb.append(';');
+    return sb.detach();
+  }
+  case KindOfStaticString:
+  case KindOfString: {
+    StringData *str = value.getStringData();
+    StringBuffer sb;
+    sb.append("s:");
+    sb.append(str->size());
+    sb.append(":\"");
+    sb.append(str->data(), str->size());
+    sb.append("\";");
+    return sb.detach();
+  }
+  case KindOfArray: {
+    ArrayData *arr = value.getArrayData();
+    if (arr->empty()) return "a:0:{}";
+    // fall-through
+  }
+  case KindOfObject:
+  case KindOfResource:
+  case KindOfDouble: {
+    VariableSerializer vs(VariableSerializer::Type::Serialize);
+    return vs.serialize(value, true);
+  }
+  default:
+    assert(false);
+    break;
+  }
+  return "";
+}
+
+Variant HHVM_FUNCTION(unserialize, const String& str,
+                                   const Array& class_whitelist /* =[] */) {
   return unserialize_from_string(str, class_whitelist);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // variable table
 
-Array f_get_defined_vars() {
+Array HHVM_FUNCTION(get_defined_vars) {
   VarEnv* v = g_context->getVarEnv();
   if (v) {
     return v->getDefinedVariables();
@@ -197,19 +237,9 @@ Array f_get_defined_vars() {
   }
 }
 
-bool f_import_request_variables(const String& types, const String& prefix /* = "" */) {
-  throw NotSupportedException(__func__,
-                              "It is bad coding practice to remove scoping of "
-                              "variables just to achieve coding convenience, "
-                              "esp. in a language that encourages global "
-                              "variables. This is possible to implement "
-                              "though, by declaring those global variables "
-                              "beforehand and assign with scoped ones when "
-                              "this function is called.");
-}
-
-int64_t f_extract(const Array& var_array, int extract_type /* = EXTR_OVERWRITE */,
-                  const String& prefix /* = "" */) {
+int64_t HHVM_FUNCTION(extract, const Array& var_array,
+                               int extract_type /* = EXTR_OVERWRITE */,
+                               const String& prefix /* = "" */) {
   bool reference = extract_type & EXTR_REFS;
   extract_type &= ~EXTR_REFS;
 
@@ -263,5 +293,53 @@ int64_t f_extract(const Array& var_array, int extract_type /* = EXTR_OVERWRITE *
   return count;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+#define EXTR_CONST(v) Native::registerConstant<KindOfInt64> \
+                                   (makeStaticString("EXTR_" #v), EXTR_##v);
+
+void StandardExtension::initVariable() {
+  EXTR_CONST(IF_EXISTS);
+  EXTR_CONST(OVERWRITE);
+  EXTR_CONST(PREFIX_ALL);
+  EXTR_CONST(PREFIX_IF_EXISTS);
+  EXTR_CONST(PREFIX_INVALID);
+  EXTR_CONST(PREFIX_SAME);
+  EXTR_CONST(REFS);
+  EXTR_CONST(SKIP);
+
+  HHVM_FE(is_null);
+  HHVM_FE(is_bool);
+  HHVM_FE(is_int);
+  HHVM_FALIAS(is_integer, is_int);
+  HHVM_FALIAS(is_long, is_int);
+  HHVM_FE(is_float);
+  HHVM_FALIAS(is_double, is_float);
+  HHVM_FALIAS(is_real, is_float);
+  HHVM_FE(is_numeric);
+  HHVM_FE(is_string);
+  HHVM_FE(is_scalar);
+  HHVM_FE(is_array);
+  HHVM_FE(is_object);
+  HHVM_FE(is_resource);
+  HHVM_FE(boolval);
+  HHVM_FE(intval);
+  HHVM_FE(floatval);
+  HHVM_FALIAS(doubleval, floatval);
+  HHVM_FE(strval);
+  HHVM_FE(gettype);
+  HHVM_FE(get_resource_type);
+  HHVM_FE(settype);
+  HHVM_FE(print_r);
+  HHVM_FE(var_export);
+  HHVM_FE(debug_zval_dump);
+  HHVM_FE(serialize);
+  HHVM_FE(unserialize);
+  HHVM_FE(get_defined_vars);
+  HHVM_FE(extract);
+
+  loadSystemlib("std_variable");
 }
+
+///////////////////////////////////////////////////////////////////////////////
+} // namespace HPHP

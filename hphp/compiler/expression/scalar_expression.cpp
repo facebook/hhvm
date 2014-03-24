@@ -30,7 +30,7 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-strtod.h"
-#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/compiler/analysis/file_scope.h"
 
 #include <sstream>
@@ -64,7 +64,7 @@ ScalarExpression::ScalarExpression
     : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ScalarExpression)),
       m_quoted(quoted) {
   if (!value.isNull()) {
-    String serialized = f_serialize(value);
+    String serialized = HHVM_FN(serialize)(value);
     m_serializedValue = string(serialized.data(), serialized.size());
     if (value.isDouble()) {
       m_dval = value.toDouble();

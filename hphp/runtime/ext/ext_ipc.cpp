@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_ipc.h"
-#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
@@ -187,7 +187,7 @@ bool f_msg_send(const Resource& queue, int64_t msgtype, const Variant& message,
   struct msgbuf *buffer = NULL;
   String data;
   if (serialize) {
-    data = f_serialize(message);
+    data = HHVM_FN(serialize)(message);
   } else {
     data = message.toString();
   }
@@ -734,7 +734,7 @@ bool f_shm_put_var(int64_t shm_identifier, int64_t variable_key,
   sysvshm_shm *shm_list_ptr = *iter;
 
   /* setup string-variable and serialize */
-  String serialized = f_serialize(variable);
+  String serialized = HHVM_FN(serialize)(variable);
 
   /* insert serialized variable into shared memory */
   int ret = put_shm_data(shm_list_ptr->ptr, variable_key,

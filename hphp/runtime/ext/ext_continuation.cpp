@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 
 #include "hphp/runtime/ext/ext_spl.h"
-#include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_function.h"
 
 #include "hphp/runtime/vm/jit/translator.h"

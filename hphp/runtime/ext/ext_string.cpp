@@ -28,7 +28,7 @@
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "folly/Unicode.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/zend/html-table.h"
@@ -1452,7 +1452,7 @@ void f_parse_str(const String& str, VRefParam arr /* = null */) {
   Array result = Array::Create();
   HttpProtocol::DecodeParameters(result, str.data(), str.size());
   if (!arr.isReferenced()) {
-    f_extract(result);
+    HHVM_FN(extract)(result);
     return;
   }
   arr = result;

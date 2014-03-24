@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/pdo_driver.h"
 #include "hphp/runtime/ext/pdo_sqlite.h"
 #include "hphp/runtime/ext/pdo_mysql.h"
-#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ void PDOConnection::sweep() {
 }
 
 void PDOConnection::persistentSave() {
-  String serialized = f_serialize(def_stmt_ctor_args);
+  String serialized = HHVM_FN(serialize)(def_stmt_ctor_args);
   serialized_def_stmt_ctor_args = std::string(serialized.data(),
     serialized.size());
   def_stmt_ctor_args.releaseForSweep(); // we're called from requestShutdown

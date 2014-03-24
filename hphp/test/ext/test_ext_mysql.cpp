@@ -17,6 +17,7 @@
 #include "hphp/test/ext/test_ext_mysql.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/test/ext/test_mysql_info.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "errmsg.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -318,7 +319,7 @@ bool TestExtMysql::test_mysql_query() {
 
   Variant res = f_mysql_query("select * from test");
   Variant row = f_mysql_fetch_assoc(res);
-  VS(f_print_r(row, true),
+  VS(HHVM_FN(print_r)(row, true),
      "Array\n"
      "(\n"
      "    [id] => 1\n"
@@ -326,7 +327,7 @@ bool TestExtMysql::test_mysql_query() {
      ")\n");
 
   row = f_mysql_fetch_assoc(res);
-  VS(f_print_r(row, true),
+  VS(HHVM_FN(print_r)(row, true),
      "Array\n"
      "(\n"
      "    [id] => 2\n"
@@ -345,7 +346,7 @@ bool TestExtMysql::test_mysql_unbuffered_query() {
 
   Variant res = f_mysql_unbuffered_query("select * from test");
   Variant row = f_mysql_fetch_assoc(res);
-  VS(f_print_r(row, true),
+  VS(HHVM_FN(print_r)(row, true),
      "Array\n"
      "(\n"
      "    [id] => 1\n"
@@ -353,7 +354,7 @@ bool TestExtMysql::test_mysql_unbuffered_query() {
      ")\n");
 
   row = f_mysql_fetch_assoc(res);
-  VS(f_print_r(row, true),
+  VS(HHVM_FN(print_r)(row, true),
      "Array\n"
      "(\n"
      "    [id] => 2\n"
@@ -469,7 +470,7 @@ bool TestExtMysql::test_mysql_data_seek() {
   Variant res = f_mysql_query("select * from test");
   f_mysql_data_seek(res, 1);
   Variant row = f_mysql_fetch_assoc(res);
-  VS(f_print_r(row, true),
+  VS(HHVM_FN(print_r)(row, true),
      "Array\n"
      "(\n"
      "    [id] => 2\n"
@@ -486,7 +487,7 @@ bool TestExtMysql::test_mysql_fetch_row() {
 
   Variant res = f_mysql_query("select * from test");
   Variant row = f_mysql_fetch_row(res);
-  VS(f_print_r(row, true),
+  VS(HHVM_FN(print_r)(row, true),
      "Array\n"
      "(\n"
      "    [0] => 1\n"
@@ -502,7 +503,7 @@ bool TestExtMysql::test_mysql_fetch_assoc() {
 
   Variant res = f_mysql_query("select * from test");
   Variant row = f_mysql_fetch_assoc(res);
-  VS(f_print_r(row, true),
+  VS(HHVM_FN(print_r)(row, true),
      "Array\n"
      "(\n"
      "    [id] => 1\n"
@@ -518,7 +519,7 @@ bool TestExtMysql::test_mysql_fetch_array() {
 
   Variant res = f_mysql_query("select * from test");
   Variant row = f_mysql_fetch_array(res);
-  VS(f_print_r(row, true),
+  VS(HHVM_FN(print_r)(row, true),
      "Array\n"
      "(\n"
      "    [0] => 1\n"
@@ -537,7 +538,7 @@ bool TestExtMysql::test_mysql_fetch_lengths() {
   Variant res = f_mysql_query("select * from test");
   Variant row = f_mysql_fetch_row(res);
   Variant lengths = f_mysql_fetch_lengths(res);
-  VS(f_print_r(lengths, true),
+  VS(HHVM_FN(print_r)(lengths, true),
      "Array\n"
      "(\n"
      "    [0] => 1\n"
@@ -556,7 +557,7 @@ bool TestExtMysql::test_mysql_fetch_lengths() {
   res = f_mysql_query("select * from testlen");
   row = f_mysql_fetch_row(res);
   lengths = f_mysql_fetch_lengths(res);
-  VS(f_print_r(lengths, true),
+  VS(HHVM_FN(print_r)(lengths, true),
      "Array\n"
      "(\n"
      "    [0] => 1\n"

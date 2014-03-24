@@ -32,7 +32,7 @@
 #include "hphp/runtime/base/zend-string.h"
 
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/system/systemlib.h"

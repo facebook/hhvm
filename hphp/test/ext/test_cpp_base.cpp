@@ -19,7 +19,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/base/shared-store-base.h"
@@ -479,7 +479,7 @@ bool TestCppBase::TestObject() {
     VERIFY(v.isObject());
     auto o = v.toObject();
     VS(o->o_getClassName(), "__PHP_Incomplete_Class");
-    auto os = f_serialize(o);
+    auto os = HHVM_FN(serialize)(o);
     VS(os, "O:1:\"B\":1:{s:3:\"obj\";O:1:\"A\":1:{s:1:\"a\";i:10;}}");
   }
   return Count(true);

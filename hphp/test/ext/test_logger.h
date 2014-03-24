@@ -18,7 +18,6 @@
 #define incl_HPHP_TEST_LOGGER_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/ext_variable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -25,8 +25,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
 
-#include "hphp/runtime/ext/ext_variable.h"
-
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/disas.h"
@@ -2232,7 +2231,7 @@ Id UnitEmitter::mergeLitstr(const StringData* litstr) {
 
 Id UnitEmitter::mergeArray(const ArrayData* a) {
   Variant v(const_cast<ArrayData*>(a));
-  auto key = f_serialize(v).toCppString();
+  auto key = HHVM_FN(serialize)(v).toCppString();
   return mergeArray(a, key);
 }
 

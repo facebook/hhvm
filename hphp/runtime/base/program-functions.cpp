@@ -127,6 +127,7 @@ struct ProgramOptions {
   int        xhprofFlags;
   string     show;
   string     parse;
+  string     program;
 
   Eval::DebuggerClientOptions debugger_options;
 };
@@ -1059,6 +1060,8 @@ static int execute_program_impl(int argc, char** argv) {
      "run server under this user account")
     ("file,f", value<string>(&po.file),
      "executing specified file")
+    ("run,r", value<string>(&po.program), "run PHP code without using script"
+     "tags")
     ("lint,l", value<string>(&po.lint),
      "lint specified file")
     ("show,w", value<string>(&po.show),
@@ -1194,6 +1197,24 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   po.isTempFile = vm.count("temp-file");
+
+  // "hhvm -r": run PHP code from the command line without script tags.
+  if (!po.program.empty()) {
+    // Write the contents of the argument to "-r" to a temp file.
+    char tmp[] = "/tmp/php-wrap-XXXXXX";
+    int tmp_fd = mkstemp(tmp);
+    if (tmp_fd == -1) {
+      std::cerr << "Error: unable to open temporary file\n";
+      return 1;
+    }
+    write(tmp_fd, "<?\n", 3);
+    write(tmp_fd, po.program.c_str(), po.program.length());
+    close(tmp_fd);
+
+    // Set the file argument to the path of the temp file.
+    po.isTempFile = 1;
+    po.file = string(tmp);
+  }
 
   // forget the source for systemlib.php unless we are debugging
   if (po.mode != "debug") SystemLib::s_source = "";

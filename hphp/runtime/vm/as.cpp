@@ -597,7 +597,7 @@ struct AsmState : private boost::noncopyable {
     FPIReg& fpi = fpiRegs.back();
     fpi.fpushOff = fpushOff;
     fpi.stackDepth = currentStackDepth;
-    fpi.fpOff = currentStackDepth->currentOffset + fdescDepth;
+    fpi.fpOff = currentStackDepth->currentOffset;
     fdescDepth += kNumActRecCells;
     fdescHighWater = std::max(fdescDepth, fdescHighWater);
   }

@@ -1,0 +1,23 @@
+array(1) {
+  ["content_queries"]=>
+  array(1) {
+    ["content_113300831086270200"]=>
+    array(1) {
+      [113301888545229100]=>
+      array(3) {
+        ["max"]=>
+        int(10)
+        ["cache"]=>
+        int(4)
+        ["order"]=>
+        array(1) {
+          ["content_113300831086270200"]=>
+          array(1) {
+            ["CMS_BUILD"]=>
+            string(4) "desc"
+          }
+        }
+      }
+    }
+  }
+}

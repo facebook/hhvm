@@ -656,7 +656,7 @@ a web server, hence eliminating a lot of setups.
     SandboxMode = false
     Pattern = www.[user]-[sandbox].[machine].facebook.com
     Home = /home
-    ConfFile = ~/.hphp
+    ConfFile = ~/.hhvm.hdf
 
     ServerVariables {
       name = value

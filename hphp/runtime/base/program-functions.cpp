@@ -59,10 +59,12 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/debug/debug.h"
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
+
 #include <libgen.h>
 #include <oniguruma.h>
 #include <signal.h>
@@ -1202,11 +1204,15 @@ static int execute_program_impl(int argc, char** argv) {
 
   Hdf config;
   for (auto& c : po.config) {
-    config.append(c);
+    if (boost::ends_with(c, ".hdf")) {
+      config.append(c);
+    }
   }
   RuntimeOption::Load(config, &po.confStrings);
   for (auto& c : po.config) {
-    process_ini_settings(c);
+    if (!boost::ends_with(c, ".hdf")) {
+      process_ini_settings(c);
+    }
   }
 
   vector<string> badnodes;

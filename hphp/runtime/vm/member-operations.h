@@ -143,6 +143,8 @@ void objOffsetSet(ObjectData* base, const Variant& offset, TypedValue* val,
 void objOffsetAppend(ObjectData* base, TypedValue* val, bool validate=true);
 void objOffsetUnset(ObjectData* base, const Variant& offset);
 
+void throw_cannot_use_newelem_for_lval_read() ATTRIBUTE_NORETURN;
+
 // Post: base is a Cell*
 ALWAYS_INLINE void opPre(TypedValue*& base, DataType& type) {
   // Get inner variant if necessary.
@@ -432,7 +434,7 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
       raise_error("Collection elements cannot be taken by reference");
       return nullptr;
     }
-    return collectionAt(obj, &scratchKey);
+    return collectionAtLval(obj, &scratchKey);
   } else if (obj->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
     auto storage = obj->o_realProp(s_storage, 0,
                                    SystemLib::s_ArrayObjectClass->nameRef());
@@ -513,7 +515,7 @@ inline TypedValue* ElemUObject(TypedValue& tvRef, TypedValue* base,
                                key_type<keyType> key) {
   auto const& scratchKey = initScratchKey(key);
   if (LIKELY(base->m_data.pobj->isCollection())) {
-    return collectionAt(base->m_data.pobj, &scratchKey);
+    return collectionAtLval(base->m_data.pobj, &scratchKey);
   }
   return objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(scratchKey));
 }
@@ -604,8 +606,8 @@ inline TypedValue* NewElemArray(TypedValue* base) {
  * NewElem when base is an Object
  */
 inline TypedValue* NewElemObject(TypedValue& tvRef, TypedValue* base) {
-  if (LIKELY(base->m_data.pobj->isCollection())) {
-    raise_error("Cannot use [] for reading");
+  if (base->m_data.pobj->isCollection()) {
+    throw_cannot_use_newelem_for_lval_read();
     return nullptr;
   }
   return objOffsetGet(tvRef, instanceFromTv(base), init_null_variant);
@@ -1129,7 +1131,7 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   case KindOfObject: {
     if (LIKELY(base->m_data.pobj->isCollection())) {
-      result = collectionAt(base->m_data.pobj, &key);
+      result = collectionAtRw(base->m_data.pobj, &key);
       SETOP_BODY(result, op, rhs);
     } else {
       result = objOffsetGet(tvRef, instanceFromTv(base),
@@ -1198,8 +1200,8 @@ inline TypedValue* SetOpNewElem(TypedValue& tvScratch, TypedValue& tvRef,
     break;
   }
   case KindOfObject: {
-    if (LIKELY(base->m_data.pobj->isCollection())) {
-      raise_error("Cannot use [] for reading");
+    if (base->m_data.pobj->isCollection()) {
+      throw_cannot_use_newelem_for_lval_read();
       result = nullptr;
     } else {
       result = objOffsetGet(tvRef, instanceFromTv(base), init_null_variant);
@@ -1392,7 +1394,7 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfObject: {
     TypedValue* result;
     if (LIKELY(base->m_data.pobj->isCollection())) {
-      result = collectionAt(base->m_data.pobj, &key);
+      result = collectionAtRw(base->m_data.pobj, &key);
     } else {
       result = objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(key));
     }
@@ -1458,8 +1460,8 @@ inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
   }
   case KindOfObject: {
     TypedValue* result;
-    if (LIKELY(base->m_data.pobj->isCollection())) {
-      raise_error("Cannot use [] for reading");
+    if (base->m_data.pobj->isCollection()) {
+      throw_cannot_use_newelem_for_lval_read();
       result = nullptr;
     } else {
       result = objOffsetGet(tvRef, instanceFromTv(base), init_null_variant);

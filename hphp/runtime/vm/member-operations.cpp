@@ -119,5 +119,15 @@ void objOffsetUnset(ObjectData* base, const Variant& offset) {
   tvRefcountedDecRef(&tv);
 }
 
+// Mutable collections support appending new elements using [] without a key
+// like so: "$vector[] = 123;". However, collections do not support using []
+// without a key to implicitly create a new element without supplying assigning
+// an initial value (ex "$vector[]['a'] = 73;").
+void throw_cannot_use_newelem_for_lval_read() {
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(
+    "Cannot use [] with collections for reading in an lvalue context"));
+  throw e;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

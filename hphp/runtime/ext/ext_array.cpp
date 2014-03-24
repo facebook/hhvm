@@ -282,7 +282,7 @@ bool f_array_key_exists(const Variant& key, const Variant& search) {
   } else if (searchCell->m_type == KindOfObject) {
     ObjectData* obj = searchCell->m_data.pobj;
     if (obj->isCollection()) {
-      return collectionOffsetContains(obj, key);
+      return collectionContains(obj, key);
     }
     return f_array_key_exists(key, toArray(search));
   } else {

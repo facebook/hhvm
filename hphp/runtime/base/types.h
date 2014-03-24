@@ -155,6 +155,9 @@ inline bool isMutableType(Collection::Type ctype) {
           ctype == Collection::MapType ||
           ctype == Collection::SetType);
 }
+inline bool isImmutableType(Collection::Type ctype) {
+  return !isMutableType(ctype);
+}
 
 }
 

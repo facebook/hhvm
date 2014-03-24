@@ -15,7 +15,7 @@ object(HH\Vector)#3 (2) {
   string(3) "one"
 }
 string(30) "Integer key 2 is out of bounds"
-string(37) "Cannot assign to an element of a Pair"
+string(46) "Cannot modify immutable object of type HH\Pair"
 object(HH\Pair)#5 (2) {
   [0]=>
   string(4) "zero"

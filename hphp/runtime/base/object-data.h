@@ -206,6 +206,10 @@ class ObjectData {
     return Collection::isMutableType(getCollectionType());
   }
 
+  bool isImmutableCollection() const {
+    return Collection::isImmutableType(getCollectionType());
+  }
+
   Collection::Type getCollectionType() const {
     return isCollection() ? static_cast<Collection::Type>(o_subclassData.u16)
                           : Collection::Type::InvalidType;

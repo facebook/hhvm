@@ -109,7 +109,7 @@ ArrayIter getArrayIterHelper(const Variant& v, size_t& sz) {
 }
 
 void triggerCow(c_Vector* vec) {
-  assert(!vec->m_immCopy.isNull()); // Should've been checked by the JIT.
+  assert(vec->hasImmutableBuffer()); // Should've been checked by the JIT.
   vec->mutate();
 }
 
@@ -646,7 +646,7 @@ Variant BaseVector::popFront() {
     memmove(m_data, m_data+1, m_size * sizeof(TypedValue));
     return ret;
   } else {
-    Object e(SystemLib::AllocRuntimeExceptionObject(
+    Object e(SystemLib::AllocInvalidOperationExceptionObject(
       "Cannot pop empty Vector"));
     throw e;
   }
@@ -676,7 +676,8 @@ BaseVector::BaseVector(Class* cls)
  * if it exists.
  */
 BaseVector::~BaseVector() {
-  if (m_immCopy.isNull() && m_data) {
+  if (!hasImmutableBuffer() && m_data) {
+    assert(m_immCopy.isNull());
     for (uint i = 0; i < m_size; ++i) {
       tvRefcountedDecRef(&m_data[i]);
     }
@@ -708,7 +709,7 @@ void BaseVector::init(const Variant& t) {
 }
 
 void BaseVector::cow() {
-  assert(!m_immCopy.isNull());
+  assert(hasImmutableBuffer());
   if (!m_size) {
     m_data = nullptr;
     m_capacity = 0;
@@ -801,7 +802,7 @@ Variant c_Vector::t_pop() {
     tvRefcountedDecRef(&m_data[m_size]);
     return ret;
   } else {
-    Object e(SystemLib::AllocRuntimeExceptionObject(
+    Object e(SystemLib::AllocInvalidOperationExceptionObject(
       "Cannot pop empty Vector"));
     throw e;
   }
@@ -965,7 +966,7 @@ void c_Vector::t_splice(const Variant& offset, const Variant& len /* = null */,
     throw e;
   }
   if (!replacement.isNull()) {
-    Object e(SystemLib::AllocRuntimeExceptionObject(
+    Object e(SystemLib::AllocInvalidOperationExceptionObject(
       "Vector::splice does not support replacement parameter"));
     throw e;
   }
@@ -1271,7 +1272,8 @@ void c_Vector::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 // This function will create a immutable copy of this Vector (if it doesn't
 // already exist) and then return it
 Object c_Vector::getImmutableCopy() {
-  if (m_immCopy.isNull()) {
+  if (!hasImmutableBuffer()) {
+    assert(m_immCopy.isNull());
     auto* vec = NEWOBJ(c_ImmVector)();
     m_immCopy = vec;
     vec->m_data = m_data;
@@ -2628,7 +2630,7 @@ Variant BaseMap::pop() {
     erase(ei);
     return ret;
   } else {
-    Object e(SystemLib::AllocRuntimeExceptionObject(
+    Object e(SystemLib::AllocInvalidOperationExceptionObject(
       "Cannot pop empty Map"));
     throw e;
   }
@@ -2653,7 +2655,7 @@ Variant BaseMap::popFront() {
     erase(ei);
     return ret;
   } else {
-    Object e(SystemLib::AllocRuntimeExceptionObject(
+    Object e(SystemLib::AllocInvalidOperationExceptionObject(
       "Cannot pop empty Map"));
     throw e;
   }
@@ -3589,7 +3591,7 @@ Variant BaseSet::pop() {
     erase(ei);
     return ret;
   } else {
-    Object e(SystemLib::AllocRuntimeExceptionObject(
+    Object e(SystemLib::AllocInvalidOperationExceptionObject(
       "Cannot pop empty Set"));
     throw e;
   }
@@ -3614,7 +3616,7 @@ Variant BaseSet::popFront() {
     erase(ei);
     return ret;
   } else {
-    Object e(SystemLib::AllocRuntimeExceptionObject(
+    Object e(SystemLib::AllocInvalidOperationExceptionObject(
       "Cannot pop empty Set"));
     throw e;
   }
@@ -3629,7 +3631,7 @@ void BaseSet::throwOOB(StringData* val) {
 }
 
 void BaseSet::throwNoIndexAccess() {
-  Object e(SystemLib::AllocRuntimeExceptionObject(
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(
     "[] operator not supported for accessing elements of Sets"));
   throw e;
 }
@@ -3739,31 +3741,6 @@ Array BaseSet::ToArray(const ObjectData* obj) {
 
 bool BaseSet::ToBool(const ObjectData* obj) {
   return static_cast<const BaseSet*>(obj)->toBoolImpl();
-}
-
-TypedValue* BaseSet::OffsetAt(ObjectData* obj, const TypedValue* key) {
-  BaseSet::throwNoIndexAccess();
-}
-
-void BaseSet::OffsetSet(ObjectData* obj, const TypedValue* key,
-                        TypedValue* val) {
-  BaseSet::throwNoIndexAccess();
-}
-
-bool BaseSet::OffsetIsset(ObjectData* obj, TypedValue* key) {
-  BaseSet::throwNoIndexAccess();
-}
-
-bool BaseSet::OffsetEmpty(ObjectData* obj, TypedValue* key) {
-  BaseSet::throwNoIndexAccess();
-}
-
-bool BaseSet::OffsetContains(ObjectData* obj, TypedValue* key) {
-  BaseSet::throwNoIndexAccess();
-}
-
-void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
-  BaseSet::throwNoIndexAccess();
 }
 
 bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
@@ -4869,7 +4846,7 @@ c_Pair::~c_Pair() {
 }
 
 void c_Pair::t___construct() {
-  Object e(SystemLib::AllocRuntimeExceptionObject(
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(
     "Pairs cannot be created using the new operator"));
   throw e;
 }
@@ -5228,14 +5205,6 @@ TypedValue* c_Pair::OffsetAt(ObjectData* obj, const TypedValue* key) {
   return nullptr;
 }
 
-void c_Pair::OffsetSet(ObjectData* obj, const TypedValue* key,
-                       TypedValue* val) {
-  assert(static_cast<c_Pair*>(obj)->isFullyConstructed());
-  Object e(SystemLib::AllocRuntimeExceptionObject(
-    "Cannot assign to an element of a Pair"));
-  throw e;
-}
-
 bool c_Pair::OffsetIsset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto pair = static_cast<c_Pair*>(obj);
@@ -5274,13 +5243,6 @@ bool c_Pair::OffsetContains(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     return false;
   }
-}
-
-void c_Pair::OffsetUnset(ObjectData* obj, const TypedValue* key) {
-  assert(static_cast<c_Pair*>(obj)->isFullyConstructed());
-  Object e(SystemLib::AllocRuntimeExceptionObject(
-    "Cannot unset an element of a Pair"));
-  throw e;
 }
 
 bool c_Pair::Equals(const ObjectData* obj1, const ObjectData* obj2) {
@@ -5584,57 +5546,6 @@ enum class ErrMsgType {
   OnlyIntKeys,
 };
 
-/**
- * Construct the error message given its type and a collection name.
- */
-static std::string getErrMsg(ErrMsgType errType, const std::string& colName) {
-  std::string msgBody;
-
-  switch (errType) {
-  case ErrMsgType::CannotAssign:
-    msgBody = "Cannot assign to an element of a";
-    break;
-  case ErrMsgType::CannotUnset:
-    msgBody = "Cannot unset an element of a";
-    break;
-  case ErrMsgType::CannotAdd:
-    msgBody = "Cannot add an element to a";
-    break;
-  case ErrMsgType::OnlyIntKeys:
-    msgBody = "Only integer keys may be used with";
-    break;
-  default:
-    assert(false);
-  }
-
-  return msgBody + " " + colName;
-}
-
-/**
- * Throws an exception of the given type.
- */
-static void collectionThrowHelper(ErrMsgType errType,
-    const std::string& colName) {
-
-  std::function<ObjectData*(std::string)> excAlloc = nullptr;
-
-  switch (errType) {
-  case ErrMsgType::CannotAssign:
-  case ErrMsgType::CannotUnset:
-  case ErrMsgType::CannotAdd:
-    excAlloc = SystemLib::AllocRuntimeExceptionObject;
-    break;
-  case ErrMsgType::OnlyIntKeys:
-    excAlloc = SystemLib::AllocInvalidArgumentExceptionObject;
-    break;
-  default:
-    assert(false);
-  }
-
-  Object exc = excAlloc(getErrMsg(errType, colName));
-  throw exc;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 template <bool throwOnMiss>
@@ -5650,7 +5561,7 @@ static inline TypedValue* collectionAtImpl(ObjectData* obj,
       return BaseMap::OffsetAt<throwOnMiss>(obj, key);
     case Collection::SetType:
     case Collection::ImmSetType:
-      return BaseSet::OffsetAt(obj, key);
+      BaseSet::throwNoIndexAccess();
     case Collection::PairType:
       return c_Pair::OffsetAt<throwOnMiss>(obj, key);
     case Collection::InvalidType:
@@ -5660,12 +5571,107 @@ static inline TypedValue* collectionAtImpl(ObjectData* obj,
   return nullptr;
 }
 
+// collectionAt() is used to get the address of an element for reading only.
+// Throws an exception if the element is not present.
 TypedValue* collectionAt(ObjectData* obj, const TypedValue* key) {
   return collectionAtImpl<true>(obj, key);
 }
 
+// collectionGet() is used to get the address of an element for reading
+// only. Returns nullptr if the element is not present.
 TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
   return collectionAtImpl<false>(obj, key);
+}
+
+// collectionAtLval() is used to get the address of an element when the
+// caller is NOT going to do direct write per se, but it intends to use
+// the element as the base of a member operation in an "lvalue" context
+// (which could mutate the element in various ways).
+TypedValue* collectionAtLval(ObjectData* obj, const TypedValue* key) {
+  assert(key->m_type != KindOfRef);
+  TypedValue* ret;
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType: {
+      ret = BaseVector::OffsetAt<true>(obj, key);
+      // We're about to expose an element of a Vector in an lvalue context;
+      // if the element is a value-type (anything other than objects and
+      // resources) we need to sever any buffer sharing that might be going on
+      auto* vec = static_cast<c_Vector*>(obj);
+      if (UNLIKELY(vec->hasImmutableBuffer() &&
+                   ret->m_type != KindOfObject &&
+                   ret->m_type != KindOfResource)) {
+        vec->mutate();
+        ret = BaseVector::OffsetAt<true>(obj, key);
+      }
+      return ret;
+    }
+    case Collection::ImmVectorType: {
+      ret = BaseVector::OffsetAt<true>(obj, key);
+      break;
+    }
+    case Collection::MapType:
+      return BaseMap::OffsetAt<true>(obj, key);
+    case Collection::ImmMapType: {
+      ret = BaseMap::OffsetAt<true>(obj, key);
+      break;
+    }
+    case Collection::SetType:
+    case Collection::ImmSetType:
+      BaseSet::throwNoIndexAccess();
+    case Collection::PairType: {
+      ret = c_Pair::OffsetAt<true>(obj, key);
+      if (ret->m_type != KindOfObject && ret->m_type != KindOfResource) {
+        warn_cannot_modify_immutable_object(obj->o_getClassName().data());
+      }
+      return ret;
+    }
+    case Collection::InvalidType:
+      assert(false);
+      break;
+  }
+  // Value-type elements (anything other than objects and resources) of
+  // an immutable collection "inherit" the collection's immutable status.
+  // We do not allow value-type elements of an immutable collection to
+  // be read in an "lvalue" context in order to prevent null->array
+  // promotion, null->stdClass promotion, and mutating strings or arrays
+  // in place (see "test/slow/collection_classes/invalid-operations.php"
+  // for examples).
+  if (ret->m_type != KindOfObject && ret->m_type != KindOfResource) {
+    throw_cannot_modify_immutable_object(obj->o_getClassName().data());
+  }
+  return ret;
+}
+
+// collectionAtRw() is used to get the address of an element for reading
+// and writing. It is typically used for read-modify-write operations (the
+// SetOp* and IncDec* instructions).
+TypedValue* collectionAtRw(ObjectData* obj, const TypedValue* key) {
+  assert(key->m_type != KindOfRef);
+  switch (obj->getCollectionType()) {
+    case Collection::VectorType:
+      // Since we're exposing an element of a Vector in an read/write context,
+      // we need to sever any buffer sharing that might be going on.
+      static_cast<c_Vector*>(obj)->mutate();
+      return BaseVector::OffsetAt<true>(obj, key);
+    case Collection::MapType:
+      return BaseMap::OffsetAt<true>(obj, key);
+    case Collection::SetType:
+    case Collection::ImmSetType:
+      BaseSet::throwNoIndexAccess();
+    case Collection::ImmVectorType:
+    case Collection::ImmMapType:
+      throw_cannot_modify_immutable_object(obj->o_getClassName().data());
+      break;
+    case Collection::PairType: {
+      auto* ret = c_Pair::OffsetAt<true>(obj, key);
+      warn_cannot_modify_immutable_object(obj->o_getClassName().data());
+      return ret;
+    }
+    case Collection::InvalidType:
+      break;
+  }
+  assert(false);
+  return nullptr;
 }
 
 void collectionInitSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
@@ -5691,22 +5697,16 @@ void collectionSet(ObjectData* obj, const TypedValue* key, TypedValue* val) {
       break;
     case Collection::SetType:
     case Collection::ImmSetType:
-      BaseSet::OffsetSet(obj, key, val);
-      break;
-    case Collection::PairType:
-      c_Pair::OffsetSet(obj, key, val);
-      break;
+      BaseSet::throwNoIndexAccess();
     case Collection::ImmVectorType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "ImmVector");
-      break;
     case Collection::ImmMapType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "ImmMap");
+    case Collection::PairType:
+      throw_cannot_modify_immutable_object(obj->o_getClassName().data());
       break;
     case Collection::InvalidType:
       assert(false);
   }
 }
-
 
 bool collectionIsset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
@@ -5719,7 +5719,7 @@ bool collectionIsset(ObjectData* obj, TypedValue* key) {
       return BaseMap::OffsetIsset(obj, key);
     case Collection::SetType:
     case Collection::ImmSetType:
-      return BaseSet::OffsetIsset(obj, key);
+      BaseSet::throwNoIndexAccess();
     case Collection::PairType:
       return c_Pair::OffsetIsset(obj, key);
     case Collection::InvalidType:
@@ -5740,7 +5740,7 @@ bool collectionEmpty(ObjectData* obj, TypedValue* key) {
       return BaseMap::OffsetEmpty(obj, key);
     case Collection::SetType:
     case Collection::ImmSetType:
-      return BaseSet::OffsetEmpty(obj, key);
+      BaseSet::throwNoIndexAccess();
     case Collection::PairType:
       return c_Pair::OffsetEmpty(obj, key);
     case Collection::InvalidType:
@@ -5760,19 +5760,12 @@ void collectionUnset(ObjectData* obj, const TypedValue* key) {
       c_Map::OffsetUnset(obj, key);
       break;
     case Collection::SetType:
-      c_Set::OffsetUnset(obj, key);
-      break;
-    case Collection::PairType:
-      c_Pair::OffsetUnset(obj, key);
-      break;
-    case Collection::ImmVectorType:
-      collectionThrowHelper(ErrMsgType::CannotUnset, "ImmVector");
-      break;
-    case Collection::ImmMapType:
-      collectionThrowHelper(ErrMsgType::CannotUnset, "ImmMap");
-      break;
     case Collection::ImmSetType:
-      collectionThrowHelper(ErrMsgType::CannotUnset, "ImmSet");
+      BaseSet::throwNoIndexAccess();
+    case Collection::ImmVectorType:
+    case Collection::ImmMapType:
+    case Collection::PairType:
+      throw_cannot_modify_immutable_object(obj->o_getClassName().data());
       break;
     case Collection::InvalidType:
       assert(false);
@@ -5794,18 +5787,11 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
     case Collection::SetType:
       static_cast<c_Set*>(obj)->add(val);
       break;
-    case Collection::PairType:
-      assert(static_cast<c_Pair*>(obj)->isFullyConstructed());
-      collectionThrowHelper(ErrMsgType::CannotAdd, "Pair");
-      break;
     case Collection::ImmVectorType:
-      collectionThrowHelper(ErrMsgType::CannotAdd, "ImmVector");
-      break;
     case Collection::ImmMapType:
-      collectionThrowHelper(ErrMsgType::CannotAdd, "ImmMap");
-      break;
     case Collection::ImmSetType:
-      collectionThrowHelper(ErrMsgType::CannotAdd, "ImmSet");
+    case Collection::PairType:
+      throw_cannot_modify_immutable_object(obj->o_getClassName().data());
       break;
     case Collection::InvalidType:
       assert(false);
@@ -5836,182 +5822,7 @@ void collectionInitAppend(ObjectData* obj, TypedValue* val) {
   }
 }
 
-template <bool throwOnMiss>
-static inline Variant& collectionOffsetAtImpl(ObjectData* obj, int64_t offset) {
-  TypedValue* res;
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-    case Collection::ImmVectorType:
-      res = throwOnMiss ? static_cast<BaseVector*>(obj)->at(offset)
-                        : static_cast<BaseVector*>(obj)->get(offset);
-      break;
-    case Collection::MapType:
-    case Collection::ImmMapType:
-      res = throwOnMiss ? static_cast<BaseMap*>(obj)->at(offset)
-                        : static_cast<BaseMap*>(obj)->get(offset);
-      break;
-    case Collection::SetType:
-    case Collection::ImmSetType:
-      BaseSet::throwNoIndexAccess();
-      res = nullptr;
-      break;
-    case Collection::PairType:
-      res = throwOnMiss ? static_cast<c_Pair*>(obj)->at(offset)
-                        : static_cast<c_Pair*>(obj)->get(offset);
-      break;
-    case Collection::InvalidType:
-      assert(false);
-      res = nullptr;
-      break;
-  }
-  if (!throwOnMiss && !res) {
-    res = (TypedValue*)(&init_null_variant);
-  }
-  return tvAsVariant(res);
-}
-
-Variant& collectionOffsetAt(ObjectData* obj, int64_t offset) {
-  return collectionOffsetAtImpl<true>(obj, offset);
-}
-
-Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
-  return collectionOffsetAtImpl<false>(obj, offset);
-}
-
-template <bool throwOnMiss>
-static inline Variant& collectionOffsetAtImpl(ObjectData* obj,
-                                              const String& offset) {
-  TypedValue* res;
-  StringData* key = offset.get();
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Vectors");
-      res = nullptr;
-      break;
-    case Collection::MapType:
-    case Collection::ImmMapType:
-      res = throwOnMiss ? static_cast<BaseMap*>(obj)->at(key)
-                        : static_cast<BaseMap*>(obj)->get(key);
-      break;
-    case Collection::SetType:
-    case Collection::ImmSetType:
-      BaseSet::throwNoIndexAccess();
-      res = nullptr;
-      break;
-    case Collection::PairType:
-      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Pairs");
-      res = nullptr;
-      break;
-    case Collection::ImmVectorType:
-      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "ImmVectors");
-      res = nullptr;
-      break;
-    case Collection::InvalidType:
-      assert(false);
-      res = nullptr;
-      break;
-  }
-  if (!throwOnMiss && !res) {
-    res = (TypedValue*)(&init_null_variant);
-  }
-  return tvAsVariant(res);
-}
-
-Variant& collectionOffsetAt(ObjectData* obj, const String& offset) {
-  return collectionOffsetAtImpl<true>(obj, offset);
-}
-
-Variant& collectionOffsetGet(ObjectData* obj, const String& offset) {
-  return collectionOffsetAtImpl<false>(obj, offset);
-}
-
-Variant& collectionOffsetAt(ObjectData* obj, const Variant& offset) {
-  TypedValue* key = cvarToCell(&offset);
-  return tvAsVariant(collectionAt(obj, key));
-}
-
-Variant& collectionOffsetGet(ObjectData* obj, const Variant& offset) {
-  TypedValue* key = cvarToCell(&offset);
-  auto* res = collectionGet(obj, key);
-  if (!res) {
-    res = (TypedValue*)(&init_null_variant);
-  }
-  return tvAsVariant(res);
-}
-
-void collectionOffsetSet(ObjectData* obj, int64_t offset, const Variant& val) {
-  TypedValue* tv = cvarToCell(&val);
-  if (UNLIKELY(tv->m_type == KindOfUninit)) {
-    tv = (TypedValue*)(&init_null_variant);
-  }
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      static_cast<c_Vector*>(obj)->set(offset, tv);
-      break;
-    case Collection::MapType:
-      static_cast<c_Map*>(obj)->set(offset, tv);
-      break;
-    case Collection::SetType:
-    case Collection::ImmSetType:
-      BaseSet::throwNoIndexAccess();
-      break;
-    case Collection::PairType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "Pair");
-      break;
-    case Collection::ImmVectorType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "ImmVector");
-      break;
-    case Collection::ImmMapType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "ImmMap");
-      break;
-    case Collection::InvalidType:
-      assert(false);
-      break;
-  }
-}
-
-void collectionOffsetSet(ObjectData* obj, const String& offset, const Variant& val) {
-  StringData* key = offset.get();
-  TypedValue* tv = cvarToCell(&val);
-  if (UNLIKELY(tv->m_type == KindOfUninit)) {
-    tv = (TypedValue*)(&init_null_variant);
-  }
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Vectors");
-      break;
-    case Collection::MapType:
-      static_cast<c_Map*>(obj)->set(key, tv);
-      break;
-    case Collection::SetType:
-    case Collection::ImmSetType:
-      BaseSet::throwNoIndexAccess();
-      break;
-    case Collection::PairType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "Pair");
-      break;
-    case Collection::ImmVectorType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "ImmVector");
-      break;
-    case Collection::ImmMapType:
-      collectionThrowHelper(ErrMsgType::CannotAssign, "ImmMap");
-      break;
-    case Collection::InvalidType:
-      assert(false);
-      break;
-  }
-}
-
-void collectionOffsetSet(ObjectData* obj, const Variant& offset, const Variant& val) {
-  TypedValue* key = cvarToCell(&offset);
-  TypedValue* tv = cvarToCell(&val);
-  if (UNLIKELY(tv->m_type == KindOfUninit)) {
-    tv = (TypedValue*)(&init_null_variant);
-  }
-  collectionSet(obj, key, tv);
-}
-
-bool collectionOffsetContains(ObjectData* obj, const Variant& offset) {
+bool collectionContains(ObjectData* obj, const Variant& offset) {
   TypedValue* key = cvarToCell(&offset);
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
@@ -6022,7 +5833,7 @@ bool collectionOffsetContains(ObjectData* obj, const Variant& offset) {
       return BaseMap::OffsetContains(obj, key);
     case Collection::SetType:
     case Collection::ImmSetType:
-      return BaseSet::OffsetContains(obj, key);
+      BaseSet::throwNoIndexAccess();
     case Collection::PairType:
       return c_Pair::OffsetContains(obj, key);
     case Collection::InvalidType:

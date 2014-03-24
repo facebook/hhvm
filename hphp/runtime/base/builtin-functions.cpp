@@ -533,7 +533,7 @@ void throw_collection_compare_exception() {
   static const string msg(
     "Cannot use relational comparison operators (<, <=, >, >=) to compare "
     "a collection with an integer, double, string, array, or object");
-  Object e(SystemLib::AllocRuntimeExceptionObject(msg));
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
   throw e;
 }
 
@@ -541,6 +541,24 @@ void throw_param_is_not_container() {
   static const string msg("Parameter must be an array or collection");
   Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
   throw e;
+}
+
+void throw_cannot_modify_immutable_object(const char* className) {
+  auto msg = folly::format(
+    "Cannot modify immutable object of type {}",
+    className
+  ).str();
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
+  throw e;
+}
+
+void warn_cannot_modify_immutable_object(const char* className) {
+  raise_warning(
+    folly::format(
+      "Cannot modify immutable object of type {}",
+      className
+    ).str()
+  );
 }
 
 void check_collection_compare(ObjectData* obj) {

@@ -1,0 +1,77 @@
+object(HH\ImmVector)#2 (1) {
+  [0]=>
+  int(1)
+}
+object(HH\ImmVector)#2 (1) {
+  [0]=>
+  int(1)
+}
+object(HH\ImmVector)#2 (1) {
+  [0]=>
+  NULL
+}
+object(HH\ImmVector)#2 (1) {
+  [0]=>
+  NULL
+}
+
+Warning: Creating default object from empty value in %s on line 33
+object(HH\ImmVector)#2 (1) {
+  [0]=>
+  NULL
+}
+object(HH\ImmVector)#2 (1) {
+  [0]=>
+  string(3) "foo"
+}
+object(HH\ImmVector)#2 (1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+object(HH\ImmVector)#2 (1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+object(HH\ImmVector)#2 (1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+object(HH\ImmVector)#3 (1) {
+  [0]=>
+  object(HH\Vector)#2 (1) {
+    [0]=>
+    int(2)
+  }
+}
+object(HH\ImmVector)#3 (1) {
+  [0]=>
+  object(HH\Vector)#2 (1) {
+    [0]=>
+    int(3)
+  }
+}
+object(HH\ImmVector)#3 (1) {
+  [0]=>
+  object(HH\Vector)#2 (2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+}
+object(HH\ImmVector)#3 (1) {
+  [0]=>
+  object(HH\Vector)#2 (1) {
+    [0]=>
+    int(2)
+  }
+}

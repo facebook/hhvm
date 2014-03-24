@@ -165,10 +165,9 @@ struct DataBlock {
         u.bytes[i] = bs[i];
       }
 
-      // If this address doesn't span cache lines, on x64 this is an
-      // atomic store.  We're not using atomic_release_store() because
-      // this code path occurs even when it may span cache lines, and
-      // that function asserts about this.
+      // If this address spans cache lines, on x64 this is not an atomic store.
+      // This being the case, use caution when overwriting code that is
+      // reachable by multiple threads: make sure it doesn't span cache lines.
       *reinterpret_cast<uint64_t*>(m_frontier) = u.qword;
     } else {
       memcpy(m_frontier, bs, n);

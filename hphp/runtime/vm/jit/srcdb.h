@@ -157,7 +157,7 @@ struct SrcRec {
    * lease.
    */
   TCA getTopTranslation() const {
-    return atomic_acquire_load(&m_topTranslation);
+    return m_topTranslation.load(std::memory_order_acquire);
   }
 
   /*
@@ -227,7 +227,7 @@ private:
   // This either points to the most recent translation in the
   // translations vector, or if hasDebuggerGuard() it points to the
   // debug guard.  Read/write with atomic primitives only.
-  TCA m_topTranslation;
+  std::atomic<TCA> m_topTranslation;
 
   /*
    * The following members are all protected by the translator write

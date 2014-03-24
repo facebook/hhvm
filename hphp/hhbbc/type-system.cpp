@@ -1200,12 +1200,22 @@ bool Type::checkInvariants() const {
     break;
   case DataTag::ArrPacked:
     assert(!m_data.apacked->elems.empty());
+    for (DEBUG_ONLY auto& v : m_data.apacked->elems) {
+      assert(v.subtypeOf(TInitGen));
+    }
     break;
   case DataTag::ArrStruct:
     assert(!m_data.astruct->map.empty());
+    for (DEBUG_ONLY auto& kv : m_data.astruct->map) {
+      assert(kv.second.subtypeOf(TInitGen));
+    }
     break;
   case DataTag::ArrPackedN:
+    assert(m_data.apackedn->type.subtypeOf(TInitGen));
+    break;
   case DataTag::ArrMapN:
+    assert(m_data.amapn->key.subtypeOf(TInitCell));
+    assert(m_data.amapn->val.subtypeOf(TInitGen));
     break;
   }
   return true;
@@ -2011,9 +2021,16 @@ Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
          "You probably don't want to put Ref types into arrays ...");
 
   auto ensure_counted = [&] {
-    arr.m_bits = combine_arr_bits(arr.m_bits, BCArr);
+    // TODO(#3696042): this same logic should be in loosen_statics.
+    if (arr.m_bits & BCArr) return;
+    if (arr.m_bits == BSArrN) {
+      arr.m_bits = combine_arr_bits(arr.m_bits, BCArrN);
+    } else if (arr.m_bits == BSArrE) {
+      arr.m_bits = combine_arr_bits(arr.m_bits, BCArrE);
+    } else {
+      arr.m_bits = combine_arr_bits(arr.m_bits, BCArr);
+    }
   };
-  auto set = [&] (Type& t) { if (t.subtypeOf(TInitCell)) t = val; };
 
   auto const key = disect_key(undisectedKey);
 
@@ -2060,7 +2077,10 @@ Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
     ensure_counted();
     if (key.i) {
       if (*key.i >= 0 && *key.i < arr.m_data.apacked->elems.size()) {
-        set(arr.m_data.apacked->elems[*key.i]);
+        auto& current = arr.m_data.apacked->elems[*key.i];
+        if (current.subtypeOf(TInitCell)) {
+          current = val;
+        }
         return arr;
       }
       if (*key.i == arr.m_data.apacked->elems.size()) {
@@ -2078,12 +2098,22 @@ Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
 
   case DataTag::ArrStruct:
     ensure_counted();
-    if (key.s) {
-      set(arr.m_data.astruct->map[*key.s]);
-      return arr;
+    {
+      auto& map = arr.m_data.astruct->map;
+      if (key.s) {
+        auto it = map.find(*key.s);
+        if (it == end(map)) {
+          map[*key.s] = val;
+        } else {
+          if (it->second.subtypeOf(TInitCell)) {
+            it->second = val;
+          }
+        }
+        return arr;
+      }
+      return arr_mapn(union_of(key.type, TSStr),
+                      union_of(struct_values(*arr.m_data.astruct), val));
     }
-    return arr_mapn(union_of(key.type, TSStr),
-                    union_of(struct_values(*arr.m_data.astruct), val));
 
   case DataTag::ArrMapN:
     ensure_counted();

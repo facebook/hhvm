@@ -45,6 +45,8 @@ struct FixedStringMap {
   const ExtraType& extra() const { return m_extra; }
 
   static ptrdiff_t tableOff() { return offsetof(FixedStringMap, m_table); }
+  ExtraType size() const { return m_extra; }
+
 private:
   struct Elm {
     LowStringPtr sd;
@@ -60,6 +62,81 @@ private:
   uint32_t  m_mask;
   ExtraType m_extra;  // not ours
   Elm*      m_table;
+};
+
+template<class T, class V, bool case_sensitive, class ExtraType = int32_t>
+struct FixedStringMapBuilder {
+  typedef typename boost::mpl::if_c<
+    case_sensitive,
+    string_data_same,
+    string_data_isame
+  >::type EqObject;
+  typedef hphp_hash_map<const StringData*,V,
+    string_data_hash,EqObject> Map;
+  typedef FixedStringMap<V, case_sensitive, ExtraType> FSMap;
+
+  typedef typename Map::const_iterator const_iterator;
+  typedef typename Map::iterator iterator;
+
+  iterator find(const StringData* key) { return m_map.find(key); }
+  iterator begin()                     { return m_map.begin(); }
+  iterator end()                       { return m_map.end(); }
+  V        size() const                { return m_list.size(); }
+
+  const_iterator find(const StringData* key) const {
+    return m_map.find(key);
+  }
+  const_iterator begin() const { return m_map.begin(); }
+  const_iterator end()   const { return m_map.end(); }
+
+  T& operator[](V idx) {
+    assert(idx >= 0);
+    assert(size_t(idx) < m_list.size());
+    return m_list[idx];
+  }
+
+  const T& operator[](V idx) const {
+    return (*const_cast<FixedStringMapBuilder*>(this))[idx];
+  }
+
+  /*
+   * Add an object to the position on the end, and allow lookup by
+   * `name'.
+   */
+  void add(const StringData* name, const T& t) {
+    if (m_list.size() >= size_t(std::numeric_limits<V>::max())) {
+      assert(false && "FixedStringMap::Builder overflowed");
+      abort();
+    }
+
+    m_map[name] = m_list.size();
+    m_list.push_back(t);
+  }
+
+  /*
+   * Adds objects that occupy indexes but can't be located by name.
+   */
+  void addUnnamed(const T& t) {
+    m_list.push_back(t);
+  }
+
+  /*
+   * Create a FixedStringMap from the builder.
+   */
+  void create(FSMap& map) {
+    map.extra() = size();
+    map.init(size(), 0);
+    if (!size()) {
+      return;
+    }
+    for (const_iterator it = begin(); it != end(); ++it) {
+      map.add(it->first, it->second);
+    }
+  }
+
+private:
+  std::vector<T> m_list;
+  Map m_map;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -438,6 +438,24 @@ typedef AtomicSmartPtr<Class> ClassPtr;
  * request context.
  *
  * See PreClass for more on the distinction.
+ *
+ * The method table is allocated at negative offset from the start
+ * of the Class object, and the method slot is used as the -ve offset
+ * from the object to index into the method table.
+ *
+ *                                 +------------+
+ * Func Slot n (offset -(n+1)) --> |            |
+ *                                      ....
+ *                                 |            |
+ *                                 +------------+
+ * Func Slot 1 (offset -2) -->     |            |
+ *                                 +------------+
+ * Func Slot 0 (offset -1) -->     |            |
+ * Class*     --------------->     +------------+
+ *                                 |            |
+ *                                     ....
+ *                                 |            |
+ *                                 +------------+
  */
 struct Class : AtomicCountable {
   enum class Avail {
@@ -518,10 +536,11 @@ struct Class : AtomicCountable {
   typedef std::vector<const Func*> InitVec;
   typedef std::vector<std::pair<LowStringPtr, LowStringPtr>> TraitAliasVec;
   typedef IndexedStringMap<LowClassPtr, true, int> InterfaceMap;
-  typedef IndexedStringMap<Func*, false, Slot> MethodMap;
+  typedef FixedStringMap<Slot, false, Slot> MethodMap;
+  typedef FixedStringMapBuilder<Func*, Slot, false, Slot> MethodMapBuilder;
 
   /* If set, runs during setMethods() */
-  static void (*MethodCreateHook)(Class* cls, MethodMap::Builder& builder);
+  static void (*MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
 
   /*
    * Allocate a new Class object.
@@ -530,6 +549,14 @@ struct Class : AtomicCountable {
    * some phase changes before that (see destroy().)
    */
   static Class* newClass(PreClass* preClass, Class* parent);
+
+  /*
+   * Load used traits of PreClass 'preClass', and append the trait Class*'s
+   * to 'usedTraits'. Returns an estimate of the method count of all used
+   * traits.
+   */
+  static unsigned loadUsedTraits(PreClass* preClass,
+                                 std::vector<ClassPtr>& usedTraits);
 
   /*
    * destroy() is called when a Class becomes unreachable. This may happen
@@ -616,17 +643,7 @@ struct Class : AtomicCountable {
     return m_preClass->parentStr();
   }
 
-  Func* const* methods() const { return m_methods.accessList(); }
   size_t numMethods() const { return m_methods.size(); }
-  typedef IterRange<Func*const*> MethodRange;
-  MethodRange methodRange() const {
-    return MethodRange(methods(), methods() + numMethods());
-  }
-  typedef IterRange<Func**> MutableMethodRange;
-  MutableMethodRange mutableMethodRange() {
-    return MutableMethodRange(m_methods.mutableAccessList(),
-                              m_methods.mutableAccessList() + m_methods.size());
-  }
   const SProp* staticProperties() const
     { return m_staticProperties.accessList(); }
   size_t numStaticProperties() const { return m_staticProperties.size(); }
@@ -702,8 +719,20 @@ struct Class : AtomicCountable {
   Slot traitsBeginIdx() const { return m_traitsBeginIdx; }
   Slot traitsEndIdx() const   { return m_traitsEndIdx; }
 
+  void setMethod(Slot idx, Func* func) {
+    Func** funcVec = (Func**)this;
+    funcVec[-((int32_t)idx + 1)] = func;
+  }
+
+  Func* getMethod(Slot idx) const {
+    Func** funcVec = (Func**)this;
+    return funcVec[-((int32_t)idx + 1)];
+  }
+
   Func* lookupMethod(const StringData* methName) const {
-    return m_methods.lookupDefault(methName, nullptr);
+    Slot* idx = m_methods.find(methName);
+    if (!idx) return nullptr;
+    return getMethod(*idx);
   }
 
   bool isPersistent() const { return m_attrCopy & AttrPersistent; }
@@ -833,6 +862,9 @@ struct Class : AtomicCountable {
   static ptrdiff_t invokeFuncOff() { return offsetof(Class, m_invoke); }
   static size_t instanceBitsOff() { return offsetof(Class, m_instanceBits); }
 
+  /* Return pointer to start of malloced memory for 'this' */
+  Func** mallocPtrFromThis() const;
+
   static hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
                        string_data_hash, string_data_isame> s_extClassHash;
 
@@ -866,7 +898,8 @@ private:
                         string_data_isame> MethodToTraitListMap;
 
 private:
-  Class(PreClass* preClass, Class* parent, unsigned classVecLen);
+  Class(PreClass* preClass, Class* parent, std::vector<ClassPtr>&& usedTraits,
+        unsigned classVecLen, unsigned funcVecLen);
   ~Class();
 
 private:
@@ -878,12 +911,12 @@ private:
 
   void importTraitMethod(const TraitMethod&  traitMethod,
                          const StringData*   methName,
-                         MethodMap::Builder& curMethodMap);
+                         MethodMapBuilder& curMethodMap);
   Class* findSingleTraitWithMethod(const StringData* methName);
   void setImportTraitMethodModifiers(TraitMethodList& methList,
                                      Class*           traitCls,
                                      Attr             modifiers);
-  void importTraitMethods(MethodMap::Builder& curMethodMap);
+  void importTraitMethods(MethodMapBuilder& curMethodMap);
   void addTraitPropInitializers(bool staticProps);
   void applyTraitRules(MethodToTraitListMap& importMethToTraitMap);
   void applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
@@ -923,7 +956,7 @@ private:
   void setInitializers();
   void setInterfaces();
   void setClassVec();
-  void setUsedTraits();
+  void setFuncVec(MethodMapBuilder& builder);
   void checkTraitConstraints() const;
   void checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
                                 const StringData* recName) const;
@@ -1010,6 +1043,7 @@ private:
   mutable RDS::Link<bool> m_sPropCacheInit{RDS::kInvalidHandle};
 
   unsigned m_classVecLen;
+  unsigned m_funcVecLen;
   /*
    * Each ObjectData is created with enough trailing space to directly store
    * the vector of declared properties. To look up a property by name and

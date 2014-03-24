@@ -2721,8 +2721,8 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
          */
         if (!(func->attrs() & AttrPrivate)) {
           SSATmp* clsTmp = gen(LdObjClass, obj);
-          SSATmp* funcTmp = gen(
-            LdClsMethod, clsTmp, cns(func->methodSlot())
+          auto funcTmp = gen(
+            LdClsMethod, clsTmp, cns(-(func->methodSlot() + 1))
           );
           if (res == LookupResult::MethodFoundNoThis) {
             gen(DecRef, obj);
@@ -2911,7 +2911,7 @@ void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
                                    cls,
                                    false);
     if (res == LookupResult::MethodFoundNoThis) {
-      auto const funcTmp = gen(LdClsMethod, clsVal, cns(func->methodSlot()));
+      auto funcTmp = gen(LdClsMethod, clsVal, cns(-(func->methodSlot() + 1)));
       emitFPushActRec(funcTmp, clsVal, numParams, nullptr);
       return;
     }

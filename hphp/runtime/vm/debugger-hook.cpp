@@ -216,7 +216,6 @@ static void addBreakPointsClass(Eval::DebuggerProxy* proxy, const Class* cls) {
   size_t numFuncs = cls->numMethods();
   if (numFuncs == 0) return;
   auto clsName = cls->name();
-  auto funcs = cls->methods();
   std::vector<Eval::BreakPointInfoPtr> bps;
   proxy->getBreakPoints(bps);
   for (unsigned int i = 0; i < bps.size(); i++) {
@@ -226,7 +225,7 @@ static void addBreakPointsClass(Eval::DebuggerProxy* proxy, const Class* cls) {
     if (bp->getClass() != clsName->data()) continue;
     bp->m_bindState = Eval::BreakPointInfo::KnownToBeInvalid;
     for (size_t i = 0; i < numFuncs; ++i) {
-      auto f = funcs[i];
+      auto f = cls->getMethod(i);
       if (!matchFunctionName(bp->getFunction(), f)) continue;
       bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
       addBreakPointFuncEntry(f);
@@ -311,9 +310,8 @@ void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
       size_t numFuncs = cls->numMethods();
       if (numFuncs == 0) continue;
       auto methodName = bp->getFunction();
-      Func* const* funcs = cls->methods();
       for (size_t i = 0; i < numFuncs; ++i) {
-        auto f = funcs[i];
+        auto f = cls->getMethod(i);
         if (!matchFunctionName(methodName, f)) continue;
         bp->m_bindState = Eval::BreakPointInfo::KnownToBeValid;
         addBreakPointFuncEntry(f);

@@ -322,7 +322,7 @@ void handleSlowPath(Entry* mce,
   if (UNLIKELY(cls->numMethods() <= mceValue->methodSlot())) {
     return lookup<fatal>(mce, ar, name, cls, ctx);
   }
-  auto const cand = cls->methods()[mceValue->methodSlot()];
+  auto const cand = cls->getMethod(mceValue->methodSlot());
 
   // If this class has the same func at the same method slot we're
   // good to go.  No need to recheck permissions, since we already

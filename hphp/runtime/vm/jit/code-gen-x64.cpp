@@ -4772,27 +4772,12 @@ void CodeGenerator::cgLdPropAddr(IRInstruction* inst) {
 void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
   auto dstReg = dstLoc(0).reg();
   auto clsReg = srcLoc(0).reg();
-  uint64_t mSlotInt64 = inst->src(1)->rawVal();
-
-  // We're going to multiply mSlotVal by sizeof(Func*) and use
-  // it as a 32-bit offset (methOff) below.
-  // TODO: #3626251 register allocator can handle large constants transparently,
-  // so if this instruction takes byte offsets, we're good to go.
-  if (mSlotInt64 > (std::numeric_limits<uint32_t>::max() / sizeof(Func*))) {
-    CG_PUNT(cgLdClsMethod_large_offset);
-  }
-  int32_t mSlotVal = (uint32_t) mSlotInt64;
+  int32_t mSlotVal = inst->src(1)->rawVal();
 
   assert(dstReg != InvalidReg);
 
-  if (clsReg == InvalidReg) {
-    CG_PUNT(LdClsMethod);
-  }
-
-  auto vecOff  = Class::getMethodsOffset() + Class::MethodMap::vecOff();
   auto methOff = int32_t(mSlotVal * sizeof(Func*));
-  m_as.loadq(clsReg[vecOff],  dstReg);
-  m_as.loadq(dstReg[methOff], dstReg);
+  m_as.loadq(clsReg[methOff],  dstReg);
 }
 
 void CodeGenerator::cgLookupClsMethodCache(IRInstruction* inst) {

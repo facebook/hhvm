@@ -244,30 +244,46 @@ void PreClass::setUserAttributes(const UserAttributeMap &ua) {
 //=============================================================================
 // Class.
 
-static_assert(sizeof(Class) == 384, "Change this only on purpose");
+static_assert(sizeof(Class) == 392, "Change this only on purpose");
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
-  auto const size = offsetof(Class, m_classVec) +
-                    sizeof(m_classVec[0]) * classVecLen;
+  auto  funcVecLen = (parent != nullptr ? parent->m_methods.size() : 0)
+                      + preClass->numMethods();
+
+  // In non-RepoAuthoritative mode, trait methods are not included
+  // in the method count, and they need to be estimated separately.
+  std::vector<ClassPtr> usedTraits;
+  if (!RuntimeOption::RepoAuthoritative) {
+    funcVecLen += loadUsedTraits(preClass, usedTraits);
+  }
+
+  auto const size = offsetof(Class, m_classVec)
+                    + sizeof(m_classVec[0]) * classVecLen
+                    + sizeof(Func*) * funcVecLen;
   auto const mem = low_malloc(size);
+  auto const classPtr = (void *)((uintptr_t)mem + funcVecLen * sizeof(Func*));
   try {
-    return new (mem) Class(preClass, parent, classVecLen);
+    return new (classPtr) Class(preClass, parent, std::move(usedTraits),
+                                classVecLen, funcVecLen);
   } catch (...) {
     low_free(mem);
     throw;
   }
 }
 
-void (*Class::MethodCreateHook)(Class* cls, MethodMap::Builder& builder);
+void (*Class::MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
 
-Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
-  : m_parent(parent)
+Class::Class(PreClass* preClass, Class* parent,
+             std::vector<ClassPtr>&& usedTraits, unsigned classVecLen,
+             unsigned funcVecLen)
+  : m_usedTraits(std::move(usedTraits))
+  , m_parent(parent)
   , m_preClass(PreClassPtr(preClass))
   , m_classVecLen(classVecLen)
+  , m_funcVecLen(funcVecLen)
 {
   setParent();
-  setUsedTraits();
   setMethods();
   setSpecial();
   setODAttributes();
@@ -290,9 +306,9 @@ Class::~Class() {
     free(m_sPropCache);
   }
 
-  auto methods = methodRange();
-  while (!methods.empty()) {
-    Func* meth = methods.popFront();
+  auto num = numMethods();
+  for (auto i = 0; i < num; i++) {
+    Func* meth = getMethod(i);
     if (meth) Func::destroy(meth);
   }
   // clean enum cache
@@ -315,14 +331,14 @@ void Class::releaseRefs() {
    * have a reference to those func's (and its only reference to
    * our parent is via this class).
    */
-  auto methods = mutableMethodRange();
+  auto num = numMethods();
   bool okToReleaseParent = true;
-  while (!methods.empty()) {
-    Func*& meth = methods.popFront();
+  for (auto i = 0; i < num; i++) {
+    Func* meth = getMethod(i);
     if (meth /* releaseRefs can be called more than once */ &&
         meth->cls() != this &&
         ((meth->attrs() & AttrPrivate) || !meth->hasStaticLocals())) {
-      meth = nullptr;
+      setMethod(i, nullptr);
       okToReleaseParent = false;
     }
   }
@@ -363,11 +379,15 @@ void Class::destroy() {
   );
 }
 
+Func** Class::mallocPtrFromThis() const {
+  return (Func**)((uintptr_t)this - m_funcVecLen * sizeof(Func *));
+}
+
 void Class::atomicRelease() {
   assert(!m_cachedClass.bound());
   assert(!getCount());
   this->~Class();
-  low_free(this);
+  low_free(mallocPtrFromThis());
 }
 
 void Class::setClassHandle(RDS::Link<Class*> link) const {
@@ -996,7 +1016,7 @@ Class* Class::findSingleTraitWithMethod(const StringData* methName) {
   // Note: m_methods includes methods from parents / traits recursively
   Class* traitCls = nullptr;
   for (auto const& t : m_usedTraits) {
-    if (t->m_methods.contains(methName)) {
+    if (t->m_methods.find(methName)) {
       if (traitCls != nullptr) { // more than one trait contains method
         raise_error("more than one trait contains method '%s'",
           methName->data());
@@ -1099,11 +1119,11 @@ void Class::applyTraitRules(MethodToTraitListMap& importMethToTraitMap) {
 
 void Class::importTraitMethod(const TraitMethod&  traitMethod,
                               const StringData*   methName,
-                              MethodMap::Builder& builder) {
+                              MethodMapBuilder& builder) {
   Func*    method    = traitMethod.m_method;
   Attr     modifiers = traitMethod.m_modifiers;
 
-  MethodMap::Builder::iterator mm_iter = builder.find(methName);
+  MethodMapBuilder::iterator mm_iter = builder.find(methName);
   // For abstract methods, simply return if method already declared
   if ((modifiers & AttrAbstract) && mm_iter != builder.end()) {
     return;
@@ -1198,14 +1218,14 @@ void Class::removeSpareTraitAbstractMethods(
 }
 
 // fatals on error
-void Class::importTraitMethods(MethodMap::Builder& builder) {
+void Class::importTraitMethods(MethodMapBuilder& builder) {
   MethodToTraitListMap importMethToTraitMap;
 
   // 1. Find all methods to be imported
   for (auto const& t : m_usedTraits) {
     Class* trait = t.get();
     for (Slot i = 0; i < trait->m_methods.size(); ++i) {
-      Func* method = trait->m_methods[i];
+      Func* method = trait->getMethod(i);
       const StringData* methName = method->name();
       TraitMethod traitMethod(trait, method, method->attrs());
       if (!Func::isSpecial(methName)) {
@@ -1301,12 +1321,12 @@ void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
 
 void Class::setMethods() {
   std::vector<Slot> parentMethodsWithStaticLocals;
-  MethodMap::Builder builder;
+  MethodMapBuilder builder;
 
   if (m_parent.get() != nullptr) {
     // Copy down the parent's method entries. These may be overridden below.
     for (Slot i = 0; i < m_parent->m_methods.size(); ++i) {
-      Func* f = m_parent->m_methods[i];
+      Func* f = m_parent->getMethod(i);
       assert(f);
       if ((f->attrs() & AttrClone) ||
           (!(f->attrs() & AttrPrivate) && f->hasStaticLocals())) {
@@ -1338,7 +1358,7 @@ void Class::setMethods() {
         continue;
       }
     }
-    MethodMap::Builder::iterator it2 = builder.find(method->name());
+    MethodMapBuilder::iterator it2 = builder.find(method->name());
     if (it2 != builder.end()) {
       Func* parentMethod = builder[it2->second];
       // We should never have null func pointers to deal with
@@ -1428,10 +1448,11 @@ void Class::setMethods() {
     }
   }
 
-  m_methods.create(builder);
-  for (Slot i = 0; i < m_methods.size(); ++i) {
-    m_methods[i]->setMethodSlot(i);
+  builder.create(m_methods);
+  for (Slot i = 0; i < builder.size(); ++i) {
+    builder[i]->setMethodSlot(i);
   }
+  setFuncVec(builder);
 }
 
 void Class::setODAttributes() {
@@ -2012,7 +2033,7 @@ void Class::checkInterfaceMethods() {
     const Class* iface = m_interfaces[i];
 
     for (size_t m = 0; m < iface->m_methods.size(); m++) {
-      Func* imeth = iface->m_methods[m];
+      Func* imeth = iface->getMethod(m);
       const StringData* methName = imeth->name();
 
       // Skip special methods
@@ -2146,15 +2167,17 @@ void Class::setNativeDataInfo() {
   }
 }
 
-void Class::setUsedTraits() {
-  for (auto const& traitName : m_preClass->usedTraits()) {
+unsigned Class::loadUsedTraits(PreClass* preClass,
+                               std::vector<ClassPtr>& usedTraits) {
+  unsigned methodCount = 0;
+  for (auto const& traitName : preClass->usedTraits()) {
     Class* classPtr = Unit::loadClass(traitName);
     if (classPtr == nullptr) {
       raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
     }
     if (!(classPtr->attrs() & AttrTrait)) {
       raise_error("%s cannot use %s - it is not a trait",
-                  m_preClass->name()->data(),
+                  preClass->name()->data(),
                   classPtr->name()->data());
     }
 
@@ -2169,8 +2192,19 @@ void Class::setUsedTraits() {
       continue;
     }
 
-    m_usedTraits.push_back(ClassPtr(classPtr));
+    usedTraits.push_back(ClassPtr(classPtr));
+    methodCount += classPtr->m_methods.size();
+
   }
+  // Trait aliases can increase method count. Get an estimate of
+  // the number of aliased functions.
+  for (auto const& rule : preClass->traitAliasRules()) {
+    auto origName = rule.getOrigMethodName();
+    auto newName = rule.getNewMethodName();
+    if (origName != newName) methodCount++;
+  }
+
+  return methodCount;
 }
 
 void Class::checkTraitConstraints() const {
@@ -2270,6 +2304,20 @@ void Class::setClassVec() {
            (m_classVecLen-1) * sizeof(m_classVec[0]));
   }
   m_classVec[m_classVecLen-1] = this;
+}
+
+void Class::setFuncVec(MethodMapBuilder& builder) {
+  Func** funcVec = (Func**)mallocPtrFromThis();
+
+  memset(funcVec, 0, m_funcVecLen * sizeof(Func*));
+
+  funcVec = (Func**)this;
+  assert(builder.size() <= m_funcVecLen);
+
+  for (Slot i = 0; i < builder.size(); i++) {
+    assert(builder[i]->methodSlot() < builder.size());
+    funcVec[-((int32_t)builder[i]->methodSlot() + 1)] = builder[i];
+  }
 }
 
 void Class::setInstanceBits() {
@@ -2401,7 +2449,7 @@ void Class::getClassInfo(ClassInfoVM* ci) {
   }
 
   for (Slot i = m_traitsBeginIdx; i < m_traitsEndIdx; ++i) {
-    Func* func = m_methods[i];
+    Func* func = getMethod(i);
     assert(func);
     if (!func->isGenerated()) {
       SET_FUNCINFO_BODY;

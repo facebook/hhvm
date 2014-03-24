@@ -675,11 +675,10 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
       arr.set(f_strtolower(m->nameStr()), VarNR(info));
     }
 
-    Func* const* clsMethods = cls->methods();
     for (Slot i = cls->traitsBeginIdx();
          i < cls->traitsEndIdx();
          ++i) {
-      const Func* m = clsMethods[i];
+      const Func* m = cls->getMethod(i);
       if (m->isGenerated()) continue;
       Array info = Array::Create();
       set_method_info(info, m, cls);

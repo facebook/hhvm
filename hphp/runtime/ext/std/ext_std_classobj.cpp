@@ -99,11 +99,10 @@ static void getMethodNamesImpl(const Class* cls,
   // The order of these methods is so that the first ones win on
   // case insensitive name conflicts.
 
-  auto const methods = cls->methods();
   auto const numMethods = cls->numMethods();
 
   for (Slot i = 0; i < numMethods; ++i) {
-    auto const meth = methods[i];
+    auto const meth = cls->getMethod(i);
     auto const declCls = meth->cls();
     auto addMeth = [&]() {
       auto const methName = Variant(meth->name(), Variant::StaticStrInit{});

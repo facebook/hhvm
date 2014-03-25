@@ -73,6 +73,7 @@ install_manifest.txt
 .*.swo
 *.vimrc
 .syntastic_cpp_config
+*~
 
 # tags files
 tags

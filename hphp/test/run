@@ -910,6 +910,22 @@ function msg_loop($num_tests, $children, $queue) {
 }
 
 function print_success($tests, $options) {
+  if (!$tests) {
+    print "\nCLOWNTOWN: No tests!\n\n".<<<CLOWN
+            _
+           {_}
+           /*\\
+          /_*_\\
+         {('o')}
+      C{{([^*^])}}D
+          [ * ]
+         /  Y  \\
+        _\\__|__/_
+       (___/ \\___)
+CLOWN
+."\n\n";
+    return;
+  }
   print "\nAll tests passed.\n\n".<<<SHIP
               |    |    |
              )_)  )_)  )_)

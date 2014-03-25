@@ -2488,3 +2488,4 @@ int zend_sprintf(char *buffer, const char *format, ...);
 
 #define PTHREADS 1
 
+#define OAUTH_USE_CURL 1

@@ -312,10 +312,6 @@ typedef hphp_hash_set<FuncId> FuncIdSet;
  * AttrSkipFrame is set to indicate that the frame should be ignored
  *   when searching for the context (eg array_map evaluates its
  *   callback in the context of its caller).
- *
- * AttrVMEntry is set on functions that are generally VM entry points.
- *   This is not necessary for correctness; it simply allows better
- *   code generation in the JIT.
  */
 enum Attr {
   AttrNone          = 0,         // class  property  method  //
@@ -344,7 +340,6 @@ enum Attr {
   AttrAllowOverride = (1 << 21), //                     X    //
   AttrSkipFrame     = (1 << 22), //                     X    //
   AttrNative        = (1 << 23), //                     X    //
-  AttrVMEntry       = (1 << 24), //                     X    //
   AttrHPHPSpecific  = (1 << 25), //                     X    //
   AttrIsFoldable    = (1 << 26), //                     X    //
   AttrNoFCallBuiltin= (1 << 27), //                     X    //

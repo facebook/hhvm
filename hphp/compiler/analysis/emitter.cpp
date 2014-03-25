@@ -8559,9 +8559,6 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
   static const StringData* exnStr = makeStaticString("exception");
 
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic | AttrMayUseVV);
-  if (m == METH_NEXT || m == METH_RAISE || m == METH_SEND) {
-    attrs = attrs | AttrVMEntry;
-  }
   fe->init(0, 0, ue.bcPos(), attrs, false, empty_string.get());
   switch (m) {
     case METH_SEND:

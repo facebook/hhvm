@@ -332,12 +332,7 @@ let apply_patches tried_patches genv env continue patches =
   file_data := SMap.empty;
   SMap.iter begin fun fn patchl ->
     List.iter begin fun (line, k, type_ as patch) ->
-      (* Nasty hack to work around HHVM bug #3340179 -- don't insert primitive
-       * types since, in namespaced code, it will always generate code that
-       * fails at *runtime* which is bad for the Hack launch. Will revert this
-       * as soon as HHVM is fixed, prob in the next 24 hours. *)
-      let prim t = match snd t with Typing_defs.Tprim _ -> true | _ -> false in
-      if prim type_ || Hashtbl.mem tried_patches (fn, patch) then () else
+      if Hashtbl.mem tried_patches (fn, patch) then () else
       let go patch =
         let errors, new_env = apply_patch genv !env fn patch in
         env := new_env;

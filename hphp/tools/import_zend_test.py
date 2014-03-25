@@ -651,6 +651,7 @@ other_files = (
     '/ext/pdo_mysql/tests/config.inc',
     '/ext/pdo_sqlite/tests/common.phpt',
     '/ext/phar/tests/files/phar_test.inc',
+    '/ext/phar/tests/tar/files/P1-1.0.0.tgz',
     '/ext/session/tests/save_handler.inc',
     '/ext/simplexml/tests/book.xml',
     '/ext/simplexml/tests/bug24392.xml',

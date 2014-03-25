@@ -614,9 +614,15 @@ class Phar extends RecursiveDirectoryIterator
     if (!$this->offsetExists($entry)) {
       return null;
     }
+    $fi = $this->fileInfo[$entry];
     return new PharFileInfo(
       $this->iteratorRoot.$entry,
-      $this->fileInfo[$entry]
+      new __SystemLib\ArchiveEntryStat(
+        $fi[3], // crc32
+        $fi[0], // size
+        $fi[2], // compressed size
+        $fi[1], // timestamp
+      )
     );
   }
 
@@ -1193,17 +1199,13 @@ class Phar extends RecursiveDirectoryIterator
     throw new PharException("Not a phar: $filename_or_alias");
   }
 
-  public function getIterator() {
-    if ($this->iterator !== null) {
-      return $this->iterator;
-    }
+  protected function getIteratorFromList(string $root, array $list) {
     $tree = array();
-    $filenames = array_keys($this->fileInfo);
-    foreach ($filenames as $filename) {
+    foreach ($list as $filename => $info) {
       $dir = dirname($filename);
       $current = &$tree;
       if ($dir !== '') {
-        $path = $this->iteratorRoot;
+        $path = $root;
         foreach (explode('/', $dir) as $part) {
           $path .= $part.'/';
           if (!isset($current[$path])) {
@@ -1212,12 +1214,24 @@ class Phar extends RecursiveDirectoryIterator
           $current = &$current[$path];
         }
       }
-      $current[$this->iteratorRoot.$filename] = $this->offsetGet($filename);
+      $current[$root.$filename] = $info;
     }
-    $this->iterator = new RecursiveArrayIterator(
+    return new RecursiveArrayIterator(
       $tree,
       RecursiveArrayIterator::CHILD_ARRAYS_ONLY
     );
+  }
+
+  protected function getIterator() {
+    if ($this->iterator !== null) {
+      return $this->iterator;
+    }
+    $filenames = array_keys($this->fileInfo);
+    $info = array();
+    foreach ($filenames as $filename) {
+      $info[$filename] = $this->offsetGet($filename);
+    }
+    $this->iterator = $this->getIteratorFromList($this->iteratorRoot, $info);
     return $this->iterator;
   }
 

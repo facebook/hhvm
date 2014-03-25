@@ -61,6 +61,10 @@ hphp/system/php/sessions/session_set_save_handler.ns.php
 
 hphp/system/php/redis/RedisException.php
 
+hphp/system/php/archive_handler/ArchiveHandler.ns.php
+hphp/system/php/archive_handler/TarArchiveHandler.ns.php
+hphp/system/php/archive_handler/ZipArchiveHandler.ns.php
+
 hphp/system/php/phar/PharException.php
 hphp/system/php/phar/Phar.php
 hphp/system/php/phar/PharFileInfo.php

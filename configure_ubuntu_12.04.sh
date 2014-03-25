@@ -110,15 +110,15 @@ make install
 cd ..
 
 # jemaloc
-tar xjvf jemalloc-3.0.0.tar.bz2
-cd jemalloc-3.0.0
+tar xjvf jemalloc-3.5.1.tar.bz2
+cd jemalloc-3.5.1
 ./configure --prefix=$CMAKE_PREFIX_PATH
 make -j $CPUS
 make install
 cd ..
 
 # cleanup
-rm -rf libevent curl google-glog jemalloc-3.0.0.tar.bz2 jemalloc-3.0.0
+rm -rf libevent curl google-glog jemalloc-3.5.1.tar.bz2 jemalloc-3.5.1
 
 # hphp
 cmake .

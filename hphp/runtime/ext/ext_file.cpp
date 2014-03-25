@@ -1151,7 +1151,7 @@ bool f_link(const String& target, const String& link) {
 }
 
 bool f_symlink(const String& target, const String& link) {
-  CHECK_SYSTEM(symlink(File::TranslatePath(target).data(),
+  CHECK_SYSTEM(symlink(File::TranslatePathKeepRelative(target).data(),
                        File::TranslatePath(link).data()));
   return true;
 }

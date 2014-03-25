@@ -1,18 +1,17 @@
 <?php
 
-declare(ticks=1);
 function foo() {
-  echo 'a';
+  echo "a\n";
   exit(1);
 }
-function bar() {
+
+function main() {
+  var_dump(pcntl_signal(SIGUSR1, 'foo'));
+  $pid = posix_getpid();
+  posix_kill($pid, SIGUSR1);
+
+  // Wait for signal to arrive.
+  while (true) continue;
 }
- pcntl_signal(SIGUSR1,  'foo');
-$pid = posix_getpid();
-posix_kill($pid, SIGUSR1);
-bar();
- /* check for received signal upon function entry/exit */ for ($i = 0;
- $i < 2;
- $i++) {
-  echo 'a';
-}
+
+main();

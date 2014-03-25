@@ -176,7 +176,7 @@ Array TimeZone::GetAbbreviations() {
   Array ret;
   for (const timelib_tz_lookup_table *entry =
          timelib_timezone_abbreviations_list(); entry->name; entry++) {
-    ArrayInit element(3);
+    ArrayInit element(3, ArrayInit::Map{});
     element.set(s_dst, (bool)entry->type);
     element.set(s_offset, entry->gmtoffset);
     if (entry->full_tz_name) {
@@ -257,13 +257,13 @@ Array TimeZone::transitions() const {
       ttinfo &offset = m_tzi->type[index];
       const char *abbr = m_tzi->timezone_abbr + offset.abbr_idx;
 
-      ArrayInit element(5);
-      element.set(s_ts, timestamp);
-      element.set(s_time, dt.toString(DateTime::DateFormat::ISO8601));
-      element.set(s_offset, offset.offset);
-      element.set(s_isdst, (bool)offset.isdst);
-      element.set(s_abbr, String(abbr, CopyString));
-      ret.append(element.create());
+      ret.append(make_map_array(
+        s_ts, timestamp,
+        s_time, dt.toString(DateTime::DateFormat::ISO8601),
+        s_offset, offset.offset,
+        s_isdst, (bool)offset.isdst,
+        s_abbr, String(abbr, CopyString)
+      ));
     }
   }
   return ret;

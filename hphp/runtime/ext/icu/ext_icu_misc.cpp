@@ -121,7 +121,7 @@ static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
   }
   result.setSize(len);
 
-  ArrayInit arr(3);
+  ArrayInit arr(3, ArrayInit::Map{});
   arr.set(s_result, result);
   arr.set(s_isTransitionalDifferent, info.isTransitionalDifferent);
   arr.set(s_errors, (long)info.errors);

@@ -2413,13 +2413,13 @@ void DebuggerClient::loadConfig() {
       return true;
     },
     [this]() {
-      ArrayInit ret(m_macros.size());
+      ArrayInit ret(m_macros.size(), ArrayInit::Map{});
       for (auto& macro : m_macros) {
-        ArrayInit ret_macro(2);
+        ArrayInit ret_macro(2, ArrayInit::Map{});
         ret_macro.set(s_name, macro->m_name);
-        ArrayInit ret_cmds(macro->m_cmds.size());
+        PackedArrayInit ret_cmds(macro->m_cmds.size());
         for (auto& cmd : macro->m_cmds) {
-          ret_cmds.set(cmd);
+          ret_cmds.append(cmd);
         }
         ret_macro.set(s_cmds, ret_cmds.toArray());
         ret.set(ret_macro.toArray());

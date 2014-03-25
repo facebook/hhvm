@@ -942,16 +942,16 @@ Array f_proc_get_status(const Resource& process) {
     running = false;
   }
 
-  ArrayInit ret(8);
-  ret.set(s_command,  proc->command);
-  ret.set(s_pid,      proc->child);
-  ret.set(s_running,  running);
-  ret.set(s_signaled, signaled);
-  ret.set(s_stopped,  stopped);
-  ret.set(s_exitcode, exitcode);
-  ret.set(s_termsig,  termsig);
-  ret.set(s_stopsig,  stopsig);
-  return ret.toArray();
+  return make_map_array(
+    s_command,  proc->command,
+    s_pid,      proc->child,
+    s_running,  running,
+    s_signaled, signaled,
+    s_stopped,  stopped,
+    s_exitcode, exitcode,
+    s_termsig,  termsig,
+    s_stopsig,  stopsig
+  );
 }
 
 bool f_proc_nice(int increment) {

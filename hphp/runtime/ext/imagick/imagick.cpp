@@ -1218,8 +1218,8 @@ static Array HHVM_METHOD(Imagick, getImageChannelStatistics) {
   auto wand = getMagickWandResource(this_);
   auto stat = MagickGetImageChannelStatistics(wand->getWand());
 
-  ArrayInit ret(sizeof(channels) / sizeof(channels[0]));
-  for (auto channel: channels) {
+  ArrayInit ret(sizeof(channels) / sizeof(channels[0]), ArrayInit::Mixed{});
+  for (auto channel : channels) {
     ret.set(channel, make_map_array(
         s_mean, stat[channel].mean,
         s_minima, stat[channel].minima,
@@ -1482,7 +1482,7 @@ static Array HHVM_METHOD(Imagick, getImageProfiles,
   }
 
   if (with_values) {
-    ArrayInit ret(count);
+    ArrayInit ret(count, ArrayInit::Map{});
     for (size_t i = 0; i < count; ++i) {
       ret.set(String(profiles[i]),
               magickGetImageProfile(wand->getWand(), profiles[i]));
@@ -1510,7 +1510,7 @@ static Array HHVM_METHOD(Imagick, getImageProperties,
   }
 
   if (with_values) {
-    ArrayInit ret(count);
+    ArrayInit ret(count, ArrayInit::Map{});
     for (size_t i = 0; i < count; ++i) {
       ret.set(String(properties[i]),
               magickGetImageProperty(wand->getWand(), properties[i]));
@@ -1815,7 +1815,7 @@ static Array HHVM_METHOD(Imagick, identifyImage, bool appendRawOutput) {
   auto wand = getMagickWandResource(this_);
   String identify = convertMagickString(MagickIdentifyImage(wand->getWand()));
   auto parsedIdentify = parseIdentify(identify);
-  ArrayInit ret(parsedIdentify.size() + 6);
+  ArrayInit ret(parsedIdentify.size() + 6, ArrayInit::Map{});
 
   ret.set(s_imageName,
     convertMagickString(MagickGetImageFilename(wand->getWand())));
@@ -2396,7 +2396,7 @@ static Array HHVM_METHOD(Imagick, queryFontMetrics,
     static const size_t boundingBoxOffset = 7;
     static const size_t size = 13;
 
-    ArrayInit ret(size - 3);
+    ArrayInit ret(size - 3, ArrayInit::Map{});
     for (size_t i = 0; i < size; ++i) {
       if (keys[i] == s_boundingBox) {
         ret.set(s_boundingBox, make_map_array(

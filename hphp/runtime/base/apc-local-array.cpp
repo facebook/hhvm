@@ -106,7 +106,7 @@ ArrayData* APCLocalArray::loadElems() const {
     }
     elems = ai.create();
   } else {
-    ArrayInit ai(count);
+    ArrayInit ai(count, ArrayInit::Mixed{});
     for (uint i = 0; i < count; i++) {
       ai.add(getKey(i), getValueRef(i), true);
     }

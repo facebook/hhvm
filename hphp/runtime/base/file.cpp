@@ -511,18 +511,18 @@ const StaticString
   s_wrapper_data("wrapper_data");
 
 Array File::getMetaData() {
-  ArrayInit ret(10);
-  ret.set(s_wrapper_type, getWrapperType());
-  ret.set(s_stream_type,  getStreamType());
-  ret.set(s_mode,         String(m_mode));
-  ret.set(s_unread_bytes, 0);
-  ret.set(s_seekable,     seekable());
-  ret.set(s_uri,          String(m_name));
-  ret.set(s_timed_out,    false);
-  ret.set(s_blocked,      true);
-  ret.set(s_eof,          eof());
-  ret.set(s_wrapper_data, getWrapperMetaData());
-  return ret.toArray();
+  return make_map_array(
+    s_wrapper_type, getWrapperType(),
+    s_stream_type,  getStreamType(),
+    s_mode,         String(m_mode),
+    s_unread_bytes, 0,
+    s_seekable,     seekable(),
+    s_uri,          String(m_name),
+    s_timed_out,    false,
+    s_blocked,      true,
+    s_eof,          eof(),
+    s_wrapper_data, getWrapperMetaData()
+  );
 }
 
 String File::getWrapperType() const {

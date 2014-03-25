@@ -26,11 +26,25 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct ArrayInit {
-  enum MapInit { mapInit };
+  enum class Map {};
+  // This is the same as map right now, but is here for documentation
+  // so we can find them later.
+  using Mixed = Map;
 
-  explicit ArrayInit(size_t n);
-
-  ArrayInit(size_t n, MapInit);
+  /*
+   * When you create an ArrayInit, you must specify the "kind" of
+   * array you are creating, for performance reasons.  "Kinds" that
+   * are relevant to know about for extension code:
+   *
+   *   Packed -- a vector-like array: don't use ArrayInit, use PackedArrayInit
+   *   Map    -- you expect only string keys and any value type
+   *   Mixed  -- you expect either integer keys, mixed keys
+   *
+   * Also, generally it's preferable to use make_map_array or
+   * make_packed_array when it's easy, since you don't have to get 'n'
+   * right in that case.
+   */
+  ArrayInit(size_t n, Map);
 
   ArrayInit(ArrayInit&& other)
     : m_data(other.m_data)
@@ -437,7 +451,7 @@ template<class... KVPairs>
 Array make_map_array(KVPairs&&... kvpairs) {
   static_assert(
     sizeof...(kvpairs) % 2 == 0, "make_map_array needs key value pairs");
-  ArrayInit init(sizeof...(kvpairs) / 2);
+  ArrayInit init(sizeof...(kvpairs) / 2, ArrayInit::Map{});
   make_array_detail::map_impl(init, std::forward<KVPairs>(kvpairs)...);
   return init.toArray();
 }

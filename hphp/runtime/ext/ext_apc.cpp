@@ -156,7 +156,7 @@ Variant f_apc_store(const Variant& key_or_array, const Variant& var /* = null_va
     Array valuesArr = key_or_array.toArray();
 
     // errors stores all keys corresponding to entries that could not be cached
-    ArrayInit errors(valuesArr.size());
+    PackedArrayInit errors(valuesArr.size());
 
     for (ArrayIter iter(valuesArr); iter; ++iter) {
       Variant key = iter.first();
@@ -166,10 +166,10 @@ Variant f_apc_store(const Variant& key_or_array, const Variant& var /* = null_va
       }
       Variant v = iter.second();
       if (!(s_apc_store[cache_id].store(key.toString(), v, ttl))) {
-        errors.set(key);
+        errors.append(key);
       }
     }
-    return errors.create();
+    return errors.toVariant();
   }
 
   if (!key_or_array.isString()) {
@@ -209,7 +209,7 @@ Variant f_apc_add(const Variant& key_or_array, const Variant& var /* = null_vari
     Array valuesArr = key_or_array.toArray();
 
     // errors stores all keys corresponding to entries that could not be cached
-    ArrayInit errors(valuesArr.size());
+    PackedArrayInit errors(valuesArr.size());
 
     for (ArrayIter iter(valuesArr); iter; ++iter) {
       Variant key = iter.first();
@@ -219,7 +219,7 @@ Variant f_apc_add(const Variant& key_or_array, const Variant& var /* = null_vari
       }
       Variant v = iter.second();
       if (!(s_apc_store[cache_id].store(key.toString(), v, ttl, false))) {
-        errors.set(key);
+        errors.append(key);
       }
     }
     return errors.create();
@@ -247,7 +247,7 @@ Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */,
   if (key.is(KindOfArray)) {
     bool tmp = false;
     Array keys = key.toArray();
-    ArrayInit init(keys.size());
+    ArrayInit init(keys.size(), ArrayInit::Map{});
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {
@@ -283,14 +283,14 @@ Variant f_apc_delete(const Variant& key, int64_t cache_id /* = 0 */) {
 
   if (key.is(KindOfArray)) {
     Array keys = key.toArray();
-    ArrayInit init(keys.size());
+    PackedArrayInit init(keys.size());
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {
         raise_warning("apc key is not a string");
-        init.set(k);
+        init.append(k);
       } else if (!s_apc_store[cache_id].erase(k.toString())) {
-        init.set(k);
+        init.append(k);
       }
     }
     return init.create();
@@ -360,7 +360,7 @@ Variant f_apc_exists(const Variant& key, int64_t cache_id /* = 0 */) {
 
   if (key.is(KindOfArray)) {
     Array keys = key.toArray();
-    ArrayInit init(keys.size());
+    PackedArrayInit init(keys.size());
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {
@@ -369,7 +369,7 @@ Variant f_apc_exists(const Variant& key, int64_t cache_id /* = 0 */) {
       }
       String strKey = k.toString();
       if (s_apc_store[cache_id].exists(strKey)) {
-        init.set(strKey);
+        init.append(strKey);
       }
     }
     return init.create();
@@ -1156,7 +1156,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       len = strlen(data->name);
       if (len > RFC1867_NAME_MAXLEN) len = RFC1867_NAME_MAXLEN;
       rfc1867ApcData->name = std::string(data->name, len);
-      ArrayInit track(6);
+      ArrayInit track(6, ArrayInit::Map{});
       track.set(s_total, rfc1867ApcData->content_length);
       track.set(s_current, rfc1867ApcData->bytes_processed);
       track.set(s_filename, rfc1867ApcData->filename);
@@ -1178,7 +1178,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
         Variant v;
         if (s_apc_store[0].get(rfc1867ApcData->tracking_key, v)) {
           if (v.is(KindOfArray)) {
-            ArrayInit track(6);
+            ArrayInit track(6, ArrayInit::Map{});
             track.set(s_total, rfc1867ApcData->content_length);
             track.set(s_current, rfc1867ApcData->bytes_processed);
             track.set(s_filename, rfc1867ApcData->filename);
@@ -1201,7 +1201,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       rfc1867ApcData->bytes_processed = data->post_bytes_processed;
       rfc1867ApcData->cancel_upload = data->cancel_upload;
       rfc1867ApcData->temp_filename = data->temp_filename;
-      ArrayInit track(8);
+      ArrayInit track(8, ArrayInit::Map{});
       track.set(s_total, rfc1867ApcData->content_length);
       track.set(s_current, rfc1867ApcData->bytes_processed);
       track.set(s_filename, rfc1867ApcData->filename);
@@ -1225,7 +1225,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       } else {
         rfc1867ApcData->rate =
           8.0*rfc1867ApcData->bytes_processed;  /* Too quick */
-        ArrayInit track(8);
+        ArrayInit track(8, ArrayInit::Map{});
         track.set(s_total, rfc1867ApcData->content_length);
         track.set(s_current, rfc1867ApcData->bytes_processed);
         track.set(s_rate, rfc1867ApcData->rate);

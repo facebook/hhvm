@@ -72,7 +72,7 @@ struct VariantController {
     return map.toArray();
   }
   static ArrayInit reserveMap(size_t n) {
-    ArrayInit res(n, ArrayInit::mapInit);
+    ArrayInit res(n, ArrayInit::Map{});
     return res;
   }
   static MapType getStaticEmptyMap() {

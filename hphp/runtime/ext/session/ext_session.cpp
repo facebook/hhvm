@@ -1496,13 +1496,13 @@ const StaticString
   s_httponly("httponly");
 
 Array f_session_get_cookie_params() {
-  ArrayInit ret(5);
-  ret.set(s_lifetime, PS(cookie_lifetime));
-  ret.set(s_path,     String(PS(cookie_path)));
-  ret.set(s_domain,   String(PS(cookie_domain)));
-  ret.set(s_secure,   PS(cookie_secure));
-  ret.set(s_httponly, PS(cookie_httponly));
-  return ret.toArray();
+  return make_map_array(
+    s_lifetime, PS(cookie_lifetime),
+    s_path,     String(PS(cookie_path)),
+    s_domain,   String(PS(cookie_domain)),
+    s_secure,   PS(cookie_secure),
+    s_httponly, PS(cookie_httponly)
+  );
 }
 
 String f_session_name(const String& newname /* = null_string */) {

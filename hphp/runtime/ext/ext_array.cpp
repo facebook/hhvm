@@ -219,7 +219,7 @@ Variant f_array_fill_keys(const Variant& keys, const Variant& value) {
   auto size = getContainerSize(cell_keys);
   if (!size) return empty_array;
 
-  ArrayInit ai(size);
+  ArrayInit ai(size, ArrayInit::Mixed{});
   for (ArrayIter iter(cell_keys); iter; ++iter) {
     auto& key = iter.secondRefPlus();
     // This is intentionally different to the $foo[$invalid_key] coercion.
@@ -253,7 +253,6 @@ Variant f_array_fill(int start_index, int num, const Variant& value) {
 }
 
 Variant f_array_flip(const Variant& trans) {
-
   auto const& transCell = *trans.asCell();
   if (UNLIKELY(!isContainer(transCell))) {
     raise_warning("Invalid operand type was used: %s expects "
@@ -261,7 +260,7 @@ Variant f_array_flip(const Variant& trans) {
     return uninit_null();
   }
 
-  ArrayInit ret(getContainerSize(transCell));
+  ArrayInit ret(getContainerSize(transCell), ArrayInit::Mixed{});
   for (ArrayIter iter(transCell); iter; ++iter) {
     const Variant& value(iter.secondRefPlus());
     if (value.isString() || value.isInteger()) {

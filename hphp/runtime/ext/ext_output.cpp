@@ -161,7 +161,7 @@ Variant f_hphp_get_timers(bool get_as_float /* = true */) {
   const int64_t &nsleep_time_s = transport->getnSleepTimeS();
   const int32_t &nsleep_time_n = transport->getnSleepTimeN();
 
-  ArrayInit ret(7);
+  ArrayInit ret(7, ArrayInit::Map{});
   if (get_as_float) {
     ret.set(s_queue,        ts_float(tsQueue));
     ret.set(s_process_wall, ts_float(tsWall));

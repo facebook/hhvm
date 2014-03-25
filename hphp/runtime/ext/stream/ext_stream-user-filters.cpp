@@ -158,10 +158,10 @@ private:
     Object obj = null_object;
 
     if (LIKELY(class_ != nullptr)) {
-      ArrayInit ctor_args(3);
-      ctor_args.set(stream);
-      ctor_args.set(filter);
-      ctor_args.set(params);
+      PackedArrayInit ctor_args(3);
+      ctor_args.append(stream);
+      ctor_args.append(filter);
+      ctor_args.append(params);
       obj = g_context->createObject(class_name.get(), ctor_args.toArray());
       auto created = obj->o_invoke(s_onCreate, Array::Create());
       /* - true: documented value for success
@@ -201,11 +201,11 @@ int64_t StreamFilter::invokeFilter(Resource in,
   auto consumedTV = make_tv<KindOfInt64>(0);
   auto consumedRef = RefData::Make(consumedTV);
 
-  ArrayInit params(4);
-  params.set(in);
-  params.set(out);
-  params.set(consumedRef);
-  params.set(closing);
+  PackedArrayInit params(4);
+  params.append(in);
+  params.append(out);
+  params.append(consumedRef);
+  params.append(closing);
   return m_filter->o_invoke(s_filter, params.toArray()).toInt64();
 }
 
@@ -229,9 +229,9 @@ bool StreamFilter::remove() {
 // BucketBrigade
 
 BucketBrigade::BucketBrigade(const String& data) {
-  ArrayInit ai(2);
-  ai.set(data);
-  ai.set(data.length());
+  PackedArrayInit ai(2);
+  ai.append(data);
+  ai.append(data.length());
   auto bucket = g_context->createObject(s_bucket_class.get(), ai.toArray());
   appendBucket(bucket);
 }

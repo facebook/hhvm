@@ -695,16 +695,16 @@ public:
     assert(p);
     CurlResource* curl = static_cast<CurlResource*>(p);
 
-    ArrayInit ai(5);
-    ai.set(Resource(curl));
-    ai.set(dltotal);
-    ai.set(dlnow);
-    ai.set(ultotal);
-    ai.set(ulnow);
+    PackedArrayInit pai(5);
+    pai.append(Resource(curl));
+    pai.append(dltotal);
+    pai.append(dlnow);
+    pai.append(ultotal);
+    pai.append(ulnow);
 
     Variant result = vm_call_user_func(
       curl->m_progress_callback,
-      ai.toArray()
+      pai.toArray()
     );
     // Both PHP and libcurl are documented as return 0 to continue, non-zero
     // to abort, however this is what Zend actually implements
@@ -968,7 +968,7 @@ Variant HHVM_FUNCTION(curl_version, int uversion /* = k_CURLVERSION_NOW */) {
     return false;
   }
 
-  ArrayInit ret(9);
+  ArrayInit ret(9, ArrayInit::Map{});
   ret.set(s_version_number,     (int)d->version_num);
   ret.set(s_age,                d->age);
   ret.set(s_features,           d->features);

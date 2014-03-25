@@ -274,7 +274,7 @@ Variant HHVM_FUNCTION(parse_url, const String& url,
     return uninit_null();
   }
 
-  ArrayInit ret(8);
+  ArrayInit ret(8, ArrayInit::Map{});
   SET_COMPONENT(scheme);
   SET_COMPONENT(host);
   if (resource.port) {

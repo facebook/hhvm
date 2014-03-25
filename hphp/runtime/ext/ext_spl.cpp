@@ -103,7 +103,7 @@ const StaticString spl_classes[] = {
 
 Array f_spl_classes() {
   const size_t num_classes = sizeof(spl_classes) / sizeof(spl_classes[0]);
-  ArrayInit ret(num_classes);
+  ArrayInit ret(num_classes, ArrayInit::Map{});
   for (size_t i = 0; i < num_classes; ++i) {
     ret.set(spl_classes[i], spl_classes[i]);
   }

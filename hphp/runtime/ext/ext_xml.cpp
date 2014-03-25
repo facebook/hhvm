@@ -395,7 +395,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
       if (parser->lastwasopen) {
         parser->ctag.toArrRef().set(s_type, s_complete);
       } else {
-        ArrayInit tag(3);
+        ArrayInit tag(3, ArrayInit::Map{});
         _xml_add_to_info(parser,((char*)tag_name) + parser->toffset);
         tag.set(s_tag, String(((char*)tag_name) + parser->toffset, CopyString));
         tag.set(s_type, s_close);

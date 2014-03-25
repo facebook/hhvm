@@ -742,7 +742,7 @@ void Array::unserialize(VariableUnserializer *uns) {
   } else {
     // Pre-allocate an ArrayData of the given size, to avoid escalation in
     // the middle, which breaks references.
-    operator=(ArrayInit(size).create());
+    operator=(ArrayInit(size, ArrayInit::Mixed{}).create());
     for (int64_t i = 0; i < size; i++) {
       Variant key(uns->unserializeKey());
       if (!key.isString() && !key.isInteger()) {

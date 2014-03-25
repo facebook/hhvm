@@ -261,7 +261,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
 
         ret = Variant(set_ret);
       } else {
-        ArrayInit init(size);
+        ArrayInit init(size, ArrayInit::Mixed{});
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(type, transport, elemspec);
           if (key.isInteger()) {

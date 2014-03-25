@@ -547,7 +547,7 @@ public:
   static void returnVals(phpret& ret, const Name& name, const Counts& counts,
                   int flags, int64_t MHz)
   {
-    ArrayInit arr(5);
+    ArrayInit arr(5, ArrayInit::Map{});
     arr.set(s_ct,  counts.count);
     arr.set(s_wt,  to_usec(counts.wall_time, MHz));
     if (flags & TrackCPU) {

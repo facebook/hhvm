@@ -18,32 +18,19 @@
 #include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-// ArrayInit
 
-ArrayInit::ArrayInit(size_t n)
+//////////////////////////////////////////////////////////////////////
+
+ArrayInit::ArrayInit(size_t n, Map)
 #ifdef DEBUG
   : m_addCount(0)
   , m_expectedCount(n)
 #endif
 {
-  if (!n) {
-    m_data = HphpArray::GetStaticEmptyArray();
-  } else {
-    m_data = HphpArray::MakeReserve(n);
-    m_data->setRefCount(0);
-  }
-}
-
-ArrayInit::ArrayInit(size_t n, MapInit)
-  : m_data(HphpArray::MakeReserve(n))
-#ifdef DEBUG
-  , m_addCount(0)
-  , m_expectedCount(n)
-#endif
-{
+  m_data = HphpArray::MakeReserve(n);
   m_data->setRefCount(0);
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 }

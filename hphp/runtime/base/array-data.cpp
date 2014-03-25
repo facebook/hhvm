@@ -495,33 +495,31 @@ bool ArrayData::IsValidKey(const Variant& k) {
          (k.isString() && IsValidKey(k.getStringData()));
 }
 
-// constructors/destructors
-
 ArrayData *ArrayData::Create() {
-  return ArrayInit((ssize_t)0).create();
+  return HphpArray::GetStaticEmptyArray();
 }
 
 ArrayData *ArrayData::Create(const Variant& value) {
-  ArrayInit init(1);
-  init.set(value);
-  return init.create();
+  PackedArrayInit pai(1);
+  pai.append(value);
+  return pai.create();
 }
 
 ArrayData *ArrayData::Create(const Variant& name, const Variant& value) {
-  ArrayInit init(1);
+  ArrayInit init(1, ArrayInit::Map{});
   // There is no toKey() call on name.
   init.set(name, value, true);
   return init.create();
 }
 
 ArrayData *ArrayData::CreateRef(const Variant& value) {
-  ArrayInit init(1);
-  init.setRef(value);
-  return init.create();
+  PackedArrayInit pai(1);
+  pai.appendRef(value);
+  return pai.create();
 }
 
 ArrayData *ArrayData::CreateRef(const Variant& name, const Variant& value) {
-  ArrayInit init(1);
+  ArrayInit init(1, ArrayInit::Map{});
   // There is no toKey() call on name.
   init.setRef(name, value, true);
   return init.create();
@@ -717,7 +715,7 @@ const StaticString
 
 Variant ArrayData::each() {
   if (m_pos != invalid_index) {
-    ArrayInit ret(4);
+    ArrayInit ret(4, ArrayInit::Mixed{});
     Variant key(getKey(m_pos));
     Variant value(getValue(m_pos));
     ret.set(1, value);

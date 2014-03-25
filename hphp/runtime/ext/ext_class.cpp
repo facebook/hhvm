@@ -170,7 +170,7 @@ Array f_get_class_constants(const String& className) {
   }
 
   auto const numConstants = cls->numConstants();
-  ArrayInit arrayInit(numConstants);
+  ArrayInit arrayInit(numConstants, ArrayInit::Map{});
 
   auto const consts = cls->constants();
   for (size_t i = 0; i < numConstants; i++) {
@@ -216,7 +216,7 @@ Variant f_get_class_vars(const String& className) {
   CallerFrame cf;
   Class* ctx = arGetContextClass(cf());
 
-  ArrayInit arr(numDeclProps + numSProps);
+  ArrayInit arr(numDeclProps + numSProps, ArrayInit::Map{});
 
   for (size_t i = 0; i < numDeclProps; ++i) {
     StringData* name = const_cast<StringData*>(propInfo[i].m_name);

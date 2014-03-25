@@ -1675,7 +1675,7 @@ Variant f_getimagesize(const String& filename,
   f_fclose(stream.toResource());
 
   if (result) {
-    ArrayInit ret(7);
+    ArrayInit ret(7, ArrayInit::Mixed{});
     ret.set(0, (int64_t)result->width);
     ret.set(1, (int64_t)result->height);
     ret.set(2, itype);
@@ -3687,12 +3687,12 @@ Variant f_imagecolorsforindex(const Resource& image, int index) {
   if ((index >= 0 && gdImageTrueColor(im)) ||
       (!gdImageTrueColor(im) && index >= 0 &&
        index < gdImageColorsTotal(im))) {
-    ArrayInit ret(4);
-    ret.set(s_red,  gdImageRed(im,index));
-    ret.set(s_green, gdImageGreen(im,index));
-    ret.set(s_blue, gdImageBlue(im,index));
-    ret.set(s_alpha, gdImageAlpha(im,index));
-    return ret.create();
+    return make_map_array(
+      s_red,  gdImageRed(im,index),
+      s_green, gdImageGreen(im,index),
+      s_blue, gdImageBlue(im,index),
+      s_alpha, gdImageAlpha(im,index)
+    );
   }
 #else
   if (col >= 0 && col < gdImageColorsTotal(im)) {

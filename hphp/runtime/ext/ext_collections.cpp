@@ -1525,7 +1525,7 @@ void c_Map::t___construct(const Variant& iterable /* = null_variant */) {
 }
 
 Array BaseMap::php_toArray() const {
-  ArrayInit ai(m_size);
+  ArrayInit ai(m_size, ArrayInit::Mixed{});
   Elm* p = data();
   Elm* pLimit = p + iterLimit();
   for (; p != pLimit; ++p) {
@@ -4333,7 +4333,7 @@ void BaseSet::warnOnStrIntDup() const {
 }
 
 Array BaseSet::toArrayImpl() const {
-  ArrayInit ai(m_size);
+  ArrayInit ai(m_size, ArrayInit::Mixed{});
   Elm* p = data();
   Elm* pLimit = p + iterLimit();
   for (; p != pLimit; ++p) {

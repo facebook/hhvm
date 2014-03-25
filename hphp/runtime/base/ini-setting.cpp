@@ -81,10 +81,6 @@ static std::string dynamic_to_std_string(const folly::dynamic& v) {
   not_reached();
 }
 
-/**
- * I was going to make this a constructor for Variant, but both folly::dynamic
- * and Variant have so many overrides that everything becomes ambiguous.
- **/
 static Variant dynamic_to_variant(const folly::dynamic& v) {
   switch (v.type()) {
     case folly::dynamic::Type::NULLT:
@@ -99,7 +95,7 @@ static Variant dynamic_to_variant(const folly::dynamic& v) {
       return v.data();
     case folly::dynamic::Type::ARRAY:
     case folly::dynamic::Type::OBJECT:
-      ArrayInit ret(v.size());
+      ArrayInit ret(v.size(), ArrayInit::Mixed{});
       for (auto& item : v.items()) {
         ret.add(dynamic_to_variant(item.first),
                 dynamic_to_variant(item.second));

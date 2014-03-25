@@ -1319,7 +1319,7 @@ Array ExecutionContext::getLocalDefinedVariables(int frame) {
   }
   const Func *func = fp->m_func;
   auto numLocals = func->numNamedLocals();
-  ArrayInit ret(numLocals);
+  ArrayInit ret(numLocals, ArrayInit::Map{});
   for (Id id = 0; id < numLocals; ++id) {
     TypedValue* ptv = frame_local(fp, id);
     if (ptv->m_type == KindOfUninit) {
@@ -2043,10 +2043,10 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
   // the backtrace
   if (parserFrame) {
     bt.append(
-      ArrayInit(2)
-        .set(s_file, parserFrame->filename, true)
-        .set(s_line, parserFrame->lineNumber, true)
-        .toVariant()
+      make_map_array(
+        s_file, parserFrame->filename,
+        s_line, parserFrame->lineNumber
+      )
     );
   }
 
@@ -2088,7 +2088,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
         assert(filename);
         Offset off = pc;
 
-        ArrayInit frame(parserFrame ? 4 : 2);
+        ArrayInit frame(parserFrame ? 4 : 2, ArrayInit::Map{});
         frame.set(s_file, filename, true);
         frame.set(s_line, unit->getLineNumber(off), true);
         if (parserFrame) {
@@ -2111,7 +2111,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
       continue;
     }
 
-    ArrayInit frame(7);
+    ArrayInit frame(7, ArrayInit::Map{});
 
     auto const curUnit = fp->m_func->unit();
     auto const curOp = *reinterpret_cast<const Op*>(curUnit->at(pc));

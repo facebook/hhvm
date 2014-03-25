@@ -716,7 +716,7 @@ static Array HHVM_FUNCTION(getrusage, int64_t who /* = 0 */) {
     throw SystemCallFailure("getrusage");
   }
 
-  return Array(ArrayInit(17).
+  return Array(ArrayInit(17, ArrayInit::Mixed{}).
                set(PHP_RUSAGE_PARA(ru_oublock)).
                set(PHP_RUSAGE_PARA(ru_inblock)).
                set(PHP_RUSAGE_PARA(ru_msgsnd)).

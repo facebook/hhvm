@@ -195,7 +195,7 @@ ExpressionList::flattenLiteralStrings(vector<ExpressionPtr> &literals) const {
 bool ExpressionList::getScalarValue(Variant &value) {
   if (m_arrayElements) {
     if (isScalarArrayPairs()) {
-      ArrayInit init(m_exps.size());
+      ArrayInit init(m_exps.size(), ArrayInit::Mixed{});
       for (unsigned int i = 0; i < m_exps.size(); i++) {
         ArrayPairExpressionPtr exp =
           dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);

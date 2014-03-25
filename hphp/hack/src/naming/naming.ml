@@ -681,25 +681,32 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
   if   (x = "Xhp") || (x = ":Xhp") || (x = "XHP")
   then Error.disallowed_xhp_type (p, x);
   match x with
-  (* TODO #3232737 Fix HHVM to pull primitives out of the global namespace
-   * and make them universal, then remove the namespaced versions here. *)
   | "\\void"
-  | "void"             -> N.Hprim N.Tvoid
   | "\\int"
-  | "int"              -> N.Hprim N.Tint
   | "\\bool"
-  | "bool"             -> N.Hprim N.Tbool
   | "\\float"
-  | "float"            -> N.Hprim N.Tfloat
-  | "num"
-  | "\\num"            -> N.Hprim N.Tnum
+  | "\\num"
   | "\\string"
-  | "string"           -> N.Hprim N.Tstring
   | "\\resource"
-  | "resource"         -> N.Hprim N.Tresource
   | "\\mixed"
-  | "mixed"            -> N.Hmixed
   | "\\array"
+  | "\\integer"
+  | "\\boolean"
+  | "\\double"
+  | "\\real" ->
+      if !Silent.is_silent_mode
+      then N.Hany
+      else
+        error p ("Primitive type annotations are always available and may no"^
+                 "longer be referred to in the toplevel namespace.")
+  | "void"             -> N.Hprim N.Tvoid
+  | "int"              -> N.Hprim N.Tint
+  | "bool"             -> N.Hprim N.Tbool
+  | "float"            -> N.Hprim N.Tfloat
+  | "num"              -> N.Hprim N.Tnum
+  | "string"           -> N.Hprim N.Tstring
+  | "resource"         -> N.Hprim N.Tresource
+  | "mixed"            -> N.Hmixed
   | "array"            ->
       (match hl with
       | [] -> N.Harray (None, None)
@@ -707,7 +714,6 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       | [x; y] -> N.Harray (Some (hint env x), Some (hint env y))
       | _ -> Error.too_many_args p
       )
-  | "\\integer"
   | "integer" ->
       if !Silent.is_silent_mode
       then N.Hprim N.Tint
@@ -715,7 +721,6 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
         error p "Invalid Hack type. Using \"integer\" in Hack is considered \
                  an error. Use \"int\" instead, to keep the codebase \
                  consistent."
-  | "\\boolean"
   | "boolean" ->
       if !Silent.is_silent_mode
       then N.Hprim N.Tbool
@@ -723,7 +728,6 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
         error p "Invalid Hack type. Using \"boolean\" in Hack is considered \
                  an error. Use \"bool\" instead, to keep the codebase \
                  consistent."
-  | "\\double"
   | "double" ->
       if !Silent.is_silent_mode
       then N.Hprim N.Tfloat
@@ -731,7 +735,6 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
         error p "Invalid Hack type. Using \"double\" in Hack is considered \
          an error. Use \"float\" instead. They are equivalent data types \
          and the codebase remains consistent."
-  | "\\real"
   | "real" ->
       if !Silent.is_silent_mode
       then N.Hprim N.Tfloat

@@ -7,6 +7,7 @@
   - Implement XSL extension
   - Implement Stream Filters
   - Improve php.ini support and get ready to kill HDF files
+  - Parse config files as ini files, unless filename contains '.hdf'
   - Various fixes to Redis, JSON, SPL, DateTime, MySQLi, and others
   - Remove C<T>Ref typedefs (use const T& now)
   - JIT default on in command line mode

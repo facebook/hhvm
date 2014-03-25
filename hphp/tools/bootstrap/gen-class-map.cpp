@@ -98,7 +98,7 @@ static fbstring genDocCommentPreamble(const fbstring& name,
 
 static fbstring genDocComment(const PhpFunc& func,
                               const fbstring& classname) {
-  fbstring ret(genDocCommentPreamble(func.name(), func.getDesc(),
+  fbstring ret(genDocCommentPreamble(func.getPhpName(), func.getDesc(),
                                      func.flags(), classname));
 
   for (auto &param : func.params()) {
@@ -205,8 +205,8 @@ static void writeFunction(std::ostream& out, const PhpFunc& func) {
     flags |= IsReference;
   }
 
-  out << "  " << castLong(flags, true) << ", \"" << func.name() << "\", "
-      << "\"\", "
+  out << "  " << castLong(flags, true)
+      << ", \"" << escapeCpp(func.getPhpName()) << "\", " << "\"\", "
       << castLong(0) << ", "
       << castLong(0) << ",\n";
 

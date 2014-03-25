@@ -24,7 +24,7 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
-#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/std/ext_std_options.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -207,7 +207,7 @@ Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
 
   String arg_sep;
   if (arg_separator.empty()) {
-    arg_sep = f_ini_get(s_arg_separator_output);
+    arg_sep = HHVM_FN(ini_get)(s_arg_separator_output);
   } else {
     arg_sep = arg_separator;
   }

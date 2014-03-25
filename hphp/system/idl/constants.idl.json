@@ -112,26 +112,6 @@
             "value": 200
         },
         {
-            "name": "ASSERT_ACTIVE",
-            "value": 1
-        },
-        {
-            "name": "ASSERT_BAIL",
-            "value": 3
-        },
-        {
-            "name": "ASSERT_CALLBACK",
-            "value": 2
-        },
-        {
-            "name": "ASSERT_QUIET_EVAL",
-            "value": 5
-        },
-        {
-            "name": "ASSERT_WARNING",
-            "value": 4
-        },
-        {
             "name": "CASE_LOWER",
             "value": 0
         },
@@ -1210,38 +1190,6 @@
         {
             "name": "IMG_XPM",
             "value": 16
-        },
-        {
-            "name": "INFO_ALL",
-            "value": 4294967295
-        },
-        {
-            "name": "INFO_CONFIGURATION",
-            "value": 4
-        },
-        {
-            "name": "INFO_CREDITS",
-            "value": 2
-        },
-        {
-            "name": "INFO_ENVIRONMENT",
-            "value": 16
-        },
-        {
-            "name": "INFO_GENERAL",
-            "value": 1
-        },
-        {
-            "name": "INFO_LICENSE",
-            "value": 64
-        },
-        {
-            "name": "INFO_MODULES",
-            "value": 8
-        },
-        {
-            "name": "INFO_VARIABLES",
-            "value": 32
         },
         {
             "name": "INI_ALL",

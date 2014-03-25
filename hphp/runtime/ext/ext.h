@@ -50,7 +50,6 @@
 #include "hphp/runtime/ext/ext_misc.h"
 #include "hphp/runtime/ext/ext_network.h"
 #include "hphp/runtime/ext/ext_openssl.h"
-#include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/ext/ext_output.h"
 #include "hphp/runtime/ext/ext_pdo.h"
 #include "hphp/runtime/ext/ext_posix.h"

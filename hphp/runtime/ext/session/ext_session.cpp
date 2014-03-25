@@ -43,7 +43,7 @@
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_hash.h"
-#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
@@ -516,7 +516,7 @@ public:
   bool open(const char *save_path, const char *session_name) {
     String tmpdir;
     if (*save_path == '\0') {
-      tmpdir = f_sys_get_temp_dir();
+      tmpdir = HHVM_FN(sys_get_temp_dir)();
       save_path = tmpdir.data();
     }
 
@@ -1472,18 +1472,18 @@ void f_session_set_cookie_params(int64_t lifetime,
                                  const Variant& secure /* = null */,
                                  const Variant& httponly /* = null */) {
   if (PS(use_cookies)) {
-    f_ini_set("session.cookie_lifetime", lifetime);
+    HHVM_FN(ini_set)("session.cookie_lifetime", lifetime);
     if (!path.isNull()) {
-      f_ini_set("session.cookie_path", path);
+      HHVM_FN(ini_set)("session.cookie_path", path);
     }
     if (!domain.isNull()) {
-      f_ini_set("session.cookie_domain", domain);
+      HHVM_FN(ini_set)("session.cookie_domain", domain);
     }
     if (!secure.isNull()) {
-      f_ini_set("session.cookie_secure", secure.toBoolean());
+      HHVM_FN(ini_set)("session.cookie_secure", secure.toBoolean());
     }
     if (!httponly.isNull()) {
-      f_ini_set("session.cookie_httponly", httponly.toBoolean());
+      HHVM_FN(ini_set)("session.cookie_httponly", httponly.toBoolean());
     }
   }
 }
@@ -1508,7 +1508,7 @@ Array f_session_get_cookie_params() {
 String f_session_name(const String& newname /* = null_string */) {
   String oldname = String(PS(session_name));
   if (!newname.isNull()) {
-    f_ini_set("session.name", newname);
+    HHVM_FN(ini_set)("session.name", newname);
   }
   return oldname;
 }
@@ -1530,7 +1530,7 @@ Variant f_session_module_name(const String& newname /* = null_string */) {
     }
     PS(mod_data) = false;
 
-    f_ini_set("session.save_handler", newname);
+    HHVM_FN(ini_set)("session.save_handler", newname);
   }
 
   return oldname;
@@ -1563,7 +1563,7 @@ bool HHVM_FUNCTION(session_set_save_handler,
     f_register_shutdown_function(1, String("session_write_close"));
   }
 
-  f_ini_set("session.save_handler", "user");
+  HHVM_FN(ini_set)("session.save_handler", "user");
   return true;
 }
 
@@ -1573,7 +1573,7 @@ String f_session_save_path(const String& newname /* = null_string */) {
       raise_warning("The save_path cannot contain NULL characters");
       return false;
     }
-    f_ini_set("session.save_path", newname);
+    HHVM_FN(ini_set)("session.save_path", newname);
   }
   return String(PS(save_path));
 }
@@ -1613,7 +1613,7 @@ bool f_session_regenerate_id(bool delete_old_session /* = false */) {
 String f_session_cache_limiter(const String& new_cache_limiter /* = null_string */) {
   String ret(PS(cache_limiter));
   if (!new_cache_limiter.isNull()) {
-    f_ini_set("session.cache_limiter", new_cache_limiter);
+    HHVM_FN(ini_set)("session.cache_limiter", new_cache_limiter);
   }
   return ret;
 }
@@ -1621,7 +1621,7 @@ String f_session_cache_limiter(const String& new_cache_limiter /* = null_string 
 int64_t f_session_cache_expire(const String& new_cache_expire /* = null_string */) {
   int64_t ret = PS(cache_expire);
   if (!new_cache_expire.isNull()) {
-    f_ini_set("session.cache_expire", new_cache_expire.toInt64());
+    HHVM_FN(ini_set)("session.cache_expire", new_cache_expire.toInt64());
   }
   return ret;
 }

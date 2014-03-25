@@ -50,7 +50,7 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
@@ -1532,7 +1532,7 @@ void hphp_process_init() {
   // Initialize per-process dynamic PHP-visible consts before ClassInfo::Load()
   k_PHP_BINARY = makeStaticString(current_executable_path());
   k_PHP_BINDIR = makeStaticString(current_executable_directory());
-  k_PHP_OS = makeStaticString(f_php_uname("s"));
+  k_PHP_OS = makeStaticString(HHVM_FN(php_uname)("s").toString());
   k_PHP_SAPI = makeStaticString(RuntimeOption::ExecutionMode);
 
   ClassInfo::Load();

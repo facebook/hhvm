@@ -232,6 +232,8 @@ public:
   static std::string WarmupDocument;
   static std::string RequestInitFunction;
   static std::string RequestInitDocument;
+  static std::string AutoPrependFile;
+  static std::string AutoAppendFile;
   static std::vector<std::string> ThreadDocuments;
   static std::vector<std::string> ThreadLoopDocuments;
 

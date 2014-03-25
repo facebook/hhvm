@@ -111,7 +111,9 @@ struct EagerVMRegAnchor {
       DEBUG_ONLY const Cell* sp = vmsp();
       DEBUG_ONLY const auto* pc = vmpc();
       VMRegAnchor _;
-      assert(vmfp() == fp && vmsp() == sp && vmpc() == pc);
+      assert(vmfp() == fp);
+      assert(vmsp() == sp);
+      assert(vmpc() == pc);
     }
     m_old = tl_regState;
     tl_regState = VMRegState::CLEAN;

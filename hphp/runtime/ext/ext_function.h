@@ -53,8 +53,9 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset);
 
 /**
  * HipHop extension that allows requesting only a subset of function arguments.
+ * Exposed as __SystemLib\func_slice_args.
  */
-Variant f_hphp_func_slice_args(int offset);
+Variant f_func_slice_args(int offset);
 
 /**
  * HPHP actually inlines this function, so this is degenerated.

@@ -273,7 +273,8 @@ Variant f_func_get_args() {
   FUNC_GET_ARGS_IMPL(0);
 }
 
-Variant f_hphp_func_slice_args(int offset) {
+// __SystemLib\func_slice_args
+Variant f_func_slice_args(int offset) {
   if (offset < 0) {
     offset = 0;
   }

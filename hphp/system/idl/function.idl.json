@@ -223,7 +223,7 @@
             ]
         },
         {
-            "name": "hphp_func_slice_args",
+            "name": "__SystemLib\\func_slice_args",
             "desc": "For internal use only, used to merge array_slice() with func_get_args() while avoiding unnecessary copies and allocations. This should not be called directly.",
             "flags": [
             ],

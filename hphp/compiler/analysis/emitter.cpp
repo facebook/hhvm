@@ -4275,7 +4275,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             if (innerCall->isCallToFunction("func_get_args") &&
                 (!innerParams || innerParams->getCount() == 0)) {
               params->removeElement(0);
-              emitFuncCall(e, innerCall, "hphp_func_slice_args", params);
+              emitFuncCall(e, innerCall,
+                           "__SystemLib\\func_slice_args", params);
               return true;
             }
           }
@@ -7392,7 +7393,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
     // foo()
     nLiteral = makeStaticString(nameStr);
     fcallBuiltin = canEmitBuiltinCall(nameStr, numParams);
-    if (fcallBuiltin && fcallBuiltin->attrs() & AttrAllowOverride) {
+    if (fcallBuiltin && (fcallBuiltin->attrs() & AttrAllowOverride)) {
       if (!Option::WholeProgram ||
           (node->getFuncScope() && node->getFuncScope()->isUserFunction())) {
         // In non-WholeProgram mode, we can't tell whether the function
@@ -7403,7 +7404,9 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       }
     }
     StringData* nsName = nullptr;
-    if (!node->hadBackslash()) {
+    if (!node->hadBackslash() && !nameOverride) {
+      // nameOverride is to be used only when there's an exact function
+      // to be called ... supporting a fallback doesn't make sense
       const std::string& nonNSName = node->getNonNSOriginalName();
       if (nonNSName != nameStr) {
         nsName = nLiteral;
@@ -7417,6 +7420,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       if (nsName == nullptr) {
         e.FPushFuncD(numParams, nLiteral);
       } else {
+        assert(!nameOverride);
         e.FPushFuncU(numParams, nsName, nLiteral);
       }
     }

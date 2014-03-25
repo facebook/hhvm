@@ -207,6 +207,10 @@ let check_not_final env pos modifiers =
   then error_at env pos "class variable cannot be final";
   ()
 
+let check_toplevel env pos =
+  if env.mode = Ast.Mstrict
+  then error_at env pos "Remove all toplevel statements except for requires"
+
 (*****************************************************************************)
 (* Check expressions. *)
 (*****************************************************************************)
@@ -491,6 +495,10 @@ and toplevel acc env terminate =
   | x when terminate x ->
       L.back env.lb;
       List.rev acc
+  | Tsc ->
+      (* Ignore extra semicolons at toplevel (important so we don't yell about
+       * them in strict mode). *)
+      toplevel acc env terminate
   | Tltlt ->
       (* Parsing attribute << .. >> *)
       let attr = attribute_remain env SMap.empty in
@@ -507,9 +515,11 @@ and toplevel acc env terminate =
       List.rev acc
   | _ ->
       (* All the other statements. *)
+      let pos = Pos.make env.lb in
       L.back env.lb;
       let error_state = !(env.errors) in
       let stmt = Stmt (statement env) in
+      check_toplevel env pos;
       if error_state != !(env.errors)
       then ignore_toplevel ~attr:SMap.empty (stmt :: acc) env terminate
       else toplevel (stmt :: acc) env terminate
@@ -586,8 +596,7 @@ and toplevel_word ~attr env = function
       let pos = Pos.make env.lb in
       L.back env.lb;
       let stmt = statement env in
-      if env.mode = Ast.Mstrict
-      then error_at env pos "Remove all toplevel statements except for requires";
+      check_toplevel env pos;
       [define_or_stmt env stmt]
 
 and define_or_stmt env = function
@@ -3169,6 +3178,7 @@ and typedef env =
   let tconstraint = typedef_constraint env in
   expect env Teq;
   let td = typedef_body env in
+  expect env Tsc;
   id, tparams, tconstraint, td
 
 and typedef_constraint env =

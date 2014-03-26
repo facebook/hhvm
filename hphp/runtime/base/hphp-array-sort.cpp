@@ -67,10 +67,7 @@ template <typename AccessorT>
 HphpArray::SortFlavor
 HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
   assert(m_size > 0);
-  if (isPacked()) {
-    // todo t2607563: this is pessimistic.
-    packedToMixed();
-  }
+  assert(!isPacked());
   if (!checkTypes && m_size == m_used) {
     // No need to loop over the elements, we're done
     return GenericSort;
@@ -152,7 +149,7 @@ void HphpArray::postSort(bool resetKeys) {
 
 ArrayData* HphpArray::EscalateForSort(ArrayData* ad) {
   // task #1910931 only do this for refCount() > 1
-  return asHphpArray(ad)->copyImpl();
+  return asMixed(ad)->copyMixed();
 }
 
 #define SORT_CASE(flag, cmp_type, acc_type) \
@@ -211,17 +208,17 @@ ArrayData* HphpArray::EscalateForSort(ArrayData* ad) {
   } while (0)
 
 void HphpArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
-  auto a = asHphpArray(ad);
+  auto a = asMixed(ad);
   SORT_BODY(KeyAccessor, false);
 }
 
 void HphpArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
-  auto a = asHphpArray(ad);
+  auto a = asMixed(ad);
   SORT_BODY(ValAccessor, true);
 }
 
 void HphpArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
-  auto a = asHphpArray(ad);
+  auto a = asMixed(ad);
   SORT_BODY(ValAccessor, false);
 }
 
@@ -259,17 +256,17 @@ void HphpArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
   } while (0)
 
 bool HphpArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
-  auto a = asHphpArray(ad);
+  auto a = asMixed(ad);
   USER_SORT_BODY(KeyAccessor, false);
 }
 
 bool HphpArray::Usort(ArrayData* ad, const Variant& cmp_function) {
-  auto a = asHphpArray(ad);
+  auto a = asMixed(ad);
   USER_SORT_BODY(ValAccessor, true);
 }
 
 bool HphpArray::Uasort(ArrayData* ad, const Variant& cmp_function) {
-  auto a = asHphpArray(ad);
+  auto a = asMixed(ad);
   USER_SORT_BODY(ValAccessor, false);
 }
 

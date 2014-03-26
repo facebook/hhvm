@@ -351,7 +351,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   assert(func->isMagic());
   assert(func->numParams() == 2);
   using namespace reg;
-  using MkPacked = HphpArray* (*)(uint32_t, const TypedValue*);
+  using MkPacked = ArrayData* (*)(uint32_t, const TypedValue*);
 
   Asm a { mcg->code.main() };
   Label not_magic_call;

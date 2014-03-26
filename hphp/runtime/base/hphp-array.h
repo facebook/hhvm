@@ -42,9 +42,6 @@ public:
    *
    * This can be used as an optimization vs. ArrayIter, which uses
    * indirect calls in the loop.
-   *
-   * Note that this iterator class doesn't skip tombstones.  You have
-   * to do that yourself if you want it.
    */
   struct ValIter;
 
@@ -130,7 +127,7 @@ public:
    *
    * Pre: size > 0
    */
-  static HphpArray* MakePacked(uint32_t size, const TypedValue* values);
+  static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
 
   /*
    * Like MakePacked, but given static strings, make a struct-like array.
@@ -140,12 +137,15 @@ public:
                                const TypedValue* values);
 
   /*
-   * Allocate an uncounted HphpArray and copy the values from the input 'array'
-   * into the uncounted one. All values copied are made uncounted as well.
-   * An uncounted array can only contain uncounted values (primitive values,
-   * uncounted or static strings and uncounted or static arrays).
+   * Allocate an uncounted HphpArray and copy the values from the
+   * input 'array' into the uncounted one. All values copied are made
+   * uncounted as well.  An uncounted array can only contain uncounted
+   * values (primitive values, uncounted or static strings and
+   * uncounted or static arrays).  The Packed version does the same
+   * when the array has a kPackedKind.
    */
   static HphpArray* MakeUncounted(ArrayData* array);
+  static ArrayData* MakeUncountedPacked(ArrayData* array);
 
   /*
    * Return a pointer to the singleton static empty array.  This is
@@ -156,6 +156,7 @@ public:
 
   // This behaves the same as iter_begin except that it assumes
   // this array is not empty and its not virtual.
+  ALWAYS_INLINE
   ssize_t getIterBegin() const {
     assert(!empty());
     if (LIKELY(!isTombstone(data()[0].data.m_type))) {
@@ -237,17 +238,14 @@ public:
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);
+  static void ReleaseUncountedPacked(ArrayData*);
 
   // overrides ArrayData
   static bool ValidMArrayIter(const ArrayData*, const MArrayIter &fp);
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
 
-  HphpArray* copyImpl() const;
-  HphpArray* copyPacked() const;
   HphpArray* copyMixed() const;
-  HphpArray* copyPackedAndResizeIfNeeded() const;
   HphpArray* copyMixedAndResizeIfNeeded() const;
-  HphpArray* copyPackedAndResizeIfNeededSlow() const;
   HphpArray* copyMixedAndResizeIfNeededSlow() const;
 
   // nvGet and friends.
@@ -327,24 +325,17 @@ private:
   enum class CloneMixed {};
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
-private:
+public:
   // Safe downcast helpers
-  friend HphpArray* asPacked(ArrayData* ad);
-  friend const HphpArray* asPacked(const ArrayData* ad);
   static HphpArray* asMixed(ArrayData* ad);
   static const HphpArray* asMixed(const ArrayData* ad);
-  static HphpArray* asHphpArray(ArrayData* ad);
-  static const HphpArray* asHphpArray(const ArrayData* ad);
 
+private:
   static void getElmKey(const Elm& e, TypedValue* out);
 
 private:
   enum class AllocMode : bool { Smart, NonSmart };
 
-  template<class CopyElem>
-  static HphpArray* CopyPacked(const HphpArray& other,
-                               AllocMode,
-                               CopyElem);
   template<class CopyKeyValue>
   static HphpArray* CopyMixed(const HphpArray& other,
                               AllocMode,

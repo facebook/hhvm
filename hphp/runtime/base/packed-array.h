@@ -25,12 +25,13 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct Variant;
-struct ArrayData;
 struct RefData;
+struct ArrayData;
 struct StringData;
 struct TypedValue;
 struct MArrayIter;
 struct APCHandle;
+struct HphpArray;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -50,7 +51,6 @@ struct APCHandle;
 struct PackedArray {
   static void Release(ArrayData*);
   static TypedValue* NvGetInt(const ArrayData*, int64_t ki);
-  static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, const Variant& v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v,
@@ -69,16 +69,25 @@ struct PackedArray {
     bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
-  static ssize_t IterAdvance(const ArrayData*, ssize_t prev);
-  static ssize_t IterRewind(const ArrayData*, ssize_t prev);
+  static ssize_t IterBegin(const ArrayData*);
+  static ssize_t IterEnd(const ArrayData*);
+  static ssize_t IterAdvance(const ArrayData*, ssize_t pos);
+  static ssize_t IterRewind(const ArrayData*, ssize_t pos);
   static bool ValidMArrayIter(const ArrayData*, const MArrayIter& fp);
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* NonSmartCopy(const ArrayData*);
-  static ArrayData* ZSetInt(ArrayData* ad, int64_t k, RefData* v);
-  static ArrayData* ZSetStr(ArrayData* ad, StringData* k, RefData* v);
-  static ArrayData* ZAppend(ArrayData* ad, RefData* v);
+  static ArrayData* EscalateForSort(ArrayData*);
+  static void Ksort(ArrayData*, int, bool);
+  static void Sort(ArrayData*, int, bool);
+  static void Asort(ArrayData*, int, bool);
+  static bool Uksort(ArrayData*, const Variant&);
+  static bool Usort(ArrayData*, const Variant&);
+  static bool Uasort(ArrayData*, const Variant&);
+  static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);
+  static ArrayData* ZSetStr(ArrayData*, StringData* k, RefData* v);
+  static ArrayData* ZAppend(ArrayData*, RefData* v);
   static ArrayData* Append(ArrayData*, const Variant& v, bool copy);
   static ArrayData* AppendRef(ArrayData*, const Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
@@ -88,6 +97,20 @@ struct PackedArray {
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
   static void OnSetEvalScalar(ArrayData*);
+
+  //////////////////////////////////////////////////////////////////////
+
+  static bool checkInvariants(const ArrayData*);
+
+private:
+  static ArrayData* Grow(ArrayData*);
+  static HphpArray* ToMixedHeader(const ArrayData*, size_t);
+  static HphpArray* ToMixed(ArrayData*);
+  static HphpArray* ToMixedCopy(const ArrayData*);
+  static HphpArray* ToMixedCopyReserve(const ArrayData*, size_t);
+  static ArrayData* CopyAndResizeIfNeededSlow(const ArrayData*);
+  static ArrayData* CopyAndResizeIfNeeded(const ArrayData*);
+  static ArrayData* ResizeIfNeeded(ArrayData*);
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -4171,56 +4171,41 @@ void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
   emitFwdJcc(CC_BE, inst->taken());
 }
 
-/**
- * Load the pointer to the HphpArray::Elm struct into the destination register.
- * It performs the load with 2 lea instruction which seems to lead to code that
- * is shorter and faster.
- * It's passed the pointer to the HphpArray and the index into the array. The
- * index must be inbound.
- *
- * Essentially given a pointer 'array' to a HphpArray and an index 'idx' the
- * computation to get to the HphpArray::Elm is the following
- * array + HphpArray::dataOff() + idx * sizeof(HphpArray::Elm)
- * and given sizeof(HphpArray::Elm) = 24
- * array + HphpArray::dataOff() + idx * 24
- * because of the lea constraints we do
- * array + HphpArray::dataOff() + 8 * (idx * 3)
- * and we use a lea to compute idx * 3 so
- * dst <- idx * 2 + idx
- * dst <- array + HphpArray::dataOff() + reg * 8
- * which is what this function does
- */
-static void emitLoadPackedArrayElemAddr(Asm& a,
-                                        PhysReg arr,
-                                        PhysReg idx,
-                                        PhysReg dst) {
-  static_assert(sizeof(HphpArray::Elm) == 24,
-                "HphpArray:Elm size must be 24 bytes");
-  auto scaledIdx1 = idx * 2;
-  a.lea(idx[scaledIdx1], dst);
-  auto scaledIdx2 = dst * 8;
-  auto scaledIdxDsp = scaledIdx2 + HphpArray::dataOff();
-  a.lea(arr[scaledIdxDsp], dst);
-}
-
 void CodeGenerator::cgLdPackedArrayElem(IRInstruction* inst) {
   if (inst->src(0)->isConst()) {
     // This would require two scratch registers and should be very
     // rare. t3626251
     CG_PUNT(LdPackedArrayElem-ConstArray);
   }
-  auto arrReg = srcLoc(0).reg();
-  auto idx = inst->src(1);
-  auto idxReg = srcLoc(1).reg();
-  if (idx->isConst()) {
-    size_t offset = HphpArray::dataOff() +
-                    idx->intVal() * sizeof(HphpArray::Elm) +
-                    HphpArray::Elm::dataOff();
-    cgLoad(inst->dst(), dstLoc(0), arrReg[offset]);
-  } else {
-    emitLoadPackedArrayElemAddr(m_as, arrReg, idxReg, m_rScratch);
-    cgLoad(inst->dst(), dstLoc(0), m_rScratch[HphpArray::Elm::dataOff()]);
+
+  auto const rArr = srcLoc(0).reg();
+  auto const rIdx = srcLoc(1).reg();
+  auto& a = m_as;
+
+  // We don't know if we have the last use of rIdx, so we can't
+  // clobber it.
+  if (rIdx != InvalidReg) {
+    /*
+     * gcc 4.8 did something more like:
+     *
+     *    lea 1(%base), %scratch   ; sizeof(ArrayData) == sizeof(TypedValue)
+     *    salq $4, %scratch
+     *    movq (%base,%scratch,1), %r1
+     *    movzxb 8(%base,%scratch,1), %r2
+     *
+     * Using this way for now (which is more like what clang produced)
+     * just because it was 2 bytes smaller.
+     */
+    static_assert(sizeof(TypedValue) == 16, "");
+    a.    movq  (rIdx, m_rScratch);
+    a.    shlq  (0x4, m_rScratch);
+    cgLoad(inst->dst(), dstLoc(0), rArr[m_rScratch + sizeof(ArrayData)]);
+    return;
   }
+
+  auto const idx    = inst->src(1)->intVal();
+  auto const offset = sizeof(ArrayData) + idx * sizeof(TypedValue);
+  cgLoad(inst->dst(), dstLoc(0), rArr[offset]);
 }
 
 void CodeGenerator::cgCheckPackedArrayElemNull(IRInstruction* inst) {
@@ -4229,24 +4214,26 @@ void CodeGenerator::cgCheckPackedArrayElemNull(IRInstruction* inst) {
     // rare. t3626251
     CG_PUNT(LdPackedArrayElemAddr-ConstArray);
   }
-  auto arrReg = srcLoc(0).reg();
-  auto idx = inst->src(1);
-  auto idxReg = srcLoc(1).reg();
-  if (idx->isConst()) {
-    size_t offset = HphpArray::dataOff() +
-                    idx->intVal() * sizeof(HphpArray::Elm) +
-                    HphpArray::Elm::dataOff() +
-                    TVOFF(m_type);
-    emitCmpTVType(m_as, KindOfNull, arrReg[offset]);
+
+  auto const rArr = srcLoc(0).reg();
+  auto const rIdx = srcLoc(1).reg();
+  auto& a = m_as;
+
+  if (rIdx != InvalidReg) {
+    static_assert(sizeof(TypedValue) == 16, "");
+    a.    movq  (rIdx, m_rScratch);
+    a.    shlq  (0x4, m_rScratch);
+    emitCmpTVType(a, KindOfNull,
+      rArr[m_rScratch + sizeof(ArrayData) + TVOFF(m_type)]);
   } else {
-    emitLoadPackedArrayElemAddr(m_as, arrReg, idxReg, m_rScratch);
-    emitCmpTVType(m_as, KindOfNull,
-                  m_rScratch[HphpArray::Elm::dataOff() + TVOFF(m_type)]);
+    auto const idx    = inst->src(1)->intVal();
+    auto const offset = sizeof(ArrayData) + idx * sizeof(TypedValue);
+    emitCmpTVType(a, KindOfNull, rArr[offset + TVOFF(m_type)]);
   }
 
-  auto dstReg = dstLoc(0).reg();
-  m_as.setne(rbyte(dstReg));
-  m_as.movzbl(rbyte(dstReg), r32(dstReg));
+  auto const dst = dstLoc(0).reg();
+  a.    setne  (rbyte(dst));
+  a.    movzbl (rbyte(dst), r32(dst));
 }
 
 void CodeGenerator::cgCheckBounds(IRInstruction* inst) {

@@ -2007,6 +2007,7 @@ static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
   }
 }
 
+namespace {
 class ArraySortTmp {
  public:
   explicit ArraySortTmp(Array& arr) : m_arr(arr) {
@@ -2024,6 +2025,7 @@ class ArraySortTmp {
   Array& m_arr;
   ArrayData* m_ad;
 };
+}
 
 static bool
 php_sort(VRefParam container, int sort_flags,

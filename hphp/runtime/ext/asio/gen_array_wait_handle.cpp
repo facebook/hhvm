@@ -80,9 +80,9 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
 
   Object exception;
 
-  HphpArray::ValIter arrIter(static_cast<HphpArray*>(depCopy.get()));
+  HphpArray::ValIter arrIter(depCopy.get());
   for (; !arrIter.empty(); arrIter.advance()) {
-    auto const current = &arrIter.current()->data;
+    auto const current = arrIter.current();
     if (UNLIKELY(current->m_type == KindOfRef)) {
       tvUnbox(current);
     }
@@ -109,7 +109,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
     auto const current_pos = arrIter.currentPos();
     arrIter.advance();
     for (; !arrIter.empty(); arrIter.advance()) {
-      auto const future = &arrIter.current()->data;
+      auto const future = arrIter.current();
       if (UNLIKELY(future->m_type == KindOfRef)) {
         tvUnbox(future);
       }
@@ -161,10 +161,10 @@ void c_GenArrayWaitHandle::initialize(const Object& exception, const Array& deps
 }
 
 void c_GenArrayWaitHandle::onUnblocked() {
-  HphpArray::ValIter arrIter(static_cast<HphpArray*>(m_deps.get()), m_iterPos);
+  HphpArray::ValIter arrIter(m_deps.get(), m_iterPos);
 
   for (; !arrIter.empty(); arrIter.advance()) {
-    auto const current = tvAssertCell(&arrIter.current()->data);
+    auto const current = tvAssertCell(arrIter.current());
 
     if (IS_NULL_TYPE(current->m_type)) continue;
     assert(current->m_type == KindOfObject);

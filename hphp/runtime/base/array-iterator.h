@@ -63,8 +63,7 @@ enum class IterNextIndex : uint16_t {
 /**
  * Iterator for an immutable array.
  */
-class ArrayIter {
- public:
+struct ArrayIter {
   enum Type : uint16_t {
     TypeUndefined = 0,
     TypeArray,
@@ -75,8 +74,9 @@ class ArrayIter {
   enum NoInc { noInc = 0 };
   enum NoIncNonNull { noIncNonNull = 0 };
 
-  /**
-   * Constructors.
+  /*
+   * Constructors.  Note that sometimes ArrayIter objects are created
+   * without running their C++ constructor.  (See new_iter_array.)
    */
   ArrayIter() : m_pos(ArrayData::invalid_index) {
     m_data = nullptr;
@@ -91,11 +91,6 @@ class ArrayIter {
     }
   }
   explicit ArrayIter(const HphpArray*) = delete;
-  ArrayIter(const HphpArray* data, NoIncNonNull) {
-    assert(data);
-    setArrayData(data);
-    m_pos = data->getIterBegin();
-  }
   explicit ArrayIter(const Array& array);
   explicit ArrayIter(ObjectData* obj);
   ArrayIter(ObjectData* obj, NoInc);
@@ -279,7 +274,11 @@ class ArrayIter {
     return (ObjectData*)((intptr_t)m_obj & ~1);
   }
 
- private:
+private:
+  friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
+  template<bool withRef>
+  friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
+    TypedValue*);
   void arrInit(const ArrayData* arr);
 
   template <bool incRef>
@@ -344,7 +343,7 @@ class ArrayIter {
     if (ad != nullptr) {
       if (ad->isPacked()) {
         m_nextHelperIdx = IterNextIndex::ArrayPacked;
-      } else if (!ad->isHphpArray()) {
+      } else if (!ad->isMixed()) {
         m_nextHelperIdx = IterNextIndex::Array;
       }
     }
@@ -365,8 +364,15 @@ class ArrayIter {
   ssize_t m_pos;
  private:
   int m_version;
-  Type m_itype;
-  IterNextIndex m_nextHelperIdx;
+  // This is unioned so new_iter_array can initialize it more
+  // efficiently.
+  union {
+    struct {
+      Type m_itype;
+      IterNextIndex m_nextHelperIdx;
+    };
+    uint32_t m_itypeAndNextHelperIdx;
+  };
 
   friend struct Iter;
 };
@@ -591,7 +597,7 @@ static_assert(sizeof(MIterTable) == 2*64, "");
 extern __thread MIterTable tl_miter_table;
 
 void free_strong_iterators(ArrayData*);
-void move_strong_iterators(ArrayData* dest, ArrayData* src);
+ArrayData* move_strong_iterators(ArrayData* dest, ArrayData* src);
 
 //////////////////////////////////////////////////////////////////////
 

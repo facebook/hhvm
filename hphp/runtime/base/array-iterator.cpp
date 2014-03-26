@@ -28,6 +28,7 @@
 #include "hphp/runtime/ext/ext_collections.h"
 
 #include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 
 namespace HPHP {
@@ -713,13 +714,24 @@ void free_strong_iterators(ArrayData* ad) {
   });
 }
 
-void move_strong_iterators(ArrayData* dst, ArrayData* src) {
+/*
+ * This function returns its first argument so that in some cases we
+ * can do tails calls (or maybe avoid spills).
+ *
+ * Note that in some cases reusing the return value can be (very
+ * slightly) worse.  The compiler won't know that the return value is
+ * going to be the same as the argument, so if it didn't already have
+ * to spill to make the call, or it can't tail call for some other
+ * reason, you can cause an extra move after the return.
+ */
+ArrayData* move_strong_iterators(ArrayData* dst, ArrayData* src) {
   for_each_strong_iterator([&] (MIterTable::Ent& ent) {
     if (ent.array == src) {
       ent.array = dst;
       ent.iter->setContainer(dst);
     }
   });
+  return dst;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1089,11 +1101,43 @@ static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
-/**
- * new_iter_array creates an iterator for the specified array iff the array is
- * not empty. If new_iter_array creates an iterator, it does not increment the
- * refcount of the specified array. If new_iter_array does not create an
- * iterator, it decRefs the array.
+static NEVER_INLINE
+int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
+  assert(arr->hasExactlyOneRef());
+  assert(arr->isPacked());
+  PackedArray::Release(arr);
+  if (debug) {
+    iter->arr().setIterType(ArrayIter::TypeUndefined);
+  }
+  return 0;
+}
+
+static NEVER_INLINE
+int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
+  assert(arr->isMixed());
+  assert(arr->hasExactlyOneRef());
+  HphpArray::Release(arr);
+  if (debug) {
+    iter->arr().setIterType(ArrayIter::TypeUndefined);
+  }
+  return 0;
+}
+
+NEVER_INLINE
+static int64_t iter_next_free_apc(Iter* iter, APCLocalArray* arr) {
+  assert(arr->hasExactlyOneRef());
+  APCLocalArray::Release(arr);
+  if (debug) {
+    iter->arr().setIterType(ArrayIter::TypeUndefined);
+  }
+  return 0;
+}
+
+/*
+ * new_iter_array creates an iterator for the specified array iff the
+ * array is not empty.  If new_iter_array creates an iterator, it does
+ * not increment the refcount of the specified array.  If
+ * new_iter_array does not create an iterator, it decRefs the array.
  */
 template <bool withRef>
 NEVER_INLINE
@@ -1120,72 +1164,123 @@ int64_t new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
 int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
   valOut = tvToCell(valOut);
-  if (UNLIKELY(!ad->isHphpArray())) {
+
+  auto const isMixed = ad->isMixed();
+  auto const isPacked = ad->isPacked();
+  if (UNLIKELY(!isMixed && !isPacked)) {
     goto cold;
   }
-  {
-    HphpArray* arr = (HphpArray*)ad;
-    if (LIKELY(arr->getSize() != 0)) {
-      if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
-        goto cold;
-      }
-      tvDecRefOnly(valOut);
-      // We are transferring ownership of the array to the iterator, therefore
-      // we do not need to adjust the refcount.
-      (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
-      dest->arr().setIterType(ArrayIter::TypeArray);
-      arr->getArrayElm<false>(dest->arr().m_pos, valOut, nullptr);
-      return 1LL;
-    }
-    // We did not transfer ownership of the array to an iterator, so we need
-    // to decRef the array.
-    if (UNLIKELY(arr->hasExactlyOneRef())) {
+
+  if (LIKELY(ad->getSize() != 0)) {
+    if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
       goto cold;
     }
-    arr->decRefCount();
-    return 0LL;
+    tvDecRefOnly(valOut);
+
+    // We are transferring ownership of the array to the iterator, therefore
+    // we do not need to adjust the refcount.
+    auto& aiter = dest->arr();
+    aiter.m_data = ad;
+    auto const itypeU32 = static_cast<uint32_t>(ArrayIter::TypeArray);
+
+    if (LIKELY(isPacked)) {
+      aiter.m_pos = 0;
+      aiter.m_itypeAndNextHelperIdx =
+        static_cast<uint32_t>(IterNextIndex::ArrayPacked) << 16 | itypeU32;
+      assert(aiter.m_itype == ArrayIter::TypeArray);
+      assert(aiter.m_nextHelperIdx == IterNextIndex::ArrayPacked);;
+      cellDup(*tvToCell(packedData(ad)), *valOut);
+      return 1;
+    }
+
+    auto const mixed = HphpArray::asMixed(ad);
+    aiter.m_pos = mixed->getIterBegin();
+    aiter.m_itypeAndNextHelperIdx =
+      static_cast<uint32_t>(IterNextIndex::ArrayMixed) << 16 | itypeU32;
+    assert(aiter.m_itype == ArrayIter::TypeArray);
+    assert(aiter.m_nextHelperIdx == IterNextIndex::ArrayMixed);
+    mixed->getArrayElm<false>(aiter.m_pos, valOut, nullptr);
+    return 1;
   }
+
+  // We did not transfer ownership of the array to an iterator, so we need
+  // to decRef the array.
+  if (UNLIKELY(ad->hasExactlyOneRef())) {
+    if (isPacked) return iter_next_free_packed(dest, ad);
+    return iter_next_free_mixed(dest, ad);
+  }
+  ad->decRefCount();
+  return 0;
+
 cold:
   return new_iter_array_cold<false>(dest, ad, valOut, nullptr);
 }
 
 template <bool withRef>
-int64_t new_iter_array_key(Iter* dest, ArrayData* ad,
-                           TypedValue* valOut, TypedValue* keyOut) {
+int64_t new_iter_array_key(Iter* dest,
+                           ArrayData* ad,
+                           TypedValue* valOut,
+                           TypedValue* keyOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
   if (!withRef) {
     valOut = tvToCell(valOut);
     keyOut = tvToCell(keyOut);
   }
-  if (UNLIKELY(!ad->isHphpArray())) {
+  auto const isMixed = ad->isMixed();
+  auto const isPacked = ad->isPacked();
+  if (UNLIKELY(!isMixed && !isPacked)) {
     goto cold;
   }
-  {
-    HphpArray* arr = (HphpArray*)ad;
-    if (LIKELY(arr->getSize() != 0)) {
-      if (!withRef) {
-        if (UNLIKELY(tvDecRefWillCallHelper(valOut)) ||
-            UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
-          goto cold;
-        }
-        tvDecRefOnly(valOut);
-        tvDecRefOnly(keyOut);
+
+  if (LIKELY(ad->getSize() != 0)) {
+    if (!withRef) {
+      if (UNLIKELY(tvDecRefWillCallHelper(valOut)) ||
+          UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
+        goto cold;
       }
-      // We are transferring ownership of the array to the iterator, therefore
-      // we do not need to adjust the refcount.
-      (void) new (&dest->arr()) ArrayIter(arr, ArrayIter::noIncNonNull);
-      dest->arr().setIterType(ArrayIter::TypeArray);
-      arr->getArrayElm<withRef>(dest->arr().m_pos, valOut, keyOut);
-      return 1LL;
+      tvDecRefOnly(valOut);
+      tvDecRefOnly(keyOut);
     }
-    // We did not transfer ownership of the array to an iterator, so we need
-    // to decRef the array.
-    if (UNLIKELY(arr->hasExactlyOneRef())) {
-      goto cold;
+
+    // We are transferring ownership of the array to the iterator, therefore
+    // we do not need to adjust the refcount.
+    auto& aiter = dest->arr();
+    aiter.m_data = ad;
+    auto const itypeU32 = static_cast<uint32_t>(ArrayIter::TypeArray);
+
+    if (LIKELY(isPacked)) {
+      aiter.m_pos = 0;
+      aiter.m_itypeAndNextHelperIdx =
+        static_cast<uint32_t>(IterNextIndex::ArrayPacked) << 16 | itypeU32;
+      assert(aiter.m_itype == ArrayIter::TypeArray);
+      assert(aiter.m_nextHelperIdx == IterNextIndex::ArrayPacked);
+      keyOut->m_type = KindOfInt64;
+      keyOut->m_data.num = 0;
+      if (withRef) {
+        tvAsVariant(valOut).setWithRef(tvAsCVarRef(packedData(ad)));
+      } else {
+        cellDup(*tvToCell(packedData(ad)), *valOut);
+      }
+      return 1;
     }
-    arr->decRefCount();
-    return 0LL;
+
+    auto const mixed = HphpArray::asMixed(ad);
+    aiter.m_pos = mixed->getIterBegin();
+    aiter.m_itypeAndNextHelperIdx =
+      static_cast<uint32_t>(IterNextIndex::ArrayMixed) << 16 | itypeU32;
+    assert(aiter.m_itype = ArrayIter::TypeArray);
+    assert(aiter.m_nextHelperIdx == IterNextIndex::ArrayMixed);
+    mixed->getArrayElm<withRef>(aiter.m_pos, valOut, keyOut);
+    return 1;
   }
+
+  if (UNLIKELY(ad->hasExactlyOneRef())) {
+    if (isPacked) return iter_next_free_packed(dest, ad);
+    return iter_next_free_mixed(dest, ad);
+  }
+  ad->decRefCount();
+  return 0;
+
 cold:
   return new_iter_array_cold<withRef>(dest, ad, valOut, keyOut);
 }
@@ -1395,31 +1490,6 @@ int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   return 1;
 }
 
-static NEVER_INLINE
-int64_t iter_next_free_arr(Iter* iter, HphpArray* arr) {
-  assert(arr->hasExactlyOneRef());
-  if (arr->isPacked()) {
-    PackedArray::Release(arr);
-  } else {
-    assert(arr->isHphpArray());
-    HphpArray::Release(arr);
-  }
-  if (debug) {
-    iter->arr().setIterType(ArrayIter::TypeUndefined);
-  }
-  return 0;
-}
-
-NEVER_INLINE
-static int64_t iter_next_free_apc_array(Iter* iter, APCLocalArray* arr) {
-  assert(arr->hasExactlyOneRef());
-  APCLocalArray::Release(arr);
-  if (debug) {
-    iter->arr().setIterType(ArrayIter::TypeUndefined);
-  }
-  return 0;
-}
-
 NEVER_INLINE
 static int64_t iter_next_apc_array(Iter* iter,
                                    TypedValue* valOut,
@@ -1432,7 +1502,7 @@ static int64_t iter_next_apc_array(Iter* iter,
   ssize_t const pos = arr->iterAdvanceImpl(arrIter->getPos());
   if (UNLIKELY(pos == ArrayData::invalid_index)) {
     if (UNLIKELY(arr->hasExactlyOneRef())) {
-      return iter_next_free_apc_array(iter, arr);
+      return iter_next_free_apc(iter, arr);
     }
     arr->decRefCount();
     if (debug) {
@@ -1456,6 +1526,8 @@ static int64_t iter_next_apc_array(Iter* iter,
   return 1;
 }
 
+// TODO(#4055866): this function currently makes calls and has a
+// frame.  We should use tvDecRefWillCallHelper and avoid it.
 int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iter_next_key: I %p\n", iter);
   assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
@@ -1466,32 +1538,63 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   }
 
   {
-    auto const ad = const_cast<ArrayData*>(arrIter->getArrayData());
-    if (UNLIKELY(!ad->isHphpArray())) {
+    auto const ad       = const_cast<ArrayData*>(arrIter->getArrayData());
+    auto const isPacked = ad->isPacked();
+    auto const isMixed  = ad->isMixed();
+
+    if (UNLIKELY(!isMixed) && UNLIKELY(!isPacked)) {
       if (ad->isSharedArray()) {
+        // TODO(#4055855): what if a local value in an apc array has
+        // been turned into a ref?  Is this actually ok to do?
         return iter_next_apc_array(iter, valOut, keyOut, ad);
       }
       goto cold;
     }
-    auto const arr = static_cast<HphpArray*>(ad);
 
-    ssize_t pos = arrIter->getPos();
-    do {
-      ++pos;
-      if (size_t(pos) >= size_t(arr->iterLimit())) {
-        if (UNLIKELY(arr->hasExactlyOneRef())) {
-          return iter_next_free_arr(iter, arr);
+    if (isPacked) {
+      ssize_t pos = arrIter->getPos() + 1;
+      if (size_t(pos) >= size_t(ad->getSize())) {
+        if (UNLIKELY(ad->hasExactlyOneRef())) {
+          return iter_next_free_packed(iter, ad);
         }
-        arr->decRefCount();
+        ad->decRefCount();
         if (debug) {
           iter->arr().setIterType(ArrayIter::TypeUndefined);
         }
         return 0;
       }
-    } while (UNLIKELY(arr->isTombstone(pos)));
+      arrIter->setPos(pos);
+      tvAsVariant(valOut).setWithRef(tvAsCVarRef(&packedData(ad)[pos]));
+      // TODO(#4049796): we only have to check keyOut for nullptr
+      // because of the WIterNext opcode, which isn't used.
+      if (keyOut != nullptr) {
+        DataType t = keyOut->m_type;
+        uint64_t d = keyOut->m_data.num;
+        keyOut->m_type = KindOfInt64;
+        keyOut->m_data.num = pos;
+        tvRefcountedDecRefHelper(t, d);
+      }
+      return 1;
+    }
+
+    auto const mixed = HphpArray::asMixed(ad);
+    ssize_t pos = arrIter->getPos();
+    do {
+      ++pos;
+      if (size_t(pos) >= size_t(mixed->iterLimit())) {
+        if (UNLIKELY(mixed->hasExactlyOneRef())) {
+          return iter_next_free_mixed(iter, mixed);
+        }
+        mixed->decRefCount();
+        if (debug) {
+          iter->arr().setIterType(ArrayIter::TypeUndefined);
+        }
+        return 0;
+      }
+    } while (UNLIKELY(mixed->isTombstone(pos)));
 
     arrIter->setPos(pos);
-    arr->getArrayElm<true>(pos, valOut, keyOut);
+    mixed->getArrayElm<true>(pos, valOut, keyOut);
     return 1;
   }
 
@@ -1587,9 +1690,11 @@ int64_t miter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 
 namespace {
 
-template <bool isPacked, bool key>
+template<bool HasKey>
 ALWAYS_INLINE
-int64_t iterNextArrayGeneric(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
+int64_t iter_next_mixed_impl(Iter* it,
+                             TypedValue* valOut,
+                             TypedValue* keyOut) {
   ArrayIter& iter = it->arr();
   auto const arrData = const_cast<ArrayData*>(iter.getArrayData());
   auto const arr = static_cast<HphpArray*>(arrData);
@@ -1598,7 +1703,7 @@ int64_t iterNextArrayGeneric(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
   do {
     if (size_t(++pos) >= size_t(arr->iterLimit())) {
       if (UNLIKELY(arr->hasExactlyOneRef())) {
-        return iter_next_free_arr(it, arr);
+        return iter_next_free_mixed(it, arr);
       }
       arr->decRefCount();
       if (debug) {
@@ -1606,25 +1711,66 @@ int64_t iterNextArrayGeneric(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
       }
       return 0;
     }
-  } while (!isPacked && UNLIKELY(arr->isTombstone(pos)));
+  } while (UNLIKELY(arr->isTombstone(pos)));
 
   if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
     return iter_next_cold<false>(it, valOut, keyOut);
   }
-  if (key && UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
+  if (HasKey && UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
     return iter_next_cold<false>(it, valOut, keyOut);
   }
   tvDecRefOnly(valOut);
-  if (key) {
+  if (HasKey) {
     tvDecRefOnly(keyOut);
   }
   iter.setPos(pos);
-  if (key) {
+  if (HasKey) {
     arr->getArrayElm<false>(pos, valOut, keyOut);
   } else {
     arr->getArrayElm(pos, valOut);
   }
   return 1;
+}
+
+template<bool HasKey>
+int64_t iter_next_packed_impl(Iter* it,
+                              TypedValue* valOut,
+                              TypedValue* keyOut) {
+  assert(it->arr().getIterType() == ArrayIter::TypeArray &&
+         it->arr().hasArrayData() &&
+         it->arr().getArrayData()->isPacked());
+  auto& iter = it->arr();
+  auto const ad = const_cast<ArrayData*>(iter.getArrayData());
+  assert(PackedArray::checkInvariants(ad));
+
+  ssize_t pos = iter.getPos() + 1;
+  if (LIKELY(pos < ad->getSize())) {
+    if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
+      return iter_next_cold<false>(it, valOut, keyOut);
+    }
+    if (HasKey && UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
+      return iter_next_cold<false>(it, valOut, keyOut);
+    }
+    tvDecRefOnly(valOut);
+    iter.setPos(pos);
+    if (HasKey) {
+      tvDecRefOnly(keyOut);
+      keyOut->m_data.num = pos;
+      keyOut->m_type = KindOfInt64;
+    }
+    cellDup(*tvToCell(packedData(ad) + pos), *valOut);
+    return 1;
+  }
+
+  // Finished iterating---we need to free the array.
+  if (UNLIKELY(ad->hasExactlyOneRef())) {
+    return iter_next_free_packed(it, ad);
+  }
+  ad->decRefCount();
+  if (debug) {
+    iter.setIterType(ArrayIter::TypeUndefined);
+  }
+  return 0;
 }
 
 }
@@ -1634,8 +1780,7 @@ int64_t iterNextArrayPacked(Iter* it, TypedValue* valOut) {
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData() &&
          it->arr().getArrayData()->isPacked());
-
-  return iterNextArrayGeneric<true, false>(it, valOut, nullptr);
+  return iter_next_packed_impl<false>(it, valOut, nullptr);
 }
 
 int64_t iterNextKArrayPacked(Iter* it,
@@ -1645,18 +1790,15 @@ int64_t iterNextKArrayPacked(Iter* it,
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData() &&
          it->arr().getArrayData()->isPacked());
-
-  return iterNextArrayGeneric<true, true>(it, valOut, keyOut);
+  return iter_next_packed_impl<true>(it, valOut, keyOut);
 }
 
 int64_t iterNextArrayMixed(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArrayMixed: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData() &&
-         it->arr().getArrayData()->isHphpArray() &&
-         !it->arr().getArrayData()->isPacked());
-
-  return iterNextArrayGeneric<false, false>(it, valOut, nullptr);
+         it->arr().getArrayData()->isMixed());
+  return iter_next_mixed_impl<false>(it, valOut, nullptr);
 }
 
 int64_t iterNextKArrayMixed(Iter* it,
@@ -1665,17 +1807,16 @@ int64_t iterNextKArrayMixed(Iter* it,
   TRACE(2, "iterNextKArrayMixed: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData() &&
-         it->arr().getArrayData()->isHphpArray() &&
-         !it->arr().getArrayData()->isPacked());
-
-  return iterNextArrayGeneric<false, true>(it, valOut, keyOut);
+         it->arr().getArrayData()->isMixed());
+  return iter_next_mixed_impl<true>(it, valOut, keyOut);
 }
 
 int64_t iterNextArray(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArray: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
-         it->arr().hasArrayData() &&
-         !it->arr().getArrayData()->isHphpArray());
+         it->arr().hasArrayData());
+  assert(!it->arr().getArrayData()->isPacked());
+  assert(!it->arr().getArrayData()->isMixed());
 
   ArrayIter& iter = it->arr();
   auto const ad = const_cast<ArrayData*>(iter.getArrayData());
@@ -1690,8 +1831,9 @@ int64_t iterNextKArray(Iter* it,
                        TypedValue* keyOut) {
   TRACE(2, "iterNextKArray: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
-         it->arr().hasArrayData() &&
-         !it->arr().getArrayData()->isHphpArray());
+         it->arr().hasArrayData());
+  assert(!it->arr().getArrayData()->isMixed());
+  assert(!it->arr().getArrayData()->isPacked());
 
   ArrayIter& iter = it->arr();
   auto const ad = const_cast<ArrayData*>(iter.getArrayData());

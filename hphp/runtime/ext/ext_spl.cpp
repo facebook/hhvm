@@ -311,10 +311,11 @@ bool f_spl_autoload_unregister(const Variant& autoload_function) {
 
 Variant f_spl_autoload_functions() {
   const Array& handlers = AutoloadHandler::s_instance->getHandlers();
-  if (handlers.isNull())
+  if (handlers.isNull()) {
     return false;
-  else
+  } else {
     return handlers.values();
+  }
 }
 
 void f_spl_autoload_call(const String& class_name) {

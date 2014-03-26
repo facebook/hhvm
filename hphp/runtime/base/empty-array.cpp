@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 
 namespace HPHP {
 
@@ -100,9 +101,6 @@ const Variant& EmptyArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
  * Used for EscalateForSort---we are already sorted by any imaginable
  * method of sorting, so the sort functions are no-ops, so we don't
  * need to copy.
- *
- * (TODO: verify nothing assumes that we /must/ copy when copy is
- * true.)
  */
 ArrayData* EmptyArray::ReturnFirstArg(ArrayData* a, ...) {
   return a;
@@ -150,22 +148,18 @@ ArrayData* EmptyArray::NonSmartCopy(const ArrayData* ad) { not_reached(); }
 
 NEVER_INLINE
 ArrayData* EmptyArray::Copy(const ArrayData*) {
-  auto const mask = HphpArray::SmallMask;            // 3
-  auto const cap  = HphpArray::computeMaxElms(mask); // 3
-  auto const ad   = smartAllocArray(cap, mask);
-
-  ad->m_kindAndSize = ArrayData::kPackedKind;
+  auto const cap = kPackedSmallSize;
+  auto const ad = static_cast<ArrayData*>(
+    MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
+  );
+  ad->m_kindAndSize = cap;
   ad->m_posAndCount = static_cast<uint32_t>(ArrayData::invalid_index);
-  ad->m_capAndUsed  = cap;
-  ad->m_tableMask   = mask;
-
   assert(ad->m_kind == ArrayData::kPackedKind);
   assert(ad->m_size == 0);
+  assert(ad->m_packedCap == cap);
   assert(ad->m_pos == ArrayData::invalid_index);
   assert(ad->m_count == 0);
-  assert(ad->m_cap == cap);
-  assert(ad->m_used == 0);
-  assert(ad->checkInvariants());
+  assert(PackedArray::checkInvariants(ad));
   return ad;
 }
 
@@ -200,16 +194,14 @@ ArrayData* EmptyArray::CopyWithStrongIterators(const ArrayData* ad) {
  */
 ALWAYS_INLINE
 std::pair<ArrayData*,TypedValue*> EmptyArray::MakePackedInl(TypedValue tv) {
-  auto const mask = HphpArray::SmallMask;            // 3
-  auto const cap  = HphpArray::computeMaxElms(mask); // 3
-  auto const ad   = smartAllocArray(cap, mask);
-
-  ad->m_kindAndSize = uint64_t{1} << 32 | ArrayData::kPackedKind;
+  auto const cap = kPackedSmallSize;
+  auto const ad = static_cast<ArrayData*>(
+    MM().objMallocLogged(sizeof(ArrayData) + cap * sizeof(TypedValue))
+  );
+  ad->m_kindAndSize = uint64_t{1} << 32 | cap; // also set kind
   ad->m_posAndCount = 0;
-  ad->m_capAndUsed  = uint64_t{1} << 32 | cap;
-  ad->m_tableMask   = mask;
 
-  auto& lval  = reinterpret_cast<HphpArray::Elm*>(ad + 1)[0].data;
+  auto& lval = *reinterpret_cast<TypedValue*>(ad + 1);
   lval.m_data = tv.m_data;
   lval.m_type = tv.m_type;
 
@@ -217,9 +209,8 @@ std::pair<ArrayData*,TypedValue*> EmptyArray::MakePackedInl(TypedValue tv) {
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 0);
-  assert(ad->m_cap == cap);
-  assert(ad->m_used == 1);
-  assert(ad->checkInvariants());
+  assert(ad->m_packedCap == cap);
+  assert(PackedArray::checkInvariants(ad));
   return { ad, &lval };
 }
 
@@ -240,7 +231,7 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   auto const cap  = HphpArray::computeMaxElms(mask); // 3
   auto const ad   = smartAllocArray(cap, mask);
 
-  ad->m_kindAndSize = uint64_t{1} << 32 | ArrayData::kMixedKind;
+  ad->m_kindAndSize = uint64_t{1} << 32 | ArrayData::kMixedKind << 24;
   ad->m_posAndCount = 0;
   ad->m_capAndUsed  = uint64_t{1} << 32 | cap;
   ad->m_tableMask   = mask;
@@ -283,7 +274,7 @@ EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   auto const cap  = HphpArray::computeMaxElms(mask); // 3
   auto const ad   = smartAllocArray(cap, mask);
 
-  ad->m_kindAndSize = uint64_t{1} << 32 | ArrayData::kMixedKind;
+  ad->m_kindAndSize = uint64_t{1} << 32 | ArrayData::kMixedKind << 24;
   ad->m_posAndCount = 0;
   ad->m_capAndUsed  = uint64_t{1} << 32 | cap;
   ad->m_tableMask   = mask;
@@ -408,7 +399,8 @@ ArrayData* EmptyArray::PlusEq(ArrayData*, const ArrayData* elems) {
 }
 
 ArrayData* EmptyArray::Merge(ArrayData*, const ArrayData* elems) {
-  auto const ret = HphpArray::MakeReserve(HphpArray::SmallSize);
+  // TODO(#4049965): can this just copy elems and then renumber?
+  auto const ret = HphpArray::MakeReserveMixed(HphpArray::SmallSize);
   auto const tmp = HphpArray::Merge(ret, elems);
   ret->release();
   return tmp;
@@ -430,7 +422,7 @@ ArrayData* EmptyArray::Prepend(ArrayData*, const Variant& vin, bool) {
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* EmptyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
-  auto const arr = HphpArray::MakeReserve(HphpArray::SmallSize);
+  auto const arr = HphpArray::MakeReserveMixed(HphpArray::SmallSize);
   arr->m_count = 0;
   DEBUG_ONLY auto const tmp = arr->zSet(k, v);
   assert(tmp == arr);
@@ -438,7 +430,7 @@ ArrayData* EmptyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
 }
 
 ArrayData* EmptyArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
-  auto const arr = HphpArray::MakeReserve(HphpArray::SmallSize);
+  auto const arr = HphpArray::MakeReserveMixed(HphpArray::SmallSize);
   arr->m_count = 0;
   DEBUG_ONLY auto const tmp = arr->zSet(k, v);
   assert(tmp == arr);
@@ -446,7 +438,7 @@ ArrayData* EmptyArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
 }
 
 ArrayData* EmptyArray::ZAppend(ArrayData* ad, RefData* v) {
-  auto const arr = HphpArray::MakeReserve(HphpArray::SmallSize);
+  auto const arr = HphpArray::MakeReserveMixed(HphpArray::SmallSize);
   arr->m_count = 0;
   DEBUG_ONLY auto const tmp = arr->zAppend(v);
   assert(tmp == arr);

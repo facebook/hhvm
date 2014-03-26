@@ -27,20 +27,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-inline HphpArray* asPacked(ArrayData* ad) {
-  assert(ad->kind() == ArrayData::kPackedKind);
-  auto a = static_cast<HphpArray*>(ad);
-  assert(a->checkInvariants());
-  return a;
-}
-
-inline const HphpArray* asPacked(const ArrayData* ad) {
-  assert(ad->kind() == ArrayData::kPackedKind);
-  auto a = static_cast<const HphpArray*>(ad);
-  assert(a->checkInvariants());
-  return a;
-}
-
 inline ArrayData::~ArrayData() {
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(this);
@@ -98,7 +84,8 @@ inline bool HphpArray::isTombstone(ssize_t pos) const {
   return isTombstone(data()[pos].data.m_type);
 }
 
-inline void HphpArray::getElmKey(const Elm& e, TypedValue* out) {
+ALWAYS_INLINE
+void HphpArray::getElmKey(const Elm& e, TypedValue* out) {
   if (e.hasIntKey()) {
     out->m_data.num = e.ikey;
     out->m_type = KindOfInt64;
@@ -114,30 +101,21 @@ template <bool withRef> ALWAYS_INLINE
 void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut,
                             TypedValue* keyOut) const {
   assert(size_t(pos) < m_used);
+  assert(!isPacked());
   auto& elm = data()[pos];
   if (withRef) {
     tvAsVariant(valOut) = withRefBind(tvAsVariant(&elm.data));
     if (LIKELY(keyOut != nullptr)) {
       DataType t = keyOut->m_type;
       uint64_t d = keyOut->m_data.num;
-      if (isPacked()) {
-        keyOut->m_data.num = pos;
-        keyOut->m_type = KindOfInt64;
-      } else {
-        HphpArray::getElmKey(elm, keyOut);
-      }
+      HphpArray::getElmKey(elm, keyOut);
       tvRefcountedDecRefHelper(t, d);
     }
   } else {
     TypedValue* cur = tvToCell(&elm.data);
     cellDup(*cur, *valOut);
     if (keyOut) {
-      if (isPacked()) {
-        keyOut->m_data.num = pos;
-        keyOut->m_type = KindOfInt64;
-      } else {
-        HphpArray::getElmKey(elm, keyOut);
-      }
+      HphpArray::getElmKey(elm, keyOut);
     }
   }
 }
@@ -163,20 +141,6 @@ HphpArray::Elm& HphpArray::allocElm(int32_t* ei) {
   return data()[i];
 }
 
-inline HphpArray* HphpArray::asHphpArray(ArrayData* ad) {
-  assert(ad->isHphpArray());
-  auto a = static_cast<HphpArray*>(ad);
-  assert(a->checkInvariants());
-  return a;
-}
-
-inline const HphpArray* HphpArray::asHphpArray(const ArrayData* ad) {
-  assert(ad->isHphpArray());
-  auto a = static_cast<const HphpArray*>(ad);
-  assert(a->checkInvariants());
-  return a;
-}
-
 inline HphpArray* HphpArray::asMixed(ArrayData* ad) {
   assert(ad->kind() == kMixedKind);
   auto a = static_cast<HphpArray*>(ad);
@@ -189,10 +153,6 @@ inline const HphpArray* HphpArray::asMixed(const ArrayData* ad) {
   auto a = static_cast<const HphpArray*>(ad);
   assert(a->checkInvariants());
   return a;
-}
-
-inline HphpArray* HphpArray::copyImpl() const {
-  return isPacked() ? copyPacked() : copyMixed();
 }
 
 inline size_t HphpArray::hashSize() const {
@@ -260,38 +220,71 @@ ArrayData* HphpArray::addLvalImpl(K k, Variant*& ret) {
 //////////////////////////////////////////////////////////////////////
 
 struct HphpArray::ValIter {
-  explicit ValIter(HphpArray* arr)
+  explicit ValIter(ArrayData* arr)
     : m_arr(arr)
-    , m_iter(arr->data())
-    , m_stop(m_iter + arr->m_used)
+    , m_kind(arr->m_kind)
   {
-    assert(arr->m_kind == kMixedKind || arr->m_kind == kPackedKind);
+    assert(m_kind == kMixedKind || m_kind == kPackedKind);
+    if (m_kind == kMixedKind) {
+      m_iterMixed = asMixed(arr)->data();
+      m_stopMixed = m_iterMixed + asMixed(arr)->m_used;
+     } else {
+       m_iterPacked = reinterpret_cast<TypedValue*>(arr + 1);
+       m_stopPacked = m_iterPacked + arr->m_size;
+     }
+   }
+
+   explicit ValIter(ArrayData* arr, ssize_t start_pos)
+     : m_arr(arr)
+     , m_kind(arr->m_kind)
+   {
+     assert(m_kind == kMixedKind || m_kind == kPackedKind);
+     if (m_kind == kMixedKind) {
+       m_iterMixed = asMixed(arr)->data() + start_pos;
+       m_stopMixed = asMixed(arr)->data() + asMixed(arr)->m_used;
+       assert(m_iterMixed <= m_stopMixed);
+     } else {
+       m_iterPacked = reinterpret_cast<TypedValue*>(arr + 1) + start_pos;
+       m_stopPacked = reinterpret_cast<TypedValue*>(arr + 1) + arr->m_size;
+       assert(m_iterPacked <= m_stopPacked);
+     }
+   }
+
+   TypedValue* current() const {
+     return UNLIKELY(m_kind == kMixedKind) ? &currentElm()->data
+                                           : m_iterPacked;
+   }
+
+   Elm* currentElm() const {
+     assert(m_kind == kMixedKind);
+     return m_iterMixed;
+   }
+
+   bool empty() const {
+     return m_kind == kMixedKind ? m_iterMixed == m_stopMixed
+                                 : m_iterPacked == m_stopPacked;
+   }
+
+   void advance() {
+     if (UNLIKELY(m_kind == kMixedKind)) {
+       do {
+         ++m_iterMixed;
+       } while (!empty() && HphpArray::isTombstone(m_iterMixed->data.m_type));
+      return;
+    }
+    ++m_iterPacked;
   }
 
-  explicit ValIter(HphpArray* arr, ssize_t start_pos)
-    : m_arr(arr)
-    , m_iter(arr->data() + start_pos)
-    , m_stop(arr->data() + arr->m_used)
-  {
-    assert(arr->m_kind == kMixedKind || arr->m_kind == kPackedKind);
-    assert(m_iter <= m_stop);
+  ssize_t currentPos() const {
+    if (m_kind == kMixedKind) return m_iterMixed - asMixed(m_arr)->data();
+    return m_iterPacked - reinterpret_cast<TypedValue*>(m_arr + 1);
   }
-
-  Elm* current() const { return m_iter; }
-  bool empty() const { return m_iter == m_stop; }
-
-  void advance() {
-    do {
-      ++m_iter;
-    } while (!empty() && HphpArray::isTombstone(m_iter->data.m_type));
-  }
-
-  ssize_t currentPos() const { return m_iter - m_arr->data(); }
 
 private:
-  HphpArray* m_arr;
-  Elm* m_iter;
-  Elm* const m_stop;
+  ArrayData* const m_arr;
+  ArrayData::ArrayKind const m_kind;
+  union { Elm* m_iterMixed; TypedValue* m_iterPacked; };
+  union { Elm* m_stopMixed; TypedValue* m_stopPacked; };
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -351,46 +344,6 @@ ALWAYS_INLINE
 HphpArray* mallocArray(uint32_t cap, uint32_t mask) {
   auto const allocBytes = computeAllocBytes(cap, mask);
   return static_cast<HphpArray*>(std::malloc(allocBytes));
-}
-
-//////////////////////////////////////////////////////////////////////
-
-// for internal use by nonSmartCopy() and copyPacked()
-template<class CopyElem>
-ALWAYS_INLINE
-HphpArray* HphpArray::CopyPacked(const HphpArray& other,
-                                 AllocMode mode,
-                                 CopyElem copyElem) {
-  assert(other.isPacked());
-
-  auto const cap  = other.m_cap;
-  auto const mask = other.m_tableMask;
-  auto const ad = mode == AllocMode::Smart
-    ? smartAllocArray(cap, mask)
-    : mallocArray(cap, mask);
-
-  ad->m_kindAndSize     = uint64_t{other.m_size} << 32 | kPackedKind;
-  ad->m_posAndCount     = static_cast<uint32_t>(other.m_pos);
-  ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
-  ad->m_tableMask       = mask;
-
-  auto const targetElms = reinterpret_cast<Elm*>(ad + 1);
-
-  // Copy the elements and bump up refcounts as needed.
-  auto const elms = other.data();
-  for (uint32_t i = 0, limit = ad->m_used; i < limit; ++i) {
-    copyElem(&elms[i].data, &targetElms[i].data, &other);
-  }
-
-  assert(ad->m_kind == kPackedKind);
-  assert(ad->m_size == other.m_size);
-  assert(ad->m_pos == other.m_pos);
-  assert(ad->m_count == 0);
-  assert(ad->m_used == other.m_used);
-  assert(ad->m_cap == cap);
-  assert(ad->m_tableMask == mask);
-  assert(ad->checkInvariants());
-  return ad;
 }
 
 //////////////////////////////////////////////////////////////////////

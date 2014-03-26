@@ -138,29 +138,25 @@ public:
   bool noCopyOnWrite() const;
 
   /*
-   * Specific derived class type querying operators.
+   * Specific kind querying operators.
    */
   bool isPacked() const { return m_kind == kPackedKind; }
   bool isMixed() const { return m_kind == kMixedKind; }
-  bool isHphpArray() const {
-    return m_kind <= kMixedKind;
-    static_assert(kPackedKind < kMixedKind, "");
-  }
   bool isSharedArray() const { return m_kind == kSharedKind; }
-  bool isNameValueTableWrapper() const {
-    return m_kind == kNvtwKind;
-  }
-  bool isProxyArray() const {
-    return m_kind == kProxyKind;
-  }
+  bool isNameValueTableWrapper() const { return m_kind == kNvtwKind; }
+  bool isProxyArray() const { return m_kind == kProxyKind; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.
    * I.e. iteration order produces int keys 0 to m_size-1 in sequence.
+   *
+   * For non-Packed array types this is generally an O(N) operation
+   * right now.
    */
   bool isVectorData() const;
 
-  static APCHandle *GetAPCHandle(const ArrayData* ad) {
+  // TODO(#3983912): move shared helpers to consolidated location
+  static APCHandle* GetAPCHandle(const ArrayData* ad) {
     return nullptr;
   }
   APCHandle* getAPCHandle();
@@ -192,6 +188,10 @@ public:
    * Interface for VM helpers.  ArrayData implements generic versions
    * using the other ArrayData api; subclasses may customize methods either
    * by providing a custom static method in g_array_funcs.
+   *
+   * An old comment said: nvGetKey does not touch out->_count, so can
+   * be used for inner or outer cells.  (It's unclear if anything is
+   * relying on this, but try not to in new code.)
    */
   TypedValue* nvGet(int64_t k) const;
   TypedValue* nvGet(const StringData* k) const;
@@ -449,14 +449,25 @@ protected:
   static bool IsValidKey(const StringData* k) { return k; }
 
 protected:
+  friend struct PackedArray;
+  friend struct EmptyArray;
+  friend struct HphpArray;
   // The following fields are blocked into unions with qwords so we
   // can combine the stores when initializing arrays.  (gcc won't do
   // this on its own.)
   union {
     struct {
-      ArrayKind m_kind;
-      UNUSED uint8_t m_unused0;
-      UNUSED uint16_t m_unused1;
+      union {
+        struct {
+          UNUSED uint16_t m_unused1;
+          UNUSED uint8_t m_unused0;
+          ArrayKind m_kind;
+        };
+        // Packed arrays overlay their capacity with the kind field.
+        // kPackedKind is zero, and aliases the top byte of
+        // m_packedCap, so it won't influence the capacity.
+        uint32_t m_packedCap;
+      };
       uint32_t m_size;
     };
     uint64_t m_kindAndSize;

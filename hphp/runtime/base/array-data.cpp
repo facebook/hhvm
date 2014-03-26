@@ -75,7 +75,8 @@ static size_t VsizeNop(const ArrayData* ad) {
   return ad->getSize();
 }
 
-// order: kPackedKind, kMixedKind, kSharedKind, kNvtwKind
+// order: kPackedKind, kMixedKind, kEmptyKind, kSharedKind, kNvtwKind,
+//        kProxyKind
 extern const ArrayFunctions g_array_funcs = {
   // release
   { &PackedArray::Release,
@@ -94,7 +95,9 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::NvGetInt,
     &ProxyArray::NvGetInt },
   // nvGetStr
-  { &PackedArray::NvGetStr,
+  { reinterpret_cast<TypedValue*(*)(const ArrayData*, const StringData*)>(
+      &EmptyArray::ReturnNull
+    ),
     &HphpArray::NvGetStr,
     &APCLocalArray::NvGetStr,
     reinterpret_cast<TypedValue*(*)(const ArrayData*, const StringData*)>(
@@ -131,7 +134,7 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::Vsize,
     &ProxyArray::Vsize },
   // getValueRef
-  { &HphpArray::GetValueRef,  // TODO(#3986711): layout w/ hphparray
+  { &PackedArray::GetValueRef,
     &HphpArray::GetValueRef,
     &APCLocalArray::GetValueRef,
     &EmptyArray::GetValueRef,
@@ -215,7 +218,7 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::SetRefStr,
     &ProxyArray::SetRefStr },
   // addInt
-  { &PackedArray::AddInt,
+  { &PackedArray::SetInt,   // reuse set
     &HphpArray::AddInt,
     &APCLocalArray::SetInt, // reuse set
     &EmptyArray::SetInt, // reuse set
@@ -247,49 +250,49 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::RemoveStr,
     &ProxyArray::RemoveStr },
   // iterBegin
-  { &HphpArray::IterBegin,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::IterBegin,
     &HphpArray::IterBegin,
     &APCLocalArray::IterBegin,
     &EmptyArray::ReturnInvalidIndex,
     &NameValueTableWrapper::IterBegin,
     &ProxyArray::IterBegin },
   // iterEnd
-  { &HphpArray::IterEnd,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::IterEnd,
     &HphpArray::IterEnd,
     &APCLocalArray::IterEnd,
     &EmptyArray::ReturnInvalidIndex,
     &NameValueTableWrapper::IterEnd,
     &ProxyArray::IterEnd },
   // iterAdvance
-  { &HphpArray::IterAdvance,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::IterAdvance,
     &HphpArray::IterAdvance,
     &APCLocalArray::IterAdvance,
     &EmptyArray::IterAdvance,
     &NameValueTableWrapper::IterAdvance,
     &ProxyArray::IterAdvance },
   // iterRewind
-  { &HphpArray::IterRewind,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::IterRewind,
     &HphpArray::IterRewind,
     &APCLocalArray::IterRewind,
     &EmptyArray::IterRewind,
     &NameValueTableWrapper::IterRewind,
     &ProxyArray::IterRewind },
   // validMArrayIter
-  { &HphpArray::ValidMArrayIter,   // TODO(#3986711): layout w/ HphpArray
+  { &HphpArray::ValidMArrayIter,
     &HphpArray::ValidMArrayIter,
     &APCLocalArray::ValidMArrayIter,
     &EmptyArray::ValidMArrayIter,
     &NameValueTableWrapper::ValidMArrayIter,
     &ProxyArray::ValidMArrayIter },
   // advanceMArrayIter
-  { &HphpArray::AdvanceMArrayIter,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::AdvanceMArrayIter,
     &HphpArray::AdvanceMArrayIter,
     &APCLocalArray::AdvanceMArrayIter,
     &EmptyArray::AdvanceMArrayIter,
     &NameValueTableWrapper::AdvanceMArrayIter,
     &ProxyArray::AdvanceMArrayIter },
   // escalateForSort
-  { &HphpArray::EscalateForSort,   // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::EscalateForSort,
     &HphpArray::EscalateForSort,
     &APCLocalArray::EscalateForSort,
     reinterpret_cast<ArrayData* (*)(ArrayData*)>(
@@ -298,7 +301,7 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::EscalateForSort,
     &ProxyArray::EscalateForSort },
   // ksort
-  { &HphpArray::Ksort,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::Ksort,
     &HphpArray::Ksort,
     &ArrayData::Ksort,
     reinterpret_cast<void (*)(ArrayData*, int, bool)>(
@@ -307,7 +310,7 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::Ksort,
     &ProxyArray::Ksort },
   // sort
-  { &HphpArray::Sort,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::Sort,
     &HphpArray::Sort,
     &ArrayData::Sort,
     reinterpret_cast<void (*)(ArrayData*, int, bool)>(
@@ -316,7 +319,7 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::Sort,
     &ProxyArray::Sort },
   // asort
-  { &HphpArray::Asort,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::Asort,
     &HphpArray::Asort,
     &ArrayData::Asort,
     reinterpret_cast<void (*)(ArrayData*, int, bool)>(
@@ -325,7 +328,7 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::Asort,
     &ProxyArray::Asort },
   // uksort
-  { &HphpArray::Uksort,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::Uksort,
     &HphpArray::Uksort,
     &ArrayData::Uksort,
     reinterpret_cast<bool (*)(ArrayData*, const Variant&)>(
@@ -334,7 +337,7 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::Uksort,
     &ProxyArray::Uksort },
   // usort
-  { &HphpArray::Usort,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::Usort,
     &HphpArray::Usort,
     &ArrayData::Usort,
     reinterpret_cast<bool (*)(ArrayData*, const Variant&)>(
@@ -343,7 +346,7 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::Usort,
     &ProxyArray::Usort },
   // uasort
-  { &HphpArray::Uasort,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::Uasort,
     &HphpArray::Uasort,
     &ArrayData::Uasort,
     reinterpret_cast<bool (*)(ArrayData*, const Variant&)>(
@@ -359,14 +362,14 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::Copy,
     &ProxyArray::Copy },
   // copyWithStrongIterators
-  { &HphpArray::CopyWithStrongIterators,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::CopyWithStrongIterators,
     &HphpArray::CopyWithStrongIterators,
     &APCLocalArray::CopyWithStrongIterators,
     &EmptyArray::CopyWithStrongIterators,
     &NameValueTableWrapper::CopyWithStrongIterators,
     &ProxyArray::CopyWithStrongIterators },
   // nonSmartCopy
-  { &HphpArray::NonSmartCopy,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::NonSmartCopy,
     &HphpArray::NonSmartCopy,
     &ArrayData::NonSmartCopy,
     &EmptyArray::NonSmartCopy,
@@ -393,14 +396,14 @@ extern const ArrayFunctions g_array_funcs = {
     &NameValueTableWrapper::AppendRef,
     &ProxyArray::AppendRef },
   // plusEq
-  { &HphpArray::PlusEq,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::PlusEq,
     &HphpArray::PlusEq,
     &APCLocalArray::PlusEq,
     &EmptyArray::PlusEq,
     &NameValueTableWrapper::PlusEq,
     &ProxyArray::PlusEq },
   // merge
-  { &HphpArray::Merge,  // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::Merge,
     &HphpArray::Merge,
     &APCLocalArray::Merge,
     &EmptyArray::Merge,
@@ -458,21 +461,21 @@ extern const ArrayFunctions g_array_funcs = {
     &ArrayData::GetAPCHandle,
     &ProxyArray::GetAPCHandle },
   // zSetInt
-  { &HphpArray::ZSetInt,        // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::ZSetInt,
     &HphpArray::ZSetInt,
     &ArrayData::ZSetInt,
     &ArrayData::ZSetInt,
     &ArrayData::ZSetInt,
     &ProxyArray::ZSetInt },
   // zSetStr
-  { &HphpArray::ZSetStr,        // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::ZSetStr,
     &HphpArray::ZSetStr,
     &ArrayData::ZSetStr,
     &ArrayData::ZSetStr,
     &ArrayData::ZSetStr,
     &ProxyArray::ZSetStr },
   // zAppend
-  { &HphpArray::ZAppend,        // TODO(#3986711): layout w/ HphpArray
+  { &PackedArray::ZAppend,
     &HphpArray::ZAppend,
     &ArrayData::ZAppend,
     &ArrayData::ZAppend,

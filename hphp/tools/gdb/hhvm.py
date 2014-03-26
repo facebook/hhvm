@@ -87,9 +87,12 @@ class ArrayDataPrinter:
             if self.cur == self.end:
                 raise StopIteration
             elt = self.cur
-            data = elt['data']
             packed = gdb.lookup_global_symbol('HPHP::ArrayData::kPackedKind') \
                 .value()
+            if self.kind == packed:
+                data = elt.dereference()
+            else:
+                data = elt['data']
             if self.kind == packed:
                 key = '%d' % self.count
             elif data['m_aux']['u_hash'] == 0:
@@ -102,7 +105,7 @@ class ArrayDataPrinter:
 
     def __init__(self, val):
         self.kind = val['m_kind']
-        if self.kind == 0 or self.kind == 1:
+        if self.kind == self.mixedKind():
             self.val = val.cast(gdb.lookup_type('HPHP::HphpArray'))
         elif self.kind == self.proxyKind():
             self.val = val.cast(gdb.lookup_type('HPHP::ProxyArray'))
@@ -110,8 +113,12 @@ class ArrayDataPrinter:
             self.val = val
 
     def children(self):
-        # Only support kPackedKind or kMixedKind
-        if self.kind == self.packedKind() or self.kind == self.mixedKind():
+        if self.kind == self.packedKind():
+            data = self.val.address.cast(gdb.lookup_type('char').pointer()) + \
+                   self.val.type.sizeof
+            pval = data.cast(gdb.lookup_type('HPHP::TypedValue').pointer())
+            return self._iterator(self.kind, pval, pval + self.val['m_size'])
+        elif self.kind == self.mixedKind():
             data = self.val.address.cast(gdb.lookup_type('char').pointer()) + \
                 self.val.type.sizeof
             pelm = data.cast(gdb.lookup_type('HPHP::HphpArray::Elm').pointer())

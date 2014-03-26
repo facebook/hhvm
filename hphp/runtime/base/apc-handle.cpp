@@ -190,7 +190,9 @@ void APCHandle::deleteShared() {
 
 APCHandle* APCTypedValue::MakeSharedArray(ArrayData* array) {
   assert(apcExtension::UseUncounted);
-  auto value = new APCTypedValue(HphpArray::MakeUncounted(array));
+  auto value = new APCTypedValue(
+    array->isPacked() ? HphpArray::MakeUncountedPacked(array)
+                      : HphpArray::MakeUncounted(array));
   return value->getHandle();
 }
 
@@ -201,7 +203,11 @@ void APCTypedValue::deleteUncounted() {
   if (type == KindOfString) {
     m_data.str->destructStatic();
   } else if (type == KindOfArray) {
-    HphpArray::ReleaseUncounted(m_data.arr);
+    if (m_data.arr->isPacked()) {
+      HphpArray::ReleaseUncountedPacked(m_data.arr);
+    } else {
+      HphpArray::ReleaseUncounted(m_data.arr);
+    }
   }
   delete this;
 }

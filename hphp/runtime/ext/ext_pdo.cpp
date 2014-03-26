@@ -616,7 +616,7 @@ static bool valid_statement_class(sp_PDOConnection dbh, const Variant& opt,
     ctor_args = Variant(Array());
     return true;
   }
-  if (!f_is_subclass_of(clsname, "PDOStatement")) {
+  if (!f_is_a(clsname, "PDOStatement", true)) {
     pdo_raise_impl_error
       (dbh, nullptr, "HY000",
        "user-supplied statement class must be derived from PDOStatement");

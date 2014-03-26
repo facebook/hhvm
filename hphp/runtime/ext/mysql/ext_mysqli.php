@@ -752,7 +752,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function set_charset(string $charset): bool {
+  public function set_charset(string $charset) {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;

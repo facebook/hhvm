@@ -1704,7 +1704,7 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
               | env, None ->
                   smember_not_found p ~is_const ~is_method env class_ mid
               | env, Some { ce_visibility = vis; ce_type = r, Tfun ft } ->
-                  check_visibility p env vis (Some cid);
+                  check_visibility p env (Reason.to_pos r, vis) (Some cid);
                   let ft = {ft with
                             ft_arity_min = 0;
                             ft_arity_max = 1000;
@@ -1713,7 +1713,7 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
                           } in env, (r, Tfun ft)
               | _ -> assert false)
           | Some { ce_visibility = vis; ce_type = method_ } ->
-              check_visibility p env vis (Some cid);
+              check_visibility p env (Reason.to_pos (fst method_), vis) (Some cid);
               let arity_match =
                 List.length class_.tc_tparams = List.length paraml
               in
@@ -1856,7 +1856,7 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
                 | env, None ->
                     member_not_found p ~is_method env class_ s x
                 | env, Some { ce_visibility = vis; ce_type = r, Tfun ft } ->
-                    check_visibility p env vis None;
+                    check_visibility p env (Reason.to_pos r, vis) None;
                     let pos = Reason.to_pos r in
                     let ft = {ft with
                               ft_arity_min = 0;
@@ -1866,7 +1866,7 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
                             } in env, (r, Tfun ft), Some (pos, vis)
                 | _ -> assert false)
             | Some { ce_visibility = vis; ce_type = method_ } ->
-                check_visibility p env vis None;
+                check_visibility p env (Reason.to_pos (fst method_), vis) None;
                 let arity_match =
                   List.length class_.tc_tparams = List.length paraml
                 in
@@ -2016,41 +2016,57 @@ and call_construct p env class_ params el =
       then error p "This constructor expects no argument";
       env
   | Some { ce_visibility = vis; ce_type = m } ->
-      check_visibility p env vis None;
+      check_visibility p env (Reason.to_pos (fst m), vis) None;
       let subst = Inst.make_subst class_.tc_tparams params in
       let env, m = Inst.instantiate subst env m in
       fst (call p env m el)
 
-and check_visibility p env vis cid =
+and check_visibility p env (p_vis, vis) cid =
   if !is_silent_mode then () else
   match is_visible env vis cid with
   | None -> ()
-  | Some msg -> error p msg
+  | Some (msg1, msg2) -> error_l [(p, msg1); (p_vis, msg2)]
 
 and is_visible env vis cid =
   let self_id = Env.get_self_id env in
   match vis with
   | Vpublic -> None
   | Vprivate _ when self_id = "" ->
-    Some "This is a private member, you cannot access it"
+    Some ("You cannot access this member", "This member is private")
   | Vprivate x ->
     (match cid with
-      (* You can use a private/protected method from a trait with
-       * self::foo(), static::foo(), etc. You cannot use MyTrait::foo() *)
-      | Some (CI _) when x <> self_id ->
-        Some ("This is a private member, you cannot access it"
-        ^" using the trait's name (did you mean to use static:: or self::?)")
-      | _ -> None)
+      | Some CIstatic -> 
+          Some ("Private members cannot be accessed"
+          ^" with static:: since a child class may also have an identically"
+          ^" named private member", "This member is private")
+      | Some CIparent -> 
+          Some (
+            "You cannot access a private member with parent::", 
+            "This member is private")
+      | Some CIself -> None
+      | Some (CI (_, called_ci)) when x <> self_id ->
+          (match Env.get_class env called_ci with
+          | _, Some {tc_kind = Ast.Ctrait} ->
+              Some ("You cannot access private members"
+              ^" using the trait's name (did you mean to use self::?)",
+              "This member is private")
+          | _ -> 
+            Some ("You cannot access this member", "This member is private"))
+      | None when x <> self_id -> 
+        Some ("You cannot access this member", "This member is private")
+      | Some (CI _) 
+      | None -> None)
   | Vprotected x when x = self_id -> None
   | Vprotected _ when self_id = "" ->
-    Some "This is a protected member, you cannot access it"
+    Some ("You cannot access this member", "This member is protected")
   | Vprotected x ->
     let env, my_class = Env.get_class env self_id in
     let env, their_class = Env.get_class env x in
     match cid, their_class with
       | Some CI _, Some {tc_kind = Ast.Ctrait} ->
-        Some ("This is a protected member, you cannot access it"
-        ^" using the trait's name (did you mean to use static:: or self::?)")
+        Some ("You cannot access protected members"
+        ^" using the trait's name (did you mean to use static:: or self::?)",
+        "This member is protected")
       | _ -> (
         match my_class, their_class with
           | Some my_class, Some their_class ->
@@ -2063,7 +2079,10 @@ and is_visible env vis cid =
                 || SSet.mem self_id their_class.tc_req_ancestors (* needed? *)
                 || not my_class.tc_members_fully_known
               then None
-              else Some ("Cannot access this protected member, you don't extend "^ x)
+              else Some (
+                "Cannot access this protected member, you don't extend "^ x, 
+                "This member is protected"
+              )
             | _, _ -> None
         )
 

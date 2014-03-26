@@ -81,7 +81,6 @@ void ProcessInit() {
     _exit(1);
   }
 
-  LitstrTable::init();
   LitstrTable::get().setWriting();
   Repo::get().loadGlobalData();
 

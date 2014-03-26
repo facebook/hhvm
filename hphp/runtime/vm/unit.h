@@ -266,11 +266,10 @@ private:
   static LitstrTable* s_litstrTable;
 
 public:
-  static void init() {
-    LitstrTable::s_litstrTable = new LitstrTable();
-  }
-
   static LitstrTable& get() {
+    if (LitstrTable::s_litstrTable == nullptr) {
+      LitstrTable::s_litstrTable = new LitstrTable();
+    }
     return *LitstrTable::s_litstrTable;
   }
 

@@ -375,10 +375,10 @@
       - yii/tests/framework/caching/CMemCacheTest.php
   zf2:
     url: https://github.com/zendframework/zf2.git
-    # Stable is release-2.2.5, but pull requests require master
+    # Stable is release-2.2.6, but pull requests require develop
     # e.g., https://github.com/zendframework/zf2/pull/5781
-    branch: master
-    commit: 2b718e20cfc22cd388ef3aeff0bc66302379ae02
+    branch: develop
+    commit: b61c596812b043acadb90d442234d1d0ae01aaaf
     install_root: zf2
     test_root: zf2/tests
     blacklist:

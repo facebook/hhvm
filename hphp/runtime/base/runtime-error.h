@@ -71,6 +71,8 @@ void raise_warning(const std::string &msg);
 void raise_warning(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_notice(const std::string &msg);
 void raise_notice(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
+void raise_deprecation(const std::string &msg);
+void raise_deprecation(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_debugging(const std::string &msg);
 void raise_debugging(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_message(ErrorConstants::ErrorModes mode,
@@ -79,7 +81,7 @@ void raise_message(ErrorConstants::ErrorModes mode,
 void raise_message(ErrorConstants::ErrorModes mode,
                    const char *fmt,
                    ...) ATTRIBUTE_PRINTF(2, 3);
-void raise_message(ErrorConstants::ErrorModes mode, std::string &msg);
+void raise_message(ErrorConstants::ErrorModes mode, const std::string &msg);
 void raise_param_type_warning(
     const char* func_name,
     int param_num,

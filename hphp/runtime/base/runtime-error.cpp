@@ -187,38 +187,29 @@ void raise_debugging(const char *fmt, ...) {
 }
 
 void raise_notice(const std::string &msg) {
-  if (RuntimeOption::NoticeFrequency <= 0 ||
-      (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
-    return;
-  }
-  int errnum = static_cast<int>(ErrorConstants::ErrorModes::NOTICE);
-  if (!g_context->errorNeedsHandling(errnum, true,
-                                     ExecutionContext::ErrorThrowMode::Never)) {
-    return;
-  }
-  g_context->handleError(msg, errnum, true,
-                         ExecutionContext::ErrorThrowMode::Never,
-                         "\nNotice: ");
+  raise_message(ErrorConstants::ErrorModes::NOTICE, msg);
 }
 
 void raise_notice(const char *fmt, ...) {
-  if (RuntimeOption::NoticeFrequency <= 0 ||
-      (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
-    return;
-  }
   std::string msg;
-  int errnum = static_cast<int>(ErrorConstants::ErrorModes::NOTICE);
-  if (!g_context->errorNeedsHandling(errnum, true,
-                                     ExecutionContext::ErrorThrowMode::Never)) {
-    return;
-  }
   va_list ap;
   va_start(ap, fmt);
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-  g_context->handleError(msg, errnum, true,
-                         ExecutionContext::ErrorThrowMode::Never,
-                         "\nNotice: ");
+  raise_message(ErrorConstants::ErrorModes::NOTICE, msg);
+}
+
+void raise_deprecation(const std::string &msg) {
+  raise_message(ErrorConstants::ErrorModes::PHP_DEPRECATED, msg);
+}
+
+void raise_deprecation(const char *fmt, ...) {
+  std::string msg;
+  va_list ap;
+  va_start(ap, fmt);
+  string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+  raise_message(ErrorConstants::ErrorModes::PHP_DEPRECATED, msg);
 }
 
 void raise_param_type_warning(
@@ -262,7 +253,7 @@ void raise_message(ErrorConstants::ErrorModes mode,
   raise_message(mode, msg);
 }
 
-void raise_message(ErrorConstants::ErrorModes mode, std::string &msg) {
+void raise_message(ErrorConstants::ErrorModes mode, const std::string &msg) {
   switch (mode) {
     case ErrorConstants::ErrorModes::ERROR:
       raise_error(msg);
@@ -271,8 +262,28 @@ void raise_message(ErrorConstants::ErrorModes mode, std::string &msg) {
       raise_warning(msg);
       break;
     case ErrorConstants::ErrorModes::NOTICE:
-    case ErrorConstants::ErrorModes::PHP_DEPRECATED:
-      raise_notice(msg);
+    case ErrorConstants::ErrorModes::PHP_DEPRECATED: {
+        // This is here rather than in the individual functions to reduce the
+        // copy+paste
+        if (RuntimeOption::NoticeFrequency <= 0 ||
+            (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
+          break;
+        }
+        int errnum = static_cast<int>(mode);
+        if (!g_context->errorNeedsHandling(errnum, true,
+                                      ExecutionContext::ErrorThrowMode::Never)) {
+          return;
+        }
+        if (mode == ErrorConstants::ErrorModes::NOTICE) {
+          g_context->handleError(msg, errnum, true,
+                                 ExecutionContext::ErrorThrowMode::Never,
+                                 "\nNotice: ");
+        } else {
+          g_context->handleError(msg, errnum, true,
+                                 ExecutionContext::ErrorThrowMode::Never,
+                                 "\nDeprecated: ");
+        }
+      }
       break;
     default:
       always_assert(!"Unhandled type of error");

@@ -26,9 +26,15 @@ namespace HH {
  * @return Boolean TRUE if successful, FALSE otherwise.
  */
 <<__Native>>
-function autoload_set_paths(
-  mixed $map,
-  string $root,
-): bool;
+function autoload_set_paths(mixed $map, string $root): bool;
+
+/**
+  * Returns whether the (php) file could be included (eg if its been compiled
+  * into the binary). This is useful when you don't have a filesystem
+  * (RepoAuthoritative mode) but still want to know if including a file will
+  * work.
+  */
+<<__Native>>
+function could_include(string $file) : bool;
 
 }

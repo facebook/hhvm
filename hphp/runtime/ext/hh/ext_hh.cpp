@@ -14,7 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/ext/hh/ext_hh.h"
+
+#include "hphp/runtime/base/file-repository.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,11 +30,17 @@ bool HHVM_FUNCTION(autoload_set_paths,
   return AutoloadHandler::s_instance->setMap(map.toCArrRef(), root);
 }
 
+bool HHVM_FUNCTION(could_include, const String& file) {
+  struct stat s;
+  return !Eval::resolveVmInclude(file.get(), "", &s).isNull();
+}
+
 static class HHExtension : public Extension {
  public:
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   virtual void moduleInit() {
     HHVM_NAMED_FE(HH\\autoload_set_paths, HHVM_FN(autoload_set_paths));
+    HHVM_NAMED_FE(HH\\could_include, HHVM_FN(could_include));
     loadSystemlib();
   }
 } s_hh_extension;

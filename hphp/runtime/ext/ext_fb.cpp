@@ -1028,11 +1028,6 @@ String f_fb_utf8_substr(const String& str, int start,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_fb_could_include(const String& file) {
-  struct stat s;
-  return !Eval::resolveVmInclude(file.get(), "", &s).isNull();
-}
-
 bool f_fb_intercept(const String& name, const Variant& handler,
                     const Variant& data /* = null_variant */) {
   return register_intercept(name, handler, data);

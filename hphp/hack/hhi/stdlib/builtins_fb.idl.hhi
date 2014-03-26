@@ -25,7 +25,6 @@ function fb_serialize($thing) { }
 function fb_unserialize($thing, &$success, &$errcode = null_variant) { }
 function fb_compact_serialize($thing) { }
 function fb_compact_unserialize($thing, &$success, &$errcode = null_variant) { }
-function fb_could_include($file) { }
 function fb_intercept($name, $handler, $data = null_variant) { }
 function fb_stubout_intercept_handler($name, $obj, $params, $data, &$done) { }
 function fb_rpc_intercept_handler($name, $obj, $params, $data, &$done) { }
@@ -64,3 +63,9 @@ function fb_lazy_realpath($filename) { }
 function fb_setprofile($callback) { }
 function fb_gc_collect_cycles() { }
 function fb_gc_detect_cycles($filename) { }
+
+namespace HH {
+
+function could_include($file) { }
+
+}

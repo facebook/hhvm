@@ -25,6 +25,7 @@ namespace HPHP {
 bool HHVM_FUNCTION(autoload_set_paths,
                    const Variant& map,
                    const String& root);
+bool HHVM_FUNCTION(could_include, const String& file);
 ///////////////////////////////////////////////////////////////////////////////
 }
 

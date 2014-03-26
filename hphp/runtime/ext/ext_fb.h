@@ -28,7 +28,6 @@ Variant f_fb_unserialize(const Variant& thing, VRefParam success);
 Variant f_fb_compact_serialize(const Variant& thing);
 Variant f_fb_compact_unserialize(const Variant& thing, VRefParam success,
                                  VRefParam errcode = null_variant);
-bool f_fb_could_include(const String& file);
 bool f_fb_intercept(const String& name, const Variant& handler,
                     const Variant& data = null_variant);
 bool f_fb_rename_function(const String& orig_func_name,

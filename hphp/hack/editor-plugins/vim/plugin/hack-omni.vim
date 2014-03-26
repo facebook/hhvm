@@ -25,9 +25,7 @@ sys.path.append(os.path.abspath(os.path.dirname(vim.eval('s:vim_script_filename'
 import hackomni
 
 # 2. delegate
-base = vim.eval('a:base')
-findstart = bool(int(vim.eval('a:findstart')))
-hackomni.HackOmniComplete(findstart, base).main()
+hackomni.HackOmniComplete(bool(int(vim.eval('a:findstart'))), vim.eval('a:base')).main()
 
 endpython
 endfun

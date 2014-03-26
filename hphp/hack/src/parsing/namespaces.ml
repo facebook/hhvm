@@ -63,22 +63,32 @@ let is_autoimport_class id = SSet.mem id autoimport_set
  * not, just relying on the idempotence of this function to make sure everything
  * works out.
  *)
-let elaborate_id nsenv (p, id) = match nsenv.ns_name with
-  | _ when id.[0] = '\\' -> p, id
-  | None -> p, if String.contains id '\\' then "\\" ^ id else id
-  | Some _ when is_autoimport_class id -> p, "\\" ^ id
-  | Some ns -> begin
-    let bslash_loc =
-      try String.index id '\\' with Not_found -> String.length id in
-    let prefix = String.sub id 0 bslash_loc in
-    let id = match SMap.get prefix nsenv.ns_uses with
-      | None -> "\\" ^ ns ^ "\\" ^ id
-      | Some use -> begin
-        let len = (String.length id) - bslash_loc in
-        use ^ (String.sub id bslash_loc len)
-      end in
-    p, id
-  end
+let elaborate_id nsenv (p, id) =
+  (* Go ahead and fully-qualify the name first. *)
+  let fully_qualified =
+    if id.[0] = '\\' then id
+    else if is_autoimport_class id then "\\" ^ id
+    else begin
+      (* Expand "use" imports. *)
+      let bslash_loc =
+        try String.index id '\\' with Not_found -> String.length id in
+      let prefix = String.sub id 0 bslash_loc in
+      match SMap.get prefix nsenv.ns_uses with
+        | None -> begin match nsenv.ns_name with
+          | None -> "\\" ^ id
+          | Some ns -> "\\" ^ ns ^ "\\" ^ id
+        end
+        | Some use -> begin
+          let len = (String.length id) - bslash_loc in
+          use ^ (String.sub id bslash_loc len)
+        end
+    end in
+  (* If the only location of a '\' in the fully-qualified name is the leading
+   * one, strip it off. *)
+  let stripped_id = if String.rindex fully_qualified '\\' = 0
+    then String.sub fully_qualified 1 ((String.length fully_qualified) - 1)
+    else fully_qualified in
+  p, stripped_id
 
 (* First pass of flattening namespaces, run super early in the pipeline, right
  * after parsing.

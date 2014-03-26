@@ -1,8 +1,6 @@
 array(6) {
   [0]=>
   object(ReflectionMethod)#2 (4) {
-    ["name"]=>
-    string(17) "my_other_override"
     ["class"]=>
     string(8) "my_child"
     ["originalClass"]=>
@@ -52,11 +50,11 @@ array(6) {
         string(17) "my_other_override"
       }
     }
+    ["name"]=>
+    string(17) "my_other_override"
   }
   [1]=>
   object(ReflectionMethod)#3 (4) {
-    ["name"]=>
-    string(15) "my_child_method"
     ["class"]=>
     string(8) "my_child"
     ["originalClass"]=>
@@ -99,11 +97,11 @@ array(6) {
       ["line2"]=>
       int(21)
     }
+    ["name"]=>
+    string(15) "my_child_method"
   }
   [2]=>
   object(ReflectionMethod)#4 (4) {
-    ["name"]=>
-    string(9) "my_method"
     ["class"]=>
     string(8) "my_class"
     ["originalClass"]=>
@@ -146,11 +144,11 @@ array(6) {
       ["line2"]=>
       int(13)
     }
+    ["name"]=>
+    string(9) "my_method"
   }
   [3]=>
   object(ReflectionMethod)#5 (4) {
-    ["name"]=>
-    string(18) "my_override_method"
     ["class"]=>
     string(8) "my_class"
     ["originalClass"]=>
@@ -200,11 +198,11 @@ array(6) {
         string(18) "my_override_method"
       }
     }
+    ["name"]=>
+    string(18) "my_override_method"
   }
   [4]=>
   object(ReflectionMethod)#6 (4) {
-    ["name"]=>
-    string(15) "my_trait_method"
     ["class"]=>
     string(8) "my_class"
     ["originalClass"]=>
@@ -247,11 +245,11 @@ array(6) {
       ["line2"]=>
       int(4)
     }
+    ["name"]=>
+    string(15) "my_trait_method"
   }
   [5]=>
   object(ReflectionMethod)#7 (4) {
-    ["name"]=>
-    string(14) "my_base_method"
     ["class"]=>
     string(7) "my_base"
     ["originalClass"]=>
@@ -294,6 +292,8 @@ array(6) {
       ["line2"]=>
       int(8)
     }
+    ["name"]=>
+    string(14) "my_base_method"
   }
 }
 object(ReflectionParameter)#9 (2) {

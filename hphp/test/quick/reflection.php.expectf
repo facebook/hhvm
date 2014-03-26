@@ -138,9 +138,9 @@ array(4) {
 --- getStaticVariables("f") ---
 array(2) {
   ["staticX"]=>
-  string(1) "4"
+  int(4)
   ["staticY"]=>
-  string(4) "null"
+  NULL
 }
 
 --- isInternal("f") ---
@@ -153,7 +153,24 @@ bool(true)
 bool(true)
 
 --- export("f") ---
-string(0) ""
+string(%d) "/**
+ * This is f's doc comment.
+ */
+Function [ <user> function &f ] {
+  @@ %s/reflection.php 13 - 20
+
+  - Parameters [4] {
+    Parameter #0 [ <required> $a ]
+    Parameter #1 [ <required> &$b ]
+    Parameter #2 [ <optional> $c = NULL ]
+    Parameter #3 [ <optional> $d = array (
+  0 => 1,
+  1 => 2,
+  2 => 'some string',
+) ]
+  }
+}
+"
 
 --- invokeArgs("f") ---
 In f()
@@ -168,10 +185,77 @@ In g(a, b, some string)
 NULL
 
 --- export("g") ---
-string(0) ""
+string(%d) "/**
+ * This is g's doc comment.
+ */
+Function [ <user> function g ] {
+  @@ %sreflection.php 87 - 89
+
+  - Parameters [3] {
+    Parameter #0 [ <optional> $a = NULL ]
+    Parameter #1 [ <optional> $b = array (
+  0 => 1,
+  1 => 2,
+  2 => 3,
+) ]
+    Parameter #2 [ <optional> $c = 'some string' ]
+  }
+}
+"
 
 --- export() ---
-string(0) ""
+string(%d) "Class [ <user> class B ] {
+  @@ %s/reflection.php %d-%d
+
+  - Constants [2] {
+    Constant [ string C0 ] { B::C0 }
+    Constant [ string C1 ] { B::C1 }
+  }
+
+  - Static properties [3] {
+    Property [ public static $s0 ]
+    Property [ public static $s1 ]
+    Property [ public static $s2 ]
+  }
+
+  - Static methods [2] {
+    Method [ <user> static public method smethB0 ] {
+      @@ %s/reflection.php %d - %d
+    }
+    Method [ <user> static private method smethB1 ] {
+      @@ %s/reflection.php %d - %d
+    }
+  }
+
+  - Properties [4] {
+    Property [ <default> private $p0 ]
+    Property [ <default> protected $p1 ]
+    Property [ <default> public $p2 ]
+    Property [ <default> public $p3 ]
+  }
+
+  - Methods [6] {
+    Method [ <user> public method methI ] {
+      @@ %s/reflection.php %d - %d
+    }
+    Method [ <user> public method methJ ] {
+      @@ %s/reflection.php %d - %d
+    }
+    Method [ <user> public method methK ] {
+      @@ %s/reflection.php %d - %d
+    }
+    Method [ <user> private method methB ] {
+      @@ %s/reflection.php %d - %d
+    }
+    Method [ <user> public method methH ] {
+      @@ %s/reflection.php %d - %d
+    }
+    Method [ <user> protected method methA ] {
+      @@ %s/reflection.php %d - %d
+    }
+  }
+}
+"
 
 --- getConstant() ---
 string(5) "B::C0"
@@ -227,7 +311,7 @@ int(0)
 string(1) "B"
 
 --- getParentClass() ---
-object(ReflectionClass)#23 (3) {
+object(ReflectionClass)#%d (3) {
   ["name"]=>
   string(1) "A"
   ["info":"ReflectionClass":private]=>
@@ -295,7 +379,7 @@ bool(false)
 bool(true)
 
 --- newInstance() ---
-object(B)#51 (4) {
+object(B)#%d (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>
@@ -307,7 +391,7 @@ object(B)#51 (4) {
 }
 
 --- newInstanceArgs() ---
-object(B)#51 (4) {
+object(B)#%d (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>

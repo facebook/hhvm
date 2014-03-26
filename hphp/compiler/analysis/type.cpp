@@ -663,6 +663,7 @@ std::string Type::getPHPName() {
 
 std::string Type::toString() const {
   switch (m_kindOf) {
+  case KindOfVoid:        return "Null";
   case KindOfBoolean:     return "Boolean";
   case KindOfInt32:       return "Int32";
   case KindOfInt64:       return "Int64";

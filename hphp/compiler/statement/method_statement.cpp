@@ -192,8 +192,8 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   funcScope->setParamCounts(ar, -1, -1);
 
   if (funcScope->isNative()) {
-    funcScope->setReturnType(ar, Type::FromDataType(
-                                   m_retTypeAnnotation->dataType()));
+    funcScope->setReturnType(
+      ar, Type::FromDataType(m_retTypeAnnotation->dataType(), Type::Variant));
   }
 
   return funcScope;

@@ -149,8 +149,8 @@ public:
 
 private:
   const char *m_classname;
-  Class *m_cls;
-  static Class *s_SHIClass;
+  LowClassPtr m_cls;
+  static LowClassPtr s_SHIClass;
   DECLARE_STATIC_REQUEST_LOCAL(SystemlibSessionInstance, s_obj);
 
   const Func *m_ctor;

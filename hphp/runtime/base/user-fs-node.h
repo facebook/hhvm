@@ -41,7 +41,7 @@ protected:
 
 protected:
   const Func* m_Call;
-  Class* m_cls;
+  LowClassPtr m_cls;
 
 private:
   Object m_obj;

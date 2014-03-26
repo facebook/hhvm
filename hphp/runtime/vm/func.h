@@ -538,15 +538,16 @@ private:
   mutable RDS::Link<Func*> m_cachedFunc{RDS::kInvalidHandle};
   FuncId m_funcId{InvalidFuncId};
   const StringData* m_name;
-  Class* m_baseCls{nullptr};// The first Class in the inheritance hierarchy that
-                            // declared this method; note that this may be an
-                            // abstract class that did not provide an
-                            // implementation
+  // The first Class in the inheritance hierarchy that declared this method;
+  // note that this may be an abstract class that did not provide an
+  // implementation.
+  LowClassPtr m_baseCls{nullptr};
+  // The Class that provided this method implementation.
+  LowClassPtr m_cls{nullptr};
   union {
     const NamedEntity* m_namedEntity{nullptr};
     Slot m_methodSlot;
   };
-  Class* m_cls{nullptr};  // The Class that provided this method implementation
   // TODO(#1114385) intercept should work via invalidation.
   mutable char m_maybeIntercepted; // -1, 0, or 1.  Accessed atomically.
   bool m_hasPrivateAncestor : 1; // This flag indicates if any of this

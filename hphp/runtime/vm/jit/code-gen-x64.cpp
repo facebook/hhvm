@@ -1848,16 +1848,8 @@ void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc,
   if (type < Type::Obj) {
     // emit the specific class test
     assert(type.getClass()->attrs() & AttrFinal);
-    auto clsImm = Immed64(type.getClass());
     auto reg = getDataPtrEnregistered(m_as, dataSrc, m_rScratch);
-    if (clsImm.fits(sz::dword)) {
-      m_as.cmpq(clsImm.l(), reg[ObjectData::getVMClassOffset()]);
-    } else {
-      // use a scratch.  We could do this without rAsm using two immediate
-      // 32-bit compares (and two branches).
-      m_as.emitImmReg(clsImm, rAsm);
-      m_as.cmpq(rAsm, reg[ObjectData::getVMClassOffset()]);
-    }
+    emitCmpClass(m_as, type.getClass(), reg[ObjectData::getVMClassOffset()]);
     doJcc(CC_E);
   } else {
     assert(type < Type::Arr);
@@ -4837,7 +4829,8 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(PhysReg ctxReg,
                                               bool    staticCallee) {
   if (staticCallee) {
     // Load (this->m_cls | 0x1) into ctxReg.
-    m_as.loadq(ctxReg[ObjectData::getVMClassOffset()], ctxReg);
+    emitLdLowPtr(m_as, ctxReg[ObjectData::getVMClassOffset()],
+                 ctxReg, sizeof(LowClassPtr));
     m_as.orq(1, ctxReg);
   } else {
     // Just incref $this.
@@ -4927,7 +4920,8 @@ void CodeGenerator::emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
   // If calling a static method...
   {
     // Load (this->m_cls | 0x1) into destCtxReg
-    m_as.loadq(thisReg[ObjectData::getVMClassOffset()], destCtxReg);
+    emitLdLowPtr(m_as, thisReg[ObjectData::getVMClassOffset()],
+                 destCtxReg, sizeof(LowClassPtr));
     m_as.orq(1, destCtxReg);
     m_as.jmp8(End);
   }

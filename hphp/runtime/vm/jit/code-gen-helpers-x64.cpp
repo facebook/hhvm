@@ -252,7 +252,8 @@ void emitLea(Asm& as, MemoryRef mr, PhysReg dst) {
 }
 
 void emitLdObjClass(Asm& as, PhysReg objReg, PhysReg dstReg) {
-  as.   loadq (objReg[ObjectData::getVMClassOffset()], dstReg);
+  emitLdLowPtr(as, objReg[ObjectData::getVMClassOffset()],
+               dstReg, sizeof(LowClassPtr));
 }
 
 void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg) {

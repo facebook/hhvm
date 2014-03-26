@@ -211,12 +211,11 @@ private:
   void copyContinuationVars(ActRec *fp);
 
 public:
-  /* 32-bit o_id from ObjectData */
+  int32_t m_size;
   Offset m_offset;
   int64_t m_index;
   Cell m_key;
   Cell m_value;
-  int32_t m_size;
 
   /* temporary storage used to save the SP when inlining into a continuation */
   void* m_stashedSP;

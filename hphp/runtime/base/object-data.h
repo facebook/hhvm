@@ -28,6 +28,8 @@
 
 #include "hphp/system/systemlib.h"
 
+#include "hphp/util/low-ptr.h"
+
 #include <vector>
 
 namespace HPHP {
@@ -438,7 +440,7 @@ private:
   static void compileTimeAssertions();
 
 private:
-  Class* m_cls;
+  LowClassPtr m_cls;
   mutable uint16_t o_attribute;
 
   // 16 bits of memory that can be reused by subclasses
@@ -449,10 +451,13 @@ protected:
   } o_subclassData;
 
 private:
+#ifdef USE_LOWPTR
+  int o_id; // Numeric identifier of this object (used for var_dump())
   mutable RefCount m_count;
-
-  // Numeric identifier of this object (used for var_dump())
-  int o_id;
+#else
+  mutable RefCount m_count;
+  int o_id; // Numeric identifier of this object (used for var_dump())
+#endif
 } __attribute__((aligned(16)));
 
 typedef GlobalNameValueTableWrapper GlobalVariables;

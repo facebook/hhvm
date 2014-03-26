@@ -1209,8 +1209,9 @@ void CodeGenerator::emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
   if (type < Type::Obj) {
     assert(type.getClass()->attrs() & AttrFinal);
     auto dataReg = enregister(m_as, dataSrc, rAsm);
-    m_as.   Ldr   (rAsm, dataReg[ObjectData::getVMClassOffset()]);
-    m_as.   Cmp   (rAsm, reinterpret_cast<int64_t>(type.getClass()));
+    emitLdLowPtr(m_as, rAsm, dataReg[ObjectData::getVMClassOffset()],
+                 sizeof(LowClassPtr));
+    emitCmpClass(m_as, rAsm, type.getClass());
     doJcc(CC_E);
   } else if (type < Type::Res) {
     CG_PUNT(TypeTest-on-Resource);

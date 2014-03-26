@@ -18,6 +18,7 @@
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/fixup.h"
@@ -89,6 +90,38 @@ void emitIncRefKnownType(vixl::MacroAssembler& a,
 void emitIncRefGeneric(vixl::MacroAssembler& a,
                        const vixl::Register& data,
                        size_t disp);
+
+/**
+ * Emit a load of a low pointer.
+ */
+template<class Mem>
+void emitLdLowPtr(vixl::MacroAssembler& a,
+                  const vixl::Register& dest,
+                  Mem mem, size_t size) {
+  if (size == 8) {
+    a.   Ldr   (dest, mem);
+  } else if (size == 4) {
+    a.   Ldr   (dest.W(), mem); // XXX will this zero-extend?
+  } else {
+    not_implemented();
+  }
+}
+
+inline
+void emitCmpClass(vixl::MacroAssembler& a,
+                  const vixl::Register& reg,
+                  const Class* c) {
+  auto size = sizeof(LowClassPtr);
+  auto imm = reinterpret_cast<int64_t>(c);
+
+  if (size == 8) {
+    a.   Cmp   (reg, imm);
+  } else if (size == 4) {
+    a.   Cmp   (reg.W(), uint32_t(imm));
+  } else {
+    not_implemented();
+  }
+}
 
 /*
  * Enables access to objects with the __thread storage class. See the

@@ -160,6 +160,42 @@ void emitStoreReg(Asm& as, PhysReg reg, Mem mem) {
   }
 }
 
+/**
+ * Emit a load of a low pointer.
+ */
+template<class Mem>
+void emitLdLowPtr(Asm& as, Mem mem, PhysReg reg, size_t size) {
+  assert(reg != InvalidReg && reg.isGP());
+  if (size == 8) {
+    as.loadq(mem, reg);
+  } else if (size == 4) {
+    as.loadl(mem, r32(reg));
+  } else {
+    not_implemented();
+  }
+}
+
+template<class Mem>
+void emitCmpClass(Asm& as, const Class* c, Mem mem) {
+  auto size = sizeof(LowClassPtr);
+  auto imm = Immed64(c);
+
+  if (size == 8) {
+    if (imm.fits(sz::dword)) {
+      as.cmpq(imm.l(), mem);
+    } else {
+      // Use a scratch.  We could do this without rAsm using two immediate
+      // 32-bit compares (and two branches).
+      as.emitImmReg(imm, rAsm);
+      as.cmpq(rAsm, mem);
+    }
+  } else if (size == 4) {
+    as.cmpl(imm.l(), mem);
+  } else {
+    not_implemented();
+  }
+}
+
 void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1);
 
 void zeroExtendIfBool(Asm& as, const SSATmp* src, PhysReg reg);

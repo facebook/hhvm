@@ -73,7 +73,8 @@ static Array ArrayObject_toArray(const ObjectData* obj) {
   return tvAsCVarRef(prop).toArray();
 }
 
-static_assert(sizeof(ObjectData) == 32, "Change this only on purpose");
+static_assert(sizeof(ObjectData) == use_lowptr ? 16 : 32,
+              "Change this only on purpose");
 
 //////////////////////////////////////////////////////////////////////
 

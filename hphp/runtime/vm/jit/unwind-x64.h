@@ -63,18 +63,51 @@ inline ptrdiff_t unwinderTvOff() {
 
 //////////////////////////////////////////////////////////////////////
 
-inline const std::type_info& typeInfoFromUnwindException(
-  _Unwind_Exception* exceptionObj)
+/*
+ * Meant to work like __cxxabiv1::__is_dependent_exception
+ * See libstdc++-v3/libsupc++/unwind-cxx.h in GCC
+ */
+static inline bool isDependentException(uint64_t c)
 {
-  constexpr size_t kTypeInfoOff = 112;
-  return **reinterpret_cast<std::type_info**>(
-    reinterpret_cast<char*>(exceptionObj + 1) - kTypeInfoOff);
+  return (c & 1);
 }
 
+/**
+ * Meant to work like __cxxabiv1::__get_object_from_ue() but with a specific
+ * return type.
+ * See libstdc++-v3/libsupc++/unwind-cxx.h in GCC
+ */
 inline std::exception* exceptionFromUnwindException(
   _Unwind_Exception* exceptionObj)
 {
-  return reinterpret_cast<std::exception*>(exceptionObj + 1);
+  constexpr size_t sizeOfDependentException = 112;
+  if (isDependentException(exceptionObj->exception_class)) {
+    return *reinterpret_cast<std::exception**>(
+      reinterpret_cast<char*>(exceptionObj + 1) - sizeOfDependentException);
+  } else {
+    return reinterpret_cast<std::exception*>(exceptionObj + 1);
+  }
+}
+
+inline const std::type_info& typeInfoFromUnwindException(
+  _Unwind_Exception* exceptionObj
+  )
+{
+  if (isDependentException(exceptionObj->exception_class)) {
+    // like __cxxabiv1::__get_refcounted_exception_header_from_obj()
+    constexpr size_t sizeOfRefcountedException = 128;
+    char * obj = reinterpret_cast<char*>(
+        exceptionFromUnwindException(exceptionObj));
+    char * header = obj - sizeOfRefcountedException;
+    // Dereference the exc field, the type_info* is the first field inside that
+    constexpr size_t excOffset = 16;
+    return *reinterpret_cast<std::type_info*>(header + excOffset);
+  } else {
+    // like __cxxabiv1::__get_exception_header_from_ue()
+    constexpr size_t sizeOfCxaException = 112;
+    return **reinterpret_cast<std::type_info**>(
+      reinterpret_cast<char*>(exceptionObj + 1) - sizeOfCxaException);
+  }
 }
 
 /*

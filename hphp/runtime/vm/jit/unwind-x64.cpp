@@ -142,7 +142,8 @@ tc_unwind_personality(int version,
   // packed into a 64-bit int. For now we shouldn't be seeing exceptions from
   // any other runtimes but this may change in the future.
   DEBUG_ONLY constexpr uint64_t kMagicClass = 0x474e5543432b2b00;
-  assert(exceptionClass == kMagicClass);
+  DEBUG_ONLY constexpr uint64_t kMagicDependentClass = 0x474e5543432b2b01;
+  assert(exceptionClass == kMagicClass || exceptionClass == kMagicDependentClass);
   assert(version == 1);
 
   auto const& ti = typeInfoFromUnwindException(exceptionObj);

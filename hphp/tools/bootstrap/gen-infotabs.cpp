@@ -39,7 +39,7 @@ void write_zend_func_stub(std::ofstream& cpp, PhpFunc func,
   cpp << folly::format(R"(
 }} // End namespace
 void {0}{1}{2}(
-  int, HPHP::RefData*, HPHP::RefData**, HPHP::RefData*, int
+  int, HPHP::RefData*, HPHP::RefData**, HPHP::RefData*, int, void***
 );
 namespace HPHP {{
 TypedValue* {3}{1}{2}(ActRec* ar) {{

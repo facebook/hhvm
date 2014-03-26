@@ -2019,14 +2019,13 @@ void CodeGenerator::cgSideExitJmpNInstanceOfBitmask(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
-  auto const testClass = inst->src(1);
   auto testReg = srcLoc(1).reg();
   auto destReg = dstLoc(0).reg();
   auto& a = m_as;
 
-  if (testClass->isConst()) {
+  if (testReg == InvalidReg) {
     // Don't need to do the null check when the class is const.
-    assert(testClass->clsVal());
+    assert(inst->src(1)->clsVal() != nullptr);
     cgCallNative(a, inst);
     return;
   }
@@ -2037,7 +2036,8 @@ void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
       cgCallNative(a, inst);
     },
     [&] {
-      a. xorl    (r32(destReg), r32(destReg));
+      // testReg == 0, set dest to false (0)
+      emitMovRegReg(a, testReg, destReg);
     }
   );
 }
@@ -5907,8 +5907,13 @@ void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
   // a bytecode's translation, which should never begin with FreeActRec or
   // RetCtrl.
   always_assert(!inst->is(FreeActRec, RetCtrl));
-
-  m_as.cmpq(safe_cast<int32_t>((uintptr_t)enterTCServiceReq), *rsp);
+  Immed64 imm = (uintptr_t)enterTCServiceReq;
+  if (imm.fits(sz::dword)) {
+    m_as.cmpq(imm.l(), *rsp);
+  } else {
+    m_as.emitImmReg(imm, m_rScratch);
+    m_as.cmpq(m_rScratch, *rsp);
+  }
   ifBlock(CC_NE, [&](Asm& a) {
      a.ud2();
   });

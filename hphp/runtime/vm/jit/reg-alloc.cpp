@@ -164,11 +164,6 @@ namespace ARM {
 // blindly in CodeGenerator.
 bool mayUseConst(const IRInstruction& inst, unsigned i) {
   assert(inst.src(i)->isConst());
-  if (CallMap::hasInfo(inst.op())) {
-    // shuffleArgs() knows what to do with immediates.
-    // TODO: #3634984 ... but it needs a scratch register
-    return true;
-  }
   union {
     int64_t cint;
     double cdouble;
@@ -204,6 +199,11 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
   default:
     break;
   }
+  if (CallMap::hasInfo(inst.op())) {
+    // shuffleArgs() knows what to do with immediates.
+    // TODO: #3634984 ... but it needs a scratch register
+    return true;
+  }
   return false;
 }
 
@@ -234,12 +234,6 @@ bool okCmp(int64_t c) { return isI32(c); }
 // pre: the src must actually be a const
 bool mayUseConst(const IRInstruction& inst, unsigned i) {
   assert(inst.src(i)->isConst());
-  if (CallMap::hasInfo(inst.op())) {
-    // shuffleArgs() knows what to do with immediates.
-    // TODO: #3634984 ... but it needs a scratch register for
-    // big constants, so handle big immediates here.
-    return true;
-  }
   union {
     int64_t cint;
     double cdouble;
@@ -364,8 +358,17 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
   case VerifyRetCls:
     if (i == 1) return okCmp(cint); // constraint class ptr
     break;
+  case FunctionExitSurpriseHook:
+    if (i == 2) return okStore(cint); // return value
+    break;
   default:
     break;
+  }
+  if (CallMap::hasInfo(inst.op())) {
+    // shuffleArgs() knows what to do with immediates.
+    // TODO: #3634984 ... but it needs a scratch register for
+    // big constants, so handle big immediates here.
+    return true;
   }
   return false;
 }

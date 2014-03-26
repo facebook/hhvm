@@ -1,0 +1,760 @@
+ProxyManagerTest\Autoloader\AutoloaderTest::testWillAutoloadExistingFile
+.
+ProxyManagerTest\Autoloader\AutoloaderTest::testWillNotAutoloadExistingClass
+.
+ProxyManagerTest\Autoloader\AutoloaderTest::testWillNotAutoloadNonExistingClass
+.
+ProxyManagerTest\Autoloader\AutoloaderTest::testWillNotAutoloadUserClasses
+.
+ProxyManagerTest\ConfigurationTest::testGetSetProxiesNamespace
+.
+ProxyManagerTest\ConfigurationTest::testSetGetClassNameInflector
+.
+ProxyManagerTest\ConfigurationTest::testSetGetGeneratorStrategy
+.
+ProxyManagerTest\ConfigurationTest::testSetGetProxiesTargetDir
+.
+ProxyManagerTest\ConfigurationTest::testSetGetProxyAutoloader
+.
+ProxyManagerTest\Exception\DisabledMethodExceptionTest::testProxyDirectoryNotFound
+.
+ProxyManagerTest\Exception\InvalidProxiedClassExceptionTest::testInterfaceNotSupported
+.
+ProxyManagerTest\Exception\InvalidProxyDirectoryExceptionTest::testProxyDirectoryNotFound
+.
+ProxyManagerTest\Exception\UnsupportedProxiedClassExceptionTest::testUnsupportedLocalizedReflectionProperty
+.
+ProxyManagerTest\Factory\AbstractBaseFactoryTest::testGeneratesClass
+.
+ProxyManagerTest\Factory\AccessInterceptorScopeLocalizerFactoryTest::testWillSkipAutoGeneration
+.
+ProxyManagerTest\Factory\AccessInterceptorScopeLocalizerFactoryTest::testWillTryAutoGeneration
+.
+ProxyManagerTest\Factory\AccessInterceptorScopeLocalizerFactoryTest::testWithOptionalFactory
+.
+ProxyManagerTest\Factory\AccessInterceptorValueHolderFactoryTest::testWillSkipAutoGeneration
+.
+ProxyManagerTest\Factory\AccessInterceptorValueHolderFactoryTest::testWillTryAutoGeneration
+.
+ProxyManagerTest\Factory\AccessInterceptorValueHolderFactoryTest::testWithOptionalFactory
+.
+ProxyManagerTest\Factory\LazyLoadingGhostFactoryTest::testWillSkipAutoGeneration
+.
+ProxyManagerTest\Factory\LazyLoadingGhostFactoryTest::testWillTryAutoGeneration
+.
+ProxyManagerTest\Factory\LazyLoadingGhostFactoryTest::testWithOptionalFactory
+.
+ProxyManagerTest\Factory\LazyLoadingValueHolderFactoryTest::testWillSkipAutoGeneration
+.
+ProxyManagerTest\Factory\LazyLoadingValueHolderFactoryTest::testWillTryAutoGeneration
+.
+ProxyManagerTest\Factory\LazyLoadingValueHolderFactoryTest::testWithOptionalFactory
+.
+ProxyManagerTest\Factory\NullObjectFactoryTest::testWillSkipAutoGeneration
+.
+ProxyManagerTest\Factory\NullObjectFactoryTest::testWillTryAutoGeneration
+.
+ProxyManagerTest\Factory\RemoteObjectFactoryTest::testWillSkipAutoGeneration
+.
+ProxyManagerTest\Factory\RemoteObjectFactoryTest::testWillTryAutoGeneration
+.
+ProxyManagerTest\Factory\RemoteObject\Adapter\BaseAdapterTest::testBaseAdapter
+.
+ProxyManagerTest\Factory\RemoteObject\Adapter\BaseAdapterTest::testBaseAdapterWithServiceMap
+.
+ProxyManagerTest\Factory\RemoteObject\Adapter\JsonRpcTest::testCanBuildAdapterWithJsonRpcClient
+.
+ProxyManagerTest\Factory\RemoteObject\Adapter\SoapTest::testCanBuildAdapterWithSoapRpcClient
+.
+ProxyManagerTest\Factory\RemoteObject\Adapter\XmlRpcTest::testCanBuildAdapterWithXmlRpcClient
+.
+ProxyManagerTest\FileLocator\FileLocatorTest::testGetProxyFileName
+.
+ProxyManagerTest\FileLocator\FileLocatorTest::testRejectsNonExistingDirectory
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testCanWriteToArrayKeysInPublicProperty
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCalls with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCalls with data set #1
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCalls with data set #2
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCalls with data set #3
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCallsAfterCloning with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCallsAfterCloning with data set #1
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCallsAfterCloning with data set #2
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCallsAfterCloning with data set #3
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCallsAfterUnSerialization with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCallsAfterUnSerialization with data set #1
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCallsAfterUnSerialization with data set #2
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCallsAfterUnSerialization with data set #3
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCallsWithSuffixListener with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCallsWithSuffixListener with data set #1
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCallsWithSuffixListener with data set #2
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCallsWithSuffixListener with data set #3
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testPropertyExistence with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testPropertyExistence with data set #1
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testPropertyReadAccess with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testPropertyReadAccess with data set #1
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testPropertyUnset with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testPropertyUnset with data set #1
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testPropertyWriteAccess with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testPropertyWriteAccess with data set #1
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testWillModifyByRefRetrievedPublicProperties
+.
+ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testWillNotModifyRetrievedPublicProperties
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testCanWriteToArrayKeysInPublicProperty
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testKeepsInitializedPublicProperties
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testKeepsInitializerWhenNotOverwitten
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testMethodCalls with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testMethodCalls with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testMethodCalls with data set #2
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testMethodCallsAfterCloning with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testMethodCallsAfterCloning with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testMethodCallsAfterCloning with data set #2
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testMethodCallsAfterUnSerialization with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testMethodCallsAfterUnSerialization with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testMethodCallsAfterUnSerialization with data set #2
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testPrivatePropertyDefaultWillBePreserved
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testPropertyAbsence with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testPropertyAbsence with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testPropertyExistence with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testPropertyExistence with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testPropertyReadAccess with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testPropertyReadAccess with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testPropertyUnset with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testPropertyUnset with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testPropertyWriteAccess with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testPropertyWriteAccess with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testProtectedPropertyDefaultWillBePreserved
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testPublicPropertyDefaultWillBePreserved
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testWillModifyByRefRetrievedPublicProperties
+.
+ProxyManagerTest\Functional\LazyLoadingGhostFunctionalTest::testWillNotModifyRetrievedPublicProperties
+.
+ProxyManagerTest\Functional\LazyLoadingGhostPerformanceTest::testProxyInstantiationPerformance with data set #0
+O
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testCanWriteToArrayKeysInPublicProperty
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testMethodCalls with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testMethodCalls with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testMethodCalls with data set #2
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testMethodCalls with data set #3
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testMethodCallsAfterCloning with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testMethodCallsAfterCloning with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testMethodCallsAfterCloning with data set #2
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testMethodCallsAfterCloning with data set #3
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testMethodCallsAfterUnSerialization with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testMethodCallsAfterUnSerialization with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testMethodCallsAfterUnSerialization with data set #2
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testMethodCallsAfterUnSerialization with data set #3
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testPropertyAbsence with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testPropertyAbsence with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testPropertyExistence with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testPropertyExistence with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testPropertyReadAccess with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testPropertyReadAccess with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testPropertyUnset with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testPropertyUnset with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testPropertyWriteAccess with data set #0
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testPropertyWriteAccess with data set #1
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testWillModifyByRefRetrievedPublicProperties
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderFunctionalTest::testWillNotModifyRetrievedPublicProperties
+.
+ProxyManagerTest\Functional\LazyLoadingValueHolderPerformanceTest::testProxyInstantiationPerformance with data set #0
+O
+ProxyManagerTest\Functional\MultipleProxyGenerationTest::testCanGenerateMultipleDifferentProxiesForSameClass with data set #0
+.
+ProxyManagerTest\Functional\MultipleProxyGenerationTest::testCanGenerateMultipleDifferentProxiesForSameClass with data set #1
+.
+ProxyManagerTest\Functional\MultipleProxyGenerationTest::testCanGenerateMultipleDifferentProxiesForSameClass with data set #2
+.
+ProxyManagerTest\Functional\MultipleProxyGenerationTest::testCanGenerateMultipleDifferentProxiesForSameClass with data set #3
+.
+ProxyManagerTest\Functional\MultipleProxyGenerationTest::testCanGenerateMultipleDifferentProxiesForSameClass with data set #4
+.
+ProxyManagerTest\Functional\MultipleProxyGenerationTest::testCanGenerateMultipleDifferentProxiesForSameClass with data set #5
+.
+ProxyManagerTest\Functional\MultipleProxyGenerationTest::testCanGenerateMultipleDifferentProxiesForSameClass with data set #6
+.
+ProxyManagerTest\Functional\MultipleProxyGenerationTest::testCanGenerateMultipleDifferentProxiesForSameClass with data set #7
+.
+ProxyManagerTest\Functional\MultipleProxyGenerationTest::testCanGenerateMultipleDifferentProxiesForSameClass with data set #8
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testMethodCalls with data set #0
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testMethodCalls with data set #1
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testMethodCalls with data set #2
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testMethodCalls with data set #3
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testMethodCallsAfterCloning with data set #0
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testMethodCallsAfterCloning with data set #1
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testMethodCallsAfterCloning with data set #2
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testMethodCallsAfterCloning with data set #3
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testMethodCallsAfterUnSerialization with data set #0
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testMethodCallsAfterUnSerialization with data set #1
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testMethodCallsAfterUnSerialization with data set #2
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testMethodCallsAfterUnSerialization with data set #3
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testPropertyExistence with data set #0
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testPropertyExistence with data set #1
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testPropertyReadAccess with data set #0
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testPropertyReadAccess with data set #1
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testPropertyUnset with data set #0
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testPropertyUnset with data set #1
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testPropertyWriteAccess with data set #0
+.
+ProxyManagerTest\Functional\NullObjectFunctionalTest::testPropertyWriteAccess with data set #1
+.
+ProxyManagerTest\Functional\RemoteObjectFunctionalTest::testJsonRpcMethodCalls with data set #0
+.
+ProxyManagerTest\Functional\RemoteObjectFunctionalTest::testJsonRpcMethodCalls with data set #1
+.
+ProxyManagerTest\Functional\RemoteObjectFunctionalTest::testJsonRpcMethodCalls with data set #2
+.
+ProxyManagerTest\Functional\RemoteObjectFunctionalTest::testJsonRpcMethodCalls with data set #3
+.
+ProxyManagerTest\Functional\RemoteObjectFunctionalTest::testJsonRpcPropertyReadAccess with data set #0
+.
+ProxyManagerTest\Functional\RemoteObjectFunctionalTest::testXmlRpcMethodCalls with data set #0
+.
+ProxyManagerTest\Functional\RemoteObjectFunctionalTest::testXmlRpcMethodCalls with data set #1
+.
+ProxyManagerTest\Functional\RemoteObjectFunctionalTest::testXmlRpcMethodCalls with data set #2
+.
+ProxyManagerTest\Functional\RemoteObjectFunctionalTest::testXmlRpcMethodCalls with data set #3
+.
+ProxyManagerTest\GeneratorStrategy\BaseGeneratorStrategyTest::testGenerate
+.
+ProxyManagerTest\GeneratorStrategy\EvaluatingGeneratorStrategyTest::testGenerate
+.
+ProxyManagerTest\GeneratorStrategy\EvaluatingGeneratorStrategyTest::testGenerateWithDisabledEval
+S
+ProxyManagerTest\GeneratorStrategy\FileWriterGeneratorStrategyTest::testGenerate
+.
+ProxyManagerTest\Generator\ClassGeneratorTest::testExtendedClassesAreFQCNs
+.
+ProxyManagerTest\Generator\ClassGeneratorTest::testImplementedInterfacesAreFQCNs
+.
+ProxyManagerTest\Generator\MagicMethodGeneratorTest::testGeneratesCorrectByRefReturnValue
+.
+ProxyManagerTest\Generator\MagicMethodGeneratorTest::testGeneratesCorrectByValReturnValue
+.
+ProxyManagerTest\Generator\MethodGeneratorTest::testGenerateFromReflection
+.
+ProxyManagerTest\Generator\MethodGeneratorTest::testGenerateSimpleMethod
+.
+ProxyManagerTest\Generator\ParameterGeneratorTest::testGeneratesDefaultParameterForInternalPhpClasses
+F
+ProxyManagerTest\Generator\ParameterGeneratorTest::testGeneratesMethodWithCallableType
+.
+ProxyManagerTest\Generator\ParameterGeneratorTest::testGeneratesParameterPassedByReference
+.
+ProxyManagerTest\Generator\ParameterGeneratorTest::testGeneratesProperTypeHint
+.
+ProxyManagerTest\Generator\ParameterGeneratorTest::testReadsParameterDefaults
+.
+ProxyManagerTest\Generator\ParameterGeneratorTest::testReadsParameterTypeHint
+.
+ProxyManagerTest\Generator\ParameterGeneratorTest::testVisitMethodWithCallable
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesUniqueIdentifiers with data set #0
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesUniqueIdentifiers with data set #1
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesUniqueIdentifiers with data set #2
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesUniqueIdentifiers with data set #3
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesUniqueIdentifiers with data set #4
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesUniqueIdentifiers with data set #5
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesUniqueIdentifiers with data set #6
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesValidIdentifiers with data set #0
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesValidIdentifiers with data set #1
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesValidIdentifiers with data set #2
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesValidIdentifiers with data set #3
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesValidIdentifiers with data set #4
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesValidIdentifiers with data set #5
+.
+ProxyManagerTest\Generator\Util\UniqueIdentifierGeneratorTest::testGeneratesValidIdentifiers with data set #6
+.
+ProxyManagerTest\Inflector\ClassNameInflectorTest::testGeneratesCorrectClassNameWhenGivenLeadingBackslash
+.
+ProxyManagerTest\Inflector\ClassNameInflectorTest::testGeneratesDifferentClassNameWithDifferentParameters
+.
+ProxyManagerTest\Inflector\ClassNameInflectorTest::testGeneratesSameClassNameWithSameParameters
+.
+ProxyManagerTest\Inflector\ClassNameInflectorTest::testInflector with data set #0
+.
+ProxyManagerTest\Inflector\ClassNameInflectorTest::testInflector with data set #1
+.
+ProxyManagerTest\Inflector\Util\ParameterEncoderTest::testGeneratesValidClassName with data set #0
+.
+ProxyManagerTest\Inflector\Util\ParameterEncoderTest::testGeneratesValidClassName with data set #1
+.
+ProxyManagerTest\Inflector\Util\ParameterEncoderTest::testGeneratesValidClassName with data set #2
+.
+ProxyManagerTest\Inflector\Util\ParameterEncoderTest::testGeneratesValidClassName with data set #3
+.
+ProxyManagerTest\Inflector\Util\ParameterEncoderTest::testGeneratesValidClassName with data set #4
+.
+ProxyManagerTest\Inflector\Util\ParameterEncoderTest::testGeneratesValidClassName with data set #5
+.
+ProxyManagerTest\Inflector\Util\ParameterEncoderTest::testGeneratesValidClassName with data set #6
+.
+ProxyManagerTest\Inflector\Util\ParameterEncoderTest::testGeneratesValidClassName with data set #7
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizerTest::testGeneratesValidCode with data set #0
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizerTest::testGeneratesValidCode with data set #1
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizerTest::testGeneratesValidCode with data set #2
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizerTest::testGeneratesValidCode with data set #3
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizerTest::testGeneratesValidCode with data set #4
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\ConstructorTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\ConstructorTest::testBodyStructureWithPrivateProperties
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\ConstructorTest::testBodyStructureWithProtectedProperties
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\ConstructorTest::testSignature
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\InterceptedMethodTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\MagicCloneTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\MagicCloneTest::testBodyStructureWithInheritedMethod
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\MagicGetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\MagicGetTest::testBodyStructureWithInheritedMethod
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\MagicIssetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\MagicIssetTest::testBodyStructureWithInheritedMethod
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\MagicSetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\MagicSetTest::testBodyStructureWithInheritedMethod
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\MagicSleepTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\MagicSleepTest::testBodyStructureWithInheritedMethod
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\MagicUnsetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\MagicUnsetTest::testBodyStructureWithInheritedMethod
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorScopeLocalizer\MethodGenerator\Util\InterceptorGeneratorTest::testInterceptorGenerator
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolderTest::testGeneratesValidCode with data set #0
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolderTest::testGeneratesValidCode with data set #1
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolderTest::testGeneratesValidCode with data set #2
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolderTest::testGeneratesValidCode with data set #3
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolderTest::testGeneratesValidCode with data set #4
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolder\MethodGenerator\ConstructorTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolder\MethodGenerator\ConstructorTest::testBodyStructureWithoutPublicProperties
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolder\MethodGenerator\InterceptedMethodTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolder\MethodGenerator\MagicCloneTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolder\MethodGenerator\MagicGetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolder\MethodGenerator\MagicIssetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolder\MethodGenerator\MagicSetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolder\MethodGenerator\MagicUnsetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptorValueHolder\MethodGenerator\Util\InterceptorGeneratorTest::testInterceptorGenerator
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptor\MethodGenerator\MagicWakeupTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptor\MethodGenerator\MagicWakeupTest::testBodyStructureWithoutPublicProperties
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptor\MethodGenerator\SetMethodPrefixInterceptorTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptor\MethodGenerator\SetMethodSuffixInterceptorTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptor\PropertyGenerator\MethodPrefixInterceptorsTest::testUniqueProperty
+.
+ProxyManagerTest\ProxyGenerator\AccessInterceptor\PropertyGenerator\MethodSuffixInterceptorsTest::testUniqueProperty
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhostGeneratorTest::testGeneratesValidCode with data set #0
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhostGeneratorTest::testGeneratesValidCode with data set #1
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhostGeneratorTest::testGeneratesValidCode with data set #2
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhostGeneratorTest::testGeneratesValidCode with data set #3
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhostGeneratorTest::testGeneratesValidCode with data set #4
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\CallInitializerTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\GetProxyInitializerTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\InitializeProxyTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\IsProxyInitializedTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\LazyLoadingMethodInterceptorTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\LazyLoadingMethodInterceptorTest::testBodyStructureWithoutParameters
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicCloneTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicGetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicGetTest::testBodyStructureWithOverriddenMagicGet
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicGetTest::testBodyStructureWithPublicProperties
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicIssetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicIssetTest::testBodyStructureWithOverriddenMagicGet
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicIssetTest::testBodyStructureWithPublicProperties
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicSetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicSetTest::testBodyStructureWithOverriddenMagicGet
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicSetTest::testBodyStructureWithPublicProperties
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicSleepTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicUnsetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicUnsetTest::testBodyStructureWithOverriddenMagicGet
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\MagicUnsetTest::testBodyStructureWithPublicProperties
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\MethodGenerator\SetProxyInitializerTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\PropertyGenerator\InitializationTrackerTest::testUniqueProperty
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingGhost\PropertyGenerator\InitializerPropertyTest::testUniqueProperty
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolderGeneratorTest::testGeneratesValidCode with data set #0
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolderGeneratorTest::testGeneratesValidCode with data set #1
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolderGeneratorTest::testGeneratesValidCode with data set #2
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolderGeneratorTest::testGeneratesValidCode with data set #3
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolderGeneratorTest::testGeneratesValidCode with data set #4
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\MethodGenerator\GetProxyInitializerTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\MethodGenerator\InitializeProxyTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\MethodGenerator\IsProxyInitializedTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\MethodGenerator\LazyLoadingMethodInterceptorTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\MethodGenerator\LazyLoadingMethodInterceptorTest::testBodyStructureWithoutParameters
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\MethodGenerator\MagicCloneTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\MethodGenerator\MagicGetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\MethodGenerator\MagicIssetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\MethodGenerator\MagicSetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\MethodGenerator\MagicSleepTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\MethodGenerator\MagicUnsetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\MethodGenerator\SetProxyInitializerTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\PropertyGenerator\InitializerPropertyTest::testUniqueProperty
+.
+ProxyManagerTest\ProxyGenerator\LazyLoadingValueHolder\PropertyGenerator\ValueHolderPropertyTest::testUniqueProperty
+.
+ProxyManagerTest\ProxyGenerator\LazyLoading\MethodGenerator\ConstructorTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\LazyLoading\MethodGenerator\ConstructorTest::testBodyStructureWithoutPublicProperties
+.
+ProxyManagerTest\ProxyGenerator\NullObjectGeneratorTest::testGeneratesValidCode with data set #0
+.
+ProxyManagerTest\ProxyGenerator\NullObjectGeneratorTest::testGeneratesValidCode with data set #1
+.
+ProxyManagerTest\ProxyGenerator\NullObjectGeneratorTest::testGeneratesValidCode with data set #2
+.
+ProxyManagerTest\ProxyGenerator\NullObjectGeneratorTest::testGeneratesValidCode with data set #3
+.
+ProxyManagerTest\ProxyGenerator\NullObjectGeneratorTest::testGeneratesValidCode with data set #4
+.
+ProxyManagerTest\ProxyGenerator\NullObject\MethodGenerator\ConstructorTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\NullObject\MethodGenerator\ConstructorTest::testBodyStructureWithoutPublicProperties
+.
+ProxyManagerTest\ProxyGenerator\NullObject\MethodGenerator\NullObjectMethodInterceptorTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\NullObject\MethodGenerator\NullObjectMethodInterceptorTest::testBodyStructureWithoutByRefReturn
+.
+ProxyManagerTest\ProxyGenerator\NullObject\MethodGenerator\NullObjectMethodInterceptorTest::testBodyStructureWithoutParameters
+.
+ProxyManagerTest\ProxyGenerator\PublicPropertiesDefaultsTest::testBaseClass
+.
+ProxyManagerTest\ProxyGenerator\PublicPropertiesDefaultsTest::testClassWithPublicProperties
+.
+ProxyManagerTest\ProxyGenerator\PublicPropertiesDefaultsTest::testEmptyClass
+.
+ProxyManagerTest\ProxyGenerator\PublicPropertiesMapTest::testClassWithPublicProperties
+.
+ProxyManagerTest\ProxyGenerator\PublicPropertiesMapTest::testEmptyClass
+.
+ProxyManagerTest\ProxyGenerator\RemoteObjectGeneratorTest::testGeneratesValidCode with data set #0
+.
+ProxyManagerTest\ProxyGenerator\RemoteObjectGeneratorTest::testGeneratesValidCode with data set #1
+.
+ProxyManagerTest\ProxyGenerator\RemoteObjectGeneratorTest::testGeneratesValidCode with data set #2
+.
+ProxyManagerTest\ProxyGenerator\RemoteObjectGeneratorTest::testGeneratesValidCode with data set #3
+.
+ProxyManagerTest\ProxyGenerator\RemoteObjectGeneratorTest::testGeneratesValidCode with data set #4
+.
+ProxyManagerTest\ProxyGenerator\RemoteObject\MethodGenerator\ConstructorTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\RemoteObject\MethodGenerator\MagicGetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\RemoteObject\MethodGenerator\MagicIssetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\RemoteObject\MethodGenerator\MagicSetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\RemoteObject\MethodGenerator\MagicUnsetTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\RemoteObject\MethodGenerator\RemoteObjectMethodTest::testBodyStructureWithArrayParameter
+.
+ProxyManagerTest\ProxyGenerator\RemoteObject\MethodGenerator\RemoteObjectMethodTest::testBodyStructureWithParameters
+.
+ProxyManagerTest\ProxyGenerator\RemoteObject\MethodGenerator\RemoteObjectMethodTest::testBodyStructureWithoutParameters
+.
+ProxyManagerTest\ProxyGenerator\RemoteObject\PropertyGenerator\AdapterPropertyTest::testUniqueProperty
+.
+ProxyManagerTest\ProxyGenerator\Util\ProxiedMethodsFilterTest::testFiltering with data set #0
+.
+ProxyManagerTest\ProxyGenerator\Util\ProxiedMethodsFilterTest::testFiltering with data set #1
+.
+ProxyManagerTest\ProxyGenerator\Util\ProxiedMethodsFilterTest::testFiltering with data set #2
+.
+ProxyManagerTest\ProxyGenerator\Util\ProxiedMethodsFilterTest::testFiltering with data set #3
+.
+ProxyManagerTest\ProxyGenerator\Util\ProxiedMethodsFilterTest::testFiltering with data set #4
+.
+ProxyManagerTest\ProxyGenerator\Util\ProxiedMethodsFilterTest::testFiltering with data set #5
+.
+ProxyManagerTest\ProxyGenerator\Util\ProxiedMethodsFilterTest::testFiltering with data set #6
+.
+ProxyManagerTest\ProxyGenerator\Util\PublicScopeSimulatorTest::testDelegatesToValueHolderWhenAvailable
+.
+ProxyManagerTest\ProxyGenerator\Util\PublicScopeSimulatorTest::testSetRequiresValidOperation
+.
+ProxyManagerTest\ProxyGenerator\Util\PublicScopeSimulatorTest::testSetRequiresValueParameterName
+.
+ProxyManagerTest\ProxyGenerator\Util\PublicScopeSimulatorTest::testSimpleGet
+.
+ProxyManagerTest\ProxyGenerator\Util\PublicScopeSimulatorTest::testSimpleIsset
+.
+ProxyManagerTest\ProxyGenerator\Util\PublicScopeSimulatorTest::testSimpleSet
+.
+ProxyManagerTest\ProxyGenerator\Util\PublicScopeSimulatorTest::testSimpleUnset
+.
+ProxyManagerTest\ProxyGenerator\Util\PublicScopeSimulatorTest::testWillReturnDirectlyWithNoReturnParam
+.
+ProxyManagerTest\ProxyGenerator\ValueHolder\MethodGenerator\GetWrappedValueHolderValueTest::testBodyStructure
+.
+ProxyManagerTest\ProxyGenerator\ValueHolder\MethodGenerator\MagicSleepTest::testBodyStructure
+.
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-private-property-isset.phpt
+.
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-private-property-read.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-private-property-unset.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-private-property-write.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-protected-property-isset.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-protected-property-read.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-protected-property-unset.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-protected-property-write.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-private-property-isset.phpt
+S
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-private-property-read.phpt
+S
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-private-property-unset.phpt
+S
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-private-property-write.phpt
+S
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-protected-property-isset.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-protected-property-read.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-protected-property-unset.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-protected-property-write.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-with-cache.phpt
+.
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-allows-inexisting-magic-property-read.phpt
+.
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-allows-inexisting-property-write.phpt
+.
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-inexisting-property-read.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-private-property-isset.phpt
+.
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-private-property-read.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-private-property-unset.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-private-property-write.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-protected-property-isset.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-protected-property-read.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-protected-property-unset.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-protected-property-write.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-with-cache.phpt
+.
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-private-property-isset.phpt
+.
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-private-property-read.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-private-property-unset.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-private-property-write.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-protected-property-isset.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-protected-property-read.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-protected-property-unset.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-protected-property-write.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-internal-php-classes.phpt
+F
+framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-with-cache.phpt
+.
+framework_downloads/proxymanager/./tests/language-feature-scripts/null-object-public-function-empty.phpt
+.
+framework_downloads/proxymanager/./tests/language-feature-scripts/null-object-public-property-empty.phpt
+.
+framework_downloads/proxymanager/./tests/language-feature-scripts/remote-object-json-adapter-denies-unknow-method.phpt
+F

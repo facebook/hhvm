@@ -103,4 +103,10 @@ inline void php_error_docref(const char *docref, int type,
 #define tsrm_mutex_lock(x) pthread_mutex_lock(&x)
 #define tsrm_mutex_unlock(x) pthread_mutex_unlock(&x)
 
+// Double definition with libjpeg, which can affect PCH builds
+#undef MAXJSAMPLE
+
+// And double definition with libxml2
+#undef ESC
+
 #endif // incl_HPHP_LIBGD_COMPAT_H_

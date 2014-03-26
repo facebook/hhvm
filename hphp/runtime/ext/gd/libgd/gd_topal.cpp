@@ -1506,6 +1506,7 @@ pass2_fs_dither (j_decompress_ptr cinfo,
 	    register int pixcode = *cachep - 1;
 	    *outptr = (JSAMPLE) pixcode;
 	    /* Compute representation error for this pixel */
+#undef GETJSAMPLE
 #define GETJSAMPLE
 	    cur0 -= GETJSAMPLE (colormap0[pixcode]);
 	    cur1 -= GETJSAMPLE (colormap1[pixcode]);

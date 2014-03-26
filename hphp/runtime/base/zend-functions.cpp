@@ -24,6 +24,7 @@ namespace HPHP {
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";
 
+#undef IS_DIGIT
 #define IS_DIGIT(c)  ((c) >= '0' && (c) <= '9')
 #define IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F')||((c) >= 'a'  && (c) <= 'f'))
 

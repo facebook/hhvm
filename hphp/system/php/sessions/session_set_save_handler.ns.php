@@ -18,7 +18,7 @@ class SessionForwardingHandler implements \SessionHandlerInterface {
       $this->write = $this->validate($write, 4);
       $this->destroy = $this->validate($destroy, 5);
       $this->gc = $this->validate($gc, 6);
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
       trigger_error($e->getMessage(), E_USER_WARNING);
       return false;
     }
@@ -56,7 +56,7 @@ class SessionForwardingHandler implements \SessionHandlerInterface {
   }
   private function validate($func, $num) {
     if (!is_callable($func)) {
-      throw new Exception("Argument $num is not a valid callback");
+      throw new \Exception("Argument $num is not a valid callback");
     }
     return $func;
   }

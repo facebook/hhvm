@@ -161,13 +161,13 @@ function get_defined_vars(): array;
  */
 function import_request_variables(string $types,
                                   string $prefix = ""): bool {
-  throw Exception("It is bad coding practice to remove scoping of ".
-                  "variables just to achieve coding convenience, ".
-                  "esp. in a language that encourages global ".
-                  "variables. This is possible to implement ".
-                  "though, by declaring those global variables ".
-                  "beforehand and assign with scoped ones when ".
-                  "this function is called.");
+  throw new Exception("It is bad coding practice to remove scoping of ".
+                      "variables just to achieve coding convenience, ".
+                      "esp. in a language that encourages global ".
+                      "variables. This is possible to implement ".
+                      "though, by declaring those global variables ".
+                      "beforehand and assign with scoped ones when ".
+                      "this function is called.");
 }
 
 /* Import variables from an array into the current symbol table.  Checks each

@@ -61,7 +61,7 @@ class ResourceBundle implements \Iterator, \ArrayAccess, \Countable {
                                 bool $fallback = false): ResourceBundle {
     try {
       return new ResourceBundle($locale, $bundlename, $fallback);
-    } catch (Expception $e) {
+    } catch (Exception $e) {
       return null;
     }
   }
@@ -213,4 +213,3 @@ function resourcebundle_get(ResourceBundle $r,
 function resourcebundle_locales(string $bundlename): array {
   return ResourceBundle::getLocales($bundlename);
 }
-

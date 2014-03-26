@@ -38,6 +38,14 @@
 #include <vector>
 #endif
 
+// HOST_NAME_MAX is recommended by POSIX, but not required.
+// FreeBSD and OSX (as of 10.9) are known to not define it.
+// 255 is generally the safe value to assume and upstream
+// PHP does this as well.
+#ifndef HOST_NAME_MAX
+#define HOST_NAME_MAX 255
+#endif
+
 #define MAXPACKET  8192 /* max packet size used internally by BIND */
 #define DNS_T_A 1
 #define DNS_T_NS 2

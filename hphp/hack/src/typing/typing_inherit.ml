@@ -142,7 +142,8 @@ let inherit_hack_class c env p class_name class_type argl =
   let class_type =
     match class_type.tc_kind with
     | Ast.Ctrait ->
-        class_type
+        (* Change the private visibility to point to the inheriting class *)
+        chown_privates (snd c.c_name) class_type
     | Ast.Cnormal | Ast.Cabstract | Ast.Cinterface ->
         filter_privates class_type
   in

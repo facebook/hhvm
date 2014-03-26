@@ -375,11 +375,6 @@ static inline bool hhirBytecodeControlFlowDefault() {
 #endif
 }
 
-static inline bool hhirExtraOptPassDefault() {
-  // TODO(t3728931)
-  return !RuntimeOption::EvalHHIRBytecodeControlFlow;
-}
-
 static inline bool pgoDefault() {
   // TODO(3496304)
   return !RuntimeOption::EvalSimulateARM;

@@ -1,0 +1,1 @@
+<?php if (!extension_loaded("ezc_test")) print "skip"; ?>

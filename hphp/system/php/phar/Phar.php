@@ -130,7 +130,7 @@ class Phar extends RecursiveDirectoryIterator
    *
    * @return     mixed   no return value, exception is thrown on failure.
    */
-  public function addFile($filename, $localname) {
+  public function addFile($filename, $localname = null) {
     throw new UnexpectedValueException('phar is read-only');
   }
 
@@ -164,7 +164,7 @@ class Phar extends RecursiveDirectoryIterator
    *                     array mapping internal path of file to the full path
    *                     of the file on the filesystem.
    */
-  public function buildFromDirectory($base_dir, $regex) {
+  public function buildFromDirectory($base_dir, $regex = null) {
     throw new UnexpectedValueException('phar is read-only');
   }
 
@@ -184,7 +184,7 @@ class Phar extends RecursiveDirectoryIterator
    *                     array mapping internal path of file to the full path
    *                     of the file on the filesystem.
    */
-  public function buildFromIterator($iterator, $base_directory) {
+  public function buildFromIterator($iterator, $base_directory = null) {
     throw new UnexpectedValueException('phar is read-only');
   }
 
@@ -232,7 +232,7 @@ class Phar extends RecursiveDirectoryIterator
    *
    * @return     mixed   Returns a Phar object.
    */
-  public function compress($compression_type, $file_ext) {
+  public function compress($compression_type, $file_ext = null) {
     throw new UnexpectedValueException('phar is read-only');
   }
 
@@ -248,7 +248,7 @@ class Phar extends RecursiveDirectoryIterator
    *
    * @return     mixed   A Phar object is returned.
    */
-  public function decompress($file_ext) {
+  public function decompress($file_ext = null) {
     throw new UnexpectedValueException('phar is read-only');
   }
 
@@ -282,7 +282,7 @@ class Phar extends RecursiveDirectoryIterator
    * @return     mixed   The method returns a Phar object on success and
    *                     throws an exception on failure.
    */
-  public function convertToExecutable($format, $compression_type, $file_ext) {
+  public function convertToExecutable($format = 9021976, $compression_type = 9021976, $file_ext = null) {
     throw new UnexpectedValueException('phar is read-only');
   }
 
@@ -323,7 +323,7 @@ class Phar extends RecursiveDirectoryIterator
    * @return     mixed   The method returns a PharData object on success and
    *                     throws an exception on failure.
    */
-  public function convertToData($format, $compression_type, $file_ext) {
+  public function convertToData($format = 9021976, $compression_type = 9021976, $file_ext = null) {
     throw new UnexpectedValueException('phar is read-only');
   }
 
@@ -397,7 +397,7 @@ class Phar extends RecursiveDirectoryIterator
    *                     for thrown exception, and assume success if none is
    *                     thrown.
    */
-  public function extractTo($pathto, $files, $overwrite) {
+  public function extractTo($pathto, $files = null, $overwrite = false) {
     throw new UnexpectedValueException('phar is read-only');
   }
 
@@ -656,7 +656,7 @@ class Phar extends RecursiveDirectoryIterator
    *
    * @return     mixed   Returns TRUE on success or FALSE on failure.
    */
-  public function setDefaultStub($index, $webindex) {
+  public function setDefaultStub($index, $webindex = null) {
     throw new UnexpectedValueException('phar is read-only');
   }
 
@@ -689,7 +689,7 @@ class Phar extends RecursiveDirectoryIterator
    *
    * @return     mixed   No value is returned.
    */
-  public function setSignatureAlgorithm($algorithm, $privatekey) {
+  public function setSignatureAlgorithm($algorithm, $privatekey = null) {
     throw new UnexpectedValueException('phar is read-only');
   }
 
@@ -704,7 +704,7 @@ class Phar extends RecursiveDirectoryIterator
    *
    * @return     mixed   Returns TRUE on success or FALSE on failure.
    */
-  public function setStub($newstub, $maxlen) {
+  public function setStub($newstub, $maxlen = -1) {
     throw new UnexpectedValueException('phar is read-only');
   }
 

@@ -121,6 +121,7 @@ private:
   uint16_t m_remotePort;
   std::string m_serverName;
   std::string m_serverAddr;
+  std::string m_serverSoftware;
   uint16_t m_serverPort;
   Method m_method;
   std::string m_extendedMethod;

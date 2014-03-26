@@ -348,7 +348,7 @@ function locale_filter_matches($langtag,
  * @return array - The array containing the list of all variants subtag
  *   for the locale or NULL if not present
  */
-function locale_get_all_variants(string $locale): array<string> {
+function locale_get_all_variants(string $locale) {
   return Locale::getAllVariants($locale);
 }
 
@@ -447,7 +447,7 @@ function locale_get_display_variant(string $locale,
  * @return array - Associative array containing the keyword-value pairs
  *   for this locale
  */
-function locale_get_keywords(string $locale): array<string,string> {
+function locale_get_keywords(string $locale) {
   return Locale::getKeywords($locale);
 }
 

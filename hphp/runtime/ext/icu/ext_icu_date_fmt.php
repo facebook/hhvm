@@ -423,8 +423,7 @@ function datefmt_get_error_message(IntlDateFormatter $fmt): string {
  *
  * @return string - the locale of this formatter or 'false' if error
  */
-function datefmt_get_locale(IntlDateFormatter $fmt,
-                            ?int $which = null): string {
+function datefmt_get_locale(IntlDateFormatter $fmt, ?int $which = null) {
   return $fmt->getLocale($which);
 }
 

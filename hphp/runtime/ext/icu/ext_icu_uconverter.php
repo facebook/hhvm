@@ -269,7 +269,7 @@ class UConverter {
   public static function transcode(string $str,
                                    string $toEncoding,
                                    string $fromEncoding,
-                                   array $options = null): string {
+                                   array $options = null): ?string {
     $cnv = new UConverter($toEncoding, $fromEncoding);
     if ((isset($options['from_subst']) &&
          !$cnv->setSourceSubstChars($options['from_subst'])) ||

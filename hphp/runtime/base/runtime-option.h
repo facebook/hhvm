@@ -382,7 +382,7 @@ public:
      2 - raises E_RECOVERABLE_ERROR if regular type hint fails, raises
          E_WARNING if soft type hint fails; note that in repo mode the
          error handler is not allowed to resume on recoverable errors */ \
-  F(int32_t, CheckReturnTypeHints,     0)                               \
+  F(int32_t, CheckReturnTypeHints,     2)                               \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \

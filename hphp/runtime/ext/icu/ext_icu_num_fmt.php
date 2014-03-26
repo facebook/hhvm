@@ -289,7 +289,7 @@ function numfmt_format_currency(NumberFormatter $fmt,
  *   FALSE on error.
  */
 function numfmt_format(NumberFormatter $fmt,
-                       $value, $type = NumberFormatter::TYPE_DEFAULT): string {
+                       $value, $type = NumberFormatter::TYPE_DEFAULT) {
   return $fmt->format($value, $type);
 }
 
@@ -351,7 +351,7 @@ function numfmt_get_locale(NumberFormatter $fmt,
  * @return string - Pattern string that is used by the formatter, or
  *   FALSE if an error happens.
  */
-function numfmt_get_pattern(NumberFormatter $fmt): string {
+function numfmt_get_pattern(NumberFormatter $fmt) {
   return $fmt->getPattern();
 }
 
@@ -364,8 +364,7 @@ function numfmt_get_pattern(NumberFormatter $fmt): string {
  *
  * @return string - The symbol string or FALSE on error.
  */
-function numfmt_get_symbol(NumberFormatter $fmt,
-                           $attr): string {
+function numfmt_get_symbol(NumberFormatter $fmt, $attr) {
   return $fmt->getSymbol($attr);
 }
 
@@ -379,8 +378,7 @@ function numfmt_get_symbol(NumberFormatter $fmt,
  * @return string - Return attribute value on success, or FALSE on
  *   error.
  */
-function numfmt_get_text_attribute(NumberFormatter $fmt,
-                                   $attr): string {
+function numfmt_get_text_attribute(NumberFormatter $fmt, $attr) {
   return $fmt->getTextAttribute($attr);
 }
 

@@ -196,6 +196,19 @@ void emitCmpClass(Asm& as, const Class* c, Mem mem) {
   }
 }
 
+template<class Mem>
+void emitCmpClass(Asm& as, Reg64 reg, Mem mem) {
+  auto size = sizeof(LowClassPtr);
+
+  if (size == 8) {
+    as.   cmpq    (reg, mem);
+  } else if (size == 4) {
+    as.   cmpl    (r32(reg), mem);
+  } else {
+    not_implemented();
+  }
+}
+
 void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1);
 
 void zeroExtendIfBool(Asm& as, const SSATmp* src, PhysReg reg);

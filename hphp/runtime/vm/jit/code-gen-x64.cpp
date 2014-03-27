@@ -2112,7 +2112,7 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
   }
 
   auto const vecOffset = Class::classVecOff() +
-    sizeof(Class*) * (testClass->classVecLen() - 1);
+    sizeof(LowClassPtr) * (testClass->classVecLen() - 1);
 
   // Check the length of the class vectors---if the candidate's is at
   // least as long as the potential base (testClass) it might be a
@@ -2123,7 +2123,7 @@ asm_label(a, notExact);
   a.    jb8    (falseLabel);
 
   // If it's a subclass, rTestClass must be at the appropriate index.
-  a.    cmpq   (rTestClass, rObjClass[vecOffset]);
+  emitCmpClass(a, rTestClass, rObjClass[vecOffset]);
   a.    sete   (rdst);
   a.    jmp8   (out);
 

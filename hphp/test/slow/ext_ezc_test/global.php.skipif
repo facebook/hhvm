@@ -1,1 +1,1 @@
-<?php /* TODO */ print "skip"; ?>
+<?php if (!extension_loaded("ezc_test")) print "skip"; ?>

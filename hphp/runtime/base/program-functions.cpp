@@ -1680,11 +1680,19 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   if (!warmupOnly) {
     try {
       ServerStatsHelper ssh("invoke");
+      if (!RuntimeOption::AutoPrependFile.empty() &&
+          RuntimeOption::AutoPrependFile != "none") {
+        require(RuntimeOption::AutoPrependFile, false, context->getCwd().data(), true);
+      }
       if (func) {
         funcRet->assignVal(invoke(cmd.c_str(), funcParams));
       } else {
         if (isServer) hphp_chdir_file(cmd);
         include_impl_invoke(cmd.c_str(), once);
+      }
+      if (!RuntimeOption::AutoAppendFile.empty() &&
+          RuntimeOption::AutoAppendFile != "none") {
+        require(RuntimeOption::AutoAppendFile, false, context->getCwd().data(), true);
       }
     } catch (...) {
       handle_invoke_exception(ret, context, errorMsg, error, richErrorMsg);

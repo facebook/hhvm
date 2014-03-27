@@ -953,11 +953,11 @@ void c_PDO::t___construct(const String& dsn, const String& username /* = null_st
 
   if (!strncmp(data_source.data(), "uri:", 4)) {
     /* the specified URI holds connection details */
-    Variant stream = File::Open(data_source.substr(4), "rb");
-    if (same(stream, false)) {
+    Resource resource = File::Open(data_source.substr(4), "rb");
+    if (resource.isNull()) {
       throw_pdo_exception(uninit_null(), uninit_null(), "invalid data source URI");
     }
-    data_source = stream.toResource().getTyped<File>()->readLine(1024);
+    data_source = resource.getTyped<File>()->readLine(1024);
     colon = strchr(data_source.data(), ':');
     if (!colon) {
       throw_pdo_exception(uninit_null(), uninit_null(), "invalid data source name (via URI)");
@@ -3107,11 +3107,11 @@ bool c_PDOStatement::t_closecursor() {
 }
 
 Variant c_PDOStatement::t_debugdumpparams() {
-  Variant fobj = File::Open("php://output", "w");
-  if (same(fobj, false)) {
+  Resource resource = File::Open("php://output", "w");
+  File *f = resource.getTyped<File>(true);
+  if (!f) {
     return false;
   }
-  File *f = fobj.toResource().getTyped<File>();
 
   Array params;
   params.append(m_stmt->query_string.size());

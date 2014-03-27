@@ -141,9 +141,9 @@ bool f_mailparse_msg_free(const Resource& mimemail) {
 }
 
 Variant f_mailparse_msg_parse_file(const String& filename) {
-  Variant stream = File::Open(filename, "rb");
-  if (same(stream, false)) return false;
-  File *f = stream.toResource().getTyped<File>();
+  Resource resource = File::Open(filename, "rb");
+  File *f = resource.getTyped<File>(true);
+  if (!f) return false;
 
   MimePart *p = NEWOBJ(MimePart)();
   Resource ret(p);

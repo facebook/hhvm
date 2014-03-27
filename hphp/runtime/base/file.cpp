@@ -139,9 +139,9 @@ bool File::IsPlainFilePath(const String& filename) {
   return filename.find("://") == String::npos;
 }
 
-Variant File::Open(const String& filename, const String& mode,
-                   int options /* = 0 */,
-                   const Variant& context /* = null */) {
+Resource File::Open(const String& filename, const String& mode,
+                    int options /* = 0 */,
+                    const Variant& context /* = null */) {
   Stream::Wrapper *wrapper = Stream::getWrapperFromURI(filename);
   Resource rcontext =
     context.isNull() ? g_context->getStreamContext() : context.toResource();
@@ -150,9 +150,8 @@ Variant File::Open(const String& filename, const String& mode,
     file->m_name = filename.data();
     file->m_mode = mode.data();
     file->m_streamContext = rcontext;
-    return Variant(file);
   }
-  return false;
+  return Resource(file);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

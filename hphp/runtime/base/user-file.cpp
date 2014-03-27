@@ -194,6 +194,28 @@ int64_t UserFile::writeImpl(const char *buffer, int64_t length) {
 
 bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   assert(seekable());
+
+  // Seek within m_buffer if we can, otherwise kill it and call user stream_seek / stream_tell
+  if (whence == SEEK_CUR &&
+      0 <= m_readpos + offset &&
+           m_readpos + offset < m_writepos) {
+    m_readpos += offset;
+    m_position += offset;
+    return true;
+  } else if (whence == SEEK_SET &&
+             0 <= offset - m_position + m_readpos &&
+                  offset - m_position + m_readpos < m_writepos) {
+    m_readpos = offset - m_position + m_readpos;
+    m_position = offset;
+    return true;
+  } else {
+    if (whence == SEEK_CUR) {
+      offset += m_readpos - m_writepos;
+    }
+    m_readpos = 0;
+    m_writepos = 0;
+  }
+
   // bool stream_seek($offset, $whence)
   bool invoked = false;
   bool sought  = invoke(
@@ -202,15 +224,8 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   if (!invoked) {
     always_assert("No seek method? But I found one earlier?");
   }
-
-  // If the userland code failed to update, do it on our buffers instead
   if (!sought) {
-    if (whence == SEEK_CUR) {
-      m_position += offset;
-    } else if (whence == SEEK_SET) {
-      m_position = offset;
-    }
-    return true;
+    return false;
   }
 
   // int stream_tell()

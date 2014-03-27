@@ -39,13 +39,6 @@ public:
   bool openImpl(const String& filename, const String& mode, int options);
   virtual bool close();
   virtual int64_t readImpl(char *buffer, int64_t length);
-  virtual int getc() {
-    char buf[1];
-    if (readImpl(buf, 1) == 1) {
-      return buf[0];
-    }
-    return 0;
-  }
   virtual int64_t writeImpl(const char *buffer, int64_t length);
   virtual bool seekable() { return m_StreamSeek || m_Call; }
   virtual bool seek(int64_t offset, int whence = SEEK_SET);

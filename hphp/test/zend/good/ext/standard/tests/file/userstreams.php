@@ -132,7 +132,7 @@ class mystream
 				}
 				break;
 			case SEEK_CUR:
-				if ($offset >= 0) {
+				if ($this->position + $offset >= 0) {
 					$this->position += $offset;
 					return true;
 				} else {

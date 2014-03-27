@@ -2776,16 +2776,25 @@ void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
 }
 
 SSATmp* HhbcTranslator::genClsMethodCtx(const Func* callee, const Class* cls) {
-  bool mightNotBeStatic = false;
-  assert(callee);
+  bool mustBeStatic = true;
+
   if (!(callee->attrs() & AttrStatic) &&
       !(curFunc()->attrs() & AttrStatic) &&
-      curClass() &&
-      curClass()->classof(cls)) {
-    mightNotBeStatic = true;
+      curClass()) {
+    if (curClass()->classof(cls)) {
+      // In this case, it might not be static, but we can be sure
+      // we're going to forward $this if thisAvailable.
+      mustBeStatic = false;
+    } else if (cls->classof(curClass())) {
+      // Unlike the above, we might be calling down to a subclass that
+      // is not related to the current instance.  To know whether this
+      // call forwards $this requires a runtime type check, so we have
+      // to punt instead of trying the thisAvailable path below.
+      PUNT(getClsMethodCtx-PossibleStaticRelatedCall);
+    }
   }
 
-  if (!mightNotBeStatic) {
+  if (mustBeStatic) {
     // static function: ctx is just the Class*. LdCls will simplify to a
     // DefConst or LdClsCached.
     return gen(LdCls, makeCatch(), cns(cls->name()), cns(curClass()));

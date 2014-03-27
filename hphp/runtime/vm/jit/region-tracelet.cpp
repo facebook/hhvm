@@ -338,7 +338,11 @@ void RegionFormer::addInstruction() {
   if (m_blockFinished) {
     FTRACE(2, "selectTracelet adding new block at {} after:\n{}\n",
            showShort(m_sk), show(*m_curBlock));
-    m_curBlock = m_region->addBlock(curFunc(), m_sk.offset(), 0, curSpOffset());
+    RegionDesc::Block* newCurBlock = m_region->addBlock(curFunc(),
+                                                        m_sk.offset(), 0,
+                                                        curSpOffset());
+    m_region->addArc(m_curBlock->id(), newCurBlock->id());
+    m_curBlock = newCurBlock;
     m_blockFinished = false;
   }
 

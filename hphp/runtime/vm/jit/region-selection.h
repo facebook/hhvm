@@ -44,7 +44,9 @@ using boost::container::flat_multimap;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * RegionDesc is a description of a code region.
+ * RegionDesc is a description of a code region.  This includes the
+ * list of blocks in the region, and also the list of control-flow
+ * arcs within the region.
  *
  * It consists of a list of unique SrcKey ranges, with type
  * annotations that may come from profiling or other sources.
@@ -54,10 +56,12 @@ using boost::container::flat_multimap;
  */
 struct RegionDesc {
   struct Block;
+  struct Arc;
   struct Location;
   struct TypePred;
   struct ReffinessPred;
   typedef std::shared_ptr<Block> BlockPtr;
+  typedef uint32_t BlockId;
 
   template<typename... Args>
   Block* addBlock(Args&&... args) {
@@ -65,8 +69,9 @@ struct RegionDesc {
       std::make_shared<Block>(std::forward<Args>(args)...));
     return blocks.back().get();
   }
-
+  void addArc(BlockId src, BlockId dst);
   std::vector<BlockPtr> blocks;
+  std::vector<Arc>      arcs;
 };
 
 typedef std::shared_ptr<RegionDesc>                      RegionDescPtr;
@@ -138,6 +143,11 @@ private:
   };
 };
 
+struct RegionDesc::Arc {
+  BlockId src;
+  BlockId dst;
+};
+
 /*
  * A type prediction for somewhere in the middle of or start of a
  * region.
@@ -199,14 +209,15 @@ public:
    * Accessors for the func, unit, length (in HHBC instructions), and
    * starting SrcKey of this Block.
    */
-  const Unit* unit() const { return m_func->unit(); }
-  const Func* func() const { return m_func; }
-  SrcKey start() const { return SrcKey { m_func, m_start }; }
-  SrcKey last() const { return SrcKey { m_func, m_last }; }
-  int length() const { return m_length; }
-  bool empty() const { return length() == 0; }
-  bool contains(SrcKey sk) const;
-  Offset initialSpOffset() const { return m_initialSpOffset; }
+  BlockId     id()                const { return m_id; }
+  const Unit* unit()              const { return m_func->unit(); }
+  const Func* func()              const { return m_func; }
+  SrcKey      start()             const { return SrcKey { m_func, m_start }; }
+  SrcKey      last()              const { return SrcKey { m_func, m_last }; }
+  int         length()            const { return m_length; }
+  bool        empty()             const { return length() == 0; }
+  bool        contains(SrcKey sk) const;
+  Offset      initialSpOffset()   const { return m_initialSpOffset; }
 
   /*
    * Set and get whether or not this block ends with an inlined FCall. Inlined
@@ -278,6 +289,9 @@ private:
   void checkMetadata() const;
 
 private:
+  static BlockId s_nextId;
+
+  BlockId        m_id;
   const Func*    m_func;
   const Offset   m_start;
   Offset         m_last;
@@ -405,6 +419,7 @@ std::string show(RegionContext::LiveType);
 std::string show(RegionContext::PreLiveAR);
 std::string show(const RegionContext&);
 std::string show(const RegionDesc::Block&);
+std::string show(const RegionDesc::Arc&);
 std::string show(const RegionDesc&);
 
 //////////////////////////////////////////////////////////////////////

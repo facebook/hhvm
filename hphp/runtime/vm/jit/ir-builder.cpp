@@ -996,7 +996,9 @@ void IRBuilder::startBlock() {
       }
       assert(m_curBlock);
       auto& prev = m_curBlock->back();
-      if (!prev.isTerminal()) {
+      if (!prev.hasEdges()) {
+        gen(Jmp, block);
+      } else if (!prev.isTerminal()) {
         prev.setNext(block);
       }
       m_curBlock = block;

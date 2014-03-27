@@ -1774,12 +1774,7 @@ SSATmp* Simplifier::simplifyCondJmp(const IRInstruction* inst) {
     if (val) {
       return gen(Jmp, inst->taken());
     } else {
-      if (!RuntimeOption::EvalHHIRBytecodeControlFlow) {
-        // We need explicit jumps to keep state tracking happy while
-        // building IR with bytecode control flow.  These can be
-        // removed in a later pass.
-        return gen(Nop);
-      }
+      return gen(Nop);
     }
     return nullptr;
   }

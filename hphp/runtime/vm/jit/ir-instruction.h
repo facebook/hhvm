@@ -65,6 +65,7 @@ struct BCMarker {
 
   std::string show() const;
   bool valid() const;
+  bool isDummy() const { return reinterpret_cast<uintptr_t>(func) == 1; }
 
   SrcKey sk() const {
     assert(valid());

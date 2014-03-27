@@ -679,6 +679,11 @@ ExitOnVarEnv S0:FramePtr -> B
   Loads the VarEnv slot off the ActRec pointed to by S0. If it is non-zero,
   jumps to the exit-trace block B.
 
+Halt
+
+  Halt execution. Used only in tests, as a terminal instruction that does not
+  require any inputs or any successors.
+
 Jmp -> B
 Jmp [S:T ...] -> B: DefLabel
 

@@ -333,7 +333,7 @@ void print(std::ostream& os, const Block* block,
       std::ostringstream mStr;
       auto const& newMarker = inst.marker();
       auto func = newMarker.func;
-      if (!func) {
+      if (!func || newMarker.isDummy()) {
         os << color(ANSI_COLOR_BLUE)
            << std::string(kIndent, ' ')
            << "--- invalid marker"

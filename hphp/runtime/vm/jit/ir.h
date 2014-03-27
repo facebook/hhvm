@@ -507,6 +507,7 @@ O(Call,                      D(StkPtr), SUnk,                          E|CRc) \
 O(CallArray,                 D(StkPtr), S(StkPtr),                   E|N|CRc) \
 O(CallBuiltin,                DBuiltin, SUnk,                     E|Er|N|PRc) \
 O(NativeImpl,                       ND, C(Func) S(FramePtr),             E|N) \
+O(Halt,                             ND, NA,                              T|E) \
 O(RetCtrl,                          ND, S(StkPtr)                             \
                                           S(FramePtr)                         \
                                           S(RetAddr),                    T|E) \

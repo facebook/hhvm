@@ -26,6 +26,7 @@
 #include "php_ini.h"
 #include "basic_functions.h"
 #include "zend_operators.h"
+#include "ext/standard/php_lcg.h"
 
 #include "zend.h"
 
@@ -42,3 +43,51 @@ PHPAPI double php_get_nan(void) {
 PHPAPI double php_get_inf(void) {
   return HPHP::k_INF;
 }
+
+PHP_MINIT_FUNCTION(basic) /* {{{ */
+{
+  PHP_MINIT(lcg)(INIT_FUNC_ARGS_PASSTHRU);
+  return SUCCESS;
+}
+/* }}} */
+
+PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
+{
+  return SUCCESS;
+}
+/* }}} */
+
+PHP_RINIT_FUNCTION(basic) /* {{{ */
+{
+  return SUCCESS;
+}
+/* }}} */
+
+PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
+{
+  return SUCCESS;
+}
+/* }}} */
+
+PHP_MINFO_FUNCTION(basic) /* {{{ */
+{
+}
+/* }}} */
+
+const zend_function_entry basic_functions[] = { /* {{{ */
+  PHP_FE_END
+};
+/* }}} */
+
+zend_module_entry basic_functions_module = { /* {{{ */
+  STANDARD_MODULE_HEADER,
+  "standard_zend_compat",               /* extension name */
+  basic_functions,                      /* function list */
+  PHP_MINIT(basic),                     /* process startup */
+  PHP_MSHUTDOWN(basic),                 /* process shutdown */
+  PHP_RINIT(basic),                     /* request startup */
+  PHP_RSHUTDOWN(basic),                 /* request shutdown */
+  PHP_MINFO(basic),                     /* extension info */
+  PHP_VERSION,                          /* extension version */
+  STANDARD_MODULE_PROPERTIES
+};

@@ -74,7 +74,6 @@ bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::InjectedStackTrace = true;
 int RuntimeOption::InjectedStackTraceLimit = -1;
 bool RuntimeOption::NoSilencer = false;
-bool RuntimeOption::EnableApplicationLog = true;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
 bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
 int RuntimeOption::RuntimeErrorReportingLevel =
@@ -130,6 +129,7 @@ bool RuntimeOption::ServerStatCache = false;
 std::vector<std::string> RuntimeOption::ServerWarmupRequests;
 boost::container::flat_set<std::string>
 RuntimeOption::ServerHighPriorityEndPoints;
+bool RuntimeOption::ServerExitOnBindFail;
 int RuntimeOption::PageletServerThreadCount = 0;
 bool RuntimeOption::PageletServerThreadRoundRobin = false;
 int RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds = 0;
@@ -149,6 +149,7 @@ bool RuntimeOption::ServerEvilShutdown = true;
 int RuntimeOption::ServerDanglingWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownListenNoWork = -1;
+std::vector<std::string> RuntimeOption::ServerNextProtocols;
 int RuntimeOption::GzipCompressionLevel = 3;
 std::string RuntimeOption::ForceCompressionURL;
 std::string RuntimeOption::ForceCompressionCookie;
@@ -233,6 +234,8 @@ std::string RuntimeOption::StartupDocument;
 std::string RuntimeOption::WarmupDocument;
 std::string RuntimeOption::RequestInitFunction;
 std::string RuntimeOption::RequestInitDocument;
+std::string RuntimeOption::AutoPrependFile;
+std::string RuntimeOption::AutoAppendFile;
 std::vector<std::string> RuntimeOption::ThreadDocuments;
 std::vector<std::string> RuntimeOption::ThreadLoopDocuments;
 
@@ -267,7 +270,6 @@ int RuntimeOption::ProxyPercentage = 0;
 std::set<std::string> RuntimeOption::ProxyURLs;
 std::vector<std::string> RuntimeOption::ProxyPatterns;
 bool RuntimeOption::AlwaysUseRelativePath = false;
-std::string RuntimeOption::IniFile = "/etc/hhvm/php.ini";
 
 int RuntimeOption::HttpDefaultTimeout = 30;
 int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
@@ -344,6 +346,7 @@ bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
+bool RuntimeOption::IntsOverflowToInts = false;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -366,6 +369,14 @@ static inline std::string regionSelectorDefault() {
 #endif
 }
 
+static inline bool hhirBytecodeControlFlowDefault() {
+#ifdef HHVM_BYTECODE_CONTROL_FLOW
+  return true;
+#else
+  return false;
+#endif
+}
+
 static inline bool pgoDefault() {
   // TODO(3496304)
   return !RuntimeOption::EvalSimulateARM;
@@ -381,7 +392,17 @@ static inline bool hhbcRelaxGuardsDefault() {
 
 static inline bool hhirRefcountOptsDefault() {
   // TODO(t3091846)
-  return !RuntimeOption::EvalSimulateARM;
+  // TODO(t3728863)
+  return !RuntimeOption::EvalSimulateARM &&
+    !RuntimeOption::EvalHHIRBytecodeControlFlow;
+}
+
+static inline bool evalJitDefault() {
+#ifdef __APPLE__
+  return false;
+#else
+  return true;
+#endif
 }
 
 static inline bool simulateARMDefault() {
@@ -405,7 +426,7 @@ const uint64_t kEvalVMStackElmsDefault =
  ;
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
 static const int kDefaultWarmupRequests = debug ? 1 : 11;
-static const int kDefaultJitPGOThreshold = debug ? 2 : 4;
+static const int kDefaultJitPGOThreshold = debug ? 2 : 10;
 static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 500;
 static const size_t kJitGlobalDataDef = RuntimeOption::EvalJitASize >> 2;
 inline size_t maxUsageDef() {
@@ -604,6 +625,41 @@ void RuntimeOption::Load(Hdf &config,
     } else if (logger["Level"] == "Verbose") {
       Logger::LogLevel = Logger::LogVerbose;
     }
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.log.level", IniSetting::SetAndGet<std::string>(
+      [](const std::string& value) {
+        if (value == "None") {
+          Logger::LogLevel = Logger::LogNone;
+        } else if (value == "Error") {
+          Logger::LogLevel = Logger::LogError;
+        } else if (value == "Warning") {
+          Logger::LogLevel = Logger::LogWarning;
+        } else if (value == "Info") {
+          Logger::LogLevel = Logger::LogInfo;
+        } else if (value == "Verbose") {
+          Logger::LogLevel = Logger::LogVerbose;
+        } else {
+          return false;
+        }
+        return true;
+      },
+      []() {
+        switch (Logger::LogLevel) {
+          case Logger::LogNone:
+            return "None";
+          case Logger::LogError:
+            return "Error";
+          case Logger::LogWarning:
+            return "Warning";
+          case Logger::LogInfo:
+            return "Info";
+          case Logger::LogVerbose:
+            return "Verbose";
+        }
+        return "";
+      }
+    ));
+
     Logger::LogHeader = logger["Header"].getBool();
     bool logInjectedStackTrace = logger["InjectedStackTrace"].getBool();
     if (logInjectedStackTrace) {
@@ -616,7 +672,10 @@ void RuntimeOption::Load(Hdf &config,
 
     Logger::UseSyslog = logger["UseSyslog"].getBool(false);
     Logger::UseLogFile = logger["UseLogFile"].getBool(true);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.log.use_log_file", &Logger::UseLogFile);
     Logger::UseCronolog = logger["UseCronolog"].getBool(false);
+    Logger::UseRequestLog = logger["UseRequestLog"].getBool(false);
     if (Logger::UseLogFile) {
       LogFile = logger["File"].getString();
       if (!RuntimeOption::ServerExecutionMode()) {
@@ -625,6 +684,19 @@ void RuntimeOption::Load(Hdf &config,
       if (LogFile[0] == '|') Logger::IsPipeOutput = true;
       LogFileSymLink = logger["SymLink"].getString();
     }
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.log.file", IniSetting::SetAndGet<std::string>(
+      [](const std::string& value) {
+        LogFile = value;
+        if (!RuntimeOption::ServerExecutionMode()) {
+          LogFile.clear();
+        }
+        if (LogFile[0] == '|') Logger::IsPipeOutput = true;
+        return true;
+      }, []() {
+        return LogFile;
+      }
+    ));
     LogFileFlusher::DropCacheChunkSize =
       logger["DropCacheChunkSize"].getInt32(1 << 20);
     AlwaysEscapeLog = logger["AlwaysEscapeLog"].getBool(false);
@@ -633,7 +705,6 @@ void RuntimeOption::Load(Hdf &config,
     AlwaysLogUnhandledExceptions =
       logger["AlwaysLogUnhandledExceptions"].getBool(true);
     NoSilencer = logger["NoSilencer"].getBool();
-    EnableApplicationLog = logger["ApplicationLog"].getBool(true);
     RuntimeErrorReportingLevel =
       logger["RuntimeErrorReportingLevel"]
         .getInt32(static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL));
@@ -708,10 +779,16 @@ void RuntimeOption::Load(Hdf &config,
     Host = server["Host"].getString();
     DefaultServerNameSuffix = server["DefaultServerNameSuffix"].getString();
     ServerType = server["Type"].getString(ServerType);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.server.type", &ServerType);
     ServerIP = server["IP"].getString();
     ServerFileSocket = server["FileSocket"].getString();
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.server.file_socket", &ServerFileSocket);
     ServerPrimaryIP = GetPrimaryIP();
     ServerPort = server["Port"].getUInt16(80);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.server.port", &ServerPort);
     ServerBacklog = server["Backlog"].getInt16(128);
     ServerConnectionLimit = server["ConnectionLimit"].getInt16(0);
     ServerThreadCount = server["ThreadCount"].getInt32(50);
@@ -735,6 +812,7 @@ void RuntimeOption::Load(Hdf &config,
     ServerStatCache = server["StatCache"].getBool(false);
     server["WarmupRequests"].get(ServerWarmupRequests);
     server["HighPriorityEndPoints"].get(ServerHighPriorityEndPoints);
+    ServerExitOnBindFail = server["ExitOnBindFail"].getBool(false);
 
     RequestTimeoutSeconds = server["RequestTimeoutSeconds"].getInt32(0);
     PspTimeoutSeconds = server["PspTimeoutSeconds"].getInt32(0);
@@ -752,6 +830,7 @@ void RuntimeOption::Load(Hdf &config,
     ServerDanglingWait = server["DanglingWait"].getInt16(0);
     ServerShutdownListenWait = server["ShutdownListenWait"].getInt16(0);
     ServerShutdownListenNoWork = server["ShutdownListenNoWork"].getInt16(-1);
+    server["SSLNextProtocols"].get(ServerNextProtocols);
     if (ServerGracefulShutdownWait < ServerDanglingWait) {
       ServerGracefulShutdownWait = ServerDanglingWait;
     }
@@ -805,6 +884,8 @@ void RuntimeOption::Load(Hdf &config,
 
     FileCache = server["FileCache"].getString();
     DefaultDocument = server["DefaultDocument"].getString();
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.server.default_document", &DefaultDocument);
     ErrorDocument404 = server["ErrorDocument404"].getString();
     normalizePath(ErrorDocument404);
     ForbiddenAs404 = server["ForbiddenAs404"].getBool();
@@ -864,14 +945,6 @@ void RuntimeOption::Load(Hdf &config,
     WarnOnCollectionToArray = server["WarnOnCollectionToArray"].getBool(false);
     UseDirectCopy = server["UseDirectCopy"].getBool(false);
     AlwaysUseRelativePath = server["AlwaysUseRelativePath"].getBool(false);
-
-    IniFile = server["IniFile"].getString(IniFile);
-    if (access(IniFile.c_str(), R_OK) == -1) {
-      if (IniFile != "/etc/hhvm/php.ini") {
-        Logger::Error("INI file doesn't exist: %s", IniFile.c_str());
-      }
-      IniFile.clear();
-    }
 
     Hdf dns = server["DnsCache"];
     EnableDnsCache = dns["Enable"].getBool();
@@ -1132,8 +1205,6 @@ void RuntimeOption::Load(Hdf &config,
 #undef get_uint32_t
 #undef get_uint64
     low_malloc_huge_pages(EvalMaxLowMemHugePages);
-    EvalJitEnableRenameFunction = EvalJitEnableRenameFunction || !EvalJit;
-
     EnableEmitSwitch = eval["EnableEmitSwitch"].getBool(true);
     EnableEmitterStats = eval["EnableEmitterStats"].getBool(EnableEmitterStats);
     EnableInstructionCounts = eval["EnableInstructionCounts"].getBool(false);
@@ -1161,6 +1232,11 @@ void RuntimeOption::Load(Hdf &config,
       DebuggerDefaultRpcAuth = debugger["RPC.DefaultAuth"].getString();
       DebuggerRpcHostDomain = debugger["RPC.HostDomain"].getString();
       DebuggerDefaultRpcTimeout = debugger["RPC.DefaultTimeout"].getInt32(30);
+    }
+    {
+      Hdf lang = config["Hack"]["Lang"];
+      IntsOverflowToInts =
+        lang["IntsOverflowToInts"].getBool(EnableHipHopSyntax);
     }
     {
       Hdf repo = config["Repo"];
@@ -1197,6 +1273,8 @@ void RuntimeOption::Load(Hdf &config,
         Hdf repoCentral = repo["Central"];
         // Repo.Central.Path.
         RepoCentralPath = repoCentral["Path"].getString();
+        IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                         "hhvm.repo.central.path", &RepoCentralPath);
       }
       {
         Hdf repoEval = repo["Eval"];
@@ -1287,6 +1365,10 @@ void RuntimeOption::Load(Hdf &config,
   // Language and Misc Configuration Options
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY, "expose_php",
                    &RuntimeOption::ExposeHPHP);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "auto_prepend_file", &RuntimeOption::AutoPrependFile);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "auto_append_file", &RuntimeOption::AutoAppendFile);
 
   // Data Handling
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
@@ -1337,6 +1419,8 @@ void RuntimeOption::Load(Hdf &config,
                      []() { return "1"; }));
 
   // HPHP specific
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
+                   "hhvm.eval.jit", &EvalJit);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.compiler_id",
                    IniSetting::SetAndGet<std::string>(

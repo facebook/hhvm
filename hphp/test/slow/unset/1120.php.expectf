@@ -1,5 +1,15 @@
-%S%wNULL
-%S%wNULL
-%S%wNULL
-%S%wNULL
-%S%wNULL
+
+Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 6
+NULL
+
+Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 10
+NULL
+
+Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 10
+NULL
+
+Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 15
+NULL
+
+Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 24
+NULL

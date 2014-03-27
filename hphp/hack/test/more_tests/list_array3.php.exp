@@ -1,0 +1,6 @@
+File "list_array3.php", line 13, characters 3-19:
+Invalid assignment
+File "list_array3.php", line 13, characters 3-14:
+This is a tuple
+File "list_array3.php", line 12, characters 16-20:
+It is incompatible with an array (used like a hashtable)

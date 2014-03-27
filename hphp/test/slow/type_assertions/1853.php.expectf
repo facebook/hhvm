@@ -1,17 +1,10 @@
 array(0) {
 }
-HipHop Notice: Undefined index: 0 in %s/test/slow/type_assertions/1853.php on line 10
+
+Notice: Undefined index: 0 in %s/test/slow/type_assertions/1853.php on line 10
 NULL
-HipHop Notice: Undefined index: 0 in %s/test/slow/type_assertions/1853.php on line 11
-NULL
-array(2) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-}
-int(0)
-HipHop Warning: Cannot use a scalar value as an array in %s/test/slow/type_assertions/1853.php on line 11
+
+Notice: Undefined index: 0 in %s/test/slow/type_assertions/1853.php on line 11
 NULL
 array(2) {
   [0]=>
@@ -20,7 +13,18 @@ array(2) {
   int(1)
 }
 int(0)
-HipHop Warning: Cannot use a scalar value as an array in %s/test/slow/type_assertions/1853.php on line 17
+
+Warning: Cannot use a scalar value as an array in %s/test/slow/type_assertions/1853.php on line 11
+NULL
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+int(0)
+
+Warning: Cannot use a scalar value as an array in %s/test/slow/type_assertions/1853.php on line 17
 NULL
 array(1) {
   [0]=>

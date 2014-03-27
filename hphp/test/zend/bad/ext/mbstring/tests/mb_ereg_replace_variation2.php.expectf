@@ -70,6 +70,7 @@ string(1) "_"
 string(1) "_"
 
 -- Iteration 24 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

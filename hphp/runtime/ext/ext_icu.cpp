@@ -49,9 +49,11 @@ Variant f_icu_match(const String& pattern, const String& subject,
                     VRefParam matches /* = null */, int64_t flags /* = 0 */) {
   UErrorCode status = U_ZERO_ERROR;
 
+  Array matchesArr;
   if (matches.isReferenced()) {
-    matches = Array();
+    matchesArr = Array::Create();
   }
+  SCOPE_EXIT { if (matches.isReferenced()) matches = matchesArr; };
 
   // Create hash map key by concatenating pattern and flags.
   StringBuffer bpattern;
@@ -119,9 +121,9 @@ Variant f_icu_match(const String& pattern, const String& subject,
           }
 
           start = usubject.countChar32(0, start);
-          matches->append(make_packed_array(match, start));
+          matchesArr.append(make_packed_array(match, start));
         } else {
-          matches->append(match);
+          matchesArr.append(match);
         }
       }
     }

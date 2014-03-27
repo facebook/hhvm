@@ -1,5 +1,7 @@
-HipHop Warning: %s
-HipHop Fatal error: %s
+
+Warning: %s
+
+Fatal error: %s
 Stack trace:
 #0 %s(%d): Element->ThrowException()
 #1 [internal function]: Element::CallBack(Object(Element))

@@ -100,6 +100,8 @@ inline void check_recursion(ThreadInfo*& info) {
   }
 }
 
+ssize_t check_request_surprise(ThreadInfo *info);
+
 //////////////////////////////////////////////////////////////////////
 
 }

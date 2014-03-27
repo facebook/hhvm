@@ -1,0 +1,6 @@
+File "test_array3.php", line 13, characters 10-14:
+Invalid return type
+File "test_array3.php", line 12, characters 32-34:
+This is an int
+File "test_array3.php", line 12, characters 21-24:
+It is incompatible with a bool

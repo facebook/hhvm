@@ -4,4 +4,5 @@ object(Z)#1 (2) {
   ["priv"]=>
   int(1)
 }
-HipHop Fatal error: Cannot access private property Y::$priv in %s/test/slow/object_property_expression/801.php on line 8
+
+Fatal error: Cannot access private property Y::$priv in %s/test/slow/object_property_expression/801.php on line 8

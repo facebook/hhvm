@@ -112,26 +112,6 @@
             "value": 200
         },
         {
-            "name": "ASSERT_ACTIVE",
-            "value": 1
-        },
-        {
-            "name": "ASSERT_BAIL",
-            "value": 3
-        },
-        {
-            "name": "ASSERT_CALLBACK",
-            "value": 2
-        },
-        {
-            "name": "ASSERT_QUIET_EVAL",
-            "value": 5
-        },
-        {
-            "name": "ASSERT_WARNING",
-            "value": 4
-        },
-        {
             "name": "CASE_LOWER",
             "value": 0
         },
@@ -580,38 +560,6 @@
             "value": 0
         },
         {
-            "name": "EXTR_IF_EXISTS",
-            "value": 6
-        },
-        {
-            "name": "EXTR_OVERWRITE",
-            "value": 0
-        },
-        {
-            "name": "EXTR_PREFIX_ALL",
-            "value": 3
-        },
-        {
-            "name": "EXTR_PREFIX_IF_EXISTS",
-            "value": 5
-        },
-        {
-            "name": "EXTR_PREFIX_INVALID",
-            "value": 4
-        },
-        {
-            "name": "EXTR_PREFIX_SAME",
-            "value": 2
-        },
-        {
-            "name": "EXTR_REFS",
-            "value": 256
-        },
-        {
-            "name": "EXTR_SKIP",
-            "value": 1
-        },
-        {
             "name": "E_ALL",
             "value": 30719
         },
@@ -849,11 +797,11 @@
         },
         {
             "name": "HPHP_VERSION",
-            "value": "2.5.0-dev"
+            "value": "3.0.0-dev"
         },
         {
             "name": "HHVM_VERSION",
-            "value": "2.5.0-dev"
+            "value": "3.0.0-dev"
         },
         {
             "name": "HTML_ENTITIES",
@@ -1242,38 +1190,6 @@
         {
             "name": "IMG_XPM",
             "value": 16
-        },
-        {
-            "name": "INFO_ALL",
-            "value": 4294967295
-        },
-        {
-            "name": "INFO_CONFIGURATION",
-            "value": 4
-        },
-        {
-            "name": "INFO_CREDITS",
-            "value": 2
-        },
-        {
-            "name": "INFO_ENVIRONMENT",
-            "value": 16
-        },
-        {
-            "name": "INFO_GENERAL",
-            "value": 1
-        },
-        {
-            "name": "INFO_LICENSE",
-            "value": 64
-        },
-        {
-            "name": "INFO_MODULES",
-            "value": 8
-        },
-        {
-            "name": "INFO_VARIABLES",
-            "value": 32
         },
         {
             "name": "INI_ALL",
@@ -3274,34 +3190,6 @@
         {
             "name": "MW_sRGBColorspace",
             "value": 13
-        },
-        {
-            "name": "MYSQL_ASSOC",
-            "value": 1
-        },
-        {
-            "name": "MYSQL_BOTH",
-            "value": 3
-        },
-        {
-            "name": "MYSQL_CLIENT_COMPRESS",
-            "value": 32
-        },
-        {
-            "name": "MYSQL_CLIENT_IGNORE_SPACE",
-            "value": 256
-        },
-        {
-            "name": "MYSQL_CLIENT_INTERACTIVE",
-            "value": 1024
-        },
-        {
-            "name": "MYSQL_CLIENT_SSL",
-            "value": 2048
-        },
-        {
-            "name": "MYSQL_NUM",
-            "value": 2
         },
         {
             "name": "M_1_PI",
@@ -5487,6 +5375,10 @@
         },
         {
             "name": "T_OBJECT_OPERATOR",
+            "type": "Int64"
+        },
+        {
+            "name": "T_ONUMBER",
             "type": "Int64"
         },
         {

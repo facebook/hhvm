@@ -1,7 +1,8 @@
 *** Testing DateTimeZone() : error conditions ***
 
 -- Testing new DateTimeZone() with more than expected no. of arguments --
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 %s(%d): DateTimeZone->__construct('GMT', 99)
 #1 {main}

@@ -1,0 +1,6 @@
+File "fun_no_ret.php", line 14, characters 10-13:
+Invalid return type
+File "fun_no_ret.php", line 12, characters 17-19:
+This is an int
+File "fun_no_ret.php", line 13, characters 8-15:
+It is incompatible with void because this function implicitly returns void

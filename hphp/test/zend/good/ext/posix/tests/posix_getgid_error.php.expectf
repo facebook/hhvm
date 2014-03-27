@@ -1,6 +1,7 @@
 *** Testing posix_getgid() : error conditions ***
 
 -- Testing posix_getgid() function with one argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

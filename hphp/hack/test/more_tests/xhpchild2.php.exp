@@ -1,0 +1,6 @@
+File "xhpchild2.php", line 18, characters 6-14:
+Invalid argument
+File "xhpchild2.php", line 14, characters 13-20:
+This is an object of type XHPChild
+File "xhpchild2.php", line 18, characters 6-14:
+It is incompatible with an object of type Foo

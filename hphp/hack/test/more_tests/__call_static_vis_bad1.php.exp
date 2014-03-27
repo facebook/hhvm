@@ -1,0 +1,4 @@
+File "__call_static_vis_bad1.php", line 19, characters 15-20:
+You cannot access this member
+File "__call_static_vis_bad1.php", line 13, characters 29-40:
+This member is protected

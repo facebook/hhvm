@@ -237,17 +237,23 @@ array(0) {
 }
 
 -- Iteration 8 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 9 --
@@ -351,7 +357,8 @@ array(1) {
 array(0) {
 }
 -- Iteration 8 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 9 --
 array(0) {

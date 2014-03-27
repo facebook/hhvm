@@ -35,10 +35,14 @@
 5 / "5.5" --> 0.90909090909091
 5.5 / "5" --> 1.1
 "5.5" / "5" --> 1.1
-1 / 0 --> HipHop Warning: Division by zero in %s on line 46
-1.0 / 0 --> HipHop Warning: Division by zero in %s on line 47
-1 / 0.0 --> HipHop Warning: Division by zero in %s on line 48
-1.0 / 0.0 --> HipHop Warning: Division by zero in %s on line 49
+1 / 0 --> 
+Warning: Division by zero in %s on line 46
+1.0 / 0 --> 
+Warning: Division by zero in %s on line 47
+1 / 0.0 --> 
+Warning: Division by zero in %s on line 48
+1.0 / 0.0 --> 
+Warning: Division by zero in %s on line 49
 
 2 % 2 --> 0
 2.5 % 5 --> 2
@@ -48,10 +52,14 @@
 5 % "5.5" --> 0
 5.5 % "5" --> 0
 "5.5" % "5" --> 0
-1 % 0 --> HipHop Warning: Division by zero in %s on line 60
-1.0 % 0 --> HipHop Warning: Division by zero in %s on line 61
-1 % 0.0 --> HipHop Warning: Division by zero in %s on line 62
-1.0 % 0.0 --> HipHop Warning: Division by zero in %s on line 63
+1 % 0 --> 
+Warning: Division by zero in %s on line 60
+1.0 % 0 --> 
+Warning: Division by zero in %s on line 61
+1 % 0.0 --> 
+Warning: Division by zero in %s on line 62
+1.0 % 0.0 --> 
+Warning: Division by zero in %s on line 63
 
 5 & 3 --> 1
 5.0 & 3.0 --> 1

@@ -1,7 +1,8 @@
 *** Testing ob_clean() : basic functionality ***
 
 -- Testing ob_clean() function with Zero arguments --
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 string(61) "bool(true)
 Ensure the buffer is still active after the clean."

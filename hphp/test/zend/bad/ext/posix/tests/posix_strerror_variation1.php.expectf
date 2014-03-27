@@ -1,6 +1,8 @@
 *** Testing posix_strerror() : usage variations ***
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 
 Arg value 10.5 
 string
@@ -16,30 +18,40 @@ string
 
 Arg value 0.5 
 string
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 boolean
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 boolean
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 boolean
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 boolean
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 boolean
 
 Arg value  
@@ -61,19 +73,23 @@ Arg value
 string
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 boolean
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 boolean
 
 Arg value string 
-HipHop Warning: %s
+
+Warning: %s
 boolean
 
 Arg value string 
-HipHop Warning: %s
+
+Warning: %s
 boolean
 
 Arg value  
@@ -81,4 +97,5 @@ string
 
 Arg value  
 string
-HipHop Fatal error: %s
+
+Fatal error: %s

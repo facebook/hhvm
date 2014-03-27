@@ -37,12 +37,14 @@ int(13)
 int(3)
 
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 
 bool(false)
 
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 
 bool(false)
 
@@ -79,17 +81,20 @@ string
 int(6)
 
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 
 bool(false)
 
 -- Iteration 21 --
-HipHop Warning: %s
+
+Warning: %s
 
 bool(false)
 
 -- Iteration 22 --
-HipHop Warning: %s
+
+Warning: %s
 
 bool(false)
 

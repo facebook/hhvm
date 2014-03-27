@@ -27,6 +27,7 @@ array(4) {
 }
 
 -- Error cases --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

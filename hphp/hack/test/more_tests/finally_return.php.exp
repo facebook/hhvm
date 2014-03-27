@@ -1,0 +1,2 @@
+File "finally_return.php", line 16, characters 5-10:
+Don't use return in a finally block; there's nothing to receive the return value

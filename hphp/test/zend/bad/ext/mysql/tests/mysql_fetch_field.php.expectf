@@ -56,8 +56,10 @@ object(stdClass)#%d (13) {
   int(0)
 }
 bool(false)
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(2) "id"

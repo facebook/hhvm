@@ -14,15 +14,20 @@ array(2) {
   [1]=>
   %string|unicode%(0) ""
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(2) {
   [0]=>
@@ -36,7 +41,8 @@ array(2) {
   [1]=>
   %string|unicode%(4) "2---"
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(2) {
   [0]=>
@@ -44,5 +50,6 @@ array(2) {
   [1]=>
   %string|unicode%(4) "2==="
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)

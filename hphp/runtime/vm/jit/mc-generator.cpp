@@ -104,7 +104,6 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/check.h"
-#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
@@ -118,6 +117,7 @@
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/func-prologues.h"
@@ -1040,21 +1040,23 @@ MCGenerator::checkRefs(SrcKey sk,
   }
 }
 
-class FreeRequestStubTrigger : public Treadmill::WorkItem {
+namespace {
+class FreeRequestStubTrigger {
   TCA m_stub;
  public:
   explicit FreeRequestStubTrigger(TCA stub) : m_stub(stub) {
     TRACE(3, "FreeStubTrigger @ %p, stub %p\n", this, m_stub);
   }
-  virtual void operator()() {
+  void operator()() {
     TRACE(3, "FreeStubTrigger: Firing @ %p , stub %p\n", this, m_stub);
     if (mcg->freeRequestStub(m_stub) != true) {
       // If we can't free the stub, enqueue again to retry.
       TRACE(3, "FreeStubTrigger: write lease failed, requeueing %p\n", m_stub);
-      enqueue(std::unique_ptr<WorkItem>(new FreeRequestStubTrigger(m_stub)));
+      Treadmill::enqueue(FreeRequestStubTrigger(m_stub));
     }
   }
 };
+}
 
 #ifdef DEBUG
 
@@ -1525,8 +1527,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
   }
 
   if (smashed && info.stubAddr) {
-    Treadmill::WorkItem::enqueue(std::unique_ptr<Treadmill::WorkItem>(
-                                    new FreeRequestStubTrigger(info.stubAddr)));
+    Treadmill::enqueue(FreeRequestStubTrigger(info.stubAddr));
   }
 
   return true;
@@ -1818,7 +1819,7 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
 
 void
 MCGenerator::translateWork(const TranslArgs& args) {
-  Timer _t("translate");
+  Timer _t(Timer::translate);
   auto sk = args.m_sk;
   std::unique_ptr<Tracelet> tp;
 
@@ -2051,7 +2052,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
 Translator::TranslateResult
 MCGenerator::translateTracelet(Tracelet& t) {
-  Timer _t("translateTracelet");
+  Timer _t(Timer::translateTracelet);
 
   FTRACE(2, "attempting to translate tracelet:\n{}\n", t.toString());
   assert(!Translator::liveFrameIsPseudoMain());
@@ -2109,7 +2110,7 @@ MCGenerator::translateTracelet(Tracelet& t) {
       ht.profileSmallFunctionShape(traceletShape(t));
     }();
 
-    Timer irGenTimer("translateTracelet_irGeneration");
+    Timer irGenTimer(Timer::translateTracelet_irGeneration);
     Unit::MetaHandle metaHand;
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
@@ -2348,7 +2349,7 @@ MCGenerator::getPerfCounters(Array& ret) {
   for (auto const& pair : Timer::Counters()) {
     if (pair.second.total == 0 && pair.second.count == 0) continue;
 
-    ret.set(String("jit_time_" + pair.first), pair.second.total);
+    ret.set(String("jit_time_") + pair.first, pair.second.total);
   }
 }
 

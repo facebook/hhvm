@@ -1,0 +1,2 @@
+File "override_attr_10.php", line 14, characters 20-22:
+BadC::foo: combining private and override is nonsensical

@@ -18,17 +18,23 @@ file unlinked
 -- unlinking hard link unlinkVar8.tmp/../unlinkVar8.tmp/file.tmp --
 file unlinked
 -- removing unlinkVar8.tmp/../BADDIR/file.tmp --
-HipHop Warning: %s
+
+Warning: %s
 -- unlinking soft link unlinkVar8.tmp/../BADDIR/file.tmp --
-HipHop Warning: %s
+
+Warning: %s
 -- unlinking hard link unlinkVar8.tmp/../BADDIR/file.tmp --
-HipHop Warning: %s
+
+Warning: %s
 -- removing BADDIR/file.tmp --
-HipHop Warning: %s
+
+Warning: %s
 -- unlinking soft link BADDIR/file.tmp --
-HipHop Warning: %s
+
+Warning: %s
 -- unlinking hard link BADDIR/file.tmp --
-HipHop Warning: %s
+
+Warning: %s
 -- removing /%s/unlinkVar8.tmp/file.tmp --
 file removed
 -- unlinking soft link /%s/unlinkVar8.tmp/file.tmp --
@@ -48,23 +54,32 @@ file unlinked
 -- unlinking hard link /%s/unlinkVar8.tmp/../unlinkVar8.tmp/file.tmp --
 file unlinked
 -- removing /%s/BADDIR/file.tmp --
-HipHop Warning: %s
+
+Warning: %s
 -- unlinking soft link /%s/BADDIR/file.tmp --
-HipHop Warning: %s
+
+Warning: %s
 -- unlinking hard link /%s/BADDIR/file.tmp --
-HipHop Warning: %s
+
+Warning: %s
 -- removing unlinkVar8.tmp/file.tmp/ --
-HipHop Warning: %s
+
+Warning: %s
 -- unlinking soft link unlinkVar8.tmp/file.tmp/ --
-HipHop Warning: %s
+
+Warning: %s
 -- unlinking hard link unlinkVar8.tmp/file.tmp/ --
-HipHop Warning: %s
+
+Warning: %s
 -- removing /%s/unlinkVar8.tmp/file.tmp/ --
-HipHop Warning: %s
+
+Warning: %s
 -- unlinking soft link /%s/unlinkVar8.tmp/file.tmp/ --
-HipHop Warning: %s
+
+Warning: %s
 -- unlinking hard link /%s/unlinkVar8.tmp/file.tmp/ --
-HipHop Warning: %s
+
+Warning: %s
 -- removing unlinkVar8.tmp//file.tmp --
 file removed
 -- unlinking soft link unlinkVar8.tmp//file.tmp --

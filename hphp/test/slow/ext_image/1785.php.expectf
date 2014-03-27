@@ -1,2 +1,4 @@
-HipHop Warning: No such file or directory in %s/test/slow/ext_image/1785.php on line 3
-HipHop Warning: failed to open stream: test/images/smile.happy.png in %s/test/slow/ext_image/1785.php on line 3
+
+Warning: No such file or directory in %s/test/slow/ext_image/1785.php on line 3
+
+Warning: failed to open stream: test/images/smile.happy.png in %s/test/slow/ext_image/1785.php on line 3

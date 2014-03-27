@@ -1,5 +1,6 @@
 SoapVar
-HipHop Warning: SoapVar::__construct() expects exactly 2 parameters, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+
+Warning: SoapVar::__construct() expects exactly 2 parameters, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(SoapVar)#1 (0) {
 }
 string(91) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:7:"SoapVar";}"
@@ -13,7 +14,8 @@ array(1) {
 }
 ================
 A_SoapVar
-HipHop Warning: SoapVar::__construct() expects exactly 2 parameters, 0 given in %s/test/quick/builtin_extensions.inc on line 23
+
+Warning: SoapVar::__construct() expects exactly 2 parameters, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_SoapVar)#3 (1) {
   ["___x"]=>
   NULL

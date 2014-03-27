@@ -1,8 +1,11 @@
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 string(13) "foobar foobar"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

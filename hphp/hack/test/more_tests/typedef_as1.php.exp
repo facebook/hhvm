@@ -1,0 +1,6 @@
+File "typedef_as1.php", line 12, characters 9-12:
+Invalid constraint on newtype
+File "typedef_as1.php", line 12, characters 17-19:
+This is an int
+File "typedef_as1.php", line 12, characters 23-26:
+It is incompatible with a bool

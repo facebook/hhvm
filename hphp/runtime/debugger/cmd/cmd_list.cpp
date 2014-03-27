@@ -188,7 +188,7 @@ bool CmdList::listFunctionOrClass(DebuggerClient &client) {
     String key = CmdInfo::FindSubSymbol(funcInfo[s_methods].toArray(),
                                         subsymbol);
     if (key.isNull()) return false;
-    funcInfo = funcInfo[s_methods][key].toArray();
+    funcInfo = funcInfo[s_methods].toArray()[key].toArray();
   }
   String file = funcInfo[s_file].toString();
   int line1 = funcInfo[s_line1].toInt32();

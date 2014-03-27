@@ -339,7 +339,13 @@ static const InferenceRule ArithRules[] = {
   { 0, KindOfInt64 },
 };
 
-static const int NumArithRules = sizeof(ArithRules) / sizeof(InferenceRule);
+static const InferenceRule ArithORules[] = {
+  // Same rules as ArithRules, but default to KindOfAny
+  { DoubleMask, KindOfDouble },
+  { ArrayMask, KindOfArray },
+  { StringMask | AnyMask, KindOfAny },
+  { 0, KindOfAny },
+};
 
 /**
  * Returns the type of the output of a bitwise operator on the two
@@ -725,15 +731,24 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
   DynLocation locLocation(inputs[kLocIdx]->location,
                           inputs[kLocIdx]->rtt.unbox());
   assert(inputs[kLocIdx]->location.isLocal());
+  bool isOverflow = true;
+
   switch (op) {
   case SetOpOp::PlusEqual:
   case SetOpOp::MinusEqual:
   case SetOpOp::MulEqual: {
-    // Same as OutArith, except we have to fiddle with inputs a bit.
+    isOverflow = false;
+    // fallthrough
+  }
+  case SetOpOp::PlusEqualO:
+  case SetOpOp::MinusEqualO:
+  case SetOpOp::MulEqualO: {
+    // Same as OutArith[O], except we have to fiddle with inputs a bit.
     std::vector<DynLocation*> arithInputs;
     arithInputs.push_back(&locLocation);
     arithInputs.push_back(inputs[kValIdx]);
-    return RuntimeType(inferType(ArithRules, arithInputs));
+    auto rules = isOverflow ? ArithORules : ArithRules;
+    return RuntimeType(inferType(rules, arithInputs));
   }
   case SetOpOp::ConcatEqual: return RuntimeType(KindOfString);
   case SetOpOp::DivEqual:
@@ -846,6 +861,9 @@ getDynLocType(const SrcKey startSk,
 
     case OutArith: {
       return RuntimeType(inferType(ArithRules, inputs));
+    }
+    case OutArithO: {
+      return RuntimeType(inferType(ArithORules, inputs));
     }
 
     case OutSameAsInput: {
@@ -1022,6 +1040,10 @@ static const struct {
   { OpAdd,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpSub,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpMul,         {StackTop2,        Stack1,       OutArith,         -1 }},
+  /* Arithmetic ops that overflow ints to floats */
+  { OpAddO,        {StackTop2,        Stack1,       OutArithO,        -1 }},
+  { OpSubO,        {StackTop2,        Stack1,       OutArithO,        -1 }},
+  { OpMulO,        {StackTop2,        Stack1,       OutArithO,        -1 }},
   /* Div and mod might return boolean false. Sigh. */
   { OpDiv,         {StackTop2,        Stack1,       OutPred,          -1 }},
   { OpMod,         {StackTop2,        Stack1,       OutPred,          -1 }},
@@ -1202,6 +1224,7 @@ static const struct {
    * runtime stack are outside the boundaries of the tracelet abstraction.
    */
   { OpFCall,       {FStack,           Stack1,       OutPred,           0 }},
+  { OpFCallD,      {FStack,           Stack1,       OutPred,           0 }},
   { OpFCallArray,  {FStack,           Stack1,       OutPred,
                                                    -(int)kNumActRecCells }},
   // TODO: output type is known
@@ -1292,12 +1315,11 @@ static const struct {
 
   { OpCreateCont,  {None,             Stack1|Local, OutObject,         1 }},
   { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
-  { OpUnpackCont,  {None,             StackTop2,    OutInt64,          2 }},
-  { OpContSuspend, {Stack1,           None,         OutNone,          -1 }},
-  { OpContSuspendK,{StackTop2,        None,         OutNone,          -2 }},
+  { OpContRaise,   {Stack1,           None,         OutNone,          -1 }},
+  { OpContSuspend, {Stack1,           Stack1,       OutUnknown,        0 }},
+  { OpContSuspendK,{StackTop2,        Stack1,       OutUnknown,       -1 }},
   { OpContRetC,    {Stack1,           None,         OutNone,          -1 }},
   { OpContCheck,   {None,             None,         OutNone,           0 }},
-  { OpContRaise,   {None,             None,         OutNone,           0 }},
   { OpContValid,   {None,             Stack1,       OutBoolean,        1 }},
   { OpContKey,     {None,             Stack1,       OutUnknown,        1 }},
   { OpContCurrent, {None,             Stack1,       OutUnknown,        1 }},
@@ -1309,9 +1331,8 @@ static const struct {
   { OpAsyncAwait,  {Stack1,           StackTop2,    OutAsyncAwait,     1 }},
   { OpAsyncESuspend,
                    {Stack1,           Stack1|Local, OutObject,         0 }},
+  { OpAsyncResume, {None,             None,         OutNone,           0 }},
   { OpAsyncWrapResult,
-                   {Stack1,           Stack1,       OutObject,         0 }},
-  { OpAsyncWrapException,
                    {Stack1,           Stack1,       OutObject,         0 }},
 };
 
@@ -1375,6 +1396,7 @@ int64_t getStackPopped(PC pc) {
   auto const op = *reinterpret_cast<const Op*>(pc);
   switch (op) {
     case Op::FCall:        return getImm((Op*)pc, 0).u_IVA + kNumActRecCells;
+    case Op::FCallD:       return getImm((Op*)pc, 0).u_IVA + kNumActRecCells;
     case Op::FCallArray:   return kNumActRecCells + 1;
 
     case Op::FCallBuiltin:
@@ -1409,17 +1431,19 @@ int getStackDelta(const NormalizedInstruction& ni) {
   initInstrInfo();
   auto op = ni.op();
   switch (op) {
-    case OpFCall: {
-      int numArgs = ni.imm[0].u_IVA;
-      return 1 - numArgs - kNumActRecCells;
-    }
+    case Op::FCall:
+    case Op::FCallD:
+      {
+        int numArgs = ni.imm[0].u_IVA;
+        return 1 - numArgs - kNumActRecCells;
+      }
 
-    case OpFCallBuiltin:
-    case OpNewPackedArray:
-    case OpCreateCl:
+    case Op::FCallBuiltin:
+    case Op::NewPackedArray:
+    case Op::CreateCl:
       return 1 - ni.imm[0].u_IVA;
 
-    case OpNewStructArray:
+    case Op::NewStructArray:
       return 1 - ni.immVec.numStackValues();
 
     default:
@@ -2226,6 +2250,7 @@ bool outputDependsOnInput(const Op instr) {
     case OutFInputL:
     case OutFInputR:
     case OutArith:
+    case OutArithO:
     case OutBitOp:
     case OutSetOp:
     case OutIncDec:
@@ -2967,6 +2992,7 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
 
     case OpPushL:
     case OpContEnter:
+    case OpContRaise:
       return DataTypeGeneric;
 
     case OpRetC:
@@ -2974,6 +3000,7 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
       return DataTypeCountness;
 
     case OpFCall:
+    case OpFCallD:
       // Note: instead of pessimizing calls that may be inlined with
       // DataTypeSpecific, we could apply the operand constraints of
       // the callee in constrainDep.
@@ -3557,7 +3584,7 @@ bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
  */
 std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
                                               const TypeMap& initialTypes) {
-  Timer _t("analyze");
+  Timer _t(Timer::analyze);
 
   std::unique_ptr<Tracelet> retval(new Tracelet());
   auto func = sk.func();
@@ -3762,7 +3789,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       annotate(ni);
     }
 
-    if (ni->op() == OpFCall) {
+    if (ni->op() == Op::FCall || ni->op() == Op::FCallD) {
       analyzeCallee(tas, t, ni);
     }
 
@@ -4125,7 +4152,7 @@ void Translator::traceFree() {
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             RegionBlacklist& toInterp) {
-  Timer _t("translateRegion");
+  Timer _t(Timer::translateRegion);
 
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
@@ -4133,7 +4160,7 @@ Translator::translateRegion(const RegionDesc& region,
   const SrcKey startSk = region.blocks.front()->start();
   auto profilingFunc = false;
 
-  Timer irGenTimer("translateRegion_irGeneration");
+  Timer irGenTimer(Timer::translateRegion_irGeneration);
   for (auto b = 0; b < region.blocks.size(); b++) {
     auto const& block = region.blocks[b];
     Unit::MetaHandle metaHand;
@@ -4290,7 +4317,8 @@ Translator::translateRegion(const RegionDesc& region,
       // the FCall and instead set up HhbcTranslator for inlining. Blocks from
       // the callee will be next in the region.
       if (i == block->length() - 1 &&
-          inst.op() == OpFCall && block->inlinedCallee()) {
+          (inst.op() == Op::FCall || inst.op() == Op::FCallD) &&
+          block->inlinedCallee()) {
         auto const* callee = block->inlinedCallee();
         FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
                "and stack:\n{}\n",
@@ -4684,6 +4712,9 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
       }
     } else if (!(func->attrs() & AttrNoOverride && !func->hasStaticLocals()) &&
                !(cls->preClass()->attrs() & AttrNoOverride)) {
+      // Even if a func has AttrNoOverride, if it has static locals it
+      // is cloned into subclasses (to give them different copies of
+      // the static locals), so we need to skip this.
       func = nullptr;
     }
   }

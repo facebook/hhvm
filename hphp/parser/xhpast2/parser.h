@@ -945,10 +945,10 @@ struct Parser : ParserBase {
   void onWhereClause(Token &out, Token &expr) {
     out.setNodeType(ONWHERECLAUSE).appendChild(&expr);
   }
-  void onJoinClause(Token &out, Token *var, Token &coll, Token *left,
-      Token *right) {
-    out.setNodeType(ONJOINCLAUSE).appendChild(var).appendChild(&coll)
-      .appendChild(left).appendChild(right);
+  void onJoinClause(Token &out, Token &var, Token &coll, Token &left,
+      Token &right) {
+    out.setNodeType(ONJOINCLAUSE).appendChild(&var).appendChild(&coll)
+      .appendChild(&left).appendChild(&right);
   }
   void onJoinIntoClause(Token &out, Token &var, Token &coll, Token &left,
       Token &right, Token &group) {
@@ -1453,6 +1453,7 @@ struct Parser : ParserBase {
         OnScalarEI *ei = dynamic_cast<OnScalarEI*>(node->extra);
         switch (ei->type) {
           case T_DNUMBER:
+          case T_ONUMBER:
           case T_LNUMBER: {
             n->type = n_NUMERIC_SCALAR;
             break;

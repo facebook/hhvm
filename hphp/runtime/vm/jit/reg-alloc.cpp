@@ -147,14 +147,14 @@ bool mustUseConst(const IRInstruction& inst, int i) {
   case LdAddr: return check(i == 1); // offset
   case Call: return check(i == 1); // returnBcOffset
   case CallBuiltin: return check(i == 0); // f
-  case LdRaw: return check(i == 1); // offset
-  case StRaw: return check(i == 1); // offset
   default: break;
   }
   return check(g_const_table.mustBeConst(int(inst.op()), i));
 }
 }
 
+bool isI32(int64_t c) { return c == int32_t(c); }
+bool isU32(int64_t c) { return c == uint32_t(c); }
 namespace ARM {
 
 // Return true if the CodeGenerator method for this instruction can
@@ -164,11 +164,6 @@ namespace ARM {
 // blindly in CodeGenerator.
 bool mayUseConst(const IRInstruction& inst, unsigned i) {
   assert(inst.src(i)->isConst());
-  if (CallMap::hasInfo(inst.op())) {
-    // shuffleArgs() knows what to do with immediates.
-    // TODO: #3634984 ... but it needs a scratch register
-    return true;
-  }
   union {
     int64_t cint;
     double cdouble;
@@ -187,8 +182,27 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
       return vixl::Assembler::IsImmArithmetic(cint);
     }
     break;
+  case AddInt:
+  case SubInt:
+  case EqInt:
+  case NeqInt:
+  case LtInt:
+  case GtInt:
+  case LteInt:
+  case GteInt:
+    if (i == 1) {
+      return vixl::Assembler::IsImmArithmetic(cint);
+    }
+    break;
+
+  //TODO: t3944093 add constraints for existing arm codegen
   default:
     break;
+  }
+  if (CallMap::hasInfo(inst.op())) {
+    // shuffleArgs() knows what to do with immediates.
+    // TODO: #3634984 ... but it needs a scratch register
+    return true;
   }
   return false;
 }
@@ -209,9 +223,10 @@ Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
 
 namespace X64 {
 
-bool isI32(int64_t c) { return c == int32_t(c); }
-bool isU32(int64_t c) { return c == uint32_t(c); }
-bool okStore(int64_t c) { return isI32(c); }
+// okStore is true if cgStore can take c as an immediate without
+// using any scratch registers.
+bool okStore(int64_t c) { return true; }
+
 bool okCmp(int64_t c) { return isI32(c); }
 
 // return true if CodeGenerator supports this operand as an
@@ -219,12 +234,6 @@ bool okCmp(int64_t c) { return isI32(c); }
 // pre: the src must actually be a const
 bool mayUseConst(const IRInstruction& inst, unsigned i) {
   assert(inst.src(i)->isConst());
-  if (CallMap::hasInfo(inst.op())) {
-    // shuffleArgs() knows what to do with immediates.
-    // TODO: #3634984 ... but it needs a scratch register for
-    // big constants, so handle big immediates here.
-    return true;
-  }
   union {
     int64_t cint;
     double cdouble;
@@ -337,8 +346,29 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
   case CheckPackedArrayBounds:
     if (i == 1) return okCmp(cint); // idx
     break;
+  case CheckBounds:
+    if (i == 0) { // idx
+      return !inst.src(1)->isConst() && okCmp(cint) && cint >= 0;
+    }
+    if (i == 1) { // size
+      return !inst.src(0)->isConst() && okCmp(cint) && cint >= 0;
+    }
+    break;
+  case VerifyParamCls:
+  case VerifyRetCls:
+    if (i == 1) return okCmp(cint); // constraint class ptr
+    break;
+  case FunctionExitSurpriseHook:
+    if (i == 2) return okStore(cint); // return value
+    break;
   default:
     break;
+  }
+  if (CallMap::hasInfo(inst.op())) {
+    // shuffleArgs() knows what to do with immediates.
+    // TODO: #3634984 ... but it needs a scratch register for
+    // big constants, so handle big immediates here.
+    return true;
   }
   return false;
 }

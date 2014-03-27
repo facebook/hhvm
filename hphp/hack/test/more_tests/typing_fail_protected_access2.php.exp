@@ -1,0 +1,4 @@
+File "typing_fail_protected_access2.php", line 19, characters 10-10:
+Cannot access this protected member, you don't extend Foo
+File "typing_fail_protected_access2.php", line 13, characters 29-29:
+This member is protected

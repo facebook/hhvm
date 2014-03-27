@@ -1,6 +1,9 @@
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Notice: %s
+
+Warning: %s
+
+Warning: %s
+
+Notice: %s
 array(0) {
 }
 NULL

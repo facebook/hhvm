@@ -24,12 +24,18 @@ array(3) {
   }
 }
 -- anonymous function with two parameters and passing one array --
-HipHop Warning: %s
-HipHop Notice: %s
-HipHop Warning: %s
-HipHop Notice: %s
-HipHop Warning: %s
-HipHop Notice: %s
+
+Warning: %s
+
+Notice: %s
+
+Warning: %s
+
+Notice: %s
+
+Warning: %s
+
+Notice: %s
 array(3) {
   [0]=>
   array(2) {
@@ -72,6 +78,7 @@ array(3) {
   NULL
 }
 -- passing NULL as 'arr1' --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

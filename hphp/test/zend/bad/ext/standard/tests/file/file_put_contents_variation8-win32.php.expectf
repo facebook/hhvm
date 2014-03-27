@@ -7,34 +7,42 @@
 9 bytes written to: 1
 
 -- Filename: FALSE --
-HipHop Warning: %s
+
+Warning: %s
 Failed to write data to: FALSE
 
 -- Filename: NULL --
-HipHop Warning: %s
+
+Warning: %s
 Failed to write data to: NULL
 
 -- Filename: "" --
-HipHop Warning: %s
+
+Warning: %s
 Failed to write data to: ""
 
 -- Filename: " " --
-HipHop Warning: %s
+
+Warning: %s
 Failed to write data to: " "
 
 -- Filename: \0 --
-HipHop Warning: %s
+
+Warning: %s
 Failed to write data to: \0
 
 -- Filename: array() --
-HipHop Warning: %s
+
+Warning: %s
 Failed to write data to: array()
 
 -- Filename: /no/such/file/dir --
-HipHop Warning: %s
+
+Warning: %s
 Failed to write data to: /no/such/file/dir
 
 -- Filename: php/php --
-HipHop Warning: %s
+
+Warning: %s
 Failed to write data to: php/php
 ===Done===

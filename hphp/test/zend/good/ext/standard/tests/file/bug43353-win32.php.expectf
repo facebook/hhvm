@@ -1,5 +1,6 @@
 bool(false)
 bool(false)
 string(3) "foo"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)

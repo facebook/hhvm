@@ -1283,7 +1283,7 @@ Variant f_iconv_mime_encode(const String& field_name, const String& field_value,
   char *buf = NULL;
 
   if (!preferences.isNull()) {
-    Variant scheme = preferences[s_scheme];
+    Variant scheme = preferences.toArray()[s_scheme];
     if (scheme.isString()) {
       String s = scheme.toString();
       switch (*s.data()) {
@@ -1296,24 +1296,24 @@ Variant f_iconv_mime_encode(const String& field_name, const String& field_value,
       }
     }
 
-    Variant input_charset = preferences[s_input_charset];
+    Variant input_charset = preferences.toArray()[s_input_charset];
     if (input_charset.isString()) {
       in_charset = input_charset.toString();
       if (!validate_charset(in_charset)) return false;
     }
 
-    Variant output_charset = preferences[s_output_charset];
+    Variant output_charset = preferences.toArray()[s_output_charset];
     if (output_charset.isString()) {
       out_charset = output_charset.toString();
       if (!validate_charset(out_charset)) return false;
     }
 
-    Variant line_length = preferences[s_line_length];
+    Variant line_length = preferences.toArray()[s_line_length];
     if (!line_length.isNull()) {
       line_len = line_length.toInt64();
     }
 
-    Variant line_break_chars = preferences[s_line_break_chars];
+    Variant line_break_chars = preferences.toArray()[s_line_break_chars];
     if (!line_break_chars.isNull()) {
       lfchars = line_break_chars.toString();
     }
@@ -1698,7 +1698,7 @@ Variant f_iconv_mime_decode_headers(const String& encoded_headers,
         if (!elem.is(KindOfArray)) {
           ret.set(header, make_packed_array(elem, value));
         } else {
-          elem.append(value);
+          elem.toArrRef().append(value);
           ret.set(header, elem);
         }
       } else {

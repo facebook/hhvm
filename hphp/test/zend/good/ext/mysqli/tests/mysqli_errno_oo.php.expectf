@@ -1,5 +1,6 @@
 int(0)
 int(%d)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 done!

@@ -1,10 +1,12 @@
 *** Testing rawurlencode() : error conditions ***
 
 -- Testing rawurlencode() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing rawurlencode() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

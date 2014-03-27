@@ -1,2 +1,3 @@
-HipHop Warning: %S(glob://%s/../test/sample_dir/*): failed to open stream: wrapper does not support stream open in %s/file_get_contents_glob.php on line %d
+
+Warning: %S(glob://%s/../test/sample_dir/*): failed to open stream: wrapper does not support stream open in %s/file_get_contents_glob.php on line %d
 bool(false)

@@ -1,314 +1,410 @@
 *** Testing rsort() : variation ***
 -- Iteration 1 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 2 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 3 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 4 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 5 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 6 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 7 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 8 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 9 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 10 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 11 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 12 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 13 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 14 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 15 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 16 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 17 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 18 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 19 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 20 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 21 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 22 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 23 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 24 --
 Flag = default:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_REGULAR:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_NUMERIC:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Flag = SORT_STRING:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

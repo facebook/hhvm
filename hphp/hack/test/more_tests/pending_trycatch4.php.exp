@@ -1,0 +1,6 @@
+File "pending_trycatch4.php", line 23, characters 10-11:
+Invalid return type
+File "pending_trycatch4.php", line 12, characters 15-17:
+This is an int
+File "pending_trycatch4.php", line 17, characters 12-16:
+It is incompatible with a bool

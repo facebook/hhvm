@@ -13,22 +13,26 @@ string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
 string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
 
 -- Iteration 4 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
 
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
 
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 %s
 
 -- Iteration 7 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 %s
 Done

@@ -4,6 +4,8 @@
 mb_parse_str("first=value&arr[]=foo+bar&arr[]=baz", $output);
 var_dump($output['first']);
 var_dump($output['arr[]']); // bug in mb_parse_str not following PHP's
+mb_parse_str('', $output);
+var_dump($output); // should be empty array, not null
 
 $date = "04/30/1973";
 $ret = mb_split("[/.-]", $date);

@@ -1,14 +1,20 @@
-*** Testing error conditions for fnmatch() ***HipHop Warning: %s
+*** Testing error conditions for fnmatch() ***
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 *** Done ***

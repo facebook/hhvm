@@ -17,17 +17,19 @@
 #ifndef incl_HPHP_JIT_TYPE_H_
 #define incl_HPHP_JIT_TYPE_H_
 
-#include <cstdint>
-#include <cstring>
+#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/type-array.h"
 
-#include "folly/Optional.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/util/data-block.h"
 
-#include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/jit/types.h"
+#include "folly/Optional.h"
+
+#include <cstdint>
+#include <cstring>
 
 namespace HPHP {
 struct Func;
@@ -836,6 +838,16 @@ struct TypeConstraint {
   // instructions away, and when we do, we remember their type in assertedType.
   Type assertedType;
 };
+
+const int kTypeWordOffset = offsetof(TypedValue, m_type) % 8;
+const int kTypeShiftBits = kTypeWordOffset * CHAR_BIT;
+
+// left shift an immediate DataType, for type, to the correct position
+// within one of the registers used to pass a TypedValue by value.
+inline uint64_t toDataTypeForCall(Type type) {
+  return uint64_t(type.toDataType()) << kTypeShiftBits;
+}
+
 
 }}
 

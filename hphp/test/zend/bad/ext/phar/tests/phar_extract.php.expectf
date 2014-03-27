@@ -9,7 +9,8 @@ string(3) "hi3"
 string(3) "hi2"
 bool(false)
 Invalid argument, expected a filename (string) or array of filenames
-HipHop Warning: %s
+
+Warning: %s
 Invalid argument, extraction path must be non-zero length
 Unable to use path "%soops" for extraction, it is a file, must be a directory
 Invalid argument, array of filenames to extract contains non-string value

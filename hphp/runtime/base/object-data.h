@@ -33,9 +33,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ArrayIter;
-class MutableArrayIter;
-
 class HphpArray;
 struct TypedValue;
 class PreClass;
@@ -73,16 +70,18 @@ class ObjectData {
   };
 
  private:
-  static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_id);
+  static __thread int os_max_id;
 
  public:
+  static void resetMaxId() { os_max_id = 0; }
+
   explicit ObjectData(Class* cls)
     : m_cls(cls)
     , o_attribute(0)
     , m_count(0)
   {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
-    o_id = ++(*os_max_id);
+    o_id = ++os_max_id;
     instanceInit(cls);
   }
 
@@ -93,7 +92,7 @@ class ObjectData {
     , m_count(0)
   {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
-    o_id = ++(*os_max_id);
+    o_id = ++os_max_id;
     instanceInit(cls);
   }
 
@@ -105,7 +104,7 @@ class ObjectData {
     , m_count(0)
   {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
-    o_id = ++(*os_max_id);
+    o_id = ++os_max_id;
   }
 
   // Disallow copy construction and assignemt
@@ -207,6 +206,10 @@ class ObjectData {
     return Collection::isMutableType(getCollectionType());
   }
 
+  bool isImmutableCollection() const {
+    return Collection::isImmutableType(getCollectionType());
+  }
+
   Collection::Type getCollectionType() const {
     return isCollection() ? static_cast<Collection::Type>(o_subclassData.u16)
                           : Collection::Type::InvalidType;
@@ -226,9 +229,6 @@ class ObjectData {
   ObjectData* clearNoDestruct() { clearAttribute(NoDestructor); return this; }
 
   Object iterableObject(bool& isIterable, bool mayImplementIterator = true);
-  ArrayIter begin(const String& context = null_string);
-  MutableArrayIter begin(Variant* key, Variant& val,
-                         const String& context = null_string);
 
   /**
    * o_instanceof() can be used for both classes and interfaces.
@@ -302,7 +302,6 @@ class ObjectData {
 
   void serialize(VariableSerializer* serializer) const;
   void serializeImpl(VariableSerializer* serializer) const;
-  void dump() const;
   ObjectData* clone();
 
   Variant offsetGet(Variant key);
@@ -312,8 +311,6 @@ class ObjectData {
   Variant invokeSleep();
   Variant invokeToDebugDisplay();
   Variant invokeWakeup();
-
-  static int GetMaxId();
 
   /**
    * Used by the ext_zend_compat layer.

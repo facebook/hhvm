@@ -1733,6 +1733,7 @@ struct LibXmlErrors final : RequestEventHandler {
   void requestInit() override {
     m_use_error = false;
     m_errors.reset();
+    xmlResetLastError();
     m_entity_loader_disabled = false;
     xmlParserInputBufferCreateFilenameDefault(hphp_libxml_input_buffer);
   }

@@ -12,7 +12,7 @@ function test() {
   show(FOO, FOO);
 }
 
-fb_autoload_map(array('constant' => array(),
-                      'failure' => 'def'), "");
+HH\autoload_set_paths(array('constant' => array(),
+                               'failure' => 'def'), "");
 
 test();

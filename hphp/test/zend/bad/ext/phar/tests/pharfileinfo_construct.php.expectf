@@ -1,5 +1,6 @@
 Cannot open phar file 'phar://%spharfileinfo_construct.phar/oops': internal corruption of phar "%spharfileinfo_construct.phar" (truncated entry)
-HipHop Warning: %s
+
+Warning: %s
 Cannot access phar file entry '/oops/I/do/not/exist' in archive '%spharfileinfo_construct.phar'
 Cannot call constructor twice
 '%spharfileinfo_construct.php' is not a valid phar archive URL (must have at least phar://filename.phar)

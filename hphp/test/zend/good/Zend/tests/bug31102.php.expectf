@@ -3,4 +3,5 @@ Caught: Test1::__construct
 __autoload(Test2,2)
 Caught: __autoload
 __autoload(Test3,3)
-HipHop Fatal error: %s
+
+Fatal error: %s

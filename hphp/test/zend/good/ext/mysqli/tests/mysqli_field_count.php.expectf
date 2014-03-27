@@ -3,6 +3,7 @@ int(2)
 int(0)
 int(0)
 int(3)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 done!

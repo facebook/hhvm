@@ -195,13 +195,13 @@ static void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 #define FIND_XML_NULL(xml, v)                                   \
   {                                                             \
     if (!xml) {                                                 \
-      v.reset();                                                \
+      v = Variant();                                            \
       return v;                                                 \
     }                                                           \
     if (xml->properties) {                                      \
       xmlAttrPtr n = get_attribute(xml->properties, "nil");     \
       if (n) {                                                  \
-        v.reset();                                              \
+        v = Variant();                                          \
         return v;                                               \
       }                                                         \
     }                                                           \
@@ -1170,7 +1170,7 @@ static bool get_zval_property(Variant &object, const char* name,
     if (!arr.exists(sname)) {
       return false;
     }
-    if (ret) ret->assignRef(object.lvalAt(sname));
+    if (ret) ret->assignRef(object.toArrRef().lvalAt(sname));
     return true;
   }
   return false;
@@ -1221,20 +1221,20 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
         /* Add array element */
         if (name) {
           String name_str(name);
-          if (any.toArray().exists(name_str)) {
-            Variant &el = any.lvalAt(name_str);
+          if (any.toArrRef().exists(name_str)) {
+            Variant &el = any.toArrRef().lvalAt(name_str);
             if (!el.isArray()) {
               /* Convert into array */
               Array arr = Array::Create();
               arr.append(el);
               el = arr;
             }
-            el.append(val);
+            el.toArrRef().append(val);
           } else {
-            any.set(name_str, val);
+            any.toArrRef().set(name_str, val);
           }
         } else {
-          any.append(val);
+          any.toArrRef().append(val);
         }
         name = NULL;
       }
@@ -1511,7 +1511,7 @@ static Variant to_zval_object_ex(encodeTypePtr type, xmlNodePtr data,
             prop = arr;
           }
           /* Add array element */
-          prop.append(tmpVal);
+          prop.toArrRef().append(tmpVal);
         }
       }
       trav = trav->next;
@@ -2108,9 +2108,9 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, const Variant& data_, int sty
     array_copy = Array::Create();
     for (ArrayIter iter(data.toObject().get()); iter; ++iter) {
       if (!iter.first().isNull() && iter.first().isString()) {
-        array_copy.set(iter.first(), iter.second());
+        array_copy.toArrRef().set(iter.first(), iter.second());
       } else {
-        array_copy.append(iter.second());
+        array_copy.toArrRef().append(iter.second());
       }
     }
     data = array_copy;
@@ -2438,13 +2438,13 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
       i = 0;
       Variant *ar = &ret;
       while (i < dimension-1) {
-        if (!ar->toArray().exists(pos[i])) {
-          ar->set(pos[i], Array::Create());
+        if (!ar->toArrRef().exists(pos[i])) {
+          ar->toArrRef().set(pos[i], Array::Create());
         }
-        ar = &ar->lvalAt(pos[i]);
+        ar = &ar->toArrRef().lvalAt(pos[i]);
         i++;
       }
-      ar->set(pos[i], tmpVal);
+      ar->toArrRef().set(pos[i], tmpVal);
 
       /* Increment position */
       i = dimension;
@@ -2520,13 +2520,13 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, const Variant& data, int style,
 }
 
 static Variant to_zval_map(encodeTypePtr type, xmlNodePtr data) {
-  Variant ret, key, value;
+  Variant key, value;
+  Array ret;
   xmlNodePtr trav, item, xmlKey, xmlValue;
 
   FIND_XML_NULL(data, ret);
 
   if (data && data->children) {
-    ret = Array::Create();
     trav = data->children;
 
     FOREACHNODE(trav, "item", item) {

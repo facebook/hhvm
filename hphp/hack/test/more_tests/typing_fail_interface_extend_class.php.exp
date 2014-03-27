@@ -1,0 +1,4 @@
+File "typing_fail_interface_extend_class.php", line 15, characters 7-7:
+a class cannot extend an interface
+File "typing_fail_interface_extend_class.php", line 15, characters 17-17:
+This is an interface

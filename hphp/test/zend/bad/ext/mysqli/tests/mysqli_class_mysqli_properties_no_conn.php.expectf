@@ -44,7 +44,8 @@ warning_count = 'NULL'
 
 Magic, magic properties:
 mysqli->affected_rows = ''/NULL (''/NULL)
-HipHop Warning: %s
+
+Warning: %s
 mysqli->client_info = ''/NULL ('%s'/%s)
 mysqli->client_version =  '%s'/integer ('%s'/integer)
 mysqli->errno = ''/NULL (''/NULL)
@@ -54,7 +55,8 @@ mysqli->insert_id = ''/NULL (''/NULL)
 mysqli->sqlstate = ''/NULL (''/NULL)
 mysqli->host_info = ''/NULL (''/NULL)
 mysqli->info = ''/NULL (''/NULL)
-HipHop Warning: %s
+
+Warning: %s
 mysqli->thread_id = ''/NULL (''/NULL)
 mysqli->protocol_version = ''/NULL (''/NULL)
 mysqli->server_info = ''/NULL (''/NULL)
@@ -115,7 +117,8 @@ warning_count = 'NULL'
 
 Magic, magic properties:
 mysqli->affected_rows = ''/NULL (''/NULL)
-HipHop Warning: %s
+
+Warning: %s
 mysqli->client_info = ''/NULL ('%s'/%s)
 mysqli->client_version =  '%s'/integer ('%s'/integer)
 mysqli->errno = ''/NULL (''/NULL)
@@ -125,7 +128,8 @@ mysqli->insert_id = ''/NULL (''/NULL)
 mysqli->sqlstate = ''/NULL (''/NULL)
 mysqli->host_info = ''/NULL (''/NULL)
 mysqli->info = ''/NULL (''/NULL)
-HipHop Warning: %s
+
+Warning: %s
 mysqli->thread_id = ''/NULL (''/NULL)
 mysqli->protocol_version = ''/NULL (''/NULL)
 mysqli->server_info = ''/NULL (''/NULL)

@@ -1,8 +1,11 @@
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 array(1) {
   [0]=>
@@ -67,8 +70,10 @@ array(4) {
   [3]=>
   float(2)
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

@@ -12,17 +12,20 @@ array(2) {
 
 -- simple class with private variable and method --
 SimpleClassPri::add
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- simple class with protected variable and method --
 SimpleClassPro::mul
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- class without members --
 EmptyClass
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- abstract class --
@@ -60,10 +63,12 @@ array(2) {
   int(4)
 }
 StaticClass::cube
-HipHop Warning: %s
+
+Warning: %s
 NULL
 StaticClass::retVal
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- class implementing an interface --
 InterClass::square

@@ -1,3 +1,0 @@
-Before error
-HipHop Fatal error: syntax error, unexpected $end, expecting ',' or ';' in %s(%d) : eval()'d code on line %d
-eval returns false

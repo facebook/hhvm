@@ -1,1 +1,2 @@
-HipHop Fatal error: Cannot redeclare A::$c in %s on line 8
+
+Fatal error: Cannot redeclare A::$c in %s on line 8

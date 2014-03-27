@@ -17,28 +17,22 @@
 #ifndef incl_HPHP_VARIANT_H_
 #define incl_HPHP_VARIANT_H_
 
-#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
-#error Directly including 'type_variant.h' is prohibited. \
-       Include 'complex_types.h' instead.
-#endif
-
-#include <type_traits>
-#include <algorithm>
-
-#include "hphp/util/trace.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/type-object.h"
-#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-object.h"
+#include "hphp/runtime/base/type-resource.h"
+#include "hphp/runtime/base/type-string.h"
+
+#include <algorithm>
+#include <type_traits>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-class ArrayIter;
-class MutableArrayIter;
 
 /*
  * This class predates HHVM.
@@ -70,48 +64,15 @@ class MutableArrayIter;
  *
  */
 
-class Variant : private TypedValue {
- public:
-  friend class Array;
-  friend class VariantVectorBase;
-  friend class c_Vector;
-  friend class c_Map;
-
-  /**
-   * setUninitNull occurs frequently; use this version where possible.
-   */
-  inline void setUninitNull() {
-    m_type = KindOfUninit;
-    assert(!isInitialized());
-  }
-
-  Variant() {
-    setUninitNull();
-  }
-
+struct Variant : private TypedValue {
   enum class NullInit {};
-  explicit Variant(NullInit) { m_type = KindOfNull; }
   enum class NoInit {};
+  enum class ArrayInitCtor {};
+
+  Variant() { m_type = KindOfUninit; }
+  explicit Variant(NullInit) { m_type = KindOfNull; }
   explicit Variant(NoInit) {}
-  enum NoInc { noInc = 0 };
 
-  static ALWAYS_INLINE void destructData(RefData* num, DataType t) {
-    tvDecRefHelper(t, uint64_t(num));
-  }
-
-  // D462768 showed no gain from inlining, even just with INLINE_VARIANT_HELPER.
-  ~Variant();
-
-  void reset() {
-    // only for special memory sweeping!
-    m_type = KindOfNull;
-  }
-
-  /**
-   * Constructors. We can't really use template<T> here, since that will make
-   * Variant being able to take many other external types, messing up those
-   * operator overloads.
-   */
   /* implicit */ Variant(bool    v) { m_type = KindOfBoolean; m_data.num = v; }
   /* implicit */ Variant(int     v) { m_type = KindOfInt64; m_data.num = v; }
   // The following two overloads will accept int64_t whether it's
@@ -140,10 +101,67 @@ class Variant : private TypedValue {
   /* implicit */ Variant(ObjectData *v);
   /* implicit */ Variant(ResourceData *v);
   /* implicit */ Variant(RefData *r);
-  /* implicit */ Variant(RefData *r, NoInc);
+
+  /* implicit */ Variant(CVarStrongBind v);
+  /* implicit */ Variant(CVarWithRefBind v);
+
+  /*
+   * Creation constructor from ArrayInit that avoids a null check.
+   */
+  explicit Variant(ArrayData* ad, ArrayInitCtor) {
+    m_type = KindOfArray;
+    m_data.parr = ad;
+    ad->incRefCount();
+  }
 
   // for static strings only
   explicit Variant(const StringData *v);
+
+  // These are prohibited, but declared just to prevent accidentally
+  // calling the bool constructor just because we had a pointer to
+  // const.
+  /* implicit */ Variant(const ArrayData *v) = delete;
+  /* implicit */ Variant(const ObjectData *v) = delete;
+  /* implicit */ Variant(const ResourceData *v) = delete;
+  /* implicit */ Variant(const RefData *v) = delete;
+  /* implicit */ Variant(const TypedValue *v) = delete;
+  /* implicit */ Variant(TypedValue *v) = delete;
+  /* implicit */ Variant(const /* implicit */ Variant *v) = delete;
+  /* implicit */ Variant(/* implicit */ Variant *v) = delete;
+
+  //////////////////////////////////////////////////////////////////////
+
+  /*
+   * Copy constructor and copy assignment do not semantically make
+   * copies: they unbox refs and turn uninits to null.
+   */
+
+  Variant(const Variant& v);
+
+  Variant& operator=(const Variant& v) {
+    return assign(v);
+  }
+
+  /*
+   * Move ctors
+   *
+   * Note: not semantically moves.  Like our "copy constructor", these
+   * unbox refs and turn uninits to null.
+   */
+
+  Variant(Variant&& v) {
+    if (UNLIKELY(v.m_type == KindOfRef)) {
+      // We can't avoid the refcounting when it's a ref.  Do basically
+      // what a copy would have done.
+      moveRefHelper(std::move(v));
+      return;
+    }
+
+    assert(this != &v);
+    m_type = v.m_type != KindOfUninit ? v.m_type : KindOfNull;
+    m_data = v.m_data;
+    v.m_type = KindOfNull;
+  }
 
   // Move ctor for strings
   /* implicit */ Variant(String&& v) {
@@ -195,73 +213,15 @@ class Variant : private TypedValue {
     }
   }
 
-  // These are prohibited, but declared just to prevent accidentally
-  // calling the bool constructor just because we had a pointer to
-  // const.
-  /* implicit */ Variant(const ArrayData *v) = delete;
-  /* implicit */ Variant(const ObjectData *v) = delete;
-  /* implicit */ Variant(const ResourceData *v) = delete;
-  /* implicit */ Variant(const RefData *v) = delete;
-  /* implicit */ Variant(const TypedValue *v) = delete;
-  /* implicit */ Variant(TypedValue *v) = delete;
-  /* implicit */ Variant(const /* implicit */ Variant *v) = delete;
-  /* implicit */ Variant(/* implicit */ Variant *v) = delete;
-
-  /*
-   * Creation constructor from ArrayInit that avoids a null check.
-   */
-  enum class ArrayInitCtor { Tag };
-  explicit Variant(ArrayData* ad, ArrayInitCtor) {
-    m_type = KindOfArray;
-    m_data.parr = ad;
-    ad->incRefCount();
-  }
-
-#ifdef INLINE_VARIANT_HELPER
-  ALWAYS_INLINE
-  /* implicit */ Variant(const Variant& v) { constructValHelper(v); }
-  ALWAYS_INLINE
-  /* implicit */ Variant(CVarStrongBind v) { constructRefHelper(variant(v)); }
-  ALWAYS_INLINE
-  /* implicit */ Variant(CVarWithRefBind v) {
-    constructWithRefHelper(variant(v));
-  }
-#else
-  /* implicit */ Variant(const Variant& v);
-  /* implicit */ Variant(CVarStrongBind v);
-  /* implicit */ Variant(CVarWithRefBind v);
-#endif
-
-  /*
-   * Move ctor
-   *
-   * Note: not semantically a move constructor.  Like our "copy
-   * constructor", unboxes refs and turns uninits to null.
-   */
-  Variant(Variant&& v) {
-    if (UNLIKELY(v.m_type == KindOfRef)) {
-      // We can't avoid the refcounting when it's a ref.  Do basically
-      // what a copy would have done.
-      moveRefHelper(std::move(v));
-      return;
-    }
-
-    assert(this != &v);
-    m_type = v.m_type != KindOfUninit ? v.m_type : KindOfNull;
-    m_data = v.m_data;
-    v.reset();
-  }
-
   /*
    * Move assign
    *
-   * Note: not semantically a move assignment operator.  Like our
-   * "copy asignment operator", unboxes refs and turns uninits to
-   * null.
+   * Note: not semantically moves.  Like our "copies", these unbox
+   * refs and turn uninits to null.
    */
   Variant& operator=(Variant &&rhs) {
-    // a = std::move(a), ILLEGAL per C++11 17.6.4.9
-    assert(this != &rhs);
+    assert(this != &rhs); // TODO(#2484130): we end up as null on a
+                          // self move-assign; decide if this is ok.
     if (rhs.m_type == KindOfRef) return *this = *rhs.m_data.pref->var();
 
     Variant& lhs = m_type == KindOfRef ? *m_data.pref->var() : *this;
@@ -273,22 +233,35 @@ class Variant : private TypedValue {
     lhs.m_data = rhs.m_data;
     lhs.m_type = rhs.m_type == KindOfUninit ? KindOfNull : rhs.m_type;
 
-    rhs.reset();
+    rhs.m_type = KindOfNull;
     return *this;
   }
 
- private:
-  friend class VarNR;
+  // D462768 showed no gain from inlining, even just into hphp-array.o
+  ~Variant();
+
+  //////////////////////////////////////////////////////////////////////
+
+  /*
+   * During sweeping, smart resources are not allowed to be decref'd
+   * or manipulated.  This function is used to cause a Variant to go
+   * into a state where its destructor will have no effects on the
+   * request local heap, in cases where sweepable objects can't
+   * organize things to avoid running Variant destructors.
+   */
+  void releaseForSweep() { m_type = KindOfNull; }
+
+  //////////////////////////////////////////////////////////////////////
 
  public:
   /**
    * Break bindings and set to null.
    */
   void unset() {
-    RefData* d = m_data.pref;
-    DataType t = m_type;
+    auto const d = m_data.num;
+    auto const t = m_type;
     m_type = KindOfUninit;
-    if (IS_REFCOUNTED_TYPE(t)) destructData(d, t);
+    tvRefcountedDecRefHelper(t, d);
   }
 
   /**
@@ -302,12 +275,7 @@ class Variant : private TypedValue {
    * In order to correctly copy circular arrays, even if v is the only
    * strong reference to arr, we still keep the reference.
    */
-  Variant &setWithRef(const Variant& v);
-
-  /**
-   * Fast accessors that can be used by generated code when type inference can
-   * prove that m_type will have a certain value at a given point in time
-   */
+  Variant& setWithRef(const Variant& v);
 
 ///////////////////////////////////////////////////////////////////////////////
 // int64
@@ -445,16 +413,6 @@ class Variant : private TypedValue {
         &m_data.pobj : &m_data.pref->tv()->m_data.pobj);
   }
 
-  ObjectData *objectForCall() const {
-    if (m_type == KindOfObject) return m_data.pobj;
-    if (m_type == KindOfRef) {
-      Variant *t = m_data.pref->var();
-      if (t->m_type == KindOfObject) return t->m_data.pobj;
-    }
-    throw_call_non_object();
-    return nullptr;
-  }
-
   /**
    * Type testing functions
    */
@@ -514,8 +472,6 @@ class Variant : private TypedValue {
     return (m_type & kNotConstantValueTypeMask) == 0;
   }
   bool isResource() const;
-  bool instanceof(const String& s) const;
-  bool instanceof(Class* cls) const;
 
   /**
    * Whether or not there are at least two variables that are strongly bound.
@@ -549,9 +505,6 @@ class Variant : private TypedValue {
   Variant &assignVal(const Variant& v) { return assign(v); }
   Variant &assignRef(const Variant& v);
 
-  Variant &operator=(const Variant& v) {
-    return assign(v);
-  }
   Variant &operator=(RefResult v) { return assignRef(variant(v)); }
   Variant &operator=(CVarStrongBind v) { return assignRef(variant(v)); }
   Variant &operator=(CVarWithRefBind v) { return setWithRef(variant(v)); }
@@ -609,14 +562,6 @@ class Variant : private TypedValue {
   Variant  operator ++ (int) = delete;
   Variant &operator -- () = delete;
   Variant  operator -- (int) = delete;
-
-  /**
-   * Iterator functions. See array-iterator.h for end() and next().
-   */
-  ArrayIter begin(const String& context = null_string) const;
-  // used by generated code
-  MutableArrayIter begin(Variant *key, Variant &val,
-                         const String& context = null_string);
 
   /*
    * Variant used to implicitly convert to all these types.  (It still
@@ -716,153 +661,8 @@ class Variant : private TypedValue {
   void unserialize(VariableUnserializer *unserializer,
                    Uns::Mode mode = Uns::Mode::Value);
 
-  /**
-   * Get the wrapped APCHandle, if any.
-   */
-  APCHandle *getAPCHandle() const;
-
-  /*
-   * Print information about a variant to stdout.  For debugging
-   * purposes.
-   */
-  void dump() const;
-
-  /**
-   * Offset functions
-   */
-  Variant rvalAtHelper(int64_t offset, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(int offset, ACCESSPARAMS_DECL) const {
-    return rvalAt((int64_t)offset, flags);
-  }
-  Variant rvalAt(int64_t offset, ACCESSPARAMS_DECL) const {
-    if (m_type == KindOfArray) {
-      return m_data.parr->get(offset, flags & AccessFlags::Error);
-    }
-    return rvalAtHelper(offset, flags);
-  }
-  Variant rvalAt(double offset, ACCESSPARAMS_DECL) const = delete;
-  Variant rvalAt(litstr offset, ACCESSPARAMS_DECL) const = delete;
-  Variant rvalAt(const String& offset, ACCESSPARAMS_DECL) const;
-  Variant rvalAt(const Variant& offset, ACCESSPARAMS_DECL) const;
-
-  // for when we know its an array or null
-  template <typename T>
-  const Variant& rvalAtRefHelper(T offset, ACCESSPARAMS_DECL) const;
-  const Variant& rvalAtRef(int offset, ACCESSPARAMS_DECL) const {
-    return rvalAtRefHelper((int64_t)offset, flags);
-  }
-  const Variant& rvalAtRef(double offset, ACCESSPARAMS_DECL) const = delete;
-  const Variant& rvalAtRef(int64_t offset, ACCESSPARAMS_DECL) const {
-    return rvalAtRefHelper(offset, flags);
-  }
-  const Variant& rvalAtRef(const String& offset, ACCESSPARAMS_DECL) const {
-    return rvalAtRefHelper<const String&>(offset, flags);
-  }
-  const Variant& rvalAtRef(const Variant& offset, ACCESSPARAMS_DECL) const {
-    return rvalAtRefHelper<const Variant&>(offset, flags);
-  }
-  const Variant operator[](int     key) const { return rvalAt(key);}
-  const Variant operator[](int64_t   key) const { return rvalAt(key);}
-  const Variant operator[](double  key) const = delete;
-  const Variant operator[](const String& key) const { return rvalAt(key);}
-  const Variant operator[](const Array& key) const { return rvalAt(key);}
-  const Variant operator[](const Object& key) const { return rvalAt(key);}
-  const Variant operator[](const Variant& key) const { return rvalAt(key);}
-  const Variant operator[](const char*) const = delete;
-
-  template<typename T>
-  Variant &lval(const T &key) {
-    if (m_type == KindOfRef) {
-      return m_data.pref->var()->lval(key);
-    }
-
-    assert(m_type == KindOfArray);
-    Variant *ret = nullptr;
-    ArrayData *arr = m_data.parr;
-    ArrayData *escalated = arr->lval(key, ret, arr->hasMultipleRefs());
-    if (escalated != arr) set(escalated);
-    assert(ret);
-    return *ret;
-  }
-
-  Variant &lvalAt();
-
   static Variant &lvalInvalid();
   static Variant &lvalBlackHole();
-
-  Variant &lvalAt(int     key, ACCESSPARAMS_DECL);
-  Variant &lvalAt(int64_t   key, ACCESSPARAMS_DECL);
-  Variant &lvalAt(double  key, ACCESSPARAMS_DECL) = delete;
-  Variant &lvalAt(litstr  key, ACCESSPARAMS_DECL) = delete;
-  Variant &lvalAt(const String& key, ACCESSPARAMS_DECL);
-  Variant &lvalAt(const Variant& key, ACCESSPARAMS_DECL);
-
-  Variant &lvalRef(int     key, Variant& tmp, ACCESSPARAMS_DECL);
-  Variant &lvalRef(int64_t   key, Variant& tmp, ACCESSPARAMS_DECL);
-  Variant &lvalRef(double  key, Variant& tmp, ACCESSPARAMS_DECL) = delete;
-  Variant &lvalRef(litstr  key, Variant& tmp, ACCESSPARAMS_DECL) = delete;
-  Variant &lvalRef(const String& key, Variant& tmp, ACCESSPARAMS_DECL);
-  Variant &lvalRef(const Variant& key, Variant& tmp, ACCESSPARAMS_DECL);
-
-  template <typename T>
-  ALWAYS_INLINE static const Variant& SetImpl(Variant *self, T key, const Variant& v,
-                                       bool isKey);
-
-  template <typename T>
-  ALWAYS_INLINE static const Variant& SetRefImpl(Variant *self, T key, const Variant& v,
-                                          bool isKey);
-
-  const Variant& set(int     key, const Variant& v) { return set((int64_t)key, v); }
-  const Variant& set(int64_t   key, const Variant& v);
-  const Variant& set(double  key, const Variant& v) = delete;
-  const Variant& set(litstr  key, const Variant& v, bool isString = false) = delete;
-  const Variant& set(const String& key, const Variant& v, bool isString = false);
-  const Variant& set(const Variant& key, const Variant& v);
-
-  const Variant& append(const Variant& v);
-
-  const Variant& setRef(int     key, const Variant& v) { return setRef((int64_t)key, v); }
-  const Variant& setRef(int64_t   key, const Variant& v);
-  const Variant& setRef(double  key, const Variant& v) = delete;
-  const Variant& setRef(litstr  key, const Variant& v, bool isString = false) = delete;
-  const Variant& setRef(const String& key, const Variant& v, bool isString = false);
-  const Variant& setRef(const Variant& key, const Variant& v);
-
-  const Variant& set(int     key, RefResult v) { return setRef(key, variant(v)); }
-  const Variant& set(int64_t   key, RefResult v) { return setRef(key, variant(v)); }
-  const Variant& set(double  key, RefResult v) = delete;
-  const Variant& set(litstr  key, RefResult v, bool isString = false) = delete;
-  const Variant& set(const String& key, RefResult v, bool isString = false) {
-    return setRef(key, variant(v), isString);
-  }
-  const Variant& set(const Variant& key, RefResult v) { return setRef(key, variant(v)); }
-
-  const Variant& appendRef(const Variant& v);
-  const Variant& append(RefResult v) { return appendRef(variant(v)); }
-
-  void remove(int     key) { removeImpl((int64_t)key);}
-  void remove(int64_t   key) { removeImpl(key);}
-  void remove(double  key) = delete;
-  void remove(litstr  key, bool isString = false) = delete;
-  void remove(const String& key, bool isString = false) {
-    removeImpl(key, isString);
-  }
-  void remove(const Variant& key);
-
-  /**
-   * More array operations.
-   */
-  Variant pop();
-  Variant dequeue();
-  void prepend(const Variant& v);
-
-  /**
-   * For C++ library users to write "var.cast<c_MyClass>()->mf_func()".
-   */
-  template<typename T>
-  T *cast() const {
-    return toObject().getTyped<T>();
-  }
 
   /**
    * Low level access that should be restricted to internal use.
@@ -926,11 +726,8 @@ class Variant : private TypedValue {
   }
 
   ObjectData *getArrayAccess() const;
-  void callOffsetUnset(const Variant& key);
   int64_t getNumData() const { return m_data.num; }
   void setEvalScalar();
-
-  void setToDefaultObject();
 
   /*
    * Access this Variant as a TypedValue. Does not unbox refs, etc.
@@ -960,11 +757,6 @@ class Variant : private TypedValue {
       (m_type == KindOfBoolean && !m_data.num) ||
       (IS_STRING_TYPE(m_type) && m_data.pstr->empty());
   }
-
-  void removeImpl(double key) = delete;
-  void removeImpl(int64_t key);
-  void removeImpl(const Variant& key, bool isString = false);
-  void removeImpl(const String& key, bool isString = false);
 
   const Variant& set(bool    v);
   const Variant& set(int     v);
@@ -999,9 +791,6 @@ class Variant : private TypedValue {
     return set(v.get());
   }
 
-  // only called from constructor
-  void init(ObjectData *v);
-
   static ALWAYS_INLINE
   void AssignValHelper(Variant *self, const Variant *other) {
     assert(tvIsPlausible(*self) && tvIsPlausible(*other));
@@ -1027,9 +816,6 @@ class Variant : private TypedValue {
     tvRefcountedDecRefHelper(stype, sdata.num);
   }
 
-#ifdef INLINE_VARIANT_HELPER
-public:
-#endif
   static ALWAYS_INLINE void PromoteToRef(const Variant& v) {
     assert(&v != &null_variant);
     if (v.m_type != KindOfRef) {
@@ -1049,11 +835,11 @@ public:
     PromoteToRef(v);
     RefData* r = v.m_data.pref;
     r->incRefCount(); // in case destruct() triggers deletion of v
-    RefData* d = m_data.pref;
-    DataType t = m_type;
+    auto const d = m_data.num;
+    auto const t = m_type;
     m_type = KindOfRef;
     m_data.pref = r;
-    if (IS_REFCOUNTED_TYPE(t)) destructData(d, t);
+    tvRefcountedDecRefHelper(t, d);
   }
 
 public:
@@ -1088,7 +874,7 @@ public:
       m_data.pstr->incRefCount();
     }
     decRefRef(v.m_data.pref);
-    v.reset();
+    v.m_type = KindOfNull;
   }
 
   ALWAYS_INLINE
@@ -1097,19 +883,20 @@ public:
 
     assert(this != &v);
 
-    const Variant& rhs = v.m_type == KindOfRef && !v.m_data.pref->isReferenced()
-      ? *v.m_data.pref->var() : v;
+    const Variant& rhs =
+      v.m_type == KindOfRef && !v.m_data.pref->isReferenced()
+        ? *v.m_data.pref->var() : v;
     if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
       assert(rhs.m_data.pstr);
       rhs.m_data.pstr->incRefCount();
     }
 
-    RefData* d = m_data.pref;
-    DataType t = m_type;
+    auto const d = m_data.num;
+    auto const t = m_type;
     m_type = rhs.m_type;
     if (m_type == KindOfUninit) m_type = KindOfNull; // drop uninit
     m_data.num = rhs.m_data.num;
-    if (destroy) destructData(d, t);
+    if (destroy) tvRefcountedDecRefHelper(t, d);
   }
 
   ALWAYS_INLINE
@@ -1117,46 +904,7 @@ public:
     setWithRefHelper(v, false);
   }
 
-#ifdef INLINE_VARIANT_HELPER
 private:
-#endif
-
-  template<typename T>
-  static ALWAYS_INLINE Variant &LvalAtImpl0(Variant *self, T key, Variant *tmp,
-                                            bool blackHole, ACCESSPARAMS_DECL);
-
-  template<typename T>
-  ALWAYS_INLINE Variant &lvalAtImpl(T key, ACCESSPARAMS_DECL);
-
- private:
-  /**
-   * Checks whether the LHS array needs to be copied for a *one-level*
-   * array set, e.g., "$a[] = $v" or "$a['x'] = $v".
-   *
-   * Note:
-   *  (1) The semantics is equivalent to having a temporary variable
-   * holding to RHS value, i.e., "$tmp = $v; $a[] = $tmp". This is NOT
-   * exactly the same as PHP 5.3, where "$a = &$b; $a = array(); $a = $b;"
-   * creates a recursive array, although the final assignment is not
-   * strong-binding.
-   *  (2) It does NOT work with multi-level array set, i.e., "$a[][] = $v".
-   * The compiler needs to generate a real temporary.
-   */
-  bool needCopyForSet(const Variant& v) {
-    assert(m_type == KindOfArray);
-    if (m_data.parr->hasMultipleRefs()) return true;
-    if (v.m_type == KindOfArray) return m_data.parr == v.m_data.parr;
-    if (v.m_type == KindOfRef) {
-      return m_data.parr == v.m_data.pref->var()->m_data.parr;
-    }
-    return false;
-  }
-
-  bool needCopyForSetRef(const Variant& v) {
-    assert(m_type == KindOfArray);
-    return m_data.parr->hasMultipleRefs();
-  }
-
   bool   toBooleanHelper() const;
   int64_t  toInt64Helper(int base = 10) const;
   double toDoubleHelper() const;
@@ -1223,12 +971,6 @@ public:
   Resource toResource() const { return m_var.toResource(); }
   ObjectData *getObjectData() const { return m_var.getObjectData(); }
 
-  const Variant& append(const Variant& v) const { return m_var.append(v); }
-
-  Variant pop() const { return m_var.pop(); }
-  Variant dequeue() const { return m_var.dequeue(); }
-  void prepend(const Variant& v) const { m_var.prepend(v); }
-
   bool isArray() const { return m_var.isArray(); }
   ArrNR toArrNR() const { return m_var.toArrNR(); }
 
@@ -1287,7 +1029,7 @@ public:
 
   VarNR(const VarNR &v) : TypedValueAux(v) {}
 
-  explicit VarNR() { asVariant()->setUninitNull(); }
+  explicit VarNR() { asVariant()->asTypedValue()->m_type = KindOfUninit; }
 
   ~VarNR() { if (debug) checkRefCount(); }
 
@@ -1390,6 +1132,13 @@ inline Variant &concat_assign(Variant &v1, const String& s2) {
 inline RefData::~RefData() {
   assert(m_magic == Magic::kMagic);
   tvAsVariant(&m_tv).~Variant();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+inline Array& forceToArray(Variant& var) {
+  if (!var.isArray()) var = Variant(Array::Create());
+  return var.toArrRef();
 }
 
 //////////////////////////////////////////////////////////////////////

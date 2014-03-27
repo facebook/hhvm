@@ -34,6 +34,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/index.h"
 
 namespace HPHP { namespace HHBBC {
@@ -366,20 +367,22 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define PUSH_INS_1(x)          push(1);
 #define PUSH_INS_2(x)          push(1);
 
-#define O(opcode, imms, inputs, outputs, flags)               \
-    auto emit_##opcode = [&] (const bc::opcode& data) {       \
-      if (Op::opcode == Op::DefCls)    defcls();              \
-      if (Op::opcode == Op::NopDefCls) nopdefcls();           \
-      if (isRet(Op::opcode))           ret_assert();          \
-      ue.emitOp(Op::opcode);                                  \
-      POP_##inputs                                            \
-      PUSH_##outputs                                          \
-      IMM_##imms                                              \
-      if (isFPush(Op::opcode))     fpush();                   \
-      if (isFCallStar(Op::opcode)) fcall();                   \
-      if (flags & TF) currentStackDepth = 0;                  \
-      if (Op::opcode == Op::FCall) ret.containsCalls = true;  \
-      emit_srcloc();                                          \
+#define O(opcode, imms, inputs, outputs, flags)                   \
+    auto emit_##opcode = [&] (const bc::opcode& data) {           \
+      if (Op::opcode == Op::DefCls)    defcls();                  \
+      if (Op::opcode == Op::NopDefCls) nopdefcls();               \
+      if (isRet(Op::opcode))           ret_assert();              \
+      ue.emitOp(Op::opcode);                                      \
+      POP_##inputs                                                \
+      PUSH_##outputs                                              \
+      IMM_##imms                                                  \
+      if (isFPush(Op::opcode))     fpush();                       \
+      if (isFCallStar(Op::opcode)) fcall();                       \
+      if (flags & TF) currentStackDepth = 0;                      \
+      if (Op::opcode == Op::FCall || Op::opcode == Op::FCallD) {  \
+        ret.containsCalls = true;                                 \
+      }                                                           \
+      emit_srcloc();                                              \
     };
 
     OPCODES
@@ -743,13 +746,9 @@ void emit_finish_func(const php::Func& func,
   fe.setReturnUserType(func.returnUserType);
   fe.setOriginalFilename(func.originalFilename);
   fe.setIsClosureBody(func.isClosureBody);
-  fe.setIsGenerator(func.isGeneratorBody);
-  fe.setIsGeneratorFromClosure(func.isGeneratorFromClosure);
-  fe.setIsPairGenerator(func.isPairGenerator);
   fe.setIsAsync(func.isAsync);
-  if (func.innerGeneratorFunc) {
-    fe.setGeneratorBodyName(func.innerGeneratorFunc->name);
-  }
+  fe.setIsGenerator(func.isGenerator);
+  fe.setIsPairGenerator(func.isPairGenerator);
   if (func.nativeInfo) {
     fe.setReturnType(func.nativeInfo->returnType);
   }
@@ -846,6 +845,8 @@ void emit_class(EmitUnitState& state,
   auto const privateStatics = state.index.lookup_private_statics(&cls);
   for (auto& prop : cls.properties) {
     auto const repoTy = [&] (const PropState& ps) {
+      // TODO(#3599292): we don't currently infer closure use var types.
+      if (is_closure(cls)) return RepoAuthType{};
       auto it = ps.find(prop.name);
       return it == end(ps) ? RepoAuthType{} : make_repo_type(ue, it->second);
     };
@@ -877,7 +878,7 @@ void emit_class(EmitUnitState& state,
 std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
                                        const php::Unit& unit) {
   auto const is_systemlib = is_systemlib_part(unit);
-  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib};
+  Trace::Bump bumper{Trace::hhbbc_emit, kSystemLibBump, is_systemlib};
 
   auto ue = folly::make_unique<UnitEmitter>(unit.md5);
   FTRACE(1, "  unit {}\n", unit.filename->data());

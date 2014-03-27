@@ -1,3 +1,4 @@
 string(%d) "%s"
-HipHop Warning: %s
+
+Warning: %s
 NULL

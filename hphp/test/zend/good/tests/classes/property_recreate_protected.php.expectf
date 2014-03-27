@@ -11,4 +11,5 @@ object(D)#%d (1) {
 }
 
 Unset a protected property, and attempt to recreate it outside of scope (expected failure):
-HipHop Fatal error: %s
+
+Fatal error: %s

@@ -1,11 +1,13 @@
 *** Testing shuffle() : error conditions ***
 
 -- Testing shuffle() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing shuffle() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- original input array --

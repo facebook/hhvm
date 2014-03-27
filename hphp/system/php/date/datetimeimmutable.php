@@ -97,7 +97,7 @@ class DateTimeImmutable implements DateTimeInterface {
   }
 
   public static function getLastErrors(): array {
-    return $this->data->getLastErrors();
+    return DateTime::getLastErrors();
   }
 
   public function __clone() {

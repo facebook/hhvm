@@ -1,3 +1,4 @@
 Object of class stdClass could not be converted to string
-HipHop Notice: %s
+
+Notice: %s
 string(6) "Object"

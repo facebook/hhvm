@@ -1,2 +1,3 @@
-HipHop Fatal error: Class undefined: Foo in %s on line 11
+
+Fatal error: Class undefined: Foo in %s on line 11
 Error

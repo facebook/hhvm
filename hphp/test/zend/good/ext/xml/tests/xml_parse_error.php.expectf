@@ -1,10 +1,12 @@
 *** Testing xml_parse() : error conditions ***
 
 -- Testing xml_parse() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing xml_parse() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

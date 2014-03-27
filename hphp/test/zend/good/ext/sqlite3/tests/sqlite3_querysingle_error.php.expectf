@@ -1,7 +1,9 @@
 Testing SQLite3 querySingle without parameters
-HipHop Warning: %s
+
+Warning: %s
 Testing SQLite3 querySingle with one array parameter
-HipHop Warning: %s
+
+Warning: %s
 Testing SQLite3 qeurySingle with empty string parameter
 bool(false)
 Done

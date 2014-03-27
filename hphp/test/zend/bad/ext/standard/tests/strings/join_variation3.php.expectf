@@ -4,8 +4,10 @@ string(6) "1], [2"
 -- Iteration 2 --
 string(10) "1.1], [2.2"
 -- Iteration 3 --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 string(14) "Array], [Array"
 -- Iteration 4 --
 string(5) "], [1"

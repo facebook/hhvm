@@ -1,0 +1,4 @@
+File "class_meth7.php", line 13, characters 27-28:
+This is a private method
+File "class_meth7.php", line 19, characters 8-33:
+you cannot use it with class_meth (whether you are in the same class or not).

@@ -1,5 +1,7 @@
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 <?xml version="1.0"?>
 <root xmlns:s="urn::test" xmlns:t="urn::test-t" xmlns:v="urn::test-v" s:att1="b" att1="a" v:att11="xxx" att2="no-ns">
    <child1>test</child1>

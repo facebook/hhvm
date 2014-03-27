@@ -1,5 +1,6 @@
 -- Too many arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Bad Arg types --
@@ -22,12 +23,14 @@ float(%s)
     int(0)
   }
 }
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 --> bad arg: object(stdClass)#%d (0) {
 }
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 --> bad arg: int(1)

@@ -1,14 +1,17 @@
 *** Testing is_a() : error conditions ***
 
 -- Testing is_a() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing is_a() function with non-boolean in last position --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing is_a() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

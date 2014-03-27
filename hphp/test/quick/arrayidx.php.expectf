@@ -9,4 +9,5 @@ string(5) "world"
 int(11)
 string(5) "empty"
 int(13)
-HipHop Fatal error: hphp_array_idx: search must be an array in %s on line 22
+
+Fatal error: hphp_array_idx: search must be an array in %s on line 22

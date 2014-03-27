@@ -1,3 +1,4 @@
-HipHop Notice: Undefined variable: this in %s/test/slow/class_constant/1612.php on line 9
+
+Notice: Undefined variable: this in %s/test/slow/class_constant/1612.php on line 9
 string(6) "X::foo"
 NULL

@@ -23,6 +23,8 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 
 namespace HPHP { namespace JIT { namespace ARM {
 
@@ -41,7 +43,7 @@ struct CodeGenerator {
     {
     }
 
-  void cgBlock(Block* block, std::vector<TransBCMapping>* bcMap);
+  Address cgInst(IRInstruction* inst);
 
  private:
   template<class Then>
@@ -68,6 +70,11 @@ struct CodeGenerator {
 
   void emitJumpToBlock(CodeBlock& cb, Block* target, ConditionCode cc);
 
+  void emitCompareInt(IRInstruction* inst);
+  void emitCompareIntAndSet(IRInstruction* inst,
+                            vixl::Condition cond);
+
+
   CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
   CallDest callDest(const IRInstruction*) const;
   CallDest callDestTV(const IRInstruction*) const;
@@ -86,9 +93,9 @@ struct CodeGenerator {
                     SyncOptions sync,
                     ArgGroup& args);
 
-  void emitDecRefDynamicType(vixl::Register baseReg, ptrdiff_t offset);
+  void emitDecRefDynamicType(vixl::Register baseReg, int offset);
   void emitDecRefStaticType(Type type, vixl::Register reg);
-  void emitDecRefMem(Type type, vixl::Register baseReg, ptrdiff_t offset);
+  void emitDecRefMem(Type type, vixl::Register baseReg, int offset);
 
   template<class Loc, class JmpFn>
   void emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
@@ -103,8 +110,7 @@ struct CodeGenerator {
                  ptrdiff_t offset,
                  SSATmp* src, PhysLoc srcLoc,
                  bool genStoreType = true);
-
-  Address cgInst(IRInstruction* inst);
+  void emitLdRaw(IRInstruction* inst, size_t extraOff);
 
   const PhysLoc srcLoc(unsigned i) const {
     return m_state.regs[m_curInst].src(i);
@@ -134,6 +140,7 @@ struct CodeGenerator {
 };
 
 void patchJumps(CodeBlock& cb, CodegenState& state, Block* block);
+void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state);
 
 }}}
 

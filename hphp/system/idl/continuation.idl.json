@@ -28,34 +28,6 @@
                     ]
                 },
                 {
-                    "name": "update",
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                        {
-                            "name": "label",
-                            "type": "Int64"
-                        },
-                        {
-                            "name": "value",
-                            "type": "Variant"
-                        }
-                    ],
-                    "flags": [
-                    ]
-                },
-                {
-                    "name": "getLabel",
-                    "return": {
-                        "type": "Int64"
-                    },
-                    "flags": [
-                    ],
-                    "args": [
-                    ]
-                },
-                {
                     "name": "current",
                     "return": {
                         "type": "Variant"

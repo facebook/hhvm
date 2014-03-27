@@ -4,4 +4,5 @@ Deprecated: Function mcrypt_cfb() is deprecated in %s on line %d
 PHP Testfest 2008
 
 Deprecated: Function mcrypt_cfb() is deprecated in %s on line %d
-HipHop Warning: %s
+
+Warning: %s

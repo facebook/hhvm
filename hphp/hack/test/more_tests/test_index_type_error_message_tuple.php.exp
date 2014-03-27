@@ -1,0 +1,2 @@
+File "test_index_type_error_message_tuple.php", line 14, characters 6-8:
+Tuple elements can only be accessed with an integer literal

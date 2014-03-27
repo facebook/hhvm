@@ -47,7 +47,8 @@ E Object
 
     [p] => 1
 )
-HipHop Warning: Creating default object from empty value in %s on line 59
+
+Warning: Creating default object from empty value in %s on line 59
 stdClass Object
 (
     [a] => <a>
@@ -56,7 +57,9 @@ stdClass Object
     [q] => 1
     [r] => hello
 )
-HipHop Warning: Attempt to assign property of non-object in %s on line 68
-HipHop Warning: Attempt to assign property of non-object in %s on line 69
+
+Warning: Attempt to assign property of non-object in %s on line 68
+
+Warning: Attempt to assign property of non-object in %s on line 69
 42
 Test end

@@ -10,15 +10,19 @@ string(14) "D1::__destruct"
 string(14) "D2::__destruct"
 string(14) "D2::__destruct"
 string(14) "D4::__destruct"
-HipHop Warning: __construct() expects exactly 1 parameter, 0 given in %s/test/slow/constructor_destructor/1570.php on line 31
-HipHop Notice: Undefined variable: a in %s/test/slow/constructor_destructor/1570.php on line 31
+
+Warning: __construct() expects exactly 1 parameter, 0 given in %s/test/slow/constructor_destructor/1570.php on line 31
+
+Notice: Undefined variable: a in %s/test/slow/constructor_destructor/1570.php on line 31
 string(14) "D4::__destruct"
 string(14) "D1::__destruct"
 string(14) "D1::__destruct"
 string(14) "D2::__destruct"
 string(14) "D2::__destruct"
 string(14) "D4::__destruct"
-HipHop Warning: __construct() expects exactly 1 parameter, 0 given in %s/test/slow/constructor_destructor/1570.php on line 31
-HipHop Notice: Undefined variable: a in %s/test/slow/constructor_destructor/1570.php on line 31
+
+Warning: __construct() expects exactly 1 parameter, 0 given in %s/test/slow/constructor_destructor/1570.php on line 31
+
+Notice: Undefined variable: a in %s/test/slow/constructor_destructor/1570.php on line 31
 string(14) "D4::__destruct"
 string(14) "D1::__destruct"

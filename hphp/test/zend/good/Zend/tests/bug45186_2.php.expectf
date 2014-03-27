@@ -11,5 +11,7 @@ string(1) "y"
 __call:
 string(1) "y"
 ok
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s

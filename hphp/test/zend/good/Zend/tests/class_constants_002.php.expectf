@@ -1,4 +1,5 @@
 int(1)
 int(5)
 int(10)
-HipHop Fatal error: %s
+
+Fatal error: %s

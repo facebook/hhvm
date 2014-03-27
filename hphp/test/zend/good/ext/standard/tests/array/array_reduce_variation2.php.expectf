@@ -1,8 +1,11 @@
 *** Testing array_reduce() : variation - invalid parameters ***
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

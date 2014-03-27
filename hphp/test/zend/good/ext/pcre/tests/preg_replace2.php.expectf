@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(1) "c"
 array(3) {

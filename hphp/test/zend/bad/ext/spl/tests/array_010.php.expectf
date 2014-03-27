@@ -27,9 +27,11 @@ string(3) "1st"
 int(1)
 string(3) "3rd"
 int(4)
-HipHop Notice: %s
+
+Notice: %s
 NULL
-HipHop Notice: %s
+
+Notice: %s
 NULL
 ===offsetSet===
 WRITE 1
@@ -59,8 +61,10 @@ array(6) {
   [6]=>
   string(9) "changed 6"
 }
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(4) {
   [0]=>
   string(3) "1st"

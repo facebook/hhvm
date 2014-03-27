@@ -1,6 +1,7 @@
 bool(true)
 bool(true)
-HipHop Notice: iconv: Detected an illegal character in input string in %s/test/slow/ext_iconv/ext_iconv.php on line 27
+
+Notice: iconv: Detected an illegal character in input string in %s/test/slow/ext_iconv/ext_iconv.php on line 27
 bool(true)
 bool(true)
 bool(true)

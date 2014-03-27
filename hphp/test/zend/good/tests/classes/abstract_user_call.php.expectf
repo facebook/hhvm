@@ -1,2 +1,3 @@
 test::func()
-HipHop Fatal error: %s
+
+Fatal error: %s

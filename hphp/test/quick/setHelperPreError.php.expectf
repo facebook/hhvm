@@ -1,13 +1,16 @@
 Test begin
-HipHop Warning: Cannot use a scalar value as an array in %s on line 8
+
+Warning: Cannot use a scalar value as an array in %s on line 8
 array(1) {
   [0]=>
   int(0)
 }
 int(1)
-HipHop Warning: Cannot use a scalar value as an array in %s on line 17
+
+Warning: Cannot use a scalar value as an array in %s on line 17
 NULL
 int(1)
-HipHop Warning: Cannot use a scalar value as an array in %s on line 22
+
+Warning: Cannot use a scalar value as an array in %s on line 22
 NULL
 Test end

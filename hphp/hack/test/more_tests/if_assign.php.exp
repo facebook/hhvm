@@ -1,0 +1,6 @@
+File "if_assign.php", line 15, characters 10-11:
+Invalid return type
+File "if_assign.php", line 12, characters 19-21:
+This is an int
+File "if_assign.php", line 13, characters 11-12:
+It is incompatible with a string

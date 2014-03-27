@@ -267,12 +267,12 @@ inline ssize_t ArrayData::iter_rewind(ssize_t pos) const {
   return g_array_funcs.iterRewind[m_kind](this, pos);
 }
 
-inline bool ArrayData::validFullPos(const FullPos& fp) const {
-  return g_array_funcs.validFullPos[m_kind](this, fp);
+inline bool ArrayData::validMArrayIter(const MArrayIter& fp) const {
+  return g_array_funcs.validMArrayIter[m_kind](this, fp);
 }
 
-inline bool ArrayData::advanceFullPos(FullPos& fp) {
-  return g_array_funcs.advanceFullPos[m_kind](this, fp);
+inline bool ArrayData::advanceMArrayIter(MArrayIter& fp) {
+  return g_array_funcs.advanceMArrayIter[m_kind](this, fp);
 }
 
 inline ArrayData* ArrayData::escalateForSort() {

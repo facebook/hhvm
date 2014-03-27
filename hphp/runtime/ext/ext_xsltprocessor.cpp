@@ -134,22 +134,22 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
             if (node->type == XML_ELEMENT_NODE) {
               c_DOMElement *elemobj = NEWOBJ(c_DOMElement)();
               elemobj->m_node = xmlCopyNode(node, /*extended*/ 1);
-              arg.append(elemobj);
+              arg.toArrRef().append(elemobj);
             } else if (node->type == XML_ATTRIBUTE_NODE) {
               c_DOMAttr *attrobj = NEWOBJ(c_DOMAttr)();
               attrobj->m_node = (xmlNodePtr)xmlCopyProp(nullptr,
                                                         (xmlAttrPtr)node);
-              arg.append(attrobj);
+              arg.toArrRef().append(attrobj);
             } else if (node->type == XML_TEXT_NODE) {
               c_DOMText *textobj = NEWOBJ(c_DOMText)();
               textobj->m_node = (xmlNodePtr)xmlNewText(xmlNodeGetContent(node));
-              arg.append(textobj);
+              arg.toArrRef().append(textobj);
             } else {
               raise_warning("Unhandled node type '%d'", node->type);
               // Use a generic DOMNode as fallback for now.
               c_DOMNode *nodeobj = NEWOBJ(c_DOMNode)();
               nodeobj->m_node = xmlCopyNode(node, /*extended*/ 1);
-              arg.append(nodeobj);
+              arg.toArrRef().append(nodeobj);
             }
           }
         }
@@ -184,8 +184,9 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
     valuePush(ctxt, xmlXPathNewString((xmlChar*)""));
   } else {
     Variant retval = vm_call_user_func(handler, args);
-    if (retval.instanceof(c_DOMNode::classof())) {
-      xmlNode *nodep = retval.toObject().getTyped<c_DOMNode>()->m_node;
+    if (retval.isObject() &&
+        retval.getObjectData()->instanceof(c_DOMNode::classof())) {
+      xmlNode *nodep = retval.asCObjRef().getTyped<c_DOMNode>()->m_node;
       valuePush(ctxt, xmlXPathNewNodeSet(nodep));
     } else if (retval.is(KindOfBoolean)) {
       valuePush(ctxt, xmlXPathNewBoolean(retval.toBoolean()));

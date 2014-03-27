@@ -3,7 +3,8 @@ string(6) "fooBar"
 object::offsetGet(2)
 int(1)
 object::offsetGet(2)
-HipHop Notice: %s
+
+Notice: %s
 object::offsetGet(2)
 int(1)
 ===DONE===

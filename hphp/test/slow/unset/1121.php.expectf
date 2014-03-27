@@ -1,4 +1,5 @@
-HipHop Warning: Invalid operand type was used: Invalid type used as key in %s/test/slow/unset/1121.php on line 4
+
+Warning: Invalid operand type was used: Invalid type used as key in %s/test/slow/unset/1121.php on line 4
 array(1) {
   [0]=>
   string(3) "foo"

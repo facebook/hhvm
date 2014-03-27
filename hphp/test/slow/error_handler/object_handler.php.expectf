@@ -1,0 +1,3 @@
+NULL
+
+Fatal error: Try to cause an error in %s/hphp/test/slow/error_handler/object_handler.php on line 18

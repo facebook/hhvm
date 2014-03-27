@@ -1,110 +1,137 @@
 *** Testing fpassthru() : usage variations ***
 
 Arg value 0 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 1 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 12345 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value -2345 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 10.5 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value -10.5 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 101234567000 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 1.07654321E-9 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 0.5 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 1 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 1 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value string 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value string 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value testClass 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

@@ -1,0 +1,8 @@
+File "gen1.php", line 18, characters 19-19:
+This is an object of type A
+File "gen1.php", line 22, characters 20-20:
+It is incompatible with an object of type B
+File "gen1.php", line 22, characters 23-23:
+Considering the constraint on the type 'T'
+File "gen1.php", line 18, characters 29-29:
+Considering the constraint on the type 'T'

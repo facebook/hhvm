@@ -1,13 +1,19 @@
-HipHop Warning: Constants may only evaluate to scalar values in %s/test/slow/constant/1602.php on line 3
+
+Warning: Constants may only evaluate to scalar values in %s/test/slow/constant/1602.php on line 3
 bool(false)
-HipHop Notice: Use of undefined constant KONST - assumed 'KONST' in %s/test/slow/constant/1602.php on line 4
+
+Notice: Use of undefined constant KONST - assumed 'KONST' in %s/test/slow/constant/1602.php on line 4
 string(5) "KONST"
 bool(true)
-HipHop Notice: Constant FLUB already defined in %s/test/slow/constant/1602.php on line 6
+
+Notice: Constant FLUB already defined in %s/test/slow/constant/1602.php on line 6
 bool(false)
 int(1230)
-HipHop Warning: Constants may only evaluate to scalar values in %s/test/slow/constant/1602.php on line 8
+
+Warning: Constants may only evaluate to scalar values in %s/test/slow/constant/1602.php on line 8
 bool(false)
-HipHop Notice: Use of undefined constant BLAH - assumed 'BLAH' in %s/test/slow/constant/1602.php on line 9
+
+Notice: Use of undefined constant BLAH - assumed 'BLAH' in %s/test/slow/constant/1602.php on line 9
 string(4) "BLAH"
-HipHop Warning: Constants may only evaluate to scalar values in %s/test/slow/constant/1602.php on line 10
+
+Warning: Constants may only evaluate to scalar values in %s/test/slow/constant/1602.php on line 10

@@ -1,5 +1,6 @@
 Native...
-HipHop Warning: %s
+
+Warning: %s
 [003] Execute has failed, 'HY093' array (
   0 => 'HY093',
   1 => NULL,
@@ -29,7 +30,8 @@ array(1) {
   }
 }
 Native...
-HipHop Warning: %s
+
+Warning: %s
 [008] Execute has failed, 'HY093' array (
   0 => 'HY093',
   1 => NULL,

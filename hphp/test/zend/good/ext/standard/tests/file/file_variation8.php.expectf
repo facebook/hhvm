@@ -25,11 +25,13 @@ array(1) {
 }
 
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 7 --
@@ -57,7 +59,8 @@ array(1) {
 }
 
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 *** Done ***

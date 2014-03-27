@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -125,6 +126,8 @@ void c_WaitableWaitHandle::setException(ObjectData* exception) {
 
 // throws on context depth level overflows and cross-context cycles
 void c_WaitableWaitHandle::join() {
+  JIT::EagerVMRegAnchor _;
+
   AsioSession* session = AsioSession::Get();
 
   assert(!isFinished());

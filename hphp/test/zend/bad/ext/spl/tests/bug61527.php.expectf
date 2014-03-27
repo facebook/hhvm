@@ -1,9 +1,12 @@
 NULL
 NULL
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 NULL
-HipHop Notice: %s
+
+Notice: %s
 NULL
 int(5)
 int(5)
@@ -13,8 +16,10 @@ NULL
 NULL
 NULL
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 NULL
 ==DONE==

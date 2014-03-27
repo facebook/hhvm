@@ -4,4 +4,5 @@ array(1) {
 }
 Done
 looking up NonExistantClass
-HipHop Fatal error: Class undefined: NonExistantClass in %s on line 32
+
+Fatal error: Class undefined: NonExistantClass in %s on line 32

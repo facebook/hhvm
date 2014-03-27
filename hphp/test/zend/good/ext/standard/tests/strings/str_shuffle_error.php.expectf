@@ -1,10 +1,12 @@
 *** Testing str_shuffle() : error conditions ***
 
 -- Testing str_shuffle() function with no arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing str_shuffle() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

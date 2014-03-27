@@ -1,0 +1,2 @@
+File "logical_binop1.php", line 13, characters 12-14:
+Do not use "xor", it has surprising precedence. Cast to bool and use "^" instead

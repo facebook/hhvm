@@ -14,16 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <iomanip>
-#include <list>
-#include <cstdio>
-#include <limits>
-#include <iostream>
-
 #include "hphp/runtime/vm/verifier/check.h"
+
+#include "hphp/runtime/base/hphp-array.h"
+
 #include "hphp/runtime/vm/verifier/cfg.h"
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/runtime/vm/verifier/pretty.h"
+
+#include <cstdio>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
 
 namespace HPHP {
 namespace Verifier {
@@ -692,6 +695,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::SetWithRefRM://ONE(MA),   R_MMANY, NOV
     return vectorSig(pc, RV);
   case Op::FCall:     // ONE(IVA),     FMANY,   ONE(RV)
+  case Op::FCallD:    // THREE(IVA,SA,SA), FMANY,   ONE(RV)
   case Op::FCallArray:// NA,           ONE(FV), ONE(RV)
     for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
@@ -750,7 +754,8 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
   FpiState& fpi = cur->fpi[cur->fpilen - 1];
   if (isFCallStar(*reinterpret_cast<const Op*>(pc))) {
     --cur->fpilen;
-    int call_params = *reinterpret_cast<const Op*>(pc) == Op::FCall
+    auto const op = static_cast<Op>(*pc);
+    int call_params = op == Op::FCall || op == Op::FCallD
       ? getImmIva(pc) : 1;
     int push_params = getImmIva(at(fpi.fpush));
     if (call_params != push_params) {

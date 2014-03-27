@@ -33,7 +33,7 @@
 
 #include "hphp/runtime/base/complex-types.h"
 #include "ext/standard/php_smart_str.h"
-#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 
 #define COMMON (Z_ISREF_PP(struc) ? "&" : "")
 /* }}} */

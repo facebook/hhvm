@@ -24,6 +24,7 @@
 namespace HPHP {
 
 struct StringData;
+struct TypedValue;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -98,6 +99,14 @@ private:
  * Otherwise returns folly::none.
  */
 folly::Optional<DataType> convertToDataType(RepoAuthType);
+
+/*
+ * Return whether a TypedValue is a legal match for a RepoAuthType.
+ * This can be used for validating that assumptions from static
+ * analysis are not violated (for example, by unserializing objects
+ * with changed private property types).
+ */
+bool tvMatchesRepoAuthType(TypedValue, RepoAuthType);
 
 //////////////////////////////////////////////////////////////////////
 

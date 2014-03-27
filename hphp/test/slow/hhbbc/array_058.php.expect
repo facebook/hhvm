@@ -1,0 +1,10 @@
+array(4) {
+  ["foo:a"]=>
+  int(2)
+  ["foo:b"]=>
+  int(3)
+  ["foo:c"]=>
+  int(4)
+  ["foo:d"]=>
+  int(5)
+}

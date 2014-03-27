@@ -23,4 +23,5 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: Unable to close database: 5, unable to close due to unfinali%ced statements%S in %s/test/slow/ext_sqlite3/ext_sqlite3.php on line %d
+
+Warning: Unable to close database: 5, unable to close due to unfinali%ced statements%S in %s/test/slow/ext_sqlite3/ext_sqlite3.php on line %d

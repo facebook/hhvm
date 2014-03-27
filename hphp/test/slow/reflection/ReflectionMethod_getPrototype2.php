@@ -22,7 +22,6 @@ class SessionScopedWaitHandleSubClass extends SessionScopedWaitHandle {
 function main() {
   $tests = array(
     array("WaitHandle", "getWaitHandle"),
-    array("Continuation", "getLabel"),
     array("Continuation", "next"),
     array("SessionScopedWaitHandle", "getContextIdx"),
     array("SessionScopedWaitHandleSubClass", "getWaitHandle"),

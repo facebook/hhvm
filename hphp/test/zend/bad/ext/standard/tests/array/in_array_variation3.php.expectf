@@ -4,9 +4,11 @@ bool(true)
 bool(true)
 
 *** Testing objects with in_array() ***
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(true)
 Done

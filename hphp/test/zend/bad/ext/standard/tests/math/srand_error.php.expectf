@@ -1,8 +1,11 @@
 *** Testing srand() : error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Notice: %s
+
+Notice: %s
 NULL
 ===Done===

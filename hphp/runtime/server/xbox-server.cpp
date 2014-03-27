@@ -205,7 +205,9 @@ static bool isLocalHost(const String& host) {
   return host.empty() || host == s_localhost || host == s_127_0_0_1;
 }
 
-bool XboxServer::SendMessage(const String& message, Variant &ret, int timeout_ms,
+bool XboxServer::SendMessage(const String& message,
+                             Array& ret,
+                             int timeout_ms,
                              const String& host /* = "localhost" */) {
   if (isLocalHost(host)) {
     XboxTransport *job;

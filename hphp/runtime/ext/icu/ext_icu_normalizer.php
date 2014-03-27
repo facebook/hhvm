@@ -10,7 +10,7 @@
  * defined a number of normalization forms reflecting the various needs of
  * applications:  Normalization Form D (NFD) - Canonical Decomposition
  * Normalization Form C (NFC) - Canonical Decomposition followed by Canonical
- * Composition   Normalization Form KD (NFKD) - Compatibility Decomposition 
+ * Composition   Normalization Form KD (NFKD) - Compatibility Decomposition
  * Normalization Form KC (NFKC) - Compatibility Decomposition followed by
  * Canonical Composition   The different forms are defined in terms of a set
  * of transformations on the text, transformations that are expressed by both
@@ -20,7 +20,7 @@ class Normalizer {
   /**
    * Checks if the provided string is already in the specified normalization
    *    form.
-   *  
+   *
    *
    * @param string $input - The input string to normalize
    * @param string $form - One of the normalization forms.
@@ -34,7 +34,7 @@ class Normalizer {
 
   /**
    * Normalizes the input provided and returns the normalized string
-   *  
+   *
    *
    * @param string $input - The input string to normalize
    * @param string $form - One of the normalization forms.
@@ -50,7 +50,7 @@ class Normalizer {
 /**
  * Checks if the provided string is already in the specified normalization
  *    form.
- *  
+ *
  *
  * @param string $input - The input string to normalize
  * @param string $form - One of the normalization forms.
@@ -65,7 +65,7 @@ function normalizer_is_normalized(string $input,
 
 /**
  * Normalizes the input provided and returns the normalized string
- *  
+ *
  *
  * @param string $input - The input string to normalize
  * @param string $form - One of the normalization forms.
@@ -74,6 +74,6 @@ function normalizer_is_normalized(string $input,
  */
 function normalizer_normalize(string $input,
                               int $form = Normalizer::FORM_C): mixed {
-  return Normalizer::normalize($intput, $form);
+  return Normalizer::normalize($input, $form);
 }
 

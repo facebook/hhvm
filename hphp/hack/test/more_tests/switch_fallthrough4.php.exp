@@ -1,0 +1,4 @@
+File "switch_fallthrough4.php", line 15, characters 11-11:
+This switch has a case that implicitly falls through and is not annotated with // FALLTHROUGH
+File "switch_fallthrough4.php", line 18, characters 8-8:
+This case implicitly falls through

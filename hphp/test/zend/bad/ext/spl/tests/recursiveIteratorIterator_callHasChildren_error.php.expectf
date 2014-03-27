@@ -1,5 +1,6 @@
 NULL
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 [internal function]: MyRecursiveIteratorIterator->callHasChildren()
 #1 %s: RecursiveIteratorIterator->next()

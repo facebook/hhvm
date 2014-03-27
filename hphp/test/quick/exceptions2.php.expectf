@@ -1,2 +1,3 @@
-HipHop Fatal error: Stack overflow in %s/test/quick/exceptions2.php on line %d
+
+Fatal error: Stack overflow in %s/test/quick/exceptions2.php on line %d
 Saw a reasonable number of calls to C::__destruct()

@@ -1,2 +1,3 @@
-HipHop Notice: Undefined variable: a in %s/test/slow/types/1748.php on line 7
+
+Notice: Undefined variable: a in %s/test/slow/types/1748.php on line 7
 string(0) ""

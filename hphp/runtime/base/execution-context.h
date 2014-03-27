@@ -310,6 +310,10 @@ public:
   const String& getSandboxId() const { return m_sandboxId; }
   void setSandboxId(const String& sandboxId) { m_sandboxId = sandboxId; }
 
+  // This has to appear before m_userErrorHandlers since C++ destructs objects
+  // from last declared to first declared. If it was after, we would destroy
+  // the property table before the error handlers ran.
+  std::unordered_map<const ObjectData*,ArrayNoDtor> dynPropTable;
 private:
   class OutputBuffer {
   public:
@@ -382,8 +386,8 @@ public:
   void requestInit();
   void requestExit();
 
-  static void fillContinuationVars(
-    ActRec* origFp, const Func* origFunc, ActRec* genFp, const Func* genFunc);
+  static void fillContinuationVars(const Func* func, ActRec* origFp,
+                                   ActRec* genFp);
   void pushLocalsAndIterators(const Func* f, int nparams = 0);
   void enqueueAPCHandle(APCHandle* handle);
 
@@ -448,6 +452,7 @@ private:
 OPCODES
 #undef O
 
+  void contEnterImpl(IOP_ARGS);
   void classExistsImpl(IOP_ARGS, Attr typeAttr);
   void fPushObjMethodImpl(
       Class* cls, StringData* name, ObjectData* obj, int numArgs);
@@ -457,8 +462,6 @@ public:
   typedef hphp_hash_map<const StringData*, ClassInfo::ConstantInfo*,
                         string_data_hash, string_data_same> ConstInfoMap;
   ConstInfoMap m_constInfo;
-
-  std::unordered_map<const ObjectData*,ArrayNoDtor> dynPropTable;
 
   const Func* lookupMethodCtx(const Class* cls,
                                         const StringData* methodName,
@@ -562,19 +565,12 @@ public:
   void preventReturnsToTC();
   void destructObjects();
   int m_lambdaCounter;
-  struct ReentryRecord {
-    VMState m_savedState;
-    const ActRec* m_entryFP;
-    ReentryRecord(const VMState &s, const ActRec* entryFP) :
-        m_savedState(s), m_entryFP(entryFP) { }
-    ReentryRecord() {}
-  };
-  typedef TinyVector<ReentryRecord, 32> NestedVMVec;
+  typedef TinyVector<VMState, 32> NestedVMVec;
   NestedVMVec m_nestedVMs;
 
   int m_nesting;
   bool isNested() { return m_nesting != 0; }
-  void pushVMState(VMState &savedVM, const ActRec* reentryAR);
+  void pushVMState(Cell* savedSP);
   void popVMState();
 
   ActRec* getPrevVMState(const ActRec* fp,
@@ -601,15 +597,15 @@ public:
   int getLastErrorLine() const { return m_lastErrorLine; }
 
 private:
-  void enterVMWork(ActRec* enterFnAr);
-  void enterVMPrologue(ActRec* enterFnAr);
-  void enterVM(TypedValue* retval, ActRec* ar);
-  void reenterVM(TypedValue* retval, ActRec* ar, TypedValue* savedSP);
+  void enterVMAtAsyncFunc(ActRec* enterFnAr, PC pc, ObjectData* exception);
+  void enterVMAtFunc(ActRec* enterFnAr);
+  void enterVMAtCurPC();
+  void enterVM(ActRec* ar, PC pc = nullptr, ObjectData* exception = nullptr);
   void doFPushCuf(IOP_ARGS, bool forward, bool safe);
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
-  bool prepareFuncEntry(ActRec* ar, PC& pc);
+  void prepareFuncEntry(ActRec* ar, PC& pc);
   bool prepareArrayArgs(ActRec* ar, const Variant& arrayArgs);
   void recordCodeCoverage(PC pc);
   bool isReturnHelper(uintptr_t address);
@@ -667,15 +663,14 @@ public:
                   ctx.cls ? (char*)ctx.cls + 1 : nullptr,
                   ctx.invName, argc, argv);
   }
-  void invokeContFunc(const Func* f,
-                      ObjectData* this_,
-                      Cell* param = nullptr);
+  void resumeAsyncFunc(c_Continuation& cont, Cell& awaitResult);
+  void resumeAsyncFuncThrow(c_Continuation& cont, ObjectData* exception);
+
   // VM ClassInfo support
   StringIMap<AtomicSmartPtr<MethodInfoVM> > m_functionInfos;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_classInfos;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_interfaceInfos;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_traitInfos;
-  Array getUserFunctionsInfo();
   Array getConstantsInfo();
   const ClassInfo::MethodInfo* findFunctionInfo(const String& name);
   const ClassInfo* findClassInfo(const String& name);

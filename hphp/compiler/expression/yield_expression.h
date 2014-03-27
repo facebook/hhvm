@@ -18,7 +18,6 @@
 #define incl_HPHP_YIELD_EXPRESSION_H_
 
 #include "hphp/compiler/expression/expression.h"
-#include "hphp/compiler/expression/generation_label.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,12 +33,10 @@ public:
 
   ExpressionPtr getKeyExpression() { return m_keyExp; }
   ExpressionPtr getValueExpression() { return m_valExp; }
-  GenerationLabel& label() { return m_label; }
 
 private:
   ExpressionPtr m_keyExp;
   ExpressionPtr m_valExp;
-  GenerationLabel m_label;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

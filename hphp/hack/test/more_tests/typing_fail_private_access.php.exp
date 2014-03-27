@@ -1,0 +1,4 @@
+File "typing_fail_private_access.php", line 18, characters 19-19:
+The member a is undefined in an object of type Bar
+File "typing_fail_private_access.php", line 16, characters 7-9:
+Check this out

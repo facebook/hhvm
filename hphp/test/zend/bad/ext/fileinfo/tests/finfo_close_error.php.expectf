@@ -1,14 +1,17 @@
 *** Testing finfo_close() : error conditions ***
 
 -- Testing finfo_close() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing finfo_close() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing finfo_close() function with wrong resource type --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

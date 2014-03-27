@@ -1,0 +1,4 @@
+File "string_expressions6.php", line 14, characters 19-23:
+You cannot use this object as a string
+File "string_expressions6.php", line 13, characters 37-39:
+This object doesn't implement __toString

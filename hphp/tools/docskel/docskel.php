@@ -1,6 +1,9 @@
 <?hh
 include(__DIR__ . '/base.php');
 
+// see hphp/runtime/vm/bytecode.h:kMaxBuiltinArgs
+const MAX_BUILTIN_ARGS = 5;
+
 function generateDocComment(string $doccomment, array $func = null,
                             string $indent = ''): string {
   $str = $doccomment . "\n";
@@ -58,7 +61,9 @@ function generateFunctionSignature(array $func, string $indent = ''): string {
   }
   $ret .= '): ' . (empty($func['return']['type']) ? 'void'
                                                   : $func['return']['type']);
-  return "$indent<<__Native>>\n$ret;\n\n";
+  $annotation = count($func['args']) > MAX_BUILTIN_ARGS
+              ? '<<__Native("ActRec")>>' : '<<__Native>>';
+  return "$indent$annotation\n$ret;\n\n";
 }
 
 function outputSystemlib(string $dest, array $funcs, array $classes):void {
@@ -108,59 +113,108 @@ function getMethod(string $name, array $classes): array {
 
 function generateCPPStub(array $func, array $classes): string {
   static $typemap = [
-    'bool' => ['bool', 'bool'],
-    'int' => ['int64_t', 'int64_t'],
-    'float' => ['double', 'double'],
-    'string' => ['const String&', 'String'],
-    'array' => ['CArrRef', 'Array'],
-    'object' => ['CObjRef', 'Object'],
-    'resource' => ['CResRef', 'Resource'],
-    'mixed' => ['CVarRef', 'Variant'],
-    'void' => [1 =>'void'],
+    // type =>     [return,     param,              actrec]
+    'bool' =>      ['bool',     'bool',             'KindOfBoolean'],
+    'int' =>       ['int64_t',  'int64_t',          'KindOfInt64'],
+    'float' =>     ['double',   'double',           'KindOfDouble'],
+    'string' =>    ['String',   'const String&',    'KindOfString'],
+    'array' =>     ['Array',    'const Array&',     'KindOfArray'],
+    'object' =>    ['Object',   'const Object&',    'KindOfObject'],
+    'resource' =>  ['Resource', 'const Resource&',  'KindOfResource'],
+    'mixed' =>     ['Variant',  'const Variant&',   'KindOfAny'],
+    'void' =>      ['void'],
+    'reference' => ['Variant',  'VRefParam',        'KindOfRef'],
   ];
 
+  $actrec = count($func['args']) > MAX_BUILTIN_ARGS;
+  $alias = !empty($func['class']) || empty($func['alias'])
+         ? null : getMethod($func['alias'], $classes);
+
+  // return type
   $ret = 'static ';
-  if (empty($func['return']['type'])) {
+  if ($actrec) {
+    $ret .= 'TypedValue*';
+  } else if (empty($func['return']['type'])) {
     $ret .= 'void';
-  } elseif (isset($typemap[$func['return']['type']])) {
-    $ret .= $typemap[$func['return']['type']][1];
+  } else if (isset($typemap[$func['return']['type']])) {
+    $ret .= $typemap[$func['return']['type']][0];
   } else {
     $ret .= 'Object';
   }
+
+  // function name
   if (empty($func['class'])) {
-    $ret .= " HHVM_FUNCTION({$func['name']}";
+    $type = $actrec ? 'HHVM_FN' : 'HHVM_FUNCTION';
+    $ret .= " $type({$func['name']}";
   } else {
-    $type = in_array('static', $func['modifiers'])
-          ? 'HHVM_STATIC_METHOD' : 'HHVM_METHOD';
+    if ($actrec) {
+      $type = in_array('static', $func['modifiers'])
+            ? 'HHVM_STATIC_MN' : 'HHVM_MN';
+    } else {
+      $type = in_array('static', $func['modifiers'])
+            ? 'HHVM_STATIC_METHOD' : 'HHVM_METHOD';
+    }
     $ret .= " $type({$func['class']}, {$func['name']}";
   }
-  foreach($func['args'] as $arg) {
+
+  // arguments
+  $args = $actrec ? "  auto this_ = ar_->m_this;\n" : '';
+  foreach(array_values($func['args']) as $index => $arg) {
     if ($arg['reference']) {
-      $ret .= ', VRefParam';
-    } elseif (isset($typemap[$arg['type']])) {
-      $ret .= ', ' . $typemap[$arg['type']][0];
+      $type = $typemap['reference'];
     } else {
-      $ret .= ', CObjRef';
+      $type = idx($typemap, $arg['type'], $typemap['object']);
     }
-    $ret .= " {$arg['name']}";
+    if ($actrec) {
+      $args .= "  auto {$arg['name']} = getArg<{$type[2]}>(ar_, $index);\n";
+    } else {
+      $args .= ", {$type[1]} {$arg['name']}";
+    }
   }
-  if (!empty($func['class']) || empty($func['alias']) ||
-      !($method = getMethod($func['alias'], $classes))) {
-    return "$ret) {\n  throw NotImplementedException(\"Not Implemented\");".
-           "\n}\n\n";
+
+  if (!$actrec) {
+    $ret .= "$args) {\n";
+  } else if (!$alias) {
+    $ret .= ")(ActRec* ar_) {\n$args\n";
+  } else {
+    $type = in_array('static', $alias['modifiers'])
+          ? 'HHVM_STATIC_MN' : 'HHVM_MN';
+    $ret .= <<<CPP
+)(ActRec* ar_) {
+  return $type({$alias['class']}, {$alias['name']})(ar_);
+}
+
+
+CPP;
+    return $ret;
   }
-  $ret .= ") {\n  ";
+
+  // body
+  if (!$alias) {
+    $qualified_name = empty($func['class']) ? '' : "{$func['class']}::";
+    $qualified_name .= $func['name'];
+    $ret .= <<<CPP
+  throw NotImplementedException("$qualified_name");
+}
+
+
+CPP;
+    return $ret;
+  }
+
+  // alias
+  $ret .= "  ";
   if (!empty($func['return']['type']) &&
       ($func['return']['type'] != 'void')) {
     $ret .= 'return ';
   }
   $comma = false;
-  if (in_array('static', $method['modifiers'])) {
-    $ret .= "HHVM_STATIC_MN({$method['class']}, {$method['name']})".
-            "(Unit::lookupClass(s_{$method['class']}.get())";
+  if (in_array('static', $alias['modifiers'])) {
+    $ret .= "HHVM_STATIC_MN({$alias['class']}, {$alias['name']})".
+            "(Unit::lookupClass(s_{$alias['class']}.get())";
     $comma = true;
   } else {
-    $ret .= "HHVM_MN({$method['class']}, {$method['name']})(";
+    $ret .= "HHVM_MN({$alias['class']}, {$alias['name']})(";
   }
 
   foreach($func['args'] as $arg) {

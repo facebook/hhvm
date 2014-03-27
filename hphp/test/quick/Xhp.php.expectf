@@ -1,1 +1,2 @@
-HipHop Fatal error: XHP: mismatched tag: 'ul' not the same as 'li' in %s on line 3
+
+Fatal error: XHP: mismatched tag: 'ul' not the same as 'li' in %s on line 3

@@ -455,7 +455,9 @@ void FrameState::save(Block* block) {
 
 bool FrameState::compatible(Block* block) {
   auto it = m_snapshots.find(block);
-  assert(it != m_snapshots.end());
+  // If we didn't find a snapshot, it's because we never saved one.
+  // Probably because the other incoming edge is unreachable.
+  if (it == m_snapshots.end()) return true;
   auto& snapshot = it->second;
   if (m_fpValue != snapshot.fpValue) return false;
 
@@ -530,8 +532,10 @@ void FrameState::merge(Snapshot& state) {
   }
 
   // TODO(t3729135): If we are merging states from different bytecode
-  // paths, we conservatively clear the CSE table.
-  if (state.curMarker != m_marker) {
+  // paths, we must conservatively clear the CSE table.  Since the
+  // markers may or may not have been updated, we always clear.  What
+  // we need is a global CSE algorithm.
+  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
     clearCse();
   }
 

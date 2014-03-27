@@ -3,8 +3,10 @@ bool(false)
 string(5) "array"
 int(%d)
 string(%d) "%s"
-HipHop Notice: %s
+
+Notice: %s
 NULL
-HipHop Notice: %s
+
+Notice: %s
 NULL
 Done

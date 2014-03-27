@@ -116,11 +116,9 @@ void unsetUnknownLocal(ISS& env) {
   for (auto& l : env.state.locals) l = union_of(l, TUninit);
 }
 
-void unsetNamedLocals(ISS& env) {
+void unsetLocals(ISS& env) {
   for (auto i = size_t{0}; i < env.state.locals.size(); ++i) {
-    if (env.ctx.func->locals[i]->name) {
-      env.state.locals[i] = TUninit;
-    }
+    env.state.locals[i] = TUninit;
   }
 }
 
@@ -251,13 +249,13 @@ ActRec fpiPop(ISS& env) {
   return ret;
 }
 
-const ActRec& fpiTop(ISS& env) {
+ActRec fpiTop(ISS& env) {
   assert(!env.state.fpiStack.empty());
   return env.state.fpiStack.back();
 }
 
 PrepKind prepKind(ISS& env, uint32_t paramId) {
-  auto& ar = fpiTop(env);
+  auto ar = fpiTop(env);
   if (ar.func) return env.index.lookup_param_prep(env.ctx, *ar.func, paramId);
   return PrepKind::Unknown;
 }

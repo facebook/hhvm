@@ -1,10 +1,12 @@
 *** Testing xml_set_object() : error conditions ***
 
 -- Testing xml_set_object() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing xml_set_object() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

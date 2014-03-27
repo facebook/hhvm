@@ -30,8 +30,8 @@ bool parse_packet_soap(c_SoapClient *client,
                        int buffer_size,
                        std::shared_ptr<sdlFunction> fn,
                        const char *fn_name,
-                       Variant &return_value,
-                       Variant &soap_headers);
+                       Variant& return_value,
+                       Array& soap_headers);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

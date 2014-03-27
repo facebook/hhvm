@@ -6,6 +6,7 @@ Strict Standards: mktime(): You should be using the time() function instead in %
 int(%d)
 
 -- Testing mktime() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

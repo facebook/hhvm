@@ -1,10 +1,22 @@
 DateTime
-object(DateTime)#2 (0) {
+object(DateTime)#2 (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(%d) "%s"
 }
-string(70) "O:8:"DateTime":1:{s:10:"_date_time";s:25:"2012-06-23T11:00:00%s";}"
-object(DateTime)#3 (0) {
+string(70) "O:8:"DateTime":1:{s:10:"_date_time";s:25:"2012-06-23T11:00:00%c%d%d:00";}"
+object(DateTime)#3 (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(%d) "%s"
 }
-array(18) {
+array(19) {
   [0]=>
   string(3) "add"
   [1]=>
@@ -41,19 +53,29 @@ array(18) {
   string(7) "__sleep"
   [17]=>
   string(8) "__wakeup"
+  [18]=>
+  string(11) "__debugInfo"
 }
 ================
 A_DateTime
-object(A_DateTime)#5 (1) {
-  ["___x"]=>
-  NULL
+object(A_DateTime)#5 (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(%d) "%s"
 }
-string(73) "O:10:"A_DateTime":1:{s:10:"_date_time";s:25:"2012-06-23T11:00:00%s";}"
-object(A_DateTime)#6 (1) {
-  ["___x"]=>
-  NULL
+string(73) "O:10:"A_DateTime":1:{s:10:"_date_time";s:25:"2012-06-23T11:00:00%c%d%d:00";}"
+object(A_DateTime)#6 (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(%d) "%s"
 }
-array(19) {
+array(20) {
   [0]=>
   string(7) "__clone"
   [1]=>
@@ -92,20 +114,26 @@ array(19) {
   string(7) "__sleep"
   [18]=>
   string(8) "__wakeup"
+  [19]=>
+  string(11) "__debugInfo"
 }
 ================
-object(A_DateTime)#5 (2) {
-  ["___x"]=>
-  NULL
-  ["___y"]=>
-  int(73)
+object(A_DateTime)#5 (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(%d) "%s"
 }
 string(10) "2012-06-23"
-object(A_DateTime)#6 (2) {
-  ["___x"]=>
-  int(1)
-  ["___y"]=>
-  int(74)
+object(A_DateTime)#6 (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(%d) "%s"
 }
 string(10) "2012-06-26"
 ================

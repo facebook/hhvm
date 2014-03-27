@@ -23,9 +23,15 @@
 #include <algorithm>
 
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/code-gen-x64.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
 
-namespace HPHP { namespace JIT { namespace NativeCalls {
+namespace HPHP { namespace JIT {
+
+struct IRInstruction;
+
+namespace NativeCalls {
 
 // Information about C++ helpers called by translated code, used by
 // CodeGenerator and LinearScan. See nativecalls.cpp for a full

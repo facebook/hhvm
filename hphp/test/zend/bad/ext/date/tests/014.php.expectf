@@ -12,9 +12,11 @@ object(DateTimeZone)#%d (2) {
   ["timezone"]=>
   string(3) "UTC"
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

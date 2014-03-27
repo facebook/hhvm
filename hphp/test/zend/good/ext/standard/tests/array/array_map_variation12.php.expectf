@@ -9,9 +9,12 @@ array(3) {
   int(243)
 }
 -- with built-in function 'pow' and one parameter --
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 array(3) {
   [0]=>
   NULL
@@ -21,6 +24,7 @@ array(3) {
   NULL
 }
 -- with language construct --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

@@ -1,2 +1,3 @@
 string(4) "blah"
-HipHop Fatal error: Cannot access protected property in %s/test/quick/protected-magic-getter.php on line 11
+
+Fatal error: Cannot access protected property in %s/test/quick/protected-magic-getter.php on line 11

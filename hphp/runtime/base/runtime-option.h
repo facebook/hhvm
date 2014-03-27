@@ -74,7 +74,6 @@ public:
   static bool InjectedStackTrace;
   static int InjectedStackTraceLimit; // limit the size of the backtrace
   static bool NoSilencer;
-  static bool EnableApplicationLog;
   static bool CallUserHandlerOnFatals;
   static bool ThrowExceptionOnBadMethodCall;
   static int RuntimeErrorReportingLevel;
@@ -127,6 +126,7 @@ public:
   static bool ServerStatCache;
   static std::vector<std::string> ServerWarmupRequests;
   static boost::container::flat_set<std::string> ServerHighPriorityEndPoints;
+  static bool ServerExitOnBindFail;
   static int PageletServerThreadCount;
   static bool PageletServerThreadRoundRobin;
   static int PageletServerThreadDropCacheTimeoutSeconds;
@@ -146,6 +146,7 @@ public:
   static bool ServerEvilShutdown;
   static int ServerShutdownListenWait;
   static int ServerShutdownListenNoWork;
+  static std::vector<std::string> ServerNextProtocols;
   static int GzipCompressionLevel;
   static std::string ForceCompressionURL;
   static std::string ForceCompressionCookie;
@@ -231,6 +232,8 @@ public:
   static std::string WarmupDocument;
   static std::string RequestInitFunction;
   static std::string RequestInitDocument;
+  static std::string AutoPrependFile;
+  static std::string AutoAppendFile;
   static std::vector<std::string> ThreadDocuments;
   static std::vector<std::string> ThreadLoopDocuments;
 
@@ -265,7 +268,6 @@ public:
   static std::set<std::string> ProxyURLs;
   static std::vector<std::string> ProxyPatterns;
   static bool AlwaysUseRelativePath;
-  static std::string IniFile;
 
   static int  HttpDefaultTimeout;
   static int  HttpSlowQueryThreshold;
@@ -346,6 +348,7 @@ public:
   static bool TimeoutsUseWallTime;
   static bool CheckFlushOnUserClose;
   static bool EvalAuthoritativeMode;
+  static bool IntsOverflowToInts;
 
   static int GetScannerType();
 
@@ -365,7 +368,7 @@ public:
    */                                                                   \
   F(uint32_t, VMInitialGlobalTableSize,                                 \
     kEvalVMInitialGlobalTableSizeDefault)                               \
-  F(bool, Jit,                         true)                            \
+  F(bool, Jit,                         evalJitDefault())                \
   F(bool, SimulateARM,                 simulateARMDefault())            \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitAHotSize,             4 << 20)                         \
@@ -375,7 +378,13 @@ public:
   F(uint64_t, JitAStubsSize,           64 << 20)                        \
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
   F(bool, AllowHhas,                   false)                           \
-  F(bool, CheckReturnTypeHints,        false)                           \
+  /* CheckReturnTypeHints:
+     0 - no checks or enforcement
+     1 - raises E_WARNING if regular type hint or soft type hint fails
+     2 - raises E_RECOVERABLE_ERROR if regular type hint fails, raises
+         E_WARNING if soft type hint fails; note that in repo mode the
+         error handler is not allowed to resume on recoverable errors */ \
+  F(int32_t, CheckReturnTypeHints,     0)                               \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
@@ -402,12 +411,14 @@ public:
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitStressLease,              false)                           \
   F(bool, JitKeepDbgFiles,             false)                           \
+  /* despite the unfortunate name, this enables function renaming and
+   * interception in the interpreter as well as the jit */              \
   F(bool, JitEnableRenameFunction,     false)                           \
   F(bool, JitUseVtuneAPI,              false)                           \
                                                                         \
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, JitTransCounters,            false)                           \
-  F(bool, HHIRBytecodeControlFlow,     false)                           \
+  F(bool, HHIRBytecodeControlFlow,     hhirBytecodeControlFlowDefault())\
   F(bool, HHIRCse,                     true)                            \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
@@ -455,11 +466,12 @@ public:
   F(bool, MapTCHuge,                   hugePagesSoundNice())            \
   F(bool, MapHotTextHuge,              hugePagesSoundNice())            \
   F(bool, MapTgtCacheHuge,             false)                           \
-  F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)   \
+  F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)    \
   F(uint32_t, TCNumHugeHotMB,          16)                              \
   F(uint32_t, TCNumHugeColdMB,         4)                               \
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
+  F(bool, CheckRepoAuthDeserialize,    false)                           \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize,                             \
                         kDefaultInitialStaticStringTableSize)           \

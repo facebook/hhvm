@@ -1,14 +1,17 @@
 *** Testing preg_grep() : error conditions ***
 
 -- Testing preg_grep() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing preg_grep() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing preg_grep() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

@@ -28,7 +28,6 @@ class TestExtServer : public TestCppExt {
   virtual bool RunTests(const std::string &which);
 
   bool test_dangling_server_proxy_old_request();
-  bool test_dangling_server_proxy_new_request();
   bool test_pagelet_server_task_start();
   bool test_pagelet_server_task_status();
   bool test_pagelet_server_task_result();

@@ -1,6 +1,8 @@
 *** Testing crc32() : with different strings in double quotes ***
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 
 -- Iteration 1 --
 int(0)

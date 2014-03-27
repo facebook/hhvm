@@ -1,5 +1,6 @@
 get
-HipHop Notice: Undefined index: a in %s/test/slow/object_property_expression/792.php on line 7
+
+Notice: Undefined index: a in %s/test/slow/object_property_expression/792.php on line 7
 set
 get
 1get

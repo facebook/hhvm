@@ -53,22 +53,26 @@ int(0)
 int(3)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(3)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(3)
 
 Arg value string 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(3)
 
 Arg value string 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(3)
 

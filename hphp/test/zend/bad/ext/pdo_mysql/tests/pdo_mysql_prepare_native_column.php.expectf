@@ -5,7 +5,8 @@ array(1) {
     string(2) "id"
   }
 }
-HipHop Warning: %s
+
+Warning: %s
 array(0) {
 }
 done!

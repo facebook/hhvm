@@ -1,0 +1,4 @@
+File "trait_private_bad3.php", line 22, characters 21-23:
+You cannot access private members using the trait's name (did you mean to use self::?)
+File "trait_private_bad3.php", line 13, characters 27-29:
+This member is private

@@ -1,1 +1,2 @@
-HipHop Fatal error: Argument 2 passed to password_hash() must be an instance of int, array given in %s/test/slow/password/invalid_algo.php on line 2
+
+Fatal error: Argument 2 passed to password_hash() must be an instance of int, array given in %s/test/slow/password/invalid_algo.php on line 2

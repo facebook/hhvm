@@ -1,9 +1,12 @@
 *** Testing hypot() : error conditions ***
 
 -- Testing hypot() function with less than expected no. of arguments --
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 
 -- Testing hypot() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 ===Done===

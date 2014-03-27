@@ -1,7 +1,9 @@
 *** Testing session_decode() : variation ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 NULL
 array(3) {
   ["foo"]=>
@@ -11,7 +13,8 @@ array(3) {
   ["guff"]=>
   float(123.456)
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(true)
 array(3) {
   ["foo"]=>
@@ -21,6 +24,7 @@ array(3) {
   ["guff"]=>
   float(123.456)
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

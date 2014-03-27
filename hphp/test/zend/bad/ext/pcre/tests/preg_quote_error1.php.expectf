@@ -4,8 +4,10 @@ Arg value is: this is a string
 string(16) "this is a string"
 
 Arg value is: Array
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

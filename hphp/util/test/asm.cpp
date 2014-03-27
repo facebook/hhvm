@@ -687,7 +687,8 @@ TEST(Asm, SimpleLabelTest) {
 
 asm_label(a, loop);
   a.    movq   (r15, rdi);
-  a.    call   (CodeAddress(static_cast<void (*)(int*)>(loopCallee)));
+  a.    movq   (CodeAddress(static_cast<void (*)(int*)>(loopCallee)), r10);
+  a.    call   (r10);
   a.    incl   (ebx);
   a.    cmpl   (ebx, r12d);
   a.    jne    (loop);

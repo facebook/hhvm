@@ -1,8 +1,11 @@
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
 bool(true)
@@ -17,6 +20,7 @@ int(0)
 bool(true)
 int(0)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

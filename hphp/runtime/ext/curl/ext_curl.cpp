@@ -100,7 +100,7 @@ private:
   };
 
 public:
-  CLASSNAME_IS("cURL handle")
+  CLASSNAME_IS("curl")
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
@@ -118,27 +118,7 @@ public:
     m_read.method  = PHP_CURL_DIRECT;
     m_write_header.method = PHP_CURL_IGNORE;
 
-    curl_easy_setopt(m_cp, CURLOPT_NOPROGRESS,        1);
-    curl_easy_setopt(m_cp, CURLOPT_VERBOSE,           0);
-    curl_easy_setopt(m_cp, CURLOPT_ERRORBUFFER,       m_error_str);
-    curl_easy_setopt(m_cp, CURLOPT_WRITEFUNCTION,     curl_write);
-    curl_easy_setopt(m_cp, CURLOPT_FILE,              (void*)this);
-    curl_easy_setopt(m_cp, CURLOPT_READFUNCTION,      curl_read);
-    curl_easy_setopt(m_cp, CURLOPT_INFILE,            (void*)this);
-    curl_easy_setopt(m_cp, CURLOPT_HEADERFUNCTION,    curl_write_header);
-    curl_easy_setopt(m_cp, CURLOPT_WRITEHEADER,       (void*)this);
-    curl_easy_setopt(m_cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 0); // for thread-safe
-    curl_easy_setopt(m_cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
-    curl_easy_setopt(m_cp, CURLOPT_MAXREDIRS, 20); // no infinite redirects
-    curl_easy_setopt(m_cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
-    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_FUNCTION,
-                     CurlResource::ssl_ctx_callback);
-    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_DATA, (void*)this);
-
-    curl_easy_setopt(m_cp, CURLOPT_TIMEOUT,
-                     RuntimeOption::HttpDefaultTimeout);
-    curl_easy_setopt(m_cp, CURLOPT_CONNECTTIMEOUT,
-                     RuntimeOption::HttpDefaultTimeout);
+    reset();
 
     if (!url.empty()) {
 #if LIBCURL_VERSION_NUM >= 0x071100
@@ -177,10 +157,7 @@ public:
     m_read.callback = src->m_read.callback;
     m_write_header.callback = src->m_write_header.callback;
 
-    curl_easy_setopt(m_cp, CURLOPT_ERRORBUFFER,       m_error_str);
-    curl_easy_setopt(m_cp, CURLOPT_FILE,              (void*)this);
-    curl_easy_setopt(m_cp, CURLOPT_INFILE,            (void*)this);
-    curl_easy_setopt(m_cp, CURLOPT_WRITEHEADER,       (void*)this);
+    reset();
 
     m_to_free = src->m_to_free;
     m_emptyPost = src->m_emptyPost;
@@ -239,6 +216,32 @@ public:
       return e;
     }
     return nullptr;
+  }
+
+  void reset() {
+    curl_easy_reset(m_cp);
+
+    curl_easy_setopt(m_cp, CURLOPT_NOPROGRESS,        1);
+    curl_easy_setopt(m_cp, CURLOPT_VERBOSE,           0);
+    curl_easy_setopt(m_cp, CURLOPT_ERRORBUFFER,       m_error_str);
+    curl_easy_setopt(m_cp, CURLOPT_WRITEFUNCTION,     curl_write);
+    curl_easy_setopt(m_cp, CURLOPT_FILE,              (void*)this);
+    curl_easy_setopt(m_cp, CURLOPT_READFUNCTION,      curl_read);
+    curl_easy_setopt(m_cp, CURLOPT_INFILE,            (void*)this);
+    curl_easy_setopt(m_cp, CURLOPT_HEADERFUNCTION,    curl_write_header);
+    curl_easy_setopt(m_cp, CURLOPT_WRITEHEADER,       (void*)this);
+    curl_easy_setopt(m_cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 0); // for thread-safe
+    curl_easy_setopt(m_cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
+    curl_easy_setopt(m_cp, CURLOPT_MAXREDIRS, 20); // no infinite redirects
+    curl_easy_setopt(m_cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
+    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_FUNCTION,
+                     CurlResource::ssl_ctx_callback);
+    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_DATA, (void*)this);
+
+    curl_easy_setopt(m_cp, CURLOPT_TIMEOUT,
+                     RuntimeOption::HttpDefaultTimeout);
+    curl_easy_setopt(m_cp, CURLOPT_CONNECTTIMEOUT,
+                     RuntimeOption::HttpDefaultTimeout);
   }
 
   Variant execute() {
@@ -928,6 +931,13 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
     return false;                                                           \
   }                                                                         \
 
+#define CHECK_RESOURCE_RETURN_VOID(curl)                                    \
+  CurlResource *curl = ch.getTyped<CurlResource>(true, true);               \
+  if (curl == nullptr) {                                                    \
+    raise_warning("supplied argument is not a valid cURL handle resource"); \
+    return;                                                                 \
+  }                                                                         \
+
 Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
   if (url.isNull()) {
     return NEWOBJ(CurlResource)(null_string);
@@ -1191,13 +1201,18 @@ Variant HHVM_FUNCTION(curl_close, const Resource& ch) {
   return uninit_null();
 }
 
+void HHVM_FUNCTION(curl_reset, const Resource& ch) {
+  CHECK_RESOURCE_RETURN_VOID(curl);
+  curl->reset();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class CurlMultiResource : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(CurlMultiResource)
 
-  CLASSNAME_IS("cURL Multi Handle")
+  CLASSNAME_IS("curl_multi")
   // overriding ResourceData
   const String& o_getClassNameHook() const { return classnameof(); }
 
@@ -1424,9 +1439,7 @@ Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
 const StaticString
   s_msg("msg"),
   s_result("result"),
-  s_handle("handle"),
-  s_headers("headers"),
-  s_requests("requests");
+  s_handle("handle");
 
 Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
                                VRefParam msgs_in_queue /* = null */) {
@@ -1457,182 +1470,6 @@ Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// evhttp functions
-
-class LibEventHttpHandle : public SweepableResourceData {
-public:
-  DECLARE_RESOURCE_ALLOCATION(LibEventHttpHandle)
-
-  CLASSNAME_IS("LibEventHttp");
-  // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
-
-  explicit LibEventHttpHandle(LibEventHttpClientPtr client) : m_client(client) {
-  }
-
-  ~LibEventHttpHandle() {
-    if (m_client) {
-      m_client->release();
-    }
-  }
-
-  LibEventHttpClientPtr m_client;
-};
-IMPLEMENT_OBJECT_ALLOCATION(LibEventHttpHandle)
-
-static LibEventHttpClientPtr prepare_client
-(const String& url, const String& data, const Variant& headers, int timeout,
- bool async, bool post) {
-  std::string sUrl = url.data();
-  if (sUrl.size() < 7 || sUrl.substr(0, 7) != "http://") {
-    raise_warning("Invalid URL: %s", sUrl.c_str());
-    return LibEventHttpClientPtr();
-  }
-
-  // parsing server address
-  size_t pos = sUrl.find('/', 7);
-  string path;
-  if (pos == std::string::npos) {
-    pos = sUrl.length();
-    path = "/";
-  } else if (pos == 7) {
-    raise_warning("Invalid URL: %s", sUrl.c_str());
-    return LibEventHttpClientPtr();
-  } else {
-    path = sUrl.substr(pos);
-  }
-  string address = sUrl.substr(7, pos - 7);
-
-  // parsing server port
-  pos = address.find(':');
-  int port = 80;
-  if (pos != string::npos) {
-    if (pos < address.length() - 1) {
-      string sport = address.substr(pos + 1, address.length() - pos - 1);
-      port = atoi(sport.c_str());
-    }
-    address = address.substr(0, pos);
-  }
-
-  LibEventHttpClientPtr client = LibEventHttpClient::Get(address, port);
-  if (!client) {
-    return client;
-  }
-
-  std::vector<std::string> sheaders;
-  for (ArrayIter iter(headers); iter; ++iter) {
-    sheaders.push_back(iter.second().toString().data());
-  }
-  if (!client->send(path.c_str(), sheaders, timeout, async,
-                    post ? (void*)data.data() : nullptr,
-                    post ? data.size() : 0)) {
-    return LibEventHttpClientPtr();
-  }
-  return client;
-}
-
-const StaticString
-  s_code("code"),
-  s_response("response");
-
-static Array prepare_response(LibEventHttpClientPtr client) {
-  int len = 0;
-  char *res = client->recv(len); // block on return
-
-  ArrayInit ret(4);
-  ret.set(s_code, client->getCode());
-  ret.set(s_response, String(res, len, AttachString));
-
-  Array headers = Array::Create();
-  const vector<string> &responseHeaders = client->getResponseHeaders();
-  for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-    headers.append(String(responseHeaders[i]));
-  }
-  ret.set(s_headers, headers);
-  ret.set(s_requests, client->getRequests());
-  return ret.create();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void HHVM_FUNCTION(evhttp_set_cache, const String& address, int max_conn,
-                        int port /* = 80 */) {
-  if (RuntimeOption::ServerHttpSafeMode) {
-    throw_fatal("evhttp_set_cache is disabled");
-  }
-  LibEventHttpClient::SetCache(address.data(), port, max_conn);
-}
-
-Variant HHVM_FUNCTION(evhttp_get, const String& url,
-                                  const Variant& headers /* = null_array */,
-                                  int timeout /* = 5 */) {
-  if (RuntimeOption::ServerHttpSafeMode) {
-    throw_fatal("evhttp_set_cache is disabled");
-  }
-  LibEventHttpClientPtr client = prepare_client(url, "", headers, timeout,
-                                                false, false);
-  if (client) {
-    Variant ret = prepare_response(client);
-    client->release();
-    return ret;
-  }
-  return false;
-}
-
-Variant HHVM_FUNCTION(evhttp_post, const String& url, const String& data,
-                      const Variant& headers /* = null_array */,
-                      int timeout /* = 5 */) {
-  if (RuntimeOption::ServerHttpSafeMode) {
-    throw_fatal("evhttp_post is disabled");
-  }
-  LibEventHttpClientPtr client = prepare_client(url, data, headers, timeout,
-                                                false, true);
-  if (client) {
-    Variant ret = prepare_response(client);
-    client->release();
-    return ret;
-  }
-  return false;
-}
-
-Variant HHVM_FUNCTION(evhttp_async_get, const String& url,
-                           const Variant& headers /* = null_array */,
-                           int timeout /* = 5 */) {
-  if (RuntimeOption::ServerHttpSafeMode) {
-    throw_fatal("evhttp_async_get is disabled");
-  }
-  LibEventHttpClientPtr client = prepare_client(url, "", headers, timeout,
-                                                true, false);
-  if (client) {
-    return Resource(NEWOBJ(LibEventHttpHandle)(client));
-  }
-  return false;
-}
-
-Variant HHVM_FUNCTION(evhttp_async_post, const String& url, const String& data,
-                            const Variant& headers /* = null_array */,
-                            int timeout /* = 5 */) {
-  if (RuntimeOption::ServerHttpSafeMode) {
-    throw_fatal("evhttp_async_post is disabled");
-  }
-  LibEventHttpClientPtr client = prepare_client(url, data, headers, timeout,
-                                                true, true);
-  if (client) {
-    return Resource(NEWOBJ(LibEventHttpHandle)(client));
-  }
-  return false;
-}
-
-Variant HHVM_FUNCTION(evhttp_recv, const Resource& handle) {
-  if (RuntimeOption::ServerHttpSafeMode) {
-    throw_fatal("evhttp_recv is disabled");
-  }
-  LibEventHttpHandle *obj = handle.getTyped<LibEventHttpHandle>();
-  if (obj->m_client) {
-    return prepare_response(obj->m_client);
-  }
-  return false;
-}
 
 #if LIBCURL_VERSION_NUM >= 0x071500
 const int64_t k_CURLINFO_LOCAL_PORT = CURLINFO_LOCAL_PORT;
@@ -2892,6 +2729,7 @@ class CurlExtension : public Extension {
     HHVM_FE(curl_errno);
     HHVM_FE(curl_error);
     HHVM_FE(curl_close);
+    HHVM_FE(curl_reset);
     HHVM_FE(curl_multi_init);
     HHVM_FE(curl_multi_add_handle);
     HHVM_FE(curl_multi_remove_handle);
@@ -2901,12 +2739,6 @@ class CurlExtension : public Extension {
     HHVM_FE(fb_curl_multi_fdset);
     HHVM_FE(curl_multi_info_read);
     HHVM_FE(curl_multi_close);
-    HHVM_FE(evhttp_set_cache);
-    HHVM_FE(evhttp_get);
-    HHVM_FE(evhttp_post);
-    HHVM_FE(evhttp_async_get);
-    HHVM_FE(evhttp_async_post);
-    HHVM_FE(evhttp_recv);
 
     loadSystemlib();
   }

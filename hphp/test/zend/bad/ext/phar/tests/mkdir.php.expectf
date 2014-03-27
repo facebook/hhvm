@@ -1,8 +1,14 @@
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 Cannot create a directory in magic ".phar" directory
 ===DONE===

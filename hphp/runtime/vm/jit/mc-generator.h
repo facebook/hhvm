@@ -31,7 +31,6 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
@@ -296,9 +295,12 @@ public:
     enterTC(nullptr, &sk);
   }
   void enterTCAtPrologue(ActRec *ar, TCA start) {
+    assert(ar);
+    assert(start);
     enterTC(start, ar);
   }
   void enterTCAfterPrologue(TCA start) {
+    assert(start);
     enterTC(start, nullptr);
   }
 

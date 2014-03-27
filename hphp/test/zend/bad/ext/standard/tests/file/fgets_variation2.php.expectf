@@ -1,14 +1,20 @@
 *** Testing fgets() : usage variations ***
 -- Testing fgets() with closed handle --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Testing fgets() with unset handle --
-HipHop Notice: %s
-HipHop Warning: %s
+
+Notice: %s
+
+Warning: %s
 bool(false)
-HipHop Notice: %s
-HipHop Warning: %s
+
+Notice: %s
+
+Warning: %s
 bool(false)
 Done

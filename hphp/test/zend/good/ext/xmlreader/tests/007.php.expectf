@@ -1,4 +1,5 @@
 file relaxNG: ok
 string relaxNG: ok
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

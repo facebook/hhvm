@@ -1,8 +1,10 @@
 *** Testing dir() : open a non-existent directory ***
 -- opening previously removed directory --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- opening non-existent directory --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

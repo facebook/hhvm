@@ -5,14 +5,17 @@ array(0) {
 }
 
 -- Testing array_combine() function with empty array for $keys argument --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing array_combine() function with empty array for $values argument --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing array_combine() function by passing array with unequal number of elements --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

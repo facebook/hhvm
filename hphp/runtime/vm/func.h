@@ -17,15 +17,18 @@
 #ifndef incl_HPHP_VM_FUNC_H_
 #define incl_HPHP_VM_FUNC_H_
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/vm/type-constraint.h"
-#include "hphp/runtime/vm/repo-helpers.h"
-#include "hphp/runtime/vm/indexed-string-map.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/type-string.h"
+
+#include "hphp/runtime/vm/indexed-string-map.h"
+#include "hphp/runtime/vm/repo-helpers.h"
+#include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/vm/unit.h"
+
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 
@@ -38,7 +41,7 @@ class PreClassEmitter;
 /*
  * Vector of pairs (param number, offset of corresponding DV funclet).
  */
-typedef std::vector<std::pair<int,Offset> > DVFuncletsVec;
+typedef std::vector<std::pair<int,Offset>> DVFuncletsVec;
 
 /*
  * Metadata about a php function or object method.
@@ -241,6 +244,7 @@ struct Func {
     return strncmp("86", methName->data(), 2) == 0;
   }
   bool isNoInjection() const { return bool(m_attrs & AttrNoInjection); }
+  bool isFoldable() const { return bool(m_attrs & AttrIsFoldable); }
 
   bool mayHaveThis() const {
     return isPseudoMain() || (isMethod() && !isStatic());
@@ -273,6 +277,12 @@ struct Func {
     return m_unit->entry() + shared()->m_base;
   }
   Offset past() const { return shared()->m_past; }
+  bool contains(PC pc) const {
+    return contains(Offset(pc - unit()->entry()));
+  }
+  bool contains(Offset offset) const {
+    return offset >= base() && offset < past();
+  }
   int line1() const { return shared()->m_line1; }
   int line2() const { return shared()->m_line2; }
   DataType returnType() const { return shared()->m_returnType; }
@@ -342,34 +352,7 @@ struct Func {
   bool isClosureBody() const { return shared()->m_isClosureBody; }
   bool isClonedClosure() const;
   bool isGenerator() const { return shared()->m_isGenerator; }
-  bool isGeneratorFromClosure() const {
-    return shared()->m_isGeneratorFromClosure;
-  }
   bool isPairGenerator() const { return shared()->m_isPairGenerator; }
-  /**
-   * If this function is a generator then it is implemented as a simple
-   * function that just returns another function. hasGeneratorAsBody() will be
-   * true for the outer functions and isGenerator() is true for the
-   * inner function.
-   *
-   * This isn't a pointer to the function itself because it was too hard to
-   * hook the parts up. If you know more and need it, there probably isn't a
-   * technical reason not to.
-   */
-  bool hasGeneratorAsBody() const { return shared()->m_generatorBodyName; }
-  const StringData* getGeneratorBodyName() const {
-    return shared()->m_generatorBodyName;
-  }
-  const Func* getGeneratorBody() const;
-
-  void setGeneratorOrigFunc(const Func* origFunc) {
-    assert(isGenerator());
-    ((const Func**)this)[-1] = origFunc;
-  }
-  const Func* getGeneratorOrigFunc() const {
-    assert(isGenerator());
-    return ((Func**)this)[-1];
-  }
 
   /**
    * Was this generated specially by the compiler to aide the runtime?
@@ -401,13 +384,12 @@ struct Func {
    * const here is the equivalent of "mutable" since this is just a cache
    */
   Func*& nextClonedClosure() const {
-    assert(isClosureBody() || isGeneratorFromClosure());
-    return ((Func**)this)[-1 - (int)isGenerator()];
+    assert(isClosureBody());
+    return ((Func**)this)[-1];
   }
 
   static void* allocFuncMem(
     const StringData* name, int numParams,
-    bool needsGeneratorOrigFunc,
     bool needsNextClonedClosure,
     bool lowMem);
 
@@ -461,7 +443,9 @@ struct Func {
   }
 
 public: // Offset accessors for the translator.
-#define X(f) static ptrdiff_t f##Off() { return offsetof(Func, m_##f); }
+#define X(f) static constexpr ptrdiff_t f##Off() {      \
+    return offsetof(Func, m_##f);                       \
+  }
   X(attrs);
   X(unit);
   X(cls);
@@ -502,13 +486,11 @@ private:
     const StringData* m_docComment;
     bool m_top : 1; // Defined at top level.
     bool m_isClosureBody : 1;
+    bool m_isAsync : 1;
     bool m_isGenerator : 1;
-    bool m_isGeneratorFromClosure : 1;
     bool m_isPairGenerator : 1;
     bool m_isGenerated : 1;
-    bool m_isAsync : 1;
     UserAttributeMap m_userAttributes;
-    const StringData* m_generatorBodyName;
     TypeConstraint m_retTypeConstraint;
     const StringData* m_retUserType;
     // per-func filepath for traits flattened during repo construction
@@ -710,17 +692,8 @@ public:
     return !isPseudoMain() && (bool)pce();
   }
 
-  void setIsGeneratorFromClosure(bool b) { m_isGeneratorFromClosure = b; }
-  bool isGeneratorFromClosure() const { return m_isGeneratorFromClosure; }
-
   void setIsPairGenerator(bool b) { m_isPairGenerator = b; }
   bool isPairGenerator() const { return m_isPairGenerator; }
-
-  void setGeneratorBodyName(const StringData* name) {
-    m_generatorBodyName = name;
-  }
-  const StringData* getGeneratorBodyName() const { return m_generatorBodyName; }
-  bool hasGeneratorAsBody() const { return m_generatorBodyName; }
 
   void setContainsCalls() { m_containsCalls = true; }
 
@@ -734,9 +707,11 @@ public:
   const UserAttributeMap& getUserAttributes() const {
     return m_userAttributes;
   }
-  int parseUserAttributes(Attr &attrs) const;
+  bool hasUserAttribute(const StringData* name) const {
+    auto it = m_userAttributes.find(name);
+    return it != m_userAttributes.end();
+  }
   int parseNativeAttributes(Attr &attrs) const;
-  int parseHipHopAttributes(Attr &attrs) const;
 
   void commit(RepoTxn& txn) const;
   Func* create(Unit& unit, PreClass* preClass = nullptr) const;
@@ -810,11 +785,10 @@ private:
   bool m_top;
   const StringData* m_docComment;
   bool m_isClosureBody;
+  bool m_isAsync;
   bool m_isGenerator;
-  bool m_isGeneratorFromClosure;
   bool m_isPairGenerator;
   bool m_containsCalls;
-  bool m_isAsync;
 
   UserAttributeMap m_userAttributes;
 
@@ -822,7 +796,6 @@ private:
   BuiltinFunction m_builtinFuncPtr;
   BuiltinFunction m_nativeFuncPtr;
 
-  const StringData* m_generatorBodyName;
   const StringData* m_originalFilename;
 };
 

@@ -1,24 +1,30 @@
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 int(0)
 NULL
 int(1)
 string(4) "data"
-HipHop Warning: %s
+
+Warning: %s
 int(-1)
 string(4) "data"
 NULL
-HipHop Warning: %s
+
+Warning: %s
 int(-1)
 array(0) {
 }
 array(0) {
 }
-HipHop Warning: %s
+
+Warning: %s
 int(-1)
 array(0) {
 }
@@ -27,6 +33,7 @@ array(0) {
 bool(false)
 array(0) {
 }
-HipHop Warning: %s
+
+Warning: %s
 int(-1)
 Done

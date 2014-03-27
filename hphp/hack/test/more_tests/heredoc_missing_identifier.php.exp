@@ -1,0 +1,2 @@
+File "heredoc_missing_identifier.php", line 13, characters 1-0:
+Expected heredoc or nowdoc identifier

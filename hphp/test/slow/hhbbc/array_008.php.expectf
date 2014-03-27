@@ -2,5 +2,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-HipHop Notice: Undefined index: 13foo in %s/slow/hhbbc/array_008.php on line 16
+
+Notice: Undefined index: 13foo in %s/slow/hhbbc/array_008.php on line 16
 bool(true)

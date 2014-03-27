@@ -17,20 +17,22 @@
 #ifndef incl_HPHP_VM_BYTECODE_H_
 #define incl_HPHP_VM_BYTECODE_H_
 
-#include <type_traits>
-
-#include "hphp/util/arena.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/tv-arith.h"
-#include "hphp/runtime/base/tv-conversions.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-util.h"
+#include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/base/tv-conversions.h"
+#include "hphp/runtime/base/tv-helpers.h"
+
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/name-value-table.h"
+#include "hphp/runtime/vm/unit.h"
+
+#include "hphp/util/arena.h"
+
+#include <type_traits>
 
 namespace HPHP {
 
@@ -68,6 +70,9 @@ void SETOP_BODY_CELL(Cell* lhs, SetOpOp op, Cell* rhs) {
     cellCastToInt64InPlace(lhs);
     lhs->m_data.num >>= cellToInt(*rhs);
     return;
+  case SetOpOp::PlusEqualO:     cellAddEqO(*lhs, *rhs); return;
+  case SetOpOp::MinusEqualO:    cellSubEqO(*lhs, *rhs); return;
+  case SetOpOp::MulEqualO:      cellMulEqO(*lhs, *rhs); return;
   }
   not_reached();
 }
@@ -79,9 +84,6 @@ void SETOP_BODY(TypedValue* lhs, SetOpOp op, Cell* rhs) {
 
 class Func;
 struct ActRec;
-
-// max number of arguments for direct call to builtin
-const int kMaxBuiltinArgs = 5;
 
 struct ExtraArgs : private boost::noncopyable {
   /*
@@ -143,7 +145,6 @@ class VarEnv {
  private:
   ExtraArgs* m_extraArgs;
   uint16_t m_depth;
-  bool m_malloced;
   bool m_global;
   ActRec* m_cfp;
   // TODO remove vector (#1099580).  Note: trying changing this to a
@@ -171,8 +172,7 @@ class VarEnv {
    * (because we're about to attach a callee frame using attach()) but
    * don't actually have one.
    */
-  static VarEnv* createLocalOnStack(ActRec* fp);
-  static VarEnv* createLocalOnHeap(ActRec* fp);
+  static VarEnv* createLocal(ActRec* fp);
 
   // Allocate a global VarEnv.  Initially not attached to any frame.
   static VarEnv* createGlobal();
@@ -568,7 +568,7 @@ private:
 
 public:
   static const int sSurprisePageSize;
-  static const uint sMinStackElms;
+  static const unsigned sMinStackElms;
   static void ValidateStackSize();
   Stack();
   ~Stack();

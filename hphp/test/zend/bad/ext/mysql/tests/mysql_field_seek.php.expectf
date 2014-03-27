@@ -1,5 +1,6 @@
 Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 object(stdClass)#%d (13) {
   [%u|b%"name"]=>
@@ -87,9 +88,11 @@ object(stdClass)#%d (13) {
   [%u|b%"zerofill"]=>
   int(0)
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 done!

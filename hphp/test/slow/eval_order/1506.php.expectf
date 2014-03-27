@@ -24,7 +24,8 @@ omc
 3
 rsfc
 int(10)
-HipHop Notice: Undefined variable: v in %s/test/slow/eval_order/1506.php on line 51
+
+Notice: Undefined variable: v in %s/test/slow/eval_order/1506.php on line 51
 NULL
 int(1)
 int(10)

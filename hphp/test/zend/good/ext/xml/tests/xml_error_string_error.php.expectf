@@ -1,10 +1,12 @@
 *** Testing xml_error_string() : error conditions ***
 
 -- Testing xml_error_string() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing xml_error_string() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

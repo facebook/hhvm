@@ -1,4 +1,12 @@
-%S%w%S%w%S%w%S%wbool(false)
+
+Notice: Undefined variable: e in %s/test/slow/logical_operators/1451.php on line 10
+
+Notice: Undefined variable: f in %s/test/slow/logical_operators/1451.php on line 11
+
+Notice: Undefined variable: g in %s/test/slow/logical_operators/1451.php on line 12
+
+Notice: Undefined variable: h in %s/test/slow/logical_operators/1451.php on line 13
+bool(false)
 bool(true)
 bool(false)
 bool(true)

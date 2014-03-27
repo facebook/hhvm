@@ -32,19 +32,24 @@ string(13) "1.07654321E-9"
 -- Iteration 15 --
 string(3) "0.5"
 -- Iteration 16 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 17 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 18 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 19 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 21 --
 string(1) "1"
@@ -77,6 +82,7 @@ string(0) ""
 -- Iteration 35 --
 string(0) ""
 -- Iteration 36 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

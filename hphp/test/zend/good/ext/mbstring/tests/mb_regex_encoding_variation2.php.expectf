@@ -7,7 +7,8 @@ string(5) "UCS-4"
 
 -- Iteration 2 --
 string(5) "UCS-4"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(5) "UCS-4"
 
@@ -18,19 +19,22 @@ string(7) "UCS-4LE"
 
 -- Iteration 4 --
 string(7) "UCS-4LE"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(7) "UCS-4LE"
 
 -- Iteration 5 --
 string(7) "UCS-4LE"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(7) "UCS-4LE"
 
 -- Iteration 6 --
 string(7) "UCS-4LE"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(7) "UCS-4LE"
 
@@ -66,13 +70,15 @@ string(8) "UTF-16LE"
 
 -- Iteration 13 --
 string(8) "UTF-16LE"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(8) "UTF-16LE"
 
 -- Iteration 14 --
 string(8) "UTF-16LE"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(8) "UTF-16LE"
 
@@ -108,13 +114,15 @@ string(4) "SJIS"
 
 -- Iteration 21 --
 string(4) "SJIS"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(4) "SJIS"
 
 -- Iteration 22 --
 string(4) "SJIS"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(4) "SJIS"
 
@@ -185,49 +193,57 @@ string(11) "ISO-8859-15"
 
 -- Iteration 36 --
 string(11) "ISO-8859-15"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 37 --
 string(11) "ISO-8859-15"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 38 --
 string(11) "ISO-8859-15"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 39 --
 string(11) "ISO-8859-15"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 40 --
 string(11) "ISO-8859-15"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 41 --
 string(11) "ISO-8859-15"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 42 --
 string(11) "ISO-8859-15"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 43 --
 string(11) "ISO-8859-15"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(11) "ISO-8859-15"
 
@@ -238,13 +254,15 @@ string(6) "EUC-CN"
 
 -- Iteration 45 --
 string(6) "EUC-CN"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(6) "EUC-CN"
 
 -- Iteration 46 --
 string(6) "EUC-CN"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(6) "EUC-CN"
 
@@ -255,7 +273,8 @@ string(6) "EUC-TW"
 
 -- Iteration 48 --
 string(6) "EUC-TW"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(6) "EUC-TW"
 
@@ -271,31 +290,36 @@ string(6) "EUC-KR"
 
 -- Iteration 51 --
 string(6) "EUC-KR"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(6) "EUC-KR"
 
 -- Iteration 52 --
 string(6) "EUC-KR"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(6) "EUC-KR"
 
 -- Iteration 53 --
 string(6) "EUC-KR"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(6) "EUC-KR"
 
 -- Iteration 54 --
 string(6) "EUC-KR"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(6) "EUC-KR"
 
 -- Iteration 55 --
 string(6) "EUC-KR"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(6) "EUC-KR"
 

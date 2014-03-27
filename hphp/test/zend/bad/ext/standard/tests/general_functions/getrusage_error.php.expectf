@@ -1,17 +1,22 @@
 *** Testing getrusage() : error conditions ***
 
 -- Testing getrusage() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 
 -- Testing getrusage() function with invalid argument - non-numeric STRING--
-HipHop Warning: %s
+
+Warning: %s
 
 -- Testing getrusage() function with invalid argument - ARRAY--
-HipHop Warning: %s
+
+Warning: %s
 
 -- Testing getrusage() function with invalid argument - OBJECT --
-HipHop Warning: %s
+
+Warning: %s
 
 -- Testing getrusage() function with invalid argument - RESOURCE --
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

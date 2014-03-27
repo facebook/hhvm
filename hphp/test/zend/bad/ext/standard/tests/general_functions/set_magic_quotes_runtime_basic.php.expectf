@@ -12,4 +12,5 @@ bool(false)
 -- Set magic quotes runtime to 1:  --
 
 Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
-HipHop Fatal error: %s
+
+Fatal error: %s

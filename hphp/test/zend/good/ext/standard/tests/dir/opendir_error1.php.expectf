@@ -1,10 +1,12 @@
 *** Testing opendir() : error conditions ***
 
 -- Testing opendir() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing opendir() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

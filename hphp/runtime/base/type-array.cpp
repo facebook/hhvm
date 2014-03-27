@@ -83,10 +83,10 @@ Array &Array::operator=(const Variant& var) {
 }
 
 // Move assign
-Array &Array::operator =  (Variant&& v) {
-  if (v.m_type == KindOfArray) {
-    m_px = v.m_data.parr;
-    v.reset();
+Array& Array::operator=(Variant&& v) {
+  if (v.asTypedValue()->m_type == KindOfArray) {
+    m_px = v.asTypedValue()->m_data.parr;
+    v.asTypedValue()->m_type = KindOfNull;
   } else {
     *this = const_cast<const Variant&>(v);
   }
@@ -454,25 +454,27 @@ Variant Array::rvalAt(const String& key, ACCESSPARAMS_IMPL) const {
 
 const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
   if (!m_px) return null_variant;
-  switch (key.m_type) {
+  switch (key.getRawType()) {
   case KindOfUninit:
   case KindOfNull:
     return m_px->get(empty_string, flags & AccessFlags::Error);
   case KindOfBoolean:
   case KindOfInt64:
-    return m_px->get(key.m_data.num, flags & AccessFlags::Error);
+    return m_px->get(key.asTypedValue()->m_data.num,
+      flags & AccessFlags::Error);
   case KindOfDouble:
-    return m_px->get((int64_t)key.m_data.dbl, flags & AccessFlags::Error);
+    return m_px->get((int64_t)key.asTypedValue()->m_data.dbl,
+      flags & AccessFlags::Error);
   case KindOfStaticString:
-  case KindOfString: {
-    int64_t n;
-    if (!(flags & AccessFlags::Key) &&
-        key.m_data.pstr->isStrictlyInteger(n)) {
-      return m_px->get(n, flags & AccessFlags::Error);
-    } else {
-      return m_px->get(key.asCStrRef(), flags & AccessFlags::Error);
+  case KindOfString:
+    {
+      int64_t n;
+      if (!(flags & AccessFlags::Key) &&
+          key.asTypedValue()->m_data.pstr->isStrictlyInteger(n)) {
+        return m_px->get(n, flags & AccessFlags::Error);
+      }
     }
-  }
+    return m_px->get(key.asCStrRef(), flags & AccessFlags::Error);
   case KindOfArray:
     throw_bad_type_exception("Invalid type used as key");
     break;
@@ -482,7 +484,7 @@ const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
   case KindOfResource:
     return m_px->get(key.toInt64(), flags & AccessFlags::Error);
   case KindOfRef:
-    return rvalAtRef(*(key.m_data.pref->var()), flags);
+    return rvalAtRef(*(key.asTypedValue()->m_data.pref->var()), flags);
   default:
     assert(false);
     break;
@@ -757,14 +759,6 @@ void Array::unserialize(VariableUnserializer *uns) {
   sep = uns->readChar();
   if (sep != '}') {
     throw Exception("Expected '}' but got '%c'", sep);
-  }
-}
-
-void Array::dump() {
-  if (m_px) {
-    m_px->dump();
-  } else {
-    printf("(null)\n");
   }
 }
 

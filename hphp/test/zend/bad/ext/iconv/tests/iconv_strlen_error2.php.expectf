@@ -1,4 +1,5 @@
 *** Testing iconv_strlen() : error ***
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 ===DONE===

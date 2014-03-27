@@ -1,14 +1,17 @@
 *** Testing property_exists() : error conditions ***
 
 -- Testing property_exists() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing property_exists() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing property_exists() function with incorrect arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

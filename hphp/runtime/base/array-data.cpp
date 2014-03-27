@@ -15,12 +15,14 @@
 */
 #include "hphp/runtime/base/array-data.h"
 
+#include <vector>
+#include <array>
 #include <boost/lexical_cast.hpp>
 #include <tbb/concurrent_hash_map.h>
-#include <vector>
 
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -33,12 +35,13 @@
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
 #include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/hphp-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 static_assert(
-  sizeof(ArrayData) == 24,
+  sizeof(ArrayData) == 16,
   "Performance is sensitive to sizeof(ArrayData)."
   " Make sure you changed it with good reason and then update this assert.");
 
@@ -46,11 +49,13 @@ typedef tbb::concurrent_hash_map<std::string, ArrayData*> ArrayDataMap;
 static ArrayDataMap s_arrayDataMap;
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
+  if (arr->empty()) return HphpArray::GetStaticEmptyArray();
   auto key = f_serialize(arr).toCppString();
   return GetScalarArray(arr, key);
 }
 
-ArrayData *ArrayData::GetScalarArray(ArrayData *arr, const std::string& key) {
+ArrayData* ArrayData::GetScalarArray(ArrayData* arr, const std::string& key) {
+  if (arr->empty()) return HphpArray::GetStaticEmptyArray();
   assert(key == f_serialize(arr).toCppString());
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
@@ -74,251 +79,342 @@ extern const ArrayFunctions g_array_funcs = {
   // release
   { &HphpArray::ReleasePacked, &HphpArray::Release,
     &APCLocalArray::Release,
+    &EmptyArray::Release,
     &NameValueTableWrapper::Release,
     &ProxyArray::Release },
   // nvGetInt
   { &HphpArray::NvGetIntPacked, &HphpArray::NvGetInt,
     &APCLocalArray::NvGetInt,
+    reinterpret_cast<TypedValue*(*)(const ArrayData*, int64_t)>(
+      &EmptyArray::ReturnNull
+    ),
     &NameValueTableWrapper::NvGetInt,
     &ProxyArray::NvGetInt },
   // nvGetStr
   { &HphpArray::NvGetStrPacked, &HphpArray::NvGetStr,
     &APCLocalArray::NvGetStr,
+    reinterpret_cast<TypedValue*(*)(const ArrayData*, const StringData*)>(
+      &EmptyArray::ReturnNull
+    ),
     &NameValueTableWrapper::NvGetStr,
     &ProxyArray::NvGetStr },
   // nvGetKey
   { &HphpArray::NvGetKeyPacked, &HphpArray::NvGetKey,
     &APCLocalArray::NvGetKey,
+    &EmptyArray::NvGetKey,
     &NameValueTableWrapper::NvGetKey,
     &ProxyArray::NvGetKey },
   // setInt
   { &HphpArray::SetIntPacked, &HphpArray::SetInt,
     &APCLocalArray::SetInt,
+    &EmptyArray::SetInt,
     &NameValueTableWrapper::SetInt,
     &ProxyArray::SetInt },
   // setStr
   { &HphpArray::SetStrPacked, &HphpArray::SetStr,
     &APCLocalArray::SetStr,
+    &EmptyArray::SetStr,
     &NameValueTableWrapper::SetStr,
     &ProxyArray::SetStr },
   // vsize
   { &VsizeNop, &VsizeNop,
+    &VsizeNop,
     &VsizeNop,
     &NameValueTableWrapper::Vsize,
     &ProxyArray::Vsize },
   // getValueRef
   { &HphpArray::GetValueRef, &HphpArray::GetValueRef,
     &APCLocalArray::GetValueRef,
+    &EmptyArray::GetValueRef,
     &NameValueTableWrapper::GetValueRef,
     &ProxyArray::GetValueRef },
   // noCopyOnWrite
   { false, false,
     false,
+    false,
     true, // NameValueTableWrapper doesn't support COW.
     false },
   // isVectorData
-  { &HphpArray::IsVectorDataPacked, &HphpArray::IsVectorData,
+  {
+    reinterpret_cast<bool (*)(const ArrayData*)>(
+      // TODO(#3983912): move shared helpers to consolidated location
+      &EmptyArray::ReturnTrue
+    ),
+    &HphpArray::IsVectorData,
     &APCLocalArray::IsVectorData,
+    reinterpret_cast<bool (*)(const ArrayData*)>(
+      &EmptyArray::ReturnTrue
+    ),
     &NameValueTableWrapper::IsVectorData,
     &ProxyArray::IsVectorData },
   // existsInt
   { &HphpArray::ExistsIntPacked, &HphpArray::ExistsInt,
     &APCLocalArray::ExistsInt,
+    reinterpret_cast<bool (*)(const ArrayData*, int64_t)>(
+      &EmptyArray::ReturnFalse
+    ),
     &NameValueTableWrapper::ExistsInt,
     &ProxyArray::ExistsInt },
   // existsStr
-  { &HphpArray::ExistsStrPacked, &HphpArray::ExistsStr,
+  {
+    reinterpret_cast<bool (*)(const ArrayData*, const StringData*)>(
+      // TODO(#3983912): move shared helpers to consolidated location
+      &EmptyArray::ReturnFalse
+    ),
+    &HphpArray::ExistsStr,
     &APCLocalArray::ExistsStr,
+    reinterpret_cast<bool (*)(const ArrayData*, const StringData*)>(
+      &EmptyArray::ReturnFalse
+    ),
     &NameValueTableWrapper::ExistsStr,
     &ProxyArray::ExistsStr },
   // lvalInt
   { &HphpArray::LvalIntPacked, &HphpArray::LvalInt,
     &APCLocalArray::LvalInt,
+    &EmptyArray::LvalInt,
     &NameValueTableWrapper::LvalInt,
     &ProxyArray::LvalInt },
   // lvalStr
   { &HphpArray::LvalStrPacked, &HphpArray::LvalStr,
     &APCLocalArray::LvalStr,
+    &EmptyArray::LvalStr,
     &NameValueTableWrapper::LvalStr,
     &ProxyArray::LvalStr },
   // lvalNew
   { &HphpArray::LvalNewPacked, &HphpArray::LvalNew,
     &APCLocalArray::LvalNew,
+    &EmptyArray::LvalNew,
     &NameValueTableWrapper::LvalNew,
     &ProxyArray::LvalNew },
   // setRefInt
   { &HphpArray::SetRefIntPacked, &HphpArray::SetRefInt,
     &APCLocalArray::SetRefInt,
+    &EmptyArray::SetRefInt,
     &NameValueTableWrapper::SetRefInt,
     &ProxyArray::SetRefInt },
   // setRefStr
   { &HphpArray::SetRefStrPacked, &HphpArray::SetRefStr,
     &APCLocalArray::SetRefStr,
+    &EmptyArray::SetRefStr,
     &NameValueTableWrapper::SetRefStr,
     &ProxyArray::SetRefStr },
   // addInt
   { &HphpArray::AddIntPacked, &HphpArray::AddInt,
     &APCLocalArray::SetInt, // reuse set
+    &EmptyArray::SetInt, // reuse set
     &NameValueTableWrapper::SetInt, // reuse set
     &ProxyArray::SetInt }, // reuse set
   // addStr
   { &HphpArray::SetStrPacked, // reuse set
     &HphpArray::AddStr,
     &APCLocalArray::SetStr, // reuse set
+    &EmptyArray::SetStr, // reuse set
     &NameValueTableWrapper::SetStr, // reuse set
     &ProxyArray::SetStr }, // reuse set
   // removeInt
   { &HphpArray::RemoveIntPacked, &HphpArray::RemoveInt,
     &APCLocalArray::RemoveInt,
+    reinterpret_cast<ArrayData* (*)(ArrayData*, int64_t, bool)>(
+      &EmptyArray::ReturnFirstArg
+    ),
     &NameValueTableWrapper::RemoveInt,
     &ProxyArray::RemoveInt },
   // removeStr
   { &HphpArray::RemoveStrPacked, &HphpArray::RemoveStr,
     &APCLocalArray::RemoveStr,
+    reinterpret_cast<ArrayData* (*)(ArrayData*, const StringData*, bool)>(
+      &EmptyArray::ReturnFirstArg
+    ),
     &NameValueTableWrapper::RemoveStr,
     &ProxyArray::RemoveStr },
   // iterBegin
   { &HphpArray::IterBegin, &HphpArray::IterBegin,
     &APCLocalArray::IterBegin,
+    &EmptyArray::ReturnInvalidIndex,
     &NameValueTableWrapper::IterBegin,
     &ProxyArray::IterBegin },
   // iterEnd
   { &HphpArray::IterEnd, &HphpArray::IterEnd,
     &APCLocalArray::IterEnd,
+    &EmptyArray::ReturnInvalidIndex,
     &NameValueTableWrapper::IterEnd,
     &ProxyArray::IterEnd },
   // iterAdvance
   { &HphpArray::IterAdvance, &HphpArray::IterAdvance,
     &APCLocalArray::IterAdvance,
+    &EmptyArray::IterAdvance,
     &NameValueTableWrapper::IterAdvance,
     &ProxyArray::IterAdvance },
   // iterRewind
   { &HphpArray::IterRewind, &HphpArray::IterRewind,
     &APCLocalArray::IterRewind,
+    &EmptyArray::IterRewind,
     &NameValueTableWrapper::IterRewind,
     &ProxyArray::IterRewind },
-  // validFullPos
-  { &HphpArray::ValidFullPos, &HphpArray::ValidFullPos,
-    &APCLocalArray::ValidFullPos,
-    &NameValueTableWrapper::ValidFullPos,
-    &ProxyArray::ValidFullPos },
-  // advanceFullPos
-  { &HphpArray::AdvanceFullPos, &HphpArray::AdvanceFullPos,
-    &APCLocalArray::AdvanceFullPos,
-    &NameValueTableWrapper::AdvanceFullPos,
-    &ProxyArray::AdvanceFullPos },
+  // validMArrayIter
+  { &HphpArray::ValidMArrayIter, &HphpArray::ValidMArrayIter,
+    &APCLocalArray::ValidMArrayIter,
+    &EmptyArray::ValidMArrayIter,
+    &NameValueTableWrapper::ValidMArrayIter,
+    &ProxyArray::ValidMArrayIter },
+  // advanceMArrayIter
+  { &HphpArray::AdvanceMArrayIter, &HphpArray::AdvanceMArrayIter,
+    &APCLocalArray::AdvanceMArrayIter,
+    &EmptyArray::AdvanceMArrayIter,
+    &NameValueTableWrapper::AdvanceMArrayIter,
+    &ProxyArray::AdvanceMArrayIter },
   // escalateForSort
   { &HphpArray::EscalateForSort, &HphpArray::EscalateForSort,
     &APCLocalArray::EscalateForSort,
+    reinterpret_cast<ArrayData* (*)(ArrayData*)>(
+      &EmptyArray::ReturnFirstArg
+    ),
     &NameValueTableWrapper::EscalateForSort,
     &ProxyArray::EscalateForSort },
   // ksort
   { &HphpArray::Ksort, &HphpArray::Ksort,
     &ArrayData::Ksort,
+    reinterpret_cast<void (*)(ArrayData*, int, bool)>(
+      &EmptyArray::NoOp
+    ),
     &NameValueTableWrapper::Ksort,
     &ProxyArray::Ksort },
   // sort
   { &HphpArray::Sort, &HphpArray::Sort,
     &ArrayData::Sort,
+    reinterpret_cast<void (*)(ArrayData*, int, bool)>(
+      &EmptyArray::NoOp
+    ),
     &NameValueTableWrapper::Sort,
     &ProxyArray::Sort },
   // asort
   { &HphpArray::Asort, &HphpArray::Asort,
     &ArrayData::Asort,
+    reinterpret_cast<void (*)(ArrayData*, int, bool)>(
+      &EmptyArray::NoOp
+    ),
     &NameValueTableWrapper::Asort,
     &ProxyArray::Asort },
   // uksort
   { &HphpArray::Uksort, &HphpArray::Uksort,
     &ArrayData::Uksort,
+    reinterpret_cast<bool (*)(ArrayData*, const Variant&)>(
+      &EmptyArray::ReturnTrue
+    ),
     &NameValueTableWrapper::Uksort,
     &ProxyArray::Uksort },
   // usort
   { &HphpArray::Usort, &HphpArray::Usort,
     &ArrayData::Usort,
+    reinterpret_cast<bool (*)(ArrayData*, const Variant&)>(
+      &EmptyArray::ReturnTrue
+    ),
     &NameValueTableWrapper::Usort,
     &ProxyArray::Usort },
   // uasort
   { &HphpArray::Uasort, &HphpArray::Uasort,
     &ArrayData::Uasort,
+    reinterpret_cast<bool (*)(ArrayData*, const Variant&)>(
+      &EmptyArray::ReturnTrue
+    ),
     &NameValueTableWrapper::Uasort,
     &ProxyArray::Uasort },
   // copy
   { &HphpArray::CopyPacked, &HphpArray::Copy,
     &APCLocalArray::Copy,
+    &EmptyArray::Copy,
     &NameValueTableWrapper::Copy,
     &ProxyArray::Copy },
   // copyWithStrongIterators
   { &HphpArray::CopyWithStrongIterators, &HphpArray::CopyWithStrongIterators,
     &APCLocalArray::CopyWithStrongIterators,
+    &EmptyArray::CopyWithStrongIterators,
     &NameValueTableWrapper::CopyWithStrongIterators,
     &ProxyArray::CopyWithStrongIterators },
   // nonSmartCopy
   { &HphpArray::NonSmartCopy, &HphpArray::NonSmartCopy,
     &ArrayData::NonSmartCopy,
-    &ArrayData::NonSmartCopy,
+    &EmptyArray::NonSmartCopy,
     &ProxyArray::NonSmartCopy },
   // append
   { &HphpArray::AppendPacked, &HphpArray::Append,
     &APCLocalArray::Append,
+    &EmptyArray::Append,
     &NameValueTableWrapper::Append,
     &ProxyArray::Append },
   // appendRef
   { &HphpArray::AppendRefPacked, &HphpArray::AppendRef,
     &APCLocalArray::AppendRef,
+    &EmptyArray::AppendRef,
     &NameValueTableWrapper::AppendRef,
     &ProxyArray::AppendRef },
   // appendWithRef
   { &HphpArray::AppendWithRefPacked, &HphpArray::AppendWithRef,
     &APCLocalArray::AppendRef,
+    &EmptyArray::AppendWithRef,
     &NameValueTableWrapper::AppendRef,
     &ProxyArray::AppendRef },
   // plusEq
   { &HphpArray::PlusEq, &HphpArray::PlusEq,
     &APCLocalArray::PlusEq,
+    &EmptyArray::PlusEq,
     &NameValueTableWrapper::PlusEq,
     &ProxyArray::PlusEq },
   // merge
   { &HphpArray::Merge, &HphpArray::Merge,
     &APCLocalArray::Merge,
+    &EmptyArray::Merge,
     &NameValueTableWrapper::Merge,
     &ProxyArray::Merge },
   // pop
   { &HphpArray::PopPacked, &HphpArray::Pop,
     &APCLocalArray::Pop,
+    &EmptyArray::PopOrDequeue,
     &NameValueTableWrapper::Pop,
     &ProxyArray::Pop },
   // dequeue
   { &HphpArray::DequeuePacked, &HphpArray::Dequeue,
     &APCLocalArray::Dequeue,
+    &EmptyArray::PopOrDequeue,
     &NameValueTableWrapper::Dequeue,
     &ProxyArray::Dequeue },
   // prepend
   { &HphpArray::PrependPacked, &HphpArray::Prepend,
     &APCLocalArray::Prepend,
+    &EmptyArray::Prepend,
     &NameValueTableWrapper::Prepend,
     &ProxyArray::Prepend },
   // renumber
   { &HphpArray::RenumberPacked, &HphpArray::Renumber,
     &APCLocalArray::Renumber,
+    reinterpret_cast<void (*)(ArrayData*)>(
+      &EmptyArray::NoOp
+    ),
     &NameValueTableWrapper::Renumber,
     &ProxyArray::Renumber },
   // onSetEvalScalar
   { &HphpArray::OnSetEvalScalarPacked, &HphpArray::OnSetEvalScalar,
     &APCLocalArray::OnSetEvalScalar,
+    &EmptyArray::OnSetEvalScalar,
     &NameValueTableWrapper::OnSetEvalScalar,
     &ProxyArray::OnSetEvalScalar },
   // escalate
   { &ArrayData::Escalate, &ArrayData::Escalate,
     &APCLocalArray::Escalate,
     &ArrayData::Escalate,
+    &ArrayData::Escalate,
     &ProxyArray::Escalate },
   // getAPCHandle
   { &ArrayData::GetAPCHandle, &ArrayData::GetAPCHandle,
     &APCLocalArray::GetAPCHandle,
+    reinterpret_cast<APCHandle* (*)(const ArrayData*)>(
+      &EmptyArray::ReturnNull
+    ),
     &ArrayData::GetAPCHandle,
     &ProxyArray::GetAPCHandle },
   // zSetInt
   { &HphpArray::ZSetInt, &HphpArray::ZSetInt,
+    &ArrayData::ZSetInt,
     &ArrayData::ZSetInt,
     &ArrayData::ZSetInt,
     &ProxyArray::ZSetInt },
@@ -326,9 +422,11 @@ extern const ArrayFunctions g_array_funcs = {
   { &HphpArray::ZSetStr, &HphpArray::ZSetStr,
     &ArrayData::ZSetStr,
     &ArrayData::ZSetStr,
+    &ArrayData::ZSetStr,
     &ProxyArray::ZSetStr },
   // zAppend
   { &HphpArray::ZAppend, &HphpArray::ZAppend,
+    &ArrayData::ZAppend,
     &ArrayData::ZAppend,
     &ArrayData::ZAppend,
     &ProxyArray::ZAppend },
@@ -387,10 +485,6 @@ ArrayData *ArrayData::NonSmartCopy(const ArrayData*) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // reads
-
-Object ArrayData::toObject() const {
-  return ObjectData::FromArray(const_cast<ArrayData*>(this));
-}
 
 int ArrayData::compare(const ArrayData *v2) const {
   assert(v2);
@@ -475,44 +569,7 @@ ArrayData *ArrayData::Dequeue(ArrayData* a, Variant &value) {
   return a;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// MutableArrayIter related functions
-
-void ArrayData::newFullPos(FullPos &fp) {
-  assert(!fp.getContainer());
-  fp.setContainer(this);
-  fp.setNext(strongIterators());
-  setStrongIterators(&fp);
-  fp.m_pos = m_pos;
-}
-
-void ArrayData::freeFullPos(FullPos &fp) {
-  assert(strongIterators() && fp.getContainer() == this);
-  // search for fp in our list, then remove it. Usually its the first one.
-  FullPos* p = strongIterators();
-  if (p == &fp) {
-    setStrongIterators(p->getNext());
-    fp.setContainer(nullptr);
-    return;
-  }
-  for (; p->getNext(); p = p->getNext()) {
-    if (p->getNext() == &fp) {
-      p->setNext(p->getNext()->getNext());
-      fp.setContainer(nullptr);
-      return;
-    }
-  }
-  // If the strong iterator list was empty or if fp could not be
-  // found in the strong iterator list, then we are in a bad state
-  assert(false);
-}
-
-void ArrayData::freeStrongIterators() {
-  for (FullPosRange r(strongIterators()); !r.empty(); r.popFront()) {
-    r.front()->setContainer(nullptr);
-  }
-  setStrongIterators(nullptr);
-}
+//////////////////////////////////////////////////////////////////////
 
 const Variant& ArrayData::endRef() {
   if (m_pos != invalid_index) {
@@ -565,13 +622,13 @@ ArrayData* ArrayData::ZAppend(ArrayData* ad, RefData* v) {
 // Default implementation of position-based iterations.
 
 Variant ArrayData::reset() {
-  m_pos = iter_begin();
+  setPosition(iter_begin());
   return m_pos != invalid_index ? getValue(m_pos) : Variant(false);
 }
 
 Variant ArrayData::prev() {
   if (m_pos != invalid_index) {
-    m_pos = iter_rewind(m_pos);
+    setPosition(iter_rewind(m_pos));
     if (m_pos != invalid_index) {
       return getValue(m_pos);
     }
@@ -581,7 +638,7 @@ Variant ArrayData::prev() {
 
 Variant ArrayData::next() {
   if (m_pos != invalid_index) {
-    m_pos = iter_advance(m_pos);
+    setPosition(iter_advance(m_pos));
     if (m_pos != invalid_index) {
       return getValue(m_pos);
     }
@@ -590,7 +647,7 @@ Variant ArrayData::next() {
 }
 
 Variant ArrayData::end() {
-  m_pos = iter_end();
+  setPosition(iter_end());
   return m_pos != invalid_index ? getValue(m_pos) : Variant(false);
 }
 
@@ -619,7 +676,7 @@ Variant ArrayData::each() {
     ret.set(s_value, value);
     ret.set(0, key);
     ret.set(s_key, key);
-    m_pos = iter_advance(m_pos);
+    setPosition(iter_advance(m_pos));
     return ret.toVariant();
   }
   return Variant(false);
@@ -702,48 +759,22 @@ void ArrayData::OnSetEvalScalar(ArrayData*) {
   assert(false);
 }
 
+// TODO(#3983912): combine with EmptyArray::ReturnFirstArg
 ArrayData* ArrayData::Escalate(const ArrayData* ad) {
   return const_cast<ArrayData*>(ad);
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  const char* names[] = {
+  std::array<const char*,6> names = {{
     "PackedKind",
     "MixedKind",
     "SharedKind",
+    "EmptyKind",
     "NvtwKind",
-  };
+    "ProxyKind",
+  }};
+  static_assert(names.size() == kNumKinds, "add new kinds here");
   return names[kind];
-}
-
-void ArrayData::dump() {
-  std::string out; dump(out); fwrite(out.c_str(), out.size(), 1, stdout);
-}
-
-void ArrayData::dump(std::string &out) {
-  VariableSerializer vs(VariableSerializer::Type::VarDump);
-  String ret(vs.serialize(Array(this), true));
-  out += "ArrayData(";
-  out += boost::lexical_cast<std::string>(m_count);
-  out += "): ";
-  out += std::string(ret.data(), ret.size());
-}
-
-void ArrayData::dump(std::ostream &out) {
-  unsigned int i = 0;
-  for (ArrayIter iter(this); iter; ++iter, i++) {
-    VariableSerializer vs(VariableSerializer::Type::Serialize);
-    Variant key(iter.first());
-    out << i << " #### " << key.toString().toCppString() << " #### ";
-    Variant val(iter.second());
-    try {
-      String valS(vs.serialize(val, true));
-      out << valS.toCppString();
-    } catch (const Exception &e) {
-      out << "Exception: " << e.what();
-    }
-    out << std::endl;
-  }
 }
 
 void ArrayData::getChildren(std::vector<TypedValue *> &out) {

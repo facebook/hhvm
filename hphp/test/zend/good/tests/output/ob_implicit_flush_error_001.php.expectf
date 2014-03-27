@@ -1,6 +1,7 @@
 *** Testing ob_implicit_flush() : error conditions ***
 
 -- Testing ob_implicit_flush() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

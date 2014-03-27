@@ -1,0 +1,538 @@
+calling f1
+
+calling f2
+Caught exception: Value returned from f2() must be of type int, null given
+Caught exception: Value returned from f2() must be of type int, string given
+Caught exception: Value returned from f2() must be of type int, bool given
+Caught exception: Value returned from f2() must be of type int, float given
+Caught exception: Value returned from f2() must be of type int, File given
+Caught exception: Value returned from f2() must be of type int, array given
+Caught exception: Value returned from f2() must be of type int, Closure given
+Caught exception: Value returned from f2() must be of type int, Shapes given
+Caught exception: Value returned from f2() must be of type int, Square given
+Caught exception: Value returned from f2() must be of type int, Fractal given
+Caught exception: Value returned from f2() must be of type int, xhp_div given
+Caught exception: Value returned from f2() must be of type int, string given
+Caught exception: Value returned from f2() must be of type int, array given
+
+calling f2_soft
+Triggered E_WARNING: Value returned from f2_soft() must be of type @int, null given
+Triggered E_WARNING: Value returned from f2_soft() must be of type @int, string given
+Triggered E_WARNING: Value returned from f2_soft() must be of type @int, bool given
+Triggered E_WARNING: Value returned from f2_soft() must be of type @int, float given
+Triggered E_WARNING: Value returned from f2_soft() must be of type @int, File given
+Triggered E_WARNING: Value returned from f2_soft() must be of type @int, array given
+Triggered E_WARNING: Value returned from f2_soft() must be of type @int, Closure given
+Triggered E_WARNING: Value returned from f2_soft() must be of type @int, Shapes given
+Triggered E_WARNING: Value returned from f2_soft() must be of type @int, Square given
+Triggered E_WARNING: Value returned from f2_soft() must be of type @int, Fractal given
+Triggered E_WARNING: Value returned from f2_soft() must be of type @int, xhp_div given
+Triggered E_WARNING: Value returned from f2_soft() must be of type @int, string given
+Triggered E_WARNING: Value returned from f2_soft() must be of type @int, array given
+
+calling f3
+Caught exception: Value returned from f3() must be of type string, null given
+Caught exception: Value returned from f3() must be of type string, int given
+Caught exception: Value returned from f3() must be of type string, bool given
+Caught exception: Value returned from f3() must be of type string, float given
+Caught exception: Value returned from f3() must be of type string, File given
+Caught exception: Value returned from f3() must be of type string, array given
+Caught exception: Value returned from f3() must be of type string, Closure given
+Caught exception: Value returned from f3() must be of type string, Shapes given
+Caught exception: Value returned from f3() must be of type string, Square given
+Caught exception: Value returned from f3() must be of type string, Fractal given
+Caught exception: Value returned from f3() must be of type string, xhp_div given
+Caught exception: Value returned from f3() must be of type string, array given
+
+calling f3_soft
+Triggered E_WARNING: Value returned from f3_soft() must be of type @string, null given
+Triggered E_WARNING: Value returned from f3_soft() must be of type @string, int given
+Triggered E_WARNING: Value returned from f3_soft() must be of type @string, bool given
+Triggered E_WARNING: Value returned from f3_soft() must be of type @string, float given
+Triggered E_WARNING: Value returned from f3_soft() must be of type @string, File given
+Triggered E_WARNING: Value returned from f3_soft() must be of type @string, array given
+Triggered E_WARNING: Value returned from f3_soft() must be of type @string, Closure given
+Triggered E_WARNING: Value returned from f3_soft() must be of type @string, Shapes given
+Triggered E_WARNING: Value returned from f3_soft() must be of type @string, Square given
+Triggered E_WARNING: Value returned from f3_soft() must be of type @string, Fractal given
+Triggered E_WARNING: Value returned from f3_soft() must be of type @string, xhp_div given
+Triggered E_WARNING: Value returned from f3_soft() must be of type @string, array given
+
+calling f4
+Caught exception: Value returned from f4() must be of type bool, null given
+Caught exception: Value returned from f4() must be of type bool, int given
+Caught exception: Value returned from f4() must be of type bool, string given
+Caught exception: Value returned from f4() must be of type bool, float given
+Caught exception: Value returned from f4() must be of type bool, File given
+Caught exception: Value returned from f4() must be of type bool, array given
+Caught exception: Value returned from f4() must be of type bool, Closure given
+Caught exception: Value returned from f4() must be of type bool, Shapes given
+Caught exception: Value returned from f4() must be of type bool, Square given
+Caught exception: Value returned from f4() must be of type bool, Fractal given
+Caught exception: Value returned from f4() must be of type bool, xhp_div given
+Caught exception: Value returned from f4() must be of type bool, string given
+Caught exception: Value returned from f4() must be of type bool, array given
+
+calling f4_soft
+Triggered E_WARNING: Value returned from f4_soft() must be of type @bool, null given
+Triggered E_WARNING: Value returned from f4_soft() must be of type @bool, int given
+Triggered E_WARNING: Value returned from f4_soft() must be of type @bool, string given
+Triggered E_WARNING: Value returned from f4_soft() must be of type @bool, float given
+Triggered E_WARNING: Value returned from f4_soft() must be of type @bool, File given
+Triggered E_WARNING: Value returned from f4_soft() must be of type @bool, array given
+Triggered E_WARNING: Value returned from f4_soft() must be of type @bool, Closure given
+Triggered E_WARNING: Value returned from f4_soft() must be of type @bool, Shapes given
+Triggered E_WARNING: Value returned from f4_soft() must be of type @bool, Square given
+Triggered E_WARNING: Value returned from f4_soft() must be of type @bool, Fractal given
+Triggered E_WARNING: Value returned from f4_soft() must be of type @bool, xhp_div given
+Triggered E_WARNING: Value returned from f4_soft() must be of type @bool, string given
+Triggered E_WARNING: Value returned from f4_soft() must be of type @bool, array given
+
+calling f5
+Caught exception: Value returned from f5() must be of type float, null given
+Caught exception: Value returned from f5() must be of type float, int given
+Caught exception: Value returned from f5() must be of type float, string given
+Caught exception: Value returned from f5() must be of type float, bool given
+Caught exception: Value returned from f5() must be of type float, File given
+Caught exception: Value returned from f5() must be of type float, array given
+Caught exception: Value returned from f5() must be of type float, Closure given
+Caught exception: Value returned from f5() must be of type float, Shapes given
+Caught exception: Value returned from f5() must be of type float, Square given
+Caught exception: Value returned from f5() must be of type float, Fractal given
+Caught exception: Value returned from f5() must be of type float, xhp_div given
+Caught exception: Value returned from f5() must be of type float, string given
+Caught exception: Value returned from f5() must be of type float, array given
+
+calling f5_soft
+Triggered E_WARNING: Value returned from f5_soft() must be of type @float, null given
+Triggered E_WARNING: Value returned from f5_soft() must be of type @float, int given
+Triggered E_WARNING: Value returned from f5_soft() must be of type @float, string given
+Triggered E_WARNING: Value returned from f5_soft() must be of type @float, bool given
+Triggered E_WARNING: Value returned from f5_soft() must be of type @float, File given
+Triggered E_WARNING: Value returned from f5_soft() must be of type @float, array given
+Triggered E_WARNING: Value returned from f5_soft() must be of type @float, Closure given
+Triggered E_WARNING: Value returned from f5_soft() must be of type @float, Shapes given
+Triggered E_WARNING: Value returned from f5_soft() must be of type @float, Square given
+Triggered E_WARNING: Value returned from f5_soft() must be of type @float, Fractal given
+Triggered E_WARNING: Value returned from f5_soft() must be of type @float, xhp_div given
+Triggered E_WARNING: Value returned from f5_soft() must be of type @float, string given
+Triggered E_WARNING: Value returned from f5_soft() must be of type @float, array given
+
+calling f6
+Caught exception: Value returned from f6() must be of type resource, null given
+Caught exception: Value returned from f6() must be of type resource, int given
+Caught exception: Value returned from f6() must be of type resource, string given
+Caught exception: Value returned from f6() must be of type resource, bool given
+Caught exception: Value returned from f6() must be of type resource, float given
+Caught exception: Value returned from f6() must be of type resource, array given
+Caught exception: Value returned from f6() must be of type resource, Closure given
+Caught exception: Value returned from f6() must be of type resource, Shapes given
+Caught exception: Value returned from f6() must be of type resource, Square given
+Caught exception: Value returned from f6() must be of type resource, Fractal given
+Caught exception: Value returned from f6() must be of type resource, xhp_div given
+Caught exception: Value returned from f6() must be of type resource, string given
+Caught exception: Value returned from f6() must be of type resource, array given
+
+calling f6_soft
+Triggered E_WARNING: Value returned from f6_soft() must be of type @resource, null given
+Triggered E_WARNING: Value returned from f6_soft() must be of type @resource, int given
+Triggered E_WARNING: Value returned from f6_soft() must be of type @resource, string given
+Triggered E_WARNING: Value returned from f6_soft() must be of type @resource, bool given
+Triggered E_WARNING: Value returned from f6_soft() must be of type @resource, float given
+Triggered E_WARNING: Value returned from f6_soft() must be of type @resource, array given
+Triggered E_WARNING: Value returned from f6_soft() must be of type @resource, Closure given
+Triggered E_WARNING: Value returned from f6_soft() must be of type @resource, Shapes given
+Triggered E_WARNING: Value returned from f6_soft() must be of type @resource, Square given
+Triggered E_WARNING: Value returned from f6_soft() must be of type @resource, Fractal given
+Triggered E_WARNING: Value returned from f6_soft() must be of type @resource, xhp_div given
+Triggered E_WARNING: Value returned from f6_soft() must be of type @resource, string given
+Triggered E_WARNING: Value returned from f6_soft() must be of type @resource, array given
+
+calling f7
+Caught exception: Value returned from f7() must be of type array, null given
+Caught exception: Value returned from f7() must be of type array, int given
+Caught exception: Value returned from f7() must be of type array, string given
+Caught exception: Value returned from f7() must be of type array, bool given
+Caught exception: Value returned from f7() must be of type array, float given
+Caught exception: Value returned from f7() must be of type array, File given
+Caught exception: Value returned from f7() must be of type array, Closure given
+Caught exception: Value returned from f7() must be of type array, Shapes given
+Caught exception: Value returned from f7() must be of type array, Square given
+Caught exception: Value returned from f7() must be of type array, Fractal given
+Caught exception: Value returned from f7() must be of type array, xhp_div given
+Caught exception: Value returned from f7() must be of type array, string given
+
+calling f7_soft
+Triggered E_WARNING: Value returned from f7_soft() must be of type @array, null given
+Triggered E_WARNING: Value returned from f7_soft() must be of type @array, int given
+Triggered E_WARNING: Value returned from f7_soft() must be of type @array, string given
+Triggered E_WARNING: Value returned from f7_soft() must be of type @array, bool given
+Triggered E_WARNING: Value returned from f7_soft() must be of type @array, float given
+Triggered E_WARNING: Value returned from f7_soft() must be of type @array, File given
+Triggered E_WARNING: Value returned from f7_soft() must be of type @array, Closure given
+Triggered E_WARNING: Value returned from f7_soft() must be of type @array, Shapes given
+Triggered E_WARNING: Value returned from f7_soft() must be of type @array, Square given
+Triggered E_WARNING: Value returned from f7_soft() must be of type @array, Fractal given
+Triggered E_WARNING: Value returned from f7_soft() must be of type @array, xhp_div given
+Triggered E_WARNING: Value returned from f7_soft() must be of type @array, string given
+
+calling f8
+Caught exception: Value returned from f8() must be of type callable, null given
+Caught exception: Value returned from f8() must be of type callable, int given
+Caught exception: Value returned from f8() must be of type callable, string given
+Caught exception: Value returned from f8() must be of type callable, bool given
+Caught exception: Value returned from f8() must be of type callable, float given
+Caught exception: Value returned from f8() must be of type callable, File given
+Caught exception: Value returned from f8() must be of type callable, array given
+Caught exception: Value returned from f8() must be of type callable, Shapes given
+Caught exception: Value returned from f8() must be of type callable, Square given
+Caught exception: Value returned from f8() must be of type callable, Fractal given
+Caught exception: Value returned from f8() must be of type callable, xhp_div given
+
+calling f8_soft
+Triggered E_WARNING: Value returned from f8_soft() must be of type @callable, null given
+Triggered E_WARNING: Value returned from f8_soft() must be of type @callable, int given
+Triggered E_WARNING: Value returned from f8_soft() must be of type @callable, string given
+Triggered E_WARNING: Value returned from f8_soft() must be of type @callable, bool given
+Triggered E_WARNING: Value returned from f8_soft() must be of type @callable, float given
+Triggered E_WARNING: Value returned from f8_soft() must be of type @callable, File given
+Triggered E_WARNING: Value returned from f8_soft() must be of type @callable, array given
+Triggered E_WARNING: Value returned from f8_soft() must be of type @callable, Shapes given
+Triggered E_WARNING: Value returned from f8_soft() must be of type @callable, Square given
+Triggered E_WARNING: Value returned from f8_soft() must be of type @callable, Fractal given
+Triggered E_WARNING: Value returned from f8_soft() must be of type @callable, xhp_div given
+
+calling f9
+Caught exception: Value returned from f9() must be of type Shapes, null given
+Caught exception: Value returned from f9() must be of type Shapes, int given
+Caught exception: Value returned from f9() must be of type Shapes, string given
+Caught exception: Value returned from f9() must be of type Shapes, bool given
+Caught exception: Value returned from f9() must be of type Shapes, float given
+Caught exception: Value returned from f9() must be of type Shapes, File given
+Caught exception: Value returned from f9() must be of type Shapes, array given
+Caught exception: Value returned from f9() must be of type Shapes, Closure given
+Caught exception: Value returned from f9() must be of type Shapes, xhp_div given
+Caught exception: Value returned from f9() must be of type Shapes, string given
+Caught exception: Value returned from f9() must be of type Shapes, array given
+
+calling f9_soft
+Triggered E_WARNING: Value returned from f9_soft() must be of type @Shapes, null given
+Triggered E_WARNING: Value returned from f9_soft() must be of type @Shapes, int given
+Triggered E_WARNING: Value returned from f9_soft() must be of type @Shapes, string given
+Triggered E_WARNING: Value returned from f9_soft() must be of type @Shapes, bool given
+Triggered E_WARNING: Value returned from f9_soft() must be of type @Shapes, float given
+Triggered E_WARNING: Value returned from f9_soft() must be of type @Shapes, File given
+Triggered E_WARNING: Value returned from f9_soft() must be of type @Shapes, array given
+Triggered E_WARNING: Value returned from f9_soft() must be of type @Shapes, Closure given
+Triggered E_WARNING: Value returned from f9_soft() must be of type @Shapes, xhp_div given
+Triggered E_WARNING: Value returned from f9_soft() must be of type @Shapes, string given
+Triggered E_WARNING: Value returned from f9_soft() must be of type @Shapes, array given
+
+calling f10
+Caught exception: Value returned from f10() must be of type Square, null given
+Caught exception: Value returned from f10() must be of type Square, int given
+Caught exception: Value returned from f10() must be of type Square, string given
+Caught exception: Value returned from f10() must be of type Square, bool given
+Caught exception: Value returned from f10() must be of type Square, float given
+Caught exception: Value returned from f10() must be of type Square, File given
+Caught exception: Value returned from f10() must be of type Square, array given
+Caught exception: Value returned from f10() must be of type Square, Closure given
+Caught exception: Value returned from f10() must be of type Square, Shapes given
+Caught exception: Value returned from f10() must be of type Square, Fractal given
+Caught exception: Value returned from f10() must be of type Square, xhp_div given
+Caught exception: Value returned from f10() must be of type Square, string given
+Caught exception: Value returned from f10() must be of type Square, array given
+
+calling f10_soft
+Triggered E_WARNING: Value returned from f10_soft() must be of type @Square, null given
+Triggered E_WARNING: Value returned from f10_soft() must be of type @Square, int given
+Triggered E_WARNING: Value returned from f10_soft() must be of type @Square, string given
+Triggered E_WARNING: Value returned from f10_soft() must be of type @Square, bool given
+Triggered E_WARNING: Value returned from f10_soft() must be of type @Square, float given
+Triggered E_WARNING: Value returned from f10_soft() must be of type @Square, File given
+Triggered E_WARNING: Value returned from f10_soft() must be of type @Square, array given
+Triggered E_WARNING: Value returned from f10_soft() must be of type @Square, Closure given
+Triggered E_WARNING: Value returned from f10_soft() must be of type @Square, Shapes given
+Triggered E_WARNING: Value returned from f10_soft() must be of type @Square, Fractal given
+Triggered E_WARNING: Value returned from f10_soft() must be of type @Square, xhp_div given
+Triggered E_WARNING: Value returned from f10_soft() must be of type @Square, string given
+Triggered E_WARNING: Value returned from f10_soft() must be of type @Square, array given
+
+calling f11
+Caught exception: Value returned from f11() must be of type xhp_div, null given
+Caught exception: Value returned from f11() must be of type xhp_div, int given
+Caught exception: Value returned from f11() must be of type xhp_div, string given
+Caught exception: Value returned from f11() must be of type xhp_div, bool given
+Caught exception: Value returned from f11() must be of type xhp_div, float given
+Caught exception: Value returned from f11() must be of type xhp_div, File given
+Caught exception: Value returned from f11() must be of type xhp_div, array given
+Caught exception: Value returned from f11() must be of type xhp_div, Closure given
+Caught exception: Value returned from f11() must be of type xhp_div, Shapes given
+Caught exception: Value returned from f11() must be of type xhp_div, Square given
+Caught exception: Value returned from f11() must be of type xhp_div, Fractal given
+Caught exception: Value returned from f11() must be of type xhp_div, string given
+Caught exception: Value returned from f11() must be of type xhp_div, array given
+
+calling f11_soft
+Triggered E_WARNING: Value returned from f11_soft() must be of type @xhp_div, null given
+Triggered E_WARNING: Value returned from f11_soft() must be of type @xhp_div, int given
+Triggered E_WARNING: Value returned from f11_soft() must be of type @xhp_div, string given
+Triggered E_WARNING: Value returned from f11_soft() must be of type @xhp_div, bool given
+Triggered E_WARNING: Value returned from f11_soft() must be of type @xhp_div, float given
+Triggered E_WARNING: Value returned from f11_soft() must be of type @xhp_div, File given
+Triggered E_WARNING: Value returned from f11_soft() must be of type @xhp_div, array given
+Triggered E_WARNING: Value returned from f11_soft() must be of type @xhp_div, Closure given
+Triggered E_WARNING: Value returned from f11_soft() must be of type @xhp_div, Shapes given
+Triggered E_WARNING: Value returned from f11_soft() must be of type @xhp_div, Square given
+Triggered E_WARNING: Value returned from f11_soft() must be of type @xhp_div, Fractal given
+Triggered E_WARNING: Value returned from f11_soft() must be of type @xhp_div, string given
+Triggered E_WARNING: Value returned from f11_soft() must be of type @xhp_div, array given
+
+calling f12
+Caught exception: Value returned from f12() must be of type Fractal, null given
+Caught exception: Value returned from f12() must be of type Fractal, int given
+Caught exception: Value returned from f12() must be of type Fractal, string given
+Caught exception: Value returned from f12() must be of type Fractal, bool given
+Caught exception: Value returned from f12() must be of type Fractal, float given
+Caught exception: Value returned from f12() must be of type Fractal, File given
+Caught exception: Value returned from f12() must be of type Fractal, array given
+Caught exception: Value returned from f12() must be of type Fractal, Closure given
+Caught exception: Value returned from f12() must be of type Fractal, Shapes given
+Caught exception: Value returned from f12() must be of type Fractal, Square given
+Caught exception: Value returned from f12() must be of type Fractal, xhp_div given
+Caught exception: Value returned from f12() must be of type Fractal, string given
+Caught exception: Value returned from f12() must be of type Fractal, array given
+
+calling f12_soft
+Triggered E_WARNING: Value returned from f12_soft() must be of type @Fractal, null given
+Triggered E_WARNING: Value returned from f12_soft() must be of type @Fractal, int given
+Triggered E_WARNING: Value returned from f12_soft() must be of type @Fractal, string given
+Triggered E_WARNING: Value returned from f12_soft() must be of type @Fractal, bool given
+Triggered E_WARNING: Value returned from f12_soft() must be of type @Fractal, float given
+Triggered E_WARNING: Value returned from f12_soft() must be of type @Fractal, File given
+Triggered E_WARNING: Value returned from f12_soft() must be of type @Fractal, array given
+Triggered E_WARNING: Value returned from f12_soft() must be of type @Fractal, Closure given
+Triggered E_WARNING: Value returned from f12_soft() must be of type @Fractal, Shapes given
+Triggered E_WARNING: Value returned from f12_soft() must be of type @Fractal, Square given
+Triggered E_WARNING: Value returned from f12_soft() must be of type @Fractal, xhp_div given
+Triggered E_WARNING: Value returned from f12_soft() must be of type @Fractal, string given
+Triggered E_WARNING: Value returned from f12_soft() must be of type @Fractal, array given
+
+calling f13
+Caught exception: Value returned from f13() must be of type Fractal, null given
+Caught exception: Value returned from f13() must be of type Fractal, int given
+Caught exception: Value returned from f13() must be of type Fractal, string given
+Caught exception: Value returned from f13() must be of type Fractal, bool given
+Caught exception: Value returned from f13() must be of type Fractal, float given
+Caught exception: Value returned from f13() must be of type Fractal, File given
+Caught exception: Value returned from f13() must be of type Fractal, array given
+Caught exception: Value returned from f13() must be of type Fractal, Closure given
+Caught exception: Value returned from f13() must be of type Fractal, Shapes given
+Caught exception: Value returned from f13() must be of type Fractal, Square given
+Caught exception: Value returned from f13() must be of type Fractal, xhp_div given
+Caught exception: Value returned from f13() must be of type Fractal, string given
+Caught exception: Value returned from f13() must be of type Fractal, array given
+
+calling f13_soft
+Triggered E_WARNING: Value returned from f13_soft() must be of type @Fractal, null given
+Triggered E_WARNING: Value returned from f13_soft() must be of type @Fractal, int given
+Triggered E_WARNING: Value returned from f13_soft() must be of type @Fractal, string given
+Triggered E_WARNING: Value returned from f13_soft() must be of type @Fractal, bool given
+Triggered E_WARNING: Value returned from f13_soft() must be of type @Fractal, float given
+Triggered E_WARNING: Value returned from f13_soft() must be of type @Fractal, File given
+Triggered E_WARNING: Value returned from f13_soft() must be of type @Fractal, array given
+Triggered E_WARNING: Value returned from f13_soft() must be of type @Fractal, Closure given
+Triggered E_WARNING: Value returned from f13_soft() must be of type @Fractal, Shapes given
+Triggered E_WARNING: Value returned from f13_soft() must be of type @Fractal, Square given
+Triggered E_WARNING: Value returned from f13_soft() must be of type @Fractal, xhp_div given
+Triggered E_WARNING: Value returned from f13_soft() must be of type @Fractal, string given
+Triggered E_WARNING: Value returned from f13_soft() must be of type @Fractal, array given
+
+calling f14
+Caught exception: Value returned from f14() must be of type my_t, null given
+Caught exception: Value returned from f14() must be of type my_t, string given
+Caught exception: Value returned from f14() must be of type my_t, bool given
+Caught exception: Value returned from f14() must be of type my_t, float given
+Caught exception: Value returned from f14() must be of type my_t, File given
+Caught exception: Value returned from f14() must be of type my_t, array given
+Caught exception: Value returned from f14() must be of type my_t, Closure given
+Caught exception: Value returned from f14() must be of type my_t, Shapes given
+Caught exception: Value returned from f14() must be of type my_t, Square given
+Caught exception: Value returned from f14() must be of type my_t, Fractal given
+Caught exception: Value returned from f14() must be of type my_t, xhp_div given
+Caught exception: Value returned from f14() must be of type my_t, string given
+Caught exception: Value returned from f14() must be of type my_t, array given
+
+calling f14_soft
+Triggered E_WARNING: Value returned from f14_soft() must be of type @my_t, null given
+Triggered E_WARNING: Value returned from f14_soft() must be of type @my_t, string given
+Triggered E_WARNING: Value returned from f14_soft() must be of type @my_t, bool given
+Triggered E_WARNING: Value returned from f14_soft() must be of type @my_t, float given
+Triggered E_WARNING: Value returned from f14_soft() must be of type @my_t, File given
+Triggered E_WARNING: Value returned from f14_soft() must be of type @my_t, array given
+Triggered E_WARNING: Value returned from f14_soft() must be of type @my_t, Closure given
+Triggered E_WARNING: Value returned from f14_soft() must be of type @my_t, Shapes given
+Triggered E_WARNING: Value returned from f14_soft() must be of type @my_t, Square given
+Triggered E_WARNING: Value returned from f14_soft() must be of type @my_t, Fractal given
+Triggered E_WARNING: Value returned from f14_soft() must be of type @my_t, xhp_div given
+Triggered E_WARNING: Value returned from f14_soft() must be of type @my_t, string given
+Triggered E_WARNING: Value returned from f14_soft() must be of type @my_t, array given
+
+calling f15
+
+calling f15_soft
+
+calling f16
+
+calling f16_soft
+
+calling f17
+Caught exception: Value returned from f17() must be of type ?int, string given
+Caught exception: Value returned from f17() must be of type ?int, bool given
+Caught exception: Value returned from f17() must be of type ?int, float given
+Caught exception: Value returned from f17() must be of type ?int, File given
+Caught exception: Value returned from f17() must be of type ?int, array given
+Caught exception: Value returned from f17() must be of type ?int, Closure given
+Caught exception: Value returned from f17() must be of type ?int, Shapes given
+Caught exception: Value returned from f17() must be of type ?int, Square given
+Caught exception: Value returned from f17() must be of type ?int, Fractal given
+Caught exception: Value returned from f17() must be of type ?int, xhp_div given
+Caught exception: Value returned from f17() must be of type ?int, string given
+Caught exception: Value returned from f17() must be of type ?int, array given
+
+calling f17_soft
+Triggered E_WARNING: Value returned from f17_soft() must be of type @?int, string given
+Triggered E_WARNING: Value returned from f17_soft() must be of type @?int, bool given
+Triggered E_WARNING: Value returned from f17_soft() must be of type @?int, float given
+Triggered E_WARNING: Value returned from f17_soft() must be of type @?int, File given
+Triggered E_WARNING: Value returned from f17_soft() must be of type @?int, array given
+Triggered E_WARNING: Value returned from f17_soft() must be of type @?int, Closure given
+Triggered E_WARNING: Value returned from f17_soft() must be of type @?int, Shapes given
+Triggered E_WARNING: Value returned from f17_soft() must be of type @?int, Square given
+Triggered E_WARNING: Value returned from f17_soft() must be of type @?int, Fractal given
+Triggered E_WARNING: Value returned from f17_soft() must be of type @?int, xhp_div given
+Triggered E_WARNING: Value returned from f17_soft() must be of type @?int, string given
+Triggered E_WARNING: Value returned from f17_soft() must be of type @?int, array given
+
+calling f18
+Caught exception: Value returned from f18() must be of type array, null given
+Caught exception: Value returned from f18() must be of type array, int given
+Caught exception: Value returned from f18() must be of type array, string given
+Caught exception: Value returned from f18() must be of type array, bool given
+Caught exception: Value returned from f18() must be of type array, float given
+Caught exception: Value returned from f18() must be of type array, File given
+Caught exception: Value returned from f18() must be of type array, Closure given
+Caught exception: Value returned from f18() must be of type array, Shapes given
+Caught exception: Value returned from f18() must be of type array, Square given
+Caught exception: Value returned from f18() must be of type array, Fractal given
+Caught exception: Value returned from f18() must be of type array, xhp_div given
+Caught exception: Value returned from f18() must be of type array, string given
+
+calling f18_soft
+Triggered E_WARNING: Value returned from f18_soft() must be of type @array, null given
+Triggered E_WARNING: Value returned from f18_soft() must be of type @array, int given
+Triggered E_WARNING: Value returned from f18_soft() must be of type @array, string given
+Triggered E_WARNING: Value returned from f18_soft() must be of type @array, bool given
+Triggered E_WARNING: Value returned from f18_soft() must be of type @array, float given
+Triggered E_WARNING: Value returned from f18_soft() must be of type @array, File given
+Triggered E_WARNING: Value returned from f18_soft() must be of type @array, Closure given
+Triggered E_WARNING: Value returned from f18_soft() must be of type @array, Shapes given
+Triggered E_WARNING: Value returned from f18_soft() must be of type @array, Square given
+Triggered E_WARNING: Value returned from f18_soft() must be of type @array, Fractal given
+Triggered E_WARNING: Value returned from f18_soft() must be of type @array, xhp_div given
+Triggered E_WARNING: Value returned from f18_soft() must be of type @array, string given
+
+calling f19
+
+calling f19_soft
+
+calling f20
+Caught exception: Value returned from f20() must be of type callable, null given
+Caught exception: Value returned from f20() must be of type callable, int given
+Caught exception: Value returned from f20() must be of type callable, string given
+Caught exception: Value returned from f20() must be of type callable, bool given
+Caught exception: Value returned from f20() must be of type callable, float given
+Caught exception: Value returned from f20() must be of type callable, File given
+Caught exception: Value returned from f20() must be of type callable, array given
+Caught exception: Value returned from f20() must be of type callable, Shapes given
+Caught exception: Value returned from f20() must be of type callable, Square given
+Caught exception: Value returned from f20() must be of type callable, Fractal given
+Caught exception: Value returned from f20() must be of type callable, xhp_div given
+
+calling f20_soft
+Triggered E_WARNING: Value returned from f20_soft() must be of type @callable, null given
+Triggered E_WARNING: Value returned from f20_soft() must be of type @callable, int given
+Triggered E_WARNING: Value returned from f20_soft() must be of type @callable, string given
+Triggered E_WARNING: Value returned from f20_soft() must be of type @callable, bool given
+Triggered E_WARNING: Value returned from f20_soft() must be of type @callable, float given
+Triggered E_WARNING: Value returned from f20_soft() must be of type @callable, File given
+Triggered E_WARNING: Value returned from f20_soft() must be of type @callable, array given
+Triggered E_WARNING: Value returned from f20_soft() must be of type @callable, Shapes given
+Triggered E_WARNING: Value returned from f20_soft() must be of type @callable, Square given
+Triggered E_WARNING: Value returned from f20_soft() must be of type @callable, Fractal given
+Triggered E_WARNING: Value returned from f20_soft() must be of type @callable, xhp_div given
+
+calling f21
+
+calling f22
+
+calling f22_soft
+
+calling f23
+Caught exception: Value returned from B::f23() must be of type B, null given
+Caught exception: Value returned from B::f23() must be of type B, int given
+Caught exception: Value returned from B::f23() must be of type B, string given
+Caught exception: Value returned from B::f23() must be of type B, bool given
+Caught exception: Value returned from B::f23() must be of type B, float given
+Caught exception: Value returned from B::f23() must be of type B, File given
+Caught exception: Value returned from B::f23() must be of type B, array given
+Caught exception: Value returned from B::f23() must be of type B, Closure given
+Caught exception: Value returned from B::f23() must be of type B, Shapes given
+Caught exception: Value returned from B::f23() must be of type B, Square given
+Caught exception: Value returned from B::f23() must be of type B, Fractal given
+Caught exception: Value returned from B::f23() must be of type B, xhp_div given
+Caught exception: Value returned from B::f23() must be of type B, A given
+
+calling f23_soft
+Triggered E_WARNING: Value returned from B::f23_soft() must be of type @B, null given
+Triggered E_WARNING: Value returned from B::f23_soft() must be of type @B, int given
+Triggered E_WARNING: Value returned from B::f23_soft() must be of type @B, string given
+Triggered E_WARNING: Value returned from B::f23_soft() must be of type @B, bool given
+Triggered E_WARNING: Value returned from B::f23_soft() must be of type @B, float given
+Triggered E_WARNING: Value returned from B::f23_soft() must be of type @B, File given
+Triggered E_WARNING: Value returned from B::f23_soft() must be of type @B, array given
+Triggered E_WARNING: Value returned from B::f23_soft() must be of type @B, Closure given
+Triggered E_WARNING: Value returned from B::f23_soft() must be of type @B, Shapes given
+Triggered E_WARNING: Value returned from B::f23_soft() must be of type @B, Square given
+Triggered E_WARNING: Value returned from B::f23_soft() must be of type @B, Fractal given
+Triggered E_WARNING: Value returned from B::f23_soft() must be of type @B, xhp_div given
+Triggered E_WARNING: Value returned from B::f23_soft() must be of type @B, A given
+
+calling f24
+Caught exception: Value returned from B::f24() must be of type A, null given
+Caught exception: Value returned from B::f24() must be of type A, int given
+Caught exception: Value returned from B::f24() must be of type A, string given
+Caught exception: Value returned from B::f24() must be of type A, bool given
+Caught exception: Value returned from B::f24() must be of type A, float given
+Caught exception: Value returned from B::f24() must be of type A, File given
+Caught exception: Value returned from B::f24() must be of type A, array given
+Caught exception: Value returned from B::f24() must be of type A, Closure given
+Caught exception: Value returned from B::f24() must be of type A, Shapes given
+Caught exception: Value returned from B::f24() must be of type A, Square given
+Caught exception: Value returned from B::f24() must be of type A, Fractal given
+Caught exception: Value returned from B::f24() must be of type A, xhp_div given
+
+calling f24_soft
+Triggered E_WARNING: Value returned from B::f24_soft() must be of type @A, null given
+Triggered E_WARNING: Value returned from B::f24_soft() must be of type @A, int given
+Triggered E_WARNING: Value returned from B::f24_soft() must be of type @A, string given
+Triggered E_WARNING: Value returned from B::f24_soft() must be of type @A, bool given
+Triggered E_WARNING: Value returned from B::f24_soft() must be of type @A, float given
+Triggered E_WARNING: Value returned from B::f24_soft() must be of type @A, File given
+Triggered E_WARNING: Value returned from B::f24_soft() must be of type @A, array given
+Triggered E_WARNING: Value returned from B::f24_soft() must be of type @A, Closure given
+Triggered E_WARNING: Value returned from B::f24_soft() must be of type @A, Shapes given
+Triggered E_WARNING: Value returned from B::f24_soft() must be of type @A, Square given
+Triggered E_WARNING: Value returned from B::f24_soft() must be of type @A, Fractal given
+Triggered E_WARNING: Value returned from B::f24_soft() must be of type @A, xhp_div given
+Done

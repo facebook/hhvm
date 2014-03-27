@@ -1,3 +1,4 @@
 resource(%d) of type (stream)
-HipHop Warning: %s
+
+Warning: %s
 int(-1)

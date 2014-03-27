@@ -87,6 +87,7 @@ function __HPHP_highlight_get_color($colors, $type) {
     case T_STRING:
     case T_VARIABLE:
     case T_DNUMBER:
+    case T_ONUMBER:
     case T_LNUMBER:
       return $colors['default'];
 

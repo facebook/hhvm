@@ -10,13 +10,16 @@ onCreate
 ---FalseFilter---
 r
 onCreate
-HipHop Warning: stream_filter_append(): unable to create or locate filter "FalseFilter" in %s/test/slow/streams/user_filter_oncreate.php on line 35
+
+Warning: stream_filter_append(): unable to create or locate filter "FalseFilter" in %s/test/slow/streams/user_filter_oncreate.php on line 35
 r+
 onCreate
-HipHop Warning: stream_filter_append(): unable to create or locate filter "FalseFilter" in %s/test/slow/streams/user_filter_oncreate.php on line 38
+
+Warning: stream_filter_append(): unable to create or locate filter "FalseFilter" in %s/test/slow/streams/user_filter_oncreate.php on line 38
 w
 onCreate
-HipHop Warning: stream_filter_append(): unable to create or locate filter "FalseFilter" in %s/test/slow/streams/user_filter_oncreate.php on line 41
+
+Warning: stream_filter_append(): unable to create or locate filter "FalseFilter" in %s/test/slow/streams/user_filter_oncreate.php on line 41
 ---NullFilter---
 r
 onCreate

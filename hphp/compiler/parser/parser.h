@@ -36,14 +36,6 @@
 #endif
 #define HPHP_PARSER_NS Compiler
 
-#define LOG_PARSE_ERROR(file, line, fmt, args...)     \
-  HPHP::Logger::Error(                                \
-    "HipHop Fatal error: " fmt " in %s on line %d",   \
-    ##args,                                           \
-    (file),                                           \
-    (line)                                            \
-  )
-
 #ifdef HPHP_PARSER_ERROR
 #undef HPHP_PARSER_ERROR
 #endif
@@ -283,8 +275,8 @@ public:
   void onFromClause(Token &out, Token &var, Token &coll);
   void onLetClause(Token &out, Token &var, Token &expr);
   void onWhereClause(Token &out, Token &expr);
-  void onJoinClause(Token &out, Token *var, Token &coll, Token *left,
-    Token *right);
+  void onJoinClause(Token &out, Token &var, Token &coll, Token &left,
+    Token &right);
   void onJoinIntoClause(Token &out, Token &var, Token &coll, Token &left,
     Token &right, Token &group);
   void onOrderbyClause(Token &out, Token &orderings);
@@ -435,46 +427,40 @@ private:
    */
   class AliasTable {
   public:
-
     struct AliasEntry {
       std::string alias;
       std::string name;
     };
 
     enum class AliasType {
-      AUTO,
       USE,
-      CURRENT_NS
+      DEF
     };
 
-    AliasTable(const std::vector<AliasEntry>& autoAliases,
+    AliasTable(const hphp_string_imap<std::string>& autoAliases,
                std::function<bool ()> autoOracle);
 
     std::string getName(std::string alias);
+    std::string getDefName(std::string alias);
+    std::string getUseName(std::string alias);
     bool isAliased(std::string alias);
-    bool isAutoImported(std::string alias);
+    bool isAutoType(std::string alias);
     bool isUseType(std::string alias);
-    void map(std::string alias, std::string name, AliasType type);
+    bool isDefType(std::string alias);
+    void set(std::string alias, std::string name, AliasType type);
     void clear();
 
   private:
-
     struct NameEntry {
       std::string name;
       AliasType type;
     };
 
     hphp_string_imap<NameEntry> m_aliases;
-    // These get imported every time we enter a new namespace.
-    std::vector<AliasEntry> m_autoAliases;
+    const hphp_string_imap<std::string>& m_autoAliases;
     // Returns true if stuff should be auto-imported.
     std::function<bool ()> m_autoOracle;
-    // Have we already auto-imported names for the current namespace?
-    // This is useful because auto-imports are done lazily.
-    bool m_alreadyImported;
-
     void setFalseOracle();
-    void addAutoImports();
   };
 
   NamespaceState m_nsState;
@@ -484,7 +470,8 @@ private:
 
   void registerAlias(std::string name);
   bool isAutoAliasOn();
-  std::vector<AliasTable::AliasEntry> getAutoAliasedClasses();
+  const hphp_string_imap<std::string>& getAutoAliasedClasses();
+  hphp_string_imap<std::string> getAutoAliasedClassesHelper();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

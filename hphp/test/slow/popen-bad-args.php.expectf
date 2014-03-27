@@ -1,2 +1,3 @@
-HipHop Warning: popen(A,): Invalid argument in %s/popen-bad-args.php on line %d
+
+Warning: popen(A,): Invalid argument in %s/popen-bad-args.php on line %d
 bool(false)

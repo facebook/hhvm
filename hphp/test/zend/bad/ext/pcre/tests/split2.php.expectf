@@ -283,7 +283,8 @@ array(6) {
     int(5)
   }
 }
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(true)
 array(1) {

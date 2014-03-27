@@ -7,7 +7,8 @@ string(15) "%12345678900.00"
 string(1) "%"
 
 -- Testing for precision value more than maximum --
-HipHop Notice: %s
+
+Notice: %s
 string(65) "12345678900.00000000000000000000000000000000000000000000000000000"
 
 -- Testing for invalid width(-15) specifier --

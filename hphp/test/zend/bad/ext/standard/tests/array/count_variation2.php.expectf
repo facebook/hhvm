@@ -46,27 +46,33 @@ int(5)
 int(3)
 
 -- Iteration 16 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 17 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 18 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 19 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 21 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 22 --
@@ -76,6 +82,7 @@ int(3)
 int(3)
 
 -- Iteration 24 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

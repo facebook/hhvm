@@ -1,10 +1,12 @@
 *** Testing urlencode() : error conditions ***
 
 -- Testing urlencode() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing urlencode() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

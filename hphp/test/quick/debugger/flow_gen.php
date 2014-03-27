@@ -10,6 +10,7 @@ function bar($a) {
 
 function genFoo($a) {
   $a = bar($a);
+  $a = bar($a);
   $z = yield $a+5;
   yield $z+1;
   error_log('Finished in genFoo');

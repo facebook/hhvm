@@ -1,6 +1,7 @@
 int(4096)
 string(%d) "Argument 2 passed to MongoClient::setReadPreference() must be %s array, integer given"
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   ["type"]=>
   string(7) "primary"
@@ -8,43 +9,50 @@ array(1) {
 ---
 int(4096)
 string(%d) "Argument 2 passed to MongoClient::setReadPreference() must be %s array, string given"
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   ["type"]=>
   string(7) "primary"
 }
 ---
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   ["type"]=>
   string(7) "primary"
 }
 ---
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   ["type"]=>
   string(7) "primary"
 }
 ---
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   ["type"]=>
   string(7) "primary"
 }
 ---
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   ["type"]=>
   string(7) "primary"
 }
 ---
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   ["type"]=>
   string(7) "primary"
 }
 ---
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   ["type"]=>
   string(7) "primary"

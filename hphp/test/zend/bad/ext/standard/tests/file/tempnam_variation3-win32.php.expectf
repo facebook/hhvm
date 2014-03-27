@@ -15,7 +15,8 @@ Failed, not created in the correct directory %s vs %s
 -- Iteration 6 --
 OK
 -- Iteration 7 --
-HipHop Warning: %s
+
+Warning: %s
 OK
 -- Iteration 8 --
 OK

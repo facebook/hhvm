@@ -1,0 +1,6 @@
+File "gen7.php", line 19, characters 9-9:
+Typing error
+File "gen7.php", line 19, characters 16-16:
+This is an object of type A
+File "gen7.php", line 22, characters 19-19:
+It is incompatible with an object of type D

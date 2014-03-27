@@ -16,13 +16,16 @@ string(20) "-20.5               "
 -- Iteration 8 --
 string(20) "101234567000        "
 -- Iteration 9 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 12 --
 string(20) "1                   "
@@ -39,7 +42,8 @@ string(20) "                    "
 -- Iteration 18 --
 string(20) "sample object       "
 -- Iteration 19 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 20 --
 string(20) "                    "

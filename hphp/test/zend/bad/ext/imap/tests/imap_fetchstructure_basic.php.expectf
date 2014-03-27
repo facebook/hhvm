@@ -1,11 +1,15 @@
 Checking with no parameters
-HipHop Warning: %s
+
+Warning: %s
 Checking with incorrect parameter type
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 Create a temporary mailbox and add 1 msgs
 .. mailbox '{%s}%s' created
-HipHop Warning: %s
+
+Warning: %s
 bool(true)
 bool(true)
 bool(true)

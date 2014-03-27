@@ -1,10 +1,12 @@
 *** Testing timezone_open() : error conditions ***
 
 -- Testing timezone_open() function with zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing timezone_open() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

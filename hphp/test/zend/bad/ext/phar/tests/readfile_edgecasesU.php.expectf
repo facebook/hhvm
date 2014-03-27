@@ -19,5 +19,6 @@ readfile("foob", true);
 readfile("./hi", 0, $context);
 readfile("../oops");
 ?>
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

@@ -4,11 +4,14 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(0) ""
 string(%d) "%s/test/ok/ok.txt"

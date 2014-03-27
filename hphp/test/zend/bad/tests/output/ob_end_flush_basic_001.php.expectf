@@ -1,11 +1,13 @@
 *** Testing ob_end_flush() : basic functionality ***
 
 -- Testing ob_end_flush() function with Zero arguments --
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 Hello
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 Done

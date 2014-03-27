@@ -58,9 +58,6 @@ interface MapAccess extends ConstMapAccess,
 interface Indexish extends \HH\KeyedTraversable {
 }
 
-interface XHPChild {
-}
-
 interface ConstVector extends ConstCollection,
                               ConstIndexAccess,
                               \HH\KeyedIterable,

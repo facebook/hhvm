@@ -66,8 +66,10 @@ array(4) {
   string(1) "d"
 }
 
-HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 53
-HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 55
+
+Warning: Invalid argument: function: method 'foo' not found in %s on line 53
+
+Warning: Invalid argument: function: method 'foo' not found in %s on line 55
 string(3) "foo"
 array(4) {
   [0]=>
@@ -81,10 +83,14 @@ array(4) {
 }
 
 A5::foo
-HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 104
-HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 105
-HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 104
-HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 105
+
+Warning: Invalid argument: function: method 'foo' not found in %s on line 104
+
+Warning: Invalid argument: function: method 'foo' not found in %s on line 105
+
+Warning: Invalid argument: function: method 'foo' not found in %s on line 104
+
+Warning: Invalid argument: function: method 'foo' not found in %s on line 105
 string(3) "foo"
 array(3) {
   [0]=>
@@ -121,10 +127,13 @@ array(3) {
   [2]=>
   int(3)
 }
-HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 153
-HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 154
+
+Warning: Invalid argument: function: method 'foo' not found in %s on line 153
+
+Warning: Invalid argument: function: method 'foo' not found in %s on line 154
 E9::__call
 E9::__call
 E9::__call
 E9::__call
-HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 194
+
+Warning: Invalid argument: function: method 'foo' not found in %s on line 194

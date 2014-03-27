@@ -1,0 +1,6 @@
+File "for_multiexpression_condition_with_typechange.php", line 15, characters 4-11:
+Typing error
+File "for_multiexpression_condition_with_typechange.php", line 14, characters 23-29:
+This is a string
+File "for_multiexpression_condition_with_typechange.php", line 15, characters 4-5:
+It is incompatible with an int because this is used in an arithmetic operation

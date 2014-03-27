@@ -1,2 +1,3 @@
-HipHop Warning: test() expects exactly 3 parameters, 2 given in %s/test/slow/compilation/1287.php on line 5
+
+Warning: test() expects exactly 3 parameters, 2 given in %s/test/slow/compilation/1287.php on line 5
 bool(true)

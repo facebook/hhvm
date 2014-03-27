@@ -2,4 +2,5 @@ array(1) {
   [0]=>
   string(2) "ok"
 }
-HipHop Fatal error: %s
+
+Fatal error: %s

@@ -24,7 +24,6 @@
 #include "hphp/util/async-func.h"
 #include "hphp/runtime/ext/ext_network.h"
 #include "hphp/runtime/ext/ext_socket.h"
-#include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/base/runtime-option.h"

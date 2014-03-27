@@ -1,10 +1,12 @@
 *** Testing parse_url() : error conditions ***
 
 -- Testing parse_url() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing parse_url() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

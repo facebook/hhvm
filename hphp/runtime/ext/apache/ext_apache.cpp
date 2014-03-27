@@ -36,17 +36,24 @@ Variant HHVM_FUNCTION(apache_note, const String& note_name,
   return false;
 }
 
+static Array get_headers(HeaderMap& headers) {
+  Array ret;
+  for (auto& iter : headers) {
+    const auto& values = iter.second;
+    if (!values.size()) {
+      continue;
+    }
+    ret.set(String(iter.first), String(values.back()));
+  }
+  return ret;
+}
+
 Array HHVM_FUNCTION(apache_request_headers) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     HeaderMap headers;
     transport->getHeaders(headers);
-    Array ret;
-    for (auto iter = headers.begin(); iter != headers.end(); ++iter) {
-      const auto& values = iter->second;
-      ret.set(String(iter->first), String(values.back()));
-    }
-    return ret;
+    return get_headers(headers);
   }
   return Array();
 }
@@ -56,12 +63,7 @@ Array HHVM_FUNCTION(apache_response_headers) {
   if (transport) {
     HeaderMap headers;
     transport->getResponseHeaders(headers);
-    Array ret;
-    for (auto iter = headers.begin(); iter != headers.end(); ++iter) {
-      const auto& values = iter->second;
-      ret.set(String(iter->first), String(values.back()));
-    }
-    return ret;
+    return get_headers(headers);
   }
   return Array();
 }
@@ -96,16 +98,6 @@ Array HHVM_FUNCTION(apache_get_config) {
   return ret.create();
 }
 
-Array HHVM_FUNCTION(apache_get_scoreboard) {
-  Array child_status;
-  for (int i = 0; i < RuntimeOption::ServerThreadCount; i++) {
-    child_status.set(i, 2);
-  }
-  ArrayInit ret(1);
-  ret.set(s_child_status, child_status);
-  return ret.create();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 class ApacheExtension : public Extension {
@@ -118,7 +110,6 @@ class ApacheExtension : public Extension {
     HHVM_FE(apache_setenv);
     HHVM_FE(getallheaders);
     HHVM_FE(apache_get_config);
-    HHVM_FE(apache_get_scoreboard);
 
     loadSystemlib();
   }

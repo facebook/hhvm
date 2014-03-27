@@ -1,5 +1,6 @@
 int(0)
--7:HipHop Warning: Offset is greater than the length of haystack string in %s/test/slow/string/168.php on line 9
+-7:
+Warning: Offset is greater than the length of haystack string in %s/test/slow/string/168.php on line 9
 bool(false)
 -6:bool(false)
 -5:int(1)

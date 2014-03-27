@@ -7,7 +7,8 @@ array(3) {
   [2]=>
   NULL
 }
-HipHop Warning: %s
+
+Warning: %s
 array(3) {
   [0]=>
   %unicode|string%(5) "42S02"
@@ -16,7 +17,8 @@ array(3) {
   [2]=>
   %unicode|string%(%d) "Table '%s.ihopeitdoesnotexist' doesn't exist"
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(3) {
   [0]=>
@@ -35,7 +37,8 @@ array(3) {
   NULL
 }
 Testing native PS...
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(3) {
   [0]=>
@@ -45,7 +48,8 @@ array(3) {
   [2]=>
   NULL
 }
-HipHop Warning: %s
+
+Warning: %s
 array(3) {
   [0]=>
   %unicode|string%(5) "42S02"

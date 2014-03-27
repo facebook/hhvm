@@ -40,7 +40,6 @@ bool TestExtServer::RunTests(const std::string &which) {
   XboxServer::Restart();
 
   RUN_TEST(test_dangling_server_proxy_old_request);
-  RUN_TEST(test_dangling_server_proxy_new_request);
   RUN_TEST(test_pagelet_server_task_start);
   RUN_TEST(test_pagelet_server_task_status);
   RUN_TEST(test_pagelet_server_task_result);
@@ -56,10 +55,6 @@ bool TestExtServer::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtServer::test_dangling_server_proxy_old_request() {
-  return Count(true);
-}
-
-bool TestExtServer::test_dangling_server_proxy_new_request() {
   return Count(true);
 }
 
@@ -117,7 +112,7 @@ bool TestExtServer::test_pagelet_server_task_result() {
     VS(expected, f_pagelet_server_task_result(tasks[i], ref(headers),
                                               ref(code), 0));
     VS(code, 200);
-    VS(headers[1], "ResponseHeader: okay");
+    VS(headers.toArray()[1], "ResponseHeader: okay");
 
     VS(expected, f_pagelet_server_task_result(tasks[i], ref(headers),
                                               ref(code), 1));
@@ -135,8 +130,8 @@ bool TestExtServer::test_xbox_send_message() {
     s_response("response");
   Variant ret;
   VERIFY(f_xbox_send_message("hello", ref(ret), 5000));
-  VS(ret[s_code], 200);
-  VS(ret[s_response], "olleh");
+  VS(ret.toArray()[s_code], 200);
+  VS(ret.toArray()[s_response], "olleh");
   return Count(true);
 }
 

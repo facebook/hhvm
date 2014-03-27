@@ -73,6 +73,7 @@ int(0)
 int(0)
 
 --resource--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

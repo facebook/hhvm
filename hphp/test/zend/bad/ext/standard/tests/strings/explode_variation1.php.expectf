@@ -47,13 +47,16 @@ array(1) {
   string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 13 --
 array(2) {
@@ -63,7 +66,8 @@ array(2) {
   string(35) " piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 14 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 15 --
 array(2) {
@@ -73,13 +77,16 @@ array(2) {
   string(35) " piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 16 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 17 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 18 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 19 --
 array(1) {
@@ -87,12 +94,15 @@ array(1) {
   string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 21 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 22 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

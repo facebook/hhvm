@@ -1,10 +1,12 @@
 *** Testing xml_parse_into_struct() : error conditions ***
 
 -- Testing xml_parse_into_struct() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing xml_parse_into_struct() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

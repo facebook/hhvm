@@ -1,0 +1,4 @@
+File "lambda09.php", line 19, characters 12-13:
+The variable $y is defined
+File "lambda09.php", line 17, characters 7-8:
+But in a different scope

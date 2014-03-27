@@ -1,0 +1,5 @@
+handler_called
+
+Fatal error: %s
+Stack trace:
+#0 {main}

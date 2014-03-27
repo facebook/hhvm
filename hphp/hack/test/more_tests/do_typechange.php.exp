@@ -1,0 +1,6 @@
+File "do_typechange.php", line 17, characters 10-11:
+Invalid return type
+File "do_typechange.php", line 12, characters 17-19:
+This is an int
+File "do_typechange.php", line 15, characters 10-13:
+It is incompatible with a nullable type

@@ -1,18 +1,22 @@
 *** Testing hash_file() : error conditions ***
 
 -- Testing hash_file() function with an unknown algorithm --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing hash_file() function with a non-existent file --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing hash_file() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing hash_file() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

@@ -78,6 +78,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-HipHop Notice: Undefined property: stdClass::$name in %s/test/slow/ext_variable/ext_variable.php on line 137
+
+Notice: Undefined property: stdClass::$name in %s/test/slow/ext_variable/ext_variable.php on line 137
 bool(true)
 bool(true)

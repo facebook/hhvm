@@ -1,4 +1,5 @@
-HipHop Warning: Creating default object from empty value in %s/slow/hhbbc/array_020.php on line 7
+
+Warning: Creating default object from empty value in %s/slow/hhbbc/array_020.php on line 7
 bool(false)
 bool(false)
 bool(true)

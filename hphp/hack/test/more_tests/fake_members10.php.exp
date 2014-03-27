@@ -1,0 +1,8 @@
+File "fake_members10.php", line 27, characters 19-22:
+You are trying to access the member frob but this object can be null. 
+File "fake_members10.php", line 18, characters 11-15:
+This is what makes me believe it can be null
+File "fake_members10.php", line 26, characters 7-29:
+All the local information about the member foo has been invalidated during this call.
+This is a limitation of the type-checker, use a local if that's the problem.
+

@@ -1,0 +1,6 @@
+File "async_anon_function_explicit_return_wrong_type.php", line 16, characters 10-13:
+Invalid return type
+File "async_anon_function_explicit_return_wrong_type.php", line 12, characters 17-19:
+This is an int
+File "async_anon_function_explicit_return_wrong_type.php", line 14, characters 5-10:
+It is incompatible with an object of type Awaitable

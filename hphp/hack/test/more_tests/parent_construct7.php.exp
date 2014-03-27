@@ -1,0 +1,4 @@
+File "parent_construct7.php", line 28, characters 19-29:
+You are extending a class that needs to be initialized
+Make sure you call parent::__construct.
+

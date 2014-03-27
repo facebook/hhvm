@@ -1,14 +1,18 @@
 *** Testing date_sun_info() : usage variations ***
 
 -- Testing date_sun_info() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing date_sun_info() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===Done===

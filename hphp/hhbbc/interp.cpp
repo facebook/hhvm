@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/runtime/ext/ext_math.h" // f_abs
 
@@ -60,6 +61,7 @@ namespace {
 
 const StaticString s_Exception("Exception");
 const StaticString s_Continuation("Continuation");
+const StaticString s_empty("");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -350,6 +352,9 @@ void in(ISS& env, const bc::Mod& op)    { arithImpl(env, op, typeMod); }
 void in(ISS& env, const bc::BitAnd& op) { arithImpl(env, op, typeBitAnd); }
 void in(ISS& env, const bc::BitOr& op)  { arithImpl(env, op, typeBitOr); }
 void in(ISS& env, const bc::BitXor& op) { arithImpl(env, op, typeBitXor); }
+void in(ISS& env, const bc::AddO& op)   { arithImpl(env, op, typeAddO); }
+void in(ISS& env, const bc::SubO& op)   { arithImpl(env, op, typeSubO); }
+void in(ISS& env, const bc::MulO& op)   { arithImpl(env, op, typeMulO); }
 
 template<class Op, class Fun>
 void shiftImpl(ISS& env, const Op& op, Fun fop) {
@@ -1059,20 +1064,20 @@ void in(ISS& env, const bc::IncDecL& op) {
     return push(env, TInitCell);
   }
 
-  auto const subop = op.subop;
-  auto const pre = subop == IncDecOp::PreInc || subop == IncDecOp::PreDec;
-  auto const inc = subop == IncDecOp::PreInc || subop == IncDecOp::PostInc;
+  auto const pre = isPre(op.subop);
+  auto const inc = isInc(op.subop);
+  auto const over = isIncDecO(op.subop);
 
   if (!pre) push(env, loc);
 
   // We can't constprop with this eval_cell, because of the effects
   // on locals.
-  auto resultTy = eval_cell([inc,val] {
+  auto resultTy = eval_cell([inc,over,val] {
     auto c = *val;
     if (inc) {
-      cellInc(c);
+      (over ? cellIncO : cellInc)(c);
     } else {
-      cellDec(c);
+      (over ? cellDecO : cellDec)(c);
     }
     return c;
   });
@@ -1204,7 +1209,7 @@ void in(ISS& env, const bc::UnsetG& op) {
 
 void in(ISS& env, const bc::FPushFuncD& op) {
   auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
-  fpiPush(env, ActRec { FPIKind::Func, rfunc });
+  fpiPush(env, ActRec { FPIKind::Func, folly::none, rfunc });
 }
 
 void in(ISS& env, const bc::FPushFunc& op) {
@@ -1230,8 +1235,11 @@ void in(ISS& env, const bc::FPushFuncU& op) {
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
   auto const obj = popC(env);
+  folly::Optional<res::Class> rcls;
+  if (obj.strictSubtypeOf(TObj)) rcls = dcls_of(objcls(obj)).cls;
   fpiPush(env, ActRec {
     FPIKind::ObjMeth,
+    rcls,
     obj.subtypeOf(TObj)
       ? env.index.resolve_method(env.ctx, objcls(obj), op.str2)
       : folly::none
@@ -1255,7 +1263,7 @@ void in(ISS& env, const bc::FPushClsMethodD& op) {
   auto const rfun =
     rcls ? env.index.resolve_method(env.ctx, clsExact(*rcls), op.str2)
          : folly::none;
-  fpiPush(env, ActRec { FPIKind::ClsMeth, rfun });
+  fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun });
 }
 
 void in(ISS& env, const bc::FPushClsMethod& op) {
@@ -1266,7 +1274,9 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
     v2 && v2->m_type == KindOfStaticString
       ? env.index.resolve_method(env.ctx, t1, v2->m_data.pstr)
       : folly::none;
-  fpiPush(env, ActRec { FPIKind::ClsMeth, rfunc });
+  folly::Optional<res::Class> rcls;
+  if (t1.strictSubtypeOf(TCls)) rcls = dcls_of(t1).cls;
+  fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc });
 }
 
 void in(ISS& env, const bc::FPushClsMethodF& op) {
@@ -1280,7 +1290,7 @@ void in(ISS& env, const bc::FPushCtorD& op) {
   push(env, rcls ? objExact(*rcls) : TObj);
   auto const rfunc =
     rcls ? env.index.resolve_ctor(env.ctx, *rcls) : folly::none;
-  fpiPush(env, ActRec { FPIKind::Ctor, rfunc });
+  fpiPush(env, ActRec { FPIKind::Ctor, rcls, rfunc });
 }
 
 void in(ISS& env, const bc::FPushCtor& op) {
@@ -1447,6 +1457,43 @@ void in(ISS& env, const bc::FPassM& op) {
 }
 
 void in(ISS& env, const bc::FCall& op) {
+  auto const ar = fpiTop(env);
+  if (ar.func) {
+    switch (ar.kind) {
+    case FPIKind::Unknown:
+    case FPIKind::CallableArr:
+    case FPIKind::ObjInvoke:
+      not_reached();
+    case FPIKind::Func:
+      return reduce(
+        env,
+        bc::FCallD { op.arg1, s_empty.get(), ar.func->name() }
+      );
+    case FPIKind::Ctor:
+    case FPIKind::ObjMeth:
+    case FPIKind::ClsMeth:
+      /*
+       * If we have a resolved func and it's a class method (or
+       * ctor), we currently must also have a resolved class.  This
+       * could change later, but this code will need to be revisited
+       * in that case, so assert.
+       */
+      always_assert(ar.cls.hasValue() &&
+        "resolved func without a resolved class");
+      return reduce(
+        env,
+        bc::FCallD { op.arg1, ar.cls->name(), ar.func->name() }
+      );
+    }
+  }
+
+  for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
+  fpiPop(env);
+  specialFunctionEffects(env, ar);
+  push(env, TInitGen);
+}
+
+void in(ISS& env, const bc::FCallD& op) {
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
   auto const ar = fpiPop(env);
   specialFunctionEffects(env, ar);
@@ -1776,48 +1823,37 @@ void in(ISS& env, const bc::CreateCl& op) {
   push(env, TObj);
 }
 
-void in(ISS& env, const bc::CreateCont&) {
-  killLocals(env);
-  if (env.ctx.func->isClosureBody) {
-    // Generator closures create functions *outside* the class that
-    // the closure is in, and we haven't hooked that up to be part
-    // of the class-at-a-time analysis.  So we need to kill
-    // everything on $this/self.
-    killThisProps(env);
-    killSelfProps(env);
-  }
+void in(ISS& env, const bc::CreateCont& op) {
+  // Resume point of this Continuation.
+  push(env, TInitNull);
+  env.propagate(*op.target, env.state);
+  popC(env);
+
+  // Normal execution flow.
+  unsetLocals(env);
   push(env, objExact(env.index.builtin_class(s_Continuation.get())));
 }
 
 void in(ISS& env, const bc::ContEnter&) { popC(env); }
-
-void in(ISS& env, const bc::UnpackCont&) {
-  readUnknownLocals(env);
-  push(env, TInitCell);
-  push(env, TInt);
-}
+void in(ISS& env, const bc::ContRaise&) { popC(env); }
 
 void in(ISS& env, const bc::ContSuspend&) {
-  readUnknownLocals(env);
   popC(env);
-  doRet(env, TInitGen);
+  push(env, TInitCell);
 }
 
 void in(ISS& env, const bc::ContSuspendK&) {
-  readUnknownLocals(env);
   popC(env);
   popC(env);
-  doRet(env, TInitGen);
+  push(env, TInitCell);
 }
 
 void in(ISS& env, const bc::ContRetC&) {
-  readUnknownLocals(env);
   popC(env);
-  doRet(env, TInitGen);
+  doRet(env, TBottom);
 }
 
 void in(ISS& env, const bc::ContCheck&)   {}
-void in(ISS& env, const bc::ContRaise&)   {}
 void in(ISS& env, const bc::ContValid&)   { push(env, TBool); }
 void in(ISS& env, const bc::ContKey&)     { push(env, TInitCell); }
 void in(ISS& env, const bc::ContCurrent&) { push(env, TInitCell); }
@@ -1836,25 +1872,39 @@ void in(ISS& env, const bc::AsyncWrapResult&) {
   push(env, wait_handle(env.index, t));
 }
 
-void in(ISS& env, const bc::AsyncESuspend&) {
+void in(ISS& env, const bc::AsyncESuspend& op) {
+  auto const t = popC(env);
+
+  // Resume point of this async function.
+  if (!is_specialized_wait_handle(t) || is_opt(t)) {
+    // Uninferred garbage?
+    push(env, TInitCell);
+    env.propagate(*op.target, env.state);
+    popC(env);
+  } else {
+    auto const inner = wait_handle_inner(t);
+    if (!inner.subtypeOf(TBottom)) {
+      // A wait handle not known to always throw?
+      push(env, inner);
+      env.propagate(*op.target, env.state);
+      popC(env);
+    }
+  }
+
   /*
    * A suspended async function WaitHandle must end up returning
-   * whatever type we infer the eager function will return, so we
-   * don't want it to influence that type.  Using WaitH<Bottom>
-   * handles this, but note that it relies on the rule that the only
-   * thing you can do with the output of this opcode is pass it to
-   * RetC.
+   * whatever type we infer the eagerly executed part of the function
+   * will return, so we don't want it to influence that type.  Using
+   * WaitH<Bottom> handles this, but note that it relies on the rule
+   * that the only thing you can do with the output of this opcode
+   * is pass it to RetC.
    */
-  unsetNamedLocals(env);
-  popC(env);
+  unsetLocals(env);
   push(env, wait_handle(env.index, TBottom));
 }
 
-void in(ISS& env, const bc::AsyncWrapException&) {
-  // A wait handle which always throws when you join it is
-  // represented as a WaitH<Bottom>.
-  popC(env);
-  push(env, wait_handle(env.index, TBottom));
+void in(ISS& env, const bc::AsyncResume&)  {
+  // Can throw, async function can resume here with an exception.
 }
 
 void in(ISS& env, const bc::Strlen&) {

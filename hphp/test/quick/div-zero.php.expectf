@@ -1,4 +1,6 @@
-HipHop Warning: Division by zero in %s/test/quick/div-zero.php on line 5
-HipHop Warning: Division by zero in %s/test/quick/div-zero.php on line 6
+
+Warning: Division by zero in %s/test/quick/div-zero.php on line 5
+
+Warning: Division by zero in %s/test/quick/div-zero.php on line 6
 bool(false)
 bool(false)

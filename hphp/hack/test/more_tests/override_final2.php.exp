@@ -1,0 +1,4 @@
+File "override_final2.php", line 17, characters 22-32:
+You cannot override this method
+File "override_final2.php", line 13, characters 25-35:
+It was declared as final

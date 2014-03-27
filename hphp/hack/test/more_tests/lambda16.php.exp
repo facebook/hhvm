@@ -1,0 +1,6 @@
+File "lambda16.php", line 14, characters 12-12:
+Invalid return type
+File "lambda16.php", line 13, characters 30-33:
+This is an object of type Foo (compatible with the type 'this')
+File "lambda16.php", line 14, characters 12-12:
+It is incompatible with a function

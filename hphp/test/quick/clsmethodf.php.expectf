@@ -12,10 +12,12 @@ bool(false)
 protected aa::blah
 bool(true)
 protected aa::blah
-HipHop Notice: Undefined variable: this in %s on line 11
+
+Notice: Undefined variable: this in %s on line 11
 bool(true)
 protected aa::blah
-HipHop Notice: Undefined variable: this in %s on line 11
+
+Notice: Undefined variable: this in %s on line 11
 bool(true)
 magic call to aa->fakemethod with 3 arguments
 magic call to aa->fakemethod with 0 arguments

@@ -13,28 +13,36 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#include "hphp/runtime/base/type-variant.h"
+
+#include "hphp/parser/hphp.tab.hpp"
+
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/dummy-resource.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-string.h"
+
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/system/systemlib.h"
+
+#include "hphp/util/abi-cxx.h"
+#include "hphp/util/logger.h"
+
 #include <limits>
 #include <utility>
 #include <vector>
-#include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/ext/ext_variable.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/dummy-resource.h"
-#include "hphp/parser/hphp.tab.hpp"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/system/systemlib.h"
-#include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/base/tv-arith.h"
-#include "hphp/util/abi-cxx.h"
-#include "hphp/util/logger.h"
 
 namespace HPHP {
 
@@ -69,17 +77,6 @@ const StaticString
   s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name");
 
 ///////////////////////////////////////////////////////////////////////////////
-// local helpers
-
-static int64_t ToKey(int64_t i) { return i; }
-static int64_t ToKey(double d) {
-  return d > std::numeric_limits<uint64_t>::max() ? 0u : uint64_t(d);
-}
-static VarNR ToKey(const String& s) { return s.toKey(); }
-static VarNR ToKey(const Variant& v) { return v.toKey(); }
-
-///////////////////////////////////////////////////////////////////////////////
-// private implementations
 
 Variant::Variant(litstr  v) {
   m_type = KindOfString;
@@ -207,15 +204,6 @@ Variant::Variant(RefData *r) {
   }
 }
 
-Variant::Variant(RefData *r, NoInc) {
-  m_type = KindOfRef;
-  if (r) {
-    m_data.pref = r;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
 // the version of the high frequency function that is not inlined
 Variant::Variant(const Variant& v) {
   constructValHelper(v);
@@ -295,10 +283,10 @@ Variant &Variant::setWithRef(const Variant& v) {
       m_data.pref->var()->name(argName);                                \
       returnStmt;                                                       \
     } else {                                                            \
-      RefData* d = m_data.pref;                                         \
-      DataType t = m_type;                                              \
+      auto const d = m_data.num;                                        \
+      auto const t = m_type;                                            \
       setOp;                                                            \
-      destructData(d, t);                                               \
+      tvDecRefHelper(t, d);                                             \
     }                                                                   \
     returnStmt;                                                         \
   }
@@ -329,11 +317,11 @@ IMPLEMENT_SET(const StaticString&,
       self->setNull();                                                  \
     } else {                                                            \
       v->incRefCount();                                                 \
-      RefData* d = self->m_data.pref;                                   \
-      DataType t = self->m_type;                                        \
+      auto const d = self->m_data.num;                                  \
+      auto const t = self->m_type;                                      \
       self->m_type = dtype;                                             \
       self->m_data.member = v;                                          \
-      if (IS_REFCOUNTED_TYPE(t)) destructData(d, t);                    \
+      tvRefcountedDecRefHelper(t, d);                                   \
     }                                                                   \
     return *this;                                                       \
   }
@@ -345,16 +333,6 @@ IMPLEMENT_PTR_SET(ObjectData, pobj, KindOfObject)
 IMPLEMENT_PTR_SET(ResourceData, pres, KindOfResource)
 
 #undef IMPLEMENT_PTR_SET
-
-void Variant::init(ObjectData *v) {
-  if (v) {
-    m_type = KindOfObject;
-    m_data.pobj = v;
-    v->incRefCount();
-  } else {
-    m_type = KindOfNull;
-  }
-}
 
 int Variant::getRefCount() const {
   switch (m_type) {
@@ -433,104 +411,12 @@ bool Variant::isResource() const {
   return (cell->m_type == KindOfResource);
 }
 
-bool Variant::instanceof(const String& s) const {
-  if (m_type == KindOfObject) {
-    assert(m_data.pobj);
-    return m_data.pobj->o_instanceof(s);
-  }
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->instanceof(s);
-  }
-  return false;
-}
-
-bool Variant::instanceof(Class* cls) const {
-  if (m_type == KindOfObject) {
-    assert(m_data.pobj);
-    return m_data.pobj->instanceof(cls);
-  }
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->instanceof(cls);
-  }
-  return false;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
-// array operations
-
-Variant Variant::pop() {
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->pop();
-  }
-  if (!is(KindOfArray)) {
-    throw_bad_type_exception("expecting an array");
-    return null_variant;
-  }
-
-  Variant ret;
-  ArrayData* a = getArrayData();
-  ArrayData* newarr = a->pop(ret);
-  if (newarr != a) set(newarr);
-  return ret;
-}
-
-Variant Variant::dequeue() {
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->dequeue();
-  }
-  if (!is(KindOfArray)) {
-    throw_bad_type_exception("expecting an array");
-    return null_variant;
-  }
-
-  Variant ret;
-  ArrayData* a = getArrayData();
-  ArrayData* newarr = a->dequeue(ret);
-  if (newarr != a) set(newarr);
-  return ret;
-}
-
-void Variant::prepend(const Variant& v) {
-  if (m_type == KindOfRef) {
-    m_data.pref->var()->prepend(v);
-    return;
-  }
-  if (isNull()) set(Array::Create());
-  if (is(KindOfArray)) {
-    ArrayData *arr = getArrayData();
-    ArrayData *newarr = arr->prepend(v, (arr->hasMultipleRefs()));
-    if (newarr != arr) set(newarr);
-  } else {
-    throw_bad_type_exception("expecting an array");
-  }
-}
 
 inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
   StringData *s = getStringData();
   assert(s);
   return s->isNumericWithVal(*lval, *dval, 1);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// iterator functions
-
-ArrayIter Variant::begin(const String& context /* = null_string */) const {
-  if (is(KindOfArray)) {
-    return ArrayIter(getArrayData());
-  }
-  if (is(KindOfObject)) {
-    return getObjectData()->begin(context);
-  }
-  raise_warning("Invalid argument supplied for foreach()");
-  return ArrayIter();
-}
-
-MutableArrayIter Variant::begin(Variant *key, Variant &val,
-                                const String& context /* = null_string */) {
-  if (is(KindOfObject)) {
-    return getObjectData()->begin(key, val, context);
-  }
-  return MutableArrayIter(this, key, val);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -644,7 +530,7 @@ Object Variant::toObjectHelper() const {
       obj->o_set(s_scalar, *this, false);
       return obj;
     }
-  case KindOfArray:   return m_data.parr->toObject();
+  case KindOfArray:   return ObjectData::FromArray(m_data.parr);
   case KindOfObject:  return m_data.pobj;
   default:
     assert(false);
@@ -692,7 +578,12 @@ VarNR Variant::toKey() const {
   case KindOfInt64:
     return VarNR(m_data.num);
   case KindOfDouble:
-    return VarNR(ToKey(m_data.dbl));
+    {
+      auto val = m_data.dbl > std::numeric_limits<uint64_t>::max()
+        ? 0u
+        : uint64_t(m_data.dbl);
+      return VarNR(val);
+    }
   case KindOfObject:
     break;
   case KindOfResource:
@@ -718,188 +609,6 @@ ObjectData *Variant::getArrayAccess() const {
   }
   return obj;
 }
-
-void Variant::callOffsetUnset(const Variant& key) {
-  assert(getType() == KindOfObject);
-  ObjectData* obj = getObjectData();
-  if (LIKELY(obj->isCollection())) {
-    collectionUnset(obj, cvarToCell(&key));
-  } else {
-    getArrayAccess()->o_invoke_few_args(s_offsetUnset, 1, key);
-  }
-}
-
-static void raise_bad_offset_notice() {
-  if (RuntimeOption::EnableHipHopErrors) {
-    raise_notice("taking offset [] on bool or number");
-  }
-}
-
-Variant Variant::rvalAtHelper(int64_t offset, ACCESSPARAMS_IMPL) const {
-  switch (m_type) {
-  case KindOfStaticString:
-  case KindOfString:
-    return m_data.pstr->getChar((int)offset);
-  case KindOfObject: {
-    ObjectData* obj = m_data.pobj;
-    if (LIKELY(obj->isCollection())) {
-      if (flags & AccessFlags::Error) {
-        return collectionOffsetAt(obj, offset);
-      } else {
-        return collectionOffsetGet(obj, offset);
-      }
-    } else {
-      return getArrayAccess()->o_invoke_few_args(s_offsetGet, 1, offset);
-    }
-    break;
-  }
-  case KindOfRef:
-    return m_data.pref->var()->rvalAt(offset, flags);
-  case KindOfUninit:
-  case KindOfNull:
-    break;
-  default:
-    if (flags & AccessFlags::Error) {
-      raise_bad_offset_notice();
-    }
-    break;
-  }
-  return null_variant;
-}
-
-Variant Variant::rvalAt(const String& offset, ACCESSPARAMS_IMPL) const {
-  if (m_type == KindOfArray) {
-    bool error = flags & AccessFlags::Error;
-    if (flags & AccessFlags::Key) {
-      return m_data.parr->get(offset, error);
-    }
-    if (offset.isNull()) return m_data.parr->get(empty_string, error);
-    int64_t n;
-    if (!offset.get()->isStrictlyInteger(n)) {
-      return m_data.parr->get(offset, error);
-    } else {
-      return m_data.parr->get(n, error);
-    }
-  }
-  switch (m_type) {
-  case KindOfStaticString:
-  case KindOfString:
-    return m_data.pstr->getChar(offset.toInt32());
-  case KindOfObject: {
-    ObjectData* obj = m_data.pobj;
-    if (LIKELY(obj->isCollection())) {
-      if (flags & AccessFlags::Error) {
-        return collectionOffsetAt(obj, offset);
-      } else {
-        return collectionOffsetGet(obj, offset);
-      }
-    } else {
-      return getArrayAccess()->o_invoke_few_args(s_offsetGet, 1, offset);
-    }
-    break;
-  }
-  case KindOfRef:
-    return m_data.pref->var()->rvalAt(offset, flags);
-  case KindOfUninit:
-  case KindOfNull:
-    break;
-  default:
-    if (flags & AccessFlags::Error) {
-      raise_bad_offset_notice();
-    }
-    break;
-  }
-  return null_variant;
-}
-
-Variant Variant::rvalAt(const Variant& offset, ACCESSPARAMS_IMPL) const {
-  if (m_type == KindOfArray) {
-    // Fast path for KindOfArray
-    switch (offset.m_type) {
-    case KindOfUninit:
-    case KindOfNull:
-      return m_data.parr->get(empty_string, flags & AccessFlags::Error);
-    case KindOfBoolean:
-    case KindOfInt64:
-      return m_data.parr->get(offset.m_data.num, flags & AccessFlags::Error);
-    case KindOfDouble:
-      return m_data.parr->get((int64_t)offset.m_data.dbl,
-                              flags & AccessFlags::Error);
-    case KindOfStaticString:
-    case KindOfString: {
-      int64_t n;
-      if (offset.m_data.pstr->isStrictlyInteger(n)) {
-        return m_data.parr->get(n, flags & AccessFlags::Error);
-      } else {
-        return m_data.parr->get(offset.asCStrRef(), flags & AccessFlags::Error);
-      }
-    }
-    case KindOfArray:
-      throw_bad_type_exception("Invalid type used as key");
-      break;
-    case KindOfObject:
-      throw_bad_type_exception("Invalid type used as key");
-      break;
-    case KindOfResource:
-      return m_data.parr->get(offset.toInt64(), flags & AccessFlags::Error);
-    case KindOfRef:
-      return rvalAt(*(offset.m_data.pref->var()), flags);
-    default:
-      assert(false);
-      break;
-    }
-    return null_variant;
-  }
-  switch (m_type) {
-  case KindOfStaticString:
-  case KindOfString:
-    return m_data.pstr->getChar(offset.toInt32());
-  case KindOfObject: {
-    ObjectData* obj = m_data.pobj;
-    if (LIKELY(obj->isCollection())) {
-      if (flags & AccessFlags::Error) {
-        return collectionOffsetAt(obj, offset);
-      } else {
-        return collectionOffsetGet(obj, offset);
-      }
-    } else {
-      return getArrayAccess()->o_invoke_few_args(s_offsetGet, 1, offset);
-    }
-    break;
-  }
-  case KindOfRef:
-    return m_data.pref->var()->rvalAt(offset, flags);
-  case KindOfUninit:
-  case KindOfNull:
-    break;
-  default:
-    if (flags & AccessFlags::Error) {
-      raise_bad_offset_notice();
-    }
-    break;
-  }
-  return null_variant;
-}
-
-template <typename T>
-const Variant& Variant::rvalAtRefHelper(T offset, ACCESSPARAMS_IMPL) const {
-  if (LIKELY(m_type == KindOfArray)) {
-    return asCArrRef().rvalAtRef(offset, flags);
-  }
-  if (LIKELY(m_type == KindOfRef)) {
-    return m_data.pref->var()->rvalAtRefHelper<T>(offset, flags);
-  }
-  return null_variant;
-}
-
-template
-const Variant& Variant::rvalAtRefHelper<int64_t>(int64_t offset, ACCESSPARAMS_IMPL) const;
-template
-const Variant& Variant::rvalAtRefHelper<const String&>(const String& offset,
-                                          ACCESSPARAMS_IMPL) const;
-template
-const Variant& Variant::rvalAtRefHelper<const Variant&>(const Variant& offset,
-                                          ACCESSPARAMS_IMPL) const;
 
 template <typename T>
 class LvalHelper {};
@@ -934,139 +643,6 @@ public:
   static const bool CheckParams = true;
 };
 
-template<typename T>
-Variant& Variant::LvalAtImpl0(
-    Variant *self, T key, Variant *tmp, bool blackHole, ACCESSPARAMS_IMPL) {
-head:
-  if (self->m_type == KindOfArray) {
-    ArrayData *arr = self->m_data.parr;
-    ArrayData *escalated;
-    Variant *ret = nullptr;
-    if (LvalHelper<T>::CheckParams && flags & AccessFlags::Key) {
-      escalated = arr->lval(key, ret, arr->hasMultipleRefs());
-    } else {
-      typename LvalHelper<T>::KeyType k(ToKey(key));
-      if (LvalHelper<T>::CheckKey(k)) {
-        escalated = arr->lval(k, ret, arr->hasMultipleRefs());
-      } else {
-        if (blackHole) ret = &lvalBlackHole();
-        else           ret = tmp;
-        escalated = arr;
-      }
-    }
-    if (escalated != arr) {
-      self->set(escalated);
-    }
-    assert(ret);
-    return *ret;
-  }
-  if (self->m_type == KindOfRef) {
-    self = self->m_data.pref->var();
-    goto head;
-  }
-  if (self->isObjectConvertable()) {
-    self->set(Array::Create());
-    goto head;
-  }
-  if (self->m_type == KindOfObject) {
-    if (self->m_data.pobj->isCollection()) {
-      return collectionOffsetAt(self->m_data.pobj, Variant(key));
-    }
-    if (!blackHole) {
-      *tmp = self->getArrayAccess()->offsetGet(key);
-      return *tmp;
-    }
-    Variant& retv = get_env_constants()->__lvalProxy;
-    retv = self->getArrayAccess()->offsetGet(key);
-    return retv;
-  }
-  return lvalInvalid();
-}
-
-template<typename T>
-Variant& Variant::lvalAtImpl(T key, ACCESSPARAMS_IMPL) {
-  return Variant::LvalAtImpl0<T>(this, key, nullptr, true, flags);
-}
-
-Variant &Variant::lvalAt(int     key, ACCESSPARAMS_IMPL) {
-  return lvalAt((int64_t)key, flags);
-}
-Variant &Variant::lvalAt(int64_t   key, ACCESSPARAMS_IMPL) {
-  return lvalAtImpl(key, flags);
-}
-Variant &Variant::lvalAt(const String& key, ACCESSPARAMS_IMPL) {
-  return lvalAtImpl<const String&>(key, flags);
-}
-Variant &Variant::lvalAt(const Variant& k, ACCESSPARAMS_IMPL) {
-  return lvalAtImpl<const Variant&>(k, flags);
-}
-
-Variant &Variant::lvalRef(int     key, Variant& tmp, ACCESSPARAMS_IMPL) {
-  return lvalRef((int64_t)key, tmp, flags);
-}
-Variant &Variant::lvalRef(int64_t   key, Variant& tmp, ACCESSPARAMS_IMPL) {
-  return LvalAtImpl0(this, key, &tmp, false, flags);
-}
-Variant &Variant::lvalRef(const String& key, Variant& tmp, ACCESSPARAMS_IMPL) {
-  return Variant::LvalAtImpl0<const String&>(this, key, &tmp, false, flags);
-}
-Variant &Variant::lvalRef(const Variant& k, Variant& tmp, ACCESSPARAMS_IMPL) {
-  return Variant::LvalAtImpl0<const Variant&>(this, k, &tmp, false, flags);
-}
-
-Variant &Variant::lvalAt() {
-  switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-    set(ArrayData::Create());
-    break;
-  case KindOfBoolean:
-    if (!toBoolean()) {
-      set(ArrayData::Create());
-    } else {
-      throw_bad_type_exception("[] operator not supported for this type");
-      return lvalBlackHole();
-    }
-    break;
-  case KindOfArray:
-    break;
-  case KindOfRef:
-    return m_data.pref->var()->lvalAt();
-  case KindOfObject:
-    {
-      ObjectData* obj = m_data.pobj;
-      if (obj->isCollection()) {
-        raise_error("Cannot use [] for reading");
-      }
-      Variant& ret = lvalBlackHole();
-      ret = m_data.pobj->o_invoke_few_args(s_offsetGet, 1, init_null_variant);
-      raise_warning("Indirect modification of overloaded element of %s has "
-                    "no effect", m_data.pobj->o_getClassName().data());
-      return ret;
-    }
-  case KindOfStaticString:
-  case KindOfString:
-    if (getStringData()->empty()) {
-      set(ArrayData::Create());
-      break;
-    }
-    // fall through to throw
-  default:
-    throw_bad_type_exception("[] operator not supported for this type");
-    return lvalBlackHole();
-  }
-
-  assert(m_type == KindOfArray);
-  Variant *ret = nullptr;
-  ArrayData *arr = m_data.parr;
-  ArrayData *escalated = arr->lvalNew(ret, arr->hasMultipleRefs());
-  if (escalated != arr) {
-    set(escalated);
-  }
-  assert(ret);
-  return *ret;
-}
-
 Variant &Variant::lvalInvalid() {
   throw_bad_type_exception("not array objects");
   return lvalBlackHole();
@@ -1076,375 +652,6 @@ Variant &Variant::lvalBlackHole() {
   Variant &bh = get_env_constants()->__lvalProxy;
   bh.unset();
   return bh;
-}
-
-template <typename T>
-ALWAYS_INLINE
-const Variant& Variant::SetImpl(Variant *self, T key, const Variant& v, bool isKey) {
-  retry:
-  if (LIKELY(self->m_type == KindOfArray)) {
-    ArrayData *escalated;
-    if (LvalHelper<T>::CheckParams && isKey) {
-      escalated = self->m_data.parr->set(key, v, self->needCopyForSet(v));
-    } else {
-      typename LvalHelper<T>::KeyType k(ToKey(key));
-      if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
-      escalated = self->m_data.parr->set(k, v, self->needCopyForSet(v));
-    }
-    if (escalated != self->m_data.parr) {
-      self->set(escalated);
-    }
-    return v;
-  }
-  switch (self->m_type) {
-  case KindOfBoolean:
-    if (self->m_data.num) {
-      throw_bad_type_exception("not array objects");
-      break;
-    }
-    /* Fall through */
-  case KindOfUninit:
-  case KindOfNull:
-  create:
-    if (LvalHelper<T>::CheckParams && isKey) {
-      self->set(ArrayData::Create(key, v));
-    } else {
-      typename LvalHelper<T>::KeyType k(ToKey(key));
-      if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
-      self->set(ArrayData::Create(k, v));
-    }
-    break;
-  case KindOfRef:
-    self = self->m_data.pref->var();
-    goto retry;
-  case KindOfStaticString:
-  case KindOfString: {
-    auto const s = self->m_data.pstr;
-    if (s->empty()) goto create;
-
-    auto const es = [&]() -> StringData* {
-      auto const offset = HPHP::toInt64(key);
-      auto const r = s->slice();
-      if (offset < 0) return s;
-      if (r.len == 0) throw OffsetOutOfRangeException();
-
-      String str = v.toString();
-      auto const ch = str.empty() ? 0 : str.data()[0];
-      if (offset < r.len && !s->hasMultipleRefs()) {
-        return s->modifyChar(offset, ch);
-      }
-      if (offset > RuntimeOption::StringOffsetLimit) {
-        throw OffsetOutOfRangeException();
-      }
-      uint32_t newlen = offset + 1;
-      auto const sd = StringData::Make(newlen);
-      auto const mslice = sd->bufferSlice();
-      memcpy(mslice.ptr, r.ptr, r.len);
-      memset(mslice.ptr + r.len, ' ', newlen - r.len);
-      mslice.ptr[offset] = ch;
-      sd->setSize(newlen);
-      return sd;
-    }();
-    if (es != s) self->set(es);
-    break;
-  }
-  case KindOfObject: {
-    ObjectData* obj = self->getObjectData();
-    if (obj->isCollection()) {
-      collectionOffsetSet(obj, key, v);
-    } else {
-      self->getArrayAccess()->o_invoke_few_args(s_offsetSet, 2, key, v);
-    }
-    break;
-  }
-  default:
-    throw_bad_type_exception("not array objects");
-    break;
-  }
-  return v;
-}
-
-const Variant& Variant::set(int64_t key, const Variant& v) {
-  return SetImpl(this, key, v, false);
-}
-
-const Variant& Variant::set(const String& key, const Variant& v,
-                     bool isString /* = false */) {
-  return SetImpl<const String&>(this, key, v, isString);
-}
-
-const Variant& Variant::set(const Variant& key, const Variant& v) {
-  return SetImpl<const Variant&>(this, key, v, false);
-}
-
-const Variant& Variant::append(const Variant& v) {
-  switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-    set(ArrayData::Create(v));
-    break;
-  case KindOfBoolean:
-    if (!toBoolean()) {
-      set(ArrayData::Create(v));
-    } else {
-      throw_bad_type_exception("[] operator not supported for this type");
-    }
-    break;
-  case KindOfArray:
-    {
-      ArrayData *escalated = m_data.parr->append(v, needCopyForSet(v));
-      if (escalated != m_data.parr) {
-        set(escalated);
-      }
-    }
-    break;
-  case KindOfRef:
-    m_data.pref->var()->append(v);
-    break;
-  case KindOfObject:
-    {
-      ObjectData* obj = m_data.pobj;
-      if (LIKELY(obj->isCollection())) {
-        collectionAppend(obj, cvarToCell(&v));
-      } else {
-        obj->o_invoke_few_args(s_offsetSet, 2, init_null_variant, v);
-      }
-      break;
-    }
-  case KindOfStaticString:
-  case KindOfString:
-    if (getStringData()->empty()) {
-      set(ArrayData::Create(v));
-      return v;
-    }
-    // fall through to throw
-  default:
-    throw_bad_type_exception("[] operator not supported for this type");
-  }
-  return v;
-}
-
-template <typename T>
-ALWAYS_INLINE
-const Variant& Variant::SetRefImpl(Variant *self, T key, const Variant& v, bool isKey) {
-  retry:
-  if (LIKELY(self->m_type == KindOfArray)) {
-    ArrayData *escalated;
-    if (LvalHelper<T>::CheckParams && isKey) {
-      escalated = self->m_data.parr->setRef(key, v, self->needCopyForSetRef(v));
-    } else {
-      typename LvalHelper<T>::KeyType k(ToKey(key));
-      if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
-      escalated = self->m_data.parr->setRef(k, v, self->needCopyForSetRef(v));
-    }
-    if (escalated != self->m_data.parr) {
-      self->set(escalated);
-    }
-    return v;
-  }
-  switch (self->m_type) {
-  case KindOfBoolean:
-    if (self->m_data.num) {
-      throw_bad_type_exception("not array objects");
-      break;
-    }
-    /* Fall through */
-  case KindOfUninit:
-  case KindOfNull:
-  create:
-    if (LvalHelper<T>::CheckParams && isKey) {
-      self->set(ArrayData::CreateRef(key, v));
-    } else {
-      typename LvalHelper<T>::KeyType k(ToKey(key));
-      if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
-      self->set(ArrayData::CreateRef(k, v));
-    }
-    break;
-  case KindOfRef:
-    self = self->m_data.pref->var();
-    goto retry;
-  case KindOfStaticString:
-  case KindOfString: {
-    if (self->m_data.pstr->empty()) {
-      goto create;
-    }
-    throw_bad_type_exception("binding assignment to stringoffset");
-    break;
-  }
-  case KindOfObject: {
-    if (self->m_data.pobj->isCollection()) {
-      raise_error("An element of a collection cannot be taken by reference");
-    }
-    self->getArrayAccess()->o_invoke_few_args(s_offsetSet, 2, key, v);
-    break;
-  }
-  default:
-    throw_bad_type_exception("not array objects");
-    break;
-  }
-  return v;
-}
-
-const Variant& Variant::setRef(int64_t key, const Variant& v) {
-  return SetRefImpl(this, key, v, false);
-}
-
-const Variant& Variant::setRef(const String& key, const Variant& v,
-                        bool isString /* = false */) {
-  return SetRefImpl<const String&>(this, key, v, isString);
-}
-
-const Variant& Variant::setRef(const Variant& key, const Variant& v) {
-  return SetRefImpl<const Variant&>(this, key, v, false);
-}
-
-const Variant& Variant::appendRef(const Variant& v) {
-  switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-    set(ArrayData::CreateRef(v));
-    break;
-  case KindOfBoolean:
-    if (!toBoolean()) {
-      set(ArrayData::CreateRef(v));
-    } else {
-      throw_bad_type_exception("[] operator not supported for this type");
-    }
-    break;
-  case KindOfArray:
-    {
-      ArrayData *escalated = m_data.parr->appendRef(v, needCopyForSetRef(v));
-      if (escalated != m_data.parr) {
-        set(escalated);
-      }
-    }
-    break;
-  case KindOfRef:
-    m_data.pref->var()->appendRef(v);
-    break;
-  case KindOfObject:
-    {
-      ObjectData* obj = m_data.pobj;
-      if (LIKELY(obj->isCollection())) {
-        raise_error("Collection elements cannot be taken by reference");
-      } else {
-        obj->o_invoke_few_args(s_offsetSet, 2, uninit_null(), v);
-      }
-    }
-  case KindOfStaticString:
-  case KindOfString:
-    if (getStringData()->empty()) {
-      set(ArrayData::CreateRef(v));
-      return v;
-    }
-    // fall through to throw
-  default:
-    throw_bad_type_exception("[] operator not supported for this type");
-  }
-  return v;
-}
-
-void Variant::removeImpl(int64_t key) {
-  switch (getType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    break;
-  case KindOfArray:
-    {
-      ArrayData *arr = getArrayData();
-      if (arr) {
-        ArrayData *escalated = arr->remove(key, (arr->hasMultipleRefs()));
-        if (escalated != arr) {
-          set(escalated);
-        }
-      }
-    }
-    break;
-  case KindOfObject:
-    callOffsetUnset(key);
-    break;
-  default:
-    lvalInvalid();
-    break;
-  }
-}
-
-void Variant::removeImpl(const Variant& key, bool isString /* false */) {
-  switch (getType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    break;
-  case KindOfArray:
-    {
-      ArrayData *arr = getArrayData();
-      if (arr) {
-        ArrayData *escalated;
-        if (isString) {
-          escalated = arr->remove(key, (arr->hasMultipleRefs()));
-        } else {
-          const VarNR &k = key.toKey();
-          if (k.isNull()) return;
-          escalated = arr->remove(k, (arr->hasMultipleRefs()));
-        }
-        if (escalated != arr) {
-          set(escalated);
-        }
-      }
-    }
-    break;
-  case KindOfObject:
-    callOffsetUnset(key);
-    break;
-  default:
-    lvalInvalid();
-    break;
-  }
-}
-
-void Variant::removeImpl(const String& key, bool isString /* false */) {
-  switch (getType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    break;
-  case KindOfArray:
-    {
-      ArrayData *arr = getArrayData();
-      if (arr) {
-        ArrayData *escalated;
-        if (isString) {
-          escalated = arr->remove(key, (arr->hasMultipleRefs()));
-        } else {
-          escalated = arr->remove(key.toKey(), (arr->hasMultipleRefs()));
-        }
-        if (escalated != arr) {
-          set(escalated);
-        }
-      }
-    }
-    break;
-  case KindOfObject:
-    callOffsetUnset(key);
-    break;
-  default:
-    lvalInvalid();
-    break;
-  }
-}
-
-void Variant::remove(const Variant& key) {
-  switch(key.getType()) {
-  case KindOfInt64:
-    removeImpl(key.toInt64());
-    return;
-  case KindOfString:
-  case KindOfStaticString:
-    removeImpl(key.toString());
-    return;
-  default:
-    break;
-  }
-  // Trouble cases: Array, Object
-  removeImpl(key);
 }
 
 void Variant::setEvalScalar() {
@@ -1480,11 +687,6 @@ void Variant::setEvalScalar() {
   default:
     break;
   }
-}
-
-void Variant::setToDefaultObject() {
-  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
-  set(Object(SystemLib::AllocStdClassObject()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1562,7 +764,37 @@ static void unserializeProp(VariableUnserializer *uns,
     // when promoting kPackedKind -> kMixedKind.
     t = &obj->reserveProperties(nProp).lvalAt(realKey, AccessFlags::Key);
   }
+
   t->unserialize(uns);
+
+  if (!RuntimeOption::EvalCheckRepoAuthDeserialize) return;
+  if (!RuntimeOption::RepoAuthoritative) return;
+  if (!Repo::get().global().HardPrivatePropInference) return;
+
+  /*
+   * We assume for performance reasons in repo authoriative mode that
+   * we can see all the sets to private properties in a class.
+   *
+   * It's a hole in this if we don't check unserialization doesn't
+   * violate what we've seen, which we handle by throwing if the repo
+   * was built with this option.
+   */
+  auto const cls  = obj->getVMClass();
+  auto const slot = cls->lookupDeclProp(key.get());
+  if (UNLIKELY(slot == kInvalidSlot)) return;
+  auto const repoTy = obj->getVMClass()->declPropRepoAuthType(slot);
+  if (LIKELY(tvMatchesRepoAuthType(*t->asTypedValue(), repoTy))) {
+    return;
+  }
+
+  auto msg = folly::format(
+    "Property {} for class {} was deserialized with type ({}) that "
+    "didn't match what we inferred in static analysis",
+    key.data(),
+    obj->getVMClass()->name()->data(),
+    tname(t->asTypedValue()->m_type)
+  ).str();
+  throw Exception(msg);
 }
 
 /*
@@ -1929,12 +1161,6 @@ void Variant::unserialize(VariableUnserializer *uns,
   if (sep != ';') {
     throw Exception("Expected ';' but got '%c'", sep);
   }
-}
-
-void Variant::dump() const {
-  VariableSerializer vs(VariableSerializer::Type::VarDump);
-  String ret(vs.serialize(*this, true));
-  printf("Variant: %s", ret.c_str());
 }
 
 VarNR::VarNR(const String& v) {

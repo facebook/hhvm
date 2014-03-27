@@ -1,7 +1,8 @@
 *** Testing preg_grep() : error conditions ***
 
 Arg value is: this is a string
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Arg value is: Array
@@ -11,6 +12,7 @@ array(2) {
   [1]=>
   string(10) "a subarray"
 }
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

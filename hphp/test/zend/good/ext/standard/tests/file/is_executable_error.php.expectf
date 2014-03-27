@@ -1,7 +1,9 @@
 *** Testing is_executable(): error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 *** Testing is_exceutable() on non-existent directory ***

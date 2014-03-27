@@ -197,9 +197,11 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   // Determine which extensions should be treated as php
   // source code. If the execution engine doesn't understand
   // the source, the content will be spit out verbatim.
-  bool treatAsContent = ext && strcasecmp(ext, "php") != 0 &&
-    (RuntimeOption::PhpFileExtensions.empty() ||
-     !RuntimeOption::PhpFileExtensions.count(ext));
+  bool treatAsContent = ext &&
+       strcasecmp(ext, "php") != 0 &&
+       strcasecmp(ext, "hh") != 0 &&
+       (RuntimeOption::PhpFileExtensions.empty() ||
+        !RuntimeOption::PhpFileExtensions.count(ext));
 
   // If this is not a php file, check the static and dynamic content caches
   if (treatAsContent) {
@@ -333,7 +335,6 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     ServerStatsHelper ssh("input");
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
     Extension::RequestInitModules();
-    process_ini_settings(RuntimeOption::IniFile);
 
     if (RuntimeOption::EnableDebugger) {
       Eval::DSandboxInfo sInfo = sourceRootInfo.getSandboxInfo();

@@ -583,6 +583,8 @@ int string_sscanf(const char *string, const char *format, int numVars,
   char buf[64];  /* Temporary buffer to hold scanned number
                   * strings before they are passed to strtoul() */
 
+  Array returnArray;
+
   /*
    * Check for errors in the format string.
    */
@@ -678,7 +680,7 @@ int string_sscanf(const char *string, const char *format, int numVars,
     switch (*ch) {
     case 'n':
       if (!(flags & SCAN_SUPPRESS)) {
-        return_value.append((int)(string - baseString));
+        returnArray.append((int)(string - baseString));
       }
       nconversions++;
       continue;
@@ -789,7 +791,7 @@ int string_sscanf(const char *string, const char *format, int numVars,
         }
       }
       if (!(flags & SCAN_SUPPRESS)) {
-        return_value.append(String(string, end-string, CopyString));
+        returnArray.append(String(string, end-string, CopyString));
       }
       string = end;
       break;
@@ -822,7 +824,7 @@ int string_sscanf(const char *string, const char *format, int numVars,
         goto done;
       }
       if (!(flags & SCAN_SUPPRESS)) {
-        return_value.append(String(string, end-string, CopyString));
+        returnArray.append(String(string, end-string, CopyString));
       }
       string = end;
       break;
@@ -947,9 +949,9 @@ int string_sscanf(const char *string, const char *format, int numVars,
         value = (int) (*fn)(buf, nullptr, base);
         if ((flags & SCAN_UNSIGNED) && (value < 0)) {
           snprintf(buf, sizeof(buf), "%u", value); /* INTL: ISO digit */
-          return_value.append(String(buf, CopyString));
+          returnArray.append(String(buf, CopyString));
         } else {
-          return_value.append(value);
+          returnArray.append(value);
         }
       }
       break;
@@ -1046,7 +1048,7 @@ int string_sscanf(const char *string, const char *format, int numVars,
         double dvalue;
         *end = '\0';
         dvalue = strtod(buf, nullptr);
-        return_value.append(dvalue);
+        returnArray.append(dvalue);
       }
       break;
     } /* switch (op) */
@@ -1060,6 +1062,7 @@ done:
   } else if (nconversions < totalVars) {
     /* TODO: not all elements converted. we need to prune the list - cc */
   }
+  return_value = returnArray;
   return SCAN_SUCCESS;
 }
 

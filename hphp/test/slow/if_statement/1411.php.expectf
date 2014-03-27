@@ -2,15 +2,21 @@ case 3
 case 4
 case 5
 case 7
-HipHop Notice: Undefined variable: a in %s/test/slow/if_statement/1411.php on line 36
+
+Notice: Undefined variable: a in %s/test/slow/if_statement/1411.php on line 36
 case 10
-HipHop Notice: Undefined variable: a in %s/test/slow/if_statement/1411.php on line 48
+
+Notice: Undefined variable: a in %s/test/slow/if_statement/1411.php on line 48
 case 13
-HipHop Notice: Undefined variable: a in %s/test/slow/if_statement/1411.php on line 60
+
+Notice: Undefined variable: a in %s/test/slow/if_statement/1411.php on line 60
 case 16
-HipHop Notice: Undefined variable: a in %s/test/slow/if_statement/1411.php on line 75
+
+Notice: Undefined variable: a in %s/test/slow/if_statement/1411.php on line 75
 case 20
-HipHop Notice: Undefined variable: a in %s/test/slow/if_statement/1411.php on line 87
+
+Notice: Undefined variable: a in %s/test/slow/if_statement/1411.php on line 87
 case 23
-HipHop Notice: Undefined variable: a in %s/test/slow/if_statement/1411.php on line 102
+
+Notice: Undefined variable: a in %s/test/slow/if_statement/1411.php on line 102
 case 27

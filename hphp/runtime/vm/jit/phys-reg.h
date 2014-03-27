@@ -397,12 +397,12 @@ struct PhysRegSaverParity {
 
   int rspAdjustment() const;
   int rspTotalAdjustmentRegs() const;
-  void bytesPushed(int64_t bytes);
+  void bytesPushed(int bytes);
 
 private:
   X64Assembler& m_as;
   RegSet m_regs;
-  int64_t m_adjust;
+  int m_adjust;
 };
 
 struct PhysRegSaverStub : public PhysRegSaverParity {

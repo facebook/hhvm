@@ -1,4 +1,5 @@
-HipHop Warning: Invalid argument: result_type: 0 in %s/test/slow/invalid_argument/1380.php on line 3
-bool(false)
-HipHop Warning: supplied argument is not a valid MySQL result resource in %s/test/slow/invalid_argument/1380.php on line 4
+Warning: mysql_fetch_array() expects parameter 1 to be resource, NULL given in %s/test/slow/invalid_argument/1380.php on line 3
+NULL
+
+Warning: mysql_fetch_object(): supplied argument is not a valid MySQL result resource in %s/test/slow/invalid_argument/1380.php on line 4
 bool(false)

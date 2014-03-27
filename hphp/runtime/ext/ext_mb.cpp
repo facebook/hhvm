@@ -1997,7 +1997,7 @@ typedef struct _php_mb_encoding_handler_info_t {
 } php_mb_encoding_handler_info_t;
 
 static mbfl_no_encoding _php_mb_encoding_handler_ex
-(const php_mb_encoding_handler_info_t *info, Variant &arg, char *res) {
+(const php_mb_encoding_handler_info_t *info, Array& arg, char *res) {
   char *var, *val;
   const char *s1, *s2;
   char *strtok_buf = NULL, **val_list = NULL;
@@ -2170,9 +2170,11 @@ bool f_mb_parse_str(const String& encoded_string,
   info.from_language          = MBSTRG(current_language);
 
   char *encstr = strndup(encoded_string.data(), encoded_string.size());
+  Array resultArr = Array::Create();
   mbfl_no_encoding detected =
-    _php_mb_encoding_handler_ex(&info, result, encstr);
+    _php_mb_encoding_handler_ex(&info, resultArr, encstr);
   free(encstr);
+  result = resultArr;
 
   MBSTRG(http_input_identify) = detected;
   return detected != mbfl_no_encoding_invalid;
@@ -3515,19 +3517,20 @@ static Variant _php_mb_regex_ereg_search_exec(const String& pattern,
       {
         beg = MBSTRG(search_regs)->beg[0];
         end = MBSTRG(search_regs)->end[0];
-        ret.append(beg);
-        ret.append(end - beg);
+        ret = make_packed_array(beg, end - beg);
       }
       break;
     case 2:
       n = MBSTRG(search_regs)->num_regs;
+      ret = Variant(Array::Create());
       for (i = 0; i < n; i++) {
         beg = MBSTRG(search_regs)->beg[i];
         end = MBSTRG(search_regs)->end[i];
         if (beg >= 0 && beg <= end && end <= len) {
-          ret.append(String((const char *)(str + beg), end - beg, CopyString));
+          ret.toArrRef().append(
+            String((const char *)(str + beg), end - beg, CopyString));
         } else {
-          ret.append(false);
+          ret.toArrRef().append(false);
         }
       }
       break;
@@ -3610,16 +3613,18 @@ static Variant _php_mb_regex_ereg_exec(const Variant& pattern, const String& str
   const char *s = str.data();
   int string_len = str.size();
   match_len = regions->end[0] - regions->beg[0];
-  regs = Array::Create();
+
+  PackedArrayInit regsPai(regions->num_regs);
   for (i = 0; i < regions->num_regs; i++) {
     beg = regions->beg[i];
     end = regions->end[i];
     if (beg >= 0 && beg < end && end <= string_len) {
-      regs.append(String(s + beg, end - beg, CopyString));
+      regsPai.append(String(s + beg, end - beg, CopyString));
     } else {
-      regs.append(false);
+      regsPai.append(false);
     }
   }
+  regs = regsPai.toArray();
 
   if (match_len == 0) {
     match_len = 1;

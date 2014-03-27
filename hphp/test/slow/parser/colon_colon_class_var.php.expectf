@@ -1,1 +1,2 @@
-HipHop Fatal error: ::class can only be used on scalars in %s/test/slow/parser/colon_colon_class_var.php on line 3
+
+Fatal error: ::class can only be used on scalars in %s/test/slow/parser/colon_colon_class_var.php on line 3

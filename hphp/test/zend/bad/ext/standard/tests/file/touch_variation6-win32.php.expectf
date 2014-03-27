@@ -8,9 +8,11 @@ PASSED: .\touchVar5.tmp\aSubDirOrFile - created
 --- testing touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile ---
 PASSED: touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile - created
 --- testing touchVar5.tmp\..\BADDIR\aSubDirOrFile ---
-HipHop Warning: %s
+
+Warning: %s
 --- testing BADDIR\aSubDirOrFile ---
-HipHop Warning: %s
+
+Warning: %s
 --- testing %s\touchVar5.tmp\aSubDirOrFile ---
 PASSED: %s\touchVar5.tmp\aSubDirOrFile - created
 --- testing %s\.\touchVar5.tmp\aSubDirOrFile ---
@@ -18,11 +20,14 @@ PASSED: %s\.\touchVar5.tmp\aSubDirOrFile - created
 --- testing %s\touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile ---
 PASSED: %s\touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile - created
 --- testing %s\BADDIR\aSubDirOrFile ---
-HipHop Warning: %s
+
+Warning: %s
 --- testing touchVar5.tmp\aSubDirOrFile\ ---
-HipHop Warning: %s
+
+Warning: %s
 --- testing %s\touchVar5.tmp\aSubDirOrFile\ ---
-HipHop Warning: %s
+
+Warning: %s
 --- testing touchVar5.tmp\\aSubDirOrFile ---
 PASSED: touchVar5.tmp\\aSubDirOrFile - created
 --- testing %s\\touchVar5.tmp\\aSubDirOrFile ---

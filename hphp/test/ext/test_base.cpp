@@ -19,8 +19,8 @@
 #include "hphp/compiler/option.h"
 #include "hphp/test/ext/test.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -1,0 +1,4 @@
+File "IUseDynamicYield_interface2.php", line 36, characters 23-29:
+The method genBlah is undefined in an object of type IFoo
+File "IUseDynamicYield_interface2.php", line 30, characters 22-25:
+Check this out

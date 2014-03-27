@@ -248,23 +248,21 @@ static CallMap s_callMap {
 
     /* Continuation support helpers */
     {CreateContFunc,     &c_Continuation::CreateFunc, DSSA, SNone,
-                          { extra(&CreateContData::genFunc) }},
-    {CreateContMeth,     &c_Continuation::CreateMeth, DSSA, SNone,
-                          { extra(&CreateContData::genFunc),
+                          { extra(&CreateContData::func),
                             {SSA, 0} }},
+    {CreateContMeth,     &c_Continuation::CreateMeth, DSSA, SNone,
+                          { extra(&CreateContData::func),
+                            {SSA, 0}, {SSA, 1} }},
 
     /* Async function support helpers */
     {CreateAFWHFunc,     &c_AsyncFunctionWaitHandle::CreateFunc, DSSA, SSync,
-                          { extra(&CreateContData::genFunc),
+                          { extra(&CreateContData::func),
                             {SSA, 0}, {SSA, 1} }},
     {CreateAFWHMeth,     &c_AsyncFunctionWaitHandle::CreateMeth, DSSA, SSync,
-                          { extra(&CreateContData::genFunc),
+                          { extra(&CreateContData::func),
                             {SSA, 0}, {SSA, 1}, {SSA, 2} }},
     {CreateSRWH,         &c_StaticResultWaitHandle::CreateFromVM, DSSA, SNone,
                           { {TV, 0} }},
-    {CreateSEWH,         &c_StaticExceptionWaitHandle::CreateFromVM,
-                          DSSA, SNone,
-                          { {SSA, 0} }},
 
     /* MInstrTranslator helpers */
     {BaseG,    fssa(0), DSSA, SSync, {{TV, 1}, {SSA, 2}}},
@@ -283,9 +281,9 @@ static CallMap s_callMap {
     {UnsetProp, fssa(0), DNone, SSync,
                  {{SSA, 1}, {SSA, 2}, {TV, 3}}},
     {SetOpProp, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {TV, 2}, {TV, 3}, {SSA, 4}, {SSA, 5}}},
+                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {TV, 4}, {SSA, 5}, {SSA, 6}}},
     {IncDecProp, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {TV, 2}, {SSA, 3}, {SSA, 4}}},
+                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}, {SSA, 5}}},
     {EmptyProp, fssa(0), DSSA, SSync,
                  {{SSA, 1}, {SSA, 2}, {TV, 3}}},
     {IssetProp, fssa(0), DSSA, SSync,
@@ -322,10 +320,10 @@ static CallMap s_callMap {
                  {{SSA, 1}, {MemberKeyIS, 2}, {TV, 3}}},
     {UnsetElem, fssa(0), DNone, SSync,
                  {{SSA, 1}, {MemberKeyIS, 2}}},
-    {SetOpElem, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {TV, 2}, {TV, 3}, {SSA, 4}}},
-    {IncDecElem, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {TV, 2}, {SSA, 3}}},
+    {SetOpElem, setOpElem, DTV, SSync,
+                 {{SSA, 0}, {TV, 1}, {TV, 2}, {SSA, 3}, {SSA, 4}}},
+    {IncDecElem, incDecElem, DTV, SSync,
+                 {{SSA, 0}, {TV, 1}, {SSA, 2}, {SSA, 3}}},
     {SetNewElem, setNewElem, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {SetNewElemArray, setNewElemArray, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {SetWithRefNewElem, fssa(0), DNone, SSync,
@@ -375,10 +373,10 @@ ArgGroup CallInfo::toArgGroup(const RegAllocInfo& regs,
       argGroup.typedValue(arg.ival);
       break;
     case ArgType::MemberKeyS:
-      argGroup.vectorKeyS(arg.ival);
+      argGroup.memberKeyS(arg.ival);
       break;
     case ArgType::MemberKeyIS:
-      argGroup.vectorKeyIS(arg.ival);
+      argGroup.memberKeyIS(arg.ival);
       break;
     case ArgType::ExtraImm:
       argGroup.imm(arg.extraFunc(inst));

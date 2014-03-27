@@ -18,7 +18,6 @@
 #define incl_HPHP_TEST_CPP_EXT_H_
 
 #include "hphp/test/ext/test_cpp_base.h"
-#include "hphp/runtime/ext/ext_variable.h" // we frequently need to call f_var_dump()
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/ext/ext_misc.h"
 
@@ -42,7 +41,7 @@ inline void evalCodeForCppExt(const String& code_str) {
 
 #define DECLARE_TEST_FUNCTIONS(s)                                       \
   char *argv[] = { const_cast<char*>(which.c_str()), nullptr };         \
-  execute_command_line_begin(1, argv, false);                           \
+  execute_command_line_begin(1, argv, false, {});                       \
   evalCodeForCppExt(s);                                                 \
                                                                         \
   SCOPE_EXIT {                                                          \

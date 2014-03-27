@@ -17,15 +17,14 @@
 #ifndef incl_HPHP_VM_NAMED_ENTITY_H_
 #define incl_HPHP_VM_NAMED_ENTITY_H_
 
-#include <tbb/concurrent_unordered_map.h>
-#include <boost/operators.hpp>
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/string-data.h"
 
-#include "folly/AtomicHashMap.h"
+#include "hphp/runtime/vm/type-alias.h"
 
 #include "hphp/util/atomic.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/type-alias.h"
+
+#include "folly/AtomicHashMap.h"
 
 namespace HPHP {
 

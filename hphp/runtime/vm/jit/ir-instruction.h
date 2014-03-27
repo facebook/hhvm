@@ -34,6 +34,14 @@ struct BCMarker {
   Offset      bcOff;
   int32_t     spOff;
 
+  /*
+   * This is for use by test code that needs to provide BCMarkers but is not
+   * deriving them from an actual bytecode region. It is always valid().
+   */
+  static BCMarker Dummy() {
+    return BCMarker(reinterpret_cast<const Func*>(1), 0, 0);
+  }
+
   BCMarker()
     : func(nullptr)
     , bcOff(0)

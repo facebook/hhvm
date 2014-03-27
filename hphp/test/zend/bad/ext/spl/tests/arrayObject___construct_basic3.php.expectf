@@ -11,8 +11,10 @@ string(8) "changed2"
 bool(true)
 bool(true)
   - Unset:
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 NULL
 NULL
   - After:
@@ -37,8 +39,10 @@ string(8) "changed2"
 bool(true)
 bool(true)
   - Unset:
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 NULL
 NULL
   - After:

@@ -1,721 +1,841 @@
 *** Testing fgetcsv() : with delimiter as NULL ***
 
 -- Testing fgetcsv() with file opened using r mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(0)
 bool(false)

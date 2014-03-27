@@ -1,4 +1,5 @@
-HipHop Notice: Use of undefined constant B - assumed 'B' in %s on line 5
+
+Notice: Use of undefined constant B - assumed 'B' in %s on line 5
 string(1) "B"
 int(1)
 int(1)

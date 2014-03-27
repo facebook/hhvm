@@ -33,8 +33,8 @@ TEST(RegAlgorithms, twoCycle) {
   auto howTo = JIT::doRegMoves(moves, r10);
   EXPECT_EQ(howTo.size(), 1);
   EXPECT_EQ(howTo[0].m_kind, JIT::MoveInfo::Kind::Xchg);
-  EXPECT_TRUE((howTo[0].m_reg1 == rax && howTo[0].m_reg2 == rdx) ||
-              (howTo[0].m_reg1 == rdx && howTo[0].m_reg2 == rax));
+  EXPECT_TRUE((howTo[0].m_src == rax && howTo[0].m_dst == rdx) ||
+              (howTo[0].m_src == rdx && howTo[0].m_dst == rax));
 }
 
 TEST(RegAlgorithms, threeCycle) {
@@ -48,10 +48,10 @@ TEST(RegAlgorithms, threeCycle) {
   auto howTo = JIT::doRegMoves(moves, r10);
   EXPECT_EQ(howTo.size(), 2);
   EXPECT_EQ(howTo[0].m_kind, JIT::MoveInfo::Kind::Xchg);
-  EXPECT_TRUE((howTo[0].m_reg1 == rax && howTo[0].m_reg2 == rdx) ||
-              (howTo[0].m_reg1 == rdx && howTo[0].m_reg2 == rax));
-  EXPECT_TRUE((howTo[1].m_reg1 == rdx && howTo[1].m_reg2 == rcx) ||
-              (howTo[1].m_reg1 == rcx && howTo[1].m_reg2 == rdx));
+  EXPECT_TRUE((howTo[0].m_src == rax && howTo[0].m_dst == rdx) ||
+              (howTo[0].m_src == rdx && howTo[0].m_dst == rax));
+  EXPECT_TRUE((howTo[1].m_src == rdx && howTo[1].m_dst == rcx) ||
+              (howTo[1].m_src == rcx && howTo[1].m_dst == rdx));
 
   // another test involving a 3-cycle plus one leaf.  pass as long as
   // it doesn't blow up.
@@ -73,14 +73,14 @@ TEST(RegAlgorithms, noCycle) {
   auto howTo = JIT::doRegMoves(moves, r11);
   EXPECT_EQ(howTo.size(), 3);
   EXPECT_EQ(howTo[0].m_kind, JIT::MoveInfo::Kind::Move);
-  EXPECT_EQ(howTo[0].m_reg1, rdx);
-  EXPECT_EQ(howTo[0].m_reg2, rax);
+  EXPECT_EQ(howTo[0].m_src, rdx);
+  EXPECT_EQ(howTo[0].m_dst, rax);
   EXPECT_EQ(howTo[1].m_kind, JIT::MoveInfo::Kind::Move);
-  EXPECT_EQ(howTo[1].m_reg1, r13);
-  EXPECT_EQ(howTo[1].m_reg2, rdx);
+  EXPECT_EQ(howTo[1].m_src, r13);
+  EXPECT_EQ(howTo[1].m_dst, rdx);
   EXPECT_EQ(howTo[2].m_kind, JIT::MoveInfo::Kind::Move);
-  EXPECT_EQ(howTo[2].m_reg1, r10);
-  EXPECT_EQ(howTo[2].m_reg2, r13);
+  EXPECT_EQ(howTo[2].m_src, r10);
+  EXPECT_EQ(howTo[2].m_dst, r13);
 }
 
 TEST(RegAlgorithms, outdegTwo) {
@@ -92,10 +92,10 @@ TEST(RegAlgorithms, outdegTwo) {
 
   auto howTo = JIT::doRegMoves(moves, r11);
   EXPECT_EQ(howTo.size(), 2);
-  EXPECT_EQ(howTo[0].m_reg1, rcx);
-  EXPECT_EQ(howTo[1].m_reg1, rcx);
-  EXPECT_TRUE((howTo[0].m_reg2 == rax && howTo[1].m_reg2 == rdx) ||
-              (howTo[0].m_reg2 == rdx && howTo[1].m_reg2 == rax));
+  EXPECT_EQ(howTo[0].m_src, rcx);
+  EXPECT_EQ(howTo[1].m_src, rcx);
+  EXPECT_TRUE((howTo[0].m_dst == rax && howTo[1].m_dst == rdx) ||
+              (howTo[0].m_dst == rdx && howTo[1].m_dst == rax));
 }
 
 TEST(RegAlgorithms, simdCycle) {
@@ -108,14 +108,14 @@ TEST(RegAlgorithms, simdCycle) {
   auto howTo = JIT::doRegMoves(moves, r11);
   EXPECT_EQ(howTo.size(), 3);
   EXPECT_EQ(howTo[0].m_kind, JIT::MoveInfo::Kind::Move);
-  EXPECT_EQ(howTo[0].m_reg1, rax);
-  EXPECT_EQ(howTo[0].m_reg2, r11);
+  EXPECT_EQ(howTo[0].m_src, rax);
+  EXPECT_EQ(howTo[0].m_dst, r11);
   EXPECT_EQ(howTo[1].m_kind, JIT::MoveInfo::Kind::Move);
-  EXPECT_EQ(howTo[1].m_reg1, xmm0);
-  EXPECT_EQ(howTo[1].m_reg2, rax);
+  EXPECT_EQ(howTo[1].m_src, xmm0);
+  EXPECT_EQ(howTo[1].m_dst, rax);
   EXPECT_EQ(howTo[2].m_kind, JIT::MoveInfo::Kind::Move);
-  EXPECT_EQ(howTo[2].m_reg1, r11);
-  EXPECT_EQ(howTo[2].m_reg2, xmm0);
+  EXPECT_EQ(howTo[2].m_src, r11);
+  EXPECT_EQ(howTo[2].m_dst, xmm0);
 }
 
 } }

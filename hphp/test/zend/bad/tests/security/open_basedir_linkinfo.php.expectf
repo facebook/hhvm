@@ -9,7 +9,8 @@ int(%d)
 int(%d)
 int(%d)
 int(%d)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 int(%d)
 bool(true)

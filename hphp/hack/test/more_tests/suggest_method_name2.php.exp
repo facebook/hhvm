@@ -1,0 +1,4 @@
+File "suggest_method_name2.php", line 17, characters 6-13:
+Could not find static method mymethod
+File "suggest_method_name2.php", line 13, characters 26-33:
+Did you mean: myMethod

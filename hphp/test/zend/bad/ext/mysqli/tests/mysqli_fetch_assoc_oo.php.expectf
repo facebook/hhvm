@@ -20,5 +20,6 @@ array(5) {
   [%u|b%"e"]=>
   %unicode|string%(1) "1"
 }
-HipHop Warning: %s
+
+Warning: %s
 done!

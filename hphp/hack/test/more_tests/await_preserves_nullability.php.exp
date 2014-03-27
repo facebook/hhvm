@@ -1,0 +1,6 @@
+File "await_preserves_nullability.php", line 16, characters 17-18:
+Invalid argument
+File "await_preserves_nullability.php", line 19, characters 25-25:
+This is a value of generic type T
+File "await_preserves_nullability.php", line 15, characters 10-20:
+It is incompatible with a nullable type

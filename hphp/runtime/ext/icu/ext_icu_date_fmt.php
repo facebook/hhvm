@@ -42,7 +42,7 @@ class IntlDateFormatter {
    * @return IntlDateFormatter - The created IntlDateFormatter or FALSE
    *   in case of failure.
    */
-  <<__Native("ActRec")>>
+  <<__Native>>
   public function __construct(string $locale, int $datetype, int $timetype,
                               mixed $timezone = NULL, mixed $calendar = NULL,
                               string $pattern = ''): void;

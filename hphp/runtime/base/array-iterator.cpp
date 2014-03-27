@@ -13,8 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/array-iterator.h"
+
+#include <algorithm>
+
+#include "folly/Likely.h"
+
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/apc-local-array.h"
@@ -22,14 +26,14 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
-// inline methods of HphpArray.
 #include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/array-iterator-defs.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-// Static strings.
 
 TRACE_SET_MOD(runtime);
+
+//////////////////////////////////////////////////////////////////////
 
 const StaticString
   s_rewind("rewind"),
@@ -38,8 +42,9 @@ const StaticString
   s_key("key"),
   s_current("current");
 
-///////////////////////////////////////////////////////////////////////////////
-// ArrayIter
+__thread MIterTable tl_miter_table;
+
+//////////////////////////////////////////////////////////////////////
 
 ArrayIter::ArrayIter(const ArrayData* data) {
   arrInit(data);
@@ -575,42 +580,231 @@ RefData* ArrayIter::zSecond() {
   return tv->m_data.pref;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// FullPos
+//////////////////////////////////////////////////////////////////////
 
-bool FullPos::end() const {
-  return !const_cast<FullPos*>(this)->prepare();
+namespace {
+
+constexpr uint32_t kInitialExtraCap = 4;
+
+// Handle the cases where we didn't have enough preallocated Ents in
+// tl_miter_table, and we need to allocate from `extras'.
+NEVER_INLINE
+MIterTable::Ent* find_empty_strong_iter_slower() {
+  return tl_miter_table.extras.find_unpopulated();
 }
 
-bool FullPos::advance() {
+// Handle finding an empty strong iterator slot when the first slot
+// was already in use.
+NEVER_INLINE
+MIterTable::Ent* find_empty_strong_iter_slow() {
+#define X(i) \
+  if (LIKELY(!tl_miter_table.ents[i].array)) return &tl_miter_table.ents[i];
+X(1);
+X(2);
+X(3);
+X(4);
+X(5);
+X(6);
+  static_assert(tl_miter_table.ents.size() == 7, "");
+#undef X
+  return find_empty_strong_iter_slower();
+}
+
+// Find a strong iterator slot that is empty.  Almost always the first
+// one will be empty, so that path is inlined---everything else
+// delegates to slow.
+ALWAYS_INLINE
+MIterTable::Ent* find_empty_strong_iter() {
+  if (LIKELY(!tl_miter_table.ents[0].array)) {
+    return &tl_miter_table.ents[0];
+  }
+  return find_empty_strong_iter_slow();
+}
+
+void newMArrayIter(MArrayIter* marr, ArrayData* ad) {
+  assert(!marr->getContainer());
+  auto const slot = find_empty_strong_iter();
+  assert(!slot->array);
+  slot->iter = marr;
+  slot->array = ad;
+  marr->setContainer(ad);
+  marr->m_pos = ad->getPosition();
+  assert(strong_iterators_exist());
+}
+
+template<class Cond>
+void free_strong_iterator_impl(Cond cond) {
+  assert(strong_iterators_exist());
+
+  // We need to maintain the invariant that if there are any strong
+  // iterators bound to arrays, one of the bindings is in slot zero.
+  // This pvalid will point to something we can move into the first
+  // slot if alreadyValid is false.  If when we're done alreadyValid
+  // is false, and pvalid is also nullptr, it means this function
+  // freed the last strong iterator.
+  MIterTable::Ent* pvalid = nullptr;
+  bool alreadyValid = true;  // because strong_iterators_exist()
+
+  auto rm = [&] (MIterTable::Ent& ent) {
+    if (cond(ent)) {
+      ent.iter->setContainer(nullptr);
+      ent.array = nullptr;
+      ent.iter = nullptr;
+    } else if (!alreadyValid && ent.array) {
+      pvalid = &ent;
+    }
+  };
+
+  if (cond(tl_miter_table.ents[0])) {
+    tl_miter_table.ents[0].iter->setContainer(nullptr);
+    tl_miter_table.ents[0].array = nullptr;
+    tl_miter_table.ents[0].iter = nullptr;
+    alreadyValid = false;
+  }
+  rm(tl_miter_table.ents[1]);
+  rm(tl_miter_table.ents[2]);
+  rm(tl_miter_table.ents[3]);
+  rm(tl_miter_table.ents[4]);
+  rm(tl_miter_table.ents[5]);
+  rm(tl_miter_table.ents[6]);
+  static_assert(tl_miter_table.ents.size() == 7, "");
+
+  if (UNLIKELY(pvalid != nullptr)) {
+    std::swap(*pvalid, tl_miter_table.ents[0]);
+    alreadyValid = true;
+  }
+  if (LIKELY(tl_miter_table.extras.empty())) return;
+
+  tl_miter_table.extras.release_if([&] (const MIterTable::Ent& e) {
+    if (cond(e)) {
+      e.iter->setContainer(nullptr);
+      return true;
+    }
+    return false;
+  });
+
+  // If we didn't manage to keep something in the first non-extra
+  // slot, scan extras again to swap something over.
+  if (LIKELY(alreadyValid)) return;
+  if (!tl_miter_table.extras.empty()) {
+    tl_miter_table.extras.visit_to_remove(
+      [&] (const MIterTable::Ent& ent) {
+        tl_miter_table.ents[0] = ent;
+      }
+    );
+  }
+}
+
+void freeMArrayIter(MArrayIter* marr) {
+  assert(strong_iterators_exist());
+  free_strong_iterator_impl(
+    [marr] (const MIterTable::Ent& e) {
+      return e.iter == marr;
+    }
+  );
+}
+
+}
+
+void free_strong_iterators(ArrayData* ad) {
+  free_strong_iterator_impl([ad] (const MIterTable::Ent& e) {
+    return e.array == ad;
+  });
+}
+
+void move_strong_iterators(ArrayData* dst, ArrayData* src) {
+  for_each_strong_iterator([&] (MIterTable::Ent& ent) {
+    if (ent.array == src) {
+      ent.array = dst;
+      ent.iter->setContainer(dst);
+    }
+  });
+}
+
+//////////////////////////////////////////////////////////////////////
+
+MArrayIter::MArrayIter(RefData* ref)
+  : m_pos(0)
+  , m_container(nullptr)
+  , m_resetFlag(false)
+{
+  ref->incRefCount();
+  setRef(ref);
+  assert(hasRef());
+  escalateCheck();
+  auto const data = cowCheck();
+  if (!data) return;
+  data->reset();
+  newMArrayIter(this, data);
+  setResetFlag(true);
+  data->next();
+  assert(getContainer() == data);
+}
+
+MArrayIter::MArrayIter(ArrayData* data)
+  : m_ref(nullptr)
+  , m_pos(0)
+  , m_container(nullptr)
+  , m_resetFlag(false)
+{
+  if (!data) return;
+  assert(!data->isStatic());
+  setAd(data);
+  escalateCheck();
+  data = cowCheck();
+  data->reset();
+  newMArrayIter(this, data);
+  setResetFlag(true);
+  data->next();
+  assert(getContainer() == data);
+}
+
+MArrayIter::~MArrayIter() {
+  auto const container = getContainer();
+  if (container) {
+    freeMArrayIter(this);
+    assert(getContainer() == nullptr);
+  }
+  if (hasRef()) {
+    decRefRef(getRef());
+  } else if (hasAd()) {
+    decRefArr(getAd());
+  }
+}
+
+bool MArrayIter::end() const {
+  return !const_cast<MArrayIter*>(this)->prepare();
+}
+
+bool MArrayIter::advance() {
   ArrayData* data = getArray();
   ArrayData* container = getContainer();
   if (!data) {
     if (container) {
-      container->freeFullPos(*this);
+      freeMArrayIter(this);
     }
     setResetFlag(false);
     return false;
   }
   if (container == data) {
-    return cowCheck()->advanceFullPos(*this);
+    return cowCheck()->advanceMArrayIter(*this);
   }
   data = reregister();
   assert(data && data == getContainer());
   assert(!getResetFlag());
-  if (!data->validFullPos(*this)) return false;
+  if (!data->validMArrayIter(*this)) return false;
   // To conform to PHP behavior, we need to set the internal
   // cursor to point to the next element.
   data->next();
   return true;
 }
 
-bool FullPos::prepare() {
+bool MArrayIter::prepare() {
   ArrayData* data = getArray();
   ArrayData* container = getContainer();
   if (!data) {
     if (container) {
-      container->freeFullPos(*this);
+      freeMArrayIter(this);
     }
     setResetFlag(false);
     return false;
@@ -618,171 +812,68 @@ bool FullPos::prepare() {
   if (container != data) {
     data = reregister();
   }
-  return data->validFullPos(*this);
+  return data->validMArrayIter(*this);
 }
 
-void FullPos::escalateCheck() {
-  ArrayData* data;
-  if (hasVar()) {
-    data = getData();
+void MArrayIter::escalateCheck() {
+  if (hasRef()) {
+    auto const data = getData();
     if (!data) return;
-    ArrayData* esc = data->escalate();
+    auto const esc = data->escalate();
     if (data != esc) {
-      *const_cast<Variant*>(getVar()) = esc;
+      cellSet(make_tv<KindOfArray>(esc), *getRef()->tv());
     }
-  } else {
-    assert(hasAd());
-    data = getAd();
-    ArrayData* esc = data->escalate();
-    if (data != esc) {
-      esc->incRefCount();
-      decRefArr(data);
-      setAd(esc);
-    }
+    return;
+  }
+
+  assert(hasAd());
+  auto const data = getAd();
+  auto const esc = data->escalate();
+  if (data != esc) {
+    esc->incRefCount();
+    decRefArr(data);
+    setAd(esc);
   }
 }
 
-ArrayData* FullPos::cowCheck() {
-  ArrayData* data;
-  if (hasVar()) {
-    data = getData();
+ArrayData* MArrayIter::cowCheck() {
+  if (hasRef()) {
+    auto data = getData();
     if (!data) return nullptr;
     if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
-      *const_cast<Variant*>(getVar()) = data = data->copyWithStrongIterators();
+      data = data->copyWithStrongIterators();
+      cellSet(make_tv<KindOfArray>(data), *getRef()->tv());
     }
-  } else {
-    assert(hasAd());
-    data = getAd();
-    if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
-      ArrayData* copied = data->copyWithStrongIterators();
-      copied->incRefCount();
-      decRefArr(data);
-      setAd(data = copied);
-    }
+    return data;
+  }
+
+  assert(hasAd());
+  auto const data = getAd();
+  if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
+    ArrayData* copied = data->copyWithStrongIterators();
+    copied->incRefCount();
+    decRefArr(data);
+    setAd(copied);
+    return copied;
   }
   return data;
 }
 
-ArrayData* FullPos::reregister() {
+ArrayData* MArrayIter::reregister() {
   ArrayData* container = getContainer();
   assert(getArray() != nullptr && container != getArray());
   if (container != nullptr) {
-    container->freeFullPos(*this);
+    freeMArrayIter(this);
   }
   setResetFlag(false);
   assert(getContainer() == nullptr);
   escalateCheck();
   ArrayData* data = cowCheck();
-  data->newFullPos(*this);
+  newMArrayIter(this, data);
   return data;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// MutableArrayIter
-
-MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
-                                   Variant &val) {
-  m_var = nullptr;
-  m_key = key;
-  m_valp = &val;
-  setVar(var);
-  assert(getVar());
-  escalateCheck();
-  ArrayData* data = cowCheck();
-  if (!data) return;
-  data->reset();
-  data->newFullPos(*this);
-  setResetFlag(true);
-  data->next();
-  assert(getContainer() == data);
-}
-
-MutableArrayIter::MutableArrayIter(ArrayData *data, Variant *key,
-                                   Variant &val) {
-  m_var = nullptr;
-  m_key = key;
-  m_valp = &val;
-  if (!data) return;
-  setAd(data);
-  escalateCheck();
-  data = cowCheck();
-  data->reset();
-  data->newFullPos(*this);
-  setResetFlag(true);
-  data->next();
-  assert(getContainer() == data);
-}
-
-MutableArrayIter::~MutableArrayIter() {
-  // free the iterator
-  ArrayData* container = getContainer();
-  if (container) {
-    container->freeFullPos(*this);
-    assert(getContainer() == nullptr);
-  }
-  // unprotect the data
-  if (hasAd()) decRefArr(getAd());
-}
-
-bool MutableArrayIter::advance() {
-  if (!this->FullPos::advance()) return false;
-  ArrayData* data = getArray();
-  assert(data);
-  assert(!getResetFlag());
-  assert(getContainer() == data);
-  assert(data->validFullPos(*this));
-  m_valp->assignRef(data->getValueRef(m_pos));
-  if (m_key) m_key->assignVal(data->getKey(m_pos));
-  return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// MArrayIter
-
-MArrayIter::MArrayIter(const RefData* ref) {
-  m_var = nullptr;
-  ref->incRefCount();
-  setVar(ref->var());
-  assert(hasVar());
-  escalateCheck();
-  ArrayData* data = cowCheck();
-  if (!data) return;
-  data->reset();
-  data->newFullPos(*this);
-  setResetFlag(true);
-  data->next();
-  assert(getContainer() == data);
-}
-
-MArrayIter::MArrayIter(ArrayData *data) {
-  m_var = nullptr;
-  if (!data) return;
-  assert(!data->isStatic());
-  setAd(data);
-  escalateCheck();
-  data = cowCheck();
-  data->reset();
-  data->newFullPos(*this);
-  setResetFlag(true);
-  data->next();
-  assert(getContainer() == data);
-}
-
-MArrayIter::~MArrayIter() {
-  // free the iterator
-  ArrayData* container = getContainer();
-  if (container) {
-    container->freeFullPos(*this);
-    assert(getContainer() == nullptr);
-  }
-  // unprotect the data
-  if (hasVar()) {
-    RefData* ref = RefData::refDataFromVariantIfYouDare(getVar());
-    decRefRef(ref);
-  } else if (hasAd()) {
-    decRefArr(getAd());
-  }
-}
+//////////////////////////////////////////////////////////////////////
 
 CufIter::~CufIter() {
   if (m_ctx && !(uintptr_t(m_ctx) & 1)) {

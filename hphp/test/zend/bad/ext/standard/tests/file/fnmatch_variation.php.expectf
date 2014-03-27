@@ -46,10 +46,12 @@ bool(false)
 -- Iteration 22 --
 bool(false)
 -- Iteration 23 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 24 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 25 --
 bool(false)
@@ -124,63 +126,83 @@ bool(true)
 --- With Strings ---
 -- Iteration 0 --
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(false)
 bool(true)
 -- Iteration 1 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 2 --
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(false)
 bool(true)
 -- Iteration 3 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 4 --
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(true)
 bool(false)
 -- Iteration 5 --
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(false)
 bool(true)
@@ -282,7 +304,8 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(false)
 bool(false)
@@ -290,7 +313,8 @@ bool(false)
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(false)
 bool(false)
@@ -298,28 +322,36 @@ bool(false)
 bool(true)
 bool(true)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(false)
 bool(false)
 -- Iteration 3 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 4 --
 bool(false)
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(true)
 bool(false)
@@ -327,7 +359,8 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(false)
 bool(true)

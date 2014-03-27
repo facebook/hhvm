@@ -43,11 +43,14 @@ int(1) != string(3) "2.5"
 int(1) != NULL
 int(1) == bool(true)
 int(1) != bool(false)
-int(1)HipHop Notice: %s
+int(1)
+Notice: %s
  == object(stdClass)#%d (0) {}
-int(1)HipHop Notice: %s
+int(1)
+Notice: %s
  == object(stdClass)#%d (0) {}
-int(1)HipHop Notice: %s
+int(1)
+Notice: %s
  == object(test)#%d (0) {}
 int(1) != array(0) {}
 int(1) != int(-9223372036854775808)
@@ -63,11 +66,14 @@ float(2.5) == string(3) "2.5"
 float(2.5) != NULL
 float(2.5) == bool(true)
 float(2.5) != bool(false)
-float(2.5)HipHop Notice: %s
+float(2.5)
+Notice: %s
  != object(stdClass)#%d (0) {}
-float(2.5)HipHop Notice: %s
+float(2.5)
+Notice: %s
  != object(stdClass)#%d (0) {}
-float(2.5)HipHop Notice: %s
+float(2.5)
+Notice: %s
  != object(test)#%d (0) {}
 float(2.5) != array(0) {}
 float(2.5) != int(-9223372036854775808)
@@ -83,11 +89,14 @@ int(0) != string(3) "2.5"
 int(0) == NULL
 int(0) != bool(true)
 int(0) == bool(false)
-int(0)HipHop Notice: %s
+int(0)
+Notice: %s
  != object(stdClass)#%d (0) {}
-int(0)HipHop Notice: %s
+int(0)
+Notice: %s
  != object(stdClass)#%d (0) {}
-int(0)HipHop Notice: %s
+int(0)
+Notice: %s
  != object(test)#%d (0) {}
 int(0) != array(0) {}
 int(0) != int(-9223372036854775808)
@@ -196,11 +205,14 @@ bool(false) != int(-9223372036854775808)
 bool(false) != string(20) "-9223372036854775808"
 object(stdClass)#%d (0) {} != array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
 object(stdClass)#%d (0) {} != string(0) ""
-object(stdClass)#%d (0) {}HipHop Notice: %s
+object(stdClass)#%d (0) {}
+Notice: %s
  == int(1)
-object(stdClass)#%d (0) {}HipHop Notice: %s
+object(stdClass)#%d (0) {}
+Notice: %s
  != float(2.5)
-object(stdClass)#%d (0) {}HipHop Notice: %s
+object(stdClass)#%d (0) {}
+Notice: %s
  != int(0)
 object(stdClass)#%d (0) {} != string(6) "string"
 object(stdClass)#%d (0) {} != string(3) "123"
@@ -212,16 +224,20 @@ object(stdClass)#%d (0) {} == object(stdClass)#%d (0) {}
 object(stdClass)#%d (0) {} == object(stdClass)#%d (0) {}
 object(stdClass)#%d (0) {} != object(test)#%d (0) {}
 object(stdClass)#%d (0) {} != array(0) {}
-object(stdClass)#%d (0) {}HipHop Notice: %s
+object(stdClass)#%d (0) {}
+Notice: %s
  != int(-9223372036854775808)
 object(stdClass)#%d (0) {} != string(20) "-9223372036854775808"
 object(stdClass)#%d (0) {} != array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
 object(stdClass)#%d (0) {} != string(0) ""
-object(stdClass)#%d (0) {}HipHop Notice: %s
+object(stdClass)#%d (0) {}
+Notice: %s
  == int(1)
-object(stdClass)#%d (0) {}HipHop Notice: %s
+object(stdClass)#%d (0) {}
+Notice: %s
  != float(2.5)
-object(stdClass)#%d (0) {}HipHop Notice: %s
+object(stdClass)#%d (0) {}
+Notice: %s
  != int(0)
 object(stdClass)#%d (0) {} != string(6) "string"
 object(stdClass)#%d (0) {} != string(3) "123"
@@ -233,16 +249,20 @@ object(stdClass)#%d (0) {} == object(stdClass)#%d (0) {}
 object(stdClass)#%d (0) {} == object(stdClass)#%d (0) {}
 object(stdClass)#%d (0) {} != object(test)#%d (0) {}
 object(stdClass)#%d (0) {} != array(0) {}
-object(stdClass)#%d (0) {}HipHop Notice: %s
+object(stdClass)#%d (0) {}
+Notice: %s
  != int(-9223372036854775808)
 object(stdClass)#%d (0) {} != string(20) "-9223372036854775808"
 object(test)#%d (0) {} != array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
 object(test)#%d (0) {} != string(0) ""
-object(test)#%d (0) {}HipHop Notice: %s
+object(test)#%d (0) {}
+Notice: %s
  == int(1)
-object(test)#%d (0) {}HipHop Notice: %s
+object(test)#%d (0) {}
+Notice: %s
  != float(2.5)
-object(test)#%d (0) {}HipHop Notice: %s
+object(test)#%d (0) {}
+Notice: %s
  != int(0)
 object(test)#%d (0) {} != string(6) "string"
 object(test)#%d (0) {} != string(3) "123"
@@ -254,7 +274,8 @@ object(test)#%d (0) {} != object(stdClass)#%d (0) {}
 object(test)#%d (0) {} != object(stdClass)#%d (0) {}
 object(test)#%d (0) {} == object(test)#%d (0) {}
 object(test)#%d (0) {} != array(0) {}
-object(test)#%d (0) {}HipHop Notice: %s
+object(test)#%d (0) {}
+Notice: %s
  != int(-9223372036854775808)
 object(test)#%d (0) {} != string(20) "-9223372036854775808"
 array(0) {} != array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
@@ -285,11 +306,14 @@ int(-9223372036854775808) != string(3) "2.5"
 int(-9223372036854775808) != NULL
 int(-9223372036854775808) == bool(true)
 int(-9223372036854775808) != bool(false)
-int(-9223372036854775808)HipHop Notice: %s
+int(-9223372036854775808)
+Notice: %s
  != object(stdClass)#%d (0) {}
-int(-9223372036854775808)HipHop Notice: %s
+int(-9223372036854775808)
+Notice: %s
  != object(stdClass)#%d (0) {}
-int(-9223372036854775808)HipHop Notice: %s
+int(-9223372036854775808)
+Notice: %s
  != object(test)#%d (0) {}
 int(-9223372036854775808) != array(0) {}
 int(-9223372036854775808) == int(-9223372036854775808)

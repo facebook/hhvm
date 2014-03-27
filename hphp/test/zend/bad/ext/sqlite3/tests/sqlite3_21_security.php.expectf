@@ -3,7 +3,8 @@ object(SQLite3)#%d (0) {
 }
 bool(true)
 Above test directory
-HipHop Warning: %s
+
+Warning: %s
 exception 'Exception' with message 'open_basedir prohibits opening %s' in %ssqlite3_21_security.php:%d
 Stack trace:
 #0 %ssqlite3_21_security.php(%d): SQLite3->__construct('%s')

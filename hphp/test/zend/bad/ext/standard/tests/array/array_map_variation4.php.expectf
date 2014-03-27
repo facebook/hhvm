@@ -1,8 +1,12 @@
 *** Testing array_map() : associative array with diff. keys for 'arr1' argument ***
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 -- Iteration 1 --
 array(0) {
 }

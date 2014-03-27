@@ -1,4 +1,5 @@
-HipHop Warning: Cannot use a scalar value as an array in %s/test/slow/array/243.php on line 10
+
+Warning: Cannot use a scalar value as an array in %s/test/slow/array/243.php on line 10
 string(3) "one"
 array(1) {
   [0]=>

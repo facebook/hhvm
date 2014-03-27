@@ -203,7 +203,7 @@ FixupMap::eagerRecord(const Func* func) {
     "func_num_args",
     "array_filter",
     "array_map",
-    "hphp_func_slice_args",
+    "__SystemLib\\func_slice_args",
   };
 
   for (int i = 0; i < sizeof(list)/sizeof(list[0]); i++) {

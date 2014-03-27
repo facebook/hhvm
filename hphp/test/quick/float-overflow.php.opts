@@ -1,0 +1,2 @@
+-vEval.EnableHipHopSyntax=false
+-vHack.Lang.IntsOverflowToInts=false

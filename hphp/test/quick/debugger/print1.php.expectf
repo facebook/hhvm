@@ -136,11 +136,11 @@ p v $s
 string(5) "hello"
 
 p $ch
-Resource id #6 of type cURL handle
+Resource id #4 of type curl
 p r $ch
-Resource id #6
+Resource id #4
 p v $ch
-resource(6) of type (cURL handle)
+resource(4) of type (curl)
 
 p $c
 "some custom string"

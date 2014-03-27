@@ -1,16 +1,26 @@
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 resource(%d) of type (file_info)
 resource(%d) of type (file_info)
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)

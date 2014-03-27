@@ -64,7 +64,7 @@ public:
     ContainsGetDefinedVars    = 0x400, // need VariableTable with getDefinedVars
     MixedVariableArgument     = 0x800, // variable args, may or may not be ref'd
     IsFoldable                = 0x1000,// function can be constant folded
-    NeedsActRec               = 0x2000,// builtin function needs ActRec
+    NoFCallBuiltin            = 0x2000,// function should not use FCallBuiltin
     AllowOverride             = 0x4000,// allow override of systemlib or builtin
     NeedsFinallyLocals        = 0x8000,
   };

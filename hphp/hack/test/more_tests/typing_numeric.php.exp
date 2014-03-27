@@ -1,0 +1,6 @@
+File "typing_numeric.php", line 13, characters 10-16:
+Invalid return type
+File "typing_numeric.php", line 12, characters 30-34:
+This is a float
+File "typing_numeric.php", line 13, characters 10-16:
+It is incompatible with a num (int/float) because it is the result of a division (/)

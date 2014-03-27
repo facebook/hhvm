@@ -1,180 +1,216 @@
 int(0)
 int(-1)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(-1)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(-3)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(-2)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(0)
 int(-2)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(-2)
 int(-2)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(-1)
 int(-1)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(-1)
 int(-1)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(-1)
 int(-1)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(0)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(1)
 int(1)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(1)
 int(1)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(1)
 int(1)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(2)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(0)
 int(2)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(2)
 int(2)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(1)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(1)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(3)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(1)
 int(1)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(1)
 int(1)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(1)
 int(1)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(0)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(1)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(1)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(3)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(1)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(1)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(0)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)
 int(0)
 int(0)
-HipHop Warning: Division by zero in %s on line 12
+
+Warning: Division by zero in %s on line 12
 bool(false)

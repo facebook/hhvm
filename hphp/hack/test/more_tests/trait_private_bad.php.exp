@@ -1,0 +1,4 @@
+File "trait_private_bad.php", line 24, characters 19-21:
+The method foo is undefined in an object of type B
+File "trait_private_bad.php", line 22, characters 7-7:
+Check this out

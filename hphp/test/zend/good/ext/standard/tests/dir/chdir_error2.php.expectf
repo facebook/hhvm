@@ -1,4 +1,5 @@
 *** Testing chdir() : error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

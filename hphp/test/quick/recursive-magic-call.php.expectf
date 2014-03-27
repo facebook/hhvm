@@ -1,1 +1,2 @@
-HipHop Fatal error: Stack overflow in %s/test/quick/recursive-magic-call.php on line 6
+
+Fatal error: Stack overflow in %s/test/quick/recursive-magic-call.php on line 6

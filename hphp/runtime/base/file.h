@@ -17,11 +17,13 @@
 #ifndef incl_HPHP_FILE_H_
 #define incl_HPHP_FILE_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-resource.h"
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/type-variant.h"
 
 struct stat;
 

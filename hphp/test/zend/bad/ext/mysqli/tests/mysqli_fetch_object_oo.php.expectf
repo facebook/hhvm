@@ -17,4 +17,5 @@ NULL
 NULL
 [E_WARNING] mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d
 NULL
-HipHop Fatal error: %s
+
+Fatal error: %s

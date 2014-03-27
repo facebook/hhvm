@@ -40,11 +40,12 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int modu
 
 	while (p->name) {
     auto updateCallback = [p](const std::string& value) -> bool {
+      TSRMLS_FETCH();
       // TODO Who is supposed to free this?
       char* data = estrndup(value.data(), value.size());
       auto ret = p->on_modify(
         const_cast<zend_ini_entry*>(p), data, value.size(),
-        p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP
+        p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP TSRMLS_CC
       );
       return ret;
     };

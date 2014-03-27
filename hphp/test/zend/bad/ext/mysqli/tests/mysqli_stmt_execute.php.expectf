@@ -1,9 +1,12 @@
-HipHop Warning: %s
+
+Warning: %s
  in %s on line %d
-HipHop Warning: %s
+
+Warning: %s
  in %s on line %d
 bool(true)
 bool(true)
 [027] Expecting boolean/false, got boolean/1
-HipHop Warning: %s
+
+Warning: %s
 done!

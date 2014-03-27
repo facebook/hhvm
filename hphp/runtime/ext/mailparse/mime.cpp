@@ -683,7 +683,7 @@ bool MimePart::processHeader() {
       if (m_headers.exists(header_key)) {
         Variant &zheaderval = m_headers.lvalAt(header_key);
         if (zheaderval.isArray()) {
-          zheaderval.append(String(header_val, CopyString));
+          zheaderval.toArrRef().append(String(header_val, CopyString));
         } else {
           // Create a nested array if there is more than one of the same header
           Array zarr = Array::Create();

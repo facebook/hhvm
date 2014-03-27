@@ -55,7 +55,6 @@ struct MInstrState {
   TypedValue tvRef2;
   TypedValue tvResult;
   TypedValue tvVal;
-  Class* ctx;
 } __attribute__((aligned(16)));
 static_assert(offsetof(MInstrState, tvScratch) % 16 == 0,
               "MInstrState members require 16-byte alignment for SSE");
@@ -110,7 +109,10 @@ void setNewElemArray(TypedValue* base, Cell val);
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis);
 RefData* boxValue(TypedValue tv);
 ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2);
-
+TypedValue setOpElem(TypedValue* base, TypedValue key,
+                     Cell val, MInstrState* mis, SetOpOp op);
+TypedValue incDecElem(TypedValue* base, TypedValue key,
+                      MInstrState* mis, IncDecOp op);
 /* Helper functions for conversion instructions that are too
  * complicated to inline
  */

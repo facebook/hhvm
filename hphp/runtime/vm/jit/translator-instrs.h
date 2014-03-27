@@ -56,6 +56,7 @@
   CASE(Concat) \
   CASE(Abs) \
   CASE(Add) \
+  CASE(AddO) \
   CASE(Xor) \
   CASE(Not) \
   CASE(Mod) \
@@ -121,6 +122,7 @@
   CASE(CheckThis) \
   CASE(InitThisLoc) \
   CASE(FCall) \
+  CASE(FCallD) \
   CASE(FCallArray) \
   CASE(FCallBuiltin) \
   CASE(VerifyParamType) \
@@ -154,20 +156,19 @@
   CASE(CreateCl) \
   CASE(CreateCont) \
   CASE(ContEnter) \
-  CASE(UnpackCont) \
+  CASE(ContRaise) \
   CASE(ContSuspend) \
   CASE(ContSuspendK) \
   CASE(ContRetC) \
   CASE(ContCheck) \
-  CASE(ContRaise) \
   CASE(ContValid) \
   CASE(ContKey) \
   CASE(ContCurrent) \
   CASE(ContStopped) \
   CASE(AsyncAwait) \
   CASE(AsyncESuspend) \
+  CASE(AsyncResume) \
   CASE(AsyncWrapResult) \
-  CASE(AsyncWrapException) \
   CASE(Strlen) \
   CASE(IncStat) \
   CASE(Idx) \
@@ -225,6 +226,8 @@
   case Op::BitXor:                                \
   case Op::Sub:                                   \
   case Op::Mul:                                   \
+  case Op::SubO:                                  \
+  case Op::MulO:                                  \
     func(BinaryArithOp, i)                        \
   case Op::Same:                                  \
   case Op::NSame:                                 \

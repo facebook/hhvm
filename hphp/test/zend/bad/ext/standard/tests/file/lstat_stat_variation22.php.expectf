@@ -2,16 +2,20 @@
 bool(false)
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 *** testing lstat ***
 bool(false)
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

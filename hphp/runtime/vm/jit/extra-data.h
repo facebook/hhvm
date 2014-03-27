@@ -591,14 +591,14 @@ struct InterpOneData : IRExtraData {
  * Create{Cont,AFWH}{Func,Meth}.
  */
 struct CreateContData : IRExtraData {
-  explicit CreateContData(const Func* genFunc) : genFunc(genFunc) {}
+  explicit CreateContData(const Func* func) : func(func) {}
 
   std::string show() const {
-    auto name = genFunc->getGeneratorOrigFunc()->fullName()->data();
+    auto name = func->fullName()->data();
     return folly::to<std::string>(name, "()");
   }
 
-  const Func* genFunc;
+  const Func* func;
 };
 
 /*
@@ -723,6 +723,37 @@ struct ClassKindData : IRExtraData {
 struct NewStructData : IRExtraData {
   uint32_t numKeys;
   StringData** keys;
+  std::string show() const;
+};
+
+struct RawMemData : IRExtraData {
+# define RAW_MEM_DATA_TYPES                     \
+  RAW_TYPE(ContOffset)                          \
+  RAW_TYPE(ContIndex)                           \
+  RAW_TYPE(ContState)                           \
+  RAW_TYPE(StrLen)                              \
+  RAW_TYPE(FuncNumParams)                       \
+
+  enum Type : uint8_t {
+#   define RAW_TYPE(name) name,
+    RAW_MEM_DATA_TYPES
+#   undef RAW_TYPE
+  };
+# define RAW_TYPE(name) +1
+  static constexpr size_t kNumTypes = RAW_MEM_DATA_TYPES;
+# undef RAW_TYPE
+
+  struct Info {
+    const int offset;
+    const int size;
+    const JIT::Type type;
+  };
+
+  explicit RawMemData(Type t) : type(t) {}
+
+  Type type;
+
+  const Info& info() const;
   std::string show() const;
 };
 
@@ -856,6 +887,10 @@ X(RBTrace,                      RBTraceData);
 X(Shuffle,                      ShuffleData);
 X(ThingExists,                  ClassKindData);
 X(NewStructArray,               NewStructData);
+X(LdRaw,                        RawMemData);
+X(StRaw,                        RawMemData);
+X(LdContArRaw,                  RawMemData);
+X(StContArRaw,                  RawMemData);
 
 #undef X
 

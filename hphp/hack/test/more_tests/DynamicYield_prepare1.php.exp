@@ -1,0 +1,6 @@
+File "DynamicYield_prepare1.php", line 28, characters 10-32:
+Invalid return type
+File "DynamicYield_prepare1.php", line 27, characters 30-32:
+This is an int
+File "DynamicYield_prepare1.php", line 22, characters 35-43:
+It is incompatible with void

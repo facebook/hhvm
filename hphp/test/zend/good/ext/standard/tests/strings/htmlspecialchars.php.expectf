@@ -276,7 +276,8 @@ string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
 string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
 
 *** Testing error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 NULL
 string(10) "&lt;br&gt;"
 Done

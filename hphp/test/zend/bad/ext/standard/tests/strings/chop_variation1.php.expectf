@@ -1,6 +1,8 @@
 *** Testing chop() : with unexpected values for str argument ***
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 
 --- Testing chop() by supplying different values for 'str' argument ---
 -- Iteration 1 --
@@ -31,29 +33,39 @@ string(12) "1.07654321E-"
 string(3) "0.5"
 string(2) "0."
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 13 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 14 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 15 --
 string(1) "1"
@@ -89,8 +101,10 @@ string(0) ""
 string(16) " @#$%Object @#$%"
 string(11) " @#$%Object"
 -- Iteration 26 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

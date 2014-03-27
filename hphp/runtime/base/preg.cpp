@@ -406,14 +406,13 @@ static char** make_subpats_table(int num_subpats, const pcre_cache_entry* pce) {
 }
 
 
-static inline void add_offset_pair(Variant &result, const String& str,
-                                   int offset, const char *name) {
-  ArrayInit match_pair(2);
-  match_pair.set(str);
-  match_pair.set(offset);
-  Variant match_pair_v = match_pair.toVariant();
-  if (name) result.set(String(name), match_pair_v);
-  result.append(match_pair_v);
+static inline void add_offset_pair(Array& result,
+                                   const String& str,
+                                   int offset,
+                                   const char *name) {
+  auto match_pair = make_packed_array(str, offset);
+  if (name) result.set(String(name), match_pair);
+  result.append(match_pair);
 }
 
 static inline bool pcre_need_log_error(int pcre_code) {
@@ -614,7 +613,6 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
   int matched = 0;
   t_last_error_code = PHP_PCRE_NO_ERROR;
 
-  Variant result_set; // Holds a set of subpatterns after a global match
   int g_notempty = 0; // If the match should not be empty
   const char **stringlist; // Holds list of subpatterns
   int i;
@@ -651,15 +649,19 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
             /* For each subpattern, insert it into the appropriate array. */
             for (i = 0; i < count; i++) {
               if (offset_capture) {
-                add_offset_pair(match_sets.lvalAt(i),
+                auto& lval = match_sets.lvalAt(i);
+                forceToArray(lval);
+                add_offset_pair(lval.toArrRef(),
                                 String(stringlist[i],
                                        offsets[(i<<1)+1] - offsets[i<<1],
                                        CopyString),
                                 offsets[i<<1], nullptr);
               } else {
-                match_sets.lvalAt(i).append
-                  (String(stringlist[i],
-                          offsets[(i<<1)+1] - offsets[i<<1], CopyString));
+                auto& lval = match_sets.lvalAt(i);
+                forceToArray(lval).append(
+                  String(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
+                    CopyString)
+                );
               }
             }
             /*
@@ -669,11 +671,12 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
              */
             if (count < num_subpats) {
               for (; i < num_subpats; i++) {
-                match_sets.lvalAt(i).append("");
+                auto& lval = match_sets.lvalAt(i);
+                forceToArray(lval).append("");
               }
             }
           } else {
-            result_set = Array::Create();
+            Array result_set = Array::Create();
 
             /* Add all the subpatterns to it */
             for (i = 0; i < count; i++) {
@@ -693,13 +696,13 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
               }
             }
             /* And add it to the output array */
-            subpats->append(result_set);
+            forceToArray(*subpats).append(std::move(result_set));
           }
         } else {      /* single pattern matching */
           /* For each subpattern, insert it into the subpatterns array. */
           for (i = 0; i < count; i++) {
             if (offset_capture) {
-              add_offset_pair(*subpats,
+              add_offset_pair(forceToArray(*subpats),
                               String(stringlist[i],
                                      offsets[(i<<1)+1] - offsets[i<<1],
                                      CopyString),
@@ -708,9 +711,9 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
               String value(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                            CopyString);
               if (subpat_names[i]) {
-                subpats->set(String(subpat_names[i]), value);
+                forceToArray(*subpats).set(String(subpat_names[i]), value);
               }
-              subpats->append(value);
+              forceToArray(*subpats).append(value);
             }
           }
         }
@@ -752,9 +755,9 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
   if (subpats && global && subpats_order == PREG_PATTERN_ORDER) {
     for (i = 0; i < num_subpats; i++) {
       if (subpat_names[i]) {
-        subpats->set(String(subpat_names[i]), match_sets[i]);
+        forceToArray(*subpats).set(String(subpat_names[i]), match_sets[i]);
       }
-      subpats->append(match_sets[i]);
+      forceToArray(*subpats).append(match_sets[i]);
     }
   }
 
@@ -1113,8 +1116,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
           String stemp;
           if (callable) {
             if (replace_var.isObject()) {
-              stemp =
-                replace_var.objectForCall()->o_getClassName() + "::__invoke";
+              stemp = replace_var.asCObjRef()->o_getClassName() + "::__invoke";
             } else {
               stemp = replace_var.toString();
             }
@@ -1323,7 +1325,7 @@ Variant preg_split(const String& pattern, const String& subject,
   pcre_extra *extra = pce->extra;
 
   // Get next piece if no limit or limit not yet reached and something matched
-  Variant return_value = Array::Create();
+  Array return_value = Array::Create();
   int g_notempty = 0;   /* If the match should not be empty */
   int utf8_check = 0;
   const pcre_cache_entry* bump_pce = nullptr; /* instance for empty matches */

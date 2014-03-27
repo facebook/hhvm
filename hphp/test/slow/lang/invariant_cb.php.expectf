@@ -1,0 +1,12 @@
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}
+
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'a' in :
+Stack trace:
+#0 (): HH\invariant_violation()
+#1 %s/test/slow/lang/invariant_cb.php(6): HH\invariant()
+#2 {main}

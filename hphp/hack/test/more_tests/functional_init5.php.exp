@@ -1,0 +1,3 @@
+File "functional_init5.php", line 21, characters 5-15:
+Until the initialization of $this is over, you can only call private methods
+The initialization is not over because $this->x can still potentially be null

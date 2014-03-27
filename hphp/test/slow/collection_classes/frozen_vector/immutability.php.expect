@@ -1,3 +1,3 @@
-RuntimeException: Cannot assign to an element of a ImmVector
-RuntimeException: Cannot add an element to a ImmVector
-RuntimeException: Cannot unset an element of a ImmVector
+InvalidOperationException: Cannot modify immutable object of type HH\ImmVector
+InvalidOperationException: Cannot modify immutable object of type HH\ImmVector
+InvalidOperationException: Cannot modify immutable object of type HH\ImmVector

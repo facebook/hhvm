@@ -1,0 +1,4 @@
+File "private_bad2.php", line 11, characters 20-22:
+You cannot access a private member with parent::
+File "private_bad2.php", line 4, characters 27-29:
+This member is private

@@ -1,0 +1,2 @@
+File "override_final_class.php", line 13, characters 7-7:
+You cannot extend a class declared as final

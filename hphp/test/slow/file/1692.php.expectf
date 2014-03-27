@@ -1,3 +1,5 @@
-HipHop Warning: No such file or directory in %s/test/slow/file/1692.php on line 3
-HipHop Warning: Not a valid stream resource in %s/test/slow/file/1692.php on line 4
+
+Warning: No such file or directory in %s/test/slow/file/1692.php on line 3
+
+Warning: Not a valid stream resource in %s/test/slow/file/1692.php on line 4
 bool(false)

@@ -101,10 +101,14 @@ array(4) {
 }
 
 A5::foo
-HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 101
-HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 102
-HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 101
-HipHop Warning: Invalid argument: function: method 'foo' not found in %s on line 102
+
+Warning: Invalid argument: function: method 'foo' not found in %s on line 101
+
+Warning: Invalid argument: function: method 'foo' not found in %s on line 102
+
+Warning: Invalid argument: function: method 'foo' not found in %s on line 101
+
+Warning: Invalid argument: function: method 'foo' not found in %s on line 102
 string(3) "foo"
 array(3) {
   [0]=>

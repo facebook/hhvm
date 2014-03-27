@@ -3,7 +3,8 @@ int(0)
 Count returns a string:
 int(0)
 Count returns an object:
-HipHop Notice: %s
+
+Notice: %s
 int(1)
 Count returns an array:
 int(1)

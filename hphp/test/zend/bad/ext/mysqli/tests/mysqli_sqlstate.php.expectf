@@ -2,6 +2,7 @@ NULL
 %s(5) "00000"
 %s(5) "42S22"
 %s(5) "00000"
-HipHop Warning: %s
+
+Warning: %s
 NULL
 done!

@@ -1,98 +1,122 @@
 *** Testing imap_fetchbody() : usage variations ***
 
 -- Iteration 1 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 2 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 3 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 4 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 7 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 8 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 9 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 13 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 14 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 15 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 16 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 17 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 18 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 19 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 21 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 22 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 23 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 24 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

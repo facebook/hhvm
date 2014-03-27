@@ -1,11 +1,13 @@
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 int(0)
 array(1) {
   [1]=>
   string(1) "1"
 }
-HipHop Warning: %s
+
+Warning: %s
 int(0)
 NULL
 int(1)

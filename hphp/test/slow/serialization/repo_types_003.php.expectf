@@ -1,0 +1,4 @@
+Notice: Unable to unserialize: [O:4:"Foob":1:{s:7:"]. Property x for class Foob was deserialized with type (String) that didn't match what we inferred in static analysis. in %s/slow/serialization/repo_types_003.php on line 18
+bool(false)
+
+Fatal error: Argument 1 passed to main() must be an instance of Foob, bool given in %s/slow/serialization/repo_types_003.php on line 15

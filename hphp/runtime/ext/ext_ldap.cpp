@@ -50,17 +50,23 @@ public:
   DECLARE_RESOURCE_ALLOCATION(LdapLink)
 
   LdapLink() : link(NULL) {}
-  ~LdapLink() { close();}
+  ~LdapLink() { closeImpl(); }
 
   void close() {
+    closeImpl();
+    rebindproc = Variant();
+  }
+
+private:
+  void closeImpl() {
     if (link) {
       ldap_unbind_s(link);
       link = NULL;
       LDAPG(num_links)--;
     }
-    rebindproc.reset();
   }
 
+public:
   CLASSNAME_IS("ldap link");
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
@@ -70,7 +76,8 @@ public:
 };
 
 void LdapLink::sweep() {
-  close();
+  closeImpl();
+  rebindproc.releaseForSweep();
 }
 
 class LdapResult : public SweepableResourceData {
@@ -635,7 +642,7 @@ bool f_ldap_set_rebind_proc(const Resource& link, const Variant& callback) {
   if (callback.isString() && callback.toString().empty()) {
     /* unregister rebind procedure */
     if (!ld->rebindproc.isNull()) {
-      ld->rebindproc.reset();
+      ld->rebindproc = Variant();
       ldap_set_rebind_proc(ld->link, NULL, NULL);
     }
     return true;
@@ -651,7 +658,7 @@ bool f_ldap_set_rebind_proc(const Resource& link, const Variant& callback) {
   if (ld->rebindproc.isNull()) {
     ldap_set_rebind_proc(ld->link, _ldap_rebind_proc, (void *)link.get());
   } else {
-    ld->rebindproc.reset();
+    ld->rebindproc = Variant();
   }
 
   ld->rebindproc = callback;

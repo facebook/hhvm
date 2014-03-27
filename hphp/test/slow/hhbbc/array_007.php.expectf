@@ -1,3 +1,4 @@
 int(1)
-HipHop Notice: Undefined index: 0 in %s/slow/hhbbc/array_007.php on line 7
+
+Notice: Undefined index: 0 in %s/slow/hhbbc/array_007.php on line 7
 NULL

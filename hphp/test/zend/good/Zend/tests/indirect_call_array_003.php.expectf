@@ -1,6 +1,7 @@
 From foo::__callStatic:
 string(3) "abc"
-HipHop Notice: %s
+
+Notice: %s
 NULL
 From foo::__call:
 string(3) "abc"

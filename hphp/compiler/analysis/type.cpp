@@ -60,21 +60,16 @@ void Type::InitTypeHintMap() {
   assert(s_HHTypeHintTypes.empty());
 
   s_TypeHintTypes["array"] = Type::Array;
-  s_TypeHintTypes["resource"] = Type::Resource;
   s_TypeHintTypes["callable"] = Type::Variant;
 
   s_HHTypeHintTypes["array"] = Type::Array;
-  s_HHTypeHintTypes["bool"]    = Type::Boolean;
-  s_HHTypeHintTypes["boolean"] = Type::Boolean;
-  s_HHTypeHintTypes["int"]     = Type::Int64;
-  s_HHTypeHintTypes["integer"] = Type::Int64;
-  s_HHTypeHintTypes["real"]    = Type::Double;
-  s_HHTypeHintTypes["double"]  = Type::Double;
-  s_HHTypeHintTypes["float"]   = Type::Double;
-  s_HHTypeHintTypes["string"]  = Type::String;
+  s_HHTypeHintTypes["HH\\bool"]    = Type::Boolean;
+  s_HHTypeHintTypes["HH\\int"]     = Type::Int64;
+  s_HHTypeHintTypes["HH\\float"]   = Type::Double;
+  s_HHTypeHintTypes["HH\\string"]  = Type::String;
   // Type::Numeric doesn't include numeric strings; this is intentional
-  s_HHTypeHintTypes["num"]      = Type::Numeric;
-  s_HHTypeHintTypes["resource"] = Type::Resource;
+  s_HHTypeHintTypes["HH\\num"]      = Type::Numeric;
+  s_HHTypeHintTypes["HH\\resource"] = Type::Resource;
   s_HHTypeHintTypes["callable"] = Type::Variant;
 }
 
@@ -668,6 +663,7 @@ std::string Type::getPHPName() {
 
 std::string Type::toString() const {
   switch (m_kindOf) {
+  case KindOfVoid:        return "Null";
   case KindOfBoolean:     return "Boolean";
   case KindOfInt32:       return "Int32";
   case KindOfInt64:       return "Int64";

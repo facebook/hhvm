@@ -1,0 +1,4 @@
+File "method_dispatch_10.php", line 31, characters 8-9:
+Could not find static method f1
+File "method_dispatch_10.php", line 17, characters 19-20:
+The closest thing is f1 but it's not a static method

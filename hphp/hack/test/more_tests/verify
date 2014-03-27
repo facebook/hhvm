@@ -1,0 +1,619 @@
+#!/usr/bin/perl
+#  Copyright 2012-2013 Facebook.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+use integer;
+use warnings;
+use strict;
+use threads;
+use threads::shared;
+
+use Getopt::Long;
+use Pod::Usage;
+use Thread::Semaphore;
+
+use constant HR => '-' x 74 . "\n";
+use constant FAILED => 0;
+use constant HH_SINGLE_TYPE_CHECK => 1;
+use constant HH_PREPROCESSOR => 2;
+use constant HH_ALL
+  => HH_SINGLE_TYPE_CHECK
+  | HH_PREPROCESSOR
+  ;
+
+my $total_utime = 0.0;	 # Total user time.
+my $total_stime = 0.0;	 # Total system time.
+my $total_hutime = 0.0;	 # Total historical user time.
+my $total_hstime = 0.0;	 # Total historical system time.
+my $total_ntime = 0.0;	 # Total time for tests that have historical data.
+
+my @test_buckets = ();
+my %tests_status = ();
+my %tests_utime = ();
+my %tests_stime = ();
+
+share %tests_status;
+share %tests_utime;
+share %tests_stime;
+
+my $opt_help = 0;
+my $opt_verbose = 0;
+my $opt_quiet = 0;
+my $opt_srcdir = '.';
+my $opt_objdir = '.';
+my $opt_hh_single_type_check;
+my $opt_hh_preprocessor;
+my $opt_ustats = 0;
+my $opt_zero = 0;
+my $opt_server = 0;
+my $opt_port = 8080;
+my $opt_home = '.';
+my $opt_threads = `cat /proc/cpuinfo | grep '^processor' | wc -l`;
+
+Getopt::Long::config('bundling');
+my %opt_config = (
+    "h|help"                 => \$opt_help,
+    "v|verbose"              => \$opt_verbose,
+    "q|quiet"                => \$opt_quiet,
+    "s|srcdir=s"             => \$opt_srcdir,
+    "o|objdir=s"             => \$opt_objdir,
+    "u|ustats"               => \$opt_ustats,
+    "hh-single-type-check=s" => \$opt_hh_single_type_check,
+    "hh-preprocessor=s"      => \$opt_hh_preprocessor,
+    "z|zero"                 => \$opt_zero,
+    "server"                 => \$opt_server,
+    "port:i"                 => \$opt_port,
+    "home:s"                 => \$opt_home,
+    "threads=i"              => \$opt_threads,
+);
+
+sub info(@) {
+    return if $opt_quiet;
+    if (@_) {
+        print @_;
+    } else {
+        print;
+    }
+}
+
+sub warning(@) {
+    return if $opt_quiet;
+    if (@_) {
+        print STDERR @_;
+    } else {
+        print STDERR;
+    }
+}
+
+sub trace(@) {
+    return unless $opt_verbose;
+    if (@_) {
+        print STDERR @_;
+    } else {
+        print STDERR;
+    }
+}
+
+sub run_hh_preprocessor_test($) {
+    my $test = shift;
+
+    my $hh_preprocessor1 = "$opt_hh_preprocessor"
+        . " < $test"
+        . " 2> $test.preprocessor1.err.out"
+        . " | sed -e '0,/^<?php/s//<?hh/'"
+        . " > $test.preprocessor1.php.out";
+
+    my $hh_preprocessor2 = "$opt_hh_preprocessor"
+        . " < $test.preprocessor1.php.out"
+        . " 2> $test.preprocessor2.err.out"
+        . " | sed -e '0,/^<?php/s//<?hh/'"
+        . " > $test.preprocessor2.php.out";
+
+    my $hh_preprocessor_cmp = "cmp -s"
+        . " $test.preprocessor1.err.out"
+        . " $test.preprocessor2.err.out";
+
+    system($hh_preprocessor1);
+    system($hh_preprocessor2);
+    system($hh_preprocessor_cmp);
+
+    return $? ? FAILED : HH_PREPROCESSOR;
+}
+
+sub run_hh_single_type_check_test($) {
+    my $test = shift;
+    my $status = HH_SINGLE_TYPE_CHECK;
+    my ($tutime, $tstime);
+    my ($utime, $stime, $cutime, $cstime);
+
+    my $hh_single_type_check = $opt_server
+        ? "GET http://localhost:$opt_port/$test"
+        : "$opt_hh_single_type_check $test";
+
+    ($utime, $stime, $cutime, $cstime) = times;
+    if (-e "$opt_srcdir/$test.filter") {
+      system "$hh_single_type_check 2>&1"
+	  . " | $opt_srcdir/$test.filter"
+	  . " > $opt_objdir/$test.out";
+    } else {
+      system "$hh_single_type_check"
+	  . " > $opt_objdir/$test.out 2>&1";
+    }
+    ($utime, $stime, $tutime, $tstime) = times;
+
+    # Compute time spent.
+    $tutime -= $cutime;
+    $tstime -= $cstime;
+
+    if ($opt_zero && $?) {
+        $status = FAILED;
+        trace
+            qq{"$opt_objdir/$test > $opt_objdir/$test.out 2>&1"},
+            "returned $?\n";
+    }
+
+    return ($status, $tutime, $tstime);
+}
+
+sub run_tests($) {
+    my $tests = shift;
+    for my $test (@$tests) {
+        my ($type_check_status, $utime, $stime)
+          = run_hh_single_type_check_test $test;
+        my $preprocessor_status = run_hh_preprocessor_test $test;
+        lock %tests_status;
+        $tests_status{$test} = $preprocessor_status | $type_check_status;
+        $tests_utime{$test} = $utime;
+        $tests_stime{$test} = $stime;
+        cond_signal %tests_status;
+    }
+}
+
+sub wait_for_test($) {
+    my $test = shift;
+    while (1) {
+        lock %tests_status;
+        if (exists $tests_status{$test}) {
+            return (
+                $tests_status{$test},
+                $tests_utime{$test},
+                $tests_stime{$test},
+            );
+        }
+        cond_wait %tests_status;
+    }
+}
+
+sub read_test_perf($) {
+    my $test = shift;
+    my ($hutime, $hstime);
+    if (open (my $TEST_PERF, '<', "$opt_objdir/$test.perf")) {
+        $_ = <$TEST_PERF>;
+        ($hutime, $hstime) = split;
+        close $TEST_PERF;
+    } else {
+        print STDERR qq{Unable to open "$opt_objdir/$test.perf"\n};
+        exit 1;
+    }
+    return ($hutime, $hstime);
+}
+
+sub write_test_perf($$$) {
+    my ($test, $utime, $stime) = @_;
+    if (open (my $TEST_PERF, '>', "$opt_objdir/$test.perf")) {
+        print $TEST_PERF "$utime $stime\n";
+        close $TEST_PERF;
+    } else {
+        warning qq{Unable to update "$opt_objdir/$test.perf"\n};
+    }
+}
+
+sub print_stats($) {
+    my $args = shift;
+    my $test = $args->{test};
+    my $status = $args->{status};
+    my $failed_subtests = $args->{failed_subtests};
+    my $subtests = $args->{subtests};
+    my $utime = $args->{utime};
+    my $stime = $args->{stime};
+    my $hutime;
+    my $hstime;
+    my $pass_str = $status & HH_SINGLE_TYPE_CHECK
+        ? "passed"
+        : "*** FAILED ***"
+        . ($subtests != 0
+           ? " ($failed_subtests/$subtests failed)"
+           : '');
+
+    my $t_str = '';
+    if (-r "$test.perf") {
+        ($hutime, $hstime) = read_test_perf($test);
+        $t_str = sprintf
+            "%7.2f  %7.2f %7.2f  %7.2f\n%-40s %7.2f  %7.2f %7.2f %7.2f%%\n",
+            $utime,
+            $stime,
+            $utime + $stime,
+            ($utime + $stime) - ($hutime + $hstime),
+            $pass_str,
+            $hutime,
+            $hstime,
+            $hutime + $hstime,
+            $hutime + $hstime == 0.0
+                ? 0.0
+                : (($utime + $stime) - ($hutime + $hstime))
+                    / ($hutime + $hstime) * 100;
+    } else {
+        $hutime = 0.0;
+        $hstime = 0.0;
+        $t_str = sprintf
+            "%-40s %7.2f  %7.2f %7.2f\n",
+            $pass_str,
+            $utime,
+            $stime,
+            $utime + $stime;
+    }
+    info $t_str;
+
+    write_test_perf($test, $utime, $stime)
+        if $status && $opt_ustats;
+
+    return ($hutime, $hstime);
+}
+
+################################################################################
+
+unless (GetOptions(%opt_config)) {
+    pod2usage(2);
+    exit 1;
+}
+
+if ($opt_help) {
+    pod2usage(2);
+    exit 0;
+}
+
+unless (defined($opt_hh_single_type_check) && defined($opt_hh_preprocessor)) {
+    print STDERR
+        qq{Both "--hh-single-type-check" and "--hh-preprocessor" are required.};
+    pod2usage(2);
+    exit 1;
+}
+
+if ($opt_verbose && $opt_quiet) {
+    print STDERR "-v and -q are incompatible\n";
+    pod2usage(2);
+    exit 1;
+}
+
+if (@ARGV == 0) {
+    print STDERR "No tests specified\n";
+    pod2usage(2);
+    exit 1;
+}
+
+# Munge directory paths if necessary.
+if (defined($opt_srcdir) && $opt_srcdir eq '') {
+    $opt_srcdir = '.';
+}
+
+if (defined($opt_objdir) && $opt_objdir eq '') {
+    $opt_objdir = '.';
+}
+
+{
+    local $" = "\n  ";
+    trace
+        "Option values: h:$opt_help, v:$opt_verbose, ",
+        qq{s:"$opt_srcdir", o:"$opt_objdir" },
+        "q:$opt_quiet, u:$opt_ustats, z:$opt_zero\n",
+        'Tests (', scalar @ARGV, " total):\n  @ARGV\n";
+}
+
+my $server_pid = 0;
+if ($opt_server) {
+  my $command = sprintf $opt_hh_single_type_check, $opt_home, $opt_port;
+  $server_pid = fork();
+  if ($server_pid == 0) {
+    system "sudo $command 2>&1 > /dev/null";
+  } else {
+    # wait for server to warm up
+    system 'sleep 5';
+  }
+}
+
+$opt_threads = 1 unless $opt_threads;
+
+info <<'END';
+--------------------------------------------------------------------------
+Test                                      c_user c_system c_total     chng
+passed/FAILED                             h_user h_system h_total   % chng
+
+END
+
+# Try to construct the buckets so the test results are ready
+# in approximately alphabetical order.
+push @test_buckets, [] for 0 .. $opt_threads - 1;
+for my $i (0 .. $#ARGV) {
+    push @{$test_buckets[$i % $opt_threads]}, $ARGV[$i];
+}
+
+# Spawn off worker threads.
+my @threads = ();
+push @threads, threads->create(\&run_tests, $test_buckets[$_])
+    for 0 .. $opt_threads - 1;
+
+my @FAILED_TESTS = ();
+
+# Postprocess for hh_single_type_check tests.
+for my $test (@ARGV) {
+
+    # Strip out any whitespace in $test.
+    $test =~ s/^\s*(.*)\s*$/$1/;
+    my $status = HH_ALL;
+    my $utime = 0;
+    my $stime = 0;
+    my $hutime = 0;
+    my $hstime = 0;
+
+    info HR, $test, "\n";
+
+    if (-e "$opt_srcdir/$test.exp") {
+
+        # Diff mode.
+
+        ($status, $utime, $stime) = wait_for_test $test;
+
+        if (-e "$opt_objdir/$test.out") {
+            my $diff_args = "--text -u";
+            if ($opt_server) {
+              system
+                "diff $diff_args -I HipHop $opt_srcdir/$test.exp "
+                . "$opt_objdir/$test.out $opt_objdir/$test.diff 2>&1";
+            } else {
+              system
+                "diff $diff_args $opt_srcdir/$test.exp "
+                . "$opt_objdir/$test.out > $opt_objdir/$test.diff 2>&1";
+            }
+            # diff returns non-zero if there is a difference.
+            $status &= ~HH_SINGLE_TYPE_CHECK if $?;
+        } else {
+            $status &= ~HH_SINGLE_TYPE_CHECK;
+            trace qq{Nonexistent output file "$opt_objdir/$test.out"\n};
+        }
+
+        ($hutime, $hstime) = print_stats {
+            test => $test,
+            status => $status,
+            failed_subtests => 0,
+            subtests => 0,
+            utime => $utime,
+            stime => $stime,
+        };
+
+    } else {
+
+        # Sequence mode.
+
+        ($status, $utime, $stime) = wait_for_test $test;
+
+        my $opened = open (my $STEST_OUT, '<', "$opt_objdir/$test.out");
+        unless ($opened) {
+            warning "Cannot open output file \"$opt_objdir/$test.out\"\n";
+            exit 1;
+        }
+
+        my $num_subtests = 0;
+        my $num_failed_subtests = 0;
+
+        while (<$STEST_OUT>) {
+            if (/1\.\.(\d+)/) {
+                $num_subtests = $1;
+                last;
+            }
+        }
+        if ($num_subtests == 0) {
+            $status &= ~HH_SINGLE_TYPE_CHECK;
+            trace "Malformed or missing 1..n line\n";
+        } else {
+            for my $subtest (1 .. $num_subtests) {
+                my $not = 0;
+                my $test_num = 0;
+                while (<$STEST_OUT>) {
+                    if (/^not\s+ok\s+(\d+)?/) {
+                        $not = 1;
+                        $test_num = $1;
+                        last;
+                    } elsif (/^ok\s+(\d+)?/) {
+                        $not = 0;
+                        $test_num = $1;
+                        last;
+                    }
+                }
+                if (eof $STEST_OUT) {
+                    $num_failed_subtests += $num_subtests - $subtest;
+                    last;
+                } else {
+                    if (defined($test_num) && ($test_num != $subtest)) {
+                        # There was no output printed for one or more tests.
+                        $num_failed_subtests += $test_num - $subtest;
+                        $subtest = $test_num;
+                    }
+                    $num_failed_subtests++ if $not;
+                }
+            }
+
+            $status &= ~HH_SINGLE_TYPE_CHECK if $num_failed_subtests > 0;
+        }
+
+        ($hutime, $hstime) = print_stats {
+            test => $test,
+            status => $status,
+            failed_subtests => $num_failed_subtests,
+            subtests => $num_subtests,
+            utime => $utime,
+            stime => $stime
+        };
+
+    }
+
+    $total_hutime += $hutime;
+    $total_hstime += $hstime;
+
+    if (($status & HH_SINGLE_TYPE_CHECK) == 0) {
+        push @FAILED_TESTS, {
+            test => $test,
+            reason => "hh_single_type_check",
+        };
+    } else {
+        $total_utime += $utime;
+        $total_stime += $stime;
+    }
+
+    if (($status & HH_PREPROCESSOR) == 0) {
+        push @FAILED_TESTS, {
+            test => $test,
+            reason => 'hh_preprocessor',
+        };
+    }
+
+    # If there were historical data, add the run time to the
+    # total time to compare against the historical run time.
+    $total_ntime += $utime + $stime
+        if $hutime + $hstime > 0;
+}
+
+# Clean up threads.
+$_->join() for @threads;
+
+# Print summary stats.
+
+my $passed_tests = @ARGV - @FAILED_TESTS;
+my $total_tests = scalar @ARGV;
+my $tt_str = sprintf "$passed_tests / $total_tests passed (%5.2f%%)",
+    $passed_tests / $total_tests * 100;
+
+my $totals_format = <<'END';
+%-40s %7.2f  %7.2f %7.2f %7.2f%%
+%-40s %7.2f  %7.2f %7.2f %7.2f%%
+END
+
+my $t_str = sprintf $totals_format,
+    'Totals',
+    $total_utime,
+    $total_stime,
+    $total_utime + $total_stime,
+    $total_ntime - ($total_hutime + $total_hstime),
+    $tt_str,
+    $total_hutime,
+    $total_hstime,
+    $total_hutime + $total_hstime,
+    ($total_hutime + $total_hstime == 0.0)
+        ? 0.0
+        : ($total_ntime - ($total_hutime + $total_hstime))
+            / ($total_hutime + $total_hstime) * 100;
+
+my $thread_warning = '';
+if ($opt_threads > 1) {
+    $thread_warning = <<'END';
+WARNING: Multiple threads were used. CPU times are wildly inaccurate.
+
+END
+}
+
+info HR, $thread_warning, $t_str, HR;
+if (@FAILED_TESTS) {
+    info sprintf "%-40s%s\n", 'FAILED TEST', 'REASON';
+    info sprintf "%-40s%s\n", $_->{test}, $_->{reason}
+        for @FAILED_TESTS;
+    info HR;
+}
+
+if ($opt_server) {
+  kill 9, $server_pid;
+  system "ps aux"
+      . " | grep hphpi"
+      . " | grep -v perl"
+      . " | cut -c10-15"
+      . " | sudo xargs kill -9"
+      . " 2>&1"
+      . " >/dev/null";
+}
+
+exit 1 if @FAILED_TESTS;
+
+# vim:filetype=perl:
+
+__END__
+
+=head1 NAME
+
+verify - Hack for HipHop test runner
+
+=head1 SYNOPSIS
+
+verify [I<option>+] I<test>+
+
+If C<I<test>.exp> exists, C<I<test>>'s output is diffed with C<I<test>.exp>. Any difference is considered failure.
+
+If C<I<test>.exp> does not exist, output to stdout of the following form is expected:
+
+    1..<n>
+    {not }ok[ 1]
+    {not }ok[ 2]
+    ...
+    {not }ok[ n]
+
+Where 1 <= I<n> < 2^31. Lines which do not match the patterns shown above are ignored.
+
+=head2 Options
+
+=over 4
+
+=item B<-h>, B<--help>
+
+Print usage and exit.
+
+=item B<-v>, B<--verbose>
+
+Verbose (incompatible with quiet).
+
+=item B<-q>, B<--quiet>
+
+Quiet (incompatible with verbose).
+
+=item B<-s>, B<--srcdir>
+
+Path to source tree (default is ".").
+
+=item B<-o>, B<--objdir>
+
+Path to object tree (default is ".").
+
+=item B<--hh-single-type-check>
+
+Path to C<hh_single_type_check>.
+
+=item B<--hh-preprocessor>
+
+Path to C<hh_preprocessor>.
+
+=item B<-u>, B<--ustats>
+
+Update historical statistics (stored in "<test>.perf").
+
+=item B<-z>, B<--zero>
+
+Consider non-zero exit code to be an error.
+
+=back

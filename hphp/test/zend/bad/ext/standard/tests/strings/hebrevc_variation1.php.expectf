@@ -18,13 +18,16 @@ string(5) "-20.5"
 -- Iteration 9 --
 string(10) "1012345.67"
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 13 --
 string(1) "1"
@@ -41,7 +44,8 @@ bool(false)
 -- Iteration 19 --
 string(13) "sample object"
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 21 --
 bool(false)

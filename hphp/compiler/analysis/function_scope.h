@@ -123,10 +123,6 @@ public:
   bool isClosure() const;
   bool isGenerator() const { return m_generator; }
   void setGenerator(bool f) { m_generator = f; }
-  int allocYieldLabel();
-  int getYieldLabelCount() const;
-  int getYieldLabelGeneration() const;
-  void resetYieldLabelCount();
   bool isAsync() const { return m_async; }
   void setAsync(bool f) { m_async = f; }
 
@@ -222,8 +218,8 @@ public:
   /*
    * If this is a builtin function and does not need an ActRec
    */
-  bool needsActRec() const;
-  void setNeedsActRec();
+  bool noFCallBuiltin() const;
+  void setNoFCallBuiltin();
 
   /*
    * If this is a builtin (C++ or PHP) and can be redefined
@@ -490,8 +486,6 @@ private:
   ExpressionListPtr m_closureValues;
   ReadWriteMutex m_inlineMutex;
   unsigned m_nextID; // used when cloning generators for traits
-  int m_yieldLabelCount; // number of allocated yield labels
-  int m_yieldLabelGen;   // generation counter for yield labels
   std::list<FunctionScopeRawPtr> m_clonedTraitOuterScope;
 };
 

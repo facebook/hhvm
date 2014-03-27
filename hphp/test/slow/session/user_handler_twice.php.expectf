@@ -1,0 +1,7 @@
+bool(true)
+--- session_set_save_handler ---
+bool(false)
+--- Changing session handler ---
+
+Warning: A session is active. You cannot change the session module's ini settings at this time in %s/test/slow/session/user_handler_twice.php on line 34
+bool(false)

@@ -18,19 +18,24 @@ string(13) "1.07654321E-9"
 -- Iteration 9 --
 string(3) "0.5"
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 13 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 14 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 15 --
 string(0) ""
@@ -55,6 +60,7 @@ string(0) ""
 -- Iteration 25 --
 string(0) ""
 -- Iteration 26 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

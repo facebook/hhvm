@@ -296,10 +296,11 @@ void CmdInfo::PrintDocComments(StringBuffer &sb, const Array& info) {
     Variant matches1, matches2;
     Variant ret1 = preg_match("#^( *)/\\*#s", doc, matches1);
     Variant ret2 = preg_match("#\n( *)\\*#s", doc, matches2);
-    if (!same(ret1, false) && !same(ret2, false)) {
+    if (!same(ret1, false) && !same(ret2, false) &&
+        matches1.isArray() && matches2.isArray()) {
       // we have perfect doc comment blocks, so we can re-adjust spaces
-      space1 = matches1[1].toString().size();
-      space2 = matches2[1].toString().size();
+      space1 = matches1.toCArrRef()[1].toString().size();
+      space2 = matches2.toCArrRef()[1].toString().size();
     }
     String spaces = f_str_repeat(" ", space2 - space1 - 1);
     sb.printf("%s%s\n", spaces.data(), doc.data());
@@ -398,7 +399,7 @@ bool CmdInfo::TryConstant(StringBuffer &sb, const Array& info,
   if (!key.isNull()) {
     sb.printf("  const %s = %s;\n", key.data(),
               DebuggerClient::FormatVariable
-              (info[s_constants][key], -1).data());
+              (info[s_constants].toArray()[key], -1).data());
     return true;
   }
   return false;
@@ -410,7 +411,7 @@ bool CmdInfo::TryProperty(StringBuffer &sb, const Array& info,
                              subsymbol[0] == '$' ?
                              subsymbol.substr(1) : subsymbol);
   if (!key.isNull()) {
-    Array prop = info[s_properties][key].toArray();
+    Array prop = info[s_properties].toArray()[key].toArray();
     PrintDocComments(sb, prop);
     sb.printf("  %s %s$%s;\n",
               prop[s_access].toString().data(),
@@ -422,7 +423,7 @@ bool CmdInfo::TryProperty(StringBuffer &sb, const Array& info,
                       subsymbol[0] == '$' ?
                       subsymbol.substr(1) : subsymbol);
   if (!key.isNull()) {
-    Array prop = info[s_private_properties][key].toArray();
+    Array prop = info[s_private_properties].toArray()[key].toArray();
     PrintDocComments(sb, prop);
     sb.printf("  private %s$%s;\n",
               GetModifier(prop, s_static).data(),
@@ -440,7 +441,7 @@ bool CmdInfo::TryMethod(DebuggerClient &client, StringBuffer &sb, const Array& i
 
   String key = FindSubSymbol(info[s_methods].toArray(), subsymbol);
   if (!key.isNull()) {
-    Array func = info[s_methods][key].toArray();
+    Array func = info[s_methods].toArray()[key].toArray();
     PrintHeader(client, sb, func);
     sb.printf("%s %s%s%sfunction %s::%s%s(%s);\n",
               func[s_access].toString().data(),

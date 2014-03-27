@@ -8,10 +8,12 @@ float(4.7958315233127)
 float(4.7958315233127)
 float(4.8425200051213)
 float(4.8425200051213)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 float(31.622776601684)
-HipHop Notice: %s
+
+Notice: %s
 float(31.622776601684)
 float(0)
 float(1)

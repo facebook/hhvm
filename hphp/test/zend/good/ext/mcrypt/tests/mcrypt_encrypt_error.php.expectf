@@ -1,10 +1,12 @@
 *** Testing mcrypt_encrypt() : error conditions ***
 
 -- Testing mcrypt_encrypt() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing mcrypt_encrypt() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

@@ -1,7 +1,10 @@
-HipHop Notice: %s
+
+Notice: %s
 A Object
 (
     [q] => 3
 )
-HipHop Notice: %s
-HipHop Fatal error: %s
+
+Notice: %s
+
+Fatal error: %s

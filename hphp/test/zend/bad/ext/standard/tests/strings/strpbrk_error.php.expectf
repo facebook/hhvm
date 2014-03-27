@@ -1,20 +1,25 @@
 *** Testing strpbrk() : error conditions ***
 
 -- Testing strpbrk() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing strpbrk() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing strpbrk() function with empty second argument --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing strpbrk() function with arrays --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

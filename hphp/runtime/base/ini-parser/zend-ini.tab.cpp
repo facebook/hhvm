@@ -97,6 +97,9 @@
 #define YYSTYPE std::string
 
 #include "hphp/runtime/base/complex-types.h"
+
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/ini-parser/zend-ini.h"
@@ -105,7 +108,7 @@ using namespace HPHP;
 
 
 /* Line 268 of yacc.c  */
-#line 109 "zend-ini.tab.cpp"
+#line 112 "zend-ini.tab.cpp"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -176,7 +179,7 @@ typedef struct YYLTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 180 "zend-ini.tab.cpp"
+#line 183 "zend-ini.tab.cpp"
 
 #ifdef short
 # undef short
@@ -480,11 +483,11 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    58,    58,    59,    63,    64,    66,    67,    68,    72,
-      73,    77,    81,    82,    86,    87,    88,    89,    93,    94,
-      98,    99,   100,   104,   105,   106,   107,   108,   109,   113,
-     114,   115,   116,   117,   118,   119,   123,   127,   128,   129,
-     130,   131
+       0,    61,    61,    62,    66,    67,    69,    70,    71,    75,
+      76,    80,    84,    85,    89,    90,    91,    92,    96,    97,
+     101,   102,   103,   107,   108,   109,   110,   111,   112,   116,
+     117,   118,   119,   120,   121,   122,   126,   130,   131,   132,
+     133,   134
 };
 #endif
 
@@ -1506,266 +1509,266 @@ yyreduce:
         case 4:
 
 /* Line 1806 of yacc.c  */
-#line 63 "zend-ini.y"
+#line 66 "zend-ini.y"
     { zend_ini_on_section((yyvsp[(2) - (3)]));}
     break;
 
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 65 "zend-ini.y"
+#line 68 "zend-ini.y"
     { zend_ini_on_pop_entry((yyvsp[(1) - (4)]), (yyvsp[(4) - (4)]), (yyvsp[(2) - (4)]));}
     break;
 
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 66 "zend-ini.y"
+#line 69 "zend-ini.y"
     { zend_ini_on_entry((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 67 "zend-ini.y"
+#line 70 "zend-ini.y"
     { zend_ini_on_label((yyvsp[(1) - (1)]));}
     break;
 
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 72 "zend-ini.y"
+#line 75 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (2)]) + '\0' + (yyvsp[(2) - (2)]);}
     break;
 
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 73 "zend-ini.y"
+#line 76 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 77 "zend-ini.y"
+#line 80 "zend-ini.y"
     { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 81 "zend-ini.y"
+#line 84 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 82 "zend-ini.y"
+#line 85 "zend-ini.y"
     { (yyval) = "";}
     break;
 
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 86 "zend-ini.y"
+#line 89 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 87 "zend-ini.y"
+#line 90 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 88 "zend-ini.y"
+#line 91 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 89 "zend-ini.y"
+#line 92 "zend-ini.y"
     { (yyval) = "";}
     break;
 
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 93 "zend-ini.y"
+#line 96 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 94 "zend-ini.y"
+#line 97 "zend-ini.y"
     { (yyval).clear();}
     break;
 
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 98 "zend-ini.y"
+#line 101 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
     break;
 
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 99 "zend-ini.y"
+#line 102 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
     break;
 
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 100 "zend-ini.y"
+#line 103 "zend-ini.y"
     { (yyval) = "";}
     break;
 
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 104 "zend-ini.y"
+#line 107 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 105 "zend-ini.y"
+#line 108 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 106 "zend-ini.y"
+#line 109 "zend-ini.y"
     { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 107 "zend-ini.y"
+#line 110 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
     break;
 
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 108 "zend-ini.y"
+#line 111 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
     break;
 
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 109 "zend-ini.y"
+#line 112 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (4)]) + (yyvsp[(3) - (4)]);}
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 113 "zend-ini.y"
+#line 116 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 114 "zend-ini.y"
+#line 117 "zend-ini.y"
     { zend_ini_on_op((yyval), '|', (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 115 "zend-ini.y"
+#line 118 "zend-ini.y"
     { zend_ini_on_op((yyval), '&', (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 116 "zend-ini.y"
+#line 119 "zend-ini.y"
     { zend_ini_on_op((yyval), '^', (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 117 "zend-ini.y"
+#line 120 "zend-ini.y"
     { zend_ini_on_op((yyval), '~', (yyvsp[(2) - (2)])    );}
     break;
 
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 118 "zend-ini.y"
+#line 121 "zend-ini.y"
     { zend_ini_on_op((yyval), '!', (yyvsp[(2) - (2)])    );}
     break;
 
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 119 "zend-ini.y"
+#line 122 "zend-ini.y"
     { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 123 "zend-ini.y"
+#line 126 "zend-ini.y"
     { zend_ini_on_var((yyval), (yyvsp[(2) - (3)]));}
     break;
 
   case 37:
 
 /* Line 1806 of yacc.c  */
-#line 127 "zend-ini.y"
+#line 130 "zend-ini.y"
     { zend_ini_on_constant((yyval), (yyvsp[(1) - (1)]));}
     break;
 
   case 38:
 
 /* Line 1806 of yacc.c  */
-#line 128 "zend-ini.y"
+#line 131 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 39:
 
 /* Line 1806 of yacc.c  */
-#line 129 "zend-ini.y"
+#line 132 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 40:
 
 /* Line 1806 of yacc.c  */
-#line 130 "zend-ini.y"
+#line 133 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 41:
 
 /* Line 1806 of yacc.c  */
-#line 131 "zend-ini.y"
+#line 134 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 1769 "zend-ini.tab.cpp"
+#line 1772 "zend-ini.tab.cpp"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2003,7 +2006,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 134 "zend-ini.y"
+#line 137 "zend-ini.y"
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2013,6 +2016,10 @@ bool zend_parse_ini_string(const std::string &str, const std::string &filename,
                            int scanner_mode,
                            IniSetting::ParserCallback &callback,
                            void *arg) {
+  if (boost::contains(filename, ".hdf")
+    || boost::ends_with(filename, ".hphp")) {
+    return false;
+  }
   zend_ini_scan(str, scanner_mode, filename, callback, arg);
   bool ret = (ini_parse() == 0);
   zend_ini_scan_cleanup();

@@ -70,6 +70,7 @@ int(0)
 int(0)
 
 -- Iteration 24 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

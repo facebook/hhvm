@@ -78,20 +78,16 @@ State entry_state(const Index& index,
 
   for (; locId < ctx.func->locals.size(); ++locId) {
     /*
-     * Generators and closures don't (necessarily) start with the
-     * frame locals uninitialized.
+     * Closures don't (necessarily) start with the frame locals
+     * uninitialized.
      *
      * Ideas:
-     *
-     *  - maybe we can do better for generators by adding edges from
-     *    the yields to the top of the generator
      *
      *  - for closures, since they are all unique to their creation
      *    sites and in the same unit, looking at the CreateCl could
      *    tell the types of used vars, even in single unit mode.
      */
-    ret.locals[locId] =
-      ctx.func->isGeneratorBody || ctx.func->isClosureBody ? TGen : TUninit;
+    ret.locals[locId] = ctx.func->isClosureBody ? TGen : TUninit;
   }
 
   return ret;
@@ -231,6 +227,17 @@ FuncAnalysis do_analyze(const Index& index,
     }
   }
 
+  /**
+   * We start inference of async functions with WaitH<TBottom>, which is
+   * what we return for async functions that always throw. This won't
+   * affect inferred return type for other async functions, as union
+   * of WaitH<TBottom> and WaitH<T> is WaitH<T>.
+   */
+  if (ctx.func->isAsync) {
+    ai.inferredReturn = union_of(std::move(ai.inferredReturn),
+                                 wait_handle(index, TBottom));
+  }
+
   /*
    * If inferredReturn is TBottom, the callee didn't execute a return
    * at all.  (E.g. it unconditionally throws, or is an abstract
@@ -261,8 +268,8 @@ FuncAnalysis do_analyze(const Index& index,
       ).str();
     }
     ret += sep + bsep;
-    ret += folly::format(
-      "Inferred return type: {}\n", show(ai.inferredReturn)).str();
+    folly::format(&ret,
+      "Inferred return type: {}\n", show(ai.inferredReturn));
     ret += bsep;
     return ret;
   }());
@@ -305,10 +312,11 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
     std::fprintf(
       stderr,
       "HNI class %s::%s inferred property type (%s) doesn't "
-        "match annotation\n",
+        "match annotation (%s)\n",
       clsAnalysis.ctx.cls->name->data(),
       prop.name->data(),
-      show(it->second).c_str()
+      show(it->second).c_str(),
+      show(hniTy).c_str()
     );
     always_assert(!"HNI property type annotation was wrong");
   };
@@ -370,9 +378,14 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     if (isHNIBuiltin) {
       auto const hniTy = from_hni_constraint(prop.typeConstraint);
       if (!cellTy.subtypeOf(hniTy)) {
-        std::fprintf(stderr, "hni %s::%s has impossible type\n",
+        std::fprintf(stderr, "hni %s::%s has impossible type. "
+                     "The annotation says it is type (%s) "
+                     "but the default value is type (%s).\n",
                      ctx.cls->name->data(),
-                     prop.name->data());
+                     prop.name->data(),
+                     show(hniTy).c_str(),
+                     show(cellTy).c_str()
+                     );
         always_assert(0 && "HNI systemlib has invalid type annotations");
       }
     }
@@ -474,15 +487,6 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     // Analyze every method in the class until we reach a fixed point
     // on the private property states.
     for (auto& f : ctx.cls->methods) {
-      if (f->isAsync && f->isGeneratorBody) {
-        /*
-         * Inner-bodies of async functions don't need to have their
-         * inner body analyzed for class analysis, because it is
-         * required to do the same thing as the eager-execution
-         * version.
-         */
-        continue;
-      }
       if (f->name->isame(s_86pinit.get()) ||
           f->name->isame(s_86sinit.get())) {
         continue;

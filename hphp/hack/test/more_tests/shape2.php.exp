@@ -1,0 +1,6 @@
+File "shape2.php", line 16, characters 10-11:
+Invalid return type
+File "shape2.php", line 15, characters 8-12:
+The field 'field2' is missing
+File "shape2.php", line 14, characters 18-24:
+The field 'field2' is defined

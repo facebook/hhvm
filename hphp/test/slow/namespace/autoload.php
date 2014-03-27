@@ -10,6 +10,10 @@ namespace {
 }
 
 namespace A {
-  $a = '\\A';
-  new $a;
+  function main() {
+    $a = '\\A';
+    new $a;
+  }
+
+  main();
 }

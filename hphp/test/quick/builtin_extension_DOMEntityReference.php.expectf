@@ -1,5 +1,6 @@
 DOMEntityReference
-HipHop Warning: DOMEntityReference::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+
+Warning: DOMEntityReference::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(DOMEntityReference)#1 (0) {
 }
 string(103) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:18:"DOMEntityReference";}"
@@ -53,7 +54,8 @@ array(21) {
 }
 ================
 A_DOMEntityReference
-HipHop Warning: DOMEntityReference::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
+
+Warning: DOMEntityReference::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_DOMEntityReference)#3 (1) {
   ["___x"]=>
   NULL

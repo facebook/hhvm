@@ -1,6 +1,7 @@
 *** Testing unlink() on deleted file ***
 bool(true)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

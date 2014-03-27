@@ -1,0 +1,6 @@
+File "gen5.php", line 12, characters 9-9:
+Typing error
+File "gen5.php", line 12, characters 14-14:
+This is an object of type A
+File "gen5.php", line 22, characters 19-19:
+It is incompatible with an object of type Z

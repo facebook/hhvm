@@ -5,7 +5,8 @@ int(5)
 int(100)
 
 ---> 2. Trying to assign by reference the return value of a function that returns a constant by ref:
-HipHop Notice: %s
+
+Notice: %s
 int(5)
 int(100)
 

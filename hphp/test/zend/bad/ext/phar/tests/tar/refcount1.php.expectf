@@ -7,7 +7,8 @@ object(PharFileInfo)#%d (2) {
 }
 string(5) "extra"
 ===UNLINK===
-HipHop Warning: %s
+
+Warning: %s
 object(PharFileInfo)#%d (2) {
   [%spathName":%sSplFileInfo":private]=>
   string(%d) "phar://%srefcount1.phar.tar/b/c.php"

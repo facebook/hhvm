@@ -1,0 +1,10 @@
+File "typing_fail_contravariant.php", line 22, characters 7-7:
+This object is of type D
+File "typing_fail_contravariant.php", line 22, characters 17-17:
+It is incompatible with this object of type C
+because some of their methods are incompatible.
+Read the following to see why:
+File "typing_fail_contravariant.php", line 19, characters 23-23:
+This is an object of type B
+File "typing_fail_contravariant.php", line 23, characters 23-23:
+It is incompatible with an object of type A

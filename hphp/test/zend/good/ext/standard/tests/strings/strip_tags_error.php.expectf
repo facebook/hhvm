@@ -1,10 +1,12 @@
 *** Testing strip_tags() : error conditions ***
 
 -- Testing strip_tags() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing strip_tags() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

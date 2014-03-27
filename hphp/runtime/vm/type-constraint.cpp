@@ -43,41 +43,17 @@ void TypeConstraint::init() {
       const StringData* name;
       Type type;
     } pairs[] = {
-      { makeStaticString("bool"),     { KindOfBoolean,
-                                                   MetaType::Precise }},
-      { makeStaticString("boolean"),  { KindOfBoolean,
-                                                   MetaType::Precise }},
-
-      { makeStaticString("int"),      { KindOfInt64,
-                                                   MetaType::Precise }},
-      { makeStaticString("integer"),  { KindOfInt64,
-                                                   MetaType::Precise }},
-
-      { makeStaticString("real"),     { KindOfDouble,
-                                                   MetaType::Precise }},
-      { makeStaticString("double"),   { KindOfDouble,
-                                                   MetaType::Precise }},
-      { makeStaticString("float"),    { KindOfDouble,
-                                                   MetaType::Precise }},
-
-      { makeStaticString("string"),   { KindOfString,
-                                                   MetaType::Precise }},
-
-      { makeStaticString("array"),    { KindOfArray,
-                                                   MetaType::Precise }},
-
-      { makeStaticString("resource"), { KindOfResource,
-                                                   MetaType::Precise }},
-
-      { makeStaticString("self"),     { KindOfObject,
-                                                   MetaType::Self }},
-      { makeStaticString("parent"),   { KindOfObject,
-                                                   MetaType::Parent }},
-      { makeStaticString("callable"), { KindOfObject,
-                                                   MetaType::Callable }},
-      { makeStaticString("num"),      { KindOfDouble,
-                                                   MetaType::Number }},
-
+      { makeStaticString("HH\\bool"),   { KindOfBoolean, MetaType::Precise }},
+      { makeStaticString("HH\\int"),    { KindOfInt64,   MetaType::Precise }},
+      { makeStaticString("HH\\float"),  { KindOfDouble,  MetaType::Precise }},
+      { makeStaticString("HH\\string"), { KindOfString,  MetaType::Precise }},
+      { makeStaticString("array"),      { KindOfArray,   MetaType::Precise }},
+      { makeStaticString("HH\\resource"), { KindOfResource,
+                                                         MetaType::Precise }},
+      { makeStaticString("HH\\num"),    { KindOfDouble,  MetaType::Number }},
+      { makeStaticString("self"),       { KindOfObject,  MetaType::Self }},
+      { makeStaticString("parent"),     { KindOfObject,  MetaType::Parent }},
+      { makeStaticString("callable"),   { KindOfObject,  MetaType::Callable }},
     };
     for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {
       s_typeNamesToTypes[pairs[i].name] = pairs[i].type;
@@ -120,6 +96,49 @@ void TypeConstraint::init() {
   assert(IMPLIES(isParent(), m_type.dt == KindOfObject));
   assert(IMPLIES(isSelf(), m_type.dt == KindOfObject));
   assert(IMPLIES(isCallable(), m_type.dt == KindOfObject));
+}
+
+std::string TypeConstraint::displayName(const Func* func /*= nullptr*/) const {
+  const StringData* tn = typeName();
+  std::string name;
+  if (isSoft()) {
+    name += '@';
+  }
+  if (isNullable() && isExtended()) {
+    name += '?';
+  }
+  if (func && isSelf()) {
+    selfToTypeName(func, &tn);
+    name += tn->data();
+  } else if (func && isParent()) {
+    parentToTypeName(func, &tn);
+    name += tn->data();
+  } else {
+    const char* str = tn->data();
+    auto len = tn->size();
+    if (len > 3 && tolower(str[0]) == 'h' && tolower(str[1]) == 'h' &&
+        str[2] == '\\') {
+      bool strip = false;
+      const char* stripped = str + 3;
+      switch (len - 3) {
+        case 3:
+          strip = (!strcasecmp(stripped, "int") ||
+                   !strcasecmp(stripped, "num"));
+          break;
+        case 4: strip = !strcasecmp(stripped, "bool"); break;
+        case 5: strip = !strcasecmp(stripped, "float"); break;
+        case 6: strip = !strcasecmp(stripped, "string"); break;
+        case 8: strip = !strcasecmp(stripped, "resource"); break;
+        default:
+          break;
+      }
+      if (strip) {
+        str = stripped;
+      }
+    }
+    name += str;
+  }
+  return name;
 }
 
 /*
@@ -257,23 +276,21 @@ TypeConstraint::checkPrimitive(DataType dt) const {
   return equivDataTypes(m_type.dt, dt);
 }
 
-static const char* describe_actual_type(const TypedValue* tv) {
+static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
   tv = tvToCell(tv);
   switch (tv->m_type) {
-  case KindOfUninit:
-  case KindOfNull:          return "null";
-  case KindOfBoolean:       return "bool";
-  case KindOfInt64:         return "int";
-  case KindOfDouble:        return "double";
-  case KindOfStaticString:
-  case KindOfString:        return "string";
-  case KindOfArray:         return "array";
-  case KindOfObject:
-    return tv->m_data.pobj->o_getClassName().c_str();
-  case KindOfResource:
-    return tv->m_data.pres->o_getClassName().c_str();
-  default:
-    assert(false);
+    case KindOfUninit:
+    case KindOfNull:          return "null";
+    case KindOfBoolean:       return "bool";
+    case KindOfInt64:         return "int";
+    case KindOfDouble:        return isHHType ? "float" : "double";
+    case KindOfStaticString:
+    case KindOfString:        return "string";
+    case KindOfArray:         return "array";
+    case KindOfObject:        return tv->m_data.pobj->o_getClassName().c_str();
+    case KindOfResource:      return tv->m_data.pres->o_getClassName().c_str();
+    default:
+      assert(false);
   }
   not_reached();
 }
@@ -281,21 +298,29 @@ static const char* describe_actual_type(const TypedValue* tv) {
 void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
                                 int id) const {
   JIT::VMRegAnchor _;
-  const StringData* tn = typeName();
-  if (isSelf()) {
-    selfToTypeName(func, &tn);
-  } else if (isParent()) {
-    parentToTypeName(func, &tn);
-  }
-  auto const givenType = describe_actual_type(tv);
+  std::string name = displayName(func);
+  auto const givenType = describe_actual_type(tv, isHHType());
   // Handle return type constraint failures
   if (id == ReturnId) {
-    raise_warning(
-      "Value returned from %s() must be of type %s, %s given",
-      func->fullName()->data(),
-      tn->data(),
-      givenType
-    );
+    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()) {
+      raise_typehint_error(
+        folly::format(
+          "Value returned from {}() must be of type {}, {} given",
+          func->fullName()->data(),
+          name,
+          givenType
+        ).str()
+      );
+    } else {
+      raise_debugging(
+        folly::format(
+          "Value returned from {}() must be of type {}, {} given",
+          func->fullName()->data(),
+          name,
+          givenType
+        ).str()
+      );
+    }
     return;
   }
   // Handle implicit collection->array conversion for array parameter type
@@ -312,7 +337,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
       folly::format(
         "Argument {} to {}() must be of type {}, {} given; argument {} was "
         "implicitly cast to array",
-        id + 1, func->fullName()->data(), fullName(), givenType, id + 1
+        id + 1, func->fullName()->data(), name, givenType, id + 1
       ).str()
     );
     tvCastToArrayInPlace(tv);
@@ -325,21 +350,21 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     raise_debugging(
       folly::format(
         "Argument {} to {}() must be of type {}, {} given",
-        id + 1, func->fullName()->data(), fullName(), givenType
+        id + 1, func->fullName()->data(), name, givenType
       ).str()
     );
   } else if (isExtended() && isNullable()) {
     raise_typehint_error(
       folly::format(
         "Argument {} to {}() must be of type {}, {} given",
-        id + 1, func->fullName()->data(), fullName(), givenType
+        id + 1, func->fullName()->data(), name, givenType
       ).str()
     );
   } else {
     raise_typehint_error(
       folly::format(
         "Argument {} passed to {}() must be an instance of {}, {} given",
-        id + 1, func->fullName()->data(), tn->data(), givenType
+        id + 1, func->fullName()->data(), name, givenType
       ).str()
     );
   }

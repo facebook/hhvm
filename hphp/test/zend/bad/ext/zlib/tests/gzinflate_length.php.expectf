@@ -1,5 +1,6 @@
 5 15
 Strings are equal
 Strings are equal
-HipHop Warning: %s
+
+Warning: %s
 Failed (as expected)

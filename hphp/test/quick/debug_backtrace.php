@@ -1,4 +1,4 @@
-<?php
+<?php // uses RenameFunction to ensure that all arguments are retained
 
 class A {
   static function foo() {
@@ -20,7 +20,7 @@ function foo() {
   call_user_func("bar");
 }
 
-function error_handler($errno, $errstr, $errfile, $errline, $errcontext, $extra) {
+function error_handler($errno, $errstr, $errfile, $errline, $errcontext) {
   // Make sure this function shows up in a backtrace
   var_dump(debug_backtrace());
 }

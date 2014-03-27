@@ -1,0 +1,19 @@
+int(1)
+object(HH\Vector)#5 (2) {
+  [0]=>
+  int(3)
+  [1]=>
+  int(2)
+}
+object(HH\Vector)#6 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(3)
+}
+object(HH\Vector)#7 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(3)
+}

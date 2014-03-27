@@ -1,0 +1,4 @@
+File "trait_private_bad5.php", line 20, characters 13-15:
+Private members cannot be accessed with static:: since a child class may also have an identically named private member
+File "trait_private_bad5.php", line 13, characters 27-29:
+This member is private

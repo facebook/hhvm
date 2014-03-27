@@ -61,8 +61,6 @@ bool TestLogger::initializeRun() {
     return false;
   }
 
-  run_id = response[s_result][s_runId].toInt32();
-
   return true;
 }
 
@@ -151,15 +149,6 @@ std::string TestLogger::getGitRevision() {
 }
 
 std::string TestLogger::getSVNRevision() {
-  std::string out;
-
-  // Redirect stderr to stdout so we don't get annoying messages
-  if (getOutput("svn info 2>&1", out) != -1) {
-    Variant regs;
-    f_mb_ereg("^Revision: (\\d+)$", out, ref(regs));
-    return regs[1].getStringData()->data();
-  }
-
   return "";
 }
 

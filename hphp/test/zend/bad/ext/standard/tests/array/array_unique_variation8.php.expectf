@@ -1,18 +1,32 @@
 *** Testing array_unique() : two dimensional array for $input argument ***
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   array(4) {

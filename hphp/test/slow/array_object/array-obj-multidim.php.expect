@@ -1,0 +1,21 @@
+object(ArrayObject)#2 (1) {
+  ["foo"]=>
+  array(1) {
+    ["bar"]=>
+    string(7) "hello!!"
+  }
+}
+object(ArrayObject)#1 (1) {
+  ["foo"]=>
+  array(1) {
+    ["bar"]=>
+    string(7) "hello!!"
+  }
+}
+object(ArrayObject)#1 (1) {
+  ["foo"]=>
+  array(1) {
+    ["bar"]=>
+    string(7) "hello!!"
+  }
+}

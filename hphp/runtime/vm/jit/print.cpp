@@ -24,8 +24,8 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/layout.h"
-#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {  namespace JIT {

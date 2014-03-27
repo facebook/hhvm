@@ -7,7 +7,8 @@ wordwrap
 function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 2 --
 string(25) "testing
@@ -24,49 +25,69 @@ string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(223) "<br />\nt<br />\ne<br />\ns<br />\nt<br />\ni<br />\nn<br />\ng<br />\n<br />\nw<br />\no<br />\nr<br />\nd<br />\nw<br />\nr<br />\na<br />\np<br />\n<br />\nf<br />\nu<br />\nn<br />\nc<br />\nt<br />\ni<br />\no<br />\nn"
 -- Iteration 4 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 7 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 8 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 9 --
 string(25) "testing
@@ -81,7 +102,8 @@ wordwrap
 function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 11 --
 string(25) "testing
@@ -96,34 +118,47 @@ wordwrap
 function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 13 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 14 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 15 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 16 --
 string(25) "testing
@@ -131,7 +166,8 @@ wordwrap
 function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 17 --
 string(25) "testing
@@ -139,34 +175,47 @@ wordwrap
 function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 18 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 19 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 21 --
 string(25) "testing
@@ -174,7 +223,8 @@ wordwrap
 function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 22 --
 string(25) "testing
@@ -182,6 +232,7 @@ wordwrap
 function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

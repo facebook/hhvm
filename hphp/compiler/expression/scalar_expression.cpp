@@ -29,7 +29,8 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/base/zend-strtod.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/compiler/analysis/file_scope.h"
 
 #include <sstream>
@@ -63,7 +64,7 @@ ScalarExpression::ScalarExpression
     : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ScalarExpression)),
       m_quoted(quoted) {
   if (!value.isNull()) {
-    String serialized = f_serialize(value);
+    String serialized = HHVM_FN(serialize)(value);
     m_serializedValue = string(serialized.data(), serialized.size());
     if (value.isDouble()) {
       m_dval = value.toDouble();
@@ -247,6 +248,10 @@ TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
   case T_DNUMBER:
     actualType = Type::Double;
     break;
+  case T_ONUMBER:
+    actualType =
+      RuntimeOption::IntsOverflowToInts ? Type::Int64 : Type::Double;
+    break;
 
   case T_LINE:
   case T_COMPILER_HALT_OFFSET:
@@ -302,6 +307,8 @@ bool ScalarExpression::isLiteralInteger() const {
     break;
   case T_LNUMBER:
     return true;
+  case T_ONUMBER:
+    return RuntimeOption::IntsOverflowToInts;
   default:
     break;
   }
@@ -429,19 +436,26 @@ void ScalarExpression::outputCodeModel(CodeGenerator &cg) {
 
   cg.printObjectHeader("ScalarExpression", 2);
   cg.printPropertyHeader("value");
+
+  auto printInt = [&]() {
+    auto i = static_cast<int64_t>(std::stoll(m_value, nullptr, 0));
+    cg.printValue(i);
+  };
+  auto printDouble = [&]() {
+    auto d = String(m_value).toDouble();
+    cg.printValue(d);
+  };
+
   switch (m_type) {
     case T_NUM_STRING:
     case T_LNUMBER:
-      {
-        auto i = (int64_t)strtoll(m_value.c_str(), nullptr, 0);
-        cg.printValue(i);
-      }
+      printInt();
       break;
     case T_DNUMBER:
-      {
-        auto d = String(m_value).toDouble();
-        cg.printValue(d);
-      }
+      printDouble();
+      break;
+    case T_ONUMBER:
+      RuntimeOption::IntsOverflowToInts ? printInt() : printDouble();
       break;
     default:
       cg.printValue(m_originalValue);
@@ -470,6 +484,7 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_NUM_STRING:
   case T_LNUMBER:
   case T_DNUMBER:
+  case T_ONUMBER:
   case T_COMPILER_HALT_OFFSET:
     cg_printf("%s", m_originalValue.c_str());
     break;
@@ -538,10 +553,17 @@ Variant ScalarExpression::getVariant() const {
     case T_METHOD_C:
     case T_FUNC_C:
       return String(m_translated);
+    case T_ONUMBER:
+      if (RuntimeOption::IntsOverflowToInts) return getIntValue();
+      if (m_value.size() >= 2 &&
+          m_value[0] == '0' && std::tolower(m_value[1]) == 'x') {
+        return zend_hex_strtod(m_value.c_str(), nullptr);
+      }
+      // fallthrough
     case T_DNUMBER:
       return String(m_value).toDouble();
     default:
-      assert(false);
+      not_reached();
   }
   return uninit_null();
 }
@@ -566,8 +588,10 @@ bool ScalarExpression::getString(const std::string *&s) const {
   }
 }
 
-bool ScalarExpression::getInt(int64_t &i) const {
-  if (m_type == T_LNUMBER || m_type == T_COMPILER_HALT_OFFSET) {
+bool ScalarExpression::getInt(int64_t& i) const {
+  bool over_int =
+    (m_type == T_ONUMBER) && RuntimeOption::IntsOverflowToInts;
+  if (m_type == T_LNUMBER || m_type == T_COMPILER_HALT_OFFSET || over_int) {
     i = getIntValue();
     return true;
   } else if (m_type == T_LINE) {
@@ -577,8 +601,10 @@ bool ScalarExpression::getInt(int64_t &i) const {
   return false;
 }
 
-bool ScalarExpression::getDouble(double &d) const {
-  if (m_type == T_DNUMBER) {
+bool ScalarExpression::getDouble(double& d) const {
+  bool over_float =
+    m_type == T_ONUMBER && !RuntimeOption::IntsOverflowToInts;
+  if (m_type == T_DNUMBER || over_float) {
     Variant v = getVariant();
     assert(v.isDouble());
     d = v.toDouble();
@@ -600,6 +626,5 @@ int64_t ScalarExpression::getIntValue() const {
   if (m_value.compare(0, 2, "0b") == 0) {
     return strtoll(m_value.c_str() + 2, nullptr, 2);
   }
-
   return strtoll(m_value.c_str(), nullptr, 0);
 }

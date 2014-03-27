@@ -15,13 +15,14 @@
 */
 
 #include "hphp/runtime/base/timezone.h"
-#include "hphp/runtime/base/complex-types.h"
+
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/type-conversions.h"
+
 #include "hphp/util/logger.h"
 #include "hphp/util/text-util.h"
 
@@ -183,7 +184,8 @@ Array TimeZone::GetAbbreviations() {
     } else {
       element.set(s_timezone_id, uninit_null());
     }
-    ret.lvalAt(String(entry->name)).append(element.create());
+    auto& val = ret.lvalAt(String(entry->name));
+    forceToArray(val).append(element.create());
   }
   return ret;
 }

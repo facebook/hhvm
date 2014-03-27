@@ -1,7 +1,8 @@
 Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 
 Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
-HipHop Warning: %s
+
+Warning: %s
 [020] Cannot connect using host '%s', user '%s', password '****', [0] 0
 
 Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d

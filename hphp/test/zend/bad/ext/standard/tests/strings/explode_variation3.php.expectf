@@ -91,13 +91,16 @@ array(6) {
   string(6) "piece6"
 }
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 13 --
 array(1) {
@@ -130,10 +133,12 @@ array(1) {
   string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 19 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 21 --
 array(1) {

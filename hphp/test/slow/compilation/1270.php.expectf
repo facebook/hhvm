@@ -1,5 +1,7 @@
-HipHop Warning: Cannot use a scalar value as an array in %s/test/slow/compilation/1270.php on line 7
-HipHop Warning: Cannot use a scalar value as an array in %s/test/slow/compilation/1270.php on line 7
+
+Warning: Cannot use a scalar value as an array in %s/test/slow/compilation/1270.php on line 7
+
+Warning: Cannot use a scalar value as an array in %s/test/slow/compilation/1270.php on line 7
 string(4) "test"
 NULL
 NULL

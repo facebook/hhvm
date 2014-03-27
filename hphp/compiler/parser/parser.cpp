@@ -437,27 +437,40 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
                        dynamic_pointer_cast<ExpressionList>(params->exp),
                        clsExp);
   } else {
-    const string &s = name.text();
+    string funcName = name.text();
     // strip out namespaces for func_get_args and friends check
-    size_t lastBackslash = s.find_last_of(NAMESPACE_SEP);
+    size_t lastBackslash = funcName.find_last_of(NAMESPACE_SEP);
     const string stripped = lastBackslash == string::npos
-                            ? s
-                            : s.substr(lastBackslash+1);
-    auto useStripped = false;
+                            ? funcName
+                            : funcName.substr(lastBackslash+1);
     if (stripped == "func_num_args" ||
         stripped == "func_get_args" ||
         stripped == "func_get_arg") {
-      useStripped = true;
+      funcName = stripped;
       if (m_hasCallToGetArgs.size() > 0) {
         m_hasCallToGetArgs.back() = true;
+      }
+    }
+
+    if (isAutoAliasOn()) {
+      // Auto import a few functions from the HH namespace
+      if (stripped == "fun" ||
+          stripped == "meth_caller" ||
+          stripped == "class_meth" ||
+          stripped == "inst_meth" ||
+          stripped == "invariant_callback_register" ||
+          stripped == "invariant" ||
+          stripped == "invariant_violation" ||
+          stripped == "tuple"
+      ) {
+        funcName = "HH\\" + stripped;
       }
     }
 
     SimpleFunctionCallPtr call
       (new RealSimpleFunctionCall
        (BlockScopePtr(), getLocation(),
-        useStripped ? stripped : name->text(),
-        name->num() & 2,
+        funcName, name->num() & 2,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
     if (m_scanner.isHHSyntaxEnabled() && !(name->num() & 2)) {
       // If the function name is without any backslashes or
@@ -584,6 +597,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
     case T_STRING:
     case T_LNUMBER:
     case T_DNUMBER:
+    case T_ONUMBER:
     case T_LINE:
     case T_COMPILER_HALT_OFFSET:
     case T_FUNC_C:
@@ -1943,13 +1957,10 @@ void Parser::onWhereClause(Token &out, Token &expr) {
   out->exp = NEW_EXP(WhereClause, expr.exp);
 }
 
-void Parser::onJoinClause(Token &out, Token *var, Token &coll,
-  Token *left, Token *right) {
-  out->exp = NEW_EXP(JoinClause,
-                     var == nullptr ? "" : var->text(), coll.exp,
-                     left == nullptr ? nullptr : left->exp,
-                     right == nullptr ? nullptr : right->exp,
-                     "");
+void Parser::onJoinClause(Token &out, Token &var, Token &coll,
+  Token &left, Token &right) {
+  out->exp = NEW_EXP(JoinClause, var.text(), coll.exp,
+                     left.exp, right.exp, "");
 }
 
 void Parser::onJoinIntoClause(Token &out, Token &var, Token &coll,
@@ -1994,11 +2005,9 @@ void Parser::onIntoClause(Token &out, Token &var, Token &query) {
 
 //////////////////// AliasTable /////////////////////
 
-Parser::AliasTable::AliasTable(const std::vector<AliasEntry>& autoAliases,
-                               std::function<bool ()> autoOracle) :
-  m_autoAliases(autoAliases), m_autoOracle(autoOracle),
-  m_alreadyImported(false) {
-
+Parser::AliasTable::AliasTable(const hphp_string_imap<std::string>& autoAliases,
+                               std::function<bool ()> autoOracle)
+  : m_autoAliases(autoAliases), m_autoOracle(autoOracle) {
   if (!m_autoOracle) {
     setFalseOracle();
   }
@@ -2008,47 +2017,59 @@ void Parser::AliasTable::setFalseOracle() {
   m_autoOracle = [] () { return false; };
 }
 
-/*
- * Add the auto-imports to the map.
- * This is called by all the other operations, so the auto-import occurs
- * on-demand.
- */
-void Parser::AliasTable::addAutoImports() {
-  if (!m_alreadyImported && m_autoOracle()) {
-    m_alreadyImported = true;
-
-    for (auto entry : m_autoAliases) {
-      m_aliases[entry.alias] = (NameEntry){entry.name, AliasType::AUTO};
-    }
+std::string Parser::AliasTable::getName(std::string alias) {
+  auto it = m_aliases.find(alias);
+  if (it != m_aliases.end()) {
+    return it->second.name;
   }
+  auto autoIt = m_autoAliases.find(alias);
+  if (autoIt != m_autoAliases.end()) {
+    set(alias, autoIt->second, AliasTable::AliasType::USE);
+    return autoIt->second;
+  }
+  return "";
 }
 
-std::string Parser::AliasTable::getName(std::string alias) {
-  addAutoImports();
+std::string Parser::AliasTable::getDefName(std::string alias) {
   auto it = m_aliases.find(alias);
-  return (m_aliases.end() == it) ? "" : it->second.name;
+  if (it != m_aliases.end() && it->second.type == AliasType::DEF) {
+    return it->second.name;
+  }
+  return "";
+}
+
+std::string Parser::AliasTable::getUseName(std::string alias) {
+  auto it = m_aliases.find(alias);
+  if (it != m_aliases.end() && it->second.type == AliasType::USE) {
+    return it->second.name;
+  }
+  return "";
 }
 
 bool Parser::AliasTable::isAliased(std::string alias) {
-  addAutoImports();
-  return m_aliases.find(alias) != m_aliases.end();
+  if (isUseType(alias)) {
+    return true;
+  }
+  return m_autoOracle() && m_autoAliases.find(alias) != m_autoAliases.end();
 }
 
-bool Parser::AliasTable::isAutoImported(std::string alias) {
-  addAutoImports();
-  auto it = m_aliases.find(alias);
-  return it != m_aliases.end() && (it->second.type == AliasType::AUTO);
+bool Parser::AliasTable::isAutoType(std::string alias) {
+  return m_autoOracle() && m_autoAliases.find(alias) != m_autoAliases.end();
 }
 
 bool Parser::AliasTable::isUseType(std::string alias) {
   auto it = m_aliases.find(alias);
-  return it != m_aliases.end() && (it->second.type == AliasType::USE);
+  return it != m_aliases.end() && it->second.type == AliasType::USE;
 }
 
-void Parser::AliasTable::map(std::string alias,
+bool Parser::AliasTable::isDefType(std::string alias) {
+  auto it = m_aliases.find(alias);
+  return it != m_aliases.end() && it->second.type == AliasType::DEF;
+}
+
+void Parser::AliasTable::set(std::string alias,
                              std::string name,
                              AliasType type) {
-  addAutoImports();
   m_aliases[alias] = (NameEntry){name, type};
 }
 
@@ -2057,7 +2078,6 @@ void Parser::AliasTable::map(std::string alias,
  */
 void Parser::AliasTable::clear() {
   m_aliases.clear();
-  m_alreadyImported = false;
 }
 
 //////////////////////////////////////////////////////
@@ -2070,9 +2090,9 @@ bool Parser::isAutoAliasOn() {
   return m_scanner.isHHSyntaxEnabled();
 }
 
-std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
+hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
+  hphp_string_imap<std::string> autoAliases;
   typedef AliasTable::AliasEntry AliasEntry;
-
   std::vector<AliasEntry> aliases {
     (AliasEntry){"Traversable", "HH\\Traversable"},
     (AliasEntry){"KeyedTraversable", "HH\\KeyedTraversable"},
@@ -2082,16 +2102,36 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
     (AliasEntry){"KeyedIterable", "HH\\KeyedIterable"},
     (AliasEntry){"Collection", "HH\\Collection"},
     (AliasEntry){"Vector", "HH\\Vector"},
-    (AliasEntry){"Set", "HH\\Set"},
-    (AliasEntry){"ImmVector", "HH\\ImmVector"},
-    (AliasEntry){"ImmSet", "HH\\ImmSet"},
-    (AliasEntry){"Pair", "HH\\Pair"},
     (AliasEntry){"Map", "HH\\Map"},
     (AliasEntry){"StableMap", "HH\\Map"}, // Merging with Map
+    (AliasEntry){"Set", "HH\\Set"},
+    (AliasEntry){"Pair", "HH\\Pair"},
+    (AliasEntry){"ImmVector", "HH\\ImmVector"},
     (AliasEntry){"ImmMap", "HH\\ImmMap"},
-  };
+    (AliasEntry){"ImmSet", "HH\\ImmSet"},
+    (AliasEntry){"InvariantException", "HH\\InvariantException"},
 
-  return aliases;
+    (AliasEntry){"bool", "HH\\bool"},
+    (AliasEntry){"boolean", "HH\\bool"},
+    (AliasEntry){"int", "HH\\int"},
+    (AliasEntry){"integer", "HH\\int"},
+    (AliasEntry){"float", "HH\\float"},
+    (AliasEntry){"double", "HH\\float"},
+    (AliasEntry){"real", "HH\\float"},
+    (AliasEntry){"num", "HH\\num"},
+    (AliasEntry){"string", "HH\\string"},
+    (AliasEntry){"resource", "HH\\resource"},
+    (AliasEntry){"mixed", "HH\\mixed"},
+  };
+  for (auto entry : aliases) {
+    autoAliases[entry.alias] = entry.name;
+  }
+  return autoAliases;
+}
+
+const hphp_string_imap<std::string>& Parser::getAutoAliasedClasses() {
+  static auto autoAliases = getAutoAliasedClassesHelper();
+  return autoAliases;
 }
 
 void Parser::nns(int token, const std::string& text) {
@@ -2144,14 +2184,21 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
   // It's not an error if the alias already exists but is auto-imported.
   // In that case, it gets replaced. It prompts an error if it is not
   // auto-imported and 'use' statement is trying to replace it.
-  if (m_aliasTable.isAliased(key) && !m_aliasTable.isAutoImported(key) &&
-      (m_aliasTable.isUseType(key) || m_aliasTable.getName(key) != ns)) {
+  if (m_aliasTable.isUseType(key)) {
     error("Cannot use %s as %s because the name is already in use: %s",
           ns.c_str(), key.c_str(), getMessage().c_str());
     return;
   }
+  if (m_aliasTable.isDefType(key)) {
+    auto defName = m_aliasTable.getDefName(key);
+    if (strcasecmp(defName.c_str(), ns.c_str())) {
+      error("Cannot use %s as %s because the name is already in use: %s",
+            ns.c_str(), key.c_str(), getMessage().c_str());
+      return;
+    }
+  }
 
-  m_aliasTable.map(key, ns, AliasTable::AliasType::USE);
+  m_aliasTable.set(key, ns, AliasTable::AliasType::USE);
 }
 
 std::string Parser::nsDecl(const std::string &name) {
@@ -2162,15 +2209,11 @@ std::string Parser::nsDecl(const std::string &name) {
 }
 
 std::string Parser::resolve(const std::string &ns, bool cls) {
-  string alias = ns;
   size_t pos = ns.find(NAMESPACE_SEP);
-  if (pos != string::npos) {
-    alias = ns.substr(0, pos);
-  }
+  string alias = (pos != string::npos) ? ns.substr(0, pos) : ns;
 
   if (m_aliasTable.isAliased(alias)) {
     auto name = m_aliasTable.getName(alias);
-
     // Was it a namespace alias?
     if (pos != string::npos) {
       return name + ns.substr(pos);
@@ -2242,7 +2285,16 @@ void Parser::registerAlias(std::string name) {
   size_t pos = name.rfind(NAMESPACE_SEP);
   if (pos != string::npos) {
     string key = name.substr(pos + 1);
-    m_aliasTable.map(key, name, AliasTable::AliasType::CURRENT_NS);
+    if (m_aliasTable.isUseType(key)) {
+      auto useName = m_aliasTable.getUseName(key);
+      if (strcasecmp(useName.c_str(), name.c_str())) {
+        error("Cannot declare class %s because the name is already in use: %s",
+              name.c_str(), getMessage().c_str());
+        return;
+      }
+    } else {
+      m_aliasTable.set(key, name, AliasTable::AliasType::DEF);
+    }
   }
 }
 

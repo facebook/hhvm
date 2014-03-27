@@ -14,13 +14,16 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/base/intl-convert.h"
-#include <stdlib.h>
+
+#include <cstdint>
+#include <cstdlib>
 
 namespace HPHP {
 
 void intl_convert_utf8_to_utf16(UChar** target, int* target_len,
-                                const char* src, int  src_len,
+                                const char* src, int src_len,
                                 UErrorCode* status) {
   UChar* dst_buf = nullptr;
   int32_t dst_len = 0;

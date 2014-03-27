@@ -1,0 +1,6 @@
+File "compile_test_yield.php", line 14, characters 11-12:
+Invalid foreach
+File "compile_test_yield.php", line 14, characters 11-12:
+This is an object of type KeyedTraversable because this is used in a foreach statement
+File "compile_test_yield.php", line 12, characters 14-25:
+It is incompatible with an object of type Continuation

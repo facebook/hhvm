@@ -1,0 +1,4 @@
+File "abstract_implement6.php", line 24, characters 7-12:
+This class must provide an implementation for the abstract method foo
+File "abstract_implement6.php", line 15, characters 19-21:
+The abstract method foo is defined here

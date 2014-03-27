@@ -1,10 +1,12 @@
 *** Testing get_class_vars() : error conditions ***
 
 -- Testing get_class_vars() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing get_class_vars() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

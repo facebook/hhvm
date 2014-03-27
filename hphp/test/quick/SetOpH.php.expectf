@@ -8,10 +8,12 @@ int(0)
 int(0)
   . string(2) "00"
 string(2) "00"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -106,10 +108,12 @@ int(0)
 int(0)
   . string(12) "0non-numeric"
 string(12) "0non-numeric"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -156,10 +160,12 @@ int(0)
 int(0)
   . string(1) "0"
 string(1) "0"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -182,10 +188,12 @@ int(123)
 int(0)
   . string(4) "1230"
 string(4) "1230"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -280,10 +288,12 @@ int(123)
 int(0)
   . string(14) "123non-numeric"
 string(14) "123non-numeric"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -330,10 +340,12 @@ int(123)
 int(0)
   . string(3) "123"
 string(3) "123"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -356,10 +368,12 @@ int(1)
 int(0)
   . string(2) "10"
 string(2) "10"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -454,10 +468,12 @@ int(1)
 int(0)
   . string(12) "1non-numeric"
 string(12) "1non-numeric"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -504,10 +520,12 @@ int(1)
 int(0)
   . string(1) "1"
 string(1) "1"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -530,10 +548,12 @@ float(123.456)
 float(0)
   . string(8) "123.4560"
 string(8) "123.4560"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -628,10 +648,12 @@ float(123.456)
 float(0)
   . string(18) "123.456non-numeric"
 string(18) "123.456non-numeric"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -678,10 +700,12 @@ float(123.456)
 float(0)
   . string(7) "123.456"
 string(7) "123.456"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -704,10 +728,12 @@ int(0)
 int(0)
   . string(12) "non-numeric0"
 string(12) "non-numeric0"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -802,10 +828,12 @@ int(0)
 int(0)
   . string(22) "non-numericnon-numeric"
 string(22) "non-numericnon-numeric"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & string(11) "non-numeric"
@@ -852,10 +880,12 @@ int(0)
 int(0)
   . string(11) "non-numeric"
 string(11) "non-numeric"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -878,10 +908,12 @@ int(789)
 int(0)
   . string(4) "7890"
 string(4) "7890"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -976,10 +1008,12 @@ int(789)
 int(0)
   . string(14) "789non-numeric"
 string(14) "789non-numeric"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & string(3) "&(("
@@ -1026,10 +1060,12 @@ int(789)
 int(0)
   . string(3) "789"
 string(3) "789"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -1052,10 +1088,12 @@ int(0)
 int(0)
   . string(1) "0"
 string(1) "0"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -1150,10 +1188,12 @@ int(0)
 int(0)
   . string(11) "non-numeric"
 string(11) "non-numeric"
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)
@@ -1200,10 +1240,12 @@ int(0)
 int(0)
   . string(0) ""
 string(0) ""
-  / HipHop Warning: Division by zero in %s on line 40
+  / 
+Warning: Division by zero in %s on line 40
 bool(false)
 bool(false)
-  % HipHop Warning: Division by zero in %s on line 45
+  % 
+Warning: Division by zero in %s on line 45
 bool(false)
 bool(false)
   & int(0)

@@ -278,7 +278,9 @@ Variant c_Memcached::t_getmultibykey(const String& server_key, const Array& keys
     return false;
   }
 
-  if (cas_tokens.isReferenced()) cas_tokens = Array();
+  Array cas_tokens_arr;
+  SCOPE_EXIT { if (cas_tokens.isReferenced()) cas_tokens = cas_tokens_arr; };
+
   MemcachedResultWrapper result(&m_impl->memcached);
   memcached_return status;
   while (memcached_fetch_result(&m_impl->memcached, &result.value, &status)) {
@@ -293,7 +295,7 @@ Variant c_Memcached::t_getmultibykey(const String& server_key, const Array& keys
     returnValue.set(sKey, value, true);
     if (cas_tokens.isReferenced()) {
       double cas = (double) memcached_result_cas(&result.value);
-      cas_tokens->set(sKey, cas, true);
+      cas_tokens_arr.set(sKey, cas, true);
     }
   }
 
@@ -630,7 +632,7 @@ memcached_return_t doServerListCallback(const memcached_st *ptr,
 }
 
 Array c_Memcached::t_getserverlist() {
-  Array returnValue;
+  Array returnValue = Array::Create();
   memcached_server_function callbacks[] = { doServerListCallback };
   memcached_server_cursor(&m_impl->memcached, callbacks, &returnValue, 1);
   return returnValue;

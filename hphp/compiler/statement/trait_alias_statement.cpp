@@ -106,7 +106,7 @@ void TraitAliasStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void TraitAliasStatement::outputCodeModel(CodeGenerator &cg) {
-  auto propCount = 4;
+  auto propCount = 3;
   auto traitName = m_traitName->getString();
   if (!traitName.empty()) propCount++;
   cg.printObjectHeader("TraitAliasStatement", propCount);

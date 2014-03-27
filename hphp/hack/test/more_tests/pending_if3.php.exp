@@ -1,0 +1,6 @@
+File "pending_if3.php", line 21, characters 10-11:
+Invalid return type
+File "pending_if3.php", line 12, characters 15-17:
+This is an int
+File "pending_if3.php", line 14, characters 10-14:
+It is incompatible with a bool

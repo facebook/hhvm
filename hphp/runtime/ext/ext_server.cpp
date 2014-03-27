@@ -72,39 +72,6 @@ bool f_dangling_server_proxy_old_request() {
   return true;
 }
 
-bool f_dangling_server_proxy_new_request(const String& host) {
-  if (host.empty()) {
-    raise_warning("proxy new request needs host name");
-    return false;
-  }
-
-  Transport *transport = g_context->getTransport();
-  if (transport == NULL) {
-    return false;
-  }
-  if (!transport->getHeader(DANGLING_HEADER).empty()) {
-    // if we are processing a dangling server request, do not do it again
-    return false;
-  }
-
-  std::string url = std::string("http://") + host.data() + ":" +
-    boost::lexical_cast<std::string>(RuntimeOption::ServerPort) +
-    transport->getServerObject();
-
-  int code = 0;
-  std::string error;
-  StringBuffer response;
-  HeaderMap headers;
-  headers[DANGLING_HEADER].push_back("1");
-  if (!HttpProtocol::ProxyRequest(transport, false, url, code, error,
-                                  response, &headers)) {
-    return false;
-  }
-  transport->setResponse(code, "dangling_server_proxy_new_request");
-  echo(response.detach());
-  return true;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Pagelet Server
 
@@ -172,9 +139,14 @@ void f_pagelet_server_flush() {
 ///////////////////////////////////////////////////////////////////////////////
 // xbox
 
-bool f_xbox_send_message(const String& msg, VRefParam ret, int64_t timeout_ms,
+bool f_xbox_send_message(const String& msg,
+                         VRefParam retRef,
+                         int64_t timeout_ms,
                          const String& host /* = "localhost" */) {
-  return XboxServer::SendMessage(msg, ret, timeout_ms, host);
+  Array ret;
+  auto b = XboxServer::SendMessage(msg, ret, timeout_ms, host);
+  retRef = ret;
+  return b;
 }
 
 bool f_xbox_post_message(const String& msg, const String& host /* = "localhost" */) {

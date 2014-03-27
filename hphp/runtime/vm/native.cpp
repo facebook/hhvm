@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/native.h"
+
 #include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP { namespace Native {
@@ -36,6 +37,20 @@ ClassConstantMapMap s_class_constant_map;
 template<class Ret, class... Args> struct NativeFunction {
   typedef Ret (*type)(Args...);
 };
+
+DEBUG_ONLY
+static bool nonDoubleArgsOnly(const Func* func, size_t numArgs) {
+  for (int i = 0; i < numArgs; ++i) {
+    if (KindOfDouble == func->params()[i].builtinType()) return false;
+  }
+  return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+/* Generalized Caller for functions containing double and non-double args
+ * Limited to kMaxBuiltinArgs to avoid exponential expansion O(2^n)
+ */
 
 // Recursively pack all parameters up to call a native builtin.
 template<class Ret, size_t NArgs, size_t CurArg> struct NativeFuncCaller {
@@ -83,23 +98,103 @@ template<class Ret, size_t CurArg> struct NativeFuncCaller<Ret,0,CurArg> {
   }
 };
 
+#define NFC(n, rettype, func, ...) \
+ case n: return NativeFuncCaller<rettype,n,0>::call(func, __VA_ARGS__);
+
+static_assert(kMaxBuiltinArgs == 7,
+ "makeNativeCall needs updates for kMaxBuiltinArgs");
+
 #define NFC_CALL(numargs, rettype, func, ...) \
-  switch (numargs) { \
-    case 0: return NativeFuncCaller<rettype,0,0>::call(func, __VA_ARGS__); \
-    case 1: return NativeFuncCaller<rettype,1,0>::call(func, __VA_ARGS__); \
-    case 2: return NativeFuncCaller<rettype,2,0>::call(func, __VA_ARGS__); \
-    case 3: return NativeFuncCaller<rettype,3,0>::call(func, __VA_ARGS__); \
-    case 4: return NativeFuncCaller<rettype,4,0>::call(func, __VA_ARGS__); \
-    case 5: return NativeFuncCaller<rettype,5,0>::call(func, __VA_ARGS__); \
-    default: assert(false); \
+ switch (numargs) { \
+  NFC(0, rettype, func, __VA_ARGS__) NFC(1, rettype, func, __VA_ARGS__) \
+  NFC(2, rettype, func, __VA_ARGS__) NFC(3, rettype, func, __VA_ARGS__) \
+  NFC(4, rettype, func, __VA_ARGS__) NFC(5, rettype, func, __VA_ARGS__) \
+  NFC(6, rettype, func, __VA_ARGS__) NFC(7, rettype, func, __VA_ARGS__) \
+  default: assert(false); \
+ }
+
+/////////////////////////////////////////////////////////////////////////////
+
+/* Specialized Caller for functions containing only non-double args
+ * Limited to kMaxBuiltinArgsNoDouble to keep it within reason O(n)
+ */
+
+// Recursively pack all parameters up to call a native builtin.
+template<class Ret, size_t NArgs, size_t CurArg>
+struct NativeFuncCallerNoDouble {
+  template<class... Args>
+  static Ret call(const Func* func, TypedValue* tvs, Args... args) {
+    typedef NativeFuncCallerNoDouble<Ret,NArgs - 1,CurArg + 1> NextArgT;
+
+    const DataType type = func->params()[CurArg].builtinType();
+    assert(type != KindOfDouble);
+    uint64_t bitwiseArg /* = void */;
+    if (type == KindOfInt64 || type == KindOfBoolean) {
+      // pass TV.m_data.num of type int64_t by value
+      bitwiseArg = tvs->m_data.num; // rely on implicit cast
+    } else if (IS_STRING_TYPE(type) || type == KindOfArray
+               || type == KindOfObject || type == KindOfResource) {
+      // pass ptr to TV.m_data for String&, Array&, or Object&
+      static_assert(sizeof(&tvs->m_data) == sizeof(uint64_t),
+                    "This code assumes 64-bit pointers.");
+      bitwiseArg = reinterpret_cast<uint64_t>(&tvs->m_data);
+    } else {
+      // final case is for passing full value as Variant&
+      static_assert(sizeof(tvs) == sizeof(uint64_t),
+                    "This code assumes 64-bit pointers.");
+      bitwiseArg = reinterpret_cast<uint64_t>(tvs);
+    }
+    // Make the recursive call
+    return NextArgT::call(func, tvs - 1, args..., bitwiseArg);
   }
+};
+
+template<class Ret, size_t CurArg>
+struct NativeFuncCallerNoDouble<Ret,0,CurArg> {
+  template<class... Args>
+  static Ret call(const Func* f, TypedValue*, Args... args) {
+    typedef typename NativeFunction<Ret,Args...>::type FuncType;
+    return reinterpret_cast<FuncType>(f->nativeFuncPtr())(args...);
+  }
+};
+
+#define NFCND(n, rettype, func, ...) \
+ case n: return NativeFuncCallerNoDouble<rettype,n,0>::call(func, __VA_ARGS__);
+
+static_assert(kMaxBuiltinArgsNoDouble == 15,
+ "makeNativeCallNoDouble needs updates for kMaxBuiltinArgsNoDouble");
+
+#define NFCND_CALL(numargs, rettype, func, ...) \
+ switch (numargs) { \
+  NFCND( 0, rettype, func, __VA_ARGS__) NFCND( 1, rettype, func, __VA_ARGS__) \
+  NFCND( 2, rettype, func, __VA_ARGS__) NFCND( 3, rettype, func, __VA_ARGS__) \
+  NFCND( 4, rettype, func, __VA_ARGS__) NFCND( 5, rettype, func, __VA_ARGS__) \
+  NFCND( 6, rettype, func, __VA_ARGS__) NFCND( 7, rettype, func, __VA_ARGS__) \
+  NFCND( 8, rettype, func, __VA_ARGS__) NFCND( 9, rettype, func, __VA_ARGS__) \
+  NFCND(10, rettype, func, __VA_ARGS__) NFCND(11, rettype, func, __VA_ARGS__) \
+  NFCND(12, rettype, func, __VA_ARGS__) NFCND(13, rettype, func, __VA_ARGS__) \
+  NFCND(14, rettype, func, __VA_ARGS__) NFCND(15, rettype, func, __VA_ARGS__) \
+ default: assert(false); \
+}
+
+/////////////////////////////////////////////////////////////////////////////
 
 // Caller is expected to always pass a String or Object for ctx (or nullptr)
 template<class Ret>
 static Ret makeNativeCall(const Func* f, TypedValue* args, size_t numArgs,
                           TypedValue *ctx = nullptr) {
-  static_assert(kMaxBuiltinArgs == 5,
-                "makeNativeCall needs updates for kMaxBuiltinArgs");
+  if (numArgs > kMaxBuiltinArgs) {
+    assert(numArgs <= kMaxBuiltinArgsNoDouble);
+    assert(nonDoubleArgsOnly(f, numArgs));
+    if (ctx == nullptr) {
+      NFCND_CALL(numArgs, Ret, f, args);
+    } else if (ctx->m_type == KindOfClass) {
+      NFCND_CALL(numArgs, Ret, f, args, ctx->m_data.pcls);
+    } else {
+      assert(ctx->m_type == KindOfObject);
+      NFCND_CALL(numArgs, Ret, f, args, &ctx->m_data);
+    }
+  }
   if (ctx == nullptr) {
     NFC_CALL(numArgs, Ret, f, args);
   } else if (ctx->m_type == KindOfClass) {
@@ -115,8 +210,18 @@ template<class Ret>
 static int64_t makeNativeRefCall(const Func* f, Ret* ret,
                                  TypedValue* args, size_t numArgs,
                                  TypedValue* ctx) {
-  static_assert(kMaxBuiltinArgs == 5,
-                "makeNativeRefCall needs updates for kMaxBuiltinArgs");
+  if (numArgs > kMaxBuiltinArgs) {
+    assert(numArgs <= kMaxBuiltinArgsNoDouble);
+    assert(nonDoubleArgsOnly(f, numArgs));
+    if (ctx == nullptr) {
+      NFCND_CALL(numArgs, int64_t, f, args, ret);
+    } else if (ctx->m_type == KindOfClass) {
+      NFCND_CALL(numArgs, int64_t, f, args, ret, ctx->m_data.pcls);
+    } else {
+      assert(ctx->m_type == KindOfObject);
+      NFCND_CALL(numArgs, int64_t, f, args, ret, &ctx->m_data);
+    }
+  }
   if (ctx == nullptr) {
     NFC_CALL(numArgs, int64_t, f, args, ret);
   } else if (ctx->m_type == KindOfClass) {
@@ -127,8 +232,11 @@ static int64_t makeNativeRefCall(const Func* f, Ret* ret,
   }
   not_reached();
 }
-#undef NFC_CALL
 
+#undef NFCND_CALL
+#undef NFCND
+#undef NFC_CALL
+#undef NFC
 //////////////////////////////////////////////////////////////////////////////
 
 bool coerceFCallArgs(TypedValue* args,

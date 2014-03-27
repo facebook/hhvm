@@ -61,20 +61,6 @@ using SArray  = const ArrayData*;
 enum class Flavor { C, V, A, R, F, U };
 
 /*
- * Types of a FPI regions.  (What sort of function call is being
- * made.)
- */
-enum class FPIKind {
-  Unknown,     // Nothing is known.
-  CallableArr, // May be an ObjMeth or a ClsMeth.
-  Func,        // Definitely a non-member function.
-  Ctor,        // Definitely a constructor for an object.
-  ObjMeth,     // Definitely a method on an object (possibly __call).
-  ClsMeth,     // Definitely a static method on a class (possibly__callStatic).
-  ObjInvoke,   // Closure invoke or __invoke on an object.
-};
-
-/*
  * Types of parameter preparation (or unknown).
  */
 enum class PrepKind { Ref, Val, Unknown };
@@ -130,36 +116,6 @@ struct trace_time {
 private:
   const char* what;
   time_point start;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Sum of SString or a borrowed_ptr<T>.
- */
-template<class T>
-struct SStringOr {
-  explicit SStringOr(SString s)
-    : bits(reinterpret_cast<uintptr_t>(s) | 0x1)
-  {}
-
-  explicit SStringOr(borrowed_ptr<T> t)
-    : bits(reinterpret_cast<uintptr_t>(t))
-  {}
-
-  SString str() const {
-    return isStr() ? reinterpret_cast<SString>(bits & ~0x1) : nullptr;
-  }
-
-  borrowed_ptr<T> other() const {
-    return isStr() ? nullptr : reinterpret_cast<T*>(bits);
-  }
-
-private:
-  bool isStr() const { return bits & 0x1; }
-
-private:
-  uintptr_t bits;
 };
 
 //////////////////////////////////////////////////////////////////////

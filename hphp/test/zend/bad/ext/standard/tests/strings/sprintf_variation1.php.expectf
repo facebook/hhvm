@@ -46,43 +46,58 @@ string(3) "0.5"
 string(3) "0.5"
 
 -- Iteration 10 --
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
 
 -- Iteration 11 --
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
 
 -- Iteration 12 --
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
 
 -- Iteration 13 --
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
 
 -- Iteration 14 --
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
-HipHop Notice: %s
+
+Notice: %s
 string(5) "Array"
 
 -- Iteration 15 --

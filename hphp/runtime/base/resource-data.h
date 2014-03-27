@@ -35,9 +35,11 @@ class VariableSerializer;
  */
 class ResourceData {
  private:
-  static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_resource_id);
+  static __thread int os_max_resource_id;
 
  public:
+  static void resetMaxId() { os_max_resource_id = 0; }
+
   ResourceData();
 
  private:
@@ -62,7 +64,6 @@ class ResourceData {
 
   int32_t o_getId() const { return o_id; }
   void o_setId(int id); // only for BuiltinFiles
-  static int GetMaxResourceId();
 
   const String& o_getClassName() const;
   virtual const String& o_getClassNameHook() const;
@@ -77,7 +78,6 @@ class ResourceData {
 
   void serialize(VariableSerializer* serializer) const;
   void serializeImpl(VariableSerializer* serializer) const;
-  void dump() const;
 
  private:
   static void compileTimeAssertions();

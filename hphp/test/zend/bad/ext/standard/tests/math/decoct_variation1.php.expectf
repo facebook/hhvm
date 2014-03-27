@@ -70,7 +70,8 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 24 --
-HipHop Notice: %s
+
+Notice: %s
 string(1) "1"
 
 -- Iteration 25 --

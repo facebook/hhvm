@@ -1,8 +1,11 @@
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(3) {
   [5]=>

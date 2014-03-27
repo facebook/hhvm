@@ -1,1 +1,2 @@
-HipHop Fatal error: Argument 1 passed to X::bar() must be an instance of X, null given in %s/test/slow/compilation/1321.php on line 7
+
+Fatal error: Argument 1 passed to X::bar() must be an instance of X, null given in %s/test/slow/compilation/1321.php on line 7

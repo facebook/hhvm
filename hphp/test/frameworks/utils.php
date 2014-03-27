@@ -198,8 +198,7 @@ function get_subclasses_of(string $parent): Vector {
   return $result;
 }
 
-function get_runtime_build(bool $with_jit = true,
-                           bool $use_php = false): string {
+function get_runtime_build(bool $use_php = false): string {
   $build = "";
 
   // FIX: Should we try to install a vanilla zend binary here instead of
@@ -236,10 +235,7 @@ function get_runtime_build(bool $with_jit = true,
       $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
       $build .= $repo_args.
         " --config ".__DIR__."/config.hdf".
-        " -v Server.IniFile=".__DIR__."/php.ini";
-    }
-    if ($with_jit) {
-      $build .= " -v Eval.Jit=true";
+        " --config ".__DIR__."/php.ini";
     }
   }
   return $build;

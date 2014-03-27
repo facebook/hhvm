@@ -1,5 +1,7 @@
-HipHop Warning: Creating default object from empty value in %s/test/slow/compilation/1299.php on line 6
-HipHop Warning: Creating default object from empty value in %s/test/slow/compilation/1299.php on line 6
+
+Warning: Creating default object from empty value in %s/test/slow/compilation/1299.php on line 6
+
+Warning: Creating default object from empty value in %s/test/slow/compilation/1299.php on line 6
 object(stdClass)#1 (1) {
   ["error"]=>
   object(stdClass)#2 (1) {

@@ -47,7 +47,8 @@ bool(false)
 open
 close
 bool(true)
-HipHop Warning: Not a valid stream resource in %s/test/slow/streams/user_flush.php on line 33
+
+Warning: Not a valid stream resource in %s/test/slow/streams/user_flush.php on line 33
 bool(false)
 open
 bool(false)
@@ -59,7 +60,8 @@ open
 flush did something
 close
 bool(true)
-HipHop Warning: Not a valid stream resource in %s/test/slow/streams/user_flush.php on line 42
+
+Warning: Not a valid stream resource in %s/test/slow/streams/user_flush.php on line 42
 bool(false)
 open
 flush did something
@@ -74,7 +76,8 @@ open
 flush succeeded
 close
 bool(true)
-HipHop Warning: Not a valid stream resource in %s/test/slow/streams/user_flush.php on line 51
+
+Warning: Not a valid stream resource in %s/test/slow/streams/user_flush.php on line 51
 bool(false)
 open
 flush succeeded
@@ -89,7 +92,8 @@ open
 flush failed
 close
 bool(false)
-HipHop Warning: Not a valid stream resource in %s/test/slow/streams/user_flush.php on line 60
+
+Warning: Not a valid stream resource in %s/test/slow/streams/user_flush.php on line 60
 bool(false)
 open
 flush failed

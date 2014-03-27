@@ -7,4 +7,5 @@ string(4) "user"
 int(2)
 array(0) {
 }
-HipHop Warning: %s
+
+Warning: %s

@@ -1,0 +1,8 @@
+File "DynamicYield_get1.php", line 28, characters 10-28:
+Invalid return type
+File "DynamicYield_get1.php", line 27, characters 20-23:
+This is void
+File "DynamicYield_get1.php", line 22, characters 45-45:
+It is incompatible with an object of type A
+File "DynamicYield_get1.php", line 22, characters 25-30:
+DynamicYield implicitly defines getA() from the definition of yieldA()

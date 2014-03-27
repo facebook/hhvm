@@ -1,1 +1,2 @@
-HipHop Fatal error: Default value for parameter a1 with type Double needs to have the same type as the type hint array in %s on line 3
+
+Fatal error: Default value for parameter a1 with type Double needs to have the same type as the type hint array in %s on line 3

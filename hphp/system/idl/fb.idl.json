@@ -139,24 +139,6 @@
             ]
         },
         {
-            "name": "fb_could_include",
-            "desc": "Returns whether the (php) file could be included (eg if its been compiled into the binary)",
-            "flags": [
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "Boolean",
-                "desc": "TRUE if it could be included"
-            },
-            "args": [
-                {
-                    "name": "file",
-                    "type": "String",
-                    "desc": "The file to test"
-                }
-            ]
-        },
-        {
             "name": "fb_intercept",
             "desc": "Invokes a user handler upon calling a function or a class method. If this handler returns FALSE, code will continue with original function. Otherwise, it will return what handler tells. The handler function looks like \"intercept_handler($name, $obj, $params, $data, &$done)\", where $name is orginal function's name, $obj is $this for an instance method call or null for static method call or function calls, and $params are original call's parameters. $data is what's passed to fb_intercept() and set $done to false to indicate function should continue its execution with old function as if interception did not happen. By default $done is true so it will return handler's return immediately without executing old function's code. Note that built-in functions are not interceptable.",
             "flags": [
@@ -205,29 +187,6 @@
                     "name": "new_func_name",
                     "type": "String",
                     "desc": "What is the new name."
-                }
-            ]
-        },
-        {
-            "name": "fb_autoload_map",
-            "desc": "Specify a map containing an array with four optional elements. 'class', 'function', 'constant', and 'failure'. The first three entries are maps from names to the file where that entity is defined. An attempt to access an undefined class\/function\/constant will look it up in the appropriate map, and if found, include that file. If the entity is still not defined, it will call the 'failure' entry.",
-            "flags": [
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "Boolean",
-                "desc": "TRUE if successful, FALSE otherwise."
-            },
-            "args": [
-                {
-                    "name": "map",
-                    "type": "Variant",
-                    "desc": "The autoload map."
-                },
-                {
-                    "name": "root",
-                    "type": "String",
-                    "desc": "Root to be prepended to all paths in the map."
                 }
             ]
         },
@@ -412,7 +371,7 @@
             "desc": "Enables code coverage. The coverage information is cleared.",
             "flags": [
                 "HipHopSpecific",
-                "NeedsActRec"
+                "NoFCallBuiltin"
             ],
             "return": {
                 "type": null
@@ -600,24 +559,6 @@
                     "type": "Boolean",
                     "value": "false",
                     "desc": "Whether connect_timeout or read_timeout are in seconds or milli-seconds."
-                }
-            ]
-        },
-        {
-            "name": "fb_const_fetch",
-            "desc": "Fetches a constant string from a special store that's compiled into the executable. This is faster than apc_fetch(), which needs locking between different threads. This store is immutable and loaded once with strings that are never changed. Therefore, no locking is needed when accessed by different threads.",
-            "flags": [
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "The value that was stored."
-            },
-            "args": [
-                {
-                    "name": "key",
-                    "type": "Variant",
-                    "desc": "The key for locating the value."
                 }
             ]
         },

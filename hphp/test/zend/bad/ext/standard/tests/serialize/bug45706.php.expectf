@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 array(2) {
   [0]=>
   object(__PHP_Incomplete_Class)#%d (1) {

@@ -14,37 +14,44 @@
    +----------------------------------------------------------------------+
 */
 
-#include <sys/mman.h>
+#include "hphp/runtime/vm/unit.h"
 
-#include <iostream>
-#include <iomanip>
-#include <tbb/concurrent_unordered_map.h>
-#include <boost/algorithm/string.hpp>
+#include "hphp/compiler/option.h"
+
+#include "hphp/parser/parser.h"
+
+#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/strings.h"
+
+#include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/vm/blob-helper.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/disas.h"
+#include "hphp/runtime/vm/func-inline.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/unit-util.h"
+
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+
+#include "hphp/runtime/vm/verifier/check.h"
+
+#include "hphp/util/atomic.h"
+#include "hphp/util/file-util.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/read-only-arena.h"
 
 #include "folly/Memory.h"
 #include "folly/ScopeGuard.h"
 
-#include "hphp/compiler/option.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/atomic.h"
-#include "hphp/util/read-only-arena.h"
-#include "hphp/util/file-util.h"
-#include "hphp/parser/parser.h"
-
-#include "hphp/runtime/ext/ext_variable.h"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/blob-helper.h"
-#include "hphp/runtime/vm/disas.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/verifier/check.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/vm/func-inline.h"
-#include "hphp/runtime/base/file-repository.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/treadmill.h"
+#include <boost/algorithm/string.hpp>
+#include <sys/mman.h>
+#include <tbb/concurrent_unordered_map.h>
+#include <iostream>
+#include <iomanip>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,16 +96,6 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
   return mem;
 }
 
-static bool needsNSNormalization(const StringData* name) {
-  return name->data()[0] == '\\' && name->data()[1] != '\\';
-}
-
-static String normalizeNS(const StringData* name) {
-  assert(needsNSNormalization(name));
-  assert(name->data()[name->size()] == 0);
-  return String(name->data() + 1, name->size() - 1, CopyString);
-}
-
 Mutex Unit::s_classesMutex;
 /*
  * We hold onto references to elements of this map. If we use a different
@@ -140,7 +137,7 @@ NamedEntity* Unit::GetNamedEntity(const StringData* str,
   NamedEntityMap::iterator it = s_namedDataMap->find(str);
   if (LIKELY(it != s_namedDataMap->end())) return &it->second;
   if (needsNSNormalization(str)) {
-    auto normStr = normalizeNS(str);
+    auto normStr = normalizeNS(StrNR(str).asString());
     if (normalizedStr) {
       *normalizedStr = normStr;
     }
@@ -201,7 +198,7 @@ UnitMergeInfo* UnitMergeInfo::alloc(size_t size) {
   return mi;
 }
 
-Array Unit::getUserFunctions() {
+Array Unit::getFunctions(bool system) {
   // Return an array of all defined functions.  This method is used
   // to support get_defined_functions().
   Array a = Array::Create();
@@ -209,7 +206,7 @@ Array Unit::getUserFunctions() {
     for (NamedEntityMap::const_iterator it = s_namedDataMap->begin();
          it != s_namedDataMap->end(); ++it) {
       Func* func_ = it->second.getCachedFunc();
-      if (!func_ || func_->isBuiltin() || func_->isGenerated()) {
+      if (!func_ || (system ^ func_->isBuiltin()) || func_->isGenerated()) {
         continue;
       }
       a.append(func_->nameRef());
@@ -801,14 +798,12 @@ Class* Unit::loadClass(const NamedEntity* ne,
   if (LIKELY((cls = ne->getCachedClass()) != nullptr)) {
     return cls;
   }
-  JIT::VMRegAnchor _;
-  AutoloadHandler::s_instance->invokeHandler(
-    StrNR(const_cast<StringData*>(name)));
-  return Unit::lookupClass(ne);
+  return loadMissingClass(ne, name);
 }
 
 Class* Unit::loadMissingClass(const NamedEntity* ne,
-                              const StringData *name) {
+                              const StringData* name) {
+  JIT::VMRegAnchor _;
   AutoloadHandler::s_instance->invokeHandler(
     StrNR(const_cast<StringData*>(name)));
   return Unit::lookupClass(ne);
@@ -992,7 +987,7 @@ TypedValue* Unit::loadCns(const StringData* cnsName) {
   if (LIKELY(tv != nullptr)) return tv;
 
   if (needsNSNormalization(cnsName)) {
-    return loadCns(normalizeNS(cnsName).get());
+    return loadCns(normalizeNS(cnsName));
   }
 
   if (!AutoloadHandler::s_instance->autoloadConstant(
@@ -2236,7 +2231,7 @@ Id UnitEmitter::mergeLitstr(const StringData* litstr) {
 
 Id UnitEmitter::mergeArray(const ArrayData* a) {
   Variant v(const_cast<ArrayData*>(a));
-  auto key = f_serialize(v).toCppString();
+  auto key = HHVM_FN(serialize)(v).toCppString();
   return mergeArray(a, key);
 }
 
@@ -2407,10 +2402,8 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
                            Offset base, Offset past,
                            const StringData* name, Attr attrs, bool top,
                            const StringData* docComment, int numParams,
-                           bool needsGeneratorOrigFunc,
                            bool needsNextClonedClosure) {
   Func* f = new (Func::allocFuncMem(name, numParams,
-                                    needsGeneratorOrigFunc,
                                     needsNextClonedClosure,
                                     !preClass))
     Func(unit, id, preClass, line1, line2, base, past, name,

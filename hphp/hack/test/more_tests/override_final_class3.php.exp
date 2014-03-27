@@ -1,0 +1,2 @@
+File "override_final_class3.php", line 12, characters 7-14:
+Expected Was expecting: 'class' (not 'abstract')

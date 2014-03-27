@@ -1,0 +1,2 @@
+File "override_attr_04.php", line 18, characters 19-21:
+C::bar() should be an override; no non-private parent definition found or overridden parent is defined in non-<?hh code

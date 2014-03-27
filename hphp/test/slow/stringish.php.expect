@@ -1,0 +1,109 @@
+********** static string **********
+true, true, string(15) "a boring string"
+
+true, true, string(15) "a boring string"
+
+********** dynamic string **********
+true, true, string(11) "hello world"
+
+true, true, string(11) "hello world"
+
+********** explicit implements **********
+true, true, object(CExplicit)#1 (0) {
+}
+
+true, true, object(CExplicit)#1 (0) {
+}
+
+********** implicit implements **********
+true, true, object(CImplicit)#2 (0) {
+}
+
+true, true, object(CImplicit)#2 (0) {
+}
+
+********** via trait implements **********
+true, true, object(CThruTrait)#3 (0) {
+}
+
+true, true, object(CThruTrait)#3 (0) {
+}
+
+********** null **********
+false, false, NULL
+
+Handled 4096: Argument 1 passed to f2() must be an instance of Stringish, null given
+false, false, NULL
+
+********** array **********
+Handled 4096: Argument 1 to f1() must be of type ?Stringish, array given
+false, false, array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+Handled 4096: Argument 1 passed to f2() must be an instance of Stringish, array given
+false, false, array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+********** number **********
+Handled 4096: Argument 1 to f1() must be of type ?Stringish, int given
+false, false, int(10)
+
+Handled 4096: Argument 1 passed to f2() must be an instance of Stringish, int given
+false, false, int(10)
+
+Handled 4096: Argument 1 to f1() must be of type ?Stringish, float given
+false, false, float(-4.2)
+
+Handled 4096: Argument 1 passed to f2() must be an instance of Stringish, float given
+false, false, float(-4.2)
+
+
+-------------------- test_reflection --------------------
+
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+array(1) {
+  [0]=>
+  string(9) "Stringish"
+}
+bool(true)
+bool(true)
+array(1) {
+  [0]=>
+  string(9) "Stringish"
+}
+bool(true)
+bool(true)
+array(1) {
+  [0]=>
+  string(9) "Stringish"
+}
+bool(true)
+bool(true)
+array(1) {
+  [0]=>
+  string(9) "Stringish"
+}
+bool(false)
+bool(false)
+array(1) {
+  [0]=>
+  string(9) "Stringish"
+}
+bool(true)
+bool(true)

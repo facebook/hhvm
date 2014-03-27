@@ -1,18 +1,25 @@
 *** Testing error conditions ***
 
 -- Testing with  Non-existing file --
-HipHop Warning: %s
+
+Warning: %s
 
 -- Testing No.of arguments less than expected --
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 
 -- Testing No.of arguments greater than expected --
-HipHop Warning: %s
-HipHop Warning: %s
 
--- Testing for invalid negative maxlen values --HipHop Warning: %s
+Warning: %s
+
+Warning: %s
+
+-- Testing for invalid negative maxlen values --
+Warning: %s
 bool(false)
 
 *** Done ***

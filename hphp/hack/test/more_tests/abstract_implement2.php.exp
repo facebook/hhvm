@@ -1,0 +1,10 @@
+File "abstract_implement2.php", line 20, characters 7-12:
+This object is of type BClass
+File "abstract_implement2.php", line 20, characters 22-27:
+It is incompatible with this object of type AClass
+because some of their methods are incompatible.
+Read the following to see why:
+File "abstract_implement2.php", line 15, characters 26-26:
+This is a bool
+File "abstract_implement2.php", line 21, characters 26-28:
+It is incompatible with an int

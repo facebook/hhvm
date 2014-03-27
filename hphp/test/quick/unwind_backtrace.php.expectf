@@ -1,8 +1,10 @@
 wat
 ~something
-HipHop Notice: Undefined index: object in %s on line 10
+
+Notice: Undefined index: object in %s on line 10
 NULL
-HipHop Fatal error: Uncaught exception 'Exception' with message 'asd' in %s/hphp/test/quick/unwind_backtrace.php:4
+
+Fatal error: Uncaught exception 'Exception' with message 'asd' in %s/hphp/test/quick/unwind_backtrace.php:4
 Stack trace:
 #0 %s/hphp/test/quick/unwind_backtrace.php(22): blah()
 #1 %s/hphp/test/quick/unwind_backtrace.php(28): Bar->foo()

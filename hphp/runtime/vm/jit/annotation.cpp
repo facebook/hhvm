@@ -21,11 +21,14 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/repo.h"
 
 namespace HPHP {
 namespace JIT {
 
 TRACE_SET_MOD(trans);
+
+const StaticString s_empty("");
 
 /*
  * A mapping from FCall instructions to the statically-known Func* that they're
@@ -42,6 +45,23 @@ static void recordFunc(const SrcKey sk,
          func->fullName()->data());
 
   s_callDB.insert(std::make_pair(sk, func));
+}
+
+static const Func* lookupDirectFunc(SrcKey const sk,
+                                    const StringData* fname,
+                                    const StringData* clsName,
+                                    bool staticCall) {
+  if (clsName && !clsName->isame(s_empty.get())) {
+    auto const cls = Unit::lookupUniqueClass(clsName);
+    bool magic = false;
+    auto const ctx = sk.func()->cls();
+    return lookupImmutableMethod(cls, fname, magic, staticCall, ctx);
+  }
+  auto const func = Unit::lookupFunc(fname);
+  if (func && func->isNameBindingImmutable(sk.unit())) {
+    return func;
+  }
+  return nullptr;
 }
 
 static void recordActRecPush(const SrcKey sk,
@@ -65,22 +85,8 @@ static void recordActRecPush(const SrcKey sk,
   assert(sk.offset() == fpi->m_fpushOff);
   auto const fcall = SrcKey { sk.func(), fpi->m_fcallOff };
   assert(isFCallStar(*reinterpret_cast<const Op*>(unit->at(fcall.offset()))));
-  if (clsName) {
-    const Class* cls = Unit::lookupUniqueClass(clsName);
-    bool magic = false;
-    Class* ctx = sk.func()->cls();
-    const Func* func = lookupImmutableMethod(cls, name, magic,
-                                             staticCall, ctx);
-    if (func) {
-      recordFunc(fcall, func);
-    }
-    return;
-  }
-  const Func* func = Unit::lookupFunc(name);
-  if (func && func->isNameBindingImmutable(unit)) {
-    // this will never go into a call cache, so we dont need to
-    // encode the args. it will be used in OpFCall below to
-    // set the i->funcd.
+  auto const func = lookupDirectFunc(sk, name, clsName, staticCall);
+  if (func) {
     recordFunc(fcall, func);
   }
 }
@@ -93,7 +99,11 @@ void annotate(NormalizedInstruction* i) {
     case OpFPushCtorD:
     case OpFPushCtor:
     case OpFPushFuncD: {
-      // When we push predictable action records, we can use a simpler
+      if (RuntimeOption::RepoAuthoritative && Repo::global().UsedHHBBC) {
+        break;
+      }
+
+      // When we push predictable activation records, we can use a simpler
       // translation for their corresponding FCall.
       const StringData* className = nullptr;
       const StringData* funcName = nullptr;
@@ -136,16 +146,52 @@ void annotate(NormalizedInstruction* i) {
     } break;
     case OpFCall:
     case OpFCallArray: {
+      if (RuntimeOption::RepoAuthoritative && Repo::global().UsedHHBBC) {
+        break;
+      }
       if (auto const func = folly::get_ptr(s_callDB, i->source)) {
         i->funcd = *func;
       }
     } break;
     default: break;
+
+    case Op::FCallD: {
+      auto const fpi      = i->func()->findFPI(i->source.offset());
+      auto const pushOp   = i->m_unit->getOpcode(fpi->m_fpushOff);
+      auto const clsName  = i->m_unit->lookupLitstrId(i->imm[1].u_SA);
+      auto const funcName = i->m_unit->lookupLitstrId(i->imm[2].u_SA);
+      auto const isStatic = pushOp == Op::FPushClsMethodD ||
+                            pushOp == Op::FPushClsMethodF ||
+                            pushOp == Op::FPushClsMethod;
+
+      /*
+       * Currently we don't attempt any of this for FPushClsMethod
+       * because lookupImmutableMethod is only for situations that
+       * don't involve LSB.
+       */
+      auto const func =
+        pushOp == Op::FPushClsMethod
+          ? nullptr
+          : lookupDirectFunc(i->source, funcName, clsName, isStatic);
+
+      if (func) {
+        FTRACE(1, "found direct func (%s) for FCallD\n",
+          func->fullName()->data());
+        i->funcd = func;
+      }
+      break;
+    }
   }
 }
 
 const StringData*
 fcallToFuncName(const NormalizedInstruction* i) {
+  if (i->op() == Op::FCallD) {
+    return i->m_unit->lookupLitstrId(i->imm[2].u_SA);
+  }
+  if (RuntimeOption::RepoAuthoritative && Repo::global().UsedHHBBC) {
+    return nullptr;
+  }
   if (auto const func = folly::get_ptr(s_callDB, i->source)) {
     return (*func)->name();
   }

@@ -105,13 +105,16 @@ array(8) {
   int(1)
 }
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 13 --
 array(1) {
@@ -163,7 +166,8 @@ array(12) {
   int(1)
 }
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 21 --
 array(0) {

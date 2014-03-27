@@ -1,5 +1,6 @@
 a
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 a
 bool(true)

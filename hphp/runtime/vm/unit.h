@@ -17,19 +17,23 @@
 #ifndef incl_HPHP_VM_UNIT_H_
 #define incl_HPHP_VM_UNIT_H_
 
-#include <memory>
+#include "hphp/parser/location.h"
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-string.h"
+
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/named-entity.h"
-#include "hphp/runtime/base/hphp-array.h"
-#include "hphp/util/range.h"
-#include "hphp/parser/location.h"
-#include "hphp/util/md5.h"
-#include "hphp/util/tiny-vector.h"
+#include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/type-alias.h"
+
+#include "hphp/util/md5.h"
+#include "hphp/util/range.h"
+#include "hphp/util/tiny-vector.h"
+
+#include <memory>
 
 namespace HPHP {
 // Forward declarations.
@@ -452,12 +456,17 @@ struct Unit {
                                      String* normStr = nullptr) FLATTEN;
 
   static size_t GetNamedEntityTableSize();
-  static Array getUserFunctions();
   static Array getClassesInfo();
   static Array getInterfacesInfo();
   static Array getTraitsInfo();
   static Array getClassesWithAttrInfo(HPHP::Attr attrs, bool inverse = false);
+  static Array getUserFunctions() { return getFunctions(false); }
+  static Array getSystemFunctions() { return getFunctions(true); }
 
+ private:
+  static Array getFunctions(bool system);
+
+ public:
   size_t numLitstrs() const {
     return m_namedInfo.size();
   }
@@ -905,7 +914,6 @@ class UnitEmitter {
                 int line1, int line2, Offset base, Offset past,
                 const StringData* name, Attr attrs, bool top,
                 const StringData* docComment, int numParams,
-                bool needsGeneratorOrigFunc,
                 bool needsNextClonedClosure);
   Unit* create();
   void returnSeen() { m_returnSeen = true; }

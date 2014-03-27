@@ -1,0 +1,2 @@
+File "naming_fail_test6.php", line 16, characters 9-10:
+Undefined variable: $i

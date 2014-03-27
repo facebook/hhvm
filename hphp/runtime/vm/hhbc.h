@@ -314,18 +314,40 @@ const char* memberCodeString(MemberCode mc);
 // Same semantics as parseLocationCode, but for member codes.
 MemberCode parseMemberCode(const char*);
 
-#define INCDEC_OPS \
-  INCDEC_OP(PreInc) \
-  INCDEC_OP(PostInc) \
-  INCDEC_OP(PreDec) \
-  INCDEC_OP(PostDec)
-constexpr int kNumIncDecOps = 4;
+#define INCDEC_OPS    \
+  INCDEC_OP(PreInc)   \
+  INCDEC_OP(PostInc)  \
+  INCDEC_OP(PreDec)   \
+  INCDEC_OP(PostDec)  \
+                      \
+  INCDEC_OP(PreIncO)  \
+  INCDEC_OP(PostIncO) \
+  INCDEC_OP(PreDecO)  \
+  INCDEC_OP(PostDecO) \
 
 enum class IncDecOp : uint8_t {
 #define INCDEC_OP(incDecOp) incDecOp,
   INCDEC_OPS
 #undef INCDEC_OP
 };
+
+inline bool isPre(IncDecOp op) {
+  return
+    op == IncDecOp::PreInc || op == IncDecOp::PreIncO ||
+    op == IncDecOp::PreDec || op == IncDecOp::PreDecO;
+}
+
+inline bool isInc(IncDecOp op) {
+  return
+    op == IncDecOp::PreInc || op == IncDecOp::PreIncO ||
+    op == IncDecOp::PostInc || op == IncDecOp::PostIncO;
+}
+
+inline bool isIncDecO(IncDecOp op) {
+  return
+    op == IncDecOp::PreIncO || op == IncDecOp::PreDecO ||
+    op == IncDecOp::PostIncO || op == IncDecOp::PostDecO;
+}
 
 #define ISTYPE_OPS                             \
   ISTYPE_OP(Null)                              \
@@ -432,8 +454,10 @@ enum class FatalOp : uint8_t {
   SETOP_OP(OrEqual,     OpBitOr) \
   SETOP_OP(XorEqual,    OpBitXor) \
   SETOP_OP(SlEqual,     OpShl) \
-  SETOP_OP(SrEqual,     OpShr)
-constexpr int kNumSetOpOps = 11;
+  SETOP_OP(SrEqual,     OpShr)  \
+  SETOP_OP(PlusEqualO,  OpAddO) \
+  SETOP_OP(MinusEqualO, OpSubO) \
+  SETOP_OP(MulEqualO,   OpMulO)
 
 enum class SetOpOp : uint8_t {
 #define SETOP_OP(setOpOp, bcOp) setOpOp,
@@ -498,6 +522,9 @@ enum class BareThisOp : uint8_t {
   O(Add,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Sub,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Mul,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(AddO,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(SubO,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(MulO,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Div,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Mod,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Sqrt,            NA,               ONE(CV),         ONE(CV),    NF) \
@@ -640,6 +667,7 @@ enum class BareThisOp : uint8_t {
   O(FPassS,          ONE(IVA),         TWO(AV,CV),      ONE(FV),    FF) \
   O(FPassM,          TWO(IVA,MA),      MMANY,           ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
+  O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    CF) \
   O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
@@ -691,23 +719,22 @@ enum class BareThisOp : uint8_t {
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
   O(CreateCl,        TWO(IVA,SA),      CVMANY,          ONE(CV),    NF) \
-  O(CreateCont,      NA,               NOV,             ONE(CV),    NF) \
+  O(CreateCont,      ONE(BA),          NOV,             ONE(CV),    NF) \
   O(ContEnter,       NA,               ONE(CV),         NOV,        CF) \
-  O(UnpackCont,      NA,               NOV,             TWO(CV,CV), NF) \
-  O(ContSuspend,     ONE(IVA),         ONE(CV),         NOV,        CF_TF) \
-  O(ContSuspendK,    ONE(IVA),         TWO(CV,CV),      NOV,        CF_TF) \
+  O(ContRaise,       NA,               ONE(CV),         NOV,        CF) \
+  O(ContSuspend,     NA,               ONE(CV),         ONE(CV),    NF) \
+  O(ContSuspendK,    NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(ContRetC,        NA,               ONE(CV),         NOV,        CF_TF) \
   O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
-  O(ContRaise,       NA,               NOV,             NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
   O(ContKey,         NA,               NOV,             ONE(CV),    NF) \
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
   O(ContStopped,     NA,               NOV,             NOV,        NF) \
   O(ContHandle,      NA,               ONE(CV),         NOV,        CF_TF) \
   O(AsyncAwait,      NA,               ONE(CV),         TWO(CV,CV), NF) \
-  O(AsyncESuspend,   TWO(IVA,IVA),     ONE(CV),         ONE(CV),    NF) \
+  O(AsyncESuspend,   TWO(BA,IVA),      ONE(CV),         ONE(CV),    NF) \
+  O(AsyncResume,     NA,               NOV,             NOV,        NF) \
   O(AsyncWrapResult, NA,               ONE(CV),         ONE(CV),    NF) \
-  O(AsyncWrapException, NA,            ONE(CV),         ONE(CV),    NF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(Abs,             NA,               ONE(CV),         ONE(CV),    NF) \
@@ -988,6 +1015,10 @@ constexpr inline bool instrIsControlFlow(Op opcode) {
   return (instrFlags(opcode) & CF) != 0;
 }
 
+constexpr inline bool instrIsInitialSuspend(Op opcode) {
+  return opcode == Op::AsyncESuspend || opcode == Op::CreateCont;
+}
+
 constexpr inline bool isUnconditionalJmp(Op opcode) {
   return opcode == Op::Jmp || opcode == Op::JmpNS;
 }
@@ -998,10 +1029,10 @@ inline bool isFPush(Op opcode) {
 
 inline bool isFCallStar(Op opcode) {
   switch (opcode) {
-    case OpFCall:
-    case OpFCallArray:
+    case Op::FCall:
+    case Op::FCallD:
+    case Op::FCallArray:
       return true;
-
     default:
       return false;
   }

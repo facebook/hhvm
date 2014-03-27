@@ -12,11 +12,13 @@ string(%d) "%s/readlink_realpath_variation1/home/tests/link/readlink_realpath_va
 
 -- Testing readlink() and realpath() with hardlink, linkname stored inside an object --
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(%d) "%s/readlink_realpath_variation1/home/readlink_realpath_variation1_link.tmp"
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(%d) "%s/readlink_realpath_variation1_link.tmp"
 Done

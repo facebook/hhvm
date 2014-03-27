@@ -6,6 +6,7 @@ int(1)
 int(15)
 int(0)
 int(0)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

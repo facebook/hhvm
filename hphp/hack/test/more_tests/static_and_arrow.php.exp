@@ -1,0 +1,6 @@
+File "static_and_arrow.php", line 14, characters 12-13:
+The method f2 is undefined in an object of type Foo
+File "static_and_arrow.php", line 12, characters 7-9:
+Check this out
+File "static_and_arrow.php", line 16, characters 26-27:
+The closest thing is f2 but it's a static method

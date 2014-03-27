@@ -1,11 +1,16 @@
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
 bool(false)
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

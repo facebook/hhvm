@@ -1,0 +1,132 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "ezc_fetch_global",
+            "desc": "Get the value of the global",
+            "flags": [
+                "ZendCompat",
+                "NoFCallBuiltin"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": []
+        },
+        {
+            "name": "ezc_set_global",
+            "desc": "Set the value of the global",
+            "flags": [
+                "ZendCompat",
+                "NoFCallBuiltin"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "value",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "ezc_call",
+            "desc": "Call a function, like call_user_func()",
+            "flags": [
+                "VariableArguments",
+                "ZendCompat",
+                "NoFCallBuiltin"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "function",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "ezc_try_call",
+            "desc": "Call a function. If it throws an exception, catch it and return the exception object. Otherwise, return the return value.",
+            "flags": [
+                "VariableArguments",
+                "ZendCompat",
+                "NoFCallBuiltin"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "function",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "ezc_throw",
+            "desc": "Throw an exception with the class of the given name",
+            "flags": [
+                "ZendCompat",
+                "NoFCallBuiltin"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "exception_class",
+                    "type": "Variant"
+                }
+            ]
+        },
+        {
+            "name": "ezc_throw_std",
+            "desc": "Throw a C++ std::exception",
+            "flags": [
+                "ZendCompat",
+                "NoFCallBuiltin"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": []
+        },
+        {
+            "name": "ezc_throw_nonstd",
+            "desc": "Throw a non-standard C++ exception",
+            "flags": [
+                "ZendCompat",
+                "NoFCallBuiltin"
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": []
+		},
+        {
+            "name": "ezc_realpath",
+            "desc": "Return the resolved path",
+            "flags": [
+                "ZendCompat",
+                "NoFCallBuiltin"
+            ],
+            "return": {
+                "type": "Variant"
+			},
+            "args": [
+                {
+                    "name": "path",
+                    "type": "Variant"
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

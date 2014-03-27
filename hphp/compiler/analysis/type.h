@@ -122,7 +122,7 @@ public:
   /**
    * Map Runtime DataType to analysis Type
    */
-  static TypePtr FromDataType(DataType dt) {
+  static TypePtr FromDataType(DataType dt, TypePtr unknown) {
     switch (dt) {
       case DataType::KindOfNull:     return Type::Null;
       case DataType::KindOfBoolean:  return Type::Boolean;
@@ -134,7 +134,7 @@ public:
       case DataType::KindOfObject:   return Type::Object;
       case DataType::KindOfResource: return Type::Resource;
       default:
-        return Type::Any;
+        return unknown;
     }
   }
 

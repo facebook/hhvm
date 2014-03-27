@@ -1,10 +1,12 @@
 *** Testing natcasesort() : error conditions ***
 
 -- Testing natcasesort() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing natcasesort() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

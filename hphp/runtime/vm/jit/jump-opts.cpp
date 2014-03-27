@@ -245,7 +245,7 @@ void eliminateJmp(Block* lastBlock, IRInstruction* jmp, Block* target) {
 //////////////////////////////////////////////////////////////////////
 
 void optimizeJumps(IRUnit& unit) {
-  Timer _t("optimize_jumpOpts");
+  Timer _t(Timer::optimize_jumpOpts);
 
   postorderWalk(unit, [&](Block* b) {
     if (RuntimeOption::EvalHHIRDirectExit) {

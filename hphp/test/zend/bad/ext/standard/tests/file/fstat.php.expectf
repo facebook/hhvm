@@ -52,6 +52,7 @@ array(26) {
   ["blocks"]=>
   int(%i)
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

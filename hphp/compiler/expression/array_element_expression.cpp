@@ -246,23 +246,17 @@ ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
           return replaceValue(makeConstant(ar, "null"));
         }
         if (m_offset->isScalar() && m_offset->getScalarValue(o)) {
-          if (v.isString()) {
-            if (!o.isInteger() ||
-                o.toInt64Val() < 0 ||
-                o.toInt64Val() >= v.toCStrRef().size()) {
-              // warnings should be raised...
-              return ExpressionPtr();
+          if (v.isArray()) {
+            try {
+              g_context->setThrowAllErrors(true);
+              Variant res = v.toArrRef().rvalAt(
+                o, hasContext(ExistContext) ?
+                AccessFlags::None : AccessFlags::Error);
+              g_context->setThrowAllErrors(false);
+              return replaceValue(makeScalarExpression(ar, res));
+            } catch (...) {
+              g_context->setThrowAllErrors(false);
             }
-          }
-          try {
-            g_context->setThrowAllErrors(true);
-            Variant res = v.rvalAt(
-              o, hasContext(ExistContext) ?
-              AccessFlags::None : AccessFlags::Error);
-            g_context->setThrowAllErrors(false);
-            return replaceValue(makeScalarExpression(ar, res));
-          } catch (...) {
-            g_context->setThrowAllErrors(false);
           }
         }
       }

@@ -34,6 +34,7 @@ static bool breaksRegion(Op opc) {
     case OpSwitch:
     case OpSSwitch:
     case OpContSuspend:
+    case OpContSuspendK:
     case OpContRetC:
     case OpRetC:
     case OpRetV:
@@ -197,8 +198,14 @@ RegionDescPtr selectHotTrace(TransID triggerId,
         break;
       }
     }
+    if (region->blocks.size() > 0) {
+      region->addArc(region->blocks.back().get()->id(),
+                     blockRegion->blocks.front().get()->id());
+    }
     region->blocks.insert(region->blocks.end(), blockRegion->blocks.begin(),
                           blockRegion->blocks.end());
+    region->arcs.insert(region->arcs.end(), blockRegion->arcs.begin(),
+                        blockRegion->arcs.end());
     selectedSet.insert(tid);
     if (selectedVec) selectedVec->push_back(tid);
 

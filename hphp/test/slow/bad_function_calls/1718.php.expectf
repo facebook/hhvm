@@ -1,2 +1,3 @@
-HipHop Warning: Invalid argument: function: not string, closure, or array in %s/test/slow/bad_function_calls/1718.php on line 3
+
+Warning: Invalid argument: function: not string, closure, or array in %s/test/slow/bad_function_calls/1718.php on line 3
 test

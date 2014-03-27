@@ -105,7 +105,7 @@ bool checkBlock(Block* b) {
   // Invariants #2, #4
   assert(it != end && b->back().isBlockEnd());
   --end;
-  for (DEBUG_ONLY IRInstruction& inst : folly::makeRange(it, end)) {
+  for (DEBUG_ONLY IRInstruction& inst : folly::range(it, end)) {
     assert(inst.op() != DefLabel);
     assert(inst.op() != BeginCatch);
     assert(!inst.isBlockEnd());

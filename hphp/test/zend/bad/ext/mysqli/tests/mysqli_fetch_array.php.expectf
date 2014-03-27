@@ -70,7 +70,10 @@ array(11) {
   [%u|b%"e"]=>
   %unicode|string%(1) "1"
 }
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 done!

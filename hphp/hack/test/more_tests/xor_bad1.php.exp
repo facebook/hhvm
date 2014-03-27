@@ -1,0 +1,6 @@
+File "xor_bad1.php", line 13, characters 3-9:
+Typing error
+File "xor_bad1.php", line 12, characters 14-16:
+This is an int
+File "xor_bad1.php", line 13, characters 3-4:
+It is incompatible with a bool because this is the result of a logical operation

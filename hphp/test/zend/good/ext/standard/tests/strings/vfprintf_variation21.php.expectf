@@ -1,9 +1,14 @@
 *** Testing vfprintf() : with unexpected values for args argument ***
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 
 *** Testing vprintf() with unexpected values for args argument ***
 

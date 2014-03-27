@@ -1,3 +1,4 @@
 string(12) "test1:Caught"
 string(12) "test2:Caught"
-HipHop Fatal error: Cls: Expected string or object in %s/test/slow/exceptions/65.php on line 23
+
+Fatal error: Cls: Expected string or object in %s/test/slow/exceptions/65.php on line 23

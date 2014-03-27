@@ -192,8 +192,8 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   funcScope->setParamCounts(ar, -1, -1);
 
   if (funcScope->isNative()) {
-    funcScope->setReturnType(ar, Type::FromDataType(
-                                   m_retTypeAnnotation->dataType()));
+    funcScope->setReturnType(
+      ar, Type::FromDataType(m_retTypeAnnotation->dataType(), Type::Variant));
   }
 
   return funcScope;
@@ -420,7 +420,6 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
     m_params->analyzeProgram(ar);
   }
 
-  funcScope->resetYieldLabelCount();
   if (m_stmt) m_stmt->analyzeProgram(ar);
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
@@ -694,13 +693,4 @@ void MethodStatement::checkParameters() {
       }
     }
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// generator helper
-
-std::string MethodStatement::getGeneratorName() const {
-  // generators in traits must use full name, see test traits/2067.php
-  return ((getClassScope() && getClassScope()->isTrait()) ?
-          getFullName() : getOriginalName()) + "$continuation";
 }

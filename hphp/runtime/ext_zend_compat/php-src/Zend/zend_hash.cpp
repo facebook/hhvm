@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_qsort.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zval-helpers.h"
-#include "hphp/runtime/ext_hhvm/ext_zend_compat.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 #include "hphp/util/safesort.h"
 #include "hphp/util/assertions.h"
 
@@ -70,7 +70,7 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void * arg TSRMLS_DC) {
   for (HPHP::ArrayIter it(ht); it; ++it) {
     zval* data = it.zSecond();
-		int result = apply_func(&data, arg);
+		int result = apply_func(&data, arg TSRMLS_CC);
 
 		if (result & ZEND_HASH_APPLY_REMOVE) {
       not_implemented();
@@ -99,7 +99,7 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func
       hash_key.h = 0;
     }
     zval* data = it.zSecond();
-		result = apply_func(&data, num_args, args, &hash_key);
+		result = apply_func(&data TSRMLS_CC, num_args, args, &hash_key);
 
 		if (result & ZEND_HASH_APPLY_REMOVE) {
       not_implemented();

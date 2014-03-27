@@ -79,7 +79,7 @@ int PhysRegSaverParity::rspTotalAdjustmentRegs() const {
   return m_regs.size() + m_adjust / sizeof(int64_t);
 }
 
-void PhysRegSaverParity::bytesPushed(int64_t bytes) {
+void PhysRegSaverParity::bytesPushed(int bytes) {
   m_adjust += bytes;
 }
 

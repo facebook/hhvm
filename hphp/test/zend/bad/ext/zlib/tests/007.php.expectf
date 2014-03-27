@@ -1,16 +1,22 @@
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(%d) "%s"
 string(%d) "%s"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(%d) "%s"
 string(%d) "%s"

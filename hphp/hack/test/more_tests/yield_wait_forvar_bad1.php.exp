@@ -1,0 +1,6 @@
+File "yield_wait_forvar_bad1.php", line 19, characters 20-63:
+await can only operate on an Awaitable
+File "yield_wait_forvar_bad1.php", line 19, characters 20-63:
+This is an object of type Awaitable
+File "yield_wait_forvar_bad1.php", line 14, characters 18-18:
+It is incompatible with an object of type A

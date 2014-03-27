@@ -17,11 +17,13 @@ bool(true)
 bool(true)
 
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 7 --
@@ -41,7 +43,8 @@ bool(true)
 bool(true)
 
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 12 --

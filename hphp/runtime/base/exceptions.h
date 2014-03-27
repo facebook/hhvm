@@ -17,13 +17,24 @@
 #ifndef incl_HPHP_CPP_BASE_EXCEPTIONS_H_
 #define incl_HPHP_CPP_BASE_EXCEPTIONS_H_
 
-#include "hphp/util/exception.h"
 #include "hphp/runtime/base/types.h"
+
+#include "hphp/util/exception.h"
+
 #include "folly/String.h"
+
+#include <boost/intrusive_ptr.hpp>
+
+#include <string>
+
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // all defined exceptions
+
+typedef boost::intrusive_ptr<ArrayData> ArrayHolder;
+void intrusive_ptr_add_ref(ArrayData* a);
+void intrusive_ptr_release(ArrayData* a);
 
 class ExtendedException : public Exception {
 public:

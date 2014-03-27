@@ -1,4 +1,5 @@
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 [internal function]: {closure}(4096, 'Argument 1 pass...', '%s', 6, Array)
 #1 %sbug64966.php(6): iterator_apply('')

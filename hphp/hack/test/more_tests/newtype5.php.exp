@@ -1,0 +1,6 @@
+File "newtype5.php--file2.php", line 7, characters 8-9:
+Invalid argument
+File "newtype5.php--file2.php", line 5, characters 15-15:
+This is an object of type a
+File "newtype5.php--file1.php", line 14, characters 17-17:
+It is incompatible with a bool

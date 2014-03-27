@@ -1,4 +1,5 @@
 Test
-HipHop Warning: %s
+
+Warning: %s
 int(1)
 Done

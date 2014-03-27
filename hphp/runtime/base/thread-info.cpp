@@ -48,17 +48,6 @@ __thread char* ThreadInfo::t_stackbase = 0;
 
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
-static int64_t ini_get_max_execution_time() {
-  return ThreadInfo::s_threadInfo.getNoCheck()->
-    m_reqInjectionData.getTimeout();
-}
-
-static bool ini_on_update_max_execution_time(const int64_t &limit) {
-  ThreadInfo::s_threadInfo.getNoCheck()->
-    m_reqInjectionData.setTimeout(limit);
-  return true;
-}
-
 ThreadInfo::ThreadInfo()
     : m_stacklimit(0), m_executing(Idling) {
   assert(!t_stackbase);
@@ -117,17 +106,6 @@ void ThreadInfo::onSessionInit() {
     m_stacklimit = (char *)s_stackLimit + StackSlack;
     assert(uintptr_t(m_stacklimit) < s_stackLimit + s_stackSize);
   }
-
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "max_execution_time",
-                   IniSetting::SetAndGet<int64_t>(
-                     ini_on_update_max_execution_time,
-                     ini_get_max_execution_time));
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "maximum_execution_time",
-                   IniSetting::SetAndGet<int64_t>(
-                     ini_on_update_max_execution_time,
-                     ini_get_max_execution_time));
 }
 
 void ThreadInfo::clearPendingException() {
@@ -143,10 +121,56 @@ void ThreadInfo::setPendingException(Exception* e) {
 }
 
 void ThreadInfo::onSessionExit() {
+  // Clear any timeout handlers to they don't fire when the request has already
+  // been destroyed
   m_reqInjectionData.setTimeout(0);
+
   m_reqInjectionData.reset();
   RDS::requestExit();
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+void throw_infinite_recursion_exception() {
+  if (!RuntimeOption::NoInfiniteRecursionDetection) {
+    // Reset profiler otherwise it might recurse further causing segfault
+    DECLARE_THREAD_INFO
+    info->m_profiler = nullptr;
+    throw UncatchableException("infinite recursion detected");
+  }
+}
+
+ssize_t check_request_surprise(ThreadInfo* info) {
+  auto& p = info->m_reqInjectionData;
+  bool do_timedout, do_memExceeded, do_signaled;
+
+  ssize_t flags = p.fetchAndClearFlags();
+  do_timedout = (flags & RequestInjectionData::TimedOutFlag) &&
+    !p.getDebugger();
+  do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
+  do_signaled = (flags & RequestInjectionData::SignaledFlag);
+
+  // Start with any pending exception that might be on the thread.
+  Exception* pendingException = info->m_pendingException;
+  info->m_pendingException = nullptr;
+
+  if (do_timedout && !pendingException) {
+    pendingException = generate_request_timeout_exception();
+  }
+  if (do_memExceeded && !pendingException) {
+    pendingException = generate_memory_exceeded_exception();
+  }
+  if (do_signaled) {
+    extern bool f_pcntl_signal_dispatch();
+    f_pcntl_signal_dispatch();
+  }
+
+  if (pendingException) {
+    pendingException->throwException();
+  }
+  return flags;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }

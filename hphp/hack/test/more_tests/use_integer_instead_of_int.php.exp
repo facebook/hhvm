@@ -1,0 +1,2 @@
+File "use_integer_instead_of_int.php", line 12, characters 23-29:
+Invalid Hack type. Using "integer" in Hack is considered an error. Use "int" instead, to keep the codebase consistent.

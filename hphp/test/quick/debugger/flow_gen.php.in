@@ -1,6 +1,8 @@
 run
-break flow_gen.php:12
+break genFoo()
+break flow_gen.php:13
 @test(1)
+cont
 next
 next
 next
@@ -8,14 +10,12 @@ next
 next
 next
 step
-step
 next
 next
 next
 next
 next
 next
-step
 step
 next
 next

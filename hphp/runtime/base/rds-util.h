@@ -37,8 +37,8 @@ namespace HPHP { namespace RDS {
  * Static locals.
  *
  * For normal functions, static locals are allocated as RefData's that
- * live in RDS.  Note that we don't put closures or
- * generatorFromClosure locals here because they are per-instance.
+ * live in RDS.  Note that we don't put closure locals here because
+ * they are per-instance.
  */
 Link<RefData> bindStaticLocal(const Func*, const StringData*);
 

@@ -1,2 +1,3 @@
-HipHop Warning: Filename cannot be empty in %s/test/slow/ext_file/fopen_empty.php on line 3
+
+Warning: Filename cannot be empty in %s/test/slow/ext_file/fopen_empty.php on line 3
 bool(false)

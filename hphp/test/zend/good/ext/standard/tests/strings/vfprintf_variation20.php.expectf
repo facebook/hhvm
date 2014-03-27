@@ -1,9 +1,14 @@
 *** Testing vfprintf() : with unexpected values for format argument ***
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
 
 *** Testing vprintf() with with unexpected values for format argument ***
 

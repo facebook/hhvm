@@ -33,6 +33,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
@@ -466,13 +467,12 @@ String f_exec(const String& command, VRefParam output /* = null */,
   if (count > 0 && lines[count - 1].toString().empty()) {
     count--; // remove explode()'s last empty line
   }
-  if (!output.is(KindOfArray)) {
-    output = Array(ArrayData::Create());
-  }
 
+  PackedArrayInit pai(count);
   for (int i = 0; i < count; i++) {
-    output.append(lines[i]);
+    pai.append(lines[i]);
   }
+  output.wrapped() = pai.toArray();
 
   if (!count || lines.empty()) {
     return String();
@@ -781,7 +781,7 @@ static Variant post_proc_open(const String& cmd, Variant &pipes,
     Resource f = items[i].dupParent();
     if (!f.isNull()) {
       proc->pipes.append(f);
-      pipes.set(items[i].index, f);
+      pipes.toArrRef().set(items[i].index, f);
     }
   }
   return Resource(proc);

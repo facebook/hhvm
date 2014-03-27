@@ -9,10 +9,12 @@ The File Contents
 -- %s\readfileVar8\readfileVar8Sub\..\..\readfileVar8\.\readfileVar8Sub --
 The File Contents
 -- %s\readfileVar8\readfileVar8Sub\..\\\readfileVar8Sub\\..\\..\readfileVar8Sub --
-HipHop Warning: %s
+
+Warning: %s
 
 -- %s\readfileVar8\readfileVar8Sub\BADDIR --
-HipHop Warning: %s
+
+Warning: %s
 
 -- readfileVar8\readfileVar8Sub --
 The File Contents
@@ -23,7 +25,8 @@ The File Contents
 -- .\readfileVar8\..\readfileVar8\readfileVar8Sub --
 The File Contents
 -- BADDIR --
-HipHop Warning: %s
+
+Warning: %s
 
 -- /%s/readfileVar8/readfileVar8Sub --
 The File Contents

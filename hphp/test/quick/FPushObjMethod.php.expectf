@@ -92,4 +92,5 @@ In Z::fZ()
   In Z::fPrivate()
   In Z::fProtected()
   In Z::fPublic()
-HipHop Fatal error: Function name must be a string in %s on line 201
+
+Fatal error: Function name must be a string in %s on line 201

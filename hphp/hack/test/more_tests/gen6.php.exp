@@ -1,0 +1,6 @@
+File "gen6.php", line 12, characters 14-14:
+This is an object of type A
+File "gen6.php", line 25, characters 11-17:
+It is incompatible with an object of type Z
+File "gen6.php", line 13, characters 30-30:
+Considering the constraint on the type 'T'

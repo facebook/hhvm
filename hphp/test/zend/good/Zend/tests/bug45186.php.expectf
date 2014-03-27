@@ -13,4 +13,5 @@ string(1) "y"
 ok
 __callstatic:
 string(3) "www"
-HipHop Warning: %s
+
+Warning: %s

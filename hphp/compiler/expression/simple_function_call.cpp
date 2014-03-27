@@ -41,7 +41,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 
 using namespace HPHP;
 
@@ -804,7 +804,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
     }
   }
 
-  if (!m_classScope && !m_funcScope->isUserFunction()) {
+  if (!m_classScope) {
     if (m_type == FunType::Unknown && m_funcScope->isFoldable()) {
       Array arr;
       if (m_params) {
@@ -1606,18 +1606,21 @@ ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
                                    AnalysisResultConstPtr ar,
                                    SimpleFunctionCallPtr call, int mode) {
   if (!cg && mode <= 1 && Option::WholeProgram) {
-    bool error = false;
-    SimpleFunctionCallPtr rep(
-      SimpleFunctionCall::GetFunctionCallForCallUserFunc(
-        ar, call, mode ? 1 : -1, 1, error));
-    if (error && !mode) {
-      if (!Option::WholeProgram) {
-        rep.reset();
-      } else {
-        return call->makeConstant(ar, "false");
+    ExpressionListPtr params = call->getParams();
+    if (params && params->getCount() == 1) {
+      bool error = false;
+      SimpleFunctionCallPtr rep(
+        SimpleFunctionCall::GetFunctionCallForCallUserFunc(
+          ar, call, mode ? 1 : -1, 1, error));
+      if (error && !mode) {
+        if (!Option::WholeProgram) {
+          rep.reset();
+        } else {
+          return call->makeConstant(ar, "false");
+        }
       }
+      return rep;
     }
-    return rep;
   }
 
   return ExpressionPtr();

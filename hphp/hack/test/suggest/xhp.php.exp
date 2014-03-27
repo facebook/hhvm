@@ -1,0 +1,5 @@
+No errors
+File: xhp.php, line: 16, kind: Kreturn, type: :xhp
+File: xhp.php, line: 24, kind: Kreturn, type: Awaitable<:xhp>
+File: xhp.php, line: 32, kind: Kreturn, type: ?:xhp
+File: xhp.php, line: 40, kind: Kreturn, type: ?:xhp

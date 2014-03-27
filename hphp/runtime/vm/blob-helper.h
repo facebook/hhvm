@@ -17,15 +17,16 @@
 #ifndef incl_HPHP_RUNTIME_VM_BLOB_HELPER_H_
 #define incl_HPHP_RUNTIME_VM_BLOB_HELPER_H_
 
-#include <algorithm>
-#include <vector>
-#include <cstdlib>
-#include <type_traits>
-
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/type-string.h"
 
 #include "folly/Varint.h"
+
+#include <algorithm>
+#include <cstdlib>
+#include <type_traits>
+#include <vector>
 
 /*
  * This module contains helpers for serializing and deserializing

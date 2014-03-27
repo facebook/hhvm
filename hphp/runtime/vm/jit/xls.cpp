@@ -1374,7 +1374,7 @@ const Abi arm_abi {
 
 // This is the public entry-point
 RegAllocInfo allocateRegs(IRUnit& unit) {
-  Timer _t("regalloc");
+  Timer _t(Timer::regalloc);
 
   RegAllocInfo regs(unit);
   Abi abi;

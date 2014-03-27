@@ -1,14 +1,27 @@
-HipHop Notice: Use of undefined constant a - assumed 'a' in %s/test/slow/concat/1584.php on line 3
-HipHop Notice: Use of undefined constant b - assumed 'b' in %s/test/slow/concat/1584.php on line 4
-HipHop Notice: Use of undefined constant c - assumed 'c' in %s/test/slow/concat/1584.php on line 5
-HipHop Notice: Use of undefined constant d - assumed 'd' in %s/test/slow/concat/1584.php on line 6
-HipHop Notice: Use of undefined constant e - assumed 'e' in %s/test/slow/concat/1584.php on line 7
-HipHop Notice: Use of undefined constant f - assumed 'f' in %s/test/slow/concat/1584.php on line 8
-HipHop Notice: Use of undefined constant g - assumed 'g' in %s/test/slow/concat/1584.php on line 9
-HipHop Notice: Use of undefined constant h - assumed 'h' in %s/test/slow/concat/1584.php on line 10
-HipHop Notice: Use of undefined constant i - assumed 'i' in %s/test/slow/concat/1584.php on line 11
-HipHop Notice: Use of undefined constant j - assumed 'j' in %s/test/slow/concat/1584.php on line 12
-HipHop Notice: Use of undefined constant k - assumed 'k' in %s/test/slow/concat/1584.php on line 13
-HipHop Notice: Use of undefined constant l - assumed 'l' in %s/test/slow/concat/1584.php on line 14
-HipHop Notice: Use of undefined constant m - assumed 'm' in %s/test/slow/concat/1584.php on line 15
+
+Notice: Use of undefined constant a - assumed 'a' in %s/test/slow/concat/1584.php on line 3
+
+Notice: Use of undefined constant b - assumed 'b' in %s/test/slow/concat/1584.php on line 4
+
+Notice: Use of undefined constant c - assumed 'c' in %s/test/slow/concat/1584.php on line 5
+
+Notice: Use of undefined constant d - assumed 'd' in %s/test/slow/concat/1584.php on line 6
+
+Notice: Use of undefined constant e - assumed 'e' in %s/test/slow/concat/1584.php on line 7
+
+Notice: Use of undefined constant f - assumed 'f' in %s/test/slow/concat/1584.php on line 8
+
+Notice: Use of undefined constant g - assumed 'g' in %s/test/slow/concat/1584.php on line 9
+
+Notice: Use of undefined constant h - assumed 'h' in %s/test/slow/concat/1584.php on line 10
+
+Notice: Use of undefined constant i - assumed 'i' in %s/test/slow/concat/1584.php on line 11
+
+Notice: Use of undefined constant j - assumed 'j' in %s/test/slow/concat/1584.php on line 12
+
+Notice: Use of undefined constant k - assumed 'k' in %s/test/slow/concat/1584.php on line 13
+
+Notice: Use of undefined constant l - assumed 'l' in %s/test/slow/concat/1584.php on line 14
+
+Notice: Use of undefined constant m - assumed 'm' in %s/test/slow/concat/1584.php on line 15
 abcdefabcdefgabcdefghabcdefghiabcdefghijabcdefghijkabcdefghijklabcdefghijklm

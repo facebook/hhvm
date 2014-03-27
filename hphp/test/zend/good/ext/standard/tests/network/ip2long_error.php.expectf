@@ -1,10 +1,12 @@
 *** Testing ip2long() : error conditions ***
 
 -- Testing ip2long() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing ip2long() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

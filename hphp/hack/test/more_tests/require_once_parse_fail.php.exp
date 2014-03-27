@@ -1,0 +1,2 @@
+File "require_once_parse_fail.php", line 13, characters 3-14:
+Parse error: require_once is not supported outside global scope

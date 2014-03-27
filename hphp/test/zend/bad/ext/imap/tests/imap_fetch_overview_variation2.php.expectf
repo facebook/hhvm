@@ -82,7 +82,8 @@ Sequence out of range
 
 -- Testing with second argument value: array(0) {
 }
-HipHop Warning: %s
+
+Warning: %s
 Sequence out of range
 
 -- Testing with second argument value: %string|unicode%(6) "string"
@@ -105,6 +106,7 @@ Syntax error in sequence
 Syntax error in sequence
 
 -- Testing with second argument value: resource(%d) of type (stream)
-HipHop Warning: %s
+
+Warning: %s
 Syntax error in sequence
 ===DONE===

@@ -11,6 +11,8 @@ class Pair {
   }
 }
 
+use Test\Pair;
+
 function main() {
   $custom_set = new Pair();
 }

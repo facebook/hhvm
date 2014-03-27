@@ -1,3 +1,4 @@
 int(12)
 NULL
-HipHop Fatal error: Argument 1 passed to yeah() must be an instance of two, string given in %s on line 8
+
+Fatal error: Argument 1 passed to yeah() must be an instance of two, string given in %s on line 8

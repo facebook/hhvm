@@ -1,4 +1,5 @@
-HipHop Warning: Creating default object from empty value in %s/test/slow/hhbbc/private_props_013.php on line 8
+
+Warning: Creating default object from empty value in %s/test/slow/hhbbc/private_props_013.php on line 8
 object(A)#1 (2) {
   ["x":"A":private]=>
   array(1) {

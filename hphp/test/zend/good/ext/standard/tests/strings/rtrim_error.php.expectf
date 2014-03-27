@@ -1,24 +1,30 @@
 *** Testing rtrim() : error conditions ***
 
 -- Testing rtrim() function with no arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing rtrim() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Test rtrim function with various invalid charlists
-HipHop Warning: %s
+
+Warning: %s
 string(14) "  Hello World
 "
-HipHop Warning: %s
+
+Warning: %s
 string(14) "  Hello World
 "
-HipHop Warning: %s
+
+Warning: %s
 string(14) "  Hello World
 "
-HipHop Warning: %s
+
+Warning: %s
 string(14) "  Hello World
 "
 ===DONE===

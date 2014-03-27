@@ -1,3 +1,4 @@
-HipHop Fatal error: Uncaught exception 'Exception' with message '55' in %s/test/quick/debug_backtrace_multiline.php:55
+
+Fatal error: Uncaught exception 'Exception' with message '55' in %s/test/quick/debug_backtrace_multiline.php:55
 Stack trace:
 #0 {main}

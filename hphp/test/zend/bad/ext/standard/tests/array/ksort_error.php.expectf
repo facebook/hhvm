@@ -1,13 +1,15 @@
 *** Testing ksort() : error conditions ***
 
 -- Testing ksort() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing ksort() function with more than expected no. of arguments --
 
 - Sort flag = SORT_REGULAR -
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(2) {
   [1]=>
@@ -17,7 +19,8 @@ array(2) {
 }
 
 - Sort flag = SORT_STRING -
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(2) {
   [1]=>
@@ -27,7 +30,8 @@ array(2) {
 }
 
 - Sort flag = SORT_NUMERIC -
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(2) {
   [1]=>

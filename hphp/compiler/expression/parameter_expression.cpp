@@ -23,6 +23,7 @@
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/runtime/vm/runtime.h"
 
 using namespace HPHP;
 
@@ -69,6 +70,33 @@ const std::string ParameterExpression::getOriginalTypeHint() const {
 const std::string ParameterExpression::getUserTypeHint() const {
   assert(hasUserType());
   return m_originalType->fullName();
+}
+
+const std::string ParameterExpression::getTypeHintDisplayName() const {
+  auto name = m_originalType->vanillaName();
+  const char* str = name.c_str();
+  auto len = name.size();
+  if (len > 3 && tolower(str[0]) == 'h' && tolower(str[1]) == 'h' &&
+      str[2] == '\\') {
+    bool strip = false;
+    const char* stripped = str + 3;
+    switch (len - 3) {
+      case 3:
+        strip = (!strcasecmp(stripped, "int") ||
+                 !strcasecmp(stripped, "num"));
+        break;
+      case 4: strip = !strcasecmp(stripped, "bool"); break;
+      case 5: strip = !strcasecmp(stripped, "float"); break;
+      case 6: strip = !strcasecmp(stripped, "string"); break;
+      case 8: strip = !strcasecmp(stripped, "resource"); break;
+      default:
+        break;
+    }
+    if (strip) {
+      return stripped;
+    }
+  }
+  return name;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -255,35 +283,53 @@ void ParameterExpression::compatibleDefault() {
     const char* hint = getTypeHint().c_str();
     switch(defaultType) {
     case KindOfBoolean:
-      compat = (!strcmp(hint, "bool") || !strcmp(hint, "boolean")); break;
+      compat = !strcasecmp(hint, "HH\\bool");
+      break;
     case KindOfInt64:
-      compat = (!strcmp(hint, "int") || !strcmp(hint, "integer")); break;
+      compat = (!strcasecmp(hint, "HH\\int") ||
+                !strcasecmp(hint, "HH\\num") ||
+                interface_supports_int(hint));
+      break;
     case KindOfDouble:
-      compat = (!strcmp(hint, "float") || !strcmp(hint, "double")); break;
+      compat = (!strcasecmp(hint, "HH\\float") ||
+                !strcasecmp(hint, "HH\\num") ||
+                interface_supports_double(hint));
+      break;
     case KindOfString:  /* fall through */
     case KindOfStaticString:
-      compat = !strcmp(hint, "string"); break;
+      compat = (!strcasecmp(hint, "HH\\string") ||
+                interface_supports_string(hint));
+      break;
     case KindOfArray:
-      compat = !strcmp(hint, "array"); break;
+      compat = (!strcasecmp(hint, "array") ||
+                interface_supports_array(hint));
+      break;
     case KindOfUninit:  /* fall through */
-    case KindOfNull:    compat = true; break;
-    /* KindOfClass is an hhvm internal type, can not occur here */
+    case KindOfNull:
+      compat = true;
+      break;
+    /* KindOfClass is an hhvm internal type, cannot occur here */
     case KindOfObject:  /* fall through */
     case KindOfResource: /* fall through */
-    case KindOfRef: assert(false /* likely parser bug */);
-    default:            compat = false; break;
+    case KindOfRef:
+      assert(false /* likely parser bug */);
+    default:
+      compat = false;
+      break;
     }
   } else {
     msg = "Default value for parameter %s with a class type hint "
           "can only be NULL";
     switch(defaultType) {
     case KindOfNull:
-      compat = true; break;
+      compat = true;
+      break;
     case KindOfArray:
-      compat = strcmp(getTypeHint().c_str(), "array") == 0; break;
+      compat = !strcasecmp(getTypeHint().c_str(), "array");
+      break;
     default:
       compat = false;
-      if (strcmp(getTypeHint().c_str(), "array") == 0) {
+      if (!strcasecmp(getTypeHint().c_str(), "array")) {
         msg = "Default value for parameter %s with array type hint "
               "can only be an array or NULL";
       }
@@ -296,7 +342,7 @@ void ParameterExpression::compatibleDefault() {
     string tdefault = HPHP::tname(defaultType);
     parseTimeFatal(Compiler::BadDefaultValueType, msg,
                    name.c_str(), tdefault.c_str(),
-                   getOriginalTypeHint().c_str());
+                   getTypeHintDisplayName().c_str());
   }
 }
 

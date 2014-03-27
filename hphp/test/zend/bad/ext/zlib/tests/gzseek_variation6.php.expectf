@@ -1,7 +1,8 @@
 move 40 bytes
 tell=int(40)
 move to the end
-HipHop Warning: %s
+
+Warning: %s
 int(-1)
 tell=int(40)
 eof=bool(false)

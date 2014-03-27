@@ -17,17 +17,17 @@
 #ifndef incl_HPHP_EVAL_FILE_REPOSITORY_H_
 #define incl_HPHP_EVAL_FILE_REPOSITORY_H_
 
-#include <time.h>
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-string.h"
+
+#include "hphp/util/lock.h"
+#include "hphp/util/md5.h"
+
 #include <sys/stat.h>
 #include <atomic>
+#include <ctime>
 #include <set>
 #include <vector>
-#include "hphp/util/lock.h"
-
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/md5.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/string-util.h"
 
 #ifdef __APPLE__
 #define st_mtim st_mtimespec
@@ -193,7 +193,7 @@ private:
 };
 
 String resolveVmInclude(StringData* path, const char* currentDir,
-                        struct stat *s);
+                        struct stat *s, bool allow_dir = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -58,6 +58,11 @@ constexpr PhysReg rVmSp      = reg::rbx;
  */
 constexpr PhysReg rVmTl      = reg::r12;
 
+/*
+ * scratch register
+ */
+constexpr Reg64 rAsm         = reg::r10;
+
 //////////////////////////////////////////////////////////////////////
 /*
  * Registers used during a tracelet for program locations.
@@ -78,8 +83,7 @@ const RegSet kCallerSaved = RegSet()
                           | RegSet(reg::rdi)
                           | RegSet(reg::r8)
                           | RegSet(reg::r9)
-                          // r10 is reserved for the assembler (rAsm), and for
-                          //     various extremely-specific scratch uses
+                          // r10 is for extremely-specific scratch uses (rAsm)
                           // r11 is reserved for CodeGenerator (rCgGP)
                           //
                           // -------------
@@ -202,9 +206,9 @@ const RegSet kAllX64Regs = RegSet(kAllRegs).add(reg::r10)
  * Some data structures are accessed often enough from translated code
  * that we have shortcuts for getting offsets into them.
  */
-#define TVOFF(nm) offsetof(TypedValue, nm)
-#define AROFF(nm) offsetof(ActRec, nm)
-#define CONTOFF(nm) offsetof(c_Continuation, nm)
+#define TVOFF(nm) int(offsetof(TypedValue, nm))
+#define AROFF(nm) int(offsetof(ActRec, nm))
+#define CONTOFF(nm) int(offsetof(c_Continuation, nm))
 
 //////////////////////////////////////////////////////////////////////
 

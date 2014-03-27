@@ -1,46 +1,66 @@
 Test begin
-HipHop Notice: Use of undefined constant CN - assumed 'CN' in %s on line 16
+
+Notice: Use of undefined constant CN - assumed 'CN' in %s on line 16
 string(2) "CN"
-HipHop Notice: Use of undefined constant CB - assumed 'CB' in %s on line 17
+
+Notice: Use of undefined constant CB - assumed 'CB' in %s on line 17
 string(2) "CB"
-HipHop Notice: Use of undefined constant CI - assumed 'CI' in %s on line 18
+
+Notice: Use of undefined constant CI - assumed 'CI' in %s on line 18
 string(2) "CI"
-HipHop Notice: Use of undefined constant CD - assumed 'CD' in %s on line 19
+
+Notice: Use of undefined constant CD - assumed 'CD' in %s on line 19
 string(2) "CD"
-HipHop Notice: Use of undefined constant CS - assumed 'CS' in %s on line 20
+
+Notice: Use of undefined constant CS - assumed 'CS' in %s on line 20
 string(2) "CS"
 Enter f()
-HipHop Notice: Use of undefined constant CN - assumed 'CN' in %s on line 5
+
+Notice: Use of undefined constant CN - assumed 'CN' in %s on line 5
 string(2) "CN"
-HipHop Notice: Use of undefined constant CB - assumed 'CB' in %s on line 6
+
+Notice: Use of undefined constant CB - assumed 'CB' in %s on line 6
 string(2) "CB"
-HipHop Notice: Use of undefined constant CI - assumed 'CI' in %s on line 7
+
+Notice: Use of undefined constant CI - assumed 'CI' in %s on line 7
 string(2) "CI"
-HipHop Notice: Use of undefined constant CD - assumed 'CD' in %s on line 8
+
+Notice: Use of undefined constant CD - assumed 'CD' in %s on line 8
 string(2) "CD"
-HipHop Notice: Use of undefined constant CS - assumed 'CS' in %s on line 9
+
+Notice: Use of undefined constant CS - assumed 'CS' in %s on line 9
 string(2) "CS"
 Leave f()
-HipHop Notice: Use of undefined constant CN - assumed 'CN' in %s on line 22
+
+Notice: Use of undefined constant CN - assumed 'CN' in %s on line 22
 string(2) "CN"
-HipHop Notice: Use of undefined constant CB - assumed 'CB' in %s on line 23
+
+Notice: Use of undefined constant CB - assumed 'CB' in %s on line 23
 string(2) "CB"
-HipHop Notice: Use of undefined constant CI - assumed 'CI' in %s on line 24
+
+Notice: Use of undefined constant CI - assumed 'CI' in %s on line 24
 string(2) "CI"
-HipHop Notice: Use of undefined constant CD - assumed 'CD' in %s on line 25
+
+Notice: Use of undefined constant CD - assumed 'CD' in %s on line 25
 string(2) "CD"
-HipHop Notice: Use of undefined constant CS - assumed 'CS' in %s on line 26
+
+Notice: Use of undefined constant CS - assumed 'CS' in %s on line 26
 string(2) "CS"
 Enter f()
-HipHop Notice: Use of undefined constant CN - assumed 'CN' in %s on line 5
+
+Notice: Use of undefined constant CN - assumed 'CN' in %s on line 5
 string(2) "CN"
-HipHop Notice: Use of undefined constant CB - assumed 'CB' in %s on line 6
+
+Notice: Use of undefined constant CB - assumed 'CB' in %s on line 6
 string(2) "CB"
-HipHop Notice: Use of undefined constant CI - assumed 'CI' in %s on line 7
+
+Notice: Use of undefined constant CI - assumed 'CI' in %s on line 7
 string(2) "CI"
-HipHop Notice: Use of undefined constant CD - assumed 'CD' in %s on line 8
+
+Notice: Use of undefined constant CD - assumed 'CD' in %s on line 8
 string(2) "CD"
-HipHop Notice: Use of undefined constant CS - assumed 'CS' in %s on line 9
+
+Notice: Use of undefined constant CS - assumed 'CS' in %s on line 9
 string(2) "CS"
 Leave f()
 NULL

@@ -117,7 +117,8 @@ array(0) {
 }
 
 -- Iteration 24 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 array(0) {
 }

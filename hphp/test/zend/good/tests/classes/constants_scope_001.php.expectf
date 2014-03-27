@@ -1,4 +1,5 @@
-HipHop Notice: %s
+
+Notice: %s
 FATAL = FATAL
 self::FATAL = Fatal error
 self::FATAL = Worst error

@@ -1,5 +1,7 @@
-HipHop Warning: hex2bin: malformed input in %s/test/slow/ext_misc/1378.php on line 4
+
+Warning: hex2bin: malformed input in %s/test/slow/ext_misc/1378.php on line 4
 bool(false)
 string(5) "hello"
-HipHop Warning: hex2bin: malformed input in %s/test/slow/ext_misc/1378.php on line 6
+
+Warning: hex2bin: malformed input in %s/test/slow/ext_misc/1378.php on line 6
 bool(false)

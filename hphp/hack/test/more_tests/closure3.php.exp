@@ -1,0 +1,6 @@
+File "closure3.php", line 14, characters 6-7:
+Invalid argument
+File "closure3.php", line 13, characters 17-19:
+This is an int
+File "closure3.php", line 14, characters 6-7:
+It is incompatible with a string

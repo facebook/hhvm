@@ -82,7 +82,7 @@ function startServer($serverPort, $adminPort, $debugPort) {
   $useJit = array_key_exists('HHVM_JIT', $_ENV) && $_ENV['HHVM_JIT'] == 1;
   $jitConfig = ' -vEval.Jit='.($useJit ? "true" : "false");
   // To emulate sandbox setup, let Sandbox.Home be '$home'
-  // and user name be 'debugger', so that the server can find the sandbox_conf
+  // and user name be 'debugger', so that the server can find the sandbox_conf.hdf
   // in '$home'.'/debugger'.
   $sandboxHomeConfig = ' -vSandbox.Home='.$home;
 

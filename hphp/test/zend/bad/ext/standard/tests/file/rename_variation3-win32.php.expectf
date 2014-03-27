@@ -7,7 +7,8 @@ bool(true)
 bool(true)
 
 -- Renaming existing file to existing directory name --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
 bool(true)

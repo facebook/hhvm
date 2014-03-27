@@ -1,0 +1,6 @@
+File "genva_preserves_type_signatures2.php", line 28, characters 10-36:
+Invalid return type
+File "genva_preserves_type_signatures2.php", line 27, characters 65-70:
+This is a string
+File "genva_preserves_type_signatures2.php", line 27, characters 98-100:
+It is incompatible with an int

@@ -28,9 +28,11 @@
 # Unless otherwise specfied, "branch" will be the latest stable release
 # of a framework
   assetic:
-    url: https://github.com/kriswallsmith/assetic.git
-    branch: v1.1.2
-    commit: 735cffd3982c6e8cdebe292d5db39d077f65890f
+    url: https://github.com/fredemmott/assetic.git
+    # Flakey test in v1.1.2 - PR up for master, this branch is the test fix
+    # cherry-picked onto 1.1.2
+    branch: filesystemcachetest-1.1.2
+    commit: 0e5b07185cb82a347ffb700e8bd2415b9ac49a91
     install_root: assetic
     test_root: assetic
     clowns:
@@ -46,6 +48,9 @@
     commit: ac8ac6a90812d3d2c880efe00c2293aef6fd8030
     install_root: codeigniter
     test_root: codeigniter/tests
+    clowns:
+      # Errors + fails with PHP5
+      - codeigniter/tests/codeigniter/core/URI_test.php
   composer:
     url: https://github.com/composer/composer.git
     # master is the only available branch
@@ -124,7 +129,11 @@
     clowns:
       - joomla-cms/tests/unit/suites/libraries/cms/pagination/JPaginationTest.php
       - joomla-cms/tests/unit/suites/libraries/cms/toolbar/button/JToolbarButtonHelpTest.php
+      - joomla-cms/tests/unit/suites/libraries/cms/html/JHtmlIconsTest.php
+      - joomla-cms/tests/unit/suites/libraries/legacy/categories/JCategoryNodeTest.php
       - joomla-cms/tests/unit/suites/libraries/joomla/twitter/JTwitterTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/document/opensearch/JDocumentOpensearchTest.php
+      - joomla-cms/tests/unit/suites/libraries/joomla/cache/storage/JCacheStorageMainTest.php
   klein:
     url: https://github.com/chriso/klein.php.git
     branch: v2.0.2
@@ -154,11 +163,12 @@
     install_root: magento2
     test_root: magento2/dev/tests/unit
   mediawiki:
-    # Bad test data in wikimedia/mediawiki-core at the moment
+    # - Bad test data in wikimedia/mediawiki-core at the moment
+    # - Some tests have @group database set incorrectly, so are ran anyway
     url: https://github.com/fredemmott/mediawiki-core.git
     # When we move back to mediawiki-core, stable branch is wmf/1.22wmf22
     branch: hhvm-fix
-    commit: 7b44088a86b09fab2b3dc6e31348c602335f2dd5
+    commit: f5e7ff5
     install_root: mediawiki-core
     test_root: mediawiki-core/tests/phpunit
     test_file_regex: /.*(\Test.*\.php)$/
@@ -254,6 +264,7 @@
       - pear-core/tests/PEAR_PackageFile_v2_Validator/test_extbinrelease.phpt
       - pear-core/tests/PEAR_PackageFile_v2_Validator/test_extsrcrelease.phpt
       - pear-core/tests/PEAR_PackageFile_v2_Validator/test_phprelease.phpt
+      - pear-core/tests/PEAR_RunTest/bug16057.phpt
       - pear-core/tests/System/find_test.phpt
       - pear-core/tests/System/test_which.phpt
       - pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents.phpt
@@ -270,17 +281,30 @@
       - phpbb3/tests/lint_test.php
   phpmyadmin:
     url: https://github.com/phpmyadmin/phpmyadmin.git
-    branch: RELEASE_4_1_7
-    commit: 775d4f1e6fe8da3dfb5e8b4e6063d2c0d345e52f
+    # Stable is RELEASE_4_1_9 but we have many pull requests in master
+    # https://github.com/phpmyadmin/phpmyadmin/pull/1061 and also #1068, #1067
+    # #1063, #1062, #1060, #1055, #1046, #1037, #1035, #1034, #1032
+    branch: master
+    commit: 568c2cbe3aab44c274dec6a3e7160db62d9d8821
     install_root: phpmyadmin
     test_root: phpmyadmin
-    config_file: phpmyadmin/phpunit.xml.nocoverage
+    # Larger timeout, no code coverage, no selenium testing
+    config_file: phpmyadmin/phpunit.xml.hhvm
   phpunit:
     url: https://github.com/sebastianbergmann/phpunit.git
-    branch: "4.0.3"
-    commit: "6a0c2db"
+    branch: 4.0.9
+    commit: c7e9e4b1253142acda4cb86a7686db412684fe04
     install_root: phpunit
     test_root: phpunit
+  proxymanager:
+    url: https://github.com/Ocramius/ProxyManager.git
+    branch: master
+    commit: 88be49f61a70700c2e0cd21b01d29bcb53698f7d
+    install_root: proxymanager
+    test_root: proxymanager
+    # include phpt and phpunit tests, exclude performance tests
+    test_name_regex: '/([A-Za-z0-9\-_\/\.]+\.phpt)|([_a-zA-Z0-9\\]*(?!PerformanceTest)*::[_a-zA-Z0-9]*( with data set (".*?"|#[0-9]+))?)/'
+    config_file: proxymanager/phpunit.xml.dist
   ratchet:
     url: https://github.com/cboden/Ratchet.git
     # "stable" might be 0.3, but master seems reasonable to test against
@@ -290,8 +314,8 @@
     test_root: ratchet
   reactphp:
     url: https://github.com/reactphp/react.git
-    branch: v0.3.3
-    commit: 210c11a6041cfa2ce1701a4870b69475d9081265
+    branch: v0.4.0
+    commit: 3a5d12166b38d059a96c232d809332e7f3e60d9d
     install_root: reactphp
     test_root: reactphp
   silverstripe:
@@ -304,9 +328,11 @@
     install_root: silverstripe
     test_root: silverstripe
   slim:
-    url: https://github.com/codeguy/Slim
-    branch: "2.4.2"
-    commit: 3a2ac723f17b5d81607287ff28575d38b9fbc70e
+    url: https://github.com/fredemmott/Slim
+    # This branch makes a test less flakey
+    # PR: https://github.com/codeguy/Slim/pull/796
+    branch: "v2.4.2-derace-testExpiresAsString"
+    commit: b86f11706b80972e3239c8ab0f24382b3b8dcf52
     install_root: slim
     test_root: slim
   symfony:
@@ -333,6 +359,9 @@
     install_root: vfsstream
     test_root: vfsstream
     config_file: vfsstream/phpunit.xml.dist
+    blacklist:
+      # Intermittently hangs, takes > 24h
+      - vfsstream/src/test/php/org/bovigo/vfs/vfsStreamWrapperWithoutRootTestCase.php
   yii:
     url: https://github.com/yiisoft/yii.git
     branch: master

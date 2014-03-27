@@ -1,2 +1,3 @@
 two
-HipHop Fatal error: Call to undefined method two::heh from context two in %stest/quick/static_fatal.php on line 6
+
+Fatal error: Call to undefined method two::heh from context two in %stest/quick/static_fatal.php on line 6

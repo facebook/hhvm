@@ -1,14 +1,17 @@
 *** Testing array_diff_ukey() : error conditions ***
 
 -- Testing array_diff_ukey() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing array_diff_ukey() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing array_diff_ukey() function with no arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

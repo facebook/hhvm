@@ -1,6 +1,21 @@
-Next
+NEXT
+  - Allow direct arg passing with up to 15 params (7 if at least one is a double)
+
+"Ghostface Killah" 17-Mar-2014
+  - Remove "HipHop" from error messages
+  - Add __IsFoldable user attribute for const-foldable functions
+  - Add __Native("NoFCallBuiltin") UA for builtins which need an actrec
+  - Add support for testing different outputs in repo mode
+  - Implement remaining functionality from intl extension
+  - Implement XSL extension
+  - Implement Stream Filters
+  - Improve php.ini support and get ready to kill HDF files
+  - Parse config files as ini files, unless filename contains '.hdf'
+  - Various fixes to Redis, JSON, SPL, DateTime, MySQLi, and others
+  - Remove C<T>Ref typedefs (use const T& now)
   - JIT default on in command line mode
   - gethostname() just returns what the syscall returns (Zend compat)
+  - HHBBC turned on in the build for facebook.com
 
 "Fifty Cent" 3-Mar-2014
   - Array parameter type constraints implicitly cast collections to arrays

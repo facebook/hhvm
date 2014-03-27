@@ -1,5 +1,6 @@
 *** Testing session_encode() : variation ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
 bool(false)
@@ -8,6 +9,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

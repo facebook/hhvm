@@ -1,23 +1,28 @@
 *** Testing stream_filter_remove() : error conditions ***
 
 -- Testing stream_filter_remove() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing stream_filter_remove() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing stream_filter_remove() function with unexisting stream filter --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing stream_filter_remove() function with bad resource --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing stream_filter_remove() function with an already removed filter --
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

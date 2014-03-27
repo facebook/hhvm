@@ -1,3 +1,4 @@
 [009] [%d] (error message varies with the MySQL Server version, check the error code)
-HipHop Warning: %s
+
+Warning: %s
 done!

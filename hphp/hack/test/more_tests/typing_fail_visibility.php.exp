@@ -1,0 +1,2 @@
+File "typing_fail_visibility.php", line 13, characters 20-20:
+This method is not declared as abstract, it must have a body

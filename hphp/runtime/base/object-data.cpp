@@ -39,6 +39,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/repo.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -52,13 +53,9 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 // current maximum object identifier
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(int, ObjectData::os_max_id);
+__thread int ObjectData::os_max_id;
 
 TRACE_SET_MOD(runtime);
-
-int ObjectData::GetMaxId() {
-  return *(ObjectData::os_max_id.getCheck());
-}
 
 const StaticString
   s_offsetGet("offsetGet"),
@@ -197,35 +194,6 @@ Object ObjectData::iterableObject(bool& isIterable,
   }
   isIterable = false;
   return obj;
-}
-
-ArrayIter ObjectData::begin(const String& context /* = null_string */) {
-  bool isIterable;
-  if (isCollection()) {
-    return ArrayIter(this);
-  }
-  Object iterable = iterableObject(isIterable);
-  if (isIterable) {
-    return ArrayIter(iterable.detach(), ArrayIter::noInc);
-  } else {
-    return ArrayIter(iterable->o_toIterArray(context));
-  }
-}
-
-MutableArrayIter ObjectData::begin(Variant* key, Variant& val,
-                                   const String& context /* = null_string */) {
-  bool isIterable;
-  if (isCollection()) {
-    raise_error("Collection elements cannot be taken by reference");
-  }
-  Object iterable = iterableObject(isIterable);
-  if (isIterable) {
-    throw FatalErrorException("An iterator cannot be used with "
-                              "foreach by reference");
-  }
-  Array properties = iterable->o_toIterArray(context, true);
-  ArrayData* arr = properties.detach();
-  return MutableArrayIter(arr, key, val);
 }
 
 Array& ObjectData::dynPropArray() const {
@@ -859,10 +827,6 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   }
 }
 
-void ObjectData::dump() const {
-  o_toArray().dump();
-}
-
 ObjectData* ObjectData::clone() {
   if (getAttribute(HasClone) && getAttribute(IsCppBuiltin)) {
     if (isCollection()) {
@@ -998,7 +962,7 @@ static void freeDynPropArray(ObjectData* inst) {
 }
 
 ObjectData::~ObjectData() {
-  int& pmax = *os_max_id;
+  int& pmax = os_max_id;
   if (o_id && o_id == pmax) {
     --pmax;
   }
@@ -1067,34 +1031,44 @@ Slot ObjectData::declPropInd(TypedValue* prop) const {
 TypedValue* ObjectData::getProp(Class* ctx, const StringData* key,
                                 bool& visible, bool& accessible,
                                 bool& unset) {
-  TypedValue* prop = nullptr;
   unset = false;
+
   Slot propInd = m_cls->getDeclPropIndex(ctx, key, accessible);
   visible = (propInd != kInvalidSlot);
-  if (propInd != kInvalidSlot) {
+  if (LIKELY(propInd != kInvalidSlot)) {
     // We found a visible property, but it might not be accessible.
     // No need to check if there is a dynamic property with this name.
-    prop = &propVec()[propInd];
+    auto const prop = &propVec()[propInd];
     if (prop->m_type == KindOfUninit) {
       unset = true;
     }
-  } else {
-    assert(!visible && !accessible);
-    // We could not find a visible declared property. We need to check
-    // for a dynamic property with this name.
-    if (UNLIKELY(getAttribute(HasDynPropArr))) {
-      prop = dynPropArray()->nvGet(key);
-      if (prop) {
-        // Returned a non-declared property, we know that it is
-        // visible and accessible (since all dynamic properties are),
-        // and we know it is not unset (since unset dynamic properties
-        // don't appear in the dynamic property array).
-        visible = true;
-        accessible = true;
+
+    if (debug) {
+      if (RuntimeOption::RepoAuthoritative && Repo::get().global().UsedHHBBC) {
+        auto const repoTy = m_cls->declPropRepoAuthType(propInd);
+        always_assert(tvMatchesRepoAuthType(*prop, repoTy));
       }
     }
+
+    return prop;
   }
-  return prop;
+
+  // We could not find a visible declared property. We need to check
+  // for a dynamic property with this name.
+  assert(!visible && !accessible);
+  if (UNLIKELY(getAttribute(HasDynPropArr))) {
+    if (auto const prop = dynPropArray()->nvGet(key)) {
+      // Returned a non-declared property, we know that it is
+      // visible and accessible (since all dynamic properties are),
+      // and we know it is not unset (since unset dynamic properties
+      // don't appear in the dynamic property array).
+      visible = true;
+      accessible = true;
+      return prop;
+    }
+  }
+
+  return nullptr;
 }
 
 const TypedValue* ObjectData::getProp(Class* ctx, const StringData* key,

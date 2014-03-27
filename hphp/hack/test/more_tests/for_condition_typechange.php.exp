@@ -1,0 +1,6 @@
+File "for_condition_typechange.php", line 15, characters 10-11:
+Typing error
+File "for_condition_typechange.php", line 15, characters 10-11:
+This is a num (int/float) because this is used in an arithmetic operation
+File "for_condition_typechange.php", line 14, characters 15-18:
+It is incompatible with a bool

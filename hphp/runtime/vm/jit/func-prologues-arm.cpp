@@ -186,7 +186,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   auto numUninitLocals = func->numLocals() - numLocals;
   assert(numUninitLocals >= 0);
-  if (numUninitLocals > 0 && !func->isGenerator()) {
+  if (numUninitLocals > 0) {
     if (numUninitLocals > kLocalsToInitializeInline) {
       auto const& loopReg = rAsm2;
 
@@ -223,11 +223,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   // Set stack pointer just past all locals
   int frameCells = func->numSlotsInFrame();
-  if (func->isGenerator()) {
-    frameCells = 1;
-  } else {
-    emitRegGetsRegPlusImm(a, rVmSp, rVmFp, -cellsToBytes(frameCells));
-  }
+  emitRegGetsRegPlusImm(a, rVmSp, rVmFp, -cellsToBytes(frameCells));
 
   Fixup fixup(funcBody.offset() - func->base(), frameCells);
 

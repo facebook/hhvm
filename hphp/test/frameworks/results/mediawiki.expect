@@ -783,67 +783,67 @@ CleanUpTest::testSurrogateRegression
 CleanUpTest::testTripleBytes
 .
 CollationTest::testGetFirstLetter with data set #0
-S
+.
 CollationTest::testGetFirstLetter with data set #1
-S
+.
 CollationTest::testGetFirstLetter with data set #10
-S
+.
 CollationTest::testGetFirstLetter with data set #11
-S
+.
 CollationTest::testGetFirstLetter with data set #12
-S
+.
 CollationTest::testGetFirstLetter with data set #13
-S
+.
 CollationTest::testGetFirstLetter with data set #14
-S
+.
 CollationTest::testGetFirstLetter with data set #15
-S
+.
 CollationTest::testGetFirstLetter with data set #16
-S
+.
 CollationTest::testGetFirstLetter with data set #2
-S
+.
 CollationTest::testGetFirstLetter with data set #3
-S
+.
 CollationTest::testGetFirstLetter with data set #4
-S
+.
 CollationTest::testGetFirstLetter with data set #5
-S
+.
 CollationTest::testGetFirstLetter with data set #6
-S
+.
 CollationTest::testGetFirstLetter with data set #7
-S
+.
 CollationTest::testGetFirstLetter with data set #8
-S
+.
 CollationTest::testGetFirstLetter with data set #9
-S
+.
 CollationTest::testIsPrefix with data set #0
-S
+.
 CollationTest::testIsPrefix with data set #1
-S
+.
 CollationTest::testIsPrefix with data set #2
-S
+.
 CollationTest::testIsPrefix with data set #3
-S
+.
 CollationTest::testIsPrefix with data set #4
-S
+.
 CollationTest::testIsPrefix with data set #5
-S
+.
 CollationTest::testIsPrefix with data set #6
-S
+.
 CollationTest::testIsPrefix with data set #7
-S
+.
 CollationTest::testIsPrefix with data set #8
-S
+.
 CollationTest::testMediaWikiTestCaseParentSetupCalled
-S
+.
 CollationTest::testNotIsPrefix with data set #0
-S
+.
 CollationTest::testNotIsPrefix with data set #1
-S
+.
 CollationTest::testNotIsPrefix with data set #2
-S
+.
 CollationTest::testNotIsPrefix with data set #3
-S
+.
 DatabaseMysqlBaseTest::testAddIdentifierQuotes with data set #0
 .
 DatabaseMysqlBaseTest::testAddIdentifierQuotes with data set #1
@@ -6528,12 +6528,6 @@ MessageTest::testMessageParamSubstitution
 .
 MessageTest::testMessageParams
 .
-ORMTableTest::testIgnoreErrorsOverride
-E
-ORMTableTest::testMediaWikiTestCaseParentSetupCalled
-.
-ORMTableTest::testSingleton
-.
 OutputPageTest::testHandheld
 .
 OutputPageTest::testMediaWikiTestCaseParentSetupCalled
@@ -8740,8 +8734,6 @@ TagHookTest::testTagHooks with data set #3
 .
 TagHookTest::testTagHooks with data set #4
 .
-TestORMRowTest::testMediaWikiTestCaseParentSetupCalled
-E
 TestSample::testCheckMainPageTitleIsConsideredLocal
 .
 TestSample::testCreateBasicListOfTitles with data set #0

@@ -28,12 +28,10 @@ Variant f_fb_unserialize(const Variant& thing, VRefParam success);
 Variant f_fb_compact_serialize(const Variant& thing);
 Variant f_fb_compact_unserialize(const Variant& thing, VRefParam success,
                                  VRefParam errcode = null_variant);
-bool f_fb_could_include(const String& file);
 bool f_fb_intercept(const String& name, const Variant& handler,
                     const Variant& data = null_variant);
 bool f_fb_rename_function(const String& orig_func_name,
                           const String& new_func_name);
-bool f_fb_autoload_map(const Variant& map, const String& root);
 bool f_fb_utf8ize(VRefParam input);
 int64_t f_fb_utf8_strlen_deprecated(const String& input);
 int64_t f_fb_utf8_strlen(const String& input);
@@ -60,7 +58,6 @@ Array f_fb_parallel_query(
   const Array& sql_map, int max_thread = 50, bool combine_result = true,
   bool retry_query_on_fail = true, int connect_timeout = -1,
   int read_timeout = -1, bool timeout_in_ms = false);
-Variant f_fb_const_fetch(const Variant& key);
 bool f_fb_output_compression(bool new_value);
 void f_fb_set_exit_callback(const Variant& function);
 int64_t f_fb_get_last_flush_size();

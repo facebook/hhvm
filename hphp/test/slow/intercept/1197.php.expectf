@@ -1,4 +1,5 @@
-HipHop Warning: bar() expects exactly 2 parameters, 1 given in %s/test/slow/intercept/1197.php on line 17
+
+Warning: bar() expects exactly 2 parameters, 1 given in %s/test/slow/intercept/1197.php on line 17
 string(3) "bar"
 int(20)
 int(3)

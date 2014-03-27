@@ -12,8 +12,10 @@ array(1) {
   ["name"]=>
   string(6) "JoeFoo"
 }
-HipHop Notice: %s
+
+Notice: %s
 string(6) "JoeFoo"
-HipHop Notice: %s
+
+Notice: %s
 string(6) "JoeFoo"
 ===DONE===

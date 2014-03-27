@@ -1,11 +1,13 @@
 *** Testing bin2hex() : error conditions ***
 
 -- Testing bin2hex() function with no arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing bin2hex() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
  
 ===DONE===

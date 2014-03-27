@@ -16,7 +16,7 @@
 
 #include "hphp/test/ext/test_ext_memcached.h"
 #include "hphp/runtime/ext/ext_memcached.h"
-#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/test/ext/test_memcached_info.inc"
 
@@ -135,7 +135,7 @@ bool TestExtMemcached::test_Memcached_types() {
 bool TestExtMemcached::test_Memcached_cas() {
   CREATE_MEMCACHED();
   for (ArrayIter iter(memc_version.toArray()); iter; ++iter) {
-    if (!f_version_compare(iter.second().toString(), "1.3.0", ">=")
+    if (!HHVM_FN(version_compare)(iter.second().toString(), "1.3.0", ">=")
         .toBoolean()) {
       SKIP("Need memcached 1.3.0 for CAS");
       return Count(true);

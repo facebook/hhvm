@@ -1,25 +1,31 @@
 -- Offset is -25 --
 Multibyte String:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ASCII String:
 mb_strrpos:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 strrpos:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Offset is -24 --
 Multibyte String:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ASCII String:
 mb_strrpos:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 strrpos:
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Offset is -13 --

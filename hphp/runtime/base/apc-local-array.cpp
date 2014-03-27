@@ -13,13 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/apc-local-array.h"
+
 #include <vector>
+
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/hphp-array-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -273,12 +275,12 @@ ssize_t APCLocalArray::IterRewind(const ArrayData* ad, ssize_t prev) {
   return next >= 0 ? next : invalid_index;
 }
 
-bool APCLocalArray::ValidFullPos(const ArrayData* ad, const FullPos& fp) {
+bool APCLocalArray::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
   assert(fp.getContainer() == ad);
   return false;
 }
 
-bool APCLocalArray::AdvanceFullPos(ArrayData* ad, FullPos& fp) {
+bool APCLocalArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   return false;
 }
 

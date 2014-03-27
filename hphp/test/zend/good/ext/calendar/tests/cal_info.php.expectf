@@ -199,4 +199,5 @@ Array
     [calname] => Julian
     [calsymbol] => CAL_JULIAN
 )
-HipHop Warning: %s
+
+Warning: %s

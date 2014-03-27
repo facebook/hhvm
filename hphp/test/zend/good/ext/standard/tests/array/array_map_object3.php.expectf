@@ -9,7 +9,8 @@ array(3) {
   int(7)
 }
 -- accessing child method from parent class --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- accessing parent method using child class object --
 array(3) {
@@ -21,6 +22,7 @@ array(3) {
   int(7)
 }
 -- accessing child method using parent class object --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

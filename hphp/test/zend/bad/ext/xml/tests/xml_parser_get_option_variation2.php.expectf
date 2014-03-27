@@ -1,104 +1,128 @@
 *** Testing xml_parser_get_option() : usage variations ***
 
 Arg value 12345 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value -2345 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 10.5 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value -10.5 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 101234567000 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 1.07654321E-9 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 0.5 
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 1 
 int(1)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value 1 
 int(1)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Arg value string 
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Arg value string 
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Arg value Some Ascii Data 
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Arg value Resource id %s
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

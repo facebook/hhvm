@@ -25,33 +25,19 @@ F2:
   Unwind
 }
 
-.function R() hasGeneratorBody("R$continuation") {
-  CreateCont
+.function R() isGenerator {
+  CreateCont L0
   RetC
-}
-
-.function R$continuation() isGenerator {
-  UnpackCont
-  Switch <L0 L1 L2 L3 L4 L5 L6> 0 0
 L0:
   PopC
   Int 1
-  ContSuspend 2
-L1:
-  Throw
-L2:
+  ContSuspend
   PopC
   Int 2
-  ContSuspend 4
-L3:
-  Throw
-L4:
+  ContSuspend
   PopC
   Int 3
-  ContSuspend 6
-L5:
-  Throw
-L6:
+  ContSuspend
   PopC
   Null
   ContRetC

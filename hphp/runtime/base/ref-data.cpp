@@ -21,12 +21,6 @@
 
 namespace HPHP {
 
-void RefData::dump() const {
-  VariableSerializer vs(VariableSerializer::Type::VarDump);
-  String ret(vs.serialize(tvAsCVarRef(&m_tv), true));
-  printf("RefData: %s", ret.c_str());
-}
-
 void RefData::compileTimeAsserts() {
   static_assert(offsetof(RefData, m_count) == FAST_REFCOUNT_OFFSET, "");
   static_assert(sizeof(RefData::m_count) == TypedValueAux::auxSize, "");

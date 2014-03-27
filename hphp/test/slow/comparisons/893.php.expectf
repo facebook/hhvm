@@ -6,9 +6,12 @@
 6	YYYY	0 != '1'	
 7	NNNN	0 != '0'	
 8	YYYY	0 != '-1'	
-9	HipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/893.php on line 126
-NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/893.php on line 130
-NHipHop Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/893.php on line 133
+9	
+Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/893.php on line 126
+N
+Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/893.php on line 130
+N
+Notice: Use of undefined constant nullptr - assumed 'nullptr' in %s/test/slow/comparisons/893.php on line 133
 NN	0 != nullptr	
 10	YYYY	0 != array()	
 11	YYYY	0 != array(1)	

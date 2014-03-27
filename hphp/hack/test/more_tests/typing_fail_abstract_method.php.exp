@@ -1,0 +1,2 @@
+File "typing_fail_abstract_method.php", line 15, characters 28-28:
+This method is declared as abstract, but has a body

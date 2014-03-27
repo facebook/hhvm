@@ -28,33 +28,12 @@ void c_StaticExceptionWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_StaticExceptionWaitHandle::ti_create(const Object& exception) {
-  if (!exception.instanceof(SystemLib::s_ExceptionClass)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected exception to be an instance of Exception"));
-    throw e;
-  }
-
-  return Create(exception.get());
-}
-
 c_StaticExceptionWaitHandle*
 c_StaticExceptionWaitHandle::Create(ObjectData* exception) {
   assert(exception->instanceof(SystemLib::s_ExceptionClass));
 
   auto wait_handle = NEWOBJ(c_StaticExceptionWaitHandle)();
   tvWriteObject(exception, &wait_handle->m_resultOrException);
-  return wait_handle;
-}
-
-ObjectData*
-c_StaticExceptionWaitHandle::CreateFromVM(ObjectData* exception) {
-  assert(exception->instanceof(SystemLib::s_ExceptionClass));
-
-  auto wait_handle = NEWOBJ(c_StaticExceptionWaitHandle)();
-  wait_handle->m_resultOrException.m_type = KindOfObject;
-  wait_handle->m_resultOrException.m_data.pobj = exception;
-  wait_handle->incRefCount();
   return wait_handle;
 }
 

@@ -1,7 +1,9 @@
 *** Creating a hard link to a non-existent file ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 int(-1)
 bool(false)
 Done

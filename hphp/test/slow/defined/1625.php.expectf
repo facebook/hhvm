@@ -1,2 +1,3 @@
-HipHop Notice: Use of undefined constant FOO - assumed 'FOO' in %s/test/slow/defined/1625.php on line 3
+
+Notice: Use of undefined constant FOO - assumed 'FOO' in %s/test/slow/defined/1625.php on line 3
 FOOundefined

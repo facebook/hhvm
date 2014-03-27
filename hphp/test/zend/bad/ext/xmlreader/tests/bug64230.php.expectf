@@ -3,7 +3,10 @@ Internal errors TRUE
 Internal: Specification mandate value for attribute att
 
 Internal errors FALSE
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 Done

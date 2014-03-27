@@ -1,0 +1,3 @@
+File "call_before_init2.php", line 16, characters 34-44:
+Until the initialization of $this is over, you can only call private methods
+The initialization is not over because $this->x can still potentially be null

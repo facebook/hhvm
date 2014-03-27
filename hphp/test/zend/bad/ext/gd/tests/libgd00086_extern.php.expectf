@@ -1,4 +1,5 @@
 gd-png:  fatal libpng error: Read Error: truncated data
 gd-png error: setjmp returns error condition 1
-HipHop Warning: %s
+
+Warning: %s
 bool(false)

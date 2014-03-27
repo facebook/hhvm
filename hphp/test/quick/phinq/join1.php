@@ -7,7 +7,6 @@ class C {
 }
 
 $customers = new Queryable();
-$orders = new Queryable();
 
 $q = from $c in $customers
      join $o in $orders on $c->CustomerID equals $o->CustomerID

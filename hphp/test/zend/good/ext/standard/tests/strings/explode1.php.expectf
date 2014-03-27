@@ -1,21 +1,29 @@
 *** Testing explode() for basic operations ***
 -- Iteration 1 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 2 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 3 --
 array(1) {
@@ -118,13 +126,17 @@ array(2) {
   string(56) "234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
 }
 -- Iteration 7 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 8 --
 array(2) {
@@ -401,8 +413,10 @@ array(2) {
 }
 
 *** Testing error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

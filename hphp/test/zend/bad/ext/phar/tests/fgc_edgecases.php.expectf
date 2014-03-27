@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 blah
 <?php
 echo file_get_contents("foo/" . basename(__FILE__));
@@ -13,7 +14,8 @@ echo file_get_contents("./hi", 0, $context, 50000);
 echo file_get_contents("./hi");
 echo file_get_contents("./hi", 0, $context, 0, 0);
 ?>
-HipHop Warning: %s
+
+Warning: %s
 test
 test
 <?php
@@ -29,8 +31,10 @@ echo file_get_contents("./hi", 0, $context, 50000);
 echo file_get_contents("./hi");
 echo file_get_contents("./hi", 0, $context, 0, 0);
 ?>
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 <?php
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();

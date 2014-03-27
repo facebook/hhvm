@@ -1,18 +1,21 @@
 *** Testing wordwrap() : error conditions ***
 
 -- Testing wordwrap() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing wordwrap() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing wordwrap() function with negative/zero value for width argument --
 -- width = 0 & cut = false --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- width = 0 & cut = true --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- width = -10 & cut = false --
 string(39) "testing<br />\nwordwrap<br />\nfunction"

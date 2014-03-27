@@ -1,4 +1,5 @@
-HipHop Warning: Creating default object from empty value in %s/test/slow/compilation/1298.php on line 6
+
+Warning: Creating default object from empty value in %s/test/slow/compilation/1298.php on line 6
 object(stdClass)#1 (1) {
   ["error"]=>
   string(0) ""

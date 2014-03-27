@@ -74,7 +74,8 @@ void VariableSerializer::setResourceInfo(const String& rsrcName, int rsrcId) {
   m_objCode = 0;
 }
 
-String VariableSerializer::serialize(const Variant& v, bool ret) {
+String VariableSerializer::serialize(const Variant& v, bool ret,
+                                     bool keepCount /* = false */) {
   StringBuffer buf;
   m_buf = &buf;
   if (ret) {
@@ -82,7 +83,7 @@ String VariableSerializer::serialize(const Variant& v, bool ret) {
   } else {
     buf.setOutputLimit(StringData::MaxSize);
   }
-  m_valueCount = 1;
+  m_valueCount = keepCount ? m_valueCount + 1 : 1;
   write(v);
   if (ret) {
     return m_buf->detach();

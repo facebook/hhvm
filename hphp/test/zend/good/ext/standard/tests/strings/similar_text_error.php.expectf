@@ -1,6 +1,8 @@
 -- Testing similar_text() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 
 -- Testing similar_text() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

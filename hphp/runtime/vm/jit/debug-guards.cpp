@@ -18,6 +18,7 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
@@ -26,7 +27,6 @@
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP { namespace JIT {
-
 
 static constexpr size_t dbgOff =
   offsetof(ThreadInfo, m_reqInjectionData) +
@@ -40,9 +40,10 @@ void addDbgGuardImpl(SrcKey sk) {
   Asm a { mcg->code.main() };
 
   // Emit the checks for debugger attach
-  emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, reg::rAsm);
-  a.   loadb  (reg::rAsm[dbgOff], rbyte(reg::rAsm));
-  a.   testb  ((int8_t)0xff, rbyte(reg::rAsm));
+  auto rtmp = rAsm;
+  emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, rtmp);
+  a.   loadb  (rtmp[dbgOff], rbyte(rtmp));
+  a.   testb  ((int8_t)0xff, rbyte(rtmp));
 
   // Branch to a special REQ_INTERPRET if attached
   auto const fallback =

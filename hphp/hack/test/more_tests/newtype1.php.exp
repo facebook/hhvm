@@ -1,0 +1,6 @@
+File "newtype1.php--file2.php", line 6, characters 10-11:
+Invalid return type
+File "newtype1.php--file2.php", line 5, characters 25-27:
+This is an int
+File "newtype1.php--file2.php", line 5, characters 15-18:
+It is incompatible with an object of type fbid

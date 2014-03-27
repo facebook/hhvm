@@ -271,13 +271,15 @@ const StaticString
   s_HH_Traversable("HH\\Traversable"),
   s_HH_KeyedTraversable("HH\\KeyedTraversable"),
   s_Indexish("Indexish"),
-  s_XHPChild("XHPChild");
+  s_XHPChild("XHPChild"),
+  s_Stringish("Stringish");
 
 bool interface_supports_non_objects(const StringData* s) {
   return s->isame(s_HH_Traversable.get()) ||
          s->isame(s_HH_KeyedTraversable.get()) ||
          s->isame(s_Indexish.get()) ||
-         s->isame(s_XHPChild.get());
+         s->isame(s_XHPChild.get()) ||
+         s->isame(s_Stringish.get());
 }
 
 bool interface_supports_array(const StringData* s) {
@@ -296,12 +298,14 @@ bool interface_supports_array(const std::string& n) {
 }
 
 bool interface_supports_string(const StringData* s) {
-  return (s->isame(s_XHPChild.get()));
+  return s->isame(s_XHPChild.get())
+    || s->isame(s_Stringish.get());
 }
 
 bool interface_supports_string(const std::string& n) {
   const char *s = n.c_str();
-  return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
+  return (n.size() == 8 && !strcasecmp(s, "XHPChild"))
+    || (n.size() == 9 && !strcasecmp(s, "Stringish"));
 }
 
 bool interface_supports_int(const StringData* s) {

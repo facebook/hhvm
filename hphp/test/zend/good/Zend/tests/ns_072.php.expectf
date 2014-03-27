@@ -1,4 +1,5 @@
 object(foo\test)#%d (0) {
 }
 NULL
-HipHop Fatal error: %s
+
+Fatal error: %s

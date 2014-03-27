@@ -1,0 +1,6 @@
+File "shape17.php", line 25, characters 10-11:
+Invalid return type
+File "shape17.php", line 16, characters 33-33:
+This is an object of type C
+File "shape17.php", line 20, characters 27-33:
+It is incompatible with an object of type A

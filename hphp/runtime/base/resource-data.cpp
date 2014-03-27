@@ -25,22 +25,18 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // resources have a separate id space
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(int, ResourceData::os_max_resource_id);
+__thread int ResourceData::os_max_resource_id;
 
 ResourceData::ResourceData() : m_count(0) {
   assert(uintptr_t(this) % sizeof(TypedValue) == 0);
-  int& pmax = *os_max_resource_id;
+  int& pmax = os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
   o_id = ++pmax;
 }
 
-int ResourceData::GetMaxResourceId() {
-  return *(os_max_resource_id.getCheck());
-}
-
 void ResourceData::o_setId(int id) {
   assert(id >= 1 && id <= 3); // only for STDIN, STDOUT, STDERR
-  int &pmax = *os_max_resource_id;
+  int &pmax = os_max_resource_id;
   if (o_id != id) {
     if (o_id == pmax) --pmax;
     o_id = id;
@@ -48,7 +44,7 @@ void ResourceData::o_setId(int id) {
 }
 
 ResourceData::~ResourceData() {
-  int &pmax = *os_max_resource_id;
+  int &pmax = os_max_resource_id;
   if (o_id && o_id == pmax) {
     --pmax;
   }
@@ -61,10 +57,6 @@ String ResourceData::o_toString() const {
 
 Array ResourceData::o_toArray() const {
   return empty_array;
-}
-
-void ResourceData::dump() const {
-  o_toArray().dump();
 }
 
 const StaticString s_Unknown("Unknown");

@@ -15,15 +15,17 @@
 */
 
 #include "hphp/runtime/base/hphp-array.h"
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/sort-helpers.h"
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/sort-helpers.h"
+#include "hphp/runtime/base/tv-helpers.h"
+
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-// inline methods of HphpArray
 #include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/array-iterator-defs.h"
 
 #include <folly/ScopeGuard.h>
 
@@ -175,33 +177,37 @@ ArrayData* HphpArray::EscalateForSort(ArrayData* ad) {
     SORT_CASE(SORT_NATURAL, cmp_type, acc_type) \
     SORT_CASE(SORT_NATURAL_CASE, cmp_type, acc_type) \
   }
-#define CALL_SORT(acc_type) \
-  if (flav == StringSort) { \
-    SORT_CASE_BLOCK(StrElm, acc_type) \
-  } else if (flav == IntegerSort) { \
-    SORT_CASE_BLOCK(IntElm, acc_type) \
-  } else { \
-    SORT_CASE_BLOCK(Elm, acc_type) \
+
+#define CALL_SORT(acc_type)                     \
+  if (flav == StringSort) {                     \
+    SORT_CASE_BLOCK(StrElm, acc_type)           \
+  } else if (flav == IntegerSort) {             \
+    SORT_CASE_BLOCK(IntElm, acc_type)           \
+  } else {                                      \
+    SORT_CASE_BLOCK(Elm, acc_type)              \
   }
-#define SORT_BODY(acc_type, resetKeys) \
-  do { \
-    a->freeStrongIterators(); \
-    if (!a->m_size) { \
-      if (resetKeys) { \
-        a->m_nextKI = 0; \
-      } \
-      return; \
-    } \
-    SortFlavor flav = a->preSort<acc_type>(acc_type(), true); \
-    a->m_pos = ssize_t(0); \
-    try { \
-      CALL_SORT(acc_type); \
-    } catch (...) { \
-      /* Make sure we leave the array in a consistent state */ \
-      a->postSort(resetKeys); \
-      throw; \
-    } \
-    a->postSort(resetKeys); \
+
+#define SORT_BODY(acc_type, resetKeys)                          \
+  do {                                                          \
+    if (UNLIKELY(strong_iterators_exist())) {                   \
+      free_strong_iterators(a);                                 \
+    }                                                           \
+    if (!a->m_size) {                                           \
+      if (resetKeys) {                                          \
+        a->m_nextKI = 0;                                        \
+      }                                                         \
+      return;                                                   \
+    }                                                           \
+    SortFlavor flav = a->preSort<acc_type>(acc_type(), true);   \
+    a->m_pos = ssize_t(0);                                      \
+    try {                                                       \
+      CALL_SORT(acc_type);                                      \
+    } catch (...) {                                             \
+      /* Make sure we leave the array in a consistent state */  \
+      a->postSort(resetKeys);                                   \
+      throw;                                                    \
+    }                                                           \
+    a->postSort(resetKeys);                                     \
   } while (0)
 
 void HphpArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
@@ -225,7 +231,9 @@ void HphpArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
 
 #define USER_SORT_BODY(acc_type, resetKeys)                     \
   do {                                                          \
-    a->freeStrongIterators();                                   \
+    if (UNLIKELY(strong_iterators_exist())) {                   \
+      free_strong_iterators(a);                                 \
+    }                                                           \
     if (!a->m_size) {                                           \
       if (resetKeys) {                                          \
         a->m_nextKI = 0;                                        \
@@ -233,7 +241,7 @@ void HphpArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
       return true;                                              \
     }                                                           \
     CallCtx ctx;                                                \
-    JIT::CallerFrame cf;                                     \
+    JIT::CallerFrame cf;                                        \
     vm_decode_function(cmp_function, cf(), false, ctx);         \
     if (!ctx.func) {                                            \
       return false;                                             \

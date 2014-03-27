@@ -1,0 +1,4 @@
+File "const_map3.php", line 13, characters 3-6:
+an object of type ConstMap does not allow array append
+File "const_map3.php", line 12, characters 14-21:
+You might want to check this out

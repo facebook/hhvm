@@ -128,7 +128,6 @@ define('AllowOverride',                  1 <<  8);
 define('IsStatic',                       1 <<  9);
 define('IsCppAbstract',                  1 << 10);
 define('IsReference',                    1 << 11);
-define('IsConstructor',                  1 << 12);
 define('IsNothing',                      1 << 13);
 define('ZendCompat',                     1 << 14);
 define('IsCppSerializable',              1 << 15);
@@ -147,7 +146,7 @@ define('NoDefaultSweep',                 1 << 27);
 define('IsSystem',                       1 << 28);
 define('IsTrait',                        1 << 29);
 define('ZendParamModeFalse',             1 << 30);
-define('NeedsActRec',                    1 << 31);
+define('NoFCallBulitin',                 1 << 31);
 
 // Mask for checking the flags related to variable arguments
 define('VarArgsMask', (VariableArguments | RefVariableArguments |
@@ -184,7 +183,7 @@ function get_flag_names($arr, $name, $global_func) {
   if ($flag & ContextSensitive      ) $ret .= ' | ContextSensitive'      ;
   if ($flag & NoDefaultSweep        ) $ret .= ' | NoDefaultSweep'        ;
   if ($flag & IsTrait               ) $ret .= ' | IsTrait'               ;
-  if ($flag & NeedsActRec           ) $ret .= ' | NeedsActRec'           ;
+  if ($flag & NoFCallBuiltin        ) $ret .= ' | NoFCallBuiltin'        ;
 
   if ($ret == '') {
     throw new Exception("invalid flag $flag");

@@ -570,7 +570,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(16) "gen$continuation"
+  string(3) "gen"
   [2]=>
   array(1) {
     ["args"]=>
@@ -582,7 +582,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(16) "gen$continuation"
+  string(3) "gen"
   [2]=>
   NULL
 }
@@ -667,7 +667,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(16) "gen$continuation"
+  string(3) "gen"
   [2]=>
   array(1) {
     ["args"]=>
@@ -679,7 +679,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(16) "gen$continuation"
+  string(3) "gen"
   [2]=>
   NULL
 }
@@ -756,7 +756,7 @@ array(3) {
   [0]=>
   string(5) "enter"
   [1]=>
-  string(16) "gen$continuation"
+  string(3) "gen"
   [2]=>
   array(1) {
     ["args"]=>
@@ -768,7 +768,7 @@ array(3) {
   [0]=>
   string(4) "exit"
   [1]=>
-  string(16) "gen$continuation"
+  string(3) "gen"
   [2]=>
   NULL
 }

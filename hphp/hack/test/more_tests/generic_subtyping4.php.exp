@@ -1,0 +1,6 @@
+File "generic_subtyping4.php", line 52, characters 14-20:
+Invalid argument
+File "generic_subtyping4.php", line 41, characters 19-22:
+This is a bool
+File "generic_subtyping4.php", line 45, characters 21-21:
+It is incompatible with an int

@@ -2367,7 +2367,7 @@
 #define ZEND_VM_KIND ZEND_VM_KIND_CALL
 
 /* */
-/* #undef ZTS */
+#define ZTS 1
 
 /* Define to 1 if on MINIX. */
 /* #undef _MINIX */
@@ -2486,5 +2486,6 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #endif
 #endif
 
-/* #undef PTHREADS */
+#define PTHREADS 1
 
+#define OAUTH_USE_CURL 1

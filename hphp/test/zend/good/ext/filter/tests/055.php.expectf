@@ -10,8 +10,10 @@ string(17) "01:23:45:67:89:aB"
 bool(false)
 bool(false)
 string(14) "0123.4567.89ab"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

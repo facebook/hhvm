@@ -1,0 +1,6 @@
+File "tobject_and_string_type_hint.php", line 16, characters 6-27:
+Invalid argument
+File "tobject_and_string_type_hint.php", line 12, characters 13-18:
+This is a string
+File "tobject_and_string_type_hint.php", line 16, characters 6-27:
+It is incompatible with an object; this class name is unknown to Hack

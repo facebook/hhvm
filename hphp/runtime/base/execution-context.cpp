@@ -142,8 +142,9 @@ String ExecutionContext::getMimeType() const {
     if (pos != String::npos) {
       mimetype = mimetype.substr(0, pos);
     }
-  } else if (m_transport && m_transport->sendDefaultContentType()) {
-    mimetype = m_transport->getDefaultContentType();
+  } else if (m_transport && m_transport->getUseDefaultContentType()) {
+    mimetype =
+        ThreadInfo::s_threadInfo->m_reqInjectionData.getDefaultMimeType();
   }
   return mimetype;
 }
@@ -165,7 +166,7 @@ void ExecutionContext::setContentType(const String& mimetype,
     contentType += "charset=";
     contentType += charset;
     m_transport->addHeader("Content-Type", contentType.c_str());
-    m_transport->setDefaultContentType(false);
+    m_transport->setUseDefaultContentType(false);
   }
 }
 
@@ -401,11 +402,11 @@ void ExecutionContext::resetCurrentBuffer() {
 // program executions
 
 void ExecutionContext::registerShutdownFunction(const Variant& function,
-                                                    Array arguments,
-                                                    ShutdownType type) {
+                                                Array arguments,
+                                                ShutdownType type) {
   Array callback = make_map_array(s_name, function, s_args, arguments);
-  Variant &funcs = m_shutdowns.lvalAt(type);
-  funcs.append(callback);
+  Variant& funcs = m_shutdowns.lvalAt(type);
+  forceToArray(funcs).append(callback);
 }
 
 Variant ExecutionContext::popShutdownFunction(ShutdownType type) {
@@ -413,7 +414,7 @@ Variant ExecutionContext::popShutdownFunction(ShutdownType type) {
   if (!funcs.isArray()) {
     return uninit_null();
   }
-  return funcs.pop();
+  return funcs.toArrRef().pop();
 }
 
 Variant ExecutionContext::pushUserErrorHandler(const Variant& function,
@@ -665,10 +666,11 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
     }
     try {
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
+      Array dummyContext = Array::Create();
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_packed_array(errnum, String(e.getMessage()), errfile,
-                                errline, "", backtrace)),
+                     errline, dummyContext, backtrace)),
                 false)) {
         return true;
       }
@@ -698,7 +700,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
   }
   // need to silence even with the AlwaysLogUnhandledExceptions flag set
   if (!silenced && RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e,
+    Logger::Log(Logger::LogError, "\nFatal error: ", e,
                 file.c_str(), line);
   }
   bool handled = false;
@@ -706,7 +708,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !silenced && !RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e,
+    Logger::Log(Logger::LogError, "\nFatal error: ", e,
                 file.c_str(), line);
   }
   return handled;
@@ -715,7 +717,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
 bool ExecutionContext::onUnhandledException(Object e) {
   String err = e.toString();
   if (RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Error("HipHop Fatal error: Uncaught %s", err.data());
+    Logger::Error("\nFatal error: Uncaught %s", err.data());
   }
 
   if (e.instanceof(SystemLib::s_ExceptionClass)) {
@@ -734,7 +736,7 @@ bool ExecutionContext::onUnhandledException(Object e) {
   m_lastError = err;
 
   if (!RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Error("HipHop Fatal error: Uncaught %s", err.data());
+    Logger::Error("\nFatal error: Uncaught %s", err.data());
   }
   return false;
 }

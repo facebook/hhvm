@@ -338,7 +338,11 @@ void RegionFormer::addInstruction() {
   if (m_blockFinished) {
     FTRACE(2, "selectTracelet adding new block at {} after:\n{}\n",
            showShort(m_sk), show(*m_curBlock));
-    m_curBlock = m_region->addBlock(curFunc(), m_sk.offset(), 0, curSpOffset());
+    RegionDesc::Block* newCurBlock = m_region->addBlock(curFunc(),
+                                                        m_sk.offset(), 0,
+                                                        curSpOffset());
+    m_region->addArc(m_curBlock->id(), newCurBlock->id());
+    m_curBlock = newCurBlock;
     m_blockFinished = false;
   }
 
@@ -347,7 +351,10 @@ void RegionFormer::addInstruction() {
 }
 
 bool RegionFormer::tryInline() {
-  if (!RuntimeOption::RepoAuthoritative || m_inst.op() != OpFCall) return false;
+  if (!RuntimeOption::RepoAuthoritative ||
+      (m_inst.op() != Op::FCall && m_inst.op() != Op::FCallD)) {
+    return false;
+  }
 
   auto refuse = [this](const std::string& str) {
     FTRACE(2, "selectTracelet not inlining {}: {}\n",
@@ -397,7 +404,7 @@ bool RegionFormer::tryInline() {
         if (sk == m_sk) return false;
 
         auto op = sk.op();
-        if (isFCallStar(op) || op == OpFCallBuiltin) return true;
+        if (isFCallStar(op) || op == Op::FCallBuiltin) return true;
         sk.advance();
       }
     }
@@ -430,7 +437,6 @@ bool RegionFormer::tryInline() {
 
   // Set up the region context, mapping stack slots in the caller to locals in
   // the callee.
-  assert(!callee->isGenerator());
   RegionContext ctx;
   ctx.func = callee;
   ctx.bcOffset = callee->base();
@@ -537,7 +543,7 @@ void RegionFormer::recordDependencies() {
   auto const doRelax = RuntimeOption::EvalHHIRRelaxGuards;
   bool changed = false;
   if (doRelax) {
-    Timer _t("selectTracelet_relaxGuards");
+    Timer _t(Timer::selectTracelet_relaxGuards);
     changed = relaxGuards(unit, *m_ht.irBuilder().guards(), m_profiling);
   }
 
@@ -566,7 +572,7 @@ void RegionFormer::recordDependencies() {
  */
 RegionDescPtr selectTracelet(const RegionContext& ctx, int inlineDepth,
                              bool profiling) {
-  Timer _t("selectTracelet");
+  Timer _t(Timer::selectTracelet);
   InterpSet interp;
   RegionDescPtr region;
   uint32_t tries = 1;

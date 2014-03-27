@@ -59,7 +59,7 @@ struct CLISession : private boost::noncopyable {
   CLISession() {
     TRACE(2, "CLISession::CLISession\n");
     char *argv[] = {"", nullptr};
-    execute_command_line_begin(1, argv, 0);
+    execute_command_line_begin(1, argv, 0, {});
   }
   ~CLISession() {
     TRACE(2, "CLISession::~CLISession\n");
@@ -93,7 +93,9 @@ void DummySandbox::run() {
           msg = "Invalid sandbox was specified. "
             "PHP files may not be loaded properly.\n";
         } else {
-          sri.setServerVariables(g->getRef(s__SERVER));
+          auto& server = g->getRef(s__SERVER);
+          forceToArray(server);
+          sri.setServerVariables(server.toArrRef());
         }
         Debugger::RegisterSandbox(sandbox);
         g_context->setSandboxId(sandbox.id());

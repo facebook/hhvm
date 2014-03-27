@@ -63,6 +63,12 @@ int emulate_zend(int argc, char** argv) {
       newargv.push_back(argv[cnt++]);
       continue;
     }
+    if (strcmp(argv[cnt], "-a") == 0) {
+      need_file = false;
+      newargv.push_back("-a");
+      cnt++;
+      continue;
+    }
     if (strcmp(argv[cnt], "-l") == 0 || strcmp(argv[cnt], "--lint") == 0) {
       cnt++;
       lint = true;
@@ -162,9 +168,8 @@ int emulate_zend(int argc, char** argv) {
   }
 
   if (ini_fd != -1) {
-    char arg[37];
-    sprintf(arg, "-vServer.IniFile=%s", ini_path);
-    newargv.push_back(arg);
+    newargv.push_back("-c");
+    newargv.push_back(ini_path);
   }
 
   if (cnt < argc && strcmp(argv[cnt], "--") == 0) cnt++;

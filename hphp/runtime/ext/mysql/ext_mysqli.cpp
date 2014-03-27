@@ -95,20 +95,17 @@ static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
 
   if (type_size < 1) {
     raise_warning("Invalid type or no types specified");
-    ar->m_r = *Variant(false).asTypedValue();
-    return &ar->m_r;
+    return arReturn(ar, false);
   }
   if (type_size != ar->numArgs() - 1 - start_index) {
     raise_warning("Number of elements in type definition string doesn't match "
                   "number of bind variables");
-    ar->m_r = *Variant(false).asTypedValue();
-    return &ar->m_r;
+    return arReturn(ar, false);
   }
   if (type_size != obj->o_get(s_param_count.get()).toInt64()) {
     raise_warning("Number of variables doesn't match number of parameters in "
                   "prepared statement");
-    ar->m_r = *Variant(false).asTypedValue();
-    return &ar->m_r;
+    return arReturn(ar, false);
   }
 
   std::vector<Variant*> vars;
@@ -117,14 +114,12 @@ static TypedValue* bind_param_helper(ObjectData* obj, ActRec* ar,
     if (t != 'i' && t != 'd' && t != 's' && t != 'b') {
       raise_warning("Undefined fieldtype %c (parameter %d)", types[i],
                     i + 2 + start_index);
-      ar->m_r = *Variant(false).asTypedValue();
-      return &ar->m_r;
+      return arReturn(ar, false);
     }
     vars.push_back(&getArg<KindOfRef>(ar, i + 1 + start_index));
   }
 
-  ar->m_r = *Variant(getStmt(obj)->bind_param(types, vars)).asTypedValue();
-  return &ar->m_r;
+  return arReturn(ar, getStmt(obj)->bind_param(types, vars));
 }
 
 static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
@@ -133,8 +128,7 @@ static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
   if (ar->numArgs() - start_index != fields) {
     raise_warning("Number of bind variables doesn't match number of fields in "
                   "prepared statement");
-    ar->m_r = *Variant(false).asTypedValue();
-    return &ar->m_r;
+    return arReturn(ar, false);
   }
 
   std::vector<Variant*> vars;
@@ -142,8 +136,7 @@ static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
     vars.push_back(&getArg<KindOfRef>(ar, i));
   }
 
-  ar->m_r = *Variant(getStmt(obj)->bind_result(vars)).asTypedValue();
-  return &ar->m_r;
+  return arReturn(ar, getStmt(obj)->bind_result(vars));
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -22,6 +22,8 @@ Existence of destination file => bool(true)
 Destination file name => %s/CopY.TMP
 Size of source file => int(1500)
 Size of destination file => int(1500)
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 *** Done ***

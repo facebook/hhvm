@@ -5075,7 +5075,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
         arg = String(str, CopyString);
         xmlFree(str);
       } else if (type == 2) {
-        arg = Array::Create();
+        Array argArr = Array::Create();
         if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
           for (int j = 0; j < obj->nodesetval->nodeNr; j++) {
             xmlNodePtr node = obj->nodesetval->nodeTab[j];
@@ -5098,9 +5098,10 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
               node->parent = nsparent;
               node->ns = curns;
             }
-            arg.append(create_node_object(node, intern->m_doc));
+            argArr.append(create_node_object(node, intern->m_doc));
           }
         }
+        arg = Variant(argArr);
       }
       break;
     default:
@@ -5128,7 +5129,8 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
     raise_warning("Not allowed to call handler '%s()'.", handler.data());
   } else {
     Variant retval = vm_call_user_func(handler, args);
-    if (retval.instanceof(c_DOMNode::classof())) {
+    if (retval.isObject() &&
+        retval.getObjectData()->instanceof(c_DOMNode::classof())) {
       if (intern->m_node_list.empty()) {
         intern->m_node_list = Array::Create();
       }

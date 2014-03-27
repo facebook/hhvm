@@ -1,5 +1,6 @@
 write: goodbye cruel world
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 [internal function]: write('%s', '')
 #1 %s(%d): session_write_close()

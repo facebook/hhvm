@@ -43,8 +43,8 @@ const StaticString
   s_user("user");
 
 Array f_get_defined_functions() {
-  return make_map_array(s_internal, ClassInfo::GetSystemFunctions(),
-                     s_user, ClassInfo::GetUserFunctions());
+  return make_map_array(s_internal, Unit::getSystemFunctions(),
+                        s_user, Unit::getUserFunctions());
 }
 
 bool f_function_exists(const String& function_name,
@@ -93,7 +93,7 @@ bool f_is_callable(const Variant& v, bool syntax /* = false */,
     if (arr.size() != 2 ||
         &clsname == &null_variant ||
         &mthname == &null_variant) {
-      name = v.toString();
+      name = String("Array");
       return false;
     }
 
@@ -153,90 +153,6 @@ Variant f_end_user_func_async(const Object& handle,
                               const Variant& additional_strategies /* = null */) {
   raise_error("%s is no longer supported", __func__);
   return uninit_null();
-}
-
-const StaticString
-  s_func("func"),
-  s_args("args"),
-  s_exception("exception"),
-  s_ret("ret");
-
-String f_call_user_func_serialized(const String& input) {
-  Variant out;
-  try {
-    Variant in = unserialize_from_string(input);
-    out.set(s_ret, vm_call_user_func(in[s_func], in[s_args].toArray()));
-  } catch (Object &e) {
-    out.set(s_exception, e);
-  }
-  return f_serialize(out);
-}
-
-Variant f_call_user_func_array_rpc(const String& host, int port,
-                                   const String& auth,
-                                   int timeout, const Variant& function,
-                                   const Array& params) {
-  return f_call_user_func_rpc(0, host, port, auth, timeout, function, params);
-}
-
-Variant f_call_user_func_rpc(int _argc, const String& host, int port,
-                             const String& auth,
-                             int timeout, const Variant& function,
-                             const Array& _argv /* = null_array */) {
-  std::string shost = host.data();
-  if (!RuntimeOption::DebuggerRpcHostDomain.empty()) {
-    unsigned int pos = shost.find(RuntimeOption::DebuggerRpcHostDomain);
-    if (pos != shost.length() - RuntimeOption::DebuggerRpcHostDomain.size()) {
-      shost += RuntimeOption::DebuggerRpcHostDomain;
-    }
-  }
-
-  std::string url = "http://";
-  url += shost;
-  url += ":";
-  url += boost::lexical_cast<std::string>(port);
-  url += "/call_user_func_serialized?auth=";
-  url += auth.data();
-
-  Array blob = make_map_array(s_func, function, s_args, _argv);
-  String message = f_serialize(blob);
-
-  std::vector<string> headers;
-  LibEventHttpClientPtr http = LibEventHttpClient::Get(shost, port);
-  if (!http->send(url, headers, timeout < 0 ? 0 : timeout, false,
-                  message.data(), message.size())) {
-    raise_error("Unable to send RPC request");
-    return false;
-  }
-
-  int code = http->getCode();
-  if (code <= 0) {
-    raise_error("Server timed out or unable to find specified URL: %s",
-                url.c_str());
-    return false;
-  }
-
-  int len = 0;
-  char *response = http->recv(len);
-  String sresponse(response, len, AttachString);
-  if (code != 200) {
-    raise_error("Internal server error: %d %s", code,
-                HttpProtocol::GetReasonString(code));
-    return false;
-  }
-
-  // This double decoding can be avoided by modifying RPC server to directly
-  // take PHP serialization format.
-  Variant res = unserialize_from_string(HHVM_FN(json_decode)(sresponse));
-  if (!res.isArray()) {
-    raise_error("Internal protocol error");
-    return false;
-  }
-
-  if (res.toArray().exists(s_exception)) {
-    throw res[s_exception];
-  }
-  return res[s_ret];
 }
 
 Variant f_forward_static_call_array(const Variant& function, const Array& params) {
@@ -357,7 +273,8 @@ Variant f_func_get_args() {
   FUNC_GET_ARGS_IMPL(0);
 }
 
-Variant f_hphp_func_slice_args(int offset) {
+// __SystemLib\func_slice_args
+Variant f_func_slice_args(int offset) {
   if (offset < 0) {
     offset = 0;
   }

@@ -61,7 +61,8 @@ bool(false)
 bool(false)
 
 -- Iteration 21 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 22 --
@@ -71,6 +72,7 @@ bool(false)
 bool(false)
 
 -- Iteration 24 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

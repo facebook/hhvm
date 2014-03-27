@@ -46,10 +46,13 @@ array(2) {
 }
 array(0) {
 }
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 == DONE ==

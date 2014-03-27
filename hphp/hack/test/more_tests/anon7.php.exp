@@ -1,0 +1,6 @@
+File "anon7.php", line 14, characters 10-11:
+Invalid return type
+File "anon7.php", line 12, characters 34-36:
+This is an int
+File "anon7.php", line 13, characters 30-36:
+It is incompatible with a string because this is the result of a concatenation

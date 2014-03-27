@@ -1,6 +1,7 @@
 *** Testing xml_parser_create_ns() : error conditions ***
 
 -- Testing xml_parser_create_ns() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

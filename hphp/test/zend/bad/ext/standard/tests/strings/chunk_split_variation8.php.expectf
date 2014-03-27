@@ -1,6 +1,7 @@
 *** Testing chunk_split() : different 'chunklen' with heredoc 'str' ***
 -- Iteration 1 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 2 --
 string(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t:::r:::i:::n:::g::: :::w:::i:::t:::h::: :::	::: :::a:::n:::d::: :::
@@ -8,7 +9,8 @@ string(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t::
 :::I:::t::: :::h:::a:::s::: :::_:::s:::p:::e:::c:::i:::@:::l::: :::c:::h:::@:::r:::$::: :::2:::2:::2:::2::: :::!:::!:::!:::N:::o:::w::: :::\:::k::: :::a:::s::: :::e:::s:::c:::a:::p:::e::: :::c:::h:::a:::r::: :::t:::o::: :::t:::e:::s:::t:::
 :::c:::h:::u:::n:::k:::_:::s:::p:::l:::i:::t:::(:::):::"
 -- Iteration 3 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 4 --
 string(129) "This's heredoc string with 	 and 
@@ -26,9 +28,11 @@ string(129) "This's heredoc string with 	 and
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 8 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

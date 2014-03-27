@@ -1,5 +1,6 @@
 ----
-HipHop Warning: Invalid operand type was used: Invalid type used as key in %s/slow/array/promote_exn_002.php on line 12
+
+Warning: Invalid operand type was used: Invalid type used as key in %s/slow/array/promote_exn_002.php on line 12
 object(bar)#1 (1) {
   ["x"]=>
   array(0) {

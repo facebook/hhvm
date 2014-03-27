@@ -1,1 +1,2 @@
-HipHop Fatal error: Cannot access property started with '\0' in %s/test/slow/object_property/704.php on line 4
+
+Fatal error: Cannot access property started with '\0' in %s/test/slow/object_property/704.php on line 4

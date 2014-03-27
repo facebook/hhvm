@@ -1,2 +1,3 @@
 Deprecated: Function call_user_method() is deprecated in %s on line %d
-HipHop Warning: %s
+
+Warning: %s

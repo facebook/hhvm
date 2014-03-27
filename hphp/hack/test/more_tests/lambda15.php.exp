@@ -1,0 +1,6 @@
+File "lambda15.php", line 31, characters 11-14:
+Invalid argument
+File "lambda15.php", line 24, characters 18-22:
+This is a float
+File "lambda15.php", line 27, characters 16-16:
+It is incompatible with an int

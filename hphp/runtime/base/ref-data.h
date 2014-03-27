@@ -105,17 +105,18 @@ struct RefData {
 
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
 
-  // Memory allocator methods
-  void dump() const;
+  /*
+   * Note, despite the name, this can never return a non-Cell.
+   */
+  const Cell* tv() const {
+    assert(m_magic == Magic::kMagic);
+    return &m_tv;
+  }
+  Cell* tv() {
+    assert(m_magic == Magic::kMagic);
+    return &m_tv;
+  }
 
-  const TypedValue* tv() const {
-    assert(m_magic == Magic::kMagic);
-    return &m_tv;
-  }
-  TypedValue* tv() {
-    assert(m_magic == Magic::kMagic);
-    return &m_tv;
-  }
   const Variant* var() const { return (const Variant*)tv(); }
   Variant* var() { return reinterpret_cast<Variant*>(tv()); }
 
@@ -126,17 +127,10 @@ struct RefData {
     not_reached();
 #endif
   }
-  static constexpr ptrdiff_t tvOffset() { return offsetof(RefData, m_tv); }
+  static constexpr int tvOffset() { return offsetof(RefData, m_tv); }
 
   void assertValid() const {
     assert(m_magic == Magic::kMagic);
-  }
-
-  // TODO: t2221110: get rid of this hack.
-  static RefData* refDataFromVariantIfYouDare(const Variant* var) {
-    RefData* ref = reinterpret_cast<RefData*>(uintptr_t(var) - tvOffset());
-    ref->assertValid();
-    return ref;
   }
 
   int32_t getRealCount() const {

@@ -100,7 +100,6 @@ static const std::unordered_map<fbstring, FuncFlags> g_flagsMap =
   {"IsStatic",                       IsStatic},
   {"IsCppAbstract",                  IsCppAbstract},
   {"IsReference",                    IsReference},
-  {"IsConstructor",                  IsConstructor},
   {"IsNothing",                      IsNothing},
   {"IsCppSerializable",              IsCppSerializable},
   {"HipHopSpecific",                 HipHopSpecific},
@@ -117,7 +116,7 @@ static const std::unordered_map<fbstring, FuncFlags> g_flagsMap =
   {"NoDefaultSweep",                 NoDefaultSweep},
   {"IsSystem",                       IsSystem},
   {"IsTrait",                        IsTrait},
-  {"NeedsActRec",                    NeedsActRec},
+  {"NoFCallBuiltin",                 NoFCallBuiltin},
 };
 
 static const std::unordered_set<fbstring> g_knownStringConstants =
@@ -479,6 +478,8 @@ fbstring phpSerialize(const folly::dynamic& d) {
   return "N;";
 }
 
+static auto NAMESPACE_STRING = "\\";
+
 static fbstring getFollyDynamicDefaultString(const folly::dynamic& d,
                                              const fbstring& key,
                                              const fbstring& def) {
@@ -491,6 +492,24 @@ static fbstring getFollyDynamicDefaultString(const folly::dynamic& d,
     return def;
   }
   return val.asString();
+}
+
+static fbstring toPhpName(fbstring idlName) {
+  fbstring phpName = idlName;
+  return phpName;
+}
+
+/*
+ * Strip an idl name of any namespaces.
+ */
+static fbstring toCppName(fbstring idlName) {
+  fbstring cppName;
+
+  size_t endNs = idlName.find_last_of(NAMESPACE_STRING);
+  cppName = (std::string::npos == endNs) ? idlName : idlName.substr(endNs + 1);
+  assert(!cppName.empty());
+
+  return cppName;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -600,7 +619,9 @@ bool PhpParam::defValueNeedsVariable() const {
 
 PhpFunc::PhpFunc(const folly::dynamic& d,
                  const fbstring& className) :
-    m_name(d["name"].asString()),
+    m_idlName(d["name"].asString()),
+    m_phpName(toPhpName(m_idlName)),
+    m_cppName(toCppName(m_idlName)),
     m_className(className),
     m_func(d),
     m_desc(getFollyDynamicDefaultString(d, "desc", "")),
@@ -610,6 +631,14 @@ PhpFunc::PhpFunc(const folly::dynamic& d,
     m_returnPhpType("void"),
     m_minNumParams(0),
     m_numTypeChecks(0) {
+
+  if (isMethod() &&
+      m_idlName.find_last_of(NAMESPACE_STRING) != std::string::npos) {
+    throw std::logic_error(
+      folly::format("'{0}' is a method and cannot have a namespace in its name",
+                    m_idlName).str()
+    );
+  }
   auto returnIt = d.find("return");
   if (returnIt != d.items().end()) {
     auto retNode = returnIt->second;
@@ -628,7 +657,7 @@ PhpFunc::PhpFunc(const folly::dynamic& d,
   auto args = d.find("args");
   if (args == d.items().end() || !args->second.isArray()) {
     throw std::logic_error(
-      folly::format("'{0}' must have an array field 'args'", name()).str()
+      folly::format("'{0}' must have an array field 'args'", m_idlName).str()
     );
   }
   auto ret = d.find("return");
@@ -636,7 +665,7 @@ PhpFunc::PhpFunc(const folly::dynamic& d,
       ret->second.find("type") == ret->second.items().end()) {
     throw std::logic_error(
       folly::format("'{0}' must have an array field 'return', which must have "
-                    "a string field 'type'", name()).str()
+                    "a string field 'type'", m_idlName).str()
     );
   }
 
@@ -666,7 +695,7 @@ PhpFunc::PhpFunc(const folly::dynamic& d,
 fbstring PhpFunc::getCppSig() const {
   std::ostringstream out;
 
-  fbstring nm = name();
+  fbstring nm = getCppName();
   fbstring lowername = nm;
   std::transform(nm.begin(), nm.end(), lowername.begin(),
                  std::ptr_fun<int, int>(std::tolower));
@@ -720,24 +749,6 @@ PhpProp::PhpProp(const folly::dynamic& d, fbstring cls) :
 
 /////////////////////////////////////////////////////////////////////////////
 // PhpClass
-
-static fbstring toPhpName(fbstring idlName) {
-  fbstring phpName = idlName;
-  return phpName;
-}
-
-/*
- * Strip an idl name of any namespaces.
- */
-static fbstring toCppName(fbstring idlName) {
-  fbstring cppName;
-
-  size_t endNs = idlName.find_last_of("\\");
-  cppName = (std::string::npos == endNs) ? idlName : idlName.substr(endNs + 1);
-  assert(!cppName.empty());
-
-  return cppName;
-}
 
 PhpClass::PhpClass(const folly::dynamic &c) :
   m_class(c),

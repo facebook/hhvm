@@ -8,17 +8,21 @@ array(1) {
 }
 string(1) "A"
 string(1) "A"
-HipHop Warning: Creating default object from empty value in %s on line 23
+
+Warning: Creating default object from empty value in %s on line 23
 object(stdClass)#1 (1) {
   ["prop"]=>
   string(1) "A"
 }
-HipHop Warning: Creating default object from empty value in %s on line 23
+
+Warning: Creating default object from empty value in %s on line 23
 object(stdClass)#1 (1) {
   ["prop"]=>
   string(1) "A"
 }
-HipHop Warning: Cannot access property on non-object in %s on line 17
+
+Warning: Cannot access property on non-object in %s on line 17
 string(1) " "
-HipHop Warning: Cannot access property on non-object in %s on line 17
+
+Warning: Cannot access property on non-object in %s on line 17
 string(1) " "

@@ -192,6 +192,7 @@ std::string escapeStringForPHP(const char *input, int len) {
     case '\t': output += "'.\"\\t\".'";  break;
     case '\'': output += "'.\"'\".'";    break;
     case '\\': output += "'.\"\\\\\".'"; break;
+    case '\0': output += "'.\"\\0\".'";  break;
     default:
       output += ch;
       break;

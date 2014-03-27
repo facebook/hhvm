@@ -1,10 +1,12 @@
 *** Testing imap_close() : error conditions ***
 
 -- Testing imap_close() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing imap_close() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

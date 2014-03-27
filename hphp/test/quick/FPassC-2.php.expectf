@@ -1,4 +1,5 @@
-HipHop Warning: File not found: doesnotexist.php in %s on line 14
+
+Warning: File not found: doesnotexist.php in %s on line 14
 bool(false)
 NULL
 object(stdClass)#1 (0) {
@@ -8,16 +9,20 @@ object(stdClass)#2 (0) {
 object(stdClass)#1 (0) {
 }
 ==============================
-HipHop Strict Warning: Only variables should be passed by reference in %s on line 32
+
+Strict Warning: Only variables should be passed by reference in %s on line 32
 string(3) "abc"
 string(3) "abc"
-HipHop Strict Warning: Only variables should be passed by reference in %s on line 36
+
+Strict Warning: Only variables should be passed by reference in %s on line 36
 int(0)
 int(0)
-HipHop Strict Warning: Only variables should be passed by reference in %s on line 40
+
+Strict Warning: Only variables should be passed by reference in %s on line 40
 int(1)
 int(1)
-HipHop Strict Warning: Only variables should be passed by reference in %s on line 44
+
+Strict Warning: Only variables should be passed by reference in %s on line 44
 NULL
 NULL
 ==============================
@@ -42,4 +47,5 @@ NULL
 int(123)
 int(123)
 ==============================
-HipHop Fatal error: Cannot pass parameter 1 by reference in %s on line 78
+
+Fatal error: Cannot pass parameter 1 by reference in %s on line 78

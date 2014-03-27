@@ -1,6 +1,6 @@
-RuntimeException: Cannot assign to an element of a ImmMap
-RuntimeException: Cannot add an element to a ImmMap
-RuntimeException: Cannot unset an element of a ImmMap
+InvalidOperationException: Cannot modify immutable object of type HH\ImmMap
+InvalidOperationException: Cannot modify immutable object of type HH\ImmMap
+InvalidOperationException: Cannot modify immutable object of type HH\ImmMap
 bool(false)
 bool(false)
 bool(false)

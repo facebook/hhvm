@@ -1,0 +1,2 @@
+File "call_user_func_method.php", line 21, characters 3-25:
+This call is invalid, this is not a function, it is an int

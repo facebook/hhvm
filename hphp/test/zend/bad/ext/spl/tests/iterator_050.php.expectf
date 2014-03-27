@@ -16,7 +16,8 @@ array(3) {
   [2]=>
   %s(1) "2"
 }
-HipHop Notice: %s
+
+Notice: %s
 int(0)
 array(2) {
   [0]=>
@@ -38,7 +39,8 @@ array(2) {
   [1]=>
   %s(1) "1"
 }
-HipHop Notice: %s
+
+Notice: %s
 object(ArrayIterator)#%d (1) {
   %s"storage"%s"ArrayIterator":private]=>
   array(9) {

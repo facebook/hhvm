@@ -20,12 +20,13 @@
 #include <mutex>
 #include <tuple>
 #include <vector>
+#include <map>
 
 #include <boost/variant.hpp>
-#include <map>
 
 #include "folly/Optional.h"
 
+#include "hphp/util/either.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
@@ -160,13 +161,13 @@ struct Class {
   folly::Optional<Class> commonAncestor(const Class& o) const;
 
 private:
-  Class(borrowed_ptr<const Index>, SStringOr<ClassInfo>);
+  Class(borrowed_ptr<const Index>, Either<SString,borrowed_ptr<ClassInfo>>);
 
 private:
   friend std::string show(const Class&);
   friend struct ::HPHP::HHBBC::Index;
   borrowed_ptr<const Index> index;
-  SStringOr<ClassInfo> val;
+  Either<SString,borrowed_ptr<ClassInfo>> val;
 };
 
 /*

@@ -1,6 +1,9 @@
 *** Testing bindec() : error conditions ***
 Incorrect number of arguments
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 Incorrect input
-HipHop Fatal error: %s
+
+Fatal error: %s

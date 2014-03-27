@@ -1,0 +1,6 @@
+File "do_cond2.php", line 17, characters 14-19:
+Typing error
+File "do_cond2.php", line 16, characters 12-15:
+This is a nullable type
+File "do_cond2.php", line 17, characters 19-19:
+It is incompatible with an int

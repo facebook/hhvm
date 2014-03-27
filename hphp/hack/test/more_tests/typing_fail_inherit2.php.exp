@@ -1,0 +1,4 @@
+File "typing_fail_inherit2.php", line 17, characters 26-28:
+The function bar is static
+File "typing_fail_inherit2.php", line 18, characters 19-21:
+It is defined as dynamic here

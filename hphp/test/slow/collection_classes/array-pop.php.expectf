@@ -24,7 +24,8 @@ object(HH\Set)#4 (2) {
   int(11)
   int(22)
 }
-HipHop Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
 NULL
 object(HH\ImmVector)#5 (3) {
   [0]=>
@@ -34,7 +35,8 @@ object(HH\ImmVector)#5 (3) {
   [2]=>
   int(33)
 }
-HipHop Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
 NULL
 object(HH\ImmMap)#6 (3) {
   ["a"]=>
@@ -44,14 +46,16 @@ object(HH\ImmMap)#6 (3) {
   ["c"]=>
   int(33)
 }
-HipHop Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
 NULL
 object(HH\ImmSet)#7 (3) {
   int(11)
   int(22)
   int(33)
 }
-HipHop Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
 NULL
 object(HH\Pair)#8 (2) {
   [0]=>
@@ -71,15 +75,18 @@ object(HH\Map)#10 (0) {
 NULL
 object(HH\Set)#11 (0) {
 }
-HipHop Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
 NULL
 object(HH\ImmVector)#12 (0) {
 }
-HipHop Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
 NULL
 object(HH\ImmMap)#13 (0) {
 }
-HipHop Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
 NULL
 object(HH\ImmSet)#14 (0) {
 }

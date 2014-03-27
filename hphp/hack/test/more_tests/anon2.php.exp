@@ -1,0 +1,6 @@
+File "anon2.php", line 14, characters 44-45:
+Typing error
+File "anon2.php", line 14, characters 44-45:
+This is a num (int/float) because this is used in an arithmetic operation
+File "anon2.php", line 15, characters 6-7:
+It is incompatible with a string

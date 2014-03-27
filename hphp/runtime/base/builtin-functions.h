@@ -185,6 +185,9 @@ void throw_collection_modified() ATTRIBUTE_NORETURN;
 void throw_collection_property_exception() ATTRIBUTE_NORETURN;
 void throw_collection_compare_exception() ATTRIBUTE_NORETURN;
 void throw_param_is_not_container() ATTRIBUTE_NORETURN;
+void throw_cannot_modify_immutable_object(const char* className)
+  ATTRIBUTE_NORETURN;
+void warn_cannot_modify_immutable_object(const char* className);
 void check_collection_compare(ObjectData* obj);
 void check_collection_compare(ObjectData* obj1, ObjectData* obj2);
 void check_collection_cast_to_array();
@@ -242,12 +245,8 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop);
 /**
  * Exceptions injected code throws
  */
-void throw_infinite_recursion_exception();
 Exception* generate_request_timeout_exception();
 Exception* generate_memory_exceeded_exception();
-void throw_call_non_object() ATTRIBUTE_NORETURN;
-void throw_call_non_object(const char *methodName)
-  ATTRIBUTE_NORETURN;
 
 // unserializable default value arguments such as TimeStamp::Current()
 // are serialized as "\x01"

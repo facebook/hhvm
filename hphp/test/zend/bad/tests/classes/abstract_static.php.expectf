@@ -1,4 +1,5 @@
 Call to function show()
 
 Strict Standards: Static function fail::func() should not be abstract in %sabstract_static.php(%d) : eval()'d code on line %d
-HipHop Fatal error: %s
+
+Fatal error: %s

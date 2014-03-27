@@ -81,7 +81,7 @@ struct IRBuilder {
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
   bool typeMightRelax(SSATmp* val = nullptr) const;
 
-  IRUnit& unit() { return m_unit; }
+  IRUnit& unit() const { return m_unit; }
   FrameState& state() { return m_state; }
   const Func* curFunc() const { return m_state.func(); }
   int32_t spOffset() { return m_state.spOffset(); }
@@ -200,7 +200,7 @@ struct IRBuilder {
   SSATmp* gen(Opcode op, BCMarker marker, Args&&... args) {
     return makeInstruction(
       [this] (IRInstruction* inst) {
-        return optimizeInst(inst, CloneFlag::Yes);
+        return optimizeInst(inst, CloneFlag::Yes, folly::none);
       },
       op,
       marker,
@@ -213,7 +213,7 @@ struct IRBuilder {
    * optimization passes and updating tracked state.
    */
   SSATmp* add(IRInstruction* inst) {
-    return optimizeInst(inst, CloneFlag::No);
+    return optimizeInst(inst, CloneFlag::No, folly::none);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -356,8 +356,14 @@ private:
   };
 
 private:
+  using ConstraintFunc = std::function<void(TypeConstraint)>;
+  SSATmp*   preOptimizeAssertTypeOp(IRInstruction*, Type, ConstraintFunc);
+  SSATmp*   preOptimizeCheckType(IRInstruction*);
+  SSATmp*   preOptimizeCheckStk(IRInstruction*);
   SSATmp*   preOptimizeCheckLoc(IRInstruction*);
   SSATmp*   preOptimizeAssertLoc(IRInstruction*);
+  SSATmp*   preOptimizeAssertStk(IRInstruction*);
+  SSATmp*   preOptimizeAssertType(IRInstruction*);
   SSATmp*   preOptimizeLdThis(IRInstruction*);
   SSATmp*   preOptimizeLdCtx(IRInstruction*);
   SSATmp*   preOptimizeDecRefThis(IRInstruction*);
@@ -367,11 +373,10 @@ private:
   SSATmp*   preOptimizeStLoc(IRInstruction*);
   SSATmp*   preOptimize(IRInstruction* inst);
 
-  SSATmp*   optimizeWork(IRInstruction* inst,
-                         const folly::Optional<IdomVector>&);
-
   enum class CloneFlag { Yes, No };
-  SSATmp*   optimizeInst(IRInstruction* inst, CloneFlag doclone);
+  SSATmp*   optimizeInst(IRInstruction* inst,
+                         CloneFlag doClone,
+                         const folly::Optional<IdomVector>& idoms);
 
 private:
   void      appendInstruction(IRInstruction* inst);

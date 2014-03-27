@@ -1,4 +1,5 @@
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 %s: Foo->bar()
 #1 [internal function]: Foo->getIterator()

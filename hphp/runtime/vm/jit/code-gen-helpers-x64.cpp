@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
 
 namespace HPHP { namespace JIT { namespace X64 {
 
@@ -78,16 +79,12 @@ void emitEagerSyncPoint(Asm& as, const Op* pc) {
   static COff fpOff = offsetof(ExecutionContext, m_fp);
   static COff pcOff = offsetof(ExecutionContext, m_pc);
 
-  /* we can't use rAsm because the pc store uses it as a
-     temporary */
-  Reg64 rEC = reg::rdi;
-
-  as.  push(rEC);
+  // we can use rAsm because we don't clobber it in X64Assembler
+  Reg64 rEC = rAsm;
   emitGetGContext(as, rEC);
   as.  storeq(rVmFp, rEC[fpOff]);
   as.  storeq(rVmSp, rEC[spOff]);
-  as.  storeq(pc, rEC[pcOff]);
-  as.  pop(rEC);
+  emitImmStoreq(as, intptr_t(pc), rEC[pcOff]);
 }
 
 // emitEagerVMRegSave --

@@ -37,6 +37,7 @@
 
 namespace HPHP {
 
+DECLARE_BOOST_TYPES(AwaitExpression);
 DECLARE_BOOST_TYPES(ClosureExpression);
 DECLARE_BOOST_TYPES(MethodStatement);
 DECLARE_BOOST_TYPES(InterfaceStatement);
@@ -326,11 +327,12 @@ public:
 
 class Funclet {
 public:
-  explicit Funclet(Thunklet* body)
-    : m_body(body) {
+  explicit Funclet(Thunklet* body, bool inGenerator)
+    : m_body(body), m_inGenerator(inGenerator) {
   }
   Thunklet* m_body;
   Label m_entry;
+  bool m_inGenerator;
 };
 
 DECLARE_BOOST_TYPES(ControlTarget);
@@ -642,6 +644,7 @@ private:
   UnitEmitter& m_ue;
   FuncEmitter* m_curFunc;
   FileScopePtr m_file;
+  bool m_inGenerator;
 
   Op m_prevOpcode;
 
@@ -652,8 +655,6 @@ private:
   std::deque<PostponedNonScalars> m_postponedCinits;
   std::deque<PostponedClosureCtor> m_postponedClosureCtors;
   PendingIterVec m_pendingIters;
-  hphp_hash_map<std::string,unsigned int> m_generatorEmitted;
-  hphp_hash_set<std::string> m_nonTopGeneratorEmitted;
   hphp_hash_set<std::string> m_topMethodEmitted;
   SymbolicStack m_evalStack;
   bool m_evalStackIsUnknown;
@@ -671,7 +672,7 @@ private:
   std::vector<Array> m_staticArrays;
   std::set<std::string,stdltistr> m_hoistables;
   LocationPtr m_tempLoc;
-  std::vector<Label> m_yieldLabels;
+  std::unordered_map<AwaitExpressionPtr, Label> m_awaitLabels;
   std::unordered_set<std::string> m_staticEmitted;
 
   // The stack of all Regions that this EmitterVisitor is currently inside
@@ -767,13 +768,8 @@ public:
                              bool builtin = false);
   void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
-  FuncEmitter* createFuncEmitterForGeneratorBody(
-                 MethodStatementPtr meth,
-                 FuncEmitter* fe,
-                 vector<FuncEmitter*>& top_fes);
   void emitAsyncMethod(MethodStatementPtr meth);
-  void emitGeneratorCreate(MethodStatementPtr meth);
-  void emitGeneratorBody(MethodStatementPtr meth);
+  void emitGeneratorMethod(MethodStatementPtr meth);
   void emitConstMethodCallNoParams(Emitter& e, string name);
   void emitCreateStaticWaitHandle(Emitter& e, std::string cls,
                                   std::function<void()> emitParam);

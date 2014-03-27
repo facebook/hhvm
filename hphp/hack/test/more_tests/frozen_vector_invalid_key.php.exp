@@ -1,0 +1,6 @@
+File "frozen_vector_invalid_key.php", line 15, characters 8-22:
+Invalid index type for this ImmVector
+File "frozen_vector_invalid_key.php", line 15, characters 12-21:
+This is a string
+File "frozen_vector_invalid_key.php", line 15, characters 12-21:
+It is incompatible with an int because this is used as an index

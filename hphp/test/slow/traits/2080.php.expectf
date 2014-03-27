@@ -1,1 +1,2 @@
-HipHop Fatal error: Only access and visibility modifiers are allowed in trait alias rule in %s/test/slow/traits/2080.php on line 10
+
+Fatal error: Only access and visibility modifiers are allowed in trait alias rule in %s/test/slow/traits/2080.php on line 10

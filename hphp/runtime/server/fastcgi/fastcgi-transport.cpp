@@ -88,6 +88,11 @@ uint16_t FastCGITransport::getServerPort() {
   return (m_serverPort != 0) ? m_serverPort : Transport::getServerPort();
 }
 
+const char *FastCGITransport::getServerSoftware() {
+  return (!m_serverSoftware.empty()) ? m_serverSoftware.c_str() :
+                                       Transport::getServerSoftware();
+}
+
 const void *FastCGITransport::getPostData(int &size) {
   assert(!m_readMore);
   return getPostDataImpl(size, false);
@@ -358,6 +363,7 @@ static const std::string
   s_remoteAddr("REMOTE_ADDR"),
   s_serverName("SERVER_NAME"),
   s_serverAddr("SERVER_ADDR"),
+  s_serverSoftware("SERVER_SOFTWARE"),
   s_extendedMethod("REQUEST_METHOD"),
   s_httpVersion("HTTP_VERSION"),
   s_documentRoot("DOCUMENT_ROOT"),
@@ -375,11 +381,16 @@ void FastCGITransport::onHeadersComplete() {
   m_remoteAddr = getRawHeader(s_remoteAddr);
   m_serverName = getRawHeader(s_serverName);
   m_serverAddr = getRawHeader(s_serverAddr);
+  m_serverSoftware = getRawHeader(s_serverSoftware);
   m_extendedMethod = getRawHeader(s_extendedMethod);
   m_httpVersion = getRawHeader(s_httpVersion);
   m_serverObject = getRawHeader(s_scriptName);
   m_pathTranslated = getRawHeader(s_pathTranslated);
-  m_documentRoot = getRawHeader(s_documentRoot) + "/";
+  m_documentRoot = getRawHeader(s_documentRoot);
+  if (!m_documentRoot.empty() &&
+      m_documentRoot[m_documentRoot.length() - 1] != '/') {
+    m_documentRoot += '/';
+  }
 
   m_serverPort = getIntHeader(s_serverPort);
   m_requestSize = getIntHeader(s_contentLength);

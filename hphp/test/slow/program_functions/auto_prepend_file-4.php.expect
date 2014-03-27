@@ -1,0 +1,6 @@
+prepend
+main
+
+Notice: Tried to invoke doesnotexist.php but file not found.
+
+Fatal error: Required file that does not exist: doesnotexist.php

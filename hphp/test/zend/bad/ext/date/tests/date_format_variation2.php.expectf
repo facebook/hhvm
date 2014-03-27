@@ -22,19 +22,23 @@ string(5) "-10.5"
 string(3) "0.5"
 
 -- empty array --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- int indexed array --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- associative array --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- nested arrays --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- uppercase NULL --
@@ -77,7 +81,8 @@ string(82) "10Europe/LondonThursdayThursday2005 42005Thu, 14 Jul 2005 22:30:41 +
 string(66) "CThursdaypm4141 PM 2005b14Europe/London2005-07-14T22:30:41+01:0031"
 
 -- instance of classWithoutToString --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- undefined var --
@@ -87,6 +92,7 @@ string(0) ""
 string(0) ""
 
 -- resource --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

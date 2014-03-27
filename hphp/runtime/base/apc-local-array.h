@@ -125,8 +125,8 @@ public:
   static ssize_t IterAdvance(const ArrayData*, ssize_t prev);
   static ssize_t IterRewind(const ArrayData*, ssize_t prev);
 
-  static bool ValidFullPos(const ArrayData*, const FullPos& fp);
-  static bool AdvanceFullPos(ArrayData*, FullPos& fp);
+  static bool ValidMArrayIter(const ArrayData*, const MArrayIter& fp);
+  static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
 
   static void Release(ArrayData*);
 

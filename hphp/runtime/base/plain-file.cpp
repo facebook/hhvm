@@ -288,9 +288,9 @@ void BuiltinFiles::requestInit() {
 }
 
 void BuiltinFiles::requestShutdown() {
-  m_stdin.reset();
-  m_stdout.reset();
-  m_stderr.reset();
+  m_stdin.releaseForSweep();
+  m_stdout.releaseForSweep();
+  m_stderr.releaseForSweep();
 }
 
 const Variant& BuiltinFiles::GetSTDIN() {

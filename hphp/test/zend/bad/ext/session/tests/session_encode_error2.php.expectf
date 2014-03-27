@@ -2,55 +2,64 @@
 
 -- Iteration 1 --
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 
 -- Iteration 2 --
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 
 -- Iteration 3 --
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 
 -- Iteration 4 --
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 
 -- Iteration 5 --
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 
 -- Iteration 6 --
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 
 -- Iteration 7 --
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 
 -- Iteration 8 --
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 
 -- Iteration 9 --
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 
@@ -66,25 +75,29 @@ bool(true)
 
 -- Iteration 12 --
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 
 -- Iteration 13 --
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 
 -- Iteration 14 --
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 
 -- Iteration 15 --
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 
@@ -115,7 +128,8 @@ bool(true)
 
 -- Iteration 21 --
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
 
@@ -133,7 +147,8 @@ bool(true)
 bool(true)
 
 Strict Standards: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 bool(true)
 Done

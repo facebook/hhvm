@@ -1,4 +1,5 @@
-HipHop Notice: Constant A already defined in %s/test/slow/dynamic_constants/1134.php on line 7
+
+Notice: Constant A already defined in %s/test/slow/dynamic_constants/1134.php on line 7
 array(1) {
   [0]=>
   int(10)

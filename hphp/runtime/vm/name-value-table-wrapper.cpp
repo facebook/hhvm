@@ -13,15 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/array-iterator.h"
+
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/runtime-error.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+NameValueTableWrapper::~NameValueTableWrapper() {}
 
 inline NameValueTableWrapper* NameValueTableWrapper::asNVTW(ArrayData* ad) {
   assert(ad->kind() == kNvtwKind);
@@ -212,7 +215,8 @@ ssize_t NameValueTableWrapper::IterRewind(const ArrayData* ad, ssize_t prev) {
 }
 
 bool
-NameValueTableWrapper::ValidFullPos(const ArrayData* ad, const FullPos & fp) {
+NameValueTableWrapper::ValidMArrayIter(const ArrayData* ad,
+                                       const MArrayIter & fp) {
   assert(fp.getContainer() == ad);
   auto a = asNVTW(ad);
   if (fp.getResetFlag()) return false;
@@ -221,7 +225,7 @@ NameValueTableWrapper::ValidFullPos(const ArrayData* ad, const FullPos & fp) {
   return iter.valid();
 }
 
-bool NameValueTableWrapper::AdvanceFullPos(ArrayData* ad, FullPos& fp) {
+bool NameValueTableWrapper::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   auto a = asNVTW(ad);
   bool reset = fp.getResetFlag();
   NameValueTable::Iterator iter = reset ?

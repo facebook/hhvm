@@ -1,11 +1,15 @@
 signal dispatched
-HipHop Warning: %s
+
+Warning: %s
 NULL
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ok

@@ -60,7 +60,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(Rfc1867Data, s_rfc1867_data);
  */
 
 static void safe_php_register_variable(char *var, const Variant& val,
-                                       Variant &track_vars_array,
+                                       Array& track_vars_array,
                                        bool override_protection);
 
 #define FAILURE -1
@@ -154,7 +154,7 @@ static bool is_protected_variable(char *varname) {
 
 
 static void safe_php_register_variable(char *var, const Variant& val,
-                                       Variant &track_vars_array,
+                                       Array& track_vars_array,
                                        bool override_protection) {
   if (override_protection || !is_protected_variable(var)) {
     register_variable(track_vars_array, var, val);
@@ -693,9 +693,12 @@ static char *multipart_buffer_read_body(multipart_buffer *self,
  *
  */
 
-void rfc1867PostHandler(Transport *transport,
-                        Variant &post, Variant &files, int content_length,
-                        const void *&data, int &size, const std::string boundary) {
+void rfc1867PostHandler(Transport* transport,
+                        Array& post,
+                        Array& files,
+                        int content_length,
+                        const void*& data, int& size,
+                        const std::string boundary) {
   char *s=nullptr, *start_arr=nullptr;
   std::string array_index, abuf;
   char *temp_filename=nullptr, *lbuf=nullptr;
@@ -1048,7 +1051,7 @@ void rfc1867PostHandler(Transport *transport,
         s = tmp;
       }
 
-      Variant globals(get_global_variables());
+      Array globals(get_global_variables());
       if (!is_anonymous) {
         if (s && s > filename) {
           String val(s+1, strlen(s+1), CopyString);

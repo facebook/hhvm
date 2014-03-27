@@ -1,6 +1,9 @@
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 array(6) {
   [1]=>
   string(1) "b"

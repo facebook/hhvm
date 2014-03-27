@@ -1,9 +1,12 @@
-HipHop Warning: %s
+
+Warning: %s
  in %s on line %d
 int(3)
 int(1)
 int(1)
-HipHop Warning: %s
+
+Warning: %s
 int(1)
-HipHop Warning: %s
+
+Warning: %s
 done!

@@ -38,9 +38,11 @@ array(6) {
   string(39) "and I know that it descends down on me
 "
 }
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 array(6) {
   [0]=>

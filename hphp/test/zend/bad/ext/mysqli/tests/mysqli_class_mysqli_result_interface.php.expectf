@@ -29,6 +29,8 @@ Access to undefined properties:
 mysqli_result->unknown = ''
 
 Constructor:
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 done!

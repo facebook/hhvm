@@ -1,146 +1,194 @@
 *** Testing array_merge_recursive() : Passing non array values to $arr1 argument ***
 
 -- Iteration 1 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 2 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 3 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 4 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 5 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 6 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 7 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 8 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 9 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 10 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 11 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 12 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 13 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 14 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 15 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 16 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 17 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 18 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 19 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 20 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 21 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 22 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 23 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 
 -- Iteration 24 --
--- With default argument --HipHop Warning: %s
+-- With default argument --
+Warning: %s
 NULL
--- With more arguments --HipHop Warning: %s
+-- With more arguments --
+Warning: %s
 NULL
 Done

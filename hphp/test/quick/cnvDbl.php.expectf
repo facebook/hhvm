@@ -5,7 +5,8 @@ float(9.007199254741E+15)
 float(1.1)
 float(0)
 float(1)
-HipHop Notice: Object of class C could not be converted to int in %s on line 4
+
+Notice: Object of class C could not be converted to int in %s on line 4
 float(1)
 float(0)
 float(0)
@@ -15,7 +16,8 @@ float(1)
 float(0)
 float(1.1)
 float(0)
-HipHop Notice: Object of class C could not be converted to int in %s on line 50
+
+Notice: Object of class C could not be converted to int in %s on line 50
 float(1)
 float(0)
 float(1)

@@ -1,4 +1,5 @@
 *** Testing iconv_substr() : error conditions ***
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
 Done

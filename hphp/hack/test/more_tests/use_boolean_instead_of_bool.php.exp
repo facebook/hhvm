@@ -1,0 +1,2 @@
+File "use_boolean_instead_of_bool.php", line 12, characters 11-17:
+Invalid Hack type. Using "boolean" in Hack is considered an error. Use "bool" instead, to keep the codebase consistent.

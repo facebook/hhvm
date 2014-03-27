@@ -2,6 +2,8 @@ bool(true)
 bool(true)
 int(4)
 bool(true)
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)

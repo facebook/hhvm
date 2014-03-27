@@ -9,10 +9,17 @@ class Pear extends Framework {
 
   protected function install(): void {
     parent::install();
+    verbose("Creating a bootstrap.php for running the pear tests.\n",
+            Options::$verbose);
+    $bootstrap_php = <<<BOOTSTRAP
+<?php
+putenv('PHP_PEAR_RUNTESTS=1');
+BOOTSTRAP;
+    file_put_contents($this->getTestPath()."/bootstrap.php", $bootstrap_php);
     verbose("Creating a phpunit.xml for running the pear tests.\n",
             Options::$verbose);
     $phpunit_xml = <<<XML
-<phpunit>
+<phpunit bootstrap="bootstrap.php">
 <testsuites>
   <testsuite name="Pear">
     <directory suffix=".phpt">tests</directory>

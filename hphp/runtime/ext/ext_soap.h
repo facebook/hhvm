@@ -119,7 +119,7 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   public: String                      m_user_agent;
   public: bool                        m_compression;
   public: Variant                     m_default_headers;
-  public: Variant                     m_cookies;
+  public: Array                       m_cookies;
   public: bool                        m_exceptions;
   public: Variant                     m_soap_fault;
   public: bool                        m_trace;

@@ -1,3 +1,4 @@
-HipHop Fatal error: Uncaught exception 'RuntimeException' with message '[] operator not supported for accessing elements of Sets' in %s
+Fatal error: Uncaught exception 'InvalidOperationException' with message '[] operator not supported for accessing elements of Sets' in %s:7
 Stack trace:
-%a
+#0 %s(10): main()
+#1 {main}

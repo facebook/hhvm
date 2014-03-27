@@ -1,8 +1,10 @@
 *** Testing fgetcsv() : with two chars as enclosure & delimiter ***
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(13) ""water",fruit"
@@ -11,8 +13,10 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(13) ""water",fruit"
@@ -21,8 +25,10 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(13) ""water",fruit"
@@ -31,8 +37,10 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(13) ""water",fruit"
@@ -41,8 +49,10 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(13) ""water",fruit"
@@ -51,8 +61,10 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(13) ""water",fruit"
@@ -61,8 +73,10 @@ int(14)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) ""water","fruit""
@@ -71,8 +85,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) ""water","fruit""
@@ -81,8 +97,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) ""water","fruit""
@@ -91,8 +109,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) ""water","fruit""
@@ -101,8 +121,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) ""water","fruit""
@@ -111,8 +133,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) ""water","fruit""
@@ -121,8 +145,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "^water^ ^fruit^"
@@ -131,8 +157,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "^water^ ^fruit^"
@@ -141,8 +169,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "^water^ ^fruit^"
@@ -151,8 +181,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "^water^ ^fruit^"
@@ -161,8 +193,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "^water^ ^fruit^"
@@ -171,8 +205,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "^water^ ^fruit^"
@@ -181,8 +217,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "&water&:&fruit&"
@@ -191,8 +229,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "&water&:&fruit&"
@@ -201,8 +241,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "&water&:&fruit&"
@@ -211,8 +253,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "&water&:&fruit&"
@@ -221,8 +265,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "&water&:&fruit&"
@@ -231,8 +277,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "&water&:&fruit&"
@@ -241,8 +289,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "=water===fruit="
@@ -251,8 +301,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "=water===fruit="
@@ -261,8 +313,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "=water===fruit="
@@ -271,8 +325,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "=water===fruit="
@@ -281,8 +337,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "=water===fruit="
@@ -291,8 +349,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "=water===fruit="
@@ -301,8 +361,10 @@ int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(17) "-water--fruit-air"
@@ -311,8 +373,10 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(17) "-water--fruit-air"
@@ -321,8 +385,10 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(17) "-water--fruit-air"
@@ -331,8 +397,10 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(17) "-water--fruit-air"
@@ -341,8 +409,10 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(17) "-water--fruit-air"
@@ -351,8 +421,10 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(17) "-water--fruit-air"
@@ -361,8 +433,10 @@ int(18)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(21) "-water---fruit---air-"
@@ -371,8 +445,10 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(21) "-water---fruit---air-"
@@ -381,8 +457,10 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(21) "-water---fruit---air-"
@@ -391,8 +469,10 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(21) "-water---fruit---air-"
@@ -401,8 +481,10 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(21) "-water---fruit---air-"
@@ -411,8 +493,10 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(21) "-water---fruit---air-"
@@ -421,8 +505,10 @@ int(22)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(23) "&""""&:&"&:,:":&,&:,,,,"
@@ -431,8 +517,10 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(23) "&""""&:&"&:,:":&,&:,,,,"
@@ -441,8 +529,10 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(23) "&""""&:&"&:,:":&,&:,,,,"
@@ -451,8 +541,10 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(23) "&""""&:&"&:,:":&,&:,,,,"
@@ -461,8 +553,10 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(23) "&""""&:&"&:,:":&,&:,,,,"
@@ -471,8 +565,10 @@ int(24)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(23) "&""""&:&"&:,:":&,&:,,,,"

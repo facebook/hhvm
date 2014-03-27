@@ -166,7 +166,7 @@ struct StringData {
   /*
    * Offset accessor for the JIT compiler.
    */
-  static std::ptrdiff_t sizeOffset() { return offsetof(StringData, m_len); }
+  static constexpr ptrdiff_t sizeOff() { return offsetof(StringData, m_len); }
 
   /*
    * Shared StringData's have a sweep list running through them for

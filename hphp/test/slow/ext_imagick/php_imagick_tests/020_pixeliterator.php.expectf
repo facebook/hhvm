@@ -1,4 +1,5 @@
 match
 match
-%s: ImagickPixelIterator::newPixelIterator is deprecated. ImagickPixelIterator::getPixelIterator should be used instead in %s on line %d
+
+Notice: ImagickPixelIterator::newPixelIterator is deprecated. ImagickPixelIterator::getPixelIterator should be used instead in %s/test/slow/ext_imagick/php_imagick_tests/020_pixeliterator.php on line 28
 done

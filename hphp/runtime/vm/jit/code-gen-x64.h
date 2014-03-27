@@ -14,88 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CG_H_
-#define incl_HPHP_VM_CG_H_
+#ifndef incl_HPHP_VM_CG_X64_H_
+#define incl_HPHP_VM_CG_X64_H_
 
-#include <vector>
-#include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/reg-alloc.h"
-#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/state-vector.h"
 
-namespace HPHP { namespace JIT {
-
-enum class SyncOptions {
-  kNoSyncPoint,
-  kSyncPoint,
-  kSyncPointAdjustOne,
-  kSmashableAndSyncPoint,
-};
-
-// Returned information from cgCallHelper
-struct CallHelperInfo {
-  TCA returnAddress;
-};
-
-// Information about where code was generated, for pretty-printing.
-struct AsmInfo {
-  explicit AsmInfo(const IRUnit& unit)
-    : instRanges(unit, TcaRange(nullptr, nullptr))
-    , asmRanges(unit, TcaRange(nullptr, nullptr))
-    , astubRanges(unit, TcaRange(nullptr, nullptr))
-  {}
-
-  // Asm address info for each instruction and block
-  StateVector<IRInstruction,TcaRange> instRanges;
-  StateVector<Block,TcaRange> asmRanges;
-  StateVector<Block,TcaRange> astubRanges;
-
-  void updateForInstruction(IRInstruction* inst, TCA start, TCA end);
-};
-
-typedef StateVector<IRInstruction, RegSet> LiveRegs;
-
-// Stuff we need to preserve between blocks while generating code,
-// and address information produced during codegen.
-struct CodegenState {
-  CodegenState(const IRUnit& unit, const RegAllocInfo& regs,
-               const LiveRegs& liveRegs, AsmInfo* asmInfo)
-    : patches(unit, nullptr)
-    , addresses(unit, nullptr)
-    , regs(regs)
-    , liveRegs(liveRegs)
-    , asmInfo(asmInfo)
-    , catches(unit, CatchInfo())
-  {}
-
-  // Each block has a list of addresses to patch, and an address if
-  // it's already been emitted.
-  StateVector<Block,void*> patches;
-  StateVector<Block,TCA> addresses;
-
-  // True if this block's terminal Jmp has a desination equal to the
-  // next block in the same assmbler.
-  bool noTerminalJmp;
-
-  // output from register allocator
-  const RegAllocInfo& regs;
-
-  // for each instruction, holds the RegSet of registers that must be
-  // preserved across that instruction.  This is for push/pop of caller-saved
-  // registers.
-  const LiveRegs& liveRegs;
-
-  // Output: start/end ranges of machine code addresses of each instruction.
-  AsmInfo* asmInfo;
-
-  // Used to pass information about the state of the world at native
-  // calls between cgCallHelper and cgBeginCatch.
-  StateVector<Block, CatchInfo> catches;
-};
+namespace HPHP { namespace JIT { namespace X64 {
 
 constexpr Reg64  rCgGP  (reg::r11);
 constexpr RegXMM rCgXMM0(reg::xmm0);
@@ -118,11 +44,9 @@ struct CodeGenerator {
   {
   }
 
-  void cgBlock(Block* block, std::vector<TransBCMapping>* bcMap);
-
-private:
   Address cgInst(IRInstruction* inst);
 
+private:
   const PhysLoc srcLoc(unsigned i) const {
     return (*m_instRegs).src(i);
   }
@@ -221,7 +145,7 @@ private:
                      void (Asm::*instrIR)(Immed, Reg64),
                      void (Asm::*instrR)(Reg64));
 
-  void cgVerifyClsWork(IRInstruction* inst);
+  void emitVerifyCls(IRInstruction* inst);
 
   void emitGetCtxFwdCallWithThis(PhysReg ctxReg,
                                  bool    staticCallee);
@@ -312,9 +236,11 @@ private:
   int iterOffset(uint32_t id);
   void emitReqBindAddr(const Func* func, TCA& dest, Offset offset);
 
-  void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int64_t adjustment);
+  void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int adjustment);
   void emitConvBoolOrIntToDbl(IRInstruction* inst);
   void cgLdClsMethodCacheCommon(IRInstruction* inst, Offset offset);
+  void emitLdRaw(IRInstruction* inst, size_t extraOff);
+  void emitStRaw(IRInstruction* inst, size_t extraOff);
 
   /*
    * Generate an if-block that branches around some unlikely code, handling
@@ -406,16 +332,8 @@ private:
   const RegAllocInfo::RegMap* m_instRegs; // registers for current m_curInst.
 };
 
-const Func* loadClassCtor(Class* cls);
-
-ObjectData* createClHelper(Class*, int, ActRec*, TypedValue*);
-
-void genCode(CodeBlock&              mainCode,
-             CodeBlock&              stubsCode,
-             IRUnit&                 unit,
-             std::vector<TransBCMapping>* bcMap,
-             MCGenerator*            mcg,
-             const RegAllocInfo&     regs);
+void patchJumps(CodeBlock& cb, CodegenState& state, Block* block);
+void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state);
 
 // Helpers to compute a reference to a TypedValue type and data
 inline MemoryRef refTVType(PhysReg reg) {
@@ -442,6 +360,6 @@ inline IndexedMemoryRef refTVData(IndexedMemoryRef ref) {
   return *(ref.r + TVOFF(m_data));
 }
 
-}}
+}}}
 
 #endif

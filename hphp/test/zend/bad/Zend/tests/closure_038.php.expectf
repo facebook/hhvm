@@ -5,4 +5,5 @@ int(22)
 Testing with scope as string
 int(23)
 int(24)
-HipHop Fatal error: %s
+
+Fatal error: %s

@@ -1,4 +1,5 @@
 *** Testing fputcsv() : with enclosure & delimiter of two chars and file opened in read mode ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

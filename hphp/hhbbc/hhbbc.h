@@ -21,6 +21,8 @@
 #include <string>
 #include <set>
 
+#include "hphp/util/functional.h"
+
 namespace HPHP { struct UnitEmitter; }
 namespace HPHP { namespace HHBBC {
 
@@ -41,7 +43,7 @@ struct Options {
    * Functions that aren't named in this list may be optimized with
    * the assumption they aren't intercepted, in whole_program mode.
    */
-  std::set<std::string> InterceptableFunctions;
+  std::set<std::string, stdltistr> InterceptableFunctions;
 
   //////////////////////////////////////////////////////////////////////
 
@@ -49,7 +51,7 @@ struct Options {
    * Flags for various limits on when to perform widening operations.
    * See analyze.cpp for details.
    */
-  uint32_t analyzeFuncWideningLimit = 20;
+  uint32_t analyzeFuncWideningLimit = 50;
   uint32_t analyzeClassWideningLimit = 20;
 
   /*
@@ -92,7 +94,7 @@ struct Options {
    * be dead.  When false, dead blocks are replaced with Fatal
    * bytecodes.
    */
-  bool RemoveDeadBlocks = false;
+  bool RemoveDeadBlocks = true;
 
   /*
    * Whether to propagate constant values by replacing instructions
@@ -174,11 +176,9 @@ struct Options {
    * This is in the can-potentially-change-program-behavior section
    * because if you unserialize specially-constructed strings you
    * could create instances with private properties that don't follow
-   * the inferred types.
-   *
-   * Currently hhvm handles this by ignoring the problem and
-   * potentially segfaulting at runtime.  We want to change this to
-   * fatal at unserialize time.  TODO(#2516227).
+   * the inferred types.  HHVM tracks the types that were inferred,
+   * and if an unserialize happens that would violate what we've
+   * inferred, we'll raise a notice and unserialize() returns false.
    */
   bool HardPrivatePropInference = true;
 };

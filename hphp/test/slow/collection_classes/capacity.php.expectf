@@ -1,4 +1,5 @@
-HipHop Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Parameter sz must be at most 4294967295; 281474976710608 passed' in :
+
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Parameter sz must be at most 4294967295; 281474976710608 passed' in :
 Stack trace:
 #0 %s(5): HH\Vector->resize()
 #1 %s(8): main()

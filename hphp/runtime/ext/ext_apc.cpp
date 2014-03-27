@@ -25,7 +25,6 @@
 #include <set>
 #include <vector>
 
-#include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/async-job.h"

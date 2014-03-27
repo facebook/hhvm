@@ -12,24 +12,30 @@ bool(false)
 
 -- Offset is 22 --
 --Multibyte String:--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 --ASCII String:--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Offset is 53 --
 --Multibyte String:--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 --ASCII String:--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Offset is 54 --
 --Multibyte String:--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 --ASCII String:--
-HipHop Warning: %s
+
+Warning: %s
 bool(false)

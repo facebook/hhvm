@@ -1,9 +1,12 @@
 *** Testing error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 float(%d)
 

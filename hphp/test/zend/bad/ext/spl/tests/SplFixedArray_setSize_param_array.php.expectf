@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 object(SplFixedArray)#1 (2) {
   [0]=>
   NULL

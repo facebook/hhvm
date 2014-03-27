@@ -6,4 +6,5 @@ bool(false)
 bool(true)
 bool(true)
 ok
-HipHop Fatal error: %s
+
+Fatal error: %s

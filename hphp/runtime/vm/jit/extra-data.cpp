@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/vm/jit/extra-data.h"
+
+#include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/util/text-util.h"
 
@@ -35,6 +37,30 @@ std::string NewStructData::show() const {
     delim = ",";
   }
   return os.str();
+}
+
+const RawMemData::Info& RawMemData::info() const {
+  static const Info infos[] = {
+    {CONTOFF(m_offset),          sz::dword, JIT::Type::Int},
+    {CONTOFF(m_index),           sz::qword, JIT::Type::Int},
+    {c_Continuation::stateOff(), sz::byte,  JIT::Type::Int},
+    {StringData::sizeOff(),      sz::dword, JIT::Type::Int},
+    {Func::numParamsOff(),       sz::dword, JIT::Type::Int},
+  };
+  static_assert(sizeof infos / sizeof infos[0] == kNumTypes,
+                "Incorrect size of infos array");
+
+  always_assert(type < kNumTypes);
+  return infos[type];
+}
+
+std::string RawMemData::show() const {
+  switch (type) {
+#   define RAW_TYPE(name) case name: return #name;
+    RAW_MEM_DATA_TYPES
+#   undef RAW_TYPE
+  }
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////

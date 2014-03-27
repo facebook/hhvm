@@ -1,10 +1,12 @@
 *** Testing each() : error conditions ***
 
 -- Testing each() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing each() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

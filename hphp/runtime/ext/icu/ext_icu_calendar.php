@@ -31,7 +31,6 @@ class IntlCalendar {
   /**
    * Whether this objectʼs time is before that of the passed object
    *
-   * @param IntlCalendar $cal -
    * @param IntlCalendar $other -
    *
    * @return bool - Returns TRUE if this objectʼs current time is before
@@ -40,8 +39,7 @@ class IntlCalendar {
    *   intl_get_error_code() to detect error conditions.
    */
   <<__Native>>
-  function before(IntlCalendar $cal,
-                  IntlCalendar $other): bool;
+  function before(IntlCalendar $other): bool;
 
   /**
    * Clear a field or all fields

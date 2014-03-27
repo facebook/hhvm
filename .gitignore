@@ -59,6 +59,7 @@ install_manifest.txt
 # Generated makefiles
 /hphp/runtime/ext_hhvm/Makefile
 /hphp/test/Makefile
+/hphp/hack/Makefile
 /hphp/hphp/Makefile
 /hphp/hhvm/Makefile
 /hphp/compiler/Makefile
@@ -75,6 +76,7 @@ install_manifest.txt
 .*.swo
 *.vimrc
 .syntastic_cpp_config
+*~
 
 # tags files
 tags

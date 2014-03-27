@@ -5,7 +5,8 @@ bool(true)
 bool(true)
 SELECTING results
 paramCount with wrong number of arguments
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Closing database
 bool(true)

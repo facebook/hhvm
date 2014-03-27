@@ -1,1 +1,2 @@
-HipHop Fatal error: Cannot change non-static method Foo::f() to static in Bar in %s on line 12
+
+Fatal error: Cannot change non-static method Foo::f() to static in Bar in %s on line 12

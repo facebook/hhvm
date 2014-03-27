@@ -1,17 +1,20 @@
 *** Testing is_subclass_of() : error conditions ***
 
 -- Testing is_subclass_of() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing is_subclass_of() function with more than typo style invalid 3rd argument --
 bool(false)
 
 -- Testing is_subclass_of() function with more than invalid 3rd argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing is_subclass_of() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

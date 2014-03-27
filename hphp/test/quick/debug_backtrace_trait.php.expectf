@@ -34,4 +34,5 @@ array(2) {
     }
   }
 }
-HipHop Fatal error: Argument 1 passed to C::bar() must be an instance of stdClass, int given in %Sdebug_backtrace_trait_helper.inc on line 16
+
+Fatal error: Argument 1 passed to C::bar() must be an instance of stdClass, int given in %Sdebug_backtrace_trait_helper.inc on line 16

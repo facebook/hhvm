@@ -1,0 +1,2 @@
+File "typing_fail_static_generic1.php", line 15, characters 18-18:
+A class variable cannot be generic

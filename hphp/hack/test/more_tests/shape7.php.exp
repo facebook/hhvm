@@ -1,0 +1,6 @@
+File "shape7.php", line 17, characters 10-11:
+Invalid return type
+File "shape7.php", line 16, characters 3-17:
+The field 'undef' is defined
+File "shape7.php", line 14, characters 18-24:
+The field 'undef' is missing

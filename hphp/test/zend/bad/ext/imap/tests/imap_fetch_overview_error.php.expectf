@@ -3,10 +3,12 @@
 -- Testing imap_fetch_overview() function with more than expected no. of arguments --
 Create a temporary mailbox and add 2 msgs
 .. mailbox '{%s}%s' created
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing imap_fetch_overview() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

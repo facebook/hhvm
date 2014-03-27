@@ -1,6 +1,8 @@
 *** Testing posix_getpgid() : usage variations ***
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 
 Arg value 10.5 
 valid output
@@ -16,30 +18,40 @@ valid output
 
 Arg value 0.5 
 valid output
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 valid output
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 valid output
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 valid output
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 valid output
-HipHop Notice: %s
+
+Notice: %s
 
 Arg value Array 
-HipHop Warning: %s
+
+Warning: %s
 valid output
 
 Arg value  
@@ -61,19 +73,23 @@ Arg value
 valid output
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 valid output
 
 Arg value  
-HipHop Warning: %s
+
+Warning: %s
 valid output
 
 Arg value string 
-HipHop Warning: %s
+
+Warning: %s
 valid output
 
 Arg value string 
-HipHop Warning: %s
+
+Warning: %s
 valid output
 
 Arg value  
@@ -81,4 +97,5 @@ valid output
 
 Arg value  
 valid output
-HipHop Fatal error: %s
+
+Fatal error: %s

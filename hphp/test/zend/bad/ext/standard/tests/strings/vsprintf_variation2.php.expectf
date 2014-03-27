@@ -28,11 +28,13 @@ string(13) "1.07654321E-9"
 string(3) "0.5"
 
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 12 --
@@ -60,15 +62,18 @@ string(6) "string"
 string(6) "string"
 
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 21 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 22 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 23 --

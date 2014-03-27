@@ -1,0 +1,4 @@
+File "type_param_shadow2_fail.php", line 13, characters 32-32:
+You cannot re-bind the type parameter T
+File "type_param_shadow2_fail.php", line 12, characters 20-20:
+T is already bound here

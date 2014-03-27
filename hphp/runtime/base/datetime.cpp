@@ -567,19 +567,6 @@ String DateTime::rfcFormat(const String& format) const {
   StringBuffer s;
   bool rfc_colon = false;
   bool error;
-
-  // Used if m_time->zone_type = TIMELIB_ZONETYPE_OFFSET
-  bool offset_zone = m_time->zone_type == TIMELIB_ZONETYPE_OFFSET;
-  timelib_time_offset *offset = timelib_time_offset_ctor();
-  offset->offset = (m_time->z) * -60;
-  offset->leap_secs = 0;
-  offset->is_dst = 0;
-  offset->abbr = (char *) malloc(9);
-  snprintf(offset->abbr, 9, "GMT%c%02d%02d",
-    !utc() ? ((offset->offset < 0) ? '-' : '+') : '+',
-    !utc() ? abs(offset->offset / 3600) : 0,
-    !utc() ? abs((offset->offset % 3600) / 60) : 0 );
-
   for (int i = 0; i < format.size(); i++) {
     switch (format.charAt(i)) {
     case 'd': s.printf("%02d", day()); break;
@@ -625,17 +612,37 @@ String DateTime::rfcFormat(const String& format) const {
       }
       break;
     case 'T':
-      s.append(utc() ? "GMT" : (offset_zone ? offset->abbr : m_time->tz_abbr) );
+      if (utc()) {
+        s.append("GMT");
+      } else {
+        if (m_time->zone_type != TIMELIB_ZONETYPE_OFFSET) {
+          s.append(m_time->tz_abbr);
+        } else {
+          auto offset = m_time->z * -60;
+          char abbr[9] = {0};
+          snprintf(abbr, 9, "GMT%c%02d%02d",
+            ((offset < 0) ? '-' : '+'),
+            abs(offset / 3600),
+            abs((offset % 3600) / 60));
+          s.append(abbr);
+        }
+      }
       break;
     case 'e':
-      {
-        char buffer[10] = {0};
-        snprintf(buffer, 9, "%c%02d:%02d",
-          ((offset->offset < 0) ? '-' : '+'),
-          abs(offset->offset / 3600),
-          abs((offset->offset % 3600) / 60) );
-
-        s.append(utc() ? "UTC" : (offset_zone ? buffer : m_tz->name()));
+      if (utc()) {
+        s.append("UTC");
+      } else {
+        if (m_time->zone_type != TIMELIB_ZONETYPE_OFFSET) {
+          s.append(m_tz->name());
+        } else {
+          auto offset = m_time->z * -60;
+          char abbr[7] = {0};
+          snprintf(abbr, 7, "%c%02d:%02d",
+            ((offset < 0) ? '-' : '+'),
+            abs(offset / 3600),
+            abs((offset % 3600) / 60));
+          s.append(abbr);
+        }
       }
       break;
     case 'Z': s.append(utc() ? 0 : this->offset()); break;

@@ -1,0 +1,6 @@
+File "await_on_awaitable_type_mismatch.php", line 13, characters 14-21:
+Typing error
+File "await_on_awaitable_type_mismatch.php", line 12, characters 37-42:
+This is a string
+File "await_on_awaitable_type_mismatch.php", line 13, characters 14-21:
+It is incompatible with a num (int/float) because this is used in an arithmetic operation

@@ -1,34 +1,42 @@
 *** Testing array_column() : error conditions ***
 
 -- Testing array_column() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing array_column() function with One argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing array_column() function with string as first parameter --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing array_column() function with int as first parameter --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing array_column() column key parameter should be a string or an integer (testing bool) --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing array_column() column key parameter should be a string or integer (testing array) --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing array_column() index key parameter should be a string or an integer (testing bool) --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing array_column() index key parameter should be a string or integer (testing array) --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

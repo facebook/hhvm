@@ -1,0 +1,2 @@
+File "relaxed_strict_array2.php", line 6, characters 26-30:
+You cannot have an array without generics in strict mode

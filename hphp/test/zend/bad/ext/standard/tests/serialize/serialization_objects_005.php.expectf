@@ -10,7 +10,8 @@ string(12) "ref1.changed"
 string(9) "p.changed"
 bool(false)
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 NULL
 
 
@@ -22,21 +23,32 @@ object(__PHP_Incomplete_Class)#%d (2) {
   int(1)
 }
 bool(false)
-HipHop Notice: %s
+
+Notice: %s
 NULL
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 NULL
-HipHop Notice: %s
+
+Notice: %s
 NULL
-HipHop Notice: %s
+
+Notice: %s
 string(9) "p.changed"
-HipHop Notice: %s
+
+Notice: %s
 bool(false)
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 bool(false)
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 NULL
-HipHop Fatal error: %s
+
+Fatal error: %s

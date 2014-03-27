@@ -7,7 +7,8 @@ array(1) {
 }
 string(13) "X::__destruct"
 1
-HipHop Warning: Illegal string offset: -1 in %s/test/slow/array/promote_string2.php on line 9
+
+Warning: Illegal string offset: -1 in %s/test/slow/array/promote_string2.php on line 9
 string(13) "X::__destruct"
 NULL
 string(1) "x"

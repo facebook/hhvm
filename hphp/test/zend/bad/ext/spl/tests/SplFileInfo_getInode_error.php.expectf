@@ -1,4 +1,5 @@
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 %s: SplFileInfo->getInode()
 #1 {main}

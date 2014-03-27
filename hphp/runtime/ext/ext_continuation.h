@@ -35,7 +35,7 @@ FORWARD_DECLARE_CLASS(Continuation);
 struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   DECLARE_CLASS_NO_ALLOCATION(Continuation)
 
-  static constexpr uint startedOffset() {
+  static constexpr ptrdiff_t startedOff() {
     return offsetof(c_Continuation, o_subclassData);
   }
   bool started() const { return o_subclassData.u8[0]; }
@@ -45,9 +45,10 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     Running = 1,
     Done    = 2
   };
-  static constexpr uint stateOffset() {
+  static constexpr ptrdiff_t stateOff() {
     return offsetof(c_Continuation, o_subclassData) + 1;
   }
+
   bool done() const { return o_subclassData.u8[1] & ContState::Done; }
   void setDone() { o_subclassData.u8[1]  =  ContState::Done; }
 
@@ -56,10 +57,9 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   void setStopped() { o_subclassData.u8[1] &= ~ContState::Running; }
 
   void t___construct();
-  void t_update(int64_t label, const Variant& value);
-  void t_update_key(int64_t label, const Variant& value, const Variant& key);
+  void suspend(Offset offset, const Cell& value);
+  void suspend(Offset offset, const Cell& value, const Cell& key);
   Object t_getwaithandle();
-  int64_t t_getlabel();
   Variant t_current();
   Variant t_key();
   void t_next();
@@ -91,24 +91,25 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
    * and iterators.
    *
    */
-  static c_Continuation* Alloc(const Func* genFunc) {
-    assert(genFunc);
-    assert(genFunc->isGenerator());
+  static c_Continuation* Alloc(const Func* func, Offset offset) {
+    assert(func);
+    assert(func->isAsync() || func->isGenerator());
+    assert(func->contains(offset));
 
-    size_t contOffset = getContOffset(genFunc);
+    size_t contOffset = getContOffset(func);
     size_t objectSize = contOffset + sizeof(c_Continuation);
     void* mem = MM().objMallocLogged(objectSize);
     void* objMem = (char*)mem + contOffset;
     auto const cont = new (objMem) c_Continuation();
     memset(mem, 0, contOffset);
-    cont->m_entry = genFunc->getPrologue(0);
+    cont->m_offset = offset;
     cont->m_size = objectSize;
     assert(cont->getObjectSize() == objectSize);
     return cont;
   }
 
-  static c_Continuation* Create(const Func* genFunc) {
-    auto const cont = c_Continuation::Alloc(genFunc);
+  static c_Continuation* Create(const Func* func, Offset offset) {
+    auto const cont = c_Continuation::Alloc(func, offset);
     cont->incRefCount();
     cont->setNoDestruct();
 
@@ -116,21 +117,22 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     // object does. We set it up once, here, and then just change FP to point
     // to it when we enter the generator body.
     auto ar = cont->actRec();
-    ar->m_func = genFunc;
+    ar->m_func = func;
     ar->initNumArgsInGenerator(0);
     ar->setVarEnv(nullptr);
     return cont;
   }
 
  public:
-  static ObjectData* CreateFunc(const Func* genFunc) {
-    auto cont = Create(genFunc);
+  static ObjectData* CreateFunc(const Func* func, Offset offset) {
+    auto cont = Create(func, offset);
     cont->actRec()->setThis(nullptr);
     return cont;
   }
 
-  static ObjectData* CreateMeth(const Func* genFunc, void* objOrCls) {
-    auto cont = Create(genFunc);
+  static ObjectData* CreateMeth(const Func* func, void* objOrCls,
+                                Offset offset) {
+    auto cont = Create(func, offset);
     auto ar = cont->actRec();
     ar->setThisOrClass(objOrCls);
     if (ar->hasThis()) {
@@ -143,15 +145,29 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     return -sizeof(ActRec);
   }
 
-  static ptrdiff_t getContOffset(const Func* genFunc) {
-    assert(genFunc->isGenerator());
-    return sizeof(Iter) * genFunc->numIterators() +
-           sizeof(TypedValue) * genFunc->numLocals() +
+  static ptrdiff_t getContOffset(const Func* func) {
+    assert(func->isAsync() || func->isGenerator());
+    return sizeof(Iter) * func->numIterators() +
+           sizeof(TypedValue) * func->numLocals() +
            sizeof(ActRec);
   }
 
-  void call_send(Cell& v);
-  void call_raise(ObjectData* e);
+  /**
+   * Get adjusted generator function base() where the real user code starts.
+   *
+   * Skips CreateCont, RetC and PopC opcodes.
+   */
+  static Offset userBase(const Func* func) {
+    assert(func->isGenerator());
+    auto base = func->base();
+
+    DEBUG_ONLY auto op = reinterpret_cast<const Op*>(func->unit()->at(base));
+    assert(op[0] == OpCreateCont);
+    assert(op[1 + sizeof(Offset)] == OpRetC);
+    assert(op[2 + sizeof(Offset)] == OpPopC);
+
+    return base + 3 + sizeof(Offset);
+  }
 
   inline void preNext() {
     if (done()) {
@@ -173,8 +189,11 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     }
   }
 
-  Offset getExecutionOffset(int32_t label) const;
-  Offset getNextExecutionOffset() const;
+  Offset offset() const {
+    assert(!running());
+    assert(actRec()->func()->contains(m_offset));
+    return m_offset;
+  }
 
 private:
   explicit c_Continuation(Class* cls = c_Continuation::classof());
@@ -193,14 +212,11 @@ private:
 
 public:
   /* 32-bit o_id from ObjectData */
-  int32_t m_label;
+  Offset m_offset;
   int64_t m_index;
-  Variant m_key;
-  Variant m_value;
+  Cell m_key;
+  Cell m_value;
   int32_t m_size;
-
-  /* TCA for function entry */
-  TCA m_entry;
 
   /* temporary storage used to save the SP when inlining into a continuation */
   void* m_stashedSP;

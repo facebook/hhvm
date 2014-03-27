@@ -1,4 +1,5 @@
-HipHop Notice: %s
+
+Notice: %s
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(1) {

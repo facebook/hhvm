@@ -1,10 +1,12 @@
 ---> 1. Via a return by ref function call, assign by reference the return value of a function that returns by value:
-HipHop Notice: %s
+
+Notice: %s
 int(5)
 int(100)
 
 ---> 2. Via a return by ref function call, assign by reference the return value of a function that returns a constant by ref:
-HipHop Notice: %s
+
+Notice: %s
 int(5)
 int(100)
 

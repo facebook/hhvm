@@ -1,10 +1,12 @@
 *** Testing iconv_strlen() : error conditions ***
 
 -- Testing iconv_strlen() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing iconv_strlen() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

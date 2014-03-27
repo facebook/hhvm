@@ -53,17 +53,22 @@ function parse_php_functions(string $file):
         $argTypes = Vector {};
         if ($argList) {
           $args = preg_split('/\s*,\s*/', $argList);
-          foreach($args as $arg) {
-            $type = preg_split('/\s*\$/', $arg)[0];
-            $type = explode('<', $type, 2)[0];
-            if ($type == '...') {
-              // Special case varargs
-              $vargTypes = Vector {'int'};
-              $vargTypes->addAll($argTypes);
-              $vargTypes[] = 'array';
-              $argTypes = $vargTypes;
-            } else {
-              $argTypes[] = $type;
+          if (count($args) > 5) {
+            $retType = 'actrec';
+            $argTypes = Vector {'actrec'};
+          } else {
+            foreach($args as $arg) {
+              $type = preg_split('/\s*\$/', $arg)[0];
+              $type = explode('<', $type, 2)[0];
+              if ($type == '...') {
+                // Special case varargs
+                $vargTypes = Vector {'int'};
+                $vargTypes->addAll($argTypes);
+                $vargTypes[] = 'array';
+                $argTypes = $vargTypes;
+              } else {
+                $argTypes[] = $type;
+              }
             }
           }
         }
@@ -83,7 +88,7 @@ function parse_cpp_functions(string $file):
 
   // Don't handle methods yet, so function can't be indented
   static $function_regex =
-            "#^(\S+) +HHVM_FUNCTION\(([^,)]+)(?:, *)?([^)]*)\)#m";
+            "#^(?:static )?(\S+) +HHVM_FUNCTION\(([^,)]+)(?:, *)?([^)]*)\)#m";
 
   $functions = Map {};
 
@@ -161,7 +166,7 @@ function match_arg_type(string $php, string $cpp): bool {
      $php = substr($php, 1);
   }
   if ($php[0] == '?') {
-    $expected = 'CVarRef';
+    $expected = 'const Variant&';
   } else {
     switch (strtolower($php)) {
       case 'bool':
@@ -183,32 +188,33 @@ function match_arg_type(string $php, string $cpp): bool {
         $expected = 'const String&';
         break;
       case 'array':
-        $expected = 'CArrRef';
+        $expected = 'const Array&';
         break;
       case 'resource':
-        $expected = 'CResRef';
+        $expected = 'const Resource&';
         break;
       case 'mixed':
       case 'callable':
-        $expected = 'CVarRef';
+        $expected = 'const Variant&';
         break;
       case 'actrec':
         $expected = 'ActRec*';
         break;
       case 'object':
       default:
-        $expected = 'CObjRef';
+        $expected = 'const Object&';
         break;
     }
   }
   // References must be a variant type
   if ($php[strlen($php)-1] == '&') {
-    if ($expected != 'CVarRef') {
+    if ($expected != 'const Variant&') {
       return false;
     } else {
       $expected = 'VRefParam';
     }
   }
+  $cpp = trim($cpp);
   // Special case for ints
   if ($cpp == 'int') {
     $cpp = 'int64_t';

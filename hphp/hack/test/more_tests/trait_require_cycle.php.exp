@@ -1,0 +1,2 @@
+File "trait_require_cycle.php", line 12, characters 7-9:
+Cyclic class definition : Tr1 C 

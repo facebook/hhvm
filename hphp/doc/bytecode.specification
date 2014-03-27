@@ -211,72 +211,40 @@ it.
 Continuations
 -------------
 
-The basic compilation strategy for continuations is to create two bytecode
-functions. One is known as the "outer generator" function, and the other is
-known as the "inner generator function" or equivalently the "generator body".
-HHBC metadata contains a link from the outer function to the inner function.
-For the purposes of this spec, we will call functions in these configurations a
-"generator function pair".
+The basic compilation strategy for continuations is to create bytecode functions
+consisting of two parts.
 
-The outer generator function for a continuation must consist of a CreateCont
-opcode, followed by a RetC. The CreateCont opcode uses the function metadata to
-determine which generator body to associate with the allocated continuation
-object.
+The first part, executed when the continuation function is called, must consist
+of a CreateCont opcode followed by a RetC, which are responsible for suspending 
+execution state into a new Continuation object (includes resume offset pointing 
+to the start of the second part of the function) and returning it back to 
+the caller.
 
-The "generator body" function is where the real user-level code of the
-generator should be placed. It should operate by first using UnpackCont, and
-then doing a Switch to determine which portion of its code should run. See the
-description of the continuation instructions for more details.
+The second part is where the real user-level code of the generator should be
+placed. ContEnter and ContRaise opcodes used in Continuation's next(), send()
+and raise() methods resume execution and transfer control to the resume offset
+stored in the Continuation object. The user-level code yields values using
+ContSuspend and ContSuspendK opcodes and returns using ContRetC opcode.
 
 
 Async functions
 ---------------
 
-Async functions are currently implemented as generator function pairs, where
-the outer function represents "eager execution" of the async function, and the
-inner function is used when "suspended execution" is necessary (i.e. if it does
-an await on something that is not yet available).
+Similarly to continuations, async functions are implemented as bytecode
+functions consisting of two parts.
 
-Both functions are required to 'have the same effects', except one works in a
-suspended mode. The inner body must start with UnpackCont, followed by a
-switch. Each switch target must exactly correspond to a section of the outer
-function that lies between two await points. Other than the bytecode used to
-compile await expressions, this switch, and returns, the bodies must consist of
-the same bytecode instructions.
+The first part represents "eager execution" of the async function, and the
+second part is used when "suspended execution" is necessary (i.e. if it does
+an await on something that is not yet available). Both parts are required to
+'have the same effects', except the latter one works in a suspended mode.
 
-Async function closures are implemented the same way, but importantly the
-"eager execution" function will be the __invoke function on a closure subclass.
+The first part uses AsyncESuspend opcode to suspend execution state into a new
+AsyncFunctionWaitHandle object. It includes the resume offset pointing to the
+second part of the function. The second part suspends using ContSuspend opcode
+and returns using ContRetC opcode.
 
-The async function implementation is still changing and may stop using
-generator function pairs soon, so this spec is staying light on details for
-now.
-
-
-Generator Function Pairs
-------------------------
-
-Whether they are being used to represent async functions or continuations, the
-following requirements apply to generator function pairs:
-
-   - All functions must either be part of only one generator function pair, or
-     must not be part of any generator function pair. Inner and outer generator
-     functions are in a 1:1 relationship.
-
-   - An outer generator function must either consist of the opcode sequence
-     CreateCont; RetC, or be designated as an async function.
-
-   - Generator function pairs must always be defined in the same unit as each
-     other.
-
-   - If the outer function of a generator function pair is a class member
-     function, and it is not the __invoke function on a subclass of closure,
-     then the inner generator function must be a member of the same class.
-
-   - If the outer function of a generator function pair is a closure __invoke
-     method, then the inner function must be a function that is not a member of
-     any class, and must have a unique name within its compilation unit. The
-     bytecode metadata must designate this inner function with the flag
-     isGeneratorFromClosure.
+The async function implementation is still changing and the implementation may
+change significantly, so this spec is staying light on details for now.
 
 
 Entry points
@@ -894,7 +862,8 @@ to the first immediate argument, and %2 is used to refer to the second
 immediate argument.
 
 Note that the relative offset immediate used by a Jmp*, Iter*, MIter*, Switch,
-or SSwitch instruction is relative the beginning of the instruction.
+SSwitch, CreateCont or AsyncESuspend instruction is relative the beginning 
+of the instruction.
 
 There are numerous instructions that operate on different kinds of locations.
 Locations are specified using "location descriptors". The complete list of
@@ -1196,6 +1165,29 @@ Mul    [C:<T2> C:<T1>]  ->  [C:Dbl]    (where T1 == Dbl || T2 == Dbl)
 
   Multiplication (*). Pushes ($2 * $1) onto the stack. This instruction throws
   a fatal error if is_array($1) || is_array($2) is true.
+
+AddO   [C:Arr C:Arr]  ->  [C:Arr]
+       [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
+       [C:<T2> C:<T1>]  ->  [C:Int|dbl] (where T1 != Dbl && T2 != Dbl &&
+                                               (T1 != Arr || T2 != Arr))
+
+  Same behavior as Add, except for when both inputs have type Int and the
+  result would not fit in a 64-bit integer. Then this instruction will push
+  (double)$1 + (double)$2.
+
+SubO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
+       [C:<T2> C:<T1>]  ->  [C:Int|Dbl] (where T1 != Dbl && T2 != Dbl)
+
+  Same behavior as Sub, except for when both inputs have type Int and the
+  result would not fit in a 64-bit integer. Then this instruction will push
+  (double)$1 - (double)$2.
+
+MulO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
+       [C:<T2> C:<T1>]  ->  [C:Int|Dbl] (where T1 != Dbl && T2 != Dbl)
+
+  Same behavior as Mul, except for when both inputs have type Int and the
+  result would not fit in a 64-bit integer. Then this instruction will push
+  (double)$1 * (double)$2.
 
 Div    [C C]  ->  [C:Bool|Int|Dbl]
        [C:Dbl C:Int]  ->  [C:Bool|Dbl]
@@ -1706,7 +1698,8 @@ SetOpL <local variable id> <op>    [C]  ->  [C]
   Next, this instruction reads the local variable into x, then executes y = x
   <op> $1, assigns y into local variable %1, and then pushes y onto the stack.
   The immediate value must be one of the following opcodes:
-    Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor.
+    Add, AddO, Sub, SubO, Mul, MulO, Div, Mod, Shl, Shr, Concat, BitAnd,
+    BitOr, BitXor.
 
 SetOpN <op>    [C C]  ->  [C]
 
@@ -2078,6 +2071,14 @@ FCall <num params>    [F..F]  ->  [R]
   FPI stack, and then invokes the dispatcher to call the callee. When the
   callee returns, it will transfer the return value onto the caller's
   evaluation stack using the R flavor.
+
+FCallD <num params> <class name> <func name>   [F..F]  ->  [R]
+
+  FPI call direct. This instruction has exactly the effects of FCall %1, but
+  provides hints from static analysis to assist the region selector in
+  determining the callee. The strings in %2 and %3 are statically known names
+  of the class (if any) and method being called. If the call is targeting a
+  non-method, %2 must be the empty string.
 
 FCallArray    [F]  ->  [R]
 
@@ -4058,64 +4059,58 @@ BreakTraceHint   []  ->  []
 14. Continuation creation and execution
 ---------------------------------------
 
-CreateCont    []  ->  [C]
+CreateCont  <rel offset>   []  ->  [C]
 
   Creates a Continuation object and pushes it on the stack. The Continuation
-  will capture all defined local variables in the current function, and marks
-  them uninitialized on the current frame. The Continuation will wrap the
-  "generator body" function associated with the current function. If no
-  generator body is associated with this function, the behavior of the
-  CreateCont opcode is undefined.
-
-ContEnter [C]  ->  []
+  will capture all local variables in the current function, and marks them
+  uninitialized on the current frame. The continuation will also store
+  resume offset specified by %1.
+  
+ContEnter   [C]  ->  []
 
   This instruction may only appear in non-static methods of the Continuation
-  class. It transfers control flow to the beginning of the continuation body
-  associated with the $this object of the Continuation object. The value on the
-  stack is sent to the Continuation to be retrieved by UnpackCont.
+  class. It transfers control flow to the saved resume offset of a function
+  associated with $this Continuation object. The $1 will remain available
+  on the stack after the control is transferred.
+ 
+ContRaise   [C:Obj]  ->  []
 
-ContSuspend  <label id>   [C]  ->  []
+  This instruction may only appear in non-static methods of the Continuation
+  class. It transfers control flow to the saved resume offset of a function
+  associated with $this Continuation object. The Exception stored at $1 is
+  raised instead of invoking code at the resume offset.
 
-  Suspend continuation. This instruction may only appear in continuation
-  bodies. Packs all defined local variables into the Continuation object in
-  local 0. Store $1 in the continuation as the result of the current iteration
-  and set the continuation's label to <label id>. Transfer control flow to the
-  caller of the continuation body, which must be a non-static method of the
-  Continuation class.
+ContSuspend   [C]  ->  [C]
 
-ContSuspendK  <label id>    [C C]  ->  []
+  This instruction may only appear in bodies of continuations and async
+  functions. Stores $1 in the continuation as the result of the current
+  iteration, sets resume offset at the next opcode and suspends execution
+  by transferring control flow back to the ContEnter or ContRaise. Once
+  the execution is resumed, the value sent by ContEnter becomes available
+  on the stack, or an exception sent by ContRaise is thrown.
 
-  Suspend continuation. This instruction may only appear in continuation
-  bodies. Packs all defined local variables into the Continuation object in
-  local 0. Store $1 in the continuation as the result of the current iteration,
-  store $2 as the key of the current iteration, and set the continuation's
-  label to <label id>. Transfer control flow to the caller of the continuation
-  body, which must be a non-static method of the Continuation class.
+ContSuspendK   [C C]  ->  []
 
-UnpackCont    []  ->  [C C:Int]
+  This instruction may only appear in bodies of continuations. Stores $1
+  in the continuation as the result and $2 as the key of the current
+  iteration, sets resume offset at the next opcode and suspends execution 
+  by transferring control flow back to the ContEnter or ContRaise. Once 
+  the execution is resumed, the value sent by ContEnter becomes available
+  on the stack, or an exception sent by ContRaise is thrown.
 
-  Unpack continuation. Unpacks variables from the Continuation object in local
-  0 into the containing environment. The stack will contain the current label
-  of the continuation in $1 and the value sent to the continuation in $2. The
-  value will be no longer referenced by the Continuation object.
+ContRetC   [C]  ->  []
 
-ContRetC    [C]  ->  []
-
-  Return from continuation. Marks the continuation in local 0 as finished, sets
-  the result and transfers control flow to the caller of the continuation body,
-  which must be a non-static method of the Continuation class. Further attempts
-  to iterate it will fail.
-
+  This instruction may only appear in bodies of continuations and async
+  functions. Stores $1 in the continuation as the result of the execution,
+  marks the continuation as finished and returns by transferring control flow
+  back to the ContEnter or ContRaise. Further attempts to iterate the
+  Continuation will fail.
+ 
 ContCheck <check started>    []  ->  []
 
   Check whether continuation can be iterated. $this must be a Continuation
   object. If the continuation is finished, already running, or not yet started
   and <check started> is enabled, an exception will be thrown.
-
-ContRaise    []  ->  []
-
-  Prepare continuation to receive a thrown exception. $this must be a
-  Continuation object that passed ContCheck<true> check.
 
 ContValid    []  ->  [C:Bool]
 
@@ -4153,30 +4148,30 @@ AsyncAwait   [C]  ->  [C C:Bool]
   pushes the result value from the WaitHandle, and then pushes true. If $1
   failed, this instruction throws the exception from the WaitHandle.
 
-AsyncESuspend <label id> <number of iterators>   [C:Obj]  ->  [C:Obj]
+AsyncESuspend  <rel offset> <number of iterators>   [C:Obj]  ->  [C:Obj]
 
-  Suspends an eagerly executed async function into an AsyncFunctionWaitHandle
-  object. The AsyncFunctionWaitHandle object will capture all named local
-  variables and the first %2 iterators in the current eagerly executed async
-  function, and mark them uninitialized on the current frame. Unnamed locals
-  are not affected. The object will store a reference to the associated
-  resumable async function and a label %1 to be used to resume the execution
-  once the WaitHandle object given by $1 is finished.
+  Suspends an eagerly executed async function into an AsyncFunctionWaitHandle 
+  object. The AsyncFunctionWaitHandle object will capture all local variables
+  and the first %2 iterators in the current eagerly executed async function,
+  and mark them uninitialized on the current frame. The object will store
+  a reference to the associated resumable async function and a resume offset 
+  %1 to be used to resume the execution once the WaitHandle object given 
+  by $1 is finished.
 
   If $1 is not a WaitHandle, or is a WaitHandle that is already finished, the
-  behavior is undefined. This opcode must only occur in the outer functions of
-  generator body pairs used to implement async functions. The value this opcode
-  pushes on the stack must be passed to a RetC opcode.
+  behavior is undefined. This opcode must only occur in the eagerly executed
+  part of the async function. The value this opcode pushes on the stack must 
+  be passed to a RetC opcode.
+
+AsyncResume   []  ->  []
+
+  No operation. Used to teach hhbbc that an exception may be thrown right after
+  unreachable ContSuspend. Must appear as the target of AsyncESuspend opcode.
 
 AsyncWrapResult   [C]  ->  [C:Obj]
 
   Wraps $1 into a StaticResultWaitHandle object.
 
-AsyncWrapException   [C:Obj]  ->  [C:Obj]
-
-  Wraps $1 into a StaticExceptionWaitHandle object. If $1 is not an Exception,
-  the behavior is undefined. The value this opcode pushes on the stack must be
-  passed to a RetC opcode.
 
 Basic statement transformations
 -------------------------------

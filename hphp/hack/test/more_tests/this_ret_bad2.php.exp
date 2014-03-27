@@ -1,0 +1,2 @@
+File "this_ret_bad2.php", line 18, characters 38-41:
+The type "this" can only be used as a return type, to instantiate a covariant type variable, or as a private non-static member variable

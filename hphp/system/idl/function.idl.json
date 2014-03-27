@@ -117,106 +117,6 @@
             ]
         },
         {
-            "name": "call_user_func_serialized",
-            "desc": "Invoke a function with serialized function and parameters by calling serialize(array(\"func\" => $func, \"params\" => $params)), and returns function return in serialized format of array(\"ret\" => $ret, \"exception\" => $exception). Useful for over-network invocation.",
-            "flags": [
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "String",
-                "desc": "Serialized return."
-            },
-            "args": [
-                {
-                    "name": "input",
-                    "type": "String",
-                    "desc": "Serialized callback and parameters."
-                }
-            ]
-        },
-        {
-            "name": "call_user_func_array_rpc",
-            "desc": "Same as call_user_func_array(), but executes on a remote HipHop RPC server",
-            "flags": [
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Returns the function result, or FALSE on error."
-            },
-            "args": [
-                {
-                    "name": "host",
-                    "type": "String",
-                    "desc": "Remote RPC server's address."
-                },
-                {
-                    "name": "port",
-                    "type": "Int32",
-                    "desc": "Remote RPC server's port."
-                },
-                {
-                    "name": "auth",
-                    "type": "String",
-                    "desc": "Remote RPC server's authentication password."
-                },
-                {
-                    "name": "timeout",
-                    "type": "Int32",
-                    "desc": "How many seconds to wait for response."
-                },
-                {
-                    "name": "function",
-                    "type": "Variant",
-                    "desc": "The function to be called, same as in call_user_func_array()."
-                },
-                {
-                    "name": "params",
-                    "type": "VariantVec",
-                    "desc": "Parameters, same as in call_user_func_array()."
-                }
-            ]
-        },
-        {
-            "name": "call_user_func_rpc",
-            "desc": "Same as call_user_func(), but executes on a remote HipHop RPC server",
-            "flags": [
-                "HipHopSpecific",
-                "MixedVariableArguments"
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Returns the function result, or FALSE on error."
-            },
-            "args": [
-                {
-                    "name": "host",
-                    "type": "String",
-                    "desc": "Remote RPC server's address."
-                },
-                {
-                    "name": "port",
-                    "type": "Int32",
-                    "desc": "Remote RPC server's port."
-                },
-                {
-                    "name": "auth",
-                    "type": "String",
-                    "desc": "Remote RPC server's authentication password."
-                },
-                {
-                    "name": "timeout",
-                    "type": "Int32",
-                    "desc": "How many seconds to wait for response."
-                },
-                {
-                    "name": "function",
-                    "type": "Variant",
-                    "desc": "The function to be called, same as in call_user_func_array()."
-                }
-            ]
-        },
-        {
             "name": "forward_static_call_array",
             "desc": "Calls a user defined function or method given by the function parameter. This function must be called within a method context, it can't be used outside a class. All arguments of the forwarded method are passed as values, and as an array, similarly to call_user_func_array().",
             "flags": [
@@ -323,7 +223,7 @@
             ]
         },
         {
-            "name": "hphp_func_slice_args",
+            "name": "__SystemLib\\func_slice_args",
             "desc": "For internal use only, used to merge array_slice() with func_get_args() while avoiding unnecessary copies and allocations. This should not be called directly.",
             "flags": [
             ],

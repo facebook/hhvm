@@ -17,8 +17,7 @@
 #ifndef incl_HPHP_THRIFT_BUFFER_H_
 #define incl_HPHP_THRIFT_BUFFER_H_
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include <arpa/inet.h>
@@ -57,6 +56,10 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+class Array;
+class Object;
+struct Variant;
 
 /**
  * Efficient thrift input/output preparation. Used by automatically generated

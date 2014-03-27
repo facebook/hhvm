@@ -1,6 +1,7 @@
 *** Test copy() function: Trying to copy dir to file ***
 *** Testing copy() in copying dir to file ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
 bool(true)

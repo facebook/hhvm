@@ -1,6 +1,8 @@
 c:2
 m:1
-x:HipHop Notice: Undefined property: b::$x in %s/test/slow/exceptions/60.php on line 11
+x:
+Notice: Undefined property: b::$x in %s/test/slow/exceptions/60.php on line 11
 
-y:HipHop Notice: Undefined property: b::$y in %s/test/slow/exceptions/60.php on line 12
+y:
+Notice: Undefined property: b::$y in %s/test/slow/exceptions/60.php on line 12
 

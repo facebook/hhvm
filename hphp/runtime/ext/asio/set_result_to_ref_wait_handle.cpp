@@ -36,7 +36,9 @@ void c_SetResultToRefWaitHandle::t___construct() {
 }
 
 void c_SetResultToRefWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
+  if (!callback.isNull() &&
+      (!callback.isObject() ||
+       !callback.getObjectData()->instanceof(c_Closure::classof()))) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Unable to set SetResultToRefWaitHandle::onCreate: on_create_cb not a closure"));
     throw e;

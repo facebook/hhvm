@@ -1,5 +1,6 @@
 *** Testing array_push() : error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 array(1) {
   [%d]=>

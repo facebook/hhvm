@@ -1,6 +1,8 @@
 *** Testing strncmp() function: by supplying all types for 'str1' and 'str2' ***
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 -- Iteration 1 --
 int(0)
 -- Iteration 2 --
@@ -30,24 +32,34 @@ int(0)
 -- Iteration 14 --
 int(0)
 -- Iteration 15 --
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 16 --
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 17 --
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 18 --
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 19 --
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 20 --
 int(0)
@@ -70,8 +82,10 @@ int(0)
 -- Iteration 29 --
 int(0)
 -- Iteration 30 --
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 31 --
 int(0)

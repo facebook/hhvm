@@ -1,3 +1,4 @@
-HipHop Notice: Use of undefined constant TEST - assumed 'TEST' in %s/test/slow/dynamic_constants/1128.php on line 7
+
+Notice: Use of undefined constant TEST - assumed 'TEST' in %s/test/slow/dynamic_constants/1128.php on line 7
 string(4) "TEST"
 int(15)

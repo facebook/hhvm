@@ -3,7 +3,8 @@ int(2)
 int(3)
 int(4)
 1213
-HipHop Notice: Undefined variable: z in %s on line 24
+
+Notice: Undefined variable: z in %s on line 24
 z in parent is now: function scope is weird
 
 bool(false)

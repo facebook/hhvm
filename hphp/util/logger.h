@@ -45,6 +45,7 @@ public:
 
   static bool UseSyslog;
   static bool UseLogFile;
+  static bool UseRequestLog;
   static bool IsPipeOutput;
   static bool UseCronolog;
   static FILE *Output;

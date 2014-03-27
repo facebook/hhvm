@@ -8,4 +8,5 @@ const ok
 const ok
 class ok
 ok
-HipHop Fatal error: %s
+
+Fatal error: %s

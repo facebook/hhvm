@@ -1,4 +1,5 @@
-HipHop Fatal error: Uncaught exception 'Exception' with message '' in %s/test/slow/error_handler/1369.php:6
+
+Fatal error: Uncaught exception 'Exception' with message '' in %s/test/slow/error_handler/1369.php:6
 Stack trace:
 #0 {main}
 NULL

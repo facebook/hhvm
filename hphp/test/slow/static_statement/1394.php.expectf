@@ -1,21 +1,27 @@
 value of static_var before unset: 1
 bool(true)
 bool(false)
-%S%wvalue of static_var after unset: 
+
+Notice: Undefined variable: static_var in %s/test/slow/static_statement/1394.php on line 10
+value of static_var after unset: 
 bool(false)
 bool(true)
 value of static_var after new assignment: 20
 value of static_var before unset: 2
 bool(true)
 bool(false)
-%S%wvalue of static_var after unset: 
+
+Notice: Undefined variable: static_var in %s/test/slow/static_statement/1394.php on line 10
+value of static_var after unset: 
 bool(false)
 bool(true)
 value of static_var after new assignment: 20
 value of static_var before unset: 3
 bool(true)
 bool(false)
-%S%wvalue of static_var after unset: 
+
+Notice: Undefined variable: static_var in %s/test/slow/static_statement/1394.php on line 10
+value of static_var after unset: 
 bool(false)
 bool(true)
 value of static_var after new assignment: 20

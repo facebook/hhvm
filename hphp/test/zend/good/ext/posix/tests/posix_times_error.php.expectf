@@ -1,6 +1,7 @@
 *** Testing posix_times() : error conditions ***
 
 -- Testing posix_times() function with one argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

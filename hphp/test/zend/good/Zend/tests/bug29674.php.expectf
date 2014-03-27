@@ -1,7 +1,9 @@
 ===BASE===
 string(4) "Base"
-HipHop Notice: %s
+
+Notice: %s
 NULL
 ===CHILD===
 string(4) "Base"
-HipHop Fatal error: %s
+
+Fatal error: %s

@@ -55,10 +55,11 @@ SourceRootInfo::SourceRootInfo(Transport* transport)
     return;
   }
   if (RuntimeOption::SandboxFromCommonRoot) {
-    String sandboxName = matches.rvalAt(1).toString();
+    String sandboxName = matches.toArray().rvalAt(1).toString();
     createFromCommonRoot(sandboxName);
   } else {
-    Array pair = StringUtil::Explode(matches.rvalAt(1), "-", 2).toArray();
+    Array pair = StringUtil::Explode(
+      matches.toArray().rvalAt(1), "-", 2).toArray();
     m_user = pair.rvalAt(0).toString();
     bool defaultSb = pair.size() == 1;
     if (defaultSb) {
@@ -199,7 +200,7 @@ void SourceRootInfo::handleError(Transport *t) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void SourceRootInfo::setServerVariables(Variant &server) const {
+void SourceRootInfo::setServerVariables(Array& server) const {
   if (!sandboxOn()) return;
   for (auto it = RuntimeOption::SandboxServerVariables.begin();
        it != RuntimeOption::SandboxServerVariables.end();
@@ -209,7 +210,7 @@ void SourceRootInfo::setServerVariables(Variant &server) const {
   }
 
   if (!m_serverVars.empty()) {
-    cellAddEq(*server.asCell(), make_tv<KindOfArray>(m_serverVars.get()));
+    server += m_serverVars;
   }
 }
 
@@ -267,7 +268,7 @@ const StaticString
 std::string& SourceRootInfo::initPhpRoot() {
   GlobalVariables *g = get_global_variables();
   const Variant& server = g->get(s_SERVER);
-  const Variant& v = server.rvalAt(s_PHP_ROOT);
+  const Variant& v = server.toArray().rvalAt(s_PHP_ROOT);
   if (v.isString()) {
     *s_phproot.getCheck() = std::string(v.asCStrRef().data()) + "/";
   } else {

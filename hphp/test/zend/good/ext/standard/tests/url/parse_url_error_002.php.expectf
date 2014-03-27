@@ -19,6 +19,7 @@
 }
 
 
---> Above range:HipHop Warning: %s
+--> Above range:
+Warning: %s
 bool(false)
 Done

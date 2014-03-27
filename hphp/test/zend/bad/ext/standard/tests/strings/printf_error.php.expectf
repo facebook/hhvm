@@ -1,26 +1,33 @@
 *** Testing printf() : error conditions ***
 
 -- Testing printf() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing printf() function with less than expected no. of arguments --
 
 -- Call printf with one argument less than expected --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Call printf with two argument less than expected --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Call printf with three argument less than expected --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

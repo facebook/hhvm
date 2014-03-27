@@ -101,7 +101,7 @@ void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   if (!orig || !orig->datefmt()) {
     s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
                            "Cannot clone unconstructed IntlDateFormatter");
-    throwException("%s", s_intl_error->getErrorMessage(false).c_str());
+    throw getException("%s", s_intl_error->getErrorMessage(false).c_str());
   }
   if (m_date_fmt) {
     udat_close(m_date_fmt);
@@ -110,7 +110,7 @@ void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   m_date_fmt = udat_clone(orig->datefmt(), &error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "datefmt_clone: date formatter clone failed");
-    throwException("%s", s_intl_error->getErrorMessage().c_str());
+    throw getException("%s", s_intl_error->getErrorMessage().c_str());
   }
 }
 
@@ -179,17 +179,15 @@ double IntlDateFormatter::getTimestamp(const Variant& arg) {
 //////////////////////////////////////////////////////////////////////////////
 // class IntlDateFormatter
 
-static TypedValue* HHVM_MN(IntlDateFormatter, __construct)(ActRec *ar) {
-  auto data = Native::data<IntlDateFormatter>(ar->getThis());
-  data->setDateFormatter(
-    getArg<KindOfString>(ar, 0), // locale
-    getArg<KindOfInt64>(ar, 1), // datetype
-    getArg<KindOfInt64>(ar, 2), // timetype
-    getArg<KindOfAny>(ar, 3), // timezone
-    getArg<KindOfAny>(ar, 4), // calendar
-    getArg<KindOfString>(ar, 5, empty_string.get())); // pattern
-  ar->m_r.m_type = KindOfNull;
-  return &ar->m_r;
+static void HHVM_METHOD(IntlDateFormatter, __construct,
+                        const String& locale,
+                        int64_t datetype, int64_t timetype,
+                        const Variant& timezone /*= null */,
+                        const Variant& calendar /*= null */,
+                        const String& pattern /*= empty_string */) {
+  auto data = Native::data<IntlDateFormatter>(this_.get());
+  data->setDateFormatter(locale, datetype, timetype,
+                         timezone, calendar, pattern);
 }
 
 static String HHVM_METHOD(IntlDateFormatter, format, const Variant& value) {

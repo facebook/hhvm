@@ -1,3 +1,4 @@
 fopen(/tmp/blah): failed to open stream: %s (2) in %s:%d
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

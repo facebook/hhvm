@@ -1,13 +1,16 @@
 int(0)
 int(1)
-HipHop Warning: %s
+
+Warning: %s
 int(0)
 int(2)
 int(0)
-HipHop Warning: %s
+
+Warning: %s
 int(1)
 int(2)
 int(1)
-HipHop Warning: %s
+
+Warning: %s
 int(-1)
 Done

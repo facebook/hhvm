@@ -1,10 +1,12 @@
 *** Testing base64_encode() : error conditions - wrong number of args ***
 
 -- Testing base64_encode() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing base64_encode() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

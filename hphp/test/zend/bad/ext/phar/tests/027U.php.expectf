@@ -23,10 +23,12 @@ fwrite on dir handle
 int(0)
 bool(false)
 opendir edge cases
-HipHop Warning: %s
+
+Warning: %s
 phar url "phar://" is unknown in %s027U.php on line %d
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 phar url "phar://foo.phar/hi" is unknown in %s027U.php on line %d
 bool(false)
 ===DONE===

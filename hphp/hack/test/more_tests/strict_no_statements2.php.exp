@@ -1,0 +1,2 @@
+File "strict_no_statements2.php", line 3, characters 1-2:
+Remove all toplevel statements except for requires

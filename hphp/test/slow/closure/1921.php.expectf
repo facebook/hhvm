@@ -1,4 +1,6 @@
-%S%wNULL
+
+Notice: Undefined variable: abc in %s/test/slow/closure/1921.php on line 8
+NULL
 int(123)
 int(456)
 NULL

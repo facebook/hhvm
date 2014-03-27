@@ -462,6 +462,9 @@ D:Int     = Shl    S0:Int S1:Int
 D:Int     = Shr    S0:Int S1:Int
 D:Dbl     = Floor  S0:Dbl
 D:Dbl     = Ceil   S0:Dbl
+D:Int     = AddIntO S0:Int S1:Int -> B
+D:Int     = SubIntO S0:Int S1:Int -> B
+D:Int     = MulIntO S0:Int S1:Int -> B
 
   Double arithmetic, integer arithmetic, and integer bitwise operations.
   Performs the operation described by the opcode name on S0 and S1, and puts
@@ -483,6 +486,9 @@ D:Dbl     = Ceil   S0:Dbl
   Floor and Ceil will return an integral value not greater, or not less
   than their input respectively. Their use requires SSE 4.1, availability
   should be checked before they are emitted.
+
+  AddIntO, SubIntO, MulIntO perform integer arithmetic on S0 and S1, but will
+  branch to block B on integer overflow.
 
 D:Bool = XorBool S0:Bool S1:Bool
 
@@ -827,6 +833,11 @@ D:ConstT = DefConst<T>
   Define a constant value of type T. D is presumed to be globally available and
   the DefConst instruction will not actually appear in the IR instruction
   stream.
+
+D:T = Conjure<T>
+
+  Define a value of type T. This is meant to be used in tests, to create a
+  non-constant value as an opaque input to other instructions.
 
 D:Cls = LdCls S0:Str S1:ConstCls
 

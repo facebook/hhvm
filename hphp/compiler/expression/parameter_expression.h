@@ -63,6 +63,7 @@ public:
   bool hasUserType() const { return m_originalType != nullptr; }
   const std::string getOriginalTypeHint() const;
   const std::string getUserTypeHint() const;
+  const std::string getTypeHintDisplayName() const;
   void parseHandler(ClassScopePtr cls);
   void compatibleDefault();
   void fixupSelfAndParentTypehints(ClassScopePtr cls);

@@ -1,0 +1,6 @@
+File "generic_subtyping2.php", line 17, characters 19-19:
+This is an object of type I
+File "generic_subtyping2.php", line 24, characters 10-29:
+It is incompatible with an object of type UnrelatedClass
+File "generic_subtyping2.php", line 17, characters 22-22:
+Considering the constraint on the type 'T'

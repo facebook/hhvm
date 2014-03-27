@@ -1,10 +1,12 @@
 *** Testing get_class_methods() : error conditions ***
 
 -- Testing get_class_methods() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing get_class_methods() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

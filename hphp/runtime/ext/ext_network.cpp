@@ -14,25 +14,36 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_network.h"
-#include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/util/lock.h"
-#include "hphp/runtime/base/file.h"
+
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
 #include <resolv.h>
+
+#include "folly/ScopeGuard.h"
+
+#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/util/lock.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/util/network.h"
 
 #if defined(__APPLE__)
 # include <arpa/nameser_compat.h>
 #include <vector>
+#endif
+
+// HOST_NAME_MAX is recommended by POSIX, but not required.
+// FreeBSD and OSX (as of 10.9) are known to not define it.
+// 255 is generally the safe value to assume and upstream
+// PHP does this as well.
+#ifndef HOST_NAME_MAX
+#define HOST_NAME_MAX 255
 #endif
 
 #define MAXPACKET  8192 /* max packet size used internally by BIND */
@@ -675,19 +686,14 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
 }
 
 Variant f_dns_get_record(const String& hostname, int type /* = -1 */,
-                         VRefParam authns /* = null */,
-                         VRefParam addtl /* = null */) {
+                         VRefParam authnsRef /* = null */,
+                         VRefParam addtlRef /* = null */) {
   IOStatusHelper io("dns_get_record", hostname.data(), type);
   if (type < 0) type = PHP_DNS_ALL;
   if (type & ~PHP_DNS_ALL && type != PHP_DNS_ANY) {
     raise_warning("Type '%d' not supported", type);
     return false;
   }
-
-  /* Initialize the return array */
-  Array ret;
-  authns = Array::Create();
-  addtl = Array::Create();
 
   unsigned char *cp = NULL, *end = NULL;
   int qd, an, ns = 0, ar = 0;
@@ -702,6 +708,7 @@ Variant f_dns_get_record(const String& hostname, int type /* = -1 */,
    * - In case of PHP_DNS_ANY we use the directly fetch DNS_T_ANY.
    *   (step NUMTYPES+1 )
    */
+  Array ret;
   bool first_query = true;
   bool store_results = true;
   for (int t = (type == PHP_DNS_ANY ? (PHP_DNS_NUM_TYPES + 1) : 0);
@@ -778,6 +785,9 @@ Variant f_dns_get_record(const String& hostname, int type /* = -1 */,
     php_dns_free_res(res);
   }
 
+  Array authns;
+  Array addtl;
+
   /* List of Authoritative Name Servers */
   while (ns-- > 0 && cp && cp < end) {
     Array retval;
@@ -796,11 +806,14 @@ Variant f_dns_get_record(const String& hostname, int type /* = -1 */,
     }
   }
 
+  authnsRef = authns;
+  addtlRef = addtl;
   return ret;
 }
 
-bool f_dns_get_mx(const String& hostname, VRefParam mxhosts,
-                  VRefParam weights /* = null */) {
+bool f_dns_get_mx(const String& hostname,
+                  VRefParam mxhostsRef,
+                  VRefParam weightsRef /* = null */) {
   IOStatusHelper io("dns_get_mx", hostname.data());
   int count, qdc;
   unsigned short type, weight;
@@ -808,8 +821,12 @@ bool f_dns_get_mx(const String& hostname, VRefParam mxhosts,
   char buf[MAXHOSTNAMELEN];
   unsigned char *cp, *end;
 
-  mxhosts = Array::Create();
-  weights = Array::Create();
+  Array mxhosts;
+  Array weights;
+  SCOPE_EXIT {
+    mxhostsRef = mxhosts;
+    weightsRef = weights;
+  };
 
   /* Go! */
   struct __res_state *res;

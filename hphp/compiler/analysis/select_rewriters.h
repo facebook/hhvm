@@ -50,17 +50,10 @@ private:
   void rewriteSelect(SelectClausePtr sc);
   void rewriteExpressionList(ExpressionListPtr l);
   void rewriteOther(ExpressionPtr ep);
-  ExpressionPtr getResultColumn(ExpressionPtr expr);
-  bool isServerSideExpression(ExpressionPtr ep);
   void rewriteClientSide(ExpressionPtr sc);
   void collectSelectedColumns(ExpressionPtr ep);
   bool isTableName(ExpressionPtr ep);
   bool isColumnName(ExpressionPtr ep);
-
-  /**
-   *  The next index to use for a column in the result received from the server.
-   */
-  int m_columnIndex = 0;
 
   /**
    * A list of simple variables and object property expressions

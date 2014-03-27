@@ -1,6 +1,5 @@
 Awaitable::getWaitHandle
-Method Continuation::getLabel does not have a prototype
-Iterator::next
+HH\Iterator::next
 Method SessionScopedWaitHandle::getContextIdx does not have a prototype
 Awaitable::getWaitHandle
 WaitableWaitHandle::getContextIdx

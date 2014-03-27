@@ -59,6 +59,7 @@ meal 0 => breakfast
      --> MealIterator::next (2)
      --> MealIterator::valid (3)
  --> MealIterator::next (3)
-HipHop Notice: %s
+
+Notice: %s
  --> MealIterator::valid (4)
 ===DONE===

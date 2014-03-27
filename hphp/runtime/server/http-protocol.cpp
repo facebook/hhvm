@@ -20,7 +20,7 @@
 #include <map>
 #include <string>
 
-#include <boost/lexical_cast.hpp>
+#include "folly/Conv.h"
 
 #include "hphp/util/logger.h"
 #include "hphp/util/text-util.h"
@@ -43,8 +43,6 @@
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
 using std::map;
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
 using std::string;
 
 namespace HPHP {
@@ -66,6 +64,12 @@ static bool read_all_post_data(Transport *transport,
     return true;
   }
   return false;
+}
+
+static void CopyParams(Array& dest, Array& src) {
+  for (ArrayIter iter(src); iter; ++iter) {
+    dest.set(iter.first(), iter.second());
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,46 +163,7 @@ static auto const s_arraysToUnset = {
   s__SESSION,
 };
 
-/**
- * PHP has "EGPCS" processing order of these global variables, and this
- * order is important in preparing $_REQUEST that needs to know which to
- * overwrite what when name happens to be the same.
- */
-void HttpProtocol::PrepareSystemVariables(Transport *transport,
-                                          const RequestURI &r,
-                                          const SourceRootInfo &sri) {
-
-  const VirtualHost *vhost = VirtualHost::GetCurrent();
-  GlobalVariables *g = get_global_variables();
-  Variant emptyArr(HphpArray::GetStaticEmptyArray());
-  for (auto& key : s_arraysToClear) {
-    g->remove(key.get(), false);
-    g->set(key.get(), emptyArr, false);
-  }
-  for (auto& key : s_arraysToUnset) {
-    g->remove(key.get(), false);
-  }
-  g->set(s_HTTP_RAW_POST_DATA, empty_string, false);
-
-  StartRequest();
-  PrepareEnv(g->getRef(s__ENV), transport);
-  PrepareRequestVariables(g->getRef(s__REQUEST),
-                          g->getRef(s__GET),
-                          g->getRef(s__POST),
-                          g->getRef(s_HTTP_RAW_POST_DATA),
-                          g->getRef(s__FILES),
-                          g->getRef(s__COOKIE),
-                          transport,
-                          r);
-  PrepareServerVariable(g->getRef(s__SERVER),
-                        transport,
-                        r,
-                        sri,
-                        vhost);
-}
-
-void HttpProtocol::PrepareEnv(Variant& env,
-                              Transport *transport) {
+static void PrepareEnv(Array& env, Transport *transport) {
   // $_ENV
   process_env_variables(env);
   env.set(s_HPHP, 1);
@@ -234,12 +199,80 @@ void HttpProtocol::PrepareEnv(Variant& env,
   }
 }
 
-void HttpProtocol::PrepareRequestVariables(Variant& request,
-                                           Variant& get,
-                                           Variant& post,
+static void StartRequest(Array& server) {
+  server.set(s_REQUEST_START_TIME, time(nullptr));
+  time_t now;
+  struct timeval tp = {0};
+  double now_double;
+  if (!gettimeofday(&tp, nullptr)) {
+    now_double = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
+    now = tp.tv_sec;
+  } else {
+    now = time(nullptr);
+    now_double = (double)now;
+  }
+  server.set(s_REQUEST_TIME, now);
+  server.set(s_REQUEST_TIME_FLOAT, now_double);
+}
+
+/**
+ * PHP has "EGPCS" processing order of these global variables, and this
+ * order is important in preparing $_REQUEST that needs to know which to
+ * overwrite what when name happens to be the same.
+ */
+void HttpProtocol::PrepareSystemVariables(Transport *transport,
+                                          const RequestURI &r,
+                                          const SourceRootInfo &sri) {
+
+  auto const vhost = VirtualHost::GetCurrent();
+  auto const g = get_global_variables();
+  Variant emptyArr(HphpArray::GetStaticEmptyArray());
+  for (auto& key : s_arraysToClear) {
+    g->remove(key.get(), false);
+    g->set(key.get(), emptyArr, false);
+  }
+  for (auto& key : s_arraysToUnset) {
+    g->remove(key.get(), false);
+  }
+  g->set(s_HTTP_RAW_POST_DATA, empty_string, false);
+
+#define X(name)                                       \
+  Array name##arr(Array::Create());                   \
+  SCOPE_EXIT { g->set(s__##name, name##arr, false); };
+
+  X(ENV)
+  X(GET)
+  X(POST)
+  X(COOKIE)
+  X(FILES)
+  X(SERVER)
+  X(REQUEST)
+
+#undef X
+
+  StartRequest(SERVERarr);
+  PrepareEnv(ENVarr, transport);
+  PrepareRequestVariables(REQUESTarr,
+                          GETarr,
+                          POSTarr,
+                          g->getRef(s_HTTP_RAW_POST_DATA),
+                          FILESarr,
+                          COOKIEarr,
+                          transport,
+                          r);
+  PrepareServerVariable(SERVERarr,
+                        transport,
+                        r,
+                        sri,
+                        vhost);
+}
+
+void HttpProtocol::PrepareRequestVariables(Array& request,
+                                           Array& get,
+                                           Array& post,
                                            Variant& raw_post,
-                                           Variant& files,
-                                           Variant& cookie,
+                                           Array& files,
+                                           Array& cookie,
                                            Transport *transport,
                                            const RequestURI &r) {
 
@@ -261,16 +294,16 @@ void HttpProtocol::PrepareRequestVariables(Variant& request,
   }
 }
 
-void HttpProtocol::PrepareGetVariable(Variant& get,
+void HttpProtocol::PrepareGetVariable(Array& get,
                                       const RequestURI &r) {
   DecodeParameters(get,
                    r.queryString().data(),
                    r.queryString().size());
 }
 
-void HttpProtocol::PreparePostVariables(Variant& post,
+void HttpProtocol::PreparePostVariables(Array& post,
                                         Variant& raw_post,
-                                        Variant& files,
+                                        Array& files,
                                         Transport *transport) {
 
   std::string contentType = transport->getHeader("Content-Type");
@@ -363,7 +396,7 @@ void HttpProtocol::PreparePostVariables(Variant& post,
   }
 }
 
-bool HttpProtocol::PrepareCookieVariable(Variant& cookie,
+bool HttpProtocol::PrepareCookieVariable(Array& cookie,
                                          Transport *transport) {
 
   string cookie_data = transport->getHeader("Cookie");
@@ -377,8 +410,8 @@ bool HttpProtocol::PrepareCookieVariable(Variant& cookie,
   }
 }
 
-void HttpProtocol::CopyHeaderVariables(Variant& server,
-                                       const HeaderMap& headers) {
+static void CopyHeaderVariables(Array& server,
+                                const HeaderMap& headers) {
   static std::atomic<int> badRequests(-1);
 
   std::vector<std::string> badHeaders;
@@ -395,8 +428,7 @@ void HttpProtocol::CopyHeaderVariables(Variant& server,
     // header past a proxy that would either overwrite or filter it
     // otherwise.  Client code should use apache_request_headers() to
     // retrieve the original headers if they are security-critical.
-    if (RuntimeOption::LogHeaderMangle != 0 &&
-        server.asArrRef().exists(normalizedKey)) {
+    if (RuntimeOption::LogHeaderMangle != 0 && server.exists(normalizedKey)) {
       badHeaders.push_back(key);
     }
 
@@ -432,7 +464,7 @@ void HttpProtocol::CopyHeaderVariables(Variant& server,
   }
 }
 
-void HttpProtocol::CopyTransportParams(Variant& server, Transport* transport) {
+static void CopyTransportParams(Array& server, Transport* transport) {
   HeaderMap transportParams;
   // Get additional server params from the transport if it has any. In the case
   // of fastcgi this is basically a full header list from apache/nginx.
@@ -444,9 +476,9 @@ void HttpProtocol::CopyTransportParams(Variant& server, Transport* transport) {
   }
 }
 
-void HttpProtocol::CopyServerInfo(Variant& server,
-                                  Transport *transport,
-                                  const VirtualHost *vhost) {
+static void CopyServerInfo(Array& server,
+                           Transport *transport,
+                           const VirtualHost *vhost) {
 
   string hostHeader = transport->getHeader("Host");
   String hostName(vhost->serverName(hostHeader));
@@ -479,14 +511,13 @@ void HttpProtocol::CopyServerInfo(Variant& server,
   server.set(s_SERVER_ADDR, transport->getServerAddr());
   server.set(s_SERVER_NAME, hostName);
   server.set(s_SERVER_PORT, transport->getServerPort());
-  server.set(s_SERVER_SOFTWARE, s_HPHP);
+  server.set(s_SERVER_SOFTWARE, transport->getServerSoftware());
   server.set(s_SERVER_PROTOCOL, "HTTP/" + transport->getHTTPVersion());
   server.set(s_SERVER_ADMIN, empty_string);
   server.set(s_SERVER_SIGNATURE, empty_string);
 }
 
-void HttpProtocol::CopyRemoteInfo(Variant& server,
-                                  Transport *transport) {
+static void CopyRemoteInfo(Array& server, Transport *transport) {
   String remoteAddr(transport->getRemoteAddr(), CopyString);
   String remoteHost(transport->getRemoteHost(), CopyString);
   if (remoteAddr.empty()) {
@@ -500,8 +531,7 @@ void HttpProtocol::CopyRemoteInfo(Variant& server,
   server.set(s_REMOTE_PORT, transport->getRemotePort());
 }
 
-void HttpProtocol::CopyAuthInfo(Variant& server,
-                                Transport *transport) {
+static void CopyAuthInfo(Array& server, Transport *transport) {
   // APE processes Authorization: Basic into PHP_AUTH_USER and PHP_AUTH_PW
   string authorization = transport->getHeader("Authorization");
   if (!authorization.empty()) {
@@ -519,24 +549,24 @@ void HttpProtocol::CopyAuthInfo(Variant& server,
   }
 }
 
-void HttpProtocol::CopyPathInfo(Variant& server,
-                                Transport *transport,
-                                const RequestURI& r,
-                                const VirtualHost *vhost) {
+static void CopyPathInfo(Array& server,
+                         Transport *transport,
+                         const RequestURI& r,
+                         const VirtualHost *vhost) {
   server.set(s_REQUEST_URI, String(transport->getUrl(), CopyString));
   server.set(s_SCRIPT_URL, r.originalURL());
   String prefix(transport->isSSL() ? "https://" : "http://");
 
   // Need to append port
-  assert(server.toCArrRef().exists(s_SERVER_PORT));
+  assert(server.exists(s_SERVER_PORT));
   std::string serverPort = "80";
-  if (server.toCArrRef().exists(s_SERVER_PORT)) {
-    CHECK(server[s_SERVER_PORT].isInteger() ||
-          server[s_SERVER_PORT].isString());
-    if (server[s_SERVER_PORT].isInteger()) {
-      serverPort = lexical_cast<string>(server[s_SERVER_PORT].toInt32());
+  if (server.exists(s_SERVER_PORT)) {
+    Variant port = server[s_SERVER_PORT];
+    always_assert(port.isInteger() || port.isString());
+    if (port.isInteger()) {
+      serverPort = folly::to<std::string>(port.toInt32());
     } else {
-      serverPort = server[s_SERVER_PORT].toString().data();
+      serverPort = port.toString().data();
     }
   }
 
@@ -546,11 +576,11 @@ void HttpProtocol::CopyPathInfo(Variant& server,
   }
 
   string hostHeader;
-  if (server.toCArrRef().exists(s_HTTP_HOST)) {
+  if (server.exists(s_HTTP_HOST)) {
     hostHeader = server[s_HTTP_HOST].toCStrRef().data();
   }
   String hostName;
-  if (server.toCArrRef().exists(s_SERVER_NAME)) {
+  if (server.exists(s_SERVER_NAME)) {
     assert(server[s_SERVER_NAME].isString());
     hostName = server[s_SERVER_NAME].toCStrRef();
   }
@@ -596,7 +626,7 @@ void HttpProtocol::CopyPathInfo(Variant& server,
   if (r.pathInfo().empty()) {
     server.set(s_PATH_TRANSLATED, r.absolutePath());
   } else {
-    assert(server.toCArrRef().exists(s_DOCUMENT_ROOT));
+    assert(server.exists(s_DOCUMENT_ROOT));
     assert(server[s_DOCUMENT_ROOT].isString());
     // reset path_translated back to the transport if it has it.
     auto const& pathTranslated = transport->getPathTranslated();
@@ -638,25 +668,7 @@ void HttpProtocol::CopyPathInfo(Variant& server,
   server.set(s_argc, 1);
 }
 
-void HttpProtocol::StartRequest() {
-  GlobalVariables *g = get_global_variables();
-  Variant& server = g->getRef(s__SERVER);
-  server.set(s_REQUEST_START_TIME, time(nullptr));
-  time_t now;
-  struct timeval tp = {0};
-  double now_double;
-  if (!gettimeofday(&tp, nullptr)) {
-    now_double = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
-    now = tp.tv_sec;
-  } else {
-    now = time(nullptr);
-    now_double = (double)now;
-  }
-  server.set(s_REQUEST_TIME, now);
-  server.set(s_REQUEST_TIME_FLOAT, now_double);
-}
-
-void HttpProtocol::PrepareServerVariable(Variant& server,
+void HttpProtocol::PrepareServerVariable(Array& server,
                                          Transport *transport,
                                          const RequestURI &r,
                                          const SourceRootInfo &sri,
@@ -677,7 +689,6 @@ void HttpProtocol::PrepareServerVariable(Variant& server,
   CopyServerInfo(server, transport, vhost);
   CopyRemoteInfo(server, transport);
   CopyAuthInfo(server, transport);
-
   CopyPathInfo(server, transport, r, vhost);
 
   // APE sets CONTENT_TYPE and CONTENT_LENGTH without HTTP_
@@ -688,18 +699,12 @@ void HttpProtocol::PrepareServerVariable(Variant& server,
     server.set(s_CONTENT_LENGTH, String(contentLength));
   }
 
-  for (map<string, string>::const_iterator iter =
-         RuntimeOption::ServerVariables.begin();
-       iter != RuntimeOption::ServerVariables.end(); ++iter) {
-      server.set(String(iter->first), String(iter->second));
+  for (auto& kv : RuntimeOption::ServerVariables) {
+    server.set(String(kv.first), String(kv.second));
   }
-  const map<string, string> &vServerVars = vhost->getServerVars();
-  for (map<string, string>::const_iterator iter =
-         vServerVars.begin();
-       iter != vServerVars.end(); ++iter) {
-    server.set(String(iter->first), String(iter->second));
+  for (auto& kv : vhost->getServerVars()) {
+    server.set(String(kv.first), String(kv.second));
   }
-
   sri.setServerVariables(server);
 
   const char *threadType = transport->getThreadTypeName();
@@ -730,16 +735,7 @@ void HttpProtocol::ClearRecord(bool success, const std::string &tmpfile) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void HttpProtocol::CopyParams(Variant &dest, Variant &src) {
-  if (src.isArray()) {
-    Array srcArray = src.toArray();
-    for (ArrayIter iter(srcArray); iter; ++iter) {
-      dest.set(iter.first(), iter.second());
-    }
-  }
-}
-
-void HttpProtocol::DecodeParameters(Variant &variables, const char *data,
+void HttpProtocol::DecodeParameters(Array& variables, const char *data,
                                     int size, bool post /* = false */) {
   if (data == nullptr || size == 0) {
     return;
@@ -781,7 +777,7 @@ void HttpProtocol::DecodeParameters(Variant &variables, const char *data,
   }
 }
 
-void HttpProtocol::DecodeCookies(Variant &variables, char *data) {
+void HttpProtocol::DecodeCookies(Array& variables, char *data) {
   assert(data && *data);
 
   char *strtok_buf = nullptr;
@@ -859,8 +855,8 @@ bool HttpProtocol::IsRfc1867(const string contentType, string &boundary) {
 }
 
 void HttpProtocol::DecodeRfc1867(Transport *transport,
-                                 Variant &post,
-                                 Variant &files,
+                                 Array& post,
+                                 Array& files,
                                  int contentLength,
                                  const void *&data,
                                  int &size,

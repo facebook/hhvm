@@ -1,9 +1,13 @@
 *** Testing array_intersect_ukey() : usage variation ***
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Notice: %s
-HipHop Warning: %s
+
+Notice: %s
+
+Warning: %s
 NULL
 ===DONE===

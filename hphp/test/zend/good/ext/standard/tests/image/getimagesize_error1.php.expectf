@@ -1,10 +1,12 @@
 *** Testing getimagesize() : error conditions ***
 
 -- Testing getimagesize() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing getimagesize() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

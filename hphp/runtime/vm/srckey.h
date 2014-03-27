@@ -16,11 +16,12 @@
 #ifndef incl_HPHP_SRCKEY_H_
 #define incl_HPHP_SRCKEY_H_
 
-#include <tuple>
-#include <boost/operators.hpp>
+#include "hphp/runtime/base/types.h"
 
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/base/complex-types.h"
+
+#include <boost/operators.hpp>
+#include <tuple>
 
 namespace HPHP {
 

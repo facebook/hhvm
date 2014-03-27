@@ -1,0 +1,12 @@
+File "trait_matching1.php", line 23, characters 7-7:
+This object is of type C
+File "trait_matching1.php", line 24, characters 7-13:
+It is incompatible with this object of type MyTrait
+because some of their methods are incompatible.
+Read the following to see why:
+File "trait_matching1.php", line 25, characters 13-18:
+Typing error
+File "trait_matching1.php", line 13, characters 13-16:
+This is a nullable type
+File "trait_matching1.php", line 25, characters 13-18:
+It is incompatible with a string

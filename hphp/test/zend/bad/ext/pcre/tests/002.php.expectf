@@ -1,18 +1,24 @@
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 string(0) ""
 string(12) "a${1b${1c${1"
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 Deprecated: preg_replace(): The /e modifier is deprecated, use preg_replace_callback instead in %s on line 12
 
 Parse error: %s in %s002.php(12) : regexp code on line 1
-HipHop Fatal error: %s
+
+Fatal error: %s
 for ($ in %s002.php on line 12

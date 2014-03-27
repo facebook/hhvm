@@ -3,12 +3,15 @@ $$x=f(): good
 ${'i'}=f(): good
 $i[0]=f(): good
 $i[0][0]=f(): good
-$i->p=f(): HipHop Warning: %s
+$i->p=f(): 
+Warning: %s
 good
-$i->p->q=f(): HipHop Warning: %s
+$i->p->q=f(): 
+Warning: %s
 good
 $i->p[0]=f(): good
-$i->p[0]->p=f(): HipHop Warning: %s
+$i->p[0]->p=f(): 
+Warning: %s
 good
 C::$p=f(): good
 C::$p[0]=f(): good

@@ -1,10 +1,12 @@
 *** Testing var_export() : error conditions ***
 
 -- Testing var_export() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing var_export() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

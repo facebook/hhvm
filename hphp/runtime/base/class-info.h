@@ -54,7 +54,7 @@ public:
     HasCall                = IsPublic,  //    x
     AllowOverride          = IsPrivate, //                  x
     IsReference            = (1 << 11), //                  x      x     x
-    IsConstructor          = (1 << 12), //                         x
+    // Unused              = (1 << 12),
 
     // need a non-zero number for const char * maps
     IsNothing              = (1 << 13),
@@ -80,7 +80,7 @@ public:
 
     IsTrait                = (1 << 29), //    x
     ZendParamModeFalse     = (1 << 30), //                  x      x
-    NeedsActRec            = (1u << 31),//                  x      x
+    NoFCallBuiltin         = (1u << 31),//                  x      x
   };
 
   class ConstantInfo {
@@ -184,16 +184,6 @@ public:
    * Load everything.
    */
   static void Load();
-
-  /**
-   * Return a list of PHP library functions.
-   */
-  static Array GetSystemFunctions();
-
-  /**
-   * Return a list of user defined functions.
-   */
-  static Array GetUserFunctions();
 
   /**
    * Locate one function.

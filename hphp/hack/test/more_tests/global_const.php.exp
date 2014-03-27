@@ -1,0 +1,6 @@
+File "global_const.php", line 5, characters 10-10:
+Invalid return type
+File "global_const.php", line 4, characters 18-21:
+This is a bool
+File "global_const.php", line 3, characters 7-9:
+It is incompatible with an int

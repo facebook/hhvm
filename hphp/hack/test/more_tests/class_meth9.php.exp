@@ -1,0 +1,4 @@
+File "class_meth9.php", line 13, characters 29-30:
+This is a protected method
+File "class_meth9.php", line 18, characters 12-32:
+you cannot use it with class_meth (whether you are in the same class hierarchy or not).

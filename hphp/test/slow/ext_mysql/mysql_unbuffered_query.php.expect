@@ -1,0 +1,13 @@
+bool(true)
+bool(true)
+Array
+(
+    [id] => 1
+    [name] => test
+)
+Array
+(
+    [id] => 2
+    [name] => test2
+)
+bool(false)

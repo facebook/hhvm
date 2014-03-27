@@ -4,12 +4,6 @@ class Queryable {
 
   public function executeQuery() {
     $args = func_get_args();
-    $serializedAST = $args[0];
-    //echo $serializedAST."\n";
-    $ast = unserialize($serializedAST);
-    //var_dump($ast);
-    $cmToPHP = new HH\CodeModel\CodeModelToPHP();
-    $args[0] = $ast->accept($cmToPHP);
     $args[1] = "closure";
     return $args;
   }
@@ -17,7 +11,8 @@ class Queryable {
 
 function print_result($e) {
   if (is_string($e)) {
-    echo $e."\n";
+    echo 'string(', strlen($e), ')', ' with \000 printed as <0>:', "\n",
+      strtr($e, [chr(0) => '<0>']), "\n";
   } else {
     var_dump($e);
   }

@@ -1,1 +1,1 @@
-HipHop Fatal error: Cannot use 'string' as class name as it is reserved in %s on line 2
+Fatal error: Cannot use 'HH\string' as class name as it is reserved in %s on line 3

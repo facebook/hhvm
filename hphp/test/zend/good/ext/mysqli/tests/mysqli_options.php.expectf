@@ -6,7 +6,8 @@ bool(true)
 bool(true)
 %s(23) "MYSQLI_OPT_LOCAL_INFILE"
 bool(true)
-HipHop Notice: %s
+
+Notice: %s
 %s(19) "MYSQLI_INIT_COMMAND"
 bool(true)
 %s(25) "MYSQLI_READ_DEFAULT_GROUP"
@@ -21,7 +22,8 @@ bool(true)
 bool(true)
 %s(17) "MYSQLI_CLIENT_SSL"
 bool(false)
-Link closedHipHop Warning: %s
+Link closed
+Warning: %s
 %s(19) "MYSQLI_INIT_COMMAND"
 NULL
 done!

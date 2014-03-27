@@ -57,6 +57,7 @@ struct NameValueTableWrapper : public ArrayData {
     : ArrayData(kNvtwKind)
     , m_tab(tab)
   {}
+  ~NameValueTableWrapper();
 
 public: // ArrayData implementation
   static void Release(ArrayData*) {}
@@ -115,8 +116,8 @@ public: // ArrayData implementation
   static ssize_t IterAdvance(const ArrayData*, ssize_t prev);
   static ssize_t IterRewind(const ArrayData*, ssize_t prev);
 
-  static bool ValidFullPos(const ArrayData*, const FullPos & fp);
-  static bool AdvanceFullPos(ArrayData*, FullPos&);
+  static bool ValidMArrayIter(const ArrayData*, const MArrayIter & fp);
+  static bool AdvanceMArrayIter(ArrayData*, MArrayIter&);
   static bool IsVectorData(const ArrayData*);
 
   static ArrayData* EscalateForSort(ArrayData*);

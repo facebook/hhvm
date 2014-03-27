@@ -135,6 +135,9 @@ public:
   virtual uint16_t getServerPort() {
     return RuntimeOption::ServerPort;
   };
+  virtual const char *getServerSoftware() {
+    return "HPHP";
+  };
 
   /**
    * POST request's data.
@@ -187,9 +190,8 @@ public:
    */
   void setMimeType(const String& mimeType);
   String getMimeType();
-  const char *getDefaultContentType() { return "text/html";}
-  bool sendDefaultContentType() { return m_sendContentType;}
-  void setDefaultContentType(bool send) { m_sendContentType = send;}
+  bool getUseDefaultContentType() { return m_sendContentType;}
+  void setUseDefaultContentType(bool send) { m_sendContentType = send;}
 
   /**
    * Can we gzip response?

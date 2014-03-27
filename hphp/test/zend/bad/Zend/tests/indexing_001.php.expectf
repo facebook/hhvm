@@ -6,11 +6,14 @@ array(1) {
     int(1)
   }
 }
-HipHop Warning: %s
+
+Warning: %s
 int(0)
-HipHop Warning: %s
+
+Warning: %s
 int(1)
-HipHop Warning: %s
+
+Warning: %s
 bool(true)
 array(1) {
   ["foo"]=>
@@ -26,10 +29,13 @@ array(1) {
     int(1)
   }
 }
-HipHop Warning: %s
-HipHop Notice: %s
+
+Warning: %s
+
+Notice: %s
 string(1) "A"
-HipHop Warning: %s
+
+Warning: %s
 float(0.1)
 array(1) {
   ["foo"]=>
@@ -47,11 +53,14 @@ array(1) {
     int(1)
   }
 }
-HipHop Warning: %s
+
+Warning: %s
 int(0)
-HipHop Warning: %s
+
+Warning: %s
 int(1)
-HipHop Warning: %s
+
+Warning: %s
 bool(true)
 array(1) {
   ["foo"]=>
@@ -67,7 +76,8 @@ array(1) {
     int(1)
   }
 }
-HipHop Warning: %s
+
+Warning: %s
 float(0.1)
 array(1) {
   ["foo"]=>
@@ -84,11 +94,14 @@ array(1) {
     int(1)
   }
 }
-HipHop Warning: %s
+
+Warning: %s
 int(0)
-HipHop Warning: %s
+
+Warning: %s
 int(1)
-HipHop Warning: %s
+
+Warning: %s
 bool(true)
 array(1) {
   [0]=>
@@ -104,7 +117,8 @@ array(1) {
     int(1)
   }
 }
-HipHop Warning: %s
+
+Warning: %s
 float(0.1)
 array(1) {
   [0]=>
@@ -122,11 +136,14 @@ array(1) {
     int(1)
   }
 }
-HipHop Warning: %s
+
+Warning: %s
 int(0)
-HipHop Warning: %s
+
+Warning: %s
 int(1)
-HipHop Warning: %s
+
+Warning: %s
 bool(true)
 array(1) {
   [0]=>
@@ -142,7 +159,8 @@ array(1) {
     int(1)
   }
 }
-HipHop Warning: %s
+
+Warning: %s
 float(0.1)
 array(1) {
   [0]=>

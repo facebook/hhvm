@@ -1273,27 +1273,27 @@ JCacheStorageTest::testRemove
 JCacheStorageTest::testStore
 .
 JCacheStorageTest_Main::testCacheClearGroup with data set #0
-F
+E
 JCacheStorageTest_Main::testCacheClearGroup with data set #1
 .
 JCacheStorageTest_Main::testCacheClearGroup with data set #2
-E
+F
 JCacheStorageTest_Main::testCacheClearGroup with data set #3
 F
 JCacheStorageTest_Main::testCacheClearNotGroup with data set #0
-F
+E
 JCacheStorageTest_Main::testCacheClearNotGroup with data set #1
 .
 JCacheStorageTest_Main::testCacheClearNotGroup with data set #2
-E
+F
 JCacheStorageTest_Main::testCacheClearNotGroup with data set #3
 F
 JCacheStorageTest_Main::testCacheHit with data set #0
-F
+.
 JCacheStorageTest_Main::testCacheHit with data set #1
 .
 JCacheStorageTest_Main::testCacheHit with data set #2
-.
+F
 JCacheStorageTest_Main::testCacheHit with data set #3
 F
 JCacheStorageTest_Main::testCacheMiss with data set #0
@@ -1305,19 +1305,19 @@ JCacheStorageTest_Main::testCacheMiss with data set #2
 JCacheStorageTest_Main::testCacheMiss with data set #3
 .
 JCacheStorageTest_Main::testCacheRemove with data set #0
-F
+.
 JCacheStorageTest_Main::testCacheRemove with data set #1
 .
 JCacheStorageTest_Main::testCacheRemove with data set #2
-.
+F
 JCacheStorageTest_Main::testCacheRemove with data set #3
 F
 JCacheStorageTest_Main::testCacheTimeout with data set #0
-F
+.
 JCacheStorageTest_Main::testCacheTimeout with data set #1
 .
 JCacheStorageTest_Main::testCacheTimeout with data set #2
-.
+F
 JCacheStorageTest_Main::testCacheTimeout with data set #3
 F
 JCacheStorageWincacheTest::testClean
@@ -1430,8 +1430,6 @@ JCategoriesTest::testGet
 S
 JCategoriesTest::testGetInstance
 .
-JCategoryNodeTest::testSetParent
-FATAL
 JClientFtpTest::testChdir
 I
 JClientFtpTest::testChmod
@@ -2945,11 +2943,11 @@ JDateTest::testToUnix with data set "Australia/BrisbaneGMT"
 JDateTest::testToUnix with data set "basic"
 .
 JDateTest::test__construct with data set "DateTime tzCT"
-.
+F
 JDateTest::test__construct with data set "basic"
 .
 JDateTest::test__construct with data set "tzCT"
-.
+F
 JDateTest::test__construct with data set "unix"
 .
 JDateTest::test__get with data set "day"
@@ -3024,14 +3022,6 @@ JDocumentJSONTest::testGetAndSetName
 .
 JDocumentJSONTest::testRender
 .
-JDocumentOpensearchTest::testAddImage
-I
-JDocumentOpensearchTest::testAddItem
-I
-JDocumentOpensearchTest::testRender
-.
-JDocumentOpensearchTest::testSetShortName
-I
 JDocumentRAWTest::testRender
 .
 JDocumentRendererAtomTest::testRender
@@ -4011,7 +4001,7 @@ JFeedEntryTest::testRemoveLink
 JFeedEntryTest::testSetAuthor
 .
 JFeedFactoryTest::testGetFeed
-E
+.
 JFeedFactoryTest::testGetFeedBad
 S
 JFeedFactoryTest::testGetFeedIdn
@@ -4131,7 +4121,7 @@ JFeedParserTest::testMoveToNextElement
 JFeedParserTest::testMoveToNextElementByName
 .
 JFeedParserTest::testParse
-E
+.
 JFeedParserTest::testProcessElementWithElement
 .
 JFeedParserTest::testProcessElementWithEntry
@@ -7082,8 +7072,6 @@ JHtmlGridTest::testSort
 I
 JHtmlGridTest::testState
 I
-JHtmlIconsTest::testButtons
-.
 JHtmlJGridTest::testCheckedout
 I
 JHtmlJGridTest::testPublished
@@ -7609,97 +7597,97 @@ JLanguageStemmerTest::testGetInstance
 JLanguageStemmerTest::testGetInstanceException
 .
 JLanguageTest::testConstruct
-E
+.
 JLanguageTest::testExists
-E
+.
 JLanguageTest::testGet
-E
+I
 JLanguageTest::testGetDefault
-E
+.
 JLanguageTest::testGetErrorFiles
-E
+I
 JLanguageTest::testGetFirstDay
-E
+I
 JLanguageTest::testGetIgnoredSearchWords
-E
+.
 JLanguageTest::testGetIgnoredSearchWordsCallback
-E
+.
 JLanguageTest::testGetInstance
-E
+.
 JLanguageTest::testGetKnownLanguages
-E
+.
 JLanguageTest::testGetLanguagePath
-E
+.
 JLanguageTest::testGetLocale
-E
+I
 JLanguageTest::testGetLowerLimitSearchWord
-E
+.
 JLanguageTest::testGetLowerLimitSearchWordCallback
-E
+.
 JLanguageTest::testGetMetadata
-E
+.
 JLanguageTest::testGetName
-E
+I
 JLanguageTest::testGetOrphans
-E
+I
 JLanguageTest::testGetPaths
-E
+I
 JLanguageTest::testGetPluralSuffixes
-E
+.
 JLanguageTest::testGetPluralSuffixesCallback
-E
+.
 JLanguageTest::testGetSearchDisplayedCharactersNumber
-E
+.
 JLanguageTest::testGetSearchDisplayedCharactersNumberCallback
-E
+.
 JLanguageTest::testGetSetDebug
-E
+.
 JLanguageTest::testGetTag
-E
+I
 JLanguageTest::testGetTransliterator
-E
+.
 JLanguageTest::testGetUpperLimitSearchWord
-E
+.
 JLanguageTest::testGetUpperLimitSearchWordCallback
-E
+.
 JLanguageTest::testGetUsed
-E
+I
 JLanguageTest::testGetWeekEnd
-E
+I
 JLanguageTest::testHasKey
-E
+I
 JLanguageTest::testIsRTL
-E
+I
 JLanguageTest::testLoad
-E
+I
 JLanguageTest::testParse
-E
+.
 JLanguageTest::testParseLanguageFiles
-E
+.
 JLanguageTest::testParseXMLLanguageFile
-E
+.
 JLanguageTest::testParseXMLLanguageFileException
-E
+.
 JLanguageTest::testSetDefault
-E
+.
 JLanguageTest::testSetIgnoredSearchWordsCallback
-E
+.
 JLanguageTest::testSetLanguage
-E
+.
 JLanguageTest::testSetLowerLimitSearchWordCallback
-E
+.
 JLanguageTest::testSetPluralSuffixesCallback
-E
+.
 JLanguageTest::testSetSearchDisplayedCharactersNumberCallback
-E
+.
 JLanguageTest::testSetTransliterator
-E
+.
 JLanguageTest::testSetUpperLimitSearchWordCallback
-E
+.
 JLanguageTest::testTransliterate
-E
+.
 JLanguageTest::test_
-E
+.
 JLanguageTransliterateTest::testData
 .
 JLanguageTransliterateTest::testUtf8_latin_to_ascii with data set #0
@@ -8878,68 +8866,6 @@ JPaginationObjectTest::testConstructor with data set #0
 .
 JPaginationObjectTest::testConstructor with data set #1
 .
-JPaginationTest::testBuildDataObject with data set #0
-.
-JPaginationTest::testConstructor with data set #0
-.
-JPaginationTest::testConstructor with data set #1
-.
-JPaginationTest::testConstructor with data set #2
-.
-JPaginationTest::testConstructor with data set #3
-.
-JPaginationTest::testConstructor with data set #4
-.
-JPaginationTest::testGet with data set #0
-.
-JPaginationTest::testGet with data set #1
-.
-JPaginationTest::testGet with data set #2
-.
-JPaginationTest::testGet with data set #3
-.
-JPaginationTest::testGetAdditionalUrlParam
-.
-JPaginationTest::testGetData with data set #0
-.
-JPaginationTest::testGetLimitBox with data set #0
-.
-JPaginationTest::testGetPagesCounter with data set #0
-.
-JPaginationTest::testGetPagesCounter with data set #1
-.
-JPaginationTest::testGetPagesLinks with data set #0
-E
-JPaginationTest::testGetRowOffset
-.
-JPaginationTest::testItemActive with data set #0
-E
-JPaginationTest::testItemInactive with data set #0
-.
-JPaginationTest::testListRender with data set #0
-.
-JPaginationTest::testOrderDownIcon with data set #0
-.
-JPaginationTest::testOrderDownIcon with data set #1
-.
-JPaginationTest::testOrderDownIcon with data set #2
-.
-JPaginationTest::testOrderUpIcon with data set #0
-.
-JPaginationTest::testOrderUpIcon with data set #1
-.
-JPaginationTest::testOrderUpIcon with data set #2
-.
-JPaginationTest::testSet with data set #0
-.
-JPaginationTest::testSet with data set #1
-.
-JPaginationTest::testSet with data set #2
-.
-JPaginationTest::testSetAdditionalUrlParam
-.
-JPaginationTest::testSetEmptyAdditionalUrlParam
-.
 JPathTest::testCanChmod
 I
 JPathTest::testCheck
@@ -10086,10 +10012,6 @@ JToolbarButtonCustomTest::testFetchButton
 .
 JToolbarButtonCustomTest::testFetchId
 .
-JToolbarButtonHelpTest::testFetchButton
-F
-JToolbarButtonHelpTest::testFetchId
-.
 JToolbarButtonLinkTest::testFetchButton
 .
 JToolbarButtonLinkTest::testFetchId
@@ -10775,36 +10697,6 @@ JTwitterStatusesTest::testTweetWithMedia with data set #0
 JTwitterStatusesTest::testTweetWithMedia with data set #1
 .
 JTwitterStatusesTest::testTweetWithMediaFailure
-.
-JTwitterTest::testGetOption
-.
-JTwitterTest::testSetOption
-.
-JTwitterTest::test__GetBlock
-.
-JTwitterTest::test__GetDirectMessages
-E
-JTwitterTest::test__GetFavorites
-.
-JTwitterTest::test__GetFriends
-.
-JTwitterTest::test__GetHelp
-.
-JTwitterTest::test__GetLists
-.
-JTwitterTest::test__GetOther
-.
-JTwitterTest::test__GetPlaces
-.
-JTwitterTest::test__GetProfile
-.
-JTwitterTest::test__GetSearch
-.
-JTwitterTest::test__GetStatuses
-.
-JTwitterTest::test__GetTrends
-.
-JTwitterTest::test__GetUsers
 .
 JTwitterTrendsTest::testGetClosest
 .

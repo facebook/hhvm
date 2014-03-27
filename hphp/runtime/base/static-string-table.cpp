@@ -15,11 +15,11 @@
 */
 #include "hphp/runtime/base/static-string-table.h"
 
-#include "folly/AtomicHashMap.h"
-
 #include "hphp/runtime/base/class-info.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/runtime-option.h"
+
+#include "folly/AtomicHashMap.h"
 
 namespace HPHP {
 

@@ -282,7 +282,7 @@ bool f_array_key_exists(const Variant& key, const Variant& search) {
   } else if (searchCell->m_type == KindOfObject) {
     ObjectData* obj = searchCell->m_data.pobj;
     if (obj->isCollection()) {
-      return collectionOffsetContains(obj, key);
+      return collectionContains(obj, key);
     }
     return f_array_key_exists(key, toArray(search));
   } else {
@@ -591,7 +591,7 @@ Variant f_array_pop(VRefParam containerRef) {
     return uninit_null();
   }
   if (container->m_type == KindOfArray) {
-    return containerRef.pop();
+    return containerRef.wrapped().toArrRef().pop();
   }
   assert(container->m_type == KindOfObject);
   auto* obj = container->m_data.pobj;
@@ -723,7 +723,7 @@ Variant f_array_shift(VRefParam array) {
     return uninit_null();
   }
   if (cell_array->m_type == KindOfArray) {
-    return array.dequeue();
+    return array.wrapped().toArrRef().dequeue();
   }
   assert(cell_array->m_type == KindOfObject);
   auto* obj = cell_array->m_data.pobj;
@@ -810,6 +810,7 @@ Variant f_array_splice(VRefParam input, int offset,
   input = ArrayUtil::Splice(arr_input, offset, len, replacement, &ret);
   return ret;
 }
+
 Variant f_array_sum(const Variant& array) {
   getCheckedArray(array);
   int64_t i;
@@ -833,10 +834,10 @@ Variant f_array_unshift(int _argc, VRefParam array, const Variant& var, const Ar
       if (!_argv.empty()) {
         for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
           pos = _argv->iter_rewind(pos)) {
-          array.prepend(_argv->getValueRef(pos));
+          array.wrapped().toArrRef().prepend(_argv->getValueRef(pos));
         }
       }
-      array.prepend(var);
+      array.wrapped().toArrRef().prepend(var);
     } else {
       {
         Array newArray;
@@ -1034,13 +1035,11 @@ int64_t f_sizeof(const Variant& var, int64_t mode /* = 0 */) {
 
 namespace {
 
-enum class CowTag {
-  Yes,
-  No
-};
-
-template<CowTag Cow, class Op, class NonArrayRet>
-static Variant iter_op_impl(VRefParam refParam, Op op, NonArrayRet nonArray) {
+enum class NoCow {};
+template<class DoCow = void, class NonArrayRet, class OpPtr>
+static Variant iter_op_impl(VRefParam refParam, OpPtr op, NonArrayRet nonArray,
+                            bool(ArrayData::*pred)() const =
+                              &ArrayData::isInvalid) {
   auto& cell = *refParam.wrapped().asCell();
   if (cell.m_type != KindOfArray) {
     throw_bad_type_exception("expecting an array");
@@ -1048,29 +1047,29 @@ static Variant iter_op_impl(VRefParam refParam, Op op, NonArrayRet nonArray) {
   }
 
   auto ad = cell.m_data.parr;
-  if (Cow == CowTag::Yes) {
-    if (ad->hasMultipleRefs() && !ad->isInvalid() && !ad->noCopyOnWrite()) {
-      ad = ad->copy();
-      cellSet(make_tv<KindOfArray>(ad), cell);
-    }
+  auto constexpr doCow = !std::is_same<DoCow, NoCow>::value;
+  if (doCow && ad->hasMultipleRefs() && !(ad->*pred)() &&
+      !ad->noCopyOnWrite()) {
+    ad = ad->copy();
+    cellSet(make_tv<KindOfArray>(ad), cell);
   }
-  return op(ad);
+  return (ad->*op)();
 }
 
 }
 
 Variant f_each(VRefParam refParam) {
-  return iter_op_impl<CowTag::Yes>(
+  return iter_op_impl(
     refParam,
-    [] (ArrayData* ad) { return ad->each(); },
+    &ArrayData::each,
     Variant::NullInit()
   );
 }
 
 Variant f_current(VRefParam refParam) {
-  return iter_op_impl<CowTag::No>(
+  return iter_op_impl<NoCow>(
     refParam,
-    [] (ArrayData* ad) { return ad->current(); },
+    &ArrayData::current,
     false
   );
 }
@@ -1080,42 +1079,44 @@ Variant f_pos(VRefParam refParam) {
 }
 
 Variant f_key(VRefParam refParam) {
-  return iter_op_impl<CowTag::No>(
+  return iter_op_impl<NoCow>(
     refParam,
-    [] (ArrayData* ad) { return ad->key(); },
+    &ArrayData::key,
     false
   );
 }
 
 Variant f_next(VRefParam refParam) {
-  return iter_op_impl<CowTag::Yes>(
+  return iter_op_impl(
     refParam,
-    [] (ArrayData* ad) { return ad->next(); },
+    &ArrayData::next,
     false
   );
 }
 
 Variant f_prev(VRefParam refParam) {
-  return iter_op_impl<CowTag::Yes>(
+  return iter_op_impl(
     refParam,
-    [] (ArrayData* ad) { return ad->prev(); },
+    &ArrayData::prev,
     false
   );
 }
 
 Variant f_reset(VRefParam refParam) {
-  return iter_op_impl<CowTag::No>(
+  return iter_op_impl(
     refParam,
-    [] (ArrayData* ad) { return ad->reset(); },
-    false
+    &ArrayData::reset,
+    false,
+    &ArrayData::isHead
   );
 }
 
 Variant f_end(VRefParam refParam) {
-  return iter_op_impl<CowTag::No>(
+  return iter_op_impl(
     refParam,
-    [] (ArrayData* ad) { return ad->end(); },
-    false
+    &ArrayData::end,
+    false,
+    &ArrayData::isTail
   );
 }
 

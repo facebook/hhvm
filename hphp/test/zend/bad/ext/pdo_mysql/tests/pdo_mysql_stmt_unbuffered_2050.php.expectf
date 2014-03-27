@@ -19,10 +19,12 @@ array(1) {
   }
 }
 Unbuffered...
-HipHop Warning: %s
+
+Warning: %s
 array(0) {
 }
-HipHop Warning: %s
+
+Warning: %s
 array(0) {
 }
 array(1) {

@@ -1,6 +1,8 @@
-HipHop Warning: %s
+
+Warning: %s
 .
 ..
 foo
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

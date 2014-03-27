@@ -1,9 +1,11 @@
 *** Test substituting argument 1 with emptyUnsetUndefNull values ***
 bool(true)
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(true)
 bool(true)

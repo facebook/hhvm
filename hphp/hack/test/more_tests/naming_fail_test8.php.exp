@@ -1,0 +1,4 @@
+File "naming_fail_test8.php", line 24, characters 3-4:
+The variable $k is defined
+File "naming_fail_test8.php", line 20, characters 17-18:
+But in a different scope

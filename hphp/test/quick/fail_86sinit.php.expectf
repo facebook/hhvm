@@ -1,4 +1,5 @@
-HipHop Fatal error: Class undefined: Z in %s on line 5
+
+Fatal error: Class undefined: Z in %s on line 5
 array(6) {
   [0]=>
   int(16777217)
@@ -9,7 +10,8 @@ array(6) {
   [3]=>
   int(5)
   [4]=>
-  string(0) ""
+  array(0) {
+  }
   [5]=>
   array(2) {
     [0]=>

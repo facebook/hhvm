@@ -1,0 +1,229 @@
+object(HH\ImmVector)#2 (2) {
+  [0]=>
+  object(HH\Vector)#3 (1) {
+    [0]=>
+    int(1)
+  }
+  [1]=>
+  object(HH\Vector)#4 (1) {
+    [0]=>
+    int(2)
+  }
+}
+object(HH\ImmMap)#5 (2) {
+  [0]=>
+  object(HH\Vector)#6 (1) {
+    [0]=>
+    int(1)
+  }
+  [1]=>
+  object(HH\Vector)#7 (1) {
+    [0]=>
+    int(2)
+  }
+}
+object(HH\Pair)#8 (2) {
+  [0]=>
+  object(HH\Vector)#9 (1) {
+    [0]=>
+    int(1)
+  }
+  [1]=>
+  object(HH\Vector)#10 (1) {
+    [0]=>
+    int(2)
+  }
+}
+
+object(HH\ImmVector)#12 (2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    object(HH\Vector)#13 (1) {
+      [0]=>
+      int(1)
+    }
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    object(HH\Vector)#14 (1) {
+      [0]=>
+      int(2)
+    }
+  }
+}
+object(HH\ImmMap)#15 (2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    object(HH\Vector)#16 (1) {
+      [0]=>
+      int(1)
+    }
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    object(HH\Vector)#17 (1) {
+      [0]=>
+      int(2)
+    }
+  }
+}
+object(HH\Pair)#18 (2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    object(HH\Vector)#19 (1) {
+      [0]=>
+      int(1)
+    }
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    object(HH\Vector)#20 (1) {
+      [0]=>
+      int(2)
+    }
+  }
+}
+
+Caught exception: Cannot modify immutable object of type HH\ImmVector
+Caught exception: Cannot modify immutable object of type HH\ImmMap
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 36
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 37
+object(HH\Pair)#28 (2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    object(HH\Vector)#29 (1) {
+      [0]=>
+      int(1)
+    }
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    object(HH\Vector)#30 (1) {
+      [0]=>
+      int(2)
+    }
+  }
+}
+
+Caught exception: Cannot modify immutable object of type HH\ImmVector
+Caught exception: Cannot modify immutable object of type HH\ImmMap
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 52
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 53
+object(HH\Pair)#36 (2) {
+  [0]=>
+  string(6) "foobaz"
+  [1]=>
+  int(457)
+}
+
+Caught exception: Cannot modify immutable object of type HH\ImmVector
+Caught exception: Cannot modify immutable object of type HH\ImmMap
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 68
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 69
+object(HH\Pair)#42 (2) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(7)
+}
+
+Caught exception: Cannot modify immutable object of type HH\ImmVector
+Caught exception: Cannot modify immutable object of type HH\ImmMap
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 84
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 85
+
+Warning: Creating default object from empty value in %s on line 85
+object(HH\Pair)#48 (2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(73)
+  }
+  [1]=>
+  object(stdClass)#51 (1) {
+    ["prop"]=>
+    string(4) "blah"
+  }
+}
+
+Caught exception: Cannot modify immutable object of type HH\ImmVector
+Caught exception: Cannot modify immutable object of type HH\ImmMap
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 100
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 101
+object(HH\Pair)#55 (2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(73)
+  }
+  [1]=>
+  array(1) {
+    ["a"]=>
+    string(1) "b"
+  }
+}
+
+Caught exception: Cannot modify immutable object of type HH\ImmVector
+Caught exception: Cannot modify immutable object of type HH\ImmMap
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 116
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 117
+object(HH\Pair)#61 (2) {
+  [0]=>
+  string(3) "boo"
+  [1]=>
+  string(3) "car"
+}
+
+Caught exception: Cannot modify immutable object of type HH\ImmVector
+Caught exception: Cannot modify immutable object of type HH\ImmMap
+Caught exception: Cannot modify immutable object of type HH\Pair
+
+Caught exception: Cannot modify immutable object of type HH\ImmVector
+Caught exception: Cannot modify immutable object of type HH\ImmMap
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 148
+
+Warning: Cannot modify immutable object of type HH\Pair in %s on line 149
+object(HH\Pair)#74 (2) {
+  [0]=>
+  array(2) {
+    [1]=>
+    int(5)
+    [2]=>
+    int(6)
+  }
+  [1]=>
+  array(2) {
+    [1]=>
+    int(8)
+    [2]=>
+    int(9)
+  }
+}
+
+Caught exception: Cannot use [] with collections for reading in an lvalue context
+Caught exception: Cannot use [] with collections for reading in an lvalue context
+Caught exception: Cannot use [] with collections for reading in an lvalue context
+
+
+Fatal error: Collection elements cannot be taken by reference in %s on line 174

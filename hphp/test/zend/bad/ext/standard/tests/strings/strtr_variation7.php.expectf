@@ -19,15 +19,18 @@ string(6) ".52-20"
 string(6) "234101"
 
 -- Iteration 7 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 8 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 9 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 10 --
@@ -52,7 +55,8 @@ string(6) "012atm"
 string(6) "plesam"
 
 -- Iteration 17 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration 18 --

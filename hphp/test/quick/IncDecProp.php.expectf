@@ -122,7 +122,8 @@ E Object
     [postDec] => -1
 )
 --- null ---
-HipHop Warning: Creating default object from empty value in %s on line 98
+
+Warning: Creating default object from empty value in %s on line 98
 int(1)
 NULL
 NULL
@@ -135,7 +136,8 @@ stdClass Object
     [postDec] => 
 )
 --- 42 ---
-HipHop Warning: Attempt to increment/decrement property of non-object in %s on line 106
+
+Warning: Attempt to increment/decrement property of non-object in %s on line 106
 NULL
 42
 Test end

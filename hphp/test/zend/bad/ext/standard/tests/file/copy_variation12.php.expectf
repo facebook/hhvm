@@ -1,8 +1,10 @@
 *** Test copy() function: Trying to create a copy of an existing dir ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
 int(%d)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 *** Done ***

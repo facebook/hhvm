@@ -1,0 +1,12 @@
+File "override_member.php", line 16, characters 7-7:
+This object is of type Y
+File "override_member.php", line 16, characters 17-17:
+It is incompatible with this object of type X
+because some of their methods are incompatible.
+Read the following to see why:
+File "override_member.php", line 17, characters 10-13:
+Typing error
+File "override_member.php", line 13, characters 10-12:
+This is an int
+File "override_member.php", line 17, characters 10-13:
+It is incompatible with a bool

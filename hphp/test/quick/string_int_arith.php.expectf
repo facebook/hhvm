@@ -4,7 +4,8 @@ int(0)
 int(0)
 int(16)
 int(16)
-HipHop Warning: Division by zero in %s on line 15
+
+Warning: Division by zero in %s on line 15
 bool(false)
 int(0)
 int(28)
@@ -21,7 +22,8 @@ int(0)
 int(0)
 int(16)
 int(16)
-HipHop Warning: Division by zero in %s on line 50
+
+Warning: Division by zero in %s on line 50
 bool(false)
 int(0)
 int(28)

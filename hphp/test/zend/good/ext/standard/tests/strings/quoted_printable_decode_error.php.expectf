@@ -1,10 +1,12 @@
 *** Testing quoted_printable_decode() : error conditions ***
 
 -- Testing quoted_printable_decode() function with no arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing quoted_printable_decode() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

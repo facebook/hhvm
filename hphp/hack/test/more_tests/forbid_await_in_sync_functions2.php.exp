@@ -1,0 +1,2 @@
+File "forbid_await_in_sync_functions2.php", line 18, characters 5-23:
+await can only be used inside async functions

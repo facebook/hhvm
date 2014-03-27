@@ -1,5 +1,6 @@
 string(3) "bar"
-HipHop Notice: %s
+
+Notice: %s
 NULL
 object(Test)#%d (1) {
   ["property":protected]=>
@@ -8,8 +9,10 @@ object(Test)#%d (1) {
     string(3) "bar"
   }
 }
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
 object(Test)#%d (1) {
   ["property":protected]=>
   array(1) {

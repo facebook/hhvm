@@ -1,33 +1,44 @@
 *** Testing fseek() : error conditions ***
 -- Testing fseek() with zero argument --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Testing fseek() with unexpected number of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Testing fseek() with invalid arguments --
 -- Iteration 1 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 2 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 3 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 4 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
--- Testing fseek() with closed/unset file handle --HipHop Warning: %s
+-- Testing fseek() with closed/unset file handle --
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

@@ -71,8 +71,7 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_async(false),
       m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
-      m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0), m_nextID(0),
-      m_yieldLabelCount(0), m_yieldLabelGen(-1) {
+      m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0), m_nextID(0) {
   init(ar);
   for (unsigned i = 0; i < attrs.size(); ++i) {
     if (m_userAttributes.find(attrs[i]->getName()) != m_userAttributes.end()) {
@@ -131,8 +130,7 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_hasGoto(orig->m_hasGoto), m_localRedeclaring(orig->m_localRedeclaring),
       m_redeclaring(orig->m_redeclaring),
       m_inlineIndex(orig->m_inlineIndex), m_optFunction(orig->m_optFunction),
-      m_nextID(0), m_yieldLabelCount(orig->m_yieldLabelCount),
-      m_yieldLabelGen(orig->m_yieldLabelGen) {
+      m_nextID(0) {
   init(ar);
   m_originalName = originalName;
   setParamCounts(ar, m_minParam, m_maxParam);
@@ -363,8 +361,8 @@ bool FunctionScope::isMixedVariableArgument() const {
   return res;
 }
 
-bool FunctionScope::needsActRec() const {
-  bool res = (m_attribute & FileScope::NeedsActRec);
+bool FunctionScope::noFCallBuiltin() const {
+  bool res = (m_attribute & FileScope::NoFCallBuiltin);
   return res;
 }
 
@@ -380,26 +378,6 @@ bool FunctionScope::mayContainThis() {
 
 bool FunctionScope::isClosure() const {
   return ParserBase::IsClosureName(name());
-}
-
-int FunctionScope::allocYieldLabel() {
-  assert(m_yieldLabelGen >= 0);
-  return ++m_yieldLabelCount;
-}
-
-int FunctionScope::getYieldLabelCount() const {
-  assert(m_yieldLabelGen >= 0);
-  return m_yieldLabelCount;
-}
-
-int FunctionScope::getYieldLabelGeneration() const {
-  assert(m_yieldLabelGen >= 0);
-  return m_yieldLabelGen;
-}
-
-void FunctionScope::resetYieldLabelCount() {
-  ++m_yieldLabelGen;
-  m_yieldLabelCount = 0;
 }
 
 void FunctionScope::setVariableArgument(int reference) {
@@ -427,15 +405,21 @@ void FunctionScope::setNoEffect() {
 }
 
 bool FunctionScope::isFoldable() const {
-  return m_attribute & FileScope::IsFoldable;
+  if (m_attribute & FileScope::IsFoldable) {
+    // IDL based builtins
+    return true;
+  }
+  // Systemlib (PHP&HNI) builtins
+  auto f = Unit::lookupFunc(String(getName()).get());
+  return f && f->isFoldable();
 }
 
 void FunctionScope::setIsFoldable() {
   m_attribute |= FileScope::IsFoldable;
 }
 
-void FunctionScope::setNeedsActRec() {
-  m_attribute |= FileScope::NeedsActRec;
+void FunctionScope::setNoFCallBuiltin() {
+  m_attribute |= FileScope::NoFCallBuiltin;
 }
 
 void FunctionScope::setHelperFunction() {

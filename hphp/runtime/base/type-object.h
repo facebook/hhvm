@@ -29,9 +29,6 @@ namespace HPHP {
 
 #define null_object Object::s_nullObject
 
-class ArrayIter;
-class MutableArrayIter;
-
 /**
  * Object type wrapping around ObjectData to implement reference count.
  */
@@ -90,10 +87,6 @@ public:
   template <class T> const T& cast() const {
     return *static_cast<const T*>(this);
   }
-  ArrayIter begin(const String& context = null_string) const;
-
-  MutableArrayIter begin(Variant *key, Variant &val,
-                         const String& context = null_string) const;
 
   /**
    * getTyped() and is() are intended for use with C++ classes that derive
@@ -128,11 +121,6 @@ public:
   template<typename T>
   T *cast() const {
     return getTyped<T>();
-  }
-
-  ObjectData *objectForCall() const {
-    if (m_px) return m_px;
-    throw_call_non_object();
   }
 
   /**

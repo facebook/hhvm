@@ -15,7 +15,7 @@ class PHPUnitPatterns {
   //    E
   //    .
   //    .  252 / 364 ( 69%)
-  //    .HipHop Warning
+  //    .\nWarning
   // That last example happened in Magento
   static string $status_code_pattern =
   "/^[\.SFEI]$|^S+$|^[\.SFEI](HipHop)|^[\.SFEI][ \t]*[0-9]* \/ [0-9]* \([ 0-9]*%\)/";

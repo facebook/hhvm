@@ -1,24 +1,33 @@
-HipHop Notice: Undefined variable: a in %s/test/slow/unary_operators/1438.php on line 9
-HipHop Notice: Undefined variable: s in %s/test/slow/unary_operators/1438.php on line 9
-HipHop Notice: Undefined variable: o in %s/test/slow/unary_operators/1438.php on line 9
+
+Notice: Undefined variable: a in %s/test/slow/unary_operators/1438.php on line 9
+
+Notice: Undefined variable: s in %s/test/slow/unary_operators/1438.php on line 9
+
+Notice: Undefined variable: o in %s/test/slow/unary_operators/1438.php on line 9
 array(0) {
 }
 array(0) {
 }
 array(0) {
 }
-HipHop Notice: Undefined variable: a in %s/test/slow/unary_operators/1438.php on line 10
-HipHop Notice: Undefined variable: s in %s/test/slow/unary_operators/1438.php on line 10
-HipHop Notice: Undefined variable: o in %s/test/slow/unary_operators/1438.php on line 10
+
+Notice: Undefined variable: a in %s/test/slow/unary_operators/1438.php on line 10
+
+Notice: Undefined variable: s in %s/test/slow/unary_operators/1438.php on line 10
+
+Notice: Undefined variable: o in %s/test/slow/unary_operators/1438.php on line 10
 string(0) ""
 string(0) ""
 string(0) ""
-HipHop Notice: Undefined variable: a in %s/test/slow/unary_operators/1438.php on line 11
+
+Notice: Undefined variable: a in %s/test/slow/unary_operators/1438.php on line 11
 object(stdClass)#1 (0) {
 }
-HipHop Notice: Undefined variable: s in %s/test/slow/unary_operators/1438.php on line 12
+
+Notice: Undefined variable: s in %s/test/slow/unary_operators/1438.php on line 12
 object(stdClass)#1 (0) {
 }
-HipHop Notice: Undefined variable: o in %s/test/slow/unary_operators/1438.php on line 13
+
+Notice: Undefined variable: o in %s/test/slow/unary_operators/1438.php on line 13
 object(stdClass)#1 (0) {
 }

@@ -1,39 +1,53 @@
 *** Testing error conditions ***
 -- Testing fgetcsv() with zero argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Testing fgetcsv() with more than expected number of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Testing fgetcsv() with invalid arguments --
 -- Iteration 1 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 2 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 3 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 4 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

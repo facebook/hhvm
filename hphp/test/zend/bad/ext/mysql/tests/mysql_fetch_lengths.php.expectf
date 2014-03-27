@@ -6,6 +6,7 @@ array(2) {
   int(1)
 }
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 done!

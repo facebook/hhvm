@@ -27,7 +27,8 @@ array(2) {
   string(3) "ccc"
 }
 int(6)
-HipHop Notice: %s
+
+Notice: %s
 array(1) {
   [0]=>
   string(15) "ArrayArrayArray"
@@ -73,7 +74,8 @@ int(0)
 -- Testing simple and complex syntax strings --
 string(5) "FOUND"
 string(5) "FOUND"
-HipHop Notice: %s
+
+Notice: %s
 string(0) ""
 string(5) "FOUND"
 string(5) "FOUND"

@@ -1,0 +1,2 @@
+File "double_argument.php", line 12, characters 14-19:
+Invalid Hack type. Using "double" in Hack is considered an error. Use "float" instead. They are equivalent data types and the codebase remains consistent.

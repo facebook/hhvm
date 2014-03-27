@@ -31,7 +31,8 @@ Host: 127.0.0.1:12342
 
 "
 -- Test: fail after 2 redirections --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(97) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
@@ -41,14 +42,16 @@ Host: 127.0.0.1:12342
 
 "
 -- Test: fail at first redirection --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(48) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
 
 "
 -- Test: fail at first redirection (2) --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(48) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342

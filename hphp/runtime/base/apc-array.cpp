@@ -13,16 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/apc-array.h"
+
+#include "folly/Bits.h"
+
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/hphp-array-defs.h"
 #include "hphp/runtime/ext/ext_apc.h"
-#include "folly/Bits.h"
 
 namespace HPHP {
 
@@ -41,8 +43,11 @@ APCHandle* APCArray::MakeShared(ArrayData* arr,
       handle->setSerializedArray();
       handle->mustCache();
       return handle;
-    } else if (apcExtension::UseUncounted &&
-               !features.hasObjectOrResource()) {
+    }
+
+    if (apcExtension::UseUncounted &&
+        !features.hasObjectOrResource() &&
+        !arr->empty()) {
       return APCTypedValue::MakeSharedArray(arr);
     }
   }

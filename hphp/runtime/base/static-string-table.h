@@ -16,10 +16,12 @@
 #ifndef incl_HPHP_STATIC_STRING_TABLE_H_
 #define incl_HPHP_STATIC_STRING_TABLE_H_
 
-#include <string>
+
+#include "hphp/runtime/base/types.h"
 
 #include "hphp/util/slice.h"
-#include "hphp/runtime/base/types.h"
+
+#include <string>
 
 namespace HPHP {
 

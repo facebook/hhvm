@@ -16,23 +16,28 @@ int(0)
 int(0)
 
 -- Iteration with len value as "Array" --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration with len value as "Array" --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration with len value as "Array" --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration with len value as "Array" --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration with len value as "Array" --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration with len value as "" --
@@ -54,23 +59,28 @@ int(0)
 int(0)
 
 -- Iteration with len value as "" --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration with len value as "" --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration with len value as "string" --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration with len value as "string" --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration with len value as "object" --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Iteration with len value as "" --
@@ -80,6 +90,7 @@ int(0)
 int(0)
 
 -- Iteration with len value as "Resource id #%d" --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

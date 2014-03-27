@@ -6,4 +6,5 @@ Leaving a::pub
 Calling x->pub
 Entering x::pub
 Entering a::pub
-HipHop Fatal error: $this is null in %s on line 7
+
+Fatal error: $this is null in %s on line 7

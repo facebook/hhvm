@@ -1,6 +1,8 @@
 Doesn't trigger __get.
-HipHop Notice: %s
+
+Notice: %s
 Doesn't trigger __set.
 Doesn't trigger __unset.
-HipHop Notice: %s
+
+Notice: %s
 Shouldn't trigger __isset.

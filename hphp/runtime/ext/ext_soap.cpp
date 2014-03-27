@@ -16,8 +16,12 @@
 */
 
 #include "hphp/runtime/ext/ext_soap.h"
+
 #include <map>
 #include <memory>
+
+#include "folly/ScopeGuard.h"
+
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/base/class-info.h"
@@ -1781,7 +1785,8 @@ static void send_soap_server_fault(
   USE_SOAP_GLOBAL;
   bool use_http_error_status = true;
   GlobalVariables *g = get_global_variables();
-  if (g->get(s__SERVER)[s_HTTP_USER_AGENT].toString() == s_Shockwave_Flash) {
+  if (g->get(s__SERVER).toArray()[s_HTTP_USER_AGENT].toString() ==
+      s_Shockwave_Flash) {
     use_http_error_status = false;
   }
   if (use_http_error_status) {
@@ -1833,7 +1838,8 @@ bool f_use_soap_error_handler(bool handler /* = true */) {
 }
 
 bool f_is_soap_fault(const Variant& fault) {
-  return fault.instanceof(SystemLib::s_SoapFaultClass);
+  return fault.isObject() &&
+    fault.getObjectData()->instanceof(SystemLib::s_SoapFaultClass);
 }
 
 int64_t f__soap_active_version() {
@@ -2045,7 +2051,7 @@ Variant c_SoapServer::t_getfunctions() {
   } else if (m_type == SOAP_CLASS) {
     class_name = m_soap_class.name;
   } else if (m_soap_functions.functions_all) {
-    return ClassInfo::GetSystemFunctions() + ClassInfo::GetUserFunctions();
+    return Unit::getSystemFunctions() + Unit::getUserFunctions();
   } else if (!m_soap_functions.ft.empty()) {
     return f_array_keys(m_soap_functions.ftOriginal);
   }
@@ -2125,7 +2131,8 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
 
     GlobalVariables *g = get_global_variables();
     if (g->get(s__SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
-      String encoding = g->get(s__SERVER)[s_HTTP_CONTENT_ENCODING].toString();
+      String encoding = g->get(s__SERVER)
+        .toArray()[s_HTTP_CONTENT_ENCODING].toString();
       Variant ret;
       if (encoding == s_gzip || encoding == s_xgzip) {
         ret = HHVM_FN(gzinflate)(String(data, size, CopyString));
@@ -2477,7 +2484,7 @@ Variant c_SoapClient::t___call(Variant name, Variant args) {
 Variant c_SoapClient::t___soapcall(const String& name, const Array& args,
                                    const Array& options /* = null_array */,
                                    const Variant& input_headers /* = null_variant */,
-                                   VRefParam output_headers /* = null */) {
+                                   VRefParam output_headers_ref /* = null */) {
   SoapClientScope ss(this);
 
   String location, soap_action, uri;
@@ -2513,18 +2520,21 @@ Variant c_SoapClient::t___soapcall(const String& name, const Array& args,
     soap_headers.merge(m_default_headers.toArray());
   }
 
-  output_headers = Array::Create();
+  Array output_headers;
+  SCOPE_EXIT {
+    output_headers_ref = output_headers;
+  };
 
   if (m_trace) {
-    m_last_request.reset();
-    m_last_response.reset();
+    m_last_request = Variant();
+    m_last_response = Variant();
   }
 
   if (location.empty()) {
     location = m_location;
   }
 
-  m_soap_fault.reset();
+  m_soap_fault = Variant();
 
   SoapServiceScope sss(this);
   Variant return_value;

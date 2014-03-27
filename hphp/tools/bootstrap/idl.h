@@ -42,7 +42,6 @@ enum FuncFlags {
   IsStatic                      = (1 <<  9),
   IsCppAbstract                 = (1 << 10),
   IsReference                   = (1 << 11),
-  IsConstructor                 = (1 << 12),
   IsNothing                     = (1 << 13),
   ZendCompat                    = (1 << 14),
   IsCppSerializable             = (1 << 15),
@@ -61,7 +60,7 @@ enum FuncFlags {
   IsSystem                      = (1 << 28),
   IsTrait                       = (1 << 29),
   ZendParamModeFalse            = (1 << 30),
-  NeedsActRec                   = (1 << 31),
+  NoFCallBuiltin                = (1 << 31),
 };
 
 #define VarArgsMask (VariableArguments | \
@@ -224,14 +223,14 @@ class PhpFunc {
  public:
   PhpFunc(const folly::dynamic& d, const fbstring& className);
 
-  fbstring name() const { return m_name; }
-  fbstring lowerName() const {
-    fbstring name = m_name;
-    for (char& c : name) {
-      c = tolower(c);
-    }
+  fbstring getPhpName() const { return m_phpName; }
+  fbstring getCppName() const { return m_cppName; }
+  fbstring lowerCppName() const {
+    fbstring name = m_cppName;
+    for (char& c : name) { c = tolower(c); }
     return name;
   }
+
   fbstring className() const { return m_className; }
   fbstring getDesc() const { return m_desc; }
 
@@ -241,29 +240,29 @@ class PhpFunc {
 
   bool isMagicMethod() const {
     return (isMethod() && (
-        (m_name == "__get") ||
-        (m_name == "__set") ||
-        (m_name == "__isset") ||
-        (m_name == "__unset") ||
-        (m_name == "__call")));
+              (m_idlName == "__get") ||
+              (m_idlName == "__set") ||
+              (m_idlName == "__isset") ||
+              (m_idlName == "__unset") ||
+              (m_idlName == "__call")));
   }
 
   fbstring getCppSig() const;
 
   fbstring getPrettyName() const {
     if (isMethod()) {
-      return m_className + "::" + m_name;
+      return m_className + "::" + getPhpName();
     } else {
-      return m_name;
+      return getPhpName();
     }
   }
 
   fbstring getUniqueName() const {
     if (isMethod()) {
       return folly::to<fbstring>(m_className.length(), m_className,
-                                 '_', m_name);
+                                 '_', getCppName());
     } else {
-      return m_name;
+      return getCppName();
     }
   }
 
@@ -275,7 +274,7 @@ class PhpFunc {
 
   bool isIndirectReturn() const { return isKindOfIndirect(returnKindOf()); }
 
-  bool isCtor() const { return isMethod() && (m_name == "__construct"); }
+  bool isCtor() const { return isMethod() && (m_idlName == "__construct"); }
   bool isStatic() const { return m_flags & IsStatic; }
   bool isVarArgs() const { return m_flags & VarArgsMask; }
   bool usesThis() const { return isMethod() && !isStatic(); }
@@ -297,7 +296,9 @@ class PhpFunc {
   }
 
 private:
-  fbstring m_name;
+  fbstring m_idlName;
+  fbstring m_phpName;
+  fbstring m_cppName;
   fbstring m_className;
   folly::dynamic m_func;
   unsigned long m_flags;
@@ -337,14 +338,6 @@ class PhpProp {
 class PhpClass {
  public:
   explicit PhpClass(const folly::dynamic &c);
-
-  fbstring lowerName() const {
-    fbstring name = m_cppName;
-    for (char& c : name) {
-      c = tolower(c);
-    }
-    return name;
-  }
 
   fbstring getPhpName() const { return m_phpName; };
   fbstring getCppName() const { return m_cppName; };

@@ -1,3 +1,4 @@
-HipHop Warning: Illegal offset type in %s/slow/hhbbc/array_055.php on line 5
+
+Warning: Illegal offset type in %s/slow/hhbbc/array_055.php on line 5
 array(0) {
 }

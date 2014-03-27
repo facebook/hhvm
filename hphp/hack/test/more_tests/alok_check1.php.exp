@@ -1,0 +1,2 @@
+File "alok_check1.php", line 12, characters 18-21:
+TBar is a type parameter. Type parameters cannot themselves take type parameters (e.g. TBar<int> doesn't make sense)

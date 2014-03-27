@@ -1,6 +1,7 @@
 *** Testing posix_getpid() : error conditions ***
 
 -- Testing posix_getpid() function with one argument --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

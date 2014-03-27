@@ -18,5 +18,7 @@ object(ClassA)#1 (1) {
   ["val"]=>
   int(2)
 }
-%S%wNULL
+
+Notice: Undefined variable: val in %s/test/slow/assignment/1703.php on line 19
+NULL
 int(2)

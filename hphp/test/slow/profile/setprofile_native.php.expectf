@@ -1,0 +1,12 @@
+fb_setprofile_callback1 event=exit
+x=fb_setprofile_callback1 event=enter
+bool(false)
+fb_setprofile_callback1 event=exit
+starting call to hash_init
+fb_setprofile_callback1 event=enter
+fb_setprofile_callback1 event=exit
+hash=fb_setprofile_callback1 event=enter
+resource(%d) of type (Hash Context)
+fb_setprofile_callback1 event=exit
+DONE!
+fb_setprofile_callback1 event=exit

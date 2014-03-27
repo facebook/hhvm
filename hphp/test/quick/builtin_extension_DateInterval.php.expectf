@@ -1,5 +1,6 @@
 DateInterval
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+
+Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(DateInterval)#1 (0) {
 }
 string(97) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:12:"DateInterval";}"
@@ -21,7 +22,8 @@ array(5) {
 }
 ================
 A_DateInterval
-HipHop Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
+
+Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
 object(A_DateInterval)#3 (1) {
   ["___x"]=>
   NULL

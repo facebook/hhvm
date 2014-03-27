@@ -21,7 +21,7 @@ static bool HHVM_METHOD(SpoofChecker, isSuspicious, const String& text,
                                  text.c_str(), text.size(),
                                  nullptr, &error);
   if (U_FAILURE(error)) {
-    data->throwException("Could not check [%s] for security issues,"
+    throw data->getException("Could not check [%s] for security issues,"
                          "error %d (%s)",
                          text.c_str(), error, u_errorName(error));
   }
@@ -39,7 +39,7 @@ static bool HHVM_METHOD(SpoofChecker, areConfusable, const String& s1,
                                          s2.c_str(), s2.size(),
                                          &error);
   if (U_FAILURE(error)) {
-    data->throwException("Could not check [%s] and [%s] for confusability,"
+    throw data->getException("Could not check [%s] and [%s] for confusability,"
                          " error %d (%s)",
                          s1.c_str(), s2.c_str(), error, u_errorName(error));
   }
@@ -52,7 +52,7 @@ static void HHVM_METHOD(SpoofChecker, setAllowedLocales, const String& locs) {
   UErrorCode error = U_ZERO_ERROR;
   uspoof_setAllowedLocales(data->checker(), locs.c_str(), &error);
   if (U_FAILURE(error)) {
-    data->throwException("Could not set allowed locales to [%s],"
+    throw data->getException("Could not set allowed locales to [%s],"
                          " error %d (%s)",
                          locs.c_str(), error, u_errorName(error));
   }
@@ -63,7 +63,7 @@ static void HHVM_METHOD(SpoofChecker, setChecks, int64_t checks) {
   UErrorCode error = U_ZERO_ERROR;
   uspoof_setChecks(data->checker(), checks, &error);
   if (U_FAILURE(error)) {
-    data->throwException("Could not set spoof checks to %d, error %d (%s)",
+    throw data->getException("Could not set spoof checks to %d, error %d (%s)",
                          checks, error, u_errorName(error));
   }
 }

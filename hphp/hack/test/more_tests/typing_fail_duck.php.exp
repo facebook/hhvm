@@ -1,0 +1,6 @@
+File "typing_fail_duck.php", line 37, characters 21-34:
+Invalid argument
+File "typing_fail_duck.php", line 32, characters 15-24:
+This is an object of type DoesRender
+File "typing_fail_duck.php", line 37, characters 21-34:
+It is incompatible with an object of type MyClass1

@@ -16,9 +16,18 @@
 #ifndef _incl_HPHP_RUNTIME_VM_NATIVE_H
 #define _incl_HPHP_RUNTIME_VM_NATIVE_H
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/typed-value.h"
+
 #include "hphp/runtime/vm/func.h"
+
 #include <type_traits>
+
+namespace HPHP {
+struct ActRec;
+struct Class;
+class Object;
+};
 
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> global functions.
@@ -78,6 +87,7 @@
 #define HHVM_NAMED_FE(fn, fimpl) Native::registerBuiltinFunction(\
                           makeStaticString(#fn), fimpl)
 #define HHVM_FE(fn) HHVM_NAMED_FE(fn, HHVM_FN(fn))
+#define HHVM_FALIAS(fn, falias) HHVM_NAMED_FE(fn, HHVM_FN(falias))
 
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> class instance methods.
@@ -115,6 +125,28 @@
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
+
+// Maximum number of args for a native using double params
+constexpr int kMaxBuiltinArgs = 7;
+
+// Maximum number of args for a native using only int-like params
+constexpr int kMaxBuiltinArgsNoDouble = 15;
+
+// t#3982283 - Our ARM code gen doesn't support stack args yet.
+// In fact, it only supports six of the eight register args.
+// Put a hard limit of five to account for the return register for now.
+constexpr int kMaxFCallBuiltinArgsARM = 5;
+
+inline int maxFCallBuiltinArgs() {
+#ifdef __AARCH64EL__
+  return kMaxFCallBuiltinArgsARM;
+#else
+  if (UNLIKELY(RuntimeOption::EvalSimulateARM)) {
+    return kMaxFCallBuiltinArgsARM;
+  }
+  return kMaxBuiltinArgsNoDouble;
+#endif
+}
 
 enum Attr {
   AttrNone = 0,

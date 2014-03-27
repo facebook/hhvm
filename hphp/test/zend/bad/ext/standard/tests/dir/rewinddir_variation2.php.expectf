@@ -5,6 +5,7 @@ resource(%d) of type (stream)
 string(%d) "%s"
 
 -- Call to rewinddir() --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

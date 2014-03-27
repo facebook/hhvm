@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
 #include "folly/Format.h"
@@ -453,8 +454,7 @@ Variant invoke_static_method(const String& s, const String& method,
 Variant invoke_failed(const Variant& func,
                       bool fatal /* = true */) {
   if (func.isObject()) {
-    return o_invoke_failed(
-        func.objectForCall()->o_getClassName().c_str(),
+    return o_invoke_failed(func.toCObjRef()->o_getClassName().c_str(),
         "__invoke", fatal);
   } else {
     return invoke_failed(func.toString().c_str(), fatal);
@@ -533,7 +533,7 @@ void throw_collection_compare_exception() {
   static const string msg(
     "Cannot use relational comparison operators (<, <=, >, >=) to compare "
     "a collection with an integer, double, string, array, or object");
-  Object e(SystemLib::AllocRuntimeExceptionObject(msg));
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
   throw e;
 }
 
@@ -541,6 +541,24 @@ void throw_param_is_not_container() {
   static const string msg("Parameter must be an array or collection");
   Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
   throw e;
+}
+
+void throw_cannot_modify_immutable_object(const char* className) {
+  auto msg = folly::format(
+    "Cannot modify immutable object of type {}",
+    className
+  ).str();
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
+  throw e;
+}
+
+void warn_cannot_modify_immutable_object(const char* className) {
+  raise_warning(
+    folly::format(
+      "Cannot modify immutable object of type {}",
+      className
+    ).str()
+  );
 }
 
 void check_collection_compare(ObjectData* obj) {
@@ -577,34 +595,6 @@ Object create_object(const String& s, const Array& params, bool init /* = true *
  */
 void pause_forever() {
   for (;;) sleep(300);
-}
-
-ssize_t check_request_surprise(ThreadInfo *info) {
-  RequestInjectionData &p = info->m_reqInjectionData;
-  bool do_timedout, do_memExceeded, do_signaled;
-
-  ssize_t flags = p.fetchAndClearFlags();
-  do_timedout = (flags & RequestInjectionData::TimedOutFlag) &&
-    !p.getDebugger();
-  do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
-  do_signaled = (flags & RequestInjectionData::SignaledFlag);
-
-  // Start with any pending exception that might be on the thread.
-  Exception* pendingException = info->m_pendingException;
-  info->m_pendingException = nullptr;
-
-  if (do_timedout && !pendingException) {
-    pendingException = generate_request_timeout_exception();
-  }
-  if (do_memExceeded && !pendingException) {
-    pendingException = generate_memory_exceeded_exception();
-  }
-  if (do_signaled) f_pcntl_signal_dispatch();
-
-  if (pendingException) {
-    pendingException->throwException();
-  }
-  return flags;
 }
 
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
@@ -711,15 +701,6 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
   return uninit_null();
 }
 
-void throw_infinite_recursion_exception() {
-  if (!RuntimeOption::NoInfiniteRecursionDetection) {
-    // Reset profiler otherwise it might recurse further causing segfault
-    DECLARE_THREAD_INFO
-    info->m_profiler = nullptr;
-    throw UncatchableException("infinite recursion detected");
-  }
-}
-
 Exception* generate_request_timeout_exception() {
   Exception* ret = nullptr;
   ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
@@ -731,87 +712,21 @@ Exception* generate_request_timeout_exception() {
     "entire web request took longer than ";
   exceptionMsg += folly::to<std::string>(data.getTimeout());
   exceptionMsg += cli ? " seconds exceeded" : " seconds and timed out";
-  ArrayHolder exceptionStack;
+  Array exceptionStack;
   if (RuntimeOption::InjectedStackTrace) {
-    exceptionStack = g_context->debugBacktrace(false, true, true).get();
+    exceptionStack = g_context->debugBacktrace(false, true, true);
   }
-  ret = new RequestTimeoutException(exceptionMsg, exceptionStack.get());
-
+  ret = new RequestTimeoutException(exceptionMsg, exceptionStack);
   return ret;
 }
 
 Exception* generate_memory_exceeded_exception() {
-  ArrayHolder exceptionStack;
+  Array exceptionStack;
   if (RuntimeOption::InjectedStackTrace) {
-    exceptionStack = g_context->debugBacktrace(false, true, true).get();
+    exceptionStack = g_context->debugBacktrace(false, true, true);
   }
   return new RequestMemoryExceededException(
-    "request has exceeded memory limit", exceptionStack.get());
-}
-
-void throw_call_non_object() {
-  throw_call_non_object(nullptr);
-}
-
-void throw_call_non_object(const char *methodName) {
-  std::string msg;
-
-  if (methodName == nullptr) {
-    msg = "Call to a member function on a non-object";
-  } else {
-    string_printf(msg, "Call to a member function %s() on a non-object",
-                        methodName);
-  }
-
-  if (RuntimeOption::ThrowExceptionOnBadMethodCall) {
-    Object e(SystemLib::AllocBadMethodCallExceptionObject(String(msg)));
-    throw e;
-  }
-
-  throw FatalErrorException(msg.c_str());
-}
-
-String f_serialize(const Variant& value) {
-  switch (value.getType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    return "N;";
-  case KindOfBoolean:
-    return value.getBoolean() ? "b:1;" : "b:0;";
-  case KindOfInt64: {
-    StringBuffer sb;
-    sb.append("i:");
-    sb.append(value.getInt64());
-    sb.append(';');
-    return sb.detach();
-  }
-  case KindOfStaticString:
-  case KindOfString: {
-    StringData *str = value.getStringData();
-    StringBuffer sb;
-    sb.append("s:");
-    sb.append(str->size());
-    sb.append(":\"");
-    sb.append(str->data(), str->size());
-    sb.append("\";");
-    return sb.detach();
-  }
-  case KindOfArray: {
-    ArrayData *arr = value.getArrayData();
-    if (arr->empty()) return "a:0:{}";
-    // fall-through
-  }
-  case KindOfObject:
-  case KindOfResource:
-  case KindOfDouble: {
-    VariableSerializer vs(VariableSerializer::Type::Serialize);
-    return vs.serialize(value, true);
-  }
-  default:
-    assert(false);
-    break;
-  }
-  return "";
+    "request has exceeded memory limit", exceptionStack);
 }
 
 Variant unserialize_ex(const char* str, int len,
@@ -1106,11 +1021,15 @@ class ConstantExistsChecker {
 };
 
 template <class T>
-AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& name,
+AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
                                                      const String& kind,
                                                      bool toLower,
                                                      const T &checkExists) {
   assert(!m_map.isNull());
+
+  // always normalize name before autoloading
+  const String& name = normalizeNS(clsName);
+
   while (true) {
     const Variant& type_map = m_map.get()->get(kind);
     auto const typeMapCell = type_map.asCell();
@@ -1186,12 +1105,12 @@ bool AutoloadHandler::autoloadType(const String& name) {
  * false otherwise. When this function returns true, it is the caller's
  * responsibility to check if the given class or interface exists.
  */
-bool AutoloadHandler::invokeHandler(const String& className,
+bool AutoloadHandler::invokeHandler(const String& clsName,
                                     bool forceSplStack /* = false */) {
 
-  if (className.empty()) {
-    return false;
-  }
+  if (clsName.empty()) return false;
+
+  const String& className = normalizeNS(clsName);
 
   if (!m_map.isNull()) {
     ClassExistsChecker ce;

@@ -8,7 +8,8 @@ array(1) {
   [0]=>
   int(1)
 }
-HipHop Warning: %s
+
+Warning: %s
 array(0) {
 }
 array(2) {
@@ -19,7 +20,8 @@ array(2) {
 }
 array(0) {
 }
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   [0]=>
   int(1)
@@ -34,6 +36,7 @@ array(1) {
   [0]=>
   int(1)
 }
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

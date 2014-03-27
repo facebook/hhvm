@@ -13,6 +13,7 @@ array(2) {
 Closing database
 bool(true)
 Check db was closed
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

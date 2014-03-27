@@ -6,22 +6,29 @@
 bool(true)
 string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2.tmp"
 string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2.tmp"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 
 -- Testing readlink() and realpath() with hardlink, linkname stored inside an array --
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2_link.tmp"
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 Done

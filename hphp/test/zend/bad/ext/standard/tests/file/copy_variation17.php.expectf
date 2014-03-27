@@ -2,16 +2,20 @@
 bool(true)
 bool(true)
 int(1500)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
 *** Done ***

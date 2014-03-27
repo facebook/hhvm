@@ -1,7 +1,10 @@
 object(stdClass)#%d (0) {
 }
 NULL
-HipHop Notice: %s
-HipHop Warning: %s
+
+Notice: %s
+
+Warning: %s
 NULL
-HipHop Fatal error: %s
+
+Fatal error: %s

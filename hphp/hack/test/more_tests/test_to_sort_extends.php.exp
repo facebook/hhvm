@@ -1,0 +1,6 @@
+File "test_to_sort_extends.php", line 22, characters 12-13:
+Invalid return type
+File "test_to_sort_extends.php", line 19, characters 37-37:
+This is an object of type B
+File "test_to_sort_extends.php", line 19, characters 24-24:
+It is incompatible with an object of type A

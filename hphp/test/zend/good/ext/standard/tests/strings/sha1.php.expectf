@@ -15,5 +15,6 @@ string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 bool(true)
 string(20) "%a"
 string(20) "%a"
-HipHop Warning: %s
+
+Warning: %s
 Done

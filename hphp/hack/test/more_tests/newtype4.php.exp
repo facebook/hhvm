@@ -1,0 +1,6 @@
+File "newtype4.php--file2.php", line 7, characters 8-9:
+Invalid argument
+File "newtype4.php--file2.php", line 5, characters 15-15:
+This is an object of type a
+File "newtype4.php--file2.php", line 6, characters 16-18:
+It is incompatible with an int

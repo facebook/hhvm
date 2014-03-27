@@ -97,11 +97,16 @@ array(8) {
   float(-0.33333333333333)
 }
 Using SORT_STRING
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(8) {
   [1000]=>
   string(4) "test"
@@ -200,11 +205,16 @@ array(8) {
   int(27)
 }
 Using SORT_STRING
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(8) {
   [16777216]=>
   float(-0.33333333333333)
@@ -499,11 +509,16 @@ array(8) {
   float(-0.33333333333333)
 }
 Using SORT_STRING
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(8) {
   [0]=>
   string(4) "test"
@@ -602,11 +617,16 @@ array(8) {
   int(27)
 }
 Using SORT_STRING
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(8) {
   [0]=>
   float(-0.33333333333333)

@@ -1,11 +1,14 @@
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk() when size = -1 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing array_chunk() when size = 4 --
@@ -44,11 +47,14 @@ array(1) {
 }
 
 -- Testing array_chunk() when size = 0 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing array_chunk() when size = 1.5 --

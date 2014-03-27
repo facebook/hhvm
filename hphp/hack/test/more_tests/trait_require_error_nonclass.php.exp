@@ -1,0 +1,2 @@
+File "trait_require_error_nonclass.php", line 15, characters 19-19:
+I is not a class. It is an interface.

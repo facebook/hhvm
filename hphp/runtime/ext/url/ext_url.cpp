@@ -24,7 +24,7 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
-#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/std/ext_std_options.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,6 +36,8 @@ const int64_t k_PHP_URL_PASS = 4;
 const int64_t k_PHP_URL_PATH = 5;
 const int64_t k_PHP_URL_QUERY = 6;
 const int64_t k_PHP_URL_FRAGMENT = 7;
+const int64_t k_PHP_QUERY_RFC1738 = 1;
+const int64_t k_PHP_QUERY_RFC3986 = 2;
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(base64_decode, const String& data,
@@ -126,7 +128,8 @@ Array HHVM_FUNCTION(get_meta_tags, const String& filename,
 static void url_encode_array(StringBuffer &ret, const Variant& varr,
                              std::set<void*> &seen_arrs,
                              const String& num_prefix, const String& key_prefix,
-                             const String& key_suffix, const String& arg_sep) {
+                             const String& key_suffix, const String& arg_sep,
+                             bool encode_plus = true) {
   void *id = varr.is(KindOfArray) ?
     (void*)varr.getArrayData() : (void*)varr.getObjectData();
   if (!seen_arrs.insert(id).second) {
@@ -136,9 +139,9 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
   Array arr;
   if (varr.is(KindOfObject)) {
     Object o = varr.toObject();
-    arr = (o.objectForCall()->isCollection()) ?
-      varr.toArray() :
-      f_get_object_vars(o).toArray();
+    arr = o->isCollection()
+      ? varr.toArray()
+      : f_get_object_vars(o).toArray();
   } else {
     arr = varr.toArray();
   }
@@ -155,7 +158,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
       if (numeric) {
         encoded = key;
       } else {
-        encoded = StringUtil::UrlEncode(key);
+        encoded = StringUtil::UrlEncode(key, encode_plus);
       }
       StringBuffer new_prefix(key_prefix.size() + num_prefix.size() +
                               encoded.size() + key_suffix.size() + 4);
@@ -176,7 +179,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
         ret.append(num_prefix);
         ret.append(key);
       } else {
-        ret.append(StringUtil::UrlEncode(key));
+        ret.append(StringUtil::UrlEncode(key, encode_plus));
       }
       ret.append(key_suffix);
       ret.append("=");
@@ -185,7 +188,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
       } else if (data.is(KindOfDouble)) {
         ret.append(String(data.toDouble()));
       } else {
-        ret.append(StringUtil::UrlEncode(data.toString()));
+        ret.append(StringUtil::UrlEncode(data.toString(), encode_plus));
       }
     }
   }
@@ -195,7 +198,8 @@ const StaticString s_arg_separator_output("arg_separator.output");
 
 Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
                            const String& numeric_prefix /* = null_string */,
-                           const String& arg_separator /* = null_string */) {
+                           const String& arg_separator /* = null_string */,
+                           int enc_type /* = k_PHP_QUERY_RFC1738 */) {
   if (!formdata.is(KindOfArray) && !formdata.is(KindOfObject)) {
     throw_invalid_argument("formdata: (need Array or Object)");
     return false;
@@ -203,7 +207,7 @@ Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
 
   String arg_sep;
   if (arg_separator.empty()) {
-    arg_sep = f_ini_get(s_arg_separator_output);
+    arg_sep = HHVM_FN(ini_get)(s_arg_separator_output);
   } else {
     arg_sep = arg_separator;
   }
@@ -211,7 +215,8 @@ Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
   StringBuffer ret(1024);
   std::set<void*> seen_arrs;
   url_encode_array(ret, formdata, seen_arrs,
-                   numeric_prefix, String(), String(), arg_sep);
+                   numeric_prefix, String(), String(), arg_sep,
+                   enc_type != k_PHP_QUERY_RFC3986);
   return ret.detach();
 }
 
@@ -309,6 +314,8 @@ const StaticString s_PHP_URL_PASS("PHP_URL_PASS");
 const StaticString s_PHP_URL_PATH("PHP_URL_PATH");
 const StaticString s_PHP_URL_QUERY("PHP_URL_QUERY");
 const StaticString s_PHP_URL_FRAGMENT("PHP_URL_FRAGMENT");
+const StaticString s_PHP_QUERY_RFC1738("PHP_QUERY_RFC1738");
+const StaticString s_PHP_QUERY_RFC3986("PHP_QUERY_RFC3986");
 
 class StandardURLExtension : public Extension {
  public:
@@ -337,6 +344,12 @@ class StandardURLExtension : public Extension {
     );
     Native::registerConstant<KindOfInt64>(
       s_PHP_URL_FRAGMENT.get(), k_PHP_URL_FRAGMENT
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_PHP_QUERY_RFC1738.get(), k_PHP_QUERY_RFC1738
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_PHP_QUERY_RFC3986.get(), k_PHP_QUERY_RFC3986
     );
     HHVM_FE(base64_decode);
     HHVM_FE(base64_encode);

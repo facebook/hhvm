@@ -1,14 +1,18 @@
 *** Testing checkdate() : error conditions ***
 
 -- Testing checkdate() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing checkdate() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

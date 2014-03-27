@@ -17,11 +17,16 @@
 #ifndef incl_HPHP_PREG_H_
 #define incl_HPHP_PREG_H_
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/type-string.h"
+
+#include <cstdint>
+#include <cstddef>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+class Array;
+struct Variant;
 
 struct PCREglobals {
   // pcre ini_settings
@@ -32,30 +37,43 @@ struct PCREglobals {
 Variant preg_grep(const String& pattern, const Array& input, int flags = 0);
 
 Variant preg_match(const String& pattern, const String& subject,
-                   Variant &matches,
+                   Variant& matches,
                    int flags = 0, int offset = 0);
 
-Variant preg_match(const String& pattern, const String& subject, int flags = 0,
+Variant preg_match(const String& pattern,
+                   const String& subject,
+                   int flags = 0,
                    int offset = 0);
 
 Variant preg_match_all(const String& pattern, const String& subject,
-                       Variant &matches,
+                       Variant& matches,
                        int flags = 0, int offset = 0);
 
 Variant preg_match_all(const String& pattern, const String& subject,
                        int flags = 0, int offset = 0);
 
 Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
-                          const Variant& subject, int limit, Variant &count,
+                          const Variant& subject, int limit, Variant& count,
                           bool is_callable, bool is_filter);
-int preg_replace(Variant &result, const Variant& pattern, const Variant& replacement,
-                 const Variant& subject, int limit = -1);
-int preg_replace_callback(Variant &result, const Variant& pattern, const Variant& callback,
-                          const Variant& subject, int limit = -1);
-int preg_filter(Variant &result, const Variant& pattern, const Variant& replacement,
-                const Variant& subject, int limit = -1);
+int preg_replace(Variant& result,
+                 const Variant& pattern,
+                 const Variant& replacement,
+                 const Variant& subject,
+                 int limit = -1);
+int preg_replace_callback(Variant& result,
+                          const Variant& pattern,
+                          const Variant& callback,
+                          const Variant& subject,
+                          int limit = -1);
+int preg_filter(Variant& result,
+                const Variant& pattern,
+                const Variant& replacement,
+                const Variant& subject,
+                int limit = -1);
 
-Variant preg_split(const String& pattern, const String& subject, int limit = -1,
+Variant preg_split(const String& pattern,
+                   const String& subject,
+                   int limit = -1,
                    int flags = 0);
 String preg_quote(const String& str, const String& delimiter = null_string);
 Variant php_split(const String& spliton, const String& str, int count,

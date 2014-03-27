@@ -49,4 +49,5 @@ array(2) {
   ["core: pcre.backtrack_limit"]=>
   bool(false)
 }
-HipHop Warning: Unable to find extension 'THIS_EXTENSION_SHOULD_NOT_EXIST' in %s on line %d
+
+Warning: Unable to find extension 'THIS_EXTENSION_SHOULD_NOT_EXIST' in %s on line %d

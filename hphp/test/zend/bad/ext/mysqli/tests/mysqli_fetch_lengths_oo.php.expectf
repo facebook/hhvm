@@ -6,6 +6,7 @@ array(2) {
   int(1)
 }
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 done!

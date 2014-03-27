@@ -1,8 +1,10 @@
 *** Testing str_split() : error conditions ***
 -- Testing str_split() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Testing str_split() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 Done

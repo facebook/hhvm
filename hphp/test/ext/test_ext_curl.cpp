@@ -101,13 +101,6 @@ bool TestExtCurl::RunTests(const std::string &which) {
   RUN_TEST(test_curl_multi_getcontent);
   RUN_TEST(test_curl_multi_info_read);
   RUN_TEST(test_curl_multi_close);
-  RUN_TEST(test_evhttp_set_cache);
-  RUN_TEST(test_evhttp_get);
-  RUN_TEST(test_evhttp_post);
-  RUN_TEST(test_evhttp_post_gzip);
-  RUN_TEST(test_evhttp_async_get);
-  RUN_TEST(test_evhttp_async_post);
-  RUN_TEST(test_evhttp_recv);
 
   server->stop();
 
@@ -150,7 +143,7 @@ static const StaticString
 
 bool TestExtCurl::test_curl_version() {
   Variant ret = HHVM_FN(curl_version)();
-  VERIFY(!ret[s_protocols].toArray().empty());
+  VERIFY(!ret.toArray()[s_protocols].toArray().empty());
   return Count(true);
 }
 
@@ -200,7 +193,7 @@ bool TestExtCurl::test_curl_getinfo() {
   HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
   HHVM_FN(curl_exec)(c.toResource());
   Variant ret = HHVM_FN(curl_getinfo)(c.toResource());
-  VS(ret[s_url], String(get_request_uri()));
+  VS(ret.toArray()[s_url], String(get_request_uri()));
   ret = HHVM_FN(curl_getinfo)(c.toResource(), k_CURLINFO_EFFECTIVE_URL);
   VS(ret, String(get_request_uri()));
   return Count(true);
@@ -321,7 +314,7 @@ bool TestExtCurl::test_curl_multi_info_read() {
   } while (more(still_running, 0));
 
   Variant ret = HHVM_FN(curl_multi_info_read)(mh);
-  VS(ret[s_result], 0);
+  VS(ret.toArray()[s_result], 0);
   return Count(true);
 }
 
@@ -343,81 +336,3 @@ bool TestExtCurl::test_curl_multi_close() {
   return Count(true);
 }
 
-bool TestExtCurl::test_evhttp_set_cache() {
-  f_evhttp_set_cache("localhost", 4, s_server_port);
-  for (int i = 0; i < 10; i++) {
-    Variant ret = f_evhttp_get(String(get_request_uri()),
-                               make_packed_array("ECHO: foo"));
-    VS(ret[s_code], 200);
-    VS(ret[s_response], "OK");
-    VS(ret[s_headers][0], "ECHOED: foo");
-    VS(ret[s_headers][4], "Content-Length: 2");
-  }
-
-  return Count(true);
-}
-
-bool TestExtCurl::test_evhttp_get() {
-  Variant ret = f_evhttp_get(String(get_request_uri()),
-                             make_packed_array("ECHO: foo"));
-  VS(ret[s_code], 200);
-  VS(ret[s_response], "OK");
-  VS(ret[s_headers][0], "ECHOED: foo");
-  VS(ret[s_headers][4], "Content-Length: 2");
-  return Count(true);
-}
-
-bool TestExtCurl::test_evhttp_post() {
-  Variant ret = f_evhttp_post(String(get_request_uri()), "echo",
-                              make_packed_array("ECHO: foo"));
-  VS(ret[s_code], 200);
-  VS(ret[s_response], "POST: echo");
-  VS(ret[s_headers][0], "ECHOED: foo");
-  VS(ret[s_headers][4], "Content-Length: 10");
-  return Count(true);
-}
-
-bool TestExtCurl::test_evhttp_post_gzip() {
-  // we fill up 2k to avoid the "oh it's < 1000 bytes, forget compression"
-  // logic in Transport's implementation.
-  char fullPostBody[2048];
-  memcpy(fullPostBody, "POST: ", 6);
-  char* postBody = fullPostBody + 6;
-  memset(postBody, 'a', sizeof(fullPostBody) - 7);
-  fullPostBody[sizeof(fullPostBody) - 1] = '\0';
-  Variant ret = f_evhttp_post(String(get_request_uri()), postBody,
-                              make_packed_array("ECHO: foo",
-                                             "Accept-Encoding: gzip"));
-  VS(ret[s_code], 200);
-  VS(ret[s_response], fullPostBody);
-  VS(ret[s_headers][0], "ECHOED: foo");
-  VS(ret[s_headers][1], "Content-Encoding: gzip");
-  return Count(true);
-}
-
-bool TestExtCurl::test_evhttp_async_get() {
-  Variant ret = f_evhttp_async_get(String(get_request_uri()),
-                                   make_packed_array("ECHO: foo"));
-  ret = f_evhttp_recv(ret.toResource());
-  VS(ret[s_code], 200);
-  VS(ret[s_response], "OK");
-  VS(ret[s_headers][0], "ECHOED: foo");
-  VS(ret[s_headers][4], "Content-Length: 2");
-  return Count(true);
-}
-
-bool TestExtCurl::test_evhttp_async_post() {
-  Variant ret = f_evhttp_async_post(String(get_request_uri()), "echo",
-                                    make_packed_array("ECHO: foo"));
-  ret = f_evhttp_recv(ret.toResource());
-  VS(ret[s_code], 200);
-  VS(ret[s_response], "POST: echo");
-  VS(ret[s_headers][0], "ECHOED: foo");
-  VS(ret[s_headers][4], "Content-Length: 10");
-  return Count(true);
-}
-
-bool TestExtCurl::test_evhttp_recv() {
-  // tested in test_evhttp_async_get() and test_evhttp_async_post()
-  return Count(true);
-}

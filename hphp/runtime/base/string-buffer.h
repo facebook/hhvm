@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_STRING_BUFFER_H_
 #define incl_HPHP_STRING_BUFFER_H_
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

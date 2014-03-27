@@ -1,10 +1,12 @@
 *** Testing md5() : error conditions ***
 
 -- Testing md5() function with no arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing md5() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE==

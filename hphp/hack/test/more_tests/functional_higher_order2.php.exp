@@ -1,0 +1,4 @@
+File "functional_higher_order2.php", line 13, characters 37-37:
+You probably forgot to bind this type parameter right?
+Add <T> somewhere (after the function name definition, or after the class name)
+Examples: function foo<T> or class A<T>

@@ -1,6 +1,8 @@
-HipHop Warning: %s
+
+Warning: %s
 string(3) "foo"
-HipHop Warning: %s
+
+Warning: %s
 array(2) {
   ["b"]=>
   string(1) "b"
@@ -26,8 +28,10 @@ array(0) {
 bool(false)
 bool(false)
 string(3) "aaa"
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 array(0) {
 }
 array(0) {

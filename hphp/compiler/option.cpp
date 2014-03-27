@@ -72,7 +72,7 @@ vector<string> Option::DynamicMethodPrefixes;
 vector<string> Option::DynamicMethodPostfixes;
 vector<string> Option::DynamicClassPrefixes;
 vector<string> Option::DynamicClassPostfixes;
-set<string> Option::DynamicInvokeFunctions;
+set<string, stdltistr> Option::DynamicInvokeFunctions;
 set<string> Option::VolatileClasses;
 map<string,string> Option::AutoloadClassMap;
 map<string,string> Option::AutoloadFuncMap;
@@ -120,6 +120,7 @@ bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
 bool Option::EnableXHP = false;
+bool Option::IntsOverflowToInts = false;
 int Option::ParserThreadCount = 0;
 
 int Option::GetScannerType() {
@@ -143,7 +144,7 @@ bool Option::VariableCoalescing = false;
 bool Option::ArrayAccessIdempotent = false;
 bool Option::DumpAst = false;
 bool Option::WholeProgram = true;
-bool Option::UseHHBBC = getenv("HHVM_HHBBC");
+bool Option::UseHHBBC = !getenv("HHVM_DISABLE_HHBBC");
 bool Option::RecordErrors = true;
 std::string Option::DocJson;
 
@@ -154,7 +155,6 @@ StringBag Option::OptionStrings;
 
 bool Option::GenerateDocComments = true;
 
-void (*Option::m_hookHandler)(Hdf &config);
 bool (*Option::PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr file);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -249,6 +249,9 @@ void Option::Load(Hdf &config) {
     config["EnableHipHopExperimentalSyntax"].getBool();
   EnableShortTags = config["EnableShortTags"].getBool(true);
 
+  IntsOverflowToInts =
+    config["Hack"]["Lang"]["IntsOverflowToInts"].getBool(EnableHipHopSyntax);
+
   EnableAspTags = config["EnableAspTags"].getBool();
 
   EnableXHP = config["EnableXHP"].getBool(false);
@@ -283,8 +286,6 @@ void Option::Load(Hdf &config) {
 
   // Temporary, during file-cache migration.
   FileCache::UseNewCache   = config["UseNewCache"].getBool(false);
-
-  if (m_hookHandler) m_hookHandler(config);
 
   OnLoad();
 }

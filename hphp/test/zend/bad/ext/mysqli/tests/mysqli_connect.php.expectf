@@ -1,4 +1,5 @@
-HipHop Warning: %s
+
+Warning: %s
 array(1) {
   [%u|b%"testing"]=>
   %unicode|string%(21) "mysqli.default_socket"

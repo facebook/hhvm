@@ -29,7 +29,8 @@ array(2) {
 
 
 --> exchangeArray() with no arg:
-HipHop Warning: %s
+
+Warning: %s
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
   object(C)#3 (2) {
@@ -55,7 +56,8 @@ array(2) {
 
 --> exchangeArray() with bad arg type:
 Exception:Passed variable is not an array or object, using empty array instead
-HipHop Notice: %s
+
+Notice: %s
 object(ArrayObject)#3 (1) {
   ["storage":"ArrayObject":private]=>
   object(C)#2 (2) {

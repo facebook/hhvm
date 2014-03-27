@@ -9,6 +9,7 @@ array(3) {
 }
 [005]
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
 done!

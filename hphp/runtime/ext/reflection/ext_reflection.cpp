@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_debugger.h"
+#include "hphp/runtime/ext/debugger/ext_debugger.h"
 #include "hphp/runtime/ext/ext_misc.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/externals.h"
@@ -82,7 +82,9 @@ const StaticString
   s_methods("methods"),
   s_properties("properties"),
   s_private_properties("private_properties"),
-  s_private_properties_offsets("private_properties_offsets"),
+  s_properties_index("properties_index"),
+  s_private_properties_index("private_properties_index"),
+  s_reorder_parent_properties("reorder_parent_properties"),
   s_attributes("attributes"),
   s_function("function"),
   s_trait_aliases("trait_aliases"),
@@ -123,17 +125,6 @@ Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
   ret.set(s_classes,   Array::Create());
 
   return ret;
-}
-
-int get_modifiers(int attribute, bool cls) {
-  int php_modifier = 0;
-  if (attribute & ClassInfo::IsAbstract)  php_modifier |= cls ? 0x20 : 0x02;
-  if (attribute & ClassInfo::IsFinal)     php_modifier |= cls ? 0x40 : 0x04;
-  if (attribute & ClassInfo::IsStatic)    php_modifier |= 0x01;
-  if (attribute & ClassInfo::IsPublic)    php_modifier |= 0x100;
-  if (attribute & ClassInfo::IsProtected) php_modifier |= 0x200;
-  if (attribute & ClassInfo::IsPrivate)   php_modifier |= 0x400;
-  return php_modifier;
 }
 
 int get_modifiers(Attr attrs, bool cls) {
@@ -201,28 +192,12 @@ static void set_doc_comment(Array& ret,
   }
 }
 
-static void set_doc_comment(Array& ret, const char* comment) {
-  if (f_hphp_debugger_attached()) {
-    ret.set(s_doc, comment);
-  } else {
-    set_empty_doc_comment(ret);
-  }
-}
-
 static void set_return_type_constraint(Array &ret, const StringData* retType) {
   if (retType && retType->size()) {
     ret.set(s_return_type, VarNR(retType));
   } else {
     ret.set(s_return_type, false_varNR);
   }
-}
-
-static void set_property_info(Array &ret, ClassInfo::PropertyInfo *info,
-                              const ClassInfo *cls) {
-  ret.set(s_name, info->name);
-  set_attrs(ret, get_modifiers(info->attribute, false) & ~0x66);
-  ret.set(s_class, VarNR(cls->getName()));
-  set_doc_comment(ret, info->docComment);
 }
 
 static void set_instance_prop_info(Array& ret,
@@ -315,107 +290,6 @@ static bool resolveDefaultParameterConstant(const char *value,
   return true;
 }
 
-static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
-                              const String *classname) {
-  // return type
-  if (info->attribute & ClassInfo::IsReference) {
-    ret.set(s_ref,      true_varNR);
-  }
-  if (info->attribute & ClassInfo::IsSystem) {
-    ret.set(s_internal, true_varNR);
-  }
-  if (info->attribute & ClassInfo::HipHopSpecific) {
-    ret.set(s_hphp,     true_varNR);
-  }
-  if (info->attribute & ClassInfo::IsClosure) {
-    ret.set(s_is_closure, true_varNR);
-  }
-
-  // doc comments
-  set_doc_comment(ret, info->docComment);
-
-  // parameters
-  {
-    Array arr = Array::Create();
-    for (unsigned int i = 0; i < info->parameters.size(); i++) {
-      Array param = Array::Create();
-      const ClassInfo::ParameterInfo *p = info->parameters[i];
-      param.set(s_index, VarNR((int)i));
-      param.set(s_name, p->name);
-      param.set(s_type, p->type);
-      param.set(s_function, info->name);
-
-      if (classname) {
-        param.set(s_class, VarNR(*classname));
-      }
-
-      const char *defText = p->valueText;
-      int64_t defTextLen = p->valueTextLen;
-      if (defText == nullptr) {
-        defText = "";
-        defTextLen = 0;
-      }
-
-      if (!p->type || !*p->type || !strcasecmp("null", defText)) {
-        param.set(s_nullable, true_varNR);
-      }
-
-      if (p->value && *p->value) {
-        if (*p->value == '\x01') {
-          Variant v;
-          if (resolveDefaultParameterConstant(defText, defTextLen, v)) {
-            param.set(s_default, v);
-          } else {
-            Object obj = SystemLib::AllocStdClassObject();
-            obj->o_set(s_msg, String("Unknown unserializable default value: ")
-                                 + defText);
-            param.set(s_default, Variant(obj));
-          }
-        } else {
-          param.set(s_default, unserialize_from_string(p->value));
-        }
-        param.set(s_defaultText, defText);
-      }
-
-      if (p->attribute & ClassInfo::IsReference) {
-        param.set(s_ref, true_varNR);
-      }
-
-      {
-        Array userAttrs = Array::Create();
-        for (unsigned int i = 0; i < p->userAttrs.size(); ++i) {
-          const ClassInfo::UserAttributeInfo *ai = p->userAttrs[i];
-          userAttrs.set(ai->name, ai->getValue());
-        }
-        param.set(s_attributes, VarNR(userAttrs));
-      }
-      arr.append(param);
-    }
-    ret.set(s_params, arr);
-  }
-
-  // static variables
-  {
-    Array arr = Array::Create();
-    for (unsigned int i = 0; i < info->staticVariables.size(); i++) {
-      const ClassInfo::ConstantInfo *p = info->staticVariables[i];
-      assert(p->valueText && *p->valueText);
-      arr.set(p->name, p->valueText);
-    }
-    ret.set(s_static_variables, arr);
-  }
-
-  // user attributes
-  {
-    Array arr = Array::Create();
-    for (unsigned i = 0; i < info->userAttrs.size(); ++i) {
-      const ClassInfo::UserAttributeInfo *ai = info->userAttrs[i];
-      arr.set(ai->name, ai->getValue());
-    }
-    ret.set(s_attributes, VarNR(arr));
-  }
-}
-
 static void set_function_info(Array &ret, const Func* func) {
   // return type
   if (func->attrs() & AttrReference) {
@@ -423,11 +297,6 @@ static void set_function_info(Array &ret, const Func* func) {
   }
   if (func->isBuiltin()) {
     ret.set(s_internal, true_varNR);
-    if ((func->methInfo() &&
-         func->methInfo()->attribute & ClassInfo::HipHopSpecific) ||
-         (!func->methInfo() && func->attrs() & AttrHPHPSpecific)) {
-      ret.set(s_hphp,     true_varNR);
-    }
   }
   set_return_type_constraint(ret, func->returnUserType());
 
@@ -549,12 +418,8 @@ static void set_function_info(Array &ret, const Func* func) {
   }
 
   ret.set(s_is_async, func->isAsync());
-
-  // closure info
   ret.set(s_is_closure, func->isClosureBody());
-  // Interestingly this isn't the same as calling isGenerator() because calling
-  // isGenerator() on the outside function for a generator returns false.
-  ret.set(s_is_generator, func->hasGeneratorAsBody());
+  ret.set(s_is_generator, func->isGenerator());
 }
 
 static void set_type_profiling_info(Array& info, const Class* cls,
@@ -570,89 +435,13 @@ static void set_type_profiling_info(Array& info, const Class* cls,
   }
 }
 
-static const ClassInfo* get_method_prototype_class(ClassInfo::MethodInfo *info,
-                                                   const ClassInfo *cls,
-                                                   bool lowestLevel) {
-  const ClassInfo *parentClassInfo = cls->getParentClassInfo();
-  if (parentClassInfo) {
-    const ClassInfo *result = get_method_prototype_class(info,
-                                                         parentClassInfo,
-                                                         false);
-    if (result) return result;
-  }
-  if (!lowestLevel) {
-    const ClassInfo::MethodMap& methods = cls->getMethods();
-    ClassInfo::MethodMap::const_iterator iter = methods.find(info->name);
-    if (iter != methods.end() &&
-      !(iter->second->attribute & ClassInfo::IsPrivate)) return cls;
-  }
-  return nullptr;
-}
-
-static const ClassInfo* get_prototype_class_from_interfaces(
-  ClassInfo::MethodInfo *info, const ClassInfo *cls, bool lowestLevel) {
-  // only looks at the interfaces if the method is public
-  if (!(info->attribute & ClassInfo::IsPublic)) return nullptr;
-
-  const ClassInfo::InterfaceVec &interfaces = cls->getInterfacesVec();
-  for (unsigned int i = 0; i < interfaces.size(); i++) {
-    const ClassInfo *interface = ClassInfo::FindInterface(interfaces[i]);
-    if (interface) {
-      const ClassInfo *result = get_prototype_class_from_interfaces(info,
-                                                                    interface,
-                                                                    false);
-      if (result) return result;
-    }
-  }
-  if (!lowestLevel) {
-    const ClassInfo::MethodMap& methods = cls->getMethods();
-    if (methods.find(info->name) != methods.end()) return cls;
-  }
-  return nullptr;
-}
-
-static void set_method_prototype_info(Array &ret, ClassInfo::MethodInfo *info,
-                                      const ClassInfo *cls) {
-  const ClassInfo *prototypeCls = get_method_prototype_class(info, cls, true);
-  if (prototypeCls) {
-    const ClassInfo *result = get_prototype_class_from_interfaces(info,
-                                                                  prototypeCls,
-                                                                  true);
-    if (result) prototypeCls = result;
-  }
-  if (!prototypeCls) {
-    prototypeCls = get_prototype_class_from_interfaces(info, cls, true);
-  }
-  if (prototypeCls) {
-    Array prototype = Array::Create();
-    prototype.set(s_class, VarNR(prototypeCls->getName()));
-    prototype.set(s_name, VarNR(info->name));
-    ret.set(s_prototype, prototype);
-  }
-}
-
-static void set_method_info(Array &ret, ClassInfo::MethodInfo *info,
-                            const ClassInfo *cls) {
-  ret.set(s_name, info->name);
-  set_attrs(ret, get_modifiers(info->attribute, false));
-  if (info->attribute & ClassInfo::IsConstructor) {
-    ret.set(s_constructor, true_varNR);
-  }
-
-  ret.set(s_class, VarNR(cls->getName()));
-  set_function_info(ret, info, &cls->getName());
-  set_source_info(ret, info->file, info->line1, info->line2);
-  set_method_prototype_info(ret, info, cls);
-}
-
 static bool isConstructor(const Func* func) {
   PreClass* pcls = func->preClass();
   if (!pcls) return false;
   if (func->cls()) return func == func->cls()->getCtor();
-  /* A same named function is not a constructor in a trait,
-     or if the function was imported from a trait */
-  if ((pcls->attrs() | func->attrs()) & AttrTrait) return false;
   if (!strcasecmp("__construct", func->name()->data())) return true;
+  /* A same named function is not a constructor in a trait */
+  if (pcls->attrs() & AttrTrait) return false;
   return pcls->name()->isame(func->name());
 }
 
@@ -710,30 +499,10 @@ static void set_method_info(Array &ret, const Func* func, const Class* cls) {
                             resolved_func ? resolved_func : func);
 }
 
-static Array get_method_info(const ClassInfo *cls, const Variant& name) {
-  if (!cls) return Array();
-  ClassInfo *owner;
-  ClassInfo::MethodInfo *meth = cls->hasMethod(
-    name.toString(), owner,
-    cls->getAttribute() & (ClassInfo::IsInterface|ClassInfo::IsAbstract));
-  if (!meth) return Array();
-
-  Array ret;
-  set_method_info(ret, meth, owner);
-  return ret;
-}
-
 Array HHVM_FUNCTION(hphp_get_method_info, const Variant& class_or_object,
                     const String &meth_name) {
   auto const cls = get_cls(class_or_object);
   if (!cls) return Array();
-  if (cls->clsInfo()) {
-    /*
-     * Default arguments for builtins arent setup correctly,
-     * so use the ClassInfo instead.
-     */
-    return get_method_info(cls->clsInfo(), meth_name);
-  }
   const Func* func = cls->lookupMethod(meth_name.get());
   if (!func) {
     if ((cls->attrs() & AttrAbstract) || (cls->attrs() & AttrInterface)) {
@@ -800,177 +569,9 @@ Array HHVM_FUNCTION(hphp_get_closure_info, const Object& closure) {
   return mi;
 }
 
-static Array get_class_info(const ClassInfo *cls) {
-  Array ret;
-  const String& className = cls->getName();
-  ret.set(s_name,       className);
-  ret.set(s_extension,  empty_string);
-  ret.set(s_parent,     cls->getParentClass());
-
-  // interfaces
-  {
-    Array arr = Array::Create();
-    for (auto const& inter : cls->getInterfacesVec()) {
-      arr.set(inter, 1);
-    }
-    ret.set(s_interfaces, VarNR(arr));
-  }
-
-  // traits
-  {
-    Array arr = Array::Create();
-    for (auto const& trait : cls->getTraitsVec()) {
-      arr.set(trait, 1);
-    }
-    ret.set(s_traits, VarNR(arr));
-  }
-
-  // trait aliases
-  {
-    Array arr = Array::Create();
-    for (auto const& alias : cls->getTraitAliasesVec()) {
-      arr.set(alias.first, alias.second);
-    }
-    ret.set(s_trait_aliases, VarNR(arr));
-  }
-
-  // attributes
-  {
-    int attribute = cls->getAttribute();
-    if (attribute & ClassInfo::IsSystem) {
-      ret.set(s_internal,  true_varNR);
-    }
-    if (attribute & ClassInfo::HipHopSpecific) {
-      ret.set(s_hphp,      true_varNR);
-    }
-    if (attribute & ClassInfo::IsFinal) {
-      ret.set(s_final,     true_varNR);
-    }
-    if (attribute & ClassInfo::IsAbstract) {
-      ret.set(s_abstract,  true_varNR);
-    }
-    if (attribute & ClassInfo::IsInterface) {
-      ret.set(s_interface, true_varNR);
-    }
-    if (attribute & ClassInfo::IsTrait) {
-      ret.set(s_trait,     true_varNR);
-    }
-    ret.set(s_modifiers, VarNR(get_modifiers(attribute, true)));
-  }
-
-  // methods
-  {
-    Array arr = Array::Create();
-    for (auto const& meth : cls->getMethodsVec()) {
-      Array info = Array::Create();
-      set_method_info(info, meth, cls);
-      arr.set(f_strtolower(meth->name), info);
-    }
-    ret.set(s_methods, VarNR(arr));
-  }
-
-  // properties
-  {
-    Array arr = Array::Create();
-    Array arrPriv = Array::Create();
-    Array arrOffset = Array::Create();
-    auto const propertiesVec = cls->getPropertiesVec();
-    const int propertiesCount = propertiesVec.size();
-    for (int i = 0; i < propertiesCount; ++i) {
-      auto const& prop = propertiesVec[i];
-      Array info = Array::Create();
-      info.add(s_default, true_varNR);
-      set_property_info(info, prop, cls);
-
-      if (prop->attribute & ClassInfo::IsPrivate) {
-        assert(prop->owner == cls);
-        arrPriv.set(prop->name, info);
-        arrOffset.set(prop->name, i);
-      } else {
-        arr.set(prop->name, info);
-      }
-    }
-    ret.set(s_properties, VarNR(arr));
-    ret.set(s_private_properties, VarNR(arrPriv));
-    ret.set(s_private_properties_offsets, VarNR(arrOffset));
-  }
-
-  // constants
-  {
-    Array arr = Array::Create();
-    for (auto const& cons : cls->getConstantsVec()) {
-      arr.set(cons->name, cons->getValue());
-    }
-    ret.set(s_constants, VarNR(arr));
-  }
-
-  { // source info
-    set_source_info(ret, cls->getFile(), cls->getLine1(),
-                    cls->getLine2());
-    set_doc_comment(ret, cls->getDocComment());
-  }
-
-  // user attributes
-  {
-    Array arr = Array::Create();
-    for (auto const& user_attr : cls->getUserAttributeVec()) {
-      arr.set(user_attr->name, user_attr->getValue());
-    }
-    ret.set(s_attributes, VarNR(arr));
-  }
-
-  return ret;
-}
-
-static void set_prop_ret(const Class* const cls,
-                         const Class::Prop& prop,
-                         const Class::PropInitVec& propInitVec,
-                         const int idx,
-                         Array& arr,
-                         Array& arrPriv,
-                         Array& arrOffset) {
-  Array info = Array::Create();
-  auto const& default_val = tvAsCVarRef(&propInitVec[idx]);
-  if ((prop.m_attrs & AttrPrivate) == AttrPrivate) {
-    if (prop.m_class == cls) {
-      set_instance_prop_info(info, &prop, default_val);
-      arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
-      arrOffset.set(*(String*)(&prop.m_name), prop.m_idx);
-    }
-  } else {
-    set_instance_prop_info(info, &prop, default_val);
-    arr.set(*(String*)(&prop.m_name), VarNR(info));
-  }
-}
-
-static void set_static_prop_ret(const Class* const cls,
-                                const Class::SProp& sProp,
-                                Array& arr,
-                                Array& arrPriv,
-                                Array& arrOffset) {
-  Array info = Array::Create();
-  if ((sProp.m_attrs & AttrPrivate) == AttrPrivate) {
-    if (sProp.m_class == cls) {
-      set_static_prop_info(info, &sProp);
-      arrPriv.set(*(String*)(&sProp.m_name), VarNR(info));
-      arrOffset.set(*(String*)(&sProp.m_name), sProp.m_idx);
-    }
-  } else {
-    set_static_prop_info(info, &sProp);
-    arr.set(*(String*)(&sProp.m_name), VarNR(info));
-  }
-}
-
 Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
   auto cls = get_cls(name);
   if (!cls) return Array();
-  if (cls->clsInfo()) {
-    /*
-     * Default arguments for builtins arent setup correctly,
-     * so use the ClassInfo instead.
-     */
-    return get_class_info(cls->clsInfo());
-  }
 
   Array ret;
   ret.set(s_name,      VarNR(cls->name()));
@@ -980,8 +581,15 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
   // interfaces
   {
     Array arr = Array::Create();
-    for (auto const& interface : cls->declInterfaces()) {
+    for (auto const& interface: cls->declInterfaces()) {
       arr.set(interface->nameRef(), VarNR(1));
+    }
+    auto const& allIfaces = cls->allInterfaces();
+    if (allIfaces.size() > cls->declInterfaces().size()) {
+      for (int i = 0; i < allIfaces.size(); ++i) {
+        auto const& interface = allIfaces[i];
+        arr.set(interface->nameRef(), VarNR(1));
+      }
     }
     ret.set(s_interfaces, VarNR(arr));
   }
@@ -1073,57 +681,67 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
   {
     Array arr = Array::Create();
     Array arrPriv = Array::Create();
-    Array arrOffset = Array::Create();
+    Array arrIdx = Array::Create();
+    Array arrPrivIdx = Array::Create();
 
     const Class::Prop* properties = cls->declProperties();
     auto const& propInitVec = cls->declPropInit();
     const size_t nProps = cls->numDeclProperties();
-    Slot propIdx = 0;
-    const Class::SProp* staticProperties = cls->staticProperties();
-    const size_t nSProps = cls->numStaticProperties();
-    Slot sPropIdx = 0;
 
-    while (propIdx < nProps && sPropIdx < nSProps) {
-      const Class::Prop& prop = properties[propIdx];
-      auto const& sProp = staticProperties[sPropIdx];
-
-      if (prop.m_idx < sProp.m_idx) {
-        set_prop_ret(cls, prop, propInitVec, propIdx,
-                     arr, arrPriv, arrOffset);
-        ++propIdx;
-      } else {
-        set_static_prop_ret(cls, sProp, arr, arrPriv, arrOffset);
-        ++sPropIdx;
+    for (Slot i = 0; i < nProps; ++i) {
+      const Class::Prop& prop = properties[i];
+      Array info = Array::Create();
+      auto const& default_val = tvAsCVarRef(&propInitVec[i]);
+      if ((prop.m_attrs & AttrPrivate) == AttrPrivate) {
+        if (prop.m_class == cls) {
+          set_instance_prop_info(info, &prop, default_val);
+          arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
+          arrPrivIdx.set(*(String*)(&prop.m_name), prop.m_idx);
+        }
+        continue;
       }
+      set_instance_prop_info(info, &prop, default_val);
+      arr.set(*(String*)(&prop.m_name), VarNR(info));
+      arrIdx.set(*(String*)(&prop.m_name), prop.m_idx);
     }
 
-    if (nProps <= propIdx) {
-      for (; sPropIdx < nSProps; ++sPropIdx) {
-        auto const& sProp = staticProperties[sPropIdx];
-        set_static_prop_ret(cls, sProp, arr, arrPriv, arrOffset);
+    const Class::SProp* staticProperties = cls->staticProperties();
+    const size_t nSProps = cls->numStaticProperties();
+
+    for (Slot i = 0; i < nSProps; ++i) {
+      auto const& prop = staticProperties[i];
+      Array info = Array::Create();
+      if ((prop.m_attrs & AttrPrivate) == AttrPrivate) {
+        if (prop.m_class == cls) {
+          set_static_prop_info(info, &prop);
+          arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
+          arrPrivIdx.set(*(String*)(&prop.m_name), prop.m_idx);
+        }
+        continue;
       }
-    } else {
-      for (; propIdx < nProps; ++propIdx) {
-        const Class::Prop& prop = properties[propIdx];
-        set_prop_ret(cls, prop, propInitVec, propIdx,
-                     arr, arrPriv, arrOffset);
-      }
+      set_static_prop_info(info, &prop);
+      arr.set(*(String*)(&prop.m_name), VarNR(info));
+      arrIdx.set(*(String*)(&prop.m_name), prop.m_idx);
     }
 
     if (name.isObject()) {
       auto obj = name.toObject();
       if (obj->hasDynProps()) {
+        int curIdx = nProps + nSProps;
         for (ArrayIter it(obj->dynPropArray().get()); !it.end(); it.next()) {
           Array info = Array::Create();
           set_dyn_prop_info(info, it.first(), cls->name());
           arr.set(it.first(), VarNR(info));
+          arrIdx.set(it.first(), curIdx++);
         }
       }
     }
 
     ret.set(s_properties, VarNR(arr));
     ret.set(s_private_properties, VarNR(arrPriv));
-    ret.set(s_private_properties_offsets, VarNR(arrOffset));
+    ret.set(s_properties_index, VarNR(arrIdx));
+    ret.set(s_private_properties_index, VarNR(arrPrivIdx));
+    ret.set(s_reorder_parent_properties, false_varNR);
   }
 
   // constants

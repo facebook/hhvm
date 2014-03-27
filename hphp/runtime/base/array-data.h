@@ -17,98 +17,61 @@
 #ifndef incl_HPHP_ARRAY_DATA_H_
 #define incl_HPHP_ARRAY_DATA_H_
 
+#include <climits>
+#include <vector>
+
+#include "folly/Likely.h"
+
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/macros.h"
-#include <climits>
-#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class APCHandle;
+struct APCHandle;
 struct TypedValue;
-class HphpArray;
 
-/**
- * Base class/interface for all types of specialized array data.
- */
-class ArrayData {
- public:
-  enum class AllocationMode : bool { smart, nonSmart };
-
-  // enum of possible array types, so we can guard nonvirtual
-  // fast paths in runtime code.  This is intentionally not
-  // an enum class, to avoid boilerplate when:
+struct ArrayData {
+  // Runtime type tag of possible array types.  This is intentionally
+  // not an enum class, since we're using it pretty much as raw bits
+  // (these tag values are not private), which avoids boilerplate
+  // when:
   //  - doing relational comparisons
   //  - using kind as an index
-  //  - maybe doing bitops in the future
+  //  - doing bit ops when storing in the union'd words below
   enum ArrayKind : uint8_t {
     kPackedKind,  // HphpArray with keys in range [0..size)
     kMixedKind,   // HphpArray arbitrary int or string keys, maybe holes
     kSharedKind,  // SharedArray
+    kEmptyKind,   // The singleton static empty array
     kNvtwKind,    // NameValueTableWrapper
     kProxyKind,   // ProxyArray
-    kNumKinds // insert new values before kNumKinds.
+    kNumKinds     // insert new values before kNumKinds.
   };
 
-  static const ssize_t invalid_index = -1;
+  static constexpr ssize_t invalid_index = -1;
 
- protected:
-   /*
-    * NOTE: HphpArray no longer calls these constructors.  If you
-    * change them, change the HphpArray::Make functions as
-    * appropriate.
-    */
-
+protected:
+  /*
+   * NOTE: HphpArray no longer calls this constructor.  If you change
+   * it, change the HphpArray::Make functions as appropriate.
+   */
   explicit ArrayData(ArrayKind kind)
     : m_kind(kind)
-    , m_allocMode(AllocationMode::smart)
     , m_size(-1)
     , m_pos(0)
     , m_count(0)
-    , m_strongIterators(nullptr)
-  {}
-
-  explicit ArrayData(ArrayKind kind, AllocationMode m)
-    : m_kind(kind)
-    , m_allocMode(m)
-    , m_size(-1)
-    , m_pos(0)
-    , m_count(0)
-    , m_strongIterators(nullptr)
-  {}
-
-  ArrayData(ArrayKind kind, AllocationMode m, uint size)
-    : m_kind(kind)
-    , m_allocMode(m)
-    , m_size(size)
-    , m_pos(size ? 0 : ArrayData::invalid_index)
-    , m_count(0)
-    , m_strongIterators(nullptr)
-  {}
-
-  ArrayData(const ArrayData *src, ArrayKind kind,
-            AllocationMode m = AllocationMode::smart)
-    : m_kind(src->m_kind)
-    , m_allocMode(m)
-    , m_pos(src->m_pos)
-    , m_count(0)
-    , m_strongIterators(nullptr)
   {}
 
   /*
-   * NOTE: HphpArray no longer calls the destructor or destroy() here.
-   * If you need to add logic, revisit HphpArray::Release{,Packed}.
+   * NOTE: HphpArray no longer calls this destructor.  If you need to
+   * add logic, revisit HphpArray::Release{,Packed}.
+   *
+   * Include hphp-array-defs.h if you need the definition of this
+   * destructor.  It is inline only.
    */
-
-  void destroy() {
-    // If there are any strong iterators pointing to this array, they need
-    // to be invalidated.
-    if (UNLIKELY(m_strongIterators != nullptr)) freeStrongIterators();
-  }
-
-  ~ArrayData() { destroy(); }
+  ~ArrayData();
 
 public:
   IMPLEMENT_COUNTABLE_METHODS
@@ -123,25 +86,10 @@ public:
   static ArrayData *CreateRef(const Variant& value);
   static ArrayData *CreateRef(const Variant& name, const Variant& value);
 
-  /**
-   * Type conversion functions. All other types are handled inside Array class.
-   */
-  Object toObject() const;
-
-  /**
-   * Array interface functions.
-   *
-   * 1. For functions that return ArrayData pointers, these are the ones that
-   *    can potentially escalate into a different ArrayData type. Return this
-   *    if no escalation is needed.
-   *
-   * 2. All functions with a "key" parameter are type-specialized.
-   */
-
-  /**
-   * For SmartAllocator.
-   *
-   *   NB: *Not* virtual. ArrayData knows about its only subclasses.
+  /*
+   * Called to return an ArrayData to the smart allocator.  This is
+   * normally called when the reference count goes to zero (e.g. via a
+   * helper like decRefArr).
    */
   void release();
 
@@ -330,49 +278,22 @@ public:
   ssize_t iter_advance(ssize_t prev) const;
   ssize_t iter_rewind(ssize_t prev) const;
 
-  /**
-   * Mutable iteration APIs
-   *
-   * The following six methods are used for mutable iteration. For all methods
-   * except newFullPos(), it is the caller's responsibility to ensure that the
-   * specified FullPos 'fp' is registered with this array and hasn't already
-   * been freed.
+  /*
+   * Checks if a mutable iterator points to a valid element within
+   * this array.  The iterator must be associated with this array (see
+   * array-iterator.cpp).  This will return false if the iterator
+   * points past the last element, or if the iterator points before
+   * the first element.
    */
+  bool validMArrayIter(const MArrayIter& fp) const;
 
-  /**
-   * Create a new mutable iterator and register it with this array (the mutable
-   * iterator will be stored in 'fp'). The new iterator will point to whatever
-   * element the array's internal cursor currently points to. Note that the
-   * array keeps track of all mutable iterators that have registered with it.
-   *
-   * A mutable iterator remains live until one of the following happens:
-   *   (1) The mutable iterator is freed by calling the freeFullPos() method.
-   *   (2) The array's refcount drops to 0 and the array frees all mutable
-   *       iterators that were registered with it.
-   *   (3) Some other kind of "invalidation" event happens to the array that
-   *       causes it to free all mutable iterators that were registered with
-   *       it (ex. array_shift() is called on the array).
+  /*
+   * Advances the mutable iterator to the next element in the array.
+   * The iterator must be associated with this array (see
+   * array-iterator.cpp).  Returns false if the iterator has moved
+   * past the last element, otherwise returns true.
    */
-  void newFullPos(FullPos &fp);
-
-  /**
-   * Frees a mutable iterator that was registered with this array.
-   */
-  void freeFullPos(FullPos &fp);
-
-  /**
-   * Checks if a mutable iterator points to a valid element within this array.
-   * This will return false if the iterator points past the last element, or
-   * if the iterator points before the first element.
-   */
-  bool validFullPos(const FullPos& fp) const;
-
-  /**
-   * Advances the mutable iterator to the next element in the array. Returns
-   * false if the iterator has moved past the last element, otherwise returns
-   * true.
-   */
-  bool advanceFullPos(FullPos& fp);
+  bool advanceMArrayIter(MArrayIter& fp);
 
   const Variant& endRef();
 
@@ -462,20 +383,9 @@ public:
 
   void onSetEvalScalar();
 
-  /**
-   * Serialize this array. We could have made this virtual function to ask
-   * sub-classes to implement it specifically, but since this is not a critical
-   * function to optimize, we implement it in a generic way in this base class.
-   * Then all the sudden we find out all Zend HashTable functions are similar
-   * to implementing array functions in this base class than utilizing a type
-   * specialized implementation, which is normally more optimized.
-   */
+  // TODO(#3903818): move serialization out of ArrayData, Variant, etc.
   void serialize(VariableSerializer *serializer,
                  bool skipNestCheck = false) const;
-
-  void dump();
-  void dump(std::string &out);
-  void dump(std::ostream &os);
 
   /**
    * Comparisons.
@@ -483,8 +393,11 @@ public:
   int compare(const ArrayData *v2) const;
   bool equal(const ArrayData *v2, bool strict) const;
 
-  void setPosition(ssize_t p) { m_pos = p; }
-  ssize_t getPosition() const { return m_pos; }
+  void setPosition(int32_t p) {
+    assert(m_pos == p || !isStatic());
+    m_pos = p;
+  }
+  int32_t getPosition() const { return m_pos; }
 
   ArrayData *escalate() const;
 
@@ -514,7 +427,7 @@ public:
   static const char* kindToString(ArrayKind kind);
 
 public: // for heap profiler
-  void getChildren(std::vector<TypedValue *> &out);
+  void getChildren(std::vector<TypedValue*>& out);
 
 private:
   void serializeImpl(VariableSerializer *serializer) const;
@@ -523,14 +436,6 @@ private:
   }
 
 protected:
-  void freeStrongIterators();
-  static void moveStrongIterators(ArrayData* dest, ArrayData* src);
-  FullPos* strongIterators() const {
-    return m_strongIterators;
-  }
-  void setStrongIterators(FullPos* p) {
-    m_strongIterators = p;
-  }
   // error-handling helpers
   static const Variant& getNotFound(int64_t k);
   static const Variant& getNotFound(const StringData* k);
@@ -550,11 +455,11 @@ protected:
   union {
     struct {
       ArrayKind m_kind;
-      AllocationMode m_allocMode;
-      UNUSED uint16_t m_forSubClasses; // unused space that subclasses may use
+      UNUSED uint8_t m_unused0;
+      UNUSED uint16_t m_unused1;
       uint32_t m_size;
     };
-    uint64_t m_kindModeAndSize;
+    uint64_t m_kindAndSize;
   };
   union {
     struct {
@@ -563,7 +468,6 @@ protected:
     };
     uint64_t m_posAndCount;   // be careful, m_pos is signed
   };
-  FullPos* m_strongIterators; // head of linked list
 };
 
 /*
@@ -602,8 +506,8 @@ struct ArrayFunctions {
   ssize_t (*iterEnd[NK])(const ArrayData*);
   ssize_t (*iterAdvance[NK])(const ArrayData*, ssize_t pos);
   ssize_t (*iterRewind[NK])(const ArrayData*, ssize_t pos);
-  bool (*validFullPos[NK])(const ArrayData*, const FullPos&);
-  bool (*advanceFullPos[NK])(ArrayData*, FullPos&);
+  bool (*validMArrayIter[NK])(const ArrayData*, const MArrayIter&);
+  bool (*advanceMArrayIter[NK])(ArrayData*, MArrayIter&);
   ArrayData* (*escalateForSort[NK])(ArrayData*);
   void (*ksort[NK])(ArrayData* ad, int sort_flags, bool ascending);
   void (*sort[NK])(ArrayData* ad, int sort_flags, bool ascending);

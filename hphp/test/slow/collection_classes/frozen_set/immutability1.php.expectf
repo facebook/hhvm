@@ -1,4 +1,4 @@
-HipHop Fatal error: Uncaught exception 'RuntimeException' with message 'Cannot add an element to a ImmSet' in %s
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot modify immutable object of type HH\ImmSet' in %s:7
 Stack trace:
-#0 %s/slow/collection_classes/frozen_set/immutability1.php(10): main()
+#0 %s(10): main()
 #1 {main}

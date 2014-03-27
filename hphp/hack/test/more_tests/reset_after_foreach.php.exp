@@ -1,0 +1,6 @@
+File "reset_after_foreach.php", line 16, characters 5-22:
+Invalid assignment
+File "reset_after_foreach.php", line 13, characters 11-13:
+This is an object of type Map
+File "reset_after_foreach.php", line 16, characters 19-22:
+It is incompatible with a nullable type

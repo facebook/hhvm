@@ -1,0 +1,4 @@
+File "class_meth8.php", line 19, characters 8-28:
+Could not find static method f1
+File "class_meth8.php", line 13, characters 19-20:
+The closest thing is f1 but it's not a static method

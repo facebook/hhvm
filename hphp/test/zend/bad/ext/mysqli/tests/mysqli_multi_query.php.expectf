@@ -3,6 +3,7 @@
 [009] [2014] Commands out of sync; you can't run this command now
 
 [010] 7
-HipHop Warning: %s
+
+Warning: %s
 NULL
 done!

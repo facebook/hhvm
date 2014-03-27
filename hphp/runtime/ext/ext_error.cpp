@@ -93,7 +93,9 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
       buf.append("(");
       if (!ignore_args) {
         bool first = true;
-        for (ArrayIter it = frame->get(s_args).begin(); !it.end(); it.next()) {
+        for (ArrayIter it(frame->get(s_args).toArray());
+            !it.end();
+            it.next()) {
           if (!first) {
             buf.append(", ");
           } else {
@@ -221,11 +223,11 @@ bool f_trigger_error(const String& error_msg,
   } else if (error_type == k_E_USER_WARNING) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::ErrorThrowMode::Never,
-                       "HipHop Warning: ");
+                       "\nWarning: ");
   } else if (error_type == k_E_USER_NOTICE) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::ErrorThrowMode::Never,
-                       "HipHop Notice: ");
+                       "\nNotice: ");
   } else if (error_type == k_E_USER_DEPRECATED) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::ErrorThrowMode::Never,

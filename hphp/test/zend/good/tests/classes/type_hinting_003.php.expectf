@@ -15,4 +15,5 @@ array(1) {
   [0]=>
   int(25)
 }
-HipHop Fatal error: %s
+
+Fatal error: %s

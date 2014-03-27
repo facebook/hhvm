@@ -10,14 +10,16 @@ int(8)
 bool(false)
 
 -- Iteration 4 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 5 --
 bool(false)
 
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 7 --
@@ -48,27 +50,33 @@ int(8)
 int(8)
 
 -- Iteration 16 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 17 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 18 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 19 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 21 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 22 --
@@ -78,6 +86,7 @@ int(8)
 int(8)
 
 -- Iteration 24 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

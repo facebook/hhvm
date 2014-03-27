@@ -18,11 +18,19 @@
 #define incl_HPHP_HPHP_ARRAY_DEFS_H_
 
 #include "hphp/runtime/base/hphp-array.h"
-#include "hphp/util/stacktrace-profiler.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/array-iterator-defs.h"
+
+#include "hphp/util/stacktrace-profiler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+inline ArrayData::~ArrayData() {
+  if (UNLIKELY(strong_iterators_exist())) {
+    free_strong_iterators(this);
+  }
+}
 
 inline void HphpArray::initHash(int32_t* hash, size_t tableSize) {
   wordfill(hash, Empty, tableSize);
@@ -200,14 +208,6 @@ inline size_t HphpArray::computeDataSize(uint32_t tableMask) {
          computeMaxElms(tableMask) * sizeof(Elm);
 }
 
-inline void ArrayData::moveStrongIterators(ArrayData* dest, ArrayData* src) {
-  for (FullPosRange r(src->strongIterators()); !r.empty(); r.popFront()) {
-    r.front()->setContainer(dest);
-  }
-  dest->m_strongIterators = src->m_strongIterators;
-  src->m_strongIterators = 0;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 struct HphpArray::ValIter {
@@ -245,9 +245,61 @@ private:
   Elm* const m_stop;
 };
 
+//////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE
+uint32_t computeMaskFromNumElms(uint32_t n) {
+  assert(n <= 0x7fffffffU);
+  auto lgSize = HphpArray::MinLgTableSize;
+  auto maxElms = HphpArray::SmallSize;
+  assert(lgSize >= 2);
+
+  // Note: it's tempting to convert this loop into something involving
+  // x64 bsr and a shift.  Naive attempts currently actually add more
+  // branches, because we need to initially check whether `n' is less
+  // than SmallSize, and after finding the next power of two we need a
+  // branch to see if it was big enough for the desired load factor.
+  // This is probably still worth revisiting (e.g., MakeReserve could
+  // have a precondition that n is at least SmallSize).
+  while (maxElms < n) {
+    ++lgSize;
+    maxElms <<= 1;
+  }
+  assert(lgSize <= 32);
+
+  // return 2^lgSize - 1
+  return ((size_t(1U)) << lgSize) - 1;
+  static_assert(HphpArray::MinLgTableSize >= 2,
+                "lower limit for 0.75 load factor");
+}
+
+ALWAYS_INLINE
+std::pair<uint32_t,uint32_t> computeCapAndMask(uint32_t minimumMaxElms) {
+  auto const mask = computeMaskFromNumElms(minimumMaxElms);
+  auto const cap  = HphpArray::computeMaxElms(mask);
+  return std::make_pair(cap, mask);
+}
+
+ALWAYS_INLINE
+size_t computeAllocBytes(uint32_t cap, uint32_t mask) {
+  auto const tabSize    = mask + 1;
+  auto const tabBytes   = tabSize * sizeof(int32_t);
+  auto const dataBytes  = cap * sizeof(HphpArray::Elm);
+  return sizeof(HphpArray) + tabBytes + dataBytes;
+}
+
+ALWAYS_INLINE
+HphpArray* smartAllocArray(uint32_t cap, uint32_t mask) {
+  /*
+   * Note: we're currently still allocating the memory for the hash
+   * for a packed array even if we aren't going to use it yet.
+   */
+  auto const allocBytes = computeAllocBytes(cap, mask);
+  return static_cast<HphpArray*>(MM().objMallocLogged(allocBytes));
+}
 
 //////////////////////////////////////////////////////////////////////
 
 }
 
-#endif // incl_HPHP_HPHP_ARRAY_DEFS_H_
+#endif

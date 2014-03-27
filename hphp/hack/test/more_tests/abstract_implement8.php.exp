@@ -1,0 +1,10 @@
+File "abstract_implement8.php", line 15, characters 16-16:
+This object is of type A
+File "abstract_implement8.php", line 15, characters 29-33:
+It is incompatible with this object of type Alpha
+because some of their methods are incompatible.
+Read the following to see why:
+File "abstract_implement8.php", line 12, characters 32-37:
+This is a string
+File "abstract_implement8.php", line 16, characters 32-34:
+It is incompatible with an int

@@ -1,10 +1,12 @@
 *** Testing mb_decode_mimeheader() : error conditions ***
 
 -- Testing mb_decode_mimeheader() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing mb_decode_mimeheader() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

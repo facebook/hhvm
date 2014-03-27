@@ -245,7 +245,7 @@ Array f_stream_get_transports() {
 Variant f_stream_resolve_include_path(const String& filename,
                                      const Resource& context /* = null_object */) {
   struct stat s;
-  String ret = Eval::resolveVmInclude(filename.get(), "", &s);
+  String ret = Eval::resolveVmInclude(filename.get(), "", &s, true);
   if (ret.isNull()) {
     return false;
   }

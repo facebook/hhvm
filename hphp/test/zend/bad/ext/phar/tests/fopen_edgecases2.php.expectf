@@ -1,5 +1,7 @@
-HipHop Warning: %s
+
+Warning: %s
 blah
 test
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

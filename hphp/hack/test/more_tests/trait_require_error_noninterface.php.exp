@@ -1,0 +1,2 @@
+File "trait_require_error_noninterface.php", line 15, characters 22-22:
+Cannot require implementation of C - it is not an interface

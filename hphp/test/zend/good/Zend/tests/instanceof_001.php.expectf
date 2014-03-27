@@ -3,4 +3,5 @@ bool(true)
 bool(true)
 bool(true)
 bool(false)
-HipHop Fatal error: %s
+
+Fatal error: %s

@@ -40,8 +40,7 @@ namespace HPHP { namespace Intl {
 #define FETCH_MFMT(data, obj) \
   auto data = MessageFormatter::Get(obj); \
   if (!data) { \
-    s_intl_error->throwException("Uninitialized Message Formatter"); \
-    not_reached(); \
+    throw s_intl_error->getException("Uninitialized Message Formatter"); \
   }
 
 const StaticString s_MessageFormatter("MessageFormatter");
@@ -79,7 +78,7 @@ static void HHVM_METHOD(MessageFormatter, __construct,
                         const String& pattern) {
   auto data = Native::data<MessageFormatter>(this_.get());
   if (!data->openFormatter(pattern, localeOrDefault(locale))) {
-    data->throwException("%s", data->getErrorMessage().c_str());
+    throw data->getException("%s", data->getErrorMessage().c_str());
   }
 }
 
@@ -394,7 +393,7 @@ static String HHVM_METHOD(MessageFormatter, getPattern) {
   UErrorCode error = U_ZERO_ERROR;
   String pat(u8(pat16, error));
   if (U_FAILURE(error)) {
-    data->throwException("Unable to return pattern to utf8");
+    throw data->getException("Unable to return pattern to utf8");
     not_reached();
   }
   return pat;

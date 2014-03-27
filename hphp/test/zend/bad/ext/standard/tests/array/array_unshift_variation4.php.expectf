@@ -1,8 +1,12 @@
 *** Testing array_unshift() : associative array with different keys ***
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
 -- Iteration 1 --
 int(1)
 array(1) {

@@ -78,6 +78,7 @@ namespace {
 #define DPtrToParam HasDest
 #define DBuiltin  HasDest
 #define DSubtract(n,t) HasDest
+#define DLdRaw    HasDest
 
 struct {
   const char* name;
@@ -123,6 +124,7 @@ struct {
 #undef DPtrToParam
 #undef DBuiltin
 #undef DSubtract
+#undef DLdRaw
 
 } // namespace
 

@@ -99,8 +99,10 @@ typedef void (*ts_allocate_dtor)(void *, void ***);
 
 #define THREAD_HASH_OF(thr,ts)  (unsigned long)thr%(unsigned long)ts
 
+#ifndef HHVM
 #ifdef __cplusplus
 extern "C" {
+#endif
 #endif
 
 /* startup/shutdown */
@@ -110,8 +112,49 @@ TSRM_API void tsrm_shutdown(void);
 /* allocates a new thread-safe-resource id */
 TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
 
+#define TSRM_SHUFFLE_RSRC_ID(rsrc_id)    ((rsrc_id)+1)
+#define TSRM_UNSHUFFLE_RSRC_ID(rsrc_id)    ((rsrc_id)-1)
+
+#ifdef HHVM
+
+#include <vector>
+#include <string>
+#include <assert.h>
+#if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
+# define TSRM_UNEXPECTED(condition) __builtin_expect(condition, 0)
+#else
+# define TSRM_UNEXPECTED(condition) (condition)
+#endif
+
+#include "hphp/util/thread-local.h"
+typedef std::vector<void*> TSRMStorageVector;
+extern HPHP::ThreadLocal<TSRMStorageVector> tsrm_thread_resources;
+void * ts_init_resource(int id);
+
+static inline void * ts_resource_from_vector(const TSRMStorageVector & vec, ts_rsrc_id id) {
+	void * ret;
+	assert(id != 0);
+	if (TSRM_UNEXPECTED(vec.size() <= TSRM_UNSHUFFLE_RSRC_ID(id))) {
+		return ts_init_resource(id);
+	} else {
+		ret = vec[TSRM_UNSHUFFLE_RSRC_ID(id)];
+		if (TSRM_UNEXPECTED(ret == nullptr)) {
+			return ts_init_resource(id);
+		} else {
+			return ret;
+		}
+	}
+}
+
+static inline void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id) {
+	assert(th_id == NULL); // unimplemented
+	return ts_resource_from_vector(*tsrm_thread_resources, id);
+}
+
+#else
 /* fetches the requested resource for the current thread */
 TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id);
+#endif
 #define ts_resource(id)      ts_resource_ex(id, NULL)
 
 /* frees all resources allocated for the current thread */
@@ -155,20 +198,31 @@ TSRM_API void *tsrm_new_interpreter_context(void);
 TSRM_API void *tsrm_set_interpreter_context(void *new_ctx);
 TSRM_API void tsrm_free_interpreter_context(void *context);
 
-#define TSRM_SHUFFLE_RSRC_ID(rsrc_id)    ((rsrc_id)+1)
-#define TSRM_UNSHUFFLE_RSRC_ID(rsrc_id)    ((rsrc_id)-1)
+#ifdef HHVM
+
+#define TSRMLS_FETCH()    void ***tsrm_ls = reinterpret_cast<void***>(tsrm_thread_resources.get())
+#define TSRMLS_FETCH_FROM_CTX(ctx)    void ***tsrm_ls = (void ***) ctx
+#define TSRMLS_SET_CTX(ctx)    ctx = (void ***) tsrm_ls
+#define TSRMG(id, type, element) \
+	(static_cast<type>(ts_resource_from_vector(*reinterpret_cast<TSRMStorageVector*>(tsrm_ls), id))->element)
+#else /*non-HHVM*/
 
 #define TSRMLS_FETCH()      void ***tsrm_ls = (void ***) ts_resource_ex(0, NULL)
 #define TSRMLS_FETCH_FROM_CTX(ctx)  void ***tsrm_ls = (void ***) ctx
 #define TSRMLS_SET_CTX(ctx)    ctx = (void ***) tsrm_ls
 #define TSRMG(id, type, element)  (((type) (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
+
+#endif
+
 #define TSRMLS_D  void ***tsrm_ls
 #define TSRMLS_DC  , TSRMLS_D
 #define TSRMLS_C  tsrm_ls
 #define TSRMLS_CC  , TSRMLS_C
 
+#ifndef HHVM
 #ifdef __cplusplus
 }
+#endif
 #endif
 
 #else /* non ZTS */

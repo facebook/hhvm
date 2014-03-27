@@ -755,7 +755,9 @@ static int php_skip_variable(const Resource& stream) {
   return 1;
 }
 
-static int php_read_APP(const Resource& stream, unsigned int marker, Variant &info) {
+static int php_read_APP(const Resource& stream,
+                        unsigned int marker,
+                        Array& info) {
   unsigned short length;
   Variant buffer;
   unsigned char markername[16];
@@ -773,8 +775,7 @@ static int php_read_APP(const Resource& stream, unsigned int marker, Variant &in
 
   snprintf((char*)markername, sizeof(markername), "APP%d", marker - M_APP0);
 
-  if (!(info.is(KindOfArray) &&
-        info.toArray().exists(String((const char *)markername)))) {
+  if (!info.exists(String((const char *)markername))) {
     /* XXX we onyl catch the 1st tag of it's kind! */
     info.set(String((char*)markername, CopyString), buffer);
   }
@@ -782,7 +783,7 @@ static int php_read_APP(const Resource& stream, unsigned int marker, Variant &in
   return 1;
 }
 
-static struct gfxinfo *php_handle_jpeg(const Resource& stream, Variant &info) {
+static struct gfxinfo *php_handle_jpeg(const Resource& stream, Array& info) {
   struct gfxinfo *result = NULL;
   unsigned int marker = M_PSEUDO;
   unsigned short length, ff_read=1;
@@ -814,7 +815,7 @@ static struct gfxinfo *php_handle_jpeg(const Resource& stream, Variant &info) {
         result->height = php_read2(stream);
         result->width = php_read2(stream);
         result->channels = file->getc();
-        if (!info.isReferenced() || length < 8) {
+        if (info.isNull() || length < 8) {
           /* if we don't want an extanded info -> return */
           return result;
         }
@@ -845,7 +846,7 @@ static struct gfxinfo *php_handle_jpeg(const Resource& stream, Variant &info) {
     case M_APP13:
     case M_APP14:
     case M_APP15:
-      if (info.isReferenced()) {
+      if (!info.isNull()) {
         if (!php_read_APP(stream, marker, info)) {
           /* read all the app markes... */
           return result;
@@ -1614,7 +1615,16 @@ Variant f_getimagesize(const String& filename,
     result = php_handle_gif(stream.toResource());
     break;
   case IMAGE_FILETYPE_JPEG:
-    result = php_handle_jpeg(stream.toResource(), imageinfo);
+    {
+      Array infoArr;
+      if (imageinfo.isReferenced()) {
+        infoArr = Array::Create();
+      }
+      result = php_handle_jpeg(stream.toResource(), infoArr);
+      if (!infoArr.empty()) {
+        imageinfo = infoArr;
+      }
+    }
     break;
   case IMAGE_FILETYPE_PNG:
     result = php_handle_png(stream.toResource());
@@ -4465,11 +4475,9 @@ Variant f_iptcparse(const String& iptcblock) {
     }
 
     String skey((const char *)key, CopyString);
-    if (!ret.exists(skey)) {
-      ret.set(skey, Array());
-    }
-    ret.lvalAt(skey).append(String((const char *)(buffer+inx), len,
-                                   CopyString));
+    auto& lval = ret.lvalAt(skey);
+    forceToArray(lval).append(
+      String((const char *)(buffer+inx), len, CopyString));
     inx += len;
     tagsfound++;
   }

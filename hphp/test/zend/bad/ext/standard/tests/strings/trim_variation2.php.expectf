@@ -18,13 +18,16 @@ string(19) "!---Hello World---!"
 -- Iteration 9 --
 string(19) "!---Hello World---!"
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 13 --
 string(19) "!---Hello World---!"
@@ -41,7 +44,8 @@ string(19) "!---Hello World---!"
 -- Iteration 19 --
 string(19) "!---Hello World---!"
 -- Iteration 20 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 21 --
 string(19) "!---Hello World---!"

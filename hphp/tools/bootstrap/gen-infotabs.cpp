@@ -39,13 +39,13 @@ void write_zend_func_stub(std::ofstream& cpp, PhpFunc func,
   cpp << folly::format(R"(
 }} // End namespace
 void {0}{1}{2}(
-  int, HPHP::RefData*, HPHP::RefData**, HPHP::RefData*, int
+  int, HPHP::RefData*, HPHP::RefData**, HPHP::RefData*, int, void***
 );
 namespace HPHP {{
 TypedValue* {3}{1}{2}(ActRec* ar) {{
   return zend_wrap_func(ar, {0}{1}{2}, {4}, {5});
 }}
-)", real_prefix, class_name, func.name(), stub_prefix,
+)", real_prefix, class_name, func.getCppName(), stub_prefix,
     func.numParams(), func.isReturnRef());
 }
 
@@ -70,7 +70,7 @@ int main(int argc, const char* argv[]) {
   std::ofstream cpp(argv[1]);
 
   cpp << "#include \"hphp/runtime/ext_hhvm/ext_hhvm.h\"\n"
-      << "#include \"hphp/runtime/ext_hhvm/ext_zend_compat.h\"\n"
+      << "#include \"hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h\"\n"
       << "#include \"hphp/runtime/ext/ext.h\"\n"
       << "#include \"hphp/runtime/vm/runtime.h\"\n"
       << "#include \"ext_hhvm_infotabs.h\"\n"
@@ -86,7 +86,7 @@ int main(int argc, const char* argv[]) {
   // Declare the fg_ and tg_ stubs
 
   for (auto const& func : funcs) {
-    fbstring name = func.lowerName();
+    fbstring name = func.lowerCppName();
     if (func.flags() & ZendCompat) {
       write_zend_func_stub(cpp, func);
     } else {
@@ -134,8 +134,8 @@ int main(int argc, const char* argv[]) {
       prefix = "zif_";
     }
 
-    fbstring name = func.lowerName();
-    cpp << "{ \"" << name << "\", " << "fg_" << name
+    fbstring name = func.lowerCppName();
+    cpp << "{ \"" << escapeCpp(func.getPhpName()) << "\", " << "fg_" << name
         << ", (void *)&" << prefix << name << " }";
   }
   cpp << "\n};\n\n";
@@ -154,9 +154,9 @@ int main(int argc, const char* argv[]) {
 
       auto name = method.getUniqueName();
       if (method.flags() & ZendCompat) {
-        name = klass.getCppName() + "_" + method.name();
+        name = klass.getCppName() + "_" + method.getCppName();
       }
-      cpp << "{ \"" << method.name() << "\", tg_" << name << " }";
+      cpp << "{ \"" << method.getCppName() << "\", tg_" << name << " }";
     }
     cpp << "\n};\n\n";
   }

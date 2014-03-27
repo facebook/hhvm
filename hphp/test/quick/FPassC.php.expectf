@@ -1,2 +1,3 @@
 6
-HipHop Fatal error: Cannot pass parameter 1 by reference in %s on line 9
+
+Fatal error: Cannot pass parameter 1 by reference in %s on line 9

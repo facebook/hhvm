@@ -18,8 +18,8 @@
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
-#include "hphp/runtime/ext/ext_options.h"
 #include "hphp/runtime/ext/ext_hash.h"
+#include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -316,7 +316,11 @@ Variant f_fpassthru(const Resource& handle) {
 Variant f_fwrite(const Resource& handle, const String& data, int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
   int64_t ret = f->write(data, length);
-  if (ret < 0) ret = 0;
+  if (ret < 0) {
+    raise_notice("fwrite(): send of %d bytes failed with errno=%d %s",
+                 data.size(), errno, folly::errnoStr(errno).c_str());
+    ret = 0;
+  }
   return ret;
 }
 
@@ -1151,7 +1155,7 @@ bool f_link(const String& target, const String& link) {
 }
 
 bool f_symlink(const String& target, const String& link) {
-  CHECK_SYSTEM(symlink(File::TranslatePath(target).data(),
+  CHECK_SYSTEM(symlink(File::TranslatePathKeepRelative(target).data(),
                        File::TranslatePath(link).data()));
   return true;
 }
@@ -1278,7 +1282,7 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
 Variant f_tempnam(const String& dir, const String& prefix) {
   String tmpdir = dir;
   if (tmpdir.empty() || !f_is_dir(tmpdir) || !f_is_writable(tmpdir)) {
-    tmpdir = f_sys_get_temp_dir();
+    tmpdir = HHVM_FN(sys_get_temp_dir)();
   }
   tmpdir = File::TranslatePath(tmpdir);
   String pbase = f_basename(prefix);

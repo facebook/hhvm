@@ -7,10 +7,12 @@ float(0.401425728)
 float(0.401425728)
 float(0.4092797096)
 float(0.4092797096)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 float(17.45329252)
-HipHop Notice: %s
+
+Notice: %s
 float(17.45329252)
 float(0)
 float(0.01745329252)

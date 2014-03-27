@@ -1,1 +1,2 @@
-HipHop Fatal error: Undefined constant 'A\B' in %s/test/slow/namespace/dynamic_extra_slash_cns2.php on line 9
+
+Fatal error: Undefined constant 'A\B' in %s/test/slow/namespace/dynamic_extra_slash_cns2.php on line 9

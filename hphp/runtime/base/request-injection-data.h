@@ -82,6 +82,7 @@ struct RequestInjectionData {
   std::string m_maxMemory;
   std::string m_argSeparatorOutput;
   std::string m_defaultCharset;
+  std::string m_defaultMimeType;
   std::vector<std::string> m_include_paths;
   int64_t m_errorReportingLevel;
   bool m_logErrors;
@@ -91,6 +92,7 @@ struct RequestInjectionData {
   bool m_safeFileAccess;
 
  public:
+  std::string getDefaultMimeType() { return m_defaultMimeType; }
   int getTimeout() const { return m_timeoutSeconds; }
   void setTimeout(int seconds);
   int getRemainingTime() const;

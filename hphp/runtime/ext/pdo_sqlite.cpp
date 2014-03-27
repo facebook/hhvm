@@ -178,7 +178,7 @@ bool PDOSqliteConnection::closer() {
 bool PDOSqliteConnection::preparer(const String& sql, sp_PDOStatement *stmt,
                                    const Variant& options) {
   if (options.toArray().exists(PDO_ATTR_CURSOR) &&
-      options[PDO_ATTR_CURSOR].toInt64() != PDO_CURSOR_FWDONLY) {
+      options.toArray()[PDO_ATTR_CURSOR].toInt64() != PDO_CURSOR_FWDONLY) {
     m_einfo.errcode = SQLITE_ERROR;
     handleError(__FILE__, __LINE__);
     return false;

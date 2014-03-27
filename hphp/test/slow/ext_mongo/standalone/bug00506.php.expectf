@@ -1,8 +1,13 @@
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
+
+Notice: %s
 array(3) {
   ["password"]=>
   int(34534)

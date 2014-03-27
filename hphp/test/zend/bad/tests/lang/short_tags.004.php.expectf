@@ -6,5 +6,7 @@ This gets echoed twice
 
 <? $b=3; ?>
 
-HipHop Notice: %s
-HipHop Notice: %s
+
+Notice: %s
+
+Notice: %s

@@ -31,6 +31,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC) {
     zvalue->tv()->m_data.pstr =
       HPHP::StringData::Make(zvalue->tv()->m_data.pstr, HPHP::CopyString);
     zvalue->tv()->m_data.pstr->incRefCount();
+    zvalue->tv()->m_type = HPHP::KindOfString; // not KindOfStaticString anymore
   } else if (zvalue->tv()->m_type == HPHP::KindOfArray) {
     zvalue->tv()->m_data.parr = zvalue->tv()->m_data.parr->copy();
     zvalue->tv()->m_data.parr->incRefCount();

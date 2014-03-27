@@ -1,0 +1,6 @@
+File "foreach_scoping.php", line 17, characters 10-13:
+Invalid return type
+File "foreach_scoping.php", line 12, characters 23-25:
+This is an int
+File "foreach_scoping.php", line 13, characters 10-13:
+It is incompatible with a nullable type

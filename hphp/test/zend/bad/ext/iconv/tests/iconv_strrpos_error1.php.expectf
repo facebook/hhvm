@@ -1,10 +1,12 @@
 *** Testing iconv_strrpos() : error conditions ***
 
 -- Testing iconv_strrpos() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing iconv_strrpos() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

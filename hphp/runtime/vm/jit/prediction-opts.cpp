@@ -70,7 +70,7 @@ bool typeSufficientlyGeneric(Type t) {
  * can specialize code earlier and avoid generic operations.
  */
 void optimizePredictions(IRUnit& unit) {
-  Timer _t("optimize_predictionOpts");
+  Timer _t(Timer::optimize_predictionOpts);
 
   FTRACE(5, "PredOpts:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "PredOpts:^^^^^^^^^^^^^^^^^^^^^\n"); };

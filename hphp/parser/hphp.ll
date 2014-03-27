@@ -201,6 +201,7 @@ static int getNextTokenType(int t) {
 %x ST_COMMENT
 %x ST_DOC_COMMENT
 %x ST_ONE_LINE_COMMENT
+%x ST_IN_PHP_OPEN_TAG
 
 %x ST_XHP_IN_TAG
 %x ST_XHP_END_SINGLETON_TAG
@@ -209,6 +210,13 @@ static int getNextTokenType(int t) {
 %x ST_XHP_COMMENT
 
 %option stack
+
+/* to get a Flex debug trace, uncomment %option debug, and uncomment
+ * 'yy_flex_debug = 1;' in Scanner::init() below.
+ *
+ * %option debug
+ */
+
 
 LNUM    [0-9]+
 DNUM    ([0-9]*[\.][0-9]+)|([0-9]+[\.][0-9]*)
@@ -638,45 +646,51 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{LNUM} {
         errno = 0;
-        long ret = strtoll(yytext, NULL, 0);
-        if (errno == ERANGE || ret < 0) {
-                _scanner->error("Dec number is too big: %s", yytext);
+        strtoll(yytext, NULL, 0);
+        if (errno == ERANGE) {
                 if (_scanner->isHHFile()) {
+                        _scanner->error("Dec number is too big: %s", yytext);
                         RETTOKEN(T_HH_ERROR);
                 }
+                RETTOKEN(T_ONUMBER);
+        } else {
+                RETTOKEN(T_LNUMBER);
         }
-        RETTOKEN(T_LNUMBER);
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{HNUM} {
         errno = 0;
-        long ret = strtoull(yytext, NULL, 16);
-        if (errno == ERANGE || ret < 0) {
-                _scanner->error("Hex number is too big: %s", yytext);
+        strtoull(yytext, NULL, 16);
+        if (errno == ERANGE) {
                 if (_scanner->isHHFile()) {
+                        _scanner->error("Hex number is too big: %s", yytext);
                         RETTOKEN(T_HH_ERROR);
                 }
+                RETTOKEN(T_ONUMBER);
+        } else {
+                RETTOKEN(T_LNUMBER);
         }
-        RETTOKEN(T_LNUMBER);
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{BNUM} {
         errno = 0;
-        long ret = strtoull(yytext + 2 /* skip over 0b */, NULL, 2);
-        if (errno == ERANGE || ret < 0) {
+        strtoull(yytext + 2 /* skip over 0b */, NULL, 2);
+        if (errno == ERANGE) {
                 _scanner->error("Bin number is too big: %s", yytext);
                 if (_scanner->isHHFile()) {
                         RETTOKEN(T_HH_ERROR);
                 }
+                RETTOKEN(T_ONUMBER);
+        } else {
+                RETTOKEN(T_LNUMBER);
         }
-        RETTOKEN(T_LNUMBER);
 }
 
 
 <ST_VAR_OFFSET>0|([1-9][0-9]*) { /* Offset could be treated as a long */
         errno = 0;
-        long ret = strtoll(yytext, NULL, 0);
-        if (ret == LLONG_MAX && errno == ERANGE) {
+        strtoll(yytext, NULL, 0);
+        if (errno == ERANGE) {
                 _scanner->error("Offset number is too big: %s", yytext);
                 if (_scanner->isHHFile()) {
                         RETTOKEN(T_HH_ERROR);
@@ -741,6 +755,19 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
           }
           return T_INLINE_HTML;
         }
+}
+
+  /* this rule, and ST_IN_PHP_OPEN_TAG are specifically for the case where a file */
+  /* contains the <?php directive followed directly by an EOF: */
+<INITIAL>"<?php" {
+        SETTOKEN(T_OPEN_TAG);
+        BEGIN(ST_IN_PHP_OPEN_TAG);
+        return T_OPEN_TAG;
+}
+
+<ST_IN_PHP_OPEN_TAG>. {
+        _scanner->error("<?php directive must be followed by whitespace, newline, or EOF");
+        return T_HH_ERROR;
 }
 
 <INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<%="|"<?=" {
@@ -1345,6 +1372,7 @@ namespace HPHP {
   void Scanner::init() {
     yylex_init_extra(this, &m_yyscanner);
     struct yyguts_t *yyg = (struct yyguts_t *)m_yyscanner;
+    /* yy_flex_debug = 1; */
     BEGIN(INITIAL);
   }
 

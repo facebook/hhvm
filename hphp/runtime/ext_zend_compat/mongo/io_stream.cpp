@@ -218,7 +218,7 @@ void php_mongo_io_stream_close(mongo_connection *con, int why)
 void php_mongo_io_stream_forget(mongo_con_manager *manager, mongo_connection *con)
 {
 	zend_rsrc_list_entry *le;
-	TSRMLS_FETCH();
+	// TSRMLS_FETCH();
 
 	/* When we fork we need to unregister the parents hash so we don't
 	 * accidentally destroy it */

@@ -1,22 +1,30 @@
 *** Testing error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
 NULL
-HipHop Warning: %s
+
+Warning: %s
  in %s on line %d
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
  in %s on line %d
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
  in %s on line %d
 bool(false)
-HipHop Warning: %s
+
+Warning: %s
  in %s on line %d
 bool(false)
 

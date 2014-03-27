@@ -1,11 +1,13 @@
 Strict Standards: Non-static method Hello::world() should not be called statically in %s on line %d
 Hello, you
-HipHop Notice: %s
+
+Notice: %s
 NULL
 
 Strict Standards: call_user_func() expects parameter 1 to be a valid callback, non-static method Hello::world() should not be called statically in %s on line %d
 Hello, you
-HipHop Notice: %s
+
+Notice: %s
 NULL
 -----
 Hello, again

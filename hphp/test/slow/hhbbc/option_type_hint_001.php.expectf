@@ -1,2 +1,4 @@
-HipHop Warning: foo() expects exactly 1 parameter, 0 given in %s/slow/hhbbc/option_type_hint_001.php on line 6
-HipHop Fatal error: Argument 1 to Foo::foo() must be of type ?Foo, null given in %s/slow/hhbbc/option_type_hint_001.php on line 6
+
+Warning: foo() expects exactly 1 parameter, 0 given in %s/slow/hhbbc/option_type_hint_001.php on line 6
+
+Fatal error: Argument 1 to Foo::foo() must be of type ?Foo, null given in %s/slow/hhbbc/option_type_hint_001.php on line 6

@@ -23,7 +23,7 @@
 #include "hphp/compiler/option.h"
 #include "hphp/util/async-func.h"
 #include "hphp/runtime/ext/curl/ext_curl.h"
-#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -102,7 +102,7 @@ bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
   int url = 0;
   for (url = 0; url < nUrls; url++) {
     String server = "http://";
-    server += f_php_uname("n");
+    server += HHVM_FN(php_uname)("n").toString();
     server += ":" + lexical_cast<string>(port) + "/";
     server += urls[url];
     actual = "<No response from server>";
@@ -195,7 +195,7 @@ void TestServer::StopServer() {
   for (int i = 0; i < 10; i++) {
     Variant c = HHVM_FN(curl_init)();
     String url = "http://";
-    url += f_php_uname("n");
+    url += HHVM_FN(php_uname)("n").toString();
     url += ":" + lexical_cast<string>(s_admin_port) + "/stop";
     HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_URL, url);
     HHVM_FN(curl_setopt)(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);

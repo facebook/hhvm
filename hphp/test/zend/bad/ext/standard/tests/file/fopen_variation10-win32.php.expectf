@@ -7,27 +7,35 @@ file in root
 file in root
 
 --c--
-HipHop Warning: %s
+
+Warning: %s
 file not opened for read
-HipHop Warning: %s
+
+Warning: %s
 
 --\--
-HipHop Warning: %s
+
+Warning: %s
 file not opened for read
-HipHop Warning: %s
+
+Warning: %s
 
 --/--
-HipHop Warning: %s
+
+Warning: %s
 file not opened for read
-HipHop Warning: %s
+
+Warning: %s
 
 --c:fopen10.tmpdirTwo--
 file in fopen10.tmpdirTwo
 
 --c:adir--
-HipHop Warning: %s
+
+Warning: %s
 file not opened for read
-HipHop Warning: %s
+
+Warning: %s
 
 --c:\/--
 file in root
@@ -45,7 +53,9 @@ file in fopen10.tmpdirTwo
 file in fopen10.tmpDir
 
 --/sortout--
-HipHop Warning: %s
+
+Warning: %s
 file not opened for read
-HipHop Warning: %s
+
+Warning: %s
 ===DONE===

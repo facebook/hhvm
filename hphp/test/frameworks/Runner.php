@@ -48,7 +48,7 @@ class Runner {
           $pretest_data = false;
           continue;
         }
-        // e.g. HipHop Warning: HipHop currently does not support circular
+        // e.g. \nWarning: HipHop currently does not support circular
         // reference collection
         // e.g. No headers testing
         // e.g. Please install runkit and enable runkit.internal_override!
@@ -83,7 +83,7 @@ class Runner {
             // e.g.
             // PHPUnit 3.7.28 by Sebastian Bergmann.
             // The Xdebug extension is not loaded. No code coverage will be gen
-            // HipHop Notice: Use of undefined constant DRIZZLE_CON_NONE
+            // \nNotice: Use of undefined constant DRIZZLE_CON_NONE
             $line = remove_string_from_text($line, __DIR__, "");
             $this->error_information .= PHP_EOL.$line.PHP_EOL.
               $this->getTestRunStr($this->name,"RUN TEST FILE: ").
@@ -95,7 +95,7 @@ class Runner {
             // e.g.
             // PHPUnit 3.7.28 by Sebastian Bergmann.
             // The Xdebug extension is not loaded. No code coverage will be gen
-            // HipHop Fatal error: Call to undefined function mysqli_report
+            // \nFatal error: Call to undefined function mysqli_report
             $line = remove_string_from_text($line, __DIR__, "");
             $this->fatal_information .= PHP_EOL.$this->name.
               PHP_EOL.$line.PHP_EOL.PHP_EOL.

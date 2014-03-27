@@ -1,1 +1,2 @@
-HipHop Fatal error: The type Coord is already defined to an incompatible type in %s on line 5
+
+Fatal error: The type Coord is already defined to an incompatible type in %s on line 5

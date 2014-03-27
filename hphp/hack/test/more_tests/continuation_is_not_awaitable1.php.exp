@@ -1,0 +1,6 @@
+File "continuation_is_not_awaitable1.php", line 13, characters 10-12:
+Invalid return type
+File "continuation_is_not_awaitable1.php", line 12, characters 23-34:
+This is an object of type Continuation
+File "continuation_is_not_awaitable1.php", line 13, characters 3-8:
+It is incompatible with an object of type Awaitable

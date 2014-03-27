@@ -1,0 +1,4 @@
+File "new_parent2.php", line 22, characters 9-11:
+The method foo is undefined in an object of type B
+File "new_parent2.php", line 15, characters 17-17:
+Check this out

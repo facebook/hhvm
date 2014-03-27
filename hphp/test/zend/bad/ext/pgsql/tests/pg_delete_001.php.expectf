@@ -32,6 +32,8 @@ array(2) {
     string(1) "2"
   }
 }
-HipHop Warning: %s
-HipHop Warning: %s
+
+Warning: %s
+
+Warning: %s
 bool(false)

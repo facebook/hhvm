@@ -1,0 +1,2 @@
+File "new_static_error.php", line 14, characters 3-14:
+Can't use new static() outside of a class

@@ -1,10 +1,12 @@
 *** Testing gmdate() : error conditions ***
 
 -- Testing gmdate() function with Zero arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Testing gmdate() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

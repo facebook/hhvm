@@ -1,4 +1,5 @@
-HipHop Fatal error: %s
+
+Fatal error: %s
 Stack trace:
 #0 %sconnection-single_error-001.php(4): Mongo->__construct('http://foofas:5...')
 #1 {main}

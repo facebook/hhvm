@@ -246,7 +246,7 @@ struct ArrayInit {
     auto ptr = m_data;
     m_data = nullptr;
     assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
-    return Variant(ptr, Variant::ArrayInitCtor::Tag);
+    return Variant(ptr, Variant::ArrayInitCtor{});
   }
 
 private:
@@ -340,7 +340,7 @@ public:
     auto ptr = m_vec;
     m_vec = nullptr;
     assert(true || (m_expectedCount = 0)); // reset; no more adds allowed
-    return Variant(ptr, Variant::ArrayInitCtor::Tag);
+    return Variant(ptr, Variant::ArrayInitCtor{});
   }
 
   Array toArray() {

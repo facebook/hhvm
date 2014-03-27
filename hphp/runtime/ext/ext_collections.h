@@ -168,7 +168,7 @@ class BaseVector : public ExtCollectionObjectData {
   }
 
   template <bool throwOnMiss>
-  static TypedValue* OffsetAt(ObjectData* obj, TypedValue* key);
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
@@ -247,14 +247,20 @@ class BaseVector : public ExtCollectionObjectData {
     ++m_size;
   }
 
+ public:
+  bool hasImmutableBuffer() const {
+    return !m_immCopy.isNull();
+  }
+
   /**
    * Should be called by any operation that mutates the vector, since
    * we might need to to trigger COW.
    */
   void mutate() {
-    if (!m_immCopy.isNull()) cow();
+    if (hasImmutableBuffer()) cow();
   }
 
+ protected:
   /**
    * Copy-On-Write the buffer and reset the immutable copy.
    */
@@ -384,8 +390,9 @@ class c_Vector : public BaseVector {
     return BaseVector::Clone<c_Vector>(obj);
   }
 
-  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
-  static void OffsetUnset(ObjectData* obj, TypedValue* key);
+  static void OffsetSet(ObjectData* obj, const TypedValue* key,
+                        TypedValue* val);
+  static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type) {
@@ -684,12 +691,13 @@ class BaseMap : public ExtCollectionObjectData {
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
   template <bool throwOnMiss>
-  static TypedValue* OffsetAt(ObjectData* obj, TypedValue* key);
-  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
+  static void OffsetSet(ObjectData* obj, const TypedValue* key,
+                        TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
-  static void OffsetUnset(ObjectData* obj, TypedValue* key);
+  static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
   enum EqualityFlavor { OrderMatters, OrderIrrelevant };
 
@@ -1372,13 +1380,6 @@ class BaseSet : public ExtCollectionObjectData {
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
 
-  static TypedValue* OffsetAt(ObjectData* obj, TypedValue* key);
-  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
-  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
-  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
-  static bool OffsetContains(ObjectData* obj, TypedValue* key);
-  static void OffsetUnset(ObjectData* obj, TypedValue* key);
-
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
   static void Unserialize(const char* setType, ObjectData* obj,
@@ -1723,12 +1724,10 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   static c_Pair* Clone(ObjectData* obj);
   static Array ToArray(const ObjectData* obj);
   template <bool throwOnMiss>
-  static TypedValue* OffsetAt(ObjectData* obj, TypedValue* key);
-  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
-  static void OffsetUnset(ObjectData* obj, TypedValue* key);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
@@ -1794,27 +1793,20 @@ class c_PairIterator : public ExtObjectData {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedValue* collectionAt(ObjectData* obj, TypedValue* key);
+TypedValue* collectionAt(ObjectData* obj, const TypedValue* key);
+TypedValue* collectionAtLval(ObjectData* obj, const TypedValue* key);
+TypedValue* collectionAtRw(ObjectData* obj, const TypedValue* key);
 TypedValue* collectionGet(ObjectData* obj, TypedValue* key);
-void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val);
+void collectionSet(ObjectData* obj, const TypedValue* key, TypedValue* val);
 // used for collection literal syntax only
 void collectionInitSet(ObjectData* obj, TypedValue* key, TypedValue* val);
 bool collectionIsset(ObjectData* obj, TypedValue* key);
 bool collectionEmpty(ObjectData* obj, TypedValue* key);
-void collectionUnset(ObjectData* obj, TypedValue* key);
+void collectionUnset(ObjectData* obj, const TypedValue* key);
 void collectionAppend(ObjectData* obj, TypedValue* val);
 // used for collection literal syntax only
 void collectionInitAppend(ObjectData* obj, TypedValue* val);
-Variant& collectionOffsetAt(ObjectData* obj, int64_t offset);
-Variant& collectionOffsetAt(ObjectData* obj, const String& offset);
-Variant& collectionOffsetAt(ObjectData* obj, const Variant& offset);
-Variant& collectionOffsetGet(ObjectData* obj, int64_t offset);
-Variant& collectionOffsetGet(ObjectData* obj, const String& offset);
-Variant& collectionOffsetGet(ObjectData* obj, const Variant& offset);
-void collectionOffsetSet(ObjectData* obj, int64_t offset, const Variant& val);
-void collectionOffsetSet(ObjectData* obj, const String& offset, const Variant& val);
-void collectionOffsetSet(ObjectData* obj, const Variant& offset, const Variant& val);
-bool collectionOffsetContains(ObjectData* obj, const Variant& offset);
+bool collectionContains(ObjectData* obj, const Variant& offset);
 void collectionReserve(ObjectData* obj, int64_t sz);
 void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
                            int64_t sz, char type);
@@ -1835,42 +1827,6 @@ ObjectData* newCollectionHelper(uint32_t type, uint32_t size);
 
 inline TypedValue* cvarToCell(const Variant* v) {
   return const_cast<TypedValue*>(v->asCell());
-}
-
-inline Variant& collectionOffsetAt(ObjectData* obj, bool offset) {
-  return collectionOffsetAt(obj, Variant(offset));
-}
-
-inline Variant& collectionOffsetAt(ObjectData* obj, double offset) {
-  return collectionOffsetAt(obj, Variant(offset));
-}
-
-inline Variant& collectionOffsetAt(ObjectData* obj, litstr offset) {
-  return collectionOffsetAt(obj, Variant(offset));
-}
-
-inline Variant& collectionOffsetGet(ObjectData* obj, bool offset) {
-  return collectionOffsetGet(obj, Variant(offset));
-}
-
-inline Variant& collectionOffsetGet(ObjectData* obj, double offset) {
-  return collectionOffsetGet(obj, Variant(offset));
-}
-
-inline Variant& collectionOffsetGet(ObjectData* obj, litstr offset) {
-  return collectionOffsetGet(obj, Variant(offset));
-}
-
-inline void collectionOffsetSet(ObjectData* obj, bool offset, const Variant& val) {
-  collectionOffsetSet(obj, Variant(offset), val);
-}
-
-inline void collectionOffsetSet(ObjectData* obj, double offset, const Variant& val) {
-  collectionOffsetSet(obj, Variant(offset), val);
-}
-
-inline void collectionOffsetSet(ObjectData* obj, litstr offset, const Variant& val) {
-  collectionOffsetSet(obj, Variant(offset), val);
 }
 
 inline bool isOptimizableCollectionClass(const Class* klass) {

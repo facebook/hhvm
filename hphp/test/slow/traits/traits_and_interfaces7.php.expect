@@ -1,0 +1,16 @@
+const from J
+const from I
+========== reflect ==========
+Array
+(
+    [0] => J
+    [1] => I
+)
+Array
+(
+    [ABC] => const from J
+    [XYZ] => const from I
+)
+Array
+(
+)

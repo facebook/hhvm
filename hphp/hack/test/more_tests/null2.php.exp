@@ -1,0 +1,6 @@
+File "null2.php", line 22, characters 12-13:
+Invalid return type
+File "null2.php", line 12, characters 17-19:
+This is an int
+File "null2.php", line 13, characters 8-11:
+It is incompatible with a nullable type

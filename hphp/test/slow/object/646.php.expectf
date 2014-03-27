@@ -4,5 +4,6 @@ object(A)#1 (2) {
   ["a"]=>
   int(2)
 }
-HipHop Notice: Undefined property: A::$c in %s/test/slow/object/646.php on line 9
+
+Notice: Undefined property: A::$c in %s/test/slow/object/646.php on line 9
 NULL

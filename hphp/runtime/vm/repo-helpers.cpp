@@ -15,9 +15,11 @@
 */
 
 #include "hphp/runtime/vm/repo-helpers.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/blob-helper.h"
+
 #include "hphp/runtime/base/builtin-functions.h"
+
+#include "hphp/runtime/vm/blob-helper.h"
+#include "hphp/runtime/vm/repo.h"
 
 namespace HPHP {
 

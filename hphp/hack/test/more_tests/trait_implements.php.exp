@@ -1,0 +1,4 @@
+File "trait_implements.php", line 22, characters 7-7:
+This class must provide an implementation for the abstract method bar
+File "trait_implements.php", line 13, characters 19-21:
+The abstract method bar is defined here

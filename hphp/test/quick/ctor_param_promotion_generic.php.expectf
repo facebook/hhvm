@@ -1,1 +1,2 @@
-HipHop Fatal error: parameter modifiers not supported with type variable annotation in %s on line 4
+
+Fatal error: parameter modifiers not supported with type variable annotation in %s on line 4

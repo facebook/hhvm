@@ -13,23 +13,28 @@ bool(false)
 bool(false)
 
 -- Iteration 5 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 6 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 7 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 8 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 9 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 10 --
@@ -39,19 +44,23 @@ bool(false)
 bool(false)
 
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 13 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 14 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 15 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 16 --
@@ -61,7 +70,8 @@ bool(false)
 bool(false)
 
 -- Iteration 18 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 19 --
@@ -74,7 +84,8 @@ bool(true)
 bool(true)
 
 -- Iteration 22 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- Iteration 23 --
@@ -84,6 +95,7 @@ bool(false)
 bool(false)
 
 -- Iteration 25 --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

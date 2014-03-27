@@ -68,7 +68,7 @@ class IntlTimeZone {
    */
   public static
   function fromDateTimeZone(DateTimeZone $zoneId): IntlTimeZone {
-    return self::createTimeZone($zoneId->name());
+    return self::createTimeZone($zoneId->getname());
   }
 
   /**

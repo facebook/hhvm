@@ -1,6 +1,7 @@
 <!DOCTYPE %a>%s</html>
 bool(true)
-HipHop Warning: %s
+
+Warning: %s
 NULL
 --
 <h1>PHP Credits</h1>

@@ -7,7 +7,8 @@ string(1) "f"
 bool(false)
 string(1) "f"
 string(1) "f"
-HipHop Notice: Undefined index: 0 in %s/test/slow/type_assertions/1855.php on line 4
+
+Notice: Undefined index: 0 in %s/test/slow/type_assertions/1855.php on line 4
 NULL
 bool(false)
 bool(false)

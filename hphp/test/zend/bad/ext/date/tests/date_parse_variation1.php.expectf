@@ -39,19 +39,23 @@ array(0) {
 }
 
 -- empty array --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- int indexed array --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- associative array --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- nested arrays --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- uppercase NULL --
@@ -135,7 +139,8 @@ array(2) {
 }
 
 -- instance of classWithoutToString --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 
 -- undefined var --
@@ -151,6 +156,7 @@ array(1) {
 }
 
 -- resource --
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 ===DONE===

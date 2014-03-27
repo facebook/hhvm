@@ -577,8 +577,9 @@ END_EXTERN_C()
 
 #ifdef HHVM
 #define ZVAL_RESOURCE(z, l) do {  \
+    TSRMLS_FETCH();       \
     zval *__z = (z);      \
-    zval_follow_ref(*__z).m_data.pres = zend_list_id_to_resource_data(l); \
+    zval_follow_ref(*__z).m_data.pres = zend_list_id_to_resource_data(l TSRMLS_CC); \
     Z_TYPE_P(__z) = IS_RESOURCE;\
   } while (0)
 #else

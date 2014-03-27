@@ -13,28 +13,30 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/func.h"
 
-#include <iostream>
-#include <boost/scoped_ptr.hpp>
+#include "hphp/parser/parser.h"
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/util/atomic-vector.h"
-#include "hphp/util/trace.h"
-#include "hphp/util/debug.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/file-repository.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/strings.h"
+
 #include "hphp/runtime/vm/blob-helper.h"
-#include "hphp/runtime/vm/func-inline.h"
-#include "hphp/system/systemlib.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/native.h"
-#include "hphp/parser/parser.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/runtime.h"
+
+#include "hphp/runtime/vm/jit/mc-generator.h"
+
+#include "hphp/system/systemlib.h"
+
+#include "hphp/util/atomic-vector.h"
+#include "hphp/util/debug.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
 
@@ -198,7 +200,6 @@ void Func::init(int numParams) {
 
 void* Func::allocFuncMem(
   const StringData* name, int numParams,
-  bool needsGeneratorOrigFunc,
   bool needsNextClonedClosure,
   bool lowMem) {
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
@@ -206,9 +207,7 @@ void* Func::allocFuncMem(
     maxNumPrologues > kNumFixedPrologues ?
     maxNumPrologues - kNumFixedPrologues :
     0;
-  int numExtraFuncPtrs =
-    (int) needsGeneratorOrigFunc +
-    (int) needsNextClonedClosure;
+  int numExtraFuncPtrs = (int) needsNextClonedClosure;
   size_t funcSize =
     sizeof(Func) +
     numExtraPrologues * sizeof(unsigned char*) +
@@ -217,15 +216,12 @@ void* Func::allocFuncMem(
   void* mem = lowMem ? low_malloc(funcSize) : malloc(funcSize);
 
   /**
-   * The Func object can have optional generatorOrigFunc and nextClonedClosure
-   * pointers to Func in front of the actual object. The layout is as follows:
+   * The Func object can have optional nextClonedClosure pointer to Func
+   * in front of the actual object. The layout is as follows:
    *
    *               +--------------------------------+ low address
    *               |  nextClonedClosure (optional)  |
-   *               |  in closures and closure gens  |
-   *               +--------------------------------+
-   *               |  generatorOrigFunc (optional)  |
-   *               |  in generator bodies           |
+   *               |  in closures                   |
    *               +--------------------------------+ Func* address
    *               |  Func object                   |
    *               +--------------------------------+ high address
@@ -277,9 +273,8 @@ void Func::destroy(Func* func) {
    */
   bool lowMem = !func->preClass() || func->m_cls;
   void* mem = func;
-  if (func->isClosureBody() || func->isGeneratorFromClosure()) {
+  if (func->isClosureBody()) {
     Func** startOfFunc = ((Func**) mem) - 1; // move back by a pointer
-    if (func->isGenerator()) --startOfFunc;  // one more if in generator
     mem = startOfFunc;
     if (Func* f = *startOfFunc) {
       /*
@@ -291,8 +286,6 @@ void Func::destroy(Func* func) {
       f->initPrologues(f->m_numParams);
       Func::destroy(f);
     }
-  } else if (func->isGenerator()) {
-    mem = ((Func**)mem) - 1;
   }
   func->~Func();
   if (lowMem) {
@@ -306,8 +299,7 @@ Func* Func::clone(Class* cls) const {
   Func* f = new (allocFuncMem(
                    m_name,
                    m_numParams,
-                   isGenerator(),
-                   isClosureBody() || isGeneratorFromClosure(),
+                   isClosureBody(),
                    cls || !preClass())) Func(*this);
 
   f->initPrologues(m_numParams);
@@ -518,6 +510,8 @@ static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrFinal)     { out << " final"; }
   if (attrs & AttrPhpLeafFn) { out << " (leaf)"; }
   if (attrs & AttrHot)       { out << " (hot)"; }
+  if (attrs & AttrDynamicInvoke) { out << " (dynamic)"; }
+  if (attrs & AttrPersistent) { out << " (persistent)"; }
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
@@ -617,13 +611,6 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
     if (m_attrs & AttrHPHPSpecific) attr |= ClassInfo::HipHopSpecific;
     if (!(attr & ClassInfo::IsProtected || attr & ClassInfo::IsPrivate)) {
       attr |= ClassInfo::IsPublic;
-    }
-    if (preClass() &&
-        (!strcasecmp(m_name->data(), "__construct") ||
-         (!(preClass()->attrs() & AttrTrait) &&
-          !strcasecmp(m_name->data(), preClass()->name()->data()) &&
-          !preClass()->hasMethod(String("__construct").get())))) {
-      attr |= ClassInfo::IsConstructor;
     }
     if (attr == 0) attr = ClassInfo::IsNothing;
     mi->attribute = (ClassInfo::Attribute)attr;
@@ -732,9 +719,8 @@ Func::SharedData::SharedData(PreClass* preClass, Id id,
     m_past(past), m_line1(line1), m_line2(line2),
     m_info(nullptr), m_refBitPtr(0), m_builtinFuncPtr(nullptr),
     m_docComment(docComment), m_top(top), m_isClosureBody(false),
-    m_isGenerator(false), m_isGeneratorFromClosure(false),
-    m_isPairGenerator(false), m_isGenerated(false), m_isAsync(false),
-    m_generatorBodyName(nullptr), m_originalFilename(nullptr) {
+    m_isAsync(false), m_isGenerator(false), m_isPairGenerator(false),
+    m_isGenerated(false), m_originalFilename(nullptr) {
 }
 
 Func::SharedData::~SharedData() {
@@ -743,21 +729,6 @@ Func::SharedData::~SharedData() {
 
 void Func::SharedData::atomicRelease() {
   delete this;
-}
-
-const Func* Func::getGeneratorBody() const {
-  const Func* genFunc;
-  if (isMethod() && !isClosureBody()) {
-    genFunc = cls()->lookupMethod(getGeneratorBodyName());
-  } else {
-    genFunc = Unit::lookupFunc(getGeneratorBodyName());
-    if (isMethod() && isClosureBody()) {
-      genFunc = genFunc->cloneAndSetClass(cls());
-    }
-  }
-
-  const_cast<Func*>(genFunc)->setGeneratorOrigFunc(this);
-  return genFunc;
 }
 
 bool Func::isEntry(Offset offset) const {
@@ -793,6 +764,16 @@ Offset Func::getEntryForNumArgs(int numArgsPassed) const {
 
 bool Func::shouldPGO() const {
   if (!RuntimeOption::EvalJitPGO) return false;
+
+  // Async function and generator bodies consist of two types of basic
+  // blocks. One type is executed in non-generator mode (eager execution),
+  // other in generator mode (resumed execution). Translator may emit
+  // the same opcodes in a different way based on the execution mode.
+  // This currently breaks region-based retranslation, as the information
+  // about the current execution mode is lost.
+  //
+  // TODO(#3880036): remove this once SrcKey contains execution mode bit
+  if (isAsync() || isGenerator()) return false;
 
   // Cloned closures use the func prologue tables to hold the
   // addresses of the DV funclets, and not real prologues.  The
@@ -834,14 +815,12 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_returnType(KindOfInvalid)
   , m_top(false)
   , m_isClosureBody(false)
+  , m_isAsync(false)
   , m_isGenerator(false)
-  , m_isGeneratorFromClosure(false)
   , m_isPairGenerator(false)
   , m_containsCalls(false)
-  , m_isAsync(false)
   , m_info(nullptr)
   , m_builtinFuncPtr(nullptr)
-  , m_generatorBodyName(nullptr)
   , m_originalFilename(nullptr)
 {}
 
@@ -862,14 +841,12 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_returnType(KindOfInvalid)
   , m_top(false)
   , m_isClosureBody(false)
+  , m_isAsync(false)
   , m_isGenerator(false)
-  , m_isGeneratorFromClosure(false)
   , m_isPairGenerator(false)
   , m_containsCalls(false)
-  , m_isAsync(false)
   , m_info(nullptr)
   , m_builtinFuncPtr(nullptr)
-  , m_generatorBodyName(nullptr)
   , m_originalFilename(nullptr)
 {}
 
@@ -1084,15 +1061,6 @@ void FuncEmitter::addUserAttribute(const StringData* name, TypedValue tv) {
   m_userAttributes[name] = tv;
 }
 
-int FuncEmitter::parseUserAttributes(Attr &attrs) const {
-  int ret = Native::AttrNone;
-
-  ret = ret | parseNativeAttributes(attrs);
-  ret = ret | parseHipHopAttributes(attrs);
-
-  return ret;
-}
-
 /* <<__Native>> user attribute causes systemlib declarations
  * to hook internal (C++) implementation of funcs/methods
  *
@@ -1100,6 +1068,8 @@ int FuncEmitter::parseUserAttributes(Attr &attrs) const {
  *  "ActRec": The internal function takes a fixed prototype
  *      TypedValue* funcname(ActRec *ar);
  *      Note that systemlib declaration must still be hack annotated
+ *  "NoFCallBuiltin": Prevent FCallBuiltin optimization
+ *      Effectively forces functions to generate an ActRec
  *  "NoInjection": Do not include this frame in backtraces
  *
  *  e.g.   <<__Native("ActRec")>> function foo():mixed;
@@ -1107,6 +1077,7 @@ int FuncEmitter::parseUserAttributes(Attr &attrs) const {
 static const StaticString
   s_native("__Native"),
   s_actrec("ActRec"),
+  s_nofcallbuiltin("NoFCallBuiltin"),
   s_variadicbyref("VariadicByRef"),
   s_noinjection("NoInjection");
 
@@ -1124,6 +1095,8 @@ int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
       if (userAttrStrVal.get()->isame(s_actrec.get())) {
         ret = ret | Native::AttrActRec;
         attrs = attrs | AttrMayUseVV;
+      } else if (userAttrStrVal.get()->isame(s_nofcallbuiltin.get())) {
+        attrs = attrs | AttrNoFCallBuiltin;
       } else if (userAttrStrVal.get()->isame(s_variadicbyref.get())) {
         attrs = attrs | AttrVariadicByRef;
       } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
@@ -1132,20 +1105,6 @@ int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
     }
   }
   return ret;
-}
-
-/* <<__HipHopSpecific>> user attribute marks funcs/methods as HipHop specific
- * for reflection.
- */
-static const StaticString s_hiphopspecific("__HipHopSpecific");
-
-int FuncEmitter::parseHipHopAttributes(Attr &attrs) const {
-  auto it = m_userAttributes.find(s_hiphopspecific.get());
-  if (it != m_userAttributes.end()) {
-    attrs = attrs | AttrHPHPSpecific;
-  }
-
-  return Native::AttrNone;
 }
 
 void FuncEmitter::commit(RepoTxn& txn) const {
@@ -1160,7 +1119,7 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(m_name->data()[0]) ||
-    ParserBase::IsClosureName(m_name->toCppString()) || m_isGenerator;
+    ParserBase::IsClosureName(m_name->toCppString());
 
   Attr attrs = m_attrs;
   if (preClass && preClass->attrs() & AttrInterface) {
@@ -1168,14 +1127,14 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   }
   if (attrs & AttrPersistent &&
       ((RuntimeOption::EvalJitEnableRenameFunction && !isGenerated) ||
-       (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited))) {
+       (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited) ||
+       attrs & AttrDynamicInvoke)) {
     attrs = Attr(attrs & ~AttrPersistent);
   }
   if (RuntimeOption::EvalJitEnableRenameFunction &&
       !m_name->empty() &&
       !Func::isSpecial(m_name) &&
-      !m_isClosureBody &&
-      !m_isGenerator) {
+      !m_isClosureBody) {
     // intercepted functions need to pass all args through
     // to the interceptee
     attrs = attrs | AttrMayUseVV;
@@ -1186,9 +1145,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   assert(!m_pce == !preClass);
   Func* f = m_ue.newFunc(this, unit, m_id, preClass, m_line1, m_line2, m_base,
                          m_past, m_name, attrs, m_top, m_docComment,
-                         m_params.size(),
-                         m_isGenerator,
-                         m_isClosureBody | m_isGeneratorFromClosure);
+                         m_params.size(), m_isClosureBody);
 
   f->shared()->m_info = m_info;
   f->shared()->m_returnType = m_returnType;
@@ -1218,18 +1175,16 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_ehtab = m_ehtab;
   f->shared()->m_fpitab = m_fpitab;
   f->shared()->m_isClosureBody = m_isClosureBody;
+  f->shared()->m_isAsync = m_isAsync;
   f->shared()->m_isGenerator = m_isGenerator;
-  f->shared()->m_isGeneratorFromClosure = m_isGeneratorFromClosure;
   f->shared()->m_isPairGenerator = m_isPairGenerator;
   f->shared()->m_userAttributes = m_userAttributes;
   f->shared()->m_builtinFuncPtr = m_builtinFuncPtr;
   f->shared()->m_nativeFuncPtr = m_nativeFuncPtr;
-  f->shared()->m_generatorBodyName = m_generatorBodyName;
   f->shared()->m_retTypeConstraint = m_retTypeConstraint;
   f->shared()->m_retUserType = m_retUserType;
   f->shared()->m_originalFilename = m_originalFilename;
   f->shared()->m_isGenerated = isGenerated;
-  f->shared()->m_isAsync = m_isAsync;
 
   if (attrs & AttrNative) {
     auto nif = Native::GetBuiltinFunction(m_name,
@@ -1267,6 +1222,9 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
   }
   if (info->attribute & ClassInfo::NoInjection) {
     attrs = attrs | AttrNoInjection;
+  }
+  if (info->attribute & ClassInfo::NoFCallBuiltin) {
+    attrs = attrs | AttrNoFCallBuiltin;
   }
   if (pce()) {
     if (info->attribute & ClassInfo::IsStatic) {
@@ -1330,11 +1288,10 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_numIterators)
     (m_maxStackCells)
     (m_isClosureBody)
+    (m_isAsync)
     (m_isGenerator)
-    (m_isGeneratorFromClosure)
     (m_isPairGenerator)
     (m_containsCalls)
-    (m_isAsync)
 
     (m_params)
     (m_localNames)
@@ -1342,7 +1299,6 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_ehtab)
     (m_fpitab)
     (m_userAttributes)
-    (m_generatorBodyName)
     (m_retTypeConstraint)
     (m_retUserType)
     (m_originalFilename)

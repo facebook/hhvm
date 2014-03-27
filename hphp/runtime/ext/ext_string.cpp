@@ -28,7 +28,7 @@
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "folly/Unicode.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/zend/html-table.h"
@@ -631,7 +631,7 @@ Variant f_substr_replace(const Variant& str, const Variant& replacement, const V
   if (!str.is(KindOfArray)) {
     String repl;
     if (replacement.is(KindOfArray)) {
-      repl = replacement[0].toString();
+      repl = replacement.asCArrRef()[0].toString();
     } else {
       repl = replacement.toString();
     }
@@ -764,7 +764,10 @@ Variant f_vsprintf(const String& format, const Array& args) {
   return String(output, len, AttachString);
 }
 
-Variant f_sscanf(int _argc, const String& str, const String& format, const Array& _argv /* = null_array */) {
+Variant f_sscanf(int _argc,
+                 const String& str,
+                 const String& format,
+                 const Array& _argv /* = null_array */) {
   Variant ret;
   int result;
   result = string_sscanf(str.c_str(), format.c_str(), _argv.size(), ret);
@@ -1446,16 +1449,13 @@ Variant f_strtr(const String& str, const Variant& from, const Variant& to /* = n
 }
 
 void f_parse_str(const String& str, VRefParam arr /* = null */) {
-  Variant result;
-
+  Array result = Array::Create();
   HttpProtocol::DecodeParameters(result, str.data(), str.size());
-
   if (!arr.isReferenced()) {
-    f_extract(result.toArray());
+    HHVM_FN(extract)(result);
     return;
   }
-
-  arr = result.toArray();
+  arr = result;
 }
 
 Variant f_setlocale(int _argc, int category, const Variant& locale, const Array& _argv /* = null_array */) {

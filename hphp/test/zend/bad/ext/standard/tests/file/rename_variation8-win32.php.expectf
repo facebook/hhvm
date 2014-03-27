@@ -1,5 +1,6 @@
 *** Testing rename() on non-existing file ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
 bool(false)
@@ -10,7 +11,8 @@ bool(false)
 bool(true)
 
 *** Testing rename() on non-existing directory ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 bool(false)
 bool(false)

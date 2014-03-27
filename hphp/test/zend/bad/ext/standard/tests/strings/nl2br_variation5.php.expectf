@@ -18,19 +18,24 @@ string(7) "1.06E-9"
 -- Iteration 9 --
 string(3) "0.5"
 -- Iteration 10 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 11 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 12 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 13 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 14 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 15 --
 string(0) ""
@@ -45,7 +50,8 @@ string(1) "1"
 -- Iteration 20 --
 string(0) ""
 -- Iteration 21 --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 -- Iteration 22 --
 string(9) "My String"

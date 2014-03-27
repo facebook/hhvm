@@ -1,4 +1,5 @@
 *** Testing mb_substr() : error conditions ***
-HipHop Warning: %s
+
+Warning: %s
 bool(false)
 Done

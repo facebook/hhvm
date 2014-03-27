@@ -2,4 +2,5 @@ bool(false)
 bool(false)
 bool(true)
 bool(true)
-HipHop Fatal error: Cannot access empty property in %s/test/slow/object_property/715.php on line 4
+
+Fatal error: Cannot access empty property in %s/test/slow/object_property/715.php on line 4

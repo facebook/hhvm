@@ -1,10 +1,12 @@
 *** Testing imap_fetchheader() : error conditions ***
 
 -- Testing imap_fetchheader() function with more than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 
 -- Testing imap_fetchheader() function with less than expected no. of arguments --
-HipHop Warning: %s
+
+Warning: %s
 NULL
 ===DONE===

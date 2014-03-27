@@ -696,14 +696,17 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
   if (needArgMiscountClause) {
     cpp << in + 2 << "} else {\n";
     if (func.isVarArgs()) {
-      cpp << in << "throw_missing_arguments_nr(\"" << func.getPrettyName()
+      cpp << in << "throw_missing_arguments_nr(\""
+          << escapeCpp(func.getPrettyName())
           << "\", " << func.minNumParams() << ", count, 1, rv);\n";
     } else {
       if (func.minNumParams() == 0) {
-        cpp << in << "throw_toomany_arguments_nr(\"" << func.getPrettyName()
+        cpp << in << "throw_toomany_arguments_nr(\""
+            << escapeCpp(func.getPrettyName())
             << "\", " << func.numParams() << ", 1, rv);\n";
       } else {
-        cpp << in << "throw_wrong_arguments_nr(\"" << func.getPrettyName()
+        cpp << in << "throw_wrong_arguments_nr(\""
+            << escapeCpp(func.getPrettyName())
             << "\", count, " << func.minNumParams() << ", "
             << func.numParams() << ", 1, rv);\n";
       }
@@ -715,7 +718,7 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
   if (func.isMethod() && !func.isStatic()) {
     cpp << in + 2 << "} else {\n";
     cpp << in << "throw_instance_method_fatal(\"" << func.className()
-        << "::" << func.name() << "\");\n";
+        << "::" << func.getCppName() << "\");\n";
     in += 2;
     cpp << in << "}\n";
   }

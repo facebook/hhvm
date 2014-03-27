@@ -1,0 +1,6 @@
+File "srecko2.php", line 20, characters 10-13:
+Invalid return type
+File "srecko2.php", line 15, characters 25-27:
+This is an object of type Foo
+File "srecko2.php", line 16, characters 23-35:
+It is incompatible with an object of type SomeInterface

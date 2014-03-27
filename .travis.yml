@@ -4,7 +4,7 @@ compiler:
   - gcc
 
 before_script:
-  - time TRAVIS=1 ./configure_ubuntu_12.04.sh
+  - time TRAVIS=1 ./configure_generic.sh
 # for some tests
   - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
   - time HPHP_HOME=`pwd` make -j 6
@@ -20,35 +20,47 @@ before_script:
 # matrix and then further split the large suites using an experimental cut
 # which divides the number of tests in each sub-run roughly in two.
 env:
-  - TEST_RUN_MODE="-m jit quick"
-  - TEST_RUN_MODE="-m jit slow -I /^hphp\/test\/slow\/[a-df-nw-x].*/"
-  - TEST_RUN_MODE="-m jit slow -E /^hphp\/test\/slow\/[a-df-nw-x].*/"
-  - TEST_RUN_MODE="-m jit zend -I /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
-  - TEST_RUN_MODE="-m jit zend -E /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/'
-  - TEST_RUN_MODE="-m jit -r quick"
-  - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[a-bdf-h].*/"
-  - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[ci-nw-x].*/"
-  - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[eo-p].*/"
-  - TEST_RUN_MODE="-m jit -r slow -I /^hphp\/test\/slow\/[q-vy-zA-Z0-9].*/"
-  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/ext\/[a-e].*/"
-  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/ext\/[f-l].*/"
-  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/ext\/[m-rt-zA-Z0-9].*/"
-  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/ext\/s[^t].*/"
-  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/ext\/standard\/tests\/[a-f].*/"
-  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/ext\/standard\/tests\/[g-zA-Z0-9].*/"  
-  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/t.*/"
-  - TEST_RUN_MODE="-m jit -r zend -I /^hphp\/test\/zend\/good\/Z.*/"
-  - TEST_RUN_MODE="-m interp quick"
-  - TEST_RUN_MODE="-m interp slow -I /^hphp\/test\/slow\/[a-df-nw-x].*/"
-  - TEST_RUN_MODE="-m interp slow -E /^hphp\/test\/slow\/[a-df-nw-x].*/"
-  - TEST_RUN_MODE="-m interp zend -I /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
-  - TEST_RUN_MODE="-m interp zend -E /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
-  - TEST_RUN_MODE="-m interp -r quick"
-  - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/[abd].*/"
+  # non-repo
+  - TEST_RUN_MODE="-m jit       quick"
+  - TEST_RUN_MODE="-m interp    quick"
+  - TEST_RUN_MODE="-m jit       slow -I /^hphp\/test\/slow\/[a-df-nw-x].*/"
+  - TEST_RUN_MODE="-m jit       slow -E /^hphp\/test\/slow\/[a-df-nw-x].*/"
+  - TEST_RUN_MODE="-m interp    slow -I /^hphp\/test\/slow\/[a-df-nw-x].*/"
+  - TEST_RUN_MODE="-m interp    slow -E /^hphp\/test\/slow\/[a-df-nw-x].*/"
+  - TEST_RUN_MODE="-m jit       zend -I /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
+  - TEST_RUN_MODE="-m jit       zend -E /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
+  - TEST_RUN_MODE="-m interp    zend -I /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
+  - TEST_RUN_MODE="-m interp    zend -E /^hphp\/test\/zend\/good\/(ext\/[a-ru-zA-Z0-9]|[Z]).*/"
+  
+  # quick repo
+  - TEST_RUN_MODE="-m jit    -r quick"
+  - TEST_RUN_MODE="-m interp -r quick -I /^hphp\/test\/quick\/[a-h].*/"
+  - TEST_RUN_MODE="-m interp -r quick -I /^hphp\/test\/quick\/[i-zA-Z0-9].*/"
+
+  # slow repo
+  - TEST_RUN_MODE="-m jit    -r slow -I /^hphp\/test\/slow\/[a-b].*/"
+  - TEST_RUN_MODE="-m jit    -r slow -I /^hphp\/test\/slow\/[df-h].*/"
+  - TEST_RUN_MODE="-m jit    -r slow -I /^hphp\/test\/slow\/[ci-nw-x].*/"
+  - TEST_RUN_MODE="-m jit    -r slow -I /^hphp\/test\/slow\/[eo-p].*/"
+  - TEST_RUN_MODE="-m jit    -r slow -I /^hphp\/test\/slow\/[q-vy-zA-Z0-9].*/"
+  - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/a.*/"
+  - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/[bd].*/"
   - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/c.*/"
   - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/[f-nw-x].*/"
   - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/[eo-p].*/"
-  - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/[q-vy-zA-Z0-9].*/"
+  - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/[q-s].*/"
+  - TEST_RUN_MODE="-m interp -r slow -I /^hphp\/test\/slow\/[t-vy-zA-Z0-9].*/"
+
+  # zend repo
+  - TEST_RUN_MODE="-m jit    -r zend -I /^hphp\/test\/zend\/good\/ext\/[a-e].*/"
+  - TEST_RUN_MODE="-m jit    -r zend -I /^hphp\/test\/zend\/good\/ext\/[f-l].*/"
+  - TEST_RUN_MODE="-m jit    -r zend -I /^hphp\/test\/zend\/good\/ext\/[m-rt-zA-Z0-9].*/"
+  - TEST_RUN_MODE="-m jit    -r zend -I /^hphp\/test\/zend\/good\/ext\/s[^t].*/"
+  - TEST_RUN_MODE="-m jit    -r zend -I /^hphp\/test\/zend\/good\/ext\/standard\/tests\/a.*/"
+  - TEST_RUN_MODE="-m jit    -r zend -I /^hphp\/test\/zend\/good\/ext\/standard\/tests\/[b-f].*/"
+  - TEST_RUN_MODE="-m jit    -r zend -I /^hphp\/test\/zend\/good\/ext\/standard\/tests\/[g-zA-Z0-9].*/"  
+  - TEST_RUN_MODE="-m jit    -r zend -I /^hphp\/test\/zend\/good\/t.*/"
+  - TEST_RUN_MODE="-m jit    -r zend -I /^hphp\/test\/zend\/good\/Z.*/"
   - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/ext\/[a-i].*/"
   - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/ext\/[j-m].*/"
   - TEST_RUN_MODE="-m interp -r zend -I /^hphp\/test\/zend\/good\/ext\/[n-rt-zA-Z0-9].*/"

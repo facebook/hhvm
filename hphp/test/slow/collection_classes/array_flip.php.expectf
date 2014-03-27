@@ -140,7 +140,8 @@ input: object(HH\Vector)#1 (4) {
   [3]=>
   string(3) "str"
 }
-flip: HipHop Warning: Can only flip STRING and INTEGER values! in %s/test/slow/collection_classes/array_flip.php on line 8
+flip: 
+Warning: Can only flip STRING and INTEGER values! in %s/test/slow/collection_classes/array_flip.php on line 8
 array(3) {
   [10]=>
   int(1)

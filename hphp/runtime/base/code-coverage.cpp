@@ -18,8 +18,10 @@
 #include <fstream>
 #include <vector>
 
-#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-string.h"
+
 #include "hphp/util/logger.h"
 
 namespace HPHP {

@@ -95,22 +95,6 @@ int BuiltinSymbols::NumGlobalNames() {
     sizeof(BuiltinSymbols::GlobalNames[0]);
 }
 
-static TypePtr typePtrFromDataType(DataType dt, TypePtr unknown) {
-  switch (dt) {
-    case KindOfNull:    return Type::Null;
-    case KindOfBoolean: return Type::Boolean;
-    case KindOfInt64:   return Type::Int64;
-    case KindOfDouble:  return Type::Double;
-    case KindOfString:  return Type::String;
-    case KindOfArray:   return Type::Array;
-    case KindOfObject:  return Type::Object;
-    case KindOfResource: return Type::Resource;
-    case KindOfUnknown:
-    default:
-      return unknown;
-  }
-}
-
 const StaticString
   s_fb_call_user_func_safe("fb_call_user_func_safe"),
   s_fb_call_user_func_safe_return("fb_call_user_func_safe_return"),
@@ -145,7 +129,7 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
     if (pinfo->attribute & ClassInfo::IsReference) {
       f->setRefParam(idx);
     }
-    f->setParamType(ar, idx, typePtrFromDataType(pinfo->argType, Type::Any));
+    f->setParamType(ar, idx, Type::FromDataType(pinfo->argType, Type::Any));
     if (pinfo->valueLen) {
       f->setParamDefault(idx, pinfo->value, pinfo->valueLen,
                          std::string(pinfo->valueText, pinfo->valueTextLen));
@@ -153,8 +137,8 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   }
 
   if (method->returnType != KindOfNull) {
-    f->setReturnType(ar, typePtrFromDataType(method->returnType,
-                                             Type::Variant));
+    f->setReturnType(ar, Type::FromDataType(method->returnType,
+                                            Type::Variant));
   }
 
   f->setClassInfoAttribute(attrs);
@@ -201,8 +185,8 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   if (attrs & ClassInfo::ContextSensitive) {
     f->setContextSensitive(true);
   }
-  if (attrs & ClassInfo::NeedsActRec) {
-    f->setNeedsActRec();
+  if (attrs & ClassInfo::NoFCallBuiltin) {
+    f->setNoFCallBuiltin();
   }
   if ((attrs & ClassInfo::AllowOverride) && !isMethod) {
     f->setAllowOverride();
@@ -255,7 +239,7 @@ void BuiltinSymbols::ImportExtProperties(AnalysisResultPtr ar,
     }
 
     dest->add(pinfo->name.data(),
-              typePtrFromDataType(pinfo->type, Type::Variant),
+              Type::FromDataType(pinfo->type, Type::Variant),
               false, ar, ExpressionPtr(), modifiers);
   }
 }
@@ -264,7 +248,7 @@ void BuiltinSymbols::ImportNativeConstants(AnalysisResultPtr ar,
                                            ConstantTablePtr dest) {
   for (auto cnsPair : Native::getConstants()) {
     dest->add(cnsPair.first->data(),
-              typePtrFromDataType(cnsPair.second.m_type, Type::Variant),
+              Type::FromDataType(cnsPair.second.m_type, Type::Variant),
               ExpressionPtr(), ar, ConstructPtr());
   }
 }
@@ -281,7 +265,7 @@ void BuiltinSymbols::ImportExtConstants(AnalysisResultPtr ar,
     dest->add(cinfo->name.data(),
               cinfo->isDeferred() ?
               (cinfo->isCallback() ? Type::Object : Type::String) :
-              typePtrFromDataType(cinfo->getValue().getType(), Type::Variant),
+              Type::FromDataType(cinfo->getValue().getType(), Type::Variant),
               ExpressionPtr(), ar, ConstructPtr());
   }
 }
@@ -388,6 +372,16 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
     for (const auto& clsVec : classes) {
       assert(clsVec.second.size() == 1);
       auto cls = clsVec.second[0];
+      if (auto nativeConsts = Native::getClassConstants(
+            String(cls->getName()).get())) {
+        for (auto cnsMap : *nativeConsts) {
+          auto tv = cnsMap.second;
+          cls->getConstants()->add(
+            cnsMap.first->data(),
+            Type::FromDataType(tv.m_type, Type::Variant),
+            ExpressionPtr(), ar, ConstructPtr());
+        }
+      }
       cls->setSystem();
       ar->addSystemClass(cls);
       for (const auto& func : cls->getFunctions()) {

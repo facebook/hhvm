@@ -19,8 +19,8 @@ namespace __SystemLib {
   }
 
   class DeflateStreamFilter extends \php_user_filter {
-    private int $level = -1; // zlib default
-    private string $buffer = '';
+    private $level = -1; // zlib default
+    private $buffer = '';
 
     public function filter($in, $out, &$consumed, $closing): int {
       while ($bucket = stream_bucket_make_writeable($in)) {
@@ -43,7 +43,7 @@ namespace __SystemLib {
         );
       }
 
-      return PSFS_PASS_ON;
+      return \PSFS_PASS_ON;
     }
   }
 
@@ -56,7 +56,7 @@ namespace __SystemLib {
     public function filter($in, $out, &$consumed, $closing): int {
       while ($bucket = stream_bucket_make_writeable($in)) {
         if ($this->impl->eof()) {
-          return PSFS_ERR_FATAL;
+          return \PSFS_ERR_FATAL;
         }
         $this_chunk = $this->impl->inflateChunk($bucket->data);
         stream_bucket_append(
@@ -66,9 +66,9 @@ namespace __SystemLib {
       }
 
       if ($this->impl->eof()) {
-        return PSFS_PASS_ON;
+        return \PSFS_PASS_ON;
       } else {
-        return PSFS_FEED_ME;
+        return \PSFS_FEED_ME;
       }
     }
   }
@@ -81,7 +81,7 @@ namespace __SystemLib {
           stream_bucket_new($this->stream, strtoupper($bucket->data))
         );
       }
-      return PSFS_PASS_ON;
+      return \PSFS_PASS_ON;
     }
   }
 
@@ -93,7 +93,7 @@ namespace __SystemLib {
           stream_bucket_new($this->stream, strtolower($bucket->data))
         );
       }
-      return PSFS_PASS_ON;
+      return \PSFS_PASS_ON;
     }
   }
 
@@ -105,7 +105,7 @@ namespace __SystemLib {
           stream_bucket_new($this->stream, str_rot13($bucket->data))
         );
       }
-      return PSFS_PASS_ON;
+      return \PSFS_PASS_ON;
     }
   }
 }

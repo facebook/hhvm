@@ -2,9 +2,11 @@ Deprecated: Assigning the return value of new by reference is deprecated in %s o
 ok1
 bar::run1
 foo::method1
-HipHop Notice: %s
+
+Notice: %s
 foo::method1
-HipHop Notice: %s
+
+Notice: %s
 foo::finalize
 done!
 ok2
@@ -22,8 +24,10 @@ done!
 ouch
 bar::run1
 foo::method1
-HipHop Notice: %s
+
+Notice: %s
 foo::method1
-HipHop Notice: %s
+
+Notice: %s
 foo::finalize
 I'm alive!

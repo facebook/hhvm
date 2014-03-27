@@ -1,0 +1,6 @@
+File "test_foreach2.php", line 14, characters 12-13:
+Invalid return type
+File "test_foreach2.php", line 12, characters 37-39:
+This is an int
+File "test_foreach2.php", line 2, characters 496-497:
+It is incompatible with a string

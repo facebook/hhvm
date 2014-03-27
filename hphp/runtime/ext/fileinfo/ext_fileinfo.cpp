@@ -166,24 +166,21 @@ static Variant php_finfo_get_type(
         goto clean;
       }
 
-      auto wrapper = Stream::getWrapperFromURI(buffer);
-      auto stream = wrapper->open(buffer, "rb", 0, HPHP::Variant());
-
+      auto resource = File::Open(buffer, "rb");
+      auto stream = resource.getTyped<File>(true);
       if (!stream) {
         ret_val = null_string;
         goto clean;
       }
 
       struct stat st;
-      if (wrapper->stat(buffer, &st) == 0) {
+      if (stream->stat(&st)) {
         if (st.st_mode & S_IFDIR) {
           ret_val = mime_directory;
         } else {
           ret_val = magic_stream(magic, stream);
         }
       }
-
-      stream->close();
       break;
     }
 

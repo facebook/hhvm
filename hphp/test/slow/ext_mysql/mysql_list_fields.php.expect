@@ -1,0 +1,1 @@
+mysql_list_fields is not supported: Deprecated. Use mysql_query(SHOW COLUMNS FROM table [LIKE 'name']) instead.

@@ -2147,8 +2147,8 @@ static const Func* findCuf(Op op,
                            SSATmp* callable,
                            Class* ctx,
                            Class*& cls,
-                           StringData*& invName) {
-  bool forward = (op == OpFPushCufF);
+                           StringData*& invName,
+                           bool& forward) {
   cls = nullptr;
   invName = nullptr;
 
@@ -2305,12 +2305,12 @@ void HhbcTranslator::emitFPushCufUnknown(Op op, int32_t numParams) {
 
 void HhbcTranslator::emitFPushCufOp(Op op, int32_t numArgs) {
   const bool safe = op == OpFPushCufSafe;
-  const bool forward = op == OpFPushCufF;
+  bool forward = op == OpFPushCufF;
   SSATmp* callable = topC(safe ? 1 : 0);
 
   Class* cls = nullptr;
   StringData* invName = nullptr;
-  auto const callee = findCuf(op, callable, curClass(), cls, invName);
+  auto const callee = findCuf(op, callable, curClass(), cls, invName, forward);
   if (!callee) return emitFPushCufUnknown(op, numArgs);
 
   SSATmp* ctx;

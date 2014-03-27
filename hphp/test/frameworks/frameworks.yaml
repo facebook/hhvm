@@ -76,6 +76,8 @@
     test_root: drupal/core
     clowns:
       - drupal/core/modules/views/tests/Drupal/views/Tests/ViewsDataHelperTest.php
+      # Flakey, test has a race condition
+      - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFileStorageTest.php
   facebookphpsdk:
     url: https://github.com/facebook/facebook-php-sdk.git
     branch: v3.2.3

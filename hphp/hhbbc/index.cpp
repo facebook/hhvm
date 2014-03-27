@@ -30,6 +30,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "folly/String.h"
 #include "folly/Format.h"
 #include "folly/Hash.h"
 #include "folly/Memory.h"
@@ -157,6 +158,7 @@ PropState make_unknown_propstate(borrowed_ptr<const php::Class> cls,
  * overriding-functions.
  */
 struct FuncFamily {
+  bool containsInterceptables = false;
   std::vector<borrowed_ptr<FuncInfo>> possibleFuncs;
 };
 
@@ -630,12 +632,38 @@ bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
 
 //////////////////////////////////////////////////////////////////////
 
-void add_unit_to_index(IndexData& index, const php::Unit& unit) {
+using InterceptableMethodMap = std::map<
+  std::string,
+  std::set<std::string,stdltistr>,
+  stdltistr
+>;
+
+InterceptableMethodMap make_interceptable_method_map() {
+  auto ret = InterceptableMethodMap{};
+  for (auto& str : options.InterceptableFunctions) {
+    std::vector<std::string> parts;
+    folly::split("::", str, parts);
+    if (parts.size() != 2) continue;
+    ret[parts[0]].insert(parts[1]);
+  }
+  return ret;
+}
+
+void add_unit_to_index(IndexData& index,
+                       const InterceptableMethodMap& imethodMap,
+                       const php::Unit& unit) {
   for (auto& c : unit.classes) {
     index.classes.insert({c->name, borrow(c)});
 
+    auto const imethIt = imethodMap.find(c->name->data());
+
     for (auto& m : c->methods) {
       index.methods.insert({m->name, borrow(m)});
+
+      if (imethIt != end(imethodMap) &&
+          imethIt->second.count(m->name->data())) {
+        m->attrs = m->attrs | AttrInterceptable;
+      }
     }
 
     if (c->closureContextCls) {
@@ -644,8 +672,8 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   }
 
   for (auto& f : unit.funcs) {
-    if (options.InterceptableFunctions.count(std::string{f->name->data()})) {
-      f->attrs = f->attrs | AttrDynamicInvoke;
+    if (options.InterceptableFunctions.count(f->name->data())) {
+      f->attrs = f->attrs | AttrInterceptable;
     }
     index.funcs.insert({f->name, borrow(f)});
   }
@@ -782,6 +810,9 @@ void define_func_family(IndexData& index,
   for (auto& cleaf : cinfo->subclassList) {
     auto const leafFnIt = cleaf->methods.find(name);
     if (leafFnIt == end(cleaf->methods)) continue;
+    if (leafFnIt->second->attrs & AttrInterceptable) {
+      family->containsInterceptables = true;
+    }
     auto const finfo = create_func_info(index, leafFnIt->second);
     family->possibleFuncs.push_back(finfo);
   }
@@ -909,7 +940,10 @@ Index::Index(borrowed_ptr<php::Program> program)
 {
   trace_time tracer("create index");
 
-  for (auto& u : program->units) add_unit_to_index(*m_data, *u);
+  auto const imethodMap = make_interceptable_method_map();
+  for (auto& u : program->units) {
+    add_unit_to_index(*m_data, imethodMap, *u);
+  }
 
   NamingEnv env;
   for (auto& u : program->units) {
@@ -929,7 +963,7 @@ Index::Index(borrowed_ptr<php::Program> program)
 Index::Index(borrowed_ptr<php::Unit> unit)
   : m_data(folly::make_unique<IndexData>())
 {
-  add_unit_to_index(*m_data, *unit);
+  add_unit_to_index(*m_data, InterceptableMethodMap{}, *unit);
 }
 
 // Defined here so IndexData is a complete type for the unique_ptr
@@ -1045,6 +1079,7 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
    */
   auto const it = cinfo->methods.find(name);
   if (it == end(cinfo->methods)) return folly::none;
+  if (it->second->attrs & AttrInterceptable) return folly::none;
 
   switch (dcls.type) {
   case DCls::Exact:
@@ -1059,6 +1094,9 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
     {
       auto const famIt = cinfo->methodFamilies.find(name);
       if (famIt == end(cinfo->methodFamilies)) return folly::none;
+      if (famIt->second->containsInterceptables) {
+        return folly::none;
+      }
       return res::Func { this, famIt->second };
     }
   }
@@ -1069,6 +1107,7 @@ folly::Optional<res::Func> Index::resolve_ctor(Context ctx,
                                                res::Class rcls) const {
   auto const cinfo = rcls.val.right();
   if (!cinfo || !cinfo->ctor) return folly::none;
+  if (cinfo->ctor->attrs & AttrInterceptable) return folly::none;
   return do_resolve(cinfo->ctor);
 }
 
@@ -1084,7 +1123,7 @@ res::Func Index::resolve_func(Context ctx, SString name) const {
   if (boost::next(begin(funcs)) != end(funcs)) return name_only();
   auto const func = begin(funcs)->second;
   if (!(func->attrs & AttrUnique)) return name_only();
-  if (func->attrs & AttrDynamicInvoke) return name_only();
+  if (func->attrs & AttrInterceptable) return name_only();
 
   return do_resolve(func);
 }

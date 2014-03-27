@@ -4686,7 +4686,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
   if ((privateOnly && (!(func->attrs() & AttrPrivate) || magicCall)) ||
       func->isAbstract() ||
-      func->attrs() & AttrDynamicInvoke) {
+      func->attrs() & AttrInterceptable) {
     return nullptr;
   }
 

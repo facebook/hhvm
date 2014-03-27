@@ -143,9 +143,22 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   // Intercept only original generator / async function calls, not resumption.
   if (ar->inGenerator()) return true;
 
-  Variant *h = get_intercept_handler(func->fullNameRef(),
+  Variant* h = get_intercept_handler(func->fullNameRef(),
                                      &func->maybeIntercepted());
   if (!h) return true;
+
+  /*
+   * In production mode, only functions that we have assumed can be
+   * intercepted during static analysis should actually be
+   * intercepted.
+   */
+  if (RuntimeOption::RepoAuthoritative &&
+      !RuntimeOption::EvalJitEnableRenameFunction) {
+    if (!(func->attrs() & AttrInterceptable)) {
+      raise_error("fb_intercept was used on a non-interceptable function (%s) "
+                  "in RepoAuthoritative mode", func->fullName()->data());
+    }
+  }
 
   JIT::VMRegAnchor _;
 

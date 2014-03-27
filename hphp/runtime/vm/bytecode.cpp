@@ -6209,7 +6209,7 @@ OPTBLD_INLINE void ExecutionContext::iopFCallD(IOP_ARGS) {
   (void) clsName;
   (void) funcName;
   if (!RuntimeOption::EvalJitEnableRenameFunction &&
-      !(ar->m_func->attrs() & AttrDynamicInvoke)) {
+      !(ar->m_func->attrs() & AttrInterceptable)) {
     assert(ar->m_func->name()->isame(funcName));
   }
   assert(numArgs == ar->numArgs());
@@ -7785,15 +7785,29 @@ void ExecutionContext::requestInit() {
   ResourceData::resetMaxId();
   mcg->requestInit();
 
-  if (UNLIKELY(RuntimeOption::EvalJitEnableRenameFunction)) {
+  if (RuntimeOption::EvalJitEnableRenameFunction) {
+    assert(SystemLib::s_anyNonPersistentBuiltins);
+  }
+
+  /*
+   * The normal case for production mode is that all builtins are
+   * persistent, and every systemlib unit is accordingly going to be
+   * merge only.
+   *
+   * However, if we have rename_function generally enabled, or if any
+   * builtin functions were specified as interceptable at
+   * repo-generation time, we'll actually need to merge systemlib on
+   * every request because some of the builtins will not be marked
+   * persistent.
+   */
+  if (UNLIKELY(SystemLib::s_anyNonPersistentBuiltins)) {
     SystemLib::s_unit->merge();
     Extension::MergeSystemlib();
     if (SystemLib::s_hhas_unit) SystemLib::s_hhas_unit->merge();
     SystemLib::s_nativeFuncUnit->merge();
     SystemLib::s_nativeClassUnit->merge();
   } else {
-    // System units are always merge only, and
-    // everything is persistent.
+    // System units are merge only, and everything is persistent.
     assert(SystemLib::s_unit->isEmpty());
     assert(!SystemLib::s_hhas_unit || SystemLib::s_hhas_unit->isEmpty());
     assert(SystemLib::s_nativeFuncUnit->isEmpty());

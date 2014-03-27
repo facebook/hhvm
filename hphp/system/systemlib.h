@@ -68,6 +68,7 @@ namespace Eval {
 class SystemLib {
  public:
   static bool s_inited;
+  static bool s_anyNonPersistentBuiltins;
   static std::string s_source;
   static HPHP::Unit* s_unit;
   static HPHP::Unit* s_hhas_unit;

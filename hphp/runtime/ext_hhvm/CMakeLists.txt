@@ -45,9 +45,6 @@ endmacro()
 # Generate ext_hhvm stubs for ext/*.cpp
 EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS "${HPHP_HOME}/hphp/runtime/ext")
 
-# ...and explicitly for builtin-functions.cpp
-EXT_HHVM_FILE(CXX_SOURCES CXX_HEADERS "base/builtin-functions.cpp" ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
-
 # Pick up relevant zend_ext_compat stubs
 if (ZEND_COMPAT_BUILD_DIRS)
 	foreach (dir ${ZEND_COMPAT_BUILD_DIRS})

@@ -372,6 +372,16 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
     for (const auto& clsVec : classes) {
       assert(clsVec.second.size() == 1);
       auto cls = clsVec.second[0];
+      if (auto nativeConsts = Native::getClassConstants(
+            String(cls->getName()).get())) {
+        for (auto cnsMap : *nativeConsts) {
+          auto tv = cnsMap.second;
+          cls->getConstants()->add(
+            cnsMap.first->data(),
+            Type::FromDataType(tv.m_type, Type::Variant),
+            ExpressionPtr(), ar, ConstructPtr());
+        }
+      }
       cls->setSystem();
       ar->addSystemClass(cls);
       for (const auto& func : cls->getFunctions()) {

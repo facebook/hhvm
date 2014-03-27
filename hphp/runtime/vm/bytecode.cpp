@@ -6208,7 +6208,8 @@ OPTBLD_INLINE void ExecutionContext::iopFCallD(IOP_ARGS) {
   DECODE_LITSTR(funcName);
   (void) clsName;
   (void) funcName;
-  if (!RuntimeOption::EvalJitEnableRenameFunction) {
+  if (!RuntimeOption::EvalJitEnableRenameFunction &&
+      !(ar->m_func->attrs() & AttrDynamicInvoke)) {
     assert(ar->m_func->name()->isame(funcName));
   }
   assert(numArgs == ar->numArgs());

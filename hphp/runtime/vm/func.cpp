@@ -510,6 +510,8 @@ static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrFinal)     { out << " final"; }
   if (attrs & AttrPhpLeafFn) { out << " (leaf)"; }
   if (attrs & AttrHot)       { out << " (hot)"; }
+  if (attrs & AttrDynamicInvoke) { out << " (dynamic)"; }
+  if (attrs & AttrPersistent) { out << " (persistent)"; }
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
@@ -1125,7 +1127,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   }
   if (attrs & AttrPersistent &&
       ((RuntimeOption::EvalJitEnableRenameFunction && !isGenerated) ||
-       (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited))) {
+       (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited) ||
+       attrs & AttrDynamicInvoke)) {
     attrs = Attr(attrs & ~AttrPersistent);
   }
   if (RuntimeOption::EvalJitEnableRenameFunction &&

@@ -32,10 +32,11 @@ endif ()
 find_path (LIBMAGICKWAND_INCLUDE_DIRS
     NAMES
       wand/MagickWand.h
+    PATH_SUFFIXES
+      ImageMagick-6
     PATHS
       /usr/include/ImageMagick
       /usr/local/include/ImageMagick
-      "${CMAKE_PREFIX_PATH}/include/ImageMagick-6"
       ENV CPATH)
 
 find_library (LIBMAGICKWAND_LIBRARIES

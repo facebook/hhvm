@@ -36,14 +36,6 @@
 #endif
 #define HPHP_PARSER_NS Compiler
 
-#define LOG_PARSE_ERROR(file, line, fmt, args...)     \
-  HPHP::Logger::Error(                                \
-    "\nFatal error: " fmt " in %s on line %d",   \
-    ##args,                                           \
-    (file),                                           \
-    (line)                                            \
-  )
-
 #ifdef HPHP_PARSER_ERROR
 #undef HPHP_PARSER_ERROR
 #endif

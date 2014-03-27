@@ -439,10 +439,9 @@ static bool isConstructor(const Func* func) {
   PreClass* pcls = func->preClass();
   if (!pcls) return false;
   if (func->cls()) return func == func->cls()->getCtor();
-  /* A same named function is not a constructor in a trait,
-     or if the function was imported from a trait */
-  if ((pcls->attrs() | func->attrs()) & AttrTrait) return false;
   if (!strcasecmp("__construct", func->name()->data())) return true;
+  /* A same named function is not a constructor in a trait */
+  if (pcls->attrs() & AttrTrait) return false;
   return pcls->name()->isame(func->name());
 }
 

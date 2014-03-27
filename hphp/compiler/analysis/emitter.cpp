@@ -6399,22 +6399,8 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
         attrs = attrs | AttrPersistent;
       }
     }
-    if (ClassScopePtr cls = meth->getClassScope()) {
-      if (meth->getName() == cls->getName() &&
-          !cls->classNameCtor()) {
-        /*
-          In WholeProgram mode, we inline the traits into their
-          classes. If a trait method name matches the class name
-          it is NOT a constructor.
-          We mark the method with AttrTrait so that we can avoid
-          treating it as a constructor even though it looks like
-          one.
-        */
-        attrs = attrs | AttrTrait;
-      }
-      if (!funcScope->hasOverride()) {
-        attrs = attrs | AttrNoOverride;
-      }
+    if (meth->getClassScope() && !funcScope->hasOverride()) {
+      attrs = attrs | AttrNoOverride;
     }
     if (funcScope->isSystem()) {
       assert((attrs & AttrPersistent) || meth->getClassScope());

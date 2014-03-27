@@ -920,6 +920,21 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     }
   }
 
+  // Make sure there won't be 2 constructors after importing
+  auto traitConstruct = importedTraitMethods.count("__construct");
+  auto traitName = importedTraitMethods.count(getName());
+  auto classConstruct = m_functions.count("__construct");
+  auto className = m_functions.count(getName());
+  if ((traitConstruct && traitName) ||
+      (traitConstruct && className) ||
+      (classConstruct && traitName)) {
+    getStmt()->analysisTimeFatal(
+      Compiler::InvalidDerivation,
+      "%s has colliding constructor definitions coming from traits",
+      getOriginalName().c_str()
+    );
+  }
+
   for (unsigned i = 0; i < importedTraitsWithOrigName.size(); i++) {
     const string &sourceName = importedTraitsWithOrigName[i].first;
     const TraitMethod *traitMethod = importedTraitsWithOrigName[i].second;

@@ -885,25 +885,32 @@ void Class::setSpecial() {
     m_invoke = nullptr;
   }
 
+  auto matchedClassOrIsTrait = [this](const StringData* sd) {
+    auto func = lookupMethod(sd);
+    if (func && (func->preClass() == m_preClass.get() ||
+                 func->preClass()->attrs() & AttrTrait)) {
+      m_ctor = func;
+      return true;
+    }
+    return false;
+  };
+
   // Look for __construct() declared in either this class or a trait
-  Func* fConstruct = lookupMethod(s_construct.get());
-  if (fConstruct && (fConstruct->preClass() == m_preClass.get() ||
-                     fConstruct->preClass()->attrs() & AttrTrait)) {
-    m_ctor = fConstruct;
+  if (matchedClassOrIsTrait(s_construct.get())) {
+    auto func = lookupMethod(m_preClass->name());
+    if (func && (func->preClass()->attrs() & AttrTrait ||
+                 m_ctor->preClass()->attrs() & AttrTrait)) {
+      throw Exception(
+        "%s has colliding constructor definitions coming from traits",
+        m_preClass->name()->data()
+      );
+    }
     return;
   }
 
   if (!(attrs() & AttrTrait)) {
-    // Look for Foo::Foo() declared in this class (cannot be via trait).
-    Func* fNamedCtor = lookupMethod(m_preClass->name());
-    if (fNamedCtor && fNamedCtor->preClass() == m_preClass.get() &&
-        !(fNamedCtor->attrs() & AttrTrait)) {
-      /*
-        Note: AttrTrait was set by the emitter if hphpc inlined a trait
-        method into a class (WholeProgram mode only), so that we dont
-        accidently mark it as a constructor here
-      */
-      m_ctor = fNamedCtor;
+    // Look for Foo::Foo() declared in this class
+    if (matchedClassOrIsTrait(m_preClass->name())) {
       return;
     }
   }

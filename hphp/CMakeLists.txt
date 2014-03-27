@@ -43,6 +43,7 @@ add_subdirectory(neo)
 add_subdirectory(parser)
 
 add_subdirectory(runtime)
+add_subdirectory(runtime/ext)
 add_subdirectory(runtime/ext_hhvm)
 add_subdirectory(system)
 add_subdirectory(util)

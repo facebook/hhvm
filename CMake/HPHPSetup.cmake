@@ -8,19 +8,24 @@ CHECK_CXX_SOURCE_COMPILES("
 #endif
 int main() { return 0; }" IS_AARCH64)
 
+set(HHVM_WHOLE_ARCHIVE_LIBRARIES
+    hphp_runtime_static
+    hphp_runtime_ext
+   )
+
 if (APPLE)
 	set(HHVM_ANCHOR_SYMS
             -Wl,-u,_register_libevent_server
-            -Wl,-all_load hphp_runtime_static)
+            -Wl,-all_load ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
 elseif (IS_AARCH64)
 	set(HHVM_ANCHOR_SYMS
             -Wl,-uregister_libevent_server
-            -Wl,--whole-archive hphp_runtime_static -Wl,--no-whole-archive)
+            -Wl,--whole-archive ${HHVM_WHOLE_ARCHIVE_LIBRARIES} -Wl,--no-whole-archive)
 else()
 	set(ENABLE_FASTCGI 1)
 	set(HHVM_ANCHOR_SYMS
             -Wl,-uregister_libevent_server,-uregister_fastcgi_server
-            -Wl,--whole-archive hphp_runtime_static -Wl,--no-whole-archive)
+            -Wl,--whole-archive ${HHVM_WHOLE_ARCHIVE_LIBRARIES} -Wl,--no-whole-archive)
 endif()
 
 set(HHVM_LINK_LIBRARIES

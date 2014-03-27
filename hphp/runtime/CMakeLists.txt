@@ -1,4 +1,4 @@
-set(RECURSIVE_SOURCE_SUBDIRS base debugger eval ext server vm)
+set(RECURSIVE_SOURCE_SUBDIRS base debugger eval server vm)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 	HHVM_SELECT_SOURCES("${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
 endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
@@ -40,7 +40,3 @@ SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 SET(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
 
 hphp_link(hphp_runtime_static)
-add_dependencies(hphp_runtime_static hphp_parser)
-
-# Workaround for GCC bug, remove after 4.8 is the minimum supported
-add_definitions(-D_GLIBCXX_USE_NANOSLEEP)

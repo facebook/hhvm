@@ -247,7 +247,7 @@ class Locale {
   public static function lookup(array $langtag,
                                 string $locale,
                                 bool $canonicalize = false,
-                                string $default): string;
+                                string $default = ""): string;
 
   /**
    * Returns a key-value array of locale ID subtag elements.

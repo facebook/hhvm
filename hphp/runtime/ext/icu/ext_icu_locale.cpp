@@ -564,7 +564,7 @@ static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
       }
       normalize_for_match(normalized);
     }
-    cur_arr.push_back(std::make_pair(val,normalized));
+    cur_arr.push_back(std::make_pair(val.toString(),normalized));
   }
 
   if (canonicalize) {

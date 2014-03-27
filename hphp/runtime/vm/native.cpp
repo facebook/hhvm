@@ -327,13 +327,13 @@ void callFunc(const Func* func, TypedValue *ctx,
 }
 
 static inline int32_t minNumArgs(ActRec *ar) {
-  int32_t num = 0;
   auto func = ar->m_func;
   auto numArgs = func->numParams();
+  int32_t num = numArgs;
   const Func::ParamInfoVec& paramInfo = func->params();
-  while ((num < numArgs) &&
-         (paramInfo[num].funcletOff() == InvalidAbsoluteOffset)) {
-    ++num;
+  while (num &&
+         (paramInfo[num-1].funcletOff() != InvalidAbsoluteOffset)) {
+    --num;
   }
   return num;
 }
@@ -359,11 +359,13 @@ static inline bool nativeWrapperCheckArgs(ActRec* ar) {
 
   if (numNonDefault < numArgs) {
     const Func::ParamInfoVec& paramInfo = func->params();
-    if (InvalidAbsoluteOffset == paramInfo[numNonDefault].funcletOff()) {
-      // There's at least one non-default param which wasn't passed
-      throw_wrong_arguments_nr(getInvokeName(ar)->data(),
-            numNonDefault, minNumArgs(ar), numArgs, 1);
-      return false;
+    for (auto i = numNonDefault; i < numArgs; ++i) {
+      if (InvalidAbsoluteOffset == paramInfo[i].funcletOff()) {
+        // There's at least one non-default param which wasn't passed
+        throw_wrong_arguments_nr(getInvokeName(ar)->data(),
+              numNonDefault, minNumArgs(ar), numArgs, 1);
+        return false;
+      }
     }
   } else if (numNonDefault > numArgs) {
     // Too many arguments passed, raise a warning ourselves this time

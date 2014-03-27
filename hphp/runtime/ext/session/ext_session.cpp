@@ -1536,13 +1536,17 @@ Variant f_session_module_name(const String& newname /* = null_string */) {
   return oldname;
 }
 
-bool HHVM_FUNCTION(session_set_save_handler, 
+bool HHVM_FUNCTION(session_set_save_handler,
     const Object& sessionhandler,
     bool register_shutdown /* = true */) {
 
   if (PS(mod) &&
       PS(session_status) != Session::None &&
       PS(mod) != &s_user_session_module) {
+    return false;
+  }
+
+  if (PS(session_status) == Session::Active) {
     return false;
   }
 
@@ -1563,7 +1567,9 @@ bool HHVM_FUNCTION(session_set_save_handler,
     f_register_shutdown_function(1, String("session_write_close"));
   }
 
-  HHVM_FN(ini_set)("session.save_handler", "user");
+  if (ini_get_save_handler() != "user") {
+    HHVM_FN(ini_set)("session.save_handler", "user");
+  }
   return true;
 }
 

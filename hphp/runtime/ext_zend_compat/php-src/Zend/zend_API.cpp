@@ -1235,7 +1235,7 @@ ZEND_API int _array_init(zval *arg, uint size ZEND_FILE_LINE_DC) {
 
 /* returns 1 if you need to copy result, 0 if it's already a copy */
 ZEND_API int zend_get_object_classname(const zval *object, const char **class_name, zend_uint *class_name_len TSRMLS_DC) {
-  zend_class_entry* clazz = zend_get_class_entry(object);
+  zend_class_entry* clazz = zend_get_class_entry(object TSRMLS_CC);
   auto* name = clazz->hphp_class->name();
   *class_name_len = name->size();
   *class_name = estrndup(name->data(), *class_name_len);
@@ -1567,7 +1567,7 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
 }
 
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC) {
-  auto ret = zend_register_internal_class(class_entry);
+  auto ret = zend_register_internal_class(class_entry TSRMLS_CC);
   if (parent_ce) {
     ret->create_object = parent_ce->create_object;
     assert(ret->hphp_class->parent() == parent_ce->hphp_class);

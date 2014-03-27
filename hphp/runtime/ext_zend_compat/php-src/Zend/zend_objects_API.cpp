@@ -40,7 +40,7 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC) {
 
 ZEND_API void *zend_object_store_get_object(const zval *zobject TSRMLS_DC) {
   const auto& zod = static_cast<HPHP::c_ZendObjectData*>(Z_OBJVAL_P(zobject));
-  return zend_object_store_get_object_by_handle(zod->getHandle());
+  return zend_object_store_get_object_by_handle(zod->getHandle() TSRMLS_CC);
 }
 
 ZEND_REQUEST_LOCAL_LIST(void*, s_object_store);

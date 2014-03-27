@@ -205,13 +205,13 @@ PHP_FUNCTION(ezc_throw)
   }
 
   ce = zend_fetch_class_by_name(
-		  class_name, class_name_length, NULL, ZEND_FETCH_CLASS_SILENT);
+		  class_name, class_name_length, NULL, ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
   if (!ce) {
     php_error_docref(NULL TSRMLS_CC, E_WARNING, "no such class \"%s\"",
 			class_name);
     RETURN_FALSE;
   }
-  zend_throw_exception(ce, "ezc_throw", 0);
+  zend_throw_exception(ce, "ezc_throw", 0 TSRMLS_CC);
 }
 /* }}} */
 
@@ -239,6 +239,35 @@ PHP_FUNCTION(ezc_throw_nonstd)
 }
 /* }}} */
 
+/* {{{ proto ezc_realpath(string path)
+ * Return the resolved path
+ */
+PHP_FUNCTION(ezc_realpath)
+{
+	char *filename;
+	int filename_len;
+	char resolved_path_buff[MAXPATHLEN];
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
+		return;
+	}
+
+	if (VCWD_REALPATH(filename, resolved_path_buff)) {
+		if (php_check_open_basedir(resolved_path_buff TSRMLS_CC)) {
+			RETURN_FALSE;
+		}
+
+#ifdef ZTS
+		if (VCWD_ACCESS(resolved_path_buff, F_OK)) {
+			RETURN_FALSE;
+		}
+#endif
+		RETURN_STRING(resolved_path_buff, 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_ezc_fetch_global, 0)
 ZEND_END_ARG_INFO()
@@ -269,6 +298,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_ezc_throw_nonstd, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_ezc_realpath, 0)
+	ZEND_ARG_INFO(0, path)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ ezc_test_functions[]
@@ -279,8 +312,9 @@ const zend_function_entry ezc_test_functions[] = {
   PHP_FE(ezc_call, arginfo_ezc_call)
   PHP_FE(ezc_try_call, arginfo_ezc_try_call)
   PHP_FE(ezc_throw, arginfo_ezc_throw)
-  PHP_FE(ezc_throw, arginfo_ezc_throw_std)
-  PHP_FE(ezc_throw, arginfo_ezc_throw_nonstd)
+	PHP_FE(ezc_throw_std, arginfo_ezc_throw_std)
+	PHP_FE(ezc_throw_nonstd, arginfo_ezc_throw_nonstd)
+	PHP_FE(ezc_realpath, arginfo_ezc_realpath)
   PHP_FE_END
 };
 /* }}} */

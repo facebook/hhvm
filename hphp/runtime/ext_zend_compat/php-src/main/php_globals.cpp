@@ -2,7 +2,7 @@
 // Zend has a very specific include order, so I can't do this class' header
 // before zend.h sadly
 #include "hphp/runtime/ext_zend_compat/php-src/main/php_globals.h"
-#include "hphp/runtime/ext_hhvm/ext_zend_compat.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 
 static IMPLEMENT_THREAD_LOCAL(_php_core_globals, s_php_core_globals);
 

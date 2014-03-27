@@ -51,6 +51,7 @@ ZEND_API zend_class_entry *zend_standard_class_def = NULL;
 /* This probably should be initialized somewhere, but I didn't find a suitable
  * place so it's wrapped in a function for now */
 zend_class_entry *get_zend_standard_class_def() {
+  TSRMLS_FETCH();
   if (!zend_standard_class_def) {
     zend_class_entry class_entry;
 

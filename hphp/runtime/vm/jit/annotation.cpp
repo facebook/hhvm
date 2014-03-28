@@ -132,12 +132,16 @@ void annotate(NormalizedInstruction* i) {
         className = i->m_unit->lookupLitstrId(i->imm[1].u_SA);
         const Class* cls = Unit::lookupUniqueClass(className);
         if (!cls) break;
-        funcName = cls->getCtor()->name();
+        auto const ctor = cls->getCtor();
+        funcName = ctor->name();
+        className = ctor->cls()->name();
       } else {
         assert(i->op() == OpFPushCtor);
         const Class* cls = i->inputs[0]->rtt.valueClass();
         if (!cls) break;
-        funcName = cls->getCtor()->name();
+        auto const ctor = cls->getCtor();
+        funcName = ctor->name();
+        className = ctor->cls()->name();
       }
       assert(funcName->isStatic());
       recordActRecPush(i->source, funcName, className,

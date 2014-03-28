@@ -10,8 +10,8 @@ class TestFilter extends php_user_filter {
     $consumed = 0;
     while ($bucket = stream_bucket_make_writeable($in)) {
       $bucket->data = strtoupper($bucket->data).$bucket->data;
-      $consumed += $bucket->dataLen;
-      $bucket->dataLen *= 2;
+      $consumed += $bucket->datalen;
+      $bucket->datalen *= 2;
       stream_bucket_append($out, $bucket);
     }
     return PSFS_PASS_ON;

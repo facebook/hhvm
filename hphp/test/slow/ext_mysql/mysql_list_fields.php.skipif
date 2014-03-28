@@ -1,5 +1,0 @@
-<?php
-require('connect.inc');
-if ($host === null) {
-  echo 'skip';
-}

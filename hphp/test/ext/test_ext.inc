@@ -14,4 +14,5 @@ RUN_TESTSUITE(TestExtApc);
 RUN_TESTSUITE(TestExtCurl);
 #endif
 RUN_TESTSUITE(TestExtMemcached);
+RUN_TESTSUITE(TestExtMysql);
 RUN_TESTSUITE(TestExtServer);

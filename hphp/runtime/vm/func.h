@@ -186,7 +186,9 @@ struct Func {
   const FPIEnt* findFPI(Offset o) const;
   const FPIEnt* findPrecedingFPI(Offset o) const;
 
-  void parametersCompat(const PreClass* preClass, const Func* imeth) const;
+  // imeth: an abstract / interface method
+  void checkDeclarationCompat(const PreClass* preClass,
+                              const Func* imeth) const;
 
   // This can be thought of as "if I look up this Func's name while in fromUnit,
   // will I always get this Func back?" This is important for the translator: if

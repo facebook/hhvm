@@ -1,0 +1,1 @@
+Fatal error: Declaration of MySQL::query() must be compatible with that of DB::query() in %s/variadic_args/method_compat/bad_remove_prevar_optionals.php on line 7

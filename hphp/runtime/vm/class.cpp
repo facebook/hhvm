@@ -1277,7 +1277,7 @@ void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
   if (!(method->attrs() & AttrAbstract) &&
       (baseMethod->attrs() & AttrAbstract) &&
       (!hphpiCompat || strcmp(method->name()->data(), "__construct"))) {
-    method->parametersCompat(m_preClass.get(), baseMethod);
+    method->checkDeclarationCompat(m_preClass.get(), baseMethod);
   }
 }
 
@@ -2038,7 +2038,7 @@ void Class::checkInterfaceMethods() {
                     "(as in interface %s)", m_preClass->name()->data(),
                     methName->data(), iface->m_preClass->name()->data());
       }
-      meth->parametersCompat(m_preClass.get(), imeth);
+      meth->checkDeclarationCompat(m_preClass.get(), imeth);
     }
   }
 }

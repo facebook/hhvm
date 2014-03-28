@@ -45,47 +45,84 @@ TRACE_SET_MOD(hhbc);
 using JIT::tx;
 using JIT::mcg;
 
-const StringData* Func::s___call = makeStaticString("__call");
-const StringData* Func::s___callStatic =
-  makeStaticString("__callStatic");
+const StringData* Func::s___call       = makeStaticString("__call");
+const StringData* Func::s___callStatic = makeStaticString("__callStatic");
 
 //=============================================================================
 // Func.
 
-static void decl_incompat(const PreClass* implementor,
-                          const Func* imeth) {
+static inline void decl_incompat(const PreClass* implementor,
+                                 const Func* imeth) {
   const char* name = imeth->name()->data();
   raise_error("Declaration of %s::%s() must be compatible with "
-              "that of %s::%s()", implementor->name()->data(), name,
+              "that of %s::%s()",
+              implementor->name()->data(), name,
               imeth->cls()->preClass()->name()->data(), name);
 }
 
 // Check compatibility vs interface and abstract declarations
-void Func::parametersCompat(const PreClass* preClass, const Func* imeth) const {
+void Func::checkDeclarationCompat(const PreClass* preClass,
+                                  const Func* imeth) const {
   const Func::ParamInfoVec& params = this->params();
   const Func::ParamInfoVec& iparams = imeth->params();
+  auto const ivariadic = imeth->hasVariadicCaptureParam();
+  if (ivariadic && !this->hasVariadicCaptureParam()) {
+    decl_incompat(preClass, imeth);
+  }
+
   // Verify that meth has at least as many parameters as imeth.
-  if ((params.size() < iparams.size())) {
+  if (this->numParams() < imeth->numParams()) {
+    // This check doesn't require special casing for variadics, because
+    // it's not ok to turn a variadic function into a non-variadic.
     decl_incompat(preClass, imeth);
   }
   // Verify that the typehints for meth's parameters are compatible with
   // imeth's corresponding parameter typehints.
-  unsigned firstOptional = 0;
-  for (unsigned i = 0; i < iparams.size(); ++i) {
-    if (!params[i].typeConstraint().compat(iparams[i].typeConstraint())
-        && !iparams[i].typeConstraint().isTypeVar()) {
-      decl_incompat(preClass, imeth);
+  size_t firstOptional = 0;
+  {
+    size_t i = 0;
+    for (; i < imeth->numNonVariadicParams(); ++i) {
+      auto const& p = params[i];
+      if (p.isVariadic()) { decl_incompat(preClass, imeth); }
+      auto const& ip = iparams[i];
+      if (!p.typeConstraint().compat(ip.typeConstraint())
+          && !ip.typeConstraint().isTypeVar()) {
+        decl_incompat(preClass, imeth);
+      }
+      if (!iparams[i].hasDefaultValue()) {
+        // The leftmost of imeth's contiguous trailing optional parameters
+        // must start somewhere to the right of this parameter (which may
+        // be the variadic param)
+        firstOptional = i + 1;
+      }
     }
-    if (!iparams[i].hasDefaultValue()) {
-      // The leftmost of imeth's contiguous trailing optional parameters
-      // must start somewhere to the right of this parameter.
-      firstOptional = i + 1;
+    if (ivariadic) {
+      assert(iparams[iparams.size() - 1].isVariadic());
+      assert(params[params.size() - 1].isVariadic());
+      // reffiness of the variadics must match
+      if (imeth->byRef(iparams.size() - 1) != this->byRef(params.size() - 1)) {
+        decl_incompat(preClass, imeth);
+      }
+
+      // To be compatible with a variadic interface, params from the
+      // variadic onwards must have a compatible typehint
+      auto const& ivarConstraint = iparams[iparams.size() - 1].typeConstraint();
+      if (!ivarConstraint.isTypeVar()) {
+        for (; i < this->numParams(); ++i) {
+          auto const& p = params[i];
+          if (!p.typeConstraint().compat(ivarConstraint)) {
+            decl_incompat(preClass, imeth);
+          }
+        }
+      }
     }
   }
+
   // Verify that meth provides defaults, starting with the parameter that
   // corresponds to the leftmost of imeth's contiguous trailing optional
-  // parameters.
-  for (unsigned i = firstOptional; i < params.size(); ++i) {
+  // parameters and *not* including any variadic last param (variadics
+  // don't have any default values).
+  for (unsigned i = firstOptional; i < this->numNonVariadicParams(); ++i) {
     if (!params[i].hasDefaultValue()) {
       decl_incompat(preClass, imeth);
     }

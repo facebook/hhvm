@@ -17,14 +17,14 @@ endif()
 macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_OS EHHVM_ARCH SOURCE_REL BUILD_TARGET)
 	set(f_SRC "${HPHP_HOME}/${SOURCE_REL}/${REL}")
 	set(f_OBJ "${HPHP_HOME}/${SOURCE_REL}/CMakeFiles/${BUILD_TARGET}.dir/${REL}.o")
-	list(APPEND ${SOURCES} "${f_SRC}.ext_hhvm.cpp")
-	list(APPEND ${HEADERS} "${f_SRC}.ext_hhvm.h")
-	add_custom_command(OUTPUT "${f_SRC}.ext_hhvm.cpp" "${f_SRC}.ext_hhvm.h"
+	list(APPEND ${SOURCES} "${f_OBJ}.ext_hhvm.cpp")
+	list(APPEND ${HEADERS} "${f_OBJ}.ext_hhvm.h")
+	add_custom_command(OUTPUT "${f_OBJ}.ext_hhvm.cpp" "${f_OBJ}.ext_hhvm.h"
 	                   DEPENDS ${f_SRC} gen-ext-hhvm
 	                   COMMAND "HPHP_HOME=${HPHP_HOME}"
 	                           "${HPHP_HOME}/hphp/tools/bootstrap/gen-ext-hhvm.sh"
 	                   ARGS ${EHHVM_OS} ${EHHVM_ARCH} ${f_OBJ}
-                               "${f_SRC}.ext_hhvm.cpp" "${f_SRC}.ext_hhvm.h"
+                               "${f_OBJ}.ext_hhvm.cpp" "${f_OBJ}.ext_hhvm.h"
 	                   WORKING_DIRECTORY "${HPHP_HOME}/hphp/tools/bootstrap"
 	                   COMMENT "Generating ext_hhvm wrapper for ${SOURCE_REL}/${REL}")
 endmacro()
@@ -47,8 +47,12 @@ EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS "hphp/runtime/ext" "hphp_runtime_ext")
 
 # Pick up relevant zend_ext_compat stubs
 if (ZEND_COMPAT_BUILD_DIRS)
+	string(LENGTH ${HPHP_HOME} HPHP_HOME_LEN)
 	foreach (dir ${ZEND_COMPAT_BUILD_DIRS})
-		EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS ${dir} "hphp_runtime_static")
+		string(LENGTH ${dir} dir_LEN)
+		math(EXPR EZC_PATH_LEN "${dir_LEN} - ${HPHP_HOME_LEN}")
+		string(SUBSTRING ${dir} ${HPHP_HOME_LEN} ${EZC_PATH_LEN} EZC_DIR)
+		EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS ${EZC_DIR} "hphp_runtime_static")
 	endforeach()
 	list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ext_zend_compat.cpp")
 endif()

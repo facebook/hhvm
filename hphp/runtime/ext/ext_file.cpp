@@ -113,9 +113,6 @@ static int accessSyscall(
     int mode,
     bool useFileCache = false) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
-    return ::access(File::TranslatePathWithFileCache(path).data(), mode);
-  }
   return w->access(path, mode);
 }
 
@@ -127,7 +124,8 @@ static int statSyscall(
   int pathIndex = 0;
   Stream::Wrapper* w = Stream::getWrapperFromURI(path, &pathIndex);
   bool isFileStream = dynamic_cast<FileStreamWrapper*>(w);
-  auto canUseFileCache = useFileCache && isFileStream;
+  bool isPlainStream = dynamic_cast<PlainStreamWrapper*>(w);
+  auto canUseFileCache = useFileCache && isFileStream && isPlainStream;
   if (isRelative && !pathIndex) {
     auto fullpath = g_context->getCwd() + String::FromChar('/') + path;
     std::string realpath = StatCache::realpath(fullpath.data());
@@ -145,6 +143,7 @@ static int statSyscall(
   if (canUseFileCache) {
     return ::stat(File::TranslatePathWithFileCache(properPath).data(), buf);
   }
+  w = Stream::getWrapperFromURI(properPath, &pathIndex);
   return w->stat(properPath, buf);
 }
 
@@ -153,9 +152,6 @@ static int lstatSyscall(
     struct stat* buf,
     bool useFileCache = false) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
-    return ::lstat(File::TranslatePathWithFileCache(path).data(), buf);
-  }
   return w->lstat(path, buf);
 }
 
@@ -919,6 +915,10 @@ Variant f_readlink(const String& path) {
 }
 
 Variant f_realpath(const String& path) {
+  // Zend doesn't support streams in realpath
+  if (!File::IsPlainFilePath(path)) {
+    return false;
+  }
   String translated = File::TranslatePath(path);
   if (translated.empty()) {
     return false;
@@ -926,11 +926,6 @@ Variant f_realpath(const String& path) {
   if (StaticContentCache::TheFileCache &&
       StaticContentCache::TheFileCache->exists(translated.data(), false)) {
     return translated;
-  }
-  // Zend doesn't support streams in realpath
-  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  if (!dynamic_cast<FileStreamWrapper*>(w)) {
-    return false;
   }
   char resolved_path[PATH_MAX];
   if (!realpath(translated.c_str(), resolved_path)) {

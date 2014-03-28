@@ -185,6 +185,8 @@ Wrapper* getWrapper(const String& scheme) {
   return nullptr;
 }
 
+static PlainStreamWrapper s_plain_stream_wrapper;
+
 Wrapper* getWrapperFromURI(const String& uri, int* pathIndex /* = NULL */) {
   const char *uri_string = uri.data();
 
@@ -200,7 +202,7 @@ Wrapper* getWrapperFromURI(const String& uri, int* pathIndex /* = NULL */) {
 
   const char *colon = strstr(uri_string, "://");
   if (!colon) {
-    return getWrapper(s_file);
+    return &s_plain_stream_wrapper;
   }
 
   int len = colon - uri_string;
@@ -208,7 +210,7 @@ Wrapper* getWrapperFromURI(const String& uri, int* pathIndex /* = NULL */) {
   if (Wrapper *w = getWrapper(String(uri_string, len, CopyString))) {
     return w;
   }
-  return getWrapper(s_file);
+  return &s_plain_stream_wrapper;
 }
 
 static FileStreamWrapper s_file_stream_wrapper;

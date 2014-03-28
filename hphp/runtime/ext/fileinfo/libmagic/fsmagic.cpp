@@ -109,8 +109,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
     name = stream->getName();
     fn = name.data();
   }
-  auto w = HPHP::Stream::getWrapperFromURI(fn);
-  if (w->stat(fn, sb) < 0) {
+  if (HPHP::Stream::stat(fn, sb) < 0) {
     if (ms->flags & MAGIC_ERROR) {
       file_error(ms, errno, "cannot stat `%s'", fn);
       return -1;

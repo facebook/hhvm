@@ -209,8 +209,7 @@ Wrapper* getWrapperFromURI(const String& uri) {
   if (Wrapper *w = getWrapper(String(uri_string, len, CopyString))) {
     return w;
   }
-  // FIXME: return nullptr for an unhandled stream
-  return &s_plain_stream_wrapper;
+  return nullptr;
 }
 
 static FileStreamWrapper s_file_stream_wrapper;

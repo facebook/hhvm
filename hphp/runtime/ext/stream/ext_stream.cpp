@@ -321,7 +321,7 @@ bool f_stream_is_local(const Variant& stream_or_url) {
     return wrapper->m_isLocal;
 
   } else if (stream_or_url.isResource()) {
-    File* file = dynamic_cast<File*>(stream_or_url.asCResRef().get());
+    File* file = stream_or_url.toResource().getTyped<File>(true, true);
     if (!file) {
       raise_warning("supplied resource is not a valid stream resource");
       return false;

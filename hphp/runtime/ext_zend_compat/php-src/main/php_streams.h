@@ -190,12 +190,8 @@ struct _php_stream_wrapper  {
 
 struct _php_stream  {
 #ifdef HHVM
-  _php_stream(HPHP::File *file) : hphp_file(file) {}
-  _php_stream(HPHP::Directory *dir) : hphp_dir(dir) {}
-  union {
-    HPHP::File *hphp_file;
-    HPHP::Directory *hphp_dir;
-  };
+  _php_stream(HPHP::Resource &resource_) : resource(resource_) {}
+  HPHP::Resource resource;
 #endif
   php_stream_ops *ops;
   void *abstract;      /* convenience pointer for abstraction */

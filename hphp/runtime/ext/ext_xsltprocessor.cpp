@@ -405,13 +405,9 @@ int64_t c_XSLTProcessor::t_setsecurityprefs(int64_t securityPrefs) {
 }
 
 bool c_XSLTProcessor::t_setprofiling(const String& filename) {
-  if (filename.length() > 0) {
-    String translated = File::TranslatePath(filename);
-    Stream::Wrapper* w = Stream::getWrapperFromURI(translated);
-    if (w->access(translated, W_OK)) {
-      m_profile = translated;
-      return true;
-    }
+  if (filename.length() > 0 && Stream::access(filename, W_OK) == 0) {
+    m_profile = filename;
+    return true;
   }
 
   return false;

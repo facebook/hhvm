@@ -32,6 +32,14 @@ class Directory;
 namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
+int access(const String& path, int mode);
+int stat(const String& path, struct stat* buf);
+int lstat(const String& path, struct stat* buf);
+Resource opendir(const String& path);
+int rmdir(const String& path, int options);
+int mkdir(const String& path, int mode, int options);
+int unlink(const String& path);
+
 class Wrapper : boost::noncopyable {
  public:
   Wrapper() : m_isLocal(true) { }

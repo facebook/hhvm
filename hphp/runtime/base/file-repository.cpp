@@ -195,8 +195,8 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
         "including urls doesn't work in RepoAuthoritative mode"
       );
     }
-    Stream::Wrapper* w = Stream::getWrapperFromURI(name);
-    File* f = w->open(name, "r", 0, null_variant);
+    Resource resource = File::Open(name, "r", 0, null_variant);
+    File *f = resource.getTyped<File>(true);
     if (!f) return nullptr;
     StringBuffer sb;
     sb.read(f);

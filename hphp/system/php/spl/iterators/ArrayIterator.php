@@ -275,6 +275,9 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    * @return     mixed   No value is returned.
    */
   public function seek($position) {
+    if ($position < 0 || $position >= count($this->storage)) {
+      throw new OutOfBoundsException("Seek position {$position} is out of range");
+    }
     reset($this->storage);
     for ($i = 0; $i < $position; $i++) {
       if (!next($this->storage)) {

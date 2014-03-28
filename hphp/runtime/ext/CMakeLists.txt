@@ -11,14 +11,7 @@ auto_sources(files "*.S" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND ASM_SOURCES ${files})
 
 set(HRE_LIBARIES)
-macro(HHVM_LINK_LIBRARIES)
-	foreach (lib ${ARGV})
-		list(APPEND HRE_LIBRARIES ${lib})
-	endforeach()
-endmacro()
-macro(HHVM_ADD_INCLUDES)
-	include_directories(${ARGV})
-endmacro()
+include(EXTFunctions)
 
 # For each directory under ext/, either pull in standard
 # source lists, or let the particular extension make that
@@ -27,6 +20,7 @@ file(GLOB subdirs ${CMAKE_CURRENT_SOURCE_DIR}/*)
 foreach (dir ${subdirs})
 	if (IS_DIRECTORY ${dir})
 		if (EXISTS "${dir}/config.cmake")
+			set(HRE_CURRENT_EXT_PATH "${dir}")
 			include("${dir}/config.cmake")
 		else ()
 			HHVM_SELECT_SOURCES(${dir})

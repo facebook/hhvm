@@ -9,6 +9,7 @@ set(CMAKE_MODULE_PATH
 set(HHVM_INCLUDE_DIRS "@HHVM_INCLUDE_DIRS@")
 set(HHVM_DEFINITIONS "@HHVM_DEFINITIONS@")
 include(HPHPFunctions)
+include(HPHPIZEFunctions)
 include(HPHPCompiler)
 include(config)
 
@@ -16,6 +17,7 @@ foreach (dir ${HHVM_INCLUDE_DIRS})
 	include_directories(${dir})
 endforeach()
 
+add_definitions("-DHHVM_BUILD_DSO")
 foreach (def ${HHVM_DEFINITIONS})
 	add_definitions("-D${def}")
 endforeach()

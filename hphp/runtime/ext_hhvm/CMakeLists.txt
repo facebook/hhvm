@@ -59,7 +59,6 @@ if (ZEND_COMPAT_BUILD_DIRS)
 		string(SUBSTRING ${dir} ${HPHP_HOME_LEN} ${EZC_PATH_LEN} EZC_DIR)
 		EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS ${EZC_DIR} "hphp_runtime_static")
 	endforeach()
-	list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ext_zend_compat.cpp")
 endif()
 
 #

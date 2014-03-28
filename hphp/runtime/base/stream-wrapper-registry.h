@@ -34,7 +34,7 @@ bool restoreWrapper(const String& scheme);
 bool registerRequestWrapper(const String& scheme, std::unique_ptr<Wrapper> wrapper);
 Array enumWrappers();
 Wrapper* getWrapper(const String& scheme);
-Wrapper* getWrapperFromURI(const String& uri, int* pathIndex = nullptr);
+Wrapper* getWrapperFromURI(const String& uri);
 
 /* Called during process init to register core wrappers */
 void RegisterCoreWrappers();

@@ -37,27 +37,48 @@ class FileStreamWrapper : public Stream::Wrapper {
   virtual File* open(const String& filename, const String& mode,
                      int options, const Variant& context);
   virtual int access(const String& path, int mode) {
-    return ::access(File::TranslatePath(path).data(), mode);
+    return valid(path) ? ::access(TranslatePath(path).data(), mode) : -1;
   }
   virtual int stat(const String& path, struct stat* buf) {
-    return ::stat(File::TranslatePath(path).data(), buf);
+    return valid(path) ? ::stat(TranslatePath(path).data(), buf) : -1;
   }
   virtual int lstat(const String& path, struct stat* buf) {
-    return ::lstat(File::TranslatePath(path).data(), buf);
+    return valid(path) ? ::lstat(TranslatePath(path).data(), buf) : -1;
   }
   virtual int unlink(const String& path) {
-    return ::unlink(File::TranslatePath(path).data());
+    return valid(path) ? ::unlink(TranslatePath(path).data()) : -1;
   }
   virtual int rename(const String& oldname, const String& newname);
   virtual int mkdir(const String& path, int mode, int options);
   virtual int rmdir(const String& path, int options) {
-    return ::rmdir(File::TranslatePath(path).data());
+    return valid(path) ? ::rmdir(TranslatePath(path).data()) : -1;
   }
 
   virtual Directory* opendir(const String& path);
 
  private:
   int mkdir_recursive(const String& path, int mode);
+  virtual bool valid(const String& path) {
+    assert(strncmp(path.c_str(), "file://", sizeof("file://") - 1) == 0);
+    if (path.data()[7] == '/') { // not just file://, but file:///
+      return true;
+    }
+    raise_warning("Only hostless file::// URLs are supported: %s", path.data());
+    errno = ENOENT;
+    return false;
+  }
+  virtual String TranslatePath(const String& filename) {
+    assert(valid(filename));
+    return File::TranslatePath(filename.substr(sizeof("file://") - 1));
+  }
+};
+
+class PlainStreamWrapper : public FileStreamWrapper {
+ private:
+  virtual bool valid(const String& path) { return true; }
+  virtual  String TranslatePath(const String& filename) {
+    return File::TranslatePath(filename);
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

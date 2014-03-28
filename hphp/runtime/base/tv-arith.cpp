@@ -61,7 +61,7 @@ again:
     for (;;) {
       if (c2.m_type == KindOfInt64)  return o(c1.m_data.num, c2.m_data.num);
       if (c2.m_type == KindOfDouble) return o(c1.m_data.num, c2.m_data.dbl);
-      c2 = numericConvHelper(c2);
+      cellCopy(numericConvHelper(c2), c2);
       assert(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
     }
   }
@@ -70,7 +70,7 @@ again:
     for (;;) {
       if (c2.m_type == KindOfDouble) return o(c1.m_data.dbl, c2.m_data.dbl);
       if (c2.m_type == KindOfInt64)  return o(c1.m_data.dbl, c2.m_data.num);
-      c2 = numericConvHelper(c2);
+      cellCopy(numericConvHelper(c2), c2);
       assert(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
     }
   }
@@ -79,7 +79,7 @@ again:
     return make_tv<KindOfArray>(o(c1.m_data.parr, c2.m_data.parr));
   }
 
-  c1 = numericConvHelper(c1);
+  cellCopy(numericConvHelper(c1), c1);
   assert(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
   goto again;
 }
@@ -94,7 +94,7 @@ Cell cellArithO(Op o, Check ck, Over ov, Cell c1, Cell c2) {
 
   auto ensure_num = [](Cell& c) {
     if (c.m_type != KindOfInt64 && c.m_type != KindOfDouble) {
-      c = numericConvHelper(c);
+      cellCopy(numericConvHelper(c), c);
     }
   };
 
@@ -190,7 +190,7 @@ again:
         c1.m_data.dbl = op(c1.m_data.num, c2.m_data.dbl);
         return;
       }
-      c2 = numericConvHelper(c2);
+      cellCopy(numericConvHelper(c2), c2);
       assert(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
     }
   }
@@ -205,7 +205,7 @@ again:
         c1.m_data.dbl = op(c1.m_data.dbl, c2.m_data.dbl);
         return;
       }
-      c2 = numericConvHelper(c2);
+      cellCopy(numericConvHelper(c2), c2);
       assert(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
     }
   }
@@ -327,12 +327,12 @@ void stringIncDecOp(Op op, Cell& cell) {
   switch (dt) {
   case KindOfInt64:
     decRefStr(sd);
-    cell = make_int(ival);
+    cellCopy(make_int(ival), cell);
     op.intCase(cell);
     break;
   case KindOfDouble:
     decRefStr(sd);
-    cell = make_dbl(dval);
+    cellCopy(make_dbl(dval), cell);
     op.dblCase(cell);
     break;
   default:

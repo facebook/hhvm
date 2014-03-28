@@ -33,7 +33,12 @@ macro(EXT_HHVM_DIR SOURCES HEADERS SOURCE_REL BUILD_TARGET)
 	string(LENGTH "${HPHP_HOME}/${SOURCE_REL}" HPHP_DIR_LEN)
 	auto_sources(files "*.cpp" "RECURSE" "${HPHP_HOME}/${SOURCE_REL}")
 	foreach (f ${files})
-		if (NOT ${f} MATCHES "(.ext_hhvm.cpp|/(old-)?tests?/)")
+		# This makes cpp files in the root path into a bogus lookup
+		# But that's okay since we want it to fail anyhow
+		string(REGEX REPLACE "hphp/runtime/ext/([^/]+)(/.*)?$"
+                                     "hphp/runtime/ext/\\1/config.cmake" DIR_CONFIG ${f})
+		if (NOT EXISTS ${DIR_CONFIG} AND
+                    NOT ${f} MATCHES "(.ext_hhvm.cpp|/(old-)?tests?/)")
 			string(LENGTH ${f} f_LEN)
 			math(EXPR f_REL_LEN "${f_LEN} - ${HPHP_DIR_LEN}")
 			string(SUBSTRING ${f} ${HPHP_DIR_LEN} ${f_REL_LEN} f_REL)

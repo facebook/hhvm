@@ -69,7 +69,7 @@ React\Tests\ChildProcess\StreamSelectLoopProcessTest::testIsRunning
 React\Tests\ChildProcess\StreamSelectLoopProcessTest::testProcessWithCwd
 .
 React\Tests\ChildProcess\StreamSelectLoopProcessTest::testProcessWithDefaultCwdAndEnv
-F
+.
 React\Tests\ChildProcess\StreamSelectLoopProcessTest::testProcessWithEnv
 .
 React\Tests\ChildProcess\StreamSelectLoopProcessTest::testSetEnhanceSigchildCompatibilityCannotBeCalledIfProcessIsRunning
@@ -361,11 +361,11 @@ S
 React\Tests\EventLoop\LibEventLoopTest::testStopShouldPreventRunFromBlocking
 S
 React\Tests\EventLoop\StreamSelectLoopTest::emptyRunShouldSimplyReturn
-F
+.
 React\Tests\EventLoop\StreamSelectLoopTest::runShouldReturnWhenNoMoreFds
-F
+.
 React\Tests\EventLoop\StreamSelectLoopTest::stopShouldStopRunningLoop
-F
+.
 React\Tests\EventLoop\StreamSelectLoopTest::testAddReadStream
 .
 React\Tests\EventLoop\StreamSelectLoopTest::testAddWriteStream
@@ -415,7 +415,7 @@ React\Tests\EventLoop\StreamSelectLoopTest::testRunWaitsForFutureTickEvents
 React\Tests\EventLoop\StreamSelectLoopTest::testRunWaitsForNextTickEvents
 .
 React\Tests\EventLoop\StreamSelectLoopTest::testStopShouldPreventRunFromBlocking
-F
+.
 React\Tests\EventLoop\StreamSelectLoopTest::testStreamSelectTimeoutEmulation
 .
 React\Tests\EventLoop\Timer\ExtEventTimerTest::testAddPeriodicTimer
@@ -575,7 +575,7 @@ React\Tests\Stream\BufferTest::testError
 React\Tests\Stream\BufferTest::testWrite
 .
 React\Tests\Stream\BufferTest::testWriteDetectsWhenOtherSideIsClosed
-F
+.
 React\Tests\Stream\BufferTest::testWriteReturnsFalseWhenBufferIsFull
 .
 React\Tests\Stream\BufferTest::testWritingToClosedBufferShouldNotWriteToStream

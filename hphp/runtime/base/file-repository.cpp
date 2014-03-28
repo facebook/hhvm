@@ -56,8 +56,6 @@ extern bool (*file_dump)(const char *filename);
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-std::set<std::string> FileRepository::s_names;
-
 PhpFile::PhpFile(const std::string &fileName,
                  const std::string &srcRoot,
                  const std::string &relPath,
@@ -91,7 +89,7 @@ PhpFile::~PhpFile() {
 void PhpFile::incRef() {
   UNUSED int ret = m_refCount.fetch_add(1, std::memory_order_acq_rel);
   TRACE(4, "PhpFile: %s incRef() %d -> %d %p called by %p\n",
-        m_fileName.c_str(), ret - 1, ret, this, __builtin_return_address(0));
+        m_fileName.c_str(), ret, ret + 1, this, __builtin_return_address(0));
 }
 
 int PhpFile::decRef(int n) {
@@ -104,7 +102,8 @@ int PhpFile::decRef(int n) {
 
 void PhpFile::decRefAndDelete() {
   if (decRef() == 0) {
-    Treadmill::enqueue([this] { FileRepository::onDelete(this); });
+    FileRepository::onDelete(this);
+    Treadmill::enqueue([this] { delete this; });
   }
 }
 
@@ -148,11 +147,8 @@ bool FileRepository::fileDump(const char *filename) {
 
 void FileRepository::onDelete(PhpFile* f) {
   assert(f->getRef() == 0);
-  if (md5Enabled()) {
-    WriteLock lock(s_md5Lock);
-    s_md5Files.erase(f->getMd5());
-  }
-  delete f;
+  WriteLock lock(s_md5Lock);
+  s_md5Files.erase(f->getMd5());
 }
 
 void FileRepository::forEachUnit(UnitVisitor& uit) {
@@ -223,7 +219,9 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
       }
       delete old;
     }
-    if (!acc->second) s_files.erase(acc);
+
+    // hit an error, remove the entry we inserted into s_files
+    if (ret == nullptr || !acc->second) s_files.erase(acc);
   };
 
   assert(isNew || old); // We don't leave null entries around.
@@ -233,7 +231,8 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
     if (isPlainFile && !readFile(n, s, fileInfo)) {
       TRACE(1, "File disappeared between stat and FR::readNewFile: %s\n",
             rname->data());
-      return nullptr;
+      ret = nullptr;
+      return ret;
     }
     ret = fileInfo.m_phpFile;
     if (isChanged && ret == old->getPhpFile()) {
@@ -261,7 +260,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
       raise_error("Tried to parse %s in repo authoritative mode", n->data());
     }
     ret = parseFile(n->data(), fileInfo);
-    if (!ret) return nullptr;
+    if (!ret) return ret;
   }
   assert(ret != nullptr);
 

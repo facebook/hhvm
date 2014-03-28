@@ -516,6 +516,7 @@ public:
     string_data_hash,
     string_data_same
   > m_evaledFiles;
+
   std::vector<Eval::PhpFile*> m_evaledFilesOrder;
   std::vector<Unit*> m_createdFuncs;
 

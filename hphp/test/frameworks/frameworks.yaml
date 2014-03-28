@@ -122,6 +122,8 @@
       - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPlusPeopleTest.php
       - joomla-framework/src/Joomla/Google/Tests/JGoogleDataPlusTest.php
       - joomla-framework/src/Joomla/Google/Tests/JGoogleTest.php
+      # This one intermittently hangs and blocks the full test runs
+      - joomla-framework/src/Joomla/Form/Tests/fields/JFormFieldIntegerTest.php
   joomlacms:
     url: https://github.com/joomla/joomla-cms.git
     branch: "3.2.2"

@@ -602,17 +602,26 @@ bool HphpArray::checkInvariants() const {
   switch (m_kind) {
   case kPackedKind:
     assert(m_size == m_used);
+    // The following loop is for debugging arrays only; it slows
+    // things down too much for general use
+    if (false) {
+      for (auto i = size_t{0}; i < m_size; ++i) {
+        assert(data()[i].data.m_type != KindOfUninit);
+        assert(tvIsPlausible(data()[i].data));
+      }
+    }
     break;
   case kMixedKind: {
     assert(m_hLoad >= m_size);
     size_t load = 0;
-    return true;
     // The following loop is for debugging arrays only; it slows
     // things down too much for general use
-    for (size_t i = 0; i <= m_tableMask; i++) {
-      load += hashTab()[i] != Empty;
+    if (false) {
+      for (size_t i = 0; i <= m_tableMask; i++) {
+        load += hashTab()[i] != Empty;
+      }
+      assert(m_hLoad == load);
     }
-    assert(m_hLoad == load);
     break;
   }
   default:

@@ -319,6 +319,8 @@ EmptyArray::MakeMixed(int64_t key, TypedValue val) {
 
 ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, const Variant& v, bool) {
   auto c = *v.asCell();
+  // TODO(#3888164): we should make it so we don't need KindOfUninit checks
+  if (c.m_type == KindOfUninit) c.m_type = KindOfNull;
   tvRefcountedIncRef(&c);
   auto const ret = k == 0 ? EmptyArray::MakePacked(c)
                           : EmptyArray::MakeMixed(k, c);
@@ -331,6 +333,8 @@ ArrayData* EmptyArray::SetStr(ArrayData*,
                               bool copy) {
   auto val = *v.asCell();
   tvRefcountedIncRef(&val);
+  // TODO(#3888164): we should make it so we don't need KindOfUninit checks
+  if (val.m_type == KindOfUninit) val.m_type = KindOfNull;
   return EmptyArray::MakeMixed(k, val).first;
 }
 
@@ -379,6 +383,8 @@ ArrayData* EmptyArray::SetRefStr(ArrayData*,
 ArrayData* EmptyArray::Append(ArrayData*, const Variant& vin, bool copy) {
   auto cell = *vin.asCell();
   tvRefcountedIncRef(&cell);
+  // TODO(#3888164): we should make it so we don't need KindOfUninit checks
+  if (cell.m_type == KindOfUninit) cell.m_type = KindOfNull;
   return EmptyArray::MakePackedInl(cell).first;
 }
 
@@ -416,6 +422,8 @@ ArrayData* EmptyArray::PopOrDequeue(ArrayData* ad, Variant& value) {
 ArrayData* EmptyArray::Prepend(ArrayData*, const Variant& vin, bool) {
   auto cell = *vin.asCell();
   tvRefcountedIncRef(&cell);
+  // TODO(#3888164): we should make it so we don't need KindOfUninit checks
+  if (cell.m_type == KindOfUninit) cell.m_type = KindOfNull;
   return EmptyArray::MakePacked(cell).first;
 }
 

@@ -852,12 +852,20 @@ bool f_file_exists(const String& filename) {
 }
 
 Variant f_stat(const String& filename) {
+  if (filename.empty()) {
+    return false;
+  }
+
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return stat_impl(&sb);
 }
 
 Variant f_lstat(const String& filename) {
+  if (filename.empty()) {
+    return false;
+  }
+
   struct stat sb;
   CHECK_SYSTEM(lstatSyscall(filename, &sb, true));
   return stat_impl(&sb);

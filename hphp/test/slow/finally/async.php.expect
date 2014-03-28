@@ -1,0 +1,9 @@
+= This test demonstrates incorrect behavior =
+
+* eager async *
+eager execution
+int(10)
+* blocking async *
+before blocking
+after blocking
+int(10)

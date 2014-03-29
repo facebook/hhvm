@@ -92,7 +92,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
     if (fp->hasVarEnv()) {
       // If there is a VarEnv, free the locals and the VarEnv
       // by calling the detach method.
-      fp->m_varEnv->detach(fp);
+      fp->m_varEnv->exitFP(fp);
       return;
     }
     // Free extra args

@@ -38,7 +38,7 @@ namespace HPHP {
  *   - Non-string keys are not really supported.  (Integers are
  *     converted to strings.)
  *
- *   - size() is an O(N) operation.  (This is because of KindOfIndirect
+ *   - size() is an O(N) operation.  (This is because of KindOfNamedLocal
  *     support in the underlying NameValueTable.)
  *
  *   - Append/prepend operations are not supported.

@@ -57,15 +57,11 @@ c_Continuation::~c_Continuation() {
   tvRefcountedDecRef(m_key);
   tvRefcountedDecRef(m_value);
 
+  // Free locals, but don't trigger the EventHook for FunctionExit
+  // since the continuation function has already been exited. We
+  // don't want redundant calls.
   ActRec* ar = actRec();
-  if (ar->hasVarEnv()) {
-    ar->getVarEnv()->detach(ar);
-  } else {
-    // Free locals, but don't trigger the EventHook for FunctionExit
-    // since the continuation function has already been exited. We
-    // don't want redundant calls.
-    frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
-  }
+  frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
 }
 
 //////////////////////////////////////////////////////////////////////

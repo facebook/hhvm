@@ -665,7 +665,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
     assert(!func->cls()->isZombie());
   }
   if (fp->hasVarEnv()) {
-    assert(fp->getVarEnv()->getCfp() == fp);
+    assert(fp->getVarEnv()->getFP() == fp);
   }
   // TODO: validate this pointer from actrec
   int numLocals = func->numLocals();

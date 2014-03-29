@@ -664,7 +664,7 @@ struct Class : AtomicCountable {
 
   bool hasDeepInitProps() const { return m_hasDeepInitProps; }
   bool needInitialization() const { return m_needInitialization; }
-  bool hasInitMethods() const { return m_hasInitMethods; }
+  bool hasSInitMethods() const { return m_hasSInitMethods; }
   bool callsCustomInstanceInit() const { return m_callsCustomInstanceInit; }
   const InterfaceMap& allInterfaces() const { return m_interfaces; }
   // See comment for m_usedTraits
@@ -1009,7 +1009,7 @@ private:
   unsigned m_needInitialization : 1;      // requires initialization,
                                           // due to [ps]init or simply
                                           // having static members
-  unsigned m_hasInitMethods : 1;          // any __[ps]init() methods?
+  unsigned m_hasSInitMethods : 1;         // any __sinit() methods?
   unsigned m_callsCustomInstanceInit : 1; // should we always call __init__
                                           // on new instances?
   unsigned m_hasDeepInitProps : 1;

@@ -4031,8 +4031,7 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
     auto const cls = ssaCls->clsVal();
     if (!classIsPersistentOrCtxParent(cls)) return false;
 
-    // TODO(#3575370): we should only check for 86sinit
-    if (cls->hasInitMethods()) return false;
+    if (cls->hasSInitMethods()) return false;
 
     bool visible, accessible;
     cls->getSProp(curClass(), propName, visible, accessible);

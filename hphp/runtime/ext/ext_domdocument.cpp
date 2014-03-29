@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
+#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/system/systemlib.h"
@@ -718,9 +719,8 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
   ctxt->recovery = recover;
   int old_error_reporting = 0;
   if (recover) {
-    old_error_reporting = ThreadInfo::s_threadInfo.getNoCheck()->
-      m_reqInjectionData.getErrorReportingLevel();
-    IniSetting::Set("error_reporting", old_error_reporting | k_E_WARNING);
+    old_error_reporting = HHVM_FN(error_reporting)();
+    HHVM_FN(error_reporting)(old_error_reporting | k_E_WARNING);
   }
 
   xmlParseDocument(ctxt);
@@ -728,7 +728,7 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
   if (ctxt->wellFormed || recover) {
     ret = ctxt->myDoc;
     if (ctxt->recovery) {
-      IniSetting::Set("error_reporting", old_error_reporting);
+      HHVM_FN(error_reporting)(old_error_reporting);
     }
     /* If loading from memory, set the base reference uri for the document */
     if (ret && ret->URL == NULL && ctxt->directory != NULL) {

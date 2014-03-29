@@ -1759,16 +1759,33 @@ void ObjectData::cloneSet(ObjectData* clone) {
       auto props = static_cast<HphpArray*>(dynProps.get());
       TypedValue key;
       props->nvGetKey(&key, iter);
-      assert(tvIsString(&key));
-      StringData* strKey = key.m_data.pstr;
-      TypedValue* val = props->nvGet(strKey);
 
-      auto const retval = reinterpret_cast<TypedValue*>(
-        &cloneProps.lvalAt(String(strKey), AccessFlags::Key)
-      );
-      tvDupFlattenVars(val, retval, cloneProps.get());
+      TypedValue* val;
+      TypedValue* ret;
+      switch (key.m_type) {
+      case HPHP::KindOfString: {
+        StringData* str = key.m_data.pstr;
+        val = props->nvGet(str);
+        ret = reinterpret_cast<TypedValue*>(
+          &cloneProps.lvalAt(String(str), AccessFlags::Key)
+        );
+        decRefStr(str);
+        break;
+      }
+      case HPHP::KindOfInt64: {
+        int64_t num = key.m_data.num;
+        val = props->nvGet(num);
+        ret = reinterpret_cast<TypedValue*>(
+          &cloneProps.lvalAt(num, AccessFlags::Key)
+        );
+        break;
+      }
+      default:
+        always_assert(false);
+      }
+
+      tvDupFlattenVars(val, ret, cloneProps.get());
       iter = dynProps.get()->iter_advance(iter);
-      decRefStr(strKey);
     }
   }
 }

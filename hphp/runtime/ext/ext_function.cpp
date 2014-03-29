@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/libevent-http-client.h"
@@ -164,16 +163,6 @@ Variant f_forward_static_call(int _argc, const Variant& function,
   // Setting the bound parameter to true tells vm_call_user_func()
   // propogate the current late bound class
   return vm_call_user_func(function, _argv, true);
-}
-
-Variant f_get_called_class() {
-  EagerCallerFrame cf;
-  ActRec* ar = cf();
-  if (ar) {
-    if (ar->hasThis()) return Variant(ar->getThis()->o_getClassName());
-    if (ar->hasClass()) return Variant(ar->getClass()->preClass()->name());
-  }
-  return Variant(false);
 }
 
 String f_create_function(const String& args, const String& code) {

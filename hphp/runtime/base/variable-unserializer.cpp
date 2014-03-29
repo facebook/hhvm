@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ bool VariableUnserializer::isWhitelistedClass(const String& cls_name) const {
   if (!m_classWhiteList.isNull() && !m_classWhiteList.empty()) {
     for (ArrayIter iter(m_classWhiteList); iter; ++iter) {
       const Variant& value(iter.secondRef());
-      if (f_is_subclass_of(cls_name, value.toString()) ||
+      if (HHVM_FN(is_subclass_of)(cls_name, value.toString()) ||
           same(value, cls_name)) {
         return true;
       }

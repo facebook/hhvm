@@ -28,6 +28,7 @@
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "folly/Unicode.h"
 #include "hphp/runtime/base/request-event-handler.h"
@@ -1110,7 +1111,7 @@ Variant f_strlen(const Variant& vstr) {
     raise_warning("strlen() expects parameter 1 to be string, resource given");
     return uninit_null();
   case KindOfObject:
-    if (!f_method_exists(vstr, "__toString")) {
+    if (!HHVM_FN(method_exists)(vstr, "__toString")) {
       raise_warning("strlen() expects parameter 1 to be string, object given");
       return uninit_null();
     } //else fallback to default

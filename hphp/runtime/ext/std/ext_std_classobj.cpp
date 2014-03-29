@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -26,6 +26,7 @@
 namespace HPHP {
 
 using JIT::CallerFrame;
+using JIT::EagerCallerFrame;
 using JIT::VMRegAnchor;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,21 +52,20 @@ static const Class* get_cls(const Variant& class_or_object) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Array f_get_declared_classes() {
+Array HHVM_FUNCTION(get_declared_classes) {
   return ClassInfo::GetClasses();
 }
 
-Array f_get_declared_interfaces() {
+Array HHVM_FUNCTION(get_declared_interfaces) {
   return ClassInfo::GetInterfaces();
 }
 
-Array f_get_declared_traits() {
+Array HHVM_FUNCTION(get_declared_traits) {
   return ClassInfo::GetTraits();
 }
 
-bool f_class_alias(const String& original,
-                   const String& alias,
-                   bool autoload /* = true */) {
+bool HHVM_FUNCTION(class_alias, const String& original, const String& alias,
+                                bool autoload /* = true */) {
   auto const origClass =
     autoload ? Unit::loadClass(original.get())
              : Unit::lookupClass(original.get());
@@ -76,17 +76,19 @@ bool f_class_alias(const String& original,
   return Unit::aliasClass(origClass, alias.get());
 }
 
-bool f_class_exists(const String& class_name, bool autoload /* = true */) {
+bool HHVM_FUNCTION(class_exists, const String& class_name,
+                                 bool autoload /* = true */) {
   return Unit::classExists(class_name.get(), autoload, AttrNone);
 }
 
-bool f_interface_exists(const String& interface_name,
-                        bool autoload /* = true */) {
+bool HHVM_FUNCTION(interface_exists, const String& interface_name,
+                                     bool autoload /* = true */) {
   return Unit::classExists(interface_name.get(), autoload,
                                AttrInterface);
 }
 
-bool f_trait_exists(const String& trait_name, bool autoload /* = true */) {
+bool HHVM_FUNCTION(trait_exists, const String& trait_name,
+                                 bool autoload /* = true */) {
   return Unit::classExists(trait_name.get(), autoload, AttrTrait);
 }
 
@@ -149,9 +151,9 @@ static void getMethodNamesImpl(const Class* cls,
   }
 }
 
-Array f_get_class_methods(const Variant& class_or_object) {
+Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   auto const cls = get_cls(class_or_object);
-  if (!cls) return Array();
+  if (!cls) return null_variant;
   VMRegAnchor _;
 
   auto retVal = Array::attach(HphpArray::MakeReserve(cls->numMethods()));
@@ -163,7 +165,7 @@ Array f_get_class_methods(const Variant& class_or_object) {
   return f_array_values(retVal).toArray();
 }
 
-Array f_get_class_constants(const String& className) {
+Array HHVM_FUNCTION(get_class_constants, const String& className) {
   auto const cls = Unit::loadClass(className.get());
   if (cls == NULL) {
     return Array::attach(HphpArray::MakeReserve(0));
@@ -191,7 +193,7 @@ Array f_get_class_constants(const String& className) {
   return arrayInit.toArray();
 }
 
-Variant f_get_class_vars(const String& className) {
+Variant HHVM_FUNCTION(get_class_vars, const String& className) {
   const Class* cls = Unit::loadClass(className.get());
   if (!cls) {
     return false;
@@ -242,7 +244,7 @@ Variant f_get_class_vars(const String& className) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_get_class(const Variant& object /* = null_variant */) {
+Variant HHVM_FUNCTION(get_class, const Variant& object /* = null_variant */) {
   if (object.isNull()) {
     // No arg passed.
     String ret;
@@ -262,8 +264,19 @@ Variant f_get_class(const Variant& object /* = null_variant */) {
   return object.toObject()->o_getClassName();
 }
 
-Variant f_get_parent_class(const Variant& object /* = null_variant */) {
-  if (!object.isInitialized()) {
+Variant HHVM_FUNCTION(get_called_class) {
+  EagerCallerFrame cf;
+  ActRec* ar = cf();
+  if (ar) {
+    if (ar->hasThis()) return Variant(ar->getThis()->o_getClassName());
+    if (ar->hasClass()) return Variant(ar->getClass()->preClass()->name());
+  }
+  return Variant(false);
+}
+
+Variant HHVM_FUNCTION(get_parent_class,
+                      const Variant& object /* = null_variant */) {
+  if (object.isNull()) {
     CallerFrame cf;
     Class* cls = arGetContextClass(cf());
     if (cls && cls->parent()) {
@@ -274,7 +287,7 @@ Variant f_get_parent_class(const Variant& object /* = null_variant */) {
 
   Variant class_name;
   if (object.isObject()) {
-    class_name = f_get_class(object);
+    class_name = HHVM_FN(get_class)(object);
   } else if (object.isString()) {
     class_name = object;
   } else {
@@ -307,17 +320,20 @@ static bool is_a_impl(const Variant& class_or_object, const String& class_name,
   return cls->classof(other);
 }
 
-bool f_is_a(const Variant& class_or_object, const String& class_name,
-            bool allow_string /* = false */) {
+bool HHVM_FUNCTION(is_a, const Variant& class_or_object,
+                         const String& class_name,
+                         bool allow_string /* = false */) {
   return is_a_impl(class_or_object, class_name, allow_string, false);
 }
 
-bool f_is_subclass_of(const Variant& class_or_object, const String& class_name,
-                      bool allow_string /* = true */) {
+bool HHVM_FUNCTION(is_subclass_of, const Variant& class_or_object,
+                                   const String& class_name,
+                                   bool allow_string /* = true */) {
   return is_a_impl(class_or_object, class_name, allow_string, true);
 }
 
-bool f_method_exists(const Variant& class_or_object, const String& method_name) {
+bool HHVM_FUNCTION(method_exists, const Variant& class_or_object,
+                                  const String& method_name) {
   const Class* cls = get_cls(class_or_object);
   if (!cls) return false;
   if (cls->lookupMethod(method_name.get()) != NULL) return true;
@@ -330,7 +346,8 @@ bool f_method_exists(const Variant& class_or_object, const String& method_name) 
   return false;
 }
 
-Variant f_property_exists(const Variant& class_or_object, const String& property) {
+Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
+                                       const String& property) {
   Class* cls = nullptr;
   ObjectData* obj = nullptr;
   if (class_or_object.isObject()) {
@@ -338,7 +355,7 @@ Variant f_property_exists(const Variant& class_or_object, const String& property
     cls = obj->getVMClass();
     assert(cls);
   } else if (class_or_object.isString()) {
-    cls = Unit::lookupClass(class_or_object.toCStrRef().get());
+    cls = Unit::loadClass(class_or_object.toString().get());
     if (!cls) return false;
   } else {
     raise_warning(
@@ -362,21 +379,43 @@ Variant f_property_exists(const Variant& class_or_object, const String& property
   return (propInd != kInvalidSlot);
 }
 
-Variant f_get_object_vars(const Object& object) {
+Array HHVM_FUNCTION(get_object_vars, const Object& object) {
   return object->o_toIterArray(ctxClassName());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_call_user_method_array(const String& method_name, VRefParam obj,
-                                 const Variant& paramarr) {
+Variant HHVM_FUNCTION(call_user_method_array, const String& method_name,
+                                              VRefParam obj,
+                                              const Variant& paramarr) {
   return obj.toObject()->o_invoke(method_name, paramarr);
 }
 
-Variant f_call_user_method(int _argc, const String& method_name, VRefParam obj,
-                           const Array& _argv /* = null_array */) {
-  return obj.toObject()->o_invoke(method_name, _argv);
+///////////////////////////////////////////////////////////////////////////////
+
+void StandardExtension::initClassobj() {
+  HHVM_FE(get_declared_classes);
+  HHVM_FE(get_declared_interfaces);
+  HHVM_FE(get_declared_traits);
+  HHVM_FE(class_alias);
+  HHVM_FE(class_exists);
+  HHVM_FE(interface_exists);
+  HHVM_FE(trait_exists);
+  HHVM_FE(get_class_methods);
+  HHVM_FE(get_class_constants);
+  HHVM_FE(get_class_vars);
+  HHVM_FE(get_class);
+  HHVM_FE(get_called_class);
+  HHVM_FE(get_parent_class);
+  HHVM_FE(is_a);
+  HHVM_FE(is_subclass_of);
+  HHVM_FE(method_exists);
+  HHVM_FE(property_exists);
+  HHVM_FE(get_object_vars);
+  HHVM_FE(call_user_method_array);
+
+  loadSystemlib("std_classobj");
 }
 
-///////////////////////////////////////////////////////////////////////////////
+
 }

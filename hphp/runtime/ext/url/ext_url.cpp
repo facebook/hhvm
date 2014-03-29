@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 
 namespace HPHP {
@@ -141,7 +142,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
     Object o = varr.toObject();
     arr = o->isCollection()
       ? varr.toArray()
-      : f_get_object_vars(o).toArray();
+      : HHVM_FN(get_object_vars(o));
   } else {
     arr = varr.toArray();
   }

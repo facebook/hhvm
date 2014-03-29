@@ -1,22 +1,14 @@
 <?php
-ini_set('error_reporting', E_ALL | E_STRICT | E_DEPRECATED );
-
 /* Prototype  : proto bool is_a(object object, string class_name)
  * Description: Returns true if the object is of this class or has this class as one of its parents 
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions: 
  */
-
-class C {
-	function __toString() {
-		return "C Instance";
-	}
-}
-
+// Note: basic use cases in Zend/tests/is_a.phpt 
 echo "*** Testing is_a() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$object = new stdclass();
+$class_name = 'stdClass';
 
 //get an unset variable
 $unset_var = 10;
@@ -59,9 +51,10 @@ $values = array(
       "",
       '',
 
-      // object data
-      new C,
-
+      // string data
+      "string",
+      'String',
+      
       // undefined data
       $undefined_var,
 
@@ -69,11 +62,11 @@ $values = array(
       $unset_var,
 );
 
-// loop through each element of the array for class_name
+// loop through each element of the array for object
 
 foreach($values as $value) {
       echo @"\nArg value $value \n";
-      var_dump( is_a($object, $value) );
+      var_dump( is_a($value, $class_name) );
 };
 
 echo "Done";

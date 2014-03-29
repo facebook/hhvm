@@ -371,7 +371,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
 
 function hphp_cmd($options, $test) {
   return implode(" ", array(
-    "HHVM_DISABLE_HHBBC=1",
+    "HHVM_DISABLE_HHBBC2=1",
     hhvm_path(),
     '--hphp',
     '--config',

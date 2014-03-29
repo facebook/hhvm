@@ -164,6 +164,11 @@ int32_t arrayVsize(ArrayData*);
 TypedValue* ldGblAddrHelper(StringData* name);
 TypedValue* ldGblAddrDefHelper(StringData* name);
 
+TypedValue* getSPropOrNull(const Class* cls,
+    const StringData* name, Class* ctx);
+TypedValue* getSPropOrRaise(const Class* cls,
+    const StringData* name, Class* ctx);
+
 int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);

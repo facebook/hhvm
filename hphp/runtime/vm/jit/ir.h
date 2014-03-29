@@ -397,7 +397,7 @@ O(CheckInit,                        ND, S(Gen),                            B) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),                B) \
 O(CheckCold,                        ND, NA,                              B|E) \
 O(CheckNullptr,                     ND, S(CountedStr,Nullptr),       B|E|CRc) \
-O(CheckNonNull,  DSubtract(0, Nullptr), S(Nullptr,Func),                   B) \
+O(CheckNonNull,  DSubtract(0, Nullptr), S(Nullptr,Func,PtrToGen),          B) \
 O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
 O(LdVectorSize,                 D(Int), S(Obj),                            E) \
 O(CheckPackedArrayBounds,           ND, S(Arr) S(Int),                   B|E) \
@@ -456,10 +456,11 @@ O(GetCtxFwdCallDyn,             D(Ctx), S(Ctx),                          PRc) \
 O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                  PRc) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
-O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),     B|C|E|N|Er) \
-O(LdClsPropAddrCached,          DParam, S(Cls) CStr CStr C(Cls),  B|C|E|N|Er) \
+O(LdClsPropAddrKnown,           DParam, C(Cls) CStr,                       C) \
+O(LdClsPropAddrOrNull,                                                        \
+                   D(PtrToGen|Nullptr), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
+O(LdClsPropAddrOrRaise,    D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
 O(LdClsInitData,          D(PtrToCell), S(Cls),                          N|C) \
-O(LdClsStaticInitData,    D(PtrToCell), S(Cls),                          N|C) \
 O(LdObjMethod,                      ND, S(Cls) CStr S(StkPtr),        E|N|Er) \
 O(LdObjInvoke,                 D(Func), S(Cls),                            B) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                          E|N) \

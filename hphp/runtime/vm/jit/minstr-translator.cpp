@@ -821,7 +821,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseS() {
    * special translation unless we know it's not boxed, and the C++
    * helpers for generic dims currently always conditionally unbox.
    */
-  m_base = m_ht.ldClsPropAddr(makeCatch(), clsRef, key);
+  m_base = m_ht.ldClsPropAddr(makeCatch(), clsRef, key, true);
 }
 
 void HhbcTranslator::MInstrTranslator::emitBaseOp() {

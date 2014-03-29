@@ -286,8 +286,8 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     // doRegMoves handles immediates.
     // TODO: #3634984 ... but it needs a scratch register
     return true;
-  case LdClsPropAddr:
-  case LdClsPropAddrCached:
+  case LdClsPropAddrOrNull:
+  case LdClsPropAddrOrRaise:
     if (i == 0) return true; // cls -> ArgGroup.ssa().
     break;
   case Same: case NSame:

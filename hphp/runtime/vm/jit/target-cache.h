@@ -106,29 +106,6 @@ struct StaticMethodFCache {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Static properties.
- *
- * We only cache statically known property name references from within
- * the class.  Current statistics shows in class references dominating
- * by 91.5% of all static property access.
- */
-struct SPropCache {
-  TypedValue* m_tv;  // public; it is used from TC and we assert the offset
-
-  static RDS::Handle alloc(const StringData* sd);
-
-  template<bool raiseOnError>
-  static TypedValue* lookup(RDS::Handle handle, const Class* cls,
-                            const StringData* nm, Class* ctx);
-
-  template<bool raiseOnError>
-  static TypedValue* lookupSProp(const Class *cls, const StringData *name,
-                                 Class* ctx);
-};
-
-//////////////////////////////////////////////////////////////////////
-
-/*
  * Method cache entries cache the dispatch target for a function call.
  * The key is a Class*, but the low bits are reused for other
  * purposes.  The fast path in the TC doesn't have to check these

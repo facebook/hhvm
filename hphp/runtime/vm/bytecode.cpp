@@ -7360,22 +7360,19 @@ OPTBLD_INLINE void ExecutionContext::iopInitProp(IOP_ARGS) {
 
   auto* cls = m_fp->getClass();
   TypedValue* tv;
-  Slot idx;
 
   auto* ctx = arGetContextClass(getFP());
   auto* fr = m_stack.topC();
 
   switch (propOp) {
-    case InitPropOp::Static: {
-      auto* propVec = cls->getSPropData();
-      always_assert(propVec);
-      idx = ctx->lookupSProp(propName);
-      tv = &propVec[idx];
-    } break;
+    case InitPropOp::Static:
+      tv = cls->getSPropData(ctx->lookupSProp(propName));
+      break;
+
     case InitPropOp::NonStatic: {
       auto* propVec = cls->getPropData();
       always_assert(propVec);
-      idx = ctx->lookupDeclProp(propName);
+      Slot idx = ctx->lookupDeclProp(propName);
       tv = &(*propVec)[idx];
     } break;
   }

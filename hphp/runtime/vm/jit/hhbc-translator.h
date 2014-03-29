@@ -663,7 +663,8 @@ private:
                             bool& checkForInt);
   Type assertObjType(const StringData*);
   void destroyName(SSATmp* name);
-  SSATmp* ldClsPropAddr(Block* catchBlock, SSATmp* cls, SSATmp* name);
+  SSATmp* ldClsPropAddr(Block* catchBlock, SSATmp* cls,
+                        SSATmp* name, bool raise);
   void emitUnboxRAux();
   void emitAGet(SSATmp* src, Block* catchBlock);
   void emitRetFromInlined(Type type);

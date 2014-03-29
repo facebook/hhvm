@@ -465,6 +465,29 @@ int32_t arrayVsize(ArrayData* ad) {
   return ad->vsize();
 }
 
+TypedValue* getSPropOrNull(const Class* cls,
+                           const StringData* name,
+                           Class* ctx) {
+  bool visible, accessible;
+  TypedValue* val = cls->getSProp(ctx, name, visible, accessible);
+
+  if (UNLIKELY(!visible || !accessible)) {
+    return nullptr;
+  }
+  return val;
+}
+
+TypedValue* getSPropOrRaise(const Class* cls,
+                            const StringData* name,
+                            Class* ctx) {
+  auto sprop = getSPropOrNull(cls, name, ctx);
+  if (UNLIKELY(!sprop)) {
+    raise_error("Invalid static property access: %s::%s",
+                cls->name()->data(), name->data());
+  }
+  return sprop;
+}
+
 TypedValue* ldGblAddrHelper(StringData* name) {
   return g_context->m_globalVarEnv->lookup(name);
 }

@@ -657,14 +657,11 @@ struct Class : AtomicCountable {
     return offsetof(Class, m_propDataCache);
   }
 
-  TypedValue* getSPropData() const;
-  static constexpr size_t spropdataOff() {
-    return offsetof(Class, m_propSDataCache);
-  }
+  TypedValue* getSPropData(Slot index) const;
 
   bool hasDeepInitProps() const { return m_hasDeepInitProps; }
   bool needInitialization() const { return m_needInitialization; }
-  bool hasSInitMethods() const { return m_hasSInitMethods; }
+  bool hasInitMethods() const { return m_hasInitMethods; }
   bool callsCustomInstanceInit() const { return m_callsCustomInstanceInit; }
   const InterfaceMap& allInterfaces() const { return m_interfaces; }
   // See comment for m_usedTraits
@@ -760,27 +757,42 @@ struct Class : AtomicCountable {
    */
   DataType clsCnsType(const StringData* clsCnsName) const;
 
-  void initialize() const;
-  void initPropHandle() const;
+  /**
+   * RDS Class* handle.
+   */
+  void setClassHandle(RDS::Link<Class*> link) const;
   RDS::Handle classHandle() const { return m_cachedClass.handle(); }
-  void setClassHandle(RDS::Link<Class*> link) const {
-    assert(!m_cachedClass.bound());
-    m_cachedClass = link;
-  }
-  RDS::Handle propHandle() const { return m_propDataCache.handle(); }
-  void initSPropHandle() const;
-  RDS::Handle sPropHandle() const { return m_propSDataCache.handle(); }
-  void initProps() const;
-  TypedValue* initSProps() const;
+
   Class* getCached() const;
   void setCached();
 
-  void setInstanceBits();
-  void setInstanceBitsAndParents();
+  /**
+   * Property initialization.
+   */
+  void initialize() const;
+  void initProps() const;
+  void initSProps() const;
 
-  // Returns kInvalidSlot if we can't find this property.
+  void initPropHandle() const;
+  RDS::Handle propHandle() const { return m_propDataCache.handle(); }
+
+  bool needsInitSProps() const;
+  void initSPropHandles() const;
+  RDS::Handle sPropInitHandle() const { return m_sPropCacheInit.handle(); }
+  RDS::Handle sPropHandle(Slot index) const;
+
+  TypedValue getStaticPropInitVal(const SProp& prop);
+
+  /**
+   * Property accessors.
+   *
+   * Lookup methods return kInvalidSlot if the property is not found.
+   */
   Slot lookupDeclProp(const StringData* propName) const {
     return m_declProperties.findIndex(propName);
+  }
+  Slot lookupSProp(const StringData* sPropName) const {
+    return m_staticProperties.findIndex(sPropName);
   }
 
   Slot getDeclPropIndex(Class* ctx, const StringData* key,
@@ -791,12 +803,11 @@ struct Class : AtomicCountable {
 
   static bool IsPropAccessible(const Prop& prop, Class* ctx);
 
-  // Returns kInvalidSlot if we can't find this static property.
-  Slot lookupSProp(const StringData* sPropName) const {
-    return m_staticProperties.findIndex(sPropName);
-  }
-
-  TypedValue getStaticPropInitVal(const SProp& prop);
+  /**
+   * Instance bits.
+   */
+  void setInstanceBits();
+  void setInstanceBitsAndParents();
 
   void getClassInfo(ClassInfoVM* ci);
 
@@ -816,6 +827,7 @@ struct Class : AtomicCountable {
     return m_classVecLen;
   }
   LowClassPtr const* classVec() const { return m_classVec; }
+
   static size_t preClassOff() { return offsetof(Class, m_preClass); }
   static size_t classVecOff() { return offsetof(Class, m_classVec); }
   static size_t classVecLenOff() { return offsetof(Class, m_classVecLen); }
@@ -985,7 +997,18 @@ private:
   BuiltinDtorFunction m_instanceDtor{nullptr};
   Func* m_dtor;
   MethodMap m_methods;
-  mutable RDS::Link<TypedValue*> m_propSDataCache{RDS::kInvalidHandle};
+
+  // Static properties are stored in RDS.  There are three phases of sprop
+  // initialization:
+  // 1. The array of links is itself allocated on Class creation.
+  // 2. The links are bound either when codegen needs the handle value, or when
+  //    initSProps() is called in any request.  Afterwards, m_sPropCacheInit is
+  //    bound, defaulting to false.
+  // 3. The RDS value at m_sPropCacheInit is set to true when initSProps() is
+  //    called, and the values are actually initialized.
+  mutable RDS::Link<TypedValue>* m_sPropCache{nullptr};
+  mutable RDS::Link<bool> m_sPropCacheInit{RDS::kInvalidHandle};
+
   unsigned m_classVecLen;
   /*
    * Each ObjectData is created with enough trailing space to directly store
@@ -1003,7 +1026,7 @@ private:
   unsigned m_needInitialization : 1;      // requires initialization,
                                           // due to [ps]init or simply
                                           // having static members
-  unsigned m_hasSInitMethods : 1;         // any __sinit() methods?
+  unsigned m_hasInitMethods : 1;          // any __[ps]init() methods?
   unsigned m_callsCustomInstanceInit : 1; // should we always call __init__
                                           // on new instances?
   unsigned m_hasDeepInitProps : 1;

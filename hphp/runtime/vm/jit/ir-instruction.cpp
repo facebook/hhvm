@@ -153,14 +153,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
 }
 
 bool IRInstruction::mayRaiseError() const {
-  if (!opcodeHasFlags(op(), MayRaiseError)) return false;
-
-  // Some instructions only throw if they do not have a non-catch label.
-  if (is(LdClsPropAddrCached, LdClsPropAddr) &&
-      taken() && !taken()->isCatch()) {
-    return false;
-  }
-
   return opcodeHasFlags(op(), MayRaiseError);
 }
 

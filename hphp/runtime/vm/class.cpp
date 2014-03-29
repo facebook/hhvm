@@ -244,7 +244,7 @@ void PreClass::setUserAttributes(const UserAttributeMap &ua) {
 //=============================================================================
 // Class.
 
-static_assert(sizeof(Class) == 376, "Change this only on purpose");
+static_assert(sizeof(Class) == 384, "Change this only on purpose");
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
@@ -282,6 +282,13 @@ Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
 
 Class::~Class() {
   releaseRefs();
+
+  if (m_sPropCache) {
+    for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
+      m_sPropCache[i].~Link();
+    }
+    free(m_sPropCache);
+  }
 
   auto methods = methodRange();
   while (!methods.empty()) {
@@ -363,7 +370,12 @@ void Class::atomicRelease() {
   low_free(this);
 }
 
-Class *Class::getCached() const {
+void Class::setClassHandle(RDS::Link<Class*> link) const {
+  assert(!m_cachedClass.bound());
+  m_cachedClass = link;
+}
+
+Class* Class::getCached() const {
   return *m_cachedClass;
 }
 
@@ -483,28 +495,13 @@ const Class* Class::commonAncestor(const Class* cls) const {
   return nullptr;
 }
 
-void Class::initialize(TypedValue*& sProps) const {
-  if (m_pinitVec.size() > 0) {
-    if (getPropData() == nullptr) {
-      initProps();
-    }
-  }
-  // The asymmetry between the logic around initProps() above and initSProps()
-  // below is due to the fact that instance properties only require storage in
-  // g_context if there are non-scalar initializers involved, whereas static
-  // properties *always* require storage in g_context.
-  if (numStaticProperties() > 0) {
-    if ((sProps = getSPropData()) == nullptr) {
-      sProps = initSProps();
-    }
-  } else {
-    sProps = nullptr;
-  }
-}
-
 void Class::initialize() const {
-  TypedValue* sProps;
-  initialize(sProps);
+  if (m_pinitVec.size() > 0 && getPropData() == nullptr) {
+    initProps();
+  }
+  if (numStaticProperties() > 0 && needsInitSProps()) {
+    initSProps();
+  }
 }
 
 Class::PropInitVec* Class::initPropsImpl() const {
@@ -642,61 +639,46 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
   return propInd;
 }
 
-TypedValue* Class::initSPropsImpl() const {
-  assert(getSPropData() == nullptr);
+void Class::initSProps() const {
+  assert(needsInitSProps());
 
-  // Initialize static props for parent
+  // Initialize static props for parent.
   Class* parent = this->parent();
-  if (parent && parent->getSPropData() == nullptr) {
-    parent->initSPropsImpl();
+  if (parent && parent->needsInitSProps()) {
+    parent->initSProps();
   }
 
-  if (!numStaticProperties()) return nullptr;
+  if (!numStaticProperties()) return;
 
-  // Create an array that is initially large enough to hold all static
-  // properties.
-  TypedValue* const spropTable =
-    smart_new_array<TypedValue>(m_staticProperties.size());
-  memset(spropTable, 0, m_staticProperties.size() * sizeof(TypedValue));
-  setSPropData(spropTable);
+  initSPropHandles();
+  *m_sPropCacheInit = true;
+
+  // Perform scalar inits.
+  for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
+    auto const& sProp = m_staticProperties[slot];
+
+    if (sProp.m_class == this) {
+      *m_sPropCache[slot] = sProp.m_val;
+    }
+  }
 
   const bool hasNonscalarInit = !m_sinitVec.empty();
 
   // If there are non-scalar initializers (i.e. 86sinit methods), run them now.
-  // They'll put their initialized values into an array, and we'll read any
-  // values we need out of the array later.
+  // They will override the KindOfUninit values set by scalar initialization.
   if (hasNonscalarInit) {
-    for (unsigned i = 0; i < m_sinitVec.size(); i++) {
+    for (unsigned i = 0, n = m_sinitVec.size(); i < n; i++) {
       TypedValue retval;
       g_context->invokeFunc(&retval, m_sinitVec[i], init_null_variant,
-                              nullptr, const_cast<Class*>(this));
+                            nullptr, const_cast<Class*>(this));
       assert(retval.m_type == KindOfNull);
     }
   }
-
-  for (Slot slot = 0; slot < m_staticProperties.size(); ++slot) {
-    auto const& sProp = m_staticProperties[slot];
-    auto const* propName = sProp.m_name;
-
-    if (sProp.m_class == this) {
-      if (spropTable[slot].m_type == KindOfUninit) {
-        spropTable[slot] = sProp.m_val;
-      }
-    } else {
-      bool visible, accessible;
-      auto* storage = sProp.m_class->getSProp(nullptr, propName,
-                                              visible, accessible);
-      tvBindIndirect(&spropTable[slot], storage);
-    }
-  }
-
-  return spropTable;
 }
 
 TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
                             bool& visible, bool& accessible) const {
-  TypedValue* sProps;
-  initialize(sProps);
+  initialize();
 
   Slot sPropInd = lookupSProp(sPropName);
   if (sPropInd == kInvalidSlot) {
@@ -736,9 +718,8 @@ TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
     }
   }
 
-  assert(sProps != nullptr);
-  TypedValue* sProp = tvDerefIndirect(&sProps[sPropInd]);
-  assert(sProp->m_type != KindOfUninit &&
+  TypedValue* sProp = getSPropData(sPropInd);
+  assert(sProp && sProp->m_type != KindOfUninit &&
          "static property initialization failed to initialize a property");
   return sProp;
 }
@@ -1821,6 +1802,12 @@ void Class::setProperties() {
   m_declProperties.create(curPropMap);
   m_staticProperties.create(curSPropMap);
 
+  m_sPropCache = (RDS::Link<TypedValue>*)
+    malloc(numStaticProperties() * sizeof(*m_sPropCache));
+  for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
+    new (&m_sPropCache[i]) RDS::Link<TypedValue>(RDS::kInvalidHandle);
+  }
+
   m_declPropNumAccessible = m_declProperties.size() - numInaccessible;
 }
 
@@ -1987,7 +1974,12 @@ void Class::setInitializers() {
 
   m_needInitialization = (m_pinitVec.size() > 0 ||
     m_staticProperties.size() > 0);
-  m_hasSInitMethods = m_sinitVec.size() > 0;
+
+  // Init methods are always called all the way up the inheritance chain, so we
+  // say a Class has 86.init methods if it does /or/ its parent does.
+  m_hasInitMethods =
+    (m_pinitVec.size() > 0 || m_sinitVec.size() > 0) ||
+    (parent() && parent()->m_hasInitMethods);
 
   // The __init__ method defined in the Exception class gets special treatment
   static StringData* sd__init__ = makeStaticString("__init__");
@@ -2529,29 +2521,50 @@ void Class::setPropData(PropInitVec* propData) const {
   *m_propDataCache = propData;
 }
 
-TypedValue* Class::getSPropData() const {
-  return m_propSDataCache.bound() ? *m_propSDataCache : nullptr;
+TypedValue* Class::getSPropData(Slot index) const {
+  assert(numStaticProperties() > index);
+  return m_sPropCache[index].bound() ? m_sPropCache[index].get() : nullptr;
 }
 
-void Class::initSPropHandle() const {
-  if (!m_propSDataCache.bound()) {
-    m_propSDataCache.bind();
-    RDS::recordRds(m_propSDataCache.handle(),
-                   sizeof(TypedValue*),
-                   "PropSDataCache",
-                   name()->data());
+bool Class::needsInitSProps() const {
+  return !m_sPropCacheInit.bound() || !*m_sPropCacheInit;
+}
+
+void Class::initSPropHandles() const {
+  if (m_sPropCacheInit.bound()) return;
+
+  // Propagate to parents so we can link inherited static props.
+  Class* parent = this->parent();
+  if (parent) parent->initSPropHandles();
+
+  // Bind all the static prop handles.
+  for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
+    if (m_sPropCache[slot].bound()) continue;
+
+    auto const& sProp = m_staticProperties[slot];
+
+    if (sProp.m_class == this) {
+      m_sPropCache[slot].bind();
+
+      auto msg = name()->toCppString() + "::" + sProp.m_name->toCppString();
+      RDS::recordRds(m_sPropCache[slot].handle(),
+                     sizeof(TypedValue), "SPropCache", msg);
+    } else {
+      auto realSlot = sProp.m_class->lookupSProp(sProp.m_name);
+      m_sPropCache[slot] = sProp.m_class->m_sPropCache[realSlot];
+    }
   }
+
+  // Bind the init handle; this indicates that all handles are bound.
+  m_sPropCacheInit.bind();
+  RDS::recordRds(m_sPropCacheInit.handle(),
+                 sizeof(bool), "SPropCacheInit", name()->data());
 }
 
-TypedValue* Class::initSProps() const {
-  TypedValue* sprops = initSPropsImpl();
-  return sprops;
-}
-
-void Class::setSPropData(TypedValue* sPropData) const {
-  assert(getSPropData() == nullptr);
-  initSPropHandle();
-  *m_propSDataCache = sPropData;
+RDS::Handle Class::sPropHandle(Slot index) const {
+  assert(m_sPropCacheInit.bound());
+  assert(numStaticProperties() > index);
+  return m_sPropCache[index].handle();
 }
 
 // True if a CPP extension class has opted into serialization.

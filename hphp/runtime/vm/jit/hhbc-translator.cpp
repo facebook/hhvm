@@ -2409,7 +2409,6 @@ SSATmp* HhbcTranslator::emitAllocObjFast(const Class* cls) {
       gen(InitProps, makeCatch(), ClassData(cls));
     }
     if (sprops) {
-      cls->initSPropHandle();
       gen(InitSProps, makeCatch(), ClassData(cls));
     }
   }
@@ -4020,65 +4019,53 @@ void HhbcTranslator::destroyName(SSATmp* name) {
 
 SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
                                       SSATmp* ssaCls,
-                                      SSATmp* ssaName) {
+                                      SSATmp* ssaName,
+                                      bool raise) {
   /*
-   * We currently can use LdClsPropAddrCached (which makes use of
-   * SPropCache) if either we know which property it is and that it is
-   * visible && accessible, or we know it is a property on this class
-   * itself, provided in either case that the class has no 86sinit
-   * method.
-   *
-   * TODO(#3575370): we should get the target cache lookup not to have
-   * to do accessibility checks by doing them here.
+   * We can use LdClsPropAddrKnown if either we know which property it is and
+   * that it is visible && accessible, or we know it is a property on this
+   * class itself.
    */
-  bool const useSpropCache = [&] {
+  bool const sPropKnown = [&] {
     if (!ssaName->isConst()) return false;
     auto const propName = ssaName->strVal();
-    auto const clsName  = findClassName(ssaCls);
-    if (clsName && curClass() && curClass()->name()->isame(clsName)) {
-      return true;
-    }
 
     if (!ssaCls->isConst()) return false;
     auto const cls = ssaCls->clsVal();
     if (!classIsPersistentOrCtxParent(cls)) return false;
 
-    if (cls->hasSInitMethods()) return false;
+    if (cls->hasInitMethods()) return false;
 
     bool visible, accessible;
     cls->getSProp(curClass(), propName, visible, accessible);
     return visible && accessible;
   }();
 
-  auto const repoTy = [&] {
-    if (!useSpropCache ||
-        !RuntimeOption::RepoAuthoritative ||
-        !Repo::get().global().UsedHHBBC) {
-      return RepoAuthType{};
-    }
-    auto const cls = [&]() -> const Class* {
-      if (ssaCls->isConst()) return ssaCls->clsVal();
-      if (auto const name = findClassName(ssaCls)) {
-        auto const cls = Unit::lookupUniqueClass(name);
-        if (cls && classIsUnique(cls)) return cls;
-      }
-      return nullptr;
-    }();
-    if (!cls) return RepoAuthType{};
-    auto const slot = cls->lookupSProp(ssaName->strVal());
-    return cls->staticPropRepoAuthType(slot);
-  }();
+  if (sPropKnown) {
+    auto const cls = ssaCls->clsVal();
 
-  auto const ptrTy = convertToType(repoTy).ptr();
-  if (useSpropCache) {
-    return gen(LdClsPropAddrCached, ptrTy,
-                                    catchBlock,
-                                    ssaCls,
-                                    ssaName,
-                                    cns(findClassName(ssaCls)),
-                                    cns(curClass()));
+    auto const repoTy = [&] {
+      if (!RuntimeOption::RepoAuthoritative ||
+          !Repo::get().global().UsedHHBBC) {
+        return RepoAuthType{};
+      }
+      auto const slot = cls->lookupSProp(ssaName->strVal());
+      return cls->staticPropRepoAuthType(slot);
+    }();
+
+    auto const ptrTy = convertToType(repoTy).ptr();
+
+    gen(InitSProps, catchBlock, ClassData(cls));
+    return gen(LdClsPropAddrKnown, ptrTy, ssaCls, ssaName);
   }
-  return gen(LdClsPropAddr, catchBlock, ssaCls, ssaName, cns(curClass()));
+
+  if (raise) {
+    return gen(LdClsPropAddrOrRaise, catchBlock,
+               ssaCls, ssaName, cns(curClass()));
+  } else {
+    return gen(LdClsPropAddrOrNull, catchBlock,
+               ssaCls, ssaName, cns(curClass()));
+  }
 }
 
 void HhbcTranslator::emitCGetS() {
@@ -4090,7 +4077,7 @@ void HhbcTranslator::emitCGetS() {
   }
 
   auto const ssaCls   = popA();
-  auto const propAddr = ldClsPropAddr(catchBlock, ssaCls, ssaPropName);
+  auto const propAddr = ldClsPropAddr(catchBlock, ssaCls, ssaPropName, true);
   auto const unboxed  = gen(UnboxPtr, propAddr);
   auto const ldMem    = gen(LdMem, unboxed->type().deref(), unboxed, cns(0));
 
@@ -4108,7 +4095,7 @@ void HhbcTranslator::emitSetS() {
 
   auto const value    = popC(DataTypeCountness);
   auto const ssaCls   = popA();
-  auto const propAddr = ldClsPropAddr(catchBlock, ssaCls, ssaPropName);
+  auto const propAddr = ldClsPropAddr(catchBlock, ssaCls, ssaPropName, true);
   auto const ptr      = gen(UnboxPtr, propAddr);
 
   destroyName(ssaPropName);
@@ -4124,7 +4111,7 @@ void HhbcTranslator::emitVGetS() {
   }
 
   auto const ssaCls   = popA();
-  auto const propAddr = ldClsPropAddr(catchBlock, ssaCls, ssaPropName);
+  auto const propAddr = ldClsPropAddr(catchBlock, ssaCls, ssaPropName, true);
 
   destroyName(ssaPropName);
   pushIncRef(gen(LdMem, Type::BoxedCell, gen(BoxPtr, propAddr), cns(0)));
@@ -4140,27 +4127,30 @@ void HhbcTranslator::emitBindS() {
 
   auto const value    = popV();
   auto const ssaCls   = popA();
-  auto const propAddr = ldClsPropAddr(catchBlock, ssaCls, ssaPropName);
+  auto const propAddr = ldClsPropAddr(catchBlock, ssaCls, ssaPropName, true);
 
   destroyName(ssaPropName);
   emitBindMem(propAddr, value);
 }
 
 void HhbcTranslator::emitIssetS() {
+  auto const catchBlock  = makeCatch();
+
   auto const ssaPropName = topC(1);
   if (!ssaPropName->isA(Type::Str)) {
     PUNT(IssetS-PropNameNotString);
   }
-
   auto const ssaCls = popA();
+
   auto const ret = m_irb->cond(
     [&] (Block* taken) {
-      return ldClsPropAddr(taken, ssaCls, ssaPropName);
+      auto propAddr = ldClsPropAddr(catchBlock, ssaCls, ssaPropName, false);
+      return gen(CheckNonNull, taken, propAddr);
     },
     [&] (SSATmp* ptr) { // Next: property or global exists
       return gen(IsNTypeMem, Type::Null, gen(UnboxPtr, ptr));
     },
-    [&] { // Taken: LdClsPropAddr* branched because it isn't defined
+    [&] { // Taken: LdClsPropAddr* returned Nullptr because it isn't defined
       return cns(false);
     }
   );
@@ -4170,6 +4160,8 @@ void HhbcTranslator::emitIssetS() {
 }
 
 void HhbcTranslator::emitEmptyS() {
+  auto const catchBlock  = makeCatch();
+
   auto const ssaPropName = topC(1);
   if (!ssaPropName->isA(Type::Str)) {
     PUNT(EmptyS-PropNameNotString);
@@ -4178,14 +4170,15 @@ void HhbcTranslator::emitEmptyS() {
   auto const ssaCls = popA();
   auto const ret = m_irb->cond(
     [&] (Block* taken) {
-      return ldClsPropAddr(taken, ssaCls, ssaPropName);
+      auto propAddr = ldClsPropAddr(catchBlock, ssaCls, ssaPropName, false);
+      return gen(CheckNonNull, taken, propAddr);
     },
     [&] (SSATmp* ptr) {
       auto const unbox = gen(UnboxPtr, ptr);
       auto const val   = gen(LdMem, unbox->type().deref(), unbox, cns(0));
       return gen(XorBool, gen(ConvCellToBool, val), cns(true));
     },
-    [&] { // Taken: LdClsPropAddr* branched because it isn't defined
+    [&] { // Taken: LdClsPropAddr* returned Nullptr because it isn't defined
       return cns(true);
     }
   );
@@ -4364,24 +4357,29 @@ void HhbcTranslator::emitInitProp(Id propId, InitPropOp op) {
   StringData* propName = lookupStringId(propId);
   SSATmp* val = popC();
 
-  auto* cctx = gen(LdCctx, m_irb->fp());
-  auto* cls = gen(LdClsCtx, cctx);
   auto* ctx = curClass();
-  SSATmp* propInitVec;
-  Slot idx;
+
+  SSATmp* base;
+  Slot idx = 0;
 
   switch(op) {
-    case InitPropOp::Static: {
-      propInitVec = gen(LdClsStaticInitData, cls);
-      idx = ctx->lookupSProp(propName);
-    } break;
+    case InitPropOp::Static:
+      // For sinit, the context class is always the same as the late-bound
+      // class, so we can just use curClass().
+      base = gen(LdClsPropAddrKnown, Type::PtrToCell, cns(ctx), cns(propName));
+      break;
+
     case InitPropOp::NonStatic: {
-      propInitVec = gen(LdClsInitData, cls);
+      // The above is not the case for pinit, so we need to load.
+      auto* cctx = gen(LdCctx, m_irb->fp());
+      auto* cls = gen(LdClsCtx, cctx);
+
+      base = gen(LdClsInitData, cls);
       idx = ctx->lookupDeclProp(propName);
     } break;
   }
 
-  gen(StElem, propInitVec, cns(idx * sizeof(TypedValue)), val);
+  gen(StElem, base, cns(idx * sizeof(TypedValue)), val);
 }
 
 static folly::Optional<Type> assertOpToType(AssertTOp op) {

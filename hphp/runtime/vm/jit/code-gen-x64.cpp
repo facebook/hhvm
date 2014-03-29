@@ -252,6 +252,8 @@ CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(ClosureStaticLocInit)
 CALL_OPCODE(ArrayIdx)
 CALL_OPCODE(GenericIdx)
+CALL_OPCODE(LdClsPropAddrOrNull)
+CALL_OPCODE(LdClsPropAddrOrRaise)
 CALL_OPCODE(LdGblAddrDef)
 
 // Vector instruction helpers
@@ -3526,7 +3528,9 @@ void CodeGenerator::cgInitProps(IRInstruction* inst) {
 
 void CodeGenerator::cgInitSProps(IRInstruction* inst) {
   auto const cls    = inst->extra<InitSProps>()->cls;
-  m_as.cmpq(0, rVmTl[cls->sPropHandle()]);
+  cls->initSPropHandles();
+
+  m_as.cmpb(0, rVmTl[cls->sPropInitHandle()]);
   unlikelyIfBlock(CC_Z, [&] (Asm& a) {
       cgCallHelper(a,
                    CppCall(getMethodPtr(&Class::initSProps)),
@@ -4977,81 +4981,14 @@ void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
   asm_label(m_as, End);
 }
 
-void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
-  auto dstReg   = dstLoc(0).reg();
-  auto clsReg   = srcLoc(0).reg();
-  SSATmp* propName = inst->src(1);
-  SSATmp* clsName  = inst->src(2);
-  Block* target    = inst->taken();
-  if (target && target->isCatch()) target = nullptr;
-
-  const StringData* propNameString = propName->strVal();
-  const StringData* clsNameString  = clsName->strVal();
-
-  std::string sds(toLower(clsNameString->data()) + ":" +
-                  std::string(propNameString->data(), propNameString->size()));
-  String sd(sds);
-  auto const ch = SPropCache::alloc(makeStaticString(sd));
-
-  // Cls is live in the slow path call to lookup, so we have to be
-  // careful not to clobber it before the branch to slow path. So
-  // use the scratch register as a temporary destination if cls is
-  // assigned the same register as the dst register.
-  auto tmpReg = dstReg;
-  if (dstReg == InvalidReg || dstReg == clsReg) {
-    tmpReg = PhysReg(m_rScratch);
-  }
-
-  // Could be optimized to cmp against zero when !label && dstReg == InvalidReg
-  m_as.loadq(rVmTl[ch], tmpReg);
-  m_as.testq(tmpReg, tmpReg);
-  unlikelyIfBlock(CC_E, [&] (Asm& a) {
-    cgCallHelper(
-      a,
-      CppCall(
-        target ? SPropCache::lookup<false>
-               : SPropCache::lookup<true> // raise on error
-      ),
-      callDest(tmpReg),
-      SyncOptions::kSyncPoint, // could re-enter to init properties
-      argGroup().imm(ch).ssa(0).ssa(1).ssa(3) // ch, cls, propName, cxt
-    );
-    if (target) {
-      a.testq(tmpReg, tmpReg);
-      emitFwdJcc(a, CC_Z, target);
-    }
-  });
-  if (dstReg != InvalidReg) {
-    emitMovRegReg(m_as, tmpReg, dstReg);
-  }
-}
-
-void CodeGenerator::cgLdClsPropAddr(IRInstruction* inst) {
+void CodeGenerator::cgLdClsPropAddrKnown(IRInstruction* inst) {
   auto dstReg = dstLoc(0).reg();
-  Block*  target = inst->taken();
-  // If our label is a catch trace we pretend we don't have one, to
-  // avoid emitting a jmp to it or calling the wrong helper.
-  if (target && target->isCatch()) target = nullptr;
 
-  if (dstReg == InvalidReg && target) {
-    // result is unused but this instruction was not eliminated
-    // because its essential
-    dstReg = m_rScratch;
-  }
-  cgCallHelper(
-    m_as,
-    CppCall(
-      target ? SPropCache::lookupSProp<false>
-             : SPropCache::lookupSProp<true> // raise on error
-    ),
-    callDest(dstReg),
-    SyncOptions::kSyncPoint, // could re-enter to init properties
-    argGroup().ssa(0/*cls*/).ssa(1/*prop*/).ssa(2/*ctx*/)
-  );
-  if (target) {
-    m_as.testq(dstReg, dstReg);
-    emitFwdJcc(m_as, CC_Z, target);
-  }
+  auto cls  = inst->src(0)->clsVal();
+  auto name = inst->src(1)->strVal();
+
+  auto ch = cls->sPropHandle(cls->lookupSProp(name));
+  m_as.lea(rVmTl[ch], dstReg);
 }
 
 RDS::Handle CodeGenerator::cgLdClsCachedCommon(
@@ -6009,16 +5946,6 @@ void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
   m_as.  loadl(clsReg[offset], r32(dstReg));
   m_as.  loadq(rVmTl[dstReg], dstReg);
   m_as.  loadq(dstReg[Class::PropInitVec::dataOff()], dstReg);
-}
-
-void CodeGenerator::cgLdClsStaticInitData(IRInstruction* inst) {
-  auto clsReg = srcLoc(0).reg();
-  auto dstReg = dstLoc(0).reg();
-
-  m_as.  loadl(clsReg[Class::spropdataOff()
-                       + RDS::Link<Class::PropInitVec*>::handleOff()],
-               r32(dstReg));
-  m_as.  loadq(rVmTl[dstReg], dstReg);
 }
 
 void CodeGenerator::print() const {

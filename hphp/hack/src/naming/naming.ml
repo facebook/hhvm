@@ -697,8 +697,8 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       if !Silent.is_silent_mode
       then N.Hany
       else
-        error p ("Primitive type annotations are always available and may no"^
-                 "longer be referred to in the toplevel namespace.")
+        error p ("Primitive type annotations are always available and may no \
+                  longer be referred to in the toplevel namespace.")
   | "void"             -> N.Hprim N.Tvoid
   | "int"              -> N.Hprim N.Tint
   | "bool"             -> N.Hprim N.Tbool

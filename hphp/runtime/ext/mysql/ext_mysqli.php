@@ -1099,7 +1099,7 @@ class mysqli_result {
    *   either need to access the result with numeric indices by using
    *   mysqli_fetch_row() or add alias names.
    */
-  public function fetch_assoc(): array {
+  public function fetch_assoc(): mixed {
     return $this->fetch_array(MYSQLI_ASSOC);
   }
 
@@ -2543,7 +2543,7 @@ function mysqli_fetch_array(mysqli_result $result,
  *   need to access the result with numeric indices by using
  *   mysqli_fetch_row() or add alias names.
  */
-function mysqli_fetch_assoc(mysqli_result $result): array {
+function mysqli_fetch_assoc(mysqli_result $result): mixed {
   return $result->fetch_assoc();
 }
 

@@ -24,18 +24,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * The error handler callbacks below are called from libxml code
- * that is compiled without frame pointers, so it's necessary to do
- * SYNC_VM_REGS_SCOPED() before calling libxml code that uses these
- * error handler callbacks.
- */
-
-void php_libxml_ctx_error(void *ctx,
-                          const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
-void php_libxml_ctx_warning(void *ctx,
-                            const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
-
 Variant f_dom_document_create_element(
   const Variant& obj, const String& name, const String& value = null_string);
 Variant f_dom_document_create_document_fragment(const Variant& obj);

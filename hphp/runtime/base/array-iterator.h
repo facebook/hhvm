@@ -650,9 +650,7 @@ int64_t new_iter_array_key(Iter* dest, ArrayData* arr, TypedValue* val,
                            TypedValue* key);
 int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* val, TypedValue* key);
-int64_t iter_next(Iter* dest, TypedValue* val);
-template <bool withRef>
-int64_t iter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
+int64_t witer_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
 
 int64_t new_miter_array_key(Iter* dest, RefData* arr, TypedValue* val,
@@ -662,21 +660,11 @@ int64_t new_miter_object(Iter* dest, RefData* obj, Class* ctx,
 int64_t new_miter_other(Iter* dest, RefData* data);
 int64_t miter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
-ArrayIter getContainerIter(const Variant& v);
-ArrayIter getContainerIter(const Variant& v, size_t& sz);
-
 int64_t iter_next_ind(Iter* iter, TypedValue* valOut);
 int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut);
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-const unsigned int kIterNextTableSize = 9;
-typedef int64_t(*IterNextHelper)(Iter*, TypedValue*);
-extern const IterNextHelper g_iterNextHelpers[kIterNextTableSize];
-typedef int64_t(*IterNextKHelper)(Iter*, TypedValue*, TypedValue*);
-extern const IterNextKHelper g_iterNextKHelpers[kIterNextTableSize];
-
-///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_ARRAY_ITERATOR_H_

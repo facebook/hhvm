@@ -1456,63 +1456,11 @@ static int64_t iter_next_apc_array(Iter* iter,
   return 1;
 }
 
-int64_t iter_next(Iter* iter, TypedValue* valOut) {
-  TRACE(2, "iter_next: I %p\n", iter);
-  assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
-         iter->arr().getIterType() == ArrayIter::TypeIterator);
-  auto const arrIter = &iter->arr();
-  valOut = tvToCell(valOut);
-  if (UNLIKELY(!arrIter->hasArrayData())) {
-    goto cold;
-  }
-
-  {
-    auto const ad = const_cast<ArrayData*>(arrIter->getArrayData());
-    if (UNLIKELY(!ad->isHphpArray())) {
-      if (ad->isSharedArray()) {
-        return iter_next_apc_array(iter, valOut, nullptr, ad);
-      }
-      goto cold;
-    }
-    auto const arr = static_cast<HphpArray*>(ad);
-
-    ssize_t pos = arrIter->getPos();
-    do {
-      if (size_t(++pos) >= size_t(arr->iterLimit())) {
-        if (UNLIKELY(arr->hasExactlyOneRef())) {
-          return iter_next_free_arr(iter, arr);
-        }
-        arr->decRefCount();
-        if (debug) {
-          iter->arr().setIterType(ArrayIter::TypeUndefined);
-        }
-        return 0;
-      }
-    } while (UNLIKELY(arr->isTombstone(pos)));
-
-    if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
-      goto cold;
-    }
-    tvDecRefOnly(valOut);
-    arrIter->setPos(pos);
-    arr->getArrayElm<false>(pos, valOut, nullptr);
-    return 1;
-  }
-
-cold:
-  return iter_next_cold<false>(iter, valOut, nullptr);
-}
-
-template <bool withRef>
-int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
+int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iter_next_key: I %p\n", iter);
   assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
          iter->arr().getIterType() == ArrayIter::TypeIterator);
   auto const arrIter = &iter->arr();
-  if (!withRef) {
-    valOut = tvToCell(valOut);
-    keyOut = tvToCell(keyOut);
-  }
   if (UNLIKELY(!arrIter->hasArrayData())) {
     goto cold;
   }
@@ -1542,31 +1490,14 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
       }
     } while (UNLIKELY(arr->isTombstone(pos)));
 
-    if (!withRef) {
-      if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
-        goto cold;
-      }
-      if (UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
-        goto cold;
-      }
-      tvDecRefOnly(valOut);
-      tvDecRefOnly(keyOut);
-    }
     arrIter->setPos(pos);
-    arr->getArrayElm<withRef>(pos, valOut, keyOut);
+    arr->getArrayElm<true>(pos, valOut, keyOut);
     return 1;
   }
 
 cold:
-  return iter_next_cold<withRef>(iter, valOut, keyOut);
+  return iter_next_cold<true>(iter, valOut, keyOut);
 }
-
-template int64_t iter_next_key<false>(Iter* dest,
-                                      TypedValue* valOut,
-                                      TypedValue* keyOut);
-template int64_t iter_next_key<true>(Iter* dest,
-                                     TypedValue* valOut,
-                                     TypedValue* keyOut);
 
 ///////////////////////////////////////////////////////////////////////////////
 // MIter functions
@@ -1651,39 +1582,8 @@ int64_t miter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   return 1LL;
 }
 
-ArrayIter getContainerIter(const Variant& v) {
-  auto c = v.asCell();
-  if (c->m_type == KindOfArray) {
-    ArrayData* a = c->m_data.parr;
-    return ArrayIter(a);
-  }
-  if (c->m_type == KindOfObject) {
-    ObjectData* o = c->m_data.pobj;
-    if (o->isCollection()) return ArrayIter(o);
-  }
-  throw_param_is_not_container();
-}
-
-ArrayIter getContainerIter(const Variant& v, size_t& sz) {
-  auto c = v.asCell();
-  if (c->m_type == KindOfArray) {
-    auto a = c->m_data.parr;
-    sz = a->size();
-    return ArrayIter(a);
-  }
-  if (c->m_type == KindOfObject) {
-    auto o = c->m_data.pobj;
-    if (o->isCollection()) {
-      sz = getCollectionSize(o);
-      return ArrayIter(o);
-    }
-  }
-  throw_param_is_not_container();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // IterNext/IterNextK helpers
-
 
 namespace {
 
@@ -1903,38 +1803,37 @@ int64_t iterNextKPair(Iter* it,
 
 int64_t iterNextObject(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextObject: I %p\n", it);
+  // We can't just put the address of iter_next_cold in the table
+  // below right now because we need to get a nullptr into the third
+  // argument register for it.
   return iter_next_cold<false>(it, valOut, nullptr);
 }
 
-int64_t iterNextKObject(Iter* it,
-                        TypedValue* valOut,
-                        TypedValue* keyOut) {
-  TRACE(2, "iterNextKObject: I %p\n", it);
-  return iter_next_cold<false>(it, valOut, keyOut);
-}
+using IterNextHelper  = int64_t (*)(Iter*, TypedValue*);
+using IterNextKHelper = int64_t (*)(Iter*, TypedValue*, TypedValue*);
 
 const IterNextHelper g_iterNextHelpers[] = {
-  (IterNextHelper)&iterNextArrayPacked,
-  (IterNextHelper)&iterNextArrayMixed,
-  (IterNextHelper)&iterNextArray,
-  (IterNextHelper)&iterNextVector,
-  (IterNextHelper)&iterNextImmVector,
-  (IterNextHelper)&iterNextMap,
-  (IterNextHelper)&iterNextSet,
-  (IterNextHelper)&iterNextPair,
-  (IterNextHelper)&iterNextObject,
+  &iterNextArrayPacked,
+  &iterNextArrayMixed,
+  &iterNextArray,
+  &iterNextVector,
+  &iterNextImmVector,
+  &iterNextMap,
+  &iterNextSet,
+  &iterNextPair,
+  &iterNextObject,
 };
 
 const IterNextKHelper g_iterNextKHelpers[] = {
-  (IterNextKHelper)&iterNextKArrayPacked,
-  (IterNextKHelper)&iterNextKArrayMixed,
-  (IterNextKHelper)&iterNextKArray,
-  (IterNextKHelper)&iterNextKVector,
-  (IterNextKHelper)&iterNextKImmVector,
-  (IterNextKHelper)&iterNextKMap,
-  (IterNextKHelper)&iterNextKSet,
-  (IterNextKHelper)&iterNextKPair,
-  (IterNextKHelper)&iterNextKObject,
+  &iterNextKArrayPacked,
+  &iterNextKArrayMixed,
+  &iterNextKArray,
+  &iterNextKVector,
+  &iterNextKImmVector,
+  &iterNextKMap,
+  &iterNextKSet,
+  &iterNextKPair,
+  &iter_next_cold<false>, // iterNextKObject
 };
 
 int64_t iter_next_ind(Iter* iter, TypedValue* valOut) {

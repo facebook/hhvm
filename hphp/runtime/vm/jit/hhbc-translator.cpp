@@ -4968,6 +4968,7 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
     case OpSetWithRefRM:
     case OpUnsetM:
     case OpFPassM:
+    case OpIncDecM:
       switch (inst.immVec.locationCode()) {
         case LL: {
           auto const& mii = getMInstrInfo(inst.mInstrOp());
@@ -4981,7 +4982,7 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
           // used instead of SetElem because SetElem makes a few assumptions
           // about side exits that interpOne won't do.
           auto const baseType = m_irb->localType(base.offset,
-                                                DataTypeSpecific).ptr();
+                                                 DataTypeSpecific).ptr();
           auto const isUnset = inst.op() == OpUnsetM;
           auto const isProp = mcodeIsProp(inst.immVecM[0]);
 

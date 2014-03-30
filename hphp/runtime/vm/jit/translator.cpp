@@ -1159,7 +1159,7 @@ static const struct {
   { OpIncDecN,     {Stack1,           Stack1|Local, OutUnknown,        0 }},
   { OpIncDecG,     {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpIncDecS,     {StackTop2,        Stack1,       OutUnknown,       -1 }},
-  { OpIncDecM,     {MVector,          Stack1,       OutUnknown,        1 }},
+  { OpIncDecM,     {MVector,          Stack1|Local, OutUnknown,        1 }},
   { OpBindL,       {Stack1|Local|
                     IgnoreInnerType,  Stack1|Local, OutSameAsInput,    0 }},
   { OpBindN,       {StackTop2,        Stack1|Local, OutSameAsInput,   -1 }},
@@ -2389,6 +2389,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                op == OpUnsetM ||
                                op == OpIncDecL ||
                                op == OpVGetM || op == OpFPassM ||
+                               op == OpIncDecM ||
                                op == OpStaticLocInit || op == OpInitThisLoc ||
                                op == OpSetL || op == OpBindL || op == OpVGetL ||
                                op == OpPushL || op == OpUnsetL ||
@@ -2436,7 +2437,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
         if (op == OpSetM || op == OpSetOpM ||
             op == OpVGetM || op == OpBindM ||
             op == OpSetWithRefLM || op == OpSetWithRefRM ||
-            op == OpUnsetM || op == OpFPassM) {
+            op == OpUnsetM || op == OpFPassM || op == OpIncDecM) {
           switch (ni->immVec.locationCode()) {
             case LL: {
               const int kVecStart = (op == OpSetM ||
@@ -2454,7 +2455,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                 // reflect the new value.
                 ni->outLocal = t.newDynLocation(locLoc, inLoc->rtt);
               } else if (inLoc->rtt.isString() ||
-                  inLoc->rtt.valueType() == KindOfBoolean) {
+                         inLoc->rtt.valueType() == KindOfBoolean) {
                 // Strings and bools produce value-dependent results; "" and
                 // false upgrade to an array successfully, while other values
                 // fail and leave the lhs unmodified.

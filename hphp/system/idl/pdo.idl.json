@@ -103,6 +103,18 @@
                     ]
                 },
                 {
+                    "name": "inTransaction",
+                    "desc": "Checks if a transaction is currently active within the driver. This method only works for database drivers that support transactions.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE if a transaction is currently active, and FALSE if not." 
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "rollBack",
                     "desc": "Rolls back the current transaction, as initiated by PDO::beginTransaction(). It is an error to call this method if no transaction is active.\n\nIf the database was set to autocommit mode, this function will restore autocommit mode after it has rolled back the transaction.\n\nSome databases, including MySQL, automatically issue an implicit COMMIT when a database definition language (DDL) statement such as DROP TABLE or CREATE TABLE is issued within a transaction. The implicit COMMIT will prevent you from rolling back any other changes within the transaction boundary.",
                     "flags": [

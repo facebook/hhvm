@@ -277,26 +277,32 @@ ArrayData* ProxyArray::EscalateForSort(ArrayData* ad) {
 }
 
 void ProxyArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
+  ad = reseatable(ad, innerArr(ad)->escalateForSort());
   return innerArr(ad)->ksort(sort_flags, ascending);
 }
 
 void ProxyArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
+  ad = reseatable(ad, innerArr(ad)->escalateForSort());
   return innerArr(ad)->sort(sort_flags, ascending);
 }
 
 void ProxyArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
+  ad = reseatable(ad, innerArr(ad)->escalateForSort());
   return innerArr(ad)->asort(sort_flags, ascending);
 }
 
 bool ProxyArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
+  ad = reseatable(ad, innerArr(ad)->escalateForSort());
   return innerArr(ad)->uksort(cmp_function);
 }
 
 bool ProxyArray::Usort(ArrayData* ad, const Variant& cmp_function) {
+  ad = reseatable(ad, innerArr(ad)->escalateForSort());
   return innerArr(ad)->usort(cmp_function);
 }
 
 bool ProxyArray::Uasort(ArrayData* ad, const Variant& cmp_function) {
+  ad = reseatable(ad, innerArr(ad)->escalateForSort());
   return innerArr(ad)->uasort(cmp_function);
 }
 

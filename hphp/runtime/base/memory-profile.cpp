@@ -142,19 +142,10 @@ size_t MemoryProfile::getSizeOfTV(TypedValue *tv) {
 }
 
 // static
-size_t MemoryProfile::getSizeOfArray(ArrayData *arr) {
-  size_t size = getSizeOfPtr(arr);
-  if (size == 0) { return 0; }
-  if (arr->isHphpArray()) {
-    // calculate extra size
-    HphpArray *ha = static_cast<HphpArray *>(arr);
-    size_t hashSize = ha->hashSize();
-    size_t maxElms = HphpArray::computeMaxElms(ha->m_tableMask);
-    if (maxElms > HphpArray::SmallSize) {
-      size += maxElms * sizeof(HphpArray::Elm) + hashSize * sizeof(int32_t);
-    }
-  }
-  return size;
+size_t MemoryProfile::getSizeOfArray(ArrayData* arr) {
+  // Some non-flat array types have extra memory (e.g. the local TV
+  // cache of an apc local array), but we haven't implemented this.
+  return getSizeOfPtr(arr);
 }
 
 // static

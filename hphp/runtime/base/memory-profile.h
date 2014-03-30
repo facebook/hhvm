@@ -72,8 +72,8 @@ private:
   void logDeallocationImpl(void *ptr);
 
   // some helpers to dive into compound TVs
-  static size_t getSizeOfArray(ArrayData *arr);
-  static size_t getSizeOfObject(ObjectData *obj);
+  static size_t getSizeOfArray(ArrayData* arr);
+  static size_t getSizeOfObject(ObjectData* obj);
 
   // Map of live allocations, keyed on their pointers.
   std::map<void *, Allocation> m_livePointers;

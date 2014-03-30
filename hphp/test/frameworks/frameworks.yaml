@@ -185,12 +185,12 @@
     commit: 6225b22de9dcf36546be3a0b2fa8e3d986153f57
     install_root: monolog
     test_root: monolog
-  mustache.php:
-    url: https://github.com/Seldaek/monolog.git
+  mustache:
+    url: https://github.com/bobthecow/mustache.php.git 
     branch: master
     commit: 996c944fa2ddedddfaf0d276b913809d6a32fd85
-    install_root: mustache.php
-    test_root: mustache.php
+    install_root: mustache
+    test_root: mustache
   paris:
     url: https://github.com/j4mie/paris.git
     branch: v1.4.2

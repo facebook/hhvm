@@ -271,7 +271,6 @@ rule token = parse
   | "<<<"              { Theredoc     }
   | int                { Tint         }
   | float              { Tfloat       }
-  | "infinity"         { Tfloat       }
   | '@'                { Tat          }
   | "?>"               { Tclose_php   }
   | word               { Tword        }

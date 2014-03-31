@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/ext_process.h"
-#include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_collections.h"

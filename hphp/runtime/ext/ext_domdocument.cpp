@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_domdocument.h"
 #include <map>
 #include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -3433,20 +3433,20 @@ void c_DOMDocument::t_normalizedocument() {
 
 bool c_DOMDocument::t_registernodeclass(const String& baseclass,
                                         const String& extendedclass) {
-  if (!f_class_exists(baseclass)) {
+  if (!HHVM_FN(class_exists)(baseclass)) {
     raise_error("Class %s does not exist", baseclass.data());
     return false;
   }
-  if (!f_is_a(baseclass, "DOMNode", true)) {
+  if (!HHVM_FN(is_a)(baseclass, "DOMNode", true)) {
     raise_error("Class %s is not DOMNode or derived from it.",
                 baseclass.data());
     return false;
   }
-  if (!f_class_exists(extendedclass)) {
+  if (!HHVM_FN(class_exists)(extendedclass)) {
     raise_error("Class %s does not exist", extendedclass.data());
     return false;
   }
-  if (!f_is_subclass_of(extendedclass, baseclass)) {
+  if (!HHVM_FN(is_subclass_of)(extendedclass, baseclass)) {
     raise_error("Class %s is not derived from %s.", extendedclass.data(),
                 baseclass.data());
     return false;

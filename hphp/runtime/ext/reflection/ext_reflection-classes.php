@@ -916,7 +916,7 @@ class ReflectionClass implements Reflector {
   const IS_EXPLICIT_ABSTRACT = 32 ;
   const IS_FINAL = 64 ;
 
-  public $name;
+  public string $name;
   private $info = null;
   private $obj = null;
   private static $fetched = array();

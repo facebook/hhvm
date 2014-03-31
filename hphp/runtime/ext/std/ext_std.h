@@ -12,12 +12,14 @@ class StandardExtension : public Extension {
 
   void moduleInit() override {
     initErrorFunc();
+    initClassobj();
     initOptions();
     initVariable();
   }
 
  private:
   void initErrorFunc();
+  void initClassobj();
   void initOptions();
   void initVariable();
 };

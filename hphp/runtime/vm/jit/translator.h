@@ -190,6 +190,13 @@ struct UnknownInputExc : std::runtime_error {
   const int m_line;
 };
 
+struct ControlFlowFailedExc : std::runtime_error {
+  ControlFlowFailedExc(const char* file, int line)
+    : std::runtime_error(folly::format("ControlFlowFailedExc @ {}:{}",
+                                       file, line).str())
+    {}
+};
+
 #define punt() do { \
   throw JIT::TranslationFailedExc(__FILE__, __LINE__); \
 } while(0)
@@ -417,6 +424,7 @@ public:
    * blacklist so they're interpreted on the next attempt. */
   typedef hphp_hash_set<SrcKey, SrcKey::Hasher> RegionBlacklist;
   TranslateResult translateRegion(const RegionDesc& region,
+                                  bool bcControlFlow,
                                   RegionBlacklist& interp);
 
 private:

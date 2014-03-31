@@ -275,6 +275,10 @@ struct FrameStack {
     return live == b.live && preLive == b.preLive;
   }
 
+  bool operator!=(const FrameStack& b) const {
+    return !(*this == b);
+  }
+
   /* Map from the instruction defining the frame to a Frame object. */
   smart::hash_map<const IRInstruction*, Frame> live;
 
@@ -558,8 +562,13 @@ struct SinkPointAnalyzer : private LocalStateHook {
     auto const& firstFrames = states.front().state.frames;
     smart::hash_map<SSATmp*, IncomingValue> mergedValues;
     for (auto const& inState : states) {
-      assert(inState.state.frames == firstFrames &&
-             "merging states with different FrameStacks is not supported");
+      if (inState.state.frames != firstFrames) {
+        if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+          throw ControlFlowFailedExc(__FILE__, __LINE__);
+        }
+        always_assert(false &&
+          "merging states with different FrameStacks is not supported");
+      }
 
       for (auto const& inPair : inState.state.values) {
         auto* value = inPair.first;
@@ -1712,7 +1721,7 @@ void eliminateTakeStacks(const BlockList& blocks) {
  * complete, a separate validation pass is run to ensure the net effect on the
  * refcount of each object has not changed.
  */
-void optimizeRefcounts(IRUnit& unit, FrameState&& fs) noexcept {
+void optimizeRefcounts(IRUnit& unit, FrameState&& fs) {
   Timer _t(Timer::optimize_refcountOpts);
   FTRACE(2, "vvvvvvvvvv refcount opts vvvvvvvvvv\n");
   auto const changed = splitCriticalEdges(unit);

@@ -1898,6 +1898,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
     Translator::RegionBlacklist regionInterps;
     Offset initSpOffset = region ? region->blocks[0]->initialSpOffset()
                                  : liveSpOff();
+    bool bcControlFlow = RuntimeOption::EvalHHIRBytecodeControlFlow;
+
     while (result == Translator::Retry) {
       m_tx.traceStart(sk.offset(), initSpOffset, liveFrame()->inGenerator(),
                       sk.func());
@@ -1907,7 +1909,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
       if (region) {
         try {
           assertCleanState();
-          result = m_tx.translateRegion(*region, regionInterps);
+          result = m_tx.translateRegion(*region, bcControlFlow, regionInterps);
 
           // If we're profiling, grab the postconditions so we can
           // use them in region selection whenever we decide to retranslate.
@@ -1918,6 +1920,13 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
           FTRACE(2, "translateRegion finished with result {}\n",
                  Translator::translateResultName(result));
+        } catch (ControlFlowFailedExc& cfe) {
+          FTRACE(2, "translateRegion with control flow failed: '{}'\n",
+                 cfe.what());
+          always_assert(bcControlFlow &&
+            "control flow translation failed, but control flow not enabled");
+          bcControlFlow = false;
+          result = Translator::Retry;
         } catch (const std::exception& e) {
           FTRACE(1, "translateRegion failed with '{}'\n", e.what());
           result = Translator::Failure;

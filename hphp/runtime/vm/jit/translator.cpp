@@ -4153,6 +4153,7 @@ void Translator::traceFree() {
 
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
+                            bool bcControlFlow,
                             RegionBlacklist& toInterp) {
   Timer _t(Timer::translateRegion);
 
@@ -4252,7 +4253,7 @@ Translator::translateRegion(const RegionDesc& region,
         // TODO(t3730617): Could extend this logic to other
         // conditional control flow ops, e.g., IterNext, etc.
         inst.includeBothPaths = [&] {
-          if (!RuntimeOption::EvalHHIRBytecodeControlFlow) return false;
+          if (!bcControlFlow) return false;
           if (inst.breaksTracelet) return false;
           Offset takenOffset = inst.offset() + inst.imm[0].u_BA;
           Offset fallthruOffset = inst.offset() + instrLen((Op*)(inst.pc()));

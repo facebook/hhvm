@@ -57,7 +57,7 @@ File *PhpStreamWrapper::openFD(const char *sFD) {
 
 
 File* PhpStreamWrapper::open(const String& filename, const String& mode,
-                             int options, const Variant& context) {
+                             int options, const Resource& context) {
   if (strncasecmp(filename.c_str(), "php://", 6)) {
     return nullptr;
   }

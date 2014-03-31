@@ -80,7 +80,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
   Variant content = f_apc_fetch(cache_key);
   if (same(content, false)) {
     Variant stream = File::Open(filename, "rb", 0, f_stream_context_create(
-                make_map_array(s_http, make_map_array(s_timeout, 1000))));
+                make_map_array(s_http, make_map_array(s_timeout, 1000))).toResource());
     if (!same(stream, false)) {
       content = f_stream_get_contents(stream.toResource());
       if (!same(content, false)) {

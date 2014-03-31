@@ -193,10 +193,8 @@ const int64_t k_STREAM_URL_STAT_QUIET = 2;
 
 Variant f_fopen(const String& filename, const String& mode,
                 bool use_include_path /* = false */,
-                const Variant& context /* = null */) {
-  if (!context.isNull() &&
-      (!context.isResource() ||
-       !context.toResource().getTyped<StreamContext>())) {
+                const Resource& context /* = null */) {
+  if (!context.isNull() && !context.getTyped<StreamContext>()) {
     raise_warning("$context must be a valid Stream Context or NULL");
     return false;
   }
@@ -415,7 +413,7 @@ Variant f_fgetcsv(const Resource& handle, int64_t length /* = 0 */,
 
 Variant f_file_get_contents(const String& filename,
                             bool use_include_path /* = false */,
-                            const Variant& context /* = null */,
+                            const Resource& context /* = null */,
                             int64_t offset /* = -1 */,
                             int64_t maxlen /* = -1 */) {
   Variant stream = f_fopen(filename, "rb", use_include_path, context);
@@ -425,7 +423,7 @@ Variant f_file_get_contents(const String& filename,
 
 Variant f_file_put_contents(const String& filename, const Variant& data,
                             int flags /* = 0 */,
-                            const Variant& context /* = null */) {
+                            const Resource& context /* = null */) {
   Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb",
                             flags, context);
   if (!fvar.toBoolean()) {
@@ -504,7 +502,7 @@ Variant f_file_put_contents(const String& filename, const Variant& data,
 }
 
 Variant f_file(const String& filename, int flags /* = 0 */,
-               const Variant& context /* = null */) {
+               const Resource& context /* = null */) {
   Variant contents = f_file_get_contents(filename,
                                          flags & PHP_FILE_USE_INCLUDE_PATH,
                                          context);
@@ -562,7 +560,7 @@ Variant f_file(const String& filename, int flags /* = 0 */,
 }
 
 Variant f_readfile(const String& filename, bool use_include_path /* = false */,
-                   const Variant& context /* = null */) {
+                   const Resource& context /* = null */) {
   Variant f = f_fopen(filename, "rb", use_include_path, context);
   if (same(f, false)) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
@@ -1065,6 +1063,7 @@ bool f_lchgrp(const String& filename, const Variant& group) {
 bool f_touch(const String& filename, int64_t mtime /* = 0 */,
              int64_t atime /* = 0 */) {
   String translated = File::TranslatePath(filename);
+  // check for empty?
 
   /* create the file if it doesn't exist already */
   if (accessSyscall(translated, F_OK)) {
@@ -1091,7 +1090,7 @@ bool f_touch(const String& filename, int64_t mtime /* = 0 */,
 }
 
 bool f_copy(const String& source, const String& dest,
-            const Variant& context /* = null */) {
+            const Resource& context /* = null */) {
   if (!context.isNull() || !File::IsPlainFilePath(source) ||
       !File::IsPlainFilePath(dest)) {
     Variant sfile = f_fopen(source, "r", false, context);
@@ -1122,7 +1121,7 @@ bool f_copy(const String& source, const String& dest,
 }
 
 bool f_rename(const String& oldname, const String& newname,
-              const Variant& context /* = null */) {
+              const Resource& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(oldname);
   if (w != Stream::getWrapperFromURI(newname)) {
     raise_warning("Can't rename a file on different streams");
@@ -1142,7 +1141,7 @@ int64_t f_umask(const Variant& mask /* = null_variant */) {
   return oldumask;
 }
 
-bool f_unlink(const String& filename, const Variant& context /* = null */) {
+bool f_unlink(const String& filename, const Resource& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   CHECK_SYSTEM(w->unlink(filename));
   return true;
@@ -1313,14 +1312,14 @@ Variant f_tmpfile() {
 // directory functions
 
 bool f_mkdir(const String& pathname, int64_t mode /* = 0777 */,
-             bool recursive /* = false */, const Variant& context /* = null */) {
+             bool recursive /* = false */, const Resource& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(pathname);
   int options = recursive ? k_STREAM_MKDIR_RECURSIVE : 0;
   CHECK_SYSTEM(w->mkdir(pathname, mode, options));
   return true;
 }
 
-bool f_rmdir(const String& dirname, const Variant& context /* = null */) {
+bool f_rmdir(const String& dirname, const Resource& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(dirname);
   int options = 0;
   CHECK_SYSTEM(w->rmdir(dirname, options));
@@ -1401,7 +1400,7 @@ Variant f_dir(const String& directory) {
   return d;
 }
 
-Variant f_opendir(const String& path, const Variant& context /* = null */) {
+Variant f_opendir(const String& path, const Resource& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
   Directory *p = w->opendir(path);
   if (!p) {
@@ -1436,7 +1435,7 @@ static bool StringAscending(const String& s1, const String& s2) {
 }
 
 Variant f_scandir(const String& directory, bool descending /* = false */,
-                  const Variant& context /* = null */) {
+                  const Resource& context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(directory);
   Directory *dir = w->opendir(directory);
   if (!dir) {

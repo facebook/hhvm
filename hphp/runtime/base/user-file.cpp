@@ -52,7 +52,7 @@ StaticString s_rmdir("rmdir");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-UserFile::UserFile(Class *cls, const Variant& context /*= null */) : UserFSNode(cls) {
+UserFile::UserFile(Class *cls, const Resource& context /*= null */) : UserFSNode(cls) {
   m_StreamOpen  = lookupMethod(s_stream_open.get());
   m_StreamClose = lookupMethod(s_stream_close.get());
   m_StreamRead  = lookupMethod(s_stream_read.get());

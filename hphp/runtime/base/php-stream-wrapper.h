@@ -27,7 +27,7 @@ class PhpStreamWrapper : public Stream::Wrapper {
  public:
   File *openFD(const char *sFD);
   virtual File* open(const String& filename, const String& mode,
-                     int options, const Variant& context);
+                     int options, const Resource& context);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

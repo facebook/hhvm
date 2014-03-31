@@ -87,9 +87,9 @@
             "args": [
                 {
                     "name": "stream_or_context",
-                    "type": "Variant",
+                    "type": "Resource",
                     "desc": "The stream or context resource to apply the options too.",
-                    "value": "null_variant"
+                    "value": "null_resource"
                 },
                 {
                     "name": "wrapper_or_options",

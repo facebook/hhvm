@@ -35,7 +35,7 @@ extern const int64_t k_STREAM_URL_STAT_QUIET;
 
 Variant f_fopen(
   const String& filename, const String& mode, bool use_include_path = false,
-  const Variant& context = uninit_null());
+  const Resource& context = null_resource);
 Variant f_popen(const String& command, const String& mode);
 bool f_fclose(const Resource& handle);
 Variant f_pclose(const Resource& handle);
@@ -72,14 +72,14 @@ Variant f_fgetcsv(
 
 Variant f_file_get_contents(
   const String& filename, bool use_include_path = false,
-  const Variant& context = uninit_null(),
+  const Resource& context = null_resource,
   int64_t offset = -1, int64_t maxlen = -1);
 Variant f_file_put_contents(const String& filename, const Variant& data, int flags = 0,
-                            const Variant& context = uninit_null());
+                            const Resource& context = null_resource);
 Variant f_file(
-  const String& filename, int flags = 0, const Variant& context = uninit_null());
+  const String& filename, int flags = 0, const Resource& context = null_resource);
 Variant f_readfile(const String& filename, bool use_include_path = false,
-                   const Variant& context = uninit_null());
+                   const Resource& context = null_resource);
 bool f_move_uploaded_file(const String& filename, const String& destination);
 Variant f_parse_ini_file(const String& filename, bool process_sections = false,
                          int scanner_mode = k_INI_SCANNER_NORMAL);
@@ -98,12 +98,12 @@ bool f_chgrp(const String& filename, const Variant& group);
 bool f_lchgrp(const String& filename, const Variant& group);
 bool f_touch(const String& filename, int64_t mtime = 0, int64_t atime = 0);
 bool f_copy(
-  const String& source, const String& dest, const Variant& context = uninit_null());
+  const String& source, const String& dest, const Resource& context = null_resource);
 bool f_rename(
   const String& oldname, const String& newname,
-  const Variant& context = uninit_null());
+  const Resource& context = null_resource);
 int64_t f_umask(const Variant& mask = null_variant);
-bool f_unlink(const String& filename, const Variant& context = uninit_null());
+bool f_unlink(const String& filename, const Resource& context = null_resource);
 bool f_link(const String& target, const String& link);
 bool f_symlink(const String& target, const String& link);
 String f_basename(const String& path, const String& suffix = null_string);
@@ -151,18 +151,18 @@ Variant f_disk_total_space(const String& directory);
 
 bool f_mkdir(
   const String& pathname, int64_t mode = 0777, bool recursive = false,
-  const Variant& context = uninit_null());
-bool f_rmdir(const String& dirname, const Variant& context = uninit_null());
+  const Resource& context = null_resource);
+bool f_rmdir(const String& dirname, const Resource& context = null_resource);
 String f_dirname(const String& path);
 Variant f_getcwd();
 bool f_chdir(const String& directory);
 bool f_chroot(const String& directory);
 Variant f_dir(const String& directory);
-Variant f_opendir(const String& path, const Variant& context = uninit_null());
+Variant f_opendir(const String& path, const Resource& context = null_resource);
 Variant f_readdir(const Resource& dir_handle = null_resource);
 void f_rewinddir(const Resource& dir_handle = null_resource);
 Variant f_scandir(const String& directory, bool descending = false,
-                  const Variant& context = uninit_null());
+                  const Resource& context = null_resource);
 void f_closedir(const Resource& dir_handle = null_resource);
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -146,5 +146,4 @@ add_definitions(-DHPHP_OSS=1)
 add_definitions(-DPACKAGE=hhvm -DPACKAGE_VERSION=Release)
 
 include_directories(${HPHP_HOME}/hphp)
-include_directories(${HPHP_HOME}/hphp/lib/system/gen)
 include_directories(${HPHP_HOME})

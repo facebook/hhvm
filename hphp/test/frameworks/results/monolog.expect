@@ -143,13 +143,13 @@ Monolog\Handler\DynamoDbHandlerTest::testHandle
 Monolog\Handler\DynamoDbHandlerTest::testInterface
 .
 Monolog\Handler\ElasticSearchHandlerTest::testConnectionErrors with data set #0
-F
+.
 Monolog\Handler\ElasticSearchHandlerTest::testConnectionErrors with data set #1
 .
 Monolog\Handler\ElasticSearchHandlerTest::testHandle
 .
 Monolog\Handler\ElasticSearchHandlerTest::testHandleIntegration
-F
+S
 Monolog\Handler\ElasticSearchHandlerTest::testOptions
 .
 Monolog\Handler\ElasticSearchHandlerTest::testSetFormatter
@@ -243,7 +243,7 @@ Monolog\Handler\MailHandlerTest::testHandleBatchNotSendsMailIfMessagesAreBelowLe
 Monolog\Handler\MongoDBHandlerTest::testConstructorShouldThrowExceptionForInvalidMongo
 .
 Monolog\Handler\MongoDBHandlerTest::testHandle
-E
+.
 Monolog\Handler\NativeMailerHandlerTest::testConstructorHeaderInjection
 .
 Monolog\Handler\NativeMailerHandlerTest::testSetterArrayHeaderInjection

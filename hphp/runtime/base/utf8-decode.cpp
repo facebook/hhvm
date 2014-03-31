@@ -119,12 +119,20 @@ utf8_decode_next(json_utf8_decode *utf8)
     if ((c & 0x80) == 0) {
         return c;
     }
+/* Reset the_index to the given position */
+#define reset_scan_pos(newpos)                           \
+    utf8->the_index = (newpos >= utf8->the_length) ?     \
+        utf8->the_length: newpos;
+
 /*
-    One contination (128 to 2047)
+  One contination (128 to 2047)
 */
     if ((c & 0xE0) == 0xC0) {
+        int cpos = utf8->the_index; /* Current scan position */
         int c1 = cont(utf8);
         if (c1 < 0) {
+            /* Reset the scan position to after leading byte*/
+            reset_scan_pos(cpos);
             return UTF8_ERROR;
         }
         r = ((c & 0x1F) << 6) | c1;
@@ -134,9 +142,12 @@ utf8_decode_next(json_utf8_decode *utf8)
     Two continuation (2048 to 55295 and 57344 to 65535)
 */
     if ((c & 0xF0) == 0xE0) {
+        int cpos = utf8->the_index; /* Current scan position */
         int c1 = cont(utf8);
         int c2 = cont(utf8);
         if (c1 < 0 || c2 < 0) {
+            /* Reset the scan position to after leading byte*/
+            reset_scan_pos(cpos);
             return UTF8_ERROR;
         }
         r = ((c & 0x0F) << 12) | (c1 << 6) | c2;
@@ -146,10 +157,13 @@ utf8_decode_next(json_utf8_decode *utf8)
     Three continuation (65536 to 1114111)
 */
     if ((c & 0xF8) == 0xF0) {
+        int cpos = utf8->the_index; /* Current scan position */
         int c1 = cont(utf8);
         int c2 = cont(utf8);
         int c3 = cont(utf8);
         if (c1 < 0 || c2 < 0 || c3 < 0) {
+            /* Reset scan position to after leading byte*/
+            reset_scan_pos(cpos);
             return UTF8_ERROR;
         }
         r = ((c & 0x0F) << 18) | (c1 << 12) | (c2 << 6) | c3;

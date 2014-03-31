@@ -1,0 +1,192 @@
+input \xE2\x82\xAC\xC2\xA2
+loose string(14) ""\u20ac\u00a2""
+strict string(14) ""\u20ac\u00a2""
+
+input \xE2\x82\xAC\xC2
+loose string(9) ""\u20ac?""
+strict string(4) "null"
+
+input \xE2\x82\xC2\xA2
+loose string(10) ""??\u00a2""
+strict string(4) "null"
+
+input \xE2\x82\xC2
+loose string(5) ""???""
+strict string(4) "null"
+
+input \xE2\x82\x22
+loose string(6) ""??\"""
+strict string(4) "null"
+
+
+
+2-byte UTF
+input 123\xC2456
+loose string(9) ""123?456""
+strict string(4) "null"
+
+input 123\xC2\xA2456
+loose string(14) ""123\u00a2456""
+strict string(14) ""123\u00a2456""
+
+input 123\xC2
+loose string(6) ""123?""
+strict string(4) "null"
+
+input 123\xC2\xA2
+loose string(11) ""123\u00a2""
+strict string(11) ""123\u00a2""
+
+input \xC2456
+loose string(6) ""?456""
+strict string(4) "null"
+
+input \xC2\xA2456
+loose string(11) ""\u00a2456""
+strict string(11) ""\u00a2456""
+
+input \xC2
+loose string(3) ""?""
+strict string(4) "null"
+
+input \xC2\xA2
+loose string(8) ""\u00a2""
+strict string(8) ""\u00a2""
+
+
+
+3-byte UTF
+input 123\xE2456
+loose string(9) ""123?456""
+strict string(4) "null"
+
+input 123\xE2\x82456
+loose string(10) ""123??456""
+strict string(4) "null"
+
+input 123\xE2\x82\xAC456
+loose string(14) ""123\u20ac456""
+strict string(14) ""123\u20ac456""
+
+input 123\xE2
+loose string(6) ""123?""
+strict string(4) "null"
+
+input 123\xE2\x82
+loose string(7) ""123??""
+strict string(4) "null"
+
+input 123\xE2\x82\xAC
+loose string(11) ""123\u20ac""
+strict string(11) ""123\u20ac""
+
+input \xE2456
+loose string(6) ""?456""
+strict string(4) "null"
+
+input \xE2\x82456
+loose string(7) ""??456""
+strict string(4) "null"
+
+input \xE2\x82\xAC456
+loose string(11) ""\u20ac456""
+strict string(11) ""\u20ac456""
+
+input \xE2
+loose string(3) ""?""
+strict string(4) "null"
+
+input \xE2\x82
+loose string(4) ""??""
+strict string(4) "null"
+
+input \xE2\x82\xAC
+loose string(8) ""\u20ac""
+strict string(8) ""\u20ac""
+
+
+
+4-byte UTF
+input 123\xF0456
+loose string(9) ""123?456""
+strict string(4) "null"
+
+input 123\xF0\x90456
+loose string(10) ""123??456""
+strict string(4) "null"
+
+input 123\xF0\x90\x80456
+loose string(11) ""123???456""
+strict string(4) "null"
+
+input 123\xF0\x90\x80\x80456
+loose string(20) ""123\ud800\udc00456""
+strict string(20) ""123\ud800\udc00456""
+
+input 123\xF0
+loose string(6) ""123?""
+strict string(4) "null"
+
+input 123\xF0\x90
+loose string(7) ""123??""
+strict string(4) "null"
+
+input 123\xF0\x90\x80
+loose string(8) ""123???""
+strict string(4) "null"
+
+input 123\xF0\x90\x80\x80
+loose string(17) ""123\ud800\udc00""
+strict string(17) ""123\ud800\udc00""
+
+input \xF0456
+loose string(6) ""?456""
+strict string(4) "null"
+
+input \xF0\x90456
+loose string(7) ""??456""
+strict string(4) "null"
+
+input \xF0\x90\x80456
+loose string(8) ""???456""
+strict string(4) "null"
+
+input \xF0\x90\x80\x80456
+loose string(17) ""\ud800\udc00456""
+strict string(17) ""\ud800\udc00456""
+
+input \xF0
+loose string(3) ""?""
+strict string(4) "null"
+
+input \xF0\x90
+loose string(4) ""??""
+strict string(4) "null"
+
+input \xF0\x90\x80
+loose string(5) ""???""
+strict string(4) "null"
+
+input \xF0\x90\x80\x80
+loose string(14) ""\ud800\udc00""
+strict string(14) ""\ud800\udc00""
+
+
+
+Misc
+input 123\xE0456
+loose string(9) ""123?456""
+strict string(4) "null"
+
+input \xE0\xE0
+loose string(4) ""??""
+strict string(4) "null"
+
+input 12
+loose string(4) ""12""
+strict string(4) ""12""
+
+input \x3Ca\x20href\x3D\x22\x2Ffoo\xC0\x22\x20title\x3D\x22\x20onmouseover\x3Dalert\x281\x29\x20\x2F\x2F\x22\x3E
+loose string(58) ""<a href=\"\/foo?\" title=\" onmouseover=alert(1) \/\/\">""
+strict string(4) "null"
+

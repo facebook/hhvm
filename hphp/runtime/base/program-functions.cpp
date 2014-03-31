@@ -285,9 +285,9 @@ void register_variable(Array& variables, char *name, const Variant& value,
       }
 
       if (!index) {
-        symtable->append(Array::Create());
+        auto& val = symtable->lvalAt();
+        val = Array::Create();
         gpc_elements.push_back(uninit_null());
-        auto& val = symtable->lvalAt((int64_t)symtable->size() - 1);
         gpc_elements.back().assignRef(val);
       } else {
         String key(index, index_len, CopyString);

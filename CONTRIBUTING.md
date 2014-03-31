@@ -8,7 +8,7 @@ All the open issues tagged [Zend incompatibility](https://github.com/facebook/hi
 
 ## Submitting Pull Requests
 
-Before changes can be accepted a [Contributor Licensing Agreement](http://developers.facebook.com/opensource/cla) ([pdf](https://github.com/facebook/hiphop-php/raw/master/hphp/doc/FB_Individual_CLA.pdf) - print, sign, scan, link) must be signed.
+Before changes can be accepted a [Contributor Licensing Agreement](http://code.facebook.com/cla) ([pdf](https://github.com/facebook/hiphop-php/raw/master/hphp/doc/FB_Individual_CLA.pdf) - print, sign, scan, link) must be signed.
 
 Please add appropriate test cases as you make changes; see [here](hphp/test) for more information. Travis-CI is integrated with this GitHub project and will provide test results automatically on all pulls.
 

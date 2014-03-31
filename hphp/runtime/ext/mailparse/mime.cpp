@@ -911,11 +911,8 @@ Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, 
   if (filename.isResource()) {
     f = filename.toResource().getTyped<File>();
   } else if (isfile) {
-    Variant stream = File::Open(filename.toString(), "rb");
-    if (!same(stream, false)) {
-      file = stream.toResource();
-      f = file.getTyped<File>();
-    }
+    file = File::Open(filename.toString(), "rb");
+    f = file.getTyped<File>(true);
   } else {
     /* filename is the actual data */
     String data = filename.toString();

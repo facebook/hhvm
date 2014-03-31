@@ -205,9 +205,13 @@ Variant f_fopen(const String& filename, const String& mode,
     return false;
   }
 
-  return File::Open(filename, mode,
-                    use_include_path ? File::USE_INCLUDE_PATH : 0,
-                    context);
+  Resource resource = File::Open(filename, mode,
+                                 use_include_path ? File::USE_INCLUDE_PATH : 0,
+                                 context);
+  if (resource.isNull()) {
+    return false;
+  }
+  return resource;
 }
 
 Variant f_popen(const String& command, const String& mode) {
@@ -426,14 +430,14 @@ Variant f_file_get_contents(const String& filename,
 Variant f_file_put_contents(const String& filename, const Variant& data,
                             int flags /* = 0 */,
                             const Variant& context /* = null */) {
-  Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb",
-                            flags, context);
-  if (!fvar.toBoolean()) {
+  Resource resource = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb",
+                                 flags, context);
+  File *f = resource.getTyped<File>(true);
+  if (!f) {
     return false;
   }
-  File *f = fvar.asResRef().getTyped<File>();
 
-  if ((flags & LOCK_EX) && flock(f->fd(), LOCK_EX)) {
+  if ((flags & LOCK_EX) && !f->lock(LOCK_EX)) {
     return false;
   }
 

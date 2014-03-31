@@ -273,7 +273,7 @@ String f_xmlwriter_output_memory(const Object& xmlwriter, bool flush /* = true *
 // helpers
 
 static int write_file(void *context, const char *buffer, int len) {
-  return len > 0 ? ((c_XMLWriter*)context)->m_uri->writeImpl(buffer, len) : 0;
+  return len > 0 ? ((c_XMLWriter*)context)->m_uri.getTyped<File>()->writeImpl(buffer, len) : 0;
 }
 
 static int close_file(void *context) {
@@ -324,11 +324,10 @@ bool c_XMLWriter::t_openmemory() {
 }
 
 bool c_XMLWriter::t_openuri(const String& uri) {
-  Variant file = File::Open(uri, "wb");
-  if (same(file, false)) {
+  m_uri = File::Open(uri, "wb");
+  if (m_uri.isNull()) {
     return false;
   }
-  m_uri = file.toResource().getTyped<File>();
 
   xmlOutputBufferPtr uri_output = xmlOutputBufferCreateIO(
     write_file, close_file, this, nullptr);

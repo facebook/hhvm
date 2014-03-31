@@ -1744,20 +1744,20 @@ Variant f_getimagesize(const String& filename,
 #define M_PI 3.14159265358979323846
 #endif
 
-static Variant php_open_plain_file(const String& filename, const char *mode,
+static Resource php_open_plain_file(const String& filename, const char *mode,
                                    FILE **fpp) {
-  Variant stream = File::Open(filename, mode);
-  if (same(stream, false)) {
-    return false;
+  Resource resource = File::Open(filename, mode);
+  PlainFile *plain_file = resource.getTyped<PlainFile>(true, true);
+  if (!plain_file) {
+    return null_resource;
   }
-  PlainFile *plain_file = stream.toResource().getTyped<PlainFile>(false, true);
   FILE *fp = NULL;
   if (!plain_file || !(fp = plain_file->getStream())) {
-    f_fclose(stream.toResource());
-    return false;
+    f_fclose(resource);
+    return null_resource;
   }
   if (fpp) *fpp = fp;
-  return stream;
+  return resource;
 }
 
 static int php_write(void *buf, uint size) {
@@ -1790,7 +1790,7 @@ static bool _php_image_output_ctx(const Resource& image, const String& filename,
                                   void (*func_p)()) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
-  Variant stream;
+  Resource resource;
   FILE *fp = NULL;
   int q = quality, i;
   int f = basefilter;
@@ -1803,8 +1803,8 @@ static bool _php_image_output_ctx(const Resource& image, const String& filename,
    */
 
   if (!filename.empty()) {
-    stream = php_open_plain_file(filename, "wb", &fp);
-    if (same(stream, false)) {
+    resource = php_open_plain_file(filename, "wb", &fp);
+    if (resource.isNull()) {
       raise_warning("Unable to open '%s' for writing", filename.c_str());
       return false;
     }
@@ -1861,7 +1861,7 @@ static bool _php_image_output_ctx(const Resource& image, const String& filename,
 
   if (fp) {
     fflush(fp);
-    f_fclose(stream.toResource());
+    f_fclose(resource);
   }
 
   return true;
@@ -1943,7 +1943,7 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
                                int dest_height, int dest_width,
                                int threshold, int image_type) {
   gdImagePtr im_org, im_dest, im_tmp;
-  Variant org_stream, dest_stream;
+  Resource org_resource, dest_resource;
   FILE *org, *dest;
   int org_height, org_width;
   int white, black;
@@ -1961,15 +1961,15 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
   }
 
   /* Open origin file */
-  org_stream = php_open_plain_file(f_org, "rb", &org);
-  if (same(org_stream, false)) {
+  org_resource = php_open_plain_file(f_org, "rb", &org);
+  if (org_resource.isNull()) {
     raise_warning("Unable to open '%s' for reading", f_org.c_str());
     return false;
   }
 
   /* Open destination file */
-  dest_stream = php_open_plain_file(f_dest, "wb", &dest);
-  if (same(dest_stream, false)) {
+  dest_resource = php_open_plain_file(f_dest, "wb", &dest);
+  if (dest_resource.isNull()) {
     raise_warning("Unable to open '%s' for writing", f_dest.c_str());
     return false;
   }
@@ -2052,7 +2052,7 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
 
   gdImageDestroy(im_org);
 
-  f_fclose(org_stream.toResource());
+  f_fclose(org_resource);
 
   im_dest = gdImageCreate(dest_width, dest_height);
   if (im_dest == NULL) {
@@ -2096,7 +2096,7 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
   gdImageWBMP(im_dest, black , dest);
 
   fflush(dest);
-  f_fclose(dest_stream.toResource());
+  f_fclose(dest_resource);
 
   gdImageDestroy(im_dest);
 
@@ -2110,7 +2110,7 @@ static bool _php_image_output(const Resource& image, const String& filename,
                               void (*func_p)()) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
-  Variant stream;
+  Resource resource;
   FILE *fp;
   int q = quality, i, t = type;
 
@@ -2121,8 +2121,8 @@ static bool _php_image_output(const Resource& image, const String& filename,
   /* The quality parameter for gd2 stands for chunk size */
 
   if (!filename.empty()) {
-    stream = php_open_plain_file(filename, "wb", &fp);
-    if (same(stream, false)) {
+    resource = php_open_plain_file(filename, "wb", &fp);
+    if (resource.isNull()) {
       raise_warning("Unable to open '%s' for writing", filename.c_str());
       return false;
     }
@@ -2178,7 +2178,7 @@ static bool _php_image_output(const Resource& image, const String& filename,
       break;
     }
     fflush(fp);
-    f_fclose(stream.toResource());
+    f_fclose(resource);
   } else {
     int   b;
     FILE *tmp;
@@ -2259,7 +2259,6 @@ static gdImagePtr _php_image_create_from(const String& filename,
                                          gdImagePtr(*func_p)(),
                                          gdImagePtr(*ioctx_func_p)()) {
   gdImagePtr im = NULL;
-  Variant stream;
 #ifdef HAVE_GD_JPG
   // long ignore_warning;
 #endif
@@ -2270,8 +2269,9 @@ static gdImagePtr _php_image_create_from(const String& filename,
       return NULL;
     }
   }
-  stream = f_fopen(filename, "rb");
-  if (same(stream, false)) {
+  Resource resource = File::Open(filename, "rb");
+  File *file = resource.getTyped<File>(true);
+  if (!file) {
     raise_warning("failed to open stream: %s", filename.c_str());
     return NULL;
   }
@@ -2281,7 +2281,6 @@ static gdImagePtr _php_image_create_from(const String& filename,
 #endif
 
   FILE *fp = NULL;
-  File *file = stream.toResource().getTyped<File>();
   PlainFile *plain_file = dynamic_cast<PlainFile*>(file);
   if (plain_file) {
     fp = plain_file->getStream();
@@ -2355,13 +2354,13 @@ static gdImagePtr _php_image_create_from(const String& filename,
   }
 
   if (im) {
-    f_fclose(stream.toResource());
+    f_fclose(resource);
     return im;
   }
 
   raise_warning("'%s' is not a valid %s file", filename.c_str(), tn);
 out_err:
-  f_fclose(stream.toResource());
+  f_fclose(resource);
   return NULL;
 }
 

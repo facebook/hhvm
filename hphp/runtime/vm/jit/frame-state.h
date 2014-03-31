@@ -204,7 +204,9 @@ struct FrameState : private LocalStateHook {
   // frame.
   void forEachLocal(LocalFunc func) const;
 
-  SSATmp* cseLookup(IRInstruction* inst, const folly::Optional<IdomVector>&);
+  SSATmp* cseLookup(IRInstruction* inst,
+                    Block* srcBlock,
+                    const folly::Optional<IdomVector>&);
 
   void getLocalEffects(const IRInstruction* inst, LocalStateHook& hook) const;
 

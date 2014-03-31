@@ -537,6 +537,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
  */
 SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
                                 CloneFlag doClone,
+                                Block* srcBlock,
                                 const folly::Optional<IdomVector>& idoms) {
   static DEBUG_ONLY __thread int instNest = 0;
   if (debug) ++instNest;
@@ -545,7 +546,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
 
   auto doCse = [&] (IRInstruction* cseInput) -> SSATmp* {
     if (m_state.enableCse() && cseInput->canCSE()) {
-      SSATmp* cseResult = m_state.cseLookup(cseInput, idoms);
+      SSATmp* cseResult = m_state.cseLookup(cseInput, srcBlock, idoms);
       if (cseResult) {
         // Found a dominating instruction that can be used instead of input
         FTRACE(1, "  {}cse found: {}\n",
@@ -702,7 +703,7 @@ void IRBuilder::reoptimize() {
       assert(inst->marker().valid());
       setMarker(inst->marker());
 
-      auto const tmp = optimizeInst(inst, CloneFlag::No, idoms);
+      auto const tmp = optimizeInst(inst, CloneFlag::No, block, idoms);
       SSATmp* dst = inst->dst(0);
 
       if (dst != tmp) {

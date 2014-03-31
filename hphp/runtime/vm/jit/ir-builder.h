@@ -200,7 +200,7 @@ struct IRBuilder {
   SSATmp* gen(Opcode op, BCMarker marker, Args&&... args) {
     return makeInstruction(
       [this] (IRInstruction* inst) {
-        return optimizeInst(inst, CloneFlag::Yes, folly::none);
+        return optimizeInst(inst, CloneFlag::Yes, nullptr, folly::none);
       },
       op,
       marker,
@@ -213,7 +213,7 @@ struct IRBuilder {
    * optimization passes and updating tracked state.
    */
   SSATmp* add(IRInstruction* inst) {
-    return optimizeInst(inst, CloneFlag::No, folly::none);
+    return optimizeInst(inst, CloneFlag::No, nullptr, folly::none);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -376,6 +376,7 @@ private:
   enum class CloneFlag { Yes, No };
   SSATmp*   optimizeInst(IRInstruction* inst,
                          CloneFlag doClone,
+                         Block* srcBlock,
                          const folly::Optional<IdomVector>& idoms);
 
 private:

@@ -452,7 +452,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
       }
     }
 
-    if (isAutoAliasOn()) {
+    if (isAutoAliasOn() && !cls) {
       // Auto import a few functions from the HH namespace
       if (stripped == "fun" ||
           stripped == "meth_caller" ||

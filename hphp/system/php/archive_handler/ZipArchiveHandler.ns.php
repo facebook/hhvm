@@ -8,8 +8,16 @@ namespace __SystemLib {
 
     public function __construct(string $path) {
       $this->path = $path;
-      $this->za = new \ZipArchive($path);
-      $this->za->open($path);
+      $this->za = new \ZipArchive();
+      if (file_exists($path)) {
+        $this->za->open($path);
+      } else {
+        $this->za->open($path, \ZipArchive::CREATE);
+      }
+    }
+
+    public function close(): void {
+      $this->za->close();
     }
 
     public function getContentsList(): Map<string, ArchiveEntryStat> {
@@ -46,6 +54,10 @@ namespace __SystemLib {
 
     public function extractAllTo(string $path): bool {
       return $this->za->extractTo($path);
+    }
+
+    public function addFile(string $path, string $archive_path): bool {
+      return $this->za->addFile($path, $archive_path);
     }
   }
 }

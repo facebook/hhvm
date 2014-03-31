@@ -100,5 +100,12 @@ namespace __SystemLib {
         file_put_contents($path, $data);
       }
     }
+
+    public function addFile(string $path, string $archivePath) {
+      throw new Exception("TarArchiveHandler::addFile is not implemented");
+    }
+
+    public function close(): void {
+    }
   }
 }

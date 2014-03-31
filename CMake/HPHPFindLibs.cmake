@@ -291,11 +291,6 @@ include_directories(${ONIGURUMA_INCLUDE_DIRS})
 find_package(Ldap REQUIRED)
 include_directories(${LDAP_INCLUDE_DIR})
 
-# ncurses, readline and history
-#set(CURSES_NEED_NCURSES true)
-find_package(Ncurses REQUIRED)
-include_directories(${NCURSES_INCLUDE_PATH})
-
 # libpthreads
 find_package(PThread REQUIRED)
 include_directories(${LIBPTHREAD_INCLUDE_DIRS})
@@ -521,7 +516,6 @@ endif()
 		target_link_libraries(${target} ${EDITLINE_LIBRARIES})
 	endif()
 
-	target_link_libraries(${target} ${NCURSES_LIBRARY})
 	target_link_libraries(${target} ${CCLIENT_LIBRARY})
 
     target_link_libraries(${target} ${LIBDWARF_LIBRARIES})

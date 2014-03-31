@@ -5,20 +5,19 @@
 # will differ slightly.
 
 macro(HHVM_LINK_LIBRARIES EXTNAME)
-	list(REMOVE_AT ARGV 0)
-	foreach (lib ${ARGV})
+	foreach (lib ${ARGN})
 		list(APPEND HRE_LIBRARIES ${lib})
 	endforeach()
 endmacro()
 
 function(HHVM_ADD_INCLUDES EXTNAME)
-	list(REMOVE_AT ARGV 0)
-	include_directories(${ARGV})
+    include_directories(${ARGN})
 endfunction()
 
 macro(HHVM_EXTENSION EXTNAME)
-	list(REMOVE_AT ARGV 0)
-	list(APPEND CXX_SOURCES "${HRE_CURRENT_EXT_PATH}/${ARGV}")
+	foreach (src ${ARGN})
+	    list(APPEND CXX_SOURCES "${HRE_CURRENT_EXT_PATH}/${src}")
+    endforeach()
 endmacro()
 
 function(HHVM_SYSTEMLIB EXTNAME SOURCE_FILE)

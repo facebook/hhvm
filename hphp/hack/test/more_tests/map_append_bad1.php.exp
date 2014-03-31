@@ -1,0 +1,6 @@
+File "map_append_bad1.php", line 4, characters 3-12:
+Invalid assignment
+File "map_append_bad1.php", line 4, characters 3-6:
+This is an object of type Pair because you can only append a Pair<Tkey, Tvalue> to an Map<Tkey, Tvalue>
+File "map_append_bad1.php", line 4, characters 10-12:
+It is incompatible with an int

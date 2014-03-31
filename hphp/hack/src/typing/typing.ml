@@ -1585,6 +1585,9 @@ and array_append is_lvalue p env ty1 =
   | Tapply ((_, "Vector"), [ty])
   | Tapply ((_, "Set"), [ty]) ->
       env, ty
+  | Tapply ((_, "Map"), [tkey; tvalue]) ->
+      (* You can append a pair to a map *)
+      env, (Reason.Rmap_append p, Tapply ((p, "Pair"), [tkey; tvalue]))
   | Tarray (is_local, Some ty, None) ->
       if is_lvalue && not is_local
       then array_cow p;

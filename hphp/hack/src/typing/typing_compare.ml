@@ -259,6 +259,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rclass_class (p, s)    -> Rclass_class (pos p, s)
     | Runknown_class p       -> Runknown_class (pos p)
     | Rdynamic_yield (p1, p2, s1, s2) -> Rdynamic_yield(pos p1, pos p2, s1, s2)
+    | Rmap_append p          -> Rmap_append (pos p)
 
   let string_id (p, x) = pos p, x
 

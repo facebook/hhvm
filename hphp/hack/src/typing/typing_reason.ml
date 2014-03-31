@@ -47,6 +47,7 @@ type t =
   | Rclass_class   of Pos.t * string
   | Runknown_class of Pos.t
   | Rdynamic_yield of Pos.t * Pos.t * string * string
+  | Rmap_append of Pos.t
 
 let rec to_string = function
   | Rnone              -> ""
@@ -104,6 +105,9 @@ This is a limitation of the type-checker, use a local if that's the problem.
         (Pos.string yield_pos)
         implicit_name
         yield_name
+  | Rmap_append p -> 
+      " because you can only append a Pair<Tkey, Tvalue> to an \
+      Map<Tkey, Tvalue>"
 
 let rec to_pos = function
   | Rnone     -> Pos.none
@@ -141,6 +145,7 @@ let rec to_pos = function
   | Rclass_class (p, _) -> p
   | Runknown_class p -> p
   | Rdynamic_yield (p, _, _, _) -> p
+  | Rmap_append p -> p
 
 type ureason =
   | URnone

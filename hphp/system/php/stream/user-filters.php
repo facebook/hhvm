@@ -33,22 +33,22 @@ function stream_bucket_new(resource $stream, string $buffer) {
 namespace __SystemLib {
   class StreamFilterBucket {
     public string $data;
-    public int $dataLen;
+    public int $datalen;
 
     public function __construct(
       string $data,
-      int $dataLen = 0,
+      int $datalen = 0,
     ) {
-      if ($dataLen <= 0) {
-        $dataLen = strlen($data);
+      if ($datalen <= 0) {
+        $datalen = strlen($data);
       }
       $this->data = $data;
-      $this->dataLen = $dataLen;
+      $this->datalen = $datalen;
     }
 
     public function __toString() {
-      if ($this->dataLen >= 0) {
-        $len = min($this->dataLen, strlen($this->data));
+      if ($this->datalen >= 0) {
+        $len = min($this->datalen, strlen($this->data));
         if ($len == 0) {
           // substr returns false on empty strings
           return '';

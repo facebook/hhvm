@@ -154,7 +154,7 @@ private:
                           const String& filter,
                           const Variant& params) {
     auto class_name = m_registeredFilters.rvalAt(filter).asCStrRef();
-    Class* class_ = Unit::lookupClass(class_name.get());
+    Class* class_ = Unit::getClass(class_name.get(), true);
     Object obj = null_object;
 
     if (LIKELY(class_ != nullptr)) {

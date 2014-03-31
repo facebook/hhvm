@@ -40,7 +40,7 @@ class UConverter {
   public function fromUCallback(int $reason,
                                 array $source,
                                 int $codePoint,
-                                int &$error): mixed {
+                                int &$error) {
     switch ($reason) {
       case self::REASON_UNASSIGNED:
       case self::REASON_ILLEGAL:
@@ -131,7 +131,7 @@ class UConverter {
    *
    * @return string
    */
-  public static function getMimeName(string $name): mixed {
+  public static function getMimeName(string $name) {
     return self::getStandardName($name, "MIME");
   }
 
@@ -164,7 +164,7 @@ class UConverter {
    *
    * @return string -
    */
-  public function getSubstChars(): mixed {
+  public function getSubstChars() {
     // Ambiguous, but mostly PHP compat
     // since PHP version lacks distinct setters
     return $this->getSourceSubstChars();
@@ -227,7 +227,7 @@ class UConverter {
    *
    * @return void -
    */
-  public function setSubstChars(string $chars): bool {
+  public function setSubstChars(string $chars) {
     return $this->setSourceSubstChars($chars) &&
            $this->setDestinationSubstChars($chars);
   }
@@ -245,7 +245,7 @@ class UConverter {
   public function toUCallback(int $reason,
                               ?string $source,
                               ?string $codeUnits,
-                              int &$error): mixed {
+                              int &$error) {
     switch ($reason) {
       case self::REASON_UNASSIGNED:
       case self::REASON_ILLEGAL:
@@ -269,7 +269,7 @@ class UConverter {
   public static function transcode(string $str,
                                    string $toEncoding,
                                    string $fromEncoding,
-                                   array $options = null): ?string {
+                                   array $options = null) {
     $cnv = new UConverter($toEncoding, $fromEncoding);
     if ((isset($options['from_subst']) &&
          !$cnv->setSourceSubstChars($options['from_subst'])) ||

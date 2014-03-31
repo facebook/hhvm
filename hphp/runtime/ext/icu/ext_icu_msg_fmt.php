@@ -52,7 +52,7 @@ class MessageFormatter {
    * @return MessageFormatter - The formatter object
    */
   public static function create(string $locale,
-                                string $pattern): ?MessageFormatter {
+                                string $pattern) {
     try {
       return new MessageFormatter($locale, $pattern);
     } catch (Exception $e) {
@@ -76,7 +76,7 @@ class MessageFormatter {
    */
   public static function formatMessage(string $locale,
                                        string $pattern,
-                                       array $args): mixed {
+                                       array $args) {
     $fmt = new MessageFormatter($locale, $pattern);
     return $fmt->format($args);
   }
@@ -138,7 +138,7 @@ class MessageFormatter {
    */
   public static function parseMessage(string $locale,
                                       string $pattern,
-                                      string $source): mixed {
+                                      string $source) {
     $fmt = new MessageFormatter($locale, $pattern);
     return $fmt->parse($source);
   }
@@ -179,7 +179,7 @@ class MessageFormatter {
  * @return MessageFormatter - The formatter object
  */
 function msgfmt_create(string $locale,
-                       string $pattern): ?MessageFormatter {
+                       string $pattern) {
   try {
     return new MessageFormatter($locale, $pattern);
   } catch (Exception $e) {
@@ -203,7 +203,7 @@ function msgfmt_create(string $locale,
  */
 function msgfmt_format_message(string $locale,
                                string $pattern,
-                               array $args): string {
+                               array $args) {
   return MessageFormatter::formatMessage($locale, $pattern, $args);
 }
 
@@ -216,7 +216,7 @@ function msgfmt_format_message(string $locale,
  * @return string - The formatted string, or FALSE if an error occurred
  */
 function msgfmt_format(MessageFormatter $fmt,
-                       array $args): mixed {
+                       array $args) {
   return $fmt->format($args);
 }
 
@@ -228,7 +228,7 @@ function msgfmt_format(MessageFormatter $fmt,
  * @return int - The error code, one of UErrorCode values. Initial value
  *   is U_ZERO_ERROR.
  */
-function msgfmt_get_error_code(MessageFormatter $fmt): int {
+function msgfmt_get_error_code(MessageFormatter $fmt) {
   return $fmt->getErrorCode();
 }
 
@@ -239,7 +239,7 @@ function msgfmt_get_error_code(MessageFormatter $fmt): int {
  *
  * @return string - Description of the last error.
  */
-function msgfmt_get_error_message(MessageFormatter $fmt): string {
+function msgfmt_get_error_message(MessageFormatter $fmt) {
   return $fmt->getErrorMessage();
 }
 
@@ -250,7 +250,7 @@ function msgfmt_get_error_message(MessageFormatter $fmt): string {
  *
  * @return string - The locale name
  */
-function msgfmt_get_locale(MessageFormatter $fmt): string {
+function msgfmt_get_locale(MessageFormatter $fmt) {
   return $fmt->getLocale();
 }
 
@@ -261,7 +261,7 @@ function msgfmt_get_locale(MessageFormatter $fmt): string {
  *
  * @return string - The pattern string for this message formatter
  */
-function msgfmt_get_pattern(MessageFormatter $fmt): string {
+function msgfmt_get_pattern(MessageFormatter $fmt) {
   return $fmt->getPattern();
 }
 
@@ -277,7 +277,7 @@ function msgfmt_get_pattern(MessageFormatter $fmt): string {
  */
 function msgfmt_parse_message(string $locale,
                               string $pattern,
-                              string $value): mixed {
+                              string $value) {
   return MessageFormatter::parseMessage($locale, $pattern, $value);
 }
 
@@ -291,7 +291,7 @@ function msgfmt_parse_message(string $locale,
  *   error
  */
 function msgfmt_parse(MessageFormatter $fmt,
-                      string $value): mixed {
+                      string $value) {
   return $fmt->parse($value);
 }
 
@@ -306,6 +306,6 @@ function msgfmt_parse(MessageFormatter $fmt,
  * @return bool -
  */
 function msgfmt_set_pattern(MessageFormatter $fmt,
-                            string $pattern): bool {
+                            string $pattern) {
   return $fmt->setPattern($pattern);
 }

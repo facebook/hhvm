@@ -19,7 +19,7 @@ class finfo {
    *   empty string will be equivalent to the default value.
    */
   public function finfo(int $options = FILEINFO_NONE,
-                        ?string $magic_file = NULL): finfo {
+                        ?string $magic_file = NULL) {
     $this->resource = finfo_open($options, $magic_file);
 
     $this->options = $options;
@@ -50,7 +50,7 @@ class finfo {
    */
   public function buffer(?string $string = NULL,
                          int $options = FILEINFO_NONE,
-                         ?resource $context = NULL): string {
+                         ?resource $context = NULL) {
     return finfo_buffer($this->resource, $string, $options, $context);
   }
 
@@ -66,7 +66,7 @@ class finfo {
    */
   public function file(?string $file_name = NULL,
                        int $options = FILEINFO_NONE,
-                       ?resource $context = NULL): string {
+                       ?resource $context = NULL) {
     return finfo_file($this->resource, $file_name, $options, $context);
   }
 
@@ -77,7 +77,7 @@ class finfo {
    *
    * @return bool -
    */
-  public function set_flags(int $options): bool {
+  public function set_flags(int $options) {
     $ret = finfo_set_flags($this->resource, $options);
     if ($ret) {
       $this->options = $options;

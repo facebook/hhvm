@@ -83,7 +83,7 @@ function hash_final(resource $context, bool $raw_output = false): string;
 function hash_hmac(?string $algo = null,
                    ?mixed $data = null,
                    ?string $key = null,
-                   ?bool $raw_output = false): mixed {
+                   ?bool $raw_output = false) {
   // Behave like a builtin function so that we pass Zend's tests
   $args = func_num_args();
   if ($args < 3) {
@@ -124,7 +124,7 @@ function hash_hmac(?string $algo = null,
 function hash_hmac_file(?string $algo = null,
                         ?string $filename = null,
                         ?string $key = null,
-                        ?bool $raw_output = false): mixed {
+                        ?bool $raw_output = false) {
   $args = func_num_args();
   if ($args < 3) {
     trigger_error("hash_hmac_file() expects 3 parameters, $args given",
@@ -183,7 +183,7 @@ function hash_update(resource $context, string $data): bool;
  * @return bool - Returns TRUE on success, FALSE on failure
  */
 function hash_update_file(mixed $context, string $filename,
-                          mixed $stream_context = null): bool {
+                          mixed $stream_context = null) {
   $fp = fopen($filename, 'r', false, $stream_context);
   if (!$fp) {
     return false;
@@ -210,7 +210,7 @@ function hash_update_file(mixed $context, string $filename,
  *               from handle.
  */
 function hash_update_stream(mixed $context, mixed $handle,
-                            int $maxlen = -1): int {
+                            int $maxlen = -1) {
   $didread = 0;
   while ($maxlen) {
     $chunk = fread($handle, ($maxlen > 0) ? $maxlen : 1024);
@@ -266,7 +266,7 @@ function hash_copy(resource $context): resource;
  */
 function hash_pbkdf2(string $algo, string $password, string $salt,
                      int $iterations, int $length = 0,
-                     bool $raw_output = false): mixed {
+                     bool $raw_output = false) {
   $algo = strtolower($algo);
   if (!in_array($algo, hash_algos())) {
     error_log("\nWarning: hash_pbkdf2(): Unknown hashing algorithm: ".

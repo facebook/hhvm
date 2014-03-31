@@ -20,7 +20,7 @@ function odbc_get_autocommit(resource $connection_id): bool;
 <<__Native>> /* private */
 function odbc_set_autocommit(resource $connection_id, bool $OnOff): bool;
 
-function odbc_autocommit(resource $connection_id, ?bool $OnOff = false): bool {
+function odbc_autocommit(resource $connection_id, ?bool $OnOff = false) {
   if (func_num_args() == 1) {
     return odbc_get_autocommit($connection_id);
   } else {
@@ -151,7 +151,7 @@ function odbc_execute(resource $result, ?array $parameters_array): bool;
  *                            row, or FALSE if there are no more rows.
  */
 <<__Native>>
-function odbc_fetch_array(resource $result , ?int $rownumber=0): mixed;
+function odbc_fetch_array(resource $result, ?int $rownumber=0): mixed;
 
 
 /**

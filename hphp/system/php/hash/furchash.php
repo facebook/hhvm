@@ -17,7 +17,7 @@ function furchash_hphp_ext(string $key, int $len, int $npart): int;
  *
  * @return bool - True
  */
-function furchash_hphp_ext_supported(): bool {
+function furchash_hphp_ext_supported() {
   return true;
 }
 

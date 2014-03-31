@@ -93,7 +93,7 @@ function idn_to_utf8(string $domain,
 function idn_to_unicode(string $domain,
                         int $options = 0,
                         int $variant = 0,
-                        mixed &$info = null): mixed {
+                        mixed &$info = null) {
   return idn_to_utf8($domain, $options, $variant, $info);
 }
 

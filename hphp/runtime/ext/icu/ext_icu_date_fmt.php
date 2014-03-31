@@ -49,7 +49,7 @@ class IntlDateFormatter {
 
   public static function create($locale, $datetype, $timetype,
                                 $timezone = NULL, $calendar = NULL,
-                                $pattern = ''): mixed {
+                                $pattern = '') {
     try {
       return new IntlDateFormatter($locale, $datetype, $timetype,
                                    $timezone, $calendar, $pattern);
@@ -270,7 +270,7 @@ class IntlDateFormatter {
    *
    * @return bool -
    */
-  public function setTimeZoneId(string $zone): bool {
+  public function setTimeZoneId(string $zone) {
     trigger_error("Use datefmt_set_timezone() instead, which also accepts ".
                   "a plain time zone identifier and for which this function ".
                   "is now an alias", E_DEPRECATED);
@@ -326,7 +326,7 @@ function datefmt_create($locale,
                         $timetype,
                         $timezone = NULL,
                         $calendar = NULL,
-                        $pattern = ''): mixed {
+                        $pattern = '') {
   return IntlDateFormatter::create($locale, $datetype, $timetype,
                                    $timezone, $calendar, $pattern);
 }
@@ -350,7 +350,7 @@ function datefmt_create($locale,
  *   FALSE.
  */
 function datefmt_format(IntlDateFormatter $fmt,
-                        $value): string {
+                        $value) {
   return $fmt->format($value);
 }
 
@@ -365,7 +365,7 @@ function datefmt_format(IntlDateFormatter $fmt,
  */
 function datefmt_format_object($obj,
                                $format = NULL,
-                               $locale = NULL): string {
+                               $locale = NULL) {
   return IntlDateFormatter::FormatObject($obj, $format, $locale);
 }
 
@@ -377,7 +377,7 @@ function datefmt_format_object($obj,
  * @return int - The calendar type being used by the formatter. Either
  *   IntlDateFormatter::TRADITIONAL or IntlDateFormatter::GREGORIAN.
  */
-function datefmt_get_calendar(IntlDateFormatter $fmt): int {
+function datefmt_get_calendar(IntlDateFormatter $fmt) {
   return $fmt->getCalendar();
 }
 
@@ -388,7 +388,7 @@ function datefmt_get_calendar(IntlDateFormatter $fmt): int {
  *
  * @return int - The current date type value of the formatter.
  */
-function datefmt_get_datetype(IntlDateFormatter $fmt): int {
+function datefmt_get_datetype(IntlDateFormatter $fmt) {
   return $fmt->getDateType();
 }
 
@@ -400,7 +400,7 @@ function datefmt_get_datetype(IntlDateFormatter $fmt): int {
  * @return int - The error code, one of UErrorCode values. Initial value
  *   is U_ZERO_ERROR.
  */
-function datefmt_get_error_code(IntlDateFormatter $fmt): int {
+function datefmt_get_error_code(IntlDateFormatter $fmt) {
   return $fmt->getErrorCode();
 }
 
@@ -411,7 +411,7 @@ function datefmt_get_error_code(IntlDateFormatter $fmt): int {
  *
  * @return string - Description of the last error.
  */
-function datefmt_get_error_message(IntlDateFormatter $fmt): string {
+function datefmt_get_error_message(IntlDateFormatter $fmt) {
   return $fmt->getErrorMessage();
 }
 
@@ -434,7 +434,7 @@ function datefmt_get_locale(IntlDateFormatter $fmt, ?int $which = null) {
  *
  * @return string - The pattern string being used to format/parse.
  */
-function datefmt_get_pattern(IntlDateFormatter $fmt): string {
+function datefmt_get_pattern(IntlDateFormatter $fmt) {
   return $fmt->getPattern();
 }
 
@@ -445,7 +445,7 @@ function datefmt_get_pattern(IntlDateFormatter $fmt): string {
  *
  * @return int - The current date type value of the formatter.
  */
-function datefmt_get_timetype(IntlDateFormatter $fmt): int {
+function datefmt_get_timetype(IntlDateFormatter $fmt) {
   return $fmt->getTimeType();
 }
 
@@ -456,7 +456,7 @@ function datefmt_get_timetype(IntlDateFormatter $fmt): int {
  *
  * @return string - ID string for the time zone used by this formatter.
  */
-function datefmt_get_timezone_id(IntlDateFormatter $fmt): string {
+function datefmt_get_timezone_id(IntlDateFormatter $fmt) {
   return $fmt->getTimeZoneId();
 }
 
@@ -466,7 +466,7 @@ function datefmt_get_timezone_id(IntlDateFormatter $fmt): string {
  * @return IntlCalendar - A copy of the internal calendar object used by
  *   this formatter.
  */
-function datefmt_get_calendar_object(IntlDateFormatter $fmt): Object {
+function datefmt_get_calendar_object(IntlDateFormatter $fmt) {
   return $fmt->getCalendarObject();
 }
 
@@ -475,7 +475,7 @@ function datefmt_get_calendar_object(IntlDateFormatter $fmt): Object {
  *
  * @return IntlTimeZone - The associated IntlTimeZone object.
  */
-function datefmt_get_timezone(IntlDateFormatter $fmt): Object {
+function datefmt_get_timezone(IntlDateFormatter $fmt) {
   return $fmt->getTimeZone();
 }
 
@@ -487,7 +487,7 @@ function datefmt_get_timezone(IntlDateFormatter $fmt): Object {
  * @return bool - TRUE if parser is lenient, FALSE if parser is strict.
  *   By default the parser is lenient.
  */
-function datefmt_is_lenient(IntlDateFormatter $fmt): bool {
+function datefmt_is_lenient(IntlDateFormatter $fmt) {
   return $fmt->isLenient();
 }
 
@@ -507,7 +507,7 @@ function datefmt_is_lenient(IntlDateFormatter $fmt): bool {
  */
 function datefmt_localtime(IntlDateFormatter $fmt,
                            $value,
-                           &$position): mixed {
+                           &$position) {
   return $fmt->localTime($value, $position);
 }
 
@@ -528,7 +528,7 @@ function datefmt_localtime(IntlDateFormatter $fmt,
  */
 function datefmt_parse(IntlDateFormatter $fmt,
                        $value,
-                       &$position = null): mixed {
+                       &$position = null) {
   return $fmt->parse($value, $position);
 }
 
@@ -547,7 +547,7 @@ function datefmt_parse(IntlDateFormatter $fmt,
  * @return bool -
  */
 function datefmt_set_calendar(IntlDateFormatter $fmt,
-                              $which): bool {
+                              $which) {
   return $fmt->setCalendar($which);
 }
 
@@ -561,7 +561,7 @@ function datefmt_set_calendar(IntlDateFormatter $fmt,
  * @return bool -
  */
 function datefmt_set_lenient(IntlDateFormatter $fmt,
-                             $lenient): bool {
+                             $lenient) {
   return $fmt->setLenient($lenient);
 }
 
@@ -576,7 +576,7 @@ function datefmt_set_lenient(IntlDateFormatter $fmt,
  *   failure.
  */
 function datefmt_set_pattern(IntlDateFormatter $fmt,
-                             $pattern): bool {
+                             $pattern) {
   return $fmt->setPattern($pattern);
 }
 
@@ -591,7 +591,7 @@ function datefmt_set_pattern(IntlDateFormatter $fmt,
  * @return bool -
  */
 function datefmt_set_timezone_id(IntlDateFormatter $fmt,
-                                 $zone): bool {
+                                 $zone) {
   return $fmt->setTimeZoneId($zone);
 }
 
@@ -602,6 +602,6 @@ function datefmt_set_timezone_id(IntlDateFormatter $fmt,
  *
  * @return bool - Returns TRUE on success and FALSE on failure.
  */
-function datefmt_set_timezone(IntlDateFormatter $fmt, $zone): bool {
+function datefmt_set_timezone(IntlDateFormatter $fmt, $zone) {
   return $fmt->setTimeZone($zone);
 }

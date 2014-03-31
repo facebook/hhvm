@@ -67,7 +67,7 @@ class IntlTimeZone {
    * @return IntlTimeZone -
    */
   public static
-  function fromDateTimeZone(DateTimeZone $zoneId): IntlTimeZone {
+  function fromDateTimeZone(DateTimeZone $zoneId) {
     return self::createTimeZone($zoneId->name());
   }
 
@@ -206,7 +206,7 @@ class IntlTimeZone {
    *
    * @return DateTimeZone -
    */
-  public function toDateTimeZone(): DateTimeZone {
+  public function toDateTimeZone() {
     $id = $this->getID();
     if (!strncmp($id, "GMT", 3)) {
       throw new Exception("Converting IntlTimeZone to DateTimeZone ".
@@ -232,14 +232,14 @@ class IntlTimeZone {
  *
  * @return integer -
  */
-function intltz_count_equivalent_ids(string $zoneId): mixed {
+function intltz_count_equivalent_ids(string $zoneId) {
   return IntlTimeZone::countEquivalentIDs($zoneId);
 }
 
 function intltz_create_time_zone_id_enumeration(
                                          int $zonetype,
                                          string $region = "",
-                                         ?int $offset = null): mixed {
+                                         ?int $offset = null) {
   return IntlTimeZone::createTimeZoneIDEnumeration($zonetype,
                                                    $region, $offset);
 }
@@ -249,7 +249,7 @@ function intltz_create_time_zone_id_enumeration(
  *
  * @return IntlTimeZone -
  */
-function intltz_create_default(): IntlTimeZone {
+function intltz_create_default() {
   return IntlTimeZone::createDefault();
 }
 
@@ -261,7 +261,7 @@ function intltz_create_default(): IntlTimeZone {
  *
  * @return IntlIterator -
  */
-function intltz_create_enumeration(mixed $countryOrRawOffset = null): mixed {
+function intltz_create_enumeration(mixed $countryOrRawOffset = null) {
   return IntlTimeZone::createEnumeration($countryOrRawOffset);
 }
 
@@ -272,7 +272,7 @@ function intltz_create_enumeration(mixed $countryOrRawOffset = null): mixed {
  *
  * @return IntlTimeZone -
  */
-function intltz_create_time_zone(string $zoneId): IntlTimeZone {
+function intltz_create_time_zone(string $zoneId) {
   return IntlTimeZone::createTimeZone($zoneId);
 }
 
@@ -283,7 +283,7 @@ function intltz_create_time_zone(string $zoneId): IntlTimeZone {
  *
  * @return IntlTimeZone -
  */
-function intltz_from_date_time_zone(DateTimeZone $zoneId): IntlTimeZone {
+function intltz_from_date_time_zone(DateTimeZone $zoneId) {
   return IntlTimeZone::fromDateTimeZone($zoneId);
 }
 
@@ -297,11 +297,11 @@ function intltz_from_date_time_zone(DateTimeZone $zoneId): IntlTimeZone {
  * @return string -
  */
 function intltz_get_canonical_id(string $zoneId,
-                                 mixed &$isSystemID = null): mixed {
+                                 mixed &$isSystemID = null) {
   return IntlTimeZone::getCanonicalID($zoneId, $isSystemID);
 }
 
-function intltz_get_region(string $str): mixed {
+function intltz_get_region(string $str) {
   return IntlTimeZone::getRegion($str);
 }
 
@@ -317,7 +317,7 @@ function intltz_get_region(string $str): mixed {
 function intltz_get_display_name(IntlTimeZone $obj,
                                  bool $isDaylight = false,
                                  int $style = IntlTimeZone::DISPLAY_LONG,
-                                 string $locale = ""): mixed {
+                                 string $locale = "") {
   return $obj->getDisplayName($isDaylight, $style, $locale);
 }
 
@@ -327,7 +327,7 @@ function intltz_get_display_name(IntlTimeZone $obj,
  *
  * @return integer -
  */
-function intltz_get_dst_savings(IntlTimeZone $obj): int {
+function intltz_get_dst_savings(IntlTimeZone $obj) {
   return $obj->getDSTSavings();
 }
 
@@ -340,7 +340,7 @@ function intltz_get_dst_savings(IntlTimeZone $obj): int {
  * @return string -
  */
 function intltz_get_equivalent_id(string $zoneId,
-                                  int $index): mixed {
+                                  int $index) {
   return IntlTimeZone::getEquivalentID($zoneId, $index);
 }
 
@@ -349,7 +349,7 @@ function intltz_get_equivalent_id(string $zoneId,
  *
  * @return integer -
  */
-function intltz_get_error_code(IntlTimeZone $obj): int {
+function intltz_get_error_code(IntlTimeZone $obj) {
   return $obj->getErrorCode();
 }
 
@@ -358,7 +358,7 @@ function intltz_get_error_code(IntlTimeZone $obj): int {
  *
  * @return string -
  */
-function intltz_get_error_message(IntlTimeZone $obj): string {
+function intltz_get_error_message(IntlTimeZone $obj) {
   return $obj->getErrorMessage();
 }
 
@@ -367,11 +367,11 @@ function intltz_get_error_message(IntlTimeZone $obj): string {
  *
  * @return IntlTimeZone -
  */
-function intltz_get_gmt(): IntlTimeZone {
+function intltz_get_gmt() {
   return IntlTimeZone::getGMT();
 }
 
-function intltz_get_unknown(): IntlTimeZone {
+function intltz_get_unknown() {
   return IntlTimeZone::getUnknown();
 }
 
@@ -380,7 +380,7 @@ function intltz_get_unknown(): IntlTimeZone {
  *
  * @return string -
  */
-function intltz_get_id(IntlTimeZone $obj): string {
+function intltz_get_id(IntlTimeZone $obj) {
   return $obj->getID();
 }
 
@@ -398,7 +398,7 @@ function intltz_get_offset(IntlTimeZone $obj,
                            float $date,
                            bool $local,
                            int &$rawOffset,
-                           int &$dstOffset): bool {
+                           int &$dstOffset) {
   return $obj->getOffset($date, $local, $rawOffset, $dstOffset);
 }
 
@@ -408,7 +408,7 @@ function intltz_get_offset(IntlTimeZone $obj,
  *
  * @return integer -
  */
-function intltz_get_raw_offset(IntlTimeZone $obj): mixed {
+function intltz_get_raw_offset(IntlTimeZone $obj) {
   return $obj->getRawOffset();
 }
 
@@ -417,7 +417,7 @@ function intltz_get_raw_offset(IntlTimeZone $obj): mixed {
  *
  * @return string -
  */
-function intltz_get_tz_data_version(): mixed {
+function intltz_get_tz_data_version() {
   return IntlTimeZone::getTZDataVersion();
 }
 
@@ -429,7 +429,7 @@ function intltz_get_tz_data_version(): mixed {
  * @return bool -
  */
 function intltz_has_same_rules(IntlTimeZone $obj,
-                               IntlTimeZone $otherTimeZone): bool {
+                               IntlTimeZone $otherTimeZone) {
   return $obj->hasSameRules($otherTimeZone);
 }
 
@@ -438,7 +438,7 @@ function intltz_has_same_rules(IntlTimeZone $obj,
  *
  * @return DateTimeZone -
  */
-function intltz_to_date_time_zone(IntlTimeZone $obj): DateTimeZone {
+function intltz_to_date_time_zone(IntlTimeZone $obj) {
   return $obj->toDateTimeZone();
 }
 
@@ -447,6 +447,6 @@ function intltz_to_date_time_zone(IntlTimeZone $obj): DateTimeZone {
  *
  * @return bool -
  */
-function intltz_use_daylight_time(IntlTimeZone $obj): bool {
+function intltz_use_daylight_time(IntlTimeZone $obj) {
   return $obj->useDaylightTime();
 }

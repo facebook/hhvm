@@ -194,7 +194,7 @@ function gzpassthru(resource $zp): mixed;
 /**
  * Alias of gzwrite()
  */
-function gzputs(resource $zp, string $string, int $length = 0): mixed {
+function gzputs(resource $zp, string $string, int $length = 0) {
   return gzwrite($zp, $string, $length);
 }
 

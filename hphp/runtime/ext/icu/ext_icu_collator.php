@@ -55,7 +55,7 @@ class Collator {
    * @return Collator - Return new instance of Collator object, or NULL
    *   on error.
    */
-  public static function create(string $locale): Collator {
+  public static function create(string $locale) {
     return new Collator($locale);
   }
 
@@ -189,7 +189,7 @@ class Collator {
  */
 function collator_asort(collator $coll,
                         mixed &$arr,
-                        int $sort_flag = Collator::SORT_REGULAR): bool {
+                        int $sort_flag = Collator::SORT_REGULAR) {
   return $coll->asort($arr, $sort_flag);
 }
 
@@ -206,7 +206,7 @@ function collator_asort(collator $coll,
  */
 function collator_compare(collator $coll,
                           mixed $str1,
-                          mixed $str2): int {
+                          mixed $str2) {
   return $coll->compare($str1, $str2);
 }
 
@@ -221,7 +221,7 @@ function collator_compare(collator $coll,
  * @return Collator - Return new instance of Collator object, or NULL on
  *   error.
  */
-function collator_create(string $locale): Collator {
+function collator_create(string $locale) {
   return Collator::create($locale);
 }
 
@@ -234,7 +234,7 @@ function collator_create(string $locale): Collator {
  * @return int - Attribute value, or boolean FALSE on error.
  */
 function collator_get_attribute(collator $coll,
-                                int $attr): int {
+                                int $attr) {
   return $coll->getAttribute($attr);
 }
 
@@ -246,7 +246,7 @@ function collator_get_attribute(collator $coll,
  * @return int - Error code returned by the last Collator API function
  *   call.
  */
-function collator_get_error_code(collator $coll): int {
+function collator_get_error_code(collator $coll) {
   return $coll->getErrorCode();
 }
 
@@ -258,7 +258,7 @@ function collator_get_error_code(collator $coll): int {
  * @return string - Description of an error occurred in the last Collator
  *   API function call.
  */
-function collator_get_error_message(collator $coll): string {
+function collator_get_error_message(collator $coll) {
   return $coll->getErrorMessage();
 }
 
@@ -274,7 +274,7 @@ function collator_get_error_message(collator $coll): string {
  *   returns boolean FALSE.
  */
 function collator_get_locale(collator $coll,
-                             int $type): string {
+                             int $type) {
   return $coll->getLocale($type);
 }
 
@@ -288,7 +288,7 @@ function collator_get_locale(collator $coll,
  *   keys can be compared directly instead of strings.
  */
 function collator_get_sort_key(collator $coll,
-                               string $str): string {
+                               string $str) {
   return $coll->getSortKey($str);
 }
 
@@ -300,7 +300,7 @@ function collator_get_sort_key(collator $coll,
  * @return int - Returns current collation strength, or boolean FALSE on
  *   error.
  */
-function collator_get_strength(collator $coll): int {
+function collator_get_strength(collator $coll) {
   return $coll->getStrength();
 }
 
@@ -315,7 +315,7 @@ function collator_get_strength(collator $coll): int {
  */
 function collator_set_attribute(collator $coll,
                                 int $attr,
-                                int $val): bool {
+                                int $val) {
   return $coll->setAttribute($attr, $val);
 }
 
@@ -331,7 +331,7 @@ function collator_set_attribute(collator $coll,
  * @return bool -
  */
 function collator_set_strength(collator $coll,
-                               int $strength): bool {
+                               int $strength) {
   return $coll->setStrength($strength);
 }
 
@@ -344,7 +344,7 @@ function collator_set_strength(collator $coll,
  * @return bool -
  */
 function collator_sort_with_sort_keys(collator $coll,
-                                      mixed &$arr): bool {
+                                      mixed &$arr) {
   return $coll->sortWithSortKeys($arr);
 }
 
@@ -364,6 +364,6 @@ function collator_sort_with_sort_keys(collator $coll,
  */
 function collator_sort(collator $coll,
                        mixed &$arr,
-                       int $sort_flag = Collator::SORT_REGULAR): bool {
+                       int $sort_flag = Collator::SORT_REGULAR) {
   return $coll->sort($arr, $sort_flag);
 }

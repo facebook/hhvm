@@ -13,14 +13,14 @@ class php_user_filter {
     resource $out,
     int &$consumed,
     bool $closed,
-  ): int {
+  ) {
     return PSFS_ERR_FATAL;
   }
 
-  public function onClose(): void {
+  public function onClose() {
   }
 
-  public function onCreate(): ?bool {
+  public function onCreate() {
     // Docs say bool, but Zend's default implementation returns null
     return null;
   }

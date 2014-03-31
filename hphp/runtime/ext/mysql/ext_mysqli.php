@@ -14,7 +14,7 @@ class mysqli {
   <<__Native>>
   private function hh_get_connection(int $state = 0): ?resource;
 
-  public function __get(string $name): mixed {
+  public function __get(string $name) {
     switch ($name) {
       case 'client_info':
         return mysqli_get_client_info();
@@ -105,7 +105,7 @@ class mysqli {
                               ?string $passwd = null,
                               ?string $dbname = null,
                               ?int $port = null,
-                              ?string $socket = null): void {
+                              ?string $socket = null) {
     $this->hh_init();
 
     if (func_num_args() == 0) {
@@ -116,7 +116,7 @@ class mysqli {
     $this->real_connect($host, $username, $passwd, $dbname, $port, $socket);
   }
 
-  public function __clone(): void {
+  public function __clone() {
     throw new Exception(
       'Trying to clone an uncloneable object of class mysqli'
     );
@@ -130,7 +130,7 @@ class mysqli {
                           ?string $passwd = null,
                           ?string $dbname = null,
                           ?int $port = null,
-                          ?string $socket = null): void {
+                          ?string $socket = null) {
     $this->hh_init();
 
     if (func_num_args() == 0) {
@@ -162,7 +162,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function begin_transaction(int $flags, string $name): bool {
+  public function begin_transaction(int $flags, string $name) {
     $query = 'START TRANSACTION';
     if ($name) {
       $query .= '/*'. $name .'*/';
@@ -220,7 +220,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function close(): bool {
+  public function close() {
     $conn = $this->__connection;
     if ($conn) {
       return mysql_close($conn);
@@ -230,7 +230,7 @@ class mysqli {
   }
 
   private function __end_transaction(bool $commit, int $flags = 0,
-                                     ?string $name = null): bool {
+                                     ?string $name = null) {
     $query = ($commit) ? 'COMMIT' : 'ROLLBACK';
     if ($name) {
       $query .= '/*'. $name .'*/';
@@ -268,7 +268,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function commit(int $flags = 0, ?string $name = null): bool {
+  public function commit(int $flags = 0, ?string $name = null) {
     return $this->__end_transaction(true, $flags, $name);
   }
 
@@ -295,7 +295,7 @@ class mysqli {
   /**
    * Alias for real_escape_string
    */
-  public function escape_string($escapestr): ?string {
+  public function escape_string($escapestr) {
     return $this->real_escape_string($escapestr);
   }
 
@@ -319,7 +319,7 @@ class mysqli {
    * @return string - A string that represents the MySQL client library
    *   version
    */
-  public function get_client_info(): string {
+  public function get_client_info() {
     return mysqli_get_client_info();
   }
 
@@ -337,7 +337,7 @@ class mysqli {
    *
    * @return mysqli_warning -
    */
-  public function get_warnings(): mixed {
+  public function get_warnings() {
     if (!$this->warning_count) {
       return false;
     }
@@ -361,7 +361,7 @@ class mysqli {
    *
    * @return mysqli - Returns an object.
    */
-  public function init(): mysqli {
+  public function init() {
     $this->hh_init();
     return $this;
   }
@@ -382,7 +382,7 @@ class mysqli {
    * @return bool - Returns TRUE if one or more result sets are available
    *   from a previous call to mysqli_multi_query(), otherwise FALSE.
    */
-  public function more_results(): mixed {
+  public function more_results() {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;
@@ -400,7 +400,7 @@ class mysqli {
    *   retrieve subsequent errors from other statements you have to call
    *   mysqli_next_result() first.
    */
-  public function multi_query(string $query): ?bool {
+  public function multi_query(string $query) {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;
@@ -413,7 +413,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function next_result(): ?bool {
+  public function next_result() {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;
@@ -448,7 +448,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function ping(): ?bool {
+  public function ping() {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;
@@ -504,7 +504,7 @@ class mysqli {
    * @return mysqli_stmt - mysqli_prepare() returns a statement object or
    *   FALSE if an error occurred.
    */
-  public function prepare(string $query): ?mysqli_stmt {
+  public function prepare(string $query) {
     $stmt = new mysqli_stmt($this);
     $prepared = $stmt->prepare($query);
 
@@ -541,7 +541,7 @@ class mysqli {
    *   will return TRUE.
    */
   public function query(string $query,
-                        int $resultmode = MYSQLI_STORE_RESULT): ?mixed {
+                        int $resultmode = MYSQLI_STORE_RESULT) {
     if ($resultmode !== MYSQLI_STORE_RESULT &&
         $resultmode !== MYSQLI_USE_RESULT) {
       trigger_error("Invalid value for resultmode", E_USER_WARNING);
@@ -607,7 +607,7 @@ class mysqli {
                                ?string $dbname = null,
                                ?int $port = null,
                                ?string $socket = null,
-                               ?int $flags = 0): bool {
+                               ?int $flags = 0) {
     $server = null;
     if ($host) {
       $server = $host;
@@ -648,7 +648,7 @@ class mysqli {
    *
    * @return string - Returns an escaped string.
    */
-  public function real_escape_string($escapestr): ?string {
+  public function real_escape_string($escapestr) {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;
@@ -664,7 +664,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function real_query(string $query): ?bool {
+  public function real_query(string $query) {
     $result = $this->hh_real_query($query);
     if ($result === null) {
       return null;
@@ -703,7 +703,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function release_savepoint(string $name): ?bool {
+  public function release_savepoint(string $name) {
     return $this->real_query('RELEASE SAVEPOINT `'. $name .'`');
   }
 
@@ -715,7 +715,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function rollback(int $flags = 0, ?string $name = null): ?bool {
+  public function rollback(int $flags = 0, ?string $name = null) {
     return $this->__end_transaction(false, $flags, $name);
   }
 
@@ -726,7 +726,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function savepoint(string $name): ?bool {
+  public function savepoint(string $name) {
     return $this->real_query('SAVEPOINT `'. $name .'`');
   }
 
@@ -737,7 +737,7 @@ class mysqli {
    *
    * @return bool -
    */
-  public function select_db(string $dbname): ?bool {
+  public function select_db(string $dbname) {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;
@@ -778,7 +778,7 @@ class mysqli {
   /**
    * Alias of options()
    */
-  public function set_opt(int $option, mixed $value): bool {
+  public function set_opt(int $option, mixed $value) {
     return $this->options($option, $value);
   }
 
@@ -810,7 +810,7 @@ class mysqli {
    * @return string - A string describing the server status. FALSE if an
    *   error occurred.
    */
-  public function stat(): ?string {
+  public function stat() {
     $conn = $this->hh_get_connection(2);
     if (!$conn) {
       return null;
@@ -824,7 +824,7 @@ class mysqli {
    *
    * @return mysqli_stmt - Returns an object.
    */
-  public function stmt_init(): mysqli_stmt {
+  public function stmt_init() {
     return new mysqli_stmt($this);
   }
 
@@ -847,7 +847,7 @@ class mysqli {
    *   allocated). If mysqli_field_count() returns a non-zero value, the
    *   statement should have produced a non-empty result set.
    */
-  public function store_result(): ?mixed {
+  public function store_result() {
     $result = $this->hh_get_result(true);
     if ($result === null) {
       return null;
@@ -865,7 +865,7 @@ class mysqli {
    * @return mysqli_result - Returns an unbuffered result object or FALSE
    *   if an error occurred.
    */
-  public function use_result(): ?mixed {
+  public function use_result() {
     $result = $this->hh_get_result(false);
     if ($result === null) {
       return null;
@@ -893,7 +893,7 @@ class mysqli_driver {
   private bool $__reconnect = false;
   private int $__report_mode = 0;
 
-  public function __get(string $name): mixed {
+  public function __get(string $name) {
     switch ($name) {
       case 'client_info':
         return mysqli_get_client_info();
@@ -915,7 +915,7 @@ class mysqli_driver {
     return null;
   }
 
-  public function __set(string $name, mixed $value): void {
+  public function __set(string $name, mixed $value) {
     switch ($name) {
       case 'reconnect':
         $this->__reconnect = (bool)$value;
@@ -931,7 +931,7 @@ class mysqli_driver {
     }
   }
 
-  public function __clone(): void {
+  public function __clone() {
     throw new Exception(
       'Trying to clone an uncloneable object of class mysqli_driver'
     );
@@ -949,7 +949,7 @@ class mysqli_result {
   private ?int $__resulttype = null;
   private bool $__done = false;
 
-  public function __get(string $name): mixed {
+  public function __get(string $name) {
     if ($this->__result === null) {
       trigger_error("supplied argument is not a valid MySQL result resource",
                     E_USER_WARNING);
@@ -985,7 +985,7 @@ class mysqli_result {
     $this->__resulttype = $resulttype;
   }
 
-  public function __clone(): void {
+  public function __clone() {
     throw new Exception(
       'Trying to clone an uncloneable object of class mysqli_result'
     );
@@ -999,7 +999,7 @@ class mysqli_result {
     return $row;
   }
 
-  private function __mysqli_to_mysql_resulttype(int $resulttype): mixed {
+  private function __mysqli_to_mysql_resulttype(int $resulttype) {
     switch ($resulttype) {
       case MYSQLI_NUM:
         return MYSQL_NUM;
@@ -1019,7 +1019,7 @@ class mysqli_result {
    *
    * @return void -
    */
-  public function close(): void {
+  public function close() {
     $this->free();
   }
 
@@ -1031,7 +1031,7 @@ class mysqli_result {
    *
    * @return bool -
    */
-  public function data_seek(int $offset): mixed {
+  public function data_seek(int $offset) {
     if ($this->__result === null) {
       return null;
     }
@@ -1054,7 +1054,7 @@ class mysqli_result {
    * @return mixed - Returns an array of associative or numeric arrays
    *   holding result rows.
    */
-  public function fetch_all(int $resulttype = MYSQLI_NUM): mixed {
+  public function fetch_all(int $resulttype = MYSQLI_NUM) {
     $result = array();
     while (($row = $this->fetch_array($resulttype)) !== null) {
       $result[] = $row;
@@ -1078,7 +1078,7 @@ class mysqli_result {
    * @return mixed - Returns an array of strings that corresponds to the
    *   fetched row or NULL if there are no more rows in resultset.
    */
-  public function fetch_array(int $resulttype = MYSQLI_BOTH): mixed {
+  public function fetch_array(int $resulttype = MYSQLI_BOTH) {
     return $this->__checkRow(
       mysql_fetch_array(
         $this->__result,
@@ -1099,7 +1099,7 @@ class mysqli_result {
    *   either need to access the result with numeric indices by using
    *   mysqli_fetch_row() or add alias names.
    */
-  public function fetch_assoc(): array {
+  public function fetch_assoc() {
     return $this->fetch_array(MYSQLI_ASSOC);
   }
 
@@ -1123,7 +1123,7 @@ class mysqli_result {
    *   The data type used for this field   decimals The number of decimals
    *   used (for integer fields)
    */
-  public function fetch_field_direct(int $fieldnr): mixed {
+  public function fetch_field_direct(int $fieldnr) {
     $this->field_seek($fieldnr);
     return $this->fetch_field();
   }
@@ -1165,7 +1165,7 @@ class mysqli_result {
    *   The data type used for this field   decimals The number of decimals
    *   used (for integer fields)
    */
-  public function fetch_fields(): array {
+  public function fetch_fields() {
     $fields = array();
     $this->field_seek(0);
     while (($field = $this->fetch_field()) !== false) {
@@ -1189,7 +1189,7 @@ class mysqli_result {
    *   resultset.
    */
   public function fetch_object(?string $class_name = null,
-                               array $params = array()): object {
+                               array $params = array()) {
     if (func_num_args() == 0) {
       $obj = mysql_fetch_object($this->__result);
     } else {
@@ -1205,7 +1205,7 @@ class mysqli_result {
    *   corresponds to the fetched row or NULL if there are no more rows in
    *   result set.
    */
-  public function fetch_row(): mixed {
+  public function fetch_row() {
     return $this->fetch_array(MYSQLI_NUM);
   }
 
@@ -1217,7 +1217,7 @@ class mysqli_result {
    *
    * @return bool -
    */
-  public function field_seek(int $fieldnr): bool {
+  public function field_seek(int $fieldnr) {
     if (!mysql_field_seek($this->__result, $fieldnr)) {
       return false;
     }
@@ -1230,7 +1230,7 @@ class mysqli_result {
    *
    * @return void -
    */
-  public function free(): void {
+  public function free() {
     mysql_free_result($this->__result);
     $this->__result = null;
   }
@@ -1240,7 +1240,7 @@ class mysqli_result {
    *
    * @return void -
    */
-  public function free_result(): void {
+  public function free_result() {
     $this->free();
   }
 
@@ -1254,7 +1254,7 @@ class mysqli_stmt {
   private ?resource $__stmt = null;
   private ?mysqli $__link = null;
 
-  public function __get(string $name): mixed {
+  public function __get(string $name) {
     switch ($name) {
       case 'affected_rows':
         return $this->hh_affected_rows();
@@ -1284,7 +1284,7 @@ class mysqli_stmt {
     }
   }
 
-  public function __clone(): void {
+  public function __clone() {
     throw new Exception(
       'Trying to clone an uncloneable object of class mysqli_stmt'
     );
@@ -1445,7 +1445,7 @@ class mysqli_stmt {
    *
    * @return object -
    */
-  public function get_warnings(): mixed {
+  public function get_warnings() {
     return $this->__link->get_warnings();
   }
 
@@ -1547,7 +1547,7 @@ class mysqli_warning {
    *
    * @return  -
    */
-  public function __construct(array $warnings): void {
+  public function __construct(array $warnings) {
     $this->__warnings = $warnings;
     $this->next();
   }
@@ -1557,7 +1557,7 @@ class mysqli_warning {
    *
    * @return bool -
    */
-  public function next(): bool {
+  public function next() {
     if (!$this->__warnings) {
       return false;
     }
@@ -1593,7 +1593,7 @@ class mysqli_warning {
  *   greater than the maximum integer value( PHP_INT_MAX ), the number of
  *   affected rows will be returned as a string.
  */
-function mysqli_affected_rows(mysqli $link): int {
+function mysqli_affected_rows(mysqli $link) {
   return $link->affected_rows;
 }
 
@@ -1605,7 +1605,7 @@ function mysqli_affected_rows(mysqli $link): int {
  *
  * @return bool -
  */
-function mysqli_autocommit(mysqli $link, bool $mode): bool {
+function mysqli_autocommit(mysqli $link, bool $mode) {
   return $link->autocommit($mode);
 }
 
@@ -1620,7 +1620,7 @@ function mysqli_autocommit(mysqli $link, bool $mode): bool {
  */
 function mysqli_begin_transaction(mysqli $link,
                                   int $flags,
-                                  string $name): bool {
+                                  string $name) {
   return $link->begin_transaction($flags, $name);
 }
 
@@ -1629,7 +1629,7 @@ function mysqli_connect(?string $host = null,
                         ?string $passwd = null,
                         ?string $dbname = null,
                         ?int $port = null,
-                        ?string $socket = null): mixed {
+                        ?string $socket = null) {
   $link = new mysqli($host, $username, $passwd, $dbname, $port, $socket);
   if ($link->connect_errno > 0) {
     return false;
@@ -1654,7 +1654,7 @@ function mysqli_connect(?string $host = null,
 function mysqli_change_user(mysqli $link,
                             string $user,
                             string $password,
-                            string $database): bool {
+                            string $database) {
   return $link->change_user($user, $password, $database);
 }
 
@@ -1665,7 +1665,7 @@ function mysqli_change_user(mysqli $link,
  *
  * @return string - The default character set for the current connection
  */
-function mysqli_character_set_name(mysqli $link): string {
+function mysqli_character_set_name(mysqli $link) {
   return $link->character_set_name();
 }
 
@@ -1677,7 +1677,7 @@ function mysqli_character_set_name(mysqli $link): string {
  * @return string - A string that represents the MySQL client library
  *   version
  */
-function mysqli_get_client_info(): string {
+function mysqli_get_client_info() {
   return mysql_get_client_info();
 }
 
@@ -1702,7 +1702,7 @@ function mysqli_get_client_version(): int;
  *
  * @return bool -
  */
-function mysqli_close(mysqli $link): bool {
+function mysqli_close(mysqli $link) {
   return $link->close();
 }
 
@@ -1716,7 +1716,7 @@ function mysqli_close(mysqli $link): bool {
  * @return bool -
  */
 function mysqli_commit(mysqli $link, int $flags = 0,
-                       ?string $name = null): bool {
+                       ?string $name = null) {
   return $link->commit($flags, $name);
 }
 
@@ -1726,7 +1726,7 @@ function mysqli_commit(mysqli $link, int $flags = 0,
  * @return int - An error code value for the last call to
  *   mysqli_connect(), if it failed. zero means no error occurred.
  */
-function mysqli_connect_errno(): int {
+function mysqli_connect_errno() {
   return mysqli::$__connection_errno;
 }
 
@@ -1736,7 +1736,7 @@ function mysqli_connect_errno(): int {
  * @return string - A string that describes the error. NULL is returned
  *   if no error occurred.
  */
-function mysqli_connect_error(): ?string {
+function mysqli_connect_error() {
   return mysqli::$__connection_error;
 }
 
@@ -1759,7 +1759,7 @@ function mysqli_connect_error(): ?string {
  *
  * @return bool -
  */
-function mysqli_dump_debug_info(mysqli $link): bool {
+function mysqli_dump_debug_info(mysqli $link) {
   return $link->dump_debug_info();
 }
 
@@ -1771,7 +1771,7 @@ function mysqli_dump_debug_info(mysqli $link): bool {
  * @return int - An error code value for the last call, if it failed.
  *   zero means no error occurred.
  */
-function mysqli_errno(mysqli $link): int {
+function mysqli_errno(mysqli $link) {
   return $link->errno;
 }
 
@@ -1783,7 +1783,7 @@ function mysqli_errno(mysqli $link): int {
  * @return array - A list of errors, each as an associative array
  *   containing the errno, error, and sqlstate.
  */
-function mysqli_error_list(mysqli $link): array {
+function mysqli_error_list(mysqli $link) {
   return $link->error_list;
 }
 
@@ -1795,7 +1795,7 @@ function mysqli_error_list(mysqli $link): array {
  * @return string - A string that describes the error. An empty string if
  *   no error occurred.
  */
-function mysqli_error(mysqli $link): string {
+function mysqli_error(mysqli $link) {
   return $link->error;
 }
 
@@ -1807,7 +1807,7 @@ function mysqli_error(mysqli $link): string {
  * @return int - An integer representing the number of fields in a result
  *   set.
  */
-function mysqli_field_count(mysqli $link): int {
+function mysqli_field_count(mysqli $link) {
   return $link->field_count;
 }
 
@@ -1824,7 +1824,7 @@ function mysqli_field_count(mysqli $link): int {
  *   bytes   number Internal character set number   state Character set
  *   status (?)
  */
-function mysqli_get_charset(mysqli $link): object {
+function mysqli_get_charset(mysqli $link) {
   return $link->get_charset();
 }
 
@@ -1857,7 +1857,7 @@ function mysqli_get_charset(mysqli $link): object {
  * @return string - A character string representing the server hostname
  *   and the connection type.
  */
-function mysqli_get_host_info(mysqli $link): string {
+function mysqli_get_host_info(mysqli $link) {
   return $link->host_info;
 }
 
@@ -1868,7 +1868,7 @@ function mysqli_get_host_info(mysqli $link): string {
  *
  * @return int - Returns an integer representing the protocol version.
  */
-function mysqli_get_proto_info(mysqli $link): int {
+function mysqli_get_proto_info(mysqli $link) {
   return (int)$link->protocol_version;
 }
 
@@ -1879,7 +1879,7 @@ function mysqli_get_proto_info(mysqli $link): int {
  *
  * @return string - A character string representing the server version.
  */
-function mysqli_get_server_info(mysqli $link): string {
+function mysqli_get_server_info(mysqli $link) {
   return $link->server_info;
 }
 
@@ -1892,7 +1892,7 @@ function mysqli_get_server_info(mysqli $link): string {
  *   of this version number is main_version * 10000 + minor_version * 100 +
  *   sub_version (i.e. version 4.1.0 is 40100).
  */
-function mysqli_get_server_version(mysqli $link): int {
+function mysqli_get_server_version(mysqli $link) {
   return $link->server_version;
 }
 
@@ -1903,7 +1903,7 @@ function mysqli_get_server_version(mysqli $link): int {
  *
  * @return mysqli_warning -
  */
-function mysqli_get_warnings(mysqli $link): mixed {
+function mysqli_get_warnings(mysqli $link) {
   return $link->get_warnings();
 }
 
@@ -1915,7 +1915,7 @@ function mysqli_get_warnings(mysqli $link): mixed {
  * @return string - A character string representing additional
  *   information about the most recently executed query.
  */
-function mysqli_info(mysqli $link): string {
+function mysqli_info(mysqli $link) {
   return $link->info;
 }
 
@@ -1925,7 +1925,7 @@ function mysqli_info(mysqli $link): string {
  *
  * @return mysqli - Returns an object.
  */
-function mysqli_init(): mysqli {
+function mysqli_init() {
   return new mysqli();
 }
 
@@ -1940,7 +1940,7 @@ function mysqli_init(): mysqli {
  *      If the number is greater than maximal int value, mysqli_insert_id()
  *   will return a string.
  */
-function mysqli_insert_id(mysqli $link): mixed {
+function mysqli_insert_id(mysqli $link) {
   return $link->insert_id;
 }
 
@@ -1952,7 +1952,7 @@ function mysqli_insert_id(mysqli $link): mixed {
  *
  * @return bool -
  */
-function mysqli_kill(mysqli $link, int $processid): bool {
+function mysqli_kill(mysqli $link, int $processid) {
   return $link->kill($processid);
 }
 
@@ -1964,7 +1964,7 @@ function mysqli_kill(mysqli $link, int $processid): bool {
  * @return bool - Returns TRUE if one or more result sets are available
  *   from a previous call to mysqli_multi_query(), otherwise FALSE.
  */
-function mysqli_more_results(mysqli $link): bool {
+function mysqli_more_results(mysqli $link) {
   return $link->more_results();
 }
 
@@ -1979,7 +1979,7 @@ function mysqli_more_results(mysqli $link): bool {
  *   retrieve subsequent errors from other statements you have to call
  *   mysqli_next_result() first.
  */
-function mysqli_multi_query(mysqli $link, string $query): bool {
+function mysqli_multi_query(mysqli $link, string $query) {
   return $link->multi_query($query);
 }
 
@@ -1990,7 +1990,7 @@ function mysqli_multi_query(mysqli $link, string $query): bool {
  *
  * @return bool -
  */
-function mysqli_next_result(mysqli $link): bool {
+function mysqli_next_result(mysqli $link) {
   return $link->next_result();
 }
 
@@ -2013,7 +2013,7 @@ function mysqli_next_result(mysqli $link): bool {
  *
  * @return bool -
  */
-function mysqli_options(mysqli $link, int $option, mixed $value): bool {
+function mysqli_options(mysqli $link, int $option, mixed $value) {
   return $link->options($option, $value);
 }
 
@@ -2025,7 +2025,7 @@ function mysqli_options(mysqli $link, int $option, mixed $value): bool {
  *
  * @return bool -
  */
-function mysqli_ping(mysqli $link): bool {
+function mysqli_ping(mysqli $link) {
   return $link->ping();
 }
 
@@ -2078,7 +2078,7 @@ function mysqli_ping(mysqli $link): bool {
  * @return mysqli_stmt - mysqli_prepare() returns a statement object or
  *   FALSE if an error occurred.
  */
-function mysqli_prepare(mysqli $link, string $query): mysqli_stmt {
+function mysqli_prepare(mysqli $link, string $query) {
   return $link->prepare($query);
 }
 
@@ -2102,7 +2102,7 @@ function mysqli_prepare(mysqli $link, string $query): mysqli_stmt {
  */
 function mysqli_query(mysqli $link,
                       string $query,
-                      int $resultmode = MYSQLI_STORE_RESULT): mixed {
+                      int $resultmode = MYSQLI_STORE_RESULT) {
   return $link->query($query, $resultmode);
 }
 
@@ -2149,7 +2149,7 @@ function mysqli_real_connect(mysqli $link,
                              ?string $dbname = null,
                              ?int $port = null,
                              ?string $socket = null,
-                             ?int $flags = 0): bool {
+                             ?int $flags = 0) {
   return $link->real_connect($host, $username, $passwd, $dbname, $port, $socket,
                              $flags);
 }
@@ -2157,7 +2157,7 @@ function mysqli_real_connect(mysqli $link,
 /**
  * Alias of mysqli_real_escape_string
  */
-function mysqli_escape_string(mysqli $link, $escapestr): string {
+function mysqli_escape_string(mysqli $link, $escapestr) {
   return mysqli_real_escape_string($link, $escapestr);
 }
 
@@ -2171,7 +2171,7 @@ function mysqli_escape_string(mysqli $link, $escapestr): string {
  *
  * @return string - Returns an escaped string.
  */
-function mysqli_real_escape_string(mysqli $link, $escapestr): string {
+function mysqli_real_escape_string(mysqli $link, $escapestr) {
   return $link->real_escape_string($escapestr);
 }
 
@@ -2184,7 +2184,7 @@ function mysqli_real_escape_string(mysqli $link, $escapestr): string {
  *
  * @return bool -
  */
-function mysqli_real_query(mysqli $link, string $query): bool {
+function mysqli_real_query(mysqli $link, string $query) {
   return $link->real_query($query);
 }
 
@@ -2210,7 +2210,7 @@ function mysqli_real_query(mysqli $link, string $query): bool {
  *
  * @return int - TRUE if the refresh was a success, otherwise FALSE
  */
-function mysqli_refresh(mysqli $link, int $options): int {
+function mysqli_refresh(mysqli $link, int $options) {
   return $link->refresh($options);
 }
 
@@ -2222,7 +2222,7 @@ function mysqli_refresh(mysqli $link, int $options): int {
  *
  * @return bool -
  */
-function mysqli_release_savepoint(mysqli $link, string $name): bool {
+function mysqli_release_savepoint(mysqli $link, string $name) {
   return $link->release_savepoint($name);
 }
 
@@ -2236,7 +2236,7 @@ function mysqli_release_savepoint(mysqli $link, string $name): bool {
  * @return bool -
  */
 function mysqli_rollback(mysqli $link, int $flags = 0,
-                         ?string $name = null): bool {
+                         ?string $name = null) {
   return $link->rollback($flags, $name);
 }
 
@@ -2248,7 +2248,7 @@ function mysqli_rollback(mysqli $link, int $flags = 0,
  *
  * @return bool -
  */
-function mysqli_savepoint(mysqli $link, string $name): bool {
+function mysqli_savepoint(mysqli $link, string $name) {
   return $link->savepoint($name);
 }
 
@@ -2260,7 +2260,7 @@ function mysqli_savepoint(mysqli $link, string $name): bool {
  *
  * @return bool -
  */
-function mysqli_select_db(mysqli $link, string $dbname): bool {
+function mysqli_select_db(mysqli $link, string $dbname) {
   return $link->select_db($dbname);
 }
 
@@ -2284,7 +2284,7 @@ function mysqli_select_db(mysqli $link, string $dbname): bool {
  *
  * @return bool -
  */
-function mysqli_set_charset(mysqli $link, string $charset): bool {
+function mysqli_set_charset(mysqli $link, string $charset) {
   return $link->set_charset($charset);
 }
 
@@ -2325,7 +2325,7 @@ function mysqli_set_charset(mysqli $link, string $charset): bool {
  *   for the last error. The error code consists of five characters.
  *   '00000' means no error.
  */
-function mysqli_sqlstate(mysqli $link): string {
+function mysqli_sqlstate(mysqli $link) {
   return $link->sqlstate;
 }
 
@@ -2350,7 +2350,7 @@ function mysqli_ssl_set(mysqli $link,
                         ?string $cert,
                         ?string $ca,
                         ?string $capath,
-                        ?string $cipher): bool {
+                        ?string $cipher) {
   return $link->ssl_set($key, $cert, $ca, $capath, $cipher);
 }
 
@@ -2362,7 +2362,7 @@ function mysqli_ssl_set(mysqli $link,
  * @return string - A string describing the server status. FALSE if an
  *   error occurred.
  */
-function mysqli_stat(mysqli $link): string {
+function mysqli_stat(mysqli $link) {
   return $link->stat();
 }
 
@@ -2374,7 +2374,7 @@ function mysqli_stat(mysqli $link): string {
  *
  * @return mysqli_stmt - Returns an object.
  */
-function mysqli_stmt_init(mysqli $link): mysqli_stmt {
+function mysqli_stmt_init(mysqli $link) {
   return $link->stmt_init();
 }
 
@@ -2396,7 +2396,7 @@ function mysqli_stmt_init(mysqli $link): mysqli_stmt {
  *   mysqli_field_count() returns a non-zero value, the statement should
  *   have produced a non-empty result set.
  */
-function mysqli_store_result(mysqli $link): mysqli_result {
+function mysqli_store_result(mysqli $link) {
   return $link->store_result();
 }
 
@@ -2407,7 +2407,7 @@ function mysqli_store_result(mysqli $link): mysqli_result {
  *
  * @return int - Returns the Thread ID for the current connection.
  */
-function mysqli_thread_id(mysqli $link): int {
+function mysqli_thread_id(mysqli $link) {
   return $link->thread_id;
 }
 
@@ -2428,7 +2428,7 @@ function mysqli_thread_safe(): bool;
  * @return mysqli_result - Returns an unbuffered result object or FALSE
  *   if an error occurred.
  */
-function mysqli_use_result(mysqli $link): mysqli_result {
+function mysqli_use_result(mysqli $link) {
   return $link->use_result();
 }
 
@@ -2439,7 +2439,7 @@ function mysqli_use_result(mysqli $link): mysqli_result {
  *
  * @return int - Number of warnings or zero if there are no warnings.
  */
-function mysqli_warning_count(mysqli $link): int {
+function mysqli_warning_count(mysqli $link) {
   return $link->warning_count;
 }
 
@@ -2455,7 +2455,7 @@ function mysqli_warning_count(mysqli $link): int {
  *
  * @return bool -
  */
-function mysqli_report(int $flags): bool {
+function mysqli_report(int $flags) {
   (new mysqli_driver())->report_mode = $flags;
   return true;
 }
@@ -2463,7 +2463,7 @@ function mysqli_report(int $flags): bool {
 /**
  * Alias of mysqli_options
  */
-function mysqli_set_opt(mysqli $link, int $option, mixed $value): bool {
+function mysqli_set_opt(mysqli $link, int $option, mixed $value) {
   return mysqli_options($link, $option, $value);
 }
 
@@ -2474,7 +2474,7 @@ function mysqli_set_opt(mysqli $link, int $option, mixed $value): bool {
  *
  * @return int - Returns current offset of field cursor.
  */
-function mysqli_field_tell(mysqli_result $result): int {
+function mysqli_field_tell(mysqli_result $result) {
   return $result->current_field;
 }
 
@@ -2487,7 +2487,7 @@ function mysqli_field_tell(mysqli_result $result): int {
  *
  * @return bool -
  */
-function mysqli_data_seek(mysqli_result $result, int $offset): bool {
+function mysqli_data_seek(mysqli_result $result, int $offset) {
   return $result->data_seek($offset);
 }
 
@@ -2504,7 +2504,7 @@ function mysqli_data_seek(mysqli_result $result, int $offset): bool {
  *   holding result rows.
  */
 function mysqli_fetch_all(mysqli_result $result,
-                          int $resulttype = MYSQLI_NUM): mixed {
+                          int $resulttype = MYSQLI_NUM) {
   return $result->fetch_all($resulttype);
 }
 
@@ -2525,7 +2525,7 @@ function mysqli_fetch_all(mysqli_result $result,
  *   fetched row or NULL if there are no more rows in resultset.
  */
 function mysqli_fetch_array(mysqli_result $result,
-                            int $resulttype = MYSQLI_BOTH): mixed {
+                            int $resulttype = MYSQLI_BOTH) {
   return $result->fetch_array($resulttype);
 }
 
@@ -2543,7 +2543,7 @@ function mysqli_fetch_array(mysqli_result $result,
  *   need to access the result with numeric indices by using
  *   mysqli_fetch_row() or add alias names.
  */
-function mysqli_fetch_assoc(mysqli_result $result): array {
+function mysqli_fetch_assoc(mysqli_result $result) {
   return $result->fetch_assoc();
 }
 
@@ -2569,7 +2569,7 @@ function mysqli_fetch_assoc(mysqli_result $result): array {
  *   fields)
  */
 function mysqli_fetch_field_direct(mysqli_result $result,
-                                   int $fieldnr): object {
+                                   int $fieldnr) {
   return $result->fetch_field_direct($fieldnr);
 }
 
@@ -2592,7 +2592,7 @@ function mysqli_fetch_field_direct(mysqli_result $result,
  *   the bit-flags for the field.   type The data type used for this field
  *    decimals The number of decimals used (for integer fields)
  */
-function mysqli_fetch_field(mysqli_result $result): object {
+function mysqli_fetch_field(mysqli_result $result) {
   return $result->fetch_field();
 }
 
@@ -2613,7 +2613,7 @@ function mysqli_fetch_field(mysqli_result $result): object {
  *   the bit-flags for the field.   type The data type used for this field
  *    decimals The number of decimals used (for integer fields)
  */
-function mysqli_fetch_fields(mysqli_result $result): array {
+function mysqli_fetch_fields(mysqli_result $result) {
   return $result->fetch_fields();
 }
 
@@ -2633,7 +2633,7 @@ function mysqli_fetch_fields(mysqli_result $result): array {
  */
 function mysqli_fetch_object(mysqli_result $result,
                              ?string $class_name = null,
-                             ?array $params = array()): object {
+                             ?array $params = array()) {
   if (func_num_args() < 2) {
     return $result->fetch_object();
   }
@@ -2650,7 +2650,7 @@ function mysqli_fetch_object(mysqli_result $result,
  *   corresponds to the fetched row or NULL if there are no more rows in
  *   result set.
  */
-function mysqli_fetch_row(mysqli_result $result): mixed {
+function mysqli_fetch_row(mysqli_result $result) {
   return $result->fetch_row();
 }
 
@@ -2661,7 +2661,7 @@ function mysqli_fetch_row(mysqli_result $result): mixed {
  *
  * @return int - The number of fields from a result set.
  */
-function mysqli_num_fields(mysqli_result $result): int {
+function mysqli_num_fields(mysqli_result $result) {
   return $result->field_count;
 }
 
@@ -2675,7 +2675,7 @@ function mysqli_num_fields(mysqli_result $result): int {
  * @return bool -
  */
 function mysqli_field_seek(mysqli_result $result,
-                           int $fieldnr): bool {
+                           int $fieldnr) {
   return $result->field_seek($fieldnr);
 }
 
@@ -2686,7 +2686,7 @@ function mysqli_field_seek(mysqli_result $result,
  *
  * @return void -
  */
-function mysqli_free_result(mysqli_result $result): void {
+function mysqli_free_result(mysqli_result $result) {
   return $result->free();
 }
 
@@ -2702,7 +2702,7 @@ function mysqli_free_result(mysqli_result $result): void {
  *   mysqli_fetch_row/array/object or after retrieving all rows in the
  *   result.
  */
-function mysqli_fetch_lengths(mysqli_result $result): array {
+function mysqli_fetch_lengths(mysqli_result $result) {
   return $result->lengths;
 }
 
@@ -2715,7 +2715,7 @@ function mysqli_fetch_lengths(mysqli_result $result): array {
  *   number of rows is greater than PHP_INT_MAX, the number will be
  *   returned as a string.
  */
-function mysqli_num_rows(mysqli_result $result): int {
+function mysqli_num_rows(mysqli_result $result) {
   return $result->num_rows;
 }
 
@@ -2735,7 +2735,7 @@ function mysqli_num_rows(mysqli_result $result): int {
  *   affected rows is greater than maximal PHP int value, the number of
  *   affected rows will be returned as a string value.
  */
-function mysqli_stmt_affected_rows(mysqli_stmt $stmt): int {
+function mysqli_stmt_affected_rows(mysqli_stmt $stmt) {
   return $stmt->affected_rows;
 }
 
@@ -2748,7 +2748,7 @@ function mysqli_stmt_affected_rows(mysqli_stmt $stmt): int {
  * @return int - Returns FALSE if the attribute is not found, otherwise
  *   returns the value of the attribute.
  */
-function mysqli_stmt_attr_get(mysqli_stmt $stmt, int $attr): int {
+function mysqli_stmt_attr_get(mysqli_stmt $stmt, int $attr) {
   return $stmt->attr_get($attr);
 }
 
@@ -2779,7 +2779,7 @@ function mysqli_stmt_attr_get(mysqli_stmt $stmt, int $attr): int {
  *
  * @return bool -
  */
-function mysqli_stmt_attr_set(mysqli_stmt $stmt, int $attr, int $mode): bool {
+function mysqli_stmt_attr_set(mysqli_stmt $stmt, int $attr, int $mode) {
   return $stmt->attr_set($attr, $mode);
 }
 
@@ -2821,7 +2821,7 @@ function mysqli_stmt_bind_result(mysqli_stmt $stmt, ...): mixed;
  *
  * @return bool -
  */
-function mysqli_stmt_close(mysqli_stmt $stmt): bool {
+function mysqli_stmt_close(mysqli_stmt $stmt) {
   return $stmt->close();
 }
 
@@ -2834,7 +2834,7 @@ function mysqli_stmt_close(mysqli_stmt $stmt): bool {
  *
  * @return void -
  */
-function mysqli_stmt_data_seek(mysqli_stmt $stmt, int $offset): void {
+function mysqli_stmt_data_seek(mysqli_stmt $stmt, int $offset) {
   $stmt->data_seek($offset);
 }
 
@@ -2845,7 +2845,7 @@ function mysqli_stmt_data_seek(mysqli_stmt $stmt, int $offset): void {
  *
  * @return int - An error code value. Zero means no error occurred.
  */
-function mysqli_stmt_errno(mysqli_stmt $stmt): int {
+function mysqli_stmt_errno(mysqli_stmt $stmt) {
   return $stmt->errno;
 }
 
@@ -2857,7 +2857,7 @@ function mysqli_stmt_errno(mysqli_stmt $stmt): int {
  * @return array - A list of errors, each as an associative array
  *   containing the errno, error, and sqlstate.
  */
-function mysqli_stmt_error_list(mysqli_stmt $stmt): array {
+function mysqli_stmt_error_list(mysqli_stmt $stmt) {
   return $stmt->error_list;
 }
 
@@ -2869,7 +2869,7 @@ function mysqli_stmt_error_list(mysqli_stmt $stmt): array {
  * @return string - A string that describes the error. An empty string if
  *   no error occurred.
  */
-function mysqli_stmt_error(mysqli_stmt $stmt): string {
+function mysqli_stmt_error(mysqli_stmt $stmt) {
   return $stmt->error;
 }
 
@@ -2880,7 +2880,7 @@ function mysqli_stmt_error(mysqli_stmt $stmt): string {
  *
  * @return bool -
  */
-function mysqli_stmt_execute(mysqli_stmt $stmt): bool {
+function mysqli_stmt_execute(mysqli_stmt $stmt) {
   return $stmt->execute();
 }
 
@@ -2893,7 +2893,7 @@ function mysqli_stmt_execute(mysqli_stmt $stmt): bool {
  *   fetched   FALSE Error occurred   NULL No more rows/data exists or data
  *   truncation occurred
  */
-function mysqli_stmt_fetch(mysqli_stmt $stmt): bool {
+function mysqli_stmt_fetch(mysqli_stmt $stmt) {
   return $stmt->fetch();
 }
 
@@ -2904,7 +2904,7 @@ function mysqli_stmt_fetch(mysqli_stmt $stmt): bool {
  *
  * @return int -
  */
-function mysqli_stmt_field_count(mysqli_stmt $stmt): int {
+function mysqli_stmt_field_count(mysqli_stmt $stmt) {
   return $stmt->field_count;
 }
 
@@ -2915,7 +2915,7 @@ function mysqli_stmt_field_count(mysqli_stmt $stmt): int {
  *
  * @return void -
  */
-function mysqli_stmt_free_result(mysqli_stmt $stmt): void {
+function mysqli_stmt_free_result(mysqli_stmt $stmt) {
   return $stmt->free_result();
 }
 
@@ -2937,7 +2937,7 @@ function mysqli_stmt_free_result(mysqli_stmt $stmt): void {
  *
  * @return object -
  */
-function mysqli_stmt_get_warnings(mysqli_stmt $stmt): mixed {
+function mysqli_stmt_get_warnings(mysqli_stmt $stmt) {
   return $stmt->get_warnings();
 }
 
@@ -2948,7 +2948,7 @@ function mysqli_stmt_get_warnings(mysqli_stmt $stmt): mixed {
  *
  * @return mixed -
  */
-function mysqli_stmt_insert_id(mysqli_stmt $stmt): mixed {
+function mysqli_stmt_insert_id(mysqli_stmt $stmt) {
   return $stmt->insert_id;
 }
 
@@ -2959,7 +2959,7 @@ function mysqli_stmt_insert_id(mysqli_stmt $stmt): mixed {
  *
  * @return bool - Returns TRUE if more results exist, otherwise FALSE.
  */
-function mysqli_stmt_more_results(mysqli_stmt $stmt): bool {
+function mysqli_stmt_more_results(mysqli_stmt $stmt) {
   return $stmt->more_results();
 }
 
@@ -2970,7 +2970,7 @@ function mysqli_stmt_more_results(mysqli_stmt $stmt): bool {
  *
  * @return bool -
  */
-function mysqli_stmt_next_result(mysqli_stmt $stmt): bool {
+function mysqli_stmt_next_result(mysqli_stmt $stmt) {
   return $stmt->next_result;
 }
 
@@ -2982,7 +2982,7 @@ function mysqli_stmt_next_result(mysqli_stmt $stmt): bool {
  * @return int - An integer representing the number of rows in result
  *   set.
  */
-function mysqli_stmt_num_rows(mysqli_stmt $stmt): int {
+function mysqli_stmt_num_rows(mysqli_stmt $stmt) {
   return $stmt->num_rows;
 }
 
@@ -2994,7 +2994,7 @@ function mysqli_stmt_num_rows(mysqli_stmt $stmt): int {
  * @return int - Returns an integer representing the number of
  *   parameters.
  */
-function mysqli_stmt_param_count(mysqli_stmt $stmt): int {
+function mysqli_stmt_param_count(mysqli_stmt $stmt) {
   return $stmt->param_count;
 }
 
@@ -3021,7 +3021,7 @@ function mysqli_stmt_param_count(mysqli_stmt $stmt): int {
  *
  * @return bool -
  */
-function mysqli_stmt_prepare(mysqli_stmt $stmt, string $query): bool {
+function mysqli_stmt_prepare(mysqli_stmt $stmt, string $query) {
   return $stmt->prepare($query);
 }
 
@@ -3032,7 +3032,7 @@ function mysqli_stmt_prepare(mysqli_stmt $stmt, string $query): bool {
  *
  * @return bool -
  */
-function mysqli_stmt_reset(mysqli_stmt $stmt): bool {
+function mysqli_stmt_reset(mysqli_stmt $stmt) {
   return $stmt->reset();
 }
 
@@ -3044,7 +3044,7 @@ function mysqli_stmt_reset(mysqli_stmt $stmt): bool {
  * @return mysqli_result - Returns a result object or FALSE if an error
  *   occurred.
  */
-function mysqli_stmt_result_metadata(mysqli_stmt $stmt): mixed {
+function mysqli_stmt_result_metadata(mysqli_stmt $stmt) {
   return $stmt->result_metadata();
 }
 
@@ -3060,7 +3060,7 @@ function mysqli_stmt_result_metadata(mysqli_stmt $stmt): mixed {
  */
 function mysqli_stmt_send_long_data(mysqli_stmt $stmt,
                                     int $param_nr,
-                                    string $data): mixed {
+                                    string $data) {
   return $stmt->send_long_data($param_nr, $data);
 }
 
@@ -3073,7 +3073,7 @@ function mysqli_stmt_send_long_data(mysqli_stmt $stmt,
  *   for the last error. The error code consists of five characters.
  *   '00000' means no error.
  */
-function mysqli_stmt_sqlstate(mysqli_stmt $stmt): string {
+function mysqli_stmt_sqlstate(mysqli_stmt $stmt) {
   return $stmt->sqlstate;
 }
 
@@ -3084,6 +3084,6 @@ function mysqli_stmt_sqlstate(mysqli_stmt $stmt): string {
  *
  * @return bool -
  */
-function mysqli_stmt_store_result(mysqli_stmt $stmt): bool {
+function mysqli_stmt_store_result(mysqli_stmt $stmt) {
   return $stmt->store_result();
 }

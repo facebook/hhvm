@@ -77,7 +77,7 @@ class Locale {
    */
   public static function filterMatches($langtag,
                                        $locale,
-                                       $canonicalize = false): bool {
+                                       $canonicalize = false) {
     if ($locale == '*') return true;
     if (empty($locale)) $locale = self::getDefault();
     if ($canonicalize) {
@@ -288,7 +288,7 @@ class Locale {
  *
  * @return string - The corresponding locale identifier.
  */
-function locale_accept_from_http(string $header): mixed {
+function locale_accept_from_http(string $header) {
   return Locale::acceptFromHttp($header);
 }
 
@@ -299,7 +299,7 @@ function locale_accept_from_http(string $header): mixed {
  *
  * @return string -
  */
-function locale_canonicalize(string $locale): mixed {
+function locale_canonicalize(string $locale) {
   return Locale::canonicalize($locale);
 }
 
@@ -336,7 +336,7 @@ function locale_compose(array $subtags) {
  */
 function locale_filter_matches($langtag,
                                $locale,
-                               $canonicalize = false): bool {
+                               $canonicalize = false) {
   return Locale::filterMatches($langtag, $locale, $canonicalize);
 }
 
@@ -357,7 +357,7 @@ function locale_get_all_variants(string $locale) {
  *
  * @return string - The current runtime locale
  */
-function locale_get_default(): string {
+function locale_get_default() {
   return Locale::getDefault();
 }
 
@@ -373,7 +373,7 @@ function locale_get_default(): string {
  *   format appropriate for $in_locale.
  */
 function locale_get_display_language(string $locale,
-                                     string $in_locale): string {
+                                     string $in_locale) {
   return Locale::getDisplayLanguage($locale, $in_locale);
 }
 
@@ -387,7 +387,7 @@ function locale_get_display_language(string $locale,
  *   for $in_locale.
  */
 function locale_get_display_name(string $locale,
-                                 string $in_locale): string {
+                                 string $in_locale) {
   return Locale::getDisplayName($locale, $in_locale);
 }
 
@@ -403,7 +403,7 @@ function locale_get_display_name(string $locale,
  *   format appropriate for $in_locale.
  */
 function locale_get_display_region(string $locale,
-                                   string $in_locale): string {
+                                   string $in_locale) {
   return Locale::getDisplayRegion($locale, $in_locale);
 }
 
@@ -419,7 +419,7 @@ function locale_get_display_region(string $locale,
  *   format appropriate for $in_locale.
  */
 function locale_get_display_script(string $locale,
-                                   string $in_locale): string {
+                                   string $in_locale) {
   return Locale::getDisplayScript($locale, $in_locale);
 }
 
@@ -435,7 +435,7 @@ function locale_get_display_script(string $locale,
  *   format appropriate for $in_locale.
  */
 function locale_get_display_variant(string $locale,
-                                    string $in_locale): string {
+                                    string $in_locale) {
   return Locale::getDisplayVariant($locale, $in_locale);
 }
 
@@ -460,7 +460,7 @@ function locale_get_keywords(string $locale) {
  * @return string - The language code associated with the language or
  *   NULL in case of error.
  */
-function locale_get_primary_language(string $locale): string {
+function locale_get_primary_language(string $locale) {
   return Locale::getPrimaryLanguage($locale);
 }
 
@@ -472,7 +472,7 @@ function locale_get_primary_language(string $locale): string {
  * @return string - The region subtag for the locale or NULL if not
  *   present
  */
-function locale_get_region(string $locale): mixed {
+function locale_get_region(string $locale) {
   return Locale::getRegion($locale);
 }
 
@@ -484,7 +484,7 @@ function locale_get_region(string $locale): mixed {
  * @return string - The script subtag for the locale or NULL if not
  *   present
  */
-function locale_get_script(string $locale): mixed {
+function locale_get_script(string $locale) {
   return Locale::getScript($locale);
 }
 
@@ -504,7 +504,7 @@ function locale_get_script(string $locale): mixed {
 function locale_lookup(array $langtag,
                        string $locale,
                        bool $canonicalize = false,
-                       string $default): string {
+                       string $default) {
   return Locale::lookup($langtag, $locale, $canonicalize, $default);
 }
 
@@ -522,7 +522,7 @@ function locale_lookup(array $langtag,
  *   '-varX-varY-varZ' then the returned array will have variant0=varX ,
  *   variant1=varY , variant2=varZ
  */
-function locale_parse(string $locale): array<string,string> {
+function locale_parse(string $locale) {
   return Locale::parseLocale($locale);
 }
 
@@ -534,6 +534,6 @@ function locale_parse(string $locale): array<string,string> {
  *
  * @return bool -
  */
-function locale_set_default(string $locale): bool {
+function locale_set_default(string $locale) {
   return Locale::setDefault($locale);
 }

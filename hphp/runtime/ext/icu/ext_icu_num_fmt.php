@@ -258,7 +258,7 @@ class NumberFormatter {
  * @return NumberFormatter - Returns NumberFormatter object or FALSE on
  *   error.
  */
-function numfmt_create($locale, $style, $pattern = ""): NumberFormatter {
+function numfmt_create($locale, $style, $pattern = "") {
   return NumberFormatter::create($locale, $style, $pattern);
 }
 
@@ -273,7 +273,7 @@ function numfmt_create($locale, $style, $pattern = ""): NumberFormatter {
  * @return string - String representing the formatted currency value.
  */
 function numfmt_format_currency(NumberFormatter $fmt,
-                                $value, $currency): mixed {
+                                $value, $currency) {
   return $fmt->formatCurrency($value, $currency);
 }
 
@@ -302,7 +302,7 @@ function numfmt_format(NumberFormatter $fmt,
  *
  * @return int - Return attribute value on success, or FALSE on error.
  */
-function numfmt_get_attribute(NumberFormatter $fmt, $attr): mixed {
+function numfmt_get_attribute(NumberFormatter $fmt, $attr) {
   return $fmt->getAttribute($attr);
 }
 
@@ -313,7 +313,7 @@ function numfmt_get_attribute(NumberFormatter $fmt, $attr): mixed {
  *
  * @return int - Returns error code from last formatter call.
  */
-function numfmt_get_error_code(NumberFormatter $fmt): int {
+function numfmt_get_error_code(NumberFormatter $fmt) {
   return $fmt->getErrorCode();
 }
 
@@ -324,7 +324,7 @@ function numfmt_get_error_code(NumberFormatter $fmt): int {
  *
  * @return string - Returns error message from last formatter call.
  */
-function numfmt_get_error_message(NumberFormatter $fmt): string {
+function numfmt_get_error_message(NumberFormatter $fmt) {
   return $fmt->getErrorMessage();
 }
 
@@ -339,7 +339,7 @@ function numfmt_get_error_message(NumberFormatter $fmt): string {
  * @return string - The locale name used to create the formatter.
  */
 function numfmt_get_locale(NumberFormatter $fmt,
-                           $type = ULOC_ACTUAL_LOCALE): string {
+                           $type = ULOC_ACTUAL_LOCALE) {
   return $fmt->getLocale($type);
 }
 
@@ -397,7 +397,7 @@ function numfmt_get_text_attribute(NumberFormatter $fmt, $attr) {
 function numfmt_parse_currency(NumberFormatter $fmt,
                                $value,
                                &$currency,
-                               &$position = null): mixed {
+                               &$position = null) {
   return $fmt->parseCurrency($value, $currency, $position);
 }
 
@@ -416,7 +416,7 @@ function numfmt_parse_currency(NumberFormatter $fmt,
 function numfmt_parse(NumberFormatter $fmt,
                       $value,
                       $type = NumberFormatter::TYPE_DOUBLE,
-                      &$position = null): mixed {
+                      &$position = null) {
   return $fmt->parse($value, $type, $position);
 }
 
@@ -432,7 +432,7 @@ function numfmt_parse(NumberFormatter $fmt,
  */
 function numfmt_set_attribute(NumberFormatter $fmt,
                               $attr,
-                              $value): bool {
+                              $value) {
   return $fmt->setAttribute($attr, $value);
 }
 
@@ -446,7 +446,7 @@ function numfmt_set_attribute(NumberFormatter $fmt,
  * @return bool -
  */
 function numfmt_set_pattern(NumberFormatter $fmt,
-                            $pattern): bool {
+                            $pattern) {
   return $fmt->setPattern($pattern);
 }
 
@@ -462,7 +462,7 @@ function numfmt_set_pattern(NumberFormatter $fmt,
  */
 function numfmt_set_symbol(NumberFormatter $fmt,
                            $attr,
-                           $value): bool {
+                           $value) {
   return $fmt->setSymbol($attr, $value);
 }
 
@@ -478,7 +478,7 @@ function numfmt_set_symbol(NumberFormatter $fmt,
  */
 function numfmt_set_text_attribute(NumberFormatter $fmt,
                                    $attr,
-                                   $value): bool {
+                                   $value) {
   return $fmt->setTextAttribute($attr, $value);
 }
 

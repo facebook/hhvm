@@ -20,7 +20,7 @@ class IntlIterator implements Iterator {
   /**
    * Only for internal use
    */
-  private final function __constructor(): void {}
+  private final function __constructor() {}
 
   /**
    * Get the current element

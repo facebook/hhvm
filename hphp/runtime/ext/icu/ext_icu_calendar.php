@@ -59,7 +59,7 @@ class IntlCalendar {
    *
    * @return  -
    */
-  private function __construct(): void {}
+  private function __construct() {}
 
   /**
    * Create a new IntlCalendar
@@ -111,7 +111,7 @@ class IntlCalendar {
    *   inside the DateTime constructor is propagated.
    */
   public static function fromDateTime(mixed $dateTime,
-                                      string $locale = ""): IntlCalendar {
+                                      string $locale = "") {
     if (!($dateTime instanceof DateTime)) {
       $dateTime = new DateTime($dateTime);
     }
@@ -392,7 +392,7 @@ class IntlCalendar {
   /**
    * Can't define a method named isSet()
    */
-  public function __call($fname, $args): mixed {
+  public function __call($fname, $args) {
     $cls = get_class($this);
     $count = count($args);
     if (!strcasecmp($fname, 'isSet')) {
@@ -455,7 +455,7 @@ class IntlCalendar {
                       ?int $dayOfMonth = NULL,
                       ?int $hour = NULL,
                       ?int $minute = NULL,
-                      ?int $second = NULL): bool {
+                      ?int $second = NULL) {
     return $this->__set_array([$yearOrField,$monthOrValue,
                        $dayOfMonth,$hour,$minute,$second]);
   }
@@ -550,7 +550,7 @@ class IntlCalendar {
    *   time, except for the smaller precision (second precision instead of
    *   millisecond). Returns FALSE on failure.
    */
-  public function toDateTime(): DateTime {
+  public function toDateTime() {
     $dtz = $this->getTimeZone()->toDateTimeZone();
     $dt  = new DateTime('@'.(int)($this->getTime()/1000), $dtz);
     $dt->setTimeZone($dtz);
@@ -569,7 +569,7 @@ class IntlCalendar {
  */
 function intlcal_add(IntlCalendar $cal,
                      int $field,
-                     int $amount): bool {
+                     int $amount) {
   return $cal->add($field, $amount);
 }
 
@@ -585,7 +585,7 @@ function intlcal_add(IntlCalendar $cal,
  *   intl_get_error_code() to detect error conditions.
  */
 function intlcal_after(IntlCalendar $cal,
-                       IntlCalendar $other): bool {
+                       IntlCalendar $other) {
   return $cal->after($other);
 }
 
@@ -601,7 +601,7 @@ function intlcal_after(IntlCalendar $cal,
  *   intl_get_error_code() to detect error conditions.
  */
 function intlcal_before(IntlCalendar $cal,
-                IntlCalendar $other): bool {
+                IntlCalendar $other) {
   return $cal->before($other);
 }
 
@@ -615,7 +615,7 @@ function intlcal_before(IntlCalendar $cal,
  *   invalid arguments are provided.
  */
 function intlcal_clear(IntlCalendar $cal,
-                      ?int $field = NULL): bool {
+                      ?int $field = NULL) {
   return $cal->clear($field);
 }
 
@@ -629,7 +629,7 @@ function intlcal_clear(IntlCalendar $cal,
  *   failure.
  */
 function intlcal_create_instance(mixed $timeZone = NULL,
-                                 string $locale = ""): IntlCalendar {
+                                 string $locale = "") {
   return IntlCalendar::createInstance($timeZone, $locale);
 }
 
@@ -646,7 +646,7 @@ function intlcal_create_instance(mixed $timeZone = NULL,
  *   distinguished by calling intl_get_error_code().
  */
 function intlcal_equals(IntlCalendar $cal,
-                        IntlCalendar $other): bool {
+                        IntlCalendar $other) {
   return $cal->equals($other);
 }
 
@@ -662,7 +662,7 @@ function intlcal_equals(IntlCalendar $cal,
  */
 function intlcal_field_difference(IntlCalendar $cal,
                                   mixed $when,
-                                  int $field): mixed {
+                                  int $field) {
   return $cal->fieldDifference($when, $field);
 }
 
@@ -676,7 +676,7 @@ function intlcal_field_difference(IntlCalendar $cal,
  *   the DateTime constructor is propagated.
  */
 function intlcal_from_date_time(mixed $dateTime,
-                                string $locale = ""): IntlCalendar {
+                                string $locale = "") {
   return IntlCalendar::fromDateTime($dateTime, $locale);
 }
 
@@ -689,7 +689,7 @@ function intlcal_from_date_time(mixed $dateTime,
  * @return int - An integer with the value of the time field.
  */
 function intlcal_get(IntlCalendar $cal,
-                     int $field): mixed {
+                     int $field) {
   return $cal->get($field);
 }
 
@@ -703,7 +703,7 @@ function intlcal_get(IntlCalendar $cal,
  *   associated with the given field.
  */
 function intlcal_get_actual_maximum(IntlCalendar $cal,
-                                   int $field): mixed {
+                                   int $field) {
   return $cal->getActualMaximum($field);
 }
 
@@ -717,7 +717,7 @@ function intlcal_get_actual_maximum(IntlCalendar $cal,
  *   unit.
  */
 function intlcal_get_actual_minimum(IntlCalendar $cal,
-                                    int $field): mixed {
+                                    int $field) {
   return $cal->getActualMinimum($field);
 }
 
@@ -726,7 +726,7 @@ function intlcal_get_actual_minimum(IntlCalendar $cal,
  *
  * @return array - An array of strings, one for which locale.
  */
-function intlcal_get_available_locales(): array {
+function intlcal_get_available_locales() {
   return IntlCalendar::getAvailableLocales();
 }
 
@@ -743,7 +743,7 @@ function intlcal_get_available_locales(): array {
  *   IntlCalendar::DOW_TYPE_WEEKEND_CEASE.
  */
 function intlcal_get_day_of_week_type(IntlCalendar $cal,
-                                      int $dayOfWeek): mixed {
+                                      int $dayOfWeek) {
   return $cal->getDayOfWeekType($dayOfWeek);
 }
 
@@ -755,7 +755,7 @@ function intlcal_get_day_of_week_type(IntlCalendar $cal,
  * @return int - An ICU error code indicating either success, failure or
  *   a warning.
  */
-function intlcal_get_error_code(IntlCalendar $cal): int {
+function intlcal_get_error_code(IntlCalendar $cal) {
   return $cal->getErrorCode();
 }
 
@@ -768,7 +768,7 @@ function intlcal_get_error_code(IntlCalendar $cal): int {
  *   occurred in a function call on this object, or a string indicating the
  *   non-existance of an error.
  */
-function intlcal_get_error_message(IntlCalendar $cal): string {
+function intlcal_get_error_message(IntlCalendar $cal) {
   return $cal->getErrorMessage();
 }
 
@@ -780,7 +780,7 @@ function intlcal_get_error_message(IntlCalendar $cal): string {
  * @return int - One of the constants IntlCalendar::DOW_SUNDAY,
  *   IntlCalendar::DOW_MONDAY, …, IntlCalendar::DOW_SATURDAY.
  */
-function intlcal_get_first_day_of_week(IntlCalendar $cal): mixed {
+function intlcal_get_first_day_of_week(IntlCalendar $cal) {
   return $cal->getFirstDayOfWeek();
 }
 
@@ -794,7 +794,7 @@ function intlcal_get_first_day_of_week(IntlCalendar $cal): mixed {
  *   unit,.
  */
 function intlcal_get_greatest_minimum(IntlCalendar $cal,
-                                      int $field): mixed {
+                                      int $field) {
   return $cal->getGreatestMinimum($field);
 }
 
@@ -810,7 +810,7 @@ function intlcal_get_greatest_minimum(IntlCalendar $cal,
  */
 function intlcal_get_keyword_values_for_locale(string $key,
                                                string $locale,
-                                               bool $commonlyUsed): mixed {
+                                               bool $commonlyUsed) {
   return IntlCalendar::getKeywordValuesForLocale($key, $locale, $commonlyUsed);
 }
 
@@ -823,7 +823,7 @@ function intlcal_get_keyword_values_for_locale(string $key,
  * @return int - An int representing a field value in the fieldʼs unit.
  */
 function intlcal_get_least_maximum(IntlCalendar $cal,
-                                   int $field): mixed {
+                                   int $field) {
   return $cal->getLeastMaximum($field);
 }
 
@@ -836,7 +836,7 @@ function intlcal_get_least_maximum(IntlCalendar $cal,
  * @return string - A locale string.
  */
 function intlcal_get_locale(IntlCalendar $cal,
-                            int $localeType): mixed {
+                            int $localeType) {
   return $cal->getLocale($localeType);
 }
 
@@ -849,7 +849,7 @@ function intlcal_get_locale(IntlCalendar $cal,
  * @return int - An int representing a field value in the fieldʼs unit.
  */
 function intlcal_get_maximum(IntlCalendar $cal,
-                             int $field): mixed {
+                             int $field) {
   return $cal->getMaximum($field);
 }
 
@@ -860,7 +860,7 @@ function intlcal_get_maximum(IntlCalendar $cal,
  *
  * @return bool - TRUE on success, FALSE on failure.
  */
-function intlcal_get_minimal_days_in_first_week(IntlCalendar $cal): mixed {
+function intlcal_get_minimal_days_in_first_week(IntlCalendar $cal) {
   return $cal->getMinimalDaysInFirstWeek();
 }
 
@@ -874,7 +874,7 @@ function intlcal_get_minimal_days_in_first_week(IntlCalendar $cal): mixed {
  *   fieldʼs unit.
  */
 function intlcal_get_minimum(IntlCalendar $cal,
-                             int $field): mixed {
+                             int $field) {
   return $cal->getMinimum($field);
 }
 
@@ -884,7 +884,7 @@ function intlcal_get_minimum(IntlCalendar $cal,
  * @return float - A float representing a number of milliseconds since
  *   the epoch, not counting leap seconds.
  */
-function intlcal_get_now(): float {
+function intlcal_get_now() {
   return IntlCalendar::getNow();
 }
 
@@ -896,7 +896,7 @@ function intlcal_get_now(): float {
  * @return int - One of the constants IntlCalendar::WALLTIME_FIRST or
  *   IntlCalendar::WALLTIME_LAST.
  */
-function intlcal_get_repeated_wall_time_option(IntlCalendar $cal): int {
+function intlcal_get_repeated_wall_time_option(IntlCalendar $cal) {
   return $cal->getRepeatedWallTimeOption();
 }
 
@@ -908,7 +908,7 @@ function intlcal_get_repeated_wall_time_option(IntlCalendar $cal): int {
  * @return int - One of the constants IntlCalendar::WALLTIME_FIRST,
  *   IntlCalendar::WALLTIME_LAST or IntlCalendar::WALLTIME_NEXT_VALID.
  */
-function intlcal_get_skipped_wall_time_option(IntlCalendar $cal): int {
+function intlcal_get_skipped_wall_time_option(IntlCalendar $cal) {
   return $cal->getSkippedWallTimeOption();
 }
 
@@ -920,7 +920,7 @@ function intlcal_get_skipped_wall_time_option(IntlCalendar $cal): int {
  * @return float - A float representing the number of milliseconds
  *   elapsed since the reference time (1 Jan 1970 00:00:00 UTC).
  */
-function intlcal_get_time(IntlCalendar $cal): mixed {
+function intlcal_get_time(IntlCalendar $cal) {
   return $cal->getTime();
 }
 
@@ -932,7 +932,7 @@ function intlcal_get_time(IntlCalendar $cal): mixed {
  * @return IntlTimeZone - An IntlTimeZone object corresponding to the one
  *   used internally in this object.
  */
-function intlcal_get_time_zone(IntlCalendar $cal): IntlTimeZone {
+function intlcal_get_time_zone(IntlCalendar $cal) {
   return $cal->getTimeZone();
 }
 
@@ -944,7 +944,7 @@ function intlcal_get_time_zone(IntlCalendar $cal): IntlTimeZone {
  * @return string - A string representing the calendar type, such as
  *   'gregorian', 'islamic', etc.
  */
-function intlcal_get_type(IntlCalendar $cal): mixed {
+function intlcal_get_type(IntlCalendar $cal) {
   return $cal->getType();
 }
 
@@ -958,7 +958,7 @@ function intlcal_get_type(IntlCalendar $cal): mixed {
  *   weekend begins or ends.
  */
 function intlcal_get_weekend_transition(IntlCalendar $cal,
-                                        int $dayOfWeek): mixed {
+                                        int $dayOfWeek) {
   return $cal->getWeekendTransition($dayOfWeek);
 }
 
@@ -972,7 +972,7 @@ function intlcal_get_weekend_transition(IntlCalendar $cal,
  *   instance after specifying invalid field values on non-lenient mode;
  *   use exceptions or query intl_get_error_code() to disambiguate.
  */
-function intlcal_in_daylight_time(IntlCalendar $cal): bool {
+function intlcal_in_daylight_time(IntlCalendar $cal) {
   return $cal->inDaylightTime();
 }
 
@@ -986,7 +986,7 @@ function intlcal_in_daylight_time(IntlCalendar $cal): bool {
  *   the calendars are equivalent except possibly for their set time.
  */
 function intlcal_is_equivalent_to(IntlCalendar $cal,
-                                  IntlCalendar $other): bool {
+                                  IntlCalendar $other) {
   return $cal->isEquivalentTo($other);
 }
 
@@ -998,7 +998,7 @@ function intlcal_is_equivalent_to(IntlCalendar $cal,
  * @return bool - A bool representing whether the calendar is set to
  *   lenient mode.
  */
-function intlcal_is_lenient(IntlCalendar $cal): bool {
+function intlcal_is_lenient(IntlCalendar $cal) {
   return $cal->isLenient();
 }
 
@@ -1012,7 +1012,7 @@ function intlcal_is_lenient(IntlCalendar $cal): bool {
  *   the field is set.
  */
 function intlcal_is_set(IntlCalendar $cal,
-                        int $field): bool {
+                        int $field) {
   return $cal->isSet($field);
 }
 
@@ -1028,7 +1028,7 @@ function intlcal_is_set(IntlCalendar $cal,
  *   mode; use exceptions or query intl_get_error_code() to disambiguate.
  */
 function intlcal_is_weekend(IntlCalendar $cal,
-                            mixed $date = NULL): bool {
+                            mixed $date = NULL) {
   return $cal->isWeekend($date);
 }
 
@@ -1043,7 +1043,7 @@ function intlcal_is_weekend(IntlCalendar $cal,
  */
 function intlcal_roll(IntlCalendar $cal,
                       int $field,
-                      mixed $amountOrUpOrDown): bool {
+                      mixed $amountOrUpOrDown) {
   return $cal->roll($field, $amountOrUpOrDown);
 }
 
@@ -1066,7 +1066,7 @@ function intlcal_set(IntlCalendar $cal,
                      ?int $dayOfMonth = NULL,
                      ?int $hour = NULL,
                      ?int $minute = NULL,
-                     ?int $second = NULL): bool {
+                     ?int $second = NULL) {
   return $cal->set($year, $month, $dayOfMonth,
                    $hour, $minute, $second);
 }
@@ -1081,7 +1081,7 @@ function intlcal_set(IntlCalendar $cal,
  *   invalid parameters.
  */
 function intlcal_set_first_day_of_week(IntlCalendar $cal,
-                                       int $dayOfWeek): bool {
+                                       int $dayOfWeek) {
   return $cal->setFirstDayOfWeek($dayOfWeek);
 }
 
@@ -1095,7 +1095,7 @@ function intlcal_set_first_day_of_week(IntlCalendar $cal,
  *   due to invalid parameters.
  */
 function intlcal_set_lenient(IntlCalendar $cal,
-                             bool $isLenient): bool {
+                             bool $isLenient) {
   return $cal->setLenient($isLenient);
 }
 
@@ -1107,7 +1107,7 @@ function intlcal_set_lenient(IntlCalendar $cal,
  * @return bool - TRUE on success, FALSE on failure.
  */
 function intlcal_set_minimal_days_in_first_week(IntlCalendar $cal,
-                                                int $minimalDays): bool {
+                                                int $minimalDays) {
   return $cal->setMinimalDaysInFirstWeek($minimalDays);
 }
 
@@ -1122,7 +1122,7 @@ function intlcal_set_minimal_days_in_first_week(IntlCalendar $cal,
  *   invalid parameters.
  */
 function intlcal_set_repeated_wall_time_option(IntlCalendar $cal,
-                                               int $wallTimeOption): bool {
+                                               int $wallTimeOption) {
   return $cal->setRepeatedWallTimeOption($wallTimeOption);
 }
 
@@ -1137,7 +1137,7 @@ function intlcal_set_repeated_wall_time_option(IntlCalendar $cal,
  *   invalid parameters.
  */
 function intlcal_set_skipped_wall_time_option(IntlCalendar $cal,
-                                              int $wallTimeOption): bool {
+                                              int $wallTimeOption) {
   return $cal->setSkippedWallTimeOption($wallTimeOption);
 }
 
@@ -1150,7 +1150,7 @@ function intlcal_set_skipped_wall_time_option(IntlCalendar $cal,
  * @return bool - Returns TRUE on success and FALSE on failure.
  */
 function intlcal_set_time(IntlCalendar $cal,
-                          mixed $date): bool {
+                          mixed $date) {
   return $cal->setTime($date);
 }
 
@@ -1163,7 +1163,7 @@ function intlcal_set_time(IntlCalendar $cal,
  * @return bool - Returns TRUE on success and FALSE on failure.
  */
 function intlcal_set_time_zone(IntlCalendar $cal,
-                               mixed $timeZone): bool {
+                               mixed $timeZone) {
   return $cal->setTimeZone($timeZone);
 }
 
@@ -1177,7 +1177,7 @@ function intlcal_set_time_zone(IntlCalendar $cal,
  *   time, except for the smaller precision (second precision instead of
  *   millisecond). Returns FALSE on failure.
  */
-function intlcal_to_date_time(IntlCalendar $cal): DateTime {
+function intlcal_to_date_time(IntlCalendar $cal) {
   return $cal->toDateTime();
 }
 
@@ -1202,7 +1202,7 @@ class IntlGregorianCalendar extends IntlCalendar {
                               ?int $day = NULL,
                               ?int $hour = NULL,
                               ?int $minute = NULL,
-                              ?int $second = NULL): void {
+                              ?int $second = NULL) {
     $this->__ctor_array([$yearOrTz, $monthOrLocale, $day,
                          $hour, $minute, $second]);
   }
@@ -1274,7 +1274,7 @@ function intlgregcal_create_instance(mixed $yearOrTz = NULL,
                                      ?int $hour = NULL,
                                      ?int $minute = NULL,
                                      ?int $second = NULL)
-                                     : IntlGregorianCalendar {
+                                     {
   return new IntlGregorianCalendar($yearOrTz, $monthOrLocale, $day,
                                    $hour, $minute, $second);
 }
@@ -1287,7 +1287,7 @@ function intlgregcal_create_instance(mixed $yearOrTz = NULL,
  * @return bool - TRUE if a leap year, FALSE otherwise
  */
 function intlgregcal_is_leap_year(IntlGregorianCalendar $cal,
-                                  int $year): bool {
+                                  int $year) {
   return $cal->isLeapYear($year);
 }
 
@@ -1300,7 +1300,7 @@ function intlgregcal_is_leap_year(IntlGregorianCalendar $cal,
  *
  * @return float
  */
-function intlgregcal_get_gregorian_change(IntlGregorianCalendar $cal): float {
+function intlgregcal_get_gregorian_change(IntlGregorianCalendar $cal) {
   return $cal->getGregorianChange();
 }
 
@@ -1316,6 +1316,6 @@ function intlgregcal_get_gregorian_change(IntlGregorianCalendar $cal): float {
  * @return bool - Whether or not the date was successfully set.
  */
 function intlgregcal_set_gregorian_change(IntlGregorianCalendar $cal,
-                                          float $change): bool {
+                                          float $change) {
   return $cal->setGregorianChange($change);
 }

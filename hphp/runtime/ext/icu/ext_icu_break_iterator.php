@@ -18,7 +18,7 @@ class IntlBreakIterator implements \Traversable, \Iterator {
   /**
    * Private constructor for disallowing instantiation
    */
-  private function __construct(): void {}
+  private function __construct() {}
 
   /**
    * Create break iterator for boundaries of combining character sequences
@@ -92,7 +92,7 @@ class IntlBreakIterator implements \Traversable, \Iterator {
    *
    * @return int
    */
-  public function rewind(): mixed {
+  public function rewind() {
     return $this->first();
   }
 
@@ -101,7 +101,7 @@ class IntlBreakIterator implements \Traversable, \Iterator {
    *
    * @return bool
    */
-  public function valid(): bool {
+  public function valid() {
     return $this->key() !== false;
   }
 

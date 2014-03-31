@@ -2159,6 +2159,10 @@ StepFlags step(Interp& interp, const Bytecode& op) {
   return flags;
 }
 
+void default_dispatch(ISS& env, const Bytecode& op) {
+  dispatch(env, op);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

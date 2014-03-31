@@ -30,6 +30,10 @@ endforeach()
 
 include_directories("${HPHP_HOME}/hphp/third_party")
 
+if(NOT LINUX)
+       add_definitions(-DNO_HARDWARE_COUNTERS)
+endif()
+
 ADD_LIBRARY(hphp_runtime_ext STATIC
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})
 target_link_libraries(hphp_runtime_ext ${HRE_LIBRARIES})

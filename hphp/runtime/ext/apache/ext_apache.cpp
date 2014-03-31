@@ -95,7 +95,7 @@ Array HHVM_FUNCTION(apache_get_config) {
   ret.set(s_max_clients, RuntimeOption::ServerThreadCount);
   ret.set(s_active_clients, workers);
   ret.set(s_queued_requests, queued);
-  return ret.create();
+  return ret.toArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -951,7 +951,7 @@ Array f_proc_get_status(const Resource& process) {
   ret.set(s_exitcode, exitcode);
   ret.set(s_termsig,  termsig);
   ret.set(s_stopsig,  stopsig);
-  return ret.create();
+  return ret.toArray();
 }
 
 bool f_proc_nice(int increment) {

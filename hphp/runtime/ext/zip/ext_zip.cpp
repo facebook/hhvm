@@ -1143,7 +1143,7 @@ static Array zipStatToArray(struct zip_stat* zipStat) {
   stat.add(String("comp_size"),   VarNR(zipStat->comp_size));
   stat.add(String("comp_method"), VarNR(zipStat->comp_method));
 
-  return stat.create();
+  return stat.toArray();
 }
 
 static Variant HHVM_METHOD(ZipArchive, statIndex, int64_t index,

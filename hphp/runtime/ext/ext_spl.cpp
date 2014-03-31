@@ -107,7 +107,7 @@ Array f_spl_classes() {
   for (size_t i = 0; i < num_classes; ++i) {
     ret.set(spl_classes[i], spl_classes[i]);
   }
-  return ret.create();
+  return ret.toArray();
 }
 
 void throw_spl_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);

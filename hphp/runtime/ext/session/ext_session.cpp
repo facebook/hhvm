@@ -1502,7 +1502,7 @@ Array f_session_get_cookie_params() {
   ret.set(s_domain,   String(PS(cookie_domain)));
   ret.set(s_secure,   PS(cookie_secure));
   ret.set(s_httponly, PS(cookie_httponly));
-  return ret.create();
+  return ret.toArray();
 }
 
 String f_session_name(const String& newname /* = null_string */) {

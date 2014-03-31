@@ -59,7 +59,7 @@ Array TimeStamp::CurrentTime() {
   ret.set(s_dsttime, (int)offset->is_dst);
 
   timelib_time_offset_dtor(offset);
-  return ret.create();
+  return ret.toArray();
 }
 
 String TimeStamp::CurrentMicroTime() {

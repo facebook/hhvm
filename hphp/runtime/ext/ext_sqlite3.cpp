@@ -261,7 +261,7 @@ Array c_SQLite3::ti_version() {
   ArrayInit ret(2);
   ret.set(s_versionString, String((char*)sqlite3_libversion(), CopyString));
   ret.set(s_versionNumber, (int64_t)sqlite3_libversion_number());
-  return ret.create();
+  return ret.toArray();
 }
 
 int64_t c_SQLite3::t_lastinsertrowid() {

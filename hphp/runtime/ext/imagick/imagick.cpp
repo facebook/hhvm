@@ -1228,7 +1228,7 @@ static Array HHVM_METHOD(Imagick, getImageChannelStatistics) {
         s_depth, (int64_t)stat[channel].depth));
   }
   freeMagickMemory(stat);
-  return ret.create();
+  return ret.toArray();
 }
 
 static Object HHVM_METHOD(Imagick, getImageClipMask) {
@@ -1488,7 +1488,7 @@ static Array HHVM_METHOD(Imagick, getImageProfiles,
               magickGetImageProfile(wand->getWand(), profiles[i]));
     }
     freeMagickMemory(profiles);
-    return ret.create();
+    return ret.toArray();
   } else {
     return convertMagickArray(count, profiles);
   }
@@ -1516,7 +1516,7 @@ static Array HHVM_METHOD(Imagick, getImageProperties,
               magickGetImageProperty(wand->getWand(), properties[i]));
     }
     freeMagickMemory(properties);
-    return ret.create();
+    return ret.toArray();
   } else {
     return convertMagickArray(count, properties);
   }
@@ -1841,7 +1841,7 @@ static Array HHVM_METHOD(Imagick, identifyImage, bool appendRawOutput) {
     ret.set(s_rawOutput, identify);
   }
 
-  return ret.create();
+  return ret.toArray();
 }
 
 static bool HHVM_METHOD(Imagick, implodeImage, double radius) {
@@ -2409,7 +2409,7 @@ static Array HHVM_METHOD(Imagick, queryFontMetrics,
       }
     }
     freeMagickMemory(metrics);
-    return ret.create();
+    return ret.toArray();
   }
 }
 

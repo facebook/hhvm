@@ -51,8 +51,14 @@ public:
    * Create an empty array or an array with one element. Note these are
    * different than those copying constructors that also take one value.
    */
-  static Array Create() { return ArrayData::Create(); }
-  static Array Create(const Variant& value) { return ArrayData::Create(value); }
+  static Array Create() {
+    return Array(ArrayData::Create());
+  }
+
+  static Array Create(const Variant& value) {
+    return Array(ArrayData::Create(value));
+  }
+
   static Array Create(const Variant& key, const Variant& value);
 
 public:
@@ -89,7 +95,7 @@ public:
    * array value from the parameter, and they are NOT constructing an array
    * with that single value (then one should use Array::Create() functions).
    */
-  /* implicit */ Array(ArrayData* data) : ArrayBase(data) { }
+  explicit Array(ArrayData* data) : ArrayBase(data) { }
   /* implicit */ Array(const Array& arr) : ArrayBase(arr.m_px) { }
 
   /*

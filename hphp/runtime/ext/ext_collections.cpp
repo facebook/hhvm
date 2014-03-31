@@ -1536,7 +1536,7 @@ Array BaseMap::php_toArray() const {
       ai.set(*(const String*)(&p->skey), tvAsCVarRef(&p->data));
     }
   }
-  return ai.create();
+  return ai.toArray();
 }
 
 template<typename TMap>
@@ -3915,7 +3915,7 @@ Array BaseSet::php_toValuesArray() {
     if (isTombstone(p->data.m_type)) continue;
     ai.append(tvAsCVarRef(&p->data));
   }
-  return ai.create();
+  return ai.toArray();
 }
 
 Object BaseSet::php_getIterator() {
@@ -4346,7 +4346,7 @@ Array BaseSet::toArrayImpl() const {
     }
   }
 
-  Array arr = ai.create();
+  Array arr = ai.toArray();
 
   // If both '123' and 123 are present in the set, we better warn the user.
   if (UNLIKELY(arr.length() < m_size)) warnOnStrIntDup();
@@ -5489,7 +5489,8 @@ void collectionDeepCopyTV(TypedValue* tv) {
 }
 
 ArrayData* collectionDeepCopyArray(ArrayData* arr) {
-  Array a = arr = arr->copy();
+  arr = arr->copy();
+  Array a(arr);
   for (ArrayIter iter(arr); iter; ++iter) {
     collectionDeepCopyTV((TypedValue*)(&iter.secondRef()));
   }

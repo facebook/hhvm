@@ -128,7 +128,7 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
 Array f_error_get_last() {
   String lastError = g_context->getLastError();
   if (lastError.isNull()) {
-    return (ArrayData *)NULL;
+    return Array();
   }
   return make_map_array(s_type, g_context->getLastErrorNumber(),
                         s_message, g_context->getLastError(),

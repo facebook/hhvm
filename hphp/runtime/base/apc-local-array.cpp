@@ -198,12 +198,12 @@ APCLocalArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
 }
 
 ArrayData* APCLocalArray::PlusEq(ArrayData* ad, const ArrayData *elems) {
-  Array escalated = Escalate(ad);
+  Array escalated{Escalate(ad)};
   return (escalated += const_cast<ArrayData*>(elems)).detach();
 }
 
 ArrayData* APCLocalArray::Merge(ArrayData* ad, const ArrayData *elems) {
-  Array escalated = Escalate(ad);
+  Array escalated{Escalate(ad)};
   return escalated->merge(elems);
 }
 

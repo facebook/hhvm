@@ -522,7 +522,7 @@ Array File::getMetaData() {
   ret.set(s_blocked,      true);
   ret.set(s_eof,          eof());
   ret.set(s_wrapper_data, getWrapperMetaData());
-  return ret.create();
+  return ret.toArray();
 }
 
 String File::getWrapperType() const {

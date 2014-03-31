@@ -300,7 +300,7 @@ Array c_DateTime::t___debuginfo() {
   ret.set(s_date, t_format(s_ISOformat));
   ret.set(s_timezone_type, m_dt->zoneType());
   ret.set(s_timezone, m_dt->timezone()->name());
-  return ret.create();
+  return ret.toArray();
 }
 
 c_DateTime* c_DateTime::Clone(ObjectData* obj) {

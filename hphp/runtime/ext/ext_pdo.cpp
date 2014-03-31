@@ -1437,7 +1437,7 @@ Variant c_PDO::t_query(int _argc, const String& sql, const Array& _argv) {
     // the argument count is > 1
     if (_argc == 1 ||
         pdo_stmt_set_fetch_mode(stmt, 0, _argv.rvalAt(0).toInt64Val(),
-                                f_array_splice(_argv, 1).getArrayData())) {
+                                f_array_splice(_argv, 1).toArray())) {
       /* now execute the statement */
       strcpy(stmt->error_code, PDO_ERR_NONE);
       if (stmt->executer()) {

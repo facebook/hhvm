@@ -183,7 +183,7 @@ Array DateTime::ParseAsStrptime(const String& format, const String& date) {
   ret.set(s_tm_wday, parsed_time.tm_wday);
   ret.set(s_tm_yday, parsed_time.tm_yday);
   ret.set(s_unparsed, String(unparsed_part, CopyString));
-  return ret.create();
+  return ret.toArray();
 }
 
 Array DateTime::ParseTime(timelib_time* parsed_time,

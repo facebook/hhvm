@@ -190,7 +190,7 @@ Variant f_array_combine(const Variant& keys, const Variant& values) {
                   "number of elements");
     return false;
   }
-  Array ret = ArrayData::Create();
+  Array ret = Array::Create();
   for (ArrayIter iter1(cell_keys), iter2(cell_values);
        iter1; ++iter1, ++iter2) {
     const Variant& key = iter1.secondRefPlus();

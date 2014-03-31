@@ -502,7 +502,7 @@ Array Variant::toArrayHelper() const {
   case KindOfInt64:   return Array::Create(m_data.num);
   case KindOfStaticString:
   case KindOfString:  return Array::Create(m_data.pstr);
-  case KindOfArray:   return m_data.parr;
+  case KindOfArray:   return Array(m_data.parr);
   case KindOfObject:  return m_data.pobj->o_toArray();
   case KindOfResource: return m_data.pres->o_toArray();
   case KindOfRef: return m_data.pref->var()->toArray();

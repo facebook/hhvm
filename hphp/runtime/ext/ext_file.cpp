@@ -202,7 +202,7 @@ Array stat_impl(struct stat *stat_sb) {
   ret.set(s_ctime,   (int64_t)stat_sb->st_ctime);
   ret.set(s_blksize, (int64_t)stat_sb->st_blksize);
   ret.set(s_blocks,  (int64_t)stat_sb->st_blocks);
-  return ret.create();
+  return ret.toArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -87,7 +87,7 @@ bool f_is_callable(const Variant& v, bool syntax /* = false */,
   }
 
   if (tv_func->m_type == KindOfArray) {
-    const Array& arr = tv_func->m_data.parr;
+    const Array& arr = Array(tv_func->m_data.parr);
     const Variant& clsname = arr.rvalAtRef(int64_t(0));
     const Variant& mthname = arr.rvalAtRef(int64_t(1));
     if (arr.size() != 2 ||

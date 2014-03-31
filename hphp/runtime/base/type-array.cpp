@@ -35,8 +35,8 @@
 
 namespace HPHP {
 
-const Array null_array = Array();
-const Array empty_array = HphpArray::GetStaticEmptyArray();
+const Array null_array{};
+const Array empty_array{HphpArray::GetStaticEmptyArray()};
 
 void Array::setEvalScalar() const {
   Array* thisPtr = const_cast<Array*>(this);
@@ -60,7 +60,7 @@ void ArrNR::compileTimeAssertions() {
 // constructors
 
 Array Array::Create(const Variant& name, const Variant& var) {
-  return ArrayData::Create(name.isString() ? name.toKey() : name, var);
+  return Array(ArrayData::Create(name.isString() ? name.toKey() : name, var));
 }
 
 Array::~Array() {}
@@ -125,7 +125,7 @@ Array Array::diff(const Variant& array, bool by_key, bool by_value,
     throw_expected_array_exception();
     return Array();
   }
-  return diffImpl(array.getArrayData(), by_key, by_value, false,
+  return diffImpl(array.toArray(), by_key, by_value, false,
                   key_cmp_function, key_data,
                   value_cmp_function, value_data);
 }
@@ -139,7 +139,7 @@ Array Array::intersect(const Variant& array, bool by_key, bool by_value,
     throw_expected_array_exception();
     return Array();
   }
-  return diffImpl(array.getArrayData(), by_key, by_value, true,
+  return diffImpl(array.toArray(), by_key, by_value, true,
                   key_cmp_function, key_data,
                   value_cmp_function, value_data);
 }

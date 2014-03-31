@@ -615,7 +615,7 @@ struct Variant : private TypedValue {
     return toStringHelper();
   }
   Array  toArray  () const {
-    if (m_type == KindOfArray) return m_data.parr;
+    if (m_type == KindOfArray) return Array(m_data.parr);
     return toArrayHelper();
   }
   Object toObject () const {

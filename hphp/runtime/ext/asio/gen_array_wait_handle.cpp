@@ -67,7 +67,7 @@ static void fail() {
 }
 
 Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
-  Array depCopy = inputDependencies->copy();
+  Array depCopy(inputDependencies->copy());
   if (UNLIKELY(depCopy->kind() > ArrayData::kMixedKind)) {
     // The only array kind that can return a non-kPackedKind or
     // non-kMixedKind from ->copy() is NameValueTableWrapper, which

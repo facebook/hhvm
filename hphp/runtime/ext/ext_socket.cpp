@@ -1263,7 +1263,7 @@ Variant f_getaddrinfo(const String& host, const String& port, int family /* = 0 
       }
     }
 
-    data.set(s_sockaddr, (sockinfo.empty() ? nullptr : sockinfo));
+    data.set(s_sockaddr, (sockinfo.empty() ? Array() : sockinfo));
 
     ret.append(data);
   }

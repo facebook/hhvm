@@ -187,6 +187,7 @@ void in(ISS& env, const bc::UnboxR&) {
 
 void in(ISS& env, const bc::UnboxRNop&) {
   nothrow(env);
+  constprop(env);
   auto const t = popR(env);
   push(env, t.subtypeOf(TInitCell) ? t : TInitCell);
 }

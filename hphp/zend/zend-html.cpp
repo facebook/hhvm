@@ -669,7 +669,7 @@ char *string_html_encode(const char *input, int &len,
           p--;
           *q++ = '&'; *q++ = 'a'; *q++ = 'm'; *q++ = 'p'; *q++ = ';';
         }
-	    } else {
+      } else {
         *q++ = '&'; *q++ = 'a'; *q++ = 'm'; *q++ = 'p'; *q++ = ';';
       }
       break;
@@ -686,70 +686,74 @@ char *string_html_encode(const char *input, int &len,
         *q++ = c;
         break;
       }
-      if (qsBitmask & static_cast<int64_t>(EntBitmask::ENT_BM_IGNORE)) {
+
+      bool should_skip =
+        qsBitmask & static_cast<int64_t>(EntBitmask::ENT_BM_IGNORE);
+      bool should_replace =
+        qsBitmask & static_cast<int64_t>(EntBitmask::ENT_BM_SUBSTITUTE);
+
+      if (!utf8 && should_skip) {
         break;
       }
 
       auto avail = end - p;
       auto utf8_trail = [](unsigned char c) { return c >= 0x80 && c <= 0xbf; };
 
+      // This has to be a macro since it needs to be able to break away from
+      // the for loop we're in.
+      // ENT_IGNORE has higher precedence than ENT_SUBSTITUTE
+      // \uFFFD is Unicode Replacement Character (U+FFFD)
+      #define UTF8_ERROR_IF(cond) \
+        if (cond) { \
+          if (should_skip) { break; } \
+          else if (should_replace) { strcpy(q, "\uFFFD"); q += 3; break; } \
+          else { goto exit_error; } \
+        }
+
       if (utf8) {
         if (c < 0xc2) {
-          goto exit_error;
+          UTF8_ERROR_IF(true);
         } else if (c < 0xe0) {
-          if (avail < 2 || !utf8_trail(*(p + 1))) {
-            goto exit_error;
-          }
+          UTF8_ERROR_IF(avail < 2 || !utf8_trail(*(p + 1)));
 
           uint16_t tc = ((c & 0x1f) << 6) | (p[1] & 0x3f);
-          if (tc < 0x80) {  // non-shortest form
-            goto exit_error;
-          }
+          UTF8_ERROR_IF(tc < 0x80); // non-shortest form
+
           codeLength = 2;
           entity[0] = *p;
           entity[1] = *(p + 1);
           entity[2] = '\0';
         } else if (c < 0xf0) {
-          if (avail < 3) {
-            goto exit_error;
-          }
+          UTF8_ERROR_IF(avail < 3);
           for (int i = 1; i < 3; ++i) {
-            if (!utf8_trail(*(p + i))) {
-              goto exit_error;
-            }
+            UTF8_ERROR_IF(!utf8_trail(*(p + i)));
           }
 
           uint32_t tc = ((c & 0x0f) << 12) |
                         ((*(p+1) & 0x3f) << 6) |
                         (*(p+2) & 0x3f);
-          if (tc < 0x800) { // non-shortest form
-            goto exit_error;
-          } else if (tc >= 0xd800 && tc <= 0xdfff) { // surrogate
-            goto exit_error;
-          }
+          UTF8_ERROR_IF(tc < 0x800); // non-shortest form
+          UTF8_ERROR_IF(tc >= 0xd800 && tc <= 0xdfff); // surrogate
+
           codeLength = 3;
           entity[0] = *p;
           entity[1] = *(p + 1);
           entity[2] = *(p + 2);
           entity[3] = '\0';
         } else if (c < 0xf5) {
-          if (avail < 4) {
-            goto exit_error;
-          }
+          UTF8_ERROR_IF(avail < 4);
           for (int i = 1; i < 4; ++i) {
-            if (!utf8_trail(*(p + i))) {
-              goto exit_error;
-            }
+            UTF8_ERROR_IF(!utf8_trail(*(p + i)));
           }
 
           uint32_t tc = ((c & 0x07) << 18) |
                         ((*(p+1) & 0x3f) << 12) |
                         ((*(p+2) & 0x3f) << 6) |
                         (*(p+3) & 0x3f);
-          if (tc < 0x10000 || tc > 0x10ffff) {
-            // non-shortest form or outside range
-            goto exit_error;
-          }
+
+          // non-shortest form or outside range
+          UTF8_ERROR_IF(tc < 0x10000 || tc > 0x10ffff);
+
           codeLength = 4;
           entity[0] = *p;
           entity[1] = *(p + 1);
@@ -757,7 +761,7 @@ char *string_html_encode(const char *input, int &len,
           entity[3] = *(p + 3);
           entity[4] = '\0';
         } else {
-          goto exit_error;
+          UTF8_ERROR_IF(true);
         }
       } else {
         codeLength = 1;
@@ -794,6 +798,8 @@ char *string_html_encode(const char *input, int &len,
     }
 
   }
+
+  #undef UTF8_ERROR_IF
 
   if (q - ret > INT_MAX) {
     goto exit_error;

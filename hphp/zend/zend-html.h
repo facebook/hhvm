@@ -62,10 +62,11 @@ enum StringHtmlEncoding {
 };
 
 enum class EntBitmask {
-  ENT_BM_NOQUOTES = 0,  /* leave all quotes alone */
-  ENT_BM_SINGLE = 1,    /* escape single quotes only */
-  ENT_BM_DOUBLE = 2,    /* escape double quotes only */
-  ENT_BM_IGNORE = 4     /* silently discard invalid chars */
+  ENT_BM_NOQUOTES = 0,   /* leave all quotes alone */
+  ENT_BM_SINGLE = 1,     /* escape single quotes only */
+  ENT_BM_DOUBLE = 2,     /* escape double quotes only */
+  ENT_BM_IGNORE = 4,     /* silently discard invalid chars */
+  ENT_BM_SUBSTITUTE = 8, /* replace invalid chars with U+FFFD */
 };
 
 namespace entity_charset_enum {

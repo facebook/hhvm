@@ -127,10 +127,14 @@ struct LocalStateHook {
  *   - current function and bytecode offset
  */
 struct FrameState : private LocalStateHook {
-  explicit FrameState(IRUnit& unit);
   FrameState(IRUnit& unit, BCMarker firstMarker);
-  FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func);
-  ~FrameState();
+  FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func,
+             uint32_t numLocals);
+
+  FrameState(const FrameState&) = delete;
+  FrameState& operator=(const FrameState&) = delete;
+
+  FrameState(FrameState&&) = default;
 
   void update(const IRInstruction* inst);
 

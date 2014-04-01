@@ -321,7 +321,7 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& guards, bool simple) {
   if (!changed) return false;
 
   // Make a second pass to reflow types, with some special logic for loads.
-  FrameState state(unit);
+  FrameState state{unit, unit.entry()->front().marker()};
   for (auto* block : blocks) {
     state.startBlock(block);
 

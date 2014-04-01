@@ -441,14 +441,15 @@ Point idForEdge(const Block* from, const Block* to, const IdMap& ids) {
  * cannot take their src to 0.
  */
 struct SinkPointAnalyzer : private LocalStateHook {
-  SinkPointAnalyzer(const BlockList* blocks, const IdMap* ids, IRUnit& unit)
+  SinkPointAnalyzer(const BlockList* blocks, const IdMap* ids,
+                    IRUnit& unit, FrameState&& frameState)
     : m_unit(unit)
     , m_blocks(*blocks)
     , m_block(nullptr)
     , m_inst(nullptr)
     , m_ids(*ids)
     , m_takenState(nullptr)
-    , m_frameState(unit)
+    , m_frameState(std::move(frameState))
   {}
 
   SinkPointsMap find() {
@@ -1723,7 +1724,9 @@ void optimizeRefcounts(IRUnit& unit) noexcept {
   IdMap ids(blocks, unit);
 
   Indent _i;
-  auto const sinkPoints = SinkPointAnalyzer(&blocks, &ids, unit).find();
+  FrameState fs{unit, unit.entry()->front().marker()};
+  auto const sinkPoints =
+    SinkPointAnalyzer(&blocks, &ids, unit, std::move(fs)).find();
   ITRACE(2, "Found sink points:\n{}\n", show(sinkPoints, ids));
 
   BlockMap before;

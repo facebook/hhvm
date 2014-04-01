@@ -37,7 +37,7 @@ IRBuilder::IRBuilder(Offset initialBcOffset,
                      const Func* func)
   : m_unit(unit)
   , m_simplifier(unit)
-  , m_state(unit, initialSpOffsetFromFp, func)
+  , m_state(unit, initialSpOffsetFromFp, func, func->numLocals())
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
   , m_constrainGuards(RuntimeOption::EvalHHIRRelaxGuards)

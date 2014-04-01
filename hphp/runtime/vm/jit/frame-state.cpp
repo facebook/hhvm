@@ -27,17 +27,14 @@ TRACE_SET_MOD(hhir);
 namespace HPHP {
 namespace JIT {
 
-FrameState::FrameState(IRUnit& unit)
-  : FrameState(unit, unit.entry()->front().marker())
-{
-}
-
 FrameState::FrameState(IRUnit& unit, BCMarker marker)
-  : FrameState(unit, marker.spOff, marker.func)
+  : FrameState(unit, marker.spOff, marker.func, marker.func->numLocals())
 {
+  assert(!marker.isDummy());
 }
 
-FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func)
+FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func,
+                       uint32_t numLocals)
   : m_unit(unit)
   , m_curFunc(func)
   , m_spValue(nullptr)
@@ -47,13 +44,10 @@ FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func)
   , m_frameSpansCall(false)
   , m_stackDeficit(0)
   , m_evalStack()
-  , m_locals(func->numLocals())
+  , m_locals(numLocals)
   , m_enableCse(false)
   , m_snapshots()
 {
-}
-
-FrameState::~FrameState() {
 }
 
 void FrameState::update(const IRInstruction* inst) {

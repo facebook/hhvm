@@ -652,7 +652,7 @@ O(MIterNextK,                  D(Bool), S(FramePtr),                     E|N) \
 O(IterFree,                         ND, S(FramePtr),                     E|N) \
 O(MIterFree,                        ND, S(FramePtr),                     E|N) \
 O(DecodeCufIter,               D(Bool), S(Arr,Obj,Str)                        \
-                                          S(FramePtr),                   E|N) \
+                                          S(FramePtr),                Er|E|N) \
 O(CIterFree,                        ND, S(FramePtr),                     E|N) \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
 O(BaseG,                   D(PtrToGen), C(TCA)                                \

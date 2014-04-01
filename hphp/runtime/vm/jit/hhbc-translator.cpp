@@ -1445,11 +1445,12 @@ void HhbcTranslator::emitMIterFree(uint32_t iterId) {
 }
 
 void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset) {
+  auto catchBlock = makeCatch();
   SSATmp* src = popC();
   Type type = src->type();
   if (type.subtypeOfAny(Type::Arr, Type::Str, Type::Obj)) {
     SSATmp* res = gen(DecodeCufIter, Type::Bool,
-                      IterId(iterId), src, m_irb->fp());
+                      IterId(iterId), catchBlock, src, m_irb->fp());
     gen(DecRef, src);
     emitJmpCondHelper(offset, true, res);
   } else {

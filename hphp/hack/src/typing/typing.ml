@@ -1024,10 +1024,8 @@ and anon_bind_param params env (param_name, ty as pname_ty) =
   match !params with
   | [] ->
       (* This code cannot be executed normally, because the arity is wrong
-       * and it should have been caught earlier. But in silent-mode, we
-       * tolerate it, we bind as many parameters as we can and carry on.
-       *)
-      assert !is_silent_mode;
+       * and it will error later. Bind as many parameters as we can and carry
+       * on. *)
       env
   | param :: paraml ->
       params := paraml;

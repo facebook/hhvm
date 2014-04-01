@@ -335,6 +335,11 @@ elseif (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.h")
     CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" auth_gss CCLIENT_HAS_GSS)
 endif()
 
+find_package(Libpam)
+if (PAM_INCLUDE_PATH)
+	include_directories(${PAM_INCLUDE_PATH})
+endif()
+
 if (NOT CCLIENT_HAS_GSS)
 	add_definitions(-DSKIP_IMAP_GSS=1)
 endif()
@@ -518,8 +523,12 @@ endif()
 
 	target_link_libraries(${target} ${CCLIENT_LIBRARY})
 
-    target_link_libraries(${target} ${LIBDWARF_LIBRARIES})
-    target_link_libraries(${target} ${LIBELF_LIBRARIES})
+	if (PAM_LIBRARY)
+		target_link_libraries(${target} ${PAM_LIBRARY})
+	endif()
+
+        target_link_libraries(${target} ${LIBDWARF_LIBRARIES})
+        target_link_libraries(${target} ${LIBELF_LIBRARIES})
 
 	if (ZEND_COMPAT_LINK_LIBRARIES)
 		target_link_libraries(${target} ${ZEND_COMPAT_LINK_LIBRARIES})

@@ -175,10 +175,7 @@ typedef struct _zend_fcall_info_cache {
   {                              \
     const char *cl_name = class_name;                \
     int _len = class_name_len;                \
-    auto sd = HPHP::StringData::Make(cl_name, _len, HPHP::CopyString); \
-    auto cls = HPHP::Unit::lookupClass(sd); \
-    assert(cls); \
-    class_container.hphp_class = cls; \
+    class_container.hphp_class = nullptr; \
     class_container.name = zend_strndup(cl_name, _len); \
     class_container.name_length = _len;            \
     INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \

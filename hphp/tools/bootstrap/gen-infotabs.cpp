@@ -29,26 +29,6 @@ using folly::fbstring;
 using folly::fbvector;
 using namespace HPHP::IDL;
 
-void write_zend_func_stub(std::ofstream& cpp, PhpFunc func,
-                          fbstring class_name = "") {
-  const auto& real_prefix = class_name.empty() ? "zif_" : "zim_";
-  const auto& stub_prefix = class_name.empty() ? "fg_" : "tg_";
-  if (!class_name.empty()) {
-    class_name = class_name + "_";
-  }
-  cpp << folly::format(R"(
-}} // End namespace
-void {0}{1}{2}(
-  int, HPHP::RefData*, HPHP::RefData**, HPHP::RefData*, int, void***
-);
-namespace HPHP {{
-TypedValue* {3}{1}{2}(ActRec* ar) {{
-  return zend_wrap_func(ar, {0}{1}{2}, {4}, {5});
-}}
-)", real_prefix, class_name, func.getCppName(), stub_prefix,
-    func.numParams(), func.isReturnRef());
-}
-
 int main(int argc, const char* argv[]) {
   if (argc < 3) {
     std::cout << "Usage: " << argv[0] << " <output file> <*.idl.json>...\n";
@@ -70,7 +50,6 @@ int main(int argc, const char* argv[]) {
   std::ofstream cpp(argv[1]);
 
   cpp << "#include \"hphp/runtime/ext_hhvm/ext_hhvm.h\"\n"
-      << "#include \"hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h\"\n"
       << "#include \"hphp/runtime/ext/ext.h\"\n"
       << "#include \"hphp/runtime/vm/runtime.h\"\n"
       << "#include \"ext_hhvm_infotabs.h\"\n"
@@ -87,25 +66,17 @@ int main(int argc, const char* argv[]) {
 
   for (auto const& func : funcs) {
     fbstring name = func.lowerCppName();
-    if (func.flags() & ZendCompat) {
-      write_zend_func_stub(cpp, func);
-    } else {
-      cpp << "TypedValue* fg_" << name << "(ActRec* ar);\n";
-    }
+    cpp << "TypedValue* fg_" << name << "(ActRec* ar);\n";
   }
 
   for (auto const& klass : classes) {
-    if (!(klass.flags() & IsCppAbstract) && !(klass.flags() & ZendCompat)) {
+    if (!(klass.flags() & IsCppAbstract)) {
       cpp << "ObjectData* new_" << klass.getCppName() << "_Instance(Class*);\n";
       classesWithCtors.insert(klass.getCppName());
     }
     for (auto const& func : klass.methods()) {
-      if (func.flags() & ZendCompat) {
-        write_zend_func_stub(cpp, func, klass.getCppName());
-      } else {
-        cpp << "TypedValue* tg_" << func.getUniqueName()
-            << "(ActRec* ar);\n";
-      }
+      cpp << "TypedValue* tg_" << func.getUniqueName()
+          << "(ActRec* ar);\n";
     }
   }
 
@@ -130,10 +101,6 @@ int main(int argc, const char* argv[]) {
     first = false;
 
     auto prefix = "fh_";
-    if (func.flags() & ZendCompat) {
-      prefix = "zif_";
-    }
-
     fbstring name = func.lowerCppName();
     cpp << "{ \"" << escapeCpp(func.getPhpName()) << "\", " << "fg_" << name
         << ", (void *)&" << prefix << name << " }";
@@ -153,18 +120,12 @@ int main(int argc, const char* argv[]) {
       first = false;
 
       auto name = method.getUniqueName();
-      if (method.flags() & ZendCompat) {
-        name = klass.getCppName() + "_" + method.getCppName();
-      }
       cpp << "{ \"" << method.getCppName() << "\", tg_" << name << " }";
     }
     cpp << "\n};\n\n";
   }
 
   cpp << "const long long hhbc_ext_class_count = " << classes.size() << ";\n";
-
-  cpp << "extern void "
-         "delete_ZendObjectData(ObjectData*, const Class*);\n";
 
   for (auto& klass : classes) {
     cpp << "extern void "
@@ -189,11 +150,6 @@ int main(int argc, const char* argv[]) {
                  : fbstring{"nullptr"};
 
     auto cpp_name = klass.getCppName();
-    if (klass.flags() & ZendCompat) {
-      cpp_name = "ZendObjectData";
-      ctor = "new_ZendObjectData_Instance";
-      dtor = "delete_ZendObjectData";
-    }
 
     auto const c_cpp_name = "c_" + cpp_name;
     cpp << "{ \"" << escapeCpp(klass.getPhpName()) << "\", " << ctor

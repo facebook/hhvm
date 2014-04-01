@@ -90,7 +90,6 @@ static const std::unordered_map<fbstring, FuncFlags> g_flagsMap =
   {"ZendParamModeNull",              ZendParamModeNull},
   {"ZendParamModeFalse",             ZendParamModeFalse},
   {"CppCustomDelete",                CppCustomDelete},
-  {"ZendCompat",                     ZendCompat},
   {"IsAbstract",                     IsAbstract},
   {"IsFinal",                        IsFinal},
   {"IsPublic",                       IsPublic},

@@ -151,6 +151,7 @@ inline int maxFCallBuiltinArgs() {
 enum Attr {
   AttrNone = 0,
   AttrActRec = 1 << 0,
+  AttrZendCompat = 1 << 1,
 };
 
 /**

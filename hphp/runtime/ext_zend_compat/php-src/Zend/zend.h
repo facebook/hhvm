@@ -512,7 +512,7 @@ typedef struct _zend_trait_alias zend_trait_alias;
 
 struct _zend_class_entry {
 #ifdef HHVM
-  HPHP::Class *hphp_class;
+  mutable HPHP::Class *hphp_class;
 #endif
   char type;
   const char *name;

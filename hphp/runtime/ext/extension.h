@@ -97,6 +97,10 @@ public:
     m_dsoName = name;
   }
 
+  const String & getName() const {
+    return m_name;
+  }
+
 private:
   // Indicates which version of the HHVM Extension API
   // this module was built against.

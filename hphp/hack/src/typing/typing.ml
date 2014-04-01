@@ -2297,7 +2297,11 @@ and non_null env ty =
   match ty with
   | _, Toption ty ->
       let env, ty = Env.expand_type env ty in
-      env, ty
+      (* When "??T" appears in the typing environment due to implicit
+       * typing, the recursion here ensures that it's treated as
+       * isomorphic to "?T"; that is, all nulls are created equal.
+       *)
+      non_null env ty
   | r, Tunresolved tyl ->
       let env, tyl = lfold non_null env tyl in
       (* We need to flatten the unresolved types, otherwise we could

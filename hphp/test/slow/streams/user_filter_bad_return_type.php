@@ -3,8 +3,8 @@
 function filter_impl($in, $out) {
   while ($bucket = stream_bucket_make_writeable($in)) {
     $bucket->data = strtoupper($bucket->data).$bucket->data;
-    $consumed += $bucket->dataLen;
-    $bucket->dataLen *= 2;
+    $consumed += $bucket->datalen;
+    $bucket->datalen *= 2;
     stream_bucket_append($out, $bucket);
   }
 }

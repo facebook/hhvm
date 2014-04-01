@@ -90,7 +90,17 @@ struct NameValueTable : private boost::noncopyable {
    */
   explicit NameValueTable(ActRec* fp);
 
+  /**
+   * Clone NameValueTable.
+   */
+  explicit NameValueTable(NameValueTable& nvTable, ActRec* fp);
+
   ~NameValueTable();
+
+  /**
+   * Suspend locals into an in-continuation ActRec.
+   */
+  void suspend(ActRec* oldFP, ActRec* newFP);
 
   /**
    * Attach to a new ActRec and populate its locals with TypedValues stored

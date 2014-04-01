@@ -110,7 +110,7 @@ void checkCreateErrors(c_WaitableWaitHandle* child) {
 }
 
 ObjectData*
-c_AsyncFunctionWaitHandle::CreateFunc(const Func* genFunc,
+c_AsyncFunctionWaitHandle::CreateFunc(const ActRec* origFp,
                                       Offset offset,
                                       ObjectData* child) {
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
@@ -119,7 +119,7 @@ c_AsyncFunctionWaitHandle::CreateFunc(const Func* genFunc,
 
   checkCreateErrors(child_wh);
 
-  auto cont = c_Continuation::CreateFunc(genFunc, offset);
+  auto cont = c_Continuation::CreateFunc(origFp, offset);
   auto wait_handle = NEWOBJ(c_AsyncFunctionWaitHandle)();
   wait_handle->incRefCount();
   wait_handle->initialize(static_cast<c_Continuation*>(cont), child_wh);
@@ -127,8 +127,7 @@ c_AsyncFunctionWaitHandle::CreateFunc(const Func* genFunc,
 }
 
 ObjectData*
-c_AsyncFunctionWaitHandle::CreateMeth(const Func* genFunc,
-                                      void* objOrCls,
+c_AsyncFunctionWaitHandle::CreateMeth(const ActRec* origFp,
                                       Offset offset,
                                       ObjectData* child) {
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
@@ -137,7 +136,7 @@ c_AsyncFunctionWaitHandle::CreateMeth(const Func* genFunc,
 
   checkCreateErrors(child_wh);
 
-  auto cont = c_Continuation::CreateMeth(genFunc, objOrCls, offset);
+  auto cont = c_Continuation::CreateMeth(origFp, offset);
   auto wait_handle = NEWOBJ(c_AsyncFunctionWaitHandle)();
   wait_handle->incRefCount();
   wait_handle->initialize(static_cast<c_Continuation*>(cont), child_wh);

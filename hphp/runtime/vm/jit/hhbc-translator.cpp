@@ -1487,22 +1487,14 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   auto const cont = curFunc()->isMethod()
     ? gen(
         CreateContMeth,
-        CreateContData { curFunc() },
-        gen(LdCtx, FuncData(curFunc()), m_irb->fp()),
+        m_irb->fp(),
         cns(resumeOffset)
       )
     : gen(
         CreateContFunc,
-        CreateContData { curFunc() },
+        m_irb->fp(),
         cns(resumeOffset)
       );
-
-  static auto const thisStr = makeStaticString("this");
-  Id thisId = kInvalidId;
-  const bool fillThis = curFunc()->isMethod() &&
-    !curFunc()->isStatic() &&
-    ((thisId = curFunc()->lookupVarId(thisStr)) != kInvalidId) &&
-    (curFunc()->lookupVarId(thisStr) == kInvalidId);
 
   SSATmp* contAR = gen(LdContActRec, Type::PtrToGen, cont);
   for (int i = 0; i < curFunc()->numLocals(); ++i) {
@@ -1512,12 +1504,6 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
     gen(StMem, contAR, cns(-cellsToBytes(i + 1)),
         ldLoc(i, DataTypeSpecific));
     gen(StLoc, LocalId(i), m_irb->fp(), cns(Type::Uninit));
-  }
-  if (fillThis) {
-    assert(thisId != kInvalidId);
-    auto const thisObj = gen(LdThis, m_irb->fp());
-    gen(IncRef, thisObj);
-    gen(StMem, contAR, cns(-cellsToBytes(thisId + 1)), thisObj);
   }
 
   push(cont);
@@ -1686,25 +1672,17 @@ void HhbcTranslator::emitAsyncESuspend(Offset resumeOffset, int numIters) {
     ? gen(
         CreateAFWHMeth,
         catchBlock,
-        CreateContData { curFunc() },
-        gen(LdCtx, FuncData(curFunc()), m_irb->fp()),
+        m_irb->fp(),
         cns(resumeOffset),
         child
       )
     : gen(
         CreateAFWHFunc,
         catchBlock,
-        CreateContData { curFunc() },
+        m_irb->fp(),
         cns(resumeOffset),
         child
       );
-
-  static auto const thisStr = makeStaticString("this");
-  Id thisId = kInvalidId;
-  const bool fillThis = curFunc()->isMethod() &&
-    !curFunc()->isStatic() &&
-    ((thisId = curFunc()->lookupVarId(thisStr)) != kInvalidId) &&
-    (curFunc()->lookupVarId(thisStr) == kInvalidId);
 
   SSATmp* asyncAR = gen(LdAFWHActRec, Type::PtrToGen, waitHandle);
   for (int i = 0; i < curFunc()->numLocals(); ++i) {
@@ -1726,13 +1704,6 @@ void HhbcTranslator::emitAsyncESuspend(Offset resumeOffset, int numIters) {
       asyncAR,
       cns(curFunc()->numLocals() * sizeof(TypedValue) + (i+1) * sizeof(Iter))
     );
-  }
-
-  if (fillThis) {
-    assert(thisId != kInvalidId);
-    auto const thisObj = gen(LdThis, m_irb->fp());
-    gen(IncRef, thisObj);
-    gen(StMem, asyncAR, cns(-cellsToBytes(thisId + 1)), thisObj);
   }
 
   push(waitHandle);

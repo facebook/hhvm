@@ -145,9 +145,6 @@ namespace Stats {
   STAT(PseudoMain_Skipped) \
   STAT(PseudoMain_SkipDeep) \
   STAT(PseudoMain_Guarded) \
-  STAT(Cont_CreateVerySlow) \
-  STAT(Cont_UnpackVerySlow) \
-  STAT(Cont_PackVerySlow) \
   STAT(VMEnter) \
   STAT(TraceletGuard_enter) \
   STAT(TraceletGuard_branch) \

@@ -62,6 +62,35 @@ NameValueTable::NameValueTable(ActRec* fp)
   }
 }
 
+/**
+ * Clone NameValueTable.
+ */
+NameValueTable::NameValueTable(NameValueTable& nvTable, ActRec* fp)
+  : m_fp(fp)
+  , m_table(nullptr)
+  , m_tabMask(0)
+  , m_elms(nvTable.m_elms)
+{
+  allocate(nvTable.m_tabMask + 1);
+  assert(m_tabMask == nvTable.m_tabMask);
+
+  for (int i = 0; i <= m_tabMask; ++i) {
+    Elm& src = nvTable.m_table[i];
+    Elm& dst = m_table[i];
+
+    dst.m_name = src.m_name;
+    if (dst.m_name) {
+      dst.m_name->incRefCount();
+      if (src.m_tv.m_type == KindOfNamedLocal) {
+        dst.m_tv.m_type = KindOfNamedLocal;
+        dst.m_tv.m_data.num = src.m_tv.m_data.num;
+      } else {
+        tvDupFlattenVars(&src.m_tv, &dst.m_tv);
+      }
+    }
+  }
+}
+
 NameValueTable::~NameValueTable() {
   if (!m_table) return;
 
@@ -74,6 +103,15 @@ NameValueTable::~NameValueTable() {
     }
   }
   free(m_table);
+}
+
+void NameValueTable::suspend(ActRec* oldFP, ActRec* newFP) {
+  assert(m_fp == oldFP);
+  assert(oldFP->func() == newFP->func());
+  assert(!oldFP->inGenerator());
+  assert(newFP->inGenerator());
+
+  m_fp = newFP;
 }
 
 void NameValueTable::attach(ActRec* fp) {

@@ -127,11 +127,6 @@ TRACE_SET_MOD(emitter)
 
 using uchar = unsigned char;
 
-namespace {
-  const StringData* s_continuationVarArgsLocal
-    = makeStaticString("0ContinuationVarArgsLocal");
-}
-
 namespace StackSym {
   static const char None = 0x00;
 
@@ -4233,35 +4228,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               return true;
             }
           }
-        } else if (call->isCallToFunction("func_num_args") && m_inGenerator) {
-          static const StringData* s_count =
-            makeStaticString("count");
-
-          emitVirtualLocal(m_curFunc->lookupVarId(s_continuationVarArgsLocal));
-          emitConvertToCell(e);
-          e.False();
-          e.FCallBuiltin(2, 1, s_count);
-          e.UnboxRNop();
-          return true;
-        } else if (call->isCallToFunction("func_get_args") && m_inGenerator) {
-          emitVirtualLocal(m_curFunc->lookupVarId(s_continuationVarArgsLocal));
-          emitConvertToCell(e);
-          return true;
-        } else if (call->isCallToFunction("func_get_arg") && m_inGenerator) {
-          if (!params || params->getCount() == 0) {
-            e.Null();
-            return true;
-          }
-
-          emitVirtualLocal(m_curFunc->lookupVarId(s_continuationVarArgsLocal));
-          emitConvertToCell(e);
-          visit((*params)[0]);
-          emitConvertToCell(e);
-          e.CastInt();
-          e.False();
-          e.ArrayIdx();
-          return true;
-        } else if (call->isCallToFunction("array_slice") && !m_inGenerator &&
+        } else if (call->isCallToFunction("array_slice") &&
                    params && params->getCount() == 2 &&
                    !Option::JitEnableRenameFunction) {
           ExpressionPtr p0 = (*params)[0];
@@ -6682,13 +6649,6 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
     }
   }
 
-  // assign id to continuationVarArgsLocal (generators/async - both methods)
-  if (meth->hasCallToGetArgs() &&
-      (meth->getFunctionScope()->isGenerator() ||
-       meth->getFunctionScope()->isAsync())) {
-    fe->allocVarId(s_continuationVarArgsLocal);
-  }
-
   // assign ids to local variables
   assignLocalVariableIds(meth->getFunctionScope());
 
@@ -6868,7 +6828,6 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
   emitMethodPrologue(e, meth);
-  emitSetFuncGetArgs(e);
 
   // emit method body executed in eager-execution mode
   visit(meth->getStmts());
@@ -6912,7 +6871,6 @@ void EmitterVisitor::emitGeneratorMethod(MethodStatementPtr meth) {
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
   emitMethodPrologue(e, meth);
-  emitSetFuncGetArgs(e);
 
   // emit code to create generator object
   Label topOfResumedBody;
@@ -6942,20 +6900,6 @@ void EmitterVisitor::emitGeneratorMethod(MethodStatementPtr meth) {
 
   FuncFinisher ff(this, e, m_curFunc);
   emitMethodDVInitializers(e, meth, topOfBody);
-}
-
-void EmitterVisitor::emitSetFuncGetArgs(Emitter& e) {
-  if (m_curFunc->hasVar(s_continuationVarArgsLocal)) {
-    static const StringData* s_func_get_args =
-      makeStaticString("func_get_args");
-
-    Id local = m_curFunc->lookupVarId(s_continuationVarArgsLocal);
-    emitVirtualLocal(local);
-    e.FCallBuiltin(0, 0, s_func_get_args);
-    e.UnboxRNop();
-    emitSet(e);
-    e.PopC();
-  }
 }
 
 void EmitterVisitor::emitMethodDVInitializers(Emitter& e,

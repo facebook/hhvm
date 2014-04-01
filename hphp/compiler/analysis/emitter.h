@@ -773,7 +773,6 @@ public:
   void emitConstMethodCallNoParams(Emitter& e, string name);
   void emitCreateStaticWaitHandle(Emitter& e, std::string cls,
                                   std::function<void()> emitParam);
-  void emitSetFuncGetArgs(Emitter& e);
   void emitMethodDVInitializers(Emitter& e,
                                 MethodStatementPtr& meth,
                                 Label& topOfBody);

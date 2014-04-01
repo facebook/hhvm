@@ -263,6 +263,18 @@ VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
   TRACE(3, "Creating lazily attached VarEnv %p on stack\n", this);
 }
 
+VarEnv::VarEnv(VarEnv* varEnv, ActRec* fp)
+  : m_nvTable(varEnv->m_nvTable, fp)
+  , m_extraArgs(varEnv->m_extraArgs ? varEnv->m_extraArgs->clone(fp) : nullptr)
+  , m_depth(1)
+  , m_global(false)
+{
+  assert(varEnv->m_depth == 1);
+  assert(!varEnv->m_global);
+
+  TRACE(3, "Cloning VarEnv %p to %p\n", varEnv, this);
+}
+
 VarEnv::~VarEnv() {
   TRACE(3, "Destroying VarEnv %p [%s]\n",
            this,
@@ -286,6 +298,14 @@ VarEnv* VarEnv::createGlobal() {
 
 VarEnv* VarEnv::createLocal(ActRec* fp) {
   return smart_new<VarEnv>(fp, fp->getExtraArgs());
+}
+
+VarEnv* VarEnv::clone(ActRec* fp) {
+  return smart_new<VarEnv>(this, fp);
+}
+
+void VarEnv::suspend(ActRec* oldFP, ActRec* newFP) {
+  m_nvTable.suspend(oldFP, newFP);
 }
 
 void VarEnv::enterFP(ActRec* oldFP, ActRec* newFP) {
@@ -416,6 +436,15 @@ void ExtraArgs::deallocate(ExtraArgs* ea, unsigned nargs) {
 void ExtraArgs::deallocate(ActRec* ar) {
   const int numExtra = ar->numArgs() - ar->m_func->numParams();
   deallocate(ar->getExtraArgs(), numExtra);
+}
+
+ExtraArgs* ExtraArgs::clone(ActRec* ar) {
+  const int numExtra = ar->numArgs() - ar->m_func->numParams();
+  auto ret = allocateUninit(numExtra);
+  for (int i = 0; i < numExtra; ++i) {
+    tvDupFlattenVars(&m_extraArgs[i], &ret->m_extraArgs[i]);
+  }
+  return ret;
 }
 
 TypedValue* ExtraArgs::getExtraArg(unsigned argInd) const {
@@ -6932,69 +6961,26 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCl(IOP_ARGS) {
   m_stack.pushObject(cl);
 }
 
-static inline void setContVar(const Func* func,
-                              const StringData* name,
-                              TypedValue* src,
-                              ActRec* genFp) {
-  Id destId = func->lookupVarId(name);
-  if (destId != kInvalidId) {
-    // Copy the value of the local to the cont object and set the
-    // local to uninit so that we don't need to change refcounts.
-    tvCopy(*src, *frame_local(genFp, destId));
-    tvWriteUninit(src);
-  } else {
-    if (!genFp->hasVarEnv()) {
-      genFp->setVarEnv(VarEnv::createLocal(genFp));
-    }
-    genFp->getVarEnv()->setWithRef(name, src);
-  }
-}
-
 const StaticString s_this("this");
 
+// The variable environment, extra args and all locals are teleported
+// from the ActRec on the evaluation stack to the suspended ActRec
+// on the stack.
 void ExecutionContext::fillContinuationVars(const Func* func,
-                                              ActRec* origFp,
-                                              ActRec* genFp) {
-  // For functions that contain only named locals, the variable
-  // environment is saved and restored by teleporting the values (and
-  // their references) between the evaluation stack and the local
-  // space at the end of the object using memcpy. Any variables in a
-  // VarEnv are saved and restored from m_vars as usual.
-  static const StringData* thisStr = s_this.get();
-  bool skipThis;
-  Id firstLocal;
-  if (origFp->hasVarEnv()) {
-    // This is currently never executed but it will be needed for eager
-    // execution of async functions - should be revisited later.
-    assert(false);
-    Stats::inc(Stats::Cont_CreateVerySlow);
-    Array definedVariables = origFp->getVarEnv()->getDefinedVariables();
-    skipThis = definedVariables.exists(s_this, true);
-    firstLocal = func->numNamedLocals();
-
-    for (ArrayIter iter(definedVariables); !iter.end(); iter.next()) {
-      setContVar(func, iter.first().getStringData(),
-        const_cast<TypedValue*>(iter.secondRef().asTypedValue()), genFp);
-    }
-  } else {
-    skipThis = func->lookupVarId(thisStr) != kInvalidId;
-    firstLocal = 0;
-  }
-
-  for (Id i = firstLocal; i < func->numLocals(); ++i) {
+                                            ActRec* origFp,
+                                            ActRec* genFp) {
+  for (Id i = 0; i < func->numLocals(); ++i) {
     TypedValue* src = frame_local(origFp, i);
     tvCopy(*src, *frame_local(genFp, i));
     tvWriteUninit(src);
   }
 
-  // If $this is used as a local inside the body and is not provided
-  // by our containing environment, just prefill it here instead of
-  // using InitThisLoc inside the body
-  if (!skipThis && origFp->hasThis()) {
-    Id id = func->lookupVarId(thisStr);
-    if (id != kInvalidId) {
-      tvAsVariant(frame_local(genFp, id)) = origFp->getThis();
-    }
+  // m_varEnv and m_extraArgs are in the same union
+  assert((void*)&genFp->m_varEnv == (void*)&genFp->m_extraArgs);
+  genFp->m_varEnv = origFp->m_varEnv;
+  origFp->m_varEnv = nullptr;
+  if (UNLIKELY(genFp->hasVarEnv())) {
+    genFp->getVarEnv()->suspend(origFp, genFp);
   }
 }
 
@@ -7006,8 +6992,8 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   offset += func->unit()->offsetOf(m_pc);
 
   c_Continuation* cont = static_cast<c_Continuation*>(func->isMethod()
-    ? c_Continuation::CreateMeth(func, m_fp->getThisOrClass(), offset)
-    : c_Continuation::CreateFunc(func, offset));
+    ? c_Continuation::CreateMeth(m_fp, offset)
+    : c_Continuation::CreateFunc(m_fp, offset));
 
   fillContinuationVars(func, m_fp, cont->actRec());
 
@@ -7199,9 +7185,8 @@ OPTBLD_INLINE void ExecutionContext::iopAsyncESuspend(IOP_ARGS) {
   assert(!child->isFinished());
 
   auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(func->isMethod()
-    ? c_AsyncFunctionWaitHandle::CreateMeth(func, m_fp->getThisOrClass(),
-                                            offset, child)
-    : c_AsyncFunctionWaitHandle::CreateFunc(func, offset, child));
+    ? c_AsyncFunctionWaitHandle::CreateMeth(m_fp, offset, child)
+    : c_AsyncFunctionWaitHandle::CreateFunc(m_fp, offset, child));
 
   m_stack.discard();
 

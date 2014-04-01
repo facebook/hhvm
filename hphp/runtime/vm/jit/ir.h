@@ -608,8 +608,8 @@ O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
 O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                     T|E|N|Er) \
 O(Shuffle,                          ND, SUnk,                             NF) \
-O(CreateContFunc,               D(Obj), C(Int),                      E|N|PRc) \
-O(CreateContMeth,               D(Obj), S(Ctx) C(Int),               E|N|PRc) \
+O(CreateContFunc,               D(Obj), S(FramePtr) C(Int),          E|N|PRc) \
+O(CreateContMeth,               D(Obj), S(FramePtr) C(Int),          E|N|PRc) \
 O(ContEnter,                        ND, S(FramePtr)                           \
                                           S(TCA) C(Int) S(FramePtr),       E) \
 O(ContPreNext,                      ND, S(Obj),                          B|E) \
@@ -628,8 +628,12 @@ O(StContArKey,                      ND, S(FramePtr) S(Gen),            E|CRc) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
-O(CreateAFWHFunc,               D(Obj), C(Int) S(Obj),        E|Er|N|CRc|PRc) \
-O(CreateAFWHMeth,               D(Obj), S(Ctx) C(Int) S(Obj), E|Er|N|CRc|PRc) \
+O(CreateAFWHFunc,               D(Obj), S(FramePtr)                           \
+                                          C(Int)                              \
+                                          S(Obj),             E|Er|N|CRc|PRc) \
+O(CreateAFWHMeth,               D(Obj), S(FramePtr)                           \
+                                          C(Int)                              \
+                                          S(Obj),             E|Er|N|CRc|PRc) \
 O(CreateSRWH,                   D(Obj), S(Cell),                   N|CRc|PRc) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr),            Er|E|N|CRc) \

@@ -1870,11 +1870,6 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
                 | _ -> assert false)
             | Some { ce_visibility = vis; ce_type = method_ } ->
                 check_visibility p env (Reason.to_pos (fst method_), vis) None;
-                let arity_match =
-                  List.length class_.tc_tparams = List.length paraml
-                in
-                assert (!is_silent_mode || arity_match);
-
                 let new_name = "alpha_varied_this" in
 
                 (* Since a param might include a "this" type, let's alpha vary

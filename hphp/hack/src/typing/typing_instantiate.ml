@@ -35,7 +35,6 @@ let rec make_subst tparams tyl =
   (* We tolerate missing types in silent_mode. When that happens, we bind
    * all the paremeters we can, and bind the remaining ones to "Tany".
    *)
-  assert (!is_silent_mode || List.length tparams = List.length tyl);
   let subst = ref SMap.empty in
   let tyl = ref tyl in
   List.iter (make_subst_tparam subst tyl) tparams;

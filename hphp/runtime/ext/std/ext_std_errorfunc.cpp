@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_error.h"
+#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 
 #include <iostream>
 
@@ -27,14 +27,37 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const int DEBUG_BACKTRACE_PROVIDE_OBJECT = 1;
-const int DEBUG_BACKTRACE_IGNORE_ARGS = 2;
+const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT = 1;
+const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS = 2;
 
-Array f_debug_backtrace(int64_t options /* = 1 */, int64_t limit /* = 0 */) {
-  bool provide_object = options & DEBUG_BACKTRACE_PROVIDE_OBJECT;
-  bool ignore_args = options & DEBUG_BACKTRACE_IGNORE_ARGS;
+const int64_t k_E_ERROR = (1 << 0);
+const int64_t k_E_WARNING = (1 << 1);
+const int64_t k_E_PARSE = (1 << 2);
+const int64_t k_E_NOTICE = (1 << 3);
+const int64_t k_E_CORE_ERROR = (1 << 4);
+const int64_t k_E_CORE_WARNING = (1 << 5);
+const int64_t k_E_COMPILE_ERROR = (1 << 6);
+const int64_t k_E_COMPILE_WARNING = (1 << 7);
+const int64_t k_E_USER_ERROR = (1 << 8);
+const int64_t k_E_USER_WARNING = (1 << 9);
+const int64_t k_E_USER_NOTICE = (1 << 10);
+const int64_t k_E_STRICT = (1 << 11);
+const int64_t k_E_RECOVERABLE_ERROR = (1 << 12);
+const int64_t k_E_DEPRECATED = (1 << 13);
+const int64_t k_E_USER_DEPRECATED = (1 << 14);
+const int64_t k_E_ALL = k_E_ERROR | k_E_WARNING | k_E_PARSE | k_E_NOTICE |
+                        k_E_CORE_ERROR | k_E_CORE_WARNING | k_E_COMPILE_ERROR |
+                        k_E_COMPILE_WARNING | k_E_USER_ERROR |
+                        k_E_USER_WARNING | k_E_USER_NOTICE | k_E_STRICT |
+                        k_E_RECOVERABLE_ERROR | k_E_DEPRECATED |
+                        k_E_USER_DEPRECATED;
+
+Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
+                                     int64_t limit /* = 0 */) {
+  bool provide_object = options & k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
+  bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
   return g_context->debugBacktrace(
-    true, false, provide_object, nullptr, ignore_args, limit
+    false, false, provide_object, nullptr, ignore_args, limit
   );
 }
 
@@ -49,17 +72,17 @@ Array f_debug_backtrace(int64_t options /* = 1 */, int64_t limit /* = 0 */) {
  * indicate the the filename and line number where the "caller" called the
  * "callee".
  */
-Array f_hphp_debug_caller_info() {
+Array HHVM_FUNCTION(hphp_debug_caller_info) {
   if (RuntimeOption::InjectedStackTrace) {
     return g_context->getCallerInfo();
   }
   return Array::Create();
 }
 
-void f_debug_print_backtrace(int64_t options /* = 0 */,
-                             int64_t limit /* = 0 */) {
-  bool ignore_args = options & DEBUG_BACKTRACE_IGNORE_ARGS;
-  echo(debug_string_backtrace(true, ignore_args, limit));
+void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,
+                                          int64_t limit /* = 0 */) {
+  bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
+  echo(debug_string_backtrace(false, ignore_args, limit));
 }
 
 const StaticString
@@ -72,7 +95,7 @@ const StaticString
   s_args("args");
 
 String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
-                              int limit /* = 0 */) {
+                              int64_t limit /* = 0 */) {
   if (RuntimeOption::InjectedStackTrace) {
     Array bt;
     StringBuffer buf;
@@ -125,7 +148,7 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
   }
 }
 
-Array f_error_get_last() {
+Array HHVM_FUNCTION(error_get_last) {
   String lastError = g_context->getLastError();
   if (lastError.isNull()) {
     return (ArrayData *)NULL;
@@ -136,9 +159,9 @@ Array f_error_get_last() {
                         s_line, g_context->getLastErrorLine());
 }
 
-bool f_error_log(const String& message, int message_type /* = 0 */,
-                 const String& destination /* = null_string */,
-                 const String& extra_headers /* = null_string */) {
+bool HHVM_FUNCTION(error_log, const String& message, int message_type /* = 0 */,
+                              const String& destination /* = null_string */,
+                              const String& extra_headers /* = null_string */) {
   // error_log() should not invoke the user error handler,
   // so we use Logger::Error() instead of raise_warning() or raise_error()
   switch (message_type) {
@@ -169,7 +192,7 @@ bool f_error_log(const String& message, int message_type /* = 0 */,
   return false;
 }
 
-int64_t f_error_reporting(const Variant& level /* = null */) {
+int64_t HHVM_FUNCTION(error_reporting, const Variant& level /* = null */) {
   auto& id = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
   int oldErrorReportingLevel = id.getErrorReportingLevel();
   if (!level.isNull()) {
@@ -178,42 +201,42 @@ int64_t f_error_reporting(const Variant& level /* = null */) {
   return oldErrorReportingLevel;
 }
 
-bool f_restore_error_handler() {
+bool HHVM_FUNCTION(restore_error_handler) {
   g_context->popUserErrorHandler();
   return true;
 }
 
-bool f_restore_exception_handler() {
+bool HHVM_FUNCTION(restore_exception_handler) {
   g_context->popUserExceptionHandler();
-  return false;
+  return true;
 }
 
-Variant f_set_error_handler(const Variant& error_handler,
-                            int error_types /* = k_E_ALL */) {
+Variant HHVM_FUNCTION(set_error_handler, const Variant& error_handler,
+                                         int error_types /* = k_E_ALL */) {
   return g_context->pushUserErrorHandler(error_handler, error_types);
 }
 
-Variant f_set_exception_handler(const Variant& exception_handler) {
+Variant HHVM_FUNCTION(set_exception_handler, const Variant& exception_handler) {
   return g_context->pushUserExceptionHandler(exception_handler);
 }
 
-void f_hphp_set_error_page(const String& page) {
+void HHVM_FUNCTION(hphp_set_error_page, const String& page) {
   g_context->setErrorPage(page);
 }
 
-void f_hphp_throw_fatal_error(const String& error_msg) {
+void HHVM_FUNCTION(hphp_throw_fatal_error, const String& error_msg) {
   std::string msg = error_msg.data();
   raise_error(msg);
 }
 
-void f_hphp_clear_unflushed() {
+void HHVM_FUNCTION(hphp_clear_unflushed) {
   g_context->obEndAll();
   g_context->obStart();
   g_context->obProtect(true);
 }
 
-bool f_trigger_error(const String& error_msg,
-                     int error_type /* = k_E_USER_NOTICE */) {
+bool HHVM_FUNCTION(trigger_error, const String& error_msg,
+                                  int error_type /* = k_E_USER_NOTICE */) {
   std::string msg = error_msg.data();
   if (g_context->getThrowAllErrors()) throw error_type;
   if (error_type == k_E_USER_ERROR) {
@@ -239,13 +262,53 @@ bool f_trigger_error(const String& error_msg,
   return true;
 }
 
-bool f_user_error(const String& error_msg,
-                  int error_type /* = k_E_USER_NOTICE */) {
-  return f_trigger_error(error_msg, error_type);
+bool HHVM_FUNCTION(user_error, const String& error_msg,
+                               int error_type /* = k_E_USER_NOTICE */) {
+  return HHVM_FN(trigger_error)(error_msg, error_type);
 }
 
-const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT = 1;
-const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS = 2;
-
 ///////////////////////////////////////////////////////////////////////////////
+
+void StandardExtension::initErrorFunc() {
+  HHVM_FE(debug_backtrace);
+  HHVM_FE(hphp_debug_caller_info);
+  HHVM_FE(debug_print_backtrace);
+  HHVM_FE(error_get_last);
+  HHVM_FE(error_log);
+  HHVM_FE(error_reporting);
+  HHVM_FE(restore_error_handler);
+  HHVM_FE(restore_exception_handler);
+  HHVM_FE(set_error_handler);
+  HHVM_FE(set_exception_handler);
+  HHVM_FE(hphp_set_error_page);
+  HHVM_FE(hphp_throw_fatal_error);
+  HHVM_FE(hphp_clear_unflushed);
+  HHVM_FE(trigger_error);
+  HHVM_FE(user_error);
+
+#define INTCONST(v) Native::registerConstant<KindOfInt64> \
+                  (makeStaticString(#v), k_##v);
+  INTCONST(DEBUG_BACKTRACE_PROVIDE_OBJECT);
+  INTCONST(DEBUG_BACKTRACE_IGNORE_ARGS);
+  INTCONST(E_ERROR);
+  INTCONST(E_WARNING);
+  INTCONST(E_PARSE);
+  INTCONST(E_NOTICE);
+  INTCONST(E_CORE_ERROR);
+  INTCONST(E_CORE_WARNING);
+  INTCONST(E_COMPILE_ERROR);
+  INTCONST(E_COMPILE_WARNING);
+  INTCONST(E_USER_ERROR);
+  INTCONST(E_USER_WARNING);
+  INTCONST(E_USER_NOTICE);
+  INTCONST(E_STRICT);
+  INTCONST(E_RECOVERABLE_ERROR);
+  INTCONST(E_DEPRECATED);
+  INTCONST(E_USER_DEPRECATED);
+  INTCONST(E_ALL);
+#undef INTCONST
+
+  loadSystemlib("std_errorfunc");
+}
+
 }

@@ -30,7 +30,6 @@
 #include "hphp/runtime/ext/ext_datetime.h"
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
 #include "hphp/runtime/ext/ext_domdocument.h"
-#include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_filter.h"

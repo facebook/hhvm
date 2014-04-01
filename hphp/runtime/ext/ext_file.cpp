@@ -462,12 +462,6 @@ Variant f_file_put_contents(const String& filename, const Variant& data,
 
   int numbytes = 0;
   switch (data.getType()) {
-  case KindOfObject:
-    {
-      raise_warning("Not a valid stream resource");
-      return false;
-    }
-    break;
   case KindOfResource:
     {
       File *fsrc = data.toResource().getTyped<File>(true, true);
@@ -504,6 +498,12 @@ Variant f_file_put_contents(const String& filename, const Variant& data,
       }
     }
     break;
+  case KindOfObject:
+    if (!data.getObjectData()->hasToString()) {
+      raise_warning("Not a valid stream resource");
+      return false;
+    }
+    // Fallthrough
   default:
     {
       String value = data.toString();

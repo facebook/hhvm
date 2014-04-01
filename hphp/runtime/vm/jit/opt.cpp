@@ -152,7 +152,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   }
 
   if (RuntimeOption::EvalHHIRRefcountOpts) {
-    optimizeRefcounts(unit);
+    optimizeRefcounts(unit, FrameState{unit, unit.entry()->front().marker()});
     finishPass("refcount opts");
   }
 

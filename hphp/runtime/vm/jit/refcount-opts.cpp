@@ -1712,7 +1712,7 @@ void eliminateTakeStacks(const BlockList& blocks) {
  * complete, a separate validation pass is run to ensure the net effect on the
  * refcount of each object has not changed.
  */
-void optimizeRefcounts(IRUnit& unit) noexcept {
+void optimizeRefcounts(IRUnit& unit, FrameState&& fs) noexcept {
   Timer _t(Timer::optimize_refcountOpts);
   FTRACE(2, "vvvvvvvvvv refcount opts vvvvvvvvvv\n");
   auto const changed = splitCriticalEdges(unit);
@@ -1724,7 +1724,6 @@ void optimizeRefcounts(IRUnit& unit) noexcept {
   IdMap ids(blocks, unit);
 
   Indent _i;
-  FrameState fs{unit, unit.entry()->front().marker()};
   auto const sinkPoints =
     SinkPointAnalyzer(&blocks, &ids, unit, std::move(fs)).find();
   ITRACE(2, "Found sink points:\n{}\n", show(sinkPoints, ids));

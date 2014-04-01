@@ -930,7 +930,7 @@ function print_success($tests, $options) {
         _\\__|__/_
        (___/ \\___)
 CLOWN
-."\n\n";
+."\n\n"; /**/
     return;
   }
   print "\nAll tests passed.\n\n".<<<SHIP

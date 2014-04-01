@@ -16,12 +16,12 @@
  * BUT ... YOU WERE GOING TO SAY BUT? BUT ...
  * THERE IS NO BUT! DONNY YOU'RE OUT OF YOUR ELEMENT!
  *
- * The lock-free data structures implemented here only work because of how 
- * the Hack phases are synchronized. 
+ * The lock-free data structures implemented here only work because of how
+ * the Hack phases are synchronized.
  *
  * There are 3 kinds of storage implemented in this file.
  * I) The global storage. Used by the master to efficiently transfer a blob
- *    of data to the workers. This is used to share an environment in 
+ *    of data to the workers. This is used to share an environment in
  *    read-only mode with all the workers.
  *    The master stores, the workers read.
  *
@@ -31,9 +31,9 @@
  *
  * II) The Hashtable.
  *     The operations implemented, and their limitations:
- * 
+ *
  *    -) Concurrent writes: SUPPORTED
- *       As long as its not interleaved with any other operation 
+ *       As long as its not interleaved with any other operation
  *       (other than mem)!
  *
  *    -) Concurrent reads: SUPPORTED
@@ -112,12 +112,12 @@ typedef struct {
 /* The location of the shared memory */
 static char* shared_mem;
 
-/* ENCODING: The first element is the size stored in bytes, the rest is 
+/* ENCODING: The first element is the size stored in bytes, the rest is
  * the data. The size is set to zero when the storage is empty.
  */
 static value* global_storage;
 
-/* ENCODING: 
+/* ENCODING:
  * The highest 2 bits are unused.
  * The next 31 bits encode the key the lower 31 bits the value.
  */
@@ -223,12 +223,14 @@ static void set_priorities() {
   // at all!)
   //
   // No need to check the return value, if we failed then whatever.
+  #ifdef __linux__
   syscall(
     SYS_ioprio_set,
     IOPRIO_WHO_PROCESS,
     my_pid,
     IOPRIO_PRIO_VALUE(IOPRIO_CLASS_IDLE, 7)
   );
+  #endif
 
   // Don't slam the CPU either, though this has much less tendency to make the
   // system totally unresponsive so we don't need to lower all the way.
@@ -242,12 +244,12 @@ void hh_shared_init() {
   /* MAP_NORESERVE is because we want a lot more virtual memory than what
    * we are actually going to use.
    */
-  int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_NORESERVE;
+  int flags = MAP_SHARED | MAP_ANON | MAP_NORESERVE;
   int prot  = PROT_READ  | PROT_WRITE;
 
   page_size = getpagesize();
 
-  shared_mem = 
+  shared_mem =
     (char*)mmap(NULL, page_size + SHARED_MEM_SIZE, prot, flags, 0, 0);
 
   if(shared_mem == MAP_FAILED) {
@@ -353,7 +355,7 @@ void hh_shared_clear() {
  * modifying.
  * The table contains key/value bindings encoded in a word.
  * The higher bits represent the key, the lower ones the value.
- * Each key/value binding is unique, but a key can have multiple value 
+ * Each key/value binding is unique, but a key can have multiple value
  * bound to it.
  * Concretely, if you try to add a key/value pair that is already in the table
  * the data structure is left unmodified.
@@ -366,7 +368,7 @@ void hh_add_dep(value ocaml_dep) {
   unsigned long dep  = Long_val(ocaml_dep);
   unsigned long hash = dep >> 31;
   unsigned long slot = hash & (DEP_SIZE - 1);
-  
+
   while(1) {
     /* It considerably speeds things up to do a normal load before trying using
      * an atomic operation.
@@ -376,7 +378,7 @@ void hh_add_dep(value ocaml_dep) {
     // The binding exists, done!
     if(slot_val == dep)
       return;
-    
+
     // The slot is free, let's try to take it.
     if(slot_val == 0) {
       // See comments in hh_add about its similar construction here.
@@ -400,7 +402,7 @@ value hh_get_dep(value dep) {
 
   unsigned long hash = Long_val(dep);
   unsigned long slot = hash & (DEP_SIZE - 1);
-  
+
   result = Val_int(0); // The empty list
 
   while(1) {
@@ -443,7 +445,7 @@ void hh_call_after_init() {
  */
 /*****************************************************************************/
 void hh_collect() {
-  int flags       = MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE;
+  int flags       = MAP_PRIVATE | MAP_ANON | MAP_NORESERVE;
   int prot        = PROT_READ | PROT_WRITE;
   char* dest;
   size_t mem_size = 0;
@@ -488,7 +490,7 @@ void hh_collect() {
 
   if(munmap(tmp_heap, HEAP_SIZE) == -1) {
     printf("Error while collecting: %s\n", strerror(errno));
-    exit(2);    
+    exit(2);
   }
 }
 
@@ -509,8 +511,8 @@ static char* hh_alloc(size_t size) {
 }
 
 /*****************************************************************************/
-/* Allocates an ocaml value in the shared heap. 
- * The values can only be ocaml strings. It returns the address of the 
+/* Allocates an ocaml value in the shared heap.
+ * The values can only be ocaml strings. It returns the address of the
  * allocated chunk.
  */
 /*****************************************************************************/
@@ -676,7 +678,7 @@ void hh_move(value key1, value key2) {
 /*****************************************************************************/
 void hh_remove(value key) {
   unsigned int slot = find_slot(key);
-  
+
   assert(my_pid == master_pid);
   assert(hashtbl[slot].hash == get_hash(key));
   hashtbl[slot].addr = NULL;
@@ -685,7 +687,7 @@ void hh_remove(value key) {
 /*****************************************************************************/
 /* Returns a copy of the content of a file in an ocaml string.
  * This code should be very tolerant to failure. At any given time, the
- * file could be modified, when that happens, we don't want to fail, we 
+ * file could be modified, when that happens, we don't want to fail, we
  * return the empty string instead.
  */
 /*****************************************************************************/
@@ -697,7 +699,7 @@ value hh_read_file(value filename) {
   int fd;
   struct stat sb;
   char* memblock;
-    
+
   fd = open(String_val(filename), O_RDONLY);
   if(fd == -1) {
     result = caml_alloc_string(0);
@@ -706,7 +708,7 @@ value hh_read_file(value filename) {
     result = caml_alloc_string(0);
     close(fd);
   }
-  else if((memblock = 
+  else if((memblock =
            (char*)mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0))
           == MAP_FAILED) {
     result = caml_alloc_string(0);
@@ -718,6 +720,6 @@ value hh_read_file(value filename) {
     munmap(memblock, sb.st_size);
     close(fd);
   }
-    
+
   CAMLreturn(result);
 }

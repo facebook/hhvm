@@ -17,6 +17,8 @@
 TOP=$(shell pwd)
 TARGET=hack
 
+OS=$(shell uname -s)
+
 #------------------------------------------------------------------------------
 #package dependencies
 #------------------------------------------------------------------------------
@@ -39,14 +41,23 @@ endif
 #------------------------------------------------------------------------------
 # Program related variables
 #------------------------------------------------------------------------------
-PROGS=hh_single hh_server hh_client
+ifeq ($(OS), Linux)
+  PROGS=hh_single hh_server hh_client
+else
+  PROGS=hh_single
+endif
 
 #------------------------------------------------------------------------------
 # Main variables
 #------------------------------------------------------------------------------
 SYSLIBS=nums.cma bigarray.cma str.cma unix.cma
 
-LIBS=inotify/inotify.cma \
+ifeq ($(OS), Linux)
+  INOTIFY=inotify
+  INOTIFYLIB=inotify/inotify.cma
+endif
+
+LIBS=$(INOTIFYLIB) \
  utils/lib.cma \
  avl/lib.cma \
  dfind/lib.cma \
@@ -58,7 +69,7 @@ LIBS=inotify/inotify.cma \
  $(BUILD_CMAS) \
  client/lib.cma
 
-MAKESUBDIRS=inotify avl dfind \
+MAKESUBDIRS=$(INOTIFY) avl dfind \
  utils globals \
  heap procs \
  deps parsing naming typing \
@@ -74,7 +85,6 @@ INCLUDEDIRS=$(filter-out $(FILTER_FROM_INCLUDE),$(MAKESUBDIRS)) \
 # Generic
 ##############################################################################
 -include $(TOP)/Makefile.common
-
 
 ##############################################################################
 # Top rules
@@ -152,10 +162,15 @@ distclean:: clean
 ##############################################################################
 # Install
 ##############################################################################
+ifeq ($(OS), Linux)
 bin:
 	cp -f hh_server.opt ../bin/hh_server
 	cp hh_client.opt ../bin/hh_client
 	cp hh_single.opt ../bin/hh_single_type_check
+else
+bin:
+	cp hh_single.opt ../bin/hh_single_type_check
+endif
 
 stamp:
 	rm -f utils/build_id.ml

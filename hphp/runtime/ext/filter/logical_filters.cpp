@@ -383,9 +383,10 @@ Variant php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) {
 Variant php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) {
   int old_len = value.length();
 
-  php_filter_url(value, flags, option_array);
+  Variant filter_result = php_filter_url(value, flags, option_array);
 
-  if (old_len != value.length()) {
+  if (!filter_result.isString() ||
+      old_len != filter_result.toString().length()) {
     RETURN_VALIDATION_FAILED
   }
 

@@ -98,7 +98,7 @@ inline TypedValue* arPreliveOverwriteCells(ActRec *preLiveAR) {
   for (size_t ar_cell = 0; ar_cell < HPHP::kNumActRecCells; ++ar_cell) {
     tvWriteNull(actRecCell + ar_cell);
   }
-  return actRecCell;
+  return actRecCell + HPHP::kNumActRecCells - 1;
 }
 
 ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);

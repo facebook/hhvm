@@ -2745,9 +2745,6 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
                     magicCall ? methodName : nullptr);
   } else {
     spillStack();
-    std::vector<SSATmp*> spill;
-    if (extraSpill) spill.push_back(extraSpill);
-    auto catchBlock = makeCatch(spill);
     emitFPushActRec(cns(Type::InitNull),
                     obj,
                     numParams,
@@ -2758,7 +2755,20 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
     // This is special. We need to move the stackpointer incase LdObjMethod
     // calls a destructor. Otherwise it would clobber the ActRec we just pushed.
     updateMarker();
-
+    Block* catchBlock;
+    if (extraSpill) {
+      /*
+       * If LdObjMethod throws, it nulls out the ActRec (since the unwinder
+       * will attempt to destroy it as if it were cells), and then writes
+       * obj into the last entry, since we need it to be destroyed.
+       * If we have another object to destroy, we should write it in
+       * the first - so pop 1 cell, then push extraSpill.
+       */
+      std::vector<SSATmp*> spill{extraSpill};
+      catchBlock = makeCatch(spill, 1);
+    } else {
+      catchBlock = makeCatchNoSpill();
+    }
     gen(LdObjMethod,
         LdObjMethodData(shouldFatal),
         catchBlock,
@@ -5379,10 +5389,11 @@ Block* HhbcTranslator::makeCatchImpl(Body body) {
  * the eval stack will be appended to spillVals to form the sources for the
  * SpillStack.
  */
-Block* HhbcTranslator::makeCatch(std::vector<SSATmp*> spillVals) {
+Block* HhbcTranslator::makeCatch(std::vector<SSATmp*> spillVals,
+                                 int64_t numPop) {
   return makeCatchImpl([&] {
     for (auto* val : peekSpillValues()) spillVals.push_back(val);
-    return emitSpillStack(m_irb->sp(), spillVals);
+    return emitSpillStack(m_irb->sp(), spillVals, numPop);
   });
 }
 
@@ -5403,8 +5414,11 @@ Block* HhbcTranslator::makeBlock(Offset targetBcOff) {
 }
 
 SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,
-                                       const std::vector<SSATmp*>& spillVals) {
-  std::vector<SSATmp*> ssaArgs{ sp, cns(int64_t(m_irb->stackDeficit())) };
+                                       const std::vector<SSATmp*>& spillVals,
+                                       int64_t extraOffset) {
+  std::vector<SSATmp*> ssaArgs{
+    sp, cns(int64_t(m_irb->stackDeficit() + extraOffset))
+  };
   ssaArgs.insert(ssaArgs.end(), spillVals.begin(), spillVals.end());
 
   auto args = std::make_pair(ssaArgs.size(), &ssaArgs[0]);

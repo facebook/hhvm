@@ -721,7 +721,8 @@ private: // Exit trace creation routines.
   template<typename Body>
   Block* makeCatchImpl(Body body);
   Block* makeCatch(std::vector<SSATmp*> extraSpill =
-                   std::vector<SSATmp*>());
+                   std::vector<SSATmp*>(),
+                   int64_t numPop = 0);
   Block* makeCatchNoSpill();
 
   /*
@@ -823,7 +824,8 @@ private:
   SSATmp* topR(uint32_t i = 0) { return top(Type::Gen, i); }
   std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(SSATmp* sp,
-                         const std::vector<SSATmp*>& spillVals);
+                         const std::vector<SSATmp*>& spillVals,
+                         int64_t extraOffset = 0);
   SSATmp* spillStack();
   void    exceptionBarrier();
   SSATmp* ldStackAddr(int32_t offset, TypeConstraint tc);

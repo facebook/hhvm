@@ -1408,10 +1408,12 @@ static NEVER_INLINE void cleanupParamsAndActRec(Stack& stack,
   stack.popAR();
 }
 
-static bool prepareArrayArgs(ActRec* ar, const Variant& arrayArgs,
+static bool prepareArrayArgs(ActRec* ar, const Cell& args,
                              Stack& stack,
                              bool doCufRefParamChecks,
                              TypedValue* retval) {
+  assert(ar != nullptr);
+  assert(!cellIsNull(&args));
   assert(stack.top() == (void*) ar);
   const Func* f = ar->m_func;
   assert(f);
@@ -1422,7 +1424,6 @@ static bool prepareArrayArgs(ActRec* ar, const Variant& arrayArgs,
          || f->name()->isame(s___call.get())
          || f->name()->isame(s___callStatic.get()));
 
-  const auto& args = *arrayArgs.asCell();
   assert(isContainer(args));
   int nargs = getContainerSize(args);
   assert(!ar->hasVarEnv() || (nargs == 0));
@@ -1895,10 +1896,12 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
 #endif
 
   if (!varEnv) {
+    auto const& prepArgs = cellIsNull(&args)
+      ? make_tv<KindOfArray>(staticEmptyArray())
+      : args;
     auto prepResult = prepareArrayArgs(
-      ar, cellIsNull(&args) ? Variant(empty_array) : args_,
-      m_stack, (flags & InvokeCuf), retval
-    );
+      ar, prepArgs,
+      m_stack, (bool) (flags & InvokeCuf), retval);
     if (UNLIKELY(!prepResult)) {
       assert(KindOfNull == retval->m_type);
       return;
@@ -6386,22 +6389,26 @@ bool ExecutionContext::doFCallArray(PC& pc) {
   assert(ar->numArgs() == 1);
 
   Cell* c1 = m_stack.topC();
-  if (skipCufOnInvalidParams && UNLIKELY(!isContainer(*c1))) {
-    // task #1756122
-    // this is what we /should/ do, but our code base depends
-    // on the broken behavior of casting the second arg to an
-    // array.
-    cleanupParamsAndActRec(m_stack, ar, nullptr, nullptr);
-    m_stack.pushNull();
-    raise_warning("call_user_func_array() expects parameter 2 to be array");
-    return false;
+  if (UNLIKELY(!isContainer(*c1))) {
+    if (skipCufOnInvalidParams) {
+      // task #1756122
+      // this is what we /should/ do, but our code base depends
+      // on the broken behavior of casting the second arg to an
+      // array.
+      cleanupParamsAndActRec(m_stack, ar, nullptr, nullptr);
+      m_stack.pushNull();
+      raise_warning("call_user_func_array() expects parameter 2 to be array");
+      return false;
+    } else {
+      tvCastToArrayInPlace(c1);
+    }
   }
 
   const Func* func = ar->m_func;
   {
-    Variant args(isContainer(*c1) ? tvAsCVarRef(c1) :
-                 Variant(tvAsVariant(c1).toArray()));
-    m_stack.popTV();
+    Cell args = *c1;
+    m_stack.discard(); // prepareArrayArgs will push arguments onto the stack
+    SCOPE_EXIT { tvRefcountedDecRef(&args); };
     checkStack(m_stack, func);
 
     assert(ar->m_savedRbp == (uint64_t)m_fp);

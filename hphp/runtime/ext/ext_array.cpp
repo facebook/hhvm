@@ -401,28 +401,29 @@ Variant f_array_map(int _argc, const Variant& callback, const Variant& arr1, con
       if (len > maxLen) maxLen = len;
     }
   }
-  Array ret = Array::Create();
+  PackedArrayInit ret_ai(maxLen);
   for (size_t k = 0; k < maxLen; k++) {
-    Array params;
+    PackedArrayInit params_ai(numIters);
     for (size_t i = 0; i < numIters; ++i) {
       if (iters[i]) {
-        params.append(iters[i].secondRefPlus());
+        params_ai.append(iters[i].secondRefPlus());
         ++iters[i];
       } else {
-        params.append(init_null_variant);
+        params_ai.append(init_null_variant);
       }
     }
+    Array params = params_ai.toArray();
     if (ctx.func) {
       Variant result;
       g_context->invokeFunc((TypedValue*)&result,
                               ctx.func, params, ctx.this_,
                               ctx.cls, nullptr, ctx.invName);
-      ret.append(result);
+      ret_ai.append(result);
     } else {
-      ret.append(params);
+      ret_ai.append(params);
     }
   }
-  return ret;
+  return ret_ai.toArray();
 }
 
 static void php_array_merge(Array &arr1, const Array& arr2) {

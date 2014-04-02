@@ -4,11 +4,19 @@ namespace __SystemLib {
   final class TarArchiveHandler extends ArchiveHandler {
     private Map<string, ArchiveEntryData> $entries;
     private string $path = '';
+    private $fp = null;
 
     public function __construct(string $path) {
       $this->path = $path;
       $this->entries = Map { };
 
+      if (file_exists($path)) {
+        $this->readTar();
+      }
+    }
+
+    private function readTar() {
+      $path = $this->path;
       $fp = fopen($path, 'rb');
       $data = fread($fp, 2);
       fclose($fp);
@@ -101,11 +109,73 @@ namespace __SystemLib {
       }
     }
 
-    public function addFile(string $path, string $archivePath) {
-      throw new Exception("TarArchiveHandler::addFile is not implemented");
+    public function addFile(string $path, string $archive_path) {
+      if ($this->fp === null) {
+        $this->fp = fopen($this->path, 'w');
+        }
+
+      if (strlen($archive_path) > 100) {
+        $header = substr($archive_path, 0, 100);
+        $header .= str_repeat("\0", 8); // mode
+        $header .= str_repeat("\0", 8); // uid
+        $header .= str_repeat("\0", 8); // gid
+        $header .= str_pad(decoct(strlen($archive_path)), 11, '0', STR_PAD_LEFT)
+          ."\0"; // length
+        $header .= str_repeat("\0", 12); // mtime
+        // Checksum in the middle...
+        $header2 = 'L'; // type == long name
+        $header2 .= str_repeat("\0", 100);
+
+        // Checksum calculated as if the checksum field was spaces
+        $to_checksum = $header.str_repeat(' ', 8).$header2;
+        $sum = 0;
+        foreach (unpack('C*', $to_checksum) as $char) {
+          $sum += ord($char);
+        }
+        $checksum = str_pad(decoct($sum), 6, '0', STR_PAD_LEFT)."\0 ";
+        fwrite($this->fp, str_pad($header.$checksum.$header2, 512, "\0"));
+        $partial_block = strlen($archive_path) % 512;
+        $padding = '';
+        if ($partial_block !== 0) {
+          $padding = str_repeat("\0", 512 - $partial_block);
+        }
+        fwrite($this->fp, $archive_path.$padding);
+      }
+
+      $stat = stat($path);
+      $header = str_pad(substr($archive_path, 0, 100), 100, "\0");
+      $header .= str_pad(decoct($stat['mode']), 7, '0', STR_PAD_LEFT)."\0";
+      $header .= str_pad(decoct($stat['uid']), 7, '0', STR_PAD_LEFT)."\0";
+      $header .= str_pad(decoct($stat['gid']), 7, '0', STR_PAD_LEFT)."\0";
+      $header .= str_pad(decoct($stat['size']), 11, '0', STR_PAD_LEFT)."\0";
+      $header .= str_pad(decoct($stat['mtime']), 11, '0', STR_PAD_LEFT)."\0";
+      // Checksum in the middle...
+      $header2 = '0'; // type == normal file
+      $header2 .= str_repeat("\0", 100);
+
+      // Checksum calculated as if the checksum field was spaces
+      $to_checksum = $header.str_repeat(' ', 8).$header2;
+      $sum = 0;
+      foreach (unpack('C*', $to_checksum) as $char) {
+        $sum += ord($char);
+      }
+      $checksum = str_pad(decoct($sum), 6, '0', STR_PAD_LEFT)."\0 ";
+      fwrite($this->fp, str_pad($header.$checksum.$header2, 512, "\0"));
+      $partial_block = $stat['size'] % 512;
+      $padding = '';
+      if ($partial_block !== 0) {
+        $padding = str_repeat("\0", 512 - $partial_block);
+      }
+      fwrite($this->fp, file_get_contents($path).$padding);
+      return true;
     }
 
     public function close(): void {
+      if ($this->fp !== null) {
+        fwrite($this->fp, str_repeat("\0", 1024));
+        fclose($this->fp);
+        $this->fp = null;
+      }
     }
   }
 }

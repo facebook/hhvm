@@ -154,6 +154,7 @@ function get_options($argv) {
     'arm' => '',
     'hhas-round-trip' => '',
     'color' => 'c',
+    'no-ship' => '',
   );
   $options = array();
   $files = array();
@@ -918,7 +919,9 @@ function msg_loop($num_tests, $children, $queue) {
 
 function print_success($tests, $options) {
   if (!$tests) {
-    print "\nCLOWNTOWN: No tests!\n\n".<<<CLOWN
+    print "\nCLOWNTOWN: No tests!\n";
+    if (empty($options['no-ship'])) {
+      print <<<CLOWN
             _
            {_}
            /*\\
@@ -930,10 +933,13 @@ function print_success($tests, $options) {
         _\\__|__/_
        (___/ \\___)
 CLOWN
-."\n\n";
+        ."\n\n";
+    }
     return;
   }
-  print "\nAll tests passed.\n\n".<<<SHIP
+  print "\nAll tests passed.\n";
+  if (empty($options['no-ship'])) {
+    print <<<SHIP
               |    |    |
              )_)  )_)  )_)
             )___))___))___)\
@@ -944,7 +950,8 @@ CLOWN
     ^^^^      ^^^^     ^^^    ^^
          ^^^^      ^^^
 SHIP
-."\n";
+      ."\n";
+  }
   if (isset($options['verbose'])) {
     print_commands($tests, $options);
   }

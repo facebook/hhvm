@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
 #ifdef __APPLE__
@@ -1395,25 +1396,35 @@ static char string_hex2int(int c) {
 }
 
 char *string_quoted_printable_encode(const char *input, int &len) {
-  const char *hex = "0123456789ABCDEF";
+  size_t length = len;
+  const unsigned char *str = (unsigned char*)input;
 
-  unsigned char *ret =
-    (unsigned char *)malloc(3 * len + 3 * (((3 * len)/PHP_QPRINT_MAXL) + 1));
-  unsigned char *d = ret;
-
-  int length = len;
-  unsigned char c;
   unsigned long lp = 0;
+  unsigned char c;
+  char *d, *ret;
+  char *hex = "0123456789ABCDEF";
+
+  ret = (char*)malloc(
+    safe_address(
+      3,
+      length + ((safe_address(3, length, 0)/(PHP_QPRINT_MAXL-9)) + 1),
+      1)
+  );
+  d = ret;
+
   while (length--) {
-    if (((c = *input++) == '\015') && (*input == '\012') && length > 0) {
+    if (((c = *str++) == '\015') && (*str == '\012') && length > 0) {
       *d++ = '\015';
-      *d++ = *input++;
+      *d++ = *str++;
       length--;
       lp = 0;
     } else {
-      if (iscntrl (c) || (c == 0x7f) || (c & 0x80) || (c == '=') ||
-          ((c == ' ') && (*input == '\015'))) {
-        if ((lp += 3) > PHP_QPRINT_MAXL) {
+      if (iscntrl (c) || (c == 0x7f) || (c & 0x80) ||
+          (c == '=') || ((c == ' ') && (*str == '\015'))) {
+        if ((((lp+= 3) > PHP_QPRINT_MAXL) && (c <= 0x7f))
+            || ((c > 0x7f) && (c <= 0xdf) && ((lp + 3) > PHP_QPRINT_MAXL))
+            || ((c > 0xdf) && (c <= 0xef) && ((lp + 6) > PHP_QPRINT_MAXL))
+            || ((c > 0xef) && (c <= 0xf4) && ((lp + 9) > PHP_QPRINT_MAXL))) {
           *d++ = '=';
           *d++ = '\015';
           *d++ = '\012';
@@ -1435,7 +1446,9 @@ char *string_quoted_printable_encode(const char *input, int &len) {
   }
   *d = '\0';
   len = d - ret;
-  return (char*)ret;
+
+  ret = (char*)realloc(ret, len + 1);
+  return ret;
 }
 
 char *string_quoted_printable_decode(const char *input, int &len, bool is_q) {
@@ -1939,7 +1952,7 @@ char *string_escape_shell_arg(const char *str) {
   y = 0;
   l = strlen(str);
 
-  cmd = (char *)malloc((l << 2) + 3); /* worst case */
+  cmd = (char *)malloc(safe_address(l, 4, 3)); /* worst case */
 
   cmd[y++] = '\'';
 
@@ -1965,7 +1978,7 @@ char *string_escape_shell_cmd(const char *str) {
   char *p = nullptr;
 
   l = strlen(str);
-  cmd = (char *)malloc((l << 1) + 1);
+  cmd = (char *)malloc(safe_address(l, 2, 1));
 
   for (x = 0, y = 0; x < l; x++) {
     switch (str[x]) {
@@ -2158,7 +2171,7 @@ char *string_money_format(const char *format, double value) {
   }
 
   int format_len = strlen(format);
-  int str_len = format_len + 1024;
+  int str_len = safe_address(format_len, 1, 1024);
   char *str = (char *)malloc(str_len);
   if ((str_len = strfmon(str, str_len, format, value)) < 0) {
     free(str);

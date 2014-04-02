@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/string-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -342,7 +343,7 @@ char *url_encode(const char *s, int &len) {
 
   from = (unsigned char const *)s;
   end = (unsigned char const *)s + len;
-  start = to = (unsigned char *)malloc(3 * len + 1);
+  start = to = (unsigned char *)malloc(safe_address(len,  3, 1));
 
   while (from < end) {
     c = *from++;
@@ -448,7 +449,7 @@ char *url_raw_encode(const char *s, int &len) {
   register int x, y;
   unsigned char *str;
 
-  str = (unsigned char *)malloc(3 * len + 1);
+  str = (unsigned char *)malloc(safe_address(len, 3, 1));
   for (x = 0, y = 0; len--; x++, y++) {
     str[y] = (unsigned char) s[x];
     if ((str[y] < '0' && str[y] != '-' && str[y] != '.') ||

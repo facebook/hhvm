@@ -151,6 +151,8 @@ public:
   static String SHA1(const String& input, bool raw = false);
 };
 
+size_t safe_address(size_t nmemb, size_t size, size_t offset);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

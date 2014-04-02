@@ -100,7 +100,8 @@ Variant f_array_chunk(const Variant& input, int chunkSize,
     return init_null();
   }
 
-  Array ret = Array::Create();
+  auto const retSize = (getContainerSize(cellInput) / chunkSize) + 1;
+  PackedArrayInit ret(retSize);
   Array chunk;
   int current = 0;
   for (ArrayIter iter(cellInput); iter; ++iter) {
@@ -118,7 +119,7 @@ Variant f_array_chunk(const Variant& input, int chunkSize,
     ret.append(chunk);
   }
 
-  return ret;
+  return ret.toArray();
 }
 
 static inline bool array_column_coerce_key(Variant &key, const char *name) {

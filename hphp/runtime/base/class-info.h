@@ -59,7 +59,7 @@ public:
     // need a non-zero number for const char * maps
     IsNothing              = (1 << 13),
 
-    ZendCompat             = (1 << 14), //                  x      x
+    // Unused              = (1 << 14),
 
     IsCppSerializable      = (1 << 15), //    x
     HipHopSpecific         = (1 << 16), //    x             x

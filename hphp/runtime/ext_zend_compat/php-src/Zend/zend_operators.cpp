@@ -30,6 +30,7 @@
 #include "zend_exceptions.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_operators.h"
 #include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
 
 #if ZEND_USE_TOLOWER_L
 #include <locale.h>
@@ -192,8 +193,15 @@ ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2) /* {{{ */
 }
 
 ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only TSRMLS_DC) {
-  return instance_ce->hphp_class->classof(ce->hphp_class);
+  HPHP::Class * instance_cls = zend_hphp_class_entry_to_class(instance_ce);
+  HPHP::Class * cls = zend_hphp_class_entry_to_class(ce);
+  if (!cls || !instance_cls) {
+    HPHP::raise_warning("instanceof_function_ex: cannot find HPHP class");
+    return 0;
+  }
+  return instance_cls->classof(cls);
 }
+
 ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce TSRMLS_DC) {
   return instanceof_function_ex(instance_ce, ce, 0 TSRMLS_CC);
 }

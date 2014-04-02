@@ -80,8 +80,12 @@ void HeapProfileRequestHandler::handleRequest(Transport *transport) {
         // for each address we get from pprof, it expects a line formatted
         // like the following
         // <address>\t<symbol name>
+        if (!addr.size()) {
+          continue;
+        }
+        std::string val(addr.data(), addr.size());
         SrcKey sk = SrcKey::fromAtomicInt(
-          static_cast<uint64_t>(std::stoll(addr.data(), 0, 16))
+          static_cast<uint64_t>(std::stoll(val, 0, 16))
         );
         folly::toAppend(addr, "\t", sk.getSymbol(), "\n", &res);
       }

@@ -70,9 +70,7 @@ void MemoryProfile::finishProfilingImpl() {
 
   TRACE(1, "request ended\n");
 
-  TRACE(2, "offering dump to profile controller, "
-           "request was for URL %s\n",
-           g_context->getTransport()->getCommand().c_str());
+  TRACE(2, "offering dump to profile controller");
 
   ProfileController::offerProfile(m_dump);
   if (RuntimeOption::ClientExecutionMode() &&

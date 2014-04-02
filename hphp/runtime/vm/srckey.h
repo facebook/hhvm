@@ -62,7 +62,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   // Packed representation of SrcKeys for use in contexts where we
   // want atomicity.  (SrcDB.)
   AtomicInt toAtomicInt() const {
-    return uint64_t(getFuncId()) << 32 | uint64_t(offset());
+    return uint64_t(getFuncId()) << 32 | uint64_t(uint32_t(offset()));
   }
   static SrcKey fromAtomicInt(AtomicInt in) {
     return SrcKey { uint32_t(in >> 32), (Offset) int32_t(in & 0xffffffff) };

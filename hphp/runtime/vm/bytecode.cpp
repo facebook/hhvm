@@ -1537,7 +1537,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell& args,
 }
 
 void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
-                                        bool stackTrimmed) {
+                                        StackArgsState stk) {
   assert(!ar->inGenerator());
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
@@ -1564,14 +1564,14 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
   } else {
     int nargs = ar->numArgs();
     if (UNLIKELY(nargs > nparams)) {
-      if (LIKELY(!stackTrimmed && func->discardExtraArgs())) {
+      if (LIKELY(stk != StackArgsState::Trimmed && func->discardExtraArgs())) {
         // In the common case, the function won't use the extra arguments,
         // so act as if they were never passed (NOTE: this has the effect
         // of slightly misleading backtraces that don't reflect the
         // discarded args)
         for (int i = nparams; i < nargs; ++i) { m_stack.popTV(); }
         ar->setNumArgs(nparams);
-      } else if (stackTrimmed) {
+      } else if (stk == StackArgsState::Trimmed) {
         assert(nargs == func->numParams());
         assert(((TypedValue*)ar - m_stack.top()) == func->numParams());
       } else {
@@ -1674,7 +1674,7 @@ void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr, PC pc,
   }
 }
 
-void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr, bool stackTrimmed) {
+void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
   assert(enterFnAr);
   assert(!enterFnAr->inGenerator());
   Stats::inc(Stats::VMEnter);
@@ -1682,7 +1682,7 @@ void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr, bool stackTrimmed) {
   bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
   bool useJitPrologue = useJit && m_fp
     && !enterFnAr->m_varEnv
-    && !stackTrimmed;
+    && (stk != StackArgsState::Trimmed);
   // The jit prologues only know how to do limited amounts of work; cannot
   // be used for magic call/pseudo-main/extra-args already determined or
   // ... or if the stack args have been explicitly been prepared (e.g. via
@@ -1697,7 +1697,7 @@ void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr, bool stackTrimmed) {
     return;
   }
 
-  prepareFuncEntry(enterFnAr, m_pc, stackTrimmed);
+  prepareFuncEntry(enterFnAr, m_pc, stk);
   if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(m_stack, enterFnAr->m_func);
   assert(m_fp->func()->contains(m_pc));
@@ -1731,12 +1731,12 @@ void ExecutionContext::enterVMAtCurPC() {
  * inside the async function must be provided. Optionally, the resumed
  * async function will throw an 'exception' upon entering VM if passed.
  */
-void ExecutionContext::enterVM(ActRec* ar, bool stackTrimmed,
+void ExecutionContext::enterVM(ActRec* ar, StackArgsState stk,
                                PC pc, ObjectData* exception) {
   assert(ar);
   assert(ar->m_soff == 0);
   assert(ar->m_savedRbp == 0);
-  assert(!(pc && stackTrimmed));
+  assert(!pc || (stk == StackArgsState::Untrimmed));
 
   DEBUG_ONLY int faultDepth = m_faults.size();
   SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
@@ -1763,7 +1763,7 @@ resume:
     if (first) {
       first = false;
       if (!pc) {
-        enterVMAtFunc(ar, stackTrimmed);
+        enterVMAtFunc(ar, stk);
       } else {
         enterVMAtAsyncFunc(ar, pc, exception);
       }
@@ -1913,7 +1913,7 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
   pushVMState(savedSP);
   SCOPE_EXIT { popVMState(); };
 
-  enterVM(ar, /* stack trimmed */ !varEnv);
+  enterVM(ar, varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed);
 
   tvCopy(*m_stack.topTV(), *retval);
   m_stack.discard();
@@ -1992,7 +1992,7 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
   pushVMState(savedSP);
   SCOPE_EXIT { popVMState(); };
 
-  enterVM(ar, /* stack trimmed */ false);
+  enterVM(ar, StackArgsState::Untrimmed);
 
   tvCopy(*m_stack.topTV(), *retval);
   m_stack.discard();
@@ -2015,7 +2015,7 @@ void ExecutionContext::resumeAsyncFunc(c_Continuation& cont,
   SCOPE_EXIT { popVMState(); };
 
   try {
-    enterVM(ar, /* stack trimmed */ false,
+    enterVM(ar, StackArgsState::Untrimmed,
             ar->func()->unit()->at(cont.offset()));
     cont.setStopped();
   } catch (...) {
@@ -2041,7 +2041,7 @@ void ExecutionContext::resumeAsyncFuncThrow(c_Continuation& cont,
   SCOPE_EXIT { popVMState(); };
 
   try {
-    enterVM(ar, /*stack trimmed*/ false,
+    enterVM(ar, StackArgsState::Untrimmed,
             ar->func()->unit()->at(cont.offset()), exception);
     cont.setStopped();
   } catch (...) {
@@ -6284,7 +6284,7 @@ bool ExecutionContext::doFCall(ActRec* ar, PC& pc) {
   ar->m_soff = m_fp->m_func->unit()->offsetOf(pc)
     - (uintptr_t)m_fp->m_func->base();
   assert(pcOff(this) >= m_fp->m_func->base());
-  prepareFuncEntry(ar, pc, /* stack trimmed */ false);
+  prepareFuncEntry(ar, pc, StackArgsState::Untrimmed);
   SYNC();
   if (EventHook::FunctionEnter(ar, EventHook::NormalFunc)) return true;
   pc = m_pc;
@@ -6402,7 +6402,7 @@ bool ExecutionContext::doFCallArray(PC& pc) {
     }
   }
 
-  prepareFuncEntry(ar, pc, /* stack trimmed */ true);
+  prepareFuncEntry(ar, pc, StackArgsState::Trimmed);
   SYNC();
   if (UNLIKELY(!EventHook::FunctionEnter(ar, EventHook::NormalFunc))) {
     pc = m_pc;

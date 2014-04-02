@@ -601,16 +601,23 @@ public:
   int getLastErrorLine() const { return m_lastErrorLine; }
 
 private:
+  enum class StackArgsState { // tells prepareFuncEntry how much work to do
+    // the stack may contain more arguments than the function expects
+    Untrimmed,
+    // the stack has already been trimmed of any extra arguments, which
+    // have been teleported away into ExtraArgs and/or a variadic param
+    Trimmed
+  };
   void enterVMAtAsyncFunc(ActRec* enterFnAr, PC pc, ObjectData* exception);
-  void enterVMAtFunc(ActRec* enterFnAr, bool stackTrimmed);
+  void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk);
   void enterVMAtCurPC();
-  void enterVM(ActRec* ar, bool stackTrimmed,
+  void enterVM(ActRec* ar, StackArgsState stackTrimmed,
                PC pc = nullptr, ObjectData* exception = nullptr);
   void doFPushCuf(IOP_ARGS, bool forward, bool safe);
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
-  void prepareFuncEntry(ActRec* ar, PC& pc, bool stackTrimmed);
+  void prepareFuncEntry(ActRec* ar, PC& pc, StackArgsState stk);
   void shuffleMagicArgs(ActRec* ar);
   void shuffleExtraStackArgs(ActRec* ar);
   void recordCodeCoverage(PC pc);

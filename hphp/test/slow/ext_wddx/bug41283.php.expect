@@ -1,0 +1,14 @@
+array(1) {
+  ["data"]=>
+  array(1) {
+    ["somearray"]=>
+    array(3) {
+      ["1.1"]=>
+      string(5) "One 1"
+      ["1.2"]=>
+      string(5) "One 2"
+      ["1.0"]=>
+      string(5) "Three"
+    }
+  }
+}

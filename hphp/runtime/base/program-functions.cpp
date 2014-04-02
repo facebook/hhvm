@@ -1149,6 +1149,11 @@ static int execute_program_impl(int argc, char** argv) {
         Logger::Verbose("Using default config file: %s", default_config_file);
         po.config.push_back(default_config_file);
       }
+      default_config_file = "/etc/hhvm/config.hdf";
+      if (access(default_config_file, R_OK) != -1) {
+        Logger::Verbose("Using default config file: %s", default_config_file);
+        po.config.push_back(default_config_file);
+      }
     }
   } catch (error &e) {
     Logger::Error("Error in command line: %s", e.what());

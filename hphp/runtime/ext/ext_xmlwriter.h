@@ -132,7 +132,7 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
 
 
  public:
-  SmartResource<File>  m_uri;
+  Resource  m_uri;
  private:
   xmlTextWriterPtr   m_ptr;
   xmlBufferPtr       m_output;

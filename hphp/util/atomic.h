@@ -52,34 +52,6 @@ inline void assert_address_is_atomically_accessible(T* address) {
 #endif
 }
 
-
-/**
- * Use of the functions below is DISCOURAGED.
- * Prefer the std::atomic library in C++11.
- *
- * Not only does it relieve you of worrying about architecture and compiler
- * portability issues, but it also encourages you to really reason through the
- * concurrency you're aiming to manage, by treating atomically-accessed data as
- * a distinct type.
- */
-
-template<class T> inline T atomic_acquire_load(const T* address) {
-  assert_address_is_atomically_accessible(address);
-
-  T ret = *address; // acquire barrier on x64
-  compiler_membar();
-  return ret;
-}
-
-template<class T, class U>
-inline void atomic_release_store(T* address, U val) {
-  assert_address_is_atomically_accessible(address);
-
-  compiler_membar();
-  *address = val; // release barrier on x64 (as long as no one is
-                  // doing any non-temporal moves or whatnot).
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

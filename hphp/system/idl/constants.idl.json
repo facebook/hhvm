@@ -3192,6 +3192,34 @@
             "value": 13
         },
         {
+            "name": "MYSQL_ASSOC",
+            "value": 1
+        },
+        {
+            "name": "MYSQL_BOTH",
+            "value": 3
+        },
+        {
+            "name": "MYSQL_CLIENT_COMPRESS",
+            "value": 32
+        },
+        {
+            "name": "MYSQL_CLIENT_IGNORE_SPACE",
+            "value": 256
+        },
+        {
+            "name": "MYSQL_CLIENT_INTERACTIVE",
+            "value": 1024
+        },
+        {
+            "name": "MYSQL_CLIENT_SSL",
+            "value": 2048
+        },
+        {
+            "name": "MYSQL_NUM",
+            "value": 2
+        },
+        {
             "name": "M_1_PI",
             "value": 0.31830988618379
         },

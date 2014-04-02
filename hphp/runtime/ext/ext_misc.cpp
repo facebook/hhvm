@@ -75,7 +75,7 @@ public:
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
-      "display_errors", "1",
+      "display_errors", RuntimeOption::EnableHipHopSyntax ? "stderr" : "1",
       IniSetting::SetAndGet<std::string>(
         [](const std::string& value) {
           if (value == s_1 || value == s_stdout) {

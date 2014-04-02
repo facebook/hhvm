@@ -14,46 +14,51 @@ if (APPLE)
 	set(EXT_HHVM_OS "darwin")
 endif()
 
-macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_OS EHHVM_ARCH)
-	set(f_SRC "${HPHP_HOME}/hphp/runtime/${REL}")
-	set(f_OBJ "${HPHP_HOME}/hphp/runtime/CMakeFiles/hphp_runtime_static.dir/${REL}.o")
-	list(APPEND ${SOURCES} "${f_SRC}.ext_hhvm.cpp")
-	list(APPEND ${HEADERS} "${f_SRC}.ext_hhvm.h")
-	add_custom_command(OUTPUT "${f_SRC}.ext_hhvm.cpp" "${f_SRC}.ext_hhvm.h"
+macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_OS EHHVM_ARCH SOURCE_REL BUILD_TARGET)
+	set(f_SRC "${HPHP_HOME}/${SOURCE_REL}/${REL}")
+	set(f_OBJ "${HPHP_HOME}/${SOURCE_REL}/CMakeFiles/${BUILD_TARGET}.dir/${REL}.o")
+	list(APPEND ${SOURCES} "${f_OBJ}.ext_hhvm.cpp")
+	list(APPEND ${HEADERS} "${f_OBJ}.ext_hhvm.h")
+	add_custom_command(OUTPUT "${f_OBJ}.ext_hhvm.cpp" "${f_OBJ}.ext_hhvm.h"
 	                   DEPENDS ${f_SRC} gen-ext-hhvm
 	                   COMMAND "HPHP_HOME=${HPHP_HOME}"
 	                           "${HPHP_HOME}/hphp/tools/bootstrap/gen-ext-hhvm.sh"
 	                   ARGS ${EHHVM_OS} ${EHHVM_ARCH} ${f_OBJ}
-                               "${f_SRC}.ext_hhvm.cpp" "${f_SRC}.ext_hhvm.h"
+                               "${f_OBJ}.ext_hhvm.cpp" "${f_OBJ}.ext_hhvm.h"
 	                   WORKING_DIRECTORY "${HPHP_HOME}/hphp/tools/bootstrap"
-	                   COMMENT "Generating ext_hhvm wrapper for ${REL}")
+	                   COMMENT "Generating ext_hhvm wrapper for ${SOURCE_REL}/${REL}")
 endmacro()
 
-macro(EXT_HHVM_DIR SOURCES HEADERS DIR)
-	string(LENGTH "${HPHP_HOME}/hphp/runtime/" HPHP_DIR_LEN)
-	auto_sources(files "*.cpp" "RECURSE" "${DIR}")
+macro(EXT_HHVM_DIR SOURCES HEADERS SOURCE_REL BUILD_TARGET)
+	string(LENGTH "${HPHP_HOME}/${SOURCE_REL}" HPHP_DIR_LEN)
+	auto_sources(files "*.cpp" "RECURSE" "${HPHP_HOME}/${SOURCE_REL}")
 	foreach (f ${files})
-		if (NOT ${f} MATCHES "(.ext_hhvm.cpp|/(old-)?tests?/)")
+		# This makes cpp files in the root path into a bogus lookup
+		# But that's okay since we want it to fail anyhow
+		string(REGEX REPLACE "hphp/runtime/ext/([^/]+)(/.*)?$"
+                                     "hphp/runtime/ext/\\1/config.cmake" DIR_CONFIG ${f})
+		if (NOT EXISTS ${DIR_CONFIG} AND
+                    NOT ${f} MATCHES "(.ext_hhvm.cpp|/(old-)?tests?/)")
 			string(LENGTH ${f} f_LEN)
 			math(EXPR f_REL_LEN "${f_LEN} - ${HPHP_DIR_LEN}")
 			string(SUBSTRING ${f} ${HPHP_DIR_LEN} ${f_REL_LEN} f_REL)
-			EXT_HHVM_FILE(${SOURCES} ${HEADERS} ${f_REL} ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
+			EXT_HHVM_FILE(${SOURCES} ${HEADERS} ${f_REL} ${EXT_HHVM_OS} ${EXT_HHVM_ARCH} ${SOURCE_REL} ${BUILD_TARGET})
 		endif()
 	endforeach()
 endmacro()
 
 # Generate ext_hhvm stubs for ext/*.cpp
-EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS "${HPHP_HOME}/hphp/runtime/ext")
-
-# ...and explicitly for builtin-functions.cpp
-EXT_HHVM_FILE(CXX_SOURCES CXX_HEADERS "base/builtin-functions.cpp" ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
+EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS "hphp/runtime/ext" "hphp_runtime_ext")
 
 # Pick up relevant zend_ext_compat stubs
 if (ZEND_COMPAT_BUILD_DIRS)
+	string(LENGTH ${HPHP_HOME} HPHP_HOME_LEN)
 	foreach (dir ${ZEND_COMPAT_BUILD_DIRS})
-		EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS ${dir})
+		string(LENGTH ${dir} dir_LEN)
+		math(EXPR EZC_PATH_LEN "${dir_LEN} - ${HPHP_HOME_LEN}")
+		string(SUBSTRING ${dir} ${HPHP_HOME_LEN} ${EZC_PATH_LEN} EZC_DIR)
+		EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS ${EZC_DIR} "hphp_runtime_static")
 	endforeach()
-	list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ext_zend_compat.cpp")
 endif()
 
 #
@@ -85,7 +90,7 @@ list(APPEND CXX_SOURCES ${INFOTABS_SOURCE})
 #
 
 ADD_LIBRARY(ext_hhvm_static STATIC ${CXX_SOURCES})
-target_link_libraries(ext_hhvm_static hphp_runtime_static)
+target_link_libraries(ext_hhvm_static hphp_runtime_ext)
 SET_TARGET_PROPERTIES(ext_hhvm_static PROPERTIES OUTPUT_NAME "ext_hhvm")
 SET_TARGET_PROPERTIES(ext_hhvm_static PROPERTIES PREFIX "lib")
 SET_TARGET_PROPERTIES(ext_hhvm_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)

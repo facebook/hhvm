@@ -696,6 +696,8 @@ function run_test($options, $test) {
       return 'skip-norepo';
     }
 
+    $hhbbc_only = file_exists($test.'.hhbbc_only');
+
     $repodb1 = "$test.repo/hhvm.hhbc";
     $repodb2 = "$test.repo/hhvm.hhbbc";
     if (file_exists($repodb1)) unlink($repodb1);
@@ -708,8 +710,10 @@ function run_test($options, $test) {
     $hhvm1 = $hhvm."-vRepo.Central.Path=$repodb1";
     $hhvm2 = $hhvm."-vRepo.Central.Path=$repodb2";
 
-    if (!($ret = run_one_config($options, $test, $hhvm1, $hhvm_env))) {
-      return $ret;
+    if (!$hhbbc_only) {
+      if (!($ret = run_one_config($options, $test, $hhvm1, $hhvm_env))) {
+        return $ret;
+      }
     }
     return run_one_config($options, $test, $hhvm2, $hhvm_env);
   }

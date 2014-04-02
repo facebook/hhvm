@@ -30,7 +30,7 @@ if (LIBDL_INCLUDE_DIRS)
 endif()
 
 # boost checks
-find_package(Boost 1.49.0 COMPONENTS system program_options filesystem regex REQUIRED)
+find_package(Boost 1.49.0 COMPONENTS system program_options filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 add_definitions("-DHAVE_BOOST1_49")
@@ -41,10 +41,6 @@ FIND_PATH(FEATURES_HEADER features.h)
 if (FEATURES_HEADER)
 	add_definitions("-DHAVE_FEATURES_H=1")
 endif()
-
-# magickwand
-find_package(LibMagickWand REQUIRED)
-include_directories(${LIBMAGICKWAND_INCLUDE_DIRS})
 
 # google-glog
 find_package(Glog REQUIRED)
@@ -295,11 +291,6 @@ include_directories(${ONIGURUMA_INCLUDE_DIRS})
 find_package(Ldap REQUIRED)
 include_directories(${LDAP_INCLUDE_DIR})
 
-# ncurses, readline and history
-#set(CURSES_NEED_NCURSES true)
-find_package(Ncurses REQUIRED)
-include_directories(${NCURSES_INCLUDE_PATH})
-
 # libpthreads
 find_package(PThread REQUIRED)
 include_directories(${LIBPTHREAD_INCLUDE_DIRS})
@@ -443,8 +434,6 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${LIBEVENT_LIB})
 	target_link_libraries(${target} ${CURL_LIBRARIES})
 	target_link_libraries(${target} ${LIBGLOG_LIBRARY})
-	target_link_libraries(${target} ${LIBMAGICKWAND_LIBRARIES})
-	target_link_libraries(${target} ${LIBMAGICKCORE_LIBRARIES})
 
 if (LibXed_LIBRARY)
 	target_link_libraries(${target} ${LibXed_LIBRARY})
@@ -532,7 +521,6 @@ endif()
 		target_link_libraries(${target} ${EDITLINE_LIBRARIES})
 	endif()
 
-	target_link_libraries(${target} ${NCURSES_LIBRARY})
 	target_link_libraries(${target} ${CCLIENT_LIBRARY})
 
 	if (PAM_LIBRARY)

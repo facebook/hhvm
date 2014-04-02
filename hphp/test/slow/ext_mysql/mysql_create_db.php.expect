@@ -1,1 +1,0 @@
-mysql_create_db is not supported: Deprecated. Use mysql_query(CREATE DATABASE) instead.

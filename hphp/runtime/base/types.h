@@ -312,6 +312,13 @@ typedef hphp_hash_set<FuncId> FuncIdSet;
  * AttrSkipFrame is set to indicate that the frame should be ignored
  *   when searching for the context (eg array_map evaluates its
  *   callback in the context of its caller).
+ *
+ * AttrInterceptable is only valid in RepoAuthoritative mode, and
+ * indicates a function can be used with fb_rename_function (even if
+ * JitEnableRenameFunction is false) and can be used with
+ * fb_intercept.  (Note: we could split this into two bits, since you
+ * can technically pessimize less for fb_intercept than you need to
+ * for fb_rename_function, but we haven't done so at this point.)
  */
 enum Attr {
   AttrNone          = 0,         // class  property  method  //
@@ -327,7 +334,7 @@ enum Attr {
   AttrTrait         = (1 <<  8), //    X                X    //
   AttrNoInjection   = (1 <<  9), //                     X    //
   AttrUnique        = (1 << 10), //    X                X    //
-  AttrDynamicInvoke = (1 << 11), //                     X    //
+  AttrInterceptable = (1 << 11), //                     X    //
   AttrNoExpandTrait = (1 << 12), //    X                     //
   AttrNoOverride    = (1 << 13), //    X                X    //
   AttrClone         = (1 << 14), //                     X    //

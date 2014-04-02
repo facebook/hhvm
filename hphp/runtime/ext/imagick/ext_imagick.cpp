@@ -353,5 +353,7 @@ IMPLEMENT_THREAD_LOCAL(ImagickExtension::ImagickIniSetting,
 
 ImagickExtension s_imagick_extension;
 
+HHVM_GET_MODULE(imagick)
+
 //////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

@@ -57,8 +57,6 @@ TEST(Simplifier, JumpConstFold) {
   IRUnit unit(0);
   Simplifier sim(unit);
 
-  OptionSetter<bool> r(RuntimeOption::EvalHHIRBytecodeControlFlow, false);
-
   // Folding JmpZero and JmpNZero.
   {
     auto tester = [&] (SSATmp* val, Opcode op) {
@@ -78,17 +76,6 @@ TEST(Simplifier, JumpConstFold) {
     EXPECT_SINGLE_OP(resultTrueNZero, Jmp);
   }
 
-  // Don't do this if bytecode control flow is on.
-  {
-    OptionSetter<bool> r(RuntimeOption::EvalHHIRBytecodeControlFlow, true);
-
-    auto jmp = unit.gen(JmpNZero, dummy, unit.defBlock(), unit.cns(false));
-    auto result = sim.simplify(jmp, false);
-    EXPECT_NO_CHANGE(result);
-    ASSERT_TRUE(RuntimeOption::EvalHHIRBytecodeControlFlow);
-  }
-  ASSERT_FALSE(RuntimeOption::EvalHHIRBytecodeControlFlow);
-
   // Folding query jumps.
   {
     auto jmpeqTaken = unit.gen(JmpEq, dummy, unit.cns(10), unit.cns(10));
@@ -105,8 +92,6 @@ TEST(Simplifier, JumpFuse) {
   BCMarker dummy = BCMarker::Dummy();
   IRUnit unit(0);
   Simplifier sim(unit);
-
-  OptionSetter<bool> r(RuntimeOption::EvalHHIRBytecodeControlFlow, false);
 
   {
     // JmpZero(Eq(X, true)) --> JmpEq(X, false)

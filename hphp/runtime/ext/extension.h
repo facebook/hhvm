@@ -109,10 +109,14 @@ private:
 
 #define HHVM_API_VERSION 20131007L
 
+#ifdef HHVM_BUILD_DSO
 #define HHVM_GET_MODULE(name) \
 extern "C" Extension *getModule() { \
   return &s_##name##_extension; \
 }
+#else
+#define HHVM_GET_MODULE(name)
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // Extension argument API

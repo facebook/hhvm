@@ -175,12 +175,17 @@ const TypeAliasReq* NamedEntity::getCachedTypeAlias() const {
 
 void NamedEntity::pushClass(Class* cls) {
   assert(!cls->m_nextClass);
-  cls->m_nextClass = m_clsList;
-  atomic_release_store(&m_clsList, cls); // TODO(#2054448): ARMv8
+  cls->m_nextClass = m_clsList.load(std::memory_order_acquire);
+  m_clsList.store(cls, std::memory_order_release);
 }
 
 void NamedEntity::removeClass(Class* goner) {
-  Class** cls = &m_clsList; // TODO(#2054448): ARMv8
+  Class* head = m_clsList.load(std::memory_order_acquire);
+  if (!head) return;
+  if (head == goner) {
+    return m_clsList.store(head->m_nextClass, std::memory_order_release);
+  }
+  Class** cls = &head->m_nextClass;
   while (*cls != goner) {
     assert(*cls);
     cls = &(*cls)->m_nextClass;

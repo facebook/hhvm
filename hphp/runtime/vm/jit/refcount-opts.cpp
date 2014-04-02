@@ -732,7 +732,6 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
     auto const nSrcs = m_inst->numSrcs();
     auto const nDsts = m_inst->numDsts();
-    auto const bcOp = m_inst->marker().sk().op();
     m_frameState.setMarker(m_inst->marker());
 
     if (auto* taken = m_inst->taken()) {
@@ -810,17 +809,18 @@ struct SinkPointAnalyzer : private LocalStateHook {
                                  Value(minCount, fromLoad));
         }
       }
-    } else if (m_inst == &m_block->back() &&
-               (!m_block->taken() && !m_block->next()) &&
+    } else if (m_inst == &m_block->back() && m_block->isExit() &&
+               // Make sure it's not a RetCtrl of a normal function
                (!m_inst->is(RetCtrl) ||
-                bcOp == OpContSuspend || bcOp == OpContSuspendK ||
-                bcOp == OpContRetC) &&
+                m_inst->extra<InGeneratorData>()->inGenerator) &&
                // The EndCatch in FunctionExitSurpriseHook's catch block is
                // special: it happens after locals and $this have been
                // decreffed, so we don't want to do the normal cleanup
-               !(m_inst->is(EndCatch) && isRet(bcOp) &&
-                 m_block->preds().front().inst()->is(
-                   FunctionExitSurpriseHook))) {
+               !(m_inst->is(EndCatch) &&
+                 m_block->preds().front().inst()
+                   ->is(FunctionExitSurpriseHook) &&
+                 !m_block->preds().front().inst()
+                   ->extra<InGeneratorData>()->inGenerator)) {
       // When leaving a trace, we need to account for all live references in
       // locals and $this pointers.
       consumeAllLocals();

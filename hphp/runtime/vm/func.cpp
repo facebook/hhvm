@@ -136,7 +136,7 @@ void Func::setFullName() {
   if (RuntimeOption::DynamicInvokeFunctions.size()) {
     if (RuntimeOption::DynamicInvokeFunctions.find(m_fullName->data()) !=
         RuntimeOption::DynamicInvokeFunctions.end()) {
-      m_attrs = Attr(m_attrs | AttrDynamicInvoke);
+      m_attrs = Attr(m_attrs | AttrInterceptable);
     }
   }
 }
@@ -424,7 +424,7 @@ bool Func::isClonedClosure() const {
 
 bool Func::isNameBindingImmutable(const Unit* fromUnit) const {
   if (RuntimeOption::EvalJitEnableRenameFunction ||
-      m_attrs & AttrDynamicInvoke) {
+      m_attrs & AttrInterceptable) {
     return false;
   }
 
@@ -510,7 +510,7 @@ static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrFinal)     { out << " final"; }
   if (attrs & AttrPhpLeafFn) { out << " (leaf)"; }
   if (attrs & AttrHot)       { out << " (hot)"; }
-  if (attrs & AttrDynamicInvoke) { out << " (dynamic)"; }
+  if (attrs & AttrInterceptable) { out << " (interceptable)"; }
   if (attrs & AttrPersistent) { out << " (persistent)"; }
 }
 
@@ -1128,7 +1128,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (attrs & AttrPersistent &&
       ((RuntimeOption::EvalJitEnableRenameFunction && !isGenerated) ||
        (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited) ||
-       attrs & AttrDynamicInvoke)) {
+       attrs & AttrInterceptable)) {
+    if (attrs & AttrBuiltin) {
+      SystemLib::s_anyNonPersistentBuiltins = true;
+    }
     attrs = Attr(attrs & ~AttrPersistent);
   }
   if (RuntimeOption::EvalJitEnableRenameFunction &&

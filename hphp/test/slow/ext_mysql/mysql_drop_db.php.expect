@@ -1,1 +1,0 @@
-mysql_drop_db is not supported: Deprecated. Use mysql_query(DROP DATABASE) instead.

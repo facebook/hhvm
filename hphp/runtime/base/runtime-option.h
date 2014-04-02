@@ -384,7 +384,7 @@ public:
      2 - raises E_RECOVERABLE_ERROR if regular type hint fails, raises
          E_WARNING if soft type hint fails; note that in repo mode the
          error handler is not allowed to resume on recoverable errors */ \
-  F(int32_t, CheckReturnTypeHints,     0)                               \
+  F(int32_t, CheckReturnTypeHints,     2)                               \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
@@ -412,7 +412,8 @@ public:
   F(bool, JitStressLease,              false)                           \
   F(bool, JitKeepDbgFiles,             false)                           \
   /* despite the unfortunate name, this enables function renaming and
-   * interception in the interpreter as well as the jit */              \
+   * interception in the interpreter as well as the jit, and also
+   * implies all functions may be used with fb_intercept */             \
   F(bool, JitEnableRenameFunction,     false)                           \
   F(bool, JitUseVtuneAPI,              false)                           \
                                                                         \

@@ -19,6 +19,7 @@ for test in sys.argv[1:]:
         continue
 
     try:
+        data = re.sub('string\(\d+\) "/data[^ ]*/hphp', 'string(%d) "%s', data)
         data = re.sub('/data[^ ]*/hphp', '%s', data)
     except UnicodeDecodeError:
         print ("%s has invalid unicode, skipping" % test)

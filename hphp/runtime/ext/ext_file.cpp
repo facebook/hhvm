@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
@@ -122,11 +123,29 @@ static int statSyscall(
     const String& path,
     struct stat* buf,
     bool useFileCache = false) {
-  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
-    return ::stat(File::TranslatePathWithFileCache(path).data(), buf);
+  bool isRelative = path.charAt(0) != '/';
+  int pathIndex = 0;
+  Stream::Wrapper* w = Stream::getWrapperFromURI(path, &pathIndex);
+  bool isFileStream = dynamic_cast<FileStreamWrapper*>(w);
+  auto canUseFileCache = useFileCache && isFileStream;
+  if (isRelative && !pathIndex) {
+    auto fullpath = g_context->getCwd() + String::FromChar('/') + path;
+    std::string realpath = StatCache::realpath(fullpath.data());
+    // realpath will return an empty string for nonexistent files
+    if (realpath.empty()) {
+      return ENOENT;
+    }
+    auto translatedPath = canUseFileCache ?
+      File::TranslatePathWithFileCache(realpath) :
+      File::TranslatePath(realpath);
+    return ::stat(translatedPath.data(), buf);
   }
-  return w->stat(path, buf);
+
+  auto properPath = isFileStream ? path.substr(pathIndex) : path;
+  if (canUseFileCache) {
+    return ::stat(File::TranslatePathWithFileCache(properPath).data(), buf);
+  }
+  return w->stat(properPath, buf);
 }
 
 static int lstatSyscall(
@@ -205,9 +224,13 @@ Variant f_fopen(const String& filename, const String& mode,
     return false;
   }
 
-  return File::Open(filename, mode,
-                    use_include_path ? File::USE_INCLUDE_PATH : 0,
-                    context);
+  Resource resource = File::Open(filename, mode,
+                                 use_include_path ? File::USE_INCLUDE_PATH : 0,
+                                 context);
+  if (resource.isNull()) {
+    return false;
+  }
+  return resource;
 }
 
 Variant f_popen(const String& command, const String& mode) {
@@ -426,14 +449,14 @@ Variant f_file_get_contents(const String& filename,
 Variant f_file_put_contents(const String& filename, const Variant& data,
                             int flags /* = 0 */,
                             const Variant& context /* = null */) {
-  Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb",
-                            flags, context);
-  if (!fvar.toBoolean()) {
+  Resource resource = File::Open(
+    filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb", flags, context);
+  File *f = resource.getTyped<File>(true);
+  if (!f) {
     return false;
   }
-  File *f = fvar.asResRef().getTyped<File>();
 
-  if ((flags & LOCK_EX) && flock(f->fd(), LOCK_EX)) {
+  if ((flags & LOCK_EX) && !f->lock(LOCK_EX)) {
     return false;
   }
 

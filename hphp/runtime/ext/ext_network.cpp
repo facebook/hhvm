@@ -982,16 +982,20 @@ void f_header(const String& str, bool replace /* = true */,
   }
 }
 
+static IMPLEMENT_THREAD_LOCAL(int, s_response_code);
+
 Variant f_http_response_code(int response_code /* = 0 */) {
   Transport *transport = g_context->getTransport();
-  if (!transport) {
-    raise_warning("Unable to access response code, no transport");
-    return false;
+  if (transport) {
+    *s_response_code = transport->getResponseCode();
+    if (response_code) {
+      transport->setResponse(response_code, "explicit_header_response_code");
+    }
   }
 
-  int old_code = transport->getResponseCode();
+  int old_code = *s_response_code;
   if (response_code) {
-    transport->setResponse(response_code, "explicit_header_response_code");
+    *s_response_code = response_code;
   }
 
   if (old_code) {

@@ -53,6 +53,16 @@ struct NamedEntity {
     , m_clsList(nullptr)
   {}
 
+  NamedEntity(NamedEntity&& ne)
+    : m_cachedClass(ne.m_cachedClass)
+    , m_cachedFunc(ne.m_cachedFunc)
+    , m_cachedTypeAlias(ne.m_cachedTypeAlias)
+    , m_clsList(nullptr)
+  {
+    m_clsList.store(ne.m_clsList.load(std::memory_order_acquire),
+                    std::memory_order_release);
+  }
+
   mutable RDS::Link<Class*> m_cachedClass;
   mutable RDS::Link<Func*> m_cachedFunc;
   mutable RDS::Link<TypeAliasReq> m_cachedTypeAlias;
@@ -85,7 +95,7 @@ struct NamedEntity {
   void setCachedTypeAlias(const TypeAliasReq&);
 
   Class* clsList() const {
-    return m_clsList;
+    return m_clsList.load(std::memory_order_acquire);
   }
 
   // Call while holding s_classesMutex.  Add or remove classes from
@@ -94,7 +104,7 @@ struct NamedEntity {
   void removeClass(Class* goner);
 
 private:
-  Class* m_clsList;
+  std::atomic<Class*> m_clsList;
 };
 
 //////////////////////////////////////////////////////////////////////

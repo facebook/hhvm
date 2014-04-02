@@ -43,7 +43,7 @@ struct Options {
    * Functions that aren't named in this list may be optimized with
    * the assumption they aren't intercepted, in whole_program mode.
    */
-  std::set<std::string, stdltistr> InterceptableFunctions;
+  std::set<std::string,stdltistr> InterceptableFunctions;
 
   //////////////////////////////////////////////////////////////////////
 

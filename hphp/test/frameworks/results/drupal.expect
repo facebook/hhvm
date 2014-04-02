@@ -78,14 +78,6 @@ Drupal\Tests\Component\PhpStorage\FileStorageTest::testReadOnly
 .
 Drupal\Tests\Component\PhpStorage\FileStorageTest::testWriteable
 .
-Drupal\Tests\Component\PhpStorage\MTimeProtectedFastFileStorageTest::testCRUD
-.
-Drupal\Tests\Component\PhpStorage\MTimeProtectedFastFileStorageTest::testSecurity
-.
-Drupal\Tests\Component\PhpStorage\MTimeProtectedFileStorageTest::testCRUD
-.
-Drupal\Tests\Component\PhpStorage\MTimeProtectedFileStorageTest::testSecurity
-.
 Drupal\Tests\Component\Plugin\ConfigurablePluginBagTest::testConfigurableGetConfiguration
 .
 Drupal\Tests\Component\Plugin\ConfigurablePluginBagTest::testConfigurableSetConfiguration
@@ -1703,22 +1695,6 @@ Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRo
 Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingValidVariables with data set #3
 .
 Drupal\Tests\Core\Extension\ModuleHandlerUnitTest::testLoadInclude
-.
-Drupal\Tests\Core\Extension\ThemeHandlerTest::testEnableAndListInfo
-E
-Drupal\Tests\Core\Extension\ThemeHandlerTest::testEnableSingleTheme
-E
-Drupal\Tests\Core\Extension\ThemeHandlerTest::testGetBaseThemes with data set #0
-.
-Drupal\Tests\Core\Extension\ThemeHandlerTest::testGetBaseThemes with data set #1
-.
-Drupal\Tests\Core\Extension\ThemeHandlerTest::testGetBaseThemes with data set #2
-.
-Drupal\Tests\Core\Extension\ThemeHandlerTest::testGetBaseThemes with data set #3
-.
-Drupal\Tests\Core\Extension\ThemeHandlerTest::testRebuildThemeData
-.
-Drupal\Tests\Core\Extension\ThemeHandlerTest::testThemeEnableWithTooLongName
 .
 Drupal\Tests\Core\ExternalUrlTest::testCreateFromPath
 .

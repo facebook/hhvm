@@ -62,6 +62,7 @@ namespace {
 const StaticString s_Exception("Exception");
 const StaticString s_Continuation("Continuation");
 const StaticString s_empty("");
+const StaticString s_construct("__construct");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1470,6 +1471,12 @@ void in(ISS& env, const bc::FCall& op) {
         bc::FCallD { op.arg1, s_empty.get(), ar.func->name() }
       );
     case FPIKind::Ctor:
+      /*
+       * Need to be wary of old-style ctors. We could get into the situation
+       * where we're constructing class D extends B, and B has an old-style ctor
+       * but D::B also exists.
+       */
+      if (!ar.func->name()->isame(s_construct.get())) break;
     case FPIKind::ObjMeth:
     case FPIKind::ClsMeth:
       /*

@@ -16,6 +16,7 @@ add_library(hphp_system STATIC ${CXX_SOURCES})
 
 # Needed to force system/constants.h to generate prior to files which need it
 add_dependencies(hphp_runtime_static hphp_system)
+add_dependencies(hphp_runtime_ext hphp_system)
 add_dependencies(hphp_analysis hphp_system)
 
 FILE(STRINGS "php.txt" SYSTEMLIB_CLASSES)

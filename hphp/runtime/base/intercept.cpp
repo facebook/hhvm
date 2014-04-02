@@ -200,16 +200,19 @@ void rename_function(const String& old_name, const String& new_name) {
     not_reached();
   }
 
-  if (!RuntimeOption::EvalJitEnableRenameFunction) {
-    raise_error("fb_rename_function must be explicitly enabled"
-                "(-v Eval.JitEnableRenameFunction=true)");
+  // Interceptable functions can be renamed even when
+  // JitEnableRenameFunction is false.
+  if (!(func->attrs() & AttrInterceptable)) {
+    if (!RuntimeOption::EvalJitEnableRenameFunction) {
+      // When EvalJitEnableRenameFunction is false, the translator may
+      // wire non-AttrInterceptable Func*'s into the TC. Don't rename
+      // functions.
+      raise_error("fb_rename_function must be explicitly enabled"
+                  "(-v Eval.JitEnableRenameFunction=true)");
+    }
   }
 
-  // When EvalJitEnableRenameFunction is false, the translator may wire
-  // non-DynamicInvoke Func*'s into the TC. Don't rename functions.
-  // if (!(func->attrs() & AttrDynamicInvoke)) { ... }
-
-  Func *fnew = Unit::lookupFunc(newNe);
+  auto const fnew = Unit::lookupFunc(newNe);
   if (fnew && fnew != func) {
     // To match hphpc, we silently ignore functions defined in user code that
     // have the same name as a function defined in a separable extension
@@ -219,6 +222,7 @@ void rename_function(const String& old_name, const String& new_name) {
     return;
   }
 
+  always_assert(!RDS::isPersistentHandle(oldNe->getFuncHandle()));
   oldNe->setCachedFunc(nullptr);
   newNe->m_cachedFunc.bind();
   newNe->setCachedFunc(func);

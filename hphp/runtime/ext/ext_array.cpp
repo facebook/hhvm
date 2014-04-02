@@ -150,7 +150,7 @@ Variant f_array_column(const Variant& input, const Variant& val_key,
       !array_column_coerce_key(idx, "index")) {
     return false;
   }
-  Array ret = Array::Create();
+  ArrayInit ret(arr_input.size(), ArrayInit::Map{});
   for(auto it = arr_input.begin(); !it.end(); it.next()) {
     if (!it.second().isArray()) {
       continue;
@@ -168,14 +168,14 @@ Variant f_array_column(const Variant& input, const Variant& val_key,
     }
 
     if (idx.isNull() || !sub.exists(idx)) {
-      ret.append(elem);
+      ret.set(elem);
     } else if (sub[idx].isObject()) {
       ret.set(sub[idx].toString(), elem);
     } else {
       ret.set(sub[idx], elem);
     }
   }
-  return ret;
+  return ret.toArray();
 }
 
 Variant f_array_combine(const Variant& keys, const Variant& values) {
@@ -367,14 +367,14 @@ Variant f_array_map(int _argc, const Variant& callback, const Variant& arr1, con
         return arr1.toArray();
       }
     }
-    Array ret = Array::Create();
+    ArrayInit ret(getContainerSize(cell_arr1), ArrayInit::Map{});
     for (ArrayIter iter(arr1); iter; ++iter) {
       Variant result;
       g_context->invokeFuncFew((TypedValue*)&result, ctx, 1,
-                                 iter.secondRefPlus().asCell());
+                               iter.secondRefPlus().asCell());
       ret.add(iter.first(), result, true);
     }
-    return ret;
+    return ret.toArray();
   }
 
   // Handle the uncommon case where the caller passed a callback

@@ -232,6 +232,7 @@ void ClassConstantExpression::outputCodeModel(CodeGenerator &cg) {
 
 void ClassConstantExpression::outputPHP(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
+  cg_printf("\\");
   StaticClassName::outputPHP(cg, ar);
   cg_printf("::%s", m_varName.c_str());
 }

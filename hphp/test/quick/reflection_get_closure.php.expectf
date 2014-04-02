@@ -1,0 +1,17 @@
+
+Warning: ReflectionMethod::getClosure() expects %s
+bool(true)
+int(11)
+
+Warning: ReflectionMethod::getClosure() expects %s
+bool(true)
+int(11)
+
+Warning: ReflectionMethod::getClosure() expects %s
+bool(true)
+int(11)
+int(2)
+int(2)
+int(2)
+int(3)
+int(4)

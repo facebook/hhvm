@@ -1,0 +1,41 @@
+A\a reflection:
+int(0)
+string(12) "SORT_REGULAR"
+
+A\a call:
+int(0)
+
+A\b reflection:
+int(42)
+string(12) "SORT_NUMERIC"
+
+A\b call:
+int(42)
+
+A\c reflection:
+int(0)
+string(13) "\SORT_REGULAR"
+
+A\c call:
+int(0)
+
+A\d reflection:
+int(1)
+string(13) "\SORT_NUMERIC"
+
+A\d call:
+int(1)
+
+A\e reflection:
+string(7) "A\B val"
+string(17) "\A\B\SORT_NUMERIC"
+
+A\e call:
+string(7) "A\B val"
+
+A\f reflection:
+string(5) "B val"
+string(15) "\B\SORT_NUMERIC"
+
+A\f call:
+string(5) "B val"

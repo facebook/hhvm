@@ -8,10 +8,6 @@ class Foo {
 
 $instance = new Foo();
 
-// no exception ... caller-responsible for the object
-$b = new ReflectionMethod(null, null);
-var_dump($b instanceof ReflectionMethod);
-
 try {
   $b = new ReflectionMethod(null, 'noSuchMethod');
 } catch (ReflectionException $ex) {

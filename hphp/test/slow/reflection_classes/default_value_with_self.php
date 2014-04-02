@@ -1,15 +1,23 @@
 <?php
-namespace Foo\Bar;
-interface A {
-  const SCOPE_CONTAINER                = 'container';
-  public function set($scope = self::SCOPE_CONTAINER);
+namespace Foo\Bar {
+  interface A {
+    const SCOPE_CONTAINER = 'container';
+    public function set($a = self::SCOPE_CONTAINER);
+  }
+  function foo($a = A::SCOPE_CONTAINER) { var_dump($a); }
 }
 
-function main() {
-  $rc = new \ReflectionClass("Foo\Bar\A");
-  var_dump($rc->isInterface());
-  var_dump($rc->getMethod('set')->getParameters()[0]->getDefaultValue());
-  var_dump($rc->getMethods()[0]->getParameters()[0]->getDefaultValue());
-}
+namespace {
+  function main() {
+    $rc = new ReflectionClass("Foo\\Bar\\A");
+    var_dump($rc->isInterface());
+    var_dump($rc->getMethod('set')->getParameters()[0]->getDefaultValue());
+    var_dump($rc->getMethod('set')->getParameters()[0]->getDefaultValueConstantName());
 
-main();
+    $rc = new \ReflectionFunction("Foo\\Bar\\foo");
+    var_dump($rc->getParameters()[0]->getDefaultValue());
+    var_dump($rc->getParameters()[0]->getDefaultValueConstantName());
+    Foo\Bar\foo();
+  }
+  main();
+}

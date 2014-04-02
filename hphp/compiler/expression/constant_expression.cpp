@@ -289,5 +289,9 @@ void ConstantExpression::outputCodeModel(CodeGenerator &cg) {
 // code generation functions
 
 void ConstantExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg_printf("%s", getNonNSOriginalName().c_str());
+  if (hadBackslash()) {
+    cg_printf("\\%s", m_name.c_str());
+  } else {
+    cg_printf("%s", getNonNSOriginalName().c_str());
+  }
 }

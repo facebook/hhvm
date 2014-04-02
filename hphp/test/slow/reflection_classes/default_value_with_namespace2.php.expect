@@ -1,0 +1,25 @@
+reflection:
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  array(1) {
+    [0]=>
+    string(2) "42"
+  }
+  [2]=>
+  string(3) "foo"
+}
+string(65) "array(SORT_NUMERIC, array(\Foo\Derived::NUM), \Foo\Bar\Base::STR)"
+call:
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  array(1) {
+    [0]=>
+    string(2) "42"
+  }
+  [2]=>
+  string(3) "foo"
+}

@@ -5467,26 +5467,20 @@ TypedValue* collectionAtLval(ObjectData* obj, const TypedValue* key) {
       }
       return ret;
     }
-    case Collection::ImmVectorType: {
+    case Collection::ImmVectorType:
       ret = BaseVector::OffsetAt<true>(obj, key);
       break;
-    }
     case Collection::MapType:
       return BaseMap::OffsetAt<true>(obj, key);
-    case Collection::ImmMapType: {
+    case Collection::ImmMapType:
       ret = BaseMap::OffsetAt<true>(obj, key);
       break;
-    }
     case Collection::SetType:
     case Collection::ImmSetType:
       BaseSet::throwNoIndexAccess();
-    case Collection::PairType: {
+    case Collection::PairType:
       ret = c_Pair::OffsetAt<true>(obj, key);
-      if (ret->m_type != KindOfObject && ret->m_type != KindOfResource) {
-        warn_cannot_modify_immutable_object(obj->o_getClassName().data());
-      }
-      return ret;
-    }
+      break;
     case Collection::InvalidType:
       assert(false);
       break;
@@ -5522,13 +5516,8 @@ TypedValue* collectionAtRw(ObjectData* obj, const TypedValue* key) {
       BaseSet::throwNoIndexAccess();
     case Collection::ImmVectorType:
     case Collection::ImmMapType:
+    case Collection::PairType:
       throw_cannot_modify_immutable_object(obj->o_getClassName().data());
-      break;
-    case Collection::PairType: {
-      auto* ret = c_Pair::OffsetAt<true>(obj, key);
-      warn_cannot_modify_immutable_object(obj->o_getClassName().data());
-      return ret;
-    }
     case Collection::InvalidType:
       break;
   }
@@ -5564,7 +5553,6 @@ void collectionSet(ObjectData* obj, const TypedValue* key, TypedValue* val) {
     case Collection::ImmMapType:
     case Collection::PairType:
       throw_cannot_modify_immutable_object(obj->o_getClassName().data());
-      break;
     case Collection::InvalidType:
       assert(false);
   }
@@ -5628,7 +5616,6 @@ void collectionUnset(ObjectData* obj, const TypedValue* key) {
     case Collection::ImmMapType:
     case Collection::PairType:
       throw_cannot_modify_immutable_object(obj->o_getClassName().data());
-      break;
     case Collection::InvalidType:
       assert(false);
       break;
@@ -5654,7 +5641,6 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
     case Collection::ImmSetType:
     case Collection::PairType:
       throw_cannot_modify_immutable_object(obj->o_getClassName().data());
-      break;
     case Collection::InvalidType:
       assert(false);
       break;

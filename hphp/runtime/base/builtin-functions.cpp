@@ -552,15 +552,6 @@ void throw_cannot_modify_immutable_object(const char* className) {
   throw e;
 }
 
-void warn_cannot_modify_immutable_object(const char* className) {
-  raise_warning(
-    folly::format(
-      "Cannot modify immutable object of type {}",
-      className
-    ).str()
-  );
-}
-
 void check_collection_compare(ObjectData* obj) {
   if (obj && obj->isCollection()) throw_collection_compare_exception();
 }

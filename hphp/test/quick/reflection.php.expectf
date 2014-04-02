@@ -146,9 +146,9 @@ array(4) {
 --- getStaticVariables("f") ---
 array(2) {
   ["staticX"]=>
-  string(1) "4"
+  NULL
   ["staticY"]=>
-  string(4) "null"
+  NULL
 }
 
 --- isInternal("f") ---
@@ -168,6 +168,14 @@ In f()
 int(5)
 In f()
 int(6)
+
+--- getStaticVariables("f") ---
+array(2) {
+  ["staticX"]=>
+  int(6)
+  ["staticY"]=>
+  NULL
+}
 
 --- invoke("g") ---
 In g(a, b, some string)
@@ -202,10 +210,10 @@ string(35) "/**
  */"
 
 --- getStartLine() ---
-int(126)
+int(131)
 
 --- getEndLine() ---
-int(142)
+int(147)
 
 --- getFileName() ---
 string(%d) "%s/test/quick/reflection.php"
@@ -235,7 +243,7 @@ int(0)
 string(1) "B"
 
 --- getParentClass() ---
-object(ReflectionClass)#23 (3) {
+object(ReflectionClass)#24 (3) {
   ["name"]=>
   string(1) "A"
   ["info":"ReflectionClass":private]=>
@@ -303,7 +311,7 @@ bool(false)
 bool(true)
 
 --- newInstance() ---
-object(B)#51 (4) {
+object(B)#52 (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>
@@ -315,7 +323,7 @@ object(B)#51 (4) {
 }
 
 --- newInstanceArgs() ---
-object(B)#51 (4) {
+object(B)#52 (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>

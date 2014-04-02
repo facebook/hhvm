@@ -1,0 +1,187 @@
+---- ReflectionFunction ----
+ReflectionFunction(1):array(4) {
+  ["a"]=>
+  NULL
+  ["b"]=>
+  NULL
+  ["c"]=>
+  NULL
+  ["d"]=>
+  NULL
+}
+foo():
+a = NULL
+b = int(4)
+c = string(1) "x"
+d = array(1) {
+  [4]=>
+  array(1) {
+    [0]=>
+    int(5)
+  }
+}
+ReflectionFunction(2):array(4) {
+  ["a"]=>
+  NULL
+  ["b"]=>
+  int(4)
+  ["c"]=>
+  string(1) "x"
+  ["d"]=>
+  array(1) {
+    [4]=>
+    array(1) {
+      [0]=>
+      int(5)
+    }
+  }
+}
+foo():
+a = NULL
+b = int(5)
+c = string(1) "x"
+d = array(1) {
+  [4]=>
+  array(1) {
+    [0]=>
+    int(5)
+  }
+}
+ReflectionFunction(3):array(4) {
+  ["a"]=>
+  NULL
+  ["b"]=>
+  int(5)
+  ["c"]=>
+  string(1) "x"
+  ["d"]=>
+  array(1) {
+    [4]=>
+    array(1) {
+      [0]=>
+      int(5)
+    }
+  }
+}
+---- ReflectionMethod ----
+ReflectionMethod(1):array(4) {
+  ["a"]=>
+  NULL
+  ["b"]=>
+  NULL
+  ["c"]=>
+  NULL
+  ["d"]=>
+  NULL
+}
+Bar::foo():
+a = NULL
+b = int(4)
+c = string(1) "x"
+d = array(1) {
+  [4]=>
+  array(1) {
+    [0]=>
+    int(5)
+  }
+}
+ReflectionMethod(2):array(4) {
+  ["a"]=>
+  NULL
+  ["b"]=>
+  int(4)
+  ["c"]=>
+  string(1) "x"
+  ["d"]=>
+  array(1) {
+    [4]=>
+    array(1) {
+      [0]=>
+      int(5)
+    }
+  }
+}
+Bar::foo():
+a = NULL
+b = int(5)
+c = string(1) "x"
+d = array(1) {
+  [4]=>
+  array(1) {
+    [0]=>
+    int(5)
+  }
+}
+ReflectionMethod(3):array(4) {
+  ["a"]=>
+  NULL
+  ["b"]=>
+  int(5)
+  ["c"]=>
+  string(1) "x"
+  ["d"]=>
+  array(1) {
+    [4]=>
+    array(1) {
+      [0]=>
+      int(5)
+    }
+  }
+}
+---- ReflectionClosure ----
+ReflectionFunction(1-closure):array(3) {
+  ["a"]=>
+  NULL
+  ["b"]=>
+  NULL
+  ["d"]=>
+  NULL
+}
+$foo():
+a = NULL
+b = int(4)
+d = array(1) {
+  [4]=>
+  array(1) {
+    [0]=>
+    int(5)
+  }
+}
+ReflectionFunction(2-closure):array(3) {
+  ["a"]=>
+  NULL
+  ["b"]=>
+  int(4)
+  ["d"]=>
+  array(1) {
+    [4]=>
+    array(1) {
+      [0]=>
+      int(5)
+    }
+  }
+}
+$foo():
+a = NULL
+b = int(5)
+d = array(1) {
+  [4]=>
+  array(1) {
+    [0]=>
+    int(5)
+  }
+}
+ReflectionFunction(3-closure):array(3) {
+  ["a"]=>
+  NULL
+  ["b"]=>
+  int(5)
+  ["d"]=>
+  array(1) {
+    [4]=>
+    array(1) {
+      [0]=>
+      int(5)
+    }
+  }
+}

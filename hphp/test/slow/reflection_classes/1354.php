@@ -28,7 +28,7 @@ function dump_func($func) {
    var_dump($func->isClosure());
    $vars = $func->getStaticVariables();
    var_dump(count($vars));
-  var_dump(isset($vars['a']));
+  var_dump(array_key_exists('a', $vars));
   var_dump($func->returnsReference());
    var_dump($func->getNumberOfParameters());
    var_dump($func->getNumberOfRequiredParameters());

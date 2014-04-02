@@ -203,7 +203,10 @@ struct HhbcTranslator {
   void emitUnboxR();
   void emitJmpZ(Offset taken, Offset next, bool bothPaths);
   void emitJmpNZ(Offset taken, Offset next, bool bothPaths);
-  void emitJmp(int32_t offset, bool breakTracelet, bool noSurprise);
+  void emitJmp(int32_t offset, bool breakTracelet, Block* catchBlock);
+  void emitJmp(int32_t offset, bool breakTracelet, bool noSurprise) {
+    emitJmp(offset, breakTracelet, noSurprise ? nullptr : makeCatch());
+  }
   void emitGt()    { emitCmp(Gt);    }
   void emitGte()   { emitCmp(Gte);   }
   void emitLt()    { emitCmp(Lt);    }
@@ -388,7 +391,7 @@ struct HhbcTranslator {
 
   // continuations
   void emitCreateCont(Offset resumeOffset);
-  void emitContReturnControl();
+  void emitContReturnControl(Block* catchBlock);
   void emitContSuspendImpl(Offset resumeOffset);
   void emitContSuspend(Offset resumeOffset);
   void emitContSuspendK(Offset resumeOffset);
@@ -671,8 +674,9 @@ private:
   template<class Lambda>
   SSATmp* emitMIterInitCommon(int offset, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
-  void emitJmpSurpriseCheck();
-  void emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator);
+  void emitJmpSurpriseCheck(Block* catchBlock);
+  void emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator,
+                            Block* catchBlock);
   void classExistsImpl(ClassKind);
 
   folly::Optional<Type> interpOutputType(const NormalizedInstruction&,

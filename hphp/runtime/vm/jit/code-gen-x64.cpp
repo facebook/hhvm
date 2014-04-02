@@ -978,6 +978,19 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
 
   auto* taken = m_curInst->taken();
   if (taken && taken->isCatch()) {
+    always_assert(sync != SyncOptions::kNoSyncPoint);
+    always_assert_log(
+      taken->catchMarker() == m_curInst->marker(),
+      [&] {
+        return folly::format("Catch trace doesn't match fixup:\n"
+                             "Instruction: {}\n"
+                             "Catch trace: {}\n"
+                             "Fixup      : {}\n",
+                             m_curInst->toString(),
+                             taken->catchMarker().show(),
+                             m_curInst->marker().show()).str();
+      });
+
     auto& info = m_state.catches[taken];
     assert(!info.afterCall);
     info.afterCall = a.frontier();

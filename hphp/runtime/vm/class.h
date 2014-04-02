@@ -1040,8 +1040,7 @@ enum class ClassKind { Class, Interface, Trait };
  * we had to allocate the handle before we loaded the class.
  */
 inline bool classHasPersistentRDS(const Class* cls) {
-  return (RuntimeOption::RepoAuthoritative &&
-          cls &&
+  return (cls &&
           RDS::isPersistentHandle(cls->classHandle()));
 }
 

@@ -239,7 +239,7 @@ static String HHVM_FUNCTION(wddx_packet_end, const Resource& packet_id) {
   return String(packetString);
 }
 
-static Resource HHVM_FUNCTION(wddx_packet_start, const String& comment) {
+static Resource HHVM_FUNCTION(wddx_packet_start, const Variant& comment) {
   auto wddxPacket = NEWOBJ(WddxPacket)(comment, true, false);  
   return Resource(wddxPacket);
 }

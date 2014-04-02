@@ -1,0 +1,11 @@
+array(1) {
+  ["data"]=>
+  array(3) {
+    ["01"]=>
+    string(4) "Zero"
+    ["+1"]=>
+    string(9) "Plus sign"
+    [" 1"]=>
+    string(5) "Space"
+  }
+}

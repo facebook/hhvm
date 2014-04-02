@@ -1,0 +1,2 @@
+<wddxPacket version='1.0'><header><comment>Variables</comment></header><data><struct><var name='php_class_name'><string>SimpleXMLElement</string></var><var name='test'><struct><var name='php_class_name'><string>SimpleXMLElement</string></var></struct></var></struct></data></wddxPacket>
+DONE

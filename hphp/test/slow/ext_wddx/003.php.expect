@@ -1,0 +1,10 @@
+array(4) {
+  ["var1"]=>
+  NULL
+  ["var2"]=>
+  string(11) "some string"
+  ["var3"]=>
+  int(756)
+  ["var4"]=>
+  bool(true)
+}

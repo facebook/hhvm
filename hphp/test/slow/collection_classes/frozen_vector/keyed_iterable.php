@@ -25,9 +25,6 @@ function foo(KeyedIterable $fv) {
   echo "\nzip...\n";
   printFv($fv->zip(Vector {4, 5}));
 
-  echo "\nkvzip...\n";
-  printFv($fv->kvzip());
-
   echo "\nkeys...\n";
   printFv($fv->keys());
 

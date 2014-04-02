@@ -259,61 +259,6 @@ BaseVector::php_filter(const Variant& callback, MakeArgs makeArgs) {
   return nv;
 }
 
-Object c_Vector::ti_slice(const Variant& vec, const Variant& offset,
-                          const Variant& len /* = uninit_null() */) {
-  ObjectData* obj;
-  if (!vec.isObject() ||
-      (obj = vec.getObjectData())->getVMClass() != c_Vector::classof()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter 1 must be an instance of Vector"));
-    throw e;
-  }
-  if (!offset.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter 2 must be an integer"));
-    throw e;
-  }
-  if (!len.isNull() && !len.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter 3 must be null or an integer"));
-    throw e;
-  }
-  auto* target = NEWOBJ(c_Vector)();
-  Object ret = target;
-  auto* v = static_cast<c_Vector*>(obj);
-  int64_t sz = v->m_size;
-  int64_t startPos = offset.toInt64();
-  if (UNLIKELY(uint64_t(startPos) >= uint64_t(sz))) {
-    if (startPos >= 0) {
-      assert(startPos >= sz);
-      return ret;
-    }
-    startPos = std::max<int64_t>(sz + startPos, 0);
-  }
-  int64_t endPos;
-  if (len.isInteger()) {
-    int64_t intLen = len.toInt64();
-    if (LIKELY(intLen >= 0)) {
-      endPos = startPos + std::min<int64_t>(intLen, sz - startPos);
-    } else {
-      endPos = sz + intLen;
-    }
-  } else {
-    endPos = sz;
-  }
-  if (startPos >= endPos) {
-    return ret;
-  }
-  uint targetSize = endPos - startPos;
-  target->reserve(targetSize);
-  target->m_size = targetSize;
-  auto* data = target->m_data;
-  for (uint i = 0; i < targetSize; ++i, ++startPos) {
-    cellDup(v->m_data[startPos], data[i]);
-  }
-  return ret;
-}
-
 template<class TVector>
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
@@ -438,21 +383,6 @@ void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
     pair->incRefCount();
     pair->initAdd(&m_data[i]);
     pair->initAdd(cvarToCell(&v));
-    bvec->m_data[i].m_data.pobj = pair;
-    bvec->m_data[i].m_type = KindOfObject;
-    ++bvec->m_size;
-  }
-}
-
-void BaseVector::kvzip(BaseVector* bvec) {
-  bvec->reserve(m_size);
-  for (uint i = 0; i < m_size; ++i) {
-    auto* pair = NEWOBJ(c_Pair)();
-    pair->incRefCount();
-    pair->elm0.m_type = KindOfInt64;
-    pair->elm0.m_data.num = i;
-    ++pair->m_size;
-    pair->initAdd(&m_data[i]);
     bvec->m_data[i].m_data.pobj = pair;
     bvec->m_data[i].m_type = KindOfObject;
     ++bvec->m_size;
@@ -885,13 +815,6 @@ Object c_Vector::t_values() {
 
 Object c_Vector::t_lazy() {
   return BaseVector::lazy();
-}
-
-Object c_Vector::t_kvzip() {
-  auto* vec = NEWOBJ(c_Vector);
-  Object obj = vec;
-  BaseVector::kvzip(vec);
-  return obj;
 }
 
 Variant c_Vector::t_at(const Variant& key) {
@@ -1415,13 +1338,6 @@ Object c_ImmVector::t_zip(const Variant& iterable) {
   return obj;
 }
 
-Object c_ImmVector::t_kvzip() {
-  auto* vec = NEWOBJ(c_ImmVector);
-  Object obj = vec;
-  BaseVector::kvzip(vec);
-  return obj;
-}
-
 Object c_ImmVector::t_keys() {
   auto* vec = NEWOBJ(c_ImmVector);
   Object obj = vec;
@@ -1685,42 +1601,6 @@ Object c_Map::t_keys() { return php_keys(); }
 Object c_ImmMap::t_lazy() { return php_lazy(); }
 
 Object c_Map::t_lazy() { return php_lazy(); }
-
-Object BaseMap::php_kvzip() const {
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
-  if (!m_size) {
-    return obj;
-  }
-  vec->reserve(m_size);
-  Elm* p = data();
-  Elm* pLimit = p + iterLimit();
-  ssize_t j = 0;
-  for (; p != pLimit; ++p) {
-    if (isTombstone(p->data.m_type)) continue;
-    auto* pair = NEWOBJ(c_Pair)();
-    pair->incRefCount();
-    if (p->hasIntKey()) {
-      pair->elm0.m_data.num = p->ikey;
-      pair->elm0.m_type = KindOfInt64;
-    } else {
-      p->skey->incRefCount();
-      pair->elm0.m_data.pstr = p->skey;
-      pair->elm0.m_type = KindOfString;
-    }
-    ++pair->m_size;
-    pair->initAdd(&p->data);
-    vec->m_data[j].m_data.pobj = pair;
-    vec->m_data[j].m_type = KindOfObject;
-    ++vec->m_size;
-    ++j;
-  }
-  return obj;
-}
-
-Object c_ImmMap::t_kvzip() { return php_kvzip(); }
-
-Object c_Map::t_kvzip() { return php_kvzip(); }
 
 Variant BaseMap::php_at(const Variant& key) const {
   if (key.isInteger()) {
@@ -4905,25 +4785,6 @@ Object c_Pair::t_values() {
 Object c_Pair::t_lazy() {
   assert(isFullyConstructed());
   return SystemLib::AllocLazyKeyedIterableViewObject(this);
-}
-
-Object c_Pair::t_kvzip() {
-  assert(isFullyConstructed());
-  auto* vec = NEWOBJ(c_ImmVector)();
-  Object obj = vec;
-  vec->reserve(2);
-  for (uint i = 0; i < 2; ++i) {
-    auto* pair = NEWOBJ(c_Pair)();
-    pair->incRefCount();
-    pair->elm0.m_type = KindOfInt64;
-    pair->elm0.m_data.num = i;
-    ++pair->m_size;
-    pair->initAdd(&getElms()[i]);
-    vec->m_data[i].m_data.pobj = pair;
-    vec->m_data[i].m_type = KindOfObject;
-    ++vec->m_size;
-  }
-  return obj;
 }
 
 Variant c_Pair::t_at(const Variant& key) {

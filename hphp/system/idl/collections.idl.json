@@ -101,17 +101,6 @@
                     ]
                 },
                 {
-                    "name": "kvzip",
-                    "flags": [
-                    ],
-                    "desc": "Returns an Iterable that produces the key\/value pairs from this Vector.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "at",
                     "flags": [
                     ],
@@ -736,31 +725,6 @@
                             "type": "Variant"
                         }
                     ]
-                },
-                {
-                    "name": "slice",
-                    "flags": [
-                        "IsStatic"
-                    ],
-                    "desc": "Returns a Vector built from the specified slice of values from the specified Vector.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "vec",
-                            "type": "Variant"
-                        },
-                        {
-                            "name": "offset",
-                            "type": "Variant"
-                        },
-                        {
-                            "name": "len",
-                            "type": "Variant",
-                            "value": "null"
-                        }
-                    ]
                 }
             ],
             "consts": [
@@ -1016,17 +980,6 @@
                           "name": "fn",
                           "type": "Variant"
                       }
-                  ]
-              },
-              {
-                  "name": "kvzip",
-                  "flags": [
-                  ],
-                  "desc": "Returns an Iterable that produces the key\/value pairs from this ImmVector.",
-                  "return": {
-                      "type": "Object"
-                  },
-                  "args": [
                   ]
               },
               {
@@ -1416,17 +1369,6 @@
                     "flags": [
                     ],
                     "desc": "Returns a lazy iterable view of this Map.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "kvzip",
-                    "flags": [
-                    ],
-                    "desc": "Returns an Iterable that produces the key\/value pairs from this Map.",
                     "return": {
                         "type": "Object"
                     },
@@ -2092,17 +2034,6 @@
                     "flags": [
                     ],
                     "desc": "Returns a lazy iterable view of this ImmMap.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "kvzip",
-                    "flags": [
-                    ],
-                    "desc": "Returns an Iterable that produces the key\/value pairs from this ImmMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -3692,17 +3623,6 @@
                     "flags": [
                     ],
                     "desc": "Returns a lazy iterable view of this Pair.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "kvzip",
-                    "flags": [
-                    ],
-                    "desc": "Returns an Iterable that produces the key\/value pairs from this Pair.",
                     "return": {
                         "type": "Object"
                     },

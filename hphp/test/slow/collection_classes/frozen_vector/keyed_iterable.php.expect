@@ -49,27 +49,6 @@ object(HH\Pair)#13 (2) {
   int(5)
 }
 
-kvzip...
-string(12) "HH\ImmVector"
-object(HH\Pair)#14 (2) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-}
-object(HH\Pair)#15 (2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-}
-object(HH\Pair)#16 (2) {
-  [0]=>
-  int(2)
-  [1]=>
-  int(3)
-}
-
 keys...
 string(12) "HH\ImmVector"
 int(0)

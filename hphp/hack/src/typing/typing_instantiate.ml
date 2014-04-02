@@ -72,11 +72,12 @@ let rec instantiate_fun env fty el =
   | _ -> env, fty
 
 and instantiate_ft env ft =
-  let env, tvarl = List.fold_left begin fun (env, vars) _ ->
+  let env, tvarl = List.fold_left begin fun (env, vars) tparam ->
     (* Set the instantiated type parameter to initially point to unresolved, so
      * that it can grow and eventually be a subtype of something like "mixed".
      *)
-    let env, var = TUtils.in_var env (Reason.none, Tunresolved []) in
+    let r = Reason.Rwitness (fst (fst tparam)) in
+    let env, var = TUtils.in_var env (r, Tunresolved []) in
     env, var :: vars
   end (env, []) ft.ft_tparams in
   let subst = make_subst ft.ft_tparams tvarl in

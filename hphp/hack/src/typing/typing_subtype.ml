@@ -309,6 +309,7 @@ and subtype_params env l1 l2 =
          polymorphic in the subclass.
        *)
       let name = if name1 = name2 then name1 else None in
+      let env = { env with Env.pos = Reason.to_pos (fst x1) } in
       let env, _ = Unify.unify env x1 x2 in
       let env, rl = Unify.unify_params env rl1 rl2 in
       env, (name, x2) :: rl

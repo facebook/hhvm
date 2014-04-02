@@ -197,15 +197,12 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   int numLocals = func->numParams();
   if (func->isClosureBody()) {
-    assert(!func->hasVariadicCaptureParam());
-    assert(numNonVariadicParams == func->numParams());
-
     // Closure object properties are the use vars followed by the
     // static locals (which are per-instance).
     int numUseVars = func->cls()->numDeclProperties() -
                      func->numStaticLocals();
 
-    emitLea(a, rVmFp[-cellsToBytes(numNonVariadicParams)], rVmSp);
+    emitLea(a, rVmFp[-cellsToBytes(numLocals)], rVmSp);
 
     PhysReg rClosure = rcx;
     a.  loadq(rVmFp[AROFF(m_this)], rClosure);

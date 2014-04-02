@@ -18,8 +18,8 @@ all sub-suites.
 * Zend tests just with the interpreter in RepoAuthoritative mode -
 `test/run test/zend/good -m interp -r`
 
-* Slow tests with the JIT in IR mode -
-`test/run test/slow -m hhir`
+* Slow tests with the JIT in PGO mode -
+`test/run test/slow -m pgo`
 
 * Slow tests with the JIT, using pseudomain_wrapper.php to ensure that
   statements in global scope get jitted (may have false positives due to,

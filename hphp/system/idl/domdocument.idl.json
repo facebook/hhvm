@@ -2236,7 +2236,7 @@
             ]
         },
         {
-            "name": "DOMCDATASection",
+            "name": "DOMCdataSection",
             "parent": "DOMText",
             "desc": "",
             "flags": [

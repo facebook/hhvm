@@ -1485,6 +1485,7 @@ bool outputIsPredicted(NormalizedInstruction& inst) {
     auto dt = predictOutputs(&inst);
     if (dt != KindOfAny) {
       inst.outPred = Type(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
+      inst.outputPredicted = true;
     } else {
       doPrediction = false;
     }
@@ -4311,8 +4312,7 @@ Translator::translateRegion(const RegionDesc& region,
       // larger region (in TransOptimize mode), the guard for the top of the
       // stack essentially does the role of type prediction.  And, if the value
       // is also inferred, then the guard is omitted.
-      auto const doPrediction = mode() != TransOptimize &&
-                                outputIsPredicted(inst);
+      auto const doPrediction = mode() == TransLive && outputIsPredicted(inst);
 
       // If this block ends with an inlined FCall, we don't emit anything for
       // the FCall and instead set up HhbcTranslator for inlining. Blocks from

@@ -4837,7 +4837,11 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
 
     case OutFDesc:       return folly::none;
     case OutUnknown:     return Type::Gen;
-    case OutPred:        return inst.outPred;
+
+    case OutPred:
+      checkTypeType = inst.outPred;
+      return inst.outPred;
+
     case OutCns:         return Type::Cell;
     case OutVUnknown:    return Type::BoxedCell;
 

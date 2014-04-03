@@ -1610,7 +1610,7 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   FTRACE(1, "\n{:-^60}\n", folly::format("translating {} with stack:\n{}",
                                          ni.toString(), ht.showStack()));
   // When profiling, we disable type predictions to avoid side exits
-  assert(JIT::tx->mode() != TransProfile || !ni.outputPredicted);
+  assert(IMPLIES(JIT::tx->mode() == TransProfile, !ni.outputPredicted));
 
   if (ni.guardedThis) {
     // Task #2067635: This should really generate an AssertThis

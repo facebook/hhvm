@@ -298,6 +298,14 @@ vm_decode_function(const Variant& function,
         }
       }
     }
+
+    if (f->isClosureBody() && !this_) {
+      if (warn) {
+        raise_warning("cannot invoke closure body without closure object");
+      }
+      return nullptr;
+    }
+
     assert(f && f->preClass());
     // If this_ is non-NULL, then this_ is the current instance and cls is
     // the class of the current instance.

@@ -1137,6 +1137,11 @@ bool c_PDO::t_commit() {
   return false;
 }
 
+bool c_PDO::t_intransaction() {
+  assert(m_dbh->driver);
+  return m_dbh->in_txn;
+}
+
 bool c_PDO::t_rollback() {
   assert(m_dbh->driver);
   if (!m_dbh->in_txn) {

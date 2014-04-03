@@ -97,35 +97,15 @@ void HphpArray::getElmKey(const Elm& e, TypedValue* out) {
   str->incRefCount();
 }
 
-template <bool withRef> ALWAYS_INLINE
-void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut,
+ALWAYS_INLINE
+void HphpArray::getArrayElm(ssize_t pos,
+                            TypedValue* valOut,
                             TypedValue* keyOut) const {
   assert(size_t(pos) < m_used);
   assert(!isPacked());
   auto& elm = data()[pos];
-  if (withRef) {
-    tvAsVariant(valOut) = withRefBind(tvAsVariant(&elm.data));
-    if (LIKELY(keyOut != nullptr)) {
-      DataType t = keyOut->m_type;
-      uint64_t d = keyOut->m_data.num;
-      HphpArray::getElmKey(elm, keyOut);
-      tvRefcountedDecRefHelper(t, d);
-    }
-  } else {
-    TypedValue* cur = tvToCell(&elm.data);
-    cellDup(*cur, *valOut);
-    if (keyOut) {
-      HphpArray::getElmKey(elm, keyOut);
-    }
-  }
-}
-
-ALWAYS_INLINE
-void HphpArray::dupArrayElmWithRef(ssize_t pos,
-                                   TypedValue* valOut,
-                                   TypedValue* keyOut) const {
-  auto& elm = data()[pos];
-  tvDupWithRef(elm.data, *valOut);
+  TypedValue* cur = tvToCell(&elm.data);
+  cellDup(*cur, *valOut);
   getElmKey(elm, keyOut);
 }
 
@@ -135,6 +115,15 @@ void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut) const {
   auto& elm = data()[pos];
   TypedValue* cur = tvToCell(&elm.data);
   cellDup(*cur, *valOut);
+}
+
+ALWAYS_INLINE
+void HphpArray::dupArrayElmWithRef(ssize_t pos,
+                                   TypedValue* valOut,
+                                   TypedValue* keyOut) const {
+  auto& elm = data()[pos];
+  tvDupWithRef(elm.data, *valOut);
+  getElmKey(elm, keyOut);
 }
 
 ALWAYS_INLINE

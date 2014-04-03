@@ -307,7 +307,6 @@ public:
   // iterator pos.  If withref is true, copy the value with "withRef"
   // semantics, and decref the previous key before copying the key.
   // Otherwise get the value cell (unboxing), and initialize keyOut.
-  template <bool withRef>
   void getArrayElm(ssize_t pos, TypedValue* out, TypedValue* keyOut) const;
   void getArrayElm(ssize_t pos, TypedValue* out) const;
   void dupArrayElmWithRef(ssize_t pos, TypedValue* valOut,

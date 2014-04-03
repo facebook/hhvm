@@ -5795,7 +5795,10 @@ void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
   if (isNextK) {
     args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
   } else if (isWNext) {
-    args.imm(0);
+    // We punt this case because nothing is using WIterNext opcodes
+    // right now, and we don't want the witer_next_key helper to need
+    // to check for null.
+    CG_PUNT(WIterNext-nonKey);
   }
   TCA helperAddr = isWNext ? (TCA)witer_next_key :
     isNextK ? (TCA)iter_next_key_ind : (TCA)iter_next_ind;

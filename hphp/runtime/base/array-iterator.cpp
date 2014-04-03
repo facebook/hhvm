@@ -1199,7 +1199,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       static_cast<uint32_t>(IterNextIndex::ArrayMixed) << 16 | itypeU32;
     assert(aiter.m_itype == ArrayIter::TypeArray);
     assert(aiter.m_nextHelperIdx == IterNextIndex::ArrayMixed);
-    mixed->getArrayElm<false>(aiter.m_pos, valOut, nullptr);
+    mixed->getArrayElm(aiter.m_pos, valOut);
     return 1;
   }
 
@@ -1272,7 +1272,7 @@ int64_t new_iter_array_key(Iter* dest,
     if (WithRef) {
       mixed->dupArrayElmWithRef(aiter.m_pos, valOut, keyOut);
     } else {
-      mixed->getArrayElm<false>(aiter.m_pos, valOut, keyOut);
+      mixed->getArrayElm(aiter.m_pos, valOut, keyOut);
     }
     return 1;
   }
@@ -1574,12 +1574,8 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 
       arrIter->setPos(pos);
       tvDupWithRef(packedData(ad)[pos], *valOut);
-      // TODO(#4049796): we only have to check keyOut for nullptr
-      // because of the WIterNext opcode, which isn't used.
-      if (keyOut != nullptr) {
-        keyOut->m_type = KindOfInt64;
-        keyOut->m_data.num = pos;
-      }
+      keyOut->m_type = KindOfInt64;
+      keyOut->m_data.num = pos;
       return 1;
     }
 
@@ -1738,7 +1734,7 @@ int64_t iter_next_mixed_impl(Iter* it,
   }
   iter.setPos(pos);
   if (HasKey) {
-    arr->getArrayElm<false>(pos, valOut, keyOut);
+    arr->getArrayElm(pos, valOut, keyOut);
   } else {
     arr->getArrayElm(pos, valOut);
   }

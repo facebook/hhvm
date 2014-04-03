@@ -181,6 +181,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/const-ss:        get const_map_size\n"
         "/static-strings:  get number of static strings\n"
         "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
+        "/dump-apc-meta:   dump meta infomration for all objects in APC to\n"
+        "                  /tmp/apc_dump_meta\n"
         "/dump-const:      dump all constant value in constant map to\n"
         "                  /tmp/const_map_dump\n"
         "/dump-file-repo:  dump file repository to /tmp/file_repo_dump\n"
@@ -882,7 +884,7 @@ bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
       waitSeconds = RuntimeOption::RequestTimeoutSeconds > 0 ?
                     RuntimeOption::RequestTimeoutSeconds : 10;
     }
-    apc_dump("/tmp/apc_dump", keyOnly, waitSeconds);
+    apc_dump("/tmp/apc_dump", keyOnly, false, waitSeconds);
     transport->sendString("Done");
     return true;
   }
@@ -890,6 +892,20 @@ bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
     if (file_dump) {
       (*file_dump)("/tmp/file_repo_dump");
     }
+    transport->sendString("Done");
+    return true;
+  }
+  if (cmd == "dump-apc-meta") {
+    if (!apcExtension::Enable) {
+      transport->sendString("No APC\n");
+      return true;
+    }
+    int waitSeconds = transport->getIntParam("waitseconds");
+    if (!waitSeconds) {
+      waitSeconds = RuntimeOption::RequestTimeoutSeconds > 0 ?
+        RuntimeOption::RequestTimeoutSeconds : 10;
+    }
+    apc_dump("/tmp/apc_dump_meta", false, true, waitSeconds);
     transport->sendString("Done");
     return true;
   }

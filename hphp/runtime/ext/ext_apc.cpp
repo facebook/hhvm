@@ -44,6 +44,7 @@ namespace HPHP {
 extern void const_load();
 
 typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
+typedef ConcurrentTableSharedStore::DumpMode DumpMode;
 
 void apcExtension::moduleLoad(Hdf config) {
   Hdf apc = config["Server"]["APC"];
@@ -1422,13 +1423,30 @@ String apc_reserialize(const String& str) {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging support
 
-bool apc_dump(const char *filename, bool keyOnly, int waitSeconds) {
+bool apc_dump(const char *filename, bool keyOnly, bool metaDump,
+              int waitSeconds) {
   const int CACHE_ID = 0; /* 0 is used as default for apc */
+  DumpMode mode;
   std::ofstream out(filename);
+
+  // only one of these should ever be specified
+  if (keyOnly && metaDump) {
+    return false;
+  }
+
   if (out.fail()) {
     return false;
   }
-  s_apc_store[CACHE_ID].dump(out, keyOnly, waitSeconds);
+
+  if (keyOnly) {
+    mode = DumpMode::keyOnly;
+  } else if (metaDump) {
+    mode = DumpMode::keyAndMeta;
+  } else {
+    mode = DumpMode::keyAndValue;
+  }
+
+  s_apc_store[CACHE_ID].dump(out, mode, waitSeconds);
   out.close();
   return true;
 }

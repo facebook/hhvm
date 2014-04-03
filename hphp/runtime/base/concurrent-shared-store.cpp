@@ -510,7 +510,70 @@ void ConcurrentTableSharedStore::primeDone() {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging support
 
-void ConcurrentTableSharedStore::dump(std::ostream & out, bool keyOnly,
+void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
+  for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
+    const char *key = iter->first;
+    out << key;
+    out << " #### ";
+    const StoreValue *sval = &iter->second;
+    if (!sval->expired()) {
+      VariableSerializer vs(VariableSerializer::Type::Serialize);
+      Variant value;
+      if (sval->inMem()) {
+        value = sval->var->toLocal();
+      } else {
+        assert(sval->inFile());
+        // we need unserialize and serialize again because the format was
+        // APCSerialize
+        value = apc_unserialize(sval->sAddr, sval->getSerializedSize());
+      }
+      try {
+        String valS(vs.serialize(value, true));
+        out << valS.toCppString();
+      } catch (const Exception &e) {
+        out << "Exception: " << e.what();
+      }
+    }
+    out << std::endl;
+  }
+}
+
+void ConcurrentTableSharedStore::dumpKeyOnly(std::ostream & out) {
+  for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
+    out << (const char*) iter->first << std::endl;
+  }
+}
+
+void ConcurrentTableSharedStore::dumpKeyAndMeta(std::ostream & out) {
+  out << "key inmem size ttl" << std::endl;
+  int64_t curr_time = time(nullptr);
+  for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
+    const char *key = iter->first;
+    const StoreValue *sval = &iter->second;
+    size_t size;
+    int64_t ttl;
+    if (sval->inMem()) {
+      VariableSerializer vs(VariableSerializer::Type::Serialize);
+      Variant value = sval->var->toLocal();
+      String valS(vs.serialize(value, true));
+      size = valS.size();
+    } else {
+      size = sval->getSerializedSize();
+    }
+    if (sval->expiry) {
+      ttl = sval->expiry - curr_time;
+    } else {
+      ttl = 0;
+    }
+    out << key << " "
+        << (int) sval->inMem() << " "
+        << size << " "
+        << ttl << std::endl;
+  }
+}
+
+void ConcurrentTableSharedStore::dump(std::ostream & out,
+                                      enum DumpMode dumpMode,
                                       int waitSeconds) {
   // Use write lock here to prevent concurrent ops running in parallel from
   // invalidatint the iterator.
@@ -526,32 +589,18 @@ void ConcurrentTableSharedStore::dump(std::ostream & out, bool keyOnly,
   WriteLock l(m_lock);
   Logger::Info("dumping apc");
   out << "Total " << m_vars.size() << std::endl;
-  for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
-    const char *key = iter->first;
-    out << key;
-    if (!keyOnly) {
-      out << " #### ";
-      const StoreValue *sval = &iter->second;
-      if (!sval->expired()) {
-        VariableSerializer vs(VariableSerializer::Type::Serialize);
-        Variant value;
-        if (sval->inMem()) {
-          value = sval->var->toLocal();
-        } else {
-          assert(sval->inFile());
-          // we need unserialize and serialize again because the format was
-          // APCSerialize
-          value = apc_unserialize(sval->sAddr, sval->getSerializedSize());
-        }
-        try {
-          String valS(vs.serialize(value, true));
-          out << valS.toCppString();
-        } catch (const Exception &e) {
-          out << "Exception: " << e.what();
-        }
-      }
-    }
-    out << std::endl;
+  switch (dumpMode) {
+    case DumpMode::keyOnly:
+      dumpKeyOnly(out);
+      break;
+    case DumpMode::keyAndValue:
+      dumpKeyAndValue(out);
+      break;
+    case DumpMode::keyAndMeta:
+      dumpKeyAndMeta(out);
+      break;
+    default:
+      Logger::Info("unknown dumper style");
   }
   Logger::Info("dumping apc done");
   if (apcExtension::ConcurrentTableLockFree) {

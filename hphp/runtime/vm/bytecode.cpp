@@ -2541,7 +2541,7 @@ public:
 
 void ExecutionContext::manageAPCHandle() {
   assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
-  if (apcExtension::UseUncounted) {
+  if (m_apcHandles.size() > 0) {
     Treadmill::enqueue(FreedAPCHandle(std::move(m_apcHandles)));
     m_apcHandles.clear();
   }

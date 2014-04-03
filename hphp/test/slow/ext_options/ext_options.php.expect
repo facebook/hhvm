@@ -18,7 +18,7 @@ string(2) "40"
 string(13) "5.5.99-hiphop"
 string(3) "1.0"
 string(7) "2.2.0b1"
-string(8) "1.4 $Id$"
+bool(false)
 string(4) "$Id$"
 bool(false)
 bool(true)

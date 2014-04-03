@@ -392,9 +392,7 @@ static inline bool hhbcRelaxGuardsDefault() {
 
 static inline bool hhirRefcountOptsDefault() {
   // TODO(t3091846)
-  // TODO(t3728863)
-  return !RuntimeOption::EvalSimulateARM &&
-    !RuntimeOption::EvalHHIRBytecodeControlFlow;
+  return !RuntimeOption::EvalSimulateARM;
 }
 
 static inline bool evalJitDefault() {

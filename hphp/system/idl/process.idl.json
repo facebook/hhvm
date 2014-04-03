@@ -468,8 +468,8 @@
                 },
                 {
                     "name": "signal",
-                    "type": "Int32",
-                    "value": "0",
+                    "type": "Variant",
+                    "value": "null_variant",
                     "desc": "This optional parameter is only useful on POSIX operating systems; you may specify a signal to send to the process using the kill(2) system call. The default is SIGTERM."
                 }
             ]

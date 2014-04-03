@@ -212,7 +212,10 @@ static void xslt_ext_function_object_php(xmlXPathParserContextPtr ctxt,
   xslt_ext_function_php(ctxt, nargs, 2);
 }
 
-static void xslt_ext_error_handler(void *ctx, const char *fmt, ...) {
+static void xslt_ext_error_handler(void *ctx,
+                                   const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+static void xslt_ext_error_handler(void *ctx,
+                                   const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
   try {
@@ -224,7 +227,7 @@ static void xslt_ext_error_handler(void *ctx, const char *fmt, ...) {
       msg = msg.substr(0, msg.size() - 1);
     }
 
-    raise_error("%s", msg.c_str());
+    raise_warning("%s", msg.c_str());
   } catch (...) {}
   va_end(args);
 }

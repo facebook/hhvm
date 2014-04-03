@@ -298,17 +298,17 @@ class c_DOMText : public c_DOMCharacterData {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class DOMCDATASection
+// class DOMCdataSection
 
-FORWARD_DECLARE_CLASS(DOMCDATASection);
-class c_DOMCDATASection : public c_DOMText {
+FORWARD_DECLARE_CLASS(DOMCdataSection);
+class c_DOMCdataSection : public c_DOMText {
  public:
-  DECLARE_CLASS_NO_SWEEP(DOMCDATASection)
+  DECLARE_CLASS_NO_SWEEP(DOMCdataSection)
 
-  c_DOMCDATASection(Class* cls = c_DOMCDATASection::classof())
+  c_DOMCdataSection(Class* cls = c_DOMCdataSection::classof())
     : c_DOMText(cls)
   {}
-  ~c_DOMCDATASection() {}
+  ~c_DOMCdataSection() {}
   public: void t___construct(const String& value);
 
 

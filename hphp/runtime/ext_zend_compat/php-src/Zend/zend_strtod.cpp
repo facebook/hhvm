@@ -2698,4 +2698,4 @@ ZEND_API double zend_bin_strtod(const char *str, const char **endptr)
 	return value;
 }
 
-}
+END_EXTERN_C()

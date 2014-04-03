@@ -3325,10 +3325,14 @@ Variant c_DOMDocument::t_createtextnode(const String& data) {
 Variant c_DOMDocument::t_getelementbyid(const String& elementid) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlAttrPtr attrp = xmlGetID(docp, (xmlChar*)elementid.data());
+  if (attrp && attrp->_private) {
+    return static_cast<c_DOMElement*>(attrp->_private);
+  }
   if (attrp && attrp->parent) {
     c_DOMElement *ret = NEWOBJ(c_DOMElement)();
     ret->m_doc = this;
     ret->m_node = attrp->parent;
+    attrp->_private = static_cast<void*>(ret);
     return ret;
   }
   return uninit_null();

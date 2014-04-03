@@ -402,6 +402,7 @@ norepo_tests = (
     '/tests/classes/autoload_018.php',
     '/tests/classes/constants_scope_001.php',
     '/tests/classes/unset_properties.php',
+    '/tests/lang/019.php',
     '/tests/lang/034.php',
     '/tests/lang/bug25922.php',
     '/tests/lang/bug32924.php',
@@ -876,6 +877,7 @@ def walk(filename, dest_subdir):
             exp = re.sub(r'(\r\n|\r|\n)', '\n', exp.strip())
 
             # PHP puts a newline in that we don't
+            exp = exp.replace('\nParse error:', 'Parse error:')
             exp = exp.replace('\nFatal error:', 'Fatal error:')
             exp = exp.replace('\nCatchable fatal error:', 'Catchable fatal error:')
             exp = exp.replace('\nWarning:', 'Warning:')
@@ -885,7 +887,7 @@ def walk(filename, dest_subdir):
             if key == 'EXPECTREGEX':
                 match_rest_of_line = '.+'
 
-            exp = re.sub(r'Fatal\\? error\\?:.*',
+            exp = re.sub(r'(?:Parse|Fatal)\\? error\\?:.*',
                     '\nFatal error: '+match_rest_of_line, exp)
             exp = re.sub(r'Catchable\\? fatal\\? error\\?:.*',
                     '\nFatal error: '+match_rest_of_line, exp)

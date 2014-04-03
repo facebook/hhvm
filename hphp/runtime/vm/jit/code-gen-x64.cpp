@@ -4076,9 +4076,10 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc,
 }
 
 // May return an invalid IndexedMemoryRef to signal that there is no
-// register conflict resolution. Callers should take proper action
-// to solve the issue (e.g. change the IndexedMemoryRef into a MemoryRef)
-// An invalid IndexedMemoryRef has the base set to InvalidReg.
+// register conflict resolution. Callers should take proper action to
+// solve the issue (e.g. change the IndexedMemoryRef into a
+// MemoryRef).  In this case, isResolved is passed back as false, and
+// then returned IndexedMemoryRef should be ignored.
 IndexedMemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
                                                     IndexedMemoryRef memRef,
                                                     bool& isResolved) {
@@ -4090,7 +4091,7 @@ IndexedMemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
     if (scratchTaken) {
       // bail, the caller will manage somehow
       isResolved = false;
-      return InvalidReg[InvalidReg];
+      return memRef;
     }
     // use the scratch register instead
     m_as.movq(base, m_rScratch);
@@ -4099,7 +4100,7 @@ IndexedMemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
     if (scratchTaken) {
       // bail, the caller will manage somehow
       isResolved = false;
-      return InvalidReg[InvalidReg];
+      return memRef;
     }
     // use the scratch register instead
     m_as.movq(index, m_rScratch);

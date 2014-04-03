@@ -310,6 +310,9 @@ public:
   template <bool withRef>
   void getArrayElm(ssize_t pos, TypedValue* out, TypedValue* keyOut) const;
   void getArrayElm(ssize_t pos, TypedValue* out) const;
+  void dupArrayElmWithRef(ssize_t pos, TypedValue* valOut,
+    TypedValue* keyOut) const;
+
   bool isTombstone(ssize_t pos) const;
 
   size_t hashSize() const;

@@ -121,6 +121,15 @@ void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut,
 }
 
 ALWAYS_INLINE
+void HphpArray::dupArrayElmWithRef(ssize_t pos,
+                                   TypedValue* valOut,
+                                   TypedValue* keyOut) const {
+  auto& elm = data()[pos];
+  tvDupWithRef(elm.data, *valOut);
+  getElmKey(elm, keyOut);
+}
+
+ALWAYS_INLINE
 void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut) const {
   assert(size_t(pos) < m_used);
   auto& elm = data()[pos];

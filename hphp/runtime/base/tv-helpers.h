@@ -396,6 +396,29 @@ inline void tvBindRef(RefData* fr, TypedValue* to) {
   tvRefcountedDecRefHelper(oldType, oldDatum);
 }
 
+/*
+ * Duplicate the value in `frIn' to `dst' in a reference-preserving
+ * way.
+ *
+ * This means either the effects of tvDup(frIn, dst) or the effects of
+ * cellDup(tvToCell(fIn), dst), depending on whether `frIn' is
+ * "observably referenced"---i.e. if it KindOfRef and
+ * RefData::isReferenced() is true.
+ *
+ * Pre: `frIn' is a live value, and `dst' is dead
+ */
+ALWAYS_INLINE
+void tvDupWithRef(const TypedValue& frIn, TypedValue& dst) {
+  assert(tvIsPlausible(frIn));
+  auto fr = &frIn;
+  if (UNLIKELY(fr->m_type == KindOfRef)) {
+    if (!fr->m_data.pref->isReferenced()) {
+      fr = fr->m_data.pref->tv();
+    }
+  }
+  tvDup(*fr, dst);
+}
+
 // Assumes 'to' is live
 inline void tvUnset(TypedValue * to) {
   tvRefcountedDecRef(to);

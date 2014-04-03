@@ -1216,16 +1216,17 @@ cold:
   return new_iter_array_cold<false>(dest, ad, valOut, nullptr);
 }
 
-template <bool withRef>
+template<bool WithRef>
 int64_t new_iter_array_key(Iter* dest,
                            ArrayData* ad,
                            TypedValue* valOut,
                            TypedValue* keyOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
-  if (!withRef) {
+  if (!WithRef) {
     valOut = tvToCell(valOut);
     keyOut = tvToCell(keyOut);
   }
+
   auto const isMixed = ad->isMixed();
   auto const isPacked = ad->isPacked();
   if (UNLIKELY(!isMixed && !isPacked)) {
@@ -1233,14 +1234,12 @@ int64_t new_iter_array_key(Iter* dest,
   }
 
   if (LIKELY(ad->getSize() != 0)) {
-    if (!withRef) {
-      if (UNLIKELY(tvDecRefWillCallHelper(valOut)) ||
-          UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
-        goto cold;
-      }
-      tvDecRefOnly(valOut);
-      tvDecRefOnly(keyOut);
+    if (UNLIKELY(tvDecRefWillCallHelper(valOut)) ||
+        UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
+      goto cold;
     }
+    tvDecRefOnly(valOut);
+    tvDecRefOnly(keyOut);
 
     // We are transferring ownership of the array to the iterator, therefore
     // we do not need to adjust the refcount.
@@ -1256,8 +1255,8 @@ int64_t new_iter_array_key(Iter* dest,
       assert(aiter.m_nextHelperIdx == IterNextIndex::ArrayPacked);
       keyOut->m_type = KindOfInt64;
       keyOut->m_data.num = 0;
-      if (withRef) {
-        tvAsVariant(valOut).setWithRef(tvAsCVarRef(packedData(ad)));
+      if (WithRef) {
+        tvDupWithRef(*packedData(ad), *valOut);
       } else {
         cellDup(*tvToCell(packedData(ad)), *valOut);
       }
@@ -1270,7 +1269,11 @@ int64_t new_iter_array_key(Iter* dest,
       static_cast<uint32_t>(IterNextIndex::ArrayMixed) << 16 | itypeU32;
     assert(aiter.m_itype = ArrayIter::TypeArray);
     assert(aiter.m_nextHelperIdx == IterNextIndex::ArrayMixed);
-    mixed->getArrayElm<withRef>(aiter.m_pos, valOut, keyOut);
+    if (WithRef) {
+      mixed->dupArrayElmWithRef(aiter.m_pos, valOut, keyOut);
+    } else {
+      mixed->getArrayElm<false>(aiter.m_pos, valOut, keyOut);
+    }
     return 1;
   }
 
@@ -1282,7 +1285,7 @@ int64_t new_iter_array_key(Iter* dest,
   return 0;
 
 cold:
-  return new_iter_array_cold<withRef>(dest, ad, valOut, keyOut);
+  return new_iter_array_cold<WithRef>(dest, ad, valOut, keyOut);
 }
 
 template int64_t new_iter_array_key<false>(Iter* dest, ArrayData* ad,
@@ -1526,8 +1529,6 @@ static int64_t iter_next_apc_array(Iter* iter,
   return 1;
 }
 
-// TODO(#4055866): this function currently makes calls and has a
-// frame.  We should use tvDecRefWillCallHelper and avoid it.
 int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iter_next_key: I %p\n", iter);
   assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
@@ -1542,7 +1543,7 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     auto const isPacked = ad->isPacked();
     auto const isMixed  = ad->isMixed();
 
-    if (UNLIKELY(!isMixed) && UNLIKELY(!isPacked)) {
+    if (UNLIKELY(!isMixed && !isPacked)) {
       if (ad->isSharedArray()) {
         // TODO(#4055855): what if a local value in an apc array has
         // been turned into a ref?  Is this actually ok to do?
@@ -1551,7 +1552,7 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
       goto cold;
     }
 
-    if (isPacked) {
+    if (LIKELY(isPacked)) {
       ssize_t pos = arrIter->getPos() + 1;
       if (size_t(pos) >= size_t(ad->getSize())) {
         if (UNLIKELY(ad->hasExactlyOneRef())) {
@@ -1563,16 +1564,21 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
         }
         return 0;
       }
+
+      if (UNLIKELY(tvDecRefWillCallHelper(valOut)) ||
+          UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
+        goto cold;
+      }
+      tvDecRefOnly(valOut);
+      tvDecRefOnly(keyOut);
+
       arrIter->setPos(pos);
-      tvAsVariant(valOut).setWithRef(tvAsCVarRef(&packedData(ad)[pos]));
+      tvDupWithRef(packedData(ad)[pos], *valOut);
       // TODO(#4049796): we only have to check keyOut for nullptr
       // because of the WIterNext opcode, which isn't used.
       if (keyOut != nullptr) {
-        DataType t = keyOut->m_type;
-        uint64_t d = keyOut->m_data.num;
         keyOut->m_type = KindOfInt64;
         keyOut->m_data.num = pos;
-        tvRefcountedDecRefHelper(t, d);
       }
       return 1;
     }
@@ -1593,8 +1599,15 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
       }
     } while (UNLIKELY(mixed->isTombstone(pos)));
 
+    if (UNLIKELY(tvDecRefWillCallHelper(valOut)) ||
+        UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
+      goto cold;
+    }
+    tvDecRefOnly(valOut);
+    tvDecRefOnly(keyOut);
+
     arrIter->setPos(pos);
-    mixed->getArrayElm<true>(pos, valOut, keyOut);
+    mixed->dupArrayElmWithRef(pos, valOut, keyOut);
     return 1;
   }
 

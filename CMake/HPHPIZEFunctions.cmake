@@ -25,3 +25,6 @@ function(HHVM_SYSTEMLIB EXTNAME)
 	embed_systemlibs(${EXTNAME} "${EXTNAME}.so")
 endfunction()
 
+function(HHVM_DEFINE EXTNAME)
+	add_definitions(${ARGN})
+endfunction()

@@ -78,6 +78,9 @@ struct EvalStack {
   int  size()  const { return m_vector.size(); }
   void clear()       { m_vector.clear(); }
 
+  void swap(std::vector<SSATmp*> &vector) {
+    m_vector.swap(vector);
+  }
 private:
   std::vector<SSATmp*> m_vector;
 };

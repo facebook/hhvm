@@ -5251,36 +5251,19 @@ Block* HhbcTranslator::makeExitOpt(TransID transId) {
 Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
                                     std::vector<SSATmp*>& stackValues,
                                     const CustomExit& customFn) {
-  BCMarker exitMarker;
-  exitMarker.bcOff = targetBcOff;
-  exitMarker.spOff = m_irb->spOffset()
-    + stackValues.size()
-    - m_irb->stackDeficit();
-  exitMarker.func  = curFunc();
-
   BCMarker currentMarker = makeMarker(bcOff());
+
+  m_irb->evalStack().swap(stackValues);
+  SCOPE_EXIT { m_irb->evalStack().swap(stackValues); };
+
+  BCMarker exitMarker = makeMarker(targetBcOff);
 
   auto const exit = m_irb->makeExit();
   BlockPusher tp(*m_irb,
                  flag == ExitFlag::DelayedMarker ? currentMarker : exitMarker,
                  exit);
 
-  // The value we use for stack is going to depend on whether we have
-  // to spillstack or what.
-  auto stack = m_irb->sp();
-
-  // TODO(#2404447) move this conditional to the simplifier?
-  if (!stackValues.empty()) {
-    std::reverse(stackValues.begin(), stackValues.end());
-    stackValues.insert(
-      stackValues.begin(),
-      { m_irb->sp(), cns(int64_t(m_irb->stackDeficit())) }
-    );
-    stack = gen(SpillStack,
-      std::make_pair(stackValues.size(), &stackValues[0]));
-  } else if (m_irb->stackDeficit() != 0 || m_irb->evalStack().size() > 0) {
-    stack = spillStack();
-  }
+  auto stack = spillStack();
 
   if (customFn) {
     stack = gen(ExceptionBarrier, stack);

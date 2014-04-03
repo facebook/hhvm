@@ -111,10 +111,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     ++where;
   }
 
-  if (m_savedBlocks.empty()) {
-    // We don't track state on non-main traces for now. t2982555
-    m_state.update(inst);
-  }
+  m_state.update(inst);
 }
 
 void IRBuilder::appendBlock(Block* block) {

@@ -1877,7 +1877,9 @@ void Parser::onTypeAnnotation(Token& out, const Token& name,
   out.set(name.num(), name.text());
   out.typeAnnotation = TypeAnnotationPtr(
     new TypeAnnotation(name.text(), typeArgs.typeAnnotation));
-  if (isTypeVar(name.text())) {
+
+  // Namespaced identifiers (num & 1) can never be type variables.
+  if ((name.num() & 1) && isTypeVar(name.text())) {
     out.typeAnnotation->setTypeVar();
   }
 }
@@ -2218,6 +2220,11 @@ std::string Parser::nsDecl(const std::string &name) {
 std::string Parser::resolve(const std::string &ns, bool cls) {
   size_t pos = ns.find(NAMESPACE_SEP);
   string alias = (pos != string::npos) ? ns.substr(0, pos) : ns;
+
+  // Don't expand type variables into the current namespace.
+  if (isTypeVar(ns)) {
+    return ns;
+  }
 
   if (m_aliasTable.isAliased(alias)) {
     auto name = m_aliasTable.getName(alias);

@@ -27,7 +27,7 @@ array(4) {
   [0]=>
   object(ReflectionParameter)#5 (2) {
     ["info"]=>
-    array(7) {
+    array(8) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -43,6 +43,8 @@ array(4) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_optional"]=>
+      bool(false)
     }
     ["name"]=>
     string(1) "a"
@@ -50,7 +52,7 @@ array(4) {
   [1]=>
   object(ReflectionParameter)#6 (2) {
     ["info"]=>
-    array(8) {
+    array(9) {
       ["index"]=>
       int(1)
       ["name"]=>
@@ -68,6 +70,8 @@ array(4) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_optional"]=>
+      bool(false)
     }
     ["name"]=>
     string(1) "b"
@@ -75,7 +79,7 @@ array(4) {
   [2]=>
   object(ReflectionParameter)#7 (2) {
     ["info"]=>
-    array(9) {
+    array(10) {
       ["index"]=>
       int(2)
       ["name"]=>
@@ -95,6 +99,8 @@ array(4) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_optional"]=>
+      bool(true)
     }
     ["name"]=>
     string(1) "c"
@@ -102,7 +108,7 @@ array(4) {
   [3]=>
   object(ReflectionParameter)#8 (2) {
     ["info"]=>
-    array(9) {
+    array(10) {
       ["index"]=>
       int(3)
       ["name"]=>
@@ -129,6 +135,8 @@ array(4) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_optional"]=>
+      bool(true)
     }
     ["name"]=>
     string(1) "d"

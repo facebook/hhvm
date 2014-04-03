@@ -298,7 +298,7 @@ array(6) {
 }
 object(ReflectionParameter)#9 (2) {
   ["info"]=>
-  array(7) {
+  array(8) {
     ["index"]=>
     int(0)
     ["name"]=>
@@ -314,6 +314,8 @@ object(ReflectionParameter)#9 (2) {
     ["attributes"]=>
     array(0) {
     }
+    ["is_optional"]=>
+    bool(false)
   }
   ["name"]=>
   string(1) "c"

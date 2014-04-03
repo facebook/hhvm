@@ -61,6 +61,7 @@ const StaticString
   s_type("type"),
   s_nullable("nullable"),
   s_msg("msg"),
+  s_is_optional("is_optional"),
   s_default("default"),
   s_defaultValue("defaultValue"),
   s_defaultText("defaultText"),
@@ -392,6 +393,15 @@ static void set_function_info(Array &ret, const Func* func) {
       }
       arr.append(VarNR(param));
     }
+
+    bool isOptional = true;
+    for (int i = func->numParams() - 1; i >= 0; i--) {
+      auto& param = arr.lvalAt(i).toArrRef();
+
+      isOptional = isOptional && param.exists(s_default);
+      param.set(s_is_optional, isOptional);
+    }
+
     ret.set(s_params, VarNR(arr));
   }
 

@@ -205,7 +205,12 @@ ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value);
 ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
                               TypedValue value);
 
+// These shuffle* functions are the JIT's version of bytecode.cpp's
+// shuffleExtraStackArgs
 void shuffleExtraArgs(ActRec* ar);
+void shuffleExtraArgsMayUseVV(ActRec* ar);
+void shuffleExtraArgsVariadic(ActRec* ar);
+void shuffleExtraArgsVariadicAndVV(ActRec* ar);
 
 void raiseMissingArgument(const char* name, int expected,
                           int got, bool variadic);

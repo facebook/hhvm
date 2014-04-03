@@ -143,13 +143,25 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // came from emitMagicFuncPrologue.
 
   if (nPassed > numNonVariadicParams) {
-    // Too many args; a weird case, so just callout. Stash ar
-    // somewhere callee-saved.
+    // Too many args; a weird case, so call out to an appropriate helper.
+    // Stash ar somewhere callee-saved.
     if (false) { // typecheck
+      JIT::shuffleExtraArgsMayUseVV((ActRec*)nullptr);
+      JIT::shuffleExtraArgsVariadicAndVV((ActRec*)nullptr);
+      JIT::shuffleExtraArgsVariadic((ActRec*)nullptr);
       JIT::shuffleExtraArgs((ActRec*)nullptr);
     }
     a.    movq   (rStashedAR, argNumToRegName[0]);
-    emitCall(a, TCA(JIT::shuffleExtraArgs));
+
+    if (func->attrs() & AttrMayUseVV) {
+      emitCall(a, func->hasVariadicCaptureParam()
+               ? TCA(JIT::shuffleExtraArgsVariadicAndVV)
+               : TCA(JIT::shuffleExtraArgsMayUseVV));
+    } else if (func->hasVariadicCaptureParam()) {
+      emitCall(a, TCA(JIT::shuffleExtraArgsVariadic));
+    } else {
+      emitCall(a, TCA(JIT::shuffleExtraArgs));
+    }
     // We'll fix rVmSp below.
   } else if (nPassed < numNonVariadicParams) {
     TRACE(1, "Only have %d of %d args; getting dvFunclet\n",

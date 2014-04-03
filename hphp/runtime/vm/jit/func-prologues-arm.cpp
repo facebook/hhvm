@@ -91,7 +91,16 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   // Resolve cases where the wrong number of args was passed.
   if (nPassed > numNonVariadicParams) {
-    void (*helper)(ActRec*) = JIT::shuffleExtraArgs;
+    void (*helper)(ActRec*);
+    if (func->attrs() & AttrMayUseVV) {
+      helper = func->hasVariadicCaptureParam()
+        ? JIT::shuffleExtraArgsVariadicAndVV
+        : JIT::shuffleExtraArgsMayUseVV;
+    } else if (func->hasVariadicCaptureParam()) {
+      helper = JIT::shuffleExtraArgsVariadic;
+    } else {
+      helper = JIT::shuffleExtraArgs;
+    }
     a.  Mov    (argReg(0), rStashedAR);
     emitCall(a, CppCall(helper));
     // We'll fix rVmSp below.

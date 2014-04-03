@@ -929,52 +929,25 @@ static void sync_regstate_to_caller(ActRec* preLive) {
   tl_regState = VMRegState::CLEAN;
 }
 
-// This function is the JIT version of bytecode.cpp's shuffleExtraStackArgs
+#define SHUFFLE_EXTRA_ARGS_PRELUDE()                                    \
+  assert(!ar->hasInvName());                                            \
+  sync_regstate_to_caller(ar);                                          \
+  const Func* f = ar->m_func;                                           \
+  int numParams = f->numNonVariadicParams();                            \
+  int numArgs = ar->numArgs();                                          \
+  assert(numArgs > numParams);                                          \
+  int numExtra = numArgs - numParams;                                   \
+  TRACE(1, "shuffleExtraArgs: %d args, function %s takes only %d, ar %p\n", \
+        numArgs, f->name()->data(), numParams, ar);                     \
+  auto tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;            \
+  /* end SHUFFLE_EXTRA_ARGS_PRELUDE */
+
 void shuffleExtraArgs(ActRec* ar) {
-  assert(!ar->hasInvName());
+  SHUFFLE_EXTRA_ARGS_PRELUDE()
+  assert(!f->hasVariadicCaptureParam());
+  assert(!(f->attrs() & AttrMayUseVV));
 
-  sync_regstate_to_caller(ar);
-  const Func* f = ar->m_func;
-  int numParams = f->numNonVariadicParams();
-  int numArgs = ar->numArgs();
-  assert(numArgs > numParams);
-  int numExtra = numArgs - numParams;
-
-  TRACE(1, "shuffleExtraArgs: %d args, function %s takes only %d, ar %p\n",
-        numArgs, f->name()->data(), numParams, ar);
-  auto const takesVariadicParam = f->hasVariadicCaptureParam();
-  auto tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;
-  if (f->attrs() & AttrMayUseVV) {
-    assert(!ar->hasExtraArgs());
-    ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
-    if (takesVariadicParam) {
-      auto varArgsArray =
-        Array::attach(MixedArray::MakePacked(numExtra, tvArgs));
-      auto tvIncr = tvArgs; uint32_t i = 0;
-      // an incref is needed to compensate for discarding from the stack
-      for (; i < numExtra; ++i, ++tvIncr) { tvRefcountedIncRef(tvIncr); }
-      // write into the last (variadic) param
-      auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
-      tv->m_type = KindOfArray;
-      tv->m_data.parr = varArgsArray.detach();
-      assert(tv->m_data.parr->hasExactlyOneRef());
-      // Before, for each arg: refcount = n + 1 (stack)
-      // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray)
-    }
-  } else if (takesVariadicParam) {
-    auto varArgsArray = Array::attach(MixedArray::MakePacked(numExtra, tvArgs));
-    // write into the last (variadic) param
-    auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
-    tv->m_type = KindOfArray;
-    tv->m_data.parr = varArgsArray.detach();
-    assert(tv->m_data.parr->hasExactlyOneRef());
-
-    // no incref is needed, since extra values are being transferred
-    // from the stack to the last local
-    assert(f->numParams() == (numArgs - numExtra + 1));
-    assert(f->numParams() == (numParams + 1));
-    ar->setNumArgs(numParams + 1);
-  } else {
+  {
     // Function is not marked as "MayUseVV", so discard the extra arguments
     for (int i = 0; i < numExtra; ++i) {
       tvRefcountedDecRef(tvArgs);
@@ -989,6 +962,76 @@ void shuffleExtraArgs(ActRec* ar) {
   // above.)
   tl_regState = VMRegState::DIRTY;
 }
+
+void shuffleExtraArgsMayUseVV(ActRec* ar) {
+  SHUFFLE_EXTRA_ARGS_PRELUDE()
+  assert(!f->hasVariadicCaptureParam());
+  assert(f->attrs() & AttrMayUseVV);
+
+  {
+    assert(!ar->hasExtraArgs());
+    ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
+  }
+
+  // Only go back to dirty in a non-exception case.  (Same reason as
+  // above.)
+  tl_regState = VMRegState::DIRTY;
+}
+
+void shuffleExtraArgsVariadic(ActRec* ar) {
+  SHUFFLE_EXTRA_ARGS_PRELUDE()
+  assert(f->hasVariadicCaptureParam());
+  assert(!(f->attrs() & AttrMayUseVV));
+
+  {
+    auto varArgsArray = Array::attach(MixedArray::MakePacked(numExtra, tvArgs));
+    // write into the last (variadic) param
+    auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
+    tv->m_type = KindOfArray;
+    tv->m_data.parr = varArgsArray.detach();
+    assert(tv->m_data.parr->hasExactlyOneRef());
+
+    // no incref is needed, since extra values are being transferred
+    // from the stack to the last local
+    assert(f->numParams() == (numArgs - numExtra + 1));
+    assert(f->numParams() == (numParams + 1));
+    ar->setNumArgs(numParams + 1);
+  }
+
+  // Only go back to dirty in a non-exception case.  (Same reason as
+  // above.)
+  tl_regState = VMRegState::DIRTY;
+}
+
+void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
+  SHUFFLE_EXTRA_ARGS_PRELUDE()
+  assert(f->hasVariadicCaptureParam());
+  assert(f->attrs() & AttrMayUseVV);
+
+  {
+    assert(!ar->hasExtraArgs());
+    ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
+
+    auto varArgsArray =
+      Array::attach(MixedArray::MakePacked(numExtra, tvArgs));
+    auto tvIncr = tvArgs; uint32_t i = 0;
+    // an incref is needed to compensate for discarding from the stack
+    for (; i < numExtra; ++i, ++tvIncr) { tvRefcountedIncRef(tvIncr); }
+    // write into the last (variadic) param
+    auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
+    tv->m_type = KindOfArray;
+    tv->m_data.parr = varArgsArray.detach();
+    assert(tv->m_data.parr->hasExactlyOneRef());
+    // Before, for each arg: refcount = n + 1 (stack)
+    // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray)
+  }
+
+  // Only go back to dirty in a non-exception case.  (Same reason as
+  // above.)
+  tl_regState = VMRegState::DIRTY;
+}
+
+#undef SHUFFLE_EXTRA_ARGS_PRELUDE
 
 void raiseMissingArgument(const char* name, int expected,
                           int got, bool variadic) {

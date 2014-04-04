@@ -6,6 +6,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -211,11 +212,31 @@ static void xslt_ext_function_object_php(xmlXPathParserContextPtr ctxt,
   xslt_ext_function_php(ctxt, nargs, 2);
 }
 
+static void xslt_ext_error_handler(void *ctx,
+                                   const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+static void xslt_ext_error_handler(void *ctx,
+                                   const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  try {
+    std::string msg;
+    string_vsnprintf(msg, fmt, args);
+
+    /* remove any trailing \n */
+    while (!msg.empty() && msg[msg.size() - 1] == '\n') {
+      msg = msg.substr(0, msg.size() - 1);
+    }
+
+    raise_warning("%s", msg.c_str());
+  } catch (...) {}
+  va_end(args);
+}
+
 c_XSLTProcessor::c_XSLTProcessor(Class *cb) :
   ExtObjectData(cb),
   m_stylesheet(nullptr), m_doc(nullptr), m_secprefs(k_XSL_SECPREF_DEFAULT),
   m_registerPhpFunctions(0) {
-  xsltSetGenericErrorFunc(nullptr, php_libxml_ctx_error);
+  xsltSetGenericErrorFunc(nullptr, xslt_ext_error_handler);
   exsltRegisterAll();
 }
 
@@ -480,6 +501,11 @@ xmlDocPtr c_XSLTProcessor::apply_stylesheet() {
   }
 
   xsltTransformContextPtr ctxt = xsltNewTransformContext (m_stylesheet, m_doc);
+  if (ctxt == nullptr) {
+    raise_error("Unable to apply stylesheet");
+    return nullptr;
+  }
+
   ctxt->_private = this;
 
   xsltSecurityPrefsPtr prefs = nullptr;

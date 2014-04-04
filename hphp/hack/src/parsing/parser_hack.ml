@@ -572,7 +572,10 @@ and toplevel_word ~attr env = function
       }]
   | "namespace" ->
       let id, body = namespace env in
-      [Namespace (id, body)]
+      (* Check for an empty name and omit the Namespace wrapper *)
+      (match id with
+      | (_, "") -> body
+      | _ -> [Namespace (id, body)])
   | "use" ->
       let usel = namespace_use_list env [] in
       [NamespaceUse usel]
@@ -3247,12 +3250,20 @@ and namespace env =
   let tl = match env.mode with
     | Ast.Mdecl -> ignore_toplevel ~attr:SMap.empty
     | _ -> toplevel in
-  let id = identifier env in
+  (* The name for a namespace is actually optional, so we need to check for
+   * the name first. Setting the name to an empty string if there's no
+   * identifier following the `namespace` token *)
+  let id = match L.token env.lb with
+    | Tword -> L.back env.lb; identifier env
+    | _ -> L.back env.lb; Pos.make env.lb, "" in
   match L.token env.lb with
   | Tlcb ->
       let body = tl [] env (fun x -> x = Trcb) in
       expect env Trcb;
       id, body
+  | Tsc when (snd id) = "" ->
+      error_expect env "{";
+      id, []
   | Tsc ->
       let terminate = function
         | Tword -> Lexing.lexeme env.lb = "namespace"

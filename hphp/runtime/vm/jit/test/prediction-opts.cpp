@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/opt.h"
 
-#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/vm/jit/test/match.h"
 
 #include <gtest/gtest.h>
 
@@ -49,36 +49,28 @@ TEST(PredictionOpts, basic) {
   // narrowed type on the fallthrough block.
   {
     ASSERT_EQ(2, entry->instrs().size());
-    auto& ctm = entry->back();
-    EXPECT_EQ(CheckTypeMem, ctm.op());
-    EXPECT_EQ(Type::Int, ctm.typeParam());
-    EXPECT_EQ(taken, ctm.taken());
-    EXPECT_EQ(end, ctm.next());
+    EXPECT_MATCH(entry->back(), CheckTypeMem, Type::Int, taken);
+    EXPECT_EQ(end, entry->back().next());
   }
 
   {
     ASSERT_EQ(3, taken->instrs().size());
     auto takenIt = taken->begin();
-    auto& ldmemGen = *takenIt;
-    EXPECT_EQ(LdMem, ldmemGen.op());
-    EXPECT_EQ(Type::Gen, ldmemGen.typeParam());
-    auto& increfGen = *(++takenIt);
-    EXPECT_EQ(IncRef, increfGen.op());
-    EXPECT_EQ(ldmemGen.dst(), increfGen.src(0));
+    auto& ldmem = *takenIt;
+    auto& incref = *(++takenIt);
+    EXPECT_MATCH(ldmem, LdMem, Type::Gen, ptr->dst());
+    EXPECT_MATCH(incref, IncRef, ldmem.dst());
   }
 
   {
     ASSERT_EQ(4, end->instrs().size());
     auto endIt = end->begin();
-    auto& ldmemInt = *endIt;
-    EXPECT_EQ(LdMem, ldmemInt.op());
-    EXPECT_EQ(Type::Int, ldmemInt.typeParam());
-    auto& increfInt = *(++endIt);
-    EXPECT_EQ(IncRef, increfInt.op());
-    EXPECT_EQ(ldmemInt.dst(), increfInt.src(0));
+    auto& ldmem = *endIt;
+    auto& incref = *(++endIt);
     auto& mov = *(++endIt);
-    EXPECT_EQ(Mov, mov.op());
-    EXPECT_EQ(ldmemInt.dst(), mov.src(0));
+    EXPECT_MATCH(ldmem, LdMem, Type::Int, ptr->dst());
+    EXPECT_MATCH(incref, IncRef, ldmem.dst());
+    EXPECT_MATCH(mov, Mov, ldmem.dst());
     EXPECT_EQ(ckt->dst(), mov.dst());
   }
 }

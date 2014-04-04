@@ -18,6 +18,8 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/opt.h"
 
+#include "hphp/runtime/vm/jit/test/match.h"
+
 #include <gtest/gtest.h>
 
 namespace HPHP { namespace JIT {
@@ -41,7 +43,7 @@ TEST(JumpOpts, eliminateTrivial) {
     optimizeJumps(unit);
 
     EXPECT_EQ(1, entry->instrs().size());
-    EXPECT_EQ(Halt, entry->front().op());
+    EXPECT_MATCH(entry->front(), Halt);
     EXPECT_TRUE(entry->isExit());
   }
 
@@ -61,9 +63,8 @@ TEST(JumpOpts, eliminateTrivial) {
     optimizeJumps(unit);
 
     EXPECT_EQ(2, entry->instrs().size());
-    EXPECT_EQ(Jmp, entry->back().op());
-    EXPECT_EQ(second, entry->back().taken());
     EXPECT_EQ(2, second->instrs().size());
+    EXPECT_MATCH(entry->back(), Jmp, second);
   }
 
   // Jumps to blocks with other predecessors are not eliminated
@@ -84,10 +85,8 @@ TEST(JumpOpts, eliminateTrivial) {
 
     EXPECT_EQ(1, pred1->instrs().size());
     EXPECT_EQ(1, pred2->instrs().size());
-    EXPECT_EQ(Jmp, pred1->back().op());
-    EXPECT_EQ(Jmp, pred2->back().op());
-    EXPECT_EQ(succ, pred1->taken());
-    EXPECT_EQ(succ, pred2->taken());
+    EXPECT_MATCH(pred1->back(), Jmp, succ);
+    EXPECT_MATCH(pred2->back(), Jmp, succ);
   }
 }
 
@@ -125,9 +124,8 @@ TEST(JumpOpts, optimizeCondTraceExit) {
   EXPECT_EQ(nullptr, entry->next());
   EXPECT_EQ(nullptr, entry->taken());
   auto const& back = entry->back();
-  EXPECT_EQ(ReqBindJmpZero, back.op());
-  EXPECT_EQ(val->dst(), back.src(0));
   auto const* data = back.extra<ReqBindJccData>();
+  EXPECT_MATCH(back, ReqBindJmpZero, val->dst());
   EXPECT_EQ(bcoff1, data->taken);
   EXPECT_EQ(bcoff2, data->notTaken);
 }
@@ -165,9 +163,8 @@ TEST(JumpOpts, optimizeSideExitJcc) {
   EXPECT_EQ(nullptr, entry->taken());
   EXPECT_EQ(Halt, entry->back().op());
   auto const& sideExit = *(--entry->backIter());
-  EXPECT_EQ(SideExitJmpZero, sideExit.op());
+  EXPECT_MATCH(sideExit, SideExitJmpZero, val->dst());
   EXPECT_EQ(bcoff, sideExit.extra<SideExitJccData>()->taken);
-  EXPECT_EQ(val->dst(), sideExit.src(0));
 }
 
 TEST(JumpOpts, optimizeSideExitCheck) {
@@ -203,7 +200,7 @@ TEST(JumpOpts, optimizeSideExitCheck) {
   EXPECT_EQ(nullptr, entry->taken());
   EXPECT_EQ(Halt, entry->back().op());
   auto const& sideExit = *(--entry->backIter());
-  EXPECT_EQ(SideExitGuardStk, sideExit.op());
+  EXPECT_MATCH(sideExit, SideExitGuardStk);
   EXPECT_EQ(bcoff, sideExit.extra<SideExitGuardData>()->taken);
 }
 

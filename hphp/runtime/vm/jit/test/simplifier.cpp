@@ -18,6 +18,8 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 
+#include "hphp/runtime/vm/jit/test/match.h"
+
 #include <gtest/gtest.h>
 
 #define EXPECT_SINGLE_OP(result, opc) \
@@ -95,10 +97,11 @@ TEST(Simplifier, JumpFuse) {
 
   {
     // JmpZero(Eq(X, true)) --> JmpEq(X, false)
+    auto taken = unit.defBlock();
     auto lhs = unit.cns(true);
     auto rhs = unit.gen(Conjure, dummy, Type::Bool);
     auto eq  = unit.gen(Eq, dummy, lhs, rhs->dst());
-    auto jmp = unit.gen(JmpZero, dummy, unit.defBlock(), eq->dst());
+    auto jmp = unit.gen(JmpZero, dummy, taken, eq->dst());
     auto result = sim.simplify(jmp, false);
 
     EXPECT_EQ(result.dst, nullptr);
@@ -108,9 +111,7 @@ TEST(Simplifier, JumpFuse) {
     // implementation. Should go away.
     EXPECT_FALSE(result.instrs[0]->isControlFlow());
 
-    EXPECT_EQ(result.instrs[1]->op(), JmpEq);
-    EXPECT_EQ(result.instrs[1]->src(0), rhs->dst());
-    EXPECT_EQ(result.instrs[1]->src(1)->boolVal(), false);
+    EXPECT_MATCH(result.instrs[1], JmpEq, taken, rhs->dst(), unit.cns(false));
   }
 }
 

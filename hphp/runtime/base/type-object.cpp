@@ -77,6 +77,8 @@ bool Object::equal(const Object& v2) const {
   if (UNLIKELY(m_px->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
     return c_DateTime::GetTimestamp(*this) ==
         c_DateTime::GetTimestamp(v2);
+  } else if (UNLIKELY(m_px->instanceof(SystemLib::s_ReflectionParameterClass))) {
+    return o_get("name").toString().equal(v2.o_get("name").toString());
   }
   if (v2.get()->getVMClass() != m_px->getVMClass()) {
     return false;

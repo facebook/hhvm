@@ -278,6 +278,11 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
   return o_getImpl(propName, 0, error, context);
 }
 
+const Variant ObjectData::o_get(const String& propName, bool error /* = true */,
+                                const String& context /* = null_string */) const {
+  return const_cast<ObjectData*>(this)->o_getImpl(propName, 0, error, context);
+}
+
 template <class T>
 ALWAYS_INLINE Variant ObjectData::o_setImpl(const String& propName, T v,
                                             const String& context) {

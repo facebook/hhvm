@@ -326,6 +326,9 @@ struct Eq {
     if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
         && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
       return c_DateTime::GetTimestamp(od1) == c_DateTime::GetTimestamp(od2);
+    } else if (UNLIKELY(od1->instanceof(SystemLib::s_ReflectionParameterClass)
+        && od2->instanceof(SystemLib::s_ReflectionParameterClass))) {
+      return od1->o_get("name").toString().equal(od2->o_get("info").toString());
     }
     if (od1->getVMClass() != od2->getVMClass()) return false;
     if (UNLIKELY(od1->instanceof(SystemLib::s_ArrayObjectClass))) {

@@ -2,7 +2,7 @@
 
 include __DIR__."/builtin_extensions.inc";
 
-class A_DOMCDATASection extends DOMCDATASection {
+class A_DOMCdataSection extends DOMCdataSection {
   public $___x;
 }
-test("DOMCDATASection");
+test("DOMCdataSection");

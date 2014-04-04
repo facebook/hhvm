@@ -2838,7 +2838,7 @@ Variant c_DOMText::t_splittext(int64_t offset) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void c_DOMCDATASection::t___construct(const String& value) {
+void c_DOMCdataSection::t___construct(const String& value) {
   m_node = xmlNewCDataBlock(NULL, (xmlChar *)value.data(), value.size());
   if (!m_node) {
     php_dom_throw_error(INVALID_STATE_ERR, 1);
@@ -3170,7 +3170,7 @@ Variant c_DOMDocument::t_createcdatasection(const String& data) {
   if (!node) {
     return false;
   }
-  c_DOMCDATASection *ret = NEWOBJ(c_DOMCDATASection)();
+  c_DOMCdataSection *ret = NEWOBJ(c_DOMCdataSection)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(*m_orphans, node);

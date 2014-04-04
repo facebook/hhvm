@@ -738,7 +738,8 @@ bool Func::isEntry(Offset offset) const {
 }
 
 bool Func::isDVEntry(Offset offset) const {
-  for (int i = 0; i < numNonVariadicParams(); i++) {
+  auto const nparams = numNonVariadicParams();
+  for (int i = 0; i < nparams; i++) {
     const ParamInfo& pi = params()[i];
     if (pi.hasDefaultValue() && pi.funcletOff() == offset) return true;
   }
@@ -746,7 +747,8 @@ bool Func::isDVEntry(Offset offset) const {
 }
 
 int Func::getDVEntryNumParams(Offset offset) const {
-  for (int i = 0; i < numNonVariadicParams(); i++) {
+  auto const nparams = numNonVariadicParams();
+  for (int i = 0; i < nparams; i++) {
     const ParamInfo& pi = params()[i];
     if (pi.hasDefaultValue() && pi.funcletOff() == offset) return i;
   }
@@ -755,7 +757,8 @@ int Func::getDVEntryNumParams(Offset offset) const {
 
 Offset Func::getEntryForNumArgs(int numArgsPassed) const {
   assert(numArgsPassed >= 0);
-  for (unsigned i = numArgsPassed; i < numNonVariadicParams(); i++) {
+  auto const nparams = numNonVariadicParams();
+  for (unsigned i = numArgsPassed; i < nparams; i++) {
     const Func::ParamInfo& pi = params()[i];
     if (pi.hasDefaultValue()) {
       return pi.funcletOff();

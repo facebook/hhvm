@@ -153,14 +153,15 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     }
     a.    movq   (rStashedAR, argNumToRegName[0]);
 
-    if (func->attrs() & AttrMayUseVV) {
+    if (LIKELY(func->discardExtraArgs())) {
+      emitCall(a, TCA(JIT::shuffleExtraArgs));
+    } else if (func->attrs() & AttrMayUseVV) {
       emitCall(a, func->hasVariadicCaptureParam()
                ? TCA(JIT::shuffleExtraArgsVariadicAndVV)
                : TCA(JIT::shuffleExtraArgsMayUseVV));
-    } else if (func->hasVariadicCaptureParam()) {
-      emitCall(a, TCA(JIT::shuffleExtraArgsVariadic));
     } else {
-      emitCall(a, TCA(JIT::shuffleExtraArgs));
+      assert(func->hasVariadicCaptureParam());
+      emitCall(a, TCA(JIT::shuffleExtraArgsVariadic));
     }
     // We'll fix rVmSp below.
   } else if (nPassed < numNonVariadicParams) {

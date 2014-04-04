@@ -1272,6 +1272,7 @@ Array ExecutionContext::getLocalDefinedVariables(int frame) {
   return ret.toArray();
 }
 
+NEVER_INLINE
 void ExecutionContext::shuffleExtraStackArgs(ActRec* ar) {
   const Func* func = ar->m_func;
   assert(func);
@@ -1282,11 +1283,10 @@ void ExecutionContext::shuffleExtraStackArgs(ActRec* ar) {
   // element of the variadic array
   const auto numArgs = ar->numArgs();
   const auto numVarArgs = numArgs - func->numNonVariadicParams();
+  assert(numVarArgs > 0);
 
-  const auto mayCallFuncGetArgs = func->attrs() & AttrMayUseVV;
   const auto takesVariadicParam = func->hasVariadicCaptureParam();
-
-  if (UNLIKELY(mayCallFuncGetArgs)) {
+  if (func->attrs() & AttrMayUseVV) {
     auto const tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;
     ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numVarArgs));
     if (takesVariadicParam) {
@@ -1309,7 +1309,8 @@ void ExecutionContext::shuffleExtraStackArgs(ActRec* ar) {
       m_stack.ndiscard(numVarArgs);
     }
     // leave ar->numArgs reflecting the actual number of args passed
-  } else if (takesVariadicParam) {
+  } else {
+    assert(takesVariadicParam); // called only if extra args are used
     auto const tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;
     auto varArgsArray =
       Array::attach(MixedArray::MakePacked(numVarArgs, tvArgs));
@@ -1321,14 +1322,6 @@ void ExecutionContext::shuffleExtraStackArgs(ActRec* ar) {
     m_stack.pushArrayNoRc(ad);
     assert(func->numParams() == (numArgs - numVarArgs + 1));
     ar->setNumArgs(func->numParams());
-  } else {
-    // the function won't use the extra arguments, so act as if they were
-    // never passed (NOTE: this has the effect of slightly misleading
-    // backtraces that don't reflect the discarded numVarArgs args)
-    for (int i = 0; i < numVarArgs; ++i) {
-      m_stack.popTV();
-    }
-    ar->setNumArgs(numArgs - numVarArgs);
   }
 }
 
@@ -1443,7 +1436,6 @@ static bool prepareArrayArgs(ActRec* ar, const Cell& args,
     return true;
   }
 
-  const auto hasVarParam = f->hasVariadicCaptureParam();
   int nparams = f->numNonVariadicParams();
 
   ArrayIter iter(args);
@@ -1480,63 +1472,70 @@ static bool prepareArrayArgs(ActRec* ar, const Cell& args,
       cellDup(*tvToCell(from), *to);
     }
   }
-  if (!iter) {
+  if (LIKELY(!iter)) {
     // argArray was exhausted, so there are no "extra" arguments but there
     // may be a deficit of non-variadic arguments, and the need to push an
     // empty array for the variadic argument ... that work is left to
     // prepareFuncEntry
     ar->initNumArgs(nargs);
-  } else { // argArray was not exhausted, and there are "extra" arguments
-    auto const extra = nargs - nparams;
-    assert(extra > 0);
-    if (ar->m_func->attrs() & AttrMayUseVV) {
-      ExtraArgs* extraArgs = ExtraArgs::allocateUninit(extra);
+    return true;
+  }
+
+  // argArray was not exhausted, and there are "extra" arguments
+  assert(nargs > nparams);
+  if (LIKELY(f->discardExtraArgs())) {
+    // the extra args are not used in the function; no reason to add them
+    // to the stack
+    ar->initNumArgs(f->numParams());
+    return true;
+  }
+
+  auto const hasVarParam = f->hasVariadicCaptureParam();
+  auto const extra = nargs - nparams;
+  if (f->attrs() & AttrMayUseVV) {
+    ExtraArgs* extraArgs = ExtraArgs::allocateUninit(extra);
+    PackedArrayInit ai(extra);
+    for (int i = 0; i < extra; ++i, ++iter) {
+      TypedValue* to = extraArgs->getExtraArg(i);
+      const TypedValue* from = iter.secondRefPlus().asTypedValue();
+      if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
+        refDup(*from, *to);
+      } else {
+        cellDup(*tvToCell(from), *to);
+      }
+      if (hasVarParam) {
+        // appendWithRef bumps the refcount: this accounts for the fact
+        // that the extra args values went from being present in
+        // arrayArgs to being in (both) ExtraArgs and the variadic args
+        ai.appendWithRef(iter.secondRefPlus());
+      }
+    }
+    assert(!iter); // iter should now be exhausted
+    if (hasVarParam) {
+      auto const ad = ai.create();
+      stack.pushArray(ad);
+      assert(ad->hasExactlyOneRef());
+    }
+    ar->initNumArgs(nargs);
+    ar->setExtraArgs(extraArgs);
+  } else {
+    assert(hasVarParam);
+    if (nparams == 0
+        && args.m_type == KindOfArray && args.m_data.parr->isVectorData()) {
+      stack.pushArray(args.m_data.parr);
+    } else {
       PackedArrayInit ai(extra);
       for (int i = 0; i < extra; ++i, ++iter) {
-        TypedValue* to = extraArgs->getExtraArg(i);
-        const TypedValue* from = iter.secondRefPlus().asTypedValue();
-        if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
-          refDup(*from, *to);
-        } else {
-          cellDup(*tvToCell(from), *to);
-        }
-        if (hasVarParam) {
-          // appendWithRef bumps the refcount: this accounts for the fact
-          // that the extra args values went from being present in
-          // arrayArgs to being in (both) ExtraArgs and the variadic args
-          ai.appendWithRef(iter.secondRefPlus());
-        }
+        // appendWithRef bumps the refcount to compensate for the
+        // eventual decref of arrayArgs.
+        ai.appendWithRef(iter.secondRefPlus());
       }
-      assert(!iter); // iter should be exhausted
-      if (hasVarParam) {
-        auto const ad = ai.create();
-        stack.pushArray(ad);
-        assert(ad->hasExactlyOneRef());
-      }
-      ar->initNumArgs(nargs);
-      ar->setExtraArgs(extraArgs);
-    } else if (hasVarParam) {
-      if (nparams == 0
-          && args.m_type == KindOfArray && args.m_data.parr->isVectorData()) {
-        stack.pushArray(args.m_data.parr);
-      } else {
-        PackedArrayInit ai(extra);
-        for (int i = 0; i < extra; ++i, ++iter) {
-          // appendWithRef bumps the refcount to compensate for the
-          // eventual decref of arrayArgs.
-          ai.appendWithRef(iter.secondRefPlus());
-        }
-        assert(!iter); // iter should be exhausted
-        auto const ad = ai.create();
-        stack.pushArray(ad);
-        assert(ad->hasExactlyOneRef());
-      }
-      ar->initNumArgs(f->numParams());
-    } else {
-      // the extra args are not used in the function; no reason to add them
-      // to the stack
-      ar->initNumArgs(f->numParams());
+      assert(!iter); // iter should now be exhausted
+      auto const ad = ai.create();
+      stack.pushArray(ad);
+      assert(ad->hasExactlyOneRef());
     }
+    ar->initNumArgs(f->numParams());
   }
   return true;
 }
@@ -1547,7 +1546,7 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
   bool raiseMissingArgumentWarnings = false;
-  int nparams = func->numNonVariadicParams();
+  const int nparams = func->numNonVariadicParams();
   if (UNLIKELY(ar->m_varEnv != nullptr)) {
     // m_varEnv != nullptr means we have a varEnv, extraArgs, or an invName.
     if (ar->hasInvName()) {
@@ -1568,8 +1567,15 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
     }
   } else {
     int nargs = ar->numArgs();
-    if (nargs > nparams) {
-      if (stackTrimmed) {
+    if (UNLIKELY(nargs > nparams)) {
+      if (LIKELY(!stackTrimmed && func->discardExtraArgs())) {
+        // In the common case, the function won't use the extra arguments,
+        // so act as if they were never passed (NOTE: this has the effect
+        // of slightly misleading backtraces that don't reflect the
+        // discarded args)
+        for (int i = nparams; i < nargs; ++i) { m_stack.popTV(); }
+        ar->setNumArgs(nparams);
+      } else if (stackTrimmed) {
         assert(nargs == func->numParams());
         assert(((TypedValue*)ar - m_stack.top()) == func->numParams());
       } else {
@@ -1596,7 +1602,7 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
           }
         }
       }
-      if (func->hasVariadicCaptureParam()) {
+      if (UNLIKELY(func->hasVariadicCaptureParam())) {
         m_stack.pushArrayNoRc(empty_array.get());
       }
     }
@@ -1687,7 +1693,7 @@ void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr, bool stackTrimmed) {
   // entry as part of invoke func).
 
   if (LIKELY(useJitPrologue)) {
-    int np = enterFnAr->m_func->numNonVariadicParams();
+    const int np = enterFnAr->m_func->numNonVariadicParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
     JIT::TCA start = enterFnAr->m_func->getPrologue(na);
@@ -2270,7 +2276,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
       // Provide an empty 'args' array to be consistent with hphpc
       frame.set(s_args, args, true);
     } else {
-      int nparams = fp->m_func->numNonVariadicParams();
+      const int nparams = fp->m_func->numNonVariadicParams();
       int nargs = fp->numArgs();
       int nformals = std::min(nparams, nargs);
 

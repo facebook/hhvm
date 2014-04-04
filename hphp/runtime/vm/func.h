@@ -223,6 +223,9 @@ struct Func {
 #endif
     return m_attrs & AttrVariadicParam;
   }
+  bool discardExtraArgs() const {
+    return ! (m_attrs & (AttrMayUseVV | AttrVariadicParam));
+  }
   bool isBuiltin() const { return m_attrs & AttrBuiltin; }
   bool isCPPBuiltin() const { return m_shared->m_builtinFuncPtr; }
   bool skipFrame() const { return m_attrs & AttrSkipFrame; }

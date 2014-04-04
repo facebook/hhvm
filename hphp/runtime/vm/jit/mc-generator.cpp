@@ -643,7 +643,7 @@ TCA
 MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
-  int numParams = func->numNonVariadicParams();
+  int const numParams = func->numNonVariadicParams();
   int paramIndex = nPassed <= numParams ? nPassed : numParams + 1;
 
   bool const funcIsMagic = func->isMagic();
@@ -819,7 +819,8 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
   TCA triggerStart = nullptr;
   std::vector<TransID> prologTransIDs;
 
-  for (int nArgs = 0; nArgs <= func->numNonVariadicParams() + 1; nArgs++) {
+  auto const limit = func->numNonVariadicParams() + 1;
+  for (int nArgs = 0; nArgs <= limit; nArgs++) {
     TransID tid = m_tx.profData()->prologueTransId(func, nArgs);
     if (tid != InvalidID) {
       prologTransIDs.push_back(tid);

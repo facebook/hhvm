@@ -284,12 +284,15 @@
     url: https://github.com/phpbb/phpbb.git
     # Stable is release-3.0.12, but we have pull requests in develop
     # https://github.com/phpbb/phpbb/pull/1908
+    # https://github.com/phpbb/phpbb/pull/2232
     branch: develop
-    commit: eaf9a41ed8bd016880b11f480f92f1b0cfb32f84
+    commit: a5216e1b0483bc5db96f10d3b3504d1fe5ab850d
     install_root: phpbb3
     test_root: phpbb3
-    # This may work if we increase the timeout. Blacklist for now
-    blacklist:
+    clowns:
+      # This is basically a really, really slow version of:
+      #   find . -name '*.php' | grep -v vendor/ | xargs -n 1 -P 32 hhvm -l
+      # We pass it, but it's slow, and not a unit test, so skip it
       - phpbb3/tests/lint_test.php
   phpmyadmin:
     url: https://github.com/phpmyadmin/phpmyadmin.git

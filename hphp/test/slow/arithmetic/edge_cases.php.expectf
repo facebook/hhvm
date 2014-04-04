@@ -1,0 +1,7 @@
+float(9.2233720368548E+18)
+
+Warning: Division by zero in %s/test/slow/arithmetic/edge_cases.php on line 8
+int(5)
+
+Warning: Division by zero in %s/test/slow/arithmetic/edge_cases.php on line 9
+int(5)

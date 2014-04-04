@@ -2889,7 +2889,7 @@ void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
    */
   updateMarker();
 
-  gen(LookupClsMethod, makeCatch({clsVal, methVal}), clsVal, methVal, actRec,
+  gen(LookupClsMethod, makeCatch({methVal, clsVal}), clsVal, methVal, actRec,
       m_irb->fp());
   gen(DecRef, methVal);
 }
@@ -5172,14 +5172,14 @@ std::string HhbcTranslator::showStack() const {
 /*
  * Get SSATmps representing all the information on the virtual eval
  * stack in preparation for a spill or exit trace. Top of stack will
- * be at index 0.
+ * be in the last element.
  *
  * Doesn't actually remove these values from the eval stack.
  */
 std::vector<SSATmp*> HhbcTranslator::peekSpillValues() const {
   std::vector<SSATmp*> ret;
   ret.reserve(m_irb->evalStack().size());
-  for (int i = 0; i < m_irb->evalStack().size(); ++i) {
+  for (int i = m_irb->evalStack().size(); i--; ) {
     // DataTypeGeneric is used here because SpillStack just teleports the
     // values to memory.
     SSATmp* elem = top(DataTypeGeneric, i);
@@ -5271,6 +5271,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
 
   // TODO(#2404447) move this conditional to the simplifier?
   if (!stackValues.empty()) {
+    std::reverse(stackValues.begin(), stackValues.end());
     stackValues.insert(
       stackValues.begin(),
       { m_irb->sp(), cns(int64_t(m_irb->stackDeficit())) }
@@ -5363,8 +5364,9 @@ Block* HhbcTranslator::makeCatchImpl(Body body) {
 Block* HhbcTranslator::makeCatch(std::vector<SSATmp*> spillVals,
                                  int64_t numPop) {
   return makeCatchImpl([&] {
-    for (auto* val : peekSpillValues()) spillVals.push_back(val);
-    return emitSpillStack(m_irb->sp(), spillVals, numPop);
+    auto spills = peekSpillValues();
+    spills.insert(spills.begin(), spillVals.begin(), spillVals.end());
+    return emitSpillStack(m_irb->sp(), spills, numPop);
   });
 }
 
@@ -5390,7 +5392,7 @@ SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,
   std::vector<SSATmp*> ssaArgs{
     sp, cns(int64_t(m_irb->stackDeficit() + extraOffset))
   };
-  ssaArgs.insert(ssaArgs.end(), spillVals.begin(), spillVals.end());
+  ssaArgs.insert(ssaArgs.end(), spillVals.rbegin(), spillVals.rend());
 
   auto args = std::make_pair(ssaArgs.size(), &ssaArgs[0]);
   return gen(SpillStack, args);

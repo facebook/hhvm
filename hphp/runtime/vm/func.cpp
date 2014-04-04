@@ -474,6 +474,7 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
   int qword = m_numParams / kBitsPerQword;
   int bit   = m_numParams % kBitsPerQword;
   m_numParams++;
+  assert(!info.isVariadic() || (m_attrs & AttrVariadicParam));
   uint64_t* refBits = &m_refBitVal;
   // Grow args, if necessary.
   if (qword) {
@@ -1148,10 +1149,11 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       !m_isClosureBody) {
     // intercepted functions need to pass all args through
     // to the interceptee
-    attrs = attrs | AttrMayUseVV;
+    attrs = Attr(attrs | AttrMayUseVV);
   }
+  if (isVariadic()) { attrs = Attr(attrs | AttrVariadicParam); }
 
-  if (!m_containsCalls) attrs = Attr(attrs | AttrPhpLeafFn);
+  if (!m_containsCalls) { attrs = Attr(attrs | AttrPhpLeafFn); }
 
   assert(!m_pce == !preClass);
   Func* f = m_ue.newFunc(this, unit, m_id, preClass, m_line1, m_line2, m_base,
@@ -1160,7 +1162,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   f->shared()->m_info = m_info;
   f->shared()->m_returnType = m_returnType;
-  std::vector<Func::ParamInfo> pBuilder;
+  std::vector<Func::ParamInfo> fParams;
   for (unsigned i = 0; i < m_params.size(); ++i) {
     Func::ParamInfo pi;
     pi.setFuncletOff(m_params[i].funcletOff());
@@ -1171,18 +1173,21 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     pi.setBuiltinType(m_params[i].builtinType());
     pi.setUserType(m_params[i].userType());
     pi.setVariadic(m_params[i].isVariadic());
-    f->appendParam(m_params[i].ref(), pi, pBuilder);
+    f->appendParam(m_params[i].ref(), pi, fParams);
   }
+  assert(f->m_numParams == m_params.size());
   if (!m_params.size()) {
     assert(!f->m_refBitVal && !f->shared()->m_refBitPtr);
     f->m_refBitVal = attrs & AttrVariadicByRef ? -1uLL : 0uLL;
   }
 
-  f->shared()->m_params = pBuilder;
+  f->shared()->m_params = fParams;
   f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
   f->m_maxStackCells = m_maxStackCells;
+  f->m_numNonVariadicParams = (attrs & AttrVariadicParam)
+    ? (f->m_numParams - 1) : f->m_numParams;
   f->shared()->m_staticVars = m_staticVars;
   f->shared()->m_ehtab = m_ehtab;
   f->shared()->m_fpitab = m_fpitab;

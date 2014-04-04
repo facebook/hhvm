@@ -364,6 +364,7 @@ enum Attr {
   AttrHPHPSpecific  = (1 << 25), //                     X    //
   AttrIsFoldable    = (1 << 26), //                     X    //
   AttrNoFCallBuiltin= (1 << 27), //                     X    //
+  AttrVariadicParam = (1 << 28), //                     X    //
 };
 
 inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }

@@ -217,8 +217,11 @@ struct Func {
   bool isPseudoMain() const { return m_name->empty(); }
 
   bool hasVariadicCaptureParam() const {
-    auto nparams = numParams();
-    return nparams && params()[nparams - 1].isVariadic();
+#ifdef DEBUG
+    assert(((bool) (m_attrs & AttrVariadicParam)) ==
+           (numParams() && params()[numParams() - 1].isVariadic()));
+#endif
+    return m_attrs & AttrVariadicParam;
   }
   bool isBuiltin() const { return m_attrs & AttrBuiltin; }
   bool isCPPBuiltin() const { return m_shared->m_builtinFuncPtr; }
@@ -326,8 +329,11 @@ struct Func {
   }
   char &maybeIntercepted() const { return m_maybeIntercepted; }
   int numParams() const { return m_numParams; }
+
   int numNonVariadicParams() const {
-    return hasVariadicCaptureParam() ? (numParams() - 1) : numParams();
+    assert(m_numNonVariadicParams ==
+           (hasVariadicCaptureParam() ? (m_numParams - 1) : (m_numParams)));
+    return m_numNonVariadicParams;
   }
   const ParamInfoVec& params() const { return shared()->m_params; }
   int numLocals() const { return shared()->m_numLocals; }
@@ -568,6 +574,7 @@ private:
   Unit* m_unit;
   SharedDataPtr m_shared;
   int m_numParams{0};
+  int m_numNonVariadicParams{0};
   Attr m_attrs;
   // This must be the last field declared in this structure
   // and the Func class should not be inherited from.
@@ -691,6 +698,9 @@ public:
 
   void setAttrs(Attr attrs) { m_attrs = attrs; }
   Attr attrs() const { return m_attrs; }
+  bool isVariadic() const {
+    return m_params.size() && m_params[(m_params.size() - 1)].isVariadic();
+  }
 
   void setTop(bool top) { m_top = top; }
   bool top() const { return m_top; }

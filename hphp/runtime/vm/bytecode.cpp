@@ -4308,41 +4308,41 @@ OPTBLD_INLINE void ExecutionContext::iopSSwitch(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopRetC(IOP_ARGS) {
   NEXT();
-  uint soff = m_fp->m_soff;
   assert(!m_fp->inGenerator());
 
-  // Call the runtime helpers to free the local variables and iterators
-  frame_free_locals_inl(m_fp, m_fp->m_func->numLocals(), m_stack.topTV());
-  ActRec* sfp = m_fp->arGetSfp();
-  // Memcpy the the return value on top of the activation record. This works
-  // the same regardless of whether the return value is boxed or not.
-  TypedValue* retval_ptr = &m_fp->m_r;
-  memcpy(retval_ptr, m_stack.topTV(), sizeof(TypedValue));
+  // Get the return value.
+  TypedValue retval = *m_stack.topTV();
+
+  // Free $this and local variables. Calls FunctionExit hook. The return value
+  // is kept on the stack so that the unwinder would free it if the hook fails.
+  frame_free_locals_inl(m_fp, m_fp->func()->numLocals(), &retval);
+  m_stack.discard();
+
+  // Type profile return value.
   if (RuntimeOption::EvalRuntimeTypeProfile) {
-    profileOneArgument(*retval_ptr, -1, m_fp->m_func);
+    profileOneArgument(retval, -1, m_fp->func());
   }
-  // Adjust the stack
-  m_stack.ndiscard(m_fp->m_func->numSlotsInFrame() + 1);
+
+  // Grab caller info from ActRec.
+  ActRec* sfp = m_fp->arGetSfp();
+  uint soff = m_fp->m_soff;
+
+  // Free ActRec and store the return value.
+  m_stack.ndiscard(m_fp->func()->numSlotsInFrame());
+  m_stack.ret();
+  *m_stack.topTV() = retval;
+  assert(m_stack.topTV() == &m_fp->m_r);
 
   if (LIKELY(sfp != m_fp)) {
-    // Restore caller's execution state.
+    // Return control to the caller.
     m_fp = sfp;
-    pc = m_fp->m_func->unit()->entry() + m_fp->m_func->base() + soff;
-    m_stack.ret();
-    assert(m_stack.topTV() == retval_ptr);
+    pc = m_fp->func()->unit()->entry() + m_fp->func()->base() + soff;
   } else {
     // No caller; terminate.
-    m_stack.ret();
-#ifdef HPHP_TRACE
-    {
-      std::ostringstream os;
-      os << toStringElm(m_stack.topTV());
-      ONTRACE(1,
-              Trace::trace("Return %s from ExecutionContext::dispatch("
-                           "%p)\n", os.str().c_str(), m_fp));
-    }
-#endif
-    pc = 0;
+    m_fp = nullptr;
+    pc = nullptr;
+    ONTRACE(1, Trace::trace("Return %s from ExecutionContext::dispatch(%p)\n",
+                            toStringElm(m_stack.topTV()).c_str(), m_fp));
   }
 }
 

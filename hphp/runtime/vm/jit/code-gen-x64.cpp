@@ -307,6 +307,7 @@ CALL_OPCODE(InterfaceSupportsInt)
 CALL_OPCODE(InterfaceSupportsDbl)
 
 CALL_OPCODE(SurpriseHook)
+CALL_OPCODE(FunctionExitSurpriseHook)
 
 #undef NOOP_OPCODE
 
@@ -3037,28 +3038,26 @@ void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
 void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   auto const rFp       = srcLoc(0).reg();
   auto const numLocals = curFunc()->numLocals();
-  auto const rDest     = dstLoc(0).reg();
   auto& a = m_as;
 
   assert(rFp == rVmFp &&
          "free locals helper assumes the frame pointer is rVmFp");
-  assert(rDest == rVmSp &&
-         "free locals helper adjusts rVmSp, which must be our dst reg");
 
   if (numLocals == 0) return;
 
-  // The helpers called below use a special ABI, in which r15 is not saved,
-  // and the stub expects the stack to be imbalanced (RSP%16==0) on entry.
-  // So save r15 in addition to the caller-save registers, and use
-  // PhysRegSaverStub which assumes the odd stack parity.
-  auto toSave = m_state.liveRegs[inst] & (kCallerSaved | RegSet(r15));
+  // The helpers called below use a special ABI, in which r14 and r15 is
+  // not saved, and the stub expects the stack to be imbalanced (RSP%16==0)
+  // on entry. So save r14 and r15 in addition to the caller-save registers,
+  // and use PhysRegSaverStub which assumes the odd stack parity.
+  auto toSave = m_state.liveRegs[inst] &
+                (kCallerSaved | RegSet(r14) | RegSet(r15));
   PhysRegSaverStub saver(a, toSave);
 
   auto const target = numLocals > kNumFreeLocalsHelpers
     ? m_mcg->tx().uniqueStubs.freeManyLocalsHelper
     : m_mcg->tx().uniqueStubs.freeLocalsHelpers[numLocals - 1];
 
-  a.lea(rFp[-numLocals * sizeof(TypedValue)], rDest);
+  a.lea(rFp[-numLocals * sizeof(TypedValue)], r14);
   a.call(target);
   recordSyncPoint(a);
 }
@@ -5347,30 +5346,6 @@ void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
 void CodeGenerator::cgCheckSurpriseFlags(IRInstruction* inst) {
   emitTestSurpriseFlags(m_as);
   emitFwdJcc(CC_NZ, inst->taken());
-}
-
-void CodeGenerator::cgFunctionExitSurpriseHook(IRInstruction* inst) {
-  auto const retVal = inst->src(1);
-  auto const retLoc = srcLoc(1);
-  auto const sp     = srcLoc(2).reg();
-
-  // To keep things simple in the unwinder, we put the return value onto
-  // the vm stack where it was coming into the RetC instruction.
-  if (inst->extra<InGeneratorData>()->inGenerator) {
-    // sp points at the stack frame base, so there are no locals or iterators
-    // to skip.
-    cgStore(sp[-sizeof(TypedValue)], retVal, retLoc, Width::Full);
-  } else {
-    // sp points at rVmFp->m_r, so we have to skip over the rest of the ActRec
-    // and anything else in the frame.
-    auto const offset = -AROFF(m_r) -
-      curFunc()->numSlotsInFrame() * sizeof(TypedValue) -
-      sizeof(TypedValue);
-
-    cgStore(sp[offset], retVal, retLoc, Width::Full);
-  }
-
-  cgCallNative(m_as, inst);
 }
 
 void CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {

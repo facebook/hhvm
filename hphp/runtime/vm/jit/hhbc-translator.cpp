@@ -3103,7 +3103,11 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   assert(!curFunc()->isPseudoMain());
   assert(!m_fpiActiveStack.empty());
 
-  auto useRet = emitDecRefLocalsInline(retVal);
+  if (curFunc()->mayHaveThis()) {
+    gen(DecRefThis, m_irb->fp());
+  }
+
+  emitDecRefLocalsInline();
 
   // Before we leave the inlined frame, grab a type prediction from our
   // DefInlineFP.
@@ -3150,31 +3154,23 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   m_irb->clearStackDeficit();
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc()->fullName()->data());
-  push(useRet);
-  if (retPred < useRet->type()) {
+  push(retVal);
+  if (retPred < retVal->type()) {
     // If we had a predicted output type that's useful, check that here.
     checkTypeStack(0, retPred, curSrcKey().advanced().offset());
   }
 }
 
-SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
-  const Func* curFunc = this->curFunc();
-
-  if (curFunc->mayHaveThis()) {
-    gen(DecRefThis, m_irb->fp());
-  }
-
+void HhbcTranslator::emitDecRefLocalsInline() {
   /*
    * Note: this is currently off for isInlining() because the shuffle
    * was preventing a decref elimination due to ordering.  Currently
    * we don't inline anything with parameters, though, so it doesn't
    * matter.  This will need to be revisted then.
    */
-  for (int id = curFunc->numLocals() - 1; id >= 0; --id) {
+  for (int id = curFunc()->numLocals() - 1; id >= 0; --id) {
     gen(DecRefLoc, Type::Gen, LocalId(id), m_irb->fp());
   }
-
-  return retVal;
 }
 
 void HhbcTranslator::emitRet(Type type, bool freeInline) {
@@ -3182,45 +3178,48 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     return emitRetFromInlined(type);
   }
 
-  const Func* curFunc = this->curFunc();
-  bool mayUseVV = (curFunc->attrs() & AttrMayUseVV);
-
-  auto catchBlock = makeCatchNoSpill();
-
-  if (mayUseVV) {
+  auto const func = curFunc();
+  if (func->attrs() & AttrMayUseVV) {
     // Note: this has to be the first thing, because we cannot bail after
     //       we start decRefing locs because then there'll be no corresponding
     //       bytecode boundaries until the end of RetC
     gen(ReleaseVVOrExit, makeExitSlow(), m_irb->fp());
   }
 
-  // The return value is teleported to its place in memory so we don't care
-  // about the type.
+  // Pop the return value. Since it will be teleported to its place in memory,
+  // we don't care about the type.
+  auto catchBlock = makeCatch();
   SSATmp* retVal = pop(type, DataTypeGeneric);
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    gen(TypeProfileFunc, TypeProfileData(-1), retVal, cns(curFunc));
-  }
-  SSATmp* sp;
 
+  // Free $this.
+  if (func->mayHaveThis()) {
+    gen(DecRefThis, m_irb->fp());
+  }
+
+  // Free local variables.
   if (freeInline) {
-    retVal = emitDecRefLocalsInline(retVal);
-    for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
+    emitDecRefLocalsInline();
+    for (unsigned i = 0; i < func->numLocals(); ++i) {
       m_irb->constrainLocal(i, DataTypeCountness, "inlined RetC/V");
     }
-    gen(StRetVal, m_irb->fp(), retVal);
-    sp = gen(RetAdjustStack, m_irb->fp());
   } else {
-    if (curFunc->mayHaveThis()) {
-      gen(DecRefThis, m_irb->fp());
-    }
-    sp = gen(GenericRetDecRefs, m_irb->fp());
-    gen(StRetVal, m_irb->fp(), retVal);
+    gen(GenericRetDecRefs, m_irb->fp());
   }
 
+  // Call the FunctionExit hook and put the return value on the stack so that
+  // the unwinder would decref it.
   emitRetSurpriseCheck(retVal, catchBlock);
 
-  // Free ActRec, and return control to caller.
+ // Type profile return value.
+  if (RuntimeOption::EvalRuntimeTypeProfile) {
+    gen(TypeProfileFunc, TypeProfileData(-1), retVal, cns(func));
+  }
+
+  // Grab caller info from ActRec, free ActRec, store the return value
+  // and return control to the caller.
+  gen(StRetVal, m_irb->fp(), retVal);
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
+  SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
   gen(RetCtrl, InGeneratorData(false), sp, fp, retAddr);
 
@@ -3240,14 +3239,13 @@ void HhbcTranslator::emitJmpSurpriseCheck(Block* catchBlock) {
 
 void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock) {
   emitRB(Trace::RBTypeFuncExit, curFunc()->fullName());
-
   m_irb->ifThen([&](Block* taken) {
                  gen(CheckSurpriseFlags, taken);
                },
                [&] {
                  m_irb->hint(Block::Hint::Unlikely);
                  gen(FunctionExitSurpriseHook, InGeneratorData(inGenerator()),
-                     catchBlock, m_irb->fp(), retVal, m_irb->sp());
+                     catchBlock, m_irb->fp(), retVal);
                });
 }
 

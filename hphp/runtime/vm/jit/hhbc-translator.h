@@ -668,7 +668,7 @@ private:
   void emitUnboxRAux();
   void emitAGet(SSATmp* src, Block* catchBlock);
   void emitRetFromInlined(Type type);
-  SSATmp* emitDecRefLocalsInline(SSATmp* retVal);
+  void emitDecRefLocalsInline();
   void emitRet(Type type, bool freeInline);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);

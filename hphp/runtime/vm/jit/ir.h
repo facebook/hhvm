@@ -383,7 +383,7 @@ O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
 O(JmpIndirect,                      ND, S(TCA),                          T|E) \
 O(CheckSurpriseFlags,               ND, NA,                              B|E) \
 O(SurpriseHook,                     ND, NA,                           Er|N|E) \
-O(FunctionExitSurpriseHook,         ND, S(FramePtr) S(Gen) S(StkPtr), Er|N|E) \
+O(FunctionExitSurpriseHook,         ND, S(FramePtr) S(Gen),           Er|N|E) \
 O(ExitOnVarEnv,                     ND, S(FramePtr),                     B|E) \
 O(ReleaseVVOrExit,                  ND, S(FramePtr),                   B|N|E) \
 O(RaiseError,                       ND, S(Str),                     E|N|T|Er) \
@@ -550,7 +550,7 @@ O(IncRefCtx,                        ND, S(Ctx),                            E) \
 O(DecRefLoc,                        ND, S(FramePtr),                     N|E) \
 O(DecRefStack,                      ND, S(StkPtr),                       N|E) \
 O(DecRefThis,                       ND, S(FramePtr),                     N|E) \
-O(GenericRetDecRefs,         D(StkPtr), S(FramePtr),                     E|N) \
+O(GenericRetDecRefs,                ND, S(FramePtr),                     E|N) \
 O(DecRef,                           ND, S(Gen),                    N|E|K|CRc) \
 O(DecRefNZ,                         ND, S(Gen),                      N|E|CRc) \
 O(DecRefMem,                        ND, S(PtrToGen)                           \

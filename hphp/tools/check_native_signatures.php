@@ -168,7 +168,7 @@ function match_arg_type(string $php, string $cpp): bool {
   if ($php[0] == '?') {
     $expected = 'const Variant&';
   } else {
-    switch (strtolower($php)) {
+    switch (strtolower(strtok($php, ' &'))) {
       case 'bool':
       case 'boolean':
         $expected = 'bool';

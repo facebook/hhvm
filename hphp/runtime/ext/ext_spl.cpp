@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_file.h"
 
@@ -355,7 +355,7 @@ void f_spl_autoload(const String& class_name,
   for (ArrayIter iter(ext); iter; ++iter) {
     String fileName = lClass + iter.second().toString();
     include(fileName, true, "", false);
-    if (f_class_exists(class_name, false)) {
+    if (HHVM_FN(class_exists)(class_name, false)) {
       found = true;
       break;
     }

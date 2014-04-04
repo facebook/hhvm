@@ -11,11 +11,13 @@ class StandardExtension : public Extension {
   StandardExtension() : Extension("standard") {}
 
   void moduleInit() override {
+    initClassobj();
     initOptions();
     initVariable();
   }
 
  private:
+  void initClassobj();
   void initOptions();
   void initVariable();
 };

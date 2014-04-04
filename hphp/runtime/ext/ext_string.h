@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/bstring.h"
 #include <langinfo.h>
-#include "hphp/runtime/ext/ext_class.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/thrift/transport.h"
 #include "hphp/runtime/ext/ext_thrift.h"
-#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/base/base-includes.h"
@@ -68,7 +68,7 @@ void skip_element(long thrift_typeID, PHPInputTransport& transport);
 // Create a PHP object given a typename and call the ctor, optionally passing up to 2 arguments
 Object createObject(const String& obj_typename, int nargs = 0,
                     const Variant& arg1 = null_variant, const Variant& arg2 = null_variant) {
-  if (!f_class_exists(obj_typename)) {
+  if (!HHVM_FN(class_exists)(obj_typename)) {
     raise_warning("runtime/ext_thrift: Class %s does not exist",
                   obj_typename.data());
     return Object();

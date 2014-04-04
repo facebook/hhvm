@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/parser/scanner.h"

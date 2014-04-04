@@ -33,7 +33,6 @@ Variant f_call_user_func_array(const Variant& function, const Variant& params);
 Variant f_forward_static_call_array(const Variant& function, const Array& params);
 Variant f_forward_static_call(
   int _argc, const Variant& function, const Array& _argv = null_array);
-Variant f_get_called_class();
 String f_create_function(const String& args, const String& code);
 
 ///////////////////////////////////////////////////////////////////////////////

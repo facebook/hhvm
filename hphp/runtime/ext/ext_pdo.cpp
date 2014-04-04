@@ -23,7 +23,7 @@
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/pdo_sqlite.h"
 #include "hphp/runtime/ext/ext_array.h"
-#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/ext_string.h"
@@ -602,7 +602,7 @@ static bool valid_statement_class(sp_PDOConnection dbh, const Variant& opt,
                                   String &clsname, Variant &ctor_args) {
   if (!opt.isArray() || !opt.toArray().exists(0) ||
       !opt.toArray()[0].isString() ||
-      !f_class_exists(opt.toArray()[0].toString())) {
+      !HHVM_FN(class_exists)(opt.toArray()[0].toString())) {
     pdo_raise_impl_error
       (dbh, nullptr, "HY000",
        "PDO::ATTR_STATEMENT_CLASS requires format array(classname, "
@@ -616,7 +616,7 @@ static bool valid_statement_class(sp_PDOConnection dbh, const Variant& opt,
     ctor_args = Variant(Array());
     return true;
   }
-  if (!f_is_a(clsname, "PDOStatement", /* allow_string */ true)) {
+  if (!HHVM_FN(is_a)(clsname, "PDOStatement", /* allow_string */ true)) {
     pdo_raise_impl_error
       (dbh, nullptr, "HY000",
        "user-supplied statement class must be derived from PDOStatement");
@@ -830,7 +830,7 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64_t mod
         pdo_raise_impl_error(stmt->dbh, stmt, "HY000",
                              "classname must be a string");
       } else {
-        retval = f_class_exists(_argv[0].toString());
+        retval = HHVM_FN(class_exists)(_argv[0].toString());
         if (retval) {
           stmt->fetch.clsname = _argv[0].toString();
         }
@@ -1844,7 +1844,7 @@ static bool do_fetch(sp_PDOStatement stmt,
       Variant val;
       fetch_value(stmt, val, i++, NULL);
       if (!val.isNull()) {
-        if (!f_class_exists(val.toString())) {
+        if (!HHVM_FN(class_exists)(val.toString())) {
           stmt->fetch.clsname = "stdclass";
         } else {
           stmt->fetch.clsname = val.toString();
@@ -2752,7 +2752,7 @@ Variant c_PDOStatement::t_fetchobject(const String& class_name /* = null_string 
   if (class_name.isNull()) {
     m_stmt->fetch.clsname = "stdclass";
   }
-  if (!f_class_exists(m_stmt->fetch.clsname)) {
+  if (!HHVM_FN(class_exists)(m_stmt->fetch.clsname)) {
     pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY000",
                          "Could not find user-supplied class");
     error = true;
@@ -2809,7 +2809,7 @@ Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
     if (class_name.isNull()) {
       m_stmt->fetch.clsname = "stdclass";
     }
-    if (!f_class_exists(m_stmt->fetch.clsname)) {
+    if (!HHVM_FN(class_exists)(m_stmt->fetch.clsname)) {
       pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY000",
                            "Could not find user-supplied class");
       error = 1;

@@ -23,7 +23,6 @@
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_asio.h"
-#include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_continuation.h"

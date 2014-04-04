@@ -159,18 +159,6 @@
             ]
         },
         {
-            "name": "get_called_class",
-            "desc": "Gets the name of the class the static method is called in.",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Returns the class name. Returns FALSE if called from outside a class."
-            },
-            "args": [
-            ]
-        },
-        {
             "name": "create_function",
             "desc": "Creates an anonymous function from the parameters passed, and returns a unique name for it.\nUsually these parameters will be passed as single quote delimited strings. The reason for using single quoted strings, is to protect the variable names from parsing, otherwise, if you use double quotes there will be a need to escape the variable names, e.g. \\$avar.",
             "flags": [

@@ -78,6 +78,8 @@
       - drupal/core/modules/views/tests/Drupal/views/Tests/ViewsDataHelperTest.php
       # Flakey, test has a race condition
       - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFileStorageTest.php
+      # Depends on previous
+      - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFastFileStorageTest.php
   facebookphpsdk:
     url: https://github.com/facebook/facebook-php-sdk.git
     branch: v3.2.3

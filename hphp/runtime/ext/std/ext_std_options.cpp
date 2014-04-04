@@ -26,7 +26,7 @@
 #include "folly/ScopeGuard.h"
 
 #include "hphp/runtime/ext/ext_misc.h"
-#include "hphp/runtime/ext/ext_error.h"
+#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -122,9 +122,9 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
   String prefixedCode = concat3("<?php return ", codeStr, ";");
 
   auto const oldErrorLevel =
-    s_option_data->assertQuietEval ? f_error_reporting(Variant(0)) : 0;
+    s_option_data->assertQuietEval ? HHVM_FN(error_reporting)(Variant(0)) : 0;
   SCOPE_EXIT {
-    if (s_option_data->assertQuietEval) f_error_reporting(oldErrorLevel);
+    if (s_option_data->assertQuietEval) HHVM_FN(error_reporting)(oldErrorLevel);
   };
 
   auto const unit = g_context->compileEvalString(prefixedCode.get());

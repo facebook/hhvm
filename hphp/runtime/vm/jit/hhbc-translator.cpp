@@ -3047,6 +3047,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
     switch (pi.builtinType()) {
       case KindOfBoolean:
       case KindOfInt64:
+      case KindOfDouble:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
@@ -3065,7 +3066,6 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
               m_irb->sp());
         }
         break;
-      case KindOfDouble: not_reached();
       case KindOfUnknown: break;
       default:            not_reached();
     }
@@ -3081,10 +3081,10 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
     switch (pi.builtinType()) {
       case KindOfBoolean:
       case KindOfInt64:
+      case KindOfDouble:
         args[i + 2] = top(Type(pi.builtinType()),
                           numArgs - i - 1);
         break;
-      case KindOfDouble: not_reached();
       default:
         args[i + 2] = ldStackAddr(numArgs - i - 1, DataTypeSpecific);
         break;

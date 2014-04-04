@@ -5511,6 +5511,9 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
     case KindOfInt64:
       e.Int(v.getInt64());
       break;
+    case KindOfDouble:
+      e.Double(v.toDouble());
+      break;
     case KindOfBoolean:
       if (v.getBoolean()) {
         e.True();
@@ -7296,8 +7299,14 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
     return nullptr;
   }
 
+  // Even though the JIT can handle an arbitrary number of arguments
+  // The interp mode function caller is limited to kMaxBuiltinArgs
+  // mixed-mode arguments, or kMaxFCallBuiltinArgs int-only arguments.
+  bool allowDoubleArgs = (f->numParams() <= Native::kMaxBuiltinArgs) &&
+                         Native::allowFCallBuiltinDoubleArgs();
   for (int i = 0; i < f->numParams(); i++) {
-    if (f->params()[i].builtinType() == KindOfDouble) {
+    if ((!allowDoubleArgs) &&
+        (f->params()[i].builtinType() == KindOfDouble)) {
       return nullptr;
     }
     if (i >= numParams) {

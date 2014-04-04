@@ -676,30 +676,42 @@ void CodeGenerator::cgHalt(IRInstruction* inst) {
  * shuffleArgs also handles adding lea-offsets for dest registers (dest = src +
  * lea-offset) and zero extending bools (dest = zeroExtend(src)).
  */
+static bool shuffleArgsPlanningHelper(PhysReg::Map<PhysReg>& moves,
+                                      PhysReg::Map<ArgDesc*>& argDescs,
+                                      ArgDesc& arg) {
+  auto kind = arg.kind();
+  if (!(kind == ArgDesc::Kind::Reg  ||
+        kind == ArgDesc::Kind::Addr ||
+        kind == ArgDesc::Kind::TypeReg)) {
+    return true;
+  }
+  auto dstReg = arg.dstReg();
+  auto srcReg = arg.srcReg();
+  if (dstReg != srcReg) {
+    moves[dstReg] = srcReg;
+    argDescs[dstReg] = &arg;
+  }
+  return false;
+}
+
 static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
   // Compute the move/shuffle plan.
   PhysReg::Map<PhysReg> moves;
   PhysReg::Map<ArgDesc*> argDescs;
 
   for (size_t i = 0; i < args.numRegArgs(); ++i) {
-    auto kind = args[i].kind();
-    if (!(kind == ArgDesc::Kind::Reg  ||
-          kind == ArgDesc::Kind::Addr ||
-          kind == ArgDesc::Kind::TypeReg)) {
+    if (shuffleArgsPlanningHelper(moves, argDescs, args[i])) {
       continue;
     }
-    auto dstReg = args[i].dstReg();
-    auto srcReg = args[i].srcReg();
-    if (dstReg != srcReg) {
-      moves[dstReg] = srcReg;
-      argDescs[dstReg] = &args[i];
-    }
-    if (call.isIndirect() && dstReg == call.getReg()) {
+    if (call.isIndirect() && args[i].dstReg() == call.getReg()) {
       // an indirect call uses an argumnet register for the func ptr.
       // Use rax instead and update the CppCall
       moves[reg::rax] = call.getReg();
       call.updateCallIndirect(reg::rax);
     }
+  }
+  for (size_t i = 0; i < args.numSIMDRegArgs(); ++i) {
+    shuffleArgsPlanningHelper(moves, argDescs, args.regSIMD(i));
   }
 
   // The caller may be using rCgGP directly, or indirectly via m_rScratch.
@@ -836,6 +848,22 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
     }
   }
 
+  for (size_t i = 0; i < args.numSIMDRegArgs(); ++i) {
+    auto &arg = args.regSIMD(i);
+    if (arg.done()) continue;
+    auto kind = arg.kind();
+    auto dst = arg.dstReg();
+    assert(dst.isSIMD());
+    if (kind == ArgDesc::Kind::Imm) {
+      a.emitImmReg(arg.imm().q(), rTmp);
+      a.movq_rx(rTmp, dst);
+    } else if (RuntimeOption::EvalHHIRGenerateAsserts &&
+               kind == ArgDesc::Kind::None) {
+      a.emitImmReg(0xbadbadbadbadbad, rTmp);
+      a.movq_rx(rTmp, dst);
+    }
+  }
+
   return args.numStackArgs() * sizeof(int64_t);
 }
 
@@ -929,6 +957,9 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
   // Assign registers to the arguments then prepare them for the call.
   for (size_t i = 0; i < args.numRegArgs(); i++) {
     args[i].setDstReg(argNumToRegName[i]);
+  }
+  for (size_t i = 0; i < args.numSIMDRegArgs(); i++) {
+    args.regSIMD(i).setDstReg(argNumToSIMDRegName[i]);
   }
   regSaver.bytesPushed(shuffleArgs(a, args, call));
 
@@ -3719,7 +3750,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
       assert(args[i]->type().isPtr() && srcLoc(srcNum).reg() != InvalidReg);
       callArgs.addr(srcLoc(srcNum).reg(), TVOFF(m_data));
     } else {
-      callArgs.ssa(srcNum);
+      callArgs.ssa(srcNum, pi.builtinType() == KindOfDouble);
     }
   }
 

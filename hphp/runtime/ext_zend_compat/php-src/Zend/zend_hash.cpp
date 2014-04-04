@@ -70,24 +70,24 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void * arg TSRMLS_DC) {
   for (HPHP::ArrayIter it(ht); it; ++it) {
     zval* data = it.zSecond();
-		int result = apply_func(&data, arg TSRMLS_CC);
+    int result = apply_func(&data, arg TSRMLS_CC);
 
-		if (result & ZEND_HASH_APPLY_REMOVE) {
+    if (result & ZEND_HASH_APPLY_REMOVE) {
       not_implemented();
-		}
-		if (result & ZEND_HASH_APPLY_STOP) {
-			break;
-		}
-	}
+    }
+    if (result & ZEND_HASH_APPLY_STOP) {
+      break;
+    }
+  }
 }
 
 ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func_args_t apply_func, int num_args, ...) {
-	va_list args;
-	zend_hash_key hash_key;
+  va_list args;
+  zend_hash_key hash_key;
 
   for (HPHP::ArrayIter it(ht); it; ++it) {
-		int result;
-		va_start(args, num_args);
+    int result;
+    va_start(args, num_args);
     if (it.first().isInteger()) {
       hash_key.arKey = "";
       hash_key.nKeyLength = 0;
@@ -99,17 +99,17 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func
       hash_key.h = 0;
     }
     zval* data = it.zSecond();
-		result = apply_func(&data TSRMLS_CC, num_args, args, &hash_key);
+    result = apply_func(&data TSRMLS_CC, num_args, args, &hash_key);
 
-		if (result & ZEND_HASH_APPLY_REMOVE) {
+    if (result & ZEND_HASH_APPLY_REMOVE) {
       not_implemented();
-		}
-		if (result & ZEND_HASH_APPLY_STOP) {
-			va_end(args);
-			break;
-		}
-		va_end(args);
-	}
+    }
+    if (result & ZEND_HASH_APPLY_STOP) {
+      va_end(args);
+      break;
+    }
+    va_end(args);
+  }
 }
 
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag) {

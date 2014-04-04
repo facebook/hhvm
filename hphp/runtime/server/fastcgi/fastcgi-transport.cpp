@@ -422,6 +422,12 @@ void FastCGITransport::onHeadersComplete() {
     m_method = Method::POST;
   }
 
+  if (m_httpVersion.empty()) {
+    // If we didn't receive a version, assume default transport version.
+    // Flushing the request early requires HTTP_VERSION to be 1.1.
+    m_httpVersion = Transport::getHTTPVersion();
+  }
+
   if (m_pathTranslated.empty()) {
     // If someone follows http://wiki.nginx.org/HttpFastcgiModule they won't
     // pass in PATH_TRANSLATED and instead will just send SCRIPT_FILENAME

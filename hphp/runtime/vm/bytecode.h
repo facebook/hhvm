@@ -111,7 +111,7 @@ struct ExtraArgs : private boost::noncopyable {
   /**
    * Make a copy of ExtraArgs.
    */
-  ExtraArgs* clone(ActRec* fp);
+  ExtraArgs* clone(ActRec* fp) const;
 
   /*
    * Get the slot for extra arg i, where i = argNum - func->numParams.
@@ -156,7 +156,7 @@ class VarEnv {
  public:
   explicit VarEnv();
   explicit VarEnv(ActRec* fp, ExtraArgs* eArgs);
-  explicit VarEnv(VarEnv* varEnv, ActRec* fp);
+  explicit VarEnv(const VarEnv* varEnv, ActRec* fp);
   ~VarEnv();
 
   // Allocates a local VarEnv and attaches it to the existing FP.
@@ -165,7 +165,7 @@ class VarEnv {
   // Allocate a global VarEnv.  Initially not attached to any frame.
   static VarEnv* createGlobal();
 
-  VarEnv* clone(ActRec* fp);
+  VarEnv* clone(ActRec* fp) const;
 
   void suspend(ActRec* oldFP, ActRec* newFP);
   void enterFP(ActRec* oldFP, ActRec* newFP);

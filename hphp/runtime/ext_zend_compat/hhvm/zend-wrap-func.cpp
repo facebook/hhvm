@@ -88,7 +88,7 @@ TypedValue* zend_wrap_func(
       return_value_ptr,
       this_ptr_var.isNull() ? nullptr : this_ptr->m_data.pref,
       1
-	  TSRMLS_CC
+      TSRMLS_CC
     );
   } catch (...) {
     ZendExecutionStack::popHHVMStack();
@@ -103,7 +103,7 @@ TypedValue* zend_wrap_func(
 
   // Take care of freeing the args, tearing down the ActRec,
   // and moving the return value to the right place
-  frame_free_locals_inl(ar, numParams);
+  frame_free_locals_inl(ar, numParams, return_value);
   memcpy(&ar->m_r, return_value, sizeof(TypedValue));
   return_value->m_type = KindOfNull;
   if (isReturnRef) {

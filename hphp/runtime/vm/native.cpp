@@ -392,8 +392,8 @@ TypedValue* functionWrapper(ActRec* ar) {
     }
   }
 
-  frame_free_locals_no_this_inl(ar, func->numLocals());
   assert(rv.m_type != KindOfUninit);
+  frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
   tvCopy(rv, ar->m_r);
   return &ar->m_r;
 }
@@ -433,12 +433,12 @@ TypedValue* methodWrapper(ActRec* ar) {
     }
   }
 
-  if (isStatic) {
-    frame_free_locals_no_this_inl(ar, func->numLocals());
-  } else {
-    frame_free_locals_inl(ar, func->numLocals());
-  }
   assert(rv.m_type != KindOfUninit);
+  if (isStatic) {
+    frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
+  } else {
+    frame_free_locals_inl(ar, func->numLocals(), &rv);
+  }
   tvCopy(rv, ar->m_r);
   return &ar->m_r;
 }
@@ -450,14 +450,14 @@ TypedValue* unimplementedWrapper(ActRec* ar) {
     raise_error("Call to unimplemented native method %s::%s()",
                 cls->name()->data(), func->name()->data());
     if (func->isStatic()) {
-      frame_free_locals_no_this_inl(ar, func->numParams());
+      frame_free_locals_no_this_inl(ar, func->numParams(), nullptr);
     } else {
-      frame_free_locals_inl(ar, func->numParams());
+      frame_free_locals_inl(ar, func->numParams(), nullptr);
     }
   } else {
     raise_error("Call to unimplemented native function %s()",
                 func->name()->data());
-    frame_free_locals_no_this_inl(ar, func->numParams());
+    frame_free_locals_no_this_inl(ar, func->numParams(), nullptr);
   }
   ar->m_r.m_type = KindOfNull;
   return &ar->m_r;

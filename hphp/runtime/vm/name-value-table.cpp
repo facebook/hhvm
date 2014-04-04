@@ -62,10 +62,7 @@ NameValueTable::NameValueTable(ActRec* fp)
   }
 }
 
-/**
- * Clone NameValueTable.
- */
-NameValueTable::NameValueTable(NameValueTable& nvTable, ActRec* fp)
+NameValueTable::NameValueTable(const NameValueTable& nvTable, ActRec* fp)
   : m_fp(fp)
   , m_table(nullptr)
   , m_tabMask(0)

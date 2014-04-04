@@ -359,7 +359,7 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     if (i == 1) return okCmp(cint); // constraint class ptr
     break;
   case FunctionExitSurpriseHook:
-    if (i == 2) return okStore(cint); // return value
+    if (i == 1) return okStore(cint); // return value
     break;
   default:
     break;
@@ -443,9 +443,6 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
 
     case CallBuiltin:
       return srcIdx >= 1 && srcIdx < inst.numSrcs();
-
-    case FunctionExitSurpriseHook:
-      return srcIdx == 2;
 
     default:
       return false;

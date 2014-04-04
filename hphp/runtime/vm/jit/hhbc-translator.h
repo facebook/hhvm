@@ -675,8 +675,7 @@ private:
   SSATmp* emitMIterInitCommon(int offset, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
   void emitJmpSurpriseCheck(Block* catchBlock);
-  void emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator,
-                            Block* catchBlock);
+  void emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock);
   void classExistsImpl(ClassKind);
 
   folly::Optional<Type> interpOutputType(const NormalizedInstruction&,

@@ -93,7 +93,7 @@ struct NameValueTable : private boost::noncopyable {
   /**
    * Clone NameValueTable.
    */
-  explicit NameValueTable(NameValueTable& nvTable, ActRec* fp);
+  explicit NameValueTable(const NameValueTable& nvTable, ActRec* fp);
 
   ~NameValueTable();
 

@@ -383,7 +383,7 @@ O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
 O(JmpIndirect,                      ND, S(TCA),                          T|E) \
 O(CheckSurpriseFlags,               ND, NA,                              B|E) \
 O(SurpriseHook,                     ND, NA,                           Er|N|E) \
-O(FunctionExitSurpriseHook,         ND, S(FramePtr) S(StkPtr) S(Gen), Er|N|E) \
+O(FunctionExitSurpriseHook,         ND, S(FramePtr) S(Gen) S(StkPtr), Er|N|E) \
 O(ExitOnVarEnv,                     ND, S(FramePtr),                     B|E) \
 O(ReleaseVVOrExit,                  ND, S(FramePtr),                   B|N|E) \
 O(RaiseError,                       ND, S(Str),                     E|N|T|Er) \

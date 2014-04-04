@@ -1511,7 +1511,7 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
 
 void HhbcTranslator::emitContReturnControl(Block* catchBlock) {
   auto const sp = spillStack();
-  emitRetSurpriseCheck(cns(Type::InitNull), true, catchBlock);
+  emitRetSurpriseCheck(cns(Type::Uninit), catchBlock);
 
   auto const retAddr = gen(LdRetAddr, m_irb->fp());
   auto const fp = gen(FreeActRec, m_irb->fp());
@@ -3221,7 +3221,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(StRetVal, m_irb->fp(), retVal);
   }
 
-  emitRetSurpriseCheck(retVal, false, catchBlock);
+  emitRetSurpriseCheck(retVal, catchBlock);
 
   // Free ActRec, and return control to caller.
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
@@ -3242,8 +3242,7 @@ void HhbcTranslator::emitJmpSurpriseCheck(Block* catchBlock) {
                });
 }
 
-void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator,
-                                          Block* catchBlock) {
+void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock) {
   emitRB(Trace::RBTypeFuncExit, curFunc()->fullName());
 
   m_irb->ifThen([&](Block* taken) {
@@ -3251,10 +3250,9 @@ void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator,
                },
                [&] {
                  m_irb->hint(Block::Hint::Unlikely);
-                 gen(FunctionExitSurpriseHook, InGeneratorData(inGenerator),
-                     catchBlock, m_irb->fp(), m_irb->sp(), retVal);
+                 gen(FunctionExitSurpriseHook, InGeneratorData(inGenerator()),
+                     catchBlock, m_irb->fp(), retVal, m_irb->sp());
                });
-
 }
 
 void HhbcTranslator::emitSwitch(const ImmVector& iv,

@@ -353,8 +353,8 @@ static CallMap s_callMap {
 
     /* surprise flag support */
     {SurpriseHook, &EventHook::CheckSurprise, DNone, SSync, {}},
-    {FunctionExitSurpriseHook, &EventHook::onFunctionExit, DNone, SSync,
-                               {{SSA, 0}}},
+    {FunctionExitSurpriseHook, &EventHook::onFunctionExitJit, DNone, SSync,
+                               {{SSA, 0}, {TV, 1}}},
 };
 
 ArgGroup CallInfo::toArgGroup(const RegAllocInfo& regs,

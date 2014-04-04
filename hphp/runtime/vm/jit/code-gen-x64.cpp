@@ -5350,13 +5350,12 @@ void CodeGenerator::cgCheckSurpriseFlags(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgFunctionExitSurpriseHook(IRInstruction* inst) {
-  auto const sp     = srcLoc(1).reg();
-  auto const retVal = inst->src(2);
-  auto const retLoc = srcLoc(2);
+  auto const retVal = inst->src(1);
+  auto const retLoc = srcLoc(1);
+  auto const sp     = srcLoc(2).reg();
 
-  // To keep things simple in both the unwinder and the user profiler, we put
-  // the return value onto the vm stack where it was coming into the RetC
-  // instruction.
+  // To keep things simple in the unwinder, we put the return value onto
+  // the vm stack where it was coming into the RetC instruction.
   if (inst->extra<InGeneratorData>()->inGenerator) {
     // sp points at the stack frame base, so there are no locals or iterators
     // to skip.

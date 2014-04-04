@@ -263,7 +263,7 @@ VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
   TRACE(3, "Creating lazily attached VarEnv %p on stack\n", this);
 }
 
-VarEnv::VarEnv(VarEnv* varEnv, ActRec* fp)
+VarEnv::VarEnv(const VarEnv* varEnv, ActRec* fp)
   : m_nvTable(varEnv->m_nvTable, fp)
   , m_extraArgs(varEnv->m_extraArgs ? varEnv->m_extraArgs->clone(fp) : nullptr)
   , m_depth(1)
@@ -300,7 +300,7 @@ VarEnv* VarEnv::createLocal(ActRec* fp) {
   return smart_new<VarEnv>(fp, fp->getExtraArgs());
 }
 
-VarEnv* VarEnv::clone(ActRec* fp) {
+VarEnv* VarEnv::clone(ActRec* fp) const {
   return smart_new<VarEnv>(this, fp);
 }
 
@@ -438,7 +438,7 @@ void ExtraArgs::deallocate(ActRec* ar) {
   deallocate(ar->getExtraArgs(), numExtra);
 }
 
-ExtraArgs* ExtraArgs::clone(ActRec* ar) {
+ExtraArgs* ExtraArgs::clone(ActRec* ar) const {
   const int numExtra = ar->numArgs() - ar->m_func->numParams();
   auto ret = allocateUninit(numExtra);
   for (int i = 0; i < numExtra; ++i) {
@@ -4312,7 +4312,7 @@ OPTBLD_INLINE void ExecutionContext::iopRetC(IOP_ARGS) {
   assert(!m_fp->inGenerator());
 
   // Call the runtime helpers to free the local variables and iterators
-  frame_free_locals_inl(m_fp, m_fp->m_func->numLocals());
+  frame_free_locals_inl(m_fp, m_fp->m_func->numLocals(), m_stack.topTV());
   ActRec* sfp = m_fp->arGetSfp();
   // Memcpy the the return value on top of the activation record. This works
   // the same regardless of whether the return value is boxed or not.
@@ -6965,7 +6965,7 @@ const StaticString s_this("this");
 
 // The variable environment, extra args and all locals are teleported
 // from the ActRec on the evaluation stack to the suspended ActRec
-// on the stack.
+// on the heap.
 void ExecutionContext::fillContinuationVars(const Func* func,
                                             ActRec* origFp,
                                             ActRec* genFp) {
@@ -7060,7 +7060,7 @@ OPTBLD_INLINE void ExecutionContext::iopContSuspend(IOP_ARGS) {
   cont->suspend(offset, *m_stack.topC());
   m_stack.popTV();
 
-  EventHook::FunctionExit(m_fp);
+  EventHook::FunctionExit(m_fp, nullptr);
   ActRec* prevFp = m_fp->arGetSfp();
   if (prevFp == m_fp) {
     pc = nullptr;
@@ -7080,7 +7080,7 @@ OPTBLD_INLINE void ExecutionContext::iopContSuspendK(IOP_ARGS) {
   m_stack.popTV();
   m_stack.popTV();
 
-  EventHook::FunctionExit(m_fp);
+  EventHook::FunctionExit(m_fp, nullptr);
   ActRec* prevFp = m_fp->arGetSfp();
   pc = prevFp->m_func->getEntry() + m_fp->m_soff;
   m_fp = prevFp;
@@ -7093,7 +7093,7 @@ OPTBLD_INLINE void ExecutionContext::iopContRetC(IOP_ARGS) {
   tvSetIgnoreRef(*m_stack.topC(), cont->m_value);
   m_stack.popC();
 
-  EventHook::FunctionExit(m_fp);
+  EventHook::FunctionExit(m_fp, nullptr);
   ActRec* prevFp = m_fp->arGetSfp();
   if (prevFp == m_fp) {
     pc = nullptr;

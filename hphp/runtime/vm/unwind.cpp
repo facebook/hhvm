@@ -208,7 +208,7 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
     // object is destroyed. But we are leaving the generator function
     // now, so signal that to anyone who cares.
     try {
-      EventHook::FunctionExit(fp);
+      EventHook::FunctionExit(fp, nullptr);
     } catch (...) {} // As above, don't let new exceptions out of unwind.
   }
 
@@ -481,7 +481,7 @@ void unwindBuiltinFrame() {
   }
 
   // Free the locals and VarEnv if there is one
-  frame_free_locals_inl(fp, fp->m_func->numLocals());
+  frame_free_locals_inl(fp, fp->m_func->numLocals(), nullptr);
 
   // Tear down the frame
   Offset pc = -1;

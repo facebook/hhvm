@@ -1709,7 +1709,11 @@ inline DataType propPreStdclass(TypedValue& tvScratch,
   base->m_data.pobj = obj;
   obj->incRefCount();
   result = base;
-  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  // In PHP5, $undef->foo should warn, but $undef->foo['bar'] shouldn't.
+  // This is crazy, so warn for both if EnableHipHopSyntax is on
+  if (RuntimeOption::EnableHipHopSyntax) {
+    raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  }
   return KindOfObject;
 }
 

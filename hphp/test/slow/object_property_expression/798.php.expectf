@@ -1,5 +1,3 @@
-
-Warning: Creating default object from empty value in %s/test/slow/object_property_expression/798.php on line 22
 string(3) "bar"
 string(3) "foo"
 

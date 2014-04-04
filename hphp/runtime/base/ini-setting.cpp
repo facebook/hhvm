@@ -482,17 +482,19 @@ void IniSetting::SystemParserCallback::makeArray(Map &hash,
                                                  const std::string &offset,
                                                  const std::string &value) {
   assert(!offset.empty());
-  Map& val = hash;
+  Map* val = &hash;
   auto start = offset.c_str();
   auto p = start;
   bool last = false;
   do {
     std::string index(p);
     last = p + index.size() >= start + offset.size();
-    Map newval = last ? Map(value) : val.getDefault(index, Map::object());
-    val[index] = newval;
+
+    Map newval = last ? Map(value) : val->getDefault(index, Map::object());
+    val = &(*val)[index];
+    *val = newval;
+
     if (!last) {
-      val = newval;
       p += index.size() + 1;
     }
   } while (!last);

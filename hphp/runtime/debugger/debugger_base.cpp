@@ -15,8 +15,11 @@
 */
 
 #include "hphp/runtime/debugger/debugger_base.h"
+
 #include <utility>
 #include <vector>
+#include <boost/algorithm/string/replace.hpp>
+
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/break_point.h"
 #include "hphp/parser/scanner.h"
@@ -210,10 +213,11 @@ void Macro::load(Hdf node) {
 
 void Macro::save(std::ostream &stream, int key) {
   TRACE(2, "Macro::save\n");
-  stream << "hhvm.macro.visited." << key << ".name = " << m_name;
+  stream << "hhvm.macros[" << key << "][name] = " << m_name << std::endl;
   for (unsigned int i = 0; i < m_cmds.size(); i++) {
-    stream << "hhvm.macro.visited." << key << ".cmds[" << i << "] = "
-           << m_cmds[i];
+    stream << "hhvm.macros[" << key << "][cmds][" << i << "] = "
+           << '"' << boost::replace_all_copy(m_cmds[i], "\"", "\\\"") << '"'
+           << std::endl;
   }
 }
 

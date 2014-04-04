@@ -2404,12 +2404,15 @@ void DebuggerClient::loadConfig() {
   }
   BIND(macros, IniSetting::SetAndGet<Array>(
     [this](const Array& val) {
-      auto macro = std::make_shared<Macro>();
-      macro->m_name = val[s_name].asCStrRef().toCppString();
-      for (ArrayIter iter(val[s_cmds]); iter; ++iter) {
-        macro->m_cmds.push_back(iter.second().asCStrRef().toCppString());
+      for (ArrayIter iter(val); iter; ++iter) {
+        auto macro = std::make_shared<Macro>();
+        auto macroArr = iter.second().asCArrRef();
+        macro->m_name = macroArr[s_name].asCStrRef().toCppString();
+        for (ArrayIter cmditer(macroArr[s_cmds]); cmditer; ++cmditer) {
+          macro->m_cmds.push_back(cmditer.second().asCStrRef().toCppString());
+        }
+        m_macros.push_back(macro);
       }
-      m_macros.push_back(macro);
       return true;
     },
     [this]() {

@@ -118,7 +118,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     auto const nextOff = offset + instrLen(pc);
     auto const atLast = nextOff == fe.past();
 
-    if (instrIsInitialSuspend(*pc) && !atLast) {
+    if (instrMayBeInitialSuspend(*pc) && !atLast) {
       markBlock(nextOff);
     }
 

@@ -136,9 +136,6 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     auto cont = Create(origFp, offset);
     auto ar = cont->actRec();
     ar->setThisOrClass(origFp->getThisOrClass());
-    if (ar->hasThis()) {
-      ar->getThis()->incRefCount();
-    }
     return cont;
   }
 
@@ -156,7 +153,7 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   /**
    * Get adjusted generator function base() where the real user code starts.
    *
-   * Skips CreateCont, RetC and PopC opcodes.
+   * Skips CreateCont and PopC opcodes.
    */
   static Offset userBase(const Func* func) {
     assert(func->isGenerator());
@@ -164,10 +161,9 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
 
     DEBUG_ONLY auto op = reinterpret_cast<const Op*>(func->unit()->at(base));
     assert(op[0] == OpCreateCont);
-    assert(op[1 + sizeof(Offset)] == OpRetC);
-    assert(op[2 + sizeof(Offset)] == OpPopC);
+    assert(op[1] == OpPopC);
 
-    return base + 3 + sizeof(Offset);
+    return base + 2;
   }
 
   inline void preNext() {

@@ -2047,7 +2047,9 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
 
     auto const curUnit = fp->m_func->unit();
     auto const curOp = *reinterpret_cast<const Op*>(curUnit->at(pc));
-    auto const isReturning = curOp == Op::RetC || curOp == Op::RetV;
+    auto const isReturning =
+      curOp == Op::RetC || curOp == Op::RetV ||
+      curOp == Op::CreateCont || curOp == Op::AsyncSuspend;
 
     // Builtins and generators don't have a file and line number
     if (prevFp && !prevFp->m_func->isBuiltin() && !fp->inGenerator()) {
@@ -6970,15 +6972,12 @@ void ExecutionContext::fillContinuationVars(const Func* func,
                                             ActRec* origFp,
                                             ActRec* genFp) {
   for (Id i = 0; i < func->numLocals(); ++i) {
-    TypedValue* src = frame_local(origFp, i);
-    tvCopy(*src, *frame_local(genFp, i));
-    tvWriteUninit(src);
+    tvCopy(*frame_local(origFp, i), *frame_local(genFp, i));
   }
 
   // m_varEnv and m_extraArgs are in the same union
   assert((void*)&genFp->m_varEnv == (void*)&genFp->m_extraArgs);
   genFp->m_varEnv = origFp->m_varEnv;
-  origFp->m_varEnv = nullptr;
   if (UNLIKELY(genFp->hasVarEnv())) {
     genFp->getVarEnv()->suspend(origFp, genFp);
   }
@@ -6986,20 +6985,44 @@ void ExecutionContext::fillContinuationVars(const Func* func,
 
 OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   NEXT();
-  DECODE(Offset, offset);
+  assert(!m_fp->inGenerator());
 
-  const Func* func = m_fp->m_func;
-  offset += func->unit()->offsetOf(m_pc);
+  const auto func = m_fp->func();
+  const auto offset = m_fp->func()->unit()->offsetOf(pc);
 
+  // Create the Continuation object.
   c_Continuation* cont = static_cast<c_Continuation*>(func->isMethod()
     ? c_Continuation::CreateMeth(m_fp, offset)
     : c_Continuation::CreateFunc(m_fp, offset));
 
+  // Teleport local variables into the Continuation.
   fillContinuationVars(func, m_fp, cont->actRec());
 
-  TypedValue* ret = m_stack.allocTV();
-  ret->m_type = KindOfObject;
-  ret->m_data.pobj = cont;
+  // Call the FunctionExit hook. Keep the Continuation on the stack so that
+  // the unwinder could free it if the hook fails.
+  m_stack.pushObjectNoRc(cont);
+  EventHook::FunctionExit(m_fp, m_stack.top());
+  m_stack.discard();
+
+  // Grab caller info from ActRec.
+  ActRec* sfp = m_fp->arGetSfp();
+  uint soff = m_fp->m_soff;
+
+  // Free ActRec and store the return value.
+  m_stack.ndiscard(m_fp->m_func->numSlotsInFrame());
+  m_stack.ret();
+  tvCopy(make_tv<KindOfObject>(cont), *m_stack.topTV());
+  assert(m_stack.topTV() == &m_fp->m_r);
+
+  if (LIKELY(sfp != m_fp)) {
+    // Return control to the caller.
+    m_fp = sfp;
+    pc = m_fp->func()->unit()->entry() + m_fp->func()->base() + soff;
+  } else {
+    // No caller; terminate.
+    m_fp = nullptr;
+    pc = nullptr;
+  }
 }
 
 static inline c_Continuation* this_continuation(const ActRec* fp) {
@@ -7169,37 +7192,85 @@ OPTBLD_INLINE void ExecutionContext::iopAsyncAwait(IOP_ARGS) {
   m_stack.pushFalse();
 }
 
-OPTBLD_INLINE void ExecutionContext::iopAsyncESuspend(IOP_ARGS) {
-  NEXT();
-  DECODE(Offset, offset);
-  DECODE_IVA(iters);
-
-  const Func* func = m_fp->m_func;
+OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, Offset offset,
+                                                   int32_t iters) {
+  assert(!m_fp->inGenerator());
+  const auto func = m_fp->m_func;
   offset += func->unit()->offsetOf(m_pc);
 
+  // Pop the blocked dependency.
   Cell* value = m_stack.topC();
   assert(value->m_type == KindOfObject);
   assert(value->m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
 
   auto child = static_cast<c_WaitableWaitHandle*>(value->m_data.pobj);
   assert(!child->isFinished());
+  m_stack.discard();
 
+  // Create the AsyncFunctionWaitHandle object.
   auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(func->isMethod()
     ? c_AsyncFunctionWaitHandle::CreateMeth(m_fp, offset, child)
     : c_AsyncFunctionWaitHandle::CreateFunc(m_fp, offset, child));
 
-  m_stack.discard();
-
+  // Teleport local varibales into the AsyncFunctionWaitHandle.
   fillContinuationVars(func, m_fp, waitHandle->getActRec());
 
-  // copy the state of all the iterators at once
-  memcpy(frame_iter(waitHandle->getActRec(), iters-1),
-         frame_iter(m_fp, iters-1),
+  // Teleport iterators into the AsyncFunctionWaitHandle.
+  memcpy(frame_iter(waitHandle->getActRec(), iters - 1),
+         frame_iter(m_fp, iters - 1),
          iters * sizeof(Iter));
 
-  TypedValue* ret = m_stack.allocTV();
-  ret->m_type = KindOfObject;
-  ret->m_data.pobj = waitHandle;
+  // Call the FunctionExit hook. Keep the AsyncFunctionWaitHandle on the stack
+  // so that the unwinder could free it if the hook fails.
+  m_stack.pushObjectNoRc(waitHandle);
+  EventHook::FunctionExit(m_fp, m_stack.topTV());
+  m_stack.discard();
+
+  // Grab caller info from ActRec.
+  ActRec* sfp = m_fp->arGetSfp();
+  uint soff = m_fp->m_soff;
+
+  // Free ActRec and store the return value.
+  m_stack.ndiscard(m_fp->m_func->numSlotsInFrame());
+  m_stack.ret();
+  tvCopy(make_tv<KindOfObject>(waitHandle), *m_stack.topTV());
+  assert(m_stack.topTV() == &m_fp->m_r);
+
+  if (LIKELY(sfp != m_fp)) {
+    // Return control to the caller.
+    m_fp = sfp;
+    pc = m_fp->func()->unit()->entry() + m_fp->func()->base() + soff;
+  } else {
+    // No caller; terminate.
+    m_fp = nullptr;
+    pc = nullptr;
+  }
+}
+
+OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS, Offset offset) {
+  assert(m_fp->inGenerator());
+  assert(m_fp->arGetSfp() == m_fp);
+  auto cont = frame_continuation(m_fp);
+  cont->suspend(m_fp->func()->unit()->offsetOf(m_pc) + offset, *m_stack.topC());
+  m_stack.popTV();
+
+  EventHook::FunctionExit(m_fp, nullptr);
+  pc = nullptr;
+  m_fp = nullptr;
+}
+
+OPTBLD_INLINE void ExecutionContext::iopAsyncSuspend(IOP_ARGS) {
+  NEXT();
+  DECODE(Offset, offset);
+  DECODE_IVA(iters);
+
+  if (m_fp->inGenerator()) {
+    // suspend resumed execution
+    asyncSuspendR(IOP_PASS_ARGS, offset);
+  } else {
+    // suspend eager execution
+    asyncSuspendE(IOP_PASS_ARGS, offset, iters);
+  }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopAsyncResume(IOP_ARGS) {
@@ -7517,6 +7588,7 @@ inline void ExecutionContext::dispatchImpl(int numInstrs) {
     if (UNLIKELY(!pc)) {                                      \
       DEBUG_ONLY const Op op = Op::name;                      \
       assert(op == OpRetC || op == OpRetV ||                  \
+             op == OpAsyncSuspend || op == OpCreateCont ||    \
              op == OpContSuspend || op == OpContSuspendK ||   \
              op == OpContRetC || op == OpNativeImpl);         \
       m_fp = 0;                                               \

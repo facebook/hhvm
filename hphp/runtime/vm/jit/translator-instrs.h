@@ -166,7 +166,7 @@
   CASE(ContCurrent) \
   CASE(ContStopped) \
   CASE(AsyncAwait) \
-  CASE(AsyncESuspend) \
+  CASE(AsyncSuspend) \
   CASE(AsyncResume) \
   CASE(AsyncWrapResult) \
   CASE(Strlen) \

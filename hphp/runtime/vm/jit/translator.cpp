@@ -1313,7 +1313,7 @@ static const struct {
 
   /*** 14. Continuation instructions ***/
 
-  { OpCreateCont,  {None,             Stack1|Local, OutObject,         1 }},
+  { OpCreateCont,  {None,             Stack1,       OutNull,           1 }},
   { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
   { OpContRaise,   {Stack1,           None,         OutNone,          -1 }},
   { OpContSuspend, {Stack1,           Stack1,       OutUnknown,        0 }},
@@ -1329,8 +1329,7 @@ static const struct {
   /*** 15. Async functions instructions ***/
 
   { OpAsyncAwait,  {Stack1,           StackTop2,    OutAsyncAwait,     1 }},
-  { OpAsyncESuspend,
-                   {Stack1,           Stack1|Local, OutObject,         0 }},
+  { OpAsyncSuspend,{Stack1,           Stack1,       OutUnknown,        0 }},
   { OpAsyncResume, {None,             None,         OutNone,           0 }},
   { OpAsyncWrapResult,
                    {Stack1,           Stack1,       OutObject,         0 }},
@@ -2356,12 +2355,6 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
         if (op == OpSetN || op == OpSetOpN || op == OpIncDecN ||
             op == OpBindN || op == OpUnsetN || op == OpVGetN) {
           varEnvTaint = true;
-          continue;
-        }
-        if (op == OpCreateCont || op == OpAsyncESuspend) {
-          // CreateCont stores Uninit to all locals but NormalizedInstruction
-          // doesn't have enough output fields, so we special case it in
-          // analyze().
           continue;
         }
 
@@ -3471,7 +3464,9 @@ void Translator::analyzeCallee(TraceletContext& tas,
    */
   if (!subTrace->m_instrStream.last ||
       (subTrace->m_instrStream.last->op() != OpRetC &&
-       subTrace->m_instrStream.last->op() != OpRetV)) {
+       subTrace->m_instrStream.last->op() != OpRetV &&
+       subTrace->m_instrStream.last->op() != OpCreateCont &&
+       subTrace->m_instrStream.last->op() != OpAsyncSuspend)) {
     FTRACE(1, "analyzeCallee: callee did not end in a return\n");
     return;
   }
@@ -3740,15 +3735,6 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
                 o->rtt.outerType(), o->rtt.innerType(),
                 o->location.spaceName(), o->location.offset);
         tas.recordWrite(o);
-      }
-    }
-    if (ni->op() == OpCreateCont || ni->op() == OpAsyncESuspend) {
-      // CreateCont stores Uninit to all locals but NormalizedInstruction
-      // doesn't have enough output fields, so we special case it here.
-      auto const numLocals = ni->func()->numLocals();
-      for (unsigned i = 0; i < numLocals; ++i) {
-        tas.recordWrite(t.newDynLocation(Location(Location::Local, i),
-                                         KindOfUninit));
       }
     }
 

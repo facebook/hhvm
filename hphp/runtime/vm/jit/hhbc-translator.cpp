@@ -1477,31 +1477,36 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
 }
 
 void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
+  assert(!inGenerator());
+  assert(curFunc()->isGenerator());
   gen(ExitOnVarEnv, makeExitSlow(), m_irb->fp());
 
-  auto const cont = curFunc()->isMethod()
-    ? gen(
-        CreateContMeth,
-        m_irb->fp(),
-        cns(resumeOffset)
-      )
-    : gen(
-        CreateContFunc,
-        m_irb->fp(),
-        cns(resumeOffset)
-      );
+  // Create the Continuation object.
+  auto const func = curFunc();
+  auto const cont = func->isMethod()
+    ? gen(CreateContMeth, m_irb->fp(), cns(resumeOffset))
+    : gen(CreateContFunc, m_irb->fp(), cns(resumeOffset));
 
+  // Teleport local variables into the Continuation.
   SSATmp* contAR = gen(LdContActRec, Type::PtrToGen, cont);
-  for (int i = 0; i < curFunc()->numLocals(); ++i) {
-    // Copy the value of the local to the cont object and set the local to
-    // uninit so that we don't need to change refcounts. We pass
-    // DataTypeGeneric to ldLoc because we're just teleporting the value.
-    gen(StMem, contAR, cns(-cellsToBytes(i + 1)),
-        ldLoc(i, DataTypeSpecific));
-    gen(StLoc, LocalId(i), m_irb->fp(), cns(Type::Uninit));
+  for (int i = 0; i < func->numLocals(); ++i) {
+    gen(StMem, contAR, cns(-cellsToBytes(i + 1)), ldLoc(i, DataTypeGeneric));
   }
 
-  push(cont);
+  // Call the FunctionExit hook and put the return value on the stack so that
+  // the unwinder would decref it.
+  emitRetSurpriseCheck(cont, makeCatch({cont}));
+
+  // Grab caller info from ActRec, free ActRec, store the return value
+  // and return control to the caller.
+  gen(StRetVal, m_irb->fp(), cont);
+  SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
+  SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
+  SSATmp* fp = gen(FreeActRec, m_irb->fp());
+  gen(RetCtrl, InGeneratorData(false), sp, fp, retAddr);
+
+  // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
+  m_hasExit = true;
 }
 
 void HhbcTranslator::emitContReturnControl(Block* catchBlock) {
@@ -1659,53 +1664,64 @@ void HhbcTranslator::emitAsyncAwait() {
   push(gen(EqInt, state, cns(kSucceeded)));
 }
 
-void HhbcTranslator::emitAsyncESuspend(Offset resumeOffset, int numIters) {
-  auto const exitSlow = makeExitSlow();
+void HhbcTranslator::emitAsyncSuspendE(Offset resumeOffset, int numIters) {
+  assert(curFunc()->isAsync());
+  assert(!inGenerator());
+  gen(ExitOnVarEnv, makeExitSlow(), m_irb->fp());
+
   auto const catchBlock = makeCatch();
   auto const child = popC();
   assert(child->isA(Type::Obj));
 
-  gen(ExitOnVarEnv, exitSlow, m_irb->fp());
+  // Create the AsyncFunctionWaitHandle object.
+  auto const func = curFunc();
+  auto const waitHandle = func->isMethod()
+    ? gen(CreateAFWHMeth, catchBlock, m_irb->fp(), cns(resumeOffset), child)
+    : gen(CreateAFWHFunc, catchBlock, m_irb->fp(), cns(resumeOffset), child);
 
-  auto const waitHandle = curFunc()->isMethod()
-    ? gen(
-        CreateAFWHMeth,
-        catchBlock,
-        m_irb->fp(),
-        cns(resumeOffset),
-        child
-      )
-    : gen(
-        CreateAFWHFunc,
-        catchBlock,
-        m_irb->fp(),
-        cns(resumeOffset),
-        child
-      );
-
+  // Teleport local variables into the AsyncFunctionWaitHandle.
   SSATmp* asyncAR = gen(LdAFWHActRec, Type::PtrToGen, waitHandle);
-  for (int i = 0; i < curFunc()->numLocals(); ++i) {
+  for (int i = 0; i < func->numLocals(); ++i) {
     // We must generate an AssertLoc because we don't have tracelet
     // guards on the object type in these outer generator functions.
-    gen(AssertLoc, Type::Gen, LocalId(i), m_irb->fp());
-    // Copy the value of the local to the async function wait handle
-    // object and set the local to uninit so that we don't need to
-    // change refcounts.
-    gen(StMem, asyncAR, cns(-cellsToBytes(i + 1)),
-        ldLoc(i, DataTypeSpecific));
-    gen(StLoc, LocalId(i), m_irb->fp(), cns(Type::Uninit));
+    //gen(AssertLoc, Type::Gen, LocalId(i), m_irb->fp());
+    gen(StMem, asyncAR, cns(-cellsToBytes(i + 1)), ldLoc(i, DataTypeGeneric));
   }
 
+  // Teleport iterators into the AsyncFunctionWaitHandle.
   for (int i = 0; i < numIters; ++i) {
-    gen(
-      IterCopy,
-      m_irb->fp(),
-      asyncAR,
-      cns(curFunc()->numLocals() * sizeof(TypedValue) + (i+1) * sizeof(Iter))
-    );
+    gen(IterCopy, m_irb->fp(), asyncAR,
+        cns(func->numLocals() * sizeof(TypedValue) + (i + 1) * sizeof(Iter)));
   }
 
+  // Call the FunctionExit hook and put the AsyncFunctionWaitHandle
+  // on the stack so that the unwinder would decref it.
   push(waitHandle);
+  emitRetSurpriseCheck(waitHandle, makeCatch());
+  discard(1);
+
+  // Grab caller info from ActRec, free ActRec, store the return value
+  // and return control to the caller.
+  gen(StRetVal, m_irb->fp(), waitHandle);
+  SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
+  SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
+  SSATmp* fp = gen(FreeActRec, m_irb->fp());
+  gen(RetCtrl, InGeneratorData(false), sp, fp, retAddr);
+
+  // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
+  m_hasExit = true;
+}
+
+void HhbcTranslator::emitAsyncSuspendR(Offset resumeOffset) {
+  assert(curFunc()->isAsync());
+  assert(inGenerator());
+  auto catchBlock = makeCatchNoSpill();
+
+  // set value and offset
+  emitContSuspendImpl(resumeOffset);
+
+  // transfer control
+  emitContReturnControl(catchBlock);
 }
 
 void HhbcTranslator::emitAsyncWrapResult() {
@@ -4898,14 +4914,6 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
   auto* func = curFunc();
 
   switch (inst.op()) {
-    case OpCreateCont: case OpAsyncESuspend: {
-      auto numLocals = func->numLocals();
-      for (unsigned i = 0; i < numLocals; ++i) {
-        setLocType(i, Type::Uninit);
-      }
-      break;
-    }
-
     case OpSetN:
     case OpSetOpN:
     case OpIncDecN:

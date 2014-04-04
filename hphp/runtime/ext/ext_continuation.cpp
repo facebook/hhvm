@@ -154,6 +154,10 @@ void c_Continuation::copyContinuationVars(ActRec* srcFp) {
     tvDupFlattenVars(frame_local(srcFp, i), frame_local(dstFp, i));
   }
 
+  if (dstFp->hasThis()) {
+    dstFp->getThis()->incRefCount();
+  }
+
   if (LIKELY(srcFp->m_varEnv == nullptr)) {
     return;
   }

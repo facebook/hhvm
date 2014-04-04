@@ -215,10 +215,9 @@ The basic compilation strategy for continuations is to create bytecode functions
 consisting of two parts.
 
 The first part, executed when the continuation function is called, must consist
-of a CreateCont opcode followed by a RetC, which are responsible for suspending 
-execution state into a new Continuation object (includes resume offset pointing 
-to the start of the second part of the function) and returning it back to 
-the caller.
+of a CreateCont, which is responsible for suspending execution state into a new 
+Continuation object (includes resume offset pointing to the start of the second
+part of the function) and returning it back to the caller.
 
 The second part is where the real user-level code of the generator should be
 placed. ContEnter and ContRaise opcodes used in Continuation's next(), send()
@@ -238,10 +237,10 @@ second part is used when "suspended execution" is necessary (i.e. if it does
 an await on something that is not yet available). Both parts are required to
 'have the same effects', except the latter one works in a suspended mode.
 
-The first part uses AsyncESuspend opcode to suspend execution state into a new
+The first part uses AsyncSuspend opcode to suspend execution state into a new
 AsyncFunctionWaitHandle object. It includes the resume offset pointing to the
-second part of the function. The second part suspends using ContSuspend opcode
-and returns using ContRetC opcode.
+second part of the function. The second part also suspends using AsyncSuspend 
+opcode, but returns using ContRetC opcode.
 
 The async function implementation is still changing and the implementation may
 change significantly, so this spec is staying light on details for now.
@@ -862,7 +861,7 @@ to the first immediate argument, and %2 is used to refer to the second
 immediate argument.
 
 Note that the relative offset immediate used by a Jmp*, Iter*, MIter*, Switch,
-SSwitch, CreateCont or AsyncESuspend instruction is relative the beginning 
+SSwitch or AsyncSuspend instruction is relative the beginning
 of the instruction.
 
 There are numerous instructions that operate on different kinds of locations.
@@ -4059,13 +4058,16 @@ BreakTraceHint   []  ->  []
 14. Continuation creation and execution
 ---------------------------------------
 
-CreateCont  <rel offset>   []  ->  [C]
+CreateCont   []  ->  [C:Null]
 
-  Creates a Continuation object and pushes it on the stack. The Continuation
-  will capture all local variables in the current function, and marks them
-  uninitialized on the current frame. The continuation will also store
-  resume offset specified by %1.
-  
+  This instruction may only appear in bodies of continuations. Creates a new
+  Continuation object, moves all local variables from the current frame into
+  the object, sets resume offset at the next opcode and suspends execution by
+  transferring control flow back to the caller, returning the Continuation
+  object. Once the execution is resumed, the Null value sent by ContEnter
+  becomes available on the stack. It is illegal to resume newly constructed
+  Continuation using ContEnter with a non-null value or ContRaise opcodes.
+
 ContEnter   [C]  ->  []
 
   This instruction may only appear in non-static methods of the Continuation
@@ -4082,12 +4084,12 @@ ContRaise   [C:Obj]  ->  []
 
 ContSuspend   [C]  ->  [C]
 
-  This instruction may only appear in bodies of continuations and async
-  functions. Stores $1 in the continuation as the result of the current
-  iteration, sets resume offset at the next opcode and suspends execution
-  by transferring control flow back to the ContEnter or ContRaise. Once
-  the execution is resumed, the value sent by ContEnter becomes available
-  on the stack, or an exception sent by ContRaise is thrown.
+  This instruction may only appear in bodies of continuations. Stores $1 
+  in the continuation as the result of the current iteration, sets resume 
+  offset at the next opcode and suspends execution by transferring control 
+  flow back to the ContEnter or ContRaise. Once the execution is resumed, 
+  the value sent by ContEnter becomes available on the stack, or 
+  an exception sent by ContRaise is thrown.
 
 ContSuspendK   [C C]  ->  []
 
@@ -4148,25 +4150,31 @@ AsyncAwait   [C]  ->  [C C:Bool]
   pushes the result value from the WaitHandle, and then pushes true. If $1
   failed, this instruction throws the exception from the WaitHandle.
 
-AsyncESuspend  <rel offset> <number of iterators>   [C:Obj]  ->  [C:Obj]
+AsyncSuspend  <rel offset> <number of iterators>   [C:Obj]  ->  [C]
 
-  Suspends an eagerly executed async function into an AsyncFunctionWaitHandle 
-  object. The AsyncFunctionWaitHandle object will capture all local variables
-  and the first %2 iterators in the current eagerly executed async function,
-  and mark them uninitialized on the current frame. The object will store
-  a reference to the associated resumable async function and a resume offset 
-  %1 to be used to resume the execution once the WaitHandle object given 
-  by $1 is finished.
+  This instruction may only appear in bodies of async functions. Suspends
+  execution of the current async function.
 
-  If $1 is not a WaitHandle, or is a WaitHandle that is already finished, the
-  behavior is undefined. This opcode must only occur in the eagerly executed
-  part of the async function. The value this opcode pushes on the stack must 
-  be passed to a RetC opcode.
+  If the async function is executed eagerly, creates an AsyncFunctionWaitHandle
+  object, moves all local variables and first %2 iterators from the current
+  frame into the object, sets resume offset at the opcode specified by %1,
+  marks the AsyncFunctionWaitHandle as blocked on the WaitHandle provided
+  by $1 and suspends execution by transferring control flow back to the caller,
+  returning the AsyncFunctionWaitHandle object.
+
+  If the async function is executed in resumed mode, sets resume offset at
+  the next opcode (must be equal to %1), marks the AsyncFunctionWaitHandle
+  as blocked on the WaitHandle provided by $1 and suspends execution by
+  transferring control flow back to the scheduler.
+  
+  Once the execution is resumed, the result of the WaitHandle provided by $1
+  becomes available on the stack. If $1 is not a WaitHandle, or is a WaitHandle
+  that is already finished, the behavior is undefined.
 
 AsyncResume   []  ->  []
 
   No operation. Used to teach hhbbc that an exception may be thrown right after
-  unreachable ContSuspend. Must appear as the target of AsyncESuspend opcode.
+  unreachable ContSuspend. Must appear as the target of AsyncSuspend opcode.
 
 AsyncWrapResult   [C]  ->  [C:Obj]
 

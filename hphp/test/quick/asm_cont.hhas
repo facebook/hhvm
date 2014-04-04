@@ -26,9 +26,7 @@ F2:
 }
 
 .function R() isGenerator {
-  CreateCont L0
-  RetC
-L0:
+  CreateCont
   PopC
   Int 1
   ContSuspend

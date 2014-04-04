@@ -147,7 +147,9 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
   auto const func = fp->m_func;
   auto const curOp = *reinterpret_cast<const Op*>(pc);
   auto const unwindingGeneratorFrame = fp->inGenerator();
-  auto const unwindingReturningFrame = curOp == OpRetC || curOp == OpRetV;
+  auto const unwindingReturningFrame =
+    curOp == OpRetC || curOp == OpRetV ||
+    curOp == OpCreateCont || curOp == OpAsyncSuspend;
   auto const prevFp = fp->arGetSfp();
   auto const soff = fp->m_soff;
 

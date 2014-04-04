@@ -4973,15 +4973,12 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         e.JmpNZ(resume);
 
         // Suspend if it is not finished.
+        e.AsyncSuspend(m_awaitLabels[await], m_pendingIters.size());
+
+        // Define resume point.
         if (m_inGenerator) {
-          // Suspend resumed execution.
-          e.ContSuspend();
           m_awaitLabels[await].set(e);
           e.AsyncResume();
-        } else {
-          // Suspend eagerly executed async function.
-          e.AsyncESuspend(m_awaitLabels[await], m_pendingIters.size());
-          e.RetC();
         }
 
         resume.set(e);
@@ -6885,9 +6882,7 @@ void EmitterVisitor::emitGeneratorMethod(MethodStatementPtr meth) {
   emitMethodPrologue(e, meth);
 
   // emit code to create generator object
-  Label topOfResumedBody;
-  e.CreateCont(topOfResumedBody);
-  e.RetC();
+  e.CreateCont();
 
   // emit generator body
   {
@@ -6898,7 +6893,6 @@ void EmitterVisitor::emitGeneratorMethod(MethodStatementPtr meth) {
     assert(!m_inGenerator);
     m_inGenerator = true;
 
-    topOfResumedBody.set(e);
     e.PopC();
     visit(meth->getStmts());
     assert(m_evalStack.size() == 0);

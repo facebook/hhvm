@@ -60,7 +60,6 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_Exception("Exception");
-const StaticString s_Continuation("Continuation");
 const StaticString s_empty("");
 const StaticString s_construct("__construct");
 
@@ -1832,14 +1831,8 @@ void in(ISS& env, const bc::CreateCl& op) {
 }
 
 void in(ISS& env, const bc::CreateCont& op) {
-  // Resume point of this Continuation.
+  // First resume is always next() which pushes null.
   push(env, TInitNull);
-  env.propagate(*op.target, env.state);
-  popC(env);
-
-  // Normal execution flow.
-  unsetLocals(env);
-  push(env, objExact(env.index.builtin_class(s_Continuation.get())));
 }
 
 void in(ISS& env, const bc::ContEnter&) { popC(env); }
@@ -1880,7 +1873,7 @@ void in(ISS& env, const bc::AsyncWrapResult&) {
   push(env, wait_handle(env.index, t));
 }
 
-void in(ISS& env, const bc::AsyncESuspend& op) {
+void in(ISS& env, const bc::AsyncSuspend& op) {
   auto const t = popC(env);
 
   // Resume point of this async function.
@@ -1899,16 +1892,9 @@ void in(ISS& env, const bc::AsyncESuspend& op) {
     }
   }
 
-  /*
-   * A suspended async function WaitHandle must end up returning
-   * whatever type we infer the eagerly executed part of the function
-   * will return, so we don't want it to influence that type.  Using
-   * WaitH<Bottom> handles this, but note that it relies on the rule
-   * that the only thing you can do with the output of this opcode
-   * is pass it to RetC.
-   */
-  unsetLocals(env);
-  push(env, wait_handle(env.index, TBottom));
+  // HACK: next opcode is not reachable, but nofallthrough() requires deeper
+  //       support and this hack is going away in a couple of diffs anyway
+  push(env, TBottom);
 }
 
 void in(ISS& env, const bc::AsyncResume&)  {

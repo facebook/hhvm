@@ -1152,48 +1152,54 @@ OpcodeParserMap opcode_parsers;
 #define NUM_POP_CMANY immIVA /* number of arguments */
 #define NUM_POP_SMANY vecImmStackValues
 
-#define O(name, imm, pop, push, flags)                            \
-  void parse_opcode_##name(AsmState& as) {                        \
-    UNUSED int64_t immIVA = -1;                                   \
-    UNUSED auto const thisOpcode = Op::name;                      \
-    UNUSED const Offset curOpcodeOff = as.ue->bcPos();            \
-    std::vector<std::pair<std::string, Offset> > labelJumps;      \
-                                                                  \
-    TRACE(                                                        \
-      4,                                                          \
-      "%d\t[%s] %s\n",                                            \
-      as.in.getLineNumber(),                                      \
-      as.displayStackDepth().c_str(),                             \
-      #name                                                       \
-    );                                                            \
-                                                                  \
-    if (isFCallStar(Op##name)) {                                  \
-      as.endFpi();                                                \
-    }                                                             \
-                                                                  \
-    as.ue->emitOp(Op##name);                                      \
-                                                                  \
-    IMM_##imm;                                                    \
-                                                                  \
-    int stackDelta = NUM_PUSH_##push - NUM_POP_##pop;             \
-    as.adjustStack(stackDelta);                                   \
-                                                                  \
-    if (isFPush(Op##name)) {                                      \
-      as.beginFpi(curOpcodeOff);                                  \
-    }                                                             \
-                                                                  \
-    for (auto& kv : labelJumps) {                                 \
-      as.addLabelJump(kv.first, kv.second, curOpcodeOff);         \
-    }                                                             \
-                                                                  \
-    /* Stack depth should be 0 after RetC or RetV. */             \
-    if (thisOpcode == OpRetC || thisOpcode == OpRetV) {           \
-      as.enforceStackDepth(0);                                    \
-    }                                                             \
-                                                                  \
-    if (instrFlags(thisOpcode) & InstrFlags::TF) {                \
-      as.enterUnreachableRegion();                                \
-    }                                                             \
+#define O(name, imm, pop, push, flags)                                 \
+  void parse_opcode_##name(AsmState& as) {                             \
+    UNUSED int64_t immIVA = -1;                                        \
+    UNUSED auto const thisOpcode = Op::name;                           \
+    UNUSED const Offset curOpcodeOff = as.ue->bcPos();                 \
+    std::vector<std::pair<std::string, Offset> > labelJumps;           \
+                                                                       \
+    TRACE(                                                             \
+      4,                                                               \
+      "%d\t[%s] %s\n",                                                 \
+      as.in.getLineNumber(),                                           \
+      as.displayStackDepth().c_str(),                                  \
+      #name                                                            \
+    );                                                                 \
+                                                                       \
+    if (isFCallStar(Op##name)) {                                       \
+      as.endFpi();                                                     \
+    }                                                                  \
+                                                                       \
+    as.ue->emitOp(Op##name);                                           \
+                                                                       \
+    IMM_##imm;                                                         \
+                                                                       \
+    int stackDelta = NUM_PUSH_##push - NUM_POP_##pop;                  \
+    as.adjustStack(stackDelta);                                        \
+                                                                       \
+    if (isFPush(Op##name)) {                                           \
+      as.beginFpi(curOpcodeOff);                                       \
+    }                                                                  \
+                                                                       \
+    for (auto& kv : labelJumps) {                                      \
+      as.addLabelJump(kv.first, kv.second, curOpcodeOff);              \
+    }                                                                  \
+                                                                       \
+    /* Stack depth should be 0 after RetC or RetV. */                  \
+    if (thisOpcode == OpRetC || thisOpcode == OpRetV) {                \
+      as.enforceStackDepth(0);                                         \
+    }                                                                  \
+                                                                       \
+    /* Stack depth should be 1 after resume from suspend. */           \
+    if (thisOpcode == OpCreateCont || thisOpcode == OpAsyncSuspend ||  \
+        thisOpcode == OpContSuspend || thisOpcode == OpContSuspendK) { \
+      as.enforceStackDepth(1);                                         \
+    }                                                                  \
+                                                                       \
+    if (instrFlags(thisOpcode) & InstrFlags::TF) {                     \
+      as.enterUnreachableRegion();                                     \
+    }                                                                  \
   }
 
 OPCODES

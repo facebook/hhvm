@@ -2112,7 +2112,8 @@ MCGenerator::translateTracelet(Tracelet& t) {
       if (!enabled) return;
       if (t.m_sk.offset() != t.func()->base()) return;
       if (auto last = t.m_instrStream.last) {
-        if (last->op() != OpRetC && last->op() != OpRetV) {
+        if (last->op() != OpRetC && last->op() != OpRetV &&
+            last->op() != OpCreateCont && last->op() != OpAsyncSuspend) {
           return;
         }
       }

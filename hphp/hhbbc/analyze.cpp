@@ -44,6 +44,7 @@ TRACE_SET_MOD(hhbbc);
 
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
+const StaticString s_Continuation("Continuation");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -236,6 +237,13 @@ FuncAnalysis do_analyze(const Index& index,
   if (ctx.func->isAsync) {
     ai.inferredReturn = union_of(std::move(ai.inferredReturn),
                                  wait_handle(index, TBottom));
+  }
+
+  /**
+   * Generators always return Continuation object.
+   */
+  if (ctx.func->isGenerator) {
+    ai.inferredReturn = objExact(index.builtin_class(s_Continuation.get()));
   }
 
   /*

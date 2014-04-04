@@ -719,7 +719,7 @@ enum class BareThisOp : uint8_t {
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
   O(CreateCl,        TWO(IVA,SA),      CVMANY,          ONE(CV),    NF) \
-  O(CreateCont,      ONE(BA),          NOV,             ONE(CV),    NF) \
+  O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
   O(ContEnter,       NA,               ONE(CV),         NOV,        CF) \
   O(ContRaise,       NA,               ONE(CV),         NOV,        CF) \
   O(ContSuspend,     NA,               ONE(CV),         ONE(CV),    NF) \
@@ -732,7 +732,7 @@ enum class BareThisOp : uint8_t {
   O(ContStopped,     NA,               NOV,             NOV,        NF) \
   O(ContHandle,      NA,               ONE(CV),         NOV,        CF_TF) \
   O(AsyncAwait,      NA,               ONE(CV),         TWO(CV,CV), NF) \
-  O(AsyncESuspend,   TWO(BA,IVA),      ONE(CV),         ONE(CV),    NF) \
+  O(AsyncSuspend,    TWO(BA,IVA),      ONE(CV),         ONE(CV),    CF) \
   O(AsyncResume,     NA,               NOV,             NOV,        NF) \
   O(AsyncWrapResult, NA,               ONE(CV),         ONE(CV),    NF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
@@ -1015,8 +1015,8 @@ constexpr inline bool instrIsControlFlow(Op opcode) {
   return (instrFlags(opcode) & CF) != 0;
 }
 
-constexpr inline bool instrIsInitialSuspend(Op opcode) {
-  return opcode == Op::AsyncESuspend || opcode == Op::CreateCont;
+constexpr inline bool instrMayBeInitialSuspend(Op opcode) {
+  return opcode == Op::AsyncSuspend || opcode == Op::CreateCont;
 }
 
 constexpr inline bool isUnconditionalJmp(Op opcode) {

@@ -212,8 +212,7 @@ void shuffleExtraArgsMayUseVV(ActRec* ar);
 void shuffleExtraArgsVariadic(ActRec* ar);
 void shuffleExtraArgsVariadicAndVV(ActRec* ar);
 
-void raiseMissingArgument(const char* name, int expected,
-                          int got, bool variadic);
+void raiseMissingArgument(const Func* func, int got);
 
 RDS::Handle lookupClsRDSHandle(const StringData* name);
 

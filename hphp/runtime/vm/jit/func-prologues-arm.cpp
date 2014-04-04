@@ -249,10 +249,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   if (!func->isCPPBuiltin()) {
     for (auto i = nPassed; i < numNonVariadicParams; ++i) {
       if (paramInfo[i].funcletOff() == InvalidAbsoluteOffset) {
-        a.  Mov  (argReg(0), func->name()->data());
-        a.  Mov  (argReg(1), numNonVariadicParams);
-        a.  Mov  (argReg(2), i);
-        a.  Mov  (argReg(3), func->hasVariadicCaptureParam());
+        a.  Mov  (argReg(0), func);
+        a.  Mov  (argReg(1), i);
         auto fixupAddr = emitCall(a, CppCall(JIT::raiseMissingArgument));
         mcg->fixupMap().recordFixup(fixupAddr, fixup);
         break;

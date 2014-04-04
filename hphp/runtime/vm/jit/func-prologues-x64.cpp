@@ -313,11 +313,12 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   if (!func->isCPPBuiltin()) {
     for (int i = nPassed; i < numNonVariadicParams; ++i) {
       if (paramInfo[i].funcletOff() == InvalidAbsoluteOffset) {
-        a.  emitImmReg((intptr_t)func->name()->data(), argNumToRegName[0]);
-        a.  emitImmReg(numNonVariadicParams, argNumToRegName[1]);
-        a.  emitImmReg(i, argNumToRegName[2]);
-        a.  emitImmReg(func->hasVariadicCaptureParam(), argNumToRegName[3]);
-        emitCall(a, (TCA)raiseMissingArgument);
+        if (false) { // typecheck
+          JIT::raiseMissingArgument((const Func*) nullptr, 0);
+        }
+        a.  emitImmReg((intptr_t)func, argNumToRegName[0]);
+        a.  emitImmReg(i, argNumToRegName[1]);
+        emitCall(a, TCA(JIT::raiseMissingArgument));
         mcg->fixupMap().recordFixup(a.frontier(), fixup);
         break;
       }

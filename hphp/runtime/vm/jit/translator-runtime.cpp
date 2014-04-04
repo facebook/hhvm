@@ -1033,13 +1033,14 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
 
 #undef SHUFFLE_EXTRA_ARGS_PRELUDE
 
-void raiseMissingArgument(const char* name, int expected,
-                          int got, bool variadic) {
+void raiseMissingArgument(const Func* func, int got) {
+  const auto expected = func->numNonVariadicParams();
+  const auto variadic = func->hasVariadicCaptureParam();
   if (expected == 1) {
-    raise_warning(Strings::MISSING_ARGUMENT, name,
+    raise_warning(Strings::MISSING_ARGUMENT, func->name()->data(),
                   variadic ? "at least" : "exactly", got);
   } else {
-    raise_warning(Strings::MISSING_ARGUMENTS, name,
+    raise_warning(Strings::MISSING_ARGUMENTS, func->name()->data(),
                   variadic ? "at least" : "exactly", expected, got);
   }
 }

@@ -127,7 +127,7 @@ public:
    */
   size_t vsize() const;
 
-  /**
+  /*
    * getValueRef() gets a reference to value at position "pos".
    */
   const Variant& getValueRef(ssize_t pos) const;
@@ -294,8 +294,6 @@ public:
    * past the last element, otherwise returns true.
    */
   bool advanceMArrayIter(MArrayIter& fp);
-
-  const Variant& endRef();
 
   ArrayData* escalateForSort();
   void ksort(int sort_flags, bool ascending);

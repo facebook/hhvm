@@ -620,13 +620,6 @@ ArrayData *ArrayData::Dequeue(ArrayData* a, Variant &value) {
 
 //////////////////////////////////////////////////////////////////////
 
-const Variant& ArrayData::endRef() {
-  if (m_pos != invalid_index) {
-    return getValueRef(iter_end());
-  }
-  throw FatalErrorException("invalid ArrayData::m_pos");
-}
-
 void ArrayData::Ksort(ArrayData*, int sort_flags, bool ascending) {
   throw FatalErrorException("Unimplemented ArrayData::ksort");
 }

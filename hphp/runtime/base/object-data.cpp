@@ -355,7 +355,9 @@ void ObjectData::o_setArray(const Array& properties) {
     }
 
     const Variant& secondRef = iter.secondRef();
-    setProp(ctx, k.get(), (TypedValue*)(&secondRef),
+    setProp(ctx,
+            k.get(),
+            const_cast<TypedValue*>(secondRef.asTypedValue()),
             secondRef.isReferenced());
   }
 }

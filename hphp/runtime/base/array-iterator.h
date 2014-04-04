@@ -165,15 +165,28 @@ struct ArrayIter {
     const_cast<ArrayData*>(ad)->nvGetKey(out, m_pos);
   }
 
+  /*
+   * Retrieve the value at the current position.
+   */
   Variant second();
+
+  /*
+   * Get a reference to the value for the current iterator position.
+   * secondRef() has slightly different behavior than second() with
+   * regard to collection types.  Use secondRefPlus when you need
+   * support for these cases.  And note that unlike second(),
+   * secondRefPlus() will throw for non-collection types.
+   */
   const Variant& secondRef();
   const Variant& secondRefPlus();
+
   TypedValue* nvSecond() {
     const ArrayData* ad = getArrayData();
     assert(ad && m_pos != ArrayData::invalid_index);
     return const_cast<ArrayData*>(ad)->nvGetValueRef(m_pos);
   }
-  /**
+
+  /*
    * Used by the ext_zend_compat layer.
    * Identical to nvSecond but the output is boxed.
    */

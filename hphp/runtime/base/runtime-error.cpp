@@ -199,11 +199,11 @@ void raise_notice(const char *fmt, ...) {
   raise_message(ErrorConstants::ErrorModes::NOTICE, msg);
 }
 
-void raise_deprecation(const std::string &msg) {
+void raise_deprecated(const std::string &msg) {
   raise_message(ErrorConstants::ErrorModes::PHP_DEPRECATED, msg);
 }
 
-void raise_deprecation(const char *fmt, ...) {
+void raise_deprecated(const char *fmt, ...) {
   std::string msg;
   va_list ap;
   va_start(ap, fmt);

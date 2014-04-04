@@ -51,7 +51,8 @@ add_subdirectory(zend)
 
 add_subdirectory(hhvm)
 
-if (NOT "$ENV{HPHP_NOTEST}" STREQUAL "1")
+option(TEST_BIN "Create the HHVM test binary" OFF)
+if (TEST_BIN)
 	add_subdirectory(test)
 endif ()
 

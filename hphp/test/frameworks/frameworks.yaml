@@ -395,4 +395,3 @@
       - zf2/tests/ZendTest/Code/Generator/ParameterGeneratorTest.php
       - zf2/tests/ZendTest/Code/Generator/PropertyGeneratorTest.php
       - zf2/tests/ZendTest/Code/Generator/ValueGeneratorTest.php
-

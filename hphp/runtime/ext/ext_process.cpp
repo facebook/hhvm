@@ -895,7 +895,8 @@ Variant f_proc_open(const String& cmd, const Array& descriptorspec, VRefParam pi
   _exit(127);
 }
 
-bool f_proc_terminate(const Resource& process, const Variant& signal /* = null_variant */) {
+bool f_proc_terminate(const Resource& process,
+                      const Variant& signal /* = null_variant */) {
   int signal_int = SIGTERM;
 
   if (!signal.isNull()) {

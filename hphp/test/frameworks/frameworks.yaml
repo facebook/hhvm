@@ -319,7 +319,7 @@
     url: https://github.com/cboden/Ratchet.git
     # "stable" might be 0.3, but master seems reasonable to test against
     branch: master
-    commit: f2c67b346084e70c66922cde6af909b74c2a1ca8
+    commit: 006a9573cee3d30a721f137facd5467f4e63bed8
     install_root: ratchet
     test_root: ratchet
   reactphp:
@@ -395,3 +395,4 @@
       - zf2/tests/ZendTest/Code/Generator/ParameterGeneratorTest.php
       - zf2/tests/ZendTest/Code/Generator/PropertyGeneratorTest.php
       - zf2/tests/ZendTest/Code/Generator/ValueGeneratorTest.php
+

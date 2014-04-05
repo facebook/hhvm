@@ -12,6 +12,14 @@ class Framework {
   private string $stats_file;
   private string $tests_file;
   private string $test_files_file;
+  private string $json_log_file;
+
+  // Used to store the location of the temporary
+  // json files that will be used to concat together
+  // into the main $json_log_file after all tests
+  // are run. These files are needed to maintain our parallel
+  // nature of the runner.
+  private Vector<string> $temp_json_log_files;
 
   private string $test_path;
   private string $test_name_pattern;
@@ -156,7 +164,8 @@ class Framework {
     return $this->current_test_statuses;
   }
 
-  public function getTestCommand(string $test): string {
+  public function getTestCommand(string $test,
+                                 string $temp_json_log_file): string {
     $command = '';
     if ($this->env_vars !== null) {
       foreach($this->env_vars as $var => $val) {
@@ -165,6 +174,8 @@ class Framework {
     }
 
     $command .= str_replace("%test%", $test, $this->test_command);
+    $this->temp_json_log_files[] = $temp_json_log_file;
+    $command = str_replace("%json_file%", $temp_json_log_file, $command);
     // Replace any \ with \\ in order to run via --filter
     // method in phpunit
     $command = str_replace("\\", "\\\\", $command);
@@ -273,6 +284,7 @@ class Framework {
     } else {
       $this->test_command .= " --debug";
     }
+    $this->test_command .= " --log-json %json_file%";
     if ($this->config_file !== null) {
       $this->test_command .= " -c ".$this->config_file;
     }
@@ -484,6 +496,7 @@ class Framework {
     unlink($this->errors_file);
     unlink($this->stats_file);
     unlink($this->fatals_file);
+    unlink($this->json_log_file);
 
     if (Options::$generate_new_expect_file) {
       unlink($this->expect_file);

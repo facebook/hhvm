@@ -18,12 +18,15 @@ class Runner {
   private string $diff_information = "";
   private string $stat_information = "";
 
+  private string $temp_json_log_file = "";
+
   private array<resource> $pipes = null;
   private resource $process = null;
   private string $actual_test_command = "";
 
   public function __construct(public Framework $framework, string $p = "") {
     $this->name = $p === "" ? $this->framework->getName() : $p;
+    $this->temp_json_log_file = tempnam("/tmp", $this->framework->getName());
   }
 
   public function run(): int {
@@ -394,7 +397,8 @@ class Runner {
   }
 
   private function initialize(): bool {
-    $this->actual_test_command = $this->framework->getTestCommand($this->name);
+    $this->actual_test_command =
+      $this->framework->getTestCommand($this->name, $this->temp_json_log_file);
     verbose("Command: ".$this->actual_test_command."\n", Options::$verbose);
 
     $descriptorspec = array(

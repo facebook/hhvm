@@ -176,11 +176,6 @@ void SessionRequestData::requestShutdownImpl() {
   m_id.reset();
 }
 
-void ext_session_request_shutdown() {
-  f_session_write_close();
-  s_session->requestShutdownImpl();
-}
-
 std::vector<SessionModule*> SessionModule::RegisteredModules;
 
 /*
@@ -1501,67 +1496,21 @@ static int php_session_cache_limiter() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int64_t f_session_status() {
+static int64_t HHVM_FUNCTION(session_status) {
   return PS(session_status);
 }
 
-void f_session_set_cookie_params(int64_t lifetime,
-                                 const String& path /* = null_string */,
-                                 const String& domain /* = null_string */,
-                                 const Variant& secure /* = null */,
-                                 const Variant& httponly /* = null */) {
-  if (PS(use_cookies)) {
-    HHVM_FN(ini_set)("session.cookie_lifetime", lifetime);
-    if (!path.isNull()) {
-      HHVM_FN(ini_set)("session.cookie_path", path);
-    }
-    if (!domain.isNull()) {
-      HHVM_FN(ini_set)("session.cookie_domain", domain);
-    }
-    if (!secure.isNull()) {
-      HHVM_FN(ini_set)("session.cookie_secure", secure.toBoolean());
-    }
-    if (!httponly.isNull()) {
-      HHVM_FN(ini_set)("session.cookie_httponly", httponly.toBoolean());
-    }
-  }
-}
-
-const StaticString
-  s_lifetime("lifetime"),
-  s_path("path"),
-  s_domain("domain"),
-  s_secure("secure"),
-  s_httponly("httponly");
-
-Array f_session_get_cookie_params() {
-  return make_map_array(
-    s_lifetime, PS(cookie_lifetime),
-    s_path,     String(PS(cookie_path)),
-    s_domain,   String(PS(cookie_domain)),
-    s_secure,   PS(cookie_secure),
-    s_httponly, PS(cookie_httponly)
-  );
-}
-
-String f_session_name(const String& newname /* = null_string */) {
-  String oldname = String(PS(session_name));
-  if (!newname.isNull()) {
-    HHVM_FN(ini_set)("session.name", newname);
-  }
-  return oldname;
-}
-
-Variant f_session_module_name(const String& newname /* = null_string */) {
+static Variant HHVM_FUNCTION(session_module_name,
+                const Variant& newname /* = null_string */) {
   String oldname;
   if (PS(mod) && PS(mod)->getName()) {
     oldname = String(PS(mod)->getName(), CopyString);
   }
 
   if (!newname.isNull()) {
-    if (!SessionModule::Find(newname.data())) {
+    if (!SessionModule::Find(newname.toString().data())) {
       raise_warning("Cannot find named PHP session module (%s)",
-                    newname.data());
+                    newname.toString().data());
       return false;
     }
     if (mod_is_open()) {
@@ -1569,13 +1518,13 @@ Variant f_session_module_name(const String& newname /* = null_string */) {
     }
     PS(mod_data) = false;
 
-    HHVM_FN(ini_set)("session.save_handler", newname);
+    HHVM_FN(ini_set)("session.save_handler", newname.toString());
   }
 
   return oldname;
 }
 
-bool HHVM_FUNCTION(session_set_save_handler,
+static bool HHVM_FUNCTION(session_set_save_handler,
     const Object& sessionhandler,
     bool register_shutdown /* = true */) {
 
@@ -1612,18 +1561,7 @@ bool HHVM_FUNCTION(session_set_save_handler,
   return true;
 }
 
-String f_session_save_path(const String& newname /* = null_string */) {
-  if (!newname.isNull()) {
-    if (memchr(newname.data(), '\0', newname.size()) != NULL) {
-      raise_warning("The save_path cannot contain NULL characters");
-      return false;
-    }
-    HHVM_FN(ini_set)("session.save_path", newname);
-  }
-  return String(PS(save_path));
-}
-
-String f_session_id(const String& newid /* = null_string */) {
+static String HHVM_FUNCTION(session_id, const Variant& newid /* = null_string */) {
   String ret = PS(id);
   if (ret.isNull()) {
     ret = empty_string;
@@ -1636,7 +1574,7 @@ String f_session_id(const String& newid /* = null_string */) {
   return ret;
 }
 
-bool f_session_regenerate_id(bool delete_old_session /* = false */) {
+static bool HHVM_FUNCTION(session_regenerate_id, bool delete_old_session /* = false */) {
   Transport *transport = g_context->getTransport();
   if (transport && transport->headersSent()) {
     raise_warning("Cannot regenerate session id - headers already sent");
@@ -1660,23 +1598,7 @@ bool f_session_regenerate_id(bool delete_old_session /* = false */) {
   return false;
 }
 
-String f_session_cache_limiter(const String& new_cache_limiter /* = null_string */) {
-  String ret(PS(cache_limiter));
-  if (!new_cache_limiter.isNull()) {
-    HHVM_FN(ini_set)("session.cache_limiter", new_cache_limiter);
-  }
-  return ret;
-}
-
-int64_t f_session_cache_expire(const String& new_cache_expire /* = null_string */) {
-  int64_t ret = PS(cache_expire);
-  if (!new_cache_expire.isNull()) {
-    HHVM_FN(ini_set)("session.cache_expire", new_cache_expire.toInt64());
-  }
-  return ret;
-}
-
-Variant f_session_encode() {
+static Variant HHVM_FUNCTION(session_encode) {
   String ret = php_session_encode();
   if (ret.isNull()) {
     return false;
@@ -1684,7 +1606,7 @@ Variant f_session_encode() {
   return ret;
 }
 
-bool f_session_decode(const String& data) {
+static bool HHVM_FUNCTION(session_decode, const String& data) {
   if (PS(session_status) != Session::None) {
     php_session_decode(data);
     return true;
@@ -1696,7 +1618,7 @@ const StaticString
   s_REQUEST_URI("REQUEST_URI"),
   s_HTTP_REFERER("HTTP_REFERER");
 
-bool f_session_start() {
+static bool HHVM_FUNCTION(session_start) {
   PS(apply_trans_sid) = PS(use_trans_sid);
 
   String value;
@@ -1826,7 +1748,7 @@ bool f_session_start() {
   return true;
 }
 
-bool f_session_destroy() {
+static bool HHVM_FUNCTION(session_destroy) {
   bool retval = true;
 
   if (PS(session_status) != Session::Active) {
@@ -1845,7 +1767,7 @@ bool f_session_destroy() {
   return retval;
 }
 
-Variant f_session_unset() {
+static Variant HHVM_FUNCTION(session_unset) {
   if (PS(session_status) == Session::None) {
     return false;
   }
@@ -1853,34 +1775,11 @@ Variant f_session_unset() {
   return uninit_null();
 }
 
-void f_session_write_close() {
+static void HHVM_FUNCTION(session_write_close) {
   if (PS(session_status) == Session::Active) {
     PS(session_status) = Session::None;
     php_session_save_current_state();
   }
-}
-
-void f_session_commit() {
-  f_session_write_close();
-}
-
-bool f_session_register(int _argc, const Variant& var_names,
-                        const Array& _argv /* = null_array */) {
-  throw NotSupportedException
-    (__func__, "Deprecated as of PHP 5.3.0 and REMOVED as of PHP 6.0.0. "
-     "Relying on this feature is highly discouraged.");
-}
-
-bool f_session_unregister(const String& varname) {
-  throw NotSupportedException
-    (__func__, "Deprecated as of PHP 5.3.0 and REMOVED as of PHP 6.0.0. "
-     "Relying on this feature is highly discouraged.");
-}
-
-bool f_session_is_registered(const String& varname) {
-  throw NotSupportedException
-    (__func__, "Deprecated as of PHP 5.3.0 and REMOVED as of PHP 6.0.0. "
-     "Relying on this feature is highly discouraged.");
 }
 
 static bool HHVM_METHOD(SessionHandler, hhopen,
@@ -1893,7 +1792,7 @@ static bool HHVM_METHOD(SessionHandler, hhclose) {
   return PS(default_mod) && PS(default_mod)->close();
 }
 
-static String HHVM_METHOD(SessionHandler, hhread, const String& session_id) {
+static Variant HHVM_METHOD(SessionHandler, hhread, const String& session_id) {
   String value;
   if (PS(default_mod) && PS(default_mod)->read(PS(id).data(), value)) {
     php_session_decode(value);
@@ -1917,12 +1816,42 @@ static bool HHVM_METHOD(SessionHandler, hhgc, int maxlifetime) {
   return PS(default_mod) && PS(default_mod)->gc(maxlifetime, &nrdels);
 }
 
+void ext_session_request_shutdown() {
+  HHVM_FN(session_write_close)();
+  s_session->requestShutdownImpl();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
+
+const StaticString s_PHP_SESSION_DISABLED("PHP_SESSION_DISABLED");
+const StaticString s_PHP_SESSION_NONE("PHP_SESSION_NONE");
+const StaticString s_PHP_SESSION_ACTIVE("PHP_SESSION_ACTIVE");
 
 static class SessionExtension : public Extension {
  public:
   SessionExtension() : Extension("session", NO_EXTENSION_VERSION_YET) { }
   virtual void moduleInit() {
+    Native::registerConstant<KindOfInt64>(
+      s_PHP_SESSION_DISABLED.get(), k_PHP_SESSION_DISABLED
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_PHP_SESSION_NONE.get(), k_PHP_SESSION_NONE
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_PHP_SESSION_ACTIVE.get(), k_PHP_SESSION_ACTIVE
+    );
+
+    HHVM_FE(session_status);
+    HHVM_FE(session_module_name);
+    HHVM_FE(session_id);
+    HHVM_FE(session_regenerate_id);
+    HHVM_FE(session_encode);
+    HHVM_FE(session_decode);
+    HHVM_FE(session_start);
+    HHVM_FE(session_destroy);
+    HHVM_FE(session_unset);
+    HHVM_FE(session_write_close);
+
     HHVM_ME(SessionHandler, hhopen);
     HHVM_ME(SessionHandler, hhclose);
     HHVM_ME(SessionHandler, hhread);
@@ -1932,7 +1861,9 @@ static class SessionExtension : public Extension {
     HHVM_NAMED_FE(__SystemLib\\session_set_save_handler,
                   HHVM_FN(session_set_save_handler)
     );
+
     loadSystemlib();
+    loadSystemlib("session-ns");
   }
 
   virtual void threadInit() {

@@ -145,7 +145,7 @@ array(1) {
 bool(true)
 array(1) {
   ["data"]=>
-  object(classA)#2 (0) {
+  object(classA)#%d (0) {
   }
 }
 

@@ -1,5 +1,6 @@
 <?php
 $_COOKIE = http_parse_cookie("PHPSESSID=_");
+_filter_snapshot_globals();
 
 error_reporting(0);
 session_start();

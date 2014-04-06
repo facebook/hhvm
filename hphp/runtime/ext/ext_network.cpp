@@ -277,19 +277,13 @@ Variant f_inet_pton(const String& address) {
 const StaticString s_255_255_255_255("255.255.255.255");
 
 Variant f_ip2long(const String& ip_address) {
-  unsigned long int ip;
+  struct in_addr ip;
   if (ip_address.empty() ||
-      (ip = inet_addr(ip_address.data())) == INADDR_NONE) {
-    /* the only special case when we should return -1 ourselves,
-     * because inet_addr() considers it wrong. We return 0xFFFFFFFF and
-     * not -1 or ~0 because of 32/64bit issues.
-     */
-    if (ip_address == s_255_255_255_255) {
-      return (int64_t)0xFFFFFFFF;
-    }
+      inet_pton(AF_INET, ip_address.data(), &ip) != 1) {
     return false;
   }
-  return (int64_t)ntohl(ip);
+
+  return (int64_t)ntohl(ip.s_addr);
 }
 
 String f_long2ip(int proper_address) {

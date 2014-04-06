@@ -692,7 +692,8 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 // can return Variants, and we use KindOfUnknown to denote these
 // return types.
 static inline bool isCppByRef(DataType t) {
-  return t != KindOfBoolean && t != KindOfInt64 && t != KindOfNull;
+  return t != KindOfBoolean && t != KindOfInt64 &&
+         t != KindOfNull && t != KindOfDouble;
 }
 
 // return true if type is passed in/out of C++ as String&/Array&/Object&

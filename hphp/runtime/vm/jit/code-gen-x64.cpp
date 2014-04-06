@@ -3761,11 +3761,16 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
                SyncOptions::kSyncPoint, callArgs);
 
   // load return value from builtin
-  // for primitive return types (int, bool), the return value
-  // is already in dstReg (the builtin call returns in rax). For return
-  // by reference (String, Object, Array, Variant), the builtin writes the
-  // return value into MInstrState::tvBuiltinReturn TV, from where it
-  // has to be tested and copied.
+
+  // For primitive SSE return types (double), the return value
+  // is in xmm0 which typically won't be the requested destination register.
+  if (funcReturnType == KindOfDouble) {
+    emitMovRegReg(m_as, reg::xmm0, dstReg);
+    return;
+  }
+  // For primitive INTEGER return types (int, bool), the return value
+  // is already in dstReg (the builtin call returns in rax).
+  // For void return types, there is no return value, so just exit.
   if (dstReg == InvalidReg || returnType.isSimpleType()) {
     return;
   }
@@ -3773,6 +3778,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   // has been clobberred.
   misReg = rsp;
 
+  // For return by reference (String, Object, Array, Variant),
+  // the builtin writes the return value into MInstrState::tvBuiltinReturn
+  // TV, from where it has to be tested and copied.
   if (returnType.isReferenceType()) {
     assert(isCppByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
     // return type is String, Array, or Object; fold nullptr to KindOfNull

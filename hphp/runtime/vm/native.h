@@ -148,8 +148,8 @@ inline int maxFCallBuiltinArgs() {
 #endif
 }
 
-// t#3982283 - Our ARM code gen doesn't support FP args yet.
-inline bool allowFCallBuiltinDoubleArgs() {
+// t#3982283 - Our ARM code gen doesn't support FP args/returns yet.
+inline bool allowFCallBuiltinDoubles() {
 #ifdef __AARCH64EL__
   return false;
 #else

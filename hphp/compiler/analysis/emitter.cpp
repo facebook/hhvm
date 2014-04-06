@@ -7224,8 +7224,10 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
       (f->attrs() & AttrNoFCallBuiltin) ||
       !f->nativeFuncPtr() ||
       (f->numParams() > Native::maxFCallBuiltinArgs()) ||
-      (numParams > f->numParams()) ||
-      (f->returnType() == KindOfDouble)) return nullptr;
+      (numParams > f->numParams())) return nullptr;
+
+  if ((f->returnType() == KindOfDouble) &&
+       !Native::allowFCallBuiltinDoubles()) return nullptr;
 
   if (f->methInfo()) {
     // IDL style builtin
@@ -7247,7 +7249,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   // The interp mode function caller is limited to kMaxBuiltinArgs
   // mixed-mode arguments, or kMaxFCallBuiltinArgs int-only arguments.
   bool allowDoubleArgs = (f->numParams() <= Native::kMaxBuiltinArgs) &&
-                         Native::allowFCallBuiltinDoubleArgs();
+                         Native::allowFCallBuiltinDoubles();
   for (int i = 0; i < f->numParams(); i++) {
     if ((!allowDoubleArgs) &&
         (f->params()[i].builtinType() == KindOfDouble)) {

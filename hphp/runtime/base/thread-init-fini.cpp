@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/ext_icu.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/persistent-resource-store.h"
 

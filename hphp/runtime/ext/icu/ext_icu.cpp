@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_icu.h"
+#include "hphp/runtime/ext/icu/icu.h"
 #include <vector>
 #include <string>
 #include <boost/scoped_ptr.hpp>
@@ -23,19 +23,14 @@
 #include <unicode/translit.h>
 #include <unicode/uregex.h>
 #include <unicode/ustring.h>
-#include "icu/LifeEventTokenizer.h" // nolint
-#include "icu/ICUMatcher.h" // nolint
-#include "icu/ICUTransliterator.h" // nolint
+#include "hphp/runtime/ext/icu/LifeEventTokenizer.h"
+#include "hphp/runtime/ext/icu/ICUMatcher.h"
+#include "hphp/runtime/ext/icu/ICUTransliterator.h"
 
 using namespace U_ICU_NAMESPACE;
 
-namespace HPHP {
+namespace HPHP { namespace Intl {
 ///////////////////////////////////////////////////////////////////////////////
-const int64_t k_UREGEX_CASE_INSENSITIVE = UREGEX_CASE_INSENSITIVE;
-const int64_t k_UREGEX_COMMENTS         = UREGEX_COMMENTS;
-const int64_t k_UREGEX_DOTALL           = UREGEX_DOTALL;
-const int64_t k_UREGEX_MULTILINE        = UREGEX_MULTILINE;
-const int64_t k_UREGEX_UWORD            = UREGEX_UWORD;
 // Intentionally higher in case ICU adds more constants.
 const int64_t k_UREGEX_OFFSET_CAPTURE   = 1LL<<32;
 
@@ -45,8 +40,10 @@ typedef tbb::concurrent_hash_map<const StringData*,const RegexPattern*,
 
 static PatternStringMap s_patternCacheMap;
 
-Variant f_icu_match(const String& pattern, const String& subject,
-                    VRefParam matches /* = null */, int64_t flags /* = 0 */) {
+static Variant HHVM_FUNCTION(icu_match, const String& pattern,
+                                        const String& subject,
+                                        VRefParam matches /* = null */,
+                                        int64_t flags /* = 0 */) {
   UErrorCode status = U_ZERO_ERROR;
 
   Array matchesArr;
@@ -179,7 +176,8 @@ private:
 
 IMPLEMENT_THREAD_LOCAL(TransliteratorWrapper, s_transliterator);
 
-String f_icu_transliterate(const String& str, bool remove_accents) {
+static String HHVM_FUNCTION(icu_transliterate, const String& str,
+                                               bool remove_accents) {
   UnicodeString u_str = UnicodeString::fromUTF8(str.data());
   if (remove_accents) {
     s_transliterator->transliterate(u_str);
@@ -302,7 +300,7 @@ void normalizeToken(struct Token& token) {
  * Other: replaced with empty string
  *
  */
-Array f_icu_tokenize(const String& text) {
+static Array HHVM_FUNCTION(icu_tokenize, const String& text) {
   // Boundary markers that indicate the beginning and end of a token stream.
   const String BEGIN_MARKER("_B_");
   const String END_MARKER("_E_");
@@ -327,9 +325,28 @@ Array f_icu_tokenize(const String& text) {
   return ret;
 }
 
+/////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_UREGEX_OFFSET_CAPTURE("UREGEX_OFFSET_CAPTURE");
 
+void IntlExtension::initICU() {
+  HHVM_FE(icu_match);
+  HHVM_FE(icu_transliterate);
+  HHVM_FE(icu_tokenize);
 
+#define UREGEX_CONST(v) Native::registerConstant<KindOfInt64> \
+                          (makeStaticString("UREGEX_" #v), UREGEX_##v);
+  UREGEX_CONST(CASE_INSENSITIVE);
+  UREGEX_CONST(COMMENTS);
+  UREGEX_CONST(DOTALL);
+  UREGEX_CONST(MULTILINE);
+  UREGEX_CONST(UWORD);
+#undef UREGEX_CONST
+  Native::registerConstant<KindOfInt64>(s_UREGEX_OFFSET_CAPTURE.get(),
+                                        k_UREGEX_OFFSET_CAPTURE);
+
+  loadSystemlib("icu");
+}
 
 ///////////////////////////////////////////////////////////////////////////////
-}
+}} // HPHP::Intl

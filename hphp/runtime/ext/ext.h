@@ -35,7 +35,6 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/ext_iconv.h"
-#include "hphp/runtime/ext/ext_icu.h"
 #include "hphp/runtime/ext/ext_imap.h"
 #include "hphp/runtime/ext/ext_ipc.h"
 #include "hphp/runtime/ext/ext_ldap.h"

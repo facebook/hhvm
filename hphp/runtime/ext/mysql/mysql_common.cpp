@@ -36,7 +36,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/socket.h"
-#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
@@ -121,7 +121,7 @@ int MySQL::GetDefaultPort() {
     if (env && *env) {
       s_default_port = atoi(env);
     } else {
-      Variant ret = f_getservbyname("mysql", "tcp");
+      Variant ret = HHVM_FN(getservbyname)("mysql", "tcp");
       if (!same(ret, false)) {
         s_default_port = ret.toInt16();
       }

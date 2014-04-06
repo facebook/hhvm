@@ -34,7 +34,11 @@ function wddx_deserialize($packet) : mixed {
     }
     return wddx_deserialize($out);
   }
-  if (!$packet instanceof SimpleXMLElement) {
+  if (is_string($packet) && empty($packet)){
+    return null;
+  }
+  
+  if (is_string($packet)) {
 
     $xml = simplexml_load_string($packet);    
     //php seems to accept malformed xml

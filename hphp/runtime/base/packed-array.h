@@ -20,6 +20,8 @@
 #include <cstdint>
 #include <sys/types.h>
 
+#include "hphp/runtime/base/array-common.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -51,12 +53,25 @@ struct HphpArray;
 struct PackedArray {
   static void Release(ArrayData*);
   static TypedValue* NvGetInt(const ArrayData*, int64_t ki);
+  static constexpr auto NvGetStr =
+    reinterpret_cast<TypedValue* (*)(const ArrayData*, const StringData*)>(
+      ArrayCommon::ReturnNull
+    );
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, const Variant& v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v,
     bool copy);
+  static size_t Vsize(const ArrayData*);
   static const Variant& GetValueRef(const ArrayData* ad, ssize_t pos);
+  static constexpr auto IsVectorData =
+    reinterpret_cast<bool (*)(const ArrayData*)>(
+      ArrayCommon::ReturnTrue
+    );
   static bool ExistsInt(const ArrayData* ad, int64_t k);
+  static constexpr auto ExistsStr =
+    reinterpret_cast<bool (*)(const ArrayData*, const StringData*)>(
+      ArrayCommon::ReturnFalse
+    );
   static ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& ret, bool copy);
   static ArrayData* LvalStr(ArrayData*, StringData* k, Variant*& ret,
                             bool copy);
@@ -65,15 +80,15 @@ struct PackedArray {
     bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k,
     const Variant& v, bool copy);
-  static ArrayData* AddInt(ArrayData* ad, int64_t k, const Variant& v,
-    bool copy);
+  static constexpr auto AddInt = &SetInt;
+  static constexpr auto AddStr = &SetStr;
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterAdvance(const ArrayData*, ssize_t pos);
   static ssize_t IterRewind(const ArrayData*, ssize_t pos);
-  static bool ValidMArrayIter(const ArrayData*, const MArrayIter& fp);
+  static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
@@ -96,7 +111,19 @@ struct PackedArray {
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
+  static constexpr auto Renumber =
+    reinterpret_cast<void (*)(ArrayData*)>(
+      ArrayCommon::NoOp
+    );
   static void OnSetEvalScalar(ArrayData*);
+  static constexpr auto Escalate =
+    reinterpret_cast<ArrayData* (*)(const ArrayData*)>(
+      ArrayCommon::ReturnFirstArg
+    );
+  static constexpr auto GetAPCHandle =
+    reinterpret_cast<APCHandle* (*)(const ArrayData*)>(
+      ArrayCommon::ReturnNull
+    );
 
   //////////////////////////////////////////////////////////////////////
 

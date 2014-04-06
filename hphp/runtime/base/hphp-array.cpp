@@ -618,6 +618,8 @@ ssize_t HphpArray::IterRewind(const ArrayData* ad, ssize_t pos) {
   return a->prevElm(a->data(), pos);
 }
 
+size_t HphpArray::Vsize(const ArrayData*) { not_reached(); }
+
 const Variant& HphpArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asMixed(ad);
   assert(a->checkInvariants());
@@ -1296,10 +1298,6 @@ HphpArray::AddStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
   return a->addVal(k, v);
 }
 
-/*
- * TODO: split these ZFoo functions into packed
- */
-
 ArrayData*
 HphpArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
   auto a = asMixed(ad);
@@ -1796,18 +1794,6 @@ void HphpArray::OnSetEvalScalar(ArrayData* ad) {
       tvAsVariant(&e.data).setEvalScalar();
     }
   }
-}
-
-// TODO(#3983912): this is shared with PackedArray.
-bool HphpArray::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
-  if (ad->isPacked()) {
-    assert(PackedArray::checkInvariants(ad));
-  } else {
-    assert(asMixed(ad));
-  }
-  assert(fp.getContainer() == ad);
-  if (fp.getResetFlag()) return false;
-  return fp.m_pos != invalid_index;
 }
 
 bool HphpArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {

@@ -1010,7 +1010,7 @@ public:
       if (has_value) {
         vu.set(p, endptr);
         try {
-          auto& sess = g->getRef(s__SESSION);
+          auto& sess = tvAsVariant(g->nvGet(s__SESSION.get()));
           forceToArray(sess).set(key, vu.unserialize());
           p = vu.head();
         } catch (Exception &e) {
@@ -1075,7 +1075,7 @@ public:
       if (has_value) {
         vu.set(q, endptr);
         try {
-          auto& sess = g->getRef(s__SESSION);
+          auto& sess = tvAsVariant(g->nvGet(s__SESSION.get()));
           forceToArray(sess).set(key, vu.unserialize());
           q = vu.head();
         } catch (Exception &e) {
@@ -1120,7 +1120,7 @@ public:
       for (ArrayIter iter(arr); iter; ++iter) {
         Variant key = iter.first();
         Variant value = iter.second();
-        auto& sess = g->getRef(s__SESSION);
+        auto& sess = tvAsVariant(g->nvGet(s__SESSION.get()));
         forceToArray(sess).set(key, value);
       }
     }
@@ -1855,7 +1855,7 @@ Variant f_session_unset() {
     return false;
   }
   GlobalVariables *g = get_global_variables();
-  g->getRef(s__SESSION) = Variant();
+  tvAsVariant(g->nvGet(s__SESSION.get())) = Variant();
   return uninit_null();
 }
 

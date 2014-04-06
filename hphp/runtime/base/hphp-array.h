@@ -18,6 +18,7 @@
 #define incl_HPHP_HPHP_ARRAY_H_
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -178,7 +179,7 @@ public:
   using ArrayData::nvGet;
   using ArrayData::release;
 
-  // implements ArrayData
+  static size_t Vsize(const ArrayData*);
   static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
 
   // overrides ArrayData
@@ -239,10 +240,16 @@ public:
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);
   static void ReleaseUncountedPacked(ArrayData*);
-
-  // overrides ArrayData
-  static bool ValidMArrayIter(const ArrayData*, const MArrayIter &fp);
+  static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
+  static constexpr auto Escalate =
+    reinterpret_cast<ArrayData* (*)(const ArrayData*)>(
+      ArrayCommon::ReturnFirstArg
+    );
+  static constexpr auto GetAPCHandle =
+    reinterpret_cast<APCHandle* (*)(const ArrayData*)>(
+      ArrayCommon::ReturnNull
+    );
 
   HphpArray* copyMixed() const;
   HphpArray* copyMixedAndResizeIfNeeded() const;

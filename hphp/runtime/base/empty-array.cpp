@@ -57,60 +57,16 @@ void EmptyArray::Release(ArrayData*) {
   always_assert(!"never try to free the empty array");
 }
 
-/*
- * Used for NvGetInt, NvGetStr.  (We never contain the string or int.)
- *
- * Used for GetAPCHandle (we don't have one).
- */
-void* EmptyArray::ReturnNull(...) {
-  return nullptr;
-}
-
-/*
- * Used for ExistsInt, ExistsStr.  (We never contain the int or string.)
- */
-bool EmptyArray::ReturnFalse(...) {
-  return false;
-}
-
-/*
- * Used for IsVectorData (we're always trivially a vector).
- *
- * Used for Uksort, Usort, Uasort.  These functions return false only
- * if the user compare function modified they array, which it can't
- * here because we don't call it.
- */
-bool EmptyArray::ReturnTrue(...) {
-  return true;
-}
-
 void EmptyArray::NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos) {
   // We have no valid positions---no one should call this function.
   not_reached();
 }
 
+size_t EmptyArray::Vsize(const ArrayData*) { not_reached(); }
+
 const Variant& EmptyArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   // We have no valid positions---no one should call this function.
   not_reached();
-}
-
-/*
- * Used for RemoveInt, RemoveStr.  We don't every have the int or str,
- * so even if copy is true we can just return the same array.
- *
- * Used for EscalateForSort---we are already sorted by any imaginable
- * method of sorting, so the sort functions are no-ops, so we don't
- * need to copy.
- */
-ArrayData* EmptyArray::ReturnFirstArg(ArrayData* a, ...) {
-  return a;
-}
-
-/*
- * Used for IterBegin and IterEnd.  We always return the invalid_index.
- */
-ssize_t EmptyArray::ReturnInvalidIndex(const ArrayData*) {
-  return ArrayData::invalid_index;
 }
 
 // Iterators can't be advanced or rewinded, because we have no valid
@@ -122,23 +78,12 @@ ssize_t EmptyArray::IterRewind(const ArrayData*, ssize_t prev) {
   not_reached();
 }
 
-// Strong iterating the empty array doesn't give back any elements.
-bool EmptyArray::ValidMArrayIter(const ArrayData*, const MArrayIter& fp) {
-  return false;
-}
+// We always return false in ValidMArrayIter, so this should never be
+// called.  ValidMArrayIter may be called on this array kind, though,
+// because Escalate is a no-op.
 bool EmptyArray::AdvanceMArrayIter(ArrayData*, MArrayIter& fp) {
   not_reached();
 }
-
-/*
- * Don't do anything.
- *
- * Used for Ksort, Sort, and Asort.  The empty array is already
- * sorted, and these functions have no other side-effects.
- *
- * Used for Renumber---we're trivially numbered properly.
- */
-void EmptyArray::NoOp(...) {}
 
 // We're always already a static array.
 void EmptyArray::OnSetEvalScalar(ArrayData*) { not_reached(); }
@@ -164,8 +109,8 @@ ArrayData* EmptyArray::Copy(const ArrayData*) {
 }
 
 ArrayData* EmptyArray::CopyWithStrongIterators(const ArrayData* ad) {
-  // We can never have strong iterators, so we don't need to do
-  // anything extra.
+  // We can never have associated strong iterators, so we don't need
+  // to do anything extra.
   return Copy(ad);
 }
 

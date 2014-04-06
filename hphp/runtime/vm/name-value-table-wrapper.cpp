@@ -269,6 +269,23 @@ bool NameValueTableWrapper::IsVectorData(const ArrayData*) {
   return false;
 }
 
+ArrayData*
+NameValueTableWrapper::CopyWithStrongIterators(const ArrayData* ad) {
+  throw FatalErrorException(
+    "Unimplemented ArrayData::copyWithStrongIterators");
+}
+
+ArrayData* NameValueTableWrapper::NonSmartCopy(const ArrayData*) {
+  throw FatalErrorException("NameValueTableWrapper::nonSmartCopy "
+    "not implemented.");
+}
+
+void NameValueTableWrapper::Renumber(ArrayData*) {}
+
+void NameValueTableWrapper::OnSetEvalScalar(ArrayData*) {
+  not_reached();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

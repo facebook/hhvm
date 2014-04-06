@@ -155,10 +155,6 @@ public:
    */
   bool isVectorData() const;
 
-  // TODO(#3983912): move shared helpers to consolidated location
-  static APCHandle* GetAPCHandle(const ArrayData* ad) {
-    return nullptr;
-  }
   APCHandle* getAPCHandle();
 
   /**
@@ -303,18 +299,6 @@ public:
   bool usort(const Variant& cmp_function);
   bool uasort(const Variant& cmp_function);
 
-  // default sort implementations
-  static void Ksort(ArrayData*, int sort_flags, bool ascending);
-  static void Sort(ArrayData*, int sort_flags, bool ascending);
-  static void Asort(ArrayData*, int sort_flags, bool ascending);
-  static bool Uksort(ArrayData*, const Variant& cmp_function);
-  static bool Usort(ArrayData*, const Variant& cmp_function);
-  static bool Uasort(ArrayData*, const Variant& cmp_function);
-
-  static ArrayData* ZSetInt(ArrayData* ad, int64_t k, RefData* v);
-  static ArrayData* ZSetStr(ArrayData* ad, StringData* k, RefData* v);
-  static ArrayData* ZAppend(ArrayData* ad, RefData* v);
-
   /**
    * Make a copy of myself.
    *
@@ -325,8 +309,6 @@ public:
   ArrayData* copy() const;
   ArrayData* copyWithStrongIterators() const;
   ArrayData* nonSmartCopy() const;
-  static ArrayData* CopyWithStrongIterators(const ArrayData*);
-  static ArrayData* NonSmartCopy(const ArrayData*);
 
   /**
    * Append a value to the array. If "copy" is true, make a copy first
@@ -341,22 +323,7 @@ public:
    */
   ArrayData* appendWithRef(const Variant& v, bool copy);
 
-  /*
-   * PHP array +=.
-   *
-   * Performs array addition, mutating the this array.  It may return
-   * a new array the array needed to grow, or if it needed to COW---in
-   * this case the new returned array will already have a reference
-   * count of 1.  Otherwise returns `elems' without manipulating its
-   * reference count.
-   */
   ArrayData* plusEq(const ArrayData* elems);
-
-  /*
-   * PHP array_merge.
-   *
-   * This function always produces a new array with reference count 1.
-   */
   ArrayData* merge(const ArrayData* elems);
 
   /**
@@ -398,16 +365,6 @@ public:
   int32_t getPosition() const { return m_pos; }
 
   ArrayData *escalate() const;
-
-  // default implementations
-  static ArrayData* Plus(ArrayData*, const ArrayData *elems, bool copy);
-  static ArrayData* Merge(ArrayData*, const ArrayData *elems, bool copy);
-  static ArrayData* Pop(ArrayData*, Variant &value);
-  static ArrayData* Dequeue(ArrayData*, Variant &value);
-  static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
-  static void Renumber(ArrayData*);
-  static void OnSetEvalScalar(ArrayData*);
-  static ArrayData* Escalate(const ArrayData* ad);
 
   static ArrayData* GetScalarArray(ArrayData *arr);
   static ArrayData* GetScalarArray(ArrayData *arr, const std::string& key);
@@ -496,7 +453,6 @@ struct ArrayFunctions {
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, const Variant& v, bool copy);
   size_t (*vsize[NK])(const ArrayData*);
   const Variant& (*getValueRef[NK])(const ArrayData*, ssize_t pos);
-  bool noCopyOnWrite[NK];
   bool (*isVectorData[NK])(const ArrayData*);
   bool (*existsInt[NK])(const ArrayData*, int64_t k);
   bool (*existsStr[NK])(const ArrayData*, const StringData* k);

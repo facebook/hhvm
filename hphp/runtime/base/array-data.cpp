@@ -75,7 +75,7 @@ static size_t VsizeNop(const ArrayData* ad) {
   return ad->getSize();
 }
 
-// order: kPackedKind, kMixedKind, kEmptyKind, kSharedKind, kNvtwKind,
+// order: kPackedKind, kMixedKind, kSharedKind, kEmptyKind, kNvtwKind,
 //        kProxyKind
 extern const ArrayFunctions g_array_funcs = {
   // release
@@ -373,6 +373,7 @@ extern const ArrayFunctions g_array_funcs = {
     &HphpArray::NonSmartCopy,
     &ArrayData::NonSmartCopy,
     &EmptyArray::NonSmartCopy,
+    &ArrayData::NonSmartCopy,
     &ProxyArray::NonSmartCopy },
   // append
   { &PackedArray::Append,

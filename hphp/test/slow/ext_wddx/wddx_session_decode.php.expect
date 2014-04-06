@@ -1,0 +1,8 @@
+array(3) {
+  ["login_ok"]=>
+  bool(true)
+  ["name"]=>
+  string(8) "somename"
+  ["integer"]=>
+  int(34)
+}

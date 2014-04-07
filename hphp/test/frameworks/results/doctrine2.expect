@@ -1,5 +1,13 @@
 Doctrine\Tests\ORM\Cache\CacheConfigTest::testSetGetCacheClassName
-FATAL
+.
+Doctrine\Tests\ORM\Cache\CacheConfigTest::testSetGetCacheFactory
+.
+Doctrine\Tests\ORM\Cache\CacheConfigTest::testSetGetCacheLogger
+.
+Doctrine\Tests\ORM\Cache\CacheConfigTest::testSetGetQueryValidator
+.
+Doctrine\Tests\ORM\Cache\CacheConfigTest::testSetGetRegionLifetime
+.
 Doctrine\Tests\ORM\Cache\CacheKeyTest::testCollectionCacheKeyAssociationCollision
 .
 Doctrine\Tests\ORM\Cache\CacheKeyTest::testCollectionCacheKeyIdentifierCollision

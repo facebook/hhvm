@@ -1,0 +1,12 @@
+array(5) {
+  ["TestAbstractClass"]=>
+  bool(true)
+  ["TestClassImplementingInterface"]=>
+  bool(false)
+  ["TestConcreteClass"]=>
+  bool(true)
+  ["TestInterface"]=>
+  bool(false)
+  ["TestTrait"]=>
+  bool(true)
+}

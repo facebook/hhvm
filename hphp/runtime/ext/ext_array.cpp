@@ -1298,7 +1298,7 @@ static void containerValuesToSetHelper(c_Set* st, const Variant& container) {
   Variant strHolder(empty_string.get());
   TypedValue* strTv = strHolder.asTypedValue();
   for (ArrayIter iter(container); iter; ++iter) {
-    const auto& c = *const_cast<TypedValue*>(iter.secondRefPlus().asCell());
+    auto const& c = *iter.secondRefPlus().asCell();
     addToSetHelper(st, c, strTv, true);
   }
 }
@@ -1308,8 +1308,7 @@ static void containerKeysToSetHelper(c_Set* st, const Variant& container) {
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = container.asCell()->m_type == KindOfArray;
   for (ArrayIter iter(container); iter; ++iter) {
-    auto key = iter.first();
-    const auto& c = *const_cast<TypedValue*>(key.asCell());
+    auto const& c = *iter.first().asCell();
     addToSetHelper(st, c, strTv, !isKey);
   }
 }
@@ -1613,7 +1612,7 @@ static void containerValuesIntersectHelper(c_Set* st,
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
   for (ArrayIter iter(tvAsCVarRef(&containers[0])); iter; ++iter) {
-    const auto& c = *const_cast<TypedValue*>(iter.secondRefPlus().asCell());
+    const auto& c = *iter.secondRefPlus().asCell();
     // For each value v in containers[0], we add the key/value pair (v, 1)
     // to the map. If a value (after various conversions) occurs more than
     // once in the container, we'll simply overwrite the old entry and that's
@@ -1622,7 +1621,7 @@ static void containerValuesIntersectHelper(c_Set* st,
   }
   for (int pos = 1; pos < count; ++pos) {
     for (ArrayIter iter(tvAsCVarRef(&containers[pos])); iter; ++iter) {
-      const auto& c = *const_cast<TypedValue*>(iter.secondRefPlus().asCell());
+      const auto& c = *iter.secondRefPlus().asCell();
       // We check if the value is present as a key in the map. If an entry
       // exists and its value equals pos, we increment it, otherwise we do
       // nothing. This is essential so that we don't accidentally double-count

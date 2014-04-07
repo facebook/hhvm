@@ -5350,12 +5350,13 @@ void collectionDeepCopyTV(TypedValue* tv) {
 }
 
 ArrayData* collectionDeepCopyArray(ArrayData* arr) {
-  arr = arr->copy();
-  Array a(arr);
+  ArrayInit ai(arr->size(), ArrayInit::Mixed{});
   for (ArrayIter iter(arr); iter; ++iter) {
-    collectionDeepCopyTV((TypedValue*)(&iter.secondRef()));
+    Variant v = iter.secondRef();
+    collectionDeepCopyTV(v.asTypedValue());
+    ai.set(iter.first(), std::move(v));
   }
-  return a.detach();
+  return ai.toArray().detach();
 }
 
 template<typename TVector>

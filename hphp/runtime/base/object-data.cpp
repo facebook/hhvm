@@ -340,6 +340,10 @@ void ObjectData::o_setArray(const Array& properties) {
     const Variant& secondRef = iter.secondRef();
     setProp(ctx,
             k.get(),
+            // Set prop is happening with WithRef semantics---we only
+            // use a binding assignment if it was already KindOfRef,
+            // so despite the const_cast here we're safely not
+            // modifying the original Variant.
             const_cast<TypedValue*>(secondRef.asTypedValue()),
             secondRef.isReferenced());
   }

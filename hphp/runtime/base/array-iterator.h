@@ -172,9 +172,12 @@ struct ArrayIter {
 
   /*
    * Get a reference to the value for the current iterator position.
-   * secondRef() has slightly different behavior than second() with
-   * regard to collection types.  Use secondRefPlus when you need
-   * support for these cases.  And note that unlike second(),
+   * This function is strictly an optimization to second()---you must
+   * not modify the Variant.
+   *
+   * note that secondRef() has slightly different behavior than
+   * second() with regard to collection types.  Use secondRefPlus when
+   * you need support for these cases.  And note that unlike second(),
    * secondRefPlus() will throw for non-collection types.
    */
   const Variant& secondRef();

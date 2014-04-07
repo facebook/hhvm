@@ -128,7 +128,8 @@ public:
   size_t vsize() const;
 
   /*
-   * getValueRef() gets a reference to value at position "pos".
+   * getValueRef() gets a reference to value at position "pos".  You
+   * must not change the returned Variant.
    */
   const Variant& getValueRef(ssize_t pos) const;
 

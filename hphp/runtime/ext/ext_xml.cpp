@@ -14,8 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_xml.h"
+
+#include "folly/ScopeGuard.h"
+
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -466,16 +468,11 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           }
         } else {
           Array tag;
-          Variant curtag;
           String myval;
           String mytype;
 
-          auto const dataArr = parser->data.getArrayData();
-          curtag.assignRef(
-            // TODO(#4087979): you're not supposed to modify the
-            // return value of getValueRef.
-            const_cast<Variant&>(dataArr->getValueRef(dataArr->iter_end()))
-          );
+          auto curtag = parser->data.toArrRef().pop();
+          SCOPE_EXIT { parser->data.toArrRef().append(curtag); };
 
           if (curtag.toArrRef().exists(s_type)) {
             mytype = curtag.toArrRef().rvalAt(s_type).toString();

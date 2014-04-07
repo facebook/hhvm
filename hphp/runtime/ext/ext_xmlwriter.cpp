@@ -361,9 +361,12 @@ bool c_XMLWriter::t_startdocument(const String& version /* = "1.0" */,
                                   const String& standalone /* = null_string */) {
   int ret = -1;
   if (m_ptr) {
-    ret = xmlTextWriterStartDocument(m_ptr, (const char *)xmls(version),
-                                     (const char *)xmls(encoding),
-                                     (const char *)xmls(standalone));
+    const auto pencoding = encoding.empty() ? nullptr : xmls(encoding);
+    const auto pstandalone = standalone.empty() ? nullptr : xmls(standalone);
+    ret = xmlTextWriterStartDocument(m_ptr,
+                                     (const char *)xmls(version),
+                                     (const char *)pencoding,
+                                     (const char *)pstandalone);
   }
   return ret != -1;
 }

@@ -80,7 +80,7 @@ DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
     return KindOfUnknown;
   }
   if (!strcasecmp(m_name.c_str(), "null") ||
-      !strcasecmp(m_name.c_str(), "void")) {
+      !strcasecmp(m_name.c_str(), "HH\\void")) {
     return KindOfNull;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\bool"))     return KindOfBoolean;

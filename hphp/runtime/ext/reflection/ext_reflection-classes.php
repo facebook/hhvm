@@ -258,9 +258,9 @@ class ReflectionParameter implements Reflector {
     if (!is_string($str)) return $str;
     return str_ireplace(
       array('HH\\bool', 'HH\\int', 'HH\\float', 'HH\\string', 'HH\\num',
-            'HH\\resource'),
+            'HH\\resource', 'HH\\void'),
       array('bool',     'int',     'float',     'string',     'num',
-            'resource'),
+            'resource',     'void'),
       $str
     );
   }
@@ -746,9 +746,9 @@ class ReflectionFunctionAbstract {
     if (!is_string($str)) return $str;
     return str_ireplace(
       array('HH\\bool', 'HH\\int', 'HH\\float', 'HH\\string', 'HH\\num',
-            'HH\\resource'),
+            'HH\\resource', 'HH\\void'),
       array('bool',     'int',     'float',     'string',     'num',
-            'resource'),
+            'resource',     'void'),
       $str
     );
   }
@@ -2290,9 +2290,9 @@ class ReflectionProperty implements Reflector {
     if (!is_string($str)) return $str;
     return str_ireplace(
       array('HH\\bool', 'HH\\int', 'HH\\float', 'HH\\string', 'HH\\num',
-            'HH\\resource'),
+            'HH\\resource', 'HH\\void'),
       array('bool',     'int',     'float',     'string',     'num',
-            'resource'),
+            'resource',     'void'),
       $str
     );
   }

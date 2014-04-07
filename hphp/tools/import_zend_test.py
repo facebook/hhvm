@@ -221,6 +221,10 @@ bad_tests = (
     '/ext/pcre/tests/preg_match_all_edit_basic.php',
     '/ext/standard/tests/general_functions/bug39322.php',
     '/ext/standard/tests/misc/time_sleep_until_basic.php',
+
+    # flaky on Travis: t4088096
+    '/ext/curl/tests/curl_copy_handle_basic_006.php',
+    '/ext/curl/tests/curl_copy_handle_basic_007.php',
 )
 
 # Tests that work but not in repo mode

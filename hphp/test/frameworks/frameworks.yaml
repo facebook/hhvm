@@ -307,8 +307,8 @@
     config_file: phpmyadmin/phpunit.xml.hhvm
   phpunit:
     url: https://github.com/sebastianbergmann/phpunit.git
-    branch: 4.0.9
-    commit: c7e9e4b1253142acda4cb86a7686db412684fe04
+    branch: 4.0.14
+    commit: a80b77d92a6c7723d77c6728b4ae37e92a65ac1d
     install_root: phpunit
     test_root: phpunit
   proxymanager:

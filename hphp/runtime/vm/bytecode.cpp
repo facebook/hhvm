@@ -3685,7 +3685,7 @@ OPTBLD_INLINE void ExecutionContext::iopNewStructArray(IOP_ARGS) {
   // This constructor moves values, no inc/decref is necessary.
   auto* a = MixedArray::MakeStruct(n, names, m_stack.topC());
   m_stack.ndiscard(n);
-  m_stack.pushArrayNoRc(a);
+  m_stack.pushArrayNoRc(a->asArrayData());
 }
 
 OPTBLD_INLINE void ExecutionContext::iopAddElemC(IOP_ARGS) {

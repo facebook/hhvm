@@ -31,7 +31,7 @@ struct MemoryProfile;
 
 //////////////////////////////////////////////////////////////////////
 
-struct MixedArray : ArrayData {
+struct MixedArray : private ArrayData {
   // Load factor scaler. If S is the # of elements, C is the
   // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
   // So 2 gives 0.5 load factor, 4 gives 0.75 load factor, 8 gives
@@ -148,7 +148,7 @@ public:
    * uncounted or static arrays).  The Packed version does the same
    * when the array has a kPackedKind.
    */
-  static MixedArray* MakeUncounted(ArrayData* array);
+  static ArrayData* MakeUncounted(ArrayData* array);
   static ArrayData* MakeUncountedPacked(ArrayData* array);
 
   // This behaves the same as iter_begin except that it assumes
@@ -162,9 +162,27 @@ public:
     return nextElm(data(), 0);
   }
 
+  using ArrayData::decRefCount;
+  using ArrayData::hasMultipleRefs;
+  using ArrayData::hasExactlyOneRef;
+  using ArrayData::incRefCount;
+
+  /*
+   * MixedArray is convertible to ArrayData*, but not implicitly.
+   * This is to avoid accidentally using virtual dispatch when you
+   * already know something is Mixed.
+   *
+   * I.e., instead of doing things like mixed->nvGet(...) you want to
+   * do MixedArray::NvGetInt(adYouKnowIsMixed, ...).  This means using
+   * MixedArray*'s directly shouldn't really happen very often.
+   */
+  ArrayData* asArrayData() { return this; }
+  const ArrayData* asArrayData() const { return this; }
+
   // These using directives ensure the full set of overloaded functions
   // are visible in this class, to avoid triggering implicit conversions
   // from a const Variant& key to int64.
+private:
   using ArrayData::exists;
   using ArrayData::lval;
   using ArrayData::lvalNew;
@@ -174,54 +192,41 @@ public:
   using ArrayData::remove;
   using ArrayData::nvGet;
   using ArrayData::release;
+public:
 
   static size_t Vsize(const ArrayData*);
   static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
-
-  // overrides ArrayData
   static bool IsVectorData(const ArrayData*);
+  static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
+  static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
+  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterAdvance(const ArrayData*, ssize_t pos);
   static ssize_t IterRewind(const ArrayData*, ssize_t pos);
-
-  // implements ArrayData
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
-
-  // implements ArrayData
   static ArrayData* LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
                             bool copy);
   static ArrayData* LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
                             bool copy);
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
-
-  // implements ArrayData
   static ArrayData* SetInt(ArrayData*, int64_t k, const Variant& v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v, bool copy);
 
   static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);
   static ArrayData* ZSetStr(ArrayData*, StringData* k, RefData* v);
   static ArrayData* ZAppend(ArrayData* ad, RefData* v);
-
-  // implements ArrayData
   static ArrayData* SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData* ad, StringData* k, Variant& v,
                               bool copy);
-
-  // overrides ArrayData
   static ArrayData* AddInt(ArrayData*, int64_t k, const Variant& v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, const Variant& v, bool copy);
-
-  // implements ArrayData
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
-
-  // overrides ArrayData
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* NonSmartCopy(const ArrayData*);
-
   static ArrayData* Append(ArrayData*, const Variant& v, bool copy);
   static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
@@ -246,20 +251,19 @@ public:
       ArrayCommon::ReturnNull
     );
 
+  static ArrayData* EscalateForSort(ArrayData* ad);
+  static void Ksort(ArrayData*, int sort_flags, bool ascending);
+  static void Sort(ArrayData*, int sort_flags, bool ascending);
+  static void Asort(ArrayData*, int sort_flags, bool ascending);
+  static bool Uksort(ArrayData*, const Variant& cmp_function);
+  static bool Usort(ArrayData*, const Variant& cmp_function);
+  static bool Uasort(ArrayData*, const Variant& cmp_function);
+
+private:
   MixedArray* copyMixed() const;
   MixedArray* copyMixedAndResizeIfNeeded() const;
   MixedArray* copyMixedAndResizeIfNeededSlow() const;
-
-  // nvGet and friends.
-  // "nv" stands for non-variant. If we know the types of keys and values
-  // through runtime and compile-time chicanery, we can directly call these
-  // methods.
-
-  // nvGet returns a pointer to the value if the specified key is in the
-  // array, NULL otherwise.
-  static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
-  static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
-  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
+public:
 
   /**
    * Main helper for AddNewElemC.  The semantics are slightly different from
@@ -269,17 +273,6 @@ public:
    * be stored in the array, this helper decref's it.
    */
   static ArrayData* AddNewElemC(ArrayData* a, TypedValue value);
-
-  /*
-   * Sorting routines.
-   */
-  static ArrayData* EscalateForSort(ArrayData* ad);
-  static void Ksort(ArrayData*, int sort_flags, bool ascending);
-  static void Sort(ArrayData*, int sort_flags, bool ascending);
-  static void Asort(ArrayData*, int sort_flags, bool ascending);
-  static bool Uksort(ArrayData*, const Variant& cmp_function);
-  static bool Usort(ArrayData*, const Variant& cmp_function);
-  static bool Uasort(ArrayData*, const Variant& cmp_function);
 
   // Elm's data.m_type == KindOfInvalid for deleted slots.
   static bool isTombstone(DataType t) {

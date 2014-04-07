@@ -1588,7 +1588,7 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
       ++pos;
       if (size_t(pos) >= size_t(mixed->iterLimit())) {
         if (UNLIKELY(mixed->hasExactlyOneRef())) {
-          return iter_next_free_mixed(iter, mixed);
+          return iter_next_free_mixed(iter, mixed->asArrayData());
         }
         mixed->decRefCount();
         if (debug) {
@@ -1707,15 +1707,15 @@ ALWAYS_INLINE
 int64_t iter_next_mixed_impl(Iter* it,
                              TypedValue* valOut,
                              TypedValue* keyOut) {
-  ArrayIter& iter = it->arr();
+  ArrayIter& iter    = it->arr();
   auto const arrData = const_cast<ArrayData*>(iter.getArrayData());
-  auto const arr = static_cast<MixedArray*>(arrData);
-  ssize_t pos = iter.getPos();
+  auto const arr     = MixedArray::asMixed(arrData);
+  ssize_t pos        = iter.getPos();
 
   do {
     if (size_t(++pos) >= size_t(arr->iterLimit())) {
       if (UNLIKELY(arr->hasExactlyOneRef())) {
-        return iter_next_free_mixed(it, arr);
+        return iter_next_free_mixed(it, arr->asArrayData());
       }
       arr->decRefCount();
       if (debug) {

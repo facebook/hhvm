@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -1751,23 +1752,25 @@ void ObjectData::cloneSet(ObjectData* clone) {
 
     ssize_t iter = dynProps.get()->iter_begin();
     while (iter != ArrayData::invalid_index) {
-      auto props = static_cast<MixedArray*>(dynProps.get());
+      auto const props = dynProps.get();
+      assert(MixedArray::asMixed(props));
+
       TypedValue key;
-      props->nvGetKey(&key, iter);
+      MixedArray::NvGetKey(props, &key, iter);
 
       const TypedValue* val;
       TypedValue* ret;
       switch (key.m_type) {
       case HPHP::KindOfString: {
         StringData* str = key.m_data.pstr;
-        val = props->nvGet(str);
+        val = MixedArray::NvGetStr(props, str);
         ret = cloneProps.lvalAt(String(str), AccessFlags::Key).asTypedValue();
         decRefStr(str);
         break;
       }
       case HPHP::KindOfInt64: {
         int64_t num = key.m_data.num;
-        val = props->nvGet(num);
+        val = MixedArray::NvGetInt(props, num);
         ret = cloneProps.lvalAt(num, AccessFlags::Key).asTypedValue();
         break;
       }
@@ -1776,7 +1779,7 @@ void ObjectData::cloneSet(ObjectData* clone) {
       }
 
       tvDupFlattenVars(val, ret, cloneProps.get());
-      iter = dynProps.get()->iter_advance(iter);
+      iter = MixedArray::IterAdvance(dynProps.get(), iter);
     }
   }
 }

@@ -297,7 +297,7 @@ Variant CreateVarForUncountedArray(const Variant& source) {
 
 }
 
-MixedArray* MixedArray::MakeUncounted(ArrayData* array) {
+ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
   auto a = asMixed(array);
   auto mixed = CopyMixed(
     *a,

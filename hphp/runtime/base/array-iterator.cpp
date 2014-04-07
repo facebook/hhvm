@@ -1516,8 +1516,10 @@ static int64_t iter_next_apc_array(Iter* iter,
   }
   arrIter->setPos(pos);
 
+  // Note that APCLocalArray can never return KindOfRefs.
   const Variant& var = APCLocalArray::GetValueRef(arr, pos);
-  cellSet(*var.asCell(), *valOut);
+  assert(var.asTypedValue()->m_type != KindOfRef);
+  cellSet(*var.asTypedValue(), *valOut);
   if (LIKELY(!keyOut)) return 1;
 
   Cell key;

@@ -30,32 +30,65 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-size_t APCLocalArray::Vsize(const ArrayData*) { not_reached(); }
+bool APCLocalArray::checkInvariants(const ArrayData* ad) {
+  assert(ad->isSharedArray());
+  DEBUG_ONLY auto const shared = static_cast<const APCLocalArray*>(ad);
+  if (auto ptr = shared->m_localCache) {
+    auto const cap = shared->m_arr->capacity();
+    auto const stop = ptr + cap;
+    for (; ptr != stop; ++ptr) {
+      // Elements in the local cache must not be KindOfRef.
+      assert(cellIsPlausible(*ptr));
+    }
+  }
+  return true;
+}
 
-const Variant& APCLocalArray::getValueRef(ssize_t pos) const {
-  APCHandle *sv = m_arr->getValue(pos);
-  DataType t = sv->getType();
+void APCLocalArray::sweep() {
+  m_arr->getHandle()->unreference();
+}
+
+ALWAYS_INLINE
+APCLocalArray* APCLocalArray::asSharedArray(ArrayData* ad) {
+  assert(ad->kind() == kSharedKind);
+  return static_cast<APCLocalArray*>(ad);
+}
+
+ALWAYS_INLINE
+const APCLocalArray* APCLocalArray::asSharedArray(const ArrayData* ad) {
+  assert(ad->kind() == kSharedKind);
+  assert(checkInvariants(ad));
+  return static_cast<const APCLocalArray*>(ad);
+}
+
+const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {
+  auto const ad = asSharedArray(adIn);
+  auto const sv = ad->m_arr->getValue(pos);
+  auto const t = sv->getType();
   if (!IS_REFCOUNTED_TYPE(t)) {
     return APCTypedValue::fromHandle(sv)->asCVarRef();
   }
-  if (LIKELY(m_localCache != nullptr)) {
-    assert(unsigned(pos) < m_arr->capacity());
-    TypedValue* tv = &m_localCache[pos];
+  if (LIKELY(ad->m_localCache != nullptr)) {
+    assert(unsigned(pos) < ad->m_arr->capacity());
+    TypedValue* tv = &ad->m_localCache[pos];
     if (tv->m_type != KindOfUninit) {
       return tvAsCVarRef(tv);
     }
   } else {
     static_assert(KindOfUninit == 0, "must be 0 since we use smart_calloc");
-    unsigned cap = m_arr->capacity();
-    m_localCache = (TypedValue*) smart_calloc(cap, sizeof(TypedValue));
+    unsigned cap = ad->m_arr->capacity();
+    ad->m_localCache = static_cast<TypedValue*>(
+      smart_calloc(cap, sizeof(TypedValue))
+    );
   }
-  TypedValue* tv = &m_localCache[pos];
+  auto const tv = &ad->m_localCache[pos];
   tvAsVariant(tv) = sv->toLocal();
   assert(tv->m_type != KindOfUninit);
   return tvAsCVarRef(tv);
 }
 
-ALWAYS_INLINE APCLocalArray::~APCLocalArray() {
+ALWAYS_INLINE
+APCLocalArray::~APCLocalArray() {
   if (m_localCache) {
     for (TypedValue* tv = m_localCache, *end = tv + m_arr->capacity();
          tv < end; ++tv) {
@@ -71,6 +104,8 @@ void APCLocalArray::Release(ArrayData* ad) {
   smap->~APCLocalArray();
   MM().smartFreeSize(smap, sizeof(APCLocalArray));
 }
+
+size_t APCLocalArray::Vsize(const ArrayData*) { not_reached(); }
 
 bool APCLocalArray::IsVectorData(const ArrayData* ad) {
   auto a = asSharedArray(ad);
@@ -98,19 +133,25 @@ ssize_t APCLocalArray::getIndex(const StringData* k) const {
   return m_arr->getIndex(k);
 }
 
+APCHandle* APCLocalArray::GetAPCHandle(const ArrayData* ad) {
+  auto a = asSharedArray(ad);
+  if (a->m_arr->shouldCache()) return nullptr;
+  return a->m_arr->getHandle();
+}
+
 ArrayData* APCLocalArray::loadElems() const {
   auto count = m_arr->size();
   ArrayData* elems;
   if (m_arr->isPacked()) {
     PackedArrayInit ai(count);
     for (uint i = 0; i < count; i++) {
-      ai.append(getValueRef(i));
+      ai.append(GetValueRef(this, i));
     }
     elems = ai.create();
   } else {
     ArrayInit ai(count, ArrayInit::Mixed{});
     for (uint i = 0; i < count; i++) {
-      ai.add(getKey(i), getValueRef(i), true);
+      ai.add(getKey(i), GetValueRef(this, i), true);
     }
     elems = ai.create();
   }
@@ -230,7 +271,7 @@ TypedValue* APCLocalArray::NvGetInt(const ArrayData* ad, int64_t k) {
   auto a = asSharedArray(ad);
   auto index = a->getIndex(k);
   if (index == -1) return nullptr;
-  return (TypedValue*)&a->getValueRef(index);
+  return const_cast<TypedValue*>(GetValueRef(a, index).asTypedValue());
 }
 
 TypedValue* APCLocalArray::NvGetStr(const ArrayData* ad,
@@ -238,7 +279,7 @@ TypedValue* APCLocalArray::NvGetStr(const ArrayData* ad,
   auto a = asSharedArray(ad);
   auto index = a->getIndex(key);
   if (index == -1) return nullptr;
-  return (TypedValue*)&a->getValueRef(index);
+  return const_cast<TypedValue*>(GetValueRef(a, index).asTypedValue());
 }
 
 void APCLocalArray::NvGetKey(const ArrayData* ad,
@@ -328,14 +369,13 @@ void APCLocalArray::OnSetEvalScalar(ArrayData*) {
 }
 
 void APCLocalArray::getChildren(std::vector<TypedValue *> &out) {
-  if (m_localCache) {
-    TypedValue *localCacheEnd = m_localCache + m_size;
-    for (TypedValue *tv = m_localCache;
-         tv < localCacheEnd;
-         ++tv) {
-      if (tv->m_type != KindOfUninit) {
-        out.push_back(tv);
-      }
+  if (!m_localCache) return;
+  TypedValue *localCacheEnd = m_localCache + m_size;
+  for (TypedValue *tv = m_localCache;
+       tv < localCacheEnd;
+       ++tv) {
+    if (tv->m_type != KindOfUninit) {
+      out.push_back(tv);
     }
   }
 }

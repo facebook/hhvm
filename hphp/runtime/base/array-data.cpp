@@ -846,9 +846,9 @@ const char* ArrayData::kindToString(ArrayKind kind) {
   return names[kind];
 }
 
-void ArrayData::getChildren(std::vector<TypedValue *> &out) {
+void ArrayData::getChildren(std::vector<TypedValue*>& out) {
   if (isSharedArray()) {
-    APCLocalArray *sm = static_cast<APCLocalArray *>(this);
+    auto const sm = static_cast<APCLocalArray*>(this);
     sm->getChildren(out);
     return;
   }

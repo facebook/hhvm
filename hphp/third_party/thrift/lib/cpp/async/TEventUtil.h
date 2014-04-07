@@ -19,12 +19,12 @@
 #ifndef HPHP_THRIFT_ASYNC_TEVENTUTIL_H
 #define HPHP_THRIFT_ASYNC_TEVENTUTIL_H 1
 
-#include <event.h>  // libevent
+#include <ev.h>  // libevent
 
 namespace apache { namespace thrift { namespace async {
 
 /**
- * low-level libevent utility functions
+ * low-level libev utility functions
  */
 class TEventUtil {
  public:

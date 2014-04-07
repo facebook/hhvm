@@ -69,8 +69,8 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
-/* define if libevent is available */
-#define HAVE_LIBEVENT
+/* define if libev is available */
+#define HAVE_LIBEV
 
 /* Define to 1 if you have the <libintl.h> header file. */
 #define HAVE_LIBINTL_H 1

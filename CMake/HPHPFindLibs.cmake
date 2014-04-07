@@ -83,15 +83,14 @@ include_directories(${LIBMEMCACHED_INCLUDE_DIR})
 find_package(PCRE REQUIRED)
 include_directories(${PCRE_INCLUDE_DIRS})
 
-# libevent checks
-find_package(LibEvent REQUIRED)
-include_directories(${LIBEVENT_INCLUDE_DIR})
+# libev checks
+find_package(LibEV REQUIRED)
+include_directories(${LIBEV_INCLUDE_DIR})
 
-set(CMAKE_REQUIRED_LIBRARIES "${LIBEVENT_LIB}")
-CHECK_FUNCTION_EXISTS("evhttp_bind_socket_with_fd" HAVE_CUSTOM_LIBEVENT)
-if(HAVE_CUSTOM_LIBEVENT)
-        message("Using custom LIBEVENT")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_CUSTOM_LIBEVENT")
+set(CMAKE_REQUIRED_LIBRARIES "${LIBEV_LIB}")
+if(HAVE_CUSTOM_LIBEV)
+        message("Using custom LibEv")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_CUSTOM_LIBEV")
 endif()
 set(CMAKE_REQUIRED_LIBRARIES)
 
@@ -413,7 +412,7 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
 	target_link_libraries(${target} ${PCRE_LIBRARY})
 	target_link_libraries(${target} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
-	target_link_libraries(${target} ${LIBEVENT_LIB})
+	target_link_libraries(${target} ${LIBEV_LIB})
 	target_link_libraries(${target} ${CURL_LIBRARIES})
 	target_link_libraries(${target} ${LIBGLOG_LIBRARY})
 

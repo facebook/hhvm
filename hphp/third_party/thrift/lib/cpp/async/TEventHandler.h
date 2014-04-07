@@ -175,7 +175,7 @@ class TEventHandler : private boost::noncopyable {
 
   void setEventBase(TEventBase* eventBase);
 
-  static void libeventCallback(int fd, short events, void* arg);
+  static void libevCallback(int fd, short events, void* arg);
 
   struct event event_;
   TEventBase* eventBase_;

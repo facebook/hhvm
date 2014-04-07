@@ -25,7 +25,7 @@
 namespace apache { namespace thrift { namespace async {
 
 TEventHandler::TEventHandler(TEventBase* eventBase, int fd) {
-  event_set(&event_, fd, 0, &TEventHandler::libeventCallback, this);
+  ev_io_init(&event_, fd, 0, &TEventHandler::libeventCallback, this);
   if (eventBase != nullptr) {
     setEventBase(eventBase);
   } else {
@@ -57,10 +57,10 @@ bool TEventHandler::registerImpl(uint16_t events, bool internal) {
   }
 
   // Update the event flags
-  // Unfortunately, event_set() resets the event_base, so we have to remember
+  // Unfortunately, ev_io_init() resets the event_base, so we have to remember
   // it before hand, then pass it back into event_base_set() afterwards
   struct event_base* evb = event_.ev_base;
-  event_set(&event_, event_.ev_fd, events,
+  ev_io_init(&event_, event_.ev_fd, events,
             &TEventHandler::libeventCallback, this);
   event_base_set(evb, &event_);
 
@@ -120,15 +120,15 @@ void TEventHandler::detachEventBase() {
 
 void TEventHandler::changeHandlerFD(int fd) {
   ensureNotRegistered(__func__);
-  // event_set() resets event_base.ev_base, so manually restore it afterwards
+  // ev_io_init() resets event_base.ev_base, so manually restore it afterwards
   struct event_base* evb = event_.ev_base;
-  event_set(&event_, fd, 0, &TEventHandler::libeventCallback, this);
+  ev_io_init(&event_, fd, 0, &TEventHandler::libeventCallback, this);
   event_.ev_base = evb; // don't use event_base_set(), since evb may be nullptr
 }
 
 void TEventHandler::initHandler(TEventBase* eventBase, int fd) {
   ensureNotRegistered(__func__);
-  event_set(&event_, fd, 0, &TEventHandler::libeventCallback, this);
+  ev_io_init(&event_, fd, 0, &TEventHandler::libeventCallback, this);
   setEventBase(eventBase);
 }
 
@@ -153,7 +153,7 @@ void TEventHandler::libeventCallback(int fd, short events, void* arg) {
 }
 
 void TEventHandler::setEventBase(TEventBase* eventBase) {
-  event_base_set(eventBase->getLibeventBase(), &event_);
+  event_base_set(eventBase->getLibevBase(), &event_);
   eventBase_ = eventBase;
 }
 

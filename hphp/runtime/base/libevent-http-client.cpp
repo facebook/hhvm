@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/libevent-http-client.h"
+#include "hphp/runtime/base/libev-http-client.h"
 #include <map>
 #include <vector>
 
@@ -25,7 +25,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
 
-// libevent is not exposing this data structure, but we need it.
+// libev is not exposing this data structure, but we need it.
 struct evkeyvalq_ {
   struct evkeyval *tqh_first;
 };
@@ -35,12 +35,12 @@ struct evkeyvalq_ {
 
 static void on_request_completed(struct evhttp_request *req, void *obj) {
   assert(obj);
-  ((HPHP::LibEventHttpClient*)obj)->onRequestCompleted(req);
+  ((HPHP::LibEvHttpClient*)obj)->onRequestCompleted(req);
 }
 
 static void on_connection_closed(struct evhttp_connection *conn, void *obj) {
   assert(obj);
-  ((HPHP::LibEventHttpClient*)obj)->onConnectionClosed();
+  ((HPHP::LibEvHttpClient*)obj)->onConnectionClosed();
 }
 
 static void timer_callback(int fd, short events, void *context) {
@@ -60,12 +60,12 @@ static std::string get_hash(const std::string &address, int port) {
   return hash;
 }
 
-ReadWriteMutex LibEventHttpClient::ConnectionPoolMutex;
-std::map<std::string,int> LibEventHttpClient::ConnectionPoolConfig;
-std::map<std::string,std::vector<LibEventHttpClientPtr>>
-  LibEventHttpClient::ConnectionPool;
+ReadWriteMutex LibEvHttpClient::ConnectionPoolMutex;
+std::map<std::string,int> LibEvHttpClient::ConnectionPoolConfig;
+std::map<std::string,std::vector<LibEvHttpClientPtr>>
+  LibEvHttpClient::ConnectionPool;
 
-void LibEventHttpClient::SetCache(const std::string &address, int port,
+void LibEvHttpClient::SetCache(const std::string &address, int port,
                                   int maxConnection) {
   auto const hash = get_hash(address, port);
 
@@ -77,7 +77,7 @@ void LibEventHttpClient::SetCache(const std::string &address, int port,
   }
 }
 
-LibEventHttpClientPtr LibEventHttpClient::Get(const std::string &address,
+LibEvHttpClientPtr LibEvHttpClient::Get(const std::string &address,
                                               int port) {
   auto const hash = get_hash(address, port);
 
@@ -89,7 +89,7 @@ LibEventHttpClientPtr LibEventHttpClient::Get(const std::string &address,
       // not configured to cache
       ServerStats::Log("evhttp.skip", 1);
       ServerStats::Log("evhttp.skip." + hash, 1);
-      return LibEventHttpClientPtr(new LibEventHttpClient(address, port));
+      return LibEvHttpClientPtr(new LibEvHttpClient(address, port));
     }
     maxConnection = iter->second;
   }
@@ -106,7 +106,7 @@ LibEventHttpClientPtr LibEventHttpClient::Get(const std::string &address,
     }
   }
 
-  LibEventHttpClientPtr ret(new LibEventHttpClient(address, port));
+  LibEvHttpClientPtr ret(new LibEvHttpClient(address, port));
   if ((int)pool.size() < maxConnection) {
     if (pool.empty()) {
       pool.reserve(maxConnection);
@@ -121,13 +121,13 @@ LibEventHttpClientPtr LibEventHttpClient::Get(const std::string &address,
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-LibEventHttpClient::LibEventHttpClient(const std::string &address, int port)
+LibEvHttpClient::LibEvHttpClient(const std::string &address, int port)
   : m_busy(true), m_address(address), m_port(port), m_requests(0),
     m_conn(nullptr), m_thread(nullptr), m_code(0), m_response(nullptr), m_len(0) {
   m_eventBase = event_base_new();
 }
 
-LibEventHttpClient::~LibEventHttpClient() {
+LibEvHttpClient::~LibEvHttpClient() {
   clear();
 
   // reset all per-connection data structures
@@ -139,7 +139,7 @@ LibEventHttpClient::~LibEventHttpClient() {
   }
 }
 
-void LibEventHttpClient::clear() {
+void LibEvHttpClient::clear() {
   // reset all per-request data structures
   if (m_thread) {
     m_thread->waitForEnd();
@@ -157,14 +157,14 @@ void LibEventHttpClient::clear() {
   m_responseHeaders.clear();
 }
 
-void LibEventHttpClient::release() {
+void LibEvHttpClient::release() {
   clear();
   m_busy = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool LibEventHttpClient::send(const std::string &url,
+bool LibEvHttpClient::send(const std::string &url,
                               const std::vector<std::string> &headers,
                               int timeoutSeconds, bool async,
                               const void *data /* = NULL */,
@@ -199,7 +199,7 @@ bool LibEventHttpClient::send(const std::string &url,
     evhttp_add_header(request->output_headers, "Connection", "keep-alive");
   }
   if (addHost) {
-    // REVIEW: libevent never sends a Host header (nor does it properly send
+    // REVIEW: libev never sends a Host header (nor does it properly send
     // HTTP 400 for HTTP/1.1 requests without such a header), in blatent
     // violation of RFC2616; this should perhaps be fixed in the library
     // proper.  For now, add it if it wasn't set by the caller.
@@ -245,30 +245,30 @@ bool LibEventHttpClient::send(const std::string &url,
     timeout.tv_sec = timeoutSeconds;
     timeout.tv_usec = 0;
 
-    event_set(&m_eventTimeout, -1, 0, timer_callback, m_eventBase);
+    ev_io_init(&m_eventTimeout, -1, 0, timer_callback, m_eventBase);
     event_base_set(m_eventBase, &m_eventTimeout);
     event_add(&m_eventTimeout, &timeout);
   }
 
   if (async) {
-    m_thread = new AsyncFunc<LibEventHttpClient>
-      (this, &LibEventHttpClient::sendImpl);
+    m_thread = new AsyncFunc<LibEvHttpClient>
+      (this, &LibEvHttpClient::sendImpl);
     m_thread->start();
   } else {
-    IOStatusHelper io("libevent_http", m_address.c_str(), m_port);
+    IOStatusHelper io("libev_http", m_address.c_str(), m_port);
     sendImpl();
   }
   return true;
 }
 
-void LibEventHttpClient::sendImpl() {
+void LibEvHttpClient::sendImpl() {
   SlowTimer timer(RuntimeOption::HttpSlowQueryThreshold, "evhttp",
                   m_url.c_str());
   event_base_dispatch(m_eventBase);
   event_del(&m_eventTimeout);
 }
 
-void LibEventHttpClient::onRequestCompleted(evhttp_request* request) {
+void LibEvHttpClient::onRequestCompleted(evhttp_request* request) {
   if (!request) {
     // eek -- this is just a clean-up notification because the connection's
     // been closed, but we already dealt with it in onConnectionClosed
@@ -312,12 +312,12 @@ void LibEventHttpClient::onRequestCompleted(evhttp_request* request) {
   event_base_loopbreak(m_eventBase);
 }
 
-void LibEventHttpClient::onConnectionClosed() {
+void LibEvHttpClient::onConnectionClosed() {
   m_conn = nullptr;
   m_requests = 0;
 }
 
-char *LibEventHttpClient::recv(int &len) {
+char *LibEvHttpClient::recv(int &len) {
   if (m_thread) {
     m_thread->waitForEnd();
     delete m_thread;

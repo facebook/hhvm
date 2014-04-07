@@ -24,7 +24,7 @@
 #include "thrift/lib/cpp/async/Request.h"
 
 #include <boost/noncopyable.hpp>
-#include <event.h>
+#include <ev.h>
 
 namespace apache { namespace thrift { namespace async {
 

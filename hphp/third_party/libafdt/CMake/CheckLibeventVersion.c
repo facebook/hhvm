@@ -1,5 +1,5 @@
 #include <sys/types.h>
-#include <event.h>
+#include <ev.h>
 #include <stdio.h>
 
 int main()

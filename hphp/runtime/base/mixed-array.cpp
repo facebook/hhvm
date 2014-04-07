@@ -284,7 +284,7 @@ Variant CreateVarForUncountedArray(const Variant& source) {
 
     case KindOfArray: {
       auto const ad = source.getArrayData();
-      return ad == MixedArray::GetStaticEmptyArray() ? ad :
+      return ad == staticEmptyArray() ? ad :
              ad->isPacked() ? MixedArray::MakeUncountedPacked(ad) :
              MixedArray::MakeUncounted(ad);
     }

@@ -76,7 +76,7 @@ struct VariantController {
     return res;
   }
   static MapType getStaticEmptyMap() {
-    return MapType(MixedArray::GetStaticEmptyArray());
+    return MapType(staticEmptyArray());
   }
   static HPHP::serialize::Type mapKeyType(const Variant& k) {
     return type(k);

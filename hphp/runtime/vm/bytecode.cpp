@@ -1283,7 +1283,7 @@ void ExecutionContext::shuffleMagicArgs(ActRec* ar) {
   auto argArray = Array::attach(
     nargs ? MixedArray::MakePacked(
               nargs, reinterpret_cast<TypedValue*>(ar) - nargs)
-          : MixedArray::GetStaticEmptyArray()
+          : staticEmptyArray()
   );
 
   // Remove the arguments from the stack; they were moved into the

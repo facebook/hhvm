@@ -532,7 +532,7 @@ void HhbcTranslator::emitArray(int arrayId) {
 
 void HhbcTranslator::emitNewArray(int capacity) {
   if (capacity == 0) {
-    push(cns(MixedArray::GetStaticEmptyArray()));
+    push(cns(staticEmptyArray()));
   } else {
     push(gen(NewArray, cns(capacity)));
   }
@@ -3895,7 +3895,7 @@ void HhbcTranslator::emitCastArray() {
   if (src->isA(Type::Arr)) {
     push(src);
   } else if (src->isA(Type::Null)) {
-    push(cns(MixedArray::GetStaticEmptyArray()));
+    push(cns(staticEmptyArray()));
   } else if (src->isA(Type::Bool)) {
     push(gen(ConvBoolToArr, src));
   } else if (src->isA(Type::Dbl)) {

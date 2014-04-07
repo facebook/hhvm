@@ -139,7 +139,7 @@ TEST(Type, RuntimeType) {
   EXPECT_TRUE(t.subtypeOf(Type::Str));
   EXPECT_FALSE(t.subtypeOf(Type::Int));
 
-  rt = HPHP::JIT::RuntimeType(MixedArray::GetStaticEmptyArray());
+  rt = HPHP::JIT::RuntimeType(staticEmptyArray());
   t = Type(rt);
   EXPECT_TRUE(t.subtypeOf(Type::Arr));
   EXPECT_FALSE(t.subtypeOf(Type::Str));

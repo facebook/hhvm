@@ -51,13 +51,13 @@ typedef tbb::concurrent_hash_map<std::string, ArrayData*> ArrayDataMap;
 static ArrayDataMap s_arrayDataMap;
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
-  if (arr->empty()) return MixedArray::GetStaticEmptyArray();
+  if (arr->empty()) return staticEmptyArray();
   auto key = f_serialize(arr).toCppString();
   return GetScalarArray(arr, key);
 }
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr, const std::string& key) {
-  if (arr->empty()) return MixedArray::GetStaticEmptyArray();
+  if (arr->empty()) return staticEmptyArray();
   assert(key == f_serialize(arr).toCppString());
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
@@ -615,7 +615,7 @@ bool ArrayData::IsValidKey(const Variant& k) {
 }
 
 ArrayData *ArrayData::Create() {
-  return MixedArray::GetStaticEmptyArray();
+  return staticEmptyArray();
 }
 
 ArrayData *ArrayData::Create(const Variant& value) {

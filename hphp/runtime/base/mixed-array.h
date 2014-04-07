@@ -23,12 +23,15 @@
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
 
 class ArrayInit;
 struct MemoryProfile;
 
-class MixedArray : public ArrayData {
+//////////////////////////////////////////////////////////////////////
+
+struct MixedArray : ArrayData {
   // Load factor scaler. If S is the # of elements, C is the
   // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
   // So 2 gives 0.5 load factor, 4 gives 0.75 load factor, 8 gives
@@ -147,13 +150,6 @@ public:
    */
   static MixedArray* MakeUncounted(ArrayData* array);
   static ArrayData* MakeUncountedPacked(ArrayData* array);
-
-  /*
-   * Return a pointer to the singleton static empty array.  This is
-   * used for initial empty arrays (COW will cause it to escalate to a
-   * request-local array if it is modified).
-   */
-  static ArrayData* GetStaticEmptyArray();
 
   // This behaves the same as iter_begin except that it assumes
   // this array is not empty and its not virtual.
@@ -527,19 +523,8 @@ private:
   int64_t  m_nextKI;        // Next integer key to use for append.
 };
 
-extern std::aligned_storage<
-  sizeof(ArrayData),
-  alignof(ArrayData)
->::type s_theEmptyArray;
+//////////////////////////////////////////////////////////////////////
 
-//=============================================================================
-
-inline ArrayData* MixedArray::GetStaticEmptyArray() {
-  void* vp = &s_theEmptyArray;
-  return static_cast<ArrayData*>(vp);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_HPHP_ARRAY_H_

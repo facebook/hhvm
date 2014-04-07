@@ -436,6 +436,25 @@ protected:
   };
 };
 
+//////////////////////////////////////////////////////////////////////
+
+extern std::aligned_storage<
+  sizeof(ArrayData),
+  alignof(ArrayData)
+>::type s_theEmptyArray;
+
+/*
+ * Return the "static empty array".  This is a singleton static array
+ * that can be used whenever an empty array is needed.  It has
+ * kEmptyKind and uses the functions in empty-array.cpp.
+ */
+inline ArrayData* staticEmptyArray() {
+  void* vp = &s_theEmptyArray;
+  return static_cast<ArrayData*>(vp);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * ArrayFunctions is a hand-built virtual dispatch table.  Each field represents
  * one virtual method with an array of function pointers, one per ArrayKind.

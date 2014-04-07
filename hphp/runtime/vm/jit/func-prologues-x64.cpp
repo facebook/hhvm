@@ -429,8 +429,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   a.    storeq (rInvName, strTV[TVOFF(m_data)]);
   emitStoreTVType(a, KindOfArray, arrayTV[TVOFF(m_type)]);
   if (nPassed == 0) {
-    emitImmStoreq(a, MixedArray::GetStaticEmptyArray(),
-                  arrayTV[TVOFF(m_data)]);
+    emitImmStoreq(a, staticEmptyArray(), arrayTV[TVOFF(m_data)]);
   } else {
     a.  storeq (rax, arrayTV[TVOFF(m_data)]);
   }

@@ -174,7 +174,9 @@ class ObjectDataPrinter:
     def __init__(self, val):
         self.dtype = val.dynamic_type
         self.val = val.cast(self.dtype)
-        self.cls = val['m_cls']
+
+        clstype = gdb.lookup_type('HPHP::Class').pointer()
+        self.cls = val['m_cls']['m_raw'].cast(clstype)
 
     def children(self):
         dp = self.cls['m_declProperties']

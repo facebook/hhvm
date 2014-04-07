@@ -81,7 +81,7 @@ typedef LowPtr<Class, uint32_t> LowClassPtr;
 #else
 constexpr bool use_lowptr = false;
 
-typedef Class* LowClassPtr;
+typedef LowPtr<Class, uintptr_t> LowClassPtr;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

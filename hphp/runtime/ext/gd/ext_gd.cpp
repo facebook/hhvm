@@ -3571,7 +3571,7 @@ Variant HHVM_FUNCTION(imagecolorat,
     if (im->tpixels && gdImageBoundsSafe(im, x, y)) {
       return gdImageTrueColorPixel(im, x, y);
     } else {
-      raise_notice("%ld,%ld is out of bounds", x, y);
+      raise_notice("%" PRId64 ",%" PRId64 " is out of bounds", x, y);
       return false;
     }
   } else {
@@ -3583,7 +3583,7 @@ Variant HHVM_FUNCTION(imagecolorat,
       return (im->pixels[x][y]);
 #endif
     } else {
-      raise_notice("%ld,%ld is out of bounds", x, y);
+      raise_notice("%" PRId64 ",%" PRId64 " is out of bounds", x, y);
       return false;
     }
 #if HAVE_LIBGD20
@@ -3619,7 +3619,7 @@ bool HHVM_FUNCTION(imagecolordeallocate, const Resource& image,
     gdImageColorDeallocate(im, color);
     return true;
   } else {
-    raise_warning("Color index %ld out of range",  color);
+    raise_warning("Color index %" PRId64 " out of range", color);
     return false;
   }
 }
@@ -3682,7 +3682,7 @@ Variant HHVM_FUNCTION(imagecolorsforindex, const Resource& image,
     return ret.create();
   }
 #endif
-  raise_warning("Color index %ld out of range", index);
+  raise_warning("Color index %" PRId64 " out of range", index);
   return false;
 }
 

@@ -20,7 +20,7 @@
 #include "folly/io/Cursor.h"
 #include "hphp/util/gen-cpp/channeled_json_compressor_types.h"
 #include "hphp/util/logger.h"
-
+#include <boost/algorithm/string/replace.hpp>
 
 using folly::dynamic;
 using folly::fbstring;
@@ -211,8 +211,9 @@ void ChanneledJsonDecompressor::readArray(int64_t length,
 void ChanneledJsonDecompressor::readString(int64_t length, Channel channel,
                                            dynamic* outStringObj) {
   const char *pos = channels_[channel].read(length);
-  *outStringObj = fbstring(pos, length);
-  //TODO(noamler) How to decode utf8? (https://fburl.com/16145985)
+  std::string result = std::string(pos, length);
+  boost::replace_all(result, "\\\\", "\\"); //replace double quotes
+  *outStringObj = result;
 }
 
 void ChanneledJsonDecompressor::readDouble(dynamic* outDoubleObj) {

@@ -900,10 +900,14 @@ bool f_proc_terminate(const Resource& process,
   int signal_int = SIGTERM;
 
   if (!signal.isNull()) {
-    if (!signal.isNumeric()) {
-      return false;
+    if (signal.isString()) {
+      const char *str = signal.toString().data();
+      char *endptr;
+      signal_int = (int) strtoll(str, &endptr, 10);
+      if (!signal_int && (str == endptr)) return false;
+    } else {
+      signal_int = signal.toInt32();
     }
-    signal_int = signal.toInt32();
   }
 
   ChildProcess *proc = process.getTyped<ChildProcess>();

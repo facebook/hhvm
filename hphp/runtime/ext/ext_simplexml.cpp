@@ -1107,7 +1107,7 @@ Variant f_simplexml_import_dom(
     Object obj = create_object(cls->nameRef(), Array(), false);
     c_SimpleXMLElement* sxe = obj.getTyped<c_SimpleXMLElement>();
     sxe->document = Resource(NEWOBJ(XmlDocWrapper)(nodep->doc, node));
-    sxe->node = xmlDocGetRootElement(nodep->doc);
+    sxe->node = nodep;
     return obj;
   } else {
     raise_warning("Invalid Nodetype to import");

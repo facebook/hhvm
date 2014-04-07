@@ -13715,7 +13715,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
           #include <sys/types.h>
-          #include <event.h>
+          #include <ev.h>
 
 int
 main ()
@@ -13880,7 +13880,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
           #include <sys/types.h>
-          #include <event.h>
+          #include <ev.h>
 
 int
 main ()
@@ -14106,7 +14106,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
           #include <sys/types.h>
-          #include <event.h>
+          #include <ev.h>
 
 int
 main ()
@@ -14271,7 +14271,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
           #include <sys/types.h>
-          #include <event.h>
+          #include <ev.h>
 
 int
 main ()
@@ -14497,7 +14497,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
           #include <sys/types.h>
-          #include <event.h>
+          #include <ev.h>
 
 int
 main ()
@@ -14662,7 +14662,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
           #include <sys/types.h>
-          #include <event.h>
+          #include <ev.h>
 
 int
 main ()
@@ -14888,7 +14888,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
           #include <sys/types.h>
-          #include <event.h>
+          #include <ev.h>
 
 int
 main ()
@@ -15053,7 +15053,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
           #include <sys/types.h>
-          #include <event.h>
+          #include <ev.h>
 
 int
 main ()
@@ -16383,7 +16383,8 @@ $debug ||
 if test -n "$CONFIG_FILES"; then
 
 
-ac_cr=''
+ac_cr='
+'
 ac_cs_awk_cr=`$AWK 'BEGIN { print "a\rb" }' </dev/null 2>/dev/null`
 if test "$ac_cs_awk_cr" = "a${ac_cr}b"; then
   ac_cs_awk_cr='\\r'

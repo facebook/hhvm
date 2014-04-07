@@ -20,7 +20,7 @@
 #define HPHP_THRIFT_ASYNC_TASYNCSIGNALHANDLER_H 1
 
 #include "thrift/lib/cpp/thrift_config.h"
-#include <event.h>
+#include <ev.h>
 #include <map>
 
 namespace apache { namespace thrift { namespace async {

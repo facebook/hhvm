@@ -23,7 +23,7 @@
 #include <boost/intrusive/list.hpp>
 #include <boost/utility.hpp>
 #include <tr1/functional>
-#include <event.h>  // libevent
+#include <ev.h>  // libevent
 #include <errno.h>
 #include <math.h>
 
@@ -330,9 +330,9 @@ class TEventBase : private boost::noncopyable, public TimeoutManager {
   // Avoid using these functions if possible.  These functions are not
   // guaranteed to always be present if we ever provide alternative TEventBase
   // implementations that do not use libevent internally.
-  event_base* getLibeventBase() const { return evb_; }
-  static const char* getLibeventVersion() { return event_get_version(); }
-  static const char* getLibeventMethod() { return event_get_method(); }
+  event_base* getLibevBase() const { return evb_; }
+  static const char* getLibevVersion() { return event_get_version(); }
+  static const char* getLibevMethod() { return event_get_method(); }
 
   /**
    * only TEventHandler/TAsyncTimeout subclasses and ourselves should

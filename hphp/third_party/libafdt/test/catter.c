@@ -19,7 +19,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <unistd.h>
-#include <event.h>
+#include <ev.h>
 #include <afdt.h>
 
 

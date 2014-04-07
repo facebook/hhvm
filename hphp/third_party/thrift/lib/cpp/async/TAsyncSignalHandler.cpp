@@ -54,7 +54,7 @@ void TAsyncSignalHandler::registerSignalHandler(int signum) {
   struct event* ev = &(ret.first->second);
   try {
     signal_set(ev, signum, libeventCallback, this);
-    if (event_base_set(eventBase_->getLibeventBase(), ev) != 0 ) {
+    if (event_base_set(eventBase_->getLibevBase(), ev) != 0 ) {
       throw TLibraryException("error initializing event handler for signal " +
                               boost::lexical_cast<string>(signum));
     }

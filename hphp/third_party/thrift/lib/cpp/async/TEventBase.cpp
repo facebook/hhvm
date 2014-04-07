@@ -542,7 +542,7 @@ void TEventBase::attachTimeoutManager(TAsyncTimeout* obj,
   struct event* ev = obj->getEvent();
   assert(ev->ev_base == nullptr);
 
-  event_base_set(getLibeventBase(), ev);
+  event_base_set(getLibevBase(), ev);
   if (internal == TAsyncTimeout::InternalEnum::INTERNAL) {
     // Set the EVLIST_INTERNAL flag
     ev->ev_flags |= EVLIST_INTERNAL;

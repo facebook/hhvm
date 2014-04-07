@@ -53,8 +53,8 @@ AC_DEFUN([AX_LIB_EVENT_DO_CHECK],
             LIBEVENT_LDFLAGS=""
           fi
 
-          # Required flag for libevent.
-          LIBEVENT_LIBS="-levent"
+          # Required flag for libev.
+          LIBEVENT_LIBS="-lev"
 
           # Prepare the environment for compilation.
           CPPFLAGS="$CPPFLAGS $LIBEVENT_CPPFLAGS"
@@ -77,7 +77,7 @@ AC_DEFUN([AX_LIB_EVENT_DO_CHECK],
           dnl but then the version cannot be checked.
           AC_RUN_IFELSE([AC_LANG_PROGRAM([[
           #include <sys/types.h>
-          #include <event.h>
+          #include <ev.h>
           ]], [[
           const char* lib_version = event_get_version();
           const char* wnt_version = "$WANT_LIBEVENT_VERSION";

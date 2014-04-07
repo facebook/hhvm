@@ -277,7 +277,7 @@ void LibEventServer::dispatchWithTimeout(int timeoutSeconds) {
   timeout.tv_usec = 0;
 
   event eventTimeout;
-  event_set(&eventTimeout, -1, 0, on_timer, m_eventBase);
+  ev_io_init(&eventTimeout, -1, 0, on_timer, m_eventBase);
   event_base_set(m_eventBase, &eventTimeout);
   event_add(&eventTimeout, &timeout);
 
@@ -288,7 +288,7 @@ void LibEventServer::dispatchWithTimeout(int timeoutSeconds) {
 
 void LibEventServer::dispatch() {
   m_pipeStop.open();
-  event_set(&m_eventStop, m_pipeStop.getOut(), EV_READ|EV_PERSIST,
+  ev_io_init(&m_eventStop, m_pipeStop.getOut(), EV_READ|EV_PERSIST,
             on_thread_stop, m_eventBase);
   event_base_set(m_eventBase, &m_eventStop);
   event_add(&m_eventStop, nullptr);
@@ -567,7 +567,7 @@ void PendingResponseQueue::create(event_base *eventBase) {
   if (!m_ready.open()) {
     throw FatalErrorException("unable to create pipe for ready signal");
   }
-  event_set(&m_event, m_ready.getOut(), EV_READ|EV_PERSIST, on_response, this);
+  ev_io_init(&m_event, m_ready.getOut(), EV_READ|EV_PERSIST, on_response, this);
   event_base_set(eventBase, &m_event);
   event_add(&m_event, nullptr);
 }

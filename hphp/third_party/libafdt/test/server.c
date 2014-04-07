@@ -27,7 +27,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <event.h>
+#include <ev.h>
 #include <sys/queue.h>
 #include <evhttp.h>
 #include <afdt.h>

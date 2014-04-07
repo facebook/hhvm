@@ -128,7 +128,7 @@ flood error logs.
     Host = www.default_domain.com
     IP = 0.0.0.0
     Port = 80
-    Type = libevent | fastcgi
+    Type = libev | fastcgi
     ThreadCount = 50
     ThreadRoundRobin = false   # last thread serves next
     ThreadDropCacheTimeoutSeconds = 0
@@ -220,12 +220,12 @@ How long to wait for dangling server to respond.
     EnableEarlyFlush = true
     ForceChunkedEncoding = false
     MaxPostSize = 8  # in MB
-    LibEventSyncSend = true
+    LibEvSyncSend = true
     ResponseQueueCount = 0
 
 To further control idle connections, set
     ConnectionTimeoutSeconds = <some value>
-This parameter controls how long libevent will timeout a connection after
+This parameter controls how long libev will timeout a connection after
 idle on read or write. It takes effect when EnableKeepAlive is enabled.
 
 - EnableEarlyFlush, ForceChunkedEncoding
@@ -233,9 +233,9 @@ idle on read or write. It takes effect when EnableKeepAlive is enabled.
 EnableEarlyFlush allows chunked encoding responses, and ForceChunkedEncoding
 will only send chunked encoding responses, unless client doesn't understand.
 
-- LibEventSyncSend, ResponseQueueCount
+- LibEvSyncSend, ResponseQueueCount
 
-These are fine tuning options for libevent server. LibEventSyncSend allows
+These are fine tuning options for libev server. LibEvSyncSend allows
 response packets to be sent directly from worker thread, normally resulting in
 faster server responses. ResponseQueueCount specifies how many response queues
 to use for sending.

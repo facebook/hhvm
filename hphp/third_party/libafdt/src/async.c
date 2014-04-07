@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include <event.h>
+#include <ev.h>
 
 #include "config.h"
 #include "afdt.h"
@@ -160,7 +160,7 @@ static void server_handle_accept_read(int acceptfd, short event_type, void* arg)
   new_userdata->error_handler = ev_userdata->error_handler;
   new_userdata->afdt_userdata = ev_userdata->afdt_userdata;
 
-  event_set(&new_userdata->ev, clientfd, EV_READ, server_handle_client_read, new_userdata);
+  ev_io_init(&new_userdata->ev, clientfd, EV_READ, server_handle_client_read, new_userdata);
   ret = event_bsa(new_userdata->eb, &new_userdata->ev, NULL, &err_op);
   if (ret < 0) {
     goto event_failed;
@@ -219,7 +219,7 @@ int afdt_create_server(
   int acceptfd = ret;
 
   enum afdt_operation err_op = AFDT_NO_OPERATION;
-  event_set(&ev_userdata->ev, acceptfd, EV_READ | EV_PERSIST, server_handle_accept_read, ev_userdata);
+  ev_io_init(&ev_userdata->ev, acceptfd, EV_READ | EV_PERSIST, server_handle_accept_read, ev_userdata);
   ret = event_bsa(eb, &ev_userdata->ev, NULL, &err_op);
   if (ret < 0) {
     set_error(&err, err_op, "");
@@ -335,7 +335,7 @@ int afdt_create_client(
   }
 
   enum afdt_operation err_op = AFDT_NO_OPERATION;
-  event_set(&ev_userdata->ev, connfd, EV_READ, client_handle_read, ev_userdata);
+  ev_io_init(&ev_userdata->ev, connfd, EV_READ, client_handle_read, ev_userdata);
   ret = event_bsa(eb, &ev_userdata->ev, timeout, &err_op);
   if (ret < 0) {
     set_error(&err, err_op, "");

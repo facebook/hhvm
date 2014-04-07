@@ -28,7 +28,7 @@ namespace apache { namespace thrift { namespace async {
 TAsyncTimeout::TAsyncTimeout(TimeoutManager* timeoutManager)
     : timeoutManager_(timeoutManager) {
 
-  event_set(&event_, -1, EV_TIMEOUT, &TAsyncTimeout::libeventCallback, this);
+  ev_io_init(&event_, -1, EV_TIMEOUT, &TAsyncTimeout::libeventCallback, this);
   event_.ev_base = nullptr;
   timeoutManager_->attachTimeoutManager(
       this,
@@ -39,7 +39,7 @@ TAsyncTimeout::TAsyncTimeout(TimeoutManager* timeoutManager)
 TAsyncTimeout::TAsyncTimeout(TEventBase* eventBase)
     : timeoutManager_(eventBase) {
 
-  event_set(&event_, -1, EV_TIMEOUT, &TAsyncTimeout::libeventCallback, this);
+  ev_io_init(&event_, -1, EV_TIMEOUT, &TAsyncTimeout::libeventCallback, this);
   event_.ev_base = nullptr;
   timeoutManager_->attachTimeoutManager(
       this,
@@ -51,7 +51,7 @@ TAsyncTimeout::TAsyncTimeout(TimeoutManager* timeoutManager,
                              InternalEnum internal)
     : timeoutManager_(timeoutManager) {
 
-  event_set(&event_, -1, EV_TIMEOUT, &TAsyncTimeout::libeventCallback, this);
+  ev_io_init(&event_, -1, EV_TIMEOUT, &TAsyncTimeout::libeventCallback, this);
   event_.ev_base = nullptr;
   timeoutManager_->attachTimeoutManager(this, internal);
   RequestContext::getStaticContext();
@@ -60,14 +60,14 @@ TAsyncTimeout::TAsyncTimeout(TimeoutManager* timeoutManager,
 TAsyncTimeout::TAsyncTimeout(TEventBase* eventBase, InternalEnum internal)
     : timeoutManager_(eventBase) {
 
-  event_set(&event_, -1, EV_TIMEOUT, &TAsyncTimeout::libeventCallback, this);
+  ev_io_init(&event_, -1, EV_TIMEOUT, &TAsyncTimeout::libeventCallback, this);
   event_.ev_base = nullptr;
   timeoutManager_->attachTimeoutManager(this, internal);
   RequestContext::getStaticContext();
 }
 
 TAsyncTimeout::TAsyncTimeout(): timeoutManager_(nullptr) {
-  event_set(&event_, -1, EV_TIMEOUT, &TAsyncTimeout::libeventCallback, this);
+  ev_io_init(&event_, -1, EV_TIMEOUT, &TAsyncTimeout::libeventCallback, this);
   event_.ev_base = nullptr;
   RequestContext::getStaticContext();
 }

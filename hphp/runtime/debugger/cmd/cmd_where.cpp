@@ -213,7 +213,7 @@ static Array createAsyncStacktrace() {
     objToWaitableWaitHandle(currentWaitHandle)->t_getdependencystack();
   for (ArrayIter iter(depStack); iter; ++iter) {
     if (iter.secondRef().isNull()) {
-      trace.append(Array(HphpArray::GetStaticEmptyArray()));
+      trace.append(Array(MixedArray::GetStaticEmptyArray()));
     } else {
       auto wh = objToWaitableWaitHandle(iter.secondRef().toObject());
       auto parents = wh->t_getparents();

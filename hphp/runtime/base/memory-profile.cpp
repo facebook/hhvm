@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/pprof-server.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 
 namespace HPHP {
 

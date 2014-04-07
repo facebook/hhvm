@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/verifier/check.h"
 
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 
 #include "hphp/runtime/vm/verifier/cfg.h"
 #include "hphp/runtime/vm/verifier/util.h"
@@ -490,7 +490,7 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
     }
     case VSA: { // vector of litstr ids
       auto len = *(uint32_t*)pc;
-      if (len < 1 || len > HphpArray::MaxMakeSize) {
+      if (len < 1 || len > MixedArray::MaxMakeSize) {
         error("invalid length of immedate VSA vector %d at offset %d\n",
               len, offset(pc));
         return false;

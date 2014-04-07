@@ -156,7 +156,7 @@ Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   if (!cls) return null_variant;
   VMRegAnchor _;
 
-  auto retVal = Array::attach(HphpArray::MakeReserve(cls->numMethods()));
+  auto retVal = Array::attach(MixedArray::MakeReserve(cls->numMethods()));
   getMethodNamesImpl(
     cls,
     arGetContextClassFromBuiltin(g_context->getFP()),
@@ -168,7 +168,7 @@ Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
 Array HHVM_FUNCTION(get_class_constants, const String& className) {
   auto const cls = Unit::loadClass(className.get());
   if (cls == NULL) {
-    return Array::attach(HphpArray::MakeReserve(0));
+    return Array::attach(MixedArray::MakeReserve(0));
   }
 
   auto const numConstants = cls->numConstants();

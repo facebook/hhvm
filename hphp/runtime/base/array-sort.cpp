@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -24,7 +24,7 @@
 
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 
 #include <folly/ScopeGuard.h>
@@ -33,7 +33,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct KeyAccessor {
-  typedef const HphpArray::Elm& ElmT;
+  typedef const MixedArray::Elm& ElmT;
   bool isInt(ElmT elm) const { return elm.hasIntKey(); }
   bool isStr(ElmT elm) const { return elm.hasStrKey(); }
   int64_t getInt(ElmT elm) const { return elm.ikey; }
@@ -48,7 +48,7 @@ struct KeyAccessor {
 };
 
 struct ValAccessor {
-  typedef const HphpArray::Elm& ElmT;
+  typedef const MixedArray::Elm& ElmT;
   bool isInt(ElmT elm) const { return elm.data.m_type == KindOfInt64; }
   bool isStr(ElmT elm) const { return IS_STRING_TYPE(elm.data.m_type); }
   int64_t getInt(ElmT elm) const { return elm.data.m_data.num; }
@@ -64,8 +64,8 @@ struct ValAccessor {
  * and avoid performing type checks during the actual sort.
  */
 template <typename AccessorT>
-HphpArray::SortFlavor
-HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
+MixedArray::SortFlavor
+MixedArray::preSort(const AccessorT& acc, bool checkTypes) {
   assert(m_size > 0);
   assert(!isPacked());
   if (!checkTypes && m_size == m_used) {
@@ -117,11 +117,11 @@ done:
 }
 
 /**
- * postSort() runs after the sort has been performed. For HphpArray, postSort()
+ * postSort() runs after the sort has been performed. For MixedArray, postSort()
  * handles rebuilding the hash. Also, if resetKeys is true, postSort() will
  * renumber the keys 0 thru n-1.
  */
-void HphpArray::postSort(bool resetKeys) {
+void MixedArray::postSort(bool resetKeys) {
   assert(m_size > 0);
   auto const ht = hashTab();
   initHash(ht, hashSize());
@@ -147,7 +147,7 @@ void HphpArray::postSort(bool resetKeys) {
   m_hLoad = m_size;
 }
 
-ArrayData* HphpArray::EscalateForSort(ArrayData* ad) {
+ArrayData* MixedArray::EscalateForSort(ArrayData* ad) {
   // task #1910931 only do this for refCount() > 1
   return asMixed(ad)->copyMixed();
 }
@@ -207,17 +207,17 @@ ArrayData* HphpArray::EscalateForSort(ArrayData* ad) {
     a->postSort(resetKeys);                                     \
   } while (0)
 
-void HphpArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
+void MixedArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
   auto a = asMixed(ad);
   SORT_BODY(KeyAccessor, false);
 }
 
-void HphpArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
+void MixedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
   auto a = asMixed(ad);
   SORT_BODY(ValAccessor, true);
 }
 
-void HphpArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
+void MixedArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
   auto a = asMixed(ad);
   SORT_BODY(ValAccessor, false);
 }
@@ -255,17 +255,17 @@ void HphpArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
     return true;                                                \
   } while (0)
 
-bool HphpArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
+bool MixedArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
   auto a = asMixed(ad);
   USER_SORT_BODY(KeyAccessor, false);
 }
 
-bool HphpArray::Usort(ArrayData* ad, const Variant& cmp_function) {
+bool MixedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
   auto a = asMixed(ad);
   USER_SORT_BODY(ValAccessor, true);
 }
 
-bool HphpArray::Uasort(ArrayData* ad, const Variant& cmp_function) {
+bool MixedArray::Uasort(ArrayData* ad, const Variant& cmp_function) {
   auto a = asMixed(ad);
   USER_SORT_BODY(ValAccessor, false);
 }

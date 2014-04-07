@@ -20,7 +20,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-constexpr uint32_t kPackedSmallSize = 3; // same as hphp-array for now
+constexpr uint32_t kPackedSmallSize = 3; // same as mixed-array for now
 constexpr uint32_t kMaxPackedCap = 1 << 24;
 
 //////////////////////////////////////////////////////////////////////

@@ -22,10 +22,10 @@
 #include "folly/Likely.h"
 
 #include "hphp/runtime/base/tv-helpers.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-error.h"
 
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 
@@ -57,7 +57,7 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE
-HphpArray* PackedArray::ToMixedHeader(const ArrayData* old,
+MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
                                       size_t neededSize) {
   assert(PackedArray::checkInvariants(old));
 
@@ -68,7 +68,7 @@ HphpArray* PackedArray::ToMixedHeader(const ArrayData* old,
   auto const ad      = smartAllocArray(cap, mask);
 
   auto const shiftedSize = uint64_t{oldSize} << 32;
-  ad->m_kindAndSize      = shiftedSize | HphpArray::kMixedKind << 24;
+  ad->m_kindAndSize      = shiftedSize | MixedArray::kMixedKind << 24;
   ad->m_posAndCount      = static_cast<uint32_t>(old->m_pos);  // zero count
   ad->m_capAndUsed       = shiftedSize | cap;
   ad->m_maskAndLoad      = shiftedSize | mask;
@@ -95,7 +95,7 @@ HphpArray* PackedArray::ToMixedHeader(const ArrayData* old,
  * The returned array is mixed, and is guaranteed not to be isFull().
  * (Note: only unset can call ToMixed when we aren't about to insert.)
  */
-HphpArray* PackedArray::ToMixed(ArrayData* old) {
+MixedArray* PackedArray::ToMixed(ArrayData* old) {
   auto const oldSize = old->m_size;
   auto const ad      = ToMixedHeader(old, oldSize + 1);
   auto const mask    = ad->m_tableMask;
@@ -112,7 +112,7 @@ HphpArray* PackedArray::ToMixed(ArrayData* old) {
     ++dstHash;
   }
   for (; i <= mask; ++i) {
-    *dstHash++ = HphpArray::Empty;
+    *dstHash++ = MixedArray::Empty;
   }
 
   old->m_size = 0;
@@ -128,7 +128,7 @@ HphpArray* PackedArray::ToMixed(ArrayData* old) {
  * time as converting to mixed.  The returned mixed array is
  * guaranteed not to be full.
  */
-HphpArray* PackedArray::ToMixedCopy(const ArrayData* old) {
+MixedArray* PackedArray::ToMixedCopy(const ArrayData* old) {
   assert(PackedArray::checkInvariants(old));
 
   auto const oldSize = old->m_size;
@@ -147,7 +147,7 @@ HphpArray* PackedArray::ToMixedCopy(const ArrayData* old) {
   }
   auto const mask = ad->m_tableMask;
   for (; i <= mask; ++i) {
-    *dstHash++ = HphpArray::Empty;
+    *dstHash++ = MixedArray::Empty;
   }
 
   assert(ad->checkInvariants());
@@ -163,7 +163,7 @@ HphpArray* PackedArray::ToMixedCopy(const ArrayData* old) {
  * Unlike the other ToMixed functions, the returned array already has
  * a reference count of 1.
  */
-HphpArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
+MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
                                            size_t neededSize) {
   assert(neededSize >= old->m_size);
   auto const ad      = ToMixedHeader(old, neededSize);
@@ -183,7 +183,7 @@ HphpArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
     ++dstHash;
   }
   for (; i <= mask; ++i) {
-    *dstHash++ = HphpArray::Empty;
+    *dstHash++ = MixedArray::Empty;
   }
 
   assert(ad->checkInvariants());
@@ -332,8 +332,8 @@ ArrayData* PackedArray::NonSmartCopy(const ArrayData* adIn) {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* HphpArray::MakeReserve(uint32_t capacity) {
-  auto const kSmallSize = HphpArray::SmallSize;
+ArrayData* MixedArray::MakeReserve(uint32_t capacity) {
+  auto const kSmallSize = MixedArray::SmallSize;
   auto const cap = std::max(capacity, kSmallSize);
   auto const ad = static_cast<ArrayData*>(
     MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
@@ -434,7 +434,7 @@ ArrayData* PackedArray::LvalNew(ArrayData* adIn, Variant*& ret, bool copy) {
                        : ResizeIfNeeded(adIn);
   if (UNLIKELY(!ad)) {
     auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(ad);
-    return HphpArray::LvalNew(mixed, ret, copy);
+    return MixedArray::LvalNew(mixed, ret, copy);
   }
 
   if (ad->m_pos == ArrayData::invalid_index) {
@@ -585,7 +585,7 @@ ArrayData* PackedArray::Append(ArrayData* adIn, const Variant& v, bool copy) {
                        : ResizeIfNeeded(adIn);
   if (UNLIKELY(!ad)) {
     auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-    return HphpArray::Append(mixed, v, copy);
+    return MixedArray::Append(mixed, v, copy);
   }
 
   if (ad->m_pos == ArrayData::invalid_index) {
@@ -606,7 +606,7 @@ ArrayData* PackedArray::AppendRef(ArrayData* adIn,
                        : ResizeIfNeeded(adIn);
   if (UNLIKELY(!ad)) {
     auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-    return HphpArray::AppendRef(mixed, v, copy);
+    return MixedArray::AppendRef(mixed, v, copy);
   }
 
   if (ad->m_pos == ArrayData::invalid_index) {
@@ -627,7 +627,7 @@ ArrayData* PackedArray::AppendWithRef(ArrayData* adIn,
                        : ResizeIfNeeded(adIn);
   if (UNLIKELY(!ad)) {
     auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-    return HphpArray::AppendRef(mixed, v, copy);
+    return MixedArray::AppendRef(mixed, v, copy);
   }
 
   if (ad->m_pos == ArrayData::invalid_index) {
@@ -644,12 +644,12 @@ ArrayData* PackedArray::PlusEq(ArrayData* adIn, const ArrayData* elems) {
   auto const neededSize = adIn->size() + elems->size();
   auto const mixed = ToMixedCopyReserve(adIn, neededSize);
   try {
-    auto const ret = HphpArray::PlusEq(mixed, elems);
+    auto const ret = MixedArray::PlusEq(mixed, elems);
     assert(ret == mixed);
     assert(!mixed->hasMultipleRefs());
     return ret;
   } catch (...) {
-    HphpArray::Release(mixed);
+    MixedArray::Release(mixed);
     throw;
   }
 }
@@ -658,7 +658,7 @@ ArrayData* PackedArray::Merge(ArrayData* adIn, const ArrayData* elems) {
   assert(checkInvariants(adIn));
   auto const neededSize = adIn->m_size + elems->size();
   auto const ret = ToMixedCopyReserve(adIn, neededSize);
-  return HphpArray::ArrayMergeGeneric(ret, elems);
+  return MixedArray::ArrayMergeGeneric(ret, elems);
 }
 
 static void adjustMArrayIter(ArrayData* ad, ssize_t pos) {
@@ -793,17 +793,17 @@ bool PackedArray::Uasort(ArrayData*, const Variant&) {
 
 ArrayData* PackedArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
   assert(checkInvariants(ad));
-  return HphpArray::ZSetInt(ToMixedCopy(ad), k, v);
+  return MixedArray::ZSetInt(ToMixedCopy(ad), k, v);
 }
 
 ArrayData* PackedArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
   assert(checkInvariants(ad));
-  return HphpArray::ZSetStr(ToMixedCopy(ad), k, v);
+  return MixedArray::ZSetStr(ToMixedCopy(ad), k, v);
 }
 
 ArrayData* PackedArray::ZAppend(ArrayData* ad, RefData* v) {
   assert(checkInvariants(ad));
-  return HphpArray::ZAppend(ToMixedCopy(ad), v);
+  return MixedArray::ZAppend(ToMixedCopy(ad), v);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -828,7 +828,7 @@ ArrayData* genericAddNewElemC(ArrayData* a, TypedValue value) {
  * than other array helpers, but tuned for the opcode.  See doc comment in
  * hphp_array.h.
  */
-ArrayData* HphpArray::AddNewElemC(ArrayData* ad, TypedValue value) {
+ArrayData* MixedArray::AddNewElemC(ArrayData* ad, TypedValue value) {
   assert(value.m_type != KindOfRef);
 
   if (LIKELY(ad->isPacked())) {

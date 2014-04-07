@@ -935,8 +935,8 @@ void RuntimeOption::Load(Hdf &config,
     LockCodeMemory = server["LockCodeMemory"].getBool(false);
     MaxArrayChain = server["MaxArrayChain"].getInt32(INT_MAX);
     if (MaxArrayChain != INT_MAX) {
-      // HphpArray needs a higher threshold to avoid false-positives.
-      // (and we always use HphpArray)
+      // MixedArray needs a higher threshold to avoid false-positives.
+      // (and we always use MixedArray)
       MaxArrayChain *= 2;
     }
 

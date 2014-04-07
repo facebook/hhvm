@@ -27,7 +27,7 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/abi-cxx.h"
 
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -5896,8 +5896,8 @@ void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
   StringData** table = m_mcg->allocData<StringData*>(sizeof(StringData*),
                                                       data->numKeys);
   memcpy(table, data->keys, data->numKeys * sizeof(*data->keys));
-  HphpArray* (*f)(uint32_t, StringData**, const TypedValue*) =
-    &HphpArray::MakeStruct;
+  MixedArray* (*f)(uint32_t, StringData**, const TypedValue*) =
+    &MixedArray::MakeStruct;
   cgCallHelper(m_as, CppCall(f), callDest(inst), SyncOptions::kNoSyncPoint,
                argGroup().imm(data->numKeys)
                                   .imm(uintptr_t(table))

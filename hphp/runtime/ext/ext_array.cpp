@@ -28,7 +28,7 @@
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/util/logger.h"
 
@@ -333,7 +333,7 @@ Variant f_array_keys(const Variant& input, const Variant& search_value /* = null
     }
     return ai.toArray();
   } else {
-    Array ai = Array::attach(HphpArray::MakeReserve(0));
+    Array ai = Array::attach(MixedArray::MakeReserve(0));
     for (ArrayIter iter(cell_input); iter; ++iter) {
       if ((strict && HPHP::same(iter.secondRefPlus(), search_value)) ||
           (!strict && HPHP::equal(iter.secondRefPlus(), search_value))) {
@@ -784,7 +784,7 @@ Variant f_array_slice(const Variant& input, int offset,
 
   // PackedArrayInit can't be used because non-numeric keys are preserved
   // even when preserve_keys is false
-  Array ret = Array::attach(HphpArray::MakeReserve(len));
+  Array ret = Array::attach(MixedArray::MakeReserve(len));
   int pos = 0;
   ArrayIter iter(input);
   for (; pos < offset && iter; ++pos, ++iter) {}

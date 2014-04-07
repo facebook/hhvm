@@ -41,8 +41,8 @@ struct ArrayData {
   //  - using kind as an index
   //  - doing bit ops when storing in the union'd words below
   enum ArrayKind : uint8_t {
-    kPackedKind,  // HphpArray with keys in range [0..size)
-    kMixedKind,   // HphpArray arbitrary int or string keys, maybe holes
+    kPackedKind,  // MixedArray with keys in range [0..size)
+    kMixedKind,   // MixedArray arbitrary int or string keys, maybe holes
     kSharedKind,  // SharedArray
     kEmptyKind,   // The singleton static empty array
     kNvtwKind,    // NameValueTableWrapper
@@ -54,8 +54,8 @@ struct ArrayData {
 
 protected:
   /*
-   * NOTE: HphpArray no longer calls this constructor.  If you change
-   * it, change the HphpArray::Make functions as appropriate.
+   * NOTE: MixedArray no longer calls this constructor.  If you change
+   * it, change the MixedArray::Make functions as appropriate.
    */
   explicit ArrayData(ArrayKind kind)
     : m_kind(kind)
@@ -65,10 +65,10 @@ protected:
   {}
 
   /*
-   * NOTE: HphpArray no longer calls this destructor.  If you need to
-   * add logic, revisit HphpArray::Release{,Packed}.
+   * NOTE: MixedArray no longer calls this destructor.  If you need to
+   * add logic, revisit MixedArray::Release{,Packed}.
    *
-   * Include hphp-array-defs.h if you need the definition of this
+   * Include mixed-array-defs.h if you need the definition of this
    * destructor.  It is inline only.
    */
   ~ArrayData();
@@ -406,7 +406,7 @@ protected:
 protected:
   friend struct PackedArray;
   friend struct EmptyArray;
-  friend struct HphpArray;
+  friend struct MixedArray;
   // The following fields are blocked into unions with qwords so we
   // can combine the stores when initializing arrays.  (gcc won't do
   // this on its own.)

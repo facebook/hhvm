@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ struct ArrayIter {
       m_pos = ArrayData::invalid_index;
     }
   }
-  explicit ArrayIter(const HphpArray*) = delete;
+  explicit ArrayIter(const MixedArray*) = delete;
   explicit ArrayIter(const Array& array);
   explicit ArrayIter(ObjectData* obj);
   ArrayIter(ObjectData* obj, NoInc);

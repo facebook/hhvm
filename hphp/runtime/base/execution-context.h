@@ -29,7 +29,7 @@
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/util/lock.h"

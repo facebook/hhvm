@@ -208,7 +208,7 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
 
   assert(!g_context->dynPropTable.count(this));
   auto& arr = g_context->dynPropTable[this].arr();
-  arr = Array::attach(HphpArray::MakeReserveMixed(numDynamic));
+  arr = Array::attach(MixedArray::MakeReserveMixed(numDynamic));
   setAttribute(HasDynPropArr);
   return arr;
 }
@@ -439,7 +439,7 @@ Array ObjectData::o_toIterArray(const String& context,
     dynProps = &dynPropArray();
     size += dynProps->size();
   }
-  Array retArray { Array::attach(HphpArray::MakeReserveMixed(size)) };
+  Array retArray { Array::attach(MixedArray::MakeReserveMixed(size)) };
 
   Class* ctx = nullptr;
   if (!context.empty()) {
@@ -1401,7 +1401,7 @@ void ObjectData::setProp(Class* ctx,
       throw_invalid_property_name(StrNR(key));
     }
     // when seting a dynamic property, do not write
-    // directly to the TypedValue in the HphpArray, since
+    // directly to the TypedValue in the MixedArray, since
     // its m_aux field is used to store the string hash of
     // the property name. Instead, call the appropriate
     // setters (set() or setRef()).
@@ -1764,7 +1764,7 @@ void ObjectData::cloneSet(ObjectData* clone) {
 
     ssize_t iter = dynProps.get()->iter_begin();
     while (iter != ArrayData::invalid_index) {
-      auto props = static_cast<HphpArray*>(dynProps.get());
+      auto props = static_cast<MixedArray*>(dynProps.get());
       TypedValue key;
       props->nvGetKey(&key, iter);
 

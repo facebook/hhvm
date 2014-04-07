@@ -23,8 +23,8 @@
 #include <hphp/runtime/ext/asio/static_exception_wait_handle.h>
 #include <hphp/runtime/ext/asio/static_result_wait_handle.h>
 #include "hphp/system/systemlib.h"
-#include "hphp/runtime/base/hphp-array.h"
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
 
   Object exception;
 
-  HphpArray::ValIter arrIter(depCopy.get());
+  MixedArray::ValIter arrIter(depCopy.get());
   for (; !arrIter.empty(); arrIter.advance()) {
     auto const current = arrIter.current();
     if (UNLIKELY(current->m_type == KindOfRef)) {
@@ -161,7 +161,7 @@ void c_GenArrayWaitHandle::initialize(const Object& exception, const Array& deps
 }
 
 void c_GenArrayWaitHandle::onUnblocked() {
-  HphpArray::ValIter arrIter(m_deps.get(), m_iterPos);
+  MixedArray::ValIter arrIter(m_deps.get(), m_iterPos);
 
   for (; !arrIter.empty(); arrIter.advance()) {
     auto const current = tvAssertCell(arrIter.current());

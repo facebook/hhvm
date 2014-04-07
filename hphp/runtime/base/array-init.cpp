@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
@@ -27,7 +27,7 @@ ArrayInit::ArrayInit(size_t n, Map)
   , m_expectedCount(n)
 #endif
 {
-  m_data = HphpArray::MakeReserveMixed(n);
+  m_data = MixedArray::MakeReserveMixed(n);
   m_data->setRefCount(0);
 }
 

@@ -24,8 +24,8 @@
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/hphp-array.h"
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 
 namespace HPHP {
@@ -172,8 +172,8 @@ std::pair<ArrayData*,TypedValue*> EmptyArray::MakePacked(TypedValue tv) {
 NEVER_INLINE
 std::pair<ArrayData*,TypedValue*>
 EmptyArray::MakeMixed(StringData* key, TypedValue val) {
-  auto const mask = HphpArray::SmallMask;            // 3
-  auto const cap  = HphpArray::computeMaxElms(mask); // 3
+  auto const mask = MixedArray::SmallMask;            // 3
+  auto const cap  = MixedArray::computeMaxElms(mask); // 3
   auto const ad   = smartAllocArray(cap, mask);
 
   ad->m_kindAndSize = uint64_t{1} << 32 | ArrayData::kMixedKind << 24;
@@ -183,11 +183,11 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   ad->m_nextKI      = 0;
   ad->m_hLoad       = 1;
 
-  auto const data = reinterpret_cast<HphpArray::Elm*>(ad + 1);
+  auto const data = reinterpret_cast<MixedArray::Elm*>(ad + 1);
   auto const hash = reinterpret_cast<int32_t*>(data + cap);
 
   assert(mask + 1 == 4);
-  auto const emptyVal = int64_t{HphpArray::Empty};
+  auto const emptyVal = int64_t{MixedArray::Empty};
   reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
   reinterpret_cast<int64_t*>(hash)[1] = emptyVal;
 
@@ -215,8 +215,8 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
  */
 std::pair<ArrayData*,TypedValue*>
 EmptyArray::MakeMixed(int64_t key, TypedValue val) {
-  auto const mask = HphpArray::SmallMask;            // 3
-  auto const cap  = HphpArray::computeMaxElms(mask); // 3
+  auto const mask = MixedArray::SmallMask;            // 3
+  auto const cap  = MixedArray::computeMaxElms(mask); // 3
   auto const ad   = smartAllocArray(cap, mask);
 
   ad->m_kindAndSize = uint64_t{1} << 32 | ArrayData::kMixedKind << 24;
@@ -226,11 +226,11 @@ EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   ad->m_nextKI      = key + 1;
   ad->m_hLoad       = 1;
 
-  auto const data = reinterpret_cast<HphpArray::Elm*>(ad + 1);
+  auto const data = reinterpret_cast<MixedArray::Elm*>(ad + 1);
   auto const hash = reinterpret_cast<int32_t*>(data + cap);
 
   assert(mask + 1 == 4);
-  auto const emptyVal = int64_t{HphpArray::Empty};
+  auto const emptyVal = int64_t{MixedArray::Empty};
   reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
   reinterpret_cast<int64_t*>(hash)[1] = emptyVal;
 
@@ -345,8 +345,8 @@ ArrayData* EmptyArray::PlusEq(ArrayData*, const ArrayData* elems) {
 
 ArrayData* EmptyArray::Merge(ArrayData*, const ArrayData* elems) {
   // TODO(#4049965): can this just copy elems and then renumber?
-  auto const ret = HphpArray::MakeReserveMixed(HphpArray::SmallSize);
-  auto const tmp = HphpArray::Merge(ret, elems);
+  auto const ret = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
+  auto const tmp = MixedArray::Merge(ret, elems);
   ret->release();
   return tmp;
 }
@@ -367,7 +367,7 @@ ArrayData* EmptyArray::Prepend(ArrayData*, const Variant& vin, bool) {
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* EmptyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
-  auto const arr = HphpArray::MakeReserveMixed(HphpArray::SmallSize);
+  auto const arr = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
   arr->m_count = 0;
   DEBUG_ONLY auto const tmp = arr->zSet(k, v);
   assert(tmp == arr);
@@ -375,7 +375,7 @@ ArrayData* EmptyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
 }
 
 ArrayData* EmptyArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
-  auto const arr = HphpArray::MakeReserveMixed(HphpArray::SmallSize);
+  auto const arr = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
   arr->m_count = 0;
   DEBUG_ONLY auto const tmp = arr->zSet(k, v);
   assert(tmp == arr);
@@ -383,7 +383,7 @@ ArrayData* EmptyArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
 }
 
 ArrayData* EmptyArray::ZAppend(ArrayData* ad, RefData* v) {
-  auto const arr = HphpArray::MakeReserveMixed(HphpArray::SmallSize);
+  auto const arr = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
   arr->m_count = 0;
   DEBUG_ONLY auto const tmp = arr->zAppend(v);
   assert(tmp == arr);

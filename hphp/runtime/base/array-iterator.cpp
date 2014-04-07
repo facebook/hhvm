@@ -20,14 +20,14 @@
 #include "folly/Likely.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 
@@ -1116,7 +1116,7 @@ static NEVER_INLINE
 int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
   assert(arr->isMixed());
   assert(arr->hasExactlyOneRef());
-  HphpArray::Release(arr);
+  MixedArray::Release(arr);
   if (debug) {
     iter->arr().setIterType(ArrayIter::TypeUndefined);
   }
@@ -1193,7 +1193,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       return 1;
     }
 
-    auto const mixed = HphpArray::asMixed(ad);
+    auto const mixed = MixedArray::asMixed(ad);
     aiter.m_pos = mixed->getIterBegin();
     aiter.m_itypeAndNextHelperIdx =
       static_cast<uint32_t>(IterNextIndex::ArrayMixed) << 16 | itypeU32;
@@ -1263,7 +1263,7 @@ int64_t new_iter_array_key(Iter* dest,
       return 1;
     }
 
-    auto const mixed = HphpArray::asMixed(ad);
+    auto const mixed = MixedArray::asMixed(ad);
     aiter.m_pos = mixed->getIterBegin();
     aiter.m_itypeAndNextHelperIdx =
       static_cast<uint32_t>(IterNextIndex::ArrayMixed) << 16 | itypeU32;
@@ -1579,7 +1579,7 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
       return 1;
     }
 
-    auto const mixed = HphpArray::asMixed(ad);
+    auto const mixed = MixedArray::asMixed(ad);
     ssize_t pos = arrIter->getPos();
     do {
       ++pos;
@@ -1706,7 +1706,7 @@ int64_t iter_next_mixed_impl(Iter* it,
                              TypedValue* keyOut) {
   ArrayIter& iter = it->arr();
   auto const arrData = const_cast<ArrayData*>(iter.getArrayData());
-  auto const arr = static_cast<HphpArray*>(arrData);
+  auto const arr = static_cast<MixedArray*>(arrData);
   ssize_t pos = iter.getPos();
 
   do {

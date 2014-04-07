@@ -37,7 +37,7 @@ namespace HPHP {
 
 class ClassInfo;
 class ClassInfoVM;
-class HphpArray;
+class MixedArray;
 class ObjectData;
 struct HhbcExtClassInfo;
 class Func;

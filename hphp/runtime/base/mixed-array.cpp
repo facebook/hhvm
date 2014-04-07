@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-init.h"
@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <utility>
 
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 
@@ -47,7 +47,7 @@ TRACE_SET_MOD(runtime);
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* HphpArray::MakeReserveMixed(uint32_t capacity) {
+ArrayData* MixedArray::MakeReserveMixed(uint32_t capacity) {
   auto const cmret = computeCapAndMask(capacity);
   auto const cap   = cmret.first;
   auto const mask  = cmret.second;
@@ -77,7 +77,7 @@ ArrayData* HphpArray::MakeReserveMixed(uint32_t capacity) {
   return ad;
 }
 
-ArrayData* HphpArray::MakePacked(uint32_t size, const TypedValue* values) {
+ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
   assert(size > 0);
 
   auto const cap = size;
@@ -108,7 +108,7 @@ ArrayData* HphpArray::MakePacked(uint32_t size, const TypedValue* values) {
   return ad;
 }
 
-HphpArray* HphpArray::MakeStruct(uint32_t size, StringData** keys,
+MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
                                  const TypedValue* values) {
   assert(size > 0);
 
@@ -158,7 +158,7 @@ HphpArray* HphpArray::MakeStruct(uint32_t size, StringData** keys,
 // for internal use by nonSmartCopy() and copyMixed()
 template<class CopyKeyValue>
 ALWAYS_INLINE
-HphpArray* HphpArray::CopyMixed(const HphpArray& other,
+MixedArray* MixedArray::CopyMixed(const MixedArray& other,
                                 AllocMode mode,
                                 CopyKeyValue copyKeyValue) {
   assert(other.m_kind == kMixedKind);
@@ -211,7 +211,7 @@ HphpArray* HphpArray::CopyMixed(const HphpArray& other,
   return ad;
 }
 
-NEVER_INLINE ArrayData* HphpArray::NonSmartCopy(const ArrayData* in) {
+NEVER_INLINE ArrayData* MixedArray::NonSmartCopy(const ArrayData* in) {
   auto a = asMixed(in);
   assert(a->checkInvariants());
   return CopyMixed(
@@ -227,7 +227,7 @@ NEVER_INLINE ArrayData* HphpArray::NonSmartCopy(const ArrayData* in) {
   );
 }
 
-NEVER_INLINE HphpArray* HphpArray::copyMixed() const {
+NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
   assert(checkInvariants());
   return CopyMixed(*this, AllocMode::Smart,
       [&](const Elm& from, Elm& to, const ArrayData* container) {
@@ -240,13 +240,13 @@ NEVER_INLINE HphpArray* HphpArray::copyMixed() const {
 }
 
 ALWAYS_INLINE
-HphpArray* HphpArray::copyMixedAndResizeIfNeeded() const {
+MixedArray* MixedArray::copyMixedAndResizeIfNeeded() const {
   if (LIKELY(!isFull())) return copyMixed();
   return copyMixedAndResizeIfNeededSlow();
 }
 
 NEVER_INLINE
-HphpArray* HphpArray::copyMixedAndResizeIfNeededSlow() const {
+MixedArray* MixedArray::copyMixedAndResizeIfNeededSlow() const {
   assert(isFull());
 
   // Note: this path will have to handle splitting strong iterators
@@ -284,9 +284,9 @@ Variant CreateVarForUncountedArray(const Variant& source) {
 
     case KindOfArray: {
       auto const ad = source.getArrayData();
-      return ad == HphpArray::GetStaticEmptyArray() ? ad :
-             ad->isPacked() ? HphpArray::MakeUncountedPacked(ad) :
-             HphpArray::MakeUncounted(ad);
+      return ad == MixedArray::GetStaticEmptyArray() ? ad :
+             ad->isPacked() ? MixedArray::MakeUncountedPacked(ad) :
+             MixedArray::MakeUncounted(ad);
     }
 
     default:
@@ -297,7 +297,7 @@ Variant CreateVarForUncountedArray(const Variant& source) {
 
 }
 
-HphpArray* HphpArray::MakeUncounted(ArrayData* array) {
+MixedArray* MixedArray::MakeUncounted(ArrayData* array) {
   auto a = asMixed(array);
   auto mixed = CopyMixed(
     *a,
@@ -321,7 +321,7 @@ HphpArray* HphpArray::MakeUncounted(ArrayData* array) {
   return mixed;
 }
 
-ArrayData* HphpArray::MakeUncountedPacked(ArrayData* array) {
+ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
   assert(PackedArray::checkInvariants(array));
 
   // We don't need to copy the full capacity, since the array won't
@@ -357,7 +357,7 @@ ArrayData* HphpArray::MakeUncountedPacked(ArrayData* array) {
 // Destruction
 
 NEVER_INLINE
-void HphpArray::Release(ArrayData* in) {
+void MixedArray::Release(ArrayData* in) {
   assert(in->isRefCounted());
   auto const ad = asMixed(in);
 
@@ -394,9 +394,9 @@ static void release_unk_tv(TypedValue& tv) {
     assert(!tv.m_data.parr->isRefCounted());
     if (!tv.m_data.parr->isStatic()) {
       if (tv.m_data.parr->isPacked()) {
-        HphpArray::ReleaseUncountedPacked(tv.m_data.parr);
+        MixedArray::ReleaseUncountedPacked(tv.m_data.parr);
       } else {
-        HphpArray::ReleaseUncounted(tv.m_data.parr);
+        MixedArray::ReleaseUncounted(tv.m_data.parr);
       }
     }
     return;
@@ -406,7 +406,7 @@ static void release_unk_tv(TypedValue& tv) {
 }
 
 NEVER_INLINE
-void HphpArray::ReleaseUncounted(ArrayData* in) {
+void MixedArray::ReleaseUncounted(ArrayData* in) {
   auto const ad = asMixed(in);
   assert(ad->m_count == UncountedValue);
 
@@ -438,7 +438,7 @@ void HphpArray::ReleaseUncounted(ArrayData* in) {
   std::free(ad);
 }
 
-void HphpArray::ReleaseUncountedPacked(ArrayData* ad) {
+void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
   assert(PackedArray::checkInvariants(ad));
   assert(ad->m_count == UncountedValue);
 
@@ -499,13 +499,13 @@ void HphpArray::ReleaseUncountedPacked(ArrayData* ad) {
  *   Elm.hash uninitialized
  *   no KindOfInvalid tombstones
  */
-bool HphpArray::checkInvariants() const {
+bool MixedArray::checkInvariants() const {
   static_assert(ssize_t(Empty) == ssize_t(-1), "");
   static_assert(sizeof(Elm) == 24, "");
   static_assert(sizeof(ArrayData) == 2 * sizeof(uint64_t), "");
   static_assert(
-    sizeof(HphpArray) == sizeof(ArrayData) + 3 * sizeof(uint64_t),
-    "Performance is sensitive to sizeof(HphpArray)."
+    sizeof(MixedArray) == sizeof(ArrayData) + 3 * sizeof(uint64_t),
+    "Performance is sensitive to sizeof(MixedArray)."
     " Make sure you changed it with good reason and then update this assert."
   );
 
@@ -565,7 +565,7 @@ bool HphpArray::checkInvariants() const {
 //=============================================================================
 // Iteration.
 
-inline ssize_t HphpArray::prevElm(Elm* elms, ssize_t ei) const {
+inline ssize_t MixedArray::prevElm(Elm* elms, ssize_t ei) const {
   assert(ei <= ssize_t(m_used));
   while (ei > 0) {
     --ei;
@@ -576,17 +576,17 @@ inline ssize_t HphpArray::prevElm(Elm* elms, ssize_t ei) const {
   return invalid_index;
 }
 
-ssize_t HphpArray::IterBegin(const ArrayData* ad) {
+ssize_t MixedArray::IterBegin(const ArrayData* ad) {
   auto a = asMixed(ad);
   return a->nextElm(a->data(), invalid_index);
 }
 
-ssize_t HphpArray::IterEnd(const ArrayData* ad) {
+ssize_t MixedArray::IterEnd(const ArrayData* ad) {
   auto a = asMixed(ad);
   return a->prevElm(a->data(), a->m_used);
 }
 
-ssize_t HphpArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
+ssize_t MixedArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
   auto a = asMixed(ad);
   // Since m_used is always less than 2^32 and invalid_index == -1,
   // we can save a check by doing an unsigned comparison instead
@@ -599,7 +599,7 @@ ssize_t HphpArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
 }
 
 // caller has already incremented pos but encountered a tombstone
-ssize_t HphpArray::iter_advance_helper(ssize_t next_pos) const {
+ssize_t MixedArray::iter_advance_helper(ssize_t next_pos) const {
   Elm* elms = data();
   // Since m_used is always less than 2^32 and invalid_index == -1,
   // we can save a check by doing an unsigned comparison instead of
@@ -612,15 +612,15 @@ ssize_t HphpArray::iter_advance_helper(ssize_t next_pos) const {
   return invalid_index;
 }
 
-ssize_t HphpArray::IterRewind(const ArrayData* ad, ssize_t pos) {
+ssize_t MixedArray::IterRewind(const ArrayData* ad, ssize_t pos) {
   if (pos == invalid_index) return invalid_index;
   auto a = asMixed(ad);
   return a->prevElm(a->data(), pos);
 }
 
-size_t HphpArray::Vsize(const ArrayData*) { not_reached(); }
+size_t MixedArray::Vsize(const ArrayData*) { not_reached(); }
 
-const Variant& HphpArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+const Variant& MixedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asMixed(ad);
   assert(a->checkInvariants());
   assert(pos != invalid_index);
@@ -629,7 +629,7 @@ const Variant& HphpArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   return tvAsCVarRef(&e.data);
 }
 
-bool HphpArray::IsVectorData(const ArrayData* ad) {
+bool MixedArray::IsVectorData(const ArrayData* ad) {
   auto a = asMixed(ad);
   if (a->m_size == 0) {
     // any 0-length array is "vector-like" for the sake of this
@@ -654,24 +654,24 @@ bool HphpArray::IsVectorData(const ArrayData* ad) {
 //=============================================================================
 // Lookup.
 
-static bool hitStringKey(const HphpArray::Elm& e, const StringData* s,
+static bool hitStringKey(const MixedArray::Elm& e, const StringData* s,
                          int32_t hash) {
   // hitStringKey() should only be called on an Elm that is referenced by a
-  // hash table entry. HphpArray guarantees that when it adds a hash table
+  // hash table entry. MixedArray guarantees that when it adds a hash table
   // entry that it always sets it to refer to a valid element. Likewise when
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
-  assert(!HphpArray::isTombstone(e.data.m_type));
+  assert(!MixedArray::isTombstone(e.data.m_type));
   return hash == e.hash() && (s == e.key || s->same(e.key));
 }
 
-static bool hitIntKey(const HphpArray::Elm& e, int64_t ki) {
+static bool hitIntKey(const MixedArray::Elm& e, int64_t ki) {
   // hitIntKey() should only be called on an Elm that is referenced by a
-  // hash table entry. HphpArray guarantees that when it adds a hash table
+  // hash table entry. MixedArray guarantees that when it adds a hash table
   // entry that it always sets it to refer to a valid element. Likewise when
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
-  assert(!HphpArray::isTombstone(e.data.m_type));
+  assert(!MixedArray::isTombstone(e.data.m_type));
   return e.ikey == ki && e.hasIntKey();
 }
 
@@ -684,7 +684,7 @@ static bool hitIntKey(const HphpArray::Elm& e, int64_t ki) {
 // table elements exactly once.
 
 template <class Hit> ALWAYS_INLINE
-ssize_t HphpArray::findImpl(size_t h0, Hit hit) const {
+ssize_t MixedArray::findImpl(size_t h0, Hit hit) const {
   // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto.  Test carefully.
   size_t tableMask = m_tableMask;
@@ -700,7 +700,7 @@ ssize_t HphpArray::findImpl(size_t h0, Hit hit) const {
   }
 }
 
-ssize_t HphpArray::find(int64_t ki) const {
+ssize_t MixedArray::find(int64_t ki) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
   return findImpl(ki, [ki] (const Elm& e) {
@@ -708,7 +708,7 @@ ssize_t HphpArray::find(int64_t ki) const {
   });
 }
 
-ssize_t HphpArray::find(const StringData* s, strhash_t prehash) const {
+ssize_t MixedArray::find(const StringData* s, strhash_t prehash) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
   auto h = prehash | STRHASH_MSB;
@@ -726,7 +726,7 @@ int32_t* warnUnbalanced(size_t n, int32_t* ei) {
 }
 
 template <class Hit> ALWAYS_INLINE
-int32_t* HphpArray::findForInsertImpl(size_t h0, Hit hit) const {
+int32_t* MixedArray::findForInsertImpl(size_t h0, Hit hit) const {
   // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto.  Test carefully.
   assert(m_hLoad <= computeMaxElms(m_tableMask));
@@ -752,7 +752,7 @@ int32_t* HphpArray::findForInsertImpl(size_t h0, Hit hit) const {
   }
 }
 
-int32_t* HphpArray::findForInsert(int64_t ki) const {
+int32_t* MixedArray::findForInsert(int64_t ki) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
   return findForInsertImpl(ki, [ki] (const Elm& e) {
@@ -761,7 +761,7 @@ int32_t* HphpArray::findForInsert(int64_t ki) const {
 }
 
 int32_t*
-HphpArray::findForInsert(const StringData* s, strhash_t prehash) const {
+MixedArray::findForInsert(const StringData* s, strhash_t prehash) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
   auto h = prehash | STRHASH_MSB;
@@ -770,7 +770,7 @@ HphpArray::findForInsert(const StringData* s, strhash_t prehash) const {
   });
 }
 
-HphpArray::InsertPos HphpArray::insert(int64_t k) {
+MixedArray::InsertPos MixedArray::insert(int64_t k) {
   assert(!isFull());
   auto ei = findForInsert(k);
   if (validPos(*ei)) {
@@ -782,7 +782,7 @@ HphpArray::InsertPos HphpArray::insert(int64_t k) {
   return InsertPos(false, e.data);
 }
 
-HphpArray::InsertPos HphpArray::insert(StringData* k) {
+MixedArray::InsertPos MixedArray::insert(StringData* k) {
   assert(!isFull());
   auto const h = k->hash();
   auto ei = findForInsert(k, h);
@@ -795,7 +795,7 @@ HphpArray::InsertPos HphpArray::insert(StringData* k) {
 }
 
 template <class Hit, class Remove> ALWAYS_INLINE
-ssize_t HphpArray::findForRemoveImpl(size_t h0, Hit hit, Remove remove) const {
+ssize_t MixedArray::findForRemoveImpl(size_t h0, Hit hit, Remove remove) const {
   assert(m_hLoad <= computeMaxElms(m_tableMask));
   size_t mask = m_tableMask;
   auto* elms = data();
@@ -822,7 +822,7 @@ ssize_t HphpArray::findForRemoveImpl(size_t h0, Hit hit, Remove remove) const {
 }
 
 NEVER_INLINE
-ssize_t HphpArray::findForRemove(int64_t ki, bool updateNext) {
+ssize_t MixedArray::findForRemove(int64_t ki, bool updateNext) {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
   return findForRemoveImpl(ki,
@@ -844,7 +844,7 @@ ssize_t HphpArray::findForRemove(int64_t ki, bool updateNext) {
 }
 
 ssize_t
-HphpArray::findForRemove(const StringData* s, strhash_t prehash) {
+MixedArray::findForRemove(const StringData* s, strhash_t prehash) {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
   auto h = prehash | STRHASH_MSB;
@@ -859,12 +859,12 @@ HphpArray::findForRemove(const StringData* s, strhash_t prehash) {
     );
 }
 
-bool HphpArray::ExistsInt(const ArrayData* ad, int64_t k) {
+bool MixedArray::ExistsInt(const ArrayData* ad, int64_t k) {
   auto a = asMixed(ad);
   return validPos(a->find(k));
 }
 
-bool HphpArray::ExistsStr(const ArrayData* ad, const StringData* k) {
+bool MixedArray::ExistsStr(const ArrayData* ad, const StringData* k) {
   auto a = asMixed(ad);
   return validPos(a->find(k, k->hash()));
 }
@@ -873,46 +873,46 @@ bool HphpArray::ExistsStr(const ArrayData* ad, const StringData* k) {
 // Append/insert/update.
 
 ALWAYS_INLINE
-HphpArray* HphpArray::initVal(TypedValue& tv, const Variant& v) {
+MixedArray* MixedArray::initVal(TypedValue& tv, const Variant& v) {
   tvAsUninitializedVariant(&tv).constructValHelper(v);
   return this;
 }
 
 ALWAYS_INLINE
-ArrayData* HphpArray::zInitVal(TypedValue& tv, RefData* v) {
+ArrayData* MixedArray::zInitVal(TypedValue& tv, RefData* v) {
   tv.m_type = KindOfRef;
   tv.m_data.pref = v;
   return this;
 }
 
 ALWAYS_INLINE
-HphpArray* HphpArray::initRef(TypedValue& tv, const Variant& v) {
+MixedArray* MixedArray::initRef(TypedValue& tv, const Variant& v) {
   tvAsUninitializedVariant(&tv).constructRefHelper(v);
   return this;
 }
 
 ALWAYS_INLINE
-HphpArray* HphpArray::getLval(TypedValue& tv, Variant*& ret) {
+MixedArray* MixedArray::getLval(TypedValue& tv, Variant*& ret) {
   ret = &tvAsVariant(&tv);
   return this;
 }
 
 ALWAYS_INLINE
-HphpArray* HphpArray::initLval(TypedValue& tv, Variant*& ret) {
+MixedArray* MixedArray::initLval(TypedValue& tv, Variant*& ret) {
   tvWriteNull(&tv);
   ret = &tvAsVariant(&tv);
   return this;
 }
 
 ALWAYS_INLINE
-HphpArray* HphpArray::initWithRef(TypedValue& tv, const Variant& v) {
+MixedArray* MixedArray::initWithRef(TypedValue& tv, const Variant& v) {
   tvWriteNull(&tv);
   tvAsVariant(&tv).setWithRef(v);
   return this;
 }
 
 ALWAYS_INLINE
-HphpArray* HphpArray::setVal(TypedValue& tv, const Variant& v) {
+MixedArray* MixedArray::setVal(TypedValue& tv, const Variant& v) {
   auto const src = v.asCell();
   auto const dst = tvToCell(&tv);
   cellSet(*src, *dst);
@@ -925,7 +925,7 @@ HphpArray* HphpArray::setVal(TypedValue& tv, const Variant& v) {
 }
 
 ALWAYS_INLINE
-ArrayData* HphpArray::zSetVal(TypedValue& tv, RefData* v) {
+ArrayData* MixedArray::zSetVal(TypedValue& tv, RefData* v) {
   // Dec ref the old value
   tvRefcountedDecRef(tv);
   // Store the RefData but do not increment the refcount
@@ -935,7 +935,7 @@ ArrayData* HphpArray::zSetVal(TypedValue& tv, RefData* v) {
 }
 
 ALWAYS_INLINE
-HphpArray* HphpArray::setRef(TypedValue& tv, const Variant& v) {
+MixedArray* MixedArray::setRef(TypedValue& tv, const Variant& v) {
   auto const ref = v.asRef();
   tvBind(ref, &tv);
   return this;
@@ -946,18 +946,18 @@ HphpArray* HphpArray::setRef(TypedValue& tv, const Variant& v) {
  * with no incref+decref because we're moving v to this array.
  */
 ALWAYS_INLINE
-HphpArray* HphpArray::moveVal(TypedValue& tv, TypedValue v) {
+MixedArray* MixedArray::moveVal(TypedValue& tv, TypedValue v) {
   tv.m_type = typeInitNull(v.m_type);
   tv.m_data.num = v.m_data.num;
   return this;
 }
 
-ALWAYS_INLINE HphpArray* HphpArray::resizeIfNeeded() {
+ALWAYS_INLINE MixedArray* MixedArray::resizeIfNeeded() {
   if (UNLIKELY(isFull())) return resize();
   return this;
 }
 
-NEVER_INLINE HphpArray* HphpArray::resize() {
+NEVER_INLINE MixedArray* MixedArray::resize() {
   uint32_t maxElms = computeMaxElms(m_tableMask);
   assert(m_used <= maxElms);
   assert(m_hLoad <= maxElms);
@@ -971,7 +971,7 @@ NEVER_INLINE HphpArray* HphpArray::resize() {
   return this;
 }
 
-HphpArray* HphpArray::Grow(HphpArray* old) {
+MixedArray* MixedArray::Grow(MixedArray* old) {
   assert(!old->isPacked());
   assert(old->m_tableMask <= 0x7fffffffU);
 
@@ -1039,7 +1039,7 @@ struct ElmKey {
 };
 }
 
-void HphpArray::compact(bool renumber /* = false */) {
+void MixedArray::compact(bool renumber /* = false */) {
   assert(!isPacked());
   ElmKey mPos;
   if (m_pos != invalid_index) {
@@ -1122,7 +1122,7 @@ void HphpArray::compact(bool renumber /* = false */) {
   });
 }
 
-bool HphpArray::nextInsert(const Variant& data) {
+bool MixedArray::nextInsert(const Variant& data) {
   assert(m_nextKI >= 0);
   assert(!isPacked());
   assert(!isFull());
@@ -1141,7 +1141,7 @@ bool HphpArray::nextInsert(const Variant& data) {
   return true;
 }
 
-ArrayData* HphpArray::nextInsertRef(const Variant& data) {
+ArrayData* MixedArray::nextInsertRef(const Variant& data) {
   assert(!isPacked());
   assert(!isFull());
   assert(m_nextKI >= 0);
@@ -1157,7 +1157,7 @@ ArrayData* HphpArray::nextInsertRef(const Variant& data) {
   return initRef(e.data, data);
 }
 
-ArrayData* HphpArray::nextInsertWithRef(const Variant& data) {
+ArrayData* MixedArray::nextInsertWithRef(const Variant& data) {
   assert(!isFull());
 
   int64_t ki = m_nextKI;
@@ -1172,7 +1172,7 @@ ArrayData* HphpArray::nextInsertWithRef(const Variant& data) {
 }
 
 template <class K> ALWAYS_INLINE
-ArrayData* HphpArray::update(K k, const Variant& data) {
+ArrayData* MixedArray::update(K k, const Variant& data) {
   assert(!isPacked());
   assert(!isFull());
   auto p = insert(k);
@@ -1183,7 +1183,7 @@ ArrayData* HphpArray::update(K k, const Variant& data) {
 }
 
 template <class K> ALWAYS_INLINE
-ArrayData* HphpArray::zSetImpl(K k, RefData* data) {
+ArrayData* MixedArray::zSetImpl(K k, RefData* data) {
   auto p = insert(k);
   if (p.found) {
     return zSetVal(p.tv, data);
@@ -1192,7 +1192,7 @@ ArrayData* HphpArray::zSetImpl(K k, RefData* data) {
 }
 
 ALWAYS_INLINE
-ArrayData* HphpArray::zAppendImpl(RefData* data) {
+ArrayData* MixedArray::zAppendImpl(RefData* data) {
   if (UNLIKELY(m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
                   "already occupied");
@@ -1207,7 +1207,7 @@ ArrayData* HphpArray::zAppendImpl(RefData* data) {
   return zInitVal(e.data, data);
 }
 
-ArrayData* HphpArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
+ArrayData* MixedArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
                               bool copy) {
   auto a = asMixed(ad);
   if (copy) {
@@ -1218,7 +1218,7 @@ ArrayData* HphpArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
   return a->addLvalImpl(k, ret);
 }
 
-ArrayData* HphpArray::LvalStr(ArrayData* ad,
+ArrayData* MixedArray::LvalStr(ArrayData* ad,
                               StringData* key,
                               Variant*& ret,
                               bool copy) {
@@ -1228,7 +1228,7 @@ ArrayData* HphpArray::LvalStr(ArrayData* ad,
   return a->addLvalImpl(key, ret);
 }
 
-ArrayData* HphpArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
+ArrayData* MixedArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
@@ -1249,7 +1249,8 @@ ArrayData* HphpArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
   return a;
 }
 
-ArrayData* HphpArray::SetInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
+ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, const Variant& v,
+                              bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -1257,7 +1258,7 @@ ArrayData* HphpArray::SetInt(ArrayData* ad, int64_t k, const Variant& v, bool co
 }
 
 ArrayData*
-HphpArray::SetStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
+MixedArray::SetStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -1265,7 +1266,7 @@ HphpArray::SetStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
 }
 
 ArrayData*
-HphpArray::SetRefInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
+MixedArray::SetRefInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -1273,7 +1274,8 @@ HphpArray::SetRefInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
 }
 
 ArrayData*
-HphpArray::SetRefStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
+MixedArray::SetRefStr(ArrayData* ad, StringData* k, const Variant& v,
+                      bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -1281,7 +1283,7 @@ HphpArray::SetRefStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) 
 }
 
 ArrayData*
-HphpArray::AddInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
+MixedArray::AddInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
   assert(!ad->exists(k));
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
@@ -1290,7 +1292,7 @@ HphpArray::AddInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
 }
 
 ArrayData*
-HphpArray::AddStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
+MixedArray::AddStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
   assert(!ad->exists(k));
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
@@ -1299,21 +1301,21 @@ HphpArray::AddStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
 }
 
 ArrayData*
-HphpArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
+MixedArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
   auto a = asMixed(ad);
   a = a->resizeIfNeeded();
   return a->zSetImpl(k, v);
 }
 
 ArrayData*
-HphpArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
+MixedArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
   auto a = asMixed(ad);
   a = a->resizeIfNeeded();
   return a->zSetImpl(k, v);
 }
 
 ArrayData*
-HphpArray::ZAppend(ArrayData* ad, RefData* v) {
+MixedArray::ZAppend(ArrayData* ad, RefData* v) {
   auto a = asMixed(ad);
   a = a->resizeIfNeeded();
   return a->zAppendImpl(v);
@@ -1323,7 +1325,7 @@ HphpArray::ZAppend(ArrayData* ad, RefData* v) {
 // Delete.
 
 NEVER_INLINE
-void HphpArray::adjustMArrayIter(ssize_t pos) {
+void MixedArray::adjustMArrayIter(ssize_t pos) {
   ssize_t eIPrev = Tombstone;
   for_each_strong_iterator([&] (MIterTable::Ent& miEnt) {
     if (miEnt.array != this) return;
@@ -1343,7 +1345,7 @@ void HphpArray::adjustMArrayIter(ssize_t pos) {
   });
 }
 
-void HphpArray::erase(ssize_t pos) {
+void MixedArray::erase(ssize_t pos) {
   assert(validPos(pos));
 
   // move strong iterators to the previous element
@@ -1381,7 +1383,7 @@ void HphpArray::erase(ssize_t pos) {
   }
 }
 
-ArrayData* HphpArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
+ArrayData* MixedArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
   auto pos = a->findForRemove(k, false);
@@ -1390,7 +1392,7 @@ ArrayData* HphpArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
 }
 
 ArrayData*
-HphpArray::RemoveStr(ArrayData* ad, const StringData* key, bool copy) {
+MixedArray::RemoveStr(ArrayData* ad, const StringData* key, bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
   auto pos = a->findForRemove(key, key->hash());
@@ -1398,15 +1400,15 @@ HphpArray::RemoveStr(ArrayData* ad, const StringData* key, bool copy) {
   return a;
 }
 
-ArrayData* HphpArray::Copy(const ArrayData* ad) {
+ArrayData* MixedArray::Copy(const ArrayData* ad) {
   return asMixed(ad)->copyMixed();
 }
 
-ArrayData* HphpArray::CopyWithStrongIterators(const ArrayData* ad) {
+ArrayData* MixedArray::CopyWithStrongIterators(const ArrayData* ad) {
   auto a = asMixed(ad);
   auto copied = a->copyMixed();
   if (LIKELY(strong_iterators_exist())) {
-    move_strong_iterators(copied, const_cast<HphpArray*>(a));
+    move_strong_iterators(copied, const_cast<MixedArray*>(a));
   }
   return copied;
 }
@@ -1414,13 +1416,13 @@ ArrayData* HphpArray::CopyWithStrongIterators(const ArrayData* ad) {
 //=============================================================================
 // non-variant interface
 
-TypedValue* HphpArray::NvGetInt(const ArrayData* ad, int64_t ki) {
+TypedValue* MixedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   auto a = asMixed(ad);
   auto i = a->find(ki);
   return LIKELY(validPos(i)) ? &a->data()[i].data : nullptr;
 }
 
-TypedValue* HphpArray::NvGetStr(const ArrayData* ad, const StringData* k) {
+TypedValue* MixedArray::NvGetStr(const ArrayData* ad, const StringData* k) {
   auto a = asMixed(ad);
   auto i = a->find(k, k->hash());
   if (LIKELY(validPos(i))) {
@@ -1429,14 +1431,14 @@ TypedValue* HphpArray::NvGetStr(const ArrayData* ad, const StringData* k) {
   return nullptr;
 }
 
-void HphpArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
+void MixedArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
   auto a = asMixed(ad);
   assert(pos != ArrayData::invalid_index);
   assert(!isTombstone(a->data()[pos].data.m_type));
   getElmKey(a->data()[pos], out);
 }
 
-ArrayData* HphpArray::Append(ArrayData* ad, const Variant& v, bool copy) {
+ArrayData* MixedArray::Append(ArrayData* ad, const Variant& v, bool copy) {
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
@@ -1449,7 +1451,7 @@ ArrayData* HphpArray::Append(ArrayData* ad, const Variant& v, bool copy) {
   return a;
 }
 
-ArrayData* HphpArray::AppendRef(ArrayData* ad, const Variant& v, bool copy) {
+ArrayData* MixedArray::AppendRef(ArrayData* ad, const Variant& v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -1466,7 +1468,8 @@ ArrayData* HphpArray::AppendRef(ArrayData* ad, const Variant& v, bool copy) {
   return a->nextInsertRef(v);
 }
 
-ArrayData *HphpArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
+ArrayData* MixedArray::AppendWithRef(ArrayData* ad, const Variant& v,
+                                     bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -1478,7 +1481,7 @@ ArrayData *HphpArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) 
  * pre-reserved size.  The input array may be either packed or mixed.
  */
 NEVER_INLINE
-HphpArray* HphpArray::CopyReserve(const HphpArray* src,
+MixedArray* MixedArray::CopyReserve(const MixedArray* src,
                                   size_t expectedSize) {
   assert(!src->isPacked());
   auto const cmret = computeCapAndMask(expectedSize);
@@ -1564,8 +1567,8 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
 }
 
 NEVER_INLINE
-ArrayData* HphpArray::ArrayPlusEqGeneric(ArrayData* ad,
-                                         HphpArray* ret,
+ArrayData* MixedArray::ArrayPlusEqGeneric(ArrayData* ad,
+                                         MixedArray* ret,
                                          const ArrayData* elems,
                                          size_t neededSize) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
@@ -1591,7 +1594,7 @@ ArrayData* HphpArray::ArrayPlusEqGeneric(ArrayData* ad,
 
 // Note: the logic relating to how to grow in this function is coupled
 // to PackedArray::PlusEq.
-ArrayData* HphpArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
+ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
   auto const neededSize = ad->size() + elems->size();
 
   auto ret =
@@ -1635,7 +1638,7 @@ ArrayData* HphpArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
 }
 
 NEVER_INLINE
-ArrayData* HphpArray::ArrayMergeGeneric(HphpArray* ret,
+ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
                                         const ArrayData* elems) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
@@ -1652,7 +1655,7 @@ ArrayData* HphpArray::ArrayMergeGeneric(HphpArray* ret,
   return ret;
 }
 
-ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems) {
+ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
   auto const ret = CopyReserve(asMixed(ad), ad->size() + elems->size());
 
   if (elems->isMixed()) {
@@ -1690,7 +1693,7 @@ ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems) {
   // about the array).
 }
 
-ArrayData* HphpArray::Pop(ArrayData* ad, Variant& value) {
+ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
   auto a = asMixed(ad);
   if (a->hasMultipleRefs()) a = a->copyMixed();
   auto elms = a->data();
@@ -1712,7 +1715,7 @@ ArrayData* HphpArray::Pop(ArrayData* ad, Variant& value) {
   return a;
 }
 
-ArrayData* HphpArray::Dequeue(ArrayData* adInput, Variant& value) {
+ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
   auto a = asMixed(adInput);
   if (a->hasMultipleRefs()) a = a->copyMixed();
   // To conform to PHP behavior, we invalidate all strong iterators when an
@@ -1739,7 +1742,7 @@ ArrayData* HphpArray::Dequeue(ArrayData* adInput, Variant& value) {
   return a;
 }
 
-ArrayData* HphpArray::Prepend(ArrayData* adInput,
+ArrayData* MixedArray::Prepend(ArrayData* adInput,
                               const Variant& v,
                               bool copy) {
   auto a = asMixed(adInput);
@@ -1776,11 +1779,11 @@ ArrayData* HphpArray::Prepend(ArrayData* adInput,
   return a;
 }
 
-void HphpArray::Renumber(ArrayData* ad) {
+void MixedArray::Renumber(ArrayData* ad) {
   asMixed(ad)->compact(true);
 }
 
-void HphpArray::OnSetEvalScalar(ArrayData* ad) {
+void MixedArray::OnSetEvalScalar(ArrayData* ad) {
   auto a = asMixed(ad);
   auto elms = a->data();
   for (uint32_t i = 0, limit = a->m_used; i < limit; ++i) {
@@ -1796,7 +1799,7 @@ void HphpArray::OnSetEvalScalar(ArrayData* ad) {
   }
 }
 
-bool HphpArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
+bool MixedArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   auto a = asMixed(ad);
   Elm* elms = a->data();
   if (fp.getResetFlag()) {

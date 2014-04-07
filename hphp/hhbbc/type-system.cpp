@@ -1469,7 +1469,7 @@ folly::Optional<Cell> tv(Type t) {
   case BFalse:       return make_tv<KindOfBoolean>(false);
   case BCArrE:       /* fallthrough */
   case BSArrE:       return make_tv<KindOfArray>(
-                       HphpArray::GetStaticEmptyArray()
+                       MixedArray::GetStaticEmptyArray()
                      );
   default:
     if (is_opt(t)) {

@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 
 namespace HPHP {
 
@@ -50,7 +50,7 @@ bool ArrayCommon::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
   if (ad->isPacked()) {
     assert(PackedArray::checkInvariants(ad));
   } else {
-    assert(HphpArray::asMixed(ad));
+    assert(MixedArray::asMixed(ad));
   }
   assert(fp.getContainer() == ad);
   if (fp.getResetFlag()) return false;

@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/enum-cache.h"
@@ -759,7 +759,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName) const {
   auto& clsCnsData = *m_nonScalarConstantCache;
 
   if (clsCnsData.get() == nullptr) {
-    clsCnsData = Array::attach(HphpArray::MakeReserve(m_constants.size()));
+    clsCnsData = Array::attach(MixedArray::MakeReserve(m_constants.size()));
   } else {
     clsCns = clsCnsData->nvGet(clsCnsName);
     if (clsCns) return *clsCns;

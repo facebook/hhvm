@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_HPHP_ARRAY_DEFS_H_
 #define incl_HPHP_HPHP_ARRAY_DEFS_H_
 
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 
@@ -42,29 +42,29 @@ inline bool validPos(int32_t pos) {
 }
 
 ALWAYS_INLINE
-bool HphpArray::isFull() const {
+bool MixedArray::isFull() const {
   assert(!isPacked());
   assert(m_used <= m_cap);
   assert(m_hLoad <= m_cap);
   return m_used == m_cap || m_hLoad == m_cap;
 }
 
-inline void HphpArray::initHash(int32_t* hash, size_t tableSize) {
+inline void MixedArray::initHash(int32_t* hash, size_t tableSize) {
   wordfill(hash, Empty, tableSize);
 }
 
 inline int32_t*
-HphpArray::copyHash(int32_t* to, const int32_t* from, size_t count) {
+MixedArray::copyHash(int32_t* to, const int32_t* from, size_t count) {
   return wordcpy(to, from, count);
 }
 
-inline HphpArray::Elm*
-HphpArray::copyElms(Elm* to, const Elm* from, size_t count) {
+inline MixedArray::Elm*
+MixedArray::copyElms(Elm* to, const Elm* from, size_t count) {
   return wordcpy(to, from, count);
 }
 
 ALWAYS_INLINE int32_t*
-HphpArray::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
+MixedArray::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
   assert(!isPacked());
   for (size_t i = 1, probe = h0;; ++i) {
     auto ei = &table[probe & mask];
@@ -75,17 +75,17 @@ HphpArray::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
 }
 
 ALWAYS_INLINE
-int32_t* HphpArray::findForNewInsert(size_t h0) const {
+int32_t* MixedArray::findForNewInsert(size_t h0) const {
   return findForNewInsert(hashTab(), m_tableMask, h0);
 }
 
-inline bool HphpArray::isTombstone(ssize_t pos) const {
+inline bool MixedArray::isTombstone(ssize_t pos) const {
   assert(size_t(pos) <= m_used);
   return isTombstone(data()[pos].data.m_type);
 }
 
 ALWAYS_INLINE
-void HphpArray::getElmKey(const Elm& e, TypedValue* out) {
+void MixedArray::getElmKey(const Elm& e, TypedValue* out) {
   if (e.hasIntKey()) {
     out->m_data.num = e.ikey;
     out->m_type = KindOfInt64;
@@ -98,7 +98,7 @@ void HphpArray::getElmKey(const Elm& e, TypedValue* out) {
 }
 
 ALWAYS_INLINE
-void HphpArray::getArrayElm(ssize_t pos,
+void MixedArray::getArrayElm(ssize_t pos,
                             TypedValue* valOut,
                             TypedValue* keyOut) const {
   assert(size_t(pos) < m_used);
@@ -110,7 +110,7 @@ void HphpArray::getArrayElm(ssize_t pos,
 }
 
 ALWAYS_INLINE
-void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut) const {
+void MixedArray::getArrayElm(ssize_t pos, TypedValue* valOut) const {
   assert(size_t(pos) < m_used);
   auto& elm = data()[pos];
   TypedValue* cur = tvToCell(&elm.data);
@@ -118,7 +118,7 @@ void HphpArray::getArrayElm(ssize_t pos, TypedValue* valOut) const {
 }
 
 ALWAYS_INLINE
-void HphpArray::dupArrayElmWithRef(ssize_t pos,
+void MixedArray::dupArrayElmWithRef(ssize_t pos,
                                    TypedValue* valOut,
                                    TypedValue* keyOut) const {
   auto& elm = data()[pos];
@@ -127,7 +127,7 @@ void HphpArray::dupArrayElmWithRef(ssize_t pos,
 }
 
 ALWAYS_INLINE
-HphpArray::Elm& HphpArray::allocElm(int32_t* ei) {
+MixedArray::Elm& MixedArray::allocElm(int32_t* ei) {
   assert(!validPos(*ei) && !isFull());
   assert(m_size != 0 || m_used == 0);
   ++m_size;
@@ -139,34 +139,34 @@ HphpArray::Elm& HphpArray::allocElm(int32_t* ei) {
   return data()[i];
 }
 
-inline HphpArray* HphpArray::asMixed(ArrayData* ad) {
+inline MixedArray* MixedArray::asMixed(ArrayData* ad) {
   assert(ad->kind() == kMixedKind);
-  auto a = static_cast<HphpArray*>(ad);
+  auto a = static_cast<MixedArray*>(ad);
   assert(a->checkInvariants());
   return a;
 }
 
-inline const HphpArray* HphpArray::asMixed(const ArrayData* ad) {
+inline const MixedArray* MixedArray::asMixed(const ArrayData* ad) {
   assert(ad->kind() == kMixedKind);
-  auto a = static_cast<const HphpArray*>(ad);
+  auto a = static_cast<const MixedArray*>(ad);
   assert(a->checkInvariants());
   return a;
 }
 
-inline size_t HphpArray::hashSize() const {
+inline size_t MixedArray::hashSize() const {
   return m_tableMask + 1;
 }
 
-inline size_t HphpArray::computeMaxElms(uint32_t tableMask) {
+inline size_t MixedArray::computeMaxElms(uint32_t tableMask) {
   return size_t(tableMask) - size_t(tableMask) / LoadScale;
 }
 
-inline size_t HphpArray::computeDataSize(uint32_t tableMask) {
+inline size_t MixedArray::computeDataSize(uint32_t tableMask) {
   return (tableMask + 1) * sizeof(int32_t) +
          computeMaxElms(tableMask) * sizeof(Elm);
 }
 
-inline ArrayData* HphpArray::addVal(int64_t ki, const Variant& data) {
+inline ArrayData* MixedArray::addVal(int64_t ki, const Variant& data) {
   assert(!exists(ki));
   assert(!isPacked());
   assert(!isFull());
@@ -179,7 +179,7 @@ inline ArrayData* HphpArray::addVal(int64_t ki, const Variant& data) {
   return this;
 }
 
-inline ArrayData* HphpArray::addVal(StringData* key, const Variant& data) {
+inline ArrayData* MixedArray::addVal(StringData* key, const Variant& data) {
   assert(!exists(key));
   assert(!isPacked());
   assert(!isFull());
@@ -193,7 +193,7 @@ inline ArrayData* HphpArray::addVal(StringData* key, const Variant& data) {
 }
 
 template <class K>
-ArrayData* HphpArray::updateRef(K k, const Variant& data) {
+ArrayData* MixedArray::updateRef(K k, const Variant& data) {
   assert(!isPacked());
   assert(!isFull());
   auto p = insert(k);
@@ -206,7 +206,7 @@ ArrayData* HphpArray::updateRef(K k, const Variant& data) {
 }
 
 template <class K>
-ArrayData* HphpArray::addLvalImpl(K k, Variant*& ret) {
+ArrayData* MixedArray::addLvalImpl(K k, Variant*& ret) {
   assert(!isPacked());
   assert(!isFull());
   auto p = insert(k);
@@ -217,7 +217,7 @@ ArrayData* HphpArray::addLvalImpl(K k, Variant*& ret) {
 
 //////////////////////////////////////////////////////////////////////
 
-struct HphpArray::ValIter {
+struct MixedArray::ValIter {
   explicit ValIter(ArrayData* arr)
     : m_arr(arr)
     , m_kind(arr->m_kind)
@@ -267,7 +267,7 @@ struct HphpArray::ValIter {
      if (UNLIKELY(m_kind == kMixedKind)) {
        do {
          ++m_iterMixed;
-       } while (!empty() && HphpArray::isTombstone(m_iterMixed->data.m_type));
+       } while (!empty() && MixedArray::isTombstone(m_iterMixed->data.m_type));
       return;
     }
     ++m_iterPacked;
@@ -290,8 +290,8 @@ private:
 ALWAYS_INLINE
 uint32_t computeMaskFromNumElms(uint32_t n) {
   assert(n <= 0x7fffffffU);
-  auto lgSize = HphpArray::MinLgTableSize;
-  auto maxElms = HphpArray::SmallSize;
+  auto lgSize = MixedArray::MinLgTableSize;
+  auto maxElms = MixedArray::SmallSize;
   assert(lgSize >= 2);
 
   // Note: it's tempting to convert this loop into something involving
@@ -309,14 +309,14 @@ uint32_t computeMaskFromNumElms(uint32_t n) {
 
   // return 2^lgSize - 1
   return ((size_t(1U)) << lgSize) - 1;
-  static_assert(HphpArray::MinLgTableSize >= 2,
+  static_assert(MixedArray::MinLgTableSize >= 2,
                 "lower limit for 0.75 load factor");
 }
 
 ALWAYS_INLINE
 std::pair<uint32_t,uint32_t> computeCapAndMask(uint32_t minimumMaxElms) {
   auto const mask = computeMaskFromNumElms(minimumMaxElms);
-  auto const cap  = HphpArray::computeMaxElms(mask);
+  auto const cap  = MixedArray::computeMaxElms(mask);
   return std::make_pair(cap, mask);
 }
 
@@ -324,24 +324,24 @@ ALWAYS_INLINE
 size_t computeAllocBytes(uint32_t cap, uint32_t mask) {
   auto const tabSize    = mask + 1;
   auto const tabBytes   = tabSize * sizeof(int32_t);
-  auto const dataBytes  = cap * sizeof(HphpArray::Elm);
-  return sizeof(HphpArray) + tabBytes + dataBytes;
+  auto const dataBytes  = cap * sizeof(MixedArray::Elm);
+  return sizeof(MixedArray) + tabBytes + dataBytes;
 }
 
 ALWAYS_INLINE
-HphpArray* smartAllocArray(uint32_t cap, uint32_t mask) {
+MixedArray* smartAllocArray(uint32_t cap, uint32_t mask) {
   /*
    * Note: we're currently still allocating the memory for the hash
    * for a packed array even if we aren't going to use it yet.
    */
   auto const allocBytes = computeAllocBytes(cap, mask);
-  return static_cast<HphpArray*>(MM().objMallocLogged(allocBytes));
+  return static_cast<MixedArray*>(MM().objMallocLogged(allocBytes));
 }
 
 ALWAYS_INLINE
-HphpArray* mallocArray(uint32_t cap, uint32_t mask) {
+MixedArray* mallocArray(uint32_t cap, uint32_t mask) {
   auto const allocBytes = computeAllocBytes(cap, mask);
-  return static_cast<HphpArray*>(std::malloc(allocBytes));
+  return static_cast<MixedArray*>(std::malloc(allocBytes));
 }
 
 //////////////////////////////////////////////////////////////////////

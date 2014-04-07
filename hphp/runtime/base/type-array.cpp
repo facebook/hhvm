@@ -36,7 +36,7 @@
 namespace HPHP {
 
 const Array null_array{};
-const Array empty_array{HphpArray::GetStaticEmptyArray()};
+const Array empty_array{MixedArray::GetStaticEmptyArray()};
 
 void Array::setEvalScalar() const {
   Array* thisPtr = const_cast<Array*>(this);

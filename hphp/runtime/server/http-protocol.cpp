@@ -226,7 +226,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 
   auto const vhost = VirtualHost::GetCurrent();
   auto const g = get_global_variables();
-  Variant emptyArr(HphpArray::GetStaticEmptyArray());
+  Variant emptyArr(MixedArray::GetStaticEmptyArray());
   for (auto& key : s_arraysToClear) {
     g->remove(key.get(), false);
     g->set(key.get(), emptyArr, false);

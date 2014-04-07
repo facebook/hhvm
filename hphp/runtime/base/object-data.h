@@ -35,7 +35,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class HphpArray;
+class MixedArray;
 struct TypedValue;
 class PreClass;
 class Class;

@@ -47,7 +47,7 @@
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/util/text-util.h"
@@ -1281,9 +1281,9 @@ void ExecutionContext::shuffleMagicArgs(ActRec* ar) {
   // We need to make an array containing all the arguments passed by
   // the caller and put it where the second argument is.
   auto argArray = Array::attach(
-    nargs ? HphpArray::MakePacked(
+    nargs ? MixedArray::MakePacked(
               nargs, reinterpret_cast<TypedValue*>(ar) - nargs)
-          : HphpArray::GetStaticEmptyArray()
+          : MixedArray::GetStaticEmptyArray()
   );
 
   // Remove the arguments from the stack; they were moved into the
@@ -3509,14 +3509,14 @@ OPTBLD_INLINE void ExecutionContext::iopArray(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopNewArray(IOP_ARGS) {
   NEXT();
   DECODE_IVA(capacity);
-  m_stack.pushArrayNoRc(HphpArray::MakeReserve(capacity));
+  m_stack.pushArrayNoRc(MixedArray::MakeReserve(capacity));
 }
 
 OPTBLD_INLINE void ExecutionContext::iopNewPackedArray(IOP_ARGS) {
   NEXT();
   DECODE_IVA(n);
   // This constructor moves values, no inc/decref is necessary.
-  auto* a = HphpArray::MakePacked(n, m_stack.topC());
+  auto* a = MixedArray::MakePacked(n, m_stack.topC());
   m_stack.ndiscard(n);
   m_stack.pushArrayNoRc(a);
 }
@@ -3524,14 +3524,14 @@ OPTBLD_INLINE void ExecutionContext::iopNewPackedArray(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopNewStructArray(IOP_ARGS) {
   NEXT();
   DECODE(uint32_t, n); // number of keys and elements
-  assert(n > 0 && n <= HphpArray::MaxMakeSize);
-  StringData* names[HphpArray::MaxMakeSize];
+  assert(n > 0 && n <= MixedArray::MaxMakeSize);
+  StringData* names[MixedArray::MaxMakeSize];
   for (size_t i = 0; i < n; i++) {
     DECODE_LITSTR(s);
     names[i] = s;
   }
   // This constructor moves values, no inc/decref is necessary.
-  auto* a = HphpArray::MakeStruct(n, names, m_stack.topC());
+  auto* a = MixedArray::MakeStruct(n, names, m_stack.topC());
   m_stack.ndiscard(n);
   m_stack.pushArrayNoRc(a);
 }

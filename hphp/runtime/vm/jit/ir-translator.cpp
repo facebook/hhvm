@@ -1252,7 +1252,7 @@ IRTranslator::translateNewStructArray(const NormalizedInstruction& i) {
   auto numArgs = i.immVec.size();
   auto ids = i.immVec.vec32();
   auto unit = m_hhbcTrans.curUnit();
-  StringData* keys[HphpArray::MaxMakeSize];
+  StringData* keys[MixedArray::MaxMakeSize];
   for (size_t i = 0; i < numArgs; i++) {
     keys[i] = unit->lookupLitstrId(ids[i]);
   }

@@ -71,7 +71,7 @@ class _BaseIterator:
         return self.__next__()
 
 class ArrayDataPrinter:
-    RECOGNIZE = '^HPHP::(ArrayData|HphpArray)$'
+    RECOGNIZE = '^HPHP::(ArrayData|MixedArray)$'
 
     class _iterator(_BaseIterator):
         def __init__(self, kind, begin, end):
@@ -106,7 +106,7 @@ class ArrayDataPrinter:
     def __init__(self, val):
         self.kind = val['m_kind']
         if self.kind == self.mixedKind():
-            self.val = val.cast(gdb.lookup_type('HPHP::HphpArray'))
+            self.val = val.cast(gdb.lookup_type('HPHP::MixedArray'))
         elif self.kind == self.proxyKind():
             self.val = val.cast(gdb.lookup_type('HPHP::ProxyArray'))
         else:
@@ -121,7 +121,7 @@ class ArrayDataPrinter:
         elif self.kind == self.mixedKind():
             data = self.val.address.cast(gdb.lookup_type('char').pointer()) + \
                 self.val.type.sizeof
-            pelm = data.cast(gdb.lookup_type('HPHP::HphpArray::Elm').pointer())
+            pelm = data.cast(gdb.lookup_type('HPHP::MixedArray::Elm').pointer())
             return self._iterator(self.kind, pelm, pelm + self.val['m_size'])
         return self._iterator(0, 0, 0)
 

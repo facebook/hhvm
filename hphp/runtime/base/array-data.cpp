@@ -37,7 +37,7 @@
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
 #include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,13 +51,13 @@ typedef tbb::concurrent_hash_map<std::string, ArrayData*> ArrayDataMap;
 static ArrayDataMap s_arrayDataMap;
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
-  if (arr->empty()) return HphpArray::GetStaticEmptyArray();
+  if (arr->empty()) return MixedArray::GetStaticEmptyArray();
   auto key = f_serialize(arr).toCppString();
   return GetScalarArray(arr, key);
 }
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr, const std::string& key) {
-  if (arr->empty()) return HphpArray::GetStaticEmptyArray();
+  if (arr->empty()) return MixedArray::GetStaticEmptyArray();
   assert(key == f_serialize(arr).toCppString());
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
@@ -87,7 +87,7 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v) {
 
 #define DISPATCH(entry)                         \
   { PackedArray::entry,                         \
-    HphpArray::entry,                           \
+    MixedArray::entry,                           \
     APCLocalArray::entry,                       \
     EmptyArray::entry,                          \
     NameValueTableWrapper::entry,               \
@@ -578,19 +578,19 @@ extern const ArrayFunctions g_array_funcs = {
    *   effects currently aren't documented.
    */
   { &PackedArray::ZSetInt,
-    &HphpArray::ZSetInt,
+    &MixedArray::ZSetInt,
     &ZSetIntThrow,
     &ZSetIntThrow,
     &ZSetIntThrow,
     &ProxyArray::ZSetInt },
   { &PackedArray::ZSetStr,
-    &HphpArray::ZSetStr,
+    &MixedArray::ZSetStr,
     &ZSetStrThrow,
     &ZSetStrThrow,
     &ZSetStrThrow,
     &ProxyArray::ZSetStr },
   { &PackedArray::ZAppend,
-    &HphpArray::ZAppend,
+    &MixedArray::ZAppend,
     &ZAppendThrow,
     &ZAppendThrow,
     &ZAppendThrow,
@@ -615,7 +615,7 @@ bool ArrayData::IsValidKey(const Variant& k) {
 }
 
 ArrayData *ArrayData::Create() {
-  return HphpArray::GetStaticEmptyArray();
+  return MixedArray::GetStaticEmptyArray();
 }
 
 ArrayData *ArrayData::Create(const Variant& value) {

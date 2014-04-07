@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 
 namespace HPHP {
@@ -291,7 +291,7 @@ private:
 class PackedArrayInit {
 public:
   explicit PackedArrayInit(size_t n)
-    : m_vec(HphpArray::MakeReserve(n))
+    : m_vec(MixedArray::MakeReserve(n))
 #ifdef DEBUG
     , m_addCount(0)
     , m_expectedCount(n)

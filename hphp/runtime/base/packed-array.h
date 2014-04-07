@@ -33,7 +33,7 @@ struct StringData;
 struct TypedValue;
 struct MArrayIter;
 struct APCHandle;
-struct HphpArray;
+struct MixedArray;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -43,11 +43,11 @@ struct HphpArray;
  * values of mixed types.
  *
  * Currently the layout of this array kind is set up to match
- * HphpArray, with some of the fields uninitialized.  I.e., packed
+ * MixedArray, with some of the fields uninitialized.  I.e., packed
  * arrays allocate space for a hashtable that they don't use, in order
  * to make the code path that transitions from packed to mixed
  * cheaper.  (This is a transitional thing---we'd like to further
- * specialize the layout.)  See HphpArray::checkInvariants for
+ * specialize the layout.)  See MixedArray::checkInvariants for
  * details.
  */
 struct PackedArray {
@@ -131,10 +131,10 @@ struct PackedArray {
 
 private:
   static ArrayData* Grow(ArrayData*);
-  static HphpArray* ToMixedHeader(const ArrayData*, size_t);
-  static HphpArray* ToMixed(ArrayData*);
-  static HphpArray* ToMixedCopy(const ArrayData*);
-  static HphpArray* ToMixedCopyReserve(const ArrayData*, size_t);
+  static MixedArray* ToMixedHeader(const ArrayData*, size_t);
+  static MixedArray* ToMixed(ArrayData*);
+  static MixedArray* ToMixedCopy(const ArrayData*);
+  static MixedArray* ToMixedCopyReserve(const ArrayData*, size_t);
   static ArrayData* CopyAndResizeIfNeededSlow(const ArrayData*);
   static ArrayData* CopyAndResizeIfNeeded(const ArrayData*);
   static ArrayData* ResizeIfNeeded(ArrayData*);

@@ -2825,7 +2825,7 @@ bool checkKeys(ExpressionPtr init_expr, Fun fun) {
   if (init_expr->getKindOf() != Expression::KindOfExpressionList) return false;
   ExpressionListPtr el = static_pointer_cast<ExpressionList>(init_expr);
   int n = el->getCount();
-  if (n < 1 || n > HphpArray::MaxMakeSize) return false;
+  if (n < 1 || n > MixedArray::MaxMakeSize) return false;
   for (int i = 0, n = el->getCount(); i < n; ++i) {
     ExpressionPtr ex = (*el)[i];
     if (ex->getKindOf() != Expression::KindOfArrayPairExpression) return false;
@@ -2841,7 +2841,7 @@ bool checkKeys(ExpressionPtr init_expr, Fun fun) {
  * array with no keys and no ref values; e.g. array(x,y,z).
  * In this case we can NewPackedArray to create the array. The elements are
  * pushed on the stack, so we arbitrarily limit this to a small multiple of
- * HphpArray::SmallSize (12).
+ * MixedArray::SmallSize (12).
  */
 bool isPackedInit(ExpressionPtr init_expr, int* size) {
   *size = 0;
@@ -3596,7 +3596,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             if (capacityHint != -1) {
               e.NewArray(capacityHint);
             } else {
-              e.NewArray(HphpArray::SmallSize);
+              e.NewArray(MixedArray::SmallSize);
             }
             visit(ex);
           }
@@ -8284,7 +8284,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
     case Expression::KindOfUnaryOpExpression: {
       UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(val));
       if (u->getOp() == T_ARRAY) {
-        m_staticArrays.push_back(Array::attach(HphpArray::MakeReserve(0)));
+        m_staticArrays.push_back(Array::attach(MixedArray::MakeReserve(0)));
         visit(u->getExpression());
         tvVal = make_tv<KindOfArray>(
           ArrayData::GetScalarArray(m_staticArrays.back().get())

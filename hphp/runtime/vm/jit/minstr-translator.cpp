@@ -15,7 +15,7 @@
 */
 
 
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include <algorithm>
 #include <vector>
 #include "hphp/runtime/base/strings.h"

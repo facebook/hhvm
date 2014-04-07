@@ -751,7 +751,7 @@ static void unserializeProp(VariableUnserializer *uns,
                                      visible, accessible, unset));
   assert(!unset);
   if (!t || !accessible) {
-    // Dynamic property. If this is the first, and we're using HphpArray,
+    // Dynamic property. If this is the first, and we're using MixedArray,
     // we need to pre-allocate space in the array to ensure the elements
     // dont move during unserialization.
     //

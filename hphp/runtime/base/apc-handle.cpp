@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -191,8 +191,8 @@ void APCHandle::deleteShared() {
 APCHandle* APCTypedValue::MakeSharedArray(ArrayData* array) {
   assert(apcExtension::UseUncounted);
   auto value = new APCTypedValue(
-    array->isPacked() ? HphpArray::MakeUncountedPacked(array)
-                      : HphpArray::MakeUncounted(array));
+    array->isPacked() ? MixedArray::MakeUncountedPacked(array)
+                      : MixedArray::MakeUncounted(array));
   return value->getHandle();
 }
 
@@ -204,9 +204,9 @@ void APCTypedValue::deleteUncounted() {
     m_data.str->destructStatic();
   } else if (type == KindOfArray) {
     if (m_data.arr->isPacked()) {
-      HphpArray::ReleaseUncountedPacked(m_data.arr);
+      MixedArray::ReleaseUncountedPacked(m_data.arr);
     } else {
-      HphpArray::ReleaseUncounted(m_data.arr);
+      MixedArray::ReleaseUncounted(m_data.arr);
     }
   }
   delete this;

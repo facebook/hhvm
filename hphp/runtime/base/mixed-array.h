@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,7 @@ namespace HPHP {
 class ArrayInit;
 struct MemoryProfile;
 
-class HphpArray : public ArrayData {
+class MixedArray : public ArrayData {
   // Load factor scaler. If S is the # of elements, C is the
   // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
   // So 2 gives 0.5 load factor, 4 gives 0.75 load factor, 8 gives
@@ -98,7 +98,7 @@ public:
   };
 
   static constexpr size_t dataOff() {
-    return sizeof(HphpArray);
+    return sizeof(MixedArray);
   }
 
   /*
@@ -118,7 +118,7 @@ public:
   static ArrayData* MakeReserveMixed(uint32_t capacity);
 
   /*
-   * Allocate a packed HphpArray.  This is an array in packed
+   * Allocate a packed MixedArray.  This is an array in packed
    * mode, containing `size' values, in the reverse order of the
    * `values' array.
    *
@@ -134,18 +134,18 @@ public:
    * Like MakePacked, but given static strings, make a struct-like array.
    * Also requires size > 0.
    */
-  static HphpArray* MakeStruct(uint32_t size, StringData** keys,
+  static MixedArray* MakeStruct(uint32_t size, StringData** keys,
                                const TypedValue* values);
 
   /*
-   * Allocate an uncounted HphpArray and copy the values from the
+   * Allocate an uncounted MixedArray and copy the values from the
    * input 'array' into the uncounted one. All values copied are made
    * uncounted as well.  An uncounted array can only contain uncounted
    * values (primitive values, uncounted or static strings and
    * uncounted or static arrays).  The Packed version does the same
    * when the array has a kPackedKind.
    */
-  static HphpArray* MakeUncounted(ArrayData* array);
+  static MixedArray* MakeUncounted(ArrayData* array);
   static ArrayData* MakeUncountedPacked(ArrayData* array);
 
   /*
@@ -251,9 +251,9 @@ public:
       ArrayCommon::ReturnNull
     );
 
-  HphpArray* copyMixed() const;
-  HphpArray* copyMixedAndResizeIfNeeded() const;
-  HphpArray* copyMixedAndResizeIfNeededSlow() const;
+  MixedArray* copyMixed() const;
+  MixedArray* copyMixedAndResizeIfNeeded() const;
+  MixedArray* copyMixedAndResizeIfNeededSlow() const;
 
   // nvGet and friends.
   // "nv" stands for non-variant. If we know the types of keys and values
@@ -336,8 +336,8 @@ private:
 
 public:
   // Safe downcast helpers
-  static HphpArray* asMixed(ArrayData* ad);
-  static const HphpArray* asMixed(const ArrayData* ad);
+  static MixedArray* asMixed(ArrayData* ad);
+  static const MixedArray* asMixed(const ArrayData* ad);
 
 private:
   static void getElmKey(const Elm& e, TypedValue* out);
@@ -346,15 +346,15 @@ private:
   enum class AllocMode : bool { Smart, NonSmart };
 
   template<class CopyKeyValue>
-  static HphpArray* CopyMixed(const HphpArray& other,
+  static MixedArray* CopyMixed(const MixedArray& other,
                               AllocMode,
                               CopyKeyValue);
-  static HphpArray* CopyReserve(const HphpArray* src, size_t expectedSize);
+  static MixedArray* CopyReserve(const MixedArray* src, size_t expectedSize);
 
-  HphpArray() = delete;
-  HphpArray(const HphpArray&) = delete;
-  HphpArray& operator=(const HphpArray&) = delete;
-  ~HphpArray() = delete;
+  MixedArray() = delete;
+  MixedArray(const MixedArray&) = delete;
+  MixedArray& operator=(const MixedArray&) = delete;
+  ~MixedArray() = delete;
 
 private:
   static void initHash(int32_t* table, size_t tableSize);
@@ -365,11 +365,11 @@ private:
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
   static ArrayData* ArrayPlusEqGeneric(ArrayData*,
-    HphpArray*, const ArrayData*, size_t);
-  static ArrayData* ArrayMergeGeneric(HphpArray*, const ArrayData*);
+    MixedArray*, const ArrayData*, size_t);
+  static ArrayData* ArrayMergeGeneric(MixedArray*, const ArrayData*);
 
   // convert in-place from kPackedKind to kMixedKind: fill in keys & hashtable
-  HphpArray* packedToMixed();
+  MixedArray* packedToMixed();
 
   ssize_t nextElm(Elm* elms, ssize_t ei) const {
     assert(ei >= -1);
@@ -437,7 +437,7 @@ private:
   void adjustMArrayIter(ssize_t pos);
   void erase(ssize_t pos);
 
-  HphpArray* copyImpl(HphpArray* target) const;
+  MixedArray* copyImpl(MixedArray* target) const;
 
   bool isFull() const;
   bool isFullPacked() const;
@@ -447,14 +447,14 @@ private:
 
   Elm& allocElm(int32_t* ei);
 
-  HphpArray* setVal(TypedValue& tv, const Variant& v);
-  HphpArray* setRef(TypedValue& tv, const Variant& v);
-  HphpArray* getLval(TypedValue& tv, Variant*& ret);
-  HphpArray* initVal(TypedValue& tv, const Variant& v);
-  HphpArray* initRef(TypedValue& tv, const Variant& v);
-  HphpArray* initLval(TypedValue& tv, Variant*& ret);
-  HphpArray* initWithRef(TypedValue& tv, const Variant& v);
-  HphpArray* moveVal(TypedValue& tv, TypedValue v);
+  MixedArray* setVal(TypedValue& tv, const Variant& v);
+  MixedArray* setRef(TypedValue& tv, const Variant& v);
+  MixedArray* getLval(TypedValue& tv, Variant*& ret);
+  MixedArray* initVal(TypedValue& tv, const Variant& v);
+  MixedArray* initRef(TypedValue& tv, const Variant& v);
+  MixedArray* initLval(TypedValue& tv, Variant*& ret);
+  MixedArray* initWithRef(TypedValue& tv, const Variant& v);
+  MixedArray* moveVal(TypedValue& tv, TypedValue v);
 
   ArrayData* zInitVal(TypedValue& tv, RefData* v);
   ArrayData* zSetVal(TypedValue& tv, RefData* v);
@@ -464,8 +464,8 @@ private:
    * elements by a factor of 2. grow() rebuilds the hash table, but it
    * does not compact the elements.
    */
-  static HphpArray* Grow(HphpArray* old);
-  static HphpArray* GrowPacked(HphpArray* old);
+  static MixedArray* Grow(MixedArray* old);
+  static MixedArray* GrowPacked(MixedArray* old);
 
   /**
    * compact() does not change the hash table size or the number of slots
@@ -483,14 +483,14 @@ private:
    * there is room for a new element and hash entry before growing or
    * compacting the array.
    *
-   * Both functions return the new HphpArray* to use (or the old one
-   * if they didn't need to grow).  The old HphpArray is left in a
+   * Both functions return the new MixedArray* to use (or the old one
+   * if they didn't need to grow).  The old MixedArray is left in a
    * zombie state where the only legal action is to decref and then
    * throw it away.
    */
-  HphpArray* resize();
-  HphpArray* resizeIfNeeded();
-  HphpArray* resizePackedIfNeeded();
+  MixedArray* resize();
+  MixedArray* resizeIfNeeded();
+  MixedArray* resizePackedIfNeeded();
 
   Elm* data() const {
     return const_cast<Elm*>(reinterpret_cast<Elm const*>(this + 1));
@@ -534,7 +534,7 @@ extern std::aligned_storage<
 
 //=============================================================================
 
-inline ArrayData* HphpArray::GetStaticEmptyArray() {
+inline ArrayData* MixedArray::GetStaticEmptyArray() {
   void* vp = &s_theEmptyArray;
   return static_cast<ArrayData*>(vp);
 }

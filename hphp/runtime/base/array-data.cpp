@@ -258,7 +258,7 @@ extern const ArrayFunctions g_array_funcs = {
   DISPATCH(LvalNew)
 
   /*
-   * ArrayData* SetRefInt(ArrayData*, int64_t key, const Variant& v, bool copy)
+   * ArrayData* SetRefInt(ArrayData*, int64_t key, Variant& v, bool copy)
    *
    *   Binding set with an integer key.  Box `v' if it is not already
    *   boxed, and then insert a KindOfRef that points to v's RefData.
@@ -267,8 +267,7 @@ extern const ArrayFunctions g_array_funcs = {
   DISPATCH(SetRefInt)
 
   /*
-   * ArrayData* SetRefStr(ArrayData*, StringData* key, const Variant& v,
-   *                      bool copy)
+   * ArrayData* SetRefStr(ArrayData*, StringData* key, Variant& v, bool copy)
    *
    *  Binding set with a string key.  The string `key' must not be an
    *  integer-like string.  Box `v' if it is not already boxed, and
@@ -467,7 +466,7 @@ extern const ArrayFunctions g_array_funcs = {
   DISPATCH(Append)
 
   /*
-   * ArrayData* AppendRef(ArrayData*, const Variant& v, bool copy)
+   * ArrayData* AppendRef(ArrayData*, Variant& v, bool copy)
    *
    *   Binding append.  This function appends a new KindOfRef to the
    *   array with the next available integer key, boxes v if it is not
@@ -631,13 +630,13 @@ ArrayData *ArrayData::Create(const Variant& name, const Variant& value) {
   return init.create();
 }
 
-ArrayData *ArrayData::CreateRef(const Variant& value) {
+ArrayData *ArrayData::CreateRef(Variant& value) {
   PackedArrayInit pai(1);
   pai.appendRef(value);
   return pai.create();
 }
 
-ArrayData *ArrayData::CreateRef(const Variant& name, const Variant& value) {
+ArrayData *ArrayData::CreateRef(const Variant& name, Variant& value) {
   ArrayInit init(1, ArrayInit::Map{});
   // There is no toKey() call on name.
   init.setRef(name, value, true);

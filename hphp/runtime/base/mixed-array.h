@@ -205,9 +205,8 @@ public:
   static ArrayData* ZAppend(ArrayData* ad, RefData* v);
 
   // implements ArrayData
-  static ArrayData* SetRefInt(ArrayData* ad, int64_t k, const Variant& v,
-                              bool copy);
-  static ArrayData* SetRefStr(ArrayData* ad, StringData* k, const Variant& v,
+  static ArrayData* SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy);
+  static ArrayData* SetRefStr(ArrayData* ad, StringData* k, Variant& v,
                               bool copy);
 
   // overrides ArrayData
@@ -224,7 +223,7 @@ public:
   static ArrayData* NonSmartCopy(const ArrayData*);
 
   static ArrayData* Append(ArrayData*, const Variant& v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
@@ -418,14 +417,14 @@ private:
   int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
 
   bool nextInsert(const Variant& data);
-  ArrayData* nextInsertRef(const Variant& data);
+  ArrayData* nextInsertRef(Variant& data);
   ArrayData* nextInsertWithRef(const Variant& data);
   ArrayData* addVal(int64_t ki, const Variant& data);
   ArrayData* addVal(StringData* key, const Variant& data);
 
   template <class K> ArrayData* addLvalImpl(K k, Variant*& ret);
   template <class K> ArrayData* update(K k, const Variant& data);
-  template <class K> ArrayData* updateRef(K k, const Variant& data);
+  template <class K> ArrayData* updateRef(K k, Variant& data);
 
   template <class K> ArrayData* zSetImpl(K k, RefData* data);
   ArrayData* zAppendImpl(RefData* data);
@@ -444,10 +443,9 @@ private:
   Elm& allocElm(int32_t* ei);
 
   MixedArray* setVal(TypedValue& tv, const Variant& v);
-  MixedArray* setRef(TypedValue& tv, const Variant& v);
   MixedArray* getLval(TypedValue& tv, Variant*& ret);
   MixedArray* initVal(TypedValue& tv, const Variant& v);
-  MixedArray* initRef(TypedValue& tv, const Variant& v);
+  MixedArray* initRef(TypedValue& tv, Variant& v);
   MixedArray* initLval(TypedValue& tv, Variant*& ret);
   MixedArray* initWithRef(TypedValue& tv, const Variant& v);
   MixedArray* moveVal(TypedValue& tv, TypedValue v);

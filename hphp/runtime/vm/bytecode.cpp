@@ -381,10 +381,10 @@ Array VarEnv::getDefinedVariables() const {
 
   NameValueTable::Iterator iter(&m_nvTable);
   for (; iter.valid(); iter.next()) {
-    const StringData* sd = iter.curKey();
-    const TypedValue* tv = iter.curVal();
+    auto const sd = iter.curKey();
+    auto const tv = iter.curVal();
     if (tvAsCVarRef(tv).isReferenced()) {
-      ret.setRef(StrNR(sd).asString(), tvAsCVarRef(tv));
+      ret.setWithRef(StrNR(sd).asString(), tvAsCVarRef(tv));
     } else {
       ret.add(StrNR(sd).asString(), tvAsCVarRef(tv));
     }
@@ -3562,9 +3562,9 @@ OPTBLD_INLINE void ExecutionContext::iopAddElemV(IOP_ARGS) {
     raise_error("AddElemV: $3 must be an array");
   }
   if (c2->m_type == KindOfInt64) {
-    cellAsVariant(*c3).asArrRef().set(c2->m_data.num, ref(tvAsCVarRef(r1)));
+    cellAsVariant(*c3).asArrRef().setRef(c2->m_data.num, tvAsVariant(r1));
   } else {
-    cellAsVariant(*c3).asArrRef().set(tvAsCVarRef(c2), ref(tvAsCVarRef(r1)));
+    cellAsVariant(*c3).asArrRef().setRef(tvAsCVarRef(c2), tvAsVariant(r1));
   }
   m_stack.popV();
   m_stack.popC();
@@ -3588,7 +3588,7 @@ OPTBLD_INLINE void ExecutionContext::iopAddNewElemV(IOP_ARGS) {
   if (c2->m_type != KindOfArray) {
     raise_error("AddNewElemV: $2 must be an array");
   }
-  cellAsVariant(*c2).asArrRef().append(ref(tvAsCVarRef(r1)));
+  cellAsVariant(*c2).asArrRef().appendRef(tvAsVariant(r1));
   m_stack.popV();
 }
 

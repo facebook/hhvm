@@ -91,12 +91,12 @@ inline ArrayData* ArrayData::set(const Variant& k, const Variant& v, bool copy) 
                         : set(getStringKey(cell), v, copy);
 }
 
-inline ArrayData* ArrayData::setRef(const String& k, const Variant& v, bool copy) {
+inline ArrayData* ArrayData::setRef(const String& k, Variant& v, bool copy) {
   assert(IsValidKey(k));
   return setRef(k.get(), v, copy);
 }
 
-inline ArrayData* ArrayData::setRef(const Variant& k, const Variant& v, bool copy) {
+inline ArrayData* ArrayData::setRef(const Variant& k, Variant& v, bool copy) {
   assert(IsValidKey(k));
   auto const cell = k.asCell();
   return isIntKey(cell) ? setRef(getIntKey(cell), v, copy)
@@ -151,7 +151,7 @@ inline ArrayData* ArrayData::append(const Variant& v, bool copy) {
   return g_array_funcs.append[m_kind](this, v, copy);
 }
 
-inline ArrayData* ArrayData::appendRef(const Variant& v, bool copy) {
+inline ArrayData* ArrayData::appendRef(Variant& v, bool copy) {
   return g_array_funcs.appendRef[m_kind](this, v, copy);
 }
 
@@ -228,11 +228,11 @@ inline ArrayData* ArrayData::lvalNew(Variant*& ret, bool copy) {
   return g_array_funcs.lvalNew[m_kind](this, ret, copy);
 }
 
-inline ArrayData* ArrayData::setRef(int64_t k, const Variant& v, bool copy) {
+inline ArrayData* ArrayData::setRef(int64_t k, Variant& v, bool copy) {
   return g_array_funcs.setRefInt[m_kind](this, k, v, copy);
 }
 
-inline ArrayData* ArrayData::setRef(StringData* k, const Variant& v, bool copy) {
+inline ArrayData* ArrayData::setRef(StringData* k, Variant& v, bool copy) {
   return g_array_funcs.setRefStr[m_kind](this, k, v, copy);
 }
 

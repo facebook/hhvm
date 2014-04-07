@@ -768,9 +768,10 @@ Variant php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL) {
     raise_warning("First argument is expected to be a valid callback");
     return uninit_null();
   }
+  Variant reffable = value;
   return vm_call_user_func(
     option_array,
-    PackedArrayInit(1).appendRef(value).toArray()
+    PackedArrayInit(1).appendRef(reffable).toArray()
   );
 }
 

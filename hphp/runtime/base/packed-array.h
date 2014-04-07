@@ -76,10 +76,9 @@ struct PackedArray {
   static ArrayData* LvalStr(ArrayData*, StringData* k, Variant*& ret,
                             bool copy);
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
-  static ArrayData* SetRefInt(ArrayData*, int64_t k, const Variant& v,
+  static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
     bool copy);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k,
-    const Variant& v, bool copy);
   static constexpr auto AddInt = &SetInt;
   static constexpr auto AddStr = &SetStr;
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
@@ -104,7 +103,7 @@ struct PackedArray {
   static ArrayData* ZSetStr(ArrayData*, StringData* k, RefData* v);
   static ArrayData* ZAppend(ArrayData*, RefData* v);
   static ArrayData* Append(ArrayData*, const Variant& v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);

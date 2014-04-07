@@ -104,7 +104,7 @@ static void sqlite3_do_callback(sqlite3_context *context, const Variant& callbac
   if (is_agg) {
     agg_context = (php_sqlite3_agg_context *)sqlite3_aggregate_context
       (context, sizeof(php_sqlite3_agg_context));
-    params.append(ref(agg_context->context));
+    params.appendRef(agg_context->context);
     params.append(agg_context->row_count);
   }
   for (int i = 0; i < argc; i++) {

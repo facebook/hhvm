@@ -210,7 +210,7 @@ Variant::Variant(const Variant& v) {
 }
 
 Variant::Variant(CVarStrongBind v) {
-  constructRefHelper(variant(v));
+  constructRefHelper(const_cast<Variant&>(variant(v))); // XXX
 }
 
 Variant::Variant(CVarWithRefBind v) {
@@ -265,12 +265,12 @@ Variant &Variant::assign(const Variant& v) {
   return *this;
 }
 
-Variant &Variant::assignRef(const Variant& v) {
+Variant& Variant::assignRef(Variant& v) {
   assignRefHelper(v);
   return *this;
 }
 
-Variant &Variant::setWithRef(const Variant& v) {
+Variant& Variant::setWithRef(const Variant& v) {
   setWithRefHelper(v, IS_REFCOUNTED_TYPE(m_type));
   return *this;
 }

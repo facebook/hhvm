@@ -156,13 +156,13 @@ APCLocalArray::SetStr(ArrayData* ad, StringData* k, const Variant& v, bool copy)
 }
 
 ArrayData*
-APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
+APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->setRef(k, v, false));
 }
 
 ArrayData*
-APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
+APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->setRef(k, v, false));
 }
@@ -193,7 +193,7 @@ ArrayData* APCLocalArray::Append(ArrayData* ad, const Variant& v, bool copy) {
 }
 
 ArrayData*
-APCLocalArray::AppendRef(ArrayData* ad, const Variant& v, bool copy) {
+APCLocalArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->appendRef(v, false));
 }

@@ -128,13 +128,17 @@ ArrayData* NameValueTableWrapper::SetStr(ArrayData* ad, StringData* k,
   return a;
 }
 
-ArrayData* NameValueTableWrapper::SetRefInt(ArrayData* ad, int64_t k,
-                                            const Variant& v, bool copy) {
+ArrayData* NameValueTableWrapper::SetRefInt(ArrayData* ad,
+                                            int64_t k,
+                                            Variant& v,
+                                            bool copy) {
   return asNVTW(ad)->setRef(String(k).get(), v, copy);
 }
 
-ArrayData* NameValueTableWrapper::SetRefStr(ArrayData* ad, StringData* k,
-                                            const Variant& v, bool copy) {
+ArrayData* NameValueTableWrapper::SetRefStr(ArrayData* ad,
+                                            StringData* k,
+                                            Variant& v,
+                                            bool copy) {
   auto a = asNVTW(ad);
   tvAsVariant(a->m_tab->lookupAdd(k)).assignRef(v);
   return a;
@@ -165,7 +169,7 @@ NameValueTableWrapper::Append(ArrayData*, const Variant& v, bool copy) {
 }
 
 ArrayData*
-NameValueTableWrapper::AppendRef(ArrayData*, const Variant& v, bool copy) {
+NameValueTableWrapper::AppendRef(ArrayData*, Variant& v, bool copy) {
   throw NotImplementedException("appendRef on $GLOBALS");
 }
 

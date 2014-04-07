@@ -471,7 +471,11 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           String mytype;
 
           auto const dataArr = parser->data.getArrayData();
-          curtag.assignRef(dataArr->getValueRef(dataArr->iter_end()));
+          curtag.assignRef(
+            // TODO(#4087979): you're not supposed to modify the
+            // return value of getValueRef.
+            const_cast<Variant&>(dataArr->getValueRef(dataArr->iter_end()))
+          );
 
           if (curtag.toArrRef().exists(s_type)) {
             mytype = curtag.toArrRef().rvalAt(s_type).toString();
@@ -579,7 +583,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
           tag.set(s_attributes,atr);
         }
         auto& lval = parser->data.toArrRef().lvalAt();
-        lval.assignRef(tag);
+        lval.assign(tag);
         parser->ctag.assignRef(lval);
       } else if (parser->level == (XML_MAXLEVEL + 1)) {
         raise_warning("Maximum depth exceeded - Results truncated");

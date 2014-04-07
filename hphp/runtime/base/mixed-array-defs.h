@@ -193,7 +193,7 @@ inline ArrayData* MixedArray::addVal(StringData* key, const Variant& data) {
 }
 
 template <class K>
-ArrayData* MixedArray::updateRef(K k, const Variant& data) {
+ArrayData* MixedArray::updateRef(K k, Variant& data) {
   assert(!isPacked());
   assert(!isFull());
   auto p = insert(k);

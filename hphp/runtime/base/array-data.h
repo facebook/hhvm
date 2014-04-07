@@ -83,8 +83,8 @@ public:
   static ArrayData *Create();
   static ArrayData *Create(const Variant& value);
   static ArrayData *Create(const Variant& name, const Variant& value);
-  static ArrayData *CreateRef(const Variant& value);
-  static ArrayData *CreateRef(const Variant& name, const Variant& value);
+  static ArrayData *CreateRef(Variant& value);
+  static ArrayData *CreateRef(const Variant& name, Variant& value);
 
   /*
    * Called to return an ArrayData to the smart allocator.  This is
@@ -222,8 +222,8 @@ public:
   ArrayData *set(int64_t k, const Variant& v, bool copy);
   ArrayData *set(StringData* k, const Variant& v, bool copy);
 
-  ArrayData *setRef(int64_t k, const Variant& v, bool copy);
-  ArrayData *setRef(StringData* k, const Variant& v, bool copy);
+  ArrayData *setRef(int64_t k, Variant& v, bool copy);
+  ArrayData *setRef(StringData* k, Variant& v, bool copy);
 
   ArrayData* zSet(int64_t k, RefData* r);
   ArrayData* zSet(StringData* k, RefData* r);
@@ -261,9 +261,9 @@ public:
   ArrayData *set(const String& k, const Variant& v, bool copy);
   ArrayData *set(const Variant& k, const Variant& v, bool copy);
   ArrayData *set(const StringData*, const Variant&, bool) = delete;
-  ArrayData *setRef(const String& k, const Variant& v, bool copy);
-  ArrayData *setRef(const Variant& k, const Variant& v, bool copy);
-  ArrayData *setRef(const StringData*, const Variant&, bool) = delete;
+  ArrayData *setRef(const String& k, Variant& v, bool copy);
+  ArrayData *setRef(const Variant& k, Variant& v, bool copy);
+  ArrayData *setRef(const StringData*, Variant&, bool) = delete;
   ArrayData *add(const String& k, const Variant& v, bool copy);
   ArrayData *add(const Variant& k, const Variant& v, bool copy);
   ArrayData *remove(const String& k, bool copy);
@@ -316,7 +316,7 @@ public:
    * escalated array data.
    */
   ArrayData* append(const Variant& v, bool copy);
-  ArrayData* appendRef(const Variant& v, bool copy);
+  ArrayData* appendRef(Variant& v, bool copy);
 
   /**
    * Similar to append(v, copy), with reference in v preserved.
@@ -480,8 +480,8 @@ struct ArrayFunctions {
   ArrayData* (*lvalStr[NK])(ArrayData*, StringData* k, Variant*& ret,
                             bool copy);
   ArrayData* (*lvalNew[NK])(ArrayData*, Variant *&ret, bool copy);
-  ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, const Variant& v, bool copy);
-  ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, const Variant& v, bool copy);
+  ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, Variant& v, bool copy);
+  ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, Variant& v, bool copy);
   ArrayData* (*addInt[NK])(ArrayData*, int64_t k, const Variant& v, bool copy);
   ArrayData* (*addStr[NK])(ArrayData*, StringData* k, const Variant& v, bool copy);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k, bool copy);
@@ -503,7 +503,7 @@ struct ArrayFunctions {
   ArrayData* (*copyWithStrongIterators[NK])(const ArrayData*);
   ArrayData* (*nonSmartCopy[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, const Variant& v, bool copy);
-  ArrayData* (*appendRef[NK])(ArrayData*, const Variant& v, bool copy);
+  ArrayData* (*appendRef[NK])(ArrayData*, Variant& v, bool copy);
   ArrayData* (*appendWithRef[NK])(ArrayData*, const Variant& v, bool copy);
   ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);

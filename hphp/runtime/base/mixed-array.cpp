@@ -886,7 +886,7 @@ ArrayData* MixedArray::zInitVal(TypedValue& tv, RefData* v) {
 }
 
 ALWAYS_INLINE
-MixedArray* MixedArray::initRef(TypedValue& tv, const Variant& v) {
+MixedArray* MixedArray::initRef(TypedValue& tv, Variant& v) {
   tvAsUninitializedVariant(&tv).constructRefHelper(v);
   return this;
 }
@@ -931,13 +931,6 @@ ArrayData* MixedArray::zSetVal(TypedValue& tv, RefData* v) {
   // Store the RefData but do not increment the refcount
   tv.m_type = KindOfRef;
   tv.m_data.pref = v;
-  return this;
-}
-
-ALWAYS_INLINE
-MixedArray* MixedArray::setRef(TypedValue& tv, const Variant& v) {
-  auto const ref = v.asRef();
-  tvBind(ref, &tv);
   return this;
 }
 
@@ -1141,7 +1134,7 @@ bool MixedArray::nextInsert(const Variant& data) {
   return true;
 }
 
-ArrayData* MixedArray::nextInsertRef(const Variant& data) {
+ArrayData* MixedArray::nextInsertRef(Variant& data) {
   assert(!isPacked());
   assert(!isFull());
   assert(m_nextKI >= 0);
@@ -1266,7 +1259,7 @@ MixedArray::SetStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
 }
 
 ArrayData*
-MixedArray::SetRefInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
+MixedArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -1274,8 +1267,7 @@ MixedArray::SetRefInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
 }
 
 ArrayData*
-MixedArray::SetRefStr(ArrayData* ad, StringData* k, const Variant& v,
-                      bool copy) {
+MixedArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
@@ -1451,7 +1443,7 @@ ArrayData* MixedArray::Append(ArrayData* ad, const Variant& v, bool copy) {
   return a;
 }
 
-ArrayData* MixedArray::AppendRef(ArrayData* ad, const Variant& v, bool copy) {
+ArrayData* MixedArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();

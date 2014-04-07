@@ -461,13 +461,16 @@ struct MArrayIter {
     return data->getKey(m_pos);
   }
 
-  const Variant& val() {
+  Variant& val() {
     ArrayData* data = getArray();
     assert(data && data == getContainer());
     assert(!data->hasMultipleRefs() || data->noCopyOnWrite());
     assert(!getResetFlag());
     assert(data->validMArrayIter(*this));
-    return data->getValueRef(m_pos);
+    // Normally it's not ok to modify the return value of getValueRef,
+    // but the whole point of mutable array iteration is that this is
+    // allowed, so this const_cast is not actually evil.
+    return const_cast<Variant&>(data->getValueRef(m_pos));
   }
 
   void release() { delete this; }

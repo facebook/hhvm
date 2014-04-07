@@ -309,27 +309,9 @@ Variant ObjectData::o_set(const String& propName, const Variant& v) {
   return o_setImpl<const Variant&>(propName, v, null_string);
 }
 
-Variant ObjectData::o_set(const String& propName, RefResult v) {
-  return o_setRef(propName, variant(v), null_string);
-}
-
-Variant ObjectData::o_setRef(const String& propName, const Variant& v) {
-  return o_setImpl<RefResult>(propName, ref(v), null_string);
-}
-
 Variant ObjectData::o_set(const String& propName, const Variant& v,
                           const String& context) {
   return o_setImpl<const Variant&>(propName, v, context);
-}
-
-Variant ObjectData::o_set(const String& propName, RefResult v,
-                          const String& context) {
-  return o_setRef(propName, variant(v), context);
-}
-
-Variant ObjectData::o_setRef(const String& propName, const Variant& v,
-                             const String& context) {
-  return o_setImpl<RefResult>(propName, ref(v), context);
 }
 
 void ObjectData::o_setArray(const Array& properties) {
@@ -462,7 +444,7 @@ Array ObjectData::o_toIterArray(const String& context,
           if (val->m_type != KindOfRef) {
             tvBox(val);
           }
-          retArray.setRef(StrNR(key), tvAsCVarRef(val), true /* isKey */);
+          retArray.setRef(StrNR(key), tvAsVariant(val), true /* isKey */);
         } else {
           retArray.set(StrNR(key), tvAsCVarRef(val), true /* isKey */);
         }
@@ -489,7 +471,7 @@ Array ObjectData::o_toIterArray(const String& context,
           if (val->m_type != KindOfRef) {
             tvBox(val);
           }
-          retArray.setRef(key.m_data.num, tvAsCVarRef(val));
+          retArray.setRef(key.m_data.num, tvAsVariant(val));
         } else {
           retArray.set(key.m_data.num, tvAsCVarRef(val));
         }
@@ -502,7 +484,7 @@ Array ObjectData::o_toIterArray(const String& context,
         if (val->m_type != KindOfRef) {
           tvBox(val);
         }
-        retArray.setRef(StrNR(strKey), tvAsCVarRef(val), true /* isKey */);
+        retArray.setRef(StrNR(strKey), tvAsVariant(val), true /* isKey */);
       } else {
         retArray.set(StrNR(strKey), tvAsCVarRef(val), true /* isKey */);
       }
@@ -1407,7 +1389,7 @@ void ObjectData::setProp(Class* ctx,
     // setters (set() or setRef()).
     if (UNLIKELY(bindingAssignment)) {
       reserveProperties().setRef(
-        StrNR(key), tvAsCVarRef(val), true /* isKey */);
+        StrNR(key), tvAsVariant(val), true /* isKey */);
     } else {
       reserveProperties().set(
         StrNR(key), tvAsCVarRef(val), true /* isKey */);

@@ -280,12 +280,7 @@ class ObjectData {
                 const String& context = null_string);
 
   Variant o_set(const String& s, const Variant& v);
-  Variant o_set(const String& s, RefResult v);
-  Variant o_setRef(const String& s, const Variant& v);
-
   Variant o_set(const String& s, const Variant& v, const String& context);
-  Variant o_set(const String& s, RefResult v, const String& context);
-  Variant o_setRef(const String& s, const Variant& v, const String& context);
 
   void o_setArray(const Array& properties);
   void o_getArray(Array& props, bool pubOnly = false) const;

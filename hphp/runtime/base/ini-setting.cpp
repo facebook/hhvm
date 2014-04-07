@@ -358,7 +358,7 @@ void IniSetting::ParserCallback::makeArray(Variant &hash,
     }
     val.toArrRef().setRef(index, newval);
     if (!last) {
-      val = strongBind(newval);
+      val.assignRef(newval);
       p += index.size() + 1;
     }
   } while (!last);

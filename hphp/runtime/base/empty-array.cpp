@@ -298,7 +298,7 @@ ArrayData* EmptyArray::LvalNew(ArrayData*, Variant*& retVar, bool) {
 
 ArrayData* EmptyArray::SetRefInt(ArrayData*,
                                  int64_t k,
-                                 const Variant& var,
+                                 Variant& var,
                                  bool) {
   auto ref = *var.asRef();
   tvIncRef(&ref);
@@ -309,7 +309,7 @@ ArrayData* EmptyArray::SetRefInt(ArrayData*,
 
 ArrayData* EmptyArray::SetRefStr(ArrayData*,
                                  StringData* k,
-                                 const Variant& var,
+                                 Variant& var,
                                  bool) {
   auto ref = *var.asRef();
   tvIncRef(&ref);
@@ -324,7 +324,7 @@ ArrayData* EmptyArray::Append(ArrayData*, const Variant& vin, bool copy) {
   return EmptyArray::MakePackedInl(cell).first;
 }
 
-ArrayData* EmptyArray::AppendRef(ArrayData*, const Variant& v, bool copy) {
+ArrayData* EmptyArray::AppendRef(ArrayData*, Variant& v, bool copy) {
   auto ref = *v.asRef();
   tvIncRef(&ref);
   return EmptyArray::MakePacked(ref).first;

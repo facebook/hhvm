@@ -487,7 +487,7 @@ ArrayData* PackedArray::SetStr(ArrayData* adIn,
 
 ArrayData* PackedArray::SetRefInt(ArrayData* adIn,
                                   int64_t k,
-                                  const Variant& v,
+                                  Variant& v,
                                   bool copy) {
   assert(checkInvariants(adIn));
 
@@ -506,7 +506,7 @@ ArrayData* PackedArray::SetRefInt(ArrayData* adIn,
 
 ArrayData* PackedArray::SetRefStr(ArrayData* adIn,
                                   StringData* k,
-                                  const Variant& v,
+                                  Variant& v,
                                   bool copy) {
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
   // todo t2606310: key can't exist.  use add/findForNewInsert
@@ -599,7 +599,7 @@ ArrayData* PackedArray::Append(ArrayData* adIn, const Variant& v, bool copy) {
 }
 
 ArrayData* PackedArray::AppendRef(ArrayData* adIn,
-                                  const Variant& v,
+                                  Variant& v,
                                   bool copy) {
   assert(checkInvariants(adIn));
   auto const ad = copy ? CopyAndResizeIfNeeded(adIn)
@@ -627,7 +627,8 @@ ArrayData* PackedArray::AppendWithRef(ArrayData* adIn,
                        : ResizeIfNeeded(adIn);
   if (UNLIKELY(!ad)) {
     auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-    return MixedArray::AppendRef(mixed, v, copy);
+    // XXX: constness
+    return MixedArray::AppendRef(mixed, const_cast<Variant&>(v), copy);
   }
 
   if (ad->m_pos == ArrayData::invalid_index) {

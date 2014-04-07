@@ -63,7 +63,7 @@
     # Stable is 2.4.2, but need master since we have pull requests.
     # e.g., https://github.com/doctrine/doctrine2/pull/928
     branch: master
-    commit: 0797feeb0f6aa1fdbdd88088df70539cb15b54cb
+    commit: 73e5bbecbef311194085e30d8b7fd6516bc50425
     install_root: doctrine2
     test_root: doctrine2
   drupal:

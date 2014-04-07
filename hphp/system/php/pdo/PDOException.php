@@ -11,6 +11,4 @@
  */
 class PDOException extends Exception {
   public $errorInfo;
-  public function __construct() {
-  }
 }

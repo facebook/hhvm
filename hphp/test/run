@@ -1224,20 +1224,20 @@ function main($argv) {
     if (isset($options['repo'])) {
       error("Server mode repo tests are not supported");
     }
-    $configs = Set {};
+    $configs = array();
     foreach ($tests as $test) {
       if (!can_run_server_test($test)) continue;
       $config = find_file_for_dir(dirname($test), 'config.hdf');
       if (!$config) {
         error("Couldn't find config file for $test");
       }
-      $configs->add($config);
+      $configs[$config] = $config;
     }
-    if ($configs->count() !== 1) {
+    if (count($configs) !== 1) {
       error("You passed a combination of tests that would require more than ".
             "one config file. This is not supported in server mode.");
     }
-    $options['server_config'] = $configs->toVector()[0];
+    $options['server_config'] = reset($configs);
     $server_status = start_server($options);
     $options['server_port'] = $server_status['port'];
     $server_proc = idx($server_status, 'proc');

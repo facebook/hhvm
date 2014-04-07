@@ -1160,6 +1160,8 @@ void RuntimeOption::Load(Hdf &config,
     EnableShortTags= eval["EnableShortTags"].getBool(true);
     EnableAspTags = eval["EnableAspTags"].getBool();
     EnableXHP = eval["EnableXHP"].getBool(false);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.eval.enable_xhp", &EnableXHP);
     EnableZendCompat = eval["EnableZendCompat"].getBool(false);
     TimeoutsUseWallTime = eval["TimeoutsUseWallTime"].getBool(true);
     CheckFlushOnUserClose = eval["CheckFlushOnUserClose"].getBool(true);

@@ -318,6 +318,7 @@ struct TranslArgs {
       , m_setFuncBody(false)
       , m_transId(InvalidID)
       , m_region(nullptr)
+      , m_dryRun(false)
     {}
 
   TranslArgs& sk(const SrcKey& sk) {
@@ -344,6 +345,10 @@ struct TranslArgs {
     m_region = region;
     return *this;
   }
+  TranslArgs& dryRun(bool dry) {
+    m_dryRun = dry;
+    return *this;
+  }
 
   SrcKey m_sk;
   bool m_align;
@@ -351,6 +356,7 @@ struct TranslArgs {
   bool m_setFuncBody;
   TransID m_transId;
   JIT::RegionDescPtr m_region;
+  bool m_dryRun;
 };
 
 class Translator;

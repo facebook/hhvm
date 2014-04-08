@@ -2665,7 +2665,7 @@ void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
   auto data = inst->extra<LdSSwitchDestFast>();
 
   auto table = m_mcg->allocData<SSwitchMap>(64);
-  table->init(data->numCases);
+  new (table) SSwitchMap(data->numCases);
   for (int64_t i = 0; i < data->numCases; ++i) {
     table->add(data->cases[i].str, nullptr);
     TCA* addr = table->find(data->cases[i].str);

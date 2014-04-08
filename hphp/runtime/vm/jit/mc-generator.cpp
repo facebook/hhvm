@@ -509,7 +509,37 @@ MCGenerator::translate(const TranslArgs& args) {
 
   TCA start = code.main().frontier();
 
-  translateWork(args);
+  if (RuntimeOption::EvalJitDryRuns &&
+      (m_tx.mode() == TransLive || m_tx.mode() == TransProfile)) {
+    auto const useRegion =
+      RuntimeOption::EvalJitRegionSelector == "tracelet";
+    always_assert(useRegion ||
+                  RuntimeOption::EvalJitRegionSelector == "");
+
+    auto dryArgs = args;
+
+    dryArgs.dryRun(!useRegion);
+    {
+      // First, run translateWork with the tracelet region selector. If
+      // useRegion == false, the generated code will be thrown away at the end.
+      OPTION_GUARD(EvalJitRegionSelector, "tracelet");
+      OPTION_GUARD(EvalHHIRRelaxGuards, true);
+      OPTION_GUARD(EvalHHBCRelaxGuards, false);
+      translateWork(dryArgs);
+    }
+
+    dryArgs.dryRun(useRegion);
+    {
+      // Now translate with analyze(), throwing away the generated code if
+      // useRegion == true.
+      OPTION_GUARD(EvalJitRegionSelector, "");
+      OPTION_GUARD(EvalHHIRRelaxGuards, false);
+      OPTION_GUARD(EvalHHBCRelaxGuards, true);
+      translateWork(dryArgs);
+    }
+  } else {
+    translateWork(args);
+  }
 
   if (args.m_setFuncBody) {
     func->setFuncBody(start);
@@ -1988,6 +2018,11 @@ MCGenerator::translateWork(const TranslArgs& args) {
              m_tx.mode() == TransOptimize);
       transKind = m_tx.mode();
     }
+  }
+
+  if (args.m_dryRun) {
+    resetState();
+    return;
   }
 
   if (transKind == TransInterp) {

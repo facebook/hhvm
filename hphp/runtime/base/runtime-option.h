@@ -449,6 +449,7 @@ public:
   F(bool, HHIRAllocSIMDRegs,           true)                            \
   /* Region compiler flags */                                           \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
+  F(bool,     JitDryRuns,              false)                           \
   F(bool,     JitCompareRegions,       false)                           \
   F(bool,     JitPGO,                  pgoDefault())                    \
   F(string,   JitPGORegionSelector,    "hottrace")                      \

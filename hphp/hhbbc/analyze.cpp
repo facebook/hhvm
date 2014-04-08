@@ -45,7 +45,7 @@ TRACE_SET_MOD(hhbbc);
 
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
-const StaticString s_AsyncGenerator("AsyncGenerator");
+const StaticString s_AsyncGenerator("HH\\AsyncGenerator");
 const StaticString s_Generator("Generator");
 const StaticString s_http_response_header("http_response_header");
 const StaticString s_php_errormsg("php_errormsg");

@@ -126,7 +126,7 @@ $objs = null;
 async function myAsyncFunc(): int { return 42; }
 $myClass = myAsyncFunc();
 $objs = objprof_get_data();
-echo get_bytes_eq('StaticWaitHandle', $objs) == 16 + $ObjSize // handle size
+echo get_bytes_eq(StaticWaitHandle::class, $objs) == 16 + $ObjSize // handle size
   ? "(GOOD) Bytes (Async) works\n"
   : "(BAD) Bytes (Async) failed: ".var_export($objs, true)."\n";
 $objs = null;

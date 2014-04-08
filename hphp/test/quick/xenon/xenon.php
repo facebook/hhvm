@@ -45,7 +45,7 @@ main(42);
 // get the Xenon data then verify that there are no unknown functions
 // and that all of the functions in this file are in the stack
 $stacks = xenon_get_data();
-$functionList = array( "main", "", "WaitHandle::join", "strcasecmp", "genFoo",
+$functionList = array( "main", "", WaitHandle::class."::join", "strcasecmp", "genFoo",
   "genBar", "gen1", "gen2", "array_shift", "include");
 $requiredFunctions = array("main" => 1);
 

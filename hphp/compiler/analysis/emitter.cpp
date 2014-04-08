@@ -8785,7 +8785,8 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     bool hasCtor = false;
     for (ssize_t j = 0; j < e.info->m_methodCount; ++j) {
       const HhbcExtMethodInfo* methodInfo = &(e.info->m_methods[j]);
-      static const StringData* asyncGenCls = makeStaticString("asyncgenerator");
+      static const StringData* asyncGenCls =
+        makeStaticString("hh\\asyncgenerator");
       static const StringData* generatorCls = makeStaticString("generator");
       static const StringData* waitHandleCls = makeStaticString("waithandle");
       static const StringData* gwhMeth = makeStaticString("getwaithandle");

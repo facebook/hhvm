@@ -1,27 +1,27 @@
 start
 --------------------testing 0--------------------
 creating
-constructing AsyncGenerator
+constructing HH\AsyncGenerator
 calling next
 step 1
 constructing Value
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
 result:  => 1
 destructing Value
-destructing StaticWaitHandle
+destructing HH\StaticWaitHandle
 calling next
 constructing SentValue
 step 2: got 1
 destructing SentValue
 constructing Key
 constructing Value
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
 result: 2 => 3
 destructing Key
 destructing Value
-destructing StaticWaitHandle
+destructing HH\StaticWaitHandle
 calling next
 constructing SentValue
 step 3: got 2
@@ -29,31 +29,31 @@ destructing SentValue
 foo
 got foo 42
 constructing Value
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
 result:  => 42
 destructing Value
-destructing StaticWaitHandle
+destructing HH\StaticWaitHandle
 calling next
 constructing SentValue
 step 4: got 3
 destructing SentValue
 bar before
-constructing AsyncGeneratorWaitHandle
-awaiting AsyncGeneratorWaitHandle
+constructing HH\AsyncGeneratorWaitHandle
+awaiting HH\AsyncGeneratorWaitHandle
 bar after
 got bar 47
 constructing Value
 result:  => 47
 destructing Value
-destructing AsyncGeneratorWaitHandle
+destructing HH\AsyncGeneratorWaitHandle
 calling next
 constructing SentValue
 step 5: got 4
 destructing SentValue
 bar before
-constructing AsyncGeneratorWaitHandle
-awaiting AsyncGeneratorWaitHandle
+constructing HH\AsyncGeneratorWaitHandle
+awaiting HH\AsyncGeneratorWaitHandle
 bar after
 got bar 47
 bar before
@@ -64,39 +64,39 @@ constructing Value
 result: 47 => 47
 destructing Key
 destructing Value
-destructing AsyncGeneratorWaitHandle
+destructing HH\AsyncGeneratorWaitHandle
 calling next
 constructing SentValue
 step 6: got 5
 destructing SentValue
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
 result: EOF
-destructing StaticWaitHandle
-destructing AsyncGenerator
+destructing HH\StaticWaitHandle
+destructing HH\AsyncGenerator
 --------------------testing 1--------------------
 creating
-constructing AsyncGenerator
+constructing HH\AsyncGenerator
 calling next
 step 1
 constructing Value
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
 result:  => 1
 destructing Value
-destructing StaticWaitHandle
+destructing HH\StaticWaitHandle
 calling next
 constructing SentValue
 step 2: got 1
 destructing SentValue
 constructing Key
 constructing Value
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
 result: 2 => 3
 destructing Key
 destructing Value
-destructing StaticWaitHandle
+destructing HH\StaticWaitHandle
 calling next
 constructing SentValue
 step 3: got 2
@@ -104,31 +104,31 @@ destructing SentValue
 foo
 got foo 42
 constructing Value
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
 result:  => 42
 destructing Value
-destructing StaticWaitHandle
+destructing HH\StaticWaitHandle
 calling next
 constructing SentValue
 step 4: got 3
 destructing SentValue
 bar before
-constructing AsyncGeneratorWaitHandle
-awaiting AsyncGeneratorWaitHandle
+constructing HH\AsyncGeneratorWaitHandle
+awaiting HH\AsyncGeneratorWaitHandle
 bar after
 got bar 47
 constructing Value
 result:  => 47
 destructing Value
-destructing AsyncGeneratorWaitHandle
+destructing HH\AsyncGeneratorWaitHandle
 calling next
 constructing SentValue
 step 5: got 4
 destructing SentValue
 bar before
-constructing AsyncGeneratorWaitHandle
-awaiting AsyncGeneratorWaitHandle
+constructing HH\AsyncGeneratorWaitHandle
+awaiting HH\AsyncGeneratorWaitHandle
 bar after
 got bar 47
 bar before
@@ -139,42 +139,42 @@ constructing Value
 result: 47 => 47
 destructing Key
 destructing Value
-destructing AsyncGeneratorWaitHandle
+destructing HH\AsyncGeneratorWaitHandle
 calling next
 constructing SentValue
 step 6: got 5
 bar before
-constructing AsyncGeneratorWaitHandle
-awaiting AsyncGeneratorWaitHandle
+constructing HH\AsyncGeneratorWaitHandle
+awaiting HH\AsyncGeneratorWaitHandle
 bar after
 got bar 47
 destructing SentValue
 result: EOF
-destructing AsyncGeneratorWaitHandle
-destructing AsyncGenerator
+destructing HH\AsyncGeneratorWaitHandle
+destructing HH\AsyncGenerator
 --------------------testing 2--------------------
 creating
-constructing AsyncGenerator
+constructing HH\AsyncGenerator
 calling next
 step 1
 constructing Value
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
 result:  => 1
 destructing Value
-destructing StaticWaitHandle
+destructing HH\StaticWaitHandle
 calling next
 constructing SentValue
 step 2: got 1
 destructing SentValue
 constructing Key
 constructing Value
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
 result: 2 => 3
 destructing Key
 destructing Value
-destructing StaticWaitHandle
+destructing HH\StaticWaitHandle
 calling next
 constructing SentValue
 step 3: got 2
@@ -182,31 +182,31 @@ destructing SentValue
 foo
 got foo 42
 constructing Value
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
 result:  => 42
 destructing Value
-destructing StaticWaitHandle
+destructing HH\StaticWaitHandle
 calling next
 constructing SentValue
 step 4: got 3
 destructing SentValue
 bar before
-constructing AsyncGeneratorWaitHandle
-awaiting AsyncGeneratorWaitHandle
+constructing HH\AsyncGeneratorWaitHandle
+awaiting HH\AsyncGeneratorWaitHandle
 bar after
 got bar 47
 constructing Value
 result:  => 47
 destructing Value
-destructing AsyncGeneratorWaitHandle
+destructing HH\AsyncGeneratorWaitHandle
 calling next
 constructing SentValue
 step 5: got 4
 destructing SentValue
 bar before
-constructing AsyncGeneratorWaitHandle
-awaiting AsyncGeneratorWaitHandle
+constructing HH\AsyncGeneratorWaitHandle
+awaiting HH\AsyncGeneratorWaitHandle
 bar after
 got bar 47
 bar before
@@ -217,41 +217,41 @@ constructing Value
 result: 47 => 47
 destructing Key
 destructing Value
-destructing AsyncGeneratorWaitHandle
+destructing HH\AsyncGeneratorWaitHandle
 calling next
 constructing SentValue
 step 6: got 5
 constructing Exception
 destructing SentValue
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
-destructing StaticWaitHandle
-destructing AsyncGenerator
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
+destructing HH\StaticWaitHandle
+destructing HH\AsyncGenerator
 exception: hello world
 destructing Exception
 --------------------testing 3--------------------
 creating
-constructing AsyncGenerator
+constructing HH\AsyncGenerator
 calling next
 step 1
 constructing Value
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
 result:  => 1
 destructing Value
-destructing StaticWaitHandle
+destructing HH\StaticWaitHandle
 calling next
 constructing SentValue
 step 2: got 1
 destructing SentValue
 constructing Key
 constructing Value
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
 result: 2 => 3
 destructing Key
 destructing Value
-destructing StaticWaitHandle
+destructing HH\StaticWaitHandle
 calling next
 constructing SentValue
 step 3: got 2
@@ -259,31 +259,31 @@ destructing SentValue
 foo
 got foo 42
 constructing Value
-constructing StaticWaitHandle
-awaiting StaticWaitHandle
+constructing HH\StaticWaitHandle
+awaiting HH\StaticWaitHandle
 result:  => 42
 destructing Value
-destructing StaticWaitHandle
+destructing HH\StaticWaitHandle
 calling next
 constructing SentValue
 step 4: got 3
 destructing SentValue
 bar before
-constructing AsyncGeneratorWaitHandle
-awaiting AsyncGeneratorWaitHandle
+constructing HH\AsyncGeneratorWaitHandle
+awaiting HH\AsyncGeneratorWaitHandle
 bar after
 got bar 47
 constructing Value
 result:  => 47
 destructing Value
-destructing AsyncGeneratorWaitHandle
+destructing HH\AsyncGeneratorWaitHandle
 calling next
 constructing SentValue
 step 5: got 4
 destructing SentValue
 bar before
-constructing AsyncGeneratorWaitHandle
-awaiting AsyncGeneratorWaitHandle
+constructing HH\AsyncGeneratorWaitHandle
+awaiting HH\AsyncGeneratorWaitHandle
 bar after
 got bar 47
 bar before
@@ -294,19 +294,19 @@ constructing Value
 result: 47 => 47
 destructing Key
 destructing Value
-destructing AsyncGeneratorWaitHandle
+destructing HH\AsyncGeneratorWaitHandle
 calling next
 constructing SentValue
 step 6: got 5
 bar before
-constructing AsyncGeneratorWaitHandle
-awaiting AsyncGeneratorWaitHandle
+constructing HH\AsyncGeneratorWaitHandle
+awaiting HH\AsyncGeneratorWaitHandle
 bar after
 got bar 47
 constructing Exception
 destructing SentValue
-destructing AsyncGeneratorWaitHandle
-destructing AsyncGenerator
+destructing HH\AsyncGeneratorWaitHandle
+destructing HH\AsyncGenerator
 exception: hello world
 destructing Exception
 end

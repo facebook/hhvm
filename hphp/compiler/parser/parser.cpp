@@ -2256,6 +2256,26 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"InvariantException", "HH\\InvariantException"},
     (AliasEntry){"IMemoizeParam", "HH\\IMemoizeParam"},
 
+    (AliasEntry){"Awaitable", "HH\\Awaitable"},
+    (AliasEntry){"AsyncGenerator", "HH\\AsyncGenerator"},
+    // Keep in sync with order in hphp/runtime/ext/asio/wait_handle.h
+    (AliasEntry){"StaticWaitHandle", "HH\\StaticWaitHandle"},
+    (AliasEntry){"WaitableWaitHandle", "HH\\WaitableWaitHandle"},
+    (AliasEntry){"BlockableWaitHandle", "HH\\BlockableWaitHandle"},
+    (AliasEntry){"ResumableWaitHandle", "HH\\ResumableWaitHandle"},
+    (AliasEntry){"AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle"},
+    (AliasEntry){"AsyncGeneratorWaitHandle", "HH\\AsyncGeneratorWaitHandle"},
+    (AliasEntry){"AwaitAllWaitHandle", "HH\\AwaitAllWaitHandle"},
+    (AliasEntry){"GenArrayWaitHandle", "HH\\GenArrayWaitHandle"},
+    (AliasEntry){"GenMapWaitHandle", "HH\\GenMapWaitHandle"},
+    (AliasEntry){"GenVectorWaitHandle", "HH\\GenVectorWaitHandle"},
+    (AliasEntry){"RescheduleWaitHandle", "HH\\RescheduleWaitHandle"},
+    (AliasEntry){"SleepWaitHandle", "HH\\SleepWaitHandle"},
+    (AliasEntry){
+      "ExternalThreadEventWaitHandle",
+      "HH\\ExternalThreadEventWaitHandle"
+    },
+
     (AliasEntry){"bool", "HH\\bool"},
     (AliasEntry){"boolean", "HH\\bool"},
     (AliasEntry){"int", "HH\\int"},

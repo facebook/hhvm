@@ -6,7 +6,7 @@
     ],
     "classes": [
         {
-            "name": "AsyncGenerator",
+            "name": "HH\\AsyncGenerator",
             "desc": "A generator that can be iterated asynchronously",
             "flags": [
                 "IsFinal",
@@ -82,7 +82,7 @@
                 "NoDefaultSweep"
             ],
             "ifaces": [
-                "Awaitable"
+                "HH\\Awaitable"
             ],
             "funcs": [
                 {
@@ -261,7 +261,7 @@
             ]
         },
         {
-            "name": "StaticWaitHandle",
+            "name": "HH\\StaticWaitHandle",
             "parent": "WaitHandle",
             "desc": "A wait handle that is always finished",
             "flags": [
@@ -285,7 +285,7 @@
             ]
         },
         {
-            "name": "WaitableWaitHandle",
+            "name": "HH\\WaitableWaitHandle",
             "parent": "WaitHandle",
             "desc": "A wait handle that can be waited upon",
             "flags": [
@@ -347,8 +347,8 @@
             ]
         },
         {
-            "name": "BlockableWaitHandle",
-            "parent": "WaitableWaitHandle",
+            "name": "HH\\BlockableWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle that can be blocked on a dependency",
             "flags": [
                 "IsAbstract",
@@ -361,8 +361,8 @@
             ]
         },
         {
-            "name": "ResumableWaitHandle",
-            "parent": "BlockableWaitHandle",
+            "name": "HH\\ResumableWaitHandle",
+            "parent": "HH\\BlockableWaitHandle",
             "desc": "A wait handle that can resume execution of PHP code",
             "flags": [
                 "IsAbstract",
@@ -447,8 +447,8 @@
             ]
         },
         {
-            "name": "AsyncFunctionWaitHandle",
-            "parent": "ResumableWaitHandle",
+            "name": "HH\\AsyncFunctionWaitHandle",
+            "parent": "HH\\ResumableWaitHandle",
             "desc": "A wait handle representing asynchronous execution of async function",
             "flags": [
                 "IsFinal",
@@ -472,8 +472,8 @@
             ]
         },
         {
-            "name": "AsyncGeneratorWaitHandle",
-            "parent": "ResumableWaitHandle",
+            "name": "HH\\AsyncGeneratorWaitHandle",
+            "parent": "HH\\ResumableWaitHandle",
             "desc": "A wait handle representing asynchronous execution of async generator",
             "flags": [
                 "IsFinal",
@@ -496,8 +496,8 @@
             ]
         },
         {
-            "name": "AwaitAllWaitHandle",
-            "parent": "BlockableWaitHandle",
+            "name": "HH\\AwaitAllWaitHandle",
+            "parent": "HH\\BlockableWaitHandle",
             "desc": "A wait handle that waits for a list of other wait handles",
             "flags": [
                 "IsFinal",
@@ -582,8 +582,8 @@
             ]
         },
         {
-            "name": "GenArrayWaitHandle",
-            "parent": "BlockableWaitHandle",
+            "name": "HH\\GenArrayWaitHandle",
+            "parent": "HH\\BlockableWaitHandle",
             "desc": "A wait handle representing an array of asynchronous operations",
             "flags": [
                 "IsFinal",
@@ -631,8 +631,8 @@
             ]
         },
         {
-            "name": "GenMapWaitHandle",
-            "parent": "BlockableWaitHandle",
+            "name": "HH\\GenMapWaitHandle",
+            "parent": "HH\\BlockableWaitHandle",
             "desc": "A wait handle representing a map of asynchronous operations",
             "flags": [
                 "IsFinal",
@@ -680,8 +680,8 @@
             ]
         },
         {
-            "name": "GenVectorWaitHandle",
-            "parent": "BlockableWaitHandle",
+            "name": "HH\\GenVectorWaitHandle",
+            "parent": "HH\\BlockableWaitHandle",
             "desc": "A wait handle representing a vector of asynchronous operations",
             "flags": [
                 "IsFinal",
@@ -729,8 +729,8 @@
             ]
         },
         {
-            "name": "RescheduleWaitHandle",
-            "parent": "WaitableWaitHandle",
+            "name": "HH\\RescheduleWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle that succeeds with null once desired scheduling priority is eligible for execution",
             "flags": [
                 "IsFinal",
@@ -775,8 +775,8 @@
             ]
         },
         {
-            "name": "SleepWaitHandle",
-            "parent": "WaitableWaitHandle",
+            "name": "HH\\SleepWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle that succeeds with null after the desired timeout expires",
             "flags": [
                 "IsFinal",
@@ -842,8 +842,8 @@
             ]
         },
         {
-            "name": "ExternalThreadEventWaitHandle",
-            "parent": "WaitableWaitHandle",
+            "name": "HH\\ExternalThreadEventWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle that synchronizes against C++ operation in external thread",
             "bases": [
                 "Sweepable"

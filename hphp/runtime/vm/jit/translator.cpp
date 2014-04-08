@@ -431,8 +431,6 @@ predictOutputs(const NormalizedInstruction* ni) {
   return KindOfAny;
 }
 
-const StaticString s_wait_handle("WaitHandle");
-
 /*
  * NB: this opcode structure is sparse; it cannot just be indexed by
  * opcode.

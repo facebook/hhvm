@@ -54,7 +54,7 @@ verifyTestRun(
   xenon_get_data(),
   array(
     "fn1", "fn0", "main", "", "fa0", "fa1", "fa2", "fa3",
-    "WaitHandle::join", "strcasecmp", "array_shift", "include",
+    WaitHandle::class."::join", "strcasecmp", "array_shift", "include",
     "fa3", "fa2", "fa1", "fa0",
   ),
   array(

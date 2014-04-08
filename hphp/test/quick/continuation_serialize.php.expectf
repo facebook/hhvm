@@ -1,9 +1,9 @@
 int(42)
 string(3) "Hi!"
 
-Warning: Attempted to serialize unserializable builtin class StaticWaitHandle in %s/continuation_serialize.php on line 26
+Warning: Attempted to serialize unserializable builtin class HH\StaticWaitHandle in %s/continuation_serialize.php on line 26
 
-Warning: Attempted to serialize unserializable builtin class StaticWaitHandle in %s/continuation_serialize.php on line 27
+Warning: Attempted to serialize unserializable builtin class HH\StaticWaitHandle in %s/continuation_serialize.php on line 27
 string(2) "N;"
 string(2) "N;"
 NULL

@@ -27,6 +27,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_http_response_header("http_response_header");
+const StaticString s_http("http");
+const StaticString s_tcp_socket("tcp_socket");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -34,7 +36,8 @@ UrlFile::UrlFile(const char *method /* = "GET" */,
                  const Array& headers /* = null_array */,
                  const String& postData /* = null_string */,
                  int maxRedirect /* = 20 */,
-                 int timeout /* = -1 */) {
+                 int timeout /* = -1 */)
+                 : MemFile(s_http, s_tcp_socket) {
   m_get = (method == nullptr || strcasecmp(method, "GET") == 0);
   m_headers = headers;
   m_postData = postData;

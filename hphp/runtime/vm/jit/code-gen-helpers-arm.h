@@ -59,6 +59,13 @@ void emitXorSwap(vixl::MacroAssembler& a,
                  const vixl::Register& r1, const vixl::Register& r2);
 
 /*
+ * Moves one register into another. This can handle GP and SIMD registers,
+ * and dst and src don't have to be the same kind.
+ */
+void emitRegRegMove(vixl::MacroAssembler& a,
+                    const vixl::CPURegister& dst, const vixl::CPURegister& src);
+
+/*
  * Check the surprise flags. If surprised, call functionEnterHelper.
  */
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,

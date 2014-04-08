@@ -549,7 +549,6 @@ class MacroAssembler : public Assembler {
   }
   void Fmov(FPRegister fd, Register rn) {
     assert(allow_macro_instructions_);
-    assert(!rn.IsZero());
     fmov(fd, rn);
   }
   void Fmov(FPRegister fd, double imm) {

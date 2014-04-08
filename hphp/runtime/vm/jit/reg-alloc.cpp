@@ -212,11 +212,18 @@ Constraint srcConstraint(const IRInstruction& inst, unsigned i) {
   if (inst.src(i)->isConst() && mayUseConst(inst, i)) {
     c |= Constraint::IMM;
   }
+  if (inst.src(i)->type() <= Type::Dbl) {
+    c |= Constraint::SIMD;
+  }
   return c;
 }
 
 Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
-  return Constraint::GP;
+  Constraint c { Constraint::GP };
+  if (inst.dst(i)->type() <= Type::Dbl) {
+    c |= Constraint::SIMD;
+  }
+  return c;
 }
 
 }

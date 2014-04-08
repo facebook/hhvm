@@ -212,7 +212,6 @@ class FPRegister : public CPURegister {
   static const FPRegister dregisters[];
 };
 
-
 // No*Reg is used to indicate an unused argument, or an error case. Note that
 // these all compare equal (using the Is() method). The Register and FPRegister
 // variants are provided for convenience.
@@ -1591,6 +1590,10 @@ class Assembler {
     return IsImmAddSub(value);
   }
 
+  // Encoding helpers.
+  static bool IsImmFP32(float imm);
+  static bool IsImmFP64(double imm);
+
  protected:
   inline const Register& AppropriateZeroRegFor(const CPURegister& reg) const {
     return reg.Is64Bits() ? xzr : wzr;
@@ -1715,10 +1718,6 @@ class Assembler {
                                const FPRegister& fm,
                                const FPRegister& fa,
                                FPDataProcessing3SourceOp op);
-
-  // Encoding helpers.
-  static bool IsImmFP32(float imm);
-  static bool IsImmFP64(double imm);
 
   void RecordLiteral(int64_t imm, unsigned size);
 

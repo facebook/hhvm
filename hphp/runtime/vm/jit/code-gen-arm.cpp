@@ -927,7 +927,25 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     }
     if (rs.numAllocated() == 0) {
       assert(src->inst()->op() == DefConst);
-      m_as.  Mov  (x2a(rd.reg(0)), src->rawVal());
+      auto rDst = rd.reg(0);
+      if (rDst.isGP()) {
+        m_as.  Mov  (x2a(rDst), src->rawVal());
+      } else {
+        // Assembler::fmov (which you'd think shouldn't be a macro instruction)
+        // will emit a ldr from a literal pool if IsImmFP64 is false. vixl's
+        // literal pools don't work well with our codegen pattern, so if that
+        // would happen, emit the raw bits into a GPR first and then move them
+        // unmodified into a SIMD.
+        if (vixl::Assembler::IsImmFP64(src->dblVal())) {
+          m_as.  Fmov (x2simd(rDst), src->dblVal());
+        } else if (src->dblVal() == 0.0) {
+          // 0 is not encodeable as an immediate to Fmov, but this works.
+          m_as.  Fmov (x2simd(rDst), vixl::xzr);
+        } else {
+          m_as.  Mov  (rAsm, src->rawVal());
+          m_as.  Fmov (x2simd(rDst), rAsm);
+        }
+      }
     }
     if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
       // Move src known type to register
@@ -971,31 +989,32 @@ static void shuffleArgs(vixl::MacroAssembler& a,
   auto const howTo = doRegMoves(moves, rAsm);
 
   for (auto& how : howTo) {
-    auto srcReg = x2a(how.m_src);
-    auto dstReg = x2a(how.m_dst);
+    vixl::CPURegister srcReg{how.m_src};
+    vixl::CPURegister dstReg{how.m_dst};
     if (how.m_kind == MoveInfo::Kind::Move) {
       auto* argDesc = argDescs[how.m_dst];
       if (argDesc) {
         auto kind = argDesc->kind();
         if (kind == ArgDesc::Kind::Addr) {
-          emitRegGetsRegPlusImm(a, dstReg, srcReg, argDesc->disp().l());
+          emitRegGetsRegPlusImm(a, vixl::Register{dstReg},
+                                vixl::Register{srcReg}, argDesc->disp().l());
         } else {
           if (argDesc->isZeroExtend()) {
             // "Unsigned eXTend Byte". The dest reg is a 32-bit reg but this
             // zeroes the top 32 bits, so the intended effect is achieved.
             a.Uxtb (dstReg.W(), srcReg.W());
           } else {
-            a.Mov  (dstReg, srcReg);
+            emitRegRegMove(a, dstReg, srcReg);
           }
         }
         if (kind != ArgDesc::Kind::TypeReg) {
           argDesc->markDone();
         }
       } else {
-        a.  Mov  (dstReg, srcReg);
+        emitRegRegMove(a, dstReg, srcReg);
       }
     } else {
-      emitXorSwap(a, dstReg, srcReg);
+      emitXorSwap(a, vixl::Register{dstReg}, vixl::Register{srcReg});
     }
   }
 
@@ -1056,13 +1075,13 @@ void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
   assert(m_curInst->isNative());
 
   auto dstReg0 = dstInfo.reg0;
-  auto dstReg1 = dstInfo.reg1;
+  DEBUG_ONLY auto dstReg1 = dstInfo.reg1;
 
   if (debug) {
     toSave.forEach([](PhysReg r) { assert(r.isGP()); });
   }
 
-  toSave = toSave & kCallerSaved;
+  toSave = toSave & kGPCallerSaved;
   assert((toSave & RegSet().add(dstReg0).add(dstReg1)).empty());
 
   // Use vixl's handy helper to push caller-save regs. It uses ldp/stp when
@@ -1104,18 +1123,19 @@ void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
     recordHostCallSyncPoint(a, syncPoint);
   }
 
-  auto armDst0 = x2a(dstReg0);
-  DEBUG_ONLY auto armDst1 = x2a(dstReg1);
+  vixl::CPURegister armDst0{dstReg0};
 
   switch (dstInfo.type) {
     case DestType::TV: not_implemented();
     case DestType::SSA:
-      assert(!armDst1.IsValid());
-      if (armDst0.IsValid() && !armDst0.Is(vixl::x0)) a.Mov(armDst0, vixl::x0);
+      assert(dstReg1 == InvalidReg);
+      if (armDst0.IsValid() && !armDst0.Is(vixl::x0)) {
+        emitRegRegMove(a, armDst0, vixl::x0);
+      }
       break;
     case DestType::SSA2: not_implemented();
     case DestType::None:
-      assert(!armDst0.IsValid() && !armDst1.IsValid());
+      assert(dstReg0 == InvalidReg && dstReg1 == InvalidReg);
       break;
   }
 }
@@ -1523,9 +1543,6 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   if (func->isA(Type::Null)) {
     // Do nothing
     assert(func->isConst());
-  } else if (func->isConst()) {
-    m_as.  Mov  (rAsm, func->funcVal());
-    m_as.  Str  (rAsm, spReg[spOff + AROFF(m_func)]);
   } else {
     auto reg0 = x2a(funcLoc.reg(0));
     m_as.  Str  (reg0, spReg[spOff + AROFF(m_func)]);
@@ -1667,14 +1684,13 @@ void CodeGenerator::emitLoadTypedValue(PhysLoc dst,
                                        vixl::Register base,
                                        ptrdiff_t offset,
                                        Block* label) {
-  auto valueDstReg = x2a(dst.reg(0));
-  auto typeDstReg  = x2a(dst.reg(1));
-
   if (label) not_implemented();
-
-  if (valueDstReg.IsFPRegister()) {
+  if (dst.reg(0).isSIMD()) {
     not_implemented();
   }
+
+  auto valueDstReg = x2a(dst.reg(0));
+  auto typeDstReg  = x2a(dst.reg(1));
 
   // Avoid clobbering the base reg if we'll need it later
   if (base.Is(typeDstReg) && valueDstReg.IsValid()) {
@@ -1713,10 +1729,15 @@ void CodeGenerator::emitLoad(Type type, PhysLoc dstLoc,
   }
   if (type <= Type::Null) return;
 
-  auto dstReg = x2a(dstLoc.reg());
-  if (!dstReg.IsValid()) return;
+  if (dstLoc.reg().isGP()) {
+    auto dstReg = x2a(dstLoc.reg());
+    if (!dstReg.IsValid()) return;
 
-  m_as.  Ldr  (dstReg, base[offset + TVOFF(m_data)]);
+    m_as.  Ldr  (dstReg, base[offset + TVOFF(m_data)]);
+  } else {
+    assert(type <= Type::Dbl);
+    m_as.  Ldr  (x2simd(dstLoc.reg()), base[offset + TVOFF(m_data)]);
+  }
 }
 
 void CodeGenerator::emitStore(vixl::Register base,
@@ -1740,22 +1761,17 @@ void CodeGenerator::emitStore(vixl::Register base,
   if (type <= Type::Null) {
     return;
   }
-  if (src->isConst()) {
-    int64_t val = 0;
-    if (type <= (Type::Bool | Type::Int | Type::Dbl |
-                 Type::Arr | Type::StaticStr | Type::Cls)) {
-      val = src->rawVal();
-    } else {
-      not_reached();
-    }
-    m_as.    Mov  (rAsm, val);
-    m_as.    Str  (rAsm, base[offset + TVOFF(m_data)]);
-  } else {
+
+  if (srcLoc.reg().isGP()) {
     auto reg = x2a(srcLoc.reg());
+    assert(reg.IsValid());
     if (src->isA(Type::Bool)) {
       m_as.  Uxtb (reg.W(), reg.W());
     }
     m_as.    Str  (x2a(srcLoc.reg()), base[offset + TVOFF(m_data)]);
+  } else {
+    assert(type <= Type::Dbl);
+    m_as.    Str  (x2simd(srcLoc.reg()), base[offset + TVOFF(m_data)]);
   }
 }
 

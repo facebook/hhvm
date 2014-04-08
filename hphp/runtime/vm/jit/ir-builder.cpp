@@ -107,6 +107,8 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
   assert(inst->marker().valid());
   if (!inst->is(Nop, DefConst)) {
+    FTRACE(3, "appendInstruction: Block {}; inst: {}\n", m_curBlock->id(),
+           inst->toString());
     where = m_curBlock->insert(where, inst);
     ++where;
   }
@@ -980,12 +982,11 @@ void IRBuilder::setMarker(BCMarker marker) {
   m_state.setMarker(marker);
 }
 
-void IRBuilder::startBlock() {
+void IRBuilder::startBlock(Block* block) {
+  assert(block);
   assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
-  auto marker = m_state.marker();
-  auto it = m_offsetToBlockMap.find(marker.bcOff);
-  if (it != m_offsetToBlockMap.end() && it->second->empty()) {
-    auto block = it->second;
+
+  if (block->empty()) {
     if (block != m_curBlock) {
       if (m_state.compatible(block)) {
         m_state.pauseBlock(block);
@@ -1005,6 +1006,12 @@ void IRBuilder::startBlock() {
              show(m_state));
     }
   }
+
+  if (sp() == nullptr) {
+    gen(DefSP, StackOffset(spOffset() + evalStack().size() - stackDeficit()),
+        fp());
+  }
+
 }
 
 Block* IRBuilder::makeBlock(Offset offset) {
@@ -1033,6 +1040,21 @@ bool IRBuilder::blockIsIncompatible(Offset offset) {
 void IRBuilder::recordOffset(Offset offset) {
   m_offsetSeen.insert(offset);
 }
+
+void IRBuilder::resetOffsetMapping() {
+  m_offsetToBlockMap.clear();
+}
+
+bool IRBuilder::hasBlock(Offset offset) const {
+  auto it = m_offsetToBlockMap.find(offset);
+  return it != m_offsetToBlockMap.end();
+}
+
+void IRBuilder::setBlock(Offset offset, Block* block) {
+  assert(!hasBlock(offset));
+  m_offsetToBlockMap[offset] = block;
+}
+
 
 void IRBuilder::pushBlock(BCMarker marker, Block* b,
                           const folly::Optional<Block::iterator>& where) {

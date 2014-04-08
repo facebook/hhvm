@@ -81,10 +81,15 @@ HhbcTranslator::HhbcTranslator(Offset startOffset,
   , m_startBcOff(startOffset)
   , m_lastBcOff(false)
   , m_hasExit(false)
+  , m_mode(IRGenMode::Trace)
 {
   updateMarker();
   auto const fp = gen(DefFP);
   gen(DefSP, StackOffset(initialSpOffsetFromFp), fp);
+}
+
+void HhbcTranslator::setGenMode(IRGenMode mode) {
+  m_mode = mode;
 }
 
 bool HhbcTranslator::classIsUniqueOrCtxParent(const Class* cls) const {
@@ -415,8 +420,7 @@ void HhbcTranslator::profileFailedInlShape(const std::string& str) {
   );
 }
 
-void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff,
-                              bool maybeStartBlock) {
+void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
   always_assert_log(
     IMPLIES(isInlining(), !lastBcOff),
     [&] {
@@ -426,15 +430,6 @@ void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff,
 
   m_bcStateStack.back().bcOff = newOff;
   updateMarker();
-  // TODO(t3729627): Instead of passing maybeStartBlock, see if it's
-  // possible to lift this and the DefSP conditional into their own
-  // API function to be called after setBcOff where we would have
-  // passed in true.
-  if (maybeStartBlock) m_irb->startBlock();
-
-  if (m_irb->sp() == nullptr) {
-    gen(DefSP, StackOffset(spOffset()), m_irb->fp());
-  }
   m_lastBcOff = lastBcOff;
 }
 
@@ -1909,7 +1904,7 @@ void HhbcTranslator::emitJmp(int32_t offset,
   if (backward && catchBlock) {
     emitJmpSurpriseCheck(catchBlock);
   }
-  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+  if (genMode() == IRGenMode::CFG) {
     // TODO(t3730057): Optimize away spillstacks and fallthrough
     // jumps, either by doing something clever here or adding to
     // jumpopts.
@@ -1918,6 +1913,7 @@ void HhbcTranslator::emitJmp(int32_t offset,
                    || m_irb->blockIsIncompatible(offset))
       ? makeExit(offset)
       : makeBlock(offset);
+    assert(target != nullptr);
     gen(Jmp, target);
     return;
   }
@@ -1942,7 +1938,7 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
                                    bool bothPaths,
                                    SSATmp* src) {
   spillStack();
-  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+  if (genMode() == IRGenMode::CFG) {
     // Before jumping to a merge point we have to ensure that the
     // stack pointer is sync'ed.  Without an ExceptionBarrier the
     // SpillStack can be removed by DCE (especially since merge points
@@ -1953,6 +1949,7 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
                         || m_irb->blockIsIncompatible(taken))
     ? makeExit(taken)
     : makeBlock(taken);
+  assert(target != nullptr);
   auto const boolSrc = gen(ConvCellToBool, src);
   gen(DecRef, src);
   gen(negate ? JmpZero : JmpNZero, target, boolSrc);
@@ -1960,8 +1957,7 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
   // TODO(t3730079): This block is probably redundant with the
   // fallthrough logic in translateRegion.  Try removing the guards
   // against conditional jumps there as well as this.
-  if (RuntimeOption::EvalHHIRBytecodeControlFlow
-      && m_irb->blockIsIncompatible(next)) {
+  if (genMode() == IRGenMode::CFG && m_irb->blockIsIncompatible(next)) {
     gen(Jmp, makeExit(next));
   }
 }
@@ -5388,8 +5384,8 @@ Block* HhbcTranslator::makeCatchNoSpill() {
 /*
  * Create a block corresponding to bytecode control flow.
  */
-Block* HhbcTranslator::makeBlock(Offset targetBcOff) {
-  return m_irb->makeBlock(targetBcOff);
+Block* HhbcTranslator::makeBlock(Offset offset) {
+  return m_irb->makeBlock(offset);
 }
 
 SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,

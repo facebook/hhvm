@@ -2125,8 +2125,7 @@ MCGenerator::translateTracelet(Tracelet& t) {
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
          ni = ni->next) {
       ht.setBcOff(ni->source.offset(),
-                  ni->breaksTracelet && !ht.isInlining(),
-                  true);
+                  ni->breaksTracelet && !ht.isInlining());
       readMetaData(metaHand, *ni, m_tx.irTrans()->hhbcTrans(),
                    m_tx.mode() == TransProfile, MetaMode::Legacy);
 

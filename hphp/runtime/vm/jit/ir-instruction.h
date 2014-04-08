@@ -331,6 +331,7 @@ struct IRInstruction {
   }
   const BCMarker& marker() const { return m_marker; }
   BCMarker& marker()             { return m_marker; }
+  Offset bcOffset()        const { return marker().bcOff; }
 
   std::string toString() const;
 

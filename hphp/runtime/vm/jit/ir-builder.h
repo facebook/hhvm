@@ -132,9 +132,9 @@ struct IRBuilder {
    */
 
   /*
-   * Start a new block using the current marker.
+   * Start the given block.
    */
-  void startBlock();
+  void startBlock(Block* block);
 
   /*
    * Create a new block corresponding to bytecode control flow.
@@ -159,6 +159,22 @@ struct IRBuilder {
    * Note that we've seen this offset as the start of a block.
    */
   void recordOffset(Offset offset);
+
+  /*
+   * Clear the map from bytecode offsets to Blocks.
+   */
+  void resetOffsetMapping();
+
+  /*
+   * Checks whether or not there's a block associated with the given
+   * bytecode offset.
+   */
+  bool hasBlock(Offset offset) const;
+
+  /*
+   * Set the block associated with the given offset in the offset->block map.
+   */
+  void setBlock(Offset offset, Block* block);
 
  public:
   /*

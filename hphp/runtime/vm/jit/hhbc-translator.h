@@ -39,6 +39,11 @@ namespace JIT {
 
 struct PropInfo;
 
+enum class IRGenMode {
+  Trace,
+  CFG,
+};
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -71,7 +76,10 @@ struct HhbcTranslator {
 
   // In between each emit* call, irtranslator indicates the new
   // bytecode offset (or whether we're finished) using this API.
-  void setBcOff(Offset newOff, bool lastBcOff, bool maybeStartBlock = false);
+  void setBcOff(Offset newOff, bool lastBcOff);
+
+  void      setGenMode(IRGenMode mode);
+  IRGenMode genMode() const { return m_mode; }
 
   // End a bytecode block and do the right thing with fallthrough.
   void endBlock(Offset next);
@@ -731,7 +739,7 @@ private: // Exit trace creation routines.
   /*
    * Create a block for a branch target that will be generated later.
    */
-  Block* makeBlock(Offset);
+  Block* makeBlock(Offset offset);
 
   /*
    * Implementation for the above.  Takes spillValues, target offset,
@@ -904,6 +912,8 @@ private:
    * is always matched with corresponding push()/pop().
    */
   std::stack<std::pair<SSATmp*,int32_t>> m_fpiActiveStack;
+
+  IRGenMode m_mode;
 };
 
 //////////////////////////////////////////////////////////////////////

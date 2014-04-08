@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
@@ -243,7 +244,11 @@ struct GuardType {
 
 typedef hphp_hash_map<Location,RuntimeType,Location> TypeMap;
 typedef hphp_hash_set<Location, Location> LocationSet;
-typedef hphp_hash_map<DynLocation*, GuardType>  DynLocTypeMap;
+typedef hphp_hash_map<DynLocation*, GuardType> DynLocTypeMap;
+typedef hphp_hash_map<RegionDesc::BlockId, Block*> BlockIdToIRBlockMap;
+typedef hphp_hash_map<RegionDesc::BlockId,
+                      RegionDesc::Block*> BlockIdToRegionBlockMap;
+
 
 
 const char* getTransKindName(TransKind kind);
@@ -403,6 +408,19 @@ private:
   RuntimeType liveType(const Cell* outer,
                        const Location& l,
                        bool specialize = false);
+
+  void createBlockMaps(const RegionDesc&        region,
+                       BlockIdToIRBlockMap&     blockIdToIRBlock,
+                       BlockIdToRegionBlockMap& blockIdToRegionBlock);
+
+  void setSuccIRBlocks(const RegionDesc&              region,
+                       RegionDesc::BlockId            srcBlockId,
+                       const BlockIdToIRBlockMap&     blockIdToIRBlock,
+                       const BlockIdToRegionBlockMap& blockIdToRegionBlock);
+
+  void setIRBlock(RegionDesc::BlockId            blockId,
+                  const BlockIdToIRBlockMap&     blockIdToIRBlock,
+                  const BlockIdToRegionBlockMap& blockIdToRegionBlock);
 
 public:
   enum TranslateResult {

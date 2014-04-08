@@ -1457,7 +1457,7 @@ class Redis {
       if (!isset($args[$i])) {
         if (isset($func['defaults']) AND
             array_key_exists($func['defaults'], $i)) {
-          $args[$i] = $func['defualts'][$i];
+          $args[$i] = $func['defaults'][$i];
         } else {
           trigger_error(
             "Redis::$fname requires at least $flen parameters $argc given",

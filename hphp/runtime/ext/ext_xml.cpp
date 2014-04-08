@@ -144,16 +144,16 @@ xml_encoding xml_encodings[] = {
 };
 
 static void *php_xml_malloc_wrapper(size_t sz) {
-  return malloc(sz);
+  return smart_malloc(sz);
 }
 
 static void *php_xml_realloc_wrapper(void *ptr, size_t sz) {
-  return realloc(ptr, sz);
+  return smart_realloc(ptr, sz);
 }
 
 static void php_xml_free_wrapper(void *ptr) {
-  if (ptr != NULL) {
-    free(ptr);
+  if (ptr) {
+    smart_free(ptr);
   }
 }
 

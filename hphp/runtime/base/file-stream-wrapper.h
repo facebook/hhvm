@@ -63,8 +63,6 @@ class FileStreamWrapper : public Stream::Wrapper {
     if (path.data()[7] == '/') { // not just file://, but file:///
       return true;
     }
-    raise_warning("Only hostless file::// URLs are supported: %s", path.data());
-    errno = ENOENT;
     return false;
   }
   virtual String TranslatePath(const String& filename) {

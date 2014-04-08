@@ -492,60 +492,87 @@ public:
         curl_httppost *last  = nullptr;
         for (ArrayIter iter(arr); iter; ++iter) {
           String key = iter.first().toString();
-          String val = iter.second().toString();
-          const char *postval = val.data();
+          Variant var_val = iter.second();
+          if (UNLIKELY(var_val.isObject()
+              && var_val.toObject()->instanceof(SystemLib::s_CURLFileClass))) {
+            Object val = var_val.toObject();
 
-          if (*postval == '@') {
-            /* Given a string like:
-             *   "@/foo/bar;type=herp/derp;filename=ponies\0"
-             * - Temporarily convert to:
-             *   "@/foo/bar\0type=herp/derp\0filename=ponies\0"
-             * - Pass pointers to the relevant null-terminated substrings to
-             *   curl_formadd
-             * - Revert changes to postval at the end
-             */
-            char* mutablePostval = const_cast<char*>(postval);
-            char* type = strstr(mutablePostval, ";type=");
-            char* filename = strstr(mutablePostval, ";filename=");
+            static const StaticString s_name("name");
+            static const StaticString s_mime("mime");
+            static const StaticString s_postname("postname");
 
-            if (type) {
-              *type = '\0';
-            }
-            if (filename) {
-              *filename = '\0';
-            }
+            String name = val.o_get(s_name).toString();
+            String mime = val.o_get(s_mime).toString();
+            String postname = val.o_get(s_postname).toString();
 
-            /* The arguments after _NAMELENGTH and _CONTENTSLENGTH
-             * must be explicitly cast to long in curl_formadd
-             * use since curl needs a long not an int. */
-            ++postval;
             m_error_no = (CURLcode)curl_formadd
               (&first, &last,
                CURLFORM_COPYNAME, key.data(),
                CURLFORM_NAMELENGTH, (long)key.size(),
-               CURLFORM_FILENAME, filename
-                                  ? filename + sizeof(";filename=") - 1
-                                  : postval,
-               CURLFORM_CONTENTTYPE, type
-                                     ? type + sizeof(";type=") - 1
-                                     : "application/octet-stream",
-               CURLFORM_FILE, postval,
+               CURLFORM_FILENAME, s_postname.empty()
+                                  ? name.c_str()
+                                  : postname.c_str(),
+               CURLFORM_CONTENTTYPE, mime.empty()
+                                     ? "application/octet-stream"
+                                     : mime.c_str(),
+               CURLFORM_FILE, name.c_str(),
                CURLFORM_END);
-
-            if (type) {
-              *type = ';';
-            }
-            if (filename) {
-              *filename = ';';
-            }
           } else {
-            m_error_no = (CURLcode)curl_formadd
-              (&first, &last,
-               CURLFORM_COPYNAME, key.data(),
-               CURLFORM_NAMELENGTH, (long)key.size(),
-               CURLFORM_COPYCONTENTS, postval,
-               CURLFORM_CONTENTSLENGTH,(long)val.size(),
-               CURLFORM_END);
+            String val = var_val.toString();
+            const char *postval = val.data();
+
+            if (*postval == '@') {
+              /* Given a string like:
+               *   "@/foo/bar;type=herp/derp;filename=ponies\0"
+               * - Temporarily convert to:
+               *   "@/foo/bar\0type=herp/derp\0filename=ponies\0"
+               * - Pass pointers to the relevant null-terminated substrings to
+               *   curl_formadd
+               * - Revert changes to postval at the end
+               */
+              char* mutablePostval = const_cast<char*>(postval);
+              char* type = strstr(mutablePostval, ";type=");
+              char* filename = strstr(mutablePostval, ";filename=");
+
+              if (type) {
+                *type = '\0';
+              }
+              if (filename) {
+                *filename = '\0';
+              }
+
+              /* The arguments after _NAMELENGTH and _CONTENTSLENGTH
+               * must be explicitly cast to long in curl_formadd
+               * use since curl needs a long not an int. */
+              ++postval;
+              m_error_no = (CURLcode)curl_formadd
+                (&first, &last,
+                 CURLFORM_COPYNAME, key.data(),
+                 CURLFORM_NAMELENGTH, (long)key.size(),
+                 CURLFORM_FILENAME, filename
+                                    ? filename + sizeof(";filename=") - 1
+                                    : postval,
+                 CURLFORM_CONTENTTYPE, type
+                                       ? type + sizeof(";type=") - 1
+                                       : "application/octet-stream",
+                 CURLFORM_FILE, postval,
+                 CURLFORM_END);
+
+              if (type) {
+                *type = ';';
+              }
+              if (filename) {
+                *filename = ';';
+              }
+            } else {
+              m_error_no = (CURLcode)curl_formadd
+                (&first, &last,
+                 CURLFORM_COPYNAME, key.data(),
+                 CURLFORM_NAMELENGTH, (long)key.size(),
+                 CURLFORM_COPYCONTENTS, postval,
+                 CURLFORM_CONTENTSLENGTH,(long)val.size(),
+                 CURLFORM_END);
+            }
           }
         }
 

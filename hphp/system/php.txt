@@ -80,6 +80,7 @@ hphp/system/php/array_map.hhas
 hphp/system/php/asio/Awaitable.php
 hphp/system/php/asio/InvalidOperationException.php
 hphp/system/php/collections/collections.ns.php
+hphp/system/php/curl/CURLFile.php
 hphp/system/php/date/dateperiod.php
 hphp/system/php/date/datetime_funcs.php
 hphp/system/php/dom/DOMException.php

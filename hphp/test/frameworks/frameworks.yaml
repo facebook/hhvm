@@ -93,9 +93,6 @@
     commit: 4de0618a01b34aa1c8c33a3f13f396dcd3882eba
     install_root: guzzle
     test_root: guzzle
-    blacklist:
-      # Will fatal until facebook/hhvm#1859 is fixed
-      - guzzle/tests/Guzzle/Tests/Http/Curl/CurlHandleTest.php
   idiorm:
     url: https://github.com/j4mie/idiorm.git
     branch: v1.4.1

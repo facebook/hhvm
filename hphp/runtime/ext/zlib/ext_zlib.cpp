@@ -58,13 +58,14 @@ static class ZlibStreamWrapper : public Stream::Wrapper {
       return NULL;
     }
 
-    if (MemFile* file = FileStreamWrapper::openFromCache(fname, mode)) {
+    String translated = File::TranslatePath(fname);
+    if (MemFile* file = PlainStreamWrapper::openFromCache(translated, mode)) {
       file->unzip();
       return file;
     }
 
     std::unique_ptr<ZipFile> file(NEWOBJ(ZipFile)());
-    bool ret = file->open(File::TranslatePath(fname), mode);
+    bool ret = file->open(translated, mode);
     if (!ret) {
       raise_warning("%s", file->getLastError().c_str());
       return NULL;

@@ -491,6 +491,21 @@ bool File::removeFilter(Resource& resource) {
   }
   for (auto it = m_writeFilters.begin(); it != m_writeFilters.end(); ++it) {
     if (it->get() == rd) {
+      std::list<Resource> closing_filters;
+      closing_filters.push_back(rd);
+      String result(applyFilters(empty_string,
+                                 closing_filters,
+                                 /* closing = */ true));
+      std::list<Resource> later_filters;
+      auto dupit(it);
+      for (++dupit; dupit != m_writeFilters.end(); ++dupit) {
+        later_filters.push_back(dupit->get());
+      }
+      result = applyFilters(result, later_filters, false);
+      if (!result.empty()) {
+        int64_t written = writeImpl(result.data(), result.size());
+        m_position += written;
+      }
       m_writeFilters.erase(it);
       return true;
     }
@@ -1002,21 +1017,22 @@ String File::getLastError() {
   return String(folly::errnoStr(errno).toStdString());
 }
 
+template<class ResourceList>
 String File::applyFilters(const String& buffer,
-                          smart::list<Resource>& filters,
+                          ResourceList& filters,
                           bool closing) {
   if (buffer.empty() && !closing) {
     return buffer;
   }
   Resource in(null_resource);
-  Resource out;(NEWOBJ(BucketBrigade));
+  Resource out;
   if (buffer.empty()) {
     out = Resource(NEWOBJ(BucketBrigade)());
   } else {
     out = Resource(NEWOBJ(BucketBrigade)(buffer));
   }
 
-  for (auto resource: filters) {
+  for (Resource& resource: filters) {
     in = out;
     out = Resource(NEWOBJ(BucketBrigade)());
 

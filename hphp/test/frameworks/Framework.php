@@ -284,7 +284,15 @@ class Framework {
     } else {
       $this->test_command .= " --debug";
     }
-    $this->test_command .= " --log-json %json_file%";
+    
+    $version = 0;
+    $version_string = shell_exec(get_runtime_build(). " --version");
+    if (preg_match('/\d+(?:\.\d+)+/', $version_string, $matches)) { 
+      $version = floatval($matches[0]); 
+    }
+    if ($version >= 4.0){
+      $this->test_command .= " --log-json %json_file%";
+    }
     if ($this->config_file !== null) {
       $this->test_command .= " -c ".$this->config_file;
     }

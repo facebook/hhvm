@@ -181,7 +181,7 @@ public:
   bool exists(int64_t k) const;
   bool exists(const StringData* k) const;
 
-  /**
+  /*
    * Interface for VM helpers.  ArrayData implements generic versions
    * using the other ArrayData api; subclasses may customize methods either
    * by providing a custom static method in g_array_funcs.
@@ -190,8 +190,8 @@ public:
    * be used for inner or outer cells.  (It's unclear if anything is
    * relying on this, but try not to in new code.)
    */
-  TypedValue* nvGet(int64_t k) const;
-  TypedValue* nvGet(const StringData* k) const;
+  const TypedValue* nvGet(int64_t k) const;
+  const TypedValue* nvGet(const StringData* k) const;
   void nvGetKey(TypedValue* out, ssize_t pos) const;
 
   // wrappers that call getValueRef()
@@ -465,8 +465,8 @@ struct ArrayFunctions {
   // NK stands for number of array kinds; here just for shorthand.
   static auto const NK = size_t(ArrayData::ArrayKind::kNumKinds);
   void (*release[NK])(ArrayData*);
-  TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
-  TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
+  const TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
+  const TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   void (*nvGetKey[NK])(const ArrayData*, TypedValue* out, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, const Variant& v, bool copy);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, const Variant& v, bool copy);

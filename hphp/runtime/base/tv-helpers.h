@@ -183,13 +183,13 @@ inline TypedValue* tvBox(TypedValue* tv) {
 
 // Assumes 'tv' is live
 // Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
-inline void tvIncRef(TypedValue* tv) {
+inline void tvIncRef(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   assert(IS_REFCOUNTED_TYPE(tv->m_type));
   tv->m_data.pstr->incRefCount();
 }
 
-ALWAYS_INLINE void tvRefcountedIncRef(TypedValue* tv) {
+ALWAYS_INLINE void tvRefcountedIncRef(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   if (IS_REFCOUNTED_TYPE(tv->m_type)) {
     tvIncRef(tv);

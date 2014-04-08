@@ -250,12 +250,17 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 
 #undef X
 
+  Variant HTTP_RAW_POST_DATA;
+  SCOPE_EXIT {
+    g->set(s_HTTP_RAW_POST_DATA.get(), HTTP_RAW_POST_DATA, false);
+  };
+
   StartRequest(SERVERarr);
   PrepareEnv(ENVarr, transport);
   PrepareRequestVariables(REQUESTarr,
                           GETarr,
                           POSTarr,
-                          tvAsVariant(g->nvGet(s_HTTP_RAW_POST_DATA.get())),
+                          HTTP_RAW_POST_DATA,
                           FILESarr,
                           COOKIEarr,
                           transport,

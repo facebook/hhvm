@@ -46,11 +46,12 @@ struct APCHandle;
 struct EmptyArray {
   static void Release(ArrayData*);
   static constexpr auto NvGetInt =
-    reinterpret_cast<TypedValue* (*)(const ArrayData*, int64_t)>(
+    reinterpret_cast<const TypedValue* (*)(const ArrayData*, int64_t)>(
       ArrayCommon::ReturnNull
     );
   static constexpr auto NvGetStr =
-    reinterpret_cast<TypedValue* (*)(const ArrayData*, const StringData*)>(
+    reinterpret_cast<const TypedValue* (*)(const ArrayData*,
+                                           const StringData*)>(
       ArrayCommon::ReturnNull
     );
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);

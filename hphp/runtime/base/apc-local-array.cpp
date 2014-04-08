@@ -267,19 +267,19 @@ ArrayData *APCLocalArray::Escalate(const ArrayData* ad) {
   return ret;
 }
 
-TypedValue* APCLocalArray::NvGetInt(const ArrayData* ad, int64_t k) {
+const TypedValue* APCLocalArray::NvGetInt(const ArrayData* ad, int64_t k) {
   auto a = asSharedArray(ad);
   auto index = a->getIndex(k);
   if (index == -1) return nullptr;
-  return const_cast<TypedValue*>(GetValueRef(a, index).asTypedValue());
+  return GetValueRef(a, index).asTypedValue();
 }
 
-TypedValue* APCLocalArray::NvGetStr(const ArrayData* ad,
+const TypedValue* APCLocalArray::NvGetStr(const ArrayData* ad,
                                     const StringData* key) {
   auto a = asSharedArray(ad);
   auto index = a->getIndex(key);
   if (index == -1) return nullptr;
-  return const_cast<TypedValue*>(GetValueRef(a, index).asTypedValue());
+  return GetValueRef(a, index).asTypedValue();
 }
 
 void APCLocalArray::NvGetKey(const ArrayData* ad,

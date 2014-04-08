@@ -734,8 +734,8 @@ TypedValue Class::getStaticPropInitVal(const SProp& prop) {
   return declCls->m_staticProperties[s].m_val;
 }
 
-Cell* Class::cnsNameToTV(const StringData* clsCnsName,
-                         Slot& clsCnsInd) const {
+const Cell* Class::cnsNameToTV(const StringData* clsCnsName,
+                               Slot& clsCnsInd) const {
   clsCnsInd = m_constants.findIndex(clsCnsName);
   if (clsCnsInd == kInvalidSlot) {
     return nullptr;
@@ -747,7 +747,7 @@ Cell* Class::cnsNameToTV(const StringData* clsCnsName,
 
 Cell Class::clsCnsGet(const StringData* clsCnsName) const {
   Slot clsCnsInd;
-  Cell* clsCns = cnsNameToTV(clsCnsName, clsCnsInd);
+  auto clsCns = cnsNameToTV(clsCnsName, clsCnsInd);
   if (!clsCns) return make_tv<KindOfUninit>();
   if (clsCns->m_type != KindOfUninit) {
     return *clsCns;

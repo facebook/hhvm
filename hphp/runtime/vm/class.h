@@ -752,7 +752,7 @@ struct Class : AtomicCountable {
    *
    * Returns nullptr if this class has no constant of the given name.
    */
-  Cell* cnsNameToTV(const StringData* name, Slot& slot) const;
+  const Cell* cnsNameToTV(const StringData* name, Slot& slot) const;
 
   /*
    * Provide the current runtime type of this class constant.  This

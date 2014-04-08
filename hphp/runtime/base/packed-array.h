@@ -52,9 +52,10 @@ struct MixedArray;
  */
 struct PackedArray {
   static void Release(ArrayData*);
-  static TypedValue* NvGetInt(const ArrayData*, int64_t ki);
+  static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
   static constexpr auto NvGetStr =
-    reinterpret_cast<TypedValue* (*)(const ArrayData*, const StringData*)>(
+    reinterpret_cast<const TypedValue* (*)(const ArrayData*,
+                                           const StringData*)>(
       ArrayCommon::ReturnNull
     );
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);

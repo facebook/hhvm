@@ -371,7 +371,7 @@ void PackedArray::Release(ArrayData* ad) {
   MM().objFreeLogged(ad, sizeof(ArrayData) + sizeof(TypedValue) * cap);
 }
 
-TypedValue* PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
+const TypedValue* PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   auto const data = packedData(ad);
   return LIKELY(size_t(ki) < ad->m_size) ? &data[ki] : nullptr;
 }

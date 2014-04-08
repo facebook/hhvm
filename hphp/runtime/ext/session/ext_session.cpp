@@ -1010,8 +1010,9 @@ public:
       if (has_value) {
         vu.set(p, endptr);
         try {
-          auto& sess = tvAsVariant(g->nvGet(s__SESSION.get()));
-          forceToArray(sess).set(key, vu.unserialize());
+          Variant* sessLval;
+          NameValueTableWrapper::LvalStr(g, s__SESSION.get(), sessLval, false);
+          forceToArray(*sessLval).set(key, vu.unserialize());
           p = vu.head();
         } catch (Exception &e) {
         }
@@ -1075,8 +1076,9 @@ public:
       if (has_value) {
         vu.set(q, endptr);
         try {
-          auto& sess = tvAsVariant(g->nvGet(s__SESSION.get()));
-          forceToArray(sess).set(key, vu.unserialize());
+          Variant* sessLval;
+          NameValueTableWrapper::LvalStr(g, s__SESSION.get(), sessLval, false);
+          forceToArray(*sessLval).set(key, vu.unserialize());
           q = vu.head();
         } catch (Exception &e) {
         }
@@ -1113,15 +1115,15 @@ public:
     Array params = Array::Create();
     params.append(value);
     Variant ret = vm_call_user_func("wddx_deserialize", params, true);
-    GlobalVariables *g = get_global_variables();
+    GlobalVariables* g = get_global_variables();
     if (ret.isArray()) {
       Array arr = ret.toArray();
-
       for (ArrayIter iter(arr); iter; ++iter) {
         Variant key = iter.first();
         Variant value = iter.second();
-        auto& sess = tvAsVariant(g->nvGet(s__SESSION.get()));
-        forceToArray(sess).set(key, value);
+        Variant* sessLval;
+        NameValueTableWrapper::LvalStr(g, s__SESSION.get(), sessLval, false);
+        forceToArray(*sessLval).set(key, value);
       }
     }
 
@@ -1854,8 +1856,8 @@ Variant f_session_unset() {
   if (PS(session_status) == Session::None) {
     return false;
   }
-  GlobalVariables *g = get_global_variables();
-  tvAsVariant(g->nvGet(s__SESSION.get())) = Variant();
+  auto const g = get_global_variables();
+  NameValueTableWrapper::SetStr(g, s__SESSION.get(), Variant(), false);
   return uninit_null();
 }
 

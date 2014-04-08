@@ -157,39 +157,35 @@ ALWAYS_INLINE void opPre(TypedValue*& base, DataType& type) {
   assert(cellIsPlausible(*base));
 }
 
-inline TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
-  TypedValue* result = base->nvGet(key);
-  return result ? result
-                : const_cast<TypedValue*>(null_variant.asTypedValue());
+inline const TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
+  auto const result = base->nvGet(key);
+  return result ? result : null_variant.asTypedValue();
 }
 
-inline TypedValue* ElemArrayPre(ArrayData* base, StringData* key) {
+inline const TypedValue* ElemArrayPre(ArrayData* base, StringData* key) {
   int64_t n;
-  TypedValue* result = !key->isStrictlyInteger(n) ? base->nvGet(key) :
-                       base->nvGet(n);
-  return result ? result
-                : const_cast<TypedValue*>(null_variant.asTypedValue());
+  auto const result = !key->isStrictlyInteger(n) ? base->nvGet(key)
+                                                 : base->nvGet(n);
+  return result ? result : null_variant.asTypedValue();
 }
 
-inline TypedValue* ElemArrayPre(ArrayData* base, TypedValue key) {
+inline const TypedValue* ElemArrayPre(ArrayData* base, TypedValue key) {
   auto dt = key.m_type;
   if (dt == KindOfInt64)  return ElemArrayPre(base, key.m_data.num);
   if (IS_STRING_TYPE(dt)) return ElemArrayPre(base, key.m_data.pstr);
-
-  return const_cast<TypedValue*>(ArrNR(base).asArray()
-                                            .rvalAtRef(cellAsCVarRef(key))
-                                            .asTypedValue());
+  return ArrNR(base).asArray().rvalAtRef(cellAsCVarRef(key)).asTypedValue();
 }
 
 /**
  * Elem when base is an Array
  */
 template <bool warn, KeyType keyType>
-inline TypedValue* ElemArray(ArrayData* base, key_type<keyType> key) {
-  auto* result = ElemArrayPre(base, key);
+inline const TypedValue* ElemArray(ArrayData* base, key_type<keyType> key) {
+  auto result = ElemArrayPre(base, key);
 
+  // TODO(#3888164): this KindOfUninit check should not be necessary
   if (UNLIKELY(result->m_type == KindOfUninit)) {
-    result = const_cast<TypedValue*>(init_null_variant.asTypedValue());
+    result = init_null_variant.asTypedValue();
     if (warn) {
       auto scratch = initScratchKey(key);
       raise_notice(Strings::UNDEFINED_INDEX,
@@ -203,14 +199,14 @@ inline TypedValue* ElemArray(ArrayData* base, key_type<keyType> key) {
 /**
  * Elem when base is Null
  */
-inline TypedValue* ElemEmptyish() {
-  return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+inline const TypedValue* ElemEmptyish() {
+  return init_null_variant.asTypedValue();
 }
 
 /**
  * Elem when base is an Int64 or Double
  */
-inline TypedValue* ElemNumberish() {
+inline const TypedValue* ElemNumberish() {
   if (RuntimeOption::EnableHipHopSyntax) {
     raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   }
@@ -220,7 +216,7 @@ inline TypedValue* ElemNumberish() {
 /**
  * Elem when base is a Boolean
  */
-inline TypedValue* ElemBoolean(TypedValue* base) {
+inline const TypedValue* ElemBoolean(TypedValue* base) {
   if (base->m_data.num) {
     return ElemNumberish();
   }
@@ -250,8 +246,9 @@ inline int64_t ElemStringPre(TypedValue key) {
  * Elem when base is a String
  */
 template <bool warn, KeyType keyType>
-inline TypedValue* ElemString(TypedValue& tvScratch, TypedValue* base,
-                              key_type<keyType> key) {
+inline const TypedValue* ElemString(TypedValue& tvScratch,
+                                    TypedValue* base,
+                                    key_type<keyType> key) {
   auto offset = ElemStringPre(key);
 
   if (offset < 0 || offset >= base->m_data.pstr->size()) {
@@ -273,8 +270,9 @@ inline TypedValue* ElemString(TypedValue& tvScratch, TypedValue* base,
  * Elem when base is an Object
  */
 template <bool warn, KeyType keyType>
-inline TypedValue* ElemObject(TypedValue& tvRef, TypedValue* base,
-                              key_type<keyType> key) {
+inline const TypedValue* ElemObject(TypedValue& tvRef,
+                                    TypedValue* base,
+                                    key_type<keyType> key) {
   TypedValue scratch = initScratchKey(key);
 
   if (LIKELY(base->m_data.pobj->isCollection())) {
@@ -296,8 +294,10 @@ inline TypedValue* ElemObject(TypedValue& tvRef, TypedValue* base,
  * $result = $base[$key];
  */
 template <bool warn, KeyType keyType>
-NEVER_INLINE TypedValue* ElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
-                                  TypedValue* base, key_type<keyType> key) {
+NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvScratch,
+                                        TypedValue& tvRef,
+                                        TypedValue* base,
+                                        key_type<keyType> key) {
   DataType type;
   opPre(base, type);
   switch (type) {
@@ -326,8 +326,8 @@ NEVER_INLINE TypedValue* ElemSlow(TypedValue& tvScratch, TypedValue& tvRef,
  * Fast path for Elem assuming base is an Array
  */
 template <bool warn, KeyType keyType = KeyType::Any>
-inline TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
-                        TypedValue* base, key_type<keyType> key) {
+inline const TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
+                              TypedValue* base, key_type<keyType> key) {
   if (LIKELY(base->m_type == KindOfArray)) {
     return ElemArray<warn, keyType>(base->m_data.parr, key);
   }
@@ -1645,7 +1645,7 @@ inline bool IssetEmptyElemString(TypedValue& tvScratch, TypedValue* base,
  */
 template <bool useEmpty, KeyType keyType>
 inline bool IssetEmptyElemArray(TypedValue* base, key_type<keyType> key) {
-  TypedValue* result = ElemArray<false, keyType>(base->m_data.parr, key);
+  auto const result = ElemArray<false, keyType>(base->m_data.parr, key);
   if (useEmpty) {
     return !cellToBool(*tvToCell(result));
   }

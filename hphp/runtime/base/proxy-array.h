@@ -50,8 +50,8 @@ public: // ArrayData implementation
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
 
-  static TypedValue* NvGetInt(const ArrayData*, int64_t k);
-  static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
+  static const TypedValue* NvGetInt(const ArrayData*, int64_t k);
+  static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
 
   static ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& ret, bool copy);
   static ArrayData* LvalStr(ArrayData*, StringData* k, Variant*& ret,

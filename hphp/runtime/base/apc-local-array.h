@@ -78,8 +78,8 @@ struct APCLocalArray : ArrayData, private Sweepable {
   static ArrayData* PlusEq(ArrayData*, const ArrayData *elems);
   static ArrayData* Merge(ArrayData*, const ArrayData *elems);
   static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
-  static TypedValue* NvGetInt(const ArrayData*, int64_t k);
-  static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
+  static const TypedValue* NvGetInt(const ArrayData*, int64_t k);
+  static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static bool IsVectorData(const ArrayData* ad);
   static ssize_t IterBegin(const ArrayData*);

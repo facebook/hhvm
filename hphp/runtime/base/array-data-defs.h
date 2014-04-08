@@ -155,11 +155,11 @@ inline ArrayData* ArrayData::appendWithRef(const Variant& v, bool copy) {
   return g_array_funcs.appendWithRef[m_kind](this, v, copy);
 }
 
-inline TypedValue* ArrayData::nvGet(int64_t ikey) const {
+inline const TypedValue* ArrayData::nvGet(int64_t ikey) const {
   return g_array_funcs.nvGetInt[m_kind](this, ikey);
 }
 
-inline TypedValue* ArrayData::nvGet(const StringData* skey) const {
+inline const TypedValue* ArrayData::nvGet(const StringData* skey) const {
   return g_array_funcs.nvGetStr[m_kind](this, skey);
 }
 

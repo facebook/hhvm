@@ -2405,7 +2405,7 @@ const ClassInfo* ExecutionContext::findTraitInfo(const String& name) {
 
 const ClassInfo::ConstantInfo* ExecutionContext::findConstantInfo(
     const String& name) {
-  TypedValue* tv = Unit::lookupCns(name.get());
+  auto const tv = Unit::lookupCns(name.get());
   if (tv == nullptr) {
     return nullptr;
   }
@@ -3403,7 +3403,12 @@ OPTBLD_INLINE bool ExecutionContext::memberHelperPre(
       } else if (define) {
         result = ElemD<warn,reffy>(tvScratch, tvRef, base, *curMember);
       } else {
-        result = Elem<warn>(tvScratch, tvRef, base, *curMember);
+        result =
+          // We're not really going to modify it in the non-D case, so
+          // this is safe.
+          const_cast<TypedValue*>(
+            Elem<warn>(tvScratch, tvRef, base, *curMember)
+          );
       }
       break;
     case MPL:
@@ -3777,7 +3782,7 @@ OPTBLD_INLINE void ExecutionContext::iopColAddElemC(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopCns(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(s);
-  TypedValue* cns = Unit::loadCns(s);
+  auto const cns = Unit::loadCns(s);
   if (cns == nullptr) {
     raise_notice(Strings::UNDEFINED_CONSTANT, s->data(), s->data());
     m_stack.pushStaticString(s);
@@ -3790,7 +3795,7 @@ OPTBLD_INLINE void ExecutionContext::iopCns(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopCnsE(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(s);
-  TypedValue* cns = Unit::loadCns(s);
+  auto const cns = Unit::loadCns(s);
   if (cns == nullptr) {
     raise_error("Undefined constant '%s'", s->data());
   }
@@ -3802,7 +3807,7 @@ OPTBLD_INLINE void ExecutionContext::iopCnsU(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(name);
   DECODE_LITSTR(fallback);
-  TypedValue* cns = Unit::loadCns(name);
+  auto cns = Unit::loadCns(name);
   if (cns == nullptr) {
     cns = Unit::loadCns(fallback);
     if (cns == nullptr) {

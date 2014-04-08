@@ -137,7 +137,7 @@ extern const ArrayFunctions g_array_funcs = {
   DISPATCH(Release)
 
   /*
-   * TypedValue* NvGetInt(const ArrayData*, int64_t key)
+   * const TypedValue* NvGetInt(const ArrayData*, int64_t key)
    *
    *   Lookup a value in an array using an integer key.  Returns
    *   nullptr if the key is not in the array.
@@ -145,7 +145,7 @@ extern const ArrayFunctions g_array_funcs = {
   DISPATCH(NvGetInt)
 
   /*
-   * TypedValue* NvGetStr(const ArrayData*, const StringData*)
+   * const TypedValue* NvGetStr(const ArrayData*, const StringData*)
    *
    *   Lookup a value in an array using a string key.  The string key
    *   must not be an integer-like string.  Returns nullptr if the key

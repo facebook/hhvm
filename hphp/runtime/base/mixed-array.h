@@ -257,8 +257,8 @@ public:
 
   // nvGet returns a pointer to the value if the specified key is in the
   // array, NULL otherwise.
-  static TypedValue* NvGetInt(const ArrayData*, int64_t ki);
-  static TypedValue* NvGetStr(const ArrayData*, const StringData* k);
+  static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
+  static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
 
   /**

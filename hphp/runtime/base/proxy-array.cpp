@@ -91,12 +91,12 @@ ProxyArray::ExistsStr(const ArrayData* ad, const StringData* k) {
   return innerArr(ad)->exists(k);
 }
 
-TypedValue*
+const TypedValue*
 ProxyArray::NvGetStr(const ArrayData* ad, const StringData* k) {
   return innerArr(ad)->nvGet(k);
 }
 
-TypedValue* ProxyArray::NvGetInt(const ArrayData* ad, int64_t k) {
+const TypedValue* ProxyArray::NvGetInt(const ArrayData* ad, int64_t k) {
   return innerArr(ad)->nvGet(k);
 }
 

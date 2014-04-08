@@ -954,7 +954,7 @@ void Unit::initialMerge() {
   }
 }
 
-Cell* Unit::lookupCns(const StringData* cnsName) {
+const Cell* Unit::lookupCns(const StringData* cnsName) {
   auto const handle = lookupCnsHandle(cnsName);
   if (LIKELY(handle != 0)) {
     TypedValue& tv = RDS::handleToRef<TypedValue>(handle);
@@ -979,7 +979,7 @@ Cell* Unit::lookupCns(const StringData* cnsName) {
   return nullptr;
 }
 
-Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
+const Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
   auto const handle = lookupCnsHandle(cnsName);
   if (!RDS::isPersistentHandle(handle)) return nullptr;
   auto const ret = &RDS::handleToRef<TypedValue>(handle);
@@ -987,8 +987,8 @@ Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
   return ret;
 }
 
-TypedValue* Unit::loadCns(const StringData* cnsName) {
-  TypedValue* tv = lookupCns(cnsName);
+const TypedValue* Unit::loadCns(const StringData* cnsName) {
+  auto const tv = lookupCns(cnsName);
   if (LIKELY(tv != nullptr)) return tv;
 
   if (needsNSNormalization(cnsName)) {

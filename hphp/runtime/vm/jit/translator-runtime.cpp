@@ -418,7 +418,7 @@ int64_t ak_exist_int_obj(ObjectData* obj, int64_t key) {
 }
 
 ALWAYS_INLINE
-TypedValue& getDefaultIfNullCell(TypedValue* tv, TypedValue& def) {
+TypedValue getDefaultIfNullCell(const TypedValue* tv, TypedValue& def) {
   if (UNLIKELY(nullptr == tv)) {
     // DecRef of def is done unconditionally by the IR, since there's
     // a good chance it will be paired with an IncRef and optimized
@@ -426,7 +426,7 @@ TypedValue& getDefaultIfNullCell(TypedValue* tv, TypedValue& def) {
     tvRefcountedIncRef(&def);
     return def;
   }
-  TypedValue* ret = tvToCell(tv);
+  auto const ret = tvToCell(tv);
   tvRefcountedIncRef(ret);
   return *ret;
 }
@@ -557,7 +557,7 @@ Cell lookupCnsHelper(const TypedValue* tv,
     }
   }
 
-  Cell *cns = nullptr;
+  const Cell* cns = nullptr;
   if (UNLIKELY(RDS::s_constants().get() != nullptr)) {
     cns = RDS::s_constants()->nvGet(nm);
   }
@@ -618,7 +618,7 @@ void lookupClsMethodHelper(Class* cls,
 Cell lookupCnsUHelper(const TypedValue* tv,
                       StringData* nm,
                       StringData* fallback) {
-  Cell *cns = nullptr;
+  const Cell* cns = nullptr;
   Cell c1;
 
   // lookup qualified name in thread-local constants

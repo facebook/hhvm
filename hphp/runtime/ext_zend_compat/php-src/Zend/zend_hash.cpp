@@ -147,7 +147,7 @@ ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLen
   }
   assert(arKey[nKeyLength - 1] == '\0');
   HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
-  auto val = ht->nvGet(key.get());
+  auto val = const_cast<HPHP::TypedValue*>(ht->nvGet(key.get())); // FIXME
   if (!val) {
     return FAILURE;
   }
@@ -162,7 +162,7 @@ ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, uint n
 }
 
 ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData) {
-  auto val = ht->nvGet(h);
+  auto val = const_cast<HPHP::TypedValue*>(ht->nvGet(h)); // FIXME: broken
   if (!val) {
     return FAILURE;
   }

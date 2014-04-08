@@ -470,26 +470,22 @@ Array ObjectData::o_toIterArray(const String& context,
       // property with a non-string name.
       if (UNLIKELY(!IS_STRING_TYPE(key.m_type))) {
         assert(key.m_type == KindOfInt64);
-        TypedValue* val = dynProps->get()->nvGet(key.m_data.num);
         if (getRef) {
-          if (val->m_type != KindOfRef) {
-            tvBox(val);
-          }
-          retArray.setRef(key.m_data.num, tvAsVariant(val));
+          auto& lval = dynProps->lvalAt(key.m_data.num);
+          retArray.setRef(key.m_data.num, lval);
         } else {
+          auto const val = dynProps->get()->nvGet(key.m_data.num);
           retArray.set(key.m_data.num, tvAsCVarRef(val));
         }
         continue;
       }
 
-      StringData* strKey = key.m_data.pstr;
-      TypedValue* val = dynProps->get()->nvGet(strKey);
+      auto const strKey = key.m_data.pstr;
       if (getRef) {
-        if (val->m_type != KindOfRef) {
-          tvBox(val);
-        }
-        retArray.setRef(StrNR(strKey), tvAsVariant(val), true /* isKey */);
+        auto& lval = dynProps->lvalAt(StrNR(strKey), AccessFlags::Key);
+        retArray.setRef(StrNR(strKey), lval, true /* isKey */);
       } else {
+        auto const val = dynProps->get()->nvGet(strKey);
         retArray.set(StrNR(strKey), tvAsCVarRef(val), true /* isKey */);
       }
       decRefStr(strKey);
@@ -1053,7 +1049,12 @@ TypedValue* ObjectData::getProp(Class* ctx, const StringData* key,
       // don't appear in the dynamic property array).
       visible = true;
       accessible = true;
-      return prop;
+      // We are using an HphpArray for storage, but not really
+      // treating it as a normal array, so this cast is safe in this
+      // situation.
+      assert(!dynPropArray()->hasMultipleRefs());
+      assert(dynPropArray()->isMixed());
+      return const_cast<TypedValue*>(prop);
     }
   }
 
@@ -1754,24 +1755,20 @@ void ObjectData::cloneSet(ObjectData* clone) {
       TypedValue key;
       props->nvGetKey(&key, iter);
 
-      TypedValue* val;
+      const TypedValue* val;
       TypedValue* ret;
       switch (key.m_type) {
       case HPHP::KindOfString: {
         StringData* str = key.m_data.pstr;
         val = props->nvGet(str);
-        ret = reinterpret_cast<TypedValue*>(
-          &cloneProps.lvalAt(String(str), AccessFlags::Key)
-        );
+        ret = cloneProps.lvalAt(String(str), AccessFlags::Key).asTypedValue();
         decRefStr(str);
         break;
       }
       case HPHP::KindOfInt64: {
         int64_t num = key.m_data.num;
         val = props->nvGet(num);
-        ret = reinterpret_cast<TypedValue*>(
-          &cloneProps.lvalAt(num, AccessFlags::Key)
-        );
+        ret = cloneProps.lvalAt(num, AccessFlags::Key).asTypedValue();
         break;
       }
       default:

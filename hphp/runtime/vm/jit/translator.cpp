@@ -582,10 +582,8 @@ predictOutputs(const NormalizedInstruction* ni) {
       ni->op() == OpCnsE ||
       ni->op() == OpCnsU) {
     StringData* sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
-    TypedValue* tv = Unit::lookupCns(sd);
-    if (tv) {
-      return tv->m_type;
-    }
+    auto const tv = Unit::lookupCns(sd);
+    if (tv) return tv->m_type;
   }
 
   if (ni->op() == OpMod) {

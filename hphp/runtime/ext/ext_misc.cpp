@@ -180,8 +180,8 @@ Variant f_constant(const String& name) {
     }
     raise_warning("Couldn't find constant %s", data);
   } else {
-    auto cns = Unit::loadCns(name.get());
-    if (cns) return tvAsVariant(cns);
+    auto const cns = Unit::loadCns(name.get());
+    if (cns) return tvAsCVarRef(cns);
   }
 
   return uninit_null();

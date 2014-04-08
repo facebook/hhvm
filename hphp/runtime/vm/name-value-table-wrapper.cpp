@@ -81,12 +81,13 @@ NameValueTableWrapper::ExistsStr(const ArrayData* ad, const StringData* k) {
   return asNVTW(ad)->m_tab->lookup(k) != nullptr;
 }
 
-TypedValue*
+const TypedValue*
 NameValueTableWrapper::NvGetStr(const ArrayData* ad, const StringData* k) {
   return asNVTW(ad)->m_tab->lookup(k);
 }
 
-TypedValue* NameValueTableWrapper::NvGetInt(const ArrayData* ad, int64_t k) {
+const TypedValue*
+NameValueTableWrapper::NvGetInt(const ArrayData* ad, int64_t k) {
   return asNVTW(ad)->m_tab->lookup(String(k).get());
 }
 

@@ -384,7 +384,7 @@ bool c_XMLWriter::t_startelement(const String& name) {
 }
 
 bool c_XMLWriter::t_startelementns(const Variant& prefix, const String& name,
-                                   const String& uri) {
+                                   const Variant& uri) {
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid element name: %s", name.data());
     return false;
@@ -396,14 +396,19 @@ bool c_XMLWriter::t_startelementns(const Variant& prefix, const String& name,
     // because null strings are coerced to empty strings automatically.
     xmlChar * prefixData = prefix.isNull()
       ? nullptr : (xmlChar *)prefix.toString().data();
+    // And same for URI
+    xmlChar* uriData = uri.isNull()
+      ? nullptr : (xmlChar *)uri.toString().data();
     ret = xmlTextWriterStartElementNS(m_ptr, prefixData,
                                       (xmlChar*)name.data(),
-                                      (xmlChar*)uri.data());
+                                      uriData);
   }
   return ret != -1;
 }
 
-bool c_XMLWriter::t_writeelementns(const String& prefix, const String& name, const String& uri,
+bool c_XMLWriter::t_writeelementns(const Variant& prefix,
+                                   const String& name,
+                                   const Variant& uri,
                                    const String& content /* = null_string */) {
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid element name: %s", name.data());
@@ -411,17 +416,21 @@ bool c_XMLWriter::t_writeelementns(const String& prefix, const String& name, con
   }
   int ret = -1;
   if (m_ptr) {
+    xmlChar* prefixData = prefix.isNull()
+      ? nullptr : (xmlChar *)prefix.toString().data();
+    xmlChar* uriData = uri.isNull()
+      ? nullptr : (xmlChar *)uri.toString().data();
     if (content.isNull()) {
-      ret = xmlTextWriterStartElementNS(m_ptr, (xmlChar*)prefix.data(),
+      ret = xmlTextWriterStartElementNS(m_ptr, prefixData,
                                         (xmlChar*)name.data(),
-                                        (xmlChar*)uri.data());
+                                        uriData);
       if (ret == -1) return false;
       ret = xmlTextWriterEndElement(m_ptr);
       if (ret == -1) return false;
     } else {
-      ret = xmlTextWriterWriteElementNS(m_ptr, (xmlChar*)prefix.data(),
+      ret = xmlTextWriterWriteElementNS(m_ptr, prefixData,
                                         (xmlChar*)name.data(),
-                                        (xmlChar*)uri.data(),
+                                        uriData,
                                         (xmlChar*)content.data());
     }
   }

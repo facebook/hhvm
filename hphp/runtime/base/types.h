@@ -75,11 +75,11 @@ class VariableUnserializer;
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef USE_LOWPTR
-constexpr auto use_lowptr = true;
+constexpr bool use_lowptr = true;
 
 typedef LowPtr<Class, uint32_t> LowClassPtr;
 #else
-constexpr auto use_lowptr = false;
+constexpr bool use_lowptr = false;
 
 typedef Class* LowClassPtr;
 #endif

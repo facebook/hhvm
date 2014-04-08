@@ -2061,6 +2061,12 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
 Translator::TranslateResult
 MCGenerator::translateTracelet(Tracelet& t) {
+  if (RuntimeOption::EvalJitRegionSelector != "") {
+    // In order to properly simulate a post-Tracelet world, refuse to translate
+    // Tracelets when a region selector is active.
+    return Translator::Failure;
+  }
+
   Timer _t(Timer::translateTracelet);
 
   FTRACE(2, "attempting to translate tracelet:\n{}\n", t.toString());

@@ -376,6 +376,110 @@ Guzzle\Tests\Http\CommaAggregatorTest::testAggregates
 .
 Guzzle\Tests\Http\CommaAggregatorTest::testEncodes
 .
+Guzzle\Tests\Http\Curl\CurlHandleTest::testAccountsForMissingStdErr
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testAddsCustomCurlOptions
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testAllowsCurloptEncodingToBeSet
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testAllowsWireTransferInfoToBeEnabled
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testCanSendBodyAsString
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testCanSendPostBodyAsString
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testConstructorExpectsCurlResource
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testConstructorExpectsProperOptions
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testConstructorInitializesObject
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testCurlConfigurationOptionsAreSet
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testDeterminesIfResourceIsAvailable
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testEnsuresRequestsHaveResponsesWhenUpdatingFromTransfer
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #0
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #1
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #10
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #11
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #12
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #13
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #14
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #15
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #16
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #2
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #3
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #4
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #5
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #6
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #7
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #8
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryCreatesCurlBasedOnRequest with data set #9
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testFactoryUsesSpecifiedProtocol
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testGetInfoWithoutDebugMode
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testParseCurlConfigConvertsStringKeysToConstantKeys with data set #0
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testParseCurlConfigConvertsStringKeysToConstantKeys with data set #1
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testParseCurlConfigConvertsStringKeysToConstantKeys with data set #2
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testSeeksToBeginningOfStreamWhenSending
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsExpectHeaderWhenSizeIsGreaterThanCutoff
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsPostFieldsForNonPostRequests
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsPostFilesForNonPostRequests
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsPostRequestsWithFields
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsPostRequestsWithFiles
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsPostUploadsWithContentDispositionHeaders
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsRequestsWithNoBodyUsingContentLengthZero with data set #0
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsRequestsWithNoBodyUsingContentLengthZero with data set #1
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testSendsRequestsWithNoBodyUsingContentLengthZero with data set #2
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testSetsCurloptEncodingWhenAcceptEncodingHeaderIsSet
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testStoresCurlErrorNumber
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testStoresStdErr
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testUploadsPutData
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testUploadsPutDataUsingChunkedEncodingWhenForced
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testUploadsPutDataUsingChunkedEncodingWhenLengthCannotBeDetermined
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testWrapsCurlOptions
+.
+Guzzle\Tests\Http\Curl\CurlHandleTest::testWrapsErrorsAndInfo
+.
 Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testAddingRequestsAddsToQueue
 .
 Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testConstructorSetsMaxHandles
@@ -385,47 +489,47 @@ Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testResetClearsState
 Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testSendWillSendQueuedRequestsFirst
 .
 Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testTrimsDownMaxHandleCount
-E
+.
 Guzzle\Tests\Http\Curl\CurlMultiTest::testCatchesExceptionsBeforeSendingMultipleRequests
 .
 Guzzle\Tests\Http\Curl\CurlMultiTest::testCatchesExceptionsBeforeSendingSingleRequest
 .
 Guzzle\Tests\Http\Curl\CurlMultiTest::testCatchesExceptionsWhenRemovingQueuedRequests
-E
+.
 Guzzle\Tests\Http\Curl\CurlMultiTest::testCatchesExceptionsWhenRemovingQueuedRequestsBeforeSending
-E
+.
 Guzzle\Tests\Http\Curl\CurlMultiTest::testConstructorCreateMultiHandle
 .
 Guzzle\Tests\Http\Curl\CurlMultiTest::testCurlErrorsAreCaught
 .
 Guzzle\Tests\Http\Curl\CurlMultiTest::testDestructorClosesMultiHandle
-F
+.
 Guzzle\Tests\Http\Curl\CurlMultiTest::testDoesNotCatchRandomExceptionsThrownDuringPerform
 .
 Guzzle\Tests\Http\Curl\CurlMultiTest::testDoesNotSendRequestsDecliningToBeSent
 .
 Guzzle\Tests\Http\Curl\CurlMultiTest::testDoesNotThrowExceptionsWhenRequestsRecoverWithRetry
-E
+.
 Guzzle\Tests\Http\Curl\CurlMultiTest::testDoesNotThrowExceptionsWhenRequestsRecoverWithSuccess
 .
 Guzzle\Tests\Http\Curl\CurlMultiTest::testHardResetReopensMultiHandle
 .
 Guzzle\Tests\Http\Curl\CurlMultiTest::testRemovesConflictingTransferEncodingHeader
-E
+.
 Guzzle\Tests\Http\Curl\CurlMultiTest::testRemovesQueuedRequests
 .
 Guzzle\Tests\Http\Curl\CurlMultiTest::testRemovesQueuedRequestsAddedInTransit
-E
+.
 Guzzle\Tests\Http\Curl\CurlMultiTest::testRequestBeforeSendIncludesContentLengthHeaderIfEmptyBody
-E
+.
 Guzzle\Tests\Http\Curl\CurlMultiTest::testRequestsCanBeAddedAndCounted
 .
 Guzzle\Tests\Http\Curl\CurlMultiTest::testRequestsCanBeRemoved
 .
 Guzzle\Tests\Http\Curl\CurlMultiTest::testSendsRequestsThroughCurl
-E
+.
 Guzzle\Tests\Http\Curl\CurlMultiTest::testSendsThroughCurlAndAggregatesRequestExceptions
-F
+.
 Guzzle\Tests\Http\Curl\CurlMultiTest::testThrowsMeaningfulExceptionsForCurlMultiErrors
 .
 Guzzle\Tests\Http\Curl\CurlMultiTest::testsResetRemovesRequestsAndResetsState
@@ -445,7 +549,7 @@ Guzzle\Tests\Http\DuplicateAggregatorTest::testEncodes
 Guzzle\Tests\Http\EntityBodyTest::testAllowsCustomRewind
 .
 Guzzle\Tests\Http\EntityBodyTest::testCreatesMd5Checksum
-F
+.
 Guzzle\Tests\Http\EntityBodyTest::testCustomRewindFunctionMustBeCallable
 .
 Guzzle\Tests\Http\EntityBodyTest::testDeterminesContentType
@@ -463,7 +567,7 @@ Guzzle\Tests\Http\EntityBodyTest::testFactoryThrowsException
 Guzzle\Tests\Http\EntityBodyTest::testGetTypeFormBodyFactoring
 .
 Guzzle\Tests\Http\EntityBodyTest::testHandlesCompression
-F
+.
 Guzzle\Tests\Http\EntityBodyTest::testSeeksToOriginalPosAfterMd5
 .
 Guzzle\Tests\Http\Exception\CurlExceptionTest::testStoresCurlError
@@ -529,7 +633,7 @@ Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testAllowsNestedPostData
 Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testCanDisableRedirects
 .
 Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testCanSendMultipleRequestsUsingASingleRequestObject
-F
+.
 Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testCanSetBodyWithoutOverridingContentType
 .
 Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testConstructorConfiguresRequest
@@ -579,11 +683,11 @@ Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testSettingExpectHeaderCut
 Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testStrictRedirectsCanBeSpecifiedOnEntityEnclosingRequests
 .
 Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testThrowsExceptionWhenContentLengthCannotBeDeterminedAndUsingHttp1
-F
+.
 Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testThrowsExceptionWhenNonStringsAreAddedToPost
 .
 Guzzle\Tests\Http\Message\EntityEnclosingRequestTest::testUsesChunkedTransferWhenBodyLengthCannotBeDetermined
-E
+.
 Guzzle\Tests\Http\Message\HeaderTest::testAllowsArrayInConstructor
 .
 Guzzle\Tests\Http\Message\HeaderTest::testAllowsFalseyValues
@@ -657,7 +761,7 @@ Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanDisableExceptions
 Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanDisableExceptionsWithErrorListener
 .
 Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanDisableRedirects
-E
+.
 Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanSetBodyOption
 .
 Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCanSetConnectTimeoutOption
@@ -697,7 +801,7 @@ Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesHeadAndDeleteReques
 Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesHttpMessagesWithBodiesAndNormalizesLineEndings
 .
 Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesNewGetRequests
-E
+.
 Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesNewPostRequestWithFields
 .
 Guzzle\Tests\Http\Message\HttpRequestFactoryTest::testCreatesNewPutRequestWithBody
@@ -737,19 +841,19 @@ Guzzle\Tests\Http\Message\PostFileTest::testCanChangeFieldName
 Guzzle\Tests\Http\Message\PostFileTest::testConstructorConfiguresPostFile
 .
 Guzzle\Tests\Http\Message\PostFileTest::testContentDispositionFilePathIsStripped
-E
+.
 Guzzle\Tests\Http\Message\PostFileTest::testEnsuresFileIsReadable
 .
 Guzzle\Tests\Http\Message\PostFileTest::testRemovesLeadingAtSymbolFromPath
 .
 Guzzle\Tests\Http\Message\PostFileTest::testReturnsCurlValueString
-E
+.
 Guzzle\Tests\Http\Message\PostFileTest::testReturnsCurlValueStringAndPostname
-E
+.
 Guzzle\Tests\Http\Message\RequestTest::testAllowsFilenameForDownloadingContent
 .
 Guzzle\Tests\Http\Message\RequestTest::testCanOverrideUnsuccessfulResponses
-F
+.
 Guzzle\Tests\Http\Message\RequestTest::testCanRetrieveUrlObject
 .
 Guzzle\Tests\Http\Message\RequestTest::testCanSendCustomRequests
@@ -787,7 +891,7 @@ Guzzle\Tests\Http\Message\RequestTest::testRecognizesBasicAuthCredentialsInUrls
 Guzzle\Tests\Http\Message\RequestTest::testRequestCanBeSentUsingCurl
 .
 Guzzle\Tests\Http\Message\RequestTest::testRequestCanHaveManuallySetResponseBody
-E
+.
 Guzzle\Tests\Http\Message\RequestTest::testRequestHandlesAuthorization
 .
 Guzzle\Tests\Http\Message\RequestTest::testRequestHasHost
@@ -807,7 +911,7 @@ Guzzle\Tests\Http\Message\RequestTest::testRequestHasScheme
 Guzzle\Tests\Http\Message\RequestTest::testRequestHasState
 .
 Guzzle\Tests\Http\Message\RequestTest::testRequestStringsIncludeAuth
-E
+.
 Guzzle\Tests\Http\Message\RequestTest::testRequestThrowsExceptionOnBadResponse
 .
 Guzzle\Tests\Http\Message\RequestTest::testRequestThrowsExceptionWhenSetToCompleteWithNoResponse
@@ -1380,12 +1484,318 @@ Guzzle\Tests\Parser\ParserRegistryTest::testReturnsNullWhenNotFound
 .
 Guzzle\Tests\Parser\ParserRegistryTest::testStoresObjects
 .
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #0
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #1
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #10
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #11
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #12
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #13
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #14
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #15
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #16
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #17
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #18
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #19
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #2
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #20
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #21
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #22
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #23
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #24
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #25
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #26
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #27
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #28
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #29
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #3
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #30
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #31
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #32
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #33
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #34
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #35
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #36
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #37
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #38
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #39
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #4
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #40
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #41
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #42
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #43
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #44
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #45
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #46
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #47
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #48
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #49
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #5
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #50
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #51
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #52
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #53
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #54
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #55
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #56
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #57
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #58
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #59
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #6
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #60
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #61
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #62
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #63
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #64
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #65
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #66
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #67
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #68
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #69
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #7
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #70
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #71
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #72
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #73
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #8
+S
+Guzzle\Tests\Parsers\UriTemplate\PeclUriTemplateTest::testExpandsUriTemplates with data set #9
+S
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testAllowsNestedArrayExpansion
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #0
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #1
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #10
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #11
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #12
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #13
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #14
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #15
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #16
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #17
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #18
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #19
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #2
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #20
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #21
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #22
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #23
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #24
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #25
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #26
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #27
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #28
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #29
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #3
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #30
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #31
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #32
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #33
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #34
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #35
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #36
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #37
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #38
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #39
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #4
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #40
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #41
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #42
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #43
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #44
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #45
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #46
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #47
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #48
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #49
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #5
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #50
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #51
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #52
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #53
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #54
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #55
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #56
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #57
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #58
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #59
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #6
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #60
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #61
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #62
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #63
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #64
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #65
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #66
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #67
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #68
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #69
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #7
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #70
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #71
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #72
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #73
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #8
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testExpandsUriTemplates with data set #9
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testParsesExpressions with data set #0
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testParsesExpressions with data set #1
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testParsesExpressions with data set #2
+.
+Guzzle\Tests\Parsers\UriTemplate\UriTemplateTest::testSetRegex
+.
 Guzzle\Tests\Plugin\Async\AsyncPluginTest::testAddsTimesOutAfterSending
 .
 Guzzle\Tests\Plugin\Async\AsyncPluginTest::testEnablesProgressCallbacks
 .
 Guzzle\Tests\Plugin\Async\AsyncPluginTest::testEnsuresIntegration
-F
+.
 Guzzle\Tests\Plugin\Async\AsyncPluginTest::testEnsuresRequestIsSet
 .
 Guzzle\Tests\Plugin\Async\AsyncPluginTest::testMasksCurlExceptions
@@ -1421,15 +1831,15 @@ Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testDoesNotSeekOnRequestsWithNoBo
 Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testDoesNothingWhenNotRetryingAndPollingRequest
 .
 Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testFailsOnTruncation
-F
+.
 Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testHasEventList
 .
 Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testRetriesPooledRequestsUsingDelayAndPollingEvent
-E
+.
 Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testRetriesRequests
 .
 Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testRetriesRequestsWhenInParallel
-F
+.
 Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testSeeksToBeginningOfRequestBodyWhenRetrying
 .
 Guzzle\Tests\Plugin\Backoff\BackoffPluginTest::testUpdatesRequestForRetry
@@ -1577,7 +1987,7 @@ Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testDoesNotTouchClosureListen
 Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testHandles404RevalidationResponses
 .
 Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testRevalidatesResponsesAgainstOriginServer with data set #0
-F
+.
 Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testRevalidatesResponsesAgainstOriginServer with data set #1
 .
 Guzzle\Tests\Plugin\Cache\DefaultRevalidationTest::testRevalidatesResponsesAgainstOriginServer with data set #2
@@ -1629,7 +2039,7 @@ Guzzle\Tests\Plugin\Cookie\CookieJar\FileCookieJarTest::testPersistsToFileFile
 Guzzle\Tests\Plugin\Cookie\CookiePluginTest::testAddsCookiesToRequests
 .
 Guzzle\Tests\Plugin\Cookie\CookiePluginTest::testCookiesAreExtractedFromRedirectResponses
-E
+.
 Guzzle\Tests\Plugin\Cookie\CookiePluginTest::testCookiesAreNotAddedWhenParamIsSet
 .
 Guzzle\Tests\Plugin\Cookie\CookiePluginTest::testEscapesCookieDomains
@@ -1675,15 +2085,15 @@ Guzzle\Tests\Plugin\CurlAuth\CurlAuthPluginTest::testAddsDigestAuthentication
 Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testEnsuresErrorResponseExists
 .
 Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testEnsuresErrorResponseImplementsInterface
-F
+.
 Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testSkipsWhenErrorResponsesIsNotSet
 .
 Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testSkipsWhenErrorResponsesIsNotSetAndAllowsSuccess
-E
+.
 Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testSkipsWhenNoClassIsSet
-E
+.
 Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testSkipsWhenReasonDoesNotMatch
-E
+.
 Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testThrowsSpecificErrorResponseOnMatch
 .
 Guzzle\Tests\Plugin\ErrorResponse\ErrorResponsePluginTest::testThrowsWhenCodeAndPhraseMatch
@@ -1725,7 +2135,7 @@ Guzzle\Tests\Plugin\Md5\CommandContentMd5PluginTest::testIgnoresValidationWhenDi
 Guzzle\Tests\Plugin\Md5\CommandContentMd5PluginTest::testValidatesMd5WhenParamExists
 .
 Guzzle\Tests\Plugin\Md5\Md5ValidatorPluginTest::testProperlyValidatesWhenUsingContentEncoding
-F
+.
 Guzzle\Tests\Plugin\Md5\Md5ValidatorPluginTest::testSkipsWhenContentLengthIsTooLarge
 .
 Guzzle\Tests\Plugin\Md5\Md5ValidatorPluginTest::testThrowsExceptionOnInvalidMd5
@@ -1799,33 +2209,33 @@ Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testSubscribesToEvents
 Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testCanLimitNumberOfRedirects
 .
 Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testCanRedirectWithNoLeadingSlashAndQuery
-E
+.
 Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testCanRedirectWithStrictRfcCompliance
 .
 Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testDefaultBehaviorIsToRedirectWithGetForEntityEnclosingRequests
 .
 Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testHandlesRedirectsWithSpacesProperly
-E
+.
 Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testRedirect303WithGet
-F
+.
 Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testRedirect303WithGetWithStrictRfcCompliance
-E
+.
 Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testRedirectWithStrictRfc386Compliance
-E
+.
 Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testRedirectsCanBeDisabledPerRequest
-E
+.
 Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testRedirectsRequests
 .
 Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testResetsHistoryEachSend
-E
+.
 Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testRewindsStreamWhenRedirectingIfNeeded
-E
+.
 Guzzle\Tests\Plugin\Redirect\RedirectPluginTest::testThrowsExceptionWhenStreamCannotBeRewound
-F
+.
 Guzzle\Tests\Plugin\Redirect\StaticClientTest::testCanCreateStreamsUsingCustomFactory
 .
 Guzzle\Tests\Plugin\Redirect\StaticClientTest::testCanCreateStreamsUsingDefaultFactory
-E
+.
 Guzzle\Tests\Plugin\Redirect\StaticClientTest::testMountsClient
 .
 Guzzle\Tests\Plugin\Redirect\StaticClientTest::testSendsRequests with data set #0
@@ -1891,13 +2301,13 @@ Guzzle\Tests\Service\ClientTest::testClientCreatesIteratorsWithNoOptions
 Guzzle\Tests\Service\ClientTest::testClientHoldsInflector
 .
 Guzzle\Tests\Service\ClientTest::testClientResetsRequestsBeforeExecutingCommands
-E
+.
 Guzzle\Tests\Service\ClientTest::testCreatesCommandsUsingCommandFactory
 .
 Guzzle\Tests\Service\ClientTest::testDescribesEvents
 .
 Guzzle\Tests\Service\ClientTest::testExecutesCommands
-F
+.
 Guzzle\Tests\Service\ClientTest::testExecutesCommandsWithArray
 .
 Guzzle\Tests\Service\ClientTest::testFactoryCreatesClient
@@ -2089,7 +2499,7 @@ Guzzle\Tests\Service\Command\LocationVisitor\Request\PostFieldVisitorTest::testV
 Guzzle\Tests\Service\Command\LocationVisitor\Request\PostFileVisitorTest::testVisitsLocation
 .
 Guzzle\Tests\Service\Command\LocationVisitor\Request\PostFileVisitorTest::testVisitsLocationWithMultipleFiles
-E
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\QueryVisitorTest::testFiltersAreAppliedToArrayParamType
 .
 Guzzle\Tests\Service\Command\LocationVisitor\Request\QueryVisitorTest::testRecursivelyBuildsQueryStrings
@@ -2099,49 +2509,49 @@ Guzzle\Tests\Service\Command\LocationVisitor\Request\QueryVisitorTest::testVisit
 Guzzle\Tests\Service\Command\LocationVisitor\Request\ResponseBodyVisitorTest::testVisitsLocation
 .
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testAddsContentTypeAndTopLevelValues
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testAllowsSendingXmlPayloadIfNoXmlParamsWereSet
 .
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testAllowsXmlEncoding
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testCanAddArrayOfSimpleTypes
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testCanAddMultipleNamespacesToRoot
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testCanChangeContentType
 .
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #0
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #1
 .
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #10
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #11
 .
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #12
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #13
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #2
 .
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #3
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #4
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #5
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #6
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #7
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #8
 .
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSerializesXml with data set #9
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testSkipsNullValues
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Request\XmlVisitorTest::testValuesAreFiltered
-F
+.
 Guzzle\Tests\Service\Command\LocationVisitor\Response\BodyVisitorTest::testVisitsLocation
 .
 Guzzle\Tests\Service\Command\LocationVisitor\Response\HeaderVisitorTest::testDiscardingUnknownHeaders
@@ -2581,15 +2991,15 @@ Guzzle\Tests\Service\ServiceBuilderTest::testUsedAsArray
 Guzzle\Tests\Service\ServiceBuilderTest::testUsesTheDefaultBuilderWhenNoBuilderIsSpecified
 .
 Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testAddsBody
-E
+F
 Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testAddsPostFields
-E
+.
 Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testAppliesProxySettings
 .
 Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testBasicAuthAddsUserAndPassToUrl
 .
 Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testCanCreateCustomStreamClass
-E
+.
 Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testCanDisableSslValidation
 .
 Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testOpensValidStreamByCreatingContext

@@ -347,7 +347,7 @@ void VarEnv::exitFP(ActRec* fp) {
   }
 }
 
-void VarEnv::set(const StringData* name, TypedValue* tv) {
+void VarEnv::set(const StringData* name, const TypedValue* tv) {
   m_nvTable.set(name, tv);
 }
 
@@ -1225,23 +1225,20 @@ VarEnv* ExecutionContext::getVarEnv(int frame) {
   return fp->m_varEnv;
 }
 
-void ExecutionContext::setVar(StringData* name, TypedValue* v, bool ref) {
+void ExecutionContext::setVar(StringData* name, const TypedValue* v) {
   VMRegAnchor _;
-  // setVar() should only be called after getVarEnv() has been called
-  // to create a varEnv
   ActRec *fp = getFP();
   if (!fp) return;
-  if (fp->skipFrame()) {
-    fp = getPrevVMState(fp);
-  }
-  assert(!fp->hasInvName());
-  assert(!fp->hasExtraArgs());
-  assert(fp->m_varEnv != nullptr);
-  if (ref) {
-    fp->m_varEnv->bind(name, v);
-  } else {
-    fp->m_varEnv->set(name, v);
-  }
+  if (fp->skipFrame()) fp = getPrevVMState(fp);
+  fp->getVarEnv()->set(name, v);
+}
+
+void ExecutionContext::bindVar(StringData* name, TypedValue* v) {
+  VMRegAnchor _;
+  ActRec *fp = getFP();
+  if (!fp) return;
+  if (fp->skipFrame()) fp = getPrevVMState(fp);
+  fp->getVarEnv()->bind(name, v);
 }
 
 Array ExecutionContext::getLocalDefinedVariables(int frame) {
@@ -6155,38 +6152,27 @@ OPTBLD_INLINE void ExecutionContext::iopFPassC(IOP_ARGS) {
   assert(paramId < ar->numArgs());
 }
 
-#define FPASSC_CHECKED_PRELUDE                                                \
-  ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);                           \
-  NEXT();                                                                     \
-  DECODE_IVA(paramId);                                                        \
-  assert(paramId < ar->numArgs());                                            \
-  const Func* func = ar->m_func;
-
 OPTBLD_INLINE void ExecutionContext::iopFPassCW(IOP_ARGS) {
-  FPASSC_CHECKED_PRELUDE
+  auto const ar = arFromInstr(m_stack.top(), reinterpret_cast<const Op*>(pc));
+  NEXT();
+  DECODE_IVA(paramId);
+  assert(paramId < ar->numArgs());
+  auto const func = ar->m_func;
   if (func->mustBeRef(paramId)) {
-    TRACE(1, "FPassCW: function %s(%d%s) param %d is by reference, "
-          "raising a strict warning (attr:0x%x)\n",
-          func->name()->data(), func->numNonVariadicParams(),
-          func->hasVariadicCaptureParam() ? "*" : "", paramId,
-          func->methInfo() ? func->methInfo()->attribute : 0);
     raise_strict_warning("Only variables should be passed by reference");
   }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopFPassCE(IOP_ARGS) {
-  FPASSC_CHECKED_PRELUDE
+  auto const ar = arFromInstr(m_stack.top(), reinterpret_cast<const Op*>(pc));
+  NEXT();
+  DECODE_IVA(paramId);
+  assert(paramId < ar->numArgs());
+  auto const func = ar->m_func;
   if (func->mustBeRef(paramId)) {
-    TRACE(1, "FPassCE: function %s(%d%s) param %d is by reference, "
-          "throwing a fatal error (attr:0x%x)\n",
-          func->name()->data(), func->numNonVariadicParams(),
-          func->hasVariadicCaptureParam() ? "*" : "", paramId,
-          func->methInfo() ? func->methInfo()->attribute : 0);
     raise_error("Cannot pass parameter %d by reference", paramId+1);
   }
 }
-
-#undef FPASSC_CHECKED_PRELUDE
 
 OPTBLD_INLINE void ExecutionContext::iopFPassV(IOP_ARGS) {
   ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);

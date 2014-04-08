@@ -458,15 +458,22 @@ bool Func::byRef(int32_t arg) const {
   return *ref & (1ull << bit);
 }
 
+const StaticString s_extract("extract");
+
 bool Func::mustBeRef(int32_t arg) const {
-  if (byRef(arg)) {
-    return
-      arg < m_numParams ||
-      !(m_attrs & AttrVariadicByRef) ||
-      !methInfo() ||
-      !(methInfo()->attribute & ClassInfo::MixedVariableArguments);
+  if (!byRef(arg)) return false;
+  if (arg == 0) {
+    if (UNLIKELY(m_attrs & AttrNative)) {
+      // Extract is special (in more ways than one)---here it needs
+      // to be able to take its first argument by ref or not by ref.
+      if (name() == s_extract.get() && !cls()) return false;
+    }
   }
-  return false;
+  return
+    arg < m_numParams ||
+    !(m_attrs & AttrVariadicByRef) ||
+    !methInfo() ||
+    !(methInfo()->attribute & ClassInfo::MixedVariableArguments);
 }
 
 void Func::appendParam(bool ref, const Func::ParamInfo& info,

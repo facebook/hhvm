@@ -195,7 +195,6 @@ public:
   void nvGetKey(TypedValue* out, ssize_t pos) const;
 
   // wrappers that call getValueRef()
-  TypedValue* nvGetValueRef(ssize_t pos);
   Variant getValue(ssize_t pos) const;
   Variant getKey(ssize_t pos) const;
 

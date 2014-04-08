@@ -258,13 +258,13 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
   if (hp == ht->invalid_index) {
     return FAILURE;
   }
-  auto val = ht->nvGetValueRef(hp);
-  if (!val) {
-    return FAILURE;
-  }
-  HPHP::zBoxAndProxy(val);
+  auto& val = ht->getValueRef(hp);
+  // FIXME: we shouldn't be modifying this TypedValue
+  HPHP::zBoxAndProxy(const_cast<HPHP::TypedValue*>(val.asTypedValue()));
+  assert(val.asTypedValue()->m_type == HPHP::KindOfRef);
   auto p = (zval***)pData;
-  *p = &val->m_data.pref;
+  // FIXME: this is broken
+  *p = &const_cast<HPHP::TypedValue*>(val.asTypedValue())->m_data.pref;
   return SUCCESS;
 }
 

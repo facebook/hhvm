@@ -855,8 +855,7 @@ void ArrayData::getChildren(std::vector<TypedValue *> &out) {
   for (ssize_t pos = iter_begin();
       pos != ArrayData::invalid_index;
       pos = iter_advance(pos)) {
-    TypedValue *tv = nvGetValueRef(pos);
-    out.push_back(tv);
+    out.push_back(const_cast<TypedValue*>(getValueRef(pos).asTypedValue()));
   }
 }
 

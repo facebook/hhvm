@@ -213,7 +213,7 @@ String c_GenArrayWaitHandle::getName() {
 c_WaitableWaitHandle* c_GenArrayWaitHandle::getChild() {
   assert(getState() == STATE_BLOCKED);
   return static_cast<c_WaitableWaitHandle*>(
-      m_deps->nvGetValueRef(m_iterPos)->m_data.pobj);
+    m_deps->getValueRef(m_iterPos).asTypedValue()->m_data.pobj);
 }
 
 void c_GenArrayWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
@@ -222,7 +222,8 @@ void c_GenArrayWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
   // recursively import current child
   {
     assert(m_iterPos != ArrayData::invalid_index);
-    Cell* current = tvAssertCell(m_deps->nvGetValueRef(m_iterPos));
+    auto const current = tvAssertCell(
+      m_deps->getValueRef(m_iterPos).asTypedValue());
 
     assert(current->m_type == KindOfObject);
     assert(current->m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
@@ -239,7 +240,8 @@ void c_GenArrayWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
          iter_pos != ArrayData::invalid_index;
          iter_pos = m_deps->iter_advance(iter_pos)) {
 
-      Cell* current = tvAssertCell(m_deps->nvGetValueRef(iter_pos));
+      auto const current = tvAssertCell(
+        m_deps->getValueRef(iter_pos).asTypedValue());
       if (IS_NULL_TYPE(current->m_type)) {
         continue;
       }

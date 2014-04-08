@@ -131,10 +131,6 @@ inline Variant ArrayData::getValue(ssize_t pos) const {
   return getValueRef(pos);
 }
 
-inline TypedValue* ArrayData::nvGetValueRef(ssize_t pos) {
-  return const_cast<TypedValue*>(getValueRef(pos).asTypedValue());
-}
-
 inline Variant ArrayData::getKey(ssize_t pos) const {
   TypedValue tv;
   nvGetKey(&tv, pos);

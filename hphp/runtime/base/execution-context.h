@@ -588,7 +588,8 @@ public:
                        bool ignoreArgs = false,
                        int limit = 0);
   VarEnv* getVarEnv(int frame = 0);
-  void setVar(StringData* name, TypedValue* v, bool ref);
+  void setVar(StringData* name, const TypedValue* v);
+  void bindVar(StringData* name, TypedValue* v);
   Array getLocalDefinedVariables(int frame);
   PCFilter* m_breakPointFilter;
   PCFilter* m_lastLocFilter;

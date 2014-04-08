@@ -991,15 +991,15 @@ Object ObjectData::FromArray(ArrayData* properties) {
   auto& dynArr = retval->reserveProperties(properties->size());
   for (ssize_t pos = properties->iter_begin(); pos != ArrayData::invalid_index;
        pos = properties->iter_advance(pos)) {
-    TypedValue* value = properties->nvGetValueRef(pos);
+    auto const value = properties->getValueRef(pos);
     TypedValue key;
     properties->nvGetKey(&key, pos);
     if (key.m_type == KindOfInt64) {
-      dynArr.set(key.m_data.num, tvAsCVarRef(value));
+      dynArr.set(key.m_data.num, value);
     } else {
       assert(IS_STRING_TYPE(key.m_type));
       StringData* strKey = key.m_data.pstr;
-      dynArr.set(StrNR(strKey), tvAsCVarRef(value), true /* isKey */);
+      dynArr.set(StrNR(strKey), value, true /* isKey */);
       decRefStr(strKey);
     }
   }

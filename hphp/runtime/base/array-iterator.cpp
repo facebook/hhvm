@@ -577,7 +577,8 @@ Variant ArrayIter::iterValue(VersionableSparse) {
 RefData* ArrayIter::zSecond() {
   auto tv = nvSecond();
   if (tv->m_type != KindOfRef) {
-    tvBox(tv);
+    // FIXME: this is not allowed.
+    tvBox(const_cast<TypedValue*>(tv));
   }
   return tv->m_data.pref;
 }
@@ -1065,7 +1066,7 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
          (!typeArray && iter->arr().getIterType() == ArrayIter::TypeIterator));
   ArrayIter& arrIter = iter->arr();
   if (typeArray) {
-    TypedValue* cur = arrIter.nvSecond();
+    auto const cur = arrIter.nvSecond();
     if (cur->m_type == KindOfRef) {
       if (!withRef || !cur->m_data.pref->isReferenced()) {
         cellDup(*(cur->m_data.pref->tv()), *out);

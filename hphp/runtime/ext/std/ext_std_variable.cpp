@@ -14,11 +14,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+
+#include "folly/Likely.h"
+
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -237,58 +240,82 @@ Array HHVM_FUNCTION(get_defined_vars) {
   }
 }
 
-int64_t HHVM_FUNCTION(extract, const Array& var_array,
+static bool modify_extract_name(VarEnv* v,
+                                String& name,
+                                int64_t extract_type,
+                                const String& prefix) {
+  switch (extract_type) {
+  case EXTR_SKIP:
+    if (v->lookup(name.get()) != nullptr) {
+      return false;
+    }
+    break;
+  case EXTR_IF_EXISTS:
+    if (v->lookup(name.get()) == nullptr) {
+      return false;
+    }
+    break;
+  case EXTR_PREFIX_SAME:
+    if (v->lookup(name.get()) != nullptr) {
+      name = prefix + "_" + name;
+    }
+    break;
+  case EXTR_PREFIX_ALL:
+    name = prefix + "_" + name;
+    break;
+  case EXTR_PREFIX_INVALID:
+    if (!is_valid_var_name(name.get()->data(), name.size())) {
+      name = prefix + "_" + name;
+    }
+    break;
+  case EXTR_PREFIX_IF_EXISTS:
+    if (v->lookup(name.get()) == nullptr) {
+      return false;
+    }
+    name = prefix + "_" + name;
+    break;
+  default:
+    break;
+  }
+
+  // skip invalid variable names, as in PHP
+  return is_valid_var_name(name.get()->data(), name.size());
+}
+
+int64_t HHVM_FUNCTION(extract, VRefParam vref_array,
                                int extract_type /* = EXTR_OVERWRITE */,
                                const String& prefix /* = "" */) {
   bool reference = extract_type & EXTR_REFS;
   extract_type &= ~EXTR_REFS;
 
-  VarEnv* v = g_context->getVarEnv();
-  if (!v) return 0;
+  if (!vref_array.wrapped().isArray()) {
+    raise_warning("extract() expects parameter 1 to be array");
+    return 0;
+  }
+
+  JIT::VMRegAnchor _;
+  auto const varEnv = g_context->getVarEnv();
+  if (!varEnv) return 0;
+
+  if (UNLIKELY(reference)) {
+    auto& arr = vref_array.wrapped().toArrRef();
+    int count = 0;
+    for (ArrayIter iter(arr); iter; ++iter) {
+      String name = iter.first();
+      if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
+      g_context->bindVar(name.get(), arr.lvalAt(name).asTypedValue());
+      ++count;
+    }
+    return count;
+  }
+
+  auto const var_array = vref_array.wrapped().toArray();
   int count = 0;
   for (ArrayIter iter(var_array); iter; ++iter) {
     String name = iter.first();
-    StringData* nameData = name.get();
-    switch (extract_type) {
-      case EXTR_SKIP:
-        if (v->lookup(nameData) != NULL) {
-          continue;
-        }
-        break;
-      case EXTR_IF_EXISTS:
-        if (v->lookup(nameData) == NULL) {
-          continue;
-        }
-        break;
-      case EXTR_PREFIX_SAME:
-        if (v->lookup(nameData) != NULL) {
-          name = prefix + "_" + name;
-        }
-        break;
-      case EXTR_PREFIX_ALL:
-        name = prefix + "_" + name;
-        break;
-      case EXTR_PREFIX_INVALID:
-        if (!is_valid_var_name(nameData->data(), nameData->size())) {
-          name = prefix + "_" + name;
-        }
-        break;
-      case EXTR_PREFIX_IF_EXISTS:
-        if (v->lookup(nameData) == NULL) {
-          continue;
-        }
-        name = prefix + "_" + name;
-        break;
-      default:
-        break;
-    }
-    nameData = name.get();
-    // skip invalid variable names, as in PHP
-    if (!is_valid_var_name(nameData->data(), nameData->size())) {
-      continue;
-    }
-    g_context->setVar(nameData, iter.nvSecond(), reference);
-    count++;
+    if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
+    g_context->setVar(name.get(), iter.secondRef().asTypedValue());
+    ++count;
   }
   return count;
 }

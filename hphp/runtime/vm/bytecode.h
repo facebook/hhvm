@@ -171,7 +171,7 @@ class VarEnv {
   void enterFP(ActRec* oldFP, ActRec* newFP);
   void exitFP(ActRec* fp);
 
-  void set(const StringData* name, TypedValue* tv);
+  void set(const StringData* name, const TypedValue* tv);
   void bind(const StringData* name, TypedValue* tv);
   void setWithRef(const StringData* name, TypedValue* tv);
   TypedValue* lookup(const StringData* name);

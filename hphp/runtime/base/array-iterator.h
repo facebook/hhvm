@@ -183,10 +183,11 @@ struct ArrayIter {
   const Variant& secondRef();
   const Variant& secondRefPlus();
 
-  TypedValue* nvSecond() {
+  // Inline version of secondRef.  Only for use in iterator helpers.
+  const TypedValue* nvSecond() const {
     const ArrayData* ad = getArrayData();
     assert(ad && m_pos != ArrayData::invalid_index);
-    return const_cast<ArrayData*>(ad)->nvGetValueRef(m_pos);
+    return ad->getValueRef(m_pos).asTypedValue();
   }
 
   /*

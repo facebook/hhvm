@@ -27,7 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Variant;
+struct Variant;
 
 /*
  * Assertions on Cells and TypedValues.  Should usually only happen
@@ -308,6 +308,10 @@ inline const Cell* tvToCell(const TypedValue* tv) {
 
 // assert that tv is cell
 inline Cell* tvAssertCell(TypedValue* tv) {
+  assert(cellIsPlausible(*tv));
+  return tv;
+}
+inline const Cell* tvAssertCell(const TypedValue* tv) {
   assert(cellIsPlausible(*tv));
   return tv;
 }

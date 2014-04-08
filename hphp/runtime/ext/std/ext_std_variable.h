@@ -60,16 +60,16 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
 
 Array HHVM_FUNCTION(get_defined_vars);
 
-#define EXTR_OVERWRITE          0
-#define EXTR_SKIP               1
-#define EXTR_PREFIX_SAME        2
-#define EXTR_PREFIX_ALL         3
-#define EXTR_PREFIX_INVALID     4
-#define EXTR_PREFIX_IF_EXISTS   5
-#define EXTR_IF_EXISTS          6
-#define EXTR_REFS               0x100
+auto constexpr EXTR_OVERWRITE        = 0;
+auto constexpr EXTR_SKIP             = 1;
+auto constexpr EXTR_PREFIX_SAME      = 2;
+auto constexpr EXTR_PREFIX_ALL       = 3;
+auto constexpr EXTR_PREFIX_INVALID   = 4;
+auto constexpr EXTR_PREFIX_IF_EXISTS = 5;
+auto constexpr EXTR_IF_EXISTS        = 6;
+auto constexpr EXTR_REFS             = 0x100;
 
-int64_t HHVM_FUNCTION(extract, const Array& var_array,
+int64_t HHVM_FUNCTION(extract, VRefParam vref_array,
                                int extract_type = EXTR_OVERWRITE,
                                const String& prefix = empty_string);
 

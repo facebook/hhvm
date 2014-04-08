@@ -14,211 +14,198 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/wddx/ext_wddx.h"
 
 namespace HPHP {
 
 using std::string;
 using std::vector;
 
-class WddxPacket: public SweepableResourceData {
- public:
-  DECLARE_RESOURCE_ALLOCATION(WddxPacket);
+WddxPacket::WddxPacket(const Variant& comment, bool manualPacket, bool sVar) :
+                       m_packetString(""), m_packetClosed(false),
+                       m_manualPacketCreation(manualPacket) {
+  string header = "<header/>";
 
-  CLASSNAME_IS("WddxPacket");
-  // overriding ResourceData
-  const String& o_getClassNameHook() const { return classnameof(); }
+  if (!comment.isNull() && !sVar) {
+    string scomment = comment.toString().data();
+    header = "<header><comment>" + scomment + "</comment></header>";
+  }
+  m_packetString = "<wddxPacket version='1.0'>" + header + "<data>";
 
-  explicit WddxPacket(const Variant& comment, bool manualPacket, bool sVar) :
-                      m_packetString(""), m_packetClosed(false),
-                      m_manualPacketCreation(manualPacket) {
-    string header = "<header/>";
+  if (m_manualPacketCreation) {
+    m_packetString = m_packetString + "<struct>";
+  }
+}
 
-    if (!comment.isNull() && !sVar) {
-      string scomment = comment.toString().data();
-      header = "<header><comment>" + scomment + "</comment></header>";
-    }
-    m_packetString = "<wddxPacket version='1.0'>" + header + "<data>";
+bool WddxPacket::add_var(const String& varName, bool hasVarTag) {
+  VarEnv* v = g_context->getVarEnv();
+  if (!v) return false;
+  Variant varVariant = *reinterpret_cast<Variant*>(v->lookup(varName.get()));
+  return recursiveAddVar(varName, varVariant, hasVarTag);
+}
 
+string WddxPacket::packet_end() {
+  if (!m_packetClosed) {
     if (m_manualPacketCreation) {
-      m_packetString = m_packetString + "<struct>";
+      m_packetString += "</struct>";
     }
+    m_packetString += "</data></wddxPacket>";
   }
+  m_packetClosed = true;
+  return m_packetString;
+}
 
-  bool add_var(const String& varName, bool hasVarTag) {
-    VarEnv* v = g_context->getVarEnv();
-    if (!v) return false;
-    Variant varVariant = *reinterpret_cast<Variant*>(v->lookup(varName.get()));
-    return recursiveAddVar(varName,varVariant,hasVarTag);
-  }
+bool WddxPacket::serialize_value(const Variant& varVariant) {
+  return recursiveAddVar(empty_string, varVariant, false);
+}
 
-  string packet_end() {
-    if (!m_packetClosed) {
-      if (m_manualPacketCreation) {
-        m_packetString += "</struct>";
-      }
-      m_packetString += "</data></wddxPacket>";
+bool WddxPacket::recursiveAddVar(String varName, const Variant& varVariant,
+                                 bool hasVarTag) {
+
+  bool isArray = varVariant.isArray();
+  bool isObject = varVariant.isObject();
+
+  if (isArray || isObject) {
+    if (hasVarTag) {
+      m_packetString += "<var name='";
+      m_packetString += varName.data();
+      m_packetString += "'>";
     }
-    m_packetClosed = true;
-    return m_packetString;
-  }
 
-  bool serialize_value(const Variant& varVariant) {
-    return recursiveAddVar(empty_string,varVariant,false);
-  }
+    Array varAsArray;
+    Object varAsObject = varVariant.toObject();
+    if (isArray) varAsArray = varVariant.toArray();
+    if (isObject) varAsArray = varAsObject.toArray();
 
- private:
-  bool recursiveAddVar(String varName, const Variant& varVariant,
-                       bool hasVarTag ) {
-
-    bool isArray = varVariant.isArray();
-    bool isObject = varVariant.isObject();
-
-    if (isArray || isObject) {
-      if (hasVarTag) {
-        m_packetString += "<var name='";
-        m_packetString += varName.data();
+    int length = varAsArray.length();
+    if (length > 0) {
+      ArrayIter it = ArrayIter(varAsArray);
+      if (it.first().isString()) isObject = true;
+      if (isObject) {
+        m_packetString += "<struct>";
+        if (!isArray) {
+          m_packetString += "<var name='php_class_name'><string>";
+          m_packetString += varAsObject->o_getClassName().c_str();
+          m_packetString += "</string></var>";
+        }
+      } else {
+        m_packetString += "<array length='";
+        m_packetString += std::to_string(length);
         m_packetString += "'>";
       }
-
-      Array varAsArray;
-      Object varAsObject = varVariant.toObject();
-      if (isArray) varAsArray = varVariant.toArray();
-      if (isObject) varAsArray = varAsObject.toArray();
-
-      int length = varAsArray.length();
-      if (length > 0) {
-        ArrayIter it = ArrayIter(varAsArray);
-        if (it.first().isString()) isObject = true;
-        if (isObject) {
-          m_packetString += "<struct>";
-          if (!isArray) {
-            m_packetString += "<var name='php_class_name'><string>";
-            m_packetString += varAsObject->o_getClassName().c_str();
-            m_packetString += "</string></var>";
-          }
-        } else {
-          m_packetString += "<array length='";
-          m_packetString += std::to_string(length);
-          m_packetString += "'>";
-        }
-        for (ArrayIter it(varAsArray); it; ++it) {
-          Variant key = it.first();
-          Variant value = it.second();
-          recursiveAddVar(key.toString(),value,isObject);
-        }
-        if (isObject) {
-          m_packetString += "</struct>";
-        }
-        else {
-          m_packetString += "</array>";
-        }
+      for (ArrayIter it(varAsArray); it; ++it) {
+        Variant key = it.first();
+        Variant value = it.second();
+        recursiveAddVar(key.toString(), value, isObject);
+      }
+      if (isObject) {
+        m_packetString += "</struct>";
       }
       else {
-        //empty object
-        if (isObject) {
-          m_packetString += "<struct>";
-          if (!isArray) {
-            m_packetString += "<var name='php_class_name'><string>";
-            m_packetString += varAsObject->o_getClassName().c_str();
-            m_packetString += "</string></var>";
-          }
-          m_packetString += "</struct>";
+        m_packetString += "</array>";
+      }
+    }
+    else {
+      //empty object
+      if (isObject) {
+        m_packetString += "<struct>";
+        if (!isArray) {
+          m_packetString += "<var name='php_class_name'><string>";
+          m_packetString += varAsObject->o_getClassName().c_str();
+          m_packetString += "</string></var>";
         }
+        m_packetString += "</struct>";
       }
-      if (hasVarTag) {
-        m_packetString += "</var>";
-      }
-      return true;
     }
-
-    string varType = getDataTypeString(varVariant.getType()).data();
-    if (!getWddxEncoded(varType,"",varName,false).empty()) {
-      string varValue = varVariant.toString().data();
-      if (varType.compare("boolean") == 0) {
-        varValue = varVariant.toBoolean() ? "true" : "false";
-      }
-      m_packetString += getWddxEncoded(varType,varValue,varName,hasVarTag);
-      return true;
-    }
-
-    return false;
-  }
-  string getWddxEncoded(string varType, string varValue, String varName,
-                        bool hasVarTag) {
-    if (varType.compare("NULL") == 0) {
-      return wrapValue("<null/>","","",varName,hasVarTag);
-    }
-    if (varType.compare("boolean") == 0) {
-      return wrapValue("<boolean value='","'/>",varValue,varName,hasVarTag);
-    }
-    if (varType.compare("integer") == 0 || varType.compare("double") == 0) {
-      return wrapValue("<number>","</number>",varValue,varName,hasVarTag);
-    }
-    if (varType.compare("string") == 0) {
-      return wrapValue("<string>","</string>",varValue,varName,hasVarTag);
-    }
-    return "";
-  }
-
-  string wrapValue(string start, string end, string varValue,
-                       String varName, bool hasVarTag) {
-    string startVar = "";
-    string endVar = "";
     if (hasVarTag) {
-      startVar += "<var name='";
-      startVar += varName.data();
-      startVar += "'>";
-      endVar = "</var>";
+      m_packetString += "</var>";
     }
-    return startVar + start + varValue + end + endVar;
+    return true;
   }
 
-  string m_packetString;
-  bool m_packetClosed;
-  bool m_manualPacketCreation;
-};
-IMPLEMENT_OBJECT_ALLOCATION(WddxPacket);
+  string varType = getDataTypeString(varVariant.getType()).data();
+  if (!getWddxEncoded(varType, "", varName, false).empty()) {
+    string varValue = varVariant.toString().data();
+    if (varType.compare("boolean") == 0) {
+      varValue = varVariant.toBoolean() ? "true" : "false";
+    }
+    m_packetString += getWddxEncoded(varType, varValue, varName, hasVarTag);
+    return true;
+  }
+
+  return false;
+}
+
+string WddxPacket::getWddxEncoded(string varType,
+                                  string varValue,
+                                  String varName,
+                                  bool hasVarTag) {
+  if (varType.compare("NULL") == 0) {
+    return wrapValue("<null/>", "", "", varName, hasVarTag);
+  }
+  if (varType.compare("boolean") == 0) {
+    return wrapValue("<boolean value='", "'/>", varValue, varName, hasVarTag);
+  }
+  if (varType.compare("integer") == 0 || varType.compare("double") == 0) {
+    return wrapValue("<number>", "</number>", varValue, varName, hasVarTag);
+  }
+  if (varType.compare("string") == 0) {
+    return wrapValue("<string>", "</string>", varValue, varName, hasVarTag);
+  }
+  return "";
+}
+
+string WddxPacket::wrapValue(string start, string end, string varValue,
+                             String varName, bool hasVarTag) {
+  string startVar = "";
+  string endVar = "";
+  if (hasVarTag) {
+    startVar += "<var name='";
+    startVar += varName.data();
+    startVar += "'>";
+    endVar = "</var>";
+  }
+  return startVar + start + varValue + end + endVar;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // helpers
-
-static void find_var_recursive(TypedValue* tv, WddxPacket* wddxPacket ) {
+void find_var_recursive(TypedValue* tv, WddxPacket* wddxPacket) {
   if (tvIsString(tv)) {
     String var_name = tvCastToString(tv);
-    wddxPacket->add_var(var_name,true);
+    wddxPacket->add_var(var_name, true);
   }
   if (tv->m_type == KindOfArray) {
-    vector<TypedValue *> children;
+    vector<TypedValue*> children;
     tv->m_data.parr->getChildren(children);
     for (TypedValue *child : children) {
-      find_var_recursive(child,wddxPacket);
+      find_var_recursive(child, wddxPacket);
     }
   }
 }
 
 static TypedValue* add_vars_helper(ActRec* ar) {
   int start_index = 1;
-  Resource packet_id = getArg<KindOfResource>(ar,0);
+  Resource packet_id = getArg<KindOfResource>(ar, 0);
   auto wddxPacket = packet_id.getTyped<WddxPacket>();
 
   for (int i = start_index; i < ar->numArgs(); i++) {
     TypedValue* tv = getArg(ar,i);
-    find_var_recursive(tv,wddxPacket);
+    find_var_recursive(tv, wddxPacket);
   }
   return arReturn(ar, true);
 }
 
 static TypedValue* serialize_vars_helper(ActRec* ar) {
-  WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(empty_string,true,true);
+  WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(empty_string, true, true);
   int start_index = 0;
   for (int i = start_index; i < ar->numArgs(); i++) {
-    TypedValue* tv = getArg(ar,i);
-    find_var_recursive(tv,wddxPacket);
+    TypedValue* tv = getArg(ar, i);
+    find_var_recursive(tv, wddxPacket);
   }
   const string packet = wddxPacket->packet_end();
   Variant strHolder = makeStaticString(packet);
-  return arReturn(ar,strHolder);
+  return arReturn(ar, strHolder);
 }
 
 //////////////////////////////////////////////////////////////////////////////

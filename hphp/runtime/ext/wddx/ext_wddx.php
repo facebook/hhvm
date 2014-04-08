@@ -34,55 +34,59 @@ function wddx_deserialize($packet) : mixed {
     }
     return wddx_deserialize($out);
   }
-  if (!$packet instanceof SimpleXMLElement) {
-
-    $xml = simplexml_load_string($packet);    
-    //php seems to accept malformed xml
-    $root = $xml->xpath("(/wddxPacket[@version='1.0'] | 
-                          /wddxpacket[@version='1.0'] )/data");
-    return wddx_deserialize($root[0]);    
+  if (is_string($packet) && empty($packet)){
+    return null;
   }
-    
+
+  if (is_string($packet)) {
+
+    $xml = simplexml_load_string($packet);
+    //php seems to accept malformed xml
+    $root = $xml->xpath("(/wddxPacket[@version='1.0'] |
+                          /wddxpacket[@version='1.0'] )/data");
+    return wddx_deserialize($root[0]);
+  }
+
   $type = $packet->getName();
-  
-  //variables 
-  switch ($type) {  
+
+  //variables
+  switch ($type) {
     case "string":
-      return (string) $packet;  
+      return (string) $packet;
     case "number":
       $packet = (string) $packet;
       if ((int) $packet == $packet) {
         return (int) $packet;
       }
-      return (float) $packet;  
+      return (float) $packet;
     case "boolean":
       if (!empty($packet["value"])) {
         return (((string) $packet["value"]) === 'true');
       }
-      break;  
+      break;
     case "binary":
-      return "binary data";      
+      return "binary data";
     case "dateTime":
-      $dateTime = new DateTime((string) $packet); 
-      return $dateTime->getTimestamp(); 
-  } 
-  
+      $dateTime = new DateTime((string) $packet);
+      return $dateTime->getTimestamp();
+  }
+
   //setup for containers
   $array = array();
   $subchildren = $packet->children();
-  
+
   if ($type == "data") {
     return wddx_deserialize($subchildren[0]);
   }
-  
+
   //array
-  if ($type == "array" ) {   
+  if ($type == "array" ) {
     foreach ($subchildren as $subchild) {
-        array_push($array, wddx_deserialize($subchild));      
+        array_push($array, wddx_deserialize($subchild));
     }
     return $array;
-  }   
-  
+  }
+
   //struct
   if ($type == "struct" || $type == "recordset") {
     $isObject = false;
@@ -94,7 +98,7 @@ function wddx_deserialize($packet) : mixed {
         $inner = (string) $firstchild->string;
         if (!class_exists($inner)) {
           trigger_error("The script tried to execute a method or " .
-                        "access a property of an incomplete object. " . 
+                        "access a property of an incomplete object. " .
                         "Please ensure that the class definition \"" .
                         $inner . "\" of the object you are trying to " .
                         "operate on was loaded _before_ unserialize()" .
@@ -103,7 +107,7 @@ function wddx_deserialize($packet) : mixed {
                         E_USER_ERROR);
           break;
         }
-        $reflect  = new ReflectionClass($inner);                
+        $reflect  = new ReflectionClass($inner);
         $array = $reflect->newInstance();
       }
     }
@@ -115,33 +119,33 @@ function wddx_deserialize($packet) : mixed {
           continue;
         }
         foreach ($returnArray as $key => $value) {
-          $array->{$key} = $value;        
+          $array->{$key} = $value;
         }
       }
       else{
-        $array = $array + $returnArray;    
-      }      
+        $array = $array + $returnArray;
+      }
     }
     return $array;
-  }  
-  
+  }
+
   //var
-  if ($type == "var" || $type == "field") {     
-    $subchild = $subchildren[0];  
-    if (!empty($packet["name"])) {        
+  if ($type == "var" || $type == "field") {
+    $subchild = $subchildren[0];
+    if (!empty($packet["name"])) {
       $key = (string)($packet["name"]);
       $array[$key] = wddx_deserialize($subchild);
       if ($type == "field") {
         $subarray = array();
           foreach ($subchildren as $subchild) {
-              array_push($subarray, wddx_deserialize($subchild));      
+              array_push($subarray, wddx_deserialize($subchild));
           }
         $array[$key] = $subarray;
       }
       return $array;
     }
     return wddx_deserialize($subchild);
-  } 
+  }
 }
 
 /**
@@ -191,4 +195,3 @@ function wddx_serialize_value(mixed $var,
  */
 <<__Native("ActRec")>>
 function wddx_serialize_vars(...): string;
-

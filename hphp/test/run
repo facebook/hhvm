@@ -1271,7 +1271,7 @@ function main($argv) {
   drain_queue($queue);
 
   // Spawn off worker threads
-  $children = Set {};
+  $children = array();
   // A poor man's shared memory
   $bad_test_files = array();
   for ($i = 0; $i < $options['threads']; $i++) {
@@ -1281,7 +1281,7 @@ function main($argv) {
     if ($pid == -1) {
       error('could not fork');
     } else if ($pid) {
-      $children->add($pid);
+      $children[$pid] = $pid;
     } else {
       exit(run($options, $test_buckets[$i], $bad_test_file));
     }
@@ -1298,7 +1298,7 @@ function main($argv) {
     return 0;
   }
 
-  while ($children->count() && $printer_pid != 0) {
+  while (count($children) && $printer_pid != 0) {
     $pid = pcntl_wait($status);
     if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {
       error("Unexpected exit status from child");
@@ -1316,10 +1316,10 @@ function main($argv) {
       $server_proc = start_server_impl($options);
       $server_pid = proc_get_status($server_proc)['pid'];
     } else {
-      if (!$children->contains($pid)) {
+      if (!isset($children[$pid])) {
         error("Unexpected child pid $pid from wait");
       }
-      $children->remove($pid);
+      unset($children[$pid]);
       $return_value |= pcntl_wexitstatus($status);
     }
   }

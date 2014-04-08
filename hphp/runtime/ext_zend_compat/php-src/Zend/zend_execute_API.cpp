@@ -48,6 +48,9 @@ ZEND_API const zend_fcall_info empty_fcall_info = { 0, NULL, NULL, NULL, NULL, 0
 ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL, NULL };
 
 ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC) {
+  // FIXME: author apparently had no idea what this function was meant to do
+  // ce is meant to point to uninitialised memory, which this function is meant
+  // to fill, so you can't just triple-dereference it
   HPHP::StringData *class_name = HPHP::makeStaticString(name, name_length);
   (**ce)->hphp_class = HPHP::Unit::loadClass(class_name);
   return (**ce)->hphp_class == nullptr ? FAILURE : SUCCESS;
@@ -212,8 +215,11 @@ ZEND_API zend_class_entry *zend_fetch_class_by_name(
   if (!class_name || !class_name_len) {
     return NULL;
   }
-  HPHP::StringData * sd = HPHP::StringData::Make(
-      class_name, class_name_len, HPHP::CopyString);
+  HPHP::StringData * sd = HPHP::makeStaticString(class_name, class_name_len);
+  zend_class_entry * zce = zend_hphp_get_internal_class_entry(sd);
+  if (zce) {
+    return zce;
+  }
   HPHP::Class * cls = HPHP::Unit::getClass(sd, use_autoload);
   if (cls == nullptr) {
     if (use_autoload) {

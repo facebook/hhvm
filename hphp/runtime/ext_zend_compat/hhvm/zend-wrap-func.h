@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/ZendExceptionStore.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/ZendExecutionStack.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zval-helpers.h"
 // zend.h is way to big to include here
 
@@ -57,11 +56,7 @@ typedef void (*zend_ext_func)(
 
 void zBoxAndProxy(TypedValue* arg);
 void zBoxAndProxy(const TypedValue* arg);
-TypedValue* zend_wrap_func(
-    ActRec* ar,
-    zend_ext_func builtin_func,
-    int numParams,
-    bool isReturnRef);
+TypedValue* zend_wrap_func(ActRec* ar);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

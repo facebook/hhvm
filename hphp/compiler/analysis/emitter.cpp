@@ -115,6 +115,7 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 #include "hphp/runtime/vm/preclass-emit.h"
 
 #include "hphp/system/systemlib.h"
@@ -6602,18 +6603,24 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   const char *classname = pce ? pce->name()->data() : nullptr;
   BuiltinFunction nif = Native::GetBuiltinFunction(funcname, classname,
                                                    modifiers->isStatic());
-  BuiltinFunction bif = pce ? Native::methodWrapper
-                            : Native::functionWrapper;
-
+  BuiltinFunction bif;
   if (!nif) {
     bif = Native::unimplementedWrapper;
-  } else if (fe->parseNativeAttributes(attributes) & Native::AttrActRec) {
-    // Call this native function with a raw ActRec*
-    // rather than pulling out args for normal func calling
-    bif = nif;
-    nif = nullptr;
+  } else {
+    int nativeAttrs = fe->parseNativeAttributes(attributes);
+    if (nativeAttrs & Native::AttrZendCompat) {
+      bif = zend_wrap_func;
+    } else {
+      if (nativeAttrs & Native::AttrActRec) {
+        // Call this native function with a raw ActRec*
+        // rather than pulling out args for normal func calling
+        bif = nif;
+        nif = nullptr;
+      } else {
+        bif = pce ? Native::methodWrapper : Native::functionWrapper;
+      }
+    }
   }
-
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
 
@@ -8441,10 +8448,6 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(name);
     assert(mi &&
       "MethodInfo not found; may be a problem with the .idl.json files");
-    if ((mi->attribute & ClassInfo::ZendCompat) &&
-        !RuntimeOption::EnableZendCompat) {
-      continue;
-    }
 
     // We already provide array_map by the hhas systemlib.  Rename
     // because that hhas implementation delegates back to the C++
@@ -8599,21 +8602,11 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       e.info = it->second;
       e.ci = ClassInfo::FindSystemClassInterfaceOrTrait(e.name);
       assert(e.ci);
-      if ((e.ci->getAttribute() & ClassInfo::ZendCompat) &&
-          !RuntimeOption::EnableZendCompat) {
-        continue;
-      }
       StringData* parentName
         = makeStaticString(e.ci->getParentClass().get());
       if (parentName->empty()) {
         // If this class doesn't have a base class, it's eligible to be
         // loaded now
-        classEntries.push_back(e);
-      } else if ((e.ci->getAttribute() & ClassInfo::ZendCompat) &&
-                 Unit::loadClass(parentName)) {
-        // You can really hurt yourself trying to extend a systemlib class from
-        // a normal IDL (like overriding the property vector with your own C++
-        // properties). ZendCompat things don't do any of that so they are cool.
         classEntries.push_back(e);
       } else {
         // If this class has a base class, we can't load it until its

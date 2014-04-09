@@ -11,6 +11,7 @@ int main() { return 0; }" IS_AARCH64)
 set(HHVM_WHOLE_ARCHIVE_LIBRARIES
     hphp_runtime_static
     hphp_runtime_ext
+    hphp_ext_zend_compat
    )
 
 if (APPLE)

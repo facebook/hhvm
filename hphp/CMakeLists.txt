@@ -17,7 +17,6 @@
 
 include(HPHPSetup)
 include(FollySetup)
-include(ExtZendCompat)
 
 add_definitions("-DHHVM")
 
@@ -45,6 +44,7 @@ add_subdirectory(parser)
 add_subdirectory(runtime)
 add_subdirectory(runtime/ext)
 add_subdirectory(runtime/ext_hhvm)
+add_subdirectory(runtime/ext_zend_compat)
 add_subdirectory(system)
 add_subdirectory(util)
 add_subdirectory(vixl)

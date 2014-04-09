@@ -896,22 +896,9 @@ Variant f_proc_open(const String& cmd, const Array& descriptorspec, VRefParam pi
 }
 
 bool f_proc_terminate(const Resource& process,
-                      const Variant& signal /* = null_variant */) {
-  int signal_int = SIGTERM;
-
-  if (!signal.isNull()) {
-    if (signal.isString()) {
-      const char *str = signal.toString().data();
-      char *endptr;
-      signal_int = (int) strtoll(str, &endptr, 10);
-      if (!signal_int && (str == endptr)) return false;
-    } else {
-      signal_int = signal.toInt32();
-    }
-  }
-
+                      int signal /* = SIGTERM */) {
   ChildProcess *proc = process.getTyped<ChildProcess>();
-  return kill(proc->child, signal_int) == 0;
+  return kill(proc->child, signal) == 0;
 }
 
 int64_t f_proc_close(const Resource& process) {

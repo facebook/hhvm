@@ -93,6 +93,12 @@
     commit: 4de0618a01b34aa1c8c33a3f13f396dcd3882eba
     install_root: guzzle
     test_root: guzzle
+  guzzle4:
+    url: https://github.com/guzzle/guzzle.git
+    branch: 4.0.1
+    commit: c1cf6c8630b71fa7c9b8f7e769758bb1d9147dae
+    install_root: guzzle4
+    test_root: guzzle4
   idiorm:
     url: https://github.com/j4mie/idiorm.git
     branch: v1.4.1

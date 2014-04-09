@@ -1,19 +1,19 @@
+/* $Id$ */
 /*
-   +----------------------------------------------------------------------+
-   | HipHop for PHP                                                       |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
-   +----------------------------------------------------------------------+
-*/
+ * Written by Solar Designer <solar at openwall.com> in 2000-2011.
+ * No copyright is claimed, and the software is hereby placed in the public
+ * domain. In case this attempt to disclaim copyright and place the software
+ * in the public domain is deemed null and void, then the software is
+ * Copyright (c) 2000-2011 Solar Designer and it is hereby released to the
+ * general public under the following terms:
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted.
+ *
+ * There's ABSOLUTELY NO WARRANTY, express or implied.
+ *
+ * See crypt_blowfish.c for more information.
+ */
 
 #ifndef incl_CRYPT_BLOWFISH_H
 #define incl_CRYPT_BLOWFISH_H

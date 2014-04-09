@@ -51,17 +51,6 @@ endmacro()
 # Generate ext_hhvm stubs for ext/*.cpp
 EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS "hphp/runtime/ext" "hphp_runtime_ext")
 
-# Pick up relevant zend_ext_compat stubs
-if (ZEND_COMPAT_BUILD_DIRS)
-	string(LENGTH ${HPHP_HOME} HPHP_HOME_LEN)
-	foreach (dir ${ZEND_COMPAT_BUILD_DIRS})
-		string(LENGTH ${dir} dir_LEN)
-		math(EXPR EZC_PATH_LEN "${dir_LEN} - ${HPHP_HOME_LEN}")
-		string(SUBSTRING ${dir} ${HPHP_HOME_LEN} ${EZC_PATH_LEN} EZC_DIR)
-		EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS ${EZC_DIR} "hphp_runtime_static")
-	endforeach()
-endif()
-
 #
 ## ext_hhvm_infotabs
 #

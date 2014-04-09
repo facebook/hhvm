@@ -23,7 +23,7 @@
 #include <string>
 #include <stack>
 #include <cassert>
-#include <stddef.h>
+#include <cstddef>
 
 namespace HPHP {
 

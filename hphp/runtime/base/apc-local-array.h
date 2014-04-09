@@ -107,7 +107,7 @@ public: // implements Sweepable
   void sweep() override;
 
 public:
-  void getChildren(std::vector<TypedValue*>& out);
+  void getChildren(std::vector<const TypedValue*>& out) const;
   ssize_t iterAdvanceImpl(ssize_t prev) const {
     assert(prev >= 0 && prev < m_size);
     ssize_t next = prev + 1;

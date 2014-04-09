@@ -382,7 +382,7 @@ public:
   static const char* kindToString(ArrayKind kind);
 
 public: // for heap profiler
-  void getChildren(std::vector<TypedValue*>& out);
+  void getChildren(std::vector<const TypedValue*>& out) const;
 
 private:
   void serializeImpl(VariableSerializer *serializer) const;

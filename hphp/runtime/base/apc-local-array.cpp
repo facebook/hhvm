@@ -368,12 +368,10 @@ void APCLocalArray::OnSetEvalScalar(ArrayData*) {
   not_reached();
 }
 
-void APCLocalArray::getChildren(std::vector<TypedValue *> &out) {
+void APCLocalArray::getChildren(std::vector<const TypedValue*>& out) const {
   if (!m_localCache) return;
-  TypedValue *localCacheEnd = m_localCache + m_size;
-  for (TypedValue *tv = m_localCache;
-       tv < localCacheEnd;
-       ++tv) {
+  auto const localCacheEnd = m_localCache + m_size;
+  for (auto tv = m_localCache; tv != localCacheEnd; ++tv) {
     if (tv->m_type != KindOfUninit) {
       out.push_back(tv);
     }

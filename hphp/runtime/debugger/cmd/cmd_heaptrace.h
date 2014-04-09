@@ -52,9 +52,9 @@ private:
                         const GraphFormat &gf);
 
   struct Accum {
-    std::map<int64_t, int8_t> typesMap;
-    std::map<int64_t, int64_t> sizeMap;
-    std::map<int64_t, std::vector<int64_t>> adjacencyList;
+    std::map<int64_t,int8_t> typesMap;
+    std::map<int64_t,int64_t> sizeMap;
+    std::map<int64_t,std::vector<int64_t>> adjacencyList;
   } m_accum;
 };
 

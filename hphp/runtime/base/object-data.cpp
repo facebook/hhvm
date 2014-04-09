@@ -1823,7 +1823,7 @@ bool ObjectData::hasDynProps() const {
   return getAttribute(HasDynPropArr) && dynPropArray().size() != 0;
 }
 
-void ObjectData::getChildren(std::vector<TypedValue*>& out) {
+void ObjectData::getChildren(std::vector<const TypedValue*>& out) const {
   Slot nProps = m_cls->numDeclProperties();
   for (Slot i = 0; i < nProps; ++i) {
     out.push_back(&propVec()[i]);

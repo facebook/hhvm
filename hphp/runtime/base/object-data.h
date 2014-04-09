@@ -342,7 +342,7 @@ class ObjectData {
   Array& reserveProperties(int nProp = 2);
 
   // heap profiling helpers
-  void getChildren(std::vector<TypedValue*>& out);
+  void getChildren(std::vector<const TypedValue*>& out) const;
 
  protected:
   TypedValue* propVec();

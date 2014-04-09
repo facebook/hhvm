@@ -113,7 +113,7 @@ void MemoryProfile::logDeallocationImpl(void *ptr) {
 }
 
 // static
-size_t MemoryProfile::getSizeOfPtr(void *ptr) {
+size_t MemoryProfile::getSizeOfPtr(void* ptr) {
   if (!RuntimeOption::HHProfServerEnabled) return 0;
   const MemoryProfile &mp = *s_memory_profile;
 
@@ -122,20 +122,20 @@ size_t MemoryProfile::getSizeOfPtr(void *ptr) {
 }
 
 // static
-size_t MemoryProfile::getSizeOfTV(TypedValue *tv) {
+size_t MemoryProfile::getSizeOfTV(const TypedValue* tv) {
   if (!RuntimeOption::HHProfServerEnabled) return 0;
 
   switch (tv->m_type) {
-    case KindOfString:
-      return getSizeOfPtr(tv->m_data.pstr);
-    case KindOfArray:
-      return getSizeOfArray(tv->m_data.parr);
-    case KindOfObject:
-      return getSizeOfObject(tv->m_data.pobj);
-    case KindOfRef:
-      return getSizeOfPtr(tv->m_data.pref);
-    default:
-      return 0;
+  case KindOfString:
+    return getSizeOfPtr(tv->m_data.pstr);
+  case KindOfArray:
+    return getSizeOfArray(tv->m_data.parr);
+  case KindOfObject:
+    return getSizeOfObject(tv->m_data.pobj);
+  case KindOfRef:
+    return getSizeOfPtr(tv->m_data.pref);
+  default:
+    return 0;
   }
 }
 

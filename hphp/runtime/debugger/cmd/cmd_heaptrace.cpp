@@ -227,17 +227,16 @@ void CmdHeaptrace::onClient(DebuggerClient &client) {
 
 }
 
-bool CmdHeaptrace::onServer(DebuggerProxy &proxy) {
+bool CmdHeaptrace::onServer(DebuggerProxy& proxy) {
 
   // globals
-  std::vector<TypedValue *> roots;
+  std::vector<const TypedValue*> roots;
   const Array& arr = g_context->m_globalVarEnv->getDefinedVariables();
   arr->getChildren(roots);
 
   // static properties
   for (AllClasses ac; !ac.empty();) {
-    Class *c = ac.popFront();
-    c->getChildren(roots);
+    ac.popFront()->getChildren(roots);
   }
 
   // locals
@@ -252,12 +251,17 @@ bool CmdHeaptrace::onServer(DebuggerProxy &proxy) {
 
   Tracer<Accum>::traceAll(
     roots,
-    [](TypedValue *node, Accum &accum) {
-      accum.typesMap[(int64_t)node] = (int8_t)node->m_type;
-      accum.sizeMap[(int64_t)node] = (int64_t)MemoryProfile::getSizeOfTV(node);
+    [](const TypedValue* node, Accum& accum) {
+      auto const nodei = reinterpret_cast<int64_t>(node);
+      accum.typesMap[nodei] = static_cast<int8_t>(node->m_type);
+      accum.sizeMap[nodei] = static_cast<int64_t>(
+        MemoryProfile::getSizeOfTV(node)
+      );
     },
-    [](TypedValue *parent, TypedValue *child, Accum &accum) {
-      accum.adjacencyList[(int64_t)parent].push_back((int64_t)child);
+    [](const TypedValue* parent, const TypedValue* child, Accum& accum) {
+      auto const parenti = reinterpret_cast<int64_t>(parent);
+      auto const childi = reinterpret_cast<int64_t>(child);
+      accum.adjacencyList[parenti].push_back(childi);
     },
     m_accum
   );

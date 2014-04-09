@@ -170,15 +170,16 @@ string WddxPacket::wrapValue(string start, string end, string varValue,
 
 //////////////////////////////////////////////////////////////////////////////
 // helpers
-void find_var_recursive(TypedValue* tv, WddxPacket* wddxPacket) {
+
+void find_var_recursive(const TypedValue* tv, WddxPacket* wddxPacket) {
   if (tvIsString(tv)) {
     String var_name = tvCastToString(tv);
     wddxPacket->add_var(var_name, true);
   }
   if (tv->m_type == KindOfArray) {
-    vector<TypedValue*> children;
+    std::vector<const TypedValue*> children;
     tv->m_data.parr->getChildren(children);
-    for (TypedValue *child : children) {
+    for (auto const& child : children) {
       find_var_recursive(child, wddxPacket);
     }
   }
@@ -190,7 +191,7 @@ static TypedValue* add_vars_helper(ActRec* ar) {
   auto wddxPacket = packet_id.getTyped<WddxPacket>();
 
   for (int i = start_index; i < ar->numArgs(); i++) {
-    TypedValue* tv = getArg(ar,i);
+    auto const tv = getArg(ar,i);
     find_var_recursive(tv, wddxPacket);
   }
   return arReturn(ar, true);
@@ -200,7 +201,7 @@ static TypedValue* serialize_vars_helper(ActRec* ar) {
   WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(empty_string, true, true);
   int start_index = 0;
   for (int i = start_index; i < ar->numArgs(); i++) {
-    TypedValue* tv = getArg(ar, i);
+    auto const tv = getArg(ar, i);
     find_var_recursive(tv, wddxPacket);
   }
   const string packet = wddxPacket->packet_end();

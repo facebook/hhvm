@@ -17,55 +17,60 @@
 #ifndef incl_HPHP_TRACER_H
 #define incl_HPHP_TRACER_H
 
+#include <functional>
+#include <queue>
+#include <set>
+#include <vector>
+
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/trace.h"
 
-#include <functional>
-#include <queue>
-#include <set>
-#include <vector>
-
 namespace HPHP {
+
+//////////////////////////////////////////////////////////////////////
 
 template<typename Accum>
 struct Tracer {
-  typedef std::function<void(TypedValue *,             Accum&)> NodeFunc;
-  typedef std::function<void(TypedValue *,TypedValue *,Accum&)> EdgeFunc;
+  typedef std::function<void(const TypedValue*, Accum&)>
+    NodeFunc;
+  typedef std::function<void(const TypedValue*, const TypedValue*, Accum&)>
+    EdgeFunc;
 
-  static void trace(TypedValue *self,
+  static void trace(const TypedValue* self,
                     NodeFunc atNode,
                     EdgeFunc atEdge,
                     Accum& accumulator) {
-    std::set<TypedValue *> visited;
+    std::set<const TypedValue*> visited;
     traceImpl(self, visited, atNode, atEdge, accumulator);
   }
 
-  static void traceAll(std::vector<TypedValue *> &ts,
+  static void traceAll(std::vector<const TypedValue*>& ts,
                        NodeFunc atNode,
                        EdgeFunc atEdge,
                        Accum& accumulator) {
-    std::set<TypedValue *> visited;
-    for (TypedValue *t : ts) {
+    std::set<const TypedValue*> visited;
+    for (auto& t : ts) {
       traceImpl(t, visited, atNode, atEdge, accumulator);
     }
   }
 
 private:
-  static void traceImpl(TypedValue *self,
-                        std::set<TypedValue *> &visited,
+  static void traceImpl(const TypedValue* self,
+                        std::set<const TypedValue*> &visited,
                         NodeFunc atNode,
                         EdgeFunc atEdge,
                         Accum& accumulator) {
-    std::queue<TypedValue *> tvs;
-    const auto traceSingle = [&](TypedValue *parent, TypedValue *child) {
+    std::queue<const TypedValue*> tvs;
+    const auto traceSingle = [&](const TypedValue* parent,
+                                 const TypedValue* child) {
       atEdge(parent, child, accumulator);
       tvs.push(child);
     };
-    const auto traceMultiple = [&](TypedValue *parent) {
-      std::vector<TypedValue *> children;
+    const auto traceMultiple = [&](const TypedValue* parent) {
+      std::vector<const TypedValue*> children;
       switch(parent->m_type) {
         case KindOfArray:
           parent->m_data.parr->getChildren(children);
@@ -76,14 +81,14 @@ private:
         default:
           not_reached();
       }
-      for (TypedValue *child : children) {
+      for (auto& child : children) {
         traceSingle(parent, child);
       }
     };
 
     tvs.push(self);
     while (!tvs.empty()) {
-      TypedValue *top = tvs.front();
+      auto const top = tvs.front();
       tvs.pop();
       if (visited.find(top) != visited.end()) {
         continue;
@@ -91,35 +96,34 @@ private:
       visited.insert(top);
       atNode(top, accumulator);
       switch (top->m_type) {
-        case KindOfUninit:
-        case KindOfNull:
-        case KindOfBoolean:
-        case KindOfInt64:
-        case KindOfDouble:
-        case KindOfStaticString:
-        case KindOfString:
-        case KindOfResource:
-          break;
-        case KindOfArray:
-        case KindOfObject:
-          traceMultiple(top);
-          break;
-        case KindOfRef:
-          traceSingle(top, top->m_data.pref->tv());
-          break;
-        case KindOfIndirect:
-          traceSingle(top, top->m_data.pind);
-          break;
-        default:
-          not_reached();
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfBoolean:
+      case KindOfInt64:
+      case KindOfDouble:
+      case KindOfStaticString:
+      case KindOfString:
+      case KindOfResource:
+        break;
+      case KindOfArray:
+      case KindOfObject:
+        traceMultiple(top);
+        break;
+      case KindOfRef:
+        traceSingle(top, top->m_data.pref->tv());
+        break;
+      case KindOfIndirect:
+        traceSingle(top, top->m_data.pind);
+        break;
+      default:
+        not_reached();
       }
     }
   }
 };
 
-}
+//////////////////////////////////////////////////////////////////////
 
-#undef TRACE_SINGLE_CHILD
-#undef TRACE_MULTIPLE_CHILDREN
+}
 
 #endif

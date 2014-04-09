@@ -846,16 +846,16 @@ const char* ArrayData::kindToString(ArrayKind kind) {
   return names[kind];
 }
 
-void ArrayData::getChildren(std::vector<TypedValue*>& out) {
+void ArrayData::getChildren(std::vector<const TypedValue*>& out) const {
   if (isSharedArray()) {
-    auto const sm = static_cast<APCLocalArray*>(this);
+    auto const sm = static_cast<const APCLocalArray*>(this);
     sm->getChildren(out);
     return;
   }
   for (ssize_t pos = iter_begin();
       pos != ArrayData::invalid_index;
       pos = iter_advance(pos)) {
-    out.push_back(const_cast<TypedValue*>(getValueRef(pos).asTypedValue()));
+    out.push_back(getValueRef(pos).asTypedValue());
   }
 }
 

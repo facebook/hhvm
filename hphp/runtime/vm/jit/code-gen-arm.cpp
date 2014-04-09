@@ -37,6 +37,73 @@ using namespace vixl;
 
 //////////////////////////////////////////////////////////////////////
 
+struct RegSaver {
+  explicit RegSaver(RegSet regs)
+      : m_gprs(CPURegister::kRegister, kXRegSize, 0)
+      , m_simds(CPURegister::kFPRegister, kDRegSize, 0)
+      , m_maybeOddGPR(folly::none)
+      , m_maybeOddSIMD(folly::none) {
+    regs.forEach([&] (PhysReg r) {
+      if (r.isGP()) {
+        m_gprs.Combine(r);
+      } else {
+        m_simds.Combine(r);
+      }
+    });
+
+    // The vixl helper requires you to pass it an even number of registers. If
+    // we have an odd number of regs to save, remove one from the list we pass,
+    // and save it ourselves.
+    if (m_gprs.Count() % 2 == 1) {
+      m_maybeOddGPR = m_gprs.PopHighestIndex();
+    }
+    if (m_simds.Count() % 2 == 1) {
+      m_maybeOddSIMD = m_simds.PopHighestIndex();
+    }
+  }
+
+  void emitPushes(MacroAssembler& as) {
+    assert(m_gprs.Count() % 2 == 0);
+    assert(m_simds.Count() % 2 == 0);
+    as.    PushCPURegList(m_gprs);
+    as.    PushCPURegList(m_simds);
+
+    if (m_maybeOddGPR.hasValue()) {
+      // We're only storing a single reg, but the stack pointer must always be
+      // 16-byte aligned. This instruction subtracts 16 from the stack pointer,
+      // then writes the value.
+      as.  Str  (m_maybeOddGPR.value(), MemOperand(sp, -16, PreIndex));
+    }
+    if (m_maybeOddSIMD.hasValue()) {
+      as.  Str  (m_maybeOddSIMD.value(), MemOperand(sp, -16, PreIndex));
+    }
+  }
+
+  void emitPops(MacroAssembler& as) {
+    assert(m_gprs.Count() % 2 == 0);
+    assert(m_simds.Count() % 2 == 0);
+
+    if (m_maybeOddSIMD.hasValue()) {
+      // Read the value, then add 16 to the stack pointer.
+      as.  Ldr  (m_maybeOddSIMD.value(), MemOperand(sp, 16, PostIndex));
+    }
+    if (m_maybeOddGPR.hasValue()) {
+      // Read the value, then add 16 to the stack pointer.
+      as.  Ldr  (m_maybeOddGPR.value(), MemOperand(sp, 16, PostIndex));
+    }
+    as.    PopCPURegList(m_simds);
+    as.    PopCPURegList(m_gprs);
+  }
+
+ private:
+  CPURegList m_gprs;
+  CPURegList m_simds;
+  folly::Optional<CPURegister> m_maybeOddGPR;
+  folly::Optional<CPURegister> m_maybeOddSIMD;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 #define NOOP_OPCODE(name) void CodeGenerator::cg##name(IRInstruction*) {}
 
 NOOP_OPCODE(DefConst)
@@ -1077,40 +1144,12 @@ void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
   auto dstReg0 = dstInfo.reg0;
   DEBUG_ONLY auto dstReg1 = dstInfo.reg1;
 
-  if (debug) {
-    toSave.forEach([](PhysReg r) { assert(r.isGP()); });
-  }
-
-  toSave = toSave & kGPCallerSaved;
+  toSave = toSave & (kGPCallerSaved | kSIMDCallerSaved);
   assert((toSave & RegSet().add(dstReg0).add(dstReg1)).empty());
 
-  // Use vixl's handy helper to push caller-save regs. It uses ldp/stp when
-  // possible.
-  CPURegList pushedRegs(vixl::CPURegister::kRegister, vixl::kXRegSize, 0);
-  toSave.forEach([&](PhysReg r) { pushedRegs.Combine(r); });
-
-  // The vixl helper requires you to pass it an even number of registers. If we
-  // have an odd number of regs to save, remove one from the list we pass, and
-  // save it ourselves.
-  folly::Optional<vixl::CPURegister> maybeOddOne;
-  if (pushedRegs.Count() % 2 == 1) {
-    maybeOddOne = pushedRegs.PopHighestIndex();
-  }
-  a.    PushCPURegList(pushedRegs);
-  if (maybeOddOne) {
-    // We're only storing a single reg, but the stack pointer must always be
-    // 16-byte aligned. This instruction subtracts 16 from the stack pointer,
-    // then writes the value.
-    a.  Str  (maybeOddOne.value(), MemOperand(vixl::sp, -16, vixl::PreIndex));
-  }
-
-  SCOPE_EXIT {
-    if (maybeOddOne) {
-      // Read the value, then add 16 to the stack pointer.
-      a.Ldr  (maybeOddOne.value(), MemOperand(vixl::sp, 16, vixl::PostIndex));
-    }
-    a.  PopCPURegList(pushedRegs);
-  };
+  RegSaver saver{toSave};
+  saver.emitPushes(a);
+  SCOPE_EXIT { saver.emitPops(a); };
 
   for (size_t i = 0; i < args.numRegArgs(); i++) {
     args[i].setDstReg(PhysReg{argReg(i)});

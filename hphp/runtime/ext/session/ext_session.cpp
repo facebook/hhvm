@@ -1767,12 +1767,13 @@ static bool HHVM_FUNCTION(session_destroy) {
   return retval;
 }
 
-static Variant HHVM_FUNCTION(session_unset) {
+static void HHVM_FUNCTION(session_unset) {
   if (PS(session_status) == Session::None) {
-    return false;
+    return;
   }
-  php_global_set(s__SESSION, Variant());
-  return uninit_null();
+  GlobalVariables *g = get_global_variables();
+  g->getRef(s__SESSION) = Variant();
+  return;
 }
 
 static void HHVM_FUNCTION(session_write_close) {

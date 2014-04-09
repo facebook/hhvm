@@ -30,6 +30,8 @@
 
 namespace HPHP { namespace JIT {
 
+using Trace::Indent;
+
 TRACE_SET_MOD(hhir);
 
 IRBuilder::IRBuilder(Offset initialBcOffset,
@@ -223,35 +225,35 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
     return inst->src(0);
   }
 
-  // Now we're left with cases where neither type is a subtype of the other but
-  // they have some nonzero intersection. We want to end up asserting the
-  // intersection, but we have to constrain the input to avoid reintroducing
-  // types that were removed from the original typeParam.
-  auto const intersect = newType & oldType;
-  inst->setTypeParam(intersect);
+  // AssertLoc is special here because it's the one AssertTypeOp that doesn't
+  // do its own filtering of the destination type based on the input type and
+  // the asserted type. This will hopefully be fixed soon.
+  if (inst->is(AssertLoc)) {
+    // Now we're left with cases where neither type is a subtype of the other
+    // but they have some nonzero intersection. We want to end up asserting the
+    // intersection, but we have to constrain the input to avoid reintroducing
+    // types that were removed from the original typeParam.
+    auto const intersect = newType & oldType;
+    inst->setTypeParam(intersect);
 
-  TypeConstraint tc;
-  if (intersect != newType) {
-    auto increment = [](DataTypeCategory& cat) {
-      always_assert(cat != DataTypeSpecialized);
-      cat = static_cast<DataTypeCategory>(static_cast<uint8_t>(cat) + 1);
-    };
-
-    Type relaxed;
-    // Find the most general constraint that doesn't modify the type being
-    // asserted.
-    while ((relaxed = newType & relaxType(oldType, tc)) != intersect) {
-      if (tc.category > DataTypeGeneric &&
-          relaxed.maybeBoxed() && intersect.maybeBoxed() &&
-          (relaxed & Type::Cell) == (intersect & Type::Cell)) {
-        // If the inner type is why we failed, constrain that a level.
-        increment(tc.innerCat);
-      } else {
-        increment(tc.category);
+    TypeConstraint tc;
+    if (intersect != newType) {
+      Type relaxed;
+      // Find the most general constraint that doesn't modify the type being
+      // asserted.
+      while ((relaxed = newType & relaxType(oldType, tc)) != intersect) {
+        if (tc.category > DataTypeGeneric &&
+            relaxed.maybeBoxed() && intersect.maybeBoxed() &&
+            (relaxed & Type::Cell) == (intersect & Type::Cell)) {
+          // If the inner type is why we failed, constrain that a level.
+          incCategory(tc.innerCat);
+        } else {
+          incCategory(tc.category);
+        }
       }
     }
+    constrain(tc);
   }
-  constrain(tc);
 
   return nullptr;
 }
@@ -261,14 +263,16 @@ SSATmp* IRBuilder::preOptimizeCheckType(IRInstruction* inst) {
   auto const oldType = src->type();
   auto const newType = inst->typeParam();
 
+  if (oldType.isBoxed() && newType.isBoxed() &&
+      (oldType.not(newType) || newType < oldType)) {
+    /* This CheckType serves to update the inner type hint for a boxed value,
+     * which requires no runtime work. This depends on the type being boxed,
+     * and constraining it with DataTypeCountness will do it.  */
+    constrainValue(src, DataTypeCountness);
+    return gen(AssertType, newType, src);
+  }
+
   if (oldType.not(newType)) {
-    if (oldType.isBoxed() && newType.isBoxed()) {
-      /* This CheckType serves to update the inner type hint for a boxed
-       * value, which requires no runtime work.  This depends on the type being
-       * boxed, and constraining it with DataTypeCountness will do it.  */
-      constrainValue(src, DataTypeCountness);
-      return gen(AssertType, newType, src);
-    }
     /* This check will always fail. It's probably due to an incorrect
      * prediction. Generate a Jmp, and return src because
      * following instructions may depend on the output of CheckType
@@ -280,15 +284,9 @@ SSATmp* IRBuilder::preOptimizeCheckType(IRInstruction* inst) {
   }
 
   if (newType >= oldType) {
-    /*
-     * The type of the src is the same or more refined than type, so the guard
-     * is unnecessary.
-     */
+    /* The type of the src is the same or more refined than type, so the guard
+     * is unnecessary. */
     return src;
-  }
-  if (newType < oldType) {
-    assert(!src->isConst());
-    return nullptr;
   }
 
   return nullptr;
@@ -302,24 +300,16 @@ SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
   auto stkVal = getStackValue(sp, offset);
   auto const oldType = stkVal.knownType;
 
-  if (newType < oldType) {
-    // The new type is strictly better than the old type.
-    return nullptr;
-  }
-
-  if (newType >= oldType) {
-    // The new type isn't better than the old type.
-    return sp;
+  if (oldType.isBoxed() && newType.isBoxed() &&
+      (oldType.not(newType) || newType < oldType)) {
+    /* This CheckStk serves to update the inner type hint for a boxed
+     * value, which requires no runtime work. This depends on the type being
+     * boxed, and constraining it with DataTypeCountness will do it.  */
+    constrainStack(sp, offset, DataTypeCountness);
+    return gen(AssertStk, newType, StackOffset(offset), sp);
   }
 
   if (newType.not(oldType)) {
-    if (oldType.isBoxed() && newType.isBoxed()) {
-      /* This CheckStk serves to update the inner type hint for a boxed
-       * value, which requires no runtime work. This depends on the type being
-       * boxed, and constraining it with DataTypeCountness will do it.  */
-      constrainStack(sp, offset, DataTypeCountness);
-      return gen(AssertStk, newType, StackOffset(offset), sp);
-    }
     /* This check will always fail. It's probably due to an incorrect
      * prediction. Generate a Jmp, and return the source because
      * following instructions may depend on the output of CheckStk
@@ -327,6 +317,11 @@ SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
      * because the return value isn't nullptr, so the original
      * instruction won't be inserted into the stream. */
     gen(Jmp, inst->taken());
+    return sp;
+  }
+
+  if (newType >= oldType) {
+    // The new type isn't better than the old type.
     return sp;
   }
 
@@ -342,7 +337,7 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
     return gen(CheckType, typeParam, inst->taken(), prevValue);
   }
 
-  auto const prevType = localType(locId, DataTypeSpecific);
+  auto const prevType = localType(locId, DataTypeGeneric);
 
   if (prevType <= typeParam) {
     return src;
@@ -786,8 +781,9 @@ bool IRBuilder::constrainGuard(IRInstruction* inst, TypeConstraint tc) {
   auto& guard = m_guardConstraints[inst];
   auto changed = false;
   auto const assertFits = typeFitsConstraint(guard.assertedType, tc);
-  FTRACE(2, "constrainGuard({}, {}): existing constraint {}, assertFits: {}\n",
+  ITRACE(2, "constrainGuard({}, {}): existing constraint {}, assertFits: {}\n",
          *inst, tc, guard, assertFits ? "true" : "false");
+  Indent _i;
 
   // For category and innerCat, constrain the guard if the assertedType isn't
   // strong enough to fit what we want and tc is more specific than the
@@ -795,24 +791,24 @@ bool IRBuilder::constrainGuard(IRInstruction* inst, TypeConstraint tc) {
 
   if (!assertFits && tc.innerCat > guard.innerCat) {
     if (!tc.weak) {
-      FTRACE(1, "constraining inner type of {}: {} -> {}\n",
+      ITRACE(1, "constraining inner type of {}: {} -> {}\n",
              *inst, guard.innerCat, tc.innerCat);
       guard.innerCat = tc.innerCat;
     }
     changed = true;
   } else {
-    FTRACE(2, "not constraining innerCat\n");
+    ITRACE(2, "not constraining innerCat\n");
   }
 
   if (!assertFits && tc.category > guard.category) {
     if (!tc.weak) {
-      FTRACE(1, "constraining {}: {} -> {}\n",
+      ITRACE(1, "constraining {}: {} -> {}\n",
              *inst, guard.category, tc.category);
       guard.category = tc.category;
     }
     changed = true;
   } else {
-    FTRACE(2, "not constraining category\n");
+    ITRACE(2, "not constraining category\n");
   }
 
   // It's fairly common to have a local that we've asserted to be Obj, and then
@@ -823,11 +819,11 @@ bool IRBuilder::constrainGuard(IRInstruction* inst, TypeConstraint tc) {
   if (assertCommon < guard.assertedType) {
     // We don't check tc.weak here because assertedType is supposed to be
     // statically known type information.
-    FTRACE(1, "using {} to refine assertedType of {}: {} -> {}\n",
+    ITRACE(1, "using {} to refine assertedType of {}: {} -> {}\n",
            tc.assertedType, *inst, guard.assertedType, assertCommon);
     guard.assertedType = assertCommon;
   } else {
-    FTRACE(2, "not refining assertedType\n");
+    ITRACE(2, "not refining assertedType\n");
   }
 
   return changed;
@@ -839,16 +835,18 @@ bool IRBuilder::constrainGuard(IRInstruction* inst, TypeConstraint tc) {
  * DataTypeCategory. Returns true iff one or more guard instructions
  * were constrained.
  */
-bool IRBuilder::constrainValue(SSATmp* const val,
-                               TypeConstraint tc) {
+bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   if (!shouldConstrainGuards()) return false;
+  always_assert(IMPLIES(tc.innerCat > DataTypeGeneric,
+                        tc.category >= DataTypeCountness));
 
   if (!val) {
-    FTRACE(1, "constrainValue(nullptr, {}), bailing\n", tc);
+    ITRACE(1, "constrainValue(nullptr, {}), bailing\n", tc);
     return false;
   }
 
-  FTRACE(1, "constrainValue({}, {})\n", *val->inst(), tc);
+  ITRACE(1, "constrainValue({}, {})\n", *val->inst(), tc);
+  Indent _i;
 
   auto inst = val->inst();
   if (inst->is(LdLoc, LdLocAddr)) {
@@ -859,11 +857,11 @@ bool IRBuilder::constrainValue(SSATmp* const val,
     auto source = inst->extra<LocalData>()->typeSrc;
     if (!source) {
       // val was newly created in this trace. Nothing to constrain.
-      FTRACE(2, "  - typeSrc is null, bailing\n");
+      ITRACE(2, "typeSrc is null, bailing\n");
       return false;
     }
 
-    // If valSrc is a FramePtr, it represents the frame the value was
+    // If typeSrc is a FramePtr, it represents the frame the value was
     // originally loaded from. Look for the guard for this local.
     if (source->isA(Type::FramePtr)) {
       return constrainLocal(inst->extra<LocalId>()->locId, source, tc,
@@ -875,16 +873,48 @@ bool IRBuilder::constrainValue(SSATmp* const val,
   } else if (inst->is(LdStack, LdStackAddr)) {
     return constrainStack(inst->src(0), inst->extra<StackOffset>()->offset,
                           tc);
-  } else if (inst->is(CheckType, AssertType)) {
-    // If the dest type of the instruction fits the constraint we want, we can
-    // stop here without constraining any further. Otherwise, continue through
-    // to the source.
-    auto changed = false;
-    if (inst->is(CheckType)) changed = constrainGuard(inst, tc) || changed;
+  } else if (inst->is(AssertType)) {
+    // Sometimes code in HhbcTranslator asks for a value with DataTypeSpecific
+    // but can tolerate a less specific value. If that happens, there's nothing
+    // to constrain.
+    if (!typeFitsConstraint(val->type(), tc)) return false;
 
-    auto dstType = inst->typeParam();
-    if (!typeFitsConstraint(dstType, tc.category)) {
-      changed = constrainValue(inst->src(0), tc) || changed;
+    // If the immutable typeParam fits the constraint, we're done.
+    auto const typeParam = inst->typeParam();
+    if (typeFitsConstraint(typeParam, tc)) return false;
+
+    auto const newTc = relaxConstraint(tc, typeParam, inst->src(0)->type());
+    ITRACE(1, "tracing through {}, orig tc: {}, new tc: {}\n",
+           *inst, tc, newTc);
+    return constrainValue(inst->src(0), newTc);
+  } else if (inst->is(CheckType)) {
+    // Sometimes code in HhbcTranslator asks for a value with DataTypeSpecific
+    // but can tolerate a less specific value. If that happens, there's nothing
+    // to constrain.
+    if (!typeFitsConstraint(val->type(), tc)) return false;
+
+    bool changed = false;
+    auto const typeParam = inst->typeParam();
+    auto const srcType = inst->src(0)->type();
+
+    // Constrain the guard on the CheckType, but first relax the constraint
+    // based on what's known about srcType.
+    auto const guardTc = relaxConstraint(tc, srcType, typeParam);
+    changed = constrainGuard(inst, guardTc) || changed;
+
+    // Relax typeParam with its current constraint. This is used below to
+    // recursively relax the constraint on the source, if needed.
+    auto constraint = m_guardConstraints[inst];
+    constraint.category = std::max(constraint.category, guardTc.category);
+    constraint.innerCat = std::max(constraint.innerCat, guardTc.innerCat);
+    auto const knownType = refineType(relaxType(typeParam, constraint),
+                                      constraint.assertedType);
+
+    if (!typeFitsConstraint(knownType, tc)) {
+      auto const newTc = relaxConstraint(tc, knownType, srcType);
+      ITRACE(1, "tracing through {}, orig tc: {}, new tc: {}\n",
+             *inst, tc, newTc);
+      changed = constrainValue(inst->src(0), newTc) || changed;
     }
     return changed;
   } else if (inst->is(StRef)) {
@@ -907,12 +937,11 @@ bool IRBuilder::constrainValue(SSATmp* const val,
     tc.assertedType = Type::Gen;
     return constrainValue(inst->src(0), tc);
   } else if (inst->is(LdRef)) {
-    // Like StRef, we're relying on the caller to have appropriately
-    // constrained the outer type of the box. Constrain the inner type of the
-    // box with tc.
+    // Constrain the inner type of the box with tc, using DataTypeCountness for
+    // the outer constraint to preserve the fact that it's a box.
 
     tc.innerCat = tc.category;
-    tc.category = DataTypeGeneric;
+    tc.category = DataTypeCountness;
     tc.assertedType = Type::Gen;
     return constrainValue(inst->src(0), tc);
   } else if (inst->isPassthrough()) {
@@ -920,7 +949,7 @@ bool IRBuilder::constrainValue(SSATmp* const val,
   } else {
     // Any instructions not special cased above produce a new value, so
     // there's no guard for us to constrain.
-    FTRACE(2, "  - value is new in this trace, bailing\n");
+    ITRACE(2, "value is new in this trace, bailing\n");
     return false;
   }
   // TODO(t2598894): Should be able to do something with LdMem<T> here
@@ -929,59 +958,63 @@ bool IRBuilder::constrainValue(SSATmp* const val,
 bool IRBuilder::constrainLocal(uint32_t locId, TypeConstraint tc,
                                const std::string& why) {
   if (!shouldConstrainGuards()) return false;
-
   return constrainLocal(locId, localTypeSource(locId), tc, why);
 }
 
-bool IRBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
+bool IRBuilder::constrainLocal(uint32_t locId, SSATmp* typeSrc,
                                TypeConstraint tc,
                                const std::string& why) {
   if (!shouldConstrainGuards()) return false;
+  always_assert(IMPLIES(tc.innerCat > DataTypeGeneric,
+                        tc.category >= DataTypeCountness));
 
-  FTRACE(1, "constrainLocal({}, {}, {}, {})\n",
-         locId, valSrc ? valSrc->inst()->toString() : "null", tc, why);
+  ITRACE(1, "constrainLocal({}, {}, {}, {})\n",
+         locId, typeSrc ? typeSrc->inst()->toString() : "null", tc, why);
+  Indent _i;
 
-  if (!valSrc) return false;
-  if (!valSrc->isA(Type::FramePtr)) {
-    return constrainValue(valSrc, tc);
+  if (!typeSrc) return false;
+  if (!typeSrc->isA(Type::FramePtr)) {
+    return constrainValue(typeSrc, tc);
   }
 
-  // When valSrc is a FramePtr, that means we loaded the value the local had
+  // When typeSrc is a FramePtr, that means we loaded the value the local had
   // coming into the trace. Trace through the FramePtr chain, looking for a
   // guard for this local id. If we find it, constrain the guard. If we don't
   // find it, there wasn't a guard for this local so there's nothing to
   // constrain.
-  auto guard = guardForLocal(locId, valSrc);
+  auto guard = guardForLocal(locId, typeSrc);
   while (guard) {
     if (guard->is(AssertLoc)) {
-      // If the refined the type of the local satisfies the constraint we're
+      // If the refined type of the local satisfies the constraint we're
       // trying to apply, we can stop here. This can happen if we assert a
       // more general type than what we already know. Otherwise we need to
       // keep tracing back to the guard.
-      if (typeFitsConstraint(guard->typeParam(), tc.category)) return false;
+      if (typeFitsConstraint(guard->typeParam(), tc)) return false;
       guard = guardForLocal(locId, guard->src(0));
     } else {
       assert(guard->is(GuardLoc, CheckLoc));
-      FTRACE(2, "    - found guard to constrain\n");
+      ITRACE(2, "found guard to constrain\n");
       return constrainGuard(guard, tc);
     }
   }
 
-  FTRACE(2, "    - no guard to constrain\n");
+  ITRACE(2, "no guard to constrain\n");
   return false;
 }
 
 bool IRBuilder::constrainStack(int32_t idx, TypeConstraint tc) {
   if (!shouldConstrainGuards()) return false;
-
   return constrainStack(sp(), idx, tc);
 }
 
 bool IRBuilder::constrainStack(SSATmp* sp, int32_t idx,
                                TypeConstraint tc) {
   if (!shouldConstrainGuards()) return false;
+  always_assert(IMPLIES(tc.innerCat > DataTypeGeneric,
+                        tc.category >= DataTypeCountness));
 
-  FTRACE(1, "constrainStack({}, {}, {})\n", *sp->inst(), idx, tc);
+  ITRACE(1, "constrainStack({}, {}, {})\n", *sp->inst(), idx, tc);
+  Indent _i;
   assert(sp->isA(Type::StkPtr));
 
   // We've hit a LdStack. If getStackValue gives us a value, recurse on
@@ -989,13 +1022,56 @@ bool IRBuilder::constrainStack(SSATmp* sp, int32_t idx,
   // stack element. If it's a GuardStk or CheckStk, it's our target. If it's
   // anything else, the value is new so there's no guard to relax.
   auto stackInfo = getStackValue(sp, idx);
+
+  // Sometimes code in HhbcTranslator asks for a value with DataTypeSpecific
+  // but can tolerate a less specific value. If that happens, there's nothing
+  // to constrain.
+  if (!typeFitsConstraint(stackInfo.knownType, tc)) return false;
+
+  IRInstruction* typeSrc = stackInfo.typeSrc;
   if (stackInfo.value) {
-    FTRACE(1, "  - value = {}\n", *stackInfo.value->inst());
+    ITRACE(1, "value = {}\n", *stackInfo.value->inst());
     return constrainValue(stackInfo.value, tc);
+  } else if (typeSrc->is(AssertStk)) {
+    // If the immutable typeParam fits the constraint, we're done.
+    auto const typeParam = typeSrc->typeParam();
+    if (typeFitsConstraint(typeParam, tc)) return false;
+
+    auto const srcIdx = typeSrc->extra<StackOffset>()->offset;
+    auto const srcType = getStackValue(typeSrc->src(0), srcIdx).knownType;
+    auto const newTc = relaxConstraint(tc, typeParam, srcType);
+    ITRACE(1, "tracing through {}, orig tc: {}, new tc: {}\n",
+           *typeSrc, tc, newTc);
+    return constrainStack(typeSrc->src(0), srcIdx, newTc);
+  } else if (typeSrc->is(CheckStk)) {
+    auto changed = false;
+    auto const typeParam = typeSrc->typeParam();
+    auto const srcIdx = typeSrc->extra<StackOffset>()->offset;
+    auto const srcType = getStackValue(typeSrc->src(0), srcIdx).knownType;
+
+    // Constrain the guard on the CheckType, but first relax the constraint
+    // based on what's known about srcType.
+    auto const guardTc = relaxConstraint(tc, srcType, typeParam);
+    changed = constrainGuard(typeSrc, guardTc) || changed;
+
+    // Relax typeParam with its current constraint.  This is used below to
+    // recursively relax the constraint on the source, if needed.
+    auto constraint = m_guardConstraints[typeSrc];
+    constraint.category = std::max(constraint.category, guardTc.category);
+    constraint.innerCat = std::max(constraint.innerCat, guardTc.innerCat);
+    auto const knownType = refineType(relaxType(typeParam, constraint),
+                                      constraint.assertedType);
+
+    if (!typeFitsConstraint(knownType, tc)) {
+      auto const newTc = relaxConstraint(tc, knownType, srcType);
+      ITRACE(1, "tracing through {}, orig tc: {}, new tc: {}\n",
+             *typeSrc, tc, newTc);
+      changed = constrainStack(typeSrc->src(0), srcIdx, newTc) || changed;
+    }
+    return changed;
   } else {
-    auto typeSrc = stackInfo.typeSrc;
-    FTRACE(1, "  - typeSrc = {}\n", *typeSrc);
-    return typeSrc->is(GuardStk, CheckStk) && constrainGuard(typeSrc, tc);
+    ITRACE(1, "typeSrc = {}\n", *typeSrc);
+    return typeSrc->is(GuardStk) && constrainGuard(typeSrc, tc);
   }
 }
 

@@ -36,7 +36,9 @@ TRACE_SET_MOD(hhir);
 //////////////////////////////////////////////////////////////////////
 
 StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
-  FTRACE(5, "getStackValue: idx = {}, {}\n", index, sp->inst()->toString());
+  ITRACE(5, "getStackValue: idx = {}, {}\n", index, sp->inst()->toString());
+  Trace::Indent _i;
+
   assert(sp->isA(Type::StkPtr));
   IRInstruction* inst = sp->inst();
 
@@ -73,8 +75,6 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     }
     return getStackValue(inst->src(0), index);
 
-  case AssertStk:
-    // fallthrough
   case CastStk:
     // fallthrough
   case CoerceStk:
@@ -87,12 +87,14 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     }
     return getStackValue(inst->src(0), index);
 
+  case AssertStk:
+    // fallthrough
   case CheckStk:
-    // CheckStk's resulting type is the intersection of its typeParam
-    // with whatever type preceded it.
+    // CheckStk's and AssertStk's resulting type is the intersection
+    // of its typeParam with whatever type preceded it.
     if (inst->extra<StackOffset>()->offset == index) {
       Type prevType = getStackValue(inst->src(0), index).knownType;
-      return StackValueInfo { inst, inst->typeParam() & prevType};
+      return StackValueInfo { inst, refineType(prevType, inst->typeParam())};
     }
     return getStackValue(inst->src(0), index);
 

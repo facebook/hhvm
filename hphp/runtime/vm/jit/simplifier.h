@@ -158,7 +158,6 @@ private:
   SSATmp* simplifyLdLoc(const IRInstruction*);
   SSATmp* simplifyAssertNonNull(const IRInstruction*);
 
-
   template <class Oper>
   SSATmp* simplifyConst(SSATmp* src1, SSATmp* src2, Oper op);
 
@@ -210,7 +209,7 @@ struct StackValueInfo {
     , spansCall(false)
     , typeSrc(value->inst())
   {
-    TRACE(5, "%s created\n", show().c_str());
+    ITRACE(5, "{} created\n", show());
   }
 
   explicit StackValueInfo(IRInstruction* inst, Type type)
@@ -219,7 +218,7 @@ struct StackValueInfo {
     , spansCall(false)
     , typeSrc(inst)
   {
-    TRACE(5, "%s created\n", show().c_str());
+    ITRACE(5, "{} created\n", show());
   }
 
   std::string show() const {

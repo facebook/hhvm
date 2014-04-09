@@ -517,9 +517,8 @@ void HhbcTranslator::MInstrTranslator::constrainBase(TypeConstraint tc,
   assert(baseType == Type::Gen || baseType.isBoxed() || baseType.notBoxed());
 
   if (baseType.isBoxed()) {
-    m_irb.constrainValue(value, DataTypeCountness);
     tc.innerCat = tc.category;
-    tc.category = DataTypeGeneric;
+    tc.category = DataTypeCountness;
   }
   m_irb.constrainValue(value, tc);
 }

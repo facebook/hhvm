@@ -800,6 +800,13 @@ Type boxType(Type);
  */
 Type convertToType(RepoAuthType ty);
 
+/*
+ * Return the type resulting from refining oldType with the fact that it also
+ * belongs to newType. This essentially intersects the two types, except that
+ * it has special logic for boxed types.
+ */
+Type refineType(Type oldType, Type newType);
+
 //////////////////////////////////////////////////////////////////////
 
 struct TypeConstraint {
@@ -819,12 +826,19 @@ struct TypeConstraint {
     return *this;
   }
 
+  bool operator==(TypeConstraint tc2) const {
+    return category == tc2.category && innerCat == tc2.innerCat &&
+      weak == tc2.weak && assertedType == tc2.assertedType;
+  }
+
   // category starts as DataTypeGeneric and is refined to more specific values
   // by consumers of the type.
   DataTypeCategory category;
 
   // When a value is boxed, innerCat is used to determine how we can relax the
-  // inner type.
+  // inner type. innerCat is only meaningful when category is at least
+  // DataTypeCountness, since a category of DataTypeGeneric relaxes types all
+  // the way to Gen which has no meaningful inner type.
   DataTypeCategory innerCat;
 
   // If weak is true, the consumer of the value being constrained doesn't

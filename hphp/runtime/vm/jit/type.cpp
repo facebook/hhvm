@@ -718,6 +718,19 @@ Type convertToType(RepoAuthType ty) {
   not_reached();
 }
 
+Type refineType(Type oldType, Type newType) {
+  // It's OK for the old and new inner types of boxed values not to
+  // intersect, since the inner type is really just a prediction.
+  // But if they do intersect, we keep the intersection.  This is
+  // necessary to keep the type known in situations like:
+  //   oldType: Boxed{Obj}
+  //   newType: Boxed{Obj<C>, InitNull}
+  if (oldType.isBoxed() && newType.isBoxed() && oldType.not(newType)) {
+    return newType;
+  }
+  return oldType & newType;
+}
+
 Type outputType(const IRInstruction* inst, int dstId) {
 #define IRT(name, ...) UNUSED static const Type name = Type::name;
   IR_TYPES
@@ -727,7 +740,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DofS(n)   return inst->src(n)->type();
 #define DUnbox(n) return inst->src(n)->type().unbox();
 #define DBox(n)   return boxType(inst->src(n)->type());
-#define DFilterS(n) return inst->src(n)->type() & inst->typeParam();
+#define DRefineS(n) return refineType(inst->src(n)->type(), inst->typeParam());
 #define DParam    return inst->typeParam();
 #define DAllocObj return allocObjReturn(inst);
 #define DLdRef    return ldRefReturn(inst);
@@ -754,7 +767,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DofS
 #undef DUnbox
 #undef DBox
-#undef DFilterS
+#undef DRefineS
 #undef DParam
 #undef DAllocObj
 #undef DLdRef
@@ -930,7 +943,7 @@ void assertOperandTypes(const IRInstruction* inst) {
                              "invalid src num");
 #define DofS(src)   checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
-#define DFilterS(src) checkDst(src < inst->numSrcs(),  \
+#define DRefineS(src) checkDst(src < inst->numSrcs(),  \
                                "invalid src num");     \
                       requireTypeParam();
 #define DParam      requireTypeParam();
@@ -966,7 +979,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DSetElem
 #undef DBox
 #undef DofS
-#undef DFilterS
+#undef DRefineS
 #undef DParam
 #undef DAllocObj
 #undef DLdRef

@@ -127,14 +127,17 @@ class FailedAssertion : public std::exception {
 #define assert_impl(cond, fail)                   \
   ((cond) ? static_cast<void>(0) : ((fail), static_cast<void>(0)))
 
-#define assert_log_impl(cond, fail, func) assert_impl(  \
-  cond,                                                 \
-  (::HPHP::assert_fail_log(#cond, func()), (fail)))     \
+#define assert_log_impl(cond, fail, str) assert_impl(   \
+    cond,                                               \
+    (::HPHP::assert_fail_log(#cond, str), (fail)))      \
 
 #define assert_fail_impl(e)                                             \
   ::HPHP::assert_fail(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__)
 #define always_assert(e) assert_impl(e, assert_fail_impl(e))
-#define always_assert_log(e, l) assert_log_impl(e, assert_fail_impl(e), l)
+#define always_assert_log(e, l) assert_log_impl(e, assert_fail_impl(e), l())
+#define always_assert_flog(e, ...)                                      \
+  assert_log_impl(e, assert_fail_impl(e),                               \
+                  ::folly::format(__VA_ARGS__).str())
 
 #define assert_throw_fail_impl(e)                                       \
   throw ::HPHP::FailedAssertion(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__)
@@ -147,11 +150,13 @@ class FailedAssertion : public std::exception {
 #ifndef NDEBUG
 #define assert(e) always_assert(e)
 #define assert_log(e, l) always_assert_log(e, l)
+#define assert_flog(e, ...) always_assert_flog(e, __VA_ARGS__)
 #define assert_throw(e) always_assert_throw(e)
 #define assert_throw_log(e, l) always_assert_throw_log(e, l)
 #else
 #define assert(e) static_cast<void>(0)
 #define assert_log(e, l) static_cast<void>(0)
+#define assert_flog(e, ...) static_cast<void>(0)
 #define assert_throw(e) static_cast<void>(0)
 #define assert_throw_log(e, l) static_cast<void>(0)
 #endif

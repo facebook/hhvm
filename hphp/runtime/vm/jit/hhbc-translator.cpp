@@ -1069,7 +1069,7 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
   }
 
   auto const exitBlock = makeExit();
-  auto loc             = ldLocInnerWarn(id, exitBlock, DataTypeSpecific);
+  auto loc             = ldLocInnerWarn(id, exitBlock, DataTypeGeneric);
 
   if (subOp == Op::Concat) {
     /*
@@ -1078,6 +1078,7 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
      */
     auto const catchBlock = makeCatch();
     auto const val    = popC();
+    m_irb->constrainValue(loc, DataTypeSpecific);
     auto const result = gen(ConcatCellCell, catchBlock, loc, val);
     pushIncRef(stLocNRC(id, nullptr, result));
     // ConcatCellCell does not DecRef its second argument,
@@ -1088,6 +1089,7 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
 
   if (areBinaryArithTypesSupported(subOp, loc->type(), topC()->type())) {
     auto val = popC();
+    m_irb->constrainValue(loc, DataTypeSpecific);
     loc = promoteBool(loc);
     val = promoteBool(val);
     Opcode opc;
@@ -2894,11 +2896,12 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
   Block* exitBlock = makeExitSlow();
 
   auto classTmp = top(Type::Cls);
-  auto methodTmp = topC(1);
+  auto methodTmp = topC(1, DataTypeGeneric);
   assert(classTmp->isA(Type::Cls));
   if (!classTmp->isConst() || !methodTmp->isConst(Type::Str)) {
     PUNT(FPushClsMethodF-unknownClassOrMethod);
   }
+  m_irb->constrainValue(methodTmp, DataTypeSpecific);
 
   auto const cls = classTmp->clsVal();
   auto const methName = methodTmp->strVal();
@@ -3082,7 +3085,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
 }
 
 void HhbcTranslator::emitRetFromInlined(Type type) {
-  SSATmp* retVal = pop(type);
+  SSATmp* retVal = pop(type, DataTypeGeneric);
 
   assert(!(curFunc()->attrs() & AttrMayUseVV));
   assert(!curFunc()->isPseudoMain());
@@ -3532,15 +3535,16 @@ void HhbcTranslator::assertClass(const RegionDesc::Location& loc,
       curType = m_irb->localType(loc.localId(), DataTypeSpecific);
       break;
   }
-
-  if (curType.canSpecializeClass() && curType.isSpecialized()) {
-    curType = curType.unspecialize();
-  }
   assert(curType.isBoxed() || curType.notBoxed());
-  if (curType.canSpecializeClass()) {
-    assertType(loc, curType.specialize(cls) |
-               (curType.isBoxed() ? Type::BoxedInitNull : Type::InitNull));
-  }
+
+  // We drop the |InitNull for boxed types because the inner type is just a
+  // hint and will be verified later.
+  Type newType =
+    (curType.isBoxed() ? Type::BoxedObj : (Type::Obj | Type::InitNull))
+    .specialize(cls);
+  FTRACE(1, "assertClass({}): curType = {}  =>  newType = {}\n",
+         show(loc), curType, newType);
+  assertType(loc, newType);
 }
 
 /*
@@ -5495,8 +5499,8 @@ SSATmp* HhbcTranslator::ldLocInnerWarn(uint32_t id, Block* target,
   if (!catchBlock) catchBlock = makeCatch();
   auto const locVal = ldLocInner(id, target, constraint);
 
+  m_irb->constrainLocal(id, DataTypeCountnessInit, "ldLocInnerWarn");
   if (locVal->type() <= Type::Uninit) {
-    m_irb->constrainLocal(id, DataTypeCountnessInit, "ldLocInnerWarn");
     gen(RaiseUninitLoc, catchBlock, cns(curFunc()->localVarName(id)));
     return cns(Type::InitNull);
   }

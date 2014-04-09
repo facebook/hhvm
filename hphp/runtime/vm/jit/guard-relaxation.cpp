@@ -364,45 +364,56 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
 }
 
 /*
- * Returns true iff t is specific enough to fit tc, meaning a consumer
- * constraining a value with tc would be satisfied with t as the value's type
- * after relaxation.
+ * Returns true iff tc.category is satisfied by t.
  */
-bool typeFitsConstraint(Type t, TypeConstraint tc) {
-  assert(t != Type::Bottom);
-
-  if (tc.innerCat > DataTypeGeneric) {
-    // First check the outer constraint.
-    if (!typeFitsConstraint(t, tc.category)) return false;
-
-    // Then, if t might be boxed, check the inner type.
-    return t.notBoxed() ||
-      typeFitsConstraint((t & Type::BoxedCell).innerType(), tc.innerCat);
-  }
-
+static bool typeFitsOuterConstraint(Type t, TypeConstraint tc) {
   switch (tc.category) {
     case DataTypeGeneric:
       return true;
 
     case DataTypeCountness:
-      // Consumers using this constraint are probably going to decref the
-      // value, so it's ok if we know whether t is counted or not. Arr and Str
-      // are special cased because we don't guard on staticness for them.
+      // Consumers using this constraint expect the type to be relaxed to
+      // Uncounted or left alone, so something like Arr|Obj isn't specific
+      // enough.
       return t.notCounted() ||
-             t <= (Type::Counted | Type::StaticArr | Type::StaticStr);
+             t.subtypeOfAny(Type::Str, Type::Arr, Type::Obj,
+                            Type::Res, Type::BoxedCell);
 
     case DataTypeCountnessInit:
-      return typeFitsConstraint(t, DataTypeCountness) &&
+      return typeFitsOuterConstraint(t, DataTypeCountness) &&
              (t <= Type::Uninit || t.not(Type::Uninit));
 
     case DataTypeSpecific:
       return t.isKnownDataType();
 
     case DataTypeSpecialized:
-      return t.isSpecialized();
+      // Type::isSpecialized() returns true for types like {Arr<Packed>|Int}
+      // and Arr has non-specialized subtypes, so we check that t is both
+      // specialized and a strict subtype of Obj or Arr.
+      return t.isSpecialized() && (t < Type::Obj || t < Type::Arr);
   }
 
   not_reached();
+}
+
+/*
+ * Returns true iff t is not boxed, or if tc.innerCat is satisfied by t's inner
+ * type.
+ */
+static bool typeFitsInnerConstraint(Type t, TypeConstraint tc) {
+  return tc.innerCat == DataTypeGeneric || t.notBoxed() ||
+    typeFitsOuterConstraint((t & Type::BoxedCell).innerType(), tc.innerCat);
+}
+
+/*
+ * Returns true iff t is specific enough to fit tc, meaning a consumer
+ * constraining a value with tc would be satisfied with t as the value's type
+ * after relaxation.
+ */
+bool typeFitsConstraint(Type t, TypeConstraint tc) {
+  always_assert(t != Type::Bottom);
+  return typeFitsInnerConstraint(t, tc) &&
+    typeFitsOuterConstraint(t, tc);
 }
 
 /*
@@ -422,19 +433,78 @@ Type relaxType(Type t, TypeConstraint tc) {
 
     case DataTypeCountnessInit:
       if (t <= Type::Uninit) return Type::Uninit;
-      return t.notCounted() ? Type::UncountedInit
-                            : relaxInner(t.unspecialize(), tc);
+      return (t.notCounted() && t.not(Type::Uninit))
+        ? Type::UncountedInit : relaxInner(t.unspecialize(), tc);
 
     case DataTypeSpecific:
-      assert(t.isKnownDataType());
       return relaxInner(t.unspecialize(), tc);
 
     case DataTypeSpecialized:
-      assert(t.isSpecialized());
       return relaxInner(t, tc);
   }
 
   not_reached();
+}
+
+void incCategory(DataTypeCategory& c) {
+  always_assert(c != DataTypeSpecialized);
+  c = static_cast<DataTypeCategory>(static_cast<uint8_t>(c) + 1);
+}
+
+/*
+ * relaxConstraint returns the least specific TypeConstraint 'tc' that doesn't
+ * prevent the intersection of knownType and relaxType(toRelax, tc) from
+ * satisfying origTc. It is used in IRBuilder::constrainValue and
+ * IRBuilder::constrainStack to determine how to constrain the typeParam and
+ * src values of CheckType/CheckStk instructions, and the src values of
+ * AssertType/AssertStk instructions.
+ *
+ * AssertType example:
+ * t24:Obj<C> = AssertType<{Obj<C>|InitNull}> t4:Obj
+ *
+ * If constrainValue is called with (t24, DataTypeSpecialized), relaxConstraint
+ * will be called with (DataTypeSpecialized, Obj<C>|InitNull, Obj). After a few
+ * iterations it will determine that constraining Obj with DataTypeCountness
+ * will still allow the result type of the AssertType instruction to satisfy
+ * DataTypeSpecialized, because relaxType(Obj, DataTypeCountness) == Obj.
+ */
+TypeConstraint relaxConstraint(const TypeConstraint origTc,
+                               const Type knownType, const Type toRelax) {
+  ITRACE(4, "relaxConstraint({}, knownType = {}, toRelax = {})\n",
+         origTc, knownType, toRelax);
+  Trace::Indent _i;
+
+  auto const dstType = refineType(knownType, toRelax);
+  always_assert_flog(typeFitsConstraint(dstType, origTc),
+                     "refine({}, {}) doesn't fit {}",
+                     knownType, toRelax, origTc);
+  Type newDstType;
+
+  // Preserve origTc's weak and assertedType properties.
+  TypeConstraint newTc{DataTypeGeneric, Type::Gen, DataTypeGeneric};
+  newTc.weak = origTc.weak;
+  newTc.assertedType = origTc.assertedType;
+
+  while (!typeFitsConstraint(
+           newDstType = refineType(relaxType(toRelax, newTc), knownType),
+           origTc)) {
+    ITRACE(5, "newDstType = {}, newTc = {}; ", newDstType, newTc);
+    if (!typeFitsOuterConstraint(newDstType, origTc)) {
+      FTRACE(5, "incrementing outer\n");
+      incCategory(newTc.category);
+    } else if (!typeFitsInnerConstraint(newDstType, origTc)) {
+      FTRACE(5, "incrementing inner\n");
+      incCategory(newTc.innerCat);
+    } else {
+      not_reached();
+    }
+  }
+
+  ITRACE(4, "Returning {}\n", newTc);
+  // newTc shouldn't be any more specific than origTc.
+  always_assert(newTc.category <= origTc.category &&
+                newTc.innerCat <= origTc.innerCat);
+  return newTc;
 }
 
 } }

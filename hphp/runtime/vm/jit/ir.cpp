@@ -67,7 +67,7 @@ namespace {
 #define DofS(n)   HasDest
 #define DUnbox(n) HasDest
 #define DBox(n)   HasDest
-#define DFilterS(n) HasDest
+#define DRefineS(n) HasDest
 #define DParam    HasDest
 #define DAllocObj HasDest
 #define DLdRef    HasDest
@@ -113,7 +113,7 @@ struct {
 #undef DofS
 #undef DUnbox
 #undef DBox
-#undef DFilterS
+#undef DRefineS
 #undef DParam
 #undef DAllocObj
 #undef DLdRef

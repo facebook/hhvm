@@ -139,7 +139,7 @@ class FailedCodeGen : public std::runtime_error {
  *     DofS(N)   single dst has the type of src N
  *     DUnbox(N) single dst has unboxed type of src N
  *     DBox(N)   single dst has boxed type of src N
- *     DFilterS(N) single dst's type is the intersection of src N and paramType
+ *     DRefineS(N) single dst's type is the intersection of src N and paramType
  *     DParam    single dst has type of the instruction's type parameter
  *     DLdRef    single dst has type of the instruction's type parameter,
  *               loosened to allow efficient type checks
@@ -202,8 +202,8 @@ class FailedCodeGen : public std::runtime_error {
 
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(CheckType,               DFilterS(0), S(Gen),                        B|E|P) \
-O(AssertType,                   DParam, S(Gen,Cls),                    C|E|P) \
+O(CheckType,               DRefineS(0), S(Gen),                        B|E|P) \
+O(AssertType,              DRefineS(0), S(Gen,Cls),                    C|E|P) \
 O(CheckTypeMem,                     ND, S(PtrToGen),                     B|E) \
 O(GuardLoc,                D(FramePtr), S(FramePtr),                       E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \

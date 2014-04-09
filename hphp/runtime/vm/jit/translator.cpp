@@ -4042,8 +4042,22 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
       case Unit::MetaInfo::Kind::Class: {
         auto& rtt = inst.inputs[arg]->rtt;
         auto const& location = inst.inputs[arg]->location;
-        if (rtt.valueType() != KindOfObject) break;
 
+        // We need to know the boxiness of rtt.
+        if (rtt.outerType() == KindOfAny) break;
+
+        // The previously known type may not be KindOfObject because
+        // it was relaxed.  The meta-data guarantees that the type is
+        // KindOfObject (or KindOfNull), so change rtt to KindOfObject
+        // while keeping its boxiness. Note the RuntimeType cannot
+        // express the Null possibility.  That's handled in assertClass.
+        if (rtt.valueType() != KindOfObject) {
+          RuntimeType newRtt = rtt.isRef() ?
+            RuntimeType(KindOfRef, KindOfObject) : RuntimeType(KindOfObject);;
+          SKTRACE(1, inst.source, "changing rtt from %s to %s\n",
+                  rtt.pretty().c_str(), newRtt.pretty().c_str());
+          rtt = newRtt;
+        }
         const StringData* metaName = inst.unit()->lookupLitstrId(info.m_data);
         const StringData* rttName =
           rtt.valueClass() ? rtt.valueClass()->name() : nullptr;
@@ -4056,13 +4070,13 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
           // Runtime type is more derived
           metaCls = rttCls;
         }
-        if (!metaCls) break;
         if (location.space != Location::This) {
           hhbcTrans.assertClass(
             stackFilter(location).toLocation(inst.stackOffset), metaCls);
         } else {
-          assert(metaCls->classof(hhbcTrans.curClass()));
+          assert(!metaCls || metaCls->classof(hhbcTrans.curClass()));
         }
+        if (!metaCls) break;
 
         if (metaCls == rttCls) break;
         SKTRACE(1, inst.source, "replacing input %d with a MetaInfo-supplied "

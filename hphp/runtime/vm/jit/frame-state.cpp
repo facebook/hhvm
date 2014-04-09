@@ -664,22 +664,16 @@ void FrameState::setLocalValue(uint32_t id, SSATmp* value) {
 void FrameState::refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {
   always_assert(id < m_locals.size());
   auto& local = m_locals[id];
-  if (type.isBoxed() && local.type.isBoxed()) {
-    // It's OK for the old and new inner types of boxed values not to
-    // intersect, since the inner type is really just a prediction.
-    FTRACE(2, "updating local {}'s inner type: {} -> {}\n",
-           id, local.type, type);
-    local.type = type;
-  } else {
-    auto const result = local.type & type;
-    always_assert_log(
-      result != Type::Bottom,
-      [&] {
-        return folly::format("Bad new type for local {}: {} & {} = {}",
-                             id, local.type, type, result).str();
-      });
-    local.type = local.type & type;
-  }
+  Type newType = refineType(local.type, type);
+  FTRACE(2, "updating local {}'s type: {} -> {}\n",
+         id, local.type, newType);
+  always_assert_log(
+    newType != Type::Bottom,
+    [&] {
+      return folly::format("Bad new type for local {}: {} & {} = {}",
+                           id, local.type, type, newType).str();
+    });
+  local.type = newType;
   local.typeSource = typeSource;
 }
 

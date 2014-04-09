@@ -1327,7 +1327,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
   ///// LocalStateHook overrides /////
   void setLocalValue(uint32_t id, SSATmp* newVal) override {
-    assert(IMPLIES(m_inst->is(LdLoc), m_frameState.localValue(id) == nullptr));
+    assert(IMPLIES(m_inst->is(LdLoc),
+                   m_frameState.localValue(id) == nullptr ||
+                   m_frameState.localValue(id)->inst()->is(DefConst)));
 
     // When a local's value is updated by StLoc(NT), the consumption of the old
     // value should've been visible to us, so we ignore that here.

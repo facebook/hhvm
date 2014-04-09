@@ -289,6 +289,7 @@ namespace RDS {
  */
 typedef uint32_t FuncId;
 constexpr FuncId InvalidFuncId = FuncId(-1LL);
+constexpr FuncId DummyFuncId = FuncId(-2LL);
 typedef hphp_hash_set<FuncId> FuncIdSet;
 
 /*

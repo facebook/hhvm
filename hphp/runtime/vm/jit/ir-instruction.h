@@ -30,47 +30,44 @@ namespace HPHP { namespace JIT {
  * from.
  */
 struct BCMarker {
-  const Func* func;
-  Offset      bcOff;
-  int32_t     spOff;
+  SrcKey      m_sk;
+  int32_t     m_spOff;
 
   /*
    * This is for use by test code that needs to provide BCMarkers but is not
    * deriving them from an actual bytecode region. It is always valid().
    */
   static BCMarker Dummy() {
-    return BCMarker(reinterpret_cast<const Func*>(1), 0, 0);
+    return BCMarker(SrcKey(DummyFuncId, 0), 0);
   }
 
   BCMarker()
-    : func(nullptr)
-    , bcOff(0)
-    , spOff(0)
+    : m_sk()
+    , m_spOff(0)
   {}
 
-  BCMarker(const Func* f, Offset o, int32_t sp)
-    : func(f)
-    , bcOff(o)
-    , spOff(sp)
+  BCMarker(SrcKey sk, int32_t sp)
+    : m_sk(sk)
+    , m_spOff(sp)
   {
     assert(valid());
   }
 
   bool operator==(BCMarker b) const {
-    return b.func == func &&
-      b.bcOff == bcOff &&
-      b.spOff == spOff;
+    return b.m_sk == m_sk && b.m_spOff == m_spOff;
   }
   bool operator!=(BCMarker b) const { return !operator==(b); }
 
   std::string show() const;
   bool valid() const;
-  bool isDummy() const { return reinterpret_cast<uintptr_t>(func) == 1; }
+  bool isDummy() const { return m_sk.valid() &&
+                                m_sk.getFuncId() == DummyFuncId; }
 
-  SrcKey sk() const {
-    assert(valid());
-    return SrcKey { func, bcOff };
-  }
+  SrcKey sk() const { assert(valid()); return m_sk; }
+  const Func* func() const { assert(valid()); return m_sk.func(); }
+  Offset bcOff() const { assert(valid()); return m_sk.offset(); }
+  int32_t spOff() const { assert(valid()); return m_spOff; }
+  void setSpOff(int32_t sp) { assert(valid()); m_spOff = sp; }
 };
 
 /*
@@ -91,16 +88,16 @@ struct IRInstruction {
                          Edge* edges = nullptr,
                          uint32_t numSrcs = 0,
                          SSATmp** srcs = nullptr)
-    : m_op(op)
-    , m_typeParam(folly::none)
+    : m_typeParam(folly::none)
+    , m_op(op)
     , m_numSrcs(numSrcs)
     , m_numDsts(0)
+    , m_marker(marker)
     , m_id(kTransient)
     , m_srcs(srcs)
     , m_dst(nullptr)
     , m_block(nullptr)
     , m_edges(edges)
-    , m_marker(marker)
     , m_extra(nullptr)
   {
     if (op != DefConst) {
@@ -331,7 +328,7 @@ struct IRInstruction {
   }
   const BCMarker& marker() const { return m_marker; }
   BCMarker& marker()             { return m_marker; }
-  Offset bcOffset()        const { return marker().bcOff; }
+  Offset bcOffset()        const { return marker().bcOff(); }
 
   std::string toString() const;
 
@@ -390,16 +387,16 @@ private:
   }
 
 private:
-  Opcode            m_op;
   folly::Optional<Type> m_typeParam;
+  Opcode            m_op;
   uint16_t          m_numSrcs;
   uint16_t          m_numDsts;
+  BCMarker          m_marker;
   const Id          m_id;
   SSATmp**          m_srcs;
   SSATmp*           m_dst;     // if HasDest or NaryDest
   Block*            m_block;   // what block owns this instruction
   Edge*             m_edges;   // outgoing edges, if this is a block-end.
-  BCMarker          m_marker;
   IRExtraData*      m_extra;
 public:
   boost::intrusive::list_member_hook<> m_listNode; // for InstructionList

@@ -126,13 +126,13 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   }
 
   bool operator==(const SrcKey& r) const {
-    return offset() == r.offset() &&
-           getFuncId() == r.getFuncId();
+    return m_offset == r.m_offset &&
+           m_funcId == r.m_funcId;
   }
 
   bool operator<(const SrcKey& r) const {
-    return std::make_tuple(getFuncId(), offset()) <
-           std::make_tuple(r.getFuncId(), r.offset());
+    return std::make_tuple(m_funcId, m_offset) <
+           std::make_tuple(r.m_funcId, r.m_offset);
   }
 
   std::string getSymbol() const;

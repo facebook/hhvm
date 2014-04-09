@@ -87,8 +87,8 @@ void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& stubsCode,
     if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
         (mcg->tx().isTransDBEnabled() ||
         RuntimeOption::EvalJitUseVtuneAPI) && bcMap) {
-      bcMap->push_back(TransBCMapping{inst->marker().func->unit()->md5(),
-                                      inst->marker().bcOff,
+      bcMap->push_back(TransBCMapping{inst->marker().func()->unit()->md5(),
+                                      inst->marker().bcOff(),
                                       cb.frontier(),
                                       stubsCode.frontier()});
       prevMarker = inst->marker();

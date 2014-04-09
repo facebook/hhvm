@@ -373,7 +373,7 @@ BCMarker HhbcTranslator::makeMarker(Offset bcOff) {
   FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
          bcOff, stackOff, curFunc()->fullName()->data());
 
-  return BCMarker{ curFunc(), bcOff, stackOff };
+  return BCMarker{ SrcKey{ curFunc(), bcOff }, stackOff };
 }
 
 void HhbcTranslator::updateMarker() {
@@ -5246,12 +5246,12 @@ Block* HhbcTranslator::makeExitOpt(TransID transId) {
   Offset targetBcOff = bcOff();
   auto const exit = m_irb->makeExit();
 
-  BCMarker exitMarker;
-  exitMarker.bcOff = targetBcOff;
-  exitMarker.spOff = m_irb->spOffset()
-    + m_irb->evalStack().size()
-    - m_irb->stackDeficit();
-  exitMarker.func  = curFunc();
+  BCMarker exitMarker{
+    SrcKey{ curFunc(), targetBcOff },
+    int32_t(m_irb->spOffset()
+            + m_irb->evalStack().size()
+            - m_irb->stackDeficit())
+  };
 
   BlockPusher blockPusher(*m_irb, exitMarker, exit);
 
@@ -5300,7 +5300,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
       stack = gen(SpillStack,
                   std::make_pair(sizeof spill2 / sizeof spill2[0], spill2)
       );
-      exitMarker.spOff += 1;
+      exitMarker.setSpOff(exitMarker.spOff() + 1);
     }
   }
 

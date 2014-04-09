@@ -977,7 +977,7 @@ void IRBuilder::setMarker(BCMarker marker) {
 
   if (marker == oldMarker) return;
   FTRACE(2, "IRBuilder changing current marker from {} to {}\n",
-         oldMarker.func ? oldMarker.show() : "<invalid>", marker.show());
+         oldMarker.valid() ? oldMarker.show() : "<invalid>", marker.show());
   assert(marker.valid());
   m_state.setMarker(marker);
 }

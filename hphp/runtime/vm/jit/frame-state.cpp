@@ -28,7 +28,7 @@ namespace HPHP {
 namespace JIT {
 
 FrameState::FrameState(IRUnit& unit, BCMarker marker)
-  : FrameState(unit, marker.spOff, marker.func, marker.func->numLocals())
+  : FrameState(unit, marker.spOff(), marker.func(), marker.func()->numLocals())
 {
   assert(!marker.isDummy());
 }
@@ -731,7 +731,7 @@ void FrameState::dropLocalInnerType(uint32_t id, unsigned inlineIdx) {
 std::string show(const FrameState& state) {
   return folly::format("func: {}, bcOff: {}, spOff: {}{}{}",
                        state.func()->fullName()->data(),
-                       state.marker().bcOff,
+                       state.marker().bcOff(),
                        state.spOffset(),
                        state.thisAvailable() ? ", thisAvailable" : "",
                        state.frameSpansCall() ? ", frameSpansCall" : ""

@@ -66,7 +66,7 @@ struct CodeGenerator {
     a.  bind(&done);
   }
 
-  const Func* curFunc() { return m_curInst->marker().func; }
+  const Func* curFunc() { return m_curInst->marker().func(); }
 
   void emitJumpToBlock(CodeBlock& cb, Block* target, ConditionCode cc);
 

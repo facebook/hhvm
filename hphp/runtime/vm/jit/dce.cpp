@@ -314,7 +314,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
 
   // We limit the total stack depth during inlining, so this is the deepest
   // we'll ever have to worry about.
-  auto* outerFunc = blocks.front()->front().marker().func;
+  auto* outerFunc = blocks.front()->front().marker().func();
   auto const maxDepth = depth(outerFunc) + kStackCheckLeafPadding;
 
   ITRACE(3, "Killed some frames. Iterating over blocks for fixups.\n");
@@ -331,7 +331,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
         case DefInlineFP: {
           auto* spillInst = findSpillFrame(inst.src(0));
           assert(spillInst);
-          curDepth += depth(spillInst->marker().func);
+          curDepth += depth(spillInst->marker().func());
           ITRACE(4, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
                  inst, state[inst].weakUseCount(),
                  folly::get_default(uses, inst.dst(), 0));
@@ -343,7 +343,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
           assert(fpInst->is(DefInlineFP));
           auto* spillInst = findSpillFrame(fpInst->src(0));
           assert(spillInst);
-          curDepth -= depth(spillInst->marker().func);
+          curDepth -= depth(spillInst->marker().func());
           assert(findPassFP(inst.src(0)->inst()) == nullptr &&
                  "Eliminated DefInlineFP but left its InlineReturn");
           break;
@@ -376,12 +376,12 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
         case DecRefLoc:
         case DecRefStack:
         case DecRefMem: {
-          auto& spOff = inst.marker().spOff;
-          auto newDepth = maxDepth - curDepth;
+          DEBUG_ONLY auto spOff = inst.marker().spOff();
+          auto newDepth = int32_t(maxDepth - curDepth);
           assert(spOff <= newDepth);
           ITRACE(4, "adjusting marker spOff for {} from {} to {}\n",
                  inst, spOff, newDepth);
-          spOff = newDepth;
+          inst.marker().setSpOff(newDepth);
           break;
         }
 

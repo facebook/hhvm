@@ -94,7 +94,7 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
 }
 
 #define CG_PUNT(instr) \
-  cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff, curFunc())
+  cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff(), curFunc())
 
 const char* getContextName(Class* ctx) {
   return ctx ? ctx->name()->data() : ":anonymous:";
@@ -105,7 +105,7 @@ const char* getContextName(Class* ctx) {
 
 const Func* CodeGenerator::curFunc() const {
   assert(m_curInst->marker().valid());
-  return m_curInst->marker().func;
+  return m_curInst->marker().func();
 }
 
 /*
@@ -2946,7 +2946,7 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
-  assert(m_unit.bcOff() == inst->marker().bcOff);
+  assert(m_unit.bcOff() == inst->marker().bcOff());
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
   auto const destSR = m_mcg->tx().getSrcRec(destSK);
   destSR->emitFallbackJump(m_mainCode);
@@ -3627,7 +3627,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   }
 
   assert(m_curInst->marker().valid());
-  SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
+  SrcKey srcKey = m_curInst->marker().sk();
   bool isImmutable = func->isConst(Type::Func);
   const Func* funcd = isImmutable ? func->funcVal() : nullptr;
   assert(m_as.base() == m_mcg->code.main().base());
@@ -3721,7 +3721,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   int returnOffset = MISOFF(tvBuiltinReturn);
 
   if (FixupMap::eagerRecord(func)) {
-    const auto* pc = curUnit()->entry() + m_curInst->marker().bcOff;
+    const auto* pc = curUnit()->entry() + m_curInst->marker().bcOff();
     // we have spilled all args to stack, so spDiff is 0
     emitEagerSyncPoint(m_as, reinterpret_cast<const Op*>(pc));
   }
@@ -4368,9 +4368,10 @@ void CodeGenerator::cgStElem(IRInstruction* inst) {
 
 void CodeGenerator::recordSyncPoint(Asm& as,
                                     SyncOptions sync /* = kSyncPoint */) {
+  auto const marker = m_curInst->marker();
   assert(m_curInst->marker().valid());
 
-  Offset stackOff = m_curInst->marker().spOff;
+  Offset stackOff = marker.spOff();
   switch (sync) {
   case SyncOptions::kSyncPointAdjustOne:
     stackOff -= 1;
@@ -4384,7 +4385,7 @@ void CodeGenerator::recordSyncPoint(Asm& as,
     assert(RuntimeOption::HHProfServerEnabled);
   }
 
-  Offset pcOff = m_curInst->marker().bcOff - m_curInst->marker().func->base();
+  Offset pcOff = marker.bcOff() - marker.func()->base();
 
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", as.frontier(), pcOff,
          stackOff);

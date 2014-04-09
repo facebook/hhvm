@@ -332,7 +332,7 @@ void print(std::ostream& os, const Block* block,
     if (inst.marker() != curMarker) {
       std::ostringstream mStr;
       auto const& newMarker = inst.marker();
-      auto func = newMarker.func;
+      auto func = newMarker.func();
       if (!func || newMarker.isDummy()) {
         os << color(ANSI_COLOR_BLUE)
            << std::string(kIndent, ' ')
@@ -340,14 +340,14 @@ void print(std::ostream& os, const Block* block,
            << color(ANSI_COLOR_END)
            << '\n';
       } else {
-        if (func != curMarker.func) {
+        if (func != curMarker.func()) {
           func->prettyPrint(mStr, Func::PrintOpts().noFpi());
         }
         mStr << std::string(kIndent, ' ')
              << newMarker.show()
              << '\n';
 
-        auto bcOffset = newMarker.bcOff;
+        auto bcOffset = newMarker.bcOff();
         func->unit()->prettyPrint(
           mStr, Unit::PrintOpts()
           .range(bcOffset, bcOffset+1)

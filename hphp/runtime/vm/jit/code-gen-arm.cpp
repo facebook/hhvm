@@ -207,14 +207,14 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
   throw FailedCodeGen(file, line, func, bcOff, vmFunc);
 }
 
-#define PUNT_OPCODE(name)                                         \
-  void CodeGenerator::cg##name(IRInstruction* inst) {             \
-    cgPunt(__FILE__, __LINE__, #name, m_curInst->marker().bcOff,  \
-           curFunc());                                            \
+#define PUNT_OPCODE(name)                                           \
+  void CodeGenerator::cg##name(IRInstruction* inst) {               \
+    cgPunt(__FILE__, __LINE__, #name, m_curInst->marker().bcOff(),  \
+           curFunc());                                              \
   }
 
 #define CG_PUNT(instr) \
-    cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff, curFunc())
+    cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff(), curFunc())
 
 /////////////////////////////////////////////////////////////////////
 //TODO t3702757: Convert to CALL_OPCODE, the following set works on
@@ -629,8 +629,8 @@ void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state) {
 
 void CodeGenerator::recordHostCallSyncPoint(vixl::MacroAssembler& as,
                                             TCA tca) {
-  auto stackOff = m_curInst->marker().spOff;
-  auto pcOff = m_curInst->marker().bcOff - m_curInst->marker().func->base();
+  auto stackOff = m_curInst->marker().spOff();
+  auto pcOff = m_curInst->marker().bcOff() - m_curInst->marker().func()->base();
   m_mcg->fixupMap().recordSyncPoint(tca, pcOff, stackOff);
 }
 
@@ -1536,7 +1536,7 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
-  assert(m_unit.bcOff() == inst->marker().bcOff);
+  assert(m_unit.bcOff() == inst->marker().bcOff());
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
   auto const destSR = m_mcg->tx().getSrcRec(destSK);
   destSR->emitFallbackJump(m_mainCode);
@@ -1615,7 +1615,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   if (FixupMap::eagerRecord(func)) {
     // Save VM registers
-    auto const* pc = curFunc()->unit()->entry() + m_curInst->marker().bcOff;
+    auto const* pc = curFunc()->unit()->entry() + m_curInst->marker().bcOff();
     m_as.Str  (rVmFp, rGContextReg[offsetof(ExecutionContext, m_fp)]);
     m_as.Str  (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
                                    Stack::topOfStackOffset()]);
@@ -1710,7 +1710,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   emitRegGetsRegPlusImm(m_as, spReg, spReg, adjustment);
 
   assert(m_curInst->marker().valid());
-  SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
+  SrcKey srcKey = m_curInst->marker().sk();
   bool isImmutable = func->isConst() && !func->isA(Type::Null);
   const Func* funcd = isImmutable ? func->funcVal() : nullptr;
   int32_t adjust  = emitBindCall(mcg->code.main(), mcg->code.stubs(),

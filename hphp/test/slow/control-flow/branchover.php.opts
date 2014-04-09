@@ -1,0 +1,2 @@
+-vEval.HHIRBytecodeControlFlow=true
+-vEval.JitPGOThreshold=6

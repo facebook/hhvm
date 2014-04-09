@@ -70,7 +70,6 @@ set(INFOTABS_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/ext_hhvm_infotabs.h")
 set(INFOTABS_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/ext_hhvm_infotabs.cpp")
 
 auto_sources(HPHP_IDLS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
-ZEND_COMPAT_STRIP_IDLS(HPHP_IDLS ${ZEND_COMPAT_EXCLUDE_IDLS})
 
 # Generate ext_hhvm_infotabs.h based on ext_hhvm files being generated
 file(WRITE ${INFOTABS_HEADER} "")

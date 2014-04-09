@@ -1,0 +1,8 @@
+File "lambda23.php", line 4, characters 10-10:
+Invalid return type
+File "lambda23.php", line 3, characters 27-29:
+Invalid argument
+File "lambda23.php", line 4, characters 11-16:
+This is a string
+File "lambda23.php", line 3, characters 27-29:
+It is incompatible with an int

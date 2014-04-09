@@ -29,7 +29,10 @@ let builtins =
   "interface KeyedIterable<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {}"^
   "interface Awaitable<T> { }"^
   "interface WaitHandle<T> extends Awaitable<T> { }"^
-  "final class Vector<Tv> implements KeyedIterable<int, Tv>, Indexish<int, Tv> {}"^
+  "final class Vector<Tv> implements KeyedIterable<int, Tv>, Indexish<int, Tv>{"^
+  "  public function map<Tu>((function(Tv): Tu) $callback): Vector<Tu>;"^
+  "  public function filter((function(Tv): bool) $callback): Vector<Tv>;"^
+  "}"^
   "final class ImmVector<Tv> implements KeyedIterable<int, Tv> {}"^
   "final class Map<Tk, Tv> implements KeyedIterable<Tk, Tv>, Indexish<Tk, Tv> {}"^
   "final class ImmMap<Tk, Tv> implements KeyedIterable<Tk, Tv> {}"^

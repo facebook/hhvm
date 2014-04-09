@@ -2167,7 +2167,7 @@ and lambda_expr_body : env -> block = fun env ->
   let (p, e1) = expr env in
   [Return (p, (Some (p, e1)))]
 
-and lambda_body env params =
+and lambda_body env params ret =
   let body =
     if peek env = Tlcb
     then function_body env
@@ -2177,7 +2177,7 @@ and lambda_body env params =
     f_name = (Pos.none, ";anonymous");
     f_tparams = [];
     f_params = params;
-    f_ret = None;
+    f_ret = ret;
     f_body = body;
     f_user_attributes = Utils.SMap.empty;
     f_type = FSync;
@@ -2199,37 +2199,27 @@ and make_lambda_param : id -> fun_param = fun var_id ->
 
 and lambda_single_arg env var_id =
   expect env Tlambda;
-  lambda_body env [make_lambda_param var_id]
-
-and short_lambda_param_list env acc =
-  let tok = L.token env.lb in
-  match tok with
-  | Trp -> Some acc;
-  | Tlvar ->
-    let next_tok = peek env in
-    (match next_tok with
-    | Tcomma | Trp ->
-        let pos = Pos.make env.lb in
-        let var_id = (pos, Lexing.lexeme env.lb) in
-        let acc = (make_lambda_param var_id) :: acc in
-        drop env;
-        if next_tok = Tcomma
-        then short_lambda_param_list env acc
-        else Some (List.rev acc)
-    | _ -> None)
-  | _ -> None
+  lambda_body env [make_lambda_param var_id] None
 
 and try_short_lambda env =
   try_parse env begin fun env ->
-    match short_lambda_param_list env [] with
-    | Some param_list ->
-        if not (peek env = Tlambda)
-        then None
-        else begin
-          drop env;
-          Some (lambda_body env param_list)
-        end
-    | None -> None
+    let error_state = !(env.errors) in
+    let param_list = parameter_list_remain env in
+    if !(env.errors) != error_state then begin
+      env.errors := error_state; 
+      None
+    end else begin
+      let ret = hint_return_opt env in
+      if !(env.errors) != error_state then begin
+        env.errors := error_state;
+        None
+      end else if not (peek env = Tlambda)
+      then None
+      else begin
+        drop env;
+        Some (lambda_body env param_list ret)
+      end
+    end
   end
 
 (*****************************************************************************)

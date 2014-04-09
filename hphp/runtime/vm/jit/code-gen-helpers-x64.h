@@ -131,7 +131,13 @@ emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
             RegNumber reg) {
   PhysRegSaver(a, kGPCallerSaved); // we don't know for sure what's alive
   a.    emitImmReg(&datum.m_key, argNumToRegName[0]);
-  a.    call((TCA)pthread_getspecific);
+  const TCA addr = (TCA)pthread_getspecific;
+  if (deltaFits((uintptr_t)addr, sz::dword)) {
+    a.    call(addr);
+  } else {
+    a.    movq(addr, reg::rax);
+    a.    call(reg::rax);
+  }
   if (reg != reg::rax) {
     a.    movq(reg::rax, r64(reg));
   }

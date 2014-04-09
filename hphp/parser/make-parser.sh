@@ -22,10 +22,10 @@ else
   OUTHEADER=${INSTALL_DIR}/hphp.tab.hpp
 
   EXTERNAL_TOOLS_ROOT=`readlink -f ${FBCODE_DIR}/third-party/centos5.2-native/`
-  export BISON_PKGDATADIR=\
-  ${EXTERNAL_TOOLS_ROOT}/bison/bison-2.4.1/da39a3e/share/bison
+  BISON_DIR=${EXTERNAL_TOOLS_ROOT}/bison/bison-2.4.1/da39a3e/
+  export BISON_PKGDATADIR=${BISON_DIR}/share/bison
 
-  BISON=${EXTERNAL_TOOLS_ROOT}/bison/bison-2.4.1/da39a3e/bin/bison
+  BISON=${BISON_DIR}/bin/bison
 fi
 
 $BISON -pCompiler --verbose --locations -d -o${OUTFILE} ${INFILE}

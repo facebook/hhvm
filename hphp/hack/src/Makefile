@@ -5,12 +5,6 @@
 # LICENSE file in the "hack" directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
-#############################################################################
-# Configuration section
-#############################################################################
-
--include Makefile.config
-
 ##############################################################################
 # Variables
 ##############################################################################
@@ -22,7 +16,7 @@ OS=$(shell uname -s)
 #------------------------------------------------------------------------------
 #package dependencies
 #------------------------------------------------------------------------------
-ifeq ($(FACEBOOK), 1)
+ifeq ($(wildcard facebook/Makefile.include),)
   -include facebook/Makefile.include
 
   # Want to open source this but no need to force everyone to have js_of_ocaml
@@ -93,11 +87,11 @@ INCLUDEDIRS=$(filter-out $(FILTER_FROM_INCLUDE),$(MAKESUBDIRS)) \
 .PHONY:: all all.opt opt top clean distclean bin
 
 all:: opt
-opt: Makefile.config
+opt:
 	$(MAKE) rec.opt
 	$(MAKE) $(PROGS:=.opt)
 	$(MAKE) bin
-bc: Makefile.config
+bc:
 	$(MAKE) rec
 	$(MAKE) $(PROGS:=.bc)
 top: $(TARGET).top
@@ -150,14 +144,9 @@ depend::
 	ocamldep $(INCLUDES) *.ml *.mli > .depend
 	set -e; for i in $(MAKESUBDIRS); do $(MAKE) -C $$i depend; done
 
-Makefile.config:
-	@echo "Makefile.config is missing. Have you run ./configure?"
-	@exit 1
-
 distclean:: clean
 	set -e; for i in $(MAKESUBDIRS); do $(MAKE) -C $$i $@; done
 	rm -f .depend
-#	rm -f Makefile.config
 
 ##############################################################################
 # Install
@@ -179,7 +168,7 @@ stamp:
 deploy:
 	$(MAKE) stamp
 	$(MAKE)
-ifeq ($(FACEBOOK), 1)
+ifeq ($(wildcard facebook/deploy.sh),)
 	./facebook/deploy.sh
 else
 	@echo

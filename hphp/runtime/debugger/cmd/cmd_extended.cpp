@@ -182,7 +182,6 @@ const ExtendedCommandMap &CmdExtended::GetExtendedCommandMap() {
   static ExtendedCommandMap s_command_map = {
     { "ample"    , "CmdExample" },
     { "tension"  , "CmdExtension" },
-    { "heaptrace", "CmdHeaptrace" }
   };
   return s_command_map;
 }
@@ -193,11 +192,8 @@ const ExtendedCommandMap &CmdExtended::GetExtendedCommandMap() {
 DebuggerCommandPtr CmdExtended::CreateExtendedCommand(const std::string &cls) {
   std::shared_ptr<CmdExtended> ret;
   if (cls.empty()) {
-
-    // add one line for each command
     ELSE_IF_CMD(Example);
     ELSE_IF_CMD(Extension);
-    ELSE_IF_CMD(Heaptrace);
   }
 
   if (ret) {

@@ -2514,13 +2514,6 @@ void Class::setSPropData(TypedValue* sPropData) const {
   *m_propSDataCache = sPropData;
 }
 
-void Class::getChildren(std::vector<const TypedValue*>& out) const {
-  for (Slot i = 0; i < m_staticProperties.size(); ++i) {
-    if (m_staticProperties[i].m_class != this) continue;
-    out.push_back(&m_staticProperties[i].m_val);
-  }
-}
-
 // True if a CPP extension class has opted into serialization.
 bool Class::isCppSerializable() const {
   assert(instanceCtor()); // Only call this on CPP classes

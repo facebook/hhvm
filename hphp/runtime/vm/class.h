@@ -760,12 +760,6 @@ struct Class : AtomicCountable {
    */
   DataType clsCnsType(const StringData* clsCnsName) const;
 
-  /*
-   * Tracing interface.  (Returns the set of static properties for the
-   * Tracer.)
-   */
-  void getChildren(std::vector<const TypedValue*>& out) const;
-
   void initialize() const;
   void initPropHandle() const;
   RDS::Handle classHandle() const { return m_cachedClass.handle(); }

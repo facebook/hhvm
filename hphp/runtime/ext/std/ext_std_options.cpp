@@ -811,6 +811,14 @@ static int64_t HHVM_FUNCTION(memory_get_allocation) {
   return ret;
 }
 
+static int64_t HHVM_FUNCTION(hphp_memory_get_interval_peak_usage,
+                             bool real_usage /*=false */) {
+  auto const& stats = MM().getStats();
+  int64_t ret = real_usage ? stats.peakIntervalUsage : stats.peakIntervalAlloc;
+  assert(ret >= 0);
+  return ret;
+}
+
 static int64_t HHVM_FUNCTION(memory_get_peak_usage,
                              bool real_usage /*=false */) {
   auto const& stats = MM().getStats();
@@ -827,6 +835,14 @@ static int64_t HHVM_FUNCTION(memory_get_usage, bool real_usage /*=false */) {
   // jemalloc stats.
   assert((use_jemalloc && real_usage) || ret >= 0);
   return std::max<int64_t>(ret, 0);
+}
+
+static bool HHVM_FUNCTION(hphp_memory_start_interval) {
+  return MM().startStatsInterval();
+}
+
+static bool HHVM_FUNCTION(hphp_memory_stop_interval) {
+  return MM().stopStatsInterval();
 }
 
 static Variant HHVM_FUNCTION(php_ini_loaded_file) {
@@ -1182,9 +1198,13 @@ void StandardExtension::initOptions() {
   HHVM_FE(ini_get_all);
   HHVM_FE(ini_restore);
   HHVM_FE(ini_set);
-  HHVM_FE(memory_get_allocation);
   HHVM_FE(memory_get_peak_usage);
   HHVM_FE(memory_get_usage);
+  // This is HH-specific as well but code depends on the old name.
+  HHVM_FE(memory_get_allocation);
+  HHVM_FE(hphp_memory_get_interval_peak_usage);
+  HHVM_FE(hphp_memory_start_interval);
+  HHVM_FE(hphp_memory_stop_interval);
   HHVM_FE(php_ini_loaded_file);
   HHVM_FE(php_sapi_name);
   HHVM_FE(php_uname);

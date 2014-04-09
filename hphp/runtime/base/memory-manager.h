@@ -304,6 +304,13 @@ struct MemoryManager {
    */
   MemoryUsageStats getStatsCopy();
 
+  /*
+   * Open and close respectively a stats-tracking interval. Return whether or
+   * not the tracking state was changed as a result of the call.
+   */
+  bool startStatsInterval();
+  bool stopStatsInterval();
+
 private:
   friend class StringData; // for enlist/delist access to m_strings
   friend void* smart_malloc(size_t nbytes);
@@ -373,6 +380,7 @@ private:
   SweepNode m_sweep;   // oversize smart_malloc'd blocks
   SweepNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;
+  bool m_statsIntervalActive;
   std::vector<char*> m_slabs;
 
 #ifdef USE_JEMALLOC

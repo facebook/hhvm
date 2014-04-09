@@ -7,6 +7,6 @@ Read the following to see why:
 File "generic_incompatible_implementation.php", line 7, characters 21-21:
 This is an object of type D
 File "generic_incompatible_implementation.php", line 11, characters 24-24:
-It was implicitely typed as an object of type D during this operation
+It was implicitly typed as an object of type D during this operation
 File "generic_incompatible_implementation.php", line 7, characters 26-26:
 It is incompatible with a value of generic type T

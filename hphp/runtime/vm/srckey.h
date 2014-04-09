@@ -32,27 +32,43 @@ namespace HPHP {
  * these using a (Func id, hhbc instruction) pair.
  */
 struct SrcKey : private boost::totally_ordered<SrcKey> {
+  static_assert(sizeof(FuncId) == sizeof(uint32_t), "");
+  static_assert(sizeof(Offset) == sizeof(uint32_t), "");
   typedef uint64_t AtomicInt;
   struct Hasher;
 
   SrcKey()
     : m_funcId(InvalidFuncId)
     , m_offset(0)
+    , m_resumed(false)
   {}
 
-  SrcKey(const Func* f, Offset off)
+  SrcKey(const Func* f, Offset off, bool resumed)
     : m_funcId(f->getFuncId())
-    , m_offset(off)
-  {}
+    , m_offset((uint32_t)off)
+    , m_resumed(resumed)
+  {
+    assert(0 <= (int32_t)off);
+  }
 
-  SrcKey(const Func* f, PC i)
+  SrcKey(const Func* f, PC i, bool resumed)
     : m_funcId(f->getFuncId())
-    , m_offset(f->unit()->offsetOf(i))
-  {}
+    , m_offset((uint32_t)f->unit()->offsetOf(i))
+    , m_resumed(resumed)
+  {
+    assert(0 <= (int32_t)f->unit()->offsetOf(i));
+  }
 
-  SrcKey(FuncId funcId, Offset off)
+  SrcKey(FuncId funcId, Offset off, bool resumed)
     : m_funcId{funcId}
-    , m_offset{off}
+    , m_offset{(uint32_t)off}
+    , m_resumed{resumed}
+  {
+    assert(0 <= (int32_t)off);
+  }
+
+  explicit SrcKey(AtomicInt in)
+    : m_atomicInt(in)
   {}
 
   bool valid() const {
@@ -62,10 +78,10 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   // Packed representation of SrcKeys for use in contexts where we
   // want atomicity.  (SrcDB.)
   AtomicInt toAtomicInt() const {
-    return uint64_t(getFuncId()) << 32 | uint64_t(uint32_t(offset()));
+    return m_atomicInt;
   }
   static SrcKey fromAtomicInt(AtomicInt in) {
-    return SrcKey { uint32_t(in >> 32), (Offset) int32_t(in & 0xffffffff) };
+    return SrcKey { in };
   }
 
   void setFuncId(FuncId id) {
@@ -97,11 +113,16 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   std::string showInst() const;
 
   void setOffset(Offset o) {
-    m_offset = o;
+    assert(0 <= (int32_t)o);
+    m_offset = (uint32_t)o;
   }
 
   int offset() const {
     return m_offset;
+  }
+
+  bool resumed() const {
+    return m_resumed;
   }
 
   /*
@@ -126,25 +147,29 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   }
 
   bool operator==(const SrcKey& r) const {
-    return m_offset == r.m_offset &&
-           m_funcId == r.m_funcId;
+    return m_atomicInt == r.m_atomicInt;
   }
 
   bool operator<(const SrcKey& r) const {
-    return std::make_tuple(m_funcId, m_offset) <
-           std::make_tuple(r.m_funcId, r.m_offset);
+    return m_atomicInt < r.m_atomicInt;
   }
 
   std::string getSymbol() const;
 
 private:
-  FuncId m_funcId;
-  Offset m_offset;
+  union {
+    AtomicInt m_atomicInt;
+    struct {
+      FuncId m_funcId;
+      uint32_t m_offset:31;
+      bool m_resumed:1;
+    };
+  };
 };
 
 struct SrcKey::Hasher {
   size_t operator()(SrcKey sk) const {
-    return hash_int64_pair(sk.getFuncId(), uint64_t(sk.offset()));
+    return hash_int64(sk.toAtomicInt());
   }
 };
 

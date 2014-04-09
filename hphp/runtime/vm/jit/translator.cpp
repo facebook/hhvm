@@ -3452,7 +3452,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
     FTRACE(1, "finished sub trace ===================================\n");
   };
 
-  auto subTrace = analyze(SrcKey(target, target->base()), initialMap);
+  auto subTrace = analyze(SrcKey(target, target->base(), false), initialMap);
 
   /*
    * Verify the target trace actually ended with a return, or we have
@@ -3582,6 +3582,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
   std::unique_ptr<Tracelet> retval(new Tracelet());
   auto func = sk.func();
   auto unit = sk.unit();
+  auto resumed = sk.resumed();
   auto& t = *retval;
   t.m_sk = sk;
 
@@ -3800,7 +3801,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       SKTRACE(1, sk, "greedily continuing through %dth jmp + %d\n",
               tas.m_numJmps, ni->imm[0].u_IA);
       tas.recordJmp();
-      sk = SrcKey(func, sk.offset() + ni->imm[0].u_IA);
+      sk = SrcKey(func, sk.offset() + ni->imm[0].u_IA, resumed);
       goto head; // don't advance sk
     } else if (opcodeBreaksBB(ni->op()) ||
                (dontGuardAnyInputs(ni->op()) && opcodeChangesPC(ni->op()))) {
@@ -4474,7 +4475,7 @@ Translator::translateRegion(const RegionDesc& region,
     translatorTraceCodeGen();
     if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
   } catch (const JIT::FailedCodeGen& exn) {
-    SrcKey sk{exn.vmFunc, exn.bcOff};
+    SrcKey sk{exn.vmFunc, exn.bcOff, exn.resumed};
     always_assert_log(
       !toInterp.count(sk),
       [&] {
@@ -4621,7 +4622,9 @@ TransRec::print(uint64_t profCount) const {
            "  src.funcId = {}\n"
            "  src.startOffset = {}\n"
            "  src.stopOffset = {}\n",
-           id, md5, src.getFuncId(), src.offset(), bcStopOffset).str();
+           "  src.resumed = {}\n",
+           id, md5, src.getFuncId(), src.offset(), bcStopOffset,
+           (int32_t)src.resumed()).str();
 
   ret += folly::format(
            "  kind = {} ({})\n"

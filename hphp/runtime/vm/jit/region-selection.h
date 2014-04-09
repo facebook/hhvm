@@ -208,7 +208,8 @@ class RegionDesc::Block {
   typedef flat_map<SrcKey, const Func*> KnownFuncMap;
 
 public:
-  explicit Block(const Func* func, Offset start, int length, Offset initSpOff);
+  explicit Block(const Func* func, bool resumed, Offset start, int length,
+                 Offset initSpOff);
 
   Block& operator=(const Block&) = delete;
 
@@ -219,8 +220,10 @@ public:
   BlockId     id()                const { return m_id; }
   const Unit* unit()              const { return m_func->unit(); }
   const Func* func()              const { return m_func; }
-  SrcKey      start()             const { return SrcKey { m_func, m_start }; }
-  SrcKey      last()              const { return SrcKey { m_func, m_last }; }
+  SrcKey      start()             const { return SrcKey { m_func, m_start,
+                                                          m_resumed }; }
+  SrcKey      last()              const { return SrcKey { m_func, m_last,
+                                                          m_resumed }; }
   int         length()            const { return m_length; }
   bool        empty()             const { return length() == 0; }
   bool        contains(SrcKey sk) const;
@@ -304,6 +307,7 @@ private:
 
   BlockId        m_id;
   const Func*    m_func;
+  const bool     m_resumed;
   const Offset   m_start;
   Offset         m_last;
   int            m_length;

@@ -434,8 +434,9 @@ std::string IRInstruction::toString() const {
 
 std::string BCMarker::show() const {
   assert(valid());
-  return folly::format("--- bc {}, spOff {} ({})",
+  return folly::format("--- bc {}{}, spOff {} ({})",
                        m_sk.offset(),
+                       m_sk.resumed() ? "r" : "",
                        m_spOff,
                        m_sk.func()->fullName()->data()).str();
 }

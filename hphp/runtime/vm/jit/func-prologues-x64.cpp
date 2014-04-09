@@ -271,7 +271,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   }
 
   auto destPC = func->unit()->entry() + entryOffset;
-  SrcKey funcBody(func, destPC);
+  SrcKey funcBody(func, destPC, false);
 
   // Move rVmSp to the right place: just past all locals
   int frameCells = func->numSlotsInFrame();
@@ -323,15 +323,16 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   TCA start = mainCode.frontier();
   if (dvs.size() == 1) {
     a.  cmpl  (dvs[0].first, rVmFp[AROFF(m_numArgsAndGenCtorFlags)]);
-    emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[0].second));
-    emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
+    emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[0].second, false));
+    emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base(), false));
   } else {
     a.    loadl  (rVmFp[AROFF(m_numArgsAndGenCtorFlags)], reg::eax);
     for (unsigned i = 0; i < dvs.size(); i++) {
       a.  cmpl   (dvs[i].first, reg::eax);
-      emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second));
+      emitBindJcc(mainCode, stubsCode, CC_LE,
+                  SrcKey(func, dvs[i].second, false));
     }
-    emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
+    emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base(), false));
   }
   return start;
 }

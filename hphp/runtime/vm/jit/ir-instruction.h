@@ -38,7 +38,7 @@ struct BCMarker {
    * deriving them from an actual bytecode region. It is always valid().
    */
   static BCMarker Dummy() {
-    return BCMarker(SrcKey(DummyFuncId, 0), 0);
+    return BCMarker(SrcKey(DummyFuncId, 0, false), 0);
   }
 
   BCMarker()
@@ -67,6 +67,7 @@ struct BCMarker {
   SrcKey sk() const { assert(valid()); return m_sk; }
   const Func* func() const { assert(hasFunc()); return m_sk.func(); }
   Offset bcOff() const { assert(valid()); return m_sk.offset(); }
+  bool resumed() const { assert(valid()); return m_sk.resumed(); }
   int32_t spOff() const { assert(valid()); return m_spOff; }
   void setSpOff(int32_t sp) { assert(valid()); m_spOff = sp; }
 };

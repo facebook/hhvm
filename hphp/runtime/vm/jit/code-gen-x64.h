@@ -228,9 +228,10 @@ private:
   RDS::Handle cgLdClsCachedCommon(IRInstruction* inst);
   void emitFwdJcc(ConditionCode cc, Block* target);
   void emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
-  const Func* curFunc() const;
-  Class*      curClass() const { return curFunc()->cls(); }
+  const Func* curFunc() const { return m_curInst->marker().func(); };
+  const Class* curClass() const { return curFunc()->cls(); }
   const Unit* curUnit() const { return curFunc()->unit(); }
+  bool resumed() const { return m_curInst->marker().resumed(); };
   void recordSyncPoint(Asm& as, SyncOptions sync = SyncOptions::kSyncPoint);
   int iterOffset(SSATmp* tmp) { return iterOffset(tmp->intVal()); }
   int iterOffset(uint32_t id);

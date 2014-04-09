@@ -373,7 +373,7 @@ BCMarker HhbcTranslator::makeMarker(Offset bcOff) {
   FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
          bcOff, stackOff, curFunc()->fullName()->data());
 
-  return BCMarker{ SrcKey{ curFunc(), bcOff }, stackOff };
+  return BCMarker{ SrcKey{ curFunc(), bcOff, inGenerator() }, stackOff };
 }
 
 void HhbcTranslator::updateMarker() {
@@ -3344,6 +3344,7 @@ void HhbcTranslator::emitSwitch(const ImmVector& iv,
   JmpSwitchData data;
   data.func        = curFunc();
   data.base        = base;
+  data.resumed     = inGenerator();
   data.bounded     = bounded;
   data.cases       = iv.size();
   data.defaultOff  = defaultOff;
@@ -5247,7 +5248,7 @@ Block* HhbcTranslator::makeExitOpt(TransID transId) {
   auto const exit = m_irb->makeExit();
 
   BCMarker exitMarker{
-    SrcKey{ curFunc(), targetBcOff },
+    SrcKey{ curFunc(), targetBcOff, inGenerator() },
     int32_t(m_irb->spOffset()
             + m_irb->evalStack().size()
             - m_irb->stackDeficit())
@@ -5312,7 +5313,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
   gen(SyncABIRegs, m_irb->fp(), stack);
 
   if (flag == ExitFlag::Interp) {
-    auto interpSk = SrcKey {curFunc(), targetBcOff};
+    auto interpSk = SrcKey {curFunc(), targetBcOff, inGenerator()};
     auto pc = curUnit()->at(targetBcOff);
     auto changesPC = opcodeChangesPC(*reinterpret_cast<const Op*>(pc));
     auto interpOp = changesPC ? InterpOneCF : InterpOne;

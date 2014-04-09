@@ -96,6 +96,7 @@ struct JmpSwitchData : IRExtraData {
     JmpSwitchData* sd = new (arena) JmpSwitchData;
     sd->func       = func;
     sd->base       = base;
+    sd->resumed    = resumed;
     sd->bounded    = bounded;
     sd->cases      = cases;
     sd->defaultOff = defaultOff;
@@ -106,6 +107,7 @@ struct JmpSwitchData : IRExtraData {
 
   const Func* func;
   int64_t base;        // base of switch case
+  bool    resumed;     // whether the destination is in resumed context
   bool    bounded;     // whether switch is bounded or not
   int32_t cases;       // number of cases
   Offset  defaultOff;  // offset of default case

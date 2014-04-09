@@ -84,15 +84,6 @@ struct ProfileDump {
 
   std::string toPProfFormat() const;
 
-  template<typename F>
-  void forEachAddress(F fun) const {
-    for (const auto &data : m_accumAllocated) {
-      for (const SrcKey &sk : data.first) {
-        fun(sk);
-      }
-    }
-  }
-
   // merge operation: takes another dump and adds all of its data.
   // used for global dumps that require logging from multiple VM
   // threads

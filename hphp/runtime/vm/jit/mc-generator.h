@@ -189,7 +189,7 @@ public:
   void initUniqueStubs();
   int numTranslations(SrcKey sk) const;
   bool addDbgGuards(const Unit* unit);
-  bool addDbgGuard(const Func* func, Offset offset);
+  bool addDbgGuard(const Func* func, Offset offset, bool resumed);
   bool freeRequestStub(TCA stub);
   TCA getFreeStub();
   void registerCatchBlock(CTCA ip, TCA block);

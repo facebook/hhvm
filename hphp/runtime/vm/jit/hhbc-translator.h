@@ -770,7 +770,8 @@ public:
   Class*      curClass()    const { return curFunc()->cls(); }
   Unit*       curUnit()     const { return curFunc()->unit(); }
   Offset      bcOff()       const { return m_bcStateStack.back().bcOff; }
-  SrcKey      curSrcKey()   const { return SrcKey(curFunc(), bcOff()); }
+  SrcKey      curSrcKey()   const { return SrcKey(curFunc(), bcOff(),
+                                                  inGenerator()); }
   bool        inGenerator() const { return m_bcStateStack.back().inGenerator; }
   size_t      spOffset()    const;
   Type        topType(uint32_t i, TypeConstraint c = DataTypeSpecific) const;
@@ -788,7 +789,7 @@ private:
    * tracelet or not).
    */
   SrcKey nextSrcKey() const {
-    SrcKey srcKey(curFunc(), bcOff());
+    SrcKey srcKey = curSrcKey();
     srcKey.advance(curFunc()->unit());
     return srcKey;
   }

@@ -94,6 +94,7 @@ private:
   const Func* curFunc() const;
   const Unit* curUnit() const;
   Offset curSpOffset() const;
+  bool resumed() const;
   int inliningDepth() const;
 
   bool prepareInstruction();
@@ -108,10 +109,11 @@ RegionFormer::RegionFormer(const RegionContext& ctx, InterpSet& interp,
                            int inlineDepth, bool profiling)
   : m_ctx(ctx)
   , m_interp(interp)
-  , m_sk(ctx.func, ctx.bcOffset)
+  , m_sk(ctx.func, ctx.bcOffset, ctx.inGenerator)
   , m_startSk(m_sk)
   , m_region(std::make_shared<RegionDesc>())
-  , m_curBlock(m_region->addBlock(ctx.func, m_sk.offset(), 0, ctx.spOffset))
+  , m_curBlock(m_region->addBlock(ctx.func, m_sk.resumed(), m_sk.offset(), 0,
+                                  ctx.spOffset))
   , m_blockFinished(false)
   , m_irTrans(ctx.bcOffset, ctx.spOffset, ctx.inGenerator, ctx.func)
   , m_ht(m_irTrans.hhbcTrans())
@@ -131,6 +133,10 @@ const Unit* RegionFormer::curUnit() const {
 
 Offset RegionFormer::curSpOffset() const {
   return m_ht.spOffset();
+}
+
+bool RegionFormer::resumed() const {
+  return m_ht.inGenerator();
 }
 
 int RegionFormer::inliningDepth() const {
@@ -339,6 +345,7 @@ void RegionFormer::addInstruction() {
     FTRACE(2, "selectTracelet adding new block at {} after:\n{}\n",
            showShort(m_sk), show(*m_curBlock));
     RegionDesc::Block* newCurBlock = m_region->addBlock(curFunc(),
+                                                        m_sk.resumed(),
                                                         m_sk.offset(), 0,
                                                         curSpOffset());
     m_region->addArc(m_curBlock->id(), newCurBlock->id());
@@ -382,7 +389,7 @@ bool RegionFormer::tryInline() {
   // For analysis purposes, we require that the FPush* instruction is in the
   // same region.
   auto fpi = curFunc()->findFPI(m_sk.offset());
-  const SrcKey pushSk{curFunc(), fpi->m_fpushOff};
+  const SrcKey pushSk{curFunc(), fpi->m_fpushOff, resumed()};
   int pushBlock = -1;
   auto& blocks = m_region->blocks;
   for (unsigned i = 0; i < blocks.size(); ++i) {

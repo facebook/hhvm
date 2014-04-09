@@ -95,18 +95,21 @@ class FailedCodeGen : public std::runtime_error {
   const char*    func;
   const Offset   bcOff;
   const Func*    vmFunc;
+  const bool     resumed;
 
   FailedCodeGen(const char* _file, int _line, const char* _func,
-                uint32_t _bcOff, const Func* _vmFunc)
-    : std::runtime_error(folly::format("FailedCodeGen @ {}:{} in {}. {}@{}",
+                uint32_t _bcOff, const Func* _vmFunc, bool _resumed)
+    : std::runtime_error(folly::format("FailedCodeGen @ {}:{} in {}. {}@{}{}",
                                        _file, _line, _func,
-                                       _vmFunc->fullName()->data(), _bcOff)
+                                       _vmFunc->fullName()->data(), _bcOff,
+                                       _resumed ? "r" : "")
                          .str())
     , file(_file)
     , line(_line)
     , func(_func)
     , bcOff(_bcOff)
     , vmFunc(_vmFunc)
+    , resumed(_resumed)
   {}
 };
 

@@ -219,7 +219,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   if (dvInitializer != InvalidAbsoluteOffset) {
     destPC = func->unit()->entry() + dvInitializer;
   }
-  SrcKey funcBody(func, destPC);
+  SrcKey funcBody(func, destPC, false);
 
   // Set stack pointer just past all locals
   int frameCells = func->numSlotsInFrame();
@@ -323,9 +323,9 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   a.   Ldr   (rAsm.W(), rVmFp[AROFF(m_numArgsAndGenCtorFlags)]);
   for (auto i = 0; i < dvs.size(); ++i) {
     a. Cmp   (rAsm.W(), dvs[i].first);
-    emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second));
+    emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second, false));
   }
-  emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
+  emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base(), false));
   return start;
 }
 

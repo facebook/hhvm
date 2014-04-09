@@ -111,10 +111,11 @@ bool hasTransId(RegionDesc::BlockId blockId) {
   return blockId >= 0;
 }
 
-RegionDesc::Block::Block(const Func* func, Offset start, int length,
-                         Offset initSpOff)
+RegionDesc::Block::Block(const Func* func, bool resumed, Offset start,
+                         int length, Offset initSpOff)
   : m_id(s_nextId--)
   , m_func(func)
+  , m_resumed(resumed)
   , m_start(start)
   , m_last(kInvalidOffset)
   , m_length(length)
@@ -123,7 +124,7 @@ RegionDesc::Block::Block(const Func* func, Offset start, int length,
 {
   assert(length >= 0);
   if (length > 0) {
-    SrcKey sk(func, start);
+    SrcKey sk(func, start, resumed);
     for (unsigned i = 1; i < length; ++i) sk.advance();
     m_last = sk.offset();
   }
@@ -300,17 +301,18 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
 
   const Func* topFunc = nullptr;
   Block* curBlock = nullptr;
-  auto newBlock = [&](const Func* func, SrcKey start, Offset spOff) {
+  auto newBlock = [&](SrcKey start, Offset spOff) {
     assert(curBlock == nullptr || curBlock->length() > 0);
     region->blocks.push_back(
-      std::make_shared<Block>(func, start.offset(), 0, spOff));
+      std::make_shared<Block>(
+        start.func(), start.resumed(), start.offset(), 0, spOff));
     Block* newCurBlock = region->blocks.back().get();
     if (curBlock) {
       region->addArc(curBlock->id(), newCurBlock->id());
     }
     curBlock = newCurBlock;
   };
-  newBlock(tlet.func(), sk, initSpOffset);
+  newBlock(sk, initSpOffset);
 
   for (auto ni = tlet.m_instrStream.first; ni; ni = ni->next) {
     assert(sk == ni->source);
@@ -335,7 +337,7 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
       SrcKey cSk = callee.m_sk;
       Unit* cUnit = callee.func()->unit();
 
-      newBlock(callee.func(), cSk, curSpOffset);
+      newBlock(cSk, curSpOffset);
 
       for (auto cni = callee.m_instrStream.first; cni; cni = cni->next) {
         assert(cSk == cni->source);
@@ -352,7 +354,7 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
 
       if (ni->next) {
         sk.advance(unit);
-        newBlock(tlet.func(), sk, curSpOffset);
+        newBlock(sk, curSpOffset);
       }
       continue;
     }
@@ -370,7 +372,7 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
       sk.setOffset(dest);
 
       // The Jmp terminates this block.
-      newBlock(tlet.func(), sk, curSpOffset);
+      newBlock(sk, curSpOffset);
     } else {
       sk.advance(unit);
     }

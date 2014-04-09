@@ -1495,7 +1495,7 @@ void ExecutionContext::enterVMAtCurPC() {
   Stats::inc(Stats::VMEnter);
 
   if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
-    SrcKey sk(m_fp->func(), m_pc);
+    SrcKey sk(m_fp->func(), m_pc, m_fp->inGenerator());
     mcg->enterTCAtSrcKey(sk);
   } else {
     dispatch();
@@ -7641,7 +7641,8 @@ void ExecutionContext::dispatchN(int numInstrs) {
     auto cat = makeStaticString("dispatchN");
     auto name = makeStaticString(
       folly::format("{} ops @ {}",
-                    numInstrs, show(SrcKey(m_fp->m_func, m_pc))).str());
+                    numInstrs, show(SrcKey(m_fp->func(), m_pc,
+                                           m_fp->inGenerator()))).str());
     Stats::incStatGrouped(cat, name, 1);
   }
 
@@ -7652,7 +7653,8 @@ void ExecutionContext::dispatchN(int numInstrs) {
 void ExecutionContext::dispatchBB() {
   if (Trace::moduleEnabled(Trace::dispatchBB)) {
     auto cat = makeStaticString("dispatchBB");
-    auto name = makeStaticString(show(SrcKey(m_fp->m_func, m_pc)));
+    auto name = makeStaticString(show(SrcKey(m_fp->func(), m_pc,
+                                             m_fp->inGenerator())));
     Stats::incStatGrouped(cat, name, 1);
   }
 

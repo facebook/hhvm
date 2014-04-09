@@ -202,19 +202,20 @@ CALL_OPCODE(IncStatGrouped)
 
 /////////////////////////////////////////////////////////////////////
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
-            const Func* vmFunc) {
+            const Func* vmFunc, bool resumed) {
   FTRACE(1, "punting: {}\n", func);
-  throw FailedCodeGen(file, line, func, bcOff, vmFunc);
+  throw FailedCodeGen(file, line, func, bcOff, vmFunc, resumed);
 }
 
 #define PUNT_OPCODE(name)                                           \
   void CodeGenerator::cg##name(IRInstruction* inst) {               \
     cgPunt(__FILE__, __LINE__, #name, m_curInst->marker().bcOff(),  \
-           curFunc());                                              \
+           curFunc(), resumed());                                   \
   }
 
-#define CG_PUNT(instr) \
-    cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff(), curFunc())
+#define CG_PUNT(instr)                                              \
+    cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff(), \
+           curFunc(), resumed())
 
 /////////////////////////////////////////////////////////////////////
 //TODO t3702757: Convert to CALL_OPCODE, the following set works on
@@ -1303,7 +1304,7 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
     rAsm.W(),
     rFP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
-      auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
+      auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
       auto const destSR = m_mcg->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
@@ -1318,7 +1319,7 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
     rAsm.W(),
     rSP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
-      auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
+      auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
       auto const destSR = m_mcg->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
@@ -1414,7 +1415,7 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
     rAsm.W(),
     sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_data)],
     [&] (ConditionCode cc) {
-      auto const sk = SrcKey(curFunc(), extra->taken);
+      auto const sk = SrcKey(curFunc(), extra->taken, resumed());
       emitBindSideExit(this->m_mainCode, this->m_stubsCode, sk, ccNegate(cc));
     }
   );
@@ -1451,7 +1452,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert(vals64Reg.IsValid() || vals64 == uint32_t(vals64));
   assert((vals64 & mask64) == vals64);
 
-  auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
+  auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
   auto const destSR = m_mcg->tx().getSrcRec(destSK);
 
   auto thenBody = [&] {
@@ -1531,13 +1532,13 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   emitBindJmp(
     m_mainCode,
     m_stubsCode,
-    SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset)
+    SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset, resumed())
   );
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   assert(m_unit.bcOff() == inst->marker().bcOff());
-  auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
+  auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
   auto const destSR = m_mcg->tx().getSrcRec(destSK);
   destSR->emitFallbackJump(m_mainCode);
 }

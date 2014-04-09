@@ -1259,6 +1259,10 @@ public:
     }
   }
 
+  virtual bool isInvalid() const {
+    return !m_multi;
+  }
+
   void add(const Resource& ch) {
     m_easyh.append(ch);
   }

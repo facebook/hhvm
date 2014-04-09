@@ -1686,7 +1686,7 @@ MCGenerator::emitNativeTrampoline(TCA helperAddr) {
   a.    jmp    (helperAddr);
   a.    ud2    ();
 
-  trampolineMap[helperAddr] = trampAddr;
+  m_trampolineMap[helperAddr] = trampAddr;
   recordBCInstr(OpNativeTrampoline, trampolines, trampAddr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTrampolineToVtune(trampAddr, trampolines.frontier() - trampAddr);
@@ -1700,7 +1700,7 @@ MCGenerator::getNativeTrampoline(TCA helperAddr) {
   if (!RuntimeOption::EvalJitTrampolines && !Stats::enabled()) {
     return helperAddr;
   }
-  auto const trampAddr = (TCA)folly::get_default(trampolineMap, helperAddr);
+  auto const trampAddr = (TCA)folly::get_default(m_trampolineMap, helperAddr);
   if (trampAddr) {
     return trampAddr;
   }
@@ -2539,7 +2539,7 @@ bool MCGenerator::dumpTCCode(const char* filename) {
     result = (fwrite(code.stubs().base(), 1, count, astubFile) == count);
   }
   if (result) {
-    for (auto const& pair : trampolineMap) {
+    for (auto const& pair : m_trampolineMap) {
       void* helperAddr = pair.first;
       void* trampAddr = pair.second;
       auto functionName = getNativeFunctionName(helperAddr);

@@ -223,7 +223,7 @@ The second part is where the real user-level code of the generator should be
 placed. ContEnter and ContRaise opcodes used in Continuation's next(), send()
 and raise() methods resume execution and transfer control to the resume offset
 stored in the Continuation object. The user-level code yields values using
-ContSuspend and ContSuspendK opcodes and returns using ContRetC opcode.
+ContSuspend and ContSuspendK opcodes and returns using RetC opcode.
 
 
 Async functions
@@ -236,11 +236,6 @@ The first part represents "eager execution" of the async function, and the
 second part is used when "suspended execution" is necessary (i.e. if it does
 an await on something that is not yet available). Both parts are required to
 'have the same effects', except the latter one works in a suspended mode.
-
-The first part uses AsyncSuspend opcode to suspend execution state into a new
-AsyncFunctionWaitHandle object. It includes the resume offset pointing to the
-second part of the function. The second part also suspends using AsyncSuspend 
-opcode, but returns using ContRetC opcode.
 
 The async function implementation is still changing and the implementation may
 change significantly, so this spec is staying light on details for now.
@@ -4100,14 +4095,6 @@ ContSuspendK   [C C]  ->  []
   the execution is resumed, the value sent by ContEnter becomes available
   on the stack, or an exception sent by ContRaise is thrown.
 
-ContRetC   [C]  ->  []
-
-  This instruction may only appear in bodies of continuations and async
-  functions. Stores $1 in the continuation as the result of the execution,
-  marks the continuation as finished and returns by transferring control flow
-  back to the ContEnter or ContRaise. Further attempts to iterate the
-  Continuation will fail.
- 
 ContCheck <check started>    []  ->  []
 
   Check whether continuation can be iterated. $this must be a Continuation
@@ -4175,10 +4162,6 @@ AsyncResume   []  ->  []
 
   No operation. Used to teach hhbbc that an exception may be thrown right after
   unreachable ContSuspend. Must appear as the target of AsyncSuspend opcode.
-
-AsyncWrapResult   [C]  ->  [C:Obj]
-
-  Wraps $1 into a StaticResultWaitHandle object.
 
 
 Basic statement transformations

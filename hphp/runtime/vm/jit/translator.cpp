@@ -1318,7 +1318,6 @@ static const struct {
   { OpContRaise,   {Stack1,           None,         OutNone,          -1 }},
   { OpContSuspend, {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpContSuspendK,{StackTop2,        Stack1,       OutUnknown,       -1 }},
-  { OpContRetC,    {Stack1,           None,         OutNone,          -1 }},
   { OpContCheck,   {None,             None,         OutNone,           0 }},
   { OpContValid,   {None,             Stack1,       OutBoolean,        1 }},
   { OpContKey,     {None,             Stack1,       OutUnknown,        1 }},
@@ -1331,8 +1330,6 @@ static const struct {
   { OpAsyncAwait,  {Stack1,           StackTop2,    OutAsyncAwait,     1 }},
   { OpAsyncSuspend,{Stack1,           Stack1,       OutUnknown,        0 }},
   { OpAsyncResume, {None,             None,         OutNone,           0 }},
-  { OpAsyncWrapResult,
-                   {Stack1,           Stack1,       OutObject,         0 }},
 };
 
 static hphp_hash_map<Op, InstrInfo> instrInfo;
@@ -3013,7 +3010,6 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
 
     case OpContSuspend:
     case OpContSuspendK:
-    case OpContRetC:
       // The stack input is teleported to the continuation's m_value field
       return DataTypeGeneric;
 

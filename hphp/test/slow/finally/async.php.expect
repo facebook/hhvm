@@ -1,9 +1,9 @@
-= This test demonstrates incorrect behavior =
-
 * eager async *
 eager execution
+finally
 int(10)
 * blocking async *
 before blocking
 after blocking
+finally
 int(10)

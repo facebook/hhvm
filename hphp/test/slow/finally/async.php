@@ -25,9 +25,6 @@ async function genBlocking($a) {
 }
 
 function main() {
-  // Note: finally should appear in output, but doesn't
-  echo '= This test demonstrates incorrect behavior =', "\n\n";
-
   echo "* eager async *\n";
   $result = genEager(42)->join();
   var_dump($result);

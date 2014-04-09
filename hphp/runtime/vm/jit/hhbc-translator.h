@@ -403,7 +403,6 @@ struct HhbcTranslator {
   void emitContSuspendImpl(Offset resumeOffset);
   void emitContSuspend(Offset resumeOffset);
   void emitContSuspendK(Offset resumeOffset);
-  void emitContRetC();
   void emitContCheck(bool checkStarted);
   void emitContValid();
   void emitContKey();
@@ -414,7 +413,6 @@ struct HhbcTranslator {
   void emitAsyncAwait();
   void emitAsyncSuspendE(Offset resumeOffset, int iters);
   void emitAsyncSuspendR(Offset resumeOffset);
-  void emitAsyncWrapResult();
 
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force);
@@ -670,6 +668,8 @@ private:
   void emitAGet(SSATmp* src, Block* catchBlock);
   void emitRetFromInlined(Type type);
   void emitDecRefLocalsInline();
+  void emitRetGen();
+  void emitRetNonGen(Type type, bool freeInline);
   void emitRet(Type type, bool freeInline);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);

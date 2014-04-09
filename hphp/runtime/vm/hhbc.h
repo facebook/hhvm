@@ -724,7 +724,6 @@ enum class BareThisOp : uint8_t {
   O(ContRaise,       NA,               ONE(CV),         NOV,        CF) \
   O(ContSuspend,     NA,               ONE(CV),         ONE(CV),    NF) \
   O(ContSuspendK,    NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(ContRetC,        NA,               ONE(CV),         NOV,        CF_TF) \
   O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
   O(ContKey,         NA,               NOV,             ONE(CV),    NF) \
@@ -734,7 +733,6 @@ enum class BareThisOp : uint8_t {
   O(AsyncAwait,      NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(AsyncSuspend,    TWO(BA,IVA),      ONE(CV),         ONE(CV),    CF) \
   O(AsyncResume,     NA,               NOV,             NOV,        NF) \
-  O(AsyncWrapResult, NA,               ONE(CV),         ONE(CV),    NF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(Abs,             NA,               ONE(CV),         ONE(CV),    NF) \

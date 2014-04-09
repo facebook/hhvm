@@ -4308,9 +4308,41 @@ OPTBLD_INLINE void ExecutionContext::iopSSwitch(IOP_ARGS) {
   m_stack.popC();
 }
 
-OPTBLD_INLINE void ExecutionContext::iopRetC(IOP_ARGS) {
-  NEXT();
+OPTBLD_INLINE void ExecutionContext::retGen(IOP_ARGS) {
+  assert(m_fp->inGenerator());
+
+  c_Continuation* cont = frame_continuation(m_fp);
+  cont->setDone();
+  tvSetIgnoreRef(*m_stack.topC(), cont->m_value);
+  m_stack.popC();
+
+  // Call the FunctionExit hook.
+  EventHook::FunctionExit(m_fp, nullptr);
+
+  // Grab caller into from ActRec.
+  ActRec* sfp = m_fp->arGetSfp();
+  uint soff = m_fp->m_soff;
+
+  if (sfp != m_fp) {
+    // Return control to the caller.
+    m_fp = sfp;
+    pc = m_fp->func()->getEntry() + soff;
+  } else {
+    // No caller; terminate.
+    m_fp = nullptr;
+    pc = nullptr;
+  }
+}
+
+OPTBLD_INLINE void ExecutionContext::retNonGen(IOP_ARGS) {
   assert(!m_fp->inGenerator());
+
+  // If in async function, wrap the return value with a StaticResultWaitHandle.
+  if (m_fp->func()->isAsync()) {
+    auto const top = m_stack.topC();
+    top->m_data.pobj = c_StaticResultWaitHandle::CreateFromVM(*top);
+    top->m_type = KindOfObject;
+  }
 
   // Get the return value.
   TypedValue retval = *m_stack.topTV();
@@ -4338,7 +4370,7 @@ OPTBLD_INLINE void ExecutionContext::iopRetC(IOP_ARGS) {
   if (LIKELY(sfp != m_fp)) {
     // Return control to the caller.
     m_fp = sfp;
-    pc = m_fp->func()->unit()->entry() + m_fp->func()->base() + soff;
+    pc = m_fp->func()->getEntry() + soff;
   } else {
     // No caller; terminate.
     m_fp = nullptr;
@@ -4348,8 +4380,20 @@ OPTBLD_INLINE void ExecutionContext::iopRetC(IOP_ARGS) {
   }
 }
 
+OPTBLD_INLINE void ExecutionContext::iopRetC(IOP_ARGS) {
+  NEXT();
+  if (m_fp->inGenerator()) {
+    retGen(IOP_PASS_ARGS);
+  } else {
+    retNonGen(IOP_PASS_ARGS);
+  }
+}
+
 OPTBLD_INLINE void ExecutionContext::iopRetV(IOP_ARGS) {
-  iopRetC(IOP_PASS_ARGS);
+  NEXT();
+  assert(!m_fp->inGenerator());
+  assert(!m_fp->func()->isAsync());
+  retNonGen(IOP_PASS_ARGS);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopUnwind(IOP_ARGS) {
@@ -7109,24 +7153,6 @@ OPTBLD_INLINE void ExecutionContext::iopContSuspendK(IOP_ARGS) {
   m_fp = prevFp;
 }
 
-OPTBLD_INLINE void ExecutionContext::iopContRetC(IOP_ARGS) {
-  NEXT();
-  c_Continuation* cont = frame_continuation(m_fp);
-  cont->setDone();
-  tvSetIgnoreRef(*m_stack.topC(), cont->m_value);
-  m_stack.popC();
-
-  EventHook::FunctionExit(m_fp, nullptr);
-  ActRec* prevFp = m_fp->arGetSfp();
-  if (prevFp == m_fp) {
-    pc = nullptr;
-    m_fp = nullptr;
-  } else {
-    pc = prevFp->m_func->getEntry() + m_fp->m_soff;
-    m_fp = prevFp;
-  }
-}
-
 OPTBLD_INLINE void ExecutionContext::iopContCheck(IOP_ARGS) {
   NEXT();
   DECODE_IVA(check_started);
@@ -7275,14 +7301,6 @@ OPTBLD_INLINE void ExecutionContext::iopAsyncSuspend(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopAsyncResume(IOP_ARGS) {
   NEXT();
-}
-
-OPTBLD_INLINE void ExecutionContext::iopAsyncWrapResult(IOP_ARGS) {
-  NEXT();
-
-  auto const top = m_stack.topC();
-  top->m_data.pobj = c_StaticResultWaitHandle::CreateFromVM(*top);
-  top->m_type = KindOfObject;
 }
 
 template<class Op>
@@ -7590,7 +7608,7 @@ inline void ExecutionContext::dispatchImpl(int numInstrs) {
       assert(op == OpRetC || op == OpRetV ||                  \
              op == OpAsyncSuspend || op == OpCreateCont ||    \
              op == OpContSuspend || op == OpContSuspendK ||   \
-             op == OpContRetC || op == OpNativeImpl);         \
+             op == OpNativeImpl);                             \
       m_fp = 0;                                               \
       return;                                                 \
     }                                                         \

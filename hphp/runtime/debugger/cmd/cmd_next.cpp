@@ -203,14 +203,15 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
   // stepping over an await, we land on the next statement.
   auto op = *reinterpret_cast<const Op*>(pc);
   if (fp->inGenerator() &&
-      (op == OpContSuspend || op == OpContSuspendK || op == OpContRetC)) {
+      (op == OpContSuspend || op == OpContSuspendK ||
+       op == OpAsyncSuspend || op == OpRetC)) {
     TRACE(2, "CmdNext: encountered yield, await or return from generator\n");
     // Patch the projected return point(s) in both cases for
     // generators, to catch if we exit the the asio iterator or if we
     // are being iterated directly by PHP.
-    if ((op == OpContRetC) || !fp->m_func->isAsync()) setupStepOuts();
+    if ((op == OpRetC) || !fp->m_func->isAsync()) setupStepOuts();
     op = *reinterpret_cast<const Op*>(pc);
-    if (op == OpContSuspend || op == OpContSuspendK) {
+    if (op == OpAsyncSuspend || op == OpContSuspend || op == OpContSuspendK) {
       // Patch the next normal execution point so we can pickup the stepping
       // from there if the caller is C++.
       setupStepCont(fp, pc);

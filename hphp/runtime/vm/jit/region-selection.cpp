@@ -334,7 +334,6 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
         assert(cni->op() == OpRetC ||
                cni->op() == OpRetV ||
                cni->op() == OpCreateCont ||
-               cni->op() == OpContRetC ||
                cni->op() == OpAsyncSuspend ||
                cni->op() == OpNativeImpl ||
                !instrIsNonCallControlFlow(cni->op()));

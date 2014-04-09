@@ -1395,18 +1395,6 @@ void EmitterVisitor::emitIterFree(Emitter& e, IterVec& iters) {
   }
 }
 
-void EmitterVisitor::emitIterFreeForReturn(Emitter& e) {
-  Region* region = m_regions.back().get();
-  IterVec iters;
-  while (region != nullptr) {
-    if (region->isForeach()) {
-      iters.push_back(IterPair(region->m_iterKind, region->m_iterId));
-    }
-    region = region->m_parent.get();
-  }
-  emitIterFree(e, iters);
-}
-
 void EmitterVisitor::emitJump(Emitter& e, IterVec& iters, Label& target) {
   if (!iters.empty()) {
     e.IterBreak(iters, target);
@@ -3142,31 +3130,20 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         assert(m_evalStack.size() == 1);
 
-        // continuations and resumed async functions
-        if (m_inGenerator) {
-          assert(retSym == StackSym::C);
-          emitIterFreeForReturn(e);
-          e.ContRetC();
-          return false;
-        }
-
-        // eagerly executed async functions
-        if (m_curFunc->isAsync()) {
-          assert(retSym == StackSym::C);
-          emitIterFreeForReturn(e);
-          e.AsyncWrapResult();
-          e.RetC();
-          return false;
-        }
-
         if (r->isGuarded()) {
           m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
                       false, 0, 0);
         }
 
-        auto tc = m_curFunc->returnTypeConstraint();
-        emitReturn(e, retSym, tc.hasConstraint(), r);
+        bool hasConstraint = m_curFunc->returnTypeConstraint().hasConstraint();
 
+        // async functions and generators
+        if (m_curFunc->isAsync() || m_curFunc->isGenerator()) {
+          assert(retSym == StackSym::C);
+          hasConstraint = false;
+        }
+
+        emitReturn(e, retSym, hasConstraint, r);
         return false;
       }
 
@@ -6845,7 +6822,6 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
   // if the current position is reachable, emit code to return null
   if (currentPositionIsReachable()) {
     e.Null();
-    e.AsyncWrapResult();
     e.RetC();
   }
 
@@ -6864,7 +6840,7 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
     // if the current position is reachable, emit code to return null
     if (currentPositionIsReachable()) {
       e.Null();
-      e.ContRetC();
+      e.RetC();
     }
   }
 
@@ -6900,7 +6876,7 @@ void EmitterVisitor::emitGeneratorMethod(MethodStatementPtr meth) {
     // if the current position is reachable, emit code to return null
     if (currentPositionIsReachable()) {
       e.Null();
-      e.ContRetC();
+      e.RetC();
     }
   }
 

@@ -1849,11 +1849,6 @@ void in(ISS& env, const bc::ContSuspendK&) {
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::ContRetC&) {
-  popC(env);
-  doRet(env, TBottom);
-}
-
 void in(ISS& env, const bc::ContCheck&)   {}
 void in(ISS& env, const bc::ContValid&)   { push(env, TBool); }
 void in(ISS& env, const bc::ContKey&)     { push(env, TInitCell); }
@@ -1866,11 +1861,6 @@ void in(ISS& env, const bc::AsyncAwait&) {
   popC(env);
   push(env, TInitCell);
   push(env, TBool);
-}
-
-void in(ISS& env, const bc::AsyncWrapResult&) {
-  auto const t = popC(env);
-  push(env, wait_handle(env.index, t));
 }
 
 void in(ISS& env, const bc::AsyncSuspend& op) {

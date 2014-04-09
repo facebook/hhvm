@@ -1574,21 +1574,6 @@ void HhbcTranslator::emitContSuspendK(Offset resumeOffset) {
   emitContReturnControl(catchBlock);
 }
 
-void HhbcTranslator::emitContRetC() {
-  auto catchBlock = makeCatchNoSpill();
-  // set state to done
-  gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
-      cns(c_Continuation::Done));
-
-  // set m_value = popC();
-  auto const oldValue = gen(LdContArValue, Type::Cell, m_irb->fp());
-  gen(StContArValue, m_irb->fp(), popC(DataTypeGeneric)); // teleporting value
-  gen(DecRef, oldValue);
-
-  // transfer control
-  emitContReturnControl(catchBlock);
-}
-
 void HhbcTranslator::emitContCheck(bool checkStarted) {
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_irb->fp());
@@ -1722,10 +1707,6 @@ void HhbcTranslator::emitAsyncSuspendR(Offset resumeOffset) {
 
   // transfer control
   emitContReturnControl(catchBlock);
-}
-
-void HhbcTranslator::emitAsyncWrapResult() {
-  push(gen(CreateSRWH, popC()));
 }
 
 void HhbcTranslator::emitStrlen() {
@@ -3189,17 +3170,35 @@ void HhbcTranslator::emitDecRefLocalsInline() {
   }
 }
 
-void HhbcTranslator::emitRet(Type type, bool freeInline) {
-  if (isInlining()) {
-    return emitRetFromInlined(type);
-  }
+void HhbcTranslator::emitRetGen() {
+  assert(inGenerator());
+  auto catchBlock = makeCatchNoSpill();
+  // set state to done
+  gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
+      cns(c_Continuation::Done));
 
+  // set m_value = popC();
+  auto const oldValue = gen(LdContArValue, Type::Cell, m_irb->fp());
+  gen(StContArValue, m_irb->fp(), popC(DataTypeGeneric)); // teleporting value
+  gen(DecRef, oldValue);
+
+  // transfer control
+  emitContReturnControl(catchBlock);
+}
+
+void HhbcTranslator::emitRetNonGen(Type type, bool freeInline) {
+  assert(!inGenerator());
   auto const func = curFunc();
   if (func->attrs() & AttrMayUseVV) {
     // Note: this has to be the first thing, because we cannot bail after
     //       we start decRefing locs because then there'll be no corresponding
     //       bytecode boundaries until the end of RetC
     gen(ReleaseVVOrExit, makeExitSlow(), m_irb->fp());
+  }
+
+  // If in async function, wrap the return value with a StaticResultWaitHandle.
+  if (func->isAsync()) {
+    push(gen(CreateSRWH, pop(type, DataTypeGeneric)));
   }
 
   // Pop the return value. Since it will be teleported to its place in memory,
@@ -3241,6 +3240,27 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
   // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
   m_hasExit = true;
+}
+
+void HhbcTranslator::emitRetC(bool freeInline) {
+  if (inGenerator()) {
+    assert(!isInlining());
+    emitRetGen();
+  } else if (isInlining()) {
+    emitRetFromInlined(Type::Cell);
+  } else {
+    emitRetNonGen(Type::Cell, freeInline);
+  }
+}
+
+void HhbcTranslator::emitRetV(bool freeInline) {
+  assert(!inGenerator());
+  assert(!curFunc()->isAsync());
+  if (isInlining()) {
+    emitRetFromInlined(Type::BoxedCell);
+  } else {
+    emitRetNonGen(Type::BoxedCell, freeInline);
+  }
 }
 
 void HhbcTranslator::emitJmpSurpriseCheck(Block* catchBlock) {
@@ -3390,14 +3410,6 @@ void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
   gen(SyncABIRegs, m_irb->fp(), stack);
   gen(JmpIndirect, dest);
   m_hasExit = true;
-}
-
-void HhbcTranslator::emitRetC(bool freeInline) {
-  emitRet(Type::Cell, freeInline);
-}
-
-void HhbcTranslator::emitRetV(bool freeInline) {
-  emitRet(Type::BoxedCell, freeInline);
 }
 
 void HhbcTranslator::setThisAvailable() {

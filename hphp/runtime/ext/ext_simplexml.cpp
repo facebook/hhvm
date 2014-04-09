@@ -23,8 +23,83 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+// entity loader
+
+int php_libxml_ext_stream_read(void *context, char *buffer, int len) {
+  if (context == nullptr || buffer == nullptr) {
+    return -1;
+  }
+
+  File *file = (File*)context;
+
+  int offset = strlen(buffer);
+  if (offset > 0 && !file->seek(offset, SEEK_SET)) {
+    raise_warning("Failed to seek to position %d in the stream", offset);
+    return -1;
+  }
+
+  String buf = file->read(len);
+  strcat(buffer, buf.c_str());
+
+  return strlen(buf.c_str());
+}
+
+int php_libxml_ext_stream_close(void *context) {
+  File *file = (File*)context;
+  return file->close();
+}
+
+xmlParserInputPtr php_libxml_ext_entity_loader(const char *url,
+                                               const char *id,
+                                               xmlParserCtxtPtr context) {
+  String translated = String((char*)url, CopyString);
+  Stream::Wrapper* w = Stream::getWrapperFromURI(translated);
+
+  if (w == nullptr) {
+    if (php_libxml_default_entity_loader != nullptr) {
+      return php_libxml_default_entity_loader(translated.c_str(), id, context);
+    } else {
+      raise_error("Default XML entity loader is not available");
+      return nullptr;
+    }
+  }
+
+  xmlParserInputPtr ret = nullptr;
+  xmlCharEncoding enc = XML_CHAR_ENCODING_NONE;
+  xmlParserInputBufferPtr pib = xmlAllocParserInputBuffer(enc);
+  if (pib == nullptr) {
+    raise_warning("Could not allocate parser input buffer");
+  } else {
+    File *file = w->open(translated, "r", 0, null_variant);
+    if (file == nullptr) {
+      raise_error("Failed to load external entity \"%s\"", translated.data());
+    }
+
+    pib->context = file;
+    pib->readcallback = php_libxml_ext_stream_read;
+    pib->closecallback = php_libxml_ext_stream_close;
+
+    ret = xmlNewIOInputStream(context, pib, enc);
+  }
+
+  if (ret == nullptr) {
+    if (pib != nullptr) {
+      xmlFreeParserInputBuffer(pib);
+    }
+
+    raise_error("Failed to load external entity \"%s\"", translated.data());
+  }
+
+  return ret;
+}
+
+xmlExternalEntityLoader php_libxml_default_entity_loader = nullptr;
+
+///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_DEFAULT_EXTENSION_VERSION(SimpleXML, 0.1);
 
@@ -1857,6 +1932,10 @@ bool f_libxml_disable_entity_loader(bool disable /* = true */) {
   bool old = s_libxml_errors->m_entity_loader_disabled;
 
   s_libxml_errors->m_entity_loader_disabled = disable;
+
+  if (php_libxml_default_entity_loader != nullptr) {
+    xmlSetExternalEntityLoader(php_libxml_default_entity_loader);
+  }
 
   return old;
 }

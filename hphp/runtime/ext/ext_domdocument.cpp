@@ -664,7 +664,7 @@ static String _dom_get_valid_file_path(const char *source) {
 }
 
 static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
-                                     char *source, int source_len,
+                                     const String& source,
                                      int options) {
   xmlDocPtr ret = NULL;
   xmlParserCtxtPtr ctxt = NULL;
@@ -678,13 +678,11 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
 
   xmlInitParser();
 
+  /* At this point, dom_parse_document checked the source already. */
   if (mode == DOM_LOAD_FILE) {
-    String file_dest = _dom_get_valid_file_path(source);
-    if (!file_dest.empty()) {
-      ctxt = xmlCreateFileParserCtxt(file_dest.data());
-    }
+    ctxt = xmlCreateFileParserCtxt(source.data());
   } else {
-    ctxt = xmlCreateMemoryParserCtxt(source, source_len);
+    ctxt = xmlCreateMemoryParserCtxt(source.data(), source.size());
   }
 
   if (ctxt == NULL) {
@@ -742,9 +740,15 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
     if (ctxt->recovery) {
       HHVM_FN(error_reporting)(old_error_reporting);
     }
-    /* If loading from memory, set the base reference uri for the document */
-    if (ret && ret->URL == NULL && ctxt->directory != NULL) {
-      ret->URL = xmlStrdup((xmlChar*)ctxt->directory);
+    if (ret && ret->URL == NULL) {
+      if (mode == DOM_LOAD_FILE) {
+        ret->URL = xmlStrdup((xmlChar*)source.c_str());
+      } else {
+        /* If loading from memory, set the base reference uri for the document */
+        if (ctxt->directory != NULL) {
+          ret->URL = xmlStrdup((xmlChar*)ctxt->directory);
+        }
+      }
     }
   } else {
     ret = NULL;
@@ -764,8 +768,7 @@ static Variant dom_parse_document(c_DOMDocument *domdoc, const String& source,
     return false;
   }
   xmlDoc *newdoc =
-    dom_document_parser(domdoc, mode, (char*)source.data(), source.length(),
-                        options);
+    dom_document_parser(domdoc, mode, source, options);
   if (!newdoc) {
     return false;
   }
@@ -827,12 +830,11 @@ static bool _dom_document_relaxNG_validate(c_DOMDocument *domdoc,
   switch (type) {
   case DOM_LOAD_FILE:
     {
-      String valid_file = _dom_get_valid_file_path(source.data());
-      if (valid_file.empty()) {
+      if (source.empty()) {
         raise_warning("Invalid RelaxNG file source");
         return false;
       }
-      parser = xmlRelaxNGNewParserCtxt(valid_file.data());
+      parser = xmlRelaxNGNewParserCtxt(source.data());
     }
     break;
   case DOM_LOAD_STRING:
@@ -886,12 +888,11 @@ static bool _dom_document_schema_validate(c_DOMDocument * domdoc,
   switch (type) {
   case DOM_LOAD_FILE:
     {
-      String valid_file = _dom_get_valid_file_path(source.data());
-      if (valid_file.empty()) {
+      if (source.empty()) {
         raise_warning("Invalid Schema file source");
         return false;
       }
-      parser = xmlSchemaNewParserCtxt(valid_file.data());
+      parser = xmlSchemaNewParserCtxt(source.data());
     }
     break;
   case DOM_LOAD_STRING:
@@ -3049,6 +3050,7 @@ c_DOMDocument::c_DOMDocument(Class* cb) :
     m_recover(false),
     m_orphans(new XmlNodeSet),
     m_owner(false) {
+  php_libxml_set_entity_loader();
 }
 
 c_DOMDocument::~c_DOMDocument() {
@@ -3398,7 +3400,7 @@ Variant c_DOMDocument::t_importnode(const Object& importednode,
 Variant c_DOMDocument::t_load(const String& filename,
                               int64_t options /* = 0 */) {
   SYNC_VM_REGS_SCOPED();
-  String translated = File::TranslatePath(filename);
+  String translated = _dom_get_valid_file_path(filename.data());
   if (translated.empty()) {
     raise_warning("Unable to read file: %s", filename.data());
     return false;
@@ -3413,7 +3415,7 @@ Variant c_DOMDocument::t_loadhtml(const String& source) {
 
 Variant c_DOMDocument::t_loadhtmlfile(const String& filename) {
   SYNC_VM_REGS_SCOPED();
-  String translated = File::TranslatePath(filename);
+  String translated = _dom_get_valid_file_path(filename.data());
   if (translated.empty()) {
     raise_warning("Unable to read file: %s", filename.data());
     return false;
@@ -3469,7 +3471,7 @@ Variant c_DOMDocument::t_save(const String& file, int64_t options /* = 0 */) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0, saveempty = 0;
 
-  String translated = File::TranslatePath(file);
+  String translated = _dom_get_valid_file_path(file.data());
   if (translated.empty()) {
     raise_warning("Invalid Filename");
     return false;
@@ -3495,7 +3497,7 @@ Variant c_DOMDocument::t_savehtmlfile(const String& file) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0;
 
-  String translated = File::TranslatePath(file);
+  String translated = _dom_get_valid_file_path(file.data());
   if (translated.empty()) {
     raise_warning("Invalid Filename");
     return false;

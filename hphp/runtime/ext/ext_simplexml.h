@@ -22,6 +22,23 @@
 #include "hphp/runtime/ext/ext_simplexml_include.h"
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// entity loader
+
+int php_libxml_ext_stream_read(void *context, char *buffer, int len);
+int php_libxml_ext_stream_close(void *context);
+xmlParserInputPtr php_libxml_ext_entity_loader(const char *url,
+                                               const char *id,
+                                               xmlParserCtxtPtr context);
+extern xmlExternalEntityLoader php_libxml_default_entity_loader;
+
+static inline void php_libxml_set_entity_loader() {
+  if (php_libxml_default_entity_loader == nullptr) {
+    php_libxml_default_entity_loader = xmlGetExternalEntityLoader();
+    xmlSetExternalEntityLoader(php_libxml_ext_entity_loader);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 Variant f_simplexml_import_dom(const Object& node,
                                const String& class_name = "SimpleXMLElement");

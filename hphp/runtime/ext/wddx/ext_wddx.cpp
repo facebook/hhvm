@@ -16,18 +16,18 @@
 */
 #include "hphp/runtime/ext/wddx/ext_wddx.h"
 
-namespace HPHP {
+#include <string>
+#include <vector>
 
-using std::string;
-using std::vector;
+namespace HPHP {
 
 WddxPacket::WddxPacket(const Variant& comment, bool manualPacket, bool sVar) :
                        m_packetString(""), m_packetClosed(false),
                        m_manualPacketCreation(manualPacket) {
-  string header = "<header/>";
+  std::string header = "<header/>";
 
   if (!comment.isNull() && !sVar) {
-    string scomment = comment.toString().data();
+    std::string scomment = comment.toString().data();
     header = "<header><comment>" + scomment + "</comment></header>";
   }
   m_packetString = "<wddxPacket version='1.0'>" + header + "<data>";
@@ -44,7 +44,7 @@ bool WddxPacket::add_var(const String& varName, bool hasVarTag) {
   return recursiveAddVar(varName, varVariant, hasVarTag);
 }
 
-string WddxPacket::packet_end() {
+std::string WddxPacket::packet_end() {
   if (!m_packetClosed) {
     if (m_manualPacketCreation) {
       m_packetString += "</struct>";
@@ -123,9 +123,9 @@ bool WddxPacket::recursiveAddVar(String varName, const Variant& varVariant,
     return true;
   }
 
-  string varType = getDataTypeString(varVariant.getType()).data();
+  std::string varType = getDataTypeString(varVariant.getType()).data();
   if (!getWddxEncoded(varType, "", varName, false).empty()) {
-    string varValue = varVariant.toString().data();
+    std::string varValue = varVariant.toString().data();
     if (varType.compare("boolean") == 0) {
       varValue = varVariant.toBoolean() ? "true" : "false";
     }
@@ -136,10 +136,10 @@ bool WddxPacket::recursiveAddVar(String varName, const Variant& varVariant,
   return false;
 }
 
-string WddxPacket::getWddxEncoded(string varType,
-                                  string varValue,
-                                  String varName,
-                                  bool hasVarTag) {
+std::string WddxPacket::getWddxEncoded(std::string varType,
+                                       std::string varValue,
+                                       String varName,
+                                       bool hasVarTag) {
   if (varType.compare("NULL") == 0) {
     return wrapValue("<null/>", "", "", varName, hasVarTag);
   }
@@ -155,10 +155,13 @@ string WddxPacket::getWddxEncoded(string varType,
   return "";
 }
 
-string WddxPacket::wrapValue(string start, string end, string varValue,
-                             String varName, bool hasVarTag) {
-  string startVar = "";
-  string endVar = "";
+std::string WddxPacket::wrapValue(std::string start,
+                                  std::string end,
+                                  std::string varValue,
+                                  String varName,
+                                  bool hasVarTag) {
+  std::string startVar = "";
+  std::string endVar = "";
   if (hasVarTag) {
     startVar += "<var name='";
     startVar += varName.data();
@@ -177,10 +180,8 @@ void find_var_recursive(const TypedValue* tv, WddxPacket* wddxPacket) {
     wddxPacket->add_var(var_name, true);
   }
   if (tv->m_type == KindOfArray) {
-    std::vector<const TypedValue*> children;
-    tv->m_data.parr->getChildren(children);
-    for (auto const& child : children) {
-      find_var_recursive(child, wddxPacket);
+    for (ArrayIter iter(tv->m_data.parr); iter; ++iter) {
+      find_var_recursive(iter.secondRef().asTypedValue(), wddxPacket);
     }
   }
 }
@@ -191,7 +192,7 @@ static TypedValue* add_vars_helper(ActRec* ar) {
   auto wddxPacket = packet_id.getTyped<WddxPacket>();
 
   for (int i = start_index; i < ar->numArgs(); i++) {
-    auto const tv = getArg(ar,i);
+    auto const tv = getArg(ar, i);
     find_var_recursive(tv, wddxPacket);
   }
   return arReturn(ar, true);
@@ -204,7 +205,7 @@ static TypedValue* serialize_vars_helper(ActRec* ar) {
     auto const tv = getArg(ar, i);
     find_var_recursive(tv, wddxPacket);
   }
-  const string packet = wddxPacket->packet_end();
+  const std::string packet = wddxPacket->packet_end();
   Variant strHolder = makeStaticString(packet);
   return arReturn(ar, strHolder);
 }
@@ -222,7 +223,7 @@ static TypedValue* HHVM_FN(wddx_serialize_vars)(ActRec* ar) {
 
 static String HHVM_FUNCTION(wddx_packet_end, const Resource& packet_id) {
   auto wddxPacket = packet_id.getTyped<WddxPacket>();
-  string packetString = wddxPacket->packet_end();
+  std::string packetString = wddxPacket->packet_end();
   return String(packetString);
 }
 
@@ -235,7 +236,7 @@ static String HHVM_FUNCTION(wddx_serialize_value, const Variant& var,
                             const Variant& comment) {
   WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(comment, false, false);
   wddxPacket->serialize_value(var);
-  const string packetString = wddxPacket->packet_end();
+  const std::string packetString = wddxPacket->packet_end();
   return String(packetString);
 }
 

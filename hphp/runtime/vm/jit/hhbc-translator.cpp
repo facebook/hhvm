@@ -1660,9 +1660,6 @@ void HhbcTranslator::emitAsyncSuspendE(Offset resumeOffset, int numIters) {
   // Teleport local variables into the AsyncFunctionWaitHandle.
   SSATmp* asyncAR = gen(LdAFWHActRec, Type::PtrToGen, waitHandle);
   for (int i = 0; i < func->numLocals(); ++i) {
-    // We must generate an AssertLoc because we don't have tracelet
-    // guards on the object type in these outer generator functions.
-    //gen(AssertLoc, Type::Gen, LocalId(i), m_irb->fp());
     gen(StMem, asyncAR, cns(-cellsToBytes(i + 1)), ldLoc(i, DataTypeGeneric));
   }
 

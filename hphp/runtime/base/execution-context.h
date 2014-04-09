@@ -453,8 +453,8 @@ OPCODES
 #undef O
 
   void contEnterImpl(IOP_ARGS);
-  void asyncSuspendE(IOP_ARGS, Offset offset, int32_t iters);
-  void asyncSuspendR(IOP_ARGS, Offset offset);
+  void asyncSuspendE(IOP_ARGS, int32_t iters);
+  void asyncSuspendR(IOP_ARGS);
   void retGen(IOP_ARGS);
   void retNonGen(IOP_ARGS);
   void classExistsImpl(IOP_ARGS, Attr typeAttr);

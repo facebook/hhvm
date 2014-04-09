@@ -2002,7 +2002,7 @@ EmitterVisitor::EmittedClosures EmitterVisitor::s_emittedClosures;
 
 EmitterVisitor::EmitterVisitor(UnitEmitter& ue)
   : m_ue(ue), m_curFunc(ue.getMain()),
-    m_inGenerator(false), m_evalStackIsUnknown(false),
+    m_evalStackIsUnknown(false),
     m_actualStackHighWater(0), m_fdescHighWater(0), m_stateLocal(-1),
     m_retLocal(-1) {
   m_prevOpcode = OpLowInvalid;
@@ -4812,14 +4812,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
         }
 
-        if (m_curFunc->isAsync() && m_inGenerator) {
-          // Closure definition in the body of async function. The closure
-          // body was already emitted, so we just create the object here.
-          assert(ce->getClosureClassName());
-          e.CreateCl(useCount, ce->getClosureClassName());
-          return true;
-        }
-
         // The parser generated a unique name for the function,
         // use that for the class
         std::string clsName = ce->getClosureFunction()->getOriginalName();
@@ -4948,13 +4940,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         e.JmpNZ(resume);
 
         // Suspend if it is not finished.
-        e.AsyncSuspend(m_awaitLabels[await], m_pendingIters.size());
-
-        // Define resume point.
-        if (m_inGenerator) {
-          m_awaitLabels[await].set(e);
-          e.AsyncResume();
-        }
+        e.AsyncSuspend(m_pendingIters.size());
 
         resume.set(e);
         return true;
@@ -6459,13 +6445,13 @@ void EmitterVisitor::emitPostponedMeths() {
       m_curFunc = fe;
       fe->setIsGenerator(true);
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
-      emitGeneratorMethod(meth);
+      emitMethod(meth);
     } else if (funcScope->isAsync()) {
       // emit the outer function (which creates continuation if blocked)
       m_curFunc = fe;
       fe->setIsAsync(true);
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
-      emitAsyncMethod(meth);
+      emitMethod(meth);
     } else {
       m_curFunc = fe;
       if (funcScope->isNative()) {
@@ -6778,6 +6764,12 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   Label topOfBody(e);
   emitMethodPrologue(e, meth);
 
+  // emit code to create generator object
+  if (m_curFunc->isGenerator()) {
+    e.CreateCont();
+    e.PopC();
+  }
+
   // emit method body
   visit(meth->getStmts());
   assert(m_evalStack.size() == 0);
@@ -6795,84 +6787,6 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
     }
     e.RetC();
     e.setTempLocation(LocationPtr());
-  }
-
-  FuncFinisher ff(this, e, m_curFunc);
-  emitMethodDVInitializers(e, meth, topOfBody);
-}
-
-void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
-  auto region = createRegion(meth, Region::Kind::FuncBody);
-  enterRegion(region);
-  SCOPE_EXIT { leaveRegion(region); };
-
-  Emitter e(meth, m_ue, *this);
-  Label topOfBody(e);
-  emitMethodPrologue(e, meth);
-
-  // emit method body executed in eager-execution mode
-  visit(meth->getStmts());
-  assert(m_evalStack.size() == 0);
-
-  // if the current position is reachable, emit code to return null
-  if (currentPositionIsReachable()) {
-    e.Null();
-    e.RetC();
-  }
-
-  // emit method body executed in resumed mode
-  {
-    SCOPE_EXIT {
-      assert(m_inGenerator);
-      m_inGenerator = false;
-    };
-    assert(!m_inGenerator);
-    m_inGenerator = true;
-
-    visit(meth->getStmts());
-    assert(m_evalStack.size() == 0);
-
-    // if the current position is reachable, emit code to return null
-    if (currentPositionIsReachable()) {
-      e.Null();
-      e.RetC();
-    }
-  }
-
-  FuncFinisher ff(this, e, m_curFunc);
-  emitMethodDVInitializers(e, meth, topOfBody);
-}
-
-void EmitterVisitor::emitGeneratorMethod(MethodStatementPtr meth) {
-  auto region = createRegion(meth, Region::Kind::FuncBody);
-  enterRegion(region);
-  SCOPE_EXIT { leaveRegion(region); };
-
-  Emitter e(meth, m_ue, *this);
-  Label topOfBody(e);
-  emitMethodPrologue(e, meth);
-
-  // emit code to create generator object
-  e.CreateCont();
-
-  // emit generator body
-  {
-    SCOPE_EXIT {
-      assert(m_inGenerator);
-      m_inGenerator = false;
-    };
-    assert(!m_inGenerator);
-    m_inGenerator = true;
-
-    e.PopC();
-    visit(meth->getStmts());
-    assert(m_evalStack.size() == 0);
-
-    // if the current position is reachable, emit code to return null
-    if (currentPositionIsReachable()) {
-      e.Null();
-      e.RetC();
-    }
   }
 
   FuncFinisher ff(this, e, m_curFunc);
@@ -8072,7 +7986,7 @@ Funclet* EmitterVisitor::addFunclet(StatementPtr stmt, Thunklet* body) {
 }
 
 Funclet* EmitterVisitor::addFunclet(Thunklet* body) {
-  m_funclets.push_back(new Funclet(body, m_inGenerator));
+  m_funclets.push_back(new Funclet(body));
   return m_funclets.back();
 }
 
@@ -8091,8 +8005,6 @@ void EmitterVisitor::emitFunclets(Emitter& e) {
   // description for more details.
   for (int i = 0; i < m_funclets.size(); ++i) {
     Funclet* f = m_funclets[i];
-    SCOPE_EXIT { m_inGenerator = false; };
-    m_inGenerator = f->m_inGenerator;
     f->m_entry.set(e);
     f->m_body->emit(e);
     delete f->m_body;
@@ -8199,7 +8111,6 @@ void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe) {
   saveMaxStackCells(fe);
   copyOverCatchAndFaultRegions(fe);
   copyOverFPIRegions(fe);
-  m_awaitLabels.clear();
   m_staticEmitted.clear();
   Offset past = e.getUnitEmitter().bcPos();
   fe->finish(past, false);

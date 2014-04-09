@@ -229,13 +229,28 @@ ContSuspend and ContSuspendK opcodes and returns using RetC opcode.
 Async functions
 ---------------
 
-Similarly to continuations, async functions are implemented as bytecode
-functions consisting of two parts.
+Async functions are special type of functions representing asynchronous
+execution. They can suspend while waiting for other asynchronous operation to
+finish. This is achieved using AsyncSuspend opcode, which suspends execution
+into an AsyncFunctionWaitHandle object. Once the given dependency is finished,
+the scheduler resumes async function at the next opcode.
 
-The first part represents "eager execution" of the async function, and the
-second part is used when "suspended execution" is necessary (i.e. if it does
-an await on something that is not yet available). Both parts are required to
-'have the same effects', except the latter one works in a suspended mode.
+The async function body can be executed in 2 different modes. If the execution
+was never suspended, we are in "eager execution" mode. The code executed after
+the resume is executed in "resumed execution" mode.
+
+The "eager execution" can end in 3 different ways. If a RetC opcode is reached,
+the result is wrapped into StaticResultWaitHandle and returned to the caller.
+If an exception is thrown, it is wrapped into StaticExceptionWaitHandle and
+returned to the caller. Otherwise, an AsyncSuspend opcode is reached, which
+suspends the current execution state into an AsyncFunctionWaitHandle object
+and returns it to the caller. This mechanism allows fast execution if no
+blocking asynchronous operation was reached.
+
+The "resumed execution" mode is always entered from the scheduler. In this mode,
+the async function either gets blocked on another dependency, or gets finished.
+The scheduler is notified of these events using AsyncSuspend and RetC opcodes
+(or via unwinder if an exception was thrown) and the control is given back.
 
 The async function implementation is still changing and the implementation may
 change significantly, so this spec is staying light on details for now.
@@ -1421,10 +1436,23 @@ SSwitch <litstr id/offset vector>    [C]  ->  []
   in the vector, which must have a litstr id of -1.
 
 RetC    [C]  ->  []
+
+  Return a cell. Returns $1 to the caller. This instruction may not be used
+  inside fault funclets.
+
+  If this instruction is used inside an async function executed in an "eager
+  execution" mode, the $1 is wrapped into a StaticResultWaitHandle prior to
+  return. In a "resumed execution" mode, the control is given back to the
+  scheduler and it is informed that the async function has finished.
+
+  If used in a generator, the Continuation object is marked as finished and
+  the control is given back to the next instruction after ContEnter or
+  ContRaise instruction in a previous frame. The $1 must be Null.
+
 RetV    [V]  ->  []
 
-  Return. Returns $1 to the caller. This instruction may not be used inside
-  default value funclets or fault funclets.
+  Return a ref. Returns $1 to the caller. This instruction may not be used
+  inside fault funclets, async functions and generators.
 
 Unwind    []  ->  []
 
@@ -4137,31 +4165,26 @@ AsyncAwait   [C]  ->  [C C:Bool]
   pushes the result value from the WaitHandle, and then pushes true. If $1
   failed, this instruction throws the exception from the WaitHandle.
 
-AsyncSuspend  <rel offset> <number of iterators>   [C:Obj]  ->  [C]
+AsyncSuspend  <number of iterators>   [C:Obj]  ->  [C]
 
   This instruction may only appear in bodies of async functions. Suspends
   execution of the current async function.
 
   If the async function is executed eagerly, creates an AsyncFunctionWaitHandle
-  object, moves all local variables and first %2 iterators from the current
-  frame into the object, sets resume offset at the opcode specified by %1,
-  marks the AsyncFunctionWaitHandle as blocked on the WaitHandle provided
-  by $1 and suspends execution by transferring control flow back to the caller,
+  object, moves all local variables and first %1 iterators from the current
+  frame into the object, sets resume offset at the next opcode, marks the
+  AsyncFunctionWaitHandle as blocked on the WaitHandle provided by $1 and
+  suspends execution by transferring control flow back to the caller,
   returning the AsyncFunctionWaitHandle object.
 
   If the async function is executed in resumed mode, sets resume offset at
-  the next opcode (must be equal to %1), marks the AsyncFunctionWaitHandle
-  as blocked on the WaitHandle provided by $1 and suspends execution by
-  transferring control flow back to the scheduler.
+  the next opcode, marks the AsyncFunctionWaitHandle as blocked on the
+  WaitHandle provided by $1 and suspends execution by transferring control
+  flow back to the scheduler.
   
   Once the execution is resumed, the result of the WaitHandle provided by $1
   becomes available on the stack. If $1 is not a WaitHandle, or is a WaitHandle
   that is already finished, the behavior is undefined.
-
-AsyncResume   []  ->  []
-
-  No operation. Used to teach hhbbc that an exception may be thrown right after
-  unreachable ContSuspend. Must appear as the target of AsyncSuspend opcode.
 
 
 Basic statement transformations

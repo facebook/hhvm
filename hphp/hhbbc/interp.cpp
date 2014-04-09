@@ -1866,29 +1866,13 @@ void in(ISS& env, const bc::AsyncAwait&) {
 void in(ISS& env, const bc::AsyncSuspend& op) {
   auto const t = popC(env);
 
-  // Resume point of this async function.
+  // The next opcode is reachable via suspend-resume.
   if (!is_specialized_wait_handle(t) || is_opt(t)) {
     // Uninferred garbage?
     push(env, TInitCell);
-    env.propagate(*op.target, env.state);
-    popC(env);
   } else {
-    auto const inner = wait_handle_inner(t);
-    if (!inner.subtypeOf(TBottom)) {
-      // A wait handle not known to always throw?
-      push(env, inner);
-      env.propagate(*op.target, env.state);
-      popC(env);
-    }
+    push(env, wait_handle_inner(t));
   }
-
-  // HACK: next opcode is not reachable, but nofallthrough() requires deeper
-  //       support and this hack is going away in a couple of diffs anyway
-  push(env, TBottom);
-}
-
-void in(ISS& env, const bc::AsyncResume&)  {
-  // Can throw, async function can resume here with an exception.
 }
 
 void in(ISS& env, const bc::Strlen&) {

@@ -166,7 +166,6 @@
   CASE(ContStopped) \
   CASE(AsyncAwait) \
   CASE(AsyncSuspend) \
-  CASE(AsyncResume) \
   CASE(Strlen) \
   CASE(IncStat) \
   CASE(Idx) \

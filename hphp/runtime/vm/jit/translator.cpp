@@ -1327,7 +1327,6 @@ static const struct {
 
   { OpAsyncAwait,  {Stack1,           StackTop2,    OutAsyncAwait,     1 }},
   { OpAsyncSuspend,{Stack1,           Stack1,       OutUnknown,        0 }},
-  { OpAsyncResume, {None,             None,         OutNone,           0 }},
 };
 
 static hphp_hash_map<Op, InstrInfo> instrInfo;

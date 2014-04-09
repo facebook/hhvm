@@ -731,8 +731,7 @@ enum class BareThisOp : uint8_t {
   O(ContStopped,     NA,               NOV,             NOV,        NF) \
   O(ContHandle,      NA,               ONE(CV),         NOV,        CF_TF) \
   O(AsyncAwait,      NA,               ONE(CV),         TWO(CV,CV), NF) \
-  O(AsyncSuspend,    TWO(BA,IVA),      ONE(CV),         ONE(CV),    CF) \
-  O(AsyncResume,     NA,               NOV,             NOV,        NF) \
+  O(AsyncSuspend,    ONE(IVA),         ONE(CV),         ONE(CV),    CF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(Abs,             NA,               ONE(CV),         ONE(CV),    NF) \
@@ -1011,10 +1010,6 @@ constexpr inline InstrFlags instrFlags(Op opcode) {
 
 constexpr inline bool instrIsControlFlow(Op opcode) {
   return (instrFlags(opcode) & CF) != 0;
-}
-
-constexpr inline bool instrMayBeInitialSuspend(Op opcode) {
-  return opcode == Op::AsyncSuspend || opcode == Op::CreateCont;
 }
 
 constexpr inline bool isUnconditionalJmp(Op opcode) {

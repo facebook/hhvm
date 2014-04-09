@@ -4532,7 +4532,7 @@ OPTBLD_INLINE void ExecutionContext::retNonGen(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopRetC(IOP_ARGS) {
   NEXT();
-  if (m_fp->inGenerator()) {
+  if (UNLIKELY(m_fp->inGenerator())) {
     retGen(IOP_PASS_ARGS);
   } else {
     retNonGen(IOP_PASS_ARGS);
@@ -7273,11 +7273,10 @@ OPTBLD_INLINE void ExecutionContext::iopAsyncAwait(IOP_ARGS) {
   m_stack.pushFalse();
 }
 
-OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, Offset offset,
-                                                   int32_t iters) {
+OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
   assert(!m_fp->inGenerator());
   const auto func = m_fp->m_func;
-  offset += func->unit()->offsetOf(m_pc);
+  const auto offset = func->unit()->offsetOf(pc);
 
   // Pop the blocked dependency.
   Cell* value = m_stack.topC();
@@ -7293,7 +7292,7 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, Offset offset,
     ? c_AsyncFunctionWaitHandle::CreateMeth(m_fp, offset, child)
     : c_AsyncFunctionWaitHandle::CreateFunc(m_fp, offset, child));
 
-  // Teleport local varibales into the AsyncFunctionWaitHandle.
+  // Teleport local variables into the AsyncFunctionWaitHandle.
   fillContinuationVars(func, m_fp, waitHandle->getActRec());
 
   // Teleport iterators into the AsyncFunctionWaitHandle.
@@ -7328,11 +7327,12 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, Offset offset,
   }
 }
 
-OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS, Offset offset) {
+OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS) {
   assert(m_fp->inGenerator());
   assert(m_fp->arGetSfp() == m_fp);
+  const auto offset = m_fp->func()->unit()->offsetOf(pc);
   auto cont = frame_continuation(m_fp);
-  cont->suspend(m_fp->func()->unit()->offsetOf(m_pc) + offset, *m_stack.topC());
+  cont->suspend(offset, *m_stack.topC());
   m_stack.popTV();
 
   EventHook::FunctionExit(m_fp, nullptr);
@@ -7342,20 +7342,15 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS, Offset offset) {
 
 OPTBLD_INLINE void ExecutionContext::iopAsyncSuspend(IOP_ARGS) {
   NEXT();
-  DECODE(Offset, offset);
   DECODE_IVA(iters);
 
   if (m_fp->inGenerator()) {
     // suspend resumed execution
-    asyncSuspendR(IOP_PASS_ARGS, offset);
+    asyncSuspendR(IOP_PASS_ARGS);
   } else {
     // suspend eager execution
-    asyncSuspendE(IOP_PASS_ARGS, offset, iters);
+    asyncSuspendE(IOP_PASS_ARGS, iters);
   }
-}
-
-OPTBLD_INLINE void ExecutionContext::iopAsyncResume(IOP_ARGS) {
-  NEXT();
 }
 
 template<class Op>

@@ -683,14 +683,10 @@ void IRTranslator::translateAsyncAwait(const NormalizedInstruction&) {
 
 void IRTranslator::translateAsyncSuspend(const NormalizedInstruction& i) {
   if (m_hhbcTrans.inGenerator()) {
-    HHIR_EMIT(AsyncSuspendR, i.offset() + i.imm[0].u_BA);
+    HHIR_EMIT(AsyncSuspendR, i.nextSk().offset());
   } else {
-    HHIR_EMIT(AsyncSuspendE, i.offset() + i.imm[0].u_BA, i.imm[1].u_IVA);
+    HHIR_EMIT(AsyncSuspendE, i.nextSk().offset(), i.imm[0].u_IVA);
   }
-}
-
-void IRTranslator::translateAsyncResume(const NormalizedInstruction& i) {
-  HHIR_EMIT(Nop);
 }
 
 void IRTranslator::translateStrlen(const NormalizedInstruction& i) {

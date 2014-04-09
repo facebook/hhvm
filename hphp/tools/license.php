@@ -40,6 +40,8 @@ $excluded = array(
   'runtime/base/zend-ini.tab.cpp',
   'third_party/',
   'util/safesort.h',
+  'zend/crypt-blowfish.h',
+  'zend/crypt-blowfish.c',
 );
 
 $files_external_party = array(

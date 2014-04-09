@@ -166,21 +166,24 @@ bool coerceFCallArgs(TypedValue* args,
   for (int32_t i = 0; (i < numNonDefault) && (i < numArgs); i++) {
     const Func::ParamInfo& pi = func->params()[i];
 
+#define COERCE_OR_CAST(kind, warn_kind)                 \
+  if (paramCoerceMode) {                                \
+    if (!tvCoerceParamTo##kind##InPlace(&args[-i])) {   \
+      raise_param_type_warning(                         \
+        func->name()->data(),                           \
+        i+1,                                            \
+        KindOf##warn_kind,                              \
+        args[-i].m_type                                 \
+      );                                                \
+      return false;                                     \
+    }                                                   \
+  } else {                                              \
+    tvCastTo##kind##InPlace(&args[-i]);                 \
+  }
+
 #define CASE(kind)                                      \
   case KindOf##kind:                                    \
-    if (paramCoerceMode) {                              \
-      if (!tvCoerceParamTo##kind##InPlace(&args[-i])) { \
-        raise_param_type_warning(                       \
-          func->name()->data(),                         \
-          i+1,                                          \
-          KindOf##kind,                                 \
-          args[-i].m_type                               \
-        );                                              \
-        return false;                                   \
-      }                                                 \
-    } else {                                            \
-      tvCastTo##kind##InPlace(&args[-i]);               \
-    }                                                   \
+    COERCE_OR_CAST(kind, kind)                          \
     break; /* end of case */
 
     switch (pi.builtinType()) {
@@ -189,8 +192,16 @@ bool coerceFCallArgs(TypedValue* args,
       CASE(Double)
       CASE(String)
       CASE(Array)
-      CASE(Object)
       CASE(Resource)
+      case KindOfObject: {
+        auto mpi = func->methInfo() ? func->methInfo()->parameters[i] : nullptr;
+        if (pi.hasDefaultValue() || (mpi && mpi->valueLen > 0)) {
+          COERCE_OR_CAST(NullableObject, Object);
+        } else {
+          COERCE_OR_CAST(Object, Object);
+        }
+        break;
+      }
       case KindOfUnknown:
         break;
       default:
@@ -198,6 +209,7 @@ bool coerceFCallArgs(TypedValue* args,
     }
 
 #undef CASE
+#undef COERCE_OR_CAST
 
   }
   return true;

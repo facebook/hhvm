@@ -3028,9 +3028,18 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
               makeExitSlow(),
               m_irb->sp());
         } else {
+          // cpi.value/valueLen contain the default values for C++ built-ins,
+          // as serialize()'d data. It's generally unneccessary to populate
+          // Func::ParamInfo default values, as the C++ code sets them up,
+          // but here we need to check if there /is/ a default.
+          Type t(pi.builtinType());;
+          if (UNLIKELY(pi.builtinType() == KindOfObject
+              && callee->methInfo()->parameters[i]->valueLen > 0)) {
+            t = Type::NullableObj;
+          }
           gen(CastStk,
               makeCatch(),
-              Type(pi.builtinType()),
+              t,
               StackOffset(numArgs - i - 1),
               m_irb->sp());
         }

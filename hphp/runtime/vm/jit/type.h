@@ -93,6 +93,7 @@ namespace constToBits_detail {
   c(Null,          kUninit|kInitNull)                                   \
   c(Str,           kStaticStr|kCountedStr)                              \
   c(Arr,           kStaticArr|kCountedArr)                              \
+  c(NullableObj,   kObj|kInitNull|kUninit)                              \
   c(UncountedInit, kInitNull|kBool|kInt|kDbl|kStaticStr|kStaticArr)     \
   c(Uncounted,     kUncountedInit|kUninit)                              \
   c(InitCell,      kUncountedInit|kStr|kArr|kObj|kRes)                  \

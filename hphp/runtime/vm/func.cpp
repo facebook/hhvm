@@ -1373,9 +1373,10 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
   for (unsigned i = 0; i < info->parameters.size(); ++i) {
     // For builtin only, we use a dummy ParamInfo
     FuncEmitter::ParamInfo pi;
-    pi.setRef((bool)(info->parameters[i]->attribute & ClassInfo::IsReference));
-    pi.setBuiltinType(info->parameters[i]->argType);
-    appendParam(makeStaticString(info->parameters[i]->name), pi);
+    const auto& parameter = info->parameters[i];
+    pi.setRef((bool)(parameter->attribute & ClassInfo::IsReference));
+    pi.setBuiltinType(parameter->argType);
+    appendParam(makeStaticString(parameter->name), pi);
   }
 }
 

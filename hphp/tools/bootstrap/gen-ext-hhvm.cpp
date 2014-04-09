@@ -22,6 +22,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "folly/FBString.h"
 #include "folly/Format.h"
@@ -207,6 +208,9 @@ void emitCast(const PhpParam& param, int32_t index, std::ostream& out,
     out << ind << "  rv->m_type = KindOfBoolean;\n"
         << ind << "  rv->m_data.num = 0;\n";
     emitZendParamSuffix(out, ind);
+  } else if (param.kindOf() == KindOfObject && param.hasDefault()) {
+    out << ind << "tvCastToNullableObject"
+        << "InPlace(args-" << index << ");\n";
   } else if (param.kindOf() != KindOfAny) {
     out << ind << "tvCastTo" << kindOfString(param.kindOf())
         << "InPlace(args-" << index << ");\n";
@@ -434,15 +438,30 @@ void emitExtCall(const PhpFunc& func, std::ostream& out, const char* ind) {
       if (kindof != KindOfAny ||
           (defVal != "null" && defVal != "null_variant")) {
         out << " = ";
-        std::string nullToType =
-          kindof == KindOfArray ? ".toArray()" :
-          kindof == KindOfString ? ".toString()" :
-          kindof == KindOfResource ? ".toResource()" :
-          kindof == KindOfObject ? ".toObject()" :
-          kindof == KindOfRef ? "" :
-          "icantconvertthisfromnull";
-        if (defVal == "null_variant") defVal += nullToType;
-        out << (defVal == "null" ? "uninit_null()" + nullToType : defVal);
+
+        if (boost::starts_with(defVal, "null")) {
+          switch (kindof) {
+            case KindOfArray:
+              out << "Array()";
+              break;
+            case KindOfString:
+              out << "String()";
+              break;
+            case KindOfResource:
+              out << "Resource()";
+              break;
+            case KindOfObject:
+              out << "Object()";
+              break;
+            case KindOfRef:
+              out << "init_null()";
+              break;
+            default:
+              out << "No valid null object.";
+          }
+        } else {
+          out << defVal;
+        }
       }
       out << ";\n";
     }

@@ -194,9 +194,7 @@ class PhpParam {
   bool hasDefault() const {
     return m_param.find("value") != m_param.items().end();
   }
-  fbstring getDefault() const {
-    return hasDefault() ? m_param["value"].asString() : "";
-  }
+  fbstring getDefault() const;
   fbstring getDefaultSerialized() const;
   fbstring getDefaultPhp() const;
 

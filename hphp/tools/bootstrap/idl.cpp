@@ -294,6 +294,24 @@ static fbstring unescapeString(fbstring val) {
   return s;
 }
 
+fbstring PhpParam::getDefault() const {
+  if (!hasDefault()) {
+    return "";
+  }
+  auto value = m_param["value"].asString();
+  if (value == "null") {
+    switch (kindOf()) {
+      case KindOfString: return "null_string";
+      case KindOfArray: return "null_array";
+      case KindOfObject: return "null_object";
+      case KindOfResource: return "null_object";
+      case KindOfAny: return "null_variant";
+      default: break;
+    }
+  }
+  return value;
+}
+
 /**
  * From idl/base.php:get_serialized_default()
  */

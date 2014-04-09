@@ -552,6 +552,7 @@ void tvCastToStringInPlace(TypedValue* tv);
 StringData* tvCastToString(const TypedValue* tv);
 void tvCastToArrayInPlace(TypedValue* tv);
 void tvCastToObjectInPlace(TypedValue* tv);
+void tvCastToNullableObjectInPlace(TypedValue* tv);
 void tvCastToResourceInPlace(TypedValue* tv);
 
 bool tvCanBeCoercedToNumber(TypedValue* tv);
@@ -561,6 +562,7 @@ bool tvCoerceParamToDoubleInPlace(TypedValue* tv);
 bool tvCoerceParamToStringInPlace(TypedValue* tv);
 bool tvCoerceParamToArrayInPlace(TypedValue* tv);
 bool tvCoerceParamToObjectInPlace(TypedValue* tv);
+bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv);
 bool tvCoerceParamToResourceInPlace(TypedValue* tv);
 
 typedef void(*RawDestructor)(void*);

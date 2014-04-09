@@ -1844,9 +1844,13 @@ SSATmp* Simplifier::simplifyCondJmp(const IRInstruction* inst) {
 SSATmp* Simplifier::simplifyCastStk(const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<CastStk>()->offset);
-  if (info.knownType <= inst->typeParam()) {
-    // No need to cast---the type was as good or better.
-    return gen(Nop);
+  if (inst->typeParam() == Type::NullableObj && info.knownType <= Type::Null) {
+    // If we're casting Null to NullableObj, we still need to call
+    // tvCastToNullableObjectInPlace. See comment there and t3879280 for
+    // details.
+    return nullptr;
+  } else if (info.knownType <= inst->typeParam()) {
+    return inst->src(0);
   }
   return nullptr;
 }

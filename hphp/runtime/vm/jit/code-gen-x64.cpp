@@ -3659,6 +3659,8 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
     tvCastHelper = (TCA)tvCastToStringInPlace;
   } else if (type <= Type::Obj) {
     tvCastHelper = (TCA)tvCastToObjectInPlace;
+  } else if (type <= Type::NullableObj) {
+    tvCastHelper = (TCA)tvCastToNullableObjectInPlace;
   } else if (type <= Type::Res) {
     tvCastHelper = (TCA)tvCastToResourceInPlace;
   } else {

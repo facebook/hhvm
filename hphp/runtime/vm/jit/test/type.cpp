@@ -183,11 +183,13 @@ TEST(Type, CanRunDtor) {
   expectTrue(Type::Arr);
   expectTrue(Type::CountedArr);
   expectTrue(Type::Obj);
+  expectTrue(Type::NullableObj);
   expectTrue(Type::Res);
   expectTrue(Type::Counted);
   expectTrue(Type::BoxedArr);
   expectTrue(Type::BoxedCountedArr);
   expectTrue(Type::BoxedObj);
+  expectTrue(Type::BoxedNullableObj);
   expectTrue(Type::BoxedRes);
   expectTrue(Type::BoxedInitCell);
   expectTrue(Type::BoxedCell);
@@ -200,6 +202,7 @@ TEST(Type, CanRunDtor) {
   expectTrue(Type::Top);
   expectTrue(Type::StackElem);
   expectTrue(Type::AnyObj);
+  expectTrue(Type::AnyNullableObj);
   expectTrue(Type::AnyRes);
   expectTrue(Type::AnyArr);
   expectTrue(Type::AnyCountedArr);

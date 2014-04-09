@@ -450,7 +450,7 @@ O(LookupClsMethodFCache,                                                      \
                        D(Func|Nullptr), C(Cls)                                \
                                           S(FramePtr),                N|E|Er) \
 O(GetCtxFwdCallDyn,             D(Ctx), S(Ctx),                          PRc) \
-O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                C|PRc) \
+O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                  PRc) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
 O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),     B|C|E|N|Er) \

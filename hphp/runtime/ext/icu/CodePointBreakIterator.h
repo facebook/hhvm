@@ -148,7 +148,7 @@ class CodePointBreakIterator : public icu::BreakIterator {
                                             int32_t &BufferSize,
                                             UErrorCode &status) override;
 
-#if U_ICU_VERSION_MAJOR_NUM * 100 + U_ICU_VERSION_MINOR_NUM >= 409 
+#if U_ICU_VERSION_MAJOR_NUM * 100 + U_ICU_VERSION_MINOR_NUM >= 409
   CodePointBreakIterator &refreshInputText(UText *input,
                                            UErrorCode &status) override;
 #endif

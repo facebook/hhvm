@@ -143,6 +143,9 @@
       - joomla-cms/tests/unit/suites/libraries/joomla/twitter/JTwitterTest.php
       - joomla-cms/tests/unit/suites/libraries/joomla/document/opensearch/JDocumentOpensearchTest.php
       - joomla-cms/tests/unit/suites/libraries/joomla/cache/storage/JCacheStorageMainTest.php
+      # This one intermittently hangs and blocks the full test runs - ditto when part
+      # of joomla-framework
+      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldIntegerTest.php
   klein:
     url: https://github.com/chriso/klein.php.git
     branch: v2.0.2

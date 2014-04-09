@@ -1285,7 +1285,7 @@
         },
         {
             "name": "LIBXML_DOTTED_VERSION",
-            "value": "2.6.26"
+            "value": "2.7.6"
         },
         {
             "name": "LIBXML_DTDATTR",
@@ -1314,6 +1314,14 @@
         {
             "name": "LIBXML_ERR_WARNING",
             "value": 1
+        },
+        {
+            "name": "LIBXML_HTML_NODEFDTD",
+            "value": 4
+        },
+        {
+            "name": "LIBXML_HTML_NOIMPLIED",
+            "value": 8192
         },
         {
             "name": "LIBXML_NOBLANKS",
@@ -1368,8 +1376,20 @@
             "value": 8192
         },
         {
+            "name": "LIBXML_PARSEHUGE",
+            "value": 524288
+        },
+        {
+            "name": "LIBXML_PEDANTIC",
+            "value": 128
+        },
+        {
+            "name": "LIBXML_SCHEMA_CREATE",
+            "value": 1 
+        },
+        {
             "name": "LIBXML_VERSION",
-            "value": 20626
+            "value": 20706
         },
         {
             "name": "LIBXML_XINCLUDE",

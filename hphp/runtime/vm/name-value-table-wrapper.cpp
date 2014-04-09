@@ -125,7 +125,7 @@ ArrayData* NameValueTableWrapper::SetInt(ArrayData* ad, int64_t k,
 ArrayData* NameValueTableWrapper::SetStr(ArrayData* ad, StringData* k,
                                          const Variant& v, bool copy) {
   auto a = asNVTW(ad);
-  tvAsVariant(a->m_tab->lookupAdd(k)).assignVal(v);
+  tvAsVariant(a->m_tab->lookupAdd(k)).assign(v);
   return a;
 }
 

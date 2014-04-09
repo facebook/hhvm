@@ -502,7 +502,6 @@ struct Variant : private TypedValue {
    * Operators
    */
   Variant &assign(const Variant& v);
-  Variant &assignVal(const Variant& v) { return assign(v); }
   Variant &assignRef(Variant& v);
 
   Variant &operator=(CVarWithRefBind v) { return setWithRef(variant(v)); }

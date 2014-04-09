@@ -1633,7 +1633,7 @@ int64_t new_miter_array_key(Iter* dest, RefData* v1,
 
   tvAsVariant(valOut).assignRef(dest->marr().val());
   if (keyOut) {
-    tvAsVariant(keyOut).assignVal(dest->marr().key());
+    tvAsVariant(keyOut).assign(dest->marr().key());
   }
 
   return 1LL;
@@ -1667,7 +1667,7 @@ int64_t new_miter_object(Iter* dest, RefData* ref, Class* ctx,
 
   tvAsVariant(valOut).assignRef(dest->marr().val());
   if (keyOut) {
-    tvAsVariant(keyOut).assignVal(dest->marr().key());
+    tvAsVariant(keyOut).assign(dest->marr().key());
   }
   return 1LL;
 }
@@ -1691,7 +1691,7 @@ int64_t miter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 
   tvAsVariant(valOut).assignRef(marr.val());
   if (keyOut) {
-    tvAsVariant(keyOut).assignVal(marr.key());
+    tvAsVariant(keyOut).assign(marr.key());
   }
 
   return 1LL;

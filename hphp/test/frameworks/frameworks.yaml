@@ -88,9 +88,10 @@
     test_root: facebook-php-sdk
     test_file_regex: /.*(tests\.php)$/
   guzzle:
-    url: https://github.com/guzzle/guzzle.git
-    branch: v3.8.1
-    commit: 4de0618a01b34aa1c8c33a3f13f396dcd3882eba
+    url: https://github.com/guzzle/guzzle3.git
+    # Slightly after v3.8.1 - need https://github.com/guzzle/guzzle3/pull/20
+    branch: master
+    commit: 840683b88b637a5310aefceac3722c6fd6b4c043
     install_root: guzzle
     test_root: guzzle
   guzzle4:

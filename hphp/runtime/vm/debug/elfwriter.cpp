@@ -98,7 +98,7 @@ void ElfWriter::initStrtab() {
 bool ElfWriter::initDwarfProducer() {
   Dwarf_Error error = 0;
   /* m_dwarfProducer is the handle used for interaction for libdwarf */
-  m_dwarfProducer = dwarf_producer_init_c(
+  m_dwarfProducer = dwarf_producer_init_b(
     DW_DLC_WRITE | DW_DLC_SIZE_64 | DW_DLC_SYMBOLIC_RELOCATIONS,
     g_dwarfCallback,
     nullptr,

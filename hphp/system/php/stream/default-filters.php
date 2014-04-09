@@ -65,11 +65,7 @@ namespace __SystemLib {
         );
       }
 
-      if ($this->impl->eof()) {
-        return \PSFS_PASS_ON;
-      } else {
-        return \PSFS_FEED_ME;
-      }
+      return \PSFS_PASS_ON;
     }
   }
 

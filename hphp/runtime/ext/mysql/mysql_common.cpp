@@ -830,7 +830,7 @@ bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
                              fields[i].length;
         break;
       default:
-        // There exists some more types in this enum like MYSQL_TYPE_TIMESTAMP2
+        // There exists some more types in this enum like MYSQL_TYPE_TIMESTAMP2,
         // MYSQL_TYPE_DATETIME2, MYSQL_TYPE_TIME2 but they are just used on the
         // server
         assert(false);

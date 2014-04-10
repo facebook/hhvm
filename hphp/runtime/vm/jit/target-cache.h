@@ -105,6 +105,11 @@ struct StaticMethodFCache {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace MethodCache {
+
+constexpr int kMovLen = 10;
+constexpr int kMovImmOff = 2;
+
 /*
  * Method cache entries cache the dispatch target for a function call.
  * The key is a Class*, but the low bits are reused for other
@@ -118,35 +123,29 @@ struct StaticMethodFCache {
  * the __call function).  The second lowest bit of the key is set if
  * the cached Func has AttrStatic.
  */
-struct MethodCache {
+struct Entry {
   uintptr_t m_key;
   const Func* m_value;
 };
 
 /*
- * When we first create method cache entries, we need some information
- * for pmethodCacheMissPath to set up an immediate for the first
- * dispatched function.  A pointer to one of these is passed in
- * pdataRaw to pmethodCacheMissPath.
+ * When we first create method cache entries, we need some information to set
+ * up an immediate for the first dispatched function.  A pointer to one of
+ * these is passed in rawTarget to handlePrimeCacheInit.
  */
-struct MethodCachePrimeData {
-  JIT::TCA smashImmAddr;
+struct SmashTarget {
+  JIT::TCA movAddr;
   JIT::TCA retAddr;
 };
 
 template<bool fatal>
-void methodCacheSlowPath(MethodCache* mce,
-                         ActRec* ar,
-                         StringData* name,
-                         Class* cls,
-                         uintptr_t mcePrime);
-
-template<bool fatal>
-void pmethodCacheMissPath(MethodCache* mce,
+void handlePrimeCacheInit(Entry* mce,
                           ActRec* ar,
                           StringData* name,
                           Class* cls,
-                          uintptr_t pdataRaw);
+                          uintptr_t rawTarget);
+
+} // namespace MethodCache
 
 //////////////////////////////////////////////////////////////////////
 

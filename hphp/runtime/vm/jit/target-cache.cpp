@@ -144,19 +144,20 @@ const Class* ClassCache::lookup(RDS::Handle handle, StringData* name) {
 //=============================================================================
 // MethodCache
 
+namespace MethodCache {
+
+namespace {
+///////////////////////////////////////////////////////////////////////////////
 
 NEVER_INLINE __attribute__((noreturn))
-static void methodCacheFatal(ActRec* ar,
-                             Class* cls,
-                             StringData* name,
-                             Class* ctx) {
+void raiseFatal(ActRec* ar, Class* cls, StringData* name, Class* ctx) {
   try {
     g_context->lookupMethodCtx(
       cls,
       name,
       ctx,
       CallType::ObjMethod,
-      true /* raise error */
+      true // raise error
     );
     not_reached();
   } catch (...) {
@@ -167,7 +168,7 @@ static void methodCacheFatal(ActRec* ar,
 }
 
 NEVER_INLINE
-static void methodCacheNullFunc(ActRec* ar, StringData* name) {
+void nullFunc(ActRec* ar, StringData* name) {
   try {
     raise_warning("Invalid argument: function: method '%s' not found",
                   name->data());
@@ -179,26 +180,23 @@ static void methodCacheNullFunc(ActRec* ar, StringData* name) {
   }
 }
 
-template<bool Fatal>
+template<bool fatal>
 NEVER_INLINE
-static void methodCacheSlowerPath(MethodCache* mce,
-                                  ActRec* ar,
-                                  StringData* name,
-                                  Class* cls) {
+void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls) {
   auto const ctx = reinterpret_cast<ActRec*>(ar->m_savedRbp)->m_func->cls();
   auto func = g_context->lookupMethodCtx(
     cls,
     name,
     ctx,
     CallType::ObjMethod,
-    false /* raise error */
+    false // raise error
   );
 
   if (UNLIKELY(!func)) {
     func = cls->lookupMethod(s_call.get());
     if (UNLIKELY(!func)) {
-      if (Fatal) return methodCacheFatal(ar, cls, name, ctx);
-      return methodCacheNullFunc(ar, name);
+      if (fatal) return raiseFatal(ar, cls, name, ctx);
+      return nullFunc(ar, name);
     }
     ar->setInvName(name);
     assert(!(func->attrs() & AttrStatic));
@@ -221,17 +219,17 @@ static void methodCacheSlowerPath(MethodCache* mce,
   }
 }
 
-template<bool Fatal>
+template<bool fatal>
 NEVER_INLINE
-static void methodCacheMagicOrStatic(MethodCache* mce,
-                                     ActRec* ar,
-                                     StringData* name,
-                                     Class* cls,
-                                     uintptr_t mceKey,
-                                     const Func* mceValue) {
+void readMagicOrStatic(Entry* mce,
+                       ActRec* ar,
+                       StringData* name,
+                       Class* cls,
+                       uintptr_t mceKey,
+                       const Func* mceValue) {
   auto const storedClass = reinterpret_cast<Class*>(mceKey & ~0x3u);
   if (storedClass != cls) {
-    return methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
+    return lookup<fatal>(mce, ar, name, cls);
   }
 
   ar->m_func = mceValue;
@@ -252,12 +250,12 @@ static void methodCacheMagicOrStatic(MethodCache* mce,
   }
 }
 
-template<bool Fatal>
+template<bool fatal>
 NEVER_INLINE
-static void staticPublicSlowPath(MethodCache* mce,
-                                 ActRec* ar,
-                                 Class* cls,
-                                 const Func* cand) {
+void readPublicStatic(Entry* mce,
+                      ActRec* ar,
+                      Class* cls,
+                      const Func* cand) {
   mce->m_key = reinterpret_cast<uintptr_t>(cls) | 0x2u;
   if (LIKELY(!cand->isClosureBody())) {
     auto const obj = ar->getThis();
@@ -267,21 +265,19 @@ static void staticPublicSlowPath(MethodCache* mce,
   }
 }
 
-template<bool Fatal>
-void methodCacheSlowPath(MethodCache* mce,
-                         ActRec* ar,
-                         StringData* name,
-                         Class* cls,
-                         uintptr_t mcePrime) {
+template<bool fatal>
+void handleSlowPath(Entry* mce,
+                    ActRec* ar,
+                    StringData* name,
+                    Class* cls,
+                    uintptr_t mcePrime) {
   assert(ar->hasThis());
   assert(ar->getThis()->getVMClass() == cls);
   assert(IMPLIES(mce->m_key, mce->m_value));
   assert(name->isStatic());
 
-  /*
-   * Check for a hit in the request local cache---since we've failed
-   * on the immediate smashed in the TC.
-   */
+  // Check for a hit in the request local cache---since we've failed
+  // on the immediate smashed in the TC.
   auto const mceKey = mce->m_key;
   if (LIKELY(mceKey == reinterpret_cast<uintptr_t>(cls))) {
     ar->m_func = mce->m_value;
@@ -292,31 +288,28 @@ void methodCacheSlowPath(MethodCache* mce,
   // from the TC's mcePrime as a starting point.
   const Func* mceValue;
   if (UNLIKELY(!mceKey)) {
-    /*
-     * If the low bit is set in mcePrime, we're in the middle of
-     * smashing immediates into the TC from the pmethodCacheMissPath,
-     * and the upper bits is not yet a valid Func*.
-     *
-     * We're assuming that writes to executable code may be seen out
-     * of order (i.e. it may call this function with the old
-     * immediate), so we check this bit to ensure we don't try to
-     * treat the immediate as a real Func* if it isn't yet.
-     */
+    // If the low bit is set in mcePrime, we're in the middle of
+    // smashing immediates into the TC from the handlePrimeCacheInit,
+    // and the upper bits is not yet a valid Func*.
+    //
+    // We're assuming that writes to executable code may be seen out
+    // of order (i.e. it may call this function with the old
+    // immediate), so we check this bit to ensure we don't try to
+    // treat the immediate as a real Func* if it isn't yet.
     if (mcePrime & 0x1) {
-      return methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
+      return lookup<fatal>(mce, ar, name, cls);
     }
     mceValue = reinterpret_cast<const Func*>(mcePrime >> 32);
     if (UNLIKELY(!mceValue)) {
       // The inline Func* might be null if it was uncacheable (not
       // low-malloced).
-      return methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
+      return lookup<fatal>(mce, ar, name, cls);
     }
     mce->m_value = mceValue; // below assumes this is already in local cache
   } else {
     mceValue = mce->m_value;
     if (UNLIKELY(mceKey & 0x3)) {
-      return methodCacheMagicOrStatic<Fatal>(mce, ar, name, cls,
-        mceKey, mceValue);
+      return readMagicOrStatic<fatal>(mce, ar, name, cls, mceKey, mceValue);
     }
   }
   assert(!(mceValue->attrs() & AttrStatic));
@@ -324,37 +317,33 @@ void methodCacheSlowPath(MethodCache* mce,
   // Note: if you manually CSE mceValue->methodSlot() here, gcc 4.8
   // will strangely generate two loads instead of one.
   if (UNLIKELY(cls->numMethods() <= mceValue->methodSlot())) {
-    return methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
+    return lookup<fatal>(mce, ar, name, cls);
   }
   auto const cand = cls->methods()[mceValue->methodSlot()];
 
-  /*
-   * If this class has the same func at the same method slot we're
-   * good to go.  No need to recheck permissions, since we already
-   * checked them first time around.
-   *
-   * This case occurs when the current target class `cls' and the
-   * class we saw last time in mceKey have some shared ancestor that
-   * defines the method, but neither overrode the method.
-   */
+  // If this class has the same func at the same method slot we're
+  // good to go.  No need to recheck permissions, since we already
+  // checked them first time around.
+  //
+  // This case occurs when the current target class `cls' and the
+  // class we saw last time in mceKey have some shared ancestor that
+  // defines the method, but neither overrode the method.
   if (LIKELY(cand == mceValue)) {
     ar->m_func = cand;
     mce->m_key = reinterpret_cast<uintptr_t>(cls);
     return;
   }
 
-  /*
-   * If the previously called function (mceValue) was private, then
-   * the current context class must be mceValue->cls(), since we
-   * called it last time.  So if the new class in `cls' derives from
-   * mceValue->cls(), its the same function that would be picked.
-   * Note that we can only get this case if there is a same-named
-   * (private or not) function deeper in the class hierarchy.
-   *
-   * In this case, we can do a fast subtype check using the classVec,
-   * because we know oldCls can't be an interface (because we observed
-   * an instance of it last time).
-   */
+  // If the previously called function (mceValue) was private, then
+  // the current context class must be mceValue->cls(), since we
+  // called it last time.  So if the new class in `cls' derives from
+  // mceValue->cls(), its the same function that would be picked.
+  // Note that we can only get this case if there is a same-named
+  // (private or not) function deeper in the class hierarchy.
+  //
+  // In this case, we can do a fast subtype check using the classVec,
+  // because we know oldCls can't be an interface (because we observed
+  // an instance of it last time).
   if (UNLIKELY(mceValue->attrs() & AttrPrivate)) {
     auto const oldCls = mceValue->cls();
     assert(!(oldCls->attrs() & AttrInterface));
@@ -367,50 +356,44 @@ void methodCacheSlowPath(MethodCache* mce,
     }
   }
 
-  /*
-   * If the candidate has the same name, its probably the right
-   * function.  Try to prove it.
-   *
-   * We can use the invoked name `name' to compare with cand, but note
-   * that function names are case insensitive, so it's not necessarily
-   * true that mceValue->name() == name bitwise.
-   */
+  // If the candidate has the same name, its probably the right
+  // function.  Try to prove it.
+  //
+  // We can use the invoked name `name' to compare with cand, but note
+  // that function names are case insensitive, so it's not necessarily
+  // true that mceValue->name() == name bitwise.
   assert(mceValue->name()->isame(name));
   if (LIKELY(cand->name() == name)) {
     if (LIKELY(cand->attrs() & AttrPublic)) {
-      /*
-       * If the candidate function is public, then it has to be the
-       * right function.  There can be no other function with this
-       * name on `cls', and we already ruled out the case where
-       * dispatch should've gone to a private function with the same
-       * name, above.
-       *
-       * The normal case here is an overridden public method.  But this
-       * case can also occur on unrelated classes that happen to have
-       * a same-named function at the same method slot, which means we
-       * still have to check whether the new function is static.
-       * Bummer.
-       */
+      // If the candidate function is public, then it has to be the
+      // right function.  There can be no other function with this
+      // name on `cls', and we already ruled out the case where
+      // dispatch should've gone to a private function with the same
+      // name, above.
+      //
+      // The normal case here is an overridden public method.  But this
+      // case can also occur on unrelated classes that happen to have
+      // a same-named function at the same method slot, which means we
+      // still have to check whether the new function is static.
+      // Bummer.
       ar->m_func   = cand;
       mce->m_value = cand;
       if (UNLIKELY(cand->attrs() & AttrStatic)) {
-        return staticPublicSlowPath<Fatal>(mce, ar, cls, cand);
+        return readPublicStatic<fatal>(mce, ar, cls, cand);
       }
       mce->m_key = reinterpret_cast<uintptr_t>(cls);
       return;
     }
 
-    /*
-     * If the candidate function and the old function are originally
-     * declared on the same class, then we have mceKey and `cls' as
-     * related class types, and they are inheriting this (non-public)
-     * function from some shared ancestor, but have different
-     * implementations (since we already know mceValue != cand).
-     *
-     * Since the current context class could call it last time, we can
-     * call the new implementation too.  We also know the new function
-     * can't be static, because the last one wasn't.
-     */
+    // If the candidate function and the old function are originally
+    // declared on the same class, then we have mceKey and `cls' as
+    // related class types, and they are inheriting this (non-public)
+    // function from some shared ancestor, but have different
+    // implementations (since we already know mceValue != cand).
+    //
+    // Since the current context class could call it last time, we can
+    // call the new implementation too.  We also know the new function
+    // can't be static, because the last one wasn't.
     if (LIKELY(cand->baseCls() == mceValue->baseCls())) {
       assert(!(cand->attrs() & AttrStatic));
       ar->m_func   = cand;
@@ -420,40 +403,39 @@ void methodCacheSlowPath(MethodCache* mce,
     }
   }
 
-  return methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
+  return lookup<fatal>(mce, ar, name, cls);
 }
 
-template<bool Fatal>
-void pmethodCacheMissPath(MethodCache* mce,
+///////////////////////////////////////////////////////////////////////////////
+}
+
+template<bool fatal>
+void handlePrimeCacheInit(Entry* mce,
                           ActRec* ar,
                           StringData* name,
                           Class* cls,
-                          uintptr_t pdataRaw) {
-  /*
-   * If pdataRaw doesn't have the flag bit we must have a smash in
-   * flight, but the call wasn't pointed at us yet.  Bail to the
-   * slower path.
-   */
-  if (!(pdataRaw & 0x1)) {
-    return methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
+                          uintptr_t rawTarget) {
+  // If rawTarget doesn't have the flag bit we must have a smash in flight, but
+  // the call is still pointed at us.  Just do a lookup.
+  if (!(rawTarget & 0x1)) {
+    return lookup<fatal>(mce, ar, name, cls);
   }
-  auto const pdata = reinterpret_cast<MethodCachePrimeData*>(pdataRaw & ~0x1);
+  auto const smashTarget = reinterpret_cast<SmashTarget*>(rawTarget & ~0x1);
 
   // First fill the request local method cache for this call.
-  methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
+  lookup<fatal>(mce, ar, name, cls);
 
-  // If we fail to get the write lease, just let it stay unsmashed for
-  // now.  We are using the write lease + whether the code is already
-  // smashed to determine which thread should free the
-  // MethodCachePrimeData---after getting the lease, we need to
-  // re-check if someone else smashed it first.
+  // If we fail to get the write lease, just let it stay unsmashed for now.
+  // We are using the write lease + whether the code is already smashed to
+  // determine which thread should free the SmashLoc---after getting the
+  // lease, we need to re-check if someone else smashed it first.
   LeaseHolder writer(Translator::WriteLease());
   if (!writer) return;
 
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
-    always_assert(isSmashable(addr, 10));
+    always_assert(isSmashable(addr, kMovLen));
     assert(addr[0] == 0x49 && addr[1] == 0xba);
-    auto const ptr = reinterpret_cast<uintptr_t*>(addr + 2);
+    auto const ptr = reinterpret_cast<uintptr_t*>(addr + kMovImmOff);
     if (!(*ptr & 1)) {
       return false;
     }
@@ -461,32 +443,29 @@ void pmethodCacheMissPath(MethodCache* mce,
     return true;
   };
 
-  /*
-   * The inline cache is a 64-bit immediate, and we need to atomically
-   * set both the Func* and the Class*.  We also can only cache these
-   * values if the Func* and Class* can't be deallocated, so this is
-   * limited to:
-   *
-   *   - Both Func* and Class* must fit in 32-bit value (i.e. be
-   *     low-malloced).
-   *
-   *   - We must be in RepoAuthoritative mode.  It is ok to cache a
-   *     non-AttrPersistent class here, because if it isn't loaded in
-   *     the request we'll never hit the TC fast path.  But we can't
-   *     do it if the Class* or Func* might be freed.
-   *
-   *   - The call must not be magic or static.  The code path in
-   *     methodCacheSlowPath currently assumes we've ruled this out.
-   *
-   * It's ok to store into the inline cache even if there are low bits
-   * set in mce->m_key.  In that case we'll always just miss the in-TC
-   * fast path.  We still need to clear the bit so methodCacheSlowPath
-   * can tell it was smashed, though.
-   *
-   * If the situation is not cacheable, we just put a value into the
-   * immediate that will cause it to always call out to
-   * methodCacheSlowPath.
-   */
+  // The inline cache is a 64-bit immediate, and we need to atomically
+  // set both the Func* and the Class*.  We also can only cache these
+  // values if the Func* and Class* can't be deallocated, so this is
+  // limited to:
+  //
+  //   - Both Func* and Class* must fit in 32-bit value (i.e. be
+  //     low-malloced).
+  //
+  //   - We must be in RepoAuthoritative mode.  It is ok to cache a
+  //     non-AttrPersistent class here, because if it isn't loaded in
+  //     the request we'll never hit the TC fast path.  But we can't
+  //     do it if the Class* or Func* might be freed.
+  //
+  //   - The call must not be magic or static.  The code path in
+  //     handleSlowPath currently assumes we've ruled this out.
+  //
+  // It's ok to store into the inline cache even if there are low bits
+  // set in mce->m_key.  In that case we'll always just miss the in-TC
+  // fast path.  We still need to clear the bit so handleSlowPath can
+  // tell it was smashed, though.
+  //
+  // If the situation is not cacheable, we just put a value into the
+  // immediate that will cause it to always call out to handleSlowPath.
   auto const fval = reinterpret_cast<uintptr_t>(mce->m_value);
   auto const cval = mce->m_key;
   bool const cacheable =
@@ -500,48 +479,30 @@ void pmethodCacheMissPath(MethodCache* mce,
     assert(!(mce->m_value->attrs() & AttrStatic));
     imm = fval << 32 | cval;
   }
-  if (!smashMov(pdata->smashImmAddr, imm)) {
-    // Someone beat us to it.  Bail early so we don't double-free
-    // pdata.
+  if (!smashMov(smashTarget->movAddr, imm)) {
+    // Someone beat us to it.  Bail early so we don't double-free.
     return;
   }
 
   // Regardless of whether the inline cache was populated, smash the
   // call to start doing real dispatch.
-  smashCall(pdata->retAddr - X64::kCallLen,
-            reinterpret_cast<TCA>(methodCacheSlowPath<Fatal>));
+  smashCall(smashTarget->retAddr - X64::kCallLen,
+            reinterpret_cast<TCA>(handleSlowPath<fatal>));
 
   // Wait to free this until no request threads could be picking up
   // the immediate.
-  Treadmill::deferredFree(pdata);
+  Treadmill::deferredFree(smashTarget);
 }
 
 template
-void methodCacheSlowPath<false>(MethodCache*,
-                                ActRec*,
-                                StringData*,
-                                Class*,
-                                uintptr_t);
-template
-void methodCacheSlowPath<true>(MethodCache*,
-                               ActRec*,
-                               StringData*,
-                               Class*,
-                               uintptr_t);
+void handlePrimeCacheInit<false>(Entry*, ActRec*, StringData*,
+                                 Class*, uintptr_t);
 
 template
-void pmethodCacheMissPath<false>(MethodCache*,
-                                 ActRec*,
-                                 StringData*,
-                                 Class*,
-                                 uintptr_t);
+void handlePrimeCacheInit<true>(Entry*, ActRec*, StringData*,
+                                Class*, uintptr_t);
 
-template
-void pmethodCacheMissPath<true>(MethodCache*,
-                                ActRec*,
-                                StringData*,
-                                Class*,
-                                uintptr_t);
+} // namespace MethodCache
 
 //=============================================================================
 // StaticMethodCache

@@ -2457,51 +2457,50 @@ void CodeGenerator::cgLdObjClass(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
+  using namespace MethodCache;
+
   auto clsReg    = srcLoc(0).reg();
   auto actRecReg = srcLoc(2).reg();
   auto& a = m_as;
 
-  auto const handle = RDS::alloc<MethodCache,sizeof(MethodCache)>().handle();
+  auto const handle = RDS::alloc<Entry, sizeof(Entry)>().handle();
   if (RuntimeOption::EvalPerfDataMap) {
     Debug::DebugInfo::recordDataMap(
       (char*)(intptr_t)handle,
       (char*)(intptr_t)handle + sizeof(TypedValue),
       folly::format("rds+MethodCache-{}", curFunc()->fullName()->data()).str());
   }
-  auto pdata = static_cast<MethodCachePrimeData*>(
-    std::malloc(sizeof(MethodCachePrimeData))
+
+  auto smashTarget = static_cast<SmashTarget*>(
+    std::malloc(sizeof(SmashTarget))
   );
 
-  auto methodCacheHelper = inst->extra<LdObjMethodData>()->fatal ?
-    pmethodCacheMissPath<true> :
-    pmethodCacheMissPath<false>;
+  auto mcHandler = inst->extra<LdObjMethodData>()->fatal ?
+    handlePrimeCacheInit<true> :
+    handlePrimeCacheInit<false>;
 
   Label slow_path;
   Label done;
-
-  constexpr int kMovLen = 10;
 
   // Inline cache: we "prime" the cache across requests by smashing
   // this immediate to hold a Func* in the upper 32 bits, and a Class*
   // in the lower 32 bits.  (If both are low-malloced pointers can
   // fit.)  See pmethodCacheMissPath.
   prepareForSmash(a.code(), kMovLen);
-  auto const smashImmAddr = a.frontier();
+  auto const movAddr = a.frontier();
   a.    movq   (0x8000000000000000u, rAsm);
-  assert(a.frontier() - smashImmAddr == kMovLen);
+  assert(a.frontier() - kMovLen == movAddr);
 
-  /*
-   * For the first time through, set the cache to hold the pointer to
-   * the MethodCachePrimeData, so pmethodCacheMissPath can use that
-   * information to know how to smash things.
-   *
-   * We set the low bit for two reasons: the Class* will never be a
-   * valid Class*, so we'll always miss the inline check before it's
-   * smashed, and pmethodCacheMissPath can tell it's not been smashed
-   * yet and is therefore a valid MethodCachePrimeData*.
-   */
-  *reinterpret_cast<uintptr_t*>(smashImmAddr + 2) =
-    reinterpret_cast<uintptr_t>(pdata) | 1;
+  // For the first time through, set the cache to hold the pointer to the
+  // SmashTarget, so handlePreCacheMiss can use that information to know how
+  // to smash things.
+  //
+  // We set the low bit for two reasons: the Class* will never be a valid
+  // Class*, so we'll always miss the inline check before it's smashed, and
+  // handlePreCacheMiss can tell it's not been smashed yet and is therefore a
+  // valid PrimeData*.
+  *reinterpret_cast<uintptr_t*>(movAddr + kMovImmOff) =
+    reinterpret_cast<uintptr_t>(smashTarget) | 1;
 
   a.    movq   (rAsm, m_rScratch);
   a.    andl   (r32(rAsm), r32(rAsm));  // zero the top 32 bits
@@ -2513,7 +2512,7 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
 asm_label(a, slow_path);
   auto const info = cgCallHelper(
     a,
-    CppCall(methodCacheHelper),
+    CppCall(mcHandler),
     kVoidDest,
     SyncOptions::kSmashableAndSyncPoint,
     argGroup()
@@ -2521,18 +2520,14 @@ asm_label(a, slow_path);
       .ssa(2/*actRec*/)
       .ssa(1/*name*/)
       .ssa(0/*cls*/)
-      /*
-       * The scratch reg contains the prime data
-       * before we've smashed the call to
-       * methodCacheSlowPath.  After, it contains the
-       * primed Class/Func pair.
-       */
+      // The scratch reg contains the prime data before we've smashed the call
+      // to handleSlowPath.  After, it contains the primed Class/Func pair.
       .reg(m_rScratch)
   );
 asm_label(a, done);
 
-  pdata->smashImmAddr  = smashImmAddr;
-  pdata->retAddr       = info.returnAddress;
+  smashTarget->movAddr = movAddr;
+  smashTarget->retAddr = info.returnAddress;
 }
 
 void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {

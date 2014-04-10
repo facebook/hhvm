@@ -30,23 +30,30 @@ TransportInfo::TransportInfo()
 }
 
 bool TransportInfo::initWithSocket(const TAsyncSocket* sock) {
+#ifndef __APPLE__
   if (!TransportInfo::readTcpInfo(&tcpinfo, sock)) {
     tcpinfoErrno = errno;
     return false;
   }
   rtt = microseconds(tcpinfo.tcpi_rtt);
+#endif
   validTcpinfo = true;
   return true;
 }
 
 int64_t TransportInfo::readRTT(const TAsyncSocket* sock) {
+#ifndef __APPLE__
   struct tcp_info tcpinfo;
   if (!TransportInfo::readTcpInfo(&tcpinfo, sock)) {
     return -1;
   }
   return tcpinfo.tcpi_rtt;
+#else
+  return 0;
+#endif
 }
 
+#ifndef __APPLE__
 bool TransportInfo::readTcpInfo(struct tcp_info* tcpinfo,
                                 const TAsyncSocket* sock) {
   socklen_t len = sizeof(struct tcp_info);
@@ -60,6 +67,7 @@ bool TransportInfo::readTcpInfo(struct tcp_info* tcpinfo,
   }
   return true;
 }
+#endif
 
 TransportInfo::~TransportInfo() {
 }

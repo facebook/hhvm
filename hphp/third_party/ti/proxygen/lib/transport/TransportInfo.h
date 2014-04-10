@@ -27,7 +27,9 @@ struct TransportInfo {
   /*
    * TCP information as fetched from getsockopt(2)
    */
+#ifndef __APPLE__
   struct tcp_info tcpinfo;
+#endif
 
   /*
    * true if the tcpinfo was successfully read from the kernel
@@ -110,8 +112,10 @@ struct TransportInfo {
   /*
    * perform the getsockopt(2) syscall to fetch TCP info for a given socket
    */
+#ifndef __APPLE__
   static bool readTcpInfo(struct tcp_info* tcpinfo,
                           const apache::thrift::async::TAsyncSocket* sock);
+#endif
 };
 
 }} // facebook::proxygen

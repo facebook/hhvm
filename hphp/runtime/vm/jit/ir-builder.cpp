@@ -281,7 +281,7 @@ SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
        * value, which requires no runtime work. This depends on the type being
        * boxed, and constraining it with DataTypeCountness will do it.  */
       constrainStack(sp, offset, DataTypeCountness);
-      return gen(AssertStk, newType, sp);
+      return gen(AssertStk, newType, StackOffset(offset), sp);
     }
     /* This check will always fail. It's probably due to an incorrect
      * prediction. Generate a Jmp, and return the source because

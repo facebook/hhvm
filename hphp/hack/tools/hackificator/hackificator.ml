@@ -113,7 +113,7 @@ let visit ast =
     V.kexpr = (fun (k, _) x ->
       match x with
       | New (_, id, None) ->
-        let ii = List.hd (Lib_parsing_php.ii_of_any (Expr id)) in
+        let ii = (Lib_parsing_php.ii_of_any (Expr id)) +> List.rev +> List.hd in
         ii.PI.transfo <- PI.AddAfter (PI.AddStr "()");
       | _ -> k x
     );

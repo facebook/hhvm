@@ -23,7 +23,7 @@ function assert_options(int $what,
  * the presence of certain features like extension functions or certain system
  * limits and features.  Assertions should not be used for normal runtime
  * operations like input parameter checks. As a rule of thumb your code should
- * always be able to work correctly if assertion checking is not activated. 
+ * always be able to work correctly if assertion checking is not activated.
  * The behavior of assert() may be configured by assert_options() or by
  * .ini-settings described in that functions manual page.  The
  * assert_options() function and/or ASSERT_CALLBACK configuration directive
@@ -220,11 +220,6 @@ function ini_restore(string $varname): void;
 function ini_set(string $varname,
                  mixed $newvalue): mixed;
 
-/* Returns the total memory, in bytes, that your PHP script has allocated.
- */
-<<__Native>>
-function memory_get_allocation(): int;
-
 /* Returns the peak of memory, in bytes, that's been allocated to your PHP
  * script.
  */
@@ -236,6 +231,33 @@ function memory_get_peak_usage(bool $real_usage = false): int;
  */
 <<__Native>>
 function memory_get_usage(bool $real_usage = false): int;
+
+/* Returns the total memory, in bytes, that your PHP script has allocated.
+ */
+<<__Native, __HipHopSpecific>>
+function memory_get_allocation(): int;
+
+/* Returns the peak of memory, in bytes, that's been allocated to your PHP
+ * script since calling memory_start_usage_interval.
+ */
+<<__Native, __HipHopSpecific>>
+function hphp_memory_get_interval_peak_usage(bool $real_usage = false): int;
+
+/* Starts per-interval usage tracking to allow peak usage to be tracked more
+ * granularly than a per-script basis.
+ *
+ * Returns whether the state of interval tracking was changed.
+ */
+<<__Native, __HipHopSpecific>>
+function hphp_memory_start_interval(): bool;
+
+/* Stops per-interval usage tracking to allow peak usage to be tracked more
+ * granularly than a per-script basis.
+ *
+ * Returns whether the state of interval tracking was changed.
+ */
+<<__Native, __HipHopSpecific>>
+function hphp_memory_stop_interval(): bool;
 
 /* Retrieve a path to the loaded php.ini file.
  */

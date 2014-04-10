@@ -175,7 +175,7 @@ const StaticString
   s_blocks("blocks");
 
 Array stat_impl(struct stat *stat_sb) {
-  ArrayInit ret(26);
+  ArrayInit ret(26, ArrayInit::Mixed{});
   ret.set((int64_t)stat_sb->st_dev);
   ret.set((int64_t)stat_sb->st_ino);
   ret.set((int64_t)stat_sb->st_mode);
@@ -951,7 +951,7 @@ const StaticString
   s_filename("filename");
 
 Variant f_pathinfo(const String& path, int opt /* = 15 */) {
-  ArrayInit ret(4);
+  ArrayInit ret(4, ArrayInit::Map{});
 
   if (opt == 0) {
     return empty_string;

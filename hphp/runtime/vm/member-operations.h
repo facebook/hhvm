@@ -571,7 +571,7 @@ inline TypedValue* NewElemEmptyish(TypedValue* base) {
  * non-empty string, etc.)
  */
 inline TypedValue* NewElemInvalid(TypedValue& tvScratch) {
-  raise_warning("Invalid NewElem operand");
+  raise_warning("Cannot use a scalar value as an array");
   tvWriteUninit(&tvScratch);
   return &tvScratch;
 }
@@ -1120,7 +1120,8 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfStaticString:
   case KindOfString: {
     if (base->m_data.pstr->size() != 0) {
-      raise_error("Invalid SetOpElem operand");
+      raise_error("Cannot use assign-op operators with overloaded "
+        "objects nor string offsets");
     }
     result = SetOpElemEmptyish(op, base, key, rhs);
     break;
@@ -1372,7 +1373,8 @@ inline void IncDecElem(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfStaticString:
   case KindOfString: {
     if (base->m_data.pstr->size() != 0) {
-      raise_error("Invalid IncDecElem operand");
+      raise_error("Cannot increment/decrement overloaded objects "
+        "nor string offsets");
     }
     IncDecElemEmptyish<setResult>(op, base, key, dest);
     break;
@@ -1444,7 +1446,7 @@ inline void IncDecNewElem(TypedValue& tvScratch, TypedValue& tvRef,
   case KindOfStaticString:
   case KindOfString: {
     if (base->m_data.pstr->size() != 0) {
-      raise_error("Invalid IncDecNewElem operand");
+      raise_error("[] operator not supported for strings");
     }
     IncDecNewElemEmptyish<setResult>(op, base, dest);
     break;
@@ -1707,7 +1709,11 @@ inline DataType propPreStdclass(TypedValue& tvScratch,
   base->m_data.pobj = obj;
   obj->incRefCount();
   result = base;
-  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  // In PHP5, $undef->foo should warn, but $undef->foo['bar'] shouldn't.
+  // This is crazy, so warn for both if EnableHipHopSyntax is on
+  if (RuntimeOption::EnableHipHopSyntax) {
+    raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  }
   return KindOfObject;
 }
 

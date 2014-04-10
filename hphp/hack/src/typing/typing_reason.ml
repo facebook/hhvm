@@ -49,67 +49,73 @@ type t =
   | Rdynamic_yield of Pos.t * Pos.t * string * string
   | Rmap_append of Pos.t
 
-let rec to_string = function
-  | Rnone              -> ""
-  | Rwitness         _ -> ""
-  | Ridx             _ -> " because this is used as an index"
-  | Ridx_vector      _ -> ". Only int can be used to index into a Vector."
-  | Rappend          _ -> " because a value is appended to it"
-  | Rfield           _ -> " because one of its field is accessed"
-  | Rforeach         _ -> " because this is used in a foreach statement"
-  | Raccess          _ -> " because one of its elements is accessed"
-  | Rcall            _ -> " because this is used as a function"
-  | Rarith           _ -> " because this is used in an arithmetic operation"
-  | Rarith_ret       _ -> " because this is the result of an arithmetic operation"
-  | Rstring2         _ -> " because this is used in a string"
-  | Rcomp            _ -> " because this is the result of a comparison"
-  | Rconcat          _ -> " because this is used in a string concatenation"
-  | Rconcat_ret      _ -> " because this is the result of a concatenation"
-  | Rlogic           _ -> " because this is used in a logical operation"
-  | Rlogic_ret       _ -> " because this is the result of a logical operation"
-  | Rbitwise         _ -> " because this is used in a bitwise operation"
-  | Rbitwise_ret     _ -> " because this is the result of a bitwise operation"
-  | Rstmt            _ -> " because this is a statement"
-  | Rno_return       _ -> " because this function implicitly returns void"
-  | Rno_return_async _ -> " because this async function implicitly returns Awaitable<void>"
-  | Rhint            _ -> ""
-  | Rnull_check      _ -> " because this was checked to see if the value was null"
-  | Rnot_in_cstr     _ -> " because it is not always defined in __construct"
-  | Rthrow           _ -> " because it is used as an exception"
-  | Rattr            _ -> " because it is used in an attribute"
-  | Rxhp             _ -> " because it is used as an XML element"
-  | Rret_div         _ -> " because it is the result of a division (/)"
-  | Rcoerced     (p1, p2, s)  ->
-      "\n"^
-      Pos.string p2^
-      "\nIt was implicitely typed as "^s^" during this operation"
+(* Translate a reason to a (pos, string) list, suitable for error_l. This 
+ * previously returned a string, however the need to return multiple lines with
+ * multiple locations meant that it needed to more than convert to a string *)
+let rec to_string prefix r = 
+  let p = to_pos r in
+  match r with
+  | Rnone              -> [(p, prefix)]
+  | Rwitness         _ -> [(p, prefix)]
+  | Ridx             _ -> [(p, prefix ^ " because this is used as an index")]
+  | Ridx_vector      _ -> [(p, prefix ^ ". Only int can be used to index into a Vector.")]
+  | Rappend          _ -> [(p, prefix ^ " because a value is appended to it")]
+  | Rfield           _ -> [(p, prefix ^ " because one of its field is accessed")]
+  | Rforeach         _ -> [(p, prefix ^ " because this is used in a foreach statement")]
+  | Raccess          _ -> [(p, prefix ^ " because one of its elements is accessed")]
+  | Rcall            _ -> [(p, prefix ^ " because this is used as a function")]
+  | Rarith           _ -> [(p, prefix ^ " because this is used in an arithmetic operation")]
+  | Rarith_ret       _ -> [(p, prefix ^ " because this is the result of an arithmetic operation")]
+  | Rstring2         _ -> [(p, prefix ^ " because this is used in a string")]
+  | Rcomp            _ -> [(p, prefix ^ " because this is the result of a comparison")]
+  | Rconcat          _ -> [(p, prefix ^ " because this is used in a string concatenation")]
+  | Rconcat_ret      _ -> [(p, prefix ^ " because this is the result of a concatenation")]
+  | Rlogic           _ -> [(p, prefix ^ " because this is used in a logical operation")]
+  | Rlogic_ret       _ -> [(p, prefix ^ " because this is the result of a logical operation")]
+  | Rbitwise         _ -> [(p, prefix ^ " because this is used in a bitwise operation")]
+  | Rbitwise_ret     _ -> [(p, prefix ^ " because this is the result of a bitwise operation")]
+  | Rstmt            _ -> [(p, prefix ^ " because this is a statement")]
+  | Rno_return       _ -> [(p, prefix ^ " because this function implicitly returns void")]
+  | Rno_return_async _ -> [(p, prefix ^ " because this async function implicitly returns Awaitable<void>")]
+  | Rhint            _ -> [(p, prefix)]
+  | Rnull_check      _ -> [(p, prefix ^ " because this was checked to see if the value was null")]
+  | Rnot_in_cstr     _ -> [(p, prefix ^ " because it is not always defined in __construct")]
+  | Rthrow           _ -> [(p, prefix ^ " because it is used as an exception")]
+  | Rattr            _ -> [(p, prefix ^ " because it is used in an attribute")]
+  | Rxhp             _ -> [(p, prefix ^ " because it is used as an XML element")]
+  | Rret_div         _ -> [(p, prefix ^ " because it is the result of a division (/)")]
+  | Rcoerced     (p1, p2, s)  -> 
+      [
+        (p, prefix); 
+        (p2, "It was implicitly typed as "^s^" during this operation")
+      ]
   | Rlost_info (s, r1, p2) ->
-      to_string r1^
-      "\n"^
-      Pos.string p2^
-      "\n\
-All the local information about "^s^" has been invalidated during this call.\n\
-This is a limitation of the type-checker, use a local if that's the problem.
-"
+      (to_string prefix r1) @
+      [
+        (p2, "All the local information about "^s^" has been invalidated \
+              during this call.\nThis is a limitation of the type-checker, \
+              use a local if that's the problem.")
+      ]
   | Rformat       (_,s,t) ->
-      let s = " because of the "^s^" format specifier" in
-        (match to_string t with
-           | "" -> s
-           | s2 -> s ^ ", " ^ s2)
-  | Rclass_class (p, s) ->
-    "; implicitly defined constant ::class is a string that contains the fully qualified name of "^s
-  | Runknown_class _ -> "; this class name is unknown to Hack"
-  | Rdynamic_yield (p, yield_pos, implicit_name, yield_name) ->
-      Printf.sprintf
+      let s = prefix ^ " because of the "^s^" format specifier" in
+        (match to_string "" t with
+          | [(_, "")] -> [(p, s)]
+          | el -> [(p, s)] @ el)
+  | Rclass_class (_, s) ->
+    [(p, prefix^"; implicitly defined constant ::class is a string that contains the \
+          fully qualified name of "^s)]
+  | Runknown_class _ -> [(p, prefix^"; this class name is unknown to Hack")]
+  | Rdynamic_yield (_, yield_pos, implicit_name, yield_name) ->
+      [(p, prefix ^ (Printf.sprintf
         "\n%s\nDynamicYield implicitly defines %s() from the definition of %s()"
         (Pos.string yield_pos)
         implicit_name
-        yield_name
-  | Rmap_append p -> 
-      " because you can only append a Pair<Tkey, Tvalue> to an \
-      Map<Tkey, Tvalue>"
+        yield_name))]
+  | Rmap_append _ -> 
+      [(p, prefix^" because you can only append a Pair<Tkey, Tvalue> to an \
+      Map<Tkey, Tvalue>")]
 
-let rec to_pos = function
+and to_pos = function
   | Rnone     -> Pos.none
   | Rwitness   p -> p
   | Ridx   p -> p

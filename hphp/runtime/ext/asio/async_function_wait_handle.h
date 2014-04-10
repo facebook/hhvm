@@ -55,11 +55,10 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
           reinterpret_cast<c_AsyncFunctionWaitHandle*>(0x100))) - 0x100;
     return offsetof(c_AsyncFunctionWaitHandle, m_continuation) - objOffset;
   }
-  static ObjectData* CreateFunc(const Func* genFunc,
+  static ObjectData* CreateFunc(const ActRec* origFp,
                                 Offset offset,
                                 ObjectData* child);
-  static ObjectData* CreateMeth(const Func* genFunc,
-                                void* objOrCls,
+  static ObjectData* CreateMeth(const ActRec* origFp,
                                 Offset offset,
                                 ObjectData* child);
   void run();

@@ -863,8 +863,8 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
       );
       return null_string;
     }
-    raise_notice(
-      "Deprecated: preg_replace(): The /e modifier is deprecated, use "
+    raise_deprecated(
+      "preg_replace(): The /e modifier is deprecated, use "
       "preg_replace_callback instead"
     );
   }

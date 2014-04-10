@@ -32,6 +32,11 @@ inline vixl::Register x2a(PhysReg x64reg) {
   return vixl::Register(vixl::CPURegister(x64reg));
 }
 
+inline vixl::FPRegister x2simd(PhysReg x64reg) {
+  always_assert(x64reg.isSIMD());
+  return vixl::FPRegister(vixl::CPURegister(x64reg));
+}
+
 inline constexpr unsigned maxArgReg() { return 7; }
 
 inline vixl::Register argReg(unsigned index) {
@@ -87,7 +92,7 @@ const vixl::Register rLinkReg(vixl::x30);
 const vixl::Register rReturnReg(vixl::x0);
 const vixl::Register rHostCallReg(vixl::x16);
 
-const RegSet kCallerSaved = RegSet()
+const RegSet kGPCallerSaved = RegSet()
   | RegSet(vixl::x0)
   | RegSet(vixl::x1)
   | RegSet(vixl::x2)
@@ -108,7 +113,7 @@ const RegSet kCallerSaved = RegSet()
   | RegSet(vixl::x18)
   ;
 
-const RegSet kCalleeSaved = RegSet()
+const RegSet kGPCalleeSaved = RegSet()
   // x19 = rVmSp
   // x20 = rVmTl
   // x21 = rStashedAR
@@ -120,6 +125,46 @@ const RegSet kCalleeSaved = RegSet()
   | RegSet(vixl::x27)
   | RegSet(vixl::x28)
   ;
+
+const RegSet kSIMDCallerSaved = RegSet()
+  | RegSet(vixl::d0)
+  | RegSet(vixl::d1)
+  | RegSet(vixl::d2)
+  | RegSet(vixl::d3)
+  | RegSet(vixl::d4)
+  | RegSet(vixl::d5)
+  | RegSet(vixl::d6)
+  | RegSet(vixl::d7)
+  // 8-15 are callee-saved
+  | RegSet(vixl::d16)
+  | RegSet(vixl::d17)
+  | RegSet(vixl::d18)
+  | RegSet(vixl::d19)
+  | RegSet(vixl::d20)
+  | RegSet(vixl::d21)
+  | RegSet(vixl::d22)
+  | RegSet(vixl::d23)
+  | RegSet(vixl::d24)
+  | RegSet(vixl::d25)
+  | RegSet(vixl::d26)
+  | RegSet(vixl::d27)
+  | RegSet(vixl::d28)
+  | RegSet(vixl::d29)
+  | RegSet(vixl::d30)
+  // d31 exists, but PhysReg can't represent it, so we don't use it.
+  ;
+
+const RegSet kSIMDCalleeSaved = RegSet()
+  | RegSet(vixl::d8)
+  | RegSet(vixl::d9)
+  | RegSet(vixl::d10)
+  | RegSet(vixl::d11)
+  | RegSet(vixl::d12)
+  | RegSet(vixl::d13)
+  | RegSet(vixl::d14)
+  | RegSet(vixl::d15)
+  ;
+
 
 }}}
 

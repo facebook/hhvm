@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,12 +46,9 @@ void zBoxAndProxy(TypedValue* arg) {
   }
 }
 
-TypedValue* zend_wrap_func(
-    ActRec* ar,
-    zend_ext_func builtin_func,
-    int numParams,
-    bool isReturnRef) {
+TypedValue* zend_wrap_func(ActRec* ar) {
   TSRMLS_FETCH();
+  zend_ext_func native_func = reinterpret_cast<zend_ext_func>(ar->func()->nativeFuncPtr());
 
   // Prepare the arguments and return value before they are
   // exposed to the PHP extension
@@ -82,13 +79,13 @@ TypedValue* zend_wrap_func(
   // Invoke the PHP extension function/method
   ZendExecutionStack::pushHHVMStack();
   try {
-    builtin_func(
+    native_func(
       ar->numArgs(),
       return_value->m_data.pref,
       return_value_ptr,
       this_ptr_var.isNull() ? nullptr : this_ptr->m_data.pref,
       1
-	  TSRMLS_CC
+      TSRMLS_CC
     );
   } catch (...) {
     ZendExecutionStack::popHHVMStack();
@@ -103,10 +100,10 @@ TypedValue* zend_wrap_func(
 
   // Take care of freeing the args, tearing down the ActRec,
   // and moving the return value to the right place
-  frame_free_locals_inl(ar, numParams);
+  frame_free_locals_inl(ar, ar->func()->numLocals(), return_value);
   memcpy(&ar->m_r, return_value, sizeof(TypedValue));
   return_value->m_type = KindOfNull;
-  if (isReturnRef) {
+  if (ar->func()->isReturnRef()) {
     if (!ar->m_r.m_data.pref->isReferenced()) {
       tvUnbox(&ar->m_r);
     }

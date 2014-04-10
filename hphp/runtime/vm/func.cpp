@@ -38,6 +38,10 @@
 #include "hphp/util/debug.h"
 #include "hphp/util/trace.h"
 
+#ifdef ENABLE_ZEND_COMPAT
+# include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
+#endif
+
 namespace HPHP {
 
 TRACE_SET_MOD(hhbc);
@@ -1071,6 +1075,7 @@ void FuncEmitter::addUserAttribute(const StringData* name, TypedValue tv) {
  *  "NoFCallBuiltin": Prevent FCallBuiltin optimization
  *      Effectively forces functions to generate an ActRec
  *  "NoInjection": Do not include this frame in backtraces
+ *  "ZendCompat": Use zend compat wrapper
  *
  *  e.g.   <<__Native("ActRec")>> function foo():mixed;
  */
@@ -1079,7 +1084,8 @@ static const StaticString
   s_actrec("ActRec"),
   s_nofcallbuiltin("NoFCallBuiltin"),
   s_variadicbyref("VariadicByRef"),
-  s_noinjection("NoInjection");
+  s_noinjection("NoInjection"),
+  s_zendcompat("ZendCompat");
 
 int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
   int ret = Native::AttrNone;
@@ -1101,6 +1107,11 @@ int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
         attrs = attrs | AttrVariadicByRef;
       } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
         attrs = attrs | AttrNoInjection;
+      } else if (userAttrStrVal.get()->isame(s_zendcompat.get())) {
+        ret = ret | Native::AttrZendCompat;
+        // ZendCompat implies ActRec, no FCallBuiltin
+        attrs = attrs | AttrMayUseVV | AttrNoFCallBuiltin;
+        ret = ret | Native::AttrActRec;
       }
     }
   }
@@ -1195,13 +1206,22 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
                                           f->isStatic());
     if (nif) {
       Attr dummy = AttrNone;
-      if (parseNativeAttributes(dummy) & Native::AttrActRec) {
-        f->shared()->m_builtinFuncPtr = nif;
-        f->shared()->m_nativeFuncPtr = nullptr;
-      } else {
+#ifdef ENABLE_ZEND_COMPAT
+      int nativeAttrs = parseNativeAttributes(dummy);
+      if (nativeAttrs & Native::AttrZendCompat) {
         f->shared()->m_nativeFuncPtr = nif;
-        f->shared()->m_builtinFuncPtr = m_pce ? Native::methodWrapper
-                                              : Native::functionWrapper;
+        f->shared()->m_builtinFuncPtr = zend_wrap_func;
+      } else
+#endif
+      {
+        if (parseNativeAttributes(dummy) & Native::AttrActRec) {
+          f->shared()->m_builtinFuncPtr = nif;
+          f->shared()->m_nativeFuncPtr = nullptr;
+        } else {
+          f->shared()->m_nativeFuncPtr = nif;
+          f->shared()->m_builtinFuncPtr = m_pce ? Native::methodWrapper
+                                                : Native::functionWrapper;
+        }
       }
     } else {
       f->shared()->m_builtinFuncPtr = Native::unimplementedWrapper;

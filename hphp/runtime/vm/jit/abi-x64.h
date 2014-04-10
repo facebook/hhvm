@@ -180,11 +180,18 @@ const RegSet kScratchCrossTraceRegs = kAllRegs - kSpecialCrossTraceRegs;
  * Calling convention registers for service requests or calling C++.
  */
 
-// x64 C argument registers.
+// x64 INTEGER class argument registers.
 const PhysReg argNumToRegName[] = {
   reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9
 };
 const int kNumRegisterArgs = sizeof(argNumToRegName) / sizeof(PhysReg);
+
+// x64 SSE class argument registers.
+const PhysReg argNumToSIMDRegName[] = {
+  reg::xmm0, reg::xmm1, reg::xmm2, reg::xmm3,
+  reg::xmm4, reg::xmm5, reg::xmm6, reg::xmm7,
+};
+const int kNumSIMDRegisterArgs = sizeof(argNumToSIMDRegName) / sizeof(PhysReg);
 
 /*
  * JIT'd code "reverse calls" the enterTC routine by returning to it,

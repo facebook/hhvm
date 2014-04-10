@@ -108,6 +108,11 @@ struct ExtraArgs : private boost::noncopyable {
   static void deallocate(ActRec*);
   static void deallocate(ExtraArgs*, unsigned numArgs);
 
+  /**
+   * Make a copy of ExtraArgs.
+   */
+  ExtraArgs* clone(ActRec* fp) const;
+
   /*
    * Get the slot for extra arg i, where i = argNum - func->numParams.
    */
@@ -143,46 +148,28 @@ private:
  */
 class VarEnv {
  private:
+  NameValueTable m_nvTable;
   ExtraArgs* m_extraArgs;
   uint16_t m_depth;
   bool m_global;
-  ActRec* m_cfp;
-  // TODO remove vector (#1099580).  Note: trying changing this to a
-  // TinyVector<> for now increased icache misses, but maybe will be
-  // feasable later (see D511561).
-  std::vector<TypedValue**> m_restoreLocations;
-  folly::Optional<NameValueTable> m_nvTable;
-
- private:
-  explicit VarEnv();
-  explicit VarEnv(ActRec* fp, ExtraArgs* eArgs);
-  VarEnv(const VarEnv&);
-  VarEnv& operator=(const VarEnv&);
-  ~VarEnv();
-
-  void ensureNvt();
 
  public:
-  /*
-   * Creates a VarEnv and attaches it to the existing frame fp.
-   *
-   * A lazy attach works by bringing all currently existing values for
-   * the names in fp->m_func into the variable environment.  This is
-   * used when we need a variable environment for some caller frame
-   * (because we're about to attach a callee frame using attach()) but
-   * don't actually have one.
-   */
+  explicit VarEnv();
+  explicit VarEnv(ActRec* fp, ExtraArgs* eArgs);
+  explicit VarEnv(const VarEnv* varEnv, ActRec* fp);
+  ~VarEnv();
+
+  // Allocates a local VarEnv and attaches it to the existing FP.
   static VarEnv* createLocal(ActRec* fp);
 
   // Allocate a global VarEnv.  Initially not attached to any frame.
   static VarEnv* createGlobal();
 
-  static void destroy(VarEnv*);
+  VarEnv* clone(ActRec* fp) const;
 
-  static size_t getObjectSz(ActRec* fp);
-
-  void attach(ActRec* fp);
-  void detach(ActRec* fp);
+  void suspend(ActRec* oldFP, ActRec* newFP);
+  void enterFP(ActRec* oldFP, ActRec* newFP);
+  void exitFP(ActRec* fp);
 
   void set(const StringData* name, TypedValue* tv);
   void bind(const StringData* name, TypedValue* tv);
@@ -194,8 +181,7 @@ class VarEnv {
   Array getDefinedVariables() const;
 
   // Used for save/store m_cfp for debugger
-  void setCfp(ActRec* fp) { m_cfp = fp; }
-  ActRec* getCfp() const { return m_cfp; }
+  ActRec* getFP() const { return m_nvTable.getFP(); }
   bool isGlobalScope() const { return m_global; }
 
   // Access to wrapped ExtraArgs, if we have one.

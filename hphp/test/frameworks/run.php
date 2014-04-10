@@ -533,10 +533,14 @@ EXAMPLES;
 
 }
 
+function get_available_frameworks(): array<string> {
+  return array_keys(Spyc::YAMLLoad(__DIR__.'/frameworks.yaml'));
+}
+
 function usage(): string {
   $msg = "Specify frameworks to run, use --all or use --allexcept. ";
   $msg .= "Available frameworks are: ".PHP_EOL;
-  $msg .= implode(PHP_EOL, get_subclasses_of("Framework")->toArray());
+  $msg .= implode(PHP_EOL, get_available_frameworks());
   return $msg;
 }
 

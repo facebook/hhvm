@@ -115,6 +115,9 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
+#ifdef ENABLE_ZEND_COMPAT
+# include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
+#endif
 #include "hphp/runtime/vm/preclass-emit.h"
 
 #include "hphp/system/systemlib.h"
@@ -126,11 +129,6 @@ namespace Compiler {
 TRACE_SET_MOD(emitter)
 
 using uchar = unsigned char;
-
-namespace {
-  const StringData* s_continuationVarArgsLocal
-    = makeStaticString("0ContinuationVarArgsLocal");
-}
 
 namespace StackSym {
   static const char None = 0x00;
@@ -2829,7 +2827,7 @@ bool checkKeys(ExpressionPtr init_expr, Fun fun) {
   if (init_expr->getKindOf() != Expression::KindOfExpressionList) return false;
   ExpressionListPtr el = static_pointer_cast<ExpressionList>(init_expr);
   int n = el->getCount();
-  if (n < 1 || n > HphpArray::MaxMakeSize) return false;
+  if (n < 1 || n > MixedArray::MaxMakeSize) return false;
   for (int i = 0, n = el->getCount(); i < n; ++i) {
     ExpressionPtr ex = (*el)[i];
     if (ex->getKindOf() != Expression::KindOfArrayPairExpression) return false;
@@ -2845,7 +2843,7 @@ bool checkKeys(ExpressionPtr init_expr, Fun fun) {
  * array with no keys and no ref values; e.g. array(x,y,z).
  * In this case we can NewPackedArray to create the array. The elements are
  * pushed on the stack, so we arbitrarily limit this to a small multiple of
- * HphpArray::SmallSize (12).
+ * MixedArray::SmallSize (12).
  */
 bool isPackedInit(ExpressionPtr init_expr, int* size) {
   *size = 0;
@@ -3600,7 +3598,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             if (capacityHint != -1) {
               e.NewArray(capacityHint);
             } else {
-              e.NewArray(HphpArray::SmallSize);
+              e.NewArray(MixedArray::SmallSize);
             }
             visit(ex);
           }
@@ -4233,35 +4231,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               return true;
             }
           }
-        } else if (call->isCallToFunction("func_num_args") && m_inGenerator) {
-          static const StringData* s_count =
-            makeStaticString("count");
-
-          emitVirtualLocal(m_curFunc->lookupVarId(s_continuationVarArgsLocal));
-          emitConvertToCell(e);
-          e.False();
-          e.FCallBuiltin(2, 1, s_count);
-          e.UnboxRNop();
-          return true;
-        } else if (call->isCallToFunction("func_get_args") && m_inGenerator) {
-          emitVirtualLocal(m_curFunc->lookupVarId(s_continuationVarArgsLocal));
-          emitConvertToCell(e);
-          return true;
-        } else if (call->isCallToFunction("func_get_arg") && m_inGenerator) {
-          if (!params || params->getCount() == 0) {
-            e.Null();
-            return true;
-          }
-
-          emitVirtualLocal(m_curFunc->lookupVarId(s_continuationVarArgsLocal));
-          emitConvertToCell(e);
-          visit((*params)[0]);
-          emitConvertToCell(e);
-          e.CastInt();
-          e.False();
-          e.ArrayIdx();
-          return true;
-        } else if (call->isCallToFunction("array_slice") && !m_inGenerator &&
+        } else if (call->isCallToFunction("array_slice") &&
                    params && params->getCount() == 2 &&
                    !Option::JitEnableRenameFunction) {
           ExpressionPtr p0 = (*params)[0];
@@ -5511,6 +5481,9 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
     case KindOfInt64:
       e.Int(v.getInt64());
       break;
+    case KindOfDouble:
+      e.Double(v.toDouble());
+      break;
     case KindOfBoolean:
       if (v.getBoolean()) {
         e.True();
@@ -6632,18 +6605,27 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   const char *classname = pce ? pce->name()->data() : nullptr;
   BuiltinFunction nif = Native::GetBuiltinFunction(funcname, classname,
                                                    modifiers->isStatic());
-  BuiltinFunction bif = pce ? Native::methodWrapper
-                            : Native::functionWrapper;
-
+  BuiltinFunction bif;
   if (!nif) {
     bif = Native::unimplementedWrapper;
-  } else if (fe->parseNativeAttributes(attributes) & Native::AttrActRec) {
-    // Call this native function with a raw ActRec*
-    // rather than pulling out args for normal func calling
-    bif = nif;
-    nif = nullptr;
+  } else {
+    int nativeAttrs = fe->parseNativeAttributes(attributes);
+#ifdef ENABLE_ZEND_COMPAT
+    if (nativeAttrs & Native::AttrZendCompat) {
+      bif = zend_wrap_func;
+    } else
+#endif
+    {
+      if (nativeAttrs & Native::AttrActRec) {
+        // Call this native function with a raw ActRec*
+        // rather than pulling out args for normal func calling
+        bif = nif;
+        nif = nullptr;
+      } else {
+        bif = pce ? Native::methodWrapper : Native::functionWrapper;
+      }
+    }
   }
-
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
 
@@ -6677,13 +6659,6 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
     for (auto& useVar : *useVars) {
       fe->allocVarId(useVar.first);
     }
-  }
-
-  // assign id to continuationVarArgsLocal (generators/async - both methods)
-  if (meth->hasCallToGetArgs() &&
-      (meth->getFunctionScope()->isGenerator() ||
-       meth->getFunctionScope()->isAsync())) {
-    fe->allocVarId(s_continuationVarArgsLocal);
   }
 
   // assign ids to local variables
@@ -6798,6 +6773,7 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
     }
 
     pi.setRef(par->isRef());
+    pi.setVariadic(par->isVariadic());
     fe->appendParam(parName, pi);
   }
 }
@@ -6864,7 +6840,6 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
   emitMethodPrologue(e, meth);
-  emitSetFuncGetArgs(e);
 
   // emit method body executed in eager-execution mode
   visit(meth->getStmts());
@@ -6908,7 +6883,6 @@ void EmitterVisitor::emitGeneratorMethod(MethodStatementPtr meth) {
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
   emitMethodPrologue(e, meth);
-  emitSetFuncGetArgs(e);
 
   // emit code to create generator object
   Label topOfResumedBody;
@@ -6938,20 +6912,6 @@ void EmitterVisitor::emitGeneratorMethod(MethodStatementPtr meth) {
 
   FuncFinisher ff(this, e, m_curFunc);
   emitMethodDVInitializers(e, meth, topOfBody);
-}
-
-void EmitterVisitor::emitSetFuncGetArgs(Emitter& e) {
-  if (m_curFunc->hasVar(s_continuationVarArgsLocal)) {
-    static const StringData* s_func_get_args =
-      makeStaticString("func_get_args");
-
-    Id local = m_curFunc->lookupVarId(s_continuationVarArgsLocal);
-    emitVirtualLocal(local);
-    e.FCallBuiltin(0, 0, s_func_get_args);
-    e.UnboxRNop();
-    emitSet(e);
-    e.PopC();
-  }
 }
 
 void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
@@ -7065,10 +7025,8 @@ void EmitterVisitor::emitPostponedCinits() {
     StringData* methDoc = empty_string.get();
     const Location* sLoc = p.m_is->getLocation().get();
     p.m_fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, false, methDoc);
-    static const StringData* s_constName =
-      makeStaticString("constName");
-    p.m_fe->appendParam(s_constName,
-                        FuncEmitter::ParamInfo());
+    static const StringData* s_constName = makeStaticString("constName");
+    p.m_fe->appendParam(s_constName, FuncEmitter::ParamInfo());
 
     Emitter e(p.m_is, m_ue, *this);
     FuncFinisher ff(this, e, p.m_fe);
@@ -7278,8 +7236,10 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
       (f->attrs() & AttrNoFCallBuiltin) ||
       !f->nativeFuncPtr() ||
       (f->numParams() > Native::maxFCallBuiltinArgs()) ||
-      (numParams > f->numParams()) ||
-      (f->returnType() == KindOfDouble)) return nullptr;
+      (numParams > f->numParams())) return nullptr;
+
+  if ((f->returnType() == KindOfDouble) &&
+       !Native::allowFCallBuiltinDoubles()) return nullptr;
 
   if (f->methInfo()) {
     // IDL style builtin
@@ -7297,8 +7257,14 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
     return nullptr;
   }
 
+  // Even though the JIT can handle an arbitrary number of arguments
+  // The interp mode function caller is limited to kMaxBuiltinArgs
+  // mixed-mode arguments, or kMaxFCallBuiltinArgs int-only arguments.
+  bool allowDoubleArgs = (f->numParams() <= Native::kMaxBuiltinArgs) &&
+                         Native::allowFCallBuiltinDoubles();
   for (int i = 0; i < f->numParams(); i++) {
-    if (f->params()[i].builtinType() == KindOfDouble) {
+    if ((!allowDoubleArgs) &&
+        (f->params()[i].builtinType() == KindOfDouble)) {
       return nullptr;
     }
     if (i >= numParams) {
@@ -8323,7 +8289,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
     case Expression::KindOfUnaryOpExpression: {
       UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(val));
       if (u->getOp() == T_ARRAY) {
-        m_staticArrays.push_back(Array::attach(HphpArray::MakeReserve(0)));
+        m_staticArrays.push_back(Array::attach(MixedArray::MakeReserve(0)));
         visit(u->getExpression());
         tvVal = make_tv<KindOfArray>(
           ArrayData::GetScalarArray(m_staticArrays.back().get())
@@ -8487,10 +8453,6 @@ emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     const ClassInfo::MethodInfo* mi = ClassInfo::FindFunction(name);
     assert(mi &&
       "MethodInfo not found; may be a problem with the .idl.json files");
-    if ((mi->attribute & ClassInfo::ZendCompat) &&
-        !RuntimeOption::EnableZendCompat) {
-      continue;
-    }
 
     // We already provide array_map by the hhas systemlib.  Rename
     // because that hhas implementation delegates back to the C++
@@ -8645,21 +8607,11 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       e.info = it->second;
       e.ci = ClassInfo::FindSystemClassInterfaceOrTrait(e.name);
       assert(e.ci);
-      if ((e.ci->getAttribute() & ClassInfo::ZendCompat) &&
-          !RuntimeOption::EnableZendCompat) {
-        continue;
-      }
       StringData* parentName
         = makeStaticString(e.ci->getParentClass().get());
       if (parentName->empty()) {
         // If this class doesn't have a base class, it's eligible to be
         // loaded now
-        classEntries.push_back(e);
-      } else if ((e.ci->getAttribute() & ClassInfo::ZendCompat) &&
-                 Unit::loadClass(parentName)) {
-        // You can really hurt yourself trying to extend a systemlib class from
-        // a normal IDL (like overriding the property vector with your own C++
-        // properties). ZendCompat things don't do any of that so they are cool.
         classEntries.push_back(e);
       } else {
         // If this class has a base class, we can't load it until its

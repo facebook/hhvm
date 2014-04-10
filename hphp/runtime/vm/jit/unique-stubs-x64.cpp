@@ -161,14 +161,13 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   Label loopHead;
 
   /*
-   * Note: the IR currently requires that we preserve r13/r14 across
+   * Note: the IR currently requires that we preserve r13 across
    * calls to these free locals helpers.  These helpers assume the
    * stack is balanced (rsp%16 == 0) on entry, unlike normal ABI calls
    * where the stack was balanced before the call, and now has the
    * return address on the stack (rsp%16 == 8).
    */
-  static_assert(rVmSp == rbx, "");
-  auto const rIter     = rbx;
+  auto const rIter     = r14;
   auto const rFinished = r15;
   auto const rType     = esi;
   auto const rData     = rdi;
@@ -176,6 +175,7 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
 
   Asm a { mcg->code.main() };
   moveToAlign(mcg->code.main(), kNonFallthroughAlign);
+  auto stubBegin = a.frontier();
 
 asm_label(a, release);
   a.    loadq  (rIter[TVOFF(m_data)], rData);
@@ -220,8 +220,10 @@ asm_label(a, loopHead);
     }
   }
 
-  a.    addq   (AROFF(m_r) + tvSize, rVmSp);
   a.    ret    ();
+
+  // Keep me small!
+  always_assert(a.frontier() - stubBegin <= 4 * kX64CacheLineSize);
 
   uniqueStubs.add("freeLocalsHelpers", uniqueStubs.freeManyLocalsHelper);
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,16 +18,18 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 
+#include "hphp/runtime/vm/jit/test/match.h"
+
 #include <gtest/gtest.h>
 
 #define EXPECT_SINGLE_OP(result, opc) \
-  EXPECT_EQ((result).dst, nullptr); \
-  ASSERT_EQ((result).instrs.size(), 1); \
-  EXPECT_EQ((result).instrs[0]->op(), (opc));
+  EXPECT_EQ(nullptr, (result).dst); \
+  ASSERT_EQ(1, (result).instrs.size()); \
+  EXPECT_EQ(opc, (result).instrs[0]->op());
 
 #define EXPECT_NO_CHANGE(result) \
-  EXPECT_EQ((result).dst, nullptr); \
-  EXPECT_EQ((result).instrs.size(), 0);
+  EXPECT_EQ(nullptr, (result).dst); \
+  EXPECT_EQ(0, (result).instrs.size());
 
 namespace HPHP { namespace JIT {
 
@@ -88,6 +90,38 @@ TEST(Simplifier, JumpConstFold) {
   }
 }
 
+TEST(Simplifier, CondJmp) {
+  IRUnit unit{0};
+  Simplifier sim{unit};
+  BCMarker marker = BCMarker::Dummy();
+
+  // Folding Conv*ToBool
+  {
+    auto val = unit.gen(Conjure, marker, Type::Int);
+    auto cnv = unit.gen(ConvIntToBool, marker, val->dst());
+    auto jcc = unit.gen(JmpZero, marker, unit.defBlock(), cnv->dst());
+
+    auto result = sim.simplify(jcc, false);
+
+    EXPECT_EQ(nullptr, result.dst);
+    ASSERT_EQ(1, result.instrs.size());
+    EXPECT_MATCH(result.instrs[0], JmpZero, val->dst());
+  }
+
+  // Folding in negation
+  {
+    auto val = unit.gen(Conjure, marker, Type::Bool);
+    auto neg = unit.gen(XorBool, marker, val->dst(), unit.cns(true));
+    auto jcc = unit.gen(JmpZero, marker, unit.defBlock(), neg->dst());
+
+    auto result = sim.simplify(jcc, false);
+
+    EXPECT_EQ(nullptr, result.dst);
+    ASSERT_EQ(1, result.instrs.size());
+    EXPECT_MATCH(result.instrs[0], JmpNZero, val->dst());
+  }
+}
+
 TEST(Simplifier, JumpFuse) {
   BCMarker dummy = BCMarker::Dummy();
   IRUnit unit(0);
@@ -95,22 +129,36 @@ TEST(Simplifier, JumpFuse) {
 
   {
     // JmpZero(Eq(X, true)) --> JmpEq(X, false)
+    auto taken = unit.defBlock();
     auto lhs = unit.cns(true);
     auto rhs = unit.gen(Conjure, dummy, Type::Bool);
     auto eq  = unit.gen(Eq, dummy, lhs, rhs->dst());
-    auto jmp = unit.gen(JmpZero, dummy, unit.defBlock(), eq->dst());
+    auto jmp = unit.gen(JmpZero, dummy, taken, eq->dst());
     auto result = sim.simplify(jmp, false);
 
-    EXPECT_EQ(result.dst, nullptr);
-    EXPECT_EQ(result.instrs.size(), 2);
+    EXPECT_EQ(nullptr, result.dst);
+    EXPECT_EQ(2, result.instrs.size());
 
     // This is a dead Eq instruction; an artifact of weirdness in the
     // implementation. Should go away.
     EXPECT_FALSE(result.instrs[0]->isControlFlow());
 
-    EXPECT_EQ(result.instrs[1]->op(), JmpEq);
-    EXPECT_EQ(result.instrs[1]->src(0), rhs->dst());
-    EXPECT_EQ(result.instrs[1]->src(1)->boolVal(), false);
+    EXPECT_MATCH(result.instrs[1], JmpEq, taken, rhs->dst(), unit.cns(false));
+  }
+
+  {
+    // JmpNZero(Neq(X, Y)) --> JmpNeq(X, Y)
+    auto taken = unit.defBlock();
+    auto x = unit.gen(Conjure, dummy, Type::Dbl);
+    auto y = unit.gen(Conjure, dummy, Type::Dbl);
+
+    auto neq = unit.gen(Neq, dummy, x->dst(), y->dst());
+    auto jmp = unit.gen(JmpNZero, dummy, taken, neq->dst());
+    auto result = sim.simplify(jmp, false);
+
+    EXPECT_EQ(nullptr, result.dst);
+    EXPECT_EQ(1, result.instrs.size());
+    EXPECT_MATCH(result.instrs[0], JmpNeq, taken, x->dst(), y->dst());
   }
 }
 

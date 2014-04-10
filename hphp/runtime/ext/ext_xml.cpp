@@ -14,8 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_xml.h"
+
+#include "folly/ScopeGuard.h"
+
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -144,16 +146,16 @@ xml_encoding xml_encodings[] = {
 };
 
 static void *php_xml_malloc_wrapper(size_t sz) {
-  return malloc(sz);
+  return smart_malloc(sz);
 }
 
 static void *php_xml_realloc_wrapper(void *ptr, size_t sz) {
-  return realloc(ptr, sz);
+  return smart_realloc(ptr, sz);
 }
 
 static void php_xml_free_wrapper(void *ptr) {
-  if (ptr != NULL) {
-    free(ptr);
+  if (ptr) {
+    smart_free(ptr);
   }
 }
 
@@ -395,7 +397,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
       if (parser->lastwasopen) {
         parser->ctag.toArrRef().set(s_type, s_complete);
       } else {
-        ArrayInit tag(3);
+        ArrayInit tag(3, ArrayInit::Map{});
         _xml_add_to_info(parser,((char*)tag_name) + parser->toffset);
         tag.set(s_tag, String(((char*)tag_name) + parser->toffset, CopyString));
         tag.set(s_type, s_close);
@@ -466,10 +468,12 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           }
         } else {
           Array tag;
-          Variant curtag;
           String myval;
           String mytype;
-          curtag.assignRef(parser->data.getArrayData()->endRef());
+
+          auto curtag = parser->data.toArrRef().pop();
+          SCOPE_EXIT { parser->data.toArrRef().append(curtag); };
+
           if (curtag.toArrRef().exists(s_type)) {
             mytype = curtag.toArrRef().rvalAt(s_type).toString();
             if (!strcmp(mytype.data(), "cdata") &&
@@ -575,8 +579,9 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         if (atcnt) {
           tag.set(s_attributes,atr);
         }
-        parser->data.toArrRef().append(tag);
-        parser->ctag.assignRef(parser->data.getArrayData()->endRef());
+        auto& lval = parser->data.toArrRef().lvalAt();
+        lval.assign(tag);
+        parser->ctag.assignRef(lval);
       } else if (parser->level == (XML_MAXLEVEL + 1)) {
         raise_warning("Maximum depth exceeded - Results truncated");
       }

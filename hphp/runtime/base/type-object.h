@@ -150,10 +150,6 @@ public:
                 const String& context = null_string) const;
   Variant o_set(
     const String& s, const Variant& v, const String& context = null_string);
-  Variant o_set(
-    const String& s, RefResult v, const String& context = null_string);
-  Variant o_setRef(
-    const String& s, const Variant& v, const String& context = null_string);
 
   /**
    * Input/Output

@@ -2,6 +2,7 @@
 require_once __DIR__.'/Options.php';
 require_once __DIR__.'/utils.php';
 require_once __DIR__.'/TestFindModes.php';
+require_once __DIR__.'/spyc/Spyc.php';
 
 class Framework {
   private string $out_file;

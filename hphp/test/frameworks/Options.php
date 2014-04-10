@@ -173,8 +173,10 @@ class Options {
     return $framework_names;
   }
 
+  // Will return a string (e.g. for test path) or
+  // an array (e.g., for blacklisted tests)
   public static function getFrameworkInfo(string $framework, string $key)
-    : ?string {
+    : mixed {
     return array_key_exists($key, self::$framework_info[$framework])
       ? self::$framework_info[$framework][$key]
       : null;

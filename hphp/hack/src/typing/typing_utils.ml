@@ -51,13 +51,12 @@ let rec is_option env ty =
 (* Unification error *)
 (*****************************************************************************)
 let uerror r1 ty1 r2 ty2 =
-  let p1 = Reason.to_pos r1 in
-  let p2 = Reason.to_pos r2 in
   let ty1 = Typing_print.error ty1 in
   let ty2 = Typing_print.error ty2 in
-  error_l [p1, "This is "^ ty1 ^ Reason.to_string r1;
-           p2, "It is incompatible with " ^ ty2 ^
-           Reason.to_string r2]
+  error_l (
+    (Reason.to_string ("This is " ^ ty1) r1) @
+    (Reason.to_string ("It is incompatible with " ^ ty2) r2)
+  )
 
 (*****************************************************************************)
 (* Adding results to auto-completion  *)
@@ -135,13 +134,13 @@ let save_infer env pos ty =
       else ()
 
 (* Find the first defined position in a list of types *)
-let rec find_pos tyl =
+let rec find_pos p_default tyl =
   match tyl with
-  | [] -> Pos.none
+  | [] -> p_default
   | (r, _) :: rl ->
       let p = Reason.to_pos r in
       if p = Pos.none
-      then find_pos rl
+      then find_pos p_default rl
       else p
 
 (*****************************************************************************)

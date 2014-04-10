@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 
 namespace HPHP {
@@ -26,11 +26,25 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct ArrayInit {
-  enum MapInit { mapInit };
+  enum class Map {};
+  // This is the same as map right now, but is here for documentation
+  // so we can find them later.
+  using Mixed = Map;
 
-  explicit ArrayInit(size_t n);
-
-  ArrayInit(size_t n, MapInit);
+  /*
+   * When you create an ArrayInit, you must specify the "kind" of
+   * array you are creating, for performance reasons.  "Kinds" that
+   * are relevant to know about for extension code:
+   *
+   *   Packed -- a vector-like array: don't use ArrayInit, use PackedArrayInit
+   *   Map    -- you expect only string keys and any value type
+   *   Mixed  -- you expect either integer keys, mixed keys
+   *
+   * Also, generally it's preferable to use make_map_array or
+   * make_packed_array when it's easy, since you don't have to get 'n'
+   * right in that case.
+   */
+  ArrayInit(size_t n, Map);
 
   ArrayInit(ArrayInit&& other)
     : m_data(other.m_data)
@@ -58,14 +72,12 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& set(RefResult v) { return setRef(variant(v)); }
-
   ArrayInit& set(CVarWithRefBind v) {
     performOp([&]{ return m_data->appendWithRef(variant(v), false); });
     return *this;
   }
 
-  ArrayInit& setRef(const Variant& v) {
+  ArrayInit& setRef(Variant& v) {
     performOp([&]{ return m_data->appendRef(v, false); });
     return *this;
   }
@@ -113,42 +125,6 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& set(const String& name, RefResult v, bool keyConverted = false) {
-    if (keyConverted) {
-      performOp([&]{ return m_data->setRef(name, variant(v), false); });
-    } else if (!name.isNull()) {
-      performOp([&]{
-        return m_data->setRef(name.toKey(), variant(v), false);
-      });
-    }
-    return *this;
-  }
-
-  ArrayInit& set(const Variant& name, RefResult v, bool keyConverted = false) {
-    if (keyConverted) {
-      performOp([&]{ return m_data->setRef(name, variant(v), false); });
-    } else {
-      VarNR k(name.toKey());
-      if (!k.isNull()) {
-        performOp([&]{ return m_data->setRef(k, variant(v), false); });
-      }
-    }
-    return *this;
-  }
-
-  template<typename T>
-  ArrayInit& set(const T &name, RefResult v, bool keyConverted = false) {
-    if (keyConverted) {
-      performOp([&]{ return m_data->setRef(name, variant(v), false); });
-    } else {
-      VarNR k(Variant(name).toKey());
-      if (!k.isNull()) {
-        performOp([&]{ return m_data->setRef(k, variant(v), false); });
-      }
-    }
-    return *this;
-  }
-
   ArrayInit& add(int64_t name, const Variant& v, bool keyConverted = false) {
     performOp([&]{ return m_data->add(name, v, false); });
     return *this;
@@ -188,12 +164,16 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& setRef(int64_t name, const Variant& v, bool keyConverted = false) {
+  ArrayInit& setRef(int64_t name,
+                    Variant& v,
+                    bool keyConverted = false) {
     performOp([&]{ return m_data->setRef(name, v, false); });
     return *this;
   }
 
-  ArrayInit& setRef(const String& name, const Variant& v, bool keyConverted = false) {
+  ArrayInit& setRef(const String& name,
+                    Variant& v,
+                    bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
@@ -202,7 +182,9 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& setRef(const Variant& name, const Variant& v, bool keyConverted = false) {
+  ArrayInit& setRef(const Variant& name,
+                    Variant& v,
+                    bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
@@ -215,7 +197,9 @@ struct ArrayInit {
   }
 
   template<typename T>
-  ArrayInit& setRef(const T &name, const Variant& v, bool keyConverted = false) {
+  ArrayInit& setRef(const T &name,
+                    Variant& v,
+                    bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
@@ -277,7 +261,7 @@ private:
 class PackedArrayInit {
 public:
   explicit PackedArrayInit(size_t n)
-    : m_vec(HphpArray::MakeReserve(n))
+    : m_vec(MixedArray::MakeReserve(n))
 #ifdef DEBUG
     , m_addCount(0)
     , m_expectedCount(n)
@@ -321,7 +305,7 @@ public:
    *
    * Post: v.getRawType() == KindOfRef
    */
-  PackedArrayInit& appendRef(const Variant& v) {
+  PackedArrayInit& appendRef(Variant& v) {
     performOp([&]{ return PackedArray::AppendRef(m_vec, v, false); });
     return *this;
   }
@@ -437,7 +421,7 @@ template<class... KVPairs>
 Array make_map_array(KVPairs&&... kvpairs) {
   static_assert(
     sizeof...(kvpairs) % 2 == 0, "make_map_array needs key value pairs");
-  ArrayInit init(sizeof...(kvpairs) / 2);
+  ArrayInit init(sizeof...(kvpairs) / 2, ArrayInit::Map{});
   make_array_detail::map_impl(init, std::forward<KVPairs>(kvpairs)...);
   return init.toArray();
 }

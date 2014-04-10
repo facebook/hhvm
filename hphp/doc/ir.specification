@@ -668,11 +668,11 @@ SurpriseHook
 
   Executes the implementation-specific surprise flag hook.
 
-FunctionExitSurpriseHook S0:FramePtr S1:StkPtr S2:Gen
+FunctionExitSurpriseHook S0:FramePtr S1:Gen
 
   Executes the implementation-specific surprise flag hook for function exit. S0
-  should be the current frame pointer, S1 should be the current stack pointer,
-  and S2 should be the return value of the function.
+  should be the current frame pointer, and S1 should be the return value
+  of the function.
 
 ExitOnVarEnv S0:FramePtr -> B
 
@@ -1271,15 +1271,12 @@ ReleaseVVOrExit S0:FramePtr -> B
   nothing. If it is an ExtraArgs, deallocates the ExtraArgs structure.
   Otherwise jumps to block B.
 
-D:StkPtr = GenericRetDecRefs S0:FramePtr
+GenericRetDecRefs S0:FramePtr
 
   Does decrefs of all the current function's locals, where S0 is a pointer to
   the relevant activation record.
 
-  Returns the adjusted VM stack pointer (pointing at the return value
-  location).
-
-  Semantically similar to a series of DecRefLoc followed by RetAdjustStack.
+  Semantically similar to a series of DecRefLoc.
 
 
 10. Stores

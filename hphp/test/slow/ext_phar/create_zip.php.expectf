@@ -1,0 +1,20 @@
+array(1) {
+  ["Herp Derp"]=>
+  string(%d) "%s/test/slow/ext_phar/create_zip.php"
+}
+array(2) {
+  [0]=>
+  string(9) "Herp Derp"
+  [1]=>
+  int(557)
+}
+array(1) {
+  ["create_zip.php"]=>
+  string(%d) "%s/test/slow/ext_phar/create_zip.php"
+}
+array(2) {
+  [0]=>
+  string(14) "create_zip.php"
+  [1]=>
+  int(557)
+}

@@ -92,7 +92,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
     if (fp->hasVarEnv()) {
       // If there is a VarEnv, free the locals and the VarEnv
       // by calling the detach method.
-      fp->m_varEnv->detach(fp);
+      fp->m_varEnv->exitFP(fp);
       return;
     }
     // Free extra args
@@ -136,31 +136,31 @@ frame_free_locals_inl_no_hook(ActRec* fp, int numLocals) {
 }
 
 void ALWAYS_INLINE
-frame_free_locals_inl(ActRec* fp, int numLocals) {
+frame_free_locals_inl(ActRec* fp, int numLocals, TypedValue* rv) {
   frame_free_locals_inl_no_hook<false>(fp, numLocals);
-  EventHook::FunctionExit(fp);
+  EventHook::FunctionExit(fp, rv);
 }
 
 void ALWAYS_INLINE
-frame_free_inl(ActRec* fp) { // For frames with no locals
+frame_free_inl(ActRec* fp, TypedValue* rv) { // For frames with no locals
   assert(0 == fp->m_func->numLocals());
   assert(!fp->hasInvName());
   assert(fp->m_varEnv == nullptr);
   assert(fp->hasThis());
   decRefObj(fp->getThis());
-  EventHook::FunctionExit(fp);
+  EventHook::FunctionExit(fp, rv);
 }
 
 void ALWAYS_INLINE
 frame_free_locals_unwind(ActRec* fp, int numLocals) {
   frame_free_locals_inl_no_hook<true>(fp, numLocals);
-  EventHook::FunctionExit(fp);
+  EventHook::FunctionExit(fp, nullptr);
 }
 
 void ALWAYS_INLINE
-frame_free_locals_no_this_inl(ActRec* fp, int numLocals) {
+frame_free_locals_no_this_inl(ActRec* fp, int numLocals, TypedValue* rv) {
   frame_free_locals_helper_inl<false>(fp, numLocals);
-  EventHook::FunctionExit(fp);
+  EventHook::FunctionExit(fp, rv);
 }
 
 // Helper for iopFCallBuiltin.

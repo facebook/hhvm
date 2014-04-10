@@ -61,6 +61,8 @@ struct Block : boost::noncopyable {
 
   // Returns whether this block starts with BeginCatch
   bool isCatch() const;
+  // If its a catch block, the BeginCatch's marker
+  BCMarker catchMarker() const;
 
   // return the fallthrough block.  Should be nullptr if the last instruction
   // is a Terminal.
@@ -283,6 +285,13 @@ inline bool Block::isCatch() const {
   auto it = skipHeader();
   if (it == begin()) return false;
   return (--it)->op() == BeginCatch;
+}
+
+inline BCMarker Block::catchMarker() const {
+  assert(isCatch());
+  auto it = skipHeader();
+  assert(it != begin());
+  return (--it)->marker();
 }
 
 // defined here to avoid circular dependencies

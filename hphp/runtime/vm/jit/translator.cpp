@@ -1485,6 +1485,7 @@ bool outputIsPredicted(NormalizedInstruction& inst) {
     auto dt = predictOutputs(&inst);
     if (dt != KindOfAny) {
       inst.outPred = Type(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
+      inst.outputPredicted = true;
     } else {
       doPrediction = false;
     }
@@ -4131,8 +4132,8 @@ void Translator::traceStart(Offset initBcOffset, Offset initSpOffset,
          " HHIR during translation ",
          color(ANSI_COLOR_END));
 
-  m_irTrans.reset(new JIT::IRTranslator(initBcOffset, initSpOffset, inGenerator,
-                                        func));
+  m_irTrans.reset(new IRTranslator(initBcOffset, initSpOffset, inGenerator,
+                                   func));
 }
 
 void Translator::traceEnd() {
@@ -4150,8 +4151,116 @@ void Translator::traceFree() {
   m_irTrans.reset();
 }
 
+/*
+ * Create two maps for all blocks in the region:
+ *   - a map from RegionDesc::BlockId -> IR Block* for all region blocks
+ *   - a map from RegionDesc::BlockId -> RegionDesc::Block
+ */
+void Translator::createBlockMaps(const RegionDesc&        region,
+                                 BlockIdToIRBlockMap&     blockIdToIRBlock,
+                                 BlockIdToRegionBlockMap& blockIdToRegionBlock)
+{
+  HhbcTranslator& ht = m_irTrans->hhbcTrans();
+  IRBuilder& irb = ht.irBuilder();
+  blockIdToIRBlock.clear();
+  blockIdToRegionBlock.clear();
+  for (auto regionBlock : region.blocks) {
+    RegionDesc::Block* rBlock = regionBlock.get();
+    auto id = rBlock->id();
+    Offset bcOff = rBlock->start().offset();
+    Block* iBlock = bcOff == irb.unit().bcOff() ? irb.unit().entry()
+                                                : irb.unit().defBlock();
+    blockIdToIRBlock[id]     = iBlock;
+    blockIdToRegionBlock[id] = rBlock;
+    FTRACE(1,
+           "createBlockMaps: RegionBlock {} => IRBlock {} (BC offset = {})\n",
+           id, iBlock->id(), bcOff);
+  }
+}
+
+/*
+ * Set IRBuilder's Block associated to blockId's block according to
+ * the mapping in blockIdToIRBlock.
+ */
+void Translator::setIRBlock(RegionDesc::BlockId            blockId,
+                            const BlockIdToIRBlockMap&     blockIdToIRBlock,
+                            const BlockIdToRegionBlockMap& blockIdToRegionBlock)
+{
+  IRBuilder& irb = m_irTrans->hhbcTrans().irBuilder();
+  auto rit = blockIdToRegionBlock.find(blockId);
+  assert(rit != blockIdToRegionBlock.end());
+  RegionDesc::Block* rBlock = rit->second;
+
+  Offset bcOffset = rBlock->start().offset();
+
+  auto iit = blockIdToIRBlock.find(blockId);
+  assert(iit != blockIdToIRBlock.end());
+
+  assert(!irb.hasBlock(bcOffset));
+  FTRACE(3, "  setIRBlock: blockId {}, offset {} => IR Block {}\n",
+         blockId, bcOffset, iit->second->id());
+  irb.setBlock(bcOffset, iit->second);
+}
+
+/*
+ * Set IRBuilder's Blocks for srcBlockId's successors' offsets within
+ * the region.
+ */
+void Translator::setSuccIRBlocks(
+  const RegionDesc&              region,
+  RegionDesc::BlockId            srcBlockId,
+  const BlockIdToIRBlockMap&     blockIdToIRBlock,
+  const BlockIdToRegionBlockMap& blockIdToRegionBlock)
+{
+  FTRACE(3, "setSuccIRBlocks: srcBlockId = {}\n", srcBlockId);
+  IRBuilder& irb = m_irTrans->hhbcTrans().irBuilder();
+  irb.resetOffsetMapping();
+  for (auto& arc : region.arcs) {
+    if (arc.src == srcBlockId) {
+      RegionDesc::BlockId dstBlockId = arc.dst;
+      setIRBlock(dstBlockId, blockIdToIRBlock, blockIdToRegionBlock);
+    }
+  }
+}
+
+/*
+ * Compute the set of bytecode offsets that may follow the execution
+ * of srcBlockId in the region.
+ */
+static void findSuccOffsets(const RegionDesc&              region,
+                            RegionDesc::BlockId            srcBlockId,
+                            const BlockIdToRegionBlockMap& blockIdToRegionBlock,
+                            OffsetSet&                     set) {
+  set.clear();
+  for (auto& arc : region.arcs) {
+    if (arc.src == srcBlockId) {
+      RegionDesc::BlockId dstBlockId = arc.dst;
+      auto rit = blockIdToRegionBlock.find(dstBlockId);
+      assert(rit != blockIdToRegionBlock.end());
+      RegionDesc::Block* rDstBlock = rit->second;
+      Offset bcOffset = rDstBlock->start().offset();
+      set.insert(bcOffset);
+    }
+  }
+}
+
+/*
+ * Returns whether or not succOffsets contains both successors of inst.
+ */
+static bool containsBothSuccs(const OffsetSet&             succOffsets,
+                              const NormalizedInstruction& inst) {
+  assert(inst.op() == OpJmpZ || inst.op() == OpJmpNZ);
+  if (inst.breaksTracelet) return false;
+  Offset takenOffset      = inst.offset() + inst.imm[0].u_BA;
+  Offset fallthruOffset   = inst.offset() + instrLen((Op*)(inst.pc()));
+  bool   takenIncluded    = succOffsets.count(takenOffset);
+  bool   fallthruIncluded = succOffsets.count(fallthruOffset);
+  return takenIncluded && fallthruIncluded;
+}
+
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
+                            bool bcControlFlow,
                             RegionBlacklist& toInterp) {
   Timer _t(Timer::translateRegion);
 
@@ -4161,9 +4270,18 @@ Translator::translateRegion(const RegionDesc& region,
   const SrcKey startSk = region.blocks.front()->start();
   auto profilingFunc = false;
 
+  BlockIdToIRBlockMap     blockIdToIRBlock;
+  BlockIdToRegionBlockMap blockIdToRegionBlock;
+
+  if (bcControlFlow) {
+    ht.setGenMode(IRGenMode::CFG);
+    createBlockMaps(region, blockIdToIRBlock, blockIdToRegionBlock);
+  }
+
   Timer irGenTimer(Timer::translateRegion_irGeneration);
   for (auto b = 0; b < region.blocks.size(); b++) {
     auto const& block = region.blocks[b];
+    RegionDesc::BlockId blockId = block->id();
     Unit::MetaHandle metaHand;
     SrcKey sk = block->start();
     const Func* topFunc = nullptr;
@@ -4171,14 +4289,19 @@ Translator::translateRegion(const RegionDesc& region,
     auto byRefs     = makeMapWalker(block->paramByRefs());
     auto refPreds   = makeMapWalker(block->reffinessPreds());
     auto knownFuncs = makeMapWalker(block->knownFuncs());
-    bool maybeStartNewBlock = true;
 
+    OffsetSet succOffsets;
+    if (ht.genMode() == IRGenMode::CFG) {
+      ht.irBuilder().startBlock(blockIdToIRBlock[blockId]);
+      findSuccOffsets(region, blockId, blockIdToRegionBlock, succOffsets);
+      setSuccIRBlocks(region, blockId, blockIdToIRBlock, blockIdToRegionBlock);
+    }
     ht.irBuilder().recordOffset(sk.offset());
+
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
       // Update bcOff here so any guards or assertions from metadata are
       // attributed to this instruction.
-      ht.setBcOff(sk.offset(), false, maybeStartNewBlock);
-      maybeStartNewBlock = false;
+      ht.setBcOff(sk.offset(), false);
 
       // Emit prediction guards. If this is the first instruction in the
       // region the guards will go to a retranslate request. Otherwise, they'll
@@ -4250,19 +4373,7 @@ Translator::translateRegion(const RegionDesc& region,
       if (inst.op() == OpJmpZ || inst.op() == OpJmpNZ) {
         // TODO(t3730617): Could extend this logic to other
         // conditional control flow ops, e.g., IterNext, etc.
-        inst.includeBothPaths = [&] {
-          if (!RuntimeOption::EvalHHIRBytecodeControlFlow) return false;
-          if (inst.breaksTracelet) return false;
-          Offset takenOffset = inst.offset() + inst.imm[0].u_BA;
-          Offset fallthruOffset = inst.offset() + instrLen((Op*)(inst.pc()));
-          bool takenIncluded = false;
-          bool fallthruIncluded = false;
-          for (auto& b : region.blocks) {
-            if (b->start().offset() == takenOffset) takenIncluded = true;
-            if (b->start().offset() == fallthruOffset) fallthruIncluded = true;
-          }
-          return takenIncluded && fallthruIncluded;
-        }();
+        inst.includeBothPaths = containsBothSuccs(succOffsets, inst);
       }
 
       // We can get a more precise output type for interpOne if we know all of
@@ -4311,8 +4422,7 @@ Translator::translateRegion(const RegionDesc& region,
       // larger region (in TransOptimize mode), the guard for the top of the
       // stack essentially does the role of type prediction.  And, if the value
       // is also inferred, then the guard is omitted.
-      auto const doPrediction = mode() != TransOptimize &&
-                                outputIsPredicted(inst);
+      auto const doPrediction = mode() == TransLive && outputIsPredicted(inst);
 
       // If this block ends with an inlined FCall, we don't emit anything for
       // the FCall and instead set up HhbcTranslator for inlining. Blocks from
@@ -4351,13 +4461,14 @@ Translator::translateRegion(const RegionDesc& region,
       }
 
       // Insert a fallthrough jump
-      if (RuntimeOption::EvalHHIRBytecodeControlFlow
-          && i == block->length() - 1
-          && block != region.blocks.back()
-          && instrAllowsFallThru(inst.op())
-          && !(inst.op() == OpJmpZ || inst.op() == OpJmpNZ)) {
-        auto fallthru = inst.offset() + instrLen((Op*)(inst.pc()));
-        ht.endBlock(fallthru);
+      if (ht.genMode() == IRGenMode::CFG &&
+          i == block->length() - 1 && block != region.blocks.back()) {
+        if (instrAllowsFallThru(inst.op())) {
+          auto nextOffset = inst.nextOffset != kInvalidOffset
+            ? inst.nextOffset
+            : inst.offset() + instrLen((Op*)(inst.pc()));
+          ht.endBlock(nextOffset);
+        }
       }
 
       // Check the prediction. If the predicted type is less specific than what

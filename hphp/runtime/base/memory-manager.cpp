@@ -188,11 +188,14 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     m_stats.usage, m_stats.alloc, m_stats.peakUsage, m_stats.peakAlloc);
 #endif
   if (isInternalCall) {
+    m_statsIntervalActive = false;
     m_stats.usage = 0;
     m_stats.alloc = 0;
     m_stats.peakUsage = 0;
     m_stats.peakAlloc = 0;
     m_stats.totalAlloc = 0;
+    m_stats.peakIntervalUsage = 0;
+    m_stats.peakIntervalAlloc = 0;
 #ifdef USE_JEMALLOC
     m_enableStatsSync = false;
 #endif

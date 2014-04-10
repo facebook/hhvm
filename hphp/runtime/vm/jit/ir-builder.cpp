@@ -107,14 +107,13 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
   assert(inst->marker().valid());
   if (!inst->is(Nop, DefConst)) {
+    FTRACE(3, "appendInstruction: Block {}; inst: {}\n", m_curBlock->id(),
+           inst->toString());
     where = m_curBlock->insert(where, inst);
     ++where;
   }
 
-  if (m_savedBlocks.empty()) {
-    // We don't track state on non-main traces for now. t2982555
-    m_state.update(inst);
-  }
+  m_state.update(inst);
 }
 
 void IRBuilder::appendBlock(Block* block) {
@@ -537,6 +536,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
  */
 SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
                                 CloneFlag doClone,
+                                Block* srcBlock,
                                 const folly::Optional<IdomVector>& idoms) {
   static DEBUG_ONLY __thread int instNest = 0;
   if (debug) ++instNest;
@@ -545,7 +545,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
 
   auto doCse = [&] (IRInstruction* cseInput) -> SSATmp* {
     if (m_state.enableCse() && cseInput->canCSE()) {
-      SSATmp* cseResult = m_state.cseLookup(cseInput, idoms);
+      SSATmp* cseResult = m_state.cseLookup(cseInput, srcBlock, idoms);
       if (cseResult) {
         // Found a dominating instruction that can be used instead of input
         FTRACE(1, "  {}cse found: {}\n",
@@ -702,7 +702,7 @@ void IRBuilder::reoptimize() {
       assert(inst->marker().valid());
       setMarker(inst->marker());
 
-      auto const tmp = optimizeInst(inst, CloneFlag::No, idoms);
+      auto const tmp = optimizeInst(inst, CloneFlag::No, block, idoms);
       SSATmp* dst = inst->dst(0);
 
       if (dst != tmp) {
@@ -982,12 +982,11 @@ void IRBuilder::setMarker(BCMarker marker) {
   m_state.setMarker(marker);
 }
 
-void IRBuilder::startBlock() {
+void IRBuilder::startBlock(Block* block) {
+  assert(block);
   assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
-  auto marker = m_state.marker();
-  auto it = m_offsetToBlockMap.find(marker.bcOff);
-  if (it != m_offsetToBlockMap.end() && it->second->empty()) {
-    auto block = it->second;
+
+  if (block->empty()) {
     if (block != m_curBlock) {
       if (m_state.compatible(block)) {
         m_state.pauseBlock(block);
@@ -1007,6 +1006,12 @@ void IRBuilder::startBlock() {
              show(m_state));
     }
   }
+
+  if (sp() == nullptr) {
+    gen(DefSP, StackOffset(spOffset() + evalStack().size() - stackDeficit()),
+        fp());
+  }
+
 }
 
 Block* IRBuilder::makeBlock(Offset offset) {
@@ -1035,6 +1040,21 @@ bool IRBuilder::blockIsIncompatible(Offset offset) {
 void IRBuilder::recordOffset(Offset offset) {
   m_offsetSeen.insert(offset);
 }
+
+void IRBuilder::resetOffsetMapping() {
+  m_offsetToBlockMap.clear();
+}
+
+bool IRBuilder::hasBlock(Offset offset) const {
+  auto it = m_offsetToBlockMap.find(offset);
+  return it != m_offsetToBlockMap.end();
+}
+
+void IRBuilder::setBlock(Offset offset, Block* block) {
+  assert(!hasBlock(offset));
+  m_offsetToBlockMap[offset] = block;
+}
+
 
 void IRBuilder::pushBlock(BCMarker marker, Block* b,
                           const folly::Optional<Block::iterator>& where) {

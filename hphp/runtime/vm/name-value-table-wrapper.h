@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/name-value-table.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-common.h"
 
 namespace HPHP {
 
@@ -38,7 +39,7 @@ namespace HPHP {
  *   - Non-string keys are not really supported.  (Integers are
  *     converted to strings.)
  *
- *   - size() is an O(N) operation.  (This is because of KindOfIndirect
+ *   - size() is an O(N) operation.  (This is because of KindOfNamedLocal
  *     support in the underlying NameValueTable.)
  *
  *   - Append/prepend operations are not supported.
@@ -59,24 +60,12 @@ struct NameValueTableWrapper : public ArrayData {
   {}
   ~NameValueTableWrapper();
 
-public: // ArrayData implementation
+public:
   static void Release(ArrayData*) {}
-
-  // These using directives ensure the full set of overloaded functions
-  // are visible in this class, to avoid triggering implicit conversions.
-  using ArrayData::exists;
-  using ArrayData::lval;
-  using ArrayData::lvalNew;
-  using ArrayData::set;
-  using ArrayData::setRef;
-  using ArrayData::add;
-  using ArrayData::remove;
-  using ArrayData::nvGet;
-
-  Variant& getRef(const String& k) {
-    return tvAsVariant(nvGet(k.get()));
-  }
-
+  static constexpr auto Copy =
+    reinterpret_cast<ArrayData* (*)(const ArrayData*)>(
+      ArrayCommon::ReturnFirstArg
+    );
   static size_t Vsize(const ArrayData*);
   static void NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos);
   static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
@@ -93,23 +82,24 @@ public: // ArrayData implementation
   static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
 
   static ArrayData* SetInt(ArrayData*, int64_t k, const Variant& v, bool copy);
-  static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v, bool copy);
-  static ArrayData* SetRefInt(ArrayData*, int64_t k, const Variant& v, bool copy);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k, const Variant& v, bool copy);
+  static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v,
+                           bool copy);
+  static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
+                              bool copy);
+  static constexpr auto AddInt = &SetInt;
+  static constexpr auto AddStr = &SetStr;
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
 
-  static ArrayData* Copy(const ArrayData* ad) {
-    return const_cast<ArrayData*>(ad);
-  }
-
   static ArrayData* Append(ArrayData*, const Variant& v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
 
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* CopyWithStrongIterators(const ArrayData*);
 
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
@@ -119,6 +109,11 @@ public: // ArrayData implementation
   static bool ValidMArrayIter(const ArrayData*, const MArrayIter & fp);
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter&);
   static bool IsVectorData(const ArrayData*);
+  static ArrayData* NonSmartCopy(const ArrayData*);
+  static constexpr auto Pop = &ArrayCommon::Pop;
+  static constexpr auto Dequeue = &ArrayCommon::Dequeue;
+  static void Renumber(ArrayData*);
+  static void OnSetEvalScalar(ArrayData*);
 
   static ArrayData* EscalateForSort(ArrayData*);
   static void Ksort(ArrayData*, int sort_flags, bool ascending);
@@ -127,6 +122,15 @@ public: // ArrayData implementation
   static bool Uksort(ArrayData*, const Variant& cmp_function);
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
+
+  static constexpr auto Escalate =
+    reinterpret_cast<ArrayData* (*)(const ArrayData*)>(
+      ArrayCommon::ReturnFirstArg
+    );
+  static constexpr auto GetAPCHandle =
+    reinterpret_cast<APCHandle* (*)(const ArrayData*)>(
+      ArrayCommon::ReturnNull
+    );
 
 private:
   static NameValueTableWrapper* asNVTW(ArrayData* ad);

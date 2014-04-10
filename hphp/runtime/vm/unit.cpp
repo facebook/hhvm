@@ -1014,7 +1014,7 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
        * optimizing for.
        */
       RDS::s_constants() =
-        Array::attach(HphpArray::MakeReserve(1));
+        Array::attach(MixedArray::MakeReserve(1));
     }
     auto const existed = !!RDS::s_constants()->nvGet(cnsName);
     if (!existed) {

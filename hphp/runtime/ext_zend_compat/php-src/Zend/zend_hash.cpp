@@ -279,7 +279,7 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC) {
   target->plusEq(source); // XXX: can this COW?
   for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
-    auto tv = (HPHP::TypedValue*)it.secondRef().asTypedValue();
+    auto tv = const_cast<HPHP::TypedValue*>(it.secondRef().asTypedValue());
     HPHP::zBoxAndProxy(tv);
     pCopyConstructor((void*)(&tv->m_data.pref));
   }
@@ -302,7 +302,7 @@ ZEND_API void zend_hash_clean(HashTable *ht) {
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size) {
   target->merge(source);
   for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
-    const void *tv = it.secondRef().asTypedValue();
+    const void* tv = it.secondRef().asTypedValue();
     pCopyConstructor(const_cast<void*>(tv));
   }
 }

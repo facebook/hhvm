@@ -351,7 +351,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   assert(func->isMagic());
   assert(func->numParams() == 2);
   using namespace reg;
-  using MkPacked = HphpArray* (*)(uint32_t, const TypedValue*);
+  using MkPacked = ArrayData* (*)(uint32_t, const TypedValue*);
 
   Asm a { mcg->code.main() };
   Label not_magic_call;
@@ -407,7 +407,8 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
     a.  subq   (rVmSp, argNumToRegName[0]);
     a.  shrq   (0x4, argNumToRegName[0]);
     a.  movq   (rVmSp, argNumToRegName[1]);
-    emitCall(a, reinterpret_cast<CodeAddress>(MkPacked{HphpArray::MakePacked}));
+    emitCall(a, reinterpret_cast<CodeAddress>(
+      MkPacked{MixedArray::MakePacked}));
     callFixup = a.frontier();
   }
   if (nPassed != 2) {
@@ -428,8 +429,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   a.    storeq (rInvName, strTV[TVOFF(m_data)]);
   emitStoreTVType(a, KindOfArray, arrayTV[TVOFF(m_type)]);
   if (nPassed == 0) {
-    emitImmStoreq(a, HphpArray::GetStaticEmptyArray(),
-                  arrayTV[TVOFF(m_data)]);
+    emitImmStoreq(a, staticEmptyArray(), arrayTV[TVOFF(m_data)]);
   } else {
     a.  storeq (rax, arrayTV[TVOFF(m_data)]);
   }

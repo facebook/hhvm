@@ -121,7 +121,7 @@ static Array HHVM_METHOD(ImagickPixel, getColor, bool normalized) {
   };
   auto wand = getPixelWandResource(this_);
 
-  ArrayInit ret(4);
+  ArrayInit ret(4, ArrayInit::Map{});
   for (int i = 0; i < 4; ++i) {
     double color = pixelGet[i](wand->getWand());
     if (i < 3 && !normalized) {

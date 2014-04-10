@@ -85,6 +85,21 @@ void emitXorSwap(vixl::MacroAssembler& a,
   a.  Eor  (r1, r1, r2);
 }
 
+void emitRegRegMove(vixl::MacroAssembler& a, const vixl::CPURegister& dst,
+                    const vixl::CPURegister& src) {
+  using namespace vixl;
+  if (dst.IsRegister() && src.IsRegister()) {
+    a.  Mov  (Register{dst}, Register{src});
+  } else if (dst.IsFPRegister() && src.IsFPRegister()) {
+    a.  Fmov (FPRegister{dst}, FPRegister{src});
+  } else if (dst.IsRegister() && src.IsFPRegister()) {
+    a.  Fmov (Register{dst}, FPRegister{src});
+  } else {
+    a.  Fmov (FPRegister{dst}, Register{src});
+  }
+}
+
+
 //////////////////////////////////////////////////////////////////////
 
 void emitTestSurpriseFlags(vixl::MacroAssembler& a) {

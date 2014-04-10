@@ -23,15 +23,6 @@ function test_base64_encode() {
   VS(base64_encode("\006\0\030v9"), "BgAYdjk=");
 }
 
-function test_get_headers() {
-  $url = "http://www.example.com";
-  $ret = get_headers($url);
-  //VS(ret[0], "HTTP/1.1 200 OK");
-  VERIFY(count($ret) > 0);
-  $ret = get_headers($url, 1);
-  //VS(ret[s_Connection], "close");
-}
-
 function test_get_meta_tags() {
   $ret = get_meta_tags(__DIR__."/get_meta_tags.html");
   VS(count($ret), 4);
@@ -125,7 +116,6 @@ function test_urlencode() {
 
 test_base64_decode();
 test_base64_encode();
-test_get_headers();
 test_get_meta_tags();
 test_http_build_query();
 test_parse_url();

@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/ext_process.h"
-#include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -298,6 +297,14 @@ vm_decode_function(const Variant& function,
         }
       }
     }
+
+    if (f->isClosureBody() && !this_) {
+      if (warn) {
+        raise_warning("cannot invoke closure body without closure object");
+      }
+      return nullptr;
+    }
+
     assert(f && f->preClass());
     // If this_ is non-NULL, then this_ is the current instance and cls is
     // the class of the current instance.
@@ -550,15 +557,6 @@ void throw_cannot_modify_immutable_object(const char* className) {
   ).str();
   Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
   throw e;
-}
-
-void warn_cannot_modify_immutable_object(const char* className) {
-  raise_warning(
-    folly::format(
-      "Cannot modify immutable object of type {}",
-      className
-    ).str()
-  );
 }
 
 void check_collection_compare(ObjectData* obj) {

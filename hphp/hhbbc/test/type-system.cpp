@@ -157,7 +157,7 @@ std::unique_ptr<php::Program> make_program() {
 //////////////////////////////////////////////////////////////////////
 
 auto const test_empty_array = folly::lazy([&] {
-  return HphpArray::GetStaticEmptyArray();
+  return staticEmptyArray();
 });
 
 auto const test_array_map_value = folly::lazy([&] {

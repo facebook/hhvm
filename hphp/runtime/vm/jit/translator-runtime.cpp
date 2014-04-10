@@ -451,13 +451,13 @@ const StaticString s_idx("idx");
 TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
   static auto func = Unit::loadFunc(s_idx.get());
   assert(func != nullptr);
-  Array args = PackedArrayInit(3)
-                         .append(tvAsVariant(&obj))
-                         .append(tvAsVariant(&key))
-                         .append(tvAsVariant(&def))
-                         .toArray();
+  TypedValue args[] = {
+    obj,
+    key,
+    def
+  };
   TypedValue ret;
-  g_context->invokeFunc(&ret, func, args);
+  g_context->invokeFuncFew(&ret, func, nullptr, nullptr, 3, &args[0]);
   return ret;
 }
 
@@ -665,7 +665,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
     assert(!func->cls()->isZombie());
   }
   if (fp->hasVarEnv()) {
-    assert(fp->getVarEnv()->getCfp() == fp);
+    assert(fp->getVarEnv()->getFP() == fp);
   }
   // TODO: validate this pointer from actrec
   int numLocals = func->numLocals();
@@ -739,7 +739,7 @@ void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   try {
     loadFuncContextImpl<OnFail::Fatal>(ArrNR(arr), preLiveAR, fp);
   } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
+    arPreliveOverwriteCells(preLiveAR);
     throw;
   }
 }
@@ -798,7 +798,7 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
     inst->incRefCount();
     preLiveAR->setThis(inst);
   } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
+    arPreliveOverwriteCells(preLiveAR);
     throw;
   }
 }
@@ -828,7 +828,7 @@ void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
       return fpushStringFail(sd, preLiveAR);
     }
   } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfString>(sd);
+    arPreliveOverwriteCells(preLiveAR);
     throw;
   }
 }

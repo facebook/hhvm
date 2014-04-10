@@ -81,10 +81,15 @@ HhbcTranslator::HhbcTranslator(Offset startOffset,
   , m_startBcOff(startOffset)
   , m_lastBcOff(false)
   , m_hasExit(false)
+  , m_mode(IRGenMode::Trace)
 {
   updateMarker();
   auto const fp = gen(DefFP);
   gen(DefSP, StackOffset(initialSpOffsetFromFp), fp);
+}
+
+void HhbcTranslator::setGenMode(IRGenMode mode) {
+  m_mode = mode;
 }
 
 bool HhbcTranslator::classIsUniqueOrCtxParent(const Class* cls) const {
@@ -415,8 +420,7 @@ void HhbcTranslator::profileFailedInlShape(const std::string& str) {
   );
 }
 
-void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff,
-                              bool maybeStartBlock) {
+void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
   always_assert_log(
     IMPLIES(isInlining(), !lastBcOff),
     [&] {
@@ -426,15 +430,6 @@ void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff,
 
   m_bcStateStack.back().bcOff = newOff;
   updateMarker();
-  // TODO(t3729627): Instead of passing maybeStartBlock, see if it's
-  // possible to lift this and the DefSP conditional into their own
-  // API function to be called after setBcOff where we would have
-  // passed in true.
-  if (maybeStartBlock) m_irb->startBlock();
-
-  if (m_irb->sp() == nullptr) {
-    gen(DefSP, StackOffset(spOffset()), m_irb->fp());
-  }
   m_lastBcOff = lastBcOff;
 }
 
@@ -537,7 +532,7 @@ void HhbcTranslator::emitArray(int arrayId) {
 
 void HhbcTranslator::emitNewArray(int capacity) {
   if (capacity == 0) {
-    push(cns(HphpArray::GetStaticEmptyArray()));
+    push(cns(staticEmptyArray()));
   } else {
     push(gen(NewArray, cns(capacity)));
   }
@@ -1455,7 +1450,7 @@ void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset) {
     emitJmpCondHelper(offset, true, res);
   } else {
     gen(DecRef, src);
-    emitJmp(offset, true, false);
+    emitJmp(offset, true, nullptr);
   }
 }
 
@@ -1487,22 +1482,14 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   auto const cont = curFunc()->isMethod()
     ? gen(
         CreateContMeth,
-        CreateContData { curFunc() },
-        gen(LdCtx, FuncData(curFunc()), m_irb->fp()),
+        m_irb->fp(),
         cns(resumeOffset)
       )
     : gen(
         CreateContFunc,
-        CreateContData { curFunc() },
+        m_irb->fp(),
         cns(resumeOffset)
       );
-
-  static auto const thisStr = makeStaticString("this");
-  Id thisId = kInvalidId;
-  const bool fillThis = curFunc()->isMethod() &&
-    !curFunc()->isStatic() &&
-    ((thisId = curFunc()->lookupVarId(thisStr)) != kInvalidId) &&
-    (curFunc()->lookupVarId(thisStr) == kInvalidId);
 
   SSATmp* contAR = gen(LdContActRec, Type::PtrToGen, cont);
   for (int i = 0; i < curFunc()->numLocals(); ++i) {
@@ -1513,19 +1500,13 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
         ldLoc(i, DataTypeSpecific));
     gen(StLoc, LocalId(i), m_irb->fp(), cns(Type::Uninit));
   }
-  if (fillThis) {
-    assert(thisId != kInvalidId);
-    auto const thisObj = gen(LdThis, m_irb->fp());
-    gen(IncRef, thisObj);
-    gen(StMem, contAR, cns(-cellsToBytes(thisId + 1)), thisObj);
-  }
 
   push(cont);
 }
 
-void HhbcTranslator::emitContReturnControl() {
+void HhbcTranslator::emitContReturnControl(Block* catchBlock) {
   auto const sp = spillStack();
-  emitRetSurpriseCheck(cns(Type::InitNull), true);
+  emitRetSurpriseCheck(cns(Type::Uninit), catchBlock);
 
   auto const retAddr = gen(LdRetAddr, m_irb->fp());
   auto const fp = gen(FreeActRec, m_irb->fp());
@@ -1546,6 +1527,8 @@ void HhbcTranslator::emitContSuspendImpl(Offset resumeOffset) {
 }
 
 void HhbcTranslator::emitContSuspend(Offset resumeOffset) {
+  auto catchBlock = makeCatchNoSpill();
+
   emitContSuspendImpl(resumeOffset);
 
   // take a fast path if this generator has no yield k => v;
@@ -1565,10 +1548,11 @@ void HhbcTranslator::emitContSuspend(Offset resumeOffset) {
   }
 
   // transfer control
-  emitContReturnControl();
+  emitContReturnControl(catchBlock);
 }
 
 void HhbcTranslator::emitContSuspendK(Offset resumeOffset) {
+  auto catchBlock = makeCatchNoSpill();
   emitContSuspendImpl(resumeOffset);
 
   auto const newKey = popC();
@@ -1582,10 +1566,11 @@ void HhbcTranslator::emitContSuspendK(Offset resumeOffset) {
   }
 
   // transfer control
-  emitContReturnControl();
+  emitContReturnControl(catchBlock);
 }
 
 void HhbcTranslator::emitContRetC() {
+  auto catchBlock = makeCatchNoSpill();
   // set state to done
   gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
       cns(c_Continuation::Done));
@@ -1596,7 +1581,7 @@ void HhbcTranslator::emitContRetC() {
   gen(DecRef, oldValue);
 
   // transfer control
-  emitContReturnControl();
+  emitContReturnControl(catchBlock);
 }
 
 void HhbcTranslator::emitContCheck(bool checkStarted) {
@@ -1686,25 +1671,17 @@ void HhbcTranslator::emitAsyncESuspend(Offset resumeOffset, int numIters) {
     ? gen(
         CreateAFWHMeth,
         catchBlock,
-        CreateContData { curFunc() },
-        gen(LdCtx, FuncData(curFunc()), m_irb->fp()),
+        m_irb->fp(),
         cns(resumeOffset),
         child
       )
     : gen(
         CreateAFWHFunc,
         catchBlock,
-        CreateContData { curFunc() },
+        m_irb->fp(),
         cns(resumeOffset),
         child
       );
-
-  static auto const thisStr = makeStaticString("this");
-  Id thisId = kInvalidId;
-  const bool fillThis = curFunc()->isMethod() &&
-    !curFunc()->isStatic() &&
-    ((thisId = curFunc()->lookupVarId(thisStr)) != kInvalidId) &&
-    (curFunc()->lookupVarId(thisStr) == kInvalidId);
 
   SSATmp* asyncAR = gen(LdAFWHActRec, Type::PtrToGen, waitHandle);
   for (int i = 0; i < curFunc()->numLocals(); ++i) {
@@ -1726,13 +1703,6 @@ void HhbcTranslator::emitAsyncESuspend(Offset resumeOffset, int numIters) {
       asyncAR,
       cns(curFunc()->numLocals() * sizeof(TypedValue) + (i+1) * sizeof(Iter))
     );
-  }
-
-  if (fillThis) {
-    assert(thisId != kInvalidId);
-    auto const thisObj = gen(LdThis, m_irb->fp());
-    gen(IncRef, thisObj);
-    gen(StMem, asyncAR, cns(-cellsToBytes(thisId + 1)), thisObj);
   }
 
   push(waitHandle);
@@ -1928,13 +1898,13 @@ void HhbcTranslator::emitDup() {
 
 void HhbcTranslator::emitJmp(int32_t offset,
                              bool breakTracelet,
-                             bool noSurprise) {
+                             Block* catchBlock) {
   // If surprise flags are set, exit trace and handle surprise
   bool backward = static_cast<uint32_t>(offset) <= bcOff();
-  if (backward && !noSurprise) {
-    emitJmpSurpriseCheck();
+  if (backward && catchBlock) {
+    emitJmpSurpriseCheck(catchBlock);
   }
-  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+  if (genMode() == IRGenMode::CFG) {
     // TODO(t3730057): Optimize away spillstacks and fallthrough
     // jumps, either by doing something clever here or adding to
     // jumpopts.
@@ -1943,6 +1913,7 @@ void HhbcTranslator::emitJmp(int32_t offset,
                    || m_irb->blockIsIncompatible(offset))
       ? makeExit(offset)
       : makeBlock(offset);
+    assert(target != nullptr);
     gen(Jmp, target);
     return;
   }
@@ -1967,7 +1938,7 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
                                    bool bothPaths,
                                    SSATmp* src) {
   spillStack();
-  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+  if (genMode() == IRGenMode::CFG) {
     // Before jumping to a merge point we have to ensure that the
     // stack pointer is sync'ed.  Without an ExceptionBarrier the
     // SpillStack can be removed by DCE (especially since merge points
@@ -1978,6 +1949,7 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
                         || m_irb->blockIsIncompatible(taken))
     ? makeExit(taken)
     : makeBlock(taken);
+  assert(target != nullptr);
   auto const boolSrc = gen(ConvCellToBool, src);
   gen(DecRef, src);
   gen(negate ? JmpZero : JmpNZero, target, boolSrc);
@@ -1985,8 +1957,7 @@ void HhbcTranslator::emitJmpHelper(int32_t taken,
   // TODO(t3730079): This block is probably redundant with the
   // fallthrough logic in translateRegion.  Try removing the guards
   // against conditional jumps there as well as this.
-  if (RuntimeOption::EvalHHIRBytecodeControlFlow
-      && m_irb->blockIsIncompatible(next)) {
+  if (genMode() == IRGenMode::CFG && m_irb->blockIsIncompatible(next)) {
     gen(Jmp, makeExit(next));
   }
 }
@@ -2300,7 +2271,7 @@ void HhbcTranslator::emitFPushCufUnknown(Op op, int32_t numParams) {
 
   auto const opcode = callable->isA(Type::Arr) ? LdArrFPushCuf
                                                : LdStrFPushCuf;
-  gen(opcode, makeCatch({callable}), callable, actRec, m_irb->fp());
+  gen(opcode, makeCatch({callable}, 1), callable, actRec, m_irb->fp());
   gen(DecRef, callable);
 }
 
@@ -2407,6 +2378,13 @@ void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
   if (func) {
     fn = cns(func);
   } else {
+    /*
+      Without the updateMarker, the catch trace will write
+      obj onto the stack, but the VMRegAnchor will setup the
+      stack as it was before the FPushCtor*, which (for
+      FPushCtorD at least) won't include obj
+    */
+    updateMarker();
     fn = gen(LdClsCtor, makeCatch(), cls);
   }
   gen(IncRef, obj);
@@ -2415,8 +2393,9 @@ void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
 }
 
 void HhbcTranslator::emitFPushCtor(int32_t numParams) {
+  auto catchBlock = makeCatch();
   SSATmp* cls = popA();
-  SSATmp* obj = gen(AllocObj, makeCatch(), cls);
+  SSATmp* obj = gen(AllocObj, catchBlock, cls);
   gen(IncRef, obj);
   emitFPushCtorCommon(cls, obj, nullptr, numParams);
 }
@@ -2649,8 +2628,7 @@ void HhbcTranslator::emitFPushFuncObj(int32_t numParams) {
 void HhbcTranslator::emitFPushFuncArr(int32_t numParams) {
   auto const thisAR = m_irb->fp();
 
-  auto const catchBlock = makeCatch();
-  auto const arr      = popC();
+  auto const arr    = popC();
   emitFPushActRec(
     cns(Type::InitNull),
     cns(Type::InitNull),
@@ -2663,7 +2641,7 @@ void HhbcTranslator::emitFPushFuncArr(int32_t numParams) {
   // pushed.
   updateMarker();
 
-  gen(LdArrFuncCtx, catchBlock, arr, actRec, thisAR);
+  gen(LdArrFuncCtx, makeCatch({arr}, 1), arr, actRec, thisAR);
   gen(DecRef, arr);
 }
 
@@ -2745,9 +2723,6 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
                     magicCall ? methodName : nullptr);
   } else {
     spillStack();
-    std::vector<SSATmp*> spill;
-    if (extraSpill) spill.push_back(extraSpill);
-    auto catchBlock = makeCatch(spill);
     emitFPushActRec(cns(Type::InitNull),
                     obj,
                     numParams,
@@ -2758,7 +2733,20 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
     // This is special. We need to move the stackpointer incase LdObjMethod
     // calls a destructor. Otherwise it would clobber the ActRec we just pushed.
     updateMarker();
-
+    Block* catchBlock;
+    if (extraSpill) {
+      /*
+       * If LdObjMethod throws, it nulls out the ActRec (since the unwinder
+       * will attempt to destroy it as if it were cells), and then writes
+       * obj into the last entry, since we need it to be destroyed.
+       * If we have another object to destroy, we should write it in
+       * the first - so pop 1 cell, then push extraSpill.
+       */
+      std::vector<SSATmp*> spill{extraSpill};
+      catchBlock = makeCatch(spill, 1);
+    } else {
+      catchBlock = makeCatchNoSpill();
+    }
     gen(LdObjMethod,
         LdObjMethodData(shouldFatal),
         catchBlock,
@@ -2908,7 +2896,7 @@ void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
    */
   updateMarker();
 
-  gen(LookupClsMethod, makeCatch({clsVal, methVal}), clsVal, methVal, actRec,
+  gen(LookupClsMethod, makeCatch({methVal, clsVal}), clsVal, methVal, actRec,
       m_irb->fp());
   gen(DecRef, methVal);
 }
@@ -2916,8 +2904,8 @@ void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
 void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
   Block* exitBlock = makeExitSlow();
 
-  auto classTmp = popA();
-  auto methodTmp = popC();
+  auto classTmp = top(Type::Cls);
+  auto methodTmp = topC(1);
   assert(classTmp->isA(Type::Cls));
   if (!classTmp->isConst() || !methodTmp->isConst(Type::Str)) {
     PUNT(FPushClsMethodF-unknownClassOrMethod);
@@ -2930,6 +2918,9 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
   const Func* func = lookupImmutableMethod(cls, methName, magicCall,
                                            true /* staticLookup */,
                                            curClass());
+  auto catchBlock = func ? nullptr : makeCatch();
+  discard(2);
+
   SSATmp* curCtxTmp = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
   if (func) {
     SSATmp*   funcTmp = cns(func);
@@ -2949,7 +2940,7 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
       },
       [&] { // taken
         m_irb->hint(Block::Hint::Unlikely);
-        auto result = gen(LookupClsMethodFCache, makeCatch(), data,
+        auto result = gen(LookupClsMethodFCache, catchBlock, data,
                           cns(cls), m_irb->fp());
         return gen(CheckNonNull, exitBlock, result);
       }
@@ -3037,6 +3028,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
     switch (pi.builtinType()) {
       case KindOfBoolean:
       case KindOfInt64:
+      case KindOfDouble:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
@@ -3055,7 +3047,6 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
               m_irb->sp());
         }
         break;
-      case KindOfDouble: not_reached();
       case KindOfUnknown: break;
       default:            not_reached();
     }
@@ -3071,10 +3062,10 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
     switch (pi.builtinType()) {
       case KindOfBoolean:
       case KindOfInt64:
+      case KindOfDouble:
         args[i + 2] = top(Type(pi.builtinType()),
                           numArgs - i - 1);
         break;
-      case KindOfDouble: not_reached();
       default:
         args[i + 2] = ldStackAddr(numArgs - i - 1, DataTypeSpecific);
         break;
@@ -3112,7 +3103,11 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   assert(!curFunc()->isPseudoMain());
   assert(!m_fpiActiveStack.empty());
 
-  auto useRet = emitDecRefLocalsInline(retVal);
+  if (curFunc()->mayHaveThis()) {
+    gen(DecRefThis, m_irb->fp());
+  }
+
+  emitDecRefLocalsInline();
 
   // Before we leave the inlined frame, grab a type prediction from our
   // DefInlineFP.
@@ -3159,31 +3154,23 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   m_irb->clearStackDeficit();
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc()->fullName()->data());
-  push(useRet);
-  if (retPred < useRet->type()) {
+  push(retVal);
+  if (retPred < retVal->type()) {
     // If we had a predicted output type that's useful, check that here.
     checkTypeStack(0, retPred, curSrcKey().advanced().offset());
   }
 }
 
-SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
-  const Func* curFunc = this->curFunc();
-
-  if (curFunc->mayHaveThis()) {
-    gen(DecRefThis, m_irb->fp());
-  }
-
+void HhbcTranslator::emitDecRefLocalsInline() {
   /*
    * Note: this is currently off for isInlining() because the shuffle
    * was preventing a decref elimination due to ordering.  Currently
    * we don't inline anything with parameters, though, so it doesn't
    * matter.  This will need to be revisted then.
    */
-  for (int id = curFunc->numLocals() - 1; id >= 0; --id) {
+  for (int id = curFunc()->numLocals() - 1; id >= 0; --id) {
     gen(DecRefLoc, Type::Gen, LocalId(id), m_irb->fp());
   }
-
-  return retVal;
 }
 
 void HhbcTranslator::emitRet(Type type, bool freeInline) {
@@ -3191,43 +3178,48 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     return emitRetFromInlined(type);
   }
 
-  const Func* curFunc = this->curFunc();
-  bool mayUseVV = (curFunc->attrs() & AttrMayUseVV);
-
-  if (mayUseVV) {
+  auto const func = curFunc();
+  if (func->attrs() & AttrMayUseVV) {
     // Note: this has to be the first thing, because we cannot bail after
     //       we start decRefing locs because then there'll be no corresponding
     //       bytecode boundaries until the end of RetC
     gen(ReleaseVVOrExit, makeExitSlow(), m_irb->fp());
   }
 
-  // The return value is teleported to its place in memory so we don't care
-  // about the type.
+  // Pop the return value. Since it will be teleported to its place in memory,
+  // we don't care about the type.
+  auto catchBlock = makeCatch();
   SSATmp* retVal = pop(type, DataTypeGeneric);
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    gen(TypeProfileFunc, TypeProfileData(-1), retVal, cns(curFunc));
-  }
-  SSATmp* sp;
 
+  // Free $this.
+  if (func->mayHaveThis()) {
+    gen(DecRefThis, m_irb->fp());
+  }
+
+  // Free local variables.
   if (freeInline) {
-    retVal = emitDecRefLocalsInline(retVal);
-    for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
+    emitDecRefLocalsInline();
+    for (unsigned i = 0; i < func->numLocals(); ++i) {
       m_irb->constrainLocal(i, DataTypeCountness, "inlined RetC/V");
     }
-    gen(StRetVal, m_irb->fp(), retVal);
-    sp = gen(RetAdjustStack, m_irb->fp());
   } else {
-    if (curFunc->mayHaveThis()) {
-      gen(DecRefThis, m_irb->fp());
-    }
-    sp = gen(GenericRetDecRefs, m_irb->fp());
-    gen(StRetVal, m_irb->fp(), retVal);
+    gen(GenericRetDecRefs, m_irb->fp());
   }
 
-  emitRetSurpriseCheck(retVal, false);
+  // Call the FunctionExit hook and put the return value on the stack so that
+  // the unwinder would decref it.
+  emitRetSurpriseCheck(retVal, catchBlock);
 
-  // Free ActRec, and return control to caller.
+ // Type profile return value.
+  if (RuntimeOption::EvalRuntimeTypeProfile) {
+    gen(TypeProfileFunc, TypeProfileData(-1), retVal, cns(func));
+  }
+
+  // Grab caller info from ActRec, free ActRec, store the return value
+  // and return control to the caller.
+  gen(StRetVal, m_irb->fp(), retVal);
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
+  SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
   gen(RetCtrl, InGeneratorData(false), sp, fp, retAddr);
 
@@ -3235,31 +3227,26 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   m_hasExit = true;
 }
 
-void HhbcTranslator::emitJmpSurpriseCheck() {
-  auto catchTrace = makeCatch();
-
+void HhbcTranslator::emitJmpSurpriseCheck(Block* catchBlock) {
   m_irb->ifThen([&](Block* taken) {
                  gen(CheckSurpriseFlags, taken);
                },
                [&] {
                  m_irb->hint(Block::Hint::Unlikely);
-                 gen(SurpriseHook, catchTrace);
+                 gen(SurpriseHook, catchBlock);
                });
 }
 
-void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator) {
+void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock) {
   emitRB(Trace::RBTypeFuncExit, curFunc()->fullName());
-  auto catchBlock = makeCatch();
-
   m_irb->ifThen([&](Block* taken) {
                  gen(CheckSurpriseFlags, taken);
                },
                [&] {
                  m_irb->hint(Block::Hint::Unlikely);
-                 gen(FunctionExitSurpriseHook, InGeneratorData(inGenerator),
-                     catchBlock, m_irb->fp(), m_irb->sp(), retVal);
+                 gen(FunctionExitSurpriseHook, InGeneratorData(inGenerator()),
+                     catchBlock, m_irb->fp(), retVal);
                });
-
 }
 
 void HhbcTranslator::emitSwitch(const ImmVector& iv,
@@ -3906,7 +3893,7 @@ void HhbcTranslator::emitCastArray() {
   if (src->isA(Type::Arr)) {
     push(src);
   } else if (src->isA(Type::Null)) {
-    push(cns(HphpArray::GetStaticEmptyArray()));
+    push(cns(staticEmptyArray()));
   } else if (src->isA(Type::Bool)) {
     push(gen(ConvBoolToArr, src));
   } else if (src->isA(Type::Dbl)) {
@@ -3975,8 +3962,9 @@ void HhbcTranslator::emitAGet(SSATmp* classSrc, Block* catchBlock) {
 void HhbcTranslator::emitAGetC() {
   auto const name = topC();
   if (isSupportedAGet(name)) {
+    auto catchBlock = makeCatch();
     popC();
-    emitAGet(name, makeCatch({name}));
+    emitAGet(name, catchBlock);
     gen(DecRef, name);
   } else {
     emitInterpOne(Type::Cls, 1);
@@ -4035,8 +4023,7 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
     auto const cls = ssaCls->clsVal();
     if (!classIsPersistentOrCtxParent(cls)) return false;
 
-    // TODO(#3575370): we should only check for 86sinit
-    if (cls->hasInitMethods()) return false;
+    if (cls->hasSInitMethods()) return false;
 
     bool visible, accessible;
     cls->getSProp(curClass(), propName, visible, accessible);
@@ -4542,9 +4529,10 @@ void HhbcTranslator::emitDiv() {
       }
 
       if (divisorVal == 0) {
+        auto catchBlock = makeCatch();
         popC();
         popC();
-        gen(RaiseWarning, makeCatch(),
+        gen(RaiseWarning, catchBlock,
             cns(makeStaticString(Strings::DIVISION_BY_ZERO)));
         push(cns(false));
         return;
@@ -4837,7 +4825,11 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
 
     case OutFDesc:       return folly::none;
     case OutUnknown:     return Type::Gen;
-    case OutPred:        return inst.outPred;
+
+    case OutPred:
+      checkTypeType = inst.outPred;
+      return inst.outPred;
+
     case OutCns:         return Type::Cell;
     case OutVUnknown:    return Type::BoxedCell;
 
@@ -5187,14 +5179,14 @@ std::string HhbcTranslator::showStack() const {
 /*
  * Get SSATmps representing all the information on the virtual eval
  * stack in preparation for a spill or exit trace. Top of stack will
- * be at index 0.
+ * be in the last element.
  *
  * Doesn't actually remove these values from the eval stack.
  */
 std::vector<SSATmp*> HhbcTranslator::peekSpillValues() const {
   std::vector<SSATmp*> ret;
   ret.reserve(m_irb->evalStack().size());
-  for (int i = 0; i < m_irb->evalStack().size(); ++i) {
+  for (int i = m_irb->evalStack().size(); i--; ) {
     // DataTypeGeneric is used here because SpillStack just teleports the
     // values to memory.
     SSATmp* elem = top(DataTypeGeneric, i);
@@ -5266,35 +5258,26 @@ Block* HhbcTranslator::makeExitOpt(TransID transId) {
 Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
                                     std::vector<SSATmp*>& stackValues,
                                     const CustomExit& customFn) {
-  BCMarker exitMarker;
-  exitMarker.bcOff = targetBcOff;
-  exitMarker.spOff = m_irb->spOffset()
-    + stackValues.size()
-    - m_irb->stackDeficit();
-  exitMarker.func  = curFunc();
+  Offset curBcOff = bcOff();
+  BCMarker currentMarker = makeMarker(curBcOff);
+  m_irb->evalStack().swap(stackValues);
+  SCOPE_EXIT {
+    m_bcStateStack.back().bcOff = curBcOff;
+    m_irb->evalStack().swap(stackValues);
+  };
 
-  BCMarker currentMarker = makeMarker(bcOff());
+  BCMarker exitMarker = makeMarker(targetBcOff);
 
   auto const exit = m_irb->makeExit();
   BlockPusher tp(*m_irb,
                  flag == ExitFlag::DelayedMarker ? currentMarker : exitMarker,
                  exit);
 
-  // The value we use for stack is going to depend on whether we have
-  // to spillstack or what.
-  auto stack = m_irb->sp();
-
-  // TODO(#2404447) move this conditional to the simplifier?
-  if (!stackValues.empty()) {
-    stackValues.insert(
-      stackValues.begin(),
-      { m_irb->sp(), cns(int64_t(m_irb->stackDeficit())) }
-    );
-    stack = gen(SpillStack,
-      std::make_pair(stackValues.size(), &stackValues[0]));
-  } else if (m_irb->stackDeficit() != 0 || m_irb->evalStack().size() > 0) {
-    stack = spillStack();
+  if (flag != ExitFlag::DelayedMarker) {
+    m_bcStateStack.back().bcOff = targetBcOff;
   }
+
+  auto stack = spillStack();
 
   if (customFn) {
     stack = gen(ExceptionBarrier, stack);
@@ -5310,6 +5293,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
 
   if (flag == ExitFlag::DelayedMarker) {
     m_irb->setMarker(exitMarker);
+    m_bcStateStack.back().bcOff = targetBcOff;
   }
 
   gen(SyncABIRegs, m_irb->fp(), stack);
@@ -5337,7 +5321,9 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
     return exit;
   }
 
-  if (!isInlining() && bcOff() == m_startBcOff && targetBcOff == m_startBcOff) {
+  if (!isInlining() &&
+      curBcOff == m_startBcOff &&
+      targetBcOff == m_startBcOff) {
     // Note that if we're inlining, then targetBcOff is in the inlined func,
     // while m_startBcOff is in the outer func, so bindJmp will always work
     // (and there's no guarantee that there is an anchor translation, so we
@@ -5375,10 +5361,12 @@ Block* HhbcTranslator::makeCatchImpl(Body body) {
  * the eval stack will be appended to spillVals to form the sources for the
  * SpillStack.
  */
-Block* HhbcTranslator::makeCatch(std::vector<SSATmp*> spillVals) {
+Block* HhbcTranslator::makeCatch(std::vector<SSATmp*> spillVals,
+                                 int64_t numPop) {
   return makeCatchImpl([&] {
-    for (auto* val : peekSpillValues()) spillVals.push_back(val);
-    return emitSpillStack(m_irb->sp(), spillVals);
+    auto spills = peekSpillValues();
+    spills.insert(spills.begin(), spillVals.begin(), spillVals.end());
+    return emitSpillStack(m_irb->sp(), spills, numPop);
   });
 }
 
@@ -5394,14 +5382,17 @@ Block* HhbcTranslator::makeCatchNoSpill() {
 /*
  * Create a block corresponding to bytecode control flow.
  */
-Block* HhbcTranslator::makeBlock(Offset targetBcOff) {
-  return m_irb->makeBlock(targetBcOff);
+Block* HhbcTranslator::makeBlock(Offset offset) {
+  return m_irb->makeBlock(offset);
 }
 
 SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,
-                                       const std::vector<SSATmp*>& spillVals) {
-  std::vector<SSATmp*> ssaArgs{ sp, cns(int64_t(m_irb->stackDeficit())) };
-  ssaArgs.insert(ssaArgs.end(), spillVals.begin(), spillVals.end());
+                                       const std::vector<SSATmp*>& spillVals,
+                                       int64_t extraOffset) {
+  std::vector<SSATmp*> ssaArgs{
+    sp, cns(int64_t(m_irb->stackDeficit() + extraOffset))
+  };
+  ssaArgs.insert(ssaArgs.end(), spillVals.rbegin(), spillVals.rend());
 
   auto args = std::make_pair(ssaArgs.size(), &ssaArgs[0]);
   return gen(SpillStack, args);
@@ -5586,7 +5577,7 @@ void HhbcTranslator::endBlock(Offset next) {
   if (m_irb->blockExists(next)) {
     emitJmp(next,
             false /* breakTracelet */,
-            true  /* noSurprise */ );
+            nullptr);
   }
 }
 

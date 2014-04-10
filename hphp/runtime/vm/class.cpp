@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/enum-cache.h"
@@ -224,7 +224,8 @@ static_assert(sizeof(Class) == 376, "Change this only on purpose");
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
-  auto const size = offsetof(Class, m_classVec) + sizeof(Class*) * classVecLen;
+  auto const size = offsetof(Class, m_classVec) +
+                    sizeof(m_classVec[0]) * classVecLen;
   auto const mem = low_malloc(size);
   try {
     return new (mem) Class(preClass, parent, classVecLen);
@@ -758,7 +759,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName) const {
   auto& clsCnsData = *m_nonScalarConstantCache;
 
   if (clsCnsData.get() == nullptr) {
-    clsCnsData = Array::attach(HphpArray::MakeReserve(m_constants.size()));
+    clsCnsData = Array::attach(MixedArray::MakeReserve(m_constants.size()));
   } else {
     clsCns = clsCnsData->nvGet(clsCnsName);
     if (clsCns) return *clsCns;
@@ -1951,7 +1952,7 @@ void Class::setInitializers() {
 
   m_needInitialization = (m_pinitVec.size() > 0 ||
     m_staticProperties.size() > 0);
-  m_hasInitMethods = (m_pinitVec.size() > 0 || m_sinitVec.size() > 0);
+  m_hasSInitMethods = m_sinitVec.size() > 0;
 
   // The __init__ method defined in the Exception class gets special treatment
   static StringData* sd__init__ = makeStaticString("__init__");
@@ -2025,7 +2026,7 @@ void Class::addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const {
     int numIfcs = trait->m_interfaces.size();
 
     for (int i = 0; i < numIfcs; i++) {
-      Class* interface = trait->m_interfaces[i];
+      auto interface = trait->m_interfaces[i];
       if (builder.find(interface->name()) == builder.end()) {
         builder.add(interface->name(), interface);
       }
@@ -2040,7 +2041,7 @@ void Class::setInterfaces() {
   if (m_parent.get() != nullptr) {
     int size = m_parent->m_interfaces.size();
     for (int i = 0; i < size; i++) {
-      Class* interface = m_parent->m_interfaces[i];
+      auto interface = m_parent->m_interfaces[i];
       interfacesBuilder.add(interface->name(), interface);
     }
   }
@@ -2060,11 +2061,11 @@ void Class::setInterfaces() {
     }
     declInterfaces.push_back(ClassPtr(cp));
     if (interfacesBuilder.find(cp->name()) == interfacesBuilder.end()) {
-      interfacesBuilder.add(cp->name(), cp);
+      interfacesBuilder.add(cp->name(), LowClassPtr(cp));
     }
     int size = cp->m_interfaces.size();
     for (int i = 0; i < size; i++) {
-      Class* interface = cp->m_interfaces[i];
+      auto interface = cp->m_interfaces[i];
       interfacesBuilder.find(interface->name());
       if (interfacesBuilder.find(interface->name()) ==
           interfacesBuilder.end()) {
@@ -2088,7 +2089,7 @@ void Class::setInterfaces() {
       Class* stringish = Unit::lookupClass(s_Stringish.get());
       assert(stringish != nullptr);
       assert((stringish->attrs() & AttrInterface));
-      interfacesBuilder.add(stringish->name(), stringish);
+      interfacesBuilder.add(stringish->name(), LowClassPtr(stringish));
     }
   }
 
@@ -2227,7 +2228,7 @@ void Class::setClassVec() {
   if (m_classVecLen > 1) {
     assert(m_parent.get() != nullptr);
     memcpy(m_classVec, m_parent->m_classVec,
-           (m_classVecLen-1) * sizeof(Class*));
+           (m_classVecLen-1) * sizeof(m_classVec[0]));
   }
   m_classVec[m_classVecLen-1] = this;
 }

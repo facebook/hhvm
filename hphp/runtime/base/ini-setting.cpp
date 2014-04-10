@@ -81,10 +81,6 @@ static std::string dynamic_to_std_string(const folly::dynamic& v) {
   not_reached();
 }
 
-/**
- * I was going to make this a constructor for Variant, but both folly::dynamic
- * and Variant have so many overrides that everything becomes ambiguous.
- **/
 static Variant dynamic_to_variant(const folly::dynamic& v) {
   switch (v.type()) {
     case folly::dynamic::Type::NULLT:
@@ -99,7 +95,7 @@ static Variant dynamic_to_variant(const folly::dynamic& v) {
       return v.data();
     case folly::dynamic::Type::ARRAY:
     case folly::dynamic::Type::OBJECT:
-      ArrayInit ret(v.size());
+      ArrayInit ret(v.size(), ArrayInit::Mixed{});
       for (auto& item : v.items()) {
         ret.add(dynamic_to_variant(item.first),
                 dynamic_to_variant(item.second));
@@ -362,7 +358,7 @@ void IniSetting::ParserCallback::makeArray(Variant &hash,
     }
     val.toArrRef().setRef(index, newval);
     if (!last) {
-      val = strongBind(newval);
+      val.assignRef(newval);
       p += index.size() + 1;
     }
   } while (!last);
@@ -486,17 +482,19 @@ void IniSetting::SystemParserCallback::makeArray(Map &hash,
                                                  const std::string &offset,
                                                  const std::string &value) {
   assert(!offset.empty());
-  Map& val = hash;
+  Map* val = &hash;
   auto start = offset.c_str();
   auto p = start;
   bool last = false;
   do {
     std::string index(p);
     last = p + index.size() >= start + offset.size();
-    Map newval = last ? Map(value) : val.getDefault(index, Map::object());
-    val[index] = newval;
+
+    Map newval = last ? Map(value) : val->getDefault(index, Map::object());
+    val = &(*val)[index];
+    *val = newval;
+
     if (!last) {
-      val = newval;
       p += index.size() + 1;
     }
   } while (!last);

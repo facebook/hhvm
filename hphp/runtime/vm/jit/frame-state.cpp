@@ -601,13 +601,14 @@ void FrameState::clearCse() {
 }
 
 SSATmp* FrameState::cseLookup(IRInstruction* inst,
-                                const folly::Optional<IdomVector>& idoms) {
+                              Block* srcBlock,
+                              const folly::Optional<IdomVector>& idoms) {
   auto tmp = cseHashTable(inst)->lookup(inst);
   if (tmp && idoms) {
     // During a reoptimize pass, we need to make sure that any values
     // we want to reuse for CSE are only reused in blocks dominated by
     // the block that defines it.
-    if (!dominates(tmp->inst()->block(), inst->block(), *idoms)) {
+    if (!dominates(tmp->inst()->block(), srcBlock, *idoms)) {
       return nullptr;
     }
   }

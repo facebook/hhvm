@@ -6,19 +6,40 @@ to our data structures and it mostly works.
 
 ## Migration Steps
 
+First, copy in the files:
+
 ```sh
 cp -R <zend_extension_dir> runtime/ext_zend_compat/<ext_name>
 
 # move all the .c to .cpp
 for i in runtime/ext_zend_compat/<ext_name>/*.c; do mv $i "$i"pp; done
+```
+Then create a system library at runtime/ext_zend_compat/ext_<ext_name>.php
+This system library contains definitions for any functions and classes that have
+C implementations in your extension. Type hinting is required, using the Hack
+syntax documented at http://docs.hhvm.com/manual/en/hack.annotations.php .
+You can follow the examples from non-Zend extensions in HHVM -- however, note
+that using types other than "mixed" is not as useful as it is in native HHVM
+extensions. All parameters will be converted to variants before they are passed
+to your extension, regardless of what type you specify.
 
-# If your extension has docs on php.net you can make the idl like this:
-cd system/idl
-php newexp.php <ext_name>
-# Otherwise you have to make the .idl by hand
+All functions should have the __Native("ZendCompat") attribute. This causes
+C implementation to be called with appropriate arguments. For example, to
+create a function called "foo" that takes one parameter:
+
+```<<__Native("ZendCompat")>> foo(mixed $a) : mixed;```
+
+Internal classes should have the attribute `<<__NativeData("ZendCompat")>>`, for
+example:
+
+```
+<<__NativeData("ZendCompat")>> class Foo {
+  <<__Native("ZendCompat")>> function bar(mixed $a) : mixed;
+}
 ```
 
-<setup the build environment>
+This causes the create_object function to be called and thus allows 
+zend_object_store_get_object() to return a valid pointer.
 
 ## Things you have to fix in your code
 
@@ -26,6 +47,17 @@ php newexp.php <ext_name>
 * Use `Z_RESVAL` instead of `Z_LVAL` for resource access
 * Don't use `PHP_MALIAS`. Define the other function.
 * Change any `ZVAL_STRING(foo, "literal string", 0)` to `ZVAL_STRING(foo, "literal string", 2)`
+
+## Bugs and caveats
+
+* Many functions are missing (causing link errors) or have empty
+  implementations.
+* Object destructors are currently not called.
+* The object handlers (read_property, clone_obj, etc.) are not called either.
+* Most core globals, e.g. SG(...) are missing and will give a link error if
+  referenced.
+* The EG(...) globals are defined, but most of them aren't read or set, so will
+  just contain null pointers.
 
 ## File structure
 

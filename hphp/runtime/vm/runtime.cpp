@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"

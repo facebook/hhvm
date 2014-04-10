@@ -32,7 +32,7 @@
 #include "hphp/runtime/ext/ext_network.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/ext_output.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/ext_string.h"
@@ -1989,7 +1989,7 @@ void c_SoapServer::t___construct(const Variant& wsdl,
 void c_SoapServer::t_setclass(int _argc, const String& name,
                               const Array& _argv /* = null_array */) {
   SoapServerScope ss(this);
-  if (f_class_exists(name, true)) {
+  if (HHVM_FN(class_exists)(name, true)) {
     m_type = SOAP_CLASS;
     m_soap_class.name = name;
     m_soap_class.argv = _argv;

@@ -383,7 +383,7 @@ O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
 O(JmpIndirect,                      ND, S(TCA),                          T|E) \
 O(CheckSurpriseFlags,               ND, NA,                              B|E) \
 O(SurpriseHook,                     ND, NA,                           Er|N|E) \
-O(FunctionExitSurpriseHook,         ND, S(FramePtr) S(StkPtr) S(Gen), Er|N|E) \
+O(FunctionExitSurpriseHook,         ND, S(FramePtr) S(Gen),           Er|N|E) \
 O(ExitOnVarEnv,                     ND, S(FramePtr),                     B|E) \
 O(ReleaseVVOrExit,                  ND, S(FramePtr),                   B|N|E) \
 O(RaiseError,                       ND, S(Str),                     E|N|T|Er) \
@@ -450,7 +450,7 @@ O(LookupClsMethodFCache,                                                      \
                        D(Func|Nullptr), C(Cls)                                \
                                           S(FramePtr),                N|E|Er) \
 O(GetCtxFwdCallDyn,             D(Ctx), S(Ctx),                          PRc) \
-O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                C|PRc) \
+O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                  PRc) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
 O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),     B|C|E|N|Er) \
@@ -550,7 +550,7 @@ O(IncRefCtx,                        ND, S(Ctx),                            E) \
 O(DecRefLoc,                        ND, S(FramePtr),                     N|E) \
 O(DecRefStack,                      ND, S(StkPtr),                       N|E) \
 O(DecRefThis,                       ND, S(FramePtr),                     N|E) \
-O(GenericRetDecRefs,         D(StkPtr), S(FramePtr),                     E|N) \
+O(GenericRetDecRefs,                ND, S(FramePtr),                     E|N) \
 O(DecRef,                           ND, S(Gen),                    N|E|K|CRc) \
 O(DecRefNZ,                         ND, S(Gen),                      N|E|CRc) \
 O(DecRefMem,                        ND, S(PtrToGen)                           \
@@ -608,8 +608,8 @@ O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
 O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                     T|E|N|Er) \
 O(Shuffle,                          ND, SUnk,                             NF) \
-O(CreateContFunc,               D(Obj), C(Int),                      E|N|PRc) \
-O(CreateContMeth,               D(Obj), S(Ctx) C(Int),               E|N|PRc) \
+O(CreateContFunc,               D(Obj), S(FramePtr) C(Int),          E|N|PRc) \
+O(CreateContMeth,               D(Obj), S(FramePtr) C(Int),          E|N|PRc) \
 O(ContEnter,                        ND, S(FramePtr)                           \
                                           S(TCA) C(Int) S(FramePtr),       E) \
 O(ContPreNext,                      ND, S(Obj),                          B|E) \
@@ -628,8 +628,12 @@ O(StContArKey,                      ND, S(FramePtr) S(Gen),            E|CRc) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
-O(CreateAFWHFunc,               D(Obj), C(Int) S(Obj),        E|Er|N|CRc|PRc) \
-O(CreateAFWHMeth,               D(Obj), S(Ctx) C(Int) S(Obj), E|Er|N|CRc|PRc) \
+O(CreateAFWHFunc,               D(Obj), S(FramePtr)                           \
+                                          C(Int)                              \
+                                          S(Obj),             E|Er|N|CRc|PRc) \
+O(CreateAFWHMeth,               D(Obj), S(FramePtr)                           \
+                                          C(Int)                              \
+                                          S(Obj),             E|Er|N|CRc|PRc) \
 O(CreateSRWH,                   D(Obj), S(Cell),                   N|CRc|PRc) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr),            Er|E|N|CRc) \

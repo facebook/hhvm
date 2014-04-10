@@ -48,6 +48,7 @@ These are the allowed extensions:
 * .php.diff or hhas.diff - The diff for .expect tests.
 * .hhas - HipHop Assembly.
 * .php.norepo - don't run the test in repo mode
+* .php.noserver - don't run the test in server mode
 
 You must have one `.php`; one and only one of `.php.expect`, `.php.expectf`, and
 `.php.expectregex`; and the rest are optional.

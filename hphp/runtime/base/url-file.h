@@ -39,6 +39,7 @@ public:
 
   virtual bool open(const String& filename, const String& mode);
   virtual int64_t writeImpl(const char *buffer, int64_t length);
+  virtual bool seekable() { return false; }
   virtual bool flush();
   virtual Array getWrapperMetaData() { return m_responseHeaders; }
   String getLastError();

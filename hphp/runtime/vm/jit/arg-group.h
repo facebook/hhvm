@@ -131,11 +131,16 @@ struct ArgGroup {
   {}
 
   size_t numRegArgs() const { return m_regArgs.size(); }
+  size_t numSIMDRegArgs() const { return m_regSIMDArgs.size(); }
   size_t numStackArgs() const { return m_stkArgs.size(); }
 
   ArgDesc& reg(size_t i) {
     assert(i < m_regArgs.size());
     return m_regArgs[i];
+  }
+  ArgDesc& regSIMD(size_t i) {
+    assert(i < m_regSIMDArgs.size());
+    return m_regSIMDArgs[i];
   }
   ArgDesc& operator[](size_t i) {
     return reg(i);
@@ -166,8 +171,13 @@ struct ArgGroup {
     return *this;
   }
 
-  ArgGroup& ssa(int i) {
-    push_arg(ArgDesc(m_inst->src(i), m_regs.src(i)));
+  ArgGroup& ssa(int i, bool isFP = false) {
+    ArgDesc arg(m_inst->src(i), m_regs.src(i));
+    if (isFP) {
+      push_SIMDarg(arg);
+    } else {
+      push_arg(arg);
+    }
     return *this;
   }
 
@@ -205,6 +215,16 @@ private:
     args->push_back(arg);
   }
 
+  void push_SIMDarg(const ArgDesc& arg) {
+    // See push_arg above
+    ArgVec* args = m_override;
+    if (!args) {
+      args = m_regSIMDArgs.size() < X64::kNumSIMDRegisterArgs
+           ? &m_regSIMDArgs : &m_stkArgs;
+    }
+    args->push_back(arg);
+  }
+
   /*
    * For passing the m_type field of a TypedValue.
    */
@@ -230,8 +250,9 @@ private:
   const IRInstruction* m_inst;
   const RegAllocInfo::RegMap& m_regs;
   ArgVec* m_override; // used to force args to go into a specific ArgVec
-  ArgVec m_regArgs;
-  ArgVec m_stkArgs;
+  ArgVec m_regArgs; // INTEGER class args
+  ArgVec m_regSIMDArgs; // SSE class args
+  ArgVec m_stkArgs; // Overflow
 };
 
 }}

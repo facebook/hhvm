@@ -127,6 +127,7 @@ class c_PDO : public ExtObjectData {
                             const Array& options = null_array);
   public: bool t_begintransaction();
   public: bool t_commit();
+  public: bool t_intransaction();
   public: bool t_rollback();
   public: bool t_setattribute(int64_t attribute, const Variant& value);
   public: Variant t_getattribute(int64_t attribute);

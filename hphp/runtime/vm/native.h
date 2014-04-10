@@ -148,9 +148,22 @@ inline int maxFCallBuiltinArgs() {
 #endif
 }
 
+// t#3982283 - Our ARM code gen doesn't support FP args/returns yet.
+inline bool allowFCallBuiltinDoubles() {
+#ifdef __AARCH64EL__
+  return false;
+#else
+  if (UNLIKELY(RuntimeOption::EvalSimulateARM)) {
+    return false;
+  }
+  return true;
+#endif
+}
+
 enum Attr {
   AttrNone = 0,
   AttrActRec = 1 << 0,
+  AttrZendCompat = 1 << 1,
 };
 
 /**

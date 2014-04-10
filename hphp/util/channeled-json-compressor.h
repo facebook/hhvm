@@ -46,6 +46,10 @@ public:
   // Returns a buffer containing the compressed channels and their length
   void finalize(folly::IOBufQueue& outBufQueue);
 
+  enum {
+    MIN_LENGTH_TO_CHANNEL_JSON = 32768
+  };
+
 private:
 
   // write an object to the underlying compressors
@@ -68,6 +72,10 @@ private:
 
   // write a double
   void writeDouble(const folly::dynamic& doubleObj);
+
+  // write a map pair (aux method)
+  void writeMapPair(const std::pair<const folly::dynamic,
+          folly::dynamic>& pair);
 
 private:
   // output channels (implemented as strings).

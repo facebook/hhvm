@@ -72,6 +72,7 @@ public:
     return m_arr->getKey(pos);
   }
 
+  static size_t Vsize(const ArrayData*);
   const Variant& getValueRef(ssize_t pos) const;
   static const Variant& GetValueRef(const ArrayData* ad, ssize_t pos) {
     return asSharedArray(ad)->getValueRef(pos);
@@ -87,19 +88,24 @@ public:
   static ArrayData* LvalNew(ArrayData*, Variant *&ret, bool copy);
 
   static ArrayData* SetInt(ArrayData*, int64_t k, const Variant& v, bool copy);
-  static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v, bool copy);
-  static ArrayData* SetRefInt(ArrayData*, int64_t k, const Variant& v, bool copy);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k, const Variant& v, bool copy);
+  static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v,
+                           bool copy);
+  static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
+                              bool copy);
+  static constexpr auto AddInt = &SetInt;
+  static constexpr auto AddStr = &SetStr;
 
   static ArrayData *RemoveInt(ArrayData* ad, int64_t k, bool copy);
   static ArrayData *RemoveStr(ArrayData* ad, const StringData* k, bool copy);
 
   static ArrayData* Copy(const ArrayData*);
+  static ArrayData* CopyWithStrongIterators(const ArrayData*);
   /**
    * Copy (escalate) the SharedArray without triggering local cache.
    */
   static ArrayData* Append(ArrayData* a, const Variant& v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData *elems);
   static ArrayData* Merge(ArrayData*, const ArrayData *elems);
@@ -127,11 +133,21 @@ public:
 
   static bool ValidMArrayIter(const ArrayData*, const MArrayIter& fp);
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
-
+  static ArrayData* NonSmartCopy(const ArrayData*);
+  static constexpr auto Pop = &ArrayCommon::Pop;
+  static constexpr auto Dequeue = &ArrayCommon::Dequeue;
+  static void Renumber(ArrayData*);
+  static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
 
   static ArrayData* Escalate(const ArrayData*);
   static ArrayData* EscalateForSort(ArrayData*);
+  static void Ksort(ArrayData*, int, bool);
+  static void Sort(ArrayData*, int, bool);
+  static void Asort(ArrayData*, int, bool);
+  static bool Uksort(ArrayData*, const Variant&);
+  static bool Usort(ArrayData*, const Variant&);
+  static bool Uasort(ArrayData*, const Variant&);
 
   // implements Sweepable.sweep()
   void sweep() FOLLY_OVERRIDE { m_arr->getHandle()->unreference(); }

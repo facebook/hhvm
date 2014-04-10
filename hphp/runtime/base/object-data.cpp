@@ -73,7 +73,8 @@ static Array ArrayObject_toArray(const ObjectData* obj) {
   return tvAsCVarRef(prop).toArray();
 }
 
-static_assert(sizeof(ObjectData) == 32, "Change this only on purpose");
+static_assert(sizeof(ObjectData) == use_lowptr ? 16 : 32,
+              "Change this only on purpose");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -207,7 +208,7 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
 
   assert(!g_context->dynPropTable.count(this));
   auto& arr = g_context->dynPropTable[this].arr();
-  arr = Array::attach(HphpArray::MakeReserve(numDynamic));
+  arr = Array::attach(MixedArray::MakeReserveMixed(numDynamic));
   setAttribute(HasDynPropArr);
   return arr;
 }
@@ -313,27 +314,9 @@ Variant ObjectData::o_set(const String& propName, const Variant& v) {
   return o_setImpl<const Variant&>(propName, v, null_string);
 }
 
-Variant ObjectData::o_set(const String& propName, RefResult v) {
-  return o_setRef(propName, variant(v), null_string);
-}
-
-Variant ObjectData::o_setRef(const String& propName, const Variant& v) {
-  return o_setImpl<RefResult>(propName, ref(v), null_string);
-}
-
 Variant ObjectData::o_set(const String& propName, const Variant& v,
                           const String& context) {
   return o_setImpl<const Variant&>(propName, v, context);
-}
-
-Variant ObjectData::o_set(const String& propName, RefResult v,
-                          const String& context) {
-  return o_setRef(propName, variant(v), context);
-}
-
-Variant ObjectData::o_setRef(const String& propName, const Variant& v,
-                             const String& context) {
-  return o_setImpl<RefResult>(propName, ref(v), context);
 }
 
 void ObjectData::o_setArray(const Array& properties) {
@@ -360,7 +343,13 @@ void ObjectData::o_setArray(const Array& properties) {
     }
 
     const Variant& secondRef = iter.secondRef();
-    setProp(ctx, k.get(), (TypedValue*)(&secondRef),
+    setProp(ctx,
+            k.get(),
+            // Set prop is happening with WithRef semantics---we only
+            // use a binding assignment if it was already KindOfRef,
+            // so despite the const_cast here we're safely not
+            // modifying the original Variant.
+            const_cast<TypedValue*>(secondRef.asTypedValue()),
             secondRef.isReferenced());
   }
 }
@@ -441,7 +430,7 @@ Array ObjectData::o_toIterArray(const String& context,
     dynProps = &dynPropArray();
     size += dynProps->size();
   }
-  Array retArray { Array::attach(HphpArray::MakeReserve(size)) };
+  Array retArray { Array::attach(MixedArray::MakeReserveMixed(size)) };
 
   Class* ctx = nullptr;
   if (!context.empty()) {
@@ -464,7 +453,7 @@ Array ObjectData::o_toIterArray(const String& context,
           if (val->m_type != KindOfRef) {
             tvBox(val);
           }
-          retArray.setRef(StrNR(key), tvAsCVarRef(val), true /* isKey */);
+          retArray.setRef(StrNR(key), tvAsVariant(val), true /* isKey */);
         } else {
           retArray.set(StrNR(key), tvAsCVarRef(val), true /* isKey */);
         }
@@ -491,7 +480,7 @@ Array ObjectData::o_toIterArray(const String& context,
           if (val->m_type != KindOfRef) {
             tvBox(val);
           }
-          retArray.setRef(key.m_data.num, tvAsCVarRef(val));
+          retArray.setRef(key.m_data.num, tvAsVariant(val));
         } else {
           retArray.set(key.m_data.num, tvAsCVarRef(val));
         }
@@ -504,7 +493,7 @@ Array ObjectData::o_toIterArray(const String& context,
         if (val->m_type != KindOfRef) {
           tvBox(val);
         }
-        retArray.setRef(StrNR(strKey), tvAsCVarRef(val), true /* isKey */);
+        retArray.setRef(StrNR(strKey), tvAsVariant(val), true /* isKey */);
       } else {
         retArray.set(StrNR(strKey), tvAsCVarRef(val), true /* isKey */);
       }
@@ -1403,13 +1392,13 @@ void ObjectData::setProp(Class* ctx,
       throw_invalid_property_name(StrNR(key));
     }
     // when seting a dynamic property, do not write
-    // directly to the TypedValue in the HphpArray, since
+    // directly to the TypedValue in the MixedArray, since
     // its m_aux field is used to store the string hash of
     // the property name. Instead, call the appropriate
     // setters (set() or setRef()).
     if (UNLIKELY(bindingAssignment)) {
       reserveProperties().setRef(
-        StrNR(key), tvAsCVarRef(val), true /* isKey */);
+        StrNR(key), tvAsVariant(val), true /* isKey */);
     } else {
       reserveProperties().set(
         StrNR(key), tvAsCVarRef(val), true /* isKey */);
@@ -1766,7 +1755,7 @@ void ObjectData::cloneSet(ObjectData* clone) {
 
     ssize_t iter = dynProps.get()->iter_begin();
     while (iter != ArrayData::invalid_index) {
-      auto props = static_cast<HphpArray*>(dynProps.get());
+      auto props = static_cast<MixedArray*>(dynProps.get());
       TypedValue key;
       props->nvGetKey(&key, iter);
 

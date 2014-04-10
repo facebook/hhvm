@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,8 +16,12 @@
 */
 
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-extension.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-object.h"
 #include "folly/AtomicHashMap.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_modules.h"
+#include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_API.h"
+#include "hphp/runtime/vm/native.h"
+#include "hphp/util/text-util.h"
 
 #include <atomic>
 
@@ -46,4 +50,36 @@ ZendExtension* ZendExtension::GetByModuleNumber(int module_number) {
     return iter->second;
   }
   return nullptr;
+}
+
+void ZendExtension::moduleInit() {
+  if (!HPHP::RuntimeOption::EnableZendCompat) {
+    return;
+  }
+  HPHP::ZendObject::registerNativeData();
+  // Allocate globals
+  zend_module_entry* entry = getEntry();
+  if (entry->globals_size) {
+    ts_allocate_id(entry->globals_id_ptr, entry->globals_size,
+        (ts_allocate_ctor) entry->globals_ctor,
+        (ts_allocate_dtor) entry->globals_dtor);
+  }
+  // Register global functions
+  const zend_function_entry * fe = entry->functions;
+  while (fe->fname) {
+    assert(fe->handler);
+    HPHP::Native::registerBuiltinFunction(HPHP::makeStaticString(fe->fname),
+                                          fe->handler);
+    fe++;
+  }
+  // Call MINIT
+  if (entry->module_startup_func) {
+    TSRMLS_FETCH();
+    entry->module_startup_func(1, entry->module_number TSRMLS_CC);
+  }
+  // The systemlib name must match the name used by the build process. For
+  // in-tree builds this is the directory name, which is typically the same
+  // as the extension name converted to lower case.
+  std::string slName = HPHP::toLower(std::string(getName()));
+  loadSystemlib(slName);
 }

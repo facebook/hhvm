@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -26,7 +26,7 @@
 #include "folly/ScopeGuard.h"
 
 #include "hphp/runtime/ext/ext_misc.h"
-#include "hphp/runtime/ext/ext_error.h"
+#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -122,9 +122,9 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
   String prefixedCode = concat3("<?php return ", codeStr, ";");
 
   auto const oldErrorLevel =
-    s_option_data->assertQuietEval ? f_error_reporting(Variant(0)) : 0;
+    s_option_data->assertQuietEval ? HHVM_FN(error_reporting)(Variant(0)) : 0;
   SCOPE_EXIT {
-    if (s_option_data->assertQuietEval) f_error_reporting(oldErrorLevel);
+    if (s_option_data->assertQuietEval) HHVM_FN(error_reporting)(oldErrorLevel);
   };
 
   auto const unit = g_context->compileEvalString(prefixedCode.get());
@@ -716,7 +716,7 @@ static Array HHVM_FUNCTION(getrusage, int64_t who /* = 0 */) {
     throw SystemCallFailure("getrusage");
   }
 
-  return Array(ArrayInit(17).
+  return Array(ArrayInit(17, ArrayInit::Mixed{}).
                set(PHP_RUSAGE_PARA(ru_oublock)).
                set(PHP_RUSAGE_PARA(ru_inblock)).
                set(PHP_RUSAGE_PARA(ru_msgsnd)).
@@ -811,6 +811,14 @@ static int64_t HHVM_FUNCTION(memory_get_allocation) {
   return ret;
 }
 
+static int64_t HHVM_FUNCTION(hphp_memory_get_interval_peak_usage,
+                             bool real_usage /*=false */) {
+  auto const& stats = MM().getStats();
+  int64_t ret = real_usage ? stats.peakIntervalUsage : stats.peakIntervalAlloc;
+  assert(ret >= 0);
+  return ret;
+}
+
 static int64_t HHVM_FUNCTION(memory_get_peak_usage,
                              bool real_usage /*=false */) {
   auto const& stats = MM().getStats();
@@ -827,6 +835,14 @@ static int64_t HHVM_FUNCTION(memory_get_usage, bool real_usage /*=false */) {
   // jemalloc stats.
   assert((use_jemalloc && real_usage) || ret >= 0);
   return std::max<int64_t>(ret, 0);
+}
+
+static bool HHVM_FUNCTION(hphp_memory_start_interval) {
+  return MM().startStatsInterval();
+}
+
+static bool HHVM_FUNCTION(hphp_memory_stop_interval) {
+  return MM().stopStatsInterval();
 }
 
 static Variant HHVM_FUNCTION(php_ini_loaded_file) {
@@ -1182,9 +1198,13 @@ void StandardExtension::initOptions() {
   HHVM_FE(ini_get_all);
   HHVM_FE(ini_restore);
   HHVM_FE(ini_set);
-  HHVM_FE(memory_get_allocation);
   HHVM_FE(memory_get_peak_usage);
   HHVM_FE(memory_get_usage);
+  // This is HH-specific as well but code depends on the old name.
+  HHVM_FE(memory_get_allocation);
+  HHVM_FE(hphp_memory_get_interval_peak_usage);
+  HHVM_FE(hphp_memory_start_interval);
+  HHVM_FE(hphp_memory_stop_interval);
   HHVM_FE(php_ini_loaded_file);
   HHVM_FE(php_sapi_name);
   HHVM_FE(php_uname);

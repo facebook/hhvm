@@ -154,12 +154,12 @@ static Variant php_posix_group_to_array(int gid,
     members.append(String(gr.gr_mem[count], CopyString));
   }
 
-  ArrayInit ret(4);
-  ret.set(s_name, String(gr.gr_name, CopyString));
-  ret.set(s_passwd, String(gr.gr_passwd, CopyString));
-  ret.set(s_members, members);
-  ret.set(s_gid, (int)gr.gr_gid);
-  return ret.create();
+  return make_map_array(
+    s_name, String(gr.gr_name, CopyString),
+    s_passwd, String(gr.gr_passwd, CopyString),
+    s_members, members,
+    s_gid, (int)gr.gr_gid
+  );
 }
 
 Variant f_posix_getgrgid(int gid) {
@@ -246,15 +246,15 @@ static Variant php_posix_passwd_to_array(int uid,
 
   if (!retpwptr) return false;
 
-  ArrayInit ret(7);
-  ret.set(s_name,   String(pw.pw_name,   CopyString));
-  ret.set(s_passwd, String(pw.pw_passwd, CopyString));
-  ret.set(s_uid,    (int)pw.pw_uid);
-  ret.set(s_gid,    (int)pw.pw_gid);
-  ret.set(s_gecos,  String(pw.pw_gecos,  CopyString));
-  ret.set(s_dir,    String(pw.pw_dir,    CopyString));
-  ret.set(s_shell,  String(pw.pw_shell,  CopyString));
-  return ret.create();
+  return make_map_array(
+    s_name,   String(pw.pw_name,   CopyString),
+    s_passwd, String(pw.pw_passwd, CopyString),
+    s_uid,    (int)pw.pw_uid,
+    s_gid,    (int)pw.pw_gid,
+    s_gecos,  String(pw.pw_gecos,  CopyString),
+    s_dir,    String(pw.pw_dir,    CopyString),
+    s_shell,  String(pw.pw_shell,  CopyString)
+  );
 }
 
 Variant f_posix_getpwnam(const String& username) {
@@ -424,13 +424,13 @@ Variant f_posix_times() {
     return false;
   }
 
-  ArrayInit ret(5);
-  ret.set(s_ticks,  (int)ticks);        /* clock ticks */
-  ret.set(s_utime,  (int)t.tms_utime);  /* user time */
-  ret.set(s_stime,  (int)t.tms_stime);  /* system time */
-  ret.set(s_cutime, (int)t.tms_cutime); /* user time of children */
-  ret.set(s_cstime, (int)t.tms_cstime); /* system time of children */
-  return ret.create();
+  return make_map_array(
+    s_ticks,  (int)ticks,        /* clock ticks */
+    s_utime,  (int)t.tms_utime,  /* user time */
+    s_stime,  (int)t.tms_stime,  /* system time */
+    s_cutime, (int)t.tms_cutime, /* user time of children */
+    s_cstime, (int)t.tms_cstime  /* system time of children */
+  );
 }
 
 Variant f_posix_ttyname(const Variant& fd) {

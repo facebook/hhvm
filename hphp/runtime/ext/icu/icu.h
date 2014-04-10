@@ -108,6 +108,7 @@ class IntlExtension : public Extension {
 
   void moduleInit() override {
     bindConstants();
+    initICU(); // HHVM-specific ICU functions
     initLocale();
     initNumberFormatter();
     initTimeZone();
@@ -134,6 +135,7 @@ class IntlExtension : public Extension {
  private:
   void bindIniSettings();
   void bindConstants();
+  void initICU();
   void initLocale();
   void initNumberFormatter();
   void initTimeZone();

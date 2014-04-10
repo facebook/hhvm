@@ -587,21 +587,6 @@ struct InterpOneData : IRExtraData {
 };
 
 /*
- * Information for creating continuation objects.
- * Create{Cont,AFWH}{Func,Meth}.
- */
-struct CreateContData : IRExtraData {
-  explicit CreateContData(const Func* func) : func(func) {}
-
-  std::string show() const {
-    auto name = func->fullName()->data();
-    return folly::to<std::string>(name, "()");
-  }
-
-  const Func* func;
-};
-
-/*
  * Important during offset to determine if crossing inline function will also
  * cross function call boundary.
  */
@@ -877,10 +862,6 @@ X(CheckDefinedClsEq,            CheckDefinedClsData);
 X(InterpOne,                    InterpOneData);
 X(TypeProfileFunc,              TypeProfileData);
 X(InterpOneCF,                  InterpOneData);
-X(CreateContFunc,               CreateContData);
-X(CreateContMeth,               CreateContData);
-X(CreateAFWHFunc,               CreateContData);
-X(CreateAFWHMeth,               CreateContData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);

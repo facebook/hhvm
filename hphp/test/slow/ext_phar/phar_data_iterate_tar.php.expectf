@@ -1,0 +1,35 @@
+array(3) {
+  ["phar://%s/test/slow/ext_phar/tgz/Archive_Tar-1.3.11.tgz/Archive_Tar-1.3.11/Archive/Tar.php"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(7) "Tar.php"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/tgz/Archive_Tar-1.3.11.tgz/Archive_Tar-1.3.11/Archive/Tar.php"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/tgz/Archive_Tar-1.3.11.tgz/Archive_Tar-1.3.11/Archive/Tar.php"
+  }
+  ["phar://%s/test/slow/ext_phar/tgz/Archive_Tar-1.3.11.tgz/Archive_Tar-1.3.11/docs/Archive_Tar.txt"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(15) "Archive_Tar.txt"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/tgz/Archive_Tar-1.3.11.tgz/Archive_Tar-1.3.11/docs/Archive_Tar.txt"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/tgz/Archive_Tar-1.3.11.tgz/Archive_Tar-1.3.11/docs/Archive_Tar.txt"
+  }
+  ["phar://%s/test/slow/ext_phar/tgz/Archive_Tar-1.3.11.tgz/package.xml"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(11) "package.xml"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/tgz/Archive_Tar-1.3.11.tgz/package.xml"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/tgz/Archive_Tar-1.3.11.tgz/package.xml"
+  }
+}

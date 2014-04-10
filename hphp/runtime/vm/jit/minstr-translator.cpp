@@ -15,7 +15,7 @@
 */
 
 
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include <algorithm>
 #include <vector>
 #include "hphp/runtime/base/strings.h"
@@ -2599,9 +2599,9 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
 
     auto toSpill = m_ht.peekSpillValues();
     assert(toSpill.size());
-    assert(toSpill[0] == m_result);
+    assert(toSpill.back() == m_result);
     SSATmp* str = m_unit.gen(AssertNonNull, m_marker, m_strTestResult)->dst();
-    toSpill[0] = str;
+    toSpill.back() = str;
 
     auto exit = m_ht.makeExit(nextOff, toSpill);
     {

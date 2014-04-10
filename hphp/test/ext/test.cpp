@@ -97,7 +97,7 @@ bool Test::logTestResults(std::string name, std::string details, int pass,
     sprintf(summary, "FAILED (%d)", fail);
   }
 
-  ArrayInit data(8);
+  ArrayInit data(8, ArrayInit::Map{});
   data.set(String("type"),         "hphp");
   data.set(String("name"),         name);
   data.set(String("contacts"),     null_array);

@@ -159,8 +159,8 @@ String apc_reserialize(const String& str);
 
 ///////////////////////////////////////////////////////////////////////////////
 // debugging support
-
-bool apc_dump(const char *filename, bool keyOnly, int waitSeconds);
+bool apc_dump(const char *filename, bool keyOnly, bool metaDump,
+              int waitSeconds);
 size_t get_const_map_size();
 
 ///////////////////////////////////////////////////////////////////////////////

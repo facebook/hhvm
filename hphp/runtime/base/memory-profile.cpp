@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/pprof-server.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 
 namespace HPHP {
 
@@ -70,9 +70,7 @@ void MemoryProfile::finishProfilingImpl() {
 
   TRACE(1, "request ended\n");
 
-  TRACE(2, "offering dump to profile controller, "
-           "request was for URL %s\n",
-           g_context->getTransport()->getCommand().c_str());
+  TRACE(2, "offering dump to profile controller");
 
   ProfileController::offerProfile(m_dump);
   if (RuntimeOption::ClientExecutionMode() &&

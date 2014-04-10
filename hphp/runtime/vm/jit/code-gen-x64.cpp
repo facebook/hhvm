@@ -27,7 +27,7 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/abi-cxx.h"
 
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -307,6 +307,7 @@ CALL_OPCODE(InterfaceSupportsInt)
 CALL_OPCODE(InterfaceSupportsDbl)
 
 CALL_OPCODE(SurpriseHook)
+CALL_OPCODE(FunctionExitSurpriseHook)
 
 #undef NOOP_OPCODE
 
@@ -676,30 +677,42 @@ void CodeGenerator::cgHalt(IRInstruction* inst) {
  * shuffleArgs also handles adding lea-offsets for dest registers (dest = src +
  * lea-offset) and zero extending bools (dest = zeroExtend(src)).
  */
+static bool shuffleArgsPlanningHelper(PhysReg::Map<PhysReg>& moves,
+                                      PhysReg::Map<ArgDesc*>& argDescs,
+                                      ArgDesc& arg) {
+  auto kind = arg.kind();
+  if (!(kind == ArgDesc::Kind::Reg  ||
+        kind == ArgDesc::Kind::Addr ||
+        kind == ArgDesc::Kind::TypeReg)) {
+    return true;
+  }
+  auto dstReg = arg.dstReg();
+  auto srcReg = arg.srcReg();
+  if (dstReg != srcReg) {
+    moves[dstReg] = srcReg;
+    argDescs[dstReg] = &arg;
+  }
+  return false;
+}
+
 static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
   // Compute the move/shuffle plan.
   PhysReg::Map<PhysReg> moves;
   PhysReg::Map<ArgDesc*> argDescs;
 
   for (size_t i = 0; i < args.numRegArgs(); ++i) {
-    auto kind = args[i].kind();
-    if (!(kind == ArgDesc::Kind::Reg  ||
-          kind == ArgDesc::Kind::Addr ||
-          kind == ArgDesc::Kind::TypeReg)) {
+    if (shuffleArgsPlanningHelper(moves, argDescs, args[i])) {
       continue;
     }
-    auto dstReg = args[i].dstReg();
-    auto srcReg = args[i].srcReg();
-    if (dstReg != srcReg) {
-      moves[dstReg] = srcReg;
-      argDescs[dstReg] = &args[i];
-    }
-    if (call.isIndirect() && dstReg == call.getReg()) {
+    if (call.isIndirect() && args[i].dstReg() == call.getReg()) {
       // an indirect call uses an argumnet register for the func ptr.
       // Use rax instead and update the CppCall
       moves[reg::rax] = call.getReg();
       call.updateCallIndirect(reg::rax);
     }
+  }
+  for (size_t i = 0; i < args.numSIMDRegArgs(); ++i) {
+    shuffleArgsPlanningHelper(moves, argDescs, args.regSIMD(i));
   }
 
   // The caller may be using rCgGP directly, or indirectly via m_rScratch.
@@ -836,6 +849,22 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
     }
   }
 
+  for (size_t i = 0; i < args.numSIMDRegArgs(); ++i) {
+    auto &arg = args.regSIMD(i);
+    if (arg.done()) continue;
+    auto kind = arg.kind();
+    auto dst = arg.dstReg();
+    assert(dst.isSIMD());
+    if (kind == ArgDesc::Kind::Imm) {
+      a.emitImmReg(arg.imm().q(), rTmp);
+      a.movq_rx(rTmp, dst);
+    } else if (RuntimeOption::EvalHHIRGenerateAsserts &&
+               kind == ArgDesc::Kind::None) {
+      a.emitImmReg(0xbadbadbadbadbad, rTmp);
+      a.movq_rx(rTmp, dst);
+    }
+  }
+
   return args.numStackArgs() * sizeof(int64_t);
 }
 
@@ -930,6 +959,9 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
   for (size_t i = 0; i < args.numRegArgs(); i++) {
     args[i].setDstReg(argNumToRegName[i]);
   }
+  for (size_t i = 0; i < args.numSIMDRegArgs(); i++) {
+    args.regSIMD(i).setDstReg(argNumToSIMDRegName[i]);
+  }
   regSaver.bytesPushed(shuffleArgs(a, args, call));
 
   // do the call; may use a trampoline
@@ -947,6 +979,19 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
 
   auto* taken = m_curInst->taken();
   if (taken && taken->isCatch()) {
+    always_assert(sync != SyncOptions::kNoSyncPoint);
+    always_assert_log(
+      taken->catchMarker() == m_curInst->marker(),
+      [&] {
+        return folly::format("Catch trace doesn't match fixup:\n"
+                             "Instruction: {}\n"
+                             "Catch trace: {}\n"
+                             "Fixup      : {}\n",
+                             m_curInst->toString(),
+                             taken->catchMarker().show(),
+                             m_curInst->marker().show()).str();
+      });
+
     auto& info = m_state.catches[taken];
     assert(!info.afterCall);
     info.afterCall = a.frontier();
@@ -1804,16 +1849,8 @@ void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc,
   if (type < Type::Obj) {
     // emit the specific class test
     assert(type.getClass()->attrs() & AttrFinal);
-    auto clsImm = Immed64(type.getClass());
     auto reg = getDataPtrEnregistered(m_as, dataSrc, m_rScratch);
-    if (clsImm.fits(sz::dword)) {
-      m_as.cmpq(clsImm.l(), reg[ObjectData::getVMClassOffset()]);
-    } else {
-      // use a scratch.  We could do this without rAsm using two immediate
-      // 32-bit compares (and two branches).
-      m_as.emitImmReg(clsImm, rAsm);
-      m_as.cmpq(rAsm, reg[ObjectData::getVMClassOffset()]);
-    }
+    emitCmpClass(m_as, type.getClass(), reg[ObjectData::getVMClassOffset()]);
     doJcc(CC_E);
   } else {
     assert(type < Type::Arr);
@@ -2076,7 +2113,7 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
   }
 
   auto const vecOffset = Class::classVecOff() +
-    sizeof(Class*) * (testClass->classVecLen() - 1);
+    sizeof(LowClassPtr) * (testClass->classVecLen() - 1);
 
   // Check the length of the class vectors---if the candidate's is at
   // least as long as the potential base (testClass) it might be a
@@ -2087,7 +2124,7 @@ asm_label(a, notExact);
   a.    jb8    (falseLabel);
 
   // If it's a subclass, rTestClass must be at the appropriate index.
-  a.    cmpq   (rTestClass, rObjClass[vecOffset]);
+  emitCmpClass(a, rTestClass, rObjClass[vecOffset]);
   a.    sete   (rdst);
   a.    jmp8   (out);
 
@@ -3001,28 +3038,26 @@ void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
 void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   auto const rFp       = srcLoc(0).reg();
   auto const numLocals = curFunc()->numLocals();
-  auto const rDest     = dstLoc(0).reg();
   auto& a = m_as;
 
   assert(rFp == rVmFp &&
          "free locals helper assumes the frame pointer is rVmFp");
-  assert(rDest == rVmSp &&
-         "free locals helper adjusts rVmSp, which must be our dst reg");
 
   if (numLocals == 0) return;
 
-  // The helpers called below use a special ABI, in which r15 is not saved,
-  // and the stub expects the stack to be imbalanced (RSP%16==0) on entry.
-  // So save r15 in addition to the caller-save registers, and use
-  // PhysRegSaverStub which assumes the odd stack parity.
-  auto toSave = m_state.liveRegs[inst] & (kCallerSaved | RegSet(r15));
+  // The helpers called below use a special ABI, in which r14 and r15 is
+  // not saved, and the stub expects the stack to be imbalanced (RSP%16==0)
+  // on entry. So save r14 and r15 in addition to the caller-save registers,
+  // and use PhysRegSaverStub which assumes the odd stack parity.
+  auto toSave = m_state.liveRegs[inst] &
+                (kCallerSaved | RegSet(r14) | RegSet(r15));
   PhysRegSaverStub saver(a, toSave);
 
   auto const target = numLocals > kNumFreeLocalsHelpers
     ? m_mcg->tx().uniqueStubs.freeManyLocalsHelper
     : m_mcg->tx().uniqueStubs.freeLocalsHelpers[numLocals - 1];
 
-  a.lea(rFp[-numLocals * sizeof(TypedValue)], rDest);
+  a.lea(rFp[-numLocals * sizeof(TypedValue)], r14);
   a.call(target);
   recordSyncPoint(a);
 }
@@ -3719,7 +3754,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
       assert(args[i]->type().isPtr() && srcLoc(srcNum).reg() != InvalidReg);
       callArgs.addr(srcLoc(srcNum).reg(), TVOFF(m_data));
     } else {
-      callArgs.ssa(srcNum);
+      callArgs.ssa(srcNum, pi.builtinType() == KindOfDouble);
     }
   }
 
@@ -3730,11 +3765,16 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
                SyncOptions::kSyncPoint, callArgs);
 
   // load return value from builtin
-  // for primitive return types (int, bool), the return value
-  // is already in dstReg (the builtin call returns in rax). For return
-  // by reference (String, Object, Array, Variant), the builtin writes the
-  // return value into MInstrState::tvBuiltinReturn TV, from where it
-  // has to be tested and copied.
+
+  // For primitive SSE return types (double), the return value
+  // is in xmm0 which typically won't be the requested destination register.
+  if (funcReturnType == KindOfDouble) {
+    emitMovRegReg(m_as, reg::xmm0, dstReg);
+    return;
+  }
+  // For primitive INTEGER return types (int, bool), the return value
+  // is already in dstReg (the builtin call returns in rax).
+  // For void return types, there is no return value, so just exit.
   if (dstReg == InvalidReg || returnType.isSimpleType()) {
     return;
   }
@@ -3742,6 +3782,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   // has been clobberred.
   misReg = rsp;
 
+  // For return by reference (String, Object, Array, Variant),
+  // the builtin writes the return value into MInstrState::tvBuiltinReturn
+  // TV, from where it has to be tested and copied.
   if (returnType.isReferenceType()) {
     assert(isCppByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
     // return type is String, Array, or Object; fold nullptr to KindOfNull
@@ -4045,9 +4088,10 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc,
 }
 
 // May return an invalid IndexedMemoryRef to signal that there is no
-// register conflict resolution. Callers should take proper action
-// to solve the issue (e.g. change the IndexedMemoryRef into a MemoryRef)
-// An invalid IndexedMemoryRef has the base set to InvalidReg.
+// register conflict resolution. Callers should take proper action to
+// solve the issue (e.g. change the IndexedMemoryRef into a
+// MemoryRef).  In this case, isResolved is passed back as false, and
+// then returned IndexedMemoryRef should be ignored.
 IndexedMemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
                                                     IndexedMemoryRef memRef,
                                                     bool& isResolved) {
@@ -4059,7 +4103,7 @@ IndexedMemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
     if (scratchTaken) {
       // bail, the caller will manage somehow
       isResolved = false;
-      return InvalidReg[InvalidReg];
+      return memRef;
     }
     // use the scratch register instead
     m_as.movq(base, m_rScratch);
@@ -4068,7 +4112,7 @@ IndexedMemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
     if (scratchTaken) {
       // bail, the caller will manage somehow
       isResolved = false;
-      return InvalidReg[InvalidReg];
+      return memRef;
     }
     // use the scratch register instead
     m_as.movq(index, m_rScratch);
@@ -4139,56 +4183,41 @@ void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
   emitFwdJcc(CC_BE, inst->taken());
 }
 
-/**
- * Load the pointer to the HphpArray::Elm struct into the destination register.
- * It performs the load with 2 lea instruction which seems to lead to code that
- * is shorter and faster.
- * It's passed the pointer to the HphpArray and the index into the array. The
- * index must be inbound.
- *
- * Essentially given a pointer 'array' to a HphpArray and an index 'idx' the
- * computation to get to the HphpArray::Elm is the following
- * array + HphpArray::dataOff() + idx * sizeof(HphpArray::Elm)
- * and given sizeof(HphpArray::Elm) = 24
- * array + HphpArray::dataOff() + idx * 24
- * because of the lea constraints we do
- * array + HphpArray::dataOff() + 8 * (idx * 3)
- * and we use a lea to compute idx * 3 so
- * dst <- idx * 2 + idx
- * dst <- array + HphpArray::dataOff() + reg * 8
- * which is what this function does
- */
-static void emitLoadPackedArrayElemAddr(Asm& a,
-                                        PhysReg arr,
-                                        PhysReg idx,
-                                        PhysReg dst) {
-  static_assert(sizeof(HphpArray::Elm) == 24,
-                "HphpArray:Elm size must be 24 bytes");
-  auto scaledIdx1 = idx * 2;
-  a.lea(idx[scaledIdx1], dst);
-  auto scaledIdx2 = dst * 8;
-  auto scaledIdxDsp = scaledIdx2 + HphpArray::dataOff();
-  a.lea(arr[scaledIdxDsp], dst);
-}
-
 void CodeGenerator::cgLdPackedArrayElem(IRInstruction* inst) {
   if (inst->src(0)->isConst()) {
     // This would require two scratch registers and should be very
     // rare. t3626251
     CG_PUNT(LdPackedArrayElem-ConstArray);
   }
-  auto arrReg = srcLoc(0).reg();
-  auto idx = inst->src(1);
-  auto idxReg = srcLoc(1).reg();
-  if (idx->isConst()) {
-    size_t offset = HphpArray::dataOff() +
-                    idx->intVal() * sizeof(HphpArray::Elm) +
-                    HphpArray::Elm::dataOff();
-    cgLoad(inst->dst(), dstLoc(0), arrReg[offset]);
-  } else {
-    emitLoadPackedArrayElemAddr(m_as, arrReg, idxReg, m_rScratch);
-    cgLoad(inst->dst(), dstLoc(0), m_rScratch[HphpArray::Elm::dataOff()]);
+
+  auto const rArr = srcLoc(0).reg();
+  auto const rIdx = srcLoc(1).reg();
+  auto& a = m_as;
+
+  // We don't know if we have the last use of rIdx, so we can't
+  // clobber it.
+  if (rIdx != InvalidReg) {
+    /*
+     * gcc 4.8 did something more like:
+     *
+     *    lea 1(%base), %scratch   ; sizeof(ArrayData) == sizeof(TypedValue)
+     *    salq $4, %scratch
+     *    movq (%base,%scratch,1), %r1
+     *    movzxb 8(%base,%scratch,1), %r2
+     *
+     * Using this way for now (which is more like what clang produced)
+     * just because it was 2 bytes smaller.
+     */
+    static_assert(sizeof(TypedValue) == 16, "");
+    a.    movq  (rIdx, m_rScratch);
+    a.    shlq  (0x4, m_rScratch);
+    cgLoad(inst->dst(), dstLoc(0), rArr[m_rScratch + sizeof(ArrayData)]);
+    return;
   }
+
+  auto const idx    = inst->src(1)->intVal();
+  auto const offset = sizeof(ArrayData) + idx * sizeof(TypedValue);
+  cgLoad(inst->dst(), dstLoc(0), rArr[offset]);
 }
 
 void CodeGenerator::cgCheckPackedArrayElemNull(IRInstruction* inst) {
@@ -4197,24 +4226,26 @@ void CodeGenerator::cgCheckPackedArrayElemNull(IRInstruction* inst) {
     // rare. t3626251
     CG_PUNT(LdPackedArrayElemAddr-ConstArray);
   }
-  auto arrReg = srcLoc(0).reg();
-  auto idx = inst->src(1);
-  auto idxReg = srcLoc(1).reg();
-  if (idx->isConst()) {
-    size_t offset = HphpArray::dataOff() +
-                    idx->intVal() * sizeof(HphpArray::Elm) +
-                    HphpArray::Elm::dataOff() +
-                    TVOFF(m_type);
-    emitCmpTVType(m_as, KindOfNull, arrReg[offset]);
+
+  auto const rArr = srcLoc(0).reg();
+  auto const rIdx = srcLoc(1).reg();
+  auto& a = m_as;
+
+  if (rIdx != InvalidReg) {
+    static_assert(sizeof(TypedValue) == 16, "");
+    a.    movq  (rIdx, m_rScratch);
+    a.    shlq  (0x4, m_rScratch);
+    emitCmpTVType(a, KindOfNull,
+      rArr[m_rScratch + sizeof(ArrayData) + TVOFF(m_type)]);
   } else {
-    emitLoadPackedArrayElemAddr(m_as, arrReg, idxReg, m_rScratch);
-    emitCmpTVType(m_as, KindOfNull,
-                  m_rScratch[HphpArray::Elm::dataOff() + TVOFF(m_type)]);
+    auto const idx    = inst->src(1)->intVal();
+    auto const offset = sizeof(ArrayData) + idx * sizeof(TypedValue);
+    emitCmpTVType(a, KindOfNull, rArr[offset + TVOFF(m_type)]);
   }
 
-  auto dstReg = dstLoc(0).reg();
-  m_as.setne(rbyte(dstReg));
-  m_as.movzbl(rbyte(dstReg), r32(dstReg));
+  auto const dst = dstLoc(0).reg();
+  a.    setne  (rbyte(dst));
+  a.    movzbl (rbyte(dst), r32(dst));
 }
 
 void CodeGenerator::cgCheckBounds(IRInstruction* inst) {
@@ -4797,7 +4828,8 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(PhysReg ctxReg,
                                               bool    staticCallee) {
   if (staticCallee) {
     // Load (this->m_cls | 0x1) into ctxReg.
-    m_as.loadq(ctxReg[ObjectData::getVMClassOffset()], ctxReg);
+    emitLdLowPtr(m_as, ctxReg[ObjectData::getVMClassOffset()],
+                 ctxReg, sizeof(LowClassPtr));
     m_as.orq(1, ctxReg);
   } else {
     // Just incref $this.
@@ -4887,7 +4919,8 @@ void CodeGenerator::emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
   // If calling a static method...
   {
     // Load (this->m_cls | 0x1) into destCtxReg
-    m_as.loadq(thisReg[ObjectData::getVMClassOffset()], destCtxReg);
+    emitLdLowPtr(m_as, thisReg[ObjectData::getVMClassOffset()],
+                 destCtxReg, sizeof(LowClassPtr));
     m_as.orq(1, destCtxReg);
     m_as.jmp8(End);
   }
@@ -5313,31 +5346,6 @@ void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
 void CodeGenerator::cgCheckSurpriseFlags(IRInstruction* inst) {
   emitTestSurpriseFlags(m_as);
   emitFwdJcc(CC_NZ, inst->taken());
-}
-
-void CodeGenerator::cgFunctionExitSurpriseHook(IRInstruction* inst) {
-  auto const sp     = srcLoc(1).reg();
-  auto const retVal = inst->src(2);
-  auto const retLoc = srcLoc(2);
-
-  // To keep things simple in both the unwinder and the user profiler, we put
-  // the return value onto the vm stack where it was coming into the RetC
-  // instruction.
-  if (inst->extra<InGeneratorData>()->inGenerator) {
-    // sp points at the stack frame base, so there are no locals or iterators
-    // to skip.
-    cgStore(sp[-sizeof(TypedValue)], retVal, retLoc, Width::Full);
-  } else {
-    // sp points at rVmFp->m_r, so we have to skip over the rest of the ActRec
-    // and anything else in the frame.
-    auto const offset = -AROFF(m_r) -
-      curFunc()->numSlotsInFrame() * sizeof(TypedValue) -
-      sizeof(TypedValue);
-
-    cgStore(sp[offset], retVal, retLoc, Width::Full);
-  }
-
-  cgCallNative(m_as, inst);
 }
 
 void CodeGenerator::cgExitOnVarEnv(IRInstruction* inst) {
@@ -5776,9 +5784,12 @@ void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
   if (isNextK) {
     args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
   } else if (isWNext) {
-    args.imm(0);
+    // We punt this case because nothing is using WIterNext opcodes
+    // right now, and we don't want the witer_next_key helper to need
+    // to check for null.
+    CG_PUNT(WIterNext-nonKey);
   }
-  TCA helperAddr = isWNext ? (TCA)iter_next_key<true> :
+  TCA helperAddr = isWNext ? (TCA)witer_next_key :
     isNextK ? (TCA)iter_next_key_ind : (TCA)iter_next_ind;
   cgCallHelper(m_as, CppCall(helperAddr), callDest(inst),
     SyncOptions::kSyncPoint, args);
@@ -5860,8 +5871,8 @@ void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
   StringData** table = m_mcg->allocData<StringData*>(sizeof(StringData*),
                                                       data->numKeys);
   memcpy(table, data->keys, data->numKeys * sizeof(*data->keys));
-  HphpArray* (*f)(uint32_t, StringData**, const TypedValue*) =
-    &HphpArray::MakeStruct;
+  MixedArray* (*f)(uint32_t, StringData**, const TypedValue*) =
+    &MixedArray::MakeStruct;
   cgCallHelper(m_as, CppCall(f), callDest(inst), SyncOptions::kNoSyncPoint,
                argGroup().imm(data->numKeys)
                                   .imm(uintptr_t(table))

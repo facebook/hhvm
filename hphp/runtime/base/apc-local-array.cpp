@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -29,6 +29,8 @@
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+size_t APCLocalArray::Vsize(const ArrayData*) { not_reached(); }
 
 const Variant& APCLocalArray::getValueRef(ssize_t pos) const {
   APCHandle *sv = m_arr->getValue(pos);
@@ -106,7 +108,7 @@ ArrayData* APCLocalArray::loadElems() const {
     }
     elems = ai.create();
   } else {
-    ArrayInit ai(count);
+    ArrayInit ai(count, ArrayInit::Mixed{});
     for (uint i = 0; i < count; i++) {
       ai.add(getKey(i), getValueRef(i), true);
     }
@@ -154,13 +156,13 @@ APCLocalArray::SetStr(ArrayData* ad, StringData* k, const Variant& v, bool copy)
 }
 
 ArrayData*
-APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, const Variant& v, bool copy) {
+APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->setRef(k, v, false));
 }
 
 ArrayData*
-APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, const Variant& v, bool copy) {
+APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->setRef(k, v, false));
 }
@@ -180,13 +182,18 @@ ArrayData* APCLocalArray::Copy(const ArrayData* ad) {
   return Escalate(ad);
 }
 
-ArrayData *APCLocalArray::Append(ArrayData* ad, const Variant& v, bool copy) {
-  ArrayData *escalated = Escalate(ad);
+ArrayData* APCLocalArray::CopyWithStrongIterators(const ArrayData*) {
+  throw FatalErrorException(
+    "Unimplemented ArrayData::copyWithStrongIterators");
+}
+
+ArrayData* APCLocalArray::Append(ArrayData* ad, const Variant& v, bool copy) {
+  ArrayData* escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->append(v, false));
 }
 
 ArrayData*
-APCLocalArray::AppendRef(ArrayData* ad, const Variant& v, bool copy) {
+APCLocalArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->appendRef(v, false));
 }
@@ -253,6 +260,30 @@ ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad) {
   return ret;
 }
 
+void APCLocalArray::Ksort(ArrayData*, int sort_flags, bool ascending) {
+  not_reached();
+}
+
+void APCLocalArray::Sort(ArrayData*, int sort_flags, bool ascending) {
+  not_reached();
+}
+
+void APCLocalArray::Asort(ArrayData*, int sort_flags, bool ascending) {
+  not_reached();
+}
+
+bool APCLocalArray::Uksort(ArrayData*, const Variant& cmp_function) {
+  not_reached();
+}
+
+bool APCLocalArray::Usort(ArrayData*, const Variant& cmp_function) {
+  not_reached();
+}
+
+bool APCLocalArray::Uasort(ArrayData*, const Variant& cmp_function) {
+  not_reached();
+}
+
 ssize_t APCLocalArray::IterBegin(const ArrayData* ad) {
   auto a = asSharedArray(ad);
   return a->m_size > 0 ? 0 : invalid_index;
@@ -275,13 +306,25 @@ ssize_t APCLocalArray::IterRewind(const ArrayData* ad, ssize_t prev) {
   return next >= 0 ? next : invalid_index;
 }
 
-bool APCLocalArray::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
+bool APCLocalArray::ValidMArrayIter(const ArrayData* ad,
+                                    const MArrayIter& fp) {
   assert(fp.getContainer() == ad);
-  return false;
+  not_reached();  // we should've escalated
 }
 
 bool APCLocalArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
-  return false;
+  not_reached();  // we should've escalated
+}
+
+ArrayData* APCLocalArray::NonSmartCopy(const ArrayData*) {
+  throw FatalErrorException("APCLocalArray::nonSmartCopy not implemented.");
+}
+
+void APCLocalArray::Renumber(ArrayData*) {
+}
+
+void APCLocalArray::OnSetEvalScalar(ArrayData*) {
+  not_reached();
 }
 
 void APCLocalArray::getChildren(std::vector<TypedValue *> &out) {

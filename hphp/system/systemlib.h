@@ -62,6 +62,7 @@ namespace Eval {
   x(LazyIterableView)                           \
   x(LazyKeyedIterableView)                      \
   x(Phar)                                       \
+  x(CURLFile)                                   \
   x(ReflectionParameter)                        \
   x(__PHP_Incomplete_Class)                     \
   x(__PHP_Unserializable_Class)                 \

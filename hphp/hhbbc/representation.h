@@ -212,7 +212,12 @@ struct Param {
   /*
    * Whether this parameter is passed by reference.
    */
-  bool byRef : 1;
+  bool byRef: 1;
+
+  /*
+   * Whether this parameter is a variadic capture.
+   */
+  bool isVariadic: 1;
 };
 
 /*

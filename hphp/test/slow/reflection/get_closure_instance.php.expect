@@ -1,0 +1,9 @@
+bool(true)
+int(42)
+array(0) {
+}
+string(6) "static"
+ReflectionException: Given object is not an instance of the class this method was declared in
+ReflectionException: Given object is not an instance of the class this method was declared in
+ReflectionException: Given object is not an instance of the class this method was declared in
+string(6) "static"

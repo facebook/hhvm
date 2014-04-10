@@ -47,7 +47,7 @@
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/util/text-util.h"
@@ -68,7 +68,6 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -241,46 +240,46 @@ static Offset pcOff(const ExecutionContext* env) {
 // VarEnv.
 
 VarEnv::VarEnv()
-  : m_depth(0)
-  , m_global(false)
-  , m_cfp(0)
+  : m_nvTable()
+  , m_extraArgs(nullptr)
+  , m_depth(0)
+  , m_global(true)
 {
-  m_nvTable.emplace(RuntimeOption::EvalVMInitialGlobalTableSize);
+  TRACE(3, "Creating VarEnv %p [global scope]\n", this);
+  assert(!g_context->m_globalVarEnv);
+  g_context->m_globalVarEnv = this;
 
-  auto tableWrapper = smart_new<GlobalNameValueTableWrapper>(&*m_nvTable);
+  auto tableWrapper = smart_new<GlobalNameValueTableWrapper>(&m_nvTable);
   auto globalArray = make_tv<KindOfArray>(tableWrapper);
-  globalArray.m_data.parr->incRefCount();
-  m_nvTable->set(makeStaticString("GLOBALS"), &globalArray);
-  tvRefcountedDecRef(&globalArray);
+  m_nvTable.set(makeStaticString("GLOBALS"), &globalArray);
 }
 
 VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
-  : m_extraArgs(eArgs)
+  : m_nvTable(fp)
+  , m_extraArgs(eArgs)
   , m_depth(1)
   , m_global(false)
-  , m_cfp(fp)
 {
-  const Func* func = fp->m_func;
-  const Id numNames = func->numNamedLocals();
+  TRACE(3, "Creating lazily attached VarEnv %p on stack\n", this);
+}
 
-  if (!numNames) return;
+VarEnv::VarEnv(const VarEnv* varEnv, ActRec* fp)
+  : m_nvTable(varEnv->m_nvTable, fp)
+  , m_extraArgs(varEnv->m_extraArgs ? varEnv->m_extraArgs->clone(fp) : nullptr)
+  , m_depth(1)
+  , m_global(false)
+{
+  assert(varEnv->m_depth == 1);
+  assert(!varEnv->m_global);
 
-  m_nvTable.emplace(numNames);
-
-  TypedValue** origLocs =
-    reinterpret_cast<TypedValue**>(uintptr_t(this) + sizeof(VarEnv));
-  TypedValue* loc = frame_local(fp, 0);
-  for (Id i = 0; i < numNames; ++i, --loc) {
-    assert(func->lookupVarId(func->localVarName(i)) == (int)i);
-    origLocs[i] = m_nvTable->migrateSet(func->localVarName(i), loc);
-  }
+  TRACE(3, "Cloning VarEnv %p to %p\n", varEnv, this);
 }
 
 VarEnv::~VarEnv() {
   TRACE(3, "Destroying VarEnv %p [%s]\n",
            this,
            isGlobalScope() ? "global scope" : "local scope");
-  assert(m_restoreLocations.empty());
+  assert(isGlobalScope() == (g_context->m_globalVarEnv == this));
 
   if (isGlobalScope()) {
     /*
@@ -289,132 +288,71 @@ VarEnv::~VarEnv() {
      * not supposed to run destructors for objects that are live at
      * the end of a request.
      */
-    m_nvTable->leak();
+    m_nvTable.leak();
   }
-}
-
-size_t VarEnv::getObjectSz(ActRec* fp) {
-  return sizeof(VarEnv) + sizeof(TypedValue*) * fp->m_func->numNamedLocals();
-}
-
-VarEnv* VarEnv::createLocal(ActRec* fp) {
-  void* mem = smart_malloc(getObjectSz(fp));
-  VarEnv* ret = new (mem) VarEnv(fp, fp->getExtraArgs());
-  TRACE(3, "Creating lazily attached VarEnv %p on stack\n", mem);
-  return ret;
 }
 
 VarEnv* VarEnv::createGlobal() {
-  assert(!g_context->m_globalVarEnv);
-
-  // Use smart_malloc instead of smartMallocSize since we need to use it above
-  // and don't want to have to record which allocator was used to select the
-  // appropriate deallocation function.
-  auto const mem = smart_malloc(sizeof(VarEnv));
-  auto ret = new (mem) VarEnv();
-
-  TRACE(3, "Creating VarEnv %p [global scope]\n", ret);
-  ret->m_global = true;
-  g_context->m_globalVarEnv = ret;
-  return ret;
+  return smart_new<VarEnv>();
 }
 
-void VarEnv::destroy(VarEnv* ve) {
-  ve->~VarEnv();
-  smart_free(ve);
+VarEnv* VarEnv::createLocal(ActRec* fp) {
+  return smart_new<VarEnv>(fp, fp->getExtraArgs());
 }
 
-void VarEnv::attach(ActRec* fp) {
+VarEnv* VarEnv::clone(ActRec* fp) const {
+  return smart_new<VarEnv>(this, fp);
+}
+
+void VarEnv::suspend(ActRec* oldFP, ActRec* newFP) {
+  m_nvTable.suspend(oldFP, newFP);
+}
+
+void VarEnv::enterFP(ActRec* oldFP, ActRec* newFP) {
   TRACE(3, "Attaching VarEnv %p [%s] %d fp @%p\n",
            this,
            isGlobalScope() ? "global scope" : "local scope",
-           int(fp->m_func->numNamedLocals()), fp);
-  assert(m_depth == 0 || fp->arGetSfp() == m_cfp ||
-         (fp->arGetSfp() == fp && g_context->isNested()));
-  m_cfp = fp;
+           int(newFP->m_func->numNamedLocals()), newFP);
+  assert(newFP);
+  if (oldFP == nullptr) {
+    assert(isGlobalScope() && m_depth == 0);
+  } else {
+    assert(m_depth >= 1);
+    assert(g_context->getPrevVMState(newFP) == oldFP);
+    m_nvTable.detach(oldFP);
+  }
+
+  m_nvTable.attach(newFP);
   m_depth++;
-
-  // Overlay fp's locals, if it has any.
-
-  const Func* func = fp->m_func;
-  const Id numNames = func->numNamedLocals();
-  if (!numNames) {
-    return;
-  }
-  if (!m_nvTable) {
-    m_nvTable.emplace(numNames);
-  }
-
-  TypedValue** origLocs = smart_new_array<TypedValue*>(func->numNamedLocals());
-  TypedValue* loc = frame_local(fp, 0);
-  for (Id i = 0; i < numNames; ++i, --loc) {
-    assert(func->lookupVarId(func->localVarName(i)) == (int)i);
-    origLocs[i] = m_nvTable->migrate(func->localVarName(i), loc);
-  }
-  m_restoreLocations.push_back(origLocs);
 }
 
-void VarEnv::detach(ActRec* fp) {
+void VarEnv::exitFP(ActRec* fp) {
   TRACE(3, "Detaching VarEnv %p [%s] @%p\n",
            this,
            isGlobalScope() ? "global scope" : "local scope",
            fp);
-  assert(fp == m_cfp);
+  assert(fp);
   assert(m_depth > 0);
 
-  // Merge/remove fp's overlaid locals, if it had any.
-  const Func* func = fp->m_func;
-  if (Id const numLocals = func->numNamedLocals()) {
-    /*
-     * In the case of a lazily attached VarEnv, we have our locations
-     * for the first (lazy) attach stored immediately following the
-     * VarEnv in memory.  In this case m_restoreLocations will be empty.
-     */
-    assert((!isGlobalScope() && m_depth == 1) == m_restoreLocations.empty());
-    TypedValue** origLocs =
-      !m_restoreLocations.empty()
-        ? m_restoreLocations.back()
-          : reinterpret_cast<TypedValue**>(uintptr_t(this) + sizeof(VarEnv));
-
-    for (Id i = 0; i < numLocals; i++) {
-      m_nvTable->resettle(func->localVarName(i), origLocs[i]);
-    }
-    if (!m_restoreLocations.empty()) {
-      m_restoreLocations.pop_back();
-    }
-  }
-
-  auto const context = g_context.getNoCheck();
-  m_cfp = context->getPrevVMState(fp);
   m_depth--;
-  if (m_depth == 0) {
-    m_cfp = nullptr;
-    // don't free global varEnv
-    if (context->m_globalVarEnv != this) {
-      assert(!isGlobalScope());
-      destroy(this);
-    }
-  }
-}
+  m_nvTable.detach(fp);
 
-// This helper is creating a NVT because of dynamic variable accesses,
-// even though we're already attached to a frame and it had no named
-// locals.
-void VarEnv::ensureNvt() {
-  const size_t kLazyNvtSize = 3;
-  if (!m_nvTable) {
-    m_nvTable.emplace(kLazyNvtSize);
+  if (m_depth == 0) {
+    // don't free global VarEnv
+    if (!isGlobalScope()) {
+      smart_delete(this);
+    }
+  } else {
+    m_nvTable.attach(g_context->getPrevVMState(fp));
   }
 }
 
 void VarEnv::set(const StringData* name, TypedValue* tv) {
-  ensureNvt();
-  m_nvTable->set(name, tv);
+  m_nvTable.set(name, tv);
 }
 
 void VarEnv::bind(const StringData* name, TypedValue* tv) {
-  ensureNvt();
-  m_nvTable->bind(name, tv);
+  m_nvTable.bind(name, tv);
 }
 
 void VarEnv::setWithRef(const StringData* name, TypedValue* tv) {
@@ -426,34 +364,27 @@ void VarEnv::setWithRef(const StringData* name, TypedValue* tv) {
 }
 
 TypedValue* VarEnv::lookup(const StringData* name) {
-  if (!m_nvTable) {
-    return 0;
-  }
-  return m_nvTable->lookup(name);
+  return m_nvTable.lookup(name);
 }
 
 TypedValue* VarEnv::lookupAdd(const StringData* name) {
-  ensureNvt();
-  return m_nvTable->lookupAdd(name);
+  return m_nvTable.lookupAdd(name);
 }
 
 bool VarEnv::unset(const StringData* name) {
-  if (!m_nvTable) return true;
-  m_nvTable->unset(name);
+  m_nvTable.unset(name);
   return true;
 }
 
 Array VarEnv::getDefinedVariables() const {
   Array ret = Array::Create();
 
-  if (!m_nvTable) return ret;
-
-  NameValueTable::Iterator iter(&*m_nvTable);
+  NameValueTable::Iterator iter(&m_nvTable);
   for (; iter.valid(); iter.next()) {
-    const StringData* sd = iter.curKey();
-    const TypedValue* tv = iter.curVal();
+    auto const sd = iter.curKey();
+    auto const tv = iter.curVal();
     if (tvAsCVarRef(tv).isReferenced()) {
-      ret.setRef(StrNR(sd).asString(), tvAsCVarRef(tv));
+      ret.setWithRef(StrNR(sd).asString(), tvAsCVarRef(tv));
     } else {
       ret.add(StrNR(sd).asString(), tvAsCVarRef(tv));
     }
@@ -505,6 +436,15 @@ void ExtraArgs::deallocate(ExtraArgs* ea, unsigned nargs) {
 void ExtraArgs::deallocate(ActRec* ar) {
   const int numExtra = ar->numArgs() - ar->m_func->numParams();
   deallocate(ar->getExtraArgs(), numExtra);
+}
+
+ExtraArgs* ExtraArgs::clone(ActRec* ar) const {
+  const int numExtra = ar->numArgs() - ar->m_func->numParams();
+  auto ret = allocateUninit(numExtra);
+  for (int i = 0; i < numExtra; ++i) {
+    tvDupFlattenVars(&m_extraArgs[i], &ret->m_extraArgs[i]);
+  }
+  return ret;
 }
 
 TypedValue* ExtraArgs::getExtraArg(unsigned argInd) const {
@@ -1319,7 +1259,7 @@ Array ExecutionContext::getLocalDefinedVariables(int frame) {
   }
   const Func *func = fp->m_func;
   auto numLocals = func->numNamedLocals();
-  ArrayInit ret(numLocals);
+  ArrayInit ret(numLocals, ArrayInit::Map{});
   for (Id id = 0; id < numLocals; ++id) {
     TypedValue* ptv = frame_local(fp, id);
     if (ptv->m_type == KindOfUninit) {
@@ -1341,9 +1281,9 @@ void ExecutionContext::shuffleMagicArgs(ActRec* ar) {
   // We need to make an array containing all the arguments passed by
   // the caller and put it where the second argument is.
   auto argArray = Array::attach(
-    nargs ? HphpArray::MakePacked(
+    nargs ? MixedArray::MakePacked(
               nargs, reinterpret_cast<TypedValue*>(ar) - nargs)
-          : HphpArray::MakeReserve(0)
+          : staticEmptyArray()
   );
 
   // Remove the arguments from the stack; they were moved into the
@@ -1386,6 +1326,7 @@ static inline void checkStack(Stack& stk, const Func* f) {
 }
 
 void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
+  assert(!ar->inGenerator());
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
   bool raiseMissingArgumentWarnings = false;
@@ -1399,12 +1340,10 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
       // further argument munging
       shuffleMagicArgs(ar);
     } else if (ar->hasVarEnv()) {
+      assert(func->isPseudoMain());
+      pushLocalsAndIterators(func);
+      ar->m_varEnv->enterFP(m_fp, ar);
       m_fp = ar;
-      if (!ar->inGenerator()) {
-        assert(func->isPseudoMain());
-        pushLocalsAndIterators(func);
-        ar->m_varEnv->attach(ar);
-      }
       pc = func->getEntry();
       // Nothing more to do; get out
       return;
@@ -1463,14 +1402,7 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
     func = ar->m_func;
   }
 
-  if (LIKELY(!ar->inGenerator())) {
-    /*
-     * we only get here from callAndResume
-     * if we failed to get a translation for
-     * a generator's prologue
-     */
-    pushLocalsAndIterators(func, nlocals);
-  }
+  pushLocalsAndIterators(func, nlocals);
 
   m_fp = ar;
   if (firstDVInitializer != InvalidAbsoluteOffset) {
@@ -2043,10 +1975,10 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
   // the backtrace
   if (parserFrame) {
     bt.append(
-      ArrayInit(2)
-        .set(s_file, parserFrame->filename, true)
-        .set(s_line, parserFrame->lineNumber, true)
-        .toVariant()
+      make_map_array(
+        s_file, parserFrame->filename,
+        s_line, parserFrame->lineNumber
+      )
     );
   }
 
@@ -2088,7 +2020,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
         assert(filename);
         Offset off = pc;
 
-        ArrayInit frame(parserFrame ? 4 : 2);
+        ArrayInit frame(parserFrame ? 4 : 2, ArrayInit::Map{});
         frame.set(s_file, filename, true);
         frame.set(s_line, unit->getLineNumber(off), true);
         if (parserFrame) {
@@ -2111,7 +2043,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
       continue;
     }
 
-    ArrayInit frame(7);
+    ArrayInit frame(7, ArrayInit::Map{});
 
     auto const curUnit = fp->m_func->unit();
     auto const curOp = *reinterpret_cast<const Op*>(curUnit->at(pc));
@@ -2197,22 +2129,28 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
     } else {
       int nparams = fp->m_func->numParams();
       int nargs = fp->numArgs();
-      /* builtin extra args are not stored in varenv */
-      if (nargs <= nparams) {
-        for (int i = 0; i < nargs; i++) {
-          TypedValue *arg = frame_local(fp, i);
+      int nformals = std::min(nparams, nargs);
+
+      if (UNLIKELY(fp->hasVarEnv() && fp->getVarEnv()->getFP() != fp)) {
+        // VarEnv is attached to eval or debugger frame, other than the current
+        // frame. Access locals thru VarEnv.
+        auto varEnv = fp->getVarEnv();
+        auto func = fp->func();
+        for (int i = 0; i < nformals; i++) {
+          TypedValue *arg = varEnv->lookup(func->localVarName(i));
           args.append(tvAsVariant(arg));
         }
       } else {
-        int i;
-        for (i = 0; i < nparams; i++) {
+        for (int i = 0; i < nformals; i++) {
           TypedValue *arg = frame_local(fp, i);
           args.append(tvAsVariant(arg));
         }
-        for (; i < nargs; i++) {
-          TypedValue *arg = fp->getExtraArg(i - nparams);
-          args.append(tvAsVariant(arg));
-        }
+      }
+
+      /* builtin extra args are not stored in varenv */
+      for (int i = nparams; i < nargs; i++) {
+        TypedValue *arg = fp->getExtraArg(i - nparams);
+        args.append(tvAsVariant(arg));
       }
       frame.set(s_args, args, true);
     }
@@ -2509,7 +2447,7 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
     m_fp->setVarEnv(VarEnv::createLocal(m_fp));
   }
   ar->m_varEnv = m_fp->m_varEnv;
-  ar->m_varEnv->attach(ar);
+  ar->m_varEnv->enterFP(m_fp, ar);
 
   m_fp = ar;
   pc = func->getEntry();
@@ -2603,7 +2541,7 @@ public:
 
 void ExecutionContext::manageAPCHandle() {
   assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
-  if (apcExtension::UseUncounted) {
+  if (m_apcHandles.size() > 0) {
     Treadmill::enqueue(FreedAPCHandle(std::move(m_apcHandles)));
     m_apcHandles.clear();
   }
@@ -2709,9 +2647,7 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   unit->setInterpretOnly();
 
   bool failed = true;
-  VarEnv *varEnv = nullptr;
   ActRec *fp = getFP();
-  ActRec *cfpSave = nullptr;
   if (fp) {
     for (; frame > 0; --frame) {
       ActRec* prevFp = getPrevVMState(fp);
@@ -2726,8 +2662,6 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     if (!fp->hasVarEnv()) {
       fp->setVarEnv(VarEnv::createLocal(fp));
     }
-    varEnv = fp->m_varEnv;
-    cfpSave = varEnv->getCfp();
   }
   ObjectData *this_ = nullptr;
   // NB: the ActRec and function within the AR may have different classes. The
@@ -2753,11 +2687,19 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   const static StaticString s_exit("Hit exit");
   const static StaticString s_fatal("Hit fatal");
   try {
+    // Start with the correct parent FP so that VarEnv can properly exitFP().
+    // Note that if the same VarEnv is used across multiple frames, the most
+    // recent FP must be used. This can happen if we are trying to debug
+    // an eval() call or a call issued by debugger itself.
+    auto savedFP = m_fp;
+    m_fp = fp->m_varEnv->getFP();
+    SCOPE_EXIT { m_fp = savedFP; };
+
     // Invoke the given PHP, possibly specialized to match the type of the
     // current function on the stack, optionally passing a this pointer or
     // class used to execute the current function.
     invokeFunc(retval, unit->getMain(functionClass), init_null_variant,
-               this_, frameClass, varEnv, nullptr, InvokePseudoMain);
+               this_, frameClass, fp->m_varEnv, nullptr, InvokePseudoMain);
     failed = false;
   } catch (FatalErrorException &e) {
     g_context->write(s_fatal);
@@ -2789,13 +2731,6 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
   } catch (...) {
     g_context->write(s_cppException.data());
   }
-
-  if (varEnv) {
-    // The debugger eval frame may have attached to the VarEnv from a
-    // frame that was not the top frame, so we need to manually set
-    // cfp back to what it was before
-    varEnv->setCfp(cfpSave);
-  }
   return failed;
 }
 
@@ -2819,7 +2754,7 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   m_pc = s_debuggerDummy->entry();
   m_firstAR = ar;
   m_fp->setVarEnv(m_globalVarEnv);
-  m_globalVarEnv->attach(m_fp);
+  m_globalVarEnv->enterFP(nullptr, m_fp);
 }
 
 void ExecutionContext::exitDebuggerDummyEnv() {
@@ -3574,14 +3509,14 @@ OPTBLD_INLINE void ExecutionContext::iopArray(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopNewArray(IOP_ARGS) {
   NEXT();
   DECODE_IVA(capacity);
-  m_stack.pushArrayNoRc(HphpArray::MakeReserve(capacity));
+  m_stack.pushArrayNoRc(MixedArray::MakeReserve(capacity));
 }
 
 OPTBLD_INLINE void ExecutionContext::iopNewPackedArray(IOP_ARGS) {
   NEXT();
   DECODE_IVA(n);
   // This constructor moves values, no inc/decref is necessary.
-  auto* a = HphpArray::MakePacked(n, m_stack.topC());
+  auto* a = MixedArray::MakePacked(n, m_stack.topC());
   m_stack.ndiscard(n);
   m_stack.pushArrayNoRc(a);
 }
@@ -3589,14 +3524,14 @@ OPTBLD_INLINE void ExecutionContext::iopNewPackedArray(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopNewStructArray(IOP_ARGS) {
   NEXT();
   DECODE(uint32_t, n); // number of keys and elements
-  assert(n > 0 && n <= HphpArray::MaxMakeSize);
-  StringData* names[HphpArray::MaxMakeSize];
+  assert(n > 0 && n <= MixedArray::MaxMakeSize);
+  StringData* names[MixedArray::MaxMakeSize];
   for (size_t i = 0; i < n; i++) {
     DECODE_LITSTR(s);
     names[i] = s;
   }
   // This constructor moves values, no inc/decref is necessary.
-  auto* a = HphpArray::MakeStruct(n, names, m_stack.topC());
+  auto* a = MixedArray::MakeStruct(n, names, m_stack.topC());
   m_stack.ndiscard(n);
   m_stack.pushArrayNoRc(a);
 }
@@ -3627,9 +3562,9 @@ OPTBLD_INLINE void ExecutionContext::iopAddElemV(IOP_ARGS) {
     raise_error("AddElemV: $3 must be an array");
   }
   if (c2->m_type == KindOfInt64) {
-    cellAsVariant(*c3).asArrRef().set(c2->m_data.num, ref(tvAsCVarRef(r1)));
+    cellAsVariant(*c3).asArrRef().setRef(c2->m_data.num, tvAsVariant(r1));
   } else {
-    cellAsVariant(*c3).asArrRef().set(tvAsCVarRef(c2), ref(tvAsCVarRef(r1)));
+    cellAsVariant(*c3).asArrRef().setRef(tvAsCVarRef(c2), tvAsVariant(r1));
   }
   m_stack.popV();
   m_stack.popC();
@@ -3653,7 +3588,7 @@ OPTBLD_INLINE void ExecutionContext::iopAddNewElemV(IOP_ARGS) {
   if (c2->m_type != KindOfArray) {
     raise_error("AddNewElemV: $2 must be an array");
   }
-  cellAsVariant(*c2).asArrRef().append(ref(tvAsCVarRef(r1)));
+  cellAsVariant(*c2).asArrRef().appendRef(tvAsVariant(r1));
   m_stack.popV();
 }
 
@@ -4373,41 +4308,41 @@ OPTBLD_INLINE void ExecutionContext::iopSSwitch(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopRetC(IOP_ARGS) {
   NEXT();
-  uint soff = m_fp->m_soff;
   assert(!m_fp->inGenerator());
 
-  // Call the runtime helpers to free the local variables and iterators
-  frame_free_locals_inl(m_fp, m_fp->m_func->numLocals());
-  ActRec* sfp = m_fp->arGetSfp();
-  // Memcpy the the return value on top of the activation record. This works
-  // the same regardless of whether the return value is boxed or not.
-  TypedValue* retval_ptr = &m_fp->m_r;
-  memcpy(retval_ptr, m_stack.topTV(), sizeof(TypedValue));
+  // Get the return value.
+  TypedValue retval = *m_stack.topTV();
+
+  // Free $this and local variables. Calls FunctionExit hook. The return value
+  // is kept on the stack so that the unwinder would free it if the hook fails.
+  frame_free_locals_inl(m_fp, m_fp->func()->numLocals(), &retval);
+  m_stack.discard();
+
+  // Type profile return value.
   if (RuntimeOption::EvalRuntimeTypeProfile) {
-    profileOneArgument(*retval_ptr, -1, m_fp->m_func);
+    profileOneArgument(retval, -1, m_fp->func());
   }
-  // Adjust the stack
-  m_stack.ndiscard(m_fp->m_func->numSlotsInFrame() + 1);
+
+  // Grab caller info from ActRec.
+  ActRec* sfp = m_fp->arGetSfp();
+  uint soff = m_fp->m_soff;
+
+  // Free ActRec and store the return value.
+  m_stack.ndiscard(m_fp->func()->numSlotsInFrame());
+  m_stack.ret();
+  *m_stack.topTV() = retval;
+  assert(m_stack.topTV() == &m_fp->m_r);
 
   if (LIKELY(sfp != m_fp)) {
-    // Restore caller's execution state.
+    // Return control to the caller.
     m_fp = sfp;
-    pc = m_fp->m_func->unit()->entry() + m_fp->m_func->base() + soff;
-    m_stack.ret();
-    assert(m_stack.topTV() == retval_ptr);
+    pc = m_fp->func()->unit()->entry() + m_fp->func()->base() + soff;
   } else {
     // No caller; terminate.
-    m_stack.ret();
-#ifdef HPHP_TRACE
-    {
-      std::ostringstream os;
-      os << toStringElm(m_stack.topTV());
-      ONTRACE(1,
-              Trace::trace("Return %s from ExecutionContext::dispatch("
-                           "%p)\n", os.str().c_str(), m_fp));
-    }
-#endif
-    pc = 0;
+    m_fp = nullptr;
+    pc = nullptr;
+    ONTRACE(1, Trace::trace("Return %s from ExecutionContext::dispatch(%p)\n",
+                            toStringElm(m_stack.topTV()).c_str(), m_fp));
   }
 }
 
@@ -7026,69 +6961,26 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCl(IOP_ARGS) {
   m_stack.pushObject(cl);
 }
 
-static inline void setContVar(const Func* func,
-                              const StringData* name,
-                              TypedValue* src,
-                              ActRec* genFp) {
-  Id destId = func->lookupVarId(name);
-  if (destId != kInvalidId) {
-    // Copy the value of the local to the cont object and set the
-    // local to uninit so that we don't need to change refcounts.
-    tvCopy(*src, *frame_local(genFp, destId));
-    tvWriteUninit(src);
-  } else {
-    if (!genFp->hasVarEnv()) {
-      genFp->setVarEnv(VarEnv::createLocal(genFp));
-    }
-    genFp->getVarEnv()->setWithRef(name, src);
-  }
-}
-
 const StaticString s_this("this");
 
+// The variable environment, extra args and all locals are teleported
+// from the ActRec on the evaluation stack to the suspended ActRec
+// on the heap.
 void ExecutionContext::fillContinuationVars(const Func* func,
-                                              ActRec* origFp,
-                                              ActRec* genFp) {
-  // For functions that contain only named locals, the variable
-  // environment is saved and restored by teleporting the values (and
-  // their references) between the evaluation stack and the local
-  // space at the end of the object using memcpy. Any variables in a
-  // VarEnv are saved and restored from m_vars as usual.
-  static const StringData* thisStr = s_this.get();
-  bool skipThis;
-  Id firstLocal;
-  if (origFp->hasVarEnv()) {
-    // This is currently never executed but it will be needed for eager
-    // execution of async functions - should be revisited later.
-    assert(false);
-    Stats::inc(Stats::Cont_CreateVerySlow);
-    Array definedVariables = origFp->getVarEnv()->getDefinedVariables();
-    skipThis = definedVariables.exists(s_this, true);
-    firstLocal = func->numNamedLocals();
-
-    for (ArrayIter iter(definedVariables); !iter.end(); iter.next()) {
-      setContVar(func, iter.first().getStringData(),
-        const_cast<TypedValue*>(iter.secondRef().asTypedValue()), genFp);
-    }
-  } else {
-    skipThis = func->lookupVarId(thisStr) != kInvalidId;
-    firstLocal = 0;
-  }
-
-  for (Id i = firstLocal; i < func->numLocals(); ++i) {
+                                            ActRec* origFp,
+                                            ActRec* genFp) {
+  for (Id i = 0; i < func->numLocals(); ++i) {
     TypedValue* src = frame_local(origFp, i);
     tvCopy(*src, *frame_local(genFp, i));
     tvWriteUninit(src);
   }
 
-  // If $this is used as a local inside the body and is not provided
-  // by our containing environment, just prefill it here instead of
-  // using InitThisLoc inside the body
-  if (!skipThis && origFp->hasThis()) {
-    Id id = func->lookupVarId(thisStr);
-    if (id != kInvalidId) {
-      tvAsVariant(frame_local(genFp, id)) = origFp->getThis();
-    }
+  // m_varEnv and m_extraArgs are in the same union
+  assert((void*)&genFp->m_varEnv == (void*)&genFp->m_extraArgs);
+  genFp->m_varEnv = origFp->m_varEnv;
+  origFp->m_varEnv = nullptr;
+  if (UNLIKELY(genFp->hasVarEnv())) {
+    genFp->getVarEnv()->suspend(origFp, genFp);
   }
 }
 
@@ -7100,8 +6992,8 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   offset += func->unit()->offsetOf(m_pc);
 
   c_Continuation* cont = static_cast<c_Continuation*>(func->isMethod()
-    ? c_Continuation::CreateMeth(func, m_fp->getThisOrClass(), offset)
-    : c_Continuation::CreateFunc(func, offset));
+    ? c_Continuation::CreateMeth(m_fp, offset)
+    : c_Continuation::CreateFunc(m_fp, offset));
 
   fillContinuationVars(func, m_fp, cont->actRec());
 
@@ -7168,7 +7060,7 @@ OPTBLD_INLINE void ExecutionContext::iopContSuspend(IOP_ARGS) {
   cont->suspend(offset, *m_stack.topC());
   m_stack.popTV();
 
-  EventHook::FunctionExit(m_fp);
+  EventHook::FunctionExit(m_fp, nullptr);
   ActRec* prevFp = m_fp->arGetSfp();
   if (prevFp == m_fp) {
     pc = nullptr;
@@ -7188,7 +7080,7 @@ OPTBLD_INLINE void ExecutionContext::iopContSuspendK(IOP_ARGS) {
   m_stack.popTV();
   m_stack.popTV();
 
-  EventHook::FunctionExit(m_fp);
+  EventHook::FunctionExit(m_fp, nullptr);
   ActRec* prevFp = m_fp->arGetSfp();
   pc = prevFp->m_func->getEntry() + m_fp->m_soff;
   m_fp = prevFp;
@@ -7201,7 +7093,7 @@ OPTBLD_INLINE void ExecutionContext::iopContRetC(IOP_ARGS) {
   tvSetIgnoreRef(*m_stack.topC(), cont->m_value);
   m_stack.popC();
 
-  EventHook::FunctionExit(m_fp);
+  EventHook::FunctionExit(m_fp, nullptr);
   ActRec* prevFp = m_fp->arGetSfp();
   if (prevFp == m_fp) {
     pc = nullptr;
@@ -7293,9 +7185,8 @@ OPTBLD_INLINE void ExecutionContext::iopAsyncESuspend(IOP_ARGS) {
   assert(!child->isFinished());
 
   auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(func->isMethod()
-    ? c_AsyncFunctionWaitHandle::CreateMeth(func, m_fp->getThisOrClass(),
-                                            offset, child)
-    : c_AsyncFunctionWaitHandle::CreateFunc(func, offset, child));
+    ? c_AsyncFunctionWaitHandle::CreateMeth(m_fp, offset, child)
+    : c_AsyncFunctionWaitHandle::CreateFunc(m_fp, offset, child));
 
   m_stack.discard();
 
@@ -7845,7 +7736,7 @@ void ExecutionContext::requestExit() {
   EnvConstants::requestExit();
 
   if (m_globalVarEnv) {
-    VarEnv::destroy(m_globalVarEnv);
+    smart_delete(m_globalVarEnv);
     m_globalVarEnv = 0;
   }
 

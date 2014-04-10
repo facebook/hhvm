@@ -128,8 +128,8 @@ T InstantStatic<T, TInit, init>::value { init() };
   CLASSNAME_IS(#originalName)                                   \
   friend ObjectData* new_##originalName##_Instance(Class*);     \
   friend void delete_##originalName(ObjectData*, const Class*); \
-  static inline HPHP::Class*& classof() {                       \
-    static HPHP::Class* result;                                 \
+  static inline HPHP::LowClassPtr& classof() {                  \
+    static HPHP::LowClassPtr result;                            \
     return result;                                              \
   }
 

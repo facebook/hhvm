@@ -11,11 +11,10 @@
 open ClientExceptions
 
 let get_hhserver () =
-  try
-    let p = Unix.getenv "HH_HOME" in
-    p ^ "/hh_server"
-  with Not_found ->
-    "hh_server"
+  let server_next_to_client = (Filename.dirname Sys.argv.(0)) ^ "/hh_server" in
+  if Sys.file_exists server_next_to_client
+  then server_next_to_client
+  else "hh_server"
 
 type env = {
   root: Path.path;
@@ -44,7 +43,9 @@ let start_server env =
   let hh_server =  Printf.sprintf "%s -d %s"
     (get_hhserver())
     (Path.string_of_path env.root) in
-  ignore(Unix.system hh_server);
+  match Unix.system hh_server with
+    | Unix.WEXITED 0 -> ()
+    | _ -> (Printf.fprintf stderr "Could not start hh_server!\n"; exit 77);
   if env.wait then wait env;
   ()
 

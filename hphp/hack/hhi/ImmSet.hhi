@@ -68,17 +68,6 @@ final class ImmSet<Tv> implements ConstSet<Tv> {
 
   public static function fromArrays(...): ImmSet<Tv>;
 
-  /**
-   * Slice an ImmSet. This function provides the functionality of
-   * array_slice() for ImmSets. Note that this function returns
-   * a new ImmSet and does not modify the original ImmSet.
-   */
-  public static function slice(
-    ImmSet<Tv> $v,
-    int $offset,
-    ?int $len = null
-  ): ImmSet<Tv>;
-
   public function __toString(): string;
 
   /**

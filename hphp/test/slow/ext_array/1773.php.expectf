@@ -1,5 +1,3 @@
-
-Warning: Creating default object from empty value in %s/test/slow/ext_array/1773.php on line 5
 bool(true)
 array(4) {
   [0]=>

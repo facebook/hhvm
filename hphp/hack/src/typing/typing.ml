@@ -1557,12 +1557,17 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
   | _ when !is_silent_mode ->
       env, (Reason.Rnone, Tany)
   | Toption _ ->
-      error_l [p,
-               "You are trying to access an element of this container"^
-               " but the container could be null. ";
-               Reason.to_pos (fst ety1),
-               "This is what makes me believe it can be null"^
-               Reason.to_string (fst ety1)]
+      error_l (
+        [
+          p,
+          "You are trying to access an element of this container"^
+          " but the container could be null. "
+        ] @
+        (Reason.to_string 
+          "This is what makes me believe it can be null"
+          (fst ety1)
+        )
+      )
   | Tobject ->
       if Env.is_strict env
       then error_array p ety1
@@ -1904,12 +1909,17 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
     | _ when !is_silent_mode ->
         env, (fst ety1, Tany), None
     | Toption _ ->
-        error_l [p,
-                 "You are trying to access the member "^s^
-                 " but this object can be null. ";
-                 Reason.to_pos (fst ety1),
-                 "This is what makes me believe it can be null"^
-                 Reason.to_string (fst ety1)]
+        error_l (
+          [
+            p,
+            "You are trying to access the member "^s^
+            " but this object can be null. "
+          ] @
+          (Reason.to_string
+            "This is what makes me believe it can be null"
+            (fst ety1)
+          )
+        )
     | ty ->
         error_l [p,
                  ("You are trying to access the member "^s^

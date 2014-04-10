@@ -13,6 +13,10 @@ set(HHVM_WHOLE_ARCHIVE_LIBRARIES
     hphp_runtime_ext
    )
 
+if (LINUX)
+	list(APPEND HHVM_WHOLE_ARCHIVE_LIBRARIES hphp_ext_zend_compat)
+endif()
+
 if (APPLE)
 	set(HHVM_ANCHOR_SYMS
             -Wl,-u,_register_libevent_server

@@ -2781,12 +2781,16 @@ private:
               }
             }
           } else if (p->getName() == "is_a" &&
-                     (ep->getCount() >= 2 && isAllScalar(ep, 1))) {
-            // special case is_a
-            bool passStmt;
-            bool negate;
-            createTypeAssertionsForKids(from, 2, passStmt, negate);
-            return newInstanceOfAssertion((*ep)[0], (*ep)[1]);
+                     ep->getCount() >= 2 && isAllScalar(ep, 1)) {
+            Variant v;
+            if (ep->getCount() == 2 ||
+                ((*ep)[2]->getScalarValue(v) && !v.toBoolean())) {
+              // special case is_a
+              bool passStmt;
+              bool negate;
+              createTypeAssertionsForKids(from, 2, passStmt, negate);
+              return newInstanceOfAssertion((*ep)[0], (*ep)[1]);
+            }
           }
           startIdx = 2; // params
         }

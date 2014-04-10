@@ -20,6 +20,7 @@
 #include <boost/range/iterator_range.hpp>
 
 #include "hphp/util/fixed-vector.h"
+#include "hphp/util/low-ptr.h"
 #include "hphp/util/range.h"
 
 #include "hphp/runtime/base/types.h"
@@ -36,7 +37,7 @@ namespace HPHP {
 
 class ClassInfo;
 class ClassInfoVM;
-class HphpArray;
+class MixedArray;
 class ObjectData;
 struct HhbcExtClassInfo;
 class Func;
@@ -454,7 +455,7 @@ struct Class : AtomicCountable {
     const StringData* m_name;
     const StringData* m_mangledName;
     const StringData* m_originalMangledName;
-    Class* m_class; // First parent class that declares this property.
+    LowClassPtr m_class; // First parent class that declares this property.
     Attr m_attrs;
     const StringData* m_typeConstraint;
 
@@ -474,14 +475,14 @@ struct Class : AtomicCountable {
     Attr m_attrs;
     const StringData* m_typeConstraint;
     const StringData* m_docComment;
-    Class* m_class; // Most derived class that declared this property.
+    LowClassPtr m_class; // Most derived class that declared this property.
     TypedValue m_val; // Used if (m_class == this).
     RepoAuthType m_repoAuthType;
     int m_idx;
   };
 
   struct Const {
-    Class* m_class; // Most derived class that declared this constant.
+    LowClassPtr m_class; // Most derived class that declared this constant.
     const StringData* m_name;
     TypedValue m_val;
     const StringData* m_phpCode;
@@ -519,8 +520,8 @@ struct Class : AtomicCountable {
   typedef std::vector<const Func*> InitVec;
   typedef std::vector<std::pair<const StringData*, const StringData*> >
           TraitAliasVec;
-  typedef IndexedStringMap<Class*,true,int> InterfaceMap;
-  typedef IndexedStringMap<Func*,false,Slot> MethodMap;
+  typedef IndexedStringMap<LowClassPtr, true, int> InterfaceMap;
+  typedef IndexedStringMap<Func*, false, Slot> MethodMap;
 
   /* If set, runs during setMethods() */
   static void (*MethodCreateHook)(Class* cls, MethodMap::Builder& builder);
@@ -663,7 +664,7 @@ struct Class : AtomicCountable {
 
   bool hasDeepInitProps() const { return m_hasDeepInitProps; }
   bool needInitialization() const { return m_needInitialization; }
-  bool hasInitMethods() const { return m_hasInitMethods; }
+  bool hasSInitMethods() const { return m_hasSInitMethods; }
   bool callsCustomInstanceInit() const { return m_callsCustomInstanceInit; }
   const InterfaceMap& allInterfaces() const { return m_interfaces; }
   // See comment for m_usedTraits
@@ -820,7 +821,7 @@ struct Class : AtomicCountable {
   unsigned classVecLen() const {
     return m_classVecLen;
   }
-  const Class* const* classVec() const { return m_classVec; }
+  LowClassPtr const* classVec() const { return m_classVec; }
   static size_t preClassOff() { return offsetof(Class, m_preClass); }
   static size_t classVecOff() { return offsetof(Class, m_classVec); }
   static size_t classVecLenOff() { return offsetof(Class, m_classVecLen); }
@@ -850,9 +851,9 @@ private:
       , m_modifiers(modifiers)
     {}
 
-    Class* m_trait;
-    Func*  m_method;
-    Attr   m_modifiers;
+    LowClassPtr m_trait;
+    Func* m_method;
+    Attr m_modifiers;
   };
   typedef std::list<TraitMethod> TraitMethodList;
   typedef hphp_hash_map<const StringData*, TraitMethodList, string_data_hash,
@@ -1008,7 +1009,7 @@ private:
   unsigned m_needInitialization : 1;      // requires initialization,
                                           // due to [ps]init or simply
                                           // having static members
-  unsigned m_hasInitMethods : 1;          // any __[ps]init() methods?
+  unsigned m_hasSInitMethods : 1;         // any __sinit() methods?
   unsigned m_callsCustomInstanceInit : 1; // should we always call __init__
                                           // on new instances?
   unsigned m_hasDeepInitProps : 1;
@@ -1016,7 +1017,7 @@ private:
 
   // Vector of Class pointers that encodes the inheritance hierarchy,
   // including this Class as the last element.
-  Class* m_classVec[1]; // Dynamically sized; must come last.
+  LowClassPtr m_classVec[1]; // Dynamically sized; must come last.
 };
 
 inline bool isTrait(const Class* cls) {
@@ -1040,8 +1041,7 @@ enum class ClassKind { Class, Interface, Trait };
  * we had to allocate the handle before we loaded the class.
  */
 inline bool classHasPersistentRDS(const Class* cls) {
-  return (RuntimeOption::RepoAuthoritative &&
-          cls &&
+  return (cls &&
           RDS::isPersistentHandle(cls->classHandle()));
 }
 

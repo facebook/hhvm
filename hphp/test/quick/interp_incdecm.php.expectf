@@ -19,4 +19,4 @@ array(1) {
   int(1)
 }
 
-Fatal error: Invalid IncDecNewElem operand in %s/quick/interp_incdecm.php on line 17
+Fatal error: [] operator not supported for strings in %s/quick/interp_incdecm.php on line 17

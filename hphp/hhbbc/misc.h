@@ -74,6 +74,13 @@ enum class PrepKind { Ref, Val, Unknown };
  */
 constexpr int kSystemLibBump = 10;
 
+/*
+ * We may run the interpreter collecting stats and when trace is on
+ * the amount of noise is unbearable. This is to keep tracing out
+ * of stats collection.
+ */
+constexpr int kTraceBump = 50;
+
 //////////////////////////////////////////////////////////////////////
 
 struct trace_time {

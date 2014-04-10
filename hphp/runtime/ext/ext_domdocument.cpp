@@ -18,11 +18,12 @@
 #include "hphp/runtime/ext/ext_domdocument.h"
 #include <map>
 #include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
+#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/system/systemlib.h"
@@ -126,7 +127,17 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
     }
   }
 }
-void php_libxml_ctx_error(void *ctx,
+
+/**
+ * The error handler callbacks below are called from libxml code
+ * that is compiled without frame pointers, so it's necessary to do
+ * SYNC_VM_REGS_SCOPED() before calling libxml code that uses these
+ * error handler callbacks.
+ */
+
+static void php_libxml_ctx_error(void *ctx,
+                          const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
+static void php_libxml_ctx_error(void *ctx,
                           const char *msg, ...) {
   va_list args;
   va_start(args, msg);
@@ -136,7 +147,9 @@ void php_libxml_ctx_error(void *ctx,
   va_end(args);
 }
 
-void php_libxml_ctx_warning(void *ctx,
+static void php_libxml_ctx_warning(void *ctx,
+                            const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
+static void php_libxml_ctx_warning(void *ctx,
                             const char *msg, ...) {
   va_list args;
   va_start(args, msg);
@@ -718,9 +731,8 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
   ctxt->recovery = recover;
   int old_error_reporting = 0;
   if (recover) {
-    old_error_reporting = ThreadInfo::s_threadInfo.getNoCheck()->
-      m_reqInjectionData.getErrorReportingLevel();
-    IniSetting::Set("error_reporting", old_error_reporting | k_E_WARNING);
+    old_error_reporting = HHVM_FN(error_reporting)();
+    HHVM_FN(error_reporting)(old_error_reporting | k_E_WARNING);
   }
 
   xmlParseDocument(ctxt);
@@ -728,7 +740,7 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
   if (ctxt->wellFormed || recover) {
     ret = ctxt->myDoc;
     if (ctxt->recovery) {
-      IniSetting::Set("error_reporting", old_error_reporting);
+      HHVM_FN(error_reporting)(old_error_reporting);
     }
     /* If loading from memory, set the base reference uri for the document */
     if (ret && ret->URL == NULL && ctxt->directory != NULL) {
@@ -2838,7 +2850,7 @@ Variant c_DOMText::t_splittext(int64_t offset) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void c_DOMCDATASection::t___construct(const String& value) {
+void c_DOMCdataSection::t___construct(const String& value) {
   m_node = xmlNewCDataBlock(NULL, (xmlChar *)value.data(), value.size());
   if (!m_node) {
     php_dom_throw_error(INVALID_STATE_ERR, 1);
@@ -3170,7 +3182,7 @@ Variant c_DOMDocument::t_createcdatasection(const String& data) {
   if (!node) {
     return false;
   }
-  c_DOMCDATASection *ret = NEWOBJ(c_DOMCDATASection)();
+  c_DOMCdataSection *ret = NEWOBJ(c_DOMCdataSection)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(*m_orphans, node);
@@ -3325,10 +3337,14 @@ Variant c_DOMDocument::t_createtextnode(const String& data) {
 Variant c_DOMDocument::t_getelementbyid(const String& elementid) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlAttrPtr attrp = xmlGetID(docp, (xmlChar*)elementid.data());
+  if (attrp && attrp->_private) {
+    return static_cast<c_DOMElement*>(attrp->_private);
+  }
   if (attrp && attrp->parent) {
     c_DOMElement *ret = NEWOBJ(c_DOMElement)();
     ret->m_doc = this;
     ret->m_node = attrp->parent;
+    attrp->_private = static_cast<void*>(ret);
     return ret;
   }
   return uninit_null();
@@ -3421,20 +3437,20 @@ void c_DOMDocument::t_normalizedocument() {
 
 bool c_DOMDocument::t_registernodeclass(const String& baseclass,
                                         const String& extendedclass) {
-  if (!f_class_exists(baseclass)) {
+  if (!HHVM_FN(class_exists)(baseclass)) {
     raise_error("Class %s does not exist", baseclass.data());
     return false;
   }
-  if (!f_is_a(baseclass, "DOMNode", true)) {
+  if (!HHVM_FN(is_a)(baseclass, "DOMNode", true)) {
     raise_error("Class %s is not DOMNode or derived from it.",
                 baseclass.data());
     return false;
   }
-  if (!f_class_exists(extendedclass)) {
+  if (!HHVM_FN(class_exists)(extendedclass)) {
     raise_error("Class %s does not exist", extendedclass.data());
     return false;
   }
-  if (!f_is_subclass_of(extendedclass, baseclass)) {
+  if (!HHVM_FN(is_subclass_of)(extendedclass, baseclass)) {
     raise_error("Class %s is not derived from %s.", extendedclass.data(),
                 baseclass.data());
     return false;

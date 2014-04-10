@@ -52,14 +52,14 @@ Array TimeStamp::CurrentTime() {
   timelib_time_offset *offset =
     timelib_get_time_zone_info(tp.tv_sec, TimeZone::Current()->get());
 
-  ArrayInit ret(4);
-  ret.set(s_sec, (int)tp.tv_sec);
-  ret.set(s_usec, (int)tp.tv_usec);
-  ret.set(s_minuteswest, (int)(-offset->offset / 60));
-  ret.set(s_dsttime, (int)offset->is_dst);
-
+  auto const ret = make_map_array(
+    s_sec, (int)tp.tv_sec,
+    s_usec, (int)tp.tv_usec,
+    s_minuteswest, (int)(-offset->offset / 60),
+    s_dsttime, (int)offset->is_dst
+  );
   timelib_time_offset_dtor(offset);
-  return ret.toArray();
+  return ret;
 }
 
 String TimeStamp::CurrentMicroTime() {

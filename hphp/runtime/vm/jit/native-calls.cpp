@@ -123,11 +123,11 @@ static CallMap s_callMap {
                            {{TV, 0}}},
     {ConvIntToArr,       convCellToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
-    {ConvObjToArr,       convCellToArrHelper, DSSA, SNone,
+    {ConvObjToArr,       convCellToArrHelper, DSSA, SSync,
                            {{TV, 0}}},
     {ConvStrToArr,       convCellToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
-    {ConvCellToArr,      convCellToArrHelper, DSSA, SNone,
+    {ConvCellToArr,      convCellToArrHelper, DSSA, SSync,
                            {{TV, 0}}},
 
     {ConvStrToBool,      method(&StringData::toBoolean), DSSA, SNone,
@@ -167,22 +167,22 @@ static CallMap s_callMap {
     {ConvCellToStr,      convCellToStrHelper, DSSA, SSync,
                            {{TV, 0}}},
 
-    {ConcatStrStr,       concat_ss, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
-    {ConcatStrInt,       concat_si, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
-    {ConcatIntStr,       concat_is, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+    {ConcatStrStr,       concat_ss, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
+    {ConcatStrInt,       concat_si, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
+    {ConcatIntStr,       concat_is, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
 
     {AddElemStrKey,      addElemStringKeyHelper, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {AddElemIntKey,      addElemIntKeyHelper, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
-    {AddNewElem,         &HphpArray::AddNewElemC, DSSA, SNone,
+    {AddNewElem,         &MixedArray::AddNewElemC, DSSA, SNone,
                            {{SSA, 0}, {TV, 1}}},
-    {ArrayAdd,           arrayAdd, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+    {ArrayAdd,           arrayAdd, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {Box,                boxValue, DSSA, SNone, {{TV, 0}}},
-    {NewArray,           HphpArray::MakeReserve, DSSA, SNone, {{SSA, 0}}},
+    {NewArray,           MixedArray::MakeReserve, DSSA, SNone, {{SSA, 0}}},
     {Clone,              method(&ObjectData::clone), DSSA, SSync,
                            {{SSA, 0}}},
-    {NewPackedArray,     HphpArray::MakePacked, DSSA, SNone,
+    {NewPackedArray,     MixedArray::MakePacked, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
     {NewCol,             newColHelper, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ColAddNewElemC,     colAddNewElemCHelper, DSSA, SSync,
@@ -248,21 +248,17 @@ static CallMap s_callMap {
 
     /* Continuation support helpers */
     {CreateContFunc,     &c_Continuation::CreateFunc, DSSA, SNone,
-                          { extra(&CreateContData::func),
-                            {SSA, 0} }},
+                          {{SSA, 0}, {SSA, 1}}},
     {CreateContMeth,     &c_Continuation::CreateMeth, DSSA, SNone,
-                          { extra(&CreateContData::func),
-                            {SSA, 0}, {SSA, 1} }},
+                          {{SSA, 0}, {SSA, 1}}},
 
     /* Async function support helpers */
     {CreateAFWHFunc,     &c_AsyncFunctionWaitHandle::CreateFunc, DSSA, SSync,
-                          { extra(&CreateContData::func),
-                            {SSA, 0}, {SSA, 1} }},
+                          {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {CreateAFWHMeth,     &c_AsyncFunctionWaitHandle::CreateMeth, DSSA, SSync,
-                          { extra(&CreateContData::func),
-                            {SSA, 0}, {SSA, 1}, {SSA, 2} }},
+                          {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {CreateSRWH,         &c_StaticResultWaitHandle::CreateFromVM, DSSA, SNone,
-                          { {TV, 0} }},
+                          {{TV, 0}}},
 
     /* MInstrTranslator helpers */
     {BaseG,    fssa(0), DSSA, SSync, {{TV, 1}, {SSA, 2}}},
@@ -357,8 +353,8 @@ static CallMap s_callMap {
 
     /* surprise flag support */
     {SurpriseHook, &EventHook::CheckSurprise, DNone, SSync, {}},
-    {FunctionExitSurpriseHook, &EventHook::onFunctionExit, DNone, SSync,
-                               {{SSA, 0}}},
+    {FunctionExitSurpriseHook, &EventHook::onFunctionExitJit, DNone, SSync,
+                               {{SSA, 0}, {TV, 1}}},
 };
 
 ArgGroup CallInfo::toArgGroup(const RegAllocInfo& regs,

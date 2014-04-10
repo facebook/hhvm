@@ -491,6 +491,21 @@ bool File::removeFilter(Resource& resource) {
   }
   for (auto it = m_writeFilters.begin(); it != m_writeFilters.end(); ++it) {
     if (it->get() == rd) {
+      std::list<Resource> closing_filters;
+      closing_filters.push_back(rd);
+      String result(applyFilters(empty_string,
+                                 closing_filters,
+                                 /* closing = */ true));
+      std::list<Resource> later_filters;
+      auto dupit(it);
+      for (++dupit; dupit != m_writeFilters.end(); ++dupit) {
+        later_filters.push_back(dupit->get());
+      }
+      result = applyFilters(result, later_filters, false);
+      if (!result.empty()) {
+        int64_t written = writeImpl(result.data(), result.size());
+        m_position += written;
+      }
       m_writeFilters.erase(it);
       return true;
     }
@@ -511,18 +526,18 @@ const StaticString
   s_wrapper_data("wrapper_data");
 
 Array File::getMetaData() {
-  ArrayInit ret(10);
-  ret.set(s_wrapper_type, getWrapperType());
-  ret.set(s_stream_type,  getStreamType());
-  ret.set(s_mode,         String(m_mode));
-  ret.set(s_unread_bytes, 0);
-  ret.set(s_seekable,     seekable());
-  ret.set(s_uri,          String(m_name));
-  ret.set(s_timed_out,    false);
-  ret.set(s_blocked,      true);
-  ret.set(s_eof,          eof());
-  ret.set(s_wrapper_data, getWrapperMetaData());
-  return ret.toArray();
+  return make_map_array(
+    s_wrapper_type, getWrapperType(),
+    s_stream_type,  getStreamType(),
+    s_mode,         String(m_mode),
+    s_unread_bytes, 0,
+    s_seekable,     seekable(),
+    s_uri,          String(m_name),
+    s_timed_out,    false,
+    s_blocked,      true,
+    s_eof,          eof(),
+    s_wrapper_data, getWrapperMetaData()
+  );
 }
 
 String File::getWrapperType() const {
@@ -1002,21 +1017,22 @@ String File::getLastError() {
   return String(folly::errnoStr(errno).toStdString());
 }
 
+template<class ResourceList>
 String File::applyFilters(const String& buffer,
-                          smart::list<Resource>& filters,
+                          ResourceList& filters,
                           bool closing) {
   if (buffer.empty() && !closing) {
     return buffer;
   }
   Resource in(null_resource);
-  Resource out;(NEWOBJ(BucketBrigade));
+  Resource out;
   if (buffer.empty()) {
     out = Resource(NEWOBJ(BucketBrigade)());
   } else {
     out = Resource(NEWOBJ(BucketBrigade)(buffer));
   }
 
-  for (auto resource: filters) {
+  for (Resource& resource: filters) {
     in = out;
     out = Resource(NEWOBJ(BucketBrigade)());
 

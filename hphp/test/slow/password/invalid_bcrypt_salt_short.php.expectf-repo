@@ -1,0 +1,2 @@
+
+Warning: password_hash(): Provided salt is too short: 3 expecting 22 in %s on line %d

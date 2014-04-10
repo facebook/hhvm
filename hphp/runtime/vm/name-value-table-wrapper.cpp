@@ -16,7 +16,7 @@
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/runtime-error.h"
 
@@ -39,7 +39,7 @@ NameValueTableWrapper::asNVTW(const ArrayData* ad) {
 
 size_t NameValueTableWrapper::Vsize(const ArrayData* ad) {
   // We need to iterate to find out the actual size, since
-  // KindOfIndirect elements in the array may have been set to
+  // KindOfNamedLocal elements in the array may have been set to
   // KindOfUninit.
   auto a = asNVTW(ad);
   size_t count = 0;
@@ -128,13 +128,17 @@ ArrayData* NameValueTableWrapper::SetStr(ArrayData* ad, StringData* k,
   return a;
 }
 
-ArrayData* NameValueTableWrapper::SetRefInt(ArrayData* ad, int64_t k,
-                                            const Variant& v, bool copy) {
+ArrayData* NameValueTableWrapper::SetRefInt(ArrayData* ad,
+                                            int64_t k,
+                                            Variant& v,
+                                            bool copy) {
   return asNVTW(ad)->setRef(String(k).get(), v, copy);
 }
 
-ArrayData* NameValueTableWrapper::SetRefStr(ArrayData* ad, StringData* k,
-                                            const Variant& v, bool copy) {
+ArrayData* NameValueTableWrapper::SetRefStr(ArrayData* ad,
+                                            StringData* k,
+                                            Variant& v,
+                                            bool copy) {
   auto a = asNVTW(ad);
   tvAsVariant(a->m_tab->lookupAdd(k)).assignRef(v);
   return a;
@@ -165,7 +169,7 @@ NameValueTableWrapper::Append(ArrayData*, const Variant& v, bool copy) {
 }
 
 ArrayData*
-NameValueTableWrapper::AppendRef(ArrayData*, const Variant& v, bool copy) {
+NameValueTableWrapper::AppendRef(ArrayData*, Variant& v, bool copy) {
   throw NotImplementedException("appendRef on $GLOBALS");
 }
 
@@ -267,6 +271,23 @@ bool NameValueTableWrapper::Uasort(ArrayData*, const Variant& cmp_function) {
 
 bool NameValueTableWrapper::IsVectorData(const ArrayData*) {
   return false;
+}
+
+ArrayData*
+NameValueTableWrapper::CopyWithStrongIterators(const ArrayData* ad) {
+  throw FatalErrorException(
+    "Unimplemented ArrayData::copyWithStrongIterators");
+}
+
+ArrayData* NameValueTableWrapper::NonSmartCopy(const ArrayData*) {
+  throw FatalErrorException("NameValueTableWrapper::nonSmartCopy "
+    "not implemented.");
+}
+
+void NameValueTableWrapper::Renumber(ArrayData*) {}
+
+void NameValueTableWrapper::OnSetEvalScalar(ArrayData*) {
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////

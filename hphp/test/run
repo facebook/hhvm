@@ -143,7 +143,9 @@ function get_options($argv) {
     'include-pattern:' => 'I:',
     'repo' => 'r',
     'mode:' => 'm:',
-    'server' => '',
+    'server' => 's',
+    'shuffle' => '',
+    'manual-port:' => 'p:',
     'help' => 'h',
     'verbose' => 'v',
     'fbmake' => '',
@@ -154,6 +156,7 @@ function get_options($argv) {
     'arm' => '',
     'hhas-round-trip' => '',
     'color' => 'c',
+    'no-fun' => '',
   );
   $options = array();
   $files = array();
@@ -405,10 +408,15 @@ class Status {
   const MODE_VERBOSE = 1;
   const MODE_FBMAKE = 2;
 
-  const MSG_EXIT = 1;
+  const MSG_FINISHED = 1;
   const MSG_TEST_PASS = 2;
-  const MSG_TEST_FAIL = 3;
-  const MSG_TEST_SKIP = 4;
+  const MSG_TEST_FAIL = 4;
+  const MSG_TEST_SKIP = 5;
+  const MSG_SERVER_RESTARTED = 6;
+
+  const RED = 31;
+  const GREEN = 32;
+  const YELLOW = 33;
 
   public static function setMode($mode) {
     self::$mode = $mode;
@@ -422,13 +430,17 @@ class Status {
     return self::$mode;
   }
 
-  public static function pass($test) {
+  public static function finished() {
+    self::send(self::MSG_FINISHED, null);
+  }
+
+  public static function pass($test, $detail) {
     array_push(self::$results, array('name' => $test, 'status' => 'passed'));
-    msg_send(self::getQueue(), self::MSG_TEST_PASS, $test);
+    self::send(self::MSG_TEST_PASS, [$test, $detail === 'pass-server']);
   }
 
   public static function skip($test, $reason = null) {
-    msg_send(self::getQueue(), self::MSG_TEST_SKIP, [$test,$reason]);
+    self::send(self::MSG_TEST_SKIP, [$test,$reason]);
   }
 
   public static function fail($test) {
@@ -437,7 +449,41 @@ class Status {
       'status' => 'failed',
       'details' => (string)@file_get_contents("$test.diff")
     ));
-    msg_send(self::getQueue(), self::MSG_TEST_FAIL, $test);
+    self::send(self::MSG_TEST_FAIL, $test);
+  }
+
+  public static function serverRestarted() {
+    self::send(self::MSG_SERVER_RESTARTED, null);
+  }
+
+  private static function send($type, $msg) {
+    msg_send(self::getQueue(), $type, $msg);
+  }
+
+  /**
+   * Takes a variable number of string arguments. If color output is enabled
+   * and any one of the arguments is preceeded by an integer (see the color
+   * constants above), that argument will be given the indicated color.
+   */
+  public static function sayColor() {
+    $args = func_get_args();
+    while (count($args)) {
+      $color = null;
+      $str = array_shift($args);
+      if (is_integer($str)) {
+        $color = $str;
+        if (self::$use_color) {
+          print "\033[0;${color}m";
+        }
+        $str = array_shift($args);
+      }
+
+      print $str;
+
+      if (self::$use_color && !is_null($color)) {
+        print "\033[0m";
+      }
+    }
   }
 
   public static function sayFBMake($test, $status) {
@@ -461,10 +507,6 @@ class Status {
     fwrite(STDERR, implode("", $data));
   }
 
-  public static function hasColor() {
-    return self::$use_color;
-  }
-
   public static function hasCursorControl() {
     return !getenv("TRAVIS");
   }
@@ -479,27 +521,15 @@ class Status {
     return str_replace('\\/', '/', $json);
   }
 
-  private static function getQueue() {
-    if (!self::$queue)
+  public static function getQueue() {
+    if (!self::$queue) {
       self::$queue = msg_get_queue(self::$key);
+    }
     return self::$queue;
-  }
-
-  public static function doExit($code) {
-    msg_send(self::getQueue(), self::MSG_EXIT, [$code,posix_getpid()]);
-    exit($code);
   }
 }
 
 function run($options, $tests, $bad_test_file) {
-  if (isset($options['verbose'])) {
-    Status::setMode(Status::MODE_VERBOSE);
-  }
-  if (isset($options['fbmake'])) {
-    Status::setMode(Status::MODE_FBMAKE);
-  }
-  Status::setUseColor(isset($options['color']) ? true : posix_isatty(STDOUT));
-
   foreach ($tests as $test) {
     $status = run_test($options, $test);
     if ($status === 'skip') {
@@ -509,7 +539,7 @@ function run($options, $tests, $bad_test_file) {
     } else if ($status === 'skip-onlyrepo') {
       Status::skip($test, 'onlyrepo');
     } else if ($status) {
-      Status::pass($test);
+      Status::pass($test, $status);
     } else {
       Status::fail($test);
     }
@@ -542,16 +572,62 @@ function dump_hhas_to_temp($hhvm_cmd, $test) {
   return $tmp_file;
 }
 
-function run_one_config($options, $test, $hhvm, $hhvm_env) {
-  $descriptorspec = array(
-     0 => array("pipe", "r"),
-     1 => array("pipe", "w"),
-     2 => array("pipe", "w"),
-  );
+const HHAS_EXT = '.hhas';
+function can_run_server_test($test) {
+  return
+    !find_test_ext($test, 'noserver') &&
+    !find_test_ext($test, 'opts') &&
+    !find_test_ext($test, 'ini') &&
+    strpos($test, 'quick/debugger') === false &&
+    strpos($test, 'slow/streams/') === false &&
+    strpos($test, 'slow/ext_mongo/') === false &&
+    strpos($test, 'slow/ext_oauth/') === false &&
+    strpos($test, 'slow/ext_yaml/') === false &&
+    strpos($test, 'slow/debugger/') === false &&
+    strpos($test, 'slow/type_profiler/debugger/') === false &&
+    strpos($test, 'zend/good/ext/standard/tests/array/') === false &&
+    strrpos($test, HHAS_EXT) !== (strlen($test) - strlen(HHAS_EXT))
+    ;
+}
+
+const SERVER_TIMEOUT = 45;
+function run_config_server($options, $test) {
+  if (!isset($options['server']) || !can_run_server_test($test)) {
+    return null;
+  }
+
+  $port = $options['server_port'];
+  $ch = curl_init("localhost:$port/$test");
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_TIMEOUT, SERVER_TIMEOUT);
+  curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+  $output = curl_exec($ch);
+  if ($output === false) {
+    // The server probably crashed so fall back to cli to determine if this was
+    // the test that caused the crash. Our parent process will see that the
+    // server died and restart it.
+    if (getenv('HHVM_TEST_SERVER_LOG')) {
+      printf("Curl failed: %d\n", curl_errno($ch));
+    }
+    return null;
+  }
+  curl_close($ch);
+  $output = trim($output);
+
+  return array($output, '');
+}
+
+function run_config_cli($options, $test, $hhvm, $hhvm_env) {
   if (isset($options['log'])) {
     $hhvm_env['TRACE'] = 'printir:2';
     $hhvm_env['HPHP_TRACE_FILE'] = $test . '.log';
   }
+
+  $descriptorspec = array(
+    0 => array("pipe", "r"),
+    1 => array("pipe", "w"),
+    2 => array("pipe", "w"),
+  );
   $pipes = null;
   $process = proc_open("$hhvm 2>&1", $descriptorspec, $pipes, null, $hhvm_env);
   if (!is_resource($process)) {
@@ -561,11 +637,20 @@ function run_one_config($options, $test, $hhvm, $hhvm_env) {
 
   fclose($pipes[0]);
   $output = trim(stream_get_contents($pipes[1]));
-  file_put_contents("$test.out", $output);
+  $stderr = stream_get_contents($pipes[2]);
   fclose($pipes[1]);
+  fclose($pipes[2]);
+  proc_close($process);
+
+  return array($output, $stderr);
+}
+
+function run_config_post($outputs, $test, $options) {
+  $output = $outputs[0];
+  $stderr = $outputs[1];
+  file_put_contents("$test.out", $output);
 
   // hhvm redirects errors to stdout, so anything on stderr is really bad
-  $stderr = stream_get_contents($pipes[2]);
   if ($stderr) {
     file_put_contents(
       "$test.diff",
@@ -573,8 +658,6 @@ function run_one_config($options, $test, $hhvm, $hhvm_env) {
     );
     return false;
   }
-  fclose($pipes[2]);
-  proc_close($process);
 
   // Needed for testing non-hhvm binaries that don't actually run the code
   // e.g. parser/test/parse_tester.cpp
@@ -680,6 +763,12 @@ function run_one_config($options, $test, $hhvm, $hhvm_env) {
   }
 }
 
+function run_one_config($options, $test, $hhvm, $hhvm_env) {
+  $outputs = run_config_cli($options, $test, $hhvm, $hhvm_env);
+  if ($outputs === false) return false;
+  return run_config_post($outputs, $test, $options);
+}
+
 function run_test($options, $test) {
   if (skip_test($options, $test)) return 'skip';
 
@@ -726,6 +815,9 @@ function run_test($options, $test) {
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
   }
 
+  if ($outputs = run_config_server($options, $test)) {
+    return run_config_post($outputs, $test, $options) ? 'pass-server' : false;
+  }
   return run_one_config($options, $test, $hhvm, $hhvm_env);
 }
 
@@ -779,110 +871,116 @@ function print_commands($tests, $options) {
   }
 }
 
-function msg_loop($num_tests, $children, $queue) {
-  $return_value = 0;
-
+function msg_loop($num_tests, $queue) {
   $passed = 0;
   $skipped = 0;
   $failed = 0;
 
-  preg_match_all("/columns.([0-9]+);/", strtolower(exec('stty -a |grep columns')), $output);
-  $cols = $output[1][0];
+  $do_progress = Status::getMode() == Status::MODE_NORMAL &&
+    Status::hasCursorControl();
+  if ($do_progress) {
+    preg_match_all("/columns.([0-9]+);/",
+                   strtolower(exec('stty -a | grep columns')),
+                   $output);
+    $cols = $output[1][0];
+  }
 
-  while (count($children) > 0) {
-    msg_receive($queue, 0, $type, 1024, $message);
+  while (true) {
+    if (!msg_receive($queue, 0, $type, 1024, $message)) {
+      error("msg_receive failed");
+    }
+
     switch ($type) {
-    case Status::MSG_EXIT:
-      list($code, $pid) = $message;
-      pcntl_waitpid($pid, $status);
-      $return_value |= pcntl_wexitstatus($status);
-      unset($children[$pid]);
-      break;
-    case Status::MSG_TEST_PASS:
-      $passed++;
-      $test = $message;
-      switch (Status::getMode()) {
-      case Status::MODE_NORMAL:
-        if (!Status::hasCursorControl()) {
-          if (Status::hasColor()) {
-            print "\033[1;32m.\033[0m";
-          } else {
-            print ".";
-          }
+      case Status::MSG_FINISHED:
+        break 2;
+
+      case Status::MSG_SERVER_RESTARTED:
+        switch (Status::getMode()) {
+          case Status::MODE_NORMAL:
+            if (!Status::hasCursorControl()) {
+              Status::sayColor(Status::YELLOW, 'x');
+            }
+            break;
+
+          case Status::MODE_VERBOSE:
+            Status::sayColor("$test ", Status::YELLOW, "failed",
+                             " to talk to server\n");
+            break;
+
+          case Status::MODE_FBMAKE:
+            break;
+        }
+
+      case Status::MSG_TEST_PASS:
+        $passed++;
+        list($test, $server) = $message;
+        switch (Status::getMode()) {
+          case Status::MODE_NORMAL:
+            if (!Status::hasCursorControl()) {
+              Status::sayColor(Status::GREEN, $server ? ',' : '.');
+            }
+            break;
+
+          case Status::MODE_VERBOSE:
+            Status::sayColor("$test ", Status::GREEN, "passed\n");
+            break;
+
+          case Status::MODE_FBMAKE:
+            Status::sayFBMake($test, 'passed');
+            break;
         }
         break;
-      case Status::MODE_VERBOSE:
-        if (Status::hasColor()) {
-          print "$test \033[1;32mpassed\033[0m\n";
-        } else {
-          print "$test passed\n";
-        }
-        break;
-      case Status::MODE_FBMAKE:
-        Status::sayFBMake($test, 'passed');
-        break;
-      }
-      break;
+
       case Status::MSG_TEST_SKIP:
         $skipped++;
         list($test, $reason) = $message;
 
         switch (Status::getMode()) {
-        case Status::MODE_NORMAL:
-          if (!Status::hasCursorControl()) {
-            if (Status::hasColor()) {
-              print "\033[1;33ms\033[0m";
-            } else {
-              print 's';
+          case Status::MODE_NORMAL:
+            if (!Status::hasCursorControl()) {
+              Status::sayColor(Status::YELLOW, 's');
             }
-          }
-          break;
-        case Status::MODE_VERBOSE:
-          if (Status::hasColor()) {
+            break;
+
+          case Status::MODE_VERBOSE:
+            Status::sayColor("$test ", Status::YELLOW, "skipped");
+
             if ($reason !== null) {
-              print "$test \033[1;33mskipped\033[0m ";
-              print "\033[1;31m$reason\033[0m\n";
-            } else {
-              print "$test \033[1;33mskipped\033[0m\n";
+              Status::sayColor(" - $reason");
             }
-          } else {
-            if ($reason !== null) {
-              print "$test skipped\n";
-            } else {
-              print "$test skipped - $reason\n";
-            }
-          }
-          break;
+            Status::sayColor("\n");
+            break;
         }
         break;
+
       case Status::MSG_TEST_FAIL:
         $failed++;
         $test = $message;
         switch (Status::getMode()) {
-        case Status::MODE_NORMAL:
-          $diff = (string)@file_get_contents($test.'.diff');
-          if (Status::hasColor()) {
-            if (Status::hasCursorControl())
+          case Status::MODE_NORMAL:
+            if (Status::hasCursorControl()) {
               print "\033[2K\033[1G";
-            print "\n\033[0;31m$test\033[0m\n$diff";
-          } else {
-            print "\nFAILED: $test\n$diff";
-          }
-          break;
-        case Status::MODE_VERBOSE:
-          if (Status::hasColor()) {
-            print "$test \033[0;31mFAILED\033[0m\n";
-          } else {
-            print "$test FAILED\n";
-          }
-          break;
-        case Status::MODE_FBMAKE:
-          Status::sayFBMake($test, 'failed');
-          break;
+            }
+            $diff = (string)@file_get_contents($test.'.diff');
+            Status::sayColor(Status::RED, "\nFAILED",
+                             ": $test\n$diff");
+            break;
+
+          case Status::MODE_VERBOSE:
+            Status::sayColor("$test ", Status::RED, "FAILED\n");
+            break;
+
+          case Status::MODE_FBMAKE:
+            Status::sayFBMake($test, 'failed');
+            break;
         }
         break;
+
+      default:
+        error("Unknown message $type");
     }
-    if (Status::getMode() == Status::MODE_NORMAL && Status::hasCursorControl()) {
+
+    if ($do_progress) {
       $total_run = ($skipped + $failed + $passed);
       $bar_cols = ($cols - 45);
 
@@ -903,22 +1001,24 @@ function msg_loop($num_tests, $children, $queue) {
         "\033[0;32m$passed_ticks".
         "\033[33m$skipped_ticks".
         "\033[31m$failed_ticks".
-        "\033[0m$fill] ($total_run/$num_tests) ($skipped skipped, $failed failed)";
+        "\033[0m$fill] ($total_run/$num_tests) ".
+        "($skipped skipped, $failed failed)";
     }
   }
 
-  if (Status::getMode() == Status::MODE_NORMAL && Status::hasCursorControl()) {
+  if ($do_progress) {
     print "\033[2K\033[1G";
     if ($skipped > 0) {
       print "$skipped tests \033[1;33mskipped\033[0m\n";
     }
   }
-  return $return_value;
 }
 
 function print_success($tests, $options) {
   if (!$tests) {
-    print "\nCLOWNTOWN: No tests!\n\n".<<<CLOWN
+    print "\nCLOWNTOWN: No tests!\n";
+    if (empty($options['no-fun'])) {
+      print <<<CLOWN
             _
            {_}
            /*\\
@@ -930,10 +1030,13 @@ function print_success($tests, $options) {
         _\\__|__/_
        (___/ \\___)
 CLOWN
-."\n\n"; /**/
+        ."\n\n";
+    }
     return;
   }
-  print "\nAll tests passed.\n\n".<<<SHIP
+  print "\nAll tests passed.\n";
+  if (empty($options['no-fun'])) {
+    print <<<SHIP
               |    |    |
              )_)  )_)  )_)
             )___))___))___)\
@@ -944,7 +1047,8 @@ CLOWN
     ^^^^      ^^^^     ^^^    ^^
          ^^^^      ^^^
 SHIP
-."\n";
+      ."\n";
+  }
   if (isset($options['verbose'])) {
     print_commands($tests, $options);
   }
@@ -959,7 +1063,9 @@ function print_failure($argv, $results, $options) {
   }
   asort($failed);
   print "\n".count($failed)." tests failed\n";
-  print "(╯°□°）╯︵ ┻━┻\n";
+  if (empty($options['no-fun'])) {
+    print "(╯°□°）╯︵ ┻━┻\n";
+  }
 
   print make_header("See the diffs:").
     implode("\n", array_map(
@@ -989,6 +1095,113 @@ function print_failure($argv, $results, $options) {
   }
 }
 
+function port_is_listening($port) {
+  $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+  return @socket_connect($socket, 'localhost', $port);
+}
+
+function find_open_port() {
+  for ($i = 0; $i < 50; ++$i) {
+    $port = rand(1024, 65535);
+    if (!port_is_listening($port)) return $port;
+  }
+
+  error("Couldn't find an open port");
+}
+
+function start_server_impl($options) {
+  if (isset($options['manual-port'])) return;
+
+  switch (idx($options, 'mode', 'jit')) {
+    case 'jit':
+      $use_jit = 1;
+      break;
+
+    case 'interp':
+      $use_jit = 0;
+      break;
+
+    default:
+      error("Mode '$mode' not supported in server tests");
+  }
+
+  $threads = $options['threads'] * 2;
+  $port = $options['server_port'];
+  $command = implode(' ', array(
+    hhvm_path(),
+    '-m', 'server',
+    '-c', $options['server_config'],
+    "-vServer.Port=$port",
+    "-vAdminServer.Port=0",
+    "-vServer.ThreadCount=$threads",
+    '-vServer.ExitOnBindFail=1',
+    '-vServer.RequestTimeoutSeconds='.SERVER_TIMEOUT,
+    '-vPageletServer.ThreadCount=0',
+    '-vLog.UseRequestLog=1',
+    '-vResourceLimit.CoreFileSize=0',
+    "-vEval.Jit=$use_jit",
+    '-vLog.File=/dev/null',
+  ));
+  if (getenv('HHVM_TEST_SERVER_LOG')) {
+    echo "Starting server '$command'\n";
+  }
+
+  $descriptors = array(
+    0 => array('file', '/dev/null', 'r'),
+    1 => array('file', '/dev/null', 'w'),
+    2 => array('file', '/dev/null', 'w'),
+  );
+  return proc_open($command, $descriptors, $dummy);
+}
+
+function start_server($options) {
+  if (isset($options['manual-port'])) {
+    return array('port' => (int)$options['manual-port']);
+  }
+
+  for ($i = 0; $i < 5; ++$i) {
+    $port = $options['server_port'] = find_open_port();
+    $proc = start_server_impl($options);
+    if (!$proc) {
+      error("Failed to start server process");
+    }
+
+    // Wait for the server to start responding. If someone else bound to $port
+    // between the call to find_open_port and the call to proc_open, then we
+    // might start talking to them thinking it's our server.
+    for ($j = 0; $j < 40; ++$j) {
+      $status = proc_get_status($proc);
+      if (port_is_listening($port)) {
+        $status['proc'] = $proc;
+        $status['port'] = $port;
+        return $status;
+      }
+
+      if (!$status['running']) {
+        if ($status['exitcode'] === 0) {
+          error("Server exited prematurely but without error");
+        }
+
+        // We lost a race. Try another port
+        if (getenv('HHVM_TEST_SERVER_LOG')) {
+          echo "\n\nLost connection race on port $port. Trying another.\n\n";
+        }
+        continue 2;
+      }
+
+      usleep(250000);
+    }
+    error("Server took too long to come up");
+  }
+
+  error("Couldn't start server");
+}
+
+function drain_queue($queue) {
+  while (@msg_receive($queue, 0, $type, 1024, $message, true,
+                      MSG_IPC_NOWAIT | MSG_NOERROR));
+}
+
 function main($argv) {
   ini_set('pcre.backtrack_limit', PHP_INT_MAX);
 
@@ -997,13 +1210,43 @@ function main($argv) {
     error(help());
   }
   $tests = find_tests($files, $options);
+  if (isset($options['shuffle'])) {
+    shuffle($tests);
+  }
 
   hhvm_path(); // check that binary exists
 
-  $threads = min(count($tests), idx($options, 'threads', num_cpus() + 1));
+  $options['threads'] =
+    min(count($tests), idx($options, 'threads', num_cpus() + 1));
+
+  $server_proc = null;
+  if (isset($options['server'])) {
+    if (isset($options['repo'])) {
+      error("Server mode repo tests are not supported");
+    }
+    $configs = array();
+    foreach ($tests as $test) {
+      if (!can_run_server_test($test)) continue;
+      $config = find_file_for_dir(dirname($test), 'config.hdf');
+      if (!$config) {
+        error("Couldn't find config file for $test");
+      }
+      $configs[$config] = $config;
+    }
+    if (count($configs) !== 1) {
+      error("You passed a combination of tests that would require more than ".
+            "one config file. This is not supported in server mode.");
+    }
+    $options['server_config'] = reset($configs);
+    $server_status = start_server($options);
+    $options['server_port'] = $server_status['port'];
+    $server_proc = idx($server_status, 'proc');
+    $server_pid = $server_status['pid'];
+  }
 
   if (!isset($options['fbmake'])) {
-    print "Running ".count($tests)." tests in $threads threads\n";
+    print "Running ".count($tests)." tests in ".
+      $options['threads']." threads\n";
   }
 
   // Try to construct the buckets so the test results are ready in
@@ -1012,7 +1255,7 @@ function main($argv) {
   $i = 0;
   foreach ($tests as $test) {
     $test_buckets[$i][] = $test;
-    $i = ($i + 1) % $threads;
+    $i = ($i + 1) % $options['threads'];
   }
 
   if (isset($options['verbose'])) {
@@ -1021,13 +1264,17 @@ function main($argv) {
   if (isset($options['fbmake'])) {
     Status::setMode(Status::MODE_FBMAKE);
   }
+  Status::setUseColor(isset($options['color']) ? true : posix_isatty(STDOUT));
+
   Status::$key = ftok(__FILE__, 't');
+  $queue = Status::getQueue();
+  drain_queue($queue);
 
   // Spawn off worker threads
   $children = array();
   // A poor man's shared memory
   $bad_test_files = array();
-  for ($i = 0; $i < $threads; $i++) {
+  for ($i = 0; $i < $options['threads']; $i++) {
     $bad_test_file = tempnam('/tmp', 'test-run-');
     $bad_test_files[] = $bad_test_file;
     $pid = pcntl_fork();
@@ -1036,14 +1283,54 @@ function main($argv) {
     } else if ($pid) {
       $children[$pid] = $pid;
     } else {
-      Status::doExit(run($options, $test_buckets[$i], $bad_test_file));
+      exit(run($options, $test_buckets[$i], $bad_test_file));
     }
   }
 
+  // Fork off a child to receive messages and print status, and have the parent
+  // wait for all children to exit.
+  $printer_pid = pcntl_fork();
+  if ($printer_pid == -1) {
+    error("failed to fork");
+  } else if ($printer_pid == 0) {
+    msg_loop(count($tests), $queue);
+    msg_remove_queue($queue);
+    return 0;
+  }
 
-  $queue = msg_get_queue(Status::$key);
-  $return_value = msg_loop(count($tests), $children, $queue);
-  msg_remove_queue($queue);
+  while (count($children) && $printer_pid != 0) {
+    $pid = pcntl_wait($status);
+    if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {
+      error("Unexpected exit status from child");
+    }
+
+    if ($pid == $printer_pid) {
+      // We should be finishing up soon.
+      $printer_pid = 0;
+    } else if ($server_proc && $pid == $server_pid) {
+      // The server crashed. Restart it.
+      if (getenv('HHVM_TEST_SERVER_LOG')) {
+        echo "\nServer $pid crashed. Restarting.\n";
+      }
+      Status::serverRestarted();
+      $server_proc = start_server_impl($options);
+      $server_pid = proc_get_status($server_proc)['pid'];
+    } else {
+      if (!isset($children[$pid])) {
+        error("Unexpected child pid $pid from wait");
+      }
+      unset($children[$pid]);
+      $return_value |= pcntl_wexitstatus($status);
+    }
+  }
+
+  Status::finished();
+
+  // Kill the server
+  if ($server_proc) {
+    proc_terminate($server_proc);
+    proc_close($server_proc);
+  }
 
   $results = array();
   foreach ($bad_test_files as $bad_test_file) {

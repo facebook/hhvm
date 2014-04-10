@@ -106,14 +106,6 @@ final class ImmVector<Tv> implements ConstVector<Tv> {
 
   public static function fromItems(?Traversable<Tv> $items): ImmVector<Tv>;
 
-  /**
-   * Slice an ImmVector. This function provides the functionality of
-   * array_slice() for ImmVectors. Note that this function returns
-   * a new ImmVector and does not modify the original ImmVector.
-   */
-  public static function slice(ImmVector<Tv> $v, int $offset,
-                               ?int $len = null): ImmVector<Tv>;
-
   public function __toString(): string;
 
   public function items(): Iterable<Tv>;

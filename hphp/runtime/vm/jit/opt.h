@@ -32,7 +32,7 @@ class IRInstruction;
 /*
  * The main optimization passes, in the order they run.
  */
-void optimizeRefcounts(IRUnit&, FrameState&&) noexcept;
+void optimizeRefcounts(IRUnit&, FrameState&&);
 void optimizePredictions(IRUnit&);
 void optimizeJumps(IRUnit&);
 void eliminateDeadCode(IRUnit&);

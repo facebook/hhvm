@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -44,6 +44,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
+#include "hphp/runtime/ext/wddx/ext_wddx.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
@@ -300,7 +301,7 @@ static StaticString s_write("write");
 static StaticString s_gc("gc");
 static StaticString s_destroy("destroy");
 
-Class *SystemlibSessionModule::s_SHIClass = nullptr;
+LowClassPtr SystemlibSessionModule::s_SHIClass = nullptr;
 
 /**
  * Relies on the fact that only one SessionModule will be active
@@ -1009,7 +1010,7 @@ public:
       if (has_value) {
         vu.set(p, endptr);
         try {
-          auto& sess = g->getRef(s__SESSION);
+          auto& sess = tvAsVariant(g->nvGet(s__SESSION.get()));
           forceToArray(sess).set(key, vu.unserialize());
           p = vu.head();
         } catch (Exception &e) {
@@ -1074,7 +1075,7 @@ public:
       if (has_value) {
         vu.set(q, endptr);
         try {
-          auto& sess = g->getRef(s__SESSION);
+          auto& sess = tvAsVariant(g->nvGet(s__SESSION.get()));
           forceToArray(sess).set(key, vu.unserialize());
           q = vu.head();
         } catch (Exception &e) {
@@ -1086,6 +1087,48 @@ public:
   }
 };
 static PhpSessionSerializer s_php_session_serializer;
+
+class WddxSessionSerializer : public SessionSerializer {
+public:
+  WddxSessionSerializer() : SessionSerializer("wddx") {}
+
+  virtual String encode() {
+    WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(empty_string, true, true);
+    GlobalVariables *g = get_global_variables();
+
+    for (ArrayIter iter(g->get(s__SESSION).toArray()); iter; ++iter) {
+      Variant key = iter.first();
+      if (key.isString()) {
+        wddxPacket->recursiveAddVar(key.toString(), iter.second(), true);
+      } else {
+        raise_notice("Skipping numeric key %" PRId64, key.toInt64());
+      }
+    }
+
+    string spacket = wddxPacket->packet_end();
+    return String(spacket);
+  }
+
+  virtual bool decode(const String& value) {
+    Array params = Array::Create();
+    params.append(value);
+    Variant ret = vm_call_user_func("wddx_deserialize", params, true);
+    GlobalVariables *g = get_global_variables();
+    if (ret.isArray()) {
+      Array arr = ret.toArray();
+
+      for (ArrayIter iter(arr); iter; ++iter) {
+        Variant key = iter.first();
+        Variant value = iter.second();
+        auto& sess = tvAsVariant(g->nvGet(s__SESSION.get()));
+        forceToArray(sess).set(key, value);
+      }
+    }
+
+    return true;
+  }
+};
+static WddxSessionSerializer s_wddx_session_serializer;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1496,13 +1539,13 @@ const StaticString
   s_httponly("httponly");
 
 Array f_session_get_cookie_params() {
-  ArrayInit ret(5);
-  ret.set(s_lifetime, PS(cookie_lifetime));
-  ret.set(s_path,     String(PS(cookie_path)));
-  ret.set(s_domain,   String(PS(cookie_domain)));
-  ret.set(s_secure,   PS(cookie_secure));
-  ret.set(s_httponly, PS(cookie_httponly));
-  return ret.toArray();
+  return make_map_array(
+    s_lifetime, PS(cookie_lifetime),
+    s_path,     String(PS(cookie_path)),
+    s_domain,   String(PS(cookie_domain)),
+    s_secure,   PS(cookie_secure),
+    s_httponly, PS(cookie_httponly)
+  );
 }
 
 String f_session_name(const String& newname /* = null_string */) {
@@ -1812,7 +1855,7 @@ Variant f_session_unset() {
     return false;
   }
   GlobalVariables *g = get_global_variables();
-  g->getRef(s__SESSION) = Variant();
+  tvAsVariant(g->nvGet(s__SESSION.get())) = Variant();
   return uninit_null();
 }
 

@@ -492,60 +492,87 @@ public:
         curl_httppost *last  = nullptr;
         for (ArrayIter iter(arr); iter; ++iter) {
           String key = iter.first().toString();
-          String val = iter.second().toString();
-          const char *postval = val.data();
+          Variant var_val = iter.second();
+          if (UNLIKELY(var_val.isObject()
+              && var_val.toObject()->instanceof(SystemLib::s_CURLFileClass))) {
+            Object val = var_val.toObject();
 
-          if (*postval == '@') {
-            /* Given a string like:
-             *   "@/foo/bar;type=herp/derp;filename=ponies\0"
-             * - Temporarily convert to:
-             *   "@/foo/bar\0type=herp/derp\0filename=ponies\0"
-             * - Pass pointers to the relevant null-terminated substrings to
-             *   curl_formadd
-             * - Revert changes to postval at the end
-             */
-            char* mutablePostval = const_cast<char*>(postval);
-            char* type = strstr(mutablePostval, ";type=");
-            char* filename = strstr(mutablePostval, ";filename=");
+            static const StaticString s_name("name");
+            static const StaticString s_mime("mime");
+            static const StaticString s_postname("postname");
 
-            if (type) {
-              *type = '\0';
-            }
-            if (filename) {
-              *filename = '\0';
-            }
+            String name = val.o_get(s_name).toString();
+            String mime = val.o_get(s_mime).toString();
+            String postname = val.o_get(s_postname).toString();
 
-            /* The arguments after _NAMELENGTH and _CONTENTSLENGTH
-             * must be explicitly cast to long in curl_formadd
-             * use since curl needs a long not an int. */
-            ++postval;
             m_error_no = (CURLcode)curl_formadd
               (&first, &last,
                CURLFORM_COPYNAME, key.data(),
                CURLFORM_NAMELENGTH, (long)key.size(),
-               CURLFORM_FILENAME, filename
-                                  ? filename + sizeof(";filename=") - 1
-                                  : postval,
-               CURLFORM_CONTENTTYPE, type
-                                     ? type + sizeof(";type=") - 1
-                                     : "application/octet-stream",
-               CURLFORM_FILE, postval,
+               CURLFORM_FILENAME, s_postname.empty()
+                                  ? name.c_str()
+                                  : postname.c_str(),
+               CURLFORM_CONTENTTYPE, mime.empty()
+                                     ? "application/octet-stream"
+                                     : mime.c_str(),
+               CURLFORM_FILE, name.c_str(),
                CURLFORM_END);
-
-            if (type) {
-              *type = ';';
-            }
-            if (filename) {
-              *filename = ';';
-            }
           } else {
-            m_error_no = (CURLcode)curl_formadd
-              (&first, &last,
-               CURLFORM_COPYNAME, key.data(),
-               CURLFORM_NAMELENGTH, (long)key.size(),
-               CURLFORM_COPYCONTENTS, postval,
-               CURLFORM_CONTENTSLENGTH,(long)val.size(),
-               CURLFORM_END);
+            String val = var_val.toString();
+            const char *postval = val.data();
+
+            if (*postval == '@') {
+              /* Given a string like:
+               *   "@/foo/bar;type=herp/derp;filename=ponies\0"
+               * - Temporarily convert to:
+               *   "@/foo/bar\0type=herp/derp\0filename=ponies\0"
+               * - Pass pointers to the relevant null-terminated substrings to
+               *   curl_formadd
+               * - Revert changes to postval at the end
+               */
+              char* mutablePostval = const_cast<char*>(postval);
+              char* type = strstr(mutablePostval, ";type=");
+              char* filename = strstr(mutablePostval, ";filename=");
+
+              if (type) {
+                *type = '\0';
+              }
+              if (filename) {
+                *filename = '\0';
+              }
+
+              /* The arguments after _NAMELENGTH and _CONTENTSLENGTH
+               * must be explicitly cast to long in curl_formadd
+               * use since curl needs a long not an int. */
+              ++postval;
+              m_error_no = (CURLcode)curl_formadd
+                (&first, &last,
+                 CURLFORM_COPYNAME, key.data(),
+                 CURLFORM_NAMELENGTH, (long)key.size(),
+                 CURLFORM_FILENAME, filename
+                                    ? filename + sizeof(";filename=") - 1
+                                    : postval,
+                 CURLFORM_CONTENTTYPE, type
+                                       ? type + sizeof(";type=") - 1
+                                       : "application/octet-stream",
+                 CURLFORM_FILE, postval,
+                 CURLFORM_END);
+
+              if (type) {
+                *type = ';';
+              }
+              if (filename) {
+                *filename = ';';
+              }
+            } else {
+              m_error_no = (CURLcode)curl_formadd
+                (&first, &last,
+                 CURLFORM_COPYNAME, key.data(),
+                 CURLFORM_NAMELENGTH, (long)key.size(),
+                 CURLFORM_COPYCONTENTS, postval,
+                 CURLFORM_CONTENTSLENGTH,(long)val.size(),
+                 CURLFORM_END);
+            }
           }
         }
 
@@ -695,16 +722,16 @@ public:
     assert(p);
     CurlResource* curl = static_cast<CurlResource*>(p);
 
-    ArrayInit ai(5);
-    ai.set(Resource(curl));
-    ai.set(dltotal);
-    ai.set(dlnow);
-    ai.set(ultotal);
-    ai.set(ulnow);
+    PackedArrayInit pai(5);
+    pai.append(Resource(curl));
+    pai.append(dltotal);
+    pai.append(dlnow);
+    pai.append(ultotal);
+    pai.append(ulnow);
 
     Variant result = vm_call_user_func(
       curl->m_progress_callback,
-      ai.toArray()
+      pai.toArray()
     );
     // Both PHP and libcurl are documented as return 0 to continue, non-zero
     // to abort, however this is what Zend actually implements
@@ -968,7 +995,7 @@ Variant HHVM_FUNCTION(curl_version, int uversion /* = k_CURLVERSION_NOW */) {
     return false;
   }
 
-  ArrayInit ret(9);
+  ArrayInit ret(9, ArrayInit::Map{});
   ret.set(s_version_number,     (int)d->version_num);
   ret.set(s_age,                d->age);
   ret.set(s_features,           d->features);
@@ -1230,6 +1257,10 @@ public:
       m_easyh.clear();
       m_multi = nullptr;
     }
+  }
+
+  virtual bool isInvalid() const {
+    return !m_multi;
   }
 
   void add(const Resource& ch) {

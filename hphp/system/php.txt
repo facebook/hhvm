@@ -37,6 +37,7 @@ hphp/system/php/spl/interfaces/OuterIterator.php
 hphp/system/php/spl/iterators/IteratorIterator.php
 hphp/system/php/spl/iterators/AppendIterator.php
 hphp/system/php/spl/iterators/FilterIterator.php
+hphp/system/php/spl/iterators/CallbackFilterIterator.php
 hphp/system/php/spl/iterators/RecursiveFilterIterator.php
 hphp/system/php/spl/iterators/RegexIterator.php
 hphp/system/php/spl/iterators/RecursiveRegexIterator.php
@@ -60,6 +61,10 @@ hphp/system/php/sessions/session_set_save_handler.ns.php
 
 hphp/system/php/redis/RedisException.php
 
+hphp/system/php/archive_handler/ArchiveHandler.ns.php
+hphp/system/php/archive_handler/TarArchiveHandler.ns.php
+hphp/system/php/archive_handler/ZipArchiveHandler.ns.php
+
 hphp/system/php/phar/PharException.php
 hphp/system/php/phar/Phar.php
 hphp/system/php/phar/PharFileInfo.php
@@ -75,6 +80,7 @@ hphp/system/php/array_map.hhas
 hphp/system/php/asio/Awaitable.php
 hphp/system/php/asio/InvalidOperationException.php
 hphp/system/php/collections/collections.ns.php
+hphp/system/php/curl/CURLFile.php
 hphp/system/php/date/dateperiod.php
 hphp/system/php/date/datetime_funcs.php
 hphp/system/php/dom/DOMException.php

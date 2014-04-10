@@ -83,6 +83,8 @@ struct PhysReg {
   explicit constexpr PhysReg(Reg32 r) : n(int(RegNumber(r))) {}
 
   constexpr /* implicit */ PhysReg(vixl::Register r) : n(r.code()) {}
+  constexpr /* implicit */ PhysReg(vixl::FPRegister r)
+    : n(r.code() + kSIMDOffset) {}
 
   explicit constexpr PhysReg(RegNumber r) : n(int(r)) {}
 

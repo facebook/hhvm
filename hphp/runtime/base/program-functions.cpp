@@ -170,7 +170,7 @@ String k_PHP_SAPI;
 static void process_cmd_arguments(int argc, char **argv) {
   GlobalVariables *g = get_global_variables();
   g->set(s_argc, Variant(argc), false);
-  Array argvArray(HphpArray::GetStaticEmptyArray());
+  Array argvArray(staticEmptyArray());
   for (int i = 0; i < argc; i++) {
     argvArray.append(String(argv[i]));
   }

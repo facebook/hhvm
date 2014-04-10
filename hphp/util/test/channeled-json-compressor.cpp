@@ -22,6 +22,7 @@
 
 #include <gtest/gtest.h>
 #include <fstream>
+#include <streambuf>
 #include <memory>
 
 
@@ -67,6 +68,7 @@ TEST(TestChanneledJsonCompressor, BaseTest) {
                        ("c", "d"),
         12.5,
         "Yo Dawg",
+        "I \\u2665 UTF-8",
         { "heh" },
         nullptr
       }

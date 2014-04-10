@@ -1,0 +1,34 @@
+array(1) {
+  ["Herp Derp"]=>
+  string(%d) "%s/test/slow/ext_phar/create_tar.php"
+}
+array(1) {
+  ["phar:///tmp/testtar%s.tar/Herp Derp"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(9) "Herp Derp"
+    [2]=>
+    string(%d) "phar:///tmp/testtar%s.tar/Herp Derp"
+    [3]=>
+    string(%d) "phar:///tmp/testtar%s.tar/Herp Derp"
+  }
+}
+array(1) {
+  ["create_tar.php"]=>
+  string(%d) "%s/test/slow/ext_phar/create_tar.php"
+}
+array(1) {
+  ["phar:///tmp/testtar%s.tar/create_tar.php"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(14) "create_tar.php"
+    [2]=>
+    string(%d) "phar:///tmp/testtar%s.tar/create_tar.php"
+    [3]=>
+    string(%d) "phar:///tmp/testtar%s.tar/create_tar.php"
+  }
+}

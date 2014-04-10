@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -36,7 +37,7 @@
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
 #include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,13 +51,13 @@ typedef tbb::concurrent_hash_map<std::string, ArrayData*> ArrayDataMap;
 static ArrayDataMap s_arrayDataMap;
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
-  if (arr->empty()) return HphpArray::GetStaticEmptyArray();
+  if (arr->empty()) return staticEmptyArray();
   auto key = f_serialize(arr).toCppString();
   return GetScalarArray(arr, key);
 }
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr, const std::string& key) {
-  if (arr->empty()) return HphpArray::GetStaticEmptyArray();
+  if (arr->empty()) return staticEmptyArray();
   assert(key == f_serialize(arr).toCppString());
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
@@ -68,417 +69,534 @@ ArrayData* ArrayData::GetScalarArray(ArrayData* arr, const std::string& key) {
   return acc->second;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-static size_t VsizeNop(const ArrayData* ad) {
-  assert(false);
-  return ad->getSize();
+static ArrayData* ZSetIntThrow(ArrayData* ad, int64_t k, RefData* v) {
+  throw FatalErrorException("Unimplemented ArrayData::ZSetInt");
 }
 
-// order: kPackedKind, kMixedKind, kSharedKind, kNvtwKind
+static ArrayData* ZSetStrThrow(ArrayData* ad, StringData* k, RefData* v) {
+  throw FatalErrorException("Unimplemented ArrayData::ZSetStr");
+}
+
+static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v) {
+  throw FatalErrorException("Unimplemented ArrayData::ZAppend");
+}
+
+//////////////////////////////////////////////////////////////////////
+
+#define DISPATCH(entry)                         \
+  { PackedArray::entry,                         \
+    MixedArray::entry,                           \
+    APCLocalArray::entry,                       \
+    EmptyArray::entry,                          \
+    NameValueTableWrapper::entry,               \
+    ProxyArray::entry                           \
+  },
+
+/*
+ * "Copy/grow" semantics:
+ *
+ *   Many of the functions that mutate arrays return an ArrayData* and
+ *   take a boolean parameter called 'copy'.  The semantics of these
+ *   functions is the following:
+ *
+ *   If the `copy' argument is false, a COW is not required for
+ *   language semantics.  The array may mutate itself in place and
+ *   return the same pointer, or the array may allocate a new array
+ *   and return that.  This is called "growing", since it may be used
+ *   if an array is out of capacity for new elements---but it is also
+ *   what happens if an array needs to change kinds and can't do that
+ *   in-place.  If an array grows, the old array pointer may not be
+ *   used for any more array operations except to eventually call
+ *   Release---these grown-from arrays are sometimes described as
+ *   being in "zombie" state.
+ *
+ *   If the `copy' argument is true, the returned array must be
+ *   indistinguishable from an array that did a COW, in terms of the
+ *   contents of the array.  Whether it is the same pointer value or
+ *   not is not specified.  Note, for example, that this means an
+ *   array doesn't have to copy if it was asked to remove an element
+ *   that doesn't exist.
+ *
+ *   When a function with these semantics returns a new array, the new
+ *   array is not yet incref'd (for historical reasons relating to our
+ *   smart pointers).  Correctly using functions with these semantics
+ *   usually involves checking whether the return value is the same
+ *   pointer to be able to conditionally incref it.  TODO(#2926276):
+ *   we want to change this to make callsites cheaper.
+ */
+
 extern const ArrayFunctions g_array_funcs = {
-  // release
-  { &PackedArray::Release,
-    &HphpArray::Release,
-    &APCLocalArray::Release,
-    &EmptyArray::Release,
-    &NameValueTableWrapper::Release,
-    &ProxyArray::Release },
-  // nvGetInt
-  { &PackedArray::NvGetInt,
-    &HphpArray::NvGetInt,
-    &APCLocalArray::NvGetInt,
-    reinterpret_cast<TypedValue*(*)(const ArrayData*, int64_t)>(
-      &EmptyArray::ReturnNull
-    ),
-    &NameValueTableWrapper::NvGetInt,
-    &ProxyArray::NvGetInt },
-  // nvGetStr
-  { &PackedArray::NvGetStr,
-    &HphpArray::NvGetStr,
-    &APCLocalArray::NvGetStr,
-    reinterpret_cast<TypedValue*(*)(const ArrayData*, const StringData*)>(
-      &EmptyArray::ReturnNull
-    ),
-    &NameValueTableWrapper::NvGetStr,
-    &ProxyArray::NvGetStr },
-  // nvGetKey
-  { &PackedArray::NvGetKey,
-    &HphpArray::NvGetKey,
-    &APCLocalArray::NvGetKey,
-    &EmptyArray::NvGetKey,
-    &NameValueTableWrapper::NvGetKey,
-    &ProxyArray::NvGetKey },
-  // setInt
-  { &PackedArray::SetInt,
-    &HphpArray::SetInt,
-    &APCLocalArray::SetInt,
-    &EmptyArray::SetInt,
-    &NameValueTableWrapper::SetInt,
-    &ProxyArray::SetInt },
-  // setStr
-  { &PackedArray::SetStr,
-    &HphpArray::SetStr,
-    &APCLocalArray::SetStr,
-    &EmptyArray::SetStr,
-    &NameValueTableWrapper::SetStr,
-    &ProxyArray::SetStr },
-  // vsize
-  { &VsizeNop,
-    &VsizeNop,
-    &VsizeNop,
-    &VsizeNop,
-    &NameValueTableWrapper::Vsize,
-    &ProxyArray::Vsize },
-  // getValueRef
-  { &HphpArray::GetValueRef,  // TODO(#3986711): layout w/ hphparray
-    &HphpArray::GetValueRef,
-    &APCLocalArray::GetValueRef,
-    &EmptyArray::GetValueRef,
-    &NameValueTableWrapper::GetValueRef,
-    &ProxyArray::GetValueRef },
-  // noCopyOnWrite
-  { false,
-    false,
-    false,
-    false,
-    true, // NameValueTableWrapper doesn't support COW.
-    false },
-  // isVectorData
-  {
-    reinterpret_cast<bool (*)(const ArrayData*)>(
-      // TODO(#3983912): move shared helpers to consolidated location
-      &EmptyArray::ReturnTrue
-    ),
-    &HphpArray::IsVectorData,
-    &APCLocalArray::IsVectorData,
-    reinterpret_cast<bool (*)(const ArrayData*)>(
-      &EmptyArray::ReturnTrue
-    ),
-    &NameValueTableWrapper::IsVectorData,
-    &ProxyArray::IsVectorData },
-  // existsInt
-  { &PackedArray::ExistsInt,
-    &HphpArray::ExistsInt,
-    &APCLocalArray::ExistsInt,
-    reinterpret_cast<bool (*)(const ArrayData*, int64_t)>(
-      &EmptyArray::ReturnFalse
-    ),
-    &NameValueTableWrapper::ExistsInt,
-    &ProxyArray::ExistsInt },
-  // existsStr
-  {
-    reinterpret_cast<bool (*)(const ArrayData*, const StringData*)>(
-      // TODO(#3983912): move shared helpers to consolidated location
-      &EmptyArray::ReturnFalse
-    ),
-    &HphpArray::ExistsStr,
-    &APCLocalArray::ExistsStr,
-    reinterpret_cast<bool (*)(const ArrayData*, const StringData*)>(
-      &EmptyArray::ReturnFalse
-    ),
-    &NameValueTableWrapper::ExistsStr,
-    &ProxyArray::ExistsStr },
-  // lvalInt
-  { &PackedArray::LvalInt,
-    &HphpArray::LvalInt,
-    &APCLocalArray::LvalInt,
-    &EmptyArray::LvalInt,
-    &NameValueTableWrapper::LvalInt,
-    &ProxyArray::LvalInt },
-  // lvalStr
-  { &PackedArray::LvalStr,
-    &HphpArray::LvalStr,
-    &APCLocalArray::LvalStr,
-    &EmptyArray::LvalStr,
-    &NameValueTableWrapper::LvalStr,
-    &ProxyArray::LvalStr },
-  // lvalNew
-  { &PackedArray::LvalNew,
-    &HphpArray::LvalNew,
-    &APCLocalArray::LvalNew,
-    &EmptyArray::LvalNew,
-    &NameValueTableWrapper::LvalNew,
-    &ProxyArray::LvalNew },
-  // setRefInt
-  { &PackedArray::SetRefInt,
-    &HphpArray::SetRefInt,
-    &APCLocalArray::SetRefInt,
-    &EmptyArray::SetRefInt,
-    &NameValueTableWrapper::SetRefInt,
-    &ProxyArray::SetRefInt },
-  // setRefStr
-  { &PackedArray::SetRefStr,
-    &HphpArray::SetRefStr,
-    &APCLocalArray::SetRefStr,
-    &EmptyArray::SetRefStr,
-    &NameValueTableWrapper::SetRefStr,
-    &ProxyArray::SetRefStr },
-  // addInt
-  { &PackedArray::AddInt,
-    &HphpArray::AddInt,
-    &APCLocalArray::SetInt, // reuse set
-    &EmptyArray::SetInt, // reuse set
-    &NameValueTableWrapper::SetInt, // reuse set
-    &ProxyArray::SetInt }, // reuse set
-  // addStr
-  { &PackedArray::SetStr, // reuse set
-    &HphpArray::AddStr,
-    &APCLocalArray::SetStr, // reuse set
-    &EmptyArray::SetStr, // reuse set
-    &NameValueTableWrapper::SetStr, // reuse set
-    &ProxyArray::SetStr }, // reuse set
-  // removeInt
-  { &PackedArray::RemoveInt,
-    &HphpArray::RemoveInt,
-    &APCLocalArray::RemoveInt,
-    reinterpret_cast<ArrayData* (*)(ArrayData*, int64_t, bool)>(
-      &EmptyArray::ReturnFirstArg
-    ),
-    &NameValueTableWrapper::RemoveInt,
-    &ProxyArray::RemoveInt },
-  // removeStr
-  { &PackedArray::RemoveStr,
-    &HphpArray::RemoveStr,
-    &APCLocalArray::RemoveStr,
-    reinterpret_cast<ArrayData* (*)(ArrayData*, const StringData*, bool)>(
-      &EmptyArray::ReturnFirstArg
-    ),
-    &NameValueTableWrapper::RemoveStr,
-    &ProxyArray::RemoveStr },
-  // iterBegin
-  { &HphpArray::IterBegin,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::IterBegin,
-    &APCLocalArray::IterBegin,
-    &EmptyArray::ReturnInvalidIndex,
-    &NameValueTableWrapper::IterBegin,
-    &ProxyArray::IterBegin },
-  // iterEnd
-  { &HphpArray::IterEnd,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::IterEnd,
-    &APCLocalArray::IterEnd,
-    &EmptyArray::ReturnInvalidIndex,
-    &NameValueTableWrapper::IterEnd,
-    &ProxyArray::IterEnd },
-  // iterAdvance
-  { &HphpArray::IterAdvance,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::IterAdvance,
-    &APCLocalArray::IterAdvance,
-    &EmptyArray::IterAdvance,
-    &NameValueTableWrapper::IterAdvance,
-    &ProxyArray::IterAdvance },
-  // iterRewind
-  { &HphpArray::IterRewind,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::IterRewind,
-    &APCLocalArray::IterRewind,
-    &EmptyArray::IterRewind,
-    &NameValueTableWrapper::IterRewind,
-    &ProxyArray::IterRewind },
-  // validMArrayIter
-  { &HphpArray::ValidMArrayIter,   // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::ValidMArrayIter,
-    &APCLocalArray::ValidMArrayIter,
-    &EmptyArray::ValidMArrayIter,
-    &NameValueTableWrapper::ValidMArrayIter,
-    &ProxyArray::ValidMArrayIter },
-  // advanceMArrayIter
-  { &HphpArray::AdvanceMArrayIter,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::AdvanceMArrayIter,
-    &APCLocalArray::AdvanceMArrayIter,
-    &EmptyArray::AdvanceMArrayIter,
-    &NameValueTableWrapper::AdvanceMArrayIter,
-    &ProxyArray::AdvanceMArrayIter },
-  // escalateForSort
-  { &HphpArray::EscalateForSort,   // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::EscalateForSort,
-    &APCLocalArray::EscalateForSort,
-    reinterpret_cast<ArrayData* (*)(ArrayData*)>(
-      &EmptyArray::ReturnFirstArg
-    ),
-    &NameValueTableWrapper::EscalateForSort,
-    &ProxyArray::EscalateForSort },
-  // ksort
-  { &HphpArray::Ksort,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::Ksort,
-    &ArrayData::Ksort,
-    reinterpret_cast<void (*)(ArrayData*, int, bool)>(
-      &EmptyArray::NoOp
-    ),
-    &NameValueTableWrapper::Ksort,
-    &ProxyArray::Ksort },
-  // sort
-  { &HphpArray::Sort,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::Sort,
-    &ArrayData::Sort,
-    reinterpret_cast<void (*)(ArrayData*, int, bool)>(
-      &EmptyArray::NoOp
-    ),
-    &NameValueTableWrapper::Sort,
-    &ProxyArray::Sort },
-  // asort
-  { &HphpArray::Asort,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::Asort,
-    &ArrayData::Asort,
-    reinterpret_cast<void (*)(ArrayData*, int, bool)>(
-      &EmptyArray::NoOp
-    ),
-    &NameValueTableWrapper::Asort,
-    &ProxyArray::Asort },
-  // uksort
-  { &HphpArray::Uksort,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::Uksort,
-    &ArrayData::Uksort,
-    reinterpret_cast<bool (*)(ArrayData*, const Variant&)>(
-      &EmptyArray::ReturnTrue
-    ),
-    &NameValueTableWrapper::Uksort,
-    &ProxyArray::Uksort },
-  // usort
-  { &HphpArray::Usort,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::Usort,
-    &ArrayData::Usort,
-    reinterpret_cast<bool (*)(ArrayData*, const Variant&)>(
-      &EmptyArray::ReturnTrue
-    ),
-    &NameValueTableWrapper::Usort,
-    &ProxyArray::Usort },
-  // uasort
-  { &HphpArray::Uasort,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::Uasort,
-    &ArrayData::Uasort,
-    reinterpret_cast<bool (*)(ArrayData*, const Variant&)>(
-      &EmptyArray::ReturnTrue
-    ),
-    &NameValueTableWrapper::Uasort,
-    &ProxyArray::Uasort },
-  // copy
-  { &PackedArray::Copy,
-    &HphpArray::Copy,
-    &APCLocalArray::Copy,
-    &EmptyArray::Copy,
-    &NameValueTableWrapper::Copy,
-    &ProxyArray::Copy },
-  // copyWithStrongIterators
-  { &HphpArray::CopyWithStrongIterators,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::CopyWithStrongIterators,
-    &APCLocalArray::CopyWithStrongIterators,
-    &EmptyArray::CopyWithStrongIterators,
-    &NameValueTableWrapper::CopyWithStrongIterators,
-    &ProxyArray::CopyWithStrongIterators },
-  // nonSmartCopy
-  { &HphpArray::NonSmartCopy,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::NonSmartCopy,
-    &ArrayData::NonSmartCopy,
-    &EmptyArray::NonSmartCopy,
-    &ProxyArray::NonSmartCopy },
-  // append
-  { &PackedArray::Append,
-    &HphpArray::Append,
-    &APCLocalArray::Append,
-    &EmptyArray::Append,
-    &NameValueTableWrapper::Append,
-    &ProxyArray::Append },
-  // appendRef
-  { &PackedArray::AppendRef,
-    &HphpArray::AppendRef,
-    &APCLocalArray::AppendRef,
-    &EmptyArray::AppendRef,
-    &NameValueTableWrapper::AppendRef,
-    &ProxyArray::AppendRef },
-  // appendWithRef
-  { &PackedArray::AppendWithRef,
-    &HphpArray::AppendWithRef,
-    &APCLocalArray::AppendRef,
-    &EmptyArray::AppendWithRef,
-    &NameValueTableWrapper::AppendRef,
-    &ProxyArray::AppendRef },
-  // plusEq
-  { &HphpArray::PlusEq,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::PlusEq,
-    &APCLocalArray::PlusEq,
-    &EmptyArray::PlusEq,
-    &NameValueTableWrapper::PlusEq,
-    &ProxyArray::PlusEq },
-  // merge
-  { &HphpArray::Merge,  // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::Merge,
-    &APCLocalArray::Merge,
-    &EmptyArray::Merge,
-    &NameValueTableWrapper::Merge,
-    &ProxyArray::Merge },
-  // pop
-  { &PackedArray::Pop,
-    &HphpArray::Pop,
-    &APCLocalArray::Pop,
-    &EmptyArray::PopOrDequeue,
-    &NameValueTableWrapper::Pop,
-    &ProxyArray::Pop },
-  // dequeue
-  { &PackedArray::Dequeue,
-    &HphpArray::Dequeue,
-    &APCLocalArray::Dequeue,
-    &EmptyArray::PopOrDequeue,
-    &NameValueTableWrapper::Dequeue,
-    &ProxyArray::Dequeue },
-  // prepend
-  { &PackedArray::Prepend,
-    &HphpArray::Prepend,
-    &APCLocalArray::Prepend,
-    &EmptyArray::Prepend,
-    &NameValueTableWrapper::Prepend,
-    &ProxyArray::Prepend },
-  // renumber
-  { reinterpret_cast<void (*)(ArrayData*)>(&EmptyArray::NoOp),
-    &HphpArray::Renumber,
-    &APCLocalArray::Renumber,
-    reinterpret_cast<void (*)(ArrayData*)>(&EmptyArray::NoOp),
-    &NameValueTableWrapper::Renumber,
-    &ProxyArray::Renumber },
-  // onSetEvalScalar
-  { &PackedArray::OnSetEvalScalar,
-    &HphpArray::OnSetEvalScalar,
-    &APCLocalArray::OnSetEvalScalar,
-    &EmptyArray::OnSetEvalScalar,
-    &NameValueTableWrapper::OnSetEvalScalar,
-    &ProxyArray::OnSetEvalScalar },
-  // escalate
-  { &ArrayData::Escalate,
-    &ArrayData::Escalate,
-    &APCLocalArray::Escalate,
-    &ArrayData::Escalate,
-    &ArrayData::Escalate,
-    &ProxyArray::Escalate },
-  // getAPCHandle
-  { &ArrayData::GetAPCHandle,
-    &ArrayData::GetAPCHandle,
-    &APCLocalArray::GetAPCHandle,
-    reinterpret_cast<APCHandle* (*)(const ArrayData*)>(
-      &EmptyArray::ReturnNull
-    ),
-    &ArrayData::GetAPCHandle,
-    &ProxyArray::GetAPCHandle },
-  // zSetInt
-  { &HphpArray::ZSetInt,        // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::ZSetInt,
-    &ArrayData::ZSetInt,
-    &ArrayData::ZSetInt,
-    &ArrayData::ZSetInt,
+  /*
+   * void Release(ArrayData*)
+   *
+   *   Free memory associated with an array.  Generally called when
+   *   the reference count on an array drops to zero.
+   */
+  DISPATCH(Release)
+
+  /*
+   * TypedValue* NvGetInt(const ArrayData*, int64_t key)
+   *
+   *   Lookup a value in an array using an integer key.  Returns
+   *   nullptr if the key is not in the array.
+   */
+  DISPATCH(NvGetInt)
+
+  /*
+   * TypedValue* NvGetStr(const ArrayData*, const StringData*)
+   *
+   *   Lookup a value in an array using a string key.  The string key
+   *   must not be an integer-like string.  Returns nullptr if the key
+   *   is not in the array.
+   */
+  DISPATCH(NvGetStr)
+
+  /*
+   * void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos)
+   *
+   *   Look up the key for an array position.  `pos' must be a valid
+   *   position for this array.
+   */
+  DISPATCH(NvGetKey)
+
+  /*
+   * ArrayData* SetInt(ArrayData*, int64_t key, const Variant& v, bool copy)
+   *
+   *   Set a value in the array for an integer key.  This function has
+   *   copy/grow semantics.
+   */
+  DISPATCH(SetInt)
+
+  /*
+   * ArrayData* SetStr(ArrayData*, StringData*, const Variant& v, bool copy)
+   *
+   *   Set a value in the array for a string key.  The string must not
+   *   be an integer-like string.  This function has copy/grow
+   *   semantics.
+   */
+  DISPATCH(SetStr)
+
+  /*
+   * size_t Vsize(const ArrayData*)
+   *
+   *   This entry point essentially is only for NameValueTableWrapper;
+   *   all the other cases are not_reached().
+   *
+   *   Because of particulars of how NameValueTableWrapper works,
+   *   determining the size of the array is an O(N) operation---we set
+   *   the size field in the generic ArrayData header to -1 in that
+   *   case and dispatch through this entry point.  ProxyArray also
+   *   always involves virtual size, because of the possibility that
+   *   it could be proxying a NameValueTableWrapper.
+   */
+  DISPATCH(Vsize)
+
+  /*
+   * const Variant& GetValueRef(const ArrayData*, ssize_t pos)
+   *
+   *   Return a reference to the value at an iterator position.  `pos'
+   *   must be a valid position for this array.
+   */
+  DISPATCH(GetValueRef)
+
+  /*
+   * bool IsVectorData(const ArrayData*)
+   *
+   *   Returns true if this array is empty, or if it has only
+   *   contiguous integer keys and the first key is zero.  Determining
+   *   this may be an O(N) operation.
+   */
+  DISPATCH(IsVectorData)
+
+  /*
+   * bool ExistsInt(const ArrayData*, int64_t key)
+   *
+   *   Returns true iff this array contains an element with the
+   *   supplied integer key.
+   */
+  DISPATCH(ExistsInt)
+
+  /*
+   * bool ExistsStr(const ArrayData*, const StringData*)
+   *
+   *   Return true iff this array contains an element with the
+   *   supplied string key.  The string must not be an integer-like
+   *   string.
+   */
+  DISPATCH(ExistsStr)
+
+  /*
+   * ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& out, bool copy)
+   *
+   *   Looks up a value in the array by the supplied integer key,
+   *   creating it as a KindOfNull if it doesn't exist, and sets `out'
+   *   to point to it.  This function has copy/grow semantics.
+   */
+  DISPATCH(LvalInt)
+
+  /*
+   * ArrayData* LvalStr(ArrayData*, StringData* key, Variant*& out, bool copy)
+   *
+   *   Looks up a value in the array by the supplied string key,
+   *   creating it as a KindOfNull if it doesn't exist, and sets `out'
+   *   to point to it.  The string `key' may not be an integer-like
+   *   string.  This function has copy/grow semantics.
+   */
+  DISPATCH(LvalStr)
+
+  /*
+   * ArrayData* LvalNew(ArrayData*, Variant*& out, bool copy)
+   *
+   *   This function inserts a new null value in the array at the next
+   *   available integer key, and then sets `out' to point to it.  In
+   *   the case that there is no next available integer key, this
+   *   function sets out to point to the lvalBlackHole.  This function
+   *   has copy/grow semantics.
+   */
+  DISPATCH(LvalNew)
+
+  /*
+   * ArrayData* SetRefInt(ArrayData*, int64_t key, Variant& v, bool copy)
+   *
+   *   Binding set with an integer key.  Box `v' if it is not already
+   *   boxed, and then insert a KindOfRef that points to v's RefData.
+   *   This function has copy/grow semantics.
+   */
+  DISPATCH(SetRefInt)
+
+  /*
+   * ArrayData* SetRefStr(ArrayData*, StringData* key, Variant& v, bool copy)
+   *
+   *  Binding set with a string key.  The string `key' must not be an
+   *  integer-like string.  Box `v' if it is not already boxed, and
+   *  then insert a KindOfRef that points to v's RefData.  This
+   *  function has copy/grow semantics.
+   */
+  DISPATCH(SetRefStr)
+
+  /*
+   * ArrayData* AddInt(ArrayData*, int64_t key, const Variant&, bool copy)
+   * ArrayData* AddStr(ArrayData*, StringData* key, const Variant&, bool copy)
+   *
+   *   These functions have the same effects as SetInt and SetStr,
+   *   respectively, except that the array may assume that it does not
+   *   already contain a value for the key `key' if it can make the
+   *   operation more efficient.
+   */
+  DISPATCH(SetInt)
+  DISPATCH(SetStr)
+
+  /*
+   * ArrayData* RemoveInt(ArrayData*, int64_t key, bool copy)
+   *
+   *   Remove an array element with an integer key.  If there was no
+   *   entry for that element, this function does not remove it, and
+   *   may or may not cow.  This function has copy/grow semantics.
+   */
+  DISPATCH(RemoveInt)
+
+  /*
+   * ArrayData* RemoveStr(ArrayData*, const StringData*, bool copy)
+   *
+   *   Remove an array element with a string key.  If there was no
+   *   entry for that element, this function does not remove it, and
+   *   may or may not cow.  This function has copy/grow semantics.
+   */
+  DISPATCH(RemoveStr)
+
+  /*
+   * ssize_t IterBegin(const ArrayData*)
+   * ssize_t IterEnd(const ArrayData*)
+   *
+   *   Array positions are represented as an opaque ssize_t.
+   *   IterBegin returns the position of the first element in the
+   *   array, and IterEnd returns the position of the last element in
+   *   the array.  Either function may return ArrayData::invalid_index
+   *   if there is no first or last element.
+   */
+  DISPATCH(IterBegin)
+  DISPATCH(IterEnd)
+
+  /*
+   * ssize_t IterAdvance(const ArrayData*, ssize_t pos)
+   *
+   *   Advance `pos' to the next position in the array.  `pos' may be
+   *   invalid_index, in which case this function returns the position
+   *   of the first element in the array.  Returns invalid_index if
+   *   there is no next position in the array.
+   */
+  DISPATCH(IterAdvance)
+
+  /*
+   * ssize_t IterRewind(const ArrayData*, ssize_t pos)
+   *
+   *   Move `pos' to the position of the previous element in the
+   *   array.  `pos' may be invalid_index, in which case this function
+   *   returns invalid_index.  Returns invalid_index if there is no
+   *   previous position in the array.
+   */
+  DISPATCH(IterRewind)
+
+  /*
+   * bool ValidMArrayIter(const ArrayData*, const MArrayIter& fp)
+   *
+   *    Returns whether a given MArrayIter is pointing at a valid
+   *    position for this array.  This should return false if the
+   *    MArrayIter is in the reset flag state.
+   *
+   *    This function may not be called without first calling
+   *    Escalate.
+   *
+   *    Pre: fp.getContainer() == ad
+   */
+  DISPATCH(ValidMArrayIter)
+
+  /*
+   * bool AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp)
+   *
+   *   Advance a mutable array iterator to the next position.
+   *
+   *   This function may not be called without first calling Escalate.
+   *
+   *   Pre: fp.getContainer() == ad
+   */
+  DISPATCH(AdvanceMArrayIter)
+
+  /*
+   * ArrayData* EscalateForSort(ArrayData*)
+   *
+   *   Must be called before calling any of the sort routines on an
+   *   array.  This gives arrays a chance to change to a kind that
+   *   supports sorting.
+   */
+  DISPATCH(EscalateForSort)
+
+  /*
+   * void Ksort(int sort_flags, bool ascending)
+   *
+   *   Sort an array by its keys, keeping the values associated with
+   *   their respective keys.
+   */
+  DISPATCH(Ksort)
+
+  /*
+   * void Sort(int sort_flags, bool ascending)
+   *
+   *   Sort an array, by values, and then assign new keys to the
+   *   elements in the resulting array.
+   */
+  DISPATCH(Sort)
+
+  /*
+   * void Asort(int sort_flags, bool ascending)
+   *
+   *   Sort an array and maintain index association.  This means sort
+   *   the array by values, but keep the keys associated with the
+   *   values they used to be associated with.
+   */
+  DISPATCH(Asort)
+
+  /*
+   * bool Uksort(ArrayData*, const Variant&)
+   *
+   *   Sort on keys with a user-defined compare function (in the
+   *   variant argument).  Returns false if the user comparison
+   *   function modifies the array we are sorting.
+   */
+  DISPATCH(Uksort)
+
+  /*
+   * bool Usort(ArrayData*, const Variant&)
+   *
+   *   Sort the array by values with a user-defined comparison
+   *   function (in the variant).  Returns false if the user-defined
+   *   comparison function modifies the array we are sorting.
+   */
+  DISPATCH(Usort)
+
+  /*
+   * bool Uasort(ArrayData*, const Variant&)
+   *
+   *   Sort array by values with a user-defined comparison function
+   *   (in the variant arg), keeping the original indexes associated
+   *   with the values.  Returns false if the user-defined comparison
+   *   function modifies the array we are sorting.
+   */
+  DISPATCH(Uasort)
+
+  /*
+   * ArrayData* Copy(const ArrayData*)
+   *
+   *   Explicitly request that an array be copyied.  This API does
+   *   /not/ actually guarantee a copy occurs.
+   *
+   *   (E.g. NameValueTableWrapper doesn't copy here.)
+   */
+  DISPATCH(Copy)
+
+  /*
+   * ArrayData* CopyWithStrongIterators(const ArrayData*)
+   *
+   *   Explicitly request an array be copied, and that any associated
+   *   strong iterators are moved to the new array.  This API does
+   *   /not/ actually guarantee a copy occurs, but if it does any
+   *   assoicated strong iterators must be moved.
+   */
+  DISPATCH(CopyWithStrongIterators)
+
+  /*
+   * ArrayData* NonSmartCopy(const ArrayData*)
+   *
+   *   Copy an array, allocating the new array with malloc() instead
+   *   of from the request local allocator.  This function does
+   *   guarantee the returned array is a new copy---but it may throw a
+   *   fatal error if this cannot be accomplished (e.g. for $GLOBALS).
+   */
+  DISPATCH(NonSmartCopy)
+
+  /*
+   * ArrayData* Append(ArrayData*, const Variant& v, bool copy)
+   *
+   *   Append a new value to the array, with the next available
+   *   integer key.  If there is no next available integer key, no
+   *   value is appended.  This function has copy/grow semantics.
+   */
+  DISPATCH(Append)
+
+  /*
+   * ArrayData* AppendRef(ArrayData*, Variant& v, bool copy)
+   *
+   *   Binding append.  This function appends a new KindOfRef to the
+   *   array with the next available integer key, boxes v if it is not
+   *   already boxed, and points the new value to the same RefData.
+   *   If there is no next available integer key, this function does
+   *   not append a value.  This function has copy/grow semantics.
+   */
+  DISPATCH(AppendRef)
+
+  /*
+   * ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy)
+   *
+   *   "With ref" append.  This function appends a new value to the
+   *   array with the next available integer key, if there is a next
+   *   available integer key.  It either sets the value to `v', or
+   *   binds the value to `v', depending on whether `v' is "observably
+   *   referenced"---i.e. if `v' is already KindOfRef and
+   *   RefData::isReferenced is true.
+   */
+  DISPATCH(AppendWithRef)
+
+  /*
+   * ArrayData* PlusEq(ArrayData*, const ArrayData* elems)
+   *
+   *    Performs array addition, logically mutating the first array.
+   *    It may return a new array if the array needed to grow, or if
+   *    it needed to COW because hasMultipleRefs was true---in this
+   *    case the new returned array will already have a reference
+   *    count of 1.
+   */
+  DISPATCH(PlusEq)
+
+  /*
+   * ArrayData* Merge(ArrayData*, const ArrayData* elems)
+   *
+   *   Perform part of the semantics of the php function array_merge.
+   *   (Renumbering keys is not done by this routine currently.)
+   *
+   *   This function always produces a new array with reference count 1.
+   */
+  DISPATCH(Merge)
+
+  /*
+   * ArrayData* Pop(ArrayData*, Variant& value);
+   *
+   *   Remove the last element from the array and assign it to
+   *   `value'.  This function may return a new (not yet incref'd)
+   *   array if it decided to COW due to hasMultipleRefs().
+   */
+  DISPATCH(Pop)
+
+  /*
+   * ArrayData* Dequeue(ArrayData*, Variant& value)
+   *
+   *   Remove the first element from the array and assign it to
+   *   `value'.  This function may return a new (not yet incref'd)
+   *   array if it decided to COW due to hasMultipleRefs().
+   */
+  DISPATCH(Dequeue)
+
+  /*
+   * ArrayData* Prepend(ArrayData*, const Variant& `v', bool copy)
+   *
+   *   Insert `v' as the first element of the array.  Then renumber
+   *   integer keys.  This function has copy/grow semantics.
+   */
+  DISPATCH(Prepend)
+
+  /*
+   * void Renumber(ArrayData*)
+   *
+   *   Renumber integer keys on the array in place.
+   */
+  DISPATCH(Renumber)
+
+  /*
+   * void OnSetEvalScalar(ArrayData*)
+   *
+   *   Go through an array and call Variant::setEvalScalar on each
+   *   value, and make all string keys into static strings.
+   */
+  DISPATCH(OnSetEvalScalar)
+
+  /*
+   * ArrayData* Escalate(const ArrayData*)
+   *
+   *   Arrays must be given a chance to 'escalate' to more general
+   *   kinds prior to some unusual operations.  The operations that
+   *   are only legal after a call to Escalate are:
+   *
+   *      - ValidMArrayIter
+   *      - AdvanceMArrayIter
+   */
+  DISPATCH(Escalate)
+
+  /*
+   * GetAPCHandle* GetAPCHandle(const ArrayData*)
+   *
+   *   If this array has an associated APCHandle, return it.
+   */
+  DISPATCH(GetAPCHandle)
+
+  /*
+   * ArrayData* ZSet{Int,Str}
+   * ArrayData* ZAppend
+   *
+   *   These functions are part of the zend compat layer but their
+   *   effects currently aren't documented.
+   */
+  { &PackedArray::ZSetInt,
+    &MixedArray::ZSetInt,
+    &ZSetIntThrow,
+    &ZSetIntThrow,
+    &ZSetIntThrow,
     &ProxyArray::ZSetInt },
-  // zSetStr
-  { &HphpArray::ZSetStr,        // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::ZSetStr,
-    &ArrayData::ZSetStr,
-    &ArrayData::ZSetStr,
-    &ArrayData::ZSetStr,
+  { &PackedArray::ZSetStr,
+    &MixedArray::ZSetStr,
+    &ZSetStrThrow,
+    &ZSetStrThrow,
+    &ZSetStrThrow,
     &ProxyArray::ZSetStr },
-  // zAppend
-  { &HphpArray::ZAppend,        // TODO(#3986711): layout w/ HphpArray
-    &HphpArray::ZAppend,
-    &ArrayData::ZAppend,
-    &ArrayData::ZAppend,
-    &ArrayData::ZAppend,
+  { &PackedArray::ZAppend,
+    &MixedArray::ZAppend,
+    &ZAppendThrow,
+    &ZAppendThrow,
+    &ZAppendThrow,
     &ProxyArray::ZAppend },
 };
+
+#undef DISPATCH
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -495,40 +613,34 @@ bool ArrayData::IsValidKey(const Variant& k) {
          (k.isString() && IsValidKey(k.getStringData()));
 }
 
-// constructors/destructors
-
 ArrayData *ArrayData::Create() {
-  return ArrayInit((ssize_t)0).create();
+  return staticEmptyArray();
 }
 
 ArrayData *ArrayData::Create(const Variant& value) {
-  ArrayInit init(1);
-  init.set(value);
-  return init.create();
+  PackedArrayInit pai(1);
+  pai.append(value);
+  return pai.create();
 }
 
 ArrayData *ArrayData::Create(const Variant& name, const Variant& value) {
-  ArrayInit init(1);
+  ArrayInit init(1, ArrayInit::Map{});
   // There is no toKey() call on name.
   init.set(name, value, true);
   return init.create();
 }
 
-ArrayData *ArrayData::CreateRef(const Variant& value) {
-  ArrayInit init(1);
-  init.setRef(value);
-  return init.create();
+ArrayData *ArrayData::CreateRef(Variant& value) {
+  PackedArrayInit pai(1);
+  pai.appendRef(value);
+  return pai.create();
 }
 
-ArrayData *ArrayData::CreateRef(const Variant& name, const Variant& value) {
-  ArrayInit init(1);
+ArrayData *ArrayData::CreateRef(const Variant& name, Variant& value) {
+  ArrayInit init(1, ArrayInit::Map{});
   // There is no toKey() call on name.
   init.setRef(name, value, true);
   return init.create();
-}
-
-ArrayData *ArrayData::NonSmartCopy(const ArrayData*) {
-  throw FatalErrorException("nonSmartCopy not implemented.");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -590,85 +702,6 @@ bool ArrayData::equal(const ArrayData *v2, bool strict) const {
   return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// stack and queue operations
-
-ArrayData *ArrayData::Pop(ArrayData* a, Variant &value) {
-  if (!a->empty()) {
-    ssize_t pos = a->iter_end();
-    value = a->getValue(pos);
-    return a->remove(a->getKey(pos), a->hasMultipleRefs());
-  }
-  value = uninit_null();
-  return a;
-}
-
-ArrayData *ArrayData::Dequeue(ArrayData* a, Variant &value) {
-  if (!a->empty()) {
-    auto const pos = a->iter_begin();
-    value = a->getValue(pos);
-    ArrayData *ret = a->remove(a->getKey(pos), a->hasMultipleRefs());
-
-    // In PHP, array_shift() will cause all numerically key-ed values re-keyed
-    ret->renumber();
-    return ret;
-  }
-  value = uninit_null();
-  return a;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-const Variant& ArrayData::endRef() {
-  if (m_pos != invalid_index) {
-    return getValueRef(iter_end());
-  }
-  throw FatalErrorException("invalid ArrayData::m_pos");
-}
-
-void ArrayData::Ksort(ArrayData*, int sort_flags, bool ascending) {
-  throw FatalErrorException("Unimplemented ArrayData::ksort");
-}
-
-void ArrayData::Sort(ArrayData*, int sort_flags, bool ascending) {
-  throw FatalErrorException("Unimplemented ArrayData::sort");
-}
-
-void ArrayData::Asort(ArrayData*, int sort_flags, bool ascending) {
-  throw FatalErrorException("Unimplemented ArrayData::asort");
-}
-
-bool ArrayData::Uksort(ArrayData*, const Variant& cmp_function) {
-  throw FatalErrorException("Unimplemented ArrayData::uksort");
-}
-
-bool ArrayData::Usort(ArrayData*, const Variant& cmp_function) {
-  throw FatalErrorException("Unimplemented ArrayData::usort");
-}
-
-bool ArrayData::Uasort(ArrayData*, const Variant& cmp_function) {
-  throw FatalErrorException("Unimplemented ArrayData::uasort");
-}
-
-ArrayData* ArrayData::CopyWithStrongIterators(const ArrayData* ad) {
-  throw FatalErrorException("Unimplemented ArrayData::copyWithStrongIterators");
-}
-
-ArrayData* ArrayData::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
-  throw FatalErrorException("Unimplemented ArrayData::ZSetInt");
-}
-
-ArrayData* ArrayData::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
-  throw FatalErrorException("Unimplemented ArrayData::ZSetStr");
-}
-
-ArrayData* ArrayData::ZAppend(ArrayData* ad, RefData* v) {
-  throw FatalErrorException("Unimplemented ArrayData::ZAppend");
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Default implementation of position-based iterations.
-
 Variant ArrayData::reset() {
   setPosition(iter_begin());
   return m_pos != invalid_index ? getValue(m_pos) : Variant(false);
@@ -717,7 +750,7 @@ const StaticString
 
 Variant ArrayData::each() {
   if (m_pos != invalid_index) {
-    ArrayInit ret(4);
+    ArrayInit ret(4, ArrayInit::Mixed{});
     Variant key(getKey(m_pos));
     Variant value(getValue(m_pos));
     ret.set(1, value);
@@ -798,18 +831,6 @@ const Variant& ArrayData::getNotFound(const String& k) {
 const Variant& ArrayData::getNotFound(const Variant& k) {
   raise_notice("Undefined index: %s", k.toString().data());
   return null_variant;
-}
-
-void ArrayData::Renumber(ArrayData*) {
-}
-
-void ArrayData::OnSetEvalScalar(ArrayData*) {
-  assert(false);
-}
-
-// TODO(#3983912): combine with EmptyArray::ReturnFirstArg
-ArrayData* ArrayData::Escalate(const ArrayData* ad) {
-  return const_cast<ArrayData*>(ad);
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {

@@ -17,7 +17,6 @@
 
 include(HPHPSetup)
 include(FollySetup)
-include(ExtZendCompat)
 
 add_definitions("-DHHVM")
 
@@ -45,6 +44,10 @@ add_subdirectory(parser)
 add_subdirectory(runtime)
 add_subdirectory(runtime/ext)
 add_subdirectory(runtime/ext_hhvm)
+if (LINUX)
+	add_definitions("-DENABLE_ZEND_COMPAT")
+	add_subdirectory(runtime/ext_zend_compat)
+endif()
 add_subdirectory(system)
 add_subdirectory(util)
 add_subdirectory(vixl)
@@ -52,7 +55,8 @@ add_subdirectory(zend)
 
 add_subdirectory(hhvm)
 
-if (NOT "$ENV{HPHP_NOTEST}" STREQUAL "1")
+option(TEST_BIN "Create the HHVM test binary" OFF)
+if (TEST_BIN)
 	add_subdirectory(test)
 endif ()
 

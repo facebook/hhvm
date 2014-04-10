@@ -22,8 +22,11 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <tuple>
 
 #include <boost/variant.hpp>
+
+#include <tbb/concurrent_hash_map.h>
 
 #include "folly/Conv.h"
 #include "folly/String.h"
@@ -37,6 +40,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/interp-internal.h"
 #include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/analyze.h"
 
@@ -77,6 +81,34 @@ struct TypeStat {
 #undef X
 };
 
+struct ISameCmp {
+  bool equal(SString s1, SString s2) const {
+    return s1->isame(s2);
+  }
+
+  size_t hash(SString s) const {
+    return s->hash();
+  }
+};
+
+// Information about builtins usage.
+// The tuple contains the known return type for the builtin, the total
+// number of calls seen and the total number of calls that could be reduced.
+// A builtin call is considered reducible if its output is a constant and
+// all its inputs are constants. That is not a guaranteed condition but it
+// gives us an idea of what's possible
+typedef tbb::concurrent_hash_map<
+    SString,
+    std::tuple<Type, uint64_t, uint64_t>,
+    ISameCmp
+  > BuiltinInfo;
+
+struct Builtins {
+  std::atomic<uint64_t> totalBuiltins;
+  std::atomic<uint64_t> reducibleBuiltins;
+  BuiltinInfo builtinsInfo;
+};
+
 struct Stats {
   std::array<std::atomic<uint64_t>,Op_count> op_counts;
   std::atomic<uint64_t> persistentClasses;
@@ -89,6 +121,7 @@ struct Stats {
   TypeStat privateProps;
   TypeStat privateStatics;
   TypeStat cgetmBase;
+  Builtins builtins;
 };
 
 void type_stat_string(std::string& ret,
@@ -102,6 +135,31 @@ void type_stat_string(std::string& ret,
   STAT_TYPES
 #undef X
   ret += "\n";
+}
+
+std::string show(const Builtins& builtins) {
+  auto ret = std::string{};
+
+  if (builtins.builtinsInfo.begin() != builtins.builtinsInfo.end()) {
+    ret += folly::format("Total number of builtin calls: {: >15}\n",
+                         builtins.totalBuiltins.load()).str();
+    ret += folly::format("Possible reducible builtins: {: >15}\n",
+                         builtins.reducibleBuiltins.load()).str();
+
+    ret += "Builtins Info:\n";
+    for (auto it = builtins.builtinsInfo.begin();
+         it != builtins.builtinsInfo.end(); ++it) {
+      ret += folly::format(
+        "  {: >30} [tot:{: >8}, red:{: >8}]\t\ttype: {}\n",
+        it->first->data(),
+        std::get<1>(it->second),
+        std::get<2>(it->second),
+        show(std::get<0>(it->second))
+      ).str();
+    }
+    ret += "\n";
+  }
+  return ret;
 }
 
 std::string show(const Stats& stats) {
@@ -138,6 +196,9 @@ std::string show(const Stats& stats) {
     stats.persistentClasses.load()
   );
 
+  ret += "\n";
+  ret += show(stats.builtins);
+
   return ret;
 }
 
@@ -153,49 +214,106 @@ void add_type(TypeStat& stat, const Type& t) {
 
 //////////////////////////////////////////////////////////////////////
 
-struct StatsVisitor : boost::static_visitor<void> {
-  explicit StatsVisitor(Stats& stats, const State& state)
-    : m_stats(stats)
-    , m_state(state)
+struct StatsSS : ISS {
+  explicit StatsSS(ISS& env, Stats& stats)
+    : ISS(env)
+    , stats(stats)
   {}
 
-  void operator()(const bc::CGetM& op) const {
-    auto const pops = op.numPop();
-    auto const ty = [&] {
-      switch (op.mvec.lcode) {
-      case LL:
-        return m_state.locals[op.mvec.locBase->id];
-      case LC:
-      case LR:
-        return topT(pops - 1);
-      case LH:
-      case LGL:
-      case LGC:
-      case LNL:
-      case LNC:
-      case LSL:
-      case LSC:
-        return TTop;
-      case NumLocationCodes:
-        break;
-      }
-      not_reached();
-    }();
-    add_type(m_stats.cgetmBase, ty);
-  }
-
-  template<class T> void operator()(const T& op) const {}
-
-private:
-  Type topT(uint32_t idx = 0) const {
-    assert(idx < m_state.stack.size());
-    return m_state.stack[m_state.stack.size() - idx - 1];
-  }
-
-private:
-  Stats& m_stats;
-  const State& m_state;
+  Stats& stats;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+template<class OpCode>
+bool in(StatsSS& env, const OpCode&) {
+  return false;
+}
+
+bool in(StatsSS& env, const bc::CGetM& op) {
+  auto const pops = op.numPop();
+  auto const ty = [&] {
+    switch (op.mvec.lcode) {
+    case LL:
+      return env.state.locals[op.mvec.locBase->id];
+    case LC:
+    case LR:
+      return topT(env, pops - 1);
+    case LH:
+    case LGL:
+    case LGC:
+    case LNL:
+    case LNC:
+    case LSL:
+    case LSC:
+      return TTop;
+    case NumLocationCodes:
+      break;
+    }
+    not_reached();
+  }();
+  add_type(env.stats.cgetmBase, ty);
+  return false;
+}
+
+bool in(StatsSS& env, const bc::FCallBuiltin& op) {
+  ++env.stats.builtins.totalBuiltins;
+
+  bool reducible = op.arg1 > 0;
+  for (auto i = uint32_t{0}; i < op.arg1; ++i) {
+    auto t = topT(env, i);
+    auto const v = tv(t);
+    if (!v || v->m_type == KindOfUninit) {
+      reducible = false;
+      break;
+    }
+  }
+
+  // run the interpreter and check the top of the stack
+  default_dispatch(env, op);
+
+  if (reducible) {
+    auto t = topT(env);
+    auto const v = tv(t);
+    if (!v) {
+      reducible = false;
+    }
+  }
+
+  auto builtin = op.str3;
+  {
+    BuiltinInfo::accessor acc;
+    auto inserted = env.stats.builtins.builtinsInfo.insert(acc, builtin);
+    if (inserted) {
+      auto f = env.index.resolve_func(env.ctx, builtin);
+      auto t = env.index.lookup_return_type(env.ctx, f);
+      acc->second = std::make_tuple(t, 1, 0);
+    } else {
+      ++std::get<1>(acc->second);
+      if (reducible) ++std::get<2>(acc->second);
+    }
+  }
+
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// Run the interpreter. The "bool in(StatsSS&, const bc::XX)" functions
+// can call the default dispatch on their own or return false to let
+// the main loop call the default dispatch. Returning true stops
+// the call to the default interpreter which implies the handler for
+// that opcode must perform all the right steps wrt the state.
+void dispatch(StatsSS& env, const Bytecode& op) {
+#define O(opcode, ...)                                   \
+  case Op::opcode:                                       \
+    if (!in(env, op.opcode)) default_dispatch(env, op);  \
+    return;
+
+  switch (op.op) { OPCODES }
+#undef O
+  not_reached();
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -212,6 +330,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
   }
 
   auto const ty = index.lookup_return_type_raw(&func);
+
   add_type(stats.returns, ty);
 
   for (auto& blk : func.blocks) {
@@ -224,16 +343,21 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
 
   auto const ctx = Context { func.unit, &func, func.cls };
   auto const fa  = analyze_func(index, ctx);
-  for (auto& blk : func.blocks) {
-    auto state = fa.bdata[blk->id].stateIn;
-    if (!state.initialized) continue;
+  {
+    Trace::Bump bumper{Trace::hhbbc, kTraceBump};
+    for (auto& blk : func.blocks) {
+      auto state = fa.bdata[blk->id].stateIn;
+      if (!state.initialized) continue;
 
-    PropertiesInfo props { index, ctx, nullptr };
-    auto interp = Interp { index, ctx, props, borrow(blk), state };
-    for (auto& bc : blk->hhbcs) {
-      auto visitor = StatsVisitor { stats, state };
-      visit(bc, visitor);
-      step(interp, bc);
+      PropertiesInfo props { index, ctx, nullptr };
+      Interp interp { index, ctx, props, borrow(blk), state };
+      for (auto& bc : blk->hhbcs) {
+        auto noop = [] (php::Block&, const State&) {};
+        auto flags = StepFlags {};
+        ISS env { interp, flags, noop };
+        StatsSS sss { env, stats };
+        dispatch(sss, bc);
+      }
     }
   }
 }

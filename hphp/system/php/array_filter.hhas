@@ -36,7 +36,7 @@ start:    IsTypeL $arr Arr
           CGetL $func
           DecodeCufIter 0 bad_param2
 .try_fault kill_iter_0 {
-            NewArray 3  # HphpArray::SmallSize
+            NewArray 3  # MixedArray::SmallSize
             SetL $res
             PopC
 

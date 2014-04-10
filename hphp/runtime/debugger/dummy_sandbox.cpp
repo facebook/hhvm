@@ -93,7 +93,7 @@ void DummySandbox::run() {
           msg = "Invalid sandbox was specified. "
             "PHP files may not be loaded properly.\n";
         } else {
-          auto& server = g->getRef(s__SERVER);
+          auto& server = tvAsVariant(g->nvGet(s__SERVER.get()));
           forceToArray(server);
           sri.setServerVariables(server.toArrRef());
         }

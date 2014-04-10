@@ -47,7 +47,7 @@ namespace HPHP {
  * All native collection class have their m_size field at the same
  * offset in the object.
  */
-constexpr ptrdiff_t FAST_COLLECTION_SIZE_OFFSET = 20;
+constexpr ptrdiff_t FAST_COLLECTION_SIZE_OFFSET = use_lowptr ? 16 : 20;
 inline size_t getCollectionSize(const ObjectData* od) {
   assert(od->isCollection());
   return *reinterpret_cast<const uint32_t*>(
@@ -125,7 +125,6 @@ class BaseVector : public ExtCollectionObjectData {
   php_skipWhile(const Variant& fn);
 
   void zip(BaseVector* bvec, const Variant& iterable);
-  void kvzip(BaseVector* bvec);
   void keys(BaseVector* bvec);
 
   // Others
@@ -326,7 +325,6 @@ class c_Vector : public BaseVector {
   Object t_keys();
   Object t_values();
   Object t_lazy();
-  Object t_kvzip();
   Variant t_at(const Variant& key);
   Variant t_get(const Variant& key);
   Object t_set(const Variant& key, const Variant& value);
@@ -356,12 +354,6 @@ class c_Vector : public BaseVector {
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(const Variant& iterable);
   static Object ti_fromarray(const Variant& arr); // deprecated
-  static Object ti_slice(const Variant& vec, const Variant& offset,
-                         const Variant& len = uninit_null());
-  static Object t_slice(const Variant& vec, const Variant& offset,
-                        const Variant& len = uninit_null()) {
-    return ti_slice(vec, offset, len);
-  }
   Object t_immutable();
 
   static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
@@ -476,7 +468,6 @@ public:
   Object t_takewhile(const Variant& fn);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
-  Object t_kvzip();
   Object t_keys();
 
   // Others
@@ -487,9 +478,6 @@ public:
   Array t_tovaluesarray();
   int64_t t_linearsearch(const Variant& search_value);
   Object t_values();
-
-  static Object ti_slice(const Variant& vec, const Variant& offset,
-                         const Variant& len = uninit_null());
 
   Object t_immutable();
 
@@ -892,7 +880,6 @@ class BaseMap : public ExtCollectionObjectData {
   Object php_lazy() {
     return SystemLib::AllocLazyKeyedIterableViewObject(this);
   }
-  Object php_kvzip() const;
   Variant php_at(const Variant& key) const;
   Variant php_get(const Variant& key) const;
   Object php_set(const Variant& key, const Variant& value);
@@ -985,7 +972,6 @@ class c_Map : public BaseMap {
   Object t_items();
   Object t_keys();
   Object t_lazy();
-  Object t_kvzip(); // const
   Variant t_at(const Variant& key); // const
   Variant t_get(const Variant& key); // const
   Object t_set(const Variant& key, const Variant& value);
@@ -1039,7 +1025,6 @@ class c_ImmMap : public BaseMap {
   Object t_items();
   Object t_keys();
   Object t_lazy();
-  Object t_kvzip();
   Variant t_at(const Variant& key);
   Variant t_get(const Variant& key);
   bool t_contains(const Variant& key);
@@ -1660,7 +1645,6 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_keys();
   Object t_values();
   Object t_lazy();
-  Object t_kvzip();
   Variant t_at(const Variant& key);
   Variant t_get(const Variant& key);
   bool t_containskey(const Variant& key);

@@ -1364,11 +1364,9 @@ const Abi x64_abi {
 };
 
 const Abi arm_abi {
-  // For now this is the same as x64, since we're pretending arm
-  // has the same register conventions as x64.
-  ARM::kCallerSaved | ARM::kCalleeSaved,
-  RegSet(), // fp/simd
-  ARM::kCalleeSaved
+  ARM::kGPCallerSaved   | ARM::kGPCalleeSaved,    // GP
+  ARM::kSIMDCallerSaved | ARM::kSIMDCalleeSaved,  // SIMD
+  ARM::kGPCalleeSaved   | ARM::kSIMDCalleeSaved   // callee-saved
 };
 }
 

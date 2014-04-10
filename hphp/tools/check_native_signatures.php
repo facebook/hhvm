@@ -53,7 +53,11 @@ function parse_php_functions(string $file):
         $argTypes = Vector {};
         if ($argList) {
           $args = preg_split('/\s*,\s*/', $argList);
-          if (count($args) > 5) {
+          if (count($args) > 7 && (in_array('float', $args)
+              || in_array('double', $args))) {
+            $retType = 'actrec';
+            $argTypes = Vector {'actrec'};
+          } else if (count($args) > 15) {
             $retType = 'actrec';
             $argTypes = Vector {'actrec'};
           } else {
@@ -168,7 +172,7 @@ function match_arg_type(string $php, string $cpp): bool {
   if ($php[0] == '?') {
     $expected = 'const Variant&';
   } else {
-    switch (strtolower($php)) {
+    switch (strtolower(strtok($php, ' &'))) {
       case 'bool':
       case 'boolean':
         $expected = 'bool';

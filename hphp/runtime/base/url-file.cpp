@@ -22,6 +22,8 @@
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
 
@@ -105,7 +107,24 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   for (unsigned int i = 0; i < responseHeaders.size(); i++) {
     m_responseHeaders.append(responseHeaders[i]);
   }
-  php_global_set(s_http_response_header, Variant(m_responseHeaders));
+  JIT::VMRegAnchor vra;
+  ActRec* fp = g_context->getFP();
+  while (fp->skipFrame()) {
+    fp = g_context->getPrevVMState(fp);
+  }
+  auto id = fp->func()->lookupVarId(s_http_response_header.get());
+  if (id != kInvalidId) {
+    auto tvTo = frame_local(fp, id);
+    Variant varFrom(m_responseHeaders);
+    const auto tvFrom(varFrom.asTypedValue());
+    if (tvTo->m_type == KindOfRef) {
+      tvTo = tvTo->m_data.pref->tv();
+    }
+    tvDup(*tvFrom, *tvTo);
+  } else if (fp->hasVarEnv()) {
+    g_context->setVar(s_http_response_header.get(),
+                      Variant(m_responseHeaders).asTypedValue());
+  }
 
   if (code == 200) {
     m_name = (std::string) url;

@@ -131,7 +131,7 @@ void CmdVariable::PrintVariable(DebuggerClient &client, const String& varName) {
   }
 }
 
-const StaticString s_http_response_header("http_response_header");
+const StaticString s_HTTP_RAW_POST_DATA("HTTP_RAW_POST_DATA");
 const StaticString s_omitted("...(omitted)");
 
 
@@ -196,8 +196,8 @@ void CmdVariable::PrintVariables(DebuggerClient &client, const Array& variables,
         client.output("$%s = %s", name.data(), value.data());
       }
 
-      // we know s_http_response_header is the last system global
-      if (global && name == s_http_response_header) {
+      // we know s_HTTP_RAW_POST_DATA is the last system global
+      if (global && name == s_HTTP_RAW_POST_DATA) {
         client.output("%s", "");
         system = false;
       }

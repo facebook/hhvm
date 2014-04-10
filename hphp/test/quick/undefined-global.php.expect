@@ -9,4 +9,3 @@ _REQUEST->Array
 _SERVER->Array
 argc->1
 argv->Array
-http_response_header->

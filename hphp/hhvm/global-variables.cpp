@@ -64,7 +64,6 @@ GlobalNameValueTableWrapper::GlobalNameValueTableWrapper(
   X(_ENV,                 arr);
   X(_REQUEST,             arr);
   X(HTTP_RAW_POST_DATA,   init_null_variant);
-  X(http_response_header, init_null_variant);
 #undef X
 
   g_variables = this;

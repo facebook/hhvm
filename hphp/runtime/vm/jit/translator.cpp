@@ -3228,12 +3228,21 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
   FTRACE(3, "relaxDeps finished\n");
 }
 
+const StaticString s_http_response_header("http_response_header");
+const StaticString s_extract("extract");
+
 bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller) {
+  auto locals = caller->localNames();
+  for (int i = 0; i < caller->numNamedLocals(); ++i) {
+    if (locals[i]->isame(s_http_response_header.get())) {
+      return true;
+    }
+  }
+
   auto* unit = caller->unit();
   auto checkTaintId = [&](Id id) {
-    static const StringData* s_extract = makeStaticString("extract");
-    return unit->lookupLitstrId(id)->isame(s_extract);
+    return unit->lookupLitstrId(id)->isame(s_extract.get());
   };
 
   if (inst.op() == OpFCallBuiltin) return checkTaintId(inst.imm[2].u_SA);

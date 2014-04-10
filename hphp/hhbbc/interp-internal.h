@@ -34,6 +34,7 @@ TRACE_SET_MOD(hhbbc);
 const StaticString s_extract("extract");
 const StaticString s_compact("compact");
 const StaticString s_get_defined_vars("get_defined_vars");
+const StaticString s_http_response_header("http_response_header");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -114,12 +115,6 @@ void unsetUnknownLocal(ISS& env) {
   readUnknownLocals(env);
   FTRACE(2, "  unsetUnknownLocal\n");
   for (auto& l : env.state.locals) l = union_of(l, TUninit);
-}
-
-void unsetLocals(ISS& env) {
-  for (auto i = size_t{0}; i < env.state.locals.size(); ++i) {
-    env.state.locals[i] = TUninit;
-  }
 }
 
 void specialFunctionEffects(ISS& env, SString name) {
@@ -276,6 +271,11 @@ Type locRaw(ISS& env, borrowed_ptr<const php::Local> l) {
 
 void setLocRaw(ISS& env, borrowed_ptr<const php::Local> l, Type t) {
   mayReadLocal(env, l->id);
+  if (l->name && l->name->isame(s_http_response_header.get())) {
+    auto current = env.state.locals[l->id];
+    assert(current == TGen || current == TCell);
+    return;
+  }
   env.state.locals[l->id] = t;
 }
 

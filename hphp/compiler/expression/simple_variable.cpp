@@ -84,6 +84,7 @@ void SimpleVariable::updateSymbol(SimpleVariablePtr src) {
 
 bool SimpleVariable::couldBeAliased() const {
   if (m_globals || m_superGlobal) return true;
+  if (m_name == "http_response_header") return true;
   always_assert(m_sym);
   if (m_sym->isGlobal() || m_sym->isStatic()) return true;
   if (getScope()->inPseudoMain() && !m_sym->isHidden()) return true;
@@ -133,6 +134,10 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
     m_globals = true;
   } else {
     m_sym = variables->addDeclaredSymbol(m_name, shared_from_this());
+  }
+
+  if (m_name == "http_response_header") {
+    setInited();
   }
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {

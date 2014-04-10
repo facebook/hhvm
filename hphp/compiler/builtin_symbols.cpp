@@ -65,7 +65,6 @@ const char *const BuiltinSymbols::GlobalNames[] = {
   "_SESSION",
   "argc",
   "argv",
-  "http_response_header",
 };
 
 const char *BuiltinSymbols::SystemClasses[] = {
@@ -398,7 +397,6 @@ void BuiltinSymbols::LoadSuperGlobals() {
     s_superGlobals["_ENV"] = Type::Variant;
     s_superGlobals["_REQUEST"] = Type::Variant;
     s_superGlobals["_SESSION"] = Type::Variant;
-    s_superGlobals["http_response_header"] = Type::Variant;
   }
 }
 

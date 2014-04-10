@@ -45,6 +45,7 @@ TRACE_SET_MOD(hhbbc);
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 const StaticString s_Continuation("Continuation");
+const StaticString s_http_response_header("http_response_header");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -79,8 +80,11 @@ State entry_state(const Index& index,
 
   for (; locId < ctx.func->locals.size(); ++locId) {
     /*
-     * Closures don't (necessarily) start with the frame locals
-     * uninitialized.
+     * - http_response_header can be set unpredictably. Don't try to guess
+     *   its' type
+     *
+     *  - Closures don't (necessarily) start with the frame locals
+     *    uninitialized.
      *
      * Ideas:
      *
@@ -88,7 +92,13 @@ State entry_state(const Index& index,
      *    sites and in the same unit, looking at the CreateCl could
      *    tell the types of used vars, even in single unit mode.
      */
-    ret.locals[locId] = ctx.func->isClosureBody ? TGen : TUninit;
+    auto name = ctx.func->locals[locId]->name;
+    if (ctx.func->isClosureBody
+        || (name && name->isame(s_http_response_header.get()))) {
+      ret.locals[locId] = TGen;
+    } else {
+      ret.locals[locId] = TUninit;
+    }
   }
 
   return ret;

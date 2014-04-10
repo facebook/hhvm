@@ -925,9 +925,16 @@ Variant f_strpbrk(const String& haystack, const String& char_list) {
     throw_invalid_argument("char_list: (empty)");
     return false;
   }
-  const char *p = strpbrk(haystack.c_str(), char_list.c_str());
-  if (p) {
-    return String(p, CopyString);
+  // We can't use the C strpbrk function as it takes null-terminated strings,
+  // and in PHP, \0 is a valid character for char_list
+  const char *hd = haystack.get()->data();
+  const char *cd = char_list.get()->data();
+  for (size_t i = 0; i < haystack.length(); ++i) {
+    for (size_t j = 0; j < char_list.length(); ++j) {
+      if (hd[i] == cd[j]) {
+        return String(hd + i, haystack.length() - i, CopyString);
+      }
+    }
   }
   return false;
 }

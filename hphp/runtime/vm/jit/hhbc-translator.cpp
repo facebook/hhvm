@@ -1182,16 +1182,9 @@ void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
 void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
   auto const name = lookupStringId(litStrId);
 
-  if (curFunc()->isClosureBody()) {
-    auto const box = gen(
-      ClosureStaticLocInit, cns(name), m_irb->fp(), cns(Type::InitNull)
-    );
-    gen(IncRef, box);
-    gen(StLoc, LocalId(locId), m_irb->fp(), box);
-    push(cns(true));
-  }
-
-  auto const box = gen(LdStaticLocCached, StaticLocName { curFunc(), name });
+  auto const box = curFunc()->isClosureBody() ?
+    gen(ClosureStaticLocInit, cns(name), m_irb->fp(), cns(Type::Uninit)) :
+    gen(LdStaticLocCached, StaticLocName { curFunc(), name });
   auto const res = m_irb->cond(
     [&] (Block* taken) {
       gen(CheckStaticLocInit, taken, box);

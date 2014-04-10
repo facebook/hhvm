@@ -26,7 +26,7 @@ int(2)
 array(4) {
   [0]=>
   object(ReflectionParameter)#5 (2) {
-    ["info"]=>
+    ["info":"ReflectionParameter":private]=>
     array(8) {
       ["index"]=>
       int(0)
@@ -51,7 +51,7 @@ array(4) {
   }
   [1]=>
   object(ReflectionParameter)#6 (2) {
-    ["info"]=>
+    ["info":"ReflectionParameter":private]=>
     array(9) {
       ["index"]=>
       int(1)
@@ -78,7 +78,7 @@ array(4) {
   }
   [2]=>
   object(ReflectionParameter)#7 (2) {
-    ["info"]=>
+    ["info":"ReflectionParameter":private]=>
     array(10) {
       ["index"]=>
       int(2)
@@ -107,7 +107,7 @@ array(4) {
   }
   [3]=>
   object(ReflectionParameter)#8 (2) {
-    ["info"]=>
+    ["info":"ReflectionParameter":private]=>
     array(10) {
       ["index"]=>
       int(3)

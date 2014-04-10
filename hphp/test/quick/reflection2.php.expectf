@@ -297,7 +297,7 @@ array(6) {
   }
 }
 object(ReflectionParameter)#9 (2) {
-  ["info"]=>
+  ["info":"ReflectionParameter":private]=>
   array(8) {
     ["index"]=>
     int(0)

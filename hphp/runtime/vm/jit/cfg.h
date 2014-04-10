@@ -38,7 +38,6 @@ void postorderWalk(const IRUnit&, Visitor visitor, Block* start = nullptr);
  */
 BlockList rpoSortCfg(const IRUnit&);
 
-
 /*
  * Similar to repoSortCfg, but also returns a StateVector mapping Blocks to
  * their index in the BlockList.
@@ -98,11 +97,6 @@ bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms);
 template <class State, class Body>
 void forPreorderDoms(Block* block, const DomChildren& children,
                      State state, Body body);
-
-/*
- * Visit the main trace followed by exit traces.
- */
-template <class Body> void forEachTrace(const IRUnit&, Body body);
 
 /*
  * Visit the instructions in this blocklist, in block order.

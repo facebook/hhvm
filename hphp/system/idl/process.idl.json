@@ -455,6 +455,7 @@
             "name": "proc_terminate",
             "desc": "Signals a process (created using proc_open()) that it should terminate. proc_terminate() returns immediately and does not wait for the process to terminate.\n\nproc_terminate() allows you terminate the process and continue with other tasks. You may poll the process (to see if it has stopped yet) by using the proc_get_status() function.",
             "flags": [
+                "ZendParamModeFalse"
             ],
             "return": {
                 "type": "Boolean",
@@ -469,7 +470,7 @@
                 {
                     "name": "signal",
                     "type": "Int32",
-                    "value": "0",
+                    "value": "k_SIGTERM",
                     "desc": "This optional parameter is only useful on POSIX operating systems; you may specify a signal to send to the process using the kill(2) system call. The default is SIGTERM."
                 }
             ]

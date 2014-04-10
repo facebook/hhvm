@@ -1,0 +1,6 @@
+bool(true)
+bool(true)
+
+Warning: proc_terminate() expects parameter 2 to be integer, string given in %s/proc_terminate.php on line %d
+bool(false)
+bool(false)

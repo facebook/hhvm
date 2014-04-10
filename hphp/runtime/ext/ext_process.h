@@ -63,7 +63,7 @@ String f_system(const String& command, VRefParam return_var = uninit_null());
 Variant f_proc_open(const String& cmd, const Array& descriptorspec, VRefParam pipes,
                     const String& cwd = null_string, const Variant& env = null_variant,
                     const Variant& other_options = null_variant);
-bool f_proc_terminate(const Resource& process, int signal = 0);
+bool f_proc_terminate(const Resource& process, int signal = SIGTERM);
 int64_t f_proc_close(const Resource& process);
 Array f_proc_get_status(const Resource& process);
 bool f_proc_nice(int increment);

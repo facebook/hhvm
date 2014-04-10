@@ -467,12 +467,9 @@ int PDOMySqlConnection::handleError(const char *file, int line,
   if (stmt && stmt->stmt()) {
     pdo_raise_impl_error(stmt->dbh, NULL, pdo_err[0], einfo->errmsg);
   } else {
-    Array info;
-    if (stmt->dbh->support(PDOConnection::MethodFetchErr)) {
-      info = Array::Create();
-      info.append(String(*pdo_err, CopyString));
-      stmt->dbh->fetchErr(stmt, info);
-    }
+    Array info = Array::Create();
+    info.append(String(*pdo_err, CopyString));
+    stmt->dbh->fetchErr(stmt, info);
     throw_pdo_exception((int)einfo->errcode, info, "SQLSTATE[%s] [%d] %s",
                         pdo_err[0], einfo->errcode, einfo->errmsg);
   }

@@ -52,7 +52,6 @@
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_mb.h"
 #include "hphp/runtime/ext/ext_memcache.h"
-#include "hphp/runtime/ext/ext_memcached.h"
 #include "hphp/runtime/ext/ext_misc.h"
 #include "hphp/runtime/ext/ext_output.h"
 #include "hphp/runtime/ext/ext_pdo.h"

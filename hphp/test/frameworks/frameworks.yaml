@@ -326,8 +326,8 @@
     test_root: slim
   symfony:
     url: https://github.com/symfony/symfony.git
-    branch: v2.4.2
-    commit: b70633f92ff71ef490af4c17e7ca3f3bf3d0f304
+    branch: v2.4.3
+    commit: 3199b2e0d194f71fe2e13c95768b2ef22206682b
     install_root: symfony
     test_root: symfony
     blacklist:
@@ -335,6 +335,9 @@
       - symfony/src/Symfony/Component/Process/Tests/SigchildDisabledProcessTest.php
       - symfony/src/Symfony/Component/Process/Tests/SigchildEnabledProcessTest.php
       - symfony/src/Symfony/Component/Process/Tests/SimpleProcessTest.php
+    clowns:
+      # Broken test. Fixed in symfony master, but not yet in release.
+      - symfony/src/Symfony/Component/ClassLoader/Tests/ApcUniversalClassLoaderTest.php
   twig:
     url: https://github.com/fabpot/Twig.git
     branch: v1.15.1

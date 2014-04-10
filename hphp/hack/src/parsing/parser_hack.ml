@@ -420,6 +420,7 @@ and get_header env =
   match L.header env.lb with
   | `error -> None
   | `default_mode -> Some Ast.Mpartial
+  | `php_decl_mode -> Some Ast.Mdecl
   | `explicit_mode ->
       let _token = L.token env.lb in
       (match Lexing.lexeme env.lb with

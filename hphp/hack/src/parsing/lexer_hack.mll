@@ -459,17 +459,18 @@ and string2 = parse
   | _                  { Tany }
 
 and header = parse
-  | eof                { `error }
-  | ws+                { header lexbuf }
-  | '\n'               { Lexing.new_line lexbuf; header lexbuf }
-  | "//"               { line_comment lexbuf; header lexbuf }
-  | "/*"               { ignore (comment (Buffer.create 256) lexbuf);
-                         header lexbuf
-                       }
-  | "#"                { line_comment lexbuf; header lexbuf }
-  | "<?hh"             { `default_mode }
-  | "<?hh" ws* "//"    { `explicit_mode }
-  | _                  { `error }
+  | eof                         { `error }
+  | ws+                         { header lexbuf }
+  | '\n'                        { Lexing.new_line lexbuf; header lexbuf }
+  | "//"                        { line_comment lexbuf; header lexbuf }
+  | "/*"                        { ignore (comment (Buffer.create 256) lexbuf);
+                                  header lexbuf
+                                }
+  | "#"                         { line_comment lexbuf; header lexbuf }
+  | "<?hh"                      { `default_mode }
+  | "<?hh" ws* "//"             { `explicit_mode }
+  | "<?php" ws* "//" ws* "decl" { `php_decl_mode }
+  | _                           { `error }
 
 and ignore_body = parse
   | eof                { Teof }

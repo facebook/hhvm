@@ -16,7 +16,7 @@ OS=$(shell uname -s)
 #------------------------------------------------------------------------------
 #package dependencies
 #------------------------------------------------------------------------------
-ifeq ($(wildcard facebook/Makefile.include),)
+ifneq ($(wildcard facebook/Makefile.include),)
   -include facebook/Makefile.include
 
   # Want to open source this but no need to force everyone to have js_of_ocaml
@@ -168,7 +168,7 @@ stamp:
 deploy:
 	$(MAKE) stamp
 	$(MAKE)
-ifeq ($(wildcard facebook/deploy.sh),)
+ifneq ($(wildcard facebook/deploy.sh),)
 	./facebook/deploy.sh
 else
 	@echo

@@ -23,7 +23,7 @@ INCLUDES=
 # Generic variables (Mosly copied shamelessly from pfff's Makefile.common)
 ##############################################################################
 
-ifeq ($(wildcard facebook/Makefile.include),)
+ifneq ($(wildcard facebook/Makefile.include),)
   -include facebook/Makefile.include
 else
   -include stubs/Makefile.include
@@ -85,7 +85,7 @@ bin:
 	cp -f hackificator.opt $(BIN)/hackificator
 
 deploy: opt
-ifeq ($(wildcard facebook/deploy_hackificator.sh),)
+ifneq ($(wildcard facebook/deploy_hackificator.sh),)
 	facebook/deploy_hackificator.sh
 else
 	@echo

@@ -225,7 +225,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const SourceRootInfo &sri) {
 
   auto const vhost = VirtualHost::GetCurrent();
-  auto const g = get_global_variables();
+  auto const g = get_global_variables()->asArrayData();
   Variant emptyArr(staticEmptyArray());
   for (auto& key : s_arraysToClear) {
     g->remove(key.get(), false);
@@ -710,7 +710,7 @@ void HttpProtocol::PrepareServerVariable(Array& server,
   for (auto& kv : vhost->getServerVars()) {
     server.set(String(kv.first), String(kv.second));
   }
-  sri.setServerVariables(server);
+  server = sri.setServerVariables(std::move(server));
 
   const char *threadType = transport->getThreadTypeName();
   server.set(s_THREAD_TYPE, threadType);

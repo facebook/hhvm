@@ -23,6 +23,7 @@
 #include "folly/ScopeGuard.h"
 
 #include "hphp/runtime/base/http-client.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/ext/soap/soap.h"
@@ -1784,8 +1785,7 @@ static void send_soap_server_fault(
     soapHeader *hdr) {
   USE_SOAP_GLOBAL;
   bool use_http_error_status = true;
-  GlobalVariables *g = get_global_variables();
-  if (g->get(s__SERVER).toArray()[s_HTTP_USER_AGENT].toString() ==
+  if (php_global(s__SERVER).toArray()[s_HTTP_USER_AGENT].toString() ==
       s_Shockwave_Flash) {
     use_http_error_status = false;
   }
@@ -2129,9 +2129,8 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
     }
     req = String(data, size, CopyString);
 
-    GlobalVariables *g = get_global_variables();
-    if (g->get(s__SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
-      String encoding = g->get(s__SERVER)
+    if (php_global(s__SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
+      String encoding = php_global(s__SERVER)
         .toArray()[s_HTTP_CONTENT_ENCODING].toString();
       Variant ret;
       if (encoding == s_gzip || encoding == s_xgzip) {

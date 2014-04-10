@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_hash.h"
@@ -227,8 +228,8 @@ const StaticString
   s__POST("_POST");
 
 String SessionModule::create_sid() {
-  GlobalVariables *g = get_global_variables();
-  String remote_addr = g->get(s__SERVER).toArray()[s_REMOTE_ADDR].toString();
+  String remote_addr = php_global(s__SERVER)
+    .toArray()[s_REMOTE_ADDR].toString();
 
   struct timeval tv;
   gettimeofday(&tv, NULL);
@@ -974,9 +975,8 @@ public:
 
   virtual String encode() {
     StringBuffer buf;
-    GlobalVariables *g = get_global_variables();
     VariableSerializer vs(VariableSerializer::Type::Serialize);
-    for (ArrayIter iter(g->get(s__SESSION).toArray()); iter; ++iter) {
+    for (ArrayIter iter(php_global(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();
       if (key.isString()) {
         String skey = key.toString();
@@ -995,7 +995,6 @@ public:
 
   virtual bool decode(const String& value) {
     const char *endptr = value.data() + value.size();
-    GlobalVariables *g = get_global_variables();
     VariableUnserializer vu(nullptr, nullptr,
                             VariableUnserializer::Type::Serialize);
     for (const char *p = value.data(); p < endptr; ) {
@@ -1010,9 +1009,9 @@ public:
       if (has_value) {
         vu.set(p, endptr);
         try {
-          Variant* sessLval;
-          NameValueTableWrapper::LvalStr(g, s__SESSION.get(), sessLval, false);
-          forceToArray(*sessLval).set(key, vu.unserialize());
+          auto sess = php_global_exchange(s__SESSION, Variant());
+          forceToArray(sess).set(key, vu.unserialize());
+          php_global_set(s__SESSION, std::move(sess));
           p = vu.head();
         } catch (Exception &e) {
         }
@@ -1032,9 +1031,8 @@ public:
 
   virtual String encode() {
     StringBuffer buf;
-    GlobalVariables *g = get_global_variables();
     VariableSerializer vs(VariableSerializer::Type::Serialize);
-    for (ArrayIter iter(g->get(s__SESSION).toArray()); iter; ++iter) {
+    for (ArrayIter iter(php_global(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();
       if (key.isString()) {
         String skey = key.toString();
@@ -1055,7 +1053,6 @@ public:
   virtual bool decode(const String& value) {
     const char *p = value.data();
     const char *endptr = value.data() + value.size();
-    GlobalVariables *g = get_global_variables();
     VariableUnserializer vu(nullptr, nullptr,
                             VariableUnserializer::Type::Serialize);
     while (p < endptr) {
@@ -1076,9 +1073,9 @@ public:
       if (has_value) {
         vu.set(q, endptr);
         try {
-          Variant* sessLval;
-          NameValueTableWrapper::LvalStr(g, s__SESSION.get(), sessLval, false);
-          forceToArray(*sessLval).set(key, vu.unserialize());
+          auto sess = php_global_exchange(s__SESSION, Variant());
+          forceToArray(sess).set(key, vu.unserialize());
+          php_global_set(s__SESSION, std::move(sess));
           q = vu.head();
         } catch (Exception &e) {
         }
@@ -1096,9 +1093,7 @@ public:
 
   virtual String encode() {
     WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(empty_string, true, true);
-    GlobalVariables *g = get_global_variables();
-
-    for (ArrayIter iter(g->get(s__SESSION).toArray()); iter; ++iter) {
+    for (ArrayIter iter(php_global(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();
       if (key.isString()) {
         wddxPacket->recursiveAddVar(key.toString(), iter.second(), true);
@@ -1115,16 +1110,15 @@ public:
     Array params = Array::Create();
     params.append(value);
     Variant ret = vm_call_user_func("wddx_deserialize", params, true);
-    GlobalVariables* g = get_global_variables();
     if (ret.isArray()) {
       Array arr = ret.toArray();
+      auto session = php_global_exchange(s__SESSION, Variant());
       for (ArrayIter iter(arr); iter; ++iter) {
-        Variant key = iter.first();
-        Variant value = iter.second();
-        Variant* sessLval;
-        NameValueTableWrapper::LvalStr(g, s__SESSION.get(), sessLval, false);
-        forceToArray(*sessLval).set(key, value);
+        auto const key = iter.first();
+        auto const value = iter.second();
+        forceToArray(session).set(key, value);
       }
+      php_global_set(s__SESSION, std::move(session));
     }
 
     return true;
@@ -1279,8 +1273,7 @@ new_session:
    */
 
   /* Unconditionally destroy existing arrays -- possible dirty data */
-  GlobalVariables *g = get_global_variables();
-  g->set(s__SESSION, Array::Create(), false);
+  php_global_set(s__SESSION, staticEmptyArray());
 
   PS(invalid_session_id) = false;
   String value;
@@ -1414,8 +1407,7 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) {
 const StaticString s_PATH_TRANSLATED("PATH_TRANSLATED");
 
 static inline void last_modified() {
-  GlobalVariables *g = get_global_variables();
-  String path = g->get(s__SERVER).toArray()[s_PATH_TRANSLATED].toString();
+  String path = php_global(s__SERVER).toArray()[s_PATH_TRANSLATED].toString();
   if (!path.empty()) {
     struct stat sb;
     if (stat(path.data(), &sb) == -1) {
@@ -1743,10 +1735,9 @@ bool f_session_start() {
    * Cookies are preferred, because initially
    * cookie and get variables will be available.
    */
-  GlobalVariables *g = get_global_variables();
   if (PS(id).empty()) {
     if (PS(use_cookies)) {
-      auto cookies = g->get(s__COOKIE).toArray();
+      auto cookies = php_global(s__COOKIE).toArray();
       if (cookies.exists(String(PS(session_name)))) {
         PS(id) = cookies[String(PS(session_name))].toString();
         PS(apply_trans_sid) = 0;
@@ -1756,7 +1747,7 @@ bool f_session_start() {
     }
 
     if (!PS(use_only_cookies) && !PS(id)) {
-      auto get = g->get(s__GET).toArray();
+      auto get = php_global(s__GET).toArray();
       if (get.exists(String(PS(session_name)))) {
         PS(id) = get[String(PS(session_name))].toString();
         PS(send_cookie) = 0;
@@ -1764,7 +1755,7 @@ bool f_session_start() {
     }
 
     if (!PS(use_only_cookies) && !PS(id)) {
-      auto post = g->get(s__POST).toArray();
+      auto post = php_global(s__POST).toArray();
       if (post.exists(String(PS(session_name)))) {
         PS(id) = post[String(PS(session_name))].toString();
         PS(send_cookie) = 0;
@@ -1778,7 +1769,7 @@ bool f_session_start() {
      '<session-name>=<session-id>' to allow URLs of the form
      http://yoursite/<session-name>=<session-id>/script.php */
   if (!PS(use_only_cookies) && PS(id).empty()) {
-    value = g->get(s__SERVER).toArray()[s_REQUEST_URI].toString();
+    value = php_global(s__SERVER).toArray()[s_REQUEST_URI].toString();
     const char *p = strstr(value.data(), PS(session_name).c_str());
     if (p && p[lensess] == '=') {
       p += lensess + 1;
@@ -1793,7 +1784,7 @@ bool f_session_start() {
   /* check whether the current request was referred to by
      an external site which invalidates the previously found id */
   if (!PS(id).empty() && PS(extern_referer_chk)[0] != '\0') {
-    value = g->get(s__SERVER).toArray()[s_HTTP_REFERER].toString();
+    value = php_global(s__SERVER).toArray()[s_HTTP_REFERER].toString();
     if (strstr(value.data(), PS(extern_referer_chk).c_str()) == NULL) {
       PS(id).reset();
       PS(send_cookie) = 1;
@@ -1856,8 +1847,7 @@ Variant f_session_unset() {
   if (PS(session_status) == Session::None) {
     return false;
   }
-  auto const g = get_global_variables();
-  NameValueTableWrapper::SetStr(g, s__SESSION.get(), Variant(), false);
+  php_global_set(s__SESSION, Variant());
   return uninit_null();
 }
 

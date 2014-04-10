@@ -34,7 +34,11 @@ public:
 
   ~SourceRootInfo();
 
-  void setServerVariables(Array& server) const;
+  // Set SERVER variables in array, and return the modified version.
+  // You'll likely want to ensure the array coming in is a temporary
+  // (so it can be modified in place).
+  Array setServerVariables(Array server) const;
+
   std::string path() const;
 
   bool sandboxOn() const {

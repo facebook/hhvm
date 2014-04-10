@@ -53,12 +53,18 @@ namespace HPHP {
  * (The wrapper is refcounted, as required by ArrayData, but the table
  * pointed to is not.)
  */
-struct NameValueTableWrapper : public ArrayData {
+struct NameValueTableWrapper : private ArrayData {
   explicit NameValueTableWrapper(NameValueTable* tab)
     : ArrayData(kNvtwKind)
     , m_tab(tab)
   {}
   ~NameValueTableWrapper();
+
+  // We only allow explicit conversions to ArrayData.  Generally you
+  // should not be talking to the NameValueTableWrapper directly (see
+  // php-globals.h).
+  ArrayData* asArrayData() { return this; }
+  const ArrayData* asArrayData() const { return this; }
 
 public:
   static void Release(ArrayData*) {}

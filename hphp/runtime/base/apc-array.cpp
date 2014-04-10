@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/ext/ext_apc.h"
@@ -129,7 +130,7 @@ Variant APCArray::MakeArray(APCHandle* handle) {
     StringData* serArr = APCString::fromHandle(handle)->getStringData();
     return apc_unserialize(serArr->data(), serArr->size());
   }
-  return APCLocalArray::Make(APCArray::fromHandle(handle));
+  return APCLocalArray::Make(APCArray::fromHandle(handle))->asArrayData();
 }
 
 void APCArray::Delete(APCHandle* handle) {
@@ -139,10 +140,10 @@ void APCArray::Delete(APCHandle* handle) {
 
 APCArray::~APCArray() {
   if (isPacked()) {
-     APCHandle** v = vals();
-     for (size_t i = 0, n = m_size; i < n; i++) {
-       v[i]->unreference();
-     }
+    APCHandle** v = vals();
+    for (size_t i = 0, n = m_size; i < n; i++) {
+      v[i]->unreference();
+    }
   } else {
     Bucket* bks = buckets();
     for (int i = 0; i < m.m_num; i++) {

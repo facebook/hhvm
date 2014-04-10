@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/ext/url/ext_url.h"
+#include "hphp/runtime/base/php-globals.h"
 
 namespace HPHP {
 
@@ -104,8 +105,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   for (unsigned int i = 0; i < responseHeaders.size(); i++) {
     m_responseHeaders.append(responseHeaders[i]);
   }
-  GlobalVariables *g = get_global_variables();
-  g->set(s_http_response_header, Variant(m_responseHeaders), /*copy=*/ true);
+  php_global_set(s_http_response_header, Variant(m_responseHeaders));
 
   if (code == 200) {
     m_name = (std::string) url;

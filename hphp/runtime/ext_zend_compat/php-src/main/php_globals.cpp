@@ -3,18 +3,19 @@
 // before zend.h sadly
 #include "hphp/runtime/ext_zend_compat/php-src/main/php_globals.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
+#include "hphp/runtime/base/php-globals.h"
 
 static IMPLEMENT_THREAD_LOCAL(_php_core_globals, s_php_core_globals);
 
 BEGIN_EXTERN_C()
 zval** PG_http_globals() {
-  auto* globals = HPHP::get_global_variables();
   auto* tl_globals = s_php_core_globals.get()->http_globals;
 
   auto copyEnv = [&](int zval_key, const HPHP::StaticString& global_key) {
-    auto v = globals->get(global_key).asTypedValue();
-    HPHP::zBoxAndProxy(const_cast<HPHP::TypedValue*>(v));
-    tl_globals[zval_key] = v->m_data.pref;
+    auto v = php_global(global_key);
+    HPHP::zBoxAndProxy(v.asTypedValue());
+    php_global_bind(global_key, v);
+    tl_globals[zval_key] = v.asTypedValue()->m_data.pref;
     tl_globals[zval_key]->incRefCount();
   };
 

@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
+#include "hphp/runtime/base/apc-local-array-defs.h"
 
 namespace HPHP {
 
@@ -1127,7 +1128,7 @@ int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
 NEVER_INLINE
 static int64_t iter_next_free_apc(Iter* iter, APCLocalArray* arr) {
   assert(arr->hasExactlyOneRef());
-  APCLocalArray::Release(arr);
+  APCLocalArray::Release(arr->asArrayData());
   if (debug) {
     iter->arr().setIterType(ArrayIter::TypeUndefined);
   }
@@ -1502,7 +1503,7 @@ static int64_t iter_next_apc_array(Iter* iter,
   assert(ad->kind() == ArrayData::kSharedKind);
 
   auto const arrIter = &iter->arr();
-  auto const arr = static_cast<APCLocalArray*>(ad);
+  auto const arr = APCLocalArray::asSharedArray(ad);
   ssize_t const pos = arr->iterAdvanceImpl(arrIter->getPos());
   if (UNLIKELY(pos == ArrayData::invalid_index)) {
     if (UNLIKELY(arr->hasExactlyOneRef())) {
@@ -1517,7 +1518,7 @@ static int64_t iter_next_apc_array(Iter* iter,
   arrIter->setPos(pos);
 
   // Note that APCLocalArray can never return KindOfRefs.
-  const Variant& var = APCLocalArray::GetValueRef(arr, pos);
+  const Variant& var = APCLocalArray::GetValueRef(arr->asArrayData(), pos);
   assert(var.asTypedValue()->m_type != KindOfRef);
   cellSet(*var.asTypedValue(), *valOut);
   if (LIKELY(!keyOut)) return 1;

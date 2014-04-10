@@ -17,6 +17,7 @@
 
 #include <vector>
 
+#include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -44,21 +45,13 @@ bool APCLocalArray::checkInvariants(const ArrayData* ad) {
   return true;
 }
 
+ALWAYS_INLINE
+Variant APCLocalArray::getKey(ssize_t pos) const {
+  return m_arr->getKey(pos);
+}
+
 void APCLocalArray::sweep() {
   m_arr->getHandle()->unreference();
-}
-
-ALWAYS_INLINE
-APCLocalArray* APCLocalArray::asSharedArray(ArrayData* ad) {
-  assert(ad->kind() == kSharedKind);
-  return static_cast<APCLocalArray*>(ad);
-}
-
-ALWAYS_INLINE
-const APCLocalArray* APCLocalArray::asSharedArray(const ArrayData* ad) {
-  assert(ad->kind() == kSharedKind);
-  assert(checkInvariants(ad));
-  return static_cast<const APCLocalArray*>(ad);
 }
 
 const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {

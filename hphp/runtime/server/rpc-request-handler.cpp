@@ -25,6 +25,7 @@
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/server/request-uri.h"
 #include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/server/satellite-server.h"
 
@@ -205,11 +206,9 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     ServerStatsHelper ssh("input");
     RequestURI reqURI(rpcFunc);
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
-
-    auto const g = get_global_variables();
-    Variant* lval;
-    NameValueTableWrapper::LvalStr(g, s__ENV.get(), lval, false);
-    lval->toArrRef().set(s_HPHP_RPC, 1);
+    auto env = php_global(s__ENV);
+    env.toArrRef().set(s_HPHP_RPC, 1);
+    php_global_set(s__ENV, std::move(env));
   }
 
   bool isFile = rpcFunc.rfind('.') != std::string::npos;

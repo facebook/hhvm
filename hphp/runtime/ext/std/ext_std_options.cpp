@@ -30,6 +30,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
@@ -587,8 +588,7 @@ static Array HHVM_FUNCTION(getopt, const String& options,
   opts->opt_name   = NULL;
 
   static const StaticString s_argv("argv");
-  GlobalVariables *g = get_global_variables();
-  Array vargv = g->get(s_argv).toArray();
+  Array vargv = php_global(s_argv).toArray();
   int argc = vargv.size();
   char **argv = (char **)malloc((argc+1) * sizeof(char*));
   std::vector<String> holders;

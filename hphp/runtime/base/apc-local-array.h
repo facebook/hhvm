@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/apc-array.h"
-#include "hphp/runtime/base/memory-manager.h"
 
 namespace HPHP {
 
@@ -42,12 +41,9 @@ struct MArrayIter;
  * via APC. It has a pointer to the APCArray that it represents and it may
  * cache values locally depending on the type accessed and/or the operation.
  */
-struct APCLocalArray : ArrayData, private Sweepable {
-  template<class... Args>
-  static APCLocalArray* Make(Args&&... args) {
-    return new (MM().smartMallocSize(sizeof(APCLocalArray)))
-      APCLocalArray(std::forward<Args>(args)...);
-  }
+struct APCLocalArray : private ArrayData
+                     , private Sweepable {
+  template<class... Args> static APCLocalArray* Make(Args&&...);
 
   static APCHandle* GetAPCHandle(const ArrayData* ad);
   static size_t Vsize(const ArrayData*);
@@ -103,15 +99,25 @@ struct APCLocalArray : ArrayData, private Sweepable {
   static bool Usort(ArrayData*, const Variant&);
   static bool Uasort(ArrayData*, const Variant&);
 
-public: // implements Sweepable
-  void sweep() override;
-
 public:
+  using ArrayData::decRefCount;
+  using ArrayData::hasMultipleRefs;
+  using ArrayData::hasExactlyOneRef;
+  using ArrayData::incRefCount;
+
   ssize_t iterAdvanceImpl(ssize_t prev) const {
     assert(prev >= 0 && prev < m_size);
     ssize_t next = prev + 1;
     return next < m_size ? next : invalid_index;
   }
+
+  // Only explicit conversions are allowed to and from ArrayData*.
+  ArrayData* asArrayData() { return this; }
+  const ArrayData* asArrayData() const { return this; }
+
+  // Pre: ad->isSharedArray()
+  static APCLocalArray* asSharedArray(ArrayData*);
+  static const APCLocalArray* asSharedArray(const ArrayData*);
 
 private:
   explicit APCLocalArray(APCArray* source)
@@ -129,14 +135,13 @@ private:
   static bool checkInvariants(const ArrayData*);
   ssize_t getIndex(int64_t k) const;
   ssize_t getIndex(const StringData* k) const;
-  static APCLocalArray* asSharedArray(ArrayData*);
-  static const APCLocalArray* asSharedArray(const ArrayData*);
+
+private: // implements Sweepable
+  void sweep() override;
 
 private:
   ArrayData* loadElems() const;
-  Variant getKey(ssize_t pos) const {
-    return m_arr->getKey(pos);
-  }
+  Variant getKey(ssize_t pos) const;
 
 private:
   APCArray* m_arr;

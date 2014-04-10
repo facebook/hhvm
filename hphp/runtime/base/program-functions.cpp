@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/thread-init-fini.h"
@@ -169,13 +170,12 @@ String k_PHP_OS;
 String k_PHP_SAPI;
 
 static void process_cmd_arguments(int argc, char **argv) {
-  GlobalVariables *g = get_global_variables();
-  g->set(s_argc, Variant(argc), false);
+  php_global_set(s_argc, Variant(argc));
   Array argvArray(staticEmptyArray());
   for (int i = 0; i < argc; i++) {
     argvArray.append(String(argv[i]));
   }
-  g->set(s_argv, argvArray, false);
+  php_global_set(s_argv, argvArray);
 }
 
 void process_env_variables(Array& variables) {
@@ -542,10 +542,8 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   StackTraceNoHeap::AddExtraLogging("Arguments", args.c_str());
 
   hphp_session_init();
-  ExecutionContext *context = g_context.getNoCheck();
+  auto const context = g_context.getNoCheck();
   context->obSetImplicitFlush(true);
-
-  GlobalVariables *g = get_global_variables();
 
   {
     Array envArr(Array::Create());
@@ -563,7 +561,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
       envArr.set(s_HHVM_ARCH, "arm");
       break;
     }
-    g->set(s__ENV.get(), envArr, false);
+    php_global_set(s__ENV, envArr);
   }
 
   process_cmd_arguments(argc, argv);
@@ -592,8 +590,8 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
     serverArr.set(s_SCRIPT_FILENAME, file);
     serverArr.set(s_SCRIPT_NAME, file);
     serverArr.set(s_PHP_SELF, file);
-    serverArr.set(s_argv, g->get(s_argv));
-    serverArr.set(s_argc, g->get(s_argc));
+    serverArr.set(s_argv, php_global(s_argv));
+    serverArr.set(s_argc, php_global(s_argc));
     serverArr.set(s_PWD, g_context->getCwd());
     char hostname[1024];
     if (!gethostname(hostname, 1024)) {
@@ -604,7 +602,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
       serverArr.set(String(kv.first.c_str()), String(kv.second.c_str()));
     }
 
-    g->set(s__SERVER.get(), serverArr, false);
+    php_global_set(s__SERVER, serverArr);
   }
 
   if (xhprof) {

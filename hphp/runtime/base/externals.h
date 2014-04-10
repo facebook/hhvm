@@ -30,7 +30,6 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-// global declarations that have generated implementations
 
 /**
  * Invoking an arbitrary user-defined function.

@@ -249,7 +249,7 @@ VarEnv::VarEnv()
   g_context->m_globalVarEnv = this;
 
   auto tableWrapper = smart_new<GlobalNameValueTableWrapper>(&m_nvTable);
-  auto globalArray = make_tv<KindOfArray>(tableWrapper);
+  auto globalArray = make_tv<KindOfArray>(tableWrapper->asArrayData());
   m_nvTable.set(makeStaticString("GLOBALS"), &globalArray);
 }
 

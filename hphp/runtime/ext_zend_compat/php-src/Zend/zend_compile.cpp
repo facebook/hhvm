@@ -29,7 +29,8 @@
 
 zend_bool zend_is_auto_global_quick(const char *name, uint name_len, ulong hashval TSRMLS_DC) /* {{{ */
 {
-  return HPHP::get_global_variables()->exists(HPHP::String(name, name_len, HPHP::CopyString));
+  return HPHP::get_global_variables()->asArrayData()->exists(
+           HPHP::String(name, name_len, HPHP::CopyString));
 }
 /* }}} */
 

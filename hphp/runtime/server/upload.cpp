@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-printf.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/string-util.h"
@@ -1051,7 +1052,7 @@ void rfc1867PostHandler(Transport* transport,
         s = tmp;
       }
 
-      Array globals(get_global_variables());
+      Array globals = php_globals_as_array();
       if (!is_anonymous) {
         if (s && s > filename) {
           String val(s+1, strlen(s+1), CopyString);

@@ -39,6 +39,7 @@ UrlFile::UrlFile(const char *method /* = "GET" */,
                  int timeout /* = -1 */)
                  : MemFile(s_http, s_tcp_socket) {
   m_get = (method == nullptr || strcasecmp(method, "GET") == 0);
+  m_method = method;
   m_headers = headers;
   m_postData = postData;
   m_maxRedirect = maxRedirect;
@@ -94,8 +95,9 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   if (m_get) {
     code = http.get(url.c_str(), m_response, pHeaders, &responseHeaders);
   } else {
-    code = http.post(url.c_str(), m_postData.data(), m_postData.size(),
-                     m_response, pHeaders, &responseHeaders);
+    code = http.request(m_method,
+                        url.c_str(), m_postData.data(), m_postData.size(),
+                        m_response, pHeaders, &responseHeaders);
   }
 
   m_responseHeaders = Array();

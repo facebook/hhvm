@@ -94,14 +94,16 @@ void HttpClient::proxy(const std::string &host, int port,
 int HttpClient::get(const char *url, StringBuffer &response,
                     const HeaderMap *requestHeaders /* = NULL */,
                     std::vector<String> *responseHeaders /* = NULL */) {
-  return impl(url, nullptr, 0, response, requestHeaders, responseHeaders);
+  return request(nullptr,
+                 url, nullptr, 0, response, requestHeaders, responseHeaders);
 }
 
 int HttpClient::post(const char *url, const char *data, int size,
                      StringBuffer &response,
                      const HeaderMap *requestHeaders /* = NULL */,
                      std::vector<String> *responseHeaders /* = NULL */) {
-  return impl(url, data, size, response, requestHeaders, responseHeaders);
+  return request(nullptr,
+                 url, data, size, response, requestHeaders, responseHeaders);
 }
 
 const StaticString
@@ -112,7 +114,8 @@ const StaticString
   s_local_cert("local_cert"),
   s_passphrase("passphrase");
 
-int HttpClient::impl(const char *url, const char *data, int size,
+int HttpClient::request(const char* verb,
+                     const char *url, const char *data, int size,
                      StringBuffer &response, const HeaderMap *requestHeaders,
                      std::vector<String> *responseHeaders) {
   SlowTimer timer(RuntimeOption::HttpSlowQueryThreshold, "curl", url);
@@ -187,6 +190,9 @@ int HttpClient::impl(const char *url, const char *data, int size,
     curl_easy_setopt(cp, CURLOPT_POST,          1);
     curl_easy_setopt(cp, CURLOPT_POSTFIELDS,    data);
     curl_easy_setopt(cp, CURLOPT_POSTFIELDSIZE, size);
+    if (verb != nullptr) {
+      curl_easy_setopt(cp, CURLOPT_CUSTOMREQUEST, verb);
+    }
   }
 
   if (responseHeaders) {

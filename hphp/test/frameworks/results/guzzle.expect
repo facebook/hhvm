@@ -308,6 +308,8 @@ Guzzle\Tests\Http\ClientTest::testBuildsRelativeUrls with data set #7
 .
 Guzzle\Tests\Http\ClientTest::testCanSetDefaultRequestOptions
 .
+Guzzle\Tests\Http\ClientTest::testCanSetRelativeUrlStartingWithHttp
+.
 Guzzle\Tests\Http\ClientTest::testCanSetSetOptionsOnRequests
 .
 Guzzle\Tests\Http\ClientTest::testCanUseCollectionAsConfig
@@ -483,6 +485,8 @@ Guzzle\Tests\Http\Curl\CurlHandleTest::testWrapsErrorsAndInfo
 Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testAddingRequestsAddsToQueue
 .
 Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testConstructorSetsMaxHandles
+.
+Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testConstructorSetsSelectTimeout
 .
 Guzzle\Tests\Http\Curl\CurlMultiProxyTest::testResetClearsState
 .
@@ -852,6 +856,8 @@ Guzzle\Tests\Http\Message\PostFileTest::testReturnsCurlValueStringAndPostname
 .
 Guzzle\Tests\Http\Message\RequestTest::testAllowsFilenameForDownloadingContent
 .
+Guzzle\Tests\Http\Message\RequestTest::testCanChangePortThroughScheme
+.
 Guzzle\Tests\Http\Message\RequestTest::testCanOverrideUnsuccessfulResponses
 .
 Guzzle\Tests\Http\Message\RequestTest::testCanRetrieveUrlObject
@@ -1167,7 +1173,7 @@ Guzzle\Tests\Inflection\PreComputedInflectorTest::testUsesPreComputedHash
 Guzzle\Tests\Iterator\AppendIteratorTest::testTraversesIteratorsInOrder
 .
 Guzzle\Tests\Iterator\ChunkedIteratorTest::mustNotTerminateWithTraversable
-E
+.
 Guzzle\Tests\Iterator\ChunkedIteratorTest::sizeLowerZeroThrowsException
 .
 Guzzle\Tests\Iterator\ChunkedIteratorTest::sizeOfZeroMakesIteratorInvalid
@@ -1405,6 +1411,14 @@ Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #10
 Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #11
 .
 Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #12
+.
+Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #13
+.
+Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #14
+.
+Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #15
+.
+Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #16
 .
 Guzzle\Tests\Parser\Cookie\CookieParserTest::testParseCookie with data set #2
 .
@@ -2012,6 +2026,8 @@ Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testOverwritesCookiesTh
 .
 Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testOverwritesCookiesThatHaveChanged
 .
+Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testRemoveExistingCookieIfEmpty
+.
 Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testRemovesExpiredCookies
 .
 Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testRemovesSelectively
@@ -2031,7 +2047,7 @@ Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testReturnsCookiesMatch
 Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testStoresAndRetrievesCookies
 .
 Guzzle\Tests\Plugin\Cookie\CookieJar\ArrayCookieJarTest::testThrowsExceptionWithStrictMode
-F
+.
 Guzzle\Tests\Plugin\Cookie\CookieJar\FileCookieJarTest::testLoadsFromFileFile
 .
 Guzzle\Tests\Plugin\Cookie\CookieJar\FileCookieJarTest::testPersistsToFileFile
@@ -2077,7 +2093,7 @@ Guzzle\Tests\Plugin\Cookie\CookieTest::testValidatesCookies with data set #3
 Guzzle\Tests\Plugin\Cookie\CookieTest::testValidatesCookies with data set #4
 .
 Guzzle\Tests\Plugin\Cookie\CookieTest::testValidatesCookies with data set #5
-F
+.
 Guzzle\Tests\Plugin\CurlAuth\CurlAuthPluginTest::testAddsBasicAuthentication
 .
 Guzzle\Tests\Plugin\CurlAuth\CurlAuthPluginTest::testAddsDigestAuthentication
@@ -2176,7 +2192,7 @@ Guzzle\Tests\Plugin\Mock\MockPluginTest::testStoresMockedRequests
 .
 Guzzle\Tests\Plugin\Mock\MockPluginTest::testThrowsExceptionWhenResponseFileIsNotFound
 .
-Guzzle\Tests\Plugin\Mock\MockPluginTest::testUpdateIgnoresWhenEmpty
+Guzzle\Tests\Plugin\Mock\MockPluginTest::testUpdateThrowsExceptionWhenEmpty
 .
 Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testAcceptsConfigurationData
 .
@@ -2195,6 +2211,8 @@ Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testDoesNotAddFalseyValuesToAuthoriza
 Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testInvalidArgumentExceptionOnMethodError
 .
 Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testMultiDimensionalArray
+.
+Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testMultiDimensionalArrayWithNonDefaultQueryAggregator
 .
 Guzzle\Tests\Plugin\Oauth\OauthPluginTest::testOptionalOauthParametersAreNotAutomaticallyAdded
 .
@@ -2313,6 +2331,8 @@ Guzzle\Tests\Service\ClientTest::testExecutesCommandsWithArray
 Guzzle\Tests\Service\ClientTest::testFactoryCreatesClient
 .
 Guzzle\Tests\Service\ClientTest::testFactoryDoesNotRequireBaseUrl
+.
+Guzzle\Tests\Service\ClientTest::testGetCommandAfterTwoSetDescriptions
 .
 Guzzle\Tests\Service\ClientTest::testMergesDefaultCommandParamsCorrectly
 .
@@ -2943,7 +2963,7 @@ Guzzle\Tests\Service\Resource\ResourceIteratorTest::testDescribesEvents
 Guzzle\Tests\Service\Resource\ResourceIteratorTest::testHoldsDataOptions
 .
 Guzzle\Tests\Service\Resource\ResourceIteratorTest::testSendsRequestsForNextSetOfResources
-E
+.
 Guzzle\Tests\Service\Resource\ResourceIteratorTest::testSettingLimitOrPageSizeClearsData
 .
 Guzzle\Tests\Service\Resource\ResourceIteratorTest::testUseAsArray
@@ -2991,7 +3011,7 @@ Guzzle\Tests\Service\ServiceBuilderTest::testUsedAsArray
 Guzzle\Tests\Service\ServiceBuilderTest::testUsesTheDefaultBuilderWhenNoBuilderIsSpecified
 .
 Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testAddsBody
-F
+.
 Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testAddsPostFields
 .
 Guzzle\Tests\Stream\PhpStreamRequestFactoryTest::testAppliesProxySettings

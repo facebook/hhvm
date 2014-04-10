@@ -46,6 +46,7 @@ public:
 
 private:
   bool m_get;
+  const char* m_method;
   Array m_headers;
   String m_postData;
   int m_maxRedirect;

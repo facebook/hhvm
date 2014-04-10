@@ -86,22 +86,24 @@ class TransCFG {
            const TcaTransIDMap& jmpToTransID);
 
   const std::vector<TransID>& nodes() const { return m_transIds; }
-  ArcPtrVec              arcs()  const;
-  int64_t                weight(TransID id) const;
-  void                   setNodeWeight(TransID id, int64_t weight);
-  const ArcPtrVec&       inArcs(TransID id) const;
-  const ArcPtrVec&       outArcs(TransID id) const;
-  void                   addNode(TransID id, int64_t weight);
-  bool                   hasNode(TransID id) const;
-  void                   addArc(TransID srcId, TransID dstId, int64_t weight=0);
-  void                   print(std::string fileName,
-                               FuncId funcId,
-                               const ProfData* profData,
-                               const TransIDSet* selected = nullptr) const;
+  ArcPtrVec                   arcs()  const;
+  int64_t                     weight(TransID id) const;
+  void                        setNodeWeight(TransID id, int64_t weight);
+  const ArcPtrVec&            inArcs(TransID id) const;
+  const ArcPtrVec&            outArcs(TransID id) const;
+  void                        addNode(TransID id, int64_t weight);
+  bool                        hasNode(TransID id) const;
+  void                        addArc(TransID srcId, TransID dstId,
+                                     int64_t weight=0);
+  bool                        hasArc(TransID srcId, TransID dstId) const;
+  void                        print(std::string fileName,
+                                    FuncId funcId,
+                                    const ProfData* profData,
+                                    const TransIDSet* selected = nullptr) const;
 
  private:
-  std::vector<TransID>                m_transIds;  // vector of TransIDs in the graph
-  std::vector<Node>                   m_nodeInfo;  // info about each node
+  std::vector<TransID>           m_transIds;  // vector of TransIDs in the graph
+  std::vector<Node>              m_nodeInfo;  // info about each node
   hphp_hash_map<TransID, size_t> m_idToIdx;   // map from TransIDs to indices
                                               // in m_nodeInfo
 };

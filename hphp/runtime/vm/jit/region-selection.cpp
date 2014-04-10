@@ -101,11 +101,19 @@ void RegionDesc::addArc(BlockId src, BlockId dst) {
 
 //////////////////////////////////////////////////////////////////////
 
-RegionDesc::BlockId RegionDesc::Block::s_nextId = 0;
+RegionDesc::BlockId RegionDesc::Block::s_nextId = -1;
+
+TransID getTransId(RegionDesc::BlockId blockId) {
+  return blockId >= 0 ? blockId : InvalidID;
+}
+
+bool hasTransId(RegionDesc::BlockId blockId) {
+  return blockId >= 0;
+}
 
 RegionDesc::Block::Block(const Func* func, Offset start, int length,
                          Offset initSpOff)
-  : m_id(s_nextId++)
+  : m_id(s_nextId--)
   , m_func(func)
   , m_start(start)
   , m_last(kInvalidOffset)

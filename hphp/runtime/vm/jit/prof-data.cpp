@@ -339,6 +339,7 @@ TransID ProfData::addTransProfile(const RegionDescPtr&  region,
   assert(region);
   DEBUG_ONLY size_t nBlocks = region->blocks.size();
   assert(nBlocks == 1 || (nBlocks > 1 && region->blocks[0]->inlinedCallee()));
+  region->blocks.front()->setId(transId);
 
   region->blocks.back()->setPostConditions(pconds);
   auto const startSk = region->blocks.front()->start();

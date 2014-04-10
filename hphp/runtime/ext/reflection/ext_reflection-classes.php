@@ -2432,7 +2432,7 @@ implements Reflector {
       }
       $args = func_get_args();
       array_shift($args);
-      return hphp_invoke_method($obj, $this->info['class'], $this->info['name'],
+      return hphp_invoke_method($obj, $this->originalClass, $this->info['name'],
                                 $args);
     } else {
       $className = $this->info['class'];
@@ -2459,7 +2459,7 @@ implements Reflector {
    * @return     mixed   Returns the method result.
    */
   public function invokeArgs($obj, $args) {
-    return hphp_invoke_method($obj, $this->info['class'], $this->info['name'],
+    return hphp_invoke_method($obj, $this->originalClass, $this->info['name'],
                               array_values($args));
   }
 

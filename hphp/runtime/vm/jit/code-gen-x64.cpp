@@ -2371,26 +2371,25 @@ void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
   auto const dstReg    = dstLoc(0).reg();
   auto const extra     = inst->extra<LdFuncCachedU>();
   auto const hFunc     = Unit::GetNamedEntity(extra->name)->getFuncHandle();
-  auto const hFallback = Unit::GetNamedEntity(
-                           extra->fallback)->getFuncHandle();
+
   auto& a = m_as;
 
-  // Check the first function handle, then the fallback.
+  // Check the first function handle, otherwise try to autoload.
   Label end;
   if (dstReg == InvalidReg) {
     a.   cmpq  (0, rVmTl[hFunc]);
     a.   jnz8  (end);
-    a.   cmpq  (0, rVmTl[hFallback]);
   } else {
     a.   loadq (rVmTl[hFunc], dstReg);
     a.   testq (dstReg, dstReg);
     a.   jnz8  (end);
-    a.   loadq (rVmTl[hFallback], dstReg);
-    a.   testq (dstReg, dstReg);
   }
 
   unlikelyIfBlock(CC_Z, [&] (Asm& a) {
-    const Func* (*const func)(const StringData*) = lookupUnknownFunc;
+    // If we get here, things are going to be slow anyway, so do all the
+    // autoloading logic in lookupFallbackFunc instead of ASM
+    const Func* (*const func)(const StringData*, const StringData*) =
+        lookupFallbackFunc;
     cgCallHelper(
       a,
       CppCall::direct(func),
@@ -2398,8 +2397,10 @@ void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
       SyncOptions::kSyncPoint,
       argGroup()
         .immPtr(extra->name)
+        .immPtr(extra->fallback)
     );
   });
+
   asm_label(m_as, end);
 }
 

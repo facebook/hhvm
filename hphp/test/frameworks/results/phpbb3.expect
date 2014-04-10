@@ -4456,3 +4456,7 @@ pphpbb_tests_tree_nestedset_forum_test::test_get_sql_where with data set #2
 S
 pphpbb_tests_tree_nestedset_forum_test::test_get_sql_where with data set #3
 S
+schmema_generator_test::test_check_dependencies_fail
+.
+schmema_generator_test::test_get_schema_success
+.

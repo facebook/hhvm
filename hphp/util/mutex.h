@@ -20,9 +20,6 @@
 #include <pthread.h>
 #include <time.h>
 #include <tbb/concurrent_hash_map.h>
-#ifdef __APPLE__
-#include "pthread-spin-lock-shim.h"
-#endif
 
 #include "hphp/util/portability.h"
 #include "hphp/util/assertions.h"

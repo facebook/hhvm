@@ -1,3 +1,4 @@
+*.expect-trimmed
 *.errors
 *.fatals
 *.out

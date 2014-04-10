@@ -299,6 +299,7 @@ void Class::releaseRefs() {
   if (okToReleaseParent) {
     m_parent.reset();
   }
+  m_numDeclInterfaces = 0;
   m_declInterfaces.reset();
   m_usedTraits.clear();
 }

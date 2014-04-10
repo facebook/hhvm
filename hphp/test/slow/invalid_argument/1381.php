@@ -31,7 +31,7 @@ var_dump(gzcompress('abc', -2));
 var_dump(gzdeflate('abc', -2));
 var_dump(http_build_query(1));
 var_dump(parse_url('http://www.example.com', 100));
-var_dump(dns_check_record('127.0.0.1', 'INVALID_TYPE'));
+var_dump(checkdnsrr('127.0.0.1', 'INVALID_TYPE'));
 var_dump(assert_options(-1));
 var_dump(simplexml_load_string('', 'INVALID_CLASS'));
 var_dump(simplexml_load_string('', 'stdClass'));

@@ -29,7 +29,7 @@
 #include "hphp/runtime/ext/soap/packet.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
-#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
@@ -608,9 +608,9 @@ static encodeMap *soap_create_typemap(sdl *sdl, Array &ht) {
 
 static void output_xml_header(int soap_version) {
   if (soap_version == SOAP_1_2) {
-    f_header("Content-Type: application/soap+xml; charset=utf-8");
+    HHVM_FN(header)("Content-Type: application/soap+xml; charset=utf-8");
   } else {
-    f_header("Content-Type: text/xml; charset=utf-8");
+    HHVM_FN(header)("Content-Type: text/xml; charset=utf-8");
   }
 }
 
@@ -1790,7 +1790,7 @@ static void send_soap_server_fault(
     use_http_error_status = false;
   }
   if (use_http_error_status) {
-    f_header("HTTP/1.1 500 Internal Service Error");
+    HHVM_FN(header)("HTTP/1.1 500 Internal Service Error");
   }
   output_xml_header(SOAP_GLOBAL(soap_version));
 
@@ -2102,7 +2102,7 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
       throw_soap_server_fault("Server", "WSDL generation is not supported");
     }
 
-    f_header("Content-Type: text/xml; charset=utf-8");
+    HHVM_FN(header)("Content-Type: text/xml; charset=utf-8");
     Variant ret = f_readfile(m_sdl->source.c_str());
     if (same(ret, false)) {
       throw_soap_server_fault("Server", "Couldn't find WSDL");
@@ -2278,8 +2278,8 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
 
   // 8. special case
   if (doc_return == NULL) {
-    f_header("HTTP/1.1 202 Accepted");
-    f_header("Content-Length: 0");
+    HHVM_FN(header)("HTTP/1.1 202 Accepted");
+    HHVM_FN(header)("Content-Length: 0");
     return;
   }
 

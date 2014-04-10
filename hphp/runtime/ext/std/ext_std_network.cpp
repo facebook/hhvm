@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/std/ext_std_network.h"
 
 #include <netinet/in.h>
 #include <netdb.h>
@@ -27,6 +27,7 @@
 
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/lock.h"
@@ -111,7 +112,7 @@ private:
 };
 IMPLEMENT_THREAD_LOCAL(ResolverInit, ResolverInit::s_res);
 
-Variant f_gethostname() {
+Variant HHVM_FUNCTION(gethostname) {
   char h_name[HOST_NAME_MAX];
 
   if (gethostname(h_name, HOST_NAME_MAX) != 0) {
@@ -123,7 +124,7 @@ Variant f_gethostname() {
   return String(h_name, CopyString);
 }
 
-Variant f_gethostbyaddr(const String& ip_address) {
+Variant HHVM_FUNCTION(gethostbyaddr, const String& ip_address) {
   IOStatusHelper io("gethostbyaddr", ip_address.data());
   struct addrinfo hints, *res, *res0;
   char h_name[NI_MAXHOST];
@@ -148,7 +149,7 @@ Variant f_gethostbyaddr(const String& ip_address) {
   return ip_address;
 }
 
-String f_gethostbyname(const String& hostname) {
+String HHVM_FUNCTION(gethostbyname, const String& hostname) {
   IOStatusHelper io("gethostbyname", hostname.data());
   if (RuntimeOption::EnableDnsCache) {
     Variant success;
@@ -181,7 +182,7 @@ String f_gethostbyname(const String& hostname) {
   return ret;
 }
 
-Variant f_gethostbynamel(const String& hostname) {
+Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
   IOStatusHelper io("gethostbynamel", hostname.data());
   HostEnt result;
   if (!safe_gethostbyname(hostname.data(), result)) {
@@ -196,7 +197,7 @@ Variant f_gethostbynamel(const String& hostname) {
   return ret;
 }
 
-Variant f_getprotobyname(const String& name) {
+Variant HHVM_FUNCTION(getprotobyname, const String& name) {
   Lock lock(NetworkMutex);
 
   struct protoent *ent = getprotobyname(name.data());
@@ -206,7 +207,7 @@ Variant f_getprotobyname(const String& name) {
   return ent->p_proto;
 }
 
-Variant f_getprotobynumber(int number) {
+Variant HHVM_FUNCTION(getprotobynumber, int64_t number) {
   Lock lock(NetworkMutex);
 
   struct protoent *ent = getprotobynumber(number);
@@ -216,7 +217,8 @@ Variant f_getprotobynumber(int number) {
   return String(ent->p_name, CopyString);
 }
 
-Variant f_getservbyname(const String& service, const String& protocol) {
+Variant HHVM_FUNCTION(getservbyname, const String& service,
+                                     const String& protocol) {
   Lock lock(NetworkMutex);
 
   struct servent *serv = getservbyname(service.data(), protocol.data());
@@ -226,7 +228,7 @@ Variant f_getservbyname(const String& service, const String& protocol) {
   return ntohs(serv->s_port);
 }
 
-Variant f_getservbyport(int port, const String& protocol) {
+Variant HHVM_FUNCTION(getservbyport, int64_t port, const String& protocol) {
   Lock lock(NetworkMutex);
 
   struct servent *serv = getservbyport(htons(port), protocol.data());
@@ -236,7 +238,7 @@ Variant f_getservbyport(int port, const String& protocol) {
   return String(serv->s_name, CopyString);
 }
 
-Variant f_inet_ntop(const String& in_addr) {
+Variant HHVM_FUNCTION(inet_ntop, const String& in_addr) {
   int af = AF_INET;
   if (in_addr.size() == 16) {
     af = AF_INET6;
@@ -253,7 +255,7 @@ Variant f_inet_ntop(const String& in_addr) {
   return String(buffer, CopyString);
 }
 
-Variant f_inet_pton(const String& address) {
+Variant HHVM_FUNCTION(inet_pton, const String& address) {
   int af = AF_INET;
   const char *saddress = address.data();
   if (strchr(saddress, ':')) {
@@ -276,7 +278,7 @@ Variant f_inet_pton(const String& address) {
 
 const StaticString s_255_255_255_255("255.255.255.255");
 
-Variant f_ip2long(const String& ip_address) {
+Variant HHVM_FUNCTION(ip2long, const String& ip_address) {
   struct in_addr ip;
   if (ip_address.empty() ||
       inet_pton(AF_INET, ip_address.data(), &ip) != 1) {
@@ -286,7 +288,7 @@ Variant f_ip2long(const String& ip_address) {
   return (int64_t)ntohl(ip.s_addr);
 }
 
-String f_long2ip(int proper_address) {
+String HHVM_FUNCTION(long2ip, int64_t proper_address) {
   struct in_addr myaddr;
   myaddr.s_addr = htonl(proper_address);
   return safe_inet_ntoa(myaddr);
@@ -310,7 +312,8 @@ static void php_dns_free_res(struct __res_state *res) {
 #endif
 }
 
-bool f_dns_check_record(const String& host, const String& type /* = null_string */) {
+bool HHVM_FUNCTION(checkdnsrr, const String& host,
+                               const String& type /* = null_string */) {
   IOStatusHelper io("dns_check_record", host.data());
   const char *stype;
   if (type.empty()) {
@@ -350,10 +353,6 @@ bool f_dns_check_record(const String& host, const String& type /* = null_string 
   res_nclose(res);
   php_dns_free_res(res);
   return (i >= 0);
-}
-
-bool f_checkdnsrr(const String& host, const String& type /* = null_string */) {
-  return f_dns_check_record(host, type);
 }
 
 typedef union {
@@ -679,9 +678,9 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
   return cp;
 }
 
-Variant f_dns_get_record(const String& hostname, int type /* = -1 */,
-                         VRefParam authnsRef /* = null */,
-                         VRefParam addtlRef /* = null */) {
+Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
+                      VRefParam authnsRef /* = null */,
+                      VRefParam addtlRef /* = null */) {
   IOStatusHelper io("dns_get_record", hostname.data(), type);
   if (type < 0) type = PHP_DNS_ALL;
   if (type & ~PHP_DNS_ALL && type != PHP_DNS_ANY) {
@@ -805,9 +804,9 @@ Variant f_dns_get_record(const String& hostname, int type /* = -1 */,
   return ret;
 }
 
-bool f_dns_get_mx(const String& hostname,
-                  VRefParam mxhostsRef,
-                  VRefParam weightsRef /* = null */) {
+bool HHVM_FUNCTION(getmxrr, const String& hostname,
+                            VRefParam mxhostsRef,
+                            VRefParam weightsRef /* = null */) {
   IOStatusHelper io("dns_get_mx", hostname.data());
   int count, qdc;
   unsigned short type, weight;
@@ -879,37 +878,12 @@ bool f_dns_get_mx(const String& hostname,
   return true;
 }
 
-bool f_getmxrr(const String& hostname, VRefParam mxhosts,
-               VRefParam weight /* = uninit_null() */) {
-  return f_dns_get_mx(hostname, ref(mxhosts), weight);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// socket
-
-/**
- * f_fsockopen() and f_pfsockopen() are implemented in ext_socket.cpp.
- */
-
-Variant f_socket_get_status(const Resource& stream) {
-  return f_stream_get_meta_data(stream);
-}
-
-bool f_socket_set_blocking(const Resource& stream, int mode) {
-  return f_stream_set_blocking(stream, mode);
-}
-
-bool f_socket_set_timeout(const Resource& stream, int seconds,
-                          int microseconds /* = 0 */) {
-  return f_stream_set_timeout(stream, seconds, microseconds);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // http
 
-void f_header(const String& str, bool replace /* = true */,
-              int http_response_code /* = 0 */) {
-  if (f_headers_sent()) {
+void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
+                   int http_response_code /* = 0 */) {
+  if (HHVM_FN(headers_sent)()) {
     raise_warning("Cannot modify header information - headers already sent");
   }
 
@@ -978,7 +952,7 @@ void f_header(const String& str, bool replace /* = true */,
 
 static IMPLEMENT_THREAD_LOCAL(int, s_response_code);
 
-Variant f_http_response_code(int response_code /* = 0 */) {
+Variant HHVM_FUNCTION(http_response_code, int response_code /* = 0 */) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     *s_response_code = transport->getResponseCode();
@@ -999,7 +973,7 @@ Variant f_http_response_code(int response_code /* = 0 */) {
   return response_code ? true : false;
 }
 
-Array f_headers_list() {
+Array HHVM_FUNCTION(headers_list) {
   Transport *transport = g_context->getTransport();
   Array ret = Array::Create();
   if (transport) {
@@ -1016,7 +990,8 @@ Array f_headers_list() {
   return ret;
 }
 
-bool f_headers_sent(VRefParam file /* = null */, VRefParam line /* = null */) {
+bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
+                                 VRefParam line /* = null */) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     file = String(transport->getFirstHeaderFile());
@@ -1026,7 +1001,7 @@ bool f_headers_sent(VRefParam file /* = null */, VRefParam line /* = null */) {
   return false;
 }
 
-bool f_header_register_callback(const Variant& callback) {
+bool HHVM_FUNCTION(header_register_callback, const Variant& callback) {
   Transport *transport = g_context->getTransport();
   if (!transport) {
     // fail if there is no transport
@@ -1039,8 +1014,8 @@ bool f_header_register_callback(const Variant& callback) {
   return transport->setHeaderCallback(callback);
 }
 
-void f_header_remove(const String& name /* = null_string */) {
-  if (f_headers_sent()) {
+void HHVM_FUNCTION(header_remove, const Variant& name /* = null_string */) {
+  if (HHVM_FN(headers_sent)()) {
     raise_warning("Cannot modify header information - headers already sent");
   }
   Transport *transport = g_context->getTransport();
@@ -1048,12 +1023,12 @@ void f_header_remove(const String& name /* = null_string */) {
     if (name.isNull()) {
       transport->removeAllHeaders();
     } else {
-      transport->removeHeader(name.data());
+      transport->removeHeader(name.toString().data());
     }
   }
 }
 
-int f_get_http_request_size() {
+int HHVM_FUNCTION(get_http_request_size) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     return transport->getRequestSize();
@@ -1062,10 +1037,13 @@ int f_get_http_request_size() {
   }
 }
 
-bool f_setcookie(const String& name, const String& value /* = null_string */,
-                 int64_t expire /* = 0 */, const String& path /* = null_string */,
-                 const String& domain /* = null_string */, bool secure /* = false */,
-                 bool httponly /* = false */) {
+bool HHVM_FUNCTION(setcookie, const String& name,
+                              const String& value /* = null_string */,
+                              int64_t expire /* = 0 */,
+                              const String& path /* = null_string */,
+                              const String& domain /* = null_string */,
+                              bool secure /* = false */,
+                              bool httponly /* = false */) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     return transport->setCookie(name, value, expire, path, domain, secure,
@@ -1074,11 +1052,13 @@ bool f_setcookie(const String& name, const String& value /* = null_string */,
   return false;
 }
 
-bool f_setrawcookie(const String& name, const String& value /* = null_string */,
-                    int64_t expire /* = 0 */, const String& path /* = null_string */,
-                    const String& domain /* = null_string */,
-                    bool secure /* = false */,
-                    bool httponly /* = false */) {
+bool HHVM_FUNCTION(setrawcookie, const String& name,
+                                 const String& value /* = null_string */,
+                                 int64_t expire /* = 0 */,
+                                 const String& path /* = null_string */,
+                                 const String& domain /* = null_string */,
+                                 bool secure /* = false */,
+                                 bool httponly /* = false */) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     return transport->setCookie(name, value, expire, path, domain, secure,
@@ -1089,23 +1069,55 @@ bool f_setrawcookie(const String& name, const String& value /* = null_string */,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_define_syslog_variables() {
-  // do nothing, since all variables are defined as constants already
-}
-
-bool f_openlog(const String& ident, int option, int facility) {
+bool HHVM_FUNCTION(openlog, const String& ident, int option, int facility) {
   openlog(ident.data(), option, facility);
   return true;
 }
 
-bool f_closelog() {
+bool HHVM_FUNCTION(closelog) {
   closelog();
   return true;
 }
 
-bool f_syslog(int priority, const String& message) {
+bool HHVM_FUNCTION(syslog, int priority, const String& message) {
   syslog(priority, "%s", message.data());
   return true;
+}
+
+void StandardExtension::initNetwork() {
+  HHVM_FE(gethostname);
+  HHVM_FE(gethostbyaddr);
+  HHVM_FE(gethostbyname);
+  HHVM_FE(gethostbynamel);
+  HHVM_FE(getprotobyname);
+  HHVM_FE(getprotobynumber);
+  HHVM_FE(getservbyname);
+  HHVM_FE(getservbyport);
+  HHVM_FE(inet_ntop);
+  HHVM_FE(inet_pton);
+  HHVM_FE(ip2long);
+  HHVM_FE(long2ip);
+  HHVM_FE(checkdnsrr);
+  HHVM_FE(dns_get_record);
+  HHVM_FE(getmxrr);
+  HHVM_FE(header);
+  HHVM_FE(http_response_code);
+  HHVM_FE(headers_list);
+  HHVM_FE(headers_sent);
+  HHVM_FE(header_register_callback);
+  HHVM_FE(header_remove);
+  HHVM_FE(get_http_request_size);
+  HHVM_FE(setcookie);
+  HHVM_FE(setrawcookie);
+  HHVM_FE(openlog);
+  HHVM_FE(closelog);
+  HHVM_FE(syslog);
+
+  // These are defined in ext_socket, but Zend has them in network
+  HHVM_FE(fsockopen);
+  HHVM_FE(pfsockopen);
+
+  loadSystemlib("std_network");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

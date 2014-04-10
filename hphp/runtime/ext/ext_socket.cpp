@@ -1157,18 +1157,18 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   return ret;
 }
 
-Variant f_fsockopen(const String& hostname, int port /* = -1 */,
-                    VRefParam errnum /* = null */,
-                    VRefParam errstr /* = null */,
-                    double timeout /* = -1.0 */) {
+Variant HHVM_FUNCTION(fsockopen, const String& hostname, int port /* = -1 */,
+                      VRefParam errnum /* = null */,
+                      VRefParam errstr /* = null */,
+                      double timeout /* = -1.0 */) {
   HostURL hosturl(static_cast<const std::string>(hostname), port);
   return sockopen_impl(hosturl, errnum, errstr, timeout, false);
 }
 
-Variant f_pfsockopen(const String& hostname, int port /* = -1 */,
-                     VRefParam errnum /* = null */,
-                     VRefParam errstr /* = null */,
-                     double timeout /* = -1.0 */) {
+Variant HHVM_FUNCTION(pfsockopen, const String& hostname, int port /* = -1 */,
+                                  VRefParam errnum /* = null */,
+                                  VRefParam errstr /* = null */,
+                                  double timeout /* = -1.0 */) {
   // TODO: persistent socket handling
   HostURL hosturl(static_cast<const std::string>(hostname), port);
   return sockopen_impl(hosturl, errnum, errstr, timeout, true);

@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/ext/ext_socket.h"
-#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/text-art.h"
@@ -485,8 +485,8 @@ bool DebuggerClient::connect(const std::string &host, int port) {
   assert((!m_machines.empty() && m_machines[0]->m_name == LocalPrompt));
   // First check for an existing connect, and reuse that.
   for (unsigned int i = 1; i < m_machines.size(); i++) {
-    if (f_gethostbyname(m_machines[i]->m_name) ==
-        f_gethostbyname(host)) {
+    if (HHVM_FN(gethostbyname)(m_machines[i]->m_name) ==
+        HHVM_FN(gethostbyname)(host)) {
       switchMachine(m_machines[i]);
       return false;
     }

@@ -13,6 +13,7 @@ class StandardExtension : public Extension {
   void moduleInit() override {
     initErrorFunc();
     initClassobj();
+    initNetwork();
     initOptions();
     initVariable();
   }
@@ -20,6 +21,7 @@ class StandardExtension : public Extension {
  private:
   void initErrorFunc();
   void initClassobj();
+  void initNetwork();
   void initOptions();
   void initVariable();
 };

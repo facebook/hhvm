@@ -47,7 +47,8 @@ const StaticString
   s_mysqli_stmt("mysqli_stmt"),
   s_mysqli_warning("mysqli_warning"),
   s_persistent_prefix("p:"),
-  s_def("def");
+  s_def("def"),
+  s_free("free");
 
 //////////////////////////////////////////////////////////////////////////////
 // helper
@@ -607,6 +608,16 @@ static int64_t HHVM_FUNCTION(mysqli_get_client_version) {
   return mysql_get_client_version();
 }
 
+void HHVM_FUNCTION(mysqli_free_result, const Variant& result) {
+  if (!UNLIKELY(result.isObject()
+      && result.toObject().instanceof(s_mysqli_result))) {
+    raise_warning(
+        "mysqli_free_result() expects parameter 1 to be mysqli_result");
+  } else {
+    result.toObject()->o_invoke_few_args(s_free, 0);
+  }
+}
+
 //static Array HHVM_FUNCTION(mysqli_get_client_stats) {
 //  throw NotImplementedException(__FUNCTION__);
 //}
@@ -692,6 +703,7 @@ class mysqliExtension : public Extension {
     HHVM_FE(mysqli_stmt_bind_param);
     HHVM_FE(mysqli_stmt_bind_result);
     HHVM_FE(mysqli_thread_safe);
+    HHVM_FE(mysqli_free_result);
 
 #define REGISTER_CONST_VALUE(option, value)                                    \
   Native::registerConstant<KindOfInt64>(makeStaticString("MYSQLI_" #option),   \

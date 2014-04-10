@@ -59,7 +59,7 @@ class HardwareCounterImpl {
 public:
   HardwareCounterImpl(int type, unsigned long config,
                       const char* desc = nullptr)
-    : m_desc(desc ? desc : ""), m_err(0), m_fd(-1) {
+    : m_desc(desc ? desc : ""), m_err(0), m_fd(-1), inited(false) {
     memset (&pe, 0, sizeof (struct perf_event_attr));
     pe.type = type;
     pe.size = sizeof (struct perf_event_attr);
@@ -70,12 +70,19 @@ public:
     pe.exclude_hv = 1;
     pe.read_format =
       PERF_FORMAT_TOTAL_TIME_ENABLED|PERF_FORMAT_TOTAL_TIME_RUNNING;
+    }
 
-    if (!useCounters()) return;
+  ~HardwareCounterImpl() {
+    close();
+  }
+
+  void init_if_not() {
     /*
      * perf_event_open(struct perf_event_attr *hw_event_uptr, pid_t pid,
      *                 int cpu, int group_fd, unsigned long flags)
      */
+    if (inited) return;
+    inited = true;
     m_fd = syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
     if (m_fd < 0) {
       Logger::Verbose("perf_event_open failed with: %s",
@@ -91,14 +98,11 @@ public:
       return;
     }
     reset();
-    }
-
-  ~HardwareCounterImpl() {
-    close();
   }
 
   int64_t read() {
     if (!useCounters()) return 0;
+    init_if_not();
 
     int64_t count = 0;
 
@@ -129,6 +133,8 @@ public:
   }
 
   void reset() {
+    if (!useCounters()) return;
+    init_if_not();
     if (m_fd > 0 && ioctl (m_fd, PERF_EVENT_IOC_RESET, 0) < 0) {
       Logger::Warning("perf_event failed to reset with: %s",
           folly::errnoStr(errno).c_str());
@@ -142,6 +148,7 @@ public:
 private:
   int m_fd;
   struct perf_event_attr pe;
+  bool inited;
 
   void close() {
     if (m_fd > 0) {

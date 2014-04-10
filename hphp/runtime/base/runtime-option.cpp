@@ -390,11 +390,6 @@ static inline bool hhbcRelaxGuardsDefault() {
   return !RuntimeOption::EvalHHIRRelaxGuards;
 }
 
-static inline bool hhirRefcountOptsDefault() {
-  // TODO(t3091846)
-  return !RuntimeOption::EvalSimulateARM;
-}
-
 static inline bool evalJitDefault() {
 #ifdef __APPLE__
   return false;

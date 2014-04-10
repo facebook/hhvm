@@ -1228,7 +1228,11 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
     }
   }
   int nret = glob(work_pattern.data(), flags & GLOB_FLAGMASK, NULL, &globbuf);
-  if (nret == GLOB_NOMATCH || !globbuf.gl_pathc || !globbuf.gl_pathv) {
+  if (nret == GLOB_NOMATCH) {
+    return Array::Create();
+  }
+
+  if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
     if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess()) {
       if (!f_is_dir(work_pattern)) {
         return false;
@@ -1236,6 +1240,7 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
     }
     return Array::Create();
   }
+
   if (nret) {
     return false;
   }

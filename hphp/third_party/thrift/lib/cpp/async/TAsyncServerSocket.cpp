@@ -591,7 +591,7 @@ void TAsyncServerSocket::handlerReady(
     address.addressUpdated(addressFamily, addrLen);
 
     int64_t nowMs = concurrency::Util::currentTime();
-    int64_t timeSinceLastAccept = std::max(0L, nowMs - lastAccepTimestamp_);
+    int64_t timeSinceLastAccept = std::max<int64_t>(0, nowMs - lastAccepTimestamp_);
     lastAccepTimestamp_ = nowMs;
     if (acceptRate_ < 1) {
       acceptRate_ *= 1 + acceptRateAdjustSpeed_ * timeSinceLastAccept;

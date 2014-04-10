@@ -186,6 +186,7 @@ class TNotificationQueue {
 
     RequestContext::getStaticContext();
 
+#ifndef __APPLE__
     if (fdType == FdType::EVENTFD) {
       eventfd_ = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK | EFD_SEMAPHORE);
       if (eventfd_ == -1) {
@@ -202,6 +203,9 @@ class TNotificationQueue {
         }
       }
     }
+#else
+    fdType = FdType::PIPE;
+#endif
     if (fdType == FdType::PIPE) {
       if (pipe(pipeFds_)) {
         throw TLibraryException("Failed to create pipe for TNotificationQueue",
@@ -410,7 +414,7 @@ class TNotificationQueue {
       // pipe semantics, add one message for each numAdded
       bytes_expected = numAdded;
       do {
-        size_t messageSize = std::min(numAdded, sizeof(kPipeMessage));
+        size_t messageSize = std::min(numAdded, (uint64_t)sizeof(kPipeMessage));
         ssize_t rc = ::write(pipeFds_[1], kPipeMessage, messageSize);
         if (rc < 0) {
           // TODO: if the pipe is full, write will fail with EAGAIN.

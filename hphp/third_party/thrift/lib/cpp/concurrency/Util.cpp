@@ -21,59 +21,29 @@
 
 #include "thrift/lib/cpp/config.h"
 #include "glog/logging.h"
+#include "hphp/util/timer.h"
 
-#if defined(HAVE_CLOCK_GETTIME)
-#include <time.h>
-#elif defined(HAVE_GETTIMEOFDAY)
-#include <sys/time.h>
-#endif // defined(HAVE_CLOCK_GETTIME)
 #include <errno.h>
 #include <assert.h>
+
+using HPHP::Timer;
 
 namespace apache { namespace thrift { namespace concurrency {
 
 const int64_t Util::currentTimeTicks(int64_t ticksPerSec) {
   int64_t result;
-
-#if defined(HAVE_CLOCK_GETTIME)
   struct timespec now;
-  int ret = clock_gettime(CLOCK_REALTIME, &now);
-  DCHECK(ret == 0);
+  Timer::GetRealtimeTime(now);
   toTicks(result, now, ticksPerSec);
-#elif defined(HAVE_GETTIMEOFDAY)
-  struct timeval now;
-  int ret = gettimeofday(&now, nullptr);
-  assert(ret == 0);
-  toTicks(result, now, ticksPerSec);
-#else
-#error "No high-precision clock is available."
-#endif // defined(HAVE_CLOCK_GETTIME)
-
   return result;
 }
 
 const int64_t Util::monotonicTimeTicks(int64_t ticksPerSec) {
-#if defined(HAVE_CLOCK_GETTIME)
-  static bool useRealtime;
-  if (useRealtime) {
-    return currentTimeTicks(ticksPerSec);
-  }
-
-  struct timespec now;
-  int ret = clock_gettime(CLOCK_MONOTONIC, &now);
-  if (ret != 0) {
-    // CLOCK_MONOTONIC is probably not supported on this system
-    assert(errno == EINVAL);
-    useRealtime = true;
-    return currentTimeTicks(ticksPerSec);
-  }
-
   int64_t result;
+  struct timespec now;
+  Timer::GetMonotonicTime(now);
   toTicks(result, now, ticksPerSec);
   return result;
-#else
-  return currentTimeTicks(ticksPerSec);
-#endif // defined(HAVE_CLOCK_GETTIME)
 }
 
 }}} // apache::thrift::concurrency

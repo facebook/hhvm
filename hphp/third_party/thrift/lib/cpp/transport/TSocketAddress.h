@@ -23,11 +23,11 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
-#include <features.h>
 #include <netdb.h>
 #include <cstddef>
 #include <iostream>
 #include <string>
+#include <cstring>
 
 namespace apache { namespace thrift { namespace transport {
 
@@ -110,7 +110,7 @@ class TSocketAddress {
     addr.storage_.addr.sa_family = AF_UNSPEC;
   }
 
-#if __GNUC_PREREQ(4, 5)
+#if defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 405)
   TSocketAddress& operator=(TSocketAddress&& addr) {
     std::swap(storage_, addr.storage_);
     return *this;

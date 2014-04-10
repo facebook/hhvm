@@ -1,8 +1,6 @@
 #ifndef THRIFT_THRIFT_CONFIG_H_
 #define THRIFT_THRIFT_CONFIG_H_
 
-#include <features.h>
-
 /* Define to 1 if you have the `clock_gettime' function. */
 #define THRIFT_HAVE_CLOCK_GETTIME 1
 

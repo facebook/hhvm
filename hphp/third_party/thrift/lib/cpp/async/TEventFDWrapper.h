@@ -9,12 +9,10 @@
 #ifndef HPHP_THRIFT_ASYNC_TEVENTFDWRAPPER_H
 #define HPHP_THRIFT_ASYNC_TEVENTFDWRAPPER_H 1
 
-#include <features.h>
-
 // <sys/eventfd.h> doesn't exist on older glibc versions
-#if (defined(__GLIBC__) && __GLIBC_PREREQ(2, 9))
+#if defined(__GLIBC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 209)
 #include <sys/eventfd.h>
-#else /* !(defined(__GLIBC__) && __GLIBC_PREREQ(2, 9)) */
+#else
 
 #include <sys/syscall.h>
 #include <unistd.h>

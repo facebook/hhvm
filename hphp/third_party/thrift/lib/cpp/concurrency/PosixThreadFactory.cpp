@@ -368,7 +368,7 @@ class PosixThreadFactory::Impl {
   void setDetachState(DetachState value) { detached_ = value; }
 
   Thread::id_t getCurrentThreadId() const {
-    return static_cast<Thread::id_t>(pthread_self());
+    return reinterpret_cast<Thread::id_t>(pthread_self());
   }
 
 };

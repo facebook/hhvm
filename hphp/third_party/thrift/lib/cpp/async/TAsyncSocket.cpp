@@ -1088,6 +1088,7 @@ int TAsyncSocket::setQuickAck(bool quickack) {
 
   }
 
+#ifdef __linux__
   int value = quickack ? 1 : 0;
   if (setsockopt(fd_, IPPROTO_TCP, TCP_QUICKACK, &value, sizeof(value)) != 0) {
     int errnoCopy = errno;
@@ -1096,6 +1097,7 @@ int TAsyncSocket::setQuickAck(bool quickack) {
             << strerror(errnoCopy);
     return errnoCopy;
   }
+#endif
 
   return 0;
 }
@@ -1613,12 +1615,18 @@ ssize_t TAsyncSocket::performWrite(const iovec* vec,
   msg.msg_controllen = 0;
   msg.msg_flags = 0;
 
+#ifndef __APPLE__
   int msg_flags = MSG_DONTWAIT | MSG_NOSIGNAL;
+#else
+  int msg_flags = MSG_DONTWAIT | SO_NOSIGPIPE;
+#endif
   if (isSet(flags, WriteFlags::CORK)) {
     // MSG_MORE tells the kernel we have more data to send, so wait for us to
     // give it the rest of the data rather than immediately sending a partial
     // frame, even when TCP_NODELAY is enabled.
+#ifndef __APPLE__
     msg_flags |= MSG_MORE;
+#endif
   }
   if (isSet(flags, WriteFlags::EOR)) {
     // marks that this is the last byte of a record (response)

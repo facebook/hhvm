@@ -33,6 +33,7 @@
 #include "hphp/runtime/ext/hash/hash_fnv1.h"
 #include "hphp/runtime/ext/hash/hash_furc.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
+#include "hphp/system/constants.h"
 
 #if defined(HPHP_OSS)
 #define furc_hash furc_hash_internal

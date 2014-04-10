@@ -35,6 +35,7 @@
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/stat-cache.h"
+#include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"

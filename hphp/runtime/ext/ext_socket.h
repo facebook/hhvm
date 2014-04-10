@@ -24,6 +24,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const int64_t k_STREAM_SERVER_BIND;
+extern const int64_t k_STREAM_SERVER_LISTEN;
+
 Variant f_socket_create(int domain, int type, int protocol);
 Variant f_socket_create_listen(int port, int backlog = 128);
 bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd);

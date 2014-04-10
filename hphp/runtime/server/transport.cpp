@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/ext/ext_openssl.h"
+#include "hphp/system/constants.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/service-data.h"

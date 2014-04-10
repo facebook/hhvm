@@ -29,6 +29,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // transformations and manipulations
 
+extern const HPHP::StaticString k_HPHP_TRIM_CHARLIST;
+extern const int64_t k_STR_PAD_RIGHT;
+extern const int64_t k_ENT_COMPAT;
+
 String f_addcslashes(const String& str, const String& charlist);
 String f_stripcslashes(const String& str);
 String f_addslashes(const String& str);

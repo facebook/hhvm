@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/compatibility.h"
-#include "hphp/system/constants.h"
 ///////////////////////////////////////////////////////////////////////////////
 
 #endif // incl_HPHP_BASE_INCLUDES_H_

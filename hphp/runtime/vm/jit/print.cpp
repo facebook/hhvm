@@ -332,15 +332,15 @@ void print(std::ostream& os, const Block* block,
     if (inst.marker() != curMarker) {
       std::ostringstream mStr;
       auto const& newMarker = inst.marker();
-      auto func = newMarker.func();
-      if (!func || newMarker.isDummy()) {
+      if (!newMarker.hasFunc()) {
         os << color(ANSI_COLOR_BLUE)
            << std::string(kIndent, ' ')
            << "--- invalid marker"
            << color(ANSI_COLOR_END)
            << '\n';
       } else {
-        if (func != curMarker.func()) {
+        auto func = newMarker.func();
+        if (!curMarker.hasFunc() || func != curMarker.func()) {
           func->prettyPrint(mStr, Func::PrintOpts().noFpi());
         }
         mStr << std::string(kIndent, ' ')

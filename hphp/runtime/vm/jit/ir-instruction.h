@@ -62,9 +62,10 @@ struct BCMarker {
   bool valid() const;
   bool isDummy() const { return m_sk.valid() &&
                                 m_sk.getFuncId() == DummyFuncId; }
+  bool hasFunc() const { return valid() && !isDummy(); }
 
   SrcKey sk() const { assert(valid()); return m_sk; }
-  const Func* func() const { assert(valid()); return m_sk.func(); }
+  const Func* func() const { assert(hasFunc()); return m_sk.func(); }
   Offset bcOff() const { assert(valid()); return m_sk.offset(); }
   int32_t spOff() const { assert(valid()); return m_spOff; }
   void setSpOff(int32_t sp) { assert(valid()); m_spOff = sp; }

@@ -291,8 +291,8 @@
     # Stable is release-3.0.12, but we have pull requests in develop
     # https://github.com/phpbb/phpbb/pull/1908
     # https://github.com/phpbb/phpbb/pull/2232
-    branch: develop
-    commit: a5216e1b0483bc5db96f10d3b3504d1fe5ab850d
+    branch: develop-ascraeus
+    commit: 2284e2897f2573467a20cb90579e7b4bb8af392c
     install_root: phpbb3
     test_root: phpbb3
     clowns:

@@ -278,6 +278,8 @@ class ObjectData {
 
   Variant o_get(const String& s, bool error = true,
                 const String& context = null_string);
+  const Variant o_get(const String& s, bool error = true,
+                      const String& context = null_string) const;
 
   Variant o_set(const String& s, const Variant& v);
   Variant o_set(const String& s, const Variant& v, const String& context);

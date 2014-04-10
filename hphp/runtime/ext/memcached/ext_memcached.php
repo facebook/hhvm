@@ -388,7 +388,7 @@ class Memcached {
   public function getMultiByKey(string $server_key,
                                 array $keys,
                                 mixed &$cas_tokens = null,
-                                int $flags = 0): array;
+                                int $flags = 0): mixed;
 
   /**
    * Retrieve a Memcached option value
@@ -427,7 +427,7 @@ class Memcached {
    *   port, and weight on success or FALSE on failure.
    */
   <<__Native>>
-  public function getServerByKey(string $server_key): array;
+  public function getServerByKey(string $server_key): mixed;
 
   /**
    * Get the list of the servers in the pool

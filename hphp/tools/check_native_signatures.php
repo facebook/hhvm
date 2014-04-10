@@ -77,7 +77,7 @@ function parse_php_functions(string $file):
           }
         }
       }
-      $functions[$name] = Pair { $retType, $argTypes };
+      $functions[strtolower($name)] = Pair { $retType, $argTypes };
     }
   }
   return $functions;
@@ -110,10 +110,108 @@ function parse_cpp_functions(string $file):
           $argTypes[] = $type;
         }
       }
-      $functions[$name] = Pair { $retType, $argTypes };
+      $functions[strtolower($name)] = Pair { $retType, $argTypes };
     }
   }
   return $functions;
+}
+
+function parse_php_methods(string $file):
+                           ConstMap<string, Pair<string, ConstVector<string>>> {
+  $source = file_get_contents($file);
+  if (!$source) {
+    return ImmMap {};
+  }
+
+  static $class_regex = "#class ([^\\s{]+)[^{]*\\{(.*?)\n\\}#ms";
+  static $method_regex =
+    "#<<[^>]*__Native([^>]*)>>\n\\s*.*?function +([^(]*)\(([^)]*)\) *: *(.+?);#m";
+
+  $methods = Map {};
+
+  if (preg_match_all($class_regex, $source, $classes, PREG_SET_ORDER)) {
+    foreach ($classes as $class) {
+      $cname = $class[1];
+      $source = $class[2];
+      if (preg_match_all($method_regex, $source, $matches, PREG_SET_ORDER)) {
+        foreach($matches as $match) {
+          $nativeArgs = $match[1];
+          $mname = $match[2];
+          if (strpos($nativeArgs, '"ActRec"') !== false) {
+            // ActRec functions have a specific structure
+            $retType = 'actrec';
+            $argTypes = Vector {'actrec'};
+          } else {
+            $argList = $match[3];
+            $retType = explode('<', $match[4], 2)[0];
+            $argTypes = Vector {};
+            if ($argList) {
+              $args = preg_split('/\s*,\s*/', $argList);
+              if (count($args) > 7 && (in_array('float', $args)
+                  || in_array('double', $args))) {
+                $retType = 'actrec';
+                $argTypes = Vector {'actrec'};
+              } else if (count($args) > 15) {
+                $retType = 'actrec';
+                $argTypes = Vector {'actrec'};
+              } else {
+                foreach($args as $arg) {
+                  $type = preg_split('/\s*\$/', $arg)[0];
+                  $type = explode('<', $type, 2)[0];
+                  if ($type == '...') {
+                    // Special case varargs
+                    $vargTypes = Vector {'int'};
+                    $vargTypes->addAll($argTypes);
+                    $vargTypes[] = 'array';
+                    $argTypes = $vargTypes;
+                  } else {
+                    $argTypes[] = $type;
+                  }
+                }
+              }
+            }
+          }
+          $methods[strtolower("$cname::$mname")] = Pair { $retType, $argTypes };
+        }
+      }
+    }
+  }
+
+  return $methods;
+}
+
+function parse_cpp_methods(string $file):
+                           ConstMap<string, Pair<string, ConstVector<string>>> {
+  $source = file_get_contents($file);
+  if (!$source) {
+    return ImmMap {};
+  }
+
+  // Don't handle methods yet, so function can't be indented
+  static $method_regex =
+    "#^(?:static )?(\S+) +HHVM_(?:STATIC_)?METHOD\(([^,)]+),\s+([^,)]+)(?:, *)?([^)]*)\)#m";
+
+  $methods = Map {};
+
+  if (preg_match_all($method_regex, $source, $matches, PREG_SET_ORDER)) {
+    foreach($matches as $match) {
+      $cname = $match[2];
+      $mname = $match[3];
+      $argList = $match[4];
+      $retType = $match[1];
+      $argTypes = Vector {};
+      if ($argList) {
+        $args = preg_split('/\s*,\s*/', $argList);
+        foreach($args as $arg) {
+          $type = preg_split('# */ *#', $arg)[0];
+          $type = implode(' ', explode(' ', $type, -1));
+          $argTypes[] = $type;
+        }
+      }
+      $methods[strtolower("$cname::$mname")] = Pair { $retType, $argTypes };
+    }
+  }
+  return $methods;
 }
 
 function match_return_type(string $php, string $cpp): bool {
@@ -261,7 +359,13 @@ function check_types(ConstMap<string, Pair<string, ConstVector<string>>> $php,
 $phpFuncs = parse_php_functions($_SERVER['argv'][2]);
 $cppFuncs = parse_cpp_functions($_SERVER['argv'][1]);
 
-if (check_types($phpFuncs, $cppFuncs)) {
+$cppMeths = parse_cpp_methods($_SERVER['argv'][1]);
+$phpMeths = parse_php_methods($_SERVER['argv'][2]);
+
+$funcs = check_types($phpFuncs, $cppFuncs);
+$meths = check_types($phpMeths, $cppMeths);
+
+if ($funcs || $meths) {
   echo "See https://github.com/facebook/hhvm/wiki/Extension-API for what types",
         " map to what\n";
 }

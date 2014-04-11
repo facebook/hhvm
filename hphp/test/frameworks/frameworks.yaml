@@ -166,6 +166,18 @@
     commit: 1faf4c8508378b0b102d148c53c322a8048b16dd
     install_root: laravel
     test_root: laravel
+  lessphp:
+    # Until pull request for phpunit.xml is accepted. The original repository
+    # is commented out below.
+    url: https://github.com/cgcai/lessphp
+    # url: https://github.com/leafo/lessphp.git
+    branch: master
+    # Version 0.4.0 (Forked) The original v0.4.0 commit is commented out
+    # below.
+    commit: 119d94329581e6d6f41627f22faf0cee0b21eb0f
+    # commit: 51f3f06f0fe78a722dabfd14578444bdd078d9de
+    install_root: lessphp
+    test_root: lessphp
   magento2:
     # Until PHPUnit 3.8 pull request is accepted
     url: https://github.com/JoelMarcey/magento2.git

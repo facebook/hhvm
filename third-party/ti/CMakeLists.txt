@@ -6,7 +6,7 @@ find_package(Boost 1.48.0 COMPONENTS thread system REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
-include_directories("${HPHP_HOME}/hphp/third_party")
+include_directories("${HPHP_HOME}/third-party")
 add_library(hphp_proxygen STATIC ${CXX_SOURCES})
 
 add_dependencies(hphp_proxygen hphp_thrift)

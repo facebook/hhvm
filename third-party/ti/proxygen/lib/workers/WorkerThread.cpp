@@ -4,7 +4,7 @@
 #include <boost/thread.hpp>
 #include <signal.h>
 
-#include "hphp/third_party/stubs/glog/portability.h"
+#include "third-party/stubs/glog/portability.h"
 #include "folly/String.h"
 #include "thrift/lib/cpp/async/TEventBaseManager.h"
 

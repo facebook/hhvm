@@ -159,7 +159,7 @@ fi
 # libevent
 cd libevent
 git checkout release-1.4.14b-stable
-cat ../hphp/third_party/libevent-1.4.14.fb-changes.diff | patch -p1
+cat ../third-party/libevent-1.4.14.fb-changes.diff | patch -p1
 ./autogen.sh
 ./configure --prefix=$CMAKE_PREFIX_PATH
 make -j $CPUS

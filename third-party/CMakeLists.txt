@@ -20,29 +20,15 @@ include(FollySetup)
 
 add_definitions("-DHHVM")
 
-add_subdirectory(tools/bootstrap)
-
-add_subdirectory(compiler)
-add_subdirectory(hack)
-add_subdirectory(hhbbc)
-add_subdirectory(neo)
-add_subdirectory(parser)
-
-add_subdirectory(runtime)
-add_subdirectory(runtime/ext)
-add_subdirectory(runtime/ext_hhvm)
-add_subdirectory(runtime/ext_zend_compat)
-add_subdirectory(system)
-add_subdirectory(util)
-add_subdirectory(vixl)
-add_subdirectory(zend)
-
-add_subdirectory(hhvm)
-
-option(TEST_BIN "Create the HHVM test binary" OFF)
-if (TEST_BIN)
-	add_subdirectory(test)
-endif ()
-
-# Keep this last
-add_subdirectory(tools/hphpize)
+add_subdirectory(libafdt)
+add_subdirectory(libmbfl)
+add_subdirectory(libsqlite3)
+add_subdirectory(timelib)
+add_subdirectory(lz4)
+add_subdirectory(double-conversion)
+add_subdirectory(folly)
+add_subdirectory(libzip)
+if(ENABLE_FASTCGI)
+	add_subdirectory(ti)
+	add_subdirectory(thrift)
+endif()

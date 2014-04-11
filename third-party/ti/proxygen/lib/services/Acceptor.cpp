@@ -7,7 +7,7 @@
 #include "ti/proxygen/lib/utils/Exception.h"
 #include "ti/proxygen/lib/services/ManagedConnection.h"
 #include "ti/proxygen/lib/utils/Time.h"
-#include "hphp/third_party/stubs/glog/portability.h"
+#include "third-party/stubs/glog/portability.h"
 
 #include <boost/cast.hpp>
 #include <fcntl.h>

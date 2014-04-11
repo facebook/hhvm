@@ -38,7 +38,6 @@ $excluded = array(
   'runtime/ext/json/JSON_parser.cpp',
   'runtime/ext/php_unicode.h',
   'runtime/base/zend-ini.tab.cpp',
-  'third_party/',
   'util/safesort.h',
   'zend/crypt-blowfish.h',
   'zend/crypt-blowfish.c',

@@ -53,7 +53,7 @@ install_manifest.txt
 
 /hphp/TAGS
 
-/hphp/third_party/libzip/libzip.dylib
+/third-party/libzip/libzip.dylib
 
 # Generated makefiles
 /hphp/runtime/ext_hhvm/Makefile

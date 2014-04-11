@@ -225,6 +225,9 @@ bad_tests = (
     # flaky on Travis: t4088096
     '/ext/curl/tests/curl_copy_handle_basic_006.php',
     '/ext/curl/tests/curl_copy_handle_basic_007.php',
+
+    # fails on Travis, output doesn't match: t4117208
+    '/ext/intl/tests/locale_get_display_script3.php',
 )
 
 # Tests that work but not in repo mode

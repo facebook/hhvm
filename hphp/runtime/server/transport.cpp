@@ -417,6 +417,7 @@ void Transport::getResponseHeaders(HeaderMap &headers) {
   headers = m_responseHeaders;
 
   std::vector<std::string> &cookies = headers["Set-Cookie"];
+  std::reverse(m_responseCookies.begin(), m_responseCookies.end());
   for (auto iter = m_responseCookies.begin();
        iter != m_responseCookies.end();
        ++iter) {

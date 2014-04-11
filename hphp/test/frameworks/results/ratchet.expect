@@ -257,7 +257,7 @@ Ratchet\Session\SessionProviderTest::testOnMessageDecorator
 Ratchet\Session\SessionProviderTest::testOpen
 .
 Ratchet\Session\SessionProviderTest::testRejectInvalidSeralizers
-E
+.
 Ratchet\Session\SessionProviderTest::testToClassCase with data set #0
 .
 Ratchet\Session\SessionProviderTest::testToClassCase with data set #1

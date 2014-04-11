@@ -1603,8 +1603,9 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   auto& ht = m_hhbcTrans;
   ht.setBcOff(ni.source.offset(),
               ni.breaksTracelet && !m_hhbcTrans.isInlining());
-  FTRACE(1, "\n{:-^60}\n", folly::format("translating {} with stack:\n{}",
-                                         ni.toString(), ht.showStack()));
+  FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",
+                                         ni.offset(), ni.toString(),
+                                         ht.showStack()));
   // When profiling, we disable type predictions to avoid side exits
   assert(IMPLIES(JIT::tx->mode() == TransProfile, !ni.outputPredicted));
 

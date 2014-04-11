@@ -2082,14 +2082,20 @@ static const EVP_MD *php_openssl_get_evp_md_from_algo(long algo) {
 }
 
 bool f_openssl_sign(const String& data, VRefParam signature, const Variant& priv_key_id,
-                    int signature_alg /* = k_OPENSSL_ALGO_SHA1 */) {
+                    const Variant& signature_alg /* = k_OPENSSL_ALGO_SHA1 */) {
   Resource okey = Key::Get(priv_key_id, false);
   if (okey.isNull()) {
     raise_warning("supplied key param cannot be coerced into a private key");
     return false;
   }
 
-  const EVP_MD *mdtype = php_openssl_get_evp_md_from_algo(signature_alg);
+  const EVP_MD *mdtype = nullptr;
+  if (signature_alg.isInteger()) {
+    mdtype = php_openssl_get_evp_md_from_algo(signature_alg.toInt64Val());
+  } else if (signature_alg.isString()) {
+    mdtype = EVP_get_digestbyname(signature_alg.toString().data());
+  }
+
   if (!mdtype) {
     raise_warning("Unknown signature algorithm.");
     return false;
@@ -2117,9 +2123,15 @@ bool f_openssl_sign(const String& data, VRefParam signature, const Variant& priv
 }
 
 Variant f_openssl_verify(const String& data, const String& signature, const Variant& pub_key_id,
-                         int signature_alg /* = k_OPENSSL_ALGO_SHA1 */) {
-  const EVP_MD *mdtype = php_openssl_get_evp_md_from_algo(signature_alg);
+                         const Variant& signature_alg /* = k_OPENSSL_ALGO_SHA1 */) {
   int err;
+  const EVP_MD *mdtype = nullptr;
+
+  if (signature_alg.isInteger()) {
+    mdtype = php_openssl_get_evp_md_from_algo(signature_alg.toInt64Val());
+  } else if (signature_alg.isString()) {
+    mdtype = EVP_get_digestbyname(signature_alg.toString().data());
+  }
 
   if (!mdtype) {
     raise_warning("Unknown signature algorithm.");

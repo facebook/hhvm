@@ -885,7 +885,7 @@
                 },
                 {
                     "name": "signature_alg",
-                    "type": "Int32",
+                    "type": "Variant",
                     "value": "k_OPENSSL_ALGO_SHA1",
                     "desc": "For more information see the list of Signature Algorithms."
                 }
@@ -915,7 +915,7 @@
                 },
                 {
                     "name": "signature_alg",
-                    "type": "Int32",
+                    "type": "Variant",
                     "value": "k_OPENSSL_ALGO_SHA1",
                     "desc": "For more information see the list of Signature Algorithms."
                 }

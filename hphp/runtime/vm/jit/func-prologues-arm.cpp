@@ -99,7 +99,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     } else if (func->hasVariadicCaptureParam()) {
       helper = JIT::shuffleExtraArgsVariadic;
     } else {
-      helper = JIT::shuffleExtraArgs;
+      helper = JIT::trimExtraArgs;
     }
     a.  Mov    (argReg(0), rStashedAR);
     emitCall(a, CppCall(helper));

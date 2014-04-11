@@ -908,7 +908,7 @@ ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
  * HHBC instructions, and that source HHBC instructions are in turn
  * uniquely associated with SP->FP deltas.
  *
- * shuffleExtraArgs is called from the prologue of the callee.
+ * trimExtraArgs is called from the prologue of the callee.
  * The prologue is 1) still in the caller frame for now,
  * and 2) shared across multiple call sites. 1 means that we have the
  * fp from the caller's frame, and 2 means that this fp is not enough
@@ -931,36 +931,50 @@ static void sync_regstate_to_caller(ActRec* preLive) {
 
 #define SHUFFLE_EXTRA_ARGS_PRELUDE()                                    \
   assert(!ar->hasInvName());                                            \
-  sync_regstate_to_caller(ar);                                          \
   const Func* f = ar->m_func;                                           \
   int numParams = f->numNonVariadicParams();                            \
   int numArgs = ar->numArgs();                                          \
   assert(numArgs > numParams);                                          \
   int numExtra = numArgs - numParams;                                   \
-  TRACE(1, "shuffleExtraArgs: %d args, function %s takes only %d, ar %p\n", \
+  TRACE(1, "extra args: %d args, function %s takes only %d, ar %p\n",   \
         numArgs, f->name()->data(), numParams, ar);                     \
   auto tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;            \
   /* end SHUFFLE_EXTRA_ARGS_PRELUDE */
 
-void shuffleExtraArgs(ActRec* ar) {
+NEVER_INLINE
+static void trimExtraArgsMayReenter(ActRec* ar,
+                                    TypedValue* tvArgs,
+                                    TypedValue* limit
+                                   ) {
+  sync_regstate_to_caller(ar);
+  do {
+    tvRefcountedDecRef(tvArgs); // may reenter for __destruct
+    ++tvArgs;
+  } while (tvArgs != limit);
+  ar->setNumArgs(ar->m_func->numParams());
+
+  // go back to dirty (see the comments of sync_regstate_to_caller)
+  tl_regState = VMRegState::DIRTY;
+}
+
+void trimExtraArgs(ActRec* ar) {
   SHUFFLE_EXTRA_ARGS_PRELUDE()
   assert(!f->hasVariadicCaptureParam());
   assert(!(f->attrs() & AttrMayUseVV));
 
-  {
-    // Function is not marked as "MayUseVV", so discard the extra arguments
-    for (int i = 0; i < numExtra; ++i) {
-      tvRefcountedDecRef(tvArgs);
-      ++tvArgs;
+  TypedValue* limit = tvArgs + numExtra;
+  do {
+    if (UNLIKELY(tvDecRefWillCallHelper(tvArgs))) {
+      trimExtraArgsMayReenter(ar, tvArgs, limit);
+      return;
     }
-    assert(f->numParams() == (numArgs - numExtra));
-    assert(f->numParams() == numParams);
-    ar->setNumArgs(numParams);
-  }
+    tvDecRefOnly(tvArgs);
+    ++tvArgs;
+  } while (tvArgs != limit);
 
-  // Only go back to dirty in a non-exception case.  (Same reason as
-  // above.)
-  tl_regState = VMRegState::DIRTY;
+  assert(f->numParams() == (numArgs - numExtra));
+  assert(f->numParams() == numParams);
+  ar->setNumArgs(numParams);
 }
 
 void shuffleExtraArgsMayUseVV(ActRec* ar) {
@@ -972,10 +986,6 @@ void shuffleExtraArgsMayUseVV(ActRec* ar) {
     assert(!ar->hasExtraArgs());
     ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
   }
-
-  // Only go back to dirty in a non-exception case.  (Same reason as
-  // above.)
-  tl_regState = VMRegState::DIRTY;
 }
 
 void shuffleExtraArgsVariadic(ActRec* ar) {
@@ -997,10 +1007,6 @@ void shuffleExtraArgsVariadic(ActRec* ar) {
     assert(f->numParams() == (numParams + 1));
     ar->setNumArgs(numParams + 1);
   }
-
-  // Only go back to dirty in a non-exception case.  (Same reason as
-  // above.)
-  tl_regState = VMRegState::DIRTY;
 }
 
 void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
@@ -1012,8 +1018,7 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
     assert(!ar->hasExtraArgs());
     ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
 
-    auto varArgsArray =
-      Array::attach(MixedArray::MakePacked(numExtra, tvArgs));
+    auto varArgsArray = Array::attach(MixedArray::MakePacked(numExtra, tvArgs));
     auto tvIncr = tvArgs; uint32_t i = 0;
     // an incref is needed to compensate for discarding from the stack
     for (; i < numExtra; ++i, ++tvIncr) { tvRefcountedIncRef(tvIncr); }
@@ -1025,10 +1030,6 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
     // Before, for each arg: refcount = n + 1 (stack)
     // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray)
   }
-
-  // Only go back to dirty in a non-exception case.  (Same reason as
-  // above.)
-  tl_regState = VMRegState::DIRTY;
 }
 
 #undef SHUFFLE_EXTRA_ARGS_PRELUDE

@@ -3869,13 +3869,8 @@ Translator::Translator()
 {
   initInstrInfo();
   if (RuntimeOption::EvalJitPGO) {
-    m_profData = new ProfData();
+    m_profData.reset(new ProfData());
   }
-}
-
-Translator::~Translator() {
-  delete m_profData;
-  m_profData = nullptr;
 }
 
 bool

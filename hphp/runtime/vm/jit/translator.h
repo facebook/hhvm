@@ -468,7 +468,7 @@ private:
 public:
 
   Translator();
-  virtual ~Translator();
+
   static Lease& WriteLease() {
     return s_writeLease;
   }
@@ -550,7 +550,7 @@ public:
 
 private:
   TransKind m_mode;
-  ProfData* m_profData;
+  std::unique_ptr<ProfData> m_profData;
 
 private:
   int m_analysisDepth;
@@ -560,7 +560,7 @@ public:
   bool addDbgBLPC(PC pc);
 
   ProfData* profData() const {
-    return m_profData;
+    return m_profData.get();
   }
 
   TransKind mode() const {

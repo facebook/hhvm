@@ -114,10 +114,10 @@ class SetResultToRefWaitHandle<T> extends BlockableWaitHandle<T> {
 }
 
 class RescheduleWaitHandle extends WaitableWaitHandle<void> {
-  const QUEUE_DEFAULT = 0;
-  const QUEUE_NO_PENDING_IO = 0;
-  static public function create(int $queue, int $priority)
-    : RescheduleWaitHandle<void> { }
+  const int QUEUE_DEFAULT = 0;
+  const int QUEUE_NO_PENDING_IO = 0;
+  static public function create(int $queue, int $priority
+  ): RescheduleWaitHandle { }
 }
 
 class SessionScopedWaitHandle<T> extends WaitableWaitHandle<T> {}

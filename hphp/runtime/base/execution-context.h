@@ -609,8 +609,7 @@ private:
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
-  void prepareFuncEntry(ActRec* ar, PC& pc);
-  bool prepareArrayArgs(ActRec* ar, const Variant& arrayArgs);
+  void prepareFuncEntry(ActRec* ar, PC& pc, bool stackTrimmed);
   void shuffleMagicArgs(ActRec* ar);
   void shuffleExtraStackArgs(ActRec* ar);
   void recordCodeCoverage(PC pc);

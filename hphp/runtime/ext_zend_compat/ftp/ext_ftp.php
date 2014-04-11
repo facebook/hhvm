@@ -12,7 +12,7 @@
 <<__Native("ZendCompat")>>
 function ftp_alloc(mixed $ftp_stream,
                    mixed $filesize,
-                   mixed $result): mixed;
+                   mixed &$result): mixed;
 
 /* Changes to the parent directory.
  */

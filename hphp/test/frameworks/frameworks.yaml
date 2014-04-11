@@ -338,6 +338,7 @@
     clowns:
       # Broken test. Fixed in symfony master, but not yet in release.
       - symfony/src/Symfony/Component/ClassLoader/Tests/ApcUniversalClassLoaderTest.php
+      - symfony/src/Symfony/Component/Config/Tests/Definition/Builder/NodeBuilderTest.php
   twig:
     url: https://github.com/fabpot/Twig.git
     branch: v1.15.1

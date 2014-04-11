@@ -66,6 +66,7 @@
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -1998,57 +1999,52 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
   m_stack.discard();
 }
 
-void ExecutionContext::resumeAsyncFunc(c_Continuation& cont,
+void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
+                                       ObjectData* freeObj,
                                        Cell& awaitResult) {
   assert(tl_regState == VMRegState::CLEAN);
   SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
-  ActRec* ar = cont.actRec();
-  checkStack(m_stack, ar->func());
-  ar->m_soff = 0;
-  ar->m_savedRbp = 0;
+  auto fp = resumable->actRec();
+  checkStack(m_stack, fp->func());
+  fp->m_soff = 0;
+  fp->m_savedRbp = 0;
 
   Cell* savedSP = m_stack.top();
   cellDup(awaitResult, *m_stack.allocC());
 
+  // decref after awaitResult is on the stack
+  decRefObj(freeObj);
+
   pushVMState(savedSP);
   SCOPE_EXIT { popVMState(); };
 
-  try {
-    enterVM(ar, StackArgsState::Untrimmed,
-            ar->func()->unit()->at(cont.resumable()->offset()));
-    cont.setStopped();
-  } catch (...) {
-    cont.setDone();
-    cellSet(make_tv<KindOfNull>(), cont.m_value);
-    throw;
-  }
+  enterVM(fp, StackArgsState::Untrimmed,
+          fp->func()->unit()->at(resumable->offset()));
 }
 
-void ExecutionContext::resumeAsyncFuncThrow(c_Continuation& cont,
+void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
+                                            ObjectData* freeObj,
                                             ObjectData* exception) {
   assert(exception);
   assert(exception->instanceof(SystemLib::s_ExceptionClass));
   assert(tl_regState == VMRegState::CLEAN);
   SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
-  ActRec* ar = cont.actRec();
-  checkStack(m_stack, ar->func());
-  ar->m_soff = 0;
-  ar->m_savedRbp = 0;
+  auto fp = resumable->actRec();
+  checkStack(m_stack, fp->func());
+  fp->m_soff = 0;
+  fp->m_savedRbp = 0;
+
+  // decref after we hold reference to the exception
+  Object e(exception);
+  decRefObj(freeObj);
 
   pushVMState(m_stack.top());
   SCOPE_EXIT { popVMState(); };
 
-  try {
-    enterVM(ar, StackArgsState::Untrimmed,
-            ar->func()->unit()->at(cont.resumable()->offset()), exception);
-    cont.setStopped();
-  } catch (...) {
-    cont.setDone();
-    cellSet(make_tv<KindOfNull>(), cont.m_value);
-    throw;
-  }
+  enterVM(fp, StackArgsState::Untrimmed,
+          fp->func()->unit()->at(resumable->offset()), exception);
 }
 
 void ExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
@@ -2225,11 +2221,6 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
 
     // check for include
     String funcname = const_cast<StringData*>(fp->m_func->name());
-    if (fp->inGenerator()) {
-      // retrieve the original function name from the inner continuation
-      funcname = frame_continuation(fp)->t_getorigfuncname();
-    }
-
     if (fp->m_func->isClosureBody()) {
       static StringData* s_closure_label =
           makeStaticString("{closure}");
@@ -4491,11 +4482,19 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
     m_stack.ret();
     *m_stack.topTV() = retval;
     assert(m_stack.topTV() == &m_fp->m_r);
-  } else {
+  } else if (m_fp->func()->isAsync()) {
+    // Mark the async function as succeeded and store the return value.
+    assert(sfp == m_fp);
+    auto waitHandle = frame_afwh(m_fp);
+    waitHandle->setState(c_AsyncFunctionWaitHandle::STATE_SUCCEEDED);
+    cellCopy(retval, waitHandle->getResult());
+  } else if (m_fp->func()->isGenerator()) {
     // Mark the generator as finished and store the return value.
     auto cont = frame_continuation(m_fp);
     cont->setDone();
     tvSetIgnoreRef(retval, cont->m_value);
+  } else {
+    not_reached();
   }
 
   if (LIKELY(sfp != m_fp)) {
@@ -7236,6 +7235,7 @@ OPTBLD_INLINE void ExecutionContext::iopAsyncAwait(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
   assert(!m_fp->inGenerator());
+  assert(m_fp->func()->isAsync());
   const auto func = m_fp->m_func;
   const auto offset = func->unit()->offsetOf(pc);
 
@@ -7253,10 +7253,10 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
     c_AsyncFunctionWaitHandle::Create(m_fp, offset, child));
 
   // Teleport local variables into the AsyncFunctionWaitHandle.
-  fillContinuationVars(func, m_fp, waitHandle->getActRec());
+  fillContinuationVars(func, m_fp, waitHandle->actRec());
 
   // Teleport iterators into the AsyncFunctionWaitHandle.
-  memcpy(frame_iter(waitHandle->getActRec(), iters - 1),
+  memcpy(frame_iter(waitHandle->actRec(), iters - 1),
          frame_iter(m_fp, iters - 1),
          iters * sizeof(Iter));
 
@@ -7289,15 +7289,24 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
 
 OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS) {
   assert(m_fp->inGenerator());
+  assert(m_fp->func()->isAsync());
   assert(m_fp->arGetSfp() == m_fp);
-  const auto offset = m_fp->func()->unit()->offsetOf(pc);
-  auto cont = frame_continuation(m_fp);
-  cont->suspend(offset, *m_stack.topC());
-  m_stack.popTV();
 
+  // Suspend the async function.
+  Cell& value = *m_stack.topC();
+  assert(value.m_type == KindOfObject);
+  assert(value.m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
+  auto const child = static_cast<c_WaitableWaitHandle*>(value.m_data.pobj);
+  auto const offset = m_fp->func()->unit()->offsetOf(pc);
+  frame_afwh(m_fp)->suspend(child, offset);
+  m_stack.discard();
+
+  // Call the FunctionExit hook.
   EventHook::FunctionExit(m_fp, nullptr);
-  pc = nullptr;
+
+  // Transfer control back to the scheduler.
   m_fp = nullptr;
+  pc = nullptr;
 }
 
 OPTBLD_INLINE void ExecutionContext::iopAsyncSuspend(IOP_ARGS) {

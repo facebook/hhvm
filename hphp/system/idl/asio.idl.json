@@ -227,6 +227,7 @@
             "parent": "StaticWaitHandle",
             "desc": "A wait handle representing static result",
             "flags": [
+                "IsFinal",
                 "NoDefaultSweep"
             ],
             "funcs": [
@@ -250,7 +251,8 @@
             "parent": "StaticWaitHandle",
             "desc": "A wait handle representing statically failed operation",
             "flags": [
-                     "NoDefaultSweep"
+                "IsFinal",
+                "NoDefaultSweep"
             ],
             "funcs": [
                 {
@@ -371,7 +373,9 @@
             "parent": "BlockableWaitHandle",
             "desc": "A wait handle representing asynchronous execution of async function",
             "flags": [
-                "NoDefaultSweep"
+                "IsFinal",
+                "NoDefaultSweep",
+                "CppCustomDelete"
             ],
             "funcs": [
                 {
@@ -494,6 +498,7 @@
             "parent": "BlockableWaitHandle",
             "desc": "A wait handle representing an array of asynchronous operations",
             "flags": [
+                "IsFinal",
                 "NoDefaultSweep"
             ],
             "funcs": [
@@ -553,6 +558,7 @@
             "parent": "BlockableWaitHandle",
             "desc": "A wait handle representing a map of asynchronous operations",
             "flags": [
+                "IsFinal",
                 "NoDefaultSweep"
             ],
             "funcs": [
@@ -612,6 +618,7 @@
             "parent": "BlockableWaitHandle",
             "desc": "A wait handle representing a vector of asynchronous operations",
             "flags": [
+                "IsFinal",
                 "NoDefaultSweep"
             ],
             "funcs": [
@@ -671,6 +678,7 @@
             "parent": "BlockableWaitHandle",
             "desc": "A wait handle proxy that sets result to a given reference",
             "flags": [
+                "IsFinal",
                 "NoDefaultSweep"
             ],
             "funcs": [
@@ -736,6 +744,7 @@
             "parent": "WaitableWaitHandle",
             "desc": "A wait handle that succeeds with null once desired scheduling priority is eligible for execution",
             "flags": [
+                "IsFinal",
                 "NoDefaultSweep"
             ],
             "funcs": [
@@ -817,6 +826,7 @@
             "parent": "SessionScopedWaitHandle",
             "desc": "A wait handle that succeeds with null after the desired timeout expires",
             "flags": [
+                "IsFinal",
                 "NoDefaultSweep"
             ],
             "funcs": [
@@ -861,6 +871,7 @@
                 "Sweepable"
             ],
             "flags": [
+                "IsFinal",
                 "NoDefaultSweep"
             ],
             "funcs": [

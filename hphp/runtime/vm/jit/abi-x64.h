@@ -215,6 +215,7 @@ const RegSet kAllX64Regs = RegSet(kAllRegs).add(reg::r10)
  */
 #define TVOFF(nm) int(offsetof(TypedValue, nm))
 #define AROFF(nm) int(offsetof(ActRec, nm))
+#define AFWHOFF(nm) int(offsetof(c_AsyncFunctionWaitHandle, nm))
 #define CONTOFF(nm) int(offsetof(c_Continuation, nm))
 
 //////////////////////////////////////////////////////////////////////

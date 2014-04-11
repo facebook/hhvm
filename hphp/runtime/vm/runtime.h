@@ -17,6 +17,7 @@
 #define incl_HPHP_VM_RUNTIME_H_
 
 #include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -70,6 +71,15 @@ inline Resumable*
 frame_resumable(const ActRec* fp) {
   assert(fp->inGenerator());
   return (Resumable*)((char*)fp - Resumable::arOff());
+}
+
+inline c_AsyncFunctionWaitHandle*
+frame_afwh(const ActRec* fp) {
+  auto resumable = frame_resumable(fp);
+  auto arOffset = c_AsyncFunctionWaitHandle::arOff();
+  auto waitHandle = (c_AsyncFunctionWaitHandle*)((char*)resumable - arOffset);
+  assert(waitHandle->getVMClass() == c_AsyncFunctionWaitHandle::classof());
+  return waitHandle;
 }
 
 inline c_Continuation*

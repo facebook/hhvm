@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/unit.h"
@@ -1500,7 +1501,7 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   m_hasExit = true;
 }
 
-void HhbcTranslator::emitContReturnControl(Block* catchBlock) {
+void HhbcTranslator::emitResumedReturnControl(Block* catchBlock) {
   auto const sp = spillStack();
   emitRetSurpriseCheck(cns(Type::Uninit), catchBlock, true);
 
@@ -1544,7 +1545,7 @@ void HhbcTranslator::emitContSuspend(Offset resumeOffset) {
   }
 
   // transfer control
-  emitContReturnControl(catchBlock);
+  emitResumedReturnControl(catchBlock);
 }
 
 void HhbcTranslator::emitContSuspendK(Offset resumeOffset) {
@@ -1562,7 +1563,7 @@ void HhbcTranslator::emitContSuspendK(Offset resumeOffset) {
   }
 
   // transfer control
-  emitContReturnControl(catchBlock);
+  emitResumedReturnControl(catchBlock);
 }
 
 void HhbcTranslator::emitContCheck(bool checkStarted) {
@@ -1687,13 +1688,18 @@ void HhbcTranslator::emitAsyncSuspendE(Offset resumeOffset, int numIters) {
 void HhbcTranslator::emitAsyncSuspendR(Offset resumeOffset) {
   assert(curFunc()->isAsync());
   assert(inGenerator());
-  auto catchBlock = makeCatchNoSpill();
 
-  // set value and offset
-  emitContSuspendImpl(resumeOffset);
+  auto const catchBlock = makeCatchNoSpill();
+  auto const child = popC();
+  assert(child->isA(Type::Obj));
 
-  // transfer control
-  emitContReturnControl(catchBlock);
+  // Store child and offset.
+  gen(StAsyncArRaw, RawMemData{RawMemData::AsyncChild}, m_irb->fp(), child);
+  gen(StAsyncArRaw, RawMemData{RawMemData::AsyncOffset}, m_irb->fp(),
+      cns(resumeOffset));
+
+  // Transfer control back to the scheduler.
+  emitResumedReturnControl(catchBlock);
 }
 
 void HhbcTranslator::emitStrlen() {
@@ -3207,7 +3213,18 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
     // Free ActRec.
     sp = gen(RetAdjustStack, m_irb->fp());
-  } else {
+  } else if (func->isAsync()) {
+    // Mark the async function as succeeded.
+    auto succeeded = c_AsyncFunctionWaitHandle::STATE_SUCCEEDED;
+    gen(StAsyncArRaw, RawMemData{RawMemData::AsyncState}, m_irb->fp(),
+        cns(succeeded));
+
+    // Store the return value.
+    gen(StAsyncArResult, m_irb->fp(), retVal);
+
+    // Sync SP.
+    sp = spillStack();
+  } else if (func->isGenerator()) {
     // Mark generator as finished.
     gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
         cns(c_Continuation::Done));
@@ -3219,6 +3236,8 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
     // Sync SP.
     sp = spillStack();
+  } else {
+    not_reached();
   }
 
   // Grab caller info from ActRec and return control to the caller.

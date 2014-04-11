@@ -92,17 +92,7 @@ void c_WaitableWaitHandle::setResult(const Cell& result) {
 
   setState(STATE_SUCCEEDED);
   cellDup(result, m_resultOrException);
-
-  // unref creator
-  if (m_creator) {
-    decRefObj(m_creator);
-    m_creator = nullptr;
-  }
-
-  // unblock parents
-  while (m_firstParent) {
-    m_firstParent = m_firstParent->unblock();
-  }
+  done();
 }
 
 void c_WaitableWaitHandle::setException(ObjectData* exception) {
@@ -111,6 +101,12 @@ void c_WaitableWaitHandle::setException(ObjectData* exception) {
 
   setState(STATE_FAILED);
   tvWriteObject(exception, &m_resultOrException);
+  done();
+}
+
+void c_WaitableWaitHandle::done() {
+  assert(isFinished());
+  assert(cellIsPlausible(m_resultOrException));
 
   // unref creator
   if (m_creator) {

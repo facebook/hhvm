@@ -82,6 +82,8 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   static c_Continuation* Clone(ObjectData* obj);
 
   static c_Continuation* Create(const ActRec* fp, Offset offset) {
+    assert(fp);
+    assert(fp->func()->isGenerator());
     void* obj = Resumable::Create(fp, offset, sizeof(c_Continuation));
     auto const cont = new (obj) c_Continuation();
     cont->incRefCount();
@@ -135,8 +137,6 @@ public:
   int64_t m_index;
   Cell m_key;
   Cell m_value;
-
-  String& getCalledClass() { not_reached(); }
 
   Resumable* resumable() const {
     return reinterpret_cast<Resumable*>(

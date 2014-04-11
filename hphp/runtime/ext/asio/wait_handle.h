@@ -95,13 +95,8 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   uint8_t getState() { return o_subclassData.u8[0]; }
   void setState(uint8_t state) { o_subclassData.u8[0] = state; }
 
-  // Access for the TC; the offset of the result from an ObjectData*.
-  static ptrdiff_t resultOffset() {
-    auto const objOffset =
-      reinterpret_cast<uintptr_t>(
-        static_cast<ObjectData*>(reinterpret_cast<c_WaitHandle*>(0x100))
-      ) - 0x100;
-    return offsetof(c_WaitHandle, m_resultOrException) - objOffset;
+  static constexpr ptrdiff_t resultOff() {
+    return offsetof(c_WaitHandle, m_resultOrException);
   }
 
   // The code in the TC will depend on the values of these constants.

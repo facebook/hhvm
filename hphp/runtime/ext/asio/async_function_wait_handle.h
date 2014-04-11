@@ -20,18 +20,18 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/resumable.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncFunctionWaitHandle
 
 /**
- * A continuation wait handle represents a basic unit of asynchronous execution
- * powered by continuation object. An asynchronous program can be written using
- * continuations; a dependency on another wait handle is set up by awaiting such
+ * An async function wait handle represents a basic unit of asynchronous
+ * execution. A dependency on another wait handle is set up by awaiting such
  * wait handle, giving control of the execution back to the asio framework.
  */
-FORWARD_DECLARE_CLASS(Continuation);
 FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
 class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
  public:
@@ -39,7 +39,7 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
 
   explicit c_AsyncFunctionWaitHandle(
     Class* cls = c_AsyncFunctionWaitHandle::classof());
-  ~c_AsyncFunctionWaitHandle() {}
+  ~c_AsyncFunctionWaitHandle();
   void t___construct();
   static void ti_setoncreatecallback(const Variant& callback);
   static void ti_setonawaitcallback(const Variant& callback);
@@ -49,11 +49,24 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   void t_setprivdata(const Object& data);
 
  public:
-  static ptrdiff_t getContOffset() {
-    // offset of m_continuation from the beginning of ObjectData
-    auto const objOffset = reinterpret_cast<uintptr_t>(static_cast<ObjectData*>(
-          reinterpret_cast<c_AsyncFunctionWaitHandle*>(0x100))) - 0x100;
-    return offsetof(c_AsyncFunctionWaitHandle, m_continuation) - objOffset;
+  static constexpr ptrdiff_t resumableOff() { return -sizeof(Resumable); }
+  static constexpr ptrdiff_t arOff() {
+    return resumableOff() + Resumable::arOff();
+  }
+  static constexpr ptrdiff_t offsetOff() {
+    return resumableOff() + Resumable::offsetOff();
+  }
+  static constexpr ptrdiff_t objOff() {
+    return resultOff() - c_WaitHandle::resultOff();
+  }
+  static constexpr ptrdiff_t stateOff() {
+    return offsetof(c_AsyncFunctionWaitHandle, o_subclassData.u8[0]);
+  }
+  static constexpr ptrdiff_t resultOff() {
+    return offsetof(c_AsyncFunctionWaitHandle, m_resultOrException);
+  }
+  static constexpr ptrdiff_t childOff() {
+    return offsetof(c_AsyncFunctionWaitHandle, m_child);
   }
   static ObjectData* Create(const ActRec* origFp,
                             Offset offset,
@@ -63,10 +76,19 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   String getName();
   void exitContext(context_idx_t ctx_idx);
   bool isRunning() { return getState() == STATE_RUNNING; }
+  void suspend(c_WaitableWaitHandle* child, Offset offset);
   String getFileName();
   Offset getNextExecutionOffset();
   int getLineNumber();
-  ActRec* getActRec();
+
+  Resumable* resumable() const {
+    return reinterpret_cast<Resumable*>(
+      const_cast<char*>(reinterpret_cast<const char*>(this) + resumableOff()));
+  }
+
+  ActRec* actRec() const {
+    return resumable()->actRec();
+  }
 
  protected:
   void onUnblocked();
@@ -74,12 +96,16 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   void enterContextImpl(context_idx_t ctx_idx);
 
  private:
-  void initialize(c_Continuation* continuation, c_WaitableWaitHandle* child);
-  void markAsSucceeded(const Cell& result);
+  void initialize(c_WaitableWaitHandle* child);
+  void markAsSucceeded();
   void markAsFailed(const Object& exception);
+  c_WaitableWaitHandle* child() {
+    assert(m_child->instanceof(c_WaitableWaitHandle::classof()));
+    return static_cast<c_WaitableWaitHandle*>(m_child);
+  }
 
-  p_Continuation m_continuation;
-  p_WaitableWaitHandle m_child;
+  // m_child is always WaitableWaitHandle, but needs to be non-virtual (JIT)
+  c_WaitHandle* m_child;
   Object m_privData;
   uint16_t m_depth;
 

@@ -305,7 +305,7 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
     auto frame = getWaitHandleAtAsyncStackPosition(m_frame);
 
     if (frame != nullptr) {
-      auto fp = frame->getActRec();
+      auto fp = frame->actRec();
       if (fp != nullptr) {
         m_variables = getVariables(fp);
       }

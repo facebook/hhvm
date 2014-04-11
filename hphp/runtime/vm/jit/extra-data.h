@@ -717,6 +717,9 @@ struct NewStructData : IRExtraData {
 
 struct RawMemData : IRExtraData {
 # define RAW_MEM_DATA_TYPES                     \
+  RAW_TYPE(AsyncState)                          \
+  RAW_TYPE(AsyncChild)                          \
+  RAW_TYPE(AsyncOffset)                         \
   RAW_TYPE(ContOffset)                          \
   RAW_TYPE(ContIndex)                           \
   RAW_TYPE(ContState)                           \
@@ -874,6 +877,7 @@ X(ThingExists,                  ClassKindData);
 X(NewStructArray,               NewStructData);
 X(LdRaw,                        RawMemData);
 X(StRaw,                        RawMemData);
+X(StAsyncArRaw,                 RawMemData);
 X(LdContArRaw,                  RawMemData);
 X(StContArRaw,                  RawMemData);
 

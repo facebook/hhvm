@@ -117,7 +117,7 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
       }
     }
 
-    // Run queue of ready continuations once.
+    // Run queue of ready async functions once.
     if (!m_runnableQueue.empty()) {
       auto current = m_runnableQueue.front();
       m_runnableQueue.pop();

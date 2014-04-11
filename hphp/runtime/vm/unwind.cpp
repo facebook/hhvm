@@ -206,11 +206,15 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
     // Free ActRec.
     stack.ndiscard(func->numSlotsInFrame());
     stack.discardAR();
-  } else {
+  } else if (fp->func()->isAsync()) {
+    // Do nothing. AsyncFunctionWaitHandle will handle the exception.
+  } else if (fp->func()->isGenerator()) {
     // Mark the generator as finished and clear its m_value.
     auto cont = frame_continuation(fp);
     cont->setDone();
     cellSet(make_tv<KindOfNull>(), cont->m_value);
+  } else {
+    not_reached();
   }
 
   /*

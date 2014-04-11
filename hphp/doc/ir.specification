@@ -1800,7 +1800,7 @@ StContArRaw S0:FramePtr S1:ConstInt S2:??
 
   Stores raw data into the Continuation object ActRec of which is S0. S1 is a
   constant from the RawMemSlow::Kind enum, which describes the offset from the
-  continutaion base, and the size. S2 is the value.
+  Continuation base, and the size. S2 is the value.
 
 D:Cell LdContArValue S0:FramePtr
 
@@ -1819,6 +1819,17 @@ StContArKey S0:FramePtr S1:Cell
 
   Stores 'key' into the Continuation object ActRec of which is S0. S1 is the
   new value.
+
+StAsyncArRaw S0:FramePtr S1:ConstInt S2:??
+
+  Stores raw data into the AsyncFunctionWaitHandle object ActRec of which is S0.
+  S1 is a constant from the RawMemSlow::Kind enum, which describes the offset
+  from the AsyncFunctionWaitHandle base, and the size. S2 is the value.
+
+StAsyncArResult S0:FramePtr S1:Cell
+
+  Stores result into the AsyncFunctionWaitHandle object ActRec of which is S0.
+  S1 is the value.
 
 D:Int = LdWHState S0:Obj
 

@@ -42,10 +42,10 @@
 namespace vixl { class Simulator; }
 
 namespace HPHP {
-struct c_Continuation;
 struct RequestEventHandler;
 struct EventHook;
 struct PCFilter;
+struct Resumable;
 namespace Eval { struct PhpFile; }
 namespace JIT { struct Translator; }
 }
@@ -672,8 +672,10 @@ public:
                   ctx.cls ? (char*)ctx.cls + 1 : nullptr,
                   ctx.invName, argc, argv);
   }
-  void resumeAsyncFunc(c_Continuation& cont, Cell& awaitResult);
-  void resumeAsyncFuncThrow(c_Continuation& cont, ObjectData* exception);
+  void resumeAsyncFunc(Resumable* resumable, ObjectData* freeObj,
+                       Cell& awaitResult);
+  void resumeAsyncFuncThrow(Resumable* resumable, ObjectData* freeObj,
+                            ObjectData* exception);
 
   // VM ClassInfo support
   StringIMap<AtomicSmartPtr<MethodInfoVM> > m_functionInfos;

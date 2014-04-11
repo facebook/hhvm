@@ -397,9 +397,10 @@ struct HhbcTranslator {
   void emitIterBreak(const ImmVector& iv, uint32_t offset, bool breakTracelet);
   void emitVerifyParamType(uint32_t paramId);
 
+  void emitResumedReturnControl(Block* catchBlock);
+
   // continuations
   void emitCreateCont(Offset resumeOffset);
-  void emitContReturnControl(Block* catchBlock);
   void emitContSuspendImpl(Offset resumeOffset);
   void emitContSuspend(Offset resumeOffset);
   void emitContSuspendK(Offset resumeOffset);

@@ -264,10 +264,10 @@ void CmdNext::stepAfterAsyncSuspend() {
   auto topObj = g_context->getStack().topTV()->m_data.pobj;
   assert(topObj->instanceof(c_AsyncFunctionWaitHandle::classof()));
   auto wh = static_cast<c_AsyncFunctionWaitHandle*>(topObj);
-  auto func = wh->getActRec()->m_func;
+  auto func = wh->actRec()->m_func;
   Offset nextInst = wh->getNextExecutionOffset();
   assert(nextInst != InvalidAbsoluteOffset);
-  m_stepContTag = wh->getActRec();
+  m_stepContTag = wh->actRec();
   TRACE(2,
         "CmdNext: patch for cont step after AsyncSuspend at '%s' offset %d\n",
         func->fullName()->data(), nextInst);
@@ -287,11 +287,11 @@ void CmdNext::cleanupStepCont() {
 // continuation, or we'll stop when we get back into it, we know the object
 // will remain alive.
 void* CmdNext::getContinuationTag(ActRec* fp) {
-  c_Continuation* cont = frame_continuation(fp);
-  TRACE(2, "CmdNext: continuation tag %p for %s\n", cont,
-        cont->t_getorigfuncname().data());
-  assert(cont->actRec() == fp);
-  return cont->actRec();
+  assert(fp->inGenerator());
+  assert(fp->func()->isAsync() || fp->func()->isGenerator());
+  TRACE(2, "CmdNext: continuation tag %p for %s\n", fp,
+        fp->func()->name()->data());
+  return fp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

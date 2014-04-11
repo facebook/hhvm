@@ -5561,6 +5561,19 @@ void CodeGenerator::cgStContArKey(IRInstruction* inst) {
   cgStore(contArReg[off], value, valueLoc, Width::Full);
 }
 
+void CodeGenerator::cgStAsyncArRaw(IRInstruction* inst) {
+  emitStRaw(inst, -c_AsyncFunctionWaitHandle::arOff());
+}
+
+void CodeGenerator::cgStAsyncArResult(IRInstruction* inst) {
+  auto asyncArReg = srcLoc(0).reg();
+  auto value = inst->src(1);
+  auto valueLoc = srcLoc(1);
+  const int64_t off = c_AsyncFunctionWaitHandle::resultOff()
+                    - c_AsyncFunctionWaitHandle::arOff();
+  cgStore(asyncArReg[off], value, valueLoc, Width::Full);
+}
+
 void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {
   auto const robj = srcLoc(0).reg();
   auto const rdst = dstLoc(0).reg();
@@ -5583,16 +5596,15 @@ void CodeGenerator::cgLdWHState(IRInstruction* inst) {
 
 void CodeGenerator::cgLdWHResult(IRInstruction* inst) {
   auto const robj = srcLoc(0).reg();
-  cgLoad(inst->dst(), dstLoc(0), robj[c_WaitHandle::resultOffset()]);
+  cgLoad(inst->dst(), dstLoc(0), robj[c_WaitHandle::resultOff()]);
 }
 
 void CodeGenerator::cgLdAFWHActRec(IRInstruction* inst) {
   auto const dest = dstLoc(0).reg();
   auto const base = srcLoc(0).reg();
-  auto asyncContOffset = c_AsyncFunctionWaitHandle::getContOffset();
-  auto contArOffset = c_Continuation::arOff();
-  m_as.loadq (base[asyncContOffset], dest);
-  m_as.lea   (dest[contArOffset], dest);
+  auto asyncArOffset = c_AsyncFunctionWaitHandle::arOff()
+                     - c_AsyncFunctionWaitHandle::objOff();
+  m_as.lea (base[asyncArOffset], dest);
 }
 
 void CodeGenerator::cgIterInit(IRInstruction* inst) {

@@ -63,6 +63,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
  protected:
   void setResult(const Cell& result);
   void setException(ObjectData* exception);
+  void done();
 
   void setContextIdx(context_idx_t ctx_idx) { o_subclassData.u8[1] = ctx_idx; }
 

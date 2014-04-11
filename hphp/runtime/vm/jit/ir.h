@@ -628,6 +628,8 @@ O(LdContArValue,                DParam, S(FramePtr),                     PRc) \
 O(StContArValue,                    ND, S(FramePtr) S(Cell),           E|CRc) \
 O(LdContArKey,                  DParam, S(FramePtr),                     PRc) \
 O(StContArKey,                      ND, S(FramePtr) S(Gen),            E|CRc) \
+O(StAsyncArRaw,                     ND, S(FramePtr) S(Int,Obj),            E) \
+O(StAsyncArResult,                  ND, S(FramePtr) S(Cell),           E|CRc) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \

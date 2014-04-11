@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/extra-data.h"
 
 #include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/util/text-util.h"
 
@@ -41,6 +42,12 @@ std::string NewStructData::show() const {
 
 const RawMemData::Info& RawMemData::info() const {
   static const Info infos[] = {
+    {c_AsyncFunctionWaitHandle::stateOff(),
+                                  sz::byte,  JIT::Type::Int},
+    {c_AsyncFunctionWaitHandle::childOff(),
+                                  sz::qword, JIT::Type::Obj},
+    {c_AsyncFunctionWaitHandle::offsetOff(),
+                                  sz::dword, JIT::Type::Int},
     {c_Continuation::offsetOff(), sz::dword, JIT::Type::Int},
     {CONTOFF(m_index),            sz::qword, JIT::Type::Int},
     {c_Continuation::stateOff(),  sz::byte,  JIT::Type::Int},

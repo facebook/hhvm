@@ -618,6 +618,7 @@ bool TSocketAddress::prefixMatch(const TSocketAddress& other,
       uint32_t addr2 = other.storage_.ipv4.sin_addr.s_addr;
       return (ntohl(addr1 ^ addr2) & mask) == 0;
     }
+#ifndef __APPLE__
     case AF_INET6:
     {
       const uint32_t* addr1 = storage_.ipv6.sin6_addr.s6_addr32;
@@ -637,6 +638,7 @@ bool TSocketAddress::prefixMatch(const TSocketAddress& other,
       }
       return true;
     }
+#endif
     default:
       return false;
   }

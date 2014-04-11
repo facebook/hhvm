@@ -15,8 +15,9 @@ set(HHVM_WHOLE_ARCHIVE_LIBRARIES
    )
 
 if (APPLE)
+	set(ENABLE_FASTCGI 1)
 	set(HHVM_ANCHOR_SYMS
-            -Wl,-u,_register_libevent_server
+            -Wl,-u,_register_libevent_server,-u,_register_fastcgi_server
             -Wl,-all_load ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
 elseif (IS_AARCH64)
 	set(HHVM_ANCHOR_SYMS

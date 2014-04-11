@@ -25,6 +25,10 @@
 #include <pthread.h>
 #include <signal.h>
 
+#ifdef __APPLE__
+#include "hphp/util/pthread-timed-lock-shim.h"
+#endif
+
 using std::shared_ptr;
 
 namespace apache { namespace thrift { namespace concurrency {

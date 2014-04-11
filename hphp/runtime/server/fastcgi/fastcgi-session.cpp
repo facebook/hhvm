@@ -274,7 +274,7 @@ size_t FastCGISession::onIngress(const IOBuf* chain) {
       } else break;
     }
   }
-  return available - avail;
+  return avail;
 }
 
 void FastCGISession::setMaxConns(int max_conns) {

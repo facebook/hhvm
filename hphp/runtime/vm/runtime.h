@@ -98,7 +98,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
     // Free extra args
     assert(fp->hasExtraArgs());
     ExtraArgs* ea = fp->getExtraArgs();
-    int numExtra = fp->numArgs() - fp->m_func->numParams();
+    int numExtra = fp->numArgs() - fp->m_func->numNonVariadicParams();
     if (unwinding) {
       fp->initNumArgs(fp->m_func->numParams());
       fp->setVarEnv(nullptr);

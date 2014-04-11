@@ -256,7 +256,7 @@ int64_t* ProfData::transCounterAddr(TransID id) {
 }
 
 TransID ProfData::prologueTransId(const Func* func, int nArgs) const {
-  int numParams = func->numParams();
+  int numParams = func->numNonVariadicParams();
   if (nArgs > numParams) nArgs = numParams + 1;
   FuncId funcId = func->getFuncId();
   return m_prologueDB.get(funcId, nArgs);

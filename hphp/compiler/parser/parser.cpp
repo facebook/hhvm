@@ -1078,6 +1078,36 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
 void Parser::onVariadicParam(Token &out, Token *params,
                              Token &type, Token &var,
                              bool ref, Token *attr, Token *modifier) {
+  if (!type.text().empty()) {
+    PARSE_ERROR("Parameter $%s is variadic and has a type constraint (%s)"
+                "; variadic params with type constraints are not supported",
+                var.text().c_str(), type.text().c_str());
+  }
+  if (ref) {
+    PARSE_ERROR("Parameter $%s is both variadic and by reference"
+                "; this is unsupported",
+                var.text().c_str());
+  }
+
+  ExpressionPtr expList;
+  if (params) {
+    expList = params->exp;
+  } else {
+    expList = NEW_EXP0(ExpressionList);
+  }
+  ExpressionListPtr attrList;
+  if (attr && attr->exp) {
+    attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
+  }
+
+  TypeAnnotationPtr typeAnnotation = type.typeAnnotation;
+  expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation,
+                              m_scanner.isHHSyntaxEnabled(), var->text(),
+                              ref, (modifier) ? modifier->num() : 0,
+                              ExpressionPtr(),
+                              attrList,
+                              /* variadic */ true));
+  out->exp = expList;
 }
 
 void Parser::onParam(Token &out, Token *params, Token &type, Token &var,

@@ -3310,6 +3310,11 @@ bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
     return false;
   }
 
+  if (target->hasVariadicCaptureParam()) {
+    FTRACE(1, "analyzeCallee: target func has variadic capture\n");
+    return false;
+  }
+
   // TODO(2716400): support __call and friends
   if (numArgs != target->numParams()) {
     FTRACE(1, "analyzeCallee: param count mismatch {} != {}\n",

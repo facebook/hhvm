@@ -215,6 +215,11 @@ struct Func {
   void prettyPrint(std::ostream& out, const PrintOpts& = PrintOpts()) const;
 
   bool isPseudoMain() const { return m_name->empty(); }
+
+  bool hasVariadicCaptureParam() const {
+    auto nparams = numParams();
+    return nparams && params()[nparams - 1].isVariadic();
+  }
   bool isBuiltin() const { return m_attrs & AttrBuiltin; }
   bool isCPPBuiltin() const { return m_shared->m_builtinFuncPtr; }
   bool skipFrame() const { return m_attrs & AttrSkipFrame; }
@@ -321,6 +326,9 @@ struct Func {
   }
   char &maybeIntercepted() const { return m_maybeIntercepted; }
   int numParams() const { return m_numParams; }
+  int numNonVariadicParams() const {
+    return hasVariadicCaptureParam() ? (numParams() - 1) : numParams();
+  }
   const ParamInfoVec& params() const { return shared()->m_params; }
   int numLocals() const { return shared()->m_numLocals; }
 

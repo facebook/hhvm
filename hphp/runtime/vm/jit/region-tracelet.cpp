@@ -382,6 +382,11 @@ bool RegionFormer::tryInline() {
     return refuse("call is recursive");
   }
 
+  if (callee->hasVariadicCaptureParam()) {
+    // FIXME: this doesn't have to remove inlining
+    return refuse("callee has a variadic capture");
+  }
+
   if (m_inst.imm[0].u_IVA != callee->numParams()) {
     return refuse("numArgs doesn't match numParams of callee");
   }

@@ -643,7 +643,7 @@ TCA
 MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
-  int numParams = func->numParams();
+  int numParams = func->numNonVariadicParams();
   int paramIndex = nPassed <= numParams ? nPassed : numParams + 1;
 
   bool const funcIsMagic = func->isMagic();
@@ -779,7 +779,7 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId,
   // cloned closures because their prologues are actually the DV
   // funclets already.
   TCA triggerSkStart = nullptr;
-  if (nArgs < func->numParams() && !func->isClonedClosure()) {
+  if (nArgs < func->numNonVariadicParams() && !func->isClonedClosure()) {
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
       m_tx.setMode(TransOptimize);
@@ -819,7 +819,7 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
   TCA triggerStart = nullptr;
   std::vector<TransID> prologTransIDs;
 
-  for (int nArgs = 0; nArgs <= func->numParams() + 1; nArgs++) {
+  for (int nArgs = 0; nArgs <= func->numNonVariadicParams() + 1; nArgs++) {
     TransID tid = m_tx.profData()->prologueTransId(func, nArgs);
     if (tid != InvalidID) {
       prologTransIDs.push_back(tid);
@@ -1363,7 +1363,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
           // are still profiling ones (living in code.prof()), then
           // save toSmash as a caller to the prologue, so that it can
           // later be smashed to call a new prologue when it's generated.
-          int calleeNumParams = func->numParams();
+          int calleeNumParams = func->numNonVariadicParams();
           int calledPrologNumArgs = (nArgs <= calleeNumParams ?
                                      nArgs :  calleeNumParams + 1);
           if (code.prof().contains(dest)) {

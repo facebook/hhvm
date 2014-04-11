@@ -205,9 +205,10 @@ ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value);
 ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
                               TypedValue value);
 
-void trimExtraArgs(ActRec* ar);
+void shuffleExtraArgs(ActRec* ar);
 
-void raiseMissingArgument(const char* name, int expected, int got);
+void raiseMissingArgument(const char* name, int expected,
+                          int got, bool variadic);
 
 RDS::Handle lookupClsRDSHandle(const StringData* name);
 

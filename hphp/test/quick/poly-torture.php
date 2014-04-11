@@ -79,7 +79,7 @@ function main() {
       $i,$i, $i,$i, $i,$i, $i,$i, $i,$i, $i,$i, $i,$i, $i,$i, $i);
       $m->$s();
       call_user_func_array(array($m, 'noSuchMethodBoyeee'), randArr());
-    } catch(Exception $e) { echo "gulp!\n"; }
+    } catch (Exception $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
   }
 }
 

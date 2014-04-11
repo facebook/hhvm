@@ -604,15 +604,15 @@ void throw_missing_arguments_nr(const char *fn, int expected, int got,
   }
   if (level == 2 || RuntimeOption::ThrowMissingArguments) {
     if (expected == 1) {
-      raise_error(Strings::MISSING_ARGUMENT, fn, got);
+      raise_error(Strings::MISSING_ARGUMENT, fn, "exactly", got);
     } else {
-      raise_error(Strings::MISSING_ARGUMENTS, fn, expected, got);
+      raise_error(Strings::MISSING_ARGUMENTS, fn, "exactly", expected, got);
     }
   } else {
     if (expected == 1) {
-      raise_warning(Strings::MISSING_ARGUMENT, fn, got);
+      raise_warning(Strings::MISSING_ARGUMENT, fn, "exactly", got);
     } else {
-      raise_warning(Strings::MISSING_ARGUMENTS, fn, expected, got);
+      raise_warning(Strings::MISSING_ARGUMENTS, fn, "exactly", expected, got);
     }
   }
 }

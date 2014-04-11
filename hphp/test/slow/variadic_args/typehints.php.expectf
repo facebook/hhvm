@@ -1,0 +1,1 @@
+Fatal error: Parameter $objects is variadic and has a type constraint (stdClass); variadic params with type constraints are not supported in %s/variadic_args/typehints.php on line 3

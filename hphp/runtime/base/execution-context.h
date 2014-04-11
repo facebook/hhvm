@@ -611,6 +611,8 @@ private:
                          ObjectData* obj, int numArgs);
   void prepareFuncEntry(ActRec* ar, PC& pc);
   bool prepareArrayArgs(ActRec* ar, const Variant& arrayArgs);
+  void shuffleMagicArgs(ActRec* ar);
+  void shuffleExtraStackArgs(ActRec* ar);
   void recordCodeCoverage(PC pc);
   bool isReturnHelper(uintptr_t address);
   void switchModeForDebugger();
@@ -621,7 +623,6 @@ private:
   int m_lastErrorLine;
 public:
   void resetCoverageCounters();
-  void shuffleMagicArgs(ActRec* ar);
   void syncGdbState();
   enum InvokeFlags {
     InvokeNormal = 0,

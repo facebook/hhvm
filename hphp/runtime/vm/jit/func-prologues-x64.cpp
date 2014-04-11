@@ -123,8 +123,8 @@ constexpr auto kMaxParamsInitUnroll = 5;
 SrcKey emitPrologueWork(Func* func, int nPassed) {
   using namespace reg;
 
-  int numParams = func->numParams();
-  const Func::ParamInfoVec& paramInfo = func->params();
+  auto const numNonVariadicParams = func->numNonVariadicParams();
+  auto const& paramInfo = func->params();
 
   Offset entryOffset = func->getEntryForNumArgs(nPassed);
 
@@ -139,52 +139,73 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   }
 
   // Note: you're not allowed to use rVmSp around here for anything in
-  // the nPassed == numParams case, because it might be junk if we
+  // the nPassed == numNonVariadicParams case, because it might be junk if we
   // came from emitMagicFuncPrologue.
 
-  if (nPassed > numParams) {
+  if (nPassed > numNonVariadicParams) {
     // Too many args; a weird case, so just callout. Stash ar
     // somewhere callee-saved.
     if (false) { // typecheck
-      JIT::trimExtraArgs((ActRec*)nullptr);
+      JIT::shuffleExtraArgs((ActRec*)nullptr);
     }
     a.    movq   (rStashedAR, argNumToRegName[0]);
-    emitCall(a, TCA(JIT::trimExtraArgs));
+    emitCall(a, TCA(JIT::shuffleExtraArgs));
     // We'll fix rVmSp below.
-  } else if (nPassed < numParams) {
+  } else if (nPassed < numNonVariadicParams) {
     TRACE(1, "Only have %d of %d args; getting dvFunclet\n",
-          nPassed, numParams);
-    if (numParams - nPassed <= kMaxParamsInitUnroll) {
-      for (int i = nPassed; i < numParams; i++) {
-        int offset = (nPassed - i - 1) * sizeof(Cell);
+          nPassed, numNonVariadicParams);
+    if (numNonVariadicParams - nPassed <= kMaxParamsInitUnroll) {
+      for (int i = nPassed; i < numNonVariadicParams; i++) {
+        int offset = cellsToBytes(nPassed - i - 1);
         emitStoreTVType(a, KindOfUninit, rVmSp[offset + TVOFF(m_type)]);
+      }
+      if (func->hasVariadicCaptureParam()) {
+        int offset = cellsToBytes(nPassed - numNonVariadicParams - 1);
+        emitStoreTVType(a, KindOfArray, rVmSp[offset + TVOFF(m_type)]);
+        emitImmStoreq(a, staticEmptyArray(), rVmSp[offset + TVOFF(m_data)]);
       }
     } else {
       a.  emitImmReg(nPassed, rax);
-      // do { *(--rVmSp) = NULL; nPassed++; } while (nPassed < numParams);
+      // do {
+      //   *(--rVmSp) = NULL; nPassed++;
+      // } while (nPassed < numNonVariadicParams);
       // This should be an unusual case, so optimize for code density
       // rather than execution speed; i.e., don't unroll the loop.
       TCA loopTop = a.frontier();
       a.    subq   (int(sizeof(Cell)), rVmSp);
       a.    incl   (eax);
       emitStoreUninitNull(a, 0, rVmSp);
-      a.    cmpl   (numParams, eax);
+      a.    cmpl   (numNonVariadicParams, eax);
       a.    jl8    (loopTop);
+      if (func->hasVariadicCaptureParam()) {
+        emitStoreTVType(a, KindOfArray, rVmSp[-sizeof(Cell) + TVOFF(m_type)]);
+        emitImmStoreq(a, staticEmptyArray(),
+                      rVmSp[-sizeof(Cell) + TVOFF(m_data)]);
+      }
     }
+  } else if (func->hasVariadicCaptureParam()) {
+    assert(!func->isMagic());
+    int offset = cellsToBytes(-1);
+    emitStoreTVType(a, KindOfArray, rVmSp[offset + TVOFF(m_type)]);
+    emitImmStoreq(a, staticEmptyArray(), rVmSp[offset + TVOFF(m_data)]);
   }
 
-  // Entry point for numParams == nPassed is here.
+  // Entry point for numNonVariadicParams == nPassed is here. XXX:
+  // what about variadics!!!
   // Args are kosher. Frame linkage: set fp = ar.
   a.    movq   (rStashedAR, rVmFp);
 
-  int numLocals = numParams;
+  int numLocals = func->numParams();
   if (func->isClosureBody()) {
+    assert(!func->hasVariadicCaptureParam());
+    assert(numNonVariadicParams == func->numParams());
+
     // Closure object properties are the use vars followed by the
     // static locals (which are per-instance).
     int numUseVars = func->cls()->numDeclProperties() -
                      func->numStaticLocals();
 
-    emitLea(a, rVmFp[-cellsToBytes(numParams)], rVmSp);
+    emitLea(a, rVmFp[-cellsToBytes(numNonVariadicParams)], rVmSp);
 
     PhysReg rClosure = rcx;
     a.  loadq(rVmFp[AROFF(m_this)], rClosure);
@@ -260,7 +281,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       PhysReg base;
       int disp, k;
       static_assert(KindOfUninit == 0, "");
-      if (numParams < func->numLocals()) {
+      if (func->numParams() < func->numLocals()) {
         a.xorl (eax, eax);
       }
       for (k = numLocals; k < func->numLocals(); ++k) {
@@ -281,11 +302,12 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   // Emit warnings for any missing arguments
   if (!func->isCPPBuiltin()) {
-    for (int i = nPassed; i < numParams; ++i) {
+    for (int i = nPassed; i < numNonVariadicParams; ++i) {
       if (paramInfo[i].funcletOff() == InvalidAbsoluteOffset) {
         a.  emitImmReg((intptr_t)func->name()->data(), argNumToRegName[0]);
-        a.  emitImmReg(numParams, argNumToRegName[1]);
+        a.  emitImmReg(numNonVariadicParams, argNumToRegName[1]);
         a.  emitImmReg(i, argNumToRegName[2]);
+        a.  emitImmReg(func->hasVariadicCaptureParam(), argNumToRegName[3]);
         emitCall(a, (TCA)raiseMissingArgument);
         mcg->fixupMap().recordFixup(a.frontier(), fixup);
         break;
@@ -300,7 +322,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
                               mcg->fixupMap(), fixup);
 
   if (func->isClosureBody() && func->cls()) {
-    int entry = nPassed <= numParams ? nPassed : numParams + 1;
+    int entry = nPassed <= numNonVariadicParams
+      ? nPassed : numNonVariadicParams + 1;
     // Relying on rStashedAR == rVmFp here
     a.    loadq   (rStashedAR[AROFF(m_func)], rax);
     a.    loadq   (rax[Func::prologueTableOff() + sizeof(TCA)*entry],
@@ -351,6 +374,7 @@ SrcKey emitFuncPrologue(Func* func, int nPassed, TCA& start) {
 SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   assert(func->isMagic());
   assert(func->numParams() == 2);
+  assert(!func->hasVariadicCaptureParam());
   using namespace reg;
   using MkPacked = ArrayData* (*)(uint32_t, const TypedValue*);
 

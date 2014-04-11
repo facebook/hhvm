@@ -197,7 +197,7 @@ Variant f_func_get_arg(int arg_num) {
     return false;
   }
 
-  const int numParams = ar->m_func->numParams();
+  const int numParams = ar->m_func->numNonVariadicParams();
 
   if (arg_num < numParams) {
     // Formal parameter. Value is on the stack.
@@ -223,7 +223,7 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   if (ar == NULL) {
     return Array();
   }
-  int numParams = ar->m_func->numParams();
+  int numParams = ar->m_func->numNonVariadicParams();
   int numArgs = ar->numArgs();
 
   PackedArrayInit retInit(std::max(numArgs - offset, 0));

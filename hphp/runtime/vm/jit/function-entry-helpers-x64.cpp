@@ -28,7 +28,7 @@ static void setupAfterPrologue(ActRec* fp, void* sp) {
   g_context->m_fp = fp;
   g_context->m_stack.top() = (Cell*)sp;
   int nargs = fp->numArgs();
-  int nparams = fp->m_func->numParams();
+  int nparams = fp->m_func->numNonVariadicParams();
   Offset firstDVInitializer = InvalidAbsoluteOffset;
   if (nargs < nparams) {
     const Func::ParamInfoVec& paramInfo = fp->m_func->params();

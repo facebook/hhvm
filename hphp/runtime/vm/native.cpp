@@ -381,6 +381,7 @@ TypedValue* functionWrapper(ActRec* ar) {
   auto func = ar->m_func;
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
+  assert(!func->hasVariadicCaptureParam());
   TypedValue* args = ((TypedValue*)ar) - 1;
   TypedValue rv;
   rv.m_type = KindOfNull;
@@ -403,6 +404,7 @@ TypedValue* methodWrapper(ActRec* ar) {
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
   bool isStatic = func->isStatic();
+  assert(!func->hasVariadicCaptureParam());
   TypedValue* args = ((TypedValue*)ar) - 1;
   TypedValue rv;
   rv.m_type = KindOfNull;

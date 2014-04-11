@@ -403,6 +403,7 @@ ExtraArgs::ExtraArgs() {}
 ExtraArgs::~ExtraArgs() {}
 
 void* ExtraArgs::allocMem(unsigned nargs) {
+  assert(nargs > 0);
   return smart_malloc(sizeof(TypedValue) * nargs + sizeof(ExtraArgs));
 }
 
@@ -434,7 +435,7 @@ void ExtraArgs::deallocate(ExtraArgs* ea, unsigned nargs) {
 }
 
 void ExtraArgs::deallocate(ActRec* ar) {
-  const int numExtra = ar->numArgs() - ar->m_func->numParams();
+  const int numExtra = ar->numArgs() - ar->m_func->numNonVariadicParams();
   deallocate(ar->getExtraArgs(), numExtra);
 }
 
@@ -1271,6 +1272,66 @@ Array ExecutionContext::getLocalDefinedVariables(int frame) {
   return ret.toArray();
 }
 
+void ExecutionContext::shuffleExtraStackArgs(ActRec* ar) {
+  const Func* func = ar->m_func;
+  assert(func);
+  assert(!ar->m_varEnv);
+
+  // the last (variadic) param is included in numParams (since it has a
+  // name), but the arg in that slot should be included as the first
+  // element of the variadic array
+  const auto numArgs = ar->numArgs();
+  const auto numVarArgs = numArgs - func->numNonVariadicParams();
+
+  const auto mayCallFuncGetArgs = func->attrs() & AttrMayUseVV;
+  const auto takesVariadicParam = func->hasVariadicCaptureParam();
+
+  if (UNLIKELY(mayCallFuncGetArgs)) {
+    auto const tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;
+    ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numVarArgs));
+    if (takesVariadicParam) {
+      auto varArgsArray =
+        Array::attach(MixedArray::MakePacked(numVarArgs, tvArgs));
+      // Incref the args (they're already referenced in extraArgs) but now
+      // additionally referenced in varArgsArray ...
+      auto tv = tvArgs; uint32_t i = 0;
+      for (; i < numVarArgs; ++i, ++tv) { tvRefcountedIncRef(tv); }
+      // ... and now remove them from the stack
+      m_stack.ndiscard(numVarArgs);
+      auto const ad = varArgsArray.detach();
+      assert(ad->hasExactlyOneRef());
+      m_stack.pushArrayNoRc(ad);
+      // Before, for each arg: refcount = n + 1 (stack)
+      // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray)
+    } else {
+      // Discard the arguments from the stack; they were all moved
+      // into the extra args so we don't decref.
+      m_stack.ndiscard(numVarArgs);
+    }
+    // leave ar->numArgs reflecting the actual number of args passed
+  } else if (takesVariadicParam) {
+    auto const tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;
+    auto varArgsArray =
+      Array::attach(MixedArray::MakePacked(numVarArgs, tvArgs));
+    // Discard the arguments from the stack; they were all moved into the
+    // variadic args array so we don't need to decref the values.
+    m_stack.ndiscard(numVarArgs);
+    auto const ad = varArgsArray.detach();
+    assert(ad->hasExactlyOneRef());
+    m_stack.pushArrayNoRc(ad);
+    assert(func->numParams() == (numArgs - numVarArgs + 1));
+    ar->setNumArgs(func->numParams());
+  } else {
+    // the function won't use the extra arguments, so act as if they were
+    // never passed (NOTE: this has the effect of slightly misleading
+    // backtraces that don't reflect the discarded numVarArgs args)
+    for (int i = 0; i < numVarArgs; ++i) {
+      m_stack.popTV();
+    }
+    ar->setNumArgs(numArgs - numVarArgs);
+  }
+}
+
 void ExecutionContext::shuffleMagicArgs(ActRec* ar) {
   // We need to put this where the first argument is
   StringData* invName = ar->getInvName();
@@ -1330,14 +1391,12 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
   bool raiseMissingArgumentWarnings = false;
-  int nparams = func->numParams();
+  int nparams = func->numNonVariadicParams();
   if (UNLIKELY(ar->m_varEnv != nullptr)) {
-    /*
-     * m_varEnv != nullptr => we have a varEnv, extraArgs, or an invName.
-     */
+    // m_varEnv != nullptr means we have a varEnv, extraArgs, or an invName.
     if (ar->hasInvName()) {
-      // shuffleMagicArgs deals with everything. no need for
-      // further argument munging
+      // shuffleMagicArgs deals with everything. no need for further
+      // argument munging
       shuffleMagicArgs(ar);
     } else if (ar->hasVarEnv()) {
       assert(func->isPseudoMain());
@@ -1349,15 +1408,17 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
       return;
     } else {
       assert(ar->hasExtraArgs());
-      assert(func->numParams() < ar->numArgs());
+      assert(nparams < ar->numArgs());
     }
   } else {
     int nargs = ar->numArgs();
-    if (nargs != nparams) {
+    if (nargs > nparams) {
+      shuffleExtraStackArgs(ar);
+    } else {
       if (nargs < nparams) {
-        // Push uninitialized nulls for missing arguments. Some of them may end
-        // up getting default-initialized, but regardless, we need to make space
-        // for them on the stack.
+        // Push uninitialized nulls for missing arguments. Some of them may
+        // end up getting default-initialized, but regardless, we need to
+        // make space for them on the stack.
         const Func::ParamInfoVec& paramInfo = func->params();
         for (int i = nargs; i < nparams; ++i) {
           m_stack.pushUninit();
@@ -1373,27 +1434,14 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
             firstDVInitializer = dvInitializer;
           }
         }
-      } else {
-        if (func->attrs() & AttrMayUseVV) {
-          // Extra parameters must be moved off the stack.
-          const int numExtras = nargs - nparams;
-          ar->setExtraArgs(ExtraArgs::allocateCopy((TypedValue*)ar - nargs,
-                                                   numExtras));
-          m_stack.ndiscard(numExtras);
-        } else {
-          // The function we're calling is not marked as "MayUseVV",
-          // so just discard the extra arguments
-          int numExtras = nargs - nparams;
-          for (int i = 0; i < numExtras; i++) {
-            m_stack.popTV();
-          }
-          ar->setNumArgs(nparams);
-        }
+      }
+      if (func->hasVariadicCaptureParam()) {
+        m_stack.pushArrayNoRc(empty_array.get());
       }
     }
   }
 
-  int nlocals = nparams;
+  int nlocals = func->numParams();
   if (UNLIKELY(func->isClosureBody())) {
     int nuse = init_closure(ar, m_stack.top());
     // init_closure doesn't move m_stack
@@ -1422,9 +1470,14 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
       if (dvInitializer == InvalidAbsoluteOffset) {
         const char* name = func->name()->data();
         if (nparams == 1) {
-          raise_warning(Strings::MISSING_ARGUMENT, name, i);
+          raise_warning(
+            Strings::MISSING_ARGUMENT, name,
+            func->hasVariadicCaptureParam() ? "at least" : "exactly", i);
         } else {
-          raise_warning(Strings::MISSING_ARGUMENTS, name, nparams, i);
+          raise_warning(
+            Strings::MISSING_ARGUMENTS, name,
+            func->hasVariadicCaptureParam() ? "at least" : "exactly",
+            nparams, i);
         }
         break;
       }
@@ -1467,7 +1520,7 @@ void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr) {
   bool useJitPrologue = useJit && m_fp && !enterFnAr->m_varEnv;
 
   if (LIKELY(useJitPrologue)) {
-    int np = enterFnAr->m_func->numParams();
+    int np = enterFnAr->m_func->numNonVariadicParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
     JIT::TCA start = enterFnAr->m_func->getPrologue(na);
@@ -1757,10 +1810,10 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
 }
 
 void ExecutionContext::invokeFuncCleanupHelper(TypedValue* retval,
-                                                 ActRec* ar,
-                                                 int numArgsPushed) {
+                                               ActRec* ar,
+                                               int numArgsPushed) {
   assert(retval && ar);
-  const int numFormalParams = ar->m_func->numParams();
+  const int numFormalParams = ar->m_func->numParams(); // FIXME: invokeFunc
   ExtraArgs* extraArgs = ar->hasExtraArgs() ? ar->getExtraArgs() : nullptr;
 
   if (extraArgs) {
@@ -1963,12 +2016,12 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
 }
 
 Array ExecutionContext::debugBacktrace(bool skip /* = false */,
-                                         bool withSelf /* = false */,
-                                         bool withThis /* = false */,
-                                         VMParserFrame*
-                                         parserFrame /* = NULL */,
-                                         bool ignoreArgs /* = false */,
-                                         int limit /* = 0 */) {
+                                       bool withSelf /* = false */,
+                                       bool withThis /* = false */,
+                                       VMParserFrame*
+                                       parserFrame /* = NULL */,
+                                       bool ignoreArgs /* = false */,
+                                       int limit /* = 0 */) {
   Array bt = Array::Create();
 
   // If there is a parser frame, put it at the beginning of
@@ -2129,7 +2182,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
       // Provide an empty 'args' array to be consistent with hphpc
       frame.set(s_args, args, true);
     } else {
-      int nparams = fp->m_func->numParams();
+      int nparams = fp->m_func->numNonVariadicParams();
       int nargs = fp->numArgs();
       int nformals = std::min(nparams, nargs);
 
@@ -2150,9 +2203,11 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
       }
 
       /* builtin extra args are not stored in varenv */
-      for (int i = nparams; i < nargs; i++) {
-        TypedValue *arg = fp->getExtraArg(i - nparams);
-        args.append(tvAsVariant(arg));
+      if (nargs > nparams && fp->hasExtraArgs()) {
+        for (int i = nparams; i < nargs; i++) {
+          TypedValue *arg = fp->getExtraArg(i - nparams);
+          args.append(tvAsVariant(arg));
+        }
       }
       frame.set(s_args, args, true);
     }
@@ -6016,9 +6071,10 @@ OPTBLD_INLINE void ExecutionContext::iopFPassC(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopFPassCW(IOP_ARGS) {
   FPASSC_CHECKED_PRELUDE
   if (func->mustBeRef(paramId)) {
-    TRACE(1, "FPassCW: function %s(%d) param %d is by reference, "
+    TRACE(1, "FPassCW: function %s(%d%s) param %d is by reference, "
           "raising a strict warning (attr:0x%x)\n",
-          func->name()->data(), func->numParams(), paramId,
+          func->name()->data(), func->numNonVariadicParams(),
+          func->hasVariadicCaptureParam() ? "*" : "", paramId,
           func->methInfo() ? func->methInfo()->attribute : 0);
     raise_strict_warning("Only variables should be passed by reference");
   }
@@ -6027,9 +6083,10 @@ OPTBLD_INLINE void ExecutionContext::iopFPassCW(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopFPassCE(IOP_ARGS) {
   FPASSC_CHECKED_PRELUDE
   if (func->mustBeRef(paramId)) {
-    TRACE(1, "FPassCE: function %s(%d) param %d is by reference, "
+    TRACE(1, "FPassCE: function %s(%d%s) param %d is by reference, "
           "throwing a fatal error (attr:0x%x)\n",
-          func->name()->data(), func->numParams(), paramId,
+          func->name()->data(), func->numNonVariadicParams(),
+          func->hasVariadicCaptureParam() ? "*" : "", paramId,
           func->methInfo() ? func->methInfo()->attribute : 0);
     raise_error("Cannot pass parameter %d by reference", paramId+1);
   }
@@ -6260,7 +6317,7 @@ bool ExecutionContext::prepareArrayArgs(ActRec* ar, const Variant& arrayArgs) {
 
   int nargs = getContainerSize(args);
   const Func* f = ar->m_func;
-  int nparams = f->numParams();
+  int nparams = f->numParams(); // FIXME: invokeFunc and arrayArgs
   int extra = nargs - nparams;
   if (extra < 0) {
     extra = 0;
@@ -6326,7 +6383,7 @@ static void cleanupParamsAndActRec(Stack& stack,
                         ar->m_func->numParams() :
                         ar->numArgs()) == (void*)ar);
   if (extraArgs) {
-    const int numExtra = ar->numArgs() - ar->m_func->numParams();
+    const int numExtra = ar->numArgs() - ar->m_func->numNonVariadicParams();
     ExtraArgs::deallocate(extraArgs, numExtra);
   }
   while (stack.top() != (void*)ar) {
@@ -6829,6 +6886,7 @@ static inline RefData* lookupStatic(StringData* name,
   auto const func = fp->m_func;
 
   if (UNLIKELY(func->isClosureBody())) {
+    assert(!func->hasVariadicCaptureParam());
     return lookupStaticFromClosure(
       frame_local(fp, func->numParams())->m_data.pobj, name, inited);
   }

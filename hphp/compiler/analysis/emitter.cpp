@@ -115,9 +115,7 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
-#ifdef ENABLE_ZEND_COMPAT
-# include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
-#endif
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 #include "hphp/runtime/vm/preclass-emit.h"
 
 #include "hphp/system/systemlib.h"
@@ -6584,12 +6582,9 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
     bif = Native::unimplementedWrapper;
   } else {
     int nativeAttrs = fe->parseNativeAttributes(attributes);
-#ifdef ENABLE_ZEND_COMPAT
     if (nativeAttrs & Native::AttrZendCompat) {
       bif = zend_wrap_func;
-    } else
-#endif
-    {
+    } else {
       if (nativeAttrs & Native::AttrActRec) {
         // Call this native function with a raw ActRec*
         // rather than pulling out args for normal func calling

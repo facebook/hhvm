@@ -37,10 +37,7 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/debug.h"
 #include "hphp/util/trace.h"
-
-#ifdef ENABLE_ZEND_COMPAT
-# include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
-#endif
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 
 namespace HPHP {
 
@@ -1206,14 +1203,11 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
                                           f->isStatic());
     if (nif) {
       Attr dummy = AttrNone;
-#ifdef ENABLE_ZEND_COMPAT
       int nativeAttrs = parseNativeAttributes(dummy);
       if (nativeAttrs & Native::AttrZendCompat) {
         f->shared()->m_nativeFuncPtr = nif;
         f->shared()->m_builtinFuncPtr = zend_wrap_func;
-      } else
-#endif
-      {
+      } else {
         if (parseNativeAttributes(dummy) & Native::AttrActRec) {
           f->shared()->m_builtinFuncPtr = nif;
           f->shared()->m_nativeFuncPtr = nullptr;

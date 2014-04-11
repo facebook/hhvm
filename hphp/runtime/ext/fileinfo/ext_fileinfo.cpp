@@ -166,7 +166,7 @@ static Variant php_finfo_get_type(
         goto clean;
       }
 
-      auto resource = File::Open(buffer, "rb");
+      auto resource = Stream::open(buffer, "rb");
       auto stream = resource.getTyped<File>(true);
       if (!stream) {
         ret_val = null_string;

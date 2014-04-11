@@ -275,7 +275,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 }
 
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) {
-  auto res = HPHP::File::Open(path, mode, options, context);
+  auto res = HPHP::Stream::open(path, mode, options, context);
   if (res.isNull()) {
     return nullptr;
   }

@@ -28,6 +28,21 @@ void Wrapper::registerAs(const std::string &scheme) {
   registerWrapper(scheme, this);
 }
 
+Resource open(const String& filename, const String& mode,
+              int options /* = 0 */,
+              const Variant& context /* = null */) {
+  Stream::Wrapper *wrapper = Stream::getWrapperFromURI(filename);
+  Resource rcontext =
+    context.isNull() ? g_context->getStreamContext() : context.toResource();
+  File *file = wrapper->open(filename, mode, options, rcontext);
+  if (file != nullptr) {
+    file->m_name = filename.data();
+    file->m_mode = mode.data();
+    file->m_streamContext = rcontext;
+  }
+  return Resource(file);
+}
+
 int access(const String& path, int mode)
 {
   Stream::Wrapper *w = Stream::getWrapperFromURI(path);

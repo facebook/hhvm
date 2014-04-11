@@ -325,7 +325,7 @@ bool c_XMLWriter::t_openmemory() {
 }
 
 bool c_XMLWriter::t_openuri(const String& uri) {
-  m_uri = File::Open(uri, "wb");
+  m_uri = Stream::open(uri, "wb");
   if (m_uri.isNull()) {
     return false;
   }

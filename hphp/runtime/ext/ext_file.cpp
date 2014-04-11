@@ -173,9 +173,9 @@ Variant f_fopen(const String& filename, const String& mode,
     return false;
   }
 
-  Resource resource = File::Open(filename, mode,
-                                 use_include_path ? File::USE_INCLUDE_PATH : 0,
-                                 context);
+  Resource resource = Stream::open(filename, mode,
+                                   use_include_path ? File::USE_INCLUDE_PATH : 0,
+                                   context);
   if (resource.isNull()) {
     return false;
   }
@@ -398,7 +398,7 @@ Variant f_file_get_contents(const String& filename,
 Variant f_file_put_contents(const String& filename, const Variant& data,
                             int flags /* = 0 */,
                             const Variant& context /* = null */) {
-  Resource resource = File::Open(
+  Resource resource = Stream::open(
     filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb", flags, context);
   File *f = resource.getTyped<File>(true);
   if (!f) {

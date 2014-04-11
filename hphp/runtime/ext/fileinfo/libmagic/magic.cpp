@@ -378,7 +378,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 
   if (!stream && inname) {
     no_in_stream = 1;
-    resource = HPHP::File::Open(inname, "rb", 0, HPHP::Variant());
+    resource = HPHP::Stream::open(inname, "rb", 0, HPHP::Variant());
     stream = resource.getTyped<HPHP::File>(true);
   }
 

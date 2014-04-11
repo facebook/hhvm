@@ -944,7 +944,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
   php_stream *stream;
 
   ms->file = fn;
-  auto resource = HPHP::File::Open(fn, "rb", 0, HPHP::Variant());
+  auto resource = HPHP::Stream::open(fn, "rb", 0, HPHP::Variant());
   stream = resource.getTyped<HPHP::File>(true);
 
   if (stream == NULL) {
@@ -2620,7 +2620,7 @@ apprentice_map(struct magic_set *ms, const char *fn)
   if (dbname == NULL)
     goto error;
 
-  resource = HPHP::File::Open(fn, "rb", 0, HPHP::Variant());
+  resource = HPHP::Stream::open(fn, "rb", 0, HPHP::Variant());
   stream = resource.getTyped<HPHP::File>(true);
 
   if (!stream) {
@@ -2751,7 +2751,7 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
     goto out;
 
 /* wb+ == O_WRONLY|O_CREAT|O_TRUNC|O_BINARY */
-  resource = HPHP::File::Open(fn, "wb+", 0, HPHP::Variant());
+  resource = HPHP::Stream::open(fn, "wb+", 0, HPHP::Variant());
   stream = resource.getTyped<HPHP::File>(true);
 
   if (!stream) {

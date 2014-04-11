@@ -286,6 +286,13 @@
       - pear-core/tests/System/find_test.phpt
       - pear-core/tests/System/test_which.phpt
       - pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents.phpt
+  json_schema:
+    url: https://github.com/justinrainbow/json-schema.git
+    branch: master
+    # Version 1.3.6
+    commit: d97cf3ce890fe80f247fc08594a1c8a1029fc7ed
+    install_root: json_schema
+    test_root: json_schema
   phpbb3:
     url: https://github.com/phpbb/phpbb.git
     # Stable is release-3.0.12, but we have pull requests in develop

@@ -17,6 +17,13 @@ ENDIF()
 
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 
+if (NOT EXISTS "${HPHP_HOME}/third-party/CMakeLists.txt")
+	message(FATAL_ERROR "third-party/CMakeLists.txt missing. Try updating your submodule with:
+rm -r third-party
+git submodule update --init --recursive
+")
+endif()
+
 include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/HPHPFunctions.cmake")
 include(CheckFunctionExists)
 

@@ -414,6 +414,10 @@ private:
 
 private:
   res::Func do_resolve(borrowed_ptr<const php::Func>) const;
+  bool must_be_derived_from(borrowed_ptr<const php::Class>,
+                            borrowed_ptr<const php::Class>) const;
+  bool could_be_related(borrowed_ptr<const php::Class>,
+                        borrowed_ptr<const php::Class>) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

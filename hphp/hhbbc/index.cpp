@@ -35,6 +35,7 @@
 #include "folly/Hash.h"
 #include "folly/Memory.h"
 #include "folly/Optional.h"
+#include "folly/Lazy.h"
 
 #include "hphp/util/match.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -56,6 +57,8 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_construct("__construct");
+const StaticString s_call("__call");
+const StaticString s_callStatic("__callStatic");
 const StaticString s_86ctor("86ctor");
 
 //////////////////////////////////////////////////////////////////////
@@ -74,15 +77,21 @@ template<class T> using ISStringToMany =
 
 /*
  * One-to-one case insensitive map, where the keys are static strings
- * and the values are some kind of borrowed_ptr.
+ * and the values are some T.
  */
-template<class T> using ISStringToOne =
+template<class T> using ISStringToOneT =
   std::unordered_map<
     SString,
-    borrowed_ptr<T>,
+    T,
     string_data_hash,
     string_data_isame
   >;
+
+/*
+ * One-to-one case insensitive map, where the keys are static strings
+ * and the values are some kind of borrowed_ptr.
+ */
+template<class T> using ISStringToOne = ISStringToOneT<borrowed_ptr<T>>;
 
 using G = std::lock_guard<std::mutex>;
 
@@ -141,6 +150,25 @@ PropState make_unknown_propstate(borrowed_ptr<const php::Class> cls,
   }
   return ret;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Entries in the ClassInfo method table need to track some additional
+ * information.
+ *
+ * The reason for this is that in php, you can override private
+ * methods with public or protected ones, which is a feature of a
+ * given class hierarchy (ClassInfo), not a property of the class
+ * definition itself.  When there's a private ancestor, we need to do
+ * additional checks in resolve_method to make sure we're not possibly
+ * calling from an ancestor class that defined a private method of
+ * that name, since it will call that one instead.
+ */
+struct MethTabEntry {
+  borrowed_ptr<const php::Func> func = nullptr;
+  bool hasPrivateAncestor = false;
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -212,7 +240,7 @@ struct ClassInfo {
   /*
    * The info for the parent of this Class.
    */
-  borrowed_ptr<const ClassInfo> parent = nullptr;
+  borrowed_ptr<ClassInfo> parent = nullptr;
 
   /*
    * A vector of the declared interfaces class info structures.  This
@@ -233,7 +261,7 @@ struct ClassInfo {
    * associated with it.  This map is flattened across the inheritance
    * hierarchy.
    */
-  ISStringToOne<const php::Func> methods;
+  ISStringToOneT<MethTabEntry> methods;
 
   /*
    * A (case-insensitive) map from class method names to associated
@@ -270,6 +298,17 @@ struct ClassInfo {
    * order.
    */
   std::vector<borrowed_ptr<ClassInfo>> baseList;
+
+  /*
+   * Flags about the existence of various magic methods, or whether
+   * any derived classes may have those methods.  The non-derived
+   * flags imply the derived flags, even if the class is final, so you
+   * don't need to check both in those situations.
+   */
+  bool hasMagicCall              = false;
+  bool hasMagicCallStatic        = false;
+  bool derivedHasMagicCall       = false;
+  bool derivedHasMagicCallStatic = false;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -560,20 +599,23 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
    *
    * Note: we're leaving non-overridden privates in their subclass
    * method table, here.  This isn't currently "wrong", because
-   * calling it would be a fatal.
+   * calling it would be a fatal.  TODO: re-evaluate this idea.
    */
   if (!isIface) {
     for (auto& m : rparent->cls->methods) {
-      auto& mptr = rleaf->methods[m->name];
-      if (mptr) {
-        if (mptr->attrs & AttrFinal) {
+      auto& ent = rleaf->methods[m->name];
+      if (ent.func) {
+        if (ent.func->attrs & AttrFinal) {
           if (!is_mock_class(rleaf->cls)) return false;
         }
-        if (!(mptr->attrs & AttrPrivate)) {
-          assert(!(mptr->attrs & AttrNoOverride));
+        if (ent.func->attrs & AttrPrivate) {
+          ent.hasPrivateAncestor =
+            ent.hasPrivateAncestor || ent.func->cls != rleaf->cls;
+        } else {
+          assert(!(ent.func->attrs & AttrNoOverride));
         }
       }
-      mptr = borrow(m);
+      ent.func = borrow(m);
     }
   }
 
@@ -586,8 +628,8 @@ borrowed_ptr<const php::Func> find_constructor(borrowed_ptr<ClassInfo> cinfo) {
   }
 
   auto cit = cinfo->methods.find(s_construct.get());
-  if (cit != end(cinfo->methods) && cit->second->cls == cinfo->cls) {
-    return cit->second;
+  if (cit != end(cinfo->methods) && cit->second.func->cls == cinfo->cls) {
+    return cit->second.func;
   }
 
   // Try old style class name constructors.  We need to check
@@ -597,7 +639,7 @@ borrowed_ptr<const php::Func> find_constructor(borrowed_ptr<ClassInfo> cinfo) {
          "We shouldn't be resolving traits right now");
   cit = cinfo->methods.find(cinfo->cls->name);
   if (cit != end(cinfo->methods)) {
-    if (cit->second->cls == cinfo->cls) return cit->second;
+    if (cit->second.func->cls == cinfo->cls) return cit->second.func;
   }
 
   // Parent class constructor if it isn't named 86ctor.
@@ -613,7 +655,7 @@ borrowed_ptr<const php::Func> find_constructor(borrowed_ptr<ClassInfo> cinfo) {
   if (cit == end(cinfo->methods)) {
     always_assert(!"no 86ctor found on class");
   }
-  return cit->second;
+  return cit->second.func;
 }
 
 /*
@@ -810,10 +852,10 @@ void define_func_family(IndexData& index,
   for (auto& cleaf : cinfo->subclassList) {
     auto const leafFnIt = cleaf->methods.find(name);
     if (leafFnIt == end(cleaf->methods)) continue;
-    if (leafFnIt->second->attrs & AttrInterceptable) {
+    if (leafFnIt->second.func->attrs & AttrInterceptable) {
       family->containsInterceptables = true;
     }
-    auto const finfo = create_func_info(index, leafFnIt->second);
+    auto const finfo = create_func_info(index, leafFnIt->second.func);
     family->possibleFuncs.push_back(finfo);
   }
 
@@ -847,12 +889,34 @@ void define_func_family(IndexData& index,
 void define_func_families(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
     for (auto& kv : cinfo->methods) {
-      auto const func = kv.second;
+      auto const func = kv.second.func;
 
       if (func->attrs & (AttrPrivate|AttrNoOverride)) continue;
       if (is_special_method_name(func->name))         continue;
 
       define_func_family(index, borrow(cinfo), kv.first, func);
+    }
+  }
+}
+
+void mark_magic_on_parents(ClassInfo& cinfo, bool call, bool callStatic) {
+  if (call) cinfo.derivedHasMagicCall = true;
+  if (callStatic) cinfo.derivedHasMagicCallStatic = true;
+  if (cinfo.parent) {
+    mark_magic_on_parents(*cinfo.parent, call, callStatic);
+  }
+}
+
+void find_magic_methods(IndexData& index) {
+  for (auto& cinfo : index.allClassInfos) {
+    auto& methods         = cinfo->methods;
+    auto const call       = methods.find(s_call.get()) != end(methods);
+    auto const callStatic = methods.find(s_callStatic.get()) != end(methods);
+
+    cinfo->hasMagicCall       = call;
+    cinfo->hasMagicCallStatic = callStatic;
+    if (call || callStatic) {
+      mark_magic_on_parents(*cinfo, call, callStatic);
     }
   }
 }
@@ -890,6 +954,21 @@ void check_invariants(borrowed_ptr<const ClassInfo> cinfo) {
   // The baseList is non-empty, and the last element is this class.
   always_assert(!cinfo->baseList.empty());
   always_assert(cinfo->baseList.back() == cinfo);
+
+  // Magic method flags should be consistent with the method table.
+  always_assert(
+    cinfo->hasMagicCall ==
+      (cinfo->methods.find(s_call.get()) != end(cinfo->methods))
+  );
+  always_assert(
+    cinfo->hasMagicCallStatic ==
+      (cinfo->methods.find(s_callStatic.get()) != end(cinfo->methods))
+  );
+
+  // Non-'derived' flags about magic methods imply the derived ones.
+  always_assert(!cinfo->hasMagicCallStatic ||
+                cinfo->derivedHasMagicCallStatic);
+  always_assert(!cinfo->hasMagicCall || cinfo->derivedHasMagicCall);
 }
 
 void check_invariants(IndexData& data) {
@@ -955,6 +1034,7 @@ Index::Index(borrowed_ptr<php::Program> program)
 
   compute_subclass_list(*m_data);
   define_func_families(*m_data);
+  find_magic_methods(*m_data);
   check_invariants(*m_data);
 
   m_data->isComprehensive = true;
@@ -1066,29 +1146,132 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
   if (!clsType.strictSubtypeOf(TCls)) {
     return folly::none;
   }
-
   auto const dcls  = dcls_of(clsType);
   auto const cinfo = dcls.cls.val.right();
-
   if (!cinfo) return folly::none;
 
   /*
-   * Note: this isn't checking accessibility, which might not be
-   * great.  We could infer things that are wrong ... but we will just
-   * fatal at run time.  HPHPc appears to do the same.
+   * Whether or not the context class has a private method with the
+   * same name as the the method we're trying to call.
    */
-  auto const it = cinfo->methods.find(name);
-  if (it == end(cinfo->methods)) return folly::none;
-  if (it->second->attrs & AttrInterceptable) return folly::none;
+  auto const contextHasPrivateWithSameName = folly::lazy([&]() -> bool {
+    if (!ctx.cls) return false;
+    // We can use any representative ClassInfo for the context class
+    // to check this, since the private method list cannot change
+    // for different realizations of the class.
+    auto const range   = find_range(m_data->classInfo, ctx.cls->name);
+    auto const ctxInfo = begin(range)->second;
+    auto const iter    = ctxInfo->methods.find(name);
+    if (iter != end(ctxInfo->methods)) {
+      return iter->second.func->attrs & AttrPrivate;
+    }
+    return false;
+  });
+
+  /*
+   * Look up the method in the target class.
+   */
+  auto const methIt = cinfo->methods.find(name);
+  if (methIt == end(cinfo->methods)) return folly::none;
+  if (methIt->second.func->attrs & AttrInterceptable) return folly::none;
+  auto const ftarget = methIt->second.func;
+
+  // We need to revisit the hasPrivateAncestor code if we start being
+  // able to look up methods on interfaces (currently they have empty
+  // method tables).
+  assert(!(cinfo->cls->attrs & AttrInterface));
+
+  /*
+   * If our candidate method has a private ancestor, unless it is
+   * defined on this class, we need to make sure we don't erroneously
+   * resolve the overriding method if the call is coming from the
+   * context the defines the private method.
+   *
+   * For now this just gives up if the context and the callee class
+   * could be related and the context defines a private of the same
+   * name.  (We should actually try to resolve that method, though.)
+   */
+  if (methIt->second.hasPrivateAncestor &&
+      ctx.cls &&
+      ctx.cls != ftarget->cls) {
+    if (could_be_related(ctx.cls, cinfo->cls)) {
+      if (contextHasPrivateWithSameName()) {
+        return folly::none;
+      }
+    }
+  }
+
+  /*
+   * Note: this currently isn't exhaustively checking accessibility,
+   * except in cases where we must do a little bit of it for
+   * correctness.
+   *
+   * It is generally ok to resolve a method that won't actually be
+   * called as long, as we only do so in cases where it will fatal at
+   * runtime.
+   *
+   * So, in the presense of magic methods, we must handle the fact
+   * that attempting to call an inaccessible method will instead call
+   * the magic method, if it exists.  Note that if any class derives
+   * from a class and adds magic methods, it can change still change
+   * dispatch to call that method instead of fatalling.
+   */
+
+  // If false, this method is definitely accessible.  If true, it may
+  // or may not be accessible.
+  auto const couldBeInaccessible = [&] {
+    // Public is always accessible.
+    if (ftarget->attrs & AttrPublic) return false;
+    // An anonymous context won't have access if it wasn't public.
+    if (!ctx.cls) return true;
+    // If the calling context class is the same as the target class,
+    // and method is defined on this class, it must be accessible.
+    if (ctx.cls == cinfo->cls && ftarget->cls == cinfo->cls) {
+      return false;
+    }
+    // If the method is private, the above case is the only case where
+    // we'd know it was accessible.
+    if (ftarget->attrs & AttrPrivate) return true;
+    /*
+     * For the protected method case: if the context class must be
+     * derived from the class that first defined the protected method
+     * we know it is accessible.
+     */
+    if (must_be_derived_from(ctx.cls, ftarget->cls)) {
+      return false;
+    }
+    /*
+     * On the other hand, if the class that defined the method must be
+     * derived from the context class, it is going to be accessible as
+     * long as the context class does not define a private method with
+     * the same name.  (If it did, we'd be calling that private
+     * method, which currently we don't ever resolve---we've removed
+     * it from the method table in the classInfo.)
+     */
+    if (must_be_derived_from(ftarget->cls, ctx.cls)) {
+      if (!contextHasPrivateWithSameName()) {
+        return false;
+      }
+    }
+    // Other cases we're not sure about (maybe some non-unique classes
+    // got in the way).  Conservatively return that it might be
+    // inaccessible.
+    return true;
+  };
 
   switch (dcls.type) {
   case DCls::Exact:
-    return do_resolve(it->second);
-  case DCls::Sub:
-    if (it->second->attrs & AttrNoOverride) {
-      return do_resolve(it->second);
+    if (cinfo->hasMagicCall || cinfo->hasMagicCallStatic) {
+      if (couldBeInaccessible()) return folly::none;
     }
-
+    return do_resolve(ftarget);
+  case DCls::Sub:
+    if (cinfo->derivedHasMagicCall || cinfo->derivedHasMagicCallStatic) {
+      if (couldBeInaccessible()) return folly::none;
+    }
+    if (ftarget->attrs & AttrNoOverride) {
+      return do_resolve(ftarget);
+    }
     if (!options.FuncFamilies) return folly::none;
 
     {
@@ -1355,6 +1538,41 @@ res::Func Index::do_resolve(borrowed_ptr<const php::Func> f) const {
   auto const finfo = create_func_info(*m_data, f);
   return res::Func { this, finfo };
 };
+
+// Return true if we know for sure that one php::Class must derive
+// from another at runtime, in all possible instantiations.
+bool Index::must_be_derived_from(borrowed_ptr<const php::Class> cls,
+                                 borrowed_ptr<const php::Class> parent) const {
+  if (cls == parent) return true;
+  auto const clsClasses    = find_range(m_data->classInfo, cls->name);
+  auto const parentClasses = find_range(m_data->classInfo, parent->name);
+  for (auto& kvCls : clsClasses) {
+    auto const rCls = res::Class { this, kvCls.second };
+    for (auto& kvPar : parentClasses) {
+      auto const rPar = res::Class { this, kvPar.second };
+      if (!rCls.subtypeOf(rPar)) return false;
+    }
+  }
+  return true;
+}
+
+// Return true if any possible definition of one php::Class could
+// derive from another at runtime, or vice versa.
+bool
+Index::could_be_related(borrowed_ptr<const php::Class> cls,
+                        borrowed_ptr<const php::Class> parent) const {
+  if (cls == parent) return true;
+  auto const clsClasses    = find_range(m_data->classInfo, cls->name);
+  auto const parentClasses = find_range(m_data->classInfo, parent->name);
+  for (auto& kvCls : clsClasses) {
+    auto const rCls = res::Class { this, kvCls.second };
+    for (auto& kvPar : parentClasses) {
+      auto const rPar = res::Class { this, kvPar.second };
+      if (rCls.couldBe(rPar)) return true;
+    }
+  }
+  return false;
+}
 
 //////////////////////////////////////////////////////////////////////
 

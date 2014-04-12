@@ -119,7 +119,7 @@ case $DISTRO in
 esac
 
 # init submodules
-git submodule update --init
+git submodule update --init --recursive
 
 # wait until all background processes finished
 FAIL=0

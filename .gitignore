@@ -53,6 +53,9 @@ install_manifest.txt
 
 /hphp/TAGS
 
+# old submodule
+/hphp/submodules
+
 /third-party/libzip/libzip.dylib
 
 # Generated makefiles

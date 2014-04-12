@@ -106,6 +106,13 @@
     commit: 11e964157a6a2c6128a0546673ad5e99ac1a62cd
     install_root: idiorm
     test_root: idiorm
+  json_schema:
+    url: https://github.com/justinrainbow/json-schema.git
+    branch: master
+    # Version 1.3.6
+    commit: d97cf3ce890fe80f247fc08594a1c8a1029fc7ed
+    install_root: json_schema
+    test_root: json_schema
   joomla:
     url: https://github.com/joomla/joomla-framework.git
     # Stable is 2.4.2, but need master since we have pull requests.
@@ -211,7 +218,7 @@
     install_root: monolog
     test_root: monolog
   mustache:
-    url: https://github.com/bobthecow/mustache.php.git 
+    url: https://github.com/bobthecow/mustache.php.git
     branch: v2.5.1
     commit: 996c944fa2ddedddfaf0d276b913809d6a32fd85
     install_root: mustache
@@ -299,13 +306,12 @@
       - pear-core/tests/System/find_test.phpt
       - pear-core/tests/System/test_which.phpt
       - pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents.phpt
-  json_schema:
-    url: https://github.com/justinrainbow/json-schema.git
-    branch: master
-    # Version 1.3.6
-    commit: d97cf3ce890fe80f247fc08594a1c8a1029fc7ed
-    install_root: json_schema
-    test_root: json_schema
+  pdepend:
+    url: https://github.com/pdepend/pdepend.git
+    branch: release-1.1.x
+    commit: 3340c91def4c6d4f4c9f0784ac04b9ed09ec68ca
+    install_root: pdepend
+    test_root: pdepend
   phpbb3:
     url: https://github.com/phpbb/phpbb.git
     # Stable is release-3.0.12, but we have pull requests in develop

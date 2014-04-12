@@ -28,6 +28,18 @@ cd $GIT_TLD
 
 ######################################################################
 
+# First check if they configured anything hphp-related.  If not, skip
+# this stuff, because these git commands take .5s or so.
+if [ -d $GIT_TLD/.fbbuild ]; then
+  if cat $GIT_TLD/.fbbuild/generated/info 2>/dev/null \
+    | grep fbconfig_argv \
+    | grep -v hphp >/dev/null 2>&1 ; then
+    exit 0
+  fi
+fi
+
+######################################################################
+
 if [ x"$COMPILER_ID" = x"" ]; then
   if [ "$GIT" = "yes" ]; then
     COMPILER_ID=$(git describe --all --long --abbrev=40 --always)

@@ -408,6 +408,9 @@ void FrameState::finishBlock(Block* block) {
   if (!block->back().isTerminal()) {
     save(block->next());
   }
+  if (m_building) {
+    save(block);
+  }
 }
 
 void FrameState::pauseBlock(Block* block) {

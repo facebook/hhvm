@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/util/assertions.h"
 
@@ -85,6 +86,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     if (prev.isBlockEnd()) {
       assert(where == m_curBlock->end());
       // start a new block
+      m_state.pauseBlock(m_curBlock);
       m_curBlock = m_unit.defBlock();
       where = m_curBlock->begin();
       FTRACE(2, "lazily adding B{}\n", m_curBlock->id());
@@ -127,7 +129,40 @@ void IRBuilder::appendBlock(Block* block) {
   m_curBlock = block;
 }
 
-std::vector<RegionDesc::TypePred> IRBuilder::getKnownTypes() const {
+static bool isMainExit(const Block* b) {
+  if (b->hint() == Block::Hint::Unlikely) return false;
+  if (b->next()) return false;
+  auto taken = b->taken();
+  if (!taken) return true;
+  if (taken->isCatch()) return true;
+  return false;
+}
+
+/*
+ * Compute the stack and local type postconditions for a
+ * single-entry/single-exit tracelet.
+ */
+std::vector<RegionDesc::TypePred> IRBuilder::getKnownTypes() {
+  // This function is only correct when given a single-exit region, as
+  // in TransProfile.  Furthermore, its output is only used to guide
+  // formation of profile-driven regions.
+  assert(tx->mode() == TransProfile);
+
+  // We want the state for the last block on the "main trace".  Figure
+  // out which that is.
+  Block* mainExit = nullptr;
+  for (auto* b : rpoSortCfg(m_unit)) {
+    if (isMainExit(b)) {
+      assert(mainExit == nullptr);
+      mainExit = b;
+    }
+  }
+  assert(mainExit != nullptr);
+
+  // Load state for mainExit.  This feels hacky.
+  m_state.startBlock(mainExit);
+
+  // Now use the current state to get all the types.
   std::vector<RegionDesc::TypePred> result;
   auto const curFunc  = m_state.func();
   auto const sp       = m_state.sp();

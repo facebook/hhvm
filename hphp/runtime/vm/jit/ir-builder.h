@@ -350,7 +350,7 @@ struct IRBuilder {
   /*
    * Get all typed locations in current translation.
    */
-  std::vector<RegionDesc::TypePred> getKnownTypes() const;
+  std::vector<RegionDesc::TypePred> getKnownTypes();
 
 private:
   // RAII disable of CSE; only restores if it used to be on.  Used for

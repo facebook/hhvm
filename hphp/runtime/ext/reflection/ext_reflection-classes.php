@@ -899,7 +899,7 @@ class ReflectionClass implements Reflector {
   const IS_FINAL = 64 ;
 
   public $name;
-  private $info = null;
+  private $info;
   private $obj = null;
   private static $fetched = array();
 
@@ -925,6 +925,8 @@ class ReflectionClass implements Reflector {
     if (empty($this->name)) {
       throw new ReflectionException("Class $name does not exist");
     }
+
+    $this->getInfo();
   }
 
   private function getInfo() {

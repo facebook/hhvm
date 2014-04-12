@@ -500,6 +500,9 @@ int RuntimeOption::Fb303ServerWorkerThreads = 1;
 int RuntimeOption::Fb303ServerPoolThreads = 1;
 #endif
 
+double RuntimeOption::XenonPeriodSeconds = 0.0;
+bool RuntimeOption::XenonForceAlwaysOn = false;
+
 int RuntimeOption::EnableAlternative = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1354,6 +1357,12 @@ void RuntimeOption::Load(Hdf &config,
     Fb303ServerPoolThreads = fb303Server["PoolThreads"].getInt16(1);
   }
 #endif
+
+  {
+    Hdf hhprofServer = config["Xenon"];
+    XenonPeriodSeconds = hhprofServer["Period"].getDouble(0.0);
+    XenonForceAlwaysOn = hhprofServer["ForceAlwaysOn"].getBool(false);
+  }
 
   refineStaticStringTableSize();
 

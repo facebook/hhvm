@@ -52,6 +52,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_xenon.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/base/simple-counter.h"
@@ -613,6 +614,10 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   if (RuntimeOption::RequestTimeoutSeconds) {
     ThreadInfo::s_threadInfo->m_reqInjectionData.setTimeout(
       RuntimeOption::RequestTimeoutSeconds);
+  }
+
+  if (RuntimeOption::XenonForceAlwaysOn) {
+    Xenon::getInstance().surpriseAll();
   }
 
   Extension::RequestInitModules();
@@ -1514,7 +1519,11 @@ extern "C" void hphp_fatal_error(const char *s) {
 static void on_timeout(int sig, siginfo_t* info, void* context) {
   if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {
     auto data = (RequestInjectionData*)info->si_value.sival_ptr;
-    data->onTimeout();
+    if (data) {
+      data->onTimeout();
+    } else {
+      Xenon::getInstance().onTimer();
+    }
   }
 }
 
@@ -1532,6 +1541,7 @@ void hphp_process_init() {
   action.sa_sigaction = on_timeout;
   action.sa_flags = SA_SIGINFO | SA_NODEFER;
   sigaction(SIGVTALRM, &action, nullptr);
+  Xenon::getInstance().start(RuntimeOption::XenonPeriodSeconds);
 
   init_thread_locals();
 
@@ -1782,6 +1792,7 @@ void hphp_session_exit() {
 }
 
 void hphp_process_exit() {
+  Xenon::getInstance().stop();
   PageletServer::Stop();
   XboxServer::Stop();
   Eval::Debugger::Stop();

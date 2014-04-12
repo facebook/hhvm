@@ -382,13 +382,20 @@ void RequestInjectionData::clearInterceptFlag() {
   getConditionFlags()->fetch_and(~RequestInjectionData::InterceptFlag);
 }
 
+void RequestInjectionData::setXenonSignalFlag() {
+  getConditionFlags()->fetch_or(RequestInjectionData::XenonSignalFlag);
+}
+
+void RequestInjectionData::clearXenonSignalFlag() {
+  getConditionFlags()->fetch_and(~RequestInjectionData::XenonSignalFlag);
+}
+
 void RequestInjectionData::setDebuggerSignalFlag() {
   getConditionFlags()->fetch_or(RequestInjectionData::DebuggerSignalFlag);
 }
 
 ssize_t RequestInjectionData::fetchAndClearFlags() {
-  return getConditionFlags()->fetch_and(RequestInjectionData::EventHookFlag |
-                                        RequestInjectionData::InterceptFlag);
+  return getConditionFlags()->fetch_and(RequestInjectionData::StickyFlags);
 }
 
 }

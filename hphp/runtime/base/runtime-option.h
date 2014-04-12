@@ -564,6 +564,10 @@ public:
   static int Fb303ServerPoolThreads;
 #endif
 
+  // Xenon options
+  static double XenonPeriodSeconds;
+  static bool XenonForceAlwaysOn;
+
   // Convenience switch to turn on/off code alternatives via command-line
   // Do not commit code guarded by this flag, for evaluation only.
   static int EnableAlternative;

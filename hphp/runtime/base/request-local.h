@@ -35,7 +35,23 @@ namespace HPHP {
  *     virtual void requestInit() {...}
  *     virtual void requestShutdown() {...}
  *   };
- *   static RequestLocal<MyRequestLocalClass> s_data;
+ *   IMPLEMENT_STATIC_REQUEST_LOCAL(IMPLEMENT_STATIC_REQUEST_LOCAL, s_data);
+ *
+ * How to use the request-local macros:
+ *
+ * Use DECLARE_STATIC_REQUEST_LOCAL to declare a *static* class field as
+ * request local:
+ *   class SomeClass {
+ *     DECLARE_STATIC_REQUEST_LOCAL(SomeFieldType, f);
+ *   }
+ *
+ * Use IMPLEMENT_STATIC_REQUEST_LOCAL in the cpp file to implement the field:
+ *   IMPLEMENT_STATIC_REQUEST_LOCAL(SomeFieldType, SomeClass::f);
+ *
+ * The DECLARE_REQUEST_LOCAL and IMPLEMENT_REQUEST_LOCAL macros are provided
+ * for declaring/implementing request locals in the global scope.
+ *
+ * Remember: *Never* write IMPLEMENT_STATIC_REQUEST_LOCAL in a header file.
  */
 
 #if defined(USE_GCC_FAST_TLS)
@@ -122,23 +138,6 @@ private:
   ThreadLocal<T> & m_tlsObjects;
 };
 
-/*
- * How to use the request-local macros:
- *
- * Use DECLARE_STATIC_REQUEST_LOCAL to declare a *static* class field as
- * request local:
- *   class SomeClass {
- *     DECLARE_STATIC_REQUEST_LOCAL(SomeFieldType, f);
- *   }
- *
- * Use IMPLEMENT_STATIC_REQUEST_LOCAL in the cpp file to implement the field:
- *   IMPLEMENT_STATIC_REQUEST_LOCAL(SomeFieldType, SomeClass::f);
- *
- * The DECLARE_REQUEST_LOCAL and IMPLEMENT_REQUEST_LOCAL macros are provided
- * for declaring/implementing request locals in the global scope.
- *
- * Remember: *Never* write IMPLEMENT_STATIC_REQUEST_LOCAL in a header file.
- */
 
 #define IMPLEMENT_REQUEST_LOCAL(T,f)     \
   IMPLEMENT_THREAD_LOCAL(T, f ## __tl);  \

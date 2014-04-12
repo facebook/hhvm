@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/ext/ext_xenon.h"
 
 namespace HPHP {
 
@@ -246,6 +247,7 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
 
 bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
   ssize_t flags = CheckSurprise();
+  Xenon::getInstance().log(true);
   if (flags & RequestInjectionData::InterceptFlag &&
       !RunInterceptHandler(const_cast<ActRec*>(ar))) {
     return false;
@@ -273,6 +275,8 @@ void EventHook::onFunctionExit(const ActRec* ar, TypedValue* retval) {
     // event to avoid unbalancing the call stack.
     return;
   }
+
+  Xenon::getInstance().log(false);
 
 #ifdef HOTPROFILER
   Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;

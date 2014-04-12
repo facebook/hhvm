@@ -18,6 +18,7 @@
 
 #include <cinttypes>
 #include <map>
+#include <functional>
 
 #include "hphp/util/portability.h"
 #include "hphp/util/thread-local.h"
@@ -41,6 +42,7 @@ struct ThreadInfo {
   };
 
   static void GetExecutionSamples(std::map<Executing, int> &counts);
+  static void ExecutePerThread(std::function<void(ThreadInfo*)> f);
   static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
   RequestInjectionData m_reqInjectionData;

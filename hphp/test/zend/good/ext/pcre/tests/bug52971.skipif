@@ -1,0 +1,5 @@
+<?php
+if ((double)PCRE_VERSION < 8.1) {
+    die('skip PCRE_VERSION >= 8.1 is required!');
+}
+?>

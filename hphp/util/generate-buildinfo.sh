@@ -9,10 +9,12 @@
 # contents would've changed.
 #
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # OSS version depends on this fallback since it's
 # obviously not using fbmake
 if [ x"$FBMAKE_PRE_COMMAND_OUTDIR" = x"" ]; then
-  FBMAKE_PRE_COMMAND_OUTDIR="$HPHP_HOME/hphp/"
+  FBMAKE_PRE_COMMAND_OUTDIR="$DIR/../"
 fi
 
 BUILDINFO_FILE="$FBMAKE_PRE_COMMAND_OUTDIR/hphp-build-info.cpp"
@@ -21,7 +23,7 @@ REPO_SCHEMA_H="$FBMAKE_PRE_COMMAND_OUTDIR/hphp-repo-schema.h"
 GIT_TLD=$(git rev-parse --show-toplevel)
 GIT="yes"
 if [ x"$GIT_TLD" = x"" ]; then
-  GIT_TLD=$HPHP_HOME
+  GIT_TLD=$DIR/../../
   GIT="no"
 fi
 cd $GIT_TLD

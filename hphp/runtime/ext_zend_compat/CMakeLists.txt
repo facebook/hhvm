@@ -9,7 +9,7 @@ set(CXX_SOURCES)
 set(C_SOURCES)
 set(ASM_SOURCES)
 set(ZEND_COMPAT_LINK_LIBRARIES)
-set(EZC_DIR "${HPHP_HOME}/hphp/runtime/ext_zend_compat/")
+set(EZC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../runtime/ext_zend_compat/")
 HHVM_SELECT_SOURCES("${EZC_DIR}/php-src")
 HHVM_SELECT_SOURCES("${EZC_DIR}/hhvm")
 

@@ -27,7 +27,7 @@ modes = {
     'VM': 'interp',
 }
 
-home = os.getenv('HPHP_HOME')
+home = os.path.dirname(os.path.realpath(__file__)) + '/../..'
 root = home + '/' + os.getenv('FBMAKE_BIN_ROOT', '_bin')
 
 def main():

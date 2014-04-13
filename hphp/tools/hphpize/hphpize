@@ -5,6 +5,8 @@ if [ ! -f "config.cmake" ]; then
   exit 1
 fi
 
-cp ${HPHP_HOME}/hphp/tools/hphpize/hphpize.cmake CMakeLists.txt
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+cp ${DIR}/hphpize.cmake CMakeLists.txt
 
 echo "** hphpize complete, now run \`cmake . && make\` to build"

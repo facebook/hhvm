@@ -1,8 +1,8 @@
-auto_sources(IDL_SRCS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
+auto_sources(IDL_SRCS "*.idl.json" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/../system/idl")
 
 add_custom_command(OUTPUT "class_map.cpp" "constants.h"
                    DEPENDS ${IDL_SRCS} gen-class-map
-                   COMMAND "${HPHP_HOME}/hphp/tools/bootstrap/gen-class-map"
+                   COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/../tools/bootstrap/gen-class-map"
                    ARGS "--system"
                         "${CMAKE_CURRENT_SOURCE_DIR}/class_map.cpp"
                         "${CMAKE_CURRENT_SOURCE_DIR}/constants.h"
@@ -33,8 +33,8 @@ endforeach()
 add_custom_target(systemlib
                   DEPENDS "php.txt" ${SYSTEMLIB_SRCS}
                   COMMAND "INSTALL_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
-                          "FBCODE_DIR=${HPHP_HOME}"
-                          "${HPHP_HOME}/hphp/runtime/ext_hhvm/make_systemlib.sh"
-                          "--install_dir=${CMAKE_CURRENT_SOURCE_DIR}" "--fbcode_dir=${HPHP_HOME}"
+                          "FBCODE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../.."
+                          "${CMAKE_CURRENT_SOURCE_DIR}/../runtime/ext_hhvm/make_systemlib.sh"
+                          "--install_dir=${CMAKE_CURRENT_SOURCE_DIR}" "--fbcode_dir=${CMAKE_CURRENT_SOURCE_DIR}/.."
                           "${SYSTEMLIB_SRCS_STR}"
                   COMMENT "Generating systemlib.php")

@@ -15,11 +15,11 @@ foreach (file ${files})
 endforeach()
 
 add_custom_command(
-  OUTPUT "${HPHP_HOME}/hphp/hphp-repo-schema.h"
-         "${HPHP_HOME}/hphp/hphp-build-info.cpp"
-  COMMAND "HPHP_HOME=${HPHP_HOME}" "hphp/util/generate-buildinfo.sh"
+  OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-repo-schema.h"
+         "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-build-info.cpp"
+         COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/generate-buildinfo.sh"
   DEPENDS ${CXX_SOURCES}
-  WORKING_DIRECTORY ${HPHP_HOME}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../
   COMMENT "Generating Repo Schema ID and Compiler ID"
   VERBATIM)
 
@@ -35,8 +35,8 @@ add_custom_command(
 #endif()
 
 add_library(hphp_util STATIC ${CXX_SOURCES}
-            "${HPHP_HOME}/hphp/hphp-repo-schema.h"
-            "${HPHP_HOME}/hphp/hphp-build-info.cpp")
+            "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-repo-schema.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-build-info.cpp")
 
 #if (LIBNUMA_LIBRARIES)
 #	target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})

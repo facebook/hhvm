@@ -16,20 +16,22 @@ OS=$(shell uname -s)
 #------------------------------------------------------------------------------
 #package dependencies
 #------------------------------------------------------------------------------
+BUILD_DIRS=stubs
+BUILD_CMAS=stubs/lib.cma
+EXTRA_INCLUDEDIRS=
+FILTER_FROM_INCLUDE=
 ifneq ($(wildcard facebook/Makefile.include),)
-  -include facebook/Makefile.include
+  ifndef CMAKE
+    # None of this stuff can build without some crazy ENV vars. Killing until it is fixed.
+    -include facebook/Makefile.include
 
-  # Want to open source this but no need to force everyone to have js_of_ocaml
-  BUILD_DIRS+=js
+    # Want to open source this but no need to force everyone to have js_of_ocaml
+    BUILD_DIRS+=js
 
-  # We filter js/ because it contains an incompatible str.ml file
-  # that would then confuse ocamldepend
-  FILTER_FROM_INCLUDE=js
-else
-	BUILD_DIRS=stubs
-	BUILD_CMAS=stubs/lib.cma
-	EXTRA_INCLUDEDIRS=
-	FILTER_FROM_INCLUDE=
+    # We filter js/ because it contains an incompatible str.ml file
+    # that would then confuse ocamldepend
+    FILTER_FROM_INCLUDE=js
+  endif
 endif
 
 #------------------------------------------------------------------------------

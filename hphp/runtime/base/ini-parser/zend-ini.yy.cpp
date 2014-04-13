@@ -1,6 +1,7 @@
-#line 2 "zend-ini.yy.cpp"
+// @generated
+#line 2 "_build/dbg/hphp/runtime/base/ini-parser/57833b0/zend-ini.ll.cc"
 
-#line 4 "zend-ini.yy.cpp"
+#line 4 "_build/dbg/hphp/runtime/base/ini-parser/57833b0/zend-ini.ll.cc"
 
 #define  YY_INT_ALIGNED short int
 
@@ -898,7 +899,7 @@ restart:
 
 
 
-#line 902 "zend-ini.yy.cpp"
+#line 902 "_build/dbg/hphp/runtime/base/ini-parser/57833b0/zend-ini.ll.cc"
 
 #define INITIAL 0
 #define ST_OFFSET 1
@@ -1101,7 +1102,7 @@ YY_DECL
 #line 169 "hphp/runtime/base/ini-parser/zend-ini.ll"
 
 
-#line 1105 "zend-ini.yy.cpp"
+#line 1105 "_build/dbg/hphp/runtime/base/ini-parser/57833b0/zend-ini.ll.cc"
 
 	if ( !(yy_init) )
 		{
@@ -1523,7 +1524,7 @@ YY_RULE_SETUP
 #line 395 "hphp/runtime/base/ini-parser/zend-ini.ll"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1527 "zend-ini.yy.cpp"
+#line 1527 "_build/dbg/hphp/runtime/base/ini-parser/57833b0/zend-ini.ll.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(ST_OFFSET):
 case YY_STATE_EOF(ST_SECTION_VALUE):

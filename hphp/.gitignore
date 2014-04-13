@@ -4,6 +4,17 @@
 /hhvm/hhvm
 /hhvm/hphp
 
+# CMake build artifacts
+CMakeFiles
+/CMakeCache.txt
+cmake_install.cmake
+Makefile
+/compiler/analysis/code_error.inc
+/runtime/ext_hhvm/ext_hhvm_infotabs.h
+/runtime/ext_hhvm/ext_hhvm_infotabs.cpp
+/hphp-build-info.cpp
+/hphp-repo-schema.h
+
 # vim swapfiles
 .*.swp
 .*.swo

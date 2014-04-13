@@ -4,7 +4,7 @@ if (OCAMLC_FOUND)
 	add_custom_target(
 		hack
 		ALL
-		COMMAND make depend && env OPTBIN="${OCAMLC_OPT_SUFFIX}" make
+    COMMAND CMAKE=1 make depend && env OPTBIN="${OCAMLC_OPT_SUFFIX}" CMAKE=1 make
 		WORKING_DIRECTORY src
 	)
 endif()

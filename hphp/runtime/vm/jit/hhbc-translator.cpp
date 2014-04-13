@@ -27,6 +27,7 @@
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -4516,104 +4517,104 @@ void HhbcTranslator::emitInitProp(Id propId, InitPropOp op) {
   gen(StElem, base, cns(idx * sizeof(TypedValue)), val);
 }
 
-static folly::Optional<Type> assertOpToType(AssertTOp op) {
-  switch (op) {
-  case AssertTOp::Uninit:     return Type::Uninit;
-  case AssertTOp::InitNull:   return Type::InitNull;
-  case AssertTOp::Int:        return Type::Int;
-  case AssertTOp::Dbl:        return Type::Dbl;
-  case AssertTOp::Res:        return Type::Res;
-  case AssertTOp::Null:       return Type::Null;
-  case AssertTOp::Bool:       return Type::Bool;
-  case AssertTOp::Str:        return Type::Str;
-  case AssertTOp::Arr:        return Type::Arr;
-  case AssertTOp::Obj:        return Type::Obj;
-  case AssertTOp::SStr:       return Type::StaticStr;
-  case AssertTOp::SArr:       return Type::StaticArr;
+
+/*
+ * Note: this is currently separate from convertToType(RepoAuthType)
+ * for now, just because we don't want to enable every single type for
+ * assertions yet.
+ *
+ * (Some of them currently regress performance, presumably because the
+ * IR doesn't always handle the additional type information very well.
+ * It is possibly a compile-time slowdown only, but we haven't
+ * investigated yet.)
+ */
+folly::Optional<Type> HhbcTranslator::ratToAssertType(RepoAuthType rat) const {
+  using T = RepoAuthType::Tag;
+  switch (rat.tag()) {
+  case T::Uninit:     return Type::Uninit;
+  case T::InitNull:   return Type::InitNull;
+  case T::Int:        return Type::Int;
+  case T::Dbl:        return Type::Dbl;
+  case T::Res:        return Type::Res;
+  case T::Null:       return Type::Null;
+  case T::Bool:       return Type::Bool;
+  case T::Str:        return Type::Str;
+  case T::Obj:        return Type::Obj;
+  case T::SStr:       return Type::StaticStr;
 
   // These aren't enabled yet:
-  case AssertTOp::OptInt:
-  case AssertTOp::OptObj:
-  case AssertTOp::OptDbl:
-  case AssertTOp::OptBool:
-  case AssertTOp::OptSStr:
-  case AssertTOp::OptSArr:
-  case AssertTOp::OptStr:
-  case AssertTOp::OptArr:
-  case AssertTOp::OptRes:
+  case T::OptInt:
+  case T::OptObj:
+  case T::OptDbl:
+  case T::OptBool:
+  case T::OptSStr:
+  case T::OptStr:
+  case T::OptRes:
     return folly::none;
 
+  case T::OptSArr:
+  case T::OptArr:
+    // TODO(#4205897): optional array types.
+    return folly::none;
+
+  case T::SArr:
+    if (auto const arr = rat.array()) {
+      return Type::StaticArr.specialize(arr);
+    }
+    return Type::StaticArr;
+  case T::Arr:
+    if (auto const arr = rat.array()) {
+      return Type::Arr.specialize(arr);
+    }
+    return Type::Arr;
+
+  case T::OptExactObj:
+  case T::OptSubObj:
+  case T::ExactObj:
+  case T::SubObj:
+    {
+      auto ty = [&] {
+        auto const cls = Unit::lookupUniqueClass(rat.clsName());
+        return classIsPersistentOrCtxParent(cls)
+          ? Type::Obj.specialize(cls)
+          : Type::Obj;
+      }();
+      if (rat.tag() == T::OptExactObj || rat.tag() == T::OptSubObj) {
+        ty = ty | Type::InitNull;
+      }
+      return ty;
+    }
+
   // We always know this at JIT time right now.
-  case AssertTOp::Cell:
-  case AssertTOp::Ref:
+  case T::Cell:
+  case T::Ref:
+    return folly::none;
+
+  case T::InitGen:
+    // Should ideally be able to remove Uninit here.
+    return folly::none;
+  case T::Gen:
     return folly::none;
 
   // The JIT can't currently handle the exact information in these
   // type assertions in some cases:
-  case AssertTOp::InitUnc:    return folly::none;
-  case AssertTOp::Unc:        return folly::none;
-  case AssertTOp::InitCell:   return Type::Cell; // - Type::Uninit
+  case T::InitUnc:    return folly::none;
+  case T::Unc:        return folly::none;
+  case T::InitCell:   return Type::Cell; // - Type::Uninit
   }
   not_reached();
 }
 
-void HhbcTranslator::emitAssertTL(int32_t id, AssertTOp op) {
-  if (auto const t = assertOpToType(op)) {
-    assertTypeLocal(id, *t);
+void HhbcTranslator::emitAssertRATL(int32_t loc, RepoAuthType rat) {
+  if (auto const t = ratToAssertType(rat)) {
+    assertTypeLocal(loc, *t);
   }
 }
 
-void HhbcTranslator::emitAssertTStk(int32_t offset, AssertTOp op) {
-  if (auto const t = assertOpToType(op)) {
+void HhbcTranslator::emitAssertRATStk(int32_t offset, RepoAuthType rat) {
+  if (auto const t = ratToAssertType(rat)) {
     assertTypeStack(offset, *t);
   }
-}
-
-void HhbcTranslator::emitPredictTL(int32_t id, AssertTOp op) {
-  if (auto const t = assertOpToType(op)) {
-    // Side exit to the next instruction to avoid redoing the failed
-    // prediction.
-    auto const nextBc = curSrcKey().advanced().offset();
-    checkTypeLocal(id, *t, nextBc);
-  }
-}
-
-void HhbcTranslator::emitPredictTStk(int32_t offset, AssertTOp op) {
-  if (auto const t = assertOpToType(op)) {
-    // Side exit to the next instruction to avoid redoing the failed
-    // prediction.
-    auto const nextBc = curSrcKey().advanced().offset();
-    checkTypeStack(offset, *t, nextBc);
-  }
-}
-
-Type HhbcTranslator::assertObjType(const StringData* name) {
-  auto const cls = Unit::lookupUniqueClass(name);
-  return classIsUniqueOrCtxParent(cls) ? Type::Obj.specialize(cls) : Type::Obj;
-}
-
-static bool is_nullable(AssertObjOp op) {
-  switch (op) {
-  case AssertObjOp::Exact:
-  case AssertObjOp::Sub:
-    return false;
-  case AssertObjOp::OptExact:
-  case AssertObjOp::OptSub:
-    return true;
-  }
-  not_reached();
-}
-
-void HhbcTranslator::emitAssertObjL(int32_t loc, Id id, AssertObjOp op) {
-  auto ty = assertObjType(lookupStringId(id));
-  if (is_nullable(op)) ty = ty | Type::InitNull;
-  assertTypeLocal(loc, ty);
-}
-
-void HhbcTranslator::emitAssertObjStk(int32_t offset, Id id, AssertObjOp op) {
-  auto ty = assertObjType(lookupStringId(id));
-  if (is_nullable(op)) ty = ty | Type::InitNull;
-  assertTypeStack(offset, ty);
 }
 
 void HhbcTranslator::emitAbs() {

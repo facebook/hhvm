@@ -102,6 +102,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -334,6 +335,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define DEC_I64A int64_t
 #define DEC_DA double
 #define DEC_SA const StringData*
+#define DEC_RATA RepoAuthType
 #define DEC_AA ArrayData*
 #define DEC_BA Label&
 #define DEC_OA(type) type
@@ -407,6 +409,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define POP_LA_I64A(i)
 #define POP_LA_DA(i)
 #define POP_LA_SA(i)
+#define POP_LA_RATA(i)
 #define POP_LA_AA(i)
 #define POP_LA_BA(i)
 #define POP_LA_IMPL(x)
@@ -556,6 +559,14 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define IMPL3_SA IMPL_SA(a3)
 #define IMPL4_SA IMPL_SA(a4)
 
+// Emitting RATAs isn't supported here right now.  (They're only
+// created in hhbbc.)
+#define IMPL_RATA(var) NOT_REACHED()
+#define IMPL1_RATA IMPL_RATA(a1)
+#define IMPL2_RATA IMPL_RATA(a2)
+#define IMPL3_RATA IMPL_RATA(a3)
+#define IMPL4_RATA IMPL_RATA(a4)
+
 #define IMPL_AA(var) \
   getUnitEmitter().emitInt32(getUnitEmitter().mergeArray(var))
 #define IMPL1_AA IMPL_AA(a1)
@@ -605,6 +616,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef DEC_I64A
 #undef DEC_DA
 #undef DEC_SA
+#undef DEC_RATA
 #undef DEC_AA
 #undef DEC_BA
 #undef DEC_OA
@@ -640,6 +652,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_LA_I64A
 #undef POP_LA_DA
 #undef POP_LA_SA
+#undef POP_LA_RATA
 #undef POP_LA_AA
 #undef POP_LA_BA
 #undef POP_LA_IMPL
@@ -710,6 +723,11 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef IMPL2_SA
 #undef IMPL3_SA
 #undef IMPL4_SA
+#undef IMPL_RATA
+#undef IMPL1_RATA
+#undef IMPL2_RATA
+#undef IMPL3_RATA
+#undef IMPL4_RATA
 #undef IMPL_AA
 #undef IMPL1_AA
 #undef IMPL2_AA
@@ -8572,12 +8590,14 @@ static void addEmitterWorker(AnalysisResultPtr ar, StatementPtr sp,
   ((JobQueueDispatcher<EmitterWorker>*)data)->enqueue(sp->getFileScope());
 }
 
-static void commitGlobalData() {
+static void
+commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   auto gd                     = Repo::GlobalData{};
   gd.HardTypeHints            = Option::HardTypeHints;
   gd.UsedHHBBC                = Option::UseHHBBC;
   gd.HardPrivatePropInference = true;
 
+  if (arrTable) gd.arrayTypeTable.repopulate(*arrTable);
   Repo::get().saveGlobalData(gd);
 }
 
@@ -8642,7 +8662,9 @@ void emitAllHHBC(AnalysisResultPtr ar) {
       }
     }
 
-    if (!Option::UseHHBBC) commitGlobalData();
+    if (!Option::UseHHBBC) {
+      commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{});
+    }
   } else {
     dispatcher.waitEmpty();
   }
@@ -8663,9 +8685,9 @@ void emitAllHHBC(AnalysisResultPtr ar) {
     return;
   }
 
-  ues = HHBBC::whole_program(std::move(ues));
-  batchCommit(std::move(ues));
-  commitGlobalData();
+  auto pair = HHBBC::whole_program(std::move(ues));
+  batchCommit(std::move(pair.first));
+  commitGlobalData(std::move(pair.second));
 }
 
 extern "C" {

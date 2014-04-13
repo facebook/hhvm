@@ -145,6 +145,7 @@ class FailedCodeGen : public std::runtime_error {
  *               loosened to allow efficient type checks
  *     DAllocObj single dst has a type of a newly allocated object; may be a
  *               specialized object type if the class is known
+ *     DArrElem  single dst has type based on reading an array element
  *     DThis     single dst has type Obj<ctx>, where ctx is the
  *               current context class
  *     DMulti    multiple dests. type and number depend on instruction
@@ -419,7 +420,7 @@ O(LdLocAddr,                    DParam, S(FramePtr),                       C) \
 O(LdMem,                        DParam, S(PtrToGen) C(Int),                B) \
 O(LdProp,                       DParam, S(Obj) C(Int),                     B) \
 O(LdElem,                      D(Cell), S(PtrToCell) S(Int),               E) \
-O(LdPackedArrayElem,            D(Gen), S(Arr) S(Int),                     E) \
+O(LdPackedArrayElem,          DArrElem, S(Arr) S(Int),                     E) \
 O(LdRef,                        DLdRef, S(BoxedCell),                      B) \
 O(LdThis,                        DThis, S(FramePtr),                     B|C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \

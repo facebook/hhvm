@@ -773,7 +773,7 @@ struct UnitEmitter {
    */
   void recordFunction(FuncEmitter *fe);
 
- private:
+private:
   template<class T>
   void emitImpl(T n, int64_t pos) {
     auto *c = (unsigned char*)&n;
@@ -792,7 +792,8 @@ struct UnitEmitter {
       }
     }
   }
- public:
+
+public:
   void emitOp(Op op, int64_t pos = -1) {
     emitByte((unsigned char)op, pos);
   }
@@ -824,10 +825,11 @@ struct UnitEmitter {
                         const StringData* name, const TypedValue& tv);
   void insertMergeableDef(int ix, UnitMergeKind kind,
                           Id id, const TypedValue& tv);
- private:
+
+private:
   void setLines(const LineTable& lines);
 
- private:
+private:
   int m_repoId;
   int64_t m_sn;
   static const size_t BCMaxInit = 4096; // Initial bytecode size.

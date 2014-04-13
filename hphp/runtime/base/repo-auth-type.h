@@ -16,12 +16,18 @@
 #ifndef incl_HPHP_REPO_AUTH_TYPE_H_
 #define incl_HPHP_REPO_AUTH_TYPE_H_
 
+#include <string>
+
 #include "folly/Optional.h"
 
-#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/compact-sized-ptr.h"
 
+#include "hphp/runtime/base/datatype.h"
+
 namespace HPHP {
+
+//////////////////////////////////////////////////////////////////////
 
 struct StringData;
 struct TypedValue;
@@ -30,31 +36,58 @@ struct TypedValue;
 
 /*
  * Representation of types inferred statically for RepoAuthoritative
- * mode, for use in runtime data structures.
- *
- * These basically map to a subset of hhbbc's type system.  It's
- * basically the parts found in AssertT subops and AssertObj subops,
- * plus TGen and TInitGen, so the tags are generated from that enum's
- * table.  TODO(#3559108): TInitGen should be part of AssertTOp.
+ * mode, for use in runtime data structures, or the bytecode stream
+ * (see the AssertRAT{L,Stk} opcodes).
  *
  * This is encoded to be space efficient, so there's a small
  * abstraction layer.
  */
+
+//////////////////////////////////////////////////////////////////////
+
 struct RepoAuthType {
+  struct Array;
+
+#define REPO_AUTH_TYPE_TAGS                       \
+    TAG(Uninit)                                   \
+    TAG(InitNull)                                 \
+    TAG(Null)                                     \
+    TAG(Int)                                      \
+    TAG(OptInt)                                   \
+    TAG(Dbl)                                      \
+    TAG(OptDbl)                                   \
+    TAG(Res)                                      \
+    TAG(OptRes)                                   \
+    TAG(Bool)                                     \
+    TAG(OptBool)                                  \
+    TAG(SStr)                                     \
+    TAG(OptSStr)                                  \
+    TAG(Str)                                      \
+    TAG(OptStr)                                   \
+    TAG(Obj)                                      \
+    TAG(OptObj)                                   \
+    TAG(InitUnc)                                  \
+    TAG(Unc)                                      \
+    TAG(InitCell)                                 \
+    TAG(Cell)                                     \
+    TAG(Ref)                                      \
+    TAG(InitGen)                                  \
+    TAG(Gen)                                      \
+    /* Types where array() may be non-null. */    \
+    TAG(SArr)                                     \
+    TAG(OptSArr)                                  \
+    TAG(Arr)                                      \
+    TAG(OptArr)                                   \
+    /* Types where clsName() will be non-null. */ \
+    TAG(ExactObj)                                 \
+    TAG(SubObj)                                   \
+    TAG(OptExactObj)                              \
+    TAG(OptSubObj)
+
   enum class Tag : uint8_t {
-
-#define ASSERTT_OP(x) x,
-    ASSERTT_OPS
-#undef ASSERTT_OP
-
-    InitGen,
-    Gen,
-
-    // Types where clsName() should be non-null
-#define ASSERTOBJ_OP(x) x##Obj,
-    ASSERTOBJ_OPS
-#undef ASSERTOBJ_OP
-
+#define TAG(x) x,
+    REPO_AUTH_TYPE_TAGS
+#undef TAG
   };
 
   explicit RepoAuthType(Tag tag = Tag::Gen, const StringData* sd = nullptr) {
@@ -69,21 +102,76 @@ struct RepoAuthType {
     }
   }
 
+  explicit RepoAuthType(Tag tag, const Array* ar) {
+    m_data.set(static_cast<uint8_t>(tag), ar);
+    assert(mayHaveArrData());
+  }
+
   Tag tag() const { return static_cast<Tag>(m_data.size() & 0xff); }
-  const StringData* clsName() const { return m_data.ptr(); }
+
+  bool operator==(RepoAuthType) const;
+  bool operator!=(RepoAuthType o) const { return !(*this == o); }
+  size_t hash() const;
+
+  const StringData* clsName() const {
+    assert(hasClassName());
+    return static_cast<const StringData*>(m_data.ptr());
+  }
+
+  const Array* array() const {
+    assert(mayHaveArrData());
+    return static_cast<const Array*>(m_data.ptr());
+  }
+
+  bool hasClassName() const {
+    switch (tag()) {
+    case Tag::SubObj: case Tag::ExactObj:
+    case Tag::OptSubObj: case Tag::OptExactObj:
+      return true;
+    default:
+      return false;
+    }
+    not_reached();
+  }
+
+  bool mayHaveArrData() const {
+    switch (tag()) {
+    case Tag::OptArr: case Tag::OptSArr: case Tag::Arr: case Tag::SArr:
+      return true;
+    default:
+      return false;
+    }
+    not_reached();
+  }
 
   template<class SerDe>
   void serde(SerDe& sd) {
     auto t = tag();
-    auto c = clsName();
-    sd(t)(c);
-    m_data.set(static_cast<uint8_t>(t), c);
+    sd(t);
+    if (SerDe::deserializing) {
+      // mayHaveArrData and hasClassName need to read tag().
+      m_data.set(static_cast<uint8_t>(t), nullptr);
+    }
+    auto const vp = [&]() -> const void* {
+      if (mayHaveArrData()) {
+        auto arr = array();
+        sd(arr);
+        return arr;
+      } else if (hasClassName()) {
+        auto c = clsName();
+        sd(c);
+        return c;
+      }
+      return nullptr;
+    }();
+    m_data.set(static_cast<uint8_t>(t), vp);
   }
 
 private:
   // This is the type tag, plus an optional pointer to a class name
-  // (for the obj_* types).
-  CompactSizedPtr<const StringData> m_data;
+  // (for the obj_* types), or an optional pointer to array
+  // information for array types.
+  CompactSizedPtr<const void> m_data;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -108,15 +196,11 @@ folly::Optional<DataType> convertToDataType(RepoAuthType);
  */
 bool tvMatchesRepoAuthType(TypedValue, RepoAuthType);
 
-//////////////////////////////////////////////////////////////////////
-
-inline bool operator==(const RepoAuthType& a, const RepoAuthType& b) {
-  return a.tag() == b.tag() && a.clsName() == b.clsName();
-}
-
-inline bool operator!=(const RepoAuthType& a, const RepoAuthType& b) {
-  return !(a == b);
-}
+/*
+ * Produce a human-readable string from a RepoAuthType.  (Intended for
+ * debugging purposes.)
+ */
+std::string show(RepoAuthType);
 
 //////////////////////////////////////////////////////////////////////
 

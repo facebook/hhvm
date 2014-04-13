@@ -308,30 +308,12 @@ IRTranslator::translateInitProp(const NormalizedInstruction& i) {
   HHIR_EMIT(InitProp, i.imm[0].u_SA, static_cast<InitPropOp>(i.imm[1].u_OA));
 }
 
-void IRTranslator::translateAssertTL(const NormalizedInstruction& i) {
-  HHIR_EMIT(AssertTL, i.imm[0].u_LA, static_cast<AssertTOp>(i.imm[1].u_OA));
+void IRTranslator::translateAssertRATL(const NormalizedInstruction& i) {
+  HHIR_EMIT(AssertRATL, i.imm[0].u_IVA, i.imm[1].u_RATA);
 }
 
-void IRTranslator::translateAssertTStk(const NormalizedInstruction& i) {
-  HHIR_EMIT(AssertTStk, i.imm[0].u_IVA, static_cast<AssertTOp>(i.imm[1].u_OA));
-}
-
-void IRTranslator::translateAssertObjL(const NormalizedInstruction& i) {
-  HHIR_EMIT(AssertObjL, i.imm[0].u_LA, i.imm[1].u_SA,
-    static_cast<AssertObjOp>(i.imm[2].u_OA));
-}
-
-void IRTranslator::translateAssertObjStk(const NormalizedInstruction& i) {
-  HHIR_EMIT(AssertObjStk, i.imm[0].u_IVA, i.imm[1].u_SA,
-    static_cast<AssertObjOp>(i.imm[2].u_OA));
-}
-
-void IRTranslator::translatePredictTL(const NormalizedInstruction& i) {
-  HHIR_EMIT(PredictTL, i.imm[0].u_LA, static_cast<AssertTOp>(i.imm[1].u_OA));
-}
-
-void IRTranslator::translatePredictTStk(const NormalizedInstruction& i) {
-  HHIR_EMIT(PredictTStk, i.imm[0].u_IVA, static_cast<AssertTOp>(i.imm[1].u_OA));
+void IRTranslator::translateAssertRATStk(const NormalizedInstruction& i) {
+  HHIR_EMIT(AssertRATStk, i.imm[0].u_IVA, i.imm[1].u_RATA);
 }
 
 void IRTranslator::translateBreakTraceHint(const NormalizedInstruction&) {
@@ -671,9 +653,7 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
 
     // These opcodes don't indicate any additional work in the callee,
     // so they shouldn't count toward the inlining cost.
-    if (op == Op::AssertTL || op == Op::AssertTStk ||
-        op == Op::AssertObjL || op == Op::AssertObjStk ||
-        op == Op::PredictTL || op == Op::PredictTStk) {
+    if (op == Op::AssertRATL || op == Op::AssertRATStk) {
       continue;
     }
 

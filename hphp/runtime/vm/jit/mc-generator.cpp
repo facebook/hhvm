@@ -1595,6 +1595,7 @@ MCGenerator::reachedTranslationLimit(SrcKey sk,
 
 void
 MCGenerator::emitGuardChecks(SrcKey sk,
+                             const ChangeMap& resolvedDeps,
                              const ChangeMap& dependencies,
                              const RefDeps& refDeps,
                              SrcRec& fail) {
@@ -1605,6 +1606,23 @@ MCGenerator::emitGuardChecks(SrcKey sk,
   m_tx.irTrans()->hhbcTrans().emitRB(RBTypeTraceletGuards, sk);
   bool checkOuterTypeOnly = m_tx.mode() != TransProfile;
   for (auto const& dep : dependencies) {
+    /*
+     * In some cases, we may have relaxed a guard to be the same as
+     * something we knew from static analysis (in resolvedDeps)---in
+     * this case skip emitting it.
+     *
+     * Note: this could probably also check whether we knew something
+     * /better/ from static analysis than what we are trying to guard
+     * on.  This code is on its way out and the tracelet region
+     * selector doesn't have these issues, though, so we haven't tried
+     * that here.
+     */
+    auto const it = resolvedDeps.find(dep.first);
+    if (it != end(resolvedDeps)) {
+      if (it->second->rtt == dep.second->rtt) {
+        continue;
+      }
+    }
     m_tx.irTrans()->checkType(dep.first, dep.second->rtt, checkOuterTypeOnly);
   }
 
@@ -1908,7 +1926,8 @@ MCGenerator::translateTracelet(Tracelet& t) {
   try {
     emitResolvedDeps(t.m_resolvedDeps);
     {
-      emitGuardChecks(sk, t.m_dependencies, t.m_refDeps, srcRec);
+      emitGuardChecks(sk, t.m_resolvedDeps,
+        t.m_dependencies, t.m_refDeps, srcRec);
 
       dumpTranslationInfo(t, code.main().frontier());
 

@@ -304,12 +304,8 @@ struct HhbcTranslator {
   void emitCeil();
   void emitCheckProp(Id propId);
   void emitInitProp(Id propId, InitPropOp op);
-  void emitAssertTL(int32_t id, AssertTOp);
-  void emitAssertTStk(int32_t offset, AssertTOp);
-  void emitAssertObjL(int32_t id, Id, AssertObjOp);
-  void emitAssertObjStk(int32_t offset, Id, AssertObjOp);
-  void emitPredictTL(int32_t id, AssertTOp);
-  void emitPredictTStk(int32_t offset, AssertTOp);
+  void emitAssertRATL(int32_t loc, RepoAuthType rat);
+  void emitAssertRATStk(int32_t offset, RepoAuthType rat);
 
   // arithmetic ops
   void emitAdd();
@@ -667,7 +663,7 @@ private:
   void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Block* exit);
   void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
                             bool& checkForInt);
-  Type assertObjType(const StringData*);
+  folly::Optional<Type> ratToAssertType(RepoAuthType rat) const;
   void destroyName(SSATmp* name);
   SSATmp* ldClsPropAddr(Block* catchBlock, SSATmp* cls,
                         SSATmp* name, bool raise);

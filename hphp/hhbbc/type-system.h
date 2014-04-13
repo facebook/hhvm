@@ -25,6 +25,8 @@
 #include "folly/Optional.h"
 
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/index.h"
@@ -383,6 +385,8 @@ private:
   friend Type array_set(Type, const Type&, const Type&);
   friend std::pair<Type,Type> array_newelem_key(const Type&, const Type&);
   friend std::pair<Type,Type> iter_types(const Type&);
+  friend RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder&,
+    const Type&);
 
 private:
   union Data {
@@ -804,6 +808,17 @@ std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val);
  * the returned types are at worst InitCell.
  */
 std::pair<Type,Type> iter_types(const Type&);
+
+/*
+ * Create a RepoAuthType for a Type.
+ *
+ * RepoAuthTypes may contain things like RepoAuthType::Array*'s or
+ * SStrings for class names.  The emit code needs to handle making
+ * sure these things are merged into the appropriate unit or repo.
+ *
+ * Pre: !t.couldBe(TCls)
+ */
+RepoAuthType make_repo_type(ArrayTypeTable::Builder&, const Type& t);
 
 //////////////////////////////////////////////////////////////////////
 

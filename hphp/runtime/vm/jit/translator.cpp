@@ -37,6 +37,7 @@
 #include "hphp/util/biased-coin.h"
 #include "hphp/util/map-walker.h"
 #include "hphp/util/ringbuffer.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
@@ -1298,12 +1299,8 @@ static const struct {
   { OpCeil,        {Stack1,           Stack1,       OutDouble,         0 }},
   { OpCheckProp,   {None,             Stack1,       OutBoolean,        1 }},
   { OpInitProp,    {Stack1,           None,         OutNone,          -1 }},
-  { OpAssertTL,    {None,             None,         OutNone,           0 }},
-  { OpAssertTStk,  {None,             None,         OutNone,           0 }},
-  { OpAssertObjL,  {None,             None,         OutNone,           0 }},
-  { OpAssertObjStk,{None,             None,         OutNone,           0 }},
-  { OpPredictTL,   {None,             None,         OutNone,           0 }},
-  { OpPredictTStk, {None,             None,         OutNone,           0 }},
+  { OpAssertRATL,  {None,             None,         OutNone,           0 }},
+  { OpAssertRATStk,{None,             None,         OutNone,           0 }},
   { OpBreakTraceHint,{None,           None,         OutNone,           0 }},
 
   /*** 14. Continuation instructions ***/
@@ -1482,29 +1479,20 @@ bool outputIsPredicted(NormalizedInstruction& inst) {
 }
 
 static bool isTypeAssert(Op op) {
-  return op == Op::AssertTL || op == Op::AssertTStk ||
-         op == Op::AssertObjL || op == Op::AssertObjStk;
+  return op == Op::AssertRATL || op == Op::AssertRATStk;
 }
 
-static bool isNullableAssertObj(const NormalizedInstruction& i) {
-  if (i.op() != Op::AssertObjStk && i.op() != Op::AssertObjL) return false;
-  switch (static_cast<AssertObjOp>(i.imm[2].u_OA)) {
-  case AssertObjOp::Exact:
-  case AssertObjOp::Sub:
-    return false;
-  case AssertObjOp::OptExact:
-  case AssertObjOp::OptSub:
-    return true;
+static bool isNullableSpecializedObj(RepoAuthType rat) {
+  switch (rat.tag()) {
+  case RepoAuthType::Tag::OptExactObj:
+  case RepoAuthType::Tag::OptSubObj: return true;
+  default:                           return false;
   }
   not_reached();
 }
 
-static bool isTypePredict(Op op) {
-  return op == Op::PredictTL || op == Op::PredictTStk;
-}
-
 bool isAlwaysNop(Op op) {
-  if (isTypeAssert(op) || isTypePredict(op)) return true;
+  if (isTypeAssert(op)) return true;
   switch (op) {
   case Op::UnboxRNop:
   case Op::BoxRNop:
@@ -1523,17 +1511,11 @@ void Translator::handleAssertionEffects(Tracelet& t,
                                         const NormalizedInstruction& ni,
                                         TraceletContext& tas,
                                         int currentStackOffset) {
-  assert(isTypeAssert(ni.op()) || isTypePredict(ni.op()));
-
   auto const loc = [&] {
     switch (ni.op()) {
-    case Op::AssertTL:
-    case Op::AssertObjL:
-    case Op::PredictTL:
+    case Op::AssertRATL:
       return Location(Location::Local, ni.imm[0].u_LA);
-    case Op::AssertTStk:
-    case Op::AssertObjStk:
-    case Op::PredictTStk:
+    case Op::AssertRATStk:
       return Location(Location::Stack,
                       currentStackOffset - 1 - ni.imm[0].u_IVA);
     default:
@@ -1542,54 +1524,38 @@ void Translator::handleAssertionEffects(Tracelet& t,
   }();
   if (loc.isInvalid()) return;
 
+  auto const rat = ni.imm[1].u_RATA;
   auto const assertTy = [&]() -> folly::Optional<RuntimeType> {
-    if (ni.op() == Op::AssertObjStk || ni.op() == Op::AssertObjL) {
-      /*
-       * Even though the class must be defined at the point of the
-       * AssertObj (unless it's optional), we might not have defined
-       * it yet in this tracelet, or it might not be unique.  For now
-       * just restrict this to unique classes (we could also check
-       * parent of current context).
-       *
-       * There's nothing we can do with the 'exact' bit right now,
-       * since neither analyze() nor the IR typesystem tracks that.
-       */
-      auto const cls = Unit::lookupUniqueClass(
-        ni.m_unit->lookupLitstrId(ni.imm[1].u_SA)
-      );
-      if (!cls || !(cls->attrs() & AttrUnique)) return folly::none;
-      return RuntimeType{KindOfObject, KindOfNone, cls};
-    }
-
-    switch (static_cast<AssertTOp>(ni.imm[1].u_OA)) {
-    case AssertTOp::Uninit:   return RuntimeType{KindOfUninit};
-    case AssertTOp::InitNull: return RuntimeType{KindOfNull};
-    case AssertTOp::Int:      return RuntimeType{KindOfInt64};
-    case AssertTOp::Dbl:      return RuntimeType{KindOfDouble};
-    case AssertTOp::Res:      return RuntimeType{KindOfResource};
-    case AssertTOp::Bool:     return RuntimeType{KindOfBoolean};
-    case AssertTOp::SStr:     return RuntimeType{KindOfString};
-    case AssertTOp::Str:      return RuntimeType{KindOfString};
-    case AssertTOp::SArr:     return RuntimeType{KindOfArray};
-    case AssertTOp::Arr:      return RuntimeType{KindOfArray};
-    case AssertTOp::Obj:      return RuntimeType{KindOfObject};
+    using T = RepoAuthType::Tag;
+    switch (rat.tag()) {
+    case T::Uninit:   return RuntimeType{KindOfUninit};
+    case T::InitNull: return RuntimeType{KindOfNull};
+    case T::Int:      return RuntimeType{KindOfInt64};
+    case T::Dbl:      return RuntimeType{KindOfDouble};
+    case T::Res:      return RuntimeType{KindOfResource};
+    case T::Bool:     return RuntimeType{KindOfBoolean};
+    case T::SStr:     return RuntimeType{KindOfString};
+    case T::Str:      return RuntimeType{KindOfString};
+    case T::SArr:     return RuntimeType{KindOfArray};
+    case T::Arr:      return RuntimeType{KindOfArray};
+    case T::Obj:      return RuntimeType{KindOfObject};
 
     // We can turn these into information in hhbc-translator but can't
     // really remove guards, since it can be more than one DataType,
     // so don't do anything here.
-    case AssertTOp::OptInt:
-    case AssertTOp::OptDbl:
-    case AssertTOp::OptRes:
-    case AssertTOp::OptBool:
-    case AssertTOp::OptSStr:
-    case AssertTOp::OptStr:
-    case AssertTOp::OptSArr:
-    case AssertTOp::OptArr:
-    case AssertTOp::OptObj:
-    case AssertTOp::Null:    // could be KindOfUninit or KindOfNull
+    case T::OptInt:
+    case T::OptDbl:
+    case T::OptRes:
+    case T::OptBool:
+    case T::OptSStr:
+    case T::OptStr:
+    case T::OptSArr:
+    case T::OptArr:
+    case T::OptObj:
+    case T::Null:    // could be KindOfUninit or KindOfNull
       return folly::none;
 
-    case AssertTOp::Ref:
+    case T::Ref:
       // We should be able to use this to avoid the outer-type guards
       // on KindOfRefs, but for now we don't because of complications
       // with communicating the predicted inner type to
@@ -1598,24 +1564,79 @@ void Translator::handleAssertionEffects(Tracelet& t,
 
     // There's really not much we can do with a Cell assertion at
     // translation time, right now.
-    case AssertTOp::Cell:
+    case T::Cell:
       return folly::none;
 
     // Since these don't correspond to data types, there's not much we
     // can do in the current situation.
-    case AssertTOp::InitUnc:
-    case AssertTOp::Unc:
-    case AssertTOp::InitCell:
+    case T::InitUnc:
+    case T::Unc:
+    case T::InitCell:
+    case T::InitGen:
+    case T::Gen:
       // These could also remove guards, but it's a little too hard to
       // get this information to hhbc-translator with this legacy
       // tracelet stuff since they don't map directly to a DataType.
       return folly::none;
+
+    // Types where clsName() should be non-null
+    case T::OptExactObj:
+    case T::OptSubObj:
+    case T::ExactObj:
+    case T::SubObj:
+      {
+        /*
+         * Even though the class must be defined at the point of the
+         * AssertObj (unless it's optional), we might not have defined
+         * it yet in this tracelet, or it might not be unique.  For
+         * now just restrict this to unique classes (we could also
+         * check parent of current context).
+         *
+         * There's nothing we can do with the 'exact' bit right now,
+         * since neither analyze() nor the IR typesystem tracks that.
+         */
+        auto const cls = Unit::lookupUniqueClass(rat.clsName());
+        // TODO: why is it returning none instead of KindOfObject if
+        // it isn't unique?  (Leaving alone for now to match pre-RAT
+        // behavior.)
+        if (!cls || !(cls->attrs() & AttrUnique)) return folly::none;
+        return RuntimeType{KindOfObject, KindOfNone, cls};
+      }
     }
     not_reached();
   }();
   if (!assertTy) return;
 
-  FTRACE(1, "examining assertion for {}\n", loc.pretty());
+  FTRACE(1, "examining assertion for {} :: {}\n", loc.pretty(), show(rat));
+
+  /*
+   * TODO(#4205897): handle nullable assert array types so we can turn
+   * them on in hhbbc.
+   */
+
+  /*
+   * For array types, we still want to be able to guard for on
+   * specialized array kinds.  So, in these cases we do a normal read
+   * (allowing a guard), and write down in resolvedDeps that we know
+   * we don't need to guard if the guard is relaxed to KindOfArray.
+   * If the guard on a specialized kind is relaxed, resolvedDeps is
+   * used to tell the JIT it doesn't need the less-specific guard
+   * because we know it statically.
+   *
+   * Note: currently the JIT will still guard the KindOfArray flag
+   * when trying to guard it's packed (or whatever), since there's no
+   * way to assert it's at least an array and still require a packed
+   * guard.
+   */
+  if (assertTy->isArray()) {
+    if (!tas.m_currentMap.count(loc)) {
+      FTRACE(1, "Asserting array type; using resolvedDeps\n");
+      tas.recordRead(InputInfo{loc});
+      assert(tas.m_currentMap.count(loc));
+      tas.m_resolvedDeps[loc] = t.newDynLocation(loc, *assertTy);
+      return;
+    }
+  }
 
   /*
    * Nullable object assertions are slightly special: we have extra
@@ -1631,7 +1652,7 @@ void Translator::handleAssertionEffects(Tracelet& t,
    * a prediction guard might be the reason we know it's not null
    * here.
    */
-  if (isNullableAssertObj(ni)) {
+  if (isNullableSpecializedObj(rat)) {
     auto const dl = tas.recordRead(InputInfo{loc});
     if (dl->rtt.isNull()) {
       FTRACE(1, "assertion leaving live KindOfNull alone for ?Obj type\n");
@@ -1647,6 +1668,7 @@ void Translator::handleAssertionEffects(Tracelet& t,
     return;
   }
 
+  FTRACE(2, "using general assert effects path\n");
   InputInfo ii{loc};
   ii.dontGuard = true;
   auto const dl = tas.recordRead(ii, assertTy->outerType());
@@ -1692,6 +1714,7 @@ void Translator::handleAssertionEffects(Tracelet& t,
    * argument types.  It's also possible in principle for a tracelet
    * to extend through a join point, and thereby propagate a better
    * type than one of the type assertions we get from static analysis.
+   * A similar case can occur with specialized array types.
    *
    * So, sometimes we may know a more derived type here dynamically,
    * in which case we don't want to modify the RuntimeType and make it
@@ -1701,14 +1724,20 @@ void Translator::handleAssertionEffects(Tracelet& t,
     assertTy->isObject() && assertTy->valueClass() != nullptr;
   auto const liveIsSpecializedObj =
     dl->rtt.isObject() && dl->rtt.valueClass() != nullptr;
+  auto const liveIsSpecializedArr =
+    dl->rtt.isArray() && dl->rtt.hasArrayKind();
   if (assertIsSpecializedObj && liveIsSpecializedObj) {
     auto const assertCls = assertTy->valueClass();
     auto const liveCls = dl->rtt.valueClass();
     if (assertCls != liveCls && !assertCls->classof(liveCls)) {
       // liveCls must be more specialized than assertCls.
-      FTRACE(1, "assertion leaving curVal alone {}\n", loc.pretty());
+      FTRACE(1, "assertion leaving object curVal alone {}\n", loc.pretty());
       return;
     }
+  }
+  if (assertTy->isArray() && liveIsSpecializedArr) {
+    FTRACE(1, "assertion leaving array curVal alone {}\n", loc.pretty());
+    return;
   }
 
   FTRACE(1, "assertion effects {} -> {}\n", loc.pretty(), assertTy->pretty());
@@ -3396,7 +3425,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     // Translation could fail entirely (because of an unknown opcode), or
     // encounter an input that cannot be computed.
     try {
-      if (isTypeAssert(ni->op()) || isTypePredict(ni->op())) {
+      if (isTypeAssert(ni->op())) {
         handleAssertionEffects(t, *ni, tas, stackFrameOffset);
       }
       InputInfos inputInfos;
@@ -3595,7 +3624,7 @@ breakBB:
     // thats only useful in the following tracelet.
     if (isLiteral(ni->op()) ||
         isThisSelfOrParent(ni->op()) ||
-        isTypeAssert(ni->op()) || isTypePredict(ni->op())) {
+        isTypeAssert(ni->op())) {
       ni = ni->prev;
       continue;
     }
@@ -3686,11 +3715,18 @@ Translator::addDbgBLPC(PC pc) {
 }
 
 void populateImmediates(NormalizedInstruction& inst) {
-  for (int i = 0; i < numImmediates(inst.op()); i++) {
-    inst.imm[i] = getImm((Op*)inst.pc(), i);
+  auto offset = 1;
+  for (int i = 0; i < numImmediates(inst.op()); ++i) {
+    if (immType(inst.op(), i) == RATA) {
+      auto rataPc = inst.pc() + offset;
+      inst.imm[i].u_RATA = decodeRAT(inst.unit(), rataPc);
+    } else {
+      inst.imm[i] = getImm(reinterpret_cast<const Op*>(inst.pc()), i);
+    }
+    offset += immSize(reinterpret_cast<const Op*>(inst.pc()), i);
   }
   if (hasImmVector(*reinterpret_cast<const Op*>(inst.pc()))) {
-    inst.immVec = getImmVector((Op*)inst.pc());
+    inst.immVec = getImmVector(reinterpret_cast<const Op*>(inst.pc()));
   }
   if (inst.op() == OpFCallArray) {
     inst.imm[0].u_IVA = 1;

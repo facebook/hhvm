@@ -22,6 +22,7 @@
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/vm/blob-helper.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 
 namespace HPHP {
 

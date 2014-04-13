@@ -229,41 +229,6 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Global repo metadata.
- *
- * Only used in RepoAuthoritative mode.  See loadGlobalData().
- */
-struct Repo::GlobalData {
-  /*
-   * Indicates whether a repo was compiled using HHBBC.
-   */
-  bool UsedHHBBC = false;
-
-  /*
-   * Indicates whether a repo was compiled with HardTypeHints.
-   *
-   * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
-   * raise if you violate a typehint, because doing so would allow
-   * violating assumptions from the optimizer.
-   */
-  bool HardTypeHints = false;
-
-  /*
-   * Indicates whether a repo was compiled with HardPrivatePropInference.
-   */
-  bool HardPrivatePropInference = false;
-
-  template<class SerDe> void serde(SerDe& sd) {
-    sd(UsedHHBBC)
-      (HardTypeHints)
-      (HardPrivatePropInference)
-      ;
-  }
-};
-
-//////////////////////////////////////////////////////////////////////
-
-/*
  * Try to commit a vector of unit emitters to the current repo.
  */
 void batchCommit(std::vector<std::unique_ptr<UnitEmitter>>);

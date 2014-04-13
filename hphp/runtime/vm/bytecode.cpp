@@ -35,6 +35,9 @@
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/event-hook.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -4922,174 +4925,40 @@ OPTBLD_INLINE void ExecutionContext::iopIsTypeC(IOP_ARGS) {
   topTv->m_type = KindOfBoolean;
 }
 
-OPTBLD_INLINE static void implAssertT(TypedValue* tv, AssertTOp op) {
-  switch (op) {
-  case AssertTOp::Uninit:
-    assert(tv->m_type == KindOfUninit);
-    break;
-  case AssertTOp::InitNull:
-    assert(tv->m_type == KindOfNull);
-    break;
-  case AssertTOp::Null:
-    assert(IS_NULL_TYPE(tv->m_type));
-    break;
-  case AssertTOp::Int:
-    assert(tv->m_type == KindOfInt64);
-    break;
-  case AssertTOp::OptInt:
-    assert(tv->m_type == KindOfNull || tv->m_type == KindOfInt64);
-    break;
-  case AssertTOp::Dbl:
-    assert(tv->m_type == KindOfDouble);
-    break;
-  case AssertTOp::OptDbl:
-    assert(tv->m_type == KindOfNull || tv->m_type == KindOfDouble);
-    break;
-  case AssertTOp::Bool:
-    assert(tv->m_type == KindOfBoolean);
-    break;
-  case AssertTOp::OptBool:
-    assert(tv->m_type == KindOfNull || tv->m_type == KindOfBoolean);
-    break;
-  case AssertTOp::Res:
-    assert(tv->m_type == KindOfResource);
-    break;
-  case AssertTOp::OptRes:
-    assert(tv->m_type == KindOfNull || tv->m_type == KindOfResource);
-    break;
-  case AssertTOp::SStr:
-    assert(IS_STRING_TYPE(tv->m_type) && tv->m_data.pstr->isStatic());
-    break;
-  case AssertTOp::OptSStr:
-    assert(tv->m_type == KindOfNull ||
-           (IS_STRING_TYPE(tv->m_type) && tv->m_data.pstr->isStatic()));
-    break;
-  case AssertTOp::Str:
-    assert(IS_STRING_TYPE(tv->m_type));
-    break;
-  case AssertTOp::OptStr:
-    assert(tv->m_type == KindOfNull || IS_STRING_TYPE(tv->m_type));
-    break;
-  case AssertTOp::SArr:
-    assert(tv->m_type == KindOfArray && tv->m_data.parr->isStatic());
-    break;
-  case AssertTOp::OptSArr:
-    assert(tv->m_type == KindOfNull ||
-           (tv->m_type == KindOfArray && tv->m_data.parr->isStatic()));
-    break;
-  case AssertTOp::Arr:
-    assert(tv->m_type == KindOfArray);
-    break;
-  case AssertTOp::OptArr:
-    assert(tv->m_type == KindOfNull || tv->m_type == KindOfArray);
-    break;
-  case AssertTOp::Obj:
-    assert(tv->m_type == KindOfObject);
-    break;
-  case AssertTOp::OptObj:
-    assert(tv->m_type == KindOfNull || tv->m_type == KindOfObject);
-    break;
-  case AssertTOp::InitUnc:
-    assert(tv->m_type != KindOfUninit);
-    /* fallthrough */
-  case AssertTOp::Unc:
-    assert(
-      !IS_REFCOUNTED_TYPE(tv->m_type) ||
-      (tv->m_type == KindOfString && tv->m_data.pstr->isStatic()) ||
-      (tv->m_type == KindOfArray  && tv->m_data.parr->isStatic())
+OPTBLD_INLINE void ExecutionContext::iopAssertRATL(IOP_ARGS) {
+  NEXT();
+  DECODE_LA(localId);
+  if (debug) {
+    auto const rat = decodeRAT(m_fp->m_func->unit(), pc);
+    auto const tv = *frame_local(m_fp, localId);
+    always_assert_flog(
+      tvMatchesRepoAuthType(tv, rat),
+      "failed assert RATL on local {}, expected {}, got {}",
+      localId,
+      show(rat),
+      tv.pretty()
     );
-    break;
-  case AssertTOp::InitCell:
-    assert(tv->m_type != KindOfUninit && tv->m_type != KindOfRef);
-    break;
-  case AssertTOp::Cell:
-    assert(tv->m_type != KindOfRef);
-    break;
-  case AssertTOp::Ref:
-    assert(tv->m_type == KindOfRef);
-    break;
-  }
-}
-
-OPTBLD_INLINE void ExecutionContext::iopAssertTL(IOP_ARGS) {
-  NEXT();
-  DECODE_LA(localId);
-  DECODE_OA(AssertTOp, op);
-  implAssertT(frame_local(m_fp, localId), op);
-}
-
-OPTBLD_INLINE void ExecutionContext::iopAssertTStk(IOP_ARGS) {
-  NEXT();
-  DECODE_IVA(stkSlot);
-  DECODE_OA(AssertTOp, op);
-  implAssertT(m_stack.indTV(stkSlot), op);
-}
-
-OPTBLD_INLINE void ExecutionContext::iopPredictTL(IOP_ARGS) {
-  NEXT();
-  DECODE_LA(localId);
-  DECODE_OA(AssertTOp, op);
-}
-
-OPTBLD_INLINE void ExecutionContext::iopPredictTStk(IOP_ARGS) {
-  NEXT();
-  DECODE_IVA(stkSlot);
-  DECODE_OA(AssertTOp, op);
-}
-
-OPTBLD_INLINE static void implAssertObj(TypedValue* tv,
-                                        const StringData* str,
-                                        AssertObjOp subop) {
-  DEBUG_ONLY auto const cls = Unit::lookupClass(str);
-  auto cls_defined = [&] {
-    assert(cls && "asserted class was not defined at AssertObj{L,Stk}");
-  };
-
-  switch (subop) {
-  case AssertObjOp::Exact:
-    assert(tv->m_type == KindOfObject);
-    cls_defined();
-    assert(tv->m_data.pobj->getVMClass() == cls);
-    return;
-  case AssertObjOp::Sub:
-    assert(tv->m_type == KindOfObject);
-    cls_defined();
-    assert(tv->m_data.pobj->getVMClass()->classof(cls));
-    return;
-  case AssertObjOp::OptExact:
-    assert(tv->m_type == KindOfObject || tv->m_type == KindOfNull);
-    if (tv->m_type == KindOfObject) {
-      cls_defined();
-      assert(tv->m_data.pobj->getVMClass() == cls);
-    }
-    return;
-  case AssertObjOp::OptSub:
-    assert(tv->m_type == KindOfObject || tv->m_type == KindOfNull);
-    if (tv->m_type == KindOfObject) {
-      cls_defined();
-      assert(tv->m_data.pobj->getVMClass()->classof(cls));
-    }
     return;
   }
-  not_reached();
+  pc += encodedRATSize(pc);
 }
 
-OPTBLD_INLINE void ExecutionContext::iopAssertObjL(IOP_ARGS) {
-  NEXT();
-  DECODE_LA(localId);
-  DECODE(Id, strId);
-  DECODE_OA(AssertObjOp, subop);
-  auto const str = m_fp->m_func->unit()->lookupLitstrId(strId);
-  implAssertObj(frame_local(m_fp, localId), str, subop);
-}
-
-OPTBLD_INLINE void ExecutionContext::iopAssertObjStk(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAssertRATStk(IOP_ARGS) {
   NEXT();
   DECODE_IVA(stkSlot);
-  DECODE(Id, strId);
-  DECODE_OA(AssertObjOp, subop);
-  auto const str = m_fp->m_func->unit()->lookupLitstrId(strId);
-  implAssertObj(m_stack.indTV(stkSlot), str, subop);
+  if (debug) {
+    auto const rat = decodeRAT(m_fp->m_func->unit(), pc);
+    auto const tv = *m_stack.indTV(stkSlot);
+    always_assert_flog(
+      tvMatchesRepoAuthType(tv, rat),
+      "failed assert RATStk {}, expected {}, got {}",
+      stkSlot,
+      show(rat),
+      tv.pretty()
+    );
+    return;
+  }
+  pc += encodedRATSize(pc);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopBreakTraceHint(IOP_ARGS) {

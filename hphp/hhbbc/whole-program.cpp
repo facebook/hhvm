@@ -322,7 +322,10 @@ make_unit_emitters(const Index& index, const php::Program& program) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<std::unique_ptr<UnitEmitter>>
+std::pair<
+  std::vector<std::unique_ptr<UnitEmitter>>,
+  std::unique_ptr<ArrayTypeTable::Builder>
+>
 whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   trace_time tracer("whole program");
 
@@ -342,7 +345,7 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   LitstrTable::get().setWriting();
   ues = make_unit_emitters(index, *program);
 
-  return ues;
+  return { std::move(ues), std::move(index.array_table_builder()) };
 }
 
 //////////////////////////////////////////////////////////////////////

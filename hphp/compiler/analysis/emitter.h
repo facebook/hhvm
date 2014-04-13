@@ -86,31 +86,31 @@ public:
     Id id;
   };
 
-#define O(name, imm, pop, push, flags) \
-  void name(imm);
 #define NA
 #define ONE(typ) \
-  typ a1
+  IMM_##typ
 #define TWO(typ1, typ2) \
-  typ1 a1, typ2 a2
+  IMM_##typ1, IMM_##typ2
 #define THREE(typ1, typ2, typ3) \
-  typ1 a1, typ2 a2, typ3 a3
+  IMM_##typ1, IMM_##typ2, IMM_##typ3
 #define FOUR(typ1, typ2, typ3, typ4) \
-  typ1 a1, typ2 a2, typ3 a3, typ4 a4
-#define MA std::vector<unsigned char>
-#define BLA std::vector<Label*>&
-#define SLA std::vector<StrOff>&
-#define ILA std::vector<IterPair>&
-#define IVA int32_t
-#define LA int32_t
-#define IA int32_t
-#define I64A int64_t
-#define DA double
-#define SA const StringData*
-#define AA ArrayData*
-#define BA Label&
-#define OA(type) type
-#define VSA std::vector<std::string>&
+  IMM_##typ1, IMM_##typ2, IMM_##typ3, IMM_##typ4
+#define IMM_MA std::vector<unsigned char>
+#define IMM_BLA std::vector<Label*>&
+#define IMM_SLA std::vector<StrOff>&
+#define IMM_ILA std::vector<IterPair>&
+#define IMM_IVA int32_t
+#define IMM_LA int32_t
+#define IMM_IA int32_t
+#define IMM_I64A int64_t
+#define IMM_DA double
+#define IMM_SA const StringData*
+#define IMM_RATA RepoAuthType
+#define IMM_AA ArrayData*
+#define IMM_BA Label&
+#define IMM_OA(type) type
+#define IMM_VSA std::vector<std::string>&
+#define O(name, imm, pop, push, flags) void name(imm);
   OPCODES
 #undef O
 #undef NA
@@ -118,20 +118,22 @@ public:
 #undef TWO
 #undef THREE
 #undef FOUR
-#undef MA
-#undef BLA
-#undef SLA
-#undef ILA
-#undef IVA
-#undef LA
-#undef IA
-#undef I64A
-#undef DA
-#undef SA
-#undef AA
-#undef BA
-#undef OA
-#undef VSA
+#undef IMM_MA
+#undef IMM_BLA
+#undef IMM_SLA
+#undef IMM_ILA
+#undef IMM_IVA
+#undef IMM_LA
+#undef IMM_IA
+#undef IMM_I64A
+#undef IMM_DA
+#undef IMM_SA
+#undef IMM_RATA
+#undef IMM_AA
+#undef IMM_BA
+#undef IMM_OA
+#undef IMM_VSA
+
 private:
   ConstructPtr m_node;
   UnitEmitter& m_ue;

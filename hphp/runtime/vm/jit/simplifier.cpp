@@ -1949,19 +1949,30 @@ SSATmp* Simplifier::simplifyAssertNonNull(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyCheckPackedArrayBounds(const IRInstruction* inst) {
-  auto* array = inst->src(0);
-  auto* idx = inst->src(1);
+  auto const array = inst->src(0);
+  auto const idx   = inst->src(1);
+  if (!idx->isConst()) return nullptr;
 
-  if (idx->isConst()) {
-    auto const idxVal = (uint64_t)idx->intVal();
-    if (idxVal >= 0xffffffffull) {
-      // ArrayData can't hold more than 2^32 - 1 elements, so this is always
-      // going to fail.
+  auto const idxVal = (uint64_t)idx->intVal();
+  if (idxVal >= 0xffffffffull) {
+    // ArrayData can't hold more than 2^32 - 1 elements, so this is
+    // always going to fail.
+    return gen(Jmp, inst->taken());
+  }
+
+  if (array->isConst()) {
+    if (idxVal >= array->arrVal()->size()) {
       return gen(Jmp, inst->taken());
-    } else if (array->isConst()) {
-      if (idxVal >= array->arrVal()->size()) {
-        return gen(Jmp, inst->taken());
-      } else {
+    } else {
+      return gen(Nop);
+    }
+  }
+
+  if (auto const at = array->type().getArrayType()) {
+    using A = RepoAuthType::Array;
+    switch (at->tag()) {
+    case A::Tag::Packed:
+      if (idxVal < at->size() && at->emptiness() == A::Empty::No) {
         return gen(Nop);
       }
     }

@@ -15,6 +15,11 @@
 */
 #include "hphp/runtime/base/repo-auth-type.h"
 
+#include <vector>
+
+#include "folly/Hash.h"
+
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/unit.h"
@@ -24,6 +29,109 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 static_assert(sizeof(RepoAuthType) == sizeof(CompactSizedPtr<void>), "");
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+bool tvMatchesArrayType(TypedValue tv, const RepoAuthType::Array* arrTy) {
+  assert(tv.m_type == KindOfArray);
+  auto const ad = tv.m_data.parr;
+  using A = RepoAuthType::Array;
+
+  auto sizeMatches = [&] {
+    switch (arrTy->emptiness()) {
+    case A::Empty::Maybe:
+      return ad->size() == 0 || ad->size() == arrTy->size();
+    case A::Empty::No:
+      return ad->size() == arrTy->size();
+    }
+    not_reached();
+  };
+
+  switch (arrTy->tag()) {
+  case A::Tag::Packed:
+    if (!sizeMatches()) return false;
+    for (auto i = uint32_t{0}; i < ad->size(); ++i) {
+      auto const elem = ad->nvGet(i);
+      if (!tvMatchesRepoAuthType(*elem, arrTy->packedElem(i))) {
+        return false;
+      }
+    }
+    break;
+  }
+
+  return true;
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+bool RepoAuthType::operator==(RepoAuthType o) const {
+  using T = Tag;
+  if (tag() != o.tag()) return false;
+  switch (tag()) {
+  case T::OptBool:
+  case T::OptInt:
+  case T::OptSStr:
+  case T::OptStr:
+  case T::OptDbl:
+  case T::OptRes:
+  case T::OptObj:
+  case T::Null:
+  case T::Cell:
+  case T::Ref:
+  case T::InitUnc:
+  case T::Unc:
+  case T::InitCell:
+  case T::InitGen:
+  case T::Gen:
+  case T::Uninit:
+  case T::InitNull:
+  case T::Bool:
+  case T::Int:
+  case T::Dbl:
+  case T::Res:
+  case T::SStr:
+  case T::Str:
+  case T::Obj:
+    return true;
+
+  case T::OptSArr:
+  case T::OptArr:
+    // Can't currently have array() info.
+    return true;
+
+  case T::SArr:
+  case T::Arr:
+    if (array() == nullptr && o.array() == nullptr) {
+      return true;
+    }
+    if ((array() == nullptr) != (o.array() == nullptr)) {
+      return false;
+    }
+    return array()->id() == o.array()->id();
+
+  case T::SubObj:
+  case T::ExactObj:
+  case T::OptSubObj:
+  case T::OptExactObj:
+    return clsName() == o.clsName();
+  }
+  not_reached();
+}
+
+size_t RepoAuthType::hash() const {
+  auto const iTag = static_cast<size_t>(tag());
+  if (hasClassName()) {
+    return folly::hash::hash_128_to_64(iTag, clsName()->hash());
+  }
+  if (mayHaveArrData() && array()) {
+    return folly::hash::hash_128_to_64(iTag, array()->id());
+  }
+  return iTag;
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -116,13 +224,23 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (initNull) return true;
     // fallthrough
   case T::SArr:
-    return tv.m_type == KindOfArray && tv.m_data.parr->isStatic();
+    if (tv.m_type != KindOfArray || !tv.m_data.parr->isStatic()) {
+      return false;
+    }
+    if (auto const arr = ty.array()) {
+      assert(tvMatchesArrayType(tv, arr));
+    }
+    return true;
 
   case T::OptArr:
     if (initNull) return true;
     // fallthrough
   case T::Arr:
-    return tv.m_type == KindOfArray;
+    if (tv.m_type != KindOfArray) return false;
+    if (auto const arr = ty.array()) {
+      assert(tvMatchesArrayType(tv, arr));
+    }
+    return true;
 
   case T::Null:
     return initNull || tv.m_type == KindOfUninit;
@@ -170,6 +288,76 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     // fallthrough
   case T::Gen:
     return true;
+  }
+  not_reached();
+}
+
+std::string show(RepoAuthType rat) {
+  auto const tag = rat.tag();
+  using T = RepoAuthType::Tag;
+  switch (tag) {
+  case T::OptBool:  return "?Bool";
+  case T::OptInt:   return "?Int";
+  case T::OptSStr:  return "?SStr";
+  case T::OptStr:   return "?Str";
+  case T::OptDbl:   return "?Dbl";
+  case T::OptRes:   return "?Res";
+  case T::OptObj:   return "?Obj";
+  case T::Null:     return "Null";
+  case T::Cell:     return "Cell";
+  case T::Ref:      return "Ref";
+  case T::InitUnc:  return "InitUnc";
+  case T::Unc:      return "Unc";
+  case T::InitCell: return "InitCell";
+  case T::InitGen:  return "InitGen";
+  case T::Gen:      return "Gen";
+  case T::Uninit:   return "Uninit";
+  case T::InitNull: return "InitNull";
+  case T::Bool:     return "Bool";
+  case T::Int:      return "Int";
+  case T::Dbl:      return "Dbl";
+  case T::Res:      return "Res";
+  case T::SStr:     return "SStr";
+  case T::Str:      return "Str";
+  case T::Obj:      return "Obj";
+
+  case T::OptSArr:
+  case T::OptArr:
+  case T::SArr:
+  case T::Arr:
+    {
+      auto ret = std::string{};
+      if (tag == T::OptArr || tag == T::OptSArr) {
+        ret += '?';
+      }
+      if (tag == T::SArr || tag == T::OptSArr) {
+        ret += 'S';
+      }
+      ret += "Arr";
+      if (auto const ar = rat.array()) {
+        folly::format(&ret, "{}", show(*ar));
+      }
+      return ret;
+    }
+    break;
+
+  case T::OptSubObj:
+  case T::OptExactObj:
+  case T::SubObj:
+  case T::ExactObj:
+    {
+      auto ret = std::string{};
+      if (tag == T::OptSubObj || tag == T::OptExactObj) {
+        ret += '?';
+      }
+      ret += "Obj";
+      if (tag == T::OptSubObj || tag == T::SubObj) {
+        ret += "<";
+      }
+      ret += '=';
+      ret += rat.clsName()->data();
+      return ret;
+    }
   }
   not_reached();
 }

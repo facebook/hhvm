@@ -23,11 +23,9 @@
 #define IRREGULAR_INSTRS \
   CASE(Add) \
   CASE(AddO) \
-  CASE(AssertObjL) \
-  CASE(AssertObjStk) \
-  CASE(AssertTL) \
-  CASE(AssertTStk) \
   CASE(Await) \
+  CASE(AssertRATL) \
+  CASE(AssertRATStk) \
   CASE(BindM) \
   CASE(BoxR) \
   CASE(BoxRNop) \
@@ -69,8 +67,6 @@
   CASE(MIterNextK) \
   CASE(NewStructArray) \
   CASE(NopDefCls) \
-  CASE(PredictTL) \
-  CASE(PredictTStk) \
   CASE(RetC) \
   CASE(RetV) \
   CASE(SSwitch) \

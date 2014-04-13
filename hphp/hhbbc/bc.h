@@ -112,6 +112,7 @@ struct BCHashHelper {
     return vec.mcodes.size() | (static_cast<size_t>(vec.lcode) << 7);
   }
 
+  static size_t hash(RepoAuthType rat) { return rat.hash(); }
   static size_t hash(SString s) { return s->hash(); }
 
   template<class T>
@@ -172,6 +173,7 @@ namespace bc {
 #define IMM_TY_IA       borrowed_ptr<php::Iter>
 #define IMM_TY_DA       double
 #define IMM_TY_SA       SString
+#define IMM_TY_RATA     RepoAuthType
 #define IMM_TY_AA       SArray
 #define IMM_TY_BA       borrowed_ptr<php::Block>
 #define IMM_TY_OA(type) type
@@ -187,6 +189,7 @@ namespace bc {
 #define IMM_NAME_IA(n)      iter##n
 #define IMM_NAME_DA(n)      dbl##n
 #define IMM_NAME_SA(n)      str##n
+#define IMM_NAME_RATA(n)    rat
 #define IMM_NAME_AA(n)      arr##n
 #define IMM_NAME_BA(n)      target
 #define IMM_NAME_OA_IMPL(n) subop
@@ -203,6 +206,7 @@ namespace bc {
 #define IMM_EXTRA_IA
 #define IMM_EXTRA_DA
 #define IMM_EXTRA_SA
+#define IMM_EXTRA_RATA
 #define IMM_EXTRA_AA
 #define IMM_EXTRA_BA        using has_target_flag = std::true_type;
 #define IMM_EXTRA_OA(x)
@@ -431,6 +435,7 @@ OPCODES
 #undef IMM_TY_IA
 #undef IMM_TY_DA
 #undef IMM_TY_SA
+#undef IMM_TY_RATA
 #undef IMM_TY_AA
 #undef IMM_TY_BA
 #undef IMM_TY_OA
@@ -448,6 +453,7 @@ OPCODES
 // #undef IMM_NAME_IA
 // #undef IMM_NAME_DA
 // #undef IMM_NAME_SA
+// #undef IMM_NAME_RATA
 // #undef IMM_NAME_AA
 // #undef IMM_NAME_BA
 // #undef IMM_NAME_OA
@@ -463,6 +469,7 @@ OPCODES
 #undef IMM_EXTRA_IA
 #undef IMM_EXTRA_DA
 #undef IMM_EXTRA_SA
+#undef IMM_EXTRA_RATA
 #undef IMM_EXTRA_AA
 #undef IMM_EXTRA_BA
 #undef IMM_EXTRA_OA

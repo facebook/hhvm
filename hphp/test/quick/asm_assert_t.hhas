@@ -1,5 +1,5 @@
 #
-# Simple test of AssertT opcodes
+# Simple test of AssertRAT opcodes
 #
 
 .main {
@@ -48,15 +48,15 @@
 
 .function obj_type($x, $sub) {
   CGetL $x
-  AssertObjStk 0 "Foo" Exact
-  AssertObjL $x "Foo" Exact
-  AssertObjL $sub "Bar" Sub
+  AssertRATStk 0 Obj=Foo
+  AssertRATL $x Obj=Foo
+  AssertRATL $sub Obj<=Bar
   PopC
-  AssertObjL $x   "Foo" Exact
-  AssertObjL $x   "Foo" Sub
-  AssertObjL $sub "Bar" Sub
-  AssertObjL $sub "Foo" Sub
-  AssertObjL $sub "Bar" Exact
+  AssertRATL $x   Obj=Foo
+  AssertRATL $x   Obj<=Foo
+  AssertRATL $sub Obj=Bar
+  AssertRATL $sub Obj<=Foo
+  AssertRATL $sub Obj=Bar
   Int 1
   RetC
 }
@@ -64,22 +64,22 @@
 .function make_bar() {
   FPushCtorD 0 "Bar"
   FCall 0
-  AssertTStk 0 InitNull
-  AssertTStk 1 Obj
-  AssertObjStk 1 "Bar" Exact
+  AssertRATStk 0 InitNull
+  AssertRATStk 1 Obj
+  AssertRATStk 1 Obj=Bar
   PopR
-  AssertObjStk 0 "Bar" Exact
+  AssertRATStk 0 Obj=Bar
   RetC
 }
 
 .function obj_type2() {
   FPushFuncD 0 "make_bar"
   FCall 0
-  AssertTStk 0 Obj
-  AssertObjStk 0 "Bar" Exact
-  AssertTL $x Uninit
+  AssertRATStk 0 Obj
+  AssertRATStk 0 Obj=Bar
+  AssertRATL $x Uninit
   UnboxR
-  AssertTStk 0 Obj
+  AssertRATStk 0 Obj
   SetL $x
   PopC
   Int 1
@@ -102,7 +102,7 @@ stuff:
   CGetL $obj
   FPushObjMethodD 0 "returns_int"
   FCall 0
-  AssertTStk 0 Int
+  AssertRATStk 0 Int
   UnboxR
   Int 0
   Add

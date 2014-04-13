@@ -458,6 +458,8 @@ struct IndexData {
   IndexData& operator=(const IndexData&) = delete;
   ~IndexData() = default;
 
+  std::unique_ptr<ArrayTypeTable::Builder> arrTableBuilder;
+
   ISStringToMany<const php::Class>     classes;
   ISStringToMany<const php::Func>      methods;
   ISStringToMany<const php::Func>      funcs;
@@ -1017,6 +1019,8 @@ Index::Index(borrowed_ptr<php::Program> program)
 {
   trace_time tracer("create index");
 
+  m_data->arrTableBuilder.reset(new ArrayTypeTable::Builder());
+
   auto const imethodMap = make_interceptable_method_map();
   for (auto& u : program->units) {
     add_unit_to_index(*m_data, imethodMap, *u);
@@ -1535,6 +1539,10 @@ void Index::refine_private_props(borrowed_ptr<const php::Class> cls,
 void Index::refine_private_statics(borrowed_ptr<const php::Class> cls,
                                    const PropState& state) {
   refine_propstate(m_data->privateStaticPropInfo, cls, state);
+}
+
+std::unique_ptr<ArrayTypeTable::Builder>& Index::array_table_builder() const {
+  return m_data->arrTableBuilder;
 }
 
 //////////////////////////////////////////////////////////////////////

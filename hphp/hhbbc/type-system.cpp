@@ -18,10 +18,13 @@
 #include <type_traits>
 #include <cmath>
 #include <algorithm>
+#include <iterator>
 
 #include "folly/Optional.h"
 #include "folly/Traits.h"
 
+#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/hhbbc/index.h"
 
@@ -2227,6 +2230,104 @@ std::pair<Type,Type> iter_types(const Type& iterable) {
     return { iterable.m_data.amapn->key, iterable.m_data.amapn->val };
   }
 
+  not_reached();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
+                                const Type& t) {
+  auto const emptiness  = TArrE.couldBe(t) ? RepoAuthType::Array::Empty::Maybe
+                                           : RepoAuthType::Array::Empty::No;
+
+  auto const arr = [&]() -> const RepoAuthType::Array* {
+    switch (t.m_dataTag) {
+    case DataTag::None:
+    case DataTag::Str:
+    case DataTag::Obj:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Cls:
+    case DataTag::ArrVal:
+    case DataTag::ArrPackedN:
+    case DataTag::ArrStruct:
+    case DataTag::ArrMapN:
+      return nullptr;
+    case DataTag::ArrPacked:
+      {
+        std::vector<RepoAuthType> repoTypes;
+        std::transform(
+          begin(t.m_data.apacked->elems), end(t.m_data.apacked->elems),
+          std::back_inserter(repoTypes),
+          [&] (const Type& t) { return make_repo_type(arrTable, t); }
+        );
+        return arrTable.packed(emptiness, repoTypes);
+      }
+      return nullptr;
+    }
+    not_reached();
+  }();
+
+  auto const tag = [&]() -> RepoAuthType::Tag {
+    if (t.subtypeOf(TSArr))    return RepoAuthType::Tag::SArr;
+    if (t.subtypeOf(TArr))     return RepoAuthType::Tag::Arr;
+    if (t.subtypeOf(TOptSArr)) return RepoAuthType::Tag::OptSArr;
+    if (t.subtypeOf(TOptArr))  return RepoAuthType::Tag::OptArr;
+    not_reached();
+  }();
+
+  return RepoAuthType { tag, arr };
+}
+
+RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
+  assert(!t.couldBe(TCls));
+  using T = RepoAuthType::Tag;
+
+  if (t.strictSubtypeOf(TObj) || (is_opt(t) && t.strictSubtypeOf(TOptObj))) {
+    auto const dobj = dobj_of(t);
+    auto const tag =
+      is_opt(t)
+        ? (dobj.type == DObj::Exact ? T::OptExactObj : T::OptSubObj)
+        : (dobj.type == DObj::Exact ? T::ExactObj    : T::SubObj);
+    return RepoAuthType { tag, dobj.cls.name() };
+  }
+
+  if (t.strictSubtypeOf(TArr) ||
+      // TODO(#4205897): optional array types.
+      (false && is_opt(t) && t.strictSubtypeOf(TOptArr))) {
+    return make_repo_type_arr(arrTable, t);
+  }
+
+#define X(x) if (t.subtypeOf(T##x)) return RepoAuthType{T::x};
+  X(Uninit)
+  X(InitNull)
+  X(Null)
+  X(Int)
+  X(OptInt)
+  X(Dbl)
+  X(OptDbl)
+  X(Res)
+  X(OptRes)
+  X(Bool)
+  X(OptBool)
+  X(SStr)
+  X(OptSStr)
+  X(Str)
+  X(OptStr)
+  X(SArr)
+  X(OptSArr)
+  X(Arr)
+  X(OptArr)
+  X(Obj)
+  X(OptObj)
+  X(InitUnc)
+  X(Unc)
+  X(InitCell)
+  X(Cell)
+  X(Ref)
+  X(InitGen)
+  X(Gen)
+#undef X
   not_reached();
 }
 

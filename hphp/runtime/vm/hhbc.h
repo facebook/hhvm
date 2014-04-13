@@ -20,6 +20,7 @@
 #include "folly/Optional.h"
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
@@ -50,6 +51,7 @@ struct Unit;
   ARGTYPE(DA,     double)        /* Double */                             \
   ARGTYPE(SA,     Id)            /* Static string ID */                   \
   ARGTYPE(AA,     Id)            /* Static array ID */                    \
+  ARGTYPE(RATA,   RepoAuthType)  /* Statically inferred RepoAuthType */   \
   ARGTYPE(BA,     Offset)        /* Bytecode offset */                    \
   ARGTYPE(OA,     unsigned char) /* Sub-opcode, untyped */                \
   ARGTYPEVEC(VSA, Id)            /* Vector of static string IDs */
@@ -63,6 +65,7 @@ enum ArgType {
 };
 
 union ArgUnion {
+  ArgUnion() : u_LA{0} {}
   char bytes[0];
 #define ARGTYPE(name, type) type u_##name;
 #define ARGTYPEVEC(name, type) type u_##name;
@@ -375,54 +378,6 @@ enum class InitPropOp : uint8_t {
 #undef INITPROP_OP
 };
 
-// NB: right now hphp/hhbbc/abstract-interp.cpp depends on this enum
-// being in order from smaller types to larger ones.
-#define ASSERTT_OPS                             \
-  ASSERTT_OP(Uninit)                            \
-  ASSERTT_OP(InitNull)                          \
-  ASSERTT_OP(Null)                              \
-  ASSERTT_OP(Int)                               \
-  ASSERTT_OP(OptInt)                            \
-  ASSERTT_OP(Dbl)                               \
-  ASSERTT_OP(OptDbl)                            \
-  ASSERTT_OP(Res)                               \
-  ASSERTT_OP(OptRes)                            \
-  ASSERTT_OP(Bool)                              \
-  ASSERTT_OP(OptBool)                           \
-  ASSERTT_OP(SStr)                              \
-  ASSERTT_OP(OptSStr)                           \
-  ASSERTT_OP(Str)                               \
-  ASSERTT_OP(OptStr)                            \
-  ASSERTT_OP(SArr)                              \
-  ASSERTT_OP(OptSArr)                           \
-  ASSERTT_OP(Arr)                               \
-  ASSERTT_OP(OptArr)                            \
-  ASSERTT_OP(Obj)                               \
-  ASSERTT_OP(OptObj)                            \
-  ASSERTT_OP(InitUnc)                           \
-  ASSERTT_OP(Unc)                               \
-  ASSERTT_OP(InitCell)                          \
-  ASSERTT_OP(Cell)                              \
-  ASSERTT_OP(Ref)
-
-enum class AssertTOp : uint8_t {
-#define ASSERTT_OP(op) op,
-  ASSERTT_OPS
-#undef ASSERTT_OP
-};
-
-#define ASSERTOBJ_OPS                           \
-  ASSERTOBJ_OP(Exact)                           \
-  ASSERTOBJ_OP(Sub)                             \
-  ASSERTOBJ_OP(OptExact)                        \
-  ASSERTOBJ_OP(OptSub)
-
-enum class AssertObjOp : uint8_t {
-#define ASSERTOBJ_OP(op) op,
-  ASSERTOBJ_OPS
-#undef ASSERTOBJ_OP
-};
-
 enum IterKind {
   KindOfIter  = 0,
   KindOfMIter = 1,
@@ -596,20 +551,8 @@ enum class BareThisOp : uint8_t {
   O(IsTypeC,         ONE(OA(IsTypeOp)),ONE(CV),         ONE(CV),    NF) \
   O(IsTypeL,         TWO(LA,                                            \
                        OA(IsTypeOp)),  NOV,             ONE(CV),    NF) \
-  O(AssertTL,        TWO(LA,                                            \
-                       OA(AssertTOp)), NOV,             NOV,        NF) \
-  O(AssertTStk,      TWO(IVA,                                           \
-                       OA(AssertTOp)), NOV,             NOV,        NF) \
-  O(AssertObjL,      THREE(LA,SA,                                       \
-                       OA(AssertObjOp)),                                \
-                                       NOV,             NOV,        NF) \
-  O(AssertObjStk,    THREE(IVA,SA,                                      \
-                       OA(AssertObjOp)),                                \
-                                       NOV,             NOV,        NF) \
-  O(PredictTL,       TWO(LA,                                            \
-                       OA(AssertTOp)), NOV,             NOV,        NF) \
-  O(PredictTStk,     TWO(IVA,                                           \
-                       OA(AssertTOp)), NOV,             NOV,        NF) \
+  O(AssertRATL,      TWO(LA,RATA),     NOV,             NOV,        NF) \
+  O(AssertRATStk,    TWO(IVA,RATA),    NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
   O(SetN,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -739,7 +682,7 @@ enum class BareThisOp : uint8_t {
   O(CheckProp,       ONE(SA),          NOV,             ONE(CV),    NF) \
   O(InitProp,        TWO(SA,                                            \
                        OA(InitPropOp)),ONE(CV),         NOV,        NF) \
-  O(HighInvalid,     NA,               NOV,             NOV,        NF) \
+  O(HighInvalid,     NA,               NOV,             NOV,        NF)
 
 enum class Op : uint8_t {
 #define O(name, ...) name,
@@ -898,7 +841,7 @@ struct MVectorItem {
 bool hasMVector(Op op);
 std::vector<MVectorItem> getMVector(const Op* opcode);
 
-/* Some decoding helper functions. */
+// Some decoding helper functions.
 int numImmediates(Op opcode);
 ArgType immType(Op opcode, int idx);
 int immSize(const Op* opcode, int idx);
@@ -908,8 +851,13 @@ int instrLen(const Op* opcode);
 int numSuccs(const Op* opcode);
 bool pushesActRec(Op opcode);
 
-// The returned struct has normalized variable-sized immediates
+/*
+ * The returned struct has normalized variable-sized immediates
+ *
+ * Don't use with RATA immediates.
+ */
 ArgUnion getImm(const Op* opcode, int idx);
+
 // Don't use this with variable-sized immediates!
 ArgUnion* getImmPtr(const Op* opcode, int idx);
 
@@ -955,8 +903,6 @@ void staticArrayStreamer(ArrayData*, std::ostream&);
 const char* opcodeToName(Op op);
 const char* subopToName(InitPropOp);
 const char* subopToName(IsTypeOp);
-const char* subopToName(AssertTOp);
-const char* subopToName(AssertObjOp);
 const char* subopToName(FatalOp);
 const char* subopToName(SetOpOp);
 const char* subopToName(IncDecOp);

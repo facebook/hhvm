@@ -129,7 +129,7 @@ struct LocalStateHook {
  *
  *   - current function and bytecode offset
  */
-struct FrameState : private LocalStateHook {
+struct FrameState final : private LocalStateHook {
   FrameState(IRUnit& unit, BCMarker firstMarker);
   FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func,
              uint32_t numLocals);

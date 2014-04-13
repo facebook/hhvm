@@ -4032,44 +4032,22 @@ ArrayIdx    [C C C] -> [C]
   if found. Otherwise, $1 is pushed onto the stack. A fatal error will be
   thrown if $3 is not an array.
 
-AssertTL   <local id>     <op>   []  ->  []
-AssertTStk <stack offset> <op>   []  ->  []
+AssertRATL    <local id>     <repo auth type>    []  ->  []
+AssertRATStk  <stack offset> <repo auth type>    []  ->  []
+
+  Assert known "repo authoritative type", for locals or stack offsets.
 
   These opcodes may be used to communicate the results of ahead of time static
-  analysis to the runtime. They indicate that the value in the specified local
-  or stack offset must be statically known to have a particular type. The sub
-  opcodes should be used to indicate the type, in an unspecified way.
+  analysis (hhbbc) to the runtime. They indicate that the value in the
+  specified local or stack offset is statically known to have a particular
+  type. The "repo auth type" immediate is an encoded RepoAuthType struct (for
+  details see runtime/base/repo-auth-type.h).
 
-AssertObjL    <local id>     <class name> <op>   []  ->  []
-AssertObjStk  <stack offset> <class name> <op>   []  ->  []
-
-  These opcodes may be used to communicate the results of ahead of time static
-  analysis to the runtime.
-
-  Depending on the value of %3, they indicate that the value in the specified
-  local or stack offset must be statically known to be an object of a
-  particular class or interface type, or an object that is a non-strict subtype
-  of a particular class or interface type, or either of those cases with
-  nullability.
-
-  %2 is a litstr id of a class or interface name. %3 has the following
-  semantics regarding what it asserts about the type of the local or stack
-  slot:
-
-        Subop                    Semantics
-      -----------------------+------------------------------------
-      AssertObjOp::Exact     |  exactly the type named in %2
-      AssertObjOp::Sub       |  non-strict subtype of %2
-      AssertObjOp::OptExact  |  null, or exactly the type in %2
-      AssertObjOp::OptSub    |  null, or non-strict subtype of %2
-
-
-PredictTL   <local id>     <op>   []  ->  []
-PredictTStk <stack offset> <op>   []  ->  []
-
-  These opcodes may be used to provide hints about the types of values at
-  runtime. Runtime behavior is implementation defined, although incorrect
-  predictions should not affect program correctness.
+  As suggested by the name, these opcodes are generally for use with
+  RepoAuthoritative mode. They may appear in non-RepoAuthoritative mode with
+  one restriction: "specialized" array type information may not be asserted,
+  because the global array type table may only be present in RepoAuthoritative
+  mode.
 
 BreakTraceHint   []  ->  []
 

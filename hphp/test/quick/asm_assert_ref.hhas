@@ -14,7 +14,7 @@
   PopV
   BreakTraceHint
 
-  AssertTL $x Ref
+  AssertRATL $x Ref
   CGetL $x
   PopC
   Int 1

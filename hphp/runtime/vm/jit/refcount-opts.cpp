@@ -553,8 +553,18 @@ struct SinkPointAnalyzer : private LocalStateHook {
     ONTRACE(3, doTrace());
 
     assert(!states.empty());
-    // Short circuit the easy, common case: one incoming state
-    if (states.size() == 1) return states.front().state;
+    /*
+     * Short circuit the easy, common case: one incoming state.  (This
+     * is just to save JIT time.)
+     *
+     * Except if it's a DefLabel---there could still be unconsumed
+     * references that need to be forwarded through the DefLabel (for
+     * example in the case of a control flow diamond where one side
+     * was optimized away because the branch turned into a Nop).
+     */
+    if (states.size() == 1 && !m_block->front().is(DefLabel)) {
+      return states.front().state;
+    }
 
     auto const& firstFrames = states.front().state.frames;
     State retState;

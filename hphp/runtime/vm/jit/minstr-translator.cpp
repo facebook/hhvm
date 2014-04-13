@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 
 // These files do ugly things with macros so include them last
 #include "hphp/util/assert-throw.h"
@@ -1664,6 +1665,7 @@ static TypedValue arrayGetNotFound(const StringData* k) {
 void HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* key) {
   assert(m_base->isA(Type::Arr) &&
          m_base->type().getArrayKind() == ArrayData::kPackedKind);
+
   m_result = m_irb.cond(
     1,
     [&] (Block* taken) {
@@ -1679,7 +1681,8 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* key) {
       m_irb.hint(Block::Hint::Unlikely);
       gen(RaiseArrayIndexNotice, makeCatch(), key);
       return cns(Type::InitNull);
-    });
+    }
+  );
 }
 
 template<KeyType keyType, bool checkForInt>

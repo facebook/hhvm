@@ -247,7 +247,8 @@ private:
   /*
    * Generate code for tracelet entry
    */
-  void emitGuardChecks(SrcKey, const ChangeMap&, const RefDeps&, SrcRec&);
+  void emitGuardChecks(SrcKey, const ChangeMap&,
+    const ChangeMap&, const RefDeps&, SrcRec&);
   void emitResolvedDeps(const ChangeMap& resolvedDeps);
   void checkRefs(SrcKey, const RefDeps&, SrcRec&);
 

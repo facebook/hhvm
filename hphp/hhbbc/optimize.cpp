@@ -51,38 +51,24 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<AssertTOp> assertTOpFor(Type t) {
-#define ASSERTT_OP(y) \
-  if (t.subtypeOf(T##y)) return AssertTOp::y;
-  ASSERTT_OPS
-#undef ASSERTT_OP
-  return folly::none;
-}
-
-template<class ObjBC, class TyBC, class ArgType>
-folly::Optional<Bytecode> makeAssert(ArgType arg, Type t) {
-  assert(!t.subtypeOf(TBottom));
-  if (t.strictSubtypeOf(TObj)) {
-    auto const dobj = dobj_of(t);
-    auto const op = dobj.type == DObj::Exact ? AssertObjOp::Exact
-                                             : AssertObjOp::Sub;
-    return Bytecode { ObjBC { arg, dobj.cls.name(), op } };
+template<class TyBC, class ArgType>
+folly::Optional<Bytecode> makeAssert(ArrayTypeTable::Builder& arrTable,
+                                     ArgType arg,
+                                     Type t) {
+  auto const rat = make_repo_type(arrTable, t);
+  using T = RepoAuthType::Tag;
+  if (options.FilterAssertions) {
+    // Gen and InitGen don't add any useful information, so leave them
+    // out entirely.
+    if (rat == RepoAuthType{T::Gen})     return folly::none;
+    if (rat == RepoAuthType{T::InitGen}) return folly::none;
   }
-  if (is_opt(t) && t.strictSubtypeOf(TOptObj)) {
-    auto const dobj = dobj_of(t);
-    auto const op = dobj.type == DObj::Exact ? AssertObjOp::OptExact
-                                             : AssertObjOp::OptSub;
-    return Bytecode { ObjBC { arg, dobj.cls.name(), op } };
-  }
-
-  if (auto const op = assertTOpFor(t)) {
-    return Bytecode { TyBC { arg, *op } };
-  }
-  return folly::none;
+  return Bytecode { TyBC { arg, rat } };
 }
 
 template<class Gen>
-void insert_assertions_step(const php::Func& func,
+void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
+                            const php::Func& func,
                             const Bytecode& bcode,
                             const State& state,
                             std::bitset<kMaxTrackedLocals> mayReadLocalSet,
@@ -95,8 +81,10 @@ void insert_assertions_step(const php::Func& func,
       }
     }
     auto const realT = state.locals[i];
-    auto const op = makeAssert<bc::AssertObjL,bc::AssertTL>(
-      borrow(func.locals[i]), realT
+    auto const op = makeAssert<bc::AssertRATL>(
+      arrTable,
+      borrow(func.locals[i]),
+      realT
     );
     if (op) gen(*op);
   }
@@ -119,15 +107,19 @@ void insert_assertions_step(const php::Func& func,
    */
   for (; i < bcode.numPop(); ++i, --stackIdx) {
     auto const realT = state.stack[stackIdx];
+    auto const flav  = stack_flav(realT);
 
-    if (options.FilterAssertions &&
-        !realT.strictSubtypeOf(stack_flav(realT))) {
+    if (flav.subtypeOf(TCls)) continue;
+    if (options.FilterAssertions && !realT.strictSubtypeOf(flav)) {
       continue;
     }
 
-    auto const op = makeAssert<bc::AssertObjStk,bc::AssertTStk>(
-      static_cast<int32_t>(i), realT
-    );
+    auto const op =
+      makeAssert<bc::AssertRATStk>(
+        arrTable,
+        static_cast<int32_t>(i),
+        realT
+      );
     if (op) gen(*op);
   }
 }
@@ -222,6 +214,8 @@ void insert_assertions(const Index& index,
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
+  auto& arrTable = *index.array_table_builder();
+
   auto lastStackOutputObvious = false;
 
   PropertiesInfo props { index, ctx, nullptr };
@@ -241,8 +235,15 @@ void insert_assertions(const Index& index,
     auto const preState = state;
     auto const flags    = step(interp, op);
 
-    insert_assertions_step(*ctx.func, op, preState, flags.mayReadLocalSet,
-      lastStackOutputObvious, gen);
+    insert_assertions_step(
+      arrTable,
+      *ctx.func,
+      op,
+      preState,
+      flags.mayReadLocalSet,
+      lastStackOutputObvious,
+      gen
+    );
 
     gen(op);
   }

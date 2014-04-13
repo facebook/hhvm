@@ -20,8 +20,11 @@
 #include <memory>
 #include <string>
 #include <set>
+#include <utility>
 
 #include "hphp/util/functional.h"
+
+#include "hphp/runtime/base/repo-auth-type-array.h"
 
 namespace HPHP { struct UnitEmitter; }
 namespace HPHP { namespace HHBBC {
@@ -195,7 +198,10 @@ extern Options options;
  * expects traits are already flattened (it might be wrong if they
  * aren't).
  */
-std::vector<std::unique_ptr<UnitEmitter>>
+std::pair<
+  std::vector<std::unique_ptr<UnitEmitter>>,
+  std::unique_ptr<ArrayTypeTable::Builder>
+>
 whole_program(std::vector<std::unique_ptr<UnitEmitter>>);
 
 //////////////////////////////////////////////////////////////////////

@@ -36,6 +36,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/parallel.h"
@@ -188,7 +189,8 @@ std::vector<std::unique_ptr<UnitEmitter>> load_input() {
   );
 }
 
-void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues) {
+void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
+                  std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   RuntimeOption::RepoCommit = true;
   RuntimeOption::RepoEvalMode = "local";
   open_repo(output_repo);
@@ -199,6 +201,8 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   gd.UsedHHBBC                = true;
   gd.HardTypeHints            = options.HardTypeHints;
   gd.HardPrivatePropInference = options.HardPrivatePropInference;
+
+  gd.arrayTypeTable.repopulate(*arrTable);
   Repo::get().saveGlobalData(gd);
 }
 
@@ -208,11 +212,10 @@ void compile_repo() {
     std::cout << folly::format("{} units\n", ues.size());
   }
 
-  ues = whole_program(std::move(ues));
-
+  auto pair = whole_program(std::move(ues));
   {
     trace_time timer("writing output repo");
-    write_output(std::move(ues));
+    write_output(std::move(pair.first), std::move(pair.second));
   }
 }
 

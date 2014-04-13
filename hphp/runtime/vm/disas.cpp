@@ -26,6 +26,9 @@
 #include "hphp/util/match.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/builtin-functions.h" // f_serialize
 #include "hphp/runtime/vm/unit.h"
@@ -346,6 +349,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_DA     out.fmt(" {}", decode<double>(pc));
 #define IMM_SA     out.fmt(" {}", \
                            escaped(finfo.unit->lookupLitstrId(decode<Id>(pc))));
+#define IMM_RATA   out.fmt(" {}", show(decodeRAT(finfo.unit, pc)));
 #define IMM_AA     out.fmt(" @A_{}", decode<Id>(pc));
 #define IMM_BA     out.fmt(" {}", rel_label(decode<Offset>(pc)));
 #define IMM_OA(ty) out.fmt(" {}", \
@@ -386,6 +390,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_IA
 #undef IMM_DA
 #undef IMM_SA
+#undef IMM_RATA
 #undef IMM_AA
 #undef IMM_BA
 #undef IMM_OA

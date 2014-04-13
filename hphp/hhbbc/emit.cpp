@@ -27,6 +27,9 @@
 #include "folly/Optional.h"
 #include "folly/Memory.h"
 
+#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/preclass-emit.h"
@@ -333,6 +336,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_IA(n)      ue.emitIVA(data.iter##n->id);
 #define IMM_DA(n)      ue.emitDouble(data.dbl##n);
 #define IMM_SA(n)      ue.emitInt32(ue.mergeLitstr(data.str##n));
+#define IMM_RATA(n)    encodeRAT(ue, data.rat);
 #define IMM_AA(n)      ue.emitInt32(ue.mergeArray(data.arr##n));
 #define IMM_OA_IMPL(n) ue.emitByte(static_cast<uint8_t>(data.subop));
 #define IMM_OA(type)   IMM_OA_IMPL
@@ -399,6 +403,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef IMM_IA
 #undef IMM_DA
 #undef IMM_SA
+#undef IMM_RATA
 #undef IMM_AA
 #undef IMM_BA
 #undef IMM_OA_IMPL
@@ -790,23 +795,53 @@ void emit_pseudomain(EmitUnitState& state,
   emit_finish_func(pm, *fe, info);
 }
 
-RepoAuthType make_repo_type(UnitEmitter& ue, const Type& t) {
+void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   using T = RepoAuthType::Tag;
 
-  if (t.strictSubtypeOf(TObj) || (is_opt(t) && t.strictSubtypeOf(TOptObj))) {
-    auto const dobj = dobj_of(t);
-    auto const tag =
-      is_opt(t)
-        ? (dobj.type == DObj::Exact ? T::OptExactObj : T::OptSubObj)
-        : (dobj.type == DObj::Exact ? T::ExactObj    : T::SubObj);
-    ue.mergeLitstr(dobj.cls.name());
-    return RepoAuthType { tag, dobj.cls.name() };
-  }
+  switch (rat.tag()) {
+  case T::OptBool:
+  case T::OptInt:
+  case T::OptSStr:
+  case T::OptStr:
+  case T::OptDbl:
+  case T::OptRes:
+  case T::OptObj:
+  case T::Null:
+  case T::Cell:
+  case T::Ref:
+  case T::InitUnc:
+  case T::Unc:
+  case T::InitCell:
+  case T::InitGen:
+  case T::Gen:
+  case T::Uninit:
+  case T::InitNull:
+  case T::Bool:
+  case T::Int:
+  case T::Dbl:
+  case T::Res:
+  case T::SStr:
+  case T::Str:
+  case T::Obj:
+    return;
 
-#define ASSERTT_OP(x) if (t.subtypeOf(T##x)) return RepoAuthType{T::x};
-  ASSERTT_OPS
-#undef ASSERTT_OP
-  return RepoAuthType{};
+  case T::OptSArr:
+  case T::OptArr:
+  case T::SArr:
+  case T::Arr:
+    // We don't need to merge the litstrs in the array, because rats
+    // in arrays in the array type table must be using global litstr
+    // ids.  (As the array type table itself is not associated with
+    // any unit.)
+    return;
+
+  case T::OptSubObj:
+  case T::OptExactObj:
+  case T::SubObj:
+  case T::ExactObj:
+    ue.mergeLitstr(rat.clsName());
+    return;
+  }
 }
 
 void emit_class(EmitUnitState& state,
@@ -849,7 +884,11 @@ void emit_class(EmitUnitState& state,
       // TODO(#3599292): we don't currently infer closure use var types.
       if (is_closure(cls)) return RepoAuthType{};
       auto it = ps.find(prop.name);
-      return it == end(ps) ? RepoAuthType{} : make_repo_type(ue, it->second);
+      if (it == end(ps)) return RepoAuthType{};
+      auto const rat = make_repo_type(*state.index.array_table_builder(),
+                                      it->second);
+      merge_repo_auth_type(ue, rat);
+      return rat;
     };
 
     pce->addProperty(

@@ -43,7 +43,7 @@
     # Test that the guard for an optional AssertObj stays: we could be
     # called with the object or nulls.
 
-    AssertObjL $x "Foo" OptExact
+    AssertRATL $x ?Obj=Foo
     CGetL $x
     Print
     PopC

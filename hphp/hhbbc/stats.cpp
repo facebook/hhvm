@@ -23,6 +23,7 @@
 #include <iostream>
 #include <memory>
 #include <tuple>
+#include <type_traits>
 
 #include <boost/variant.hpp>
 
@@ -91,17 +92,20 @@ struct ISameCmp {
   }
 };
 
-// Information about builtins usage.
-// The tuple contains the known return type for the builtin, the total
-// number of calls seen and the total number of calls that could be reduced.
-// A builtin call is considered reducible if its output is a constant and
-// all its inputs are constants. That is not a guaranteed condition but it
-// gives us an idea of what's possible
-typedef tbb::concurrent_hash_map<
-    SString,
-    std::tuple<Type, uint64_t, uint64_t>,
-    ISameCmp
-  > BuiltinInfo;
+/*
+ * Information about builtins usage.
+ *
+ * The tuple contains the known return type for the builtin, the total
+ * number of calls seen and the total number of calls that could be
+ * reduced.  A builtin call is considered reducible if its output is a
+ * constant and all its inputs are constants. That is not a guaranteed
+ * condition but it gives us an idea of what's possible.
+ */
+using BuiltinInfo = tbb::concurrent_hash_map<
+  SString,
+  std::tuple<Type,uint64_t,uint64_t>,
+  ISameCmp
+>;
 
 struct Builtins {
   std::atomic<uint64_t> totalBuiltins;
@@ -109,8 +113,16 @@ struct Builtins {
   BuiltinInfo builtinsInfo;
 };
 
+#define TAG(x) 1 +
+constexpr uint32_t kNumRATTags = REPO_AUTH_TYPE_TAGS 0 ;
+#undef TAG
+
 struct Stats {
   std::array<std::atomic<uint64_t>,Op_count> op_counts;
+  std::array<std::atomic<uint64_t>,kNumRATTags> ratL_tags;
+  std::array<std::atomic<uint64_t>,kNumRATTags> ratStk_tags;
+  std::atomic<uint64_t> ratL_specialized_array;
+  std::atomic<uint64_t> ratStk_specialized_array;
   std::atomic<uint64_t> persistentClasses;
   std::atomic<uint64_t> persistentFunctions;
   std::atomic<uint64_t> uniqueClasses;
@@ -198,6 +210,26 @@ std::string show(const Stats& stats) {
 
   ret += "\n";
   ret += show(stats.builtins);
+
+  ret += "\n";
+  using T = RepoAuthType::Tag;
+  using U = std::underlying_type<T>::type;
+#define TAG(x)                                                          \
+  folly::format(&ret, "  {: >24}:  {: >8}\n"                            \
+                      "  {: >24}:  {: >8}\n",                           \
+                      "RATL_" #x,                                       \
+                      stats.ratL_tags[static_cast<U>(T::x)].load(),     \
+                      "RATStk_" #x,                                     \
+                      stats.ratStk_tags[static_cast<U>(T::x)].load());
+  REPO_AUTH_TYPE_TAGS
+#undef TAG
+
+  folly::format(&ret, "  {: >24}:  {: >8}\n"
+                      "  {: >24}:  {: >8}\n",
+                      "RATL_Arr_Special",
+                      stats.ratL_specialized_array.load(),
+                      "RATStk_Arr_Special",
+                      stats.ratStk_specialized_array.load());
 
   return ret;
 }
@@ -317,6 +349,44 @@ void dispatch(StatsSS& env, const Bytecode& op) {
 
 //////////////////////////////////////////////////////////////////////
 
+// Simple stats about opcodes (that don't require full type
+// information---those cases are only enabled when extendedStats is
+// on).
+void collect_simple(Stats& stats, const Bytecode& bc) {
+  ++stats.op_counts[static_cast<uint64_t>(bc.op)];
+
+  RepoAuthType rat;
+  switch (bc.op) {
+  case Op::AssertRATL:
+    rat = bc.AssertRATL.rat;
+    break;
+  case Op::AssertRATStk:
+    rat = bc.AssertRATStk.rat;
+    break;
+  default:
+    return;
+  }
+
+  using U = std::underlying_type<RepoAuthType::Tag>::type;
+  auto const tagInt = static_cast<U>(rat.tag());
+  assert(tagInt < stats.ratL_tags.size());
+  if (bc.op == Op::AssertRATL) {
+    ++stats.ratL_tags[tagInt];
+  } else {
+    ++stats.ratStk_tags[tagInt];
+  }
+
+  if (rat.mayHaveArrData()) {
+    if (auto const array = rat.array()) {
+      if (bc.op == Op::AssertRATL) {
+        ++stats.ratL_specialized_array;
+      } else {
+        ++stats.ratStk_specialized_array;
+      }
+    }
+  }
+}
+
 void collect_func(Stats& stats, const Index& index, php::Func& func) {
   auto const isPM = func.unit->pseudomain.get() == &func;
   if (!func.cls && !isPM) {
@@ -335,7 +405,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
 
   for (auto& blk : func.blocks) {
     for (auto& bc : blk->hhbcs) {
-      ++stats.op_counts[static_cast<uint64_t>(bc.op)];
+      collect_simple(stats, bc);
     }
   }
 

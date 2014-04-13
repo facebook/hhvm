@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_TYPE_H_
 
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-array.h"
 
@@ -173,6 +174,11 @@ class Type {
 #undef IRT
   };
 
+  // An ArrayKind in the top 16 bits, optional RepoAuthType::Array* in
+  // the lower 48 bits, and the low bit that says whether the kind is
+  // valid.
+  enum class ArrayInfo : uintptr_t {};
+
   bits_t m_bits:63;
   bool m_hasConstVal:1;
 
@@ -191,14 +197,39 @@ class Type {
     RDS::Handle m_rdsHandleVal;
     TypedValue* m_ptrVal;
 
-    // Specialization for object classes and array kinds.
+    // Specialization for object classes and arrays.
     const Class* m_class;
-    struct {
-      bool m_arrayKindValid;
-      ArrayData::ArrayKind m_arrayKind;
-      uint64_t m_padding:48; // We want all 8 bytes of m_extra to be defined.
-    };
+    ArrayInfo m_arrayInfo;
   };
+
+  static ArrayInfo makeArrayInfo(folly::Optional<ArrayData::ArrayKind> kind,
+                                 const RepoAuthType::Array* arrTy) {
+    auto ret = reinterpret_cast<uintptr_t>(arrTy);
+    if (kind.hasValue()) {
+      ret |= 0x1;
+      ret |= uintptr_t{*kind} << 48;
+    }
+    return static_cast<ArrayInfo>(ret);
+  }
+
+  static bool arrayKindValid(ArrayInfo info) {
+    return static_cast<uintptr_t>(info) & 0x1;
+  }
+
+  static ArrayData::ArrayKind kind(ArrayInfo info) {
+    assert(arrayKindValid(info));
+    return static_cast<ArrayData::ArrayKind>(
+      static_cast<uintptr_t>(info) >> 48
+    );
+  }
+
+  // May return nullptr if we have no specialized array type
+  // information.
+  static const RepoAuthType::Array* arrayType(ArrayInfo info) {
+    return reinterpret_cast<const RepoAuthType::Array*>(
+      static_cast<uintptr_t>(info) & (-1ull >> 16) & ~0x1
+    );
+  }
 
   bool checkValid() const;
 
@@ -218,15 +249,15 @@ class Type {
     assert(checkValid());
   }
 
-  explicit Type(bits_t bits, ArrayData::ArrayKind arrayKind)
+  explicit Type(bits_t bits, ArrayInfo arrayInfo)
     : m_bits(bits)
     , m_hasConstVal(false)
-    , m_arrayKindValid(true)
-    , m_arrayKind(arrayKind)
-    , m_padding(0)
+    , m_arrayInfo(arrayInfo)
   {
     assert(checkValid());
   }
+
+  explicit Type(bits_t bits, ArrayData::ArrayKind) = delete;
 
   static bits_t bitsFromDataType(DataType outer, DataType inner);
 
@@ -237,6 +268,7 @@ class Type {
 
   struct Union;
   struct Intersect;
+  struct ArrayOps;
 
 public:
 # define IRT(name, ...) static const Type name;
@@ -564,14 +596,14 @@ public:
   }
 
   /*
-   * True if type can have a specialized array kind.
+   * True if type can have specialized array information.
    */
-  bool canSpecializeArrayKind() const {
+  bool canSpecializeArray() const {
     return (m_bits & kAnyArr) && !(m_bits & kAnyObj);
   }
 
   bool canSpecializeAny() const {
-    return canSpecializeClass() || canSpecializeArrayKind();
+    return canSpecializeClass() || canSpecializeArray();
   }
 
   Type specialize(const Class* klass) const {
@@ -580,13 +612,18 @@ public:
   }
 
   Type specialize(ArrayData::ArrayKind arrayKind) const {
-    assert(canSpecializeArrayKind());
-    return Type(m_bits, arrayKind);
+    assert(canSpecializeArray());
+    return Type(m_bits, makeArrayInfo(arrayKind, nullptr));
+  }
+
+  Type specialize(const RepoAuthType::Array* array) const {
+    assert(canSpecializeArray());
+    return Type(m_bits, makeArrayInfo(folly::none, array));
   }
 
   bool isSpecialized() const {
     return (canSpecializeClass() && getClass()) ||
-      (canSpecializeArrayKind() && hasArrayKind());
+      (canSpecializeArray() && (hasArrayKind() || getArrayType()));
   }
 
   Type unspecialize() const {
@@ -599,13 +636,18 @@ public:
   }
 
   bool hasArrayKind() const {
-    assert(canSpecializeArrayKind());
-    return m_hasConstVal || m_arrayKindValid;
+    assert(canSpecializeArray());
+    return m_hasConstVal || arrayKindValid(m_arrayInfo);
   }
 
   ArrayData::ArrayKind getArrayKind() const {
     assert(hasArrayKind());
-    return m_hasConstVal ? m_arrVal->kind() : m_arrayKind;
+    return m_hasConstVal ? m_arrVal->kind() : kind(m_arrayInfo);
+  }
+
+  const RepoAuthType::Array* getArrayType() const {
+    assert(canSpecializeArray());
+    return m_hasConstVal ? nullptr : arrayType(m_arrayInfo);
   }
 
   // Returns a subset of *this containing only the members relating to its
@@ -615,7 +657,7 @@ public:
   Type specializedType() const {
     assert(isSpecialized());
     if (canSpecializeClass()) return *this & AnyObj;
-    if (canSpecializeArrayKind()) return *this & AnyArr;
+    if (canSpecializeArray()) return *this & AnyArr;
     not_reached();
   }
 
@@ -643,8 +685,8 @@ public:
           (m_class != nullptr && m_class->classof(t2.m_class));
       }
 
-      return !canSpecializeArrayKind() ||
-        (m_arrayKindValid && getArrayKind() == t2.getArrayKind());
+      if (!canSpecializeArray()) return true;
+      return m_arrayInfo == t2.m_arrayInfo;
     }
 
     return true;

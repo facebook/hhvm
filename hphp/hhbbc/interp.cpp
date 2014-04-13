@@ -151,12 +151,8 @@ void in(ISS& env, const bc::Dup& op) {
   push(env, val);
 }
 
-void in(ISS& env, const bc::AssertTL&)       { nothrow(env); }
-void in(ISS& env, const bc::AssertTStk&)     { nothrow(env); }
-void in(ISS& env, const bc::AssertObjL&)     { nothrow(env); }
-void in(ISS& env, const bc::AssertObjStk&)   { nothrow(env); }
-void in(ISS& env, const bc::PredictTL&)      { nothrow(env); }
-void in(ISS& env, const bc::PredictTStk&)    { nothrow(env); }
+void in(ISS& env, const bc::AssertRATL&)     { nothrow(env); }
+void in(ISS& env, const bc::AssertRATStk&)   { nothrow(env); }
 void in(ISS& env, const bc::BreakTraceHint&) { nothrow(env); }
 
 void in(ISS& env, const bc::Box&) {

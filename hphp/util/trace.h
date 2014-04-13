@@ -139,6 +139,7 @@ namespace Trace {
       TM(jittime)     \
       TM(xenon)       \
       TM(xls)         \
+      TM(rat)         \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)    \
       TM(stress_txInterpSeed)   \

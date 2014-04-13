@@ -85,8 +85,11 @@
 #include <boost/bind.hpp>
 
 #include "folly/String.h"
+#include "folly/Range.h"
 
 #include "hphp/util/md5.h"
+#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -949,6 +952,108 @@ std::vector<unsigned char> read_immvector(AsmState& as, int& stackCount) {
   return ret;
 }
 
+RepoAuthType read_repo_auth_type(AsmState& as) {
+  auto const str = read_opcode_arg<std::string>(as);
+  folly::StringPiece parse(str);
+
+  /*
+   * Note: no support for reading array types.  (The assembler only
+   * emits a single unit, so it can't really be involved in creating a
+   * ArrayTypeTable.)
+   */
+
+  using T = RepoAuthType::Tag;
+
+#define X(what, tag) \
+  if (parse.startsWith(what)) return RepoAuthType{tag}
+
+#define Y(what, tag)                                  \
+  if (parse.startsWith(what)) {                       \
+    parse.removePrefix(what);                         \
+    auto const cls = makeStaticString(parse.data());  \
+    as.ue->mergeLitstr(cls);                          \
+    return RepoAuthType{tag, cls};                    \
+  }
+
+  Y("Obj=",     T::ExactObj);
+  Y("?Obj=",    T::OptExactObj);
+  Y("?Obj<=",   T::OptSubObj);
+  Y("Obj<=",    T::SubObj);
+
+  X("Arr",      T::Arr);
+  X("?Arr",     T::OptArr);
+  X("Bool",     T::Bool);
+  X("?Bool",    T::OptBool);
+  X("Cell",     T::Cell);
+  X("Dbl",      T::Dbl);
+  X("?Dbl",     T::OptDbl);
+  X("Gen",      T::Gen);
+  X("InitCell", T::InitCell);
+  X("InitGen",  T::InitGen);
+  X("InitNull", T::InitNull);
+  X("InitUnc",  T::InitUnc);
+  X("Int",      T::Int);
+  X("?Int",     T::OptInt);
+  X("Null",     T::Null);
+  X("Obj",      T::Obj);
+  X("?Obj",     T::OptObj);
+  X("Ref",      T::Ref);
+  X("?Res",     T::OptRes);
+  X("Res",      T::Res);
+  X("?SArr",    T::OptSArr);
+  X("SArr",     T::SArr);
+  X("?SStr",    T::OptSStr);
+  X("SStr",     T::SStr);
+  X("?Str",     T::OptStr);
+  X("Str",      T::Str);
+  X("Unc",      T::Unc);
+  X("Uninit",   T::Uninit);
+
+#undef X
+#undef Y
+
+  // Make sure the above parsing code is revisited when new tags are
+  // added (we'll get a warning for a missing case label):
+  if (debug) switch (RepoAuthType{}.tag()) {
+  case T::Uninit:
+  case T::InitNull:
+  case T::Null:
+  case T::Int:
+  case T::OptInt:
+  case T::Dbl:
+  case T::OptDbl:
+  case T::Res:
+  case T::OptRes:
+  case T::Bool:
+  case T::OptBool:
+  case T::SStr:
+  case T::OptSStr:
+  case T::Str:
+  case T::OptStr:
+  case T::SArr:
+  case T::OptSArr:
+  case T::Arr:
+  case T::OptArr:
+  case T::Obj:
+  case T::OptObj:
+  case T::InitUnc:
+  case T::Unc:
+  case T::InitCell:
+  case T::Cell:
+  case T::Ref:
+  case T::InitGen:
+  case T::Gen:
+  case T::ExactObj:
+  case T::SubObj:
+  case T::OptExactObj:
+  case T::OptSubObj:
+    break;
+  }
+
+  as.error("unrecognized RepoAuthType format");
+  not_reached();
+}
+
 // Read in a vector of iterators the format for this vector is:
 // <(TYPE) ID, (TYPE) ID, ...>
 // Where TYPE := Iter | MIter | CIter
@@ -1071,6 +1176,7 @@ OpcodeParserMap opcode_parsers;
   }
 
 #define IMM_SA     as.ue->emitInt32(as.ue->mergeLitstr(read_litstr(as)))
+#define IMM_RATA   encodeRAT(*as.ue, read_repo_auth_type(as))
 #define IMM_I64A   as.ue->emitInt64(read_opcode_arg<int64_t>(as))
 #define IMM_DA     as.ue->emitDouble(read_opcode_arg<double>(as))
 #define IMM_LA     as.ue->emitIVA(as.getLocalId(  \
@@ -1208,6 +1314,7 @@ OPCODES
 
 #undef IMM_I64A
 #undef IMM_SA
+#undef IMM_RATA
 #undef IMM_DA
 #undef IMM_IVA
 #undef IMM_LA

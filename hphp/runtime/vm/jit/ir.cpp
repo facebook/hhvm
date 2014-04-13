@@ -70,6 +70,7 @@ namespace {
 #define DRefineS(n) HasDest
 #define DParam    HasDest
 #define DAllocObj HasDest
+#define DArrElem  HasDest
 #define DLdRef    HasDest
 #define DThis     HasDest
 #define DMulti    NaryDest
@@ -116,6 +117,7 @@ struct {
 #undef DBox
 #undef DRefineS
 #undef DParam
+#undef DArrElem
 #undef DAllocObj
 #undef DLdRef
 #undef DThis

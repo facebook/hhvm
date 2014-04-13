@@ -1,11 +1,10 @@
 Memcache
 object(Memcache)#1 (0) {
 }
-string(92) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:8:"Memcache";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(8) "Memcache"
-}
+
+Warning: Attempted to serialize unserializable builtin class Memcache in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(21) {
   [0]=>
   string(11) "__construct"
@@ -52,15 +51,14 @@ array(21) {
 }
 ================
 A_Memcache
-object(A_Memcache)#3 (1) {
+object(A_Memcache)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(95) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:10:"A_Memcache";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(10) "A_Memcache"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_Memcache in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(21) {
   [0]=>
   string(11) "__construct"

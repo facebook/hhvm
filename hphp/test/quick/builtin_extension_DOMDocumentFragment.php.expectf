@@ -1,11 +1,10 @@
 DOMDocumentFragment
 object(DOMDocumentFragment)#1 (0) {
 }
-string(104) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:19:"DOMDocumentFragment";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(19) "DOMDocumentFragment"
-}
+
+Warning: Attempted to serialize unserializable builtin class DOMDocumentFragment in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(22) {
   [0]=>
   string(11) "__construct"
@@ -54,15 +53,14 @@ array(22) {
 }
 ================
 A_DOMDocumentFragment
-object(A_DOMDocumentFragment)#3 (1) {
+object(A_DOMDocumentFragment)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(106) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:21:"A_DOMDocumentFragment";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(21) "A_DOMDocumentFragment"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_DOMDocumentFragment in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(22) {
   [0]=>
   string(11) "__construct"

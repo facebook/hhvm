@@ -1,13 +1,12 @@
 DOMEntityReference
 
-Warning: DOMEntityReference::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+Warning: DOMEntityReference::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
 object(DOMEntityReference)#1 (0) {
 }
-string(103) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:18:"DOMEntityReference";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(18) "DOMEntityReference"
-}
+
+Warning: Attempted to serialize unserializable builtin class DOMEntityReference in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(21) {
   [0]=>
   string(11) "__construct"
@@ -55,16 +54,15 @@ array(21) {
 ================
 A_DOMEntityReference
 
-Warning: DOMEntityReference::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
-object(A_DOMEntityReference)#3 (1) {
+Warning: DOMEntityReference::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+object(A_DOMEntityReference)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(105) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:20:"A_DOMEntityReference";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(20) "A_DOMEntityReference"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_DOMEntityReference in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(21) {
   [0]=>
   string(11) "__construct"

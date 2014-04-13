@@ -9,7 +9,7 @@ function test($cls) {
   var_dump($b);
   $c = unserialize($b);
   var_dump($c);
-  if (($a != $c) && (get_class($c) != "__PHP_Unserializable_Class")) {
+  if (($a != $c) && ($c !== null)) {
     echo "bad serialization/deserialization\n";
     exit(1);
   }
@@ -27,7 +27,7 @@ function test($cls) {
   var_dump($b);
   $c = unserialize($b);
   var_dump($c);
-  if (($a != $c) && (get_class($c) != "__PHP_Unserializable_Class")) {
+  if (($a != $c) && ($c !== null)) {
     echo "bad serialization/deserialization\n";
     exit(1);
   }

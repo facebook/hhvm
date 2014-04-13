@@ -590,7 +590,6 @@ const StaticString
   s_PHP_DebugDisplay("__PHP_DebugDisplay"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
-  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name"),
   s_debugInfo("__debugInfo");
 
 /* Get properties from the actual object unless we're
@@ -655,13 +654,14 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       return;
     }
     // Only serialize CPP extension type instances which can actually
-    // be deserialized.
+    // be deserialized.  Otherwise, raise a warning and serialize
+    // null.
     auto cls = getVMClass();
     if (cls->instanceCtor() && !cls->isCppSerializable()) {
-      Object placeholder = ObjectData::newInstance(
-        SystemLib::s___PHP_Unserializable_ClassClass);
-      placeholder->o_set(s_PHP_Unserializable_Class_Name, o_getClassName());
-      placeholder->serialize(serializer);
+      raise_warning("Attempted to serialize unserializable builtin class %s",
+        getVMClass()->preClass()->name()->data());
+      Variant placeholder = init_null();
+      placeholder.serialize(serializer);
       return;
     }
     if (getAttribute(HasSleep)) {

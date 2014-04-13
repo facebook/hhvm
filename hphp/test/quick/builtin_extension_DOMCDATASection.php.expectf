@@ -1,13 +1,12 @@
 DOMCdataSection
 
-Warning: DOMCdataSection::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+Warning: DOMCdataSection::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
 object(DOMCdataSection)#1 (0) {
 }
-string(100) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:15:"DOMCdataSection";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(15) "DOMCdataSection"
-}
+
+Warning: Attempted to serialize unserializable builtin class DOMCdataSection in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(28) {
   [0]=>
   string(11) "__construct"
@@ -69,16 +68,15 @@ array(28) {
 ================
 A_DOMCdataSection
 
-Warning: DOMCdataSection::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
-object(A_DOMCdataSection)#3 (1) {
+Warning: DOMCdataSection::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+object(A_DOMCdataSection)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(102) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:17:"A_DOMCdataSection";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(17) "A_DOMCdataSection"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_DOMCdataSection in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(28) {
   [0]=>
   string(11) "__construct"

@@ -1,11 +1,10 @@
 DOMEntity
 object(DOMEntity)#1 (0) {
 }
-string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"DOMEntity";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(9) "DOMEntity"
-}
+
+Warning: Attempted to serialize unserializable builtin class DOMEntity in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(21) {
   [0]=>
   string(11) "__construct"
@@ -52,15 +51,14 @@ array(21) {
 }
 ================
 A_DOMEntity
-object(A_DOMEntity)#3 (1) {
+object(A_DOMEntity)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(96) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:11:"A_DOMEntity";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(11) "A_DOMEntity"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_DOMEntity in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(21) {
   [0]=>
   string(11) "__construct"

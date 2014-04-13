@@ -1,11 +1,10 @@
 SimpleXMLElementIterator
 object(SimpleXMLElementIterator)#1 (0) {
 }
-string(109) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:24:"SimpleXMLElementIterator";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(24) "SimpleXMLElementIterator"
-}
+
+Warning: Attempted to serialize unserializable builtin class SimpleXMLElementIterator in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(6) {
   [0]=>
   string(11) "__construct"
@@ -22,15 +21,14 @@ array(6) {
 }
 ================
 A_SimpleXMLElementIterator
-object(A_SimpleXMLElementIterator)#3 (1) {
+object(A_SimpleXMLElementIterator)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(111) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:26:"A_SimpleXMLElementIterator";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(26) "A_SimpleXMLElementIterator"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_SimpleXMLElementIterator in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(6) {
   [0]=>
   string(11) "__construct"

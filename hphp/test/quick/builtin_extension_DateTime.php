@@ -16,7 +16,7 @@ function test($cls, $args = array()) {
   var_dump($b);
   $c = unserialize($b);
   var_dump($c);
-  if (($a != $c) && (get_class($c) != "__PHP_Unserializable_Class")) {
+  if (($a != $c) && (get_class($c) !== null)) {
     echo "bad serialization/deserialization\n";
     exit(1);
   }
@@ -34,7 +34,7 @@ function test($cls, $args = array()) {
   var_dump($b);
   $c = unserialize($b);
   var_dump($c);
-  if (($a != $c) && (get_class($c) != "__PHP_Unserializable_Class")) {
+  if (($a != $c) && (get_class($c) !== null)) {
     echo "bad serialization/deserialization\n";
     exit(1);
   }

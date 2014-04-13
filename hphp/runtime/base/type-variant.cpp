@@ -73,8 +73,7 @@ const StaticString
   s_1("1"),
   s_unserialize("unserialize"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
-  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
-  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name");
+  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1032,9 +1031,7 @@ void Variant::unserialize(VariableUnserializer *uns,
         // support it. Otherwise, we risk creating a CPP object
         // without having it initialized completely.
         if (cls->instanceCtor() && !cls->isCppSerializable()) {
-          obj = ObjectData::newInstance(
-            SystemLib::s___PHP_Unserializable_ClassClass);
-          obj->o_set(s_PHP_Unserializable_Class_Name, clsName);
+          assert(obj.isNull());
         } else {
           obj = ObjectData::newInstance(cls);
           if (UNLIKELY(cls == c_Pair::classof() && size != 2)) {

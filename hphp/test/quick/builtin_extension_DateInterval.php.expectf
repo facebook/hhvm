@@ -1,13 +1,12 @@
 DateInterval
 
-Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
 object(DateInterval)#1 (0) {
 }
-string(97) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:12:"DateInterval";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(12) "DateInterval"
-}
+
+Warning: Attempted to serialize unserializable builtin class DateInterval in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(5) {
   [0]=>
   string(11) "__construct"
@@ -23,16 +22,15 @@ array(5) {
 ================
 A_DateInterval
 
-Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
-object(A_DateInterval)#3 (1) {
+Warning: DateInterval::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+object(A_DateInterval)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(99) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:14:"A_DateInterval";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(14) "A_DateInterval"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_DateInterval in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(5) {
   [0]=>
   string(11) "__construct"

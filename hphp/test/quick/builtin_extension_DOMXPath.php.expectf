@@ -1,13 +1,12 @@
 DOMXPath
 
-Warning: DOMXPath::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+Warning: DOMXPath::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
 object(DOMXPath)#1 (0) {
 }
-string(92) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:8:"DOMXPath";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(8) "DOMXPath"
-}
+
+Warning: Attempted to serialize unserializable builtin class DOMXPath in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(8) {
   [0]=>
   string(11) "__construct"
@@ -29,16 +28,15 @@ array(8) {
 ================
 A_DOMXPath
 
-Warning: DOMXPath::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
-object(A_DOMXPath)#3 (1) {
+Warning: DOMXPath::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+object(A_DOMXPath)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(95) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:10:"A_DOMXPath";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(10) "A_DOMXPath"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_DOMXPath in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(8) {
   [0]=>
   string(11) "__construct"

@@ -1,11 +1,10 @@
 DOMNotation
 object(DOMNotation)#1 (0) {
 }
-string(96) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:11:"DOMNotation";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(11) "DOMNotation"
-}
+
+Warning: Attempted to serialize unserializable builtin class DOMNotation in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(21) {
   [0]=>
   string(11) "__construct"
@@ -52,15 +51,14 @@ array(21) {
 }
 ================
 A_DOMNotation
-object(A_DOMNotation)#3 (1) {
+object(A_DOMNotation)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(98) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:13:"A_DOMNotation";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(13) "A_DOMNotation"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_DOMNotation in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(21) {
   [0]=>
   string(11) "__construct"

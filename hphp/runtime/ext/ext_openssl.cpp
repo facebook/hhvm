@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_openssl.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/system/constants.h"
 #include "hphp/util/logger.h"
 
 #include <openssl/evp.h>

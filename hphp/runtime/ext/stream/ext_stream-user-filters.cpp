@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/ext_array.h"
+#include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {

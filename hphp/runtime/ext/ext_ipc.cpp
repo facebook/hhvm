@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_ipc.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/system/constants.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include "folly/String.h"

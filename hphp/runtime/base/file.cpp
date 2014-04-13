@@ -34,6 +34,8 @@
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/virtual-host.h"
 
+#include "hphp/system/constants.h"
+
 #include "hphp/util/file-util.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"

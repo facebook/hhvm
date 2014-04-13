@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/system/constants.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {

@@ -25,6 +25,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // stream context
 
+extern const int64_t k_STREAM_SERVER_BIND;
+extern const int64_t k_STREAM_SERVER_LISTEN;
+
 class StreamContext : public ResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamContext);

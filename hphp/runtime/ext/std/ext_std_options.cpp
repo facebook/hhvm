@@ -39,6 +39,7 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/system/constants.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/base/request-event-handler.h"
 

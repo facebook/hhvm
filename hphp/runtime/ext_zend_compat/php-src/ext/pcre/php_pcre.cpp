@@ -44,6 +44,7 @@
 
 #ifdef HHVM
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/system/constants.h"
 #endif
 
 enum {

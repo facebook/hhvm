@@ -1,0 +1,20 @@
+both_short
+string(4) ":bar"
+bool(false)
+short_needle
+string(5) ":1337"
+bool(false)
+short_haystack
+string(3) "345"
+bool(false)
+both_long
+string(12) "901234567890"
+bool(false)
+empties
+bool(false)
+bool(false)
+string(4) ":bar"
+string(4) ":bar"
+string(6) "waaaaa"
+string(11) "r\x00waaaaa"
+string(1) "z"

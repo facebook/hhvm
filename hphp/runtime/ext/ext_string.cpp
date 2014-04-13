@@ -920,21 +920,46 @@ Variant f_stristr(const String& haystack, const Variant& needle) {
   return haystack.substr(ret.toInt32());
 }
 
-Variant f_strpbrk(const String& haystack, const String& char_list) {
-  if (char_list.empty()) {
-    throw_invalid_argument("char_list: (empty)");
-    return false;
-  }
-  // We can't use the C strpbrk function as it takes null-terminated strings,
-  // and in PHP, \0 is a valid character for char_list
-  const char *hd = haystack.get()->data();
-  const char *cd = char_list.get()->data();
+static NEVER_INLINE
+Variant strpbrk_slow(const String& haystack, const String& char_list) {
+  auto const hd = haystack.get()->data();
+  auto const cd = char_list.get()->data();
   for (size_t i = 0; i < haystack.length(); ++i) {
     for (size_t j = 0; j < char_list.length(); ++j) {
       if (hd[i] == cd[j]) {
         return String(hd + i, haystack.length() - i, CopyString);
       }
     }
+  }
+  return false;
+}
+
+Variant f_strpbrk(const String& haystack, const String& char_list) {
+  if (char_list.empty()) {
+    throw_invalid_argument("char_list: (empty)");
+    return false;
+  }
+
+  auto const charListData = char_list.c_str();
+  auto const charListStop = charListData + char_list.size();
+  for (auto ptr = charListData; ptr != charListStop;) {
+    if (UNLIKELY(*ptr++ == '\0')) return strpbrk_slow(haystack, char_list);
+  }
+
+  // Use strcspn instead of strpbrk because the latter doesn't report
+  // when its terminated due to a null byte in haystack in any
+  // manageable way.
+  auto haySize = haystack.size();
+  auto hayData = haystack.c_str();
+retry:
+  size_t idx = strcspn(hayData, charListData);
+  if (idx < haySize) {
+    if (UNLIKELY(hayData[idx] == '\0')) {
+      hayData += idx + 1;
+      haySize -= idx + 1;
+      goto retry;
+    }
+    return String(hayData + idx, haySize - idx, CopyString);
   }
   return false;
 }

@@ -597,23 +597,23 @@ const StaticString
   s_array("array"),
   s_object("object"),
   s_resource("resource"),
-  s_indirect("indirect"),
+  s_namedlocal("namedlocal"),
   s_ref("reference");
 
 String getDataTypeString(DataType t) {
   switch (t) {
     case KindOfUninit:
-    case KindOfNull:     return s_NULL;
-    case KindOfBoolean:  return s_boolean;
-    case KindOfInt64:    return s_integer;
-    case KindOfDouble:   return s_double;
+    case KindOfNull:       return s_NULL;
+    case KindOfBoolean:    return s_boolean;
+    case KindOfInt64:      return s_integer;
+    case KindOfDouble:     return s_double;
     case KindOfStaticString:
-    case KindOfString:   return s_string;
-    case KindOfArray:    return s_array;
-    case KindOfObject:   return s_object;
-    case KindOfResource: return s_resource;
-    case KindOfRef:      return s_ref;
-    case KindOfIndirect: return s_indirect;
+    case KindOfString:     return s_string;
+    case KindOfArray:      return s_array;
+    case KindOfObject:     return s_object;
+    case KindOfResource:   return s_resource;
+    case KindOfRef:        return s_ref;
+    case KindOfNamedLocal: return s_namedlocal;
 
     default:
       assert(false);

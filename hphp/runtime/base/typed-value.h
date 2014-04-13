@@ -51,7 +51,6 @@ union Value {
   ResourceData* pres;   // KindOfResource
   Class*        pcls;   // only in vm stack, no type tag.
   RefData*      pref;   // KindOfRef
-  TypedValue*   pind;   // only for KindOfIndirect
 };
 
 enum VarNrFlag { NR_FLAG = 1<<29 };

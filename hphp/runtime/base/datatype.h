@@ -67,10 +67,9 @@ enum DataType : int8_t {
   KindOfObject           = 0x30,  //   0110000
   KindOfResource         = 0x40,  //   1000000
   KindOfRef              = 0x50,  //   1010000
-  KindOfIndirect         = 0x51,  //   1010001
-  KindOfNamedLocal       = KindOfIndirect,
+  KindOfNamedLocal       = 0x51,  //   1010001
 
-  MaxNumDataTypes        = KindOfIndirect + 1, // marker, not a valid type
+  MaxNumDataTypes        = KindOfNamedLocal + 1, // marker, not a valid type
   MaxNumDataTypesIndex   = 12 + 1,  // 1 + the number of valid DataTypes above
 
   // Note: KindOfStringBit must be set in KindOfStaticString and KindOfString,
@@ -121,7 +120,7 @@ static_assert(!(KindOfArray      & KindOfStringBit), "");
 static_assert(!(KindOfObject     & KindOfStringBit), "");
 static_assert(!(KindOfResource   & KindOfStringBit), "");
 static_assert(!(KindOfRef        & KindOfStringBit), "");
-static_assert(!(KindOfIndirect   & KindOfStringBit), "");
+static_assert(!(KindOfNamedLocal & KindOfStringBit), "");
 static_assert(!(KindOfClass      & KindOfStringBit), "");
 
 static_assert(KindOfNull         & KindOfUncountedInitBit, "");
@@ -135,7 +134,7 @@ static_assert(!(KindOfArray      & KindOfUncountedInitBit), "");
 static_assert(!(KindOfObject     & KindOfUncountedInitBit), "");
 static_assert(!(KindOfResource   & KindOfUncountedInitBit), "");
 static_assert(!(KindOfRef        & KindOfUncountedInitBit), "");
-static_assert(!(KindOfIndirect   & KindOfUncountedInitBit), "");
+static_assert(!(KindOfNamedLocal & KindOfUncountedInitBit), "");
 static_assert(!(KindOfClass      & KindOfUncountedInitBit), "");
 
 // assume KindOfUninit == 0 in ClsCns
@@ -212,7 +211,7 @@ inline int getDataTypeIndex(DataType type) {
     case KindOfObject       : return 8;
     case KindOfResource     : return 9;
     case KindOfRef          : return 10;
-    case KindOfIndirect     : return 11;
+    case KindOfNamedLocal   : return 11;
     default                 : not_reached();
   }
 }
@@ -230,7 +229,7 @@ inline DataType getDataTypeValue(unsigned index) {
     case 8  : return KindOfObject;
     case 9  : return KindOfResource;
     case 10 : return KindOfRef;
-    case 11 : return KindOfIndirect;
+    case 11 : return KindOfNamedLocal;
     default : not_reached();
   }
 }

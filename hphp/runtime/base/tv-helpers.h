@@ -429,22 +429,6 @@ inline void tvUnset(TypedValue * to) {
   tvWriteUninit(to);
 }
 
-// Assumes `fr' is dead and binds it using KindOfIndirect to `to'.
-inline void tvBindIndirect(TypedValue* fr, TypedValue* to) {
-  assert(tvIsPlausible(*to));
-  fr->m_type = KindOfIndirect;
-  fr->m_data.pind = to;
-}
-
-// If a TypedValue is KindOfIndirect, dereference to the inner
-// TypedValue.
-inline TypedValue* tvDerefIndirect(TypedValue* tv) {
-  return tv->m_type == KindOfIndirect ? tv->m_data.pind : tv;
-}
-inline const TypedValue* tvDerefIndirect(const TypedValue* tv) {
-  return tvDerefIndirect(const_cast<TypedValue*>(tv));
-}
-
 /*
  * Returns true if this tv is not a ref-counted type, or if it is a
  * ref-counted type and the object pointed to is static.

@@ -54,6 +54,7 @@ namespace Eval {
   x(Serializable)                               \
   x(ArrayAccess)                                \
   x(ArrayObject)                                \
+  x(ArrayIterator)                              \
   x(Iterator)                                   \
   x(IteratorAggregate)                          \
   x(Traversable)                                \

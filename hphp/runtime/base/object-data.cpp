@@ -64,10 +64,10 @@ const StaticString
   s_serialize("serialize"),
   s_clone("__clone");
 
-static Array ArrayObject_toArray(const ObjectData* obj) {
+static Array convert_to_array(const ObjectData* obj, HPHP::Class* cls) {
   bool visible, accessible, unset;
   auto prop = obj->getProp(
-    SystemLib::s_ArrayObjectClass, s_storage.get(),
+    cls, s_storage.get(),
     visible, accessible, unset
   );
   assert(visible && accessible && !unset);
@@ -410,7 +410,9 @@ Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
     assert(instanceof(c_SimpleXMLElement::classof()));
     return c_SimpleXMLElement::ToArray(this);
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
-    return ArrayObject_toArray(this);
+    return convert_to_array(this, SystemLib::s_ArrayObjectClass);
+  } else if (UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
+    return convert_to_array(this, SystemLib::s_ArrayIteratorClass);
   } else {
     Array ret(ArrayData::Create());
     o_getArray(ret, pubOnly);
@@ -605,6 +607,14 @@ inline Array getSerializeProps(const ObjectData* obj,
   auto cls = obj->getVMClass();
   auto debuginfo = cls->lookupMethod(s_debugInfo.get());
   if (!debuginfo) {
+    // When ArrayIterator is casted to an array, it return it's array object,
+    // however when it's being var_dump'd or print_r'd, it shows it's properties
+    if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
+      Array ret(ArrayData::Create());
+      obj->o_getArray(ret);
+      return ret;
+    }
+
     return obj->o_toArray();
   }
   if (debuginfo->attrs() & (AttrPrivate|AttrProtected|

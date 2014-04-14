@@ -41,3 +41,26 @@ function ezc_throw_nonstd(): mixed;
  */
 <<__Native("ZendCompat")>>
 function ezc_realpath(mixed $path): mixed;
+
+/* Create a hash which maps string keys to string values. When a value is
+ * deleted from the hash, it is written to the current output buffer.
+ */
+<<__Native("ZendCompat")>>
+function ezc_hash_create(): mixed;
+
+/* Create a hash which maps string keys to string values. When a value is
+ * deleted from the hash, it is written to the current output buffer.
+ */
+<<__Native("ZendCompat")>>
+function ezc_hash_set(mixed $table, string $key, string $value): mixed;
+
+/* Get a hash item
+ */
+<<__Native("ZendCompat")>>
+function ezc_hash_get(mixed $table, string $key): mixed;
+
+/* Append a value to the hash, with the next-highest available numeric
+ * key.
+ */
+<<__Native("ZendCompat")>>
+function ezc_hash_append(mixed $table, string $value): mixed;

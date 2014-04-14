@@ -98,3 +98,10 @@ PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char
   HPHP::raise_message(mode, msg.c_str(), args);
   va_end(args);
 }
+
+PHPAPI int php_write(void *buf, uint size TSRMLS_DC)
+{
+  always_assert(size < INT_MAX);
+  HPHP::g_context->write((const char*)buf, size);
+  return (int)size;
+}

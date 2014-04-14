@@ -10,8 +10,13 @@
 #include "zend_exceptions.h"
 #include <stdexcept>
 
-ZEND_DECLARE_MODULE_GLOBALS(ezc_test)
+static int le_ezc_test_hash;
+#define le_ezc_test_hash_name "EZC test hashtable"
 
+static void ezc_hash_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
+static void ezc_hash_element_dtor(void * data);
+
+ZEND_DECLARE_MODULE_GLOBALS(ezc_test)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
@@ -25,6 +30,9 @@ PHP_INI_END()
 PHP_MINIT_FUNCTION(ezc_test)
 {
   REGISTER_INI_ENTRIES();
+  le_ezc_test_hash = zend_register_list_destructors_ex(
+      ezc_hash_dtor, NULL, le_ezc_test_hash_name, module_number);
+
   return SUCCESS;
 }
 /* }}} */
@@ -204,8 +212,8 @@ PHP_FUNCTION(ezc_throw)
     RETURN_FALSE;
   }
 
-  ce = zend_fetch_class_by_name(class_name, class_name_length, NULL,
-      ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
+  ce = zend_fetch_class_by_name(
+      class_name, class_name_length, NULL, ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
   if (!ce) {
     php_error_docref(NULL TSRMLS_CC, E_WARNING, "no such class \"%s\"",
         class_name);
@@ -215,7 +223,7 @@ PHP_FUNCTION(ezc_throw)
 }
 /* }}} */
 
-/* {{{ proto ezc_throw_cpp_std()
+/* {{{ proto void ezc_throw_cpp_std()
  * Throw a C++ std::exception */
 PHP_FUNCTION(ezc_throw_std)
 {
@@ -227,7 +235,7 @@ PHP_FUNCTION(ezc_throw_std)
 }
 /* }}} */
 
-/* {{{ proto ezc_throw_cpp_nonstd()
+/* {{{ proto void ezc_throw_cpp_nonstd()
  * Throw a non-standard C++ exception */
 PHP_FUNCTION(ezc_throw_nonstd)
 {
@@ -239,7 +247,7 @@ PHP_FUNCTION(ezc_throw_nonstd)
 }
 /* }}} */
 
-/* {{{ proto ezc_realpath(string path)
+/* {{{ proto string ezc_realpath(string path)
  * Return the resolved path
  */
 PHP_FUNCTION(ezc_realpath)
@@ -268,6 +276,112 @@ PHP_FUNCTION(ezc_realpath)
   }
 }
 /* }}} */
+
+/** {{{ proto resource ezc_hash_create()
+ * Create a hash which maps string keys to string values. When a value is
+ * deleted from the hash, it is written to the current output buffer.
+ */
+PHP_FUNCTION(ezc_hash_create)
+{
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+    return;
+  }
+  HashTable * hash;
+  ALLOC_HASHTABLE(hash);
+  zend_hash_init(hash, 0, NULL, ezc_hash_element_dtor, 0);
+  ZEND_REGISTER_RESOURCE(return_value, hash, le_ezc_test_hash);
+}
+/* }}} */
+
+/** {{{ proto void ezc_hash_set(resource table, string key, string value)
+ * Set a hash item
+ */
+PHP_FUNCTION(ezc_hash_set)
+{
+  zval * zht;
+  HashTable * hash;
+  char * key;
+  int key_len;
+  char * value;
+  int value_len;
+  char * initial_value;
+  char * dest;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "rss", &zht, &key, &key_len, &value, &value_len) == FAILURE) {
+    return;
+  }
+  ZEND_FETCH_RESOURCE(hash, HashTable*, &zht, -1, le_ezc_test_hash_name, le_ezc_test_hash);
+
+  initial_value = (char*)ecalloc(1, value_len + 1);
+  zend_symtable_update(hash, key, key_len + 1, initial_value, value_len, (void**)&dest);
+  memcpy(dest, value, value_len);
+  dest[value_len] = '\0';
+  efree(initial_value);
+}
+/* }}} */
+
+/** {{{ proto mixed ezc_hash_get(resource table, string key)
+ * Get a hash item
+ */
+PHP_FUNCTION(ezc_hash_get)
+{
+  zval * zht;
+  HashTable * hash;
+  char * key;
+  int key_len;
+  char * value;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "rs", &zht, &key, &key_len) == FAILURE) {
+    return;
+  }
+  ZEND_FETCH_RESOURCE(hash, HashTable*, &zht, -1, le_ezc_test_hash_name, le_ezc_test_hash);
+
+  if (zend_symtable_find(hash, key, key_len + 1, (void**)&value) == SUCCESS) {
+    RETURN_STRING(value, 1);
+  } else {
+    RETURN_FALSE;
+  }
+}
+/* }}} */
+
+/** {{{ proto ezc_hash_append(resource table, string value)
+ * Append a value to the hash, with the next-highest available numeric
+ * key.
+ */
+PHP_FUNCTION(ezc_hash_append)
+{
+  zval * zht;
+  HashTable * hash;
+  char * value;
+  int value_len;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "rs", &zht, &value, &value_len) == FAILURE) {
+    return;
+  }
+  ZEND_FETCH_RESOURCE(hash, HashTable*, &zht, -1, le_ezc_test_hash_name, le_ezc_test_hash);
+  zend_hash_next_index_insert(hash, value, value_len + 1, NULL);
+}
+/* }}} */
+
+static void ezc_hash_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
+{
+  HashTable * hash = (HashTable*)rsrc->ptr;
+  zend_hash_destroy(hash);
+  FREE_HASHTABLE(ht);
+}
+/* }}} */
+
+static void ezc_hash_element_dtor(void * data) /* {{{ */
+{
+  TSRMLS_FETCH();
+  char * value = (char*)data;
+  php_write(value, strlen(value) TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_ezc_fetch_global, 0)
 ZEND_END_ARG_INFO()
@@ -302,6 +416,25 @@ ZEND_BEGIN_ARG_INFO(arginfo_ezc_realpath, 0)
   ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_ezc_hash_create, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_ezc_hash_set, 0)
+  ZEND_ARG_INFO(0, table)
+  ZEND_ARG_INFO(0, key)
+  ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_ezc_hash_get, 0)
+  ZEND_ARG_INFO(0, table)
+  ZEND_ARG_INFO(0, key)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_ezc_hash_append, 0)
+  ZEND_ARG_INFO(0, table)
+  ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ ezc_test_functions[]
@@ -315,6 +448,10 @@ const zend_function_entry ezc_test_functions[] = {
   PHP_FE(ezc_throw_std, arginfo_ezc_throw_std)
   PHP_FE(ezc_throw_nonstd, arginfo_ezc_throw_nonstd)
   PHP_FE(ezc_realpath, arginfo_ezc_realpath)
+  PHP_FE(ezc_hash_create, arginfo_ezc_hash_create)
+  PHP_FE(ezc_hash_set, arginfo_ezc_hash_set)
+  PHP_FE(ezc_hash_get, arginfo_ezc_hash_get)
+  PHP_FE(ezc_hash_append, arginfo_ezc_hash_append)
   PHP_FE_END
 };
 /* }}} */

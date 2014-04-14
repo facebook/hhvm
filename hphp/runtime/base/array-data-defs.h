@@ -183,8 +183,8 @@ inline ArrayData* ArrayData::zSet(StringData* k, RefData* v) {
   return g_array_funcs.zSetStr[m_kind](this, k, v);
 }
 
-inline ArrayData* ArrayData::zAppend(RefData* v) {
-  return g_array_funcs.zAppend[m_kind](this, v);
+inline ArrayData* ArrayData::zAppend(RefData* v, int64_t * key_ptr) {
+  return g_array_funcs.zAppend[m_kind](this, v, key_ptr);
 }
 
 inline size_t ArrayData::vsize() const {

@@ -32,17 +32,24 @@
 ZEND_API int le_index_ptr;
 
 namespace HPHP {
-  IMPLEMENT_OBJECT_ALLOCATION(ZendResourceData);
+  static std::vector<zend_rsrc_list_dtors_entry> s_resource_dtors;
 
-  ZEND_REQUEST_LOCAL_MAP(int, zend_rsrc_list_dtors_entry, s_resource_dtors);
   const String& ZendResourceData::o_getClassNameHook() const {
-    auto& dtor = s_resource_dtors.get()->get()[type];
+    auto& dtor = s_resource_dtors.at(type);
 
     if (dtor.type_name_str.empty()) {
       dtor.type_name_str = dtor.type_name;
     }
 
     return dtor.type_name_str;
+  }
+
+  ZendResourceData::~ZendResourceData() {
+    auto& dtor = s_resource_dtors.at(type);
+    if (dtor.list_dtor_ex) {
+      TSRMLS_FETCH();
+      dtor.list_dtor_ex(this TSRMLS_CC);
+    }
   }
 }
 
@@ -64,9 +71,7 @@ static zend_rsrc_list_entry *zend_list_id_to_entry(int id TSRMLS_DC) {
 ///////////////////////////////////////////////////////////////////////////////////
 
 ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC) {
-  zend_rsrc_list_entry* le = NEWOBJ(zend_rsrc_list_entry)(ptr, type);
-  // TODO is this right?
-  le->incRefCount();
+  zend_rsrc_list_entry* le = new zend_rsrc_list_entry(ptr, type);
   le->incRefCount();
   RL().push_back(le);
   int id = RL().size() - 1;
@@ -206,11 +211,11 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
   lde.list_dtor_ex = ld;
   lde.plist_dtor_ex = pld;
   lde.module_number = module_number;
-  lde.resource_id = HPHP::s_resource_dtors.get()->get().size();
+  lde.resource_id = HPHP::s_resource_dtors.size();
   lde.type = ZEND_RESOURCE_LIST_TYPE_EX;
   lde.type_name = type_name;
 
-  HPHP::s_resource_dtors.get()->get()[lde.resource_id] = lde;
+  HPHP::s_resource_dtors.push_back(lde);
   return lde.resource_id;
 }
 
@@ -222,7 +227,7 @@ int zval_get_resource_id(const zval &z) {
   }
 
   // Make a zend_rsrc_list_entry and return that
-  le = NEWOBJ(HPHP::ZendNormalResourceDataHolder)(z.tv()->m_data.pres);
+  le = new HPHP::ZendNormalResourceDataHolder(z.tv()->m_data.pres);
   RL().push_back(le);
   int id = RL().size() - 1;
   le->id = id;

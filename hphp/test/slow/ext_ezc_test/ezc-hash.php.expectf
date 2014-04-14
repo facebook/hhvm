@@ -1,0 +1,10 @@
+get(k): a
+a
+get(k): b
+get(0): c
+get(0): c
+get(1): d
+b
+c
+d
+Done

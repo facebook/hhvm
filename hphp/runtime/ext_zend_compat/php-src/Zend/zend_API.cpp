@@ -1228,8 +1228,8 @@ ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *f
 
 ZEND_API int _array_init(zval *arg, uint size ZEND_FILE_LINE_DC) {
   ALLOC_HASHTABLE(Z_ARRVAL_P(arg));
+  _zend_hash_init(Z_ARRVAL_P(arg), size, NULL, ZVAL_PTR_DTOR, 0 ZEND_FILE_LINE_RELAY_CC);
   Z_TYPE_P(arg) = IS_ARRAY;
-  Z_ARRVAL_P(arg)->incRefCount();
   return SUCCESS;
 }
 

@@ -7136,11 +7136,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
     return nullptr;
   }
 
-  // Even though the JIT can handle an arbitrary number of arguments
-  // The interp mode function caller is limited to kMaxBuiltinArgs
-  // mixed-mode arguments, or kMaxFCallBuiltinArgs int-only arguments.
-  bool allowDoubleArgs = (f->numParams() <= Native::kMaxBuiltinArgs) &&
-                         Native::allowFCallBuiltinDoubles();
+  bool allowDoubleArgs = Native::allowFCallBuiltinDoubles();
   for (int i = 0; i < f->numParams(); i++) {
     if ((!allowDoubleArgs) &&
         (f->params()[i].builtinType() == KindOfDouble)) {

@@ -1636,6 +1636,14 @@ D:Str = ConcatCellCell S0:Cell S1:Cell
   Concatenate S0 and S1 after converting them to strings in a way that obeys
   php semantics. (Calling object __toString methods, etc.)
 
+D:Str = ConcatStr3 S0:Str S1:Str S2:Str
+
+  Concatenate S0, S1, and S2.
+
+D:Str = ConcatStr4 S0:Str S1:Str S2:Str S3:Str
+
+  Concatenate S0, S1, S2, and S3.
+
 D:Arr = AddElemStrKey S0:Arr S1:Str S2:Cell
 
   Add S2 to the array S0 for the key S1, and return the resulting array.

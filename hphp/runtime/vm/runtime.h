@@ -40,6 +40,9 @@ ObjectData* newPairHelper();
 StringData* concat_is(int64_t v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64_t v2);
 StringData* concat_ss(StringData* v1, StringData* v2);
+StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3);
+StringData* concat_s4(StringData* v1, StringData* v2,
+                      StringData* v3, StringData* v4);
 
 void print_string(StringData* s);
 void print_int(int64_t i);

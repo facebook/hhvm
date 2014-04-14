@@ -611,6 +611,11 @@ O(ConcatStrStr,                 D(Str), S(Str) S(Str),          Er|N|CRc|PRc) \
 O(ConcatIntStr,                 D(Str), S(Int) S(Str),              Er|N|PRc) \
 O(ConcatStrInt,                 D(Str), S(Str) S(Int),          Er|N|CRc|PRc) \
 O(ConcatCellCell,               D(Str), S(Cell) S(Cell),        Er|N|CRc|PRc) \
+O(ConcatStr3,                   D(Str), S(Str) S(Str) S(Str),   Er|N|CRc|PRc) \
+O(ConcatStr4,                   D(Str), S(Str)                                \
+                                          S(Str)                              \
+                                          S(Str)                              \
+                                          S(Str),               Er|N|CRc|PRc) \
 O(ArrayAdd,                     D(Arr), S(Arr) S(Arr),          Er|N|CRc|PRc) \
 O(AKExists,                    D(Bool), S(Cell) S(Cell),                   N) \
 O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \

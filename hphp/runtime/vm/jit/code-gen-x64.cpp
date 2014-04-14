@@ -210,6 +210,8 @@ CALL_OPCODE(ConvCellToStr);
 CALL_OPCODE(ConcatStrStr);
 CALL_OPCODE(ConcatStrInt);
 CALL_OPCODE(ConcatIntStr);
+CALL_OPCODE(ConcatStr3);
+CALL_OPCODE(ConcatStr4);
 
 CALL_OPCODE(TypeProfileFunc)
 CALL_OPCODE(CreateCont)

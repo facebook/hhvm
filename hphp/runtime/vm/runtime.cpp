@@ -96,8 +96,7 @@ ObjectData* newPairHelper() {
  * concat_ss will will incRef the output string
  * and decref its first argument
  */
-StringData*
-concat_ss(StringData* v1, StringData* v2) {
+StringData* concat_ss(StringData* v1, StringData* v2) {
   if (v1->hasMultipleRefs()) {
     StringData* ret = StringData::Make(v1, v2);
     ret->setRefCount(1);
@@ -107,21 +106,19 @@ concat_ss(StringData* v1, StringData* v2) {
     return ret;
   }
 
-  auto const newV1 = v1->append(v2->slice());
-  if (UNLIKELY(newV1 != v1)) {
+  auto const ret = v1->append(v2->slice());
+  if (UNLIKELY(ret != v1)) {
     assert(v1->hasExactlyOneRef());
     v1->release();
-    newV1->incRefCount();
-    return newV1;
+    ret->incRefCount();
   }
-  return v1;
+  return ret;
 }
 
 /**
  * concat_is will incRef the output string
  */
-StringData*
-concat_is(int64_t v1, StringData* v2) {
+StringData* concat_is(int64_t v1, StringData* v2) {
   char intbuf[21];
   // Convert the int to a string
   auto const s1 = conv_10(v1, intbuf + sizeof(intbuf));
@@ -148,14 +145,56 @@ StringData* concat_si(StringData* v1, int64_t v2) {
     return ret;
   }
 
-  auto const newV1 = v1->append(s2);
-  if (UNLIKELY(newV1 != v1)) {
+  auto const ret = v1->append(s2);
+  if (UNLIKELY(ret != v1)) {
     assert(v1->hasExactlyOneRef());
     v1->release();
-    newV1->incRefCount();
-    return newV1;
+    ret->incRefCount();
   }
-  return v1;
+  return ret;
+}
+
+StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
+  if (v1->hasMultipleRefs()) {
+    StringData* ret = StringData::Make(
+        v1->slice(), v2->slice(), v3->slice());
+    ret->setRefCount(1);
+    // Because v1->getCount() is greater than 1, we know we will never
+    // have to release the string here
+    v1->decRefCount();
+    return ret;
+  }
+
+  auto const ret = v1->append(v2->slice(), v3->slice());
+
+  if (UNLIKELY(ret != v1)) {
+    assert(v1->hasExactlyOneRef());
+    v1->release();
+    ret->incRefCount();
+  }
+  return ret;
+}
+
+StringData* concat_s4(StringData* v1, StringData* v2,
+                      StringData* v3, StringData* v4) {
+  if (v1->hasMultipleRefs()) {
+    StringData* ret = StringData::Make(
+        v1->slice(), v2->slice(), v3->slice(), v4->slice());
+    ret->setRefCount(1);
+    // Because v1->getCount() is greater than 1, we know we will never
+    // have to release the string here
+    v1->decRefCount();
+    return ret;
+  }
+
+  auto const ret = v1->append(v2->slice(), v3->slice(), v4->slice());
+
+  if (UNLIKELY(ret != v1)) {
+    assert(v1->hasExactlyOneRef());
+    v1->release();
+    ret->incRefCount();
+  }
+  return ret;
 }
 
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,

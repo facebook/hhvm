@@ -1150,6 +1150,10 @@ Concat    [C C]  ->  [C:Str]
 
   Concatenation (.). Pushes ((string)$2 . (string)$1) on the stack.
 
+ConcatN <n>   [C..C]  ->  [C:Str]
+
+  Concatenation (.). Pushes ((string)$n . ... . (string)$1) on the stack.
+
 Abs    [C] -> [C:Int|Dbl|Bool]
 
   Absolute value. Computes the absolute value of $1 and pushes the result onto

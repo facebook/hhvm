@@ -32,13 +32,14 @@
 #include "hphp/runtime/base/complex-types.h"
 
 #include "hphp/hhbbc/hhbbc.h"
-#include "hphp/hhbbc/misc.h"
-#include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/interp-state.h"
-#include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/analyze.h"
-#include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/dce.h"
+#include "hphp/hhbbc/interp.h"
+#include "hphp/hhbbc/interp-state.h"
+#include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/peephole.h"
+#include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
@@ -364,18 +365,30 @@ void first_pass(const Index& index,
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
+  BytecodeAccumulator accumulator(newBCs);
+
   CollectedInfo collect { index, ctx, nullptr };
   auto interp = Interp { index, ctx, collect, blk, state };
+
+  std::vector<Op> srcStack(state.stack.size(), Op::LowInvalid);
+
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(op));
 
-    auto gen = [&] (const Bytecode& newb) {
-      newBCs.push_back(newb);
-      newBCs.back().srcLoc = op.srcLoc;
-      FTRACE(2, "   + {}\n", show(newBCs.back()));
+    auto gen = [&, state, srcStack] (const Bytecode& newBC) {
+      const_cast<Bytecode&>(newBC).srcLoc = op.srcLoc;
+      FTRACE(2, "   + {}\n", show(newBC));
+      // The accumulator expects input eval state.
+      if (options.Peephole) {
+        accumulator.append(newBC, state, srcStack);
+      } else {
+        newBCs.push_back(newBC);
+      }
     };
 
     auto const flags = step(interp, op);
+    srcStack.resize(state.stack.size(), op.op);
+
     if (flags.calledNoReturn) {
       gen(op);
       gen(bc::BreakTraceHint {}); // The rest of this code is going to
@@ -420,6 +433,9 @@ void first_pass(const Index& index,
     gen(op);
   }
 
+  if (options.Peephole) {
+    accumulator.finalize();
+  }
   blk->hhbcs = std::move(newBCs);
 }
 

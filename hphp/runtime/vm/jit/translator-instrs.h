@@ -32,6 +32,7 @@
   CASE(BreakTraceHint) \
   CASE(CGetM) \
   CASE(ClsCnsD) \
+  CASE(ConcatN) \
   CASE(ContEnter) \
   CASE(ContRaise) \
   CASE(CreateCont) \

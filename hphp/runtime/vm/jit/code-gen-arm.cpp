@@ -141,6 +141,8 @@ CALL_OPCODE(NewPackedArray)
 CALL_OPCODE(ConcatStrStr)
 CALL_OPCODE(ConcatIntStr)
 CALL_OPCODE(ConcatStrInt)
+CALL_OPCODE(ConcatStr3);
+CALL_OPCODE(ConcatStr4);
 
 CALL_OPCODE(PrintStr)
 CALL_OPCODE(PrintInt)

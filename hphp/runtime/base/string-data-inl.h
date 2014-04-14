@@ -25,7 +25,6 @@ inline StringData* StringData::Make() {
 }
 
 //////////////////////////////////////////////////////////////////////
-
 // CopyString
 
 inline StringData* StringData::Make(const char* data) {
@@ -43,7 +42,6 @@ inline StringData* StringData::Make(const StringData* s, CopyStringMode) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
 // AttachString
 
 inline StringData* StringData::Make(char* data, AttachStringMode) {
@@ -61,7 +59,6 @@ inline StringData* StringData::Make(char* data, int len, AttachStringMode) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
 // Concat creation
 
 inline StringData* StringData::Make(const StringData* s1,

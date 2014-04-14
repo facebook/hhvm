@@ -1052,6 +1052,7 @@ static const struct {
 
   /* Binary string */
   { OpConcat,      {StackTop2,        Stack1,       OutString,        -1 }},
+  { OpConcatN,     {StackN,           Stack1,       OutString,         0 }},
   /* Arithmetic ops */
   { OpAbs,         {Stack1,           Stack1,       OutPred,           0 }},
   { OpAdd,         {StackTop2,        Stack1,       OutArith,         -1 }},
@@ -1407,8 +1408,9 @@ int64_t getStackPopped(PC pc) {
     case Op::FCallD:       return getImm((Op*)pc, 0).u_IVA + kNumActRecCells;
     case Op::FCallArray:   return kNumActRecCells + 1;
 
-    case Op::FCallBuiltin:
     case Op::NewPackedArray:
+    case Op::ConcatN:
+    case Op::FCallBuiltin:
     case Op::CreateCl:     return getImm((Op*)pc, 0).u_IVA;
 
     case Op::NewStructArray: return getImmVector((Op*)pc).size();
@@ -1446,8 +1448,9 @@ int getStackDelta(const NormalizedInstruction& ni) {
         return 1 - numArgs - kNumActRecCells;
       }
 
-    case Op::FCallBuiltin:
     case Op::NewPackedArray:
+    case Op::ConcatN:
+    case Op::FCallBuiltin:
     case Op::CreateCl:
       return 1 - ni.imm[0].u_IVA;
 
@@ -1939,10 +1942,13 @@ void getInputsImpl(SrcKey startSk,
     }
   }
   if (input & StackN) {
-    int numArgs = ni->op() == OpNewPackedArray ? ni->imm[0].u_IVA :
-                  ni->immVec.numStackValues();
-    SKTRACE(1, sk, "getInputs: stackN %d %d\n", currentStackOffset - 1,
-            numArgs);
+    int numArgs = (ni->op() == Op::NewPackedArray ||
+                   ni->op() == Op::ConcatN)
+      ? ni->imm[0].u_IVA
+      : ni->immVec.numStackValues();
+
+    SKTRACE(1, sk, "getInputs: stackN %d %d\n",
+            currentStackOffset - 1, numArgs);
     for (int i = 0; i < numArgs; i++) {
       inputs.emplace_back(Location(Location::Stack, --currentStackOffset));
       inputs.back().dontGuard = true;

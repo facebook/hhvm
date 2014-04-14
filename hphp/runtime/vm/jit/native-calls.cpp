@@ -156,6 +156,10 @@ static CallMap s_callMap {
     {ConcatStrStr,       concat_ss, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ConcatStrInt,       concat_si, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ConcatIntStr,       concat_is, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
+    {ConcatStr3,         concat_s3, DSSA, SSync,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
+    {ConcatStr4,         concat_s4, DSSA, SSync,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
 
     {AddElemStrKey,      addElemStringKeyHelper, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},

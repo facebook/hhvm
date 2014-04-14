@@ -442,6 +442,8 @@ enum class SilenceOp : uint8_t {
 #undef SILENCE_OP
 };
 
+constexpr int32_t kMaxConcatN = 4;
+
 //  name             immediates        inputs           outputs     flags
 #define OPCODES \
   O(LowInvalid,      NA,               NOV,             NOV,        NF) \
@@ -485,6 +487,7 @@ enum class SilenceOp : uint8_t {
   O(File,            NA,               NOV,             ONE(CV),    NF) \
   O(Dir,             NA,               NOV,             ONE(CV),    NF) \
   O(Concat,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(ConcatN,         ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(Add,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Sub,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Mul,             NA,               TWO(CV,CV),      ONE(CV),    NF) \

@@ -3871,15 +3871,43 @@ OPTBLD_INLINE void ExecutionContext::iopConcat(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   Cell* c2 = m_stack.indC(1);
-  if (IS_STRING_TYPE(c1->m_type) && IS_STRING_TYPE(c2->m_type)) {
-    cellAsVariant(*c2) = concat(
-      cellAsVariant(*c2).toString(), cellAsCVarRef(*c1).toString());
-  } else {
-    cellAsVariant(*c2) = concat(cellAsVariant(*c2).toString(),
-                                cellAsCVarRef(*c1).toString());
-  }
+
+  cellAsVariant(*c2) = concat(cellAsVariant(*c2).toString(),
+                              cellAsCVarRef(*c1).toString());
   assert_refcount_realistic_nz(c2->m_data.pstr->getCount());
   m_stack.popC();
+}
+
+OPTBLD_INLINE void ExecutionContext::iopConcatN(IOP_ARGS) {
+  NEXT();
+  DECODE_IVA(n);
+
+  Cell* c1 = m_stack.topC();
+  Cell* c2 = m_stack.indC(1);
+
+  if (n == 2) {
+    cellAsVariant(*c2) = concat(cellAsVariant(*c2).toString(),
+                                cellAsCVarRef(*c1).toString());
+    assert_refcount_realistic_nz(c2->m_data.pstr->getCount());
+  } else if (n == 3) {
+    Cell* c3 = m_stack.indC(2);
+    cellAsVariant(*c3) = concat3(cellAsVariant(*c3).toString(),
+                                 cellAsCVarRef(*c2).toString(),
+                                 cellAsCVarRef(*c1).toString());
+    assert_refcount_realistic_nz(c3->m_data.pstr->getCount());
+  } else /* n == 4 */ {
+    Cell* c3 = m_stack.indC(2);
+    Cell* c4 = m_stack.indC(3);
+    cellAsVariant(*c4) = concat4(cellAsVariant(*c4).toString(),
+                                 cellAsCVarRef(*c3).toString(),
+                                 cellAsCVarRef(*c2).toString(),
+                                 cellAsCVarRef(*c1).toString());
+    assert_refcount_realistic_nz(c4->m_data.pstr->getCount());
+  }
+
+  for (int i = 1; i < n; ++i) {
+    m_stack.popC();
+  }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopNot(IOP_ARGS) {

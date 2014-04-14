@@ -94,6 +94,8 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case ConcatStrStr:
     case ConcatStrInt:
     case ConcatCellCell:
+    case ConcatStr3:
+    case ConcatStr4:
       // Call a helper that decrefs the first argument
       return srcNo == 0;
 

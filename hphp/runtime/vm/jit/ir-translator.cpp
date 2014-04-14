@@ -339,6 +339,10 @@ IRTranslator::translateAddO(const NormalizedInstruction& i) {
   }
 }
 
+void IRTranslator::translateConcatN(const NormalizedInstruction& i) {
+  HHIR_EMIT(ConcatN, i.imm[0].u_IVA);
+}
+
 void IRTranslator::translateJmp(const NormalizedInstruction& i) {
   HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, i.breaksTracelet, false);
 }

@@ -221,6 +221,24 @@ StringData* StringData::MakeMalloced(const char* data, int len) {
   return ret;
 }
 
+StringData* StringData::Make(int reserveLen) {
+  auto const allocRet = allocFlatForLen(reserveLen);
+  auto const sd       = allocRet.first;
+  auto const cap      = allocRet.second;
+  auto const data     = reinterpret_cast<char*>(sd + 1);
+
+  data[0] = 0;
+  sd->m_data        = data;
+  sd->m_lenAndCount = 0;
+  sd->m_capAndHash  = cap - sizeof(StringData);
+
+  assert(sd->isFlat());
+  assert(sd->checkSane());
+  return sd;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 StringData* StringData::Make(StringSlice r1, StringSlice r2) {
   auto const len      = r1.len + r2.len;
   auto const allocRet = allocFlatForLen(len);
@@ -245,6 +263,55 @@ StringData* StringData::Make(StringSlice s1, const char* lit2) {
   return Make(s1, StringSlice(lit2, strlen(lit2)));
 }
 
+StringData* StringData::Make(StringSlice r1, StringSlice r2,
+                             StringSlice r3) {
+  auto const len      = r1.len + r2.len + r3.len;
+  auto const allocRet = allocFlatForLen(len);
+  auto const sd       = allocRet.first;
+  auto const cap      = allocRet.second;
+  auto const data     = reinterpret_cast<char*>(sd + 1);
+
+  sd->m_data        = data;
+  sd->m_lenAndCount = len;
+  sd->m_capAndHash  = cap - sizeof(StringData);
+
+  void* p;
+  p = memcpy(data,              r1.ptr, r1.len);
+  p = memcpy((char*)p + r1.len, r2.ptr, r2.len);
+      memcpy((char*)p + r2.len, r3.ptr, r3.len);
+  data[len] = 0;
+
+  assert(sd->isFlat());
+  assert(sd->checkSane());
+  return sd;
+}
+
+StringData* StringData::Make(StringSlice r1, StringSlice r2,
+                             StringSlice r3, StringSlice r4) {
+  auto const len      = r1.len + r2.len + r3.len + r4.len;
+  auto const allocRet = allocFlatForLen(len);
+  auto const sd       = allocRet.first;
+  auto const cap      = allocRet.second;
+  auto const data     = reinterpret_cast<char*>(sd + 1);
+
+  sd->m_data        = data;
+  sd->m_lenAndCount = len;
+  sd->m_capAndHash  = cap - sizeof(StringData);
+
+  void* p;
+  p = memcpy(data,              r1.ptr, r1.len);
+  p = memcpy((char*)p + r1.len, r2.ptr, r2.len);
+  p = memcpy((char*)p + r2.len, r3.ptr, r3.len);
+      memcpy((char*)p + r3.len, r4.ptr, r4.len);
+  data[len] = 0;
+
+  assert(sd->isFlat());
+  assert(sd->checkSane());
+  return sd;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 NEVER_INLINE
 void StringData::releaseDataSlowPath() {
   assert(!isFlat());
@@ -265,21 +332,12 @@ void StringData::release() {
   freeForSize(this, sizeof(StringData) + m_cap);
 }
 
-StringData* StringData::Make(int reserveLen) {
-  auto const allocRet = allocFlatForLen(reserveLen);
-  auto const sd       = allocRet.first;
-  auto const cap      = allocRet.second;
-  auto const data     = reinterpret_cast<char*>(sd + 1);
+//////////////////////////////////////////////////////////////////////
 
-  data[0] = 0;
-  sd->m_data        = data;
-  sd->m_lenAndCount = 0;
-  sd->m_capAndHash  = cap - sizeof(StringData);
-
-  assert(sd->isFlat());
-  assert(sd->checkSane());
-  return sd;
-}
+#define ALIASING_APPEND_ASSERT(ptr, len)                      \
+  assert(uintptr_t(ptr) <= uintptr_t(data()) ||               \
+         uintptr_t(ptr) >= uintptr_t(data() + capacity()));   \
+  assert(ptr != data() || len <= m_len);
 
 StringData* StringData::append(StringSlice range) {
   assert(!hasMultipleRefs());
@@ -302,9 +360,7 @@ StringData* StringData::append(StringSlice range) {
    * interior pointer, although we may be asked to append less than
    * the whole string in an aliasing situation.
    */
-  assert(uintptr_t(s) <= uintptr_t(data()) ||
-         uintptr_t(s) >= uintptr_t(data() + capacity()));
-  assert(s != data() || len <= m_len);
+  ALIASING_APPEND_ASSERT(s, len);
 
   auto const target = UNLIKELY(isShared()) ? escalate(newLen)
                                            : reserve(newLen);
@@ -322,6 +378,98 @@ StringData* StringData::append(StringSlice range) {
 
   return target;
 }
+
+StringData* StringData::append(StringSlice r1, StringSlice r2) {
+  assert(!hasMultipleRefs());
+
+  auto const len = r1.len + r2.len;
+
+  if (len == 0) return this;
+  if (UNLIKELY(uint32_t(len) > MaxSize)) {
+    throw_string_too_large(len);
+  }
+  if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
+    throw_string_too_large2(size_t(len) + size_t(m_len));
+  }
+
+  auto const newLen = m_len + len;
+
+  /*
+   * We may have an aliasing append.  We don't allow appending with an
+   * interior pointer, although we may be asked to append less than
+   * the whole string in an aliasing situation.
+   */
+  ALIASING_APPEND_ASSERT(r1.ptr, r1.len);
+  ALIASING_APPEND_ASSERT(r2.ptr, r2.len);
+
+  auto const target = UNLIKELY(isShared()) ? escalate(newLen)
+                                           : reserve(newLen);
+  auto const mslice = target->bufferSlice();
+
+  /*
+   * memcpy is safe even if it's a self append---the regions will be
+   * disjoint, since rN.ptr can't point past the start of our source
+   * pointer, and rN.len is smaller than the old length.
+   */
+  void* p = mslice.ptr;
+  p = memcpy((char*)p + m_len,  r1.ptr, r1.len);
+      memcpy((char*)p + r1.len, r2.ptr, r2.len);
+
+  target->setSize(newLen);
+  assert(target->checkSane());
+
+  return target;
+}
+
+StringData* StringData::append(StringSlice r1,
+                               StringSlice r2,
+                               StringSlice r3) {
+  assert(!hasMultipleRefs());
+
+  auto const len = r1.len + r2.len + r3.len;
+
+  if (len == 0) return this;
+  if (UNLIKELY(uint32_t(len) > MaxSize)) {
+    throw_string_too_large(len);
+  }
+  if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
+    throw_string_too_large2(size_t(len) + size_t(m_len));
+  }
+
+  auto const newLen = m_len + len;
+
+  /*
+   * We may have an aliasing append.  We don't allow appending with an
+   * interior pointer, although we may be asked to append less than
+   * the whole string in an aliasing situation.
+   */
+  ALIASING_APPEND_ASSERT(r1.ptr, r1.len);
+  ALIASING_APPEND_ASSERT(r2.ptr, r2.len);
+  ALIASING_APPEND_ASSERT(r3.ptr, r3.len);
+
+  auto const target = UNLIKELY(isShared()) ? escalate(newLen)
+                                           : reserve(newLen);
+  auto const mslice = target->bufferSlice();
+
+  /*
+   * memcpy is safe even if it's a self append---the regions will be
+   * disjoint, since rN.ptr can't point past the start of our source
+   * pointer, and rN.len is smaller than the old length.
+   */
+  void* p = mslice.ptr;
+  p = memcpy((char*)p + m_len,  r1.ptr, r1.len);
+  p = memcpy((char*)p + r1.len, r2.ptr, r2.len);
+      memcpy((char*)p + r2.len, r3.ptr, r3.len);
+
+  target->setSize(newLen);
+  assert(target->checkSane());
+
+  return target;
+}
+
+#undef ALIASING_APPEND_ASSERT
+
+//////////////////////////////////////////////////////////////////////
 
 StringData* StringData::reserve(int cap) {
   assert(!isImmutable() && !hasMultipleRefs() && cap >= 0);

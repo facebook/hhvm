@@ -751,6 +751,40 @@ void HhbcTranslator::emitConcat() {
   gen(DecRef, tr);
 }
 
+void HhbcTranslator::emitConcatN(int n) {
+  if (n == 2) return emitConcat();
+
+  auto const catchBlock = makeCatch();
+
+  SSATmp* t1 = popC();
+  SSATmp* t2 = popC();
+  SSATmp* t3 = popC();
+
+  if (!t1->isA(Type::Str) ||
+      !t2->isA(Type::Str) ||
+      !t3->isA(Type::Str)) {
+    PUNT(ConcatN);
+  }
+
+  if (n == 3) {
+    push(gen(ConcatStr3, catchBlock, t3, t2, t1));
+    gen(DecRef, t2);
+    gen(DecRef, t1);
+
+  } else if (n == 4) {
+    SSATmp* t4 = popC();
+    if (!t4->isA(Type::Str)) PUNT(ConcatN);
+
+    push(gen(ConcatStr4, catchBlock, t4, t3, t2, t1));
+    gen(DecRef, t3);
+    gen(DecRef, t2);
+    gen(DecRef, t1);
+
+  } else {
+    not_reached();
+  }
+}
+
 void HhbcTranslator::emitDefCls(int cid, Offset after) {
   emitInterpOne(0);
 }

@@ -162,6 +162,7 @@ struct HhbcTranslator {
   void emitCnsE(uint32_t id);
   void emitCnsU(uint32_t id, uint32_t fallbackId);
   void emitConcat();
+  void emitConcatN(int n);
   void emitDefCls(int id, Offset after);
   void emitDefFunc(int id);
 

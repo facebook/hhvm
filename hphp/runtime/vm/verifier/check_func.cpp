@@ -452,18 +452,22 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
       PC iva_pc = pc;
       int32_t k = decodeVariableSizeImm(&iva_pc);
       switch (*instr) {
-      case OpStaticLoc:
-      case OpStaticLocInit:
-        ok &= checkLocal(pc, k);
-        break;
-      case OpVerifyParamType:
-        if (k >= numParams()) {
-          error("invalid parameter id %d at %d\n",
-                 k, offset((PC)instr));
-          ok = false;
-        }
-      default:
-        break;
+        case Op::ConcatN:
+          ok &= (k >= 2 && k <= kMaxConcatN);
+          break;
+        case Op::StaticLoc:
+        case Op::StaticLocInit:
+          ok &= checkLocal(pc, k);
+          break;
+        case Op::VerifyParamType:
+          if (k >= numParams()) {
+            error("invalid parameter id %d at %d\n",
+                   k, offset((PC)instr));
+            ok = false;
+          }
+          break;
+        default:
+          break;
       }
       break;
     }
@@ -708,6 +712,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     return m_tmp_sig;
   case Op::NewPackedArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewStructArray:  // ONE(VSA),     SMANY,   ONE(CV)
+  case Op::ConcatN:         // ONE(IVA),     CMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
       m_tmp_sig[i] = CV;
     }

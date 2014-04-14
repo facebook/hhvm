@@ -140,6 +140,12 @@ struct Options {
   bool StrengthReduce = true;
 
   /*
+   * Whether to turn on peephole optimizations (e.g., Concat, ..., Concat ->
+   * ..., ConcatN).
+   */
+  bool Peephole = true;
+
+  /*
    * Whether to enable 'FuncFamily' method resolution.
    *
    * This allows possible overrides of a method to be resolved as a

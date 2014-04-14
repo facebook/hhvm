@@ -113,8 +113,12 @@ struct StringData {
   static StringData* Make(const StringData* s1, const StringData* s2);
   static StringData* Make(const StringData* s1, StringSlice s2);
   static StringData* Make(const StringData* s1, const char* lit2);
-  static StringData* Make(StringSlice s1, StringSlice s2);
   static StringData* Make(StringSlice s1, const char* lit2);
+  static StringData* Make(StringSlice s1, StringSlice s2);
+  static StringData* Make(StringSlice s1, StringSlice s2,
+                          StringSlice s3);
+  static StringData* Make(StringSlice s1, StringSlice s2,
+                          StringSlice s3, StringSlice s4);
 
   /*
    * Create a new request-local empty string big enough to hold
@@ -210,6 +214,8 @@ struct StringData {
    * Pre: the string is request-local
    */
   StringData* append(StringSlice r);
+  StringData* append(StringSlice r1, StringSlice r2);
+  StringData* append(StringSlice r1, StringSlice r2, StringSlice r3);
 
   /*
    * Reserve space for a string of length `maxLen' (not counting null

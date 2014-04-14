@@ -334,6 +334,17 @@ void in(ISS& env, const bc::Concat& op) {
   push(env, TStr);
 }
 
+void in(ISS& env, const bc::ConcatN& op) {
+  auto n = op.arg1;
+  assert(n > 1);
+  assert(n < 5);
+
+  for (auto i = 0; i < n; ++i) {
+    popC(env);
+  }
+  push(env, TStr);
+}
+
 template<class Op, class Fun>
 void arithImpl(ISS& env, const Op& op, Fun fun) {
   constprop(env);

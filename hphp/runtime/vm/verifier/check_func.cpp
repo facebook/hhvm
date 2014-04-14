@@ -401,7 +401,7 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
   for (int i = 0, n = numImmediates(*instr); i < n;
        pc += immSize(instr, i), i++) {
     switch (immType(*instr, i)) {
-    default: assert(false && "Unexpected immType");
+    case NA: always_assert(false && "Unexpected immType");
     case MA: { // member vector
       ImmVecRange vr(instr);
       if (vr.size() < 2) {

@@ -1746,14 +1746,9 @@ void Class::setProperties() {
       // Prohibit non-static-->static redeclaration.
       auto const it2 = curPropMap.find(preProp->name());
       if (it2 != curPropMap.end()) {
-        // Find class that declared non-static property.
-        Class* ancestor;
-        for (ancestor = m_parent.get();
-             !ancestor->m_preClass->hasProp(preProp->name());
-             ancestor = ancestor->m_parent.get()) {
-        }
+        auto& prop = curPropMap[it2->second];
         raise_error("Cannot redeclare non-static %s::$%s as static %s::$%s",
-                    ancestor->name()->data(),
+                    prop.m_class->name()->data(),
                     preProp->name()->data(),
                     m_preClass->name()->data(),
                     preProp->name()->data());

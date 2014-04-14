@@ -130,7 +130,7 @@ inline void
 emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
             RegNumber reg) {
   PhysRegSaver(a, kGPCallerSaved); // we don't know for sure what's alive
-  a.    emitImmReg(&datum.m_key, argNumToRegName[0]);
+  a.    emitImmReg(datum.m_key, argNumToRegName[0]);
   const TCA addr = (TCA)pthread_getspecific;
   if (deltaFits((uintptr_t)addr, sz::dword)) {
     a.    call(addr);

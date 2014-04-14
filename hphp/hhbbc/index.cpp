@@ -1084,15 +1084,6 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   };
   if (!m_data->isComprehensive) return name_only();
 
-  DEBUG_ONLY auto has_unique = [&]() -> bool {
-    auto const classes = find_range(m_data->classes, clsName);
-    if (begin(classes) != end(classes)) {
-      return begin(classes)->second->attrs & AttrUnique &&
-        !(begin(classes)->second->attrs & AttrTrait);
-    }
-    return false;
-  };
-
   /*
    * If there's only one preresolved ClassInfo, we can give out a
    * specific res::Class for it.  (Any other possible resolutions were
@@ -1115,14 +1106,6 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
       return res::Class { this, cinfo };
     }
     break;
-  }
-
-  if (debug && has_unique()) {
-    int count = m_data->classInfo.count(clsName);
-    std::fprintf(stderr, "A unique class failed to resolve: %s\n"
-                    "  Size of the classes vec was %d\n",
-                    clsName->data(), count);
-    always_assert(0);
   }
 
   return name_only();
@@ -1160,6 +1143,13 @@ folly::Optional<res::Func> Index::resolve_method(Context ctx,
     // to check this, since the private method list cannot change
     // for different realizations of the class.
     auto const range   = find_range(m_data->classInfo, ctx.cls->name);
+    if (begin(range) == end(range)) {
+      // This class had no pre-resolved ClassInfos, which means it
+      // always fatals in any way it could be defined, so it doesn't
+      // matter what we return here (as all methods in the the context
+      // class are unreachable code).
+      return true;
+    }
     auto const ctxInfo = begin(range)->second;
     auto const iter    = ctxInfo->methods.find(name);
     if (iter != end(ctxInfo->methods)) {

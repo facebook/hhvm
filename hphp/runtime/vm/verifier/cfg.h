@@ -159,7 +159,6 @@ class GraphBuilder {
   Offset offset(PC addr) const {
     return m_unit->offsetOf(addr);
   }
-  void addEdge(Block* from, EdgeKind k, Block* target);
   Block** succs(Block* b);
   Block** exns(Block* b);
  private:

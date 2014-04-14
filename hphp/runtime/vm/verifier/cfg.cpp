@@ -250,11 +250,6 @@ Block* GraphBuilder::at(PC target) {
   return i == m_blocks.end() ? 0 : i->second;
 }
 
-void GraphBuilder::addEdge(Block* from, EdgeKind k, Block* target) {
-  assert(target != 0);
-  from->succs[k] = target;
-}
-
 /**
  * RpoSort does a depth-first search over successor and exception edges
  * of a Graph, visits blocks in postorder, and builds the reverse-postorder

@@ -467,6 +467,8 @@ struct Func {
     m_cachedFunc = l;
   }
 
+  bool anyBlockEndsAt(Offset off) const;
+
 public: // Offset accessors for the translator.
 #define X(f) static constexpr ptrdiff_t f##Off() {      \
     return offsetof(Func, m_##f);                       \
@@ -508,6 +510,7 @@ private:
     SVInfoVec m_staticVars;
     EHEntVec m_ehtab;
     FPIEntVec m_fpitab;
+    hphp_hash_set<Offset> m_blockEnds;
     const StringData* m_docComment;
     bool m_top : 1; // Defined at top level.
     bool m_isClosureBody : 1;

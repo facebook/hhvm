@@ -32,6 +32,8 @@
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
+#include "hphp/runtime/vm/verifier/cfg.h"
+
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/atomic-vector.h"
@@ -188,6 +190,28 @@ void Func::setFullName() {
       m_attrs = Attr(m_attrs | AttrInterceptable);
     }
   }
+}
+
+bool Func::anyBlockEndsAt(Offset off) const {
+  assert(JIT::Translator::WriteLease().amOwner());
+  // The empty() check relies on a Func's bytecode always being nonempty
+  assert(base() != past());
+  if (m_shared->m_blockEnds.empty()) {
+    using namespace Verifier;
+
+    Arena arena;
+    GraphBuilder builder{arena, this};
+    Graph* cfg = builder.build();
+
+    for (LinearBlocks blocks = linearBlocks(cfg); !blocks.empty(); ) {
+      auto last = blocks.popFront()->last - m_unit->entry();
+      m_shared->m_blockEnds.insert(last);
+    }
+
+    assert(!m_shared->m_blockEnds.empty());
+  }
+
+  return m_shared->m_blockEnds.count(off) != 0;
 }
 
 void Func::resetPrologue(int numParams) {

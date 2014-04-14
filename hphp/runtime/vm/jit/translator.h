@@ -677,7 +677,7 @@ opcodeBreaksBB(const Op instr) {
  *
  * Similar to opcodeBreaksBB but more strict. We break profiling blocks after
  * any instruction that can side exit, including instructions with predicted
- * output.
+ * output, and before any control flow merge point.
  */
 bool instrBreaksProfileBB(const NormalizedInstruction* instr);
 

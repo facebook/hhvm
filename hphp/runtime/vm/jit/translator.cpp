@@ -3528,9 +3528,16 @@ void Translator::analyzeCallee(TraceletContext& tas,
 }
 
 bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
-  return (instrIsNonCallControlFlow(instr->op()) ||
-          instr->outputPredicted ||
-          instr->op() == OpClsCnsD); // side exits if misses in the RDS
+  if (instrIsNonCallControlFlow(instr->op()) ||
+      instr->outputPredicted ||
+      instr->op() == OpClsCnsD) { // side exits if misses in the RDS
+    return true;
+  }
+  // In profiling mode, don't trace through a control flow merge point
+  if (instr->func()->anyBlockEndsAt(instr->offset())) {
+    return true;
+  }
+  return false;
 }
 
 /*
@@ -3780,7 +3787,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     }
 
     if (m_mode == TransProfile && instrBreaksProfileBB(ni)) {
-      SKTRACE(1, sk, "BB broken\n");
+      SKTRACE(1, sk, "Profiling BB broken\n");
       sk.advance(unit);
       goto breakBB;
     }

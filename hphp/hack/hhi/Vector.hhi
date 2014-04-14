@@ -105,7 +105,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
 
   /**
    * Stores a value into the Vector with the specified key, overwriting the
-   * previous value associated with the key. If the key is not present, an
+   * previous value associated with the key. If the key is not present,
    * an exception is thrown. "$vec->set($k,$v)" is semantically equivalent
    * to "$vec[$k] = $v" (except that set() returns the Vector).
    */

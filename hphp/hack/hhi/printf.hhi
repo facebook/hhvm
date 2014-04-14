@@ -23,12 +23,12 @@
  *
  * and consume an 'int' from the argument list.
  *
- * Hex escapes are used for non-alphabetic charcaters. The '%%'
+ * Hex escapes are used for non-alphabetic characters. The '%%'
  * pseudo-specifier consumes nothing and appears as
  *
  *     function format_0x25() : string;
  *
- * Modifiers and multi-char entires can be encoded by return a new
+ * Modifiers and multi-char entries can be encoded by return a new
  * formatter instead of a string:
  *
  *     function format_upcase_l() : ListFormatter;

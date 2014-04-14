@@ -89,7 +89,7 @@ final class ImmVector<Tv> implements ConstVector<Tv> {
   public function toKeysArray(): array;
 
   /**
-   * Returns an iterator that points to beginning of this ImmVector.
+   * Returns an iterator that points to the beginning of this ImmVector.
    */
   public function getIterator(): VectorIterator<Tv>;
 

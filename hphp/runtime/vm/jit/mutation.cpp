@@ -134,10 +134,39 @@ void retypeDests(IRInstruction* inst) {
   assertOperandTypes(inst);
 }
 
+/*
+ * Algorithm for reflow:
+ * 1. for each block in reverse postorder:
+ * 2.   compute dest types of each instruction in forwards order
+ * 3.   if the block ends with a jmp that passes types to a label,
+ *      and the jmp is a loop edge,
+ *      and any passed types cause the target label's type to widen,
+ *      then set again=true
+ * 4. if again==true, goto step 1
+ */
 void reflowTypes(IRUnit& unit) {
-  for (auto* block : rpoSortCfg(unit)) {
-    FTRACE(5, "reflowTypes: visiting block {}\n", block->id());
-    for (auto& inst : *block) retypeDests(&inst);
+  auto blocklist = rpoSortCfgWithIds(unit);
+  auto isBackEdge = [&](Block* from, Block* to) {
+    return blocklist.ids[from] > blocklist.ids[to];
+  };
+  for (bool again = true; again;) {
+    again = false;
+    for (auto* block : blocklist.blocks) {
+      FTRACE(5, "reflowTypes: visiting block {}\n", block->id());
+      for (auto& inst : *block) retypeDests(&inst);
+      auto& jmp = block->back();
+      auto n = jmp.numSrcs();
+      if (!again && jmp.is(Jmp) && n > 0 && isBackEdge(block, jmp.taken())) {
+        // if we pass a widening type to a label, loop again.
+        auto srcs = jmp.srcs();
+        auto dsts = jmp.taken()->front().dsts();
+        for (unsigned i = 0; i < n; ++i) {
+          if (srcs[i]->type() <= dsts[i].type()) continue;
+          again = true;
+          break;
+        }
+      }
+    }
   }
 }
 

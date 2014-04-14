@@ -663,7 +663,7 @@ void CodeGenerator::cgConjure(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgHalt(IRInstruction* inst) {
-  always_assert(false);
+  m_as.ud2();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -201,8 +201,6 @@ private:
   PhysReg::Map<unsigned> posns;
 };
 
-bool checkBlockOrder(IRUnit& unit, BlockList& blocks);
-
 //////////////////////////////////////////////////////////////////////////////
 
 // returns true if this range contains r
@@ -458,7 +456,6 @@ void dstConstraints(Interval* ivl, const Abi& abi, Constraint constraint) {
 // no special handling is needed for goto/label (phi) instructions because
 // they use/define tmps in the expected locations.
 void XLS::buildIntervals() {
-  assert(checkBlockOrder(m_unit, m_blocks));
   unsigned min_need = 0;
   for (auto blockIt = m_blocks.end(); blockIt != m_blocks.begin();) {
     auto block = *--blockIt;
@@ -549,6 +546,17 @@ void XLS::buildIntervals() {
       min_need = std::max(min_need, src_need);
     }
     m_liveIn[block] = live;
+    // if this block is a loop header, add a live range that covers
+    // the whole loop, to each interval live-into this block.
+    block->forEachPred([&](Block* pred) {
+      auto predEnd = m_posns[pred->back()] + 2;
+      if (predEnd > blockStart) {
+        live.forEach([&](uint32_t id) {
+          auto ivl = m_intervals[id];
+          ivl->add(LiveRange{blockStart, predEnd});
+        });
+      }
+    });
   }
   // Implement stress mode by blocking NumFreeRegs more than minimum needed.
   min_need += RuntimeOption::EvalHHIRNumFreeRegs;
@@ -1115,8 +1123,12 @@ void XLS::resolveFlow(Interval* parent, Block* pred, Block* succ,
     if (ivl->covers(pos1)) i1 = ivl;
     if (ivl->covers(pos2)) i2 = ivl;
   }
-  if (i2->loc.spilled()) return; // we did spill store after def.
-  if (i1->loc == i2->loc) return; // nothing to do.
+  if (i2->loc.spilled() || i1->loc == i2->loc || i2->loc.numAllocated() == 0) {
+    // if i2 target is a spill loc, equal to i1, or unallocated,
+    // then we don't need any copy.  i2 can be unallocated if the tmp is
+    // a constant.
+    return; // nothing to do
+  }
   auto& shuffle = pred->next() == succ ? m_edgeCopies[pred].first :
                   m_edgeCopies[pred].second;
   if (pred->taken() && pred->next()) {
@@ -1338,19 +1350,6 @@ bool Interval::checkInvariants() const {
   }
   assert(u == uses.end()); // 4,5: all uses covered
   assert(!next || next->start() >= end()); // 6: next child is ok.
-  return true;
-}
-
-// check that each block comes after all its predecessors (XXX won't be
-// true once we have loops).
-bool checkBlockOrder(IRUnit& unit, BlockList& blocks) {
-  StateVector<Block, bool> seen(unit, false);
-  for (auto b : blocks) {
-    b->forEachPred([&](Block* p) {
-      assert(seen[p]);
-    });
-    seen[b] = true;
-  }
   return true;
 }
 }

@@ -113,7 +113,7 @@ void FastCGIConnection::readDataAvailable(size_t len) noexcept {
   resetTimeout();
 
   size_t length = m_session.onIngress(m_readBuf.front());
-  if(m_readBuf.front() != nullptr) {
+  if (m_readBuf.front() != nullptr) {
     m_readBuf.split(length);
   }
 }

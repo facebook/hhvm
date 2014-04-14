@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/server/fastcgi/fastcgi-session.h"
+#include "hphp/util/logger.h"
 #include "folly/io/IOBuf.h"
 #include "folly/io/Cursor.h"
 #include "folly/Memory.h"
@@ -482,6 +483,7 @@ void FastCGISession::handleAbortRequest() {
     handleInvalidRecord();
     return;
   }
+  Logger::Verbose("FastCGI protocol: received an abort request");
   endTransaction(m_requestId);
   writeEndRequest(m_requestId, 1, ProtoStatus::REQUEST_COMPLETE);
   handleClose();
@@ -559,7 +561,7 @@ void FastCGISession::handleGetValueResult(const std::string& key) {
 }
 
 void FastCGISession::handleInvalidRecord() {
-  LOG(ERROR) << "FastCGI protocol: received an invalid record";
+  Logger::Error("FastCGI protocol: received an invalid record");
   m_phase = Phase::INVALID;
   if (m_callback) {
     m_callback->onSessionError();

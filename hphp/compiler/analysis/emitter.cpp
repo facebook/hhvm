@@ -8367,7 +8367,6 @@ typedef hphp_hash_map<const StringData*, ContinuationMethod,
 static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
                                    ContinuationMethod m) {
   static const StringData* valStr = makeStaticString("value");
-  static const StringData* exnStr = makeStaticString("exception");
 
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic | AttrMayUseVV);
   fe->init(0, 0, ue.bcPos(), attrs, false, empty_string.get());
@@ -8385,8 +8384,7 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
       ue.emitOp(OpContCheck);
       ue.emitIVA(m == METH_SEND || m == METH_RAISE);
 
-      const Offset ehStart = ue.bcPos();
-      switch(m) {
+      switch (m) {
         case METH_NEXT:
           ue.emitOp(OpNull);
           ue.emitOp(OpContEnter);
@@ -8406,15 +8404,6 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
       ue.emitOp(OpContStopped);
       ue.emitOp(OpNull);
       ue.emitOp(OpRetC);
-
-      EHEnt& eh = fe->addEHEnt();
-      eh.m_type = EHEnt::Type::Catch;
-      eh.m_base = ehStart;
-      eh.m_past = ue.bcPos();
-      eh.m_catches.push_back(
-        std::pair<Id, Offset>(ue.mergeLitstr(exnStr), ue.bcPos()));
-      ue.emitOp(OpCatch);
-      ue.emitOp(OpContHandle);
       break;
     }
     case METH_VALID: {

@@ -820,9 +820,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
         }
       }
     } else if (m_inst == &m_block->back() && m_block->isExit() &&
-               // Make sure it's not a RetCtrl of a normal function
+               // Make sure it's not a RetCtrl from Ret{C,V}
                (!m_inst->is(RetCtrl) ||
-                m_inst->extra<InGeneratorData>()->inGenerator) &&
+                m_inst->extra<RetCtrlData>()->suspendingResumed) &&
                // The EndCatch in FunctionExitSurpriseHook's catch block is
                // special: it happens after locals and $this have been
                // decreffed, so we don't want to do the normal cleanup
@@ -830,7 +830,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
                  m_block->preds().front().inst()
                    ->is(FunctionExitSurpriseHook) &&
                  !m_block->preds().front().inst()
-                   ->extra<InGeneratorData>()->inGenerator)) {
+                   ->extra<RetCtrlData>()->suspendingResumed)) {
       // When leaving a trace, we need to account for all live references in
       // locals and $this pointers.
       consumeAllLocals();
@@ -920,8 +920,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst->is(InlineReturn)) {
       FTRACE(3, "{}", show(m_state));
       m_state.frames.popInline(frameRoot(m_inst->src(0)->inst()));
-    } else if (m_inst->is(RetCtrl) &&
-               !m_inst->extra<InGeneratorData>()->inGenerator) {
+    } else if (m_inst->is(RetAdjustStack)) {
       m_state.frames.pop();
     } else if (m_inst->is(Call, CallArray)) {
       resolveAllFrames();

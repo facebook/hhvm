@@ -1321,7 +1321,6 @@ static const struct {
   { OpContKey,     {None,             Stack1,       OutUnknown,        1 }},
   { OpContCurrent, {None,             Stack1,       OutUnknown,        1 }},
   { OpContStopped, {None,             None,         OutNone,           0 }},
-  { OpContHandle,  {Stack1,           None,         OutNone,          -1 }},
 
   /*** 15. Async functions instructions ***/
 
@@ -3008,10 +3007,6 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
     case OpContSuspend:
     case OpContSuspendK:
       // The stack input is teleported to the continuation's m_value field
-      return DataTypeGeneric;
-
-    case OpContHandle:
-      // This always calls the interpreter
       return DataTypeGeneric;
 
     case OpAddElemC:

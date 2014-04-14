@@ -49,7 +49,6 @@ static bool breaksRegion(Op opc) {
     case OpUnwind:
     case OpEval:
     case OpNativeImpl:
-    case OpContHandle:
       return true;
 
     default:

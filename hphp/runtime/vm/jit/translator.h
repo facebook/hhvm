@@ -625,7 +625,6 @@ opcodeControlFlowInfo(const Op instr) {
     case Op::Unwind:
     case Op::Eval:
     case Op::NativeImpl:
-    case Op::ContHandle:
     case Op::BreakTraceHint:
       return ControlFlowInfo::BreaksBB;
     case Op::FCall:

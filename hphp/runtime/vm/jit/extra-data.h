@@ -403,16 +403,18 @@ struct CallData : IRExtraData {
   bool destroyLocals;
 };
 
-struct InGeneratorData : IRExtraData {
-  explicit InGeneratorData(bool inGenerator)
-    : inGenerator(inGenerator)
+struct RetCtrlData : IRExtraData {
+  explicit RetCtrlData(bool suspendingResumed)
+    : suspendingResumed(suspendingResumed)
   {}
 
   std::string show() const {
-    return inGenerator ? "in generator" : "";
+    return suspendingResumed ? "suspending resumed" : "";
   }
 
-  bool inGenerator;
+  // Indicates that the current generator frame is being suspended without
+  // decrefing locals. Used by refcount optimizer.
+  bool suspendingResumed;
 };
 
 /*
@@ -807,8 +809,8 @@ X(IncProfCounter,               TransIDData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallData);
 X(CallArray,                    CallArrayData);
-X(RetCtrl,                      InGeneratorData);
-X(FunctionExitSurpriseHook,     InGeneratorData);
+X(RetCtrl,                      RetCtrlData);
+X(FunctionExitSurpriseHook,     RetCtrlData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);
 X(LookupClsMethodCache,         ClsMethodData);

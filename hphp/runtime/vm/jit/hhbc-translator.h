@@ -668,8 +668,6 @@ private:
   void emitAGet(SSATmp* src, Block* catchBlock);
   void emitRetFromInlined(Type type);
   void emitDecRefLocalsInline();
-  void emitRetGen();
-  void emitRetNonGen(Type type, bool freeInline);
   void emitRet(Type type, bool freeInline);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
@@ -684,7 +682,8 @@ private:
   SSATmp* emitMIterInitCommon(int offset, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
   void emitJmpSurpriseCheck(Block* catchBlock);
-  void emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock);
+  void emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock,
+                            bool suspendingResumed);
   void classExistsImpl(ClassKind);
 
   folly::Optional<Type> interpOutputType(const NormalizedInstruction&,

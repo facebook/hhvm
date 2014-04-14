@@ -1488,7 +1488,7 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
 
   // Call the FunctionExit hook and put the return value on the stack so that
   // the unwinder would decref it.
-  emitRetSurpriseCheck(cont, makeCatch({cont}));
+  emitRetSurpriseCheck(cont, makeCatch({cont}), false);
 
   // Grab caller info from ActRec, free ActRec, store the return value
   // and return control to the caller.
@@ -1496,7 +1496,7 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
   SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
-  gen(RetCtrl, InGeneratorData(false), sp, fp, retAddr);
+  gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
   m_hasExit = true;
@@ -1504,12 +1504,12 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
 
 void HhbcTranslator::emitContReturnControl(Block* catchBlock) {
   auto const sp = spillStack();
-  emitRetSurpriseCheck(cns(Type::Uninit), catchBlock);
+  emitRetSurpriseCheck(cns(Type::Uninit), catchBlock, true);
 
   auto const retAddr = gen(LdRetAddr, m_irb->fp());
   auto const fp = gen(FreeActRec, m_irb->fp());
 
-  gen(RetCtrl, InGeneratorData(true), sp, fp, retAddr);
+  gen(RetCtrl, RetCtrlData(true), sp, fp, retAddr);
   m_hasExit = true;
 }
 
@@ -1672,7 +1672,7 @@ void HhbcTranslator::emitAsyncSuspendE(Offset resumeOffset, int numIters) {
   // Call the FunctionExit hook and put the AsyncFunctionWaitHandle
   // on the stack so that the unwinder would decref it.
   push(waitHandle);
-  emitRetSurpriseCheck(waitHandle, makeCatch());
+  emitRetSurpriseCheck(waitHandle, makeCatch(), false);
   discard(1);
 
   // Grab caller info from ActRec, free ActRec, store the return value
@@ -1681,7 +1681,7 @@ void HhbcTranslator::emitAsyncSuspendE(Offset resumeOffset, int numIters) {
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
   SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
-  gen(RetCtrl, InGeneratorData(false), sp, fp, retAddr);
+  gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
   m_hasExit = true;
@@ -2316,7 +2316,7 @@ void HhbcTranslator::emitNativeImpl() {
   SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
-  gen(RetCtrl, InGeneratorData(false), sp, fp, retAddr);
+  gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction so no ExitTrace is needed
   m_hasExit = true;
@@ -3160,24 +3160,7 @@ void HhbcTranslator::emitDecRefLocalsInline() {
   }
 }
 
-void HhbcTranslator::emitRetGen() {
-  assert(inGenerator());
-  auto catchBlock = makeCatchNoSpill();
-  // set state to done
-  gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
-      cns(c_Continuation::Done));
-
-  // set m_value = popC();
-  auto const oldValue = gen(LdContArValue, Type::Cell, m_irb->fp());
-  gen(StContArValue, m_irb->fp(), popC(DataTypeGeneric)); // teleporting value
-  gen(DecRef, oldValue);
-
-  // transfer control
-  emitContReturnControl(catchBlock);
-}
-
-void HhbcTranslator::emitRetNonGen(Type type, bool freeInline) {
-  assert(!inGenerator());
+void HhbcTranslator::emitRet(Type type, bool freeInline) {
   auto const func = curFunc();
   if (func->attrs() & AttrMayUseVV) {
     // Note: this has to be the first thing, because we cannot bail after
@@ -3187,7 +3170,7 @@ void HhbcTranslator::emitRetNonGen(Type type, bool freeInline) {
   }
 
   // If in async function, wrap the return value with a StaticResultWaitHandle.
-  if (func->isAsync()) {
+  if (!inGenerator() && func->isAsync()) {
     push(gen(CreateSRWH, pop(type, DataTypeGeneric)));
   }
 
@@ -3213,33 +3196,50 @@ void HhbcTranslator::emitRetNonGen(Type type, bool freeInline) {
 
   // Call the FunctionExit hook and put the return value on the stack so that
   // the unwinder would decref it.
-  emitRetSurpriseCheck(retVal, catchBlock);
+  emitRetSurpriseCheck(inGenerator() ? cns(Type::Uninit) : retVal,
+                       catchBlock, false);
 
- // Type profile return value.
+  // Type profile return value.
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     gen(TypeProfileFunc, TypeProfileData(-1), retVal, cns(func));
   }
 
-  // Grab caller info from ActRec, free ActRec, store the return value
-  // and return control to the caller.
-  gen(StRetVal, m_irb->fp(), retVal);
+  SSATmp* sp;
+  if (!inGenerator()) {
+    // Store the return value.
+    gen(StRetVal, m_irb->fp(), retVal);
+
+    // Free ActRec.
+    sp = gen(RetAdjustStack, m_irb->fp());
+  } else {
+    // Mark generator as finished.
+    gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
+        cns(c_Continuation::Done));
+
+    // Store the return value.
+    auto const oldValue = gen(LdContArValue, Type::Cell, m_irb->fp());
+    gen(StContArValue, m_irb->fp(), retVal);
+    gen(DecRef, oldValue);
+
+    // Sync SP.
+    sp = spillStack();
+  }
+
+  // Grab caller info from ActRec and return control to the caller.
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
-  SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
-  gen(RetCtrl, InGeneratorData(false), sp, fp, retAddr);
+  gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
   m_hasExit = true;
 }
 
 void HhbcTranslator::emitRetC(bool freeInline) {
-  if (inGenerator()) {
-    assert(!isInlining());
-    emitRetGen();
-  } else if (isInlining()) {
+  if (isInlining()) {
+    assert(!inGenerator());
     emitRetFromInlined(Type::Cell);
   } else {
-    emitRetNonGen(Type::Cell, freeInline);
+    emitRet(Type::Cell, freeInline);
   }
 }
 
@@ -3249,7 +3249,7 @@ void HhbcTranslator::emitRetV(bool freeInline) {
   if (isInlining()) {
     emitRetFromInlined(Type::BoxedCell);
   } else {
-    emitRetNonGen(Type::BoxedCell, freeInline);
+    emitRet(Type::BoxedCell, freeInline);
   }
 }
 
@@ -3263,14 +3263,15 @@ void HhbcTranslator::emitJmpSurpriseCheck(Block* catchBlock) {
                });
 }
 
-void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock) {
+void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock,
+                                          bool suspendingResumed) {
   emitRB(Trace::RBTypeFuncExit, curFunc()->fullName());
   m_irb->ifThen([&](Block* taken) {
                  gen(CheckSurpriseFlags, taken);
                },
                [&] {
                  m_irb->hint(Block::Hint::Unlikely);
-                 gen(FunctionExitSurpriseHook, InGeneratorData(inGenerator()),
+                 gen(FunctionExitSurpriseHook, RetCtrlData(suspendingResumed),
                      catchBlock, m_irb->fp(), retVal);
                });
 }

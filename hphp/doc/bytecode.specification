@@ -752,9 +752,9 @@ inputs' flavor descriptors.
 point.
 
 4) If a given instruction is not the target of a forward branch and it follows
-a Jmp, Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw, NativeImpl, or
-ContHandle instruction, the evaluation stack before executing the given
-instruction must be empty.
+a Jmp, Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw, or NativeImpl
+instruction, the evaluation stack before executing the given instruction
+must be empty.
 
 5) Before executing the RetC instruction, the evaluation stack must contain
 exactly one value and the flavor descriptor of the value must be cell.
@@ -773,7 +773,7 @@ another funclet.
 7) Any bytecode instruction inside the primary function body or a fault funclet
 that is immediately followed by an instruction not inside the same primary
 function body or fault funclet must be one of the following instructions: Jmp,
-Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw, NativeImpl, or ContHandle.
+Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw, or NativeImpl.
 
 8) The primary function body may not contain the Unwind instruction, and fault
 funclets may not contain the Ret* instructions. Also, each catch entry point
@@ -4147,12 +4147,6 @@ ContCurrent    []  ->  [C]
 ContStopped    []  ->  []
 
   Mark continuation as stopped. $this must be a Continuation object.
-
-ContHandle    [C]  ->  []
-
-  Handle exception from continuation body. $this must be a Continuation object.
-  Marks the continuation as no longer running and finished and rethrows the
-  exception on the top of the stack.
 
 15. Async functions
 -------------------

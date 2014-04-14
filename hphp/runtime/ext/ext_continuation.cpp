@@ -57,6 +57,10 @@ c_Continuation::~c_Continuation() {
   tvRefcountedDecRef(m_key);
   tvRefcountedDecRef(m_value);
 
+  if (LIKELY(done())) {
+    return;
+  }
+
   // Free locals, but don't trigger the EventHook for FunctionExit
   // since the continuation function has already been exited. We
   // don't want redundant calls.

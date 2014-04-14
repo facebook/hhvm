@@ -4458,37 +4458,10 @@ OPTBLD_INLINE void ExecutionContext::iopSSwitch(IOP_ARGS) {
   m_stack.popC();
 }
 
-OPTBLD_INLINE void ExecutionContext::retGen(IOP_ARGS) {
-  assert(m_fp->inGenerator());
-
-  c_Continuation* cont = frame_continuation(m_fp);
-  cont->setDone();
-  tvSetIgnoreRef(*m_stack.topC(), cont->m_value);
-  m_stack.popC();
-
-  // Call the FunctionExit hook.
-  EventHook::FunctionExit(m_fp, nullptr);
-
-  // Grab caller into from ActRec.
-  ActRec* sfp = m_fp->arGetSfp();
-  uint soff = m_fp->m_soff;
-
-  if (sfp != m_fp) {
-    // Return control to the caller.
-    m_fp = sfp;
-    pc = m_fp->func()->getEntry() + soff;
-  } else {
-    // No caller; terminate.
-    m_fp = nullptr;
-    pc = nullptr;
-  }
-}
-
-OPTBLD_INLINE void ExecutionContext::retNonGen(IOP_ARGS) {
-  assert(!m_fp->inGenerator());
-
-  // If in async function, wrap the return value with a StaticResultWaitHandle.
-  if (m_fp->func()->isAsync()) {
+OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
+  // If in an eagerly executed async function, wrap the return value
+  // with a StaticResultWaitHandle.
+  if (UNLIKELY(!m_fp->inGenerator() && m_fp->func()->isAsync())) {
     auto const top = m_stack.topC();
     top->m_data.pobj = c_StaticResultWaitHandle::CreateFromVM(*top);
     top->m_type = KindOfObject;
@@ -4499,7 +4472,8 @@ OPTBLD_INLINE void ExecutionContext::retNonGen(IOP_ARGS) {
 
   // Free $this and local variables. Calls FunctionExit hook. The return value
   // is kept on the stack so that the unwinder would free it if the hook fails.
-  frame_free_locals_inl(m_fp, m_fp->func()->numLocals(), &retval);
+  frame_free_locals_inl(m_fp, m_fp->func()->numLocals(),
+                        m_fp->inGenerator() ? nullptr : &retval);
   m_stack.discard();
 
   // Type profile return value.
@@ -4509,13 +4483,20 @@ OPTBLD_INLINE void ExecutionContext::retNonGen(IOP_ARGS) {
 
   // Grab caller info from ActRec.
   ActRec* sfp = m_fp->arGetSfp();
-  uint soff = m_fp->m_soff;
+  Offset soff = m_fp->m_soff;
 
-  // Free ActRec and store the return value.
-  m_stack.ndiscard(m_fp->func()->numSlotsInFrame());
-  m_stack.ret();
-  *m_stack.topTV() = retval;
-  assert(m_stack.topTV() == &m_fp->m_r);
+  if (LIKELY(!m_fp->inGenerator())) {
+    // Free ActRec and store the return value.
+    m_stack.ndiscard(m_fp->func()->numSlotsInFrame());
+    m_stack.ret();
+    *m_stack.topTV() = retval;
+    assert(m_stack.topTV() == &m_fp->m_r);
+  } else {
+    // Mark the generator as finished and store the return value.
+    auto cont = frame_continuation(m_fp);
+    cont->setDone();
+    tvSetIgnoreRef(retval, cont->m_value);
+  }
 
   if (LIKELY(sfp != m_fp)) {
     // Return control to the caller.
@@ -4525,25 +4506,19 @@ OPTBLD_INLINE void ExecutionContext::retNonGen(IOP_ARGS) {
     // No caller; terminate.
     m_fp = nullptr;
     pc = nullptr;
-    ONTRACE(1, Trace::trace("Return %s from ExecutionContext::dispatch(%p)\n",
-                            toStringElm(m_stack.topTV()).c_str(), m_fp));
   }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopRetC(IOP_ARGS) {
   NEXT();
-  if (UNLIKELY(m_fp->inGenerator())) {
-    retGen(IOP_PASS_ARGS);
-  } else {
-    retNonGen(IOP_PASS_ARGS);
-  }
+  ret(IOP_PASS_ARGS);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopRetV(IOP_ARGS) {
   NEXT();
   assert(!m_fp->inGenerator());
   assert(!m_fp->func()->isAsync());
-  retNonGen(IOP_PASS_ARGS);
+  ret(IOP_PASS_ARGS);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopUnwind(IOP_ARGS) {
@@ -7242,18 +7217,6 @@ OPTBLD_INLINE void ExecutionContext::iopContCurrent(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopContStopped(IOP_ARGS) {
   NEXT();
   this_continuation(m_fp)->setStopped();
-}
-
-OPTBLD_INLINE void ExecutionContext::iopContHandle(IOP_ARGS) {
-  NEXT();
-  c_Continuation* cont = this_continuation(m_fp);
-  cont->setDone();
-  cellSet(make_tv<KindOfNull>(), cont->m_value);
-
-  Variant exn = tvAsVariant(m_stack.topTV());
-  m_stack.popC();
-  assert(exn.asObjRef().instanceof(SystemLib::s_ExceptionClass));
-  throw exn.asObjRef();
 }
 
 OPTBLD_INLINE void ExecutionContext::iopAsyncAwait(IOP_ARGS) {

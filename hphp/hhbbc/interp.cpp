@@ -1854,7 +1854,6 @@ void in(ISS& env, const bc::ContValid&)   { push(env, TBool); }
 void in(ISS& env, const bc::ContKey&)     { push(env, TInitCell); }
 void in(ISS& env, const bc::ContCurrent&) { push(env, TInitCell); }
 void in(ISS& env, const bc::ContStopped&) {}
-void in(ISS& env, const bc::ContHandle&)  { popC(env); }
 
 void in(ISS& env, const bc::AsyncAwait&) {
   // We handle this better if we manage to group the opcode.

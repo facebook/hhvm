@@ -49,7 +49,7 @@ final class ImmSet<Tv> implements ConstSet<Tv> {
   public function toValuesArray(): array;
 
   /**
-   * Returns an iterator that points to beginning of this ImmSet.
+   * Returns an iterator that points to the beginning of this ImmSet.
    */
   public function getIterator(): SetIterator<Tv>;
 

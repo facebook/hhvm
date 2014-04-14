@@ -178,6 +178,18 @@ final class Vector<Tv> implements MutableVector<Tv> {
   public function splice(int $offset, ?int $len = null): void;
 
   /**
+   * Returns a Vector containing the first n values of this Vector.
+   */
+  public function take(int $n): Vector<Tv>;
+
+  /**
+   * Returns a Vector containing the values of this Vector up to but not
+   * including the first value that produces false when passed to the specified
+   * callback.
+   */
+  public function takeWhile((function(Tv): bool) $callback): Vector<Tv>;
+
+  /**
    * Returns the index of the first element that matches the search value.
    * If no element matches the search value, this function returns -1.
    */

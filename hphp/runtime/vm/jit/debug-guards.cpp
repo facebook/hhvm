@@ -105,8 +105,6 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec) {
     case Arch::ARM:
       ARM::addDbgGuardImpl(sk);
       break;
-    default:
-      not_implemented();
   }
 
   // Emit a jump to the actual code

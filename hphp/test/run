@@ -145,7 +145,6 @@ function get_options($argv) {
     'mode:' => 'm:',
     'server' => 's',
     'shuffle' => '',
-    'manual-port:' => 'p:',
     'help' => 'h',
     'verbose' => 'v',
     'fbmake' => '',
@@ -328,6 +327,21 @@ function hhvm_path() {
   return idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm');
 }
 
+function hhvm_cmd_impl($options, $config, /* $extra_args... */) {
+  $args = array(
+    hhvm_path(),
+    '--config',
+    $config,
+    '-vEval.EnableArgsInBacktraces=true',
+    mode_cmd($options),
+    isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
+    extra_args($options),
+  );
+
+  $extra_args = array_slice(func_get_args(), 2);
+  return implode(' ', array_merge($args, $extra_args));
+}
+
 // Return the command and the env to run it in.
 function hhvm_cmd($options, $test, $test_run = null) {
   $use_automain = false;
@@ -338,21 +352,16 @@ function hhvm_cmd($options, $test, $test_run = null) {
       ? __DIR__.'/pseudomain_wrapper.php'
       : $test;
   }
-  $cmd = implode(' ', array(
-    hhvm_path(),
-    '--config',
+  $cmd = hhvm_cmd_impl(
+    $options,
     find_test_ext($test, 'hdf'),
     find_debug_config($test, 'hphpd.ini'),
-    mode_cmd($options),
-    '-vEval.EnableArgsInBacktraces=true',
     read_file(find_test_ext($test, 'opts')),
-    isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
-    extra_args($options),
     '-vResourceLimit.CoreFileSize=0',
     '--file',
     escapeshellarg($test_run),
     $use_automain ? escapeshellarg($test) : ''
-  ));
+  );
   if (file_exists($test.'.ini')) {
     file_put_contents($test_ini = tempnam('/tmp', $test).'.ini',
                       str_replace('{PWD}', dirname($test),
@@ -580,6 +589,7 @@ function can_run_server_test($test) {
     !find_test_ext($test, 'opts') &&
     !find_test_ext($test, 'ini') &&
     strpos($test, 'quick/debugger') === false &&
+    strpos($test, 'quick/xenon') === false &&
     strpos($test, 'slow/streams/') === false &&
     strpos($test, 'slow/ext_mongo/') === false &&
     strpos($test, 'slow/ext_oauth/') === false &&
@@ -587,6 +597,7 @@ function can_run_server_test($test) {
     strpos($test, 'slow/debugger/') === false &&
     strpos($test, 'slow/type_profiler/debugger/') === false &&
     strpos($test, 'zend/good/ext/standard/tests/array/') === false &&
+    strpos($test, 'zend/good/ext/ftp') === false &&
     strrpos($test, HHAS_EXT) !== (strlen($test) - strlen(HHAS_EXT))
     ;
 }
@@ -597,7 +608,8 @@ function run_config_server($options, $test) {
     return null;
   }
 
-  $port = $options['server_port'];
+  $config = find_file_for_dir(dirname($test), 'config.hdf');
+  $port = $options['servers']['configs'][$config]['port'];
   $ch = curl_init("localhost:$port/$test");
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_TIMEOUT, SERVER_TIMEOUT);
@@ -1033,6 +1045,9 @@ function print_success($tests, $options) {
 CLOWN
         ."\n\n";
     }
+
+    /* Emacs' syntax highlighting gets confused by that clown and this comment
+     * resets whatever state got messed up. */
     return;
   }
   print "\nAll tests passed.\n";
@@ -1110,28 +1125,16 @@ function find_open_port() {
   error("Couldn't find an open port");
 }
 
-function start_server_impl($options) {
-  if (isset($options['manual-port'])) return;
-
-  switch (idx($options, 'mode', 'jit')) {
-    case 'jit':
-      $use_jit = 1;
-      break;
-
-    case 'interp':
-      $use_jit = 0;
-      break;
-
-    default:
-      error("Mode '$mode' not supported in server tests");
+function start_server_impl($options, $config, $port) {
+  if (idx($options, 'mode') === 'automain') {
+    error("Mode 'automain' not supported in server mode");
   }
 
-  $threads = $options['threads'] * 2;
-  $port = $options['server_port'];
-  $command = implode(' ', array(
-    hhvm_path(),
+  $threads = $options['threads'];
+  $command = hhvm_cmd_impl(
+    $options,
+    $config,
     '-m', 'server',
-    '-c', $options['server_config'],
     "-vServer.Port=$port",
     "-vAdminServer.Port=0",
     "-vServer.ThreadCount=$threads",
@@ -1139,10 +1142,8 @@ function start_server_impl($options) {
     '-vServer.RequestTimeoutSeconds='.SERVER_TIMEOUT,
     '-vPageletServer.ThreadCount=0',
     '-vLog.UseRequestLog=1',
-    '-vResourceLimit.CoreFileSize=0',
-    "-vEval.Jit=$use_jit",
     '-vLog.File=/dev/null',
-  ));
+  );
   if (getenv('HHVM_TEST_SERVER_LOG')) {
     echo "Starting server '$command'\n";
   }
@@ -1152,34 +1153,31 @@ function start_server_impl($options) {
     1 => array('file', '/dev/null', 'w'),
     2 => array('file', '/dev/null', 'w'),
   );
-  return proc_open($command, $descriptors, $dummy);
+
+  $proc = proc_open($command, $descriptors, $dummy);
+  if (!$proc) {
+    error("Failed to start server process");
+  }
+  $status = proc_get_status($proc);
+  $status['proc'] = $proc;
+  $status['port'] = $port;
+  $status['config'] = $config;
+  return $status;
 }
 
-function start_server($options) {
-  if (isset($options['manual-port'])) {
-    return array('port' => (int)$options['manual-port']);
-  }
-
+function start_server($options, $config) {
   for ($i = 0; $i < 5; ++$i) {
-    $port = $options['server_port'] = find_open_port();
-    $proc = start_server_impl($options);
-    if (!$proc) {
-      error("Failed to start server process");
-    }
+    $port = find_open_port();
+    $status = start_server_impl($options, $config, $port);
 
     // Wait for the server to start responding. If someone else bound to $port
     // between the call to find_open_port and the call to proc_open, then we
     // might start talking to them thinking it's our server.
     for ($j = 0; $j < 40; ++$j) {
-      $status = proc_get_status($proc);
-      if (port_is_listening($port)) {
-        $status['proc'] = $proc;
-        $status['port'] = $port;
-        return $status;
-      }
+      $new_status = proc_get_status($status['proc']);
 
-      if (!$status['running']) {
-        if ($status['exitcode'] === 0) {
+      if (!$new_status['running']) {
+        if ($new_status['exitcode'] === 0) {
           error("Server exited prematurely but without error");
         }
 
@@ -1190,12 +1188,32 @@ function start_server($options) {
         continue 2;
       }
 
+      if (port_is_listening($port)) {
+        return $status;
+      }
+
       usleep(250000);
     }
     error("Server took too long to come up");
   }
 
   error("Couldn't start server");
+}
+
+/*
+ * For each config file in $configs, start up a server on a randomly-determined
+ * port. Return value is an array mapping pids and config files to arrays of
+ * information about the server.
+ */
+function start_servers($options, $configs) {
+  $servers = array('pids' => array(), 'configs' => array());
+  foreach ($configs as $config) {
+    $server = start_server($options, $config);
+    $servers['pids'][$server['pid']] =& $server;
+    $servers['configs'][$server['config']] =& $server;
+    unset($server);
+  }
+  return $servers;
 }
 
 function drain_queue($queue) {
@@ -1219,13 +1237,19 @@ function main($argv) {
 
   $options['threads'] =
     min(count($tests), idx($options, 'threads', num_cpus() + 1));
+  if (isset($options['server'])) {
+    $options['threads'] *= 2;
+  }
 
-  $server_proc = null;
+  $servers = null;
   if (isset($options['server'])) {
     if (isset($options['repo'])) {
       error("Server mode repo tests are not supported");
     }
     $configs = array();
+
+    /* We need to start up a separate server process for each config file
+     * found. */
     foreach ($tests as $test) {
       if (!can_run_server_test($test)) continue;
       $config = find_file_for_dir(dirname($test), 'config.hdf');
@@ -1234,15 +1258,15 @@ function main($argv) {
       }
       $configs[$config] = $config;
     }
-    if (count($configs) !== 1) {
-      error("You passed a combination of tests that would require more than ".
-            "one config file. This is not supported in server mode.");
+
+    $max_configs = 10;
+    if (count($configs) > $max_configs) {
+      error("More than $max_configs unique config files will be needed to run ".
+            "the tests you specified. They may not be a good fit for server ".
+            "mode.");
     }
-    $options['server_config'] = reset($configs);
-    $server_status = start_server($options);
-    $options['server_port'] = $server_status['port'];
-    $server_proc = idx($server_status, 'proc');
-    $server_pid = $server_status['pid'];
+
+    $servers = $options['servers'] = start_servers($options, $configs);
   }
 
   if (!isset($options['fbmake'])) {
@@ -1308,14 +1332,19 @@ function main($argv) {
     if ($pid == $printer_pid) {
       // We should be finishing up soon.
       $printer_pid = 0;
-    } else if ($server_proc && $pid == $server_pid) {
-      // The server crashed. Restart it.
+    } else if (isset($servers['pids'][$pid])) {
+      // A server crashed. Restart it.
       if (getenv('HHVM_TEST_SERVER_LOG')) {
         echo "\nServer $pid crashed. Restarting.\n";
       }
       Status::serverRestarted();
-      $server_proc = start_server_impl($options);
-      $server_pid = proc_get_status($server_proc)['pid'];
+      $server =& $servers['pids'][$pid];
+      $server = start_server_impl($options, $server['config'], $server['port']);
+
+      // Unset the old $pid entry and insert the new one.
+      unset($servers['pids'][$pid]);
+      $servers['pids'][$server['pid']] =& $server;
+      unset($server);
     } else {
       if (!isset($children[$pid])) {
         error("Unexpected child pid $pid from wait");
@@ -1328,9 +1357,11 @@ function main($argv) {
   Status::finished();
 
   // Kill the server
-  if ($server_proc) {
-    proc_terminate($server_proc);
-    proc_close($server_proc);
+  if ($servers) {
+    foreach ($servers['pids'] as $server) {
+      proc_terminate($server['proc']);
+      proc_close($server['proc']);
+    }
   }
 
   $results = array();

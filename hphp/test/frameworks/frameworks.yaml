@@ -89,9 +89,11 @@
     test_file_regex: /.*(tests\.php)$/
   guzzle:
     url: https://github.com/guzzle/guzzle3.git
-    # Slightly after v3.8.1 - need https://github.com/guzzle/guzzle3/pull/20
+    # Slightly after v3.8.1 - need:
+    #   https://github.com/guzzle/guzzle3/pull/20
+    #   https://github.com/guzzle/guzzle3/pull/22
     branch: master
-    commit: 840683b88b637a5310aefceac3722c6fd6b4c043
+    commit: fa0046309160ea52aeed51b5608adfd263dfa0a2
     install_root: guzzle
     test_root: guzzle
   guzzle4:

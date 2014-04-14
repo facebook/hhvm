@@ -552,6 +552,17 @@ static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
 void RuntimeOption::Load(Hdf &config,
                          std::vector<std::string> *overwrites /* = NULL */,
                          bool empty /* = false */) {
+  if (overwrites) {
+    // Do these first, mainly so we can override Tier.*.machine,
+    // Tier.*.tier and Tier.*.cpu on the command line. But it can
+    // also make sense to override fields within a Tier (
+    // eg if you are using the same command line across a lot
+    // of different machines)
+    for (unsigned int i = 0; i < overwrites->size(); i++) {
+      config.fromString(overwrites->at(i).c_str());
+    }
+  }
+
   // Machine metrics
   string hostname, tier, cpu;
   {
@@ -567,17 +578,6 @@ void RuntimeOption::Load(Hdf &config,
     cpu = machine["cpu"].getString();
     if (cpu.empty()) {
       cpu = Process::GetCPUModel();
-    }
-  }
-
-  if (overwrites) {
-    // Do these first, mainly so we can override Tier.*.machine,
-    // Tier.*.tier and Tier.*.cpu on the command line. But it can
-    // also make sense to override fields within a Tier (
-    // eg if you are using the same command line across a lot
-    // of different machines)
-    for (unsigned int i = 0; i < overwrites->size(); i++) {
-      config.fromString(overwrites->at(i).c_str());
     }
   }
 

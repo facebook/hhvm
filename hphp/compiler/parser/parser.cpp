@@ -2173,6 +2173,7 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"resource", "HH\\resource"},
     (AliasEntry){"mixed", "HH\\mixed"},
     (AliasEntry){"void", "HH\\void"},
+    (AliasEntry){"this", "HH\\this"},
   };
   for (auto entry : aliases) {
     autoAliases[entry.alias] = entry.name;

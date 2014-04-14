@@ -30,6 +30,10 @@ function fn0($a) {
   return 2 * fa1(1 + $a)->join();
 }
 
+function idx($arr, $idx, $def = null) {
+  return isset($arr[$idx]) ? $arr[$idx] : $def;
+}
+
 async function fa0($a) {
   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
   return fn0($a);

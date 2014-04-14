@@ -30,6 +30,10 @@ async function genFoo($a) {
   return $x + $y;
 }
 
+function idx($arr, $idx, $def = null) {
+  return isset($arr[$idx]) ? $arr[$idx] : $def;
+}
+
 function main($a) {
   $result = genFoo($a)->join();
 }

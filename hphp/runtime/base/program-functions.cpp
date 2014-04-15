@@ -620,6 +620,9 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   }
 
   Extension::RequestInitModules();
+  // If extension constants were used in the in ini files, they would have come
+  // out as 0 in the previous pass. Lets re-import the ini files. We could be
+  // more clever, but that would be harder and this works.
   for (auto& c : config) {
     process_ini_settings(c);
   }

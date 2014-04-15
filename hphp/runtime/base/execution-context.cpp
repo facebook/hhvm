@@ -81,14 +81,20 @@ ExecutionContext::ExecutionContext()
   , m_executingSetprofileCallback(false)
 {
   // We want this to run on every request, instead of just once per thread
-  auto max_mem = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
-  IniSetting::Set("memory_limit", max_mem);
+  auto hasSystemDefault = IniSetting::ResetSytemDefault("memory_limit");
+  if (!hasSystemDefault) {
+    auto max_mem = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
+    IniSetting::SetUser("memory_limit", max_mem);
+  }
 
   // This one is hot so we don't want to go through the ini_set() machinery to
   // change it in error_reporting(). Because of that, we have to set it back to
   // the default on every request.
-  ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.
-    setErrorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel);
+  hasSystemDefault = IniSetting::ResetSytemDefault("error_reporting");
+  if (!hasSystemDefault) {
+    ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.
+      setErrorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel);
+  }
 
   // Make sure any fields accessed from the TC are within a byte of
   // ExecutionContext's beginning.

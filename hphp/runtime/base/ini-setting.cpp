@@ -558,13 +558,16 @@ struct IniCallbackData {
 };
 
 typedef std::map<std::string, IniCallbackData> CallbackMap;
-// Things that the user can change go here
-static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_user_callbacks);
-// Things that are only settable at startup go here
+// Only settable at startup
 static CallbackMap s_system_ini_callbacks;
+// The script can change these during the request
+static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_user_callbacks);
 
-typedef std::map<std::string, folly::dynamic> DefaultMap;
-static IMPLEMENT_THREAD_LOCAL(DefaultMap, s_savedDefaults);
+typedef std::map<std::string, folly::dynamic> SettingMap;
+// Set by a .ini file at the start
+static SettingMap s_system_settings;
+// Changed during the course of the request
+static IMPLEMENT_THREAD_LOCAL(SettingMap, s_saved_defaults);
 
 class IniSettingExtension : public Extension {
 public:
@@ -572,20 +575,20 @@ public:
 
   void requestShutdown() {
     // Put all the defaults back to the way they were before any ini_set()
-    for (auto &item : *s_savedDefaults) {
-      IniSetting::Set(item.first, item.second, IniSetting::FollyDynamic());
+    for (auto &item : *s_saved_defaults) {
+      IniSetting::SetUser(item.first, item.second, IniSetting::FollyDynamic());
     }
-    s_savedDefaults->clear();
+    s_saved_defaults->clear();
   }
 
 } s_ini_extension;
 
 void IniSetting::Bind(const Extension* extension, const Mode mode,
-                      const char *name,
+                      const std::string& name,
                       std::function<bool(const folly::dynamic& value)>
                         updateCallback,
                       std::function<folly::dynamic()> getCallback) {
-  assert(name && *name);
+  assert(!name.empty());
 
   bool is_thread_local = (mode == PHP_INI_USER || mode == PHP_INI_ALL);
   // For now, we require the extensions to use their own thread local memory for
@@ -606,8 +609,8 @@ void IniSetting::Bind(const Extension* extension, const Mode mode,
   data.getCallback = getCallback;
 }
 
-void IniSetting::Unbind(const char *name) {
-  assert(name && *name);
+void IniSetting::Unbind(const std::string& name) {
+  assert(!name.empty());
   s_user_callbacks->erase(name);
 }
 
@@ -669,9 +672,8 @@ static bool ini_set(const std::string& name, const folly::dynamic& value,
 
 bool IniSetting::Set(const std::string& name, const folly::dynamic& value,
                      FollyDynamic) {
-  return ini_set(name, value, static_cast<Mode>(
-    PHP_INI_ONLY | PHP_INI_SYSTEM | PHP_INI_PERDIR | PHP_INI_USER | PHP_INI_ALL
-  ));
+  s_system_settings.insert(make_pair(name, value));
+  return ini_set(name, value, PHP_INI_SET_EVERY);
 }
 
 bool IniSetting::Set(const String& name, const Variant& value) {
@@ -680,21 +682,27 @@ bool IniSetting::Set(const String& name, const Variant& value) {
 
 bool IniSetting::SetUser(const std::string& name, const folly::dynamic& value,
                          FollyDynamic) {
-  auto it = s_savedDefaults->find(name);
-  if (it == s_savedDefaults->end()) {
+  auto it = s_saved_defaults->find(name);
+  if (it == s_saved_defaults->end()) {
     folly::dynamic def = nullptr;
     auto success = Get(name, def);
     if (success) {
-      s_savedDefaults->insert(make_pair(name, def));
+      s_saved_defaults->insert(make_pair(name, def));
     }
   }
-  return ini_set(name, value, static_cast<Mode>(
-    PHP_INI_USER | PHP_INI_ALL
-  ));
+  return ini_set(name, value, PHP_INI_SET_USER);
 }
 
 bool IniSetting::SetUser(const String& name, const Variant& value) {
   return SetUser(name.toCppString(), variant_to_dynamic(value), FollyDynamic());
+}
+
+bool IniSetting::ResetSytemDefault(const std::string& name) {
+  auto it = s_system_settings.find(name);
+  if (it == s_system_settings.end()) {
+    return false;
+  }
+  return ini_set(name, it->second, PHP_INI_SET_EVERY);
 }
 
 Array IniSetting::GetAll(const String& ext_name, bool details) {

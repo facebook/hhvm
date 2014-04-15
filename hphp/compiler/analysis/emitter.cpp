@@ -8295,12 +8295,15 @@ struct Entry {
   const ClassInfo* ci;
 };
 
+const StaticString s_systemlibNativeFunc("/:systemlib.nativefunc");
+const StaticString s_systemlibNativeCls("/:systemlib.nativecls");
+
 static std::unique_ptr<UnitEmitter>
 emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
                        ssize_t numBuiltinFuncs) {
   MD5 md5("11111111111111111111111111111111");
   auto ue = folly::make_unique<UnitEmitter>(md5);
-  ue->setFilepath(makeStaticString(""));
+  ue->setFilepath(s_systemlibNativeFunc.get());
   ue->addTrivialPseudoMain();
 
   Attr attrs = AttrBuiltin | AttrUnique | AttrPersistent;
@@ -8441,7 +8444,7 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
                         ssize_t numBuiltinClasses) {
   MD5 md5("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
   auto ue = folly::make_unique<UnitEmitter>(md5);
-  ue->setFilepath(makeStaticString(""));
+  ue->setFilepath(s_systemlibNativeCls.get());
   ue->addTrivialPseudoMain();
 
   ContMethMap contMethods;

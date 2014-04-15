@@ -797,9 +797,9 @@ class UnitEmitter {
 
   bool isASystemLib() const {
     static const char systemlib_prefix[] = "/:systemlib";
-    return !*getFilepath()->data() ||
-      !strncmp(getFilepath()->data(),
-        systemlib_prefix, sizeof systemlib_prefix - 1);
+    return !strncmp(getFilepath()->data(),
+                    systemlib_prefix,
+                    sizeof systemlib_prefix - 1);
   }
 
   void addTrivialPseudoMain();

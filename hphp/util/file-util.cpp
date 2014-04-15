@@ -452,9 +452,9 @@ std::string FileUtil::relativePath(const std::string& fromDir,
 }
 
 std::string FileUtil::canonicalize(const std::string &path) {
-  const char *r = canonicalize(path.c_str(), path.size());
-  string res(r);
-  free((void*)r);
+  auto const r = canonicalize(path.c_str(), path.size());
+  SCOPE_EXIT { free(r); };
+  std::string res(r);
   return res;
 }
 

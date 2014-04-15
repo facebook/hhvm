@@ -777,7 +777,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName) const {
     m_constants[clsCnsInd].m_class->lookupMethod(sd86cinit);
   TypedValue args[1] = {
     make_tv<KindOfStaticString>(
-      const_cast<StringData*>(m_constants[clsCnsInd].m_name))
+      const_cast<StringData*>(m_constants[clsCnsInd].m_name.get()))
   };
 
   Cell ret;

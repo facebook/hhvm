@@ -78,10 +78,12 @@ class VariableUnserializer;
 constexpr bool use_lowptr = true;
 
 typedef LowPtr<Class, uint32_t> LowClassPtr;
+typedef LowPtr<const StringData, uint32_t> LowStringPtr;
 #else
 constexpr bool use_lowptr = false;
 
 typedef LowPtr<Class, uintptr_t> LowClassPtr;
+typedef LowPtr<const StringData, uintptr_t> LowStringPtr;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

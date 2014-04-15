@@ -47,7 +47,7 @@ struct FixedStringMap {
   static ptrdiff_t tableOff() { return offsetof(FixedStringMap, m_table); }
 private:
   struct Elm {
-    const StringData* sd;
+    LowStringPtr sd;
     V data;
   };
 

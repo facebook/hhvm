@@ -40,7 +40,7 @@ public:
    */
   LowPtr() {}
 
-  explicit LowPtr(T* px) : m_raw(toLow(px)) {}
+  /* implicit */ LowPtr(T* px) : m_raw(toLow(px)) {}
 
   /* implicit */ LowPtr(std::nullptr_t px) : m_raw(0) {}
 
@@ -58,7 +58,7 @@ public:
   }
 
   LowPtr& operator=(std::nullptr_t px) {
-    return operator=(0);
+    return operator=((S)0);
   }
 
   LowPtr& operator=(const LowPtr<T, S>& r) {

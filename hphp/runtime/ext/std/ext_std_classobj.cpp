@@ -179,7 +179,7 @@ Array HHVM_FUNCTION(get_class_constants, const String& className) {
     // Note: hphpc doesn't include inherited constants in
     // get_class_constants(), so mimic that behavior
     if (consts[i].m_class == cls) {
-      auto const name  = const_cast<StringData*>(consts[i].m_name);
+      auto const name  = const_cast<StringData*>(consts[i].m_name.get());
       Cell value = consts[i].m_val;
       // Handle dynamically set constants
       if (value.m_type == KindOfUninit) {
@@ -221,7 +221,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
   ArrayInit arr(numDeclProps + numSProps, ArrayInit::Map{});
 
   for (size_t i = 0; i < numDeclProps; ++i) {
-    StringData* name = const_cast<StringData*>(propInfo[i].m_name);
+    StringData* name = const_cast<StringData*>(propInfo[i].m_name.get());
     // Empty names are used for invisible/private parent properties; skip them
     assert(name->size() != 0);
     if (Class::IsPropAccessible(propInfo[i], ctx)) {
@@ -234,7 +234,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
     bool vis, access;
     TypedValue* value = cls->getSProp(ctx, sPropInfo[i].m_name, vis, access);
     if (access) {
-      arr.set(const_cast<StringData*>(sPropInfo[i].m_name),
+      arr.set(const_cast<StringData*>(sPropInfo[i].m_name.get()),
         tvAsCVarRef(value), true /* isKey */);
     }
   }

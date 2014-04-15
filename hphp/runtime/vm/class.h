@@ -50,20 +50,18 @@ class NamedEntity;
 class PreClass;
 namespace Native { struct NativeDataInfo; }
 
-typedef hphp_hash_set<const StringData*, string_data_hash,
+typedef hphp_hash_set<LowStringPtr,
+                      string_data_hash,
                       string_data_isame> TraitNameSet;
-typedef hphp_hash_set<const Class*, pointer_hash<Class> > ClassSet;
 
 /*
  * User attributes on various runtime structures are stored in this
  * map, currently.
  */
-typedef hphp_hash_map<
-  const StringData*,
-  TypedValue,
-  string_data_hash,
-  string_data_isame
-> UserAttributeMap;
+typedef hphp_hash_map<LowStringPtr,
+                      TypedValue,
+                      string_data_hash,
+                      string_data_isame> UserAttributeMap;
 
 using BuiltinCtorFunction = ObjectData* (*)(Class*);
 using BuiltinDtorFunction = void (*)(ObjectData*, const Class*);
@@ -154,11 +152,11 @@ class PreClass : public AtomicCountable {
 
   private:
     PreClass* m_preClass;
-    const StringData* m_name;
-    const StringData* m_mangledName;
+    LowStringPtr m_name;
+    LowStringPtr m_mangledName;
     Attr m_attrs;
-    const StringData* m_typeConstraint;
-    const StringData* m_docComment;
+    LowStringPtr m_typeConstraint;
+    LowStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
   };
@@ -180,17 +178,17 @@ class PreClass : public AtomicCountable {
 
   private:
     PreClass* m_preClass;
-    const StringData* m_name;
-    const StringData* m_typeConstraint;
+    LowStringPtr m_name;
+    LowStringPtr m_typeConstraint;
     TypedValue m_val;
-    const StringData* m_phpCode;
+    LowStringPtr m_phpCode;
   };
 
   class TraitPrecRule {
    public:
     TraitPrecRule()
-      : m_methodName(0)
-      , m_selectedTraitName(0)
+      : m_methodName(nullptr)
+      , m_selectedTraitName(nullptr)
     {}
 
     TraitPrecRule(const StringData* selectedTraitName,
@@ -214,17 +212,17 @@ class PreClass : public AtomicCountable {
     }
 
    private:
-    const StringData*  m_methodName;
-    const StringData*  m_selectedTraitName;
-    TraitNameSet       m_otherTraitNames;
+    LowStringPtr m_methodName;
+    LowStringPtr m_selectedTraitName;
+    TraitNameSet m_otherTraitNames;
   };
 
   class TraitAliasRule {
    public:
     TraitAliasRule()
-      : m_traitName(0)
-      , m_origMethodName(0)
-      , m_newMethodName(0)
+      : m_traitName(nullptr)
+      , m_origMethodName(nullptr)
+      , m_newMethodName(nullptr)
       , m_modifiers(AttrNone)
     {}
 
@@ -247,10 +245,10 @@ class PreClass : public AtomicCountable {
     }
 
    private:
-    const StringData* m_traitName;
-    const StringData* m_origMethodName;
-    const StringData* m_newMethodName;
-    Attr              m_modifiers;
+    LowStringPtr m_traitName;
+    LowStringPtr m_origMethodName;
+    LowStringPtr m_newMethodName;
+    Attr         m_modifiers;
   };
 
   struct TraitRequirement {
@@ -294,8 +292,8 @@ class PreClass : public AtomicCountable {
     uintptr_t m_word;
   };
 
-  typedef FixedVector<const StringData*> InterfaceVec;
-  typedef FixedVector<const StringData*> UsedTraitVec;
+  typedef FixedVector<LowStringPtr> InterfaceVec;
+  typedef FixedVector<LowStringPtr> UsedTraitVec;
   typedef FixedVector<TraitRequirement> TraitRequirementsVec;
   typedef FixedVector<TraitPrecRule> TraitPrecRuleVec;
   typedef FixedVector<TraitAliasRule> TraitAliasRuleVec;
@@ -417,9 +415,9 @@ private:
   int32_t m_builtinODOffset{0};
   Attr m_attrs;
   Hoistable m_hoistable;
-  const StringData* m_name;
-  const StringData* m_parent;
-  const StringData* m_docComment;
+  LowStringPtr m_name;
+  LowStringPtr m_parent;
+  LowStringPtr m_docComment;
   BuiltinCtorFunction m_instanceCtor = nullptr;
   InterfaceVec m_interfaces;
   UsedTraitVec m_usedTraits;
@@ -453,12 +451,12 @@ struct Class : AtomicCountable {
   struct Prop {
     // m_name is "" for inaccessible properties (i.e. private properties
     // declared by parents).
-    const StringData* m_name;
-    const StringData* m_mangledName;
-    const StringData* m_originalMangledName;
+    LowStringPtr m_name;
+    LowStringPtr m_mangledName;
+    LowStringPtr m_originalMangledName;
     LowClassPtr m_class; // First parent class that declares this property.
     Attr m_attrs;
-    const StringData* m_typeConstraint;
+    LowStringPtr m_typeConstraint;
 
     /*
      * When built in RepoAuthoritative mode, this is a control-flow
@@ -467,15 +465,15 @@ struct Class : AtomicCountable {
      */
     RepoAuthType m_repoAuthType;
 
-    const StringData* m_docComment;
+    LowStringPtr m_docComment;
     int m_idx;
   };
 
   struct SProp {
-    const StringData* m_name;
+    LowStringPtr m_name;
     Attr m_attrs;
-    const StringData* m_typeConstraint;
-    const StringData* m_docComment;
+    LowStringPtr m_typeConstraint;
+    LowStringPtr m_docComment;
     LowClassPtr m_class; // Most derived class that declared this property.
     TypedValue m_val; // Used if (m_class == this).
     RepoAuthType m_repoAuthType;
@@ -484,10 +482,10 @@ struct Class : AtomicCountable {
 
   struct Const {
     LowClassPtr m_class; // Most derived class that declared this constant.
-    const StringData* m_name;
+    LowStringPtr m_name;
     TypedValue m_val;
-    const StringData* m_phpCode;
-    const StringData* m_typeConstraint;
+    LowStringPtr m_phpCode;
+    LowStringPtr m_typeConstraint;
     const StringData* name() const { return m_name; }
     StrNR nameStr() const { return StrNR(m_name); }
   };
@@ -520,8 +518,7 @@ struct Class : AtomicCountable {
   };
 
   typedef std::vector<const Func*> InitVec;
-  typedef std::vector<std::pair<const StringData*, const StringData*> >
-          TraitAliasVec;
+  typedef std::vector<std::pair<LowStringPtr, LowStringPtr>> TraitAliasVec;
   typedef IndexedStringMap<LowClassPtr, true, int> InterfaceMap;
   typedef IndexedStringMap<Func*, false, Slot> MethodMap;
 
@@ -864,7 +861,9 @@ private:
     Attr m_modifiers;
   };
   typedef std::list<TraitMethod> TraitMethodList;
-  typedef hphp_hash_map<const StringData*, TraitMethodList, string_data_hash,
+  typedef hphp_hash_map<LowStringPtr,
+                        TraitMethodList,
+                        string_data_hash,
                         string_data_isame> MethodToTraitListMap;
 
 private:

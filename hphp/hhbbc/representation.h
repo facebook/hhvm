@@ -471,7 +471,7 @@ struct Class {
   /*
    * Names of inherited interfaces.
    */
-  std::vector<SString> interfaceNames;
+  std::vector<LowStringPtr> interfaceNames;
 
   /*
    * Names of used traits, and the trait alias/precedence rules (if
@@ -481,7 +481,7 @@ struct Class {
    * WholeProgram mode, we won't see these because traits will already
    * be flattened.
    */
-  std::vector<SString> usedTraitNames;
+  std::vector<LowStringPtr> usedTraitNames;
   std::vector<PreClass::TraitRequirement> traitRequirements;
   std::vector<PreClass::TraitPrecRule> traitPrecRules;
   std::vector<PreClass::TraitAliasRule> traitAliasRules;

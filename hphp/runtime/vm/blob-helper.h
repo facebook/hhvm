@@ -243,6 +243,12 @@ struct BlobDecoder {
     sd = s.get() ? makeStaticString(s) : 0;
   }
 
+  void decode(LowStringPtr& s) {
+    const StringData* sd;
+    decode(sd);
+    s = sd;
+  }
+
   void decode(TypedValue& tv) {
     tvWriteUninit(&tv);
 

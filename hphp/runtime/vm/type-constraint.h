@@ -265,7 +265,7 @@ private:
   // alias name and test for a different DataType.
   Type m_type;
   Flags m_flags;
-  const StringData* m_typeName;
+  LowStringPtr m_typeName;
   const NamedEntity* m_namedEntity;
 };
 

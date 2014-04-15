@@ -46,11 +46,11 @@ class PreClassEmitter {
   class Prop {
    public:
     Prop()
-      : m_name(0)
-      , m_mangledName(0)
+      : m_name(nullptr)
+      , m_mangledName(nullptr)
       , m_attrs(AttrNone)
-      , m_typeConstraint(0)
-      , m_docComment(0)
+      , m_typeConstraint(nullptr)
+      , m_docComment(nullptr)
       , m_repoAuthType{}
     {}
 
@@ -83,11 +83,11 @@ class PreClassEmitter {
     }
 
    private:
-    const StringData* m_name;
-    const StringData* m_mangledName;
+    LowStringPtr m_name;
+    LowStringPtr m_mangledName;
     Attr m_attrs;
-    const StringData* m_typeConstraint;
-    const StringData* m_docComment;
+    LowStringPtr m_typeConstraint;
+    LowStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
   };
@@ -95,9 +95,9 @@ class PreClassEmitter {
   class Const {
    public:
     Const()
-      : m_name(0)
-      , m_typeConstraint(0)
-      , m_phpCode(0)
+      : m_name(nullptr)
+      , m_typeConstraint(nullptr)
+      , m_phpCode(nullptr)
     {}
     Const(const StringData* n, const StringData* typeConstraint,
           const TypedValue* val, const StringData* phpCode)
@@ -116,14 +116,14 @@ class PreClassEmitter {
     }
 
    private:
-    const StringData* m_name;
-    const StringData* m_typeConstraint;
+    LowStringPtr m_name;
+    LowStringPtr m_typeConstraint;
     TypedValue m_val;
-    const StringData* m_phpCode;
+    LowStringPtr m_phpCode;
   };
 
-  typedef IndexedStringMap<Prop,true,Slot> PropMap;
-  typedef IndexedStringMap<Const,true,Slot> ConstMap;
+  typedef IndexedStringMap<Prop, true, Slot> PropMap;
+  typedef IndexedStringMap<Const, true, Slot> ConstMap;
 
   PreClassEmitter(UnitEmitter& ue, Id id, const StringData* n,
                   PreClass::Hoistable hoistable);
@@ -147,7 +147,7 @@ class PreClassEmitter {
   const StringData* parentName() const { return m_parent; }
 
   void addInterface(const StringData* n);
-  const std::vector<const StringData*>& interfaces() const {
+  const std::vector<LowStringPtr>& interfaces() const {
     return m_interfaces;
   }
   bool addMethod(FuncEmitter* method);
@@ -166,7 +166,7 @@ class PreClassEmitter {
   }
   void addTraitPrecRule(const PreClass::TraitPrecRule &rule);
   void addTraitAliasRule(const PreClass::TraitAliasRule &rule);
-  const std::vector<const StringData*>& usedTraits() const {
+  const std::vector<LowStringPtr>& usedTraits() const {
     return m_usedTraits;
   }
   const std::vector<PreClass::TraitRequirement>& traitRequirements() const {
@@ -201,17 +201,19 @@ class PreClassEmitter {
   }
 
  private:
-  typedef hphp_hash_map<const StringData*, FuncEmitter*, string_data_hash,
+  typedef hphp_hash_map<LowStringPtr,
+                        FuncEmitter*,
+                        string_data_hash,
                         string_data_isame> MethodMap;
 
   UnitEmitter& m_ue;
   int m_line1;
   int m_line2;
   Offset m_offset;  // offset of the DefCls for this class
-  const StringData* m_name;
+  LowStringPtr m_name;
   Attr m_attrs;
-  const StringData* m_parent;
-  const StringData* m_docComment;
+  LowStringPtr m_parent;
+  LowStringPtr m_docComment;
   Id m_id;
   PreClass::Hoistable m_hoistable;
   BuiltinCtorFunction m_instanceCtor{nullptr};
@@ -219,8 +221,8 @@ class PreClassEmitter {
   uint32_t m_builtinObjSize{0};
   int32_t  m_builtinODOffset{0};
 
-  std::vector<const StringData*> m_interfaces;
-  std::vector<const StringData*> m_usedTraits;
+  std::vector<LowStringPtr> m_interfaces;
+  std::vector<LowStringPtr> m_usedTraits;
   std::vector<PreClass::TraitRequirement> m_traitRequirements;
   std::vector<PreClass::TraitPrecRule> m_traitPrecRules;
   std::vector<PreClass::TraitAliasRule> m_traitAliasRules;

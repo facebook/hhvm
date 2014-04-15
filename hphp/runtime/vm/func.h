@@ -53,7 +53,7 @@ struct Func {
     // construct a dummy ParamInfo
     ParamInfo()
       : m_builtinType(KindOfInvalid), m_funcletOff(InvalidAbsoluteOffset),
-        m_phpCode(nullptr), m_variadic(false), m_userType(nullptr) {
+        m_phpCode(nullptr), m_userType(nullptr), m_variadic(false) {
       tvWriteUninit(&m_defVal);
     }
 
@@ -118,17 +118,17 @@ struct Func {
     Offset m_funcletOff; // If no default: InvalidAbsoluteOffset.
     TypedValue m_defVal; // Set to uninit null if there is no default value
                          // or if there is a non-scalar default value.
-    const StringData* m_phpCode; // eval'able PHP code.
+    LowStringPtr m_phpCode; // eval'able PHP code.
+    // the type the user typed in source code, contains type parameters and all
+    LowStringPtr m_userType;
     TypeConstraint m_typeConstraint;
     bool m_variadic;
 
     UserAttributeMap m_userAttributes;
-    // the type the user typed in source code, contains type parameters and all
-    const StringData* m_userType;
   };
   struct SVInfo { // Static variable info.
-    const StringData* name;
-    const StringData* phpCode; // eval'able PHP or NULL if no default.
+    LowStringPtr name;
+    LowStringPtr phpCode; // eval'able PHP or NULL if no default.
 
     template<class SerDe> void serde(SerDe& sd) { sd(name)(phpCode); }
   };
@@ -343,7 +343,7 @@ struct Func {
   const ParamInfoVec& params() const { return shared()->m_params; }
   int numLocals() const { return shared()->m_numLocals; }
 
-  const StringData* const* localNames() const {
+  LowStringPtr const* localNames() const {
     return shared()->m_localNames.accessList();
   }
   Id numNamedLocals() const { return shared()->m_localNames.size(); }
@@ -352,7 +352,7 @@ struct Func {
   // unnamed local.
   const StringData* localVarName(Id id) const {
     assert(id >= 0);
-    return id < numNamedLocals() ? shared()->m_localNames[id] : 0;
+    return id < numNamedLocals() ? shared()->m_localNames[id] : nullptr;
   }
 
   const TypeConstraint& returnTypeConstraint() const {
@@ -487,7 +487,7 @@ public: // Offset accessors for the translator.
 #undef X
 
 private:
-  typedef IndexedStringMap<const StringData*,true,Id> NamedLocalsMap;
+  typedef IndexedStringMap<LowStringPtr, true, Id> NamedLocalsMap;
 
   struct SharedData : public AtomicCountable {
     PreClass* m_preClass;
@@ -511,7 +511,7 @@ private:
     EHEntVec m_ehtab;
     FPIEntVec m_fpitab;
     hphp_hash_set<Offset> m_blockEnds;
-    const StringData* m_docComment;
+    LowStringPtr m_docComment;
     bool m_top : 1; // Defined at top level.
     bool m_isClosureBody : 1;
     bool m_isAsync : 1;
@@ -520,9 +520,9 @@ private:
     bool m_isGenerated : 1;
     UserAttributeMap m_userAttributes;
     TypeConstraint m_retTypeConstraint;
-    const StringData* m_retUserType;
+    LowStringPtr m_retUserType;
     // per-func filepath for traits flattened during repo construction
-    const StringData* m_originalFilename;
+    LowStringPtr m_originalFilename;
     SharedData(PreClass* preClass, Id id, Offset base,
         Offset past, int line1, int line2, bool top,
         const StringData* docComment);
@@ -555,12 +555,12 @@ private:
 #ifdef DEBUG
   int m_magic; // For asserts only.
 #endif
-  const StringData* m_fullName;
+  LowStringPtr m_fullName;
   uint32_t m_profCounter{0};     // profile counter used to detect hot functions
   unsigned char* volatile m_funcBody;  // Accessed from assembly.
   mutable RDS::Link<Func*> m_cachedFunc{RDS::kInvalidHandle};
   FuncId m_funcId{InvalidFuncId};
-  const StringData* m_name;
+  LowStringPtr m_name;
   // The first Class in the inheritance hierarchy that declared this method;
   // note that this may be an abstract class that did not provide an
   // implementation.
@@ -794,7 +794,7 @@ private:
   Offset m_past;
   int m_line1;
   int m_line2;
-  const StringData* m_name;
+  LowStringPtr m_name;
 
   ParamInfoVec m_params;
   Func::NamedLocalsMap::Builder m_localNames;
@@ -807,7 +807,7 @@ private:
   SVInfoVec m_staticVars;
 
   TypeConstraint m_retTypeConstraint;
-  const StringData* m_retUserType;
+  LowStringPtr m_retUserType;
 
   EHEntVec m_ehtab;
   bool m_ehTabSorted;
@@ -816,7 +816,7 @@ private:
   Attr m_attrs;
   DataType m_returnType;
   bool m_top;
-  const StringData* m_docComment;
+  LowStringPtr m_docComment;
   bool m_isClosureBody;
   bool m_isAsync;
   bool m_isGenerator;
@@ -829,7 +829,7 @@ private:
   BuiltinFunction m_builtinFuncPtr;
   BuiltinFunction m_nativeFuncPtr;
 
-  const StringData* m_originalFilename;
+  LowStringPtr m_originalFilename;
 };
 
 class FuncRepoProxy : public RepoProxy {

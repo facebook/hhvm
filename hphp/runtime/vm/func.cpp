@@ -250,7 +250,7 @@ void Func::init(int numParams) {
     setNewFuncId();
     setFullName();
   } else {
-    m_fullName = 0;
+    m_fullName = nullptr;
   }
   if (isSpecial(m_name)) {
     /*
@@ -748,7 +748,7 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
         // convert the typedvalue to a cvarref and push into pi.
         auto userAttr = new ClassInfo::UserAttributeInfo;
         assert(it->first->isStatic());
-        userAttr->name = const_cast<StringData*>(it->first);
+        userAttr->name = const_cast<StringData*>(it->first.get());
         userAttr->setStaticValue(tvAsCVarRef(&it->second));
         pi->userAttrs.push_back(userAttr);
       }

@@ -230,6 +230,7 @@ struct Func {
   }
   bool isBuiltin() const { return m_attrs & AttrBuiltin; }
   bool isCPPBuiltin() const { return m_shared->m_builtinFuncPtr; }
+  bool isNative() const { return m_attrs & AttrNative; }
   bool skipFrame() const { return m_attrs & AttrSkipFrame; }
   bool isMethod() const {
     return !isPseudoMain() && (bool)cls();
@@ -388,6 +389,8 @@ struct Func {
   int numStaticLocals() const { return shared()->m_staticVars.size(); }
   const ClassInfo::MethodInfo* methInfo() const { return shared()->m_info; }
   bool isAllowOverride() const { return m_attrs & AttrAllowOverride; }
+
+  bool isParamCoerceMode() const;
 
   const BuiltinFunction& nativeFuncPtr() const {
     return shared()->m_nativeFuncPtr;

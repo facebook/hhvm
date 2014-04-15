@@ -3006,11 +3006,6 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
   //    would be overkill.
   spillStack();
 
-  bool zendParamMode =
-      !callee->methInfo() ||
-      (callee->methInfo()->attribute &
-      (ClassInfo::ParamCoerceModeNull | ClassInfo::ParamCoerceModeFalse));
-
   // Convert types if needed.
   for (int i = 0; i < numNonDefault; i++) {
     const Func::ParamInfo& pi = callee->params()[i];
@@ -3022,7 +3017,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
       case KindOfObject:
       case KindOfResource:
       case KindOfString:
-        if (zendParamMode) {
+        if (callee->isParamCoerceMode()) {
           gen(CoerceStk,
               Type(pi.builtinType()),
               StackOffset(numArgs - i - 1),

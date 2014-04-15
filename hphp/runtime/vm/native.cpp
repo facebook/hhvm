@@ -161,18 +161,14 @@ bool coerceFCallArgs(TypedValue* args,
                      const Func* func) {
   assert(numArgs == func->numParams());
 
-  // funcs without a methInfo struct are HNI (with a struct are IDL)
-  // All HNI functions have ZPM enabled by default
-  bool zendParamMode =
-    !func->methInfo() || func->methInfo()->attribute &
-    (ClassInfo::ParamCoerceModeNull | ClassInfo::ParamCoerceModeFalse);
+  bool paramCoerceMode = func->isParamCoerceMode();
 
   for (int32_t i = 0; (i < numNonDefault) && (i < numArgs); i++) {
     const Func::ParamInfo& pi = func->params()[i];
 
 #define CASE(kind)                                      \
   case KindOf##kind:                                    \
-    if (zendParamMode) {                                \
+    if (paramCoerceMode) {                              \
       if (!tvCoerceParamTo##kind##InPlace(&args[-i])) { \
         raise_param_type_warning(                       \
           func->name()->data(),                         \

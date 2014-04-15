@@ -2782,16 +2782,20 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
       getPredictedDataType(fn);
 
     if (dt != KindOfUnknown) {
-      if (builtinFunc) {
+      // If we're in ParamCoerceMode, then predict the statically-known type
+      // instead of trying to infer the return type + Null/False.
+      if (builtinFunc && !builtinFunc->isParamCoerceMode()) {
         switch (dt) {
           case KindOfBoolean:
           case KindOfInt64:
-          case KindOfDouble: /* inferred */
-                             m_evalStack.setKnownType(dt, false);
-                             break;
-          default:           /* predicted */
-                             m_evalStack.setKnownType(dt, true);
-                             break;
+          case KindOfDouble:
+            /* inferred */
+            m_evalStack.setKnownType(dt, false);
+            break;
+          default:
+            /* predicted */
+            m_evalStack.setKnownType(dt, true);
+            break;
         }
       } else {
         m_evalStack.setKnownType(dt, true /* predicted */);

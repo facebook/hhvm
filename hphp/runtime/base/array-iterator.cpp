@@ -1255,13 +1255,13 @@ int64_t new_iter_array_key(Iter* dest,
         static_cast<uint32_t>(IterNextIndex::ArrayPacked) << 16 | itypeU32;
       assert(aiter.m_itype == ArrayIter::TypeArray);
       assert(aiter.m_nextHelperIdx == IterNextIndex::ArrayPacked);
-      keyOut->m_type = KindOfInt64;
-      keyOut->m_data.num = 0;
       if (WithRef) {
         tvDupWithRef(*packedData(ad), *valOut);
       } else {
         cellDup(*tvToCell(packedData(ad)), *valOut);
       }
+      keyOut->m_type = KindOfInt64;
+      keyOut->m_data.num = 0;
       return 1;
     }
 
@@ -1766,12 +1766,12 @@ int64_t iter_next_packed_impl(Iter* it,
     }
     tvDecRefOnly(valOut);
     iter.setPos(pos);
+    cellDup(*tvToCell(packedData(ad) + pos), *valOut);
     if (HasKey) {
       tvDecRefOnly(keyOut);
       keyOut->m_data.num = pos;
       keyOut->m_type = KindOfInt64;
     }
-    cellDup(*tvToCell(packedData(ad) + pos), *valOut);
     return 1;
   }
 

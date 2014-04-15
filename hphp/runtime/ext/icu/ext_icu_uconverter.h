@@ -28,14 +28,7 @@ public:
     }
     return *this;
   }
-  ~IntlUConverter() {
-    if (m_src) {
-      ucnv_close(m_src);
-    }
-    if (m_dest) {
-      ucnv_close(m_dest);
-    }
-  }
+  ~IntlUConverter() { }
 
   bool isValid() const { return true; }
 

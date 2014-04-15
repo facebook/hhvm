@@ -15,6 +15,11 @@ class UConverter {
   public function __construct(string $destination_encoding = 'utf-8',
                               string $source_encoding = 'utf-8'): void;
 
+  // TODO(4017519) PHP5 doesn't have this destructor, we have it to prevent a
+  // nasty issue with destructing IntlUConverter.
+  <<__Native>>
+  public function __destruct(): void;
+
   /**
    * Convert string from one charset to another
    *

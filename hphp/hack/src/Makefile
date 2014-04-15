@@ -195,18 +195,18 @@ wwwtest:
 DIRS=$(INCLUDEDIRS)
 ifdef TEST
 debug:
-	make hh_single_type_check.bc
+	make hh_single.bc
 	$(info Debugging $(TEST))
-	ocamldebug $(DIRS) ../bin/hh_single_type_check.bc $(TEST)
+	ocamldebug $(patsubst %,-I %,$(DIRS)) ./hh_single.bc $(TEST)
 else
 debug:
 	$(info Set the TEST env variable to the test you want to debug)
-	$(info For example: export TEST=../tests/more_tests/my_test.php)
+	$(info For example: export TEST=../test/more_tests/my_test.php)
 endif
 
 debug_client:
 	make hh_client.bc
-	ocamldebug $(DIRS) ../bin/hh_client.bc
+	ocamldebug $(patsubst %,-I %,$(DIRS)) ./hh_client.bc
 
 # everybody can customize in its own repo his own Makefile.user
 -include Makefile.user

@@ -327,7 +327,7 @@ function hhvm_path() {
   return idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm');
 }
 
-function hhvm_cmd_impl($options, $config, /* $extra_args... */) {
+function hhvm_cmd_impl($options, $config /*, $extra_args... */) {
   $args = array(
     hhvm_path(),
     '--config',
@@ -1142,7 +1142,7 @@ function start_server_impl($options, $config, $port) {
     '-vServer.RequestTimeoutSeconds='.SERVER_TIMEOUT,
     '-vPageletServer.ThreadCount=0',
     '-vLog.UseRequestLog=1',
-    '-vLog.File=/dev/null',
+    '-vLog.File=/dev/null'
   );
   if (getenv('HHVM_TEST_SERVER_LOG')) {
     echo "Starting server '$command'\n";

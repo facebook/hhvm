@@ -3,6 +3,9 @@
 .mkdir
 hphp.log
 
+*_cotire.cmake
+cotire
+
 /hphp/test/test
 /hphp/test/test_fast.inc
 /hphp/test/test_mysql_info.inc

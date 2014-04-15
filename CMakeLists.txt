@@ -26,6 +26,11 @@ endif()
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/HPHPFunctions.cmake")
 include(CheckFunctionExists)
+include(cotire)
+
+FIND_PATH(LIBC_INCLUDE_PATH stdlib.h)
+FIND_PATH(ARCH_INCLUDE_PATH ${CMAKE_LIBRARY_ARCHITECTURE})
+SET(ARCH_INCLUDE_PATH "${ARCH_INCLUDE_PATH}/${CMAKE_LIBRARY_ARCHITECTURE}")
 
 add_subdirectory(third-party)
 add_subdirectory(hphp)

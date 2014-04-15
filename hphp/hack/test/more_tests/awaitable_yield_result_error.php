@@ -9,6 +9,6 @@
  *
  */
 
-async function foo(): void {
+async function foo(): ?int {
   return null;
 }

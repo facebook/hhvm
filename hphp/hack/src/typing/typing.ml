@@ -390,6 +390,19 @@ and stmt env = function
         | Ast.FAsync -> (Reason.Rwitness p), Tapply ((p, "Awaitable"), [rty]) in
       let expected_return = Env.get_return env in
       (match snd (Env.expand_type env expected_return) with
+      | r, Tprim Tvoid ->
+          (* Yell about returning a value from a void function. This catches
+           * more issues than just unifying with void would do -- in particular
+           * just unifying allows you to return a Tany from a void function,
+           * which is clearly wrong. Note this check is best-effort; if the
+           * function returns a generic type which later ends up being Tvoid
+           * then there's not much we can do here. *)
+          error_l [
+            p,
+            "You cannot return a value";
+            Reason.to_pos r,
+            "This is a void function"
+         ]
       | _, Tunresolved _ ->
           (* we allow return types to grow for anonymous functions *)
           let env, rty = TUtils.unresolved env rty in

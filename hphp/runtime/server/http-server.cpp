@@ -122,7 +122,8 @@ HttpServer::HttpServer()
   ServerOptions admin_options
     (RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,
      RuntimeOption::AdminThreadCount);
-  m_adminServer = std::move(serverFactory->createServer(admin_options));
+  auto serveradminFactory = ServerFactoryRegistry::getInstance()->getFactory("libevent");
+  m_adminServer = std::move(serveradminFactory->createServer(admin_options));
   m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
     RuntimeOption::RequestTimeoutSeconds);
 

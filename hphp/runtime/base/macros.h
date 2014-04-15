@@ -133,10 +133,6 @@ T InstantStatic<T, TInit, init>::value { init() };
     return result;                                              \
   }
 
-#define DECLARE_CLASS_NO_ALLOCATION(originalName)   \
-  DECLARE_CLASS_NO_SWEEP(originalName)              \
-  static void *ObjAllocatorInitSetup;               \
-
 /**
  * By this declaration a class introduced with DECLARE_CLASS can only
  * be smart-allocated.

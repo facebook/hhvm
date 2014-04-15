@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
 namespace HPHP {
@@ -65,10 +66,16 @@ frame_local_inner(const ActRec* fp, int n) {
   return ret->m_type == KindOfRef ? ret->m_data.pref->tv() : ret;
 }
 
+inline Resumable*
+frame_resumable(const ActRec* fp) {
+  assert(fp->inGenerator());
+  return (Resumable*)((char*)fp - Resumable::arOff());
+}
+
 inline c_Continuation*
 frame_continuation(const ActRec* fp) {
-  auto arOffset = c_Continuation::getArOffset();
-  ObjectData* obj = (ObjectData*)((char*)fp - arOffset);
+  auto resumable = frame_resumable(fp);
+  auto obj = (ObjectData*)((char*)resumable - c_Continuation::resumableOff());
   assert(obj->getVMClass() == c_Continuation::classof());
   return static_cast<c_Continuation*>(obj);
 }

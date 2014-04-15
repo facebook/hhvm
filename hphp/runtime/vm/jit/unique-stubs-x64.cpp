@@ -63,7 +63,7 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   // find where its embedded AR is.
   PhysReg rContAR = serviceReqArgRegs[0];
   a.    loadq  (rVmFp[AROFF(m_this)], rContAR);
-  a.    lea  (rContAR[c_Continuation::getArOffset()], rContAR);
+  a.    lea  (rContAR[c_Continuation::arOff()], rContAR);
   a.    movq   (rVmFp, serviceReqArgRegs[1]);
   emitServiceReq(mcg->code.stubs(), SRFlags::JmpInsteadOfRet,
                  REQ_POST_INTERP_RET);

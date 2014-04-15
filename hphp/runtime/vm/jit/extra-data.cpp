@@ -41,11 +41,11 @@ std::string NewStructData::show() const {
 
 const RawMemData::Info& RawMemData::info() const {
   static const Info infos[] = {
-    {CONTOFF(m_offset),          sz::dword, JIT::Type::Int},
-    {CONTOFF(m_index),           sz::qword, JIT::Type::Int},
-    {c_Continuation::stateOff(), sz::byte,  JIT::Type::Int},
-    {StringData::sizeOff(),      sz::dword, JIT::Type::Int},
-    {Func::numParamsOff(),       sz::dword, JIT::Type::Int},
+    {c_Continuation::offsetOff(), sz::dword, JIT::Type::Int},
+    {CONTOFF(m_index),            sz::qword, JIT::Type::Int},
+    {c_Continuation::stateOff(),  sz::byte,  JIT::Type::Int},
+    {StringData::sizeOff(),       sz::dword, JIT::Type::Int},
+    {Func::numParamsOff(),        sz::dword, JIT::Type::Int},
   };
   static_assert(sizeof infos / sizeof infos[0] == kNumTypes,
                 "Incorrect size of infos array");

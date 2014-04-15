@@ -358,14 +358,14 @@ String c_AsyncFunctionWaitHandle::getFileName() {
 // Get the next execution offset
 Offset c_AsyncFunctionWaitHandle::getNextExecutionOffset() {
   if (m_continuation.isNull()) return InvalidAbsoluteOffset;
-  return m_continuation->offset();
+  return m_continuation->resumable()->offset();
 }
 
 // Get the line number on which execution will proceed when execution resumes.
 int c_AsyncFunctionWaitHandle::getLineNumber() {
   if (m_continuation.isNull()) return -1;
   auto const unit = m_continuation->actRec()->m_func->unit();
-  return unit->getLineNumber(m_continuation->offset());
+  return unit->getLineNumber(m_continuation->resumable()->offset());
 }
 
 ActRec* c_AsyncFunctionWaitHandle::getActRec() {

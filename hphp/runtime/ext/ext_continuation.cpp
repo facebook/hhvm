@@ -33,13 +33,10 @@ namespace HPHP {
 
 void delete_Continuation(ObjectData* od, const Class*) {
   auto const cont = static_cast<c_Continuation*>(od);
-  auto const size = cont->getObjectSize();
-  auto const base = cont->getMallocBase();
+  auto const size = cont->resumable()->size();
+  auto const base = (char*)(cont + 1) - size;
   cont->~c_Continuation();
-  if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSizeLogged(base, size);
-  }
-  MM().smartFreeSizeBigLogged(base, size);
+  MM().objFreeLogged(base, size);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,16 +70,14 @@ c_Continuation::~c_Continuation() {
 void c_Continuation::t___construct() {}
 
 void c_Continuation::suspend(Offset offset, const Cell& value) {
-  assert(actRec()->func()->contains(offset));
-  m_offset = offset;
+  resumable()->setOffset(offset);
   cellSet(make_tv<KindOfInt64>(++m_index), m_key);
   cellSet(value, m_value);
 }
 
 void c_Continuation::suspend(Offset offset, const Cell& key,
                              const Cell& value) {
-  assert(actRec()->func()->contains(offset));
-  m_offset = offset;
+  resumable()->setOffset(offset);
   cellSet(key, m_key);
   cellSet(value, m_value);
   if (m_key.m_type == KindOfInt64) {
@@ -178,7 +173,7 @@ c_Continuation *c_Continuation::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Continuation*>(obj);
   auto fp = thiz->actRec();
 
-  c_Continuation* cont = Create(fp, thiz->m_offset);
+  c_Continuation* cont = Create(fp, thiz->resumable()->offset());
   cont->copyContinuationVars(fp);
   cont->o_subclassData.u16 = thiz->o_subclassData.u16;
   cont->m_index  = thiz->m_index;

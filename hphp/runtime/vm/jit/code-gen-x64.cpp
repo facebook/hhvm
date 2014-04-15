@@ -2758,7 +2758,7 @@ void CodeGenerator::cgStashGeneratorSP(IRInstruction* inst) {
   auto fpReg = srcLoc(0).reg();
   auto spReg = srcLoc(1).reg();
 
-  ssize_t stashLoc = CONTOFF(m_stashedSP) - c_Continuation::getArOffset();
+  ssize_t stashLoc = Resumable::stashedSpOff() - Resumable::arOff();
 
   m_as.    storeq(spReg, fpReg[stashLoc]);
 }
@@ -2767,7 +2767,7 @@ void CodeGenerator::cgReDefGeneratorSP(IRInstruction* inst) {
   auto fpReg = srcLoc(1).reg();
   auto dstReg = dstLoc(0).reg();
 
-  ssize_t stashLoc = CONTOFF(m_stashedSP) - c_Continuation::getArOffset();
+  ssize_t stashLoc = Resumable::stashedSpOff() - Resumable::arOff();
 
   m_as.    loadq (fpReg[stashLoc], dstReg);
 }
@@ -5444,13 +5444,12 @@ void CodeGenerator::cgContValid(IRInstruction* inst) {
 void CodeGenerator::cgContArIncKey(IRInstruction* inst) {
   auto contArReg = srcLoc(0).reg();
   m_as.incq(contArReg[CONTOFF(m_key) + TVOFF(m_data) -
-                      c_Continuation::getArOffset()]);
+                      c_Continuation::arOff()]);
 }
 
 void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
   auto contArReg = srcLoc(0).reg();
-  int64_t off = CONTOFF(m_index) -
-                c_Continuation::getArOffset();
+  int64_t off = CONTOFF(m_index) - c_Continuation::arOff();
   auto newIdx = inst->src(1);
   auto newIdxReg = srcLoc(1).reg();
 
@@ -5471,7 +5470,7 @@ void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
 void CodeGenerator::cgLdContActRec(IRInstruction* inst) {
   auto dest = dstLoc(0).reg();
   auto base = srcLoc(0).reg();
-  ptrdiff_t offset = c_Continuation::getArOffset();
+  ptrdiff_t offset = c_Continuation::arOff();
 
   m_as.lea (base[offset], dest) ;
 }
@@ -5494,7 +5493,7 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
-  emitLdRaw(inst, -c_Continuation::getArOffset());
+  emitLdRaw(inst, -c_Continuation::arOff());
 }
 
 void CodeGenerator::emitStRaw(IRInstruction* inst, size_t extraOff) {
@@ -5526,13 +5525,13 @@ void CodeGenerator::cgStRaw(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgStContArRaw(IRInstruction* inst) {
-  emitStRaw(inst, -c_Continuation::getArOffset());
+  emitStRaw(inst, -c_Continuation::arOff());
 }
 
 void CodeGenerator::cgLdContArValue(IRInstruction* inst) {
   auto contArReg = srcLoc(0).reg();
   const int64_t valueOff = CONTOFF(m_value);
-  int64_t off = valueOff - c_Continuation::getArOffset();
+  int64_t off = valueOff - c_Continuation::arOff();
   cgLoad(inst->dst(), dstLoc(0), contArReg[off], inst->taken());
 }
 
@@ -5541,14 +5540,14 @@ void CodeGenerator::cgStContArValue(IRInstruction* inst) {
   auto value = inst->src(1);
   auto valueLoc = srcLoc(1);
   const int64_t valueOff = CONTOFF(m_value);
-  int64_t off = valueOff - c_Continuation::getArOffset();
+  int64_t off = valueOff - c_Continuation::arOff();
   cgStore(contArReg[off], value, valueLoc, Width::Full);
 }
 
 void CodeGenerator::cgLdContArKey(IRInstruction* inst) {
   auto contArReg = srcLoc(0).reg();
   const int64_t keyOff = CONTOFF(m_key);
-  int64_t off = keyOff - c_Continuation::getArOffset();
+  int64_t off = keyOff - c_Continuation::arOff();
   cgLoad(inst->dst(), dstLoc(0), contArReg[off], inst->taken());
 }
 
@@ -5558,7 +5557,7 @@ void CodeGenerator::cgStContArKey(IRInstruction* inst) {
   auto valueLoc = srcLoc(1);
 
   const int64_t keyOff = CONTOFF(m_key);
-  int64_t off = keyOff - c_Continuation::getArOffset();
+  int64_t off = keyOff - c_Continuation::arOff();
   cgStore(contArReg[off], value, valueLoc, Width::Full);
 }
 
@@ -5591,7 +5590,7 @@ void CodeGenerator::cgLdAFWHActRec(IRInstruction* inst) {
   auto const dest = dstLoc(0).reg();
   auto const base = srcLoc(0).reg();
   auto asyncContOffset = c_AsyncFunctionWaitHandle::getContOffset();
-  auto contArOffset = c_Continuation::getArOffset();
+  auto contArOffset = c_Continuation::arOff();
   m_as.loadq (base[asyncContOffset], dest);
   m_as.lea   (dest[contArOffset], dest);
 }

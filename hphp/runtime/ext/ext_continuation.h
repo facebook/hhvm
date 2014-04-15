@@ -20,6 +20,7 @@
 
 
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/system/systemlib.h"
 
 typedef unsigned char* TCA; // "Translation cache address."
@@ -33,11 +34,22 @@ FORWARD_DECLARE_CLASS(Continuation);
 // class Continuation
 
 struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
-  DECLARE_CLASS_NO_ALLOCATION(Continuation)
+  DECLARE_CLASS_NO_SWEEP(Continuation)
 
-  static constexpr ptrdiff_t startedOff() {
-    return offsetof(c_Continuation, o_subclassData);
+  static constexpr ptrdiff_t resumableOff() { return -sizeof(Resumable); }
+  static constexpr ptrdiff_t arOff() {
+    return resumableOff() + Resumable::arOff();
   }
+  static constexpr ptrdiff_t offsetOff() {
+    return resumableOff() + Resumable::offsetOff();
+  }
+  static constexpr ptrdiff_t startedOff() {
+    return offsetof(c_Continuation, o_subclassData.u8[0]);
+  }
+  static constexpr ptrdiff_t stateOff() {
+    return offsetof(c_Continuation, o_subclassData.u8[1]);
+  }
+
   bool started() const { return o_subclassData.u8[0]; }
   void start() { o_subclassData.u8[0] = true; }
 
@@ -45,9 +57,6 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     Running = 1,
     Done    = 2
   };
-  static constexpr ptrdiff_t stateOff() {
-    return offsetof(c_Continuation, o_subclassData) + 1;
-  }
 
   bool done() const { return o_subclassData.u8[1] & ContState::Done; }
   void setDone() { o_subclassData.u8[1]  =  ContState::Done; }
@@ -72,70 +81,12 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
 
   static c_Continuation* Clone(ObjectData* obj);
 
- private:
-  /*
-   * The memory allocated by c_Continuation::alloc is laid out as follows:
-   *
-   *                +--------------------------+ high address
-   *                |  c_Continuation object   |
-   *                +--------------------------+
-   *                |         ActRec           |
-   *                +--------------------------+
-   *                |                          |
-   *                |  Function locals and     |
-   *                |  iterators               |
-   * malloc ptr ->  +--------------------------+ low address
-   *
-   * Given a c_Continuation object, the ActRec is just below
-   * the object in memory, followed by the functions locals
-   * and iterators.
-   *
-   */
-  static c_Continuation* Alloc(const Func* func, Offset offset) {
-    assert(func);
-    assert(func->isAsync() || func->isGenerator());
-    assert(func->contains(offset));
-
-    size_t contOffset = getContOffset(func);
-    size_t objectSize = contOffset + sizeof(c_Continuation);
-    void* mem = MM().objMallocLogged(objectSize);
-    void* objMem = (char*)mem + contOffset;
-    auto const cont = new (objMem) c_Continuation();
-    memset(mem, 0, contOffset);
-    cont->m_offset = offset;
-    cont->m_size = objectSize;
-    assert(cont->getObjectSize() == objectSize);
-    return cont;
-  }
-
- public:
-  static c_Continuation* Create(const ActRec* origFp, Offset offset) {
-    assert(origFp);
-    auto const func = origFp->func();
-    auto const cont = c_Continuation::Alloc(func, offset);
+  static c_Continuation* Create(const ActRec* fp, Offset offset) {
+    void* obj = Resumable::Create(fp, offset, sizeof(c_Continuation));
+    auto const cont = new (obj) c_Continuation();
     cont->incRefCount();
     cont->setNoDestruct();
-
-    // The ActRec corresponding to the generator body lives as long as the
-    // object does. We set it up once, here, and then just change FP to point
-    // to it when we enter the generator body.
-    auto ar = cont->actRec();
-    ar->m_func = func;
-    ar->initNumArgsInGenerator(origFp->numArgs());
-    ar->setVarEnv(nullptr);
-    ar->setThisOrClassAllowNull(origFp->getThisOrClass());
     return cont;
-  }
-
-  static ptrdiff_t getArOffset() {
-    return -sizeof(ActRec);
-  }
-
-  static ptrdiff_t getContOffset(const Func* func) {
-    assert(func->isAsync() || func->isGenerator());
-    return sizeof(Iter) * func->numIterators() +
-           sizeof(TypedValue) * func->numLocals() +
-           sizeof(ActRec);
   }
 
   /**
@@ -174,40 +125,26 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     }
   }
 
-  Offset offset() const {
-    assert(!running());
-    assert(actRec()->func()->contains(m_offset));
-    return m_offset;
-  }
-
 private:
   explicit c_Continuation(Class* cls = c_Continuation::classof());
   ~c_Continuation();
 
-  void* getMallocBase() {
-    return (char*)(this + 1) - getObjectSize();
-  }
-
-  size_t getObjectSize() {
-    return m_size;
-  }
-
   void copyContinuationVars(ActRec *fp);
 
 public:
-  int32_t m_size;
-  Offset m_offset;
   int64_t m_index;
   Cell m_key;
   Cell m_value;
 
-  /* temporary storage used to save the SP when inlining into a continuation */
-  void* m_stashedSP;
-
   String& getCalledClass() { not_reached(); }
 
+  Resumable* resumable() const {
+    return reinterpret_cast<Resumable*>(
+      const_cast<char*>(reinterpret_cast<const char*>(this) + resumableOff()));
+  }
+
   ActRec* actRec() const {
-    return (ActRec *)((char*)this + getArOffset());
+    return resumable()->actRec();
   }
 };
 

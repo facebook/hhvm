@@ -2016,7 +2016,7 @@ void ExecutionContext::resumeAsyncFunc(c_Continuation& cont,
 
   try {
     enterVM(ar, StackArgsState::Untrimmed,
-            ar->func()->unit()->at(cont.offset()));
+            ar->func()->unit()->at(cont.resumable()->offset()));
     cont.setStopped();
   } catch (...) {
     cont.setDone();
@@ -2042,7 +2042,7 @@ void ExecutionContext::resumeAsyncFuncThrow(c_Continuation& cont,
 
   try {
     enterVM(ar, StackArgsState::Untrimmed,
-            ar->func()->unit()->at(cont.offset()), exception);
+            ar->func()->unit()->at(cont.resumable()->offset()), exception);
     cont.setStopped();
   } catch (...) {
     cont.setDone();
@@ -7124,8 +7124,8 @@ OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
 
   m_fp = contAR;
 
-  assert(contAR->func()->contains(cont->m_offset));
-  pc = contAR->func()->unit()->at(cont->m_offset);
+  assert(contAR->func()->contains(cont->resumable()->offset()));
+  pc = contAR->func()->unit()->at(cont->resumable()->offset());
   SYNC();
 }
 

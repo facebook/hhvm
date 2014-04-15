@@ -1877,7 +1877,7 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
-  emitLdRaw(inst, -c_Continuation::getArOffset());
+  emitLdRaw(inst, -c_Continuation::arOff());
 }
 
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {

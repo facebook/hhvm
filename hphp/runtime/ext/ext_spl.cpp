@@ -165,7 +165,7 @@ Variant f_class_implements(const Variant& obj, bool autoload /* = true */) {
   Array ret(Array::Create());
   const Class::InterfaceMap& ifaces = cls->allInterfaces();
   for (int i = 0, size = ifaces.size(); i < size; i++) {
-    ret.set(ifaces[i]->nameRef(), ifaces[i]->nameRef());
+    ret.set(ifaces[i]->nameStr(), VarNR(ifaces[i]->name()));
   }
   return ret;
 }
@@ -184,8 +184,7 @@ Variant f_class_parents(const Variant& obj, bool autoload /* = true */) {
   }
   Array ret(Array::Create());
   for (cls = cls->parent(); cls; cls = cls->parent()) {
-    auto& clsName = cls->nameRef();
-    ret.set(clsName, clsName);
+    ret.set(cls->nameStr(), VarNR(cls->name()));
   }
   return ret;
 }
@@ -204,8 +203,7 @@ Variant f_class_uses(const Variant& obj, bool autoload /* = true */) {
   }
   Array ret(Array::Create());
   for (auto const& traitName : cls->preClass()->usedTraits()) {
-    const String& nameRef = *(String*)(&traitName);
-    ret.set(nameRef, nameRef);
+    ret.set(StrNR(traitName), VarNR(traitName));
   }
   return ret;
 }

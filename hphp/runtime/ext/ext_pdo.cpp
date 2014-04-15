@@ -748,7 +748,7 @@ static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
   if (cls) {
     const HPHP::Func* method = cls->getDeclaredCtor();
     if (method) {
-      stmt->fetch.constructor = method->nameRef();
+      stmt->fetch.constructor = method->nameStr();
       return true;
     }
   }

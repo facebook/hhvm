@@ -214,7 +214,7 @@ Array Unit::getFunctions(bool system) {
       if (!func_ || (system ^ func_->isBuiltin()) || func_->isGenerated()) {
         continue;
       }
-      a.append(func_->nameRef());
+      a.append(VarNR(func_->name()));
     }
   }
   return a;
@@ -307,9 +307,9 @@ Array Unit::getClassesWithAttrInfo(Attr attrs, bool inverse) {
       Class* c = ac.popFront();
       if ((c->attrs() & attrs) ? !inverse : inverse) {
         if (c->isBuiltin()) {
-          a.prepend(c->nameRef());
+          a.prepend(VarNR(c->name()));
         } else {
-          a.append(c->nameRef());
+          a.append(VarNR(c->name()));
         }
       }
     }

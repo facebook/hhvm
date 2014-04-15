@@ -159,7 +159,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   // Intercept only original generator / async function calls, not resumption.
   if (ar->resumed()) return true;
 
-  Variant* h = get_intercept_handler(func->fullNameRef(),
+  Variant* h = get_intercept_handler(func->fullNameStr(),
                                      &func->maybeIntercepted());
   if (!h) return true;
 
@@ -191,7 +191,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   }
   Variant intArgs =
     PackedArrayInit(5)
-      .append(ar->func()->fullNameRef())
+      .append(VarNR(ar->func()->fullName()))
       .append(called_on)
       .append(get_frame_args_with_ref(ar))
       .append(h->asCArrRef()[1])

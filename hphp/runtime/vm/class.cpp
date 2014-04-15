@@ -835,7 +835,7 @@ void Class::setParent() {
     m_instanceDtor = m_preClass->instanceDtor();
     m_builtinODTailSize = m_preClass->builtinObjSize() -
       m_preClass->builtinODOffset();
-    m_clsInfo = ClassInfo::FindSystemClassInterfaceOrTrait(nameRef());
+    m_clsInfo = ClassInfo::FindSystemClassInterfaceOrTrait(nameStr());
   } else if (m_parent.get()) {
     m_instanceCtor = m_parent->m_instanceCtor;
     m_instanceDtor = m_parent->m_instanceDtor;

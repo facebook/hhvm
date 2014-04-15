@@ -117,8 +117,8 @@ bool ObjectData::destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 // class info
 
-const String& ObjectData::o_getClassName() const {
-  return *(const String*)(&m_cls->preClass()->nameRef());
+StrNR ObjectData::o_getClassName() const {
+  return m_cls->preClass()->nameStr();
 }
 
 bool ObjectData::o_instanceof(const String& s) const {
@@ -749,7 +749,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
             if (prop->m_type != KindOfUninit) {
               auto attrs = m_cls->declProperties()[propInd].m_attrs;
               if (attrs & AttrPrivate) {
-                memberName = concat4(s_zero, ctx->nameRef(),
+                memberName = concat4(s_zero, ctx->nameStr(),
                                      s_zero, memberName);
               } else if (attrs & AttrProtected) {
                 memberName = concat(s_protected_prefix, memberName);
@@ -784,7 +784,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     if (isCollection()) {
       collectionSerialize(const_cast<ObjectData*>(this), serializer);
     } else {
-      const String& className = o_getClassName();
+      auto className = o_getClassName();
       Array properties = getSerializeProps(this, serializer);
       if (serializer->getType() ==
         VariableSerializer::Type::DebuggerSerialize) {
@@ -807,7 +807,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         }
       }
       if (serializer->getType() != VariableSerializer::Type::VarDump &&
-          className == s_PHP_Incomplete_Class) {
+          className.asString() == s_PHP_Incomplete_Class) {
         Variant* cname = const_cast<ObjectData*>(this)-> // XXX
           o_realProp(s_PHP_Incomplete_Class_Name, 0);
         if (cname && cname->isString()) {

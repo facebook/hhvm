@@ -439,7 +439,7 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
     return collectionAtLval(obj, &scratchKey);
   } else if (obj->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
     auto storage = obj->o_realProp(s_storage, 0,
-                                   SystemLib::s_ArrayObjectClass->nameRef());
+                                   SystemLib::s_ArrayObjectClass->nameStr());
     // ArrayObject should have the 'storage' property...
     assert(storage != nullptr);
     return ElemDArray<false /* warn */, keyType>(storage->asTypedValue(), key);

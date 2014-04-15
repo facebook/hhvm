@@ -2405,7 +2405,7 @@ const ClassInfo::ConstantInfo* ExecutionContext::findConstantInfo(
   }
   StringData* key = makeStaticString(name.get());
   ClassInfo::ConstantInfo* ci = new ClassInfo::ConstantInfo();
-  ci->name = *(const String*)&key;
+  ci->name = StrNR(key);
   ci->valueLen = 0;
   ci->valueText = "";
   ci->setValue(tvAsCVarRef(tv));
@@ -2604,7 +2604,7 @@ StaticString
   s_semicolon(";");
 const Variant& ExecutionContext::getEvaledArg(const StringData* val,
                                          const String& namespacedName) {
-  const String& key = *(String*)&val;
+  auto key = StrNR(val);
 
   if (m_evaledArgs.get()) {
     const Variant& arg = m_evaledArgs.get()->get(key);
@@ -2721,8 +2721,8 @@ Unit* ExecutionContext::compileEvalString(
   return acc->second;
 }
 
-const String& ExecutionContext::createFunction(const String& args,
-                                               const String& code) {
+StrNR ExecutionContext::createFunction(const String& args,
+                                       const String& code) {
   if (UNLIKELY(RuntimeOption::EvalAuthoritativeMode)) {
     // Whole program optimizations need to assume they can see all the
     // code.
@@ -2768,7 +2768,7 @@ const String& ExecutionContext::createFunction(const String& args,
   // __lambda_func will be the only hoistable function.
   // Any functions or closures defined in it will not be hoistable.
   Func* lambda = unit->firstHoistable();
-  return lambda->nameRef();
+  return lambda->nameStr();
 }
 
 bool ExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,

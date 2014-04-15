@@ -472,7 +472,7 @@ bool TestCppBase::TestObject() {
     Variant v = unserialize_from_string(s);
     VERIFY(v.isObject());
     auto o = v.toObject();
-    VS(o->o_getClassName(), "__PHP_Incomplete_Class");
+    VS(o->o_getClassName().asString(), "__PHP_Incomplete_Class");
     auto os = HHVM_FN(serialize)(o);
     VS(os, "O:1:\"B\":1:{s:3:\"obj\";O:1:\"A\":1:{s:1:\"a\";i:10;}}");
   }

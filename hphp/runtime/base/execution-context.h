@@ -561,7 +561,7 @@ public:
   void invokeUnit(TypedValue* retval, Unit* unit);
   Unit* compileEvalString(StringData* code,
                                 const char* evalFilename = nullptr);
-  const String& createFunction(const String& args, const String& code);
+  StrNR createFunction(const String& args, const String& code);
   bool evalPHPDebugger(TypedValue* retval, StringData *code, int frame);
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();

@@ -310,17 +310,17 @@ struct Func {
     assert(m_name != nullptr);
     return m_name;
   }
-  const String& nameRef() const {
+  StrNR nameStr() const {
     assert(m_name != nullptr);
-    return *(String*)(&m_name);
+    return StrNR(m_name);
   }
   const StringData* fullName() const {
     if (m_fullName == nullptr) return m_name;
     return m_fullName;
   }
-  const String& fullNameRef() const {
+  StrNR fullNameStr() const {
     assert(m_fullName != nullptr);
-    return *(String*)(&m_fullName);
+    return StrNR(m_fullName);
   }
   // Assembly linkage.
   static size_t fullNameOffset() {

@@ -32,9 +32,9 @@ using JIT::VMRegAnchor;
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-static inline const String& ctxClassName() {
+static inline StrNR ctxClassName() {
   Class* ctx = g_context->getContextClass();
-  return ctx ? ctx->nameRef() : empty_string;
+  return ctx ? ctx->nameStr() : StrNR(empty_string);
 }
 
 static const Class* get_cls(const Variant& class_or_object) {
@@ -251,7 +251,7 @@ Variant HHVM_FUNCTION(get_class, const Variant& object /* = null_variant */) {
     CallerFrame cf;
     Class* cls = arGetContextClassImpl<true>(cf());
     if (cls) {
-      ret = String(cls->nameRef());
+      ret = String(cls->nameStr());
     }
 
     if (ret.empty()) {
@@ -261,7 +261,7 @@ Variant HHVM_FUNCTION(get_class, const Variant& object /* = null_variant */) {
     return ret;
   }
   if (!object.isObject()) return false;
-  return object.toObject()->o_getClassName();
+  return VarNR(object.toObject()->o_getClassName());
 }
 
 Variant HHVM_FUNCTION(get_called_class) {
@@ -280,7 +280,7 @@ Variant HHVM_FUNCTION(get_parent_class,
     CallerFrame cf;
     Class* cls = arGetContextClass(cf());
     if (cls && cls->parent()) {
-      return String(cls->parentRef());
+      return String(cls->parentStr());
     }
     return false;
   }
@@ -296,9 +296,9 @@ Variant HHVM_FUNCTION(get_parent_class,
 
   const Class* cls = Unit::lookupClass(class_name.toString().get());
   if (cls) {
-    auto& parentClass = *(const String*)(&cls->parentRef());
+    auto parentClass = cls->parentStr();
     if (!parentClass.empty()) {
-      return parentClass;
+      return VarNR(parentClass);
     }
   }
   return false;

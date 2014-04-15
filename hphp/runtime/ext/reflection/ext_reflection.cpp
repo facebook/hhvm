@@ -348,7 +348,7 @@ static void set_function_info(Array &ret, const Func* func) {
           // exceptions here.
           const Variant& v = g_context->getEvaledArg(
             fpi.phpCode(),
-            func->cls() ? func->cls()->nameRef() : func->nameRef()
+            func->cls() ? func->cls()->nameStr() : func->nameStr()
           );
           param.set(s_default, v);
         }
@@ -386,8 +386,7 @@ static void set_function_info(Array &ret, const Func* func) {
         Array userAttrs = Array::Create();
         for (auto it = fpi.userAttributes().begin();
              it != fpi.userAttributes().end(); ++it) {
-          userAttrs.set(String(const_cast<StringData*>(it->first)),
-                        tvAsCVarRef(&it->second));
+          userAttrs.set(StrNR(it->first), tvAsCVarRef(&it->second));
         }
         param.set(s_attributes, VarNR(userAttrs));
       }
@@ -421,8 +420,7 @@ static void set_function_info(Array &ret, const Func* func) {
     Array arr = Array::Create();
     for (auto it = func->userAttributes().begin();
          it != func->userAttributes().end(); ++it) {
-      arr.set(String(const_cast<StringData*>(it->first)),
-              tvAsCVarRef(&it->second));
+      arr.set(StrNR(it->first), tvAsCVarRef(&it->second));
     }
     ret.set(s_attributes, VarNR(arr));
   }
@@ -480,8 +478,8 @@ static void set_method_prototype_info(Array &ret, const Func *func) {
   }
   if (prototypeCls) {
     Array prototype = Array::Create();
-    prototype.set(s_class, VarNR(prototypeCls->nameRef()));
-    prototype.set(s_name, VarNR(func->nameRef()));
+    prototype.set(s_class, VarNR(prototypeCls->name()));
+    prototype.set(s_name, VarNR(func->name()));
     ret.set(s_prototype, prototype);
   }
 }
@@ -490,7 +488,7 @@ static void set_method_info(Array &ret, const Func* func, const Class* cls) {
   if (RuntimeOption::EvalRuntimeTypeProfile && !ret.exists(s_type_profiling)) {
     ret.set(s_type_profiling, Array());
   }
-  ret.set(s_name, VarNR(func->nameRef()));
+  ret.set(s_name, VarNR(func->name()));
   set_attrs(ret, get_modifiers(func->attrs(), false));
 
   if (isConstructor(func)) {
@@ -530,7 +528,8 @@ Array HHVM_FUNCTION(hphp_get_method_info, const Variant& class_or_object,
 }
 
 Array HHVM_FUNCTION(hphp_get_closure_info, const Object& closure) {
-  Array mi = HHVM_FN(hphp_get_method_info)(closure->o_getClassName(), s___invoke);
+  Array mi = HHVM_FN(hphp_get_method_info)(
+      VarNR(closure->o_getClassName()), s___invoke);
   mi.set(s_name, s_closure_in_braces);
   mi.set(s_closureobj, closure);
   mi.set(s_closure, empty_string);
@@ -545,7 +544,7 @@ Array HHVM_FUNCTION(hphp_get_closure_info, const Object& closure) {
   for (Slot i = 0; i < cls->numDeclProperties(); ++i) {
     auto const& prop = cls->declProperties()[i];
     auto val = closure.o_get(StrNR(prop.m_name), false /* error */,
-                             cls->nameRef());
+                             cls->nameStr());
 
     // Closure static locals are represented as special instance
     // properties with a mangled name.
@@ -564,9 +563,9 @@ Array HHVM_FUNCTION(hphp_get_closure_info, const Object& closure) {
 
   auto clos = closure.getTyped<c_Closure>();
   if (auto const cls = clos->getClass()) {
-    mi.set(s_closure_scope_class, cls->nameRef());
+    mi.set(s_closure_scope_class, VarNR(cls->name()));
   } else if (auto const thiz = clos->getThis()) {
-    mi.set(s_closure_scope_class, thiz->o_getClassName());
+    mi.set(s_closure_scope_class, VarNR(thiz->o_getClassName()));
   } else {
     mi.set(s_closure_scope_class, null_variant);
   }
@@ -586,19 +585,19 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
   Array ret;
   ret.set(s_name,      VarNR(cls->name()));
   ret.set(s_extension, empty_string);
-  ret.set(s_parent,    cls->parentRef());
+  ret.set(s_parent,    VarNR(cls->parentStr()));
 
   // interfaces
   {
     Array arr = Array::Create();
     for (auto const& interface: cls->declInterfaces()) {
-      arr.set(interface->nameRef(), VarNR(1));
+      arr.set(interface->nameStr(), VarNR(1));
     }
     auto const& allIfaces = cls->allInterfaces();
     if (allIfaces.size() > cls->declInterfaces().size()) {
       for (int i = 0; i < allIfaces.size(); ++i) {
         auto const& interface = allIfaces[i];
-        arr.set(interface->nameRef(), VarNR(1));
+        arr.set(interface->nameStr(), VarNR(1));
       }
     }
     ret.set(s_interfaces, VarNR(arr));
@@ -608,8 +607,7 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
   {
     Array arr = Array::Create();
     for (auto const& traitName : cls->preClass()->usedTraits()) {
-      auto& nameRef = *(String*)(&traitName);
-      arr.set(nameRef, VarNR(1));
+      arr.set(StrNR(traitName), VarNR(1));
     }
     ret.set(s_traits, VarNR(arr));
   }
@@ -619,7 +617,7 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
     Array arr = Array::Create();
     const Class::TraitAliasVec& aliases = cls->traitAliases();
     for (int i = 0, s = aliases.size(); i < s; ++i) {
-      arr.set(*(String*)&aliases[i].first, VarNR(aliases[i].second));
+      arr.set(StrNR(aliases[i].first), VarNR(aliases[i].second));
     }
 
     ret.set(s_trait_aliases, VarNR(arr));
@@ -671,7 +669,7 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
         set_type_profiling_info(info, cls, m);
       }
       set_method_info(info, m, cls);
-      arr.set(f_strtolower(m->nameRef()), VarNR(info));
+      arr.set(f_strtolower(m->nameStr()), VarNR(info));
     }
 
     Func* const* clsMethods = cls->methods();
@@ -682,7 +680,7 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
       if (m->isGenerated()) continue;
       Array info = Array::Create();
       set_method_info(info, m, cls);
-      arr.set(f_strtolower(m->nameRef()), VarNR(info));
+      arr.set(f_strtolower(m->nameStr()), VarNR(info));
     }
     ret.set(s_methods, VarNR(arr));
   }
@@ -705,14 +703,14 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
       if ((prop.m_attrs & AttrPrivate) == AttrPrivate) {
         if (prop.m_class == cls) {
           set_instance_prop_info(info, &prop, default_val);
-          arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
-          arrPrivIdx.set(*(String*)(&prop.m_name), prop.m_idx);
+          arrPriv.set(StrNR(prop.m_name), VarNR(info));
+          arrPrivIdx.set(StrNR(prop.m_name), prop.m_idx);
         }
         continue;
       }
       set_instance_prop_info(info, &prop, default_val);
-      arr.set(*(String*)(&prop.m_name), VarNR(info));
-      arrIdx.set(*(String*)(&prop.m_name), prop.m_idx);
+      arr.set(StrNR(prop.m_name), VarNR(info));
+      arrIdx.set(StrNR(prop.m_name), prop.m_idx);
     }
 
     const Class::SProp* staticProperties = cls->staticProperties();
@@ -724,14 +722,14 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
       if ((prop.m_attrs & AttrPrivate) == AttrPrivate) {
         if (prop.m_class == cls) {
           set_static_prop_info(info, &prop);
-          arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
-          arrPrivIdx.set(*(String*)(&prop.m_name), prop.m_idx);
+          arrPriv.set(StrNR(prop.m_name), VarNR(info));
+          arrPrivIdx.set(StrNR(prop.m_name), prop.m_idx);
         }
         continue;
       }
       set_static_prop_info(info, &prop);
-      arr.set(*(String*)(&prop.m_name), VarNR(info));
-      arrIdx.set(*(String*)(&prop.m_name), prop.m_idx);
+      arr.set(StrNR(prop.m_name), VarNR(info));
+      arrIdx.set(StrNR(prop.m_name), prop.m_idx);
     }
 
     if (name.isObject()) {
@@ -767,7 +765,7 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
       if (consts[i].m_class == cls) {
         Cell value = cls->clsCnsGet(consts[i].m_name);
         assert(value.m_type != KindOfUninit);
-        arr.set(consts[i].nameRef(), cellAsCVarRef(value));
+        arr.set(consts[i].nameStr(), cellAsCVarRef(value));
       }
     }
 
@@ -787,8 +785,7 @@ Array HHVM_FUNCTION(hphp_get_class_info, const Variant& name) {
     const PreClass* pcls = cls->preClass();
     for (auto it = pcls->userAttributes().begin();
          it != pcls->userAttributes().end(); ++it) {
-      arr.set(String(const_cast<StringData*>(it->first)),
-              tvAsCVarRef(&it->second));
+      arr.set(StrNR(it->first), tvAsCVarRef(&it->second));
     }
     ret.set(s_attributes, VarNR(arr));
   }
@@ -905,7 +902,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
 String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
   Class* cls = Unit::loadClass(name.get());
   if (!cls) return empty_string;
-  return cls->nameRef();
+  return cls->nameStr();
 }
 
 bool HHVM_FUNCTION(hphp_scalar_typehints_enabled) {

@@ -85,8 +85,8 @@ const EnumCache::EnumValues* EnumCache::loadEnumValues(
       msg += " enum can only contain static string and int values";
       EnumCache::failLookup(msg);
     }
-    values.set(consts[i].nameRef(), cellAsCVarRef(value));
-    names.set(cellAsCVarRef(value), consts[i].nameRef());
+    values.set(consts[i].nameStr(), cellAsCVarRef(value));
+    names.set(cellAsCVarRef(value), VarNR(consts[i].name()));
   }
   if (UNLIKELY(foundOnClass == 0)) {
     std::string msg;

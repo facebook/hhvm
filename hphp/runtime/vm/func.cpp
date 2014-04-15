@@ -319,7 +319,7 @@ Func::Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2,
 
 Func::~Func() {
   if (m_fullName != nullptr && m_maybeIntercepted != -1) {
-    unregister_intercept_flag(fullNameRef(), &m_maybeIntercepted);
+    unregister_intercept_flag(fullNameStr(), &m_maybeIntercepted);
   }
   if (m_funcId != InvalidFuncId) {
     DEBUG_ONLY auto oldVal = s_funcVec.exchange(m_funcId, nullptr);
@@ -732,7 +732,7 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
           // exceptions here.
           const Variant& v = g_context->getEvaledArg(
             fpi.phpCode(),
-            cls() ? cls()->nameRef() : nameRef()
+            cls() ? cls()->nameStr() : nameStr()
           );
           pi->value = strdup(f_serialize(v).get()->data());
         }
@@ -766,7 +766,7 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
     for (SVInfoVec::const_iterator it = staticVars.begin();
          it != staticVars.end(); ++it) {
       ClassInfo::ConstantInfo* ci = new ClassInfo::ConstantInfo;
-      ci->name = *(String*)(&(*it).name);
+      ci->name = StrNR(it->name);
       if ((*it).phpCode != nullptr) {
         ci->valueLen = (*it).phpCode->size();
         ci->valueText = (*it).phpCode->data();

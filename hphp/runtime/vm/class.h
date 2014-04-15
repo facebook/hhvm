@@ -24,6 +24,7 @@
 #include "hphp/util/range.h"
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -142,9 +143,9 @@ class PreClass : public AtomicCountable {
 
     PreClass* preClass() const { return m_preClass; }
     const StringData* name() const { return m_name; }
-    const String& nameRef() const { return *(String*)&m_name; }
+    StrNR nameStr() const { return StrNR(m_name); }
     const StringData* mangledName() const { return m_mangledName; }
-    const String& mangledNameRef() const { return *(String*)(&m_mangledName); }
+    StrNR mangledNameRef() const { return StrNR(m_mangledName); }
     Attr attrs() const { return m_attrs; }
     const StringData* typeConstraint() const { return m_typeConstraint; }
     RepoAuthType repoAuthType() const { return m_repoAuthType; }
@@ -172,7 +173,7 @@ class PreClass : public AtomicCountable {
 
     PreClass* preClass() const { return m_preClass; }
     const StringData* name() const { return m_name; }
-    const String& nameRef() const { return *(String*)&m_name; }
+    StrNR nameStr() const { return StrNR(m_name); }
     const StringData* typeConstraint() const { return m_typeConstraint; }
     const TypedValue& val() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
@@ -310,11 +311,11 @@ class PreClass : public AtomicCountable {
   int line2() const { return m_line2; }
   Offset getOffset() const { return m_offset; }
   const StringData* name() const { return m_name; }
-  const String& nameRef() const { return *(String*)(&m_name); }
+  StrNR nameStr() const { return StrNR(m_name); }
   Attr attrs() const { return m_attrs; }
   static Offset attrsOffset() { return offsetof(PreClass, m_attrs); }
   const StringData* parent() const { return m_parent; }
-  const String& parentRef() const { return *(String*)(&m_parent); }
+  StrNR parentStr() const { return StrNR(m_parent); }
   const StringData* docComment() const { return m_docComment; }
   Id id() const { return m_id; }
   const InterfaceVec& interfaces() const { return m_interfaces; }
@@ -487,7 +488,8 @@ struct Class : AtomicCountable {
     TypedValue m_val;
     const StringData* m_phpCode;
     const StringData* m_typeConstraint;
-    const String& nameRef() const { return *(String*)&m_name; }
+    const StringData* name() const { return m_name; }
+    StrNR nameStr() const { return StrNR(m_name); }
   };
 
   class PropInitVec {
@@ -612,11 +614,11 @@ struct Class : AtomicCountable {
   Class* parent() const {
     return m_parent.get();
   }
-  const String& nameRef() const {
-    return m_preClass->nameRef();
+  StrNR nameStr() const {
+    return m_preClass->nameStr();
   }
-  const String& parentRef() const {
-    return m_preClass->parentRef();
+  StrNR parentStr() const {
+    return m_preClass->parentStr();
   }
 
   Func* const* methods() const { return m_methods.accessList(); }

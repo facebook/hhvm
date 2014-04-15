@@ -1104,7 +1104,7 @@ Variant f_simplexml_import_dom(
     if (!cls) {
       return uninit_null();
     }
-    Object obj = create_object(cls->nameRef(), Array(), false);
+    Object obj = create_object(cls->nameStr(), Array(), false);
     c_SimpleXMLElement* sxe = obj.getTyped<c_SimpleXMLElement>();
     sxe->document = Resource(NEWOBJ(XmlDocWrapper)(nodep->doc, node));
     sxe->node = nodep;
@@ -1133,7 +1133,7 @@ Variant f_simplexml_load_string(
     return false;
   }
 
-  Object obj = create_object(cls->nameRef(), Array(), false);
+  Object obj = create_object(cls->nameStr(), Array(), false);
   c_SimpleXMLElement* sxe = obj.getTyped<c_SimpleXMLElement>();
   sxe->document = Resource(NEWOBJ(XmlDocWrapper)(doc));
   sxe->node = xmlDocGetRootElement(doc);
@@ -1614,7 +1614,7 @@ Array c_SimpleXMLElement::ToArray(const ObjectData* obj) {
 }
 
 Variant c_SimpleXMLElement::t_getiterator() {
-  Object obj = create_object(c_SimpleXMLElementIterator::classof()->nameRef(),
+  Object obj = create_object(c_SimpleXMLElementIterator::classof()->nameStr(),
                              Array(), false);
   c_SimpleXMLElementIterator* iter = obj.getTyped<c_SimpleXMLElementIterator>();
   iter->sxe = this;

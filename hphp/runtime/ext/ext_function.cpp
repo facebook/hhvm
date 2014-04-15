@@ -124,7 +124,7 @@ bool f_is_callable(const Variant& v, bool syntax /* = false */,
         // Hack to stop the mangled name from showing up
         name = s_Closure__invoke;
       } else {
-        name = d->o_getClassName() + "::__invoke";
+        name = d->o_getClassName().asString() + "::__invoke";
       }
     }
     return invoke != NULL;

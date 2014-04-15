@@ -238,7 +238,7 @@ class ObjectData {
   bool o_instanceof(const String& s) const;
 
   // class info
-  const String& o_getClassName() const;
+  StrNR o_getClassName() const;
   int o_getId() const { return o_id;}
 
   bool o_toBoolean() const {

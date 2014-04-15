@@ -1449,7 +1449,7 @@ Array BaseMap::php_toArray() const {
     if (p->hasIntKey()) {
       ai.set((int64_t)p->ikey, tvAsCVarRef(&p->data));
     } else {
-      ai.set(*(const String*)(&p->skey), tvAsCVarRef(&p->data));
+      ai.set(StrNR(p->skey), tvAsCVarRef(&p->data));
     }
   }
   return ai.toArray();
@@ -1752,7 +1752,7 @@ Array BaseMap::php_toKeysArray() const {
     if (p.hasIntKey()) {
       ai.append(int64_t{p.ikey});
     } else {
-      ai.append(*(const String*)(&p.skey));
+      ai.append(VarNR(p.skey));
     }
   }
   return ai.toArray();

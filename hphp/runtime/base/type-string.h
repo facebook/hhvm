@@ -492,28 +492,28 @@ class StrNR {
   StringData *m_px;
 
 public:
-  explicit StrNR(StringData *data) {
-    m_px = data;
-  }
-  explicit StrNR(const StringData *data) {
-    m_px = const_cast<StringData*>(data);
-  }
-  explicit StrNR(const String &s) { // XXX
-    m_px = s.get();
-  }
-  ~StrNR() {
-  }
+  StrNR() : m_px(nullptr) {}
+  explicit StrNR(StringData *sd) : m_px(sd) {}
+  explicit StrNR(const StringData *sd) : m_px(const_cast<StringData*>(sd)) {}
+  explicit StrNR(const String &s) : m_px(s.get()) {} // XXX
+
+  ~StrNR() {}
 
   /* implicit */ operator const String&() const { return asString(); }
-  const char *data() const { return m_px ? m_px->data() : ""; }
+  const char* data() const { return m_px ? m_px->data() : ""; }
+  const char* c_str() const { return data(); }
+  int size() const { return m_px ? m_px->size() : 0; }
+  bool empty() const { return size() == 0; }
 
   String& asString() {
     return *reinterpret_cast<String*>(this);
   }
-
   const String& asString() const {
     return const_cast<StrNR*>(this)->asString();
   }
+
+  StringData* get() const { return m_px; }
+  StringData* operator->() const { return get(); }
 
 private:
   static void compileTimeAssertions() {

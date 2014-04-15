@@ -112,18 +112,18 @@ static const TransIDVec& getRegionTransIDVec(const RegionToTransIDsMap& map,
 /**
  * Sorts the regions vector in a linear order to be used for
  * translation.  The goal is to obtain an order that improves locality
- * when the function is executed.
+ * when the function is executed.  Each region is translated separately.
  */
-static void sortRegion(RegionVec&                  regions,
-                       const Func*                 func,
-                       const TransCFG&             cfg,
-                       const ProfData*             profData,
-                       const TransIDToRegionMap&   headToRegion,
-                       const RegionToTransIDsMap&  regionToTransIds) {
+static void sortRegions(RegionVec&                  regions,
+                        const Func*                 func,
+                        const TransCFG&             cfg,
+                        const ProfData*             profData,
+                        const TransIDToRegionMap&   headToRegion,
+                        const RegionToTransIDsMap&  regionToTransIds) {
   RegionVec sorted;
   RegionSet selected;
 
-  if (regions.size() == 0) return;
+  if (regions.empty()) return;
 
   // First, pick the region starting at the lowest bytecode offset.
   // This will normally correspond to the main function entry (for
@@ -186,7 +186,7 @@ static void sortRegion(RegionVec&                  regions,
       auto r = regions[i];
       auto tids = getRegionTransIDVec(regionToTransIds, r);
       std::string transIds = folly::join(", ", tids);
-      FTRACE(6, "sortRegion: region[{}]: {}\n", i, transIds);
+      FTRACE(6, "sortRegions: region[{}]: {}\n", i, transIds);
     }
   }
 }
@@ -281,7 +281,7 @@ void regionizeFunc(const Func*       func,
   assert(coveredNodes.size() == cfg.nodes().size());
   assert(coveredArcs.size() == arcs.size());
 
-  sortRegion(regions, func, cfg, profData, headToRegion, regionToTransIds);
+  sortRegions(regions, func, cfg, profData, headToRegion, regionToTransIds);
 
   if (debug && Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
     FTRACE(5, "\n--------------------------------------------\n"

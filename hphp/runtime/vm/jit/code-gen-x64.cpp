@@ -5877,8 +5877,8 @@ void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
     m_as.emitImmReg(imm, m_rScratch);
     m_as.cmpq(m_rScratch, *rsp);
   }
-  ifBlock(CC_NE, [&](Asm& a) {
-     a.ud2();
+  ifThen(m_as, CC_NE, [&] {
+     m_as.ud2();
   });
 }
 

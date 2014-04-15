@@ -55,31 +55,6 @@ struct Jcc32 {
   }
 };
 
-// JccBlock --
-//   A raw condition-code block; assumes whatever comparison or ALU op
-//   that sets the Jcc has already executed.
-template <ConditionCode Jcc, typename J=Jcc8>
-struct JccBlock {
-  mutable X64Assembler* m_a;
-  TCA m_jcc;
-
-  explicit JccBlock(X64Assembler& a)
-    : m_a(&a) {
-    m_jcc = a.frontier();
-    J::branch(a, Jcc, m_a->frontier());
-  }
-
-  ~JccBlock() {
-    if (m_a) {
-      J::patch(*m_a, m_jcc, m_a->frontier());
-    }
-  }
-
-private:
-  JccBlock(const JccBlock&);
-  JccBlock& operator=(const JccBlock&);
-};
-
 // A CondBlock is an RAII structure for emitting conditional code. It
 // compares the source register at fieldOffset with fieldValue, and
 // conditionally branches over the enclosing block of assembly on the

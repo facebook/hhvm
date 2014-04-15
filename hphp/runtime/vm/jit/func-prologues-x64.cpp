@@ -226,10 +226,11 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
     if (!(func->attrs() & AttrStatic)) {
       a.shrq(1, rAsm);
-      JccBlock<CC_BE> ifRealThis(a);
-      a.shlq(1, rAsm);
-      // XXX can objects be static?
-      emitIncRefCheckNonStatic(a, rAsm, KindOfObject);
+      ifThen(a, CC_NBE, [&] {
+        a.shlq(1, rAsm);
+        // XXX can objects be static?
+        emitIncRefCheckNonStatic(a, rAsm, KindOfObject);
+      });
     }
 
     // Put in the correct context

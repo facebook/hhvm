@@ -6,10 +6,12 @@ if [ ! -x "$SED" ]; then
   exit 1
 fi
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 if [ -z "${INSTALL_DIR}" ]; then
-  INFILE=${HPHP_HOME}/hphp/parser/hphp.y
-  OUTFILE=${HPHP_HOME}/hphp/parser/hphp.tab.cpp
-  OUTHEADER=${HPHP_HOME}/hphp/parser/hphp.tab.hpp
+  INFILE=${DIR}/hphp.y
+  OUTFILE=${DIR}/hphp.tab.cpp
+  OUTHEADER=${DIR}/hphp.tab.hpp
 
   BISON=`which bison`
   if [ ! -x "$BISON" ]; then
@@ -56,5 +58,13 @@ $SED -i \
      -e "s/YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));/YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));\n      memset(yyptr, 0, YYSTACK_BYTES (yystacksize));/" \
      -e "s/YYSTACK_RELOCATE (yyvs_alloc, yyvs)/YYSTACK_RELOCATE_RESET (yyvs_alloc, yyvs)/" \
      -e "s/YYSTACK_FREE (yyss)/YYSTACK_FREE (yyss);\n  YYSTACK_CLEANUP/" \
+     -e "s/\".*hphp.tab.cpp\"/\"hphp.tab.cpp\"/" \
      ${OUTFILE}
 
+# We still want the files in our tree since they are checked in
+if [ -n "${INSTALL_DIR}" ]; then
+  $SED -i -e "1i// @""generated" $OUTFILE
+  $SED -i -e "1i// @""generated" $OUTHEADER
+  cp $OUTFILE ${DIR}/hphp.tab.cpp
+  cp $OUTHEADER ${DIR}/hphp.tab.hpp
+fi

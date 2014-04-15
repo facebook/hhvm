@@ -21,8 +21,8 @@ $excluded = array(
   'util/cronoutils.h',
   'util/cronoutils.cpp',
   'vixl/',
+  'parser/hphp.tab.cpp',
   'runtime/base/ini-parser/zend-ini.tab.cpp',
-  'runtime/base/ini-parser/zend-ini.yy.cpp',
   'runtime/ext/gd/libgd/',
   'runtime/ext/zlib/quicklz.h',
   'runtime/ext/zlib/quicklz.inc',
@@ -31,7 +31,6 @@ $excluded = array(
   'submodules',
 
   // non-PHP licenses
-  'compiler/parser/hphp.tab.cpp',
   'runtime/base/utf8-decode.c',
   'runtime/base/utf8-to-utf16.c',
   'runtime/base/zend-strtod.cpp',

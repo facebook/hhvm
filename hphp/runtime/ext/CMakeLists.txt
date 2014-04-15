@@ -28,8 +28,6 @@ foreach (dir ${subdirs})
 	endif()
 endforeach()
 
-include_directories("${HPHP_HOME}/third-party")
-
 if(NOT LINUX)
        add_definitions(-DNO_HARDWARE_COUNTERS)
 endif()

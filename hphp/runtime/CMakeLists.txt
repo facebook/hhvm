@@ -26,8 +26,6 @@ if(NOT HAVE_CUSTOM_LIBEVENT)
 	endforeach(file ${CXX_SOURES})
 endif()
 
-include_directories("${HPHP_HOME}/third-party")
-
 ADD_LIBRARY(hphp_runtime_static STATIC
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES OUTPUT_NAME "hphp_runtime")

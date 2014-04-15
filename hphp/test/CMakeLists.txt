@@ -15,8 +15,6 @@ if(NOT HAVE_CUSTOM_LIBEVENT)
 	list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ext/test_ext_curl.cpp")
 endif()
 
-include_directories("${HPHP_HOME}/third-party")
-
 if (NOT ENABLE_FASTCGI)
 	list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ext/test_fastcgi.cpp")
 	list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ext/test_fastcgi_protocol.cpp")

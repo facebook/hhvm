@@ -402,12 +402,11 @@ PhysReg CodeGenerator::prepXMMReg(Asm& as, const SSATmp* src,
 
 void CodeGenerator::doubleCmp(Asm& a, RegXMM xmmReg0, RegXMM xmmReg1) {
   a.    ucomisd(xmmReg0, xmmReg1);
-  Label notPF;
-  a.    jnp8(notPF);
-  // PF means the doubles were unordered. We treat this as !equal, so
-  // clear ZF.
-  a.    orq  (1, m_rScratch);
-asm_label(a, notPF);
+  ifThen(a, CC_P, [&] {
+    // PF means the doubles were unordered. We treat this as !equal, so
+    // clear ZF.
+    a.    orq  (1, m_rScratch);
+  });
 }
 
 void CodeGenerator::emitCompare(IRInstruction* inst) {
@@ -519,11 +518,10 @@ void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
   auto srcReg = srcLoc(0).reg();
   auto dstReg = dstLoc(0).reg();
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    Label nonNull;
     m_as.testq (srcReg, srcReg);
-    m_as.jne8  (nonNull);
-    m_as.ud2();
-    asm_label(m_as, nonNull);
+    ifThen(m_as, CC_Z, [&] {
+      m_as.ud2();
+    });
   }
   emitMovRegReg(m_as, srcReg, dstReg);
 }
@@ -2155,35 +2153,31 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
 
     ifThen(a, CC_B, [&] {
       // src0 > 0 (CF = 1 -> less than 0 or unordered)
-      Label isUnordered;
-      a.   jp8     (isUnordered);
+      ifThen(a, CC_NP, [&] {
+        emitLoadImm(a, maxULongAsDouble, rCgXMM1);
+        a.   ucomisd    (rCgXMM1, srcReg);
+        ifThenElse(a, CC_B, [&] {
+          // src0 > ULONG_MAX
+          a.    xorq    (dstReg, dstReg);
 
-      emitLoadImm(a, maxULongAsDouble, rCgXMM1);
+        }, [&] {
+          // 0 < src0 <= ULONG_MAX
+          emitLoadImm(a, maxLongAsDouble, rCgXMM1);
+          emitMovRegReg(a, srcReg, rCgXMM0);
 
-      a.   ucomisd    (rCgXMM1, srcReg);
+          // we know that LONG_MAX < src0 <= UINT_MAX, therefore,
+          // 0 < src0 - ULONG_MAX <= LONG_MAX
+          a.    subsd            (rCgXMM1, rCgXMM0);
+          a.    cvttsd2siq       (rCgXMM0, dstReg);
 
-      ifThenElse(a, CC_B, [&] {
-        // src0 > ULONG_MAX
-        a.    xorq    (dstReg, dstReg);
-
-      }, [&] {
-        // 0 < src0 <= ULONG_MAX
-        emitLoadImm(a, maxLongAsDouble, rCgXMM1);
-        emitMovRegReg(a, srcReg, rCgXMM0);
-
-        // we know that LONG_MAX < src0 <= UINT_MAX, therefore,
-        // 0 < src0 - ULONG_MAX <= LONG_MAX
-        a.    subsd            (rCgXMM1, rCgXMM0);
-        a.    cvttsd2siq       (rCgXMM0, dstReg);
-
-        // We want to simulate integer overflow so we take the resulting integer
-        // and flip its sign bit (NB: we don't use orq here because it's
-        // possible that src0 == LONG_MAX in which case cvttsd2siq will yeild
-        // an indefiniteInteger, which we would like to make zero)
-        a.    xorq             (rIndef, dstReg);
+          // We want to simulate integer overflow so we take the resulting
+          // integer and flip its sign bit (NB: we don't use orq here
+          // because it's possible that src0 == LONG_MAX in which case
+          // cvttsd2siq will yeild an indefiniteInteger, which we would
+          // like to make zero)
+          a.    xorq             (rIndef, dstReg);
+        });
       });
-
-      asm_label(a, isUnordered);
     });
   });
 }

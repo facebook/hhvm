@@ -178,12 +178,8 @@ c_Continuation *c_Continuation::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Continuation*>(obj);
   auto fp = thiz->actRec();
 
-  c_Continuation* cont = static_cast<c_Continuation*>(fp->getThisOrClass()
-    ? CreateMeth(fp, thiz->m_offset)
-    : CreateFunc(fp, thiz->m_offset));
-
+  c_Continuation* cont = Create(fp, thiz->m_offset);
   cont->copyContinuationVars(fp);
-
   cont->o_subclassData.u16 = thiz->o_subclassData.u16;
   cont->m_index  = thiz->m_index;
   cellSet(thiz->m_key, cont->m_key);

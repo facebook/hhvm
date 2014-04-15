@@ -837,8 +837,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       consumeAllFrames();
     } else if (m_inst->is(GenericRetDecRefs, NativeImpl)) {
       consumeAllLocals();
-    } else if (m_inst->is(CreateContMeth, CreateContFunc,
-                          CreateAFWHMeth, CreateAFWHFunc)) {
+    } else if (m_inst->is(CreateCont, CreateAFWH)) {
       consumeAllLocals();
       consumeInputs();
       defineOutputs();

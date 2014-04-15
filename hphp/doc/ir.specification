@@ -1740,14 +1740,17 @@ StClosureArg<offsetBytes> S0:Obj<Closure> S1:Gen
   Store one of the closure environment arguments (i.e. from the closure's use
   clause) from S1 into the closure object S0.
 
-D:Obj = CreateContFunc<origFunc,generatorFunc>
+D:Obj<Continuation> = CreateCont S0:FramePtr S1:Int
 
-  Create a continuation object for a generator function.
+  Create a Continuation object and suspend the ActRec provided by S0 into
+  its embedded ActRec. Set the resume offset to S1.
 
-D:Obj = CreateContMeth<origFunc,generatorFunc> S0:Ctx
+D:Obj<AsyncFunctionWaitHandle> = CreateAFWH S0:FramePtr S1:Int 
+                                            S2:Obj<WaitableWaitHandle>
 
-  Create a continuation object for a generator method. S0 is the m_this/m_cls
-  field of the current frame pointer.
+  Create an AsyncFunctionWaitHandle object and suspend the ActRec provided by
+  S0 into its embedded ActRec. Set the resume offset to S1 and mark it blocked
+  on non-finished child S2.
 
 ContEnter S0:FramePtr S1:TCA S2:ConstInt S3:FramePtr
 

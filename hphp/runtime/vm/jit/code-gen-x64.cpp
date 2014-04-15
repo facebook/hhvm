@@ -212,10 +212,8 @@ CALL_OPCODE(ConcatStrInt);
 CALL_OPCODE(ConcatIntStr);
 
 CALL_OPCODE(TypeProfileFunc)
-CALL_OPCODE(CreateContFunc)
-CALL_OPCODE(CreateContMeth)
-CALL_OPCODE(CreateAFWHFunc)
-CALL_OPCODE(CreateAFWHMeth)
+CALL_OPCODE(CreateCont)
+CALL_OPCODE(CreateAFWH)
 CALL_OPCODE(CreateSRWH)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewPackedArray)

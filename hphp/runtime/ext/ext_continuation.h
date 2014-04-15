@@ -108,6 +108,7 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     return cont;
   }
 
+ public:
   static c_Continuation* Create(const ActRec* origFp, Offset offset) {
     assert(origFp);
     auto const func = origFp->func();
@@ -122,20 +123,7 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     ar->m_func = func;
     ar->initNumArgsInGenerator(origFp->numArgs());
     ar->setVarEnv(nullptr);
-    return cont;
-  }
-
- public:
-  static ObjectData* CreateFunc(const ActRec* origFp, Offset offset) {
-    auto cont = Create(origFp, offset);
-    cont->actRec()->setThis(nullptr);
-    return cont;
-  }
-
-  static ObjectData* CreateMeth(const ActRec* origFp, Offset offset) {
-    auto cont = Create(origFp, offset);
-    auto ar = cont->actRec();
-    ar->setThisOrClass(origFp->getThisOrClass());
+    ar->setThisOrClassAllowNull(origFp->getThisOrClass());
     return cont;
   }
 

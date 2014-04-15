@@ -110,36 +110,19 @@ void checkCreateErrors(c_WaitableWaitHandle* child) {
 }
 
 ObjectData*
-c_AsyncFunctionWaitHandle::CreateFunc(const ActRec* origFp,
-                                      Offset offset,
-                                      ObjectData* child) {
+c_AsyncFunctionWaitHandle::Create(const ActRec* origFp,
+                                  Offset offset,
+                                  ObjectData* child) {
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
   auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
   assert(!child_wh->isFinished());
 
   checkCreateErrors(child_wh);
 
-  auto cont = c_Continuation::CreateFunc(origFp, offset);
+  auto cont = c_Continuation::Create(origFp, offset);
   auto wait_handle = NEWOBJ(c_AsyncFunctionWaitHandle)();
   wait_handle->incRefCount();
-  wait_handle->initialize(static_cast<c_Continuation*>(cont), child_wh);
-  return wait_handle;
-}
-
-ObjectData*
-c_AsyncFunctionWaitHandle::CreateMeth(const ActRec* origFp,
-                                      Offset offset,
-                                      ObjectData* child) {
-  assert(child->instanceof(c_WaitableWaitHandle::classof()));
-  auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
-  assert(!child_wh->isFinished());
-
-  checkCreateErrors(child_wh);
-
-  auto cont = c_Continuation::CreateMeth(origFp, offset);
-  auto wait_handle = NEWOBJ(c_AsyncFunctionWaitHandle)();
-  wait_handle->incRefCount();
-  wait_handle->initialize(static_cast<c_Continuation*>(cont), child_wh);
+  wait_handle->initialize(cont, child_wh);
   return wait_handle;
 }
 

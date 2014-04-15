@@ -257,15 +257,11 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
 
     /* Continuation support helpers */
-    {CreateContFunc,     &c_Continuation::CreateFunc, DSSA, SNone,
-                          {{SSA, 0}, {SSA, 1}}},
-    {CreateContMeth,     &c_Continuation::CreateMeth, DSSA, SNone,
+    {CreateCont,         &c_Continuation::Create, DSSA, SNone,
                           {{SSA, 0}, {SSA, 1}}},
 
     /* Async function support helpers */
-    {CreateAFWHFunc,     &c_AsyncFunctionWaitHandle::CreateFunc, DSSA, SSync,
-                          {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
-    {CreateAFWHMeth,     &c_AsyncFunctionWaitHandle::CreateMeth, DSSA, SSync,
+    {CreateAFWH,         &c_AsyncFunctionWaitHandle::Create, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {CreateSRWH,         &c_StaticResultWaitHandle::CreateFromVM, DSSA, SNone,
                           {{TV, 0}}},

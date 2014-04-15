@@ -7065,9 +7065,7 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   const auto offset = m_fp->func()->unit()->offsetOf(pc);
 
   // Create the Continuation object.
-  c_Continuation* cont = static_cast<c_Continuation*>(func->isMethod()
-    ? c_Continuation::CreateMeth(m_fp, offset)
-    : c_Continuation::CreateFunc(m_fp, offset));
+  auto cont = c_Continuation::Create(m_fp, offset);
 
   // Teleport local variables into the Continuation.
   fillContinuationVars(func, m_fp, cont->actRec());
@@ -7251,9 +7249,8 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
   m_stack.discard();
 
   // Create the AsyncFunctionWaitHandle object.
-  auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(func->isMethod()
-    ? c_AsyncFunctionWaitHandle::CreateMeth(m_fp, offset, child)
-    : c_AsyncFunctionWaitHandle::CreateFunc(m_fp, offset, child));
+  auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(
+    c_AsyncFunctionWaitHandle::Create(m_fp, offset, child));
 
   // Teleport local variables into the AsyncFunctionWaitHandle.
   fillContinuationVars(func, m_fp, waitHandle->getActRec());

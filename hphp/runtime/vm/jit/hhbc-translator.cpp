@@ -1476,9 +1476,7 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
 
   // Create the Continuation object.
   auto const func = curFunc();
-  auto const cont = func->isMethod()
-    ? gen(CreateContMeth, m_irb->fp(), cns(resumeOffset))
-    : gen(CreateContFunc, m_irb->fp(), cns(resumeOffset));
+  auto const cont = gen(CreateCont, m_irb->fp(), cns(resumeOffset));
 
   // Teleport local variables into the Continuation.
   SSATmp* contAR = gen(LdContActRec, Type::PtrToGen, cont);
@@ -1653,9 +1651,8 @@ void HhbcTranslator::emitAsyncSuspendE(Offset resumeOffset, int numIters) {
 
   // Create the AsyncFunctionWaitHandle object.
   auto const func = curFunc();
-  auto const waitHandle = func->isMethod()
-    ? gen(CreateAFWHMeth, catchBlock, m_irb->fp(), cns(resumeOffset), child)
-    : gen(CreateAFWHFunc, catchBlock, m_irb->fp(), cns(resumeOffset), child);
+  auto const waitHandle =
+    gen(CreateAFWH, catchBlock, m_irb->fp(), cns(resumeOffset), child);
 
   // Teleport local variables into the AsyncFunctionWaitHandle.
   SSATmp* asyncAR = gen(LdAFWHActRec, Type::PtrToGen, waitHandle);

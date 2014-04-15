@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-object.h"
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
@@ -106,6 +107,8 @@ bool ConcurrentTableSharedStore::eraseImpl(const String& key,
       return false;
     }
     if (acc->second.inMem()) {
+      m_apcStats.removeAPCValue(acc->second.size,
+          acc->second.var, acc->second.expiry == 0, expired);
       if (expired && acc->second.expiry < oldestLive &&
           acc->second.var->getUncounted()) {
         APCTypedValue::fromHandle(acc->second.var)->deleteUncounted();
@@ -200,6 +203,8 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
     // updated it already, check before updating
     if (sv == svar && !sv->getIsObj()) {
       sval->var = converted;
+      sval->size = m_apcStats.updateAPCValue(converted, sv,
+          sval->size, sval->expiry == 0, false);
       sv->unreferenceRoot();
       return true;
     }
@@ -220,6 +225,7 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
     Variant v;
     v.unserialize(&vu);
     sval->var = APCHandle::Create(v, sval->isSerializedObj());
+    sval->size = m_apcStats.addAPCValue(sval->var, true);
     return sval->var;
   } catch (Exception &e) {
     raise_notice("APC Primed fetch failed: key %s (%s).",
@@ -308,8 +314,11 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
       if (!sval->expired()) {
         ret = get_int64_value(sval) + step;
         APCHandle *svar = construct(Variant(ret));
+        auto size = m_apcStats.updateAPCValue(svar, sval->var,
+            sval->size, sval->expiry == 0, false);
         sval->var->unreferenceRoot();
         sval->var = svar;
+        sval->size = size;
         found = true;
       }
     }
@@ -329,8 +338,11 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
       sval = &acc->second;
       if (!sval->expired() && get_int64_value(sval) == old) {
         APCHandle *var = construct(Variant(val));
+        auto size = m_apcStats.updateAPCValue(var, sval->var,
+            sval->size, sval->expiry == 0, false);
         sval->var->unreferenceRoot();
         sval->var = var;
+        sval->size = size;
         success = true;
       }
     }
@@ -387,17 +399,18 @@ bool ConcurrentTableSharedStore::store(const String& key, const Variant& value,
   bool overwritePrime = false;
   {
     Map::accessor acc;
+    APCHandle* current = nullptr;
     present = !m_vars.insert(acc, kcp);
     sval = &acc->second;
     if (present) {
-      free((void *)kcp);
+      free((void*)kcp);
       if (overwrite || sval->expired()) {
         // if ApcTTLLimit is set, then only primed keys can have expiry == 0
         overwritePrime = (sval->expiry == 0);
         if (sval->inMem()) {
-          sval->var->unreferenceRoot();
+          current = sval->var;
         } else {
-          // mark the inFile copy invalid since we are updating the key
+          m_apcStats.removeInFileValue(std::abs(sval->sSize));
           sval->sAddr = nullptr;
           sval->sSize = 0;
         }
@@ -405,10 +418,24 @@ bool ConcurrentTableSharedStore::store(const String& key, const Variant& value,
         svar->unreferenceRoot();
         return false;
       }
+    } else {
+      m_apcStats.addKey(kcp);
     }
     int64_t adjustedTtl = adjust_ttl(ttl, overwritePrime || !limit_ttl);
     if (check_noTTL(key.data(), key.size())) {
       adjustedTtl = 0;
+    }
+    if (current) {
+      if (sval->expiry == 0 && adjustedTtl != 0) {
+        m_apcStats.removeAPCValue(sval->size, current, true, sval->expired());
+        m_apcStats.addAPCValue(svar, false);
+      } else {
+        sval->size = m_apcStats.updateAPCValue(svar, current, sval->size,
+            sval->expiry == 0, sval->expired());
+      }
+      current->unreferenceRoot();
+    } else {
+      sval->size = m_apcStats.addAPCValue(svar, present);
     }
     sval->set(svar, adjustedTtl);
     expiry = sval->expiry;
@@ -430,13 +457,17 @@ void ConcurrentTableSharedStore::prime(const std::vector<KeyValuePair> &vars) {
     const KeyValuePair &item = vars[i];
     Map::accessor acc;
     const char *copy = strdup(item.key);
-    m_vars.insert(acc, copy);
+    if (m_vars.insert(acc, copy)) {
+      m_apcStats.addPrimedKey(copy);
+    }
     if (item.inMem()) {
+      auto size = m_apcStats.addAPCValue(item.value, true);
+      acc->second.size = size;
       acc->second.set(item.value, 0);
     } else {
       acc->second.sAddr = item.sAddr;
       acc->second.sSize = item.sSize;
-      continue;
+      m_apcStats.addInFileValue(std::abs(acc->second.sSize));
     }
   }
 }

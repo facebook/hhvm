@@ -322,6 +322,8 @@ private:
   enum class CloneMixed {};
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
+  friend size_t getMemSize(const ArrayData*);
+
 public:
   // Safe downcast helpers
   static MixedArray* asMixed(ArrayData* ad);

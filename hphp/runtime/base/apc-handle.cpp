@@ -24,9 +24,12 @@
 #include "hphp/runtime/base/mixed-array.h"
 
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
-static APCHandle* getAPCHandle(const Variant& source) {
+namespace {
+
+APCHandle* getAPCHandle(const Variant& source) {
   auto const cell = source.asCell();
   if (cell->m_type == KindOfString) {
     return cell->m_data.pstr->getAPCHandle();
@@ -35,6 +38,8 @@ static APCHandle* getAPCHandle(const Variant& source) {
     return cell->m_data.parr->getAPCHandle();
   }
   return nullptr;
+}
+
 }
 
 APCHandle* APCHandle::Create(const Variant& source,

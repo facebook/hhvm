@@ -431,6 +431,9 @@ protected:
     };
     uint64_t m_posAndCount;   // be careful, m_pos is signed
   };
+
+private:
+  friend size_t getMemSize(const ArrayData*);
 };
 
 //////////////////////////////////////////////////////////////////////

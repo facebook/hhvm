@@ -70,6 +70,16 @@ public:
 #endif
   }
 
+  static const APCTypedValue* fromHandle(const APCHandle* handle) {
+#if PACKED_TV
+    assert(offsetof(APCTypedValue, m_handle) == 0);
+    return reinterpret_cast<const APCTypedValue*>(handle);
+#else
+    assert(offsetof(APCTypedValue, m_handle) == sizeof(SharedData));
+    return reinterpret_cast<const APCTypedValue*>(handle - 1);
+#endif
+  }
+
   APCHandle* getHandle() {
     return &m_handle;
   }

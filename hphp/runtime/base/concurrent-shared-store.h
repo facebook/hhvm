@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/server/server-stats.h"
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_priority_queue.h>
@@ -177,6 +178,9 @@ private:
 
   void eraseAcc(Map::accessor &acc) {
     const char *pkey = acc->first;
+    if (RuntimeOption::EnableAPCStats) {
+      m_apcStats.removeKey(pkey);
+    }
     m_vars.erase(acc);
     free((void *)pkey);
   }
@@ -207,6 +211,7 @@ private:
                                  ExpirationCompare> m_expQueue;
   ExpMap m_expMap;
   std::atomic<uint64_t> m_purgeCounter;
+  APCStats m_apcStats;
 };
 
 //////////////////////////////////////////////////////////////////////

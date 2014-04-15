@@ -288,6 +288,7 @@ public:
   static bool MemcacheReadOnly;
 
   static bool EnableStats;
+  static bool EnableAPCStats;
   static bool EnableWebStats;
   static bool EnableMemoryStats;
   static bool EnableMemcacheStats;

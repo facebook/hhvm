@@ -57,10 +57,16 @@ struct APCObject {
     return reinterpret_cast<APCObject*>(handle);
   }
 
+  static const APCObject* fromHandle(const APCHandle* handle) {
+    assert(offsetof(APCObject, m_handle) == 0);
+    return reinterpret_cast<const APCObject*>(handle);
+  }
+
   APCHandle* getHandle() { return &m_handle; }
 
 private:
   friend struct APCHandle;
+  friend size_t getMemSize(const APCObject*);
 
   struct Prop {
     StringData* name;

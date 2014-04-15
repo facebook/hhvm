@@ -47,11 +47,24 @@ struct APCString {
     return reinterpret_cast<APCString*>(handle);
   }
 
+  static const APCString* fromHandle(const APCHandle* handle) {
+    assert(offsetof(APCString, m_handle) == 0);
+    return reinterpret_cast<const APCString*>(handle);
+  }
+
+  const APCHandle* getHandle() const {
+    return &m_handle;
+  }
+
   APCHandle* getHandle() {
     return &m_handle;
   }
 
   StringData* getStringData() {
+    return &m_data;
+  }
+
+  const StringData* getStringData() const {
     return &m_data;
   }
 

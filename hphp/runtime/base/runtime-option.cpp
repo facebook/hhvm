@@ -295,6 +295,7 @@ bool RuntimeOption::LocalMemcache = false;
 bool RuntimeOption::MemcacheReadOnly = false;
 
 bool RuntimeOption::EnableStats = false;
+bool RuntimeOption::EnableAPCStats = false;
 bool RuntimeOption::EnableWebStats = false;
 bool RuntimeOption::EnableMemoryStats = false;
 bool RuntimeOption::EnableMemcacheStats = false;
@@ -965,7 +966,6 @@ void RuntimeOption::Load(Hdf &config,
     if (ImageMemoryMaxBytes == 0) {
       ImageMemoryMaxBytes = UploadMaxFileSize * 2;
     }
-    SharedStores::Create();
 
     LightProcessFilePrefix =
       server["LightProcessFilePrefix"].getString("./lightprocess");
@@ -1127,6 +1127,7 @@ void RuntimeOption::Load(Hdf &config,
     Hdf stats = config["Stats"];
     EnableStats = stats.getBool(); // main switch
 
+    EnableAPCStats = stats["APC"].getBool(false);
     EnableWebStats = stats["Web"].getBool();
     EnableMemoryStats = stats["Memory"].getBool();
     EnableMemcacheStats = stats["Memcache"].getBool();
@@ -1459,6 +1460,7 @@ void RuntimeOption::Load(Hdf &config,
                    &RuntimeOption::WarningFrequency);
 
   Extension::LoadModules(config);
+  SharedStores::Create();
   if (overwrites) Loaded = true;
 }
 

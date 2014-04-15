@@ -33,6 +33,7 @@ set(HHVM_LINK_LIBRARIES
     ${HHVM_ANCHOR_SYMS}
     hphp_analysis
     ext_hhvm_static
+    hphp_ext_zend_compat
     hphp_system
     hphp_parser
     hphp_zend

@@ -1512,7 +1512,7 @@ void HhbcTranslator::emitResumedReturnControl(Block* catchBlock) {
   m_hasExit = true;
 }
 
-void HhbcTranslator::emitContSuspendImpl(Offset resumeOffset) {
+void HhbcTranslator::emitYieldImpl(Offset resumeOffset) {
   // set m_value = popC();
   auto const oldValue = gen(LdContArValue, Type::Cell, m_irb->fp());
   gen(StContArValue, m_irb->fp(), popC(DataTypeGeneric)); // teleporting value
@@ -1523,10 +1523,10 @@ void HhbcTranslator::emitContSuspendImpl(Offset resumeOffset) {
       cns(resumeOffset));
 }
 
-void HhbcTranslator::emitContSuspend(Offset resumeOffset) {
+void HhbcTranslator::emitYield(Offset resumeOffset) {
   auto catchBlock = makeCatchNoSpill();
 
-  emitContSuspendImpl(resumeOffset);
+  emitYieldImpl(resumeOffset);
 
   // take a fast path if this generator has no yield k => v;
   if (curFunc()->isPairGenerator()) {
@@ -1548,9 +1548,9 @@ void HhbcTranslator::emitContSuspend(Offset resumeOffset) {
   emitResumedReturnControl(catchBlock);
 }
 
-void HhbcTranslator::emitContSuspendK(Offset resumeOffset) {
+void HhbcTranslator::emitYieldK(Offset resumeOffset) {
   auto catchBlock = makeCatchNoSpill();
-  emitContSuspendImpl(resumeOffset);
+  emitYieldImpl(resumeOffset);
 
   auto const newKey = popC();
   auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());

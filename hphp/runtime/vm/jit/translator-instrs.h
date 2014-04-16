@@ -157,8 +157,8 @@
   CASE(CreateCont) \
   CASE(ContEnter) \
   CASE(ContRaise) \
-  CASE(ContSuspend) \
-  CASE(ContSuspendK) \
+  CASE(Yield) \
+  CASE(YieldK) \
   CASE(ContCheck) \
   CASE(ContValid) \
   CASE(ContKey) \

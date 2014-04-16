@@ -109,8 +109,8 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
   auto func = unit->getFunc(site->getCurOffset());
   if (func->isAsync() || func->isGenerator()) {
     auto excludeContinuationReturns = [] (Op op) {
-      return (op != OpContSuspend) &&
-             (op != OpContSuspendK) &&
+      return (op != OpYield) &&
+             (op != OpYieldK) &&
              (op != OpAsyncSuspend) &&
              (op != OpRetC);
     };

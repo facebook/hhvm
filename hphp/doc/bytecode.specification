@@ -223,7 +223,7 @@ The second part is where the real user-level code of the generator should be
 placed. ContEnter and ContRaise opcodes used in Continuation's next(), send()
 and raise() methods resume execution and transfer control to the resume offset
 stored in the Continuation object. The user-level code yields values using
-ContSuspend and ContSuspendK opcodes and returns using RetC opcode.
+Yield and YieldK opcodes and returns using RetC opcode.
 
 
 Async functions
@@ -4105,7 +4105,7 @@ ContRaise   [C:Obj]  ->  []
   associated with $this Continuation object. The Exception stored at $1 is
   raised instead of invoking code at the resume offset.
 
-ContSuspend   [C]  ->  [C]
+Yield   [C]  ->  [C]
 
   This instruction may only appear in bodies of continuations. Stores $1 
   in the continuation as the result of the current iteration, sets resume 
@@ -4114,7 +4114,7 @@ ContSuspend   [C]  ->  [C]
   the value sent by ContEnter becomes available on the stack, or 
   an exception sent by ContRaise is thrown.
 
-ContSuspendK   [C C]  ->  []
+YieldK   [C C]  ->  [C]
 
   This instruction may only appear in bodies of continuations. Stores $1
   in the continuation as the result and $2 as the key of the current

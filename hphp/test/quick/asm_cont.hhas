@@ -29,13 +29,13 @@ F2:
   CreateCont
   PopC
   Int 1
-  ContSuspend
+  Yield
   PopC
   Int 2
-  ContSuspend
+  Yield
   PopC
   Int 3
-  ContSuspend
+  Yield
   PopC
   Null
   RetC

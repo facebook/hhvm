@@ -1314,8 +1314,8 @@ static const struct {
   { OpCreateCont,  {None,             Stack1,       OutNull,           1 }},
   { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
   { OpContRaise,   {Stack1,           None,         OutNone,          -1 }},
-  { OpContSuspend, {Stack1,           Stack1,       OutUnknown,        0 }},
-  { OpContSuspendK,{StackTop2,        Stack1,       OutUnknown,       -1 }},
+  { OpYield,       {Stack1,           Stack1,       OutUnknown,        0 }},
+  { OpYieldK,      {StackTop2,        Stack1,       OutUnknown,       -1 }},
   { OpContCheck,   {None,             None,         OutNone,           0 }},
   { OpContValid,   {None,             Stack1,       OutBoolean,        1 }},
   { OpContKey,     {None,             Stack1,       OutUnknown,        1 }},
@@ -3004,8 +3004,8 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
     case OpPopR:
       return DataTypeCountness;
 
-    case OpContSuspend:
-    case OpContSuspendK:
+    case OpYield:
+    case OpYieldK:
       // The stack input is teleported to the continuation's m_value field
       return DataTypeGeneric;
 

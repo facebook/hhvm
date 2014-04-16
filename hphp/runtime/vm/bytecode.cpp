@@ -7146,7 +7146,7 @@ OPTBLD_INLINE void ExecutionContext::iopContRaise(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void ExecutionContext::iopContSuspend(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopYield(IOP_ARGS) {
   NEXT();
 
   auto cont = frame_continuation(m_fp);
@@ -7165,7 +7165,7 @@ OPTBLD_INLINE void ExecutionContext::iopContSuspend(IOP_ARGS) {
   }
 }
 
-OPTBLD_INLINE void ExecutionContext::iopContSuspendK(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
   NEXT();
 
   auto cont = frame_continuation(m_fp);
@@ -7623,7 +7623,7 @@ inline void ExecutionContext::dispatchImpl(int numInstrs) {
       DEBUG_ONLY const Op op = Op::name;                      \
       assert(op == OpRetC || op == OpRetV ||                  \
              op == OpAsyncSuspend || op == OpCreateCont ||    \
-             op == OpContSuspend || op == OpContSuspendK ||   \
+             op == OpYield || op == OpYieldK ||               \
              op == OpNativeImpl);                             \
       m_fp = 0;                                               \
       return;                                                 \

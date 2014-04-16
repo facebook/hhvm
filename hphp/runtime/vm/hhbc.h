@@ -722,8 +722,8 @@ enum class BareThisOp : uint8_t {
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
   O(ContEnter,       NA,               ONE(CV),         NOV,        CF) \
   O(ContRaise,       NA,               ONE(CV),         NOV,        CF) \
-  O(ContSuspend,     NA,               ONE(CV),         ONE(CV),    NF) \
-  O(ContSuspendK,    NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(Yield,           NA,               ONE(CV),         ONE(CV),    NF) \
+  O(YieldK,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
   O(ContKey,         NA,               NOV,             ONE(CV),    NF) \

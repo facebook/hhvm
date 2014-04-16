@@ -1838,12 +1838,12 @@ void in(ISS& env, const bc::CreateCont& op) {
 void in(ISS& env, const bc::ContEnter&) { popC(env); }
 void in(ISS& env, const bc::ContRaise&) { popC(env); }
 
-void in(ISS& env, const bc::ContSuspend&) {
+void in(ISS& env, const bc::Yield&) {
   popC(env);
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::ContSuspendK&) {
+void in(ISS& env, const bc::YieldK&) {
   popC(env);
   popC(env);
   push(env, TInitCell);

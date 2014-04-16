@@ -1193,7 +1193,7 @@ OpcodeParserMap opcode_parsers;
                                                                        \
     /* Stack depth should be 1 after resume from suspend. */           \
     if (thisOpcode == OpCreateCont || thisOpcode == OpAsyncSuspend ||  \
-        thisOpcode == OpContSuspend || thisOpcode == OpContSuspendK) { \
+        thisOpcode == OpYield || thisOpcode == OpYieldK) {             \
       as.enforceStackDepth(1);                                         \
     }                                                                  \
                                                                        \

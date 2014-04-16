@@ -649,12 +649,12 @@ void IRTranslator::translateContRaise(const NormalizedInstruction& i) {
   HHIR_UNIMPLEMENTED(ContRaise);
 }
 
-void IRTranslator::translateContSuspend(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContSuspend, i.nextSk().offset());
+void IRTranslator::translateYield(const NormalizedInstruction& i) {
+  HHIR_EMIT(Yield, i.nextSk().offset());
 }
 
-void IRTranslator::translateContSuspendK(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContSuspendK, i.nextSk().offset());
+void IRTranslator::translateYieldK(const NormalizedInstruction& i) {
+  HHIR_EMIT(YieldK, i.nextSk().offset());
 }
 
 void IRTranslator::translateContCheck(const NormalizedInstruction& i) {

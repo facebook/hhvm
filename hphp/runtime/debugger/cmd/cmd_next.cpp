@@ -203,7 +203,7 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
   // stepping over an await, we land on the next statement.
   auto op = *reinterpret_cast<const Op*>(pc);
   if (fp->inGenerator() &&
-      (op == OpContSuspend || op == OpContSuspendK ||
+      (op == OpYield || op == OpYieldK ||
        op == OpAsyncSuspend || op == OpRetC)) {
     TRACE(2, "CmdNext: encountered yield, await or return from generator\n");
     // Patch the projected return point(s) in both cases for
@@ -211,7 +211,7 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
     // are being iterated directly by PHP.
     if ((op == OpRetC) || !fp->m_func->isAsync()) setupStepOuts();
     op = *reinterpret_cast<const Op*>(pc);
-    if (op == OpAsyncSuspend || op == OpContSuspend || op == OpContSuspendK) {
+    if (op == OpAsyncSuspend || op == OpYield || op == OpYieldK) {
       // Patch the next normal execution point so we can pickup the stepping
       // from there if the caller is C++.
       setupStepCont(fp, pc);
@@ -220,7 +220,7 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
     return;
   } else if (op == OpAsyncSuspend) {
     // We need to step over this opcode, then grab the continuation
-    // and setup continuation stepping like we do for OpContSuspend.
+    // and setup continuation stepping like we do for OpYield.
     TRACE(2, "CmdNext: encountered create async\n");
     m_skippingAsyncSuspend = true;
     m_needsVMInterrupt = true;
@@ -239,13 +239,13 @@ bool CmdNext::atStepContOffset(Unit* unit, Offset o) {
   return m_stepCont.at(unit, o);
 }
 
-// A ContSuspend marks a return point from a generator or async
+// A Yield marks a return point from a generator or async
 // function. Execution will resume at this function later, and the
 // Continuation associated with this function can predict where.
 void CmdNext::setupStepCont(ActRec* fp, PC pc) {
-  // ContSuspend is followed by the label where execution will continue.
+  // Yield is followed by the label where execution will continue.
   DEBUG_ONLY auto ops = reinterpret_cast<const Op*>(pc);
-  assert(ops[0] == OpContSuspend || ops[0] == OpContSuspendK);
+  assert(ops[0] == OpYield || ops[0] == OpYieldK);
   ++pc;
   Offset nextInst = fp->func()->unit()->offsetOf(pc);
   assert(nextInst != InvalidAbsoluteOffset);

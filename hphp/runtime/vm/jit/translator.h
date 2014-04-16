@@ -606,8 +606,8 @@ opcodeControlFlowInfo(const Op instr) {
     case Op::Switch:
     case Op::SSwitch:
     case Op::CreateCont:
-    case Op::ContSuspend:
-    case Op::ContSuspendK:
+    case Op::Yield:
+    case Op::YieldK:
     case Op::AsyncSuspend:
     case Op::RetC:
     case Op::RetV:

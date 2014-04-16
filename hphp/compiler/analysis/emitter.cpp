@@ -4891,10 +4891,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         // suspend continuation
         if (keyExp) {
           assert(m_evalStack.size() == 2);
-          e.ContSuspendK();
+          e.YieldK();
         } else {
           assert(m_evalStack.size() == 1);
-          e.ContSuspend();
+          e.Yield();
         }
 
         // continue with the received result on the stack

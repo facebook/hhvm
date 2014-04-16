@@ -145,12 +145,12 @@ UnwindAction checkHandlers(const EHEnt* eh,
 }
 
 void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
-  auto const func = fp->m_func;
+  auto const func = fp->func();
   auto const curOp = *reinterpret_cast<const Op*>(pc);
   auto const unwindingReturningFrame =
     curOp == OpRetC || curOp == OpRetV ||
     curOp == OpCreateCont || curOp == OpAsyncSuspend;
-  auto const prevFp = fp->arGetSfp();
+  auto const prevFp = fp->sfp();
   auto const soff = fp->m_soff;
 
   FTRACE(1, "tearDownFrame: {} ({})\n  fp {} prevFp {}\n",
@@ -222,18 +222,18 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
    * pc and fp since we're about to re-throw the exception.  And we
    * don't want to dereference prefFp since we just popped it.
    */
-  if (prevFp == fp) return;
+  if (!prevFp) return;
 
   assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
          prevFp->resumed());
-  auto const prevOff = soff + prevFp->m_func->base();
-  pc = prevFp->m_func->unit()->at(prevOff);
+  auto const prevOff = soff + prevFp->func()->base();
+  pc = prevFp->func()->unit()->at(prevOff);
   fp = prevFp;
 }
 
 void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc, ObjectData* e) {
-  auto const func = fp->m_func;
-  auto const prevFp = fp->arGetSfp();
+  auto const func = fp->func();
+  auto const prevFp = fp->sfp();
   auto const soff = fp->m_soff;
   assert(!fp->resumed());
   assert(func->isAsync());
@@ -255,15 +255,15 @@ void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc, ObjectData* e) {
   tvWriteObject(c_StaticExceptionWaitHandle::Create(e), &fp->m_r);
   e->decRefCount();
 
-  if (UNLIKELY(prevFp == fp)) {
+  if (UNLIKELY(!prevFp)) {
     pc = 0;
     return;
   }
 
   assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
          prevFp->resumed());
-  auto const prevOff = soff + prevFp->m_func->base();
-  pc = prevFp->m_func->unit()->at(prevOff);
+  auto const prevOff = soff + prevFp->func()->base();
+  pc = prevFp->func()->unit()->at(prevOff);
   fp = prevFp;
 }
 
@@ -442,7 +442,7 @@ UnwindAction unwind(ActRec*& fp,
 
     // We found no more handlers in this frame, so the nested fault
     // count starts over for the caller frame.
-    auto const lastFrameForNesting = fp == fp->arGetSfp();
+    auto const lastFrameForNesting = !fp->sfp();
     tearDownFrame(fp, stack, pc);
 
     // Once we are done with EHs for the current frame we restore

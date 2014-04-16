@@ -232,9 +232,9 @@ void emitFunctionEnterHelper(UniqueStubs& us) {
   a.   Push    (rLinkReg, rVmFp);
   a.   Mov     (rVmFp, vixl::sp);
   // rAsm2 gets the savedRbp, rAsm gets the savedRip.
-  a.   Ldp     (rAsm2, rAsm, ar[AROFF(m_savedRbp)]);
-  static_assert(AROFF(m_savedRbp) + 8 == AROFF(m_savedRip),
-                "m_savedRbp must precede m_savedRip");
+  a.   Ldp     (rAsm2, rAsm, ar[AROFF(m_sfp)]);
+  static_assert(AROFF(m_sfp) + 8 == AROFF(m_savedRip),
+                "m_sfp must precede m_savedRip");
   a.   Push    (rAsm, rAsm2);
   a.   Mov     (argReg(1), EventHook::NormalFunc);
   a.   Mov     (rHostCallReg, reinterpret_cast<intptr_t>(helper));

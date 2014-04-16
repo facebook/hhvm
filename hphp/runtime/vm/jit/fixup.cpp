@@ -32,7 +32,7 @@ FixupMap::getFrameRegs(const ActRec* ar, const ActRec* prevAr,
   // Non-obvious off-by-one fun: if the *return address* points into the TC,
   // then the frame we were running on in the TC is actually the previous
   // frame.
-  ar = (const ActRec*)ar->m_savedRbp;
+  ar = ar->m_sfp;
   auto* ent = m_fixups.find(tca);
   if (!ent) return false;
   if (ent->isIndirect()) {
@@ -41,7 +41,7 @@ FixupMap::getFrameRegs(const ActRec* ar, const ActRec* prevAr,
     // stubs in a.code stop.
     assert(prevAr);
     auto pRealRip = ent->indirect.returnIpDisp +
-      uintptr_t(prevAr->m_savedRbp);
+      uintptr_t(prevAr->m_sfp);
     ent = m_fixups.find(*reinterpret_cast<CTCA*>(pRealRip));
     assert(ent && !ent->isIndirect());
   }
@@ -84,7 +84,7 @@ FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
     auto* prevRbp = rbp;
     rbp = nextRbp;
     assert(rbp && "Missing fixup for native call");
-    nextRbp = reinterpret_cast<ActRec*>(rbp->m_savedRbp);
+    nextRbp = rbp->m_sfp;
     TRACE(2, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
 
     if (isVMFrame(ec, nextRbp)) {
@@ -139,7 +139,7 @@ FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
 
     while (rbp && !isVMFrame(rbp, sim)) {
       tca = reinterpret_cast<TCA>(rbp->m_savedRip);
-      rbp = reinterpret_cast<ActRec*>(rbp->m_savedRbp);
+      rbp = rbp->m_sfp;
     }
 
     if (!rbp) continue;

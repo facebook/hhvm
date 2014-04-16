@@ -945,7 +945,7 @@ static void sync_regstate_to_caller(ActRec* preLive) {
   auto const ec = g_context.getNoCheck();
   ec->m_stack.top() = (TypedValue*)preLive - preLive->numArgs();
   ActRec* fp = preLive == ec->m_firstAR ?
-    ec->m_nestedVMs.back().fp : (ActRec*)preLive->m_savedRbp;
+    ec->m_nestedVMs.back().fp : preLive->m_sfp;
   ec->m_fp = fp;
   ec->m_pc = fp->m_func->unit()->at(fp->m_func->base() + preLive->m_soff);
   tl_regState = VMRegState::CLEAN;

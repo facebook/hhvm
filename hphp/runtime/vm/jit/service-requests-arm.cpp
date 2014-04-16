@@ -158,7 +158,7 @@ int32_t emitNativeImpl(CodeBlock& cb, const Func* func) {
   mcg->fixupMap().recordSyncPoint(syncPoint, pcOffset, stackOff);
 
   int nLocalCells = func->numSlotsInFrame();
-  a.  Ldr  (rVmFp, rVmFp[AROFF(m_savedRbp)]);
+  a.  Ldr  (rVmFp, rVmFp[AROFF(m_sfp)]);
 
   return sizeof(ActRec) + cellsToBytes(nLocalCells - 1);
 }

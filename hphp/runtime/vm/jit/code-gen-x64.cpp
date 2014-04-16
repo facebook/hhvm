@@ -2727,7 +2727,7 @@ void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
   auto const fakeRet  = m_mcg->tx().uniqueStubs.retInlHelper;
   auto const retBCOff = inst->extra<DefInlineFP>()->retBCOff;
 
-  m_as.    storeq (callerFP, calleeFP[AROFF(m_savedRbp)]);
+  m_as.    storeq (callerFP, calleeFP[AROFF(m_sfp)]);
   emitImmStoreq(m_as, intptr_t(fakeRet), calleeFP[AROFF(m_savedRip)]);
   m_as.    storel (retBCOff, calleeFP[AROFF(m_soff)]);
   cgMov(inst);
@@ -2736,7 +2736,7 @@ void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
 void CodeGenerator::cgInlineReturn(IRInstruction* inst) {
   auto fpReg = srcLoc(0).reg();
   assert(fpReg == rVmFp);
-  m_as.    loadq  (fpReg[AROFF(m_savedRbp)], rVmFp);
+  m_as.    loadq  (fpReg[AROFF(m_sfp)], rVmFp);
 }
 
 void CodeGenerator::cgDefInlineSP(IRInstruction* inst) {
@@ -2777,7 +2777,7 @@ void CodeGenerator::cgReDefResumableSP(IRInstruction* inst) {
 
 void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
   auto ptr = srcLoc(0).reg();
-  auto off = AROFF(m_savedRbp);
+  auto off = AROFF(m_sfp);
   auto dst = dstLoc(0).reg();
   m_as.loadq(ptr[off], dst);
 }
@@ -3621,7 +3621,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   }
   // store the return bytecode offset into the outgoing actrec
   auto returnBc = safe_cast<int32_t>(returnBcOffset->intVal());
-  m_as.storeq(fpReg, spReg[AROFF(m_savedRbp)]);
+  m_as.storeq(fpReg, spReg[AROFF(m_sfp)]);
   m_as.storel(returnBc, spReg[AROFF(m_soff)]);
   if (adjustment != 0) {
     m_as.addq(adjustment, spReg);
@@ -5394,7 +5394,7 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
   auto returnOff = safe_cast<int32_t>(inst->src(2)->intVal());
   auto curFp = srcLoc(3).reg();
 
-  m_as.  storeq (curFp, contARReg[AROFF(m_savedRbp)]);
+  m_as.  storeq (curFp, contARReg[AROFF(m_sfp)]);
   m_as.  storel (returnOff, contARReg[AROFF(m_soff)]);
   m_as.  movq   (contARReg, rStashedAR);
   m_as.  call   (addrReg);

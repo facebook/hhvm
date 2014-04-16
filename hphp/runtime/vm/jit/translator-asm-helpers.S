@@ -44,7 +44,7 @@ ETCH_NAME(enterTCHelper:)
   CFI2(adjust_cfa_offset, 8) // cfa is now 8 bytes further from rsp than it was before
   CFI3C(offset, rbp, -16)    // Where to find previous value of rbp, relative to cfa
 
-  // Set firstAR->m_savedRbp to point to this frame.
+  // Set firstAR->m_sfp to point to this frame.
   mov %rsp, (%r8)
 
   // Save infoPtr

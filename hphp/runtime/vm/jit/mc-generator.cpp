@@ -1533,7 +1533,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
   } break;
 
   case REQ_STACK_OVERFLOW:
-    if (((ActRec*)info.saved_rStashedAr)->m_savedRbp == (uintptr_t)vmfp()) {
+    if (((ActRec*)info.saved_rStashedAr)->m_sfp == (ActRec*)vmfp()) {
       /*
        * The normal case - we were called via FCall, or FCallArray.
        * We need to construct the pc of the fcall from the return
@@ -1674,7 +1674,7 @@ OPCODES
 TCA MCGenerator::getTranslatedCaller() const {
   DECLARE_FRAME_POINTER(fp);
   ActRec* framePtr = fp;  // can't directly mutate the register-mapped one
-  for (; framePtr; framePtr = (ActRec*)framePtr->m_savedRbp) {
+  for (; framePtr; framePtr = framePtr->m_sfp) {
     TCA rip = (TCA)framePtr->m_savedRip;
     if (isValidCodeAddress(rip)) {
       return rip;

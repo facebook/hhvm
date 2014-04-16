@@ -442,7 +442,7 @@ void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
   a.   push    (rVmFp);
   a.   movq    (rsp, rVmFp);
   a.   push    (ar[AROFF(m_savedRip)]);
-  a.   push    (ar[AROFF(m_savedRbp)]);
+  a.   push    (ar[AROFF(m_sfp)]);
   a.   movq    (EventHook::NormalFunc, argNumToRegName[1]);
   emitCall(a, CppCall(helper));
   a.   testb   (al, al);

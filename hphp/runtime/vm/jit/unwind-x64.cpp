@@ -70,7 +70,7 @@ void sync_regstate(_Unwind_Context* context) {
    * aren't allowed to throw, so this is ok.
    */
   ActRec fakeAr;
-  fakeAr.m_savedRbp = frameRbp;
+  fakeAr.m_sfp = reinterpret_cast<ActRec*>(frameRbp);
   fakeAr.m_savedRip = frameRip;
 
   Stats::inc(Stats::TC_SyncUnwind);

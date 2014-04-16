@@ -119,7 +119,7 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func) {
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
 
-  auto ar = (ActRec*)framePtr->m_savedRbp;
+  auto ar = framePtr->m_sfp;
   if (LIKELY(ar->m_func->isBuiltin())) {
     ar = g_context->getOuterVMFrame(ar);
   }

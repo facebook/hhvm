@@ -537,7 +537,7 @@ class FrameRestore {
         is NULL
       */
       ActRec &tmp = *ec->m_stack.allocA();
-      tmp.m_savedRbp = (uint64_t)fp;
+      tmp.m_sfp = fp;
       tmp.m_savedRip = 0;
       tmp.m_func = preClass->unit()->getMain();
       tmp.m_soff = !fp

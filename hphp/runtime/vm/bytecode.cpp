@@ -133,26 +133,26 @@ static bool isReturnHelper(void* address) {
          tcAddr == u.callToExit;
 }
 
-ActRec* ActRec::arGetSfp() const {
-  ActRec* prevFrame = (ActRec*)m_savedRbp;
-  if (LIKELY(((uintptr_t)prevFrame - s_stackLimit) >= s_stackSize)) {
-    if (LIKELY(prevFrame != nullptr)) return prevFrame;
+ActRec* ActRec::sfp() const {
+  // Native frame? (used by enterTCHelper)
+  if (UNLIKELY(((uintptr_t)m_sfp - s_stackLimit) < s_stackSize)) {
+    return nullptr;
   }
 
-  return const_cast<ActRec*>(this);
+  return m_sfp;
 }
 
 void ActRec::setReturn(ActRec* fp, PC pc, void* retAddr) {
   assert(fp->func()->contains(pc));
   assert(isReturnHelper(retAddr));
-  m_savedRbp = reinterpret_cast<uintptr_t>(fp);
+  m_sfp = fp;
   m_savedRip = reinterpret_cast<uintptr_t>(retAddr);
   m_soff = Offset(pc - fp->func()->getEntry());
 }
 
 void ActRec::setReturnVMExit() {
   assert(isReturnHelper(tx->uniqueStubs.callToExit));
-  m_savedRbp = 0;
+  m_sfp = nullptr;
   m_savedRip = reinterpret_cast<uintptr_t>(tx->uniqueStubs.callToExit);
   m_soff = 0;
 }
@@ -821,27 +821,27 @@ bool Stack::wouldOverflow(int numCells) const {
 
 TypedValue* Stack::frameStackBase(const ActRec* fp) {
   assert(!fp->resumed());
-  const Func* func = fp->m_func;
-  return (TypedValue*)((uintptr_t)fp
-                       - (uintptr_t)(func->numLocals()) * sizeof(TypedValue)
-                       - (uintptr_t)(func->numIterators() * sizeof(Iter)));
+  return (TypedValue*)fp - fp->func()->numSlotsInFrame();
 }
 
 TypedValue* Stack::resumableStackBase(const ActRec* fp) {
   assert(fp->resumed());
-  auto const context = g_context.getNoCheck();
-  ActRec* sfp = fp->arGetSfp();
-  if (sfp == fp) {
-    // In the reentrant case, we can consult the savedVM state. We simply
-    // use the top of stack of the previous VM frame (since the ActRec,
-    // locals, and iters for this frame do not reside on the VM stack).
-    return context->m_nestedVMs.back().sp;
+  auto const sfp = fp->sfp();
+  if (sfp) {
+    // The non-reentrant case occurs when a generator is resumed via ContEnter
+    // or ContRaise opcode. These opcodes leave a single value on the stack
+    // that becomes part of the generator's stack. So we find the caller's FP,
+    // compensate for its locals and iterators, and then we've found the base
+    // of the generator's stack.
+    assert(fp->func()->isGenerator());
+    return (TypedValue*)sfp - sfp->func()->numSlotsInFrame();
+  } else {
+    // The reentrant case occurs when asio scheduler resumes an async function.
+    // We simply use the top of stack of the previous VM frame (since the
+    // ActRec, locals, and iters for this frame do not reside on the VM stack).
+    assert(fp->func()->isAsync());
+    return g_context.getNoCheck()->m_nestedVMs.back().sp;
   }
-  // In the non-reentrant case, we know resumables are always resumed from a
-  // function with an empty stack. So we find the caller's FP, compensate for
-  // its locals and iterators, and then we've found the base of the resumable's
-  // stack.
-  return (TypedValue*)sfp - sfp->m_func->numSlotsInFrame();
 }
 
 
@@ -851,13 +851,9 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
 using namespace HPHP;
 
 ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
-  ActRec* prevFrame = (ActRec*)ar->m_savedRbp;
-  if (LIKELY(((uintptr_t)prevFrame - s_stackLimit) >= s_stackSize)) {
-    if (LIKELY(prevFrame != nullptr)) return prevFrame;
-  }
-
-  if (LIKELY(!m_nestedVMs.empty())) return m_nestedVMs.back().fp;
-  return nullptr;
+  ActRec* sfp = ar->sfp();
+  if (LIKELY(sfp != nullptr)) return sfp;
+  return LIKELY(!m_nestedVMs.empty()) ? m_nestedVMs.back().fp : nullptr;
 }
 
 Cell ExecutionContext::lookupClsCns(const NamedEntity* ne,
@@ -1761,15 +1757,15 @@ void ExecutionContext::enterVMAtCurPC() {
 void ExecutionContext::enterVM(ActRec* ar, StackArgsState stk,
                                PC pc, ObjectData* exception) {
   assert(ar);
+  assert(!ar->sfp());
+  assert(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
   assert(ar->m_soff == 0);
-  assert(ar->m_savedRbp == 0);
   assert(!pc || (stk == StackArgsState::Untrimmed));
 
   DEBUG_ONLY int faultDepth = m_faults.size();
   SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
 
   m_firstAR = ar;
-  assert(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
 
   /*
    * When an exception is propagating, each nesting of the VM is
@@ -2083,22 +2079,23 @@ void ExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
  * set prevPc and prevSp.
  */
 ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
-                                           Offset* prevPc /* = NULL */,
-                                           TypedValue** prevSp /* = NULL */,
-                                           bool* fromVMEntry /* = NULL */) {
+                                         Offset* prevPc /* = NULL */,
+                                         TypedValue** prevSp /* = NULL */,
+                                         bool* fromVMEntry /* = NULL */) {
   if (fp == nullptr) {
     return nullptr;
   }
-  ActRec* prevFp = fp->arGetSfp();
-  if (prevFp != fp) {
+  ActRec* prevFp = fp->sfp();
+  if (LIKELY(prevFp != nullptr)) {
     if (prevSp) {
       if (UNLIKELY(fp->resumed())) {
-        *prevSp = (TypedValue*)prevFp - prevFp->m_func->numSlotsInFrame();
+        assert(fp->func()->isGenerator());
+        *prevSp = (TypedValue*)prevFp - prevFp->func()->numSlotsInFrame();
       } else {
-        *prevSp = (TypedValue*)&fp[1];
+        *prevSp = (TypedValue*)(fp + 1);
       }
     }
-    if (prevPc) *prevPc = prevFp->m_func->base() + fp->m_soff;
+    if (prevPc) *prevPc = prevFp->func()->base() + fp->m_soff;
     if (fromVMEntry) *fromVMEntry = false;
     return prevFp;
   }
@@ -2113,10 +2110,10 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   const VMState& vmstate = m_nestedVMs[i];
   prevFp = vmstate.fp;
   assert(prevFp);
-  assert(prevFp->m_func->unit());
+  assert(prevFp->func()->unit());
   if (prevSp) *prevSp = vmstate.sp;
   if (prevPc) {
-    *prevPc = prevFp->m_func->unit()->offsetOf(vmstate.pc);
+    *prevPc = prevFp->func()->unit()->offsetOf(vmstate.pc);
   }
   if (fromVMEntry) *fromVMEntry = true;
   return prevFp;
@@ -2916,7 +2913,7 @@ void ExecutionContext::exitDebuggerDummyEnv() {
   // Ensure that m_fp points to the only frame on the call stack.
   // In other words, make sure there are no VM frames directly below
   // this one and that we are not in a nested VM (reentrancy)
-  assert(m_fp->arGetSfp() == m_fp);
+  assert(!m_fp->sfp());
   assert(m_nestedVMs.size() == 0);
   assert(m_nesting == 0);
   // Teardown the frame we erected by enterDebuggerDummyEnv()
@@ -4476,7 +4473,7 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   }
 
   // Grab caller info from ActRec.
-  ActRec* sfp = m_fp->arGetSfp();
+  ActRec* sfp = m_fp->sfp();
   Offset soff = m_fp->m_soff;
 
   if (LIKELY(!m_fp->resumed())) {
@@ -4487,7 +4484,7 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
     assert(m_stack.topTV() == &m_fp->m_r);
   } else if (m_fp->func()->isAsync()) {
     // Mark the async function as succeeded and store the return value.
-    assert(sfp == m_fp);
+    assert(!sfp);
     auto waitHandle = frame_afwh(m_fp);
     waitHandle->setState(c_AsyncFunctionWaitHandle::STATE_SUCCEEDED);
     cellCopy(retval, waitHandle->getResult());
@@ -4500,15 +4497,9 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
     not_reached();
   }
 
-  if (LIKELY(sfp != m_fp)) {
-    // Return control to the caller.
-    m_fp = sfp;
-    pc = m_fp->func()->getEntry() + soff;
-  } else {
-    // No caller; terminate.
-    m_fp = nullptr;
-    pc = nullptr;
-  }
+  // Return control to the caller.
+  m_fp = sfp;
+  pc = LIKELY(m_fp != nullptr) ? m_fp->func()->getEntry() + soff : nullptr;
 }
 
 OPTBLD_INLINE void ExecutionContext::iopRetC(IOP_ARGS) {
@@ -6950,36 +6941,25 @@ OPTBLD_INLINE void ExecutionContext::iopVerifyRetTypeV(PC& pc) {
 
 OPTBLD_INLINE void ExecutionContext::iopNativeImpl(IOP_ARGS) {
   NEXT();
-  uint soff = m_fp->m_soff;
-  BuiltinFunction func = m_fp->m_func->builtinFuncPtr();
+  BuiltinFunction func = m_fp->func()->builtinFuncPtr();
   assert(func);
   // Actually call the native implementation. This will handle freeing the
   // locals in the normal case. In the case of an exception, the VM unwinder
   // will take care of it.
   func(m_fp);
+
+  // Grab caller info from ActRec.
+  ActRec* sfp = m_fp->sfp();
+  Offset soff = m_fp->m_soff;
+
   // Adjust the stack; the native implementation put the return value in the
   // right place for us already
-  m_stack.ndiscard(m_fp->m_func->numSlotsInFrame());
-  ActRec* sfp = m_fp->arGetSfp();
-  if (LIKELY(sfp != m_fp)) {
-    // Restore caller's execution state.
-    m_fp = sfp;
-    pc = m_fp->m_func->unit()->entry() + m_fp->m_func->base() + soff;
-    m_stack.ret();
-  } else {
-    // No caller; terminate.
-    m_stack.ret();
-#ifdef HPHP_TRACE
-    {
-      std::ostringstream os;
-      os << toStringElm(m_stack.topTV());
-      ONTRACE(1,
-              Trace::trace("Return %s from ExecutionContext::dispatch("
-                           "%p)\n", os.str().c_str(), m_fp));
-    }
-#endif
-    pc = 0;
-  }
+  m_stack.ndiscard(m_fp->func()->numSlotsInFrame());
+  m_stack.ret();
+
+  // Return control to the caller.
+  m_fp = sfp;
+  pc = LIKELY(m_fp != nullptr) ? m_fp->func()->getEntry() + soff : nullptr;
 }
 
 OPTBLD_INLINE void ExecutionContext::iopHighInvalid(IOP_ARGS) {
@@ -7060,8 +7040,8 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   m_stack.discard();
 
   // Grab caller info from ActRec.
-  ActRec* sfp = m_fp->arGetSfp();
-  uint soff = m_fp->m_soff;
+  ActRec* sfp = m_fp->sfp();
+  Offset soff = m_fp->m_soff;
 
   // Free ActRec and store the return value.
   m_stack.ndiscard(m_fp->m_func->numSlotsInFrame());
@@ -7069,15 +7049,9 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   tvCopy(make_tv<KindOfObject>(cont), *m_stack.topTV());
   assert(m_stack.topTV() == &m_fp->m_r);
 
-  if (LIKELY(sfp != m_fp)) {
-    // Return control to the caller.
-    m_fp = sfp;
-    pc = m_fp->func()->unit()->entry() + m_fp->func()->base() + soff;
-  } else {
-    // No caller; terminate.
-    m_fp = nullptr;
-    pc = nullptr;
-  }
+  // Return control to the caller.
+  m_fp = sfp;
+  pc = LIKELY(m_fp != nullptr) ? m_fp->func()->getEntry() + soff : nullptr;
 }
 
 static inline c_Continuation* this_continuation(const ActRec* fp) {
@@ -7133,14 +7107,12 @@ OPTBLD_INLINE void ExecutionContext::iopYield(IOP_ARGS) {
   m_stack.popTV();
 
   EventHook::FunctionExit(m_fp, nullptr);
-  ActRec* prevFp = m_fp->arGetSfp();
-  if (prevFp == m_fp) {
-    pc = nullptr;
-    m_fp = nullptr;
-  } else {
-    pc = prevFp->m_func->getEntry() + m_fp->m_soff;
-    m_fp = prevFp;
-  }
+
+  // Return control to the next()/send()/raise() caller.
+  Offset soff = m_fp->m_soff;
+  m_fp = m_fp->sfp();
+  pc = m_fp->func()->getEntry() + soff;
+  assert(m_fp);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
@@ -7153,9 +7125,12 @@ OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
   m_stack.popTV();
 
   EventHook::FunctionExit(m_fp, nullptr);
-  ActRec* prevFp = m_fp->arGetSfp();
-  pc = prevFp->m_func->getEntry() + m_fp->m_soff;
-  m_fp = prevFp;
+
+  // Return control to the next()/send()/raise() caller.
+  Offset soff = m_fp->m_soff;
+  m_fp = m_fp->sfp();
+  pc = m_fp->func()->getEntry() + soff;
+  assert(m_fp);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContCheck(IOP_ARGS) {
@@ -7245,8 +7220,8 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
   m_stack.discard();
 
   // Grab caller info from ActRec.
-  ActRec* sfp = m_fp->arGetSfp();
-  uint soff = m_fp->m_soff;
+  ActRec* sfp = m_fp->sfp();
+  Offset soff = m_fp->m_soff;
 
   // Free ActRec and store the return value.
   m_stack.ndiscard(m_fp->m_func->numSlotsInFrame());
@@ -7254,21 +7229,15 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
   tvCopy(make_tv<KindOfObject>(waitHandle), *m_stack.topTV());
   assert(m_stack.topTV() == &m_fp->m_r);
 
-  if (LIKELY(sfp != m_fp)) {
-    // Return control to the caller.
-    m_fp = sfp;
-    pc = m_fp->func()->unit()->entry() + m_fp->func()->base() + soff;
-  } else {
-    // No caller; terminate.
-    m_fp = nullptr;
-    pc = nullptr;
-  }
+  // Return control to the caller.
+  m_fp = sfp;
+  pc = LIKELY(m_fp != nullptr) ? m_fp->func()->getEntry() + soff : nullptr;
 }
 
 OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS) {
   assert(m_fp->resumed());
   assert(m_fp->func()->isAsync());
-  assert(m_fp->arGetSfp() == m_fp);
+  assert(!m_fp->sfp());
 
   // Suspend the async function.
   Cell& value = *m_stack.topC();

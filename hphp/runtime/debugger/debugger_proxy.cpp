@@ -814,10 +814,9 @@ int DebuggerProxy::getStackDepth() {
   auto const context = g_context.getNoCheck();
   auto fp = context->getFP();
   if (!fp) return 0;
-  ActRec *prev = fp->arGetSfp();
-  while (fp != prev) {
-    fp = prev;
-    prev = fp->arGetSfp();
+  fp = fp->sfp();
+  while (fp) {
+    fp = fp->sfp();
     depth++;
   }
   return depth;

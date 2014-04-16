@@ -1703,7 +1703,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     emitStore(spReg, cellsToBytes(-(i + 1)), args[i], srcLoc(i + 4));
   }
 
-  m_as.  Str  (fpReg, spReg[AROFF(m_savedRbp)]);
+  m_as.  Str  (fpReg, spReg[AROFF(m_sfp)]);
   m_as.  Mov  (rAsm.W(), returnBcOffset->intVal());
   m_as.  Str  (rAsm.W(), spReg[AROFF(m_soff)]);
   emitRegGetsRegPlusImm(m_as, spReg, spReg, adjustment);

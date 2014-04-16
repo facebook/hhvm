@@ -47,13 +47,13 @@ void* reader(void* that) {
   Unit u;
   Func f(u, 1, nullptr, 1, 1, 0, 0, sd, AttrNone, true, nullptr, 0);
   ActRec ar2;
+  ar2.m_sfp = nullptr;
   ar2.m_savedRip = 0xdeadbeef;
-  ar2.m_savedRbp = 0;
   ar2.m_func = &f;
   for (int i = 1; i < kNumToCheck; i++) {
     // ar1(i) -> ar2(DONTCARE) -> NULL
     ActRec ar1;
-    ar1.m_savedRbp = (uint64_t)&ar2;
+    ar1.m_sfp = &ar2;
     ar1.m_savedRip = i;
     FixupMap::VMRegs vmr = { 0, 0, 0 };
     while (!m->getFrameRegs(&ar1, 0, &vmr)) {

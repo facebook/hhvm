@@ -3420,7 +3420,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
    * analysis phase which pretty liberally inspects live VM state.
    */
   ActRec fakeAR;
-  fakeAR.m_savedRbp = reinterpret_cast<uintptr_t>(liveFrame());
+  fakeAR.m_sfp = liveFrame();
   fakeAR.m_savedRip = 0xbaabaa;  // should never be inspected
   fakeAR.m_func = fcall->funcd;
   fakeAR.m_soff = 0xb00b00;      // should never be inspected

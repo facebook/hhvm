@@ -215,7 +215,10 @@ struct ActRec {
     // dependency.
     TypedValue _dummyA;
     struct {
-      uint64_t m_savedRbp;     // Previous hardware frame pointer/ActRec.
+      union {
+        ActRec* m_sfp;         // Previous hardware frame pointer/ActRec.
+        uint64_t m_savedRbp;   // TODO: Remove. Used by debugger macros.
+      };
       uint64_t m_savedRip;     // In-TC address to return to.
     };
   };
@@ -252,8 +255,8 @@ struct ActRec {
   };
 
   // Get the next outermost VM frame, but if this is
-  // a re-entry frame, return ar
-  ActRec* arGetSfp() const;
+  // a re-entry frame, return nullptr
+  ActRec* sfp() const;
 
   void setReturn(ActRec* fp, PC pc, void* retAddr);
   void setReturnVMExit();
@@ -430,6 +433,9 @@ struct ActRec {
   }
 };
 
+static_assert(offsetof(ActRec, m_sfp) == 0,
+              "m_sfp should be at offset 0 of ActRec");
+
 inline int32_t arOffset(const ActRec* ar, const ActRec* other) {
   return (intptr_t(other) - intptr_t(ar)) / sizeof(TypedValue);
 }
@@ -440,14 +446,6 @@ inline ActRec* arAtOffset(const ActRec* ar, int32_t offset) {
 
 inline ActRec* arFromSpOffset(const ActRec *sp, int32_t offset) {
   return arAtOffset(sp, offset);
-}
-
-inline void arSetSfp(ActRec* ar, const ActRec* sfp) {
-  static_assert(offsetof(ActRec, m_savedRbp) == 0,
-                "m_savedRbp should be at offset 0 of ActRec");
-  static_assert(sizeof(ActRec*) <= sizeof(uint64_t),
-                "ActRec* must be <= 64 bits");
-  ar->m_savedRbp = (uint64_t)sfp;
 }
 
 inline TypedValue* arReturn(ActRec* ar, const Variant& value) {

@@ -158,7 +158,7 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func) {
    * reg-to-reg move.
    */
   int nLocalCells = func->numSlotsInFrame();
-  a.   loadq  (rVmFp[AROFF(m_savedRbp)], rVmFp);
+  a.   loadq  (rVmFp[AROFF(m_sfp)], rVmFp);
 
   emitRB(a, Trace::RBTypeFuncExit, func->fullName()->data());
   return sizeof(ActRec) + cellsToBytes(nLocalCells-1);

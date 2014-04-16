@@ -461,7 +461,7 @@ O(LdClsPropAddrOrNull,                                                        \
                    D(PtrToGen|Nullptr), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
 O(LdClsPropAddrOrRaise,    D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
 O(LdClsInitData,          D(PtrToCell), S(Cls),                          N|C) \
-O(LdObjMethod,                      ND, S(Cls) CStr S(StkPtr),        E|N|Er) \
+O(LdObjMethod,                      ND, S(Cls) CStr S(StkPtr) C(Cls), E|N|Er) \
 O(LdObjInvoke,                 D(Func), S(Cls),                            B) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                          E|N) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                          B|N) \

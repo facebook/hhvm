@@ -143,6 +143,7 @@ void handlePrimeCacheInit(Entry* mce,
                           ActRec* ar,
                           StringData* name,
                           Class* cls,
+                          Class* ctx,
                           uintptr_t rawTarget);
 
 } // namespace MethodCache

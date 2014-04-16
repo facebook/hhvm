@@ -182,8 +182,7 @@ void nullFunc(ActRec* ar, StringData* name) {
 
 template<bool fatal>
 NEVER_INLINE
-void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls) {
-  auto const ctx = reinterpret_cast<ActRec*>(ar->m_savedRbp)->m_func->cls();
+void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
   auto func = g_context->lookupMethodCtx(
     cls,
     name,
@@ -225,11 +224,12 @@ void readMagicOrStatic(Entry* mce,
                        ActRec* ar,
                        StringData* name,
                        Class* cls,
+                       Class* ctx,
                        uintptr_t mceKey,
                        const Func* mceValue) {
   auto const storedClass = reinterpret_cast<Class*>(mceKey & ~0x3u);
   if (storedClass != cls) {
-    return lookup<fatal>(mce, ar, name, cls);
+    return lookup<fatal>(mce, ar, name, cls, ctx);
   }
 
   ar->m_func = mceValue;
@@ -270,6 +270,7 @@ void handleSlowPath(Entry* mce,
                     ActRec* ar,
                     StringData* name,
                     Class* cls,
+                    Class* ctx,
                     uintptr_t mcePrime) {
   assert(ar->hasThis());
   assert(ar->getThis()->getVMClass() == cls);
@@ -297,19 +298,20 @@ void handleSlowPath(Entry* mce,
     // immediate), so we check this bit to ensure we don't try to
     // treat the immediate as a real Func* if it isn't yet.
     if (mcePrime & 0x1) {
-      return lookup<fatal>(mce, ar, name, cls);
+      return lookup<fatal>(mce, ar, name, cls, ctx);
     }
     mceValue = reinterpret_cast<const Func*>(mcePrime >> 32);
     if (UNLIKELY(!mceValue)) {
       // The inline Func* might be null if it was uncacheable (not
       // low-malloced).
-      return lookup<fatal>(mce, ar, name, cls);
+      return lookup<fatal>(mce, ar, name, cls, ctx);
     }
     mce->m_value = mceValue; // below assumes this is already in local cache
   } else {
     mceValue = mce->m_value;
     if (UNLIKELY(mceKey & 0x3)) {
-      return readMagicOrStatic<fatal>(mce, ar, name, cls, mceKey, mceValue);
+      return readMagicOrStatic<fatal>(mce, ar, name, cls, ctx, mceKey,
+                                      mceValue);
     }
   }
   assert(!(mceValue->attrs() & AttrStatic));
@@ -317,7 +319,7 @@ void handleSlowPath(Entry* mce,
   // Note: if you manually CSE mceValue->methodSlot() here, gcc 4.8
   // will strangely generate two loads instead of one.
   if (UNLIKELY(cls->numMethods() <= mceValue->methodSlot())) {
-    return lookup<fatal>(mce, ar, name, cls);
+    return lookup<fatal>(mce, ar, name, cls, ctx);
   }
   auto const cand = cls->methods()[mceValue->methodSlot()];
 
@@ -403,7 +405,7 @@ void handleSlowPath(Entry* mce,
     }
   }
 
-  return lookup<fatal>(mce, ar, name, cls);
+  return lookup<fatal>(mce, ar, name, cls, ctx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -414,16 +416,17 @@ void handlePrimeCacheInit(Entry* mce,
                           ActRec* ar,
                           StringData* name,
                           Class* cls,
+                          Class* ctx,
                           uintptr_t rawTarget) {
   // If rawTarget doesn't have the flag bit we must have a smash in flight, but
   // the call is still pointed at us.  Just do a lookup.
   if (!(rawTarget & 0x1)) {
-    return lookup<fatal>(mce, ar, name, cls);
+    return lookup<fatal>(mce, ar, name, cls, ctx);
   }
   auto const smashTarget = reinterpret_cast<SmashTarget*>(rawTarget & ~0x1);
 
   // First fill the request local method cache for this call.
-  lookup<fatal>(mce, ar, name, cls);
+  lookup<fatal>(mce, ar, name, cls, ctx);
 
   // If we fail to get the write lease, just let it stay unsmashed for now.
   // We are using the write lease + whether the code is already smashed to
@@ -496,11 +499,11 @@ void handlePrimeCacheInit(Entry* mce,
 
 template
 void handlePrimeCacheInit<false>(Entry*, ActRec*, StringData*,
-                                 Class*, uintptr_t);
+                                 Class*, Class*, uintptr_t);
 
 template
 void handlePrimeCacheInit<true>(Entry*, ActRec*, StringData*,
-                                Class*, uintptr_t);
+                                Class*, Class*, uintptr_t);
 
 } // namespace MethodCache
 

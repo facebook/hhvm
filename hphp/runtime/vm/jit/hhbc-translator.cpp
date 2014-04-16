@@ -2741,7 +2741,8 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
         catchBlock,
         objCls,
         cns(methodName),
-        actRec);
+        actRec,
+        cns(curFunc()->cls()));
   }
 }
 

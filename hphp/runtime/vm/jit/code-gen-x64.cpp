@@ -2512,6 +2512,7 @@ asm_label(a, slow_path);
       .ssa(2/*actRec*/)
       .ssa(1/*name*/)
       .ssa(0/*cls*/)
+      .ssa(3/*ctx*/)
       // The scratch reg contains the prime data before we've smashed the call
       // to handleSlowPath.  After, it contains the primed Class/Func pair.
       .reg(m_rScratch)

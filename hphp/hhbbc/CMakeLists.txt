@@ -4,9 +4,9 @@ list(APPEND CXX_SOURCES ${files})
 
 # remove anything in a test folder
 foreach (file ${CXX_SOURCES})
-	if (${file} MATCHES "/test/")
-		list(REMOVE_ITEM CXX_SOURCES ${file})
-	endif()
+  if (${file} MATCHES "/test/")
+    list(REMOVE_ITEM CXX_SOURCES ${file})
+  endif()
 endforeach(file ${CXX_SOURCES})
 
 add_library(hphp_hhbbc STATIC ${CXX_SOURCES})

@@ -24,7 +24,8 @@ if (EXISTS "public_tld")
                         ${CMAKE_MODULE_PATH})
   set(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/public_tld/third-party/")
   if (NOT EXISTS ${TP_DIR})
-    message(FATAL_ERROR "I can't find ${TP_DIR}. Maybe try\ngit submodule update --init --recursive")
+    message(FATAL_ERROR "I can't find ${TP_DIR}. Maybe Try
+git submodule update --init --recursive")
   endif()
 else()
   set(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../third-party/")
@@ -78,7 +79,7 @@ add_subdirectory(hhvm)
 
 option(TEST_BIN "Create the HHVM test binary" OFF)
 if (TEST_BIN)
-	add_subdirectory(test)
+  add_subdirectory(test)
 endif ()
 
 # Keep this last

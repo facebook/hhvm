@@ -3,15 +3,15 @@ auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND CXX_SOURCES ${files})
 
 foreach (file ${files})
-	if (${file} MATCHES "/test/")
-		list(REMOVE_ITEM CXX_SOURCES ${file})
-	endif()
+  if (${file} MATCHES "/test/")
+    list(REMOVE_ITEM CXX_SOURCES ${file})
+  endif()
 
-	# Disable Channeled JSON until we're sure it's going to stick
-	# sgolemon(2014-02-19)
+  # Disable Channeled JSON until we're sure it's going to stick
+  # sgolemon(2014-02-19)
         if (${file} MATCHES "channeled-json-")
-		list(REMOVE_ITEM CXX_SOURCES ${file})
-	endif()
+    list(REMOVE_ITEM CXX_SOURCES ${file})
+  endif()
 endforeach()
 
 add_custom_command(
@@ -30,8 +30,8 @@ add_custom_command(
 
 #find_package(LibNuma)
 #if (LIBNUMA_INCLUDE_DIRS)
-#	add_definitions("-DHAVE_NUMA=1")
-#	include_directories(${LIBNUMA_INCLUDE_DIRS})
+#  add_definitions("-DHAVE_NUMA=1")
+#  include_directories(${LIBNUMA_INCLUDE_DIRS})
 #endif()
 
 add_library(hphp_util STATIC ${CXX_SOURCES}
@@ -39,5 +39,5 @@ add_library(hphp_util STATIC ${CXX_SOURCES}
             "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-build-info.cpp")
 
 #if (LIBNUMA_LIBRARIES)
-#	target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})
+#  target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})
 #endif()

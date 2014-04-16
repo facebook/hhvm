@@ -1,29 +1,31 @@
 set(RECURSIVE_SOURCE_SUBDIRS base debugger eval server vm)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
-	HHVM_SELECT_SOURCES("${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
+  HHVM_SELECT_SOURCES("${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
 endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 
 if(NOT LINUX)
-	add_definitions(-DNO_HARDWARE_COUNTERS)
-	list(REMOVE_ITEM CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/vm/debug/elfwriter.cpp)
+  add_definitions(-DNO_HARDWARE_COUNTERS)
+  list(REMOVE_ITEM CXX_SOURCES
+       ${CMAKE_CURRENT_SOURCE_DIR}/vm/debug/elfwriter.cpp)
 endif()
 
 if(NOT ENABLE_FASTCGI)
-	foreach (file ${CXX_SOURCES})
-		if (${file} MATCHES "/fastcgi/")
-			list(REMOVE_ITEM CXX_SOURCES ${file})
-		endif()
-	endforeach(file ${CXX_SOURCES})
+  foreach (file ${CXX_SOURCES})
+    if (${file} MATCHES "/fastcgi/")
+      list(REMOVE_ITEM CXX_SOURCES ${file})
+    endif()
+  endforeach(file ${CXX_SOURCES})
 endif()
 
 if(NOT HAVE_CUSTOM_LIBEVENT)
-	# Not working with off-the-shelf libevent
-	list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/server/server-name-indication.cpp")
-	foreach (file ${CXX_SOURCES})
-		if(${file} MATCHES "/server/libevent-")
-			list(REMOVE_ITEM CXX_SOURCES ${file})
-		endif()
-	endforeach(file ${CXX_SOURES})
+  # Not working with off-the-shelf libevent
+  list(REMOVE_ITEM CXX_SOURCES
+       "${CMAKE_CURRENT_SOURCE_DIR}/server/server-name-indication.cpp")
+  foreach (file ${CXX_SOURCES})
+    if(${file} MATCHES "/server/libevent-")
+      list(REMOVE_ITEM CXX_SOURCES ${file})
+    endif()
+  endforeach(file ${CXX_SOURES})
 endif()
 
 ADD_LIBRARY(hphp_runtime_static STATIC

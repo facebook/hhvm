@@ -1,0 +1,10 @@
+array(4) {
+  [0]=>
+  string(5) "array"
+  [1]=>
+  string(6) "string"
+  [2]=>
+  string(3) "int"
+  [3]=>
+  string(6) "object"
+}

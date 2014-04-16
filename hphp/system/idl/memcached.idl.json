@@ -403,6 +403,18 @@
                     ]
                 },
                 {
+                    "name": "getAllKeys",
+                    "desc": "Memcached::getAllKeys() Gets the keys stored on all the servers",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns the keys stored on all the servers on success or FALSE on failure."
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "getByKey",
                     "desc": "Memcached::getByKey() is functionally equivalent to Memcached::get(), except that the free-form server_key can be used to map the key to a specific server.",
                     "flags": [

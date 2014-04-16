@@ -5,7 +5,7 @@ object(Memcached)#1 (0) {
 Warning: Attempted to serialize unserializable builtin class Memcached in %s/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(38) {
+array(39) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -39,48 +39,50 @@ array(38) {
   [15]=>
   string(3) "get"
   [16]=>
-  string(8) "getByKey"
+  string(10) "getAllKeys"
   [17]=>
-  string(10) "getDelayed"
+  string(8) "getByKey"
   [18]=>
-  string(15) "getDelayedByKey"
+  string(10) "getDelayed"
   [19]=>
-  string(8) "getMulti"
+  string(15) "getDelayedByKey"
   [20]=>
-  string(13) "getMultiByKey"
+  string(8) "getMulti"
   [21]=>
-  string(9) "getOption"
+  string(13) "getMultiByKey"
   [22]=>
-  string(13) "getResultCode"
+  string(9) "getOption"
   [23]=>
-  string(16) "getResultMessage"
+  string(13) "getResultCode"
   [24]=>
-  string(14) "getServerByKey"
+  string(16) "getResultMessage"
   [25]=>
-  string(13) "getServerList"
+  string(14) "getServerByKey"
   [26]=>
-  string(8) "getStats"
+  string(13) "getServerList"
   [27]=>
-  string(10) "getVersion"
+  string(8) "getStats"
   [28]=>
-  string(9) "increment"
+  string(10) "getVersion"
   [29]=>
-  string(7) "prepend"
+  string(9) "increment"
   [30]=>
-  string(12) "prependByKey"
+  string(7) "prepend"
   [31]=>
-  string(7) "replace"
+  string(12) "prependByKey"
   [32]=>
-  string(12) "replaceByKey"
+  string(7) "replace"
   [33]=>
-  string(3) "set"
+  string(12) "replaceByKey"
   [34]=>
-  string(8) "setByKey"
+  string(3) "set"
   [35]=>
-  string(8) "setMulti"
+  string(8) "setByKey"
   [36]=>
-  string(13) "setMultiByKey"
+  string(8) "setMulti"
   [37]=>
+  string(13) "setMultiByKey"
+  [38]=>
   string(9) "setOption"
 }
 ================
@@ -93,7 +95,7 @@ object(A_Memcached)#2 (1) {
 Warning: Attempted to serialize unserializable builtin class A_Memcached in %s/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(38) {
+array(39) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -127,47 +129,49 @@ array(38) {
   [15]=>
   string(3) "get"
   [16]=>
-  string(8) "getByKey"
+  string(10) "getAllKeys"
   [17]=>
-  string(10) "getDelayed"
+  string(8) "getByKey"
   [18]=>
-  string(15) "getDelayedByKey"
+  string(10) "getDelayed"
   [19]=>
-  string(8) "getMulti"
+  string(15) "getDelayedByKey"
   [20]=>
-  string(13) "getMultiByKey"
+  string(8) "getMulti"
   [21]=>
-  string(9) "getOption"
+  string(13) "getMultiByKey"
   [22]=>
-  string(13) "getResultCode"
+  string(9) "getOption"
   [23]=>
-  string(16) "getResultMessage"
+  string(13) "getResultCode"
   [24]=>
-  string(14) "getServerByKey"
+  string(16) "getResultMessage"
   [25]=>
-  string(13) "getServerList"
+  string(14) "getServerByKey"
   [26]=>
-  string(8) "getStats"
+  string(13) "getServerList"
   [27]=>
-  string(10) "getVersion"
+  string(8) "getStats"
   [28]=>
-  string(9) "increment"
+  string(10) "getVersion"
   [29]=>
-  string(7) "prepend"
+  string(9) "increment"
   [30]=>
-  string(12) "prependByKey"
+  string(7) "prepend"
   [31]=>
-  string(7) "replace"
+  string(12) "prependByKey"
   [32]=>
-  string(12) "replaceByKey"
+  string(7) "replace"
   [33]=>
-  string(3) "set"
+  string(12) "replaceByKey"
   [34]=>
-  string(8) "setByKey"
+  string(3) "set"
   [35]=>
-  string(8) "setMulti"
+  string(8) "setByKey"
   [36]=>
-  string(13) "setMultiByKey"
+  string(8) "setMulti"
   [37]=>
+  string(13) "setMultiByKey"
+  [38]=>
   string(9) "setOption"
 }

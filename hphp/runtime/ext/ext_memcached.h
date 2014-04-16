@@ -114,6 +114,7 @@ class c_Memcached : public ExtObjectData, public Sweepable {
   public: Variant t_fetchall();
   public: bool t_flush(int delay = 0);
   public: Variant t_get(const String& key, const Variant& cache_cb = null_variant, VRefParam cas_token = null_variant);
+  public: Variant t_getallkeys();
   public: Variant t_getbykey(const String& server_key, const String& key, const Variant& cache_cb = null_variant, VRefParam cas_token = null_variant);
   public: bool t_getdelayed(const Array& keys, bool with_cas = false, const Variant& value_cb = null_variant);
   public: bool t_getdelayedbykey(const String& server_key, const Array& keys, bool with_cas = false, const Variant& value_cb = null_variant);

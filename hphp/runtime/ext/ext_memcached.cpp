@@ -184,6 +184,16 @@ public:
 };
 }
 
+/*
+ * Since libmemcachd is in C, we cannot use lambda functions as lambda functions
+ * are special typed and normally passed by templated types.
+ */
+static memcached_return_t memcached_dump_callback(const memcached_st*,
+                                                  const char* key,
+                                                  size_t len, void* context) {
+  ((Array*)context)->append(makeStaticString(key, len));
+  return MEMCACHED_SUCCESS;
+}
 
 c_Memcached::c_Memcached(Class* cb) :
     ExtObjectData(cb) {
@@ -215,6 +225,23 @@ void c_Memcached::t___construct(const String& persistent_id /*= null_string*/) {
 Variant c_Memcached::t_get(const String& key, const Variant& cache_cb /*= null_variant*/,
                            VRefParam cas_token /*= null_variant*/) {
   return t_getbykey(null_string, key, cache_cb, cas_token);
+}
+
+Variant c_Memcached::t_getallkeys() {
+  memcached_dump_fn callbacks[] = {
+    &memcached_dump_callback,
+  };
+
+  Array allKeys;
+  memcached_return status = memcached_dump(&m_impl->memcached, callbacks,
+                                           &allKeys,
+                                           sizeof(callbacks) /
+                                             sizeof(memcached_dump_fn));
+  if (!handleError(status)) {
+    return false;
+  }
+
+  return allKeys;
 }
 
 Variant c_Memcached::t_getbykey(const String& server_key, const String& key,

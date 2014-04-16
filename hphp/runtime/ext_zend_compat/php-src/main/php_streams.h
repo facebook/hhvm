@@ -190,12 +190,8 @@ struct _php_stream_wrapper  {
 
 struct _php_stream  {
 #ifdef HHVM
-  _php_stream(HPHP::File *file) : hphp_file(file) {}
-  _php_stream(HPHP::Directory *dir) : hphp_dir(dir) {}
-  union {
-    HPHP::File *hphp_file;
-    HPHP::Directory *hphp_dir;
-  };
+  _php_stream(HPHP::Resource &resource_) : resource(resource_) {}
+  HPHP::Resource resource;
 #endif
   php_stream_ops *ops;
   void *abstract;      /* convenience pointer for abstraction */
@@ -273,7 +269,8 @@ END_EXTERN_C()
   { \
     HPHP::File *__file; \
     ZEND_FETCH_RESOURCE2((__file), HPHP::File *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream()) \
-    (xstr) = HPHP::smart_new<php_stream>(__file); \
+    HPHP::Resource __resource(__file); \
+    (xstr) = HPHP::smart_new<php_stream>(__resource);			\
   }
 #else
 #define php_stream_from_zval(xstr, ppzval)  ZEND_FETCH_RESOURCE2((xstr), php_stream *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())
@@ -284,7 +281,8 @@ END_EXTERN_C()
     HPHP::File *__file; \
     __file = static_cast<HPHP::File*>(zend_fetch_resource((ppzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())); \
     assert(__file); \
-    (xstr) = HPHP::smart_new<php_stream>(__file); \
+    HPHP::Resource __resource(__file); \
+    (xstr) = HPHP::smart_new<php_stream>(__resource);	\
  }
 #else
 #define php_stream_from_zval_no_verify(xstr, ppzval)  (xstr) = (php_stream*)zend_fetch_resource((ppzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())

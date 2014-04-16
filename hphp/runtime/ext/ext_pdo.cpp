@@ -953,7 +953,7 @@ void c_PDO::t___construct(const String& dsn, const String& username /* = null_st
 
   if (!strncmp(data_source.data(), "uri:", 4)) {
     /* the specified URI holds connection details */
-    Resource resource = File::Open(data_source.substr(4), "rb");
+    Resource resource = Stream::open(data_source.substr(4), "rb");
     if (resource.isNull()) {
       throw_pdo_exception(uninit_null(), uninit_null(), "invalid data source URI");
     }
@@ -3112,7 +3112,7 @@ bool c_PDOStatement::t_closecursor() {
 }
 
 Variant c_PDOStatement::t_debugdumpparams() {
-  Resource resource = File::Open("php://output", "w");
+  Resource resource = Stream::open("php://output", "w");
   File *f = resource.getTyped<File>(true);
   if (!f) {
     return false;

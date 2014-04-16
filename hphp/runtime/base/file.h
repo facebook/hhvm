@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/stream-wrapper.h"
 
 struct stat;
 
@@ -57,8 +58,10 @@ public:
   // Same as TranslatePath except checks the file cache on miss
   static String TranslatePathWithFileCache(const String& filename);
   static String TranslateCommand(const String& cmd);
-  static Resource Open(const String& filename, const String& mode,
-                       int options = 0, const Variant& context = uninit_null());
+  friend // sets m_name, m_mode and m_streamContext
+  Resource Stream::open(const String& filename, const String& mode,
+                        int options /* = 0 */,
+                        const Variant& context /* = null */);
 
   static bool IsVirtualDirectory(const String& filename);
   static bool IsPlainFilePath(const String& filename);

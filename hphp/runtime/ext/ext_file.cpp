@@ -109,57 +109,6 @@ static bool check_error(const char *function, int line, bool ret) {
   return ret;
 }
 
-static int accessSyscall(
-    const String& path,
-    int mode,
-    bool useFileCache = false) {
-  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
-    return ::access(File::TranslatePathWithFileCache(path).data(), mode);
-  }
-  return w->access(path, mode);
-}
-
-static int statSyscall(
-    const String& path,
-    struct stat* buf,
-    bool useFileCache = false) {
-  bool isRelative = path.charAt(0) != '/';
-  int pathIndex = 0;
-  Stream::Wrapper* w = Stream::getWrapperFromURI(path, &pathIndex);
-  bool isFileStream = dynamic_cast<FileStreamWrapper*>(w);
-  auto canUseFileCache = useFileCache && isFileStream;
-  if (isRelative && !pathIndex) {
-    auto fullpath = g_context->getCwd() + String::FromChar('/') + path;
-    std::string realpath = StatCache::realpath(fullpath.data());
-    // realpath will return an empty string for nonexistent files
-    if (realpath.empty()) {
-      return ENOENT;
-    }
-    auto translatedPath = canUseFileCache ?
-      File::TranslatePathWithFileCache(realpath) :
-      File::TranslatePath(realpath);
-    return ::stat(translatedPath.data(), buf);
-  }
-
-  auto properPath = isFileStream ? path.substr(pathIndex) : path;
-  if (canUseFileCache) {
-    return ::stat(File::TranslatePathWithFileCache(properPath).data(), buf);
-  }
-  return w->stat(properPath, buf);
-}
-
-static int lstatSyscall(
-    const String& path,
-    struct stat* buf,
-    bool useFileCache = false) {
-  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
-    return ::lstat(File::TranslatePathWithFileCache(path).data(), buf);
-  }
-  return w->lstat(path, buf);
-}
-
 const StaticString
   s_dev("dev"),
   s_ino("ino"),
@@ -225,9 +174,9 @@ Variant f_fopen(const String& filename, const String& mode,
     return false;
   }
 
-  Resource resource = File::Open(filename, mode,
-                                 use_include_path ? File::USE_INCLUDE_PATH : 0,
-                                 context);
+  Resource resource = Stream::open(filename, mode,
+                                   use_include_path ? File::USE_INCLUDE_PATH : 0,
+                                   context);
   if (resource.isNull()) {
     return false;
   }
@@ -450,7 +399,7 @@ Variant f_file_get_contents(const String& filename,
 Variant f_file_put_contents(const String& filename, const Variant& data,
                             int flags /* = 0 */,
                             const Variant& context /* = null */) {
-  Resource resource = File::Open(
+  Resource resource = Stream::open(
     filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb", flags, context);
   File *f = resource.getTyped<File>(true);
   if (!f) {
@@ -661,13 +610,13 @@ Variant f_sha1_file(const String& filename, bool raw_output /* = false */) {
 
 Variant f_fileperms(const String& filename) {
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
+  CHECK_SYSTEM(Stream::stat(filename, &sb));
   return (int64_t)sb.st_mode;
 }
 
 Variant f_fileinode(const String& filename) {
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb));
+  CHECK_SYSTEM(Stream::stat(filename, &sb));
   return (int64_t)sb.st_ino;
 }
 
@@ -679,43 +628,43 @@ Variant f_filesize(const String& filename) {
     if (size >= 0) return size;
   }
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
+  CHECK_SYSTEM(Stream::stat(filename, &sb));
   return (int64_t)sb.st_size;
 }
 
 Variant f_fileowner(const String& filename) {
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
+  CHECK_SYSTEM(Stream::stat(filename, &sb));
   return (int64_t)sb.st_uid;
 }
 
 Variant f_filegroup(const String& filename) {
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
+  CHECK_SYSTEM(Stream::stat(filename, &sb));
   return (int64_t)sb.st_gid;
 }
 
 Variant f_fileatime(const String& filename) {
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
+  CHECK_SYSTEM(Stream::stat(filename, &sb));
   return (int64_t)sb.st_atime;
 }
 
 Variant f_filemtime(const String& filename) {
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
+  CHECK_SYSTEM(Stream::stat(filename, &sb));
   return (int64_t)sb.st_mtime;
 }
 
 Variant f_filectime(const String& filename) {
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
+  CHECK_SYSTEM(Stream::stat(filename, &sb));
   return (int64_t)sb.st_ctime;
 }
 
 Variant f_filetype(const String& filename) {
   struct stat sb;
-  CHECK_SYSTEM(lstatSyscall(filename, &sb));
+  CHECK_SYSTEM(Stream::lstat(filename, &sb));
 
   switch (sb.st_mode & S_IFMT) {
   case S_IFLNK:  return "link";
@@ -731,15 +680,12 @@ Variant f_filetype(const String& filename) {
 
 Variant f_linkinfo(const String& filename) {
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb));
+  CHECK_SYSTEM(Stream::stat(filename, &sb));
   return (int64_t)sb.st_dev;
 }
 
 bool f_is_writable(const String& filename) {
-  if (filename.empty()) {
-    return false;
-  }
-  CHECK_SYSTEM(accessSyscall(filename, W_OK));
+  CHECK_SYSTEM(Stream::access(filename, W_OK));
   return true;
   /*
   int mask = S_IWOTH;
@@ -770,10 +716,7 @@ bool f_is_writeable(const String& filename) {
 }
 
 bool f_is_readable(const String& filename) {
-  if (filename.empty()) {
-    return false;
-  }
-  CHECK_SYSTEM(accessSyscall(filename, R_OK, true));
+  CHECK_SYSTEM(Stream::access(filename, R_OK));
   return true;
   /*
   int mask = S_IROTH;
@@ -800,10 +743,7 @@ bool f_is_readable(const String& filename) {
 }
 
 bool f_is_executable(const String& filename) {
-  if (filename.empty()) {
-    return false;
-  }
-  CHECK_SYSTEM(accessSyscall(filename, X_OK));
+  CHECK_SYSTEM(Stream::access(filename, X_OK));
   return true;
   /*
   int mask = S_IXOTH;
@@ -831,15 +771,12 @@ bool f_is_executable(const String& filename) {
 
 bool f_is_file(const String& filename) {
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
+  CHECK_SYSTEM(Stream::stat(filename, &sb));
   return (sb.st_mode & S_IFMT) == S_IFREG;
 }
 
 bool f_is_dir(const String& filename) {
   String cwd;
-  if (filename.empty()) {
-    return false;
-  }
   bool isRelative = (filename.charAt(0) != '/');
   if (isRelative) cwd = g_context->getCwd();
   if (!isRelative || cwd == String(RuntimeOption::SourceRoot)) {
@@ -849,13 +786,13 @@ bool f_is_dir(const String& filename) {
   }
 
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb));
+  CHECK_SYSTEM(Stream::stat(filename, &sb));
   return (sb.st_mode & S_IFMT) == S_IFDIR;
 }
 
 bool f_is_link(const String& filename) {
   struct stat sb;
-  CHECK_SYSTEM(lstatSyscall(filename, &sb));
+  CHECK_SYSTEM(Stream::lstat(filename, &sb));
   return (sb.st_mode & S_IFMT) == S_IFLNK;
 }
 
@@ -868,11 +805,7 @@ bool f_is_uploaded_file(const String& filename) {
 }
 
 bool f_file_exists(const String& filename) {
-  if (filename.empty() ||
-      (accessSyscall(filename, F_OK, true)) < 0) {
-    return false;
-  }
-  return true;
+  return Stream::access(filename, F_OK) == 0;
 }
 
 Variant f_stat(const String& filename) {
@@ -881,7 +814,7 @@ Variant f_stat(const String& filename) {
   }
 
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
+  CHECK_SYSTEM(Stream::stat(filename, &sb));
   return stat_impl(&sb);
 }
 
@@ -891,7 +824,7 @@ Variant f_lstat(const String& filename) {
   }
 
   struct stat sb;
-  CHECK_SYSTEM(lstatSyscall(filename, &sb, true));
+  CHECK_SYSTEM(Stream::lstat(filename, &sb));
   return stat_impl(&sb);
 }
 
@@ -920,6 +853,10 @@ Variant f_readlink(const String& path) {
 }
 
 Variant f_realpath(const String& path) {
+  // Zend doesn't support streams in realpath
+  if (!File::IsPlainFilePath(path)) {
+    return false;
+  }
   String translated = File::TranslatePath(path);
   if (translated.empty()) {
     return false;
@@ -927,11 +864,6 @@ Variant f_realpath(const String& path) {
   if (StaticContentCache::TheFileCache &&
       StaticContentCache::TheFileCache->exists(translated.data(), false)) {
     return translated;
-  }
-  // Zend doesn't support streams in realpath
-  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  if (!dynamic_cast<FileStreamWrapper*>(w)) {
-    return false;
   }
   char resolved_path[PATH_MAX];
   if (!realpath(translated.c_str(), resolved_path)) {
@@ -1099,7 +1031,7 @@ bool f_touch(const String& filename, int64_t mtime /* = 0 */,
   String translated = File::TranslatePath(filename);
 
   /* create the file if it doesn't exist already */
-  if (accessSyscall(translated, F_OK)) {
+  if (Stream::access(translated, F_OK)) {
     FILE *f = fopen(translated.data(), "w");
     if (!f) {
       Logger::Verbose("%s/%d: Unable to create file %s because %s",
@@ -1175,8 +1107,7 @@ int64_t f_umask(const Variant& mask /* = null_variant */) {
 }
 
 bool f_unlink(const String& filename, const Variant& context /* = null */) {
-  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
-  CHECK_SYSTEM(w->unlink(filename));
+  CHECK_SYSTEM(Stream::unlink(filename));
   return true;
 }
 
@@ -1351,16 +1282,14 @@ Variant f_tmpfile() {
 
 bool f_mkdir(const String& pathname, int64_t mode /* = 0777 */,
              bool recursive /* = false */, const Variant& context /* = null */) {
-  Stream::Wrapper* w = Stream::getWrapperFromURI(pathname);
   int options = recursive ? k_STREAM_MKDIR_RECURSIVE : 0;
-  CHECK_SYSTEM(w->mkdir(pathname, mode, options));
+  CHECK_SYSTEM(Stream::mkdir(pathname, mode, options));
   return true;
 }
 
 bool f_rmdir(const String& dirname, const Variant& context /* = null */) {
-  Stream::Wrapper* w = Stream::getWrapperFromURI(dirname);
   int options = 0;
-  CHECK_SYSTEM(w->rmdir(dirname, options));
+  CHECK_SYSTEM(Stream::rmdir(dirname, options));
   return true;
 }
 
@@ -1439,13 +1368,12 @@ Variant f_dir(const String& directory) {
 }
 
 Variant f_opendir(const String& path, const Variant& context /* = null */) {
-  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  Directory *p = w->opendir(path);
-  if (!p) {
+  Resource resource = Stream::opendir(path);
+  if (resource.isNull()) {
     return false;
   }
-  s_directory_data->defaultDirectory = p;
-  return Resource(p);
+  s_directory_data->defaultDirectory = resource;
+  return resource;
 }
 
 Variant f_readdir(const Resource& dir_handle /* = null */) {
@@ -1474,12 +1402,11 @@ static bool StringAscending(const String& s1, const String& s2) {
 
 Variant f_scandir(const String& directory, bool descending /* = false */,
                   const Variant& context /* = null */) {
-  Stream::Wrapper* w = Stream::getWrapperFromURI(directory);
-  Directory *dir = w->opendir(directory);
+  Resource resource = Stream::opendir(directory);
+  Directory *dir = resource.getTyped<Directory>(true);
   if (!dir) {
     return false;
   }
-  Resource deleter(dir);
 
   std::vector<String> names;
   while (true) {

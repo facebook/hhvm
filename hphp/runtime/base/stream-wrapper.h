@@ -19,8 +19,7 @@
 
 #include <string>
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/file.h"
-
+#include "hphp/runtime/base/type-variant.h"
 #include <boost/noncopyable.hpp>
 
 struct stat;
@@ -28,9 +27,20 @@ struct stat;
 namespace HPHP {
 
 class Directory;
+class File;
 
 namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
+
+Resource open(const String& filename, const String& mode,
+              int options = 0, const Variant& context = uninit_null());
+int access(const String& path, int mode);
+int stat(const String& path, struct stat* buf);
+int lstat(const String& path, struct stat* buf);
+Resource opendir(const String& path);
+int rmdir(const String& path, int options);
+int mkdir(const String& path, int mode, int options);
+int unlink(const String& path);
 
 class Wrapper : boost::noncopyable {
  public:

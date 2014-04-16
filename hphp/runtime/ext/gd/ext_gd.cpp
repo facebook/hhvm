@@ -1745,7 +1745,7 @@ Variant HHVM_FUNCTION(getimagesize, const String& filename,
 
 static Resource php_open_plain_file(const String& filename, const char *mode,
                                    FILE **fpp) {
-  Resource resource = File::Open(filename, mode);
+  Resource resource = Stream::open(filename, mode);
   PlainFile *plain_file = resource.getTyped<PlainFile>(true, true);
   if (!plain_file) {
     return null_resource;
@@ -2271,7 +2271,7 @@ static gdImagePtr _php_image_create_from(const String& filename,
       return NULL;
     }
   }
-  Resource resource = File::Open(filename, "rb");
+  Resource resource = Stream::open(filename, "rb");
   File *file = resource.getTyped<File>(true);
   if (!file) {
     raise_warning("failed to open stream: %s", filename.c_str());

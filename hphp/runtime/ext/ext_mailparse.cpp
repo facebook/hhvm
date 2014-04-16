@@ -141,7 +141,7 @@ bool f_mailparse_msg_free(const Resource& mimemail) {
 }
 
 Variant f_mailparse_msg_parse_file(const String& filename) {
-  Resource resource = File::Open(filename, "rb");
+  Resource resource = Stream::open(filename, "rb");
   File *f = resource.getTyped<File>(true);
   if (!f) return false;
 

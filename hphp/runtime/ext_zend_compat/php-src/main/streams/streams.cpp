@@ -161,10 +161,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 }
 
 PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) {
-  // kinda weird this is on the wrapper not the file
-  auto path = stream->hphp_file->getName();
-  auto w = HPHP::Stream::getWrapperFromURI(path);
-  return w->stat(path, &ssb->sb);
+  return stream->resource.getTyped<HPHP::File>()->stat(&ssb->sb) ? 0 : -1;
 }
 
 /* If buf == NULL, the buffer will be allocated automatically and will be of an
@@ -173,7 +170,7 @@ PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 		size_t *returned_len TSRMLS_DC)
 {
-  auto s = stream->hphp_file->readLine(maxlen);
+  auto s = stream->resource.getTyped<HPHP::File>()->readLine(maxlen);
   if (s.empty()) {
     return nullptr;
   }
@@ -188,24 +185,19 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 
 PHPAPI php_stream *_php_stream_opendir(char *path, int options, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
-  auto wrapper = HPHP::Stream::getWrapperFromURI(path);
-  if (!wrapper) {
-    return nullptr;
-  }
-  auto dir = wrapper->opendir(path);
-  if (!dir) {
+  auto dir = HPHP::Stream::opendir(path);
+  if (dir.isNull()) {
     return nullptr;
   }
 
   // TODO this leaks
   php_stream *stream = HPHP::smart_new<php_stream>(dir);
-  stream->hphp_dir->incRefCount();
   return stream;
 }
 
 PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent TSRMLS_DC)
 {
-  auto *dir = dirstream->hphp_dir;
+  auto *dir = dirstream->resource.getTyped<HPHP::Directory>(true);
   if (!dir) {
     return nullptr;
   }
@@ -262,10 +254,10 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
     HPHP::String s;
     if (maxlen == PHP_STREAM_COPY_ALL) {
       HPHP::StringBuffer sb;
-      sb.read(src->hphp_file);
+      sb.read(src->resource.getTyped<HPHP::File>());
       s = sb.detach();
     } else {
-      s = src->hphp_file->read(maxlen);
+      s = src->resource.getTyped<HPHP::File>()->read(maxlen);
     }
     *buf = (char*) emalloc(s.size());
     memcpy(*buf, s.data(), s.size());
@@ -275,7 +267,7 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err TSRMLS_DC) {
   switch (castas) {
     case PHP_STREAM_AS_STDIO:
-      HPHP::PlainFile* pf = dynamic_cast<HPHP::PlainFile*>(stream->hphp_file);
+      HPHP::PlainFile* pf = stream->resource.getTyped<HPHP::PlainFile>();
       *ret = pf->getStream();
       return true;
   }
@@ -283,16 +275,13 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 }
 
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) {
-  HPHP::Stream::Wrapper* w = HPHP::Stream::getWrapperFromURI(path);
-  HPHP::File* file = w->open(path, mode, options, context);
-  if (!file) {
+  auto res = HPHP::Stream::open(path, mode, options, context);
+  if (res.isNull()) {
     return nullptr;
   }
-  // TODO this leaks
-  php_stream *stream = HPHP::smart_new<php_stream>(file);
-  stream->hphp_file->incRefCount();
+  php_stream *stream = HPHP::smart_new<php_stream>(res);
 
-  if (auto urlFile = dynamic_cast<HPHP::UrlFile*>(file)) {
+  if (auto urlFile = res.getTyped<HPHP::UrlFile>(true,true)) {
     // Why is there no ZVAL_ARRAY?
     MAKE_STD_ZVAL(stream->wrapperdata);
     Z_TYPE_P(stream->wrapperdata) = IS_ARRAY;
@@ -307,34 +296,34 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int
 }
 
 PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) {
-  decRefRes(stream->hphp_file);
+  decRefRes(stream->resource.detach());
   return 1;
 }
 
 PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC) {
-  return stream->hphp_file->seek(offset, whence);
+  return stream->resource.getTyped<HPHP::File>()->seek(offset, whence);
 }
 
 PHPAPI off_t _php_stream_tell(php_stream *stream TSRMLS_DC) {
-  return stream->hphp_file->tell();
+  return stream->resource.getTyped<HPHP::File>()->tell();
 }
 
 PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) {
-  return stream->hphp_file->readImpl(buf, count);
+  return stream->resource.getTyped<HPHP::File>()->readImpl(buf, count);
 }
 
 PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) {
-  return stream->hphp_file->writeImpl(buf, count);
+  return stream->resource.getTyped<HPHP::File>()->writeImpl(buf, count);
 }
 
 PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC) {
-  return stream->hphp_file->eof();
+  return stream->resource.getTyped<HPHP::File>()->eof();
 }
 
 PHPAPI int _php_stream_getc(php_stream *stream TSRMLS_DC) {
-  return stream->hphp_file->getc();
+  return stream->resource.getTyped<HPHP::File>()->getc();
 }
 
 PHPAPI int _php_stream_putc(php_stream *stream, int c TSRMLS_DC) {
-  return stream->hphp_file->putc(c);
+  return stream->resource.getTyped<HPHP::File>()->putc(c);
 }

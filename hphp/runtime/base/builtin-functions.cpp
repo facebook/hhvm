@@ -1035,6 +1035,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
     String canonicalName = toLower ? f_strtolower(name) : name;
     const Variant& file = typeMapCell->m_data.parr->get(canonicalName);
     bool ok = false;
+    Variant err{Variant::NullInit()};
     if (file.isString()) {
       String fName = file.toCStrRef().get();
       if (fName.get()->data()[0] != '/') {
@@ -1057,7 +1058,13 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
           }
           ok = true;
         }
-      } catch (...) {}
+      } catch (Exception& e) {
+        err = e.getMessage();
+      } catch (Object& e) {
+        err = e;
+      } catch (...) {
+        err = String("Unknown Exception");
+      }
     }
     if (ok && checkExists(name)) {
       return Success;
@@ -1068,7 +1075,8 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& clsName,
     //  - true means the map was updated. try again
     //  - false means we should stop applying autoloaders (only affects classes)
     //  - anything else means keep going
-    Variant action = vm_call_user_func(func, make_packed_array(kind, name));
+    Variant action = vm_call_user_func(func,
+                                       make_packed_array(kind, name, err));
     auto const actionCell = action.asCell();
     if (actionCell->m_type == KindOfBoolean) {
       if (actionCell->m_data.num) continue;

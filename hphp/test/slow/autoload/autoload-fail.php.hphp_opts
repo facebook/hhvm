@@ -1,0 +1,1 @@
+--ffile=hphp/test/slow/autoload/autoload-fail-c.inc --ffile=hphp/test/slow/autoload/autoload-fail-d.inc

@@ -1,0 +1,22 @@
+string(5) "class"
+string(1) "C"
+string(28) "syntax error, unexpected '{'"
+string(5) "class"
+string(1) "D"
+string(9) "Surprise!"
+array(1) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/test/slow/autoload/autoload-fail.php"
+    ["line"]=>
+    int(24)
+    ["function"]=>
+    string(7) "include"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      string(%d) "%s/test/slow/autoload/autoload-fail-d.inc"
+    }
+  }
+}

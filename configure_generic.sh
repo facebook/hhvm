@@ -5,7 +5,7 @@
 #########################################
 
 # Current Script details
-SCRIPT="$(readlink -f ${BASH_SOURCE[0]})"
+SCRIPT="$(readlink -f $0)"
 SCRIPT_DIR="$(dirname $SCRIPT)"
 PWD=$(readlink -f `pwd`)
 

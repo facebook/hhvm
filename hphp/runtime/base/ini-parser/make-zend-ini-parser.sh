@@ -6,7 +6,7 @@ if [ ! -x "$SED" ]; then
   exit 1
 fi
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 if [ -z "${INSTALL_DIR}" ]; then
   INFILE=${DIR}/zend-ini.y

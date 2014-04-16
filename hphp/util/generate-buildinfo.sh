@@ -9,7 +9,7 @@
 # contents would've changed.
 #
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 # OSS version depends on this fallback since it's
 # obviously not using fbmake

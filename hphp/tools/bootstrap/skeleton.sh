@@ -3,7 +3,7 @@
 # $1 Source IDL file
 # $2 (optional) location to store skeleton
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 HHVM=$DIR/../../hhvm/hhvm
 SOURCE=$1

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 # $1 Operating System (currently: "linux" or "darwin")
 # $2 Machine architecture (currently: "x64" or "arm")

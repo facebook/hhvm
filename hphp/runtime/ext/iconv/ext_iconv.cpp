@@ -15,7 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_iconv.h"
+#include "hphp/runtime/ext/iconv/ext_iconv.h"
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -37,8 +39,6 @@
 #endif
 
 namespace HPHP {
-
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(iconv, NO_EXTENSION_VERSION_YET);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -138,11 +138,12 @@ static bool validate_charset(const String& charset) {
   return true;
 }
 
-static Variant check_charset(const String& charset) {
-  if (!validate_charset(charset)) return false;
-  if (charset.empty()) {
+static Variant check_charset(const Variant& charset) {
+  String charset_str = charset.isNull() ? null_string : charset.toString();
+  if (charset_str.empty()) {
     return ICONVG(internal_encoding);
   }
+  if (!validate_charset(charset_str)) return false;
   return charset;
 }
 
@@ -1272,8 +1273,9 @@ const StaticString
   s_line_length("line-length"),
   s_line_break_chars("line-break-chars");
 
-Variant f_iconv_mime_encode(const String& field_name, const String& field_value,
-                            const Variant& preferences /* = null_variant */) {
+static Variant HHVM_FUNCTION(iconv_mime_encode,
+    const String& field_name, const String& field_value,
+    const Variant& preferences /* = null_variant */) {
   php_iconv_enc_scheme_t scheme_id = PHP_ICONV_ENC_SCHEME_BASE64;
   String in_charset;
   String out_charset;
@@ -1628,8 +1630,9 @@ Variant f_iconv_mime_encode(const String& field_name, const String& field_value,
   return ret.detach();
 }
 
-Variant f_iconv_mime_decode(const String& encoded_string, int mode /* = 0 */,
-                            const String& charset /* = null_string */) {
+static Variant HHVM_FUNCTION(iconv_mime_decode,
+    const String& encoded_string, int64_t mode /* = 0 */,
+    const Variant& charset /* = null_string */) {
   Variant encoded = check_charset(charset);
   if (same(encoded, false)) return false;
   String enc = encoded.toString();
@@ -1645,9 +1648,10 @@ Variant f_iconv_mime_decode(const String& encoded_string, int mode /* = 0 */,
   return false;
 }
 
-Variant f_iconv_mime_decode_headers(const String& encoded_headers,
-                                    int mode /* = 0 */,
-                                    const String& charset /* = null_string */) {
+static Variant HHVM_FUNCTION(iconv_mime_decode_headers,
+    const String& encoded_headers,
+    int64_t mode /* = 0 */,
+    const Variant& charset /* = null_string */) {
   Variant encoded = check_charset(charset);
   if (same(encoded, false)) return false;
   String enc = encoded.toString();
@@ -1723,7 +1727,8 @@ const StaticString
   s_all("all");
 
 
-Variant f_iconv_get_encoding(const String& type /* = "all" */) {
+static Variant HHVM_FUNCTION(iconv_get_encoding,
+    const String& type /* = "all" */) {
   if (type == s_all) {
     Array ret;
     ret.set(s_input_encoding,    ICONVG(input_encoding));
@@ -1737,7 +1742,8 @@ Variant f_iconv_get_encoding(const String& type /* = "all" */) {
   return false;
 }
 
-bool f_iconv_set_encoding(const String& type, const String& charset) {
+static bool HHVM_FUNCTION(iconv_set_encoding,
+    const String& type, const String& charset) {
   if (!validate_charset(charset)) return false;
   if (type == s_input_encoding) {
     ICONVG(input_encoding) = charset;
@@ -1751,8 +1757,8 @@ bool f_iconv_set_encoding(const String& type, const String& charset) {
   return true;
 }
 
-Variant f_iconv(const String& in_charset, const String& out_charset,
-                const String& str) {
+static Variant HHVM_FUNCTION(iconv, const String& in_charset,
+    const String& out_charset, const String& str) {
   if (!validate_charset(in_charset)) return false;
   if (!validate_charset(out_charset)) return false;
 
@@ -1768,8 +1774,8 @@ Variant f_iconv(const String& in_charset, const String& out_charset,
   return false;
 }
 
-Variant f_iconv_strlen(const String& str,
-                       const String& charset /* = null_string */) {
+static Variant HHVM_FUNCTION(iconv_strlen,
+    const String& str, const Variant& charset /* = null_string */) {
   Variant encoded = check_charset(charset);
   if (same(encoded, false)) return false;
   String enc = encoded.toString();
@@ -1783,9 +1789,9 @@ Variant f_iconv_strlen(const String& str,
   return false;
 }
 
-Variant f_iconv_strpos(const String& haystack, const String& needle,
-                       int offset /* = 0 */,
-                       const String& charset /* = null_string */) {
+static Variant HHVM_FUNCTION(iconv_strpos,
+    const String& haystack, const String& needle, int64_t offset /* = 0 */,
+    const Variant& charset /* = null_string */) {
   if (offset < 0) {
     raise_warning("Offset not contained in string.");
     return false;
@@ -1808,8 +1814,9 @@ Variant f_iconv_strpos(const String& haystack, const String& needle,
   return false;
 }
 
-Variant f_iconv_strrpos(const String& haystack, const String& needle,
-                        const String& charset /* = null_string */) {
+static Variant HHVM_FUNCTION(iconv_strrpos,
+    const String& haystack, const String& needle,
+    const Variant& charset /* = null_string */) {
   if (needle.size() < 1) {
     return false;
   }
@@ -1828,12 +1835,13 @@ Variant f_iconv_strrpos(const String& haystack, const String& needle,
   return false;
 }
 
-Variant f_iconv_substr(const String& str, int offset,
-                       int length /* = INT_MAX */,
-                       const String& charset /* = null_string */) {
+static Variant HHVM_FUNCTION(iconv_substr,
+    const String& str, int64_t offset, int64_t length /* = INT_MAX */,
+    const Variant& charset /* = null_string */) {
   Variant encoded = check_charset(charset);
   if (same(encoded, false)) return false;
   String enc = encoded.toString();
+  length = length <= INT32_MAX ? length : INT32_MAX; 
   StringBuffer retval;
   php_iconv_err_t err = _php_iconv_substr(retval, str.data(), str.size(),
                                           offset, length, enc.data());
@@ -1844,7 +1852,8 @@ Variant f_iconv_substr(const String& str, int offset,
   return false;
 }
 
-String f_ob_iconv_handler(const String& contents, int status) {
+static String HHVM_FUNCTION(ob_iconv_handler,
+    const String& contents, int64_t status) {
   String mimetype = g_context->getMimeType();
   if (!mimetype.empty()) {
     char *out_buffer;
@@ -1864,4 +1873,45 @@ String f_ob_iconv_handler(const String& contents, int status) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+const StaticString s_ICONV_IMPL("ICONV_IMPL");
+const StaticString s_ICONV_MIME_DECODE_CONTINUE_ON_ERROR("ICONV_MIME_DECODE_CONTINUE_ON_ERROR");
+const StaticString s_ICONV_MIME_DECODE_STRICT("ICONV_MIME_DECODE_STRICT");
+const StaticString s_ICONV_VERSION("ICONV_VERSION");
+
+class iconvExtension : public Extension {
+public:
+  iconvExtension() : Extension("iconv") {}
+
+  virtual void moduleInit() {
+    Native::registerConstant<KindOfStaticString>(
+        s_ICONV_IMPL.get(), StaticString("glibc").get()
+    );
+    Native::registerConstant<KindOfInt64>(
+        s_ICONV_MIME_DECODE_CONTINUE_ON_ERROR.get(), 2
+    );
+    Native::registerConstant<KindOfInt64>(
+        s_ICONV_MIME_DECODE_STRICT.get(), 1
+    );
+    Native::registerConstant<KindOfStaticString>(
+        s_ICONV_VERSION.get(), StaticString("2.5").get()
+    );
+
+    HHVM_FE(iconv_get_encoding);
+    HHVM_FE(iconv_mime_decode_headers);
+    HHVM_FE(iconv_mime_decode);
+    HHVM_FE(iconv_mime_encode);
+    HHVM_FE(iconv_set_encoding);
+    HHVM_FE(iconv_strlen);
+    HHVM_FE(iconv_strpos);
+    HHVM_FE(iconv_strrpos);
+    HHVM_FE(iconv_substr);
+    HHVM_FE(iconv);
+    HHVM_FE(ob_iconv_handler);
+
+    loadSystemlib();
+  }
+
+} s_iconv_extension;
+
 }

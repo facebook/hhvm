@@ -23,30 +23,45 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_iconv_mime_encode(
-  const String& field_name, const String& field_value,
-  const Variant& preferences = null_variant);
-Variant f_iconv_mime_decode(
-  const String& encoded_string, int mode = 0,
-  const String& charset = null_string);
-Variant f_iconv_mime_decode_headers(
-  const String& encoded_headers, int mode = 0,
-  const String& charset = null_string);
-Variant f_iconv_get_encoding(const String& type = "all");
-bool f_iconv_set_encoding(const String& type, const String& charset);
-Variant f_iconv(
-  const String& in_charset, const String& out_charset, const String& str);
-Variant f_iconv_strlen(const String& str, const String& charset = null_string);
-Variant f_iconv_strpos(
-  const String& haystack, const String& needle, int offset = 0,
-  const String& charset = null_string);
-Variant f_iconv_strrpos(
-  const String& haystack, const String& needle,
-  const String& charset = null_string);
-Variant f_iconv_substr(
-  const String& str, int offset, int length = INT_MAX,
-  const String& charset = null_string);
-String f_ob_iconv_handler(const String& contents, int status);
+
+static Variant HHVM_FUNCTION(iconv_mime_encode,
+    const String& field_name, const String& field_value,
+    const Variant& preferences = null_variant);
+
+static Variant HHVM_FUNCTION(iconv_mime_decode,
+    const String& encoded_string, int64_t mode = 0,
+    const Variant& charset = null_string);
+
+static Variant HHVM_FUNCTION(iconv_mime_decode_headers,
+    const String& encoded_headers,
+    int64_t mode = 0,
+    const Variant& charset = null_string);
+
+static Variant HHVM_FUNCTION(iconv_get_encoding, const String& type = "all");
+
+static bool HHVM_FUNCTION(iconv_set_encoding, const String& type,
+		const String& charset);
+
+static Variant HHVM_FUNCTION(iconv, const String& in_charset,
+    const String& out_charset, const String& str);
+
+static Variant HHVM_FUNCTION(iconv_strlen,
+    const String& str, const Variant& charset = null_string);
+
+static Variant HHVM_FUNCTION(iconv_strpos,
+    const String& haystack, const String& needle, int64_t offset = 0,
+    const Variant& charset = null_string);
+
+static Variant HHVM_FUNCTION(iconv_strrpos,
+    const String& haystack, const String& needle,
+    const Variant& charset = null_string);
+
+static Variant HHVM_FUNCTION(iconv_substr,
+    const String& str, int64_t offset, int64_t length = INT64_MAX,
+    const Variant& charset = null_string);
+
+static String HHVM_FUNCTION(ob_iconv_handler,
+    const String& contents, int64_t status);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

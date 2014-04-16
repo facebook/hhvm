@@ -2342,8 +2342,20 @@ bool HHVM_FUNCTION(openssl_x509_export, const Variant& x509, VRefParam output,
  *          ts->tm_mon+1,ts->tm_mday,ts->tm_hour,ts->tm_min,ts->tm_sec);
  */
 static time_t asn1_time_to_time_t(ASN1_UTCTIME *timestr) {
-  if (timestr->length < 13) {
-    raise_warning("extension author too lazy to parse %s correctly",
+
+  if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME) {
+    raise_warning("illegal ASN1 data type for timestamp");
+    return (time_t)-1;
+  }
+
+  // Binary safety
+  if (ASN1_STRING_length(timestr) != strlen((char*)ASN1_STRING_data(timestr))) {
+    raise_warning("illegal length in timestamp");
+    return (time_t)-1;
+  }
+
+  if (ASN1_STRING_length(timestr) < 13) {
+    raise_warning("unable to parse time string %s correctly",
                     timestr->data);
     return (time_t)-1;
   }
@@ -2354,7 +2366,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME *timestr) {
   memset(&thetime, 0, sizeof(thetime));
 
   /* we work backwards so that we can use atoi more easily */
-  char *thestr = strbuf + timestr->length - 3;
+  char *thestr = strbuf + ASN1_STRING_length(timestr) - 3;
   thetime.tm_sec  = atoi(thestr);   *thestr = '\0';  thestr -= 2;
   thetime.tm_min  = atoi(thestr);   *thestr = '\0';  thestr -= 2;
   thetime.tm_hour = atoi(thestr);   *thestr = '\0';  thestr -= 2;

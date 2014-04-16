@@ -118,7 +118,7 @@ public:
   bool hasImpl() const;
   void setDirectInvoke() { m_directInvoke = true; }
   bool hasDirectInvoke() const { return m_directInvoke; }
-  bool isZendParamMode() const;
+  bool isParamCoerceMode() const;
   bool mayContainThis();
   bool isClosure() const;
   bool isGenerator() const { return m_generator; }

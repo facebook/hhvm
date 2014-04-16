@@ -276,7 +276,7 @@
                     "name": "query",
                     "desc": "Executes an SQL query, returning an SQLite3Result object if the query returns results.",
                     "flags": [
-                        "ZendParamModeNull"
+                        "ParamCoerceModeNull"
                     ],
                     "return": {
                         "type": "Variant",
@@ -294,7 +294,7 @@
                     "name": "querysingle",
                     "desc": "Executes a query and returns a single result.",
                     "flags": [
-                        "ZendParamModeNull"
+                        "ParamCoerceModeNull"
                     ],
                     "return": {
                         "type": "Variant",

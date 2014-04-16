@@ -3006,7 +3006,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
   bool zendParamMode =
       !callee->methInfo() ||
       (callee->methInfo()->attribute &
-      (ClassInfo::ZendParamModeNull | ClassInfo::ZendParamModeFalse));
+      (ClassInfo::ParamCoerceModeNull | ClassInfo::ParamCoerceModeFalse));
 
   // Convert types if needed.
   for (int i = 0; i < numNonDefault; i++) {

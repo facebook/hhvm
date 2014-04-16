@@ -37,7 +37,7 @@ class ClassInfoHook;
 class ClassInfo {
 public:
   enum Attribute {                      //  class   prop   func  method param
-    ZendParamModeNull      = (1 <<  0), //                  x      x
+    ParamCoerceModeNull    = (1 <<  0), //                  x      x
     IsRedeclared           = (1 <<  1), //    x             x
     IsVolatile             = (1 <<  2), //    x             x
 
@@ -79,7 +79,7 @@ public:
     IsSystem               = (1 << 28), //    x             x
 
     IsTrait                = (1 << 29), //    x
-    ZendParamModeFalse     = (1 << 30), //                  x      x
+    ParamCoerceModeFalse   = (1 << 30), //                  x      x
     NoFCallBuiltin         = (1u << 31),//                  x      x
   };
 

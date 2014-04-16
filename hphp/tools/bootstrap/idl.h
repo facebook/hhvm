@@ -31,7 +31,7 @@ namespace HPHP { namespace IDL {
 /////////////////////////////////////////////////////////////////////////////
 
 enum FuncFlags {
-  ZendParamModeNull             = (1 <<  0),
+  ParamCoerceModeNull           = (1 <<  0),
   CppCustomDelete               = (1 <<  1),
   IsAbstract                    = (1 <<  4),
   IsFinal                       = (1 <<  5),
@@ -59,7 +59,7 @@ enum FuncFlags {
   NoDefaultSweep                = (1 << 27),
   IsSystem                      = (1 << 28),
   IsTrait                       = (1 << 29),
-  ZendParamModeFalse            = (1 << 30),
+  ParamCoerceModeFalse          = (1 << 30),
   NoFCallBuiltin                = (1 << 31),
 };
 

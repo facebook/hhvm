@@ -2187,13 +2187,13 @@ class ReflectionProperty implements Reflector {
         $this->forceAccessible
       );
     }
-    // Can be removed once we support ZendParamMode in PHP
+    // Can be removed once we support ParamCoerceMode in PHP
     if (func_num_args() != 1) {
       trigger_error('ReflectionProperty::getValue() expects exactly 1'
         . ' parameter, ' . func_num_args() . ' given', E_USER_WARNING);
       return null;
     }
-    // Can be removed once we support ZendParamMode in PHP
+    // Can be removed once we support ParamCoerceMode in PHP
     if (gettype($obj) != "object") {
       trigger_error('ReflectionProperty::getValue() expects parameter 1'
          . ' to be object, ' . gettype($obj) . ' given', E_USER_WARNING);
@@ -2234,13 +2234,13 @@ class ReflectionProperty implements Reflector {
         $this->forceAccessible
       );
     } else {
-      // Can be removed once we support ZendParamMode in PHP
+      // Can be removed once we support ParamCoerceMode in PHP
       if (func_num_args() != 2) {
         trigger_error('ReflectionProperty::setValue() expects exactly 2'
           . ' parameters, ' . func_num_args() . ' given', E_USER_WARNING);
         return null;
       }
-      // Can be removed once we support ZendParamMode in PHP
+      // Can be removed once we support ParamCoerceMode in PHP
       if (gettype($obj) != "object") {
         trigger_error('ReflectionProperty::setValue() expects parameter 1'
           . ' to be object, ' . gettype($obj) . ' given', E_USER_WARNING);

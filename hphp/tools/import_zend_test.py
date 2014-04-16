@@ -1319,8 +1319,8 @@ def walk(filename, dest_subdir):
             }
         }
 
-        # This remove the ZendParamMode checks that is usually in the beginning
-        # of the tests. Remove this when we have ZendParamMode working for PHP
+        # This remove the ParamCoerceMode checks that is usually in the beginning
+        # of the tests. Remove this when we have ParamCoerceMode working for PHP
         # methods
         r = re.compile('^\s*if \(.*@.*\)[\s\r\n]*.*Expecting.*[\r\n]+',
                        re.MULTILINE)

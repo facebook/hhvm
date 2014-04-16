@@ -748,7 +748,7 @@
             "name": "sqrt",
             "desc": "Returns the square root of arg.",
             "flags": [
-                "ZendParamModeNull"
+                "ParamCoerceModeNull"
             ],
             "return": {
                 "type": "Double",

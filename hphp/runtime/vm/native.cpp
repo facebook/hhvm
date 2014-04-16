@@ -165,7 +165,7 @@ bool coerceFCallArgs(TypedValue* args,
   // All HNI functions have ZPM enabled by default
   bool zendParamMode =
     !func->methInfo() || func->methInfo()->attribute &
-    (ClassInfo::ZendParamModeNull | ClassInfo::ZendParamModeFalse);
+    (ClassInfo::ParamCoerceModeNull | ClassInfo::ParamCoerceModeFalse);
 
   for (int32_t i = 0; (i < numNonDefault) && (i < numArgs); i++) {
     const Func::ParamInfo& pi = func->params()[i];

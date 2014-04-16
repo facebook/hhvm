@@ -87,8 +87,8 @@ static const std::unordered_map<int, fbstring> g_phpTypeMap =
 
 static const std::unordered_map<fbstring, FuncFlags> g_flagsMap =
 {
-  {"ZendParamModeNull",              ZendParamModeNull},
-  {"ZendParamModeFalse",             ZendParamModeFalse},
+  {"ParamCoerceModeNull",            ParamCoerceModeNull},
+  {"ParamCoerceModeFalse",           ParamCoerceModeFalse},
   {"CppCustomDelete",                CppCustomDelete},
   {"IsAbstract",                     IsAbstract},
   {"IsFinal",                        IsFinal},
@@ -673,9 +673,9 @@ PhpFunc::PhpFunc(const folly::dynamic& d,
   m_flags = parseFlags(m_func["flags"]);
 
   ParamMode paramMode = ParamMode::CoerceAndCall;
-  if (m_flags & ZendParamModeNull) {
+  if (m_flags & ParamCoerceModeNull) {
     paramMode = ParamMode::ZendNull;
-  } else if (m_flags & ZendParamModeFalse) {
+  } else if (m_flags & ParamCoerceModeFalse) {
     paramMode = ParamMode::ZendFalse;
   }
 

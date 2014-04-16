@@ -186,8 +186,8 @@ static void outputConstants(const char *outputfn,
                         HipHopSpecific|VariableArguments|\
                         RefVariableArguments|MixedVariableArguments|\
                         NoFCallBuiltin|FunctionIsFoldable|\
-                        NoInjection|NoEffect|HasOptFunction|ZendParamModeNull|\
-                        ZendParamModeFalse|ZendCompat)
+                        NoInjection|NoEffect|HasOptFunction|ParamCoerceModeNull|\
+                        ParamCoerceModeFalse|ZendCompat)
 
 static void writeFunction(std::ostream& out, const PhpFunc& func) {
   auto flags = (func.flags() & FUNC_FLAG_MASK) | IsSystem | IsNothing;

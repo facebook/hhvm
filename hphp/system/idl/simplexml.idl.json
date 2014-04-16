@@ -85,7 +85,7 @@
             "name": "simplexml_import_dom",
             "desc": "This function takes a node of a DOM document and makes it into a SimpleXML node. This new object can then be used as a native SimpleXML element.",
             "flags": [
-                "ZendParamModeNull"
+                "ParamCoerceModeNull"
             ],
             "return": {
                 "type": "Variant",
@@ -145,7 +145,7 @@
             "name": "libxml_use_internal_errors",
             "desc": "libxml_use_internal_errors() allows you to disable standard libxml errors and enable user error handling.",
             "flags": [
-                "ZendParamModeNull"
+                "ParamCoerceModeNull"
             ],
             "return": {
                 "type": "Boolean",

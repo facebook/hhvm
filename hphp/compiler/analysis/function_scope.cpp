@@ -302,9 +302,9 @@ bool FunctionScope::hasUserAttr(const char *attr) const {
   return m_userAttributes.find(attr) != m_userAttributes.end();
 }
 
-bool FunctionScope::isZendParamMode() const {
+bool FunctionScope::isParamCoerceMode() const {
   return m_attributeClassInfo &
-    (ClassInfo::ZendParamModeNull | ClassInfo::ZendParamModeFalse);
+    (ClassInfo::ParamCoerceModeNull | ClassInfo::ParamCoerceModeFalse);
 }
 
 bool FunctionScope::isPublic() const {
@@ -668,7 +668,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
     /**
      * Duplicate the logic of getParamType(i), w/o the mutation
      */
-    TypePtr paramType(i < m_maxParam && !isZendParamMode() ?
+    TypePtr paramType(i < m_maxParam && !isParamCoerceMode() ?
                       m_paramTypes[i] : TypePtr());
     if (!paramType) paramType = Type::Some;
     if (valid && !canSetParamType && i < m_maxParam &&

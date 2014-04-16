@@ -316,7 +316,7 @@
             "name": "date_sunrise",
             "desc": "date_sunrise() returns the sunrise time for a given day (specified as a timestamp) and location.",
             "flags": [
-              "ZendParamModeFalse"
+              "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -364,7 +364,7 @@
             "name": "date_sunset",
             "desc": "date_sunset() returns the sunset time for a given day (specified as a timestamp) and location.",
             "flags": [
-              "ZendParamModeFalse"
+              "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",

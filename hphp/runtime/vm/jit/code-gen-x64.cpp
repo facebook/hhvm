@@ -2375,14 +2375,11 @@ void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
   auto& a = m_as;
 
   // Check the first function handle, otherwise try to autoload.
-  Label end;
   if (dstReg == InvalidReg) {
     a.   cmpq  (0, rVmTl[hFunc]);
-    a.   jnz8  (end);
   } else {
     a.   loadq (rVmTl[hFunc], dstReg);
     a.   testq (dstReg, dstReg);
-    a.   jnz8  (end);
   }
 
   unlikelyIfBlock(CC_Z, [&] (Asm& a) {
@@ -2400,8 +2397,6 @@ void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
         .immPtr(extra->fallback)
     );
   });
-
-  asm_label(m_as, end);
 }
 
 void CodeGenerator::cgLdFunc(IRInstruction* inst) {

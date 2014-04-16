@@ -47,6 +47,9 @@ zend_object_store_get_object() to return a valid pointer.
 * Use `Z_RESVAL` instead of `Z_LVAL` for resource access
 * Don't use `PHP_MALIAS`. Define the other function.
 * Change any `ZVAL_STRING(foo, "literal string", 0)` to `ZVAL_STRING(foo, "literal string", 2)`
+* Allocate hashtables with ALLOC_HASHTABLE() and zvals with ALLOC_ZVAL() or
+  one of the macros that calls ALLOC_ZVAL(), don't allocate them directly.
+  Don't use malloc(sizeof(zval)) or create them on the stack.
 
 ## Bugs and caveats
 
@@ -58,6 +61,7 @@ zend_object_store_get_object() to return a valid pointer.
   referenced.
 * The EG(...) globals are defined, but most of them aren't read or set, so will
   just contain null pointers.
+* Persistent HashTables and zvals will not work.
 
 ## File structure
 

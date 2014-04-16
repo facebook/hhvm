@@ -5516,18 +5516,18 @@ SSATmp* HhbcTranslator::ldLocInnerWarn(uint32_t id, Block* target,
 SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
                                   Block* exit,
                                   SSATmp* newVal,
-                                  bool doRefCount) {
+                                  bool decRefOld,
+                                  bool incRefNew) {
   assert(!newVal->type().maybeBoxed());
 
-  auto const oldLoc = ldLoc(id, doRefCount ? DataTypeCountness
-                                           : DataTypeGeneric);
+  auto const cat = decRefOld ? DataTypeCountness : DataTypeGeneric;
+  auto const oldLoc = ldLoc(id, cat);
   assert(oldLoc->type().isBoxed() || oldLoc->type().notBoxed());
 
   if (oldLoc->type().notBoxed()) {
     gen(StLoc, LocalId(id), m_irb->fp(), newVal);
-    if (doRefCount) {
-      gen(DecRef, oldLoc);
-    }
+    if (incRefNew) gen(IncRef, newVal);
+    if (decRefOld) gen(DecRef, oldLoc);
     return newVal;
   }
 
@@ -5537,7 +5537,8 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
     LdRef, oldLoc->type().innerType(), exit, oldLoc
   );
   gen(StRef, oldLoc, newVal);
-  if (doRefCount) {
+  if (incRefNew) gen(IncRef, newVal);
+  if (decRefOld) {
     gen(DecRef, innerCell);
     m_irb->constrainValue(oldLoc, TypeConstraint(DataTypeCountness, Type::Gen,
                                                  DataTypeCountness));
@@ -5547,8 +5548,9 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
 }
 
 SSATmp* HhbcTranslator::pushStLoc(uint32_t id, Block* exit, SSATmp* newVal) {
-  const bool doRefCount = true;
-  SSATmp* ret = stLocImpl(id, exit, newVal, doRefCount);
+  constexpr bool decRefOld = true;
+  constexpr bool incRefNew = true;
+  SSATmp* ret = stLocImpl(id, exit, newVal, decRefOld, incRefNew);
 
   // Approximately mimic hhbc guard relaxation.  When RefcountOpts are
   // enabled a SetL followed by a PopC will not touch the refcount,
@@ -5556,17 +5558,22 @@ SSATmp* HhbcTranslator::pushStLoc(uint32_t id, Block* exit, SSATmp* newVal) {
   auto outputPopped = curSrcKey().advanced().op() == OpPopC &&
     m_irb->localType(id, DataTypeGeneric).notBoxed() &&
     RuntimeOption::EvalHHIRRefcountOpts;
-  return pushIncRef(ret, outputPopped ? DataTypeGeneric : DataTypeCountness);
+
+  auto const cat = outputPopped ? DataTypeGeneric : DataTypeCountness;
+  m_irb->constrainValue(ret, cat);
+  return push(ret);
 }
 
 SSATmp* HhbcTranslator::stLoc(uint32_t id, Block* exit, SSATmp* newVal) {
-  const bool doRefCount = true;
-  return stLocImpl(id, exit, newVal, doRefCount);
+  constexpr bool decRefOld = true;
+  constexpr bool incRefNew = false;
+  return stLocImpl(id, exit, newVal, decRefOld, incRefNew);
 }
 
 SSATmp* HhbcTranslator::stLocNRC(uint32_t id, Block* exit, SSATmp* newVal) {
-  const bool doRefCount = false;
-  return stLocImpl(id, exit, newVal, doRefCount);
+  constexpr bool decRefOld = false;
+  constexpr bool incRefNew = false;
+  return stLocImpl(id, exit, newVal, decRefOld, incRefNew);
 }
 
 void HhbcTranslator::end() {

@@ -861,7 +861,12 @@ public:
   SSATmp* pushStLoc(uint32_t id, Block* exit, SSATmp* newVal);
   SSATmp* stLoc(uint32_t id, Block* exit, SSATmp* newVal);
   SSATmp* stLocNRC(uint32_t id, Block* exit, SSATmp* newVal);
-  SSATmp* stLocImpl(uint32_t id, Block*, SSATmp* newVal, bool doRefCount);
+
+  SSATmp* stLocImpl(uint32_t id,
+                    Block* exit,
+                    SSATmp* newVal,
+                    bool decRefOld,
+                    bool incRefOld);
 
 private:
   // Tracks information about the current bytecode offset and which

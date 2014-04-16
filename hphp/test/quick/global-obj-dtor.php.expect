@@ -1,0 +1,7 @@
+C::__destruct
+object(D)#2 (0) {
+}
+Leaving C::__destruct
+D::__destruct
+****
+int(1)

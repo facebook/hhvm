@@ -90,8 +90,10 @@ const StaticString
   s_function("function"),
   s_trait_aliases("trait_aliases"),
   s_varg("varg"),
+  s_closure("closure"),
   s___invoke("__invoke"),
   s_closure_in_braces("{closure}"),
+  s_closureobj("closureobj"),
   s_return_type("return_type"),
   s_type_hint("type_hint"),
   s_type_profiling("type_profiling"),
@@ -409,12 +411,7 @@ static void set_function_info(Array &ret, const Func* func) {
     const Func::SVInfoVec& staticVars = func->staticVars();
     for (unsigned int i = 0; i < staticVars.size(); i++) {
       const Func::SVInfo &sv = staticVars[i];
-
-      auto const refData = RDS::bindStaticLocal(func, sv.name);
-      arr.set(VarNR(sv.name), refData->isUninitializedInRDS()
-        ? null_variant
-        : tvAsCVarRef(refData.get()->tv())
-      );
+      arr.set(VarNR(sv.name), VarNR(sv.phpCode));
     }
     ret.set(s_static_variables, VarNR(arr));
   }
@@ -535,6 +532,8 @@ Array HHVM_FUNCTION(hphp_get_method_info, const Variant& class_or_object,
 Array HHVM_FUNCTION(hphp_get_closure_info, const Object& closure) {
   Array mi = HHVM_FN(hphp_get_method_info)(closure->o_getClassName(), s___invoke);
   mi.set(s_name, s_closure_in_braces);
+  mi.set(s_closureobj, closure);
+  mi.set(s_closure, empty_string);
   mi.remove(s_access);
   mi.remove(s_accessible);
   mi.remove(s_modifiers);
@@ -803,6 +802,7 @@ Array HHVM_FUNCTION(hphp_get_function_info, const String& name) {
   const Func* func = Unit::loadFunc(name.get());
   if (!func) return ret;
   ret.set(s_name,       VarNR(func->name()));
+  ret.set(s_closure,    empty_string);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     ret.set(s_type_profiling, getPercentParamInfoArray(func));
   }

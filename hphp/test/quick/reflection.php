@@ -81,11 +81,6 @@ var_dump($rf->invokeArgs(array("a", &$b, "c")));
 var_dump($rf->invokeArgs(array("a", &$b, "c")));
 print "\n";
 
-print "--- getStaticVariables(\"f\") ---\n";
-$rf = new ReflectionFunction("f");
-var_dump($rf->getStaticVariables());
-print "\n";
-
 /**
  * This is g's doc comment.
  */

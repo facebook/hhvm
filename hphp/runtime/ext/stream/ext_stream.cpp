@@ -167,9 +167,6 @@ Variant f_stream_copy_to_stream(const Resource& source, const Resource& dest,
     raise_warning("Failed to seek to position %d in the stream", offset);
     return false;
   }
-  if (destFile->seekable()) {
-    (void)destFile->seek(0, SEEK_END);
-  }
   int cbytes = 0;
   if (maxlength == 0) maxlength = INT_MAX;
   while (cbytes < maxlength) {

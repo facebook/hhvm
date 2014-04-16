@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/region-hot-trace.h"
+#include "hphp/runtime/vm/jit/region-whole-cfg.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace JIT {
@@ -263,8 +264,14 @@ void regionizeFunc(const Func*       func,
       FTRACE(6, "regionizeFunc: selecting trace to cover node {}\n", newHead);
       TransIDSet selectedSet;
       TransIDVec selectedVec;
-      RegionDescPtr region = selectHotTrace(newHead, profData, cfg,
-                                            selectedSet, &selectedVec);
+      RegionDescPtr region;
+      if (RuntimeOption::EvalJitPGORegionSelector == "hottrace") {
+        region = selectHotTrace(newHead, profData, cfg,
+                                selectedSet, &selectedVec);
+      } else if (RuntimeOption::EvalJitPGORegionSelector == "wholecfg") {
+        region = selectWholeCFG(newHead, profData, cfg, selectedSet,
+                                &selectedVec);
+      }
       profData->setOptimized(profData->transSrcKey(newHead));
       assert(selectedVec.size() > 0 && selectedVec[0] == newHead);
       regions.push_back(region);

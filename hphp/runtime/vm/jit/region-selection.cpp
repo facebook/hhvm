@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/region-hot-trace.h"
+#include "hphp/runtime/vm/jit/region-whole-cfg.h"
 
 namespace HPHP { namespace JIT {
 
@@ -76,12 +77,14 @@ RegionMode regionMode() {
 enum class PGORegionMode {
   Hottrace, // Select a long region, using profile counters to guide the trace
   Hotblock, // Select a single block
+  WholeCFG, // Select the entire CFG that has been profiled
 };
 
 PGORegionMode pgoRegionMode() {
   auto& s = RuntimeOption::EvalJitPGORegionSelector;
   if (s == "hottrace") return PGORegionMode::Hottrace;
   if (s == "hotblock") return PGORegionMode::Hotblock;
+  if (s == "wholecfg") return PGORegionMode::WholeCFG;
   FTRACE(1, "unknown pgo region mode {}: using hottrace\n", s);
   assert(false);
   return PGORegionMode::Hottrace;
@@ -477,6 +480,10 @@ RegionDescPtr selectHotRegion(TransID transId,
 
     case PGORegionMode::Hotblock:
       region = selectHotBlock(transId, profData, cfg);
+      break;
+
+    case PGORegionMode::WholeCFG:
+      region = selectWholeCFG(transId, profData, cfg, selectedTIDs);
       break;
   }
   assert(region);

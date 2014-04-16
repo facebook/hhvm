@@ -26,7 +26,6 @@ if (EXISTS "public_tld")
   if (NOT EXISTS ${TP_DIR})
     message(FATAL_ERROR "I can't find ${TP_DIR}. Maybe try\ngit submodule update --init --recursive")
   endif()
-  add_subdirectory(${TP_DIR})
 else()
   set(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../third-party/")
 endif()
@@ -42,6 +41,10 @@ include_directories("${TP_DIR}/double-conversion/src")
 include_directories("${TP_DIR}/folly")
 include_directories("${TP_DIR}/libzip")
 include_directories("${TP_DIR}")
+
+if (EXISTS "public_tld")
+  add_subdirectory(${TP_DIR})
+endif()
 
 # Some included files need to use relative paths, but they could be included
 # from anywhere, so give them a variable that points to a known place. Only use

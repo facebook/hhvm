@@ -393,6 +393,8 @@ class ObjectData {
                Array& props, std::vector<bool>& inserted) const;
   void getProps(const Class* klass, bool pubOnly, const PreClass* pc,
                 Array& props, std::vector<bool>& inserted) const;
+  void getTraitProps(const Class* klass, bool pubOnly, const Class* trait,
+                     Array& props, std::vector<bool>& inserted) const;
  public:
   void prop(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
             const StringData* key);

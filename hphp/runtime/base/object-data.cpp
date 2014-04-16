@@ -366,7 +366,7 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   do {
     getProps(cls, pubOnly, cls->preClass(), props, inserted);
     for (auto const& traitCls : cls->usedTraitClasses()) {
-      getProps(cls, pubOnly, traitCls->preClass(), props, inserted);
+      getTraitProps(cls, pubOnly, traitCls.get(), props, inserted);
     }
     cls = cls->parent();
   } while (cls);
@@ -1678,6 +1678,19 @@ void ObjectData::getProps(const Class* klass, bool pubOnly,
   size_t count = pc->numProperties();
   for (size_t i = 0; i < count; ++i) {
     getProp(klass, pubOnly, &propVec[i], props, inserted);
+  }
+}
+
+void ObjectData::getTraitProps(const Class* klass, bool pubOnly,
+                               const Class* trait, Array& props,
+                               std::vector<bool>& inserted) const {
+  assert(isNormalClass(klass));
+  assert(isTrait(trait));
+
+  getProps(klass, pubOnly, trait->preClass(), props, inserted);
+  for (auto const& traitCls : trait->usedTraitClasses()) {
+    getProps(klass, pubOnly, traitCls->preClass(), props, inserted);
+    getTraitProps(klass, pubOnly, traitCls.get(), props, inserted);
   }
 }
 

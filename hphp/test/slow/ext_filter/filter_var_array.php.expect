@@ -1,0 +1,112 @@
+No filters, Add empty
+array(7) {
+  ["null"]=>
+  string(0) ""
+  ["empty_array"]=>
+  bool(false)
+  ["filled_array"]=>
+  bool(false)
+  ["int"]=>
+  string(1) "1"
+  ["double"]=>
+  string(1) "1"
+  ["string"]=>
+  string(6) "string"
+  ["missing"]=>
+  NULL
+}
+No filters
+array(6) {
+  ["null"]=>
+  string(0) ""
+  ["empty_array"]=>
+  bool(false)
+  ["filled_array"]=>
+  bool(false)
+  ["int"]=>
+  string(1) "1"
+  ["double"]=>
+  string(1) "1"
+  ["string"]=>
+  string(6) "string"
+}
+Require Scalar, Add empty
+array(7) {
+  ["null"]=>
+  string(0) ""
+  ["empty_array"]=>
+  bool(false)
+  ["filled_array"]=>
+  bool(false)
+  ["int"]=>
+  string(1) "1"
+  ["double"]=>
+  string(1) "1"
+  ["string"]=>
+  string(6) "string"
+  ["missing"]=>
+  NULL
+}
+Require Scalar
+array(6) {
+  ["null"]=>
+  string(0) ""
+  ["empty_array"]=>
+  bool(false)
+  ["filled_array"]=>
+  bool(false)
+  ["int"]=>
+  string(1) "1"
+  ["double"]=>
+  string(1) "1"
+  ["string"]=>
+  string(6) "string"
+}
+Require Array, Add empty
+array(7) {
+  ["null"]=>
+  bool(false)
+  ["empty_array"]=>
+  array(0) {
+  }
+  ["filled_array"]=>
+  array(3) {
+    [0]=>
+    string(1) "1"
+    [1]=>
+    string(1) "2"
+    [2]=>
+    string(1) "3"
+  }
+  ["int"]=>
+  bool(false)
+  ["double"]=>
+  bool(false)
+  ["string"]=>
+  bool(false)
+  ["missing"]=>
+  NULL
+}
+Require Array
+array(6) {
+  ["null"]=>
+  bool(false)
+  ["empty_array"]=>
+  array(0) {
+  }
+  ["filled_array"]=>
+  array(3) {
+    [0]=>
+    string(1) "1"
+    [1]=>
+    string(1) "2"
+    [2]=>
+    string(1) "3"
+  }
+  ["int"]=>
+  bool(false)
+  ["double"]=>
+  bool(false)
+  ["string"]=>
+  bool(false)
+}

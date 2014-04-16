@@ -10,6 +10,10 @@ function _filter_var_array_single($value, $filter, $options = array()) {
   if ($flags & FILTER_REQUIRE_SCALAR && is_array($ret)) {
     $ret = false;
   }
+  if ($flags & FILTER_REQUIRE_ARRAY && is_null($ret)) {
+    $ret = array();
+  }
+
   return $ret;
 }
 
@@ -79,7 +83,7 @@ function filter_var_array($data, $definition = null, $add_empty = true) {
       return false;
     }
 
-    if (!isset($data[$key])) {
+    if (!array_key_exists($key, $data)) {
       if ($add_empty) {
         $ret[$key] = null;
       }

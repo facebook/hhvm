@@ -73,6 +73,7 @@ final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
     ImmMap<Tk, Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable):
     ImmMap<Tk, Pair<Tv, Tu>>;
+  public function concat(Traversable<Tv> $iterable): ImmVector<Tv>;
 
   /**
    * Returns true if the ImmMap is empty, false otherwise.

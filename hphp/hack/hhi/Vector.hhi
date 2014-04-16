@@ -79,6 +79,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
   public function filterWithKey((function(int, Tv): bool) $callback):
     Vector<Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable): Vector<Pair<Tv, Tu>>;
+  public function concat(Traversable<Tv> $iterable): Vector<Tv>;
 
   /**
    * Returns true if the Vector is empty, false otherwise.

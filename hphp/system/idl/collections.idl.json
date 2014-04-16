@@ -563,6 +563,21 @@
                     ]
                 },
                 {
+                    "name": "concat",
+                    "flags": [
+                    ],
+                    "desc": "Builds a new Vector by concatenating the elements of this Vector with the elements of the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "reverse",
                     "flags": [
                     ],
@@ -978,6 +993,21 @@
                   "args": [
                       {
                           "name": "fn",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "concat",
+                  "flags": [
+                  ],
+                  "desc": "Builds a new ImmVector by concatenating the elements of this ImmVector with the elements of the specified Iterable.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "iterable",
                           "type": "Variant"
                       }
                   ]
@@ -1852,6 +1882,21 @@
                     ]
                 },
                 {
+                    "name": "concat",
+                    "flags": [
+                    ],
+                    "desc": "Builds a new Vector by concatenating the values of this Map with the elements of the specified Iterable. Note that this ignores the keys of this Map and the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "__toString",
                     "return": {
                         "type": "String"
@@ -2377,6 +2422,21 @@
                     "args": [
                         {
                             "name": "fn",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "concat",
+                    "flags": [
+                    ],
+                    "desc": "Builds a new ImmVector by concatenating the values of this ImmMap with the elements of the specified Iterable. Note that this ignores the keys of this ImmMap and the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
                             "type": "Variant"
                         }
                     ]
@@ -2910,6 +2970,21 @@
                     ]
                 },
                 {
+                    "name": "concat",
+                    "flags": [
+                    ],
+                    "desc": "Builds a new Vector by concatenating the elements of this Set with the elements of the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "removeAll",
                     "flags": [
                     ],
@@ -3354,6 +3429,21 @@
                     "args": [
                         {
                             "name": "fn",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "concat",
+                    "flags": [
+                    ],
+                    "desc": "Builds a new ImmVector by concatenating the elements of this ImmSet with the elements of the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
                             "type": "Variant"
                         }
                     ]
@@ -3881,6 +3971,21 @@
                     "args": [
                         {
                             "name": "fn",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "concat",
+                    "flags": [
+                    ],
+                    "desc": "Builds a new ImmVector by concatenating the elements of this Pair with the elements of the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
                             "type": "Variant"
                         }
                     ]

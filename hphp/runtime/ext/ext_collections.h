@@ -124,6 +124,11 @@ class BaseVector : public ExtCollectionObjectData {
     std::is_base_of<BaseVector, TVector>::value, Object>::type
   php_skipWhile(const Variant& fn);
 
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_concat(const Variant& iterable);
+
   void zip(BaseVector* bvec, const Variant& iterable);
   void keys(BaseVector* bvec);
 
@@ -290,6 +295,8 @@ class BaseVector : public ExtCollectionObjectData {
   // Friends
 
   friend class c_VectorIterator;
+  friend class BaseMap;
+  friend class BaseSet;
   friend class c_Pair;
 
   template<class TVector>
@@ -351,6 +358,7 @@ class c_Vector : public BaseVector {
   Object t_takewhile(const Variant& fn);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_concat(const Variant& iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(const Variant& iterable);
   static Object ti_fromarray(const Variant& arr); // deprecated
@@ -468,6 +476,7 @@ public:
   Object t_takewhile(const Variant& fn);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_concat(const Variant& iterable);
   Object t_keys();
 
   // Others
@@ -937,6 +946,11 @@ class BaseMap : public ExtCollectionObjectData {
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_skipWhile(const Variant& fn);
 
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_concat(const Variant& iterable);
+
   template<class TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
@@ -998,6 +1012,7 @@ class c_Map : public BaseMap {
   Object t_takewhile(const Variant& callback);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_concat(const Variant& iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(const Variant& iterable);
   static Object ti_fromarray(const Variant& arr); // deprecated
@@ -1045,6 +1060,7 @@ class c_ImmMap : public BaseMap {
   Object t_takewhile(const Variant& callback);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_concat(const Variant& iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(const Variant& iterable);
   Object t_immutable();
@@ -1440,6 +1456,11 @@ protected:
     std::is_base_of<BaseSet, TSet>::value, Object>::type
   php_skipWhile(const Variant& fn);
 
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_concat(const Variant& iterable);
+
   template<class TSet>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
@@ -1526,6 +1547,7 @@ class c_Set : public BaseSet {
   Object t_takewhile(const Variant& callback);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_concat(const Variant& iterable);
   Object t_removeall(const Variant& iterable);
   Object t_difference(const Variant& iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
@@ -1571,6 +1593,7 @@ class c_ImmSet : public BaseSet {
   Object t_takewhile(const Variant& callback);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_concat(const Variant& iterable);
 
   // Materialization methods.
   Array t_toarray();
@@ -1662,6 +1685,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_takewhile(const Variant& callback);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_concat(const Variant& iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
   Object t_immutable();
 

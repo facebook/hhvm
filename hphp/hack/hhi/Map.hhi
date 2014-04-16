@@ -85,6 +85,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public function filterWithKey((function(Tk, Tv): bool) $callback):
     Map<Tk, Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable): Map<Tk, Pair<Tv, Tu>>;
+  public function concat(Traversable<Tv> $iterable): Vector<Tv>;
 
   /**
    * Returns true if the Map is empty, false otherwise.

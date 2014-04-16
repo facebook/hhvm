@@ -144,4 +144,5 @@ final class ImmVector<Tv> implements ConstVector<Tv> {
     ImmVector<Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable):
     ImmVector<Pair<Tv, Tu>>;
+  public function concat(Traversable<Tv> $iterable): ImmVector<Tv>;
 }

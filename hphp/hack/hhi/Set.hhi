@@ -70,6 +70,7 @@ final class Set<Tv> implements MutableSet<Tv> {
   public function map<Tu>((function(Tv): Tu) $callback): Set<Tu>;
   public function filter((function(Tv): bool) $callback): Set<Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable): Set<Pair<Tv, Tu>>;
+  public function concat(Traversable<Tv> $iterable): Vector<Tv>;
 
   /**
    * Returns true if the Set is empty, false otherwise.

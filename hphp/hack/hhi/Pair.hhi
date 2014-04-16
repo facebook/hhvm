@@ -64,15 +64,17 @@ final class Pair<Tv1, Tv2> implements ConstVector<mixed> {
   public function toSet(): Set<mixed>;
   public function toImmSet(): ImmSet<mixed>;
   public function lazy(): KeyedIterable<int, mixed>;
-  public function values(): Vector<mixed>;
-  public function keys(): Vector<int>;
-  public function map<Tu>((function(mixed): Tu) $callback): Vector<Tu>;
+  public function values(): ImmVector<mixed>;
+  public function keys(): ImmVector<int>;
+  public function map<Tu>((function(mixed): Tu) $callback): ImmVector<Tu>;
   public function mapWithKey<Tu>((function(int, mixed): Tu) $callback):
-    Vector<Tu>;
-  public function filter((function(mixed): bool) $callback): Vector<mixed>;
+    ImmVector<Tu>;
+  public function filter((function(mixed): bool) $callback): ImmVector<mixed>;
   public function filterWithKey((function(int, mixed): bool) $callback):
-    Vector<mixed>;
-  public function zip<Tu>(Traversable<Tu> $iterable): Vector<Pair<mixed, Tu>>;
+    ImmVector<mixed>;
+  public function zip<Tu>(Traversable<Tu> $iterable):
+    ImmVector<Pair<mixed, Tu>>;
+  public function concat(Traversable<Tv> $iterable): ImmVector<Tv>;
 
   /**
    * Returns true if the Pair is empty, false otherwise.

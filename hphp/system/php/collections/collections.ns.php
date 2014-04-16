@@ -183,6 +183,16 @@ trait StrictIterable {
     }
     return $res;
   }
+  public function concat($iterable) {
+    $res = Vector {};
+    foreach ($this as $v) {
+      $res[] = $v;
+    }
+    foreach ($iterable as $v) {
+      $res[] = $v;
+    }
+    return $res;
+  }
 }
 
 trait StrictKeyedIterable {
@@ -313,10 +323,13 @@ trait StrictKeyedIterable {
     }
     return $res;
   }
-  public function kvzip() {
+  public function concat($iterable) {
     $res = Vector {};
-    foreach ($this as $k => $v) {
-      $res[] = Pair {$k, $v};
+    foreach ($this as $v) {
+      $res[] = $v;
+    }
+    foreach ($iterable as $v) {
+      $res[] = $v;
     }
     return $res;
   }
@@ -358,6 +371,9 @@ trait LazyIterable {
     return new LazyFilterIterable($this, $callback);
   }
   public function zip($iterable) {
+    if (is_array($iterable)) {
+      $iterable = new ImmMap($iterable);
+    }
     return new LazyZipIterable($this, $iterable);
   }
   public function take($n) {
@@ -371,6 +387,12 @@ trait LazyIterable {
   }
   public function skipWhile($fn) {
     return new LazySkipWhileIterable($this, $fn);
+  }
+  public function concat($iterable) {
+    if (is_array($iterable)) {
+      $iterable = new ImmMap($iterable);
+    }
+    return new LazyConcatIterable($this, $iterable);
   }
 }
 
@@ -433,6 +455,9 @@ trait LazyKeyedIterable {
     return new LazyFilterWithKeyIterable($this, $callback);
   }
   public function zip($iterable) {
+    if (is_array($iterable)) {
+      $iterable = new ImmMap($iterable);
+    }
     return new LazyZipKeyedIterable($this, $iterable);
   }
   public function take($n) {
@@ -450,8 +475,11 @@ trait LazyKeyedIterable {
   public function keys() {
     return new LazyKeysIterable($this);
   }
-  public function kvzip() {
-    return new LazyKVZipIterable($this);
+  public function concat($iterable) {
+    if (is_array($iterable)) {
+      $iterable = new ImmMap($iterable);
+    }
+    return new LazyConcatIterable($this, $iterable);
   }
 }
 
@@ -1358,6 +1386,71 @@ class LazyKVZipIterable implements \HH\Iterable {
   }
 }
 
+class LazyConcatIterator implements \HH\Iterator {
+  private $it1;
+  private $it2;
+  private $currentIt;
+  private $state;
+
+  public function __construct($it1, $it2) {
+    $this->it1 = $it1;
+    $this->it2 = $it2;
+    $this->currentIt = $it1;
+    $this->state = 1;
+    if (!$this->currentIt->valid()) {
+      $this->currentIt = $this->it2;
+      $this->state = 2;
+    }
+  }
+  public function __clone() {
+    $this->it1 = clone $this->it1;
+    $this->it2 = clone $this->it2;
+    $this->currentIt = ($this->state === 1) ? $this->it1 : $this->it2;
+  }
+  public function rewind() {
+    $this->it1->rewind();
+    $this->it2->rewind();
+    $this->currentIt = $this->it1;
+    $this->state = 1;
+    if (!$this->currentIt->valid()) {
+      $this->currentIt = $this->it2;
+      $this->state = 2;
+    }
+  }
+  public function valid() {
+    return $this->currentIt->valid();
+  }
+  public function next() {
+    $this->currentIt->next();
+    if ($this->state === 1 && !$this->currentIt->valid()) {
+      $this->currentIt = $this->it2;
+      $this->state = 2;
+    }
+  }
+  public function key() {
+    return $this->currentIt->key();
+  }
+  public function current() {
+    return $this->currentIt->current();
+  }
+}
+
+class LazyConcatIterable implements \HH\Iterable {
+  use LazyIterable;
+
+  private $iterable1;
+  private $iterable2;
+
+  public function __construct($iterable1, $iterable2) {
+    $this->iterable1 = $iterable1;
+    $this->iterable2 = $iterable2;
+  }
+  public function getIterator() {
+    return new LazyConcatIterator($this->iterable1->getIterator(),
+                                  $this->iterable2->getIterator());
+  }
+}
+
 class LazyIterableView implements \HH\Iterable {
   public $iterable;
 
@@ -1398,6 +1491,9 @@ class LazyIterableView implements \HH\Iterable {
     return new LazyFilterIterable($this->iterable, $callback);
   }
   public function zip($iterable) {
+    if (is_array($iterable)) {
+      $iterable = new ImmMap($iterable);
+    }
     return new LazyZipIterable($this->iterable, $iterable);
   }
   public function take($n) {
@@ -1411,6 +1507,12 @@ class LazyIterableView implements \HH\Iterable {
   }
   public function skipWhile($fn) {
     return new LazySkipWhileIterable($this->iterable, $fn);
+  }
+  public function concat($iterable) {
+    if (is_array($iterable)) {
+      $iterable = new ImmMap($iterable);
+    }
+    return new LazyConcatIterable($this->iterable, $iterable);
   }
 }
 
@@ -1474,6 +1576,9 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
     return new LazyFilterWithKeyIterable($this->iterable, $callback);
   }
   public function zip($iterable) {
+    if (is_array($iterable)) {
+      $iterable = new ImmMap($iterable);
+    }
     return new LazyZipKeyedIterable($this->iterable, $iterable);
   }
   public function take($n) {
@@ -1494,8 +1599,11 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
   public function keys() {
     return new LazyKeysIterable($this->iterable);
   }
-  public function kvzip() {
-    return new LazyKVZipIterable($this->iterable);
+  public function concat($iterable) {
+    if (is_array($iterable)) {
+      $iterable = new ImmMap($iterable);
+    }
+    return new LazyConcatIterable($this->iterable, $iterable);
   }
 }
 

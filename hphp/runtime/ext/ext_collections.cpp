@@ -1016,6 +1016,36 @@ Object c_ImmVector::t_skipwhile(const Variant& fn) {
   return BaseVector::php_skipWhile<c_ImmVector, false>(fn);
 }
 
+Object c_Vector::t_concat(const Variant& iterable) {
+  return BaseVector::php_concat<c_Vector>(iterable);
+}
+
+Object c_ImmVector::t_concat(const Variant& iterable) {
+  return BaseVector::php_concat<c_ImmVector>(iterable);
+}
+
+template<class TVector>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_concat(const Variant& iterable) {
+  size_t itSize;
+  ArrayIter iter = getArrayIterHelper(iterable, itSize);
+  auto* vec = NEWOBJ(TVector)();
+  Object obj = vec;
+  uint sz = m_size;
+  vec->reserve((size_t)sz + itSize);
+  vec->m_size = sz;
+  for (uint i = 0; i < sz; ++i) {
+    cellDup(m_data[i], vec->m_data[i]);
+  }
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = v.asCell();
+    vec->add(tv);
+  }
+  return obj;
+}
+
 Object c_Vector::t_set(const Variant& key, const Variant& value) {
   if (key.isInteger()) {
     TypedValue* tv = cvarToCell(&value);
@@ -2289,6 +2319,42 @@ Object c_Map::t_skipwhile(const Variant& fn) {
 
 Object c_ImmMap::t_skipwhile(const Variant& fn) {
   return BaseMap::php_skipWhile<c_ImmMap, false>(fn);
+}
+
+Object c_Map::t_concat(const Variant& iterable) {
+  return BaseMap::php_concat<c_Vector>(iterable);
+}
+
+Object c_ImmMap::t_concat(const Variant& iterable) {
+  return BaseMap::php_concat<c_ImmVector>(iterable);
+}
+
+template<class TVector>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseMap::php_concat(const Variant& iterable) {
+  size_t itSize;
+  ArrayIter iter = getArrayIterHelper(iterable, itSize);
+  auto* vec = NEWOBJ(TVector)();
+  Object obj = vec;
+  uint sz = m_size;
+  vec->reserve((size_t)sz + itSize);
+  vec->m_size = sz;
+
+  uint32_t used = iterLimit();
+  for (uint32_t i = 0, j = 0; i < used; ++i) {
+    if (isTombstone(i)) {
+      continue;
+    }
+    cellDup(data()[i].data, vec->m_data[j]);
+    ++j;
+  }
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = v.asCell();
+    vec->add(tv);
+  }
+  return obj;
 }
 
 template<typename TMap>
@@ -4532,6 +4598,42 @@ Object c_ImmSet::t_skipwhile(const Variant& fn) {
   return BaseSet::php_skipWhile<c_ImmSet, false>(fn);
 }
 
+Object c_Set::t_concat(const Variant& iterable) {
+  return BaseSet::php_concat<c_Vector>(iterable);
+}
+
+Object c_ImmSet::t_concat(const Variant& iterable) {
+  return BaseSet::php_concat<c_ImmVector>(iterable);
+}
+
+template<class TVector>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseSet::php_concat(const Variant& iterable) {
+  size_t itSize;
+  ArrayIter iter = getArrayIterHelper(iterable, itSize);
+  auto* vec = NEWOBJ(TVector)();
+  Object obj = vec;
+  uint sz = m_size;
+  vec->reserve((size_t)sz + itSize);
+  vec->m_size = sz;
+
+  uint32_t used = iterLimit();
+  for (uint32_t i = 0, j = 0; i < used; ++i) {
+    if (isTombstone(i)) {
+      continue;
+    }
+    cellDup(data()[i].data, vec->m_data[j]);
+    ++j;
+  }
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = v.asCell();
+    vec->add(tv);
+  }
+  return obj;
+}
+
 Object c_Set::t_removeall(const Variant& iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
@@ -5032,6 +5134,25 @@ Object c_Pair::t_skipwhile(const Variant& fn) {
   }
   for (; i < 2; ++i) {
     vec->add(&getElms()[i]);
+  }
+  return obj;
+}
+
+Object c_Pair::t_concat(const Variant& iterable) {
+  size_t itSize;
+  ArrayIter iter = getArrayIterHelper(iterable, itSize);
+  auto* vec = NEWOBJ(c_ImmVector)();
+  Object obj = vec;
+  vec->reserve((size_t)2 + itSize);
+  vec->m_size = 2;
+
+  for (uint32_t i = 0; i < 2; ++i) {
+    cellDup(getElms()[i], vec->m_data[i]);
+  }
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = v.asCell();
+    vec->add(tv);
   }
   return obj;
 }

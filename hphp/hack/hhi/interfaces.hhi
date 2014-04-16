@@ -49,6 +49,7 @@ interface Iterable<Tv> extends IteratorAggregate<Tv> {
   public function map<Tu>((function(Tv): Tu) $callback): Iterable<Tu>;
   public function filter((function(Tv): bool) $callback): Iterable<Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable): Iterable<Pair<Tv, Tu>>;
+  public function concat(Traversable<Tv> $iterable): Iterable<Tv>;
 }
 
 interface KeyedIterable<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {
@@ -156,6 +157,7 @@ interface ConstVector<Tv> extends ConstCollection<Tv>,
   public function filterWithKey((function(int, Tv): bool) $callback):
     ConstVector<Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable): ConstVector<Pair<Tv, Tu>>;
+  public function concat(Traversable<Tv> $iterable): ConstVector<Tv>;
 }
 
 interface MutableVector<Tv> extends ConstVector<Tv>,
@@ -171,6 +173,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
     MutableVector<Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable):
     MutableVector<Pair<Tv, Tu>>;
+  public function concat(Traversable<Tv> $iterable): MutableVector<Tv>;
 }
 
 interface ConstMap<Tk, Tv> extends ConstCollection<Pair<Tk, Tv>>,
@@ -187,6 +190,7 @@ interface ConstMap<Tk, Tv> extends ConstCollection<Pair<Tk, Tv>>,
     ConstMap<Tk, Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable):
     ConstMap<Tk, Pair<Tv, Tu>>;
+  public function concat(Traversable<Tv> $iterable): ConstVector<Tv>;
 }
 
 interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
@@ -202,6 +206,7 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
     MutableMap<Tk, Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable):
     MutableMap<Tk, Pair<Tv, Tu>>;
+  public function concat(Traversable<Tv> $iterable): MutableVector<Tv>;
 }
 
 interface ConstSet<Tv> extends ConstCollection<Tv>,
@@ -211,6 +216,7 @@ interface ConstSet<Tv> extends ConstCollection<Tv>,
   public function map<Tu>((function(Tv): Tu) $callback): ConstSet<Tu>;
   public function filter((function(Tv): bool) $callback): ConstSet<Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable): ConstSet<Pair<Tv, Tu>>;
+  public function concat(Traversable<Tv> $iterable): ConstVector<Tv>;
 }
 
 interface MutableSet<Tv> extends ConstSet<Tv>,
@@ -220,6 +226,7 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
   public function map<Tu>((function(Tv): Tu) $callback): MutableSet<Tu>;
   public function filter((function(Tv): bool) $callback): MutableSet<Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable): MutableSet<Pair<Tv, Tu>>;
+  public function concat(Traversable<Tv> $iterable): MutableVector<Tv>;
 }
 
 /**

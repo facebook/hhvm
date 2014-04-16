@@ -4620,7 +4620,7 @@ TransRec::print(uint64_t profCount) const {
            "  src.md5 = {}\n"
            "  src.funcId = {}\n"
            "  src.startOffset = {}\n"
-           "  src.stopOffset = {}\n",
+           "  src.stopOffset = {}\n"
            "  src.resumed = {}\n",
            id, md5, src.getFuncId(), src.offset(), bcStopOffset,
            (int32_t)src.resumed()).str();

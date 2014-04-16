@@ -894,7 +894,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
         m_ret.decRefs[m_ids.before(m_inst)] = valState.realCount;
       }
     } else if (m_inst->is(SpillFrame)) {
-      auto* this_ = m_inst->src(3);
+      auto* this_ = m_inst->src(2);
       if (this_->isA(Type::Obj)) {
         m_state.frames.pushPreLive(Frame(canonical(this_), this_));
         // When spilling an Object to a pre-live ActRec, we can reliably track
@@ -974,7 +974,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
                              Call, CallArray, ContEnter)) {
         // If the StkPtr being consumed points to a pre-live ActRec, observe
         // its $this pointer since many of our helper functions decref it.
-        auto* this_ = src->inst()->src(3);
+        auto* this_ = src->inst()->src(2);
         if (this_->isA(Type::Obj)) {
           auto const sinkPoint = SinkPoint(m_ids.before(m_inst), this_, false);
           this_ = canonical(this_);

@@ -410,8 +410,8 @@ SSATmp* IRBuilder::preOptimizeLdThis(IRInstruction* inst) {
         auto spInst = findSpillFrame(fpInst->src(0));
         // In an inlined call, we should always be able to find our SpillFrame.
         always_assert(spInst && spInst->src(0) == fpInst->src(1));
-        if (spInst->src(3)->isA(Type::Obj)) {
-          return spInst->src(3);
+        if (spInst->src(2)->isA(Type::Obj)) {
+          return spInst->src(2);
         }
       }
     }

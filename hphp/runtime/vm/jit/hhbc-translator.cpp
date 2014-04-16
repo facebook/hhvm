@@ -2352,7 +2352,6 @@ void HhbcTranslator::emitFPushActRec(SSATmp* func,
     // Using actualStack instead of returnSp so SpillFrame still gets
     // the src in rVmSp.  (TODO(#2288359).)
     actualStack,
-    m_irb->fp(),
     func,
     objOrClass
   );
@@ -2955,34 +2954,35 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
                                Offset returnBcOffset,
                                const Func* callee,
                                bool destroyLocals) {
-  SSATmp* params[numParams + 3];
+  SSATmp* params[numParams + 4];
   std::memset(params, 0, sizeof params);
   for (uint32_t i = 0; i < numParams; i++) {
     // DataTypeGeneric is used because the Call instruction just spills the
     // values to the stack unmodified.
-    params[numParams + 3 - i - 1] = popF(DataTypeGeneric);
+    params[numParams + 4 - i - 1] = popF(DataTypeGeneric);
   }
 
   params[0] = spillStack();
-  params[1] = cns(returnBcOffset);
-  params[2] = callee ? cns(callee) : cns(Type::InitNull);
+  params[1] = m_irb->fp();
+  params[2] = cns(returnBcOffset);
+  params[3] = callee ? cns(callee) : cns(Type::InitNull);
 
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     for (uint32_t i = 0; i < numParams; i++) {
       if (callee != nullptr &&
-          params[numParams + 3 - i - 1]) {
+          params[numParams + 4 - i - 1]) {
         gen(TypeProfileFunc, TypeProfileData(i),
-            params[numParams + 3 - i - 1], cns(callee));
+            params[numParams + 4 - i - 1], cns(callee));
       } else  {
         SSATmp* func = gen(LdARFuncPtr, m_irb->sp(), cns(0));
         gen(TypeProfileFunc, TypeProfileData(i),
-            params[numParams + 3 - i - 1], func);
+            params[numParams + 4 - i - 1], func);
       }
     }
   }
 
   SSATmp** decayedPtr = params;
-  gen(Call, CallData(destroyLocals), std::make_pair(numParams + 3, decayedPtr));
+  gen(Call, CallData(destroyLocals), std::make_pair(numParams + 4, decayedPtr));
   if (!m_fpiStack.empty()) {
     m_fpiStack.pop();
   }

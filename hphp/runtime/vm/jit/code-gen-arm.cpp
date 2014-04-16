@@ -1544,19 +1544,15 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
-  auto const func     = inst->src(2);
-  auto const objOrCls = inst->src(3);
+  auto const func     = inst->src(1);
+  auto const objOrCls = inst->src(2);
   auto const invName  = inst->extra<SpillFrame>()->invName;
   auto const nArgs    = inst->extra<SpillFrame>()->numArgs;
 
   auto spReg = x2a(srcLoc(0).reg());
-  auto fpReg = x2a(srcLoc(1).reg());
-  auto funcLoc = srcLoc(2);
-  auto objClsReg = x2a(srcLoc(3).reg());
+  auto funcLoc = srcLoc(1);
+  auto objClsReg = x2a(srcLoc(2).reg());
   auto spOff = -kNumActRecCells * sizeof(Cell);
-
-  // Saved rbp.
-  m_as.    Str  (fpReg, spReg[spOff + AROFF(m_savedRbp)]);
 
   // Num args. Careful here: nArgs is 32 bits and the high bit may be set. Mov's
   // immediate argument is intptr_t, and the implicit int32->intptr conversion
@@ -1696,16 +1692,18 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
 void CodeGenerator::cgCall(IRInstruction* inst) {
   auto spReg = x2a(srcLoc(0).reg());
-  auto* returnBcOffset = inst->src(1);
-  auto* func = inst->src(2);
-  SrcRange args = inst->srcs().subpiece(3);
+  auto fpReg = x2a(srcLoc(1).reg());
+  auto* returnBcOffset = inst->src(2);
+  auto* func = inst->src(3);
+  SrcRange args = inst->srcs().subpiece(4);
   int32_t numArgs = args.size();
 
   int64_t adjustment = cellsToBytes((int64_t)-numArgs);
   for (int32_t i = 0; i < numArgs; ++i) {
-    emitStore(spReg, cellsToBytes(-(i + 1)), args[i], srcLoc(i + 3));
+    emitStore(spReg, cellsToBytes(-(i + 1)), args[i], srcLoc(i + 4));
   }
 
+  m_as.  Str  (fpReg, spReg[AROFF(m_savedRbp)]);
   m_as.  Mov  (rAsm.W(), returnBcOffset->intVal());
   m_as.  Str  (rAsm.W(), spReg[AROFF(m_soff)]);
   emitRegGetsRegPlusImm(m_as, spReg, spReg, adjustment);

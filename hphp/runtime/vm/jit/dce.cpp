@@ -244,7 +244,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
           state[outerFrame].incWeakUse();
 
           auto DEBUG_ONLY spillFrame = findSpillFrame(inst->src(0));
-          assert(spillFrame->src(1) == outerFrame->dst());
+          assert(spillFrame);
           ITRACE(4, "{} weak use of {}\n", *spillFrame, *outerFrame->dst());
           state[outerFrame].incWeakUse();
         }
@@ -415,15 +415,12 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
          * so that they reflect the frame that they logically fall inside of.
          */
         case Call: {
-          auto const arInst = findSpillFrame(inst.src(0));
-          if (arInst && arInst->is(SpillFrame)) {
-            if (auto fpInst = findPassFP(arInst->src(1)->inst())) {
-              not_reached(); // TODO t3203284
-              assert(retFixupMap.count(fpInst->dst()));
-              ITRACE(4, "{} repairing\n", inst);
-              Offset retBCOff = retFixupMap[fpInst->dst()];
-              inst.setSrc(1, unit.cns(retBCOff));
-            }
+          if (auto fpInst = findPassFP(inst.src(1)->inst())) {
+            not_reached(); // TODO t3203284
+            assert(retFixupMap.count(fpInst->dst()));
+            ITRACE(4, "{} repairing\n", inst);
+            Offset retBCOff = retFixupMap[fpInst->dst()];
+            inst.setSrc(2, unit.cns(retBCOff));
           }
           break;
         }

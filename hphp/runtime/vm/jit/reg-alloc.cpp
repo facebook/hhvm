@@ -144,7 +144,7 @@ bool mustUseConst(const IRInstruction& inst, int i) {
   // handle special cases we can't derive from IR_OPCODES macro
   switch (inst.op()) {
   case LdAddr: return check(i == 1); // offset
-  case Call: return check(i == 1); // returnBcOffset
+  case Call: return check(i == 2); // returnBcOffset
   case CallBuiltin: return check(i == 0); // f
   default: break;
   }
@@ -263,9 +263,9 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     if (i >= 2) return okStore(cint);
     break;
   case SpillFrame:
-    if (i == 2) return true; // func
-    if (i == 3 && type <= Type::Cls) return true; // objOrCls is Cls
-    if (i == 3 && type <= Type::InitNull) return true; // objOrCls is null
+    if (i == 1) return true; // func
+    if (i == 2 && type <= Type::Cls) return true; // objOrCls is Cls
+    if (i == 2 && type <= Type::InitNull) return true; // objOrCls is null
     break;
   case StRetVal:
     if (i == 1) return okStore(cint); // value->cgStore
@@ -292,8 +292,8 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     if (i == 1) return okStore(cint);
     break;
   case Call:
-    if (i == 2) return true; // func
-    if (i >= 3) return okStore(cint);
+    if (i == 3) return true; // func
+    if (i >= 4) return okStore(cint);
     break;
   case CallBuiltin:
     if (i >= 2) return true; // args -> ArgGroup.ssa()
@@ -488,7 +488,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
       return srcIdx >= 2 && srcIdx < inst.numSrcs();
 
     case Call:
-      return srcIdx >= 3 && srcIdx < inst.numSrcs();
+      return srcIdx >= 4 && srcIdx < inst.numSrcs();
 
     case CallBuiltin:
       return srcIdx >= 1 && srcIdx < inst.numSrcs();

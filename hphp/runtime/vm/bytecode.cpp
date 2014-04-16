@@ -122,6 +122,17 @@ using JIT::VMRegState;
 #endif
 TRACE_SET_MOD(bcinterp);
 
+// Identifies the set of return helpers that we may set m_savedRip to in an
+// ActRec.
+static bool isReturnHelper(void* address) {
+  auto tcAddr = reinterpret_cast<JIT::TCA>(address);
+  auto& u = tx->uniqueStubs;
+  return tcAddr == u.retHelper ||
+         tcAddr == u.genRetHelper ||
+         tcAddr == u.retInlHelper ||
+         tcAddr == u.callToExit;
+}
+
 ActRec* ActRec::arGetSfp() const {
   ActRec* prevFrame = (ActRec*)m_savedRbp;
   if (LIKELY(((uintptr_t)prevFrame - s_stackLimit) >= s_stackSize)) {
@@ -129,6 +140,21 @@ ActRec* ActRec::arGetSfp() const {
   }
 
   return const_cast<ActRec*>(this);
+}
+
+void ActRec::setReturn(ActRec* fp, PC pc, void* retAddr) {
+  assert(fp->func()->contains(pc));
+  assert(isReturnHelper(retAddr));
+  m_savedRbp = reinterpret_cast<uintptr_t>(fp);
+  m_savedRip = reinterpret_cast<uintptr_t>(retAddr);
+  m_soff = Offset(pc - fp->func()->getEntry());
+}
+
+void ActRec::setReturnVMExit() {
+  assert(isReturnHelper(tx->uniqueStubs.callToExit));
+  m_savedRbp = 0;
+  m_savedRip = reinterpret_cast<uintptr_t>(tx->uniqueStubs.callToExit);
+  m_soff = 0;
 }
 
 bool
@@ -1743,8 +1769,7 @@ void ExecutionContext::enterVM(ActRec* ar, StackArgsState stk,
   SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
 
   m_firstAR = ar;
-  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx->uniqueStubs.callToExit);
-  assert(isReturnHelper(ar->m_savedRip));
+  assert(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
 
   /*
    * When an exception is propagating, each nesting of the VM is
@@ -1869,8 +1894,7 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
   }
 
   ActRec* ar = m_stack.allocA();
-  ar->m_soff = 0;
-  ar->m_savedRbp = 0;
+  ar->setReturnVMExit();
   ar->m_func = f;
   if (this_) {
     ar->setThis(this_);
@@ -1958,8 +1982,7 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
   }
 
   ActRec* ar = m_stack.allocA();
-  ar->m_soff = 0;
-  ar->m_savedRbp = 0;
+  ar->setReturnVMExit();
   ar->m_func = f;
   ar->m_this = (ObjectData*)thisOrCls;
   ar->initNumArgs(argc);
@@ -2006,9 +2029,8 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
   SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
   auto fp = resumable->actRec();
+  fp->setReturnVMExit();
   checkStack(m_stack, fp->func());
-  fp->m_soff = 0;
-  fp->m_savedRbp = 0;
 
   Cell* savedSP = m_stack.top();
   cellDup(awaitResult, *m_stack.allocC());
@@ -2032,9 +2054,8 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
   auto fp = resumable->actRec();
+  fp->setReturnVMExit();
   checkStack(m_stack, fp->func());
-  fp->m_soff = 0;
-  fp->m_savedRbp = 0;
 
   // decref after we hold reference to the exception
   Object e(exception);
@@ -2575,11 +2596,7 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   ar->initNumArgs(0);
   assert(getFP());
   assert(!m_fp->hasInvName());
-  arSetSfp(ar, m_fp);
-  ar->m_soff = uintptr_t(
-    m_fp->m_func->unit()->offsetOf(pc) - m_fp->m_func->base());
-  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx->uniqueStubs.retHelper);
-  assert(isReturnHelper(ar->m_savedRip));
+  ar->setReturn(m_fp, pc, tx->uniqueStubs.retHelper);
   pushLocalsAndIterators(func);
   if (!m_fp->hasVarEnv()) {
     m_fp->setVarEnv(VarEnv::createLocal(m_fp));
@@ -2884,10 +2901,7 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   ar->m_func = s_debuggerDummy->getMain();
   ar->initNumArgs(0);
   ar->setThis(nullptr);
-  ar->m_soff = 0;
-  ar->m_savedRbp = 0;
-  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx->uniqueStubs.callToExit);
-  assert(isReturnHelper(ar->m_savedRip));
+  ar->setReturnVMExit();
   m_fp = ar;
   m_pc = s_debuggerDummy->entry();
   m_firstAR = ar;
@@ -2918,17 +2932,6 @@ void ExecutionContext::exitDebuggerDummyEnv() {
   m_pc = nullptr;
 }
 
-// Identifies the set of return helpers that we may set m_savedRip to in an
-// ActRec.
-bool ExecutionContext::isReturnHelper(uintptr_t address) {
-  auto tcAddr = reinterpret_cast<JIT::TCA>(address);
-  auto& u = tx->uniqueStubs;
-  return tcAddr == u.retHelper ||
-         tcAddr == u.genRetHelper ||
-         tcAddr == u.retInlHelper ||
-         tcAddr == u.callToExit;
-}
-
 // Walk the stack and find any return address to jitted code and bash it to
 // the appropriate RetFromInterpreted*Frame helper. This ensures that we don't
 // return into jitted code and gives the system the proper chance to interpret
@@ -2938,7 +2941,7 @@ void ExecutionContext::preventReturnsToTC() {
   if (RuntimeOption::EvalJit) {
     ActRec *ar = getFP();
     while (ar) {
-      if (!isReturnHelper(ar->m_savedRip) &&
+      if (!isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)) &&
           (mcg->isValidCodeAddress((JIT::TCA)ar->m_savedRip))) {
         TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
                  "func %s\n", ar, ar->m_savedRip,
@@ -2950,7 +2953,7 @@ void ExecutionContext::preventReturnsToTC() {
           ar->m_savedRip =
             reinterpret_cast<uintptr_t>(tx->uniqueStubs.retHelper);
         }
-        assert(isReturnHelper(ar->m_savedRip));
+        assert(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
       }
       ar = getPrevVMState(ar);
     }
@@ -5640,7 +5643,6 @@ OPTBLD_INLINE ActRec* ExecutionContext::fPushFuncImpl(
     int numArgs) {
   DEBUGGER_IF(phpBreakpointEnabled(func->name()->data()));
   ActRec* ar = m_stack.allocA();
-  arSetSfp(ar, m_fp);
   ar->m_func = func;
   ar->initNumArgs(numArgs);
   ar->setVarEnv(nullptr);
@@ -5774,7 +5776,6 @@ void ExecutionContext::fPushObjMethodImpl(
                                      arGetContextClass(getFP()), true);
   assert(f);
   ActRec* ar = m_stack.allocA();
-  arSetSfp(ar, m_fp);
   ar->m_func = f;
   if (res == LookupResult::MethodFoundNoThis) {
     decRefObj(obj);
@@ -5859,7 +5860,6 @@ void ExecutionContext::pushClsMethodImpl(Class* cls,
   }
   assert(f);
   ActRec* ar = m_stack.allocA();
-  arSetSfp(ar, m_fp);
   ar->m_func = f;
   if (obj) {
     ar->setThis(obj);
@@ -5959,11 +5959,9 @@ OPTBLD_INLINE void ExecutionContext::iopFPushCtor(IOP_ARGS) {
   tv->m_data.pobj = this_;
   // Push new activation record.
   ActRec* ar = m_stack.allocA();
-  arSetSfp(ar, m_fp);
   ar->m_func = f;
   ar->setThis(this_);
   ar->initNumArgsFromFPushCtor(numArgs);
-  arSetSfp(ar, m_fp);
   ar->setVarEnv(nullptr);
 }
 
@@ -5990,7 +5988,6 @@ OPTBLD_INLINE void ExecutionContext::iopFPushCtorD(IOP_ARGS) {
   m_stack.pushObject(this_);
   // Push new activation record.
   ActRec* ar = m_stack.allocA();
-  arSetSfp(ar, m_fp);
   ar->m_func = f;
   ar->setThis(this_);
   ar->initNumArgsFromFPushCtor(numArgs);
@@ -6047,7 +6044,6 @@ OPTBLD_INLINE void ExecutionContext::iopFPushCufIter(IOP_ARGS) {
   auto n = it->cuf().name();
 
   ActRec* ar = m_stack.allocA();
-  arSetSfp(ar, m_fp);
   ar->m_func = f;
   ar->m_this = (ObjectData*)o;
   if (o && !(uintptr_t(o) & 1)) ar->m_this->incRefCount();
@@ -6088,7 +6084,6 @@ OPTBLD_INLINE void ExecutionContext::doFPushCuf(IOP_ARGS,
   }
 
   ActRec* ar = m_stack.allocA();
-  arSetSfp(ar, m_fp);
   ar->m_func = f;
   if (obj) {
     ar->setThis(obj);
@@ -6273,16 +6268,9 @@ void ExecutionContext::iopFPassM(IOP_ARGS) {
 }
 
 bool ExecutionContext::doFCall(ActRec* ar, PC& pc) {
-  assert(getOuterVMFrame(ar) == m_fp);
-  ar->m_savedRip =
-    reinterpret_cast<uintptr_t>(tx->uniqueStubs.retHelper);
-  assert(isReturnHelper(ar->m_savedRip));
   TRACE(3, "FCall: pc %p func %p base %d\n", m_pc,
         m_fp->m_func->unit()->entry(),
         int(m_fp->m_func->base()));
-  ar->m_soff = m_fp->m_func->unit()->offsetOf(pc)
-    - (uintptr_t)m_fp->m_func->base();
-  assert(pcOff(this) >= m_fp->m_func->base());
   prepareFuncEntry(ar, pc, StackArgsState::Untrimmed);
   SYNC();
   if (EventHook::FunctionEnter(ar, EventHook::NormalFunc)) return true;
@@ -6296,6 +6284,7 @@ OPTBLD_INLINE void ExecutionContext::iopFCall(IOP_ARGS) {
   DECODE_IVA(numArgs);
   assert(numArgs == ar->numArgs());
   checkStack(m_stack, ar->m_func);
+  ar->setReturn(m_fp, pc, tx->uniqueStubs.retHelper);
   doFCall(ar, pc);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     profileAllArguments(ar);
@@ -6316,6 +6305,7 @@ OPTBLD_INLINE void ExecutionContext::iopFCallD(IOP_ARGS) {
   }
   assert(numArgs == ar->numArgs());
   checkStack(m_stack, ar->m_func);
+  ar->setReturn(m_fp, pc, tx->uniqueStubs.retHelper);
   doFCall(ar, pc);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     profileAllArguments(ar);
@@ -6381,17 +6371,11 @@ bool ExecutionContext::doFCallArray(PC& pc) {
     SCOPE_EXIT { tvRefcountedDecRef(&args); };
     checkStack(m_stack, func);
 
-    assert(ar->m_savedRbp == (uint64_t)m_fp);
     assert(!ar->resumed());
-    ar->m_savedRip =
-      reinterpret_cast<uintptr_t>(tx->uniqueStubs.retHelper);
-    assert(isReturnHelper(ar->m_savedRip));
     TRACE(3, "FCallArray: pc %p func %p base %d\n", m_pc,
           m_fp->unit()->entry(),
           int(m_fp->m_func->base()));
-    ar->m_soff = m_fp->unit()->offsetOf(pc)
-      - (uintptr_t)m_fp->m_func->base();
-    assert(pcOff(this) > m_fp->m_func->base());
+    ar->setReturn(m_fp, pc, tx->uniqueStubs.retHelper);
 
     auto prepResult = prepareArrayArgs(ar, args, m_stack,
                                        /* ref param checks */ true, nullptr);
@@ -7113,13 +7097,7 @@ OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
   assert(m_fp->hasThis());
   c_Continuation* cont = this_continuation(m_fp);
   ActRec* contAR = cont->actRec();
-  arSetSfp(contAR, m_fp);
-
-  contAR->m_soff = m_fp->m_func->unit()->offsetOf(pc) -
-    (uintptr_t)m_fp->m_func->base();
-  contAR->m_savedRip =
-    reinterpret_cast<uintptr_t>(tx->uniqueStubs.genRetHelper);
-  assert(isReturnHelper(contAR->m_savedRip));
+  contAR->setReturn(m_fp, pc, tx->uniqueStubs.genRetHelper);
 
   m_fp = contAR;
 

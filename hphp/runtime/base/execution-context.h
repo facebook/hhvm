@@ -621,7 +621,6 @@ private:
   void shuffleMagicArgs(ActRec* ar);
   void shuffleExtraStackArgs(ActRec* ar);
   void recordCodeCoverage(PC pc);
-  bool isReturnHelper(uintptr_t address);
   void switchModeForDebugger();
   int m_coverPrevLine;
   Unit* m_coverPrevUnit;

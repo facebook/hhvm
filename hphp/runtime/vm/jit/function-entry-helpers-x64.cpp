@@ -63,16 +63,14 @@ TCA fcallHelper(ActRec* ar, void* sp) {
        * dv funclets. Dont run the prologue again.
        */
       VMRegAnchor _(ar);
-      uint64_t rip = ar->m_savedRip;
       if (g_context->doFCall(ar, g_context->m_pc)) {
-        ar->m_savedRip = rip;
         return tx->uniqueStubs.resumeHelperRet;
       }
       // We've been asked to skip the function body
       // (fb_intercept). frame, stack and pc have
       // already been fixed - flag that with a negative
       // return address.
-      return (TCA)-rip;
+      return (TCA)-ar->m_savedRip;
     }
     setupAfterPrologue(ar, sp);
     assert(ar == g_context->m_fp);

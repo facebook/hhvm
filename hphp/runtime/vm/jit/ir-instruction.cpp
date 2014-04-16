@@ -124,11 +124,11 @@ bool IRInstruction::consumesReference(int srcNo) const {
 
     case SpillFrame:
       // Consumes the $this/Class field of the ActRec
-      return srcNo == 3;
+      return srcNo == 2;
 
     case Call:
       // Inputs 3+ are arguments to the function
-      return srcNo >= 3;
+      return srcNo >= 4;
 
     case ColAddElemC:
       // value at index 2

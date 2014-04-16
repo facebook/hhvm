@@ -2722,12 +2722,14 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
  * anyway.
  */
 void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
-  auto const fp       = srcLoc(0).reg();
+  auto const calleeFP = srcLoc(0).reg();
+  auto const callerFP = srcLoc(2).reg();
   auto const fakeRet  = m_mcg->tx().uniqueStubs.retInlHelper;
   auto const retBCOff = inst->extra<DefInlineFP>()->retBCOff;
 
-  emitImmStoreq(m_as, intptr_t(fakeRet), fp[AROFF(m_savedRip)]);
-  m_as.    storel (retBCOff, fp[AROFF(m_soff)]);
+  m_as.    storeq (callerFP, calleeFP[AROFF(m_savedRbp)]);
+  emitImmStoreq(m_as, intptr_t(fakeRet), calleeFP[AROFF(m_savedRip)]);
+  m_as.    storel (retBCOff, calleeFP[AROFF(m_soff)]);
   cgMov(inst);
 }
 
@@ -3363,7 +3365,6 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
       m_as.orq (ActRec::kInvNameBit, m_rScratch);
     });
   m_as.storeq  (m_rScratch, spReg[spOffset + int(AROFF(m_invName))]);
-  m_as.storeq  (fpReg, spReg[spOffset + int(AROFF(m_savedRbp))]);
   m_as.storel  (safe_cast<int32_t>(nArgs),
                 spReg[spOffset + int(AROFF(m_numArgsAndGenCtorFlags))]);
 
@@ -3371,8 +3372,8 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
-  auto const func      = inst->src(2);
-  auto const objOrCls  = inst->src(3);
+  auto const func      = inst->src(1);
+  auto const objOrCls  = inst->src(2);
   auto const magicName = inst->extra<SpillFrame>()->invName;
   auto const nArgs     = inst->extra<SpillFrame>()->numArgs;
   auto& a              = m_as;
@@ -3387,18 +3388,18 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
       emitImmStoreq(a, uintptr_t(objOrCls->clsVal()) | 1,
                     spReg[spOffset + int(AROFF(m_this))]);
     } else {
-      Reg64 clsPtrReg = srcLoc(3/*objOrCls*/).reg();
+      Reg64 clsPtrReg = srcLoc(2/*objOrCls*/).reg();
       a.   movq   (clsPtrReg, m_rScratch);
       a.   orq    (1, m_rScratch);
       a.   storeq (m_rScratch, spReg[spOffset + int(AROFF(m_this))]);
     }
   } else if (objOrCls->isA(Type::Obj)) {
     // store this pointer
-    a.     storeq (srcLoc(3/*objOrCls*/).reg(),
+    a.     storeq (srcLoc(2/*objOrCls*/).reg(),
                    spReg[spOffset + int(AROFF(m_this))]);
   } else if (objOrCls->isA(Type::Ctx)) {
     // Stores either a this pointer or a Cctx -- statically unknown.
-    Reg64 objOrClsPtrReg = srcLoc(3/*objOrCls*/).reg();
+    Reg64 objOrClsPtrReg = srcLoc(2/*objOrCls*/).reg();
     a.     storeq (objOrClsPtrReg, spReg[spOffset + int(AROFF(m_this))]);
   } else {
     assert(objOrCls->isA(Type::InitNull));
@@ -3422,12 +3423,10 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     emitImmStoreq(a, intptr_t(f), spReg[spOffset + int(AROFF(m_func))]);
   } else {
     int offset_m_func = spOffset + int(AROFF(m_func));
-    auto funcLoc = srcLoc(2);
+    auto funcLoc = srcLoc(1);
     a.  storeq (funcLoc.reg(0), spReg[offset_m_func]);
   }
 
-  auto fpLoc = srcLoc(1);
-  a.    storeq (fpLoc.reg(), spReg[spOffset + int(AROFF(m_savedRbp))]);
   a.    storel (nArgs, spReg[spOffset + int(AROFF(m_numArgsAndGenCtorFlags))]);
 
   emitAdjustSp(spReg, dstLoc(0).reg(), spOffset);
@@ -3609,18 +3608,20 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
 
 void CodeGenerator::cgCall(IRInstruction* inst) {
   auto spReg = srcLoc(0).reg();
-  SSATmp* returnBcOffset = inst->src(1);
-  SSATmp* func           = inst->src(2);
-  SrcRange args          = inst->srcs().subpiece(3);
+  auto fpReg = srcLoc(1).reg();
+  SSATmp* returnBcOffset = inst->src(2);
+  SSATmp* func           = inst->src(3);
+  SrcRange args          = inst->srcs().subpiece(4);
   int numArgs            = args.size();
 
   // put all outgoing arguments onto the VM stack
   int adjustment = -numArgs * sizeof(Cell);
   for (int i = 0; i < numArgs; i++) {
-    cgStore(spReg[-(i + 1) * sizeof(Cell)], args[i], srcLoc(i+3), Width::Full);
+    cgStore(spReg[-(i + 1) * sizeof(Cell)], args[i], srcLoc(i+4), Width::Full);
   }
   // store the return bytecode offset into the outgoing actrec
   auto returnBc = safe_cast<int32_t>(returnBcOffset->intVal());
+  m_as.storeq(fpReg, spReg[AROFF(m_savedRbp)]);
   m_as.storel(returnBc, spReg[AROFF(m_soff)]);
   if (adjustment != 0) {
     m_as.addq(adjustment, spReg);
@@ -5393,8 +5394,8 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
   auto returnOff = safe_cast<int32_t>(inst->src(2)->intVal());
   auto curFp = srcLoc(3).reg();
 
-  m_as.  storel (returnOff, contARReg[AROFF(m_soff)]);
   m_as.  storeq (curFp, contARReg[AROFF(m_savedRbp)]);
+  m_as.  storel (returnOff, contARReg[AROFF(m_soff)]);
   m_as.  movq   (contARReg, rStashedAR);
   m_as.  call   (addrReg);
 }

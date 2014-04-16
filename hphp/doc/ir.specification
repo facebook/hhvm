@@ -1144,16 +1144,14 @@ D:Obj = Clone S0:Obj
 
 
 D:StkPtr = SpillFrame<numArgs,invName> S0:StkPtr
-                                       S1:FramePtr
-                                       S2:{Func|InitNull}
-                                       S3:{Ctx|Class|InitNull}
+                                       S1:{Func|InitNull}
+                                       S2:{Ctx|Class|InitNull}
 
   Operands:
 
      S0 - caller stack pointer
-     S1 - caller frame pointer
-     S2 - callee Func or null
-     S3 - object (for FPushObjMethod*), class (for FPushClsMethod*), or null
+     S1 - callee Func or null
+     S2 - object (for FPushObjMethod*), class (for FPushClsMethod*), or null
           (for FPushFunc*).
 
   Defines the fields for an activation record and writes them to the stack
@@ -1206,12 +1204,12 @@ D:StkPtr = CallArray S0:StkPtr
   arguments is pushed. CallArray pops the array off the stack, pushes the
   elements of the array as arguments, and invokes the function in the ActRec.
 
-D:StkPtr = Call S0:StkPtr S1:ConstInt S2:Func S3...
+D:StkPtr = Call S0:StkPtr S1:FramePtr S2:ConstInt S3:Func S4...
 
-  Invoke the function S2 with ActRec S0 and variadic arguments S3...
+  Invoke the function S3 with ActRec S0 and variadic arguments S4...
   representing values to pass to the function. A value of type None means the
-  value to be passed is already on the stack. S1 is the bytecode offset of the
-  next instruction to execute when the call returns.
+  value to be passed is already on the stack. S1 is the caller FP and S2 is
+  the bytecode offset of the next instruction to execute when the call returns.
 
 NativeImpl = S0:ConstFunc S1:FramePtr
 

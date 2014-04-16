@@ -255,6 +255,9 @@ struct ActRec {
   // a re-entry frame, return ar
   ActRec* arGetSfp() const;
 
+  void setReturn(ActRec* fp, PC pc, void* retAddr);
+  void setReturnVMExit();
+
   // skip this frame if it is for a builtin function
   bool skipFrame() const;
 

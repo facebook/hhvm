@@ -212,7 +212,7 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
 
   auto ignoreSrc = [&](IRInstruction& inst, SSATmp* src) {
     /*
-     * ReDefSP, ReDefGeneratorSP, and TakeStack, and FramePtr/StKptr-typed
+     * ReDefSP, ReDefResumableSP, and TakeStack, and FramePtr/StKptr-typed
      * tmps are used only for stack analysis in the simplifier and therefore
      * may live across calls.  In particular, ReDef[Generator]SP are used to
      * bridge the logical stack of the caller when a callee is inlined so that
@@ -223,7 +223,7 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
      * registers if needed by the instructions using the const.
      */
     return (inst.is(ReDefSP) && src->isA(Type::StkPtr)) ||
-           (inst.is(ReDefGeneratorSP) && src->isA(Type::StkPtr)) ||
+           (inst.is(ReDefResumableSP) && src->isA(Type::StkPtr)) ||
            src->isA(Type::StkPtr) ||
            src->inst()->is(DefConst) ||
            src->isA(Type::FramePtr);

@@ -69,7 +69,7 @@ frame_local_inner(const ActRec* fp, int n) {
 
 inline Resumable*
 frame_resumable(const ActRec* fp) {
-  assert(fp->inGenerator());
+  assert(fp->resumed());
   return (Resumable*)((char*)fp - Resumable::arOff());
 }
 

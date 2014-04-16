@@ -80,7 +80,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
     auto const start  = unit->offsetOf(b->start);
     auto const length = numInstrs(b->start, b->end);
     ret->blocks.emplace_back(
-      std::make_shared<RegionDesc::Block>(context.func, context.inGenerator,
+      std::make_shared<RegionDesc::Block>(context.func, context.resumed,
                                           start, length, spOffset)
     );
     spOffset = -1; // flag SP offset as unknown for all but the first block

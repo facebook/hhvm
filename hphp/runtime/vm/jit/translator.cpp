@@ -4106,7 +4106,7 @@ bool instrMustInterp(const NormalizedInstruction& inst) {
 }
 
 void Translator::traceStart(Offset initBcOffset, Offset initSpOffset,
-                            bool inGenerator, const Func* func) {
+                            bool resumed, const Func* func) {
   assert(!m_irTrans);
 
   FTRACE(1, "{}{:-^40}{}\n",
@@ -4114,8 +4114,7 @@ void Translator::traceStart(Offset initBcOffset, Offset initSpOffset,
          " HHIR during translation ",
          color(ANSI_COLOR_END));
 
-  m_irTrans.reset(new IRTranslator(initBcOffset, initSpOffset, inGenerator,
-                                   func));
+  m_irTrans.reset(new IRTranslator(initBcOffset, initSpOffset, resumed, func));
 }
 
 void Translator::traceEnd() {

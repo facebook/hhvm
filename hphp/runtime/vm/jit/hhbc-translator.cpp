@@ -71,14 +71,14 @@ bool classIsUniqueInterface(const Class* cls) {
 
 HhbcTranslator::HhbcTranslator(Offset startOffset,
                                uint32_t initialSpOffsetFromFp,
-                               bool inGenerator,
+                               bool resumed,
                                const Func* func)
   : m_unit(startOffset)
   , m_irb(new IRBuilder(startOffset,
                         initialSpOffsetFromFp,
                         m_unit,
                         func))
-  , m_bcStateStack {BcState(startOffset, inGenerator, func)}
+  , m_bcStateStack {BcState(startOffset, resumed, func)}
   , m_startBcOff(startOffset)
   , m_lastBcOff(false)
   , m_hasExit(false)
@@ -248,7 +248,7 @@ size_t HhbcTranslator::spOffset() const {
  *   // sp_pre = some SpillStack, or maybe the DefSP
  *
  *   // FPI region:
- *           [ StashGeneratorSP fp0 sp0 ]
+ *           [ StashResumableSP fp0 sp0 ]
  *     sp1   = SpillStack sp_pre, ...
  *     sp2   = SpillFrame sp1, ...
  *     // ... possibly more spillstacks due to argument expressions
@@ -260,7 +260,7 @@ size_t HhbcTranslator::spOffset() const {
  *
  *           = InlineReturn fp2
  *
- * [ sp5  = ReDefGeneratorSP<spansCall> sp1 fp0     ]
+ * [ sp5  = ReDefResumableSP<spansCall> sp1 fp0     ]
  * [ sp5  = ReDefSP<frameOffset,spOffset,spansCall> sp1 fp0 ]
  *
  * The rest of the code then depends on sp5, and not any of the StkPtr
@@ -274,12 +274,12 @@ size_t HhbcTranslator::spOffset() const {
  * become PassSP and PassFP respectively to avoid the need to relabel inlined
  * IR instructions that refer to them.
  *
- * In the case of generators StashGeneratorSP and ReDefGeneratorSP are used to
+ * In the case of generators StashResumableSP and ReDefResumableSP are used to
  * store/extract the value of the StkPtr from a field in the continuation class.
  * This behavior is important because the StkPtr cannot be computed from the
  * FramePtr and if a call occurs it cannot live across the FCall in a register.
  *
- * ReDefSP and ReDefGeneratorSP both take sp1, the stack pointer from before the
+ * ReDefSP and ReDefResumableSP both take sp1, the stack pointer from before the
  * inlined frame.  While this SSATmp may be dead if an FCall occurs in the
  * inlined frame it is still useful for determining stack types in the
  * simplifier.  Additionally these instructions both take an extradata
@@ -374,7 +374,7 @@ BCMarker HhbcTranslator::makeMarker(Offset bcOff) {
   FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
          bcOff, stackOff, curFunc()->fullName()->data());
 
-  return BCMarker{ SrcKey{ curFunc(), bcOff, inGenerator() }, stackOff };
+  return BCMarker{ SrcKey{ curFunc(), bcOff, resumed() }, stackOff };
 }
 
 void HhbcTranslator::updateMarker() {
@@ -1471,7 +1471,7 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
 }
 
 void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
-  assert(!inGenerator());
+  assert(!resumed());
   assert(curFunc()->isGenerator());
   gen(ExitOnVarEnv, makeExitSlow(), m_irb->fp());
 
@@ -1643,7 +1643,7 @@ void HhbcTranslator::emitAsyncAwait() {
 
 void HhbcTranslator::emitAsyncSuspendE(Offset resumeOffset, int numIters) {
   assert(curFunc()->isAsync());
-  assert(!inGenerator());
+  assert(!resumed());
   gen(ExitOnVarEnv, makeExitSlow(), m_irb->fp());
 
   auto const catchBlock = makeCatch();
@@ -1687,7 +1687,7 @@ void HhbcTranslator::emitAsyncSuspendE(Offset resumeOffset, int numIters) {
 
 void HhbcTranslator::emitAsyncSuspendR(Offset resumeOffset) {
   assert(curFunc()->isAsync());
-  assert(inGenerator());
+  assert(resumed());
 
   auto const catchBlock = makeCatchNoSpill();
   auto const child = popC();
@@ -2337,8 +2337,8 @@ void HhbcTranslator::emitFPushActRec(SSATmp* func,
   auto actualStack = spillStack();
   auto returnSp = actualStack;
 
-  if (inGenerator()) {
-    gen(StashGeneratorSP, m_irb->fp(), m_irb->sp());
+  if (resumed()) {
+    gen(StashResumableSP, m_irb->fp(), m_irb->sp());
   }
 
   m_fpiStack.emplace(returnSp, m_irb->spOffset());
@@ -3117,9 +3117,9 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
 
   updateMarker();
   // See the comment in beginInlining about generator frames.
-  if (inGenerator()) {
-    gen(ReDefGeneratorSP,
-        ReDefGeneratorSPData(m_irb->inlinedFrameSpansCall()),
+  if (resumed()) {
+    gen(ReDefResumableSP,
+        ReDefResumableSPData(m_irb->inlinedFrameSpansCall()),
         m_irb->sp(), m_irb->fp());
   } else {
     smart::vector<ReDefSPData::Frame> frames;
@@ -3172,7 +3172,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   }
 
   // If in async function, wrap the return value with a StaticResultWaitHandle.
-  if (!inGenerator() && func->isAsync()) {
+  if (!resumed() && func->isAsync()) {
     push(gen(CreateSRWH, pop(type, DataTypeGeneric)));
   }
 
@@ -3198,7 +3198,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
   // Call the FunctionExit hook and put the return value on the stack so that
   // the unwinder would decref it.
-  emitRetSurpriseCheck(inGenerator() ? cns(Type::Uninit) : retVal,
+  emitRetSurpriseCheck(resumed() ? cns(Type::Uninit) : retVal,
                        catchBlock, false);
 
   // Type profile return value.
@@ -3207,7 +3207,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   }
 
   SSATmp* sp;
-  if (!inGenerator()) {
+  if (!resumed()) {
     // Store the return value.
     gen(StRetVal, m_irb->fp(), retVal);
 
@@ -3251,7 +3251,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 
 void HhbcTranslator::emitRetC(bool freeInline) {
   if (isInlining()) {
-    assert(!inGenerator());
+    assert(!resumed());
     emitRetFromInlined(Type::Cell);
   } else {
     emitRet(Type::Cell, freeInline);
@@ -3259,7 +3259,7 @@ void HhbcTranslator::emitRetC(bool freeInline) {
 }
 
 void HhbcTranslator::emitRetV(bool freeInline) {
-  assert(!inGenerator());
+  assert(!resumed());
   assert(!curFunc()->isAsync());
   if (isInlining()) {
     emitRetFromInlined(Type::BoxedCell);
@@ -3357,7 +3357,7 @@ void HhbcTranslator::emitSwitch(const ImmVector& iv,
   JmpSwitchData data;
   data.func        = curFunc();
   data.base        = base;
-  data.resumed     = inGenerator();
+  data.resumed     = resumed();
   data.bounded     = bounded;
   data.cases       = iv.size();
   data.defaultOff  = defaultOff;
@@ -5127,7 +5127,7 @@ std::string HhbcTranslator::showStack() const {
     out << folly::format("+{:-^82}+\n", str);
   };
 
-  const int32_t frameCells = inGenerator() ? 0 : curFunc()->numSlotsInFrame();
+  const int32_t frameCells = resumed() ? 0 : curFunc()->numSlotsInFrame();
   const int32_t stackDepth =
     m_irb->spOffset() + m_irb->evalStack().size()
     - m_irb->stackDeficit() - frameCells;
@@ -5260,7 +5260,7 @@ Block* HhbcTranslator::makeExitOpt(TransID transId) {
   auto const exit = m_irb->makeExit();
 
   BCMarker exitMarker{
-    SrcKey{ curFunc(), targetBcOff, inGenerator() },
+    SrcKey{ curFunc(), targetBcOff, resumed() },
     int32_t(m_irb->spOffset()
             + m_irb->evalStack().size()
             - m_irb->stackDeficit())
@@ -5325,7 +5325,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
   gen(SyncABIRegs, m_irb->fp(), stack);
 
   if (flag == ExitFlag::Interp) {
-    auto interpSk = SrcKey {curFunc(), targetBcOff, inGenerator()};
+    auto interpSk = SrcKey {curFunc(), targetBcOff, resumed()};
     auto pc = curUnit()->at(targetBcOff);
     auto changesPC = opcodeChangesPC(*reinterpret_cast<const Op*>(pc));
     auto interpOp = changesPC ? InterpOneCF : InterpOne;

@@ -67,7 +67,7 @@ struct Resumable {
     // Populate ActRec.
     auto& actRec = resumable->m_actRec;
     actRec.m_func = func;
-    actRec.initNumArgsInGenerator(fp->numArgs());
+    actRec.initNumArgsFromResumable(fp->numArgs());
     actRec.setVarEnv(nullptr);
     actRec.setThisOrClassAllowNull(fp->getThisOrClass());
 

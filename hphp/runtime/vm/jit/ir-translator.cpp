@@ -83,9 +83,9 @@ static const bool debug = false;
     }                                                   \
   } while (0)
 
-IRTranslator::IRTranslator(Offset bcOff, Offset spOff, bool inGenerator,
+IRTranslator::IRTranslator(Offset bcOff, Offset spOff, bool resumed,
                            const Func* curFunc)
-  : m_hhbcTrans(bcOff, spOff, inGenerator, curFunc)
+  : m_hhbcTrans(bcOff, spOff, resumed, curFunc)
 {
 }
 
@@ -682,7 +682,7 @@ void IRTranslator::translateAsyncAwait(const NormalizedInstruction&) {
 }
 
 void IRTranslator::translateAsyncSuspend(const NormalizedInstruction& i) {
-  if (m_hhbcTrans.inGenerator()) {
+  if (m_hhbcTrans.resumed()) {
     HHIR_EMIT(AsyncSuspendR, i.nextSk().offset());
   } else {
     HHIR_EMIT(AsyncSuspendE, i.nextSk().offset(), i.imm[0].u_IVA);

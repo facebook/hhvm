@@ -67,7 +67,7 @@ enum class IRGenMode {
 struct HhbcTranslator {
   HhbcTranslator(Offset startOffset,
                  uint32_t initialSpOffsetFromFp,
-                 bool inGenerator,
+                 bool resumed,
                  const Func* func);
 
   // Accessors.
@@ -772,8 +772,8 @@ public:
   Unit*       curUnit()     const { return curFunc()->unit(); }
   Offset      bcOff()       const { return m_bcStateStack.back().bcOff; }
   SrcKey      curSrcKey()   const { return SrcKey(curFunc(), bcOff(),
-                                                  inGenerator()); }
-  bool        inGenerator() const { return m_bcStateStack.back().inGenerator; }
+                                                  resumed()); }
+  bool        resumed()     const { return m_bcStateStack.back().resumed; }
   size_t      spOffset()    const;
   Type        topType(uint32_t i, TypeConstraint c = DataTypeSpecific) const;
 
@@ -868,14 +868,14 @@ private:
   // function we are in.  Goes in m_bcStateStack; we push and pop as
   // we deal with inlined calls.
   struct BcState {
-    explicit BcState(Offset bcOff, bool inGenerator, const Func* func)
+    explicit BcState(Offset bcOff, bool resumed, const Func* func)
       : bcOff(bcOff)
-      , inGenerator(inGenerator)
+      , resumed(resumed)
       , func(func)
     {}
 
     Offset bcOff;
-    bool inGenerator;
+    bool resumed;
     const Func* func;
   };
 

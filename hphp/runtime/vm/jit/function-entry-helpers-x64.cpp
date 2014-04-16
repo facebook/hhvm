@@ -49,7 +49,7 @@ static void setupAfterPrologue(ActRec* fp, void* sp) {
 
 TCA fcallHelper(ActRec* ar, void* sp) {
   try {
-    assert(!ar->inGenerator());
+    assert(!ar->resumed());
     TCA tca =
       mcg->getFuncPrologue((Func*)ar->m_func, ar->numArgs(), ar);
     if (tca) {

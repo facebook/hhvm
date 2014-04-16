@@ -568,8 +568,8 @@ O(DefInlineSP,               D(StkPtr), S(StkPtr) S(FramePtr),             E) \
 O(ReDefSP,                   D(StkPtr), S(StkPtr) S(FramePtr),            NF) \
 O(PassSP,                    D(StkPtr), S(StkPtr),                         P) \
 O(PassFP,                  D(FramePtr), S(FramePtr),                       P) \
-O(StashGeneratorSP,                 ND, S(FramePtr) S(StkPtr),             E) \
-O(ReDefGeneratorSP,          D(StkPtr), S(StkPtr) S(FramePtr),             E) \
+O(StashResumableSP,                 ND, S(FramePtr) S(StkPtr),             E) \
+O(ReDefResumableSP,          D(StkPtr), S(StkPtr) S(FramePtr),             E) \
 O(VerifyParamCls,                   ND, S(Cls)                                \
                                           S(Cls)                              \
                                           C(Int)                              \

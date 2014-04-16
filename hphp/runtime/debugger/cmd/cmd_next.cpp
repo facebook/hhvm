@@ -102,7 +102,7 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
       if (deeper) return; // Recursion
       TRACE(2, "CmdNext: hit step-out\n");
     } else if (atStepContOffset(unit, offset)) {
-      if (m_stepContTag != getContinuationTag(fp)) return;
+      if (m_stepContTag != getResumableTag(fp)) return;
       TRACE(2, "CmdNext: hit step-cont\n");
       // We're in the continuation we expect. This may be at a
       // different stack depth, though, especially if we've moved from
@@ -125,7 +125,7 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
       // in the original continuation. We don't care about exception handlers
       // in continuations being driven at the same level.
       if (hasStepCont() && originalDepth &&
-          (m_stepContTag != getContinuationTag(fp))) {
+          (m_stepContTag != getResumableTag(fp))) {
         TRACE(2, "CmdNext: exception handler, original depth, wrong cont\n");
         return;
       }
@@ -202,7 +202,7 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
   // and end up at the caller of ASIO or send(). For async functions
   // stepping over an await, we land on the next statement.
   auto op = *reinterpret_cast<const Op*>(pc);
-  if (fp->inGenerator() &&
+  if (fp->resumed() &&
       (op == OpYield || op == OpYieldK ||
        op == OpAsyncSuspend || op == OpRetC)) {
     TRACE(2, "CmdNext: encountered yield, await or return from generator\n");
@@ -286,8 +286,8 @@ void CmdNext::cleanupStepCont() {
 // Since we'll either stop when we get out of whatever is driving this
 // continuation, or we'll stop when we get back into it, we know the object
 // will remain alive.
-void* CmdNext::getContinuationTag(ActRec* fp) {
-  assert(fp->inGenerator());
+void* CmdNext::getResumableTag(ActRec* fp) {
+  assert(fp->resumed());
   assert(fp->func()->isAsync() || fp->func()->isGenerator());
   TRACE(2, "CmdNext: continuation tag %p for %s\n", fp,
         fp->func()->name()->data());

@@ -794,15 +794,15 @@ bool Stack::wouldOverflow(int numCells) const {
 }
 
 TypedValue* Stack::frameStackBase(const ActRec* fp) {
-  assert(!fp->inGenerator());
+  assert(!fp->resumed());
   const Func* func = fp->m_func;
   return (TypedValue*)((uintptr_t)fp
                        - (uintptr_t)(func->numLocals()) * sizeof(TypedValue)
                        - (uintptr_t)(func->numIterators() * sizeof(Iter)));
 }
 
-TypedValue* Stack::generatorStackBase(const ActRec* fp) {
-  assert(fp->inGenerator());
+TypedValue* Stack::resumableStackBase(const ActRec* fp) {
+  assert(fp->resumed());
   auto const context = g_context.getNoCheck();
   ActRec* sfp = fp->arGetSfp();
   if (sfp == fp) {
@@ -811,9 +811,9 @@ TypedValue* Stack::generatorStackBase(const ActRec* fp) {
     // locals, and iters for this frame do not reside on the VM stack).
     return context->m_nestedVMs.back().sp;
   }
-  // In the non-reentrant case, we know generators are always called from a
+  // In the non-reentrant case, we know resumables are always resumed from a
   // function with an empty stack. So we find the caller's FP, compensate for
-  // its locals and iterators, and then we've found the base of the generator's
+  // its locals and iterators, and then we've found the base of the resumable's
   // stack.
   return (TypedValue*)sfp - sfp->m_func->numSlotsInFrame();
 }
@@ -1539,7 +1539,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell& args,
 
 void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
                                         StackArgsState stk) {
-  assert(!ar->inGenerator());
+  assert(!ar->resumed());
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
   bool raiseMissingArgumentWarnings = false;
@@ -1658,7 +1658,7 @@ void ExecutionContext::syncGdbState() {
 void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr, PC pc,
                                           ObjectData* exception) {
   assert(enterFnAr);
-  assert(enterFnAr->inGenerator());
+  assert(enterFnAr->resumed());
   assert(pc);
 
   m_fp = enterFnAr;
@@ -1677,7 +1677,7 @@ void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr, PC pc,
 
 void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
   assert(enterFnAr);
-  assert(!enterFnAr->inGenerator());
+  assert(!enterFnAr->resumed());
   Stats::inc(Stats::VMEnter);
 
   bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
@@ -1718,7 +1718,7 @@ void ExecutionContext::enterVMAtCurPC() {
   Stats::inc(Stats::VMEnter);
 
   if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
-    SrcKey sk(m_fp->func(), m_pc, m_fp->inGenerator());
+    SrcKey sk(m_fp->func(), m_pc, m_fp->resumed());
     mcg->enterTCAtSrcKey(sk);
   } else {
     dispatch();
@@ -2071,7 +2071,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   ActRec* prevFp = fp->arGetSfp();
   if (prevFp != fp) {
     if (prevSp) {
-      if (UNLIKELY(fp->inGenerator())) {
+      if (UNLIKELY(fp->resumed())) {
         *prevSp = (TypedValue*)prevFp - prevFp->m_func->numSlotsInFrame();
       } else {
         *prevSp = (TypedValue*)&fp[1];
@@ -2191,7 +2191,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
       curOp == Op::CreateCont || curOp == Op::AsyncSuspend;
 
     // Builtins and generators don't have a file and line number
-    if (prevFp && !prevFp->m_func->isBuiltin() && !fp->inGenerator()) {
+    if (prevFp && !prevFp->m_func->isBuiltin() && !fp->resumed()) {
       auto const prevUnit = prevFp->m_func->unit();
       auto prevFile = prevUnit->filepath();
       if (prevFp->m_func->originalFilename()) {
@@ -2943,7 +2943,7 @@ void ExecutionContext::preventReturnsToTC() {
         TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
                  "func %s\n", ar, ar->m_savedRip,
                  ar->m_func->fullName()->data());
-        if (ar->inGenerator()) {
+        if (ar->resumed()) {
           ar->m_savedRip =
             reinterpret_cast<uintptr_t>(tx->uniqueStubs.genRetHelper);
         } else {
@@ -4452,7 +4452,7 @@ OPTBLD_INLINE void ExecutionContext::iopSSwitch(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   // If in an eagerly executed async function, wrap the return value
   // with a StaticResultWaitHandle.
-  if (UNLIKELY(!m_fp->inGenerator() && m_fp->func()->isAsync())) {
+  if (UNLIKELY(!m_fp->resumed() && m_fp->func()->isAsync())) {
     auto const top = m_stack.topC();
     top->m_data.pobj = c_StaticResultWaitHandle::CreateFromVM(*top);
     top->m_type = KindOfObject;
@@ -4464,7 +4464,7 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   // Free $this and local variables. Calls FunctionExit hook. The return value
   // is kept on the stack so that the unwinder would free it if the hook fails.
   frame_free_locals_inl(m_fp, m_fp->func()->numLocals(),
-                        m_fp->inGenerator() ? nullptr : &retval);
+                        m_fp->resumed() ? nullptr : &retval);
   m_stack.discard();
 
   // Type profile return value.
@@ -4476,7 +4476,7 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   ActRec* sfp = m_fp->arGetSfp();
   Offset soff = m_fp->m_soff;
 
-  if (LIKELY(!m_fp->inGenerator())) {
+  if (LIKELY(!m_fp->resumed())) {
     // Free ActRec and store the return value.
     m_stack.ndiscard(m_fp->func()->numSlotsInFrame());
     m_stack.ret();
@@ -4515,7 +4515,7 @@ OPTBLD_INLINE void ExecutionContext::iopRetC(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopRetV(IOP_ARGS) {
   NEXT();
-  assert(!m_fp->inGenerator());
+  assert(!m_fp->resumed());
   assert(!m_fp->func()->isAsync());
   ret(IOP_PASS_ARGS);
 }
@@ -6382,7 +6382,7 @@ bool ExecutionContext::doFCallArray(PC& pc) {
     checkStack(m_stack, func);
 
     assert(ar->m_savedRbp == (uint64_t)m_fp);
-    assert(!ar->inGenerator());
+    assert(!ar->resumed());
     ar->m_savedRip =
       reinterpret_cast<uintptr_t>(tx->uniqueStubs.retHelper);
     assert(isReturnHelper(ar->m_savedRip));
@@ -7058,7 +7058,7 @@ void ExecutionContext::fillContinuationVars(const Func* func,
 
 OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   NEXT();
-  assert(!m_fp->inGenerator());
+  assert(!m_fp->resumed());
 
   const auto func = m_fp->func();
   const auto offset = m_fp->func()->unit()->offsetOf(pc);
@@ -7105,7 +7105,7 @@ static inline c_Continuation* this_continuation(const ActRec* fp) {
 OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
   NEXT();
 
-  // The stack must have one cell! Or else generatorStackBase() won't work!
+  // The stack must have one cell! Or else resumableStackBase() won't work!
   assert(m_stack.top() + 1 ==
          (TypedValue*)m_fp - m_fp->m_func->numSlotsInFrame());
 
@@ -7234,7 +7234,7 @@ OPTBLD_INLINE void ExecutionContext::iopAsyncAwait(IOP_ARGS) {
 }
 
 OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
-  assert(!m_fp->inGenerator());
+  assert(!m_fp->resumed());
   assert(m_fp->func()->isAsync());
   const auto func = m_fp->m_func;
   const auto offset = func->unit()->offsetOf(pc);
@@ -7288,7 +7288,7 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
 }
 
 OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS) {
-  assert(m_fp->inGenerator());
+  assert(m_fp->resumed());
   assert(m_fp->func()->isAsync());
   assert(m_fp->arGetSfp() == m_fp);
 
@@ -7313,7 +7313,7 @@ OPTBLD_INLINE void ExecutionContext::iopAsyncSuspend(IOP_ARGS) {
   NEXT();
   DECODE_IVA(iters);
 
-  if (m_fp->inGenerator()) {
+  if (m_fp->resumed()) {
     // suspend resumed execution
     asyncSuspendR(IOP_PASS_ARGS);
   } else {
@@ -7658,7 +7658,7 @@ void ExecutionContext::dispatchN(int numInstrs) {
     auto name = makeStaticString(
       folly::format("{} ops @ {}",
                     numInstrs, show(SrcKey(m_fp->func(), m_pc,
-                                           m_fp->inGenerator()))).str());
+                                           m_fp->resumed()))).str());
     Stats::incStatGrouped(cat, name, 1);
   }
 
@@ -7670,7 +7670,7 @@ void ExecutionContext::dispatchBB() {
   if (Trace::moduleEnabled(Trace::dispatchBB)) {
     auto cat = makeStaticString("dispatchBB");
     auto name = makeStaticString(show(SrcKey(m_fp->func(), m_pc,
-                                             m_fp->inGenerator())));
+                                             m_fp->resumed())));
     Stats::incStatGrouped(cat, name, 1);
   }
 

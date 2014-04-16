@@ -1500,27 +1500,27 @@ D:StkPtr = ReDefSP<offset,spansCall> S0:StkPtr S1:FramePtr
   call and that any SSATmps created before inlining are now invalid. This is
   required for several analysis steps including the simplifier.
 
-D:StkPtr = StashGeneratorSP<offset> S0:FramePtr S1:StkPtr
+D:StkPtr = StashResumableSP<offset> S0:FramePtr S1:StkPtr
 
-  Store a generator stack pointer, for later use.
+  Store a resumable's stack pointer, for later use.
 
   The point of this is a bit of a hack to handle the fact that we currently
   assign the same registers to frame (rVmFp) and stack pointers (rVmSp) through
   the IR. During an inline call, we want to be able to have uses of the stack
   after the call, but we can't restore it using a frame pointer like with
   ReDefSP, because the values of rVmSp and rVmFp are not related like that in a
-  generator.
+  resumable.
 
-  This instruction moves the value of rVmSp into a continuation object. It can
-  be retrieved using ReDefGeneratorSP.
+  This instruction moves the value of rVmSp into a Resumable. It can be
+  retrieved using ReDefResumableSP.
 
   TODO(#2288359): this shouldn't be needed.
 
-D:StkPtr = ReDefGeneratorSP<offset,spansCall> S0:StkPtr S1:FramePtr
+D:StkPtr = ReDefResumableSP<offset,spansCall> S0:StkPtr S1:FramePtr
 
-  Restore a generator stack pointer. See StashGeneratorSP. The S0 stack pointer
-  refers to the stack pointer before inlining, it is used for stack value
-  analysis but never used outside of analysis (see ReDefSP). The spansCall
+  Restore a resumable's stack pointer. See StashResumableSP. The S0 stack
+  pointer refers to the stack pointer before inlining, it is used for stack 
+  value analysis but never used outside of analysis (see ReDefSP). The spansCall
   boolean value indicates that the inlined frame spanned a function call, this
   is important as it indicates to later analysis steps that SSATmps created
   before the inlined frame have been invalidated.

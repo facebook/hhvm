@@ -48,8 +48,8 @@ namespace JIT {
  *
  *     The Fixup record just stores an offset relative to the ActRec*
  *     for vpsp, and an offset from the start of the func for pc.  In
- *     the case of generator frames the sp offset is relative to
- *     Stack::generatorStackBase.
+ *     the case of resumable frames the sp offset is relative to
+ *     Stack::resumableStackBase.
  *
  *   - IndirectFixup: this is used for some shared stubs in the TC.
  *
@@ -200,9 +200,9 @@ private:
     outRegs->m_pc = reinterpret_cast<const Op*>(pc(ar, f, fixup));
     outRegs->m_fp = ar;
 
-    if (UNLIKELY(ar->inGenerator())) {
-      TypedValue* genStackBase = Stack::generatorStackBase(ar);
-      outRegs->m_sp = genStackBase - fixup.m_spOffset;
+    if (UNLIKELY(ar->resumed())) {
+      TypedValue* stackBase = Stack::resumableStackBase(ar);
+      outRegs->m_sp = stackBase - fixup.m_spOffset;
     } else {
       outRegs->m_sp = (TypedValue*)ar - fixup.m_spOffset;
     }

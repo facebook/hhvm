@@ -2556,7 +2556,7 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
     return;
   }
   checkFrame(fp, sp, /*checkLocals*/ false);
-  assert(sp <= (Cell*)fp || fp->inGenerator());
+  assert(sp <= (Cell*)fp || fp->resumed());
   // check return value if stack not empty
   if (sp < (Cell*)fp) assertTv(sp);
 }
@@ -2747,14 +2747,14 @@ void CodeGenerator::cgReDefSP(IRInstruction* inst) {
   // TODO(#2288359): this instruction won't be necessary (for
   // non-generator frames) when we don't track rVmSp independently
   // from rVmFp.  In generator frames we'll have to track offsets from
-  // a DefGeneratorSP or something similar.
+  // a DefResumableSP or something similar.
   auto fp  = srcLoc(1).reg();
   auto dst = dstLoc(0).reg();
   auto off = -inst->extra<ReDefSP>()->spOffset * sizeof(Cell);
   emitLea(m_as, fp[off], dst);
 }
 
-void CodeGenerator::cgStashGeneratorSP(IRInstruction* inst) {
+void CodeGenerator::cgStashResumableSP(IRInstruction* inst) {
   auto fpReg = srcLoc(0).reg();
   auto spReg = srcLoc(1).reg();
 
@@ -2763,7 +2763,7 @@ void CodeGenerator::cgStashGeneratorSP(IRInstruction* inst) {
   m_as.    storeq(spReg, fpReg[stashLoc]);
 }
 
-void CodeGenerator::cgReDefGeneratorSP(IRInstruction* inst) {
+void CodeGenerator::cgReDefResumableSP(IRInstruction* inst) {
   auto fpReg = srcLoc(1).reg();
   auto dstReg = dstLoc(0).reg();
 

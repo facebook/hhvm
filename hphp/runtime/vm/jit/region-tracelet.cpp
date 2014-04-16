@@ -109,13 +109,13 @@ RegionFormer::RegionFormer(const RegionContext& ctx, InterpSet& interp,
                            int inlineDepth, bool profiling)
   : m_ctx(ctx)
   , m_interp(interp)
-  , m_sk(ctx.func, ctx.bcOffset, ctx.inGenerator)
+  , m_sk(ctx.func, ctx.bcOffset, ctx.resumed)
   , m_startSk(m_sk)
   , m_region(std::make_shared<RegionDesc>())
   , m_curBlock(m_region->addBlock(ctx.func, m_sk.resumed(), m_sk.offset(), 0,
                                   ctx.spOffset))
   , m_blockFinished(false)
-  , m_irTrans(ctx.bcOffset, ctx.spOffset, ctx.inGenerator, ctx.func)
+  , m_irTrans(ctx.bcOffset, ctx.spOffset, ctx.resumed, ctx.func)
   , m_ht(m_irTrans.hhbcTrans())
   , m_arStates(1)
   , m_inlineDepth(inlineDepth)
@@ -136,7 +136,7 @@ Offset RegionFormer::curSpOffset() const {
 }
 
 bool RegionFormer::resumed() const {
-  return m_ht.inGenerator();
+  return m_ht.resumed();
 }
 
 int RegionFormer::inliningDepth() const {
@@ -453,7 +453,7 @@ bool RegionFormer::tryInline() {
   ctx.func = callee;
   ctx.bcOffset = callee->base();
   ctx.spOffset = callee->numSlotsInFrame();
-  ctx.inGenerator = false;
+  ctx.resumed = false;
   for (int i = 0; i < callee->numParams(); ++i) {
     // DataTypeGeneric is used because we're just passing the locals into the
     // callee. It's up to the callee to constraint further if needed.

@@ -269,7 +269,7 @@ struct ActRec {
     return m_numArgsAndGenCtorFlags & ~(3u << 30);
   }
 
-  bool inGenerator() const {
+  bool resumed() const {
     return m_numArgsAndGenCtorFlags & (1u << 30);
   }
 
@@ -278,16 +278,16 @@ struct ActRec {
   }
 
   static inline uint32_t
-  encodeNumArgs(uint32_t numArgs, bool inGenerator, bool isFPushCtor) {
+  encodeNumArgs(uint32_t numArgs, bool resumed, bool isFPushCtor) {
     assert((numArgs & (1u << 30)) == 0);
-    return numArgs | (inGenerator << 30) | (isFPushCtor << 31);
+    return numArgs | (resumed << 30) | (isFPushCtor << 31);
   }
 
   void initNumArgs(uint32_t numArgs) {
     m_numArgsAndGenCtorFlags = encodeNumArgs(numArgs, false, false);
   }
 
-  void initNumArgsInGenerator(uint32_t numArgs) {
+  void initNumArgsFromResumable(uint32_t numArgs) {
     m_numArgsAndGenCtorFlags = encodeNumArgs(numArgs, true, false);
   }
 
@@ -296,7 +296,7 @@ struct ActRec {
   }
 
   void setNumArgs(uint32_t numArgs) {
-    m_numArgsAndGenCtorFlags = encodeNumArgs(numArgs, inGenerator(),
+    m_numArgsAndGenCtorFlags = encodeNumArgs(numArgs, resumed(),
                                              isFromFPushCtor());
   }
 
@@ -580,7 +580,7 @@ public:
   }
 
   static TypedValue* frameStackBase(const ActRec* fp);
-  static TypedValue* generatorStackBase(const ActRec* fp);
+  static TypedValue* resumableStackBase(const ActRec* fp);
 
   ALWAYS_INLINE
   size_t count() const {
@@ -960,7 +960,7 @@ public:
 
 /*
  * Visit all the slots and pre-live ActRecs on a live eval stack,
- * handling FPI regions and generators correctly, and stopping when we
+ * handling FPI regions and resumables correctly, and stopping when we
  * reach the supplied activation record.
  *
  * The stack elements are visited from lower address to higher, with
@@ -981,15 +981,15 @@ visitStackElems(const ActRec* const fp,
                 ARFun arFun,
                 TVFun tvFun) {
   const TypedValue* const base =
-    fp->inGenerator() ? Stack::generatorStackBase(fp)
-                      : Stack::frameStackBase(fp);
+    fp->resumed() ? Stack::resumableStackBase(fp)
+                  : Stack::frameStackBase(fp);
   MaybeConstTVPtr cursor = stackTop;
   assert(cursor <= base);
 
   if (auto fe = fp->m_func->findFPI(bcOffset)) {
     for (;;) {
       ActRec* ar;
-      if (!fp->inGenerator()) {
+      if (!fp->resumed()) {
         ar = arAtOffset(fp, -fe->m_fpOff);
       } else {
         // fp is pointing into the continuation object. Since fpOff is

@@ -31,13 +31,13 @@ PhysReg forceAlloc(const SSATmp& tmp) {
   auto inst = tmp.inst();
   auto opc = inst->op();
 
-  // Note that the point of StashGeneratorSP is to save a StkPtr
+  // Note that the point of StashResumableSP is to save a StkPtr
   // somewhere other than rVmSp.  (TODO(#2288359): make rbx not
   // special.)
-  if (opc != StashGeneratorSP && tmp.isA(Type::StkPtr)) {
+  if (opc != StashResumableSP && tmp.isA(Type::StkPtr)) {
     assert(opc == DefSP ||
            opc == ReDefSP ||
-           opc == ReDefGeneratorSP ||
+           opc == ReDefResumableSP ||
            opc == PassSP ||
            opc == DefInlineSP ||
            opc == Call ||

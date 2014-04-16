@@ -202,7 +202,7 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
     } catch (...) {}
   }
 
-  if (LIKELY(!fp->inGenerator())) {
+  if (LIKELY(!fp->resumed())) {
     // Free ActRec.
     stack.ndiscard(func->numSlotsInFrame());
     stack.discardAR();
@@ -225,7 +225,7 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
   if (prevFp == fp) return;
 
   assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
-         prevFp->inGenerator());
+         prevFp->resumed());
   auto const prevOff = soff + prevFp->m_func->base();
   pc = prevFp->m_func->unit()->at(prevOff);
   fp = prevFp;
@@ -235,7 +235,7 @@ void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc, ObjectData* e) {
   auto const func = fp->m_func;
   auto const prevFp = fp->arGetSfp();
   auto const soff = fp->m_soff;
-  assert(!fp->inGenerator());
+  assert(!fp->resumed());
   assert(func->isAsync());
   assert(*reinterpret_cast<const Op*>(pc) != OpRetC);
 
@@ -261,7 +261,7 @@ void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc, ObjectData* e) {
   }
 
   assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
-         prevFp->inGenerator());
+         prevFp->resumed());
   auto const prevOff = soff + prevFp->m_func->base();
   pc = prevFp->m_func->unit()->at(prevOff);
   fp = prevFp;
@@ -433,7 +433,7 @@ UnwindAction unwind(ActRec*& fp,
 
     // If in an eagerly executed async function, wrap the user exception
     // into a StaticExceptionWaitHandle and return it to the caller.
-    if (fp->m_func->isAsync() && !fp->inGenerator() &&
+    if (!fp->resumed() && fp->m_func->isAsync() &&
         fault.m_faultType == Fault::Type::UserException) {
       tearDownEagerAsyncFrame(fp, stack, pc, fault.m_userException);
       g_context->m_faults.pop_back();

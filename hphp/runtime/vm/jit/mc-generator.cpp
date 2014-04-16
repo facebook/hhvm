@@ -1514,7 +1514,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     Unit* destUnit = caller->m_func->unit();
     // Set PC so logging code in getTranslation doesn't get confused.
     vmpc() = destUnit->at(caller->m_func->base() + ar->m_soff);
-    SrcKey dest(caller->m_func, vmpc(), caller->inGenerator());
+    SrcKey dest(caller->func(), vmpc(), caller->resumed());
     sk = dest;
     start = getTranslation(TranslArgs(dest, true));
     TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
@@ -1908,8 +1908,9 @@ MCGenerator::translateWork(const TranslArgs& args) {
     } else {
       assert(m_tx.mode() == TransProfile || m_tx.mode() == TransLive);
       tp = m_tx.analyze(sk);
+      // TODO(#4150507): use sk.resumed() instead of liveResumed()?
       RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
-                                    liveFrame()->inGenerator() };
+                               liveResumed() };
       FTRACE(2, "populating live context for region\n");
       populateLiveContext(rContext);
       region = selectRegion(rContext, tp.get(), m_tx.mode());
@@ -1937,8 +1938,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
     bool bcControlFlow = RuntimeOption::EvalHHIRBytecodeControlFlow;
 
     while (result == Translator::Retry) {
-      m_tx.traceStart(sk.offset(), initSpOffset, liveFrame()->inGenerator(),
-                      sk.func());
+      // TODO(#4150507): use sk.resumed() instead of liveResumed()?
+      m_tx.traceStart(sk.offset(), initSpOffset, liveResumed(), sk.func());
 
       // Try translating a region if we have one, then fall back to using the
       // Tracelet.
@@ -1969,8 +1970,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
         }
         if (result == Translator::Failure) {
           m_tx.traceFree();
-          m_tx.traceStart(sk.offset(), liveSpOff(), liveFrame()->inGenerator(),
-                          sk.func());
+          // TODO(#4150507): use sk.resumed() instead of liveResumed()?
+          m_tx.traceStart(sk.offset(), liveSpOff(), liveResumed(), sk.func());
           resetState();
         }
       }

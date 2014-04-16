@@ -99,7 +99,7 @@ void FrameState::update(const IRInstruction* inst) {
     m_fpValue = inst->dst();
     break;
 
-  case ReDefGeneratorSP:
+  case ReDefResumableSP:
     m_spValue = inst->dst();
     break;
 

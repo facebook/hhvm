@@ -40,7 +40,7 @@ static ProfileStackTrace getStackTrace() {
   Unit *u = f->unit();
   Offset off = pc - u->entry();
   for (;;) {
-    trace.push_back({ f, off, fp->inGenerator() });
+    trace.push_back({ f, off, fp->resumed() });
     fp = g_context->getPrevVMState(fp, &off);
     if (!fp) break;
     f = fp->m_func;

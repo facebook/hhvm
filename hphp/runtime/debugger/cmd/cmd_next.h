@@ -41,7 +41,7 @@ private:
   bool atStepContOffset(Unit* unit, Offset o);
   void setupStepCont(ActRec* fp, PC pc);
   void cleanupStepCont();
-  void* getContinuationTag(ActRec* fp);
+  void* getResumableTag(ActRec* fp);
 
   StepDestination m_stepCont;
   void* m_stepContTag; // Unique identifier for the continuation we're stepping

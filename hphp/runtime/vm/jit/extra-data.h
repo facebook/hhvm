@@ -281,7 +281,7 @@ struct ActRecInfo : IRExtraData {
     ar.m_numArgsAndGenCtorFlags = numArgs;
     return folly::to<std::string>(ar.numArgs(),
                                   ar.isFromFPushCtor() ? ",ctor" : "",
-                                  ar.inGenerator() ? ",gen" : "",
+                                  ar.resumed() ? ",res" : "",
                                   invName ? " M" : "");
   }
 };
@@ -594,8 +594,8 @@ struct InterpOneData : IRExtraData {
  * Important during offset to determine if crossing inline function will also
  * cross function call boundary.
  */
-struct ReDefGeneratorSPData : IRExtraData {
-  explicit ReDefGeneratorSPData(bool spans) : spansCall(spans) {}
+struct ReDefResumableSPData : IRExtraData {
+  explicit ReDefResumableSPData(bool spans) : spansCall(spans) {}
 
   std::string show() const {
     return folly::to<std::string>(spansCall);
@@ -798,7 +798,7 @@ X(CastStk,                      StackOffset);
 X(CoerceStk,                    StackOffset);
 X(AssertStk,                    StackOffset);
 X(ReDefSP,                      ReDefSPData);
-X(ReDefGeneratorSP,             ReDefGeneratorSPData);
+X(ReDefResumableSP,             ReDefResumableSPData);
 X(DefSP,                        StackOffset);
 X(DefInlineSP,                  StackOffset);
 X(LdStack,                      StackOffset);

@@ -44,12 +44,12 @@ inline ActRec* liveFrame()    { return (ActRec*)vmfp(); }
 inline const Func* liveFunc() { return liveFrame()->m_func; }
 inline const Unit* liveUnit() { return liveFunc()->unit(); }
 inline Class* liveClass() { return liveFunc()->cls(); }
-inline bool liveResumed() { return liveFrame()->inGenerator(); }
+inline bool liveResumed() { return liveFrame()->resumed(); }
 
 inline Offset liveSpOff() {
   Cell* fp = vmfp();
-  if (liveFrame()->inGenerator()) {
-    fp = (Cell*)Stack::generatorStackBase((ActRec*)fp);
+  if (liveFrame()->resumed()) {
+    fp = (Cell*)Stack::resumableStackBase((ActRec*)fp);
   }
   return fp - vmsp();
 }
@@ -90,7 +90,7 @@ struct VMRegAnchor : private boost::noncopyable {
 
     auto prevAr = g_context->getOuterVMFrame(ar);
     const Func* prevF = prevAr->m_func;
-    assert(!ar->inGenerator());
+    assert(!ar->resumed());
     vmsp() = (TypedValue*)ar - ar->numArgs();
     assert(g_context->m_stack.isValidAddress((uintptr_t)vmsp()));
     vmpc() = prevF->unit()->at(prevF->base() + ar->m_soff);

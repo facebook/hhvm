@@ -435,7 +435,7 @@ public:
     Success
   };
   static const char* translateResultName(TranslateResult r);
-  void traceStart(Offset initBcOffset, Offset initSpOffset, bool inGenerator,
+  void traceStart(Offset initBcOffset, Offset initSpOffset, bool resumed,
                   const Func* func);
   void traceEnd();
   void traceFree();

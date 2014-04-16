@@ -105,8 +105,8 @@ NameValueTable::~NameValueTable() {
 void NameValueTable::suspend(ActRec* oldFP, ActRec* newFP) {
   assert(m_fp == oldFP);
   assert(oldFP->func() == newFP->func());
-  assert(!oldFP->inGenerator());
-  assert(newFP->inGenerator());
+  assert(!oldFP->resumed());
+  assert(newFP->resumed());
 
   m_fp = newFP;
 }

@@ -338,7 +338,7 @@ struct RegionContext {
   const Func* func;
   Offset bcOffset;
   Offset spOffset;
-  bool inGenerator;
+  bool resumed;
   smart::vector<LiveType> liveTypes;
   smart::vector<PreLiveAR> preLiveARs;
 };

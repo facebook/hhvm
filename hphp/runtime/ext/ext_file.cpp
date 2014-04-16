@@ -114,9 +114,6 @@ static int accessSyscall(
     int mode,
     bool useFileCache = false) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
-    return ::access(File::TranslatePathWithFileCache(path).data(), mode);
-  }
   return w->access(path, mode);
 }
 
@@ -124,29 +121,8 @@ static int statSyscall(
     const String& path,
     struct stat* buf,
     bool useFileCache = false) {
-  bool isRelative = path.charAt(0) != '/';
-  int pathIndex = 0;
-  Stream::Wrapper* w = Stream::getWrapperFromURI(path, &pathIndex);
-  bool isFileStream = dynamic_cast<FileStreamWrapper*>(w);
-  auto canUseFileCache = useFileCache && isFileStream;
-  if (isRelative && !pathIndex) {
-    auto fullpath = g_context->getCwd() + String::FromChar('/') + path;
-    std::string realpath = StatCache::realpath(fullpath.data());
-    // realpath will return an empty string for nonexistent files
-    if (realpath.empty()) {
-      return ENOENT;
-    }
-    auto translatedPath = canUseFileCache ?
-      File::TranslatePathWithFileCache(realpath) :
-      File::TranslatePath(realpath);
-    return ::stat(translatedPath.data(), buf);
-  }
-
-  auto properPath = isFileStream ? path.substr(pathIndex) : path;
-  if (canUseFileCache) {
-    return ::stat(File::TranslatePathWithFileCache(properPath).data(), buf);
-  }
-  return w->stat(properPath, buf);
+  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
+  return w->stat(path, buf);
 }
 
 static int lstatSyscall(
@@ -154,9 +130,6 @@ static int lstatSyscall(
     struct stat* buf,
     bool useFileCache = false) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
-    return ::lstat(File::TranslatePathWithFileCache(path).data(), buf);
-  }
   return w->lstat(path, buf);
 }
 
@@ -920,6 +893,10 @@ Variant f_readlink(const String& path) {
 }
 
 Variant f_realpath(const String& path) {
+  // Zend doesn't support streams in realpath
+  if (!File::IsPlainFilePath(path)) {
+    return false;
+  }
   String translated = File::TranslatePath(path);
   if (translated.empty()) {
     return false;
@@ -927,11 +904,6 @@ Variant f_realpath(const String& path) {
   if (StaticContentCache::TheFileCache &&
       StaticContentCache::TheFileCache->exists(translated.data(), false)) {
     return translated;
-  }
-  // Zend doesn't support streams in realpath
-  Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  if (!dynamic_cast<FileStreamWrapper*>(w)) {
-    return false;
   }
   char resolved_path[PATH_MAX];
   if (!realpath(translated.c_str(), resolved_path)) {

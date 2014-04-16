@@ -185,7 +185,9 @@ Wrapper* getWrapper(const String& scheme) {
   return nullptr;
 }
 
-Wrapper* getWrapperFromURI(const String& uri, int* pathIndex /* = NULL */) {
+static PlainStreamWrapper s_plain_stream_wrapper;
+
+Wrapper* getWrapperFromURI(const String& uri) {
   const char *uri_string = uri.data();
 
   /* Special case for PHP4 Backward Compatability */
@@ -200,15 +202,15 @@ Wrapper* getWrapperFromURI(const String& uri, int* pathIndex /* = NULL */) {
 
   const char *colon = strstr(uri_string, "://");
   if (!colon) {
-    return getWrapper(s_file);
+    return &s_plain_stream_wrapper;
   }
 
   int len = colon - uri_string;
-  if (pathIndex != nullptr) *pathIndex = len + sizeof("://") - 1;
   if (Wrapper *w = getWrapper(String(uri_string, len, CopyString))) {
     return w;
   }
-  return getWrapper(s_file);
+  // FIXME: return nullptr for an unhandled stream
+  return &s_plain_stream_wrapper;
 }
 
 static FileStreamWrapper s_file_stream_wrapper;

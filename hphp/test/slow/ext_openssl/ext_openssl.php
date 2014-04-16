@@ -32,7 +32,9 @@ function test_openssl_csr_get_public_key() {
 function test_openssl_csr_get_subject() {
   $csr = openssl_csr_new(null, $ignore);
   VERIFY($csr != null);
-  VERIFY(openssl_csr_get_subject($csr)['O'] == "Internet Widgits Pty Ltd");
+  $subject = openssl_csr_get_subject($csr)['O'];
+  VERIFY($subject == "Internet Widgits Pty Ltd" ||
+         $subject == "Default Company Ltd");
 }
 
 function test_openssl_csr_sign() {

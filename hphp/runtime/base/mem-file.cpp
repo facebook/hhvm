@@ -183,6 +183,15 @@ bool MemFile::flush() {
                              m_name).c_str());
 }
 
+const StaticString s_unread_bytes("unread_bytes");
+
+Array MemFile::getMetaData() {
+  Array ret = File::getMetaData();
+  ret.set(s_unread_bytes, m_len - m_cursor);
+  return ret;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void MemFile::unzip() {

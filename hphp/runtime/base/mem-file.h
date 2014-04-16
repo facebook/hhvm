@@ -53,6 +53,8 @@ public:
   virtual bool rewind();
   virtual bool flush();
 
+  virtual Array getMetaData();
+
   void unzip();
 
 protected:

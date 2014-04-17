@@ -29,8 +29,15 @@ include(CheckFunctionExists)
 include(cotire)
 
 FIND_PATH(LIBC_INCLUDE_PATH stdlib.h)
-FIND_PATH(ARCH_INCLUDE_PATH ${CMAKE_LIBRARY_ARCHITECTURE})
-SET(ARCH_INCLUDE_PATH "${ARCH_INCLUDE_PATH}/${CMAKE_LIBRARY_ARCHITECTURE}")
+
+# Detect the architecture-specific include directory
+IF("${CMAKE_LIBRARY_ARCHITECTURE}" STREQUAL "")
+        # For CentOS/Red Hat where they store it directly in /usr/include
+        SET(ARCH_INCLUDE_PATH "${LIBC_INCLUDE_PATH}/bits")
+ELSE()
+        FIND_PATH(ARCH_INCLUDE_PATH ${CMAKE_LIBRARY_ARCHITECTURE})
+        SET(ARCH_INCLUDE_PATH "${ARCH_INCLUDE_PATH}/${CMAKE_LIBRARY_ARCHITECTURE}")
+ENDIF()
 
 add_subdirectory(third-party)
 add_subdirectory(hphp)

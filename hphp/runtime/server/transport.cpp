@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/server/access-log.h"
-#include "hphp/runtime/ext/ext_openssl.h"
+#include "hphp/runtime/ext/openssl/ext_openssl.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/text-util.h"
@@ -656,14 +656,15 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
     String ip = RuntimeOption::ServerPrimaryIP;
     String key = RuntimeOption::XFBDebugSSLKey;
     String cipher("AES-256-CBC");
-    int iv_len = f_openssl_cipher_iv_length(cipher).toInt32();
-    String iv = f_openssl_random_pseudo_bytes(iv_len);
+    int iv_len = HHVM_FN(openssl_cipher_iv_length)(cipher).toInt32();
+    String iv = HHVM_FN(openssl_random_pseudo_bytes)(iv_len);
     String encrypted =
-      f_openssl_encrypt(ip, cipher, key, k_OPENSSL_RAW_DATA, iv);
+      HHVM_FN(openssl_encrypt)(ip, cipher, key, k_OPENSSL_RAW_DATA, iv);
     String output = StringUtil::Base64Encode(iv + encrypted);
     if (debug) {
-      String decrypted =
-        f_openssl_decrypt(encrypted, cipher, key, k_OPENSSL_RAW_DATA, iv);
+      String decrypted = HHVM_FN(openssl_decrypt)(
+        encrypted, cipher, key, k_OPENSSL_RAW_DATA, iv
+      );
       assert(decrypted.get()->same(ip.get()));
     }
     addHeaderImpl("X-FB-Debug", output.c_str());

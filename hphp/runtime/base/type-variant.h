@@ -115,11 +115,13 @@ struct Variant : private TypedValue {
   }
 
   // for static strings only
-  explicit Variant(const StringData *v);
+  enum class StaticStrInit {};
+  explicit Variant(const StringData *v, StaticStrInit);
 
   // These are prohibited, but declared just to prevent accidentally
   // calling the bool constructor just because we had a pointer to
   // const.
+  /* implicit */ Variant(const StringData* v) = delete;
   /* implicit */ Variant(const ArrayData *v) = delete;
   /* implicit */ Variant(const ObjectData *v) = delete;
   /* implicit */ Variant(const ResourceData *v) = delete;
@@ -510,6 +512,7 @@ struct Variant : private TypedValue {
     set(v);
     return *this;
   }
+
   template<typename T> Variant &operator=(const T &v) {
     set(v);
     return *this;

@@ -292,7 +292,7 @@ static Array getVariables(const ActRec *fp) {
       if (ptv->m_type == KindOfUninit) {
         continue;
       }
-      Variant name(func->localVarName(id));
+      Variant name(func->localVarName(id), Variant::StaticStrInit{});
       ret.add(name, tvAsVariant(ptv));
     }
     return ret.toArray();

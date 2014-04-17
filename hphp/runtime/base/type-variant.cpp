@@ -153,7 +153,7 @@ Variant::Variant(StringData *v) {
   }
 }
 
-Variant::Variant(const StringData *v) {
+Variant::Variant(const StringData* v, StaticStrInit) {
   if (v) {
     assert(v->isStatic());
     m_data.pstr = const_cast<StringData*>(v);
@@ -304,6 +304,7 @@ IMPLEMENT_SET(const StaticString&,
               assert(s);
               m_type = KindOfStaticString;
               m_data.pstr = s)
+
 
 #undef IMPLEMENT_SET_IMPL
 #undef IMPLEMENT_VOID_SET

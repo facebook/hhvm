@@ -106,7 +106,7 @@ static void getMethodNamesImpl(const Class* cls,
     auto const meth = methods[i];
     auto const declCls = meth->cls();
     auto addMeth = [&]() {
-      auto const methName = Variant(meth->name());
+      auto const methName = Variant(meth->name(), Variant::StaticStrInit{});
       auto const lowerName = f_strtolower(methName.toString());
       if (!out.exists(lowerName)) {
         out.add(lowerName, methName);
@@ -268,8 +268,13 @@ Variant HHVM_FUNCTION(get_called_class) {
   EagerCallerFrame cf;
   ActRec* ar = cf();
   if (ar) {
-    if (ar->hasThis()) return Variant(ar->getThis()->o_getClassName());
-    if (ar->hasClass()) return Variant(ar->getClass()->preClass()->name());
+    if (ar->hasThis()) {
+      return Variant(ar->getThis()->o_getClassName());
+    }
+    if (ar->hasClass()) {
+      return Variant(ar->getClass()->preClass()->name(),
+        Variant::StaticStrInit{});
+    }
   }
   return Variant(false);
 }

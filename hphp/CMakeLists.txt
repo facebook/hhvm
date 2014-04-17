@@ -15,7 +15,7 @@
 #   +----------------------------------------------------------------------+
 #
 
-if (EXISTS "public_tld")
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/public_tld")
   # I'm sorry, but facebook's internal repo has the top level dir stored inside
   # of hphp/, so we need to pull that one in first if it exists
   CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)

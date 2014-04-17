@@ -117,6 +117,22 @@ let visit ast =
         ii.PI.transfo <- PI.AddAfter (PI.AddStr "()");
       | _ -> k x
     );
+
+    V.kclass_stmt = (fun (k, _) x ->
+      match x with
+    (* methods without modifiers, we'll give a "public" modifier *)
+      | Method (method_def) -> (
+          (match method_def.f_modifiers with
+            | [] -> (
+                let ii = List.hd (Lib_parsing_php.ii_of_any (ClassStmt (Method method_def))) in
+                ii.PI.transfo <- PI.AddBefore (PI.AddStr "public ");
+              )
+            | _ -> ()
+          );
+          k x
+      )
+      | _ -> k x
+    );
   }
   in
   visitor (Program ast)

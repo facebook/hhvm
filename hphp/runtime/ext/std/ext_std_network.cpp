@@ -89,25 +89,33 @@ static Mutex NetworkMutex;
 
 class ResolverInit {
 public:
-  ResolverInit() : m_res(NULL) {
+  ResolverInit() : m_res(nullptr) {
     m_res = (struct __res_state *)calloc(1, sizeof(*m_res));
-    if (res_ninit(m_res)) {
-      free(m_res);
-      m_res = NULL;
-    }
+    initRes();
   }
   ~ResolverInit() {
     if (m_res)
       free(m_res);
-    m_res = NULL;
+    m_res = nullptr;
   }
 
   struct __res_state *getResolver(void) {
+    initRes();
     return m_res;
   }
 
   static DECLARE_THREAD_LOCAL(ResolverInit, s_res);
 private:
+  void initRes(void) {
+    if (m_res) {
+      memset(m_res, 0, sizeof(*m_res));
+      if (res_ninit(m_res)) {
+        free(m_res);
+        m_res = nullptr;
+      }
+    }
+  }
+
   struct __res_state *m_res;
 };
 IMPLEMENT_THREAD_LOCAL(ResolverInit, ResolverInit::s_res);

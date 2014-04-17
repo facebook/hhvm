@@ -1217,11 +1217,9 @@ function main($argv) {
 
   hhvm_path(); // check that binary exists
 
+  $cpus = isset($options['server']) ? num_cpus() * 2 : num_cpus();
   $options['threads'] =
-    min(count($tests), idx($options, 'threads', num_cpus() + 1));
-  if (isset($options['server'])) {
-    $options['threads'] *= 2;
-  }
+    min(count($tests), idx($options, 'threads', $cpus));
 
   $servers = null;
   if (isset($options['server'])) {

@@ -23,11 +23,6 @@
 
 namespace HPHP { namespace JIT {
 
-std::string LocalData::show() const {
-  return folly::to<std::string>(LocalId::show(), ',',
-                                typeSrc ? typeSrc->toString() : "null");
-}
-
 std::string NewStructData::show() const {
   std::ostringstream os;
   auto delim = "";

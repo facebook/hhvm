@@ -91,6 +91,9 @@ void dumpTrace(int level, const IRUnit&, const char* caption,
 inline std::ostream& operator<<(std::ostream& os, Type t) {
   return os << t.toString();
 }
+inline std::ostream& operator<<(std::ostream& os, TypeConstraint tc) {
+  return os << tc.toString();
+}
 
 }}
 

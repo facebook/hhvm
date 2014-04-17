@@ -863,11 +863,6 @@ size_t constexpr kNumOpcodes = IR_OPCODES;
 bool isGuardOp(Opcode opc);
 
 /*
- * Returns the corresponding Assert* opcode for a guard instruction.
- */
-Opcode guardToAssert(Opcode opc);
-
-/*
  * A "query op" is any instruction returning Type::Bool that is
  * negateable.
  */
@@ -1041,8 +1036,24 @@ struct CatchInfo {
 
 typedef folly::Range<TCA> TcaRange;
 
-// Used instead of StateVector because it's expected to be very sparse.
-typedef smart::flat_map<const IRInstruction*, TypeConstraint> GuardConstraints;
+/* GuardConstraints holds state that is collected during initial IR generation
+ * and needed by the guard relaxation pass. */
+struct GuardConstraints {
+  /* guards maps from guard instructions (GuardLoc, CheckLoc, GuardStk, etc...)
+   * to TypeConstraints. The TypeConstraints for a guard start out fully
+   * generic and are tightened appropriately when a value's type is used. */
+  smart::hash_map<const IRInstruction*, TypeConstraint> guards;
+
+  /* typeSrcs maps from certain instructions dealing with locals to the source
+   * of the local's type coming into the instruction: usually either a guard or
+   * the current value of the local. */
+  smart::hash_map<const IRInstruction*, SSATmp*> typeSrcs;
+
+  /* prevtypes maps from AssertLoc/CheckLoc instructions to the type of the
+   * local coming into the instruction. It is needed to compute the type of the
+   * local after the guard. */
+  smart::hash_map<const IRInstruction*, Type> prevTypes;
+};
 
 /*
  * Counts the number of cells a SpillStack will logically push.  (Not

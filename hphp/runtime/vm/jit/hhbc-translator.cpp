@@ -5088,7 +5088,11 @@ void HhbcTranslator::emitInterpOne(const NormalizedInstruction& inst) {
 
   emitInterpOne(stackType, popped, pushed, idata);
   if (checkTypeType) {
-    checkTypeTopOfStack(*checkTypeType, inst.nextSk().offset());
+    auto const out = getInstrInfo(inst.op()).out;
+    auto const checkIdx = (out & InstrFlags::StackIns2) ? 2
+                        : (out & InstrFlags::StackIns1) ? 1
+                        : 0;
+    checkTypeStack(checkIdx, *checkTypeType, inst.nextSk().offset());
   }
 }
 
@@ -5460,16 +5464,12 @@ SSATmp* HhbcTranslator::ldStackAddr(int32_t offset, TypeConstraint tc) {
 
 SSATmp* HhbcTranslator::ldLoc(uint32_t locId, TypeConstraint tc) {
   m_irb->constrainLocal(locId, tc, "LdLoc");
-  return gen(LdLoc, Type::Gen,
-             LocalData(locId, m_irb->localTypeSource(locId)),
-             m_irb->fp());
+  return gen(LdLoc, Type::Gen, LocalId(locId), m_irb->fp());
 }
 
 SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId, TypeConstraint tc) {
   m_irb->constrainLocal(locId, tc, "LdLocAddr");
-  return gen(LdLocAddr, Type::PtrToGen,
-             LocalData(locId, m_irb->localTypeSource(locId)),
-             m_irb->fp());
+  return gen(LdLocAddr, Type::PtrToGen, LocalId(locId), m_irb->fp());
 }
 
 /*
@@ -5554,7 +5554,7 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
   if (incRefNew) gen(IncRef, newVal);
   if (decRefOld) {
     gen(DecRef, innerCell);
-    m_irb->constrainValue(oldLoc, TypeConstraint(DataTypeCountness, Type::Gen,
+    m_irb->constrainValue(oldLoc, TypeConstraint(DataTypeCountness,
                                                  DataTypeCountness));
   }
 

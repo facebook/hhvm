@@ -726,9 +726,13 @@ Type refineType(Type oldType, Type newType) {
   //   oldType: Boxed{Obj}
   //   newType: Boxed{Obj<C>, InitNull}
   if (oldType.isBoxed() && newType.isBoxed() && oldType.not(newType)) {
-    return newType;
+    return oldType < newType ? oldType : newType;
   }
-  return oldType & newType;
+
+  auto const result = oldType & newType;
+  always_assert_flog(result != Type::Bottom,
+                     "refineType({}, {}) failed", oldType, newType);
+  return result;
 }
 
 Type outputType(const IRInstruction* inst, int dstId) {
@@ -995,7 +999,7 @@ std::string TypeConstraint::toString() const {
     folly::toAppend(",inner:", typeCategoryName(innerCat), &catStr);
   }
 
-  return folly::format("<{},{}>", catStr, assertedType).str();
+  return folly::format("<{}>", catStr).str();
 }
 
 //////////////////////////////////////////////////////////////////////

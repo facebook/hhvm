@@ -51,7 +51,7 @@ FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func,
 }
 
 void FrameState::update(const IRInstruction* inst) {
-  FTRACE(3, "FrameState::update processing {}\n", *inst);
+  ITRACE(3, "FrameState::update processing {}\n", *inst);
 
   if (auto* taken = inst->taken()) {
     // When we're building the IR, we append a conditional jump after
@@ -401,7 +401,7 @@ void FrameState::startBlock(Block* block) {
   auto it = m_snapshots.find(block);
   if (it != m_snapshots.end()) {
     load(it->second);
-    FTRACE(4, "Loading state for B{}: {}\n", block->id(), show(*this));
+    ITRACE(4, "Loading state for B{}: {}\n", block->id(), show(*this));
     m_inlineSavedStates = it->second.inlineSavedStates;
     m_snapshots.erase(it);
   }
@@ -444,11 +444,11 @@ FrameState::Snapshot FrameState::createSnapshot() const {
  * existing snapshot.
  */
 void FrameState::save(Block* block) {
-  FTRACE(4, "Saving state for B{}: {}\n", block->id(), show(*this));
+  ITRACE(4, "Saving state for B{}: {}\n", block->id(), show(*this));
   auto it = m_snapshots.find(block);
   if (it != m_snapshots.end()) {
     merge(it->second);
-    FTRACE(4, "Merged state: {}\n", show(*this));
+    ITRACE(4, "Merged state: {}\n", show(*this));
   } else {
     auto& snapshot = m_snapshots[block] = createSnapshot();
     snapshot.inlineSavedStates = m_inlineSavedStates;
@@ -561,7 +561,7 @@ void FrameState::trackDefInlineFP(const IRInstruction* inst) {
 
   auto const stackValues = collectStackValues(m_spValue, m_spOffset);
   for (DEBUG_ONLY auto& val : stackValues) {
-    FTRACE(4, "    marking caller stack value available: {}\n",
+    ITRACE(4, "    marking caller stack value available: {}\n",
            val->toString());
   }
 
@@ -665,14 +665,11 @@ void FrameState::refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {
   always_assert(id < m_locals.size());
   auto& local = m_locals[id];
   Type newType = refineType(local.type, type);
-  FTRACE(2, "updating local {}'s type: {} -> {}\n",
+  ITRACE(2, "updating local {}'s type: {} -> {}\n",
          id, local.type, newType);
-  always_assert_log(
-    newType != Type::Bottom,
-    [&] {
-      return folly::format("Bad new type for local {}: {} & {} = {}",
-                           id, local.type, type, newType).str();
-    });
+  always_assert_flog(newType != Type::Bottom,
+                     "Bad new type for local {}: {} & {} = {}",
+                     id, local.type, type, newType);
   local.type = newType;
   local.typeSource = typeSource;
 }

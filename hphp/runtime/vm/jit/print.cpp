@@ -92,7 +92,7 @@ void printLabel(std::ostream& os, const Block* block) {
  * IRInstruction
  */
 void printOpcode(std::ostream& os, const IRInstruction* inst,
-                 const GuardConstraints* guards) {
+                 const GuardConstraints* constraints) {
   os << color(ANSI_COLOR_CYAN)
      << opcodeName(inst->op())
      << color(ANSI_COLOR_END)
@@ -100,7 +100,8 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
 
   auto const hasTypeParam = inst->hasTypeParam();
   auto const hasExtra = inst->hasExtra();
-  auto const isGuard = guards && !inst->isTransient() && isGuardOp(inst->op());
+  auto const isGuard =
+    constraints && !inst->isTransient() && isGuardOp(inst->op());
 
   if (!hasTypeParam && !hasExtra && !isGuard) return;
   os << color(ANSI_COLOR_LIGHT_BLUE) << '<' << color(ANSI_COLOR_END);
@@ -121,8 +122,8 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
   }
 
   if (isGuard) {
-    auto it = guards->find(inst);
-    os << (it == guards->end() ? "unused" : it->second.toString());
+    auto it = constraints->guards.find(inst);
+    os << (it == constraints->guards.end() ? "unused" : it->second.toString());
   }
 
   os << color(ANSI_COLOR_LIGHT_BLUE)

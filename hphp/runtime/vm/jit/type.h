@@ -812,12 +812,10 @@ Type refineType(Type oldType, Type newType);
 
 struct TypeConstraint {
   /* implicit */ TypeConstraint(DataTypeCategory cat = DataTypeGeneric,
-                                Type aType = Type::Gen,
                                 DataTypeCategory inner = DataTypeGeneric)
     : category(cat)
     , innerCat(inner)
     , weak(false)
-    , assertedType(aType)
   {}
 
   std::string toString() const;
@@ -829,7 +827,11 @@ struct TypeConstraint {
 
   bool operator==(TypeConstraint tc2) const {
     return category == tc2.category && innerCat == tc2.innerCat &&
-      weak == tc2.weak && assertedType == tc2.assertedType;
+      weak == tc2.weak;
+  }
+
+  bool empty() const {
+    return category == DataTypeGeneric && innerCat == DataTypeGeneric && !weak;
   }
 
   // category starts as DataTypeGeneric and is refined to more specific values
@@ -846,12 +848,6 @@ struct TypeConstraint {
   // actually want to constrain the guard (if found). Most often used to figure
   // out if a type can be used without further constraining guards.
   bool weak;
-
-  // It's fairly common to emit an AssertType op with a type that is less
-  // specific than the current guard type, but more specific than the type the
-  // guard will eventually be relaxed to. We want to simplify these
-  // instructions away, and when we do, we remember their type in assertedType.
-  Type assertedType;
 };
 
 const int kTypeWordOffset = offsetof(TypedValue, m_type) % 8;

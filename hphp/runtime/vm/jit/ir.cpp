@@ -185,18 +185,6 @@ bool isGuardOp(Opcode opc) {
   }
 }
 
-Opcode guardToAssert(Opcode opc) {
-  switch (opc) {
-    case GuardLoc:
-    case CheckLoc:  return AssertLoc;
-    case GuardStk:
-    case CheckStk:  return AssertStk;
-    case CheckType: return AssertType;
-
-    default:        not_reached();
-  }
-}
-
 bool isQueryOp(Opcode opc) {
   switch (opc) {
   case Gt:

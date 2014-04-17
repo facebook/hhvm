@@ -126,23 +126,6 @@ struct LocalId : IRExtraData {
   uint32_t locId;
 };
 
-struct LocalData : LocalId {
-  explicit LocalData(uint32_t id, SSATmp* src)
-    : LocalId(id)
-    , typeSrc(src)
-  {}
-
-  bool cseEquals(const LocalData& o) const {
-    return LocalId::cseEquals(o) && typeSrc == o.typeSrc;
-  }
-  size_t cseHash() const {
-    return hash_int64_pair(LocalId::cseHash(), int64_t(typeSrc));
-  }
-  std::string show() const;
-
-  SSATmp* typeSrc;
-};
-
 struct IterId : IRExtraData {
   explicit IterId(uint32_t id)
     : iterId(id)
@@ -764,8 +747,8 @@ X(LdSSwitchDestSlow,            LdSSwitchData);
 X(GuardLoc,                     LocalId);
 X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
-X(LdLocAddr,                    LocalData);
-X(LdLoc,                        LocalData);
+X(LdLocAddr,                    LocalId);
+X(LdLoc,                        LocalId);
 X(DecRefLoc,                    LocalId);
 X(StLoc,                        LocalId);
 X(StLocNT,                      LocalId);

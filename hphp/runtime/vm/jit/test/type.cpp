@@ -245,15 +245,25 @@ TEST(Type, TypeConstraints) {
   EXPECT_FALSE(fits(Type::Gen, DataTypeSpecialized));
 
   EXPECT_TRUE(fits(Type::Cell,
-                   {DataTypeGeneric, Type::Gen, DataTypeSpecific}));
+                   {DataTypeGeneric, DataTypeSpecific}));
   EXPECT_FALSE(fits(Type::Gen,
-                    {DataTypeGeneric, Type::Gen, DataTypeSpecific}));
+                    {DataTypeGeneric, DataTypeSpecific}));
 }
 
 TEST(Type, Relax) {
   EXPECT_EQ(Type::BoxedInitCell | Type::InitNull,
-            relaxType(Type::BoxedObj | Type::InitNull,
-                      {DataTypeCountness, Type::Gen, DataTypeGeneric}));
+            relaxType(Type::BoxedObj |Type::InitNull,
+                      {DataTypeCountness, DataTypeGeneric}));
+
+  EXPECT_EQ(TypeConstraint(DataTypeCountness, DataTypeCountness),
+            relaxConstraint(TypeConstraint{DataTypeSpecific, DataTypeSpecific},
+                            Type::BoxedCell,
+                            Type::BoxedArr));
+
+  EXPECT_EQ(TypeConstraint(DataTypeGeneric, DataTypeGeneric),
+            relaxConstraint(TypeConstraint{DataTypeCountness, DataTypeSpecific},
+                            Type::BoxedArr,
+                            Type::BoxedCell));
 }
 
 TEST(Type, Specialized) {

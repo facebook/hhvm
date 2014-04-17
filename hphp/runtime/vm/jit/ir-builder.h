@@ -87,7 +87,7 @@ struct IRBuilder {
   int32_t spOffset() { return m_state.spOffset(); }
   SSATmp* sp() const { return m_state.sp(); }
   SSATmp* fp() const { return m_state.fp(); }
-  const GuardConstraints* guards() const { return &m_guardConstraints; }
+  const GuardConstraints* guards() const { return &m_constraints; }
   uint32_t stackDeficit() const { return m_state.stackDeficit(); }
   void incStackDeficit() { m_state.incStackDeficit(); }
   void clearStackDeficit() { m_state.clearStackDeficit(); }
@@ -127,8 +127,7 @@ struct IRBuilder {
 
  public:
   /*
-   * API for managing state when building IR with bytecode-level
-   * control flow.
+   * API for managing state when building IR with bytecode-level control flow.
    */
 
   /*
@@ -372,14 +371,19 @@ private:
   };
 
 private:
-  using ConstraintFunc = std::function<void(TypeConstraint)>;
-  SSATmp*   preOptimizeAssertTypeOp(IRInstruction*, Type, ConstraintFunc);
+  using ConstrainBoxedFunc = std::function<SSATmp*(Type)>;
+  SSATmp*   preOptimizeCheckTypeOp(IRInstruction* inst, Type oldType,
+                                   ConstrainBoxedFunc func);
   SSATmp*   preOptimizeCheckType(IRInstruction*);
   SSATmp*   preOptimizeCheckStk(IRInstruction*);
   SSATmp*   preOptimizeCheckLoc(IRInstruction*);
-  SSATmp*   preOptimizeAssertLoc(IRInstruction*);
-  SSATmp*   preOptimizeAssertStk(IRInstruction*);
+
+  SSATmp*   preOptimizeAssertTypeOp(IRInstruction* inst, Type oldType,
+                                    SSATmp* oldVal, IRInstruction* typeSrc);
   SSATmp*   preOptimizeAssertType(IRInstruction*);
+  SSATmp*   preOptimizeAssertStk(IRInstruction*);
+  SSATmp*   preOptimizeAssertLoc(IRInstruction*);
+
   SSATmp*   preOptimizeLdThis(IRInstruction*);
   SSATmp*   preOptimizeLdCtx(IRInstruction*);
   SSATmp*   preOptimizeDecRefThis(IRInstruction*);
@@ -421,7 +425,7 @@ private:
   bool m_enableSimplification;
   bool m_constrainGuards;
 
-  GuardConstraints m_guardConstraints;
+  GuardConstraints m_constraints;
 
   // Keep track of blocks created to support bytecode control flow.
   //

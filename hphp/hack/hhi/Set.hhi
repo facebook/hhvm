@@ -105,6 +105,7 @@ final class Set<Tv> implements MutableSet<Tv> {
   public function remove(Tv $v): Set<Tv>;
 
   public function removeAll(Traversable<Tv> $other): Set<Tv>;
+  public function difference(Traversable<Tv> $other): Set<Tv>;
 
   /**
    * Returns an iterator that points to the beginning of this Set.

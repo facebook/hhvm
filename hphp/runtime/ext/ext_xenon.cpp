@@ -135,7 +135,10 @@ Xenon& Xenon::getInstance() {
   return instance;
 }
 
-Xenon::Xenon() : m_stopping(false), m_timerid(0), m_sec(10*60), m_nsec(0) {
+Xenon::Xenon() : m_stopping(false), m_sec(10*60), m_nsec(0) {
+#ifndef __APPLE__
+  m_timerid = 0;
+#endif
 }
 
 Xenon::~Xenon() {
@@ -147,6 +150,7 @@ Xenon::~Xenon() {
 // We need to create a semaphore and a thread.
 // If all of those happen, then we need a timer attached to a signal handler.
 void Xenon::start(double seconds) {
+#ifndef __APPLE__
   TRACE(1, "XenonForceAlwaysOn %d\n", RuntimeOption::XenonForceAlwaysOn);
   if (!RuntimeOption::XenonForceAlwaysOn
       && m_timerid == 0
@@ -172,10 +176,12 @@ void Xenon::start(double seconds) {
     ts.it_interval.tv_nsec = m_nsec;
     timer_settime(m_timerid, 0, &ts, nullptr);
   }
+#endif
 }
 
 // If Xenon owns a pthread, tell it to stop, also clean up anything from start.
 void Xenon::stop() {
+#ifndef __APPLE__
   if (m_timerid) {
     m_stopping = true;
     sem_post(&m_timerTriggered);
@@ -184,6 +190,7 @@ void Xenon::stop() {
     timer_delete(m_timerid);
     sem_destroy(&m_timerTriggered);
   }
+#endif
 }
 
 // Xenon data is gathered for logging per request, "if we should"

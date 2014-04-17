@@ -80,7 +80,9 @@ class Xenon {
   private:
     sem_t     m_timerTriggered;
     pthread_t m_triggerThread;
+#ifndef __APPLE__
     timer_t   m_timerid;
+#endif
     long      m_sec;
     long      m_nsec;
 };

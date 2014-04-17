@@ -77,6 +77,12 @@ enum TransKind {
 #undef DO
 };
 
+constexpr size_t NumTransKinds =
+#define DO(KIND) + 1
+  TRANS_KINDS
+#undef DO
+  ;
+
 inline std::string show(TransKind k) {
   switch (k) {
 #   define DO(name) case Trans##name: return "Trans" #name;

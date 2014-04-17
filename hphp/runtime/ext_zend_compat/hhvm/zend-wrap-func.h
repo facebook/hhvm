@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_EXT_ZEND_COMPAT_H_
 #define incl_HPHP_EXT_ZEND_COMPAT_H_
 
+#ifdef ENABLE_ZEND_COMPAT
+
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/macros.h"
@@ -60,5 +62,9 @@ TypedValue* zend_wrap_func(ActRec* ar);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+#else
+# include "hphp/runtime/vm/native.h"
+# define zend_wrap_func Native::unimplementedWrapper
+#endif // ENABLE_ZEND_COMPAT
 
 #endif // incl_HPHP_EXT_ZEND_COMPAT_H_

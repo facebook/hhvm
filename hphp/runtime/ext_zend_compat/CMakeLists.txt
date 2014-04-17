@@ -1,4 +1,3 @@
-option(ENABLE_ZEND_COMPAT "Enable Zend source compatibility extensions" OFF)
 INCLUDE(CMakeDependentOption)
 CMAKE_DEPENDENT_OPTION(ENABLE_MONGO
   "Enable Mongo extension (requires ENABLE_ZEND_COMPAT)" OFF

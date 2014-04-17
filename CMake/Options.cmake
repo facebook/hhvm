@@ -15,3 +15,5 @@ option(USE_GOOGLE_HEAP_PROFILER "Use Google heap profiler" OFF)
 option(USE_GOOGLE_CPU_PROFILER "Use Google cpu profiler" OFF)
 
 option(DISABLE_HARDWARE_COUNTERS "Disable hardware counters (for XenU systems)" OFF)
+
+option(ENABLE_ZEND_COMPAT "Enable Zend source compatibility" OFF)

@@ -11,8 +11,12 @@ int main() { return 0; }" IS_AARCH64)
 set(HHVM_WHOLE_ARCHIVE_LIBRARIES
     hphp_runtime_static
     hphp_runtime_ext
-    hphp_ext_zend_compat
    )
+
+if (ENABLE_ZEND_COMPAT)
+  add_definitions("-DENABLE_ZEND_COMPAT=1")
+  list(APPEND HHVM_WHOLE_ARCHIVE_LIBRARIES hphp_ext_zend_compat)
+endif()
 
 if (APPLE)
 	set(HHVM_ANCHOR_SYMS
@@ -145,6 +149,12 @@ add_definitions(-DHPHP_OSS=1)
 
 # later versions of binutils don't play well without automake
 add_definitions(-DPACKAGE=hhvm -DPACKAGE_VERSION=Release)
+
+if (EXISTS "public_tld")
+  include_directories("${CMAKE_CURRENT_SOURCE_DIR}/public_tld/third-party")
+else()
+  include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../third-party")
+endif()
 
 include_directories(${HPHP_HOME}/hphp)
 include_directories(${HPHP_HOME})

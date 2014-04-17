@@ -16,7 +16,10 @@ set(CXX_SOURCES "class_map.cpp" "systemlib.cpp")
 add_library(hphp_system STATIC ${CXX_SOURCES})
 
 # Needed to force system/constants.h to generate prior to files which need it
-add_dependencies(hphp_ext_zend_compat hphp_system)
+if (ENABLE_ZEND_COMPAT)
+  add_dependencies(hphp_ext_zend_compat hphp_system)
+endif()
+
 add_dependencies(hphp_runtime_static hphp_system)
 add_dependencies(hphp_runtime_ext hphp_system)
 add_dependencies(hphp_analysis hphp_system)

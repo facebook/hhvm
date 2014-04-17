@@ -55,20 +55,25 @@ const Func* loadClassCtor(Class* cls) {
  * registers whose lifetimes end at inst, nor registers defined by inst.
  */
 LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs) {
-  StateVector<Block, RegSet> liveMap(unit, RegSet());
+  StateVector<Block, RegSet> live_in(unit, RegSet());
   LiveRegs live_regs(unit, RegSet());
-  postorderWalk(unit,
-    [&](Block* block) {
-      RegSet& live = liveMap[block];
-      if (Block* taken = block->taken()) live = liveMap[taken];
-      if (Block* next = block->next()) live |= liveMap[next];
-      for (auto it = block->end(); it != block->begin(); ) {
-        IRInstruction& inst = *--it;
-        live -= regs.dstRegs(inst);
-        live_regs[inst] = live;
-        live |= regs.srcRegs(inst);
-      }
-    });
+  for (bool changed = true; changed;) {
+    changed = false;
+    postorderWalk(unit,
+      [&](Block* block) {
+        RegSet live;
+        if (Block* taken = block->taken()) live = live_in[taken];
+        if (Block* next = block->next()) live |= live_in[next];
+        for (auto it = block->end(); it != block->begin(); ) {
+          IRInstruction& inst = *--it;
+          live -= regs.dstRegs(inst);
+          live_regs[inst] = live;
+          live |= regs.srcRegs(inst);
+        }
+        changed |= (live != live_in[block]);
+        live_in[block] = live;
+      });
+  }
   return live_regs;
 }
 

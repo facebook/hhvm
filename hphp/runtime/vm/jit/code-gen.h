@@ -97,6 +97,8 @@ const Func* loadClassCtor(Class* cls);
 
 ObjectData* createClHelper(Class*, int, ActRec*, TypedValue*);
 
+LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs);
+
 void genCode(CodeBlock&              mainCode,
              CodeBlock&              stubsCode,
              IRUnit&                 unit,

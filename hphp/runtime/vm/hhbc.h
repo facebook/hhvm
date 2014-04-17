@@ -719,22 +719,18 @@ enum class BareThisOp : uint8_t {
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
   O(CreateCl,        TWO(IVA,SA),      CVMANY,          ONE(CV),    NF) \
-  O(CreateCont,      ONE(BA),          NOV,             ONE(CV),    NF) \
+  O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
   O(ContEnter,       NA,               ONE(CV),         NOV,        CF) \
   O(ContRaise,       NA,               ONE(CV),         NOV,        CF) \
   O(ContSuspend,     NA,               ONE(CV),         ONE(CV),    NF) \
   O(ContSuspendK,    NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(ContRetC,        NA,               ONE(CV),         NOV,        CF_TF) \
   O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
   O(ContKey,         NA,               NOV,             ONE(CV),    NF) \
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
   O(ContStopped,     NA,               NOV,             NOV,        NF) \
-  O(ContHandle,      NA,               ONE(CV),         NOV,        CF_TF) \
   O(AsyncAwait,      NA,               ONE(CV),         TWO(CV,CV), NF) \
-  O(AsyncESuspend,   TWO(BA,IVA),      ONE(CV),         ONE(CV),    NF) \
-  O(AsyncResume,     NA,               NOV,             NOV,        NF) \
-  O(AsyncWrapResult, NA,               ONE(CV),         ONE(CV),    NF) \
+  O(AsyncSuspend,    ONE(IVA),         ONE(CV),         ONE(CV),    CF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(Abs,             NA,               ONE(CV),         ONE(CV),    NF) \
@@ -1013,10 +1009,6 @@ constexpr inline InstrFlags instrFlags(Op opcode) {
 
 constexpr inline bool instrIsControlFlow(Op opcode) {
   return (instrFlags(opcode) & CF) != 0;
-}
-
-constexpr inline bool instrIsInitialSuspend(Op opcode) {
-  return opcode == Op::AsyncESuspend || opcode == Op::CreateCont;
 }
 
 constexpr inline bool isUnconditionalJmp(Op opcode) {

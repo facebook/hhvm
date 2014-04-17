@@ -40,7 +40,7 @@ Array createImagickPixelArray(size_t num, PixelWand* wands[], bool owner) {
     for (int i = 0; i < num; ++i) {
       ret.appendWithRef(createImagickPixel(wands[i], owner));
     }
-    return ret.create();
+    return ret.toArray();
   }
 }
 
@@ -121,7 +121,7 @@ static Array HHVM_METHOD(ImagickPixel, getColor, bool normalized) {
   };
   auto wand = getPixelWandResource(this_);
 
-  ArrayInit ret(4);
+  ArrayInit ret(4, ArrayInit::Map{});
   for (int i = 0; i < 4; ++i) {
     double color = pixelGet[i](wand->getWand());
     if (i < 3 && !normalized) {
@@ -131,7 +131,7 @@ static Array HHVM_METHOD(ImagickPixel, getColor, bool normalized) {
       ret.set(key[i], color);
     }
   }
-  return ret.create();
+  return ret.toArray();
 }
 
 static String HHVM_METHOD(ImagickPixel, getColorAsString) {

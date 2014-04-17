@@ -57,7 +57,7 @@ union Value {
 enum VarNrFlag { NR_FLAG = 1<<29 };
 
 union AuxUnion {
-  int32_t u_hash;        // key type and hash for HphpArray and [Stable]Map
+  int32_t u_hash;        // key type and hash for MixedArray and [Stable]Map
   VarNrFlag u_varNrFlag; // magic number for asserts in VarNR
   bool u_deepInit;       // used by Class::initPropsImpl for deep init
   int32_t u_rdsHandle;   // used by unit.cpp to squirrel away rds handles TODO type

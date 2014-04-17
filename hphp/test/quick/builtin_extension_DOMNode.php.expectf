@@ -1,11 +1,10 @@
 DOMNode
 object(DOMNode)#1 (0) {
 }
-string(91) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:7:"DOMNode";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(7) "DOMNode"
-}
+
+Warning: Attempted to serialize unserializable builtin class DOMNode in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(21) {
   [0]=>
   string(11) "__construct"
@@ -52,15 +51,14 @@ array(21) {
 }
 ================
 A_DOMNode
-object(A_DOMNode)#3 (1) {
+object(A_DOMNode)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"A_DOMNode";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(9) "A_DOMNode"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_DOMNode in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(21) {
   [0]=>
   string(11) "__construct"

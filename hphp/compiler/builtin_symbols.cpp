@@ -200,11 +200,6 @@ void BuiltinSymbols::ImportExtFunctions(AnalysisResultPtr ar,
                                         ClassInfo *cls) {
   const ClassInfo::MethodVec &methods = cls->getMethodsVec();
   for (auto it = methods.begin(); it != methods.end(); ++it) {
-    if (((*it)->attribute & ClassInfo::ZendCompat) &&
-        !Option::EnableZendCompat) {
-      continue;
-    }
-
     FunctionScopePtr f = ImportFunctionScopePtr(ar, cls, *it);
     ar->addSystemFunction(f);
   }
@@ -303,13 +298,6 @@ ClassScopePtr BuiltinSymbols::ImportClassScopePtr(AnalysisResultPtr ar,
 void BuiltinSymbols::ImportExtClasses(AnalysisResultPtr ar) {
   const ClassInfo::ClassMap &classes = ClassInfo::GetClassesMap();
   for (auto it = classes.begin(); it != classes.end(); ++it) {
-
-    const ClassInfo *info = it->second;
-    if ((info->getAttribute() & ClassInfo::ZendCompat) &&
-        !Option::EnableZendCompat) {
-      continue;
-    }
-
     ClassScopePtr cl = ImportClassScopePtr(ar, it->second);
     ar->addSystemClass(cl);
   }

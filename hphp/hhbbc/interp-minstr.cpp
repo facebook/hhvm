@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -825,21 +825,7 @@ void miNewElem(MIS& env) {
   }
 
   if (env.base.type.subtypeOf(TArr)) {
-    /*
-     * Inside of an array, this appears to create a TUninit and let
-     * the next operation turn it into a real null (or stdClass or
-     * whatever).  The lvalBlackhole case explicitly unsets the
-     * blackhole before making it the base.
-     *
-     * We're representing it as TNull because it doesn't really seem
-     * like we should be using Uninit in these cases (it would be
-     * nice if Elem dims didn't have to have KindOfUninit in their
-     * switches), and a wider type is never wrong.
-     *
-     * TODO(#3821136): the KindOfUninits should never be visible, so
-     * this almost certainly can be TInitNull.
-     */
-    moveBase(env, Base { TNull, BaseLoc::PostElem, env.base.type });
+    moveBase(env, Base { TInitNull, BaseLoc::PostElem, env.base.type });
     return;
   }
 

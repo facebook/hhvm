@@ -213,13 +213,22 @@ bad_tests = (
     '/ext/standard/tests/file/copy_variation8.php',
 
     # flaky: t3851970
+    '/ext/ftp/tests/ftp_alloc_basic2.php',
     '/ext/sockets/tests/socket_write_params.php',
     '/ext/curl/tests/bug52202.php',
     '/ext/sockets/tests/socket_read_params.php',
+    '/ext/curl/tests/bug52202.php',
     '/ext/standard/tests/network/bug20134.php',
     '/ext/pcre/tests/preg_match_all_edit_basic.php',
     '/ext/standard/tests/general_functions/bug39322.php',
     '/ext/standard/tests/misc/time_sleep_until_basic.php',
+
+    # flaky on Travis: t4088096
+    '/ext/curl/tests/curl_copy_handle_basic_006.php',
+    '/ext/curl/tests/curl_copy_handle_basic_007.php',
+
+    # fails on Travis, output doesn't match: t4117208
+    '/ext/intl/tests/locale_get_display_script3.php',
 )
 
 # Tests that work but not in repo mode
@@ -299,9 +308,13 @@ norepo_tests = (
     '/ext/standard/tests/class_object/get_declared_classes_variation1.php',
     '/ext/standard/tests/class_object/get_declared_interfaces_variation1.php',
     '/ext/standard/tests/class_object/get_declared_traits_variation1.php',
+    '/ext/standard/tests/class_object/get_class_methods_variation_001',
     '/ext/standard/tests/class_object/interface_exists_variation3.php',
     '/ext/standard/tests/class_object/interface_exists_variation4.php',
     '/ext/standard/tests/class_object/is_a_variation_001.php',
+    '/ext/standard/tests/class_object/is_subclass_of_variation_002',
+    '/ext/standard/tests/class_object/method_exists_variation_002',
+    '/ext/standard/tests/class_object/property_exists_variation1',
     '/ext/standard/tests/file/file_get_contents_basic.php',
     '/ext/standard/tests/file/file_get_contents_file_put_contents_basic.php',
     '/ext/standard/tests/file/file_get_contents_file_put_contents_variation1.php',
@@ -402,6 +415,7 @@ norepo_tests = (
     '/tests/classes/autoload_018.php',
     '/tests/classes/constants_scope_001.php',
     '/tests/classes/unset_properties.php',
+    '/tests/lang/019.php',
     '/tests/lang/034.php',
     '/tests/lang/bug25922.php',
     '/tests/lang/bug32924.php',
@@ -649,6 +663,7 @@ other_files = (
     '/ext/pdo_mysql/tests/config.inc',
     '/ext/pdo_sqlite/tests/common.phpt',
     '/ext/phar/tests/files/phar_test.inc',
+    '/ext/phar/tests/tar/files/P1-1.0.0.tgz',
     '/ext/session/tests/save_handler.inc',
     '/ext/simplexml/tests/book.xml',
     '/ext/simplexml/tests/bug24392.xml',
@@ -683,6 +698,7 @@ other_files = (
     '/ext/standard/tests/array/data.inc',
     '/ext/standard/tests/class_object/AutoInterface.inc',
     '/ext/standard/tests/class_object/AutoLoaded.inc',
+    '/ext/standard/tests/class_object/AutoTest.inc',
     '/ext/standard/tests/class_object/AutoTrait.inc',
     '/ext/standard/tests/file/bug30362.txt',
     '/ext/standard/tests/file/bug40501.csv',
@@ -876,6 +892,7 @@ def walk(filename, dest_subdir):
             exp = re.sub(r'(\r\n|\r|\n)', '\n', exp.strip())
 
             # PHP puts a newline in that we don't
+            exp = exp.replace('\nParse error:', 'Parse error:')
             exp = exp.replace('\nFatal error:', 'Fatal error:')
             exp = exp.replace('\nCatchable fatal error:', 'Catchable fatal error:')
             exp = exp.replace('\nWarning:', 'Warning:')
@@ -885,7 +902,7 @@ def walk(filename, dest_subdir):
             if key == 'EXPECTREGEX':
                 match_rest_of_line = '.+'
 
-            exp = re.sub(r'Fatal\\? error\\?:.*',
+            exp = re.sub(r'(?:Parse|Fatal)\\? error\\?:.*',
                     '\nFatal error: '+match_rest_of_line, exp)
             exp = re.sub(r'Catchable\\? fatal\\? error\\?:.*',
                     '\nFatal error: '+match_rest_of_line, exp)

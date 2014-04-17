@@ -52,6 +52,8 @@ struct MemoryUsageStats {
                       // allocator size class APIs at maximum
   int64_t totalAlloc; // how many bytes have cumulatively been allocated
                       // by the underlying allocator
+  int64_t peakIntervalUsage; // peakUsage during a userland specified interval
+  int64_t peakIntervalAlloc; // peakAlloc during a userland specified interval
 };
 
 #define JEMALLOC_STATS_ADJUST(stats, amt)       \

@@ -24,18 +24,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * The error handler callbacks below are called from libxml code
- * that is compiled without frame pointers, so it's necessary to do
- * SYNC_VM_REGS_SCOPED() before calling libxml code that uses these
- * error handler callbacks.
- */
-
-void php_libxml_ctx_error(void *ctx,
-                          const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
-void php_libxml_ctx_warning(void *ctx,
-                            const char *msg, ...) ATTRIBUTE_PRINTF(2,3);
-
 Variant f_dom_document_create_element(
   const Variant& obj, const String& name, const String& value = null_string);
 Variant f_dom_document_create_document_fragment(const Variant& obj);
@@ -298,17 +286,17 @@ class c_DOMText : public c_DOMCharacterData {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class DOMCDATASection
+// class DOMCdataSection
 
-FORWARD_DECLARE_CLASS(DOMCDATASection);
-class c_DOMCDATASection : public c_DOMText {
+FORWARD_DECLARE_CLASS(DOMCdataSection);
+class c_DOMCdataSection : public c_DOMText {
  public:
-  DECLARE_CLASS_NO_SWEEP(DOMCDATASection)
+  DECLARE_CLASS_NO_SWEEP(DOMCdataSection)
 
-  c_DOMCDATASection(Class* cls = c_DOMCDATASection::classof())
+  c_DOMCdataSection(Class* cls = c_DOMCdataSection::classof())
     : c_DOMText(cls)
   {}
-  ~c_DOMCDATASection() {}
+  ~c_DOMCdataSection() {}
   public: void t___construct(const String& value);
 
 

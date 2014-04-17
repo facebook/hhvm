@@ -1,0 +1,1540 @@
+JsonSchema\Tests\Constraints\AdditionalPropertiesTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\AdditionalPropertiesTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\AdditionalPropertiesTest::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Constraints\AdditionalPropertiesTest::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Constraints\AdditionalPropertiesTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\AdditionalPropertiesTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\AdditionalPropertiesTest::testValidCases with data set #2
+.
+JsonSchema\Tests\Constraints\AdditionalPropertiesTest::testValidCases with data set #3
+.
+JsonSchema\Tests\Constraints\ArraysTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\ArraysTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\ArraysTest::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Constraints\ArraysTest::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Constraints\ArraysTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\ArraysTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\ArraysTest::testValidCases with data set #2
+.
+JsonSchema\Tests\Constraints\ArraysTest::testValidCases with data set #3
+.
+JsonSchema\Tests\Constraints\ArraysTest::testValidCases with data set #4
+.
+JsonSchema\Tests\Constraints\ArraysTest::testValidCases with data set #5
+.
+JsonSchema\Tests\Constraints\BasicTypesTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\BasicTypesTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testInvalidCases with data set #4
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testInvalidCases with data set #5
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testInvalidCases with data set #6
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testValidCases with data set #2
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testValidCases with data set #3
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testValidCases with data set #4
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testValidCases with data set #5
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testValidCases with data set #6
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testValidCases with data set #7
+.
+JsonSchema\Tests\Constraints\DependenciesTest::testValidCases with data set #8
+.
+JsonSchema\Tests\Constraints\DisallowTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\DisallowTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\DisallowTest::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Constraints\DisallowTest::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Constraints\DisallowTest::testInvalidCases with data set #4
+.
+JsonSchema\Tests\Constraints\DisallowTest::testInvalidCases with data set #5
+.
+JsonSchema\Tests\Constraints\DisallowTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\DisallowTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\DisallowTest::testValidCases with data set #2
+.
+JsonSchema\Tests\Constraints\DisallowTest::testValidCases with data set #3
+.
+JsonSchema\Tests\Constraints\DivisibleByTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\DivisibleByTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\DivisibleByTest::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Constraints\DivisibleByTest::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Constraints\DivisibleByTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\DivisibleByTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\DivisibleByTest::testValidCases with data set #2
+.
+JsonSchema\Tests\Constraints\DivisibleByTest::testValidCases with data set #3
+.
+JsonSchema\Tests\Constraints\EnumTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\EnumTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\EnumTest::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Constraints\EnumTest::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Constraints\EnumTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\EnumTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\EnumTest::testValidCases with data set #2
+.
+JsonSchema\Tests\Constraints\EnumTest::testValidCases with data set #3
+.
+JsonSchema\Tests\Constraints\EnumTest::testValidCases with data set #4
+.
+JsonSchema\Tests\Constraints\EnumTest::testValidCases with data set #5
+.
+JsonSchema\Tests\Constraints\ExtendsTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\ExtendsTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\ExtendsTest::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Constraints\ExtendsTest::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Constraints\ExtendsTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\ExtendsTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\ExtendsTest::testValidCases with data set #2
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #0
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #1
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #10
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #11
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #12
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #13
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #14
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #15
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #16
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #17
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #18
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #19
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #2
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #20
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #21
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #22
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #23
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #3
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #4
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #5
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #6
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #7
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #8
+.
+JsonSchema\Tests\Constraints\FormatTest::testInvalidFormat with data set #9
+.
+JsonSchema\Tests\Constraints\FormatTest::testNullThing
+.
+JsonSchema\Tests\Constraints\FormatTest::testRegex
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #0
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #1
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #10
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #11
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #12
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #13
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #14
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #15
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #16
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #17
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #18
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #19
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #2
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #20
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #21
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #22
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #23
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #24
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #25
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #26
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #27
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #28
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #29
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #3
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #30
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #31
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #32
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #33
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #34
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #35
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #36
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #37
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #4
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #5
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #6
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #7
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #8
+.
+JsonSchema\Tests\Constraints\FormatTest::testValidFormat with data set #9
+.
+JsonSchema\Tests\Constraints\MinItemsMaxItemsTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\MinItemsMaxItemsTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\MinItemsMaxItemsTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\MinItemsMaxItemsTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\MinLengthMaxLengthTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\MinLengthMaxLengthTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\MinLengthMaxLengthTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\MinLengthMaxLengthTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testInvalidCases with data set #4
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testInvalidCases with data set #5
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testInvalidCases with data set #6
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testInvalidCases with data set #7
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testValidCases with data set #2
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testValidCases with data set #3
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testValidCases with data set #4
+.
+JsonSchema\Tests\Constraints\MinimumMaximumTest::testValidCases with data set #5
+.
+JsonSchema\Tests\Constraints\NotTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\NotTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\NotTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\NumberAndIntegerTypesTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\NumberAndIntegerTypesTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\NumberAndIntegerTypesTest::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Constraints\NumberAndIntegerTypesTest::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Constraints\NumberAndIntegerTypesTest::testInvalidCases with data set #4
+.
+JsonSchema\Tests\Constraints\NumberAndIntegerTypesTest::testInvalidCases with data set #5
+.
+JsonSchema\Tests\Constraints\NumberAndIntegerTypesTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\NumberAndIntegerTypesTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\NumberAndIntegerTypesTest::testValidCases with data set #2
+.
+JsonSchema\Tests\Constraints\NumberAndIntegerTypesTest::testValidCases with data set #3
+.
+JsonSchema\Tests\Constraints\OfPropertiesTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\OfPropertiesTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\OfPropertiesTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\PatternPropertiesTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\PatternPropertiesTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\PatternPropertiesTest::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Constraints\PatternPropertiesTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\PatternPropertiesTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\PatternTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\PatternTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\PatternTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\PatternTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\PatternTest::testValidCases with data set #2
+.
+JsonSchema\Tests\Constraints\ReadOnlyTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\ReadOnlyTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\RequireTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\RequireTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testInvalidCases with data set #10
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testInvalidCases with data set #11
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testInvalidCases with data set #4
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testInvalidCases with data set #5
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testInvalidCases with data set #6
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testInvalidCases with data set #7
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testInvalidCases with data set #8
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testInvalidCases with data set #9
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testValidCases with data set #2
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testValidCases with data set #3
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testValidCases with data set #4
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testValidCases with data set #5
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testValidCases with data set #6
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testValidCases with data set #7
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testValidCases with data set #8
+.
+JsonSchema\Tests\Constraints\RequiredPropertyTest::testValidCases with data set #9
+.
+JsonSchema\Tests\Constraints\SelfDefinedSchemaTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\SelfDefinedSchemaTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\TupleTypingTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\TupleTypingTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\TupleTypingTest::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Constraints\TupleTypingTest::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Constraints\TupleTypingTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\TupleTypingTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\TupleTypingTest::testValidCases with data set #2
+.
+JsonSchema\Tests\Constraints\UnionTypesTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\UnionTypesTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\UnionWithNullValueTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\UnionWithNullValueTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\UniqueItemsTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\UniqueItemsTest::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Constraints\UniqueItemsTest::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Constraints\UniqueItemsTest::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Constraints\UniqueItemsTest::testInvalidCases with data set #4
+.
+JsonSchema\Tests\Constraints\UniqueItemsTest::testInvalidCases with data set #5
+.
+JsonSchema\Tests\Constraints\UniqueItemsTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Constraints\UniqueItemsTest::testValidCases with data set #1
+.
+JsonSchema\Tests\Constraints\UniqueItemsTest::testValidCases with data set #2
+.
+JsonSchema\Tests\Constraints\UniqueItemsTest::testValidCases with data set #3
+.
+JsonSchema\Tests\Constraints\UniqueItemsTest::testValidCases with data set #4
+.
+JsonSchema\Tests\Constraints\UniqueItemsTest::testValidCases with data set #5
+.
+JsonSchema\Tests\Constraints\UniqueItemsTest::testValidCases with data set #6
+.
+JsonSchema\Tests\Constraints\WrongMessagesFailingTestCaseTest::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Constraints\WrongMessagesFailingTestCaseTest::testValidCases with data set #0
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #10
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #100
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #101
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #102
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #103
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #104
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #105
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #106
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #107
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #108
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #109
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #11
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #110
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #111
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #112
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #113
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #114
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #115
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #116
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #117
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #118
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #119
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #12
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #120
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #121
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #122
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #123
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #124
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #125
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #126
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #127
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #128
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #129
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #13
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #14
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #15
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #16
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #17
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #18
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #19
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #20
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #21
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #22
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #23
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #24
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #25
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #26
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #27
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #28
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #29
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #30
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #31
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #32
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #33
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #34
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #35
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #36
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #37
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #38
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #39
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #4
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #40
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #41
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #42
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #43
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #44
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #45
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #46
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #47
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #48
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #49
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #5
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #50
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #51
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #52
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #53
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #54
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #55
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #56
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #57
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #58
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #59
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #6
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #60
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #61
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #62
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #63
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #64
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #65
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #66
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #67
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #68
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #69
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #7
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #70
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #71
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #72
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #73
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #74
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #75
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #76
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #77
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #78
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #79
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #8
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #80
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #81
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #82
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #83
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #84
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #85
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #86
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #87
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #88
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #89
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #9
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #90
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #91
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #92
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #93
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #94
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #95
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #96
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #97
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #98
+.
+JsonSchema\Tests\Drafts\Draft3Test::testInvalidCases with data set #99
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #0
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #1
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #10
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #100
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #101
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #102
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #103
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #104
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #105
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #106
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #107
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #108
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #109
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #11
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #110
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #111
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #112
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #113
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #114
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #115
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #12
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #13
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #14
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #15
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #16
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #17
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #18
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #19
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #2
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #20
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #21
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #22
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #23
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #24
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #25
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #26
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #27
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #28
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #29
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #3
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #30
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #31
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #32
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #33
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #34
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #35
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #36
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #37
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #38
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #39
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #4
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #40
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #41
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #42
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #43
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #44
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #45
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #46
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #47
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #48
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #49
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #5
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #50
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #51
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #52
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #53
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #54
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #55
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #56
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #57
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #58
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #59
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #6
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #60
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #61
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #62
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #63
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #64
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #65
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #66
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #67
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #68
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #69
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #7
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #70
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #71
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #72
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #73
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #74
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #75
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #76
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #77
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #78
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #79
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #8
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #80
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #81
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #82
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #83
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #84
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #85
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #86
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #87
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #88
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #89
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #9
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #90
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #91
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #92
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #93
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #94
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #95
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #96
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #97
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #98
+.
+JsonSchema\Tests\Drafts\Draft3Test::testValidCases with data set #99
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #0
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #1
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #10
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #100
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #101
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #102
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #103
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #104
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #105
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #106
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #107
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #108
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #109
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #11
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #110
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #111
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #112
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #113
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #114
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #115
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #116
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #117
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #118
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #119
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #12
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #120
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #121
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #122
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #123
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #124
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #125
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #13
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #14
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #15
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #16
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #17
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #18
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #19
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #2
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #20
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #21
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #22
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #23
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #24
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #25
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #26
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #27
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #28
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #29
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #3
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #30
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #31
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #32
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #33
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #34
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #35
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #36
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #37
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #38
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #39
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #4
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #40
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #41
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #42
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #43
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #44
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #45
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #46
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #47
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #48
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #49
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #5
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #50
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #51
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #52
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #53
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #54
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #55
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #56
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #57
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #58
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #59
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #6
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #60
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #61
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #62
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #63
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #64
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #65
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #66
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #67
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #68
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #69
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #7
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #70
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #71
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #72
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #73
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #74
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #75
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #76
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #77
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #78
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #79
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #8
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #80
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #81
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #82
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #83
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #84
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #85
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #86
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #87
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #88
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #89
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #9
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #90
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #91
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #92
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #93
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #94
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #95
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #96
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #97
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #98
+.
+JsonSchema\Tests\Drafts\Draft4Test::testInvalidCases with data set #99
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #0
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #1
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #10
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #100
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #101
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #102
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #103
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #104
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #105
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #106
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #107
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #108
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #109
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #11
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #12
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #13
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #14
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #15
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #16
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #17
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #18
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #19
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #2
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #20
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #21
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #22
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #23
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #24
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #25
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #26
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #27
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #28
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #29
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #3
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #30
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #31
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #32
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #33
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #34
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #35
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #36
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #37
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #38
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #39
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #4
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #40
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #41
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #42
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #43
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #44
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #45
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #46
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #47
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #48
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #49
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #5
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #50
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #51
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #52
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #53
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #54
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #55
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #56
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #57
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #58
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #59
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #6
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #60
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #61
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #62
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #63
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #64
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #65
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #66
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #67
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #68
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #69
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #7
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #70
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #71
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #72
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #73
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #74
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #75
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #76
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #77
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #78
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #79
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #8
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #80
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #81
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #82
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #83
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #84
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #85
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #86
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #87
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #88
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #89
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #9
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #90
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #91
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #92
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #93
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #94
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #95
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #96
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #97
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #98
+.
+JsonSchema\Tests\Drafts\Draft4Test::testValidCases with data set #99
+.
+JsonSchema\Tests\RefResolverTest::testFetchRef
+.
+JsonSchema\Tests\RefResolverTest::testFetchRefAbsolute
+.
+JsonSchema\Tests\RefResolverTest::testFetchRefAbsoluteAnchor
+.
+JsonSchema\Tests\RefResolverTest::testFetchRefRelativeAnchor
+.
+JsonSchema\Tests\RefResolverTest::testResolve with data set "empty object"
+.
+JsonSchema\Tests\RefResolverTest::testResolve with data set "non-object"
+.
+JsonSchema\Tests\RefResolverTest::testResolveArrayOfSchemas with data set "empty array"
+.
+JsonSchema\Tests\RefResolverTest::testResolveArrayOfSchemas with data set "empty object"
+.
+JsonSchema\Tests\RefResolverTest::testResolveArrayOfSchemas with data set "filled array"
+.
+JsonSchema\Tests\RefResolverTest::testResolveArrayOfSchemas with data set "filled object"
+.
+JsonSchema\Tests\RefResolverTest::testResolveArrayOfSchemas with data set "non-object"
+.
+JsonSchema\Tests\RefResolverTest::testResolveArrayOfSchemas with data set "undefined"
+.
+JsonSchema\Tests\RefResolverTest::testResolveObjectOfSchemas with data set "empty array"
+.
+JsonSchema\Tests\RefResolverTest::testResolveObjectOfSchemas with data set "empty object"
+.
+JsonSchema\Tests\RefResolverTest::testResolveObjectOfSchemas with data set "filled array"
+.
+JsonSchema\Tests\RefResolverTest::testResolveObjectOfSchemas with data set "filled object"
+.
+JsonSchema\Tests\RefResolverTest::testResolveObjectOfSchemas with data set "non-object"
+.
+JsonSchema\Tests\RefResolverTest::testResolveObjectOfSchemas with data set "undefined"
+.
+JsonSchema\Tests\RefResolverTest::testResolveRef with data set "empty ref"
+.
+JsonSchema\Tests\RefResolverTest::testResolveRef with data set "no ref"
+.
+JsonSchema\Tests\RefResolverTest::testResolveRef with data set "qualified ref"
+.
+JsonSchema\Tests\RefResolverTest::testSchemas
+.
+JsonSchema\Tests\RefResolverTest::testSetGetUriRetriever
+.
+JsonSchema\Tests\Uri\Retrievers\PredefinedArrayTest::testGetContentType
+.
+JsonSchema\Tests\Uri\Retrievers\PredefinedArrayTest::testRetrieve
+.
+JsonSchema\Tests\Uri\Retrievers\PredefinedArrayTest::testRetrieveNonExistsingSchema
+.
+JsonSchema\Tests\Uri\UriResolverTest::testCombineRelativePathWithBasePath
+.
+JsonSchema\Tests\Uri\UriResolverTest::testCombineRelativePathWithBasePathAbsolute
+.
+JsonSchema\Tests\Uri\UriResolverTest::testCombineRelativePathWithBasePathNoPath
+.
+JsonSchema\Tests\Uri\UriResolverTest::testCombineRelativePathWithBasePathRelativeSub
+.
+JsonSchema\Tests\Uri\UriResolverTest::testParse
+.
+JsonSchema\Tests\Uri\UriResolverTest::testParseAnchor
+.
+JsonSchema\Tests\Uri\UriResolverTest::testResolveAbsoluteUri
+.
+JsonSchema\Tests\Uri\UriResolverTest::testResolveAnchor
+.
+JsonSchema\Tests\Uri\UriResolverTest::testResolveAnchorAnchor
+.
+JsonSchema\Tests\Uri\UriResolverTest::testResolveAnchorWithFile
+.
+JsonSchema\Tests\Uri\UriResolverTest::testResolveEmpty
+.
+JsonSchema\Tests\Uri\UriResolverTest::testResolveRelativeUriBaseDir
+.
+JsonSchema\Tests\Uri\UriResolverTest::testResolveRelativeUriBaseFile
+.
+JsonSchema\Tests\Uri\UriResolverTest::testResolveRelativeUriNoBase
+.
+JsonSchema\Tests\Uri\UriRetrieverTest::testChildExtendsParentInvalidChildTest with data set #0
+.
+JsonSchema\Tests\Uri\UriRetrieverTest::testChildExtendsParentInvalidParentTest with data set #0
+.
+JsonSchema\Tests\Uri\UriRetrieverTest::testChildExtendsParentValidTest with data set #0
+.
+JsonSchema\Tests\Uri\UriRetrieverTest::testResolvePointerFragment
+.
+JsonSchema\Tests\Uri\UriRetrieverTest::testResolvePointerFragmentNoArray
+.
+JsonSchema\Tests\Uri\UriRetrieverTest::testResolvePointerFragmentNotFound
+.
+JsonSchema\Tests\Uri\UriRetrieverTest::testResolvePointerNoFragment
+.
+JsonSchema\Tests\Uri\UriRetrieverTest::testResolveRelativeUri with data set #0
+.

@@ -861,7 +861,12 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
 
     // Import any interfaces implemented
     tCls->getInterfaces(ar, m_bases, false);
-
+  }
+  for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
+    // Requirements must be checked in a separate loop because the
+    // interfaces required by one trait may be implemented by another trait
+    // whose "use" appears later in the class' scope
+    ClassScopePtr tCls = ar->findClass(m_usedTraitNames[i]);
     importTraitRequirements(ar, tCls);
   }
 

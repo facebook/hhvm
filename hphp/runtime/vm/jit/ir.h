@@ -95,18 +95,21 @@ class FailedCodeGen : public std::runtime_error {
   const char*    func;
   const Offset   bcOff;
   const Func*    vmFunc;
+  const bool     resumed;
 
   FailedCodeGen(const char* _file, int _line, const char* _func,
-                uint32_t _bcOff, const Func* _vmFunc)
-    : std::runtime_error(folly::format("FailedCodeGen @ {}:{} in {}. {}@{}",
+                uint32_t _bcOff, const Func* _vmFunc, bool _resumed)
+    : std::runtime_error(folly::format("FailedCodeGen @ {}:{} in {}. {}@{}{}",
                                        _file, _line, _func,
-                                       _vmFunc->fullName()->data(), _bcOff)
+                                       _vmFunc->fullName()->data(), _bcOff,
+                                       _resumed ? "r" : "")
                          .str())
     , file(_file)
     , line(_line)
     , func(_func)
     , bcOff(_bcOff)
     , vmFunc(_vmFunc)
+    , resumed(_resumed)
   {}
 };
 
@@ -383,7 +386,7 @@ O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
 O(JmpIndirect,                      ND, S(TCA),                          T|E) \
 O(CheckSurpriseFlags,               ND, NA,                              B|E) \
 O(SurpriseHook,                     ND, NA,                           Er|N|E) \
-O(FunctionExitSurpriseHook,         ND, S(FramePtr) S(StkPtr) S(Gen), Er|N|E) \
+O(FunctionExitSurpriseHook,         ND, S(FramePtr) S(Gen),           Er|N|E) \
 O(ExitOnVarEnv,                     ND, S(FramePtr),                     B|E) \
 O(ReleaseVVOrExit,                  ND, S(FramePtr),                   B|N|E) \
 O(RaiseError,                       ND, S(Str),                     E|N|T|Er) \
@@ -394,7 +397,7 @@ O(CheckInit,                        ND, S(Gen),                            B) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),                B) \
 O(CheckCold,                        ND, NA,                              B|E) \
 O(CheckNullptr,                     ND, S(CountedStr,Nullptr),       B|E|CRc) \
-O(CheckNonNull,  DSubtract(0, Nullptr), S(Nullptr,Func),                   B) \
+O(CheckNonNull,  DSubtract(0, Nullptr), S(Nullptr,Func,PtrToGen),          B) \
 O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
 O(LdVectorSize,                 D(Int), S(Obj),                            E) \
 O(CheckPackedArrayBounds,           ND, S(Arr) S(Int),                   B|E) \
@@ -450,13 +453,14 @@ O(LookupClsMethodFCache,                                                      \
                        D(Func|Nullptr), C(Cls)                                \
                                           S(FramePtr),                N|E|Er) \
 O(GetCtxFwdCallDyn,             D(Ctx), S(Ctx),                          PRc) \
-O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                C|PRc) \
+O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                  PRc) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
-O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),     B|C|E|N|Er) \
-O(LdClsPropAddrCached,          DParam, S(Cls) CStr CStr C(Cls),  B|C|E|N|Er) \
+O(LdClsPropAddrKnown,           DParam, C(Cls) CStr,                       C) \
+O(LdClsPropAddrOrNull,                                                        \
+                   D(PtrToGen|Nullptr), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
+O(LdClsPropAddrOrRaise,    D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
 O(LdClsInitData,          D(PtrToCell), S(Cls),                          N|C) \
-O(LdClsStaticInitData,    D(PtrToCell), S(Cls),                          N|C) \
 O(LdObjMethod,                      ND, S(Cls) CStr S(StkPtr),        E|N|Er) \
 O(LdObjInvoke,                 D(Func), S(Cls),                            B) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                          E|N) \
@@ -507,6 +511,7 @@ O(Call,                      D(StkPtr), SUnk,                          E|CRc) \
 O(CallArray,                 D(StkPtr), S(StkPtr),                   E|N|CRc) \
 O(CallBuiltin,                DBuiltin, SUnk,                     E|Er|N|PRc) \
 O(NativeImpl,                       ND, C(Func) S(FramePtr),             E|N) \
+O(Halt,                             ND, NA,                              T|E) \
 O(RetCtrl,                          ND, S(StkPtr)                             \
                                           S(FramePtr)                         \
                                           S(RetAddr),                    T|E) \
@@ -549,7 +554,7 @@ O(IncRefCtx,                        ND, S(Ctx),                            E) \
 O(DecRefLoc,                        ND, S(FramePtr),                     N|E) \
 O(DecRefStack,                      ND, S(StkPtr),                       N|E) \
 O(DecRefThis,                       ND, S(FramePtr),                     N|E) \
-O(GenericRetDecRefs,         D(StkPtr), S(FramePtr),                     E|N) \
+O(GenericRetDecRefs,                ND, S(FramePtr),                     E|N) \
 O(DecRef,                           ND, S(Gen),                    N|E|K|CRc) \
 O(DecRefNZ,                         ND, S(Gen),                      N|E|CRc) \
 O(DecRefMem,                        ND, S(PtrToGen)                           \
@@ -607,8 +612,8 @@ O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
 O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                     T|E|N|Er) \
 O(Shuffle,                          ND, SUnk,                             NF) \
-O(CreateContFunc,               D(Obj), C(Int),                      E|N|PRc) \
-O(CreateContMeth,               D(Obj), S(Ctx) C(Int),               E|N|PRc) \
+O(CreateContFunc,               D(Obj), S(FramePtr) C(Int),          E|N|PRc) \
+O(CreateContMeth,               D(Obj), S(FramePtr) C(Int),          E|N|PRc) \
 O(ContEnter,                        ND, S(FramePtr)                           \
                                           S(TCA) C(Int) S(FramePtr),       E) \
 O(ContPreNext,                      ND, S(Obj),                          B|E) \
@@ -627,8 +632,12 @@ O(StContArKey,                      ND, S(FramePtr) S(Gen),            E|CRc) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
-O(CreateAFWHFunc,               D(Obj), C(Int) S(Obj),        E|Er|N|CRc|PRc) \
-O(CreateAFWHMeth,               D(Obj), S(Ctx) C(Int) S(Obj), E|Er|N|CRc|PRc) \
+O(CreateAFWHFunc,               D(Obj), S(FramePtr)                           \
+                                          C(Int)                              \
+                                          S(Obj),             E|Er|N|CRc|PRc) \
+O(CreateAFWHMeth,               D(Obj), S(FramePtr)                           \
+                                          C(Int)                              \
+                                          S(Obj),             E|Er|N|CRc|PRc) \
 O(CreateSRWH,                   D(Obj), S(Cell),                   N|CRc|PRc) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr),            Er|E|N|CRc) \
@@ -651,7 +660,7 @@ O(MIterNextK,                  D(Bool), S(FramePtr),                     E|N) \
 O(IterFree,                         ND, S(FramePtr),                     E|N) \
 O(MIterFree,                        ND, S(FramePtr),                     E|N) \
 O(DecodeCufIter,               D(Bool), S(Arr,Obj,Str)                        \
-                                          S(FramePtr),                   E|N) \
+                                          S(FramePtr),                Er|E|N) \
 O(CIterFree,                        ND, S(FramePtr),                     E|N) \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
 O(BaseG,                   D(PtrToGen), C(TCA)                                \

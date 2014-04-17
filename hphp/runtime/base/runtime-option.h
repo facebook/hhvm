@@ -389,6 +389,7 @@ public:
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
   F(bool, PerfPidMap,                  true)                            \
+  F(bool, PerfDataMap,                 false)                           \
   F(bool, KeepPerfPidMap,              false)                           \
   F(bool, RuntimeTypeProfile,          false)                           \
   F(int32_t, RuntimeTypeProfileLoggingFreq,  0)                         \
@@ -424,7 +425,7 @@ public:
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRJumpOpts,                true)                            \
-  F(bool, HHIRRefcountOpts,            hhirRefcountOptsDefault())       \
+  F(bool, HHIRRefcountOpts,            true)                            \
   F(bool, HHIRRefcountOptsAlwaysSink,  false)                           \
   F(bool, HHIRExtraOptPass,            true)                            \
   F(uint32_t, HHIRNumFreeRegs,         64)                              \
@@ -563,6 +564,10 @@ public:
   static int Fb303ServerWorkerThreads;
   static int Fb303ServerPoolThreads;
 #endif
+
+  // Xenon options
+  static double XenonPeriodSeconds;
+  static bool XenonForceAlwaysOn;
 
   // Convenience switch to turn on/off code alternatives via command-line
   // Do not commit code guarded by this flag, for evaluation only.

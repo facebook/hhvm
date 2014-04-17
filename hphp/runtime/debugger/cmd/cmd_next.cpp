@@ -158,9 +158,9 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
     return;
   }
 
-  if (m_skippingAsyncESuspend) {
-    m_skippingAsyncESuspend = false;
-    stepAfterAsyncESuspend();
+  if (m_skippingAsyncSuspend) {
+    m_skippingAsyncSuspend = false;
+    stepAfterAsyncSuspend();
     return;
   }
 
@@ -203,25 +203,26 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
   // stepping over an await, we land on the next statement.
   auto op = *reinterpret_cast<const Op*>(pc);
   if (fp->inGenerator() &&
-      (op == OpContSuspend || op == OpContSuspendK || op == OpContRetC)) {
+      (op == OpContSuspend || op == OpContSuspendK ||
+       op == OpAsyncSuspend || op == OpRetC)) {
     TRACE(2, "CmdNext: encountered yield, await or return from generator\n");
     // Patch the projected return point(s) in both cases for
     // generators, to catch if we exit the the asio iterator or if we
     // are being iterated directly by PHP.
-    if ((op == OpContRetC) || !fp->m_func->isAsync()) setupStepOuts();
+    if ((op == OpRetC) || !fp->m_func->isAsync()) setupStepOuts();
     op = *reinterpret_cast<const Op*>(pc);
-    if (op == OpContSuspend || op == OpContSuspendK) {
+    if (op == OpAsyncSuspend || op == OpContSuspend || op == OpContSuspendK) {
       // Patch the next normal execution point so we can pickup the stepping
       // from there if the caller is C++.
       setupStepCont(fp, pc);
     }
     removeLocationFilter();
     return;
-  } else if (op == OpAsyncESuspend) {
+  } else if (op == OpAsyncSuspend) {
     // We need to step over this opcode, then grab the continuation
     // and setup continuation stepping like we do for OpContSuspend.
     TRACE(2, "CmdNext: encountered create async\n");
-    m_skippingAsyncESuspend = true;
+    m_skippingAsyncSuspend = true;
     m_needsVMInterrupt = true;
     removeLocationFilter();
     return;
@@ -254,12 +255,12 @@ void CmdNext::setupStepCont(ActRec* fp, PC pc) {
   m_stepCont = StepDestination(fp->m_func->unit(), nextInst);
 }
 
-// A AsyncESuspend is used in the codegen for an async function to setup
+// A AsyncSuspend is used in the codegen for an async function to setup
 // a Continuation and return a wait handle so execution can continue
-// later. We have just completed a AsyncESuspend, so the new
+// later. We have just completed a AsyncSuspend, so the new
 // Continuation is available, and it can predict where execution will
 // resume.
-void CmdNext::stepAfterAsyncESuspend() {
+void CmdNext::stepAfterAsyncSuspend() {
   auto topObj = g_context->getStack().topTV()->m_data.pobj;
   assert(topObj->instanceof(c_AsyncFunctionWaitHandle::classof()));
   auto wh = static_cast<c_AsyncFunctionWaitHandle*>(topObj);
@@ -268,7 +269,7 @@ void CmdNext::stepAfterAsyncESuspend() {
   assert(nextInst != InvalidAbsoluteOffset);
   m_stepContTag = wh->getActRec();
   TRACE(2,
-        "CmdNext: patch for cont step after AsyncESuspend at '%s' offset %d\n",
+        "CmdNext: patch for cont step after AsyncSuspend at '%s' offset %d\n",
         func->fullName()->data(), nextInst);
   m_stepCont = StepDestination(func->unit(), nextInst);
 }

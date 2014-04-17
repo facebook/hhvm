@@ -253,8 +253,9 @@ private:
   char *m_buffer;
   int64_t m_bufferSize;
 
+  template<class ResourceList>
   String applyFilters(const String& buffer,
-                      smart::list<Resource>& filters,
+                      ResourceList& filters,
                       bool closing);
 };
 

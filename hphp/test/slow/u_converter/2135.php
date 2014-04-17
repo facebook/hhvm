@@ -10,8 +10,18 @@ class MyConverter extends UConverter {
     return parent::fromUCallback($reason, $source, $codePoint, $error);
   }
 }
-$c = new MyConverter('ascii', 'utf-8');
-foreach(array("regular", "irregul\xC1\xA1r", "\xC2\xA1unsupported!") as $word) {
-  $c->convert($word);
+
+function main() {
+  $c = new MyConverter('ascii', 'utf-8');
+  $words = array(
+    "regular",
+    "irregul\xC1\xA1r",
+    "\xC2\xA1unsupported!",
+  );
+  foreach($words as $word) {
+    $c->convert($word);
+  }
+  unset($c);
 }
-unset($c);
+
+main();

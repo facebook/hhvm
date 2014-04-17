@@ -256,7 +256,7 @@ int64_t* ProfData::transCounterAddr(TransID id) {
 }
 
 TransID ProfData::prologueTransId(const Func* func, int nArgs) const {
-  int numParams = func->numParams();
+  int numParams = func->numNonVariadicParams();
   if (nArgs > numParams) nArgs = numParams + 1;
   FuncId funcId = func->getFuncId();
   return m_prologueDB.get(funcId, nArgs);
@@ -310,14 +310,36 @@ RegionDescPtr ProfData::transRegion(TransID id) const {
   return pTransRec.region();
 }
 
+/*
+ * Returns the last BC offset in the region that corresponds to the
+ * function where the region starts.  This will normally be the offset
+ * of the last instruction in the last block, except if the function
+ * ends with an inlined call.  In this case, the offset of the
+ * corresponding FCall* in the function that starts the region is
+ * returned.
+ */
+static Offset findLastBcOffset(const RegionDescPtr region) {
+  assert(region->blocks.size() > 0);
+  auto& blocks = region->blocks;
+  FuncId startFuncId = blocks[0]->start().getFuncId();
+  for (int i = blocks.size() - 1; i >= 0; i--) {
+    SrcKey sk = blocks[i]->last();
+    if (sk.getFuncId() == startFuncId) {
+      return sk.offset();
+    }
+  }
+  not_reached();
+}
+
 TransID ProfData::addTransProfile(const RegionDescPtr&  region,
                                   const PostConditions& pconds) {
   TransID transId   = m_numTrans++;
-  Offset  lastBcOff = region->blocks.back()->last().offset();
+  Offset  lastBcOff = findLastBcOffset(region);
 
   assert(region);
   DEBUG_ONLY size_t nBlocks = region->blocks.size();
   assert(nBlocks == 1 || (nBlocks > 1 && region->blocks[0]->inlinedCallee()));
+  region->blocks.front()->setId(transId);
 
   region->blocks.back()->setPostConditions(pconds);
   auto const startSk = region->blocks.front()->start();

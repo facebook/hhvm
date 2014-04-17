@@ -96,6 +96,7 @@ struct JmpSwitchData : IRExtraData {
     JmpSwitchData* sd = new (arena) JmpSwitchData;
     sd->func       = func;
     sd->base       = base;
+    sd->resumed    = resumed;
     sd->bounded    = bounded;
     sd->cases      = cases;
     sd->defaultOff = defaultOff;
@@ -106,6 +107,7 @@ struct JmpSwitchData : IRExtraData {
 
   const Func* func;
   int64_t base;        // base of switch case
+  bool    resumed;     // whether the destination is in resumed context
   bool    bounded;     // whether switch is bounded or not
   int32_t cases;       // number of cases
   Offset  defaultOff;  // offset of default case
@@ -401,16 +403,18 @@ struct CallData : IRExtraData {
   bool destroyLocals;
 };
 
-struct InGeneratorData : IRExtraData {
-  explicit InGeneratorData(bool inGenerator)
-    : inGenerator(inGenerator)
+struct RetCtrlData : IRExtraData {
+  explicit RetCtrlData(bool suspendingResumed)
+    : suspendingResumed(suspendingResumed)
   {}
 
   std::string show() const {
-    return inGenerator ? "in generator" : "";
+    return suspendingResumed ? "suspending resumed" : "";
   }
 
-  bool inGenerator;
+  // Indicates that the current generator frame is being suspended without
+  // decrefing locals. Used by refcount optimizer.
+  bool suspendingResumed;
 };
 
 /*
@@ -584,21 +588,6 @@ struct InterpOneData : IRExtraData {
 
     return ret;
   }
-};
-
-/*
- * Information for creating continuation objects.
- * Create{Cont,AFWH}{Func,Meth}.
- */
-struct CreateContData : IRExtraData {
-  explicit CreateContData(const Func* func) : func(func) {}
-
-  std::string show() const {
-    auto name = func->fullName()->data();
-    return folly::to<std::string>(name, "()");
-  }
-
-  const Func* func;
 };
 
 /*
@@ -820,8 +809,8 @@ X(IncProfCounter,               TransIDData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallData);
 X(CallArray,                    CallArrayData);
-X(RetCtrl,                      InGeneratorData);
-X(FunctionExitSurpriseHook,     InGeneratorData);
+X(RetCtrl,                      RetCtrlData);
+X(FunctionExitSurpriseHook,     RetCtrlData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);
 X(LookupClsMethodCache,         ClsMethodData);
@@ -877,10 +866,6 @@ X(CheckDefinedClsEq,            CheckDefinedClsData);
 X(InterpOne,                    InterpOneData);
 X(TypeProfileFunc,              TypeProfileData);
 X(InterpOneCF,                  InterpOneData);
-X(CreateContFunc,               CreateContData);
-X(CreateContMeth,               CreateContData);
-X(CreateAFWHFunc,               CreateContData);
-X(CreateAFWHMeth,               CreateContData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);

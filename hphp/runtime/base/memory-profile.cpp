@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/pprof-server.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 
 namespace HPHP {
 
@@ -40,7 +40,7 @@ static ProfileStackTrace getStackTrace() {
   Unit *u = f->unit();
   Offset off = pc - u->entry();
   for (;;) {
-    trace.push_back({ f, off });
+    trace.push_back({ f, off, fp->inGenerator() });
     fp = g_context->getPrevVMState(fp, &off);
     if (!fp) break;
     f = fp->m_func;
@@ -70,9 +70,7 @@ void MemoryProfile::finishProfilingImpl() {
 
   TRACE(1, "request ended\n");
 
-  TRACE(2, "offering dump to profile controller, "
-           "request was for URL %s\n",
-           g_context->getTransport()->getCommand().c_str());
+  TRACE(2, "offering dump to profile controller");
 
   ProfileController::offerProfile(m_dump);
   if (RuntimeOption::ClientExecutionMode() &&
@@ -115,7 +113,7 @@ void MemoryProfile::logDeallocationImpl(void *ptr) {
 }
 
 // static
-size_t MemoryProfile::getSizeOfPtr(void *ptr) {
+size_t MemoryProfile::getSizeOfPtr(void* ptr) {
   if (!RuntimeOption::HHProfServerEnabled) return 0;
   const MemoryProfile &mp = *s_memory_profile;
 
@@ -124,37 +122,28 @@ size_t MemoryProfile::getSizeOfPtr(void *ptr) {
 }
 
 // static
-size_t MemoryProfile::getSizeOfTV(TypedValue *tv) {
+size_t MemoryProfile::getSizeOfTV(const TypedValue* tv) {
   if (!RuntimeOption::HHProfServerEnabled) return 0;
 
   switch (tv->m_type) {
-    case KindOfString:
-      return getSizeOfPtr(tv->m_data.pstr);
-    case KindOfArray:
-      return getSizeOfArray(tv->m_data.parr);
-    case KindOfObject:
-      return getSizeOfObject(tv->m_data.pobj);
-    case KindOfRef:
-      return getSizeOfPtr(tv->m_data.pref);
-    default:
-      return 0;
+  case KindOfString:
+    return getSizeOfPtr(tv->m_data.pstr);
+  case KindOfArray:
+    return getSizeOfArray(tv->m_data.parr);
+  case KindOfObject:
+    return getSizeOfObject(tv->m_data.pobj);
+  case KindOfRef:
+    return getSizeOfPtr(tv->m_data.pref);
+  default:
+    return 0;
   }
 }
 
 // static
-size_t MemoryProfile::getSizeOfArray(ArrayData *arr) {
-  size_t size = getSizeOfPtr(arr);
-  if (size == 0) { return 0; }
-  if (arr->isHphpArray()) {
-    // calculate extra size
-    HphpArray *ha = static_cast<HphpArray *>(arr);
-    size_t hashSize = ha->hashSize();
-    size_t maxElms = HphpArray::computeMaxElms(ha->m_tableMask);
-    if (maxElms > HphpArray::SmallSize) {
-      size += maxElms * sizeof(HphpArray::Elm) + hashSize * sizeof(int32_t);
-    }
-  }
-  return size;
+size_t MemoryProfile::getSizeOfArray(ArrayData* arr) {
+  // Some non-flat array types have extra memory (e.g. the local TV
+  // cache of an apc local array), but we haven't implemented this.
+  return getSizeOfPtr(arr);
 }
 
 // static

@@ -208,7 +208,7 @@ void emitAssertFlagsNonNegative(Asm& as) {
 
 void emitAssertRefCount(Asm& as, PhysReg base) {
   as.cmpl(HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET]);
-  ifThen(as, CC_NBE, [&] {
+  ifThen(as, CC_NLE, [&] {
       as.cmpl(HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]);
       ifThen(as, CC_NBE, [&] { as.ud2(); });
   });
@@ -252,7 +252,8 @@ void emitLea(Asm& as, MemoryRef mr, PhysReg dst) {
 }
 
 void emitLdObjClass(Asm& as, PhysReg objReg, PhysReg dstReg) {
-  as.   loadq (objReg[ObjectData::getVMClassOffset()], dstReg);
+  emitLdLowPtr(as, objReg[ObjectData::getVMClassOffset()],
+               dstReg, sizeof(LowClassPtr));
 }
 
 void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg) {

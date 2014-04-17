@@ -29,7 +29,7 @@
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/util/lock.h"
@@ -453,6 +453,9 @@ OPCODES
 #undef O
 
   void contEnterImpl(IOP_ARGS);
+  void asyncSuspendE(IOP_ARGS, int32_t iters);
+  void asyncSuspendR(IOP_ARGS);
+  void ret(IOP_ARGS);
   void classExistsImpl(IOP_ARGS, Attr typeAttr);
   void fPushObjMethodImpl(
       Class* cls, StringData* name, ObjectData* obj, int numArgs);
@@ -584,7 +587,8 @@ public:
                        bool ignoreArgs = false,
                        int limit = 0);
   VarEnv* getVarEnv(int frame = 0);
-  void setVar(StringData* name, TypedValue* v, bool ref);
+  void setVar(StringData* name, const TypedValue* v);
+  void bindVar(StringData* name, TypedValue* v);
   Array getLocalDefinedVariables(int frame);
   PCFilter* m_breakPointFilter;
   PCFilter* m_lastLocFilter;
@@ -598,15 +602,17 @@ public:
 
 private:
   void enterVMAtAsyncFunc(ActRec* enterFnAr, PC pc, ObjectData* exception);
-  void enterVMAtFunc(ActRec* enterFnAr);
+  void enterVMAtFunc(ActRec* enterFnAr, bool stackTrimmed);
   void enterVMAtCurPC();
-  void enterVM(ActRec* ar, PC pc = nullptr, ObjectData* exception = nullptr);
+  void enterVM(ActRec* ar, bool stackTrimmed,
+               PC pc = nullptr, ObjectData* exception = nullptr);
   void doFPushCuf(IOP_ARGS, bool forward, bool safe);
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
-  void prepareFuncEntry(ActRec* ar, PC& pc);
-  bool prepareArrayArgs(ActRec* ar, const Variant& arrayArgs);
+  void prepareFuncEntry(ActRec* ar, PC& pc, bool stackTrimmed);
+  void shuffleMagicArgs(ActRec* ar);
+  void shuffleExtraStackArgs(ActRec* ar);
   void recordCodeCoverage(PC pc);
   bool isReturnHelper(uintptr_t address);
   void switchModeForDebugger();
@@ -617,7 +623,6 @@ private:
   int m_lastErrorLine;
 public:
   void resetCoverageCounters();
-  void shuffleMagicArgs(ActRec* ar);
   void syncGdbState();
   enum InvokeFlags {
     InvokeNormal = 0,
@@ -639,9 +644,6 @@ public:
     invokeFunc(retval, ctx.func, args_, ctx.this_, ctx.cls, varEnv,
                ctx.invName);
   }
-  void invokeFuncCleanupHelper(TypedValue* retval,
-                               ActRec* ar,
-                               int numArgsPushed);
   void invokeFuncFew(TypedValue* retval,
                      const Func* f,
                      void* thisOrCls,

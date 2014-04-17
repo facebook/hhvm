@@ -44,6 +44,7 @@
 
 #ifdef HHVM
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/system/constants.h"
 #endif
 
 enum {
@@ -151,7 +152,8 @@ static PHP_MINFO_FUNCTION(pcre)
 static PHP_MINIT_FUNCTION(pcre)
 {
 	REGISTER_INI_ENTRIES();
-	
+
+#ifndef HHVM
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_OFFSET_CAPTURE", PREG_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
@@ -167,7 +169,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_ERROR", PHP_PCRE_BAD_UTF8_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_OFFSET_ERROR", PHP_PCRE_BAD_UTF8_OFFSET_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("PCRE_VERSION", (char *)pcre_version(), CONST_CS | CONST_PERSISTENT);
-
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -1972,17 +1974,19 @@ static const zend_function_entry pcre_functions[] = {
 };
 
 #ifdef HHVM
-zend_module_entry pcre_zend_compat_module_entry = {
-#else
-zend_module_entry pcre_zend_module_entry = {
+static const zend_function_entry empty_functions[] = {PHP_FE_END};
+static const zend_function_entry * pcre_functions_unused UNUSED = pcre_functions;
 #endif
+
+zend_module_entry pcre_zend_module_entry = {
 	STANDARD_MODULE_HEADER,
 #ifdef HHVM
-   "pcre_zend_compat",
+    "pcre_zend_compat",
+    empty_functions,
 #else
    "pcre",
-#endif
 	pcre_functions,
+#endif
 	PHP_MINIT(pcre),
 	PHP_MSHUTDOWN(pcre),
 	NULL,
@@ -1997,11 +2001,7 @@ zend_module_entry pcre_zend_module_entry = {
 };
 
 #ifdef COMPILE_DL_PCRE
-#ifdef HHVM
-ZEND_GET_MODULE(pcre_zend_compat)
-#else
 ZEND_GET_MODULE(pcre)
-#endif
 #endif
 
 /* }}} */

@@ -1,5 +1,5 @@
 <?php
-// Copyright 2004-2013 Facebook. All Rights Reserved.
+// Copyright 2004-2014 Facebook. All Rights Reserved.
 
 // Test behavior around exceptions leaking out of destructors.
 // Specifically, fatals vs. user exceptions.

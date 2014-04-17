@@ -39,6 +39,8 @@ class DebugInfo {
                      bool inPrologue);
   void recordBCInstr(TCRange range, uint32_t op);
 
+  static void recordDataMap(void* from, void* to, const std::string& desc);
+
   void debugSync();
   static DebugInfo* Get();
   static void setPidMapOverlay(void* from, void* to) {
@@ -47,6 +49,7 @@ class DebugInfo {
   }
  private:
   void generatePidMapOverlay();
+  void recordDataMapImpl(void* from, void* to, const std::string& desc);
 
   /* maintain separate dwarf info for a and astubs, so that we
    * don't emit dwarf info for the two in the same ELF file.
@@ -61,6 +64,14 @@ class DebugInfo {
    */
   FILE* m_perfMap;
   char m_perfMapName[64];
+
+  /*
+   * Similar to perfMap, but for data addresses. Perf doesn't use
+   * it directly, but we can write tools based on perf script that
+   * do.
+   */
+  FILE* m_dataMap;
+  char m_dataMapName[64];
 
   static void* pidMapOverlayStart;
   static void* pidMapOverlayEnd;

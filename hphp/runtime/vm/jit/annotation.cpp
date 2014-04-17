@@ -39,9 +39,10 @@ static CallDB s_callDB;
 
 static void recordFunc(const SrcKey sk,
                        const Func* func) {
-  FTRACE(2, "annotation: recordFunc: {}@{} {}\n",
+  FTRACE(2, "annotation: recordFunc: {}@{}{} {}\n",
          sk.unit()->filepath()->data(),
          sk.offset(),
+         sk.resumed() ? "r" : "",
          func->fullName()->data());
 
   s_callDB.insert(std::make_pair(sk, func));
@@ -83,7 +84,7 @@ static void recordActRecPush(const SrcKey sk,
   assert(fpi);
   assert(name->isStatic());
   assert(sk.offset() == fpi->m_fpushOff);
-  auto const fcall = SrcKey { sk.func(), fpi->m_fcallOff };
+  auto const fcall = SrcKey { sk.func(), fpi->m_fcallOff, sk.resumed() };
   assert(isFCallStar(*reinterpret_cast<const Op*>(unit->at(fcall.offset()))));
   auto const func = lookupDirectFunc(sk, name, clsName, staticCall);
   if (func) {

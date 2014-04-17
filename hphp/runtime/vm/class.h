@@ -20,6 +20,7 @@
 #include <boost/range/iterator_range.hpp>
 
 #include "hphp/util/fixed-vector.h"
+#include "hphp/util/low-ptr.h"
 #include "hphp/util/range.h"
 
 #include "hphp/runtime/base/types.h"
@@ -36,7 +37,7 @@ namespace HPHP {
 
 class ClassInfo;
 class ClassInfoVM;
-class HphpArray;
+class MixedArray;
 class ObjectData;
 struct HhbcExtClassInfo;
 class Func;
@@ -454,7 +455,7 @@ struct Class : AtomicCountable {
     const StringData* m_name;
     const StringData* m_mangledName;
     const StringData* m_originalMangledName;
-    Class* m_class; // First parent class that declares this property.
+    LowClassPtr m_class; // First parent class that declares this property.
     Attr m_attrs;
     const StringData* m_typeConstraint;
 
@@ -474,14 +475,14 @@ struct Class : AtomicCountable {
     Attr m_attrs;
     const StringData* m_typeConstraint;
     const StringData* m_docComment;
-    Class* m_class; // Most derived class that declared this property.
+    LowClassPtr m_class; // Most derived class that declared this property.
     TypedValue m_val; // Used if (m_class == this).
     RepoAuthType m_repoAuthType;
     int m_idx;
   };
 
   struct Const {
-    Class* m_class; // Most derived class that declared this constant.
+    LowClassPtr m_class; // Most derived class that declared this constant.
     const StringData* m_name;
     TypedValue m_val;
     const StringData* m_phpCode;
@@ -519,8 +520,8 @@ struct Class : AtomicCountable {
   typedef std::vector<const Func*> InitVec;
   typedef std::vector<std::pair<const StringData*, const StringData*> >
           TraitAliasVec;
-  typedef IndexedStringMap<Class*,true,int> InterfaceMap;
-  typedef IndexedStringMap<Func*,false,Slot> MethodMap;
+  typedef IndexedStringMap<LowClassPtr, true, int> InterfaceMap;
+  typedef IndexedStringMap<Func*, false, Slot> MethodMap;
 
   /* If set, runs during setMethods() */
   static void (*MethodCreateHook)(Class* cls, MethodMap::Builder& builder);
@@ -656,10 +657,7 @@ struct Class : AtomicCountable {
     return offsetof(Class, m_propDataCache);
   }
 
-  TypedValue* getSPropData() const;
-  static constexpr size_t spropdataOff() {
-    return offsetof(Class, m_propSDataCache);
-  }
+  TypedValue* getSPropData(Slot index) const;
 
   bool hasDeepInitProps() const { return m_hasDeepInitProps; }
   bool needInitialization() const { return m_needInitialization; }
@@ -751,7 +749,7 @@ struct Class : AtomicCountable {
    *
    * Returns nullptr if this class has no constant of the given name.
    */
-  Cell* cnsNameToTV(const StringData* name, Slot& slot) const;
+  const Cell* cnsNameToTV(const StringData* name, Slot& slot) const;
 
   /*
    * Provide the current runtime type of this class constant.  This
@@ -759,33 +757,42 @@ struct Class : AtomicCountable {
    */
   DataType clsCnsType(const StringData* clsCnsName) const;
 
-  /*
-   * Tracing interface.  (Returns the set of static properties for the
-   * Tracer.)
+  /**
+   * RDS Class* handle.
    */
-  void getChildren(std::vector<TypedValue*>& out);
-
-  void initialize() const;
-  void initPropHandle() const;
+  void setClassHandle(RDS::Link<Class*> link) const;
   RDS::Handle classHandle() const { return m_cachedClass.handle(); }
-  void setClassHandle(RDS::Link<Class*> link) const {
-    assert(!m_cachedClass.bound());
-    m_cachedClass = link;
-  }
-  RDS::Handle propHandle() const { return m_propDataCache.handle(); }
-  void initSPropHandle() const;
-  RDS::Handle sPropHandle() const { return m_propSDataCache.handle(); }
-  void initProps() const;
-  TypedValue* initSProps() const;
+
   Class* getCached() const;
   void setCached();
 
-  void setInstanceBits();
-  void setInstanceBitsAndParents();
+  /**
+   * Property initialization.
+   */
+  void initialize() const;
+  void initProps() const;
+  void initSProps() const;
 
-  // Returns kInvalidSlot if we can't find this property.
+  void initPropHandle() const;
+  RDS::Handle propHandle() const { return m_propDataCache.handle(); }
+
+  bool needsInitSProps() const;
+  void initSPropHandles() const;
+  RDS::Handle sPropInitHandle() const { return m_sPropCacheInit.handle(); }
+  RDS::Handle sPropHandle(Slot index) const;
+
+  TypedValue getStaticPropInitVal(const SProp& prop);
+
+  /**
+   * Property accessors.
+   *
+   * Lookup methods return kInvalidSlot if the property is not found.
+   */
   Slot lookupDeclProp(const StringData* propName) const {
     return m_declProperties.findIndex(propName);
+  }
+  Slot lookupSProp(const StringData* sPropName) const {
+    return m_staticProperties.findIndex(sPropName);
   }
 
   Slot getDeclPropIndex(Class* ctx, const StringData* key,
@@ -796,12 +803,11 @@ struct Class : AtomicCountable {
 
   static bool IsPropAccessible(const Prop& prop, Class* ctx);
 
-  // Returns kInvalidSlot if we can't find this static property.
-  Slot lookupSProp(const StringData* sPropName) const {
-    return m_staticProperties.findIndex(sPropName);
-  }
-
-  TypedValue getStaticPropInitVal(const SProp& prop);
+  /**
+   * Instance bits.
+   */
+  void setInstanceBits();
+  void setInstanceBitsAndParents();
 
   void getClassInfo(ClassInfoVM* ci);
 
@@ -820,7 +826,8 @@ struct Class : AtomicCountable {
   unsigned classVecLen() const {
     return m_classVecLen;
   }
-  const Class* const* classVec() const { return m_classVec; }
+  LowClassPtr const* classVec() const { return m_classVec; }
+
   static size_t preClassOff() { return offsetof(Class, m_preClass); }
   static size_t classVecOff() { return offsetof(Class, m_classVec); }
   static size_t classVecLenOff() { return offsetof(Class, m_classVecLen); }
@@ -850,9 +857,9 @@ private:
       , m_modifiers(modifiers)
     {}
 
-    Class* m_trait;
-    Func*  m_method;
-    Attr   m_modifiers;
+    LowClassPtr m_trait;
+    Func* m_method;
+    Attr m_modifiers;
   };
   typedef std::list<TraitMethod> TraitMethodList;
   typedef hphp_hash_map<const StringData*, TraitMethodList, string_data_hash,
@@ -990,7 +997,18 @@ private:
   BuiltinDtorFunction m_instanceDtor{nullptr};
   Func* m_dtor;
   MethodMap m_methods;
-  mutable RDS::Link<TypedValue*> m_propSDataCache{RDS::kInvalidHandle};
+
+  // Static properties are stored in RDS.  There are three phases of sprop
+  // initialization:
+  // 1. The array of links is itself allocated on Class creation.
+  // 2. The links are bound either when codegen needs the handle value, or when
+  //    initSProps() is called in any request.  Afterwards, m_sPropCacheInit is
+  //    bound, defaulting to false.
+  // 3. The RDS value at m_sPropCacheInit is set to true when initSProps() is
+  //    called, and the values are actually initialized.
+  mutable RDS::Link<TypedValue>* m_sPropCache{nullptr};
+  mutable RDS::Link<bool> m_sPropCacheInit{RDS::kInvalidHandle};
+
   unsigned m_classVecLen;
   /*
    * Each ObjectData is created with enough trailing space to directly store
@@ -1016,7 +1034,7 @@ private:
 
   // Vector of Class pointers that encodes the inheritance hierarchy,
   // including this Class as the last element.
-  Class* m_classVec[1]; // Dynamically sized; must come last.
+  LowClassPtr m_classVec[1]; // Dynamically sized; must come last.
 };
 
 inline bool isTrait(const Class* cls) {
@@ -1040,10 +1058,19 @@ enum class ClassKind { Class, Interface, Trait };
  * we had to allocate the handle before we loaded the class.
  */
 inline bool classHasPersistentRDS(const Class* cls) {
-  return (RuntimeOption::RepoAuthoritative &&
-          cls &&
+  return (cls &&
           RDS::isPersistentHandle(cls->classHandle()));
 }
+
+/*
+ * Returns that class that "owns" f. This will normally be
+ * f->cls(), but for Funcs with static locals, f may have
+ * been cloned into a derived class.
+ *
+ * May only be called when RuntimeOption::EvalPerfDataMap
+ * is true.
+ */
+const Class* getOwningClassForFunc(const Func* f);
 
 } // HPHP
 

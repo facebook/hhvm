@@ -1,0 +1,21 @@
+object(ArrayIterator)#2 (2) {
+  ["storage":"ArrayIterator":private]=>
+  array(3) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+    ["c"]=>
+    int(3)
+  }
+  ["flags":"ArrayIterator":private]=>
+  int(0)
+}
+array(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}

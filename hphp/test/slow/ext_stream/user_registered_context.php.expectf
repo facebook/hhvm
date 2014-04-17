@@ -1,0 +1,9 @@
+resource(%d) of type (stream-context)
+Array
+(
+    [my] => Array
+        (
+            [foo] => bar
+        )
+
+)

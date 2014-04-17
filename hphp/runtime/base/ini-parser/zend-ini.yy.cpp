@@ -1,6 +1,7 @@
-#line 2 "zend-ini.yy.cpp"
+// @generated
+#line 2 "_build/dbg/hphp/runtime/base/ini-parser/57833b0/zend-ini.ll.cc"
 
-#line 4 "zend-ini.yy.cpp"
+#line 4 "_build/dbg/hphp/runtime/base/ini-parser/57833b0/zend-ini.ll.cc"
 
 #define  YY_INT_ALIGNED short int
 
@@ -54,6 +55,7 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
+#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -83,8 +85,6 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
-
-#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -142,15 +142,7 @@ typedef unsigned int flex_uint32_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
-#ifdef __ia64__
-/* On IA-64, the buffer size is 16k, not 8k.
- * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
- * Ditto for the __ia64__ case accordingly.
- */
-#define YY_BUF_SIZE 32768
-#else
 #define YY_BUF_SIZE 16384
-#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -766,8 +758,8 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "zend-ini.ll"
-#line 2 "zend-ini.ll"
+#line 1 "hphp/runtime/base/ini-parser/zend-ini.ll"
+#line 2 "hphp/runtime/base/ini-parser/zend-ini.ll"
 /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
@@ -907,7 +899,7 @@ restart:
 
 
 
-#line 911 "zend-ini.yy.cpp"
+#line 902 "_build/dbg/hphp/runtime/base/ini-parser/57833b0/zend-ini.ll.cc"
 
 #define INITIAL 0
 #define ST_OFFSET 1
@@ -1006,12 +998,7 @@ static int input (void );
     
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
-#ifdef __ia64__
-/* On IA-64, the buffer size is 16k, not 8k */
-#define YY_READ_BUF_SIZE 16384
-#else
 #define YY_READ_BUF_SIZE 8192
-#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -1030,7 +1017,7 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		unsigned n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -1112,10 +1099,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 169 "zend-ini.ll"
+#line 169 "hphp/runtime/base/ini-parser/zend-ini.ll"
 
 
-#line 1119 "zend-ini.yy.cpp"
+#line 1105 "_build/dbg/hphp/runtime/base/ini-parser/57833b0/zend-ini.ll.cc"
 
 	if ( !(yy_init) )
 		{
@@ -1200,7 +1187,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 171 "zend-ini.ll"
+#line 171 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Section start */
   /* Enter section data lookup state */
@@ -1215,7 +1202,7 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 182 "zend-ini.ll"
+#line 182 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* End of section */
   BEGIN(INITIAL);
@@ -1225,7 +1212,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 189 "zend-ini.ll"
+#line 189 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Start of option with offset */
   /* Eat leading whitespace */
@@ -1242,7 +1229,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 203 "zend-ini.ll"
+#line 203 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* End of section or an option offset */
   yy_push_state(ST_LABEL);
@@ -1251,7 +1238,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 209 "zend-ini.ll"
+#line 209 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Variable start */
   yy_push_state(ST_VARNAME);
@@ -1260,7 +1247,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 215 "zend-ini.ll"
+#line 215 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Variable name */
   /* Eat leading whitespace */
@@ -1274,7 +1261,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 226 "zend-ini.ll"
+#line 226 "hphp/runtime/base/ini-parser/zend-ini.ll"
 { /* Variable end */
   yy_pop_state();
   return '}';
@@ -1282,7 +1269,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 231 "zend-ini.ll"
+#line 231 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* TRUE value (when used outside option value/offset this causes error!) */
   RETURN_TOKEN(BOOL_TRUE, "1", 1);
@@ -1290,7 +1277,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 236 "zend-ini.ll"
+#line 236 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* FALSE value (when used outside option value/offset this causes error!)*/
   RETURN_TOKEN(BOOL_FALSE, "", (size_t) 0);
@@ -1298,7 +1285,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 241 "zend-ini.ll"
+#line 241 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Get option name */
   /* Eat leading whitespace */
@@ -1314,7 +1301,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 254 "zend-ini.ll"
+#line 254 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Start option value */
   if (SCNG(scanner_mode) == IniSetting::RawScanner) {
@@ -1327,7 +1314,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 264 "zend-ini.ll"
+#line 264 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Raw value, only used when SCNG(scanner_mode) == IniSetting::RawScanner. */
   /* Eat leading and trailing double quotes */
@@ -1338,7 +1325,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 272 "zend-ini.ll"
+#line 272 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Raw value, only used when SCNG(scanner_mode) == IniSetting::RawScanner. */
   RETURN_TOKEN(TC_RAW, yytext, yyleng);
@@ -1346,7 +1333,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 277 "zend-ini.ll"
+#line 277 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Raw value, only used when SCNG(scanner_mode) == IniSetting::RawScanner. */
   RETURN_TOKEN(TC_RAW, yytext, yyleng);
@@ -1355,7 +1342,7 @@ YY_RULE_SETUP
 case 15:
 /* rule 15 can match eol */
 YY_RULE_SETUP
-#line 282 "zend-ini.ll"
+#line 282 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* End of option value */
   BEGIN(INITIAL);
@@ -1365,7 +1352,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 289 "zend-ini.ll"
+#line 289 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Get constant option value */
   RETURN_TOKEN(TC_CONSTANT, yytext, yyleng);
@@ -1373,7 +1360,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 294 "zend-ini.ll"
+#line 294 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Get number option value as string */
   RETURN_TOKEN(TC_NUMBER, yytext, yyleng);
@@ -1381,7 +1368,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 299 "zend-ini.ll"
+#line 299 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Disallow these chars outside option values */
   return yytext[0];
@@ -1389,7 +1376,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 304 "zend-ini.ll"
+#line 304 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Boolean operators */
   return yytext[0];
@@ -1397,7 +1384,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 309 "zend-ini.ll"
+#line 309 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Make = used in option value to trigger error */
   yyless(0);
@@ -1408,7 +1395,7 @@ YY_RULE_SETUP
 case 21:
 /* rule 21 can match eol */
 YY_RULE_SETUP
-#line 316 "zend-ini.ll"
+#line 316 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Get everything else as option/offset value */
   RETURN_TOKEN(TC_STRING, yytext, yyleng);
@@ -1417,7 +1404,7 @@ YY_RULE_SETUP
 case 22:
 /* rule 22 can match eol */
 YY_RULE_SETUP
-#line 321 "zend-ini.ll"
+#line 321 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Get rest as section/offset value */
   RETURN_TOKEN(TC_STRING, yytext, yyleng);
@@ -1426,7 +1413,7 @@ YY_RULE_SETUP
 case 23:
 /* rule 23 can match eol */
 YY_RULE_SETUP
-#line 326 "zend-ini.ll"
+#line 326 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Raw string */
   /* Eat leading and trailing single quotes */
@@ -1439,7 +1426,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 336 "zend-ini.ll"
+#line 336 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Double quoted '"' string start */
   yy_push_state(ST_DOUBLE_QUOTES);
@@ -1448,7 +1435,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 342 "zend-ini.ll"
+#line 342 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Double quoted '"' string ends */
   yy_pop_state();
@@ -1458,7 +1445,7 @@ YY_RULE_SETUP
 case 26:
 /* rule 26 can match eol */
 YY_RULE_SETUP
-#line 348 "zend-ini.ll"
+#line 348 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Escape double quoted string contents */
   zend_ini_escape_string(*ini_lval, yytext, yyleng, '"');
@@ -1467,14 +1454,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 354 "zend-ini.ll"
+#line 354 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
   RETURN_TOKEN(TC_WHITESPACE, yytext, yyleng);
 }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 358 "zend-ini.ll"
+#line 358 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
   /* eat whitespace */
   return GOTO_RESTART;
@@ -1483,7 +1470,7 @@ YY_RULE_SETUP
 case 29:
 /* rule 29 can match eol */
 YY_RULE_SETUP
-#line 363 "zend-ini.ll"
+#line 363 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
   SCNG(lineno)++;
   BEGIN(INITIAL);
@@ -1493,7 +1480,7 @@ YY_RULE_SETUP
 case 30:
 /* rule 30 can match eol */
 YY_RULE_SETUP
-#line 369 "zend-ini.ll"
+#line 369 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* Comment */
   BEGIN(INITIAL);
@@ -1504,7 +1491,7 @@ YY_RULE_SETUP
 case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
-#line 376 "zend-ini.ll"
+#line 376 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* #Comment */
   Logger::Error("Comments starting with '#' are deprecated in %s on line %d",
@@ -1517,7 +1504,7 @@ YY_RULE_SETUP
 case YY_STATE_EOF(ST_VALUE):
 case YY_STATE_EOF(ST_RAW):
 case YY_STATE_EOF(ST_LABEL):
-#line 385 "zend-ini.ll"
+#line 385 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
 /* End of option value (if EOF is reached before EOL) */
   BEGIN(INITIAL);
@@ -1527,17 +1514,17 @@ case YY_STATE_EOF(ST_LABEL):
 case 32:
 /* rule 32 can match eol */
 YY_RULE_SETUP
-#line 391 "zend-ini.ll"
+#line 391 "hphp/runtime/base/ini-parser/zend-ini.ll"
 {
   return JUNK;
 }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 395 "zend-ini.ll"
+#line 395 "hphp/runtime/base/ini-parser/zend-ini.ll"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1541 "zend-ini.yy.cpp"
+#line 1527 "_build/dbg/hphp/runtime/base/ini-parser/57833b0/zend-ini.ll.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(ST_OFFSET):
 case YY_STATE_EOF(ST_SECTION_VALUE):
@@ -2300,8 +2287,8 @@ YY_BUFFER_STATE yy_scan_string (yyconst char * yystr )
 
 /** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
- * @param yybytes the byte buffer to scan
- * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
+ * @param bytes the byte buffer to scan
+ * @param len the number of bytes in the buffer pointed to by @a bytes.
  * 
  * @return the newly allocated buffer state object.
  */
@@ -2585,7 +2572,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 395 "zend-ini.ll"
+#line 395 "hphp/runtime/base/ini-parser/zend-ini.ll"
 
 
 

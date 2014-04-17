@@ -5,10 +5,10 @@ class C {
   public static function f(
     @array<int, string> $foo,
     $whatever
-  ): void {}
+  ): @void {}
 }
 
-function g(@string $bar): void {}
+function g(@string $bar): @void {}
 
 function h(): @Vector<int> {
 }

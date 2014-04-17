@@ -68,7 +68,19 @@ static bool objOffsetExists(ObjectData* base, const Variant& offset) {
 
 bool objOffsetIsset(TypedValue& tvRef, ObjectData* base, const Variant& offset,
                     bool validate /* = true */) {
-  return objOffsetExists(base, offset);
+  auto exists = objOffsetExists(base, offset);
+
+  if (!exists) {
+    return false;
+  }
+
+  if (!base->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
+    return exists;
+  }
+
+  TypedValue tvResult;
+  tvWriteUninit(&tvResult);
+  return is_not_null(tvAsVariant(objOffsetGet(tvResult, base, offset)));
 }
 
 bool objOffsetEmpty(TypedValue& tvRef, ObjectData* base, const Variant& offset,

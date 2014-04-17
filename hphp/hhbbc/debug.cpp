@@ -61,11 +61,6 @@ void dump_representation(fs::path dir, const php::Program& program) {
   parallel::for_each(
     program.units,
     [&] (const std::unique_ptr<php::Unit>& u) {
-      if (!*u->filename->data()) {
-        // The native systemlibs: for now just skip.
-        return;
-      }
-
       with_file(dir, borrow(u), [&] (std::ostream& out) {
         out << show(*u);
       });

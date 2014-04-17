@@ -118,10 +118,6 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     auto const nextOff = offset + instrLen(pc);
     auto const atLast = nextOff == fe.past();
 
-    if (instrIsInitialSuspend(*pc) && !atLast) {
-      markBlock(nextOff);
-    }
-
     if (instrIsNonCallControlFlow(*pc) && !atLast) {
       markBlock(nextOff);
     }
@@ -699,7 +695,8 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
         param.phpCode(),
         param.userAttributes(),
         param.builtinType(),
-        param.ref()
+        param.ref(),
+        param.isVariadic()
       }
     );
   }

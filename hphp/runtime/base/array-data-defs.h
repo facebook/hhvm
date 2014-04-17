@@ -91,12 +91,12 @@ inline ArrayData* ArrayData::set(const Variant& k, const Variant& v, bool copy) 
                         : set(getStringKey(cell), v, copy);
 }
 
-inline ArrayData* ArrayData::setRef(const String& k, const Variant& v, bool copy) {
+inline ArrayData* ArrayData::setRef(const String& k, Variant& v, bool copy) {
   assert(IsValidKey(k));
   return setRef(k.get(), v, copy);
 }
 
-inline ArrayData* ArrayData::setRef(const Variant& k, const Variant& v, bool copy) {
+inline ArrayData* ArrayData::setRef(const Variant& k, Variant& v, bool copy) {
   assert(IsValidKey(k));
   auto const cell = k.asCell();
   return isIntKey(cell) ? setRef(getIntKey(cell), v, copy)
@@ -131,10 +131,6 @@ inline Variant ArrayData::getValue(ssize_t pos) const {
   return getValueRef(pos);
 }
 
-inline TypedValue* ArrayData::nvGetValueRef(ssize_t pos) {
-  return const_cast<TypedValue*>(getValueRef(pos).asTypedValue());
-}
-
 inline Variant ArrayData::getKey(ssize_t pos) const {
   TypedValue tv;
   nvGetKey(&tv, pos);
@@ -151,7 +147,7 @@ inline ArrayData* ArrayData::append(const Variant& v, bool copy) {
   return g_array_funcs.append[m_kind](this, v, copy);
 }
 
-inline ArrayData* ArrayData::appendRef(const Variant& v, bool copy) {
+inline ArrayData* ArrayData::appendRef(Variant& v, bool copy) {
   return g_array_funcs.appendRef[m_kind](this, v, copy);
 }
 
@@ -159,11 +155,11 @@ inline ArrayData* ArrayData::appendWithRef(const Variant& v, bool copy) {
   return g_array_funcs.appendWithRef[m_kind](this, v, copy);
 }
 
-inline TypedValue* ArrayData::nvGet(int64_t ikey) const {
+inline const TypedValue* ArrayData::nvGet(int64_t ikey) const {
   return g_array_funcs.nvGetInt[m_kind](this, ikey);
 }
 
-inline TypedValue* ArrayData::nvGet(const StringData* skey) const {
+inline const TypedValue* ArrayData::nvGet(const StringData* skey) const {
   return g_array_funcs.nvGetStr[m_kind](this, skey);
 }
 
@@ -200,7 +196,8 @@ inline const Variant& ArrayData::getValueRef(ssize_t pos) const {
 }
 
 inline bool ArrayData::noCopyOnWrite() const {
-  return g_array_funcs.noCopyOnWrite[m_kind];
+  // NameValueTableWrapper doesn't support COW.
+  return m_kind == kNvtwKind;
 }
 
 inline bool ArrayData::isVectorData() const {
@@ -227,11 +224,11 @@ inline ArrayData* ArrayData::lvalNew(Variant*& ret, bool copy) {
   return g_array_funcs.lvalNew[m_kind](this, ret, copy);
 }
 
-inline ArrayData* ArrayData::setRef(int64_t k, const Variant& v, bool copy) {
+inline ArrayData* ArrayData::setRef(int64_t k, Variant& v, bool copy) {
   return g_array_funcs.setRefInt[m_kind](this, k, v, copy);
 }
 
-inline ArrayData* ArrayData::setRef(StringData* k, const Variant& v, bool copy) {
+inline ArrayData* ArrayData::setRef(StringData* k, Variant& v, bool copy) {
   return g_array_funcs.setRefStr[m_kind](this, k, v, copy);
 }
 

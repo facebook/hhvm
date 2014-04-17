@@ -88,6 +88,13 @@ void ThreadInfo::GetExecutionSamples(std::map<Executing, int> &counts) {
   }
 }
 
+void ThreadInfo::ExecutePerThread(std::function<void(ThreadInfo*)> f) {
+  Lock lock(s_thread_info_mutex);
+  for (auto& thread : s_thread_infos) {
+    f(thread);
+  }
+}
+
 void ThreadInfo::onSessionInit() {
   m_reqInjectionData.onSessionInit();
 

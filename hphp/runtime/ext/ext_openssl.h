@@ -25,6 +25,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const int64_t k_OPENSSL_ALGO_SHA1;
+extern const int64_t k_OPENSSL_CIPHER_RC2_40;
+extern const int64_t k_OPENSSL_PKCS1_PADDING;
+extern const int64_t k_OPENSSL_RAW_DATA;
+extern const int64_t k_OPENSSL_ZERO_PADDING;
+extern const int64_t k_PKCS7_DETACHED;
+
 bool f_openssl_csr_export_to_file(const Variant& csr, const String& outfilename, bool notext = true);
 bool f_openssl_csr_export(const Variant& csr, VRefParam out, bool notext = true);
 Variant f_openssl_csr_get_public_key(const Variant& csr);

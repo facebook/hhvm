@@ -1,11 +1,10 @@
 DOMImplementation
 object(DOMImplementation)#1 (0) {
 }
-string(102) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:17:"DOMImplementation";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(17) "DOMImplementation"
-}
+
+Warning: Attempted to serialize unserializable builtin class DOMImplementation in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(4) {
   [0]=>
   string(11) "__construct"
@@ -18,15 +17,14 @@ array(4) {
 }
 ================
 A_DOMImplementation
-object(A_DOMImplementation)#3 (1) {
+object(A_DOMImplementation)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(104) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:19:"A_DOMImplementation";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(19) "A_DOMImplementation"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_DOMImplementation in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(4) {
   [0]=>
   string(11) "__construct"

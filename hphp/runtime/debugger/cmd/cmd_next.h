@@ -27,7 +27,7 @@ public:
   CmdNext() :
       CmdFlowControl(KindOfNext)
       , m_stepContTag(nullptr)
-      , m_skippingAsyncESuspend(false)
+      , m_skippingAsyncSuspend(false)
     {}
 
   virtual void help(DebuggerClient& client);
@@ -36,7 +36,7 @@ public:
 
 private:
   void stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc);
-  void stepAfterAsyncESuspend();
+  void stepAfterAsyncSuspend();
   bool hasStepCont();
   bool atStepContOffset(Unit* unit, Offset o);
   void setupStepCont(ActRec* fp, PC pc);
@@ -45,7 +45,7 @@ private:
 
   StepDestination m_stepCont;
   void* m_stepContTag; // Unique identifier for the continuation we're stepping
-  bool m_skippingAsyncESuspend;
+  bool m_skippingAsyncSuspend;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

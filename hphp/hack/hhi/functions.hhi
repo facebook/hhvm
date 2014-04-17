@@ -19,7 +19,7 @@ function array_fill<T>(int $start_index, int $num, T $value): array<T>;
 // TODO make non-nullable once Thrift files are fixed
 function array_key_exists<Tk, Tv>(mixed $key, ?Indexish<Tk, Tv> $search): bool;
 function chr(int $ascii): string;
-function count(mixed $x): int; // count takes Countable or array. We'll need to hardcode this...
+function count(mixed $x, int $mode = COUNT_NORMAL): int; // count takes Countable or array. We'll need to hardcode this...
 function dechex(int $number): string;
 function fb_bsdiff(string $data1, string $data2): (array<int>, string, string);
 function fb_bspatch(

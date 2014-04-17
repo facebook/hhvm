@@ -61,7 +61,14 @@ struct RegionDesc {
   struct TypePred;
   struct ReffinessPred;
   typedef std::shared_ptr<Block> BlockPtr;
-  typedef uint32_t BlockId;
+  typedef int32_t BlockId;
+  // BlockId Encoding:
+  //   - Non-negative numbers are blocks that correspond
+  //     to the start of a TransProfile translation, and therefore can
+  //     be used to index into ProfData.
+  //   - Negative numbers are used for other blocks, which correspond
+  //     to blocks created by inlining and which don't correspond to
+  //     the beginning of a profiling translation.
 
   template<typename... Args>
   Block* addBlock(Args&&... args) {
@@ -201,7 +208,8 @@ class RegionDesc::Block {
   typedef flat_map<SrcKey, const Func*> KnownFuncMap;
 
 public:
-  explicit Block(const Func* func, Offset start, int length, Offset initSpOff);
+  explicit Block(const Func* func, bool resumed, Offset start, int length,
+                 Offset initSpOff);
 
   Block& operator=(const Block&) = delete;
 
@@ -212,12 +220,18 @@ public:
   BlockId     id()                const { return m_id; }
   const Unit* unit()              const { return m_func->unit(); }
   const Func* func()              const { return m_func; }
-  SrcKey      start()             const { return SrcKey { m_func, m_start }; }
-  SrcKey      last()              const { return SrcKey { m_func, m_last }; }
+  SrcKey      start()             const { return SrcKey { m_func, m_start,
+                                                          m_resumed }; }
+  SrcKey      last()              const { return SrcKey { m_func, m_last,
+                                                          m_resumed }; }
   int         length()            const { return m_length; }
   bool        empty()             const { return length() == 0; }
   bool        contains(SrcKey sk) const;
   Offset      initialSpOffset()   const { return m_initialSpOffset; }
+
+  void setId(BlockId id) {
+    m_id = id;
+  }
 
   /*
    * Set and get whether or not this block ends with an inlined FCall. Inlined
@@ -293,6 +307,7 @@ private:
 
   BlockId        m_id;
   const Func*    m_func;
+  const bool     m_resumed;
   const Offset   m_start;
   Offset         m_last;
   int            m_length;
@@ -408,6 +423,12 @@ void regionizeFunc(const Func*  func,
  * than b, trace both regions.
  */
 void diffRegions(const RegionDesc& a, const RegionDesc& b);
+
+/*
+ * Functions to map BlockIds to TransIDs.
+ */
+bool    hasTransId(RegionDesc::BlockId blockId);
+TransID getTransId(RegionDesc::BlockId blockId);
 
 /*
  * Debug stringification for various things.

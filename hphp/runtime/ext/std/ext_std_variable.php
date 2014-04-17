@@ -175,6 +175,6 @@ function import_request_variables(string $types,
  * collisions with existing variables in the symbol table.
  */
 <<__Native>>
-function extract(array $var_array,
+function extract(mixed &$var_array,
                  int $extract_type = EXTR_OVERWRITE,
                  string $prefix = ""): int;

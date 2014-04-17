@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/ext/ext_xenon.h"
 
 namespace HPHP {
 
@@ -70,50 +71,65 @@ public:
   }
 };
 
-void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
+namespace {
+
+bool shouldRunUserProfiler(const Func* func) {
   // Don't do anything if we are running the profiling function itself
   // or if we haven't set up a profiler.
   if (g_context->m_executingSetprofileCallback ||
       g_context->m_setprofileCallback.isNull()) {
-    return;
+    return false;
   }
   // Don't profile 86ctor, since its an implementation detail,
   // and we dont guarantee to call it
-  if (ar->m_func->cls() && ar->m_func == ar->m_func->cls()->getCtor() &&
-      Func::isSpecial(ar->m_func->name())) {
-    return;
+  if (func->cls() && func == func->cls()->getCtor() &&
+      Func::isSpecial(func->name())) {
+    return false;
   }
+  return true;
+}
+
+void runUserProfilerOnFunctionEnter(const ActRec* ar) {
   JIT::VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
   Array params;
+  params.append(s_enter);
+  params.append(VarNR(ar->func()->fullName()));
+
   Array frameinfo;
-
-  if (mode == ProfileEnter) {
-    params.append(s_enter);
-    frameinfo.set(s_args, hhvm_get_frame_args(ar, 0));
-  } else {
-    params.append(s_exit);
-    if (!g_context->m_faults.empty()) {
-      Fault fault = g_context->m_faults.back();
-      if (fault.m_faultType == Fault::Type::UserException) {
-        frameinfo.set(s_exception, fault.m_userException);
-      }
-    } else if (!ar->m_func->isCPPBuiltin() &&
-               !ar->inGenerator()) {
-      // TODO (#1131400) This is wrong for builtins
-      frameinfo.set(s_return, tvAsCVarRef(g_context->m_stack.topTV()));
-    }
-  }
-
-  params.append(VarNR(ar->m_func->fullName()));
+  frameinfo.set(s_args, hhvm_get_frame_args(ar, 0));
   params.append(frameinfo);
 
   vm_call_user_func(g_context->m_setprofileCallback, params);
 }
 
+void runUserProfilerOnFunctionExit(const ActRec* ar, TypedValue* retval) {
+  JIT::VMRegAnchor _;
+  ExecutingSetprofileCallbackGuard guard;
+
+  Array params;
+  params.append(s_exit);
+  params.append(VarNR(ar->func()->fullName()));
+
+  Array frameinfo;
+  if (!g_context->m_faults.empty()) {
+    Fault fault = g_context->m_faults.back();
+    if (fault.m_faultType == Fault::Type::UserException) {
+      frameinfo.set(s_exception, fault.m_userException);
+    }
+  } else if (retval) {
+    frameinfo.set(s_return, tvAsCVarRef(retval));
+  }
+  params.append(frameinfo);
+
+  vm_call_user_func(g_context->m_setprofileCallback, params);
+}
+
+}
+
 static Array get_frame_args_with_ref(const ActRec* ar) {
-  int numParams = ar->m_func->numParams();
+  int numParams = ar->func()->numParams();
   int numArgs = ar->numArgs();
 
   PackedArrayInit retArray(numArgs);
@@ -137,7 +153,7 @@ static Array get_frame_args_with_ref(const ActRec* ar) {
 }
 
 bool EventHook::RunInterceptHandler(ActRec* ar) {
-  const Func* func = ar->m_func;
+  const Func* func = ar->func();
   if (LIKELY(func->maybeIntercepted() == 0)) return true;
 
   // Intercept only original generator / async function calls, not resumption.
@@ -175,7 +191,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   }
   Variant intArgs =
     PackedArrayInit(5)
-      .append(ar->m_func->fullNameRef())
+      .append(ar->func()->fullNameRef())
       .append(called_on)
       .append(get_frame_args_with_ref(ar))
       .append(h->asCArrRef()[1])
@@ -187,13 +203,13 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     Offset pcOff;
     ActRec* outer = g_context->getPrevVMState(ar, &pcOff);
 
-    frame_free_locals_inl_no_hook<true>(ar, ar->m_func->numLocals());
+    frame_free_locals_inl_no_hook<true>(ar, ar->func()->numLocals());
     Stack& stack = g_context->getStack();
     stack.top() = (Cell*)(ar + 1);
     cellDup(*ret.asCell(), *stack.allocTV());
 
     g_context->m_fp = outer;
-    g_context->m_pc = outer ? outer->m_func->unit()->at(pcOff) : nullptr;
+    g_context->m_pc = outer ? outer->func()->unit()->at(pcOff) : nullptr;
 
     return false;
   }
@@ -203,12 +219,12 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   return true;
 }
 
-const char* EventHook::GetFunctionNameForProfiler(const ActRec* ar,
+const char* EventHook::GetFunctionNameForProfiler(const Func* func,
                                                   int funcType) {
   const char* name;
   switch (funcType) {
     case EventHook::NormalFunc:
-      name = ar->m_func->fullName()->data();
+      name = func->fullName()->data();
       if (name[0] == '\0') {
         // We're evaling some code for internal purposes, most
         // likely getting the default value for a function parameter
@@ -217,7 +233,7 @@ const char* EventHook::GetFunctionNameForProfiler(const ActRec* ar,
       break;
     case EventHook::PseudoMain:
       name = makeStaticString(
-        std::string("run_init::") + ar->m_func->unit()->filepath()->data())
+        std::string("run_init::") + func->unit()->filepath()->data())
         ->data();
       break;
     case EventHook::Eval:
@@ -231,23 +247,27 @@ const char* EventHook::GetFunctionNameForProfiler(const ActRec* ar,
 
 bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
   ssize_t flags = CheckSurprise();
+  Xenon::getInstance().log(true);
   if (flags & RequestInjectionData::InterceptFlag &&
       !RunInterceptHandler(const_cast<ActRec*>(ar))) {
     return false;
   }
   if (flags & RequestInjectionData::EventHookFlag) {
-    RunUserProfiler(ar, ProfileEnter);
+    if (shouldRunUserProfiler(ar->func())) {
+      runUserProfilerOnFunctionEnter(ar);
+    }
 #ifdef HOTPROFILER
     Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
     if (profiler != nullptr) {
-      begin_profiler_frame(profiler, GetFunctionNameForProfiler(ar, funcType));
+      begin_profiler_frame(profiler,
+                           GetFunctionNameForProfiler(ar->func(), funcType));
     }
 #endif
   }
   return true;
 }
 
-void EventHook::onFunctionExit(const ActRec* ar) {
+void EventHook::onFunctionExit(const ActRec* ar, TypedValue* retval) {
   auto const inlinedRip = JIT::tx->uniqueStubs.retInlHelper;
   if ((JIT::TCA)ar->m_savedRip == inlinedRip) {
     // Inlined calls normally skip the function enter and exit events. If we
@@ -256,13 +276,16 @@ void EventHook::onFunctionExit(const ActRec* ar) {
     return;
   }
 
+  Xenon::getInstance().log(false);
+
 #ifdef HOTPROFILER
   Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
   if (profiler != nullptr) {
     // NB: we don't have a function type flag to match what we got in
     // onFunctionEnter. That's okay, though... we tolerate this in
     // TraceProfiler.
-    end_profiler_frame(profiler, GetFunctionNameForProfiler(ar, NormalFunc));
+    end_profiler_frame(profiler,
+                       GetFunctionNameForProfiler(ar->func(), NormalFunc));
   }
 #endif
 
@@ -271,7 +294,9 @@ void EventHook::onFunctionExit(const ActRec* ar) {
   // also avoid raising more exceptions for surprises (including the pending
   // exception).
   if (ThreadInfo::s_threadInfo->m_pendingException == nullptr) {
-    RunUserProfiler(ar, ProfileExit);
+    if (shouldRunUserProfiler(ar->func())) {
+      runUserProfilerOnFunctionExit(ar, retval);
+    }
     // XXX Disabled until t2329497 is fixed:
     // CheckSurprise();
   }

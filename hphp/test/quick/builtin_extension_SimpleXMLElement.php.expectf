@@ -1,13 +1,12 @@
 SimpleXMLElement
 
-Warning: SimpleXMLElement::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+Warning: SimpleXMLElement::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
 object(SimpleXMLElement)#1 (0) {
 }
-string(101) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:16:"SimpleXMLElement";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(16) "SimpleXMLElement"
-}
+
+Warning: Attempted to serialize unserializable builtin class SimpleXMLElement in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(23) {
   [0]=>
   string(11) "__construct"
@@ -59,14 +58,13 @@ array(23) {
 ================
 A_SimpleXMLElement
 
-Warning: SimpleXMLElement::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
-object(A_SimpleXMLElement)#3 (0) {
+Warning: SimpleXMLElement::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+object(A_SimpleXMLElement)#2 (0) {
 }
-string(103) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:18:"A_SimpleXMLElement";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(18) "A_SimpleXMLElement"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_SimpleXMLElement in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(23) {
   [0]=>
   string(11) "__construct"

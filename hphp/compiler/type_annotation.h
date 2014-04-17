@@ -105,7 +105,7 @@ public:
 
   bool isMixed() const { return !strcasecmp(m_name.c_str(), "HH\\mixed"); }
 
-  bool isVoid() const { return !strcasecmp(m_name.c_str(), "void"); }
+  bool isVoid() const { return !strcasecmp(m_name.c_str(), "HH\\void"); }
 
   bool isThis() const { return !strcasecmp(m_name.c_str(), "this"); }
 

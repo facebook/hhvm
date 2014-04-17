@@ -261,7 +261,7 @@ IRInstruction* findSpillFrame(SSATmp* sp) {
   auto inst = sp->inst();
   while (!inst->is(SpillFrame)) {
     assert(inst->dst()->isA(Type::StkPtr));
-    assert(!inst->is(RetAdjustStack, GenericRetDecRefs));
+    assert(!inst->is(RetAdjustStack));
     if (inst->is(DefSP)) return nullptr;
     if (inst->is(InterpOne) && isFPush(inst->extra<InterpOne>()->opcode)) {
       // A non-punted translation of this bytecode would contain a SpillFrame.

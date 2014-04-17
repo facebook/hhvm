@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -452,9 +452,9 @@ std::string FileUtil::relativePath(const std::string& fromDir,
 }
 
 std::string FileUtil::canonicalize(const std::string &path) {
-  const char *r = canonicalize(path.c_str(), path.size());
-  string res(r);
-  free((void*)r);
+  auto const r = canonicalize(path.c_str(), path.size());
+  SCOPE_EXIT { free(r); };
+  std::string res(r);
   return res;
 }
 

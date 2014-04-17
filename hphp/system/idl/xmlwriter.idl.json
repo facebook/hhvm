@@ -1130,7 +1130,7 @@
                         },
                         {
                             "name": "uri",
-                            "type": "String"
+                            "type": "Variant"
                         }
                     ]
                 },
@@ -1144,7 +1144,7 @@
                     "args": [
                         {
                             "name": "prefix",
-                            "type": "String"
+                            "type": "Variant"
                         },
                         {
                             "name": "name",
@@ -1152,7 +1152,7 @@
                         },
                         {
                             "name": "uri",
-                            "type": "String"
+                            "type": "Variant"
                         },
                         {
                             "name": "content",

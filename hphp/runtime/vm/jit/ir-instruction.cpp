@@ -24,15 +24,15 @@
 namespace HPHP {  namespace JIT {
 
 IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
-  : m_op(inst->m_op)
-  , m_typeParam(inst->m_typeParam)
+  : m_typeParam(inst->m_typeParam)
+  , m_op(inst->m_op)
   , m_numSrcs(inst->m_numSrcs)
   , m_numDsts(inst->m_numDsts)
+  , m_marker(inst->m_marker)
   , m_id(id)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
   , m_dst(nullptr)
   , m_block(nullptr)
-  , m_marker(inst->m_marker)
   , m_extra(inst->m_extra ? cloneExtra(op(), inst->m_extra, arena)
                           : nullptr)
 {
@@ -153,14 +153,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
 }
 
 bool IRInstruction::mayRaiseError() const {
-  if (!opcodeHasFlags(op(), MayRaiseError)) return false;
-
-  // Some instructions only throw if they do not have a non-catch label.
-  if (is(LdClsPropAddrCached, LdClsPropAddr) &&
-      taken() && !taken()->isCatch()) {
-    return false;
-  }
-
   return opcodeHasFlags(op(), MayRaiseError);
 }
 
@@ -434,19 +426,21 @@ std::string IRInstruction::toString() const {
 
 std::string BCMarker::show() const {
   assert(valid());
-  return folly::format("--- bc {}, spOff {} ({})",
-                       bcOff,
-                       spOff,
-                       func->fullName()->data()).str();
+  return folly::format("--- bc {}{}, spOff {} ({})",
+                       m_sk.offset(),
+                       m_sk.resumed() ? "r" : "",
+                       m_spOff,
+                       m_sk.func()->fullName()->data()).str();
 }
 
 bool BCMarker::valid() const {
-  if (reinterpret_cast<uintptr_t>(func) == 1) return true;
+  if (isDummy()) return true;
   return
-    func != nullptr &&
-    bcOff >= func->base() && bcOff < func->past() &&
+    m_sk.valid() &&
+    m_sk.offset() >= m_sk.func()->base() &&
+    m_sk.offset() < m_sk.func()->past() &&
     (RuntimeOption::EvalHHIREnableGenTimeInlining ||
-     spOff <= func->numSlotsInFrame() + func->maxStackCells());
+     m_spOff <= m_sk.func()->numSlotsInFrame() + m_sk.func()->maxStackCells());
   // When inlining is on, we may modify markers to weird values in case reentry
   // happens.
 }

@@ -88,7 +88,7 @@ let extra_actions () = [
   "-hackify", " <file>",
   Common.mk_action_1_arg (fun file ->
     let file = Common.realpath file in
-    let res = Hackificator.hackify_thrift file in
+    let res = Hackificator.hackify ~upgrade:false "<?hh" file in
     match res with
     | None -> failwith "no transfo"
     | Some s ->

@@ -511,19 +511,19 @@ struct Unit {
     return const_cast<ArrayData*>(m_arrays.at(id));
   }
 
-  static Func *lookupFunc(const NamedEntity *ne);
-  static Func *lookupFunc(const StringData *funcName);
-  static Func *loadFunc(const NamedEntity *ne, const StringData* name);
-  static Func *loadFunc(const StringData* name);
+  static Func* lookupFunc(const NamedEntity *ne);
+  static Func* lookupFunc(const StringData *funcName);
+  static Func* loadFunc(const NamedEntity *ne, const StringData* name);
+  static Func* loadFunc(const StringData* name);
 
   static Class* defClass(const HPHP::PreClass* preClass,
                          bool failIsFatal = true);
   static bool aliasClass(Class* original, const StringData* alias);
   void defTypeAlias(Id id);
 
-  static Cell* lookupCns(const StringData* cnsName);
-  static Cell* lookupPersistentCns(const StringData* cnsName);
-  static Cell* loadCns(const StringData* cnsName);
+  static const Cell* lookupCns(const StringData* cnsName);
+  static const Cell* lookupPersistentCns(const StringData* cnsName);
+  static const Cell* loadCns(const StringData* cnsName);
   static bool defCns(const StringData* cnsName, const TypedValue* value,
                      bool persistent = false);
   static uint64_t defCnsHelper(uint64_t ch,
@@ -797,9 +797,9 @@ class UnitEmitter {
 
   bool isASystemLib() const {
     static const char systemlib_prefix[] = "/:systemlib";
-    return !*getFilepath()->data() ||
-      !strncmp(getFilepath()->data(),
-        systemlib_prefix, sizeof systemlib_prefix - 1);
+    return !strncmp(getFilepath()->data(),
+                    systemlib_prefix,
+                    sizeof systemlib_prefix - 1);
   }
 
   void addTrivialPseudoMain();

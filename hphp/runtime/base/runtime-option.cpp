@@ -390,13 +390,6 @@ static inline bool hhbcRelaxGuardsDefault() {
   return !RuntimeOption::EvalHHIRRelaxGuards;
 }
 
-static inline bool hhirRefcountOptsDefault() {
-  // TODO(t3091846)
-  // TODO(t3728863)
-  return !RuntimeOption::EvalSimulateARM &&
-    !RuntimeOption::EvalHHIRBytecodeControlFlow;
-}
-
 static inline bool evalJitDefault() {
 #ifdef __APPLE__
   return false;
@@ -507,6 +500,9 @@ int RuntimeOption::Fb303ServerWorkerThreads = 1;
 int RuntimeOption::Fb303ServerPoolThreads = 1;
 #endif
 
+double RuntimeOption::XenonPeriodSeconds = 0.0;
+bool RuntimeOption::XenonForceAlwaysOn = false;
+
 int RuntimeOption::EnableAlternative = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -556,6 +552,17 @@ static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
 void RuntimeOption::Load(Hdf &config,
                          std::vector<std::string> *overwrites /* = NULL */,
                          bool empty /* = false */) {
+  if (overwrites) {
+    // Do these first, mainly so we can override Tier.*.machine,
+    // Tier.*.tier and Tier.*.cpu on the command line. But it can
+    // also make sense to override fields within a Tier (
+    // eg if you are using the same command line across a lot
+    // of different machines)
+    for (unsigned int i = 0; i < overwrites->size(); i++) {
+      config.fromString(overwrites->at(i).c_str());
+    }
+  }
+
   // Machine metrics
   string hostname, tier, cpu;
   {
@@ -571,17 +578,6 @@ void RuntimeOption::Load(Hdf &config,
     cpu = machine["cpu"].getString();
     if (cpu.empty()) {
       cpu = Process::GetCPUModel();
-    }
-  }
-
-  if (overwrites) {
-    // Do these first, mainly so we can override Tier.*.machine,
-    // Tier.*.tier and Tier.*.cpu on the command line. But it can
-    // also make sense to override fields within a Tier (
-    // eg if you are using the same command line across a lot
-    // of different machines)
-    for (unsigned int i = 0; i < overwrites->size(); i++) {
-      config.fromString(overwrites->at(i).c_str());
     }
   }
 
@@ -937,8 +933,8 @@ void RuntimeOption::Load(Hdf &config,
     LockCodeMemory = server["LockCodeMemory"].getBool(false);
     MaxArrayChain = server["MaxArrayChain"].getInt32(INT_MAX);
     if (MaxArrayChain != INT_MAX) {
-      // HphpArray needs a higher threshold to avoid false-positives.
-      // (and we always use HphpArray)
+      // MixedArray needs a higher threshold to avoid false-positives.
+      // (and we always use MixedArray)
       MaxArrayChain *= 2;
     }
 
@@ -1162,6 +1158,8 @@ void RuntimeOption::Load(Hdf &config,
     EnableShortTags= eval["EnableShortTags"].getBool(true);
     EnableAspTags = eval["EnableAspTags"].getBool();
     EnableXHP = eval["EnableXHP"].getBool(false);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.eval.enable_xhp", &EnableXHP);
     EnableZendCompat = eval["EnableZendCompat"].getBool(false);
     TimeoutsUseWallTime = eval["TimeoutsUseWallTime"].getBool(true);
     CheckFlushOnUserClose = eval["CheckFlushOnUserClose"].getBool(true);
@@ -1359,6 +1357,12 @@ void RuntimeOption::Load(Hdf &config,
     Fb303ServerPoolThreads = fb303Server["PoolThreads"].getInt16(1);
   }
 #endif
+
+  {
+    Hdf hhprofServer = config["Xenon"];
+    XenonPeriodSeconds = hhprofServer["Period"].getDouble(0.0);
+    XenonForceAlwaysOn = hhprofServer["ForceAlwaysOn"].getBool(false);
+  }
 
   refineStaticStringTableSize();
 

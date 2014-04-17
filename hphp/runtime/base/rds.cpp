@@ -17,6 +17,7 @@
 
 #include <cassert>
 #include <cstdio>
+#include <execinfo.h>
 
 #include <sys/mman.h>
 #include <atomic>
@@ -30,6 +31,7 @@
 #include "hphp/util/lock.h"
 
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/vm/debug/debug.h"
 
 namespace HPHP { namespace RDS {
 
@@ -53,6 +55,37 @@ size_t s_persistent_frontier = 0;
 SimpleMutex s_allocMutex(false /*recursive*/, RankLeaf);
 
 //////////////////////////////////////////////////////////////////////
+
+struct SymbolKind : boost::static_visitor<std::string> {
+  std::string operator()(StaticLocal k) const { return "StaticLocal"; }
+  std::string operator()(ClsConstant k) const { return "ClsConstant"; }
+  std::string operator()(StaticProp k) const { return "StaticProp"; }
+  std::string operator()(StaticMethod k) const { return "StaticMethod"; }
+  std::string operator()(StaticMethodF k) const { return "StaticMethodF"; }
+};
+
+struct SymbolRep : boost::static_visitor<std::string> {
+  std::string operator()(StaticLocal k) const {
+    const Func* func = Func::fromFuncId(k.funcId);
+    const Class* cls = getOwningClassForFunc(func);
+    std::string name;
+    if (cls != func->cls()) {
+      name = cls->name()->toCppString() + "::" +
+        func->name()->toCppString();
+    } else {
+      name = func->fullName()->toCppString();
+    }
+    return name + "::" + k.name->toCppString();
+  }
+
+  std::string operator()(ClsConstant k) const {
+    return k.clsName->data() + std::string("::") + k.cnsName->data();
+  }
+
+  std::string operator()(StaticProp k)    const { return k.name->data(); }
+  std::string operator()(StaticMethod k)  const { return k.name->data(); }
+  std::string operator()(StaticMethodF k) const { return k.name->data(); }
+};
 
 struct SymbolEq : boost::static_visitor<bool> {
   template<class T, class U>
@@ -169,6 +202,8 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes, size_t align) {
   if (s_linkTable.find(acc, key)) return acc->second;
 
   auto const retval = alloc(mode, sizeBytes, align);
+
+  recordRds(retval, sizeBytes, key);
   if (!s_linkTable.insert(LinkTable::value_type(key, retval))) {
     always_assert(0);
   }
@@ -258,6 +293,7 @@ size_t allocBit() {
     int bytes = ((~s_frontier + 1) & kNumBytesMask) + kNumBytes;
     s_bits_to_go = bytes * CHAR_BIT;
     s_frontier += bytes;
+    recordRds(s_frontier - bytes, bytes, "Unknown", "bits");
   }
   s_bits_to_go--;
   return s_next_bit++;
@@ -313,10 +349,41 @@ void threadInit() {
                    RuntimeOption::EvalJitTargetCacheSize - s_persistent_base,
                    PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED, s_tc_fd, 0);
   always_assert(mem == shared_base);
+
+  if (RuntimeOption::EvalPerfDataMap) {
+    Debug::DebugInfo::recordDataMap(
+      tl_base,
+      (char*)tl_base + RuntimeOption::EvalJitTargetCacheSize,
+      "rds");
+  }
 }
 
 void threadExit() {
+  if (RuntimeOption::EvalPerfDataMap) {
+    Debug::DebugInfo::recordDataMap(
+      tl_base,
+      (char*)tl_base + RuntimeOption::EvalJitTargetCacheSize,
+      "-rds");
+  }
   munmap(tl_base, RuntimeOption::EvalJitTargetCacheSize);
+}
+
+void recordRds(Handle h, size_t size,
+               const std::string& type, const std::string& msg) {
+  if (RuntimeOption::EvalPerfDataMap) {
+    Debug::DebugInfo::recordDataMap(
+      (char*)(intptr_t)h,
+      (char*)(intptr_t)h + size,
+      folly::format("rds+{}-{}", type, msg).str());
+  }
+}
+
+void recordRds(Handle h, size_t size, const Symbol& sym) {
+  if (RuntimeOption::EvalPerfDataMap) {
+    recordRds(h, size,
+              boost::apply_visitor(SymbolKind(), sym),
+              boost::apply_visitor(SymbolRep(), sym));
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

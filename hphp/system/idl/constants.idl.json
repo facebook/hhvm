@@ -560,70 +560,6 @@
             "value": 0
         },
         {
-            "name": "E_ALL",
-            "value": 30719
-        },
-        {
-            "name": "E_COMPILE_ERROR",
-            "value": 64
-        },
-        {
-            "name": "E_COMPILE_WARNING",
-            "value": 128
-        },
-        {
-            "name": "E_CORE_ERROR",
-            "value": 16
-        },
-        {
-            "name": "E_CORE_WARNING",
-            "value": 32
-        },
-        {
-            "name": "E_DEPRECATED",
-            "value": 8192
-        },
-        {
-            "name": "E_ERROR",
-            "value": 1
-        },
-        {
-            "name": "E_NOTICE",
-            "value": 8
-        },
-        {
-            "name": "E_PARSE",
-            "value": 4
-        },
-        {
-            "name": "E_RECOVERABLE_ERROR",
-            "value": 4096
-        },
-        {
-            "name": "E_STRICT",
-            "value": 2048
-        },
-        {
-            "name": "E_USER_DEPRECATED",
-            "value": 16384
-        },
-        {
-            "name": "E_USER_ERROR",
-            "value": 256
-        },
-        {
-            "name": "E_USER_NOTICE",
-            "value": 1024
-        },
-        {
-            "name": "E_USER_WARNING",
-            "value": 512
-        },
-        {
-            "name": "E_WARNING",
-            "value": 2
-        },
-        {
             "name": "FALSE",
             "value": false
         },
@@ -797,11 +733,11 @@
         },
         {
             "name": "HPHP_VERSION",
-            "value": "3.0.0-dev"
+            "value": "3.1.0-dev"
         },
         {
             "name": "HHVM_VERSION",
-            "value": "3.0.0-dev"
+            "value": "3.1.0-dev"
         },
         {
             "name": "HTML_ENTITIES",
@@ -1349,7 +1285,7 @@
         },
         {
             "name": "LIBXML_DOTTED_VERSION",
-            "value": "2.6.26"
+            "value": "2.7.8"
         },
         {
             "name": "LIBXML_DTDATTR",
@@ -1378,6 +1314,14 @@
         {
             "name": "LIBXML_ERR_WARNING",
             "value": 1
+        },
+        {
+            "name": "LIBXML_HTML_NODEFDTD",
+            "value": 4
+        },
+        {
+            "name": "LIBXML_HTML_NOIMPLIED",
+            "value": 8192
         },
         {
             "name": "LIBXML_NOBLANKS",
@@ -1432,8 +1376,20 @@
             "value": 8192
         },
         {
+            "name": "LIBXML_PARSEHUGE",
+            "value": 524288
+        },
+        {
+            "name": "LIBXML_PEDANTIC",
+            "value": 128
+        },
+        {
+            "name": "LIBXML_SCHEMA_CREATE",
+            "value": 1
+        },
+        {
             "name": "LIBXML_VERSION",
-            "value": 20626
+            "value": 20708
         },
         {
             "name": "LIBXML_XINCLUDE",
@@ -3298,150 +3254,6 @@
         {
             "name": "NULL",
             "value": null
-        },
-        {
-            "name": "OCI_ASSOC",
-            "value": 1
-        },
-        {
-            "name": "OCI_BOTH",
-            "value": 3
-        },
-        {
-            "name": "OCI_B_BFILE",
-            "value": 114
-        },
-        {
-            "name": "OCI_B_BIN",
-            "value": 23
-        },
-        {
-            "name": "OCI_B_BLOB",
-            "value": 113
-        },
-        {
-            "name": "OCI_B_CFILEE",
-            "value": 115
-        },
-        {
-            "name": "OCI_B_CLOB",
-            "value": 112
-        },
-        {
-            "name": "OCI_B_CURSOR",
-            "value": 116
-        },
-        {
-            "name": "OCI_B_INT",
-            "value": 3
-        },
-        {
-            "name": "OCI_B_NTY",
-            "value": 108
-        },
-        {
-            "name": "OCI_B_NUM",
-            "value": 2
-        },
-        {
-            "name": "OCI_B_ROWID",
-            "value": 104
-        },
-        {
-            "name": "OCI_COMMIT_ON_SUCCESS",
-            "value": 32
-        },
-        {
-            "name": "OCI_DEFAULT",
-            "value": 0
-        },
-        {
-            "name": "OCI_DESCRIBE_ONLY",
-            "value": 16
-        },
-        {
-            "name": "OCI_DTYPE_FILE",
-            "value": 56
-        },
-        {
-            "name": "OCI_DTYPE_LOB",
-            "value": 50
-        },
-        {
-            "name": "OCI_DTYPE_ROWID",
-            "value": 54
-        },
-        {
-            "name": "OCI_D_FILE",
-            "value": 56
-        },
-        {
-            "name": "OCI_D_LOB",
-            "value": 50
-        },
-        {
-            "name": "OCI_D_ROWID",
-            "value": 54
-        },
-        {
-            "name": "OCI_EXACT_FETCH",
-            "value": 2
-        },
-        {
-            "name": "OCI_FETCHSTATEMENT_BY_COLUMN",
-            "value": 16
-        },
-        {
-            "name": "OCI_FETCHSTATEMENT_BY_ROW",
-            "value": 32
-        },
-        {
-            "name": "OCI_LOB_BUFFER_FREE",
-            "value": 1
-        },
-        {
-            "name": "OCI_NUM",
-            "value": 2
-        },
-        {
-            "name": "OCI_RETURN_LOBS",
-            "value": 8
-        },
-        {
-            "name": "OCI_RETURN_NULLS",
-            "value": 4
-        },
-        {
-            "name": "OCI_SEEK_CUR",
-            "value": 1
-        },
-        {
-            "name": "OCI_SEEK_END",
-            "value": 2
-        },
-        {
-            "name": "OCI_SEEK_SET",
-            "value": 0
-        },
-        {
-            "name": "OCI_SYSDATE",
-            "value": "SYSDATE"
-        },
-        {
-            "name": "OCI_SYSDBA",
-            "value": 2
-        },
-        {
-            "name": "OCI_SYSOPER",
-            "value": 4
-        },
-        {
-            "name": "OCI_TEMP_BLOB",
-            "value": 1
-        },
-        {
-            "name": "OCI_TEMP_CLOB",
-            "value": 2
         },
         {
             "name": "OPENSSL_ALGO_RMD160",
@@ -5547,6 +5359,10 @@
         },
         {
             "name": "T_YIELD",
+            "type": "Int64"
+        },
+        {
+            "name": "T_ELLIPSIS",
             "type": "Int64"
         },
         {

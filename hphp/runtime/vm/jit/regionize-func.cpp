@@ -39,11 +39,14 @@ typedef hphp_hash_map<RegionDescPtr, TransIDVec,
  * covered given the new region containing the translations in
  * selectedVec.
  */
-static void markCovered(const TransCFG& cfg, const TransIDVec selectedVec,
-                        const TransIDSet heads, TransIDSet& coveredNodes,
+static void markCovered(const TransCFG& cfg, const RegionDescPtr region,
+                        const TransIDVec& selectedVec, const TransIDSet heads,
+                        TransIDSet& coveredNodes,
                         TransCFG::ArcPtrSet& coveredArcs) {
   assert(selectedVec.size() > 0);
   TransID newHead = selectedVec[0];
+  assert(region->blocks.size() > 0);
+  assert(newHead == getTransId(region->blocks[0]->id()));
 
   // Mark all region's nodes as covered.
   coveredNodes.insert(selectedVec.begin(), selectedVec.end());
@@ -56,13 +59,15 @@ static void markCovered(const TransCFG& cfg, const TransIDVec selectedVec,
     }
   }
 
-  // Mark all arcs between consecutive region nodes as covered.
-  for (size_t i = 0; i < selectedVec.size() - 1; i++) {
-    TransID node = selectedVec[i];
-    TransID next = selectedVec[i + 1];
+  // Mark all CFG arcs within the region as covered.
+  for (auto& arc : region->arcs) {
+    if (!hasTransId(arc.src) || !hasTransId(arc.dst)) continue;
+    TransID srcTid = getTransId(arc.src);
+    TransID dstTid = getTransId(arc.dst);
+    assert(cfg.hasArc(srcTid, dstTid));
     bool foundArc = false;
-    for (auto arc : cfg.outArcs(node)) {
-      if (arc->dst() == next) {
+    for (auto arc : cfg.outArcs(srcTid)) {
+      if (arc->dst() == dstTid) {
         coveredArcs.insert(arc);
         foundArc = true;
       }
@@ -107,18 +112,18 @@ static const TransIDVec& getRegionTransIDVec(const RegionToTransIDsMap& map,
 /**
  * Sorts the regions vector in a linear order to be used for
  * translation.  The goal is to obtain an order that improves locality
- * when the function is executed.
+ * when the function is executed.  Each region is translated separately.
  */
-static void sortRegion(RegionVec&                  regions,
-                       const Func*                 func,
-                       const TransCFG&             cfg,
-                       const ProfData*             profData,
-                       const TransIDToRegionMap&   headToRegion,
-                       const RegionToTransIDsMap&  regionToTransIds) {
+static void sortRegions(RegionVec&                  regions,
+                        const Func*                 func,
+                        const TransCFG&             cfg,
+                        const ProfData*             profData,
+                        const TransIDToRegionMap&   headToRegion,
+                        const RegionToTransIDsMap&  regionToTransIds) {
   RegionVec sorted;
   RegionSet selected;
 
-  if (regions.size() == 0) return;
+  if (regions.empty()) return;
 
   // First, pick the region starting at the lowest bytecode offset.
   // This will normally correspond to the main function entry (for
@@ -181,7 +186,7 @@ static void sortRegion(RegionVec&                  regions,
       auto r = regions[i];
       auto tids = getRegionTransIDVec(regionToTransIds, r);
       std::string transIds = folly::join(", ", tids);
-      FTRACE(6, "sortRegion: region[{}]: {}\n", i, transIds);
+      FTRACE(6, "sortRegions: region[{}]: {}\n", i, transIds);
     }
   }
 }
@@ -264,7 +269,7 @@ void regionizeFunc(const Func*       func,
       assert(selectedVec.size() > 0 && selectedVec[0] == newHead);
       regions.push_back(region);
       heads.insert(newHead);
-      markCovered(cfg, selectedVec, heads, coveredNodes, coveredArcs);
+      markCovered(cfg, region, selectedVec, heads, coveredNodes, coveredArcs);
       regionToTransIds[region] = selectedVec;
       headToRegion[newHead] = region;
 
@@ -276,7 +281,7 @@ void regionizeFunc(const Func*       func,
   assert(coveredNodes.size() == cfg.nodes().size());
   assert(coveredArcs.size() == arcs.size());
 
-  sortRegion(regions, func, cfg, profData, headToRegion, regionToTransIds);
+  sortRegions(regions, func, cfg, profData, headToRegion, regionToTransIds);
 
   if (debug && Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
     FTRACE(5, "\n--------------------------------------------\n"

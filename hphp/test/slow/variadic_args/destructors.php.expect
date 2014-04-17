@@ -1,0 +1,347 @@
+= test_refcount =
+
+* variadic_only_no_vv
+bool(true)
+array(1) {
+  [0]=>
+  object(HasD)#1 (1) {
+    ["name":"HasD":private]=>
+    string(6) "HasD 0"
+  }
+}
+HasD::__destruct(HasD 0)
+
+* variadic_only_no_vv
+bool(true)
+array(2) {
+  [0]=>
+  object(HasD)#1 (1) {
+    ["name":"HasD":private]=>
+    string(6) "HasD 1"
+  }
+  [1]=>
+  object(HasD)#2 (1) {
+    ["name":"HasD":private]=>
+    string(6) "HasD 2"
+  }
+}
+HasD::__destruct(HasD 1)
+HasD::__destruct(HasD 2)
+
+* variadic_only
+bool(true)
+array(1) {
+  [0]=>
+  object(HasD)#2 (1) {
+    ["name":"HasD":private]=>
+    string(6) "HasD 3"
+  }
+}
+bool(true)
+bool(true)
+HasD::__destruct(HasD 3)
+
+* variadic_only
+bool(true)
+array(2) {
+  [0]=>
+  object(HasD)#2 (1) {
+    ["name":"HasD":private]=>
+    string(6) "HasD 4"
+  }
+  [1]=>
+  object(HasD)#3 (1) {
+    ["name":"HasD":private]=>
+    string(6) "HasD 5"
+  }
+}
+bool(true)
+bool(true)
+HasD::__destruct(HasD 4)
+HasD::__destruct(HasD 5)
+
+* cuf *
+
+* variadic_only_no_vv
+bool(true)
+array(1) {
+  [0]=>
+  object(HasD)#3 (1) {
+    ["name":"HasD":private]=>
+    string(6) "HasD 6"
+  }
+}
+HasD::__destruct(HasD 6)
+
+* variadic_only_no_vv
+bool(true)
+array(2) {
+  [0]=>
+  object(HasD)#3 (1) {
+    ["name":"HasD":private]=>
+    string(6) "HasD 7"
+  }
+  [1]=>
+  object(HasD)#4 (1) {
+    ["name":"HasD":private]=>
+    string(6) "HasD 8"
+  }
+}
+HasD::__destruct(HasD 7)
+HasD::__destruct(HasD 8)
+* cufa *
+
+* variadic_only_no_vv
+bool(true)
+array(1) {
+  [0]=>
+  object(HasD)#4 (1) {
+    ["name":"HasD":private]=>
+    string(6) "HasD 9"
+  }
+}
+HasD::__destruct(HasD 9)
+
+* variadic_only_no_vv
+bool(true)
+array(2) {
+  [0]=>
+  object(HasD)#4 (1) {
+    ["name":"HasD":private]=>
+    string(7) "HasD 10"
+  }
+  [1]=>
+  object(HasD)#5 (1) {
+    ["name":"HasD":private]=>
+    string(7) "HasD 11"
+  }
+}
+HasD::__destruct(HasD 10)
+HasD::__destruct(HasD 11)
+
+* variadic_only
+bool(true)
+array(1) {
+  [0]=>
+  object(HasD)#5 (1) {
+    ["name":"HasD":private]=>
+    string(7) "HasD 12"
+  }
+}
+bool(true)
+bool(true)
+HasD::__destruct(HasD 12)
+
+* variadic_only
+bool(true)
+array(2) {
+  [0]=>
+  object(HasD)#5 (1) {
+    ["name":"HasD":private]=>
+    string(7) "HasD 13"
+  }
+  [1]=>
+  object(HasD)#6 (1) {
+    ["name":"HasD":private]=>
+    string(7) "HasD 14"
+  }
+}
+bool(true)
+bool(true)
+HasD::__destruct(HasD 13)
+HasD::__destruct(HasD 14)
+Exiting test_refcount
+= test_with_exceptions =
+
+* variadic_only_no_vv_exc
+bool(true)
+array(1) {
+  [0]=>
+  object(HasD)#6 (1) {
+    ["name":"HasD":private]=>
+    string(5) "i1 15"
+  }
+}
+variadic_only_no_vv_exc: Array
+(
+    [0] => HasD Object
+        (
+            [name:HasD:private] => i1 15
+        )
+
+)
+test_with_exceptions: Array
+(
+)
+main: Array
+(
+)
+Exception: variadic_only_no_vv_exc: 1
+
+* variadic_only_no_vv_exc
+bool(true)
+array(2) {
+  [0]=>
+  object(HasD)#7 (1) {
+    ["name":"HasD":private]=>
+    string(5) "i2 16"
+  }
+  [1]=>
+  object(HasD)#8 (1) {
+    ["name":"HasD":private]=>
+    string(5) "i3 17"
+  }
+}
+variadic_only_no_vv_exc: Array
+(
+    [0] => HasD Object
+        (
+            [name:HasD:private] => i2 16
+        )
+
+    [1] => HasD Object
+        (
+            [name:HasD:private] => i3 17
+        )
+
+)
+test_with_exceptions: Array
+(
+)
+main: Array
+(
+)
+Exception: variadic_only_no_vv_exc: 2
+* cuf *
+
+* variadic_only_no_vv_exc
+bool(true)
+array(1) {
+  [0]=>
+  object(HasD)#9 (1) {
+    ["name":"HasD":private]=>
+    string(7) "HasD 18"
+  }
+}
+variadic_only_no_vv_exc: Array
+(
+    [0] => HasD Object
+        (
+            [name:HasD:private] => HasD 18
+        )
+
+)
+test_with_exceptions: Array
+(
+)
+main: Array
+(
+)
+Exception: variadic_only_no_vv_exc: 1
+HasD::__destruct(HasD 18)
+
+* variadic_only_no_vv_exc
+bool(true)
+array(2) {
+  [0]=>
+  object(HasD)#9 (1) {
+    ["name":"HasD":private]=>
+    string(7) "HasD 19"
+  }
+  [1]=>
+  object(HasD)#10 (1) {
+    ["name":"HasD":private]=>
+    string(7) "HasD 20"
+  }
+}
+variadic_only_no_vv_exc: Array
+(
+    [0] => HasD Object
+        (
+            [name:HasD:private] => HasD 19
+        )
+
+    [1] => HasD Object
+        (
+            [name:HasD:private] => HasD 20
+        )
+
+)
+test_with_exceptions: Array
+(
+)
+main: Array
+(
+)
+Exception: variadic_only_no_vv_exc: 2
+HasD::__destruct(HasD 19)
+HasD::__destruct(HasD 20)
+* cufa *
+
+* variadic_only_no_vv_exc
+bool(true)
+array(1) {
+  [0]=>
+  object(HasD)#10 (1) {
+    ["name":"HasD":private]=>
+    string(7) "HasD 21"
+  }
+}
+variadic_only_no_vv_exc: Array
+(
+    [0] => HasD Object
+        (
+            [name:HasD:private] => HasD 21
+        )
+
+)
+test_with_exceptions: Array
+(
+)
+main: Array
+(
+)
+Exception: variadic_only_no_vv_exc: 1
+HasD::__destruct(HasD 21)
+
+* variadic_only_no_vv_exc
+bool(true)
+array(2) {
+  [0]=>
+  object(HasD)#10 (1) {
+    ["name":"HasD":private]=>
+    string(7) "HasD 22"
+  }
+  [1]=>
+  object(HasD)#11 (1) {
+    ["name":"HasD":private]=>
+    string(7) "HasD 23"
+  }
+}
+variadic_only_no_vv_exc: Array
+(
+    [0] => HasD Object
+        (
+            [name:HasD:private] => HasD 22
+        )
+
+    [1] => HasD Object
+        (
+            [name:HasD:private] => HasD 23
+        )
+
+)
+test_with_exceptions: Array
+(
+)
+main: Array
+(
+)
+Exception: variadic_only_no_vv_exc: 2
+HasD::__destruct(HasD 22)
+HasD::__destruct(HasD 23)
+Exiting test_with_exceptions
+HasD::__destruct(i3 17)
+HasD::__destruct(i2 16)
+HasD::__destruct(i1 15)
+Done

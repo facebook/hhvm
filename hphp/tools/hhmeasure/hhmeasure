@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ -e ~/fbcode/_build/opt/hphp/hhvm/hhvm ] ;
+  then hhvmpath=~/fbcode/_build/opt/hphp/hhvm;
+elif [ -e /usr/local/hphpi/bin ] ;
+  then hhvmpath=/usr/local/hphpi/bin;
+else
+  echo "Couldn't find hhvm binary";
+  exit;
+fi
+echo "Using hhvm from $hhvmpath"
+if [ "$1" == "basic" ] ;
+  then
+  $hhvmpath/hhvm -c /usr/local/hphpi/cli.hdf -vEval.Jit=1 -vRepo.Local.Mode=-- -vRepo.Central.Path=./t1.hhbc -vEval.HHIREnableGenTimeInlining=0 --arg MeasureBasicOps.php basic;
+
+else
+  $hhvmpath/hhvm -c /usr/local/hphpi/cli.hdf -vEval.Jit=1 -vRepo.Local.Mode=-- -vRepo.Central.Path=./t1.hhbc -vEval.HHIREnableGenTimeInlining=0 MeasureBasicOps.php;
+fi

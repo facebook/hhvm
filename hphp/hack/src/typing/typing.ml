@@ -390,6 +390,19 @@ and stmt env = function
         | Ast.FAsync -> (Reason.Rwitness p), Tapply ((p, "Awaitable"), [rty]) in
       let expected_return = Env.get_return env in
       (match snd (Env.expand_type env expected_return) with
+      | r, Tprim Tvoid ->
+          (* Yell about returning a value from a void function. This catches
+           * more issues than just unifying with void would do -- in particular
+           * just unifying allows you to return a Tany from a void function,
+           * which is clearly wrong. Note this check is best-effort; if the
+           * function returns a generic type which later ends up being Tvoid
+           * then there's not much we can do here. *)
+          error_l [
+            p,
+            "You cannot return a value";
+            Reason.to_pos r,
+            "This is a void function"
+         ]
       | _, Tunresolved _ ->
           (* we allow return types to grow for anonymous functions *)
           let env, rty = TUtils.unresolved env rty in
@@ -1024,10 +1037,8 @@ and anon_bind_param params env (param_name, ty as pname_ty) =
   match !params with
   | [] ->
       (* This code cannot be executed normally, because the arity is wrong
-       * and it should have been caught earlier. But in silent-mode, we
-       * tolerate it, we bind as many parameters as we can and carry on.
-       *)
-      assert !is_silent_mode;
+       * and it will error later. Bind as many parameters as we can and carry
+       * on. *)
       env
   | param :: paraml ->
       params := paraml;
@@ -1559,12 +1570,17 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
   | _ when !is_silent_mode ->
       env, (Reason.Rnone, Tany)
   | Toption _ ->
-      error_l [p,
-               "You are trying to access an element of this container"^
-               " but the container could be null. ";
-               Reason.to_pos (fst ety1),
-               "This is what makes me believe it can be null"^
-               Reason.to_string (fst ety1)]
+      error_l (
+        [
+          p,
+          "You are trying to access an element of this container"^
+          " but the container could be null. "
+        ] @
+        (Reason.to_string 
+          "This is what makes me believe it can be null"
+          (fst ety1)
+        )
+      )
   | Tobject ->
       if Env.is_strict env
       then error_array p ety1
@@ -1585,6 +1601,9 @@ and array_append is_lvalue p env ty1 =
   | Tapply ((_, "Vector"), [ty])
   | Tapply ((_, "Set"), [ty]) ->
       env, ty
+  | Tapply ((_, "Map"), [tkey; tvalue]) ->
+      (* You can append a pair to a map *)
+      env, (Reason.Rmap_append p, Tapply ((p, "Pair"), [tkey; tvalue]))
   | Tarray (is_local, Some ty, None) ->
       if is_lvalue && not is_local
       then array_cow p;
@@ -1867,11 +1886,6 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
                 | _ -> assert false)
             | Some { ce_visibility = vis; ce_type = method_ } ->
                 check_visibility p env (Reason.to_pos (fst method_), vis) None;
-                let arity_match =
-                  List.length class_.tc_tparams = List.length paraml
-                in
-                assert (!is_silent_mode || arity_match);
-
                 let new_name = "alpha_varied_this" in
 
                 (* Since a param might include a "this" type, let's alpha vary
@@ -1908,12 +1922,17 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
     | _ when !is_silent_mode ->
         env, (fst ety1, Tany), None
     | Toption _ ->
-        error_l [p,
-                 "You are trying to access the member "^s^
-                 " but this object can be null. ";
-                 Reason.to_pos (fst ety1),
-                 "This is what makes me believe it can be null"^
-                 Reason.to_string (fst ety1)]
+        error_l (
+          [
+            p,
+            "You are trying to access the member "^s^
+            " but this object can be null. "
+          ] @
+          (Reason.to_string
+            "This is what makes me believe it can be null"
+            (fst ety1)
+          )
+        )
     | ty ->
         error_l [p,
                  ("You are trying to access the member "^s^
@@ -2299,7 +2318,11 @@ and non_null env ty =
   match ty with
   | _, Toption ty ->
       let env, ty = Env.expand_type env ty in
-      env, ty
+      (* When "??T" appears in the typing environment due to implicit
+       * typing, the recursion here ensures that it's treated as
+       * isomorphic to "?T"; that is, all nulls are created equal.
+       *)
+      non_null env ty
   | r, Tunresolved tyl ->
       let env, tyl = lfold non_null env tyl in
       (* We need to flatten the unresolved types, otherwise we could

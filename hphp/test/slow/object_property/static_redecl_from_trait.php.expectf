@@ -1,0 +1,1 @@
+Fatal error: Cannot redeclare non-static X::$foo as static Y::$foo in %s on line %d

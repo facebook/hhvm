@@ -286,7 +286,7 @@ static Array getVariables(const ActRec *fp) {
   } else {
     const Func *func = fp->m_func;
     auto numLocals = func->numNamedLocals();
-    ArrayInit ret(numLocals);
+    ArrayInit ret(numLocals, ArrayInit::Map{});
     for (Id id = 0; id < numLocals; ++id) {
       TypedValue* ptv = frame_local(fp, id);
       if (ptv->m_type == KindOfUninit) {
@@ -324,7 +324,7 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
   }
   if (m_version == 1) {
     // Remove the values before sending to client.
-    ArrayInit ret(m_variables->size());
+    ArrayInit ret(m_variables->size(), ArrayInit::Map{});
     Variant v;
     for (ArrayIter iter(m_variables); iter; ++iter) {
       ret.add(iter.first().toString(), v);
@@ -334,13 +334,13 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
   } else if (m_version == 2) {
     // Remove entries that do not match a non empty m_varName.
     if (!m_varName.empty()) {
-      ArrayInit ret(1);
+      ArrayInit ret(1, ArrayInit::Map{});
       ret.add(m_varName, m_variables[m_varName]);
       m_variables = ret.toArray();
     }
     // Remove entries whose name or contents do not match a non empty m_filter
     if (!m_filter.empty()) {
-      ArrayInit ret(1);
+      ArrayInit ret(m_variables.size(), ArrayInit::Map{});
       for (ArrayIter iter(m_variables); iter; ++iter) {
         String name = iter.first().toString();
         if (name.find(m_filter, 0, false) < 0) {

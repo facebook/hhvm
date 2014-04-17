@@ -89,7 +89,7 @@ final class ImmVector<Tv> implements ConstVector<Tv> {
   public function toKeysArray(): array;
 
   /**
-   * Returns an iterator that points to beginning of this ImmVector.
+   * Returns an iterator that points to the beginning of this ImmVector.
    */
   public function getIterator(): VectorIterator<Tv>;
 
@@ -105,14 +105,6 @@ final class ImmVector<Tv> implements ConstVector<Tv> {
   public static function fromArray(array $arr): ImmVector<Tv>;
 
   public static function fromItems(?Traversable<Tv> $items): ImmVector<Tv>;
-
-  /**
-   * Slice an ImmVector. This function provides the functionality of
-   * array_slice() for ImmVectors. Note that this function returns
-   * a new ImmVector and does not modify the original ImmVector.
-   */
-  public static function slice(ImmVector<Tv> $v, int $offset,
-                               ?int $len = null): ImmVector<Tv>;
 
   public function __toString(): string;
 

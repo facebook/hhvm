@@ -32,6 +32,7 @@ struct PropertiesInfo;
 struct State;
 struct StepFlags;
 struct Bytecode;
+struct ISS;
 namespace php { struct Block; }
 
 //////////////////////////////////////////////////////////////////////
@@ -154,6 +155,16 @@ StepFlags step(Interp&, const Bytecode& op);
  */
 using PropagateFn = std::function<void (php::Block&, const State&)>;
 RunFlags run(Interp&, PropagateFn);
+
+/*
+ * Dispatch a bytecode to the default interpreter.
+ *
+ * This entry point is used by custom interpreters that need to add
+ * some logic to the default interpreter but want to run it otherwise.
+ * Calling step() does not give control over the state (ISS instance)
+ * which a custom interpreter may need to specialize.
+ */
+void default_dispatch(ISS&, const Bytecode&);
 
 //////////////////////////////////////////////////////////////////////
 

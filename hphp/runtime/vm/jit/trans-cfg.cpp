@@ -189,6 +189,15 @@ void TransCFG::addArc(TransID srcId, TransID dstId, int64_t weight) {
   m_nodeInfo[dstIdx].addInArc(arc);
 }
 
+bool TransCFG::hasArc(TransID srcId, TransID dstId) const {
+  assert(hasNode(srcId));
+  assert(hasNode(dstId));
+  for (auto arc : outArcs(srcId)) {
+    if (arc->dst() == dstId) return true;
+  }
+  return false;
+}
+
 void TransCFG::print(std::string fileName, FuncId funcId,
                      const ProfData* profData,
                      const TransIDSet* selected) const {

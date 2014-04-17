@@ -21,6 +21,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
@@ -146,8 +147,9 @@ UnwindAction checkHandlers(const EHEnt* eh,
 void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
   auto const func = fp->m_func;
   auto const curOp = *reinterpret_cast<const Op*>(pc);
-  auto const unwindingGeneratorFrame = fp->inGenerator();
-  auto const unwindingReturningFrame = curOp == OpRetC || curOp == OpRetV;
+  auto const unwindingReturningFrame =
+    curOp == OpRetC || curOp == OpRetV ||
+    curOp == OpCreateCont || curOp == OpAsyncSuspend;
   auto const prevFp = fp->arGetSfp();
   auto const soff = fp->m_soff;
 
@@ -168,48 +170,47 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
     fp->getThis()->setNoDestruct();
   }
 
-  // A generator's locals don't live on this stack.
-  if (LIKELY(!unwindingGeneratorFrame)) {
-    /*
-     * If we're unwinding through a frame that's returning, it's only
-     * possible that its locals have already been decref'd.
-     *
-     * Here's why:
-     *
-     *   - If a destructor for any of these things throws a php
-     *     exception, it's swallowed at the dtor boundary and we keep
-     *     running php.
-     *
-     *   - If the destructor for any of these things throws a fatal,
-     *     it's swallowed, and we set surprise flags to throw a fatal
-     *     from now on.
-     *
-     *   - If the second case happened and we have to run another
-     *     destructor, its enter hook will throw, but it will be
-     *     swallowed again.
-     *
-     *   - Finally, the exit hook for the returning function can
-     *     throw, but this happens last so everything is destructed.
-     *
-     */
-    if (!unwindingReturningFrame) {
-      try {
-        // Note that we must convert locals and the $this to
-        // uninit/zero during unwind.  This is because a backtrace
-        // from another destructing object during this unwind may try
-        // to read them.
-        frame_free_locals_unwind(fp, func->numLocals());
-      } catch (...) {}
-    }
+  /*
+   * If we're unwinding through a frame that's returning, it's only
+   * possible that its locals have already been decref'd.
+   *
+   * Here's why:
+   *
+   *   - If a destructor for any of these things throws a php
+   *     exception, it's swallowed at the dtor boundary and we keep
+   *     running php.
+   *
+   *   - If the destructor for any of these things throws a fatal,
+   *     it's swallowed, and we set surprise flags to throw a fatal
+   *     from now on.
+   *
+   *   - If the second case happened and we have to run another
+   *     destructor, its enter hook will throw, but it will be
+   *     swallowed again.
+   *
+   *   - Finally, the exit hook for the returning function can
+   *     throw, but this happens last so everything is destructed.
+   *
+   */
+  if (!unwindingReturningFrame) {
+    try {
+      // Note that we must convert locals and the $this to
+      // uninit/zero during unwind.  This is because a backtrace
+      // from another destructing object during this unwind may try
+      // to read them.
+      frame_free_locals_unwind(fp, func->numLocals());
+    } catch (...) {}
+  }
+
+  if (LIKELY(!fp->inGenerator())) {
+    // Free ActRec.
     stack.ndiscard(func->numSlotsInFrame());
     stack.discardAR();
   } else {
-    // The generator's locals will be cleaned up when the Continuation
-    // object is destroyed. But we are leaving the generator function
-    // now, so signal that to anyone who cares.
-    try {
-      EventHook::FunctionExit(fp);
-    } catch (...) {} // As above, don't let new exceptions out of unwind.
+    // Mark the generator as finished and clear its m_value.
+    auto cont = frame_continuation(fp);
+    cont->setDone();
+    cellSet(make_tv<KindOfNull>(), cont->m_value);
   }
 
   /*
@@ -481,7 +482,7 @@ void unwindBuiltinFrame() {
   }
 
   // Free the locals and VarEnv if there is one
-  frame_free_locals_inl(fp, fp->m_func->numLocals());
+  frame_free_locals_inl(fp, fp->m_func->numLocals(), nullptr);
 
   // Tear down the frame
   Offset pc = -1;

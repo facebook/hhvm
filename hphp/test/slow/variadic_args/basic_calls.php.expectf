@@ -1,0 +1,244 @@
+* variadic_only_no_vv
+bool(true)
+array(1) {
+  [0]=>
+  string(1) "a"
+}
+========= test_standard_calls ==========
+
+* variadic_only_no_vv
+bool(true)
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+* variadic_only
+bool(true)
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(true)
+bool(true)
+
+* variadic_some
+bool(true)
+bool(true)
+array(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+}
+bool(true)
+bool(true)
+
+* variadic_hack_only
+int(3)
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+* variadic_hack_some
+int(3)
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+========= static methods ==========
+
+* C::st_variadic_only
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(true)
+bool(true)
+
+* C::st_variadic_some
+array(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+}
+bool(true)
+bool(true)
+
+* C::st_variadic_hack_only
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+* C::st_variadic_hack_some
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+========= instance methods ==========
+
+* C::variadic_only
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(true)
+bool(true)
+
+* C::variadic_some
+bool(true)
+array(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+}
+bool(true)
+bool(true)
+
+* C::variadic_hack_only
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+* C::variadic_hack_some
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+
+========= test_standard_insuffient_calls ==========
+
+* variadic_only_no_vv
+bool(true)
+array(0) {
+}
+
+* variadic_only
+bool(true)
+array(0) {
+}
+bool(true)
+bool(true)
+
+Warning: variadic_some() expects at least 1 parameter, 0 given in %s/variadic_funcs.inc on line %d
+
+* variadic_some
+bool(false)
+bool(true)
+array(0) {
+}
+bool(true)
+bool(true)
+
+* variadic_hack_only
+int(0)
+array(0) {
+}
+
+Warning: variadic_hack_some() expects exactly 1 parameter, 0 given in %s/variadic_funcs.inc on line %d
+
+* variadic_hack_some
+int(0)
+array(0) {
+}
+
+========= static methods ==========
+
+* C::st_variadic_only
+array(0) {
+}
+bool(true)
+bool(true)
+
+Warning: st_variadic_some() expects at least 1 parameter, 0 given in %s/variadic_funcs.inc on line %d
+
+* C::st_variadic_some
+array(0) {
+}
+bool(true)
+bool(true)
+
+* C::st_variadic_hack_only
+array(0) {
+}
+
+Warning: st_variadic_hack_some() expects exactly 1 parameter, 0 given in %s/variadic_funcs.inc on line %d
+
+* C::st_variadic_hack_some
+array(0) {
+}
+
+========= instance methods ==========
+
+* C::variadic_only
+array(0) {
+}
+bool(true)
+bool(true)
+
+Warning: variadic_some() expects at least 1 parameter, 0 given in %s/variadic_funcs.inc on line %d
+
+* C::variadic_some
+bool(false)
+array(0) {
+}
+bool(true)
+bool(true)
+
+* C::variadic_hack_only
+array(0) {
+}
+
+Warning: variadic_hack_some() expects exactly 1 parameter, 0 given in %s/variadic_funcs.inc on line %d
+
+* C::variadic_hack_some
+array(0) {
+}

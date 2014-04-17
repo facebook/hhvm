@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/filter/logical_filters.h"
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/php-globals.h"
 
 namespace HPHP {
 
@@ -88,13 +89,12 @@ const StaticString
 
 struct FilterRequestData final : RequestEventHandler {
   void requestInit() override {
-    GlobalVariables *g = get_global_variables();
     // This doesn't copy them yet, but will do COW if they are modified
-    m_GET = g->get(s_GET).toArray();
-    m_POST = g->get(s_POST).toArray();
-    m_COOKIE = g->get(s_COOKIE).toArray();
-    m_SERVER = g->get(s_SERVER).toArray();
-    m_ENV = g->get(s_ENV).toArray();
+    m_GET    = php_global(s_GET).toArray();
+    m_POST   = php_global(s_POST).toArray();
+    m_COOKIE = php_global(s_COOKIE).toArray();
+    m_SERVER = php_global(s_SERVER).toArray();
+    m_ENV    = php_global(s_ENV).toArray();
   }
 
   void requestShutdown() override {

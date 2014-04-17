@@ -70,6 +70,7 @@ template<size_t Align>
 void Link<T>::bind(Mode mode) {
   if (LIKELY(bound())) return;
   detail::bindOnLinkImpl(m_handle, mode, sizeof(T), Align);
+  recordRds(m_handle, sizeof(T), "Unknown", __PRETTY_FUNCTION__);
 }
 
 //////////////////////////////////////////////////////////////////////

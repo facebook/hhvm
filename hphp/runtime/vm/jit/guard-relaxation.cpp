@@ -321,7 +321,7 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& guards, bool simple) {
   if (!changed) return false;
 
   // Make a second pass to reflow types, with some special logic for loads.
-  FrameState state(unit);
+  FrameState state{unit, unit.entry()->front().marker()};
   for (auto* block : blocks) {
     state.startBlock(block);
 
@@ -356,7 +356,7 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
     } else if (inst.op() == GuardStk) {
       uint32_t offsetFromSp =
         safe_cast<uint32_t>(inst.extra<StackOffset>()->offset);
-      uint32_t offsetFromFp = inst.marker().spOff - offsetFromSp;
+      uint32_t offsetFromFp = inst.marker().spOff() - offsetFromSp;
       func(L::Stack{offsetFromSp, offsetFromFp},
            inst.typeParam());
     }

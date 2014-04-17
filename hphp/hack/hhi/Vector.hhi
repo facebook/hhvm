@@ -105,7 +105,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
 
   /**
    * Stores a value into the Vector with the specified key, overwriting the
-   * previous value associated with the key. If the key is not present, an
+   * previous value associated with the key. If the key is not present,
    * an exception is thrown. "$vec->set($k,$v)" is semantically equivalent
    * to "$vec[$k] = $v" (except that set() returns the Vector).
    */
@@ -176,6 +176,18 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * Vector in place.
    */
   public function splice(int $offset, ?int $len = null): void;
+
+  /**
+   * Returns a Vector containing the first n values of this Vector.
+   */
+  public function take(int $n): Vector<Tv>;
+
+  /**
+   * Returns a Vector containing the values of this Vector up to but not
+   * including the first value that produces false when passed to the specified
+   * callback.
+   */
+  public function takeWhile((function(Tv): bool) $callback): Vector<Tv>;
 
   /**
    * Returns the index of the first element that matches the search value.

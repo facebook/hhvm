@@ -33,9 +33,10 @@ static bool breaksRegion(Op opc) {
     case OpMIterNextK:
     case OpSwitch:
     case OpSSwitch:
+    case OpCreateCont:
     case OpContSuspend:
     case OpContSuspendK:
-    case OpContRetC:
+    case OpAsyncSuspend:
     case OpRetC:
     case OpRetV:
     case OpExit:
@@ -48,7 +49,6 @@ static bool breaksRegion(Op opc) {
     case OpUnwind:
     case OpEval:
     case OpNativeImpl:
-    case OpContHandle:
       return true;
 
     default:
@@ -199,8 +199,29 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       }
     }
     if (region->blocks.size() > 0) {
-      region->addArc(region->blocks.back().get()->id(),
-                     blockRegion->blocks.front().get()->id());
+      auto newBlockId  = blockRegion->blocks.front().get()->id();
+      auto predBlockId = region->blocks.back().get()->id();
+      region->addArc(predBlockId, newBlockId);
+
+      // With bytecode control-flow, we add all forward arcs in the TransCFG
+      // that are induced by the blocks in the region, as a simple way
+      // to expose control-flow for now.
+      // This can go away once Task #4075822 is done.
+      if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+        assert(hasTransId(newBlockId));
+        auto newTransId = getTransId(newBlockId);
+        for (auto iOther = 0; iOther < region->blocks.size(); iOther++) {
+          auto other = region->blocks[iOther];
+          auto otherBlockId = other.get()->id();
+          if (!hasTransId(otherBlockId)) continue;
+          auto otherTransId = getTransId(otherBlockId);
+          if (cfg.hasArc(otherTransId, newTransId) &&
+              otherTransId != predBlockId &&  // avoid duplicate arc
+              !other.get()->inlinedCallee()) {
+            region->addArc(otherBlockId, newBlockId);
+          }
+        }
+      }
     }
     region->blocks.insert(region->blocks.end(), blockRegion->blocks.begin(),
                           blockRegion->blocks.end());

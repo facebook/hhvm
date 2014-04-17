@@ -147,7 +147,7 @@ ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLen
   }
   assert(arKey[nKeyLength - 1] == '\0');
   HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
-  auto val = ht->nvGet(key.get());
+  auto val = const_cast<HPHP::TypedValue*>(ht->nvGet(key.get())); // FIXME
   if (!val) {
     return FAILURE;
   }
@@ -162,7 +162,7 @@ ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, uint n
 }
 
 ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData) {
-  auto val = ht->nvGet(h);
+  auto val = const_cast<HPHP::TypedValue*>(ht->nvGet(h)); // FIXME: broken
   if (!val) {
     return FAILURE;
   }
@@ -258,13 +258,13 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
   if (hp == ht->invalid_index) {
     return FAILURE;
   }
-  auto val = ht->nvGetValueRef(hp);
-  if (!val) {
-    return FAILURE;
-  }
-  HPHP::zBoxAndProxy(val);
+  auto& val = ht->getValueRef(hp);
+  // FIXME: we shouldn't be modifying this TypedValue
+  HPHP::zBoxAndProxy(const_cast<HPHP::TypedValue*>(val.asTypedValue()));
+  assert(val.asTypedValue()->m_type == HPHP::KindOfRef);
   auto p = (zval***)pData;
-  *p = &val->m_data.pref;
+  // FIXME: this is broken
+  *p = &const_cast<HPHP::TypedValue*>(val.asTypedValue())->m_data.pref;
   return SUCCESS;
 }
 
@@ -279,7 +279,7 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC) {
   target->plusEq(source); // XXX: can this COW?
   for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
-    auto tv = (HPHP::TypedValue*)it.secondRef().asTypedValue();
+    auto tv = const_cast<HPHP::TypedValue*>(it.secondRef().asTypedValue());
     HPHP::zBoxAndProxy(tv);
     pCopyConstructor((void*)(&tv->m_data.pref));
   }
@@ -302,7 +302,7 @@ ZEND_API void zend_hash_clean(HashTable *ht) {
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size) {
   target->merge(source);
   for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
-    const void *tv = it.secondRef().asTypedValue();
+    const void* tv = it.secondRef().asTypedValue();
     pCopyConstructor(const_cast<void*>(tv));
   }
 }

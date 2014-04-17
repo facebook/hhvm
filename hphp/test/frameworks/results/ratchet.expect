@@ -21,11 +21,11 @@ Ratchet\AbstractConnectionDecoratorTest::testUnset
 Ratchet\AbstractConnectionDecoratorTest::testUnsetLevel2
 .
 Ratchet\AbstractConnectionDecoratorTest::testWarningGettingNothing
-F
+.
 Ratchet\AbstractConnectionDecoratorTest::testWarningGettingNothingLevel1
-F
+.
 Ratchet\AbstractConnectionDecoratorTest::testWarningGettingNothingLevel2
-F
+.
 Ratchet\AbstractConnectionDecoratorTest::testWrapperCanStoreSelfInDecorator
 .
 Ratchet\Application\Server\FlashPolicyTest::testAddAllowedAccessOnlyAcceptsValidPorts
@@ -196,6 +196,8 @@ Ratchet\Http\RouterTest::testFourOhFour
 .
 Ratchet\Http\RouterTest::testNullRequest
 .
+Ratchet\Http\RouterTest::testRouterGeneratesRouteParameters
+.
 Ratchet\Server\EchoServerTest::testErrorClosesConnection
 .
 Ratchet\Server\EchoServerTest::testMessageEchod
@@ -205,13 +207,13 @@ Ratchet\Server\IoServerTest::testFactory
 Ratchet\Server\IoServerTest::testNoLoopProvidedError
 .
 Ratchet\Server\IoServerTest::testOnClose
-E
+.
 Ratchet\Server\IoServerTest::testOnData
-E
+.
 Ratchet\Server\IoServerTest::testOnErrorPassesException
 .
 Ratchet\Server\IoServerTest::testOnOpen
-E
+.
 Ratchet\Server\IpBlackListTest::testAddAndRemoveWithFluentInterfaces
 .
 Ratchet\Server\IpBlackListTest::testBlockClosesConnection
@@ -241,25 +243,25 @@ Ratchet\Server\IpBlackListTest::testUnblockingSilentlyFails
 Ratchet\Session\Serialize\PhpHandlerTest::testUnserialize with data set #0
 .
 Ratchet\Session\SessionProviderTest::testConnectionValueFromPdo
-E
+.
 Ratchet\Session\SessionProviderTest::testGetSubProtocolsGetFromApp
-E
+.
 Ratchet\Session\SessionProviderTest::testGetSubProtocolsReturnsArray
-E
+.
 Ratchet\Session\SessionProviderTest::testOnClose
-E
+.
 Ratchet\Session\SessionProviderTest::testOnError
-E
+.
 Ratchet\Session\SessionProviderTest::testOnMessageDecorator
-E
+.
 Ratchet\Session\SessionProviderTest::testOpen
-E
+.
 Ratchet\Session\SessionProviderTest::testRejectInvalidSeralizers
-E
+.
 Ratchet\Session\SessionProviderTest::testToClassCase with data set #0
-E
+.
 Ratchet\Session\SessionProviderTest::testToClassCase with data set #1
-E
+.
 Ratchet\Wamp\ServerProtocolTest::testCall with data set #0
 .
 Ratchet\Wamp\ServerProtocolTest::testCall with data set #1

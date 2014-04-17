@@ -108,7 +108,9 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     return cont;
   }
 
-  static c_Continuation* Create(const Func* func, Offset offset) {
+  static c_Continuation* Create(const ActRec* origFp, Offset offset) {
+    assert(origFp);
+    auto const func = origFp->func();
     auto const cont = c_Continuation::Alloc(func, offset);
     cont->incRefCount();
     cont->setNoDestruct();
@@ -118,26 +120,22 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     // to it when we enter the generator body.
     auto ar = cont->actRec();
     ar->m_func = func;
-    ar->initNumArgsInGenerator(0);
+    ar->initNumArgsInGenerator(origFp->numArgs());
     ar->setVarEnv(nullptr);
     return cont;
   }
 
  public:
-  static ObjectData* CreateFunc(const Func* func, Offset offset) {
-    auto cont = Create(func, offset);
+  static ObjectData* CreateFunc(const ActRec* origFp, Offset offset) {
+    auto cont = Create(origFp, offset);
     cont->actRec()->setThis(nullptr);
     return cont;
   }
 
-  static ObjectData* CreateMeth(const Func* func, void* objOrCls,
-                                Offset offset) {
-    auto cont = Create(func, offset);
+  static ObjectData* CreateMeth(const ActRec* origFp, Offset offset) {
+    auto cont = Create(origFp, offset);
     auto ar = cont->actRec();
-    ar->setThisOrClass(objOrCls);
-    if (ar->hasThis()) {
-      ar->getThis()->incRefCount();
-    }
+    ar->setThisOrClass(origFp->getThisOrClass());
     return cont;
   }
 
@@ -155,7 +153,7 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   /**
    * Get adjusted generator function base() where the real user code starts.
    *
-   * Skips CreateCont, RetC and PopC opcodes.
+   * Skips CreateCont and PopC opcodes.
    */
   static Offset userBase(const Func* func) {
     assert(func->isGenerator());
@@ -163,10 +161,9 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
 
     DEBUG_ONLY auto op = reinterpret_cast<const Op*>(func->unit()->at(base));
     assert(op[0] == OpCreateCont);
-    assert(op[1 + sizeof(Offset)] == OpRetC);
-    assert(op[2 + sizeof(Offset)] == OpPopC);
+    assert(op[1] == OpPopC);
 
-    return base + 3 + sizeof(Offset);
+    return base + 2;
   }
 
   inline void preNext() {
@@ -207,16 +204,14 @@ private:
     return m_size;
   }
 
-  void dupContVar(const StringData *name, TypedValue *src);
   void copyContinuationVars(ActRec *fp);
 
 public:
-  /* 32-bit o_id from ObjectData */
+  int32_t m_size;
   Offset m_offset;
   int64_t m_index;
   Cell m_key;
   Cell m_value;
-  int32_t m_size;
 
   /* temporary storage used to save the SP when inlining into a continuation */
   void* m_stashedSP;

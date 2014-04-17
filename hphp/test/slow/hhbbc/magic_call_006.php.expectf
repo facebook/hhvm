@@ -1,0 +1,3 @@
+a
+
+Fatal error: Call to protected method Asd::heh from anonymous context in %s/slow/hhbbc/magic_call_006.php on line 18

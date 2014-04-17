@@ -1,5 +1,4 @@
 auto_sources(IDL_SRCS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
-ZEND_COMPAT_STRIP_IDLS(IDL_SRCS ${ZEND_COMPAT_EXCLUDE_IDLS})
 
 add_custom_command(OUTPUT "class_map.cpp" "constants.h"
                    DEPENDS ${IDL_SRCS} gen-class-map
@@ -15,6 +14,7 @@ set(CXX_SOURCES "class_map.cpp" "systemlib.cpp")
 add_library(hphp_system STATIC ${CXX_SOURCES})
 
 # Needed to force system/constants.h to generate prior to files which need it
+add_dependencies(hphp_ext_zend_compat hphp_system)
 add_dependencies(hphp_runtime_static hphp_system)
 add_dependencies(hphp_runtime_ext hphp_system)
 add_dependencies(hphp_analysis hphp_system)

@@ -235,7 +235,7 @@ class ArrayObject implements \HH\KeyedIterable, ArrayAccess,
    */
   public function offsetExists($index) {
     if ($this->isArray()) {
-      return isset($this->storage[$index]);
+      return array_key_exists($index, $this->storage);
     } else {
       return property_exists($this->storage, $index);
     }

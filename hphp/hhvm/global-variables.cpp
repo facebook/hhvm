@@ -51,7 +51,7 @@ void EnvConstants::requestExit() {
 GlobalNameValueTableWrapper::GlobalNameValueTableWrapper(
   NameValueTable* tab) : NameValueTableWrapper(tab) {
 
-  Variant arr(HphpArray::GetStaticEmptyArray());
+  Variant arr(staticEmptyArray());
 #define X(s,v) tab->set(makeStaticString(#s), v.asTypedValue());
 
   X(argc,                 init_null_variant);

@@ -26,14 +26,21 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/ext/ext_openssl.h"
+#include "hphp/system/constants.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/timer.h"
+#ifdef FACEBOOK
+#include "hphp/util/channeled-json-compressor.h"
+#include <memory>
+#endif
 #include "hphp/runtime/base/hardware-counter.h"
 #include "folly/String.h"
+#include <stdio.h>
+#include <fstream>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -686,6 +693,30 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
       m_compressionDecision == CompressionDecision::ShouldNot) {
     return response;
   }
+
+#ifdef FACEBOOK
+  if ((strstr(getHeader("X-FB-Channeled-Json").c_str(), "true") != nullptr) &&
+      (size > ChanneledJsonCompressor::MIN_LENGTH_TO_CHANNEL_JSON) &&
+      (m_compressor == nullptr) && (last) && (!m_headerSent)) {
+
+      ChanneledJsonCompressor channeledJsonCompressor;
+      channeledJsonCompressor.processJson((const char*)data, size);
+      folly::IOBufQueue bufQueue;
+      channeledJsonCompressor.finalize(bufQueue);
+      std::unique_ptr<folly::IOBuf> output = bufQueue.move();
+      output->coalesce();
+
+      String concatenated((const char*)output->data(), output->length(),
+              CopyString);
+      response = concatenated;
+
+      // overriding the data pointer
+      data = response.data();
+      size = response.length();
+
+      replaceHeader("Content-Type", "application/channeled-json");
+  }
+#endif
 
   // There isn't that much need to gzip response, when it can fit into one
   // Ethernet packet (1500 bytes), unless we are doing chunked encoding,

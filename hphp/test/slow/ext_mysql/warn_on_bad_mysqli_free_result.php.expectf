@@ -1,0 +1,3 @@
+Warning: mysqli_free_result() expects parameter 1 to be mysqli_result in %s/test/slow/ext_mysql/warn_on_bad_mysqli_free_result.php on line 4
+NULL
+NULL

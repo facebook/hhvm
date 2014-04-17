@@ -1,11 +1,10 @@
 SQLite3Result
 object(SQLite3Result)#1 (0) {
 }
-string(98) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:13:"SQLite3Result";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(13) "SQLite3Result"
-}
+
+Warning: Attempted to serialize unserializable builtin class SQLite3Result in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(7) {
   [0]=>
   string(11) "__construct"
@@ -24,15 +23,14 @@ array(7) {
 }
 ================
 A_SQLite3Result
-object(A_SQLite3Result)#3 (1) {
+object(A_SQLite3Result)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(100) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:15:"A_SQLite3Result";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(15) "A_SQLite3Result"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_SQLite3Result in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(7) {
   [0]=>
   string(11) "__construct"

@@ -50,7 +50,6 @@
 #include "hphp/runtime/debugger/cmd/cmd_macro.h"
 #include "hphp/runtime/debugger/cmd/cmd_config.h"
 #include "hphp/runtime/debugger/cmd/cmd_complete.h"
-#include "hphp/runtime/debugger/cmd/cmd_heaptrace.h"
 #include "hphp/runtime/debugger/cmd/cmd_internal_testing.h"
 //tag: new_cmd.php inserts new command here, do NOT remove/modify this line
 

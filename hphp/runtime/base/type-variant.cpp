@@ -73,8 +73,7 @@ const StaticString
   s_1("1"),
   s_unserialize("unserialize"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
-  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
-  s_PHP_Unserializable_Class_Name("__PHP_Unserializable_Class_Name");
+  s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -210,7 +209,7 @@ Variant::Variant(const Variant& v) {
 }
 
 Variant::Variant(CVarStrongBind v) {
-  constructRefHelper(variant(v));
+  constructRefHelper(const_cast<Variant&>(variant(v))); // XXX
 }
 
 Variant::Variant(CVarWithRefBind v) {
@@ -265,12 +264,12 @@ Variant &Variant::assign(const Variant& v) {
   return *this;
 }
 
-Variant &Variant::assignRef(const Variant& v) {
+Variant& Variant::assignRef(Variant& v) {
   assignRefHelper(v);
   return *this;
 }
 
-Variant &Variant::setWithRef(const Variant& v) {
+Variant& Variant::setWithRef(const Variant& v) {
   setWithRefHelper(v, IS_REFCOUNTED_TYPE(m_type));
   return *this;
 }
@@ -502,7 +501,7 @@ Array Variant::toArrayHelper() const {
   case KindOfInt64:   return Array::Create(m_data.num);
   case KindOfStaticString:
   case KindOfString:  return Array::Create(m_data.pstr);
-  case KindOfArray:   return m_data.parr;
+  case KindOfArray:   return Array(m_data.parr);
   case KindOfObject:  return m_data.pobj->o_toArray();
   case KindOfResource: return m_data.pres->o_toArray();
   case KindOfRef: return m_data.pref->var()->toArray();
@@ -643,14 +642,9 @@ public:
   static const bool CheckParams = true;
 };
 
-Variant &Variant::lvalInvalid() {
-  throw_bad_type_exception("not array objects");
-  return lvalBlackHole();
-}
-
-Variant &Variant::lvalBlackHole() {
-  Variant &bh = get_env_constants()->__lvalProxy;
-  bh.unset();
+Variant& lvalBlackHole() {
+  auto& bh = get_env_constants()->lvalProxy;
+  bh = uninit_null();
   return bh;
 }
 
@@ -756,7 +750,7 @@ static void unserializeProp(VariableUnserializer *uns,
                                      visible, accessible, unset));
   assert(!unset);
   if (!t || !accessible) {
-    // Dynamic property. If this is the first, and we're using HphpArray,
+    // Dynamic property. If this is the first, and we're using MixedArray,
     // we need to pre-allocate space in the array to ensure the elements
     // dont move during unserialization.
     //
@@ -1037,9 +1031,7 @@ void Variant::unserialize(VariableUnserializer *uns,
         // support it. Otherwise, we risk creating a CPP object
         // without having it initialized completely.
         if (cls->instanceCtor() && !cls->isCppSerializable()) {
-          obj = ObjectData::newInstance(
-            SystemLib::s___PHP_Unserializable_ClassClass);
-          obj->o_set(s_PHP_Unserializable_Class_Name, clsName);
+          assert(obj.isNull());
         } else {
           obj = ObjectData::newInstance(cls);
           if (UNLIKELY(cls == c_Pair::classof() && size != 2)) {

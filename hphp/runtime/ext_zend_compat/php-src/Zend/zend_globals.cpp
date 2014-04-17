@@ -22,5 +22,7 @@ HashTable& EG_persistent_list() {
   return *s_zend_executor_globals.get()->persistent_list;
 }
 
-HashTable& EG_symbol_table() { return *HPHP::get_global_variables(); }
+HashTable& EG_symbol_table() {
+  return *HPHP::get_global_variables()->asArrayData();
+}
 int& EG_exit_status() { return HPHP::ExitException::ExitCode; }

@@ -427,7 +427,7 @@ GuardRefs S0:FuncPtr S1:Int S2:Int S3:Int S4:Int S5:Int
   If any of the checks fail, make a fallback jump. (Jump to a service request
   that will chain to a retranslation of this tracelet.)
 
-D:{Func} = CheckNonNull S0:{Nullptr|Func} -> B
+D:{Func} = CheckNonNull S0:{Nullptr|Func|PtrToGen} -> B
 
   If the value in S0 is Nullptr, branch to block B.
 
@@ -668,16 +668,21 @@ SurpriseHook
 
   Executes the implementation-specific surprise flag hook.
 
-FunctionExitSurpriseHook S0:FramePtr S1:StkPtr S2:Gen
+FunctionExitSurpriseHook S0:FramePtr S1:Gen
 
   Executes the implementation-specific surprise flag hook for function exit. S0
-  should be the current frame pointer, S1 should be the current stack pointer,
-  and S2 should be the return value of the function.
+  should be the current frame pointer, and S1 should be the return value
+  of the function.
 
 ExitOnVarEnv S0:FramePtr -> B
 
   Loads the VarEnv slot off the ActRec pointed to by S0. If it is non-zero,
   jumps to the exit-trace block B.
+
+Halt
+
+  Halt execution. Used only in tests, as a terminal instruction that does not
+  require any inputs or any successors.
 
 Jmp -> B
 Jmp [S:T ...] -> B: DefLabel
@@ -874,10 +879,6 @@ D:PtrToCell = LdClsInitData S0:Cls
 
   Loads the pointer to the property initializer array for class S0.
 
-D:PtrToCell = LdClsStaticInitData S0:Cls
-
-  Loads the pointer to the static property initializer array for class S0.
-
 D:RDSHandle = LookupClsRDSHandle S0:Str
 
   Look up the cached-class RDS handle for a given class name.
@@ -980,23 +981,26 @@ D:PtrToGen = LdGblAddrDef S0:Str
   Loads a pointer to a global. S0 is the global's name. Defines the global if
   it is not already defined.
 
-D:PtrToGen = LdClsPropAddr S0:Cls S1:Str S2:ConstCls [ -> B ]
+D:PtrToGen = LdClsPropAddrKnown S0:ConstCls S1:ConstStr
+
+  Loads a pointer to a static class property. S0 points to the class, and S1 is
+  the property name. Should only be called when S0 is known statically, and
+  when it is known to have a visible and accessible static property named S1.
+  The type of D will be a Ptr of whatever type the static property has.
+
+D:{PtrToGen|Nullptr} = LdClsPropAddrOrNull S0:Cls S1:Str S2:ConstCls
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
   property name, and S2 is the class representing the context of the code
   accessing the property. If class S0 does not have a visible and accessible
-  static property named S1, then this instruction will either (1) jump to B if
-  it is present and not a catch trace, or (2) throw a fatal error.
+  static property named S1, then nullptr is returned.
 
-D:PtrToGen = LdClsPropAddrCached S0:Cls S1:ConstStr S2:ConstStr
-                                 S3:ConstCls [ -> B ]
+D:PtrToGen = LdClsPropAddrOrRaise S0:Cls S1:Str S2:ConstCls
 
-  Loads a pointer to a static class property via the RDS. S0 points to the
-  class, S1 is the property name, S2 is the class name, and S3 is the class
-  representing the context of the code accessing the property. If class S0 does
-  not have a visible and accessible static property named S1, then this
-  instruction will either (1) throw a fatal error if the optional block B is
-  not given, or (2) jump to B if it is present.
+  Loads a pointer to a static class property. S0 points to the class, S1 is the
+  property name, and S2 is the class representing the context of the code
+  accessing the property. If class S0 does not have a visible and accessible
+  static property named S1, throw a fatal error.
 
 LdObjMethod S0:Cls S1:ConstStr S2:StkPtr
 
@@ -1266,15 +1270,12 @@ ReleaseVVOrExit S0:FramePtr -> B
   nothing. If it is an ExtraArgs, deallocates the ExtraArgs structure.
   Otherwise jumps to block B.
 
-D:StkPtr = GenericRetDecRefs S0:FramePtr
+GenericRetDecRefs S0:FramePtr
 
   Does decrefs of all the current function's locals, where S0 is a pointer to
   the relevant activation record.
 
-  Returns the adjusted VM stack pointer (pointing at the return value
-  location).
-
-  Semantically similar to a series of DecRefLoc followed by RetAdjustStack.
+  Semantically similar to a series of DecRefLoc.
 
 
 10. Stores

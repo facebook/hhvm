@@ -86,47 +86,65 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   }
 
   auto dvInitializer = InvalidAbsoluteOffset;
-  auto const numParams = func->numParams();
+  auto const numNonVariadicParams = func->numNonVariadicParams();
   auto const& paramInfo = func->params();
 
   // Resolve cases where the wrong number of args was passed.
-  if (nPassed > numParams) {
-    void (*helper)(ActRec*) = JIT::trimExtraArgs;
+  if (nPassed > numNonVariadicParams) {
+    void (*helper)(ActRec*);
+    if (func->attrs() & AttrMayUseVV) {
+      helper = func->hasVariadicCaptureParam()
+        ? JIT::shuffleExtraArgsVariadicAndVV
+        : JIT::shuffleExtraArgsMayUseVV;
+    } else if (func->hasVariadicCaptureParam()) {
+      helper = JIT::shuffleExtraArgsVariadic;
+    } else {
+      helper = JIT::trimExtraArgs;
+    }
     a.  Mov    (argReg(0), rStashedAR);
     emitCall(a, CppCall(helper));
     // We'll fix rVmSp below.
-  } else if (nPassed < numParams) {
-    for (auto i = nPassed; i < numParams; ++i) {
-      auto const& pi = paramInfo[i];
-      if (pi.hasDefaultValue()) {
-        dvInitializer = pi.funcletOff();
-        break;
+  } else {
+    if (nPassed < numNonVariadicParams) {
+      for (auto i = nPassed; i < numNonVariadicParams; ++i) {
+        auto const& pi = paramInfo[i];
+        if (pi.hasDefaultValue()) {
+          dvInitializer = pi.funcletOff();
+          break;
+        }
       }
+
+      a.  Mov    (rAsm, nPassed);
+
+      // do { *(--rVmSp) = NULL; nPassed++; }
+      // while (nPassed < numNonVariadicParams);
+      vixl::Label loopTop;
+      a.  bind   (&loopTop);
+      a.  Sub    (rVmSp, rVmSp, sizeof(Cell));
+      a.  Add    (rAsm, rAsm, 1);
+      static_assert(KindOfUninit == 0, "need this for zero-register hack");
+      a.  Strb   (vixl::xzr, rVmSp[TVOFF(m_type)]);
+      a.  Cmp    (rAsm, numNonVariadicParams);
+      a.  B      (&loopTop, vixl::lt);
     }
-
-    a.  Mov    (rAsm, nPassed);
-
-    // do { *(--rVmSp) = NULL; nPassed++; } while (nPassed < numParams);
-    vixl::Label loopTop;
-    a.  bind   (&loopTop);
-    a.  Sub    (rVmSp, rVmSp, sizeof(Cell));
-    a.  Add    (rAsm, rAsm, 1);
-    static_assert(KindOfUninit == 0, "need this for zero-register hack");
-    a.  Strb   (vixl::xzr, rVmSp[TVOFF(m_type)]);
-    a.  Cmp    (rAsm, numParams);
-    a.  B      (&loopTop, vixl::lt);
+    if (func->hasVariadicCaptureParam()) {
+      a.  Mov   (rAsm, KindOfArray);
+      a.  Strb  (rAsm.W(), rVmSp[TVOFF(m_type) - sizeof(Cell)]);
+      a.  Mov   (rAsm, uint64_t(staticEmptyArray()));
+      a.  Str   (rAsm, rVmSp[TVOFF(m_data) - sizeof(Cell)]);
+    }
   }
 
   // Frame linkage.
   a.    Mov    (rVmFp, rStashedAR);
 
-  auto numLocals = numParams;
+  auto numLocals = func->numParams();
 
   if (func->isClosureBody()) {
     int numUseVars = func->cls()->numDeclProperties() -
                      func->numStaticLocals();
 
-    emitRegGetsRegPlusImm(a, rVmSp, rVmFp, -cellsToBytes(numParams));
+    emitRegGetsRegPlusImm(a, rVmSp, rVmFp, -cellsToBytes(numLocals));
 
     // This register needs to live a long time, across calls to helpers that may
     // use both rAsm and rAsm2. So it can't be one of them. Fortunately, we're
@@ -219,7 +237,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   if (dvInitializer != InvalidAbsoluteOffset) {
     destPC = func->unit()->entry() + dvInitializer;
   }
-  SrcKey funcBody(func, destPC);
+  SrcKey funcBody(func, destPC, false);
 
   // Set stack pointer just past all locals
   int frameCells = func->numSlotsInFrame();
@@ -229,11 +247,10 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   // Emit warnings for missing arguments
   if (!func->isCPPBuiltin()) {
-    for (auto i = nPassed; i < numParams; ++i) {
+    for (auto i = nPassed; i < numNonVariadicParams; ++i) {
       if (paramInfo[i].funcletOff() == InvalidAbsoluteOffset) {
-        a.  Mov  (argReg(0), func->name()->data());
-        a.  Mov  (argReg(1), numParams);
-        a.  Mov  (argReg(2), i);
+        a.  Mov  (argReg(0), func);
+        a.  Mov  (argReg(1), i);
         auto fixupAddr = emitCall(a, CppCall(JIT::raiseMissingArgument));
         mcg->fixupMap().recordFixup(fixupAddr, fixup);
         break;
@@ -248,7 +265,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
                               mcg->fixupMap(), fixup);
 
   if (func->isClosureBody() && func->cls()) {
-    int entry = nPassed <= numParams ? nPassed : numParams + 1;
+    int entry = nPassed <= numNonVariadicParams
+      ? nPassed : numNonVariadicParams + 1;
     // Relying on rStashedAR == rVmFp here
     a.   Ldr   (rAsm, rStashedAR[AROFF(m_func)]);
     a.   Ldr   (rAsm, rAsm[Func::prologueTableOff() + sizeof(TCA)*entry]);
@@ -281,6 +299,7 @@ int shuffleArgsForMagicCall(ActRec* ar) {
   assert(f->name()->isame(s_call.get())
          || f->name()->isame(s_callStatic.get()));
   assert(f->numParams() == 2);
+  assert(!f->hasVariadicCaptureParam());
   assert(ar->hasInvName());
   StringData* invName = ar->getInvName();
   assert(invName);
@@ -323,9 +342,9 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   a.   Ldr   (rAsm.W(), rVmFp[AROFF(m_numArgsAndGenCtorFlags)]);
   for (auto i = 0; i < dvs.size(); ++i) {
     a. Cmp   (rAsm.W(), dvs[i].first);
-    emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second));
+    emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second, false));
   }
-  emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
+  emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base(), false));
   return start;
 }
 

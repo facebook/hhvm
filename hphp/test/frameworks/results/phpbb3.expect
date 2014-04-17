@@ -212,6 +212,14 @@ phpbb_build_hidden_fields_for_query_params_test::test_build_hidden_fields_for_qu
 .
 phpbb_build_hidden_fields_for_query_params_test::test_build_hidden_fields_for_query_params with data set #5
 .
+phpbb_cache_apc_driver_test::test_cache_sql
+S
+phpbb_cache_apc_driver_test::test_destroy
+S
+phpbb_cache_apc_driver_test::test_get_put_exists
+S
+phpbb_cache_apc_driver_test::test_purge
+S
 phpbb_cache_file_driver_test::test_cache_sql
 S
 phpbb_cache_file_driver_test::test_destroy
@@ -398,61 +406,69 @@ phpbb_controller_controller_test::test_controller_resolver
 .
 phpbb_controller_controller_test::test_provider
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #0
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #0
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #1
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #1
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #10
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #10
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #11
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #11
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #12
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #12
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #13
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #13
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #2
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #14
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #3
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #15
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #4
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #2
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #5
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #3
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #6
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #4
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #7
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #5
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #8
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #6
 .
-phpbb_controller_helper_url_test::test_helper_url_no_rewrite with data set #9
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #7
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #0
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #8
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #1
+phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #9
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #10
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #0
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #11
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #1
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #12
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #10
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #13
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #11
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #2
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #12
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #3
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #13
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #4
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #14
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #5
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #15
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #6
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #2
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #7
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #3
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #8
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #4
 .
-phpbb_controller_helper_url_test::test_helper_url_with_rewrite with data set #9
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #5
+.
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #6
+.
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #7
+.
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #8
+.
+phpbb_controller_helper_route_test::test_helper_url_with_rewrite with data set #9
 .
 phpbb_convert_30_dbms_to_31_test::test_convert_30_dbms_to_31 with data set #0
 .
@@ -853,13 +869,13 @@ S
 phpbb_extension_modules_test::test_get_module_infos
 .
 phpbb_extension_modules_test::test_modules_auth with data set #0
-E
+.
 phpbb_extension_modules_test::test_modules_auth with data set #1
-E
+.
 phpbb_extension_modules_test::test_modules_auth with data set #2
-E
+.
 phpbb_extension_modules_test::test_modules_auth with data set #3
-E
+.
 phpbb_filespec_test::test_additional_checks with data set #0
 .
 phpbb_filespec_test::test_additional_checks with data set #1
@@ -1134,6 +1150,48 @@ phpbb_functions_acp_validate_range_test::test_validate_range_too_low with data s
 .
 phpbb_functions_acp_validate_range_test::test_validate_range_too_low with data set #9
 .
+phpbb_functions_content_get_username_string_test::test_get_username_string_colour with data set #0
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_colour with data set #1
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_colour with data set #2
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_colour with data set #3
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_full with data set #0
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_full with data set #1
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_full with data set #2
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_full with data set #3
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_full with data set #4
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_no_profile with data set #0
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_no_profile with data set #1
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_no_profile with data set #2
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_no_profile with data set #3
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_profile with data set #0
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_profile with data set #1
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_profile with data set #2
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_username with data set #0
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_username with data set #1
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_username with data set #2
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_username with data set #3
+.
+phpbb_functions_content_get_username_string_test::test_get_username_string_username with data set #4
+.
 phpbb_functions_install_ignore_new_file_on_update_test::test_ignore_new_file_on_update with data set #0
 .
 phpbb_functions_install_ignore_new_file_on_update_test::test_ignore_new_file_on_update with data set #1
@@ -1222,6 +1280,14 @@ phpbb_functions_obtain_online_test::test_obtain_users_online_string with data se
 S
 phpbb_functions_obtain_online_test::test_obtain_users_online_string with data set #5
 S
+phpbb_functions_parse_cfg_file::test_parse_cfg_file with data set #0
+.
+phpbb_functions_parse_cfg_file::test_parse_cfg_file with data set #1
+.
+phpbb_functions_parse_cfg_file::test_parse_cfg_file with data set #2
+.
+phpbb_functions_parse_cfg_file::test_parse_cfg_file with data set #3
+.
 phpbb_functions_style_select_test::test_style_select with data set #0
 S
 phpbb_functions_style_select_test::test_style_select with data set #1
@@ -1690,6 +1756,16 @@ phpbb_notification_test::test_notifications
 S
 phpbb_notification_test::test_subscriptions
 S
+phpbb_notification_user_list_trim_test::test_user_list_trim with data set #0
+S
+phpbb_notification_user_list_trim_test::test_user_list_trim with data set #1
+S
+phpbb_notification_user_list_trim_test::test_user_list_trim with data set #2
+S
+phpbb_notification_user_list_trim_test::test_user_list_trim with data set #3
+S
+phpbb_notification_user_list_trim_test::test_user_list_trim with data set #4
+S
 phpbb_pagination_pagination_test::test_generate_template_pagination with data set #0
 .
 phpbb_pagination_pagination_test::test_generate_template_pagination with data set #1
@@ -1904,6 +1980,20 @@ phpbb_privmsgs_delete_user_pms_test::test_delete_user_pms with data set #1
 S
 phpbb_privmsgs_delete_user_pms_test::test_delete_user_pms with data set #2
 S
+phpbb_profile_custom_string_test::test_string_validate with data set #0
+S
+phpbb_profile_custom_string_test::test_string_validate with data set #1
+S
+phpbb_profile_custom_string_test::test_string_validate with data set #2
+S
+phpbb_profile_custom_string_test::test_string_validate with data set #3
+S
+phpbb_profile_custom_string_test::test_string_validate with data set #4
+S
+phpbb_profile_custom_string_test::test_string_validate with data set #5
+S
+phpbb_profile_custom_string_test::test_string_validate with data set #6
+S
 phpbb_profile_custom_test::test_dropdown_validate with data set #0
 S
 phpbb_profile_custom_test::test_dropdown_validate with data set #1
@@ -1916,6 +2006,22 @@ phpbb_profile_custom_test::test_dropdown_validate with data set #4
 S
 phpbb_profile_custom_test::test_dropdown_validate with data set #5
 S
+phpbb_profile_get_profile_value_test::test_get_profile_value_int with data set #0
+.
+phpbb_profile_get_profile_value_test::test_get_profile_value_int with data set #1
+.
+phpbb_profile_get_profile_value_test::test_get_profile_value_int with data set #2
+.
+phpbb_profile_get_profile_value_test::test_get_profile_value_int with data set #3
+.
+phpbb_profile_get_profile_value_test::test_get_profile_value_int with data set #4
+.
+phpbb_profile_get_profile_value_test::test_get_profile_value_int with data set #5
+.
+phpbb_profile_get_profile_value_test::test_get_profile_value_int with data set #6
+.
+phpbb_profile_get_profile_value_test::test_get_profile_value_int with data set #7
+.
 phpbb_quoteattr_test::test_quoteattr with data set #0
 .
 phpbb_quoteattr_test::test_quoteattr with data set #1
@@ -2528,6 +2634,18 @@ phpbb_search_native_test::test_split_keywords with data set #1
 S
 phpbb_search_native_test::test_split_keywords with data set #10
 S
+phpbb_search_native_test::test_split_keywords with data set #11
+S
+phpbb_search_native_test::test_split_keywords with data set #12
+S
+phpbb_search_native_test::test_split_keywords with data set #13
+S
+phpbb_search_native_test::test_split_keywords with data set #14
+S
+phpbb_search_native_test::test_split_keywords with data set #15
+S
+phpbb_search_native_test::test_split_keywords with data set #16
+S
 phpbb_search_native_test::test_split_keywords with data set #2
 S
 phpbb_search_native_test::test_split_keywords with data set #3
@@ -2779,7 +2897,37 @@ phpbb_template_template_events_test::test_event with data set #5
 phpbb_template_template_includecss_test::test_includecss_compilation
 .
 phpbb_template_template_includejs_test::test_includejs_compilation with data set #0
-FATAL
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #1
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #10
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #11
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #12
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #13
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #14
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #15
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #2
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #3
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #4
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #5
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #6
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #7
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #8
+.
+phpbb_template_template_includejs_test::test_includejs_compilation with data set #9
+.
 phpbb_template_template_inheritance_test::test_template with data set #0
 .
 phpbb_template_template_inheritance_test::test_template with data set #1
@@ -2787,17 +2935,113 @@ phpbb_template_template_inheritance_test::test_template with data set #1
 phpbb_template_template_inheritance_test::test_template with data set #2
 .
 phpbb_template_template_parser_test::test_set_filenames
-FATAL
+.
+phpbb_template_template_test::test_alter_block_array with data set #0
+.
+phpbb_template_template_test::test_alter_block_array with data set #1
+.
+phpbb_template_template_test::test_alter_block_array with data set #2
+.
+phpbb_template_template_test::test_alter_block_array with data set #3
+.
+phpbb_template_template_test::test_append_var_with_assign_var
+.
+phpbb_template_template_test::test_append_var_without_assign_var
+.
+phpbb_template_template_test::test_assign_block_vars_array with data set #0
+.
+phpbb_template_template_test::test_assign_display
+.
+phpbb_template_template_test::test_define_error
+.
 phpbb_template_template_test::test_invalid_handle
 .
 phpbb_template_template_test::test_missing_file
+.
+phpbb_template_template_test::test_more_alter_block_array
+.
+phpbb_template_template_test::test_php
 .
 phpbb_template_template_test::test_template with data set #0
 .
 phpbb_template_template_test::test_template with data set #1
 .
+phpbb_template_template_test::test_template with data set #10
+.
+phpbb_template_template_test::test_template with data set #11
+.
+phpbb_template_template_test::test_template with data set #12
+.
+phpbb_template_template_test::test_template with data set #13
+.
+phpbb_template_template_test::test_template with data set #14
+.
+phpbb_template_template_test::test_template with data set #15
+.
+phpbb_template_template_test::test_template with data set #16
+.
+phpbb_template_template_test::test_template with data set #17
+.
+phpbb_template_template_test::test_template with data set #18
+.
+phpbb_template_template_test::test_template with data set #19
+.
 phpbb_template_template_test::test_template with data set #2
-FATAL
+.
+phpbb_template_template_test::test_template with data set #20
+.
+phpbb_template_template_test::test_template with data set #21
+.
+phpbb_template_template_test::test_template with data set #22
+.
+phpbb_template_template_test::test_template with data set #23
+.
+phpbb_template_template_test::test_template with data set #24
+.
+phpbb_template_template_test::test_template with data set #25
+.
+phpbb_template_template_test::test_template with data set #26
+.
+phpbb_template_template_test::test_template with data set #27
+.
+phpbb_template_template_test::test_template with data set #28
+.
+phpbb_template_template_test::test_template with data set #29
+.
+phpbb_template_template_test::test_template with data set #3
+.
+phpbb_template_template_test::test_template with data set #30
+.
+phpbb_template_template_test::test_template with data set #31
+.
+phpbb_template_template_test::test_template with data set #32
+.
+phpbb_template_template_test::test_template with data set #33
+.
+phpbb_template_template_test::test_template with data set #34
+.
+phpbb_template_template_test::test_template with data set #35
+.
+phpbb_template_template_test::test_template with data set #36
+.
+phpbb_template_template_test::test_template with data set #37
+.
+phpbb_template_template_test::test_template with data set #38
+.
+phpbb_template_template_test::test_template with data set #39
+.
+phpbb_template_template_test::test_template with data set #4
+.
+phpbb_template_template_test::test_template with data set #5
+.
+phpbb_template_template_test::test_template with data set #6
+.
+phpbb_template_template_test::test_template with data set #7
+.
+phpbb_template_template_test::test_template with data set #8
+.
+phpbb_template_template_test::test_template with data set #9
+.
 phpbb_tests_tree_nestedset_forum_add_remove_test::test_delete with data set #0
 S
 phpbb_tests_tree_nestedset_forum_add_remove_test::test_delete with data set #1
@@ -2807,6 +3051,10 @@ S
 phpbb_tests_tree_nestedset_forum_add_remove_test::test_delete_throws with data set #1
 S
 phpbb_tests_tree_nestedset_forum_add_remove_test::test_insert with data set #0
+S
+phpbb_tests_tree_nestedset_forum_get_data_test::test_get_all_tree_data with data set #0
+S
+phpbb_tests_tree_nestedset_forum_get_data_test::test_get_all_tree_data with data set #1
 S
 phpbb_tests_tree_nestedset_forum_get_data_test::test_get_path_and_subtree_data with data set #0
 S
@@ -4102,6 +4350,50 @@ phpbb_utf_utf8_wordwrap_test::test_utf8_wordwrap_utf8
 .
 phpbb_utf_utf8_wordwrap_test::test_utf8_wordwrap_utf8_cut
 .
+phpbb_version_helper_fetch_test::test_version_phpbb_com
+.
+phpbb_version_helper_test::test_get_latest_on_current_branch with data set #0
+.
+phpbb_version_helper_test::test_get_latest_on_current_branch with data set #1
+.
+phpbb_version_helper_test::test_get_latest_on_current_branch with data set #2
+.
+phpbb_version_helper_test::test_get_latest_on_current_branch with data set #3
+.
+phpbb_version_helper_test::test_get_latest_on_current_branch with data set #4
+.
+phpbb_version_helper_test::test_get_latest_on_current_branch with data set #5
+.
+phpbb_version_helper_test::test_get_suggested_updates with data set #0
+.
+phpbb_version_helper_test::test_get_suggested_updates with data set #1
+.
+phpbb_version_helper_test::test_get_suggested_updates with data set #2
+.
+phpbb_version_helper_test::test_get_suggested_updates with data set #3
+.
+phpbb_version_helper_test::test_get_suggested_updates with data set #4
+.
+phpbb_version_helper_test::test_get_suggested_updates with data set #5
+.
+phpbb_version_helper_test::test_is_stable with data set #0
+.
+phpbb_version_helper_test::test_is_stable with data set #1
+.
+phpbb_version_helper_test::test_is_stable with data set #2
+.
+phpbb_version_helper_test::test_is_stable with data set #3
+.
+phpbb_version_helper_test::test_is_stable with data set #4
+.
+phpbb_version_helper_test::test_is_stable with data set #5
+.
+phpbb_version_helper_test::test_is_stable with data set #6
+.
+phpbb_version_helper_test::test_is_stable with data set #7
+.
+phpbb_version_helper_test::test_is_stable with data set #8
+.
 phpbb_wrapper_gmgetdate_test::test_gmgetdate
 .
 phpbb_wrapper_mt_rand_test::test_max_equals_min
@@ -4164,3 +4456,7 @@ pphpbb_tests_tree_nestedset_forum_test::test_get_sql_where with data set #2
 S
 pphpbb_tests_tree_nestedset_forum_test::test_get_sql_where with data set #3
 S
+schmema_generator_test::test_check_dependencies_fail
+.
+schmema_generator_test::test_get_schema_success
+.

@@ -26,14 +26,49 @@
 #include "zend_operators.h"
 #include "zend_globals.h"
 
-ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result, zend_class_entry *scope, ulong flags TSRMLS_DC) {
+#include "hphp/runtime/vm/native.h"
+
+ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
+    zend_class_entry *scope, ulong flags TSRMLS_DC)
+{
   return 0;
 }
-ZEND_API void zend_register_long_constant(const char *name, uint name_len, long lval, int flags, int module_number TSRMLS_DC) {
+
+/**
+ * Register a constant. Note that name_len is actually the length plus one,
+ * so that it can be conveniently derived from sizeof(). */
+ZEND_API void zend_register_long_constant(const char *name, uint name_len,
+    long lval, int flags, int module_number TSRMLS_DC)
+{
+  using namespace HPHP;
+  Native::registerConstant(
+      makeStaticString(name, name_len - 1),
+      make_tv<KindOfInt64>(lval));
 }
-ZEND_API void zend_register_double_constant(const char *name, uint name_len, double dval, int flags, int module_number TSRMLS_DC) {
+
+ZEND_API void zend_register_double_constant(const char *name, uint name_len,
+    double dval, int flags, int module_number TSRMLS_DC)
+{
+  using namespace HPHP;
+  Native::registerConstant(
+      makeStaticString(name, name_len - 1),
+      make_tv<KindOfDouble>(dval));
 }
-ZEND_API void zend_register_string_constant(const char *name, uint name_len, char *strval, int flags, int module_number TSRMLS_DC) {
+
+ZEND_API void zend_register_string_constant(const char *name, uint name_len,
+    char *strval, int flags, int module_number TSRMLS_DC)
+{
+  using namespace HPHP;
+  Native::registerConstant(
+      makeStaticString(name, name_len - 1),
+      make_tv<KindOfStaticString>(makeStaticString(strval)));
 }
-ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, char *strval, uint strlen, int flags, int module_number TSRMLS_DC) {
+
+ZEND_API void zend_register_stringl_constant(const char *name, uint name_len,
+    char *strval, uint strlen, int flags, int module_number TSRMLS_DC)
+{
+  using namespace HPHP;
+  Native::registerConstant(
+      makeStaticString(name, name_len - 1),
+      make_tv<KindOfStaticString>(makeStaticString(strval, strlen)));
 }

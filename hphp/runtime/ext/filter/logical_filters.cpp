@@ -383,9 +383,10 @@ Variant php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) {
 Variant php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) {
   int old_len = value.length();
 
-  php_filter_url(value, flags, option_array);
+  Variant filter_result = php_filter_url(value, flags, option_array);
 
-  if (old_len != value.length()) {
+  if (!filter_result.isString() ||
+      old_len != filter_result.toString().length()) {
     RETURN_VALIDATION_FAILED
   }
 
@@ -767,9 +768,10 @@ Variant php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL) {
     raise_warning("First argument is expected to be a valid callback");
     return uninit_null();
   }
+  Variant reffable = value;
   return vm_call_user_func(
     option_array,
-    PackedArrayInit(1).appendRef(value).toArray()
+    PackedArrayInit(1).appendRef(reffable).toArray()
   );
 }
 

@@ -24,6 +24,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const int64_t k_STREAM_SERVER_BIND;
+extern const int64_t k_STREAM_SERVER_LISTEN;
+
 Variant f_socket_create(int domain, int type, int protocol);
 Variant f_socket_create_listen(int port, int backlog = 128);
 bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd);
@@ -64,6 +67,20 @@ int64_t f_socket_last_error(const Resource& socket = null_resource);
 void f_socket_clear_error(const Resource& socket = null_resource);
 Variant f_getaddrinfo(const String& host, const String& port, int family = 0,
                       int socktype = 0, int protocol = 0, int flags = 0);
+
+Variant HHVM_FUNCTION(fsockopen, const String& hostname, int port = -1,
+                      VRefParam errnum = null_variant,
+                      VRefParam errstr = null_variant,
+                      double timeout = -1.0);
+Variant HHVM_FUNCTION(pfsockopen, const String& hostname, int port = -1,
+                                  VRefParam errnum = null_variant,
+                                  VRefParam errstr = null_variant,
+                                  double timeout = -1.0);
+
+///////////////////////////////////////////////////////////////////////////////
+
+Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
+                      VRefParam errstr, double timeout, bool persistent);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

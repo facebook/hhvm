@@ -167,13 +167,11 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY(arr[0].toInt32() == 0);
-    VS(arr, Array(ArrayInit(1).set(0).create()));
 
     arr = Array::Create("test");
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY(equal(arr[0], String("test")));
-    VS(arr, Array(ArrayInit(1).set("test").create()));
 
     Array arrCopy = arr;
     arr = Array::Create(arr);
@@ -181,19 +179,16 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.isNull());
     VERIFY(arr[0].toArray().size() == 1);
     VS(arr[0], arrCopy);
-    VS(arr, Array(ArrayInit(1).set(arrCopy).create()));
 
     arr = Array::Create("name", 1);
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY(arr[s_name].toInt32() == 1);
-    VS(arr, Array(ArrayInit(1).set(s_name, 1).create()));
 
     arr = Array::Create(s_name, "test");
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY(equal(arr[s_name], String("test")));
-    VS(arr, Array(ArrayInit(1).set(s_name, "test").create()));
 
     arrCopy = arr;
     arr = Array::Create(s_name, arr);
@@ -201,7 +196,6 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.isNull());
     VS(arr[s_name], arrCopy);
     VERIFY(arr[s_name].toArray().size() == 1);
-    VS(arr, Array(ArrayInit(1).set(s_name, arrCopy).create()));
   }
 
   // iteration

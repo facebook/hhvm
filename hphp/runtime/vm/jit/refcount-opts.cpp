@@ -275,6 +275,10 @@ struct FrameStack {
     return live == b.live && preLive == b.preLive;
   }
 
+  bool operator!=(const FrameStack& b) const {
+    return !(*this == b);
+  }
+
   /* Map from the instruction defining the frame to a Frame object. */
   smart::hash_map<const IRInstruction*, Frame> live;
 
@@ -441,14 +445,15 @@ Point idForEdge(const Block* from, const Block* to, const IdMap& ids) {
  * cannot take their src to 0.
  */
 struct SinkPointAnalyzer : private LocalStateHook {
-  SinkPointAnalyzer(const BlockList* blocks, const IdMap* ids, IRUnit& unit)
+  SinkPointAnalyzer(const BlockList* blocks, const IdMap* ids,
+                    IRUnit& unit, FrameState&& frameState)
     : m_unit(unit)
     , m_blocks(*blocks)
     , m_block(nullptr)
     , m_inst(nullptr)
     , m_ids(*ids)
     , m_takenState(nullptr)
-    , m_frameState(unit)
+    , m_frameState(std::move(frameState))
   {}
 
   SinkPointsMap find() {
@@ -557,8 +562,13 @@ struct SinkPointAnalyzer : private LocalStateHook {
     auto const& firstFrames = states.front().state.frames;
     smart::hash_map<SSATmp*, IncomingValue> mergedValues;
     for (auto const& inState : states) {
-      assert(inState.state.frames == firstFrames &&
-             "merging states with different FrameStacks is not supported");
+      if (inState.state.frames != firstFrames) {
+        if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+          throw ControlFlowFailedExc(__FILE__, __LINE__);
+        }
+        always_assert(false &&
+          "merging states with different FrameStacks is not supported");
+      }
 
       for (auto const& inPair : inState.state.values) {
         auto* value = inPair.first;
@@ -810,9 +820,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
         }
       }
     } else if (m_inst == &m_block->back() && m_block->isExit() &&
-               // Make sure it's not a RetCtrl of a normal function
+               // Make sure it's not a RetCtrl from Ret{C,V}
                (!m_inst->is(RetCtrl) ||
-                m_inst->extra<InGeneratorData>()->inGenerator) &&
+                m_inst->extra<RetCtrlData>()->suspendingResumed) &&
                // The EndCatch in FunctionExitSurpriseHook's catch block is
                // special: it happens after locals and $this have been
                // decreffed, so we don't want to do the normal cleanup
@@ -820,13 +830,18 @@ struct SinkPointAnalyzer : private LocalStateHook {
                  m_block->preds().front().inst()
                    ->is(FunctionExitSurpriseHook) &&
                  !m_block->preds().front().inst()
-                   ->extra<InGeneratorData>()->inGenerator)) {
+                   ->extra<RetCtrlData>()->suspendingResumed)) {
       // When leaving a trace, we need to account for all live references in
       // locals and $this pointers.
       consumeAllLocals();
       consumeAllFrames();
     } else if (m_inst->is(GenericRetDecRefs, NativeImpl)) {
       consumeAllLocals();
+    } else if (m_inst->is(CreateContMeth, CreateContFunc,
+                          CreateAFWHMeth, CreateAFWHFunc)) {
+      consumeAllLocals();
+      consumeInputs();
+      defineOutputs();
     } else if (m_inst->is(DecRefLoc)) {
       consumeLocal(m_inst->extra<DecRefLoc>()->locId);
     } else {
@@ -905,8 +920,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst->is(InlineReturn)) {
       FTRACE(3, "{}", show(m_state));
       m_state.frames.popInline(frameRoot(m_inst->src(0)->inst()));
-    } else if (m_inst->is(RetCtrl) &&
-               !m_inst->extra<InGeneratorData>()->inGenerator) {
+    } else if (m_inst->is(RetAdjustStack)) {
       m_state.frames.pop();
     } else if (m_inst->is(Call, CallArray)) {
       resolveAllFrames();
@@ -1711,7 +1725,7 @@ void eliminateTakeStacks(const BlockList& blocks) {
  * complete, a separate validation pass is run to ensure the net effect on the
  * refcount of each object has not changed.
  */
-void optimizeRefcounts(IRUnit& unit) noexcept {
+void optimizeRefcounts(IRUnit& unit, FrameState&& fs) {
   Timer _t(Timer::optimize_refcountOpts);
   FTRACE(2, "vvvvvvvvvv refcount opts vvvvvvvvvv\n");
   auto const changed = splitCriticalEdges(unit);
@@ -1723,7 +1737,8 @@ void optimizeRefcounts(IRUnit& unit) noexcept {
   IdMap ids(blocks, unit);
 
   Indent _i;
-  auto const sinkPoints = SinkPointAnalyzer(&blocks, &ids, unit).find();
+  auto const sinkPoints =
+    SinkPointAnalyzer(&blocks, &ids, unit, std::move(fs)).find();
   ITRACE(2, "Found sink points:\n{}\n", show(sinkPoints, ids));
 
   BlockMap before;

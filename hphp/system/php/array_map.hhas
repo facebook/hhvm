@@ -1,8 +1,9 @@
 .function array_map($func = no_args, $arr = one_arg, $res = one_array, ...) {
           .numiters 2;
 
-# If we get here, a value was supplied for $res
-# so we bail out to the c++ implementation
+# If we get here, a value was supplied for $res (or we did not get an
+# an array as $arr), so we bail out to the c++ implementation
+
 call_cpp_impl:
           FPushFuncD   1   "__builtin_array_map"
           FCallBuiltin 0 0 "func_get_args"
@@ -37,7 +38,7 @@ one_array:
           CGetL $func
           DecodeCufIter 0 bad_func
 .try_fault kill_iter_0 {
-            NewArray 3  # HphpArray::SmallSize
+            NewArray 3  # MixedArray::SmallSize
             SetL $res
             PopC
 

@@ -131,7 +131,13 @@ emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
             RegNumber reg) {
   PhysRegSaver(a, kGPCallerSaved); // we don't know for sure what's alive
   a.    emitImmReg(&datum.m_key, argNumToRegName[0]);
-  a.    call((TCA)pthread_getspecific);
+  const TCA addr = (TCA)pthread_getspecific;
+  if (deltaFits((uintptr_t)addr, sz::dword)) {
+    a.    call(addr);
+  } else {
+    a.    movq(addr, reg::rax);
+    a.    call(reg::rax);
+  }
   if (reg != reg::rax) {
     a.    movq(reg::rax, r64(reg));
   }
@@ -157,6 +163,55 @@ void emitStoreReg(Asm& as, PhysReg reg, Mem mem) {
     as. storeq(reg, mem);
   } else {
     as. movsd(reg, mem);
+  }
+}
+
+/**
+ * Emit a load of a low pointer.
+ */
+template<class Mem>
+void emitLdLowPtr(Asm& as, Mem mem, PhysReg reg, size_t size) {
+  assert(reg != InvalidReg && reg.isGP());
+  if (size == 8) {
+    as.loadq(mem, reg);
+  } else if (size == 4) {
+    as.loadl(mem, r32(reg));
+  } else {
+    not_implemented();
+  }
+}
+
+template<class Mem>
+void emitCmpClass(Asm& as, const Class* c, Mem mem) {
+  auto size = sizeof(LowClassPtr);
+  auto imm = Immed64(c);
+
+  if (size == 8) {
+    if (imm.fits(sz::dword)) {
+      as.cmpq(imm.l(), mem);
+    } else {
+      // Use a scratch.  We could do this without rAsm using two immediate
+      // 32-bit compares (and two branches).
+      as.emitImmReg(imm, rAsm);
+      as.cmpq(rAsm, mem);
+    }
+  } else if (size == 4) {
+    as.cmpl(imm.l(), mem);
+  } else {
+    not_implemented();
+  }
+}
+
+template<class Mem>
+void emitCmpClass(Asm& as, Reg64 reg, Mem mem) {
+  auto size = sizeof(LowClassPtr);
+
+  if (size == 8) {
+    as.   cmpq    (reg, mem);
+  } else if (size == 4) {
+    as.   cmpl    (r32(reg), mem);
+  } else {
+    not_implemented();
   }
 }
 

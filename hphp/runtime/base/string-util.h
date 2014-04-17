@@ -50,6 +50,7 @@ public:
     QS(FBUtf8, 32768)     \
     /* Order of the fields matters here if we're
      * matching on what flags are set */  \
+    QS(Substitute, 8) /* k_ENT_SUBSTITUTE: replace invalid chars with FFFD */ \
     QS(Ignore, 4) /* k_ENT_IGNORE:   silently discard invalid chars */ \
     QS(Both, 3)   /* k_ENT_QUOTES:   escape both double and single quotes */  \
     QS(Double, 2) /* k_ENT_COMPAT:   escape double quotes only */   \
@@ -149,6 +150,8 @@ public:
   static String MD5(const String& input, bool raw = false);
   static String SHA1(const String& input, bool raw = false);
 };
+
+size_t safe_address(size_t nmemb, size_t size, size_t offset);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -2,9 +2,6 @@ set(RECURSIVE_SOURCE_SUBDIRS base debugger eval server vm)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 	HHVM_SELECT_SOURCES("${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
 endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
-foreach (dir ${ZEND_COMPAT_BUILD_DIRS})
-	HHVM_SELECT_SOURCES("${dir}")
-endforeach(dir ${ZEND_COMPAT_BUILD_DIRS})
 
 if(NOT LINUX)
 	add_definitions(-DNO_HARDWARE_COUNTERS)
@@ -28,8 +25,6 @@ if(NOT HAVE_CUSTOM_LIBEVENT)
 		endif()
 	endforeach(file ${CXX_SOURES})
 endif()
-
-include_directories("${HPHP_HOME}/hphp/third_party")
 
 ADD_LIBRARY(hphp_runtime_static STATIC
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})

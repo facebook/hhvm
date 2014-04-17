@@ -1,13 +1,12 @@
 DOMAttr
 
-Warning: DOMAttr::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
+Warning: DOMAttr::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
 object(DOMAttr)#1 (0) {
 }
-string(91) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:7:"DOMAttr";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(7) "DOMAttr"
-}
+
+Warning: Attempted to serialize unserializable builtin class DOMAttr in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(22) {
   [0]=>
   string(11) "__construct"
@@ -57,16 +56,15 @@ array(22) {
 ================
 A_DOMAttr
 
-Warning: DOMAttr::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
-object(A_DOMAttr)#3 (1) {
+Warning: DOMAttr::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+object(A_DOMAttr)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"A_DOMAttr";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(9) "A_DOMAttr"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_DOMAttr in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(22) {
   [0]=>
   string(11) "__construct"

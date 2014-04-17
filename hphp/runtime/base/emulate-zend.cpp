@@ -55,6 +55,7 @@ int emulate_zend(int argc, char** argv) {
   bool need_file = true;
   int ini_fd = -1;
   char ini_path[] = "/tmp/php-ini-XXXXXX";
+  std::string ini_section = "";
   const char* program = nullptr;
 
   int cnt = 1;
@@ -63,10 +64,18 @@ int emulate_zend(int argc, char** argv) {
       newargv.push_back(argv[cnt++]);
       continue;
     }
-    if (strcmp(argv[cnt], "-a") == 0) {
+    if (strcmp(argv[cnt], "-a") == 0 ||
+        strcmp(argv[cnt], "--interactive") == 0) {
       need_file = false;
       newargv.push_back("-a");
       cnt++;
+      continue;
+    }
+    if (strcmp(argv[cnt], "-z") == 0) {
+      std::string arg = "-vDynamicExtensions.0=";
+      arg.append(argv[cnt+1]);
+      newargv.push_back(arg.c_str());
+      cnt += 2;
       continue;
     }
     if (strcmp(argv[cnt], "-l") == 0 || strcmp(argv[cnt], "--lint") == 0) {
@@ -112,10 +121,27 @@ int emulate_zend(int argc, char** argv) {
           fprintf(stderr, "Error: unable to open temporary file");
           exit(EXIT_FAILURE);
         }
-        write(ini_fd, "[php]\n", 6);
       }
-      auto &line = argv[cnt+1];
-      write(ini_fd, line, strlen(line));
+
+      std::string line = argv[cnt+1];
+      std::string section = "php";
+      int pos_period = line.find_first_of('.');
+      int pos_equals = line.find_first_of('=');
+
+      if (pos_period != std::string::npos &&
+          pos_equals != std::string::npos &&
+          pos_period < pos_equals) {
+        section = line.substr(0, pos_period);
+      }
+
+      if (section != ini_section) {
+        ini_section = section;
+        write(ini_fd, "[", 1);
+        write(ini_fd, section.c_str(), section.length());
+        write(ini_fd, "]\n", 2);
+      }
+
+      write(ini_fd, line.c_str(), line.length());
       write(ini_fd, "\n", 1);
       cnt += 2;
       continue;

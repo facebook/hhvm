@@ -24,6 +24,6 @@ class Foo {
   }
 }
 
-function donkey(): void {
+function donkey(): int {
   return (new Foo())->getA();
 }

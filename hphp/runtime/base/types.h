@@ -26,10 +26,11 @@
 #include <list>
 #include <map>
 
-#include "hphp/util/thread-local.h"
-#include "hphp/util/mutex.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/low-ptr.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/memory-manager.h"
@@ -66,8 +67,22 @@ class ObjectData;
 class ResourceData;
 class MArrayIter;
 
+class Class;
+
 class VariableSerializer;
 class VariableUnserializer;
+
+///////////////////////////////////////////////////////////////////////////////
+
+#ifdef USE_LOWPTR
+constexpr bool use_lowptr = true;
+
+typedef LowPtr<Class, uint32_t> LowClassPtr;
+#else
+constexpr bool use_lowptr = false;
+
+typedef LowPtr<Class, uintptr_t> LowClassPtr;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -201,8 +216,6 @@ inline RefResult ref(Variant& v) {
   return *(RefResultValue*)&v;
 }
 
-class Class;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 class GlobalNameValueTableWrapper;
@@ -276,6 +289,7 @@ namespace RDS {
  */
 typedef uint32_t FuncId;
 constexpr FuncId InvalidFuncId = FuncId(-1LL);
+constexpr FuncId DummyFuncId = FuncId(-2LL);
 typedef hphp_hash_set<FuncId> FuncIdSet;
 
 /*
@@ -350,6 +364,7 @@ enum Attr {
   AttrHPHPSpecific  = (1 << 25), //                     X    //
   AttrIsFoldable    = (1 << 26), //                     X    //
   AttrNoFCallBuiltin= (1 << 27), //                     X    //
+  AttrVariadicParam = (1 << 28), //                     X    //
 };
 
 inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }

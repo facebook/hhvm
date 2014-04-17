@@ -708,34 +708,36 @@ memcached_return_t doStatsCallback(const memcached_st *ptr,
   memcached_stat_st *stats = context->stats;
   ssize_t i = context->returnValue.size();
 
-  context->returnValue.set(String(key, CopyString), Array(ArrayInit(24)
-      .set(s_pid,                        (int64_t)stats[i].pid)
-      .set(s_uptime,                     (int64_t)stats[i].uptime)
-      .set(s_threads,                    (int64_t)stats[i].threads)
-      .set(s_time,                       (int64_t)stats[i].time)
-      .set(s_pointer_size,               (int64_t)stats[i].pointer_size)
-      .set(s_rusage_user_seconds,        (int64_t)stats[i].rusage_user_seconds)
-      .set(s_rusage_user_microseconds,   (int64_t)stats[i]
-                                                .rusage_user_microseconds)
-      .set(s_rusage_system_seconds,      (int64_t)stats[i].rusage_system_seconds)
-      .set(s_rusage_system_microseconds, (int64_t)stats[i]
-                                                .rusage_system_microseconds)
-      .set(s_curr_items,                 (int64_t)stats[i].curr_items)
-      .set(s_total_items,                (int64_t)stats[i].total_items)
-      .set(s_limit_maxbytes,             (int64_t)stats[i].limit_maxbytes)
-      .set(s_curr_connections,           (int64_t)stats[i].curr_connections)
-      .set(s_total_connections,          (int64_t)stats[i].total_connections)
-      .set(s_connection_structures,      (int64_t)stats[i].connection_structures)
-      .set(s_bytes,                      (int64_t)stats[i].bytes)
-      .set(s_cmd_get,                    (int64_t)stats[i].cmd_get)
-      .set(s_cmd_set,                    (int64_t)stats[i].cmd_set)
-      .set(s_get_hits,                   (int64_t)stats[i].get_hits)
-      .set(s_get_misses,                 (int64_t)stats[i].get_misses)
-      .set(s_evictions,                  (int64_t)stats[i].evictions)
-      .set(s_bytes_read,                 (int64_t)stats[i].bytes_read)
-      .set(s_bytes_written,              (int64_t)stats[i].bytes_written)
-      .set(s_version,                    String(stats[i].version, CopyString))
-      .create()));
+  context->returnValue.set(String(key, CopyString),
+    make_map_array(
+      s_pid,                        (int64_t)stats[i].pid,
+      s_uptime,                     (int64_t)stats[i].uptime,
+      s_threads,                    (int64_t)stats[i].threads,
+      s_time,                       (int64_t)stats[i].time,
+      s_pointer_size,               (int64_t)stats[i].pointer_size,
+      s_rusage_user_seconds,        (int64_t)stats[i].rusage_user_seconds,
+      s_rusage_user_microseconds,   (int64_t)stats[i]
+                                                .rusage_user_microseconds,
+      s_rusage_system_seconds,      (int64_t)stats[i].rusage_system_seconds,
+      s_rusage_system_microseconds, (int64_t)stats[i]
+                                                .rusage_system_microseconds,
+      s_curr_items,                 (int64_t)stats[i].curr_items,
+      s_total_items,                (int64_t)stats[i].total_items,
+      s_limit_maxbytes,             (int64_t)stats[i].limit_maxbytes,
+      s_curr_connections,           (int64_t)stats[i].curr_connections,
+      s_total_connections,          (int64_t)stats[i].total_connections,
+      s_connection_structures,      (int64_t)stats[i].connection_structures,
+      s_bytes,                      (int64_t)stats[i].bytes,
+      s_cmd_get,                    (int64_t)stats[i].cmd_get,
+      s_cmd_set,                    (int64_t)stats[i].cmd_set,
+      s_get_hits,                   (int64_t)stats[i].get_hits,
+      s_get_misses,                 (int64_t)stats[i].get_misses,
+      s_evictions,                  (int64_t)stats[i].evictions,
+      s_bytes_read,                 (int64_t)stats[i].bytes_read,
+      s_bytes_written,              (int64_t)stats[i].bytes_written,
+      s_version,                    String(stats[i].version, CopyString)
+    )
+  );
 
   return MEMCACHED_SUCCESS;
 }
@@ -1027,9 +1029,9 @@ bool c_Memcached::toObject(Variant& value, const memcached_result_st &result) {
 
 memcached_return c_Memcached::doCacheCallback(const Variant& callback, const String& key,
                                               Variant& value) {
-  Array params(ArrayInit(3).set(Variant(this))
-                           .set(key)
-                           .setRef(value).create());
+  Array params(PackedArrayInit(3).append(Variant(this))
+                                 .append(key)
+                                 .appendRef(value).create());
   if (!vm_call_user_func(callback, params).toBoolean()) {
     return MEMCACHED_NOTFOUND;
   }

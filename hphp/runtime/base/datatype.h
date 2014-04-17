@@ -68,6 +68,7 @@ enum DataType : int8_t {
   KindOfResource         = 0x40,  //   1000000
   KindOfRef              = 0x50,  //   1010000
   KindOfIndirect         = 0x51,  //   1010001
+  KindOfNamedLocal       = KindOfIndirect,
 
   MaxNumDataTypes        = KindOfIndirect + 1, // marker, not a valid type
   MaxNumDataTypesIndex   = 12 + 1,  // 1 + the number of valid DataTypes above

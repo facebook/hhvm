@@ -19,6 +19,7 @@
 #include <atomic>
 #include <cstdlib>
 #include <cinttypes>
+#include <string>
 #include <boost/variant.hpp>
 
 #include "hphp/runtime/base/types.h"
@@ -306,6 +307,16 @@ T& handleToRef(Handle h) {
  * region.
  */
 bool isPersistentHandle(Handle handle);
+
+/*
+ * Used to record information about the rds handle h in the
+ * perf-data-pid.map (if enabled).
+ * The type indicates the type of entry (eg StaticLocal), and the
+ * msg identifies this particular entry (eg function-name:local-name)
+ */
+void recordRds(Handle h, size_t size,
+               const std::string& type, const std::string& msg);
+void recordRds(Handle h, size_t size, const Symbol& sym);
 
 //////////////////////////////////////////////////////////////////////
 

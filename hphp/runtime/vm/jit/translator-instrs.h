@@ -159,16 +159,13 @@
   CASE(ContRaise) \
   CASE(ContSuspend) \
   CASE(ContSuspendK) \
-  CASE(ContRetC) \
   CASE(ContCheck) \
   CASE(ContValid) \
   CASE(ContKey) \
   CASE(ContCurrent) \
   CASE(ContStopped) \
   CASE(AsyncAwait) \
-  CASE(AsyncESuspend) \
-  CASE(AsyncResume) \
-  CASE(AsyncWrapResult) \
+  CASE(AsyncSuspend) \
   CASE(Strlen) \
   CASE(IncStat) \
   CASE(Idx) \

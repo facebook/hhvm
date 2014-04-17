@@ -28,7 +28,7 @@
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/util/logger.h"
 
@@ -100,7 +100,8 @@ Variant f_array_chunk(const Variant& input, int chunkSize,
     return init_null();
   }
 
-  Array ret = Array::Create();
+  auto const retSize = (getContainerSize(cellInput) / chunkSize) + 1;
+  PackedArrayInit ret(retSize);
   Array chunk;
   int current = 0;
   for (ArrayIter iter(cellInput); iter; ++iter) {
@@ -118,7 +119,7 @@ Variant f_array_chunk(const Variant& input, int chunkSize,
     ret.append(chunk);
   }
 
-  return ret;
+  return ret.toArray();
 }
 
 static inline bool array_column_coerce_key(Variant &key, const char *name) {
@@ -190,7 +191,7 @@ Variant f_array_combine(const Variant& keys, const Variant& values) {
                   "number of elements");
     return false;
   }
-  Array ret = ArrayData::Create();
+  Array ret = Array::Create();
   for (ArrayIter iter1(cell_keys), iter2(cell_values);
        iter1; ++iter1, ++iter2) {
     const Variant& key = iter1.secondRefPlus();
@@ -219,7 +220,7 @@ Variant f_array_fill_keys(const Variant& keys, const Variant& value) {
   auto size = getContainerSize(cell_keys);
   if (!size) return empty_array;
 
-  ArrayInit ai(size);
+  ArrayInit ai(size, ArrayInit::Mixed{});
   for (ArrayIter iter(cell_keys); iter; ++iter) {
     auto& key = iter.secondRefPlus();
     // This is intentionally different to the $foo[$invalid_key] coercion.
@@ -253,7 +254,6 @@ Variant f_array_fill(int start_index, int num, const Variant& value) {
 }
 
 Variant f_array_flip(const Variant& trans) {
-
   auto const& transCell = *trans.asCell();
   if (UNLIKELY(!isContainer(transCell))) {
     raise_warning("Invalid operand type was used: %s expects "
@@ -261,7 +261,7 @@ Variant f_array_flip(const Variant& trans) {
     return uninit_null();
   }
 
-  ArrayInit ret(getContainerSize(transCell));
+  ArrayInit ret(getContainerSize(transCell), ArrayInit::Mixed{});
   for (ArrayIter iter(transCell); iter; ++iter) {
     const Variant& value(iter.secondRefPlus());
     if (value.isString() || value.isInteger()) {
@@ -334,7 +334,7 @@ Variant f_array_keys(const Variant& input, const Variant& search_value /* = null
     }
     return ai.toArray();
   } else {
-    Array ai = Array::attach(HphpArray::MakeReserve(0));
+    Array ai = Array::attach(MixedArray::MakeReserve(0));
     for (ArrayIter iter(cell_input); iter; ++iter) {
       if ((strict && HPHP::same(iter.secondRefPlus(), search_value)) ||
           (!strict && HPHP::equal(iter.secondRefPlus(), search_value))) {
@@ -401,28 +401,29 @@ Variant f_array_map(int _argc, const Variant& callback, const Variant& arr1, con
       if (len > maxLen) maxLen = len;
     }
   }
-  Array ret = Array::Create();
+  PackedArrayInit ret_ai(maxLen);
   for (size_t k = 0; k < maxLen; k++) {
-    Array params;
+    PackedArrayInit params_ai(numIters);
     for (size_t i = 0; i < numIters; ++i) {
       if (iters[i]) {
-        params.append(iters[i].secondRefPlus());
+        params_ai.append(iters[i].secondRefPlus());
         ++iters[i];
       } else {
-        params.append(init_null_variant);
+        params_ai.append(init_null_variant);
       }
     }
+    Array params = params_ai.toArray();
     if (ctx.func) {
       Variant result;
       g_context->invokeFunc((TypedValue*)&result,
                               ctx.func, params, ctx.this_,
                               ctx.cls, nullptr, ctx.invName);
-      ret.append(result);
+      ret_ai.append(result);
     } else {
-      ret.append(params);
+      ret_ai.append(params);
     }
   }
-  return ret;
+  return ret_ai.toArray();
 }
 
 static void php_array_merge(Array &arr1, const Array& arr2) {
@@ -784,7 +785,7 @@ Variant f_array_slice(const Variant& input, int offset,
 
   // PackedArrayInit can't be used because non-numeric keys are preserved
   // even when preserve_keys is false
-  Array ret = Array::attach(HphpArray::MakeReserve(len));
+  Array ret = Array::attach(MixedArray::MakeReserve(len));
   int pos = 0;
   ArrayIter iter(input);
   for (; pos < offset && iter; ++pos, ++iter) {}
@@ -1298,7 +1299,7 @@ static void containerValuesToSetHelper(c_Set* st, const Variant& container) {
   Variant strHolder(empty_string.get());
   TypedValue* strTv = strHolder.asTypedValue();
   for (ArrayIter iter(container); iter; ++iter) {
-    const auto& c = *const_cast<TypedValue*>(iter.secondRefPlus().asCell());
+    auto const& c = *iter.secondRefPlus().asCell();
     addToSetHelper(st, c, strTv, true);
   }
 }
@@ -1308,8 +1309,7 @@ static void containerKeysToSetHelper(c_Set* st, const Variant& container) {
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = container.asCell()->m_type == KindOfArray;
   for (ArrayIter iter(container); iter; ++iter) {
-    auto key = iter.first();
-    const auto& c = *const_cast<TypedValue*>(key.asCell());
+    auto const& c = *iter.first().asCell();
     addToSetHelper(st, c, strTv, !isKey);
   }
 }
@@ -1613,7 +1613,7 @@ static void containerValuesIntersectHelper(c_Set* st,
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
   for (ArrayIter iter(tvAsCVarRef(&containers[0])); iter; ++iter) {
-    const auto& c = *const_cast<TypedValue*>(iter.secondRefPlus().asCell());
+    const auto& c = *iter.secondRefPlus().asCell();
     // For each value v in containers[0], we add the key/value pair (v, 1)
     // to the map. If a value (after various conversions) occurs more than
     // once in the container, we'll simply overwrite the old entry and that's
@@ -1622,7 +1622,7 @@ static void containerValuesIntersectHelper(c_Set* st,
   }
   for (int pos = 1; pos < count; ++pos) {
     for (ArrayIter iter(tvAsCVarRef(&containers[pos])); iter; ++iter) {
-      const auto& c = *const_cast<TypedValue*>(iter.secondRefPlus().asCell());
+      const auto& c = *iter.secondRefPlus().asCell();
       // We check if the value is present as a key in the map. If an entry
       // exists and its value equals pos, we increment it, otherwise we do
       // nothing. This is essential so that we don't accidentally double-count
@@ -2007,6 +2007,7 @@ static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
   }
 }
 
+namespace {
 class ArraySortTmp {
  public:
   explicit ArraySortTmp(Array& arr) : m_arr(arr) {
@@ -2024,6 +2025,7 @@ class ArraySortTmp {
   Array& m_arr;
   ArrayData* m_ad;
 };
+}
 
 static bool
 php_sort(VRefParam container, int sort_flags,

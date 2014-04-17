@@ -39,12 +39,14 @@ public:
                       bool ref,
                       TokenID modifier,
                       ExpressionPtr defaultValue,
-                      ExpressionPtr attributeList);
+                      ExpressionPtr attributeList,
+                      bool variadic = false);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   bool isRef() const { return m_ref;}
   bool isOptional() const { return m_defaultValue != nullptr;}
+  bool isVariadic() const { return m_variadic; }
   const std::string &getName() const { return m_name; }
   int getLocalEffects() const { return NoEffect; }
   void rename(const std::string &name) { m_name = name;}
@@ -80,6 +82,7 @@ private:
   TokenID m_modifier;
   ExpressionPtr m_defaultValue;
   ExpressionPtr m_attributeList;
+  bool m_variadic;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

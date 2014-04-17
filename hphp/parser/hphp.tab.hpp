@@ -1,8 +1,11 @@
-/* A Bison parser, made by GNU Bison 2.5.  */
+// @generated
 
-/* Bison interface for Yacc-like parsers in C
+/* A Bison parser, made by GNU Bison 2.4.1.  */
+
+/* Skeleton interface for Bison's Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -177,9 +180,9 @@
      YYTOKEN(391, T_XHP_ENUM)
      YYTOKEN(392, T_XHP_REQUIRED)
      YYTOKEN(393, T_TRAIT)
-     YYTOKEN(394, T_INSTEADOF)
-     YYTOKEN(395, T_TRAIT_C)
-     YYTOKEN(396, T_VARARG)
+     YYTOKEN(394, T_ELLIPSIS)
+     YYTOKEN(395, T_INSTEADOF)
+     YYTOKEN(396, T_TRAIT_C)
      YYTOKEN(397, T_HH_ERROR)
      YYTOKEN(398, T_FINALLY)
      YYTOKEN(399, T_XHP_TAG_LT)

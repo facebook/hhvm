@@ -668,6 +668,11 @@ struct Parser : ParserBase {
       .appendChild(mods).setExtra(new OnParamEI(ref));
   }
 
+  void onVariadicParam(Token &out, Token *params, Token &type, Token &var,
+                       bool ref, Token *attr, Token *mods) {
+    /* TODO */
+  }
+
   void onClassStart(int type, Token &name) {
     /* TODO */
   }

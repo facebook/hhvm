@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/repo-schema.h"
 

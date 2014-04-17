@@ -1,0 +1,65 @@
+array(7) {
+  ["arguments_1_defaults"]=>
+  array(3) {
+    [0]=>
+    bool(false)
+    [1]=>
+    bool(false)
+    [2]=>
+    bool(false)
+  }
+  ["arguments_2_defaults"]=>
+  array(3) {
+    [0]=>
+    bool(false)
+    [1]=>
+    bool(false)
+    [2]=>
+    bool(false)
+  }
+  ["arguments_3_defaults"]=>
+  array(3) {
+    [0]=>
+    bool(false)
+    [1]=>
+    bool(false)
+    [2]=>
+    bool(true)
+  }
+  ["arguments_12_defaults"]=>
+  array(3) {
+    [0]=>
+    bool(false)
+    [1]=>
+    bool(false)
+    [2]=>
+    bool(false)
+  }
+  ["arguments_13_defaults"]=>
+  array(3) {
+    [0]=>
+    bool(false)
+    [1]=>
+    bool(false)
+    [2]=>
+    bool(true)
+  }
+  ["arguments_23_defaults"]=>
+  array(3) {
+    [0]=>
+    bool(false)
+    [1]=>
+    bool(true)
+    [2]=>
+    bool(true)
+  }
+  ["arguments_123_defaults"]=>
+  array(3) {
+    [0]=>
+    bool(true)
+    [1]=>
+    bool(true)
+    [2]=>
+    bool(true)
+  }
+}

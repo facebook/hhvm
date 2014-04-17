@@ -287,12 +287,26 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   try {
     ret = executePHPRequest(transport, reqURI, sourceRootInfo,
                             cachableDynamicContent);
-  } catch (const Eval::DebuggerException &e) {
-    transport->sendString(e.what(), 200);
-    transport->onSendEnd();
-    hphp_context_exit(g_context.getNoCheck(), true, true, transport->getUrl());
   } catch (...) {
-    Logger::Error("Unhandled exception in HPHP server engine.");
+    try {
+      throw;
+    } catch (const Eval::DebuggerException &e) {
+      transport->sendString(e.what(), 200);
+      transport->onSendEnd();
+    } catch (Object &e) {
+      string emsg;
+      try {
+        emsg = e.toString().data();
+      } catch (...) {
+        emsg = "Unknown";
+      }
+      Logger::Error("Unhandled server exception: %s", emsg.c_str());
+    } catch (const std::exception &e) {
+      Logger::Error("Unhandled server exception: %s", e.what());
+    } catch (...) {
+      Logger::Error("Unhandled unknown server exception.");
+    }
+    hphp_context_exit(g_context.getNoCheck(), true, true, transport->getUrl());
   }
   GetAccessLog().log(transport, vhost);
   /*

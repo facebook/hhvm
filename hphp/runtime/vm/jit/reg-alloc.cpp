@@ -49,7 +49,6 @@ PhysReg forceAlloc(const SSATmp& tmp) {
            opc == RetAdjustStack ||
            opc == InterpOne ||
            opc == InterpOneCF ||
-           opc == GenericRetDecRefs ||
            opc == CheckStk ||
            opc == GuardStk ||
            opc == AssertStk ||
@@ -212,11 +211,18 @@ Constraint srcConstraint(const IRInstruction& inst, unsigned i) {
   if (inst.src(i)->isConst() && mayUseConst(inst, i)) {
     c |= Constraint::IMM;
   }
+  if (inst.src(i)->type() <= Type::Dbl) {
+    c |= Constraint::SIMD;
+  }
   return c;
 }
 
 Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
-  return Constraint::GP;
+  Constraint c { Constraint::GP };
+  if (inst.dst(i)->type() <= Type::Dbl) {
+    c |= Constraint::SIMD;
+  }
+  return c;
 }
 
 }
@@ -280,8 +286,8 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     // doRegMoves handles immediates.
     // TODO: #3634984 ... but it needs a scratch register
     return true;
-  case LdClsPropAddr:
-  case LdClsPropAddrCached:
+  case LdClsPropAddrOrNull:
+  case LdClsPropAddrOrRaise:
     if (i == 0) return true; // cls -> ArgGroup.ssa().
     break;
   case Same: case NSame:
@@ -359,7 +365,7 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     if (i == 1) return okCmp(cint); // constraint class ptr
     break;
   case FunctionExitSurpriseHook:
-    if (i == 2) return okStore(cint); // return value
+    if (i == 1) return okStore(cint); // return value
     break;
   default:
     break;
@@ -419,7 +425,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   // may give it an XMM register, and the instruction will store the whole 16
   // bytes into memory.  Therefore it's important *not* to return true if the
   // TypedValue.m_aux field in memory has important data.  This is the case for
-  // HphpArray elements, // Map elements, and RefData inner values.  We don't
+  // MixedArray elements, // Map elements, and RefData inner values.  We don't
   // have StMem in here since it sometimes stores to RefDatas.
   switch (inst.op()) {
     case StRetVal:
@@ -443,9 +449,6 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
 
     case CallBuiltin:
       return srcIdx >= 1 && srcIdx < inst.numSrcs();
-
-    case FunctionExitSurpriseHook:
-      return srcIdx == 2;
 
     default:
       return false;

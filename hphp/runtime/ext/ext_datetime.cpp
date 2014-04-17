@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_datetime.h"
 #include "hphp/runtime/base/ini-setting.h"
 
+#include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -296,11 +297,11 @@ const StaticString
   s_ISOformat("Y-m-d H:i:s");
 
 Array c_DateTime::t___debuginfo() {
-  ArrayInit ret(3);
-  ret.set(s_date, t_format(s_ISOformat));
-  ret.set(s_timezone_type, m_dt->zoneType());
-  ret.set(s_timezone, m_dt->timezone()->name());
-  return ret.create();
+  return make_map_array(
+    s_date, t_format(s_ISOformat),
+    s_timezone_type, m_dt->zoneType(),
+    s_timezone, m_dt->timezone()->name()
+  );
 }
 
 c_DateTime* c_DateTime::Clone(ObjectData* obj) {

@@ -1,0 +1,78 @@
+= Single-arg array_map =
+* f_variadic
+array(1) {
+  [0]=>
+  int(1)
+}
+* f_variadic
+array(1) {
+  [0]=>
+  int(2)
+}
+* f_variadic
+array(1) {
+  [0]=>
+  int(3)
+}
+* f_variadic
+array(1) {
+  [0]=>
+  int(4)
+}
+bool(true)
+bool(true)
+* f_variadic
+array(1) {
+  [0]=>
+  int(1)
+}
+* f_variadic
+array(1) {
+  [0]=>
+  int(2)
+}
+* f_variadic
+array(1) {
+  [0]=>
+  int(3)
+}
+* f_variadic
+array(1) {
+  [0]=>
+  int(4)
+}
+bool(true)
+bool(true)
+
+
+ = Multi-arg ArrayMap =
+* f_variadic
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(1) "a"
+}
+* f_variadic
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  string(1) "b"
+}
+* f_variadic
+array(2) {
+  [0]=>
+  int(3)
+  [1]=>
+  string(1) "c"
+}
+* f_variadic
+array(2) {
+  [0]=>
+  int(4)
+  [1]=>
+  string(1) "d"
+}
+bool(true)
+bool(true)

@@ -147,7 +147,6 @@ let mapM (f:'s->'x->'s*'y) : 'st -> 'x list -> 's * 'y list =
             st'', x' :: xs'
   in f'
 
-
 (* If expr is a constant string, that string, otherwise a position
    where it is obviously not *)
 let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) either =
@@ -159,7 +158,6 @@ let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) 
       | _, Nast.String (_, s) -> env, Right s
       | _, Nast.String2 (xs, s) ->
           let env, xs = mapM const_string_of env (List.rev xs) in
-          (* todo: remove the List.rev along with the one elsewhere *)
           env, List.fold_right glue xs (Right s)
     | _, Nast.Binop (Ast.Dot, a, b) ->
         let env, stra = const_string_of env a in
@@ -171,14 +169,15 @@ let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) 
 let retype_magic_func (env:Env.env) (ft:fun_type) (el:Nast.expr list) : Env.env * fun_type =
   let rec f env param_types args : Env.env * (fun_params * tparam list) option =
     (match param_types, args with
-      | [(name, (why, Tapply ((_, "FormatString"), [type_arg])))],
-        (arg :: args) ->
+      | [(_,    (_,   Toption (_, Tapply ((_, "FormatString"), [_       ]))))], [(_, Nast.Null)] -> env,None
+      | [(name, (why, Toption (_, Tapply ((_, "FormatString"), [type_arg]))))], (arg :: args)
+      | [(name, (why,             Tapply ((_, "FormatString"), [type_arg] )))], (arg :: args) ->
           (match const_string_of env arg with
              |  env, Right str ->
                   let env, argl, targl = parse_printf_string env str (fst arg) type_arg in
                   env, Some ((name, (why, Tprim Nast.Tstring)) :: argl, targl)
              |  env, Left pos ->
-                  if true || Env.is_strict env
+                  if Env.is_strict env
                   then error pos "This argument must be a literal string"
                   else env, None)
       | (param::params), (_::args) ->
@@ -194,4 +193,3 @@ let retype_magic_func (env:Env.env) (ft:fun_type) (el:Nast.expr list) : Env.env 
                  ft_params = xs;
                  ft_arity_min = List.length xs;
                  ft_arity_max = List.length xs }
-

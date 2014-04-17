@@ -5,48 +5,55 @@
 # LICENSE file in the "hack" directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
-#############################################################################
-# Configuration section
-#############################################################################
-
--include Makefile.config
-
 ##############################################################################
 # Variables
 ##############################################################################
 TOP=$(shell pwd)
 TARGET=hack
 
+OS=$(shell uname -s)
+
 #------------------------------------------------------------------------------
 #package dependencies
 #------------------------------------------------------------------------------
-ifeq ($(FACEBOOK), 1)
-  -include facebook/Makefile.include
+BUILD_DIRS=stubs
+BUILD_CMAS=stubs/lib.cma
+EXTRA_INCLUDEDIRS=
+FILTER_FROM_INCLUDE=
+ifneq ($(wildcard facebook/Makefile.include),)
+  ifndef CMAKE
+    # None of this stuff can build without some crazy ENV vars. Killing until it is fixed.
+    -include facebook/Makefile.include
 
-  # Want to open source this but no need to force everyone to have js_of_ocaml
-  BUILD_DIRS+=js
+    # Want to open source this but no need to force everyone to have js_of_ocaml
+    BUILD_DIRS+=js
 
-  # We filter js/ because it contains an incompatible str.ml file
-  # that would then confuse ocamldepend
-  FILTER_FROM_INCLUDE=js
-else
-	BUILD_DIRS=stubs
-	BUILD_CMAS=stubs/lib.cma
-	EXTRA_INCLUDEDIRS=
-	FILTER_FROM_INCLUDE=
+    # We filter js/ because it contains an incompatible str.ml file
+    # that would then confuse ocamldepend
+    FILTER_FROM_INCLUDE=js
+  endif
 endif
 
 #------------------------------------------------------------------------------
 # Program related variables
 #------------------------------------------------------------------------------
-PROGS=hh_single hh_server hh_client
+ifeq ($(OS), Linux)
+  PROGS=hh_single hh_server hh_client
+else
+  PROGS=hh_single
+endif
 
 #------------------------------------------------------------------------------
 # Main variables
 #------------------------------------------------------------------------------
 SYSLIBS=nums.cma bigarray.cma str.cma unix.cma
 
-LIBS=inotify/inotify.cma \
+ifeq ($(OS), Linux)
+  INOTIFY=inotify
+  INOTIFYLIB=inotify/inotify.cma
+endif
+
+LIBS=$(INOTIFYLIB) \
  utils/lib.cma \
  avl/lib.cma \
  dfind/lib.cma \
@@ -58,7 +65,7 @@ LIBS=inotify/inotify.cma \
  $(BUILD_CMAS) \
  client/lib.cma
 
-MAKESUBDIRS=inotify avl dfind \
+MAKESUBDIRS=$(INOTIFY) avl dfind \
  utils globals \
  heap procs \
  deps parsing naming typing \
@@ -75,7 +82,6 @@ INCLUDEDIRS=$(filter-out $(FILTER_FROM_INCLUDE),$(MAKESUBDIRS)) \
 ##############################################################################
 -include $(TOP)/Makefile.common
 
-
 ##############################################################################
 # Top rules
 ##############################################################################
@@ -83,11 +89,11 @@ INCLUDEDIRS=$(filter-out $(FILTER_FROM_INCLUDE),$(MAKESUBDIRS)) \
 .PHONY:: all all.opt opt top clean distclean bin
 
 all:: opt
-opt: Makefile.config
+opt:
 	$(MAKE) rec.opt
 	$(MAKE) $(PROGS:=.opt)
 	$(MAKE) bin
-bc: Makefile.config
+bc:
 	$(MAKE) rec
 	$(MAKE) $(PROGS:=.bc)
 top: $(TARGET).top
@@ -140,22 +146,22 @@ depend::
 	ocamldep $(INCLUDES) *.ml *.mli > .depend
 	set -e; for i in $(MAKESUBDIRS); do $(MAKE) -C $$i depend; done
 
-Makefile.config:
-	@echo "Makefile.config is missing. Have you run ./configure?"
-	@exit 1
-
 distclean:: clean
 	set -e; for i in $(MAKESUBDIRS); do $(MAKE) -C $$i $@; done
 	rm -f .depend
-#	rm -f Makefile.config
 
 ##############################################################################
 # Install
 ##############################################################################
+ifeq ($(OS), Linux)
 bin:
 	cp -f hh_server.opt ../bin/hh_server
 	cp hh_client.opt ../bin/hh_client
 	cp hh_single.opt ../bin/hh_single_type_check
+else
+bin:
+	cp hh_single.opt ../bin/hh_single_type_check
+endif
 
 stamp:
 	rm -f utils/build_id.ml
@@ -164,7 +170,7 @@ stamp:
 deploy:
 	$(MAKE) stamp
 	$(MAKE)
-ifeq ($(FACEBOOK), 1)
+ifneq ($(wildcard facebook/deploy.sh),)
 	./facebook/deploy.sh
 else
 	@echo
@@ -191,18 +197,18 @@ wwwtest:
 DIRS=$(INCLUDEDIRS)
 ifdef TEST
 debug:
-	make hh_single_type_check.bc
+	make hh_single.bc
 	$(info Debugging $(TEST))
-	ocamldebug $(DIRS) ../bin/hh_single_type_check.bc $(TEST)
+	ocamldebug $(patsubst %,-I %,$(DIRS)) ./hh_single.bc $(TEST)
 else
 debug:
 	$(info Set the TEST env variable to the test you want to debug)
-	$(info For example: export TEST=../tests/more_tests/my_test.php)
+	$(info For example: export TEST=../test/more_tests/my_test.php)
 endif
 
 debug_client:
 	make hh_client.bc
-	ocamldebug $(DIRS) ../bin/hh_client.bc
+	ocamldebug $(patsubst %,-I %,$(DIRS)) ./hh_client.bc
 
 # everybody can customize in its own repo his own Makefile.user
 -include Makefile.user

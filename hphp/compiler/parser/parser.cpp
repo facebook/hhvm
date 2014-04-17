@@ -443,26 +443,29 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     const string stripped = lastBackslash == string::npos
                             ? funcName
                             : funcName.substr(lastBackslash+1);
-    if (stripped == "func_num_args" ||
-        stripped == "func_get_args" ||
-        stripped == "func_get_arg") {
-      funcName = stripped;
-      if (m_hasCallToGetArgs.size() > 0) {
-        m_hasCallToGetArgs.back() = true;
-      }
-    }
+    bool hadBackslash = name->num() & 2;
 
-    if (isAutoAliasOn()) {
+    if (!cls && !hadBackslash) {
+      if (stripped == "func_num_args" ||
+          stripped == "func_get_args" ||
+          stripped == "func_get_arg") {
+        funcName = stripped;
+        if (m_hasCallToGetArgs.size() > 0) {
+          m_hasCallToGetArgs.back() = true;
+        }
+      }
       // Auto import a few functions from the HH namespace
-      if (stripped == "fun" ||
-          stripped == "meth_caller" ||
-          stripped == "class_meth" ||
-          stripped == "inst_meth" ||
-          stripped == "invariant_callback_register" ||
-          stripped == "invariant" ||
-          stripped == "invariant_violation" ||
-          stripped == "tuple"
-      ) {
+      if (isAutoAliasOn() &&
+          (stripped == "fun" ||
+           stripped == "meth_caller" ||
+           stripped == "class_meth" ||
+           stripped == "inst_meth" ||
+           stripped == "invariant_callback_register" ||
+           stripped == "invariant" ||
+           stripped == "invariant_violation" ||
+           stripped == "tuple" ||
+           stripped == "xenon_get_data"
+          )) {
         funcName = "HH\\" + stripped;
       }
     }
@@ -470,7 +473,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     SimpleFunctionCallPtr call
       (new RealSimpleFunctionCall
        (BlockScopePtr(), getLocation(),
-        funcName, name->num() & 2,
+        funcName, hadBackslash,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
     if (m_scanner.isHHSyntaxEnabled() && !(name->num() & 2)) {
       // If the function name is without any backslashes or
@@ -1071,6 +1074,41 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
                       Token *attr, bool reloc /* = true */) {
   out->stmt = onFunctionHelper(FunctionType::Method,
                 &modifiers, ret, ref, &name, params, stmt, attr, reloc);
+}
+
+void Parser::onVariadicParam(Token &out, Token *params,
+                             Token &type, Token &var,
+                             bool ref, Token *attr, Token *modifier) {
+  if (!type.text().empty()) {
+    PARSE_ERROR("Parameter $%s is variadic and has a type constraint (%s)"
+                "; variadic params with type constraints are not supported",
+                var.text().c_str(), type.text().c_str());
+  }
+  if (ref) {
+    PARSE_ERROR("Parameter $%s is both variadic and by reference"
+                "; this is unsupported",
+                var.text().c_str());
+  }
+
+  ExpressionPtr expList;
+  if (params) {
+    expList = params->exp;
+  } else {
+    expList = NEW_EXP0(ExpressionList);
+  }
+  ExpressionListPtr attrList;
+  if (attr && attr->exp) {
+    attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
+  }
+
+  TypeAnnotationPtr typeAnnotation = type.typeAnnotation;
+  expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation,
+                              m_scanner.isHHSyntaxEnabled(), var->text(),
+                              ref, (modifier) ? modifier->num() : 0,
+                              ExpressionPtr(),
+                              attrList,
+                              /* variadic */ true));
+  out->exp = expList;
 }
 
 void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
@@ -1870,7 +1908,9 @@ void Parser::onTypeAnnotation(Token& out, const Token& name,
   out.set(name.num(), name.text());
   out.typeAnnotation = TypeAnnotationPtr(
     new TypeAnnotation(name.text(), typeArgs.typeAnnotation));
-  if (isTypeVar(name.text())) {
+
+  // Namespaced identifiers (num & 1) can never be type variables.
+  if ((name.num() & 1) && isTypeVar(name.text())) {
     out.typeAnnotation->setTypeVar();
   }
 }
@@ -2122,6 +2162,7 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"string", "HH\\string"},
     (AliasEntry){"resource", "HH\\resource"},
     (AliasEntry){"mixed", "HH\\mixed"},
+    (AliasEntry){"void", "HH\\void"},
   };
   for (auto entry : aliases) {
     autoAliases[entry.alias] = entry.name;
@@ -2211,6 +2252,11 @@ std::string Parser::nsDecl(const std::string &name) {
 std::string Parser::resolve(const std::string &ns, bool cls) {
   size_t pos = ns.find(NAMESPACE_SEP);
   string alias = (pos != string::npos) ? ns.substr(0, pos) : ns;
+
+  // Don't expand type variables into the current namespace.
+  if (isTypeVar(ns)) {
+    return ns;
+  }
 
   if (m_aliasTable.isAliased(alias)) {
     auto name = m_aliasTable.getName(alias);

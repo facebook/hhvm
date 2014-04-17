@@ -17,9 +17,9 @@
 
 #include "thrift/lib/cpp/util/BitwiseCast.h" //nolint
 #include "thrift/lib/cpp/protocol/TProtocol.h" //nolint
-#include "hphp/util/gen-cpp/channeled_json_compressor_types.h"
 #include "folly/json.h"
 #include "folly/MapUtil.h"
+#include "hphp/util/gen-cpp/channeled_json_compressor_types.h"
 
 #define JSON_CHANNELED_CODING CODING_GZIP
 
@@ -42,7 +42,7 @@ ChanneledJsonCompressor::~ChanneledJsonCompressor() {
 
 void ChanneledJsonCompressor::processJson(const char* data, int length) {
   folly::json::serialization_opts opts;
-  opts.encode_non_ascii = true; //encodes non ascii characters
+  opts.encode_non_ascii = true;
   dynamic completeJson = folly::parseJson(data, opts);
   write(completeJson);
 }
@@ -126,25 +126,49 @@ void ChanneledJsonCompressor::writeMap(const dynamic& mapObj) {
     writeVarInt(CHANNEL_MAPLEN, mapObj.size());
   }
 
-  // writing (key, value) pairs
+  // if there's a __type__ field, it must be written first (GraphQL spec)
+  static const fbstring typeString = "__type__";
+  auto typeField = mapObj.find(typeString);
+  if (typeField != mapObj.items().end()) {
+      writeMapPair(*typeField);
+  }
+
+  // writing (key, value) pairs, but not __type__'s
   for (auto& pair : mapObj.items()) {
-
-    // Future reference - there might be a use of KEY_TYPE_STATIC at some point
-    int *memoisedKey = get_ptr(memoKeys_, pair.first.c_str());
-    if (memoisedKey != nullptr) { //if memoised
-      writeVarInt(CHANNEL_KEYS, KEY_TYPE_MEMOISED_BASE + *memoisedKey);
-    } else {
-      writeVarInt(CHANNEL_KEYS, KEY_TYPE_STRING);
-      writeVarInt(CHANNEL_KEYS, pair.first.size());
-      channels_[CHANNEL_KEYS].append(pair.first.c_str());
-
-      memoKeys_[pair.first.c_str()] = memoKeysNext_;
-      ++memoKeysNext_;
+    if (pair.first != typeString) {
+      writeMapPair(pair);
     }
-    //value
-    write(pair.second);
   }
 }
+
+
+void ChanneledJsonCompressor::writeMapPair(
+        const std::pair<const dynamic, dynamic>& pair) {
+  // Future reference - there might be a use of KEY_TYPE_STATIC at some point
+  int *memoisedKey = get_ptr(memoKeys_, pair.first.c_str());
+  if (memoisedKey != nullptr) { //if memoised
+    writeVarInt(CHANNEL_KEYS, KEY_TYPE_MEMOISED_BASE + *memoisedKey);
+  } else {
+    writeVarInt(CHANNEL_KEYS, KEY_TYPE_STRING);
+
+    folly::json::serialization_opts opts;
+    opts.encode_non_ascii = true;
+    fbstring serialized = folly::json::serialize(pair.first, opts);
+
+    // serialize adds two double quotes (beginning and end. Don't want them)
+    writeVarInt(CHANNEL_KEYS, serialized.size() - 2);
+    channels_[CHANNEL_KEYS].append(serialized.data() + 1,
+            serialized.size() - 2);
+
+    memoKeys_[pair.first.c_str()] = memoKeysNext_;
+    ++memoKeysNext_;
+  }
+
+  //value
+  write(pair.second);
+}
+
+
 
 
 void ChanneledJsonCompressor::writeArray(const folly::dynamic& arrayObj) {
@@ -173,13 +197,19 @@ void ChanneledJsonCompressor::writeString(const dynamic& stringObj) {
     memoStrings_[stringObj.c_str()] = memoStringsNext_;
     ++memoStringsNext_;
 
-    if (stringObj.size() < SHORT_TYPE_LENGTH) {
-      writeType(TYPE_SHORT_STRING_BASE + stringObj.size());
+    folly::json::serialization_opts opts;
+    opts.encode_non_ascii = true;
+    fbstring serialized = folly::json::serialize(stringObj, opts);
+
+    // serialize adds two double quotes (beginning and end. Don't want them)
+    if (serialized.size() - 2 < SHORT_TYPE_LENGTH) {
+      writeType(TYPE_SHORT_STRING_BASE + serialized.size() - 2);
     } else {
       writeType(TYPE_STRING_SIZE);
-      writeVarInt(CHANNEL_STRLEN, stringObj.size());
+      writeVarInt(CHANNEL_STRLEN, serialized.size() - 2);
     }
-    channels_[CHANNEL_STRS].append(stringObj.c_str());
+    channels_[CHANNEL_STRS].append(serialized.data() + 1,
+            serialized.size() - 2);
   }
 }
 

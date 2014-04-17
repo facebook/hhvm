@@ -173,17 +173,17 @@ Array DateTime::ParseAsStrptime(const String& format, const String& date) {
     return Array();
   }
 
-  ArrayInit ret(9);
-  ret.set(s_tm_sec,  parsed_time.tm_sec);
-  ret.set(s_tm_min,  parsed_time.tm_min);
-  ret.set(s_tm_hour, parsed_time.tm_hour);
-  ret.set(s_tm_mday, parsed_time.tm_mday);
-  ret.set(s_tm_mon,  parsed_time.tm_mon);
-  ret.set(s_tm_year, parsed_time.tm_year);
-  ret.set(s_tm_wday, parsed_time.tm_wday);
-  ret.set(s_tm_yday, parsed_time.tm_yday);
-  ret.set(s_unparsed, String(unparsed_part, CopyString));
-  return ret.create();
+  return make_map_array(
+    s_tm_sec,  parsed_time.tm_sec,
+    s_tm_min,  parsed_time.tm_min,
+    s_tm_hour, parsed_time.tm_hour,
+    s_tm_mday, parsed_time.tm_mday,
+    s_tm_mon,  parsed_time.tm_mon,
+    s_tm_year, parsed_time.tm_year,
+    s_tm_wday, parsed_time.tm_wday,
+    s_tm_yday, parsed_time.tm_yday,
+    s_unparsed, String(unparsed_part, CopyString)
+  );
 }
 
 Array DateTime::ParseTime(timelib_time* parsed_time,

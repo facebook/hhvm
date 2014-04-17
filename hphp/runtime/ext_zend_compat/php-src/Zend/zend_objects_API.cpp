@@ -26,7 +26,8 @@
 #include "hphp/runtime/ext_zend_compat/hhvm/ZendRequestLocal.h"
 #include "zend_API.h"
 #include "zend_objects_API.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-object.h"
+#include "hphp/runtime/vm/native-data.h"
 
 #define ZEND_DEBUG_OBJECTS 0
 
@@ -39,7 +40,7 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC) {
 }
 
 ZEND_API void *zend_object_store_get_object(const zval *zobject TSRMLS_DC) {
-  const auto& zod = static_cast<HPHP::c_ZendObjectData*>(Z_OBJVAL_P(zobject));
+  const HPHP::ZendObject * zod = HPHP::Native::data<HPHP::ZendObject>(Z_OBJVAL_P(zobject));
   return zend_object_store_get_object_by_handle(zod->getHandle() TSRMLS_CC);
 }
 

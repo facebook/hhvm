@@ -53,7 +53,7 @@ struct Func {
     // construct a dummy ParamInfo
     ParamInfo()
       : m_builtinType(KindOfInvalid), m_funcletOff(InvalidAbsoluteOffset),
-        m_phpCode(nullptr), m_userType(nullptr) {
+        m_phpCode(nullptr), m_variadic(false), m_userType(nullptr) {
       tvWriteUninit(&m_defVal);
     }
 
@@ -64,6 +64,7 @@ struct Func {
         (m_defVal)
         (m_phpCode)
         (m_typeConstraint)
+        (m_variadic)
         (m_userAttributes)
         (m_userType)
         ;
@@ -86,6 +87,9 @@ struct Func {
     }
     void setDefaultValue(const TypedValue& defVal) { m_defVal = defVal; }
     const TypedValue& defaultValue() const { return m_defVal; }
+
+    void setVariadic(const bool isVariadic) { m_variadic = isVariadic; }
+    bool isVariadic() const { return m_variadic; }
 
     void setPhpCode(const StringData* phpCode) { m_phpCode = phpCode; }
     const StringData* phpCode() const { return m_phpCode; }
@@ -110,12 +114,13 @@ struct Func {
     }
 
   private:
-    DataType m_builtinType;     // typehint for builtins
+    DataType m_builtinType; // typehint for builtins
     Offset m_funcletOff; // If no default: InvalidAbsoluteOffset.
     TypedValue m_defVal; // Set to uninit null if there is no default value
                          // or if there is a non-scalar default value.
     const StringData* m_phpCode; // eval'able PHP code.
     TypeConstraint m_typeConstraint;
+    bool m_variadic;
 
     UserAttributeMap m_userAttributes;
     // the type the user typed in source code, contains type parameters and all
@@ -181,7 +186,9 @@ struct Func {
   const FPIEnt* findFPI(Offset o) const;
   const FPIEnt* findPrecedingFPI(Offset o) const;
 
-  void parametersCompat(const PreClass* preClass, const Func* imeth) const;
+  // imeth: an abstract / interface method
+  void checkDeclarationCompat(const PreClass* preClass,
+                              const Func* imeth) const;
 
   // This can be thought of as "if I look up this Func's name while in fromUnit,
   // will I always get this Func back?" This is important for the translator: if
@@ -210,6 +217,17 @@ struct Func {
   void prettyPrint(std::ostream& out, const PrintOpts& = PrintOpts()) const;
 
   bool isPseudoMain() const { return m_name->empty(); }
+
+  bool hasVariadicCaptureParam() const {
+#ifdef DEBUG
+    assert(((bool) (m_attrs & AttrVariadicParam)) ==
+           (numParams() && params()[numParams() - 1].isVariadic()));
+#endif
+    return m_attrs & AttrVariadicParam;
+  }
+  bool discardExtraArgs() const {
+    return ! (m_attrs & (AttrMayUseVV | AttrVariadicParam));
+  }
   bool isBuiltin() const { return m_attrs & AttrBuiltin; }
   bool isCPPBuiltin() const { return m_shared->m_builtinFuncPtr; }
   bool skipFrame() const { return m_attrs & AttrSkipFrame; }
@@ -220,6 +238,7 @@ struct Func {
     PreClass* pcls = preClass();
     return pcls && (pcls->attrs() & AttrTrait);
   }
+  bool isReturnRef() const { return bool(m_attrs & AttrReference); }
   bool isPublic() const { return bool(m_attrs & AttrPublic); }
   bool isStatic() const { return bool(m_attrs & AttrStatic); }
   bool isAbstract() const { return bool(m_attrs & AttrAbstract); }
@@ -315,6 +334,12 @@ struct Func {
   }
   char &maybeIntercepted() const { return m_maybeIntercepted; }
   int numParams() const { return m_numParams; }
+
+  int numNonVariadicParams() const {
+    assert(m_numNonVariadicParams ==
+           (hasVariadicCaptureParam() ? (m_numParams - 1) : (m_numParams)));
+    return m_numNonVariadicParams;
+  }
   const ParamInfoVec& params() const { return shared()->m_params; }
   int numLocals() const { return shared()->m_numLocals; }
 
@@ -533,15 +558,16 @@ private:
   mutable RDS::Link<Func*> m_cachedFunc{RDS::kInvalidHandle};
   FuncId m_funcId{InvalidFuncId};
   const StringData* m_name;
-  Class* m_baseCls{nullptr};// The first Class in the inheritance hierarchy that
-                            // declared this method; note that this may be an
-                            // abstract class that did not provide an
-                            // implementation
+  // The first Class in the inheritance hierarchy that declared this method;
+  // note that this may be an abstract class that did not provide an
+  // implementation.
+  LowClassPtr m_baseCls{nullptr};
+  // The Class that provided this method implementation.
+  LowClassPtr m_cls{nullptr};
   union {
     const NamedEntity* m_namedEntity{nullptr};
     Slot m_methodSlot;
   };
-  Class* m_cls{nullptr};  // The Class that provided this method implementation
   // TODO(#1114385) intercept should work via invalidation.
   mutable char m_maybeIntercepted; // -1, 0, or 1.  Accessed atomically.
   bool m_hasPrivateAncestor : 1; // This flag indicates if any of this
@@ -553,6 +579,7 @@ private:
   Unit* m_unit;
   SharedDataPtr m_shared;
   int m_numParams{0};
+  int m_numNonVariadicParams{0};
   Attr m_attrs;
   // This must be the last field declared in this structure
   // and the Func class should not be inherited from.
@@ -676,6 +703,9 @@ public:
 
   void setAttrs(Attr attrs) { m_attrs = attrs; }
   Attr attrs() const { return m_attrs; }
+  bool isVariadic() const {
+    return m_params.size() && m_params[(m_params.size() - 1)].isVariadic();
+  }
 
   void setTop(bool top) { m_top = top; }
   bool top() const { return m_top; }

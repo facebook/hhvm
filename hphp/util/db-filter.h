@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 #include <set>
-#include <assert.h>
+#include <cassert>
 
 namespace HPHP {
 

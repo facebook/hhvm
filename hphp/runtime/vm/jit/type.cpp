@@ -623,7 +623,7 @@ Type thisReturn(const IRInstruction* inst) {
     assert(fpInst->is(GuardLoc, CheckLoc, AssertLoc, SideExitGuardLoc, PassFP));
     fpInst = fpInst->src(0)->inst();
   }
-  auto const func = fpInst->is(DefFP) ? fpInst->marker().func
+  auto const func = fpInst->is(DefFP) ? fpInst->marker().func()
                                       : fpInst->extra<DefInlineFP>()->target;
   func->validate();
   assert(func->isMethod() || func->isPseudoMain());

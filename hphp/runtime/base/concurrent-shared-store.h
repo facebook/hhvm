@@ -111,7 +111,12 @@ struct ConcurrentTableSharedStore {
   void primeDone();
 
   // debug support
-  void dump(std::ostream & out, bool keyOnly, int waitSeconds);
+  enum class DumpMode {
+    keyOnly=0,
+    keyAndValue=1,
+    keyAndMeta=2
+  };
+  void dump(std::ostream& out, DumpMode dumpMode, int waitSeconds);
 
 private:
 
@@ -184,6 +189,11 @@ private:
   bool handleUpdate(const String& key, APCHandle* svar);
   bool handlePromoteObj(const String& key, APCHandle* svar, const Variant& valye);
   APCHandle* unserialize(const String& key, const StoreValue* sval);
+
+  // helpers for dumping APC
+  void dumpKeyOnly(std::ostream& out);
+  void dumpKeyAndValue(std::ostream& out);
+  void dumpKeyAndMeta(std::ostream& out);
 
 private:
   int m_id;

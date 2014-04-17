@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -60,16 +60,16 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
 
 Array HHVM_FUNCTION(get_defined_vars);
 
-#define EXTR_OVERWRITE          0
-#define EXTR_SKIP               1
-#define EXTR_PREFIX_SAME        2
-#define EXTR_PREFIX_ALL         3
-#define EXTR_PREFIX_INVALID     4
-#define EXTR_PREFIX_IF_EXISTS   5
-#define EXTR_IF_EXISTS          6
-#define EXTR_REFS               0x100
+int64_t constexpr EXTR_OVERWRITE        = 0;
+int64_t constexpr EXTR_SKIP             = 1;
+int64_t constexpr EXTR_PREFIX_SAME      = 2;
+int64_t constexpr EXTR_PREFIX_ALL       = 3;
+int64_t constexpr EXTR_PREFIX_INVALID   = 4;
+int64_t constexpr EXTR_PREFIX_IF_EXISTS = 5;
+int64_t constexpr EXTR_IF_EXISTS        = 6;
+int64_t constexpr EXTR_REFS             = 0x100;
 
-int64_t HHVM_FUNCTION(extract, const Array& var_array,
+int64_t HHVM_FUNCTION(extract, VRefParam vref_array,
                                int extract_type = EXTR_OVERWRITE,
                                const String& prefix = empty_string);
 

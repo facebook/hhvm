@@ -127,6 +127,15 @@ int MethodStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
+static inline bool hasVariadicParam(const ExpressionListPtr params) {
+  for (int i = 0; i < params->getCount(); ++i) {
+    ParameterExpressionPtr param =
+      dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+    if (param->isVariadic()) return true;
+  }
+  return false;
+}
+
 FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
                                                  FileScopePtr fs) {
   int minParam, maxParam;
@@ -343,9 +352,6 @@ void MethodStatement::setSpecialMethod(ClassScopePtr classScope) {
     classScope->setAttribute(ClassScope::HasConstructor);
   } else if (m_name == "__destruct") {
     classScope->setAttribute(ClassScope::HasDestructor);
-  } else if (m_name == "__call") {
-    classScope->setAttribute(ClassScope::HasUnknownMethodHandler);
-    numArgs = 2;
   } else if (m_name == "__get") {
     classScope->setAttribute(ClassScope::HasUnknownPropGetter);
     numArgs = 1;
@@ -384,6 +390,12 @@ void MethodStatement::setSpecialMethod(ClassScopePtr classScope) {
       parseTimeFatal(Compiler::InvalidMagicMethod,
         "Method %s::%s() cannot take arguments by reference",
         m_originalClassName.c_str(), m_originalName.c_str());
+    }
+    // Fatal if any arguments are variadic
+    if (m_params && hasRefParam()) {
+      parseTimeFatal(Compiler::InvalidMagicMethod,
+                     "Method %s::%s() cannot take a variadic argument",
+                     m_originalClassName.c_str(), m_originalName.c_str());
     }
     // Fatal if protected/private or if the staticness is wrong
     if (m_modifiers->isProtected() || m_modifiers->isPrivate() ||

@@ -1,0 +1,2 @@
+string(78) "<wddxPacket version='1.0'><header/><data><struct></struct></data></wddxPacket>"
+string(120) "<wddxPacket version='1.0'><header/><data><struct><var name='foo'><string>bar</string></var></struct></data></wddxPacket>"

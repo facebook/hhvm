@@ -41,8 +41,8 @@ struct ArrayData {
   //  - using kind as an index
   //  - doing bit ops when storing in the union'd words below
   enum ArrayKind : uint8_t {
-    kPackedKind,  // HphpArray with keys in range [0..size)
-    kMixedKind,   // HphpArray arbitrary int or string keys, maybe holes
+    kPackedKind,  // MixedArray with keys in range [0..size)
+    kMixedKind,   // MixedArray arbitrary int or string keys, maybe holes
     kSharedKind,  // SharedArray
     kEmptyKind,   // The singleton static empty array
     kNvtwKind,    // NameValueTableWrapper
@@ -54,8 +54,8 @@ struct ArrayData {
 
 protected:
   /*
-   * NOTE: HphpArray no longer calls this constructor.  If you change
-   * it, change the HphpArray::Make functions as appropriate.
+   * NOTE: MixedArray no longer calls this constructor.  If you change
+   * it, change the MixedArray::Make functions as appropriate.
    */
   explicit ArrayData(ArrayKind kind)
     : m_kind(kind)
@@ -65,10 +65,10 @@ protected:
   {}
 
   /*
-   * NOTE: HphpArray no longer calls this destructor.  If you need to
-   * add logic, revisit HphpArray::Release{,Packed}.
+   * NOTE: MixedArray no longer calls this destructor.  If you need to
+   * add logic, revisit MixedArray::Release{,Packed}.
    *
-   * Include hphp-array-defs.h if you need the definition of this
+   * Include mixed-array-defs.h if you need the definition of this
    * destructor.  It is inline only.
    */
   ~ArrayData();
@@ -83,8 +83,8 @@ public:
   static ArrayData *Create();
   static ArrayData *Create(const Variant& value);
   static ArrayData *Create(const Variant& name, const Variant& value);
-  static ArrayData *CreateRef(const Variant& value);
-  static ArrayData *CreateRef(const Variant& name, const Variant& value);
+  static ArrayData *CreateRef(Variant& value);
+  static ArrayData *CreateRef(const Variant& name, Variant& value);
 
   /*
    * Called to return an ArrayData to the smart allocator.  This is
@@ -127,8 +127,9 @@ public:
    */
   size_t vsize() const;
 
-  /**
-   * getValueRef() gets a reference to value at position "pos".
+  /*
+   * getValueRef() gets a reference to value at position "pos".  You
+   * must not change the returned Variant.
    */
   const Variant& getValueRef(ssize_t pos) const;
 
@@ -138,31 +139,23 @@ public:
   bool noCopyOnWrite() const;
 
   /*
-   * Specific derived class type querying operators.
+   * Specific kind querying operators.
    */
   bool isPacked() const { return m_kind == kPackedKind; }
   bool isMixed() const { return m_kind == kMixedKind; }
-  bool isHphpArray() const {
-    return m_kind <= kMixedKind;
-    static_assert(kPackedKind < kMixedKind, "");
-  }
   bool isSharedArray() const { return m_kind == kSharedKind; }
-  bool isNameValueTableWrapper() const {
-    return m_kind == kNvtwKind;
-  }
-  bool isProxyArray() const {
-    return m_kind == kProxyKind;
-  }
+  bool isNameValueTableWrapper() const { return m_kind == kNvtwKind; }
+  bool isProxyArray() const { return m_kind == kProxyKind; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.
    * I.e. iteration order produces int keys 0 to m_size-1 in sequence.
+   *
+   * For non-Packed array types this is generally an O(N) operation
+   * right now.
    */
   bool isVectorData() const;
 
-  static APCHandle *GetAPCHandle(const ArrayData* ad) {
-    return nullptr;
-  }
   APCHandle* getAPCHandle();
 
   /**
@@ -188,17 +181,20 @@ public:
   bool exists(int64_t k) const;
   bool exists(const StringData* k) const;
 
-  /**
+  /*
    * Interface for VM helpers.  ArrayData implements generic versions
    * using the other ArrayData api; subclasses may customize methods either
    * by providing a custom static method in g_array_funcs.
+   *
+   * An old comment said: nvGetKey does not touch out->_count, so can
+   * be used for inner or outer cells.  (It's unclear if anything is
+   * relying on this, but try not to in new code.)
    */
-  TypedValue* nvGet(int64_t k) const;
-  TypedValue* nvGet(const StringData* k) const;
+  const TypedValue* nvGet(int64_t k) const;
+  const TypedValue* nvGet(const StringData* k) const;
   void nvGetKey(TypedValue* out, ssize_t pos) const;
 
   // wrappers that call getValueRef()
-  TypedValue* nvGetValueRef(ssize_t pos);
   Variant getValue(ssize_t pos) const;
   Variant getKey(ssize_t pos) const;
 
@@ -214,7 +210,7 @@ public:
    * available integer key. Return this if escalation is not needed, or an
    * escalated array data. Note that adding a new element with the next
    * available integer key may fail, in which case ret is set to point to
-   * the lval blackhole (see Variant::lvalBlackHole() for details).
+   * the lval blackhole (see lvalBlackHole() for details).
    */
   ArrayData *lvalNew(Variant *&ret, bool copy);
 
@@ -226,8 +222,8 @@ public:
   ArrayData *set(int64_t k, const Variant& v, bool copy);
   ArrayData *set(StringData* k, const Variant& v, bool copy);
 
-  ArrayData *setRef(int64_t k, const Variant& v, bool copy);
-  ArrayData *setRef(StringData* k, const Variant& v, bool copy);
+  ArrayData *setRef(int64_t k, Variant& v, bool copy);
+  ArrayData *setRef(StringData* k, Variant& v, bool copy);
 
   ArrayData* zSet(int64_t k, RefData* r);
   ArrayData* zSet(StringData* k, RefData* r);
@@ -265,9 +261,9 @@ public:
   ArrayData *set(const String& k, const Variant& v, bool copy);
   ArrayData *set(const Variant& k, const Variant& v, bool copy);
   ArrayData *set(const StringData*, const Variant&, bool) = delete;
-  ArrayData *setRef(const String& k, const Variant& v, bool copy);
-  ArrayData *setRef(const Variant& k, const Variant& v, bool copy);
-  ArrayData *setRef(const StringData*, const Variant&, bool) = delete;
+  ArrayData *setRef(const String& k, Variant& v, bool copy);
+  ArrayData *setRef(const Variant& k, Variant& v, bool copy);
+  ArrayData *setRef(const StringData*, Variant&, bool) = delete;
   ArrayData *add(const String& k, const Variant& v, bool copy);
   ArrayData *add(const Variant& k, const Variant& v, bool copy);
   ArrayData *remove(const String& k, bool copy);
@@ -295,8 +291,6 @@ public:
    */
   bool advanceMArrayIter(MArrayIter& fp);
 
-  const Variant& endRef();
-
   ArrayData* escalateForSort();
   void ksort(int sort_flags, bool ascending);
   void sort(int sort_flags, bool ascending);
@@ -304,18 +298,6 @@ public:
   bool uksort(const Variant& cmp_function);
   bool usort(const Variant& cmp_function);
   bool uasort(const Variant& cmp_function);
-
-  // default sort implementations
-  static void Ksort(ArrayData*, int sort_flags, bool ascending);
-  static void Sort(ArrayData*, int sort_flags, bool ascending);
-  static void Asort(ArrayData*, int sort_flags, bool ascending);
-  static bool Uksort(ArrayData*, const Variant& cmp_function);
-  static bool Usort(ArrayData*, const Variant& cmp_function);
-  static bool Uasort(ArrayData*, const Variant& cmp_function);
-
-  static ArrayData* ZSetInt(ArrayData* ad, int64_t k, RefData* v);
-  static ArrayData* ZSetStr(ArrayData* ad, StringData* k, RefData* v);
-  static ArrayData* ZAppend(ArrayData* ad, RefData* v);
 
   /**
    * Make a copy of myself.
@@ -327,8 +309,6 @@ public:
   ArrayData* copy() const;
   ArrayData* copyWithStrongIterators() const;
   ArrayData* nonSmartCopy() const;
-  static ArrayData* CopyWithStrongIterators(const ArrayData*);
-  static ArrayData* NonSmartCopy(const ArrayData*);
 
   /**
    * Append a value to the array. If "copy" is true, make a copy first
@@ -336,29 +316,14 @@ public:
    * escalated array data.
    */
   ArrayData* append(const Variant& v, bool copy);
-  ArrayData* appendRef(const Variant& v, bool copy);
+  ArrayData* appendRef(Variant& v, bool copy);
 
   /**
    * Similar to append(v, copy), with reference in v preserved.
    */
   ArrayData* appendWithRef(const Variant& v, bool copy);
 
-  /*
-   * PHP array +=.
-   *
-   * Performs array addition, mutating the this array.  It may return
-   * a new array the array needed to grow, or if it needed to COW---in
-   * this case the new returned array will already have a reference
-   * count of 1.  Otherwise returns `elems' without manipulating its
-   * reference count.
-   */
   ArrayData* plusEq(const ArrayData* elems);
-
-  /*
-   * PHP array_merge.
-   *
-   * This function always produces a new array with reference count 1.
-   */
   ArrayData* merge(const ArrayData* elems);
 
   /**
@@ -401,16 +366,6 @@ public:
 
   ArrayData *escalate() const;
 
-  // default implementations
-  static ArrayData* Plus(ArrayData*, const ArrayData *elems, bool copy);
-  static ArrayData* Merge(ArrayData*, const ArrayData *elems, bool copy);
-  static ArrayData* Pop(ArrayData*, Variant &value);
-  static ArrayData* Dequeue(ArrayData*, Variant &value);
-  static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
-  static void Renumber(ArrayData*);
-  static void OnSetEvalScalar(ArrayData*);
-  static ArrayData* Escalate(const ArrayData* ad);
-
   static ArrayData* GetScalarArray(ArrayData *arr);
   static ArrayData* GetScalarArray(ArrayData *arr, const std::string& key);
 
@@ -425,9 +380,6 @@ public:
   static constexpr size_t sizeofSize() { return sizeof(m_size); }
 
   static const char* kindToString(ArrayKind kind);
-
-public: // for heap profiler
-  void getChildren(std::vector<TypedValue*>& out);
 
 private:
   void serializeImpl(VariableSerializer *serializer) const;
@@ -449,14 +401,25 @@ protected:
   static bool IsValidKey(const StringData* k) { return k; }
 
 protected:
+  friend struct PackedArray;
+  friend struct EmptyArray;
+  friend struct MixedArray;
   // The following fields are blocked into unions with qwords so we
   // can combine the stores when initializing arrays.  (gcc won't do
   // this on its own.)
   union {
     struct {
-      ArrayKind m_kind;
-      UNUSED uint8_t m_unused0;
-      UNUSED uint16_t m_unused1;
+      union {
+        struct {
+          UNUSED uint16_t m_unused1;
+          UNUSED uint8_t m_unused0;
+          ArrayKind m_kind;
+        };
+        // Packed arrays overlay their capacity with the kind field.
+        // kPackedKind is zero, and aliases the top byte of
+        // m_packedCap, so it won't influence the capacity.
+        uint32_t m_packedCap;
+      };
       uint32_t m_size;
     };
     uint64_t m_kindAndSize;
@@ -470,6 +433,25 @@ protected:
   };
 };
 
+//////////////////////////////////////////////////////////////////////
+
+extern std::aligned_storage<
+  sizeof(ArrayData),
+  alignof(ArrayData)
+>::type s_theEmptyArray;
+
+/*
+ * Return the "static empty array".  This is a singleton static array
+ * that can be used whenever an empty array is needed.  It has
+ * kEmptyKind and uses the functions in empty-array.cpp.
+ */
+inline ArrayData* staticEmptyArray() {
+  void* vp = &s_theEmptyArray;
+  return static_cast<ArrayData*>(vp);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * ArrayFunctions is a hand-built virtual dispatch table.  Each field represents
  * one virtual method with an array of function pointers, one per ArrayKind.
@@ -480,14 +462,13 @@ struct ArrayFunctions {
   // NK stands for number of array kinds; here just for shorthand.
   static auto const NK = size_t(ArrayData::ArrayKind::kNumKinds);
   void (*release[NK])(ArrayData*);
-  TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
-  TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
+  const TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
+  const TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   void (*nvGetKey[NK])(const ArrayData*, TypedValue* out, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, const Variant& v, bool copy);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, const Variant& v, bool copy);
   size_t (*vsize[NK])(const ArrayData*);
   const Variant& (*getValueRef[NK])(const ArrayData*, ssize_t pos);
-  bool noCopyOnWrite[NK];
   bool (*isVectorData[NK])(const ArrayData*);
   bool (*existsInt[NK])(const ArrayData*, int64_t k);
   bool (*existsStr[NK])(const ArrayData*, const StringData* k);
@@ -496,8 +477,8 @@ struct ArrayFunctions {
   ArrayData* (*lvalStr[NK])(ArrayData*, StringData* k, Variant*& ret,
                             bool copy);
   ArrayData* (*lvalNew[NK])(ArrayData*, Variant *&ret, bool copy);
-  ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, const Variant& v, bool copy);
-  ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, const Variant& v, bool copy);
+  ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, Variant& v, bool copy);
+  ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, Variant& v, bool copy);
   ArrayData* (*addInt[NK])(ArrayData*, int64_t k, const Variant& v, bool copy);
   ArrayData* (*addStr[NK])(ArrayData*, StringData* k, const Variant& v, bool copy);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k, bool copy);
@@ -519,7 +500,7 @@ struct ArrayFunctions {
   ArrayData* (*copyWithStrongIterators[NK])(const ArrayData*);
   ArrayData* (*nonSmartCopy[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, const Variant& v, bool copy);
-  ArrayData* (*appendRef[NK])(ArrayData*, const Variant& v, bool copy);
+  ArrayData* (*appendRef[NK])(ArrayData*, Variant& v, bool copy);
   ArrayData* (*appendWithRef[NK])(ArrayData*, const Variant& v, bool copy);
   ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);

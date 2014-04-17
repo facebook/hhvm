@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/libevent-http-client.h"
@@ -87,7 +86,7 @@ bool f_is_callable(const Variant& v, bool syntax /* = false */,
   }
 
   if (tv_func->m_type == KindOfArray) {
-    const Array& arr = tv_func->m_data.parr;
+    const Array& arr = Array(tv_func->m_data.parr);
     const Variant& clsname = arr.rvalAtRef(int64_t(0));
     const Variant& mthname = arr.rvalAtRef(int64_t(1));
     if (arr.size() != 2 ||
@@ -166,16 +165,6 @@ Variant f_forward_static_call(int _argc, const Variant& function,
   return vm_call_user_func(function, _argv, true);
 }
 
-Variant f_get_called_class() {
-  EagerCallerFrame cf;
-  ActRec* ar = cf();
-  if (ar) {
-    if (ar->hasThis()) return Variant(ar->getThis()->o_getClassName());
-    if (ar->hasClass()) return Variant(ar->getClass()->preClass()->name());
-  }
-  return Variant(false);
-}
-
 String f_create_function(const String& args, const String& code) {
   return g_context->createFunction(args, code);
 }
@@ -208,7 +197,7 @@ Variant f_func_get_arg(int arg_num) {
     return false;
   }
 
-  const int numParams = ar->m_func->numParams();
+  const int numParams = ar->m_func->numNonVariadicParams();
 
   if (arg_num < numParams) {
     // Formal parameter. Value is on the stack.
@@ -234,7 +223,7 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   if (ar == NULL) {
     return Array();
   }
-  int numParams = ar->m_func->numParams();
+  int numParams = ar->m_func->numNonVariadicParams();
   int numArgs = ar->numArgs();
 
   PackedArrayInit retInit(std::max(numArgs - offset, 0));

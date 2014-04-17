@@ -44,6 +44,7 @@ inline ActRec* liveFrame()    { return (ActRec*)vmfp(); }
 inline const Func* liveFunc() { return liveFrame()->m_func; }
 inline const Unit* liveUnit() { return liveFunc()->unit(); }
 inline Class* liveClass() { return liveFunc()->cls(); }
+inline bool liveResumed() { return liveFrame()->inGenerator(); }
 
 inline Offset liveSpOff() {
   Cell* fp = vmfp();

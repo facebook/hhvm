@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/util/assertions.h"
 
@@ -37,7 +38,7 @@ IRBuilder::IRBuilder(Offset initialBcOffset,
                      const Func* func)
   : m_unit(unit)
   , m_simplifier(unit)
-  , m_state(unit, initialSpOffsetFromFp, func)
+  , m_state(unit, initialSpOffsetFromFp, func, func->numLocals())
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
   , m_constrainGuards(RuntimeOption::EvalHHIRRelaxGuards)
@@ -85,6 +86,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     if (prev.isBlockEnd()) {
       assert(where == m_curBlock->end());
       // start a new block
+      m_state.pauseBlock(m_curBlock);
       m_curBlock = m_unit.defBlock();
       where = m_curBlock->begin();
       FTRACE(2, "lazily adding B{}\n", m_curBlock->id());
@@ -107,14 +109,13 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
   assert(inst->marker().valid());
   if (!inst->is(Nop, DefConst)) {
+    FTRACE(3, "appendInstruction: Block {}; inst: {}\n", m_curBlock->id(),
+           inst->toString());
     where = m_curBlock->insert(where, inst);
     ++where;
   }
 
-  if (m_savedBlocks.empty()) {
-    // We don't track state on non-main traces for now. t2982555
-    m_state.update(inst);
-  }
+  m_state.update(inst);
 }
 
 void IRBuilder::appendBlock(Block* block) {
@@ -128,7 +129,40 @@ void IRBuilder::appendBlock(Block* block) {
   m_curBlock = block;
 }
 
-std::vector<RegionDesc::TypePred> IRBuilder::getKnownTypes() const {
+static bool isMainExit(const Block* b) {
+  if (b->hint() == Block::Hint::Unlikely) return false;
+  if (b->next()) return false;
+  auto taken = b->taken();
+  if (!taken) return true;
+  if (taken->isCatch()) return true;
+  return false;
+}
+
+/*
+ * Compute the stack and local type postconditions for a
+ * single-entry/single-exit tracelet.
+ */
+std::vector<RegionDesc::TypePred> IRBuilder::getKnownTypes() {
+  // This function is only correct when given a single-exit region, as
+  // in TransProfile.  Furthermore, its output is only used to guide
+  // formation of profile-driven regions.
+  assert(tx->mode() == TransProfile);
+
+  // We want the state for the last block on the "main trace".  Figure
+  // out which that is.
+  Block* mainExit = nullptr;
+  for (auto* b : rpoSortCfg(m_unit)) {
+    if (isMainExit(b)) {
+      assert(mainExit == nullptr);
+      mainExit = b;
+    }
+  }
+  assert(mainExit != nullptr);
+
+  // Load state for mainExit.  This feels hacky.
+  m_state.startBlock(mainExit);
+
+  // Now use the current state to get all the types.
   std::vector<RegionDesc::TypePred> result;
   auto const curFunc  = m_state.func();
   auto const sp       = m_state.sp();
@@ -282,7 +316,7 @@ SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
        * value, which requires no runtime work. This depends on the type being
        * boxed, and constraining it with DataTypeCountness will do it.  */
       constrainStack(sp, offset, DataTypeCountness);
-      return gen(AssertStk, newType, sp);
+      return gen(AssertStk, newType, StackOffset(offset), sp);
     }
     /* This check will always fail. It's probably due to an incorrect
      * prediction. Generate a Jmp, and return the source because
@@ -537,6 +571,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
  */
 SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
                                 CloneFlag doClone,
+                                Block* srcBlock,
                                 const folly::Optional<IdomVector>& idoms) {
   static DEBUG_ONLY __thread int instNest = 0;
   if (debug) ++instNest;
@@ -545,7 +580,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
 
   auto doCse = [&] (IRInstruction* cseInput) -> SSATmp* {
     if (m_state.enableCse() && cseInput->canCSE()) {
-      SSATmp* cseResult = m_state.cseLookup(cseInput, idoms);
+      SSATmp* cseResult = m_state.cseLookup(cseInput, srcBlock, idoms);
       if (cseResult) {
         // Found a dominating instruction that can be used instead of input
         FTRACE(1, "  {}cse found: {}\n",
@@ -702,7 +737,7 @@ void IRBuilder::reoptimize() {
       assert(inst->marker().valid());
       setMarker(inst->marker());
 
-      auto const tmp = optimizeInst(inst, CloneFlag::No, idoms);
+      auto const tmp = optimizeInst(inst, CloneFlag::No, block, idoms);
       SSATmp* dst = inst->dst(0);
 
       if (dst != tmp) {
@@ -977,17 +1012,16 @@ void IRBuilder::setMarker(BCMarker marker) {
 
   if (marker == oldMarker) return;
   FTRACE(2, "IRBuilder changing current marker from {} to {}\n",
-         oldMarker.func ? oldMarker.show() : "<invalid>", marker.show());
+         oldMarker.valid() ? oldMarker.show() : "<invalid>", marker.show());
   assert(marker.valid());
   m_state.setMarker(marker);
 }
 
-void IRBuilder::startBlock() {
+void IRBuilder::startBlock(Block* block) {
+  assert(block);
   assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
-  auto marker = m_state.marker();
-  auto it = m_offsetToBlockMap.find(marker.bcOff);
-  if (it != m_offsetToBlockMap.end() && it->second->empty()) {
-    auto block = it->second;
+
+  if (block->empty()) {
     if (block != m_curBlock) {
       if (m_state.compatible(block)) {
         m_state.pauseBlock(block);
@@ -1007,6 +1041,12 @@ void IRBuilder::startBlock() {
              show(m_state));
     }
   }
+
+  if (sp() == nullptr) {
+    gen(DefSP, StackOffset(spOffset() + evalStack().size() - stackDeficit()),
+        fp());
+  }
+
 }
 
 Block* IRBuilder::makeBlock(Offset offset) {
@@ -1035,6 +1075,21 @@ bool IRBuilder::blockIsIncompatible(Offset offset) {
 void IRBuilder::recordOffset(Offset offset) {
   m_offsetSeen.insert(offset);
 }
+
+void IRBuilder::resetOffsetMapping() {
+  m_offsetToBlockMap.clear();
+}
+
+bool IRBuilder::hasBlock(Offset offset) const {
+  auto it = m_offsetToBlockMap.find(offset);
+  return it != m_offsetToBlockMap.end();
+}
+
+void IRBuilder::setBlock(Offset offset, Block* block) {
+  assert(!hasBlock(offset));
+  m_offsetToBlockMap[offset] = block;
+}
+
 
 void IRBuilder::pushBlock(BCMarker marker, Block* b,
                           const folly::Optional<Block::iterator>& where) {

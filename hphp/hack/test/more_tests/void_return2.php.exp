@@ -1,0 +1,4 @@
+File "void_return2.php", line 9, characters 3-8:
+You cannot return a value
+File "void_return2.php", line 7, characters 15-18:
+This is a void function

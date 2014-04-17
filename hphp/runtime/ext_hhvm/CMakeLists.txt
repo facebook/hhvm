@@ -40,8 +40,9 @@ macro(EXT_HHVM_DIR SOURCES HEADERS SOURCE_REL BUILD_TARGET)
 		if (NOT EXISTS ${DIR_CONFIG} AND
                     NOT ${f} MATCHES "(.ext_hhvm.cpp|/(old-)?tests?/)")
 			string(LENGTH ${f} f_LEN)
-			math(EXPR f_REL_LEN "${f_LEN} - ${HPHP_DIR_LEN}")
-			string(SUBSTRING ${f} ${HPHP_DIR_LEN} ${f_REL_LEN} f_REL)
+			math(EXPR f_REL_LEN "${f_LEN} - ${HPHP_DIR_LEN} - 1")
+			math(EXPR f_REL_OFF "${HPHP_DIR_LEN} + 1")
+			string(SUBSTRING ${f} ${f_REL_OFF} ${f_REL_LEN} f_REL)
 			EXT_HHVM_FILE(${SOURCES} ${HEADERS} ${f_REL} ${EXT_HHVM_OS} ${EXT_HHVM_ARCH} ${SOURCE_REL} ${BUILD_TARGET})
 		endif()
 	endforeach()
@@ -49,17 +50,6 @@ endmacro()
 
 # Generate ext_hhvm stubs for ext/*.cpp
 EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS "hphp/runtime/ext" "hphp_runtime_ext")
-
-# Pick up relevant zend_ext_compat stubs
-if (ZEND_COMPAT_BUILD_DIRS)
-	string(LENGTH ${HPHP_HOME} HPHP_HOME_LEN)
-	foreach (dir ${ZEND_COMPAT_BUILD_DIRS})
-		string(LENGTH ${dir} dir_LEN)
-		math(EXPR EZC_PATH_LEN "${dir_LEN} - ${HPHP_HOME_LEN}")
-		string(SUBSTRING ${dir} ${HPHP_HOME_LEN} ${EZC_PATH_LEN} EZC_DIR)
-		EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS ${EZC_DIR} "hphp_runtime_static")
-	endforeach()
-endif()
 
 #
 ## ext_hhvm_infotabs
@@ -69,7 +59,6 @@ set(INFOTABS_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/ext_hhvm_infotabs.h")
 set(INFOTABS_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/ext_hhvm_infotabs.cpp")
 
 auto_sources(HPHP_IDLS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
-ZEND_COMPAT_STRIP_IDLS(HPHP_IDLS ${ZEND_COMPAT_EXCLUDE_IDLS})
 
 # Generate ext_hhvm_infotabs.h based on ext_hhvm files being generated
 file(WRITE ${INFOTABS_HEADER} "")

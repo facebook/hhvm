@@ -367,7 +367,7 @@ struct Bigint {
 
 typedef struct Bigint Bigint;
 
-void destroy_freelist(void);
+void destroy_freelist(Bigint** freelist);
 
 class BigintData {
 public:
@@ -375,7 +375,7 @@ public:
     freelist = (Bigint **)calloc(Kmax + 1, sizeof(Bigint *));
   }
   ~BigintData() {
-    destroy_freelist();
+    destroy_freelist(freelist);
     free(freelist);
   }
 
@@ -1264,12 +1264,11 @@ static int quorem(Bigint *b, Bigint *S)
   return q;
 }
 
-void destroy_freelist(void)
+void destroy_freelist(Bigint** freelist)
 {
   int i;
   Bigint *tmp;
 
-  Bigint **&freelist = s_bigint_data->freelist;
   for (i = 0; i <= Kmax; i++) {
     Bigint **listp = &freelist[i];
     while ((tmp = *listp) != nullptr) {

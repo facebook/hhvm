@@ -21,8 +21,9 @@
 
 namespace HPHP {
 
-extern const bool enable_stacktrace_profiler =
-  getenv("STACKTRACE_PROFILER") != nullptr;
+std::atomic<bool> enable_stacktrace_profiler {
+  getenv("STACKTRACE_PROFILER") != nullptr
+};
 
 StackTraceProfiler::StackTraceProfiler(std::string name, int skip) :
   m_name(name), finishing(false), m_root(nullptr), m_skip(skip) {

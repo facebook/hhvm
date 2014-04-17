@@ -1,5 +1,4 @@
 string(1) "x"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(42) "Closure$$%s$"
-}
+
+Warning: Attempted to serialize unserializable builtin class %s in %s/apc/1825.php on line 8
+NULL

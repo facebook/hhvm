@@ -72,11 +72,11 @@ struct VariantController {
     return map.toArray();
   }
   static ArrayInit reserveMap(size_t n) {
-    ArrayInit res(n, ArrayInit::mapInit);
+    ArrayInit res(n, ArrayInit::Map{});
     return res;
   }
   static MapType getStaticEmptyMap() {
-    return HphpArray::GetStaticEmptyArray();
+    return MapType(staticEmptyArray());
   }
   static HPHP::serialize::Type mapKeyType(const Variant& k) {
     return type(k);

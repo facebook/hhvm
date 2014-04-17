@@ -32,7 +32,7 @@ If you want to host a website:
 
 We'd love to have your help in making HHVM better.
 
-Before changes can be accepted a [Contributor License Agreement](http://developers.facebook.com/opensource/cla) ([pdf](https://github.com/facebook/hhvm/raw/master/hphp/doc/FB_Individual_CLA.pdf) - print, sign, scan, link) must be signed.
+Before changes can be accepted a [Contributor License Agreement](http://code.facebook.com/cla) ([pdf](https://github.com/facebook/hhvm/raw/master/hphp/doc/FB_Individual_CLA.pdf) - print, sign, scan, link) must be signed.
 
 If you run into problems, please open an [issue](http://github.com/facebook/hhvm/issues), or better yet, [fork us and send a pull request](https://github.com/facebook/hhvm/pulls). Join us on [#hhvm on freenode](http://webchat.freenode.net/?channels=hhvm).
 

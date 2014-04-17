@@ -225,8 +225,8 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const SourceRootInfo &sri) {
 
   auto const vhost = VirtualHost::GetCurrent();
-  auto const g = get_global_variables();
-  Variant emptyArr(HphpArray::GetStaticEmptyArray());
+  auto const g = get_global_variables()->asArrayData();
+  Variant emptyArr(staticEmptyArray());
   for (auto& key : s_arraysToClear) {
     g->remove(key.get(), false);
     g->set(key.get(), emptyArr, false);
@@ -250,12 +250,17 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 
 #undef X
 
+  Variant HTTP_RAW_POST_DATA;
+  SCOPE_EXIT {
+    g->set(s_HTTP_RAW_POST_DATA.get(), HTTP_RAW_POST_DATA, false);
+  };
+
   StartRequest(SERVERarr);
   PrepareEnv(ENVarr, transport);
   PrepareRequestVariables(REQUESTarr,
                           GETarr,
                           POSTarr,
-                          g->getRef(s_HTTP_RAW_POST_DATA),
+                          HTTP_RAW_POST_DATA,
                           FILESarr,
                           COOKIEarr,
                           transport,
@@ -705,7 +710,7 @@ void HttpProtocol::PrepareServerVariable(Array& server,
   for (auto& kv : vhost->getServerVars()) {
     server.set(String(kv.first), String(kv.second));
   }
-  sri.setServerVariables(server);
+  server = sri.setServerVariables(std::move(server));
 
   const char *threadType = transport->getThreadTypeName();
   server.set(s_THREAD_TYPE, threadType);

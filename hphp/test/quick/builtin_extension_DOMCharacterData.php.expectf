@@ -1,11 +1,10 @@
 DOMCharacterData
 object(DOMCharacterData)#1 (0) {
 }
-string(101) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:16:"DOMCharacterData";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(16) "DOMCharacterData"
-}
+
+Warning: Attempted to serialize unserializable builtin class DOMCharacterData in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(26) {
   [0]=>
   string(11) "__construct"
@@ -62,15 +61,14 @@ array(26) {
 }
 ================
 A_DOMCharacterData
-object(A_DOMCharacterData)#3 (1) {
+object(A_DOMCharacterData)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(103) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:18:"A_DOMCharacterData";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(18) "A_DOMCharacterData"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_DOMCharacterData in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(26) {
   [0]=>
   string(11) "__construct"

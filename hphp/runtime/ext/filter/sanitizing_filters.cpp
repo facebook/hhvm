@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/system/constants.h"
 
 namespace HPHP {
 

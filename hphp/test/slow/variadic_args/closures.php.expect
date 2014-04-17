@@ -1,0 +1,39 @@
+basic closure
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}
+eager async closure
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}
+blocking async closure
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}
+CWithClosures::{closure}
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}
+string(1) "a"
+string(6) "prop-a"
+CWithClosures::variadic
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(6) "prop-a"
+  [2]=>
+  string(1) "a"
+}

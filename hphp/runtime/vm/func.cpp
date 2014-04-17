@@ -37,6 +37,7 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/debug.h"
 #include "hphp/util/trace.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 
 namespace HPHP {
 
@@ -44,47 +45,84 @@ TRACE_SET_MOD(hhbc);
 using JIT::tx;
 using JIT::mcg;
 
-const StringData* Func::s___call = makeStaticString("__call");
-const StringData* Func::s___callStatic =
-  makeStaticString("__callStatic");
+const StringData* Func::s___call       = makeStaticString("__call");
+const StringData* Func::s___callStatic = makeStaticString("__callStatic");
 
 //=============================================================================
 // Func.
 
-static void decl_incompat(const PreClass* implementor,
-                          const Func* imeth) {
+static inline void decl_incompat(const PreClass* implementor,
+                                 const Func* imeth) {
   const char* name = imeth->name()->data();
   raise_error("Declaration of %s::%s() must be compatible with "
-              "that of %s::%s()", implementor->name()->data(), name,
+              "that of %s::%s()",
+              implementor->name()->data(), name,
               imeth->cls()->preClass()->name()->data(), name);
 }
 
 // Check compatibility vs interface and abstract declarations
-void Func::parametersCompat(const PreClass* preClass, const Func* imeth) const {
+void Func::checkDeclarationCompat(const PreClass* preClass,
+                                  const Func* imeth) const {
   const Func::ParamInfoVec& params = this->params();
   const Func::ParamInfoVec& iparams = imeth->params();
+  auto const ivariadic = imeth->hasVariadicCaptureParam();
+  if (ivariadic && !this->hasVariadicCaptureParam()) {
+    decl_incompat(preClass, imeth);
+  }
+
   // Verify that meth has at least as many parameters as imeth.
-  if ((params.size() < iparams.size())) {
+  if (this->numParams() < imeth->numParams()) {
+    // This check doesn't require special casing for variadics, because
+    // it's not ok to turn a variadic function into a non-variadic.
     decl_incompat(preClass, imeth);
   }
   // Verify that the typehints for meth's parameters are compatible with
   // imeth's corresponding parameter typehints.
-  unsigned firstOptional = 0;
-  for (unsigned i = 0; i < iparams.size(); ++i) {
-    if (!params[i].typeConstraint().compat(iparams[i].typeConstraint())
-        && !iparams[i].typeConstraint().isTypeVar()) {
-      decl_incompat(preClass, imeth);
+  size_t firstOptional = 0;
+  {
+    size_t i = 0;
+    for (; i < imeth->numNonVariadicParams(); ++i) {
+      auto const& p = params[i];
+      if (p.isVariadic()) { decl_incompat(preClass, imeth); }
+      auto const& ip = iparams[i];
+      if (!p.typeConstraint().compat(ip.typeConstraint())
+          && !ip.typeConstraint().isTypeVar()) {
+        decl_incompat(preClass, imeth);
+      }
+      if (!iparams[i].hasDefaultValue()) {
+        // The leftmost of imeth's contiguous trailing optional parameters
+        // must start somewhere to the right of this parameter (which may
+        // be the variadic param)
+        firstOptional = i + 1;
+      }
     }
-    if (!iparams[i].hasDefaultValue()) {
-      // The leftmost of imeth's contiguous trailing optional parameters
-      // must start somewhere to the right of this parameter.
-      firstOptional = i + 1;
+    if (ivariadic) {
+      assert(iparams[iparams.size() - 1].isVariadic());
+      assert(params[params.size() - 1].isVariadic());
+      // reffiness of the variadics must match
+      if (imeth->byRef(iparams.size() - 1) != this->byRef(params.size() - 1)) {
+        decl_incompat(preClass, imeth);
+      }
+
+      // To be compatible with a variadic interface, params from the
+      // variadic onwards must have a compatible typehint
+      auto const& ivarConstraint = iparams[iparams.size() - 1].typeConstraint();
+      if (!ivarConstraint.isTypeVar()) {
+        for (; i < this->numParams(); ++i) {
+          auto const& p = params[i];
+          if (!p.typeConstraint().compat(ivarConstraint)) {
+            decl_incompat(preClass, imeth);
+          }
+        }
+      }
     }
   }
+
   // Verify that meth provides defaults, starting with the parameter that
   // corresponds to the leftmost of imeth's contiguous trailing optional
-  // parameters.
-  for (unsigned i = firstOptional; i < params.size(); ++i) {
+  // parameters and *not* including any variadic last param (variadics
+  // don't have any default values).
+  for (unsigned i = firstOptional; i < this->numNonVariadicParams(); ++i) {
     if (!params[i].hasDefaultValue()) {
       decl_incompat(preClass, imeth);
     }
@@ -132,6 +170,17 @@ void Func::setFullName() {
   } else {
     m_fullName = m_name;
     m_namedEntity = Unit::GetNamedEntity(m_name);
+  }
+  if (RuntimeOption::EvalPerfDataMap) {
+    int numPre = isClosureBody() ? 1 : 0;
+    char* from = (char*)this - numPre * sizeof(Func);
+
+    int maxNumPrologues = Func::getMaxNumPrologues(m_numParams);
+    int numPrologues = maxNumPrologues > kNumFixedPrologues ?
+      maxNumPrologues : kNumFixedPrologues;
+    char* to = (char*)(m_prologueTable + numPrologues);
+    Debug::DebugInfo::recordDataMap(
+      from, to, folly::format("Func-{}-{}", numPre, m_fullName->data()).str());
   }
   if (RuntimeOption::DynamicInvokeFunctions.size()) {
     if (RuntimeOption::DynamicInvokeFunctions.find(m_fullName->data()) !=
@@ -457,15 +506,22 @@ bool Func::byRef(int32_t arg) const {
   return *ref & (1ull << bit);
 }
 
+const StaticString s_extract("extract");
+
 bool Func::mustBeRef(int32_t arg) const {
-  if (byRef(arg)) {
-    return
-      arg < m_numParams ||
-      !(m_attrs & AttrVariadicByRef) ||
-      !methInfo() ||
-      !(methInfo()->attribute & ClassInfo::MixedVariableArguments);
+  if (!byRef(arg)) return false;
+  if (arg == 0) {
+    if (UNLIKELY(m_attrs & AttrNative)) {
+      // Extract is special (in more ways than one)---here it needs
+      // to be able to take its first argument by ref or not by ref.
+      if (name() == s_extract.get() && !cls()) return false;
+    }
   }
-  return false;
+  return
+    arg < m_numParams ||
+    !(m_attrs & AttrVariadicByRef) ||
+    !methInfo() ||
+    !(methInfo()->attribute & ClassInfo::MixedVariableArguments);
 }
 
 void Func::appendParam(bool ref, const Func::ParamInfo& info,
@@ -473,6 +529,7 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
   int qword = m_numParams / kBitsPerQword;
   int bit   = m_numParams % kBitsPerQword;
   m_numParams++;
+  assert(!info.isVariadic() || (m_attrs & AttrVariadicParam));
   uint64_t* refBits = &m_refBitVal;
   // Grow args, if necessary.
   if (qword) {
@@ -736,7 +793,8 @@ bool Func::isEntry(Offset offset) const {
 }
 
 bool Func::isDVEntry(Offset offset) const {
-  for (int i = 0; i < numParams(); i++) {
+  auto const nparams = numNonVariadicParams();
+  for (int i = 0; i < nparams; i++) {
     const ParamInfo& pi = params()[i];
     if (pi.hasDefaultValue() && pi.funcletOff() == offset) return true;
   }
@@ -744,7 +802,8 @@ bool Func::isDVEntry(Offset offset) const {
 }
 
 int Func::getDVEntryNumParams(Offset offset) const {
-  for (int i = 0; i < numParams(); i++) {
+  auto const nparams = numNonVariadicParams();
+  for (int i = 0; i < nparams; i++) {
     const ParamInfo& pi = params()[i];
     if (pi.hasDefaultValue() && pi.funcletOff() == offset) return i;
   }
@@ -753,7 +812,8 @@ int Func::getDVEntryNumParams(Offset offset) const {
 
 Offset Func::getEntryForNumArgs(int numArgsPassed) const {
   assert(numArgsPassed >= 0);
-  for (unsigned i = numArgsPassed; i < numParams(); i++) {
+  auto const nparams = numNonVariadicParams();
+  for (unsigned i = numArgsPassed; i < nparams; i++) {
     const Func::ParamInfo& pi = params()[i];
     if (pi.hasDefaultValue()) {
       return pi.funcletOff();
@@ -1071,6 +1131,7 @@ void FuncEmitter::addUserAttribute(const StringData* name, TypedValue tv) {
  *  "NoFCallBuiltin": Prevent FCallBuiltin optimization
  *      Effectively forces functions to generate an ActRec
  *  "NoInjection": Do not include this frame in backtraces
+ *  "ZendCompat": Use zend compat wrapper
  *
  *  e.g.   <<__Native("ActRec")>> function foo():mixed;
  */
@@ -1079,7 +1140,8 @@ static const StaticString
   s_actrec("ActRec"),
   s_nofcallbuiltin("NoFCallBuiltin"),
   s_variadicbyref("VariadicByRef"),
-  s_noinjection("NoInjection");
+  s_noinjection("NoInjection"),
+  s_zendcompat("ZendCompat");
 
 int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
   int ret = Native::AttrNone;
@@ -1101,6 +1163,11 @@ int FuncEmitter::parseNativeAttributes(Attr &attrs) const {
         attrs = attrs | AttrVariadicByRef;
       } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
         attrs = attrs | AttrNoInjection;
+      } else if (userAttrStrVal.get()->isame(s_zendcompat.get())) {
+        ret = ret | Native::AttrZendCompat;
+        // ZendCompat implies ActRec, no FCallBuiltin
+        attrs = attrs | AttrMayUseVV | AttrNoFCallBuiltin;
+        ret = ret | Native::AttrActRec;
       }
     }
   }
@@ -1140,10 +1207,11 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       !m_isClosureBody) {
     // intercepted functions need to pass all args through
     // to the interceptee
-    attrs = attrs | AttrMayUseVV;
+    attrs = Attr(attrs | AttrMayUseVV);
   }
+  if (isVariadic()) { attrs = Attr(attrs | AttrVariadicParam); }
 
-  if (!m_containsCalls) attrs = Attr(attrs | AttrPhpLeafFn);
+  if (!m_containsCalls) { attrs = Attr(attrs | AttrPhpLeafFn); }
 
   assert(!m_pce == !preClass);
   Func* f = m_ue.newFunc(this, unit, m_id, preClass, m_line1, m_line2, m_base,
@@ -1152,7 +1220,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   f->shared()->m_info = m_info;
   f->shared()->m_returnType = m_returnType;
-  std::vector<Func::ParamInfo> pBuilder;
+  std::vector<Func::ParamInfo> fParams;
   for (unsigned i = 0; i < m_params.size(); ++i) {
     Func::ParamInfo pi;
     pi.setFuncletOff(m_params[i].funcletOff());
@@ -1162,18 +1230,22 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     pi.setUserAttributes(m_params[i].userAttributes());
     pi.setBuiltinType(m_params[i].builtinType());
     pi.setUserType(m_params[i].userType());
-    f->appendParam(m_params[i].ref(), pi, pBuilder);
+    pi.setVariadic(m_params[i].isVariadic());
+    f->appendParam(m_params[i].ref(), pi, fParams);
   }
+  assert(f->m_numParams == m_params.size());
   if (!m_params.size()) {
     assert(!f->m_refBitVal && !f->shared()->m_refBitPtr);
     f->m_refBitVal = attrs & AttrVariadicByRef ? -1uLL : 0uLL;
   }
 
-  f->shared()->m_params = pBuilder;
+  f->shared()->m_params = fParams;
   f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
   f->m_maxStackCells = m_maxStackCells;
+  f->m_numNonVariadicParams = (attrs & AttrVariadicParam)
+    ? (f->m_numParams - 1) : f->m_numParams;
   f->shared()->m_staticVars = m_staticVars;
   f->shared()->m_ehtab = m_ehtab;
   f->shared()->m_fpitab = m_fpitab;
@@ -1195,13 +1267,19 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
                                           f->isStatic());
     if (nif) {
       Attr dummy = AttrNone;
-      if (parseNativeAttributes(dummy) & Native::AttrActRec) {
-        f->shared()->m_builtinFuncPtr = nif;
-        f->shared()->m_nativeFuncPtr = nullptr;
-      } else {
+      int nativeAttrs = parseNativeAttributes(dummy);
+      if (nativeAttrs & Native::AttrZendCompat) {
         f->shared()->m_nativeFuncPtr = nif;
-        f->shared()->m_builtinFuncPtr = m_pce ? Native::methodWrapper
-                                              : Native::functionWrapper;
+        f->shared()->m_builtinFuncPtr = zend_wrap_func;
+      } else {
+        if (parseNativeAttributes(dummy) & Native::AttrActRec) {
+          f->shared()->m_builtinFuncPtr = nif;
+          f->shared()->m_nativeFuncPtr = nullptr;
+        } else {
+          f->shared()->m_nativeFuncPtr = nif;
+          f->shared()->m_builtinFuncPtr = m_pce ? Native::methodWrapper
+                                                : Native::functionWrapper;
+        }
       }
     } else {
       f->shared()->m_builtinFuncPtr = Native::unimplementedWrapper;

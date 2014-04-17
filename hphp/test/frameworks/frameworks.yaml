@@ -63,7 +63,7 @@
     # Stable is 2.4.2, but need master since we have pull requests.
     # e.g., https://github.com/doctrine/doctrine2/pull/928
     branch: master
-    commit: 0797feeb0f6aa1fdbdd88088df70539cb15b54cb
+    commit: 73e5bbecbef311194085e30d8b7fd6516bc50425
     install_root: doctrine2
     test_root: doctrine2
   drupal:
@@ -78,6 +78,8 @@
       - drupal/core/modules/views/tests/Drupal/views/Tests/ViewsDataHelperTest.php
       # Flakey, test has a race condition
       - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFileStorageTest.php
+      # Depends on previous
+      - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFastFileStorageTest.php
   facebookphpsdk:
     url: https://github.com/facebook/facebook-php-sdk.git
     branch: v3.2.3
@@ -86,20 +88,33 @@
     test_root: facebook-php-sdk
     test_file_regex: /.*(tests\.php)$/
   guzzle:
-    url: https://github.com/guzzle/guzzle.git
-    branch: v3.8.1
-    commit: 4de0618a01b34aa1c8c33a3f13f396dcd3882eba
+    url: https://github.com/guzzle/guzzle3.git
+    # Slightly after v3.8.1 - need:
+    #   https://github.com/guzzle/guzzle3/pull/20
+    #   https://github.com/guzzle/guzzle3/pull/22
+    branch: master
+    commit: fa0046309160ea52aeed51b5608adfd263dfa0a2
     install_root: guzzle
     test_root: guzzle
-    blacklist:
-      # Will fatal until facebook/hhvm#1859 is fixed
-      - guzzle/tests/Guzzle/Tests/Http/Curl/CurlHandleTest.php
+  guzzle4:
+    url: https://github.com/guzzle/guzzle.git
+    branch: 4.0.1
+    commit: c1cf6c8630b71fa7c9b8f7e769758bb1d9147dae
+    install_root: guzzle4
+    test_root: guzzle4
   idiorm:
     url: https://github.com/j4mie/idiorm.git
     branch: v1.4.1
     commit: 11e964157a6a2c6128a0546673ad5e99ac1a62cd
     install_root: idiorm
     test_root: idiorm
+  json_schema:
+    url: https://github.com/justinrainbow/json-schema.git
+    branch: master
+    # Version 1.3.6
+    commit: d97cf3ce890fe80f247fc08594a1c8a1029fc7ed
+    install_root: json_schema
+    test_root: json_schema
   joomla:
     url: https://github.com/joomla/joomla-framework.git
     # Stable is 2.4.2, but need master since we have pull requests.
@@ -138,6 +153,9 @@
       - joomla-cms/tests/unit/suites/libraries/joomla/twitter/JTwitterTest.php
       - joomla-cms/tests/unit/suites/libraries/joomla/document/opensearch/JDocumentOpensearchTest.php
       - joomla-cms/tests/unit/suites/libraries/joomla/cache/storage/JCacheStorageMainTest.php
+      # This one intermittently hangs and blocks the full test runs - ditto when part
+      # of joomla-framework
+      - joomla-cms/tests/unit/suites/libraries/joomla/form/fields/JFormFieldIntegerTest.php
   klein:
     url: https://github.com/chriso/klein.php.git
     branch: v2.0.2
@@ -158,6 +176,18 @@
     commit: 1faf4c8508378b0b102d148c53c322a8048b16dd
     install_root: laravel
     test_root: laravel
+  lessphp:
+    # Until pull request for phpunit.xml is accepted. The original repository
+    # is commented out below.
+    url: https://github.com/cgcai/lessphp
+    # url: https://github.com/leafo/lessphp.git
+    branch: master
+    # Version 0.4.0 (Forked) The original v0.4.0 commit is commented out
+    # below.
+    commit: 119d94329581e6d6f41627f22faf0cee0b21eb0f
+    # commit: 51f3f06f0fe78a722dabfd14578444bdd078d9de
+    install_root: lessphp
+    test_root: lessphp
   magento2:
     # Until PHPUnit 3.8 pull request is accepted
     url: https://github.com/JoelMarcey/magento2.git
@@ -189,6 +219,12 @@
     commit: 6225b22de9dcf36546be3a0b2fa8e3d986153f57
     install_root: monolog
     test_root: monolog
+  mustache:
+    url: https://github.com/bobthecow/mustache.php.git
+    branch: v2.5.1
+    commit: 996c944fa2ddedddfaf0d276b913809d6a32fd85
+    install_root: mustache
+    test_root: mustache
   paris:
     url: https://github.com/j4mie/paris.git
     branch: v1.4.2
@@ -272,16 +308,25 @@
       - pear-core/tests/System/find_test.phpt
       - pear-core/tests/System/test_which.phpt
       - pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents.phpt
+  pdepend:
+    url: https://github.com/pdepend/pdepend.git
+    branch: release-1.1.x
+    commit: 3340c91def4c6d4f4c9f0784ac04b9ed09ec68ca
+    install_root: pdepend
+    test_root: pdepend
   phpbb3:
     url: https://github.com/phpbb/phpbb.git
     # Stable is release-3.0.12, but we have pull requests in develop
     # https://github.com/phpbb/phpbb/pull/1908
-    branch: develop
-    commit: eaf9a41ed8bd016880b11f480f92f1b0cfb32f84
+    # https://github.com/phpbb/phpbb/pull/2232
+    branch: develop-ascraeus
+    commit: 2284e2897f2573467a20cb90579e7b4bb8af392c
     install_root: phpbb3
     test_root: phpbb3
-    # This may work if we increase the timeout. Blacklist for now
-    blacklist:
+    clowns:
+      # This is basically a really, really slow version of:
+      #   find . -name '*.php' | grep -v vendor/ | xargs -n 1 -P 32 hhvm -l
+      # We pass it, but it's slow, and not a unit test, so skip it
       - phpbb3/tests/lint_test.php
   phpmyadmin:
     url: https://github.com/phpmyadmin/phpmyadmin.git
@@ -296,8 +341,8 @@
     config_file: phpmyadmin/phpunit.xml.hhvm
   phpunit:
     url: https://github.com/sebastianbergmann/phpunit.git
-    branch: 4.0.9
-    commit: c7e9e4b1253142acda4cb86a7686db412684fe04
+    branch: 4.0.14
+    commit: a80b77d92a6c7723d77c6728b4ae37e92a65ac1d
     install_root: phpunit
     test_root: phpunit
   proxymanager:
@@ -313,7 +358,7 @@
     url: https://github.com/cboden/Ratchet.git
     # "stable" might be 0.3, but master seems reasonable to test against
     branch: master
-    commit: f2c67b346084e70c66922cde6af909b74c2a1ca8
+    commit: 006a9573cee3d30a721f137facd5467f4e63bed8
     install_root: ratchet
     test_root: ratchet
   reactphp:
@@ -341,8 +386,8 @@
     test_root: slim
   symfony:
     url: https://github.com/symfony/symfony.git
-    branch: v2.4.2
-    commit: b70633f92ff71ef490af4c17e7ca3f3bf3d0f304
+    branch: v2.4.3
+    commit: 3199b2e0d194f71fe2e13c95768b2ef22206682b
     install_root: symfony
     test_root: symfony
     blacklist:
@@ -350,6 +395,9 @@
       - symfony/src/Symfony/Component/Process/Tests/SigchildDisabledProcessTest.php
       - symfony/src/Symfony/Component/Process/Tests/SigchildEnabledProcessTest.php
       - symfony/src/Symfony/Component/Process/Tests/SimpleProcessTest.php
+    clowns:
+      # Broken test. Fixed in symfony master, but not yet in release.
+      - symfony/src/Symfony/Component/ClassLoader/Tests/ApcUniversalClassLoaderTest.php
   twig:
     url: https://github.com/fabpot/Twig.git
     branch: v1.15.1

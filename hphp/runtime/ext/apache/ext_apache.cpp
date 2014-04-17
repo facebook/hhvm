@@ -90,12 +90,12 @@ Array HHVM_FUNCTION(apache_get_config) {
     workers = HttpServer::Server->getPageServer()->getActiveWorker();
     queued = HttpServer::Server->getPageServer()->getQueuedJobs();
   }
-  ArrayInit ret(4);
-  ret.set(s_restart_time, HttpServer::StartTime);
-  ret.set(s_max_clients, RuntimeOption::ServerThreadCount);
-  ret.set(s_active_clients, workers);
-  ret.set(s_queued_requests, queued);
-  return ret.create();
+  return make_map_array(
+    s_restart_time, HttpServer::StartTime,
+    s_max_clients, RuntimeOption::ServerThreadCount,
+    s_active_clients, workers,
+    s_queued_requests, queued
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

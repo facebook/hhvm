@@ -24,11 +24,14 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/bstring.h"
 #include <langinfo.h>
-#include "hphp/runtime/ext/ext_class.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // transformations and manipulations
+
+extern const HPHP::StaticString k_HPHP_TRIM_CHARLIST;
+extern const int64_t k_STR_PAD_RIGHT;
+extern const int64_t k_ENT_COMPAT;
 
 String f_addcslashes(const String& str, const String& charlist);
 String f_stripcslashes(const String& str);

@@ -51,7 +51,7 @@ w
 switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:24
-#1  genBar ()
+#1  genBar (43)
 #2  WaitHandle::join ()
     at %s/async_stack.php:46
 #3  main (42)
@@ -75,7 +75,7 @@ w
 switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:24
-#1  genBar ()
+#1  genBar (44)
 #2  WaitHandle::join ()
     at %s/async_stack.php:46
 #3  main (42)
@@ -99,7 +99,7 @@ w
 switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:15
-#1  gen2 ()
+#1  gen2 (45)
 #2  WaitHandle::join ()
     at %s/async_stack.php:46
 #3  main (42)
@@ -126,7 +126,7 @@ switching stack contexts (async->sync) resetting stack state
     at %s/async_stack.php:8
 #1  gen1 (45)
     at %s/async_stack.php:15
-#2  gen2 ()
+#2  gen2 (45)
 #3  WaitHandle::join ()
     at %s/async_stack.php:46
 #4  main (42)
@@ -149,10 +149,10 @@ w
 switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:8
-#1  gen1 ()
+#1  gen1 (45)
 #2  WaitHandle::join ()
     at %s/async_stack.php:15
-#3  gen2 ()
+#3  gen2 (45)
 #4  WaitHandle::join ()
     at %s/async_stack.php:46
 #5  main (42)

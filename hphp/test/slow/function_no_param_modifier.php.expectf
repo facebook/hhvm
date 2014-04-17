@@ -1,2 +1,1 @@
-
-Fatal error: syntax error, unexpected T_PUBLIC, expecting '&' or T_VARIABLE in %s/test/slow/function_no_param_modifier.php on line 6
+Fatal error: syntax error, unexpected T_PUBLIC, expecting %s in %s/test/slow/function_no_param_modifier.php on line 6

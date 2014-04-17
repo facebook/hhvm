@@ -39,6 +39,11 @@ namespace JIT {
 
 struct PropInfo;
 
+enum class IRGenMode {
+  Trace,
+  CFG,
+};
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -71,7 +76,10 @@ struct HhbcTranslator {
 
   // In between each emit* call, irtranslator indicates the new
   // bytecode offset (or whether we're finished) using this API.
-  void setBcOff(Offset newOff, bool lastBcOff, bool maybeStartBlock = false);
+  void setBcOff(Offset newOff, bool lastBcOff);
+
+  void      setGenMode(IRGenMode mode);
+  IRGenMode genMode() const { return m_mode; }
 
   // End a bytecode block and do the right thing with fallthrough.
   void endBlock(Offset next);
@@ -203,7 +211,10 @@ struct HhbcTranslator {
   void emitUnboxR();
   void emitJmpZ(Offset taken, Offset next, bool bothPaths);
   void emitJmpNZ(Offset taken, Offset next, bool bothPaths);
-  void emitJmp(int32_t offset, bool breakTracelet, bool noSurprise);
+  void emitJmp(int32_t offset, bool breakTracelet, Block* catchBlock);
+  void emitJmp(int32_t offset, bool breakTracelet, bool noSurprise) {
+    emitJmp(offset, breakTracelet, noSurprise ? nullptr : makeCatch());
+  }
   void emitGt()    { emitCmp(Gt);    }
   void emitGte()   { emitCmp(Gte);   }
   void emitLt()    { emitCmp(Lt);    }
@@ -388,11 +399,10 @@ struct HhbcTranslator {
 
   // continuations
   void emitCreateCont(Offset resumeOffset);
-  void emitContReturnControl();
+  void emitContReturnControl(Block* catchBlock);
   void emitContSuspendImpl(Offset resumeOffset);
   void emitContSuspend(Offset resumeOffset);
   void emitContSuspendK(Offset resumeOffset);
-  void emitContRetC();
   void emitContCheck(bool checkStarted);
   void emitContValid();
   void emitContKey();
@@ -401,8 +411,8 @@ struct HhbcTranslator {
 
   // async functions
   void emitAsyncAwait();
-  void emitAsyncESuspend(Offset resumeOffset, int iters);
-  void emitAsyncWrapResult();
+  void emitAsyncSuspendE(Offset resumeOffset, int iters);
+  void emitAsyncSuspendR(Offset resumeOffset);
 
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force);
@@ -653,11 +663,12 @@ private:
                             bool& checkForInt);
   Type assertObjType(const StringData*);
   void destroyName(SSATmp* name);
-  SSATmp* ldClsPropAddr(Block* catchBlock, SSATmp* cls, SSATmp* name);
+  SSATmp* ldClsPropAddr(Block* catchBlock, SSATmp* cls,
+                        SSATmp* name, bool raise);
   void emitUnboxRAux();
   void emitAGet(SSATmp* src, Block* catchBlock);
   void emitRetFromInlined(Type type);
-  SSATmp* emitDecRefLocalsInline(SSATmp* retVal);
+  void emitDecRefLocalsInline();
   void emitRet(Type type, bool freeInline);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
@@ -671,8 +682,9 @@ private:
   template<class Lambda>
   SSATmp* emitMIterInitCommon(int offset, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
-  void emitJmpSurpriseCheck();
-  void emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator);
+  void emitJmpSurpriseCheck(Block* catchBlock);
+  void emitRetSurpriseCheck(SSATmp* retVal, Block* catchBlock,
+                            bool suspendingResumed);
   void classExistsImpl(ClassKind);
 
   folly::Optional<Type> interpOutputType(const NormalizedInstruction&,
@@ -721,13 +733,14 @@ private: // Exit trace creation routines.
   template<typename Body>
   Block* makeCatchImpl(Body body);
   Block* makeCatch(std::vector<SSATmp*> extraSpill =
-                   std::vector<SSATmp*>());
+                   std::vector<SSATmp*>(),
+                   int64_t numPop = 0);
   Block* makeCatchNoSpill();
 
   /*
    * Create a block for a branch target that will be generated later.
    */
-  Block* makeBlock(Offset);
+  Block* makeBlock(Offset offset);
 
   /*
    * Implementation for the above.  Takes spillValues, target offset,
@@ -757,7 +770,8 @@ public:
   Class*      curClass()    const { return curFunc()->cls(); }
   Unit*       curUnit()     const { return curFunc()->unit(); }
   Offset      bcOff()       const { return m_bcStateStack.back().bcOff; }
-  SrcKey      curSrcKey()   const { return SrcKey(curFunc(), bcOff()); }
+  SrcKey      curSrcKey()   const { return SrcKey(curFunc(), bcOff(),
+                                                  inGenerator()); }
   bool        inGenerator() const { return m_bcStateStack.back().inGenerator; }
   size_t      spOffset()    const;
   Type        topType(uint32_t i, TypeConstraint c = DataTypeSpecific) const;
@@ -775,7 +789,7 @@ private:
    * tracelet or not).
    */
   SrcKey nextSrcKey() const {
-    SrcKey srcKey(curFunc(), bcOff());
+    SrcKey srcKey = curSrcKey();
     srcKey.advance(curFunc()->unit());
     return srcKey;
   }
@@ -823,7 +837,8 @@ private:
   SSATmp* topR(uint32_t i = 0) { return top(Type::Gen, i); }
   std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(SSATmp* sp,
-                         const std::vector<SSATmp*>& spillVals);
+                         const std::vector<SSATmp*>& spillVals,
+                         int64_t extraOffset = 0);
   SSATmp* spillStack();
   void    exceptionBarrier();
   SSATmp* ldStackAddr(int32_t offset, TypeConstraint tc);
@@ -899,6 +914,8 @@ private:
    * is always matched with corresponding push()/pop().
    */
   std::stack<std::pair<SSATmp*,int32_t>> m_fpiActiveStack;
+
+  IRGenMode m_mode;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -98,6 +98,7 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/pendq.h"
+#include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/type-profile.h"
@@ -114,6 +115,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/unwind-arm.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
@@ -539,7 +541,7 @@ MCGenerator::getCallArrayPrologue(Func* func) {
     }
     func->setFuncBody(tca);
   } else {
-    SrcKey sk(func, func->base());
+    SrcKey sk(func, func->base(), false);
     tca = mcg->getTranslation(TranslArgs(sk, false).setFuncBody());
   }
 
@@ -641,7 +643,7 @@ TCA
 MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
-  int numParams = func->numParams();
+  int const numParams = func->numNonVariadicParams();
   int paramIndex = nPassed <= numParams ? nPassed : numParams + 1;
 
   bool const funcIsMagic = func->isMagic();
@@ -651,7 +653,7 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
 
   Offset entry = func->getEntryForNumArgs(nPassed);
-  SrcKey funcBody(func, entry);
+  SrcKey funcBody(func, entry, false);
 
   if (func->isClonedClosure()) {
     assert(ar);
@@ -777,11 +779,11 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId,
   // cloned closures because their prologues are actually the DV
   // funclets already.
   TCA triggerSkStart = nullptr;
-  if (nArgs < func->numParams() && !func->isClonedClosure()) {
+  if (nArgs < func->numNonVariadicParams() && !func->isClonedClosure()) {
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
       m_tx.setMode(TransOptimize);
-      SrcKey  funcletSK(func, paramInfo.funcletOff());
+      SrcKey  funcletSK(func, paramInfo.funcletOff(), false);
       TransID funcletTransId = m_tx.profData()->dvFuncletTransId(func, nArgs);
       if (funcletTransId != InvalidID) {
         invalidateSrcKey(funcletSK);
@@ -817,7 +819,8 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
   TCA triggerStart = nullptr;
   std::vector<TransID> prologTransIDs;
 
-  for (int nArgs = 0; nArgs <= func->numParams() + 1; nArgs++) {
+  auto const limit = func->numNonVariadicParams() + 1;
+  for (int nArgs = 0; nArgs <= limit; nArgs++) {
     TransID tid = m_tx.profData()->prologueTransId(func, nArgs);
     if (tid != InvalidID) {
       prologTransIDs.push_back(tid);
@@ -924,7 +927,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
   if (!writer) return nullptr;
   Offset offWillExplore = taken ? offTaken : offNotTaken;
   Offset offWillDefer = taken ? offNotTaken : offTaken;
-  SrcKey dest(f, offWillExplore);
+  SrcKey dest(f, offWillExplore, liveResumed());
   TRACE(3, "bindJmpccFirst: explored %d, will defer %d; overwriting cc%02x "
         "taken %d\n",
         offWillExplore, offWillDefer, cc, taken);
@@ -991,7 +994,7 @@ TCA
 MCGenerator::bindJmpccSecond(TCA toSmash, const Offset off,
                              ConditionCode cc, bool& smashed) {
   const Func* f = liveFunc();
-  SrcKey dest(f, off);
+  SrcKey dest(f, off, liveResumed());
   TCA branch = getTranslation(TranslArgs(dest, true));
   if (branch) {
     LeaseHolder writer(Translator::WriteLease());
@@ -1109,6 +1112,33 @@ extern "C" void enterTCHelper(Cell* vm_sp,
                               ActRec* firstAR,
                               void* targetCacheBase);
 
+/*
+ * A partial equivalent of enterTCHelper, used to set up the ARM simulator.
+ */
+uintptr_t setupSimRegsAndStack(vixl::Simulator& sim,
+                               uintptr_t saved_rStashedAr) {
+  sim.   set_xreg(ARM::rGContextReg.code(), g_context.getNoCheck());
+  sim.   set_xreg(ARM::rVmFp.code(), vmfp());
+  sim.   set_xreg(ARM::rVmSp.code(), vmsp());
+  sim.   set_xreg(ARM::rVmTl.code(), RDS::tl_base);
+  sim.   set_xreg(ARM::rStashedAR.code(), saved_rStashedAr);
+
+  // Leave space for register spilling and MInstrState.
+  sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
+  assert(sim.is_on_stack(reinterpret_cast<void*>(sim.sp())));
+
+  auto spOnEntry = sim.sp();
+
+  // Push the link register onto the stack. The link register is
+  // technically caller-saved; what this means in practice is that
+  // non-leaf functions push it at the very beginning and pop it just
+  // before returning (as opposed to just saving it around calls).
+  sim.   set_sp(sim.sp() - 16);
+  *reinterpret_cast<uint64_t*>(sim.sp()) = sim.lr();
+
+  return spOnEntry;
+}
+
 
 struct TReqInfo {
   uintptr_t requestNum;
@@ -1156,7 +1186,7 @@ MCGenerator::enterTC(TCA start, void* data) {
       g_context->dispatchBB();
       PC newPc = g_context->getPC();
       if (!newPc) { g_context->m_fp = 0; return; }
-      sk = SrcKey(liveFunc(), newPc);
+      sk = SrcKey(liveFunc(), newPc, liveResumed());
       start = getTranslation(TranslArgs(sk, true));
     }
     assert(start == m_tx.uniqueStubs.funcBodyHelperThunk ||
@@ -1204,37 +1234,14 @@ MCGenerator::enterTC(TCA start, void* data) {
           Stats::inc(Stats::vixl_SimulatedLoad, sim.load_count());
           Stats::inc(Stats::vixl_SimulatedStore, sim.store_count());
         };
-        sim.set_exception_hook(
-          [] (vixl::Simulator* s) {
-            if (tl_regState == VMRegState::DIRTY) {
-              // This is a pseudo-copy of the logic in sync_regstate.
-              mcg->fixupMap().fixupWorkSimulated(g_context.getNoCheck());
-              tl_regState = VMRegState::CLEAN;
-            }
-          }
-        );
+
+        sim.set_exception_hook(ARM::simulatorExceptionHook);
 
         g_context->m_activeSims.push_back(&sim);
         SCOPE_EXIT { g_context->m_activeSims.pop_back(); };
 
-        sim.   set_xreg(ARM::rGContextReg.code(), g_context.getNoCheck());
-        sim.   set_xreg(ARM::rVmFp.code(), vmfp());
-        sim.   set_xreg(ARM::rVmSp.code(), vmsp());
-        sim.   set_xreg(ARM::rVmTl.code(), RDS::tl_base);
-        sim.   set_xreg(ARM::rStashedAR.code(), info.saved_rStashedAr);
-
-        // Leave space for register spilling and MInstrState.
-        sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
-        assert(sim.is_on_stack(reinterpret_cast<void*>(sim.sp())));
-
-        DEBUG_ONLY auto spOnEntry = sim.sp();
-
-        // Push the link register onto the stack. The link register is
-        // technically caller-saved; what this means in practice is that
-        // non-leaf functions push it at the very beginning and pop it just
-        // before returning (as opposed to just saving it around calls).
-        sim.   set_sp(sim.sp() - 16);
-        *reinterpret_cast<uint64_t*>(sim.sp()) = sim.lr();
+        DEBUG_ONLY auto spOnEntry =
+          setupSimRegsAndStack(sim, info.saved_rStashedAr);
 
         // The handshake is different in the case of REQ_BIND_CALL. The code
         // we're jumping to expects to find a return address in x30, and a saved
@@ -1357,7 +1364,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
           // are still profiling ones (living in code.prof()), then
           // save toSmash as a caller to the prologue, so that it can
           // later be smashed to call a new prologue when it's generated.
-          int calleeNumParams = func->numParams();
+          int calleeNumParams = func->numNonVariadicParams();
           int calledPrologNumArgs = (nArgs <= calleeNumParams ?
                                      nArgs :  calleeNumParams + 1);
           if (code.prof().contains(dest)) {
@@ -1397,7 +1404,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
   {
     TCA toSmash = (TCA)args[0];
     Offset off = args[1];
-    sk = SrcKey(liveFunc(), off);
+    sk = SrcKey(liveFunc(), off, liveResumed());
     if (requestNum == JIT::REQ_BIND_SIDE_EXIT) {
       SKTRACE(3, sk, "side exit taken!\n");
     }
@@ -1413,7 +1420,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     start = bindJmpccFirst(toSmash, offTaken, offNotTaken,
                            taken, cc, smashed);
     // SrcKey: we basically need to emulate the fail
-    sk = SrcKey(liveFunc(), taken ? offTaken : offNotTaken);
+    sk = SrcKey(liveFunc(), taken ? offTaken : offNotTaken, liveResumed());
   } break;
 
   case JIT::REQ_BIND_JMPCC_SECOND: {
@@ -1421,14 +1428,13 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     Offset off = (Offset)args[1];
     ConditionCode cc = ConditionCode(args[2]);
     start = bindJmpccSecond(toSmash, off, cc, smashed);
-    sk = SrcKey(liveFunc(), off);
+    sk = SrcKey(liveFunc(), off, liveResumed());
   } break;
 
   case JIT::REQ_RETRANSLATE_OPT: {
-    FuncId  funcId  = (FuncId) args[0];
-    Offset  offset  = (Offset) args[1];
-    TransID transId = (TransID)args[2];
-    sk = SrcKey(funcId, offset);
+    auto ai = (SrcKey::AtomicInt)args[0];
+    TransID transId = (TransID)args[1];
+    sk = SrcKey::fromAtomicInt(ai);
     start = retranslateOpt(transId, false);
     SKTRACE(2, sk, "retranslated-OPT: transId = %d  start: @%p\n", transId,
             start);
@@ -1437,7 +1443,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
 
   case JIT::REQ_RETRANSLATE: {
     INC_TPC(retranslate);
-    sk = SrcKey(liveFunc(), (Offset)args[0]);
+    sk = SrcKey(liveFunc(), (Offset)args[0], liveResumed());
     start = retranslate(TranslArgs(sk, true));
     SKTRACE(2, sk, "retranslated @%p\n", start);
   } break;
@@ -1452,7 +1458,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
      * axiom.
      */
     assert(numInstrs >= 0);
-    SKTRACE(5, SrcKey(liveFunc(), off), "interp: enter\n");
+    SKTRACE(5, SrcKey(liveFunc(), off, liveResumed()), "interp: enter\n");
     if (numInstrs) {
       s_perfCounters[tpc_interp_instr] += numInstrs;
       g_context->dispatchN(numInstrs);
@@ -1463,7 +1469,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     }
     PC newPc = g_context->getPC();
     if (!newPc) { g_context->m_fp = 0; return false; }
-    SrcKey newSk(liveFunc(), newPc);
+    SrcKey newSk(liveFunc(), newPc, liveResumed());
     SKTRACE(5, newSk, "interp: exit\n");
     sk = newSk;
     start = getTranslation(TranslArgs(newSk, true));
@@ -1478,7 +1484,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     Unit* destUnit = caller->m_func->unit();
     // Set PC so logging code in getTranslation doesn't get confused.
     vmpc() = destUnit->at(caller->m_func->base() + ar->m_soff);
-    SrcKey dest(caller->m_func, vmpc());
+    SrcKey dest(caller->m_func, vmpc(), caller->inGenerator());
     sk = dest;
     start = getTranslation(TranslArgs(dest, true));
     TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
@@ -1491,7 +1497,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
       g_context->m_fp = 0;
       return false;
     }
-    SrcKey dest(liveFunc(), vmpc());
+    SrcKey dest(liveFunc(), vmpc(), liveResumed());
     sk = dest;
     start = getTranslation(TranslArgs(dest, true));
   } break;
@@ -1600,7 +1606,7 @@ TCA MCGenerator::getFreeStub() {
 ExecutionContext*                                                       \
 interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {                 \
   interp_set_regs(ar, sp, pcOff);                                       \
-  SKTRACE(5, SrcKey(liveFunc(), vmpc()), "%40s %p %p\n",                \
+  SKTRACE(5, SrcKey(liveFunc(), vmpc(), liveResumed()), "%40s %p %p\n", \
           "interpOne" #opcode " before (fp,sp)",                        \
           vmfp(), vmsp());                                              \
   assert(*reinterpret_cast<const Op*>(vmpc()) == Op::opcode);           \
@@ -1686,7 +1692,7 @@ MCGenerator::emitNativeTrampoline(TCA helperAddr) {
   a.    jmp    (helperAddr);
   a.    ud2    ();
 
-  trampolineMap[helperAddr] = trampAddr;
+  m_trampolineMap[helperAddr] = trampAddr;
   recordBCInstr(OpNativeTrampoline, trampolines, trampAddr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTrampolineToVtune(trampAddr, trampolines.frontier() - trampAddr);
@@ -1700,7 +1706,7 @@ MCGenerator::getNativeTrampoline(TCA helperAddr) {
   if (!RuntimeOption::EvalJitTrampolines && !Stats::enabled()) {
     return helperAddr;
   }
-  auto const trampAddr = (TCA)folly::get_default(trampolineMap, helperAddr);
+  auto const trampAddr = (TCA)folly::get_default(m_trampolineMap, helperAddr);
   if (trampAddr) {
     return trampAddr;
   }
@@ -1898,6 +1904,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
     Translator::RegionBlacklist regionInterps;
     Offset initSpOffset = region ? region->blocks[0]->initialSpOffset()
                                  : liveSpOff();
+    bool bcControlFlow = RuntimeOption::EvalHHIRBytecodeControlFlow;
+
     while (result == Translator::Retry) {
       m_tx.traceStart(sk.offset(), initSpOffset, liveFrame()->inGenerator(),
                       sk.func());
@@ -1907,7 +1915,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
       if (region) {
         try {
           assertCleanState();
-          result = m_tx.translateRegion(*region, regionInterps);
+          result = m_tx.translateRegion(*region, bcControlFlow, regionInterps);
 
           // If we're profiling, grab the postconditions so we can
           // use them in region selection whenever we decide to retranslate.
@@ -1918,6 +1926,13 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
           FTRACE(2, "translateRegion finished with result {}\n",
                  Translator::translateResultName(result));
+        } catch (ControlFlowFailedExc& cfe) {
+          FTRACE(2, "translateRegion with control flow failed: '{}'\n",
+                 cfe.what());
+          always_assert(bcControlFlow &&
+            "control flow translation failed, but control flow not enabled");
+          bcControlFlow = false;
+          result = Translator::Retry;
         } catch (const std::exception& e) {
           FTRACE(1, "translateRegion failed with '{}'\n", e.what());
           result = Translator::Failure;
@@ -2052,6 +2067,12 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
 Translator::TranslateResult
 MCGenerator::translateTracelet(Tracelet& t) {
+  if (RuntimeOption::EvalJitRegionSelector != "") {
+    // In order to properly simulate a post-Tracelet world, refuse to translate
+    // Tracelets when a region selector is active.
+    return Translator::Failure;
+  }
+
   Timer _t(Timer::translateTracelet);
 
   FTRACE(2, "attempting to translate tracelet:\n{}\n", t.toString());
@@ -2103,7 +2124,8 @@ MCGenerator::translateTracelet(Tracelet& t) {
       if (!enabled) return;
       if (t.m_sk.offset() != t.func()->base()) return;
       if (auto last = t.m_instrStream.last) {
-        if (last->op() != OpRetC && last->op() != OpRetV) {
+        if (last->op() != OpRetC && last->op() != OpRetV &&
+            last->op() != OpCreateCont && last->op() != OpAsyncSuspend) {
           return;
         }
       }
@@ -2116,8 +2138,7 @@ MCGenerator::translateTracelet(Tracelet& t) {
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
          ni = ni->next) {
       ht.setBcOff(ni->source.offset(),
-                  ni->breaksTracelet && !ht.isInlining(),
-                  true);
+                  ni->breaksTracelet && !ht.isInlining());
       readMetaData(metaHand, *ni, m_tx.irTrans()->hhbcTrans(),
                    m_tx.mode() == TransProfile, MetaMode::Legacy);
 
@@ -2151,7 +2172,7 @@ MCGenerator::translateTracelet(Tracelet& t) {
     } catch (JIT::FailedCodeGen& fcg) {
       // Code-gen failed. Search for the bytecode instruction that caused the
       // problem, flag it to be interpreted, and retranslate the tracelet.
-      SrcKey sk{fcg.vmFunc, fcg.bcOff};
+      SrcKey sk{fcg.vmFunc, fcg.bcOff, fcg.resumed};
 
       for (auto ni = t.m_instrStream.first; ni; ni = ni->next) {
         if (ni->source == sk) {
@@ -2473,8 +2494,8 @@ bool MCGenerator::addDbgGuards(const Unit* unit) {
   return true;
 }
 
-bool MCGenerator::addDbgGuard(const Func* func, Offset offset) {
-  SrcKey sk(func, offset);
+bool MCGenerator::addDbgGuard(const Func* func, Offset offset, bool resumed) {
+  SrcKey sk(func, offset, resumed);
   {
     if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
       if (sr->hasDebuggerGuard()) {
@@ -2531,7 +2552,7 @@ bool MCGenerator::dumpTCCode(const char* filename) {
     result = (fwrite(code.stubs().base(), 1, count, astubFile) == count);
   }
   if (result) {
-    for (auto const& pair : trampolineMap) {
+    for (auto const& pair : m_trampolineMap) {
       void* helperAddr = pair.first;
       void* trampAddr = pair.second;
       auto functionName = getNativeFunctionName(helperAddr);

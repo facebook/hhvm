@@ -27,17 +27,14 @@ TRACE_SET_MOD(hhir);
 namespace HPHP {
 namespace JIT {
 
-FrameState::FrameState(IRUnit& unit)
-  : FrameState(unit, unit.entry()->front().marker())
-{
-}
-
 FrameState::FrameState(IRUnit& unit, BCMarker marker)
-  : FrameState(unit, marker.spOff, marker.func)
+  : FrameState(unit, marker.spOff(), marker.func(), marker.func()->numLocals())
 {
+  assert(!marker.isDummy());
 }
 
-FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func)
+FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func,
+                       uint32_t numLocals)
   : m_unit(unit)
   , m_curFunc(func)
   , m_spValue(nullptr)
@@ -47,13 +44,10 @@ FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func)
   , m_frameSpansCall(false)
   , m_stackDeficit(0)
   , m_evalStack()
-  , m_locals(func->numLocals())
+  , m_locals(numLocals)
   , m_enableCse(false)
   , m_snapshots()
 {
-}
-
-FrameState::~FrameState() {
 }
 
 void FrameState::update(const IRInstruction* inst) {
@@ -414,6 +408,9 @@ void FrameState::finishBlock(Block* block) {
   if (!block->back().isTerminal()) {
     save(block->next());
   }
+  if (m_building) {
+    save(block);
+  }
 }
 
 void FrameState::pauseBlock(Block* block) {
@@ -607,13 +604,14 @@ void FrameState::clearCse() {
 }
 
 SSATmp* FrameState::cseLookup(IRInstruction* inst,
-                                const folly::Optional<IdomVector>& idoms) {
+                              Block* srcBlock,
+                              const folly::Optional<IdomVector>& idoms) {
   auto tmp = cseHashTable(inst)->lookup(inst);
   if (tmp && idoms) {
     // During a reoptimize pass, we need to make sure that any values
     // we want to reuse for CSE are only reused in blocks dominated by
     // the block that defines it.
-    if (!dominates(tmp->inst()->block(), inst->block(), *idoms)) {
+    if (!dominates(tmp->inst()->block(), srcBlock, *idoms)) {
       return nullptr;
     }
   }
@@ -736,7 +734,7 @@ void FrameState::dropLocalInnerType(uint32_t id, unsigned inlineIdx) {
 std::string show(const FrameState& state) {
   return folly::format("func: {}, bcOff: {}, spOff: {}{}{}",
                        state.func()->fullName()->data(),
-                       state.marker().bcOff,
+                       state.marker().bcOff(),
                        state.spOffset(),
                        state.thisAvailable() ? ", thisAvailable" : "",
                        state.frameSpansCall() ? ", frameSpansCall" : ""

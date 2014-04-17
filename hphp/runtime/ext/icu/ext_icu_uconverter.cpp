@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -270,6 +270,13 @@ static void HHVM_METHOD(UConverter, __construct, const String& toEncoding,
   }
 }
 
+// TODO(4017519)
+static void HHVM_METHOD(UConverter, __destruct) {
+  FETCH_CNV(data, this_,);
+  if (data->src()) ucnv_close(data->src());
+  if (data->dest()) ucnv_close(data->dest());
+}
+
 /* Get algorithmic types */
 
 static int64_t HHVM_METHOD(UConverter, getSourceType) {
@@ -488,6 +495,8 @@ static Variant HHVM_STATIC_METHOD(UConverter, getStandardName,
 
 void IntlExtension::initUConverter() {
   HHVM_ME(UConverter, __construct);
+  // TODO(4017519)
+  HHVM_ME(UConverter, __destruct);
   HHVM_ME(UConverter, convert);
   HHVM_ME(UConverter, getDestinationEncoding);
   HHVM_ME(UConverter, getSourceEncoding);

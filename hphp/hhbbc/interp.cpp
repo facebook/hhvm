@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -60,7 +60,6 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_Exception("Exception");
-const StaticString s_Continuation("Continuation");
 const StaticString s_empty("");
 const StaticString s_construct("__construct");
 
@@ -187,6 +186,7 @@ void in(ISS& env, const bc::UnboxR&) {
 
 void in(ISS& env, const bc::UnboxRNop&) {
   nothrow(env);
+  constprop(env);
   auto const t = popR(env);
   push(env, t.subtypeOf(TInitCell) ? t : TInitCell);
 }
@@ -1831,14 +1831,8 @@ void in(ISS& env, const bc::CreateCl& op) {
 }
 
 void in(ISS& env, const bc::CreateCont& op) {
-  // Resume point of this Continuation.
+  // First resume is always next() which pushes null.
   push(env, TInitNull);
-  env.propagate(*op.target, env.state);
-  popC(env);
-
-  // Normal execution flow.
-  unsetLocals(env);
-  push(env, objExact(env.index.builtin_class(s_Continuation.get())));
 }
 
 void in(ISS& env, const bc::ContEnter&) { popC(env); }
@@ -1855,17 +1849,11 @@ void in(ISS& env, const bc::ContSuspendK&) {
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::ContRetC&) {
-  popC(env);
-  doRet(env, TBottom);
-}
-
 void in(ISS& env, const bc::ContCheck&)   {}
 void in(ISS& env, const bc::ContValid&)   { push(env, TBool); }
 void in(ISS& env, const bc::ContKey&)     { push(env, TInitCell); }
 void in(ISS& env, const bc::ContCurrent&) { push(env, TInitCell); }
 void in(ISS& env, const bc::ContStopped&) {}
-void in(ISS& env, const bc::ContHandle&)  { popC(env); }
 
 void in(ISS& env, const bc::AsyncAwait&) {
   // We handle this better if we manage to group the opcode.
@@ -1874,44 +1862,16 @@ void in(ISS& env, const bc::AsyncAwait&) {
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::AsyncWrapResult&) {
-  auto const t = popC(env);
-  push(env, wait_handle(env.index, t));
-}
-
-void in(ISS& env, const bc::AsyncESuspend& op) {
+void in(ISS& env, const bc::AsyncSuspend& op) {
   auto const t = popC(env);
 
-  // Resume point of this async function.
+  // The next opcode is reachable via suspend-resume.
   if (!is_specialized_wait_handle(t) || is_opt(t)) {
     // Uninferred garbage?
     push(env, TInitCell);
-    env.propagate(*op.target, env.state);
-    popC(env);
   } else {
-    auto const inner = wait_handle_inner(t);
-    if (!inner.subtypeOf(TBottom)) {
-      // A wait handle not known to always throw?
-      push(env, inner);
-      env.propagate(*op.target, env.state);
-      popC(env);
-    }
+    push(env, wait_handle_inner(t));
   }
-
-  /*
-   * A suspended async function WaitHandle must end up returning
-   * whatever type we infer the eagerly executed part of the function
-   * will return, so we don't want it to influence that type.  Using
-   * WaitH<Bottom> handles this, but note that it relies on the rule
-   * that the only thing you can do with the output of this opcode
-   * is pass it to RetC.
-   */
-  unsetLocals(env);
-  push(env, wait_handle(env.index, TBottom));
-}
-
-void in(ISS& env, const bc::AsyncResume&)  {
-  // Can throw, async function can resume here with an exception.
 }
 
 void in(ISS& env, const bc::Strlen&) {
@@ -2156,6 +2116,10 @@ StepFlags step(Interp& interp, const Bytecode& op) {
   ISS env { interp, flags, noop };
   dispatch(env, op);
   return flags;
+}
+
+void default_dispatch(ISS& env, const Bytecode& op) {
+  dispatch(env, op);
 }
 
 //////////////////////////////////////////////////////////////////////

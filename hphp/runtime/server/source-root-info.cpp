@@ -21,6 +21,7 @@
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/base/php-globals.h"
 
 using std::map;
 
@@ -200,8 +201,8 @@ void SourceRootInfo::handleError(Transport *t) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void SourceRootInfo::setServerVariables(Array& server) const {
-  if (!sandboxOn()) return;
+Array SourceRootInfo::setServerVariables(Array server) const {
+  if (!sandboxOn()) return std::move(server);
   for (auto it = RuntimeOption::SandboxServerVariables.begin();
        it != RuntimeOption::SandboxServerVariables.end();
        ++it) {
@@ -212,6 +213,8 @@ void SourceRootInfo::setServerVariables(Array& server) const {
   if (!m_serverVars.empty()) {
     server += m_serverVars;
   }
+
+  return std::move(server);
 }
 
 Eval::DSandboxInfo SourceRootInfo::getSandboxInfo() const {
@@ -266,9 +269,7 @@ const StaticString
   s_PHP_ROOT("PHP_ROOT");
 
 std::string& SourceRootInfo::initPhpRoot() {
-  GlobalVariables *g = get_global_variables();
-  const Variant& server = g->get(s_SERVER);
-  const Variant& v = server.toArray().rvalAt(s_PHP_ROOT);
+  auto v = php_global(s_SERVER).toArray().rvalAt(s_PHP_ROOT);
   if (v.isString()) {
     *s_phproot.getCheck() = std::string(v.asCStrRef().data()) + "/";
   } else {

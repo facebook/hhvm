@@ -1,0 +1,17 @@
+$undef->foo should warn ("Creating default object from default value"):
+
+Warning: Creating default object from empty value in %s/test/slow/object_property/null_promotion_hh.php on line 8
+object(stdClass)#1 (1) {
+  ["derp"]=>
+  string(6) "foobar"
+}
+As should $undef->foo["bar"]:
+
+Warning: Creating default object from empty value in %s/test/slow/object_property/null_promotion_hh.php on line 11
+object(stdClass)#2 (1) {
+  ["bar"]=>
+  array(1) {
+    ["baz"]=>
+    string(8) "herpderp"
+  }
+}

@@ -15,9 +15,41 @@
 #   +----------------------------------------------------------------------+
 #
 
+if (EXISTS "public_tld")
+  # I'm sorry, but facebook's internal repo has the top level dir stored inside
+  # of hphp/, so we need to pull that one in first if it exists
+  CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
+  PROJECT(hphp C CXX ASM)
+  SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/public_tld/CMake"
+                        ${CMAKE_MODULE_PATH})
+  set(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/public_tld/third-party/")
+  if (NOT EXISTS ${TP_DIR})
+    message(FATAL_ERROR "I can't find ${TP_DIR}. Maybe try\ngit submodule update --init --recursive")
+  endif()
+  add_subdirectory(${TP_DIR})
+else()
+  set(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../third-party/")
+endif()
+
+include_directories("${TP_DIR}/libsqlite3")
+include_directories("${TP_DIR}/timelib")
+include_directories("${TP_DIR}/libafdt/src")
+include_directories("${TP_DIR}/libmbfl")
+include_directories("${TP_DIR}/libmbfl/mbfl")
+include_directories("${TP_DIR}/libmbfl/filter")
+include_directories("${TP_DIR}/lz4")
+include_directories("${TP_DIR}/double-conversion/src")
+include_directories("${TP_DIR}/folly")
+include_directories("${TP_DIR}/libzip")
+include_directories("${TP_DIR}")
+
+# Some included files need to use relative paths, but they could be included
+# from anywhere, so give them a variable that points to a known place. Only use
+# this if your file is not named CMakeLists.txt
+set(HPHP_HOME ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
 include(HPHPSetup)
 include(FollySetup)
-include(ExtZendCompat)
 
 set_property(DIRECTORY
     PROPERTY COTIRE_PREFIX_HEADER_IGNORE_PATH
@@ -37,21 +69,9 @@ set_property(DIRECTORY
         "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}")
 
 add_definitions("-DHHVM")
+add_definitions("-DUSE_CMAKE")
 
 add_subdirectory(tools/bootstrap)
-
-add_subdirectory(third_party/libafdt)
-add_subdirectory(third_party/libmbfl)
-add_subdirectory(third_party/libsqlite3)
-add_subdirectory(third_party/timelib)
-add_subdirectory(third_party/lz4)
-add_subdirectory(third_party/double-conversion)
-add_subdirectory(third_party/folly)
-add_subdirectory(third_party/libzip)
-if(ENABLE_FASTCGI)
-	add_subdirectory(third_party/ti)
-	add_subdirectory(third_party/thrift)
-endif()
 
 add_subdirectory(compiler)
 add_subdirectory(hack)
@@ -62,6 +82,7 @@ add_subdirectory(parser)
 add_subdirectory(runtime)
 add_subdirectory(runtime/ext)
 add_subdirectory(runtime/ext_hhvm)
+add_subdirectory(runtime/ext_zend_compat)
 add_subdirectory(system)
 add_subdirectory(util)
 add_subdirectory(vixl)
@@ -69,7 +90,8 @@ add_subdirectory(zend)
 
 add_subdirectory(hhvm)
 
-if (NOT "$ENV{HPHP_NOTEST}" STREQUAL "1")
+option(TEST_BIN "Create the HHVM test binary" OFF)
+if (TEST_BIN)
 	add_subdirectory(test)
 endif ()
 

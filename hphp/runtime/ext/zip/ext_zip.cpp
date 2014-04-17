@@ -1128,22 +1128,29 @@ static bool HHVM_METHOD(ZipArchive, setCommentName, const String& name,
   return true;
 }
 
+const StaticString s_name("name");
+const StaticString s_index("index");
+const StaticString s_crc("crc");
+const StaticString s_size("size");
+const StaticString s_mtime("mtime");
+const StaticString s_comp_size("comp_size");
+const StaticString s_comp_method("comp_method");
+
 ALWAYS_INLINE
 static Array zipStatToArray(struct zip_stat* zipStat) {
   if (zipStat == nullptr) {
     return Array();
   }
 
-  ArrayInit stat(7);
-  stat.add(String("name"),        String(zipStat->name));
-  stat.add(String("index"),       VarNR(zipStat->index));
-  stat.add(String("crc"),         VarNR(static_cast<int64_t>(zipStat->crc)));
-  stat.add(String("size"),        VarNR(zipStat->size));
-  stat.add(String("mtime"),       VarNR(zipStat->mtime));
-  stat.add(String("comp_size"),   VarNR(zipStat->comp_size));
-  stat.add(String("comp_method"), VarNR(zipStat->comp_method));
-
-  return stat.create();
+  return make_map_array(
+    s_name,        String(zipStat->name),
+    s_index,       VarNR(zipStat->index),
+    s_crc,         VarNR(static_cast<int64_t>(zipStat->crc)),
+    s_size,        VarNR(zipStat->size),
+    s_mtime,       VarNR(zipStat->mtime),
+    s_comp_size,   VarNR(zipStat->comp_size),
+    s_comp_method, VarNR(zipStat->comp_method)
+  );
 }
 
 static Variant HHVM_METHOD(ZipArchive, statIndex, int64_t index,

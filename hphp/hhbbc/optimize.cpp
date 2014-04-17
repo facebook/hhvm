@@ -269,7 +269,10 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
     case Flavor::C:  gen(bc::PopC {}); break;
     case Flavor::V:  gen(bc::PopV {}); break;
     case Flavor::A:  gen(bc::PopA {}); break;
-    case Flavor::R:  not_reached();    break;
+    case Flavor::R:
+      gen(bc::UnboxRNop {});
+      gen(bc::PopC {});
+      break;
     case Flavor::F:  not_reached();    break;
     case Flavor::U:  not_reached();    break;
     }

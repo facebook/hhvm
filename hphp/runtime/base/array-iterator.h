@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,8 +63,7 @@ enum class IterNextIndex : uint16_t {
 /**
  * Iterator for an immutable array.
  */
-class ArrayIter {
- public:
+struct ArrayIter {
   enum Type : uint16_t {
     TypeUndefined = 0,
     TypeArray,
@@ -75,8 +74,9 @@ class ArrayIter {
   enum NoInc { noInc = 0 };
   enum NoIncNonNull { noIncNonNull = 0 };
 
-  /**
-   * Constructors.
+  /*
+   * Constructors.  Note that sometimes ArrayIter objects are created
+   * without running their C++ constructor.  (See new_iter_array.)
    */
   ArrayIter() : m_pos(ArrayData::invalid_index) {
     m_data = nullptr;
@@ -90,12 +90,7 @@ class ArrayIter {
       m_pos = ArrayData::invalid_index;
     }
   }
-  explicit ArrayIter(const HphpArray*) = delete;
-  ArrayIter(const HphpArray* data, NoIncNonNull) {
-    assert(data);
-    setArrayData(data);
-    m_pos = data->getIterBegin();
-  }
+  explicit ArrayIter(const MixedArray*) = delete;
   explicit ArrayIter(const Array& array);
   explicit ArrayIter(ObjectData* obj);
   ArrayIter(ObjectData* obj, NoInc);
@@ -170,15 +165,32 @@ class ArrayIter {
     const_cast<ArrayData*>(ad)->nvGetKey(out, m_pos);
   }
 
+  /*
+   * Retrieve the value at the current position.
+   */
   Variant second();
+
+  /*
+   * Get a reference to the value for the current iterator position.
+   * This function is strictly an optimization to second()---you must
+   * not modify the Variant.
+   *
+   * note that secondRef() has slightly different behavior than
+   * second() with regard to collection types.  Use secondRefPlus when
+   * you need support for these cases.  And note that unlike second(),
+   * secondRefPlus() will throw for non-collection types.
+   */
   const Variant& secondRef();
   const Variant& secondRefPlus();
-  TypedValue* nvSecond() {
+
+  // Inline version of secondRef.  Only for use in iterator helpers.
+  const TypedValue* nvSecond() const {
     const ArrayData* ad = getArrayData();
     assert(ad && m_pos != ArrayData::invalid_index);
-    return const_cast<ArrayData*>(ad)->nvGetValueRef(m_pos);
+    return ad->getValueRef(m_pos).asTypedValue();
   }
-  /**
+
+  /*
    * Used by the ext_zend_compat layer.
    * Identical to nvSecond but the output is boxed.
    */
@@ -279,7 +291,11 @@ class ArrayIter {
     return (ObjectData*)((intptr_t)m_obj & ~1);
   }
 
- private:
+private:
+  friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
+  template<bool withRef>
+  friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
+    TypedValue*);
   void arrInit(const ArrayData* arr);
 
   template <bool incRef>
@@ -344,7 +360,7 @@ class ArrayIter {
     if (ad != nullptr) {
       if (ad->isPacked()) {
         m_nextHelperIdx = IterNextIndex::ArrayPacked;
-      } else if (!ad->isHphpArray()) {
+      } else if (!ad->isMixed()) {
         m_nextHelperIdx = IterNextIndex::Array;
       }
     }
@@ -365,8 +381,15 @@ class ArrayIter {
   ssize_t m_pos;
  private:
   int m_version;
-  Type m_itype;
-  IterNextIndex m_nextHelperIdx;
+  // This is unioned so new_iter_array can initialize it more
+  // efficiently.
+  union {
+    struct {
+      Type m_itype;
+      IterNextIndex m_nextHelperIdx;
+    };
+    uint32_t m_itypeAndNextHelperIdx;
+  };
 
   friend struct Iter;
 };
@@ -442,13 +465,16 @@ struct MArrayIter {
     return data->getKey(m_pos);
   }
 
-  const Variant& val() {
+  Variant& val() {
     ArrayData* data = getArray();
     assert(data && data == getContainer());
     assert(!data->hasMultipleRefs() || data->noCopyOnWrite());
     assert(!getResetFlag());
     assert(data->validMArrayIter(*this));
-    return data->getValueRef(m_pos);
+    // Normally it's not ok to modify the return value of getValueRef,
+    // but the whole point of mutable array iteration is that this is
+    // allowed, so this const_cast is not actually evil.
+    return const_cast<Variant&>(data->getValueRef(m_pos));
   }
 
   void release() { delete this; }
@@ -591,7 +617,7 @@ static_assert(sizeof(MIterTable) == 2*64, "");
 extern __thread MIterTable tl_miter_table;
 
 void free_strong_iterators(ArrayData*);
-void move_strong_iterators(ArrayData* dest, ArrayData* src);
+ArrayData* move_strong_iterators(ArrayData* dest, ArrayData* src);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -650,9 +676,7 @@ int64_t new_iter_array_key(Iter* dest, ArrayData* arr, TypedValue* val,
                            TypedValue* key);
 int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* val, TypedValue* key);
-int64_t iter_next(Iter* dest, TypedValue* val);
-template <bool withRef>
-int64_t iter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
+int64_t witer_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
 
 int64_t new_miter_array_key(Iter* dest, RefData* arr, TypedValue* val,
@@ -662,21 +686,11 @@ int64_t new_miter_object(Iter* dest, RefData* obj, Class* ctx,
 int64_t new_miter_other(Iter* dest, RefData* data);
 int64_t miter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
-ArrayIter getContainerIter(const Variant& v);
-ArrayIter getContainerIter(const Variant& v, size_t& sz);
-
 int64_t iter_next_ind(Iter* iter, TypedValue* valOut);
 int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut);
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-const unsigned int kIterNextTableSize = 9;
-typedef int64_t(*IterNextHelper)(Iter*, TypedValue*);
-extern const IterNextHelper g_iterNextHelpers[kIterNextTableSize];
-typedef int64_t(*IterNextKHelper)(Iter*, TypedValue*, TypedValue*);
-extern const IterNextKHelper g_iterNextKHelpers[kIterNextTableSize];
-
-///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_ARRAY_ITERATOR_H_

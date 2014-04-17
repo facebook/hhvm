@@ -30,7 +30,6 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-// global declarations that have generated implementations
 
 /**
  * Invoking an arbitrary user-defined function.
@@ -72,7 +71,7 @@ extern void free_global_variables_after_sweep();
 struct EnvConstants {
   static void requestInit(EnvConstants* gt);
   static void requestExit();
-  Variant __lvalProxy;
+  Variant lvalProxy;
   Variant stgv_Variant[1];
 #define k_SID stgv_Variant[0]
 };

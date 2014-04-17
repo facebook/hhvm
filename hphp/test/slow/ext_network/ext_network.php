@@ -50,21 +50,6 @@ var_dump(inet_pton("::1"));
 var_dump(ip2long("127.0.0.1"));
 var_dump(long2ip(2130706433));
 
-header("Location: http://www.facebook.com");
-header("Location: http://www.facebook.com");
-var_dump(headers_list());
-
-header("Location: http://www.facebook.com");
-var_dump(!headers_sent());
-
-header_remove("name");
-header_remove();
-
-var_dump(!setcookie("name", "value"));
-var_dump(!setcookie("name", "value", 253402300800));
-
-var_dump(!setrawcookie("name", "value"));
-
 define_syslog_variables();
 
 openlog("TestExtNetwork", LOG_ODELAY, LOG_USER);

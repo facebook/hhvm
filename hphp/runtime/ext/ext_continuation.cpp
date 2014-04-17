@@ -57,15 +57,15 @@ c_Continuation::~c_Continuation() {
   tvRefcountedDecRef(m_key);
   tvRefcountedDecRef(m_value);
 
-  ActRec* ar = actRec();
-  if (ar->hasVarEnv()) {
-    ar->getVarEnv()->detach(ar);
-  } else {
-    // Free locals, but don't trigger the EventHook for FunctionExit
-    // since the continuation function has already been exited. We
-    // don't want redundant calls.
-    frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
+  if (LIKELY(done())) {
+    return;
   }
+
+  // Free locals, but don't trigger the EventHook for FunctionExit
+  // since the continuation function has already been exited. We
+  // don't want redundant calls.
+  ActRec* ar = actRec();
+  frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -149,50 +149,28 @@ String c_Continuation::t_getcalledclass() {
   return called_class;
 }
 
-void c_Continuation::dupContVar(const StringData* name, TypedValue* src) {
-  ActRec *fp = actRec();
-  Id destId = fp->m_func->lookupVarId(name);
-  if (destId != kInvalidId) {
-    // Copy the value of the local to the cont object.
-    tvDupFlattenVars(src, frame_local(fp, destId));
-  } else {
-    if (!fp->hasVarEnv()) {
-      fp->setVarEnv(VarEnv::createLocal(fp));
-    }
-    fp->getVarEnv()->setWithRef(name, src);
-  }
-}
+void c_Continuation::copyContinuationVars(ActRec* srcFp) {
+  const auto dstFp = actRec();
+  const auto func = dstFp->func();
+  assert(srcFp->func() == dstFp->func());
 
-void c_Continuation::copyContinuationVars(ActRec* fp) {
-  // For functions that contain only named locals, we can copy TVs
-  // right to the local space.
-  static const StringData* thisStr = s_this.get();
-  bool skipThis;
-  if (fp->hasVarEnv()) {
-    Stats::inc(Stats::Cont_CreateVerySlow);
-    Array definedVariables = fp->getVarEnv()->getDefinedVariables();
-    skipThis = definedVariables.exists(s_this, true);
-
-    for (ArrayIter iter(definedVariables); !iter.end(); iter.next()) {
-      dupContVar(iter.first().getStringData(),
-                 const_cast<TypedValue *>(iter.secondRef().asTypedValue()));
-    }
-  } else {
-    const Func *func = actRec()->m_func;
-    skipThis = func->lookupVarId(thisStr) != kInvalidId;
-    for (Id i = 0; i < func->numNamedLocals(); ++i) {
-      dupContVar(func->localVarName(i), frame_local(fp, i));
-    }
+  for (Id i = 0; i < func->numLocals(); ++i) {
+    tvDupFlattenVars(frame_local(srcFp, i), frame_local(dstFp, i));
   }
 
-  // If $this is used as a local inside the body and is not provided
-  // by our containing environment, just prefill it here instead of
-  // using InitThisLoc inside the body
-  if (!skipThis && fp->hasThis()) {
-    Id id = actRec()->m_func->lookupVarId(thisStr);
-    if (id != kInvalidId) {
-      tvAsVariant(frame_local(actRec(), id)) = fp->getThis();
-    }
+  if (dstFp->hasThis()) {
+    dstFp->getThis()->incRefCount();
+  }
+
+  if (LIKELY(srcFp->m_varEnv == nullptr)) {
+    return;
+  }
+
+  if (srcFp->hasExtraArgs()) {
+    dstFp->setExtraArgs(srcFp->getExtraArgs()->clone(dstFp));
+  } else {
+    assert(srcFp->hasVarEnv());
+    dstFp->setVarEnv(srcFp->getVarEnv()->clone(dstFp));
   }
 }
 
@@ -201,8 +179,8 @@ c_Continuation *c_Continuation::Clone(ObjectData* obj) {
   auto fp = thiz->actRec();
 
   c_Continuation* cont = static_cast<c_Continuation*>(fp->getThisOrClass()
-    ? CreateMeth(fp->func(), fp->getThisOrClass(), thiz->m_offset)
-    : CreateFunc(fp->func(), thiz->m_offset));
+    ? CreateMeth(fp, thiz->m_offset)
+    : CreateFunc(fp, thiz->m_offset));
 
   cont->copyContinuationVars(fp);
 

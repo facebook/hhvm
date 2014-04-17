@@ -237,7 +237,7 @@ struct Variant : private TypedValue {
     return *this;
   }
 
-  // D462768 showed no gain from inlining, even just into hphp-array.o
+  // D462768 showed no gain from inlining, even just into mixed-array.o
   ~Variant();
 
   //////////////////////////////////////////////////////////////////////
@@ -502,11 +502,8 @@ struct Variant : private TypedValue {
    * Operators
    */
   Variant &assign(const Variant& v);
-  Variant &assignVal(const Variant& v) { return assign(v); }
-  Variant &assignRef(const Variant& v);
+  Variant &assignRef(Variant& v);
 
-  Variant &operator=(RefResult v) { return assignRef(variant(v)); }
-  Variant &operator=(CVarStrongBind v) { return assignRef(variant(v)); }
   Variant &operator=(CVarWithRefBind v) { return setWithRef(variant(v)); }
 
   Variant &operator=(const StaticString &v) {
@@ -615,7 +612,7 @@ struct Variant : private TypedValue {
     return toStringHelper();
   }
   Array  toArray  () const {
-    if (m_type == KindOfArray) return m_data.parr;
+    if (m_type == KindOfArray) return Array(m_data.parr);
     return toArrayHelper();
   }
   Object toObject () const {
@@ -660,9 +657,6 @@ struct Variant : private TypedValue {
                  bool skipNestCheck = false) const;
   void unserialize(VariableUnserializer *unserializer,
                    Uns::Mode mode = Uns::Mode::Value);
-
-  static Variant &lvalInvalid();
-  static Variant &lvalBlackHole();
 
   /**
    * Low level access that should be restricted to internal use.
@@ -743,11 +737,10 @@ struct Variant : private TypedValue {
         Cell* asCell()       { return tvToCell(asTypedValue()); }
 
   /*
-   * Access this Variant as a Ref. Promotes this Variant to a ref
-   * if it is not already a ref.
+   * Access this Variant as a Ref, converting it to a Ref it isn't
+   * one.
    */
-  const Ref* asRef() const { PromoteToRef(*this); return this; }
-        Ref* asRef()       { PromoteToRef(*this); return this; }
+  Ref* asRef() { PromoteToRef(*this); return this; }
 
  private:
   bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
@@ -816,12 +809,12 @@ struct Variant : private TypedValue {
     tvRefcountedDecRefHelper(stype, sdata.num);
   }
 
-  static ALWAYS_INLINE void PromoteToRef(const Variant& v) {
+  static ALWAYS_INLINE void PromoteToRef(Variant& v) {
     assert(&v != &null_variant);
     if (v.m_type != KindOfRef) {
       auto const ref = RefData::Make(*v.asTypedValue());
-      const_cast<Variant&>(v).m_type = KindOfRef;
-      const_cast<Variant&>(v).m_data.pref = ref;
+      v.m_type = KindOfRef;
+      v.m_data.pref = ref;
     }
   }
 
@@ -829,7 +822,7 @@ struct Variant : private TypedValue {
     AssignValHelper(this, &v);
   }
 
-  ALWAYS_INLINE void assignRefHelper(const Variant& v) {
+  ALWAYS_INLINE void assignRefHelper(Variant& v) {
     assert(tvIsPlausible(*this) && tvIsPlausible(v));
 
     PromoteToRef(v);
@@ -843,7 +836,7 @@ struct Variant : private TypedValue {
   }
 
 public:
-  ALWAYS_INLINE void constructRefHelper(const Variant& v) {
+  ALWAYS_INLINE void constructRefHelper(Variant& v) {
     assert(tvIsPlausible(v));
     PromoteToRef(v);
     v.m_data.pref->incRefCount();
@@ -978,10 +971,6 @@ private:
   mutable Variant m_var;
 };
 
-inline VRefParamValue vref(const Variant& v) {
-  return VRefParamValue(strongBind(v));
-}
-
 inline VRefParam directRef(const Variant& v) {
   return *(VRefParamValue*)&v;
 }
@@ -1075,6 +1064,15 @@ private:
     assert(false);
   }
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * The lvalBlackHole is used in array operations when a NewElem can't
+ * create a new slot.  (Basically if the next integer key in an array
+ * is already at the maximum integer.)
+ */
+Variant& lvalBlackHole();
 
 ///////////////////////////////////////////////////////////////////////////////
 // breaking circular dependencies

@@ -129,19 +129,6 @@ Variant Object::o_set(const String& propName, const Variant& val,
   return m_px->o_set(propName, val, context);
 }
 
-Variant Object::o_setRef(const String& propName, const Variant& val,
-                         const String& context /* = null_string */) {
-  if (!m_px) {
-    setToDefaultObject();
-  }
-  return m_px->o_setRef(propName, val, context);
-}
-
-Variant Object::o_set(const String& propName, RefResult val,
-                      const String& context /* = null_string */) {
-  return o_setRef(propName, variant(val), context);
-}
-
 const char* Object::classname_cstr() const {
   return m_px->o_getClassName().c_str();
 }

@@ -23,16 +23,17 @@
 #include "folly/ScopeGuard.h"
 
 #include "hphp/runtime/base/http-client.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/soap/packet.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
-#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/ext_output.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/ext_string.h"
@@ -608,9 +609,9 @@ static encodeMap *soap_create_typemap(sdl *sdl, Array &ht) {
 
 static void output_xml_header(int soap_version) {
   if (soap_version == SOAP_1_2) {
-    f_header("Content-Type: application/soap+xml; charset=utf-8");
+    HHVM_FN(header)("Content-Type: application/soap+xml; charset=utf-8");
   } else {
-    f_header("Content-Type: text/xml; charset=utf-8");
+    HHVM_FN(header)("Content-Type: text/xml; charset=utf-8");
   }
 }
 
@@ -1784,13 +1785,12 @@ static void send_soap_server_fault(
     soapHeader *hdr) {
   USE_SOAP_GLOBAL;
   bool use_http_error_status = true;
-  GlobalVariables *g = get_global_variables();
-  if (g->get(s__SERVER).toArray()[s_HTTP_USER_AGENT].toString() ==
+  if (php_global(s__SERVER).toArray()[s_HTTP_USER_AGENT].toString() ==
       s_Shockwave_Flash) {
     use_http_error_status = false;
   }
   if (use_http_error_status) {
-    f_header("HTTP/1.1 500 Internal Service Error");
+    HHVM_FN(header)("HTTP/1.1 500 Internal Service Error");
   }
   output_xml_header(SOAP_GLOBAL(soap_version));
 
@@ -1989,7 +1989,7 @@ void c_SoapServer::t___construct(const Variant& wsdl,
 void c_SoapServer::t_setclass(int _argc, const String& name,
                               const Array& _argv /* = null_array */) {
   SoapServerScope ss(this);
-  if (f_class_exists(name, true)) {
+  if (HHVM_FN(class_exists)(name, true)) {
     m_type = SOAP_CLASS;
     m_soap_class.name = name;
     m_soap_class.argv = _argv;
@@ -2102,7 +2102,7 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
       throw_soap_server_fault("Server", "WSDL generation is not supported");
     }
 
-    f_header("Content-Type: text/xml; charset=utf-8");
+    HHVM_FN(header)("Content-Type: text/xml; charset=utf-8");
     Variant ret = f_readfile(m_sdl->source.c_str());
     if (same(ret, false)) {
       throw_soap_server_fault("Server", "Couldn't find WSDL");
@@ -2129,9 +2129,8 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
     }
     req = String(data, size, CopyString);
 
-    GlobalVariables *g = get_global_variables();
-    if (g->get(s__SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
-      String encoding = g->get(s__SERVER)
+    if (php_global(s__SERVER).toArray().exists(s_HTTP_CONTENT_ENCODING)) {
+      String encoding = php_global(s__SERVER)
         .toArray()[s_HTTP_CONTENT_ENCODING].toString();
       Variant ret;
       if (encoding == s_gzip || encoding == s_xgzip) {
@@ -2278,8 +2277,8 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
 
   // 8. special case
   if (doc_return == NULL) {
-    f_header("HTTP/1.1 202 Accepted");
-    f_header("Content-Length: 0");
+    HHVM_FN(header)("HTTP/1.1 202 Accepted");
+    HHVM_FN(header)("Content-Length: 0");
     return;
   }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -382,13 +382,20 @@ void RequestInjectionData::clearInterceptFlag() {
   getConditionFlags()->fetch_and(~RequestInjectionData::InterceptFlag);
 }
 
+void RequestInjectionData::setXenonSignalFlag() {
+  getConditionFlags()->fetch_or(RequestInjectionData::XenonSignalFlag);
+}
+
+void RequestInjectionData::clearXenonSignalFlag() {
+  getConditionFlags()->fetch_and(~RequestInjectionData::XenonSignalFlag);
+}
+
 void RequestInjectionData::setDebuggerSignalFlag() {
   getConditionFlags()->fetch_or(RequestInjectionData::DebuggerSignalFlag);
 }
 
 ssize_t RequestInjectionData::fetchAndClearFlags() {
-  return getConditionFlags()->fetch_and(RequestInjectionData::EventHookFlag |
-                                        RequestInjectionData::InterceptFlag);
+  return getConditionFlags()->fetch_and(RequestInjectionData::StickyFlags);
 }
 
 }

@@ -15,7 +15,7 @@
 */
 
 
-#include "hphp/runtime/base/hphp-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include <algorithm>
 #include <vector>
 #include "hphp/runtime/base/strings.h"
@@ -821,7 +821,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseS() {
    * special translation unless we know it's not boxed, and the C++
    * helpers for generic dims currently always conditionally unbox.
    */
-  m_base = m_ht.ldClsPropAddr(makeCatch(), clsRef, key);
+  m_base = m_ht.ldClsPropAddr(makeCatch(), clsRef, key, true);
 }
 
 void HhbcTranslator::MInstrTranslator::emitBaseOp() {
@@ -1063,11 +1063,15 @@ static inline TypedValue* elemImpl(TypedValue* base, key_type<keyType> key,
                                    MInstrState* mis) {
   if (unset) {
     return ElemU<keyType>(mis->tvScratch, mis->tvRef, base, key);
-  } else if (define) {
-    return ElemD<warn, reffy, keyType>(mis->tvScratch, mis->tvRef, base, key);
-  } else {
-    return Elem<warn, keyType>(mis->tvScratch, mis->tvRef, base, key);
   }
+  if (define) {
+    return ElemD<warn, reffy, keyType>(mis->tvScratch, mis->tvRef, base, key);
+  }
+  // We won't really modify the TypedValue in the non-D case, so
+  // this const_cast is safe.
+  return const_cast<TypedValue*>(
+    Elem<warn, keyType>(mis->tvScratch, mis->tvRef, base, key)
+  );
 }
 
 #define HELPER_TABLE(m)                          \
@@ -1155,37 +1159,38 @@ void HhbcTranslator::MInstrTranslator::emitElem() {
 
 template<bool warn>
 NEVER_INLINE
-static TypedValue* elemArrayNotFound(int64_t k) {
+static const TypedValue* elemArrayNotFound(int64_t k) {
   if (warn) {
     raise_notice("Undefined index: %" PRId64, k);
   }
-  return (TypedValue*)&null_variant;
+  return null_variant.asTypedValue();
 }
 
 template<bool warn>
 NEVER_INLINE
-static TypedValue* elemArrayNotFound(const StringData* k) {
+static const TypedValue* elemArrayNotFound(const StringData* k) {
   if (warn) {
     raise_notice("Undefined index: %s", k->data());
   }
-  return (TypedValue*)&null_variant;
+  return null_variant.asTypedValue();
 }
 
-static inline TypedValue* checkedGet(ArrayData* a, StringData* key) {
+static inline const TypedValue* checkedGet(ArrayData* a, StringData* key) {
   int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGet(i) : a->nvGet(key);
 }
 
-static inline TypedValue* checkedGet(ArrayData* a, int64_t key) {
+static inline const TypedValue* checkedGet(ArrayData* a, int64_t key) {
   not_reached();
 }
 
 template<KeyType keyType, bool checkForInt, bool warn>
-static inline TypedValue* elemArrayImpl(TypedValue* a, key_type<keyType> key) {
+static inline const TypedValue* elemArrayImpl(TypedValue* a,
+                                              key_type<keyType> key) {
   assert(a->m_type == KindOfArray);
-  ArrayData* ad = a->m_data.parr;
-  TypedValue* ret = checkForInt ? checkedGet(ad, key)
-                                : ad->nvGet(key);
+  auto const ad = a->m_data.parr;
+  auto const ret = checkForInt ? checkedGet(ad, key)
+                               : ad->nvGet(key);
   return ret ? ret : elemArrayNotFound<warn>(key);
 }
 
@@ -1199,7 +1204,7 @@ static inline TypedValue* elemArrayImpl(TypedValue* a, key_type<keyType> key) {
   m(elemArrayIW,   KeyType::Int,       false,  true)
 
 #define ELEM(nm, keyType, checkForInt, warn)                    \
-  TypedValue* nm(TypedValue* a, key_type<keyType> key) {        \
+  const TypedValue* nm(TypedValue* a, key_type<keyType> key) {  \
     return elemArrayImpl<keyType, checkForInt, warn>(           \
       a, key);                                                  \
   }
@@ -1681,8 +1686,7 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* key) {
 
 template<KeyType keyType, bool checkForInt>
 static inline TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
-  TypedValue* ret = checkForInt ? checkedGet(a, key)
-                                : a->nvGet(key);
+  auto ret = checkForInt ? checkedGet(a, key) : a->nvGet(key);
   if (ret) {
     ret = tvToCell(ret);
     tvRefcountedIncRef(ret);
@@ -1808,11 +1812,8 @@ template <KeyType keyType>
 static inline TypedValue cGetElemImpl(TypedValue* base, key_type<keyType> key,
                                       MInstrState* mis) {
   TypedValue scratch;
-  TypedValue* result = Elem<true, keyType>(scratch, mis->tvRef, base, key);
-
-  if (result->m_type == KindOfRef) {
-    result = result->m_data.pref->tv();
-  }
+  auto result = Elem<true, keyType>(scratch, mis->tvRef, base, key);
+  result = tvToCell(result);
   tvRefcountedIncRef(result);
   return *result;
 }
@@ -1959,10 +1960,9 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayIsset() {
 
 template<KeyType keyType, bool checkForInt>
 static inline uint64_t arrayIssetImpl(ArrayData* a, key_type<keyType> key) {
-  TypedValue* value = checkForInt ? checkedGet(a, key)
-                                  : a->nvGet(key);
-  Variant* var = &tvAsVariant(value);
-  return var && !var->isNull();
+  auto const value = checkForInt ? checkedGet(a, key) : a->nvGet(key);
+  if (!value) return 0;
+  return !tvAsCVarRef(value).isNull();
 }
 
 #define HELPER_TABLE(m)                         \
@@ -2599,9 +2599,9 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
 
     auto toSpill = m_ht.peekSpillValues();
     assert(toSpill.size());
-    assert(toSpill[0] == m_result);
+    assert(toSpill.back() == m_result);
     SSATmp* str = m_unit.gen(AssertNonNull, m_marker, m_strTestResult)->dst();
-    toSpill[0] = str;
+    toSpill.back() = str;
 
     auto exit = m_ht.makeExit(nextOff, toSpill);
     {

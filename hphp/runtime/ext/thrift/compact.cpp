@@ -900,7 +900,10 @@ class CompactReader {
 
         ret = Variant(set_ret);
       } else {
-        ArrayInit ainit(size);
+        // Note: the Mixed{} is just out of uncertainty right now.
+        // These probably are generally string keys and this should
+        // probably be ArrayInit::Map.
+        ArrayInit ainit(size, ArrayInit::Mixed{});
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(valueSpec, valueType);
           ainit.set(value, true);

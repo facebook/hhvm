@@ -249,7 +249,7 @@ bool Scanner::tryParseTypeList(TokenStore::iterator& pos) {
 bool Scanner::tryParseNonEmptyLambdaParams(TokenStore::iterator& pos) {
   for (;; nextLookahead(pos)) {
     if (pos->t != T_VARIABLE) {
-      if (pos->t == T_VARARG) {
+      if (pos->t == T_ELLIPSIS) {
         nextLookahead(pos);
         return true;
       }
@@ -364,7 +364,7 @@ void Scanner::parseApproxParamDefVal(TokenStore::iterator& pos) {
 
 bool Scanner::tryParseFuncTypeList(TokenStore::iterator& pos) {
   for (;;) {
-    if (pos->t == T_VARARG) {
+    if (pos->t == T_ELLIPSIS) {
       nextLookahead(pos);
       return true;
     }

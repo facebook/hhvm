@@ -22,7 +22,7 @@
 #include "hphp/util/process.h"
 #include "hphp/compiler/option.h"
 #include "hphp/util/async-func.h"
-#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_file.h"

@@ -19,8 +19,8 @@ class ProxyInformation {
           "HTTPS_PROXY" => "http://fwdproxy.any.facebook.com:8080",
           "HTTP_PROXY" => "http://fwdproxy.any.facebook.com:8080",
           "HTTP_PROXY_REQUEST_FULLURI" => "true",
-          "no_proxy" => "facebook.com,fbcdn.net",
-          "NO_PROXY" => "facebook.com,fbcdn.net",
+          "no_proxy" => "facebook.com,fbcdn.net,localhost,127.0.0.1",
+          "NO_PROXY" => "facebook.com,fbcdn.net,localhost,127.0.0.1",
         };
         return true;
     } else {

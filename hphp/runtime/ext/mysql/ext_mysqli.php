@@ -2686,9 +2686,8 @@ function mysqli_field_seek(mysqli_result $result,
  *
  * @return void -
  */
-function mysqli_free_result(mysqli_result $result): void {
-  return $result->free();
-}
+<<__Native>>
+function mysqli_free_result(mixed $result): void;
 
 /**
  * Returns the lengths of the columns of the current row in the result set

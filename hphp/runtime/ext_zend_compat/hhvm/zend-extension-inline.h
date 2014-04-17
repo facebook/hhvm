@@ -1,20 +1,6 @@
 #ifndef incl_ZEND_EXTENSION_INLINE_H_
 #define incl_ZEND_EXTENSION_INLINE_H_
 
-inline void ZendExtension::moduleInit() {
-  if (!HPHP::RuntimeOption::EnableZendCompat) {
-    return;
-  }
-  zend_module_entry* entry = getEntry();
-  if (entry->globals_size) {
-    ts_allocate_id(entry->globals_id_ptr, entry->globals_size,
-        (ts_allocate_ctor) entry->globals_ctor, (ts_allocate_dtor) entry->globals_dtor);
-  }
-  if (entry->module_startup_func) {
-    TSRMLS_FETCH();
-    entry->module_startup_func(1, entry->module_number TSRMLS_CC);
-  }
-}
 inline void ZendExtension::moduleShutdown() {
   if (!HPHP::RuntimeOption::EnableZendCompat) {
     return;

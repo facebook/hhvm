@@ -9,6 +9,6 @@
  *
  */
 
-function lol_wat<T1, T2 as T1>(T1 $arg1, T2 $arg2): void {
+function lol_wat<T1, T2 as T1>(T1 $arg1, T2 $arg2): mixed {
   return lol_wat($arg1, $arg2);
 }

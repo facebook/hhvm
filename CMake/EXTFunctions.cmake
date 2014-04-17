@@ -26,3 +26,6 @@ function(HHVM_SYSTEMLIB EXTNAME SOURCE_FILE)
 	# which aren't going to be used
 endfunction()
 
+function(HHVM_DEFINE EXTNAME)
+	add_definitions(${ARGN})
+endfunction()

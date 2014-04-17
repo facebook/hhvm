@@ -37,6 +37,73 @@ using namespace vixl;
 
 //////////////////////////////////////////////////////////////////////
 
+struct RegSaver {
+  explicit RegSaver(RegSet regs)
+      : m_gprs(CPURegister::kRegister, kXRegSize, 0)
+      , m_simds(CPURegister::kFPRegister, kDRegSize, 0)
+      , m_maybeOddGPR(folly::none)
+      , m_maybeOddSIMD(folly::none) {
+    regs.forEach([&] (PhysReg r) {
+      if (r.isGP()) {
+        m_gprs.Combine(r);
+      } else {
+        m_simds.Combine(r);
+      }
+    });
+
+    // The vixl helper requires you to pass it an even number of registers. If
+    // we have an odd number of regs to save, remove one from the list we pass,
+    // and save it ourselves.
+    if (m_gprs.Count() % 2 == 1) {
+      m_maybeOddGPR = m_gprs.PopHighestIndex();
+    }
+    if (m_simds.Count() % 2 == 1) {
+      m_maybeOddSIMD = m_simds.PopHighestIndex();
+    }
+  }
+
+  void emitPushes(MacroAssembler& as) {
+    assert(m_gprs.Count() % 2 == 0);
+    assert(m_simds.Count() % 2 == 0);
+    as.    PushCPURegList(m_gprs);
+    as.    PushCPURegList(m_simds);
+
+    if (m_maybeOddGPR.hasValue()) {
+      // We're only storing a single reg, but the stack pointer must always be
+      // 16-byte aligned. This instruction subtracts 16 from the stack pointer,
+      // then writes the value.
+      as.  Str  (m_maybeOddGPR.value(), MemOperand(sp, -16, PreIndex));
+    }
+    if (m_maybeOddSIMD.hasValue()) {
+      as.  Str  (m_maybeOddSIMD.value(), MemOperand(sp, -16, PreIndex));
+    }
+  }
+
+  void emitPops(MacroAssembler& as) {
+    assert(m_gprs.Count() % 2 == 0);
+    assert(m_simds.Count() % 2 == 0);
+
+    if (m_maybeOddSIMD.hasValue()) {
+      // Read the value, then add 16 to the stack pointer.
+      as.  Ldr  (m_maybeOddSIMD.value(), MemOperand(sp, 16, PostIndex));
+    }
+    if (m_maybeOddGPR.hasValue()) {
+      // Read the value, then add 16 to the stack pointer.
+      as.  Ldr  (m_maybeOddGPR.value(), MemOperand(sp, 16, PostIndex));
+    }
+    as.    PopCPURegList(m_simds);
+    as.    PopCPURegList(m_gprs);
+  }
+
+ private:
+  CPURegList m_gprs;
+  CPURegList m_simds;
+  folly::Optional<CPURegister> m_maybeOddGPR;
+  folly::Optional<CPURegister> m_maybeOddSIMD;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 #define NOOP_OPCODE(name) void CodeGenerator::cg##name(IRInstruction*) {}
 
 NOOP_OPCODE(DefConst)
@@ -135,19 +202,20 @@ CALL_OPCODE(IncStatGrouped)
 
 /////////////////////////////////////////////////////////////////////
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
-            const Func* vmFunc) {
+            const Func* vmFunc, bool resumed) {
   FTRACE(1, "punting: {}\n", func);
-  throw FailedCodeGen(file, line, func, bcOff, vmFunc);
+  throw FailedCodeGen(file, line, func, bcOff, vmFunc, resumed);
 }
 
-#define PUNT_OPCODE(name)                                         \
-  void CodeGenerator::cg##name(IRInstruction* inst) {             \
-    cgPunt(__FILE__, __LINE__, #name, m_curInst->marker().bcOff,  \
-           curFunc());                                            \
+#define PUNT_OPCODE(name)                                           \
+  void CodeGenerator::cg##name(IRInstruction* inst) {               \
+    cgPunt(__FILE__, __LINE__, #name, m_curInst->marker().bcOff(),  \
+           curFunc(), resumed());                                   \
   }
 
-#define CG_PUNT(instr) \
-    cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff, curFunc())
+#define CG_PUNT(instr)                                              \
+    cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff(), \
+           curFunc(), resumed())
 
 /////////////////////////////////////////////////////////////////////
 //TODO t3702757: Convert to CALL_OPCODE, the following set works on
@@ -324,7 +392,6 @@ PUNT_OPCODE(LdClsCns)
 PUNT_OPCODE(LookupClsCns)
 PUNT_OPCODE(LdCns)
 PUNT_OPCODE(LdClsInitData)
-PUNT_OPCODE(LdClsStaticInitData)
 PUNT_OPCODE(LookupCns)
 PUNT_OPCODE(LookupCnsE)
 PUNT_OPCODE(LookupCnsU)
@@ -338,8 +405,9 @@ PUNT_OPCODE(GetCtxFwdCallDyn);
 PUNT_OPCODE(GetCtxFwdCall)
 PUNT_OPCODE(LdClsMethod)
 PUNT_OPCODE(LdPropAddr)
-PUNT_OPCODE(LdClsPropAddr)
-PUNT_OPCODE(LdClsPropAddrCached)
+PUNT_OPCODE(LdClsPropAddrKnown)
+PUNT_OPCODE(LdClsPropAddrOrNull)
+PUNT_OPCODE(LdClsPropAddrOrRaise)
 PUNT_OPCODE(LdObjMethod)
 PUNT_OPCODE(LdObjInvoke)
 PUNT_OPCODE(LdGblAddrDef)
@@ -562,14 +630,18 @@ void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state) {
 
 void CodeGenerator::recordHostCallSyncPoint(vixl::MacroAssembler& as,
                                             TCA tca) {
-  auto stackOff = m_curInst->marker().spOff;
-  auto pcOff = m_curInst->marker().bcOff - m_curInst->marker().func->base();
+  auto stackOff = m_curInst->marker().spOff();
+  auto pcOff = m_curInst->marker().bcOff() - m_curInst->marker().func()->base();
   m_mcg->fixupMap().recordSyncPoint(tca, pcOff, stackOff);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgConjure(IRInstruction* inst) {
+  always_assert(false);
+}
+
+void CodeGenerator::cgHalt(IRInstruction* inst) {
   always_assert(false);
 }
 
@@ -923,7 +995,25 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     }
     if (rs.numAllocated() == 0) {
       assert(src->inst()->op() == DefConst);
-      m_as.  Mov  (x2a(rd.reg(0)), src->rawVal());
+      auto rDst = rd.reg(0);
+      if (rDst.isGP()) {
+        m_as.  Mov  (x2a(rDst), src->rawVal());
+      } else {
+        // Assembler::fmov (which you'd think shouldn't be a macro instruction)
+        // will emit a ldr from a literal pool if IsImmFP64 is false. vixl's
+        // literal pools don't work well with our codegen pattern, so if that
+        // would happen, emit the raw bits into a GPR first and then move them
+        // unmodified into a SIMD.
+        if (vixl::Assembler::IsImmFP64(src->dblVal())) {
+          m_as.  Fmov (x2simd(rDst), src->dblVal());
+        } else if (src->dblVal() == 0.0) {
+          // 0 is not encodeable as an immediate to Fmov, but this works.
+          m_as.  Fmov (x2simd(rDst), vixl::xzr);
+        } else {
+          m_as.  Mov  (rAsm, src->rawVal());
+          m_as.  Fmov (x2simd(rDst), rAsm);
+        }
+      }
     }
     if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
       // Move src known type to register
@@ -967,31 +1057,32 @@ static void shuffleArgs(vixl::MacroAssembler& a,
   auto const howTo = doRegMoves(moves, rAsm);
 
   for (auto& how : howTo) {
-    auto srcReg = x2a(how.m_src);
-    auto dstReg = x2a(how.m_dst);
+    vixl::CPURegister srcReg{how.m_src};
+    vixl::CPURegister dstReg{how.m_dst};
     if (how.m_kind == MoveInfo::Kind::Move) {
       auto* argDesc = argDescs[how.m_dst];
       if (argDesc) {
         auto kind = argDesc->kind();
         if (kind == ArgDesc::Kind::Addr) {
-          emitRegGetsRegPlusImm(a, dstReg, srcReg, argDesc->disp().l());
+          emitRegGetsRegPlusImm(a, vixl::Register{dstReg},
+                                vixl::Register{srcReg}, argDesc->disp().l());
         } else {
           if (argDesc->isZeroExtend()) {
             // "Unsigned eXTend Byte". The dest reg is a 32-bit reg but this
             // zeroes the top 32 bits, so the intended effect is achieved.
             a.Uxtb (dstReg.W(), srcReg.W());
           } else {
-            a.Mov  (dstReg, srcReg);
+            emitRegRegMove(a, dstReg, srcReg);
           }
         }
         if (kind != ArgDesc::Kind::TypeReg) {
           argDesc->markDone();
         }
       } else {
-        a.  Mov  (dstReg, srcReg);
+        emitRegRegMove(a, dstReg, srcReg);
       }
     } else {
-      emitXorSwap(a, dstReg, srcReg);
+      emitXorSwap(a, vixl::Register{dstReg}, vixl::Register{srcReg});
     }
   }
 
@@ -1052,42 +1143,14 @@ void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
   assert(m_curInst->isNative());
 
   auto dstReg0 = dstInfo.reg0;
-  auto dstReg1 = dstInfo.reg1;
+  DEBUG_ONLY auto dstReg1 = dstInfo.reg1;
 
-  if (debug) {
-    toSave.forEach([](PhysReg r) { assert(r.isGP()); });
-  }
-
-  toSave = toSave & kCallerSaved;
+  toSave = toSave & (kGPCallerSaved | kSIMDCallerSaved);
   assert((toSave & RegSet().add(dstReg0).add(dstReg1)).empty());
 
-  // Use vixl's handy helper to push caller-save regs. It uses ldp/stp when
-  // possible.
-  CPURegList pushedRegs(vixl::CPURegister::kRegister, vixl::kXRegSize, 0);
-  toSave.forEach([&](PhysReg r) { pushedRegs.Combine(r); });
-
-  // The vixl helper requires you to pass it an even number of registers. If we
-  // have an odd number of regs to save, remove one from the list we pass, and
-  // save it ourselves.
-  folly::Optional<vixl::CPURegister> maybeOddOne;
-  if (pushedRegs.Count() % 2 == 1) {
-    maybeOddOne = pushedRegs.PopHighestIndex();
-  }
-  a.    PushCPURegList(pushedRegs);
-  if (maybeOddOne) {
-    // We're only storing a single reg, but the stack pointer must always be
-    // 16-byte aligned. This instruction subtracts 16 from the stack pointer,
-    // then writes the value.
-    a.  Str  (maybeOddOne.value(), MemOperand(vixl::sp, -16, vixl::PreIndex));
-  }
-
-  SCOPE_EXIT {
-    if (maybeOddOne) {
-      // Read the value, then add 16 to the stack pointer.
-      a.Ldr  (maybeOddOne.value(), MemOperand(vixl::sp, 16, vixl::PostIndex));
-    }
-    a.  PopCPURegList(pushedRegs);
-  };
+  RegSaver saver{toSave};
+  saver.emitPushes(a);
+  SCOPE_EXIT { saver.emitPops(a); };
 
   for (size_t i = 0; i < args.numRegArgs(); i++) {
     args[i].setDstReg(PhysReg{argReg(i)});
@@ -1100,18 +1163,31 @@ void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
     recordHostCallSyncPoint(a, syncPoint);
   }
 
-  auto armDst0 = x2a(dstReg0);
-  DEBUG_ONLY auto armDst1 = x2a(dstReg1);
+  auto* taken = m_curInst->taken();
+  if (taken && taken->isCatch()) {
+    auto& info = m_state.catches[taken];
+    assert(!info.afterCall);
+    info.afterCall = syncPoint;
+    info.savedRegs = toSave;
+    assert_not_implemented(args.numStackArgs() == 0);
+    info.rspOffset = args.numStackArgs();
+  } else if (!m_curInst->is(Call, CallArray, ContEnter)) {
+    m_mcg->registerCatchBlock(a.frontier(), nullptr);
+  }
+
+  vixl::CPURegister armDst0{dstReg0};
 
   switch (dstInfo.type) {
     case DestType::TV: not_implemented();
     case DestType::SSA:
-      assert(!armDst1.IsValid());
-      if (armDst0.IsValid() && !armDst0.Is(vixl::x0)) a.Mov(armDst0, vixl::x0);
+      assert(dstReg1 == InvalidReg);
+      if (armDst0.IsValid() && !armDst0.Is(vixl::x0)) {
+        emitRegRegMove(a, armDst0, vixl::x0);
+      }
       break;
     case DestType::SSA2: not_implemented();
     case DestType::None:
-      assert(!armDst0.IsValid() && !armDst1.IsValid());
+      assert(dstReg0 == InvalidReg && dstReg1 == InvalidReg);
       break;
   }
 }
@@ -1205,8 +1281,9 @@ void CodeGenerator::emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
   if (type < Type::Obj) {
     assert(type.getClass()->attrs() & AttrFinal);
     auto dataReg = enregister(m_as, dataSrc, rAsm);
-    m_as.   Ldr   (rAsm, dataReg[ObjectData::getVMClassOffset()]);
-    m_as.   Cmp   (rAsm, reinterpret_cast<int64_t>(type.getClass()));
+    emitLdLowPtr(m_as, rAsm, dataReg[ObjectData::getVMClassOffset()],
+                 sizeof(LowClassPtr));
+    emitCmpClass(m_as, rAsm, type.getClass());
     doJcc(CC_E);
   } else if (type < Type::Res) {
     CG_PUNT(TypeTest-on-Resource);
@@ -1227,7 +1304,7 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
     rAsm.W(),
     rFP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
-      auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
+      auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
       auto const destSR = m_mcg->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
@@ -1242,7 +1319,7 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
     rAsm.W(),
     rSP[baseOff + TVOFF(m_data)],
     [&] (ConditionCode cc) {
-      auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
+      auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
       auto const destSR = m_mcg->tx().getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
@@ -1338,7 +1415,7 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
     rAsm.W(),
     sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_data)],
     [&] (ConditionCode cc) {
-      auto const sk = SrcKey(curFunc(), extra->taken);
+      auto const sk = SrcKey(curFunc(), extra->taken, resumed());
       emitBindSideExit(this->m_mainCode, this->m_stubsCode, sk, ccNegate(cc));
     }
   );
@@ -1375,7 +1452,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   assert(vals64Reg.IsValid() || vals64 == uint32_t(vals64));
   assert((vals64 & mask64) == vals64);
 
-  auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
+  auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
   auto const destSR = m_mcg->tx().getSrcRec(destSK);
 
   auto thenBody = [&] {
@@ -1455,13 +1532,13 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   emitBindJmp(
     m_mainCode,
     m_stubsCode,
-    SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset)
+    SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset, resumed())
   );
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
-  assert(m_unit.bcOff() == inst->marker().bcOff);
-  auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
+  assert(m_unit.bcOff() == inst->marker().bcOff());
+  auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
   auto const destSR = m_mcg->tx().getSrcRec(destSK);
   destSR->emitFallbackJump(m_mainCode);
 }
@@ -1518,9 +1595,6 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   if (func->isA(Type::Null)) {
     // Do nothing
     assert(func->isConst());
-  } else if (func->isConst()) {
-    m_as.  Mov  (rAsm, func->funcVal());
-    m_as.  Str  (rAsm, spReg[spOff + AROFF(m_func)]);
   } else {
     auto reg0 = x2a(funcLoc.reg(0));
     m_as.  Str  (reg0, spReg[spOff + AROFF(m_func)]);
@@ -1542,7 +1616,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   if (FixupMap::eagerRecord(func)) {
     // Save VM registers
-    auto const* pc = curFunc()->unit()->entry() + m_curInst->marker().bcOff;
+    auto const* pc = curFunc()->unit()->entry() + m_curInst->marker().bcOff();
     m_as.Str  (rVmFp, rGContextReg[offsetof(ExecutionContext, m_fp)]);
     m_as.Str  (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
                                    Stack::topOfStackOffset()]);
@@ -1637,7 +1711,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   emitRegGetsRegPlusImm(m_as, spReg, spReg, adjustment);
 
   assert(m_curInst->marker().valid());
-  SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
+  SrcKey srcKey = m_curInst->marker().sk();
   bool isImmutable = func->isConst() && !func->isA(Type::Null);
   const Func* funcd = isImmutable ? func->funcVal() : nullptr;
   int32_t adjust  = emitBindCall(mcg->code.main(), mcg->code.stubs(),
@@ -1649,11 +1723,26 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
-  m_as.  Brk  (0);
+  auto const& info = m_state.catches[inst->block()];
+  assert(info.afterCall);
+
+  m_mcg->registerCatchBlock(info.afterCall, m_as.frontier());
+
+  assert(info.rspOffset == 0);
+  RegSaver regSaver(info.savedRegs);
+  regSaver.emitPops(m_as);
+}
+
+static void unwindResumeHelper() {
+  // We don't have this sorted out for native mode yet
+  always_assert(RuntimeOption::EvalSimulateARM);
+
+  tl_regState = VMRegState::CLEAN;
+  g_context->m_activeSims.back()->resume_last_exception();
 }
 
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
-  m_as.  Brk  (0);
+  emitCall(m_as, CppCall{unwindResumeHelper});
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1662,14 +1751,13 @@ void CodeGenerator::emitLoadTypedValue(PhysLoc dst,
                                        vixl::Register base,
                                        ptrdiff_t offset,
                                        Block* label) {
-  auto valueDstReg = x2a(dst.reg(0));
-  auto typeDstReg  = x2a(dst.reg(1));
-
   if (label) not_implemented();
-
-  if (valueDstReg.IsFPRegister()) {
+  if (dst.reg(0).isSIMD()) {
     not_implemented();
   }
+
+  auto valueDstReg = x2a(dst.reg(0));
+  auto typeDstReg  = x2a(dst.reg(1));
 
   // Avoid clobbering the base reg if we'll need it later
   if (base.Is(typeDstReg) && valueDstReg.IsValid()) {
@@ -1708,10 +1796,15 @@ void CodeGenerator::emitLoad(Type type, PhysLoc dstLoc,
   }
   if (type <= Type::Null) return;
 
-  auto dstReg = x2a(dstLoc.reg());
-  if (!dstReg.IsValid()) return;
+  if (dstLoc.reg().isGP()) {
+    auto dstReg = x2a(dstLoc.reg());
+    if (!dstReg.IsValid()) return;
 
-  m_as.  Ldr  (dstReg, base[offset + TVOFF(m_data)]);
+    m_as.  Ldr  (dstReg, base[offset + TVOFF(m_data)]);
+  } else {
+    assert(type <= Type::Dbl);
+    m_as.  Ldr  (x2simd(dstLoc.reg()), base[offset + TVOFF(m_data)]);
+  }
 }
 
 void CodeGenerator::emitStore(vixl::Register base,
@@ -1735,22 +1828,17 @@ void CodeGenerator::emitStore(vixl::Register base,
   if (type <= Type::Null) {
     return;
   }
-  if (src->isConst()) {
-    int64_t val = 0;
-    if (type <= (Type::Bool | Type::Int | Type::Dbl |
-                 Type::Arr | Type::StaticStr | Type::Cls)) {
-      val = src->rawVal();
-    } else {
-      not_reached();
-    }
-    m_as.    Mov  (rAsm, val);
-    m_as.    Str  (rAsm, base[offset + TVOFF(m_data)]);
-  } else {
+
+  if (srcLoc.reg().isGP()) {
     auto reg = x2a(srcLoc.reg());
+    assert(reg.IsValid());
     if (src->isA(Type::Bool)) {
       m_as.  Uxtb (reg.W(), reg.W());
     }
     m_as.    Str  (x2a(srcLoc.reg()), base[offset + TVOFF(m_data)]);
+  } else {
+    assert(type <= Type::Dbl);
+    m_as.    Str  (x2simd(srcLoc.reg()), base[offset + TVOFF(m_data)]);
   }
 }
 

@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
@@ -190,6 +191,13 @@ struct UnknownInputExc : std::runtime_error {
   const int m_line;
 };
 
+struct ControlFlowFailedExc : std::runtime_error {
+  ControlFlowFailedExc(const char* file, int line)
+    : std::runtime_error(folly::format("ControlFlowFailedExc @ {}:{}",
+                                       file, line).str())
+    {}
+};
+
 #define punt() do { \
   throw JIT::TranslationFailedExc(__FILE__, __LINE__); \
 } while(0)
@@ -236,7 +244,11 @@ struct GuardType {
 
 typedef hphp_hash_map<Location,RuntimeType,Location> TypeMap;
 typedef hphp_hash_set<Location, Location> LocationSet;
-typedef hphp_hash_map<DynLocation*, GuardType>  DynLocTypeMap;
+typedef hphp_hash_map<DynLocation*, GuardType> DynLocTypeMap;
+typedef hphp_hash_map<RegionDesc::BlockId, Block*> BlockIdToIRBlockMap;
+typedef hphp_hash_map<RegionDesc::BlockId,
+                      RegionDesc::Block*> BlockIdToRegionBlockMap;
+
 
 
 const char* getTransKindName(TransKind kind);
@@ -397,6 +409,19 @@ private:
                        const Location& l,
                        bool specialize = false);
 
+  void createBlockMaps(const RegionDesc&        region,
+                       BlockIdToIRBlockMap&     blockIdToIRBlock,
+                       BlockIdToRegionBlockMap& blockIdToRegionBlock);
+
+  void setSuccIRBlocks(const RegionDesc&              region,
+                       RegionDesc::BlockId            srcBlockId,
+                       const BlockIdToIRBlockMap&     blockIdToIRBlock,
+                       const BlockIdToRegionBlockMap& blockIdToRegionBlock);
+
+  void setIRBlock(RegionDesc::BlockId            blockId,
+                  const BlockIdToIRBlockMap&     blockIdToIRBlock,
+                  const BlockIdToRegionBlockMap& blockIdToRegionBlock);
+
 public:
   enum TranslateResult {
     Failure,
@@ -417,6 +442,7 @@ public:
    * blacklist so they're interpreted on the next attempt. */
   typedef hphp_hash_set<SrcKey, SrcKey::Hasher> RegionBlacklist;
   TranslateResult translateRegion(const RegionDesc& region,
+                                  bool bcControlFlow,
                                   RegionBlacklist& interp);
 
 private:
@@ -442,7 +468,7 @@ private:
 public:
 
   Translator();
-  virtual ~Translator();
+
   static Lease& WriteLease() {
     return s_writeLease;
   }
@@ -524,7 +550,7 @@ public:
 
 private:
   TransKind m_mode;
-  ProfData* m_profData;
+  std::unique_ptr<ProfData> m_profData;
 
 private:
   int m_analysisDepth;
@@ -534,7 +560,7 @@ public:
   bool addDbgBLPC(PC pc);
 
   ProfData* profData() const {
-    return m_profData;
+    return m_profData.get();
   }
 
   TransKind mode() const {
@@ -573,9 +599,10 @@ opcodeControlFlowInfo(const Op instr) {
     case Op::JmpNZ:
     case Op::Switch:
     case Op::SSwitch:
+    case Op::CreateCont:
     case Op::ContSuspend:
     case Op::ContSuspendK:
-    case Op::ContRetC:
+    case Op::AsyncSuspend:
     case Op::RetC:
     case Op::RetV:
     case Op::Exit:
@@ -598,7 +625,6 @@ opcodeControlFlowInfo(const Op instr) {
     case Op::Unwind:
     case Op::Eval:
     case Op::NativeImpl:
-    case Op::ContHandle:
     case Op::BreakTraceHint:
       return ControlFlowInfo::BreaksBB;
     case Op::FCall:
@@ -684,7 +710,8 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 // can return Variants, and we use KindOfUnknown to denote these
 // return types.
 static inline bool isCppByRef(DataType t) {
-  return t != KindOfBoolean && t != KindOfInt64 && t != KindOfNull;
+  return t != KindOfBoolean && t != KindOfInt64 &&
+         t != KindOfNull && t != KindOfDouble;
 }
 
 // return true if type is passed in/out of C++ as String&/Array&/Object&

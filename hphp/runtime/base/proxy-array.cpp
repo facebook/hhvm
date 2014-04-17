@@ -91,12 +91,12 @@ ProxyArray::ExistsStr(const ArrayData* ad, const StringData* k) {
   return innerArr(ad)->exists(k);
 }
 
-TypedValue*
+const TypedValue*
 ProxyArray::NvGetStr(const ArrayData* ad, const StringData* k) {
   return innerArr(ad)->nvGet(k);
 }
 
-TypedValue* ProxyArray::NvGetInt(const ArrayData* ad, int64_t k) {
+const TypedValue* ProxyArray::NvGetInt(const ArrayData* ad, int64_t k) {
   return innerArr(ad)->nvGet(k);
 }
 
@@ -140,16 +140,20 @@ ArrayData* ProxyArray::SetStr(ArrayData* ad, StringData* k,
   return reseatable(ad, r);
 }
 
-ArrayData* ProxyArray::SetRefInt(ArrayData* ad, int64_t k,
-                                            const Variant& v, bool copy) {
+ArrayData* ProxyArray::SetRefInt(ArrayData* ad,
+                                 int64_t k,
+                                 Variant& v,
+                                 bool copy) {
   ad = copy ? Make(innerArr(ad)) : ad;
   auto r = innerArr(ad)->setRef(k, v, innerArr(ad)->hasMultipleRefs());
   assert(!copy);
   return reseatable(ad, r);
 }
 
-ArrayData* ProxyArray::SetRefStr(ArrayData* ad, StringData* k,
-                                            const Variant& v, bool copy) {
+ArrayData* ProxyArray::SetRefStr(ArrayData* ad,
+                                 StringData* k,
+                                 Variant& v,
+                                 bool copy) {
   ad = copy ? Make(innerArr(ad)) : ad;
   auto r = innerArr(ad)->setRef(k, v, innerArr(ad)->hasMultipleRefs());
   assert(!copy);
@@ -187,7 +191,7 @@ ProxyArray::Append(ArrayData* ad, const Variant& v, bool copy) {
 }
 
 ArrayData*
-ProxyArray::AppendRef(ArrayData* ad, const Variant& v, bool copy) {
+ProxyArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
   ad = copy ? Make(innerArr(ad)) : ad;
   auto r = innerArr(ad)->appendRef(v, innerArr(ad)->hasMultipleRefs());
   assert(!copy);
@@ -277,26 +281,32 @@ ArrayData* ProxyArray::EscalateForSort(ArrayData* ad) {
 }
 
 void ProxyArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
+  ad = reseatable(ad, innerArr(ad)->escalateForSort());
   return innerArr(ad)->ksort(sort_flags, ascending);
 }
 
 void ProxyArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
+  ad = reseatable(ad, innerArr(ad)->escalateForSort());
   return innerArr(ad)->sort(sort_flags, ascending);
 }
 
 void ProxyArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
+  ad = reseatable(ad, innerArr(ad)->escalateForSort());
   return innerArr(ad)->asort(sort_flags, ascending);
 }
 
 bool ProxyArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
+  ad = reseatable(ad, innerArr(ad)->escalateForSort());
   return innerArr(ad)->uksort(cmp_function);
 }
 
 bool ProxyArray::Usort(ArrayData* ad, const Variant& cmp_function) {
+  ad = reseatable(ad, innerArr(ad)->escalateForSort());
   return innerArr(ad)->usort(cmp_function);
 }
 
 bool ProxyArray::Uasort(ArrayData* ad, const Variant& cmp_function) {
+  ad = reseatable(ad, innerArr(ad)->escalateForSort());
   return innerArr(ad)->uasort(cmp_function);
 }
 

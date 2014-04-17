@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_class.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_file.h"
 
@@ -103,11 +103,11 @@ const StaticString spl_classes[] = {
 
 Array f_spl_classes() {
   const size_t num_classes = sizeof(spl_classes) / sizeof(spl_classes[0]);
-  ArrayInit ret(num_classes);
+  ArrayInit ret(num_classes, ArrayInit::Map{});
   for (size_t i = 0; i < num_classes; ++i) {
     ret.set(spl_classes[i], spl_classes[i]);
   }
-  return ret.create();
+  return ret.toArray();
 }
 
 void throw_spl_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
@@ -311,10 +311,11 @@ bool f_spl_autoload_unregister(const Variant& autoload_function) {
 
 Variant f_spl_autoload_functions() {
   const Array& handlers = AutoloadHandler::s_instance->getHandlers();
-  if (handlers.isNull())
+  if (handlers.isNull()) {
     return false;
-  else
+  } else {
     return handlers.values();
+  }
 }
 
 void f_spl_autoload_call(const String& class_name) {
@@ -355,7 +356,7 @@ void f_spl_autoload(const String& class_name,
   for (ArrayIter iter(ext); iter; ++iter) {
     String fileName = lClass + iter.second().toString();
     include(fileName, true, "", false);
-    if (f_class_exists(class_name, false)) {
+    if (HHVM_FN(class_exists)(class_name, false)) {
       found = true;
       break;
     }

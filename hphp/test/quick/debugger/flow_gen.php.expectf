@@ -110,14 +110,8 @@ Break at genFoo() on line 16 of %s/flow_gen.php
 
 next
 Finished in genFoo
-Break at genFoo() on line 11 of %s/flow_gen.php
-  10 
-  11*function genFoo($a) {
-  12*  $a = bar($a);
-  13*  $a = bar($a);
-  14*  $z = yield $a+5;
-  15*  yield $z+1;
-  16*  error_log('Finished in genFoo');
+Break at genFoo() on line 17 of %s/flow_gen.php
+  16   error_log('Finished in genFoo');
   17*}
   18 
 

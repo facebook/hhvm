@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,41 +13,53 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_VM_TRANSLATOR_X64_H_
-#define incl_HPHP_RUNTIME_VM_TRANSLATOR_X64_H_
+#ifndef incl_HPHP_RUNTIME_VM_JIT_MCGENERATOR_H_
+#define incl_HPHP_RUNTIME_VM_JIT_MCGENERATOR_H_
 
 #include <memory>
-#include <boost/noncopyable.hpp>
-
-#include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/util/asm-x64.h"
-#include "hphp/util/code-cache.h"
-#include "hphp/runtime/vm/jit/unwind-x64.h"
-#include <tbb/concurrent_hash_map.h>
 #include <utility>
 #include <vector>
+#include <boost/noncopyable.hpp>
+#include <tbb/concurrent_hash_map.h>
+
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/code-cache.h"
 #include "hphp/util/ringbuffer.h"
+
+#include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
-#include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/base/stats.h"
-
-namespace HPHP { class ExecutionContext; }
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/unwind-x64.h"
 
 namespace HPHP { namespace JIT {
-class HhbcTranslator;
-class IRUnit;
-class CSEHash;
-class IRBuilder;
-class CodeGenerator;
-}}
 
-namespace HPHP { namespace JIT {
+typedef X64Assembler Asm;
+typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
+
+struct TReqInfo;
+struct Label;
+struct MCGenerator;
+
+extern MCGenerator* mcg;
+extern void* interpOneEntryPoints[];
+
+constexpr size_t kNonFallthroughAlign = 64;
+constexpr int kLeaRipLen = 7;
+constexpr int kTestRegRegLen = 3;
+constexpr int kTestImmRegLen = 5;  // only for rax -- special encoding
+// Cache alignment is required for mutable instructions to make sure
+// mutations don't "tear" on remote cpus.
+constexpr size_t kX64CacheLineSize = 64;
+constexpr size_t kX64CacheLineMask = kX64CacheLineSize - 1;
+
+//////////////////////////////////////////////////////////////////////
 
 struct TraceletCounters {
   uint64_t m_numEntered, m_numExecuted;
@@ -73,210 +85,70 @@ struct FreeStubList {
   void push(TCA stub);
 };
 
-class MCGenerator;
-extern MCGenerator* mcg;
+//////////////////////////////////////////////////////////////////////
 
-extern void* interpOneEntryPoints[];
+/*
+ *
+ * MCGenerator handles the machine-level details of code generation
+ * (e.g., tcache entry, code smashing, code cache management) and
+ * delegates the bytecode-to-asm translation process to Translator.
+ *
+ */
+struct MCGenerator : private boost::noncopyable {
+  /*
+   * True iff the calling thread is the sole writer.
+   */
+  static bool canWrite() {
+    // We can get called early in boot, so allow null mcg.
+    return !mcg || Translator::WriteLease().amOwner();
+  }
 
-struct TReqInfo;
-struct Label;
-
-typedef X64Assembler Asm;
-
-typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
-
-constexpr size_t kNonFallthroughAlign = 64;
-constexpr int kLeaRipLen = 7;
-constexpr int kTestRegRegLen = 3;
-constexpr int kTestImmRegLen = 5;  // only for rax -- special encoding
-// Cache alignment is required for mutable instructions to make sure
-// mutations don't "tear" on remote cpus.
-constexpr size_t kX64CacheLineSize = 64;
-constexpr size_t kX64CacheLineMask = kX64CacheLineSize - 1;
-
-
-class MCGenerator : private boost::noncopyable {
-  friend class SrcRec; // so it can smash code.
-  friend class SrcDB;  // For write lock and code invalidation.
-  friend class MCGReaper;
-  friend class HPHP::JIT::CodeGenerator;
-
-  typedef X64Assembler Asm;
-
-public:
-  Translator& tx() { return m_tx; }
-
-private:
-  Translator           m_tx;
-
-public:
-  CodeCache code;
-
-private:
-  PointerMap           trampolineMap;
-  int                  m_numNativeTrampolines;
-
-  TcaTransIDMap        m_jmpToTransID; // maps jump addresses to the ID
-                                       // of translation containing them
-
-  // Data structures for HHIR-based translation
-  uint64_t               m_numHHIRTrans;
-
-public:
-  void traceCodeGen();
-
-private:
-  FixupMap                   m_fixupMap;
-  UnwindInfoHandle           m_unwindRegistrar;
-  std::vector<std::pair<CTCA, TCA>> m_pendingCatchTraces;
-  CatchTraceMap              m_catchTraceMap;
-  std::vector<TransBCMapping> m_bcMap;
-
-  Debug::DebugInfo m_debugInfo;
-
-  FreeStubList m_freeStubs;
-
-  // asize + astubssize + gdatasize + trampolinesblocksize
-  size_t m_totalSize;
-
-  ////////////////////////////////////////
-  //
-  // Function prologues
-  //
-  ////////////////////////////////////////
-public:
-  TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr);
-  TCA getCallArrayPrologue(Func* func);
-  void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
-
-private:
-  bool checkCachedPrologue(const Func*, int, TCA&) const;
-
-  ////////////////////////////////////////
-  //
-  // Service request handling
-  //
-  ////////////////////////////////////////
-private:
-  TCA bindJmp(TCA toSmash, SrcKey dest, JIT::ServiceRequest req, bool& smashed);
-  TCA bindJmpccFirst(TCA toSmash,
-                     Offset offTrue, Offset offFalse,
-                     bool toTake,
-                     ConditionCode cc,
-                     bool& smashed);
-  TCA bindJmpccSecond(TCA toSmash, const Offset off,
-                      ConditionCode cc,
-                      bool& smashed);
-  bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
-
-
-  ////////////////////////////////////////
-  //
-  // Calling into C++
-  //
-  ////////////////////////////////////////
-public:
-  TCA getNativeTrampoline(TCA helperAddress);
-
-private:
-  TCA emitNativeTrampoline(TCA helperAddress);
-
-  ////////////////////////////////////////
-  //
-  // Tracelet entry
-  //
-  ////////////////////////////////////////
-private:
-  void emitGuardChecks(SrcKey, const ChangeMap&, const RefDeps&, SrcRec&);
-  void emitResolvedDeps(const ChangeMap& resolvedDeps);
-  void checkRefs(SrcKey, const RefDeps&, SrcRec&);
-
-  void drawCFG(std::ofstream& out) const;
-
-  void invalidateSrcKey(SrcKey sk);
-  void invalidateFuncProfSrcKeys(const Func* func);
-
-public:
   static JIT::CppCall getDtorCall(DataType type);
+  static bool isPseudoEvent(const char* event);
 
+public:
+  MCGenerator();
+  ~MCGenerator();
+
+public:
+  /*
+   * Accessors.
+   */
+  Translator& tx() { return m_tx; }
   FixupMap& fixupMap() { return m_fixupMap; }
-
   DataBlock& globalData() { return code.data(); }
-
-  bool freeRequestStub(TCA stub);
-  TCA getFreeStub();
-
-  void registerCatchBlock(CTCA ip, TCA block);
-  void processPendingCatchTraces();
-  folly::Optional<TCA> getCatchTrace(CTCA ip) const;
-
-  TCA getTranslatedCaller() const;
+  Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
 
   const TcaTransIDMap& getJmpToTransIDMap() const {
     return m_jmpToTransID;
-  }
-
-  void setJmpTransID(TCA jmp);
-
-  bool profileSrcKey(const SrcKey& sk) const;
-  bool profilePrologue(const SrcKey& sk) const;
-
-  TCA getTopTranslation(SrcKey sk) {
-    return m_tx.getSrcRec(sk)->getTopTranslation();
   }
 
   inline bool isValidCodeAddress(TCA tca) const {
     return code.isValidCodeAddress(tca);
   }
 
-  static bool isPseudoEvent(const char* event);
-  void getPerfCounters(Array& ret);
+  /*
+   * Handlers for function prologues.
+   */
+  TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr);
+  TCA getCallArrayPrologue(Func* func);
+  void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
+
+  /*
+   * Get trampoline for a call into native C++.
+   */
+  TCA getNativeTrampoline(TCA helperAddress);
 
   inline void sync() {
     if (tl_regState == VMRegState::CLEAN) return;
     syncWork();
   }
-private:
-  void syncWork();
-
-public:
-
-  Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
 
   template<typename T, typename... Args>
   T* allocData(Args&&... args) {
     return code.data().alloc<T>(std::forward<Args>(args)...);
   }
 
-  bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
-  Translator::TranslateResult translateTracelet(Tracelet& t);
-
-private:
-  bool shouldTranslate() const {
-    return code.main().used() < RuntimeOption::EvalJitAMaxUsage;
-  }
-  TCA getTranslation(const TranslArgs& args);
-  TCA createTranslation(const TranslArgs& args);
-  TCA retranslate(const TranslArgs& args);
-  TCA translate(const TranslArgs& args);
-  void translateWork(const TranslArgs& args);
-
-  TCA lookupTranslation(SrcKey sk) const;
-  TCA retranslateOpt(TransID transId, bool align);
-  TCA regeneratePrologues(Func* func, SrcKey triggerSk);
-  TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk);
-
-  void recordGdbTranslation(SrcKey sk, const Func* f,
-                            const CodeBlock& cb,
-                            const TCA start,
-                            bool exit, bool inPrologue);
-public:
-  void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
-private:
-  void recordBCInstr(uint32_t op, const CodeBlock& cb, const TCA addr);
-
-
-public:
   /*
    * enterTC is the main entry point for the translator from the
    * bytecode interpreter (see enterVMWork).  It operates on behalf of
@@ -304,40 +176,138 @@ public:
     enterTC(start, nullptr);
   }
 
-  MCGenerator();
-  ~MCGenerator();
-
-  void initUniqueStubs();
-
-  // Called before entering a new PHP "world."
+  /*
+   * Called before entering a new PHP "world."
+   */
   void requestInit();
 
-  // Called at the end of eval()
+  /*
+   * Called at the end of eval()
+   */
   void requestExit();
 
-  // Returns a string with cache usage information
+  void initUniqueStubs();
+  int numTranslations(SrcKey sk) const;
+  bool addDbgGuards(const Unit* unit);
+  bool addDbgGuard(const Func* func, Offset offset, bool resumed);
+  bool freeRequestStub(TCA stub);
+  TCA getFreeStub();
+  void registerCatchBlock(CTCA ip, TCA block);
+  folly::Optional<TCA> getCatchTrace(CTCA ip) const;
+  TCA getTranslatedCaller() const;
+  void setJmpTransID(TCA jmp);
+  bool profileSrcKey(const SrcKey& sk) const;
+  bool profilePrologue(const SrcKey& sk) const;
+  void getPerfCounters(Array& ret);
+  bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
+  Translator::TranslateResult translateTracelet(Tracelet& t);
+  void traceCodeGen();
+  void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
+
+  /*
+   * Dump translation cache.  True if successful.
+   */
+  bool dumpTC(bool ignoreLease = false);
+
+  /*
+   * Return cache usage information as a string
+   */
   std::string getUsage();
   std::string getTCAddrs();
 
-  // true iff calling thread is sole writer.
-  static bool canWrite() {
-    // We can get called early in boot, so allow null mcg.
-    return !mcg || Translator::WriteLease().amOwner();
+public:
+  CodeCache code;
+
+private:
+  /*
+   * Check if function prologue already exists.
+   */
+  bool checkCachedPrologue(const Func*, int, TCA&) const;
+
+  /*
+   * Service request handlers.
+   */
+  TCA bindJmp(TCA toSmash, SrcKey dest, JIT::ServiceRequest req, bool& smashed);
+  TCA bindJmpccFirst(TCA toSmash,
+                     Offset offTrue, Offset offFalse,
+                     bool toTake,
+                     ConditionCode cc,
+                     bool& smashed);
+  TCA bindJmpccSecond(TCA toSmash, const Offset off,
+                      ConditionCode cc,
+                      bool& smashed);
+  bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
+
+
+  /*
+   * Emit trampoline to native C++ code.
+   */
+  TCA emitNativeTrampoline(TCA helperAddress);
+
+  /*
+   * Generate code for tracelet entry
+   */
+  void emitGuardChecks(SrcKey, const ChangeMap&, const RefDeps&, SrcRec&);
+  void emitResolvedDeps(const ChangeMap& resolvedDeps);
+  void checkRefs(SrcKey, const RefDeps&, SrcRec&);
+
+  bool shouldTranslate() const {
+    return code.main().used() < RuntimeOption::EvalJitAMaxUsage;
   }
 
-  // Returns true on success
-  bool dumpTC(bool ignoreLease = false);
+  TCA getTopTranslation(SrcKey sk) {
+    return m_tx.getSrcRec(sk)->getTopTranslation();
+  }
 
-  // Returns true on success
+  void syncWork();
+
+  TCA getTranslation(const TranslArgs& args);
+  TCA createTranslation(const TranslArgs& args);
+  TCA retranslate(const TranslArgs& args);
+  TCA translate(const TranslArgs& args);
+  void translateWork(const TranslArgs& args);
+
+  TCA lookupTranslation(SrcKey sk) const;
+  TCA retranslateOpt(TransID transId, bool align);
+  TCA regeneratePrologues(Func* func, SrcKey triggerSk);
+  TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk);
+  void processPendingCatchTraces();
+
+  void invalidateSrcKey(SrcKey sk);
+  void invalidateFuncProfSrcKeys(const Func* func);
+
+  void recordGdbTranslation(SrcKey sk, const Func* f,
+                            const CodeBlock& cb,
+                            const TCA start,
+                            bool exit, bool inPrologue);
+
+  void recordBCInstr(uint32_t op, const CodeBlock& cb, const TCA addr);
+
+  /*
+   * TC dump helpers
+   */
   bool dumpTCCode(const char* filename);
-
-  // Returns true on success
   bool dumpTCData();
+  void drawCFG(std::ofstream& out) const;
 
-  int numTranslations(SrcKey sk) const;
+private:
+  Translator         m_tx;
+  PointerMap         m_trampolineMap;
+  int                m_numNativeTrampolines;
 
-  bool addDbgGuards(const Unit* unit);
-  bool addDbgGuard(const Func* func, Offset offset);
+  // maps jump addresses to the ID of translation containing them.
+  TcaTransIDMap      m_jmpToTransID;
+  uint64_t           m_numHHIRTrans;
+  FixupMap           m_fixupMap;
+  UnwindInfoHandle   m_unwindRegistrar;
+  std::vector<std::pair<CTCA, TCA>> m_pendingCatchTraces;
+  CatchTraceMap      m_catchTraceMap;
+  std::vector<TransBCMapping> m_bcMap;
+  Debug::DebugInfo   m_debugInfo;
+  FreeStubList       m_freeStubs;
+
+  // asize + astubssize + gdatasize + trampolinesblocksize
+  size_t             m_totalSize;
 };
 
 /*

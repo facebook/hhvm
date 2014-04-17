@@ -638,7 +638,7 @@ void IRTranslator::translateDup(const NormalizedInstruction& ni) {
 }
 
 void IRTranslator::translateCreateCont(const NormalizedInstruction& i) {
-  HHIR_EMIT(CreateCont, i.offset() + i.imm[0].u_BA);
+  HHIR_EMIT(CreateCont, i.nextSk().offset());
 }
 
 void IRTranslator::translateContEnter(const NormalizedInstruction& i) {
@@ -655,10 +655,6 @@ void IRTranslator::translateContSuspend(const NormalizedInstruction& i) {
 
 void IRTranslator::translateContSuspendK(const NormalizedInstruction& i) {
   HHIR_EMIT(ContSuspendK, i.nextSk().offset());
-}
-
-void IRTranslator::translateContRetC(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContRetC);
 }
 
 void IRTranslator::translateContCheck(const NormalizedInstruction& i) {
@@ -685,16 +681,12 @@ void IRTranslator::translateAsyncAwait(const NormalizedInstruction&) {
   HHIR_EMIT(AsyncAwait);
 }
 
-void IRTranslator::translateAsyncESuspend(const NormalizedInstruction& i) {
-  HHIR_EMIT(AsyncESuspend, i.offset() + i.imm[0].u_BA, i.imm[1].u_IVA);
-}
-
-void IRTranslator::translateAsyncResume(const NormalizedInstruction& i) {
-  HHIR_EMIT(Nop);
-}
-
-void IRTranslator::translateAsyncWrapResult(const NormalizedInstruction& i) {
-  HHIR_EMIT(AsyncWrapResult);
+void IRTranslator::translateAsyncSuspend(const NormalizedInstruction& i) {
+  if (m_hhbcTrans.inGenerator()) {
+    HHIR_EMIT(AsyncSuspendR, i.nextSk().offset());
+  } else {
+    HHIR_EMIT(AsyncSuspendE, i.nextSk().offset(), i.imm[0].u_IVA);
+  }
 }
 
 void IRTranslator::translateStrlen(const NormalizedInstruction& i) {
@@ -1252,7 +1244,7 @@ IRTranslator::translateNewStructArray(const NormalizedInstruction& i) {
   auto numArgs = i.immVec.size();
   auto ids = i.immVec.vec32();
   auto unit = m_hhbcTrans.curUnit();
-  StringData* keys[HphpArray::MaxMakeSize];
+  StringData* keys[MixedArray::MaxMakeSize];
   for (size_t i = 0; i < numArgs; i++) {
     keys[i] = unit->lookupLitstrId(ids[i]);
   }
@@ -1607,10 +1599,11 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   auto& ht = m_hhbcTrans;
   ht.setBcOff(ni.source.offset(),
               ni.breaksTracelet && !m_hhbcTrans.isInlining());
-  FTRACE(1, "\n{:-^60}\n", folly::format("translating {} with stack:\n{}",
-                                         ni.toString(), ht.showStack()));
+  FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",
+                                         ni.offset(), ni.toString(),
+                                         ht.showStack()));
   // When profiling, we disable type predictions to avoid side exits
-  assert(JIT::tx->mode() != TransProfile || !ni.outputPredicted);
+  assert(IMPLIES(JIT::tx->mode() == TransProfile, !ni.outputPredicted));
 
   if (ni.guardedThis) {
     // Task #2067635: This should really generate an AssertThis

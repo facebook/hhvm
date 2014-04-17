@@ -300,7 +300,7 @@ Array convertArray(size_t num, const T* arr) {
   for (size_t i = 0; i < num; ++i) {
     ret.appendWithRef(arr[i]);
   }
-  return ret.create();
+  return ret.toArray();
 }
 
 template<typename T>

@@ -262,7 +262,7 @@ void emitBuildExtraArgs(const PhpFunc& func, std::ostream& out,
     R"(
 {0}Array extraArgs;
 {0}{{
-{0}  ArrayInit ai(count-{1});
+{0}  ArrayInit ai((size_t)count-{1}, ArrayInit::Mixed{{}});
 {0}  for (int32_t i = {1}; i < count; ++i) {{
 {0}    TypedValue* extraArg = ar->getExtraArg(i-{1});
 {0}    if (tvIsStronglyBound(extraArg)) {{
@@ -676,7 +676,7 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
   // Call the f_ function via the fh_ alias
   emitExtCall(func, cpp, in);
   if (needArgMiscountClause && (func.numParams() == 0) && func.usesThis()) {
-    cpp << in << "frame_free_inl(ar);\n";
+    cpp << in << "frame_free_inl(ar, rv);\n";
     cpp << in << "ar->m_r = *rv;\n";
     cpp << in << "return &ar->m_r;\n";
   }
@@ -726,7 +726,7 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
   auto numLocals = func.numParams();
   auto frameFree =
     func.usesThis() ? "frame_free_locals_inl" : "frame_free_locals_no_this_inl";
-  cpp << in << frameFree << "(ar, " << numLocals << ");\n";
+  cpp << in << frameFree << "(ar, " << numLocals << ", rv);\n";
   cpp << in << "ar->m_r = *rv;\n";
   cpp << in << "return &ar->m_r;\n";
   cpp << "}\n\n";

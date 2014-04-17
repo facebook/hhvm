@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/thread-init-fini.h"
@@ -52,12 +53,14 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_xenon.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/system/constants.h"
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
@@ -168,13 +171,12 @@ String k_PHP_OS;
 String k_PHP_SAPI;
 
 static void process_cmd_arguments(int argc, char **argv) {
-  GlobalVariables *g = get_global_variables();
-  g->set(s_argc, Variant(argc), false);
-  Array argvArray = HphpArray::GetStaticEmptyArray();
+  php_global_set(s_argc, Variant(argc));
+  Array argvArray(staticEmptyArray());
   for (int i = 0; i < argc; i++) {
     argvArray.append(String(argv[i]));
   }
-  g->set(s_argv, argvArray, false);
+  php_global_set(s_argv, argvArray);
 }
 
 void process_env_variables(Array& variables) {
@@ -285,9 +287,9 @@ void register_variable(Array& variables, char *name, const Variant& value,
       }
 
       if (!index) {
-        symtable->append(Array::Create());
+        auto& val = symtable->lvalAt();
+        val = Array::Create();
         gpc_elements.push_back(uninit_null());
-        auto& val = symtable->lvalAt((int64_t)symtable->size() - 1);
         gpc_elements.back().assignRef(val);
       } else {
         String key(index, index_len, CopyString);
@@ -541,10 +543,8 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   StackTraceNoHeap::AddExtraLogging("Arguments", args.c_str());
 
   hphp_session_init();
-  ExecutionContext *context = g_context.getNoCheck();
+  auto const context = g_context.getNoCheck();
   context->obSetImplicitFlush(true);
-
-  GlobalVariables *g = get_global_variables();
 
   {
     Array envArr(Array::Create());
@@ -562,7 +562,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
       envArr.set(s_HHVM_ARCH, "arm");
       break;
     }
-    g->set(s__ENV.get(), envArr, false);
+    php_global_set(s__ENV, envArr);
   }
 
   process_cmd_arguments(argc, argv);
@@ -591,8 +591,8 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
     serverArr.set(s_SCRIPT_FILENAME, file);
     serverArr.set(s_SCRIPT_NAME, file);
     serverArr.set(s_PHP_SELF, file);
-    serverArr.set(s_argv, g->get(s_argv));
-    serverArr.set(s_argc, g->get(s_argc));
+    serverArr.set(s_argv, php_global(s_argv));
+    serverArr.set(s_argc, php_global(s_argc));
     serverArr.set(s_PWD, g_context->getCwd());
     char hostname[1024];
     if (!gethostname(hostname, 1024)) {
@@ -603,7 +603,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
       serverArr.set(String(kv.first.c_str()), String(kv.second.c_str()));
     }
 
-    g->set(s__SERVER.get(), serverArr, false);
+    php_global_set(s__SERVER, serverArr);
   }
 
   if (xhprof) {
@@ -615,7 +615,14 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
       RuntimeOption::RequestTimeoutSeconds);
   }
 
+  if (RuntimeOption::XenonForceAlwaysOn) {
+    Xenon::getInstance().surpriseAll();
+  }
+
   Extension::RequestInitModules();
+  // If extension constants were used in the in ini files, they would have come
+  // out as 0 in the previous pass. Lets re-import the ini files. We could be
+  // more clever, but that would be harder and this works.
   for (auto& c : config) {
     process_ini_settings(c);
   }
@@ -1514,7 +1521,11 @@ extern "C" void hphp_fatal_error(const char *s) {
 static void on_timeout(int sig, siginfo_t* info, void* context) {
   if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {
     auto data = (RequestInjectionData*)info->si_value.sival_ptr;
-    data->onTimeout();
+    if (data) {
+      data->onTimeout();
+    } else {
+      Xenon::getInstance().onTimer();
+    }
   }
 }
 
@@ -1532,6 +1543,7 @@ void hphp_process_init() {
   action.sa_sigaction = on_timeout;
   action.sa_flags = SA_SIGINFO | SA_NODEFER;
   sigaction(SIGVTALRM, &action, nullptr);
+  Xenon::getInstance().start(RuntimeOption::XenonPeriodSeconds);
 
   init_thread_locals();
 
@@ -1691,7 +1703,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                 context->getCwd().data(), true);
       }
       if (func) {
-        funcRet->assignVal(invoke(cmd.c_str(), funcParams));
+        funcRet->assign(invoke(cmd.c_str(), funcParams));
       } else {
         if (isServer) hphp_chdir_file(cmd);
         include_impl_invoke(cmd.c_str(), once);
@@ -1782,6 +1794,7 @@ void hphp_session_exit() {
 }
 
 void hphp_process_exit() {
+  Xenon::getInstance().stop();
   PageletServer::Stop();
   XboxServer::Stop();
   Eval::Debugger::Stop();

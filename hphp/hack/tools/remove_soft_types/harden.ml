@@ -15,16 +15,26 @@ module V = Visitor_php
 
 let changed = ref false
 
+let harden_param (k, _) param = begin
+  match param.A.p_soft_type with
+    | Some tok -> (tok.PI.transfo <- PI.Remove; changed := true)
+    | None -> ()
+  end;
+  k param
+
+let harden_func (k, _) func = begin
+  match func.A.f_return_type with
+    | Some (_, Some tok, _) -> (tok.PI.transfo <- PI.Remove; changed := true)
+    | _ -> ()
+  end;
+  k func
+
 (* Removes all the "@" sigils in front of every typehint. *)
 let harden_visitor =
   V.mk_visitor { V.default_visitor with
-    V.kparameter = begin fun (k, _) param ->
-      (match param.A.p_soft_type with
-        | Some tok -> (tok.PI.transfo <- PI.Remove; changed := true)
-        | None -> ()
-      );
-      k param
-    end
+    V.kparameter = harden_param;
+    V.kfunc_def = harden_func;
+    V.kmethod_def = harden_func;
   }
 
 let go fn =

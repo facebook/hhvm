@@ -126,11 +126,16 @@ class Object;
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 
-// Maximum number of args for a native using double params
-constexpr int kMaxBuiltinArgs = 7;
-
-// Maximum number of args for a native using only int-like params
-constexpr int kMaxBuiltinArgsNoDouble = 15;
+// Maximum number of args for a native function call
+// Beyond this number, a function/method will have to
+// take a raw ActRec (using <<__Native("ActRec")>>) and
+// deal with the args using getArg<KindOf*>(ar, argNum)
+//
+// To paraphrase you-know-who, "32 args should be enough for anybody"
+//
+// Note: If changing this number, update native-func-caller.h
+// using make_native-func-caller.php
+const int kMaxBuiltinArgs = 32;
 
 // t#3982283 - Our ARM code gen doesn't support stack args yet.
 // In fact, it only supports six of the eight register args.
@@ -144,13 +149,26 @@ inline int maxFCallBuiltinArgs() {
   if (UNLIKELY(RuntimeOption::EvalSimulateARM)) {
     return kMaxFCallBuiltinArgsARM;
   }
-  return kMaxBuiltinArgsNoDouble;
+  return kMaxBuiltinArgs;
+#endif
+}
+
+// t#3982283 - Our ARM code gen doesn't support FP args/returns yet.
+inline bool allowFCallBuiltinDoubles() {
+#ifdef __AARCH64EL__
+  return false;
+#else
+  if (UNLIKELY(RuntimeOption::EvalSimulateARM)) {
+    return false;
+  }
+  return true;
 #endif
 }
 
 enum Attr {
   AttrNone = 0,
   AttrActRec = 1 << 0,
+  AttrZendCompat = 1 << 1,
 };
 
 /**

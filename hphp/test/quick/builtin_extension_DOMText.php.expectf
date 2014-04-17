@@ -1,11 +1,10 @@
 DOMText
 object(DOMText)#1 (0) {
 }
-string(91) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:7:"DOMText";}"
-object(__PHP_Unserializable_Class)#2 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(7) "DOMText"
-}
+
+Warning: Attempted to serialize unserializable builtin class DOMText in %s/builtin_extensions.inc on line 8
+string(2) "N;"
+NULL
 array(28) {
   [0]=>
   string(11) "__construct"
@@ -66,15 +65,14 @@ array(28) {
 }
 ================
 A_DOMText
-object(A_DOMText)#3 (1) {
+object(A_DOMText)#2 (1) {
   ["___x"]=>
   NULL
 }
-string(93) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:9:"A_DOMText";}"
-object(__PHP_Unserializable_Class)#4 (1) {
-  ["__PHP_Unserializable_Class_Name"]=>
-  string(9) "A_DOMText"
-}
+
+Warning: Attempted to serialize unserializable builtin class A_DOMText in %s/builtin_extensions.inc on line 26
+string(2) "N;"
+NULL
 array(28) {
   [0]=>
   string(11) "__construct"

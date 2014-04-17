@@ -179,7 +179,7 @@ static void addBreakPointFuncEntry(const Func* f) {
   if (RuntimeOption::EvalJit) {
     if (tx->addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
-      if (!mcg->addDbgGuard(f, base)) {
+      if (!mcg->addDbgGuard(f, base, false)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
     }

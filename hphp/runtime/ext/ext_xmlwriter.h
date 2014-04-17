@@ -92,8 +92,8 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
   public: bool t_setindent(bool indent);
   public: bool t_startdocument(const String& version = "1.0", const String& encoding = null_string, const String& standalone = null_string);
   public: bool t_startelement(const String& name);
-  public: bool t_startelementns(const Variant& prefix, const String& name, const String& uri);
-  public: bool t_writeelementns(const String& prefix, const String& name, const String& uri, const String& content = null_string);
+  public: bool t_startelementns(const Variant& prefix, const String& name, const Variant& uri);
+  public: bool t_writeelementns(const Variant& prefix, const String& name, const Variant& uri, const String& content = null_string);
   public: bool t_writeelement(const String& name, const String& content = null_string);
   public: bool t_endelement();
   public: bool t_fullendelement();

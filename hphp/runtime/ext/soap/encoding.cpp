@@ -526,7 +526,7 @@ static bool soap_check_xml_ref(Variant &data, xmlNodePtr node) {
       return true;
     }
   } else {
-    ref_map.set((int64_t)node, ref(data));
+    ref_map.setRef((int64_t)node, data);
   }
   return false;
 }

@@ -1,0 +1,123 @@
+array(11) {
+  ["phar://%s/test/slow/ext_phar/archive.zip/archive/.hg_archival.txt"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(16) ".hg_archival.txt"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/.hg_archival.txt"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/.hg_archival.txt"
+  }
+  ["phar://%s/test/slow/ext_phar/archive.zip/archive/.hgignore"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(9) ".hgignore"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/.hgignore"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/.hgignore"
+  }
+  ["phar://%s/test/slow/ext_phar/archive.zip/archive/A/prefixA.foo"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(11) "prefixA.foo"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/A/prefixA.foo"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/A/prefixA.foo"
+  }
+  ["phar://%s/test/slow/ext_phar/archive.zip/archive/A/prefixB.foo"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(11) "prefixB.foo"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/A/prefixB.foo"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/A/prefixB.foo"
+  }
+  ["phar://%s/test/slow/ext_phar/archive.zip/archive/A/prefixC.foo"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(11) "prefixC.foo"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/A/prefixC.foo"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/A/prefixC.foo"
+  }
+  ["phar://%s/test/slow/ext_phar/archive.zip/archive/A/prefixD.foo"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(11) "prefixD.foo"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/A/prefixD.foo"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/A/prefixD.foo"
+  }
+  ["phar://%s/test/slow/ext_phar/archive.zip/archive/prefixA.foo"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(11) "prefixA.foo"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/prefixA.foo"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/prefixA.foo"
+  }
+  ["phar://%s/test/slow/ext_phar/archive.zip/archive/prefixB.foo"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(11) "prefixB.foo"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/prefixB.foo"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/prefixB.foo"
+  }
+  ["phar://%s/test/slow/ext_phar/archive.zip/archive/prefixC.foo"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(11) "prefixC.foo"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/prefixC.foo"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/prefixC.foo"
+  }
+  ["phar://%s/test/slow/ext_phar/archive.zip/archive/toplevelA.foo"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(13) "toplevelA.foo"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/toplevelA.foo"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/toplevelA.foo"
+  }
+  ["phar://%s/test/slow/ext_phar/archive.zip/archive/toplevelB.foo"]=>
+  array(4) {
+    [0]=>
+    string(12) "PharFileInfo"
+    [1]=>
+    string(13) "toplevelB.foo"
+    [2]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/toplevelB.foo"
+    [3]=>
+    string(%d) "phar://%s/test/slow/ext_phar/archive.zip/archive/toplevelB.foo"
+  }
+}

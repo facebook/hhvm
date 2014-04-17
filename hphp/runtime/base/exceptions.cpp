@@ -73,7 +73,7 @@ FatalErrorException::FatalErrorException(const std::string &msg,
 }
 
 Array ExtendedException::getBackTrace() const {
-  return m_btp.get();
+  return Array(m_btp.get());
 }
 
 /**

@@ -61,6 +61,8 @@ struct Block : boost::noncopyable {
 
   // Returns whether this block starts with BeginCatch
   bool isCatch() const;
+  // If its a catch block, the BeginCatch's marker
+  BCMarker catchMarker() const;
 
   // return the fallthrough block.  Should be nullptr if the last instruction
   // is a Terminal.
@@ -125,6 +127,7 @@ struct Block : boost::noncopyable {
   iterator         erase(IRInstruction* inst);
   iterator insert(iterator pos, IRInstruction* inst);
   void splice(iterator pos, Block* from, iterator begin, iterator end);
+  void push_back(std::initializer_list<IRInstruction*> insts);
   void push_back(IRInstruction* inst);
   template <class Predicate> void remove_if(Predicate p);
   InstructionList&& moveInstrs();
@@ -256,6 +259,10 @@ void Block::splice(iterator pos, Block* from, iterator begin, iterator end) {
   m_instrs.splice(pos, from->instrs(), begin, end);
 }
 
+inline void Block::push_back(std::initializer_list<IRInstruction*> insts) {
+  for (auto inst : insts) { push_back(inst); }
+}
+
 inline void Block::push_back(IRInstruction* inst) {
   assert(inst->marker().valid());
   inst->setBlock(this);
@@ -278,6 +285,13 @@ inline bool Block::isCatch() const {
   auto it = skipHeader();
   if (it == begin()) return false;
   return (--it)->op() == BeginCatch;
+}
+
+inline BCMarker Block::catchMarker() const {
+  assert(isCatch());
+  auto it = skipHeader();
+  assert(it != begin());
+  return (--it)->marker();
 }
 
 // defined here to avoid circular dependencies

@@ -24,13 +24,13 @@
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/system/constants.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -181,8 +181,8 @@ Variant f_constant(const String& name) {
     }
     raise_warning("Couldn't find constant %s", data);
   } else {
-    auto cns = Unit::loadCns(name.get());
-    if (cns) return tvAsVariant(cns);
+    auto const cns = Unit::loadCns(name.get());
+    if (cns) return tvAsCVarRef(cns);
   }
 
   return uninit_null();
@@ -528,7 +528,7 @@ const int UserTokenId_T_XHP_REQUIRED = 389;
 const int UserTokenId_T_TRAIT = 390;
 const int UserTokenId_T_INSTEADOF = 391;
 const int UserTokenId_T_TRAIT_C = 392;
-const int UserTokenId_T_VARARG = 393;
+const int UserTokenId_T_ELLIPSIS = 393;
 const int UserTokenId_T_HH_ERROR = 394;
 const int UserTokenId_T_FINALLY = 395;
 const int UserTokenId_T_XHP_TAG_LT = 396;

@@ -40,7 +40,7 @@ class UserStreamWrapper : public Stream::Wrapper {
   virtual Directory* opendir(const String& path);
  private:
   String m_name;
-  Class *m_cls;
+  LowClassPtr m_cls;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

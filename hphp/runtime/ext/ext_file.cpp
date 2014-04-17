@@ -35,6 +35,7 @@
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/stat-cache.h"
+#include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
@@ -175,7 +176,7 @@ const StaticString
   s_blocks("blocks");
 
 Array stat_impl(struct stat *stat_sb) {
-  ArrayInit ret(26);
+  ArrayInit ret(26, ArrayInit::Mixed{});
   ret.set((int64_t)stat_sb->st_dev);
   ret.set((int64_t)stat_sb->st_ino);
   ret.set((int64_t)stat_sb->st_mode);
@@ -202,7 +203,7 @@ Array stat_impl(struct stat *stat_sb) {
   ret.set(s_ctime,   (int64_t)stat_sb->st_ctime);
   ret.set(s_blksize, (int64_t)stat_sb->st_blksize);
   ret.set(s_blocks,  (int64_t)stat_sb->st_blocks);
-  return ret.create();
+  return ret.toArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -462,12 +463,6 @@ Variant f_file_put_contents(const String& filename, const Variant& data,
 
   int numbytes = 0;
   switch (data.getType()) {
-  case KindOfObject:
-    {
-      raise_warning("Not a valid stream resource");
-      return false;
-    }
-    break;
   case KindOfResource:
     {
       File *fsrc = data.toResource().getTyped<File>(true, true);
@@ -504,6 +499,12 @@ Variant f_file_put_contents(const String& filename, const Variant& data,
       }
     }
     break;
+  case KindOfObject:
+    if (!data.getObjectData()->hasToString()) {
+      raise_warning("Not a valid stream resource");
+      return false;
+    }
+    // Fallthrough
   default:
     {
       String value = data.toString();
@@ -875,12 +876,20 @@ bool f_file_exists(const String& filename) {
 }
 
 Variant f_stat(const String& filename) {
+  if (filename.empty()) {
+    return false;
+  }
+
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return stat_impl(&sb);
 }
 
 Variant f_lstat(const String& filename) {
+  if (filename.empty()) {
+    return false;
+  }
+
   struct stat sb;
   CHECK_SYSTEM(lstatSyscall(filename, &sb, true));
   return stat_impl(&sb);
@@ -943,7 +952,7 @@ const StaticString
   s_filename("filename");
 
 Variant f_pathinfo(const String& path, int opt /* = 15 */) {
-  ArrayInit ret(4);
+  ArrayInit ret(4, ArrayInit::Map{});
 
   if (opt == 0) {
     return empty_string;
@@ -1255,7 +1264,11 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
     }
   }
   int nret = glob(work_pattern.data(), flags & GLOB_FLAGMASK, NULL, &globbuf);
-  if (nret == GLOB_NOMATCH || !globbuf.gl_pathc || !globbuf.gl_pathv) {
+  if (nret == GLOB_NOMATCH) {
+    return Array::Create();
+  }
+
+  if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
     if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess()) {
       if (!f_is_dir(work_pattern)) {
         return false;
@@ -1263,6 +1276,7 @@ Variant f_glob(const String& pattern, int flags /* = 0 */) {
     }
     return Array::Create();
   }
+
   if (nret) {
     return false;
   }

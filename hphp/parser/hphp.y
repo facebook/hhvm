@@ -549,6 +549,16 @@ static void only_in_hh_syntax(Parser *_p) {
   }
 }
 
+static void validate_hh_variadic_variant(Parser* _p,
+                                         Token& userAttrs, Token& typehint,
+                                         Token* mod) {
+  if (!userAttrs.text().empty() || !typehint.text().empty() ||
+     (mod && !mod->text().empty())) {
+    HPHP_PARSER_ERROR("Variadic '...' should be followed by a '$variable'", _p);
+  }
+  only_in_hh_syntax(_p);
+}
+
 // Shapes may not have leading integers in key names, considered as a
 // parse time error.  This is because at runtime they are currently
 // hphp arrays, which will treat leading integer keys as numbers.
@@ -575,6 +585,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
 %right T_LAMBDA_ARROW
 %left ','
+%nonassoc "..."
 %left T_LOGICAL_OR
 %left T_LOGICAL_XOR
 %left T_LOGICAL_AND
@@ -688,10 +699,10 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_XHP_REQUIRED
 
 %token T_TRAIT
+%token T_ELLIPSIS "..."
 %token T_INSTEADOF
 %token T_TRAIT_C
 
-%token T_VARARG
 %token T_HH_ERROR
 %token T_FINALLY
 
@@ -1214,12 +1225,33 @@ new_else_single:
 ;
 
 method_parameter_list:
-    non_empty_method_parameter_list
-    ',' T_VARARG                       { $$ = $1;}
+    non_empty_method_parameter_list ','
+    optional_user_attributes
+    parameter_modifiers
+    hh_type_opt "..." T_VARIABLE
+                                      { _p->onVariadicParam($$,&$1,$5,$7,false,
+                                                            &$3,&$4); }
+  | non_empty_method_parameter_list ','
+    optional_user_attributes
+    parameter_modifiers
+    hh_type_opt "..."
+                                      { validate_hh_variadic_variant(
+                                          _p, $3, $5, &$4);
+                                        $$ = $1; }
   | non_empty_method_parameter_list
-    hh_possible_comma                  { $$ = $1;}
-  | T_VARARG                           { $$.reset();}
-  |                                    { $$.reset();}
+    hh_possible_comma                 { $$ = $1;}
+  | optional_user_attributes
+    parameter_modifiers
+    hh_type_opt "..." T_VARIABLE
+                                      { _p->onVariadicParam($$,NULL,$3,$5,false,
+                                                            &$1,&$2); }
+  | optional_user_attributes
+    parameter_modifiers
+    hh_type_opt "..."
+                                      { validate_hh_variadic_variant(
+                                          _p, $1, $3, &$2);
+                                        $$.reset(); }
+  |                                   { $$.reset(); }
 ;
 
 non_empty_method_parameter_list:
@@ -1267,46 +1299,63 @@ non_empty_method_parameter_list:
 
 parameter_list:
     non_empty_parameter_list ','
-    T_VARARG                           { $$ = $1;}
+    optional_user_attributes
+    hh_type_opt "..." T_VARIABLE
+                                      { _p->onVariadicParam($$,&$1,$4,$6,
+                                        false,&$3,NULL); }
+  | non_empty_parameter_list ','
+    optional_user_attributes
+    hh_type_opt "..."
+                                      { validate_hh_variadic_variant(
+                                          _p, $3, $4, NULL);
+                                        $$ = $1; }
   | non_empty_parameter_list
-    hh_possible_comma                  { $$ = $1;}
-  | T_VARARG                           { $$.reset();}
-  |                                    { $$.reset();}
+    hh_possible_comma                 { $$ = $1;}
+  | optional_user_attributes
+    hh_type_opt "..." T_VARIABLE
+                                      { _p->onVariadicParam($$,NULL,$2,$4,
+                                                            false,&$1,NULL); }
+  | optional_user_attributes
+    hh_type_opt "..."
+                                      { validate_hh_variadic_variant(
+                                          _p, $1, $2, NULL);
+                                        $$.reset(); }
+  |                                   { $$.reset();}
 ;
 
 non_empty_parameter_list:
     optional_user_attributes
-    hh_type_opt T_VARIABLE             { _p->onParam($$,NULL,$2,$3,0,
-                                                     NULL,&$1,NULL);}
+    hh_type_opt T_VARIABLE             { _p->onParam($$,NULL,$2,$3,false,
+                                                     NULL,&$1,NULL); }
   | optional_user_attributes
-    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,NULL,$2,$4,1,
-                                                     NULL,&$1,NULL);}
+    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,NULL,$2,$4,true,
+                                                     NULL,&$1,NULL); }
   | optional_user_attributes
     hh_type_opt '&' T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,NULL,$2,$4,1,
-                                                     &$6,&$1,NULL);}
+    '=' static_scalar                  { _p->onParam($$,NULL,$2,$4,true,
+                                                     &$6,&$1,NULL); }
   | optional_user_attributes
     hh_type_opt T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,NULL,$2,$3,0,
-                                                     &$5,&$1,NULL);}
+    '=' static_scalar                  { _p->onParam($$,NULL,$2,$3,false,
+                                                     &$5,&$1,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
-    hh_type_opt T_VARIABLE             { _p->onParam($$,&$1,$4,$5,0,
-                                                     NULL,&$3,NULL);}
+    hh_type_opt T_VARIABLE             { _p->onParam($$,&$1,$4,$5,false,
+                                                     NULL,&$3,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
-    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,&$1,$4,$6,1,
-                                                     NULL,&$3,NULL);}
+    hh_type_opt '&' T_VARIABLE         { _p->onParam($$,&$1,$4,$6,true,
+                                                     NULL,&$3,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
     hh_type_opt '&' T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,&$1,$4,$6,1,
-                                                     &$8,&$3,NULL);}
+    '=' static_scalar                  { _p->onParam($$,&$1,$4,$6,true,
+                                                     &$8,&$3,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
     hh_type_opt T_VARIABLE
-    '=' static_scalar                  { _p->onParam($$,&$1,$4,$5,0,
-                                                     &$7,&$3,NULL);}
+    '=' static_scalar                  { _p->onParam($$,&$1,$4,$5,false,
+                                                     &$7,&$3,NULL); }
 ;
 
 function_call_parameter_list:
@@ -2647,9 +2696,9 @@ hh_type_list:
 ;
 
 hh_func_type_list:
-    hh_type_list ',' T_VARARG          { $$ = $1; }
+  hh_type_list ',' T_ELLIPSIS          { $$ = $1; }
   | hh_type_list                       { $$ = $1; }
-  | T_VARARG                           { $$.reset(); }
+  | T_ELLIPSIS                         { $$.reset(); }
   |                                    { $$.reset(); }
 ;
 

@@ -572,15 +572,24 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
       if (num_varargs > 0) {
         int iv = 0;
-        auto tmp = ZendExecutionStack::getArg(i);
-        zval **p = &tmp;
 
         *n_varargs = num_varargs;
 
-        /* allocate space for array and store args */
-        *varargs = (zval ***) safe_emalloc(num_varargs, sizeof(zval **), 0);
-        while (num_varargs-- > 0) {
-          (*varargs)[iv++] = p++;
+        /* Allocate space for the args. Zend already has single pointers
+         * persistently stored, and only needs to allocate space for the double
+         * pointers, but we need to allocate space for both.
+         *
+         * We need to allocate it in such a way that a single efree(varargs)
+         * in the caller will free all relevant memory. So we allocate a single
+         * block and then split it.
+         */
+        zval *** double_ptrs = (zval***)safe_emalloc(num_varargs * 2, sizeof(void*), 0);
+        *varargs = double_ptrs;
+        zval ** single_ptrs = (zval**)(double_ptrs + num_varargs);
+
+        for (iv = 0; iv < num_varargs; iv++) {
+          double_ptrs[iv] = &single_ptrs[iv];
+          single_ptrs[iv] = ZendExecutionStack::getArg(i + iv);
         }
 
         /* adjust how many args we have left and restart loop */

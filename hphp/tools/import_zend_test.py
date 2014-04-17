@@ -213,6 +213,7 @@ bad_tests = (
     '/ext/standard/tests/file/copy_variation8.php',
 
     # flaky: t3851970
+    '/ext/sockets/tests/ipv4loop.php',
     '/ext/ftp/tests/ftp_alloc_basic2.php',
     '/ext/sockets/tests/socket_write_params.php',
     '/ext/curl/tests/bug52202.php',

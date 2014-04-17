@@ -212,7 +212,7 @@ public:
       return ini_get(v);
     };
     Bind(extension, mode, name, setter, getter);
-    auto hasSystemDefault = ResetSytemDefault(name);
+    auto hasSystemDefault = ResetSystemDefault(name);
     if (!hasSystemDefault && defaultValue) {
       setter(defaultValue);
     }
@@ -244,7 +244,7 @@ public:
    * Set an ini setting back to the value from the config file
    * (or the hard-coded default)
    */
-  static bool ResetSytemDefault(const std::string& name);
+  static bool ResetSystemDefault(const std::string& name);
 
   // Used to allow you to Bind to PHP_INI_SYSTEM settings even after modules
   // have been initialized. This should only be used in rare cases that can't

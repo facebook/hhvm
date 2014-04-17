@@ -697,7 +697,7 @@ bool IniSetting::SetUser(const String& name, const Variant& value) {
   return SetUser(name.toCppString(), variant_to_dynamic(value), FollyDynamic());
 }
 
-bool IniSetting::ResetSytemDefault(const std::string& name) {
+bool IniSetting::ResetSystemDefault(const std::string& name) {
   auto it = s_system_settings.find(name);
   if (it == s_system_settings.end()) {
     return false;

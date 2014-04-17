@@ -4857,7 +4857,9 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
 
     case OutPred:
       checkTypeType = inst.outPred;
-      return inst.outPred;
+      // Returning inst.outPred from this function would turn the CheckStk
+      // after the InterpOne into a nop.
+      return Type::Gen;
 
     case OutCns:         return Type::Cell;
     case OutVUnknown:    return Type::BoxedCell;

@@ -29,6 +29,15 @@ using folly::fbstring;
 using folly::fbvector;
 using namespace HPHP::IDL;
 
+/// The set of PHP class names which need to be initialised before systemlib.php
+const fbstring baseClasses[] = {
+  fbstring("Closure")
+};
+
+void print_classes(std::ostream& cpp, const char* identifier,
+                   const fbvector<PhpClass>& classes,
+                   const std::unordered_set<fbstring>& classesWithCtors);
+
 int main(int argc, const char* argv[]) {
   if (argc < 3) {
     std::cout << "Usage: " << argv[0] << " <output file> <*.idl.json>...\n";
@@ -125,7 +134,44 @@ int main(int argc, const char* argv[]) {
     cpp << "\n};\n\n";
   }
 
-  cpp << "const long long hhbc_ext_class_count = " << classes.size() << ";\n";
+  // We need to separate the list of classes out. Some classes need to be loaded
+  // before the systemlib.php gets loaded (e.g. Closure). The rest will be
+  // loaded *after* systemlib.php
+  fbvector<PhpClass> baseClasses;
+  {
+    std::unordered_set<fbstring> baseClassNames;
+    std::for_each(::baseClasses, ::baseClasses + sizeof(::baseClasses),
+                  [&baseClassNames] (const fbstring& klass) {
+      baseClassNames.insert(klass);
+    });
+
+    // Move all base classes to the baseClasses vector, and store the iterator
+    // to that element so we can remove it from the classes vector.
+    fbvector<fbvector<PhpClass>::iterator> baseClassIterators;
+    for (auto i = begin(classes), j = end(classes); i != j; ++i) {
+      if (baseClassNames.find(i->getPhpName()) != end(baseClassNames)) {
+        baseClasses.emplace_back(*i);
+        baseClassIterators.push_back(i);
+      }
+    }
+
+    // Filter out the base classes out of the main classes vector
+    for (auto i : baseClassIterators) {
+      classes.erase(i);
+    }
+  }
+
+  print_classes(cpp, "hhbc_ext_base_classes", baseClasses, classesWithCtors);
+  print_classes(cpp, "hhbc_ext_classes", classes, classesWithCtors);
+
+  cpp << "} // namespace HPHP\n";
+  return 0;
+}
+
+void print_classes(std::ostream& cpp, const char* identifier,
+                   const fbvector<PhpClass>& classes,
+                   const std::unordered_set<fbstring>& classesWithCtors) {
+  cpp << "const long long " << identifier << "_count = " << classes.size() << ";\n";
 
   for (auto& klass : classes) {
     cpp << "extern void "
@@ -133,8 +179,8 @@ int main(int argc, const char* argv[]) {
         << "(ObjectData*, const Class*);\n";
   }
 
-  cpp << "const HhbcExtClassInfo hhbc_ext_classes[] = {\n  ";
-  first = true;
+  cpp << "const HhbcExtClassInfo " << identifier << "[] = {\n  ";
+  bool first = true;
   for (auto const& klass : classes) {
     if (!first) {
       cpp << ",\n  ";
@@ -165,7 +211,4 @@ int main(int argc, const char* argv[]) {
         << ", &" << c_cpp_name << "::classof() }";
   }
   cpp << "\n};\n\n";
-  cpp << "} // namespace HPHP\n";
-
-  return 0;
 }

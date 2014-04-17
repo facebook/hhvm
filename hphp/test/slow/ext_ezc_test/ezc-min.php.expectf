@@ -1,0 +1,11 @@
+Warning: ezc_min() expects at least 1 parameter, 0 given in %s on line %d
+NULL
+int(1)
+int(1)
+float(2.09)
+string(0) ""
+bool(false)
+bool(false)
+bool(false)
+int(0)
+Done

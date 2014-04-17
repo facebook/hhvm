@@ -31,6 +31,7 @@
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_operators.h"
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
+#include "hphp/runtime/base/comparisons.h"
 
 #if ZEND_USE_TOLOWER_L
 #include <locale.h>
@@ -221,3 +222,58 @@ ZEND_API void convert_to_boolean(zval *op) {
 ZEND_API void convert_to_array(zval *op) {
   tvCastToArrayInPlace(op->tv());
 }
+
+ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+  HPHP::Variant v1(op1);
+  HPHP::Variant v2(op2);
+  if (HPHP::less(v1, v2)) {
+    ZVAL_LONG(result, -1);
+  } else if (HPHP::equal(v1, v2)) {
+    ZVAL_LONG(result, 0);
+  } else {
+    ZVAL_LONG(result, 1);
+  }
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int is_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+  if (compare_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
+    return FAILURE;
+  }
+  ZVAL_BOOL(result, (Z_LVAL_P(result) == 0));
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int is_not_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+  if (compare_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
+    return FAILURE;
+  }
+  ZVAL_BOOL(result, (Z_LVAL_P(result) != 0));
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int is_smaller_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+  if (compare_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
+    return FAILURE;
+  }
+  ZVAL_BOOL(result, (Z_LVAL_P(result) < 0));
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+  if (compare_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
+    return FAILURE;
+  }
+  ZVAL_BOOL(result, (Z_LVAL_P(result) <= 0));
+  return SUCCESS;
+}
+/* }}} */

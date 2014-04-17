@@ -117,6 +117,13 @@ void ProcessInit() {
     }
   }
 
+  // Create and merge a smaller unit containing the dependencies of the systemlib
+  // first. At the time of writing, this is only the Closure class.
+  Unit* nativeBaseClassUnit = build_native_class_unit(hhbc_ext_base_classes,
+                                                      hhbc_ext_base_classes_count);
+  SystemLib::s_nativeBaseClassUnit = nativeBaseClassUnit;
+  SystemLib::s_nativeBaseClassUnit->merge();
+
   // Load the systemlib unit to build the Class objects
   SystemLib::s_unit->merge();
   if (SystemLib::s_hhas_unit) {

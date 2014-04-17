@@ -190,9 +190,9 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       if (!succOffs.count(profData->transSrcKey(tid).offset())) {
         if (HPHP::Trace::moduleEnabled(HPHP::Trace::pgo, 2)) {
           FTRACE(2, "selectHotTrace: WARNING: Breaking region @: {}\n",
-                 JIT::show(*region));
+                 show(*region));
           FTRACE(2, "selectHotTrace: next translation selected: tid = {}\n{}\n",
-                 tid, JIT::show(*blockRegion));
+                 tid, show(*blockRegion));
           FTRACE(2, "\nsuccOffs = {}\n", folly::join(", ", succOffs));
         }
         break;

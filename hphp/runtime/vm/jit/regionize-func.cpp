@@ -220,7 +220,7 @@ static bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
  *           covered appropriately
  */
 void regionizeFunc(const Func*       func,
-                   JIT::MCGenerator* mcg,
+                   MCGenerator* mcg,
                    RegionVec&        regions) {
   Timer _t(Timer::regionizeFunc);
   assert(RuntimeOption::EvalJitPGO);

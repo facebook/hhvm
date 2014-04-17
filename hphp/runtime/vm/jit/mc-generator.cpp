@@ -176,18 +176,18 @@ MCGenerator* mcg;
 // Register dirtiness: thread-private.
 __thread VMRegState tl_regState = VMRegState::CLEAN;
 
-JIT::CppCall MCGenerator::getDtorCall(DataType type) {
+CppCall MCGenerator::getDtorCall(DataType type) {
   switch (type) {
   case BitwiseKindOfString:
-    return JIT::CppCall(getMethodPtr(&StringData::release));
+    return CppCall(getMethodPtr(&StringData::release));
   case KindOfArray:
-    return JIT::CppCall(getMethodPtr(&ArrayData::release));
+    return CppCall(getMethodPtr(&ArrayData::release));
   case KindOfObject:
-    return JIT::CppCall(getMethodPtr(&ObjectData::release));
+    return CppCall(getMethodPtr(&ObjectData::release));
   case KindOfResource:
-    return JIT::CppCall(getMethodPtr(&ResourceData::release));
+    return CppCall(getMethodPtr(&ResourceData::release));
   case KindOfRef:
-    return JIT::CppCall(getMethodPtr(&RefData::release));
+    return CppCall(getMethodPtr(&RefData::release));
   default:
     assert(false);
     NOT_REACHED();
@@ -309,8 +309,8 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   TCA start = regeneratePrologues(func, sk);
 
   // Regionize func and translate all its regions.
-  std::vector<JIT::RegionDescPtr> regions;
-  JIT::regionizeFunc(func, this, regions);
+  std::vector<RegionDescPtr> regions;
+  regionizeFunc(func, this, regions);
 
   for (auto region : regions) {
     m_tx.setMode(TransOptimize);
@@ -369,15 +369,15 @@ MCGenerator::numTranslations(SrcKey sk) const {
   return 0;
 }
 
-static void populateLiveContext(JIT::RegionContext& ctx) {
-  typedef JIT::RegionDesc::Location L;
+static void populateLiveContext(RegionContext& ctx) {
+  typedef RegionDesc::Location L;
 
   const ActRec*     const fp {g_context->getFP()};
   const TypedValue* const sp {g_context->getStack().top()};
 
   for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
     ctx.liveTypes.push_back(
-      { L::Local{i}, JIT::liveTVType(frame_local(fp, i)) }
+      { L::Local{i}, liveTVType(frame_local(fp, i)) }
     );
   }
 
@@ -404,7 +404,7 @@ static void populateLiveContext(JIT::RegionContext& ctx) {
     },
     [&](const TypedValue* tv) {
       ctx.liveTypes.push_back(
-        { L::Stack{stackOff, ctx.spOffset - stackOff}, JIT::liveTVType(tv) }
+        { L::Stack{stackOff, ctx.spOffset - stackOff}, liveTVType(tv) }
       );
       stackOff++;
       FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
@@ -445,7 +445,7 @@ MCGenerator::createTranslation(const TranslArgs& args) {
   //   allow conditional jump fall-throughs
   TCA astart = code.main().frontier();
   TCA stubstart = code.stubs().frontier();
-  TCA req = emitServiceReq(code.stubs(), JIT::REQ_RETRANSLATE, sk.offset());
+  TCA req = emitServiceReq(code.stubs(), REQ_RETRANSLATE, sk.offset());
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
           sk.unit(), sk.offset(), req);
   SrcRec* sr = m_tx.getSrcRec(sk);
@@ -504,7 +504,7 @@ MCGenerator::translate(const TranslArgs& args) {
                              .hot(func->attrs() & AttrHot));
 
   if (args.m_align) {
-    JIT::X64::moveToAlign(code.main(), kNonFallthroughAlign);
+    X64::moveToAlign(code.main(), kNonFallthroughAlign);
   }
 
   TCA start = code.main().frontier();
@@ -563,10 +563,10 @@ MCGenerator::getCallArrayPrologue(Func* func) {
     if (tca != m_tx.uniqueStubs.funcBodyHelperThunk) return tca;
     switch (arch()) {
       case Arch::X64:
-        tca = JIT::X64::emitCallArrayPrologue(func, dvs);
+        tca = X64::emitCallArrayPrologue(func, dvs);
         break;
       case Arch::ARM:
-        tca = JIT::ARM::emitCallArrayPrologue(func, dvs);
+        tca = ARM::emitCallArrayPrologue(func, dvs);
         break;
     }
     func->setFuncBody(tca);
@@ -584,7 +584,7 @@ MCGenerator::smashPrologueGuards(TCA* prologues, int numPrologues,
   DEBUG_ONLY std::unique_ptr<LeaseHolder> writer;
   for (int i = 0; i < numPrologues; i++) {
     if (prologues[i] != m_tx.uniqueStubs.fcallHelperThunk
-        && JIT::funcPrologueHasGuard(prologues[i], func)) {
+        && funcPrologueHasGuard(prologues[i], func)) {
       if (debug) {
         /*
          * Unit's are sometimes created racily, in which case all
@@ -605,10 +605,10 @@ MCGenerator::smashPrologueGuards(TCA* prologues, int numPrologues,
       }
       switch (arch()) {
         case Arch::X64:
-          JIT::X64::funcPrologueSmashGuard(prologues[i], func);
+          X64::funcPrologueSmashGuard(prologues[i], func);
           break;
         case Arch::ARM:
-          JIT::ARM::funcPrologueSmashGuard(prologues[i], func);
+          ARM::funcPrologueSmashGuard(prologues[i], func);
           break;
       }
     }
@@ -721,7 +721,7 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   // If we're close to a cache line boundary, just burn some space to
   // try to keep the func and its body on fewer total lines.
   if (((uintptr_t)code.main().frontier() & kX64CacheLineMask) >= 32) {
-    JIT::X64::moveToAlign(code.main(), kX64CacheLineSize);
+    X64::moveToAlign(code.main(), kX64CacheLineSize);
   }
 
   // Careful: this isn't necessarily the real entry point. For funcIsMagic
@@ -731,20 +731,20 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   TCA stubStart = code.stubs().frontier();
 
   auto const skFuncBody = [&] {
-    switch (JIT::arch()) {
-    case JIT::Arch::X64:
+    switch (arch()) {
+    case Arch::X64:
       return funcIsMagic
-        ? JIT::X64::emitMagicFuncPrologue(func, nPassed, start)
-        : JIT::X64::emitFuncPrologue(func, nPassed, start);
-    case JIT::Arch::ARM:
-      return JIT::ARM::emitFuncPrologue(
+        ? X64::emitMagicFuncPrologue(func, nPassed, start)
+        : X64::emitFuncPrologue(func, nPassed, start);
+    case Arch::ARM:
+      return ARM::emitFuncPrologue(
         code.main(), code.stubs(), func, funcIsMagic, nPassed, start, aStart
       );
     }
     not_reached();
   }();
 
-  assert(JIT::funcPrologueHasGuard(start, func));
+  assert(funcPrologueHasGuard(start, func));
   TRACE(2, "funcPrologue mcg %p %s(%d) setting prologue %p\n",
         this, func->fullName()->data(), nPassed, start);
   assert(isValidCodeAddress(start));
@@ -790,16 +790,16 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId,
   func->setPrologue(nArgs, start);
 
   // Smash callers of the old prologue with the address of the new one.
-  JIT::PrologueCallersRec* pcr =
+  PrologueCallersRec* pcr =
     m_tx.profData()->prologueCallers(prologueTransId);
   for (TCA toSmash : pcr->mainCallers()) {
-    JIT::smashCall(toSmash, start);
+    smashCall(toSmash, start);
   }
   // If the prologue has a guard, then smash its guard-callers as well.
-  if (JIT::funcPrologueHasGuard(start, func)) {
-    TCA guard = JIT::funcPrologueToGuard(start, func);
+  if (funcPrologueHasGuard(start, func)) {
+    TCA guard = funcPrologueToGuard(start, func);
     for (TCA toSmash : pcr->guardCallers()) {
-      JIT::smashCall(toSmash, guard);
+      smashCall(toSmash, guard);
     }
   }
   pcr->clearAllCallers();
@@ -883,7 +883,7 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
  */
 TCA
 MCGenerator::bindJmp(TCA toSmash, SrcKey destSk,
-                     JIT::ServiceRequest req, bool& smashed) {
+                     ServiceRequest req, bool& smashed) {
   TCA tDest = getTranslation(TranslArgs(destSk, false));
   if (!tDest) return nullptr;
   LeaseHolder writer(Translator::WriteLease());
@@ -896,15 +896,15 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk,
   tDest = sr->getTopTranslation();
   if (tDest == nullptr) return nullptr;
 
-  if (req == JIT::REQ_BIND_ADDR) {
+  if (req == REQ_BIND_ADDR) {
     auto addr = reinterpret_cast<TCA*>(toSmash);
     if (*addr == tDest) {
       // Already smashed
       return tDest;
     }
     sr->chainFrom(IncomingBranch::addr(addr));
-  } else if (req == JIT::REQ_BIND_JCC || req == JIT::REQ_BIND_SIDE_EXIT) {
-    auto jt = JIT::jccTarget(toSmash);
+  } else if (req == REQ_BIND_JCC || req == REQ_BIND_SIDE_EXIT) {
+    auto jt = jccTarget(toSmash);
     assert(jt);
     if (jt == tDest) {
       // Already smashed
@@ -912,8 +912,8 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk,
     }
     sr->chainFrom(IncomingBranch::jccFrom(toSmash));
   } else {
-    assert(!JIT::jccTarget(toSmash));
-    if (!JIT::jmpTarget(toSmash) || JIT::jmpTarget(toSmash) == tDest) {
+    assert(!jccTarget(toSmash));
+    if (!jmpTarget(toSmash) || jmpTarget(toSmash) == tDest) {
       // Already smashed
       return tDest;
     }
@@ -973,7 +973,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
   // Its not clear where chainFrom should go to if as is astubs
   assert(&cb != &code.stubs());
 
-  using namespace JIT::X64;
+  using namespace X64;
 
   // can we just directly fall through?
   // a jmp + jz takes 5 + 6 = 11 bytes
@@ -986,7 +986,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
     return 0;
   }
 
-  if (JIT::jmpTarget(toSmash + kJmpccLen) != JIT::jccTarget(toSmash)) {
+  if (jmpTarget(toSmash + kJmpccLen) != jccTarget(toSmash)) {
     // someone else already smashed this one. Ideally we would
     // just re-execute from toSmash - except the flags will have
     // been trashed.
@@ -994,7 +994,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
   }
 
   TCA stub = emitEphemeralServiceReq(code.stubs(), getFreeStub(),
-                                     JIT::REQ_BIND_JMPCC_SECOND, toSmash,
+                                     REQ_BIND_JMPCC_SECOND, toSmash,
                                      offWillDefer, cc);
 
   smashed = true;
@@ -1029,7 +1029,7 @@ MCGenerator::bindJmpccSecond(TCA toSmash, const Offset off,
   if (branch) {
     LeaseHolder writer(Translator::WriteLease());
     if (writer) {
-      if (branch == JIT::jccTarget(toSmash)) {
+      if (branch == jccTarget(toSmash)) {
         // already smashed
         return branch;
       } else {
@@ -1133,7 +1133,7 @@ static_assert(X64::rVmSp == rbx &&
               X64::rVmTl == r12 &&
               X64::rStashedAR == r15,
               "__enterTCHelper needs to be modified to use the correct ABI");
-static_assert(JIT::REQ_BIND_CALL == 0x1,
+static_assert(REQ_BIND_CALL == 0x1,
               "Update assembly test for REQ_BIND_CALL in __enterTCHelper");
 extern "C" void enterTCHelper(Cell* vm_sp,
                               Cell* vm_fp,
@@ -1193,7 +1193,7 @@ MCGenerator::enterTC(TCA start, void* data) {
   SrcKey sk;
 
   if (LIKELY(start != nullptr)) {
-    info.requestNum = data ? JIT::REQ_BIND_CALL : -1;
+    info.requestNum = data ? REQ_BIND_CALL : -1;
     info.saved_rStashedAr = (uintptr_t)data;
   } else {
     info.requestNum = -1;
@@ -1321,11 +1321,11 @@ MCGenerator::enterTC(TCA start, void* data) {
 
     TRACE(2, "enterTC: request(%s) args: %" PRIxPTR " %" PRIxPTR " %"
              PRIxPTR " %" PRIxPTR " %" PRIxPTR "\n",
-          JIT::serviceReqName(info.requestNum),
+          serviceReqName(info.requestNum),
           info.args[0], info.args[1], info.args[2], info.args[3],
           info.args[4]);
 
-    if (LIKELY(info.requestNum == JIT::REQ_EXIT)) {
+    if (LIKELY(info.requestNum == REQ_EXIT)) {
       vmfp() = nullptr;
       return;
     }
@@ -1350,16 +1350,16 @@ MCGenerator::enterTC(TCA start, void* data) {
 bool MCGenerator::handleServiceRequest(TReqInfo& info,
                                        TCA& start,
                                        SrcKey& sk) {
-  const JIT::ServiceRequest requestNum =
-    static_cast<JIT::ServiceRequest>(info.requestNum);
+  const ServiceRequest requestNum =
+    static_cast<ServiceRequest>(info.requestNum);
   auto* const args = info.args;
-  assert(requestNum != JIT::REQ_EXIT);
+  assert(requestNum != REQ_EXIT);
   INC_TPC(service_req);
 
   bool smashed = false;
   switch (requestNum) {
-  case JIT::REQ_BIND_CALL: {
-    JIT::ReqBindCall* req = reinterpret_cast<JIT::ReqBindCall*>(args[0]);
+  case REQ_BIND_CALL: {
+    ReqBindCall* req = reinterpret_cast<ReqBindCall*>(args[0]);
     ActRec* calleeFrame = reinterpret_cast<ActRec*>(args[1]);
     TCA toSmash = req->m_toSmash;
     Func *func = const_cast<Func*>(calleeFrame->m_func);
@@ -1372,7 +1372,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     if (!isImmutable) {
       // We dont know we're calling the right function, so adjust
       // dest to point to the dynamic check of ar->m_func.
-      dest = JIT::funcPrologueToGuard(dest, func);
+      dest = funcPrologueToGuard(dest, func);
     } else {
       TRACE(2, "enterTC: bindCall immutably %s -> %p\n",
             func->fullName()->data(), dest);
@@ -1384,11 +1384,11 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
         // waited for the write lease, so read it again.
         dest = getFuncPrologue(func, nArgs);
         assert(dest);
-        if (!isImmutable) dest = JIT::funcPrologueToGuard(dest, func);
+        if (!isImmutable) dest = funcPrologueToGuard(dest, func);
 
-        if (JIT::callTarget(toSmash) != dest) {
+        if (callTarget(toSmash) != dest) {
           TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
-          JIT::smashCall(toSmash, dest);
+          smashCall(toSmash, dest);
           smashed = true;
           // For functions to be PGO'ed, if their current prologues
           // are still profiling ones (living in code.prof()), then
@@ -1422,26 +1422,26 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
       // interpret in doFCall, so we clear out the requestNum in this
       // case to prevent enterTCHelper from pushing the return ip
       // onto the stack.
-      info.requestNum = ~JIT::REQ_BIND_CALL;
+      info.requestNum = ~REQ_BIND_CALL;
     }
     start = dest;
   } break;
 
-  case JIT::REQ_BIND_SIDE_EXIT:
-  case JIT::REQ_BIND_JMP:
-  case JIT::REQ_BIND_JCC:
-  case JIT::REQ_BIND_ADDR:
+  case REQ_BIND_SIDE_EXIT:
+  case REQ_BIND_JMP:
+  case REQ_BIND_JCC:
+  case REQ_BIND_ADDR:
   {
     TCA toSmash = (TCA)args[0];
     Offset off = args[1];
     sk = SrcKey(liveFunc(), off, liveResumed());
-    if (requestNum == JIT::REQ_BIND_SIDE_EXIT) {
+    if (requestNum == REQ_BIND_SIDE_EXIT) {
       SKTRACE(3, sk, "side exit taken!\n");
     }
     start = bindJmp(toSmash, sk, requestNum, smashed);
   } break;
 
-  case JIT::REQ_BIND_JMPCC_FIRST: {
+  case REQ_BIND_JMPCC_FIRST: {
     TCA toSmash = (TCA)args[0];
     Offset offTaken = (Offset)args[1];
     Offset offNotTaken = (Offset)args[2];
@@ -1453,7 +1453,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     sk = SrcKey(liveFunc(), taken ? offTaken : offNotTaken, liveResumed());
   } break;
 
-  case JIT::REQ_BIND_JMPCC_SECOND: {
+  case REQ_BIND_JMPCC_SECOND: {
     TCA toSmash = (TCA)args[0];
     Offset off = (Offset)args[1];
     ConditionCode cc = ConditionCode(args[2]);
@@ -1461,7 +1461,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     sk = SrcKey(liveFunc(), off, liveResumed());
   } break;
 
-  case JIT::REQ_RETRANSLATE_OPT: {
+  case REQ_RETRANSLATE_OPT: {
     auto ai = (SrcKey::AtomicInt)args[0];
     TransID transId = (TransID)args[1];
     sk = SrcKey::fromAtomicInt(ai);
@@ -1471,14 +1471,14 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     break;
   }
 
-  case JIT::REQ_RETRANSLATE: {
+  case REQ_RETRANSLATE: {
     INC_TPC(retranslate);
     sk = SrcKey(liveFunc(), (Offset)args[0], liveResumed());
     start = retranslate(TranslArgs(sk, true));
     SKTRACE(2, sk, "retranslated @%p\n", start);
   } break;
 
-  case JIT::REQ_INTERPRET: {
+  case REQ_INTERPRET: {
     Offset off = args[0];
     int numInstrs = args[1];
     g_context->m_pc = liveUnit()->at(off);
@@ -1505,7 +1505,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     start = getTranslation(TranslArgs(newSk, true));
   } break;
 
-  case JIT::REQ_POST_INTERP_RET: {
+  case REQ_POST_INTERP_RET: {
     // This is only responsible for the control-flow aspect of the Ret:
     // getting to the destination's translation, if any.
     ActRec* ar = (ActRec*)args[0];
@@ -1522,7 +1522,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
           caller->m_func->fullName()->data());
   } break;
 
-  case JIT::REQ_RESUME: {
+  case REQ_RESUME: {
     if (UNLIKELY(vmpc() == 0)) {
       g_context->m_fp = 0;
       return false;
@@ -1532,7 +1532,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     start = getTranslation(TranslArgs(dest, true));
   } break;
 
-  case JIT::REQ_STACK_OVERFLOW:
+  case REQ_STACK_OVERFLOW:
     if (((ActRec*)info.saved_rStashedAr)->m_savedRbp == (uintptr_t)vmfp()) {
       /*
        * The normal case - we were called via FCall, or FCallArray.
@@ -1558,7 +1558,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
       throw VMReenterStackOverflow();
     }
 
-  case JIT::REQ_EXIT:
+  case REQ_EXIT:
     not_reached();
   }
 
@@ -1901,7 +1901,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
       } else {
         TransID transId = args.m_transId;
         assert(transId != InvalidID);
-        region = JIT::selectHotRegion(transId, this);
+        region = selectHotRegion(transId, this);
         assert(region);
         if (region && region->blocks.size() == 0) region = nullptr;
       }
@@ -2036,22 +2036,22 @@ MCGenerator::translateWork(const TranslArgs& args) {
         Asm a { code.main() };
         // Add a counter for the translation if requested
         if (RuntimeOption::EvalJitTransCounters) {
-          JIT::X64::emitTransCounterInc(a);
+          X64::emitTransCounterInc(a);
         }
-        a.    jmp(emitServiceReq(code.stubs(), JIT::REQ_INTERPRET,
+        a.    jmp(emitServiceReq(code.stubs(), REQ_INTERPRET,
                                  sk.offset(), interpOps));
         break;
       }
       case Arch::ARM: {
         if (RuntimeOption::EvalJitTransCounters) {
           vixl::MacroAssembler a { code.main() };
-          JIT::ARM::emitTransCounterInc(a);
+          ARM::emitTransCounterInc(a);
         }
         // This jump won't be smashed, but a far jump on ARM requires the same
         // code sequence.
-        JIT::emitSmashableJump(
+        emitSmashableJump(
           code.main(),
-          emitServiceReq(code.stubs(), JIT::REQ_INTERPRET,
+          emitServiceReq(code.stubs(), REQ_INTERPRET,
                          sk.offset(), interpOps),
           CC_None
         );
@@ -2183,7 +2183,7 @@ MCGenerator::translateTracelet(Tracelet& t) {
         assert(!(m_tx.mode() ==
                TransProfile && ni->outputPredicted && ni->next));
         m_tx.irTrans()->translateInstr(*ni);
-      } catch (JIT::FailedIRGen& fcg) {
+      } catch (FailedIRGen& fcg) {
         always_assert(!ni->interp);
         ni->interp = true;
         FTRACE(1, "HHIR: RETRY Translation {}: will interpOne BC instr {} "
@@ -2205,7 +2205,7 @@ MCGenerator::translateTracelet(Tracelet& t) {
             m_tx.getCurrentTransID());
       if (profilingFunc) m_tx.profData()->setProfiling(t.func()->getFuncId());
       return Translator::Success;
-    } catch (JIT::FailedCodeGen& fcg) {
+    } catch (FailedCodeGen& fcg) {
       // Code-gen failed. Search for the bytecode instruction that caused the
       // problem, flag it to be interpreted, and retranslate the tracelet.
       SrcKey sk{fcg.vmFunc, fcg.bcOff, fcg.resumed};
@@ -2231,14 +2231,14 @@ MCGenerator::translateTracelet(Tracelet& t) {
       }
       throw fcg;
     }
-  } catch (JIT::FailedCodeGen& fcg) {
+  } catch (FailedCodeGen& fcg) {
     TRACE(1, "HHIR: FAILED to generate code for Translation %d "
           "@ %s:%d (%s)\n", m_tx.getCurrentTransID(),
           fcg.file, fcg.line, fcg.func);
     // HHIR:TODO Remove extra TRACE and adjust tools
     TRACE(1, "HHIR: FAILED to translate @ %s:%d (%s)\n",
           fcg.file, fcg.line, fcg.func);
-  } catch (JIT::FailedIRGen& x) {
+  } catch (FailedIRGen& x) {
     TRACE(1, "HHIR: FAILED to translate @ %s:%d (%s)\n",
           x.file, x.line, x.func);
   } catch (const FailedAssertion& fa) {
@@ -2248,7 +2248,7 @@ MCGenerator::translateTracelet(Tracelet& t) {
       folly::format("{}\n\nActive Unit:\n{}\n",
                     fa.summary, ht.unit().toString()).str());
     abort();
-  } catch (const JIT::FailedTraceGen& e) {
+  } catch (const FailedTraceGen& e) {
     FTRACE(1, "HHIR: FAILED to translate whole unit: {}\n",
            e.what());
   }
@@ -2306,10 +2306,10 @@ void MCGenerator::initUniqueStubs() {
   CodeCache::Selector asmSel(CodeCache::Selector::Args(code).hot(true));
   switch (arch()) {
     case Arch::X64:
-      m_tx.uniqueStubs = JIT::X64::emitUniqueStubs();
+      m_tx.uniqueStubs = X64::emitUniqueStubs();
       break;
     case Arch::ARM:
-      m_tx.uniqueStubs = JIT::ARM::emitUniqueStubs();
+      m_tx.uniqueStubs = ARM::emitUniqueStubs();
       break;
   }
 }
@@ -2518,7 +2518,7 @@ bool MCGenerator::addDbgGuards(const Unit* unit) {
     if (sr->unitMd5() == unit->md5() &&
         !sr->hasDebuggerGuard() &&
         m_tx.isSrcKeyInBL(sk)) {
-      JIT::addDbgGuardImpl(sk, sr);
+      addDbgGuardImpl(sk, sr);
     }
   }
   Translator::WriteLease().drop();
@@ -2554,7 +2554,7 @@ bool MCGenerator::addDbgGuard(const Func* func, Offset offset, bool resumed) {
   }
   {
     if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
-      JIT::addDbgGuardImpl(sk, sr);
+      addDbgGuardImpl(sk, sr);
     }
   }
   Translator::WriteLease().drop();

@@ -73,10 +73,6 @@ TRACE_SET_MOD(trans);
 namespace HPHP {
 namespace JIT {
 
-using namespace HPHP;
-using HPHP::JIT::Type;
-using HPHP::JIT::HhbcTranslator;
-
 static __thread BiasedCoin *dbgTranslateCoin;
 Lease Translator::s_writeLease;
 
@@ -3470,7 +3466,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
    * (potentially increasing the specificity of guards), and we don't
    * want to do that unnecessarily.
    */
-  if (!JIT::shouldIRInline(callerFunc, target, *subTrace)) {
+  if (!shouldIRInline(callerFunc, target, *subTrace)) {
     if (UNLIKELY(Stats::enabledAny() && getenv("HHVM_STATS_FAILEDINL"))) {
       subTrace->m_inliningFailed = true;
       // Save the trace for stats purposes but don't waste time doing any
@@ -4296,7 +4292,7 @@ Translator::translateRegion(const RegionDesc& region,
         auto loc  = pred.location;
         if (type <= Type::Cls) {
           // Do not generate guards for class; instead assert the type
-          assert(loc.tag() == JIT::RegionDesc::Location::Tag::Stack);
+          assert(loc.tag() == RegionDesc::Location::Tag::Stack);
           ht.assertType(loc, type);
         } else if (isFirstRegionInstr) {
           bool checkOuterTypeOnly = m_mode != TransProfile;
@@ -4428,7 +4424,7 @@ Translator::translateRegion(const RegionDesc& region,
       // Emit IR for the body of the instruction.
       try {
         m_irTrans->translateInstr(inst);
-      } catch (const JIT::FailedIRGen& exn) {
+      } catch (const FailedIRGen& exn) {
         always_assert_log(
           !toInterp.count(sk),
           [&] {
@@ -4472,7 +4468,7 @@ Translator::translateRegion(const RegionDesc& region,
   try {
     translatorTraceCodeGen();
     if (profilingFunc) profData()->setProfiling(startSk.func()->getFuncId());
-  } catch (const JIT::FailedCodeGen& exn) {
+  } catch (const FailedCodeGen& exn) {
     SrcKey sk{exn.vmFunc, exn.bcOff, exn.resumed};
     always_assert_log(
       !toInterp.count(sk),

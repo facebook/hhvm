@@ -23,11 +23,11 @@
 
 namespace HPHP { namespace JIT {
 
-RegionDescPtr selectWholeCFG(JIT::TransID triggerId,
+RegionDescPtr selectWholeCFG(TransID triggerId,
                              const ProfData* profData,
                              TransCFG& cfg,
-                             JIT::TransIDSet& selectedSet,
-                             JIT::TransIDVec* selectedVec = nullptr);
+                             TransIDSet& selectedSet,
+                             TransIDVec* selectedVec = nullptr);
 
 } }
 

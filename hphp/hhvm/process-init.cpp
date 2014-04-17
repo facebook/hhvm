@@ -51,6 +51,8 @@ SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
 #undef pinitSentinel
 #undef STRINGIZE_CLASS_NAME
 
+void ProcessClassInit(long long classes_count, const HhbcExtClassInfo* class_info);
+
 void ProcessInit() {
   // Create the global mcg object
   JIT::mcg = new JIT::MCGenerator();
@@ -132,7 +134,7 @@ void ProcessInit() {
   // Each function and method will have a bytecode body that will thunk
   // to the native implementation.
   Unit* nativeClassUnit = build_native_class_unit(hhbc_ext_classes,
-                                                  hhbc_ext_class_count);
+                                                  hhbc_ext_classes_count);
   SystemLib::s_nativeClassUnit = nativeClassUnit;
 
   LitstrTable::get().setReading();
@@ -142,8 +144,9 @@ void ProcessInit() {
 
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                 \
   {                                                                     \
-    Class *cls = Unit::GetNamedEntity(s_##cls.get())->clsList();       \
-    assert(!hhbc_ext_class_count || cls);                               \
+    Class *cls = Unit::GetNamedEntity(s_##cls.get())->clsList();        \
+    assert(!(hhbc_ext_classes_count + hhbc_ext_base_classes_count) ||   \
+           cls);                                                        \
     SystemLib::s_##cls##Class = cls;                                    \
   }
 
@@ -154,14 +157,8 @@ void ProcessInit() {
 #undef INIT_SYSTEMLIB_CLASS_FIELD
 
   // Retrieve all of the class pointers
-  for (long long i = 0; i < hhbc_ext_class_count; ++i) {
-    const HhbcExtClassInfo* info = hhbc_ext_classes + i;
-    const StringData* name = makeStaticString(info->m_name);
-    const NamedEntity* ne = Unit::GetNamedEntity(name);
-    Class* cls = Unit::lookupClass(ne);
-    assert(cls);
-    *(info->m_clsPtr) = cls;
-  }
+  ProcessClassInit(hhbc_ext_base_classes_count, hhbc_ext_base_classes);
+  ProcessClassInit(hhbc_ext_classes_count, hhbc_ext_classes);
 
   ClassInfo::InitializeSystemConstants();
   Stack::ValidateStackSize();
@@ -172,6 +169,17 @@ void ProcessInit() {
   RuntimeOption::EvalDumpBytecode = db;
   RuntimeOption::EvalAllowHhas = ah;
   Option::WholeProgram = wp;
+}
+
+void ProcessClassInit(long long classes_count, const HhbcExtClassInfo* class_info) {
+  for (long long i = 0; i < classes_count; ++i) {
+    const HhbcExtClassInfo* info = class_info + i;
+    const StringData* name = makeStaticString(info->m_name);
+    const NamedEntity* ne = Unit::GetNamedEntity(name);
+    Class* cls = Unit::lookupClass(ne);
+    assert(cls);
+    *(info->m_clsPtr) = cls;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -74,6 +74,7 @@ class SystemLib {
   static HPHP::Unit* s_unit;
   static HPHP::Unit* s_hhas_unit;
   static HPHP::Unit* s_nativeFuncUnit;
+  static HPHP::Unit* s_nativeBaseClassUnit;
   static HPHP::Unit* s_nativeClassUnit;
 
 

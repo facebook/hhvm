@@ -50,7 +50,9 @@ struct HhbcExtClassInfo {
 
 extern const long long hhbc_ext_funcs_count;
 extern const HhbcExtFuncInfo hhbc_ext_funcs[];
-extern const long long hhbc_ext_class_count;
+extern const long long hhbc_ext_base_classes_count;
+extern const HhbcExtClassInfo hhbc_ext_base_classes[];
+extern const long long hhbc_ext_classes_count;
 extern const HhbcExtClassInfo hhbc_ext_classes[];
 
 ///////////////////////////////////////////////////////////////////////////////

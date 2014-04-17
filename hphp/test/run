@@ -518,7 +518,7 @@ class Status {
 
   public static function hasCursorControl() {
     return !getenv("TRAVIS")
-      && !preg_match('/erase = <undef>/', exec('stty -a | grep "erase ="'));
+      && !exec('stty -a | grep -e "\\berase = <undef>"');
   }
 
   public static function jsonEncode($data) {

@@ -122,6 +122,10 @@ public:
   String(const String& str) : StringBase(str.m_px) { }
   /* implicit */ String(char) = delete; // prevent unintentional promotion
 
+  // Disable this---otherwise this would generally implicitly create a
+  // Variant(bool) and then call String(Variant&&) ...
+  /* implicit */ String(const StringData*) = delete;
+
   // Move ctor
   /* implicit */ String(String&& str) : StringBase(std::move(str)) {}
   /* implicit */ String(Variant&& src);

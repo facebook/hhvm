@@ -267,8 +267,8 @@ static const StringData* getInvokeName(ActRec *ar) {
   if (!cls) {
     return func->name();
   }
-  String clsname(cls->name());
-  String funcname(func->name());
+  String clsname(const_cast<StringData*>(cls->name()));
+  String funcname(const_cast<StringData*>(func->name()));
   return makeStaticString(clsname + "::" + funcname);
 }
 

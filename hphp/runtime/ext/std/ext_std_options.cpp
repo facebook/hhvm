@@ -180,7 +180,7 @@ static Variant HHVM_FUNCTION(assert, const Variant& assertion) {
     auto const unit = fp->m_func->unit();
 
     PackedArrayInit ai(3);
-    ai.append(String(unit->filepath()));
+    ai.append(String(const_cast<StringData*>(unit->filepath())));
     ai.append(Variant(unit->getLineNumber(callerOffset)));
     ai.append(assertion.isString() ? assertion.toString() : String(""));
     f_call_user_func(1, s_option_data->assertCallback, ai.toArray());

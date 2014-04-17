@@ -51,7 +51,6 @@ function xhprof_run_trace($packedTrace, $flags) { }
 function xhprof_sample_enable() { }
 function xhprof_sample_disable() { }
 function fb_load_local_databases($servers) { }
-function fb_parallel_query($sql_map, $max_thread = 50, $combine_result = true, $retry_query_on_fail = true, $connect_timeout = -1, $read_timeout = -1, $timeout_in_ms = false) { }
 function fb_crossall_query($sql, $max_thread = 50, $retry_query_on_fail = true, $connect_timeout = -1, $read_timeout = -1, $timeout_in_ms = false) { }
 function fb_output_compression($new_value) { }
 function fb_set_exit_callback($function) { }

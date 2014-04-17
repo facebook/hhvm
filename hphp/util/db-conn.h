@@ -46,15 +46,6 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * What it takes to connect to a MySQL server.
- */
-struct DBConnQueryJob;
-template <> class WorkerInfo<DBConnQueryJob> {
- public:
-  enum { DoInit = false };
-};
-
 typedef std::vector<std::pair<std::string, std::string> > SessionVariableVec;
 
 class ServerData {
@@ -103,7 +94,6 @@ typedef std::vector<ServerQuery> ServerQueryVec;
  */
 class DBConn {
  public:
-  static unsigned int DefaultWorkerCount; // for parallel executions
   static unsigned int DefaultConnectTimeout;
   static unsigned int DefaultReadTimeout;
 
@@ -140,28 +130,6 @@ class DBConn {
   typedef std::map<int, ErrorInfo> ErrorInfoMap;
 
   /**
-   * Query local dbs in parallel. Returns number of total affecected rows.
-   * Use "DBID" for any place in the query that needs to be replaced by dbId.
-   * For example, "SELECT DBID as dbid, count(*) as count FROM ...".
-   */
-  static int parallelExecute
-    (const char *sql, DBDataSet &ds,
-     ErrorInfoMap &errors, int maxThread, bool retryQueryOnFail = true,
-     int connectTimeout = -1, int readTimeout = -1,
-     int maxRetryOpenOnFail = 1, int maxRetryQueryOnFail = 1
-     );
-  static int parallelExecute
-    (const ServerQueryVec &sqls, DBDataSet &ds,
-     ErrorInfoMap &errors, int maxThread, bool retryQueryOnFail = true,
-     int connectTimeout = -1, int readTimeout = -1,
-     int maxRetryOpenOnFail = 1, int maxRetryQueryOnFail = 1);
-  static int parallelExecute
-    (const ServerQueryVec &sqls, std::vector<std::shared_ptr<DBDataSet>> &dss,
-     ErrorInfoMap &errors, int maxThread, bool retryQueryOnFail = true,
-     int connectTimeout = -1, int readTimeout = -1,
-     int maxRetryOpenOnFail = 1, int maxRetryQueryOnFail = 1);
-
-  /**
    * Put a connection back to pool.
    */
   void close();
@@ -193,9 +161,6 @@ class DBConn {
   unsigned int m_readTimeout;
   int m_maxRetryOpenOnFail;
 
-  static int parallelExecute(std::vector<std::shared_ptr<DBConnQueryJob>> &jobs,
-                             ErrorInfoMap &errors,
-                             int maxThread);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

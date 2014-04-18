@@ -8,7 +8,6 @@ all sub-suites.
 * slow - Slower full featured tests. Grouped into sub-suites.
 * zend/good - Passing tests from Zend's suite.
 * zend/bad - Failing tests from Zend. Fix these and move them to zend/good.
-* vm-perf - Some performance tests that aren't commonly run.
 
 # Examples how to run them
 

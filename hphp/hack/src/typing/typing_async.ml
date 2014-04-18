@@ -21,8 +21,8 @@ let enforce_not_awaitable env e ty =
       (* Match only a single unresolved -- this isn't typically how you
        * look into an unresolved, but the single list case is all we care
        * about since that's all you can get in this case (I think). *)
-      | _, Tunresolved [r, Tapply ((_, "Awaitable"), _)]
-      | r, Tapply ((_, "Awaitable"), _) -> begin
+      | _, Tunresolved [r, Tapply ((_, "\\Awaitable"), _)]
+      | r, Tapply ((_, "\\Awaitable"), _) -> begin
         match snd e with
           | Nast.Binop (Ast.Eq _, _, _) -> ()
           | _ ->
@@ -65,8 +65,8 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
     end tyl (env, []) in
     env, (r, Tunresolved rtyl)
   | _ ->
-    let expected_opt_type = r, Toption (r, Tapply ((p, "Awaitable"), [type_var])) in
-    let expected_non_opt_type = r, Tapply ((p, "Awaitable"), [type_var]) in
+    let expected_opt_type = r, Toption (r, Tapply ((p, "\\Awaitable"), [type_var])) in
+    let expected_non_opt_type = r, Tapply ((p, "\\Awaitable"), [type_var]) in
     let expected_type, return_type = (match e_opt_ty with
       | _, Toption _ ->
         expected_opt_type, (r, Toption type_var)

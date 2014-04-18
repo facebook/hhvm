@@ -173,13 +173,13 @@ let predef_fun x =
   x
 
 let anon      = predef_fun "?anon"
-let is_int    = predef_fun "is_int"
-let is_bool   = predef_fun "is_bool"
-let is_array  = predef_fun "is_array"
-let is_float  = predef_fun "is_float"
-let is_string = predef_fun "is_string"
-let is_null   = predef_fun "is_null"
-let is_resource = predef_fun "is_resource"
+let is_int    = predef_fun "\\is_int"
+let is_bool   = predef_fun "\\is_bool"
+let is_array  = predef_fun "\\is_array"
+let is_float  = predef_fun "\\is_float"
+let is_string = predef_fun "\\is_string"
+let is_null   = predef_fun "\\is_null"
+let is_resource = predef_fun "\\is_resource"
 
 let predef_tests_list =
   [is_int; is_bool; is_float; is_string; is_null; is_array; is_resource]
@@ -320,7 +320,7 @@ module Env = struct
   let var env (p, x) =
     let v = SMap.get x !env in
     match v with
-    | None   -> error p ("Unbound name: "^x)
+    | None   -> error p ("Unbound name: "^(strip_ns x))
     | Some v -> p, snd v
 
 (* Is called bad_style, but it is still an error ... Whatever *)
@@ -428,19 +428,6 @@ module Env = struct
           end
       | None -> p, Ident.tmp()
 
-  let resolve_namespace genv x =
-    (* Resolve an id to a fully-qualified name. Things in the global namespace
-     * aren't prefixed with a slash so that we don't gum up error message for
-     * folks who don't use namespaces. So we have to manually remove the
-     * leading slash from a fully-qualified name if it's referring to a name in
-     * the global namespace. This logic is shared between classes and functions
-     * and so does not deal with the function name fallback crap. *)
-    let p, id = Namespaces.elaborate_id genv.namespace x in
-    let fq_global = try String.rindex id '\\' = 0 with Not_found -> false in
-    let id =
-      if fq_global then String.sub id 1 (String.length id - 1) else id in
-    p, id
-
   let get_name genv namespace x =
     try ignore (var namespace x); x with exn ->
       match genv.in_mode with
@@ -450,19 +437,18 @@ module Env = struct
   let const (genv, env) x  = get_name genv env.consts x
 
   let global_const (genv, env) x  =
-    let x = resolve_namespace genv x in
+    let x = Namespaces.elaborate_id genv.namespace x in
     get_name genv genv.gconsts x
 
   let class_name (genv, _) x =
-    let x = resolve_namespace genv x in
+    let x = Namespaces.elaborate_id genv.namespace x in
     get_name genv genv.classes x
 
   let fun_id (genv, _) x =
-    let fq_x = resolve_namespace genv x in
-    let need_fallback =
-      (snd fq_x).[0] = '\\' &&
-      not (String.contains (snd x) '\\') in
+    let fq_x = Namespaces.elaborate_id genv.namespace x in
+    let need_fallback = not (String.contains (snd x) '\\') in
     if need_fallback then begin
+      let global_x = (fst x, "\\" ^ (snd x)) in
       (* Explicitly add dependencies on both of the functions we could be
        * referring to here. Normally naming doesn't have to deal with deps at
        * all -- they are added during typechecking just by the nature of
@@ -477,13 +463,13 @@ module Env = struct
        * referred to here actually changes as a result of the other file, which
        * is stronger than just the need to retypecheck. *)
       Typing_deps.add_idep genv.droot (Typing_deps.Dep.FunName (snd fq_x));
-      Typing_deps.add_idep genv.droot (Typing_deps.Dep.FunName (snd x));
-      let mem x = SMap.mem (snd x) !(genv.funs) in
-      match mem fq_x, mem x with
+      Typing_deps.add_idep genv.droot (Typing_deps.Dep.FunName (snd global_x));
+      let mem (_, s) = SMap.mem s !(genv.funs) in
+      match mem fq_x, mem global_x with
       (* Found in the current namespace *)
       | true, _ -> get_name genv genv.funs fq_x
       (* Found in the global namespace *)
-      | _, true -> get_name genv genv.funs x
+      | _, true -> get_name genv genv.funs global_x
       (* Not found. Pick the more specific one to error on. *)
       | false, false -> get_name genv genv.funs fq_x
     end else
@@ -502,7 +488,7 @@ module Env = struct
       if Pos.compare p p' = 0 then (p, y)
       else if not !Silent.is_silent_mode
       then
-        error_l [p, "Name already bound: "^x;
+        error_l [p, "Name already bound: "^(Utils.strip_ns x);
                  p', "Previous definition is here"]
       else
         let y = p, Ident.make x in
@@ -613,7 +599,8 @@ let implement env x =
   | _ -> ()
 
 (* Check that a name is not a typedef *)
-let no_typedef (genv, _) (pos, name) =
+let no_typedef (genv, _) cid =
+  let (pos, name) = Namespaces.elaborate_id genv.namespace cid in
   if SMap.mem name !(genv.typedefs)
   then
     let def_pos, _ = SMap.find_unsafe name !(genv.typedefs) in
@@ -794,7 +781,8 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
        *   private ?WaitHandle<this> wh = ...; // e.g. generic preparables
        *)
     let cname = snd (Env.class_name env id) in
-    let awaitable_covariance = (cname = "Awaitable" || cname = "WaitHandle") in
+    let awaitable_covariance =
+      (cname = "\\Awaitable" || cname = "\\WaitHandle") in
     let allow_this = allow_this && awaitable_covariance in
     N.Happly (Env.class_name env id, hintl ~allow_this env hl)
 
@@ -1409,18 +1397,18 @@ and expr env (p, e) = p, expr_ env e
 and expr_ env = function
   | Array l -> N.Array (List.map (afield env) l)
   | Collection (id, l) -> begin
-    let p, cn = Env.resolve_namespace (fst env) id in
+    let p, cn = Namespaces.elaborate_id ((fst env).namespace) id in
     match cn with
-      | "Vector"
-      | "ImmVector"
-      | "Set"
-      | "ImmSet" ->
+      | "\\Vector"
+      | "\\ImmVector"
+      | "\\Set"
+      | "\\ImmSet" ->
         N.ValCollection (cn, (List.map (afield_value env cn) l))
-      | "Map"
-      | "ImmMap"
-      | "StableMap" ->
+      | "\\Map"
+      | "\\ImmMap"
+      | "\\StableMap" ->
         N.KeyValCollection (cn, (List.map (afield_kvalue env cn) l))
-      | "Pair" ->
+      | "\\Pair" ->
         (match l with
           | [] -> error p "Too few arguments"
           | e1::e2::[] ->
@@ -1428,7 +1416,7 @@ and expr_ env = function
             N.Pair (afield_value env pn e1, afield_value env pn e2)
           | _ -> error p "Too many arguments"
         )
-      | _ -> error p ("Unexpected collection type " ^ cn)
+      | _ -> error p ("Unexpected collection type " ^ (Utils.strip_ns cn))
   end
   | Clone e -> N.Clone (expr env e)
   | Null -> N.Null
@@ -1523,7 +1511,7 @@ and expr_ env = function
           (match (expr env e1), (expr env e2) with
           | (_, N.String cl), (_, N.String meth)
           | (_, N.Class_const (N.CI cl, (_, "class"))), (_, N.String meth) ->
-            N.Method_caller (cl, meth)
+            N.Method_caller (Env.class_name env cl, meth)
           | (p, _), (_) ->
             let msg =
               "The two arguments to meth_caller() must be:"
@@ -1541,7 +1529,7 @@ and expr_ env = function
           (match (expr env e1), (expr env e2) with
           | (_, N.String cl), (_, N.String meth)
           | (_, N.Class_const (N.CI cl, (_, "class"))), (_, N.String meth) ->
-            N.Smethod_id (cl, meth)
+            N.Smethod_id (Env.class_name env cl, meth)
           | (p, _), (_) ->
             let msg =
               "The two arguments to class_meth() must be:"

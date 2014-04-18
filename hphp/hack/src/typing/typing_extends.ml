@@ -55,9 +55,9 @@ module Error = struct
 
   (* Incompatible override *)
   let override (parent_pos, parent_name) (pos, name) error_message_l =
-    let msg1 = pos, ("This object is of type "^name) in
+    let msg1 = pos, ("This object is of type "^(strip_ns name)) in
     let msg2 = parent_pos,
-      ("It is incompatible with this object of type "^parent_name^
+      ("It is incompatible with this object of type "^(strip_ns parent_name)^
        "\nbecause some of their methods are incompatible."^
        "\nRead the following to see why:"
       ) in

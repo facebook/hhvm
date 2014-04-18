@@ -192,6 +192,13 @@ and normalize_ = function
   | Tprim _ as ty -> ty
   | Tvar _ -> raise Exit
   | Tfun _ -> raise Exit
+  | Tapply ((pos, name), tyl) when name.[0] = '\\' && String.rindex name '\\' = 0 ->
+      (* TODO this transform isn't completely legit; can cause a reference into
+       * the global namespace to suddenly refer to a different class in the
+       * local one. Figure something else out that doesn't involve spamming '\'
+       * across FB code, maybe? See if anyone complains on GitHub? I have no
+       * idea how bad this is in practice, I'm kinda hoping it's okay. *)
+      normalize_ (Tapply ((pos, strip_ns name), tyl))
   | Tapply ((pos1, "Awaitable"), [(_, Toption (pos2, Tprim Nast.Tvoid))]) ->
       (* Special case: Awaitable<?void> is nonsensical, but often
        * Awaitable<void> works. *)

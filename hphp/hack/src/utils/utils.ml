@@ -333,3 +333,6 @@ let cat file =
     | None -> acc
   in
   cat_aux [] () |> List.rev |> (fun x -> close_in chan; x)
+
+let strip_ns s =
+  if s.[0] = '\\' then String.sub s 1 ((String.length s) - 1) else s

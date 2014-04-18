@@ -338,3 +338,6 @@ let iter_n_acc n f acc =
     acc := f !acc
   done;
   !acc
+
+let strip_ns s =
+  if s.[0] = '\\' then String.sub s 1 ((String.length s) - 1) else s

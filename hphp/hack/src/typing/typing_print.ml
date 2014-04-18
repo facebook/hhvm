@@ -49,7 +49,7 @@ module ErrorString = struct
     | Tanon _ | Tfun _   -> "a function"
     | Tgeneric (x, y)    -> generic (x, y)
     | Tabstract ((_, x), _, _)
-    | Tapply ((_, x), _) -> "an object of type "^x
+    | Tapply ((_, x), _) -> "an object of type "^(strip_ns x)
     | Tobject            -> "an object"
     | Tshape _           -> "a shape"
 
@@ -103,12 +103,12 @@ module Suggest = struct
     | Tprim tp               -> prim tp
     | Tvar _                 -> "..."
     | Tanon _ | Tfun _       -> "..."
-    | Tapply ((_, cid), [])  -> cid
-    | Tapply ((_, cid), [x]) -> cid^"<"^type_ x^">"
-    | Tapply ((_, cid), l)   -> cid^"<"^list l^">"
-    | Tabstract ((_, cid), [], _)  -> cid
-    | Tabstract ((_, cid), [x], _) -> cid^"<"^type_ x^">"
-    | Tabstract ((_, cid), l, _)   -> cid^"<"^list l^">"
+    | Tapply ((_, cid), [])  -> Utils.strip_ns cid
+    | Tapply ((_, cid), [x]) -> (Utils.strip_ns cid)^"<"^type_ x^">"
+    | Tapply ((_, cid), l)   -> (Utils.strip_ns cid)^"<"^list l^">"
+    | Tabstract ((_, cid), [], _)  -> Utils.strip_ns cid
+    | Tabstract ((_, cid), [x], _) -> (Utils.strip_ns cid)^"<"^type_ x^">"
+    | Tabstract ((_, cid), l, _)   -> (Utils.strip_ns cid)^"<"^list l^">"
     | Tobject                -> "..."
     | Tshape _               -> "..."
 
@@ -167,6 +167,8 @@ module Full = struct
       if ft.ft_abstract then o "abs " else ();
       o "(function"; fun_type st env o ft; o ")"
     | Tabstract ((_, s), tyl, _) -> o s; o "<"; list k tyl; o ">"
+    (* Don't strip_ns here! We want the FULL type, including the initial slash.
+    *)
     | Tapply ((_, s), tyl) -> o s; o "<"; list k tyl; o ">"
     | Ttuple tyl -> o "("; list k tyl; o ")"
     | Tanon _ -> o "[fun]"

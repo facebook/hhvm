@@ -32,7 +32,7 @@ module Env = Typing_env
 module Error = struct
 
   let type_arity name nargs =
-    sl ["The type ";name;" expects ";nargs;" type parameter(s)"]
+    sl ["The type ";(Utils.strip_ns name);" expects ";nargs;" type parameter(s)"]
 
   let abstract_outside (p, _) =
     error p
@@ -73,7 +73,7 @@ module Error = struct
       ("Don't call "^s^" it's one of these magic things we want to avoid")
 
   let non_interface (p : Pos.t) (c2: string) (verb: string): 'a =
-    error p ("Cannot " ^ verb ^ " " ^ c2 ^ " - it is not an interface")
+    error p ("Cannot " ^ verb ^ " " ^ (strip_ns c2) ^ " - it is not an interface")
 
   let toString_returns_string pos =
     error pos "__toString should return a string"
@@ -82,10 +82,10 @@ module Error = struct
     error pos "__toString must have public visibility and cannot be static"
 
   let uses_non_trait (p: Pos.t) (n: string) (t: string) =
-    error p (n ^ " is not a trait. It is " ^ t ^ ".")
+    error p ((Utils.strip_ns n) ^ " is not a trait. It is " ^ t ^ ".")
 
   let requires_non_class (p: Pos.t) (n: string) (t: string) =
-    error p (n ^ " is not a class. It is " ^ t ^ ".")
+    error p ((Utils.strip_ns n) ^ " is not a class. It is " ^ t ^ ".")
 
 end
 
@@ -545,7 +545,7 @@ and method_ (env, is_static) m =
   (match env.class_name with
   | Some cname ->
       let p, mname = m.m_name in
-      if String.lowercase cname = String.lowercase mname
+      if String.lowercase (strip_ns cname) = String.lowercase mname
           && env.class_kind <> Some Ast.Ctrait
       then
         error p ("This is a dangerous method name, "^

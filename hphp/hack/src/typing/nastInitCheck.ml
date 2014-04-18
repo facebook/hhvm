@@ -173,7 +173,7 @@ open Env
 (*****************************************************************************)
 
 let is_whitelisted = function
-  | "get_class" -> true
+  | "\\get_class" -> true
   | _ -> false
 
 let rec class_decl tenv c =

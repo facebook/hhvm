@@ -75,7 +75,7 @@ let is_array = function _, Tarray _ -> true | _ -> false
 let unbound_name env (pos, name)=
   match env.Env.genv.Env.mode with
   | Ast.Mstrict ->
-      error pos ("Unbound name, Typing: "^name)
+      error pos ("Unbound name, Typing: "^(strip_ns name))
   | Ast.Mdecl | Ast.Mpartial ->
       env, (Reason.Rnone, Tany)
 
@@ -325,7 +325,7 @@ and implicit_return_async b p env ret reason =
     if !is_suggest_mode && NastVisitor.HasReturn.block b
     then rty_core
     else Tprim Nast.Tvoid in
-  let mk_rty core = reason, Tapply ((p, "Awaitable"), [reason, core]) in
+  let mk_rty core = reason, Tapply ((p, "\\Awaitable"), [reason, core]) in
   Typing_suggest.save_return env ret (mk_rty suggest_core);
   Type.sub_type p Reason.URreturn env ret (mk_rty rty_core)
 
@@ -377,7 +377,7 @@ and stmt env = function
   | Return (p, None) ->
       let rty = match Env.get_fn_type env with
         | Ast.FSync -> (Reason.Rwitness p, Tprim Tvoid)
-        | Ast.FAsync -> (Reason.Rwitness p, Tapply ((p, "Awaitable"), [(Reason.Rwitness p, Toption (Env.fresh_type ()))])) in
+        | Ast.FAsync -> (Reason.Rwitness p, Tapply ((p, "\\Awaitable"), [(Reason.Rwitness p, Toption (Env.fresh_type ()))])) in
       let expected_return = Env.get_return env in
       Typing_suggest.save_return env expected_return rty;
       let env = Type.sub_type p Reason.URreturn env expected_return rty in
@@ -387,7 +387,7 @@ and stmt env = function
       let env, rty = expr env e in
       let rty = match Env.get_fn_type env with
         | Ast.FSync -> rty
-        | Ast.FAsync -> (Reason.Rwitness p), Tapply ((p, "Awaitable"), [rty]) in
+        | Ast.FAsync -> (Reason.Rwitness p), Tapply ((p, "\\Awaitable"), [rty]) in
       let expected_return = Env.get_return env in
       (match snd (Env.expand_type env expected_return) with
       | r, Tprim Tvoid ->
@@ -505,7 +505,7 @@ and stmt env = function
   | Throw (_, e) ->
     let p = fst e in
     let env, ty = expr env e in
-    let exn_ty = Reason.Rthrow p, Tapply ((p, "Exception"), []) in
+    let exn_ty = Reason.Rthrow p, Tapply ((p, "\\Exception"), []) in
     Type.sub_type p (Reason.URthrow) env exn_ty ty
   | Continue
   | Break -> env
@@ -577,12 +577,12 @@ and as_expr env pe  = function
        this happens should be for vectors *)
   | As_id e ->
       let ty = Env.fresh_type() in
-      let tvector = Tapply ((pe, "Traversable"), [ty]) in
+      let tvector = Tapply ((pe, "\\Traversable"), [ty]) in
       env, (Reason.Rforeach pe, tvector)
   | As_kv (e1, e2) ->
       let ty1 = Env.fresh_type() in
       let ty2 = Env.fresh_type() in
-      let tmap = Tapply ((pe, "KeyedTraversable"), [ty1; ty2]) in
+      let tmap = Tapply ((pe, "\\KeyedTraversable"), [ty1; ty2]) in
       env, (Reason.Rforeach pe, tmap)
 
 and bind_as_expr env ty aexpr =
@@ -841,7 +841,7 @@ and expr_ is_lvalue env (p, e) =
   | Pair (e1, e2) ->
       let env, ty1 = expr env e1 in
       let env, ty2 = expr env e2 in
-      let ty = Reason.Rwitness p, Tapply ((p, "Pair"), [ty1; ty2]) in
+      let ty = Reason.Rwitness p, Tapply ((p, "\\Pair"), [ty1; ty2]) in
       env, ty
   | Expr_list el ->
       let env, tyl = lmap expr env el in
@@ -866,7 +866,7 @@ and expr_ is_lvalue env (p, e) =
       | r, ety ->
           TUtils.in_var env (r, ety)
       )
-  | Call (Cnormal, (_, Id (_, "hh_show")), [x]) when !debug ->
+  | Call (Cnormal, (_, Id (_, "\\hh_show")), [x]) when !debug ->
       let env, ty = expr env x in
       Env.debug env ty;
       env, Env.fresh_type()
@@ -966,10 +966,10 @@ and expr_ is_lvalue env (p, e) =
        *)
       let env, erty = Env.expand_type env rty in
       (match erty with
-      | r, Tapply ((p, "_AsyncWaitHandle"), [rty]) ->
+      | r, Tapply ((p, "\\_AsyncWaitHandle"), [rty]) ->
           env, rty
       | _ ->
-          let rty = r, Tapply ((p, "Continuation"), [rty]) in
+          let rty = r, Tapply ((p, "\\Continuation"), [rty]) in
           let env = Type.sub_type (fst e) (Reason.URyield) env (Env.get_return env) rty in
           let env = Env.forget_members env p in
           (* the return type of yield could be anything, it depends on the value
@@ -1127,7 +1127,7 @@ and special_func env p func =
       let env, etyl = lmap expr env el in
       Async.gen_array_va_rec env p etyl
   ) in
-  env, (Reason.Rwitness p, Tapply ((p, "Awaitable"), [ty]))
+  env, (Reason.Rwitness p, Tapply ((p, "\\Awaitable"), [ty]))
 
 and new_object ~check_not_abstract p env c el =
   let env, class_ = class_id p env c in
@@ -1147,7 +1147,7 @@ and new_object ~check_not_abstract p env c el =
   | Some (cname, class_) ->
       if check_not_abstract && class_.tc_abstract && c <> CIstatic &&
         not !is_silent_mode
-      then error p ("Can't instantiate " ^ snd cname);
+      then error p ("Can't instantiate " ^ Utils.strip_ns (snd cname));
       let env, params = lfold begin fun env x ->
         TUtils.in_var env (Reason.Rnone, Tunresolved [])
       end env class_.tc_tparams in
@@ -1194,7 +1194,7 @@ and assign p env e1 ty2 =
       | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
           let env, ty2 = Typing_tdef.expand_typedef SSet.empty env r x argl in
           assign p env e1 ty2
-      | r, Tapply ((_, ("Vector" | "ImmVector")), [elt_type])
+      | r, Tapply ((_, ("\\Vector" | "\\ImmVector")), [elt_type])
       | r, Tarray (_, Some elt_type, None) ->
           let env, _ = lfold begin fun env e ->
             assign (fst e) env e elt_type
@@ -1206,7 +1206,7 @@ and assign p env e1 ty2 =
             assign (fst e) env e (r, Tany)
           end env el in
           env, ty2
-      | r, Tapply ((_, "Pair"), [ty1; ty2]) ->
+      | r, Tapply ((_, "\\Pair"), [ty1; ty2]) ->
           (match el with
           | [x1; x2] ->
               let env, _ = assign p env x1 ty1 in
@@ -1344,7 +1344,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
   | Id (_, "echo") ->
       let env, _ = lfold expr env el in
       env, (Reason.Rwitness p, Tprim Tvoid)
-  | Id (_, "isset") ->
+  | Id (_, "\\isset") ->
       let env, _ = lfold expr env el in
       if Env.is_strict env
       then error p "Don't use isset!";
@@ -1473,42 +1473,42 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       let ty1 = Reason.Ridx (fst e2), Tprim Tint in
       let env, _ = Type.unify p Reason.URarray_get env ty2 ty1 in
       env, ty
-  | Tgeneric (_, Some (_, Tapply ((_, "Vector"), [ty])))
-  | Tapply ((_, "Vector"), [ty]) ->
+  | Tgeneric (_, Some (_, Tapply ((_, "\\Vector"), [ty])))
+  | Tapply ((_, "\\Vector"), [ty]) ->
       let ty1 = Reason.Ridx_vector (fst e2), Tprim Tint in
       let env, _ = Type.unify p Reason.URvector_get env ty2 ty1 in
       env, ty
-  | Tgeneric (_, Some (_, Tapply ((_, "Map"), [k; v])))
-  | Tgeneric (_, Some (_, Tapply ((_, "StableMap"), [k; v])))
-  | Tapply ((_, "Map"), [k; v])
-  | Tapply ((_, "StableMap"), [k; v]) ->
+  | Tgeneric (_, Some (_, Tapply ((_, "\\Map"), [k; v])))
+  | Tgeneric (_, Some (_, Tapply ((_, "\\StableMap"), [k; v])))
+  | Tapply ((_, "\\Map"), [k; v])
+  | Tapply ((_, "\\StableMap"), [k; v]) ->
       let env, ty2 = TUtils.unresolved env ty2 in
       let env, _ = Type.unify p Reason.URmap_get env k ty2 in
       env, v
-  | Tgeneric (_, Some (_, Tapply ((_, ("ConstMap" | "ImmMap")), [k; v])))
-  | Tapply ((_, ("ConstMap" | "ImmMap")), [k; v])
+  | Tgeneric (_, Some (_, Tapply ((_, ("\\ConstMap" | "\\ImmMap")), [k; v])))
+  | Tapply ((_, ("\\ConstMap" | "\\ImmMap")), [k; v])
       when not is_lvalue ->
       let env, _ = Type.unify p Reason.URmap_get env k ty2 in
       env, v
-  | Tgeneric (_, Some (_, Tapply ((_, ("ConstMap" | "ImmMap")), _)))
-  | Tapply ((_, ("ConstMap" | "ImmMap")), _)
+  | Tgeneric (_, Some (_, Tapply ((_, ("\\ConstMap" | "\\ImmMap")), _)))
+  | Tapply ((_, ("\\ConstMap" | "\\ImmMap")), _)
       when is_lvalue -> error_const_mutation p ety1
-  | Tgeneric (_, Some (_, Tapply ((_, "Indexish"), [k; v])))
-  | Tapply ((_, "Indexish"), [k; v]) ->
+  | Tgeneric (_, Some (_, Tapply ((_, "\\Indexish"), [k; v])))
+  | Tapply ((_, "\\Indexish"), [k; v]) ->
       let env, _ = Type.unify p Reason.URcontainer_get env k ty2 in
       env, v
-  | Tgeneric (_, Some (_, Tapply ((_, ("ConstVector" | "ImmVector" as cn)), [ty])))
-  | Tapply ((_, ("ConstVector" | "ImmVector" as cn)), [ty])
+  | Tgeneric (_, Some (_, Tapply ((_, ("\\ConstVector" | "\\ImmVector" as cn)), [ty])))
+  | Tapply ((_, ("\\ConstVector" | "\\ImmVector" as cn)), [ty])
       when not is_lvalue ->
       let ty1 = Reason.Ridx (fst e2), Tprim Tint in
       let ur = (match cn with
-                  "ConstVector"   -> Reason.URconst_vector_get
-                | "ImmVector"  -> Reason.URimm_vector_get
+                  "\\ConstVector"   -> Reason.URconst_vector_get
+                | "\\ImmVector"  -> Reason.URimm_vector_get
                 | _  -> failwith ("Unexpected collection name: " ^ cn)) in
       let env, _ = Type.unify p ur env ty2 ty1 in
       env, ty
-  | Tgeneric (_, Some (_, Tapply ((_, ("ConstVector" | "ImmVector")), _)))
-  | Tapply ((_, ("ConstVector" | "ImmVector")), _)
+  | Tgeneric (_, Some (_, Tapply ((_, ("\\ConstVector" | "\\ImmVector")), _)))
+  | Tapply ((_, ("\\ConstVector" | "\\ImmVector")), _)
       when is_lvalue -> error_const_mutation p ety1
   | Tarray (is_local, Some k, Some v) ->
       if is_lvalue && not is_local
@@ -1544,7 +1544,7 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       | p, _ ->
           error p (Reason.string_of_ureason Reason.URtuple_access)
       )
-  | Tapply ((_, "Pair"), [ty1; ty2]) ->
+  | Tapply ((_, "\\Pair"), [ty1; ty2]) ->
       (match e2 with
       | p, Int n ->
           (try
@@ -1596,14 +1596,14 @@ and array_append is_lvalue p env ty1 =
   let env, ety1 = Env.expand_type env ty1 in
   match snd ety1 with
   | Tany | Tarray (_, None, None) -> env, (Reason.Rnone, Tany)
-  | Tgeneric (_, Some (_, Tapply ((_, "Vector"), [ty])))
-  | Tgeneric (_, Some (_, Tapply ((_, "Set"), [ty])))
-  | Tapply ((_, "Vector"), [ty])
-  | Tapply ((_, "Set"), [ty]) ->
+  | Tgeneric (_, Some (_, Tapply ((_, "\\Vector"), [ty])))
+  | Tgeneric (_, Some (_, Tapply ((_, "\\Set"), [ty])))
+  | Tapply ((_, "\\Vector"), [ty])
+  | Tapply ((_, "\\Set"), [ty]) ->
       env, ty
-  | Tapply ((_, "Map"), [tkey; tvalue]) ->
+  | Tapply ((_, "\\Map"), [tkey; tvalue]) ->
       (* You can append a pair to a map *)
-      env, (Reason.Rmap_append p, Tapply ((p, "Pair"), [tkey; tvalue]))
+      env, (Reason.Rmap_append p, Tapply ((p, "\\Pair"), [tkey; tvalue]))
   | Tarray (is_local, Some ty, None) ->
       if is_lvalue && not is_local
       then array_cow p;
@@ -1773,7 +1773,7 @@ and smember_not_found pos ~is_const ~is_method env class_ member_name =
 and member_not_found pos ~is_method env class_ member_name class_name =
   let kind = if is_method then "method " else "member " in
   let msg = "The "^kind^member_name^" is undefined "
-    ^"in an object of type "^(snd class_name)
+    ^"in an object of type "^(strip_ns (snd class_name))
   in
   let errors = [pos, msg; (fst class_name), "Check this out"] in
   match Env.suggest_member is_method class_ member_name with
@@ -2099,7 +2099,8 @@ and is_visible env vis cid =
                 || not my_class.tc_members_fully_known
               then None
               else Some (
-                "Cannot access this protected member, you don't extend "^ x, 
+                "Cannot access this protected member, you don't extend "^
+                  (Utils.strip_ns x), 
                 "This member is protected"
               )
             | _, _ -> None
@@ -2381,10 +2382,10 @@ and condition env tparamet = function
   | r, Expr_list (x::xs) ->
       let env, _ = expr env x in
       condition env tparamet (r, Expr_list xs)
-  | _, Call (Cnormal, (_, Id (_, "isset")), [param])
+  | _, Call (Cnormal, (_, Id (_, "\\isset")), [param])
     when tparamet && not (Env.is_strict env) ->
       condition_isset env param
-  | _, Call (Cnormal, (_, Id (_, "is_null")), [e]) when not tparamet ->
+  | _, Call (Cnormal, (_, Id (_, "\\is_null")), [e]) when not tparamet ->
       condition_var_non_null env e
   | r, Binop ((Ast.Eqeq | Ast.EQeqeq as bop),
               (_, Null), e)

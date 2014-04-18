@@ -166,8 +166,9 @@ and unify_ env r1 ty1 r2 ty2 =
             with Error l ->
               match ty2 with
               | Tapply ((_, y), _) when y = x ->
-                let message1 = "Since "^(snd id)^" is not final" in
-                let message2 = "this might not be a "^(snd id) in
+                let n = Utils.strip_ns (snd id) in
+                let message1 = "Since "^n^" is not final" in
+                let message2 = "this might not be a "^n in
                 Utils.error_l
                   (l @ [(fst id, message1);  (Reason.to_pos r1, message2)])
               | _ -> Utils.error_l l

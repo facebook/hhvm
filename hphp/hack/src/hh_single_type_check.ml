@@ -52,7 +52,8 @@ let builtins =
   "interface XHPChild {}"^
   "interface ConstVector<Tv> {}"^
   "interface ConstMap<Tk, Tv> {}"^
-  "function hh_show($val) {}"
+  "function hh_show($val) {}"^
+  "interface Countable { public function count(): int; }"
 
 (*****************************************************************************)
 (* Helpers *)

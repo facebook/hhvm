@@ -90,6 +90,7 @@ let rec to_string prefix r =
         (p2, "It was implicitly typed as "^s^" during this operation")
       ]
   | Rlost_info (s, r1, p2) ->
+      let s = Utils.strip_ns s in
       (to_string prefix r1) @
       [
         (p2, "All the local information about "^s^" has been invalidated \
@@ -103,7 +104,7 @@ let rec to_string prefix r =
           | el -> [(p, s)] @ el)
   | Rclass_class (_, s) ->
     [(p, prefix^"; implicitly defined constant ::class is a string that contains the \
-          fully qualified name of "^s)]
+          fully qualified name of "^(Utils.strip_ns s))]
   | Runknown_class _ -> [(p, prefix^"; this class name is unknown to Hack")]
   | Rdynamic_yield (_, yield_pos, implicit_name, yield_name) ->
       [(p, prefix ^ (Printf.sprintf

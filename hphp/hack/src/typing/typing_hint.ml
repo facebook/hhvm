@@ -58,8 +58,8 @@ and hint_ p env = function
       ft_params = paraml;
       ft_ret = ret;
     }
-  | Happly ((p, "Tuple"), _)
-  | Happly ((p, "tuple"), _) ->
+  | Happly ((p, "\\Tuple"), _)
+  | Happly ((p, "\\tuple"), _) ->
       error p ("Did you want a tuple? Try (X,Y), not tuple<X,Y>")
   | Happly (((p, c) as id), argl) ->
       Find_refs.process_class_ref p c None;

@@ -169,9 +169,9 @@ let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) 
 let retype_magic_func (env:Env.env) (ft:fun_type) (el:Nast.expr list) : Env.env * fun_type =
   let rec f env param_types args : Env.env * (fun_params * tparam list) option =
     (match param_types, args with
-      | [(_,    (_,   Toption (_, Tapply ((_, "FormatString"), [_       ]))))], [(_, Nast.Null)] -> env,None
-      | [(name, (why, Toption (_, Tapply ((_, "FormatString"), [type_arg]))))], (arg :: args)
-      | [(name, (why,             Tapply ((_, "FormatString"), [type_arg] )))], (arg :: args) ->
+      | [(_,    (_,   Toption (_, Tapply ((_, "\\FormatString"), [_       ]))))], [(_, Nast.Null)] -> env,None
+      | [(name, (why, Toption (_, Tapply ((_, "\\FormatString"), [type_arg]))))], (arg :: args)
+      | [(name, (why,             Tapply ((_, "\\FormatString"), [type_arg] )))], (arg :: args) ->
           (match const_string_of env arg with
              |  env, Right str ->
                   let env, argl, targl = parse_printf_string env str (fst arg) type_arg in

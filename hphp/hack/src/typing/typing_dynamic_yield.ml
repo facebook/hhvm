@@ -48,7 +48,7 @@ let rec decl env methods =
         let gen_name = "gen"^base in
         let gen_r = Reason.Rdynamic_yield (p, ft.ft_pos, gen_name, name) in
         let gen_ty = ce_r, Tfun {ft with
-          ft_ret =  gen_r, Tapply ((p, "Awaitable"), [base_ty])
+          ft_ret =  gen_r, Tapply ((p, "\\Awaitable"), [base_ty])
         } in
         let acc = add gen_name {ce with ce_type = gen_ty} acc in
 
@@ -56,7 +56,7 @@ let rec decl env methods =
         let prepare_name = "prepare"^base in
         let prepare_r = Reason.Rdynamic_yield (p, ft.ft_pos, prepare_name, name) in
         let prepare_ty = ce_r, Tfun {ft with
-          ft_ret =  prepare_r, Tapply ((p, "Awaitable"), [r, Tprim Nast.Tvoid])
+          ft_ret =  prepare_r, Tapply ((p, "\\Awaitable"), [r, Tprim Nast.Tvoid])
         } in
         let acc = add prepare_name {ce with ce_type = prepare_ty} acc in
 
@@ -88,7 +88,7 @@ let rec decl env methods =
               let p = Reason.to_pos (fst ft.ft_ret) in
               let gen_r = Reason.Rdynamic_yield (p, ft.ft_pos, gen_name, name) in
               let gen_ty = ce_r, Tfun {ft with
-                ft_ret = gen_r, Tapply ((p, "Awaitable"), [ft.ft_ret])
+                ft_ret = gen_r, Tapply ((p, "\\Awaitable"), [ft.ft_ret])
               } in
               let acc = add gen_name {ce with ce_type = gen_ty} acc in
               env, acc
@@ -98,15 +98,15 @@ let rec decl env methods =
 and check_yield_types env p hret =
   let type_var = Env.fresh_type() in
   let r = Reason.Rwitness p in
-  let expected_type = r, Tapply ((p, "Awaitable"), [type_var]) in
+  let expected_type = r, Tapply ((p, "\\Awaitable"), [type_var]) in
   let env = Type.sub_type p (Reason.URdynamic_yield) env expected_type hret in
   (* Fully expand to make doubly sure we don't leak any type variables *)
   env, Typing_expand.fully_expand env type_var
 
-and contains_dynamic_yield = SSet.mem "DynamicYield"
-and contains_dynamic_yield_interface = SSet.mem "IUseDynamicYield"
-and implements_dynamic_yield_interface ancestors = SMap.mem "IUseDynamicYield" ancestors
-and is_dynamic_yield name = (name = "DynamicYield")
+and contains_dynamic_yield = SSet.mem "\\DynamicYield"
+and contains_dynamic_yield_interface = SSet.mem "\\IUseDynamicYield"
+and implements_dynamic_yield_interface ancestors = SMap.mem "\\IUseDynamicYield" ancestors
+and is_dynamic_yield name = (name = "\\DynamicYield")
 
 and parse_yield_name name =
   if Str.string_match (Str.regexp "^yield\\(.*\\)") name 0

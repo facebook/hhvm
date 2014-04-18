@@ -105,17 +105,17 @@ and sub_type env ty1 ty2 =
          Reason.explain_generic_constraint r2 x2 l
       )
   (* Dirty covariance hacks *)
-  | (_, (Tapply ((_, "Awaitable"), [ty1]))),
-    (_, (Tapply ((_, "Awaitable"), [ty2]))) ->
+  | (_, (Tapply ((_, "\\Awaitable"), [ty1]))),
+    (_, (Tapply ((_, "\\Awaitable"), [ty2]))) ->
       let old_allow_null_as_void = Env.allow_null_as_void env in
       let env = Env.set_allow_null_as_void env in
       let env = sub_type env ty1 ty2 in
       Env.set_allow_null_as_void ~allow:old_allow_null_as_void env
-  | (_, (Tapply ((_, ("Continuation" | "ImmVector" | "ImmSet")), [ty1]))),
-    (_, (Tapply ((_, ("Continuation" | "ImmVector" | "ImmSet")), [ty2]))) ->
+  | (_, (Tapply ((_, ("\\Continuation" | "\\ImmVector" | "\\ImmSet")), [ty1]))),
+    (_, (Tapply ((_, ("\\Continuation" | "\\ImmVector" | "\\ImmSet")), [ty2]))) ->
       sub_type env ty1 ty2
-  | (_, (Tapply ((_, ("Pair" | "ImmMap")), [kty1; vty1]))),
-    (_, (Tapply ((_, ("Pair" | "ImmMap")), [kty2; vty2]))) ->
+  | (_, (Tapply ((_, ("\\Pair" | "\\ImmMap")), [kty1; vty1]))),
+    (_, (Tapply ((_, ("\\Pair" | "\\ImmMap")), [kty2; vty2]))) ->
       let env = sub_type env kty1 kty2 in
       sub_type env vty1 vty2
   | (p1, (Tapply (x1, tyl1) as ty1_)), (p2, (Tapply (x2, tyl2) as ty2_)) ->
@@ -180,7 +180,7 @@ and sub_type env ty1 ty2 =
     end
   | (_, Tmixed), _ -> env
   | (_, Tprim Nast.Tnum), (_, Tprim (Nast.Tint | Nast.Tfloat)) -> env
-  | (_, Tapply ((_, "Traversable"), [ty2])), (r, Tarray (_, ty3, ty4)) ->
+  | (_, Tapply ((_, "\\Traversable"), [ty2])), (r, Tarray (_, ty3, ty4)) ->
       (match ty3, ty4 with
       | None, _ -> env
       | Some ty3, None ->
@@ -190,7 +190,7 @@ and sub_type env ty1 ty2 =
           let env, _ = Unify.unify env ty2 ty4 in
           env
       )
-  | (_, Tapply ((_, "KeyedTraversable"), [ty1; ty2])), (r, Tarray (_, ty3, ty4)) ->
+  | (_, Tapply ((_, "\\KeyedTraversable"), [ty1; ty2])), (r, Tarray (_, ty3, ty4)) ->
       (match ty3 with
       | None -> env
       | Some ty3 ->
@@ -205,7 +205,7 @@ and sub_type env ty1 ty2 =
               env
           )
       )
-  | (_, Tapply ((_, "Indexish"), [ty1; ty2])), (r, Tarray (_, ty3, ty4)) ->
+  | (_, Tapply ((_, "\\Indexish"), [ty1; ty2])), (r, Tarray (_, ty3, ty4)) ->
       (match ty3 with
       | None -> env
       | Some ty3 ->
@@ -220,12 +220,12 @@ and sub_type env ty1 ty2 =
               env
           )
       )
-  | (_, Tapply ((_, "Stringish"), _)), (_, Tprim Nast.Tstring) -> env
-  | (_, Tapply ((_, "XHPChild"), _)), (_, Tarray _) -> env
-  | (_, Tapply ((_, "XHPChild"), _)), (_, Tprim Nast.Tint) -> env
-  | (_, Tapply ((_, "XHPChild"), _)), (_, Tprim Nast.Tfloat) -> env
-  | (_, Tapply ((_, "XHPChild"), _)), (_, Tprim Nast.Tstring) -> env
-  | (_, Tapply ((_, "XHPChild"), _)), (_, Tprim Nast.Tnum) -> env
+  | (_, Tapply ((_, "\\Stringish"), _)), (_, Tprim Nast.Tstring) -> env
+  | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tarray _) -> env
+  | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tprim Nast.Tint) -> env
+  | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tprim Nast.Tfloat) -> env
+  | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tprim Nast.Tstring) -> env
+  | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tprim Nast.Tnum) -> env
   | (_, (Tarray (_, Some ty1, None))), (_, (Tarray (_, Some ty2, None))) ->
       sub_type env ty1 ty2
   | (_, (Tarray (_, Some kty1, Some vty1))), (_, Tarray (_, Some kty2, Some vty2)) ->
@@ -284,8 +284,8 @@ and sub_string p env ty2 =
       | None when Env.is_strict env ->
           raise Ignore
       | None -> env
-      | Some {tc_name = "Stringish"} -> env
-      | Some tc when SMap.mem "Stringish" tc.tc_ancestors -> env
+      | Some {tc_name = "\\Stringish"} -> env
+      | Some tc when SMap.mem "\\Stringish" tc.tc_ancestors -> env
       | _ when !is_silent_mode -> env
       | Some _ -> error_l [
           p, "You cannot use this object as a string";

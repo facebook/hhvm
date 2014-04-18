@@ -113,7 +113,7 @@ let get_class_parents_and_traits env class_nast =
   env, parents, is_complete
 
 let error_trait_req pos req =
-  error pos ("Failure to satisfy trait requirement: "^req)
+  error pos ("Failure to satisfy trait requirement: "^(Utils.strip_ns req))
 
 (* for non-traits, check that each used trait's requirements have been
  * satisfied; for traits, accumulate the requirements so that we can
@@ -198,7 +198,7 @@ type class_env = {
   }
 
 let error_cyclic stack pos =
-  let stack = SSet.fold (fun x y -> x^" "^y) stack "" in
+  let stack = SSet.fold (fun x y -> (Utils.strip_ns x)^" "^y) stack "" in
   error pos ("Cyclic class definition : "^stack)
 
 let error_final ~parent ~child =
@@ -322,11 +322,11 @@ and class_decl_ c =
   let env, cstr = constructor_decl env parent_cstr c in
   let impl = c.c_extends @ c.c_implements @ c.c_uses in
   let impl = match SMap.get "__toString" m with
-    | Some {ce_type = (_, Tfun ft)} when cls_name <> "Stringish" ->
+    | Some {ce_type = (_, Tfun ft)} when cls_name <> "\\Stringish" ->
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
       let pos = ft.ft_pos in
-      let h = (pos, Nast.Happly ((pos, "Stringish"), [])) in
+      let h = (pos, Nast.Happly ((pos, "\\Stringish"), [])) in
       h :: impl
     | _ -> impl
   in
@@ -561,7 +561,7 @@ and method_check_override c m acc =
   let class_pos, class_id = c.c_name in
   let override = SMap.mem "Override" m.m_user_attributes in
   if m.m_visibility = Private && override then
-    error pos (class_id^"::"^id
+    error pos ((Utils.strip_ns class_id)^"::"^id
                ^": combining private and override is nonsensical");
   match SMap.get id acc with
     | Some { ce_final = true; ce_type = (r, _) } when not !is_silent_mode ->
@@ -569,7 +569,7 @@ and method_check_override c m acc =
     | Some _ -> false
     | None when override && c.c_kind = Ast.Ctrait -> true
     | None when override ->
-      error pos (class_id^"::"^id^"() should be an override; \
+      error pos ((Utils.strip_ns class_id)^"::"^id^"() should be an override; \
                     no non-private parent definition found \
                     or overridden parent is defined in non-<?hh code")
     | None -> false
@@ -595,8 +595,8 @@ and method_check_trait_overrides c id method_ce =
   if method_ce.ce_override then
     let c_pos, c_name = c.c_name in
     let err_msg =
-      ("Method "^c_name^"::"^id^" is should be an override per the declaring \
-        trait; no non-private parent definition found \
+      ("Method "^(Utils.strip_ns c_name)^"::"^id^" is should be an override \
+        per the declaring trait; no non-private parent definition found \
         or overridden parent is defined in non-<?hh code")
     in error_l [
       c_pos, err_msg;

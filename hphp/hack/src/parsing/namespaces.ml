@@ -83,12 +83,7 @@ let elaborate_id nsenv (p, id) =
           use ^ (String.sub id bslash_loc len)
         end
     end in
-  (* If the only location of a '\' in the fully-qualified name is the leading
-   * one, strip it off. *)
-  let stripped_id = if String.rindex fully_qualified '\\' = 0
-    then String.sub fully_qualified 1 ((String.length fully_qualified) - 1)
-    else fully_qualified in
-  p, stripped_id
+  p, fully_qualified
 
 (* First pass of flattening namespaces, run super early in the pipeline, right
  * after parsing.

@@ -28,16 +28,12 @@ hphp.log
 /hphp/runtime/tmp/run
 /hphp/runtime/tmp/run.sh
 /hphp/runtime/tmp/libtest.so
-/hphp/hphp-build-info.cpp
-/hphp/hphp-repo-schema.h
 
 /hphp/hhvm/gen
 /hphp/hhvm/hhvm
 
 *.ext_hhvm.cpp
 *.ext_hhvm.h
-/hphp/runtime/ext_hhvm/ext_hhvm_infotabs.cpp
-/hphp/runtime/ext_hhvm/ext_hhvm_infotabs.h
 
 /hphp/tools/shmw/shmw
 

@@ -135,18 +135,6 @@ add_definitions(${LIBXSLT_DEFINITIONS})
 find_package(EXPAT REQUIRED)
 include_directories(${EXPAT_INCLUDE_DIRS})
 
-# SQLite3 + timelib are bundled in HPHP sources
-include_directories("${HPHP_HOME}/third-party/libsqlite3")
-include_directories("${HPHP_HOME}/third-party/timelib")
-include_directories("${HPHP_HOME}/third-party/libafdt/src")
-include_directories("${HPHP_HOME}/third-party/libmbfl")
-include_directories("${HPHP_HOME}/third-party/libmbfl/mbfl")
-include_directories("${HPHP_HOME}/third-party/libmbfl/filter")
-include_directories("${HPHP_HOME}/third-party/lz4")
-include_directories("${HPHP_HOME}/third-party/double-conversion/src")
-include_directories("${HPHP_HOME}/third-party/folly")
-include_directories("${HPHP_HOME}/third-party/libzip")
-
 # ICU
 find_package(ICU REQUIRED)
 if (ICU_FOUND)
@@ -388,7 +376,6 @@ endif()
 #endif()
 
 include_directories(${HPHP_HOME}/hphp)
-include_directories(${HPHP_HOME}/hphp/system/gen)
 
 macro(hphp_link target)
 	if (LIBDL_LIBRARIES)

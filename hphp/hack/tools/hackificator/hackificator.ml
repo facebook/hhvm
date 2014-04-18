@@ -120,15 +120,18 @@ let visit ast =
 
     V.kclass_stmt = (fun (k, _) x ->
       match x with
-    (* methods without modifiers, we'll give a "public" modifier *)
+      (* methods without modifiers, we'll give a "public" modifier *)
       | Method (method_def) -> (
-          (match method_def.f_modifiers with
-            | [] -> (
-                let ii = List.hd (Lib_parsing_php.ii_of_any (ClassStmt (Method method_def))) in
-                ii.PI.transfo <- PI.AddBefore (PI.AddStr "public ");
-              )
-            | _ -> ()
-          );
+          let visibility_modifiers = [Ast_php.Public; Ast_php.Private; Ast_php.Protected]
+          in
+          let fold = (fun x acc -> if List.mem (unwrap x) visibility_modifiers then false else acc)
+          in
+          if List.fold_right fold method_def.f_modifiers true
+          then begin
+            (* todo: insert at the correct position *)
+            let ii = List.hd (Lib_parsing_php.ii_of_any (ClassStmt (Method method_def))) in
+            ii.PI.transfo <- PI.AddBefore (PI.AddStr "public ");
+          end;
           k x
       )
       | _ -> k x

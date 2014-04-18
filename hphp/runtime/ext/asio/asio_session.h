@@ -69,8 +69,6 @@ class AsioSession {
       return isInContext() ? getCurrentContext()->getCurrent() : nullptr;
     }
 
-    uint16_t getCurrentWaitHandleDepth();
-
     // External thread events.
     AsioExternalThreadEventQueue* getExternalThreadEventQueue() {
       return &m_externalThreadEventQueue;

@@ -72,7 +72,6 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
                             Offset offset,
                             ObjectData* child);
   void run();
-  uint16_t getDepth() { return m_depth; }
   String getName();
   void exitContext(context_idx_t ctx_idx);
   bool isRunning() { return getState() == STATE_RUNNING; }
@@ -107,7 +106,6 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   // m_child is always WaitableWaitHandle, but needs to be non-virtual (JIT)
   c_WaitHandle* m_child;
   Object m_privData;
-  uint16_t m_depth;
 
   static const int8_t STATE_SCHEDULED = 4;
   static const int8_t STATE_RUNNING   = 5;

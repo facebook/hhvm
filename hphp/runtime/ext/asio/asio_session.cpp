@@ -71,11 +71,6 @@ void AsioSession::exitContext() {
   assert(!isInContext() || getCurrentContext()->isRunning());
 }
 
-uint16_t AsioSession::getCurrentWaitHandleDepth() {
-  assert(!isInContext() || getCurrentContext()->isRunning());
-  return isInContext() ? getCurrentWaitHandle()->getDepth() : 0;
-}
-
 void AsioSession::initAbruptInterruptException() {
   assert(!hasAbruptInterruptException());
   m_abruptInterruptException = SystemLib::AllocInvalidOperationExceptionObject(

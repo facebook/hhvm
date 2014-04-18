@@ -38,12 +38,8 @@ void delete_AsyncFunctionWaitHandle(ObjectData* od, const Class*) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// max depth of async function stack
-const uint16_t MAX_DEPTH = 512;
-
 c_AsyncFunctionWaitHandle::c_AsyncFunctionWaitHandle(Class* cb)
-    : c_BlockableWaitHandle(cb), m_child(nullptr), m_privData(),
-      m_depth(0) {
+    : c_BlockableWaitHandle(cb), m_child(nullptr), m_privData() {
 }
 
 c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
@@ -122,12 +118,6 @@ const StaticString s__closure_("{closure}");
 
 void checkCreateErrors(c_WaitableWaitHandle* child) {
   AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(session->getCurrentWaitHandleDepth() >= MAX_DEPTH)) {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-          "Asio stack overflow"));
-    throw e;
-  }
-
   if (session->isInContext()) {
     child->enterContext(session->getCurrentContextIdx());
   }
@@ -163,7 +153,6 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
 
   m_child = child;
   m_privData = nullptr;
-  m_depth = session->getCurrentWaitHandleDepth() + 1;
   blockOn(child);
 
   // needs to be called with non-zero refcnt

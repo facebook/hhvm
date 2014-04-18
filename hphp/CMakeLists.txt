@@ -15,42 +15,16 @@
 #   +----------------------------------------------------------------------+
 #
 
-if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/public_tld")
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/facebook")
   # I'm sorry, but facebook's internal repo has the top level dir stored inside
   # of hphp/, so we need to pull that one in first if it exists
   CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
-  PROJECT(hphp C CXX ASM)
-  SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/public_tld/CMake"
+  set(HPHP_HOME ${CMAKE_CURRENT_SOURCE_DIR}/..)
+  set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/facebook/CMake"
+                        "${CMAKE_CURRENT_SOURCE_DIR}/public_tld/CMake"
                         ${CMAKE_MODULE_PATH})
-  set(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/public_tld/third-party/")
-  if (NOT EXISTS ${TP_DIR})
-    message(FATAL_ERROR "I can't find ${TP_DIR}. Maybe Try
-git submodule update --init --recursive")
-  endif()
-else()
-  set(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../third-party/")
+  include(FBTLD)
 endif()
-
-include_directories("${TP_DIR}/libsqlite3")
-include_directories("${TP_DIR}/timelib")
-include_directories("${TP_DIR}/libafdt/src")
-include_directories("${TP_DIR}/libmbfl")
-include_directories("${TP_DIR}/libmbfl/mbfl")
-include_directories("${TP_DIR}/libmbfl/filter")
-include_directories("${TP_DIR}/lz4")
-include_directories("${TP_DIR}/double-conversion/src")
-include_directories("${TP_DIR}/folly")
-include_directories("${TP_DIR}/libzip")
-include_directories("${TP_DIR}")
-
-if (EXISTS "public_tld")
-  add_subdirectory(${TP_DIR})
-endif()
-
-# Some included files need to use relative paths, but they could be included
-# from anywhere, so give them a variable that points to a known place. Only use
-# this if your file is not named CMakeLists.txt
-set(HPHP_HOME ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 include(HPHPSetup)
 include(FollySetup)

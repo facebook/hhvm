@@ -18,5 +18,8 @@ endif()
 include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/HPHPFunctions.cmake")
 include(CheckFunctionExists)
 
+set(HPHP_HOME ${CMAKE_CURRENT_SOURCE_DIR})
+set(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party")
+
 add_subdirectory(third-party)
 add_subdirectory(hphp)

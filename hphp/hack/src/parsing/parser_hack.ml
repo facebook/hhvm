@@ -485,6 +485,9 @@ and ignore_toplevel ~attr acc env terminate =
           ignore_toplevel ~attr:SMap.empty (def @ acc) env terminate
       | _ -> ignore_toplevel ~attr acc env terminate
       )
+  | Tclose_php ->
+      error env "Hack does not allow the closing ?> tag";
+      acc
   | _ -> ignore_toplevel ~attr acc env terminate
 
 (*****************************************************************************)

@@ -185,6 +185,28 @@ public:
       s_PCRE_VERSION.get(), makeStaticString(pcre_version())
     );
 
+#define PCRECNS(c) Native::registerConstant<KindOfInt64> \
+                    (makeStaticString("PREG_" #c), PHP_PCRE_##c);
+    PCRECNS(NO_ERROR);
+    PCRECNS(INTERNAL_ERROR);
+    PCRECNS(BACKTRACK_LIMIT_ERROR);
+    PCRECNS(RECURSION_LIMIT_ERROR);
+    PCRECNS(BAD_UTF8_ERROR);
+    PCRECNS(BAD_UTF8_OFFSET_ERROR);
+#undef PCRECNS
+#define PREGCNS(c) Native::registerConstant<KindOfInt64> \
+                    (makeStaticString("PREG_" #c), PREG_##c);
+    PREGCNS(PATTERN_ORDER);
+    PREGCNS(SET_ORDER);
+    PREGCNS(OFFSET_CAPTURE);
+
+    PREGCNS(SPLIT_NO_EMPTY);
+    PREGCNS(SPLIT_DELIM_CAPTURE);
+    PREGCNS(SPLIT_OFFSET_CAPTURE);
+
+    PREGCNS(GREP_INVERT);
+#undef PREGCNS
+
     HHVM_FE(preg_filter);
     HHVM_FE(preg_grep);
     HHVM_FE(preg_match);

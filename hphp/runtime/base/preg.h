@@ -22,6 +22,27 @@
 #include <cstdint>
 #include <cstddef>
 
+#define PREG_PATTERN_ORDER          1
+#define PREG_SET_ORDER              2
+#define PREG_OFFSET_CAPTURE         (1<<8)
+
+#define PREG_SPLIT_NO_EMPTY         (1<<0)
+#define PREG_SPLIT_DELIM_CAPTURE    (1<<1)
+#define PREG_SPLIT_OFFSET_CAPTURE   (1<<2)
+
+#define PREG_REPLACE_EVAL           (1<<0)
+
+#define PREG_GREP_INVERT            (1<<0)
+
+enum {
+  PHP_PCRE_NO_ERROR = 0,
+  PHP_PCRE_INTERNAL_ERROR,
+  PHP_PCRE_BACKTRACK_LIMIT_ERROR,
+  PHP_PCRE_RECURSION_LIMIT_ERROR,
+  PHP_PCRE_BAD_UTF8_ERROR,
+  PHP_PCRE_BAD_UTF8_OFFSET_ERROR
+};
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

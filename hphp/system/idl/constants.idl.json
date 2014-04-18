@@ -3594,54 +3594,6 @@
             "value": 0
         },
         {
-            "name": "PREG_BACKTRACK_LIMIT_ERROR",
-            "value": 2
-        },
-        {
-            "name": "PREG_BAD_UTF8_ERROR",
-            "value": 4
-        },
-        {
-            "name": "PREG_GREP_INVERT",
-            "value": 1
-        },
-        {
-            "name": "PREG_INTERNAL_ERROR",
-            "value": 1
-        },
-        {
-            "name": "PREG_NO_ERROR",
-            "value": 0
-        },
-        {
-            "name": "PREG_OFFSET_CAPTURE",
-            "value": 256
-        },
-        {
-            "name": "PREG_PATTERN_ORDER",
-            "value": 1
-        },
-        {
-            "name": "PREG_RECURSION_LIMIT_ERROR",
-            "value": 3
-        },
-        {
-            "name": "PREG_SET_ORDER",
-            "value": 2
-        },
-        {
-            "name": "PREG_SPLIT_DELIM_CAPTURE",
-            "value": 2
-        },
-        {
-            "name": "PREG_SPLIT_NO_EMPTY",
-            "value": 1
-        },
-        {
-            "name": "PREG_SPLIT_OFFSET_CAPTURE",
-            "value": 4
-        },
-        {
             "name": "PRIO_PGRP",
             "value": 1
         },

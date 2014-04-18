@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
+#include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/system/constants.h"
@@ -115,7 +116,7 @@ Array HHVM_FUNCTION(get_meta_tags, const String& filename,
 
   Variant matches;
   HHVM_FN(preg_match_all)("/<meta\\s+name=\"(.*?)\"\\s+content=\"(.*?)\".*?>/s",
-                          f, ref(matches), k_PREG_SET_ORDER);
+                          f, ref(matches), PREG_SET_ORDER);
 
   Array ret = Array::Create();
   for (ArrayIter iter(matches.toArray()); iter; ++iter) {

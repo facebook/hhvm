@@ -32,7 +32,7 @@ public:
 
   explicit UrlFile(const char *method = "GET", const Array& headers = null_array,
                    const String& postData = null_string, int maxRedirect = 20,
-                   int timeout = -1);
+                   int timeout = -1, bool ignoreErrors = false);
 
   // overriding ResourceData
   const String& o_getClassNameHook() const { return classnameof(); }
@@ -46,6 +46,7 @@ public:
 
 private:
   bool m_get;
+  bool m_ignoreErrors;
   const char* m_method;
   Array m_headers;
   String m_postData;

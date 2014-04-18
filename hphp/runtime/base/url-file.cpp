@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -39,7 +40,8 @@ UrlFile::UrlFile(const char *method /* = "GET" */,
                  const Array& headers /* = null_array */,
                  const String& postData /* = null_string */,
                  int maxRedirect /* = 20 */,
-                 int timeout /* = -1 */)
+                 int timeout /* = -1 */,
+                 bool ignoreErrors /* = false */)
                  : MemFile(s_http, s_tcp_socket) {
   m_get = (method == nullptr || strcasecmp(method, "GET") == 0);
   m_method = method;
@@ -47,6 +49,7 @@ UrlFile::UrlFile(const char *method /* = "GET" */,
   m_postData = postData;
   m_maxRedirect = maxRedirect;
   m_timeout = timeout;
+  m_ignoreErrors = ignoreErrors;
   m_isLocal = false;
 }
 
@@ -126,7 +129,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
                       Variant(m_responseHeaders).asTypedValue());
   }
 
-  if (code == 200) {
+  if (code == 200 || m_ignoreErrors) {
     m_name = (std::string) url;
     m_data = const_cast<char*>(m_response.data());
     m_len = m_response.size();

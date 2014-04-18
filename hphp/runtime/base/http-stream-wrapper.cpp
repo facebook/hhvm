@@ -29,6 +29,7 @@ const StaticString
   s_method("method"),
   s_http("http"),
   s_header("header"),
+  s_ignore_errors("ignore_errors"),
   s_max_redirects("max_redirects"),
   s_timeout("timeout"),
   s_content("content"),
@@ -86,9 +87,14 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
     if (opts.exists(s_timeout)) {
       timeout = opts[s_timeout].toInt64();
     }
+    bool ignore_errors = false;
+    if (opts.exists(s_ignore_errors)) {
+      ignore_errors = opts[s_ignore_errors].toBoolean();
+    }
     file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)(method.data(), headers,
                                                     opts[s_content].toString(),
-                                                    max_redirs, timeout));
+                                                    max_redirs, timeout,
+                                                    ignore_errors));
   }
   bool ret = file->open(filename, mode);
   if (!ret) {

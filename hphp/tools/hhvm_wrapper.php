@@ -35,10 +35,13 @@ function my_option_map(): OptionInfoMap {
 }
 
 function get_paths(): Map<string,string> {
-  $fbcode = __DIR__.'/../..';
+  $root = __DIR__.'/../../_bin/hphp';
+  if (!is_dir($root)) {
+    $root = __DIR__.'/..';
+  }
   return Map {
-    'hhvm' => "$fbcode/_bin/hphp/hhvm/hhvm",
-    'hphp' => "$fbcode/_bin/hphp/hhvm/hphp",
+    'hhvm' => "$root/hhvm/hhvm",
+    'hphp' => "$root/hhvm/hphp",
   };
 }
 

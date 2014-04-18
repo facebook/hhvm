@@ -3602,6 +3602,10 @@
             "value": 4
         },
         {
+            "name": "PREG_BAD_UTF8_OFFSET_ERROR",
+            "value": 5
+        },
+        {
             "name": "PREG_GREP_INVERT",
             "value": 1
         },

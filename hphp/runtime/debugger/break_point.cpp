@@ -633,7 +633,7 @@ void mangleXhpName(const std::string &source, std::string &target) {
 
 int32_t scanName(const std::string &str, int32_t offset) {
   auto len = str.length();
-  assert(0 <= offset && offset < len);
+  assert(0 <= offset && offset <= len);
   while (offset < len) {
     char ch = str[offset];
     if (ch == ':' || ch == '\\' || ch == ',' || ch == '(' || ch == '=' ||

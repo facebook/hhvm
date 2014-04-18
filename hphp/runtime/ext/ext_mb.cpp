@@ -1309,7 +1309,7 @@ static Variant php_mbfl_convert(const Variant& var,
                                 mbfl_string *string,
                                 mbfl_string *result) {
   if (var.is(KindOfArray)) {
-    Array ret;
+    Array ret = empty_array;
     Array items = var.toArray();
     for (ArrayIter iter(items); iter; ++iter) {
       ret.set(iter.first(),
@@ -1323,8 +1323,7 @@ static Variant php_mbfl_convert(const Variant& var,
     Array items = var.toArray();
     for (ArrayIter iter(items); iter; ++iter) {
       obj->o_set(iter.first().toString(),
-                 php_mbfl_convert(iter.second().toString().data(), convd,
-                                  string, result));
+                 php_mbfl_convert(iter.second(), convd, string, result));
     }
     return var; // which still has obj
   }
@@ -1367,7 +1366,7 @@ Variant f_mb_convert_variables(int _argc, const String& to_encoding,
   string.no_language = MBSTRG(current_language);
 
   /* pre-conversion encoding */
-  elist = NULL;
+  elist = nullptr;
   elistsz = 0;
   php_mb_parse_encoding(from_encoding, &elist, &elistsz, false);
   if (elistsz <= 0) {
@@ -1379,7 +1378,7 @@ Variant f_mb_convert_variables(int _argc, const String& to_encoding,
     _from_encoding = mbfl_no_encoding_invalid;
     identd = mbfl_encoding_detector_new(elist, elistsz,
                                         MBSTRG(strict_detection));
-    if (identd != NULL) {
+    if (identd != nullptr) {
       for (int n = -1; n < _argv.size(); n++) {
         if (php_mbfl_encoding_detect(n < 0 ? (Variant&)vars : _argv[n],
                                      identd, &string)) {
@@ -1395,15 +1394,15 @@ Variant f_mb_convert_variables(int _argc, const String& to_encoding,
       _from_encoding = mbfl_no_encoding_pass;
     }
   }
-  if (elist != NULL) {
+  if (elist != nullptr) {
     free((void *)elist);
   }
 
   /* create converter */
-  convd = NULL;
+  convd = nullptr;
   if (_from_encoding != mbfl_no_encoding_pass) {
     convd = mbfl_buffer_converter_new(_from_encoding, _to_encoding, 0);
-    if (convd == NULL) {
+    if (convd == nullptr) {
       raise_warning("Unable to create converter");
       return false;
     }
@@ -1414,7 +1413,7 @@ Variant f_mb_convert_variables(int _argc, const String& to_encoding,
   }
 
   /* convert */
-  if (convd != NULL) {
+  if (convd != nullptr) {
     vars = php_mbfl_convert(vars, convd, &string, &result);
     for (int n = 0; n < _argv.size(); n++) {
       const_cast<Array&>(_argv).set(n, php_mbfl_convert(_argv[n], convd,
@@ -1425,7 +1424,7 @@ Variant f_mb_convert_variables(int _argc, const String& to_encoding,
   }
 
   name = (char *)mbfl_no_encoding2name(_from_encoding);
-  if (name != NULL) {
+  if (name != nullptr) {
     return String(name, CopyString);
   }
   return false;

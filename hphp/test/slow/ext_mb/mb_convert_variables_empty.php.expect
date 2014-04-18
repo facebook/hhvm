@@ -1,0 +1,16 @@
+object(A)#1 (4) {
+  ["test"]=>
+  bool(false)
+  ["test2"]=>
+  string(0) ""
+  ["test3"]=>
+  array(0) {
+  }
+  ["_"]=>
+  bool(false)
+}
+array(1) {
+  ["test"]=>
+  array(0) {
+  }
+}

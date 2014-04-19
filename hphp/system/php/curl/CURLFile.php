@@ -34,7 +34,7 @@ class CURLFile {
     $this->mime = $mime;
   }
 
-  public function setPostFilename(string $Postname): void {
+  public function setPostFilename(string $postname): void {
     $this->postname = $postname;
   }
 }

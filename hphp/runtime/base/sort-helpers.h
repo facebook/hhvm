@@ -279,16 +279,16 @@ struct ElmUCompare {
       g_context->invokeFuncFew(ret.asTypedValue(), *ctx, 2, args);
     }
     if (ret.isInteger()) {
-      return ret.toInt64() < 0;
+      return ret.toInt64() <= 0;
     }
     if (ret.isDouble()) {
-      return ret.toDouble() < 0.0;
+      return ret.toDouble() <= 0.0;
     }
     if (ret.isString()) {
       int64_t lval; double dval;
       switch (ret.getStringData()->isNumericWithVal(lval, dval, 0)) {
-        case KindOfInt64: return lval < 0;
-        case KindOfDouble: return dval < 0;
+        case KindOfInt64: return lval <= 0;
+        case KindOfDouble: return dval <= 0;
         default: /* fall through */ break;
       }
     }
@@ -319,7 +319,7 @@ struct ElmUCompare {
       // We have a wild comparator that returns boolean and non-boolean
       // values; give up and fall through to the logic below
     }
-    return ret.toInt64() < 0;
+    return ret.toInt64() <= 0;
   }
 private:
   mutable bool warned;

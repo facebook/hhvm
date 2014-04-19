@@ -84,9 +84,7 @@ void HeapProfileRequestHandler::handleRequest(Transport *transport) {
           continue;
         }
         std::string val(addr.data(), addr.size());
-        SrcKey sk = SrcKey::fromAtomicInt(
-          static_cast<uint64_t>(std::stoll(val, 0, 16))
-        );
+        SrcKey sk = SrcKey::fromAtomicInt(std::stoull(val, 0, 16));
         folly::toAppend(addr, "\t", sk.getSymbol(), "\n", &res);
       }
       transport->sendString(res, 200);

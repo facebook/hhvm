@@ -180,6 +180,11 @@ void FrameState::update(const IRInstruction* inst) {
       }
     }
   }
+
+  // Save state for each block at the end.
+  if (inst->isTerminal()) {
+    save(inst->block());
+  }
 }
 
 void FrameState::getLocalEffects(const IRInstruction* inst,

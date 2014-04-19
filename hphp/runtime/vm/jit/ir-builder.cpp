@@ -160,6 +160,7 @@ std::vector<RegionDesc::TypePred> IRBuilder::getKnownTypes() {
   assert(mainExit != nullptr);
 
   // Load state for mainExit.  This feels hacky.
+  FTRACE(1, "mainExit: B{}\n", mainExit->id());
   m_state.startBlock(mainExit);
 
   // Now use the current state to get all the types.
@@ -178,6 +179,7 @@ std::vector<RegionDesc::TypePred> IRBuilder::getKnownTypes() {
   for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
     auto t = m_state.localType(i);
     if (!t.equals(Type::Gen)) {
+      FTRACE(1, "Local {}: {}\n", i, t.toString());
       result.push_back({ RegionDesc::Location::Local{i}, t });
     }
   }

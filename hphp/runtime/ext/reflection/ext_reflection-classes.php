@@ -819,7 +819,7 @@ implements Reflector {
     } else {
       $this->info = hphp_get_function_info($this->src);
       if (empty($this->info)) {
-        throw new ReflectionException("Function $name does not exist");
+        throw new ReflectionException("Function {$this->src} does not exist");
       }
     }
   }

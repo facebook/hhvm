@@ -298,6 +298,12 @@
     test_root: mediawiki-core/tests/phpunit
     test_file_regex: /.*(\Test.*\.php)$/
     config_file: mediawiki-core/tests/phpunit/suite.xml
+  jshrink:
+    url: https://github.com/tedivm/JShrink.git
+    branch: master
+    commit: 7a5cc44d6f4a2a52b65b72c801210eead092d16c
+    install_root: jshrink
+    test_root: jshrink
   mockery:
     url: https://github.com/padraic/mockery.git
     branch: "0.9.0"

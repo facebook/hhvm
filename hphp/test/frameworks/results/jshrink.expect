@@ -1,0 +1,44 @@
+JShrink\Test\JShrinkTest::testJShrink with data set #0
+.
+JShrink\Test\JShrinkTest::testJShrink with data set #1
+.
+JShrink\Test\JShrinkTest::testJShrink with data set #2
+.
+JShrink\Test\JShrinkTest::testJShrink with data set #3
+.
+JShrink\Test\JShrinkTest::testJShrink with data set #4
+.
+JShrink\Test\JShrinkTest::testUglify with data set #0
+.
+JShrink\Test\JShrinkTest::testUglify with data set #1
+.
+JShrink\Test\JShrinkTest::testUglify with data set #10
+.
+JShrink\Test\JShrinkTest::testUglify with data set #11
+.
+JShrink\Test\JShrinkTest::testUglify with data set #12
+.
+JShrink\Test\JShrinkTest::testUglify with data set #13
+.
+JShrink\Test\JShrinkTest::testUglify with data set #2
+.
+JShrink\Test\JShrinkTest::testUglify with data set #3
+.
+JShrink\Test\JShrinkTest::testUglify with data set #4
+.
+JShrink\Test\JShrinkTest::testUglify with data set #5
+.
+JShrink\Test\JShrinkTest::testUglify with data set #6
+.
+JShrink\Test\JShrinkTest::testUglify with data set #7
+.
+JShrink\Test\JShrinkTest::testUglify with data set #8
+.
+JShrink\Test\JShrinkTest::testUglify with data set #9
+.
+JShrink\Test\JShrinkTest::testUnclosedCommentException
+.
+JShrink\Test\JShrinkTest::testUnclosedRegexException
+.
+JShrink\Test\JShrinkTest::testUnclosedStringException
+.

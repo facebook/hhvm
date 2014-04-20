@@ -54,6 +54,7 @@ include(FollySetup)
 set_property(DIRECTORY
     PROPERTY COTIRE_PREFIX_HEADER_IGNORE_PATH
         "${LIBC_INCLUDE_PATH}/stdlib.h"
+        "${LIBC_INCLUDE_PATH}/string.h"
         "${LIBC_INCLUDE_PATH}/ansidecl.h"
         "${LIBC_INCLUDE_PATH}/bfd.h"
         "${LIBC_INCLUDE_PATH}/libelf.h"

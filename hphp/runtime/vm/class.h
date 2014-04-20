@@ -660,7 +660,6 @@ struct Class : AtomicCountable {
 
   bool hasDeepInitProps() const { return m_hasDeepInitProps; }
   bool needInitialization() const { return m_needInitialization; }
-  bool hasInitMethods() const { return m_hasInitMethods; }
   bool callsCustomInstanceInit() const { return m_callsCustomInstanceInit; }
   const InterfaceMap& allInterfaces() const { return m_interfaces; }
   // See comment for m_usedTraits
@@ -797,6 +796,8 @@ struct Class : AtomicCountable {
   Slot getDeclPropIndex(Class* ctx, const StringData* key,
                         bool& accessible) const;
 
+  Slot findSProp(Class* ctx, const StringData* sPropName,
+                 bool& visible, bool& accessible) const;
   TypedValue* getSProp(Class* ctx, const StringData* sPropName,
                        bool& visible, bool& accessible) const;
 
@@ -1027,7 +1028,7 @@ private:
   unsigned m_needInitialization : 1;      // requires initialization,
                                           // due to [ps]init or simply
                                           // having static members
-  unsigned m_hasInitMethods : 1;          // any __[ps]init() methods?
+  unsigned m_completelyUnused : 1;        // keep things in the same place
   unsigned m_callsCustomInstanceInit : 1; // should we always call __init__
                                           // on new instances?
   unsigned m_hasDeepInitProps : 1;

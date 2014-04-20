@@ -676,16 +676,14 @@ void Class::initSProps() const {
   }
 }
 
-TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
-                            bool& visible, bool& accessible) const {
-  initialize();
-
+Slot Class::findSProp(Class* ctx, const StringData* sPropName,
+                      bool& visible, bool& accessible) const {
   Slot sPropInd = lookupSProp(sPropName);
   if (sPropInd == kInvalidSlot) {
-    // Non-existant property.
+    // Non-existent property.
     visible = false;
     accessible = false;
-    return nullptr;
+    return kInvalidSlot;
   }
 
   visible = true;
@@ -699,23 +697,43 @@ TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
       // Property access is from within a parent class's method, which is
       // allowed for protected/public properties.
       switch (sPropAttrs & (AttrPublic|AttrProtected|AttrPrivate)) {
-      case AttrPublic:
-      case AttrProtected: accessible = true; break;
-      case AttrPrivate:
-        accessible = g_context->debuggerSettings.bypassCheck; break;
-      default:            not_reached();
+        case AttrPublic:
+        case AttrProtected:
+          accessible = true;
+          break;
+        case AttrPrivate:
+          accessible = g_context->debuggerSettings.bypassCheck;
+          break;
+        default:
+          not_reached();
       }
     } else {
       // Property access is in an effectively anonymous context, so only public
       // properties are accessible.
       switch (sPropAttrs & (AttrPublic|AttrProtected|AttrPrivate)) {
-      case AttrPublic:    accessible = true; break;
-      case AttrProtected:
-      case AttrPrivate:
-        accessible = g_context->debuggerSettings.bypassCheck; break;
-      default:            not_reached();
+        case AttrPublic:
+          accessible = true;
+          break;
+        case AttrProtected:
+        case AttrPrivate:
+          accessible = g_context->debuggerSettings.bypassCheck;
+          break;
+        default:
+          not_reached();
       }
     }
+  }
+
+  return sPropInd;
+}
+
+TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
+                            bool& visible, bool& accessible) const {
+  initialize();
+
+  Slot sPropInd = findSProp(ctx, sPropName, visible, accessible);
+  if (sPropInd == kInvalidSlot) {
+    return nullptr;
   }
 
   TypedValue* sProp = getSPropData(sPropInd);
@@ -1974,12 +1992,6 @@ void Class::setInitializers() {
 
   m_needInitialization = (m_pinitVec.size() > 0 ||
     m_staticProperties.size() > 0);
-
-  // Init methods are always called all the way up the inheritance chain, so we
-  // say a Class has 86.init methods if it does /or/ its parent does.
-  m_hasInitMethods =
-    (m_pinitVec.size() > 0 || m_sinitVec.size() > 0) ||
-    (parent() && parent()->m_hasInitMethods);
 
   // The __init__ method defined in the Exception class gets special treatment
   static StringData* sd__init__ = makeStaticString("__init__");

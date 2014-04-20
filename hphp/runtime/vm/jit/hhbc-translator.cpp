@@ -4050,10 +4050,8 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
     auto const cls = ssaCls->clsVal();
     if (!classIsPersistentOrCtxParent(cls)) return false;
 
-    if (cls->hasInitMethods()) return false;
-
     bool visible, accessible;
-    cls->getSProp(curClass(), propName, visible, accessible);
+    cls->findSProp(curClass(), propName, visible, accessible);
     return visible && accessible;
   }();
 

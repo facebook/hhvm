@@ -1180,6 +1180,8 @@ void rfc1867PostHandler(Transport* transport,
       safe_php_register_variable(lbuf, file_size, files, 0);
       free(param);
     }
+    if (temp_filename) free(temp_filename);
+    temp_filename = nullptr;
   }
 fileupload_done:
   data = mbuff->post_data;
@@ -1197,6 +1199,7 @@ fileupload_done:
   if (mbuff->boundary) free(mbuff->boundary);
   if (mbuff->buffer) free(mbuff->buffer);
   if (mbuff) free(mbuff);
+  if (temp_filename) free(temp_filename);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -72,7 +72,8 @@ const StaticString
   s_function("function"),
   s_constant("constant"),
   s_type("type"),
-  s_failure("failure");
+  s_failure("failure"),
+  s_phar("phar://");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -891,9 +892,18 @@ String resolve_include(const String& file, const char* currentDir,
   const char* c_file = file.data();
 
   if (!File::IsPlainFilePath(file)) {
+    String abs_file = file;
+    if (file.length() >= 8) {
+      if (file.substr(0, 7) == s_phar) {
+        if (file[7] != '/') {
+          abs_file = s_phar + String(currentDir) + "/" + file.substr(7);
+        }
+      }
+    }
+
     // URIs don't have an include path
-    if (tryFile(file, ctx)) {
-      return file;
+    if (tryFile(abs_file, ctx)) {
+      return abs_file;
     }
 
   } else if (c_file[0] == '/') {

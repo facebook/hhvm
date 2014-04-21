@@ -8,7 +8,8 @@ SRC= clientEnv.ml clientExceptions.ml  clientUtils.ml colorFile.ml \
   clientStop.ml clientColorFile.ml clientStart.ml clientCommand.ml \
   clientArgs.ml \
   clientBuild.ml clientProlog.ml clientStatus.ml clientCheckStatus.ml \
-  clientRestart.ml clientFindRefs.ml clientOutline.ml clientCheck.ml
+  clientRestart.ml clientFindRefs.ml clientOutline.ml clientRefactor.ml \
+  clientCheck.ml
 
 
 INCLUDEDIRS=$(TOP)/utils \

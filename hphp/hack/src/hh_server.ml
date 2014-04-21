@@ -241,6 +241,8 @@ end = struct
       end
     | ServerMsg.FIND_REFS find_refs_action ->
         ServerFindRefs.go find_refs_action genv env oc
+    | ServerMsg.REFACTOR refactor_action ->
+        ServerRefactor.go refactor_action genv env oc
     | ServerMsg.PROLOG ->
       let path = PrologMain.go genv env oc in
       (* the rational for this PROLOG_READY: prefix is that the string

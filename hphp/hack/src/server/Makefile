@@ -13,7 +13,7 @@ SRC= serverArgs.ml serverEnv.ml \
  serverError.ml serverTypeCheck.ml serverIdentifyFunction.ml \
  serverAutoComplete.ml serverEnvBuild.ml serverHealth.ml serverSign.ml \
  serverInit.ml serverConvert.ml findRefsService.ml serverFindRefs.ml \
- serverInferType.ml \
+ serverRefactor.ml serverInferType.ml \
  fileOutline.ml serverFileOutline.ml
 
 

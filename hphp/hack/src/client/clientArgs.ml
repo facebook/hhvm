@@ -124,6 +124,8 @@ let parse_check_args cmd =
       " (mode) finds references of the provided class name";
     "--identify-function", Arg.String (fun x -> set_mode (MODE_IDENTIFY_FUNCTION x) ()),
       " (mode) print the full function name at the position [line:character] of the text on stdin";
+    "--refactor", Arg.Unit (set_mode MODE_REFACTOR),
+      "";
     "--outline", Arg.Unit (set_mode MODE_OUTLINE),
       " (mode) prints an outline of the text on stdin";
     "--version", Arg.Unit (set_mode MODE_VERSION),

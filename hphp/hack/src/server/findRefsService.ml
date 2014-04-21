@@ -93,11 +93,50 @@ let parallel_find_refs workers files target_classes target_method =
     ~merge:(List.rev_append)
     ~next:(Bucket.make files)
 
-let find_references workers target_classes target_method file_list =
-  if List.length file_list < 10 then
-    find_refs target_classes target_method [] file_list
+let get_definitions target_classes target_method =
+  match target_classes, target_method with
+  | Some classes, Some method_name ->
+      SSet.fold begin fun class_name acc ->
+        match Naming_heap.ClassHeap.get class_name with
+        | Some class_ ->
+            let methods = class_.Nast.c_methods @ class_.Nast.c_static_methods in
+            List.fold_left begin fun acc method_ ->
+              let mid = method_.Nast.m_name in
+              if (snd mid) = method_name then ((snd mid), (fst mid)) :: acc
+              else acc
+            end acc methods
+        | None -> acc
+      end classes []
+  | Some classes, None ->
+      SSet.fold begin fun class_name acc ->
+        match Naming_heap.ClassHeap.get class_name with
+        | Some class_ ->
+            let cid = class_.Nast.c_name in
+            ((snd cid), (fst cid)) :: acc
+        | None -> acc
+      end classes []
+  | None, Some fun_name ->
+      begin
+        match Naming_heap.FunHeap.get fun_name with
+        | Some fun_ ->
+            let fid = fun_.Nast.f_name in
+            [(snd fid), (fst fid)]
+        | None -> []
+      end
+  | None, None -> []
+
+let find_references workers target_classes target_method include_defs file_list =
+  let results =
+    if List.length file_list < 10 then
+      find_refs target_classes target_method [] file_list
+    else
+      parallel_find_refs workers file_list target_classes target_method
+    in
+  if include_defs then
+    let defs = get_definitions target_classes target_method in
+    List.rev_append defs results
   else
-    parallel_find_refs workers file_list target_classes target_method
+    results
 
 let get_dependent_files_function workers f_name =
   (* This is performant enough to not need to go parallel for now *)

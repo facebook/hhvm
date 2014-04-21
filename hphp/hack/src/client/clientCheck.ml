@@ -93,6 +93,9 @@ let rec main args retries =
         let results = Marshal.from_channel ic in
         ClientFindRefs.go results args.output_json;
         exit 0
+    | MODE_REFACTOR ->
+        ClientRefactor.go args;
+        exit 0
     | MODE_IDENTIFY_FUNCTION arg ->
       let tpos = Str.split (Str.regexp ":") arg in
       let line, char =

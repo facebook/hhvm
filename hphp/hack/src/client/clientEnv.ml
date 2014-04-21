@@ -24,6 +24,7 @@ type client_mode =
 | MODE_FIND_REFS of string
 | MODE_IDENTIFY_FUNCTION of string
 | MODE_OUTLINE
+| MODE_REFACTOR
 | MODE_FIND_CLASS_REFS of string
 
 type client_check_env = {

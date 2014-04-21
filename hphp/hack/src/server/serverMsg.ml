@@ -41,6 +41,21 @@ type find_refs_action =
 | Method of string * string
 | Function of string
 
+type refactor_action =
+| ClassRename of string * string (* old_name * new_name *)
+| MethodRename of string * string * string (* class_name * old_name * new_name*)
+| FunctionRename of string * string (* old_name * new_name *)
+
+type insert_patch = {
+  pos: Pos.t;
+  text: string;
+}
+
+type patch =
+| Insert of insert_patch
+| Remove of Pos.t
+| Replace of insert_patch 
+
 type command =
 | ERROR_OUT_OF_DATE
 | PRINT_TYPES of string
@@ -58,6 +73,7 @@ type command =
 | IDENTIFY_FUNCTION of string * int * int
 | OUTLINE of string
 | INFER_TYPE of string * int * int (* filename, line, char *)
+| REFACTOR of refactor_action
 
 let cmd_to_channel (oc:out_channel) (cmd:command): unit =
   Printf.fprintf oc "%s\n" Build_id.build_id_ohai;

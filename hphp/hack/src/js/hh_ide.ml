@@ -553,19 +553,19 @@ let (hh_arg_info: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_ca
 
 let export_fun0 f fname =
   Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") fname [|Js.Unsafe.inject f|];
-  let js_def = fname^" = function(x) { return hh_ide."^fname^"[1](); };" in
+  let js_def = "self."^fname^" = function(x) { return hh_ide."^fname^"[1](); };" in
   Js.Unsafe.eval_string js_def
 
 let export_fun1 f fname farg =
   Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") fname [|Js.Unsafe.inject f|];
   let js_def =
-    fname^" = function(x) { return hh_ide."^fname^"[1]("^farg^"); };" in
+    "self."^fname^" = function(x) { return hh_ide."^fname^"[1]("^farg^"); };" in
   Js.Unsafe.eval_string js_def
 
 let export_fun2 f fname farg1 farg2 =
   Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") fname [|Js.Unsafe.inject f|];
   let js_def =
-    fname^" = function(x, y) { return hh_ide."^fname
+    "self."^fname^" = function(x, y) { return hh_ide."^fname
     ^"[1]("^farg1^", "^farg2^"); };"
   in
   Js.Unsafe.eval_string js_def
@@ -573,21 +573,22 @@ let export_fun2 f fname farg1 farg2 =
 let export_fun3 f fname farg1 farg2 farg3 =
   Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") fname [|Js.Unsafe.inject f|];
   let js_def =
-    fname^" = function(x, y, z) { return hh_ide."^fname
+    "self."^fname^" = function(x, y, z) { return hh_ide."^fname
     ^"[1]("^farg1^", "^farg2^", "^farg3^"); };"
   in
   Js.Unsafe.eval_string js_def
 
-let () = Js.Unsafe.eval_string "hh_ide = { };"
-let () = export_fun1 hh_check "hh_check_file" "new MlString(x)"
-let () = export_fun2 hh_add_file "hh_add_file" "new MlString(x)" "new MlString(y)"
-let () = export_fun1 hh_auto_complete "hh_auto_complete" "new MlString(x)"
+let () = Js.Unsafe.eval_string "self.hh_ide = { };"
+let () = Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") "str" [|Js.Unsafe.inject (Js.wrap_callback Js.to_string)|]
+let () = export_fun1 hh_check "hh_check_file" "hh_ide.str[1](x)"
+let () = export_fun2 hh_add_file "hh_add_file" "hh_ide.str[1](x)" "hh_ide.str[1](y)"
+let () = export_fun1 hh_auto_complete "hh_auto_complete" "hh_ide.str[1](x)"
 let () = export_fun0 hh_get_deps "hh_get_deps"
-let () = export_fun3 hh_infer_type "hh_infer_type" "new MlString(x)" "y" "z"
-let () = export_fun3 hh_infer_pos "hh_infer_pos" "new MlString(x)" "y" "z"
-let () = export_fun1 hh_file_summary "hh_file_summary" "new MlString(x)"
-let () = export_fun1 hh_hack_coloring "hh_hack_coloring" "new MlString(x)"
-let () = export_fun3 hh_find_lvar_refs "hh_find_lvar_refs" "new MlString(x)" "y" "z"
-let () = export_fun1 hh_get_method_calls "hh_get_method_calls" "new MlString(x)"
-let () = export_fun3 hh_get_method_name "hh_get_method_name" "new MlString(x)" "y" "z"
-let () = export_fun3 hh_arg_info "hh_arg_info" "new MlString(x)" "y" "z"
+let () = export_fun3 hh_infer_type "hh_infer_type" "hh_ide.str[1](x)" "y" "z"
+let () = export_fun3 hh_infer_pos "hh_infer_pos" "hh_ide.str[1](x)" "y" "z"
+let () = export_fun1 hh_file_summary "hh_file_summary" "hh_ide.str[1](x)"
+let () = export_fun1 hh_hack_coloring "hh_hack_coloring" "hh_ide.str[1](x)"
+let () = export_fun3 hh_find_lvar_refs "hh_find_lvar_refs" "hh_ide.str[1](x)" "y" "z"
+let () = export_fun1 hh_get_method_calls "hh_get_method_calls" "hh_ide.str[1](x)"
+let () = export_fun3 hh_get_method_name "hh_get_method_name" "hh_ide.str[1](x)" "y" "z"
+let () = export_fun3 hh_arg_info "hh_arg_info" "hh_ide.str[1](x)" "y" "z"

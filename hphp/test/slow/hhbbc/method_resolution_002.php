@@ -9,6 +9,10 @@ class Base {
   }
 }
 
+function gen($x) {
+  return $x ? new D1 : null;
+}
+
 class D1 extends Base {
   public function foo() {
     return "a string";
@@ -18,6 +22,8 @@ class D1 extends Base {
 function main() {
   $x = new D1;
   var_dump($x->heh($x));
+  $y = gen(1);
+  var_dump($y->heh($y));
 }
 
 main();

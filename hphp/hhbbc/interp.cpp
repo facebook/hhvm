@@ -1235,8 +1235,9 @@ void in(ISS& env, const bc::FPushFuncU& op) {
 }
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
-  auto const obj = popC(env);
+  auto obj = popC(env);
   folly::Optional<res::Class> rcls;
+  if (is_opt(obj)) obj = unopt(obj);
   if (obj.strictSubtypeOf(TObj)) rcls = dcls_of(objcls(obj)).cls;
   fpiPush(env, ActRec {
     FPIKind::ObjMeth,

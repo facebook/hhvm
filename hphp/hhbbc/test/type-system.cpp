@@ -647,6 +647,11 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TInitUnc, union_of(TOptSArr, TSStr));
   EXPECT_EQ(TInitUnc, union_of(TSStr, TOptSArr));
 
+  EXPECT_EQ(TOptSStr,
+            union_of(opt(sval(s_test.get())), opt(sval(s_TestClass.get()))));
+
+  EXPECT_EQ(TOptInt, union_of(opt(ival(2)), opt(ival(3))));
+  EXPECT_EQ(TOptDbl, union_of(opt(dval(2.0)), opt(dval(3.0))));
   EXPECT_EQ(TOptNum, union_of(TInitNull, TNum));
   EXPECT_EQ(TOptNum, union_of(TInitNull, union_of(dval(1), ival(0))));
 }

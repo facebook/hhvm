@@ -1751,11 +1751,14 @@ Type union_of(Type a, Type b) {
   if (a == TInitNull && canBeOptional(b.m_bits)) return opt(b);
   if (b == TInitNull && canBeOptional(a.m_bits)) return opt(a);
 
-  // Optional types where the non-Null part is already a union need to
-  // be manually tried (e.g. if we are merging TOptTrue and TOptFalse,
-  // we want TOptBool).
+  // Optional types where the non-Null part is already a union or can have a
+  // value need to be manually tried (e.g. if we are merging TOptTrue and TOptFalse,
+  // we want TOptBool, or merging TOptInt=1 and TOptInt=2 should give us TOptInt).
   X(TOptBool)
+  X(TOptInt)
+  X(TOptDbl)
   X(TOptNum)
+  X(TOptSStr)
   X(TOptStr)
   X(TOptArrN)
   X(TOptArrE)

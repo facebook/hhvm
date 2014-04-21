@@ -20,185 +20,193 @@
  * Macros used for dispatch in the translator.
  */
 
-#define INSTRS \
-  CASE(BreakTraceHint) \
-  CASE(PopA) \
-  CASE(PopC) \
-  CASE(PopV) \
-  CASE(PopR) \
-  CASE(UnboxR) \
-  CASE(BoxR) \
-  CASE(UnboxRNop) \
-  CASE(BoxRNop) \
-  CASE(Null) \
-  CASE(NullUninit) \
-  CASE(True) \
-  CASE(False) \
-  CASE(Int) \
-  CASE(Double) \
-  CASE(String) \
+#define IRREGULAR_INSTRS \
+  CASE(AGetL) \
+  CASE(Add) \
+  CASE(AddO) \
   CASE(Array) \
-  CASE(NewArray) \
-  CASE(NewPackedArray) \
-  CASE(NewStructArray) \
-  CASE(NewCol) \
-  CASE(Clone) \
-  CASE(Nop) \
-  CASE(AddElemC) \
-  CASE(AddNewElemC) \
-  CASE(ColAddElemC) \
-  CASE(ColAddNewElemC) \
+  CASE(AssertObjL) \
+  CASE(AssertObjStk) \
+  CASE(AssertTL) \
+  CASE(AssertTStk) \
+  CASE(AsyncSuspend) \
+  CASE(BareThis) \
+  CASE(BindM) \
+  CASE(BoxR) \
+  CASE(BoxRNop) \
+  CASE(BreakTraceHint) \
+  CASE(CGetL) \
+  CASE(CGetL2) \
+  CASE(CGetM) \
+  CASE(CIterFree) \
+  CASE(CheckProp) \
+  CASE(ClsCnsD) \
   CASE(Cns) \
   CASE(CnsE) \
   CASE(CnsU) \
+  CASE(ContCheck) \
+  CASE(ContEnter) \
+  CASE(ContRaise) \
+  CASE(CreateCl) \
+  CASE(CreateCont) \
+  CASE(DecodeCufIter) \
+  CASE(DefCls) \
   CASE(DefCns) \
-  CASE(ClsCnsD) \
-  CASE(Concat) \
-  CASE(Abs) \
-  CASE(Add) \
-  CASE(AddO) \
-  CASE(Xor) \
-  CASE(Not) \
-  CASE(Mod) \
-  CASE(Sqrt) \
-  CASE(BitNot) \
-  CASE(CastInt) \
-  CASE(CastString) \
-  CASE(CastDouble) \
-  CASE(CastArray) \
-  CASE(CastObject) \
-  CASE(Print) \
-  CASE(Jmp) \
-  CASE(JmpNS) \
-  CASE(Switch) \
-  CASE(SSwitch) \
-  CASE(RetC) \
-  CASE(RetV) \
-  CASE(NativeImpl) \
-  CASE(AGetC) \
-  CASE(AGetL) \
-  CASE(CGetL) \
-  CASE(PushL) \
-  CASE(CGetL2) \
-  CASE(CGetS) \
-  CASE(CGetM) \
-  CASE(CGetG) \
-  CASE(VGetL) \
-  CASE(VGetG) \
-  CASE(VGetM) \
-  CASE(IssetM) \
+  CASE(DefFunc) \
+  CASE(Div) \
+  CASE(Double) \
   CASE(EmptyM) \
-  CASE(AKExists) \
-  CASE(SetS) \
-  CASE(SetG) \
-  CASE(SetM) \
-  CASE(SetWithRefLM) \
-  CASE(SetWithRefRM) \
-  CASE(SetOpL) \
-  CASE(SetOpM) \
-  CASE(IncDecL) \
-  CASE(IncDecM) \
-  CASE(UnsetL) \
-  CASE(UnsetM) \
-  CASE(BindM) \
-  CASE(FPushFuncD) \
-  CASE(FPushFuncU) \
-  CASE(FPushFunc) \
+  CASE(FCall) \
+  CASE(FCallArray) \
+  CASE(FCallBuiltin) \
+  CASE(FCallD) \
+  CASE(FPassG) \
+  CASE(FPassL) \
+  CASE(FPassM) \
+  CASE(FPassR) \
+  CASE(FPassS) \
+  CASE(FPassV) \
+  CASE(FPassVNop) \
   CASE(FPushClsMethod) \
   CASE(FPushClsMethodD) \
   CASE(FPushClsMethodF) \
-  CASE(FPushObjMethodD) \
   CASE(FPushCtor) \
   CASE(FPushCtorD) \
-  CASE(FPassR) \
-  CASE(FPassL) \
-  CASE(FPassM) \
-  CASE(FPassS) \
-  CASE(FPassG) \
-  CASE(FPassV) \
-  CASE(FPassVNop) \
-  CASE(This) \
-  CASE(BareThis) \
-  CASE(CheckThis) \
+  CASE(FPushCufIter) \
+  CASE(FPushFunc) \
+  CASE(FPushFuncD) \
+  CASE(FPushFuncU) \
+  CASE(FPushObjMethodD) \
+  CASE(IncDecL) \
+  CASE(IncDecM) \
+  CASE(IncStat) \
+  CASE(InitProp) \
   CASE(InitThisLoc) \
-  CASE(FCall) \
-  CASE(FCallD) \
-  CASE(FCallArray) \
-  CASE(FCallBuiltin) \
-  CASE(VerifyParamType) \
-  CASE(VerifyRetTypeC) \
-  CASE(VerifyRetTypeV) \
   CASE(InstanceOfD) \
-  CASE(InstanceOf) \
-  CASE(StaticLocInit) \
-  CASE(StaticLoc) \
+  CASE(Int) \
+  CASE(IssetL) \
+  CASE(IssetM) \
+  CASE(IterBreak) \
+  CASE(IterFree) \
   CASE(IterInit) \
   CASE(IterInitK) \
   CASE(IterNext) \
   CASE(IterNextK) \
-  CASE(WIterInit) \
-  CASE(WIterInitK) \
-  CASE(WIterNext) \
-  CASE(WIterNextK) \
+  CASE(Jmp) \
+  CASE(JmpNS) \
+  CASE(MIterFree) \
   CASE(MIterInit) \
   CASE(MIterInitK) \
   CASE(MIterNext) \
   CASE(MIterNextK) \
-  CASE(DefCls) \
+  CASE(Mod) \
+  CASE(NewArray) \
+  CASE(NewCol) \
+  CASE(NewPackedArray) \
+  CASE(NewStructArray) \
   CASE(NopDefCls) \
-  CASE(DefFunc) \
-  CASE(Self) \
-  CASE(Parent) \
-  CASE(ClassExists) \
-  CASE(InterfaceExists) \
-  CASE(TraitExists) \
-  CASE(Dup) \
-  CASE(CreateCl) \
-  CASE(CreateCont) \
-  CASE(ContEnter) \
-  CASE(ContRaise) \
-  CASE(Yield) \
-  CASE(YieldK) \
-  CASE(ContCheck) \
-  CASE(ContValid) \
-  CASE(ContKey) \
-  CASE(ContCurrent) \
-  CASE(ContStopped) \
-  CASE(AsyncAwait) \
-  CASE(AsyncSuspend) \
-  CASE(Strlen) \
-  CASE(IncStat) \
-  CASE(Idx) \
-  CASE(ArrayIdx) \
-  CASE(FPushCufIter) \
-  CASE(CIterFree) \
-  CASE(LateBoundCls) \
-  CASE(IssetS) \
-  CASE(IssetG) \
-  CASE(IssetL) \
-  CASE(EmptyS) \
-  CASE(EmptyG) \
-  CASE(VGetS) \
-  CASE(BindS) \
-  CASE(BindG) \
-  CASE(IterFree) \
-  CASE(MIterFree) \
-  CASE(IterBreak) \
-  CASE(DecodeCufIter) \
-  CASE(Shl) \
-  CASE(Shr) \
-  CASE(Div) \
-  CASE(Floor) \
-  CASE(Ceil) \
-  CASE(CheckProp) \
-  CASE(InitProp) \
-  CASE(AssertTL) \
-  CASE(AssertTStk) \
-  CASE(AssertObjL) \
-  CASE(AssertObjStk) \
   CASE(PredictTL) \
   CASE(PredictTStk) \
+  CASE(PushL) \
+  CASE(RetC) \
+  CASE(RetV) \
+  CASE(SSwitch) \
+  CASE(SetM) \
+  CASE(SetOpL) \
+  CASE(SetOpM) \
+  CASE(SetWithRefLM) \
+  CASE(SetWithRefRM) \
+  CASE(StaticLoc) \
+  CASE(StaticLocInit) \
+  CASE(String) \
+  CASE(Switch) \
+  CASE(UnboxR) \
+  CASE(UnboxRNop) \
+  CASE(UnsetL) \
+  CASE(UnsetM) \
+  CASE(VGetL) \
+  CASE(VGetM) \
+  CASE(VerifyParamType) \
+  CASE(WIterInit) \
+  CASE(WIterInitK) \
+  CASE(WIterNext) \
+  CASE(WIterNextK) \
+  CASE(Yield) \
+  CASE(YieldK) \
   /* */
+
+#define REGULAR_INSTRS \
+  CASE(AGetC) \
+  CASE(AKExists) \
+  CASE(Abs) \
+  CASE(AddElemC) \
+  CASE(AddNewElemC) \
+  CASE(ArrayIdx) \
+  CASE(AsyncAwait) \
+  CASE(BindG) \
+  CASE(BindS) \
+  CASE(BitNot) \
+  CASE(CGetG) \
+  CASE(CGetS) \
+  CASE(CastArray) \
+  CASE(CastDouble) \
+  CASE(CastInt) \
+  CASE(CastObject) \
+  CASE(CastString) \
+  CASE(Ceil) \
+  CASE(CheckThis) \
+  CASE(ClassExists) \
+  CASE(Clone) \
+  CASE(ColAddElemC) \
+  CASE(ColAddNewElemC) \
+  CASE(Concat) \
+  CASE(ContCurrent) \
+  CASE(ContKey) \
+  CASE(ContStopped) \
+  CASE(ContValid) \
+  CASE(Dup) \
+  CASE(EmptyG) \
+  CASE(EmptyS) \
+  CASE(False) \
+  CASE(Floor) \
+  CASE(Idx) \
+  CASE(InstanceOf) \
+  CASE(InterfaceExists) \
+  CASE(IssetG) \
+  CASE(IssetS) \
+  CASE(LateBoundCls) \
+  CASE(NativeImpl) \
+  CASE(Nop) \
+  CASE(Not) \
+  CASE(Null) \
+  CASE(NullUninit) \
+  CASE(Parent) \
+  CASE(PopA) \
+  CASE(PopC) \
+  CASE(PopR) \
+  CASE(PopV) \
+  CASE(Print) \
+  CASE(Self) \
+  CASE(SetG) \
+  CASE(SetS) \
+  CASE(Shl) \
+  CASE(Shr) \
+  CASE(Sqrt) \
+  CASE(Strlen) \
+  CASE(This) \
+  CASE(TraitExists) \
+  CASE(True) \
+  CASE(VGetG) \
+  CASE(VGetS) \
+  CASE(VerifyRetTypeC) \
+  CASE(VerifyRetTypeV) \
+  CASE(Xor) \
+  /* */
+
+
+#define INSTRS \
+  REGULAR_INSTRS \
+  IRREGULAR_INSTRS
 
   // These are instruction-like functions which cover more than one
   // opcode.

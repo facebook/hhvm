@@ -300,25 +300,6 @@ IRTranslator::translateAssignToLocalOp(const NormalizedInstruction& ni) {
   }
 }
 
-void IRTranslator::translatePopA(const NormalizedInstruction&) {
-  HHIR_EMIT(PopA);
-}
-
-void
-IRTranslator::translatePopC(const NormalizedInstruction& i) {
-  HHIR_EMIT(PopC);
-}
-
-void
-IRTranslator::translatePopV(const NormalizedInstruction& i) {
-  HHIR_EMIT(PopV);
-}
-
-void
-IRTranslator::translatePopR(const NormalizedInstruction& i) {
-  HHIR_EMIT(PopR);
-}
-
 void
 IRTranslator::translateUnboxR(const NormalizedInstruction& i) {
   if (i.noOp) {
@@ -353,26 +334,6 @@ void IRTranslator::translateBoxRNop(const NormalizedInstruction& i) {
 }
 
 void
-IRTranslator::translateNull(const NormalizedInstruction& i) {
-  HHIR_EMIT(Null);
-}
-
-void
-IRTranslator::translateNullUninit(const NormalizedInstruction& i) {
-  HHIR_EMIT(NullUninit);
-}
-
-void
-IRTranslator::translateTrue(const NormalizedInstruction& i) {
-  HHIR_EMIT(True);
-}
-
-void
-IRTranslator::translateFalse(const NormalizedInstruction& i) {
-  HHIR_EMIT(False);
-}
-
-void
 IRTranslator::translateInt(const NormalizedInstruction& i) {
   HHIR_EMIT(Int, i.imm[0].u_I64A);
 }
@@ -395,26 +356,6 @@ IRTranslator::translateArray(const NormalizedInstruction& i) {
 void
 IRTranslator::translateNewArray(const NormalizedInstruction& i) {
   HHIR_EMIT(NewArray, i.imm[0].u_IVA);
-}
-
-void
-IRTranslator::translateNop(const NormalizedInstruction& i) {
-  HHIR_EMIT(Nop);
-}
-
-void
-IRTranslator::translateAddElemC(const NormalizedInstruction& i) {
-  HHIR_EMIT(AddElemC);
-}
-
-void
-IRTranslator::translateFloor(const NormalizedInstruction& i) {
-  HHIR_EMIT(Floor);
-}
-
-void
-IRTranslator::translateCeil(const NormalizedInstruction& i) {
-  HHIR_EMIT(Ceil);
 }
 
 void
@@ -457,11 +398,6 @@ void IRTranslator::translateBreakTraceHint(const NormalizedInstruction&) {
 }
 
 void
-IRTranslator::translateAddNewElemC(const NormalizedInstruction& i) {
-  HHIR_EMIT(AddNewElemC);
-}
-
-void
 IRTranslator::translateCns(const NormalizedInstruction& i) {
   HHIR_EMIT(Cns, i.imm[0].u_SA);
 }
@@ -487,11 +423,6 @@ IRTranslator::translateClsCnsD(const NormalizedInstruction& i) {
 }
 
 void
-IRTranslator::translateConcat(const NormalizedInstruction& i) {
-  HHIR_EMIT(Concat);
-}
-
-void
 IRTranslator::translateAdd(const NormalizedInstruction& i) {
   auto leftType = m_hhbcTrans.topType(1);
   auto rightType = m_hhbcTrans.topType(0);
@@ -511,71 +442,6 @@ IRTranslator::translateAddO(const NormalizedInstruction& i) {
   } else {
     HHIR_EMIT(AddO);
   }
-}
-
-void
-IRTranslator::translateSqrt(const NormalizedInstruction& i) {
-  HHIR_EMIT(Sqrt);
-}
-
-void
-IRTranslator::translateAbs(const NormalizedInstruction& i) {
-  HHIR_EMIT(Abs);
-}
-
-void
-IRTranslator::translateXor(const NormalizedInstruction& i) {
-  HHIR_EMIT(Xor);
-}
-
-void
-IRTranslator::translateNot(const NormalizedInstruction& i) {
-  HHIR_EMIT(Not);
-}
-
-void
-IRTranslator::translateBitNot(const NormalizedInstruction& i) {
-  HHIR_EMIT(BitNot);
-}
-
-void
-IRTranslator::translateShl(const NormalizedInstruction& i) {
-  HHIR_EMIT(Shl);
-}
-
-void
-IRTranslator::translateShr(const NormalizedInstruction& i) {
-  HHIR_EMIT(Shr);
-}
-
-void
-IRTranslator::translateCastInt(const NormalizedInstruction& i) {
-  HHIR_EMIT(CastInt);
-}
-
-void
-IRTranslator::translateCastArray(const NormalizedInstruction& i) {
-  HHIR_EMIT(CastArray);
-}
-
-void
-IRTranslator::translateCastObject(const NormalizedInstruction& i) {
-  HHIR_EMIT(CastObject);
-}
-
-void
-IRTranslator::translateCastDouble(const NormalizedInstruction& i) {
-  HHIR_EMIT(CastDouble);
-}
-
-void
-IRTranslator::translateCastString(const NormalizedInstruction& i) {
-  HHIR_EMIT(CastString);
-}
-
-void
-IRTranslator::translatePrint(const NormalizedInstruction& i) {
-  HHIR_EMIT(Print);
 }
 
 void IRTranslator::translateJmp(const NormalizedInstruction& i) {
@@ -612,29 +478,8 @@ IRTranslator::translateRetV(const NormalizedInstruction& i) {
   HHIR_EMIT(RetV, i.inlineReturn);
 }
 
-void
-IRTranslator::translateNativeImpl(const NormalizedInstruction& ni) {
-  HHIR_EMIT(NativeImpl);
-}
-
-void IRTranslator::translateAGetC(const NormalizedInstruction& ni) {
-  HHIR_EMIT(AGetC);
-}
-
 void IRTranslator::translateAGetL(const NormalizedInstruction& i) {
   HHIR_EMIT(AGetL, i.imm[0].u_LA);
-}
-
-void IRTranslator::translateSelf(const NormalizedInstruction& i) {
-  HHIR_EMIT(Self);
-}
-
-void IRTranslator::translateParent(const NormalizedInstruction& i) {
-  HHIR_EMIT(Parent);
-}
-
-void IRTranslator::translateDup(const NormalizedInstruction& ni) {
-  HHIR_EMIT(Dup);
 }
 
 void IRTranslator::translateCreateCont(const NormalizedInstruction& i) {
@@ -661,26 +506,6 @@ void IRTranslator::translateContCheck(const NormalizedInstruction& i) {
   HHIR_EMIT(ContCheck, i.imm[0].u_IVA);
 }
 
-void IRTranslator::translateContValid(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContValid);
-}
-
-void IRTranslator::translateContKey(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContKey);
-}
-
-void IRTranslator::translateContCurrent(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContCurrent);
-}
-
-void IRTranslator::translateContStopped(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContStopped);
-}
-
-void IRTranslator::translateAsyncAwait(const NormalizedInstruction&) {
-  HHIR_EMIT(AsyncAwait);
-}
-
 void IRTranslator::translateAsyncSuspend(const NormalizedInstruction& i) {
   if (m_hhbcTrans.resumed()) {
     HHIR_EMIT(AsyncSuspendR, i.nextSk().offset());
@@ -689,89 +514,8 @@ void IRTranslator::translateAsyncSuspend(const NormalizedInstruction& i) {
   }
 }
 
-void IRTranslator::translateStrlen(const NormalizedInstruction& i) {
-  HHIR_EMIT(Strlen);
-}
-
 void IRTranslator::translateIncStat(const NormalizedInstruction& i) {
   HHIR_EMIT(IncStat, i.imm[0].u_IVA, i.imm[1].u_IVA, false);
-}
-
-void IRTranslator::translateIdx(const NormalizedInstruction& i) {
-  HHIR_EMIT(Idx);
-}
-
-void IRTranslator::translateArrayIdx(const NormalizedInstruction& i) {
-  HHIR_EMIT(ArrayIdx);
-}
-
-void IRTranslator::translateClassExists(const NormalizedInstruction& i) {
-  HHIR_EMIT(ClassExists);
-}
-
-void IRTranslator::translateInterfaceExists(const NormalizedInstruction& i) {
-  HHIR_EMIT(InterfaceExists);
-}
-
-void IRTranslator::translateTraitExists(const NormalizedInstruction& i) {
-  HHIR_EMIT(TraitExists);
-}
-
-void IRTranslator::translateVGetS(const NormalizedInstruction& i) {
-  HHIR_EMIT(VGetS);
-}
-
-void
-IRTranslator::translateVGetG(const NormalizedInstruction& i) {
-  HHIR_EMIT(VGetG);
-}
-
-void IRTranslator::translateBindS(const NormalizedInstruction& i) {
-  HHIR_EMIT(BindS);
-}
-
-void IRTranslator::translateEmptyS(const NormalizedInstruction& i) {
-  HHIR_EMIT(EmptyS);
-}
-
-void IRTranslator::translateEmptyG(const NormalizedInstruction& i) {
-  HHIR_EMIT(EmptyG);
-}
-
-void
-IRTranslator::translateIssetS(const NormalizedInstruction& i) {
-  HHIR_EMIT(IssetS);
-}
-
-void
-IRTranslator::translateIssetG(const NormalizedInstruction& i) {
-  HHIR_EMIT(IssetG);
-}
-
-void IRTranslator::translateCGetS(const NormalizedInstruction& i) {
-  HHIR_EMIT(CGetS);
-}
-
-void IRTranslator::translateSetS(const NormalizedInstruction& i) {
-  HHIR_EMIT(SetS);
-}
-
-void
-IRTranslator::translateCGetG(const NormalizedInstruction& i) {
-  HHIR_EMIT(CGetG);
-}
-
-void IRTranslator::translateSetG(const NormalizedInstruction& i) {
-  HHIR_EMIT(SetG);
-}
-
-void IRTranslator::translateBindG(const NormalizedInstruction& i) {
-  HHIR_EMIT(BindG);
-}
-
-void
-IRTranslator::translateLateBoundCls(const NormalizedInstruction&i) {
-  HHIR_EMIT(LateBoundCls);
 }
 
 void IRTranslator::translateFPassL(const NormalizedInstruction& ni) {
@@ -839,11 +583,6 @@ IRTranslator::translateCheckTypeCOp(const NormalizedInstruction& ni) {
     DataType t = typeOpToDataType(op);
     HHIR_EMIT(IsTypeC, t);
   }
-}
-
-void
-IRTranslator::translateAKExists(const NormalizedInstruction& ni) {
-  HHIR_EMIT(AKExists);
 }
 
 void
@@ -937,18 +676,8 @@ void IRTranslator::translateCreateCl(const NormalizedInstruction& i) {
 }
 
 void
-IRTranslator::translateThis(const NormalizedInstruction &i) {
-  HHIR_EMIT(This);
-}
-
-void
 IRTranslator::translateBareThis(const NormalizedInstruction &i) {
   HHIR_EMIT(BareThis, (i.imm[0].u_OA));
-}
-
-void
-IRTranslator::translateCheckThis(const NormalizedInstruction& i) {
-  HHIR_EMIT(CheckThis);
 }
 
 void
@@ -1256,20 +985,6 @@ IRTranslator::translateNewCol(const NormalizedInstruction& i) {
   HHIR_EMIT(NewCol, i.imm[0].u_IVA, i.imm[1].u_IVA);
 }
 
-void IRTranslator::translateClone(const NormalizedInstruction&) {
-  HHIR_EMIT(Clone);
-}
-
-void
-IRTranslator::translateColAddNewElemC(const NormalizedInstruction& i) {
-  HHIR_EMIT(ColAddNewElemC);
-}
-
-void
-IRTranslator::translateColAddElemC(const NormalizedInstruction& i) {
-  HHIR_EMIT(ColAddElemC);
-}
-
 void
 IRTranslator::translateStaticLocInit(const NormalizedInstruction& i) {
   HHIR_EMIT(StaticLocInit, i.imm[0].u_IVA, i.imm[1].u_SA);
@@ -1287,23 +1002,8 @@ IRTranslator::translateVerifyParamType(const NormalizedInstruction& i) {
 }
 
 void
-IRTranslator::translateVerifyRetTypeC(const NormalizedInstruction& i) {
-  HHIR_EMIT(VerifyRetTypeC);
-}
-
-void
-IRTranslator::translateVerifyRetTypeV(const NormalizedInstruction& i) {
-  HHIR_EMIT(VerifyRetTypeV);
-}
-
-void
 IRTranslator::translateInstanceOfD(const NormalizedInstruction& i) {
   HHIR_EMIT(InstanceOfD, (i.imm[0].u_SA));
-}
-
-void
-IRTranslator::translateInstanceOf(const NormalizedInstruction& i) {
-  HHIR_EMIT(InstanceOf);
 }
 
 /*
@@ -1505,6 +1205,17 @@ IRTranslator::translateCIterFree(const NormalizedInstruction& i) {
 MINSTRS
 MII(FPass)
 #undef MII
+
+/*
+ * Generate translateBluh methods for regular instructions.
+ */
+#define CASE(name) \
+  void IRTranslator::translate##name(const NormalizedInstruction&) { \
+    HHIR_EMIT(name); \
+  }
+
+  REGULAR_INSTRS
+#undef CASE
 
 void
 IRTranslator::translateInstrWork(const NormalizedInstruction& i) {

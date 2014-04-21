@@ -22,6 +22,7 @@
 #include <sys/mman.h>
 
 #include "folly/Bits.h"
+#include "folly/Format.h"
 
 #include "hphp/util/assertions.h"
 
@@ -37,17 +38,6 @@ namespace sz {
 
 typedef uint8_t* Address;
 typedef uint8_t* CodeAddress;
-
-#define BLOCK_EMISSION_ASSERT(canEmitCheck)                                   \
-  always_assert_log(canEmitCheck,                                             \
-    [] { return                                                               \
-      "Data block emission failed. This almost certainly means the TC is "    \
-      "full. If this is the case, increasing Eval.JitASize, "                 \
-      "Eval.JitAStubsSize and Eval.JitGlobalDataSize in the configuration "   \
-      "file when running this script or application should fix this "         \
-      "problem.";                                                             \
-    }                                                                         \
-  )
 
 /**
  * DataBlock is a simple bump-allocating wrapper around a chunk of memory.
@@ -121,6 +111,20 @@ struct DataBlock {
     return m_frontier + nBytes <= m_base + m_size;
   }
 
+  void assertCanEmit(size_t nBytes) {
+    always_assert_log(
+      canEmit(nBytes),
+      ([this,nBytes] {
+        return folly::format(
+          "Attempted to emit {} byte(s) into a {} byte DataBlock with {} bytes "
+          "available. This almost certainly means the TC is full. If this is "
+          "the case, increasing Eval.JitASize, Eval.JitAStubsSize and "
+          "Eval.JitGlobalDataSize in the configuration file when running this "
+          "script or application should fix this problem.",
+          nBytes, m_size, m_size - (m_frontier - m_base)).str();
+      }));
+  }
+
   bool isValidAddress(const CodeAddress tca) const {
     return tca >= m_base && tca < (m_base + m_size);
   }
@@ -130,28 +134,28 @@ struct DataBlock {
   }
 
   void byte(const uint8_t byte) {
-    BLOCK_EMISSION_ASSERT(canEmit(sz::byte));
+    assertCanEmit(sz::byte);
     *m_frontier = byte;
     m_frontier += sz::byte;
   }
   void word(const uint16_t word) {
-    BLOCK_EMISSION_ASSERT(canEmit(sz::word));
+    assertCanEmit(sz::word);
     *(uint16_t*)m_frontier = word;
     m_frontier += sz::word;
   }
   void dword(const uint32_t dword) {
-    BLOCK_EMISSION_ASSERT(canEmit(sz::dword));
+    assertCanEmit(sz::dword);
     *(uint32_t*)m_frontier = dword;
     m_frontier += sz::dword;
   }
   void qword(const uint64_t qword) {
-    BLOCK_EMISSION_ASSERT(canEmit(sz::qword));
+    assertCanEmit(sz::qword);
     *(uint64_t*)m_frontier = qword;
     m_frontier += sz::qword;
   }
 
   void bytes(size_t n, const uint8_t *bs) {
-    BLOCK_EMISSION_ASSERT(canEmit(n));
+    assertCanEmit(canEmit(n));
     if (n <= 8) {
       // If it is a modest number of bytes, try executing in one machine
       // store. This allows control-flow edges, including nop, to be

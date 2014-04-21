@@ -314,3 +314,42 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
   }
   return $result;
 }
+
+/**
+ * hash_equals - Compare two strings in constant time
+ *
+ * Note that this function is meant to be slower than a standard
+ * strcmp which short-circuits the comparison once the result is
+ * known.
+ *
+ * This function is meant to take the same amount of time
+ * (based on user_string length) regardless of the length or
+ * contents of known_string.
+ *
+ * @param string $known - Fixed string to be compared against
+ * @param string $user - User-supplied string to check
+ *
+ * @return bool - Whether $known == $user
+ */
+function hash_equals(string $known, string $user): bool {
+  $known_len = strlen($known);
+  $user_len  = strlen($user);
+  $equals    = ($known_len == $user_len);
+
+  // Special case to avoid divide by zeros
+  if ($user_len == 0) {
+    // Doesn't actually let it match $known === "\0"
+    // since the length check already failed.
+    // Just gives the loop below something to run against.
+    $user = "\0";
+    $user_len = 1;
+  }
+
+  for ($i = 0; $i < $known_len; ++$i) {
+    if ($user[$i % $user_len] !== $known[$i]) {
+      $equals = false;
+      // break; intentionally left out see docblock above
+    }
+  }
+  return $equals;
+}

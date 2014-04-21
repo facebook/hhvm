@@ -28,13 +28,15 @@ void registerNativeDataInfo(const StringData* name,
                             size_t sz,
                             NativeDataInfo::InitFunc init,
                             NativeDataInfo::CopyFunc copy,
-                            NativeDataInfo::DestroyFunc destroy) {
+                            NativeDataInfo::DestroyFunc destroy,
+                            NativeDataInfo::SweepFunc sweep) {
   assert(s_nativedatainfo.find(name) == s_nativedatainfo.end());
   NativeDataInfo info;
   info.sz = sz;
   info.init = init;
   info.copy = copy;
   info.destroy = destroy;
+  info.sweep = sweep;
   s_nativedatainfo[name] = info;
 }
 
@@ -94,7 +96,7 @@ void sweepNativeData() {
   for (auto node = s_sweep; node;) {
     auto obj = reinterpret_cast<ObjectData*>(node + 1);
     auto ndi = obj->getVMClass()->getNativeDataInfo();
-    ndi->destroy(obj);
+    ndi->sweep(obj);
     node = node->next;
     assert(invalidateNativeData(obj, ndi));
   }

@@ -26,11 +26,13 @@ struct NativeDataInfo {
   typedef void (*InitFunc)(ObjectData *obj);
   typedef void (*CopyFunc)(ObjectData *dest, ObjectData *src);
   typedef void (*DestroyFunc)(ObjectData *obj);
+  typedef void (*SweepFunc)(ObjectData *sweep);
 
   size_t sz;
-  InitFunc init;
-  CopyFunc copy;
-  DestroyFunc destroy;
+  InitFunc init; // new Object
+  CopyFunc copy; // clone $obj
+  DestroyFunc destroy; // unset($obj)
+  SweepFunc sweep; // sweep $obj
 };
 
 NativeDataInfo* getNativeDataInfo(const StringData* name);
@@ -46,7 +48,8 @@ void registerNativeDataInfo(const StringData* name,
                             size_t sz,
                             NativeDataInfo::InitFunc init,
                             NativeDataInfo::CopyFunc copy,
-                            NativeDataInfo::DestroyFunc destroy);
+                            NativeDataInfo::DestroyFunc destroy,
+                            NativeDataInfo::SweepFunc sweep);
 
 template<class T>
 void nativeDataInfoInit(ObjectData* obj) {
@@ -63,12 +66,29 @@ void nativeDataInfoDestroy(ObjectData* obj) {
   data<T>(obj)->~T();
 }
 
+// If the NDI class has a void sweep() method,
+// call it during sweep, otherwise call ~T()
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(hasSweep, sweep);
+
+template<class T>
+typename std::enable_if<hasSweep<T,void ()>::value,
+void>::type nativeDataInfoSweep(ObjectData* obj) {
+  data<T>(obj)->sweep();
+}
+
+template<class T>
+typename std::enable_if<!hasSweep<T,void ()>::value,
+void>::type nativeDataInfoSweep(ObjectData* obj) {
+  data<T>(obj)->~T();
+}
+
 template<class T>
 void registerNativeDataInfo(const StringData* name) {
   registerNativeDataInfo(name, sizeof(T),
                          &nativeDataInfoInit<T>,
                          &nativeDataInfoCopy<T>,
-                         &nativeDataInfoDestroy<T>);
+                         &nativeDataInfoDestroy<T>,
+                         &nativeDataInfoSweep<T>);
 }
 
 ObjectData* nativeDataInstanceCtor(Class* cls);

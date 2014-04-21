@@ -34,7 +34,8 @@ void ZendObject::registerNativeData() {
         sizeof(ZendObject),
         nativeDataCtor,
         Native::nativeDataInfoCopy<ZendObject>,
-        Native::nativeDataInfoDestroy<ZendObject>);
+        Native::nativeDataInfoDestroy<ZendObject>,
+        Native::nativeDataInfoSweep<ZendObject>);
   }
 }
 

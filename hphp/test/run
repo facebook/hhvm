@@ -789,7 +789,6 @@ function run_test($options, $test) {
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
 
   $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;
-  $output = '';
 
   if (isset($options['repo'])) {
     if ($test_ext === 'hhas' ||
@@ -798,26 +797,17 @@ function run_test($options, $test) {
       return 'skip-norepo';
     }
 
-    $hhbbc_only = file_exists($test.'.hhbbc_only');
-
-    $repodb1 = "$test.repo/hhvm.hhbc";
-    $repodb2 = "$test.repo/hhvm.hhbbc";
-    if (file_exists($repodb1)) unlink($repodb1);
-    if (file_exists($repodb2)) unlink($repodb2);
+    $hphp_repo = "$test.repo/hhvm.hhbc";
+    $hhbbc_repo = "$test.repo/hhvm.hhbbc";
+    shell_exec("rm -f $hphp_repo $hhbbc_repo");
     $hphp = hphp_cmd($options, $test);
     $hhbbc = hhbbc_cmd($options, $test);
-    $output .= shell_exec("$hphp 2>&1");
-    $output .= shell_exec("$hhbbc 2>&1");
-    $hhvm .= ' -vRepo.Authoritative=true -vRepo.Commit=0 ';
-    $hhvm1 = $hhvm."-vRepo.Central.Path=$repodb1";
-    $hhvm2 = $hhvm."-vRepo.Central.Path=$repodb2";
+    shell_exec("$hphp 2>&1");
+    shell_exec("$hhbbc 2>&1");
+    $hhvm .= ' -vRepo.Authoritative=true -vRepo.Commit=0';
+    $hhvm .= " -vRepo.Central.Path=$hhbbc_repo";
 
-    if (!$hhbbc_only) {
-      if (!($ret = run_one_config($options, $test, $hhvm1, $hhvm_env))) {
-        return $ret;
-      }
-    }
-    return run_one_config($options, $test, $hhvm2, $hhvm_env);
+    return run_one_config($options, $test, $hhvm, $hhvm_env);
   }
 
   if (file_exists($test.'.onlyrepo')) {
@@ -865,14 +855,6 @@ function print_commands($tests, $options) {
       print "$command\n";
       continue;
     }
-
-    // How to run without hhbbc:
-    $command .= " -vRepo.Authoritative=true ";
-    $hphpc_hhvm = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbc",
-                                $command);
-    $hphpc_cmds = hphp_cmd($options, $test)."\n";
-    $hphpc_cmds .= $hphpc_hhvm."\n";
-    print "$hphpc_cmds\n\n";
 
     // How to run it with hhbbc:
     $hhbbc_hhvm = str_replace(verify_hhbc(), "$test.repo/hhvm.hhbbc",

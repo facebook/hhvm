@@ -97,7 +97,7 @@ struct Type;
  *   WaitH<T>
  *
  *       A WaitHandle that is known will either return a value of type
- *       T from its join() method (or AsyncAwait), or else throw an
+ *       T from its join() method (or Await), or else throw an
  *       exception.
  *
  * Array types:

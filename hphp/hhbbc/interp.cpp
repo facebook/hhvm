@@ -538,24 +538,6 @@ void jmpImpl(ISS& env, const Op& op) {
 void in(ISS& env, const bc::JmpNZ& op) { jmpImpl<true>(env, op); }
 void in(ISS& env, const bc::JmpZ& op)  { jmpImpl<false>(env, op); }
 
-void group(ISS& env, const bc::AsyncAwait& await, const bc::JmpNZ& jmp) {
-  auto const t = topC(env);
-  if (!is_specialized_wait_handle(t) || is_opt(t)) {
-    return impl(env, await, jmp);
-  }
-  auto const inner = wait_handle_inner(t);
-  if (inner.subtypeOf(TBottom)) {
-    // It's always going to throw.
-    return impl(env, await, jmp);
-  }
-
-  popC(env);
-  push(env, wait_handle_inner(t));
-  env.propagate(*jmp.target, env.state);
-  popC(env);
-  push(env, t);
-}
-
 template<class JmpOp>
 void group(ISS& env, const bc::IsTypeL& istype, const JmpOp& jmp) {
   if (istype.subop == IsTypeOp::Scalar) return impl(env, istype, jmp);
@@ -1856,19 +1838,14 @@ void in(ISS& env, const bc::ContKey&)     { push(env, TInitCell); }
 void in(ISS& env, const bc::ContCurrent&) { push(env, TInitCell); }
 void in(ISS& env, const bc::ContStopped&) {}
 
-void in(ISS& env, const bc::AsyncAwait&) {
-  // We handle this better if we manage to group the opcode.
-  popC(env);
-  push(env, TInitCell);
-  push(env, TBool);
-}
-
-void in(ISS& env, const bc::AsyncSuspend& op) {
+void in(ISS& env, const bc::Await&) {
   auto const t = popC(env);
 
   // The next opcode is reachable via suspend-resume.
-  if (!is_specialized_wait_handle(t) || is_opt(t)) {
+  if (!is_specialized_wait_handle(t) || is_opt(t) ||
+      wait_handle_inner(t).subtypeOf(TBottom)) {
     // Uninferred garbage?
+    // TODO(#4205450): Mark next opcode as unreachable if inner is TBottom.
     push(env, TInitCell);
   } else {
     push(env, wait_handle_inner(t));
@@ -2019,18 +1996,6 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
     default: break;
     }
     break;
-  case Op::AsyncAwait:
-    switch (o2) {
-    /*
-     * Note: AsyncAwait is in practice always followed by JmpNZ with
-     * the current async function implementation.  We could support
-     * JmpZ, but this is not easy to test, and we'd rather hit an
-     * assert here if we change emission to start doing this.
-     */
-    case Op::JmpNZ:  return group(env, it, it[0].AsyncAwait, it[1].JmpNZ);
-    case Op::JmpZ:   always_assert(!"who is generating this code?");
-    default: break;
-    }
   default: break;
   }
 

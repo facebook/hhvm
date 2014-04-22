@@ -10,7 +10,7 @@
   .default_ctor;
 }
 
-.function main() {
+.function main() isAsync {
   FPushCtorD 0 "heh"
   FCall 0
   PopR
@@ -18,8 +18,7 @@
   PopC
 
   CGetL $x
-  AsyncAwait  # should fatal
-  PopC
+  Await 0  # should fatal
   PopC
 
   Int 1

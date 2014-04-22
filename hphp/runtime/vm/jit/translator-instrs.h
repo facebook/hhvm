@@ -29,7 +29,7 @@
   CASE(AssertObjStk) \
   CASE(AssertTL) \
   CASE(AssertTStk) \
-  CASE(AsyncSuspend) \
+  CASE(Await) \
   CASE(BareThis) \
   CASE(BindM) \
   CASE(BoxR) \
@@ -142,7 +142,6 @@
   CASE(AddElemC) \
   CASE(AddNewElemC) \
   CASE(ArrayIdx) \
-  CASE(AsyncAwait) \
   CASE(BindG) \
   CASE(BindS) \
   CASE(BitNot) \

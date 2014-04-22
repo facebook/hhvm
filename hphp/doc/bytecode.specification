@@ -4151,18 +4151,16 @@ ContStopped    []  ->  []
 15. Async functions
 -------------------
 
-AsyncAwait   [C]  ->  [C C:Bool]
+Await  <number of iterators>   [C:Obj]  ->  [C]
 
-  Perform an await operation on a wait handle. If $1 is not a subclass of
-  WaitHandle, raises a fatal error. If $1 is not finished, this instruction
-  pushes $1, and pushes False. Otherwise, if $1 succeeded, this instruction
-  pushes the result value from the WaitHandle, and then pushes true. If $1
-  failed, this instruction throws the exception from the WaitHandle.
+  This instruction may only appear in bodies of async functions. Awaits
+  a WaitHandle provided by $1, suspending the execution if the WaitHandle
+  was not yet ready.
 
-AsyncSuspend  <number of iterators>   [C:Obj]  ->  [C]
-
-  This instruction may only appear in bodies of async functions. Suspends
-  execution of the current async function.
+  If $1 is not a subclass of WaitHandle, raises a fatal error. If $1 succeeded,
+  this instruction pushes the result value from the WaitHandle. If $1 failed,
+  this instruction throws the exception from the WaitHandle. Otherwise the
+  execution needs to be suspended:
 
   If the async function is executed eagerly, creates an AsyncFunctionWaitHandle
   object, moves all local variables and first %1 iterators from the current
@@ -4177,8 +4175,7 @@ AsyncSuspend  <number of iterators>   [C:Obj]  ->  [C]
   flow back to the scheduler.
   
   Once the execution is resumed, the result of the WaitHandle provided by $1
-  becomes available on the stack. If $1 is not a WaitHandle, or is a WaitHandle
-  that is already finished, the behavior is undefined.
+  becomes available on the stack.
 
 
 Basic statement transformations

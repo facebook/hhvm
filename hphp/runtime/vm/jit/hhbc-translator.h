@@ -411,9 +411,10 @@ struct HhbcTranslator {
   void emitContStopped();
 
   // async functions
-  void emitAsyncAwait();
-  void emitAsyncSuspendE(Offset resumeOffset, int iters);
-  void emitAsyncSuspendR(Offset resumeOffset);
+  void emitAwaitE(SSATmp* child, Block* catchBlock, Offset resumeOffset,
+                  int iters);
+  void emitAwaitR(SSATmp* child, Block* catchBlock, Offset resumeOffset);
+  void emitAwait(Offset resumeOffset, int iters);
 
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force);

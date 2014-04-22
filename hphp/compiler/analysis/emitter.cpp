@@ -4909,7 +4909,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         AwaitExpressionPtr await(static_pointer_cast<AwaitExpression>(node));
 
         registerYieldAwait(await);
-
         assert(m_evalStack.size() == 0);
 
         // If we know statically that it's a subtype of WaitHandle, we
@@ -4939,12 +4938,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         assert(m_evalStack.size() == 1);
 
         // TODO(#3197024): if isKnownWaitHandle, we should put an
-        // AssertObjStk so the AsyncAwait type check can be avoided.
-        e.AsyncAwait();
-        e.JmpNZ(resume);
-
-        // Suspend if it is not finished.
-        e.AsyncSuspend(m_pendingIters.size());
+        // AssertObjStk so the Await type check can be avoided.
+        e.Await(m_pendingIters.size());
 
         resume.set(e);
         return true;

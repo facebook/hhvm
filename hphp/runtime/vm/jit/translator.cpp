@@ -952,7 +952,6 @@ getDynLocType(const SrcKey startSk,
     case OutVInputL:
     case OutFInputL:
     case OutFInputR:
-    case OutAsyncAwait:
       return RuntimeType(KindOfAny);
 
     case OutFPushCufSafe:
@@ -1320,8 +1319,7 @@ static const struct {
 
   /*** 15. Async functions instructions ***/
 
-  { OpAsyncAwait,  {Stack1,           StackTop2,    OutAsyncAwait,     1 }},
-  { OpAsyncSuspend,{Stack1,           Stack1,       OutUnknown,        0 }},
+  { OpAwait,       {Stack1,           Stack1,       OutUnknown,        0 }},
 };
 
 static hphp_hash_map<Op, InstrInfo> instrInfo;
@@ -2229,7 +2227,6 @@ bool outputDependsOnInput(const Op instr) {
     case OutNone:
       return false;
 
-    case OutAsyncAwait:
     case OutFDesc:
     case OutSameAsInput:
     case OutCInput:
@@ -2573,17 +2570,6 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
             ni->outStack2 = dl;
           }
           continue;
-        }
-        if (ni->op() == OpAsyncAwait) {
-          // The second output of OpAsyncAwait is a bool.
-          if (opnd == Stack2) {
-            assert(ni->outStack == nullptr);
-            // let getDynLocType do it.
-          } else {
-            assert(ni->outStack2 == nullptr);
-            ni->outStack2 = t.newDynLocation(loc, KindOfBoolean);
-            continue;
-          }
         }
       } break;
       case StackIns1: {
@@ -3464,7 +3450,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
       (subTrace->m_instrStream.last->op() != OpRetC &&
        subTrace->m_instrStream.last->op() != OpRetV &&
        subTrace->m_instrStream.last->op() != OpCreateCont &&
-       subTrace->m_instrStream.last->op() != OpAsyncSuspend)) {
+       subTrace->m_instrStream.last->op() != OpAwait)) {
     FTRACE(1, "analyzeCallee: callee did not end in a return\n");
     return;
   }

@@ -1,2 +1,2 @@
 
-Fatal error: AsyncAwait on a non-WaitHandle in %s/test/quick/asm_fatal_await.hhas on line -1
+Fatal error: Await on a non-WaitHandle in %s/test/quick/asm_fatal_await.hhas on line -1

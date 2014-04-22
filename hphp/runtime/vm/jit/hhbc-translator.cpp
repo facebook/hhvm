@@ -1610,48 +1610,10 @@ void HhbcTranslator::emitContStopped() {
   gen(ContSetRunning, cont, cns(false));
 }
 
-void HhbcTranslator::emitAsyncAwait() {
-  auto const exitSlow   = makeExitSlow();
-  if (!topC()->isA(Type::Obj)) PUNT(AsyncAwait-NonObject);
-
-  auto const obj = popC();
-  auto const isWH = gen(IsWaitHandle, obj);
-  gen(JmpZero, exitSlow, isWH);
-
-  // cns() would ODR-use these
-  auto const kFailed    = c_WaitHandle::STATE_FAILED;
-  auto const kSucceeded = c_WaitHandle::STATE_SUCCEEDED;
-
-  auto const state = gen(LdWHState, obj);
-  gen(JmpEq, exitSlow, state, cns(kFailed));
-
-  auto const toPush = m_irb->cond(
-    [&] (Block* taken) {
-      gen(JmpEq, taken, state, cns(kSucceeded));
-    },
-    [&] { // Next: the wait handle isn't done.  We'll push false and
-          // the same WaitHandle object.
-      return obj;
-    },
-    [&] { // Taken: retrieve the result from the wait handle
-      auto const res = gen(LdWHResult, obj);
-      gen(IncRef, res);
-      gen(DecRef, obj);
-      return res;
-    }
-  );
-
-  push(toPush);
-  push(gen(EqInt, state, cns(kSucceeded)));
-}
-
-void HhbcTranslator::emitAsyncSuspendE(Offset resumeOffset, int numIters) {
+void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
+                                Offset resumeOffset, int numIters) {
   assert(curFunc()->isAsync());
   assert(!resumed());
-  gen(ExitOnVarEnv, makeExitSlow(), m_irb->fp());
-
-  auto const catchBlock = makeCatch();
-  auto const child = popC();
   assert(child->isA(Type::Obj));
 
   // Create the AsyncFunctionWaitHandle object.
@@ -1684,17 +1646,12 @@ void HhbcTranslator::emitAsyncSuspendE(Offset resumeOffset, int numIters) {
   SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());
   gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
-
-  // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
-  m_hasExit = true;
 }
 
-void HhbcTranslator::emitAsyncSuspendR(Offset resumeOffset) {
+void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
+                                Offset resumeOffset) {
   assert(curFunc()->isAsync());
   assert(resumed());
-
-  auto const catchBlock = makeCatchNoSpill();
-  auto const child = popC();
   assert(child->isA(Type::Obj));
 
   // Store child and offset.
@@ -1703,7 +1660,54 @@ void HhbcTranslator::emitAsyncSuspendR(Offset resumeOffset) {
       cns(resumeOffset));
 
   // Transfer control back to the scheduler.
-  emitResumedReturnControl(catchBlock);
+  auto const sp = spillStack();
+  emitRetSurpriseCheck(cns(Type::Uninit), catchBlock, true);
+
+  auto const retAddr = gen(LdRetAddr, m_irb->fp());
+  auto const fp = gen(FreeActRec, m_irb->fp());
+
+  gen(RetCtrl, RetCtrlData(true), sp, fp, retAddr);
+}
+
+void HhbcTranslator::emitAwait(Offset resumeOffset, int numIters) {
+  assert(curFunc()->isAsync());
+
+  auto const catchBlock = resumed() ? makeCatchNoSpill() : makeCatch();
+  auto const exitSlow   = makeExitSlow();
+
+  if (!topC()->isA(Type::Obj)) PUNT(Await-NonObject);
+
+  auto const child = popC();
+  gen(JmpZero, exitSlow, gen(IsWaitHandle, child));
+  if (!resumed()) {
+    gen(ExitOnVarEnv, exitSlow, m_irb->fp());
+  }
+
+  // cns() would ODR-use these
+  auto const kSucceeded = c_WaitHandle::STATE_SUCCEEDED;
+  auto const kFailed    = c_WaitHandle::STATE_FAILED;
+
+  auto const state = gen(LdWHState, child);
+  gen(JmpEq, exitSlow, state, cns(kFailed));
+
+  m_irb->ifThenElse(
+    [&] (Block* taken) {
+      gen(JmpEq, taken, state, cns(kSucceeded));
+    },
+    [&] { // Next: the wait handle is not finished, we need to suspend
+      if (resumed()) {
+        emitAwaitR(child, catchBlock, resumeOffset);
+      } else {
+        emitAwaitE(child, catchBlock, resumeOffset, numIters);
+      }
+    },
+    [&] { // Taken: retrieve the result from the wait handle
+      auto const res = gen(LdWHResult, child);
+      gen(IncRef, res);
+      gen(DecRef, child);
+      push(res);
+    }
+  );
 }
 
 void HhbcTranslator::emitStrlen() {
@@ -4900,7 +4904,6 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
       return topType(0) <= Type::Str ? Type::Int : Type::UncountedInit;
     case OutClassRef:   return Type::Cls;
     case OutFPushCufSafe: return folly::none;
-    case OutAsyncAwait:   return folly::none; // custom in getStackValue
 
     case OutNone:       return folly::none;
 

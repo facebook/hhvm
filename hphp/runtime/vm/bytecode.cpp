@@ -2206,7 +2206,7 @@ Array ExecutionContext::debugBacktrace(bool skip /* = false */,
     auto const curOp = *reinterpret_cast<const Op*>(curUnit->at(pc));
     auto const isReturning =
       curOp == Op::RetC || curOp == Op::RetV ||
-      curOp == Op::CreateCont || curOp == Op::AsyncSuspend;
+      curOp == Op::CreateCont || curOp == Op::Await;
 
     // Builtins and generators don't have a file and line number
     if (prevFp && !prevFp->m_func->isBuiltin() && !fp->resumed()) {
@@ -7169,23 +7169,6 @@ OPTBLD_INLINE void ExecutionContext::iopContStopped(IOP_ARGS) {
   this_continuation(m_fp)->setStopped();
 }
 
-OPTBLD_INLINE void ExecutionContext::iopAsyncAwait(IOP_ARGS) {
-  NEXT();
-  auto const& c1 = *m_stack.topC();
-  if (c1.m_type != KindOfObject ||
-      !c1.m_data.pobj->getAttribute(ObjectData::IsWaitHandle)) {
-    raise_error("AsyncAwait on a non-WaitHandle");
-  }
-  auto const wh = static_cast<c_WaitHandle*>(c1.m_data.pobj);
-  if (wh->isSucceeded()) {
-    cellSet(wh->getResult(), *m_stack.topC());
-    m_stack.pushTrue();
-    return;
-  }
-  if (wh->isFailed()) throw Object(wh->getException());
-  m_stack.pushFalse();
-}
-
 OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
   assert(!m_fp->resumed());
   assert(m_fp->func()->isAsync());
@@ -7256,9 +7239,20 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS) {
   pc = nullptr;
 }
 
-OPTBLD_INLINE void ExecutionContext::iopAsyncSuspend(IOP_ARGS) {
+OPTBLD_INLINE void ExecutionContext::iopAwait(IOP_ARGS) {
   NEXT();
   DECODE_IVA(iters);
+
+  auto const wh = c_WaitHandle::fromCell(m_stack.topC());
+  if (UNLIKELY(wh == nullptr)) {
+    raise_error("Await on a non-WaitHandle");
+    not_reached();
+  } else if (wh->isSucceeded()) {
+    cellSet(wh->getResult(), *m_stack.topC());
+    return;
+  } else if (UNLIKELY(wh->isFailed())) {
+    throw Object(wh->getException());
+  }
 
   if (m_fp->resumed()) {
     // suspend resumed execution
@@ -7569,7 +7563,7 @@ inline void ExecutionContext::dispatchImpl(int numInstrs) {
     if (UNLIKELY(!pc)) {                                      \
       DEBUG_ONLY const Op op = Op::name;                      \
       assert(op == OpRetC || op == OpRetV ||                  \
-             op == OpAsyncSuspend || op == OpCreateCont ||    \
+             op == OpAwait || op == OpCreateCont ||           \
              op == OpYield || op == OpYieldK ||               \
              op == OpNativeImpl);                             \
       m_fp = 0;                                               \

@@ -286,6 +286,39 @@ struct IRBuilder {
   }
 
   /*
+   * ifThenElse() generates if-then-else blocks within a trace that do not
+   * produce values. Code emitted in the {next,taken} lambda will be executed
+   * iff the branch emitted in the branch lambda is {not,} taken.
+   */
+  template <class Branch, class Next, class Taken>
+  void ifThenElse(Branch branch, Next next, Taken taken) {
+    Block* taken_block = m_unit.defBlock();
+    Block* done_block = m_unit.defBlock();
+    DisableCseGuard guard(*this);
+    branch(taken_block);
+    next();
+    // patch the last block added by the Next lambda to jump to
+    // the done block.  Note that last might not be taken_block.
+    Block* last = m_curBlock;
+    if (last->empty() || !last->back().isBlockEnd()) {
+      gen(Jmp, done_block);
+    } else if (!last->back().isTerminal()) {
+      last->back().setNext(done_block);
+    }
+    appendBlock(taken_block);
+    taken();
+    // patch the last block added by the Taken lambda to jump to
+    // the done block.  Note that last might not be taken_block.
+    last = m_curBlock;
+    if (last->empty() || !last->back().isBlockEnd()) {
+      gen(Jmp, done_block);
+    } else if (!last->back().isTerminal()) {
+      last->back().setNext(done_block);
+    }
+    appendBlock(done_block);
+  }
+
+  /*
    * ifThen generates if-then blocks within a trace that do not
    * produce values. Code emitted in the taken lambda will be executed
    * iff the branch emitted in the branch lambda is taken.
@@ -306,7 +339,7 @@ struct IRBuilder {
     last = m_curBlock;
     if (last->empty() || !last->back().isBlockEnd()) {
       gen(Jmp, done_block);
-    } else {
+    } else if (!last->back().isTerminal()) {
       last->back().setNext(done_block);
     }
     appendBlock(done_block);
@@ -329,7 +362,7 @@ struct IRBuilder {
     auto last = m_curBlock;
     if (last->empty() || !last->back().isBlockEnd()) {
       gen(Jmp, done_block);
-    } else {
+    } else if (!last->back().isTerminal()) {
       last->back().setNext(done_block);
     }
     appendBlock(done_block);

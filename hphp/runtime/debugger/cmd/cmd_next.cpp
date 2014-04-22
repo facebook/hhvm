@@ -96,13 +96,13 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   // we can make an accurate prediction of where execution should flow,
   // eventually, and when we want to let the program run normally until we get
   // there.
-  if (hasStepOuts() || hasStepCont()) {
+  if (hasStepOuts() || hasStepResumable()) {
     TRACE(2, "CmdNext: checking internal breakpoint(s)\n");
     if (atStepOutOffset(unit, offset)) {
       if (deeper) return; // Recursion
       TRACE(2, "CmdNext: hit step-out\n");
-    } else if (atStepContOffset(unit, offset)) {
-      if (m_stepContTag != getResumableTag(fp)) return;
+    } else if (atStepResumableOffset(unit, offset)) {
+      if (m_stepResumableId != getResumableId(fp)) return;
       TRACE(2, "CmdNext: hit step-cont\n");
       // We're in the continuation we expect. This may be at a
       // different stack depth, though, especially if we've moved from
@@ -124,8 +124,8 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
       // For step-conts, we ignore handlers at the original level if we're not
       // in the original continuation. We don't care about exception handlers
       // in continuations being driven at the same level.
-      if (hasStepCont() && originalDepth &&
-          (m_stepContTag != getResumableTag(fp))) {
+      if (hasStepResumable() && originalDepth &&
+          (m_stepResumableId != getResumableId(fp))) {
         TRACE(2, "CmdNext: exception handler, original depth, wrong cont\n");
         return;
       }
@@ -145,7 +145,7 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
     // We've hit one internal breakpoint at a useful place, or decided we don't,
     // need them, so we can remove them all now.
     cleanupStepOuts();
-    cleanupStepCont();
+    cleanupStepResumable();
   }
 
   if (interrupt.getInterruptType() == ExceptionHandler) {
@@ -158,9 +158,9 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
     return;
   }
 
-  if (m_skippingAsyncSuspend) {
-    m_skippingAsyncSuspend = false;
-    stepAfterAsyncSuspend();
+  if (m_skippingAwait) {
+    m_skippingAwait = false;
+    stepAfterAwait();
     return;
   }
 
@@ -202,82 +202,102 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
   // and end up at the caller of ASIO or send(). For async functions
   // stepping over an await, we land on the next statement.
   auto op = *reinterpret_cast<const Op*>(pc);
-  if (fp->resumed() &&
-      (op == OpYield || op == OpYieldK ||
-       op == OpAsyncSuspend || op == OpRetC)) {
-    TRACE(2, "CmdNext: encountered yield, await or return from generator\n");
-    // Patch the projected return point(s) in both cases for
-    // generators, to catch if we exit the the asio iterator or if we
-    // are being iterated directly by PHP.
-    if ((op == OpRetC) || !fp->m_func->isAsync()) setupStepOuts();
-    op = *reinterpret_cast<const Op*>(pc);
-    if (op == OpAsyncSuspend || op == OpYield || op == OpYieldK) {
-      // Patch the next normal execution point so we can pickup the stepping
-      // from there if the caller is C++.
-      setupStepCont(fp, pc);
+  if (fp->func()->isAsync()) {
+    if (op == OpAwait) {
+      auto wh = c_WaitHandle::fromCell(g_context->getStack().topC());
+      if (wh && !wh->isFinished()) {
+        TRACE(2, "CmdNext: encountered blocking await from async function\n");
+        if (fp->resumed()) {
+          setupStepSuspend(fp, pc);
+          removeLocationFilter();
+        } else {
+          // We need to step over this opcode, then grab the created
+          // AsyncFunctionWaitHandle and setup stepping like we do for
+          // OpAwait.
+          m_skippingAwait = true;
+          m_needsVMInterrupt = true;
+          removeLocationFilter();
+        }
+        return;
+      }
+    } else if (fp->resumed() && op == OpRetC) {
+      TRACE(2, "CmdNext: encountered return from resumed async function\n");
+      setupStepOuts();
+      removeLocationFilter();
+      return;
     }
-    removeLocationFilter();
-    return;
-  } else if (op == OpAsyncSuspend) {
-    // We need to step over this opcode, then grab the continuation
-    // and setup continuation stepping like we do for OpYield.
-    TRACE(2, "CmdNext: encountered create async\n");
-    m_skippingAsyncSuspend = true;
-    m_needsVMInterrupt = true;
-    removeLocationFilter();
-    return;
+  } else if (fp->func()->isGenerator()) {
+    if (op == OpYield || op == OpYieldK) {
+      TRACE(2, "CmdNext: encountered yield from generator\n");
+      assert(fp->resumed());
+      setupStepOuts();
+      setupStepSuspend(fp, pc);
+      removeLocationFilter();
+      return;
+    } else if (op == OpRetC) {
+      TRACE(2, "CmdNext: encountered return from generator\n");
+      assert(fp->resumed());
+      setupStepOuts();
+      removeLocationFilter();
+      return;
+    }
   }
+
   installLocationFilterForLine(interrupt.getSite());
   m_needsVMInterrupt = true;
 }
 
-bool CmdNext::hasStepCont() {
-  return m_stepCont.valid();
+bool CmdNext::hasStepResumable() {
+  return m_stepResumable.valid();
 }
 
-bool CmdNext::atStepContOffset(Unit* unit, Offset o) {
-  return m_stepCont.at(unit, o);
+bool CmdNext::atStepResumableOffset(Unit* unit, Offset o) {
+  return m_stepResumable.at(unit, o);
 }
 
-// A Yield marks a return point from a generator or async
-// function. Execution will resume at this function later, and the
-// Continuation associated with this function can predict where.
-void CmdNext::setupStepCont(ActRec* fp, PC pc) {
+// Await / Yield opcodes mark a suspend points of async functions and
+// generators. Execution will resume at this function later after the
+// opcode.
+void CmdNext::setupStepSuspend(ActRec* fp, PC pc) {
   // Yield is followed by the label where execution will continue.
-  DEBUG_ONLY auto ops = reinterpret_cast<const Op*>(pc);
-  assert(ops[0] == OpYield || ops[0] == OpYieldK);
+  auto op = *reinterpret_cast<const Op*>(pc);
+  assert(op == OpAwait || op == OpYield || op == OpYieldK);
   ++pc;
+  if (op == OpAwait) {
+    decodeVariableSizeImm(&pc);
+  }
   Offset nextInst = fp->func()->unit()->offsetOf(pc);
   assert(nextInst != InvalidAbsoluteOffset);
-  m_stepContTag = fp;
-  TRACE(2, "CmdNext: patch for cont step at '%s' offset %d\n",
+  m_stepResumableId = fp;
+  TRACE(2, "CmdNext: patch for resumable step at '%s' offset %d\n",
         fp->m_func->fullName()->data(), nextInst);
-  m_stepCont = StepDestination(fp->m_func->unit(), nextInst);
+  m_stepResumable = StepDestination(fp->m_func->unit(), nextInst);
 }
 
-// A AsyncSuspend is used in the codegen for an async function to setup
-// a Continuation and return a wait handle so execution can continue
-// later. We have just completed a AsyncSuspend, so the new
-// Continuation is available, and it can predict where execution will
-// resume.
-void CmdNext::stepAfterAsyncSuspend() {
+// An Await opcode is used in the codegen for an async function to suspend
+// execution until the given wait handle is finished. In eager execution,
+// the state is suspended into a new AsyncFunctionWaitHandle object so that
+// the execution can continue later. We have just completed an Await, so
+// the new AsyncFunctionWaitHandle is now available, and it can predict
+// where execution will resume.
+void CmdNext::stepAfterAwait() {
   auto topObj = g_context->getStack().topTV()->m_data.pobj;
   assert(topObj->instanceof(c_AsyncFunctionWaitHandle::classof()));
   auto wh = static_cast<c_AsyncFunctionWaitHandle*>(topObj);
-  auto func = wh->actRec()->m_func;
+  auto func = wh->actRec()->func();
   Offset nextInst = wh->getNextExecutionOffset();
   assert(nextInst != InvalidAbsoluteOffset);
-  m_stepContTag = wh->actRec();
+  m_stepResumableId = wh->actRec();
   TRACE(2,
-        "CmdNext: patch for cont step after AsyncSuspend at '%s' offset %d\n",
+        "CmdNext: patch for cont step after Await at '%s' offset %d\n",
         func->fullName()->data(), nextInst);
-  m_stepCont = StepDestination(func->unit(), nextInst);
+  m_stepResumable = StepDestination(func->unit(), nextInst);
 }
 
-void CmdNext::cleanupStepCont() {
-  if (m_stepCont.valid()) {
-    m_stepCont = StepDestination();
-    m_stepContTag = nullptr;
+void CmdNext::cleanupStepResumable() {
+  if (m_stepResumable.valid()) {
+    m_stepResumable = StepDestination();
+    m_stepResumableId = nullptr;
   }
 }
 
@@ -286,7 +306,7 @@ void CmdNext::cleanupStepCont() {
 // Since we'll either stop when we get out of whatever is driving this
 // continuation, or we'll stop when we get back into it, we know the object
 // will remain alive.
-void* CmdNext::getResumableTag(ActRec* fp) {
+void* CmdNext::getResumableId(ActRec* fp) {
   assert(fp->resumed());
   assert(fp->func()->isAsync() || fp->func()->isGenerator());
   TRACE(2, "CmdNext: continuation tag %p for %s\n", fp,

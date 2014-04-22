@@ -596,7 +596,7 @@ opcodeControlFlowInfo(const Op instr) {
     case Op::CreateCont:
     case Op::Yield:
     case Op::YieldK:
-    case Op::AsyncSuspend:
+    case Op::Await:
     case Op::RetC:
     case Op::RetV:
     case Op::Exit:
@@ -778,7 +778,6 @@ enum OutTypeConstraints {
   OutClassRef,          // KindOfClass
   OutFPushCufSafe,      // FPushCufSafe pushes two values of different
                         // types and an ActRec
-  OutAsyncAwait,        // AwaitHandle pushes its input and then a bool
 
   OutNone,
 };

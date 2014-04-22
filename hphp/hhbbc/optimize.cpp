@@ -61,6 +61,7 @@ folly::Optional<AssertTOp> assertTOpFor(Type t) {
 
 template<class ObjBC, class TyBC, class ArgType>
 folly::Optional<Bytecode> makeAssert(ArgType arg, Type t) {
+  assert(!t.subtypeOf(TBottom));
   if (t.strictSubtypeOf(TObj)) {
     auto const dobj = dobj_of(t);
     auto const op = dobj.type == DObj::Exact ? AssertObjOp::Exact

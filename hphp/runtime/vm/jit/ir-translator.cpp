@@ -495,6 +495,10 @@ void IRTranslator::translateContRaise(const NormalizedInstruction& i) {
   HHIR_UNIMPLEMENTED(ContRaise);
 }
 
+void IRTranslator::translateContCheck(const NormalizedInstruction& i) {
+  HHIR_EMIT(ContCheck, i.imm[0].u_IVA);
+}
+
 void IRTranslator::translateYield(const NormalizedInstruction& i) {
   HHIR_EMIT(Yield, i.nextSk().offset());
 }
@@ -503,16 +507,8 @@ void IRTranslator::translateYieldK(const NormalizedInstruction& i) {
   HHIR_EMIT(YieldK, i.nextSk().offset());
 }
 
-void IRTranslator::translateContCheck(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContCheck, i.imm[0].u_IVA);
-}
-
-void IRTranslator::translateAsyncSuspend(const NormalizedInstruction& i) {
-  if (m_hhbcTrans.resumed()) {
-    HHIR_EMIT(AsyncSuspendR, i.nextSk().offset());
-  } else {
-    HHIR_EMIT(AsyncSuspendE, i.nextSk().offset(), i.imm[0].u_IVA);
-  }
+void IRTranslator::translateAwait(const NormalizedInstruction& i) {
+  HHIR_EMIT(Await, i.nextSk().offset(), i.imm[0].u_IVA);
 }
 
 void IRTranslator::translateIncStat(const NormalizedInstruction& i) {

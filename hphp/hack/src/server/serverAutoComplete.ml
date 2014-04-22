@@ -17,11 +17,13 @@ open Utils
 let complete_global nenv oc =
   let gname = !Autocomplete.auto_complete_for_global in
   let completion_type = !Autocomplete.argument_global_type in
+  let gname = Utils.strip_ns gname in
   let gname = 
     String.sub gname 0 (String.length gname - Autocomplete.suffix_len)
   in
   let gname_size = String.length gname in
   let is_prefix x =
+    let x = Utils.strip_ns x in
     gname_size <= String.length x &&
     String.sub x 0 gname_size = gname
   in
@@ -30,7 +32,7 @@ let complete_global nenv oc =
     SMap.iter begin fun name _ ->
       if !count > 100 then raise Exit;
       if is_prefix name && handler name
-      then (Printf.fprintf oc "%s\n" name; incr count)
+      then (Printf.fprintf oc "%s\n" (Utils.strip_ns name); incr count)
       else ()
     end map;
   in

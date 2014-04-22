@@ -129,7 +129,12 @@ bool UrlFile::open(const String& input_url, const String& mode) {
                       Variant(m_responseHeaders).asTypedValue());
   }
 
-  if (code == 200 || m_ignoreErrors) {
+  /*
+   * If code == 0, Curl failed to connect; per PHP5, ignore_errors just means
+   * to not worry if we get an http resonse code that isn't 200, but we
+   * shouldn't ignore other errors.
+   */
+  if (code == 200 || (m_ignoreErrors && code != 0)) {
     m_name = (std::string) url;
     m_data = const_cast<char*>(m_response.data());
     m_len = m_response.size();

@@ -750,25 +750,18 @@ TakeStack S0:Gen
   Does nothing at runtime. Acts as a hint to the optimizer that the code is
   taking ownership of a reference to S0.
 
-D:T = LdLoc<T,localId,valSrc> S0:FramePtr
+D:T = LdLoc<T,localId> S0:FramePtr
 
-  Loads local number localId from the frame S0 and puts the value in D as type
-  T. valSrc is an SSATmp* used for guard relaxation; its value is never used at
-  runtime. If the local has a known value, valSrc will be that value, even if
-  there's been a Call since the value's definition. If the local has an unknown
-  value that was stored in the current trace, valSrc will be null. Otherwise,
-  val has an unknown value that existed upon entry to the current trace, and
-  valSrc will point to the FramePtr it's loading from.
+  Loads local slot localId from the frame S0 and puts the value in D as type T.
 
 D:PtrToGen = LdStackAddr<offset> S0:StkPtr
 
   Loads the address of the stack slot given by the pointer in S0 at the offset
   (in cells).
 
-D:T* = LdLocAddr<T,localId,valSrc> S0:FramePtr
+D:T* = LdLocAddr<T,localId> S0:FramePtr
 
-  Loads the address of the local slot localId from the frame S0 into D. See
-  LdLoc for a description of valSrc.
+  Loads the address of the local slot localId from the frame S0 into D.
 
 D:PtrToCell = LdVectorBase S0:Obj<Vector>
 D:PtrToCell = LdPairBase S0:Obj<Pair>

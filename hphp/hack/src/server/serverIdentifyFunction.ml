@@ -27,7 +27,7 @@ let identify content line char =
   restore();
   ServerIdeUtils.revive funs classes;
   match result with
-  | Some result -> result.Find_refs.name
+  | Some result -> Utils.strip_ns result.Find_refs.name
   | _ -> ""
 
 let go content line char oc =

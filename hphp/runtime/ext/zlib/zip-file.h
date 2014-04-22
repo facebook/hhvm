@@ -50,7 +50,8 @@ public:
 
 private:
   gzFile m_gzFile;
-  PlainFile *m_innerFile;
+  Resource m_innerFile;
+  Resource m_tempFile;
 
   bool closeImpl();
 };

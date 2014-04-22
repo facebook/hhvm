@@ -51,6 +51,8 @@ DECLARE_EXTERN_REQUEST_LOCAL(FileData, s_file_data);
  */
 class File : public SweepableResourceData {
 public:
+  static const int CHUNK_SIZE = 8192;
+
   static String TranslatePath(const String& filename);
   // Same as TranslatePath except doesn't make paths absolute
   static String TranslatePathKeepRelative(const String& filename);
@@ -249,7 +251,6 @@ protected:
    */
   int64_t filteredWrite(const char* buffer, int64_t length);
 private:
-  static const int CHUNK_SIZE = 8192;
   char *m_buffer;
   int64_t m_bufferSize;
 

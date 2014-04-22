@@ -58,10 +58,15 @@ static class ZlibStreamWrapper : public Stream::Wrapper {
       return NULL;
     }
 
-    String translated = File::TranslatePath(fname);
-    if (MemFile* file = PlainStreamWrapper::openFromCache(translated, mode)) {
-      file->unzip();
-      return file;
+    String translated;
+    if (fname.find("://") == -1) {
+      translated = File::TranslatePath(fname);
+      if (MemFile* file = PlainStreamWrapper::openFromCache(translated, mode)) {
+        file->unzip();
+        return file;
+      }
+    } else {
+      translated = fname;
     }
 
     std::unique_ptr<ZipFile> file(NEWOBJ(ZipFile)());
@@ -325,7 +330,6 @@ Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
   Resource handle(file);
   bool ret = file->open(File::TranslatePath(filename), mode);
   if (!ret) {
-    raise_warning("%s",folly::errnoStr(errno).c_str());
     return false;
   }
   return handle;

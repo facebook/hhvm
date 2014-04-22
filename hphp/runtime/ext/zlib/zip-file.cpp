@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/ext/zlib/zip-file.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/mem-file.h"
+#include "hphp/runtime/base/temp-file.h"
 #include "hphp/runtime/base/runtime-error.h"
 
 namespace HPHP {
@@ -24,19 +26,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 ZipFile::ZipFile() : m_gzFile(nullptr) {
-  m_innerFile = NEWOBJ(PlainFile)();
   m_isLocal = true;
   m_eof = false;
 }
 
 ZipFile::~ZipFile() {
   ZipFile::closeImpl();
-  delete m_innerFile;
 }
 
 void ZipFile::sweep() {
   closeImpl();
-  m_innerFile = nullptr; // it'll get swept elsewhere
   File::sweep();
 }
 
@@ -49,8 +48,28 @@ bool ZipFile::open(const String& filename, const String& mode) {
     return false;
   }
 
-  return m_innerFile->open(filename, mode) &&
-    (m_gzFile = gzdopen(dup(m_innerFile->fd()), mode.data()));
+  m_innerFile = File::Open(filename, mode);
+  if (m_innerFile.is<MemFile>()) {
+    // We need an FD for the correct zlib APIs; MemFiles don't have an FD
+    if (strchr(mode.c_str(), 'w')) {
+      raise_warning("Cannot write to this stream type");
+      return false;
+    }
+    auto buffer = m_innerFile.getTyped<MemFile>();
+    auto file = NEWOBJ(TempFile);
+    while (!buffer->eof()) {
+      file->write(buffer->read(File::CHUNK_SIZE));
+    }
+    file->rewind();
+    m_tempFile = Resource(file);
+    return (m_gzFile = gzdopen(dup(file->fd()), mode.data()));
+  }
+  if (m_innerFile.is<File>()) {
+    auto file = m_innerFile.getTyped<File>();
+    m_tempFile = null_resource;
+    return (m_gzFile = gzdopen(dup(file->fd()), mode.data()));
+  }
+  return false;
 }
 
 bool ZipFile::close() {
@@ -68,7 +87,13 @@ bool ZipFile::closeImpl() {
       m_gzFile = nullptr;
     }
     m_closed = true;
-    m_innerFile->close();
+    if (m_innerFile.is<File>()) {
+      m_innerFile.getTyped<File>()->close();
+    }
+    if (m_tempFile.is<File>()) {
+      m_tempFile.getTyped<File>()->close();
+      m_tempFile = null_resource;
+    }
   }
   File::closeImpl();
   return ret;

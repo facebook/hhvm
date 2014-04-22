@@ -278,10 +278,11 @@ struct ActRecInfo : IRExtraData {
 
   std::string show() const {
     ActRec ar;
-    ar.m_numArgsAndGenCtorFlags = numArgs;
+    ar.m_numArgsAndFlags = numArgs;
     return folly::to<std::string>(ar.numArgs(),
                                   ar.isFromFPushCtor() ? ",ctor" : "",
                                   ar.resumed() ? ",res" : "",
+                                  ar.localsDecRefd() ? ",ldrd" : "",
                                   invName ? " M" : "");
   }
 };

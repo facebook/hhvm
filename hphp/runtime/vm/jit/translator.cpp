@@ -3424,7 +3424,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
   fakeAR.m_savedRip = 0xbaabaa;  // should never be inspected
   fakeAR.m_func = fcall->funcd;
   fakeAR.m_soff = 0xb00b00;      // should never be inspected
-  fakeAR.m_numArgsAndGenCtorFlags = numArgs;
+  fakeAR.m_numArgsAndFlags = numArgs;
   fakeAR.m_varEnv = nullptr;
 
   /*

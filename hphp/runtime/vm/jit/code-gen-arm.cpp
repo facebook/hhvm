@@ -1531,7 +1531,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   // immediate argument is intptr_t, and the implicit int32->intptr conversion
   // will sign-extend, which isn't what we want.
   m_as.    Mov  (rAsm.W(), (uint32_t)nArgs);
-  m_as.    Str  (rAsm.W(), spReg[spOff + AROFF(m_numArgsAndGenCtorFlags)]);
+  m_as.    Str  (rAsm.W(), spReg[spOff + AROFF(m_numArgsAndFlags)]);
 
   // Magic-call name.
   if (invName) {

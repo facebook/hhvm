@@ -127,8 +127,8 @@ void emitFuncPrologueRedispatch(UniqueStubs& us) {
   // so there are no live registers.
 
   a.  Ldr  (x0, rStashedAR[AROFF(m_func)]);
-  a.  Ldr  (w1, rStashedAR[AROFF(m_numArgsAndGenCtorFlags)]);
-  a.  And  (w1, w1, 0x7fffffff);
+  a.  Ldr  (w1, rStashedAR[AROFF(m_numArgsAndFlags)]);
+  a.  And  (w1, w1, 0x1fffffff);
   a.  Ldr  (w2, x0[Func::numParamsOff()]);
 
   // If we passed more args than declared, jump to the numParamsCheck.

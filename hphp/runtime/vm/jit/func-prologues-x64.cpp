@@ -356,11 +356,11 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   Asm a { mainCode };
   TCA start = mainCode.frontier();
   if (dvs.size() == 1) {
-    a.  cmpl  (dvs[0].first, rVmFp[AROFF(m_numArgsAndGenCtorFlags)]);
+    a.  cmpl  (dvs[0].first, rVmFp[AROFF(m_numArgsAndFlags)]);
     emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[0].second, false));
     emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base(), false));
   } else {
-    a.    loadl  (rVmFp[AROFF(m_numArgsAndGenCtorFlags)], reg::eax);
+    a.    loadl  (rVmFp[AROFF(m_numArgsAndFlags)], reg::eax);
     for (unsigned i = 0; i < dvs.size(); i++) {
       a.  cmpl   (dvs[i].first, reg::eax);
       emitBindJcc(mainCode, stubsCode, CC_LE,
@@ -448,7 +448,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
     callFixup = a.frontier();
   }
   if (nPassed != 2) {
-    a.  storel (2, rStashedAR[AROFF(m_numArgsAndGenCtorFlags)]);
+    a.  storel (2, rStashedAR[AROFF(m_numArgsAndFlags)]);
   }
   if (debug) { // "assertion": the emitPrologueWork path fixes up rVmSp.
     a.  movq   (0, rVmSp);

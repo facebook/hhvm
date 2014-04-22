@@ -339,7 +339,7 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   vixl::MacroAssembler a { mainCode };
   vixl::MacroAssembler astubs { stubsCode };
   TCA start = mainCode.frontier();
-  a.   Ldr   (rAsm.W(), rVmFp[AROFF(m_numArgsAndGenCtorFlags)]);
+  a.   Ldr   (rAsm.W(), rVmFp[AROFF(m_numArgsAndFlags)]);
   for (auto i = 0; i < dvs.size(); ++i) {
     a. Cmp   (rAsm.W(), dvs[i].first);
     emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second, false));

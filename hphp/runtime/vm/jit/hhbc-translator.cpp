@@ -2379,8 +2379,8 @@ void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
     fn = gen(LdClsCtor, makeCatch(), cls);
   }
   gen(IncRef, obj);
-  auto numArgsAndGenCtorFlags = ActRec::encodeNumArgs(numParams, false, true);
-  emitFPushActRec(fn, obj, numArgsAndGenCtorFlags, nullptr);
+  auto numArgsAndFlags = ActRec::encodeNumArgs(numParams, false, false, true);
+  emitFPushActRec(fn, obj, numArgsAndFlags, nullptr);
 }
 
 void HhbcTranslator::emitFPushCtor(int32_t numParams) {

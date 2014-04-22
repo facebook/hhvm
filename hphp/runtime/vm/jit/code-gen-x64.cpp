@@ -3366,7 +3366,7 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
     });
   m_as.storeq  (m_rScratch, spReg[spOffset + int(AROFF(m_invName))]);
   m_as.storel  (safe_cast<int32_t>(nArgs),
-                spReg[spOffset + int(AROFF(m_numArgsAndGenCtorFlags))]);
+                spReg[spOffset + int(AROFF(m_numArgsAndFlags))]);
 
   emitAdjustSp(spReg, dstLoc(0).reg(), spOffset);
 }
@@ -3427,7 +3427,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     a.  storeq (funcLoc.reg(0), spReg[offset_m_func]);
   }
 
-  a.    storel (nArgs, spReg[spOffset + int(AROFF(m_numArgsAndGenCtorFlags))]);
+  a.    storel (nArgs, spReg[spOffset + int(AROFF(m_numArgsAndFlags))]);
 
   emitAdjustSp(spReg, dstLoc(0).reg(), spOffset);
 }

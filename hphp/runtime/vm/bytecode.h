@@ -229,10 +229,11 @@ struct ActRec {
       uint32_t m_soff;         // Saved offset of caller from beginning of
                                //   caller's Func's bytecode.
 
-      // Bits 0-29 are the number of function args.
-      // Bit 30 is whether this ActRec embedded in a Continuation object.
+      // Bits 0-28 are the number of function args.
+      // Bit 29 is whether the locals were already decrefd (used by unwinder)
+      // Bit 30 is whether this ActRec is embedded in a Resumable object.
       // Bit 31 is whether this ActRec came from FPushCtor*.
-      uint32_t m_numArgsAndGenCtorFlags;
+      uint32_t m_numArgsAndFlags;
     };
   };
   union {
@@ -265,45 +266,58 @@ struct ActRec {
   bool skipFrame() const;
 
   /**
-   * Accessors for the packed m_numArgsAndGenCtorFlags field. We track
+   * Accessors for the packed m_numArgsAndFlags field. We track
    * whether ActRecs came from FPushCtor* so that during unwinding we
    * can set the flag not to call destructors for objects whose
    * constructors exit via an exception.
    */
 
   int32_t numArgs() const {
-    return m_numArgsAndGenCtorFlags & ~(3u << 30);
+    return m_numArgsAndFlags & ~(7u << 29);
+  }
+
+  bool localsDecRefd() const {
+    return m_numArgsAndFlags & (1u << 29);
   }
 
   bool resumed() const {
-    return m_numArgsAndGenCtorFlags & (1u << 30);
+    return m_numArgsAndFlags & (1u << 30);
   }
 
   bool isFromFPushCtor() const {
-    return m_numArgsAndGenCtorFlags & (1u << 31);
+    return m_numArgsAndFlags & (1u << 31);
   }
 
   static inline uint32_t
-  encodeNumArgs(uint32_t numArgs, bool resumed, bool isFPushCtor) {
-    assert((numArgs & (1u << 30)) == 0);
-    return numArgs | (resumed << 30) | (isFPushCtor << 31);
+  encodeNumArgs(uint32_t numArgs, bool localsDecRefd, bool resumed,
+                bool isFPushCtor) {
+    assert((numArgs & (1u << 29)) == 0);
+    return numArgs |
+      (localsDecRefd << 29) |
+      (resumed << 30) |
+      (isFPushCtor << 31);
   }
 
   void initNumArgs(uint32_t numArgs) {
-    m_numArgsAndGenCtorFlags = encodeNumArgs(numArgs, false, false);
+    m_numArgsAndFlags = encodeNumArgs(numArgs, false, false, false);
   }
 
   void initNumArgsFromResumable(uint32_t numArgs) {
-    m_numArgsAndGenCtorFlags = encodeNumArgs(numArgs, true, false);
+    m_numArgsAndFlags = encodeNumArgs(numArgs, false, true, false);
   }
 
   void initNumArgsFromFPushCtor(uint32_t numArgs) {
-    m_numArgsAndGenCtorFlags = encodeNumArgs(numArgs, false, true);
+    m_numArgsAndFlags = encodeNumArgs(numArgs, false, false, true);
   }
 
   void setNumArgs(uint32_t numArgs) {
-    m_numArgsAndGenCtorFlags = encodeNumArgs(numArgs, resumed(),
-                                             isFromFPushCtor());
+    m_numArgsAndFlags = encodeNumArgs(numArgs, localsDecRefd(), resumed(),
+                                      isFromFPushCtor());
+  }
+
+  void setLocalsDecRefd() {
+    assert(!(m_numArgsAndFlags & (1 << 29)));
+    m_numArgsAndFlags |= 1 << 29;
   }
 
   static void* encodeThis(ObjectData* obj, Class* cls) {

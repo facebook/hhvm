@@ -1,0 +1,1 @@
+Fatal error: array_fill_keys: keys must be ints or strings in %s/test/slow/strict/array_fill_keys_error.php on line 9

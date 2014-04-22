@@ -1,0 +1,9 @@
+Warning: array_fill_keys: keys must be ints or strings in %s/test/slow/strict/array_fill_keys_warn.php on line 9
+array(3) {
+  [1234]=>
+  string(3) "foo"
+  ["foo"]=>
+  string(3) "foo"
+  ["1.234"]=>
+  string(3) "foo"
+}

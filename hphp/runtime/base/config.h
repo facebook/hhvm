@@ -25,6 +25,17 @@ namespace HPHP {
 
 typedef folly::dynamic IniSettingMap;
 
+/**
+ * Parts of the language can individually be made stricter, warning or
+ * erroring when there's dangerous/unintuive usage; for example,
+ * array_fill_keys() with non-int/string keys: Hack.Lang.StrictArrayFillKeys
+ */
+enum class HackStrictOption {
+  OFF, // PHP5 behavior
+  WARN,
+  ERROR
+};
+
 struct Config {
 
   static void Parse(const std::string &config, IniSettingMap &ini, Hdf &hdf);
@@ -53,6 +64,9 @@ struct Config {
                             const uint64_t defValue = 0);
   static double GetDouble(const IniSettingMap &ini, const Hdf& config,
                           const double defValue = 0);
+  static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
+                                              const Hdf& config,
+                                              const bool EnableHipHopSyntax);
 
   template<class T>
   static void Get(const IniSettingMap &ini, const Hdf& config, T &data) {

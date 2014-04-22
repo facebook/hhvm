@@ -24,6 +24,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/string-bag.h"
 #include "hphp/util/deprecated/base.h"
 #include "hphp/util/deprecated/declare-boost-types.h"
@@ -233,6 +234,7 @@ public:
   static bool EnableAspTags;
   static bool EnableXHP;
   static bool IntsOverflowToInts;
+  static HackStrictOption StrictArrayFillKeys;
   static int ParserThreadCount;
 
   static int GetScannerType();

@@ -348,6 +348,8 @@ bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
+HackStrictOption RuntimeOption::StrictArrayFillKeys
+    = HackStrictOption::OFF;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -1241,6 +1243,10 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
       Hdf lang = config["Hack"]["Lang"];
       IntsOverflowToInts =
         Config::GetBool(ini, lang["IntsOverflowToInts"], EnableHipHopSyntax);
+      StrictArrayFillKeys =
+        Config::GetHackStrictOption(ini,
+                                    lang["StrictArrayFillKeys"],
+                                    EnableHipHopSyntax);
     }
     {
       Hdf repo = config["Repo"];

@@ -248,12 +248,13 @@ Variant f_array_fill_keys(const Variant& keys, const Variant& value) {
     // See tests/slow/ext_array/array_fill_keys_tostring.php for examples.
     if (LIKELY(key.isInteger() || key.isString())) {
       ai.set(key, value);
-    } else if (RuntimeOption::EnableHipHopSyntax) {
-      // @todo (fredemmott): Use the Zend toString() behavior, but retain the
-      // warning/error behind a separate config setting
-      raise_warning("array_fill_keys: keys must be ints or strings");
-      ai.set(key, value);
     } else {
+      if (RuntimeOption::StrictArrayFillKeys == HackStrictOption::WARN) {
+        raise_warning("array_fill_keys: keys must be ints or strings");
+      } else if (RuntimeOption::StrictArrayFillKeys ==
+                 HackStrictOption::ERROR) {
+        raise_error("array_fill_keys: keys must be ints or strings");
+      }
       ai.set(key.toString(), value);
     }
   }

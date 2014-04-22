@@ -123,6 +123,7 @@ bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
 bool Option::EnableXHP = false;
 bool Option::IntsOverflowToInts = false;
+HackStrictOption Option::StrictArrayFillKeys = HackStrictOption::OFF;
 int Option::ParserThreadCount = 0;
 
 int Option::GetScannerType() {
@@ -252,8 +253,15 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     Config::GetBool(ini, config["EnableHipHopExperimentalSyntax"]);
   EnableShortTags = Config::GetBool(ini, config["EnableShortTags"], true);
 
-  IntsOverflowToInts =
-    Config::GetBool(ini, config["Hack"]["Lang"]["IntsOverflowToInts"], EnableHipHopSyntax);
+  {
+    const Hdf& lang = config["Hack"]["Lang"];
+    IntsOverflowToInts =
+      Config::GetBool(ini, lang["IntsOverflowToInts"], EnableHipHopSyntax);
+    StrictArrayFillKeys =
+      Config::GetHackStrictOption(ini,
+                                  lang["StrictArrayFillKeys"],
+                                  EnableHipHopSyntax);
+  }
 
   EnableAspTags = Config::GetBool(ini, config["EnableAspTags"]);
 

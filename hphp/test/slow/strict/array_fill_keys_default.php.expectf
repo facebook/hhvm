@@ -1,0 +1,8 @@
+array(3) {
+  [1234]=>
+  string(3) "foo"
+  ["foo"]=>
+  string(3) "foo"
+  ["1.234"]=>
+  string(3) "foo"
+}

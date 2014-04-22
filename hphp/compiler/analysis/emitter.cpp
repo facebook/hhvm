@@ -6676,7 +6676,7 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
     }
     if (builtin) {
       if (auto const typeAnnotation = par->annotation()) {
-        pi.setBuiltinType(typeAnnotation->dataType());
+        pi.setBuiltinType(typeAnnotation->dataType(true));
       }
     }
 

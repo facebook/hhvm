@@ -50,7 +50,15 @@ ParameterExpression::ParameterExpression(
   , m_attributeList(attributeList)
   , m_variadic(variadic)
 {
-  m_type = toLower(type ? type->vanillaName() : "");
+  if (type) {
+    TypeAnnotation t = *type;
+    if (t.isNullable()) {
+      t = t.stripNullable();
+    }
+    m_type = toLower(t.vanillaName());
+  } else {
+    m_type = "";
+  }
   if (m_defaultValue) {
     m_defaultValue->setContext(InParameterExpression);
   }

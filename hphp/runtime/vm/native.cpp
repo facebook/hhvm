@@ -183,18 +183,20 @@ bool coerceFCallArgs(TypedValue* args,
     }                                                   \
     break; /* end of case */
 
-    switch (pi.builtinType()) {
-      CASE(Boolean)
-      CASE(Int64)
-      CASE(Double)
-      CASE(String)
-      CASE(Array)
-      CASE(Object)
-      CASE(Resource)
-      case KindOfUnknown:
-        break;
-      default:
-        not_reached();
+    if (!pi.typeConstraint().isNullable() || args[-i].m_type != KindOfNull) {
+      switch (pi.builtinType()) {
+        CASE(Boolean)
+        CASE(Int64)
+        CASE(Double)
+        CASE(String)
+        CASE(Array)
+        CASE(Object)
+        CASE(Resource)
+        case KindOfUnknown:
+          break;
+        default:
+          not_reached();
+      }
     }
 
 #undef CASE

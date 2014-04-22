@@ -55,6 +55,10 @@ const char *FastCGITransport::getUrl() {
   return m_requestURI.c_str();
 }
 
+const std::string FastCGITransport::getScriptFilename() {
+  return m_scriptFilename;
+}
+
 const std::string FastCGITransport::getPathTranslated() {
   return m_pathTranslated;
 }
@@ -385,6 +389,7 @@ void FastCGITransport::onHeadersComplete() {
   m_extendedMethod = getRawHeader(s_extendedMethod);
   m_httpVersion = getRawHeader(s_httpVersion);
   m_serverObject = getRawHeader(s_scriptName);
+  m_scriptFilename = getRawHeader(s_scriptFilename);
   m_pathTranslated = getRawHeader(s_pathTranslated);
   m_documentRoot = getRawHeader(s_documentRoot);
   if (!m_documentRoot.empty() &&
@@ -428,27 +433,33 @@ void FastCGITransport::onHeadersComplete() {
     m_httpVersion = Transport::getHTTPVersion();
   }
 
-  if (m_pathTranslated.empty()) {
-    // If someone follows http://wiki.nginx.org/HttpFastcgiModule they won't
-    // pass in PATH_TRANSLATED and instead will just send SCRIPT_FILENAME
-    m_pathTranslated = getRawHeader(s_scriptFilename);
+  if (m_scriptFilename.empty()) {
+    // According to php-fpm, some servers don't set $SCRIPT_FILENAME. In
+    // this case, it uses $PATH_TRANSLATED.
+    m_scriptFilename = getRawHeader(s_pathTranslated);
   }
 
   // do a check for mod_proxy_cgi and remove the start portion of the string
   const std::string modProxy = "proxy:fcgi://";
-  if (m_pathTranslated.find(modProxy) == 0) {
-    m_pathTranslated = m_pathTranslated.substr(modProxy.length());
+  if (m_scriptFilename.find(modProxy) == 0) {
+    m_scriptFilename = m_scriptFilename.substr(modProxy.length());
     // remove everything before the first / which is host:port
-    int slashPos = m_pathTranslated.find('/');
+    int slashPos = m_scriptFilename.find('/');
     if (slashPos != String::npos) {
-      m_pathTranslated = m_pathTranslated.substr(slashPos);
+      m_scriptFilename = m_scriptFilename.substr(slashPos);
     }
   }
 
-  // RequestURI needs path_translated to not include the document root
+  // RequestURI needs script_filename and path_translated to not include
+  // the document root
   if (!m_pathTranslated.empty()) {
     if (m_pathTranslated.find(m_documentRoot) == 0) {
       m_pathTranslated = m_pathTranslated.substr(m_documentRoot.length());
+    }
+  }
+  if (!m_scriptFilename.empty()) {
+    if (m_scriptFilename.find(m_documentRoot) == 0) {
+      m_scriptFilename = m_scriptFilename.substr(m_documentRoot.length());
     } else {
       // if the document root isn't in the url set document root to /
       m_documentRoot = "/";

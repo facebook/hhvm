@@ -573,8 +573,8 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, const Variant& data, int s
     }
   } else {
     if (check_class_map && !SOAP_GLOBAL(classmap).empty() &&
-        data.isString() && !data.toString().empty()) {
-      String clsname = data.toString();
+        data.isObject()) {
+      const String& clsname = data.toObject()->o_getClassName();
       for (ArrayIter iter(SOAP_GLOBAL(classmap)); iter; ++iter) {
         if (same(iter.second(), clsname)) {
           /* TODO: namespace isn't stored */
@@ -1532,12 +1532,13 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model,
     encodePtr enc;
 
     Variant data;
-    if (get_zval_property(object, model->u_element->name.c_str(), &data) &&
-        data.isNull() && !model->u_element->nillable &&
+    bool propExists =
+      get_zval_property(object, model->u_element->name.c_str(), &data);
+    if (propExists && data.isNull() && !model->u_element->nillable &&
         model->min_occurs > 0 && !strict) {
       return 0;
     }
-    if (!data.isNull()) {
+    if (propExists) {
       enc = model->u_element->encode;
       if ((model->max_occurs == -1 || model->max_occurs > 1) &&
           data.isArray() && data.toArray()->isVectorData()) {

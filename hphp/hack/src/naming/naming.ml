@@ -781,9 +781,12 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
        *   private ?WaitHandle<this> wh = ...; // e.g. generic preparables
        *)
     let cname = snd (Env.class_name env id) in
+    let gen_read_api_covariance =
+      (cname = "\\GenReadApi" || cname = "\\GenReadIdxApi") in
     let awaitable_covariance =
       (cname = "\\Awaitable" || cname = "\\WaitHandle") in
-    let allow_this = allow_this && awaitable_covariance in
+    let allow_this = allow_this &&
+      (awaitable_covariance || gen_read_api_covariance) in
     N.Happly (Env.class_name env id, hintl ~allow_this env hl)
 
 and get_constraint env tparam =
@@ -827,7 +830,7 @@ let check_name_collision methods =
 (* Checking for shadowing of method type parameters *)
 (*****************************************************************************)
 
-let shadowed_type_param p (pos, name) = 
+let shadowed_type_param p (pos, name) =
   error_l [
     p, Printf.sprintf "You cannot re-bind the type parameter %s" name;
     pos, Printf.sprintf "%s is already bound here" name
@@ -924,8 +927,8 @@ and class_check env c =
   List.iter check_constraint c.c_tparams;
   ()
 
-and type_paraml env tparams = 
-  let _, ret = List.fold_left 
+and type_paraml env tparams =
+  let _, ret = List.fold_left
     (fun (seen, tparaml) (((p, name), _) as tparam) ->
       match SMap.get name seen with
       | None -> (SMap.add name p seen, (type_param env tparam)::tparaml)

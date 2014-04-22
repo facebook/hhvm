@@ -114,8 +114,8 @@ and sub_type env ty1 ty2 =
   | (_, (Tapply ((_, ("\\Continuation" | "\\ImmVector" | "\\ImmSet")), [ty1]))),
     (_, (Tapply ((_, ("\\Continuation" | "\\ImmVector" | "\\ImmSet")), [ty2]))) ->
       sub_type env ty1 ty2
-  | (_, (Tapply ((_, ("\\Pair" | "\\ImmMap")), [kty1; vty1]))),
-    (_, (Tapply ((_, ("\\Pair" | "\\ImmMap")), [kty2; vty2]))) ->
+  | (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty1; vty1]))),
+    (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty2; vty2]))) ->
       let env = sub_type env kty1 kty2 in
       sub_type env vty1 vty2
   | (p1, (Tapply (x1, tyl1) as ty1_)), (p2, (Tapply (x2, tyl2) as ty2_)) ->

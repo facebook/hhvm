@@ -814,7 +814,9 @@ void HhbcTranslator::emitInitThisLoc(int32_t id) {
   }
   auto const tmpThis = gen(LdThis, makeExitSlow(), m_irb->fp());
   gen(IncRef, tmpThis);
+  auto const oldLoc = ldLoc(id, DataTypeCountness);
   gen(StLoc, LocalId(id), m_irb->fp(), tmpThis);
+  gen(DecRef, oldLoc);
 }
 
 void HhbcTranslator::emitCGetL(int32_t id) {
@@ -4965,7 +4967,7 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
       break;
 
     case OpInitThisLoc:
-      setImmLocType(0, Type::Gen);
+      setImmLocType(0, Type::Cell);
       break;
 
     case OpSetL: {

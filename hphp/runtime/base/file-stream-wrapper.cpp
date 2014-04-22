@@ -33,7 +33,8 @@ MemFile* FileStreamWrapper::openFromCache(const String& filename,
     return nullptr;
   }
 
-  String relative = FileCache::GetRelativePath(filename.c_str());
+  String relative =
+    FileCache::GetRelativePath(File::TranslatePath(filename).c_str());
   std::unique_ptr<MemFile> file(NEWOBJ(MemFile)());
   bool ret = file->open(relative, mode);
   if (ret) {
@@ -44,9 +45,9 @@ MemFile* FileStreamWrapper::openFromCache(const String& filename,
 
 File* FileStreamWrapper::open(const String& filename, const String& mode,
                               int options, const Variant& context) {
-
-  if (!valid(filename)) return nullptr;
-  String fname = TranslatePath(filename);
+  String fname =
+    !strncmp(filename.data(), "file://", sizeof("file://") - 1)
+    ? filename.substr(sizeof("file://") - 1) : filename;
 
   if (MemFile *file = openFromCache(fname, mode)) {
     return file;
@@ -61,7 +62,7 @@ File* FileStreamWrapper::open(const String& filename, const String& mode,
   }
 
   std::unique_ptr<PlainFile> file(NEWOBJ(PlainFile)());
-  bool ret = file->open(fname, mode);
+  bool ret = file->open(File::TranslatePath(fname), mode);
   if (!ret) {
     raise_warning("%s", file->getLastError().c_str());
     return nullptr;
@@ -70,9 +71,8 @@ File* FileStreamWrapper::open(const String& filename, const String& mode,
 }
 
 Directory* FileStreamWrapper::opendir(const String& path) {
-  if (!valid(path)) return nullptr;
   std::unique_ptr<PlainDirectory> dir(
-    NEWOBJ(PlainDirectory)(TranslatePath(path))
+    NEWOBJ(PlainDirectory)(File::TranslatePath(path))
   );
   if (!dir->isValid()) {
     raise_warning("%s", dir->getLastError().c_str());
@@ -82,24 +82,24 @@ Directory* FileStreamWrapper::opendir(const String& path) {
 }
 
 int FileStreamWrapper::rename(const String& oldname, const String& newname) {
-  return !valid(oldname) || !valid(newname) ? -1 :
+  int ret =
     RuntimeOption::UseDirectCopy ?
-      FileUtil::directRename(TranslatePath(oldname).data(),
-                             TranslatePath(newname).data())
+      FileUtil::directRename(File::TranslatePath(oldname).data(),
+                             File::TranslatePath(newname).data())
                                  :
-      FileUtil::rename(TranslatePath(oldname).data(),
-                       TranslatePath(newname).data());
+      FileUtil::rename(File::TranslatePath(oldname).data(),
+                       File::TranslatePath(newname).data());
+  return ret;
 }
 
 int FileStreamWrapper::mkdir(const String& path, int mode, int options) {
   if (options & k_STREAM_MKDIR_RECURSIVE)
     return mkdir_recursive(path, mode);
-  return valid(path) ? ::mkdir(TranslatePath(path).data(), mode) : -1;
+  return ::mkdir(File::TranslatePath(path).data(), mode);
 }
 
 int FileStreamWrapper::mkdir_recursive(const String& path, int mode) {
-  if (!valid(path)) return -1;
-  String fullpath = TranslatePath(path);
+  String fullpath = File::TranslatePath(path);
   if (fullpath.size() > PATH_MAX) {
     errno = ENAMETOOLONG;
     return -1;

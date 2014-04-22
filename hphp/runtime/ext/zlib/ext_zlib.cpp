@@ -61,7 +61,7 @@ static class ZlibStreamWrapper : public Stream::Wrapper {
     String translated;
     if (fname.find("://") == -1) {
       translated = File::TranslatePath(fname);
-      if (MemFile* file = PlainStreamWrapper::openFromCache(translated, mode)) {
+      if (MemFile* file = FileStreamWrapper::openFromCache(translated, mode)) {
         file->unzip();
         return file;
       }

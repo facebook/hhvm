@@ -523,8 +523,7 @@ static bool findFileWrapper(const String& file, void* ctx) {
   assert(context->path.isNull());
 
   Stream::Wrapper* w = Stream::getWrapperFromURI(file);
-  if (!dynamic_cast<FileStreamWrapper*>(w) &&
-      !dynamic_cast<PlainStreamWrapper*>(w)) {
+  if (!dynamic_cast<FileStreamWrapper*>(w)) {
     if (w->stat(file, context->s) == 0) {
       context->path = file;
       return true;

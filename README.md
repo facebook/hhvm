@@ -45,6 +45,8 @@ All the open issues tagged [php5 incompatibility](https://github.com/facebook/hh
 
 HHVM is licensed under the PHP and Zend licenses except as otherwise noted.
 
+The Hack typechecker (`hphp/hack`) is licensed under the BSD license (`hphp/hack/LICENSE`) with an additional grant of patent rights (`hphp/hack/PATENTS`) except as otherwise noted.
+
 ## Reporting Crashes
 
 See [Reporting Crashes](https://github.com/facebook/hhvm/wiki/Reporting-Crashes) for helpful tips on how to report crashes in an actionable manner.

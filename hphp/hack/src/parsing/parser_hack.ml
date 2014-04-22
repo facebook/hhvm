@@ -3136,8 +3136,8 @@ and xhp_body pos name env =
       if is_xhp env
       then
         (match xhp env with
-        | _, Xml (_, _, el) ->
-            el @ xhp_body pos name env
+        | (_, Xml (_, _, _)) as xml ->
+            xml :: xhp_body pos name env
         | _ -> xhp_body pos name env)
       else
         (match L.xhptoken env.lb with

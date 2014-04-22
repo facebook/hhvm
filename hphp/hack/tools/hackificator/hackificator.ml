@@ -124,9 +124,11 @@ let visit ast =
       | Method (method_def) -> (
           let visibility_modifiers = [Ast_php.Public; Ast_php.Private; Ast_php.Protected]
           in
-          let fold = (fun x acc -> if List.mem (unwrap x) visibility_modifiers then false else acc)
+          let is_visibility_modifier = (fun x -> List.mem (unwrap x) visibility_modifiers)
           in
-          if List.fold_right fold method_def.f_modifiers true
+          let has_visibility_modifier = List.exists is_visibility_modifier method_def.f_modifiers
+          in
+          if not has_visibility_modifier
           then begin
             (* todo: insert at the correct position *)
             let ii = List.hd (Lib_parsing_php.ii_of_any (ClassStmt (Method method_def))) in

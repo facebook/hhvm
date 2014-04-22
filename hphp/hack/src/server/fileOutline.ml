@@ -11,10 +11,10 @@
 open Utils
 
 let get_class_summary class_ =
-  let class_name = snd class_.Nast.c_name in
+  let class_name = Utils.strip_ns (snd class_.Nast.c_name) in
   let res_list =
     (fst class_.Nast.c_name,
-      snd class_.Nast.c_name, "class") :: [] in
+      class_name, "class") :: [] in
   let res_list = List.fold_left begin fun acc method_ ->
     (fst method_.Nast.m_name,
       class_name ^ "::" ^ snd method_.Nast.m_name, "method"):: acc
@@ -47,5 +47,5 @@ let outline content =
       List.rev_append (get_class_summary class_) acc
     end [] classes in
   List.fold_left begin fun acc f_name ->
-      (fst f_name, snd f_name, "function") :: acc
+      (fst f_name, Utils.strip_ns (snd f_name), "function") :: acc
     end res_list funs

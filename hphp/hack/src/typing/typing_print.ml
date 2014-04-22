@@ -207,6 +207,15 @@ module Full = struct
     let buf = Buffer.create 50 in
     ty ISet.empty env (Buffer.add_string buf) x;
     Buffer.contents buf
+  
+  let to_string_strip_ns env x =
+    let buf = Buffer.create 50 in
+    let add_string str =
+      let str = Utils.strip_ns str in
+      Buffer.add_string buf str
+    in
+    ty ISet.empty env add_string x;
+    Buffer.contents buf
 
 end
 
@@ -379,5 +388,6 @@ end
 let error ty = ErrorString.type_ ty
 let suggest ty = Suggest.type_ ty
 let full env ty = Full.to_string env ty
+let full_strip_ns env ty = Full.to_string_strip_ns env ty
 let class_ c = PrintClass.class_type c
 let fun_ f = PrintFun.fun_type f

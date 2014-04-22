@@ -16,5 +16,6 @@
 val error: Typing_defs.ty_ -> string
 val suggest: Typing_defs.ty -> string
 val full: Typing_env.env -> Typing_defs.ty -> string
+val full_strip_ns: Typing_env.env -> Typing_defs.ty -> string
 val class_: Typing_defs.class_type -> string
 val fun_: Typing_defs.fun_type -> string

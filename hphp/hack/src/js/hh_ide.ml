@@ -207,7 +207,7 @@ let complete_global completion_type fn =
         (match (Typing_env.Funs.get s) with
         | Some fun_ ->
             let it = (Typing_reason.Rnone, Typing_defs.Tfun fun_) in
-            let type_ = Typing_print.full (Typing_env.empty fn) it in
+            let type_ = Typing_print.full_strip_ns (Typing_env.empty fn) it in
             let sig_ = s^" "^type_ in
             SMap.add sig_ (Autocomplete.make_result s Pos.none type_)
                 !result

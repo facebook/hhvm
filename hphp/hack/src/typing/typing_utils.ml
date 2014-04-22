@@ -66,7 +66,7 @@ let add_auto_result env class_members =
   Autocomplete.auto_complete_result :=
     SMap.fold begin fun x class_elt acc ->
       let ty = class_elt.ce_type in
-      let type_ = Typing_print.full env ty in
+      let type_ = Typing_print.full_strip_ns env ty in
       let pos = Reason.to_pos (fst ty) in
       let sig_ = x^" "^type_ in
       SMap.add sig_ (Autocomplete.make_result x pos type_) acc
@@ -106,7 +106,7 @@ let process_arg_info fun_args used_args env =
     end (0, None) used_args in
     if result <> None then (
       argument_info_expected := Some (List.map begin
-          fun (x,y) -> x, Typing_print.full env y end fun_args);
+          fun (x,y) -> x, Typing_print.full_strip_ns env y end fun_args);
       argument_info_position := result
     );
   ()
@@ -128,7 +128,7 @@ let save_infer env pos ty =
       let l, start, end_ = Pos.info_pos pos in
       if l = line && start <= char_pos && char_pos <= end_ && !infer_type = None
       then begin
-        infer_type := Some (Typing_print.full env ty);
+        infer_type := Some (Typing_print.full_strip_ns env ty);
         infer_pos := Some (Reason.to_pos (fst ty));
       end
       else ()

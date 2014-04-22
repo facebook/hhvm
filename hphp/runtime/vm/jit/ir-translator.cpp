@@ -160,17 +160,6 @@ void IRTranslator::assertType(const JIT::Location& l,
 }
 
 void
-IRTranslator::translateMod(const NormalizedInstruction& i) {
-  HHIR_EMIT(Mod);
-}
-
-
-void
-IRTranslator::translateDiv(const NormalizedInstruction& i) {
-  HHIR_EMIT(Div);
-}
-
-void
 IRTranslator::translateBinaryArithOp(const NormalizedInstruction& i) {
   switch (i.op()) {
   case Op::Add:    HHIR_EMIT(Add);
@@ -270,26 +259,6 @@ IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
 }
 
 void
-IRTranslator::translateCGetL(const NormalizedInstruction& i) {
-  HHIR_EMIT(CGetL, i.imm[0].u_LA);
-}
-
-void
-IRTranslator::translatePushL(const NormalizedInstruction& ni) {
-  HHIR_EMIT(PushL, ni.imm[0].u_LA);
-}
-
-void
-IRTranslator::translateCGetL2(const NormalizedInstruction& ni) {
-  HHIR_EMIT(CGetL2, ni.imm[0].u_LA);
-}
-
-void
-IRTranslator::translateVGetL(const NormalizedInstruction& i) {
-  HHIR_EMIT(VGetL, i.imm[0].u_LA);
-}
-
-void
 IRTranslator::translateAssignToLocalOp(const NormalizedInstruction& ni) {
   auto const op = ni.op();
   assert(op == OpSetL || op == OpBindL);
@@ -335,36 +304,6 @@ void IRTranslator::translateBoxRNop(const NormalizedInstruction& i) {
 }
 
 void
-IRTranslator::translateInt(const NormalizedInstruction& i) {
-  HHIR_EMIT(Int, i.imm[0].u_I64A);
-}
-
-void
-IRTranslator::translateDouble(const NormalizedInstruction& i) {
-  HHIR_EMIT(Double, i.imm[0].u_DA);
-}
-
-void
-IRTranslator::translateString(const NormalizedInstruction& i) {
-  HHIR_EMIT(String, (i.imm[0].u_SA));
-}
-
-void
-IRTranslator::translateArray(const NormalizedInstruction& i) {
-  HHIR_EMIT(Array, i.imm[0].u_AA);
-}
-
-void
-IRTranslator::translateNewArray(const NormalizedInstruction& i) {
-  HHIR_EMIT(NewArray, i.imm[0].u_IVA);
-}
-
-void
-IRTranslator::translateCheckProp(const NormalizedInstruction& i) {
-  HHIR_EMIT(CheckProp, i.imm[0].u_SA);
-}
-
-void
 IRTranslator::translateInitProp(const NormalizedInstruction& i) {
   HHIR_EMIT(InitProp, i.imm[0].u_SA, static_cast<InitPropOp>(i.imm[1].u_OA));
 }
@@ -396,26 +335,6 @@ void IRTranslator::translatePredictTStk(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateBreakTraceHint(const NormalizedInstruction&) {
-}
-
-void
-IRTranslator::translateCns(const NormalizedInstruction& i) {
-  HHIR_EMIT(Cns, i.imm[0].u_SA);
-}
-
-void
-IRTranslator::translateCnsE(const NormalizedInstruction& i) {
-  HHIR_EMIT(CnsE, i.imm[0].u_SA);
-}
-
-void
-IRTranslator::translateCnsU(const NormalizedInstruction& i) {
-  HHIR_EMIT(CnsU, i.imm[0].u_SA, i.imm[1].u_SA);
-}
-
-void
-IRTranslator::translateDefCns(const NormalizedInstruction& i) {
-  HHIR_EMIT(DefCns, (i.imm[0].u_SA));
 }
 
 void
@@ -479,10 +398,6 @@ IRTranslator::translateRetV(const NormalizedInstruction& i) {
   HHIR_EMIT(RetV, i.inlineReturn);
 }
 
-void IRTranslator::translateAGetL(const NormalizedInstruction& i) {
-  HHIR_EMIT(AGetL, i.imm[0].u_LA);
-}
-
 void IRTranslator::translateCreateCont(const NormalizedInstruction& i) {
   HHIR_EMIT(CreateCont, i.nextSk().offset());
 }
@@ -493,10 +408,6 @@ void IRTranslator::translateContEnter(const NormalizedInstruction& i) {
 
 void IRTranslator::translateContRaise(const NormalizedInstruction& i) {
   HHIR_UNIMPLEMENTED(ContRaise);
-}
-
-void IRTranslator::translateContCheck(const NormalizedInstruction& i) {
-  HHIR_EMIT(ContCheck, i.imm[0].u_IVA);
 }
 
 void IRTranslator::translateYield(const NormalizedInstruction& i) {
@@ -526,23 +437,18 @@ void IRTranslator::translateFPassL(const NormalizedInstruction& ni) {
 
 void IRTranslator::translateFPassS(const NormalizedInstruction& ni) {
   if (ni.preppedByRef) {
-    translateVGetS(ni);
+    unpackVGetS(nullptr, ni);
   } else {
-    translateCGetS(ni);
+    unpackCGetS(nullptr, ni);
   }
 }
 
 void IRTranslator::translateFPassG(const NormalizedInstruction& ni) {
   if (ni.preppedByRef) {
-    translateVGetG(ni);
+    unpackVGetG(nullptr, ni);
   } else {
-    translateCGetG(ni);
+    unpackCGetG(nullptr, ni);
   }
-}
-
-void
-IRTranslator::translateIssetL(const NormalizedInstruction& ni) {
-  HHIR_EMIT(IssetL, ni.imm[0].u_LA);
 }
 
 static inline DataType typeOpToDataType(IsTypeOp op) {
@@ -612,85 +518,12 @@ IRTranslator::translateIncDecL(const NormalizedInstruction& i) {
   HHIR_EMIT(IncDecL, isPre(op), isInc(op), isIncDecO(op), i.imm[0].u_LA);
 }
 
-void
-IRTranslator::translateUnsetL(const NormalizedInstruction& i) {
-  HHIR_EMIT(UnsetL, i.imm[0].u_LA);
-}
-
 void IRTranslator::translateDefCls(const NormalizedInstruction& i) {
   int cid = i.imm[0].u_IVA;
   HHIR_EMIT(DefCls, cid, i.source.offset());
 }
 
 void IRTranslator::translateNopDefCls(const NormalizedInstruction&) {}
-
-void IRTranslator::translateDefFunc(const NormalizedInstruction& i) {
-  int fid = i.imm[0].u_IVA;
-  HHIR_EMIT(DefFunc, fid);
-}
-
-void
-IRTranslator::translateFPushFunc(const NormalizedInstruction& i) {
-  HHIR_EMIT(FPushFunc, (i.imm[0].u_IVA));
-}
-
-void
-IRTranslator::translateFPushClsMethod(const NormalizedInstruction& i) {
-  HHIR_EMIT(FPushClsMethod, i.imm[0].u_IVA);
-}
-
-void
-IRTranslator::translateFPushClsMethodD(const NormalizedInstruction& i) {
-  HHIR_EMIT(FPushClsMethodD,
-            i.imm[0].u_IVA, // num params
-            i.imm[1].u_SA,  // method name
-            i.imm[2].u_SA); // class name
-}
-
-void
-IRTranslator::translateFPushClsMethodF(const NormalizedInstruction& i) {
-  HHIR_EMIT(FPushClsMethodF, i.imm[0].u_IVA /* # of arguments */);
-}
-
-void
-IRTranslator::translateFPushObjMethodD(const NormalizedInstruction& i) {
-  HHIR_EMIT(FPushObjMethodD,
-            i.imm[0].u_IVA, // numParams
-            i.imm[1].u_SA); // methodName
-}
-
-void IRTranslator::translateFPushCtor(const NormalizedInstruction& i) {
-  HHIR_EMIT(FPushCtor, (i.imm[0].u_IVA));
-}
-
-void IRTranslator::translateFPushCtorD(const NormalizedInstruction& i) {
-
-  HHIR_EMIT(FPushCtorD, (i.imm[0].u_IVA), (i.imm[1].u_SA));
-}
-
-void IRTranslator::translateCreateCl(const NormalizedInstruction& i) {
-  HHIR_EMIT(CreateCl, (i.imm[0].u_IVA), (i.imm[1].u_SA));
-}
-
-void
-IRTranslator::translateBareThis(const NormalizedInstruction &i) {
-  HHIR_EMIT(BareThis, (i.imm[0].u_OA));
-}
-
-void
-IRTranslator::translateInitThisLoc(const NormalizedInstruction& i) {
-  HHIR_EMIT(InitThisLoc, i.imm[0].u_LA);
-}
-
-void
-IRTranslator::translateFPushFuncD(const NormalizedInstruction& i) {
-  HHIR_EMIT(FPushFuncD, (i.imm[0].u_IVA), (i.imm[1].u_SA));
-}
-
-void
-IRTranslator::translateFPushFuncU(const NormalizedInstruction& i) {
-  HHIR_EMIT(FPushFuncU, i.imm[0].u_IVA, i.imm[1].u_SA, i.imm[2].u_SA);
-}
 
 void
 IRTranslator::translateFPassCOp(const NormalizedInstruction& i) {
@@ -715,11 +548,6 @@ IRTranslator::translateFPassV(const NormalizedInstruction& i) {
 
 void IRTranslator::translateFPassVNop(const NormalizedInstruction& i) {
   assert(i.noOp);
-}
-
-void
-IRTranslator::translateFPushCufIter(const NormalizedInstruction& i) {
-  HHIR_EMIT(FPushCufIter, i.imm[0].u_IVA, i.imm[1].u_IA);
 }
 
 void
@@ -960,12 +788,6 @@ IRTranslator::translateFCallArray(const NormalizedInstruction& i) {
 }
 
 void
-IRTranslator::translateNewPackedArray(const NormalizedInstruction& i) {
-  int numArgs = i.imm[0].u_IVA;
-  HHIR_EMIT(NewPackedArray, numArgs);
-}
-
-void
 IRTranslator::translateNewStructArray(const NormalizedInstruction& i) {
   auto numArgs = i.immVec.size();
   auto ids = i.immVec.vec32();
@@ -975,32 +797,6 @@ IRTranslator::translateNewStructArray(const NormalizedInstruction& i) {
     keys[i] = unit->lookupLitstrId(ids[i]);
   }
   HHIR_EMIT(NewStructArray, numArgs, keys);
-}
-
-void
-IRTranslator::translateNewCol(const NormalizedInstruction& i) {
-  HHIR_EMIT(NewCol, i.imm[0].u_IVA, i.imm[1].u_IVA);
-}
-
-void
-IRTranslator::translateStaticLocInit(const NormalizedInstruction& i) {
-  HHIR_EMIT(StaticLocInit, i.imm[0].u_IVA, i.imm[1].u_SA);
-}
-
-void IRTranslator::translateStaticLoc(const NormalizedInstruction& i) {
-  HHIR_EMIT(StaticLoc, i.imm[0].u_IVA, i.imm[1].u_SA);
-}
-
-// check class hierarchy and fail if no match
-void
-IRTranslator::translateVerifyParamType(const NormalizedInstruction& i) {
-  int param = i.imm[0].u_IVA;
-  HHIR_EMIT(VerifyParamType, param);
-}
-
-void
-IRTranslator::translateInstanceOfD(const NormalizedInstruction& i) {
-  HHIR_EMIT(InstanceOfD, (i.imm[0].u_SA));
 }
 
 /*
@@ -1164,18 +960,6 @@ IRTranslator::translateWIterNextK(const NormalizedInstruction& i) {
 }
 
 void
-IRTranslator::translateIterFree(const NormalizedInstruction& i) {
-
-  HHIR_EMIT(IterFree, i.imm[0].u_IVA);
-}
-
-void
-IRTranslator::translateMIterFree(const NormalizedInstruction& i) {
-
-  HHIR_EMIT(MIterFree, i.imm[0].u_IVA);
-}
-
-void
 IRTranslator::translateIterBreak(const NormalizedInstruction& i) {
 
   assert(i.breaksTracelet);
@@ -1188,11 +972,38 @@ IRTranslator::translateDecodeCufIter(const NormalizedInstruction& i) {
   HHIR_EMIT(DecodeCufIter, i.imm[0].u_IVA, i.offset() + i.imm[1].u_BA);
 }
 
-void
-IRTranslator::translateCIterFree(const NormalizedInstruction& i) {
 
-  HHIR_EMIT(CIterFree, i.imm[0].u_IVA);
-}
+/*
+ * Generate HhbcTranslator method callers for all bytecodes, using its
+ * table-defined signature.
+ *
+ * The static_cast is to make it so that the invalid emit##nm call is due to
+ * template parameter substitution failure and thus Not An Error.
+ */
+#define O(nm, imms, pop, push, flags) \
+  template<class HT> \
+  typename std::enable_if<HT::supports##nm, void>::type \
+  IRTranslator::unpack##nm(std::nullptr_t, const NormalizedInstruction& ni) { \
+    static_cast<HT&>(m_hhbcTrans).emit##nm(imms);  \
+  }
+#define NA /**/
+#define ONE(T) ni.imm[0].u_##T
+#define TWO(T1, T2) ni.imm[0].u_##T1, ni.imm[1].u_##T2
+#define THREE(T1, T2, T3) \
+  ni.imm[0].u_##T1, ni.imm[1].u_##T2, ni.imm[2].u_##T3
+#define FOUR(T1, T2, T3, T4) \
+  ni.imm[0].u_##T1, ni.imm[1].u_##T2, ni.imm[2].u_##T3, ni.imm[3].u_##T4
+#define u_OA(_) u_OA
+
+OPCODES
+
+#undef FOUR
+#undef THREE
+#undef TWO
+#undef ONE
+#undef NA
+#undef u_OA
+#undef O
 
 // All vector instructions are handled by one HhbcTranslator method.
 #define MII(instr, ...)                                                 \
@@ -1203,33 +1014,26 @@ MINSTRS
 MII(FPass)
 #undef MII
 
-/*
- * Generate translateBluh methods for regular instructions.
- */
-#define CASE(name) \
-  void IRTranslator::translate##name(const NormalizedInstruction&) { \
-    HHIR_EMIT(name); \
-  }
-
-  REGULAR_INSTRS
-#undef CASE
-
 void
 IRTranslator::translateInstrWork(const NormalizedInstruction& i) {
   auto const op = i.op();
 
   switch (op) {
-#define CASE(iNm)                               \
-    case Op::iNm:                               \
-      translate ## iNm(i);                      \
-      break;
-#define TRANSLATE(name, inst) translate ## name(inst); break;
-    INSTRS
-      PSEUDOINSTR_DISPATCH(TRANSLATE)
+#define CASE(iNm) \
+    case Op::iNm: return unpack ## iNm(nullptr, i);
+
+    REGULAR_INSTRS
+#undef CASE
+
+#define CASE(nm) \
+    case Op::nm: return translate ## nm(i); break;
+#define TRANSLATE(name, inst) translate ## name(i); break;
+    IRREGULAR_INSTRS
+    PSEUDOINSTR_DISPATCH(TRANSLATE)
 #undef TRANSLATE
 #undef CASE
     default:
-      not_reached();
+      always_assert(false);
   }
 }
 

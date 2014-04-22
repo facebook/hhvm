@@ -21,40 +21,24 @@
  */
 
 #define IRREGULAR_INSTRS \
-  CASE(AGetL) \
   CASE(Add) \
   CASE(AddO) \
-  CASE(Array) \
   CASE(AssertObjL) \
   CASE(AssertObjStk) \
   CASE(AssertTL) \
   CASE(AssertTStk) \
   CASE(Await) \
-  CASE(BareThis) \
   CASE(BindM) \
   CASE(BoxR) \
   CASE(BoxRNop) \
   CASE(BreakTraceHint) \
-  CASE(CGetL) \
-  CASE(CGetL2) \
   CASE(CGetM) \
-  CASE(CIterFree) \
-  CASE(CheckProp) \
   CASE(ClsCnsD) \
-  CASE(Cns) \
-  CASE(CnsE) \
-  CASE(CnsU) \
-  CASE(ContCheck) \
   CASE(ContEnter) \
   CASE(ContRaise) \
-  CASE(CreateCl) \
   CASE(CreateCont) \
   CASE(DecodeCufIter) \
   CASE(DefCls) \
-  CASE(DefCns) \
-  CASE(DefFunc) \
-  CASE(Div) \
-  CASE(Double) \
   CASE(EmptyM) \
   CASE(FCall) \
   CASE(FCallArray) \
@@ -67,47 +51,26 @@
   CASE(FPassS) \
   CASE(FPassV) \
   CASE(FPassVNop) \
-  CASE(FPushClsMethod) \
-  CASE(FPushClsMethodD) \
-  CASE(FPushClsMethodF) \
-  CASE(FPushCtor) \
-  CASE(FPushCtorD) \
-  CASE(FPushCufIter) \
-  CASE(FPushFunc) \
-  CASE(FPushFuncD) \
-  CASE(FPushFuncU) \
-  CASE(FPushObjMethodD) \
   CASE(IncDecL) \
   CASE(IncDecM) \
   CASE(IncStat) \
   CASE(InitProp) \
-  CASE(InitThisLoc) \
-  CASE(InstanceOfD) \
-  CASE(Int) \
-  CASE(IssetL) \
   CASE(IssetM) \
   CASE(IterBreak) \
-  CASE(IterFree) \
   CASE(IterInit) \
   CASE(IterInitK) \
   CASE(IterNext) \
   CASE(IterNextK) \
   CASE(Jmp) \
   CASE(JmpNS) \
-  CASE(MIterFree) \
   CASE(MIterInit) \
   CASE(MIterInitK) \
   CASE(MIterNext) \
   CASE(MIterNextK) \
-  CASE(Mod) \
-  CASE(NewArray) \
-  CASE(NewCol) \
-  CASE(NewPackedArray) \
   CASE(NewStructArray) \
   CASE(NopDefCls) \
   CASE(PredictTL) \
   CASE(PredictTStk) \
-  CASE(PushL) \
   CASE(RetC) \
   CASE(RetV) \
   CASE(SSwitch) \
@@ -116,17 +79,11 @@
   CASE(SetOpM) \
   CASE(SetWithRefLM) \
   CASE(SetWithRefRM) \
-  CASE(StaticLoc) \
-  CASE(StaticLocInit) \
-  CASE(String) \
   CASE(Switch) \
   CASE(UnboxR) \
   CASE(UnboxRNop) \
-  CASE(UnsetL) \
   CASE(UnsetM) \
-  CASE(VGetL) \
   CASE(VGetM) \
-  CASE(VerifyParamType) \
   CASE(WIterInit) \
   CASE(WIterInitK) \
   CASE(WIterNext) \
@@ -137,43 +94,79 @@
 
 #define REGULAR_INSTRS \
   CASE(AGetC) \
+  CASE(AGetL) \
   CASE(AKExists) \
   CASE(Abs) \
   CASE(AddElemC) \
   CASE(AddNewElemC) \
+  CASE(Array) \
   CASE(ArrayIdx) \
+  CASE(BareThis) \
   CASE(BindG) \
   CASE(BindS) \
   CASE(BitNot) \
   CASE(CGetG) \
+  CASE(CGetL) \
+  CASE(CGetL2) \
   CASE(CGetS) \
+  CASE(CIterFree) \
   CASE(CastArray) \
   CASE(CastDouble) \
   CASE(CastInt) \
   CASE(CastObject) \
   CASE(CastString) \
   CASE(Ceil) \
+  CASE(CheckProp) \
   CASE(CheckThis) \
   CASE(ClassExists) \
   CASE(Clone) \
+  CASE(Cns) \
+  CASE(CnsE) \
+  CASE(CnsU) \
   CASE(ColAddElemC) \
   CASE(ColAddNewElemC) \
   CASE(Concat) \
+  CASE(ContCheck) \
   CASE(ContCurrent) \
   CASE(ContKey) \
   CASE(ContValid) \
+  CASE(CreateCl) \
+  CASE(DefCns) \
+  CASE(DefFunc) \
+  CASE(Div) \
+  CASE(Double) \
   CASE(Dup) \
   CASE(EmptyG) \
   CASE(EmptyS) \
+  CASE(FPushClsMethodD) \
+  CASE(FPushClsMethod) \
+  CASE(FPushClsMethodF) \
+  CASE(FPushCtor) \
+  CASE(FPushCtorD) \
+  CASE(FPushCufIter) \
+  CASE(FPushFunc) \
+  CASE(FPushFuncD) \
+  CASE(FPushFuncU) \
+  CASE(FPushObjMethodD) \
   CASE(False) \
   CASE(Floor) \
   CASE(Idx) \
+  CASE(InitThisLoc) \
   CASE(InstanceOf) \
+  CASE(InstanceOfD) \
+  CASE(Int) \
   CASE(InterfaceExists) \
   CASE(IssetG) \
+  CASE(IssetL) \
   CASE(IssetS) \
+  CASE(IterFree) \
   CASE(LateBoundCls) \
+  CASE(MIterFree) \
+  CASE(Mod) \
   CASE(NativeImpl) \
+  CASE(NewArray) \
+  CASE(NewCol) \
+  CASE(NewPackedArray) \
   CASE(Nop) \
   CASE(Not) \
   CASE(Null) \
@@ -184,18 +177,25 @@
   CASE(PopR) \
   CASE(PopV) \
   CASE(Print) \
+  CASE(PushL) \
   CASE(Self) \
   CASE(SetG) \
   CASE(SetS) \
   CASE(Shl) \
   CASE(Shr) \
   CASE(Sqrt) \
+  CASE(StaticLoc) \
+  CASE(StaticLocInit) \
+  CASE(String) \
   CASE(Strlen) \
   CASE(This) \
   CASE(TraitExists) \
   CASE(True) \
+  CASE(UnsetL) \
   CASE(VGetG) \
+  CASE(VGetL) \
   CASE(VGetS) \
+  CASE(VerifyParamType) \
   CASE(VerifyRetTypeC) \
   CASE(VerifyRetTypeV) \
   CASE(Xor) \

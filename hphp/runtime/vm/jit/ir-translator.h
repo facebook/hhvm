@@ -65,9 +65,44 @@ struct IRTranslator {
   void translateInstrWork(const NormalizedInstruction& i);
   void interpretInstr(const NormalizedInstruction& i);
   void passPredictedAndInferredTypes(const NormalizedInstruction& i);
-# define CASE(nm) void translate ## nm(const NormalizedInstruction& i);
-INSTRS
-PSEUDOINSTRS
+
+  // Generated callers to HhbcTranslator.
+  //
+  // There are two overloads of "unpackName" for each opcode name, distinguished
+  // by the first parameter. The first overload will be taken out by enable_if
+  // if HhbcTranslator::supportsName is not true. The first parameter of this
+  // one is nullptr_t.
+  //
+  // The second overload is there to take over if the first one fails, and just
+  // asserts. The first parameter is void*. These methods are always called with
+  // nullptr as the first argument; this way, the first overload is preferred if
+  // it exists but the compiler is allowed to fall back to the second overload
+  // by way of an implicit conversion.
+  //
+  // The overloads are templates so that invalid calls to emitName methods on
+  // HhbcTranslator are template parameter substitution failures, which is of
+  // course Not An Error.
+  //
+  // If you're hitting the always_assert below, that means there's an opcode in
+  // REGULAR_INSTRS that doesn't have a corresponding method in HhbcTranslator
+  // with the correct signature.
+# define O(nm, a_, b_, c_, d_) \
+  template<class HT = HhbcTranslator> \
+  typename std::enable_if<HT::supports##nm, void>::type \
+  unpack##nm(std::nullptr_t, const NormalizedInstruction& i); \
+  \
+  template<class HT = HhbcTranslator> \
+  void unpack##nm(void*, const NormalizedInstruction& i) { \
+    always_assert(false); \
+  }
+
+  OPCODES
+# undef O
+
+  // Handwritten callers to HhbcTranslator.
+# define CASE(nm) void translate##nm(const NormalizedInstruction& i);
+  IRREGULAR_INSTRS
+  PSEUDOINSTRS
 # undef CASE
 
   HhbcTranslator m_hhbcTrans;

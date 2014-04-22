@@ -432,6 +432,10 @@ struct HhbcTranslator {
   void emitIsTypeC(DataType t);
   void emitIsTypeL(uint32_t id, DataType t);
 
+#define CASE(nm) static constexpr bool supports##nm = true;
+  REGULAR_INSTRS
+#undef CASE
+
 private:
   /*
    * MInstrTranslator is responsible for translating one of the vector

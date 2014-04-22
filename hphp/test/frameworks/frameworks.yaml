@@ -40,6 +40,13 @@
       # release of 1.1.2; test is fixed in master, but we want to test
       # latest stable
       - assetic/tests/Assetic/Test/Filter/GoogleClosure/CompilerApiFilterTest.php
+  # Stable (2.x) doesn't use phpunit, so targetting the next major release
+  cakephp3:
+    url: https://github.com/cakephp/cakephp
+    branch: 3.0
+    commit: 542eddbc8fdf0f56dbf283ae57015974d3276fa7
+    install_root: cakephp3
+    test_root: cakephp3
   codeigniter:
     url: https://github.com/EllisLab/CodeIgniter.git
     # Stable is 2.1.4, but need develop since we have pull requests

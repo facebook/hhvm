@@ -53,8 +53,8 @@ public:
    * TimeZone database queries.
    */
   static bool IsValid(const String& name);
-  static Array GetNames();
   static Array GetAbbreviations();
+  static Array GetNamesToCountryCodes();
   static String AbbreviationToName(String abbr, int utcoffset = -1,
                                    bool isdst = true);
 

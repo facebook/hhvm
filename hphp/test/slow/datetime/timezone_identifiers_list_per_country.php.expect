@@ -1,0 +1,80 @@
+array(29) {
+  [0]=>
+  string(12) "America/Adak"
+  [1]=>
+  string(17) "America/Anchorage"
+  [2]=>
+  string(13) "America/Boise"
+  [3]=>
+  string(15) "America/Chicago"
+  [4]=>
+  string(14) "America/Denver"
+  [5]=>
+  string(15) "America/Detroit"
+  [6]=>
+  string(28) "America/Indiana/Indianapolis"
+  [7]=>
+  string(20) "America/Indiana/Knox"
+  [8]=>
+  string(23) "America/Indiana/Marengo"
+  [9]=>
+  string(26) "America/Indiana/Petersburg"
+  [10]=>
+  string(25) "America/Indiana/Tell_City"
+  [11]=>
+  string(21) "America/Indiana/Vevay"
+  [12]=>
+  string(25) "America/Indiana/Vincennes"
+  [13]=>
+  string(23) "America/Indiana/Winamac"
+  [14]=>
+  string(14) "America/Juneau"
+  [15]=>
+  string(27) "America/Kentucky/Louisville"
+  [16]=>
+  string(27) "America/Kentucky/Monticello"
+  [17]=>
+  string(19) "America/Los_Angeles"
+  [18]=>
+  string(17) "America/Menominee"
+  [19]=>
+  string(18) "America/Metlakatla"
+  [20]=>
+  string(16) "America/New_York"
+  [21]=>
+  string(12) "America/Nome"
+  [22]=>
+  string(27) "America/North_Dakota/Beulah"
+  [23]=>
+  string(27) "America/North_Dakota/Center"
+  [24]=>
+  string(30) "America/North_Dakota/New_Salem"
+  [25]=>
+  string(15) "America/Phoenix"
+  [26]=>
+  string(13) "America/Sitka"
+  [27]=>
+  string(15) "America/Yakutat"
+  [28]=>
+  string(16) "Pacific/Honolulu"
+}
+array(3) {
+  [0]=>
+  string(15) "Atlantic/Azores"
+  [1]=>
+  string(16) "Atlantic/Madeira"
+  [2]=>
+  string(13) "Europe/Lisbon"
+}
+array(1) {
+  [0]=>
+  string(13) "Europe/Athens"
+}
+array(1) {
+  [0]=>
+  string(14) "Asia/Jerusalem"
+}
+array(1) {
+  [0]=>
+  string(14) "America/Belize"
+}

@@ -130,7 +130,9 @@ class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasClone> {
   public: int64_t t_getoffset(const Object& datetime);
   public: Array t_gettransitions();
   public: static Array ti_listabbreviations();
-  public: static Array ti_listidentifiers();
+  public: static Variant ti_listidentifiers(int64_t what = q_DateTimeZone$$ALL,
+                                            const String& country =
+                                              null_string);
 
   // Helper for TimeZone -> c_DateTimeZone conversion
   public: static Object wrap(SmartResource<TimeZone> tz) {
@@ -233,7 +235,8 @@ Variant f_strtotime(const String& input,
 
 String f_date_default_timezone_get();
 bool f_date_default_timezone_set(const String& name);
-Array f_timezone_identifiers_list();
+Variant f_timezone_identifiers_list(int64_t what = q_DateTimeZone$$ALL,
+                                    const String& country = null_string);
 Array f_timezone_abbreviations_list();
 Variant f_timezone_name_from_abbr(const String& abbr, int gmtoffset = -1,
                                   bool isdst = true);

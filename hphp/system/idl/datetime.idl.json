@@ -823,9 +823,21 @@
             "flags": [
             ],
             "return": {
-                "type": "StringVec"
+                "type": "Variant"
             },
             "args": [
+              {
+                  "name": "what",
+                  "type": "Int64",
+                  "value": "2047",
+                  "desc": "One of DateTimeZone class constants."
+              },
+              {
+                  "name": "country",
+                  "type": "String",
+                  "value": "null_string",
+                  "desc": "The timestamp which is used as a base for the calculation of relative dates."
+              }
             ]
         },
         {
@@ -1415,10 +1427,22 @@
                         "IsStatic"
                     ],
                     "return": {
-                        "type": "VariantMap",
+                        "type": "Variant",
                         "desc": "Returns array on success or FALSE on failure."
                     },
                     "args": [
+                      {
+                          "name": "what",
+                          "type": "Int64",
+                          "value": "2047",
+                          "desc": "One of DateTimeZone class constants."
+                      },
+                      {
+                          "name": "country",
+                          "type": "String",
+                          "value": "null_string",
+                          "desc": "The timestamp which is used as a base for the calculation of relative dates."
+                      }
                     ]
                 }
             ],

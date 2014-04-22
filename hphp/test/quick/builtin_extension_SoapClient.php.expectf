@@ -1,6 +1,6 @@
 SoapClient
 
-Warning: SoapClient::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
+Warning: SoapClient::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
 object(SoapClient)#1 (0) {
 }
 
@@ -38,7 +38,7 @@ array(13) {
 ================
 A_SoapClient
 
-Warning: SoapClient::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+Warning: SoapClient::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
 object(A_SoapClient)#2 (1) {
   ["___x"]=>
   NULL

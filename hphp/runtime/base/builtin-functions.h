@@ -203,6 +203,9 @@ Object create_object(const String& s, const Array &params, bool init = true);
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
                                 int level = 0, TypedValue *rv = nullptr)
   __attribute__((cold));
+void throw_missing_min_arguments_nr(const char *fn, int expected, int got,
+                                    int level = 0, TypedValue *rv = nullptr)
+  __attribute__((cold));
 void throw_toomany_arguments_nr(const char *fn, int num, int level = 0,
                                 TypedValue *rv = nullptr)
   __attribute__((cold));

@@ -7,9 +7,9 @@ bool(false)
 array(0) {
 }
 
-Warning: array_chunk() expects exactly 2 parameters, 1 given in %s/test/slow/ext_array/1767.php on line 6
+Warning: array_chunk() expects at least 2 parameters, 1 given in %s/test/slow/ext_array/1767.php on line 6
 NULL
 
-Warning: array_chunk() expects exactly 2 parameters, 1 given in %s/test/slow/ext_array/1767.php on line 7
+Warning: array_chunk() expects at least 2 parameters, 1 given in %s/test/slow/ext_array/1767.php on line 7
 NULL
 bool(true)

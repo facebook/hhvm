@@ -1,6 +1,6 @@
 SQLite3
 
-Warning: SQLite3::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
+Warning: SQLite3::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
 object(SQLite3)#1 (0) {
 }
 
@@ -48,7 +48,7 @@ array(18) {
 ================
 A_SQLite3
 
-Warning: SQLite3::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+Warning: SQLite3::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
 object(A_SQLite3)#2 (1) {
   ["___x"]=>
   NULL

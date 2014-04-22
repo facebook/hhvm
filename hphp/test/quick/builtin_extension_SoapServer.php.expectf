@@ -1,6 +1,6 @@
 SoapServer
 
-Warning: SoapServer::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
+Warning: SoapServer::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
 object(SoapServer)#1 (0) {
 }
 
@@ -30,7 +30,7 @@ array(9) {
 ================
 A_SoapServer
 
-Warning: SoapServer::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+Warning: SoapServer::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
 object(A_SoapServer)#2 (1) {
   ["___x"]=>
   NULL

@@ -78,6 +78,25 @@ using HPHP::JIT::EagerCallerFrame;
   ArrNR arrNR_##input(cell_##input->m_data.parr);                 \
   const Array& arr_##input = arrNR_##input.asArray();
 
+#define getCheckedArrayColumnRet(input, fail)                     \
+  auto const cell_##input = static_cast<const Variant&>(input).asCell(); \
+  if (UNLIKELY(cell_##input->m_type != KindOfArray)) {            \
+    if (cell_##input->m_type == KindOfString ||                   \
+        cell_##input->m_type == KindOfStaticString) {             \
+      throw_bad_type_exception("array_column() expects parameter" \
+                               " 1 to be array, string given");   \
+    } else if (cell_##input->m_type == KindOfInt64) {             \
+      throw_bad_type_exception("array_column() expects parameter" \
+                               " 1 to be array, integer given");  \
+    } else {                                                      \
+      throw_expected_array_exception();                           \
+    }                                                             \
+    return fail;                                                  \
+  }                                                               \
+  ArrNR arrNR_##input(cell_##input->m_data.parr);                 \
+  Array arr_##input = arrNR_##input.asArray();
+
+
 #define getCheckedArray(input) getCheckedArrayRet(input, uninit_null())
 
 Variant f_array_change_key_case(const Variant& input, int64_t case_ /* = 0 */) {
@@ -136,7 +155,8 @@ static inline bool array_column_coerce_key(Variant &key, const char *name) {
     key = key.toString();
     return true;
   } else {
-    raise_warning("The %s key should be either a string or an integer", name);
+    raise_warning("array_column(): The %s key should be either a string "
+                  "or an integer", name);
     return false;
   }
 }
@@ -144,7 +164,7 @@ static inline bool array_column_coerce_key(Variant &key, const char *name) {
 Variant f_array_column(const Variant& input, const Variant& val_key,
                        const Variant& idx_key /* = null_variant */) {
   /* Be strict about array type */
-  getCheckedArrayRet(input, uninit_null());
+  getCheckedArrayColumnRet(input, uninit_null());
   Variant val = val_key, idx = idx_key;
   if (!array_column_coerce_key(val, "column") ||
       !array_column_coerce_key(idx, "index")) {

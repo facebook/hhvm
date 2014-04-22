@@ -1,6 +1,6 @@
 DOMAttr
 
-Warning: DOMAttr::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
+Warning: DOMAttr::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
 object(DOMAttr)#1 (0) {
 }
 
@@ -56,7 +56,7 @@ array(22) {
 ================
 A_DOMAttr
 
-Warning: DOMAttr::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+Warning: DOMAttr::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
 object(A_DOMAttr)#2 (1) {
   ["___x"]=>
   NULL

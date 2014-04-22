@@ -1,6 +1,6 @@
 SimpleXMLElement
 
-Warning: SimpleXMLElement::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
+Warning: SimpleXMLElement::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
 object(SimpleXMLElement)#1 (0) {
 }
 
@@ -58,7 +58,7 @@ array(23) {
 ================
 A_SimpleXMLElement
 
-Warning: SimpleXMLElement::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+Warning: SimpleXMLElement::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
 object(A_SimpleXMLElement)#2 (0) {
 }
 

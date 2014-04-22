@@ -1,6 +1,6 @@
 DOMProcessingInstruction
 
-Warning: DOMProcessingInstruction::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
+Warning: DOMProcessingInstruction::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 5
 object(DOMProcessingInstruction)#1 (0) {
 }
 
@@ -54,7 +54,7 @@ array(21) {
 ================
 A_DOMProcessingInstruction
 
-Warning: DOMProcessingInstruction::__construct() expects exactly 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
+Warning: DOMProcessingInstruction::__construct() expects at least 1 parameter, 0 given in %s/builtin_extensions.inc on line 23
 object(A_DOMProcessingInstruction)#2 (1) {
   ["___x"]=>
   NULL

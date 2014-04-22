@@ -1,6 +1,6 @@
 SoapHeader
 
-Warning: SoapHeader::__construct() expects exactly 2 parameters, 0 given in %s/builtin_extensions.inc on line 5
+Warning: SoapHeader::__construct() expects at least 2 parameters, 0 given in %s/builtin_extensions.inc on line 5
 object(SoapHeader)#1 (0) {
 }
 
@@ -14,7 +14,7 @@ array(1) {
 ================
 A_SoapHeader
 
-Warning: SoapHeader::__construct() expects exactly 2 parameters, 0 given in %s/builtin_extensions.inc on line 23
+Warning: SoapHeader::__construct() expects at least 2 parameters, 0 given in %s/builtin_extensions.inc on line 23
 object(A_SoapHeader)#2 (1) {
   ["___x"]=>
   NULL

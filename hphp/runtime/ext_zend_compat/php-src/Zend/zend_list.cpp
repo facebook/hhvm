@@ -28,6 +28,7 @@
 #include "zend_API.h"
 #include "php.h"
 #include "php_streams.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 ZEND_API int le_index_ptr;
 
@@ -48,6 +49,7 @@ namespace HPHP {
     auto& dtor = s_resource_dtors.at(type);
     if (dtor.list_dtor_ex) {
       TSRMLS_FETCH();
+      JIT::VMRegAnchor _;
       dtor.list_dtor_ex(this TSRMLS_CC);
     }
   }

@@ -93,8 +93,9 @@ void emitBindJ(CodeBlock& cb, CodeBlock& stubs,
 
   TCA sr = (req == JIT::REQ_BIND_JMP
             ? emitEphemeralServiceReq(mcg->code.stubs(), mcg->getFreeStub(),
-                                      req, toSmash, dest.offset())
-            : emitServiceReq(mcg->code.stubs(), req, toSmash, dest.offset()));
+                                      req, toSmash, dest.toAtomicInt())
+            : emitServiceReq(mcg->code.stubs(), req, toSmash,
+                             dest.toAtomicInt()));
 
   Asm a { cb };
   if (cb.base() == stubs.base()) {

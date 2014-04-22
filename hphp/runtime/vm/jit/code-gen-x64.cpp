@@ -2587,14 +2587,12 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::emitReqBindAddr(const Func* func,
-                                    TCA& dest,
-                                    Offset offset) {
+void CodeGenerator::emitReqBindAddr(TCA& dest,
+                                    SrcKey sk) {
   mcg->setJmpTransID((TCA)&dest);
 
   dest = emitServiceReq(mcg->code.stubs(), REQ_BIND_ADDR,
-                        &dest,
-                        offset);
+                        &dest, sk.toAtomicInt());
 }
 
 void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
@@ -2636,7 +2634,7 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
     m_as.   jmp(m_rScratch[indexReg*8]);
 
     for (int i = 0; i < data->cases; i++) {
-      emitReqBindAddr(data->func, table[i], data->targets[i]);
+      emitReqBindAddr(table[i], SrcKey(curFunc(), data->targets[i], resumed()));
     }
   } else {
     int64_t indexVal = index->intVal();
@@ -2645,12 +2643,12 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       indexVal -= data->base;
       if (indexVal >= data->cases - 2 || indexVal < 0) {
         emitBindJmp(m_mainCode, m_stubsCode,
-                    SrcKey(data->func, data->defaultOff, data->resumed));
+                    SrcKey(curFunc(), data->defaultOff, resumed()));
         return;
       }
     }
     emitBindJmp(m_mainCode, m_stubsCode,
-                SrcKey(data->func, data->targets[indexVal], data->resumed));
+                SrcKey(curFunc(), data->targets[indexVal], resumed()));
   }
 }
 
@@ -2662,10 +2660,10 @@ void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
   for (int64_t i = 0; i < data->numCases; ++i) {
     table->add(data->cases[i].str, nullptr);
     TCA* addr = table->find(data->cases[i].str);
-    emitReqBindAddr(data->func, *addr, data->cases[i].dest);
+    emitReqBindAddr(*addr, SrcKey(curFunc(), data->cases[i].dest, resumed()));
   }
   TCA* def = m_mcg->allocData<TCA>(sizeof(TCA), 1);
-  emitReqBindAddr(data->func, *def, data->defaultOff);
+  emitReqBindAddr(*def, SrcKey(curFunc(), data->defaultOff, resumed()));
 
   cgCallHelper(m_as,
                CppCall(sswitchHelperFast),
@@ -2696,9 +2694,11 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
   auto jmptab = m_mcg->allocData<TCA>(sizeof(TCA), data->numCases + 1);
   for (int i = 0; i < data->numCases; ++i) {
     strtab[i] = data->cases[i].str;
-    emitReqBindAddr(data->func, jmptab[i], data->cases[i].dest);
+    emitReqBindAddr(jmptab[i],
+                    SrcKey(curFunc(), data->cases[i].dest, resumed()));
   }
-  emitReqBindAddr(data->func, jmptab[data->numCases], data->defaultOff);
+  emitReqBindAddr(jmptab[data->numCases],
+                  SrcKey(curFunc(), data->defaultOff, resumed()));
 
   cgCallHelper(m_as,
                CppCall(sswitchHelperSlow),

@@ -3369,9 +3369,7 @@ void HhbcTranslator::emitSwitch(const ImmVector& iv,
   }
 
   JmpSwitchData data;
-  data.func        = curFunc();
   data.base        = base;
-  data.resumed     = resumed();
   data.bounded     = bounded;
   data.cases       = iv.size();
   data.defaultOff  = defaultOff;
@@ -3416,7 +3414,6 @@ void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
   }
 
   LdSSwitchData data;
-  data.func       = curFunc();
   data.numCases   = numCases;
   data.cases      = &cases[0];
   data.defaultOff = bcOff() + iv.strvec()[iv.size() - 1].dest;

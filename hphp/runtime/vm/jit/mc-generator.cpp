@@ -1244,8 +1244,8 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
   case REQ_BIND_ADDR:
   {
     TCA toSmash = (TCA)args[0];
-    Offset off = args[1];
-    sk = SrcKey(liveFunc(), off, liveResumed());
+    auto ai = static_cast<SrcKey::AtomicInt>(args[1]);
+    sk = SrcKey::fromAtomicInt(ai);
     if (requestNum == REQ_BIND_SIDE_EXIT) {
       SKTRACE(3, sk, "side exit taken!\n");
     }
@@ -1273,7 +1273,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
   } break;
 
   case REQ_RETRANSLATE_OPT: {
-    auto ai = (SrcKey::AtomicInt)args[0];
+    auto ai = static_cast<SrcKey::AtomicInt>(args[0]);
     TransID transId = (TransID)args[1];
     sk = SrcKey::fromAtomicInt(ai);
     start = retranslateOpt(transId, false);

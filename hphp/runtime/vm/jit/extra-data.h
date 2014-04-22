@@ -77,7 +77,6 @@ struct LdSSwitchData : IRExtraData {
 
   LdSSwitchData* clone(Arena& arena) const {
     LdSSwitchData* target = new (arena) LdSSwitchData;
-    target->func       = func;
     target->numCases   = numCases;
     target->defaultOff = defaultOff;
     target->cases      = new (arena) Elm[numCases];
@@ -85,7 +84,6 @@ struct LdSSwitchData : IRExtraData {
     return target;
   }
 
-  const Func* func;
   int64_t     numCases;
   const Elm*  cases;
   Offset      defaultOff;
@@ -94,9 +92,7 @@ struct LdSSwitchData : IRExtraData {
 struct JmpSwitchData : IRExtraData {
   JmpSwitchData* clone(Arena& arena) const {
     JmpSwitchData* sd = new (arena) JmpSwitchData;
-    sd->func       = func;
     sd->base       = base;
-    sd->resumed    = resumed;
     sd->bounded    = bounded;
     sd->cases      = cases;
     sd->defaultOff = defaultOff;
@@ -105,9 +101,7 @@ struct JmpSwitchData : IRExtraData {
     return sd;
   }
 
-  const Func* func;
   int64_t base;        // base of switch case
-  bool    resumed;     // whether the destination is in resumed context
   bool    bounded;     // whether switch is bounded or not
   int32_t cases;       // number of cases
   Offset  defaultOff;  // offset of default case

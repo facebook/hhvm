@@ -20,11 +20,11 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/vm/jit/arch.h"
-#include "hphp/runtime/vm/jit/jump-smash.h"
+#include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
@@ -55,21 +55,13 @@ TRACE_SET_MOD(hhir);
  */
 void moveToAlign(CodeBlock& cb,
                  const size_t align /* =kJmpTargetAlign */) {
-  switch (arch()) {
-    case Arch::X64: {
-      X64Assembler a { cb };
-      assert(folly::isPowTwo(align));
-      size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
-      if (leftInBlock == align) return;
-      if (leftInBlock > 2) {
-        a.ud2();
-        leftInBlock -= 2;
-      }
-      break;
-    }
-    case Arch::ARM:
-      // TODO(2967396) implement properly, move function
-      break;
+  X64Assembler a { cb };
+  assert(folly::isPowTwo(align));
+  size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
+  if (leftInBlock == align) return;
+  if (leftInBlock > 2) {
+    a.ud2();
+    leftInBlock -= 2;
   }
 }
 
@@ -308,22 +300,14 @@ void emitRB(X64Assembler& a,
 }
 
 void emitTraceCall(CodeBlock& cb, int64_t pcOff) {
-  switch (arch()) {
-    case Arch::X64: {
-      Asm a { cb };
-      // call to a trace function
-      a.    movq   (a.frontier(), rcx);
-      a.    movq   (rVmFp, rdi);
-      a.    movq   (rVmSp, rsi);
-      a.    movq   (pcOff, rdx);
-      // do the call; may use a trampoline
-      emitCall(a, reinterpret_cast<TCA>(traceCallback));
-      break;
-    }
-    case Arch::ARM:
-      // TODO(2967396) implement properly, move function
-      break;
-  }
+  Asm a { cb };
+  // call to a trace function
+  a.    movq   (a.frontier(), rcx);
+  a.    movq   (rVmFp, rdi);
+  a.    movq   (rVmSp, rsi);
+  a.    movq   (pcOff, rdx);
+  // do the call; may use a trampoline
+  emitCall(a, reinterpret_cast<TCA>(traceCallback));
 }
 
 void emitTestSurpriseFlags(Asm& a) {

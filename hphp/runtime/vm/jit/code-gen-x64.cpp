@@ -43,18 +43,17 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-util.h"
-#include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/code-gen-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/jump-smash.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/layout.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
+#include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -467,7 +466,8 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
                                    const ReqBindJccData* extra) {
   auto& a = m_as;
 
-  prepareForTestAndSmash(m_mainCode, 0, TestAndSmashFlags::kAlignJccAndJmp);
+  mcg->backEnd().prepareForTestAndSmash(m_mainCode, 0,
+                                        TestAndSmashFlags::kAlignJccAndJmp);
   auto const patchAddr = a.frontier();
   auto const jccStub =
     emitEphemeralServiceReq(mcg->code.stubs(),
@@ -960,7 +960,7 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
 
   // do the call; may use a trampoline
   if (sync == SyncOptions::kSmashableAndSyncPoint) {
-    prepareForSmash(a.code(), kCallLen);
+    mcg->backEnd().prepareForSmash(a.code(), kCallLen);
   }
   emitCall(a, call);
   ret.returnAddress = a.frontier();
@@ -2478,7 +2478,7 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
   // this immediate to hold a Func* in the upper 32 bits, and a Class*
   // in the lower 32 bits.  (If both are low-malloced pointers can
   // fit.)  See pmethodCacheMissPath.
-  prepareForSmash(a.code(), kMovLen);
+  mcg->backEnd().prepareForSmash(a.code(), kMovLen);
   auto const movAddr = a.frontier();
   a.    movq   (0x8000000000000000u, rAsm);
   assert(a.frontier() - kMovLen == movAddr);
@@ -2614,7 +2614,7 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
         }
       }
       m_as.    cmpq(data->cases - 2, indexReg);
-      prepareForSmash(m_mainCode, kJmpccLen);
+      mcg->backEnd().prepareForSmash(m_mainCode, kJmpccLen);
       TCA def = emitEphemeralServiceReq(
         mcg->code.stubs(),
         mcg->getFreeStub(),
@@ -5950,20 +5950,6 @@ void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
 
 void CodeGenerator::print() const {
   JIT::print(std::cout, m_unit, &m_state.regs, m_state.asmInfo);
-}
-
-void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
-  void* list = state.patches[block];
-  Address labelAddr = cb.frontier();
-  while (list) {
-    int32_t* toPatch = (int32_t*)list;
-    int32_t diffToNext = *toPatch;
-    ssize_t diff = labelAddr - ((Address)list + sizeof(int32_t));
-    *toPatch = safe_cast<int32_t>(diff); // patch the jump address
-    if (diffToNext == 0) break;
-    void* next = (TCA)list - diffToNext;
-    list = next;
-  }
 }
 
 }}}

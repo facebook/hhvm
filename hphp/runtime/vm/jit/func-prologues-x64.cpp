@@ -66,9 +66,8 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
   assert(kScratchCrossTraceRegs.contains(rax));
   assert(kScratchCrossTraceRegs.contains(rdx));
 
-  const int kAlign = kX64CacheLineSize;
-  const int kAlignMask = kAlign - 1;
   auto funcImm = Immed64(func);
+  const int kAlignMask = kCacheLineMask;
   int loBits = uintptr_t(a.frontier()) & kAlignMask;
   int delta, size;
 

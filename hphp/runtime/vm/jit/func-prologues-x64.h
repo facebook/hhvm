@@ -17,7 +17,8 @@
 #define incl_HPHP_JIT_FUNC_PROLOGUES_X64_H
 
 #include "hphp/util/asm-x64.h"
-#include "hphp/runtime/vm/jit/arch.h"
+#include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -46,7 +47,7 @@ T* funcPrologueToGuardImm(JIT::TCA prologue) {
                                kFuncGuardShortLen - kFuncCmpImm));
   // We padded these so the immediate would fit inside a cache line
   assert(((uintptr_t(retval) ^ (uintptr_t(retval + 1) - 1)) &
-          ~(kX64CacheLineSize - 1)) == 0);
+          ~kCacheLineMask) == 0);
 
   return retval;
 }

@@ -26,6 +26,9 @@ namespace HPHP {  namespace JIT {
 
 class IRUnit;
 
+inline bool isI32(int64_t c) { return c == int32_t(c); }
+inline bool isU32(int64_t c) { return c == uint32_t(c); }
+
 // This value must be consistent with the number of pre-allocated
 // bytes for spill locations in __enterTCHelper in mc-generator.cpp.
 // Be careful when changing this value.

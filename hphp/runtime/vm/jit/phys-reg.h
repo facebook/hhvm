@@ -21,26 +21,7 @@
 
 #include "hphp/vixl/a64/assembler-a64.h"
 
-#include "hphp/runtime/vm/jit/arch.h"
-
 namespace HPHP { namespace JIT {
-
-namespace X64 {
-constexpr auto kNumGPRegs   = 16;
-constexpr auto kNumSIMDRegs = 16;
-constexpr auto kNumRegs     = kNumGPRegs + kNumSIMDRegs;
-}
-
-namespace ARM {
-// ARM machines really only have 32 GP regs. However, vixl has 33 separate
-// register codes, because it treats the zero register and stack pointer (which
-// are really both register 31) separately. Rather than lose this distinction in
-// vixl (it's really helpful for avoiding stupid mistakes), we sacrifice the
-// ability to represent all 32 SIMD regs, and pretend that are 33 GP regs.
-constexpr auto kNumGPRegs   = 33;
-constexpr auto kNumSIMDRegs = 31;
-constexpr auto kNumRegs     = kNumGPRegs + kNumSIMDRegs;
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -59,12 +40,6 @@ struct PhysReg {
  private:
   static constexpr auto kMaxRegs = 64;
   static constexpr auto kSIMDOffset = 33;
-  static_assert(kSIMDOffset >= X64::kNumGPRegs, "");
-  static_assert(kSIMDOffset >= ARM::kNumGPRegs, "");
-  static_assert(kMaxRegs - kSIMDOffset >= X64::kNumSIMDRegs, "");
-  static_assert(kMaxRegs - kSIMDOffset >= ARM::kNumSIMDRegs, "");
-  static_assert(kMaxRegs >= X64::kNumRegs, "");
-  static_assert(kMaxRegs >= ARM::kNumRegs, "");
 
   // These are populated in Map's constructor, because they depend on a
   // RuntimeOption.
@@ -148,6 +123,9 @@ struct PhysReg {
     return *(*this + ScaledIndex(dr.base, 0x1) + dr.disp);
   }
 
+  static int getNumGP();
+  static int getNumSIMD();
+
   /*
    * This struct can be used to efficiently represent a map from PhysReg to T.
    * Note that the semantics are that all keys are present at all times. There
@@ -164,16 +142,8 @@ struct PhysReg {
       // initialized here because they depend on a RuntimeOption so they can't
       // be inited at static init time.
       if (kNumGP == 0 || kNumSIMD == 0) {
-        switch (arch()) {
-          case Arch::X64:
-            kNumGP = X64::kNumGPRegs;
-            kNumSIMD = X64::kNumSIMDRegs;
-            break;
-          case Arch::ARM:
-            kNumGP = ARM::kNumGPRegs;
-            kNumSIMD = ARM::kNumSIMDRegs;
-            break;
-        }
+        kNumGP = getNumGP();
+        kNumSIMD = getNumSIMD();
       }
     }
 

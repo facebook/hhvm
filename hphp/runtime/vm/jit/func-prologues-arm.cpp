@@ -20,7 +20,7 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
-#include "hphp/runtime/vm/jit/jump-smash.h"
+#include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
@@ -40,8 +40,8 @@ void emitStackCheck(int funcDepth, Offset pc) {
   a.   Sub  (rAsm, rAsm, funcDepth + Stack::sSurprisePageSize, vixl::SetFlags);
   // This doesn't need to be smashable, but it is a long jump from mainCode to
   // stubs, so it can't be direct.
-  emitSmashableJump(mcg->code.main(), tx->uniqueStubs.stackOverflowHelper,
-                    CC_L);
+  mcg->backEnd().emitSmashableJump(mcg->code.main(),
+                                   tx->uniqueStubs.stackOverflowHelper, CC_L);
 }
 
 TCA emitFuncGuard(vixl::MacroAssembler& a, Func* func) {

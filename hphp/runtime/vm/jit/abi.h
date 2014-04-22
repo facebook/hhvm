@@ -13,21 +13,27 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_ARCH_H
-#define incl_HPHP_JIT_ARCH_H
+#ifndef incl_HPHP_JIT_ABI_H
+#define incl_HPHP_JIT_ABI_H
 
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
 
 namespace HPHP { namespace JIT {
 
-enum class Arch {
-  X64,
-  ARM,
-};
+// machine-specific register conventions
+struct Abi {
+  RegSet gpUnreserved;   // unreserved general purpose 64-bit registers
+  RegSet gpReserved;     // reserved general purpose 64-bit registers
+  RegSet simdUnreserved; // unreserved floating point / simd 128-bit registers
+  RegSet simdReserved;   // reserved floating point / simd 128-bit registers
+  RegSet calleeSaved;    // callee-saved (gp and simd)
 
-inline Arch arch() {
-  return RuntimeOption::EvalSimulateARM ? Arch::ARM : Arch::X64;
-}
+  // convenience methods
+  RegSet unreserved() const { return gpUnreserved | simdUnreserved; }
+  RegSet gp() const { return gpUnreserved | gpReserved; }
+  RegSet simd() const { return simdUnreserved |simdReserved; }
+  RegSet all() const { return gp() | simd(); }
+};
 
 }}
 

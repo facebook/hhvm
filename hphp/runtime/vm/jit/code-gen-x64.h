@@ -23,11 +23,12 @@
 
 namespace HPHP { namespace JIT { namespace X64 {
 
-constexpr Reg64  rCgGP  (reg::r11);
-constexpr RegXMM rCgXMM0(reg::xmm0);
-constexpr RegXMM rCgXMM1(reg::xmm1);
+// Cache alignment is required for mutable instructions to make sure
+// mutations don't "tear" on remote cpus.
+constexpr size_t kCacheLineSize = 64;
+constexpr size_t kCacheLineMask = kCacheLineSize - 1;
 
-struct CodeGenerator {
+struct CodeGenerator : public JIT::CodeGenerator {
   typedef JIT::X64Assembler Asm;
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
@@ -44,7 +45,10 @@ struct CodeGenerator {
   {
   }
 
-  Address cgInst(IRInstruction* inst);
+  virtual ~CodeGenerator() {
+  }
+
+  Address cgInst(IRInstruction* inst) override;
 
 private:
   const PhysLoc srcLoc(unsigned i) const {
@@ -325,7 +329,6 @@ private:
   const RegAllocInfo::RegMap* m_instRegs; // registers for current m_curInst.
 };
 
-void patchJumps(CodeBlock& cb, CodegenState& state, Block* block);
 void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state);
 
 // Helpers to compute a reference to a TypedValue type and data

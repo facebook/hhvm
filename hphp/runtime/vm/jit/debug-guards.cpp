@@ -13,79 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/debug-guards.h"
 
-#include "hphp/util/asm-x64.h"
-#include "hphp/vixl/a64/macro-assembler-a64.h"
-#include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
-#include "hphp/runtime/vm/jit/jump-smash.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h" // XXX Layering violation.
 
 namespace HPHP { namespace JIT {
 
 static constexpr size_t dbgOff =
   offsetof(ThreadInfo, m_reqInjectionData) +
   RequestInjectionData::debuggerReadOnlyOffset();
-
-//////////////////////////////////////////////////////////////////////
-
-namespace X64 {
-
-void addDbgGuardImpl(SrcKey sk) {
-  Asm a { mcg->code.main() };
-
-  // Emit the checks for debugger attach
-  auto rtmp = rAsm;
-  emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, rtmp);
-  a.   loadb  (rtmp[dbgOff], rbyte(rtmp));
-  a.   testb  ((int8_t)0xff, rbyte(rtmp));
-
-  // Branch to a special REQ_INTERPRET if attached
-  auto const fallback =
-    emitServiceReq(mcg->code.stubs(), REQ_INTERPRET, sk.offset(), 0);
-  a.   jnz    (fallback);
-}
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
-namespace ARM {
-
-void addDbgGuardImpl(SrcKey sk) {
-  vixl::MacroAssembler a { mcg->code.main() };
-
-  vixl::Label after;
-  vixl::Label interpReqAddr;
-
-  // Get the debugger-attached flag from thread-local storage. Don't bother
-  // saving caller-saved regs around the host call; this is between blocks.
-  emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, rAsm);
-
-  // Is the debugger attached?
-  a.   Ldr  (rAsm.W(), rAsm[dbgOff]);
-  a.   Tst  (rAsm, 0xff);
-  // skip jump to stubs if no debugger attached
-  a.   B    (&after, vixl::eq);
-  a.   Ldr  (rAsm, &interpReqAddr);
-  a.   Br   (rAsm);
-  if (!a.isFrontierAligned(8)) {
-    a. Nop  ();
-    assert(a.isFrontierAligned(8));
-  }
-  a.   bind (&interpReqAddr);
-  TCA interpReq =
-    emitServiceReq(mcg->code.stubs(), REQ_INTERPRET, sk.offset(), 0);
-  a.   dc64 (interpReq);
-  a.   bind (&after);
-}
-
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -97,19 +37,14 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec) {
   }
   TCA dbgGuard = mcg->code.main().frontier();
 
-  switch (arch()) {
-    case Arch::X64:
-      X64::addDbgGuardImpl(sk);
-      prepareForSmash(mcg->code.main(), X64::kJmpLen);
-      break;
-    case Arch::ARM:
-      ARM::addDbgGuardImpl(sk);
-      break;
-  }
+  mcg->backEnd().addDbgGuard(mcg->code.main(), mcg->code.stubs(), sk, dbgOff);
 
   // Emit a jump to the actual code
+  //
+  // XXX kJmpLen access here is a layering violation.
+  mcg->backEnd().prepareForSmash(mcg->code.main(), X64::kJmpLen);
   TCA dbgBranchGuardSrc = mcg->code.main().frontier();
-  emitSmashableJump(mcg->code.main(), realCode, CC_None);
+  mcg->backEnd().emitSmashableJump(mcg->code.main(), realCode, CC_None);
 
   // Add it to srcRec
   srcRec->addDebuggerGuard(dbgGuard, dbgBranchGuardSrc);

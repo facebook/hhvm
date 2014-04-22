@@ -20,12 +20,10 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include <unordered_set>
 #include <algorithm>
@@ -49,16 +47,6 @@ namespace {
 using namespace reg;
 struct Interval;
 struct RegPositions;
-
-// machine-specific register conventions
-struct Abi {
-  RegSet gp;      // general purpose 64-bit registers
-  RegSet simd;    // floating point / simd 128-bit registers
-  RegSet saved;   // callee-saved (gp and simd)
-
-  // convenience methods
-  RegSet all() const { return gp | simd; }
-};
 
 typedef StateVector<SSATmp, Interval*> Intervals;
 typedef IdSet<SSATmp> LiveSet;
@@ -365,7 +353,7 @@ XLS::XLS(IRUnit& unit, RegAllocInfo& regs, const Abi& abi)
   , m_posns(unit, 0)
   , m_liveIn(unit, LiveSet())
   , m_edgeCopies(unit, { nullptr, nullptr }) {
-  auto all = abi.all();
+  auto all = abi.unreserved();
   for (auto r : m_blocked) {
     m_blocked[r].blocked = true;
     m_blocked[r].need = 1;
@@ -423,10 +411,10 @@ void XLS::computePositions() {
 // in CodeGenerator.
 RegSet constrainedRegs(Constraint c, const Abi& abi) {
   auto regs = RegSet();
-  if (c & Constraint::GP) regs |= abi.gp;
+  if (c & Constraint::GP) regs |= abi.gpUnreserved;
   if (c & Constraint::SIMD) {
     if (regs.empty() || RuntimeOption::EvalHHIRAllocSIMDRegs) {
-      regs |= abi.simd;
+      regs |= abi.simdUnreserved;
     }
   }
   return regs;
@@ -437,9 +425,9 @@ void srcConstraints(Interval* ivl, const Abi& abi, Constraint constraint) {
   auto allow = constrainedRegs(constraint, abi);
   ivl->allow &= allow;
   ivl->prefer &= allow;
-  if (!(ivl->allow & abi.simd).empty()) {
+  if (!(ivl->allow & abi.simdUnreserved).empty()) {
     // we allow gp and simd, so prefer just simd
-    ivl->prefer &= abi.simd;
+    ivl->prefer &= abi.simdUnreserved;
   }
 }
 
@@ -448,9 +436,9 @@ void dstConstraints(Interval* ivl, const Abi& abi, Constraint constraint) {
   auto allow = constrainedRegs(constraint, abi);
   ivl->allow &= allow;
   ivl->prefer &= allow;
-  if (!(ivl->allow & abi.simd).empty()) {
+  if (!(ivl->allow & abi.simdUnreserved).empty()) {
     // if we allow gp and simd, then prefer just simd
-    ivl->prefer &= abi.simd;
+    ivl->prefer &= abi.simdUnreserved;
   }
   if (ivl->tmp->numWords() == 2 && !(ivl->allow & ivl->prefer).empty()) {
     // we prefer simd, but allow gp and simd, so restrict allow to just
@@ -499,7 +487,7 @@ void XLS::buildIntervals() {
           dest->add(LiveRange(pos, pos + 1));
           dest->tmp = d;
           dest->need = d->numWords();
-          dest->allow = dest->prefer = m_abi.all();
+          dest->allow = dest->prefer = m_abi.unreserved();
         } else {
           // adjust start pos for live intervals defined by this instruction
           dest->ranges.back().start = pos;
@@ -512,7 +500,7 @@ void XLS::buildIntervals() {
       min_need = std::max(min_need, dst_need);
       if (inst.isNative()) {
         if (RuntimeOption::EvalHHIREnableCalleeSavedOpt) {
-          auto scratch = m_abi.gp - m_abi.saved;
+          auto scratch = m_abi.gpUnreserved - m_abi.calleeSaved;
           scratch.forEach([&](PhysReg r) {
             m_scratch[r].add(LiveRange(pos, pos + 1));
           });
@@ -520,7 +508,7 @@ void XLS::buildIntervals() {
       }
       if (inst.is(Call, CallArray, ContEnter)) {
         // block all registers at php callsites.
-        m_abi.all().forEach([&](PhysReg r) {
+        m_abi.unreserved().forEach([&](PhysReg r) {
           m_blocked[r].add(LiveRange(pos, pos + 1));
         });
       }
@@ -547,7 +535,7 @@ void XLS::buildIntervals() {
         if (!src->tmp) {
           src->tmp = s;
           src->need = need;
-          src->allow = src->prefer = m_abi.all();
+          src->allow = src->prefer = m_abi.unreserved();
         }
         srcConstraints(src, m_abi, constraint);
         src_need += src->need;
@@ -1376,34 +1364,12 @@ bool Interval::checkInvariants() const {
 }
 //////////////////////////////////////////////////////////////////////////////
 
-namespace {
-const Abi x64_abi {
-  X64::kAllRegs - X64::kXMMRegs, // general purpose
-  X64::kAllRegs & X64::kXMMRegs, // fp/simd
-  X64::kCalleeSaved
-};
-
-const Abi arm_abi {
-  ARM::kGPCallerSaved   | ARM::kGPCalleeSaved,    // GP
-  ARM::kSIMDCallerSaved | ARM::kSIMDCalleeSaved,  // SIMD
-  ARM::kGPCalleeSaved   | ARM::kSIMDCalleeSaved   // callee-saved
-};
-}
-
 // This is the public entry-point
 RegAllocInfo allocateRegs(IRUnit& unit) {
   Timer _t(Timer::regalloc);
 
   RegAllocInfo regs(unit);
-  Abi abi;
-  switch (arch()) {
-    case Arch::X64:
-      abi = x64_abi;
-      break;
-    case Arch::ARM:
-      abi = arm_abi;
-      break;
-  }
+  Abi abi = mcg->backEnd().abi();
   XLS xls(unit, regs, abi);
   xls.allocate();
   if (dumpIREnabled()) {

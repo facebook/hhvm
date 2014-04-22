@@ -21,8 +21,8 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
-#include "hphp/runtime/vm/jit/jump-smash.h"
-#include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/back-end.h"
+#include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP { namespace JIT { namespace ARM {
@@ -37,7 +37,7 @@ void emitBindJ(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
   TCA toSmash = cb.frontier();
   if (cb.base() == stubs.base()) {
     // This is just to reserve space. We'll overwrite with the real dest later.
-    emitSmashableJump(cb, toSmash, cc);
+    mcg->backEnd().emitSmashableJump(cb, toSmash, cc);
   }
 
   mcg->setJmpTransID(toSmash);
@@ -51,10 +51,10 @@ void emitBindJ(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
   if (cb.base() == stubs.base()) {
     UndoMarker um {cb};
     cb.setFrontier(toSmash);
-    emitSmashableJump(cb, sr, cc);
+    mcg->backEnd().emitSmashableJump(cb, sr, cc);
     um.undo();
   } else {
-    emitSmashableJump(cb, sr, cc);
+    mcg->backEnd().emitSmashableJump(cb, sr, cc);
   }
 }
 
@@ -198,7 +198,7 @@ int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,
   ReqBindCall* req = mcg->globalData().alloc<ReqBindCall>();
 
   auto toSmash = mainCode.frontier();
-  emitSmashableCall(mainCode, stubsCode.frontier());
+  mcg->backEnd().emitSmashableCall(mainCode, stubsCode.frontier());
 
   MacroAssembler astubs { stubsCode };
   astubs.  Mov  (serviceReqArgReg(1), rStashedAR);

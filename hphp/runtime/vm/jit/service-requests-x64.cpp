@@ -19,10 +19,12 @@
 #include "folly/Optional.h"
 
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
-#include "hphp/runtime/vm/jit/jump-smash.h"
+#include "hphp/runtime/vm/jit/back-end.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
+#include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/asm-x64.h"
@@ -80,7 +82,7 @@ void StoreImmPatcher::patch(uint64_t actual) {
 
 void emitBindJ(CodeBlock& cb, CodeBlock& stubs,
                ConditionCode cc, SrcKey dest, ServiceRequest req) {
-  prepareForSmash(cb, cc == JIT::CC_None ? kJmpLen : kJmpccLen);
+  mcg->backEnd().prepareForSmash(cb, cc == JIT::CC_None ? kJmpLen : kJmpccLen);
   TCA toSmash = cb.frontier();
   if (cb.base() == stubs.base()) {
     Asm a { cb };
@@ -175,7 +177,7 @@ void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& stubsCode,
   ReqBindCall* req = mcg->globalData().alloc<ReqBindCall>();
 
   Asm a { mainCode };
-  prepareForSmash(mainCode, kCallLen);
+  mcg->backEnd().prepareForSmash(mainCode, kCallLen);
   TCA toSmash = mainCode.frontier();
   a.    call(stubsCode.frontier());
 

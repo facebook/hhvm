@@ -19,9 +19,7 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/code-gen-arm.h"
-#include "hphp/runtime/vm/jit/code-gen-x64.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/layout.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -77,12 +75,14 @@ LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs) {
   return live_regs;
 }
 
-template <class CG>
-void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& stubsCode,
-              MCGenerator* mcg, CodegenState& state, Block* block,
-              std::vector<TransBCMapping>* bcMap) {
+static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& stubsCode,
+                     MCGenerator* mcg, CodegenState& state, Block* block,
+                     std::vector<TransBCMapping>* bcMap) {
   FTRACE(6, "genBlock: {}\n", block->id());
-  CG cg(unit, cb, stubsCode, mcg, state);
+  std::unique_ptr<CodeGenerator> cg(mcg->backEnd().newCodeGenerator(unit, cb,
+                                                                    stubsCode,
+                                                                    mcg,
+                                                                    state));
 
   BCMarker prevMarker;
   for (IRInstruction& instr : *block) {
@@ -98,7 +98,7 @@ void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& stubsCode,
                                       stubsCode.frontier()});
       prevMarker = inst->marker();
     }
-    auto* addr = cg.cgInst(inst);
+    auto* addr = cg->cgInst(inst);
     if (state.asmInfo && addr) {
       state.asmInfo->updateForInstruction(inst, addr, cb.frontier());
     }
@@ -134,14 +134,7 @@ void genCodeImpl(CodeBlock& mainCode,
 
     auto const aStart      = cb.frontier();
     auto const astubsStart = stubsCode.frontier();
-    switch (arch()) {
-      case Arch::X64:
-        X64::patchJumps(cb, state, block);
-        break;
-      case Arch::ARM:
-        ARM::patchJumps(cb, state, block);
-        break;
-    }
+    mcg->backEnd().patchJumps(cb, state, block);
     state.addresses[block] = aStart;
 
     // If the block ends with a Jmp and the next block is going to be
@@ -153,25 +146,10 @@ void genCodeImpl(CodeBlock& mainCode,
       state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
     }
 
-    switch (arch()) {
-      case Arch::X64: {
-        genBlock<X64::CodeGenerator>(unit, cb, stubsCode, mcg, state, block,
-                                     bcMap);
-        auto nextFlow = block->next();
-        if (nextFlow && nextFlow != nextLinear) {
-          X64::emitFwdJmp(cb, nextFlow, state);
-        }
-        break;
-      }
-      case Arch::ARM: {
-        genBlock<ARM::CodeGenerator>(unit, cb, stubsCode, mcg, state, block,
-                                     bcMap);
-        auto nextFlow = block->next();
-        if (nextFlow && nextFlow != nextLinear) {
-          ARM::emitFwdJmp(cb, nextFlow, state);
-        }
-        break;
-      }
+    genBlock(unit, cb, stubsCode, mcg, state, block, bcMap);
+    auto nextFlow = block->next();
+    if (nextFlow && nextFlow != nextLinear) {
+      mcg->backEnd().emitFwdJmp(cb, nextFlow, state);
     }
 
     if (state.asmInfo) {
@@ -184,13 +162,7 @@ void genCodeImpl(CodeBlock& mainCode,
   };
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    switch (arch()) {
-      case Arch::X64:
-        X64::emitTraceCall(mainCode, unit.bcOff());
-        break;
-      case Arch::ARM:
-        break;
-    }
+    mcg->backEnd().emitTraceCall(mainCode, unit.bcOff());
   }
 
   auto const linfo = layoutBlocks(unit);

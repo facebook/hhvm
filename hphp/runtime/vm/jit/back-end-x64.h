@@ -13,24 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_SERVICE_REQUESTS_ARM_H
-#define incl_HPHP_JIT_SERVICE_REQUESTS_ARM_H
+#ifndef incl_HPHP_JIT_BACK_END_X64_H
+#define incl_HPHP_JIT_BACK_END_X64_H
 
-namespace HPHP { namespace JIT { namespace ARM {
+#include "hphp/runtime/vm/jit/back-end.h"
 
-/*
- * See service-requests-x64.h for interface documentation.
- */
+namespace HPHP { namespace JIT { namespace X64 {
 
-TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
-                       ServiceRequest req, const ServiceReqArgVec& argInfo);
-void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest);
-void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, JIT::ConditionCode cc,
-                 SrcKey dest);
-void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
-                      JIT::ConditionCode cc);
-int32_t emitBindCall(CodeBlock& cb, CodeBlock& stubs,
-                     SrcKey srcKey, const Func* funcd, int numArgs);
+constexpr int kJmpLen = 5;
+constexpr int kCallLen = 5;
+constexpr int kJmpccLen = 6;
+constexpr int kJmpImmBytes = 4;
+
+std::unique_ptr<BackEnd> newBackEnd();
 
 }}}
 

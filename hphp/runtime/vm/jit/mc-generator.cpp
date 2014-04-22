@@ -30,21 +30,6 @@
 #include <queue>
 #include <unwind.h>
 #include <unordered_set>
-#ifdef __FreeBSD__
-#include <sys/ucontext.h>
-#endif
-
-#ifdef __FreeBSD__
-#define RIP_REGISTER(v) (v).mc_rip
-#elif defined(__APPLE__)
-#define RIP_REGISTER(v) (v)->__ss.__rip
-#elif defined(__x86_64__)
-#define RIP_REGISTER(v) (v).gregs[REG_RIP]
-#elif defined(__AARCH64EL__)
-#define RIP_REGISTER(v) (v).pc
-#else
-#error How is rip accessed on this architecture?
-#endif
 
 #include <boost/bind.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>
@@ -59,10 +44,8 @@
 #include "folly/String.h"
 
 #include "hphp/util/abi-cxx.h"
-#include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
 #include "hphp/util/debug.h"
-#include "hphp/util/disasm.h"
 #include "hphp/util/maphuge.h"
 #include "hphp/util/rank.h"
 #include "hphp/util/ringbuffer.h"
@@ -73,15 +56,6 @@
 #include "hphp/util/repo-schema.h"
 #include "hphp/util/cycles.h"
 
-#include "hphp/vixl/a64/decoder-a64.h"
-#include "hphp/vixl/a64/disasm-a64.h"
-#include "hphp/vixl/a64/macro-assembler-a64.h"
-#include "hphp/vixl/a64/simulator-a64.h"
-
-#include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/arch.h"
-#include "hphp/runtime/vm/jit/unique-stubs-arm.h"
-#include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/php-debug.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -103,7 +77,6 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/member-operations.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
@@ -115,16 +88,9 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/unwind-arm.h"
-#include "hphp/runtime/vm/jit/unwind-x64.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
-#include "hphp/runtime/vm/jit/service-requests-x64.h"
-#include "hphp/runtime/vm/jit/jump-smash.h"
-#include "hphp/runtime/vm/jit/func-prologues.h"
-#include "hphp/runtime/vm/jit/func-prologues-x64.h"
-#include "hphp/runtime/vm/jit/func-prologues-arm.h"
+#include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h" // XXX Layering violation.
 #include "hphp/runtime/vm/jit/debug-guards.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/unwind.h"
@@ -504,7 +470,8 @@ MCGenerator::translate(const TranslArgs& args) {
                              .hot(func->attrs() & AttrHot));
 
   if (args.m_align) {
-    X64::moveToAlign(code.main(), kNonFallthroughAlign);
+    mcg->backEnd().moveToAlign(code.main(),
+                               MoveToAlignFlags::kNonFallthroughAlign);
   }
 
   TCA start = code.main().frontier();
@@ -561,14 +528,7 @@ MCGenerator::getCallArrayPrologue(Func* func) {
     if (!writer) return nullptr;
     tca = func->getFuncBody();
     if (tca != m_tx.uniqueStubs.funcBodyHelperThunk) return tca;
-    switch (arch()) {
-      case Arch::X64:
-        tca = X64::emitCallArrayPrologue(func, dvs);
-        break;
-      case Arch::ARM:
-        tca = ARM::emitCallArrayPrologue(func, dvs);
-        break;
-    }
+    tca = mcg->backEnd().emitCallArrayPrologue(func, dvs);
     func->setFuncBody(tca);
   } else {
     SrcKey sk(func, func->base(), false);
@@ -584,7 +544,7 @@ MCGenerator::smashPrologueGuards(TCA* prologues, int numPrologues,
   DEBUG_ONLY std::unique_ptr<LeaseHolder> writer;
   for (int i = 0; i < numPrologues; i++) {
     if (prologues[i] != m_tx.uniqueStubs.fcallHelperThunk
-        && funcPrologueHasGuard(prologues[i], func)) {
+        && backEnd().funcPrologueHasGuard(prologues[i], func)) {
       if (debug) {
         /*
          * Unit's are sometimes created racily, in which case all
@@ -603,14 +563,7 @@ MCGenerator::smashPrologueGuards(TCA* prologues, int numPrologues,
                        LeaseAcquire::BLOCKING));
         }
       }
-      switch (arch()) {
-        case Arch::X64:
-          X64::funcPrologueSmashGuard(prologues[i], func);
-          break;
-        case Arch::ARM:
-          ARM::funcPrologueSmashGuard(prologues[i], func);
-          break;
-      }
+      mcg->backEnd().funcPrologueSmashGuard(prologues[i], func);
     }
   }
 }
@@ -720,8 +673,9 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
 
   // If we're close to a cache line boundary, just burn some space to
   // try to keep the func and its body on fewer total lines.
-  if (((uintptr_t)code.main().frontier() & kX64CacheLineMask) >= 32) {
-    X64::moveToAlign(code.main(), kX64CacheLineSize);
+  if (((uintptr_t)code.main().frontier() & mcg->backEnd().cacheLineMask()) >=
+      (mcg->backEnd().cacheLineSize() / 2)) {
+    mcg->backEnd().moveToAlign(code.main(), MoveToAlignFlags::kCacheLineAlign);
   }
 
   // Careful: this isn't necessarily the real entry point. For funcIsMagic
@@ -731,20 +685,11 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   TCA stubStart = code.stubs().frontier();
 
   auto const skFuncBody = [&] {
-    switch (arch()) {
-    case Arch::X64:
-      return funcIsMagic
-        ? X64::emitMagicFuncPrologue(func, nPassed, start)
-        : X64::emitFuncPrologue(func, nPassed, start);
-    case Arch::ARM:
-      return ARM::emitFuncPrologue(
-        code.main(), code.stubs(), func, funcIsMagic, nPassed, start, aStart
-      );
-    }
-    not_reached();
+    return mcg->backEnd().emitFuncPrologue(code.main(), code.stubs(), func,
+                                           funcIsMagic, nPassed, start, aStart);
   }();
 
-  assert(funcPrologueHasGuard(start, func));
+  assert(backEnd().funcPrologueHasGuard(start, func));
   TRACE(2, "funcPrologue mcg %p %s(%d) setting prologue %p\n",
         this, func->fullName()->data(), nPassed, start);
   assert(isValidCodeAddress(start));
@@ -793,13 +738,13 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId,
   PrologueCallersRec* pcr =
     m_tx.profData()->prologueCallers(prologueTransId);
   for (TCA toSmash : pcr->mainCallers()) {
-    smashCall(toSmash, start);
+    backEnd().smashCall(toSmash, start);
   }
   // If the prologue has a guard, then smash its guard-callers as well.
-  if (funcPrologueHasGuard(start, func)) {
-    TCA guard = funcPrologueToGuard(start, func);
+  if (backEnd().funcPrologueHasGuard(start, func)) {
+    TCA guard = backEnd().funcPrologueToGuard(start, func);
     for (TCA toSmash : pcr->guardCallers()) {
-      smashCall(toSmash, guard);
+      backEnd().smashCall(toSmash, guard);
     }
   }
   pcr->clearAllCallers();
@@ -904,7 +849,7 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk,
     }
     sr->chainFrom(IncomingBranch::addr(addr));
   } else if (req == REQ_BIND_JCC || req == REQ_BIND_SIDE_EXIT) {
-    auto jt = jccTarget(toSmash);
+    auto jt = backEnd().jccTarget(toSmash);
     assert(jt);
     if (jt == tDest) {
       // Already smashed
@@ -912,8 +857,9 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk,
     }
     sr->chainFrom(IncomingBranch::jccFrom(toSmash));
   } else {
-    assert(!jccTarget(toSmash));
-    if (!jmpTarget(toSmash) || jmpTarget(toSmash) == tDest) {
+    assert(!backEnd().jccTarget(toSmash));
+    if (!backEnd().jmpTarget(toSmash)
+        || backEnd().jmpTarget(toSmash) == tDest) {
       // Already smashed
       return tDest;
     }
@@ -973,6 +919,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
   // Its not clear where chainFrom should go to if as is astubs
   assert(&cb != &code.stubs());
 
+  // XXX Use of kJmp*Len here is a layering violation.
   using namespace X64;
 
   // can we just directly fall through?
@@ -986,7 +933,8 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
     return 0;
   }
 
-  if (jmpTarget(toSmash + kJmpccLen) != jccTarget(toSmash)) {
+  if (backEnd().jmpTarget(toSmash + kJmpccLen)
+      != backEnd().jccTarget(toSmash)) {
     // someone else already smashed this one. Ideally we would
     // just re-execute from toSmash - except the flags will have
     // been trashed.
@@ -1029,7 +977,7 @@ MCGenerator::bindJmpccSecond(TCA toSmash, const Offset off,
   if (branch) {
     LeaseHolder writer(Translator::WriteLease());
     if (writer) {
-      if (branch == jccTarget(toSmash)) {
+      if (branch == backEnd().jccTarget(toSmash)) {
         // already smashed
         return branch;
       } else {
@@ -1108,80 +1056,6 @@ struct DepthGuard { bool depthOne() const { return false; } };
 
 #endif
 
-/*
- * enterTCHelper does not save callee-saved registers except %rbp. This means
- * when we call it from C++, we have to tell gcc to clobber all the other
- * callee-saved registers.
- */
-#if defined(__x86_64__)
-#  define CALLEE_SAVED_BARRIER() \
-  asm volatile("" : : : "rbx", "r12", "r13", "r14", "r15")
-#elif defined(__AARCH64EL__)
-#  define CALLEE_SAVED_BARRIER() \
-  asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25", \
-               "x26", "x27", "x28")
-#else
-#  error What are the callee-saved registers on your system?
-#endif
-
-/*
- * enterTCHelper is a handwritten assembly function that transfers control in
- * and out of the TC.
- */
-static_assert(X64::rVmSp == rbx &&
-              X64::rVmFp == rbp &&
-              X64::rVmTl == r12 &&
-              X64::rStashedAR == r15,
-              "__enterTCHelper needs to be modified to use the correct ABI");
-static_assert(REQ_BIND_CALL == 0x1,
-              "Update assembly test for REQ_BIND_CALL in __enterTCHelper");
-extern "C" void enterTCHelper(Cell* vm_sp,
-                              Cell* vm_fp,
-                              TCA start,
-                              TReqInfo* infoPtr,
-                              ActRec* firstAR,
-                              void* targetCacheBase);
-
-/*
- * A partial equivalent of enterTCHelper, used to set up the ARM simulator.
- */
-uintptr_t setupSimRegsAndStack(vixl::Simulator& sim,
-                               uintptr_t saved_rStashedAr) {
-  sim.   set_xreg(ARM::rGContextReg.code(), g_context.getNoCheck());
-  sim.   set_xreg(ARM::rVmFp.code(), vmfp());
-  sim.   set_xreg(ARM::rVmSp.code(), vmsp());
-  sim.   set_xreg(ARM::rVmTl.code(), RDS::tl_base);
-  sim.   set_xreg(ARM::rStashedAR.code(), saved_rStashedAr);
-
-  // Leave space for register spilling and MInstrState.
-  sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
-  assert(sim.is_on_stack(reinterpret_cast<void*>(sim.sp())));
-
-  auto spOnEntry = sim.sp();
-
-  // Push the link register onto the stack. The link register is
-  // technically caller-saved; what this means in practice is that
-  // non-leaf functions push it at the very beginning and pop it just
-  // before returning (as opposed to just saving it around calls).
-  sim.   set_sp(sim.sp() - 16);
-  *reinterpret_cast<uint64_t*>(sim.sp()) = sim.lr();
-
-  return spOnEntry;
-}
-
-
-struct TReqInfo {
-  uintptr_t requestNum;
-  uintptr_t args[5];
-
-  // Some TC registers need to be preserved across service requests.
-  uintptr_t saved_rStashedAr;
-
-  // Stub addresses are passed back to allow us to recycle used stubs.
-  TCA stubAddr;
-};
-
-
 void
 MCGenerator::enterTC(TCA start, void* data) {
   if (debug) {
@@ -1237,70 +1111,7 @@ MCGenerator::enterTC(TCA start, void* data) {
       Trace::ringbufferEntry(RBTypeEnterTC, skData, (uint64_t)start);
     }
 
-    switch (arch()) {
-      case Arch::X64: {
-        // We have to force C++ to spill anything that might be in a
-        // callee-saved register (aside from rbp). enterTCHelper does not save
-        // them.
-        CALLEE_SAVED_BARRIER();
-        enterTCHelper(vmsp(), vmfp(), start, &info, vmFirstAR(),
-                      RDS::tl_base);
-        CALLEE_SAVED_BARRIER();
-        break;
-      }
-      case Arch::ARM: {
-        // This is a pseudo-copy of the logic in enterTCHelper: it sets up the
-        // simulator's registers and stack, runs the translation, and gets the
-        // necessary information out of the registers when it's done.
-
-        vixl::PrintDisassembler disasm(std::cout);
-        vixl::Decoder decoder;
-        if (getenv("ARM_DISASM")) {
-          decoder.AppendVisitor(&disasm);
-        }
-        vixl::Simulator sim(&decoder, std::cout);
-        SCOPE_EXIT {
-          Stats::inc(Stats::vixl_SimulatedInstr, sim.instr_count());
-          Stats::inc(Stats::vixl_SimulatedLoad, sim.load_count());
-          Stats::inc(Stats::vixl_SimulatedStore, sim.store_count());
-        };
-
-        sim.set_exception_hook(ARM::simulatorExceptionHook);
-
-        g_context->m_activeSims.push_back(&sim);
-        SCOPE_EXIT { g_context->m_activeSims.pop_back(); };
-
-        DEBUG_ONLY auto spOnEntry =
-          setupSimRegsAndStack(sim, info.saved_rStashedAr);
-
-        // The handshake is different in the case of REQ_BIND_CALL. The code
-        // we're jumping to expects to find a return address in x30, and a saved
-        // return address on the stack.
-        if (info.requestNum == REQ_BIND_CALL) {
-          // Put the call's return address in the link register.
-          auto* ar = reinterpret_cast<ActRec*>(info.saved_rStashedAr);
-          sim.set_lr(ar->m_savedRip);
-        }
-
-        std::cout.flush();
-        sim.RunFrom(vixl::Instruction::Cast(start));
-        std::cout.flush();
-
-        assert(sim.sp() == spOnEntry);
-
-        info.requestNum = sim.xreg(0);
-        info.args[0] = sim.xreg(1);
-        info.args[1] = sim.xreg(2);
-        info.args[2] = sim.xreg(3);
-        info.args[3] = sim.xreg(4);
-        info.args[4] = sim.xreg(5);
-        info.saved_rStashedAr = sim.xreg(ARM::rStashedAR.code());
-
-        info.stubAddr = reinterpret_cast<TCA>(sim.xreg(ARM::rAsm.code()));
-        break;
-      }
-    }
-
+    mcg->backEnd().enterTCHelper(start, info);
     assert(g_context->m_stack.isValidAddress((uintptr_t)vmsp()));
 
     tl_regState = VMRegState::CLEAN; // Careful: pc isn't sync'ed yet.
@@ -1372,7 +1183,7 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
     if (!isImmutable) {
       // We dont know we're calling the right function, so adjust
       // dest to point to the dynamic check of ar->m_func.
-      dest = funcPrologueToGuard(dest, func);
+      dest = backEnd().funcPrologueToGuard(dest, func);
     } else {
       TRACE(2, "enterTC: bindCall immutably %s -> %p\n",
             func->fullName()->data(), dest);
@@ -1384,11 +1195,11 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
         // waited for the write lease, so read it again.
         dest = getFuncPrologue(func, nArgs);
         assert(dest);
-        if (!isImmutable) dest = funcPrologueToGuard(dest, func);
+        if (!isImmutable) dest = backEnd().funcPrologueToGuard(dest, func);
 
-        if (callTarget(toSmash) != dest) {
+        if (backEnd().callTarget(toSmash) != dest) {
           TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
-          smashCall(toSmash, dest);
+          backEnd().smashCall(toSmash, dest);
           smashed = true;
           // For functions to be PGO'ed, if their current prologues
           // are still profiling ones (living in code.prof()), then
@@ -2031,33 +1842,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
     auto interpOps = tp ? tp->m_numOpcodes : 1;
     FTRACE(1, "emitting {}-instr interp request for failed translation\n",
            interpOps);
-    switch (arch()) {
-      case Arch::X64: {
-        Asm a { code.main() };
-        // Add a counter for the translation if requested
-        if (RuntimeOption::EvalJitTransCounters) {
-          X64::emitTransCounterInc(a);
-        }
-        a.    jmp(emitServiceReq(code.stubs(), REQ_INTERPRET,
-                                 sk.offset(), interpOps));
-        break;
-      }
-      case Arch::ARM: {
-        if (RuntimeOption::EvalJitTransCounters) {
-          vixl::MacroAssembler a { code.main() };
-          ARM::emitTransCounterInc(a);
-        }
-        // This jump won't be smashed, but a far jump on ARM requires the same
-        // code sequence.
-        emitSmashableJump(
-          code.main(),
-          emitServiceReq(code.stubs(), REQ_INTERPRET,
-                         sk.offset(), interpOps),
-          CC_None
-        );
-        break;
-      }
-    }
+    mcg->backEnd().emitInterpReq(code.main(), code.stubs(), sk, interpOps);
     // Fall through.
   }
 
@@ -2279,7 +2064,8 @@ void MCGenerator::traceCodeGen() {
 }
 
 MCGenerator::MCGenerator()
-  : m_numNativeTrampolines(0)
+  : m_backEnd(newBackEnd())
+  , m_numNativeTrampolines(0)
   , m_numHHIRTrans(0)
   , m_catchTraceMap(128)
 {
@@ -2304,14 +2090,7 @@ MCGenerator::MCGenerator()
 void MCGenerator::initUniqueStubs() {
   // Put the following stubs into ahot, rather than a.
   CodeCache::Selector asmSel(CodeCache::Selector::Args(code).hot(true));
-  switch (arch()) {
-    case Arch::X64:
-      m_tx.uniqueStubs = X64::emitUniqueStubs();
-      break;
-    case Arch::ARM:
-      m_tx.uniqueStubs = ARM::emitUniqueStubs();
-      break;
-  }
+  m_tx.uniqueStubs = mcg->backEnd().emitUniqueStubs();
 }
 
 void MCGenerator::registerCatchBlock(CTCA ip, TCA block) {
@@ -2683,25 +2462,7 @@ emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint index, int n, bool force) {
   if (!force && !Stats::enabled()) return;
   intptr_t disp = uintptr_t(&tl_table[index]) - tlsBase();
 
-  if (arch() == Arch::X64) {
-    X64Assembler a { cb };
-
-    a.    pushf ();
-    //    addq $n, [%fs:disp]
-    a.    fs().addq(n, baseless(disp));
-    a.    popf  ();
-  } else if (arch() == Arch::ARM) {
-    using ARM::rAsm;
-    using ARM::rAsm2;
-    vixl::MacroAssembler a { cb };
-
-    a.    Mrs   (rAsm2, vixl::TPIDR_EL0);
-    a.    Ldr   (rAsm, rAsm2[disp]);
-    a.    Add   (rAsm, rAsm, n);
-    a.    Str   (rAsm, rAsm2[disp]);
-  } else {
-    not_implemented();
-  }
+  mcg->backEnd().emitIncStat(cb, disp, n);
 }
 
 } // HPHP::JIT

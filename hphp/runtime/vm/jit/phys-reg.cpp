@@ -16,11 +16,20 @@
 
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP { namespace JIT {
 
 int PhysReg::kNumGP = 0;
 int PhysReg::kNumSIMD = 0;
+
+int PhysReg::getNumGP() {
+  return mcg->backEnd().abi().gp().size();
+}
+
+int PhysReg::getNumSIMD() {
+  return mcg->backEnd().abi().simd().size();
+}
 
 PhysRegSaverParity::PhysRegSaverParity(int parity, X64Assembler& as,
                                        RegSet regs)

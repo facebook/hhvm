@@ -17,7 +17,6 @@
 #define incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
 
 #include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -162,116 +161,6 @@ struct ServiceReqArgInfo {
 
 typedef smart::vector<ServiceReqArgInfo> ServiceReqArgVec;
 
-inline ServiceReqArgInfo ccServiceReqArgInfo(JIT::ConditionCode cc) {
-  return ServiceReqArgInfo{ServiceReqArgInfo::CondCode, { uint64_t(cc) }};
-}
-
-template<typename T>
-typename std::enable_if<
-  // Only allow for things with a sensible cast to uint64_t.
-  std::is_integral<T>::value || std::is_pointer<T>::value ||
-  std::is_enum<T>::value
-  >::type packServiceReqArg(ServiceReqArgVec& args, T arg) {
-  // By default, assume we meant to pass an immediate arg.
-  args.push_back({ ServiceReqArgInfo::Immediate, { uint64_t(arg) } });
-}
-
-inline void packServiceReqArg(ServiceReqArgVec& args,
-                       const ServiceReqArgInfo& argInfo) {
-  args.push_back(argInfo);
-}
-
-template<typename T, typename... Arg>
-void packServiceReqArgs(ServiceReqArgVec& argv, T arg, Arg... args) {
-  packServiceReqArg(argv, arg);
-  packServiceReqArgs(argv, args...);
-}
-
-inline void packServiceReqArgs(ServiceReqArgVec& argv) {
-  // Recursive base case.
-}
-
-//////////////////////////////////////////////////////////////////////
-
-
-/*
- * emitServiceReqWork --
- *
- *   Call a translator service co-routine. The code emitted here
- *   reenters the enterTC loop, invoking the requested service. Control
- *   will be returned non-locally to the next logical instruction in
- *   the TC.
- *
- *   Return value is a destination; we emit the bulky service
- *   request code into astubs.
- *
- *   Returns a continuation that will run after the arguments have been
- *   emitted. This is gross, but is a partial workaround for the inability
- *   to capture argument packs in the version of gcc we're using.
- */
-namespace X64 {
-TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
-                       ServiceRequest req, const ServiceReqArgVec& argInfo);
-}
-namespace ARM {
-TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
-                       ServiceRequest req, const ServiceReqArgVec& argInfo);
-}
-
-template<typename... Arg>
-TCA emitServiceReq(CodeBlock& cb, SRFlags flags, ServiceRequest sr, Arg... a) {
-  // These should reuse stubs. Use emitEphemeralServiceReq.
-  assert(sr != REQ_BIND_JMPCC_FIRST &&
-         sr != REQ_BIND_JMPCC_SECOND &&
-         sr != REQ_BIND_JMP);
-
-  ServiceReqArgVec argv;
-  packServiceReqArgs(argv, a...);
-  switch (arch()) {
-    case Arch::X64:
-      return X64::emitServiceReqWork(cb, cb.frontier(), true, flags, sr, argv);
-    case Arch::ARM:
-      return ARM::emitServiceReqWork(cb, cb.frontier(), true, flags, sr, argv);
-  }
-  not_reached();
-}
-
-template<typename... Arg>
-TCA emitServiceReq(CodeBlock& cb, ServiceRequest sr, Arg... a) {
-  return emitServiceReq(cb, SRFlags::None, sr, a...);
-}
-
-template<typename... Arg>
-TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
-                            Arg... a) {
-  assert(sr == REQ_BIND_JMPCC_FIRST ||
-         sr == REQ_BIND_JMPCC_SECOND ||
-         sr == REQ_BIND_JMP);
-  assert(cb.contains(start));
-
-  ServiceReqArgVec argv;
-  packServiceReqArgs(argv, a...);
-  switch (arch()) {
-    case Arch::X64:
-      return X64::emitServiceReqWork(cb, start, false, SRFlags::None, sr, argv);
-    case Arch::ARM:
-      return ARM::emitServiceReqWork(cb, start, false, SRFlags::None, sr, argv);
-  }
-  not_reached();
-}
-
-//////////////////////////////////////////////////////////////////////
-
 }}
-
-namespace std {
-
-template<> struct hash<HPHP::JIT::ServiceRequest> {
-  size_t operator()(const HPHP::JIT::ServiceRequest& sr) const {
-    return sr;
-  }
-};
-
-}
 
 #endif

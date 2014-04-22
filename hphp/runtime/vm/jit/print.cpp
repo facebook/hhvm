@@ -16,16 +16,15 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include <vector>
 
-#include "hphp/util/disasm.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/abi-cxx.h"
-#include "hphp/vixl/a64/disasm-a64.h"
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/layout.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {  namespace JIT {
@@ -198,27 +197,12 @@ std::ostream& operator<<(std::ostream& os, const PhysLoc& loc) {
   os << '(';
   auto delim = "";
   for (int i = 0; i < sz; ++i) {
+    os << delim;
     if (!loc.spilled()) {
       PhysReg reg = loc.reg(i);
-      switch (arch()) {
-        case Arch::X64: {
-          auto name = reg.type() == PhysReg::GP ? reg::regname(Reg64(reg)) :
-            reg::regname(RegXMM(reg));
-          os << delim << name;
-          break;
-        }
-        case Arch::ARM: {
-          auto prefix =
-            reg.isGP() ? (vixl::Register(reg).size() == vixl::kXRegSize
-                          ? 'x' : 'w')
-            : (vixl::FPRegister(reg).size() == vixl::kSRegSize
-               ? 's' : 'd');
-          os << delim << prefix << int(RegNumber(reg));
-          break;
-        }
-      }
+      mcg->backEnd().streamPhysReg(os, reg);
     } else {
-      os << delim << "spill[" << loc.slot(i) << "]";
+      os << "spill[" << loc.slot(i) << "]";
     }
     delim = ",";
   }
@@ -275,27 +259,8 @@ void print(const SSATmp* tmp) {
 static constexpr auto kIndent = 4;
 
 static void disasmRange(std::ostream& os, TCA begin, TCA end) {
-  switch (arch()) {
-    case Arch::X64: {
-      Disasm disasm(Disasm::Options().indent(kIndent + 4)
-                    .printEncoding(dumpIREnabled(kExtraLevel))
-                    .color(color(ANSI_COLOR_BROWN)));
-      disasm.disasm(os, begin, end);
-      break;
-    }
-    case Arch::ARM: {
-      using namespace vixl;
-      Decoder dec;
-      PrintDisassembler disasm(os, kIndent + 4, dumpIREnabled(kExtraLevel),
-                               color(ANSI_COLOR_BROWN));
-      dec.AppendVisitor(&disasm);
-      assert(begin <= end);
-      for (; begin < end; begin += kInstructionSize) {
-        dec.Decode(Instruction::Cast(begin));
-      }
-      break;
-    }
-  }
+  mcg->backEnd().disasmRange(os, kIndent, dumpIREnabled(kExtraLevel),
+                             begin, end);
 }
 
 void print(std::ostream& os, const Block* block,

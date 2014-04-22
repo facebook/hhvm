@@ -25,6 +25,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/text-util.h"
 
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -38,7 +39,6 @@
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/server/virtual-host.h"
-#include "hphp/runtime/vm/jit/arch.h"
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
@@ -171,11 +171,11 @@ static void PrepareEnv(Array& env, Transport *transport) {
   if (RuntimeOption::EvalJit) {
     env.set(s_HHVM_JIT, 1);
   }
-  switch (JIT::arch()) {
-  case JIT::Arch::X64:
+  switch (arch()) {
+  case Arch::X64:
     env.set(s_HHVM_ARCH, "x64");
     break;
-  case JIT::Arch::ARM:
+  case Arch::ARM:
     env.set(s_HHVM_ARCH, "arm");
     break;
   }

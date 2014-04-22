@@ -15,6 +15,9 @@
 */
 
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
+#include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/abi-arm.h"
+
 #include "hphp/util/slice.h"
 
 namespace HPHP { namespace JIT {
@@ -33,8 +36,7 @@ bool cycleHasSIMDReg(const CycleInfo& cycle,
 
 smart::vector<MoveInfo> doRegMoves(PhysReg::Map<PhysReg>& moves,
                                    PhysReg rTmp) {
-  auto constexpr N = X64::kNumRegs > ARM::kNumRegs ? X64::kNumRegs :
-                     ARM::kNumRegs;
+  auto N = std::max(X64::abi.all().size(), ARM::abi.all().size());
   smart::vector<MoveInfo> howTo;
   CycleInfo cycle_mem[N];
   List<CycleInfo> cycles(cycle_mem, 0, N);

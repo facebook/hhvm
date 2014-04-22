@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/jump-smash.h"
+#include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP { namespace JIT { namespace ARM {
@@ -116,7 +116,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
   vixl::MacroAssembler astubs { stubsCode };
 
   emitTestSurpriseFlags(a);
-  emitSmashableJump(mainCode, stubsCode.frontier(), CC_NZ);
+  mcg->backEnd().emitSmashableJump(mainCode, stubsCode.frontier(), CC_NZ);
 
   astubs.  Mov  (argReg(0), rVmFp);
 
@@ -131,7 +131,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
     // going through the pending fixup path like normal.
     fixupMap.recordFixup(fixupAddr, fixup);
   }
-  emitSmashableJump(stubsCode, mainCode.frontier(), CC_None);
+  mcg->backEnd().emitSmashableJump(stubsCode, mainCode.frontier(), CC_None);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -22,8 +22,6 @@
 
 namespace HPHP { namespace JIT { namespace X64 {
 
-typedef JIT::X64Assembler Asm;
-
 /*
  * emitServiceReqWork --
  *
@@ -39,7 +37,7 @@ typedef JIT::X64Assembler Asm;
  *   emitted. This is gross, but is a partial workaround for the inability
  *   to capture argument packs in the version of gcc we're using.
  */
-TCA emitServiceReqWork(Asm& as, TCA start, bool persist, SRFlags flags,
+TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
                        ServiceRequest req, const ServiceReqArgVec& argInfo);
 
 /*

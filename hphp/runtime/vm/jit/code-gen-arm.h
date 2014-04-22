@@ -28,7 +28,7 @@
 
 namespace HPHP { namespace JIT { namespace ARM {
 
-struct CodeGenerator {
+struct CodeGenerator : public JIT::CodeGenerator {
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
                 JIT::MCGenerator* mcg, CodegenState& state)
@@ -43,7 +43,10 @@ struct CodeGenerator {
     {
     }
 
-  Address cgInst(IRInstruction* inst);
+  virtual ~CodeGenerator() {
+  }
+
+  Address cgInst(IRInstruction* inst) override;
 
  private:
   template<class Then>
@@ -139,9 +142,6 @@ struct CodeGenerator {
   CodegenState&               m_state;
   IRInstruction*              m_curInst;
 };
-
-void patchJumps(CodeBlock& cb, CodegenState& state, Block* block);
-void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state);
 
 }}}
 

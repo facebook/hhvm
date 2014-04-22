@@ -76,12 +76,12 @@
 #include <memory>
 #include <vector>
 
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/file-repository.h"
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/compiler/builtin_symbols.h"
 
@@ -554,11 +554,11 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
     if (RuntimeOption::EvalJit) {
       envArr.set(s_HHVM_JIT, 1);
     }
-    switch (JIT::arch()) {
-    case JIT::Arch::X64:
+    switch (arch()) {
+    case Arch::X64:
       envArr.set(s_HHVM_ARCH, "x64");
       break;
-    case JIT::Arch::ARM:
+    case Arch::ARM:
       envArr.set(s_HHVM_ARCH, "arm");
       break;
     }

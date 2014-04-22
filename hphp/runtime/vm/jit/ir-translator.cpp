@@ -25,6 +25,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/stack-trace.h"
 
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/complex-types.h"

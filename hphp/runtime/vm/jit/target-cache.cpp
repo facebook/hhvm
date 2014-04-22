@@ -29,7 +29,8 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
-#include "hphp/runtime/vm/jit/jump-smash.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/text-util.h"
@@ -436,7 +437,7 @@ void handlePrimeCacheInit(Entry* mce,
   if (!writer) return;
 
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
-    always_assert(isSmashable(addr, kMovLen));
+    always_assert(mcg->backEnd().isSmashable(addr, kMovLen));
     assert(addr[0] == 0x49 && addr[1] == 0xba);
     auto const ptr = reinterpret_cast<uintptr_t*>(addr + kMovImmOff);
     if (!(*ptr & 1)) {
@@ -489,8 +490,10 @@ void handlePrimeCacheInit(Entry* mce,
 
   // Regardless of whether the inline cache was populated, smash the
   // call to start doing real dispatch.
-  smashCall(smashTarget->retAddr - X64::kCallLen,
-            reinterpret_cast<TCA>(handleSlowPath<fatal>));
+  //
+  // XXX Use of kCallLen here is a layering violation.
+  mcg->backEnd().smashCall(smashTarget->retAddr - X64::kCallLen,
+                           reinterpret_cast<TCA>(handleSlowPath<fatal>));
 
   // Wait to free this until no request threads could be picking up
   // the immediate.

@@ -22,6 +22,7 @@
 #include "hphp/vixl/a64/assembler-a64.h"
 #include "hphp/vixl/a64/constants-a64.h"
 
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
@@ -98,6 +99,7 @@ const RegSet kGPCallerSaved = RegSet()
   | RegSet(vixl::x2)
   | RegSet(vixl::x3)
   | RegSet(vixl::x4)
+  | RegSet(vixl::x5)
   | RegSet(vixl::x6)
   | RegSet(vixl::x7)
   | RegSet(vixl::x8)
@@ -124,6 +126,32 @@ const RegSet kGPCalleeSaved = RegSet()
   | RegSet(vixl::x26)
   | RegSet(vixl::x27)
   | RegSet(vixl::x28)
+  ;
+
+const RegSet kGPUnreserved = RegSet()
+  | kGPCallerSaved
+  | kGPCalleeSaved
+  ;
+
+const RegSet kGPReserved = RegSet()
+  | RegSet(rAsm)
+  | RegSet(rAsm2)
+  | RegSet(rHostCallReg)
+  | RegSet(vixl::x17)
+  | RegSet(rVmSp)
+  | RegSet(rVmTl)
+  | RegSet(rStashedAR)
+  | RegSet(rGContextReg)
+  | RegSet(rVmFp)
+  | RegSet(rLinkReg)
+  // ARM machines really only have 32 GP regs. However, vixl has 33 separate
+  // register codes, because it treats the zero register and stack pointer
+  // (which are really both register 31) separately. Rather than lose this
+  // distinction in vixl (it's really helpful for avoiding stupid mistakes), we
+  // sacrifice the ability to represent all 32 SIMD regs, and pretend that are
+  // 33 GP regs.
+  | RegSet(vixl::xzr) // x31
+  | RegSet(vixl::sp) // x31, but with special vixl code
   ;
 
 const RegSet kSIMDCallerSaved = RegSet()
@@ -165,6 +193,26 @@ const RegSet kSIMDCalleeSaved = RegSet()
   | RegSet(vixl::d15)
   ;
 
+const RegSet kSIMDUnreserved = RegSet()
+  | kSIMDCallerSaved
+  | kSIMDCalleeSaved
+  ;
+
+const RegSet kSIMDReserved = RegSet()
+  ;
+
+const RegSet kCalleeSaved = RegSet()
+  | kGPCalleeSaved
+  | kSIMDCalleeSaved
+  ;
+
+const Abi abi {
+  kGPUnreserved,   // gpUnreserved
+  kGPReserved,     // gpReserved
+  kSIMDUnreserved, // simdUnreserved
+  kSIMDReserved,   // simdReserved
+  kCalleeSaved     // calleeSaved
+};
 
 }}}
 

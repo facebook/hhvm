@@ -13,36 +13,28 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_FUNC_PROLOGUES_H
-#define incl_HPHP_JIT_FUNC_PROLOGUES_H
 
-#include "hphp/runtime/vm/jit/arch.h"
-#include "hphp/runtime/vm/jit/func-prologues-arm.h"
-#include "hphp/runtime/vm/jit/func-prologues-x64.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/vm/jit/back-end.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h"
+#include "hphp/runtime/vm/jit/back-end-arm.h"
 
 namespace HPHP { namespace JIT {
 
-inline bool funcPrologueHasGuard(JIT::TCA prologue, const Func* func) {
+std::unique_ptr<BackEnd> newBackEnd() {
   switch (arch()) {
-    case Arch::X64:
-      return X64::funcPrologueHasGuard(prologue, func);
-    case Arch::ARM:
-      return ARM::funcPrologueHasGuard(prologue, func);
+  case Arch::X64:
+    return X64::newBackEnd();
+  case Arch::ARM:
+    return ARM::newBackEnd();
   }
   not_reached();
 }
 
-inline JIT::TCA funcPrologueToGuard(JIT::TCA prologue, const Func* func) {
-  switch (arch()) {
-    case Arch::X64:
-      return X64::funcPrologueToGuard(prologue, func);
-    case Arch::ARM:
-      return ARM::funcPrologueToGuard(prologue, func);
-  }
-  not_reached();
+BackEnd::BackEnd() {
+}
+
+BackEnd::~BackEnd() {
 }
 
 }}
-
-#endif

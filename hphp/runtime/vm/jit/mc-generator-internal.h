@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TRANSLATOR_X64_INTERNAL_H_
-#define incl_HPHP_TRANSLATOR_X64_INTERNAL_H_
+#ifndef incl_HPHP_MC_GENERATOR_INTERNAL_H_
+#define incl_HPHP_MC_GENERATOR_INTERNAL_H_
 
 #include <boost/filesystem.hpp>
 #include <boost/utility/typed_in_place_factory.hpp>

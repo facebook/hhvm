@@ -23,10 +23,11 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
-#include "hphp/runtime/vm/jit/jump-smash.h"
+#include "hphp/runtime/vm/jit/back-end-arm.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
+#include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace JIT { namespace ARM {
@@ -572,8 +573,6 @@ PUNT_OPCODE(MulIntO)
 
 //////////////////////////////////////////////////////////////////////
 
-static TCA kEndOfTargetChain = reinterpret_cast<TCA>(0xf00ffeeffaaff11f);
-
 void CodeGenerator::emitJumpToBlock(CodeBlock& cb,
                                     Block* target,
                                     ConditionCode cc) {
@@ -596,34 +595,8 @@ void CodeGenerator::emitJumpToBlock(CodeBlock& cb,
 
   // This will never actually be executed as a jump to "next". It's just a
   // pointer to the next jump instruction to retarget.
-  emitSmashableJump(cb, next, cc);
+  mcg->backEnd().emitSmashableJump(cb, next, cc);
   m_state.patches[target] = here;
-}
-
-void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
-  auto dest = cb.frontier();
-  auto jump = reinterpret_cast<TCA>(state.patches[block]);
-
-  while (jump && jump != kEndOfTargetChain) {
-    auto nextIfJmp = jmpTarget(jump);
-    auto nextIfJcc = jccTarget(jump);
-
-    // Exactly one of them must be non-nullptr
-    assert(!(nextIfJmp && nextIfJcc));
-    assert(nextIfJmp || nextIfJcc);
-
-    if (nextIfJmp) {
-      smashJmp(jump, dest);
-      jump = nextIfJmp;
-    } else {
-      smashJcc(jump, dest);
-      jump = nextIfJcc;
-    }
-  }
-}
-
-void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state) {
-  always_assert(false);
 }
 
 //////////////////////////////////////////////////////////////////////

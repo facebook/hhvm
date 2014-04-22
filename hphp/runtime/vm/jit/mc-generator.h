@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_VM_JIT_MCGENERATOR_H_
-#define incl_HPHP_RUNTIME_VM_JIT_MCGENERATOR_H_
+#ifndef incl_HPHP_RUNTIME_VM_JIT_MC_GENERATOR_H_
+#define incl_HPHP_RUNTIME_VM_JIT_MC_GENERATOR_H_
 
 #include <memory>
 #include <utility>
@@ -31,7 +31,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
@@ -110,7 +110,6 @@ public:
   MCGenerator();
   ~MCGenerator();
 
-public:
   /*
    * Accessors.
    */
@@ -118,6 +117,7 @@ public:
   FixupMap& fixupMap() { return m_fixupMap; }
   DataBlock& globalData() { return code.data(); }
   Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }
+  BackEnd& backEnd() { return *m_backEnd; }
 
   const TcaTransIDMap& getJmpToTransIDMap() const {
     return m_jmpToTransID;
@@ -291,6 +291,7 @@ private:
   void drawCFG(std::ofstream& out) const;
 
 private:
+  std::unique_ptr<BackEnd> m_backEnd;
   Translator         m_tx;
   PointerMap         m_trampolineMap;
   int                m_numNativeTrampolines;

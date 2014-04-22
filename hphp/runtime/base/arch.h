@@ -13,25 +13,23 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_SERVICE_REQUESTS_ARM_H
-#define incl_HPHP_JIT_SERVICE_REQUESTS_ARM_H
+#ifndef incl_HPHP_ARCH_H
+#define incl_HPHP_ARCH_H
 
-namespace HPHP { namespace JIT { namespace ARM {
+#include "hphp/runtime/base/runtime-option.h"
 
-/*
- * See service-requests-x64.h for interface documentation.
- */
+namespace HPHP {
 
-TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
-                       ServiceRequest req, const ServiceReqArgVec& argInfo);
-void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest);
-void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, JIT::ConditionCode cc,
-                 SrcKey dest);
-void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
-                      JIT::ConditionCode cc);
-int32_t emitBindCall(CodeBlock& cb, CodeBlock& stubs,
-                     SrcKey srcKey, const Func* funcd, int numArgs);
+enum class Arch {
+  X64,
+  ARM,
+};
 
-}}}
+inline Arch arch() {
+  if (RuntimeOption::EvalSimulateARM) return Arch::ARM;
+  return Arch::X64;
+}
+
+}
 
 #endif

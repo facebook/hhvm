@@ -67,11 +67,6 @@ const StaticString
 bool disableWrapper(const String& scheme) {
   String lscheme = f_strtolower(scheme);
 
-  if (lscheme.same(s_file)) {
-    // Zend quietly succeeds, but does nothing
-    return true;
-  }
-
   bool ret = false;
 
   // Unregister request-specific wrappers entirely
@@ -186,6 +181,7 @@ Wrapper* getWrapper(const String& scheme) {
 }
 
 static PlainStreamWrapper s_plain_stream_wrapper;
+static FileStreamWrapper s_file_stream_wrapper;
 
 Wrapper* getWrapperFromURI(const String& uri) {
   const char *uri_string = uri.data();
@@ -202,6 +198,12 @@ Wrapper* getWrapperFromURI(const String& uri) {
 
   const char *colon = strstr(uri_string, "://");
   if (!colon) {
+    auto def = getWrapper(s_file);
+    if (def && def != &s_file_stream_wrapper) {
+      // Script has registered its own file:// wrapper
+      // apply that to plainfiles as well
+      return def;
+    }
     return &s_plain_stream_wrapper;
   }
 
@@ -213,7 +215,6 @@ Wrapper* getWrapperFromURI(const String& uri) {
   return &s_plain_stream_wrapper;
 }
 
-static FileStreamWrapper s_file_stream_wrapper;
 static PhpStreamWrapper  s_php_stream_wrapper;
 static HttpStreamWrapper s_http_stream_wrapper;
 static DataStreamWrapper s_data_stream_wrapper;

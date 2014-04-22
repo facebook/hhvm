@@ -1,0 +1,7 @@
+bool(true)
+
+Warning: %s
+bool(false)
+bool(true)
+resource(%d) of type (stream)
+Done

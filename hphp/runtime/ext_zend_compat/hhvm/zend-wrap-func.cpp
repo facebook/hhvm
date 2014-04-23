@@ -17,7 +17,9 @@
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 #include <algorithm>
 #include "hphp/runtime/base/proxy-array.h"
+#include "hphp/runtime/ext_zend_compat/php-src/Zend/zend.h"
 #include "hphp/runtime/ext_zend_compat/php-src/TSRM/TSRM.h"
+#include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_exceptions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,8 +75,7 @@ TypedValue* zend_wrap_func(ActRec* ar) {
   auto *return_value_ptr = &return_value->m_data.pref;
 
   // Clear any stored exception
-  ZendExceptionStore& exceptionStore = ZendExceptionStore::getInstance();
-  exceptionStore.clear();
+  zend_clear_exception(TSRMLS_C);
 
   // Invoke the PHP extension function/method
   ZendExecutionStack::pushHHVMStack();
@@ -94,6 +95,7 @@ TypedValue* zend_wrap_func(ActRec* ar) {
   ZendExecutionStack::popHHVMStack();
 
   // If an exception was caught, rethrow it
+  ZendExceptionStore& exceptionStore = ZendExceptionStore::getInstance();
   if (!exceptionStore.empty()) {
     exceptionStore.rethrow();
   }

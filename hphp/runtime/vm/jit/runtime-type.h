@@ -211,6 +211,7 @@ class RuntimeType {
         struct {
           bool arrayKindValid;
           ArrayData::ArrayKind arrayKind;
+          uint32_t emptyPadding;
         };
       };
       union {

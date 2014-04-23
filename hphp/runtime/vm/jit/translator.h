@@ -83,9 +83,7 @@ struct DynLocation {
 
   DynLocation() : location(), rtt() {}
 
-  bool operator==(const DynLocation& r) const {
-    return rtt == r.rtt && location == r.location;
-  }
+  bool operator==(const DynLocation& r) const = delete;
 
   // Hash function
   size_t operator()(const DynLocation &dl) const {

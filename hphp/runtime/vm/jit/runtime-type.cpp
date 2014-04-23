@@ -330,11 +330,11 @@ bool RuntimeType::operator==(const RuntimeType& r) const {
     case VALUE:
       return r.m_value.innerType == m_value.innerType &&
              r.m_value.outerType == m_value.outerType &&
-             r.m_value.klass == m_value.klass;
-    default:
-      assert(false);
-      return false;
+             // punning through unions to compare a few things here:
+             r.m_value.klass == m_value.klass &&
+             r.m_value.knownClass == m_value.knownClass;
   }
+  not_reached();
 }
 
 size_t

@@ -8,18 +8,35 @@
  *
  *)
 
-(* Contains all the inotify context *)
+exception Error of string * int
+
+(* Contains all the fsevents context *)
 type env 
 
 (* A subscription to events for a directory *)
 type watch
 
 type event = {
-  watch : watch;
-  filename : string;
+  path : string; (* The full path for the file/directory that changed *)
+  wpath : string; (* The watched path that triggered this event *)
 }
 
-val init : unit -> env
-val add_watch : env -> string -> watch
-val rm_watch : env -> watch -> unit
-val read : env -> event list
+val init : string -> out_channel -> env
+
+(* Returns None if we're already watching that path and Some watch otherwise *)
+val add_watch : env -> string -> watch option
+
+(* A file descriptor and what to do when it is selected *)
+type fd_select = Unix.file_descr * (unit -> unit)
+val select : 
+  (* The fsevents context *)
+  env -> 
+  (* Additional file descriptor to select for reading *)
+  ?read_fdl:(fd_select list) -> 
+  (* Additional file descriptor to select for writing *)
+  ?write_fdl:(fd_select list) -> 
+  (* Timeout...like Unix.select *)
+  timeout:float ->
+  (* The callback for file system events *)
+  (event list -> unit) ->
+  unit

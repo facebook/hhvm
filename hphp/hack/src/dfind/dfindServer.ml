@@ -80,7 +80,6 @@ let set_handle_time env handle =
   set_handle env handle new_time
 
 let get_all_files env (dir, h as handle) =
-  Printf.fprintf env.log "Dumping handle: %s[%s]\n" dir h; flush env.log;
   (* Find the time when the handle was created *)
   let time =
     match get_handle env handle with
@@ -163,7 +162,7 @@ let process_client_msg env oc = function
 (*****************************************************************************)
 
 let server_socket, client_socket =
-  let tmp = Filename.temp_dir_name in
+  let tmp = Tmp.temp_dir_name in
   let user = Sys.getenv "USER" in
   let sock_name = tmp ^ "/dfind_"^user^".sock" in
   begin fun () -> (* Server side *)
@@ -205,7 +204,7 @@ let server_socket, client_socket =
 (*****************************************************************************)
 
 let get_pid_file () =
-  let tmp = Filename.temp_dir_name in
+  let tmp = Tmp.temp_dir_name in
   let user = Sys.getenv "USER" in
   let fn = tmp ^ "/dfind_"^user^".pid" in
   fn
@@ -321,48 +320,11 @@ let fork_in_pipe root =
   | 0 ->
       Unix.close msg_out;
       Unix.close result_in;
-      let env = DfindEnv.make() in
+      let env = DfindEnv.make root in
       DfindAddFile.path env root;
-      Printf.printf "Added %s\n" root; flush stdout;
       daemon_from_pipe env msg_in result_out;
       assert false
   | pid ->
       Unix.close msg_in;
       Unix.close result_out;
       msg_out, result_in, pid
-
-
-let fork () =
-  let ready_in, ready_out = Unix.pipe() in
-  match Unix.fork() with
-  | -1 -> failwith "Go get yourself a real computer"
-  | 0 ->
-      (* The server must not die when a client dies,
-       * if a client is killed via sig interrupt,
-       * we will get the SIGPIPE signal server-side,
-       * OCaml doesn't catch this signal (one of the very few).
-       * All the other signals that we care about are turned
-       * into exceptions ... So we are good.
-       *)
-      close_in  stdin;
-      close_out stdout;
-      close_out stderr;
-      Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
-      Sys.set_signal Sys.sigint Sys.Signal_ignore;
-      Unix.close ready_in;
-      let env = DfindEnv.make() in
-      DfindMaybe.set_log env.log;
-      let socket = server_socket () in
-      lock_pid_file();
-      (* This tells the client that originated the fork that
-       * the server is ready.
-       *)
-      notify_client ready_out;
-      (try
-        daemon env socket;
-      with e ->
-        Printf.fprintf env.log "Daemon died: %s\n" (Printexc.to_string e));
-      assert false (* daemon doesn't finish *)
-  | pid ->
-      Unix.close ready_out;
-      ready_in

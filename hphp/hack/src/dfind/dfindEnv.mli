@@ -117,7 +117,7 @@ val get_clients: t -> client list
  *)
 (*****************************************************************************)
 
-val make: unit -> t
+val make: string -> t
 
 (*****************************************************************************)
 (* The environment variable containing the pattern we want to skip *)

@@ -9,6 +9,7 @@ TARGET=lib
 SRC= serverArgs.ml serverEnv.ml \
  serverMsg.ml find.ml serverDfind.ml \
  serverIdeUtils.ml \
+ findRefsService.ml methodJumps.ml serverMethodJumps.ml \
  serverPeriodical.ml serverPrintTypes.ml \
  serverError.ml serverTypeCheck.ml serverIdentifyFunction.ml \
  serverAutoComplete.ml serverEnvBuild.ml serverHealth.ml serverSign.ml \

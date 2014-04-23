@@ -21,9 +21,10 @@ type event = {
   wpath : string; (* The watched path that triggered this event *)
 }
 
-val init : out_channel -> env
+val init : string -> out_channel -> env
+
+(* Returns None if we're already watching that path and Some watch otherwise *)
 val add_watch : env -> string -> watch option
-val rm_watch : env -> watch -> unit
 
 (* A file descriptor and what to do when it is selected *)
 type fd_select = Unix.file_descr * (unit -> unit)

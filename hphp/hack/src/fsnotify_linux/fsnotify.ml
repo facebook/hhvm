@@ -38,7 +38,7 @@ type event = {
   wpath : string; (* The watched path that triggered this event *)
 }
 
-let init log = {
+let init _root log = {
   fd     = wrap (Inotify.init) ();
   log    = log;
   wpaths = WMap.empty;
@@ -59,8 +59,6 @@ let add_watch env path =
     env.wpaths <- WMap.add watch path env.wpaths;
     Some watch
   end
-
-let rm_watch env watch = wrap (fun () -> Inotify.rm_watch env.fd watch) ()
 
 let check_event_type env = function
   | Inotify.Access

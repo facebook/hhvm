@@ -20,6 +20,7 @@ BUILD_DIRS=stubs
 BUILD_CMAS=stubs/lib.cma
 EXTRA_INCLUDEDIRS=
 FILTER_FROM_INCLUDE=
+PROGS=hh_single hh_server hh_client
 
 # If you want to build the JS typechecker, uncomment these lines. Requires
 # js_of_ocaml, and is kind of slow to build, which is why it's off by default.
@@ -28,15 +29,6 @@ FILTER_FROM_INCLUDE=
 # that would then confuse ocamldepend
 #BUILD_DIRS+=js
 #FILTER_FROM_INCLUDE=js
-
-#------------------------------------------------------------------------------
-# Program related variables
-#------------------------------------------------------------------------------
-ifeq ($(OS), Linux)
-  PROGS=hh_single hh_server hh_client
-else
-  PROGS=hh_single
-endif
 
 #------------------------------------------------------------------------------
 # Main variables
@@ -51,9 +43,10 @@ ifeq ($(OS), Linux)
 endif
 ifeq ($(OS), Darwin)
   FSEVENTS=fsevents
-  FSEVENTSLIB=fsevents/fsevents.cma
+  FSEVENTSLIB=fsevents/fsevents.cma 
   FSNOTIFY=fsnotify_darwin
   FSNOTIFYLIB=fsnotify_darwin/lib.cma
+  SECTCREATE=-cclib "-sectcreate __text hhi ../bin/hhi.tar.gz"
 endif
 
 LIBS=$(INOTIFYLIB) $(FSEVENTSLIB)\
@@ -71,9 +64,10 @@ LIBS=$(INOTIFYLIB) $(FSEVENTSLIB)\
  client/lib.cma
 
 MAKESUBDIRS=$(INOTIFY) $(FSEVENTS) \
+ utils \
  $(FSNOTIFY) \
  avl dfind \
- utils globals \
+ globals \
  hhi \
  heap procs \
  deps parsing naming typing \
@@ -132,9 +126,9 @@ hh_single.opt: $(LIBS:.cma=.cmxa) $(OBJS:.cmo=.cmx) hh_single_type_check.cmx
 
 
 hh_server.bc: $(LIBS) $(OBJS) hh_server.cmo
-	$(OCAMLC) -custom -o $@ $(SYSLIBS) $^
+	$(OCAMLC) $(SECTCREATE) -custom -o $@ $(SYSLIBS) $^
 hh_server.opt: $(LIBS:.cma=.cmxa) $(OBJS:.cmo=.cmx) hh_server.cmx
-	$(OCAMLOPT) -o $@ $(SYSLIBS:.cma=.cmxa)  $^
+	$(OCAMLOPT) $(SECTCREATE) -o $@ $(SYSLIBS:.cma=.cmxa)  $^
 
 hh_client.bc: $(LIBS) $(OBJS) hh_client.cmo
 	$(OCAMLC) -custom -o $@ $(SYSLIBS) $^
@@ -166,15 +160,13 @@ distclean:: clean
 ##############################################################################
 # Install
 ##############################################################################
-ifeq ($(OS), Linux)
+
 bin:
+ifeq ($(OS), Linux)
 	objcopy --add-section hhi=../bin/hhi.tar.gz hh_server.opt ../bin/hh_server
+endif
 	cp hh_client.opt ../bin/hh_client
 	cp hh_single.opt ../bin/hh_single_type_check
-else
-bin:
-	cp hh_single.opt ../bin/hh_single_type_check
-endif
 
 stamp:
 	rm -f utils/get_build_id.gen.c

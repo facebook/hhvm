@@ -111,9 +111,9 @@ class c_SimpleXMLElement :
 
 FORWARD_DECLARE_CLASS(SimpleXMLElementIterator);
 
-class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
+class c_SimpleXMLElementIterator : public ExtObjectData {
  public:
-  DECLARE_CLASS(SimpleXMLElementIterator)
+  DECLARE_CLASS_NO_SWEEP(SimpleXMLElementIterator)
 
   public: c_SimpleXMLElementIterator(Class* cls = c_SimpleXMLElementIterator::classof());
   public: ~c_SimpleXMLElementIterator();

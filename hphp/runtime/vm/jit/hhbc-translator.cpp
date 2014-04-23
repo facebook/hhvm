@@ -4552,7 +4552,7 @@ void HhbcTranslator::emitDiv() {
 
   // not going to bother with string division etc.
   if (!isNumeric(divisorType) || !isNumeric(dividendType)) {
-    emitInterpOne(Type::Cell, 2);
+    emitInterpOne(Type::UncountedInit, 2);
     return;
   }
 
@@ -4600,7 +4600,7 @@ void HhbcTranslator::emitDiv() {
       }
       /* fall through */
     }
-    emitInterpOne(Type::Cell, 2);
+    emitInterpOne(Type::UncountedInit, 2);
     return;
   }
 
@@ -4702,7 +4702,7 @@ void HhbcTranslator::emitSqrt() {
     return;
   }
 
-  emitInterpOne(Type::Cell, 1);
+  emitInterpOne(Type::UncountedInit, 1);
 }
 
 void HhbcTranslator::emitBitNot() {
@@ -4804,7 +4804,7 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
   case SetOpOp::MulEqualO:   return arithOpOverResult(locType.unbox(), valType);
   case SetOpOp::ConcatEqual: return Type::Str;
   case SetOpOp::DivEqual:
-  case SetOpOp::ModEqual:    return Type::Cell;
+  case SetOpOp::ModEqual:    return Type::UncountedInit;
   case SetOpOp::AndEqual:
   case SetOpOp::OrEqual:
   case SetOpOp::XorEqual:    return bitOpResult(locType.unbox(), valType);
@@ -4896,7 +4896,8 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
       auto ty = localType().unbox();
       return ty <= Type::Dbl ? ty : Type::Cell;
     }
-    case OutStrlen:     return topType(0) <= Type::Str ? Type::Int : Type::Cell;
+    case OutStrlen:
+      return topType(0) <= Type::Str ? Type::Int : Type::UncountedInit;
     case OutClassRef:   return Type::Cls;
     case OutFPushCufSafe: return folly::none;
     case OutAsyncAwait:   return folly::none; // custom in getStackValue

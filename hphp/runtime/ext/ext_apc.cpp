@@ -1098,7 +1098,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
     rfc1867ApcData->tracking_key.clear();
     rfc1867ApcData->name.clear();
     rfc1867ApcData->cancel_upload = 0;
-    rfc1867ApcData->temp_filename = NULL;
+    rfc1867ApcData->temp_filename = "";
     rfc1867ApcData->start_time = my_time();
     rfc1867ApcData->bytes_processed = 0;
     rfc1867ApcData->prev_bytes_processed = 0;
@@ -1153,7 +1153,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       int len = strlen(*data->filename);
       if (len > RFC1867_FILENAME_MAXLEN) len = RFC1867_FILENAME_MAXLEN;
       rfc1867ApcData->filename = std::string(*data->filename, len);
-      rfc1867ApcData->temp_filename = NULL;
+      rfc1867ApcData->temp_filename = "";
       len = strlen(data->name);
       if (len > RFC1867_NAME_MAXLEN) len = RFC1867_NAME_MAXLEN;
       rfc1867ApcData->name = std::string(data->name, len);
@@ -1207,7 +1207,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       track.set(s_current, rfc1867ApcData->bytes_processed);
       track.set(s_filename, rfc1867ApcData->filename);
       track.set(s_name, rfc1867ApcData->name);
-      track.set(s_temp_filename, rfc1867ApcData->temp_filename, CopyString);
+      track.set(s_temp_filename, rfc1867ApcData->temp_filename);
       track.set(s_cancel_upload, rfc1867ApcData->cancel_upload);
       track.set(s_done, 0);
       track.set(s_start_time, rfc1867ApcData->start_time);

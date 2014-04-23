@@ -119,7 +119,7 @@ public:
   int64_t content_length;
   std::string filename;
   std::string name;
-  char *temp_filename;
+  std::string temp_filename;
   int cancel_upload;
   double start_time;
   int64_t bytes_processed;

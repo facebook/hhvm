@@ -61,9 +61,9 @@ typedef struct _multipart_event_file_data {
 } multipart_event_file_data;
 
 typedef struct _multipart_event_file_end {
-  size_t  post_bytes_processed;
-  char  *temp_filename;
-  int  cancel_upload;
+  size_t      post_bytes_processed;
+  const char* temp_filename;
+  int         cancel_upload;
 } multipart_event_file_end;
 
 typedef struct _multipart_event_end {

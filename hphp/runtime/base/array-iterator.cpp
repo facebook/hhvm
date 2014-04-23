@@ -493,6 +493,10 @@ ArrayIter::ArrayIter(Tuplish* coll, Fixed)
     : m_pos(0), m_itype(ArrayIter::TypeIterator) {
   assert(coll);
   setObject(coll);
+  // TODO Task #4204598: In theory, we might be able to squeeze out a win
+  // here by not checking the version for immutable collections, but we'd
+  // to make sure all iteration implementations are consistent about this.
+  m_version = coll->getVersion();
 }
 
 template<class Vectorish>

@@ -1736,6 +1736,10 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
     return (TypedValue*)(&elm0);
   }
 
+  int getVersion() const {
+    return 0;
+  }
+
   friend ObjectData* collectionDeepCopyPair(c_Pair* pair);
   friend class c_PairIterator;
   friend class c_Vector;

@@ -21,10 +21,9 @@
 #include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/ext_function.h"
 
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
@@ -67,18 +66,19 @@ c_Continuation::~c_Continuation() {
 
 void c_Continuation::t___construct() {}
 
-void c_Continuation::suspend(Offset offset, const Cell& value) {
+void c_Continuation::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
+                             const Cell& value) {
   assert(getState() == Running);
-  resumable()->setOffset(offset);
+  resumable()->setResumeAddr(resumeAddr, resumeOffset);
   cellSet(make_tv<KindOfInt64>(++m_index), m_key);
   cellSet(value, m_value);
   setState(Started);
 }
 
-void c_Continuation::suspend(Offset offset, const Cell& key,
-                             const Cell& value) {
+void c_Continuation::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
+                             const Cell& key, const Cell& value) {
   assert(getState() == Running);
-  resumable()->setOffset(offset);
+  resumable()->setResumeAddr(resumeAddr, resumeOffset);
   cellSet(key, m_key);
   cellSet(value, m_value);
   if (m_key.m_type == KindOfInt64) {
@@ -153,7 +153,8 @@ c_Continuation *c_Continuation::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Continuation*>(obj);
   auto fp = thiz->actRec();
 
-  c_Continuation* cont = Create(fp, thiz->resumable()->offset());
+  c_Continuation* cont = Create(fp, thiz->resumable()->resumeAddr(),
+                                    thiz->resumable()->resumeOffset());
   cont->copyContinuationVars(fp);
   cont->setState(thiz->getState());
   cont->m_index  = thiz->m_index;

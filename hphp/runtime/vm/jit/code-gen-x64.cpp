@@ -2596,6 +2596,25 @@ void CodeGenerator::emitReqBindAddr(TCA& dest,
                         &dest, sk.toAtomicInt());
 }
 
+void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
+  auto data   = inst->extra<LdBindAddr>();
+  auto dstReg = dstLoc(0).reg();
+
+  // Emit service request to smash address of SrcKey into 'addr'.
+  TCA* addrPtr = m_mcg->allocData<TCA>(sizeof(TCA), 1);
+  emitReqBindAddr(*addrPtr, data->sk);
+
+  // Load the maybe bound address.
+  auto addr = intptr_t(addrPtr);
+  if (int32_t(addr) == addr) {
+    m_as.loadq(baseless(int32_t(addr)), dstReg);
+  } else {
+    // x64 does not support mov addr64, reg
+    m_as.movq(int64_t(addr), dstReg);
+    m_as.loadq(*dstReg, dstReg);
+  }
+}
+
 void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
   JmpSwitchData* data = inst->extra<JmpSwitchDest>();
   SSATmp* index       = inst->src(0);
@@ -5392,15 +5411,29 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {
-  auto contARReg = srcLoc(0).reg();
-  auto addrReg = srcLoc(1).reg();
-  auto returnOff = safe_cast<int32_t>(inst->src(2)->intVal());
-  auto curFp = srcLoc(3).reg();
+  // ContEnter does not directly use SP, but the generator body we are jumping
+  // to obviously does. We depend on SP via srcLoc(0) to avoid last SpillStack
+  // be optimized away.
+  auto curFpReg  = srcLoc(1).reg();
+  auto genFpReg  = srcLoc(2).reg();
+  auto addrReg   = srcLoc(3).reg();
+  auto returnOff = safe_cast<int32_t>(inst->src(4)->intVal());
+  assert(srcLoc(0).reg() == rVmSp);
+  assert(curFpReg == rVmFp);
 
-  m_as.  storeq (curFp, contARReg[AROFF(m_sfp)]);
-  m_as.  storel (returnOff, contARReg[AROFF(m_soff)]);
-  m_as.  movq   (contARReg, rStashedAR);
-  m_as.  call   (addrReg);
+  Label Prologue, End;
+
+  m_as.  storeq (curFpReg, genFpReg[AROFF(m_sfp)]);
+  m_as.  storel (returnOff, genFpReg[AROFF(m_soff)]);
+  m_as.  movq   (genFpReg, curFpReg);
+  m_as.  jmp8   (End);
+
+  asm_label(m_as, Prologue);
+  m_as.  pop    (curFpReg[AROFF(m_savedRip)]);
+  m_as.  jmp    (addrReg);
+
+  asm_label(m_as, End);
+  m_as.  call   (Prologue);
 }
 
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
@@ -5498,23 +5531,24 @@ void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
 
 void CodeGenerator::emitStRaw(IRInstruction* inst, size_t extraOff) {
   auto offset = inst->extra<RawMemData>()->info().offset;
-  auto dest   = srcLoc(0).reg()[offset + extraOff];
+  auto dst    = srcLoc(0).reg()[offset + extraOff];
+  auto src    = inst->src(1);
+  auto srcReg = srcLoc(1).reg();
   auto size   = inst->extra<RawMemData>()->info().size;
 
-  auto const valueReg = srcLoc(1).reg();
-  if (valueReg == InvalidReg) {
-    auto val = Immed64(inst->src(0)->rawVal());
+  if (srcReg == InvalidReg) {
+    auto val = Immed64(src->type().hasRawVal() ? src->rawVal() : 0);
     switch (size) {
-      case sz::byte:  m_as.storeb(val.b(), dest); break;
-      case sz::dword: m_as.storel(val.l(), dest); break;
-      case sz::qword: emitImmStoreq(m_as, val.q(), dest); break;
+      case sz::byte:  m_as.storeb(val.b(), dst); break;
+      case sz::dword: m_as.storel(val.l(), dst); break;
+      case sz::qword: emitImmStoreq(m_as, val.q(), dst); break;
       default:        not_implemented();
     }
   } else {
     switch (size) {
-      case sz::byte:  m_as.storeb(rbyte(valueReg), dest); break;
-      case sz::dword: m_as.storel(r32(valueReg), dest); break;
-      case sz::qword: m_as.storeq(r64(valueReg), dest); break;
+      case sz::byte:  m_as.storeb(rbyte(srcReg), dst); break;
+      case sz::dword: m_as.storel(r32(srcReg), dst); break;
+      case sz::qword: m_as.storeq(r64(srcReg), dst); break;
       default:        not_implemented();
     }
   }

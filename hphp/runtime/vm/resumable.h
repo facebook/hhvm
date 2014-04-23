@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
 
@@ -47,16 +48,20 @@ struct Resumable {
   static constexpr ptrdiff_t stashedSpOff() {
     return offsetof(Resumable, m_stashedSp);
   }
-  static constexpr ptrdiff_t offsetOff() {
-    return offsetof(Resumable, m_offset);
+  static constexpr ptrdiff_t resumeAddrOff() {
+    return offsetof(Resumable, m_resumeAddr);
+  }
+  static constexpr ptrdiff_t resumeOffsetOff() {
+    return offsetof(Resumable, m_resumeOffset);
   }
 
-  static void* Create(const ActRec* fp, Offset offset, size_t objSize) {
+  static void* Create(const ActRec* fp, JIT::TCA resumeAddr,
+                      Offset resumeOffset, size_t objSize) {
     assert(fp);
     auto const func = fp->func();
     assert(func);
     assert(func->isAsync() || func->isGenerator());
-    assert(func->contains(offset));
+    assert(func->contains(resumeOffset));
 
     // Allocate memory.
     size_t frameSize = func->numSlotsInFrame() * sizeof(TypedValue);
@@ -72,7 +77,8 @@ struct Resumable {
     actRec.setThisOrClassAllowNull(fp->getThisOrClass());
 
     // Populate Resumable.
-    resumable->m_offset = offset;
+    resumable->m_resumeAddr = resumeAddr;
+    resumable->m_resumeOffset = resumeOffset;
     resumable->m_size = totalSize;
 
     // Return pointer to the parent object.
@@ -80,15 +86,17 @@ struct Resumable {
   }
 
   ActRec* actRec() { return &m_actRec; }
-  Offset offset() const {
-    assert(m_actRec.func()->contains(m_offset));
-    return m_offset;
+  JIT::TCA resumeAddr() const { return m_resumeAddr; }
+  Offset resumeOffset() const {
+    assert(m_actRec.func()->contains(m_resumeOffset));
+    return m_resumeOffset;
   }
   size_t size() const { return m_size; }
 
-  void setOffset(Offset offset) {
-    assert(m_actRec.func()->contains(offset));
-    m_offset = offset;
+  void setResumeAddr(JIT::TCA resumeAddr, Offset resumeOffset) {
+    assert(m_actRec.func()->contains(resumeOffset));
+    m_resumeAddr = resumeAddr;
+    m_resumeOffset = resumeOffset;
   }
 
 private:
@@ -105,12 +113,15 @@ private:
   // Temporary storage used to save the SP when inlining into a resumable.
   void* m_stashedSp;
 
+  // Resume address.
+  JIT::TCA m_resumeAddr;
+
   // Resume offset.
-  Offset m_offset;
+  Offset m_resumeOffset;
 
   // Size of the smart allocated memory that includes this resumable.
   int32_t m_size;
-};
+} __attribute__((aligned(16)));
 
 static_assert(Resumable::arOff() == 0,
               "ActRec must be in the beginning of Resumable");

@@ -1481,7 +1481,9 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
 
   // Create the Continuation object.
   auto const func = curFunc();
-  auto const cont = gen(CreateCont, m_irb->fp(), cns(resumeOffset));
+  auto const resumeSk = SrcKey(func, resumeOffset, true);
+  auto const resumeAddr = gen(LdBindAddr, LdBindAddrData(resumeSk));
+  auto const cont = gen(CreateCont, m_irb->fp(), resumeAddr, cns(resumeOffset));
 
   // Teleport local variables into the Continuation.
   SSATmp* contAR = gen(LdContActRec, Type::PtrToGen, cont);
@@ -1505,6 +1507,35 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   m_hasExit = true;
 }
 
+void HhbcTranslator::emitContEnter(Offset returnOffset) {
+  assert(curClass());
+  assert(curClass()->classof(c_Continuation::classof()));
+  assert(curFunc()->contains(returnOffset));
+
+  // Load generator's FP and resume address.
+  auto genObj = gen(LdThis, m_irb->fp());
+  auto genFp = gen(LdContActRec, Type::FramePtr, genObj);
+  auto resumeAddr =
+    gen(LdContArRaw, RawMemData{RawMemData::ContResumeAddr}, genFp);
+
+  // Make sure function enter hook is called if needed.
+  auto exitSlow = makeExitSlow();
+  gen(CheckSurpriseFlags, exitSlow);
+
+  // Exit to interpreter if resume address is not known.
+  resumeAddr = gen(CheckNonNull, exitSlow, resumeAddr);
+
+  // Sync stack.
+  auto const sp = spillStack();
+
+  // Enter generator.
+  auto returnBcOffset = returnOffset - curFunc()->base();
+  gen(ContEnter, sp, m_irb->fp(), genFp, resumeAddr, cns(returnBcOffset));
+
+  // The top of the stack was consumed by the generator.
+  popC(DataTypeGeneric);
+}
+
 void HhbcTranslator::emitResumedReturnControl(Block* catchBlock) {
   auto const sp = spillStack();
   emitRetSurpriseCheck(cns(Type::Uninit), catchBlock, true);
@@ -1517,8 +1548,12 @@ void HhbcTranslator::emitResumedReturnControl(Block* catchBlock) {
 }
 
 void HhbcTranslator::emitYieldImpl(Offset resumeOffset) {
-  // Set resume offset.
-  gen(StContArRaw, RawMemData{RawMemData::ContOffset}, m_irb->fp(),
+  // Resumable::setResumeAddr(resumeAddr, resumeOffset)
+  auto const resumeSk = SrcKey(curFunc(), resumeOffset, true);
+  auto const resumeAddr = gen(LdBindAddr, LdBindAddrData(resumeSk));
+  gen(StContArRaw, RawMemData{RawMemData::ContResumeAddr}, m_irb->fp(),
+      resumeAddr);
+  gen(StContArRaw, RawMemData{RawMemData::ContResumeOffset}, m_irb->fp(),
       cns(resumeOffset));
 
   // Set yielded value.
@@ -1612,8 +1647,11 @@ void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
 
   // Create the AsyncFunctionWaitHandle object.
   auto const func = curFunc();
+  auto const resumeSk = SrcKey(func, resumeOffset, true);
+  auto const resumeAddr = gen(LdBindAddr, LdBindAddrData(resumeSk));
   auto const waitHandle =
-    gen(CreateAFWH, catchBlock, m_irb->fp(), cns(resumeOffset), child);
+    gen(CreateAFWH, catchBlock, m_irb->fp(), resumeAddr, cns(resumeOffset),
+        child);
 
   // Teleport local variables into the AsyncFunctionWaitHandle.
   SSATmp* asyncAR = gen(LdAFWHActRec, Type::PtrToGen, waitHandle);
@@ -1649,9 +1687,13 @@ void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
   assert(child->isA(Type::Obj));
 
   // Store child and offset.
-  gen(StAsyncArRaw, RawMemData{RawMemData::AsyncChild}, m_irb->fp(), child);
-  gen(StAsyncArRaw, RawMemData{RawMemData::AsyncOffset}, m_irb->fp(),
+  auto const resumeSk = SrcKey(curFunc(), resumeOffset, true);
+  auto const resumeAddr = gen(LdBindAddr, LdBindAddrData(resumeSk));
+  gen(StAsyncArRaw, RawMemData{RawMemData::AsyncResumeAddr}, m_irb->fp(),
+      resumeAddr);
+  gen(StAsyncArRaw, RawMemData{RawMemData::AsyncResumeOffset}, m_irb->fp(),
       cns(resumeOffset));
+  gen(StAsyncArRaw, RawMemData{RawMemData::AsyncChild}, m_irb->fp(), child);
 
   // Transfer control back to the scheduler.
   auto const sp = spillStack();

@@ -403,7 +403,7 @@ void IRTranslator::translateCreateCont(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateContEnter(const NormalizedInstruction& i) {
-  HHIR_UNIMPLEMENTED(ContEnter);
+  HHIR_EMIT(ContEnter, i.nextSk().offset());
 }
 
 void IRTranslator::translateContRaise(const NormalizedInstruction& i) {

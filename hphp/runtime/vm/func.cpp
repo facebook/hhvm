@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/runtime/vm/verifier/cfg.h"
 
@@ -330,7 +331,7 @@ Func::~Func() {
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
                                          : kNumFixedPrologues;
   if (mcg != nullptr) {
-    mcg->smashPrologueGuards((TCA *)m_prologueTable,
+    mcg->smashPrologueGuards((JIT::TCA*)m_prologueTable,
                              numPrologues, this);
   }
 #ifdef DEBUG

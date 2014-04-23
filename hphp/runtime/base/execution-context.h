@@ -608,11 +608,12 @@ private:
     // have been teleported away into ExtraArgs and/or a variadic param
     Trimmed
   };
-  void enterVMAtAsyncFunc(ActRec* enterFnAr, PC pc, ObjectData* exception);
+  void enterVMAtAsyncFunc(ActRec* enterFnAr, Resumable* resumable,
+                          ObjectData* exception);
   void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk);
   void enterVMAtCurPC();
   void enterVM(ActRec* ar, StackArgsState stackTrimmed,
-               PC pc = nullptr, ObjectData* exception = nullptr);
+               Resumable* resumable = nullptr, ObjectData* exception = nullptr);
   void doFPushCuf(IOP_ARGS, bool forward, bool safe);
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,

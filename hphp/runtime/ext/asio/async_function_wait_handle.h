@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,8 +54,11 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   static constexpr ptrdiff_t arOff() {
     return resumableOff() + Resumable::arOff();
   }
-  static constexpr ptrdiff_t offsetOff() {
-    return resumableOff() + Resumable::offsetOff();
+  static constexpr ptrdiff_t resumeAddrOff() {
+    return resumableOff() + Resumable::resumeAddrOff();
+  }
+  static constexpr ptrdiff_t resumeOffsetOff() {
+    return resumableOff() + Resumable::resumeOffsetOff();
   }
   static constexpr ptrdiff_t objOff() {
     return resultOff() - c_WaitHandle::resultOff();
@@ -69,13 +73,15 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
     return offsetof(c_AsyncFunctionWaitHandle, m_child);
   }
   static ObjectData* Create(const ActRec* origFp,
-                            Offset offset,
+                            JIT::TCA resumeAddr,
+                            Offset resumeOffset,
                             ObjectData* child);
   void run();
   String getName();
   void exitContext(context_idx_t ctx_idx);
   bool isRunning() { return getState() == STATE_RUNNING; }
-  void suspend(c_WaitableWaitHandle* child, Offset offset);
+  void suspend(JIT::TCA resumeAddr, Offset resumeOffset,
+               c_WaitableWaitHandle* child);
   String getFileName();
   Offset getNextExecutionOffset();
   int getLineNumber();

@@ -27,7 +27,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val)
     // tmp is a constant
     m_srcReg = InvalidReg;
     if (val) {
-      m_imm64 = tmp->type() <= Type::Null ? 0 : tmp->rawVal();
+      m_imm64 = tmp->type().hasRawVal() ? tmp->rawVal() : 0;
     } else {
       m_imm64 = toDataTypeForCall(tmp->type());
     }

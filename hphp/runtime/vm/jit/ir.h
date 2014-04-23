@@ -398,7 +398,7 @@ O(CheckInit,                        ND, S(Gen),                            B) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),                B) \
 O(CheckCold,                        ND, NA,                              B|E) \
 O(CheckNullptr,                     ND, S(CountedStr,Nullptr),       B|E|CRc) \
-O(CheckNonNull,  DSubtract(0, Nullptr), S(Nullptr,Func,PtrToGen),          B) \
+O(CheckNonNull,  DSubtract(0, Nullptr), S(Nullptr,Func,PtrToGen,TCA),      B) \
 O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
 O(LdVectorSize,                 D(Int), S(Obj),                            E) \
 O(CheckPackedArrayBounds,           ND, S(Arr) S(Int),                   B|E) \
@@ -481,6 +481,7 @@ O(LdFuncCached,                D(Func), NA,                           N|E|Er) \
 O(LdFuncCachedU,               D(Func), NA,                           N|E|Er) \
 O(LdFuncCachedSafe,            D(Func), NA,                                B) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr,FramePtr) C(Int),         C) \
+O(LdBindAddr,                   D(TCA), NA,                                N) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \
 O(LdSSwitchDestSlow,            D(TCA), S(Gen),                       E|N|Er) \
 O(LdSwitchDblIndex,             D(Int), S(Dbl) S(Int) S(Int),              N) \
@@ -612,9 +613,13 @@ O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
 O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                     T|E|N|Er) \
 O(Shuffle,                          ND, SUnk,                             NF) \
-O(CreateCont,                   D(Obj), S(FramePtr) C(Int),          E|N|PRc) \
-O(ContEnter,                        ND, S(FramePtr)                           \
-                                          S(TCA) C(Int) S(FramePtr),       E) \
+O(CreateCont,                   D(Obj), S(FramePtr)                           \
+                                          S(TCA,Nullptr) C(Int),     E|N|PRc) \
+O(ContEnter,                        ND, S(StkPtr)                             \
+                                          S(FramePtr)                         \
+                                          S(FramePtr)                         \
+                                          S(TCA)                              \
+                                          C(Int),                          E) \
 O(ContPreNext,                      ND, S(Obj) C(Bool),                  B|E) \
 O(ContStartedCheck,                 ND, S(Obj),                          B|E) \
 O(ContValid,                   D(Bool), S(Obj),                            E) \
@@ -622,17 +627,19 @@ O(ContArIncKey,                     ND, S(FramePtr),                       E) \
 O(ContArUpdateIdx,                  ND, S(FramePtr) S(Int),                E) \
 O(LdContActRec,                 DParam, S(Obj),                            C) \
 O(LdContArRaw,                  DLdRaw, S(FramePtr),                      NF) \
-O(StContArRaw,                      ND, S(FramePtr) S(Int),                E) \
+O(StContArRaw,                      ND, S(FramePtr) S(Int,TCA,Nullptr),    E) \
 O(LdContArValue,                DParam, S(FramePtr),                     PRc) \
 O(StContArValue,                    ND, S(FramePtr) S(Cell),           E|CRc) \
 O(LdContArKey,                  DParam, S(FramePtr),                     PRc) \
 O(StContArKey,                      ND, S(FramePtr) S(Gen),            E|CRc) \
-O(StAsyncArRaw,                     ND, S(FramePtr) S(Int,Obj),            E) \
+O(StAsyncArRaw,                     ND, S(FramePtr)                           \
+                                          S(Int,Obj,TCA,Nullptr),          E) \
 O(StAsyncArResult,                  ND, S(FramePtr) S(Cell),           E|CRc) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
 O(CreateAFWH,                   D(Obj), S(FramePtr)                           \
+                                          S(TCA,Nullptr)                      \
                                           C(Int)                              \
                                           S(Obj),             E|Er|N|CRc|PRc) \
 O(CreateSRWH,                   D(Obj), S(Cell),                   N|CRc|PRc) \

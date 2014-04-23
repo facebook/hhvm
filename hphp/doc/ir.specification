@@ -427,7 +427,7 @@ GuardRefs S0:FuncPtr S1:Int S2:Int S3:Int S4:Int S5:Int
   If any of the checks fail, make a fallback jump. (Jump to a service request
   that will chain to a retranslation of this tracelet.)
 
-D:{Func} = CheckNonNull S0:{Nullptr|Func|PtrToGen} -> B
+D:{Func} = CheckNonNull S0:{Nullptr|Func|PtrToGen|TCA} -> B
 
   If the value in S0 is Nullptr, branch to block B.
 
@@ -1668,6 +1668,13 @@ D:Cell = GenericIdx S0:ConstTCA S1:Cell S2:Cell S3:Cell
   S3 is returned. S1 must support array or indexed access. If S1 does not
   support array or indexed access S3 is returned.
 
+D:TCA LdBindAddr<SrcKey>
+
+  Creates a service request to bind the given target address. Returns a TCA
+  pointing either to the service request (before the service request is
+  satisfied) or to the native code for the given target address (once the
+  service request is satisfied).
+
 D:Int LdSwitchDblIndex S0:Dbl S1:Int S2:Int
 D:Int LdSwitchStrIndex S0:Str S1:Int S2:Int
 D:Int LdSwitchObjIndex S0:Obj S1:Int S2:Int
@@ -1737,39 +1744,38 @@ StClosureArg<offsetBytes> S0:Obj<Closure> S1:Gen
   Store one of the closure environment arguments (i.e. from the closure's use
   clause) from S1 into the closure object S0.
 
-D:Obj<Continuation> = CreateCont S0:FramePtr S1:Int
+D:Obj<Continuation> = CreateCont S0:FramePtr S1:{TCA,Nullptr} S2:Int
 
   Create a Continuation object and suspend the ActRec provided by S0 into
-  its embedded ActRec. Set the resume offset to S1.
+  its embedded ActRec. Set the native resume address to S1 and resume offset
+  to S2.
 
-D:Obj<AsyncFunctionWaitHandle> = CreateAFWH S0:FramePtr S1:Int
-                                            S2:Obj<WaitableWaitHandle>
+D:Obj<AsyncFunctionWaitHandle> = CreateAFWH S0:FramePtr S1:{TCA,Nullptr} S2:Int
+                                            S3:Obj<WaitableWaitHandle>
 
   Create an AsyncFunctionWaitHandle object and suspend the ActRec provided by
-  S0 into its embedded ActRec. Set the resume offset to S1 and mark it blocked
-  on non-finished child S2.
+  S0 into its embedded ActRec. Set the native resume address to S1, resume
+  offset to S2, and mark it blocked on non-finished child S3.
 
-ContEnter S0:FramePtr S1:TCA S2:ConstInt S3:FramePtr
+ContEnter S0:StkPtr S1:FramePtr S2:FramePtr S3:TCA S4:ConstInt
 
-  Enters a generator body. S0 is the ActRec embedded in the Continuation
-  object. S1 is the address to jump to. S2 is the bytecode offset in the caller
-  to return to when the generator body yields. S3 is the current frame.
+  Enters a generator body. S0 is the current stack pointer pointing to fully
+  spilled stack, S1 is the current frame pointer, S2 is the generator frame
+  pointer embedded in the Continuation object, S3 is the address to jump to,
+  and S4 is the bytecode offset in the caller to return to when the generator
+  suspends or returns.
 
-ContPreNext S0:Obj -> B
+ContPreNext S0:Obj S1:Bool -> B
 
-  Performs operations needed for the Continuation::next() method. This includes
-  checking m_done and m_running---if either is not the case branches to block
-  B.
+  Performs operations needed for the next() method of Continuation object S0.
+  If the generator is already running or finished, or it was not started yet
+  and the S1 check-started flag is set, the branch B is taken. Otherwise,
+  the generator is marked as running.
 
 ContStartedCheck S0:Obj -> B
 
   Checks if the continuation object S0 has started, and if not branches to
   block B.
-
-ContSetRunning S0:Obj S1:ConstBool
-
-  Sets the continuation object S0 to running if S1 is true, or sets it as
-  stopped otherwise.
 
 ContArIncKey S0:FramePtr
 
@@ -1793,7 +1799,7 @@ D:T LdContArRaw<T> S0:FramePtr S1:ConstInt
   constant from the RawMemSlot::Kind enum, which describes the offset from the
   continuation base, and the size.
 
-StContArRaw S0:FramePtr S1:ConstInt S2:??
+StContArRaw S0:FramePtr S1:ConstInt S2:{Int,TCA,Nullptr}
 
   Stores raw data into the Continuation object ActRec of which is S0. S1 is a
   constant from the RawMemSlow::Kind enum, which describes the offset from the
@@ -1817,7 +1823,7 @@ StContArKey S0:FramePtr S1:Cell
   Stores 'key' into the Continuation object ActRec of which is S0. S1 is the
   new value.
 
-StAsyncArRaw S0:FramePtr S1:ConstInt S2:??
+StAsyncArRaw S0:FramePtr S1:ConstInt S2:{Int,Obj,TCA,Nullptr}
 
   Stores raw data into the AsyncFunctionWaitHandle object ActRec of which is S0.
   S1 is a constant from the RawMemSlow::Kind enum, which describes the offset

@@ -1677,23 +1677,31 @@ void ExecutionContext::syncGdbState() {
   }
 }
 
-void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr, PC pc,
+void ExecutionContext::enterVMAtAsyncFunc(ActRec* enterFnAr,
+                                          Resumable* resumable,
                                           ObjectData* exception) {
   assert(enterFnAr);
+  assert(enterFnAr->func()->isAsync());
   assert(enterFnAr->resumed());
-  assert(pc);
+  assert(resumable);
 
   m_fp = enterFnAr;
-  m_pc = pc;
+  m_pc = m_fp->func()->unit()->at(resumable->resumeOffset());
   if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
   assert(m_fp->func()->contains(m_pc));
 
-  if (!exception) {
-    enterVMAtCurPC();
-  } else {
+  if (UNLIKELY(exception != nullptr)) {
     assert(exception->instanceof(SystemLib::s_ExceptionClass));
     Object e(exception);
     throw e;
+  }
+
+  bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
+  if (LIKELY(useJit && resumable->resumeAddr())) {
+    Stats::inc(Stats::VMEnter);
+    mcg->enterTCAfterPrologue(resumable->resumeAddr());
+  } else {
+    enterVMAtCurPC();
   }
 }
 
@@ -1755,12 +1763,12 @@ void ExecutionContext::enterVMAtCurPC() {
  * async function will throw an 'exception' upon entering VM if passed.
  */
 void ExecutionContext::enterVM(ActRec* ar, StackArgsState stk,
-                               PC pc, ObjectData* exception) {
+                               Resumable* resumable, ObjectData* exception) {
   assert(ar);
   assert(!ar->sfp());
   assert(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
   assert(ar->m_soff == 0);
-  assert(!pc || (stk == StackArgsState::Untrimmed));
+  assert(!resumable || (stk == StackArgsState::Untrimmed));
 
   DEBUG_ONLY int faultDepth = m_faults.size();
   SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
@@ -1784,10 +1792,10 @@ resume:
   try {
     if (first) {
       first = false;
-      if (!pc) {
+      if (!resumable) {
         enterVMAtFunc(ar, stk);
       } else {
-        enterVMAtAsyncFunc(ar, pc, exception);
+        enterVMAtAsyncFunc(ar, resumable, exception);
       }
     } else {
       enterVMAtCurPC();
@@ -2037,8 +2045,7 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
   pushVMState(savedSP);
   SCOPE_EXIT { popVMState(); };
 
-  enterVM(fp, StackArgsState::Untrimmed,
-          fp->func()->unit()->at(resumable->offset()));
+  enterVM(fp, StackArgsState::Untrimmed, resumable);
 }
 
 void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
@@ -2060,8 +2067,7 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   pushVMState(m_stack.top());
   SCOPE_EXIT { popVMState(); };
 
-  enterVM(fp, StackArgsState::Untrimmed,
-          fp->func()->unit()->at(resumable->offset()), exception);
+  enterVM(fp, StackArgsState::Untrimmed, resumable, exception);
 }
 
 void ExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
@@ -7027,10 +7033,10 @@ OPTBLD_INLINE void ExecutionContext::iopCreateCont(IOP_ARGS) {
   assert(!m_fp->resumed());
 
   const auto func = m_fp->func();
-  const auto offset = m_fp->func()->unit()->offsetOf(pc);
+  const auto resumeOffset = m_fp->func()->unit()->offsetOf(pc);
 
   // Create the Continuation object.
-  auto cont = c_Continuation::Create(m_fp, offset);
+  auto cont = c_Continuation::Create(m_fp, nullptr, resumeOffset);
 
   // Teleport local variables into the Continuation.
   fillContinuationVars(func, m_fp, cont->actRec());
@@ -7078,8 +7084,8 @@ OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
 
   m_fp = contAR;
 
-  assert(contAR->func()->contains(cont->resumable()->offset()));
-  pc = contAR->func()->unit()->at(cont->resumable()->offset());
+  assert(contAR->func()->contains(cont->resumable()->resumeOffset()));
+  pc = contAR->func()->unit()->at(cont->resumable()->resumeOffset());
   SYNC();
 }
 
@@ -7105,8 +7111,8 @@ OPTBLD_INLINE void ExecutionContext::iopYield(IOP_ARGS) {
   NEXT();
 
   auto cont = frame_continuation(m_fp);
-  auto offset = m_fp->func()->unit()->offsetOf(pc);
-  cont->suspend(offset, *m_stack.topC());
+  auto resumeOffset = m_fp->func()->unit()->offsetOf(pc);
+  cont->suspend(nullptr, resumeOffset, *m_stack.topC());
   m_stack.popTV();
 
   EventHook::FunctionExit(m_fp, nullptr);
@@ -7122,8 +7128,8 @@ OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
   NEXT();
 
   auto cont = frame_continuation(m_fp);
-  auto offset = m_fp->func()->unit()->offsetOf(pc);
-  cont->suspend(offset, *m_stack.indC(1), *m_stack.topC());
+  auto resumeOffset = m_fp->func()->unit()->offsetOf(pc);
+  cont->suspend(nullptr, resumeOffset, *m_stack.indC(1), *m_stack.topC());
   m_stack.popTV();
   m_stack.popTV();
 
@@ -7167,7 +7173,7 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
   assert(!m_fp->resumed());
   assert(m_fp->func()->isAsync());
   const auto func = m_fp->m_func;
-  const auto offset = func->unit()->offsetOf(pc);
+  const auto resumeOffset = func->unit()->offsetOf(pc);
 
   // Pop the blocked dependency.
   Cell* value = m_stack.topC();
@@ -7180,7 +7186,7 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {
 
   // Create the AsyncFunctionWaitHandle object.
   auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(
-    c_AsyncFunctionWaitHandle::Create(m_fp, offset, child));
+    c_AsyncFunctionWaitHandle::Create(m_fp, nullptr, resumeOffset, child));
 
   // Teleport local variables into the AsyncFunctionWaitHandle.
   fillContinuationVars(func, m_fp, waitHandle->actRec());
@@ -7220,9 +7226,9 @@ OPTBLD_INLINE void ExecutionContext::asyncSuspendR(IOP_ARGS) {
   Cell& value = *m_stack.topC();
   assert(value.m_type == KindOfObject);
   assert(value.m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
+  auto const resumeOffset = m_fp->func()->unit()->offsetOf(pc);
   auto const child = static_cast<c_WaitableWaitHandle*>(value.m_data.pobj);
-  auto const offset = m_fp->func()->unit()->offsetOf(pc);
-  frame_afwh(m_fp)->suspend(child, offset);
+  frame_afwh(m_fp)->suspend(nullptr, resumeOffset, child);
   m_stack.discard();
 
   // Call the FunctionExit hook.

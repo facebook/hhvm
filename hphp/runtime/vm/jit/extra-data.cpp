@@ -37,15 +37,20 @@ std::string NewStructData::show() const {
 
 const RawMemData::Info& RawMemData::info() const {
   static const Info infos[] = {
+    {c_AsyncFunctionWaitHandle::resumeAddrOff(),
+                                  sz::qword, JIT::Type::TCA|JIT::Type::Nullptr},
+    {c_AsyncFunctionWaitHandle::resumeOffsetOff(),
+                                  sz::dword, JIT::Type::Int},
     {c_AsyncFunctionWaitHandle::stateOff(),
                                   sz::byte,  JIT::Type::Int},
     {c_AsyncFunctionWaitHandle::childOff(),
                                   sz::qword, JIT::Type::Obj},
-    {c_AsyncFunctionWaitHandle::offsetOff(),
+    {c_Continuation::resumeAddrOff(),
+                                  sz::qword, JIT::Type::TCA|JIT::Type::Nullptr},
+    {c_Continuation::resumeOffsetOff(),
                                   sz::dword, JIT::Type::Int},
-    {c_Continuation::offsetOff(), sz::dword, JIT::Type::Int},
-    {CONTOFF(m_index),            sz::qword, JIT::Type::Int},
     {c_Continuation::stateOff(),  sz::byte,  JIT::Type::Int},
+    {CONTOFF(m_index),            sz::qword, JIT::Type::Int},
     {StringData::sizeOff(),       sz::dword, JIT::Type::Int},
     {Func::numParamsOff(),        sz::dword, JIT::Type::Int},
   };

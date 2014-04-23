@@ -21,9 +21,8 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/system/systemlib.h"
-
-typedef unsigned char* TCA; // "Translation cache address."
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,8 +39,11 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   static constexpr ptrdiff_t arOff() {
     return resumableOff() + Resumable::arOff();
   }
-  static constexpr ptrdiff_t offsetOff() {
-    return resumableOff() + Resumable::offsetOff();
+  static constexpr ptrdiff_t resumeAddrOff() {
+    return resumableOff() + Resumable::resumeAddrOff();
+  }
+  static constexpr ptrdiff_t resumeOffsetOff() {
+    return resumableOff() + Resumable::resumeOffsetOff();
   }
   static constexpr ptrdiff_t stateOff() {
     return offsetof(c_Continuation, o_subclassData.u8[0]);
@@ -60,8 +62,9 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   void setState(GeneratorState state) { o_subclassData.u8[0] = state; }
 
   void t___construct();
-  void suspend(Offset offset, const Cell& value);
-  void suspend(Offset offset, const Cell& value, const Cell& key);
+  void suspend(JIT::TCA resumeAddr, Offset resumeOffset, const Cell& value);
+  void suspend(JIT::TCA resumeAddr, Offset resumeOffset, const Cell& value,
+               const Cell& key);
   Object t_getwaithandle();
   Variant t_current();
   Variant t_key();
@@ -75,10 +78,12 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
 
   static c_Continuation* Clone(ObjectData* obj);
 
-  static c_Continuation* Create(const ActRec* fp, Offset offset) {
+  static c_Continuation* Create(const ActRec* fp, JIT::TCA resumeAddr,
+                                Offset resumeOffset) {
     assert(fp);
     assert(fp->func()->isGenerator());
-    void* obj = Resumable::Create(fp, offset, sizeof(c_Continuation));
+    void* obj = Resumable::Create(fp, resumeAddr, resumeOffset,
+                                  sizeof(c_Continuation));
     auto const cont = new (obj) c_Continuation();
     cont->incRefCount();
     cont->setNoDestruct();

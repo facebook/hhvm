@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -127,7 +128,8 @@ void checkCreateErrors(c_WaitableWaitHandle* child) {
 
 ObjectData*
 c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
-                                  Offset offset,
+                                  JIT::TCA resumeAddr,
+                                  Offset resumeOffset,
                                   ObjectData* child) {
   assert(fp);
   assert(!fp->resumed());
@@ -140,7 +142,8 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
 
   checkCreateErrors(child_wh);
 
-  void* obj = Resumable::Create(fp, offset, sizeof(c_AsyncFunctionWaitHandle));
+  void* obj = Resumable::Create(fp, resumeAddr, resumeOffset,
+                                sizeof(c_AsyncFunctionWaitHandle));
   auto const waitHandle = new (obj) c_AsyncFunctionWaitHandle();
   waitHandle->incRefCount();
   waitHandle->setNoDestruct();
@@ -256,9 +259,10 @@ void c_AsyncFunctionWaitHandle::markAsFailed(const Object& exception) {
 }
 
 void
-c_AsyncFunctionWaitHandle::suspend(c_WaitableWaitHandle* child, Offset offset) {
+c_AsyncFunctionWaitHandle::suspend(JIT::TCA resumeAddr, Offset resumeOffset,
+                                   c_WaitableWaitHandle* child) {
+  resumable()->setResumeAddr(resumeAddr, resumeOffset);
   m_child = child;
-  resumable()->setOffset(offset);
 }
 
 String c_AsyncFunctionWaitHandle::getName() {
@@ -387,7 +391,7 @@ Offset c_AsyncFunctionWaitHandle::getNextExecutionOffset() {
   }
 
   always_assert(!isRunning());
-  return resumable()->offset();
+  return resumable()->resumeOffset();
 }
 
 // Get the line number on which execution will proceed when execution resumes.
@@ -397,7 +401,7 @@ int c_AsyncFunctionWaitHandle::getLineNumber() {
   }
 
   always_assert(!isRunning());
-  return actRec()->func()->unit()->getLineNumber(resumable()->offset());
+  return actRec()->func()->unit()->getLineNumber(resumable()->resumeOffset());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

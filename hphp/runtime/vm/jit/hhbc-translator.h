@@ -401,6 +401,7 @@ struct HhbcTranslator {
 
   // continuations
   void emitCreateCont(Offset resumeOffset);
+  void emitContEnter(Offset returnOffset);
   void emitYieldImpl(Offset resumeOffset);
   void emitYield(Offset resumeOffset);
   void emitYieldK(Offset resumeOffset);

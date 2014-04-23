@@ -65,6 +65,16 @@ template<Opcode op> struct IRExtraDataType;
 
 struct IRExtraData {};
 
+struct LdBindAddrData : IRExtraData {
+  explicit LdBindAddrData(SrcKey sk)
+    : sk(sk)
+  {}
+
+  std::string show() const { return showShort(sk); }
+
+  SrcKey sk;
+};
+
 struct LdSSwitchData : IRExtraData {
   struct Elm {
     const StringData* str;
@@ -695,12 +705,14 @@ struct NewStructData : IRExtraData {
 
 struct RawMemData : IRExtraData {
 # define RAW_MEM_DATA_TYPES                     \
+  RAW_TYPE(AsyncResumeAddr)                     \
+  RAW_TYPE(AsyncResumeOffset)                   \
   RAW_TYPE(AsyncState)                          \
   RAW_TYPE(AsyncChild)                          \
-  RAW_TYPE(AsyncOffset)                         \
-  RAW_TYPE(ContOffset)                          \
-  RAW_TYPE(ContIndex)                           \
+  RAW_TYPE(ContResumeAddr)                      \
+  RAW_TYPE(ContResumeOffset)                    \
   RAW_TYPE(ContState)                           \
+  RAW_TYPE(ContIndex)                           \
   RAW_TYPE(StrLen)                              \
   RAW_TYPE(FuncNumParams)                       \
 
@@ -735,6 +747,7 @@ struct RawMemData : IRExtraData {
   static_assert(boost::has_trivial_destructor<data>::value,           \
                 "IR extra data type must be trivially destructible")
 
+X(LdBindAddr,                   LdBindAddrData);
 X(JmpSwitchDest,                JmpSwitchData);
 X(LdSSwitchDestFast,            LdSSwitchData);
 X(LdSSwitchDestSlow,            LdSSwitchData);

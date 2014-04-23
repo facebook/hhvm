@@ -83,7 +83,7 @@ struct _zend_module_entry {
   const struct _zend_ini_entry *ini_entry;
   const struct _zend_module_dep *deps;
 #ifdef HHVM
-  ZendExtension name;
+  HPHP::ZendExtension name;
 #else
   const char* name;
 #endif

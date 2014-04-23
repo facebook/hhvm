@@ -1046,6 +1046,58 @@ BaseVector::php_concat(const Variant& iterable) {
   return obj;
 }
 
+Variant c_Vector::t_firstvalue() {
+  return BaseVector::php_firstValue();
+}
+
+Variant c_ImmVector::t_firstvalue() {
+  return BaseVector::php_firstValue();
+}
+
+Variant BaseVector::php_firstValue() {
+  if (!m_size) return uninit_null();
+  return tvAsCVarRef(&m_data[0]);
+}
+
+Variant c_Vector::t_firstkey() {
+  return BaseVector::php_firstKey();
+}
+
+Variant c_ImmVector::t_firstkey() {
+  return BaseVector::php_firstKey();
+}
+
+Variant BaseVector::php_firstKey() {
+  if (!m_size) return uninit_null();
+  return 0;
+}
+
+Variant c_Vector::t_lastvalue() {
+  return BaseVector::php_lastValue();
+}
+
+Variant c_ImmVector::t_lastvalue() {
+  return BaseVector::php_lastValue();
+}
+
+Variant BaseVector::php_lastValue() {
+  if (!m_size) return uninit_null();
+  return tvAsCVarRef(&m_data[m_size - 1]);
+}
+
+Variant c_Vector::t_lastkey() {
+  return BaseVector::php_lastKey();
+}
+
+Variant c_ImmVector::t_lastkey() {
+  return BaseVector::php_lastKey();
+}
+
+Variant BaseVector::php_lastKey() {
+  if (!m_size) return uninit_null();
+  return (int64_t)m_size - 1;
+}
+
 Object c_Vector::t_set(const Variant& key, const Variant& value) {
   if (key.isInteger()) {
     TypedValue* tv = cvarToCell(&value);
@@ -2355,6 +2407,86 @@ BaseMap::php_concat(const Variant& iterable) {
     vec->add(tv);
   }
   return obj;
+}
+
+Variant c_Map::t_firstvalue() {
+  return BaseMap::php_firstValue();
+}
+
+Variant c_ImmMap::t_firstvalue() {
+  return BaseMap::php_firstValue();
+}
+
+Variant BaseMap::php_firstValue() {
+  if (!m_size) return uninit_null();
+  uint32_t pos = 0;
+  while (isTombstone(m_data[pos].data.m_type)) {
+    assert(pos + 1 < m_used);
+    ++pos;
+  }
+  return tvAsCVarRef(&m_data[pos].data);
+}
+
+Variant c_Map::t_firstkey() {
+  return BaseMap::php_firstKey();
+}
+
+Variant c_ImmMap::t_firstkey() {
+  return BaseMap::php_firstKey();
+}
+
+Variant BaseMap::php_firstKey() {
+  if (!m_size) return uninit_null();
+  uint32_t pos = 0;
+  while (isTombstone(m_data[pos].data.m_type)) {
+    assert(pos + 1 < m_used);
+    ++pos;
+  }
+  if (m_data[pos].hasIntKey()) {
+    return m_data[pos].ikey;
+  } else {
+    return m_data[pos].skey;
+  }
+}
+
+Variant c_Map::t_lastvalue() {
+  return BaseMap::php_lastValue();
+}
+
+Variant c_ImmMap::t_lastvalue() {
+  return BaseMap::php_lastValue();
+}
+
+Variant BaseMap::php_lastValue() {
+  if (!m_size) return uninit_null();
+  uint32_t pos = iterLimit() - 1;
+  while (isTombstone(m_data[pos].data.m_type)) {
+    assert(pos > 0);
+    --pos;
+  }
+  return tvAsCVarRef(&m_data[pos].data);
+}
+
+Variant c_Map::t_lastkey() {
+  return BaseMap::php_lastKey();
+}
+
+Variant c_ImmMap::t_lastkey() {
+  return BaseMap::php_lastKey();
+}
+
+Variant BaseMap::php_lastKey() {
+  if (!m_size) return uninit_null();
+  uint32_t pos = iterLimit() - 1;
+  while (isTombstone(m_data[pos].data.m_type)) {
+    assert(pos > 0);
+    --pos;
+  }
+  if (m_data[pos].hasIntKey()) {
+    return m_data[pos].ikey;
+  } else {
+    return m_data[pos].skey;
+  }
 }
 
 template<typename TMap>
@@ -4634,6 +4766,42 @@ BaseSet::php_concat(const Variant& iterable) {
   return obj;
 }
 
+Variant c_Set::t_firstvalue() {
+  return BaseSet::php_firstValue();
+}
+
+Variant c_ImmSet::t_firstvalue() {
+  return BaseSet::php_firstValue();
+}
+
+Variant BaseSet::php_firstValue() {
+  if (!m_size) return uninit_null();
+  uint32_t pos = 0;
+  while (isTombstone(m_data[pos].data.m_type)) {
+    assert(pos + 1 < m_used);
+    ++pos;
+  }
+  return tvAsCVarRef(&m_data[pos].data);
+}
+
+Variant c_Set::t_lastvalue() {
+  return BaseSet::php_lastValue();
+}
+
+Variant c_ImmSet::t_lastvalue() {
+  return BaseSet::php_lastValue();
+}
+
+Variant BaseSet::php_lastValue() {
+  if (!m_size) return uninit_null();
+  uint32_t pos = iterLimit() - 1;
+  while (isTombstone(m_data[pos].data.m_type)) {
+    assert(pos > 0);
+    --pos;
+  }
+  return tvAsCVarRef(&m_data[pos].data);
+}
+
 Object c_Set::t_removeall(const Variant& iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
@@ -5155,6 +5323,22 @@ Object c_Pair::t_concat(const Variant& iterable) {
     vec->add(tv);
   }
   return obj;
+}
+
+Variant c_Pair::t_firstvalue() {
+  return tvAsCVarRef(&getElms()[0]);
+}
+
+Variant c_Pair::t_firstkey() {
+  return 0;
+}
+
+Variant c_Pair::t_lastvalue() {
+  return tvAsCVarRef(&getElms()[1]);
+}
+
+Variant c_Pair::t_lastkey() {
+  return 1;
 }
 
 void c_Pair::throwOOB(int64_t key) {

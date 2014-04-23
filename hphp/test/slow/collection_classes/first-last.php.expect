@@ -1,0 +1,73 @@
+HH\Vector
+NULL
+NULL
+NULL
+NULL
+HH\Vector
+int(11)
+int(0)
+int(22)
+int(1)
+HH\ImmVector
+NULL
+NULL
+NULL
+NULL
+HH\ImmVector
+int(11)
+int(0)
+int(22)
+int(1)
+HH\Map
+NULL
+NULL
+NULL
+NULL
+HH\Map
+int(11)
+string(1) "a"
+int(22)
+string(1) "b"
+HH\ImmMap
+NULL
+NULL
+NULL
+NULL
+HH\ImmMap
+int(11)
+string(1) "a"
+int(22)
+string(1) "b"
+HH\Set
+NULL
+NULL
+HH\Set
+int(11)
+int(22)
+HH\ImmSet
+NULL
+NULL
+HH\ImmSet
+int(11)
+int(22)
+HH\Pair
+int(11)
+int(0)
+int(22)
+int(1)
+Map lazy()
+int(11)
+string(1) "a"
+int(22)
+string(1) "b"
+Map lazy()->map()
+int(11)
+string(1) "a"
+int(22)
+string(1) "b"
+Set lazy()
+int(11)
+int(22)
+Set lazy()->map()
+int(11)
+int(22)

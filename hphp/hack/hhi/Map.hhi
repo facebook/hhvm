@@ -86,6 +86,10 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
     Map<Tk, Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable): Map<Tk, Pair<Tv, Tu>>;
   public function concat(Traversable<Tv> $iterable): Vector<Tv>;
+  public function firstValue(): ?Tv;
+  public function firstKey(): ?Tk;
+  public function lastValue(): ?Tv;
+  public function lastKey(): ?Tk;
 
   /**
    * Returns true if the Map is empty, false otherwise.

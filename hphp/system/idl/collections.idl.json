@@ -578,6 +578,50 @@
                     ]
                 },
                 {
+                    "name": "firstValue",
+                    "flags": [
+                    ],
+                    "desc": "Returns the first value from this Vector, or null if this Vector is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "firstKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns the first key from this Vector, or null if this Vector is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lastValue",
+                    "flags": [
+                    ],
+                    "desc": "Returns the last value from this Vector, or null if this Vector is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lastKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns the last key from this Vector, or null if this Vector is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "reverse",
                     "flags": [
                     ],
@@ -1010,6 +1054,50 @@
                           "name": "iterable",
                           "type": "Variant"
                       }
+                  ]
+              },
+              {
+                  "name": "firstValue",
+                  "flags": [
+                  ],
+                  "desc": "Returns the first value from this ImmVector, or null if this ImmVector is empty.",
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "firstKey",
+                  "flags": [
+                  ],
+                  "desc": "Returns the first key from this ImmVector, or null if this ImmVector is empty.",
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "lastValue",
+                  "flags": [
+                  ],
+                  "desc": "Returns the last value from this ImmVector, or null if this ImmVector is empty.",
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "lastKey",
+                  "flags": [
+                  ],
+                  "desc": "Returns the last key from this ImmVector, or null if this ImmVector is empty.",
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
                   ]
               },
               {
@@ -1897,6 +1985,50 @@
                     ]
                 },
                 {
+                    "name": "firstValue",
+                    "flags": [
+                    ],
+                    "desc": "Returns the first value from this Map, or null if this Map is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "firstKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns the first key from this Map, or null if this Map is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lastValue",
+                    "flags": [
+                    ],
+                    "desc": "Returns the last value from this Map, or null if this Map is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lastKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns the last key from this Map, or null if this Map is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "__toString",
                     "return": {
                         "type": "String"
@@ -2439,6 +2571,50 @@
                             "name": "iterable",
                             "type": "Variant"
                         }
+                    ]
+                },
+                {
+                    "name": "firstValue",
+                    "flags": [
+                    ],
+                    "desc": "Returns the first value from this ImmMap, or null if this ImmMap is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "firstKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns the first key from this ImmMap, or null if this ImmMap is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lastValue",
+                    "flags": [
+                    ],
+                    "desc": "Returns the last value from this ImmMap, or null if this ImmMap is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lastKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns the last key from this ImmMap, or null if this ImmMap is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
                     ]
                 },
                 {
@@ -2985,6 +3161,28 @@
                     ]
                 },
                 {
+                    "name": "firstValue",
+                    "flags": [
+                    ],
+                    "desc": "Returns the first value from this Set, or null if this Set is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lastValue",
+                    "flags": [
+                    ],
+                    "desc": "Returns the last value from this Set, or null if this Set is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "removeAll",
                     "flags": [
                     ],
@@ -3446,6 +3644,28 @@
                             "name": "iterable",
                             "type": "Variant"
                         }
+                    ]
+                },
+                {
+                    "name": "firstValue",
+                    "flags": [
+                    ],
+                    "desc": "Returns the first value from this ImmSet, or null if this ImmSet is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lastValue",
+                    "flags": [
+                    ],
+                    "desc": "Returns the last value from this ImmSet, or null if this ImmSet is empty.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
                     ]
                 },
                 {
@@ -3988,6 +4208,50 @@
                             "name": "iterable",
                             "type": "Variant"
                         }
+                    ]
+                },
+                {
+                    "name": "firstValue",
+                    "flags": [
+                    ],
+                    "desc": "Returns the first value from this Pair.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "firstKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns the first key from this Pair.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lastValue",
+                    "flags": [
+                    ],
+                    "desc": "Returns the last value from this Pair.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lastKey",
+                    "flags": [
+                    ],
+                    "desc": "Returns the last key from this Pair.",
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
                     ]
                 },
                 {

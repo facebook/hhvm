@@ -129,6 +129,11 @@ class BaseVector : public ExtCollectionObjectData {
     std::is_base_of<BaseVector, TVector>::value, Object>::type
   php_concat(const Variant& iterable);
 
+  Variant php_firstValue();
+  Variant php_firstKey();
+  Variant php_lastValue();
+  Variant php_lastKey();
+
   void zip(BaseVector* bvec, const Variant& iterable);
   void keys(BaseVector* bvec);
 
@@ -359,6 +364,10 @@ class c_Vector : public BaseVector {
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
   Object t_concat(const Variant& iterable);
+  Variant t_firstvalue();
+  Variant t_firstkey();
+  Variant t_lastvalue();
+  Variant t_lastkey();
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(const Variant& iterable);
   static Object ti_fromarray(const Variant& arr); // deprecated
@@ -477,6 +486,10 @@ public:
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
   Object t_concat(const Variant& iterable);
+  Variant t_firstvalue();
+  Variant t_firstkey();
+  Variant t_lastvalue();
+  Variant t_lastkey();
   Object t_keys();
 
   // Others
@@ -951,6 +964,11 @@ class BaseMap : public ExtCollectionObjectData {
     std::is_base_of<BaseVector, TVector>::value, Object>::type
   php_concat(const Variant& iterable);
 
+  Variant php_firstValue();
+  Variant php_firstKey();
+  Variant php_lastValue();
+  Variant php_lastKey();
+
   template<class TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
@@ -1013,6 +1031,10 @@ class c_Map : public BaseMap {
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
   Object t_concat(const Variant& iterable);
+  Variant t_firstvalue();
+  Variant t_firstkey();
+  Variant t_lastvalue();
+  Variant t_lastkey();
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(const Variant& iterable);
   static Object ti_fromarray(const Variant& arr); // deprecated
@@ -1061,6 +1083,10 @@ class c_ImmMap : public BaseMap {
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
   Object t_concat(const Variant& iterable);
+  Variant t_firstvalue();
+  Variant t_firstkey();
+  Variant t_lastvalue();
+  Variant t_lastkey();
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(const Variant& iterable);
   Object t_immutable();
@@ -1461,6 +1487,9 @@ protected:
     std::is_base_of<BaseVector, TVector>::value, Object>::type
   php_concat(const Variant& iterable);
 
+  Variant php_firstValue();
+  Variant php_lastValue();
+
   template<class TSet>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
@@ -1548,6 +1577,8 @@ class c_Set : public BaseSet {
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
   Object t_concat(const Variant& iterable);
+  Variant t_firstvalue();
+  Variant t_lastvalue();
   Object t_removeall(const Variant& iterable);
   Object t_difference(const Variant& iterable);
   DECLARE_COLLECTION_MAGIC_METHODS();
@@ -1594,6 +1625,8 @@ class c_ImmSet : public BaseSet {
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
   Object t_concat(const Variant& iterable);
+  Variant t_firstvalue();
+  Variant t_lastvalue();
 
   // Materialization methods.
   Array t_toarray();
@@ -1686,6 +1719,10 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
   Object t_concat(const Variant& iterable);
+  Variant t_firstvalue();
+  Variant t_firstkey();
+  Variant t_lastvalue();
+  Variant t_lastkey();
   DECLARE_COLLECTION_MAGIC_METHODS();
   Object t_immutable();
 

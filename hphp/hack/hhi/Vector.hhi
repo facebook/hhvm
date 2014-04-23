@@ -80,6 +80,10 @@ final class Vector<Tv> implements MutableVector<Tv> {
     Vector<Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable): Vector<Pair<Tv, Tu>>;
   public function concat(Traversable<Tv> $iterable): Vector<Tv>;
+  public function firstValue(): ?Tv;
+  public function firstKey(): ?int;
+  public function lastValue(): ?Tv;
+  public function lastKey(): ?int;
 
   /**
    * Returns true if the Vector is empty, false otherwise.

@@ -97,4 +97,6 @@ final class ImmSet<Tv> implements ConstSet<Tv> {
   public function filter((function(Tv): bool) $callback): ImmSet<Tv>;
   public function zip<Tu>(Traversable<Tu> $iterable): ImmSet<Pair<Tv, Tu>>;
   public function concat(Traversable<Tv> $iterable): ImmVector<Tv>;
+  public function firstValue(): ?Tv;
+  public function lastValue(): ?Tv;
 }

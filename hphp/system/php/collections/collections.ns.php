@@ -113,11 +113,11 @@ trait StrictIterable {
   public function toImmSet() {
     return new ImmSet($this);
   }
-  public function values() {
-    return new Vector($this);
-  }
   public function lazy() {
     return new LazyIterableView($this);
+  }
+  public function values() {
+    return new Vector($this);
   }
   public function map($callback) {
     $res = Vector {};
@@ -193,6 +193,17 @@ trait StrictIterable {
     }
     return $res;
   }
+  public function firstValue() {
+    foreach ($this as $v) {
+      return $v;
+    }
+    return null;
+  }
+  public function lastValue() {
+    $v = null;
+    foreach ($this as $v) {}
+    return $v;
+  }
 }
 
 trait StrictKeyedIterable {
@@ -237,6 +248,16 @@ trait StrictKeyedIterable {
   }
   public function lazy() {
     return new LazyKeyedIterableView($this);
+  }
+  public function values() {
+    return new Vector($this);
+  }
+  public function keys() {
+    $res = Vector {};
+    foreach ($this as $k => $_) {
+      $res[] = $k;
+    }
+    return $res;
   }
   public function map($callback) {
     $res = Map {};
@@ -316,13 +337,6 @@ trait StrictKeyedIterable {
     }
     return $res;
   }
-  public function keys() {
-    $res = Vector {};
-    foreach ($this as $k => $_) {
-      $res[] = $k;
-    }
-    return $res;
-  }
   public function concat($iterable) {
     $res = Vector {};
     foreach ($this as $v) {
@@ -332,6 +346,28 @@ trait StrictKeyedIterable {
       $res[] = $v;
     }
     return $res;
+  }
+  public function firstValue() {
+    foreach ($this as $v) {
+      return $v;
+    }
+    return null;
+  }
+  public function firstKey() {
+    foreach ($this as $k => $_) {
+      return $k;
+    }
+    return null;
+  }
+  public function lastValue() {
+    $v = null;
+    foreach ($this as $v) {}
+    return $v;
+  }
+  public function lastKey() {
+    $k = null;
+    foreach ($this as $k => $_) {}
+    return $k;
   }
 }
 
@@ -394,6 +430,17 @@ trait LazyIterable {
     }
     return new LazyConcatIterable($this, $iterable);
   }
+  public function firstValue() {
+    foreach ($this as $v) {
+      return $v;
+    }
+    return null;
+  }
+  public function lastValue() {
+    $v = null;
+    foreach ($this as $v) {}
+    return $v;
+  }
 }
 
 trait LazyKeyedIterable {
@@ -442,6 +489,9 @@ trait LazyKeyedIterable {
   public function values() {
     return new LazyValuesIterable($this);
   }
+  public function keys() {
+    return new LazyKeysIterable($this);
+  }
   public function map($callback) {
     return new LazyMapKeyedIterable($this, $callback);
   }
@@ -472,14 +522,33 @@ trait LazyKeyedIterable {
   public function skipWhile($fn) {
     return new LazySkipWhileKeyedIterable($this, $fn);
   }
-  public function keys() {
-    return new LazyKeysIterable($this);
-  }
   public function concat($iterable) {
     if (is_array($iterable)) {
       $iterable = new ImmMap($iterable);
     }
     return new LazyConcatIterable($this, $iterable);
+  }
+  public function firstValue() {
+    foreach ($this as $v) {
+      return $v;
+    }
+    return null;
+  }
+  public function firstKey() {
+    foreach ($this as $k => $_) {
+      return $k;
+    }
+    return null;
+  }
+  public function lastValue() {
+    $v = null;
+    foreach ($this as $v) {}
+    return $v;
+  }
+  public function lastKey() {
+    $k = null;
+    foreach ($this as $k => $_) {}
+    return $k;
   }
 }
 
@@ -1514,6 +1583,17 @@ class LazyIterableView implements \HH\Iterable {
     }
     return new LazyConcatIterable($this->iterable, $iterable);
   }
+  public function firstValue() {
+    foreach ($this->iterable as $v) {
+      return $v;
+    }
+    return null;
+  }
+  public function lastValue() {
+    $v = null;
+    foreach ($this->iterable as $v) {}
+    return $v;
+  }
 }
 
 class LazyKeyedIterableView implements \HH\KeyedIterable {
@@ -1563,6 +1643,12 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
   public function lazy() {
     return $this;
   }
+  public function values() {
+    return new LazyValuesIterable($this->iterable);
+  }
+  public function keys() {
+    return new LazyKeysIterable($this->iterable);
+  }
   public function map($callback) {
     return new LazyMapKeyedIterable($this->iterable, $callback);
   }
@@ -1593,17 +1679,33 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
   public function skipWhile($fn) {
     return new LazySkipWhileKeyedIterable($this->iterable, $fn);
   }
-  public function values() {
-    return new LazyValuesIterable($this->iterable);
-  }
-  public function keys() {
-    return new LazyKeysIterable($this->iterable);
-  }
   public function concat($iterable) {
     if (is_array($iterable)) {
       $iterable = new ImmMap($iterable);
     }
     return new LazyConcatIterable($this->iterable, $iterable);
+  }
+  public function firstValue() {
+    foreach ($this->iterable as $v) {
+      return $v;
+    }
+    return null;
+  }
+  public function firstKey() {
+    foreach ($this->iterable as $k => $_) {
+      return $k;
+    }
+    return null;
+  }
+  public function lastValue() {
+    $v = null;
+    foreach ($this->iterable as $v) {}
+    return $v;
+  }
+  public function lastKey() {
+    $k = null;
+    foreach ($this->iterable as $k => $_) {}
+    return $k;
   }
 }
 

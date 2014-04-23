@@ -49,6 +49,24 @@ trait StrictIterable<Tv> implements Iterable<Tv> {
   public function zip<Tu>(Traversable<Tu> $iterable): Iterable<Pair<Tv,Tu>> {
     return Vector {};
   }
+  public function take(int $n): Iterable<Tv> {
+    return Vector {};
+  }
+  public function takeWhile((function(Tv): bool) $n): Iterable<Tv> {
+    return Vector {};
+  }
+  public function skip(int $n): Iterable<Tv> {
+    return Vector {};
+  }
+  public function skipWhile((function(Tv): bool) $n): Iterable<Tv> {
+    return Vector {};
+  }
+  public function firstValue(): ?Tv {
+    return null;
+  }
+  public function lastValue(): ?Tv {
+    return null;
+  }
 }
 
 trait StrictKeyedIterable<Tk,Tv> implements KeyedIterable<Tk,Tv> {
@@ -108,6 +126,30 @@ trait StrictKeyedIterable<Tk,Tv> implements KeyedIterable<Tk,Tv> {
     Traversable<Tu> $iterable
   ): KeyedIterable<Tk,Pair<Tv,Tu>> {
     return Map {};
+  }
+  public function take(int $n): KeyedIterable<Tk, Tv> {
+    return Map {};
+  }
+  public function takeWhile((function(Tv): bool) $n): KeyedIterable<Tk, Tv> {
+    return Map {};
+  }
+  public function skip(int $n): KeyedIterable<Tk, Tv> {
+    return Map {};
+  }
+  public function skipWhile((function(Tv): bool) $n): KeyedIterable<Tk, Tv> {
+    return Map {};
+  }
+  public function firstValue(): ?Tv {
+    return null;
+  }
+  public function firstKey(): ?Tk {
+    return null;
+  }
+  public function lastValue(): ?Tv {
+    return null;
+  }
+  public function lastKey(): ?Tk {
+    return null;
   }
 }
 

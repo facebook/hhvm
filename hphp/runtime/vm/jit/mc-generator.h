@@ -360,9 +360,6 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction&,
                                 Class* contextClass,
                                 const MInstrInfo&);
 
-bool isSupportedCGetM(const NormalizedInstruction& i);
-TXFlags planInstrAdd_Int(const NormalizedInstruction& i);
-TXFlags planInstrAdd_Array(const NormalizedInstruction& i);
 void dumpTranslationInfo(const Tracelet& t, TCA postGuards);
 
 // Both emitIncStat()s push/pop flags but don't clobber any registers.

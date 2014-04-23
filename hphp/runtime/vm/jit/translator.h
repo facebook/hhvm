@@ -154,16 +154,6 @@ struct DynLocation {
   bool canBeAliased() const;
 };
 
-// Flags that summarize the plan for handling a given instruction.
-enum TXFlags {
-  Interp = 0,       // default; must be boolean false
-  Supported = 1,    // Not interpreted, though possibly with C++
-  NonReentrant = 2, // Supported with no possibility of reentry.
-  MachineCode  = 4, // Supported without C++ at all.
-  Simple = NonReentrant | Supported,
-  Native = MachineCode | Simple
-};
-
 struct Tracelet;
 struct TraceletContext;
 

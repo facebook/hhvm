@@ -46,16 +46,15 @@ c_Continuation::c_Continuation(Class* cb)
   , m_key(make_tv<KindOfInt64>(-1LL))
   , m_value(make_tv<KindOfNull>())
 {
-  o_subclassData.u16 = 0;
 }
 
 c_Continuation::~c_Continuation() {
-  tvRefcountedDecRef(m_key);
-  tvRefcountedDecRef(m_value);
-
-  if (LIKELY(done())) {
+  if (LIKELY(getState() == Done)) {
     return;
   }
+
+  tvRefcountedDecRef(m_key);
+  tvRefcountedDecRef(m_value);
 
   // Free locals, but don't trigger the EventHook for FunctionExit
   // since the continuation function has already been exited. We
@@ -69,13 +68,16 @@ c_Continuation::~c_Continuation() {
 void c_Continuation::t___construct() {}
 
 void c_Continuation::suspend(Offset offset, const Cell& value) {
+  assert(getState() == Running);
   resumable()->setOffset(offset);
   cellSet(make_tv<KindOfInt64>(++m_index), m_key);
   cellSet(value, m_value);
+  setState(Started);
 }
 
 void c_Continuation::suspend(Offset offset, const Cell& key,
                              const Cell& value) {
+  assert(getState() == Running);
   resumable()->setOffset(offset);
   cellSet(key, m_key);
   cellSet(value, m_value);
@@ -83,44 +85,23 @@ void c_Continuation::suspend(Offset offset, const Cell& key,
     int64_t new_index = m_key.m_data.num;
     m_index = new_index > m_index ? new_index : m_index;
   }
+  setState(Started);
 }
 
-Variant c_Continuation::t_current() {
-  const_assert(false);
-  return tvAsCVarRef(&m_value);
-}
+// Functions with native implementation.
+void c_Continuation::t_next() { const_assert(false); }
+void c_Continuation::t_send(const Variant& v) { const_assert(false); }
+void c_Continuation::t_raise(const Variant& v) { const_assert(false); }
+bool c_Continuation::t_valid() { const_assert(false); }
+Variant c_Continuation::t_current() { const_assert(false); }
+Variant c_Continuation::t_key() { const_assert(false); }
 
-Variant c_Continuation::t_key() {
-  startedCheck();
-  return tvAsCVarRef(&m_key);
-}
-
-void c_Continuation::t_next() {
-  const_assert(false);
-}
-
-const StaticString
-  s_next("next"),
-  s__closure_("{closure}"),
-  s_this("this");
-
+const StaticString s_next("next");
 void c_Continuation::t_rewind() {
   this->o_invoke_few_args(s_next, 0);
 }
 
-bool c_Continuation::t_valid() {
-  const_assert(false);
-  return !done();
-}
-
-void c_Continuation::t_send(const Variant& v) {
-  const_assert(false);
-}
-
-void c_Continuation::t_raise(const Variant& v) {
-  const_assert(false);
-}
-
+const StaticString s__closure_("{closure}");
 String c_Continuation::t_getorigfuncname() {
   const Func* origFunc = actRec()->func();
   auto const origName = origFunc->isClosureBody() ? s__closure_.get()
@@ -174,7 +155,7 @@ c_Continuation *c_Continuation::Clone(ObjectData* obj) {
 
   c_Continuation* cont = Create(fp, thiz->resumable()->offset());
   cont->copyContinuationVars(fp);
-  cont->o_subclassData.u16 = thiz->o_subclassData.u16;
+  cont->setState(thiz->getState());
   cont->m_index  = thiz->m_index;
   cellSet(thiz->m_key, cont->m_key);
   cellSet(thiz->m_value, cont->m_value);

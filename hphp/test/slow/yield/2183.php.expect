@@ -18,13 +18,13 @@ in __destruct(): object(Evil)#2 (0) {
 current: object(Evil)#3 (0) {
 }
 iter from destructor
-Caught: Continuation is already running
+Caught: Generator is already running
 iter 5
 gen 5
 in __destruct(): object(Evil)#3 (0) {
 }
 current: NULL
 iter from destructor
-Caught: Continuation is already finished
+Caught: Generator is already running
 Finished!
 Returned from main safely

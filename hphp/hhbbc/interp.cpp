@@ -1836,7 +1836,6 @@ void in(ISS& env, const bc::ContCheck&)   {}
 void in(ISS& env, const bc::ContValid&)   { push(env, TBool); }
 void in(ISS& env, const bc::ContKey&)     { push(env, TInitCell); }
 void in(ISS& env, const bc::ContCurrent&) { push(env, TInitCell); }
-void in(ISS& env, const bc::ContStopped&) {}
 
 void in(ISS& env, const bc::Await&) {
   auto const t = popC(env);

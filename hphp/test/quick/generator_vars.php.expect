@@ -47,7 +47,7 @@ array(5) {
   int(5)
 }
 int(4)
-string(32) "Continuation is already finished"
+string(29) "Generator is already finished"
 array(12) {
   ["b"]=>
   int(2)

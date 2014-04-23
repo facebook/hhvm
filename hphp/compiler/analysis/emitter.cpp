@@ -8400,7 +8400,6 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
           not_reached();
       }
 
-      ue.emitOp(OpContStopped);
       ue.emitOp(OpNull);
       ue.emitOp(OpRetC);
       break;

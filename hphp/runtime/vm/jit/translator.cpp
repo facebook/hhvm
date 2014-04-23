@@ -1315,7 +1315,6 @@ static const struct {
   { OpContValid,   {None,             Stack1,       OutBoolean,        1 }},
   { OpContKey,     {None,             Stack1,       OutUnknown,        1 }},
   { OpContCurrent, {None,             Stack1,       OutUnknown,        1 }},
-  { OpContStopped, {None,             None,         OutNone,           0 }},
 
   /*** 15. Async functions instructions ***/
 

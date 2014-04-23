@@ -614,9 +614,8 @@ O(Shuffle,                          ND, SUnk,                             NF) \
 O(CreateCont,                   D(Obj), S(FramePtr) C(Int),          E|N|PRc) \
 O(ContEnter,                        ND, S(FramePtr)                           \
                                           S(TCA) C(Int) S(FramePtr),       E) \
-O(ContPreNext,                      ND, S(Obj),                          B|E) \
+O(ContPreNext,                      ND, S(Obj) C(Bool),                  B|E) \
 O(ContStartedCheck,                 ND, S(Obj),                          B|E) \
-O(ContSetRunning,                   ND, S(Obj) C(Bool),                    E) \
 O(ContValid,                   D(Bool), S(Obj),                            E) \
 O(ContArIncKey,                     ND, S(FramePtr),                       E) \
 O(ContArUpdateIdx,                  ND, S(FramePtr) S(Int),                E) \

@@ -408,7 +408,6 @@ struct HhbcTranslator {
   void emitContValid();
   void emitContKey();
   void emitContCurrent();
-  void emitContStopped();
 
   // async functions
   void emitAwaitE(SSATmp* child, Block* catchBlock, Offset resumeOffset,

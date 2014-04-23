@@ -4490,9 +4490,8 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
     cellCopy(retval, waitHandle->getResult());
   } else if (m_fp->func()->isGenerator()) {
     // Mark the generator as finished and store the return value.
-    auto cont = frame_continuation(m_fp);
-    cont->setDone();
-    tvSetIgnoreRef(retval, cont->m_value);
+    assert(IS_NULL_TYPE(retval.m_type));
+    frame_continuation(m_fp)->finish();
   } else {
     not_reached();
   }
@@ -7070,6 +7069,7 @@ OPTBLD_INLINE void ExecutionContext::contEnterImpl(IOP_ARGS) {
   // Do linkage of the continuation's AR.
   assert(m_fp->hasThis());
   c_Continuation* cont = this_continuation(m_fp);
+  assert(cont->getState() == c_Continuation::Running);
   ActRec* contAR = cont->actRec();
   contAR->setReturn(m_fp, pc, tx->uniqueStubs.genRetHelper);
 
@@ -7135,19 +7135,15 @@ OPTBLD_INLINE void ExecutionContext::iopYieldK(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::iopContCheck(IOP_ARGS) {
   NEXT();
-  DECODE_IVA(check_started);
-  c_Continuation* cont = this_continuation(m_fp);
-  if (check_started) {
-    cont->startedCheck();
-  }
-  cont->preNext();
+  DECODE_IVA(checkStarted);
+  this_continuation(m_fp)->preNext(checkStarted);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContValid(IOP_ARGS) {
   NEXT();
   TypedValue* tv = m_stack.allocTV();
   tvWriteUninit(tv);
-  tvAsVariant(tv) = !this_continuation(m_fp)->done();
+  tvAsVariant(tv) = this_continuation(m_fp)->getState() != c_Continuation::Done;
 }
 
 OPTBLD_INLINE void ExecutionContext::iopContKey(IOP_ARGS) {
@@ -7162,11 +7158,6 @@ OPTBLD_INLINE void ExecutionContext::iopContCurrent(IOP_ARGS) {
   c_Continuation* cont = this_continuation(m_fp);
   cont->startedCheck();
   cellDup(cont->m_value, *m_stack.allocC());
-}
-
-OPTBLD_INLINE void ExecutionContext::iopContStopped(IOP_ARGS) {
-  NEXT();
-  this_continuation(m_fp)->setStopped();
 }
 
 OPTBLD_INLINE void ExecutionContext::asyncSuspendE(IOP_ARGS, int32_t iters) {

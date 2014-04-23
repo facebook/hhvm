@@ -206,10 +206,8 @@ void tearDownFrame(ActRec*& fp, Stack& stack, PC& pc) {
   } else if (fp->func()->isAsync()) {
     // Do nothing. AsyncFunctionWaitHandle will handle the exception.
   } else if (fp->func()->isGenerator()) {
-    // Mark the generator as finished and clear its m_value.
-    auto cont = frame_continuation(fp);
-    cont->setDone();
-    cellSet(make_tv<KindOfNull>(), cont->m_value);
+    // Mark the generator as finished.
+    frame_continuation(fp)->finish();
   } else {
     not_reached();
   }

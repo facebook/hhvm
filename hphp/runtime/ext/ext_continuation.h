@@ -43,27 +43,21 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   static constexpr ptrdiff_t offsetOff() {
     return resumableOff() + Resumable::offsetOff();
   }
-  static constexpr ptrdiff_t startedOff() {
+  static constexpr ptrdiff_t stateOff() {
     return offsetof(c_Continuation, o_subclassData.u8[0]);
   }
-  static constexpr ptrdiff_t stateOff() {
-    return offsetof(c_Continuation, o_subclassData.u8[1]);
-  }
 
-  bool started() const { return o_subclassData.u8[0]; }
-  void start() { o_subclassData.u8[0] = true; }
-
-  enum ContState : uint8_t {
-    Running = 1,
-    Done    = 2
+  enum GeneratorState : uint8_t {
+    Created = 0,  // generator was created but never iterated
+    Started = 1,  // generator was iterated but not currently running
+    Running = 2,  // generator is currently being iterated
+    Done    = 3   // generator has finished its execution
   };
 
-  bool done() const { return o_subclassData.u8[1] & ContState::Done; }
-  void setDone() { o_subclassData.u8[1]  =  ContState::Done; }
-
-  bool running() const { return o_subclassData.u8[1] & ContState::Running; }
-  void setRunning() { o_subclassData.u8[1]  =  ContState::Running; }
-  void setStopped() { o_subclassData.u8[1] &= ~ContState::Running; }
+  GeneratorState getState() const {
+    return static_cast<GeneratorState>(o_subclassData.u8[0]);
+  }
+  void setState(GeneratorState state) { o_subclassData.u8[0] = state; }
 
   void t___construct();
   void suspend(Offset offset, const Cell& value);
@@ -88,6 +82,7 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     auto const cont = new (obj) c_Continuation();
     cont->incRefCount();
     cont->setNoDestruct();
+    cont->setState(Created);
     return cont;
   }
 
@@ -107,24 +102,34 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     return base + 2;
   }
 
-  inline void preNext() {
-    if (done()) {
-      throw_exception(Object(SystemLib::AllocExceptionObject(
-                               "Continuation is already finished")));
+  inline void startedCheck() {
+    if (getState() == Created) {
+      throw_exception(Object(
+        SystemLib::AllocExceptionObject("Need to call next() first")));
     }
-    if (running()) {
-      throw_exception(Object(SystemLib::AllocExceptionObject(
-                               "Continuation is already running")));
-    }
-    setRunning();
-    start();
   }
 
-  inline void startedCheck() {
-    if (!started()) {
-      throw_exception(
-        Object(SystemLib::AllocExceptionObject("Need to call next() first")));
+  inline void preNext(bool checkStarted) {
+    if (checkStarted) {
+      startedCheck();
     }
+    if (getState() == Running) {
+      throw_exception(Object(
+        SystemLib::AllocExceptionObject("Generator is already running")));
+    }
+    if (getState() == Done) {
+      throw_exception(Object(
+        SystemLib::AllocExceptionObject("Generator is already finished")));
+    }
+    assert(getState() == Created || getState() == Started);
+    setState(Running);
+  }
+
+  inline void finish() {
+    assert(getState() == Running);
+    cellSet(make_tv<KindOfNull>(), m_key);
+    cellSet(make_tv<KindOfNull>(), m_value);
+    setState(Done);
   }
 
 private:

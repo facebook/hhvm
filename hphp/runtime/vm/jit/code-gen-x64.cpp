@@ -5403,46 +5403,41 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
-  auto contReg = srcLoc(0).reg();
+  auto contReg      = srcLoc(0).reg();
+  auto checkStarted = inst->src(1)->boolVal();
+  auto stateOff     = c_Continuation::stateOff();
 
-  const Offset startedOffset = c_Continuation::startedOff();
-  const Offset stateOffset = c_Continuation::stateOff();
-  // Check done and running at the same time
-  m_as.testb(0x3, contReg[stateOffset]);
-  emitFwdJcc(CC_NZ, inst->taken());
+  static_assert(c_Continuation::Created == 0, "used below");
+  static_assert(c_Continuation::Started == 1, "used below");
 
-  static_assert(startedOffset + 1 == stateOffset,
-                "started should immediately precede state");
-  m_as.storew(0x101, contReg[startedOffset]);
+  // Take exit if state != 1 (checkStarted) or state > 1 (!checkStarted).
+  m_as.cmpb(1, contReg[stateOff]);
+  emitFwdJcc(checkStarted ? CC_NE : CC_A, inst->taken());
+
+  // Set generator state as Running.
+  m_as.storeb(c_Continuation::Running, contReg[stateOff]);
 }
 
 void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
-  auto contReg = srcLoc(0).reg();
-  auto startedOffset = c_Continuation::startedOff();
+  auto contReg  = srcLoc(0).reg();
+  auto stateOff = c_Continuation::stateOff();
 
-  m_as.testb(0x1, contReg[startedOffset]);
+  static_assert(c_Continuation::Created == 0, "used below");
+
+  // Take exit if state == 0.
+  m_as.testb(int8_t(0xff), contReg[stateOff]);
   emitFwdJcc(CC_Z, inst->taken());
 }
 
-void CodeGenerator::cgContSetRunning(IRInstruction* inst) {
-  auto contReg = srcLoc(0).reg();
-  bool running = inst->src(1)->boolVal();
-
-  const Offset stateOffset = c_Continuation::stateOff();
-  if (running) {
-    m_as.storeb(0x1, contReg[stateOffset]);
-  } else {
-    m_as.andb  (0x2, contReg[stateOffset]);
-  }
-}
-
 void CodeGenerator::cgContValid(IRInstruction* inst) {
-  auto contReg = srcLoc(0).reg();
-  auto destReg = dstLoc(0).reg();
+  auto contReg  = srcLoc(0).reg();
+  auto dstReg   = dstLoc(0).reg();
+  auto stateOff = c_Continuation::stateOff();
 
-  m_as.loadzbl(contReg[c_Continuation::stateOff()], r32(destReg));
-  m_as.shrl(0x1, r32(destReg));
-  m_as.xorb(0x1, rbyte(destReg));
+  // Return 1 if generator state is not Done.
+  m_as.cmpb(c_Continuation::Done, contReg[stateOff]);
+  m_as.setne(rbyte(dstReg));
+  m_as.movzbl(rbyte(dstReg), r32(dstReg));
 }
 
 void CodeGenerator::cgContArIncKey(IRInstruction* inst) {

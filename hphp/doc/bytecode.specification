@@ -4144,10 +4144,6 @@ ContCurrent    []  ->  [C]
   Get continuation value. $this must be a Continuation object. Pushes the most
   recently yielded value from the continuation onto the stack.
 
-ContStopped    []  ->  []
-
-  Mark continuation as stopped. $this must be a Continuation object.
-
 15. Async functions
 -------------------
 

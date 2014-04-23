@@ -1517,14 +1517,18 @@ void HhbcTranslator::emitResumedReturnControl(Block* catchBlock) {
 }
 
 void HhbcTranslator::emitYieldImpl(Offset resumeOffset) {
-  // set m_value = popC();
+  // Set resume offset.
+  gen(StContArRaw, RawMemData{RawMemData::ContOffset}, m_irb->fp(),
+      cns(resumeOffset));
+
+  // Set yielded value.
   auto const oldValue = gen(LdContArValue, Type::Cell, m_irb->fp());
   gen(StContArValue, m_irb->fp(), popC(DataTypeGeneric)); // teleporting value
   gen(DecRef, oldValue);
 
-  // set m_offset = offset;
-  gen(StContArRaw, RawMemData{RawMemData::ContOffset}, m_irb->fp(),
-      cns(resumeOffset));
+  // Set state from Running to Started.
+  gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
+      cns(c_Continuation::Started));
 }
 
 void HhbcTranslator::emitYield(Offset resumeOffset) {
@@ -1573,10 +1577,7 @@ void HhbcTranslator::emitYieldK(Offset resumeOffset) {
 void HhbcTranslator::emitContCheck(bool checkStarted) {
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_irb->fp());
-  if (checkStarted) {
-    gen(ContStartedCheck, makeExitSlow(), cont);
-  }
-  gen(ContPreNext, makeExitSlow(), cont);
+  gen(ContPreNext, makeExitSlow(), cont, cns(checkStarted));
 }
 
 void HhbcTranslator::emitContValid() {
@@ -1601,13 +1602,6 @@ void HhbcTranslator::emitContCurrent() {
   SSATmp* offset = cns(CONTOFF(m_value));
   SSATmp* value = gen(LdProp, Type::Cell, cont, offset);
   pushIncRef(value);
-}
-
-void HhbcTranslator::emitContStopped() {
-  assert(curClass());
-  SSATmp* cont = gen(LdThis, m_irb->fp());
-
-  gen(ContSetRunning, cont, cns(false));
 }
 
 void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
@@ -3193,7 +3187,8 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   // Pop the return value. Since it will be teleported to its place in memory,
   // we don't care about the type.
   auto catchBlock = makeCatch();
-  SSATmp* retVal = pop(type, DataTypeGeneric);
+  SSATmp* retVal = pop(type, func->isGenerator() ? DataTypeSpecific
+                                                 : DataTypeGeneric);
 
   // Free $this.
   if (func->mayHaveThis()) {
@@ -3239,14 +3234,20 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     // Sync SP.
     sp = spillStack();
   } else if (func->isGenerator()) {
+    assert(retVal->type() <= Type::Null);
+
+    // Clear generator's key and value.
+    auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());
+    gen(StContArKey, m_irb->fp(), cns(Type::InitNull));
+    gen(DecRef, oldKey);
+
+    auto const oldValue = gen(LdContArValue, Type::Cell, m_irb->fp());
+    gen(StContArValue, m_irb->fp(), cns(Type::InitNull));
+    gen(DecRef, oldValue);
+
     // Mark generator as finished.
     gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
         cns(c_Continuation::Done));
-
-    // Store the return value.
-    auto const oldValue = gen(LdContArValue, Type::Cell, m_irb->fp());
-    gen(StContArValue, m_irb->fp(), retVal);
-    gen(DecRef, oldValue);
 
     // Sync SP.
     sp = spillStack();

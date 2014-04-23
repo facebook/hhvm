@@ -161,7 +161,6 @@
   CASE(Concat) \
   CASE(ContCurrent) \
   CASE(ContKey) \
-  CASE(ContStopped) \
   CASE(ContValid) \
   CASE(Dup) \
   CASE(EmptyG) \

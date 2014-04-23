@@ -213,7 +213,6 @@ struct FrameState : private LocalStateHook {
 
   void getLocalEffects(const IRInstruction* inst, LocalStateHook& hook) const;
 
- private:
   /*
    * LocalState stores information about a local in the current function.
    */
@@ -236,8 +235,12 @@ struct FrameState : private LocalStateHook {
         typeSource == b.typeSource;
     }
   };
+
   typedef smart::vector<LocalState> LocalVec;
 
+  const LocalVec& localsForBlock(Block* b) const;
+
+ private:
   /*
    * Snapshot stores fields of FrameState to be saved, restored, and merged for
    * inlining and control flow.

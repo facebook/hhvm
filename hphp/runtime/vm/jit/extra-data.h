@@ -743,6 +743,7 @@ X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
 X(LdLocAddr,                    LocalId);
 X(LdLoc,                        LocalId);
+X(TrackLoc,                     LocalId);
 X(DecRefLoc,                    LocalId);
 X(StLoc,                        LocalId);
 X(StLocNT,                      LocalId);

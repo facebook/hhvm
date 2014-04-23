@@ -23,6 +23,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
+#include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/base/rds.h"
@@ -1068,6 +1069,95 @@ void IRBuilder::setMarker(BCMarker marker) {
   m_state.setMarker(marker);
 }
 
+void IRBuilder::insertLocalPhis() {
+  if (m_curBlock->numPreds() < 2) return;
+
+  smart::hash_map<Block*, smart::vector<SSATmp*>> blockToPhiTmpsMap;
+  smart::vector<uint32_t> localIds;
+  int numPhis = 0;
+
+  // Determine which SSATmps must receive a phi.
+  for (int i = 0; i < m_state.func()->numLocals(); i++) {
+    SSATmp* phiLocal = nullptr;
+    bool needsPhi = false;
+    bool definedAll = true;
+
+    for (auto& e : m_curBlock->preds()) {
+      Block* pred = e.inst()->block();
+      auto local = m_state.localsForBlock(pred)[i].value;
+      if (local == nullptr) {
+        definedAll = false;
+        break;
+      }
+      if (phiLocal == nullptr) {
+        phiLocal = local;
+      } else if (phiLocal != local) {
+        needsPhi = true;
+      }
+    }
+
+    if (!needsPhi || !definedAll) {
+      continue;
+    }
+    numPhis++;
+    localIds.push_back(i);
+
+    for (auto& e : m_curBlock->preds()) {
+      Block* pred = e.inst()->block();
+      auto local = m_state.localsForBlock(pred)[i].value;
+      blockToPhiTmpsMap[pred].push_back(local);
+    }
+  }
+
+  if (numPhis == 0) {
+    return;
+  }
+
+  // Split incoming critical edges.
+  bool again = true;
+  while (again) {
+    again = false;
+    for (auto& e : m_curBlock->preds()) {
+      IRInstruction* branch = e.inst();
+      Block* pred = branch->block();
+      if (pred->numSuccs() > 1) {
+        Block* middle = splitEdge(m_unit, pred, m_curBlock, m_state.marker());
+        auto& vec = blockToPhiTmpsMap[middle];
+        std::copy(blockToPhiTmpsMap[pred].begin(),
+                  blockToPhiTmpsMap[pred].end(),
+                  std::inserter(vec, vec.begin()));
+        again = true;
+        break;
+      }
+    }
+  }
+
+  // Modify the incoming Jmps to set the phi inputs.
+  for (auto& e : m_curBlock->preds()) {
+    Block* pred = e.inst()->block();
+    smart::vector<SSATmp*>& tmpVec = blockToPhiTmpsMap[pred];
+    auto& jmp = pred->back();
+    always_assert_log(
+      jmp.is(Jmp),
+      [&] {
+        return folly::format("Need Jmp to create a phi, instead got: {}",
+                             jmp.toString()).str();
+      });
+    always_assert(jmp.numSrcs() == 0 && "Phi already exists for this Jmp");
+    m_unit.replace(&jmp, Jmp, std::make_pair(tmpVec.size(), tmpVec.data()));
+  }
+
+  // Create a DefLabel with appropriately-typed dests.
+  IRInstruction* label = m_unit.defLabel(numPhis, m_state.marker());
+  m_curBlock->prepend(label);
+  retypeDests(label);
+
+  // Add TrackLoc's to update local state.
+  for (int i = 0; i < numPhis; ++i) {
+    gen(TrackLoc, LocalId(localIds.at(i)), label->dst(i));
+  }
+}
+
 void IRBuilder::startBlock(Block* block) {
   assert(block);
   assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
@@ -1075,6 +1165,7 @@ void IRBuilder::startBlock(Block* block) {
   if (block->empty()) {
     if (block != m_curBlock) {
       if (m_state.compatible(block)) {
+        m_state.pauseBlock(m_curBlock);
         m_state.pauseBlock(block);
       } else {
         m_state.clearCse();
@@ -1088,6 +1179,7 @@ void IRBuilder::startBlock(Block* block) {
       }
       m_curBlock = block;
       m_state.startBlock(m_curBlock);
+      insertLocalPhis();
       FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
              show(m_state));
     }

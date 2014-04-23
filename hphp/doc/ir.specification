@@ -1000,7 +1000,7 @@ LdObjMethod S0:Cls S1:ConstStr S2:StkPtr S3:Cls
   Stores a pointer to an object's method into an activation record. S0 points
   to the object's class, S1 is the method name, S2 points to the activation
   record, and S3, a compile time constant, points to the current context class.
-  Caches the mapping in the target cache. Fatals if the class does not have 
+  Caches the mapping in the target cache. Fatals if the class does not have
   an accessible method with the given name and does not have a __call method.
 
 D:Func = LdObjInvoke S0:Cls -> B
@@ -1411,6 +1411,12 @@ D:T = Mov S0:T
   Defines D as S0. May imply register-to-register moves at code generation
   time. Does not imply an incref or any other manipulation of S0.
 
+TrackLoc<localId> S0:T
+
+  Defines localId as having value given by S0.  This does not generate code; it
+  is used by the translator to track values that are stored in locals. It can
+  be thought of as a store (which does not physically store anything).
+
 D:T* = LdAddr S0:T* S1:ConstInt
 
   Load address. Returns a pointer to (S0 + S1) with the same type as S0.
@@ -1510,7 +1516,7 @@ D:StkPtr = StashResumableSP<offset> S0:FramePtr S1:StkPtr
 D:StkPtr = ReDefResumableSP<offset,spansCall> S0:StkPtr S1:FramePtr
 
   Restore a resumable's stack pointer. See StashResumableSP. The S0 stack
-  pointer refers to the stack pointer before inlining, it is used for stack 
+  pointer refers to the stack pointer before inlining, it is used for stack
   value analysis but never used outside of analysis (see ReDefSP). The spansCall
   boolean value indicates that the inlined frame spanned a function call, this
   is important as it indicates to later analysis steps that SSATmps created
@@ -1736,7 +1742,7 @@ D:Obj<Continuation> = CreateCont S0:FramePtr S1:Int
   Create a Continuation object and suspend the ActRec provided by S0 into
   its embedded ActRec. Set the resume offset to S1.
 
-D:Obj<AsyncFunctionWaitHandle> = CreateAFWH S0:FramePtr S1:Int 
+D:Obj<AsyncFunctionWaitHandle> = CreateAFWH S0:FramePtr S1:Int
                                             S2:Obj<WaitableWaitHandle>
 
   Create an AsyncFunctionWaitHandle object and suspend the ActRec provided by

@@ -163,6 +163,7 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
 NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
 NOOP_OPCODE(DefSP)
+NOOP_OPCODE(TrackLoc)
 NOOP_OPCODE(AssertLoc)
 NOOP_OPCODE(AssertStk)
 NOOP_OPCODE(Nop)

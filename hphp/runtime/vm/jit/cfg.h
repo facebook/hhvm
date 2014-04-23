@@ -49,6 +49,11 @@ struct BlocksWithIds {
 BlocksWithIds rpoSortCfgWithIds(const IRUnit&);
 
 /*
+ * Split the edge between "from" and "to", returning the new middle block.
+ */
+Block* splitEdge(IRUnit& unit, Block* from, Block* to, BCMarker marker);
+
+/*
  * Removes unreachable blocks from the unit and then splits any critical edges.
  *
  * Returns: true iff any modifications were made to the unit.

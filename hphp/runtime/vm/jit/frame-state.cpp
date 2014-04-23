@@ -233,6 +233,10 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
                            inst->dst());
       break;
 
+    case TrackLoc:
+      hook.setLocalValue(inst->extra<LocalId>()->locId, inst->src(0));
+      break;
+
     case CheckType:
     case AssertType: {
       SSATmp* newVal = inst->dst();
@@ -483,6 +487,12 @@ bool FrameState::compatible(Block* block) {
   // values flowing in and insert phis or exits as needed.
 
   return true;
+}
+
+const FrameState::LocalVec& FrameState::localsForBlock(Block* b) const {
+  auto bit = m_snapshots.find(b);
+  assert(bit != m_snapshots.end());
+  return bit->second.locals;
 }
 
 void FrameState::load(Snapshot& state) {

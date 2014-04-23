@@ -435,6 +435,7 @@ private:
 private:
   void      appendInstruction(IRInstruction* inst);
   void      appendBlock(Block* block);
+  void      insertLocalPhis();
 
 private:
   IRUnit& m_unit;

@@ -89,6 +89,40 @@ let input_prompt str =
   flush stdout;
   input_line stdin
 
+let apply_patches file_map =
+  SMap.iter apply_patches_to_file file_map;
+  print_endline
+      ("Rewrote "^(string_of_int (SMap.cardinal file_map))^" files.")
+
+let patch_to_json res =
+  let type_, replacement = match res with
+    | ServerMsg.Insert patch ->
+        "insert", patch.ServerMsg.text
+    | ServerMsg.Replace patch ->
+        "replace", patch.ServerMsg.text
+    | ServerMsg.Remove _ ->
+        "remove", ""
+  in
+  let pos = get_pos res in
+  let char_start, char_end = Pos.info_raw pos in
+  let line, start, end_ = Pos.info_pos pos in
+  Json.JAssoc [ "char_start",  Json.JInt char_start;
+                "char_end",    Json.JInt char_end;
+                "line",        Json.JInt line;
+                "col_start",   Json.JInt start;
+                "col_end",     Json.JInt end_;
+                "patch_type",  Json.JString type_;
+                "replacement", Json.JString replacement;
+              ]
+
+let print_patches_json file_map =
+  let entries = SMap.fold begin fun fn patch_list acc ->
+    Json.JAssoc [ "filename", Json.JString fn;
+                  "patches",  Json.JList (List.map patch_to_json patch_list);
+                ] :: acc
+  end file_map [] in
+  print_endline (Json.json_to_string (Json.JList entries))
+
 let go args =
   try
     print_endline ("WARNING: This tool will only refactor references in "^
@@ -100,7 +134,7 @@ let go args =
     print_endline "    3 - Method";
     print_string "Enter 1, 2, or 3: ";
     flush stdout;
-    
+
     let refactor_type = input_line stdin in
     let command = match refactor_type with
     | "1" -> 
@@ -124,9 +158,8 @@ let go args =
     ServerMsg.cmd_to_channel oc command;
     let patches = Marshal.from_channel ic in
     let file_map = List.fold_left map_patches_to_filename SMap.empty patches in
-    SMap.iter apply_patches_to_file file_map;
-    
-    print_endline
-        ("Rewrote "^(string_of_int (SMap.cardinal file_map))^" files.")
+    if args.output_json
+    then print_patches_json file_map
+    else apply_patches file_map
   with Exit ->
     print_endline "Invalid Input"

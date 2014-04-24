@@ -563,6 +563,25 @@
                     ]
                 },
                 {
+                    "name": "slice",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector containing the specified range of values from this Vector. The range is specified by two non-negative integers: a starting position and a length.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "start",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "len",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "concat",
                     "flags": [
                     ],
@@ -1037,6 +1056,25 @@
                   "args": [
                       {
                           "name": "fn",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "slice",
+                  "flags": [
+                  ],
+                  "desc": "Returns an ImmVector containing the specified range of values from this ImmVector. The range is specified by two non-negative integers: a starting position and a length.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "start",
+                          "type": "Variant"
+                      },
+                      {
+                          "name": "len",
                           "type": "Variant"
                       }
                   ]
@@ -1970,6 +2008,25 @@
                     ]
                 },
                 {
+                    "name": "slice",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Map containing the specified range of key/value pairs from this Map. The range is specified by two non-negative integers: a starting position and a length.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "start",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "len",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "concat",
                     "flags": [
                     ],
@@ -2554,6 +2611,25 @@
                     "args": [
                         {
                             "name": "fn",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "slice",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmMap containing the specified range of key/value pairs from this ImmMap. The range is specified by two non-negative integers: a starting position and a length.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "start",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "len",
                             "type": "Variant"
                         }
                     ]
@@ -3146,6 +3222,25 @@
                     ]
                 },
                 {
+                    "name": "slice",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set containing the specified range of values from this Set. The range is specified by two non-negative integers: a starting position and a length.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "start",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "len",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "concat",
                     "flags": [
                     ],
@@ -3627,6 +3722,25 @@
                     "args": [
                         {
                             "name": "fn",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "slice",
+                    "flags": [
+                    ],
+                    "desc": "Returns a ImmSet containing the specified range of values from this ImmSet. The range is specified by two non-negative integers: a starting position and a length.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "start",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "len",
                             "type": "Variant"
                         }
                     ]
@@ -4191,6 +4305,25 @@
                     "args": [
                         {
                             "name": "fn",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "slice",
+                    "flags": [
+                    ],
+                    "desc": "Returns an ImmVector containing the specified range of values from this Pair. The range is specified by two non-negative integers: a starting position and a length.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "start",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "len",
                             "type": "Variant"
                         }
                     ]

@@ -1,0 +1,65 @@
+HH\Vector
+0 => 2
+1 => 3
+HH\Vector
+0 => 5
+HH\Vector
+HH\ImmVector
+0 => 2
+1 => 3
+HH\ImmVector
+0 => 5
+HH\ImmVector
+HH\Map
+b => 2
+c => 3
+HH\Map
+e => 5
+HH\Map
+HH\ImmMap
+b => 2
+c => 3
+HH\ImmMap
+e => 5
+HH\ImmMap
+HH\Set
+2
+3
+HH\Set
+5
+HH\Set
+HH\ImmSet
+2
+3
+HH\ImmSet
+5
+HH\ImmSet
+HH\ImmVector
+0 => 2
+HH\ImmVector
+0 => 2
+HH\ImmVector
+LazySliceKeyedIterable
+b => 2
+c => 3
+LazySliceKeyedIterable
+e => 5
+LazySliceKeyedIterable
+LazySliceKeyedIterable
+b => 2
+c => 3
+LazySliceKeyedIterable
+e => 5
+LazySliceKeyedIterable
+LazySliceIterable
+2
+3
+LazySliceIterable
+5
+LazySliceIterable
+LazySliceIterable
+2
+3
+LazySliceIterable
+5
+LazySliceIterable

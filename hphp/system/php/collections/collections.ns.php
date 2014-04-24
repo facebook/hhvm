@@ -183,6 +183,19 @@ trait StrictIterable {
     }
     return $res;
   }
+  public function slice($start, $len) {
+    $res = Vector {};
+    if ($len <= 0) return $res;
+    foreach ($this as $v) {
+      if ($start !== 0) {
+        --$start;
+        continue;
+      }
+      $res[] = $v;
+      if (--$len === 0) break;
+    }
+    return $res;
+  }
   public function concat($iterable) {
     $res = Vector {};
     foreach ($this as $v) {
@@ -337,6 +350,19 @@ trait StrictKeyedIterable {
     }
     return $res;
   }
+  public function slice($start, $len) {
+    $res = Map {};
+    if ($len <= 0) return $res;
+    foreach ($this as $k => $v) {
+      if ($start !== 0) {
+        --$start;
+        continue;
+      }
+      $res[$k] = $v;
+      if (--$len === 0) break;
+    }
+    return $res;
+  }
   public function concat($iterable) {
     $res = Vector {};
     foreach ($this as $v) {
@@ -423,6 +449,9 @@ trait LazyIterable {
   }
   public function skipWhile($fn) {
     return new LazySkipWhileIterable($this, $fn);
+  }
+  public function slice($start, $len) {
+    return new LazySliceIterable($this, $start, $len);
   }
   public function concat($iterable) {
     if (is_array($iterable)) {
@@ -522,6 +551,9 @@ trait LazyKeyedIterable {
   public function skipWhile($fn) {
     return new LazySkipWhileKeyedIterable($this, $fn);
   }
+  public function slice($start, $len) {
+    return new LazySliceKeyedIterable($this, $start, $len);
+  }
   public function concat($iterable) {
     if (is_array($iterable)) {
       $iterable = new ImmMap($iterable);
@@ -573,7 +605,7 @@ class LazyMapIterator implements \HH\Iterator {
     $this->it->next();
   }
   public function key() {
-    return null;
+    return $this->it->key();
   }
   public function current() {
     return ($this->fn)($this->it->current());
@@ -713,7 +745,7 @@ class LazyFilterIterator implements \HH\Iterator {
     }
   }
   public function key() {
-    return null;
+    return $this->it->key();
   }
   public function current() {
     return $this->it->current();
@@ -867,7 +899,7 @@ class LazyZipIterator implements \HH\Iterator {
     $this->it2->next();
   }
   public function key() {
-    return null;
+    return $this->it->key();
   }
   public function current() {
     return Pair {$this->it1->current(), $this->it2->current()};
@@ -962,7 +994,7 @@ class LazyTakeIterator implements \HH\Iterator {
     --$this->numLeft;
   }
   public function key() {
-    return null;
+    return $this->it->key();
   }
   public function current() {
     return $this->it->current();
@@ -1058,7 +1090,7 @@ class LazyTakeWhileIterator implements \HH\Iterator {
     $this->it->next();
   }
   public function key() {
-    return null;
+    return $this->it->key();
   }
   public function current() {
     return $this->it->current();
@@ -1157,7 +1189,7 @@ class LazySkipIterator implements \HH\Iterator {
     $this->it->next();
   }
   public function key() {
-    return null;
+    return $this->it->key();
   }
   public function current() {
     return $this->it->current();
@@ -1263,7 +1295,7 @@ class LazySkipWhileIterator implements \HH\Iterator {
     $this->it->next();
   }
   public function key() {
-    return null;
+    return $this->it->key();
   }
   public function current() {
     return $this->it->current();
@@ -1335,6 +1367,138 @@ class LazySkipWhileKeyedIterable implements \HH\Iterable {
   public function getIterator() {
     return new LazySkipWhileKeyedIterator($this->iterable->getIterator(),
                                           $this->fn);
+  }
+}
+
+class LazySliceIterator implements \HH\Iterator {
+  private $it;
+  private $start;
+  private $len;
+  private $currentLen;
+
+  public function __construct($it, $start, $len) {
+    $this->it = $it;
+    $this->start = $start;
+    $this->len = $len;
+    $this->currentLen = $len;
+    while ($start !== 0 && $it->valid()) {
+      $it->next();
+      --$start;
+    }
+  }
+  public function __clone() {
+    $this->it = clone $this->it;
+  }
+  public function rewind() {
+    $it = $this->it;
+    $start = $this->start;
+    $len = $this->len;
+    $it->rewind();
+    $this->currentLen = $len;
+    while ($start !== 0 && $it->valid()) {
+      $it->next();
+      --$start;
+    }
+  }
+  public function valid() {
+    return $this->it->valid() && $this->currentLen !== 0;
+  }
+  public function next() {
+    $this->it->next();
+    if ($this->currentLen !== 0) {
+      --$this->currentLen;
+    }
+  }
+  public function key() {
+    return $this->it->key();
+  }
+  public function current() {
+    return $this->it->current();
+  }
+}
+
+class LazySliceIterable implements \HH\Iterable {
+  use LazyIterable;
+
+  private $iterable;
+  private $start;
+  private $len;
+
+  public function __construct($iterable, $start, $len) {
+    $this->iterable = $iterable;
+    $this->start = $start;
+    $this->len = $len;
+  }
+  public function getIterator() {
+    return new LazySliceIterator($this->iterable->getIterator(),
+                                 $this->start,
+                                 $this->len);
+  }
+}
+
+class LazySliceKeyedIterator implements \HH\KeyedIterator {
+  private $it;
+  private $start;
+  private $len;
+  private $currentLen;
+
+  public function __construct($it, $start, $len) {
+    $this->it = $it;
+    $this->start = $start;
+    $this->len = $len;
+    $this->currentLen = $len;
+    while ($start !== 0 && $it->valid()) {
+      $it->next();
+      --$start;
+    }
+  }
+  public function __clone() {
+    $this->it = clone $this->it;
+  }
+  public function rewind() {
+    $it = $this->it;
+    $start = $this->start;
+    $len = $this->len;
+    $it->rewind();
+    $this->currentLen = $len;
+    while ($start !== 0 && $it->valid()) {
+      $it->next();
+      --$start;
+    }
+  }
+  public function valid() {
+    return $this->it->valid() && $this->currentLen !== 0;
+  }
+  public function next() {
+    $this->it->next();
+    if ($this->currentLen !== 0) {
+      --$this->currentLen;
+    }
+  }
+  public function key() {
+    return $this->it->key();
+  }
+  public function current() {
+    return $this->it->current();
+  }
+}
+
+class LazySliceKeyedIterable implements \HH\KeyedIterable {
+  use LazyKeyedIterable;
+
+  private $iterable;
+  private $start;
+  private $len;
+
+  public function __construct($iterable, $start, $len) {
+    $this->iterable = $iterable;
+    $this->start = $start;
+    $this->len = $len;
+  }
+  public function getIterator() {
+    return new LazySliceKeyedIterator($this->iterable->getIterator(),
+                                      $this->start,
+                                      $this->len);
   }
 }
 
@@ -1577,6 +1741,9 @@ class LazyIterableView implements \HH\Iterable {
   public function skipWhile($fn) {
     return new LazySkipWhileIterable($this->iterable, $fn);
   }
+  public function slice($start, $len) {
+    return new LazySliceIterable($this->iterable, $start, $len);
+  }
   public function concat($iterable) {
     if (is_array($iterable)) {
       $iterable = new ImmMap($iterable);
@@ -1678,6 +1845,9 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
   }
   public function skipWhile($fn) {
     return new LazySkipWhileKeyedIterable($this->iterable, $fn);
+  }
+  public function slice($start, $len) {
+    return new LazySliceKeyedIterable($this->iterable, $start, $len);
   }
   public function concat($iterable) {
     if (is_array($iterable)) {

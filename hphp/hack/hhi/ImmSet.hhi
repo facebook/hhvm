@@ -95,8 +95,13 @@ final class ImmSet<Tv> implements ConstSet<Tv> {
   public function lazy(): Iterable<Tv>;
   public function map<Tu>((function(Tv): Tu) $callback): ImmSet<Tu>;
   public function filter((function(Tv): bool) $callback): ImmSet<Tv>;
-  public function zip<Tu>(Traversable<Tu> $iterable): ImmSet<Pair<Tv, Tu>>;
-  public function concat(Traversable<Tv> $iterable): ImmVector<Tv>;
+  public function zip<Tu>(Traversable<Tu> $traversable): ImmSet<Pair<Tv, Tu>>;
+  public function take(int $n): ImmSet<Tv>;
+  public function takeWhile((function(Tv): bool) $fn): ImmSet<Tv>;
+  public function skip(int $n): ImmSet<Tv>;
+  public function skipWhile((function(Tv): bool) $fn): ImmSet<Tv>;
+  public function slice(int $start, int $len): ImmSet<Tv>;
+  public function concat(Traversable<Tv> $traversable): ImmVector<Tv>;
   public function firstValue(): ?Tv;
   public function lastValue(): ?Tv;
 }

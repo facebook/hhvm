@@ -78,8 +78,24 @@ final class Vector<Tv> implements MutableVector<Tv> {
   public function filter((function(Tv): bool) $callback): Vector<Tv>;
   public function filterWithKey((function(int, Tv): bool) $callback):
     Vector<Tv>;
-  public function zip<Tu>(Traversable<Tu> $iterable): Vector<Pair<Tv, Tu>>;
-  public function concat(Traversable<Tv> $iterable): Vector<Tv>;
+  public function zip<Tu>(Traversable<Tu> $traversable): Vector<Pair<Tv, Tu>>;
+
+  /**
+   * Returns a Vector containing the first n values of this Vector.
+   */
+  public function take(int $n): Vector<Tv>;
+
+  /**
+   * Returns a Vector containing the values of this Vector up to but not
+   * including the first value that produces false when passed to the specified
+   * callback.
+   */
+  public function takeWhile((function(Tv): bool) $fn): Vector<Tv>;
+
+  public function skip(int $n): Vector<Tv>;
+  public function skipWhile((function(Tv): bool) $fn): Vector<Tv>;
+  public function slice(int $start, int $len): Vector<Tv>;
+  public function concat(Traversable<Tv> $traversable): Vector<Tv>;
   public function firstValue(): ?Tv;
   public function firstKey(): ?int;
   public function lastValue(): ?Tv;
@@ -181,18 +197,6 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * Vector in place.
    */
   public function splice(int $offset, ?int $len = null): void;
-
-  /**
-   * Returns a Vector containing the first n values of this Vector.
-   */
-  public function take(int $n): Vector<Tv>;
-
-  /**
-   * Returns a Vector containing the values of this Vector up to but not
-   * including the first value that produces false when passed to the specified
-   * callback.
-   */
-  public function takeWhile((function(Tv): bool) $callback): Vector<Tv>;
 
   /**
    * Returns the index of the first element that matches the search value.

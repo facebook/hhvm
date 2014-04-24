@@ -72,8 +72,14 @@ final class Pair<Tv1, Tv2> implements ConstVector<mixed> {
   public function filter((function(mixed): bool) $callback): ImmVector<mixed>;
   public function filterWithKey((function(int, mixed): bool) $callback):
     ImmVector<mixed>;
-  public function zip<Tu>(Traversable<Tu> $iterable):
+  public function zip<Tu>(Traversable<Tu> $traversable):
     ImmVector<Pair<mixed, Tu>>;
+  public function take(int $n): ImmVector<mixed>;
+  public function takeWhile((function(mixed): bool) $fn): ImmVector<mixed>;
+  public function skip(int $n): ImmVector<mixed>;
+  public function skipWhile((function(mixed): bool) $fn): ImmVector<mixed>;
+  public function slice(int $start, int $len): ImmVector<mixed>;
+  public function concat(Traversable<mixed> $traversable): ImmVector<mixed>;
   public function firstValue(): Tv1;
   public function firstKey(): int;
   public function lastValue(): Tv2;

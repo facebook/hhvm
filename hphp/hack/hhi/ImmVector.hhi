@@ -142,9 +142,14 @@ final class ImmVector<Tv> implements ConstVector<Tv> {
   public function filter((function(Tv): bool) $callback): ImmVector<Tv>;
   public function filterWithKey((function(int, Tv): bool) $callback):
     ImmVector<Tv>;
-  public function zip<Tu>(Traversable<Tu> $iterable):
+  public function zip<Tu>(Traversable<Tu> $traversable):
     ImmVector<Pair<Tv, Tu>>;
-  public function concat(Traversable<Tv> $iterable): ImmVector<Tv>;
+  public function take(int $n): ImmVector<Tv>;
+  public function takeWhile((function(Tv): bool) $fn): ImmVector<Tv>;
+  public function skip(int $n): ImmVector<Tv>;
+  public function skipWhile((function(Tv): bool) $fn): ImmVector<Tv>;
+  public function slice(int $start, int $len): ImmVector<Tv>;
+  public function concat(Traversable<Tv> $traversable): ImmVector<Tv>;
   public function firstValue(): ?Tv;
   public function firstKey(): ?int;
   public function lastValue(): ?Tv;

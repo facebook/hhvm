@@ -127,6 +127,11 @@ class BaseVector : public ExtCollectionObjectData {
   template<class TVector>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, Object>::type
+  php_slice(const Variant& start, const Variant& len);
+
+  template<class TVector>
+  typename std::enable_if<
+    std::is_base_of<BaseVector, TVector>::value, Object>::type
   php_concat(const Variant& iterable);
 
   Variant php_firstValue();
@@ -363,6 +368,7 @@ class c_Vector : public BaseVector {
   Object t_takewhile(const Variant& fn);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_slice(const Variant& start, const Variant& len);
   Object t_concat(const Variant& iterable);
   Variant t_firstvalue();
   Variant t_firstkey();
@@ -485,6 +491,7 @@ public:
   Object t_takewhile(const Variant& fn);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_slice(const Variant& start, const Variant& len);
   Object t_concat(const Variant& iterable);
   Variant t_firstvalue();
   Variant t_firstkey();
@@ -551,29 +558,28 @@ class BaseMap : public ExtCollectionObjectData {
      * data.m_type == KindOfInvalid if this is an empty slot in the
      * Map (e.g. after an element is removed). */
     TypedValueAux data;
-    bool hasStrKey() const {
-      return data.hash() != 0;
-    }
-    bool hasIntKey() const {
-      return data.hash() == 0;
-    }
-    int32_t hash() const {
-      return data.hash();
-    }
-    void setStaticKey(StringData* k, strhash_t h) {
+
+    inline int32_t hash() const { return data.hash(); }
+    inline int32_t probe() const { return hasIntKey() ? ikey : hash(); }
+
+    inline bool hasStrKey() const { return hash() != 0; }
+    inline bool hasIntKey() const { return hash() == 0; }
+
+    inline void setStaticKey(StringData* k, strhash_t h) {
       assert(k->isStatic());
       skey = k;
       data.hash() = h | STRHASH_MSB;
     }
-    void setStrKey(StringData* k, strhash_t h) {
+    inline void setStrKey(StringData* k, strhash_t h) {
       skey = k;
       data.hash() = h | STRHASH_MSB;
       k->incRefCount();
     }
-    void setIntKey(int64_t k) {
+    inline void setIntKey(int64_t k) {
       ikey = k;
       data.hash() = 0;
     }
+
     static constexpr size_t dataOff() {
       return offsetof(Elm, data);
     }
@@ -637,18 +643,22 @@ class BaseMap : public ExtCollectionObjectData {
   void freeData();
 
  protected:
-  Elm* data() const { return (Elm*)m_data; }
-  int32_t* hashTab() const { return (int32_t*)m_hash; }
-  uint32_t iterLimit() const { return m_used; }
+  inline Elm* data() { return m_data; }
+  inline const Elm* data() const { return m_data; }
+  inline int32_t* hashTab() const { return (int32_t*)m_hash; }
+  inline uint32_t iterLimit() const { return m_used; }
 
   // We use this funny-looking helper to make g++ use lea and shl
   // instructions instead of imul when indexing into m_data
-  Elm* fetchElm(Elm* data, intptr_t pos) const {
+  inline static const BaseMap::Elm* fetchElm(const Elm* data, int64_t pos) {
     assert(sizeof(Elm) == 24);
     assert(sizeof(int64_t) == 8);
-    intptr_t index = 3 * pos;
+    int64_t index = 3 * pos;
     int64_t* ptr = (int64_t*)data;
-    return (Elm*)(&ptr[index]);
+    return (const Elm*)(&ptr[index]);
+  }
+  inline static BaseMap::Elm* fetchElm(Elm* data, int64_t pos) {
+    return (Elm*)fetchElm((const Elm*)data, pos);
   }
 
   static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
@@ -731,15 +741,52 @@ class BaseMap : public ExtCollectionObjectData {
     static_assert(Empty == -1, "");
   }
 
-  static bool isTombstone(DataType t) {
+  inline const Elm* firstElmImpl() const {
+    const Elm* e = data();
+    const Elm* eLimit = elmLimit();
+    for (; e != eLimit && isTombstone(e); ++e) {}
+    return (Elm*)e;
+  }
+  inline Elm* firstElm() {
+    return (Elm*)firstElmImpl();
+  }
+  inline const Elm* firstElm() const {
+    return firstElmImpl();
+  }
+
+  inline Elm* elmLimit() {
+    return fetchElm(data(), iterLimit());
+  }
+  inline const Elm* elmLimit() const {
+    return fetchElm(data(), iterLimit());
+  }
+
+  inline static Elm* nextElm(Elm* e, Elm* eLimit) {
+    assert(e != eLimit);
+    for (++e; e != eLimit && isTombstone(e); ++e) {}
+    return e;
+  }
+  inline static const Elm* nextElm(const Elm* e, const Elm* eLimit) {
+    return (const Elm*)nextElm((Elm*)e, (Elm*)eLimit);
+  }
+
+  static bool isTombstoneType(DataType t) {
     assert(IS_REAL_TYPE(t) || t == KindOfInvalid);
     return t < KindOfUninit;
     static_assert(KindOfUninit == 0 && KindOfInvalid < 0, "");
   }
 
+  static bool isTombstone(const Elm* e) {
+    return isTombstoneType(e->data.m_type);
+  }
+
+  static bool isTombstone(ssize_t pos, const Elm* data) {
+    return isTombstoneType(fetchElm(data, pos)->data.m_type);
+  }
+
   bool isTombstone(ssize_t pos) const {
     assert(size_t(pos) <= m_used);
-    return isTombstone(data()[pos].data.m_type);
+    return isTombstone(pos, data());
   }
 
   bool hasTombstones() const { return m_size != m_used; }
@@ -771,8 +818,8 @@ class BaseMap : public ExtCollectionObjectData {
   int32_t* findForNewInsert(size_t h0) const;
   int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
 
-  void update(int64_t h, TypedValue* data);
-  void update(StringData* key, TypedValue* data);
+  void update(int64_t h, const TypedValue* data);
+  void update(StringData* key, const TypedValue* data);
 
   void erase(int32_t* pos);
   void eraseNoCompact(int32_t* pos);
@@ -797,25 +844,36 @@ class BaseMap : public ExtCollectionObjectData {
     (*ei) = i;
     m_used = i + 1;
     ++m_size;
-    return data()[i];
+    return *fetchElm(data(), i);
+  }
+
+  static void copyElm(const Elm& frE, Elm& toE) {
+    memcpy(&toE, &frE, sizeof(Elm));
+  }
+
+  static void dupElm(const Elm& frE, Elm& toE) {
+    assert(!isTombstoneType(frE.data.m_type));
+    memcpy(&toE, &frE, sizeof(Elm));
+    if (toE.hasStrKey()) toE.skey->incRefCount();
+    tvRefcountedIncRef(&toE.data);
   }
 
  public:
   ssize_t iter_begin() const {
-    Elm* p = data();
-    auto* pLimit = fetchElm(data(), iterLimit());
-    for (; p != pLimit; ++p) {
-      if (LIKELY(!isTombstone(p->data.m_type))) return ssize_t(p);
+    const Elm* p = firstElm();
+    auto* pLimit = elmLimit();
+    if (p != pLimit) {
+      return ssize_t(p);
     }
     return 0;
   }
 
   ssize_t iter_next(ssize_t pos) const {
     if (!iter_valid(pos)) return pos;
-    auto* p = (Elm*)pos;
-    auto* pLimit = fetchElm(data(), iterLimit());
-    for (++p; p != pLimit; ++p) {
-      if (LIKELY(!isTombstone(p->data.m_type))) return ssize_t(p);
+    auto* pLimit = elmLimit();
+    auto* p = nextElm((Elm*)pos, pLimit);
+    if (p != pLimit) {
+      return ssize_t(p);
     }
     return 0;
   }
@@ -825,7 +883,7 @@ class BaseMap : public ExtCollectionObjectData {
     auto* p = (Elm*)pos;
     auto* pLimit = fetchElm(data(), -1);
     for (--p; p != pLimit; --p) {
-      if (LIKELY(!isTombstone(p->data.m_type))) return ssize_t(p);
+      if (LIKELY(!isTombstone(p))) return ssize_t(p);
     }
     return 0;
   }
@@ -847,6 +905,33 @@ class BaseMap : public ExtCollectionObjectData {
 
   bool iter_valid(ssize_t pos) const {
     return pos != 0;
+  }
+
+  uint32_t nthElmPos(size_t n) {
+    if (LIKELY(!hasTombstones())) {
+      // Fast path: Map contains no tombstones
+      return n;
+    }
+    // Slow path: Map has at least one tombstone, so we need to
+    // count forward
+    // TODO Task# 4281431: If n > m_size/2 we could get better
+    // performance by starting at the end of the buffer and
+    // walking backward.
+    if (n >= m_size) {
+      return m_used;
+    }
+    uint32_t pos = 0;
+    for (;;) {
+      while (isTombstone(pos)) {
+        assert(pos + 1 < m_used);
+        ++pos;
+      }
+      if (n <= 0) break;
+      --n;
+      assert(pos + 1 < m_used);
+      ++pos;
+    }
+    return pos;
   }
 
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
@@ -959,6 +1044,11 @@ class BaseMap : public ExtCollectionObjectData {
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_skipWhile(const Variant& fn);
 
+  template<class TMap>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, Object>::type
+  php_slice(const Variant& start, const Variant& len);
+
   template<class TVector>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, Object>::type
@@ -1030,6 +1120,7 @@ class c_Map : public BaseMap {
   Object t_takewhile(const Variant& callback);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_slice(const Variant& start, const Variant& len);
   Object t_concat(const Variant& iterable);
   Variant t_firstvalue();
   Variant t_firstkey();
@@ -1082,6 +1173,7 @@ class c_ImmMap : public BaseMap {
   Object t_takewhile(const Variant& callback);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_slice(const Variant& start, const Variant& len);
   Object t_concat(const Variant& iterable);
   Variant t_firstvalue();
   Variant t_firstkey();
@@ -1137,6 +1229,9 @@ class BaseSet : public ExtCollectionObjectData {
     // Set (e.g. after a value is deleted).
     TypedValueAux data;
 
+    inline int32_t hash() const { return data.hash(); }
+    inline int32_t probe() const { return hasInt() ? data.m_data.num : hash(); }
+
     inline bool hasStr() const { return IS_STRING_TYPE(data.m_type); }
     inline bool hasInt() const { return data.m_type == KindOfInt64; }
 
@@ -1144,16 +1239,13 @@ class BaseSet : public ExtCollectionObjectData {
       k->incRefCount();
       data.m_data.pstr = k;
       data.m_type = KindOfString;
-      data.hash() = int32_t(h) | 0x80000000;
+      data.hash() = h | STRHASH_MSB;
     }
-
     inline void setInt(int64_t k) {
       data.m_data.num = k;
       data.m_type = KindOfInt64;
-      data.hash() = int32_t(k) | 0x80000000;
+      data.hash() = 0;
     }
-
-    inline int32_t hash() const { return data.hash(); }
 
     static constexpr size_t dataOff() {
       return offsetof(Elm, data);
@@ -1204,7 +1296,8 @@ class BaseSet : public ExtCollectionObjectData {
   void freeData();
 
  protected:
-  Elm* data() const { return (Elm*)m_data; }
+  Elm* data() { return m_data; }
+  const Elm* data() const { return m_data; }
   int32_t* hashTab() const { return (int32_t*)m_hash; }
   uint32_t iterLimit() const { return m_used; }
 
@@ -1235,15 +1328,52 @@ class BaseSet : public ExtCollectionObjectData {
     static_assert(Empty == -1, "");
   }
 
-  static bool isTombstone(DataType t) {
+  inline const Elm* firstElmImpl() const {
+    const Elm* e = data();
+    const Elm* eLimit = elmLimit();
+    for (; e != eLimit && isTombstone(e); ++e) {}
+    return (Elm*)e;
+  }
+  inline Elm* firstElm() {
+    return (Elm*)firstElmImpl();
+  }
+  inline const Elm* firstElm() const {
+    return firstElmImpl();
+  }
+
+  inline Elm* elmLimit() {
+    return data() + iterLimit();
+  }
+  inline const Elm* elmLimit() const {
+    return data() + iterLimit();
+  }
+
+  inline static Elm* nextElm(Elm* e, Elm* eLimit) {
+    assert(e != eLimit);
+    for (++e; e != eLimit && isTombstone(e); ++e) {}
+    return e;
+  }
+  inline static const Elm* nextElm(const Elm* e, const Elm* eLimit) {
+    return (const Elm*)nextElm((Elm*)e, (Elm*)eLimit);
+  }
+
+  static bool isTombstoneType(DataType t) {
     assert(IS_REAL_TYPE(t) || t == KindOfInvalid);
     return t < KindOfUninit;
     static_assert(KindOfUninit == 0 && KindOfInvalid < 0, "");
   }
 
+  static bool isTombstone(const Elm* e) {
+    return isTombstoneType(e->data.m_type);
+  }
+
+  static bool isTombstone(ssize_t pos, const Elm* data) {
+    return isTombstoneType(data[pos].data.m_type);
+  }
+
   bool isTombstone(ssize_t pos) const {
     assert(size_t(pos) <= m_used);
-    return isTombstone(data()[pos].data.m_type);
+    return isTombstone(pos, data());
   }
 
   bool hasTombstones() const { return m_size != m_used; }
@@ -1274,6 +1404,7 @@ class BaseSet : public ExtCollectionObjectData {
   int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
 
   void erase(int32_t* pos);
+  void eraseNoCompact(int32_t* pos);
 
   bool isFull() { return m_used == m_cap; }
   bool isDensityTooLow() const { return (m_size < m_used / 2); }
@@ -1287,7 +1418,7 @@ class BaseSet : public ExtCollectionObjectData {
   void reserve(int64_t sz);
 
   void grow(uint32_t newCap, uint32_t newMask);
-  void compact();
+  void compactIfNecessary();
 
   BaseSet::Elm& allocElm(int32_t* ei) {
     assert(ei && !validPos(*ei) && m_size <= m_used && m_used < m_cap);
@@ -1300,22 +1431,32 @@ class BaseSet : public ExtCollectionObjectData {
 
   BaseSet::Elm& allocElmFront(int32_t* ei);
 
+  static void copyElm(const Elm& frE, Elm& toE) {
+    memcpy(&toE, &frE, sizeof(Elm));
+  }
+
+  static void dupElm(const Elm& frE, Elm& toE) {
+    assert(!isTombstoneType(frE.data.m_type));
+    memcpy(&toE, &frE, sizeof(Elm));
+    tvRefcountedIncRef(&toE.data);
+  }
+
  public:
   ssize_t iter_begin() const {
-    Elm* p = data();
-    auto* pLimit = data() + iterLimit();
-    for (; p != pLimit; ++p) {
-      if (LIKELY(!isTombstone(p->data.m_type))) return ssize_t(p);
+    const Elm* p = firstElm();
+    auto* pLimit = elmLimit();
+    if (p != pLimit) {
+      return ssize_t(p);
     }
     return 0;
   }
 
   ssize_t iter_next(ssize_t pos) const {
     if (!iter_valid(pos)) return pos;
-    auto* p = (Elm*)pos;
-    auto* pLimit = data() + iterLimit();
-    for (++p; p != pLimit; ++p) {
-      if (LIKELY(!isTombstone(p->data.m_type))) return ssize_t(p);
+    auto* pLimit = elmLimit();
+    auto* p = nextElm((Elm*)pos, pLimit);
+    if (p != pLimit) {
+      return ssize_t(p);
     }
     return 0;
   }
@@ -1325,7 +1466,7 @@ class BaseSet : public ExtCollectionObjectData {
     auto* p = (Elm*)pos;
     auto* pFirst = data();
     for (--p; p >= pFirst; --p) {
-      if (LIKELY(!isTombstone(p->data.m_type))) return ssize_t(p);
+      if (LIKELY(!isTombstone(p))) return ssize_t(p);
     }
     return 0;
   }
@@ -1342,6 +1483,33 @@ class BaseSet : public ExtCollectionObjectData {
 
   bool iter_valid(ssize_t pos) const {
     return pos != 0;
+  }
+
+  uint32_t nthElmPos(size_t n) {
+    if (LIKELY(!hasTombstones())) {
+      // Fast path: Set contains no tombstones
+      return n;
+    }
+    // Slow path: Set has at least one tombstone, so we need to
+    // count forward
+    // TODO Task# 4281431: If n > m_size/2 we could get better
+    // performance by starting at the end of the buffer and
+    // walking backward.
+    if (n >= m_size) {
+      return m_used;
+    }
+    uint32_t pos = 0;
+    for (;;) {
+      while (isTombstone(pos)) {
+        assert(pos + 1 < m_used);
+        ++pos;
+      }
+      if (n <= 0) break;
+      --n;
+      assert(pos + 1 < m_used);
+      ++pos;
+    }
+    return pos;
   }
 
  public:
@@ -1482,6 +1650,11 @@ protected:
     std::is_base_of<BaseSet, TSet>::value, Object>::type
   php_skipWhile(const Variant& fn);
 
+  template<class TSet>
+  typename std::enable_if<
+    std::is_base_of<BaseSet, TSet>::value, Object>::type
+  php_slice(const Variant& start, const Variant& len);
+
   template<class TVector>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, Object>::type
@@ -1576,6 +1749,7 @@ class c_Set : public BaseSet {
   Object t_takewhile(const Variant& callback);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_slice(const Variant& start, const Variant& len);
   Object t_concat(const Variant& iterable);
   Variant t_firstvalue();
   Variant t_lastvalue();
@@ -1624,6 +1798,7 @@ class c_ImmSet : public BaseSet {
   Object t_takewhile(const Variant& callback);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_slice(const Variant& start, const Variant& len);
   Object t_concat(const Variant& iterable);
   Variant t_firstvalue();
   Variant t_lastvalue();
@@ -1718,6 +1893,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_takewhile(const Variant& callback);
   Object t_skip(const Variant& n);
   Object t_skipwhile(const Variant& fn);
+  Object t_slice(const Variant& start, const Variant& len);
   Object t_concat(const Variant& iterable);
   Variant t_firstvalue();
   Variant t_firstkey();
@@ -1753,7 +1929,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
     }
     return &getElms()[key];
   }
-  void initAdd(TypedValue* val) {
+  void initAdd(const TypedValue* val) {
     assert(!isFullyConstructed());
     assert(val->m_type != KindOfRef);
     cellDup(*val, getElms()[m_size]);

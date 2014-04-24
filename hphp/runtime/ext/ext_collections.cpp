@@ -203,6 +203,7 @@ static std::array<TypedValue, 2> makeArgsFromVectorKeyAndValue(
 }
 
 template<class TVector, class MakeArgs>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_map(const Variant& callback, MakeArgs makeArgs) {
@@ -232,6 +233,7 @@ BaseVector::php_map(const Variant& callback, MakeArgs makeArgs) {
 }
 
 template<class TVector, class MakeArgs>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_filter(const Variant& callback, MakeArgs makeArgs) {
@@ -260,6 +262,7 @@ BaseVector::php_filter(const Variant& callback, MakeArgs makeArgs) {
 }
 
 template<class TVector>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_take(const Variant& n) {
@@ -284,6 +287,7 @@ BaseVector::php_take(const Variant& n) {
 }
 
 template<class TVector, bool checkVersion>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_takeWhile(const Variant& fn) {
@@ -314,6 +318,7 @@ BaseVector::php_takeWhile(const Variant& fn) {
 }
 
 template<class TVector>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_skip(const Variant& n) {
@@ -337,6 +342,7 @@ BaseVector::php_skip(const Variant& n) {
 }
 
 template<class TVector, bool checkVersion>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_skipWhile(const Variant& fn) {
@@ -365,6 +371,38 @@ BaseVector::php_skipWhile(const Variant& fn) {
   }
   for (; i < m_size; ++i) {
     vec->add(&m_data[i]);
+  }
+  return obj;
+}
+
+template<class TVector>
+ALWAYS_INLINE
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_slice(const Variant& start, const Variant& len) {
+  int64_t istart;
+  int64_t ilen;
+  if (!start.isInteger() || (istart = start.toInt64()) < 0) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter start must be a non-negative integer"));
+    throw e;
+  }
+  if (!len.isInteger() || (ilen = len.toInt64()) < 0) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter len must be a non-negative integer"));
+    throw e;
+  }
+  size_t skipAmt = std::min<size_t>(istart, m_size);
+  size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
+  auto* vec = NEWOBJ(TVector)();
+  Object obj = vec;
+  vec->reserve(sz);
+  vec->m_size = sz;
+  auto* e = m_data + skipAmt;
+  auto* eLimit = e + sz;
+  auto* ne = vec->m_data;
+  for (; e != eLimit; ++e, ++ne) {
+    cellDup(*e, *ne);
   }
   return obj;
 }
@@ -435,8 +473,6 @@ int64_t BaseVector::linearsearch(const Variant& search_value) {
   }
   return -1;
 }
-
-// Non PHP-land methods.
 
 bool BaseVector::OffsetIsset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
@@ -1016,6 +1052,14 @@ Object c_ImmVector::t_skipwhile(const Variant& fn) {
   return BaseVector::php_skipWhile<c_ImmVector, false>(fn);
 }
 
+Object c_Vector::t_slice(const Variant& start, const Variant& len) {
+  return BaseVector::php_slice<c_Vector>(start, len);
+}
+
+Object c_ImmVector::t_slice(const Variant& start, const Variant& len) {
+  return BaseVector::php_slice<c_ImmVector>(start, len);
+}
+
 Object c_Vector::t_concat(const Variant& iterable) {
   return BaseVector::php_concat<c_Vector>(iterable);
 }
@@ -1025,6 +1069,7 @@ Object c_ImmVector::t_concat(const Variant& iterable) {
 }
 
 template<class TVector>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_concat(const Variant& iterable) {
@@ -1129,8 +1174,8 @@ Object c_Vector::ti_fromitems(const Variant& iterable) {
   if (iterable.isNull()) return NEWOBJ(c_Vector)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  c_Vector* target;
-  Object ret = target = NEWOBJ(c_Vector)();
+  auto* target = NEWOBJ(c_Vector)();
+  Object ret = target;
   for (uint i = 0; iter; ++i, ++iter) {
     Variant v = iter.second();
     TypedValue* tv = v.asCell();
@@ -1145,8 +1190,8 @@ Object c_Vector::ti_fromarray(const Variant& arr) {
       "Parameter arr must be an array"));
     throw e;
   }
-  c_Vector* target;
-  Object ret = target = NEWOBJ(c_Vector)();
+  auto* target = NEWOBJ(c_Vector)();
+  Object ret = target;
   ArrayData* ad = arr.getArrayData();
   uint sz = ad->size();
   if (!sz) {
@@ -1502,13 +1547,11 @@ void BaseMap::freeData() {
 }
 
 void BaseMap::deleteElms() {
-  Elm* p = data();
-  Elm* pLimit = p + iterLimit();
-  for (; p != pLimit; ++p) {
-    if (isTombstone(p->data.m_type)) continue;
-    tvRefcountedDecRef(&p->data);
-    if (p->hasStrKey()) {
-      decRefStr(p->skey);
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+    tvRefcountedDecRef(&e->data);
+    if (e->hasStrKey()) {
+      decRefStr(e->skey);
     }
   }
 }
@@ -1524,14 +1567,12 @@ void c_Map::t___construct(const Variant& iterable /* = null_variant */) {
 
 Array BaseMap::php_toArray() const {
   ArrayInit ai(m_size, ArrayInit::Mixed{});
-  Elm* p = data();
-  Elm* pLimit = p + iterLimit();
-  for (; p != pLimit; ++p) {
-    if (isTombstone(p->data.m_type)) continue;
-    if (p->hasIntKey()) {
-      ai.set((int64_t)p->ikey, tvAsCVarRef(&p->data));
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+    if (e->hasIntKey()) {
+      ai.set((int64_t)e->ikey, tvAsCVarRef(&e->data));
     } else {
-      ai.set(StrNR(p->skey), tvAsCVarRef(&p->data));
+      ai.set(StrNR(e->skey), tvAsCVarRef(&e->data));
     }
   }
   return ai.toArray();
@@ -1557,18 +1598,14 @@ BaseMap::Clone(ObjectData* obj) {
   target->m_hash = (int32_t*)(target->m_data + target->m_cap);
   wordcpy(target->hashTab(), thiz->hashTab(), thiz->hashSize());
 
-  for (ssize_t i = 0; i < thiz->iterLimit(); ++i) {
-    Elm& e = thiz->data()[i];
-    Elm& te = target->data()[i];
-    if (thiz->isTombstone(e.data.m_type)) {
-      te.data.m_type = e.data.m_type;
-      continue;
+  auto* eLimit = thiz->elmLimit();
+  auto* te = target->data();
+  for (auto* e = thiz->data(); e != eLimit; ++e, ++te) {
+    if (isTombstone(e)) {
+      te->data.m_type = e->data.m_type;
+    } else {
+      dupElm(*e, *te);
     }
-    te.skey = e.skey;
-    te.data.hash() = e.data.hash();
-    if (te.hasStrKey()) te.skey->incRefCount();
-    cellDup(e.data, te.data);
-    assert(te.hash() == e.hash()); // ensure not clobbered.
   }
 
   return target;
@@ -1651,27 +1688,24 @@ Object c_ImmMap::t_items() { return php_items(); }
 Object c_Map::t_items() { return php_items(); }
 
 Object BaseMap::php_keys() const {
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
+  auto* vec = NEWOBJ(c_Vector)();
+  Object obj = vec;
   if (!m_size) {
     return obj;
   }
   vec->reserve(m_size);
-  Elm* p = data();
-  Elm* pLimit = p + iterLimit();
+  auto* e = firstElm();
+  auto* eLimit = elmLimit();
   ssize_t j = 0;
-  for (; p != pLimit; ++p) {
-    if (isTombstone(p->data.m_type)) continue;
-    if (p->hasIntKey()) {
-      vec->m_data[j].m_data.num = p->ikey;
+  for (; e != eLimit; e = nextElm(e, eLimit), ++vec->m_size, ++j) {
+    if (e->hasIntKey()) {
+      vec->m_data[j].m_data.num = e->ikey;
       vec->m_data[j].m_type = KindOfInt64;
     } else {
-      p->skey->incRefCount();
-      vec->m_data[j].m_data.pstr = p->skey;
+      e->skey->incRefCount();
+      vec->m_data[j].m_data.pstr = e->skey;
       vec->m_data[j].m_type = KindOfString;
     }
-    ++vec->m_size;
-    ++j;
   }
   return obj;
 }
@@ -1801,23 +1835,19 @@ Array c_ImmMap::t_toarray() { return php_toArray(); }
 Array c_Map::t_toarray() { return php_toArray(); }
 
 Object BaseMap::php_values() const {
-  c_Vector* target;
-  Object ret = target = NEWOBJ(c_Vector)();
+  auto* target = NEWOBJ(c_Vector)();
+  Object ret = target;
   int64_t sz = m_size;
   if (!sz) {
     return ret;
   }
-  TypedValue* vecData;
   target->m_capacity = target->m_size = sz;
-  target->m_data = vecData =
-    (TypedValue*)MM().objMallocLogged(sz * sizeof(TypedValue));
+  auto* out = (TypedValue*)MM().objMallocLogged(sz * sizeof(TypedValue));
+  target->m_data = out;
 
-  int64_t j = 0;
-  for (ssize_t i = 0; i < iterLimit(); ++i) {
-    if (isTombstone(i)) continue;
-    Elm& p = data()[i];
-    cellDup(p.data, vecData[j]);
-    ++j;
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit), ++out) {
+    cellDup(e->data, *out);
   }
   return ret;
 }
@@ -1828,13 +1858,12 @@ Object c_Map::t_values() { return php_values(); }
 
 Array BaseMap::php_toKeysArray() const {
   PackedArrayInit ai(m_size);
-  for (ssize_t i = 0; i < iterLimit(); ++i) {
-    if (isTombstone(i)) continue;
-    Elm& p = data()[i];
-    if (p.hasIntKey()) {
-      ai.append(int64_t{p.ikey});
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+    if (e->hasIntKey()) {
+      ai.append(int64_t{e->ikey});
     } else {
-      ai.append(VarNR(p.skey));
+      ai.append(VarNR(e->skey));
     }
   }
   return ai.toArray();
@@ -1846,10 +1875,9 @@ Array c_Map::t_tokeysarray() { return php_toKeysArray(); }
 
 Array BaseMap::php_toValuesArray() const {
   PackedArrayInit ai(m_size);
-  for (ssize_t i = 0; i < iterLimit(); ++i) {
-    if (isTombstone(i)) continue;
-    Elm& p = data()[i];
-    ai.append(tvAsCVarRef(&p.data));
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+    ai.append(tvAsCVarRef(&e->data));
   }
   return ai.toArray();
 }
@@ -1859,6 +1887,7 @@ Array c_ImmMap::t_tovaluesarray() { return php_toValuesArray(); }
 Array c_Map::t_tovaluesarray() { return php_toValuesArray(); }
 
 template<typename TMap>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_differenceByKey(const Variant& it) {
@@ -1872,13 +1901,12 @@ BaseMap::php_differenceByKey(const Variant& it) {
   auto ret = Object::attach(target);
   if (Collection::isMapType(obj->getCollectionType())) {
     auto mp = static_cast<BaseMap*>(obj);
-    for (uint i = 0; i < mp->iterLimit(); ++i) {
-      if (mp->isTombstone(i)) continue;
-      BaseMap::Elm& p = mp->data()[i];
-      if (p.hasIntKey()) {
-        target->remove((int64_t)p.ikey);
+    auto* eLimit = mp->elmLimit();
+    for (auto* e = mp->firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+      if (e->hasIntKey()) {
+        target->remove((int64_t)e->ikey);
       } else {
-        target->remove(p.skey);
+        target->remove(e->skey);
       }
     }
     return ret;
@@ -1928,7 +1956,7 @@ Object c_Map::t_getiterator() { return php_getIterator(); }
 
 ALWAYS_INLINE
 static std::array<TypedValue, 2> makeArgsFromMapKeyAndValue(
-  BaseMap::Elm& e) {
+  const BaseMap::Elm& e) {
   return std::array<TypedValue, 2> {{
     (e.hasIntKey() ? make_tv<KindOfInt64>(e.ikey)
      : make_tv<KindOfString>(e.skey)),
@@ -1937,7 +1965,7 @@ static std::array<TypedValue, 2> makeArgsFromMapKeyAndValue(
 }
 
 ALWAYS_INLINE
-static std::array<TypedValue, 1> makeArgsFromMapValue(BaseMap::Elm& e) {
+static std::array<TypedValue, 1> makeArgsFromMapValue(const BaseMap::Elm& e) {
   // note that this is a potentially unnecessary copy
   // that might be reinterpret_cast ed away
   // http://stackoverflow.com/questions/11205186/treat-c-cstyle-array-as-stdarray
@@ -1945,6 +1973,7 @@ static std::array<TypedValue, 1> makeArgsFromMapValue(BaseMap::Elm& e) {
 }
 
 template<typename TMap, class MakeArgs>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
@@ -1955,8 +1984,8 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
                "Parameter must be a valid callback"));
     throw e;
   }
-  TMap* mp;
-  Object obj = mp = NEWOBJ(TMap)();
+  auto* mp = NEWOBJ(TMap)();
+  Object obj = mp;
   if (!m_size) return obj;
   assert(m_used != 0);
   mp->deleteElms();
@@ -1972,25 +2001,25 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
   uint32_t used = iterLimit();
   mp->m_used = 0;
   for (uint32_t i = 0; i < used; mp->m_used = ++i) {
-    Elm& p = data()[i];
-    Elm& np = mp->data()[i];
+    const Elm& e = data()[i];
+    Elm& ne = mp->data()[i];
     if (isTombstone(i)) {
-      np.data.m_type = p.data.m_type;
+      ne.data.m_type = e.data.m_type;
       continue;
     }
-    TypedValue* tv = &np.data;
+    TypedValue* tv = &ne.data;
     int32_t version = m_version;
-    auto args = makeArgs(p);
+    auto args = makeArgs(e);
     g_context->invokeFuncFew(tv, ctx, args.size(), &(args[0]));
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
     }
-    if (p.hasStrKey()) {
-      p.skey->incRefCount();
+    if (e.hasStrKey()) {
+      e.skey->incRefCount();
     }
-    np.ikey = p.ikey;
-    np.data.hash() = p.data.hash();
+    ne.ikey = e.ikey;
+    ne.data.hash() = e.data.hash();
   }
   return obj;
 }
@@ -2012,6 +2041,7 @@ Object c_Map::t_mapwithkey(const Variant& callback) {
 }
 
 template<typename TMap, class MakeArgs>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_filter(const Variant& callback, MakeArgs makeArgs) const {
@@ -2022,27 +2052,25 @@ BaseMap::php_filter(const Variant& callback, MakeArgs makeArgs) const {
                "Parameter must be a valid callback"));
     throw e;
   }
-  TMap* mp;
-  Object obj = mp = NEWOBJ(TMap)();
+  auto* mp = NEWOBJ(TMap)();
+  Object obj = mp;
   if (!m_size) return obj;
 
-  uint32_t used = iterLimit();
-  for (uint i = 0; i < used; ++i) {
-    if (isTombstone(i)) continue;
-    Elm& p = data()[i];
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
     Variant ret;
     int32_t version = m_version;
-    auto args = makeArgs(p);
+    auto args = makeArgs(*e);
     g_context->invokeFuncFew(ret.asTypedValue(), ctx,
-                               args.size(), &(args[0]));
+                             args.size(), &(args[0]));
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
     if (!ret.toBoolean()) continue;
-    if (p.hasIntKey()) {
-      mp->update(p.ikey, &p.data);
+    if (e->hasIntKey()) {
+      mp->update(e->ikey, &e->data);
     } else {
-      mp->update(p.skey, &p.data);
+      mp->update(e->skey, &e->data);
     }
   }
   return obj;
@@ -2077,15 +2105,13 @@ Object BaseMap::php_retain(const Variant& callback, MakeArgs makeArgs) {
   auto size = m_size;
   if (!size) { return this; }
 
-  uint32_t used = iterLimit();
-  for (int32_t i = 0; i < used; ++i) {
-    if (isTombstone(i)) continue;
-    Elm& p = data()[i];
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
     Variant ret;
     int32_t version = m_version;
-    auto args = makeArgs(p);
+    auto args = makeArgs(*e);
     g_context->invokeFuncFew(ret.asTypedValue(), ctx,
-                               args.size(), &(args[0]));
+                             args.size(), &(args[0]));
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
@@ -2094,9 +2120,9 @@ Object BaseMap::php_retain(const Variant& callback, MakeArgs makeArgs) {
     // checking version above allows us to defer compaction, since we
     // know that no operations that mutate internal state have been
     // allowed to happen inside this loop other than this erase
-    int32_t* pos = (p.hasIntKey()
-                    ? findForInsert(p.ikey)
-                    : findForInsert(p.skey, p.skey->hash()));
+    int32_t* pos = (e->hasIntKey()
+                    ? findForInsert(e->ikey)
+                    : findForInsert(e->skey, e->skey->hash()));
     eraseNoCompact(pos);
   }
   assert(m_size <= size);
@@ -2113,13 +2139,14 @@ Object c_Map::t_retainwithkey(const Variant& callback) {
 }
 
 template<typename TMap>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_zip(const Variant& iterable) const {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  TMap* mp;
-  Object obj = mp = NEWOBJ(TMap)();
+  auto* mp = NEWOBJ(TMap)();
+  Object obj = mp;
   if (!m_size) {
     return obj;
   }
@@ -2127,19 +2154,19 @@ BaseMap::php_zip(const Variant& iterable) const {
   uint used = iterLimit();
   for (uint i = 0; i < used && iter; ++i) {
     if (isTombstone(i)) continue;
-    Elm& p = data()[i];
+    const Elm& e = data()[i];
     Variant v = iter.second();
-    c_Pair* pair;
-    Object pairObj = pair = NEWOBJ(c_Pair)();
-    pair->initAdd(&p.data);
+    auto* pair = NEWOBJ(c_Pair)();
+    Object pairObj = pair;
+    pair->initAdd(&e.data);
     pair->initAdd(cvarToCell(&v));
     TypedValue tv;
     tv.m_data.pobj = pair;
     tv.m_type = KindOfObject;
-    if (p.hasIntKey()) {
-      mp->update(p.ikey, &tv);
+    if (e.hasIntKey()) {
+      mp->update(e.ikey, &tv);
     } else {
-      mp->update(p.skey, &tv);
+      mp->update(e.skey, &tv);
     }
     ++iter;
   }
@@ -2155,6 +2182,7 @@ Object c_Map::t_zip(const Variant& iterable) {
 }
 
 template<class TMap>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_take(const Variant& n) {
@@ -2182,23 +2210,19 @@ BaseMap::php_take(const Variant& n) {
   auto table = mp->hashTab();
   auto mask = mp->m_tableMask;
   for (uint32_t frPos = 0, toPos = 0; toPos < sz; ++toPos, ++frPos) {
-    while (isTombstone(m_data[frPos].data.m_type)) {
+    while (isTombstone(frPos)) {
       assert(frPos + 1 < m_used);
       ++frPos;
     }
     auto& toE = mp->m_data[toPos];
-    toE.skey = m_data[frPos].skey;
-    toE.data.hash() = m_data[frPos].data.hash();
-    if (toE.hasStrKey()) toE.skey->incRefCount();
-    cellDup(m_data[frPos].data, toE.data);
-    auto ie = findForNewInsert(table, mask,
-                               toE.hasIntKey() ? toE.ikey : toE.hash());
-    *ie = toPos;
+    dupElm(m_data[frPos], toE);
+    *findForNewInsert(table, mask, toE.probe()) = toPos;
   }
   return obj;
 }
 
 template<class TMap, bool checkVersion>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_takeWhile(const Variant& fn) {
@@ -2212,31 +2236,30 @@ BaseMap::php_takeWhile(const Variant& fn) {
   auto* mp = NEWOBJ(TMap)();
   Object obj = mp;
   if (!m_size) return obj;
-  uint32_t used = iterLimit();
-  for (uint i = 0; i < used; ++i) {
-    if (isTombstone(i)) continue;
-    Elm& p = data()[i];
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
     Variant ret;
     if (checkVersion) {
       int32_t version = m_version;
-      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e->data);
       if (UNLIKELY(version != m_version)) {
         throw_collection_modified();
       }
     } else {
-      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e->data);
     }
     if (!ret.toBoolean()) continue;
-    if (p.hasIntKey()) {
-      mp->update(p.ikey, &p.data);
+    if (e->hasIntKey()) {
+      mp->update(e->ikey, &e->data);
     } else {
-      mp->update(p.skey, &p.data);
+      mp->update(e->skey, &e->data);
     }
   }
   return obj;
 }
 
 template<class TMap>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_skip(const Variant& n) {
@@ -2262,43 +2285,23 @@ BaseMap::php_skip(const Variant& n) {
   assert(sz);
   mp->reserve(sz);
   mp->m_size = mp->m_used = sz;
-  uint32_t frPos;
-  if (LIKELY(!hasTombstones())) {
-    // Fast path: Map contains no tombstones
-    frPos = len;
-  } else {
-    // Slow path: Map has at least one tombstone, so we need to
-    // count forward
-    frPos = 0;
-    while (len > 0) {
-      while (isTombstone(m_data[frPos].data.m_type)) {
-        assert(frPos + 1 < m_used);
-        ++frPos;
-      }
-      --len;
-      ++frPos;
-    }
-  }
+  uint32_t frPos = nthElmPos(len);
   auto table = mp->hashTab();
   auto mask = mp->m_tableMask;
   for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
-    while (isTombstone(m_data[frPos].data.m_type)) {
+    while (isTombstone(frPos)) {
       assert(frPos + 1 < m_used);
       ++frPos;
     }
     auto& toE = mp->m_data[toPos];
-    toE.skey = m_data[frPos].skey;
-    toE.data.hash() = m_data[frPos].data.hash();
-    if (toE.hasStrKey()) toE.skey->incRefCount();
-    cellDup(m_data[frPos].data, toE.data);
-    auto ie = findForNewInsert(table, mask,
-                               toE.hasIntKey() ? toE.ikey : toE.hash());
-    *ie = toPos;
+    dupElm(m_data[frPos], toE);
+    *findForNewInsert(table, mask, toE.probe()) = toPos;
   }
   return obj;
 }
 
 template<class TMap, bool checkVersion>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_skipWhile(const Variant& fn) {
@@ -2312,31 +2315,65 @@ BaseMap::php_skipWhile(const Variant& fn) {
   auto* mp = NEWOBJ(TMap)();
   Object obj = mp;
   if (!m_size) return obj;
-  uint32_t used = iterLimit();
-  uint i = 0;
-  for (; i < used; ++i) {
-    if (isTombstone(i)) continue;
-    Elm& p = data()[i];
+  auto* eLimit = elmLimit();
+  auto* e = firstElm();
+  for (; e != eLimit; e = nextElm(e, eLimit)) {
     Variant ret;
     if (checkVersion) {
       int32_t version = m_version;
-      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e->data);
       if (UNLIKELY(version != m_version)) {
         throw_collection_modified();
       }
     } else {
-      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e->data);
     }
     if (!ret.toBoolean()) break;
   }
-  for (; i < used; ++i) {
-    if (isTombstone(i)) continue;
-    Elm& p = data()[i];
-    if (p.hasIntKey()) {
-      mp->update(p.ikey, &p.data);
+  for (; e != eLimit; e = nextElm(e, eLimit)) {
+    if (e->hasIntKey()) {
+      mp->update(e->ikey, &e->data);
     } else {
-      mp->update(p.skey, &p.data);
+      mp->update(e->skey, &e->data);
     }
+  }
+  return obj;
+}
+
+template<class TMap>
+ALWAYS_INLINE
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, Object>::type
+BaseMap::php_slice(const Variant& start, const Variant& len) {
+  int64_t istart;
+  int64_t ilen;
+  if (!start.isInteger() || (istart = start.toInt64()) < 0) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter start must be a non-negative integer"));
+    throw e;
+  }
+  if (!len.isInteger() || (ilen = len.toInt64()) < 0) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter len must be a non-negative integer"));
+    throw e;
+  }
+  size_t skipAmt = std::min<size_t>(istart, m_size);
+  size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
+  auto* mp = NEWOBJ(TMap)();
+  Object obj = mp;
+  mp->reserve(sz);
+  mp->m_size = mp->m_used = sz;
+  uint32_t frPos = nthElmPos(skipAmt);
+  auto table = mp->hashTab();
+  auto mask = mp->m_tableMask;
+  for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
+    while (isTombstone(frPos)) {
+      assert(frPos + 1 < m_used);
+      ++frPos;
+    }
+    auto& toE = mp->m_data[toPos];
+    dupElm(m_data[frPos], toE);
+    *findForNewInsert(table, mask, toE.probe()) = toPos;
   }
   return obj;
 }
@@ -2373,6 +2410,14 @@ Object c_ImmMap::t_skipwhile(const Variant& fn) {
   return BaseMap::php_skipWhile<c_ImmMap, false>(fn);
 }
 
+Object c_Map::t_slice(const Variant& start, const Variant& len) {
+  return BaseMap::php_slice<c_Map>(start, len);
+}
+
+Object c_ImmMap::t_slice(const Variant& start, const Variant& len) {
+  return BaseMap::php_slice<c_ImmMap>(start, len);
+}
+
 Object c_Map::t_concat(const Variant& iterable) {
   return BaseMap::php_concat<c_Vector>(iterable);
 }
@@ -2382,6 +2427,7 @@ Object c_ImmMap::t_concat(const Variant& iterable) {
 }
 
 template<class TVector>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseMap::php_concat(const Variant& iterable) {
@@ -2419,12 +2465,9 @@ Variant c_ImmMap::t_firstvalue() {
 
 Variant BaseMap::php_firstValue() {
   if (!m_size) return uninit_null();
-  uint32_t pos = 0;
-  while (isTombstone(m_data[pos].data.m_type)) {
-    assert(pos + 1 < m_used);
-    ++pos;
-  }
-  return tvAsCVarRef(&m_data[pos].data);
+  auto* e = firstElm();
+  assert(e != elmLimit());
+  return tvAsCVarRef(&e->data);
 }
 
 Variant c_Map::t_firstkey() {
@@ -2437,15 +2480,12 @@ Variant c_ImmMap::t_firstkey() {
 
 Variant BaseMap::php_firstKey() {
   if (!m_size) return uninit_null();
-  uint32_t pos = 0;
-  while (isTombstone(m_data[pos].data.m_type)) {
-    assert(pos + 1 < m_used);
-    ++pos;
-  }
-  if (m_data[pos].hasIntKey()) {
-    return m_data[pos].ikey;
+  auto* e = firstElm();
+  assert(e != elmLimit());
+  if (e->hasIntKey()) {
+    return e->ikey;
   } else {
-    return m_data[pos].skey;
+    return e->skey;
   }
 }
 
@@ -2459,8 +2499,12 @@ Variant c_ImmMap::t_lastvalue() {
 
 Variant BaseMap::php_lastValue() {
   if (!m_size) return uninit_null();
+  // TODO Task# 4281431: If nthElmPos(n) is optimized to
+  // walk backward from the end when n > m_size/2, then
+  // we could use that here instead of having to use a
+  // manual while loop.
   uint32_t pos = iterLimit() - 1;
-  while (isTombstone(m_data[pos].data.m_type)) {
+  while (isTombstone(pos)) {
     assert(pos > 0);
     --pos;
   }
@@ -2477,8 +2521,12 @@ Variant c_ImmMap::t_lastkey() {
 
 Variant BaseMap::php_lastKey() {
   if (!m_size) return uninit_null();
+  // TODO Task# 4281431: If nthElmPos(n) is optimized to
+  // walk backward from the end when n > m_size/2, then
+  // we could use that here instead of having to use a
+  // manual while loop.
   uint32_t pos = iterLimit() - 1;
-  while (isTombstone(m_data[pos].data.m_type)) {
+  while (isTombstone(pos)) {
     assert(pos > 0);
     --pos;
   }
@@ -2490,14 +2538,15 @@ Variant BaseMap::php_lastKey() {
 }
 
 template<typename TMap>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_mapFromIterable(const Variant& iterable) {
   if (iterable.isNull()) return NEWOBJ(TMap)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  TMap* target;
-  Object ret = target = NEWOBJ(TMap)();
+  auto* target = NEWOBJ(TMap)();
+  Object ret = target;
   if (sz) {
     target->reserve(sz);
   }
@@ -2535,6 +2584,7 @@ Object c_Map::ti_fromitems(const Variant& iterable) {
 }
 
 template<typename TMap>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_mapFromArray(const Variant& arr) {
@@ -2543,8 +2593,8 @@ BaseMap::php_mapFromArray(const Variant& arr) {
       "Parameter arr must be an array"));
     throw e;
   }
-  TMap* mp;
-  Object ret = mp = NEWOBJ(TMap)();
+  auto* mp = NEWOBJ(TMap)();
+  Object ret = mp;
   ArrayData* ad = arr.getArrayData();
   for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
@@ -2573,8 +2623,8 @@ collectionDeepCopyBaseMap(TMap* mp) {
   uint used = mp->iterLimit();
   for (uint32_t i = 0; i < used; ++i) {
     if (mp->isTombstone(i)) continue;
-    BaseMap::Elm* p = &mp->data()[i];
-    collectionDeepCopyTV(&p->data);
+    auto* e = &mp->data()[i];
+    collectionDeepCopyTV(&e->data);
   }
   return o.detach();
 }
@@ -2641,7 +2691,7 @@ TypedValue* BaseMap::at(int64_t key) const {
   if (UNLIKELY(p == Empty)) {
     throwOOB(key);
   }
-  return &data()[p].data;
+  return (TypedValue*)&fetchElm(data(), p)->data;
 }
 
 TypedValue* BaseMap::at(StringData* key) const {
@@ -2649,7 +2699,7 @@ TypedValue* BaseMap::at(StringData* key) const {
   if (UNLIKELY(p == Empty)) {
     throwOOB(key);
   }
-  return &data()[p].data;
+  return (TypedValue*)&fetchElm(data(), p)->data;
 }
 
 TypedValue* BaseMap::get(int64_t key) const {
@@ -2657,7 +2707,7 @@ TypedValue* BaseMap::get(int64_t key) const {
   if (p == Empty) {
     return nullptr;
   }
-  return &data()[p].data;
+  return (TypedValue*)&fetchElm(data(), p)->data;
 }
 
 TypedValue* BaseMap::get(StringData* key) const {
@@ -2665,7 +2715,7 @@ TypedValue* BaseMap::get(StringData* key) const {
   if (p == Empty) {
     return nullptr;
   }
-  return &data()[p].data;
+  return (TypedValue*)&fetchElm(data(), p)->data;
 }
 
 void BaseMap::add(TypedValue* val) {
@@ -2692,10 +2742,10 @@ void BaseMap::add(TypedValue* val) {
 Variant BaseMap::pop() {
   if (m_size) {
     ++m_version;
-    Elm* e = data() + iterLimit() - 1;
+    auto* e = elmLimit() - 1;
     for (;; --e) {
       assert(e >= data());
-      if (!isTombstone(e->data.m_type)) break;
+      if (!isTombstone(e)) break;
     }
     Variant ret = tvAsCVarRef(&e->data);
     int32_t* ei;
@@ -2717,10 +2767,10 @@ Variant BaseMap::pop() {
 Variant BaseMap::popFront() {
   if (m_size) {
     ++m_version;
-    Elm* e = data();
+    auto* e = data();
     for (;; ++e) {
-      assert(e != data() + iterLimit());
-      if (!isTombstone(e->data.m_type)) break;
+      assert(e != elmLimit());
+      if (!isTombstone(e)) break;
     }
     Variant ret = tvAsCVarRef(&e->data);
     int32_t* ei;
@@ -2770,7 +2820,7 @@ static bool hitStringKey(const BaseMap::Elm& e, const StringData* s,
   // entry that it always sets it to refer to a valid element. Likewise when
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
-  assert(!BaseMap::isTombstone(e.data.m_type));
+  assert(!BaseMap::isTombstone(&e));
   return hash == e.hash() && (s == e.skey || s->same(e.skey));
 }
 
@@ -2780,7 +2830,7 @@ static bool hitIntKey(const BaseMap::Elm& e, int64_t ki) {
   // entry that it always sets it to refer to a valid element. Likewise when
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
-  assert(!BaseMap::isTombstone(e.data.m_type));
+  assert(!BaseMap::isTombstone(&e));
   return e.ikey == ki && e.hasIntKey();
 }
 
@@ -2800,7 +2850,7 @@ ssize_t BaseMap::findImpl(size_t h0, Hit hit) const {
   auto* hashtable = hashTab();
   for (size_t probeIndex = h0, i = 1;; ++i) {
     ssize_t pos = hashtable[probeIndex & tableMask];
-    if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
+    if ((validPos(pos) && hit(*fetchElm(elms, pos))) || pos == Empty) {
       return pos;
     }
     probeIndex += i;
@@ -2834,7 +2884,7 @@ int32_t* BaseMap::findForInsertImpl(size_t h0, Hit hit) const {
     auto ei = &hashtable[probe & mask];
     ssize_t pos = *ei;
     if (validPos(pos)) {
-      if (hit(elms[pos])) {
+      if (hit(*fetchElm(elms, pos))) {
         return ei;
       }
     } else {
@@ -2878,13 +2928,13 @@ int32_t* BaseMap::findForNewInsert(size_t h0) const {
   return findForNewInsert(hashTab(), m_tableMask, h0);
 }
 
-void BaseMap::update(int64_t h, TypedValue* val) {
+void BaseMap::update(int64_t h, const TypedValue* val) {
   assert(val->m_type != KindOfRef);
 retry:
   auto* p = findForInsert(h);
   assert(p);
   if (validPos(*p)) {
-    auto& e = data()[*p];
+    auto& e = *fetchElm(data(), *p);
     DataType oldType = e.data.m_type;
     uint64_t oldDatum = e.data.m_data.num;
     cellDup(*val, e.data);
@@ -2903,14 +2953,14 @@ retry:
   ++m_version;
 }
 
-void BaseMap::update(StringData* key, TypedValue* val) {
+void BaseMap::update(StringData* key, const TypedValue* val) {
   assert(val->m_type != KindOfRef);
   strhash_t h = key->hash();
 retry:
   auto* p = findForInsert(key, h);
   assert(p);
   if (validPos(*p)) {
-    auto& e = data()[*p];
+    auto& e = *fetchElm(data(), *p);
     DataType oldType = e.data.m_type;
     uint64_t oldDatum = e.data.m_data.num;
     cellDup(*val, e.data);
@@ -2932,8 +2982,8 @@ retry:
 void BaseMap::eraseNoCompact(int32_t* pos) {
   assert(validPos(*pos) && !isTombstone(*pos));
   assert(data());
-  Elm* elms = data();
-  auto& e = elms[*pos];
+  auto* elms = data();
+  auto& e = *fetchElm(elms, *pos);
   // Mark the hash slot as a tombstone.
   *pos = Tombstone;
   // Decref the key if it's a string.
@@ -3016,15 +3066,13 @@ void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
   m_tableMask = newMask;
   initHash(table, newHashSize);
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
-    while (isTombstone(oldData[frPos].data.m_type)) {
+    while (isTombstone(frPos, oldData)) {
       assert(frPos + 1 < m_used);
       ++frPos;
     }
     auto& toE = data[toPos];
-    toE = oldData[frPos];
-    auto ie = findForNewInsert(table, newMask,
-                               toE.hasIntKey() ? toE.ikey : toE.hash());
-    *ie = toPos;
+    copyElm(oldData[frPos], toE);
+    *findForNewInsert(table, newMask, toE.probe()) = toPos;
   }
   if (oldData) {
     MM().objFreeLogged(
@@ -3043,17 +3091,15 @@ void BaseMap::compactIfNecessary() {
   auto table = hashTab();
   initHash(table, tableSize);
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
-    while (isTombstone(elms[frPos].data.m_type)) {
+    while (isTombstone(frPos, elms)) {
       assert(frPos + 1 < m_used);
       ++frPos;
     }
     auto& toE = elms[toPos];
     if (toPos != frPos) {
-      toE = elms[frPos];
+      copyElm(elms[frPos], toE);
     }
-    auto ie = findForNewInsert(table, mask,
-                               toE.hasIntKey() ? toE.ikey : toE.hash());
-    *ie = toPos;
+    *findForNewInsert(table, mask, toE.probe()) = toPos;
   }
   m_used = m_size;
 }
@@ -3112,13 +3158,13 @@ BaseMap::SortFlavor BaseMap::preSort(const AccessorT& acc, bool checkTypes) {
     // No need to loop over the elements, we're done
     return GenericSort;
   }
-  Elm* start = data();
-  Elm* end = data() + m_used;
+  auto* start = data();
+  auto* end = data() + m_used;
   bool allInts UNUSED = true;
   bool allStrs UNUSED = true;
   for (;;) {
     if (checkTypes) {
-      while (!isTombstone(start->data.m_type)) {
+      while (!isTombstone(start)) {
         allInts = (allInts && acc.isInt(*start));
         allStrs = (allStrs && acc.isStr(*start));
         ++start;
@@ -3127,7 +3173,7 @@ BaseMap::SortFlavor BaseMap::preSort(const AccessorT& acc, bool checkTypes) {
         }
       }
     } else {
-      while (!isTombstone(start->data.m_type)) {
+      while (!isTombstone(start)) {
         ++start;
         if (start == end) {
           goto done;
@@ -3138,13 +3184,13 @@ BaseMap::SortFlavor BaseMap::preSort(const AccessorT& acc, bool checkTypes) {
     if (start == end) {
       goto done;
     }
-    while (isTombstone(end->data.m_type)) {
+    while (isTombstone(end)) {
       --end;
       if (start == end) {
         goto done;
       }
     }
-    memcpy(start, end, sizeof(Elm));
+    copyElm(*end, *start);
   }
   done:
   m_used = start - data();
@@ -3169,8 +3215,7 @@ void BaseMap::postSort() {
     auto data = this->data();
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data[pos];
-      auto ei = findForNewInsert(table, mask,
-                                 e.hasIntKey() ? e.ikey : e.hash());
+      auto ei = findForNewInsert(table, mask, e.probe());
       *ei = pos;
     }
   }
@@ -3372,16 +3417,16 @@ bool BaseMap::Equals(EqualityFlavor eq,
       // matches that of == on two PHP (associative) arrays.
       for (uint i = 0; i < mp1->iterLimit(); ++i) {
         if (mp1->isTombstone(i)) continue;
-        BaseMap::Elm& p = mp1->data()[i];
+        const BaseMap::Elm& e = mp1->data()[i];
         TypedValue* tv2;
-        if (p.hasIntKey()) {
-          tv2 = mp2->get(p.ikey);
+        if (e.hasIntKey()) {
+          tv2 = mp2->get(e.ikey);
         } else {
-          assert(p.hasStrKey());
-          tv2 = mp2->get(p.skey);
+          assert(e.hasStrKey());
+          tv2 = mp2->get(e.skey);
         }
         if (!tv2) return false;
-        if (!equal(tvAsCVarRef(&p.data), tvAsCVarRef(tv2))) return false;
+        if (!equal(tvAsCVarRef(&e.data), tvAsCVarRef(tv2))) return false;
       }
       return true;
     }
@@ -3402,21 +3447,21 @@ bool BaseMap::Equals(EqualityFlavor eq,
           continue;
         }
 
-        BaseMap::Elm& p1 = mp1->data()[ix1];
-        BaseMap::Elm& p2 = mp2->data()[ix2];
+        const BaseMap::Elm& e1 = mp1->data()[ix1];
+        const BaseMap::Elm& e2 = mp2->data()[ix2];
 
-        if (p1.hasIntKey()) {
-          if (!p2.hasIntKey() ||
-              p1.ikey != p2.ikey) {
+        if (e1.hasIntKey()) {
+          if (!e2.hasIntKey() ||
+              e1.ikey != e2.ikey) {
             return false;
           }
         } else {
-          assert(p1.hasStrKey());
-          if (!p2.hasStrKey() || !equal(p1.skey, p2.skey)) {
+          assert(e1.hasStrKey());
+          if (!e2.hasStrKey() || !equal(e1.skey, e2.skey)) {
             return false;
           }
         }
-        if (!equal(tvAsCVarRef(&p1.data), tvAsCVarRef(&p2.data))) {
+        if (!equal(tvAsCVarRef(&e1.data), tvAsCVarRef(&e2.data))) {
           return false;
         }
 
@@ -3653,10 +3698,10 @@ void BaseSet::addFront(StringData *key) {
 Variant BaseSet::pop() {
   if (m_size) {
     ++m_version;
-    Elm* e = data() + iterLimit() - 1;
+    auto* e = elmLimit() - 1;
     for (;; --e) {
       assert(e >= data());
-      if (!isTombstone(e->data.m_type)) break;
+      if (!isTombstone(e)) break;
     }
     Variant ret = tvAsCVarRef(&e->data);
     int32_t* ei;
@@ -3678,10 +3723,10 @@ Variant BaseSet::pop() {
 Variant BaseSet::popFront() {
   if (m_size) {
     ++m_version;
-    Elm* e = data();
+    auto* e = data();
     for (;; ++e) {
-      assert(e != data() + iterLimit());
-      if (!isTombstone(e->data.m_type)) break;
+      assert(e != elmLimit());
+      if (!isTombstone(e)) break;
     }
     Variant ret = tvAsCVarRef(&e->data);
     int32_t* ei;
@@ -3771,15 +3816,13 @@ void BaseSet::grow(uint32_t newCap, uint32_t newMask) {
   m_tableMask = newMask;
   initHash(table, newHashSize);
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
-    while (isTombstone(oldData[frPos].data.m_type)) {
+    while (isTombstone(frPos, oldData)) {
       assert(frPos + 1 < m_used);
       ++frPos;
     }
     auto& toE = data[toPos];
-    toE = oldData[frPos];
-    auto ie = findForNewInsert(table, newMask,
-            toE.hasInt() ? toE.data.m_data.num : toE.data.m_data.pstr->hash());
-    *ie = toPos;
+    copyElm(oldData[frPos], toE);
+    *findForNewInsert(table, newMask, toE.probe()) = toPos;
   }
   if (oldData) {
     MM().objFreeLogged(
@@ -3789,7 +3832,8 @@ void BaseSet::grow(uint32_t newCap, uint32_t newMask) {
   m_used = m_size;
 }
 
-void BaseSet::compact() {
+void BaseSet::compactIfNecessary() {
+  if (!isDensityTooLow()) { return; }
   auto* elms = data();
   assert(elms);
   auto mask = m_tableMask;
@@ -3797,17 +3841,15 @@ void BaseSet::compact() {
   auto table = hashTab();
   initHash(table, tableSize);
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
-    while (isTombstone(elms[frPos].data.m_type)) {
+    while (isTombstone(frPos, elms)) {
       assert(frPos + 1 < m_used);
       ++frPos;
     }
     auto& toE = elms[toPos];
     if (toPos != frPos) {
-      toE = elms[frPos];
+      copyElm(elms[frPos], toE);
     }
-    auto ie = findForNewInsert(table, mask,
-            toE.hasInt() ? toE.data.m_data.num : toE.data.m_data.pstr->hash());
-    *ie = toPos;
+    *findForNewInsert(table, mask, toE.probe()) = toPos;
   }
   m_used = m_size;
 }
@@ -3826,17 +3868,13 @@ bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto st2 = static_cast<const BaseSet*>(obj2);
   if (st1->m_size != st2->m_size) return false;
 
-  Elm* p = st1->data();
-  Elm* pLimit = p + st1->iterLimit();
-  for (; p != pLimit; ++p) {
-    if (isTombstone(p->data.m_type)) continue;
-    if (p->hasInt()) {
-      int64_t key = p->data.m_data.num;
-      if (!st2->contains(key)) return false;
+  auto* eLimit = st1->elmLimit();
+  for (auto* e = st1->firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+    if (e->hasInt()) {
+      if (!st2->contains(e->data.m_data.num)) return false;
     } else {
-      assert(p->hasStr());
-      StringData* key = p->data.m_data.pstr;
-      if (!st2->contains(key)) return false;
+      assert(e->hasStr());
+      if (!st2->contains(e->data.m_data.pstr)) return false;
     }
   }
   return true;
@@ -3912,20 +3950,15 @@ BaseSet::Clone(ObjectData* obj) {
   for (ssize_t i = 0; i < thiz->iterLimit(); ++i) {
     Elm& e = thiz->data()[i];
     Elm& te = target->data()[i];
-    if (thiz->isTombstone(e.data.m_type)) {
+    if (isTombstone(&e)) {
       te.data.m_type = e.data.m_type;
-      continue;
+    } else {
+      dupElm(e, te);
     }
-    te.data.hash() = e.data.hash();
-    cellDup(e.data, te.data);
-    if (te.hasStr()) te.data.m_data.pstr->incRefCount();
-    assert(te.hash() == e.hash()); // ensure not clobbered.
   }
 
   return target;
 }
-
-// Protected (PHP-accesible methods)
 
 void BaseSet::php_construct(const Variant& iterable /* = null_variant */) {
   if (iterable.isNull()) return;
@@ -3987,11 +4020,9 @@ Object BaseSet::php_remove(const Variant& key) {
 
 Array BaseSet::php_toValuesArray() {
   PackedArrayInit ai(m_size);
-  Elm* p = data();
-  Elm* pLimit = p + iterLimit();
-  for (; p != pLimit; ++p) {
-    if (isTombstone(p->data.m_type)) continue;
-    ai.append(tvAsCVarRef(&p->data));
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+    ai.append(tvAsCVarRef(&e->data));
   }
   return ai.toArray();
 }
@@ -4005,6 +4036,7 @@ Object BaseSet::php_getIterator() {
 }
 
 template<class TSet>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_map(const Variant& callback) {
@@ -4015,16 +4047,14 @@ BaseSet::php_map(const Variant& callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  TSet* st;
-  Object obj = st = NEWOBJ(TSet)();
+  auto* st = NEWOBJ(TSet)();
+  Object obj = st;
   if (!m_size) return obj;
-  Elm* p = data();
-  Elm* pLimit = p + iterLimit();
-  for (; p != pLimit; ++p) {
-    if (isTombstone(p->data.m_type)) continue;
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
     TypedValue tvCbRet;
     int32_t pVer = m_version;
-    g_context->invokeFuncFew(&tvCbRet, ctx, 1, &p->data);
+    g_context->invokeFuncFew(&tvCbRet, ctx, 1, &e->data);
     // Now that tvCbRet is live, make sure to decref even if we throw.
     SCOPE_EXIT { tvRefcountedDecRef(&tvCbRet); };
     if (UNLIKELY(m_version != pVer)) throw_collection_modified();
@@ -4034,6 +4064,7 @@ BaseSet::php_map(const Variant& callback) {
 }
 
 template<class TSet>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_filter(const Variant& callback) {
@@ -4044,31 +4075,30 @@ BaseSet::php_filter(const Variant& callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  TSet* st;
-  Object obj = st = NEWOBJ(TSet)();
+  auto* st = NEWOBJ(TSet)();
+  Object obj = st;
   if (!m_size) return obj;
-  Elm* p = data();
-  Elm* pLimit = p + iterLimit();
-  for (; p != pLimit; ++p) {
-    if (isTombstone(p->data.m_type)) continue;
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
     Variant ret;
     int32_t version = m_version;
-    g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p->data);
+    g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e->data);
     if (UNLIKELY(version != m_version)) {
       throw_collection_modified();
     }
     if (!ret.toBoolean()) continue;
-    if (p->hasInt()) {
-      st->add(p->data.m_data.num);
+    if (e->hasInt()) {
+      st->add(e->data.m_data.num);
     } else {
-      assert(p->hasStr());
-      st->add(p->data.m_data.pstr);
+      assert(e->hasStr());
+      st->add(e->data.m_data.pstr);
     }
   }
   return obj;
 }
 
 template<class TSet>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_zip(const Variant& iterable) {
@@ -4085,6 +4115,7 @@ BaseSet::php_zip(const Variant& iterable) {
 }
 
 template<class TSet>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_take(const Variant& n) {
@@ -4112,21 +4143,19 @@ BaseSet::php_take(const Variant& n) {
   auto table = st->hashTab();
   auto mask = st->m_tableMask;
   for (uint32_t frPos = 0, toPos = 0; toPos < sz; ++toPos, ++frPos) {
-    while (isTombstone(m_data[frPos].data.m_type)) {
+    while (isTombstone(frPos)) {
       assert(frPos + 1 < m_used);
       ++frPos;
     }
     auto& toE = st->m_data[toPos];
-    toE.data.hash() = m_data[frPos].data.hash();
-    cellDup(m_data[frPos].data, toE.data);
-    auto ie = findForNewInsert(table, mask,
-            toE.hasInt() ? toE.data.m_data.num : toE.data.m_data.pstr->hash());
-    *ie = toPos;
+    dupElm(m_data[frPos], toE);
+    *findForNewInsert(table, mask, toE.probe()) = toPos;
   }
   return obj;
 }
 
 template<class TSet, bool checkVersion>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_takeWhile(const Variant& fn) {
@@ -4143,29 +4172,30 @@ BaseSet::php_takeWhile(const Variant& fn) {
   uint32_t used = iterLimit();
   for (uint i = 0; i < used; ++i) {
     if (isTombstone(i)) continue;
-    Elm& p = data()[i];
+    Elm& e = data()[i];
     Variant ret;
     if (checkVersion) {
       int32_t version = m_version;
-      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e.data);
       if (UNLIKELY(version != m_version)) {
         throw_collection_modified();
       }
     } else {
-      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e.data);
     }
     if (!ret.toBoolean()) continue;
-    if (p.hasInt()) {
-      st->add(p.data.m_data.num);
+    if (e.hasInt()) {
+      st->add(e.data.m_data.num);
     } else {
-      assert(p.hasStr());
-      st->add(p.data.m_data.pstr);
+      assert(e.hasStr());
+      st->add(e.data.m_data.pstr);
     }
   }
   return obj;
 }
 
 template<class TSet>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_skip(const Variant& n) {
@@ -4191,41 +4221,23 @@ BaseSet::php_skip(const Variant& n) {
   assert(sz);
   st->reserve(sz);
   st->m_size = st->m_used = sz;
-  uint32_t frPos;
-  if (LIKELY(!hasTombstones())) {
-    // Fast path: Set contains no tombstones
-    frPos = len;
-  } else {
-    // Slow path: Set has at least one tombstone, so we need to
-    // count forward
-    frPos = 0;
-    while (len > 0) {
-      while (isTombstone(m_data[frPos].data.m_type)) {
-        assert(frPos + 1 < m_used);
-        ++frPos;
-      }
-      --len;
-      ++frPos;
-    }
-  }
+  uint32_t frPos = nthElmPos(len);
   auto table = st->hashTab();
   auto mask = st->m_tableMask;
   for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
-    while (isTombstone(m_data[frPos].data.m_type)) {
+    while (isTombstone(frPos)) {
       assert(frPos + 1 < m_used);
       ++frPos;
     }
     auto& toE = st->m_data[toPos];
-    toE.data.hash() = m_data[frPos].data.hash();
-    cellDup(m_data[frPos].data, toE.data);
-    auto ie = findForNewInsert(table, mask,
-            toE.hasInt() ? toE.data.m_data.num : toE.data.m_data.pstr->hash());
-    *ie = toPos;
+    dupElm(m_data[frPos], toE);
+    *findForNewInsert(table, mask, toE.probe()) = toPos;
   }
   return obj;
 }
 
 template<class TSet, bool checkVersion>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_skipWhile(const Variant& fn) {
@@ -4243,41 +4255,80 @@ BaseSet::php_skipWhile(const Variant& fn) {
   uint i = 0;
   for (; i < used; ++i) {
     if (isTombstone(i)) continue;
-    Elm& p = data()[i];
+    Elm& e = data()[i];
     Variant ret;
     if (checkVersion) {
       int32_t version = m_version;
-      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e.data);
       if (UNLIKELY(version != m_version)) {
         throw_collection_modified();
       }
     } else {
-      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+      g_context->invokeFuncFew(ret.asTypedValue(), ctx, 1, &e.data);
     }
     if (!ret.toBoolean()) break;
   }
   for (; i < used; ++i) {
     if (isTombstone(i)) continue;
-    Elm& p = data()[i];
-    if (p.hasInt()) {
-      st->add(p.data.m_data.num);
+    Elm& e = data()[i];
+    if (e.hasInt()) {
+      st->add(e.data.m_data.num);
     } else {
-      assert(p.hasStr());
-      st->add(p.data.m_data.pstr);
+      assert(e.hasStr());
+      st->add(e.data.m_data.pstr);
     }
   }
   return obj;
 }
 
 template<class TSet>
+ALWAYS_INLINE
+typename std::enable_if<
+  std::is_base_of<BaseSet, TSet>::value, Object>::type
+BaseSet::php_slice(const Variant& start, const Variant& len) {
+  int64_t istart;
+  int64_t ilen;
+  if (!start.isInteger() || (istart = start.toInt64()) < 0) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter start must be a non-negative integer"));
+    throw e;
+  }
+  if (!len.isInteger() || (ilen = len.toInt64()) < 0) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter len must be a non-negative integer"));
+    throw e;
+  }
+  size_t skipAmt = std::min<size_t>(istart, m_size);
+  size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
+  auto* st = NEWOBJ(TSet)();
+  Object obj = st;
+  st->reserve(sz);
+  st->m_size = st->m_used = sz;
+  uint32_t frPos = nthElmPos(skipAmt);
+  auto table = st->hashTab();
+  auto mask = st->m_tableMask;
+  for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
+    while (isTombstone(frPos)) {
+      assert(frPos + 1 < m_used);
+      ++frPos;
+    }
+    auto& toE = st->m_data[toPos];
+    dupElm(m_data[frPos], toE);
+    *findForNewInsert(table, mask, toE.probe()) = toPos;
+  }
+  return obj;
+}
+
+template<class TSet>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromItems(const Variant& iterable) {
   if (iterable.isNull()) return NEWOBJ(TSet)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  TSet* target;
-  Object ret = target = NEWOBJ(TSet)();
+  auto* target = NEWOBJ(TSet)();
+  Object ret = target;
   for (; iter; ++iter) {
     Variant v = iter.second();
     if (v.isInteger()) {
@@ -4292,6 +4343,7 @@ BaseSet::php_fromItems(const Variant& iterable) {
 }
 
 template<class TSet>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromArray(const Variant& arr) {
@@ -4300,8 +4352,8 @@ BaseSet::php_fromArray(const Variant& arr) {
       "Parameter arr must be an array"));
     throw e;
   }
-  TSet* st;
-  Object ret = st = NEWOBJ(TSet)();
+  auto* st = NEWOBJ(TSet)();
+  Object ret = st;
   ArrayData* ad = arr.getArrayData();
   for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
@@ -4318,11 +4370,12 @@ BaseSet::php_fromArray(const Variant& arr) {
 }
 
 template<class TSet>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
-  TSet* st;
-  Object ret = st = NEWOBJ(TSet)();
+  auto* st = NEWOBJ(TSet)();
+  Object ret = st;
   for (ArrayIter iter(_argv); iter; ++iter) {
     Variant arr = iter.second();
     if (!arr.isArray()) {
@@ -4366,11 +4419,9 @@ void BaseSet::freeData() {
 }
 
 void BaseSet::deleteElms() {
-  Elm* p = data();
-  Elm* pLimit = p + iterLimit();
-  for (; p != pLimit; ++p) {
-    if (isTombstone(p->data.m_type)) continue;
-    tvRefcountedDecRef(&p->data);
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+    tvRefcountedDecRef(&e->data);
   }
 }
 
@@ -4380,18 +4431,16 @@ NEVER_INLINE
 void BaseSet::warnOnStrIntDup() const {
   smart::hash_set<int64_t> seenVals;
 
-  Elm* p = data();
-  Elm* pLimit = p + iterLimit();
-  for (; p != pLimit; ++p) {
-    if (isTombstone(p->data.m_type)) continue;
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
     int64_t newVal = 0;
 
-    if (p->hasInt()) {
-      newVal = p->data.m_data.num;
+    if (e->hasInt()) {
+      newVal = e->data.m_data.num;
     } else {
-      assert(p->hasStr());
+      assert(e->hasStr());
       // isStriclyInteger() puts the int value in newVal as a side effect.
-      if (!p->data.m_data.pstr->isStrictlyInteger(newVal)) continue;
+      if (!e->data.m_data.pstr->isStrictlyInteger(newVal)) continue;
     }
 
     if (seenVals.find(newVal) != seenVals.end()) {
@@ -4412,15 +4461,13 @@ void BaseSet::warnOnStrIntDup() const {
 
 Array BaseSet::toArrayImpl() const {
   ArrayInit ai(m_size, ArrayInit::Mixed{});
-  Elm* p = data();
-  Elm* pLimit = p + iterLimit();
-  for (; p != pLimit; ++p) {
-    if (isTombstone(p->data.m_type)) continue;
-    if (p->hasInt()) {
-      ai.set(p->data.m_data.num, tvAsCVarRef(&p->data));
+  auto* eLimit = elmLimit();
+  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
+    if (e->hasInt()) {
+      ai.set(e->data.m_data.num, tvAsCVarRef(&e->data));
     } else {
-      assert(p->hasStr());
-      ai.set(p->data.m_data.pstr, tvAsCVarRef(&p->data));
+      assert(e->hasStr());
+      ai.set(e->data.m_data.pstr, tvAsCVarRef(&e->data));
     }
   }
 
@@ -4477,7 +4524,7 @@ static bool hitString(const BaseSet::Elm& e, const StringData* s,
   // entry that it always sets it to refer to a valid element. Likewise when
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
-  assert(!BaseSet::isTombstone(e.data.m_type));
+  assert(!BaseSet::isTombstone(&e));
   return hash == e.hash() && e.hasStr() &&
          (s == e.data.m_data.pstr || s->same(e.data.m_data.pstr));
 }
@@ -4488,7 +4535,7 @@ static bool hitInt(const BaseSet::Elm& e, int64_t ki) {
   // entry that it always sets it to refer to a valid element. Likewise when
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
-  assert(!BaseSet::isTombstone(e.data.m_type));
+  assert(!BaseSet::isTombstone(&e));
   return e.hasInt() && e.data.m_data.num == ki;
 }
 
@@ -4586,10 +4633,10 @@ int32_t* BaseSet::findForNewInsert(size_t h0) const {
   return findForNewInsert(hashTab(), m_tableMask, h0);
 }
 
-void BaseSet::erase(int32_t* pos) {
+void BaseSet::eraseNoCompact(int32_t* pos) {
   assert(validPos(*pos) && !isTombstone(*pos));
   assert(data());
-  Elm* elms = data();
+  auto* elms = data();
   auto& e = elms[*pos];
   // Mark the hash slot as a tombstone.
   *pos = Tombstone;
@@ -4605,12 +4652,14 @@ void BaseSet::erase(int32_t* pos) {
   assert(m_used <= m_cap);
   // Finally, decref the old value
   tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+void BaseSet::erase(int32_t* pos) {
+  eraseNoCompact(pos);
   // Compact in order to keep elms from being overly sparse. Other parts
   // of Set's implementation rely on the fact that erase() does not allow
   // the Elm density to drop below ~50%.
-  if (isDensityTooLow()) {
-    compact();
-  }
+  compactIfNecessary();
 }
 
 void BaseSet::throwBadValueType() {
@@ -4730,6 +4779,14 @@ Object c_ImmSet::t_skipwhile(const Variant& fn) {
   return BaseSet::php_skipWhile<c_ImmSet, false>(fn);
 }
 
+Object c_Set::t_slice(const Variant& start, const Variant& len) {
+  return BaseSet::php_slice<c_Set>(start, len);
+}
+
+Object c_ImmSet::t_slice(const Variant& start, const Variant& len) {
+  return BaseSet::php_slice<c_ImmSet>(start, len);
+}
+
 Object c_Set::t_concat(const Variant& iterable) {
   return BaseSet::php_concat<c_Vector>(iterable);
 }
@@ -4739,6 +4796,7 @@ Object c_ImmSet::t_concat(const Variant& iterable) {
 }
 
 template<class TVector>
+ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseSet::php_concat(const Variant& iterable) {
@@ -4776,12 +4834,9 @@ Variant c_ImmSet::t_firstvalue() {
 
 Variant BaseSet::php_firstValue() {
   if (!m_size) return uninit_null();
-  uint32_t pos = 0;
-  while (isTombstone(m_data[pos].data.m_type)) {
-    assert(pos + 1 < m_used);
-    ++pos;
-  }
-  return tvAsCVarRef(&m_data[pos].data);
+  auto* e = firstElm();
+  assert(e != elmLimit());
+  return tvAsCVarRef(&e->data);
 }
 
 Variant c_Set::t_lastvalue() {
@@ -4794,8 +4849,12 @@ Variant c_ImmSet::t_lastvalue() {
 
 Variant BaseSet::php_lastValue() {
   if (!m_size) return uninit_null();
+  // TODO Task# 4281431: If nthElmPos(n) is optimized to
+  // walk backward from the end when n > m_size/2, then
+  // we could use that here instead of having to use a
+  // manual while loop.
   uint32_t pos = iterLimit() - 1;
-  while (isTombstone(m_data[pos].data.m_type)) {
+  while (isTombstone(pos)) {
     assert(pos > 0);
     --pos;
   }
@@ -5302,6 +5361,31 @@ Object c_Pair::t_skipwhile(const Variant& fn) {
   }
   for (; i < 2; ++i) {
     vec->add(&getElms()[i]);
+  }
+  return obj;
+}
+
+Object c_Pair::t_slice(const Variant& start, const Variant& len) {
+  int64_t istart;
+  int64_t ilen;
+  if (!start.isInteger() || (istart = start.toInt64()) < 0) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter start must be a non-negative integer"));
+    throw e;
+  }
+  if (!len.isInteger() || (ilen = len.toInt64()) < 0) {
+    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+      "Parameter len must be a non-negative integer"));
+    throw e;
+  }
+  size_t skipAmt = std::min<size_t>(istart, 2);
+  size_t sz = std::min<size_t>(ilen, size_t(2) - skipAmt);
+  auto* vec = NEWOBJ(c_ImmVector)();
+  Object obj = vec;
+  vec->reserve(sz);
+  vec->m_size = sz;
+  for (size_t i = 0; i < sz; ++i) {
+    cellDup(getElms()[i + skipAmt], vec->m_data[i]);
   }
   return obj;
 }

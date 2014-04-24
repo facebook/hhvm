@@ -1338,11 +1338,8 @@ void HhbcTranslator::MInstrTranslator::emitCGetProp() {
   if (propInfo.offset != -1 &&
       !mightCallMagicPropMethod(None, knownCls, propInfo)) {
     emitPropSpecialized(MIA_warn, propInfo);
-    bool const hhbbcRepo = RuntimeOption::RepoAuthoritative &&
-                             Repo::get().global().UsedHHBBC;
-    if (!hhbbcRepo) {
-      // For hphpc we always need to unbox, since it gives some types
-      // ignoring refiness.
+
+    if (!RuntimeOption::RepoAuthoritative) {
       SSATmp* cellPtr = gen(UnboxPtr, m_base);
       m_result = gen(LdMem, Type::Cell, cellPtr, cns(0));
       gen(IncRef, m_result);

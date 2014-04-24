@@ -4072,10 +4072,7 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
     auto const cls = ssaCls->clsVal();
 
     auto const repoTy = [&] {
-      if (!RuntimeOption::RepoAuthoritative ||
-          !Repo::get().global().UsedHHBBC) {
-        return RepoAuthType{};
-      }
+      if (!RuntimeOption::RepoAuthoritative) return RepoAuthType{};
       auto const slot = cls->lookupSProp(ssaName->strVal());
       return cls->staticPropRepoAuthType(slot);
     }();

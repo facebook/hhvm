@@ -1040,7 +1040,7 @@ TypedValue* ObjectData::getProp(Class* ctx, const StringData* key,
     }
 
     if (debug) {
-      if (RuntimeOption::RepoAuthoritative && Repo::get().global().UsedHHBBC) {
+      if (RuntimeOption::RepoAuthoritative) {
         auto const repoTy = m_cls->declPropRepoAuthType(propInd);
         always_assert(tvMatchesRepoAuthType(*prop, repoTy));
       }

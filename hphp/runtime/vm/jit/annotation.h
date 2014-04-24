@@ -18,16 +18,20 @@
 
 #include "hphp/runtime/vm/jit/translator.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace JIT {
+
+//////////////////////////////////////////////////////////////////////
 
 /*
- * The annotation module is opaque to most of the translator, and maintains
- * per-instruction state that persists across tracelets.
+ * Note: the current name of this module/function is historical.  It
+ * use to record cross-tracelet global information ("annotations") to
+ * help bind call targets.  Now this information comes from static
+ * analysis in FCallD opcodes.
  */
 void annotate(NormalizedInstruction* instr);
-const StringData* fcallToFuncName(const NormalizedInstruction* fcall);
 
-} }
+//////////////////////////////////////////////////////////////////////
+
+}}
 
 #endif

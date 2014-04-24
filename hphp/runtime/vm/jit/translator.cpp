@@ -695,7 +695,11 @@ predictOutputs(const NormalizedInstruction* ni) {
     pred = predictMVec(ni);
   }
   if (pred.second < kAccept) {
-    if (const StringData* invName = fcallToFuncName(ni)) {
+    const StringData* const invName
+      = ni->op() == Op::FCallD
+        ? ni->m_unit->lookupLitstrId(ni->imm[2].u_SA)
+        : nullptr;
+    if (invName) {
       pred = predictType(TypeProfileKey(TypeProfileKey::MethodName, invName));
       FTRACE(1, "prediction for methods named {}: {}, {:.2}\n",
              invName->data(),

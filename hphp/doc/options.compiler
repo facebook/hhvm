@@ -6,6 +6,13 @@ This documentation describes what's available for both of them.
 
 When in doubt, look for how these options are parsed in compiler/options.cpp.
 
+= UseHHBBC
+
+Default is true. Determines whether whole-program optimizations should
+performed on the bytecode using hhbbc as part of the hphp run. When
+false, you can still separately run hhbbc on the repo that hphp
+produces (useful for development on hhbbc itself).
+
 = AllDynamic
 
 Default is false. When turned on, all functions and methods can be invoked

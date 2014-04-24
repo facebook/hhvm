@@ -4,22 +4,16 @@ HHBBC: HipHop Bytecode to Bytecode Compiler
 Overview
 --------
 
-This directory contains a rough, work-in-progress bytecode optimizer
-for HHBC.  It's not close to production-ready (if you're wondering
-whether you should try to use it, the answer is no).
-
-This is a short document to hopefully give an overview that makes it
-easier to understand the code.
+This directory contains a bytecode-level optimizer for HHBC.  This is
+a short document to hopefully give an overview that makes it easier to
+understand the code.
 
 Right now this is optionally hooked into the hphpc emitter code in
 compiler/analysis/emitter, and uses UnitEmitters as both input and
-output.  The HHBBC::single_unit entry point takes one UnitEmitter and
-produces a hopefully better one.  The HHBBC::whole_program entry point
-takes a set of UnitEmitters and returns a new set.
-
-At some later point we may add a main() function for HHBBC, so it can
-run as a standalone program that operates on an already-compiled hhbc
-repo.
+output.  The HHBBC::whole_program entry point takes a set of
+UnitEmitters and returns a new set.  You can also run it as a
+standalone program by passing --hhbbc to hhvm, or running hhvm with
+argv[0] as 'hhbbc' (e.g. via a symlink).
 
 HHBBC Entry Points
 ------------------

@@ -85,7 +85,6 @@ private:
   bool m_blockFinished;
   IRTranslator m_irTrans;
   HhbcTranslator& m_ht;
-  Unit::MetaHandle m_metaHand;
   smart::vector<ActRecState> m_arStates;
   RefDeps m_refDeps;
   const int m_inlineDepth;
@@ -193,7 +192,6 @@ RegionDescPtr RegionFormer::go() {
       m_curBlock->setInlinedCallee(callee);
       m_ht.beginInlining(m_inst.imm[0].u_IVA, callee, returnFuncOff,
                          doPrediction ? m_inst.outPred : Type::Gen);
-      m_metaHand = Unit::MetaHandle();
 
       m_sk = m_ht.curSrcKey();
       m_blockFinished = true;
@@ -218,7 +216,6 @@ RegionDescPtr RegionFormer::go() {
     if (inlineReturn) {
       // If we just translated an inlined RetC, grab the updated SrcKey from
       // m_ht and clean up.
-      m_metaHand = Unit::MetaHandle();
       m_sk = m_ht.curSrcKey().advanced(curUnit());
       m_arStates.pop_back();
       m_blockFinished = true;
@@ -276,7 +273,6 @@ bool RegionFormer::prepareInstruction() {
   m_inst.changesPC = opcodeChangesPC(m_inst.op());
   m_inst.funcd = m_arStates.back().knownFunc();
   populateImmediates(m_inst);
-  preInputApplyMetaData(m_metaHand, &m_inst);
   m_ht.setBcOff(m_sk.offset(), false);
 
   InputInfos inputInfos;
@@ -293,16 +289,15 @@ bool RegionFormer::prepareInstruction() {
   };
 
   for (auto const& ii : inputInfos) m_inst.inputs.push_back(newDynLoc(ii));
-  try {
-    readMetaData(m_metaHand, m_inst, m_ht, m_profiling);
-  } catch (const FailedTraceGen& exn) {
-    FTRACE(1, "failed to apply metadata for {}: {}\n",
-           m_inst, exn.what());
-    return false;
+
+  // This may not be necessary, but for now it's preserving
+  // side-effects that the call to readMetaData used to have.
+  if (isAlwaysNop(m_inst.op())) {
+    m_inst.noOp = true;
   }
 
-  // This reads valueClass from the inputs so it needs to happen after
-  // readMetaData.
+  // This reads valueClass from the inputs so it used to need to
+  // happen after readMetaData.  But now readMetaData is gone ...
   if (inliningDepth() == 0) annotate(&m_inst);
 
   // Check all the inputs for unknown values.

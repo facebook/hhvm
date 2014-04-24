@@ -39,11 +39,9 @@
 
 namespace HPHP { namespace Compiler {
 
-class MetaInfoBuilder;
-
 class Peephole {
 public:
-  Peephole(UnitEmitter& ue, MetaInfoBuilder& metaInfo);
+  explicit Peephole(UnitEmitter& ue);
 
 private:
   void buildFuncTargets(FuncEmitter* fe);

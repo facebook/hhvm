@@ -1954,14 +1954,12 @@ MCGenerator::translateTracelet(Tracelet& t) {
     }();
 
     Timer irGenTimer(Timer::translateTracelet_irGeneration);
-    Unit::MetaHandle metaHand;
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
          ni = ni->next) {
       ht.setBcOff(ni->source.offset(),
                   ni->breaksTracelet && !ht.isInlining());
-      readMetaData(metaHand, *ni, m_tx.irTrans()->hhbcTrans(),
-                   m_tx.mode() == TransProfile, MetaMode::Legacy);
+      if (isAlwaysNop(ni->op())) ni->noOp = true;
 
       try {
         SKTRACE(1, ni->source, "HHIR: translateInstr\n");

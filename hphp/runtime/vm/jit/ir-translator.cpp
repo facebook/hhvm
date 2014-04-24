@@ -752,10 +752,13 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
         m_hhbcTrans.profileInlineFunctionShape(traceletShape(*i.calleeTrace));
       }
 
-      Unit::MetaHandle metaHand;
-      for (auto* ni = i.calleeTrace->m_instrStream.first;
-           ni; ni = ni->next) {
-        readMetaData(metaHand, *ni, m_hhbcTrans, false, MetaMode::Legacy);
+      for (auto* ni = i.calleeTrace->m_instrStream.first; ni; ni = ni->next) {
+        if (isAlwaysNop(ni->op())) {
+          // This might not be necessary---but for now it's preserving
+          // side effects of the call to readMetaData that used to
+          // exist here.
+          ni->noOp = true;
+        }
         translateInstr(*ni);
       }
       return;

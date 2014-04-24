@@ -317,100 +317,6 @@ struct Unit {
   typedef hphp_hash_map<const Class*, Func*,
                         pointer_hash<Class> > PseudoMainCacheMap;
 
-  class MetaInfo {
-   public:
-    enum class Kind {
-      None,
-      Class,
-
-      /*
-       * Marks types that are proven to be a particular type by static
-       * analysis.  Guards are not needed in these cases.
-       */
-      DataTypeInferred,
-
-      /*
-       * Marks types that are predicted by static analysis.  Guards
-       * will still be needed in case the prediction is wrong.
-       */
-      DataTypePredicted,
-
-      GuardedThis,
-      GuardedCls,
-
-      /*
-       * Information about the known class of a property base in the
-       * middle of a vector instruction.
-       *
-       * In this case, m_arg is the index of the member code for the
-       * relevant property dim.  (Unlike other cases, m_arg is not an
-       * index into the instruction inputs in NormalizedInstruction.)
-       *
-       * Whatever the base is when processing that member code will be
-       * an object of the supplied class type (or a null).
-       */
-      MVecPropClass,
-    };
-
-    /*
-     * This flag is used to mark that m_arg is an index into an
-     * MVector input list.  (We need to know this so we can bump the
-     * indexes different amounts depending on the instruction type;
-     * see applyInputMetaData.)
-     */
-    static const int VectorArg = 1 << 7;
-
-    MetaInfo(Kind k, int a, Id d) : m_kind(k), m_arg(a), m_data(d) {
-      assert((int)m_arg == a);
-    }
-    MetaInfo() : m_kind(Kind::None), m_arg(-1), m_data(0) {}
-
-    /*
-     * m_arg indicates which input the MetaInfo applies to.
-     *
-     * For instructions taking vector immediates, it is an index into
-     * the immediate elements, excluding any MW members (and including
-     * the base).  (This is currently even if the instruction takes
-     * other stack arguments.)
-     */
-    Kind  m_kind;
-    uint8_t m_arg;
-    Id    m_data;
-  };
-
-  class MetaHandle {
-    /*
-      The meta-data in Unit::m_bc_meta is stored as:
-
-      Offset     <num entries>
-      Offset     byte-code-offset-1
-      Offset     byte-code-offset-2
-      ...
-      Offset     byte-code_offset-n
-      Offset     INT_MAX # sentinel
-      Offset     data-offset-1
-      Offset     data-offset-2
-      ...
-      Offset     data-offset-n
-      Offset     m_bc_meta_len # sentinel
-      uint8      m_kind1
-      uint8      m_arg1
-      VSI        m_data1
-      ...
-      uint8      m_kind-n
-      uint8      m_arg-n
-      VSI        m_data-n
-    */
-   public:
-    MetaHandle() : index(nullptr), cur(0) {}
-    bool findMeta(const Unit* unit, Offset offset);
-    bool nextArg(MetaInfo& info);
-   private:
-    const Offset* index;
-    unsigned cur;
-    const uint8_t *ptr;
-  };
-
   Unit();
   ~Unit();
   void* operator new(size_t sz);
@@ -773,8 +679,6 @@ private:
   */
 
   int64_t m_sn{-1};
-  unsigned char const* m_bc_meta{nullptr};
-  size_t m_bc_meta_len{0};
   const StringData* m_dirpath{nullptr};
   MD5 m_md5;
   std::vector<NamedEntityPair> m_namedInfo;
@@ -810,7 +714,6 @@ class UnitEmitter {
   const unsigned char* bc() const { return m_bc; }
   Offset bcPos() const { return (Offset)m_bclen; }
   void setBc(const unsigned char* bc, size_t bclen);
-  void setBcMeta(const unsigned char* bc_meta, size_t bc_meta_len);
   const StringData* getFilepath() const { return m_filepath; }
   void setFilepath(const StringData* filepath) { m_filepath = filepath; }
   void setMainReturn(const TypedValue* v) { m_mainReturn = *v; }
@@ -934,8 +837,6 @@ class UnitEmitter {
   size_t m_bcmax;
   unsigned char* m_bc;
   size_t m_bclen;
-  unsigned char* m_bc_meta;
-  size_t m_bc_meta_len;
   TypedValue m_mainReturn;
   const StringData* m_filepath;
   MD5 m_md5;
@@ -1054,11 +955,13 @@ class UnitRepoProxy : public RepoProxy {
   class InsertUnitStmt : public RepoProxy::Stmt {
    public:
     InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t& unitSn, const MD5& md5,
+    void insert(RepoTxn& txn,
+                int64_t& unitSn,
+                const MD5& md5,
                 const unsigned char* bc,
-                size_t bclen, const unsigned char* bc_meta,
-                size_t bc_meta_len,
-                const TypedValue* mainReturn, bool mergeOnly,
+                size_t bclen,
+                const TypedValue* mainReturn,
+                bool mergeOnly,
                 const LineTable& lines,
                 const std::vector<TypeAlias>&);
   };

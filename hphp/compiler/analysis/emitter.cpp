@@ -1912,90 +1912,6 @@ void EmitterVisitor::unregisterControlTarget(ControlTarget* t) {
 }
 
 //=============================================================================
-
-void MetaInfoBuilder::add(int pos, Unit::MetaInfo::Kind kind,
-                          bool mVector, int arg, Id data) {
-  assert(arg >= 0);
-  if (arg > 127) return;
-  if (mVector) arg |= Unit::MetaInfo::VectorArg;
-  Vec& info = m_metaMap[pos];
-  int i = info.size();
-  if (kind == Unit::MetaInfo::Kind::DataTypeInferred ||
-      kind == Unit::MetaInfo::Kind::DataTypePredicted) {
-    // Put DataType first, because if applyInputMetaData saw Class
-    // first, it would call recordRead which mark the input as
-    // needing a guard before we saw the DataType
-    i = 0;
-  }
-  info.insert(info.begin() + i, Unit::MetaInfo(kind, arg, data));
-}
-
-void MetaInfoBuilder::addKnownDataType(DataType dt,
-                                       bool     dtPredicted,
-                                       int      pos,
-                                       bool     mVector,
-                                       int      arg) {
-  if (dt != KindOfUnknown) {
-    Unit::MetaInfo::Kind dtKind = (dtPredicted ?
-                                   Unit::MetaInfo::Kind::DataTypePredicted :
-                                   Unit::MetaInfo::Kind::DataTypeInferred);
-    add(pos, dtKind, mVector, arg, dt);
-  }
-}
-
-void MetaInfoBuilder::deleteInfo(Offset bcOffset) {
-  m_metaMap.erase(bcOffset);
-}
-
-void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
-  int entries = m_metaMap.size();
-  if (!entries) return;
-
-  vector<Offset> index1;
-  vector<Offset> index2;
-  vector<uint8_t> data;
-  index1.push_back(entries);
-
-  size_t sz1 = (2 + entries) * sizeof(Offset);
-  size_t sz2 = (1 + entries) * sizeof(Offset);
-  for (Map::const_iterator it = m_metaMap.begin(), end = m_metaMap.end();
-      it != end; ++it) {
-    index1.push_back(it->first);
-    index2.push_back(sz1 + sz2 + data.size());
-
-    const Vec& v = it->second;
-    assert(v.size());
-    for (unsigned i = 0; i < v.size(); i++) {
-      const Unit::MetaInfo& mi = v[i];
-      data.push_back(static_cast<uint8_t>(mi.m_kind));
-      data.push_back(mi.m_arg);
-      if (mi.m_data < 0x80) {
-        data.push_back(mi.m_data << 1);
-      } else {
-        union {
-          uint32_t val;
-          uint8_t  bytes[4];
-        } u;
-        u.val = (mi.m_data << 1) | 1;
-        for (int j = 0; j < 4; j++) {
-          data.push_back(u.bytes[j]);
-        }
-      }
-    }
-  }
-  index1.push_back(INT_MAX);
-  index2.push_back(sz1 + sz2 + data.size());
-
-  size_t size = sz1 + sz2 + data.size();
-  uint8_t* meta = (uint8_t*)malloc(size);
-  memcpy(meta, &index1[0], sz1);
-  memcpy(meta + sz1, &index2[0], sz2);
-  memcpy(meta + sz1 + sz2, &data[0], data.size());
-  target.setBcMeta(meta, size);
-  free(meta);
-}
-
-//=============================================================================
 // EmitterVisitor.
 
 EmitterVisitor::EmittedClosures EmitterVisitor::s_emittedClosures;
@@ -2049,13 +1965,6 @@ void EmitterVisitor::popEvalStack(char expected, int arg, int pos) {
     return;
   }
 
-  if (arg >= 0 && pos >= 0 &&
-      (expected == StackSym::C || expected == StackSym::R)) {
-    m_metaInfo.addKnownDataType(m_evalStack.getKnownType(),
-                                m_evalStack.isTypePredicted(),
-                                pos, false, arg);
-  }
-
   char sym = m_evalStack.top();
   char actual = StackSym::GetSymFlavor(sym);
   m_evalStack.pop();
@@ -2092,11 +2001,6 @@ void EmitterVisitor::popSymbolicLocal(Op op, int arg, int pos) {
     }
     m_evalStack.consumeBelowTop(belowTop - 1);
   } else {
-    if (arg >= 0 && pos >= 0) {
-      m_metaInfo.addKnownDataType(m_evalStack.getKnownType(),
-                                  m_evalStack.isTypePredicted(),
-                                  pos, false, arg);
-    }
     popEvalStack(StackSym::L);
   }
 }
@@ -2693,8 +2597,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
   emitPostponedPinits();
   emitPostponedSinits();
   emitPostponedCinits();
-  Peephole peephole(m_ue, m_metaInfo);
-  m_metaInfo.setForUnit(m_ue);
+  Peephole peephole(m_ue);
 }
 
 static StringData* getClassName(ExpressionPtr e) {
@@ -3131,12 +3034,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
 
         assert(m_evalStack.size() == 1);
-
-        if (r->isGuarded()) {
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
-                      false, 0, 0);
-        }
-
         bool hasConstraint = m_curFunc->returnTypeConstraint().hasConstraint();
 
         // async functions and generators
@@ -4479,7 +4376,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         visit(om->getObject());
         m_tempLoc = om->getLocation();
         emitConvertToCell(e);
-        StringData* clsName = getClassName(om->getObject());
         ExpressionListPtr params(om->getParams());
         int numParams = params ? params->getCount() : 0;
 
@@ -4510,11 +4406,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           fpiStart = m_ue.bcPos();
           e.FPushObjMethod(numParams);
         }
-        if (clsName) {
-          Id id = m_ue.mergeLitstr(clsName);
-          m_metaInfo.add(fpiStart, Unit::MetaInfo::Kind::Class, false,
-                         useDirectForm ? 0 : 1, id);
-        }
         {
           FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
           // $obj->name(...)
@@ -4536,10 +4427,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         ExpressionPtr obj = op->getObject();
         SimpleVariablePtr sv = dynamic_pointer_cast<SimpleVariable>(obj);
         if (sv && sv->isThis() && sv->hasContext(Expression::ObjectContext)) {
-          if (sv->isGuarded()) {
-            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
-                           false, 0, 0);
-          }
           e.CheckThis();
           m_evalStack.push(StackSym::H);
         } else {
@@ -4645,10 +4532,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(node));
         if (sv->isThis()) {
           if (sv->hasContext(Expression::ObjectContext)) {
-            if (sv->isGuarded()) {
-              m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
-                             false, 0, 0);
-            }
             e.This();
           } else if (sv->getFunctionScope()->needsLocalThis()) {
             static const StringData* thisStr = makeStaticString("this");
@@ -4656,8 +4539,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             emitVirtualLocal(thisId);
           } else {
             if (sv->isGuarded()) {
-              m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
-                             false, 0, 0);
               e.This();
             } else {
               auto const subop = sv->hasContext(Expression::ExistContext)
@@ -5040,13 +4921,6 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
     char sym = m_evalStack.get(iFirst);
     char symFlavor = StackSym::GetSymFlavor(sym);
     char marker = StackSym::GetMarker(sym);
-    m_metaInfo.addKnownDataType(m_evalStack.getKnownType(iFirst),
-                                m_evalStack.isTypePredicted(iFirst),
-                                m_ue.bcPos(), true, 0);
-    if (const StringData* cls = m_evalStack.getClsName(iFirst)) {
-      Id id = m_ue.mergeLitstr(cls);
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::Class, true, 0, id);
-    }
     switch (marker) {
       case StackSym::N: {
         if (symFlavor == StackSym::C) {
@@ -5108,14 +4982,6 @@ void EmitterVisitor::buildVectorImm(std::vector<uchar>& vectorImm,
     if (const StringData* name = m_evalStack.getName(i)) {
       strid = m_ue.mergeLitstr(name);
     }
-    if (const StringData* cls = m_evalStack.getClsName(i)) {
-      const int mcodeNum = i - (iFirst + 1);
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::MVecPropClass,
-                     false, mcodeNum, m_ue.mergeLitstr(cls));
-    }
-    m_metaInfo.addKnownDataType(m_evalStack.getKnownType(i),
-                                m_evalStack.isTypePredicted(i),
-                                m_ue.bcPos(), true, i - iFirst);
 
     switch (marker) {
       case StackSym::M: {
@@ -6780,10 +6646,6 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
     loc->char0 = loc->char1-1;
     e.setTempLocation(loc);
     e.Null();
-    if ((meth->getStmts() && meth->getStmts()->isGuarded())) {
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
-                     false, 0, 0);
-    }
     e.RetC();
     e.setTempLocation(LocationPtr());
   }
@@ -7191,9 +7053,6 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       StringData* nLiteral = makeStaticString(nameStr);
       fpiStart = m_ue.bcPos();
       e.FPushClsMethodD(numParams, nLiteral, cLiteral);
-      if (node->forcedPresent()) {
-        m_metaInfo.add(fpiStart, Unit::MetaInfo::Kind::GuardedCls, false, 0, 0);
-      }
     } else {
       emitVirtualClassBase(e, node.get());
       if (!nameStr.empty()) {
@@ -8611,9 +8470,7 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     }
   }
 
-  MetaInfoBuilder metaInfo;
-  Peephole peephole(*ue, metaInfo);
-  metaInfo.setForUnit(*ue);
+  Peephole peephole(*ue);
 
   return ue;
 }

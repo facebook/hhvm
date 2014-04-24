@@ -66,16 +66,6 @@ class NormalizedInstruction {
   std::vector<MemberCode> immVecM;
 
   /*
-   * For property dims, if we know the Class* for the base when we'll
-   * be executing a given dim, it is stored here (at the index for the
-   * relevant member code minus 1, because the known class for the
-   * first member code is given by the base in inputs[]).
-   *
-   * Other entries here store null.  See MetaInfo::MVecPropClass.
-   */
-  std::vector<Class*> immVecClasses;
-
-  /*
    * On certain FCalls, we can inspect the callee and generate a
    * tracelet with information about what happens over there.
    *

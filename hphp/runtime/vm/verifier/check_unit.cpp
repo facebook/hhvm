@@ -59,14 +59,13 @@ bool checkUnit(const Unit* unit, bool verbose) {
 }
 
 // Unit contents to check:
-// 1. bc
-// 2. bc_meta
-// 3. lines
-// 4. UnitLitStr table
-// 5. UnitArray table
-// 6. UnitSourceLoc table
-// 8. Classes
-// 9. Functions
+//   o bc
+//   o lines
+//   o UnitLitStr table
+//   o UnitArray table
+//   o UnitSourceLoc table
+//   o Classes
+//   o Functions
 
 UnitChecker::UnitChecker(const Unit* unit, bool verbose)
 : m_unit(unit), m_verbose(verbose) {

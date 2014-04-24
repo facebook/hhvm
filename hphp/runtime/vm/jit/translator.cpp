@@ -398,8 +398,6 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
     baseClass = ni.inputs[baseIndex]->rtt.isObject()
       ? ni.inputs[baseIndex]->rtt.valueClass()
       : nullptr;
-  } else {
-    baseClass = ni.immVecClasses[mInd - 1];
   }
   if (!baseClass) return PropInfo();
 
@@ -1479,30 +1477,6 @@ bool outputIsPredicted(NormalizedInstruction& inst) {
   return doPrediction;
 }
 
-/*
- * For MetaData information that affects whether we want to even put a
- * value in the ni->inputs, we need to look at it before we call
- * getInputs(), so this is separate from applyInputMetaData.
- *
- * We also check GuardedThis here, since RetC is short-circuited in
- * applyInputMetaData.
- */
-void preInputApplyMetaData(Unit::MetaHandle metaHand,
-                           NormalizedInstruction* ni) {
-  if (!metaHand.findMeta(ni->unit(), ni->offset())) return;
-
-  Unit::MetaInfo info;
-  while (metaHand.nextArg(info)) {
-    switch (info.m_kind) {
-    case Unit::MetaInfo::Kind::GuardedThis:
-      ni->guardedThis = true;
-      break;
-    default:
-      break;
-    }
-  }
-}
-
 static bool isTypeAssert(Op op) {
   return op == Op::AssertTL || op == Op::AssertTStk ||
          op == Op::AssertObjL || op == Op::AssertObjStk;
@@ -1525,7 +1499,7 @@ static bool isTypePredict(Op op) {
   return op == Op::PredictTL || op == Op::PredictTStk;
 }
 
-static bool isAlwaysNop(Op op) {
+bool isAlwaysNop(Op op) {
   if (isTypeAssert(op) || isTypePredict(op)) return true;
   switch (op) {
   case Op::UnboxRNop:
@@ -1678,7 +1652,6 @@ void Translator::handleAssertionEffects(Tracelet& t,
     if (!dl->rtt.isVagueValue()) {
       /*
        * The live or tracked type disagrees with ahead of time analysis.
-       * A similar case occurs in applyInputMetaData.
        *
        * Either static analysis is wrong (bug), this was a mispredicted
        * type from warmup profiling, or the code is unreachable because
@@ -1738,194 +1711,6 @@ void Translator::handleAssertionEffects(Tracelet& t,
   dl->rtt = *assertTy;
 }
 
-bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
-                                    NormalizedInstruction* ni,
-                                    TraceletContext& tas,
-                                    InputInfos &inputInfos) {
-  if (isAlwaysNop(ni->op())) {
-    ni->noOp = true;
-    return true;
-  }
-
-  if (!metaHand.findMeta(ni->unit(), ni->offset())) return false;
-
-  Unit::MetaInfo info;
-  if (!metaHand.nextArg(info)) return false;
-
-  /*
-   * We need to adjust the indexes in MetaInfo::m_arg if this
-   * instruction takes other stack arguments than those related to the
-   * MVector.  (For example, the rhs of an assignment.)
-   */
-  const InstrInfo& iInfo = instrInfo[ni->op()];
-  if (iInfo.in & AllLocals) {
-    /*
-     * RetC/RetV dont care about their stack input, but it may have
-     * been annotated. Skip it (because RetC/RetV pretend they dont
-     * have a stack input).
-     */
-    return false;
-  }
-  if (iInfo.in == FuncdRef) {
-    /*
-     * FPassC* pretend to have no inputs
-     */
-    return false;
-  }
-  const int base = !(iInfo.in & MVector) ? 0 :
-                   !(iInfo.in & Stack1) ? 0 :
-                   !(iInfo.in & Stack2) ? 1 :
-                   !(iInfo.in & Stack3) ? 2 : 3;
-
-  do {
-    SKTRACE(3, ni->source, "considering MetaInfo of kind %d\n", info.m_kind);
-
-    int arg = info.m_arg & Unit::MetaInfo::VectorArg ?
-      base + (info.m_arg & ~Unit::MetaInfo::VectorArg) : info.m_arg;
-
-    switch (info.m_kind) {
-      case Unit::MetaInfo::Kind::GuardedCls:
-        ni->guardedCls = true;
-        break;
-      case Unit::MetaInfo::Kind::DataTypePredicted: {
-        // In TransProfile mode, disable type predictions to avoid side exits.
-        if (m_mode == TransProfile) break;
-
-        // If the original type was invalid or predicted, then use the
-        // prediction in the meta-data.
-        assert((unsigned) arg < inputInfos.size());
-
-        SKTRACE(1, ni->source, "MetaInfo DataTypePredicted for input %d; "
-                "newType = %d\n", arg, DataType(info.m_data));
-        InputInfo& ii = inputInfos[arg];
-        DynLocation* dl = tas.recordRead(ii, KindOfAny);
-        NormalizedInstruction* src = findInputSrc(tas.m_t->m_instrStream.last,
-                                                  dl);
-        if (src) {
-          // Update the rtt and mark src's output as predicted if either:
-          //  a) we don't have type information yet (ie, it's KindOfAny), or
-          //  b) src's output was predicted. This is assuming that the
-          //     front-end's prediction is more accurate.
-          if (dl->rtt.outerType() == KindOfAny || src->outputPredicted) {
-            SKTRACE(1, ni->source, "MetaInfo DataTypePredicted for input %d; "
-                    "replacing oldType = %d with newType = %d\n", arg,
-                    dl->rtt.outerType(), DataType(info.m_data));
-            dl->rtt = RuntimeType((DataType)info.m_data);
-            src->outputPredicted = true;
-            src->outputPredictionStatic = true;
-          }
-        }
-        break;
-      }
-      case Unit::MetaInfo::Kind::DataTypeInferred: {
-        assert((unsigned)arg < inputInfos.size());
-        SKTRACE(1, ni->source, "MetaInfo DataTypeInferred for input %d; "
-                   "newType = %d\n", arg, DataType(info.m_data));
-        InputInfo& ii = inputInfos[arg];
-        ii.dontGuard = true;
-        DynLocation* dl = tas.recordRead(ii, (DataType)info.m_data);
-        if (dl->rtt.outerType() != info.m_data &&
-            (!dl->isString() || info.m_data != KindOfString)) {
-          if (dl->rtt.outerType() != KindOfAny) {
-            // Either static analysis is wrong, or
-            // this was mis-predicted by the type
-            // profiler, or this code is unreachable,
-            // and there's an earlier bytecode in the tracelet
-            // thats going to fatal
-            NormalizedInstruction *src = nullptr;
-            if (tas.m_changeSet.count(dl->location)) {
-              src = findInputSrc(tas.m_t->m_instrStream.last, dl);
-              if (src && src->outputPredicted) {
-                src->outputPredicted = false;
-              } else {
-                src = nullptr;
-              }
-            }
-            if (!src) {
-              // Not a type-profiler mis-predict
-              if (tas.m_t->m_instrStream.first) {
-                // We're not the first instruction, so punt
-                // If this bytecode /is/ reachable, we'll
-                // get here again, and that time, we will
-                // be the first instruction
-                punt();
-              }
-              not_reached();
-            }
-          }
-          dl->rtt = RuntimeType((DataType)info.m_data);
-          ni->markInputInferred(arg);
-        } else {
-          /*
-           * Static inference confirmed the expected type
-           * but if the expected type was provided by the type
-           * profiler we want to clear outputPredicted to
-           * avoid unneeded guards
-           */
-          if (tas.m_changeSet.count(dl->location)) {
-            NormalizedInstruction *src =
-              findInputSrc(tas.m_t->m_instrStream.last, dl);
-            if (src->outputPredicted) {
-              src->outputPredicted = false;
-              ni->markInputInferred(arg);
-            }
-          }
-        }
-        break;
-      }
-
-      case Unit::MetaInfo::Kind::Class: {
-        assert((unsigned)arg < inputInfos.size());
-        InputInfo& ii = inputInfos[arg];
-        DynLocation* dl = tas.recordRead(ii);
-        if (dl->rtt.valueType() != KindOfObject) {
-          continue;
-        }
-
-        const StringData* metaName = ni->unit()->lookupLitstrId(info.m_data);
-        const StringData* rttName =
-          dl->rtt.valueClass() ? dl->rtt.valueClass()->name() : nullptr;
-        // The two classes might not be exactly the same, which is ok
-        // as long as metaCls is more derived than rttCls.
-        Class* metaCls = Unit::lookupUniqueClass(metaName);
-        Class* rttCls = rttName ? Unit::lookupUniqueClass(rttName) : nullptr;
-        if (metaCls && rttCls && metaCls != rttCls &&
-            !metaCls->classof(rttCls)) {
-          // Runtime type is more derived
-          metaCls = 0;
-        }
-        if (metaCls && metaCls != rttCls) {
-          SKTRACE(1, ni->source, "replacing input %d with a MetaInfo-supplied "
-                  "class of %s; old type = %s\n",
-                  arg, metaName->data(), dl->pretty().c_str());
-          if (dl->rtt.isRef()) {
-            dl->rtt = RuntimeType(KindOfRef, KindOfObject, metaCls);
-          } else {
-            dl->rtt = RuntimeType(KindOfObject, KindOfNone, metaCls);
-          }
-        }
-        break;
-      }
-
-      case Unit::MetaInfo::Kind::MVecPropClass: {
-        const StringData* metaName = ni->unit()->lookupLitstrId(info.m_data);
-        Class* metaCls = Unit::lookupUniqueClass(metaName);
-        if (metaCls) {
-          ni->immVecClasses[arg] = metaCls;
-        }
-        break;
-      }
-
-      case Unit::MetaInfo::Kind::GuardedThis:
-        // fallthrough; these are handled in preInputApplyMetaData.
-      case Unit::MetaInfo::Kind::None:
-        break;
-    }
-  } while (metaHand.nextArg(info));
-
-  return false;
-}
-
 static void addMVectorInputs(NormalizedInstruction& ni,
                              int& currentStackOffset,
                              std::vector<InputInfo>& inputs) {
@@ -1950,10 +1735,6 @@ static void addMVectorInputs(NormalizedInstruction& ni,
   /*
    * Note that we have to push as we go so that the arguments come in
    * the order expected for the M-vector.
-   *
-   * Indexes into these argument lists must also be in the same order
-   * as the information in Unit::MetaInfo, because the analysis phase
-   * may replace some of them with literals.
    */
 
   /*
@@ -2025,8 +1806,6 @@ static void addMVectorInputs(NormalizedInstruction& ni,
   if (trailingClassRef) {
     push_stack();
   }
-
-  ni.immVecClasses.resize(ni.immVecM.size());
 
   assert(stackCount == ni.immVec.numStackValues());
 
@@ -3592,7 +3371,6 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
   // numOpcodes counts the original number of opcodes in a tracelet
   // before the translator does any optimization
   t.m_numOpcodes = 0;
-  Unit::MetaHandle metaHand;
 
   for (;; sk.advance(unit)) {
   head:
@@ -3617,7 +3395,6 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       if (isTypeAssert(ni->op()) || isTypePredict(ni->op())) {
         handleAssertionEffects(t, *ni, tas, stackFrameOffset);
       }
-      preInputApplyMetaData(metaHand, ni);
       InputInfos inputInfos;
       getInputsImpl(
         t.m_sk, ni, stackFrameOffset, inputInfos, sk.func(),
@@ -3627,8 +3404,8 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
         }
       );
 
-      bool noOp = applyInputMetaData(metaHand, ni, tas, inputInfos);
-      if (noOp) {
+      if (isAlwaysNop(ni->op())) {
+        ni->noOp = true;
         t.m_instrStream.append(ni);
         ++t.m_numOpcodes;
         stackFrameOffset = oldStackFrameOffset;
@@ -3923,174 +3700,6 @@ const char* Translator::translateResultName(TranslateResult r) {
   return names[r];
 }
 
-/*
- * Similar to applyInputMetaData, but designed to be used during ir
- * generation. Reads and writes types of values using hhbcTrans. This will
- * eventually replace applyInputMetaData.
- */
-void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
-                  HhbcTranslator& hhbcTrans, bool profiling,
-                  MetaMode metaMode /* = Normal */) {
-  if (isAlwaysNop(inst.op())) {
-    inst.noOp = true;
-    return;
-  }
-
-  if (!handle.findMeta(inst.unit(), inst.offset())) return;
-
-  Unit::MetaInfo info;
-  if (!handle.nextArg(info)) return;
-
-  /*
-   * We need to adjust the indexes in MetaInfo::m_arg if this instruction takes
-   * other stack arguments than those related to the MVector.  (For example,
-   * the rhs of an assignment.)
-   */
-  auto const& iInfo = instrInfo[inst.op()];
-  if (iInfo.in & AllLocals) {
-    /*
-     * RetC/RetV dont care about their stack input, but it may have been
-     * annotated. Skip it (because RetC/RetV pretend they dont have a stack
-     * input).
-     */
-    return;
-  }
-  if (iInfo.in == FuncdRef) {
-    /*
-     * FPassC* pretend to have no inputs
-     */
-    return;
-  }
-  const int base = !(iInfo.in & MVector) ? 0 :
-                   !(iInfo.in & Stack1) ? 0 :
-                   !(iInfo.in & Stack2) ? 1 :
-                   !(iInfo.in & Stack3) ? 2 : 3;
-
-  auto stackFilter = [metaMode, &inst](Location loc) {
-    if (metaMode == MetaMode::Legacy && loc.space == Location::Stack) {
-      loc.offset = -(loc.offset + 1) + inst.stackOffset;
-    }
-    return loc;
-  };
-
-  do {
-    SKTRACE(3, inst.source, "considering MetaInfo of kind %d\n", info.m_kind);
-
-    int arg = info.m_arg & Unit::MetaInfo::VectorArg ?
-      base + (info.m_arg & ~Unit::MetaInfo::VectorArg) : info.m_arg;
-    auto updateType = [&]{
-      /* don't update input rtt for Legacy mode */
-      if (metaMode == MetaMode::Legacy) return;
-      auto& input = *inst.inputs[arg];
-      input.rtt = hhbcTrans.rttFromLocation(stackFilter(input.location));
-    };
-
-    switch (info.m_kind) {
-      case Unit::MetaInfo::Kind::GuardedCls:
-        inst.guardedCls = true;
-        break;
-      case Unit::MetaInfo::Kind::DataTypePredicted: {
-        // When we're translating a Tracelet from Translator::analyze(), the
-        // information from these predictions has been added to the
-        // NormalizedInstructions in the instruction stream, so they aren't
-        // necessary (and they caused a perf regression). HHIR guard relaxation
-        // is capable of eliminating unnecessary predictions and the
-        // information added here is valuable to it.
-        if ((metaMode == MetaMode::Legacy &&
-             !RuntimeOption::EvalHHIRRelaxGuards) || profiling) {
-          break;
-        }
-        auto const loc = stackFilter(inst.inputs[arg]->location).
-                         toLocation(inst.stackOffset);
-        auto const t = Type(DataType(info.m_data));
-        auto const offset = inst.source.offset();
-
-        // These 'predictions' mean the type is InitNull or the predicted type,
-        // so we assert InitNull | t, then guard t if the location isn't known
-        // to be null. This allows certain optimizations in the IR.
-        hhbcTrans.assertType(loc, Type::InitNull | t);
-        auto oldType = hhbcTrans.rttFromLocation(
-          stackFilter(inst.inputs[arg]->location)).valueType();
-        if (!IS_NULL_TYPE(oldType)) {
-          hhbcTrans.checkType(loc, t, offset);
-        }
-        updateType();
-        break;
-      }
-      case Unit::MetaInfo::Kind::DataTypeInferred: {
-        hhbcTrans.assertType(
-          stackFilter(inst.inputs[arg]->location).toLocation(inst.stackOffset),
-          Type(DataType(info.m_data)));
-        updateType();
-        break;
-      }
-      case Unit::MetaInfo::Kind::Class: {
-        auto& rtt = inst.inputs[arg]->rtt;
-        auto const& location = inst.inputs[arg]->location;
-
-        // We need to know the boxiness of rtt.
-        if (rtt.outerType() == KindOfAny) break;
-
-        // The previously known type may not be KindOfObject because
-        // it was relaxed.  The meta-data guarantees that the type is
-        // KindOfObject (or KindOfNull), so change rtt to KindOfObject
-        // while keeping its boxiness. Note the RuntimeType cannot
-        // express the Null possibility.  That's handled in assertClass.
-        if (rtt.valueType() != KindOfObject) {
-          RuntimeType newRtt = rtt.isRef() ?
-            RuntimeType(KindOfRef, KindOfObject) : RuntimeType(KindOfObject);;
-          SKTRACE(1, inst.source, "changing rtt from %s to %s\n",
-                  rtt.pretty().c_str(), newRtt.pretty().c_str());
-          rtt = newRtt;
-        }
-        const StringData* metaName = inst.unit()->lookupLitstrId(info.m_data);
-        const StringData* rttName =
-          rtt.valueClass() ? rtt.valueClass()->name() : nullptr;
-        // The two classes might not be exactly the same, which is ok
-        // as long as metaCls is more derived than rttCls.
-        Class* metaCls = Unit::lookupUniqueClass(metaName);
-        Class* rttCls = rttName ? Unit::lookupUniqueClass(rttName) : nullptr;
-        if (!metaCls || (rttCls && metaCls != rttCls &&
-                         !metaCls->classof(rttCls))) {
-          // Runtime type is more derived
-          metaCls = rttCls;
-        }
-        if (location.space != Location::This) {
-          hhbcTrans.assertClass(
-            stackFilter(location).toLocation(inst.stackOffset), metaCls);
-        } else {
-          assert(!metaCls || metaCls->classof(hhbcTrans.curClass()));
-        }
-        if (!metaCls) break;
-
-        if (metaCls == rttCls) break;
-        SKTRACE(1, inst.source, "replacing input %d with a MetaInfo-supplied "
-                "class of %s; old type = %s\n",
-                arg, metaName->data(), rtt.pretty().c_str());
-        if (rtt.isRef()) {
-          rtt = RuntimeType(KindOfRef, KindOfObject, metaCls);
-        } else {
-          rtt = RuntimeType(KindOfObject, KindOfNone, metaCls);
-        }
-        break;
-      }
-      case Unit::MetaInfo::Kind::MVecPropClass: {
-        const StringData* metaName = inst.unit()->lookupLitstrId(info.m_data);
-        Class* metaCls = Unit::lookupUniqueClass(metaName);
-        if (metaCls) {
-          inst.immVecClasses[arg] = metaCls;
-        }
-        break;
-      }
-
-      case Unit::MetaInfo::Kind::GuardedThis:
-        // fallthrough; these are handled in preInputApplyMetaData.
-      case Unit::MetaInfo::Kind::None:
-        break;
-    }
-  } while (handle.nextArg(info));
-}
-
 bool instrMustInterp(const NormalizedInstruction& inst) {
   if (RuntimeOption::EvalJitAlwaysInterpOne) return true;
 
@@ -4267,7 +3876,6 @@ Translator::translateRegion(const RegionDesc& region,
   for (auto b = 0; b < region.blocks.size(); b++) {
     auto const& block = region.blocks[b];
     RegionDesc::BlockId blockId = block->id();
-    Unit::MetaHandle metaHand;
     SrcKey sk = block->start();
     const Func* topFunc = nullptr;
     auto typePreds  = makeMapWalker(block->typePreds());
@@ -4366,10 +3974,6 @@ Translator::translateRegion(const RegionDesc& region,
       // this is true.
       inst.interp = toInterp.count(sk);
 
-      // Apply the first round of metadata from the repo and get a list of
-      // input locations.
-      preInputApplyMetaData(metaHand, &inst);
-
       InputInfos inputInfos;
       getInputs(startSk, inst, inputInfos, block->func(), [&](int i) {
           return ht.irBuilder().localType(i, DataTypeGeneric);
@@ -4389,10 +3993,7 @@ Translator::translateRegion(const RegionDesc& region,
       for (auto const& ii : inputInfos) {
         inst.inputs.push_back(newDynLoc(ii));
       }
-
-      // Apply the remaining metadata. This may change the types of some of
-      // inst's inputs.
-      readMetaData(metaHand, inst, ht, m_mode == TransProfile);
+      if (isAlwaysNop(inst.op())) inst.noOp = true;
       if (!inst.noOp && inputInfos.needsRefCheck) {
         assert(byRefs.hasNext(sk));
         inst.preppedByRef = byRefs.next();

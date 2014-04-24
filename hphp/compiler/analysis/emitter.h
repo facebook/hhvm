@@ -59,24 +59,6 @@ namespace Compiler {
 class Label;
 class EmitterVisitor;
 
-// Helper for creating unit MetaInfo.
-struct MetaInfoBuilder {
-  void add(int pos, Unit::MetaInfo::Kind kind,
-           bool mVector, int arg, Id data);
-  void addKnownDataType(DataType dt,
-                        bool     dtPredicted,
-                        int      pos,
-                        bool     mVector,
-                        int      arg);
-  void deleteInfo(Offset bcOffset);
-  void setForUnit(UnitEmitter&) const;
-
-private:
-  typedef std::vector<Unit::MetaInfo> Vec;
-  typedef std::map<Offset,Vec> Map;
-  Map m_metaMap;
-};
-
 class Emitter {
 public:
   Emitter(ConstructPtr node, UnitEmitter& ue, EmitterVisitor& ev)
@@ -680,8 +662,6 @@ private:
   // Unnamed local variables used by the "finally router" logic
   Id m_stateLocal;
   Id m_retLocal;
-
-  MetaInfoBuilder m_metaInfo;
 
 public:
   bool checkIfStackEmpty(const char* forInstruction) const;

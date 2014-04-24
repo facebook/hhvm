@@ -36,7 +36,7 @@ data exists in the other tables.
   PRAGMA foreign_keys=OFF;
   BEGIN TRANSACTION;
   CREATE TABLE Unit_77fae842fab099b2eb4771f620e15a4bbf3883aa(
-    unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB, bc_meta BLOB,
+    unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB,
     mainReturn BLOB, mergeable INTEGER,lines BLOB, UNIQUE (md5));
   COMMIT;
 

@@ -368,10 +368,6 @@ private:
   void analyzeCallee(TraceletContext&,
                      Tracelet& parent,
                      NormalizedInstruction* fcall);
-  bool applyInputMetaData(Unit::MetaHandle&,
-                          NormalizedInstruction* ni,
-                          TraceletContext& tas,
-                          InputInfos& ii);
   void handleAssertionEffects(Tracelet&,
                               const NormalizedInstruction&,
                               TraceletContext&,
@@ -716,14 +712,8 @@ static inline bool isSmartPtrRef(DataType t) {
 }
 
 void populateImmediates(NormalizedInstruction&);
-void preInputApplyMetaData(Unit::MetaHandle, NormalizedInstruction*);
-enum class MetaMode {
-  Normal,
-  Legacy,
-};
-void readMetaData(Unit::MetaHandle&, NormalizedInstruction&, HhbcTranslator&,
-                  bool profiling, MetaMode m = MetaMode::Normal);
 bool instrMustInterp(const NormalizedInstruction&);
+bool isAlwaysNop(Op op);
 
 typedef std::function<Type(int)> LocalTypeFn;
 void getInputs(SrcKey startSk, NormalizedInstruction& inst, InputInfos& infos,

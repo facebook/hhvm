@@ -31,7 +31,7 @@ static void collapseJmp(Offset* offsetPtr, Op* instr, Op* start) {
   }
 }
 
-Peephole::Peephole(UnitEmitter &ue, MetaInfoBuilder& metaInfo)
+Peephole::Peephole(UnitEmitter &ue)
     : m_ue(ue) {
   // be careful about an empty input
   if (ue.m_bclen == 0) {
@@ -73,7 +73,6 @@ Peephole::Peephole(UnitEmitter &ue, MetaInfoBuilder& metaInfo)
           *prev = OpNop;
           *cur = OpJmpZ;
         }
-        metaInfo.deleteInfo(prev - start);
       }
 
       // IncDec* Post*,  PopC -> IncDec* Pre*,  PopC

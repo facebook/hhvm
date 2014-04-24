@@ -343,48 +343,6 @@ bool Unit::checkStringId(Id id) const {
   return id >= 0 && unsigned(id) < numLitstrs();
 }
 
-bool Unit::MetaHandle::findMeta(const Unit* unit, Offset offset) {
-  if (!unit->m_bc_meta_len) return false;
-  assert(unit->m_bc_meta);
-  Offset* index1 = (Offset*)unit->m_bc_meta;
-  Offset* index2 = index1 + *index1 + 1;
-
-  assert(index1[*index1 + 1] == INT_MAX); // sentinel
-  assert(offset >= 0 && (unsigned)offset < unit->m_bclen);
-  assert(cur == 0 || index == index1);
-  if (cur && offset >= index[cur]) {
-    while (offset >= index[cur+1]) cur++;
-  } else {
-    int hi = *index1 + 2;
-    int lo = 1;
-    while (hi - lo > 1) {
-      int mid = (hi + lo) >> 1;
-      if (offset >= index1[mid]) {
-        lo = mid;
-      } else {
-        hi = mid;
-      }
-    }
-    index = index1;
-    cur = lo;
-  }
-  assert(cur <= (unsigned)*index1);
-  assert((unsigned)index2[cur] <= unit->m_bc_meta_len);
-  ptr = unit->m_bc_meta + index2[cur];
-  return index[cur] == offset;
-}
-
-bool Unit::MetaHandle::nextArg(MetaInfo& info) {
-  assert(index && cur && ptr);
-  uint8_t* end = (uint8_t*)index + index[*index + cur + 2];
-  assert(ptr <= end);
-  if (ptr == end) return false;
-  info.m_kind = (Unit::MetaInfo::Kind)*ptr++;
-  info.m_arg = *ptr++;
-  info.m_data = decodeVariableSizeImm(&ptr);
-  return true;
-}
-
 //=============================================================================
 // LitstrTable.
 
@@ -432,7 +390,6 @@ Unit::~Unit() {
       memset(const_cast<unsigned char*>(m_bc), 0xff, m_bclen);
     }
     free(const_cast<unsigned char*>(m_bc));
-    free(const_cast<unsigned char*>(m_bc_meta));
   }
 
   if (m_mergeInfo) {
@@ -1656,7 +1613,6 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
 
   const auto* it = &m_bc[startOffset];
   int prevLineNum = -1;
-  MetaHandle metaHand;
   while (it < &m_bc[stopOffset]) {
     assert(funcIt == funcMap.end() ||
       funcIt->first >= offsetOf(it));
@@ -1678,46 +1634,9 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
     }
 
     out << std::string(opts.indentSize, ' ')
-        << std::setw(4) << (it - m_bc) << ": ";
-    out << instrToString((Op*)it, this);
-    if (metaHand.findMeta(this, offsetOf(it))) {
-      out << " #";
-      Unit::MetaInfo info;
-      while (metaHand.nextArg(info)) {
-        int arg = info.m_arg & ~MetaInfo::VectorArg;
-        const char *argKind = info.m_arg & MetaInfo::VectorArg ? "M" : "";
-        switch (info.m_kind) {
-          case Unit::MetaInfo::Kind::DataTypeInferred:
-          case Unit::MetaInfo::Kind::DataTypePredicted:
-            out << " i" << argKind << arg
-                << ":t=" << tname(DataType(info.m_data));
-            if (info.m_kind == Unit::MetaInfo::Kind::DataTypePredicted) {
-              out << "*";
-            }
-            break;
-          case Unit::MetaInfo::Kind::Class: {
-            const StringData* sd = lookupLitstrId(info.m_data);
-            out << " i" << argKind << arg << ":c=" << sd->data();
-            break;
-          }
-          case Unit::MetaInfo::Kind::MVecPropClass: {
-            const StringData* sd = lookupLitstrId(info.m_data);
-            out << " i" << argKind << arg << ":pc=" << sd->data();
-            break;
-          }
-          case Unit::MetaInfo::Kind::GuardedThis:
-            out << " GuardedThis";
-            break;
-          case Unit::MetaInfo::Kind::GuardedCls:
-            out << " GuardedCls";
-            break;
-          case Unit::MetaInfo::Kind::None:
-            assert(false);
-            break;
-        }
-      }
-    }
-    out << std::endl;
+        << std::setw(4) << (it - m_bc) << ": "
+        << instrToString((Op*)it, this)
+        << std::endl;
     it += instrLen((Op*)it);
   }
 }
@@ -1787,7 +1706,7 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
     std::stringstream ssCreate;
     ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Unit")
              << "(unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB,"
-                " bc_meta BLOB, mainReturn BLOB, mergeable INTEGER,"
+                " mainReturn BLOB, mergeable INTEGER,"
                 "lines BLOB, typeAliases BLOB, UNIQUE (md5));";
     txn.exec(ssCreate.str());
   }
@@ -1875,7 +1794,6 @@ Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
 void UnitRepoProxy::InsertUnitStmt
                   ::insert(RepoTxn& txn, int64_t& unitSn, const MD5& md5,
                            const unsigned char* bc, size_t bclen,
-                           const unsigned char* bc_meta, size_t bc_meta_len,
                            const TypedValue* mainReturn, bool mergeOnly,
                            const LineTable& lines,
                            const std::vector<TypeAlias>& typeAliases) {
@@ -1885,16 +1803,13 @@ void UnitRepoProxy::InsertUnitStmt
   if (!prepared()) {
     std::stringstream ssInsert;
     ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Unit")
-             << " VALUES(NULL, @md5, @bc, @bc_meta,"
+             << " VALUES(NULL, @md5, @bc, "
                 " @mainReturn, @mergeable, @lines, @typeAliases);";
     txn.prepare(*this, ssInsert.str());
   }
   RepoTxnQuery query(txn, *this);
   query.bindMd5("@md5", md5);
   query.bindBlob("@bc", (const void*)bc, bclen);
-  query.bindBlob("@bc_meta",
-                 bc_meta_len ? (const void*)bc_meta : (const void*)"",
-                 bc_meta_len);
   query.bindTypedValue("@mainReturn", *mainReturn);
   query.bindBool("@mergeable", mergeOnly);
   query.bindBlob("@lines", linesBlob(lines), /* static */ true);
@@ -1910,7 +1825,7 @@ bool UnitRepoProxy::GetUnitStmt
     RepoTxn txn(m_repo);
     if (!prepared()) {
       std::stringstream ssSelect;
-      ssSelect << "SELECT unitSn,bc,bc_meta,mainReturn,mergeable,"
+      ssSelect << "SELECT unitSn,bc,mainReturn,mergeable,"
                   "lines,typeAliases FROM "
                << m_repo.table(m_repoId, "Unit")
                << " WHERE md5 == @md5;";
@@ -1924,16 +1839,13 @@ bool UnitRepoProxy::GetUnitStmt
     }
     int64_t unitSn;                          /**/ query.getInt64(0, unitSn);
     const void* bc; size_t bclen;            /**/ query.getBlob(1, bc, bclen);
-    const void* bc_meta; size_t bc_meta_len; /**/ query.getBlob(2, bc_meta,
-                                                                bc_meta_len);
-    TypedValue value;                        /**/ query.getTypedValue(3, value);
-    bool mergeable;                          /**/ query.getBool(4, mergeable);
-    BlobDecoder linesBlob =                  /**/ query.getBlob(5);
-    BlobDecoder typeAliasesBlob =            /**/ query.getBlob(6);
+    TypedValue value;                        /**/ query.getTypedValue(2, value);
+    bool mergeable;                          /**/ query.getBool(3, mergeable);
+    BlobDecoder linesBlob =                  /**/ query.getBlob(4);
+    BlobDecoder typeAliasesBlob =            /**/ query.getBlob(5);
     ue.setRepoId(m_repoId);
     ue.setSn(unitSn);
     ue.setBc((const unsigned char*)bc, bclen);
-    ue.setBcMeta((const unsigned char*)bc_meta, bc_meta_len);
     ue.setMainReturn(&value);
     ue.setMergeOnly(mergeable);
 
@@ -2174,19 +2086,24 @@ bool UnitRepoProxy::GetSourceLocTabStmt
 // UnitEmitter.
 
 UnitEmitter::UnitEmitter(const MD5& md5)
-  : m_repoId(-1), m_sn(-1), m_bcmax(BCMaxInit), m_bc((unsigned char*)malloc(BCMaxInit)),
-    m_bclen(0), m_bc_meta(nullptr), m_bc_meta_len(0), m_filepath(nullptr),
-    m_md5(md5), m_nextFuncSn(0), m_mergeOnly(false),
-    m_allClassesHoistable(true), m_returnSeen(false) {
+  : m_repoId(-1)
+  , m_sn(-1)
+  , m_bcmax(BCMaxInit)
+  , m_bc((unsigned char*)malloc(BCMaxInit))
+  , m_bclen(0)
+  , m_filepath(nullptr)
+  , m_md5(md5)
+  , m_nextFuncSn(0)
+  , m_mergeOnly(false)
+  , m_allClassesHoistable(true)
+  , m_returnSeen(false)
+{
   tvWriteUninit(&m_mainReturn);
 }
 
 UnitEmitter::~UnitEmitter() {
   if (m_bc) {
     free(m_bc);
-  }
-  if (m_bc_meta) {
-    free(m_bc_meta);
   }
   for (FeVec::const_iterator it = m_fes.begin(); it != m_fes.end(); ++it) {
     delete *it;
@@ -2222,15 +2139,6 @@ void UnitEmitter::setBc(const unsigned char* bc, size_t bclen) {
   m_bcmax = bclen;
   memcpy(m_bc, bc, bclen);
   m_bclen = bclen;
-}
-
-void UnitEmitter::setBcMeta(const unsigned char* bc_meta, size_t bc_meta_len) {
-  assert(m_bc_meta == nullptr);
-  if (bc_meta_len) {
-    m_bc_meta = (unsigned char*)malloc(bc_meta_len);
-    memcpy(m_bc_meta, bc_meta, bc_meta_len);
-  }
-  m_bc_meta_len = bc_meta_len;
 }
 
 void UnitEmitter::setLines(const LineTable& lines) {
@@ -2499,7 +2407,6 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
     {
       auto lines = createLineTable(m_sourceLocTab, m_bclen);
       urp.insertUnit(repoId).insert(txn, m_sn, m_md5, m_bc, m_bclen,
-                                    m_bc_meta, m_bc_meta_len,
                                     &m_mainReturn, m_mergeOnly, lines,
                                     m_typeAliases);
     }
@@ -2585,10 +2492,6 @@ Unit* UnitEmitter::create() {
   u->m_sn = m_sn;
   u->m_bc = allocateBCRegion(m_bc, m_bclen);
   u->m_bclen = m_bclen;
-  if (m_bc_meta_len) {
-    u->m_bc_meta = allocateBCRegion(m_bc_meta, m_bc_meta_len);
-    u->m_bc_meta_len = m_bc_meta_len;
-  }
   u->m_filepath = m_filepath;
   u->m_mainReturn = m_mainReturn;
   u->m_mergeOnly = m_mergeOnly;

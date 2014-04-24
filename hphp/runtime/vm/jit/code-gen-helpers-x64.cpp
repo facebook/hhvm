@@ -63,6 +63,9 @@ void moveToAlign(CodeBlock& cb,
     a.ud2();
     leftInBlock -= 2;
   }
+  if (leftInBlock > 0) {
+    a.emitInt3s(leftInBlock);
+  }
 }
 
 void emitEagerSyncPoint(Asm& as, const Op* pc) {

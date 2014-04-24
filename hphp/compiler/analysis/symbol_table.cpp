@@ -548,19 +548,19 @@ void SymbolTable::canonicalizeSymbolOrder() {
 
 void SymbolTable::getSymbols(vector<Symbol*> &syms,
                              bool filterHidden /* = false */) const {
-  BOOST_FOREACH(Symbol *sym, m_symbolVec) {
+  for (Symbol *sym: m_symbolVec) {
     if (!filterHidden || !sym->isHidden()) syms.push_back(sym);
   }
 }
 
 void SymbolTable::getSymbols(vector<string> &syms) const {
-  BOOST_FOREACH(Symbol *sym, m_symbolVec) {
+  for (Symbol *sym: m_symbolVec) {
     syms.push_back(sym->getName());
   }
 }
 
 void SymbolTable::getCoerced(StringToTypePtrMap &coerced) const {
-  BOOST_FOREACH(Symbol *sym, m_symbolVec) {
+  for (Symbol *sym: m_symbolVec) {
     coerced[sym->getName()] = sym->getType();
   }
 }

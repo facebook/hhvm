@@ -147,7 +147,7 @@ const {
 void ConstantTable::cleanupForError(AnalysisResultConstPtr ar) {
   AnalysisResult::Locker lock(ar);
 
-  BOOST_FOREACH(Symbol *sym, m_symbolVec) {
+  for (Symbol *sym: m_symbolVec) {
     if (!sym->isDynamic()) {
       sym->setDynamic();
       sym->setDeclaration(ConstructPtr());

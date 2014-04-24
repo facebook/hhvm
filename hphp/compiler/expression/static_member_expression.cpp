@@ -255,8 +255,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
     bool found = false;
     TypePtr tp;
     if (isRedeclared()) {
-      BOOST_FOREACH(ClassScopePtr clsr,
-                    ar->findRedeclaredClasses(m_className)) {
+      for (ClassScopePtr clsr: ar->findRedeclaredClasses(m_className)) {
         sym = clsr->findProperty(clsr, name, ar);
         if (sym && sym->isStatic()) {
           {
@@ -303,8 +302,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
   if (m_resolvedClass || isRedeclared()) {
     if (modified) {
       if (isRedeclared()) {
-        BOOST_FOREACH(ClassScopePtr clsr,
-                      ar->findRedeclaredClasses(m_className)) {
+        for (ClassScopePtr clsr: ar->findRedeclaredClasses(m_className)) {
           int mask = clsr == getOriginalClass() ?
             VariableTable::AnyStaticVars : VariableTable::NonPrivateStaticVars;
           GET_LOCK(clsr);

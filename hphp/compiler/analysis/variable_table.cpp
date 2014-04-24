@@ -516,7 +516,7 @@ bool VariableTable::checkUnused(Symbol *sym) {
 void VariableTable::clearUsed() {
   typedef std::pair<const string,Symbol> symPair;
   bool ps = isPseudoMainTable();
-  BOOST_FOREACH(symPair &sym, m_symbolMap) {
+  for (symPair &sym: m_symbolMap) {
     if (!ps || sym.second.isHidden()) {
       sym.second.clearUsed();
       sym.second.clearNeeded();
@@ -676,7 +676,7 @@ void VariableTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (Option::ConvertSuperGlobals && !getAttribute(ContainsDynamicVariable)) {
     std::set<string> convertibles;
     typedef std::pair<const string,Symbol> symPair;
-    BOOST_FOREACH(symPair &sym, m_symbolMap) {
+    for (symPair &sym: m_symbolMap) {
       if (sym.second.isSuperGlobal() && !sym.second.declarationSet()) {
         convertibles.insert(sym.second.getName());
       }

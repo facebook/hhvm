@@ -83,7 +83,7 @@ FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,
 void FileScope::cleanupForError(AnalysisResultConstPtr ar) {
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classes.begin();
        iter != m_classes.end(); ++iter) {
-    BOOST_FOREACH(ClassScopePtr cls, iter->second) {
+    for (ClassScopePtr cls: iter->second) {
       cls->getVariables()->cleanupForError(ar);
     }
   }
@@ -184,7 +184,7 @@ int FileScope::getFunctionCount() const {
   int total = FunctionContainer::getFunctionCount();
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classes.begin();
        iter != m_classes.end(); ++iter) {
-    BOOST_FOREACH(ClassScopePtr cls, iter->second) {
+    for (ClassScopePtr cls: iter->second) {
       total += cls->getFunctionCount();
     }
   }
@@ -195,7 +195,7 @@ void FileScope::countReturnTypes(std::map<std::string, int> &counts) {
   FunctionContainer::countReturnTypes(counts, m_redeclaredFunctions);
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classes.begin();
        iter != m_classes.end(); ++iter) {
-    BOOST_FOREACH(ClassScopePtr cls, iter->second) {
+    for (ClassScopePtr cls: iter->second) {
       cls->countReturnTypes(counts, 0);
     }
   }
@@ -381,7 +381,7 @@ void FileScope::analyzeIncludesHelper(AnalysisResultPtr ar) {
           if (!fs->m_includeState) {
             fs->analyzeIncludesHelper(ar);
           }
-          BOOST_FOREACH(BlockScopeRawPtr bs, fs->m_providedDefs) {
+          for (BlockScopeRawPtr bs: fs->m_providedDefs) {
             m_providedDefs.insert(bs);
           }
           continue;

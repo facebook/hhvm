@@ -458,8 +458,6 @@ struct IndexData {
   IndexData& operator=(const IndexData&) = delete;
   ~IndexData() = default;
 
-  bool isComprehensive = false;
-
   ISStringToMany<const php::Class>     classes;
   ISStringToMany<const php::Func>      methods;
   ISStringToMany<const php::Func>      funcs;
@@ -1036,14 +1034,6 @@ Index::Index(borrowed_ptr<php::Program> program)
   define_func_families(*m_data);
   find_magic_methods(*m_data);
   check_invariants(*m_data);
-
-  m_data->isComprehensive = true;
-}
-
-Index::Index(borrowed_ptr<php::Unit> unit)
-  : m_data(folly::make_unique<IndexData>())
-{
-  add_unit_to_index(*m_data, InterceptableMethodMap{}, *unit);
 }
 
 // Defined here so IndexData is a complete type for the unique_ptr
@@ -1082,7 +1072,6 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
     }
     return folly::none;
   };
-  if (!m_data->isComprehensive) return name_only();
 
   /*
    * If there's only one preresolved ClassInfo, we can give out a
@@ -1288,8 +1277,6 @@ res::Func Index::resolve_func(Context ctx, SString name) const {
   name = normalizeNS(name);
 
   auto name_only = [&] { return res::Func { this, name }; };
-
-  if (!m_data->isComprehensive) return name_only();
 
   auto const funcs = find_range(m_data->funcs, name);
   if (begin(funcs) == end(funcs)) return name_only();

@@ -222,11 +222,8 @@ std::string show(const Class&);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * This class encapsulates the known facts about the program, possibly
- * with a whole-program view.  If the Index is created from a
- * php::Program instead of a php::Unit, it is considered a
- * "comprehensive" Index, which means it will assume it can see the
- * whole program, and may return more aggressive answers.
+ * This class encapsulates the known facts about the program, with a
+ * whole-program view.
  *
  * This structure contains unowned pointers into the php::Program it
  * was created for.  It should not out-live the Program.
@@ -238,14 +235,10 @@ std::string show(const Class&);
  */
 struct Index {
   /*
-   * Create a comprehensive, whole-program-aware index.
+   * Create an Index for a php::Program.  Performs some initial
+   * analysis of the program.
    */
   explicit Index(borrowed_ptr<php::Program>);
-
-  /*
-   * Create a non-comprehensive index for a single php::Unit.
-   */
-  explicit Index(borrowed_ptr<php::Unit>);
 
   /*
    * This class must not be destructed after its associated

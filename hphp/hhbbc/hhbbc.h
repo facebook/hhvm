@@ -198,11 +198,6 @@ extern Options options;
 std::vector<std::unique_ptr<UnitEmitter>>
 whole_program(std::vector<std::unique_ptr<UnitEmitter>>);
 
-/*
- * Perform single-unit optimizations.
- */
-std::unique_ptr<UnitEmitter> single_unit(std::unique_ptr<UnitEmitter>);
-
 //////////////////////////////////////////////////////////////////////
 
 /*

@@ -1245,15 +1245,19 @@ void ClassScope::getInterfaces(AnalysisResultConstPtr ar,
   if (!m_bases.empty()) {
     vector<string>::const_iterator begin =
       m_parent.empty() ? m_bases.begin() : m_bases.begin() + 1;
-    for (vector<string>::const_iterator it = begin;
-         it != m_bases.end(); ++it) {
-      ClassScopePtr cls(ar->findClass(*it));
+    for (auto const& base : m_bases) {
+      ClassScopePtr cls(ar->findClass(base));
       if (cls && cls->isRedeclaring()) {
         cls = self->findExactClass(cls);
       }
-      names.push_back(cls ? cls->getDocName() : *it);
       if (cls && recursive) {
+        names.push_back(cls ? cls->getDocName() : base);
         cls->getInterfaces(ar, names, true);
+      } else if (std::find_if(names.begin(), names.end(),
+                              [base](std::string& b) {
+                                return string_eqstri()(base,b);
+                              }) == names.end()) {
+        names.push_back(base);
       }
     }
   }

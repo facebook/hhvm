@@ -799,10 +799,17 @@ function run_test($options, $test) {
 
     $hphp_repo = "$test.repo/hhvm.hhbc";
     $hhbbc_repo = "$test.repo/hhvm.hhbbc";
-    shell_exec("rm -f $hphp_repo $hhbbc_repo");
+    shell_exec("rm -f $hphp_repo $hhbbc_repo $test.repo/CodeError.js");
     $hphp = hphp_cmd($options, $test);
     $hhbbc = hhbbc_cmd($options, $test);
     shell_exec("$hphp 2>&1");
+    if (file_exists("$test.code_error") &&
+        file_exists("$test.repo/CodeError.js")) {
+      file_put_contents("$test.diff",
+                        "Test failed because CodeError.js was not empty: ".
+                        file_get_contents("$test.repo/CodeError.js"));
+      return false;
+    }
     shell_exec("$hhbbc 2>&1");
     $hhvm .= ' -vRepo.Authoritative=true -vRepo.Commit=0';
     $hhvm .= " -vRepo.Central.Path=$hhbbc_repo";

@@ -591,8 +591,6 @@ void AnalysisResult::checkClassDerivations() {
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
     BOOST_FOREACH(cls, iter->second) {
-      hphp_string_iset seen;
-      cls->checkDerivation(ar, seen);
       if (Option::WholeProgram) {
         try {
           cls->importUsedTraits(ar);
@@ -600,6 +598,8 @@ void AnalysisResult::checkClassDerivations() {
           cls->setFatal(e);
         }
       }
+      hphp_string_iset seen;
+      cls->checkDerivation(ar, seen);
     }
   }
 }

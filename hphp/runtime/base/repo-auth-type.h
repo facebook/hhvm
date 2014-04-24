@@ -193,6 +193,12 @@ folly::Optional<DataType> convertToDataType(RepoAuthType);
  * This can be used for validating that assumptions from static
  * analysis are not violated (for example, by unserializing objects
  * with changed private property types).
+ *
+ * Note: this function returns true on array types without checking
+ * every element.  This is ok for private properties for now because
+ * we don't ever infer inner-array types on properties, but if that
+ * changes new mechanisms may be needed.  Relevant to both:
+ * TODO(#3696042,#2516227).
  */
 bool tvMatchesRepoAuthType(TypedValue, RepoAuthType);
 

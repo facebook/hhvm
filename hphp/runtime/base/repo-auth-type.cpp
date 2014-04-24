@@ -49,13 +49,31 @@ bool tvMatchesArrayType(TypedValue tv, const RepoAuthType::Array* arrTy) {
     not_reached();
   };
 
+  // O(N) checks are available if you want them for debugging, but
+  // they are too slow for general use in debug builds.  These type
+  // matching functions are currently only used for assertions, so
+  // it's ok to leave them out.
+  auto const use_slow_checks = false;
+
   switch (arrTy->tag()) {
   case A::Tag::Packed:
     if (!sizeMatches()) return false;
-    for (auto i = uint32_t{0}; i < ad->size(); ++i) {
-      auto const elem = ad->nvGet(i);
-      if (!tvMatchesRepoAuthType(*elem, arrTy->packedElem(i))) {
-        return false;
+    if (use_slow_checks) {
+      for (auto i = uint32_t{0}; i < ad->size(); ++i) {
+        auto const elem = ad->nvGet(i);
+        if (!tvMatchesRepoAuthType(*elem, arrTy->packedElem(i))) {
+          return false;
+        }
+      }
+    }
+    break;
+  case A::Tag::PackedN:
+    if (use_slow_checks) {
+      for (auto i = uint32_t{0}; i < ad->size(); ++i) {
+        auto const elem = ad->nvGet(i);
+        if (!tvMatchesRepoAuthType(*elem, arrTy->elemType())) {
+          return false;
+        }
       }
     }
     break;

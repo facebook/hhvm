@@ -2249,9 +2249,18 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
     case DataTag::Dbl:
     case DataTag::Cls:
     case DataTag::ArrVal:
-    case DataTag::ArrPackedN:
     case DataTag::ArrStruct:
     case DataTag::ArrMapN:
+      return nullptr;
+    case DataTag::ArrPackedN:
+      // TODO(#4205897): we need to use this before it's worth putting
+      // in the repo.
+      if (false) {
+        return arrTable.packedn(
+          emptiness,
+          make_repo_type(arrTable, t.m_data.apackedn->type)
+        );
+      }
       return nullptr;
     case DataTag::ArrPacked:
       {

@@ -1975,6 +1975,12 @@ SSATmp* Simplifier::simplifyCheckPackedArrayBounds(const IRInstruction* inst) {
       if (idxVal < at->size() && at->emptiness() == A::Empty::No) {
         return gen(Nop);
       }
+      break;
+    case A::Tag::PackedN:
+      if (idxVal == 0 && at->emptiness() == A::Empty::No) {
+        return gen(Nop);
+      }
+      break;
     }
   }
 

@@ -73,14 +73,21 @@ private:
 /*
  * Deeper information about array types are represented using this
  * structure.
- *
- * The only supported tag so far is Packed, which currently means the
- * array contents are packed-ish, but it may or may not actually be
- * kPackedKind at runtime.
  */
 struct RepoAuthType::Array {
   enum class Tag : uint8_t {
-    Packed
+    /*
+     * Known size with zero-based contiguous integer keys.
+     *
+     * Does not currently imply kPackedKind at runtime.
+     */
+    Packed,
+    /*
+     * Unknown size, zero-based contiguous integer keys.
+     *
+     * Does not currently imply kPackedKind at runtime.
+     */
+    PackedN,
   };
   enum class Empty : uint8_t { Maybe, No };
 
@@ -144,6 +151,16 @@ struct RepoAuthType::Array {
     return m_types[idx];
   }
 
+  /*
+   * Return a type that is larger than all possible element types.
+   *
+   * Pre: tag() == Tag::PackedN
+   */
+  RepoAuthType elemType() const {
+    assert(tag() == Tag::PackedN);
+    return m_types[0];
+  }
+
 private:
   Array(Tag tag, Empty emptiness, uint32_t size)
     : m_tag(tag)
@@ -188,7 +205,7 @@ struct ArrayTypeTable::Builder {
   ~Builder();
 
   /*
-   * Create a new packed array type descriptor, using this table
+   * Create a new Packed array type descriptor, using this table
    * builder.  May return an existing descriptor if it has the same
    * shape as an array type that already exists.
    *
@@ -197,6 +214,14 @@ struct ArrayTypeTable::Builder {
   const RepoAuthType::Array* packed(
     RepoAuthType::Array::Empty emptiness,
     const std::vector<RepoAuthType>& types);
+
+  /*
+   * Create a new PackedN array type descriptor, using this table
+   * builder.  May return an existing descriptor if it has the same
+   * shape as a PackedN type that already exists.
+   */
+  const RepoAuthType::Array* packedn(RepoAuthType::Array::Empty emptiness,
+                                     RepoAuthType elemTy);
 
 private:
   const RepoAuthType::Array* insert(RepoAuthType::Array*);

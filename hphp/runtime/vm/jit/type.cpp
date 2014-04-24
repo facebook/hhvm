@@ -732,14 +732,20 @@ Type arrElemReturn(const IRInstruction* inst) {
   if (inst->op() != LdPackedArrayElem) return Type::Gen;
   auto const arrTy = inst->src(0)->type().getArrayType();
   if (!arrTy) return Type::Gen;
-  auto const idx = inst->src(1);
-  if (!idx->isConst()) return Type::Gen;
 
+  using T = RepoAuthType::Array::Tag;
   switch (arrTy->tag()) {
-  case RepoAuthType::Array::Tag::Packed:
-    if (idx->intVal() >= 0 && idx->intVal() < arrTy->size()) {
-      return convertToType(arrTy->packedElem(idx->intVal()));
+  case T::Packed:
+    {
+      auto const idx = inst->src(1);
+      if (!idx->isConst()) return Type::Gen;
+      if (idx->intVal() >= 0 && idx->intVal() < arrTy->size()) {
+        return convertToType(arrTy->packedElem(idx->intVal()));
+      }
     }
+    return Type::Gen;
+  case T::PackedN:
+    return convertToType(arrTy->elemType());
   }
 
   return Type::Gen;

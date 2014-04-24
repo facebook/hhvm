@@ -39,19 +39,24 @@ struct repo_auth_array_hash {
   size_t operator()(const RepoAuthType::Array* ar) const {
     size_t hash = folly::hash::hash_combine(
       static_cast<uint32_t>(ar->tag()),
-      static_cast<uint32_t>(ar->emptiness()),
-      ar->size()
+      static_cast<uint32_t>(ar->emptiness())
     );
     using T = RepoAuthType::Array::Tag;
-    auto const size = ar->size();
     switch (ar->tag()) {
     case T::Packed:
-      for (auto i = uint32_t{0}; i < size; ++i) {
-        // If we have arrays of arrays, this can try to hash the inner
-        // arrays.  This is safe (it uses the array id) because they
-        // must already be inserted in the array table builder.
-        hash = folly::hash::hash_128_to_64(hash, ar->packedElem(i).hash());
+      {
+        auto const size = ar->size();
+        hash = folly::hash::hash_128_to_64(hash, size);
+        for (auto i = uint32_t{0}; i < size; ++i) {
+          // If we have arrays of arrays, this can try to hash the inner
+          // arrays.  This is safe (it uses the array id) because they
+          // must already be inserted in the array table builder.
+          hash = folly::hash::hash_128_to_64(hash, ar->packedElem(i).hash());
+        }
       }
+      break;
+    case T::PackedN:
+      hash = folly::hash::hash_128_to_64(hash, ar->elemType().hash());
       break;
     }
     return hash;
@@ -61,19 +66,22 @@ struct repo_auth_array_hash {
 struct repo_auth_array_eq {
   bool operator()(const RepoAuthType::Array* a,
                   const RepoAuthType::Array* b) const {
-    if (a->tag() != b->tag() ||
-        a->emptiness() != b->emptiness() ||
-        a->size() != b->size()) {
+    if (a->tag() != b->tag() || a->emptiness() != b->emptiness()) {
       return false;
     }
     using T = RepoAuthType::Array::Tag;
-    auto const size = a->size();
     switch (a->tag()) {
     case T::Packed:
-      for (auto i = uint32_t{0}; i < size; ++i) {
-        if (a->packedElem(i) != b->packedElem(i)) return false;
+      {
+        if (a->size() != b->size()) return false;
+        auto const size = a->size();
+        for (auto i = uint32_t{0}; i < size; ++i) {
+          if (a->packedElem(i) != b->packedElem(i)) return false;
+        }
       }
       return true;
+    case T::PackedN:
+      return a->elemType() == b->elemType();
     }
     not_reached();
   }
@@ -138,6 +146,25 @@ Builder::packed(RepoAuthType::Array::Empty emptiness,
   return ret;
 }
 
+const RepoAuthType::Array*
+Builder::packedn(RepoAuthType::Array::Empty emptiness, RepoAuthType elemTy) {
+  auto const size = sizeof elemTy + sizeof(RepoAuthType::Array);
+  auto const arr = new (std::malloc(size)) RepoAuthType::Array(
+    RepoAuthType::Array::Tag::PackedN,
+    emptiness,
+    std::numeric_limits<uint32_t>::max()
+  );
+  arr->m_types[0] = elemTy;
+
+  auto const ret = insert(arr);
+  if (arr != ret) {
+    arr->~Array();
+    std::free(arr);
+  }
+
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 // Returns the `cand' if it was successfully inserted; otherwise it's
@@ -192,6 +219,10 @@ std::string show(const RepoAuthType::Array& ar) {
       ret += show(ar.packedElem(i));
       if (i != ar.size() - 1) ret += ',';
     }
+    break;
+  case T::PackedN:
+    folly::format(&ret, "[{}]", show(ar.elemType()));
+    break;
   }
 
   ret += ')';

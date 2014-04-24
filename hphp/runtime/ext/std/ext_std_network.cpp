@@ -284,8 +284,6 @@ Variant HHVM_FUNCTION(inet_pton, const String& address) {
   return String(buffer, af == AF_INET ? 4 : 16, CopyString);
 }
 
-const StaticString s_255_255_255_255("255.255.255.255");
-
 Variant HHVM_FUNCTION(ip2long, const String& ip_address) {
   struct in_addr ip;
   if (ip_address.empty() ||

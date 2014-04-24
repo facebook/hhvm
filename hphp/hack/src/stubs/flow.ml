@@ -10,6 +10,6 @@
 
 let init _ x _ = x
 
-let main _ = ()
+let main _ _ = ()
 
 let recheck _ _ _ _ = ()

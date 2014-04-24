@@ -27,6 +27,7 @@ type options = {
     should_detach    : bool;
     convert          : Path.path option;
     lang             : lang;
+    rest             : string list;
   }
 
 (*****************************************************************************)
@@ -56,6 +57,7 @@ module Messages = struct
   let from_hhclient = " passed from hh_client"
   let convert       = " adds type annotations automatically"
   let flow          = ""
+  let rest          = ""
 end
 
 
@@ -68,6 +70,8 @@ end
 (*****************************************************************************)
 
 let arg x = Arg.Unit (fun () -> x := true)
+
+let rest r = Arg.Rest (fun x -> r := x :: !r)
 
 let populate_options () =
   let root          = ref "" in
@@ -85,6 +89,7 @@ let populate_options () =
   let all           = ref false in
   let cdir          = fun s -> convert_dir := Some s in
   let flow          = ref false in
+  let rest_options  = ref [] in
   let options =
     ["--debug"         , arg debug         , Messages.debug;
      "--debug-init"    , arg debug_init    , Messages.debug_init;
@@ -100,6 +105,7 @@ let populate_options () =
      "--from-hhclient" , arg from_hhclient , Messages.from_hhclient;
      "--convert"       , Arg.String cdir   , Messages.convert;
      "--flow"          , arg flow          , Messages.flow;
+     "--"              , rest rest_options , Messages.rest;
    ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -125,6 +131,7 @@ let populate_options () =
     should_detach = !should_detach;
     convert       = convert;
     lang          = if !flow then Flow else Hack;
+    rest          = !rest_options;
   }
 
 (* useful in testing code *)
@@ -138,6 +145,7 @@ let default_options ~root =
   should_detach = false;
   convert = None;
   lang = Hack;
+  rest = [];
 }
 
 (*****************************************************************************)

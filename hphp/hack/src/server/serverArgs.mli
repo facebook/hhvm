@@ -21,6 +21,7 @@ type options = {
     should_detach    : bool;
     convert          : Path.path option;
     lang             : lang;
+    rest             : string list;
   }
   and lang = Hack | Flow
 
@@ -39,4 +40,3 @@ val root          : options -> Path.path
 val should_detach : options -> bool
 val convert       : options -> Path.path option
 val is_flow	  : options -> bool
-

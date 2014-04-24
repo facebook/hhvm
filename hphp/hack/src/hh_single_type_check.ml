@@ -14,7 +14,12 @@ open Utils
 (* Types, constants *)
 (*****************************************************************************)
 
-type options = { filename : string; suggest : bool; flow : bool }
+type options = {
+  filename : string;
+  suggest : bool;
+  flow : bool;
+  rest : string list
+}
 
 let builtins =
   "<?hh // decl\n"^
@@ -72,6 +77,8 @@ let parse_options () =
   let fn_ref = ref None in
   let suggest = ref false in
   let flow = ref false in
+  let rest_options = ref [] in
+  let rest x = rest_options := x :: !rest_options in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let options = [
     "--suggest",
@@ -80,12 +87,15 @@ let parse_options () =
     "--flow",
       Arg.Set flow,
       "";
+    "--",
+      Arg.Rest rest,
+      "";
   ] in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
   let fn = match !fn_ref with
     | Some fn -> fn
     | None -> die usage in
-  { filename = fn; suggest = !suggest; flow = !flow }
+  { filename = fn; suggest = !suggest; flow = !flow; rest = !rest_options }
 
 let suggest_and_print fn funs classes typedefs consts =
   let make_set =
@@ -187,10 +197,10 @@ let main_hack { filename; suggest } =
   | Utils.Error l -> error l
 
 (* flow single-file entry point *)
-let main_flow { filename; suggest } =
+let main_flow { filename; suggest; rest } =
   SharedMem.init();
   try
-    Flow.main [filename]
+    Flow.main [filename] rest
   with
   | Utils.Error l -> error l
 

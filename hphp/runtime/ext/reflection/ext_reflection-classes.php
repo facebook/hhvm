@@ -818,6 +818,10 @@ implements Reflector {
   protected function updateInfo() {
     if ($this->isClosure()) {
       $this->info = hphp_get_closure_info($this->src);
+      $closureScopeClass = $this->getClosureScopeClass();
+      if ($closureScopeClass !== null) {
+        $this->info['name'] = $closureScopeClass->getNamespaceName() . '\{closure}';
+      }
     } else {
       $this->info = hphp_get_function_info($this->src);
       if (empty($this->info)) {

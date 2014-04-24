@@ -1063,7 +1063,6 @@ and anon_bind_param params env (param_name, ty as pname_ty) =
 and anon_bind_opt_param env param =
   match param.param_expr with
   | None ->
-      assert !is_silent_mode;
       let ty = Reason.Rnone, Tany in
       bind_param env (None, ty) param
   | Some default ->
@@ -1665,7 +1664,6 @@ and class_contains_smethod env cty (p, mid) =
       (match class_ with
       | None -> None
       | Some class_ ->
-          assert (!is_silent_mode || List.length class_.tc_tparams = List.length paraml);
           let env, smethod = Env.get_static_member true env class_ mid in
           smethod
       )
@@ -1736,7 +1734,6 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
               let arity_match =
                 List.length class_.tc_tparams = List.length paraml
               in
-              assert (!is_silent_mode || arity_match);
               let subst = Inst.make_subst class_.tc_tparams paraml in
               let env, method_ = Inst.instantiate subst env method_ in
               env, method_)

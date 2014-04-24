@@ -1731,9 +1731,6 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
               | _ -> assert false)
           | Some { ce_visibility = vis; ce_type = method_ } ->
               check_visibility p env (Reason.to_pos (fst method_), vis) (Some cid);
-              let arity_match =
-                List.length class_.tc_tparams = List.length paraml
-              in
               let subst = Inst.make_subst class_.tc_tparams paraml in
               let env, method_ = Inst.instantiate subst env method_ in
               env, method_)

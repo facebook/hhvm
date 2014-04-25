@@ -51,7 +51,7 @@ struct RunFlags {
 
 //////////////////////////////////////////////////////////////////////
 
-constexpr int kMaxTrackedLocals = 128;
+constexpr int kMaxTrackedLocals = 512;
 
 /*
  * StepFlags are information about the effects of a single opcode.

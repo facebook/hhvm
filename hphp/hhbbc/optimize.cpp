@@ -51,6 +51,25 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * For filtering assertions, some opcodes are considered to have no
+ * use for a stack input assertion.
+ *
+ * For now this is restricted to opcodes that do literally nothing.
+ */
+bool ignoresStackInput(Op op) {
+  switch (op) {
+  case Op::UnboxRNop:
+  case Op::BoxRNop:
+  case Op::FPassVNop:
+  case Op::FPassC:
+    return true;
+  default:
+    return false;
+  }
+  not_reached();
+}
+
 template<class TyBC, class ArgType>
 folly::Optional<Bytecode> makeAssert(ArrayTypeTable::Builder& arrTable,
                                      ArgType arg,
@@ -92,12 +111,15 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
   if (!options.InsertStackAssertions) return;
 
   // Skip asserting the top of the stack if it just came immediately
-  // out of an 'obvious' instruction.  (See hasObviousStackOutput.)
+  // out of an 'obvious' instruction (see hasObviousStackOutput), or
+  // if this instruction ignoresStackInput.
   assert(state.stack.size() >= bcode.numPop());
   auto i = size_t{0};
   auto stackIdx = state.stack.size() - 1;
-  if (lastStackOutputObvious) {
-    ++i, --stackIdx;
+  if (options.FilterAssertions) {
+    if (lastStackOutputObvious || ignoresStackInput(bcode.op)) {
+      ++i, --stackIdx;
+    }
   }
 
   /*
@@ -202,6 +224,15 @@ bool hasObviousStackOutput(Op op) {
   case Op::Floor:
   case Op::Ceil:
     return true;
+
+  // Consider CGetL obvious because if we knew the type of the local,
+  // we'll assert that right before the CGetL.  Similarly, the output
+  // of SetL is obvious if you know what its input is (which we'll
+  // assert if we know).
+  case Op::CGetL:
+  case Op::SetL:
+    return true;
+
   default:
     return false;
   }

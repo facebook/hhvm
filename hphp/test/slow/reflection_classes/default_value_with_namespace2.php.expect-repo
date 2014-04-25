@@ -10,7 +10,14 @@ array(3) {
   [2]=>
   string(3) "foo"
 }
-string(39) "array(SORT_NUMERIC, array('42'), 'foo')"
+string(71) "array (
+  0 => 1,
+  1 => 
+  array (
+    0 => "42",
+  ),
+  2 => "foo",
+)"
 call:
 array(3) {
   [0]=>

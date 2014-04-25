@@ -115,6 +115,20 @@ struct ClassAnalysis {
 FuncAnalysis analyze_func(const Index&, Context);
 
 /*
+ * Perform a flow-sensitive type analysis on a function, using the
+ * given Index and Context when we need information about things
+ * outside of this function, and assuming that the arguments to the
+ * function have the supplied types.
+ *
+ * This function is used to perform callsite-sensitive type inference.
+ *
+ * Currently this is not supported for closure bodies.
+ */
+FuncAnalysis analyze_func_inline(const Index&,
+                                 Context,
+                                 std::vector<Type> args);
+
+/*
  * Perform an analysis for a whole php::Class at a time.
  *
  * This involves doing a analyze_func call on each of its functions,

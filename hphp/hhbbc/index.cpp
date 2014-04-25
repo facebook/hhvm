@@ -49,6 +49,7 @@
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/analyze.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -143,20 +144,6 @@ using DepMap =
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Filter>
-PropState make_unknown_propstate(borrowed_ptr<const php::Class> cls,
-                                 Filter filter) {
-  auto ret = PropState{};
-  for (auto& prop : cls->properties) {
-    if (filter(prop)) {
-      ret[prop.name] = TGen;
-    }
-  }
-  return ret;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * Entries in the ClassInfo method table need to track some additional
  * information.
@@ -173,6 +160,46 @@ struct MethTabEntry {
   borrowed_ptr<const php::Func> func = nullptr;
   bool hasPrivateAncestor = false;
 };
+
+struct CallContextHashCompare {
+  bool equal(const CallContext& a, const CallContext& b) const {
+    return a == b;
+  }
+
+  size_t hash(const CallContext& c) const {
+    auto ret = folly::hash::hash_combine(
+      c.caller.func,
+      c.args.size()
+    );
+    for (auto& t : c.args) {
+      ret = folly::hash::hash_combine(ret, t.hash());
+    }
+    return ret;
+  }
+};
+
+// Note: CallContext contains the caller Context primarily to reduce
+// the contention in this tbb.  (And because everywhere you need a
+// CallContext you also need that caller Context.)
+using ContextRetTyMap = tbb::concurrent_hash_map<
+  CallContext,
+  Type,
+  CallContextHashCompare
+>;
+
+//////////////////////////////////////////////////////////////////////
+
+template<class Filter>
+PropState make_unknown_propstate(borrowed_ptr<const php::Class> cls,
+                                 Filter filter) {
+  auto ret = PropState{};
+  for (auto& prop : cls->properties) {
+    if (filter(prop)) {
+      ret[prop.name] = TGen;
+    }
+  }
+  return ret;
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -227,6 +254,20 @@ struct FuncInfo {
    * to method and it's always false for functions.
    */
   bool thisAvailable = false;
+
+  /*
+   * Call-context sensitive return types are cached here.  This is not
+   * an optimization.
+   *
+   * The reason we need to retain this information about the
+   * calling-context-sensitive return types is that once the Index is
+   * frozen (during the final optimization pass), calls to
+   * lookup_return_type with a CallContext can't look at the bytecode
+   * bodies of functions other than the calling function.  So we need
+   * to know what we determined the last time we were alloewd to do
+   * that so we can return it again.
+   */
+  ContextRetTyMap contextualReturnTypes;
 };
 
 /*
@@ -461,6 +502,8 @@ struct IndexData {
   IndexData(const IndexData&) = delete;
   IndexData& operator=(const IndexData&) = delete;
   ~IndexData() = default;
+
+  bool frozen{false};
 
   std::unique_ptr<ArrayTypeTable::Builder> arrTableBuilder;
 
@@ -931,7 +974,7 @@ void mark_no_override(IndexData& index) {
         !(cinfo->cls->attrs & AttrInterface)) {
       assert(cinfo->subclassList.front() == borrow(cinfo));
       if (!(cinfo->cls->attrs & AttrNoOverride)) {
-        FTRACE(1, "Adding AttrNoOverride to {}\n", cinfo->cls->name->data());
+        FTRACE(2, "Adding AttrNoOverride to {}\n", cinfo->cls->name->data());
       }
       const_cast<borrowed_ptr<php::Class>>(cinfo->cls)->attrs =
         cinfo->cls->attrs | AttrNoOverride;
@@ -1034,6 +1077,106 @@ void check_invariants(IndexData& data) {
   for (auto& cinfo : data.allClassInfos) {
     check_invariants(borrow(cinfo));
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Type context_sensitive_return_type(const Index& index,
+                                   borrowed_ptr<FuncInfo> finfo,
+                                   CallContext callCtx) {
+  auto const callInsensitiveType = finfo->returnTy;
+
+  constexpr auto max_interp_nexting_level = 2;
+  static thread_local uint32_t interp_nesting_level{0};
+
+  // TODO(#3788877): more heuristics here would be useful.  (And even
+  // functions without params might be worth interpreting in a
+  // context-sensitive way once the context includes the type of
+  // $this.)
+  bool const tryContextSensitive =
+    options.ContextSensitiveInterp &&
+    !finfo->func->params.empty() &&
+    interp_nesting_level + 1 < max_interp_nexting_level;
+  if (!tryContextSensitive) {
+    return callInsensitiveType;
+  }
+
+  ContextRetTyMap::accessor acc;
+  if (finfo->contextualReturnTypes.insert(acc, callCtx)) {
+    acc->second = TTop;
+  }
+
+  auto const contextType = [&] {
+    if (index.frozen()) return acc->second;
+
+    ++interp_nesting_level;
+    SCOPE_EXIT { --interp_nesting_level; };
+
+    auto const calleeCtx = Context {
+      finfo->func->unit,
+      const_cast<borrowed_ptr<php::Func>>(finfo->func),
+      finfo->func->cls
+    };
+    return analyze_func_inline(index, calleeCtx, callCtx.args).inferredReturn;
+  }();
+
+  if (!index.frozen()) {
+    if (contextType.strictSubtypeOf(acc->second)) {
+      acc->second = contextType;
+    }
+  }
+
+  // TODO(#4441939): we can't do anything if it's a strict subtype of
+  // array because of the lack of intersection types.  See below.
+  if (contextType.strictSubtypeOf(TArr)) return callInsensitiveType;
+
+  /*
+   * Note: it may seem like the context sensitive return type should
+   * always be at least as good as the context insensitive one, but
+   * this doesn't hold in general, because we have a constant maximum
+   * nesting depth.  I.e. we could get a better type in the normal,
+   * context insensitive case because we're doing 'inlining'
+   * (context-sensitive) interprets on the callees instead, and there
+   * must be some maximum depth that we'll do that.
+   *
+   * For example, if the max_interp_nexting_level is two, consider the
+   * following functions:
+   *
+   *       Function:                         Context-insensitive return type
+   *
+   *    function f($x) { return $x; }                    InitCell
+   *
+   *    function g($x) { return f($x ? 1 : 2); }         Int
+   *
+   * Now given the following:
+   *
+   *    function foo() { return g(true); }
+   *
+   * We'll inline interpret g, but not f (exceeds maximum depth), so
+   * we'll determine g returned InitCell here, which is worse than
+   * it's context-insensitive type of Int.
+   */
+  if (!contextType.subtypeOf(callInsensitiveType)) {
+    FTRACE(1, "{} <= {} didn't happen on {} called from {} ({})\n",
+      show(contextType),
+      show(callInsensitiveType),
+      finfo->func->name->data(),
+      callCtx.caller.func->name->data(),
+      callCtx.caller.cls ? callCtx.caller.cls->name->data() : "");
+    return callInsensitiveType;
+  }
+
+  /*
+   * TODO(#4441939): for this to be safe for the index invariants on
+   * return types, we need to be intersecting the types here.  This is
+   * because aggregate types (various array subtypes) could have some
+   * parts become more refined when inferring it in a
+   * context-sensitive way, while other parts are less refined.  If
+   * you take one or the other it's possible for normal context
+   * insensitive return types in the index to get bigger instead of
+   * getting smaller.
+   */
+  return contextType;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1486,6 +1629,22 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
   );
 }
 
+Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
+  return match<Type>(
+    rfunc.val,
+    [&] (SString s) {
+      return lookup_return_type(callCtx.caller, rfunc);
+    },
+    [&] (borrowed_ptr<FuncInfo> finfo) {
+      add_dependency(*m_data, finfo->func, callCtx.caller, Dep::ReturnTy);
+      return context_sensitive_return_type(*this, finfo, callCtx);
+    },
+    [&] (borrowed_ptr<FuncFamily> fam) {
+      return lookup_return_type(callCtx.caller, rfunc);
+    }
+  );
+}
+
 std::vector<Type>
 Index::lookup_closure_use_vars(borrowed_ptr<const php::Func> func) const {
   assert(func->isClosureBody);
@@ -1586,6 +1745,7 @@ Index::lookup_private_statics(borrowed_ptr<const php::Class> cls) const {
 std::vector<Context>
 Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
   auto const fdata = create_func_info(*m_data, func);
+
   always_assert_flog(
     t.subtypeOf(fdata->returnTy),
     "Index return type invariant violated in {} {}{}.\n"
@@ -1597,6 +1757,7 @@ Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
     show(t),
     show(fdata->returnTy)
   );
+
   if (!t.strictSubtypeOf(fdata->returnTy)) return {};
   if (fdata->returnRefinments + 1 < options.returnTypeRefineLimit) {
     fdata->returnTy = t;
@@ -1655,6 +1816,14 @@ void Index::refine_private_props(borrowed_ptr<const php::Class> cls,
 void Index::refine_private_statics(borrowed_ptr<const php::Class> cls,
                                    const PropState& state) {
   refine_propstate(m_data->privateStaticPropInfo, cls, state);
+}
+
+bool Index::frozen() const {
+  return m_data->frozen;
+}
+
+void Index::freeze() {
+  m_data->frozen = true;
 }
 
 std::unique_ptr<ArrayTypeTable::Builder>& Index::array_table_builder() const {

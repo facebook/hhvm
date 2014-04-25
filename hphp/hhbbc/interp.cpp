@@ -1477,11 +1477,17 @@ void in(ISS& env, const bc::FCall& op) {
 }
 
 void in(ISS& env, const bc::FCallD& op) {
-  for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
   auto const ar = fpiPop(env);
   specialFunctionEffects(env, ar);
   if (ar.func) {
-    auto const ty = env.index.lookup_return_type(env.ctx, *ar.func);
+    std::vector<Type> args(op.arg1);
+    for (auto i = uint32_t{0}; i < op.arg1; ++i) {
+      args[op.arg1 - i - 1] = popF(env);
+    }
+    auto const ty = env.index.lookup_return_type(
+      CallContext { env.ctx, args },
+      *ar.func
+    );
     if (ty == TBottom) {
       // The callee function never returns.  It might throw, or loop
       // forever.
@@ -1494,6 +1500,7 @@ void in(ISS& env, const bc::FCallD& op) {
     }
     return push(env, ty);
   }
+  for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
   push(env, TInitGen);
 }
 

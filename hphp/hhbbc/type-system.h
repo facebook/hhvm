@@ -313,10 +313,11 @@ struct Type {
   ~Type() noexcept;
 
   /*
-   * Exact equality or inequality of types.
+   * Exact equality or inequality of types, and hashing.
    */
   bool operator==(const Type& o) const;
   bool operator!=(const Type& o) const { return !(*this == o); }
+  size_t hash() const;
 
   /*
    * Returns true if this type is definitely going to be a subtype or a strict

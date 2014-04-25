@@ -104,6 +104,8 @@ void parse_options(int argc, char** argv) {
 
   po::options_description oflags("Optimization Flags");
   oflags.add_options()
+    ("context-sensitive-interp",
+                                po::value(&options.ContextSensitiveInterp))
     ("remove-dead-blocks",      po::value(&options.RemoveDeadBlocks))
     ("constant-prop",           po::value(&options.ConstantProp))
     ("local-dce",               po::value(&options.LocalDCE))

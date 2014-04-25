@@ -22,6 +22,7 @@
 
 #include "folly/Optional.h"
 #include "folly/Traits.h"
+#include "folly/Hash.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
@@ -1119,6 +1120,14 @@ bool Type::operator==(const Type& o) const {
   }
 
   return equivData(o);
+}
+
+size_t Type::hash() const {
+  using U1 = std::underlying_type<decltype(m_bits)>::type;
+  using U2 = std::underlying_type<decltype(m_dataTag)>::type;
+  auto const rawBits = U1{m_bits};
+  auto const rawTag  = static_cast<U2>(m_dataTag);
+  return folly::hash::hash_combine(rawBits, rawTag);
 }
 
 bool Type::subtypeOf(Type o) const {

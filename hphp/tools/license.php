@@ -60,6 +60,7 @@ $files_zend = array(
   'runtime/base/zend-functions.cpp',
   'runtime/base/zend-ini.lex.yy.cpp',
   'runtime/base/zend-math.h',
+  'runtime/base/zend-math.cpp',
   'runtime/base/zend-multiply.h',
   'runtime/base/zend-pack.h',
   'runtime/base/zend-pack.cpp',

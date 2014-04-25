@@ -341,3 +341,6 @@ let iter_n_acc n f acc =
 
 let strip_ns s =
   if s.[0] = '\\' then String.sub s 1 ((String.length s) - 1) else s
+
+let cat fn = failwith "Cannot use cat in JS"
+

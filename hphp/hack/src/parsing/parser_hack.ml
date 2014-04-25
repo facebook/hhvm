@@ -3298,11 +3298,7 @@ let program ?(fail=true) content =
   snd (entry ~fail content)
 
 let from_file_with_comments filename =
-  let ic = open_in filename in
-  let buf = Buffer.create 256 in
-  Buffer.add_channel buf ic (in_channel_length ic);
-  let content = Buffer.contents buf in
-  close_in ic;
+  let content = Utils.cat filename in
   entry ~fail:true content
 
 let from_file filename =

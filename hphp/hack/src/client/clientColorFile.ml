@@ -52,11 +52,7 @@ let to_json input =
 (*****************************************************************************)
 
 let go filename output_json pos_type_l =
-  let ic = open_in filename in
-  let len = in_channel_length ic in
-  let buf = Buffer.create len in
-  Buffer.add_channel buf ic len;
-  let str = Buffer.contents buf in
+  let str = Utils.cat filename in
   let results = ColorFile.go str pos_type_l in
   if output_json then
     print_endline (Json.json_to_string (to_json results))

@@ -132,11 +132,7 @@ let rec make_files = function
   | _ -> assert false
 
 let parse_file fn =
-  let ic = open_in fn in
-  let buf = Buffer.create 256 in
-  Buffer.add_channel buf ic (in_channel_length ic);
-  let content = Buffer.contents buf in
-  close_in ic;
+  let content = cat fn in
   let delim = Str.regexp "////.*" in
   if Str.string_match delim content 0
   then

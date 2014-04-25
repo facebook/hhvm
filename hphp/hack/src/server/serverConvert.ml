@@ -29,32 +29,6 @@ let add_file env fn =
   let failed_parsing = SSet.add fn env.ServerEnv.failed_parsing in
   { env with ServerEnv.failed_parsing = failed_parsing }
 
-let open_in_no_fail fn = 
-  try open_in fn
-  with e -> 
-    let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not open_in: '%s' (%s)\n" fn e;
-    exit 3
-
-let close_in_no_fail fn ic =
-  try close_in ic with e ->
-    let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not close: '%s' (%s)\n" fn e;
-    exit 3
-
-let open_out_no_fail fn =
-  try open_out fn
-  with e -> 
-    let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not open_out: '%s' (%s)\n" fn e;
-    exit 3
-
-let close_out_no_fail fn oc =
-  try close_out oc with e ->
-    let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not close: '%s' (%s)\n" fn e;
-    exit 3
-
 (* Maps filenames to the contents of those files, split into lines. Each line
  * is numbered with the line number of the *original* line in the file, before
  * any patches were applied this pass. We need the original line number since
@@ -70,19 +44,14 @@ let close_out_no_fail fn oc =
 let file_data = ref (SMap.empty : (int * string) list SMap.t)
 
 let split_and_number content =
-  let re = Str.regexp "[\n]" in
-  let lines = Str.split re content in
+  let lines = Utils.split_lines content in
   let (_, numbered_lines) = List.fold_left begin fun (n, acc) line ->
     n+1, (n, line)::acc
   end (1, []) lines in
   List.rev numbered_lines
 
 let read_file_raw fn =
-  let ic = open_in_no_fail fn in
-  let buf = Buffer.create 256 in
-  Buffer.add_channel buf ic (in_channel_length ic);
-  close_in_no_fail fn ic;
-  let content = Buffer.contents buf in
+  let content = cat_no_fail fn in
   split_and_number content
 
 let read_file fn =

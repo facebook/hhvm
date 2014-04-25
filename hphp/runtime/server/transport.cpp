@@ -41,6 +41,7 @@
 #include "folly/String.h"
 #include <stdio.h>
 #include <fstream>
+#include "hphp/runtime/base/type-conversions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -554,6 +555,7 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
     cookie += name.data();
     cookie += "=deleted; expires=";
     cookie += sdt.data();
+    cookie += "; Max-Age=0";
   } else {
     cookie += name.data();
     cookie += "=";
@@ -567,6 +569,9 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
       String sdt =
         DateTime(expire, true).toString(DateTime::DateFormat::Cookie);
       cookie += sdt.data();
+      cookie += "; Max-Age=";
+      String sdelta = toString( expire - time(0) );
+      cookie += sdelta.data();
     }
   }
 

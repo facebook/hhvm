@@ -62,6 +62,16 @@ namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
+ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
+  ArrayData* r = a->append(tvAsCVarRef(&value), a->getCount() != 1);
+  if (UNLIKELY(r != a)) {
+    r->incRefCount();
+    decRefArr(a);
+  }
+  tvRefcountedDecRef(value);
+  return r;
+}
+
 ArrayData* addElemIntKeyHelper(ArrayData* ad,
                                int64_t key,
                                TypedValue value) {

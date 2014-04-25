@@ -220,7 +220,13 @@ void in(ISS& env, const bc::Array& op) {
   push(env, aval(op.arr1));
 }
 
-void in(ISS& env, const bc::NewArray&) { push(env, TArr); }
+void in(ISS& env, const bc::NewArray& op) {
+  push(env, op.arg1 == 0 ? aempty() : counted_aempty());
+}
+
+void in(ISS& env, const bc::NewMixedArray& op) {
+  push(env, op.arg1 == 0 ? aempty() : counted_aempty());
+}
 
 void in(ISS& env, const bc::NewPackedArray& op) {
   auto elems = std::vector<Type>{};

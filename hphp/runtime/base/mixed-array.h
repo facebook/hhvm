@@ -260,17 +260,8 @@ private:
   MixedArray* copyMixed() const;
   MixedArray* copyMixedAndResizeIfNeeded() const;
   MixedArray* copyMixedAndResizeIfNeededSlow() const;
+
 public:
-
-  /**
-   * Main helper for AddNewElemC.  The semantics are slightly different from
-   * other helpers, but tuned for the opcode.  The value to set is passed by
-   * value; the caller has incref'd it if necessary, and this call *moves* it
-   * to its location in the array (caller must not decref).  If the value cannot
-   * be stored in the array, this helper decref's it.
-   */
-  static ArrayData* AddNewElemC(ArrayData* a, TypedValue value);
-
   // Elm's data.m_type == KindOfInvalid for deleted slots.
   static bool isTombstone(DataType t) {
     assert(IS_REAL_TYPE(t) || t == KindOfInvalid);

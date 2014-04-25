@@ -549,6 +549,14 @@ void HhbcTranslator::emitNewArray(int capacity) {
   }
 }
 
+void HhbcTranslator::emitNewMixedArray(int capacity) {
+  if (capacity == 0) {
+    push(cns(staticEmptyArray()));
+  } else {
+    push(gen(NewMixedArray, cns(capacity)));
+  }
+}
+
 void HhbcTranslator::emitNewPackedArray(int numArgs) {
   // The NewPackedArray opcode's helper needs array values passed to it
   // via the stack.  We use spillStack() to flush the eval stack and

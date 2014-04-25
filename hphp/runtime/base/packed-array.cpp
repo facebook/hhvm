@@ -925,49 +925,4 @@ ArrayData* PackedArray::ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Cold path helper for AddNewElemC delegates to the ArrayData::append
- * virtual method.
- */
-static NEVER_INLINE
-ArrayData* genericAddNewElemC(ArrayData* a, TypedValue value) {
-  ArrayData* r = a->append(tvAsCVarRef(&value), a->getCount() != 1);
-  if (UNLIKELY(r != a)) {
-    r->incRefCount();
-    decRefArr(a);
-  }
-  tvRefcountedDecRef(value);
-  return r;
-}
-
-/*
- * The pass-by-value and move semantics of this helper are slightly different
- * than other array helpers, but tuned for the opcode.  See doc comment in
- * hphp_array.h.
- */
-ArrayData* MixedArray::AddNewElemC(ArrayData* ad, TypedValue value) {
-  assert(value.m_type != KindOfRef);
-
-  if (LIKELY(ad->isPacked())) {
-    assert(PackedArray::checkInvariants(ad));
-    if (LIKELY(ad->m_pos >= 0) &&
-        LIKELY(!ad->hasMultipleRefs())) {
-      int64_t const k = ad->m_size;
-      if (LIKELY(sizeLessThanPackedCapCode(k, ad->m_packedCapCode))) {
-        auto& tv = packedData(ad)[k];
-        // TODO(#3888164): this KindOfUninit check is almost certainly
-        // unnecessary, but it was here so it hasn't been removed yet.
-        tv.m_type = value.m_type == KindOfUninit ? KindOfNull : value.m_type;
-        tv.m_data = value.m_data;
-        ad->m_size = k + 1;
-        return ad;
-      }
-    }
-  }
-
-  return genericAddNewElemC(ad, value);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 }

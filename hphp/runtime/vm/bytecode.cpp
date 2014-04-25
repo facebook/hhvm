@@ -3717,7 +3717,21 @@ OPTBLD_INLINE void ExecutionContext::iopArray(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopNewArray(IOP_ARGS) {
   NEXT();
   DECODE_IVA(capacity);
-  vmStack().pushArrayNoRc(MixedArray::MakeReserve(capacity));
+  if (capacity == 0) {
+    vmStack().pushArrayNoRc(staticEmptyArray());
+  } else {
+    vmStack().pushArrayNoRc(MixedArray::MakeReserve(capacity));
+  }
+}
+
+OPTBLD_INLINE void ExecutionContext::iopNewMixedArray(IOP_ARGS) {
+  NEXT();
+  DECODE_IVA(capacity);
+  if (capacity == 0) {
+    vmStack().pushArrayNoRc(staticEmptyArray());
+  } else {
+    vmStack().pushArrayNoRc(MixedArray::MakeReserveMixed(capacity));
+  }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopNewPackedArray(IOP_ARGS) {

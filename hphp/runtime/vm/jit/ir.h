@@ -509,6 +509,7 @@ O(StClosureFunc,                    ND, S(Obj),                            E) \
 O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \
 O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                        N|PRc) \
+O(NewMixedArray,                D(Arr), C(Int),                        N|PRc) \
 O(NewPackedArray,           DArrPacked, C(Int) S(StkPtr),        E|N|PRc|CRc) \
 O(NewStructArray,               D(Arr), S(StkPtr),               E|N|PRc|CRc) \
 O(NewCol,                       D(Obj), C(Int) C(Int),                 N|PRc) \

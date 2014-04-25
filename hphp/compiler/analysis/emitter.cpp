@@ -2736,15 +2736,23 @@ void EmitterVisitor::visitKids(ConstructPtr c) {
 }
 
 template<class Fun>
-bool checkKeys(ExpressionPtr init_expr, Fun fun) {
-  if (init_expr->getKindOf() != Expression::KindOfExpressionList) return false;
-  ExpressionListPtr el = static_pointer_cast<ExpressionList>(init_expr);
+bool checkKeys(ExpressionPtr init_expr, bool check_size, Fun fun) {
+  if (init_expr->getKindOf() != Expression::KindOfExpressionList) {
+    return false;
+  }
+
+  auto el = static_pointer_cast<ExpressionList>(init_expr);
   int n = el->getCount();
-  if (n < 1 || n > MixedArray::MaxMakeSize) return false;
+  if (n < 1 || (check_size && n > MixedArray::MaxMakeSize)) {
+    return false;
+  }
+
   for (int i = 0, n = el->getCount(); i < n; ++i) {
     ExpressionPtr ex = (*el)[i];
-    if (ex->getKindOf() != Expression::KindOfArrayPairExpression) return false;
-    ArrayPairExpressionPtr ap = static_pointer_cast<ArrayPairExpression>(ex);
+    if (ex->getKindOf() != Expression::KindOfArrayPairExpression) {
+      return false;
+    }
+    auto ap = static_pointer_cast<ArrayPairExpression>(ex);
     if (ap->isRef()) return false;
     if (!fun(ap)) return false;
   }
@@ -2754,14 +2762,25 @@ bool checkKeys(ExpressionPtr init_expr, Fun fun) {
 /*
  * isPackedInit() returns true if this expression list looks like an
  * array with no keys and no ref values; e.g. array(x,y,z).
+ *
  * In this case we can NewPackedArray to create the array. The elements are
  * pushed on the stack, so we arbitrarily limit this to a small multiple of
  * MixedArray::SmallSize (12).
  */
-bool isPackedInit(ExpressionPtr init_expr, int* size) {
+bool isPackedInit(ExpressionPtr init_expr, int* size,
+                  bool check_size = true) {
   *size = 0;
-  return checkKeys(init_expr, [&](ArrayPairExpressionPtr ap) {
-    if (ap->getName() != nullptr) return false;
+  return checkKeys(init_expr, check_size, [&](ArrayPairExpressionPtr ap) {
+    Variant key;
+
+    // If we have a key but it is not the next integral index, then we don't
+    // have a packed initializer.
+    if (ap->getName() != nullptr && !(ap->getScalarValue(key) &&
+                                      key.isInteger() &&
+                                      key.asInt64Val() == *size)) {
+      return false;
+    }
+
     (*size)++;
     return true;
   });
@@ -2772,7 +2791,7 @@ bool isPackedInit(ExpressionPtr init_expr, int* size) {
  * all static strings with no duplicates.
  */
 bool isStructInit(ExpressionPtr init_expr, std::vector<std::string>& keys) {
-  return checkKeys(init_expr, [&](ArrayPairExpressionPtr ap) {
+  return checkKeys(init_expr, true, [&](ArrayPairExpressionPtr ap) {
     auto key = ap->getName();
     if (key == nullptr || !key->isLiteralString()) return false;
     auto name = key->getLiteralString();
@@ -3454,6 +3473,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         if (op == T_ARRAY) {
           int num_elems;
           std::vector<std::string> keys;
+
           if (u->isScalar()) {
             TypedValue tv;
             tvWriteUninit(&tv);
@@ -3461,42 +3481,44 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             if (m_staticArrays.empty()) {
               e.Array(tv.m_data.parr);
             }
+
           } else if (isPackedInit(u->getExpression(), &num_elems)) {
             // evaluate array values onto stack
-            ExpressionListPtr el =
-              static_pointer_cast<ExpressionList>(u->getExpression());
+            auto el = static_pointer_cast<ExpressionList>(u->getExpression());
             for (int i = 0; i < num_elems; i++) {
-              ArrayPairExpressionPtr ap =
-                static_pointer_cast<ArrayPairExpression>((*el)[i]);
+              auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
               visit(ap->getValue());
               emitConvertToCell(e);
             }
             e.NewPackedArray(num_elems);
+
           } else if (isStructInit(u->getExpression(), keys)) {
-            ExpressionListPtr el =
-              static_pointer_cast<ExpressionList>(u->getExpression());
+            auto el = static_pointer_cast<ExpressionList>(u->getExpression());
             for (int i = 0, n = keys.size(); i < n; i++) {
-              ArrayPairExpressionPtr ap =
-                static_pointer_cast<ArrayPairExpression>((*el)[i]);
+              auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
               visit(ap->getValue());
               emitConvertToCell(e);
             }
             e.NewStructArray(keys);
+
           } else {
             assert(m_staticArrays.empty());
+            auto capacityHint = MixedArray::SmallSize;
+
             ExpressionPtr ex = u->getExpression();
-            int capacityHint = -1;
             if (ex->getKindOf() == Expression::KindOfExpressionList) {
-              ExpressionListPtr el(static_pointer_cast<ExpressionList>(ex));
+              auto el = static_pointer_cast<ExpressionList>(ex);
+
               int capacity = el->getCount();
               if (capacity > 0) {
                 capacityHint = capacity;
               }
             }
-            if (capacityHint != -1) {
+
+            if (isPackedInit(ex, &num_elems, false /* ignore size */)) {
               e.NewArray(capacityHint);
             } else {
-              e.NewArray(MixedArray::SmallSize);
+              e.NewMixedArray(capacityHint);
             }
             visit(ex);
           }

@@ -59,10 +59,12 @@ inline bool magFits(uint64_t val, int s) {
  * implicit implementation-defined conversion.
  */
 struct Immed {
-  /* implicit */ Immed(int32_t i) : m_int(i) {}
-  /* implicit */ Immed(uint32_t i) = delete;
-  /* implicit */ Immed(int64_t i) = delete;
-  /* implicit */ Immed(uint64_t i) = delete;
+  /* implicit */ Immed(int i) : m_int(i) {}
+  /* implicit */ Immed(unsigned i) = delete;
+  /* implicit */ Immed(long i) = delete;
+  /* implicit */ Immed(unsigned long i) = delete;
+  /* implicit */ Immed(long long i) = delete;
+  /* implicit */ Immed(unsigned long long i) = delete;
 
   int64_t q() const { return m_int; }
   int32_t l() const { return safe_cast<int32_t>(m_int); }

@@ -27,34 +27,10 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-APCHandle* getAPCHandle(const Variant& source) {
-  auto const cell = source.asCell();
-  if (cell->m_type == KindOfString) {
-    return cell->m_data.pstr->getAPCHandle();
-  }
-  if (cell->m_type == KindOfArray) {
-    return cell->m_data.parr->getAPCHandle();
-  }
-  return nullptr;
-}
-
-}
-
 APCHandle* APCHandle::Create(const Variant& source,
                              bool serialized,
                              bool inner /* = false */,
                              bool unserializeObj /* = false*/) {
-  // if a wrapper of an existing APC object is provided then just use
-  // the wrapped APC object.
-  // getAPCHandle() is responsible to check the conditions under which
-  // a wrapped object can be returned
-  auto wrapped = getAPCHandle(source);
-  if (UNLIKELY(wrapped && !unserializeObj && !wrapped->getUncounted())) {
-    wrapped->reference();
-    return wrapped;
-  }
   return CreateSharedType(source, serialized, inner, unserializeObj);
 }
 

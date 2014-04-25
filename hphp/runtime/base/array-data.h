@@ -29,7 +29,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct APCHandle;
 struct TypedValue;
 
 struct ArrayData {
@@ -155,8 +154,6 @@ public:
    * right now.
    */
   bool isVectorData() const;
-
-  APCHandle* getAPCHandle();
 
   /**
    * Position-based iterations, implemented using iter_begin,
@@ -513,7 +510,6 @@ struct ArrayFunctions {
   void (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);
-  APCHandle* (*getAPCHandle[NK])(const ArrayData*);
   ArrayData* (*zSetInt[NK])(ArrayData*, int64_t k, RefData* v);
   ArrayData* (*zSetStr[NK])(ArrayData*, StringData* k, RefData* v);
   ArrayData* (*zAppend[NK])(ArrayData*, RefData* v);

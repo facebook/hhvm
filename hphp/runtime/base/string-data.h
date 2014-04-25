@@ -32,7 +32,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-class APCHandle;
 class APCString;
 class Array;
 class String;
@@ -201,12 +200,6 @@ struct StringData {
   void setRefCount(RefCount n);
   bool isStatic() const;
   bool isUncounted() const;
-
-  /*
-   * Get the wrapped APCHandle, or return null if this string is
-   * not shared.
-   */
-  APCHandle* getAPCHandle() const;
 
   /*
    * Append the supplied range to this string.  If there is not

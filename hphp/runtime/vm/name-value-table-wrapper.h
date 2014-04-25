@@ -133,10 +133,6 @@ public:
     reinterpret_cast<ArrayData* (*)(const ArrayData*)>(
       ArrayCommon::ReturnFirstArg
     );
-  static constexpr auto GetAPCHandle =
-    reinterpret_cast<APCHandle* (*)(const ArrayData*)>(
-      ArrayCommon::ReturnNull
-    );
 
 private:
   static NameValueTableWrapper* asNVTW(ArrayData* ad);

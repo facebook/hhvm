@@ -114,11 +114,6 @@ StringData* StringData::Make(APCString* shared) {
   return ret;
 }
 
-APCHandle* StringData::getAPCHandle() const {
-  if (isShared()) return sharedPayload()->shared->getHandle();
-  return nullptr;
-}
-
 // Defined here for inlining into MakeSVSlowPath
 ALWAYS_INLINE void StringData::enlist() {
  assert(isShared());

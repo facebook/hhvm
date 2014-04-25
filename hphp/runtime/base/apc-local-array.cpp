@@ -126,12 +126,6 @@ ssize_t APCLocalArray::getIndex(const StringData* k) const {
   return m_arr->getIndex(k);
 }
 
-APCHandle* APCLocalArray::GetAPCHandle(const ArrayData* ad) {
-  auto a = asSharedArray(ad);
-  if (a->m_arr->shouldCache()) return nullptr;
-  return a->m_arr->getHandle();
-}
-
 ArrayData* APCLocalArray::loadElems() const {
   auto count = m_arr->size();
   ArrayData* elems;

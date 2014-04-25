@@ -32,7 +32,6 @@ struct ArrayData;
 struct StringData;
 struct TypedValue;
 struct MArrayIter;
-struct APCHandle;
 struct MixedArray;
 
 //////////////////////////////////////////////////////////////////////
@@ -119,10 +118,6 @@ struct PackedArray {
   static constexpr auto Escalate =
     reinterpret_cast<ArrayData* (*)(const ArrayData*)>(
       ArrayCommon::ReturnFirstArg
-    );
-  static constexpr auto GetAPCHandle =
-    reinterpret_cast<APCHandle* (*)(const ArrayData*)>(
-      ArrayCommon::ReturnNull
     );
 
   //////////////////////////////////////////////////////////////////////

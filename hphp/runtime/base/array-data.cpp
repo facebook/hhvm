@@ -563,13 +563,6 @@ extern const ArrayFunctions g_array_funcs = {
   DISPATCH(Escalate)
 
   /*
-   * GetAPCHandle* GetAPCHandle(const ArrayData*)
-   *
-   *   If this array has an associated APCHandle, return it.
-   */
-  DISPATCH(GetAPCHandle)
-
-  /*
    * ArrayData* ZSet{Int,Str}
    * ArrayData* ZAppend
    *

@@ -45,7 +45,6 @@ struct APCLocalArray : private ArrayData
                      , private Sweepable {
   template<class... Args> static APCLocalArray* Make(Args&&...);
 
-  static APCHandle* GetAPCHandle(const ArrayData* ad);
   static size_t Vsize(const ArrayData*);
   static const Variant& GetValueRef(const ArrayData* ad, ssize_t pos);
   static bool ExistsInt(const ArrayData* ad, int64_t k);

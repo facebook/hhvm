@@ -246,10 +246,6 @@ public:
     reinterpret_cast<ArrayData* (*)(const ArrayData*)>(
       ArrayCommon::ReturnFirstArg
     );
-  static constexpr auto GetAPCHandle =
-    reinterpret_cast<APCHandle* (*)(const ArrayData*)>(
-      ArrayCommon::ReturnNull
-    );
 
   static ArrayData* EscalateForSort(ArrayData* ad);
   static void Ksort(ArrayData*, int sort_flags, bool ascending);

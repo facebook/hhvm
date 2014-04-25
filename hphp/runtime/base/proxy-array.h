@@ -90,7 +90,6 @@ public: // ArrayData implementation
   static bool ValidMArrayIter(const ArrayData*, const MArrayIter & fp);
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter&);
   static bool IsVectorData(const ArrayData*);
-  static APCHandle *GetAPCHandle(const ArrayData* ad);
 
   static ArrayData* EscalateForSort(ArrayData*);
   static void Ksort(ArrayData*, int sort_flags, bool ascending);

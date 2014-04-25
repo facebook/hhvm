@@ -314,10 +314,6 @@ bool ProxyArray::IsVectorData(const ArrayData* ad) {
   return innerArr(ad)->isVectorData();
 }
 
-APCHandle *ProxyArray::GetAPCHandle(const ArrayData* ad) {
-  return innerArr(ad)->getAPCHandle();
-}
-
 ArrayData* ProxyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
   auto r = innerArr(ad)->zSet(k, v);
   return reseatable(ad, r);

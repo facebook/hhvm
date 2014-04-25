@@ -322,3 +322,5 @@ clean::
 # legacy
 clean::
 	rm -f nast_helpers.ml
+
+.depend:: $(SRC)

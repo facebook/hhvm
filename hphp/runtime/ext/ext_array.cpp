@@ -266,12 +266,20 @@ Variant f_array_fill(int start_index, int num, const Variant& value) {
     return false;
   }
 
-  Array ret;
-  ret.set(start_index, value);
-  for (int i = num - 1; i > 0; i--) {
-    ret.append(value);
+  if (start_index == 0) {
+    PackedArrayInit pai(num);
+    for (size_t k = 0; k < num; k++) {
+      pai.append(value);
+    }
+    return pai.toVariant();
+  } else {
+    ArrayInit ret(num, ArrayInit::Mixed{});
+    ret.set(start_index, value);
+    for (int i = num - 1; i > 0; i--) {
+      ret.set(value);
+    }
+    return ret.toVariant();
   }
-  return ret;
 }
 
 Variant f_array_flip(const Variant& trans) {

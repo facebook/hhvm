@@ -206,12 +206,13 @@ Variant f_array_combine(const Variant& keys, const Variant& values) {
                   "arrays or collections");
     return uninit_null();
   }
-  if (UNLIKELY(getContainerSize(cell_keys) != getContainerSize(cell_values))) {
+  auto keys_size = getContainerSize(cell_keys);
+  if (UNLIKELY(keys_size != getContainerSize(cell_values))) {
     raise_warning("array_combine(): Both parameters should have an equal "
                   "number of elements");
     return false;
   }
-  Array ret = Array::Create();
+  Array ret = Array::attach(MixedArray::MakeReserveMixed(keys_size));
   for (ArrayIter iter1(cell_keys), iter2(cell_values);
        iter1; ++iter1, ++iter2) {
     const Variant& key = iter1.secondRefPlus();

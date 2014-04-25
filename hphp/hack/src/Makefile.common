@@ -76,7 +76,7 @@ all::
 	$(OCAMLC) -i $<
 
 .c.o:
-	$(OCAMLC) -c $^ -o $@
+	$(OCAMLC) -ccopt -g -c $^ -o $@
 
 clean::
 	rm -f *.cm[ioxa] *.cmt* *.o *.a *.so *.cmxa *.annot *.opt *.bc

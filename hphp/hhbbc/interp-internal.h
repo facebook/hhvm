@@ -41,16 +41,18 @@ const StaticString s_http_response_header("http_response_header");
 /*
  * Interpreter Step State.
  *
- * This struct is gives interpreter functions access to shared state.
+ * This struct gives interpreter functions access to shared state.
  * It's not in interp-state.h because it's part of the internal
  * implementation of interpreter routines.  The publicized state as
  * results of interpretation are in that header and interp.h.
  */
 struct ISS {
-  explicit ISS(Interp& bag, StepFlags& flags, PropagateFn propagate)
+  explicit ISS(Interp& bag,
+               StepFlags& flags,
+               PropagateFn propagate)
     : index(bag.index)
     , ctx(bag.ctx)
-    , props(bag.props)
+    , collect(bag.collect)
     , blk(*bag.blk)
     , state(bag.state)
     , flags(flags)
@@ -59,7 +61,7 @@ struct ISS {
 
   const Index& index;
   const Context ctx;
-  PropertiesInfo& props;
+  CollectedInfo& collect;
   const php::Block& blk;
   State& state;
   StepFlags& flags;
@@ -389,7 +391,7 @@ folly::Optional<Type> selfCls(ISS& env) {
  */
 
 Type* thisPropRaw(ISS& env, SString name) {
-  auto& privateProperties = env.props.privateProperties();
+  auto& privateProperties = env.collect.props.privateProperties();
   auto const it = privateProperties.find(name);
   if (it != end(privateProperties)) {
     return &it->second;
@@ -403,7 +405,9 @@ bool isTrackedThisProp(ISS& env, SString name) {
 
 void killThisProps(ISS& env) {
   FTRACE(2, "    killThisProps\n");
-  for (auto& kv : env.props.privateProperties()) kv.second = TGen;
+  for (auto& kv : env.collect.props.privateProperties()) {
+    kv.second = TGen;
+  }
 }
 
 /*
@@ -454,7 +458,7 @@ void mergeThisProp(ISS& env, SString name, Type type) {
  */
 template<class MapFn>
 void mergeEachThisPropRaw(ISS& env, MapFn fn) {
-  for (auto& kv : env.props.privateProperties()) {
+  for (auto& kv : env.collect.props.privateProperties()) {
     mergeThisProp(env, kv.first, fn(kv.second));
   }
 }
@@ -464,7 +468,7 @@ void unsetThisProp(ISS& env, SString name) {
 }
 
 void unsetUnknownThisProp(ISS& env) {
-  for (auto& kv : env.props.privateProperties()) {
+  for (auto& kv : env.collect.props.privateProperties()) {
     mergeThisProp(env, kv.first, TUninit);
   }
 }
@@ -483,7 +487,7 @@ void boxThisProp(ISS& env, SString name) {
  */
 void loseNonRefThisPropTypes(ISS& env) {
   FTRACE(2, "    loseNonRefThisPropTypes\n");
-  for (auto& kv : env.props.privateProperties()) {
+  for (auto& kv : env.collect.props.privateProperties()) {
     if (kv.second.subtypeOf(TCell)) kv.second = TCell;
   }
 }
@@ -495,7 +499,7 @@ void loseNonRefThisPropTypes(ISS& env) {
 // insensitive types for these.
 
 Type* selfPropRaw(ISS& env, SString name) {
-  auto& privateStatics = env.props.privateStatics();
+  auto& privateStatics = env.collect.props.privateStatics();
   auto it = privateStatics.find(name);
   if (it != end(privateStatics)) {
     return &it->second;
@@ -505,7 +509,9 @@ Type* selfPropRaw(ISS& env, SString name) {
 
 void killSelfProps(ISS& env) {
   FTRACE(2, "    killSelfProps\n");
-  for (auto& kv : env.props.privateStatics()) kv.second = TGen;
+  for (auto& kv : env.collect.props.privateStatics()) {
+    kv.second = TGen;
+  }
 }
 
 void killSelfProp(ISS& env, SString name) {
@@ -538,7 +544,7 @@ void mergeSelfProp(ISS& env, SString name, Type type) {
  */
 template<class MapFn>
 void mergeEachSelfPropRaw(ISS& env, MapFn fn) {
-  for (auto& kv : env.props.privateStatics()) {
+  for (auto& kv : env.collect.props.privateStatics()) {
     mergeSelfProp(env, kv.first, fn(kv.second));
   }
 }
@@ -558,7 +564,7 @@ void boxSelfProp(ISS& env, SString name) {
  */
 void loseNonRefSelfPropTypes(ISS& env) {
   FTRACE(2, "    loseNonRefSelfPropTypes\n");
-  for (auto& kv : env.props.privateStatics()) {
+  for (auto& kv : env.collect.props.privateStatics()) {
     if (kv.second.subtypeOf(TInitCell)) kv.second = TCell;
   }
 }

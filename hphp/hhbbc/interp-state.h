@@ -18,12 +18,14 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 #include <boost/variant.hpp>
 
 #include "folly/Optional.h"
 
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/bc.h"
 
@@ -106,8 +108,9 @@ State without_stacks(const State&);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * PropertiesInfo returns the PropState for private instance and static
- * properties.
+ * PropertiesInfo packages the PropState for private instance and
+ * static properties, which is cross-block information collected in
+ * CollectedInfo.
  *
  * During analysis the ClassAnalysis* is available and the PropState is
  * retrieved from there. However during optimization the ClassAnalysis is
@@ -127,6 +130,40 @@ private:
   ClassAnalysis* const m_cls;
   PropState m_privateProperties;
   PropState m_privateStatics;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Map from closure classes to types for each of their used vars.
+ * Shows up in a few different interpreter structures.
+ */
+using ClosureUseVarMap = std::map<
+  borrowed_ptr<php::Class>,
+  std::vector<Type>
+>;
+
+/*
+ * Merge the types in the vector as possible use vars for the closure
+ * `clo' into the destination map.
+ */
+void merge_closure_use_vars_into(ClosureUseVarMap& dst,
+                                 borrowed_ptr<php::Class> clo,
+                                 std::vector<Type>);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Area used for writing down any information that is collected across
+ * a series of step operations (possibly cross block).
+ */
+struct CollectedInfo {
+  explicit CollectedInfo(const Index& index, Context ctx, ClassAnalysis* cls)
+    : props{index, ctx, cls}
+  {}
+
+  ClosureUseVarMap closureUseTypes;
+  PropertiesInfo props;
 };
 
 //////////////////////////////////////////////////////////////////////

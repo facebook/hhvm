@@ -67,9 +67,18 @@ struct FuncAnalysis {
   // Block data is indexed by Block::id.
   std::vector<BlockData> bdata;
 
-  // The inferred function return type.  May be TBottom if the
-  // function never returns.
+  /*
+   * The inferred function return type.  May be TBottom if the
+   * function never returns.
+   */
   Type inferredReturn;
+
+  /*
+   * If this function allocates closures, this maps each of those
+   * closure classes to the types of its used variables, in their
+   * declared order.
+   */
+  ClosureUseVarMap closureUseTypes;
 };
 
 /*

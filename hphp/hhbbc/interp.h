@@ -29,6 +29,7 @@
 namespace HPHP { namespace HHBBC {
 
 struct PropertiesInfo;
+struct CollectedInfo;
 struct State;
 struct StepFlags;
 struct Bytecode;
@@ -132,7 +133,7 @@ struct StepFlags {
 struct Interp {
   const Index& index;
   Context ctx;
-  PropertiesInfo& props;
+  CollectedInfo& collect;
   borrowed_ptr<const php::Block> blk;
   State& state;
 };

@@ -37,7 +37,9 @@
 #include "folly/Optional.h"
 #include "folly/Lazy.h"
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/match.h"
+
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
 
@@ -45,6 +47,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/func-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -498,6 +501,11 @@ struct IndexData {
     borrowed_ptr<const php::Class>,
     PropState
   > privateStaticPropInfo;
+
+  std::unordered_map<
+    borrowed_ptr<const php::Class>,
+    std::vector<Type>
+  > closureUseVars;
 
   // For now we only need dependencies for function return types.
   DepMap dependencyMap;
@@ -1100,6 +1108,24 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   return name_only();
 }
 
+std::pair<res::Class,borrowed_ptr<php::Class>>
+Index::resolve_closure_class(Context ctx, SString name) const {
+  auto const rcls = resolve_class(ctx, name);
+
+  // Closure classes must be unique and defined in the unit that uses
+  // the CreateCl opcode, so resolution must succeed.
+  always_assert_flog(
+    rcls.hasValue() && rcls->val.right(),
+    "A Closure class ({}) failed to resolve",
+    name->data()
+  );
+
+  return {
+    *rcls,
+    const_cast<borrowed_ptr<php::Class>>(rcls->val.right()->cls)
+  };
+}
+
 res::Class Index::builtin_class(SString name) const {
   auto const rcls = resolve_class(Context {}, name);
   if (!rcls) {
@@ -1412,6 +1438,19 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
   );
 }
 
+std::vector<Type>
+Index::lookup_closure_use_vars(borrowed_ptr<const php::Func> func) const {
+  assert(func->isClosureBody);
+
+  auto const numUseVars = closure_num_use_vars(func);
+  if (!numUseVars) return {};
+  auto const it = m_data->closureUseVars.find(func->cls);
+  if (it == end(m_data->closureUseVars)) {
+    return std::vector<Type>(numUseVars, TInitGen);
+  }
+  return it->second;
+}
+
 Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
   auto it = m_data->funcInfo.find(f);
   if (it != end(m_data->funcInfo)) return it->second.returnTy;
@@ -1499,7 +1538,17 @@ Index::lookup_private_statics(borrowed_ptr<const php::Class> cls) const {
 std::vector<Context>
 Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
   auto const fdata = create_func_info(*m_data, func);
-  always_assert(t.subtypeOf(fdata->returnTy));
+  always_assert_flog(
+    t.subtypeOf(fdata->returnTy),
+    "Index return type invariant violated in {} {}{}.\n"
+    "   {} is not a subtype of {}\n",
+    func->unit->filename->data(),
+    func->cls ? folly::to<std::string>(func->cls->name->data(), "::")
+              : std::string{},
+    func->name->data(),
+    show(t),
+    show(fdata->returnTy)
+  );
   if (!t.strictSubtypeOf(fdata->returnTy)) return {};
   if (fdata->returnRefinments + 1 < options.returnTypeRefineLimit) {
     fdata->returnTy = t;
@@ -1509,6 +1558,29 @@ Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
   FTRACE(1, "maxed out return type refinements on {}:{}\n",
     func->unit->filename->data(), func->name->data());
   return {};
+}
+
+bool Index::refine_closure_use_vars(borrowed_ptr<const php::Class> cls,
+                                    const std::vector<Type>& vars) {
+  assert(is_closure(*cls));
+
+  auto& current = m_data->closureUseVars[cls];
+  always_assert(current.empty() || current.size() == vars.size());
+  if (current.empty()) {
+    current = vars;
+    return true;
+  }
+
+  auto changed = false;
+  for (auto i = uint32_t{0}; i < vars.size(); ++i) {
+    always_assert(vars[i].subtypeOf(current[i]));
+    if (current[i].strictSubtypeOf(vars[i])) {
+      changed = true;
+      current[i] = vars[i];
+    }
+  }
+
+  return changed;
 }
 
 template<class Container>

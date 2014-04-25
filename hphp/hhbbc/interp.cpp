@@ -62,6 +62,7 @@ namespace {
 const StaticString s_Exception("Exception");
 const StaticString s_empty("");
 const StaticString s_construct("__construct");
+const StaticString s_86ctor("86ctor");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1461,7 +1462,11 @@ void in(ISS& env, const bc::FCall& op) {
        * where we're constructing class D extends B, and B has an old-style ctor
        * but D::B also exists.
        */
-      if (!ar.func->name()->isame(s_construct.get())) break;
+      if (!ar.func->name()->isame(s_construct.get()) &&
+          !ar.func->name()->isame(s_86ctor.get())) {
+        break;
+      }
+      // fallthrough
     case FPIKind::ObjMeth:
     case FPIKind::ClsMeth:
       /*

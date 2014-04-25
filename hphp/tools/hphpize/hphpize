@@ -5,7 +5,11 @@ if [ ! -f "config.cmake" ]; then
   exit 1
 fi
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if [ ! -z $BASH_SOURCE ]; then
+    DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+else
+    DIR="$( cd "$( dirname "$0" )" && pwd )"
+fi
 
 cp ${DIR}/hphpize.cmake CMakeLists.txt
 

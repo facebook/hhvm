@@ -237,7 +237,8 @@ void throw_expected_array_or_collection_exception();
  * If RuntimeOption::ThrowInvalidArguments is off, we will log a
  * warning and swallow the error.
  */
-void throw_invalid_argument(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
+void throw_invalid_argument(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2)
+   __attribute__((cold));
 
 /**
  * Unsetting ClassName::StaticProperty.

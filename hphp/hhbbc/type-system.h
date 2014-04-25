@@ -415,6 +415,8 @@ private:
 
 private:
   template<class Ret, class T, class Function>
+  DJHelperFn<Ret,T,Function> djbind(const Function& f, const T& t) const;
+  template<class Ret, class T, class Function>
   Ret dj2nd(const Type&, DJHelperFn<Ret,T,Function>) const;
   template<class Function>
   typename Function::result_type disjointDataFn(const Type&, Function) const;

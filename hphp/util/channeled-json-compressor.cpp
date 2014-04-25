@@ -96,7 +96,7 @@ void ChanneledJsonCompressor::writeVarInt(Channel channel, int64_t value) {
   if (value >= 0) {
     bigValue = value;
   } else {
-    bigValue = UINT64_MAX + value + 1;
+    bigValue = std::numeric_limits<uint64_t>::max() + value + 1;
   }
 
   uint8_t bits = bigValue & 0x7f;

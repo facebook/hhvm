@@ -52,26 +52,22 @@ struct MixedArray;
 struct PackedArray {
   static void Release(ArrayData*);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
-  static constexpr auto NvGetStr =
-    reinterpret_cast<const TypedValue* (*)(const ArrayData*,
-                                           const StringData*)>(
-      ArrayCommon::ReturnNull
-    );
+  static const TypedValue* NvGetStr(const ArrayData*, const StringData*) {
+    return nullptr;
+  }
   static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, const Variant& v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, const Variant& v,
     bool copy);
   static size_t Vsize(const ArrayData*);
   static const Variant& GetValueRef(const ArrayData* ad, ssize_t pos);
-  static constexpr auto IsVectorData =
-    reinterpret_cast<bool (*)(const ArrayData*)>(
-      ArrayCommon::ReturnTrue
-    );
+  static bool IsVectorData(const ArrayData*) {
+    return true;
+  }
   static bool ExistsInt(const ArrayData* ad, int64_t k);
-  static constexpr auto ExistsStr =
-    reinterpret_cast<bool (*)(const ArrayData*, const StringData*)>(
-      ArrayCommon::ReturnFalse
-    );
+  static bool ExistsStr(const ArrayData*, const StringData*) {
+    return false;
+  }
   static ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& ret, bool copy);
   static ArrayData* LvalStr(ArrayData*, StringData* k, Variant*& ret,
                             bool copy);
@@ -110,15 +106,11 @@ struct PackedArray {
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
-  static constexpr auto Renumber =
-    reinterpret_cast<void (*)(ArrayData*)>(
-      ArrayCommon::NoOp
-    );
+  static void Renumber(ArrayData*) {}
   static void OnSetEvalScalar(ArrayData*);
-  static constexpr auto Escalate =
-    reinterpret_cast<ArrayData* (*)(const ArrayData*)>(
-      ArrayCommon::ReturnFirstArg
-    );
+  static ArrayData* Escalate(const ArrayData* ad) {
+    return const_cast<ArrayData*>(ad);
+  }
 
   //////////////////////////////////////////////////////////////////////
 

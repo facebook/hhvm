@@ -60,7 +60,7 @@ file_magwarn(struct magic_set *ms, const char *f, ...)
   char *expanded_format;
 
   va_start(va, f);
-  if (vasprintf(&expanded_format, f, va)); /* silence */
+  if (vasprintf(&expanded_format, f, va)) { /* silence */ }
   va_end(va);
 
   HPHP::raise_notice("Warning: %s", expanded_format);

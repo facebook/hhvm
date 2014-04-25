@@ -64,29 +64,6 @@ FILE_RCSID("@(#)$File: compress.c,v 1.70 2012/11/07 17:54:48 christos Exp $")
 #undef FIONREAD
 
 
-private const struct {
-  const char magic[8];
-  size_t maglen;
-  const char *argv[3];
-  int silent;
-} compr[] = {
-  { "\037\235", 2, { "gzip", "-cdq", NULL }, 1 },    /* compressed */
-  /* Uncompress can get stuck; so use gzip first if we have it
-   * Idea from Damien Clark, thanks! */
-  { "\037\235", 2, { "uncompress", "-c", NULL }, 1 },  /* compressed */
-  { "\037\213", 2, { "gzip", "-cdq", NULL }, 1 },    /* gzipped */
-  { "\037\236", 2, { "gzip", "-cdq", NULL }, 1 },    /* frozen */
-  { "\037\240", 2, { "gzip", "-cdq", NULL }, 1 },    /* SCO LZH */
-  /* the standard pack utilities do not accept standard input */
-  { "\037\036", 2, { "gzip", "-cdq", NULL }, 0 },    /* packed */
-  { "PK\3\4",   4, { "gzip", "-cdq", NULL }, 1 },    /* pkzipped, */
-              /* ...only first file examined */
-  { "BZh",      3, { "bzip2", "-cd", NULL }, 1 },    /* bzip2-ed */
-  { "LZIP",     4, { "lzip", "-cdq", NULL }, 1 },
-   { "\3757zXZ\0",6,{ "xz", "-cd", NULL }, 1 },    /* XZ Utils */
-   { "LRZI",     4, { "lrzip", "-dqo-", NULL }, 1 },  /* LRZIP */
-};
-
 #define NODATA ((size_t)~0)
 
 private ssize_t swrite(int, const void *, size_t);

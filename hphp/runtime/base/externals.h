@@ -31,6 +31,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * This file is included from inside an extern "C" block in some places, but
+ * these functions have return types that are incompatible with C linkage.
+ */
+extern "C++" {
+
 /**
  * Invoking an arbitrary user-defined function.
  */
@@ -46,6 +52,8 @@ extern Variant get_static_property(const String& s, const char *prop);
  * Getting the init value of a class variable
  */
 extern Variant get_class_var_init(const String& s, const char *var);
+
+} // extern C++
 
 /**
  * Class/function meta info entirely encoded here as a const char * array.

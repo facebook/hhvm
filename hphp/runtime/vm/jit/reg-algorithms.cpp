@@ -36,7 +36,8 @@ bool cycleHasSIMDReg(const CycleInfo& cycle,
 
 smart::vector<MoveInfo> doRegMoves(PhysReg::Map<PhysReg>& moves,
                                    PhysReg rTmp) {
-  auto N = std::max(X64::abi.all().size(), ARM::abi.all().size());
+  constexpr auto N = 64;
+  assert(std::max(X64::abi.all().size(), ARM::abi.all().size()) == N);
   smart::vector<MoveInfo> howTo;
   CycleInfo cycle_mem[N];
   List<CycleInfo> cycles(cycle_mem, 0, N);

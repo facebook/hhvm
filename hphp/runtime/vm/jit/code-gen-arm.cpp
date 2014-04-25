@@ -1039,8 +1039,8 @@ static void shuffleArgs(vixl::MacroAssembler& a,
   auto const howTo = doRegMoves(moves, rAsm);
 
   for (auto& how : howTo) {
-    vixl::CPURegister srcReg{how.m_src};
-    vixl::CPURegister dstReg{how.m_dst};
+    vixl::CPURegister srcReg(how.m_src);
+    vixl::CPURegister dstReg(how.m_dst);
     if (how.m_kind == MoveInfo::Kind::Move) {
       auto* argDesc = argDescs[how.m_dst];
       if (argDesc) {
@@ -1158,7 +1158,7 @@ void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
     m_mcg->registerCatchBlock(a.frontier(), nullptr);
   }
 
-  vixl::CPURegister armDst0{dstReg0};
+  vixl::CPURegister armDst0(dstReg0);
 
   switch (dstInfo.type) {
     case DestType::TV: not_implemented();

@@ -20,7 +20,7 @@
 
 namespace HPHP { namespace JIT { namespace ARM {
 
-constexpr TCA kEndOfTargetChain = reinterpret_cast<TCA>(0xf00ffeeffaaff11f);
+const TCA kEndOfTargetChain = reinterpret_cast<TCA>(0xf00ffeeffaaff11f);
 
 std::unique_ptr<BackEnd> newBackEnd();
 

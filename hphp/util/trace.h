@@ -305,7 +305,7 @@ const bool enabled = true;
   ONTRACE_MOD(mod, level, HPHP::Trace::trace("%s",      \
              folly::format(__VA_ARGS__).str().c_str()))
 #define TRACE_SET_MOD(name)  \
-  static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
+  UNUSED static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 
 /*
  * The Indent struct and ITRACE are used for tracing with nested
@@ -436,4 +436,3 @@ struct FormatValue<Val,
 }
 
 #endif /* incl_HPHP_TRACE_H_ */
-

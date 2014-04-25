@@ -500,7 +500,7 @@ static void php_mongo_enumerate_collections(INTERNAL_FUNCTION_PARAMETERS, int fu
 		name++;
 
 		/* "foo." was allowed in earlier versions */
-		if (name == '\0') {
+		if (*name == '\0') {
 			zval_ptr_dtor(&next);
 			MAKE_STD_ZVAL(next);
 			ZVAL_NULL(next);
@@ -625,7 +625,7 @@ PHP_METHOD(MongoDB, execute)
 	/* Check whether we have nolock as an option */
 	if (options) {
 		zval **nolock;
-	
+
 		if (zend_hash_find(HASH_P(options), "nolock", strlen("nolock") + 1, (void**) &nolock) == SUCCESS) {
 			convert_to_boolean_ex(nolock);
 			zval_add_ref(nolock);

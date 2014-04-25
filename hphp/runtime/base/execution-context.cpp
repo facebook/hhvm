@@ -753,9 +753,9 @@ void ExecutionContext::debuggerInfo(
     std::vector<std::pair<const char*,std::string>>& info) {
   int64_t newInt = convert_bytes_to_long(IniSetting::Get("memory_limit"));
   if (newInt <= 0) {
-    newInt = INT64_MAX;
+    newInt = std::numeric_limits<int64_t>::max();
   }
-  if (newInt == INT64_MAX) {
+  if (newInt == std::numeric_limits<int64_t>::max()) {
     info.emplace_back("Max Memory", "(unlimited)");
   } else {
     info.emplace_back("Max Memory", IDebuggable::FormatSize(newInt));

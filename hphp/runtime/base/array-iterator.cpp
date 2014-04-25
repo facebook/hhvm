@@ -592,8 +592,6 @@ RefData* ArrayIter::zSecond() {
 
 namespace {
 
-constexpr uint32_t kInitialExtraCap = 4;
-
 // Handle the cases where we didn't have enough preallocated Ents in
 // tl_miter_table, and we need to allocate from `extras'.
 NEVER_INLINE

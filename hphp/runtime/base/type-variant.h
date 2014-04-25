@@ -130,6 +130,8 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(TypedValue *v) = delete;
   /* implicit */ Variant(const /* implicit */ Variant *v) = delete;
   /* implicit */ Variant(/* implicit */ Variant *v) = delete;
+  template<typename Ret, typename... Args>
+  /* implicit */ Variant(Ret (*)(Args...)) = delete;
 
   //////////////////////////////////////////////////////////////////////
 

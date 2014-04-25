@@ -158,13 +158,9 @@ namespace StackSym {
 
   static const char CN = C | N;
   static const char CG = C | G;
-  static const char CE = C | E;
-  static const char CP = C | P;
   static const char CS = C | S;
   static const char LN = L | N;
   static const char LG = L | G;
-  static const char LE = L | E;
-  static const char LP = L | P;
   static const char LS = L | S;
   static const char AM = A | M;
 
@@ -8683,7 +8679,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
 
 extern "C" {
 
-String hphp_compiler_serialize_code_model_for(String code, String prefix) {
+StringData* hphp_compiler_serialize_code_model_for(String code, String prefix) {
   AnalysisResultPtr ar(new AnalysisResult());
   auto statements = Parser::ParseString(code, ar, nullptr, false);
   if (statements != nullptr) {
@@ -8697,10 +8693,11 @@ String hphp_compiler_serialize_code_model_for(String code, String prefix) {
     CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel);
     cg.setAstClassPrefix(prefix.data());
     block->outputCodeModel(cg);
-    std::string r(serialized.str().c_str(), serialized.str().length());
-    return r;
+    return StringData::Make(serialized.str().c_str(),
+                            serialized.str().length(),
+                            CopyString);
   } else {
-    return "";
+    return StringData::Make();
   }
 }
 

@@ -127,15 +127,6 @@ int MethodStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-static inline bool hasVariadicParam(const ExpressionListPtr params) {
-  for (int i = 0; i < params->getCount(); ++i) {
-    ParameterExpressionPtr param =
-      dynamic_pointer_cast<ParameterExpression>((*params)[i]);
-    if (param->isVariadic()) return true;
-  }
-  return false;
-}
-
 FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
                                                  FileScopePtr fs) {
   int minParam, maxParam;

@@ -29,7 +29,7 @@
 namespace HPHP {
 namespace JIT {
 
-static const Trace::Module TRACEMOD = Trace::pgo;
+TRACE_SET_MOD(pgo);
 
 
 ///////////   Counters   //////////

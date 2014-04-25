@@ -2,6 +2,10 @@
 #include "hphp/parser/scanner.h"
 #include <cassert>
 
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wnull-conversion"
+#endif
+
 // macros for flex
 #define YYSTYPE HPHP::ScannerToken
 #define YYLTYPE HPHP::Location

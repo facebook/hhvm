@@ -61,7 +61,7 @@ static Variant HHVM_METHOD(Transliterator, __createInverse) {
   auto trans = data->trans()->createInverse(error);
   if (U_FAILURE(error)) {
     data->setError(error, "transliterator_create_inverse: could not create ");
-    return uninit_null;
+    return init_null();
   }
   data->clearError();
   return Transliterator::newInstance(trans);

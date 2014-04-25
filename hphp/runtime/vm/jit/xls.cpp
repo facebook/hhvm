@@ -181,7 +181,8 @@ private:
   unsigned m_ldconst { 0 };
 };
 
-const uint32_t kMaxPos = UINT32_MAX; // "infinity" use position
+// "infinity" use position
+constexpr uint32_t kMaxPos = std::numeric_limits<uint32_t>::max();
 
 // Keep track of a future use or conflict position for each register.
 // Initially all usable registers have kMaxPos

@@ -30,6 +30,7 @@ namespace {
 /*
  * Return the payload from a ArrayData* that is kPackedKind.
  */
+TypedValue* packedData(const ArrayData*) UNUSED;
 TypedValue* packedData(const ArrayData* arr) {
   return const_cast<TypedValue*>(
     reinterpret_cast<const TypedValue*>(arr + 1)

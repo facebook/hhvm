@@ -40,16 +40,7 @@ struct Variant;
  * should actually be called.
  */
 struct ArrayCommon {
-  /*
-   * Super generic cases---these functions aren't really vararg; we
-   * cast them to the appropriate signatures.
-   */
-  static void* ReturnNull(...);
-  static bool ReturnFalse(...);
-  static bool ReturnTrue(...);
-  static ArrayData* ReturnFirstArg(ArrayData*, ...);
   static ssize_t ReturnInvalidIndex(const ArrayData*);
-  static void NoOp(...);
 
   /*
    * The normal case for ValidMArrayIter is shared between packed and

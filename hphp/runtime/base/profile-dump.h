@@ -79,7 +79,6 @@ struct ProfileDump {
     m_numDumps = 1;
     auto &current = m_currentlyAllocated[trace];
     current -= size;
-    assert(current.m_count >= 0 && current.m_bytes >= 0);
   }
 
   std::string toPProfFormat() const;

@@ -1243,9 +1243,8 @@ void ClassScope::getInterfaces(AnalysisResultConstPtr ar,
     if (cls) cls->getInterfaces(ar, names, true);
   }
   if (!m_bases.empty()) {
-    vector<string>::const_iterator begin =
-      m_parent.empty() ? m_bases.begin() : m_bases.begin() + 1;
     for (auto const& base : m_bases) {
+      if (base == m_parent) continue;
       ClassScopePtr cls(ar->findClass(base));
       if (cls && cls->isRedeclaring()) {
         cls = self->findExactClass(cls);

@@ -110,8 +110,10 @@ private:
   // ActRec of the resumed frame.
   ActRec m_actRec;
 
-  // Temporary storage used to save the SP when inlining into a resumable.
-  void* m_stashedSp;
+  // Temporary storage used to save the SP when inlining into a resumable. This
+  // is used in an offsetof expression above, but clang doesn't recognize that
+  // as a "use", hence the UNUSED.
+  UNUSED void* m_stashedSp;
 
   // Resume address.
   JIT::TCA m_resumeAddr;

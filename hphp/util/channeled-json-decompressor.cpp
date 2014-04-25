@@ -156,11 +156,6 @@ int64_t ChanneledJsonDecompressor::readVarInt(Channel channel) {
 
   value += (*bits << shift);
 
-  //checking for an originally negative value
-  if ((value & (0x8000000000000000ull)) != 0) {
-    value -= UINT64_MAX + 1;
-  }
-
   return value;
 }
 

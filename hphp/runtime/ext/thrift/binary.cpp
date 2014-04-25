@@ -54,8 +54,8 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(thrift_protocol, NO_EXTENSION_VERSION_YET);
 
 const int32_t VERSION_MASK = 0xffff0000;
 const int32_t VERSION_1 = 0x80010000;
-const int8_t T_CALL = 1;
-const int8_t T_REPLY = 2;
+const int8_t T_CALL UNUSED = 1;
+const int8_t T_REPLY UNUSED = 2;
 const int8_t T_EXCEPTION = 3;
 // tprotocolexception
 const int INVALID_DATA = 1;

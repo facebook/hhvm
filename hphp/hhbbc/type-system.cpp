@@ -891,7 +891,8 @@ struct Type::DJHelperFn {
 };
 
 template<class Ret, class T, class Function>
-Type::DJHelperFn<Ret,T,Function> djbind(const Function& f, const T& t) {
+Type::DJHelperFn<Ret,T,Function> Type::djbind(const Function& f,
+                                              const T& t) const {
   return { f, t };
 }
 
@@ -1932,7 +1933,7 @@ Type array_elem(const Type& arr, const Type& undisectedKey) {
   assert(arr.subtypeOf(TArr));
 
   auto const key = disect_key(undisectedKey);
-  auto ty = [&] {
+  auto ty = [&]() -> Type {
     switch (arr.m_dataTag) {
     case DataTag::Str:
     case DataTag::Obj:

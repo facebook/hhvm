@@ -893,7 +893,7 @@ void miFinalSetProp(MIS& env) {
 
   if (couldBeThisObj(env, env.base)) {
     if (!name) {
-      mergeEachThisPropRaw(env, [&] (Type propTy) {
+      mergeEachThisPropRaw(env, [&] (Type propTy) -> Type {
         if (propTy.couldBe(TInitCell)) {
           return union_of(std::move(propTy), t1);
         }
@@ -1325,4 +1325,3 @@ MINSTRS
 //////////////////////////////////////////////////////////////////////
 
 }}
-

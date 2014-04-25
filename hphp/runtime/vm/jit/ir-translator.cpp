@@ -54,11 +54,6 @@ using namespace Trace;
 using std::max;
 
 TRACE_SET_MOD(hhir);
-#ifdef DEBUG
-static const bool debug = true;
-#else
-static const bool debug = false;
-#endif
 
 #define HHIR_EMIT(op, ...)                      \
   do {                                          \

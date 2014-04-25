@@ -562,7 +562,7 @@ private:
   ArrayData* m_container;
   // The m_resetFlag is used to indicate a mutable array iterator is
   // "before the first" position in the array.
-  uint32_t m_unused;
+  UNUSED uint32_t m_unused;
   uint32_t m_resetFlag;
 };
 

@@ -1366,10 +1366,7 @@ private:
 
 class MemoProfiler : public Profiler {
  public:
-  explicit MemoProfiler(int flags)
-    : m_flags(flags)
-  {
-  }
+  explicit MemoProfiler(int flags) {}
 
   ~MemoProfiler() {
   }
@@ -1560,8 +1557,6 @@ class MemoProfiler : public Profiler {
     String m_args;
   };
   vector<Frame> m_stack;
-
-  uint32_t m_flags;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

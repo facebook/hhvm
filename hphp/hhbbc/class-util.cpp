@@ -42,6 +42,7 @@ const StaticString
   s_86sinit("86sinit"),
   s_MockClass("__MockClass");
 
+bool has_magic_bool_conversion(res::Class) UNUSED;
 bool has_magic_bool_conversion(res::Class cls) {
   return is_collection(cls) || cls.name()->isame(s_SimpleXMLElement.get());
 }

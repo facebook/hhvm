@@ -25,6 +25,10 @@
 
 using namespace HPHP;
 
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wnull-conversion"
+#endif
+
 /* Globals Macros */
 struct ZendINIGlobals {
   int scanner_mode;
@@ -245,7 +249,7 @@ DOUBLE_QUOTES_CHARS (("\\"{ANY_CHAR}|"$"[^{\"]|[^$\"\\])+|"$")
 
   /* Eat trailing whitespace */
   EAT_TRAILING_WHITESPACE();
-    
+
   yy_push_state(ST_LABEL);
 
   RETURN_TOKEN(TC_LABEL, yytext, yyleng);
@@ -432,7 +436,7 @@ void zend_ini_on_label(const std::string &name) {
 void zend_ini_on_entry(const std::string &key, const std::string &value) {
   SCNG(callback)->onEntry(key, value, SCNG(arg));
 }
-void zend_ini_on_pop_entry(const std::string &key, const std::string &value, 
+void zend_ini_on_pop_entry(const std::string &key, const std::string &value,
                            const std::string &offset) {
   SCNG(callback)->onPopEntry(key, value, offset, SCNG(arg));
 }

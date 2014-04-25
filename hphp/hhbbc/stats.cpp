@@ -278,7 +278,7 @@ bool in(StatsSS& env, const bc::IterInitK& op) {
 
 bool in(StatsSS& env, const bc::CGetM& op) {
   auto const pops = op.numPop();
-  auto const ty = [&] {
+  auto const ty = [&]() -> Type {
     switch (op.mvec.lcode) {
     case LL:
       return env.state.locals[op.mvec.locBase->id];
@@ -518,4 +518,3 @@ void print_stats(const Index& index, const php::Program& program) {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

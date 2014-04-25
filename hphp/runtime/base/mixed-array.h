@@ -242,10 +242,9 @@ public:
   static void ReleaseUncountedPacked(ArrayData*);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
-  static constexpr auto Escalate =
-    reinterpret_cast<ArrayData* (*)(const ArrayData*)>(
-      ArrayCommon::ReturnFirstArg
-    );
+  static ArrayData* Escalate(const ArrayData* ad) {
+    return const_cast<ArrayData*>(ad);
+  }
 
   static ArrayData* EscalateForSort(ArrayData* ad);
   static void Ksort(ArrayData*, int sort_flags, bool ascending);

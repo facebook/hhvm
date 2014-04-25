@@ -36,10 +36,8 @@ namespace {
 
 constexpr SyncOptions SNone = SyncOptions::kNoSyncPoint;
 constexpr SyncOptions SSync = SyncOptions::kSyncPoint;
-constexpr SyncOptions SSyncAdj1 = SyncOptions::kSyncPointAdjustOne;
 
 constexpr DestType DSSA  = DestType::SSA;
-constexpr DestType DSSA2 = DestType::SSA2;
 constexpr DestType DTV   = DestType::TV;
 constexpr DestType DNone = DestType::None;
 

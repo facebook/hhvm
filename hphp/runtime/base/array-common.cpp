@@ -24,27 +24,9 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-void* ArrayCommon::ReturnNull(...) {
-  return nullptr;
-}
-
-bool ArrayCommon::ReturnFalse(...) {
-  return false;
-}
-
-bool ArrayCommon::ReturnTrue(...) {
-  return true;
-}
-
-ArrayData* ArrayCommon::ReturnFirstArg(ArrayData* a, ...) {
-  return a;
-}
-
 ssize_t ArrayCommon::ReturnInvalidIndex(const ArrayData*) {
   return ArrayData::invalid_index;
 }
-
-void ArrayCommon::NoOp(...) {}
 
 bool ArrayCommon::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
   if (ad->isPacked()) {

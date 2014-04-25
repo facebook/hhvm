@@ -36,16 +36,14 @@
 #include <memory>
 
 namespace HPHP {
-// Forward declarations.
-namespace Compiler { class Peephole; }
-struct ActRec;
 
-class Func;
-class FuncEmitter;
-class Repo;
-class FuncDict;
-class Unit;
-class PreClassEmitter;
+struct ActRec;
+struct Func;
+struct FuncEmitter;
+struct Repo;
+struct FuncDict;
+struct Unit;
+struct PreClassEmitter;
 
 enum class UnitOrigin {
   File = 0,
@@ -692,10 +690,9 @@ private:
 int getLineNumber(const LineTable& table, Offset pc);
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
 
-class UnitEmitter {
+struct UnitEmitter {
   friend class UnitRepoProxy;
-  friend class ::HPHP::Compiler::Peephole;
- public:
+
   explicit UnitEmitter(const MD5& md5);
   ~UnitEmitter();
 

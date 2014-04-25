@@ -114,11 +114,9 @@ using BuiltinDtorFunction = void (*)(ObjectData*, const Class*);
  *    threads are trying to load the same unit.
  *
  */
-class PreClass : public AtomicCountable {
+struct PreClass : AtomicCountable {
   friend class PreClassEmitter;
-  friend class Peephole;
 
- public:
   enum Hoistable {
     NotHoistable,
     Mergeable,

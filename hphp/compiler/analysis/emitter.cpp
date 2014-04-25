@@ -34,7 +34,6 @@
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/peephole.h"
 #include "hphp/compiler/expression/array_element_expression.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/assignment_expression.h"
@@ -2597,7 +2596,6 @@ void EmitterVisitor::visit(FileScopePtr file) {
   emitPostponedPinits();
   emitPostponedSinits();
   emitPostponedCinits();
-  Peephole peephole(m_ue);
 }
 
 static StringData* getClassName(ExpressionPtr e) {
@@ -8469,8 +8467,6 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       }
     }
   }
-
-  Peephole peephole(*ue);
 
   return ue;
 }

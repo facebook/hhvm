@@ -1213,7 +1213,9 @@ void in(ISS& env, const bc::FPushFunc& op) {
 }
 
 void in(ISS& env, const bc::FPushFuncU& op) {
-  fpiPush(env, ActRec { FPIKind::Func });
+  auto const rfunc =
+    env.index.resolve_func_fallback(env.ctx, op.str2, op.str3);
+  fpiPush(env, ActRec { FPIKind::Func, folly::none, rfunc });
 }
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {

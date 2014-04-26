@@ -1273,19 +1273,48 @@ folly::Optional<res::Func> Index::resolve_ctor(Context ctx,
   return do_resolve(cinfo->ctor);
 }
 
-res::Func Index::resolve_func(Context ctx, SString name) const {
-  name = normalizeNS(name);
-
+template<class FuncRange>
+res::Func
+Index::resolve_func_helper(const FuncRange& funcs, SString name) const {
   auto name_only = [&] { return res::Func { this, name }; };
 
-  auto const funcs = find_range(m_data->funcs, name);
-  if (begin(funcs) == end(funcs)) return name_only();
   if (boost::next(begin(funcs)) != end(funcs)) return name_only();
   auto const func = begin(funcs)->second;
   if (!(func->attrs & AttrUnique)) return name_only();
   if (func->attrs & AttrInterceptable) return name_only();
 
   return do_resolve(func);
+}
+
+res::Func Index::resolve_func(Context ctx, SString name) const {
+  name = normalizeNS(name);
+  auto const funcs = find_range(m_data->funcs, name);
+  if (begin(funcs) == end(funcs)) {
+    return res::Func { this, name };
+  }
+  return resolve_func_helper(funcs, name);
+}
+
+folly::Optional<res::Func>
+Index::resolve_func_fallback(Context ctx,
+                             SString nsName,
+                             SString fallbackName) const {
+  assert(!needsNSNormalization(nsName));
+  assert(!needsNSNormalization(fallbackName));
+
+  // It's possible that in some requests nsName might succeed, while
+  // in others fallbackName must succeed.  Both ranges must be
+  // considered before we can decide which function we're after.
+  auto const r1 = find_range(m_data->funcs, nsName);
+  auto const r2 = find_range(m_data->funcs, fallbackName);
+  if (begin(r1) != end(r1) && begin(r2) != end(r2)) {
+    // It could come from either at runtime.  (We could try to rule it
+    // out by figuring out if one must be defined based on the
+    // ctx.unit, but it's unlikely to matter for now.)
+    return folly::none;
+  }
+  return begin(r1) == end(r1) ? resolve_func_helper(r2, fallbackName)
+                              : resolve_func_helper(r1, nsName);
 }
 
 Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {

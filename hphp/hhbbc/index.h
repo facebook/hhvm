@@ -283,6 +283,22 @@ struct Index {
   res::Func resolve_func(Context, SString name) const;
 
   /*
+   * Try to resolve a function using namespace-style fallback lookup.
+   *
+   * The name `name' is tried first, and `fallback' is used if this
+   * isn't found.  Both names must already be namespace-normalized.
+   * Resolution can fail because there are possible situations where
+   * we don't know which will be called at runtime.
+   *
+   * Note: the returned function may or may not be defined at the
+   * program point (it could require a function autoload that might
+   * fail).
+   */
+  folly::Optional<res::Func> resolve_func_fallback(Context,
+                                                   SString name,
+                                                   SString fallback) const;
+
+  /*
    * Try to resolve a class method named `name' with a given Context
    * and class type.
    *
@@ -406,6 +422,8 @@ private:
   Index& operator=(Index&&) = delete;
 
 private:
+  template<class FuncRange>
+  res::Func resolve_func_helper(const FuncRange&, SString) const;
   res::Func do_resolve(borrowed_ptr<const php::Func>) const;
   bool must_be_derived_from(borrowed_ptr<const php::Class>,
                             borrowed_ptr<const php::Class>) const;

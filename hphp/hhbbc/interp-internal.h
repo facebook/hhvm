@@ -271,7 +271,7 @@ Type locRaw(ISS& env, borrowed_ptr<const php::Local> l) {
 
 void setLocRaw(ISS& env, borrowed_ptr<const php::Local> l, Type t) {
   mayReadLocal(env, l->id);
-  if (l->name && l->name->isame(s_http_response_header.get())) {
+  if (l->name && l->name->same(s_http_response_header.get())) {
     auto current = env.state.locals[l->id];
     assert(current == TGen || current == TCell);
     return;

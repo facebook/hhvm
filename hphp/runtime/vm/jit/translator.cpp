@@ -3003,7 +3003,7 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller) {
   auto locals = caller->localNames();
   for (int i = 0; i < caller->numNamedLocals(); ++i) {
-    if (locals[i]->isame(s_http_response_header.get())) {
+    if (locals[i]->same(s_http_response_header.get())) {
       return true;
     }
   }

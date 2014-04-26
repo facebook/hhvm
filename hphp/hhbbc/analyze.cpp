@@ -94,7 +94,7 @@ State entry_state(const Index& index,
      */
     auto name = ctx.func->locals[locId]->name;
     if (ctx.func->isClosureBody
-        || (name && name->isame(s_http_response_header.get()))) {
+        || (name && name->same(s_http_response_header.get()))) {
       ret.locals[locId] = TGen;
     } else {
       ret.locals[locId] = TUninit;

@@ -848,26 +848,28 @@ Type outputType(const IRInstruction* inst, int dstId) {
   IR_TYPES
 #undef IRT
 
-#define D(type)   return type;
-#define DofS(n)   return inst->src(n)->type();
-#define DUnbox(n) return inst->src(n)->type().unbox();
-#define DBox(n)   return boxType(inst->src(n)->type());
-#define DRefineS(n) return refineType(inst->src(n)->type(), inst->typeParam());
-#define DParam    return inst->typeParam();
-#define DAllocObj return allocObjReturn(inst);
-#define DArrElem  return arrElemReturn(inst);
-#define DLdRef    return ldRefReturn(inst);
-#define DThis     return thisReturn(inst);
-#define DMulti    return Type::Bottom;
-#define DStk(in)  return stkReturn(inst, dstId,                         \
+#define D(type)         return type;
+#define DofS(n)         return inst->src(n)->type();
+#define DUnbox(n)       return inst->src(n)->type().unbox();
+#define DBox(n)         return boxType(inst->src(n)->type());
+#define DRefineS(n)     return refineType(inst->src(n)->type(), \
+                                          inst->typeParam());
+#define DParam          return inst->typeParam();
+#define DAllocObj       return allocObjReturn(inst);
+#define DArrElem        return arrElemReturn(inst);
+#define DArrPacked      return Type::Arr.specialize(ArrayData::kPackedKind);
+#define DLdRef          return ldRefReturn(inst);
+#define DThis           return thisReturn(inst);
+#define DMulti          return Type::Bottom;
+#define DStk(in)        return stkReturn(inst, dstId, \
                                    [&]() -> Type { in not_reached(); });
-#define DSetElem  return setElemReturn(inst);
-#define ND        assert(0 && "outputType requires HasDest or NaryDest");
-#define DBuiltin  return builtinReturn(inst);
+#define DSetElem        return setElemReturn(inst);
+#define ND              assert(0 && "outputType requires HasDest or NaryDest");
+#define DBuiltin        return builtinReturn(inst);
 #define DSubtract(n, t) return inst->src(n)->type() - t;
-#define DLdRaw    return inst->extra<RawMemData>()->info().type;
-#define DCns      return Type::Uninit | Type::InitNull | Type::Bool |   \
-                         Type::Int | Type::Dbl | Type::Str | Type::Res;
+#define DLdRaw          return inst->extra<RawMemData>()->info().type;
+#define DCns            return Type::Uninit | Type::InitNull | Type::Bool | \
+                               Type::Int | Type::Dbl | Type::Str | Type::Res;
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -886,6 +888,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DParam
 #undef DAllocObj
 #undef DArrElem
+#undef DArrPacked
 #undef DLdRef
 #undef DThis
 #undef DMulti
@@ -1067,6 +1070,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #define DLdRef      requireTypeParam();
 #define DAllocObj
 #define DArrElem
+#define DArrPacked
 #define DThis
 #define DLdRaw
 #define DCns
@@ -1102,6 +1106,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DParam
 #undef DAllocObj
 #undef DArrElem
+#undef DArrPacked
 #undef DLdRef
 #undef DThis
 #undef DLdRaw

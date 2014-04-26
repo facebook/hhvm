@@ -134,32 +134,34 @@ class FailedCodeGen : public std::runtime_error {
  *   Contains a description of how to compute the type of the
  *   destination(s) of an instruction from its sources.
  *
- *     ND        instruction has no destination
- *     D(type)   single dst has a specific type
- *     DofS(N)   single dst has the type of src N
- *     DUnbox(N) single dst has unboxed type of src N
- *     DBox(N)   single dst has boxed type of src N
+ *     ND          instruction has no destination
+ *     D(type)     single dst has a specific type
+ *     DofS(N)     single dst has the type of src N
+ *     DUnbox(N)   single dst has unboxed type of src N
+ *     DBox(N)     single dst has boxed type of src N
  *     DRefineS(N) single dst's type is the intersection of src N and paramType
- *     DParam    single dst has type of the instruction's type parameter
- *     DLdRef    single dst has type of the instruction's type parameter,
- *               loosened to allow efficient type checks
- *     DAllocObj single dst has a type of a newly allocated object; may be a
- *               specialized object type if the class is known
- *     DArrElem  single dst has type based on reading an array element
- *     DThis     single dst has type Obj<ctx>, where ctx is the
- *               current context class
- *     DMulti    multiple dests. type and number depend on instruction
- *     DSetElem  single dst is a subset of CountedStr|Nullptr depending on
- *               sources
- *     DStk(x)   up to two dests. x should be another D* macro and indicates
- *               the type of the first dest, if any. the second (or first,
- *               depending on the presence of a primary destination), will be
- *               of type Type::StkPtr. implies ModifiesStack.
- *     DBuiltin  single dst for CallBuiltin. This can return complex data
- *               types such as (Type::Str | Type::Null)
+ *     DParam      single dst has type of the instruction's type parameter
+ *     DLdRef      single dst has type of the instruction's type parameter,
+ *                 loosened to allow efficient type checks
+ *     DAllocObj   single dst has a type of a newly allocated object; may be a
+ *                   specialized object type if the class is known
+ *     DArrPacked  single dst has a packed array type
+ *     DArrElem    single dst has type based on reading an array element
+ *     DThis       single dst has type Obj<ctx>, where ctx is the
+ *                   current context class
+ *     DMulti      multiple dests. type and number depend on instruction
+ *     DSetElem    single dst is a subset of CountedStr|Nullptr depending on
+ *                   sources
+ *     DStk(x)     up to two dests. x should be another D* macro and indicates
+ *                   the type of the first dest, if any. the second (or first,
+ *                   depending on the presence of a primary destination), will
+ *                   be of type Type::StkPtr. implies ModifiesStack.
+ *     DBuiltin    single dst for CallBuiltin. This can return complex data
+ *                   types such as (Type::Str | Type::Null)
  *     DSubtract(N,t) single dest has type of src N with t removed
- *     DLdRaw    single dst has type determined by RawMemData
- *     DCns      single dst's type is the union of legal types for PHP constants
+ *     DLdRaw      single dst has type determined by RawMemData
+ *     DCns        single dst's type is the union of legal types for PHP
+ *                   constants
  *
  * srcinfo:
  *
@@ -504,7 +506,7 @@ O(StClosureFunc,                    ND, S(Obj),                            E) \
 O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \
 O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                        N|PRc) \
-O(NewPackedArray,               D(Arr), C(Int) S(StkPtr),        E|N|PRc|CRc) \
+O(NewPackedArray,           DArrPacked, C(Int) S(StkPtr),        E|N|PRc|CRc) \
 O(NewStructArray,               D(Arr), S(StkPtr),               E|N|PRc|CRc) \
 O(NewCol,                       D(Obj), C(Int) C(Int),                 N|PRc) \
 O(Clone,                        D(Obj), S(Obj),                   N|E|PRc|Er) \

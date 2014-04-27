@@ -44,12 +44,24 @@ enum class FuncType : unsigned {
 
 struct FuncPtr {
   FuncPtr() {}
-  explicit FuncPtr(TCA f) : type(FuncType::Call), call(f) {}
+  explicit FuncPtr(TCA) = delete;
 
   template<class Ret, class... Args>
   /* implicit */ FuncPtr(Ret (*fp)(Args...))
     : type(FuncType::Call)
-    , call(fp)
+    , call(CppCall::direct(fp))
+  {}
+
+  template<class Ret, class Cls, class... Args>
+  /* implicit */ FuncPtr(Ret (Cls::*fp)(Args...))
+    : type(FuncType::Call)
+    , call(CppCall::method(fp))
+  {}
+
+  template<class Ret, class Cls, class... Args>
+  /* implicit */ FuncPtr(Ret (Cls::*fp)(Args...) const)
+    : type(FuncType::Call)
+    , call(CppCall::method(fp))
   {}
 
   FuncPtr(FuncType t, uint64_t i) : type(t), srcIdx(i) {

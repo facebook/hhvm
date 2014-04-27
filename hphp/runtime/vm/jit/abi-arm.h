@@ -206,7 +206,7 @@ const RegSet kCalleeSaved = RegSet()
   | kSIMDCalleeSaved
   ;
 
-const Abi abi {
+UNUSED const Abi abi {
   kGPUnreserved,   // gpUnreserved
   kGPReserved,     // gpReserved
   kSIMDUnreserved, // simdUnreserved

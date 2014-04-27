@@ -152,7 +152,7 @@ int32_t emitNativeImpl(CodeBlock& cb, const Func* func) {
     a.Str  (rVmSp, rGContextReg[offsetof(ExecutionContext, m_stack) +
                                 Stack::topOfStackOffset()]);
   }
-  auto syncPoint = emitCall(a, CppCall(builtinFuncPtr));
+  auto syncPoint = emitCall(a, CppCall::direct(builtinFuncPtr));
 
   Offset pcOffset = 0;
   Offset stackOff = func->numLocals();

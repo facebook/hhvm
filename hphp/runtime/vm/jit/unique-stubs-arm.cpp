@@ -179,14 +179,14 @@ void emitFCallHelperThunk(UniqueStubs& us) {
   a.   Mov   (argReg(1), rVmSp);
   a.   Cmp   (rVmFp, rStashedAR);
   a.   B     (&popAndXchg, vixl::ne);
-  emitCall(a, CppCall(helper));
+  emitCall(a, CppCall::direct(helper));
   a.   Br    (rReturnReg);
 
   a.   bind  (&popAndXchg);
   emitXorSwap(a, rStashedAR, rVmFp);
   // Put return address into ActRec.
   a.   Str   (rLinkReg, rVmFp[AROFF(m_savedRip)]);
-  emitCall(a, CppCall(helper));
+  emitCall(a, CppCall::direct(helper));
   // Put return address back in the link register.
   a.   Ldr   (rLinkReg, rVmFp[AROFF(m_savedRip)]);
   emitXorSwap(a, rStashedAR, rVmFp);

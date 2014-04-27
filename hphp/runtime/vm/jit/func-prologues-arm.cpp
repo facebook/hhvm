@@ -102,7 +102,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       helper = JIT::trimExtraArgs;
     }
     a.  Mov    (argReg(0), rStashedAR);
-    emitCall(a, CppCall(helper));
+    emitCall(a, CppCall::direct(helper));
     // We'll fix rVmSp below.
   } else {
     if (nPassed < numNonVariadicParams) {
@@ -251,7 +251,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       if (paramInfo[i].funcletOff() == InvalidAbsoluteOffset) {
         a.  Mov  (argReg(0), func);
         a.  Mov  (argReg(1), i);
-        auto fixupAddr = emitCall(a, CppCall(JIT::raiseMissingArgument));
+        auto fixupAddr = emitCall(a,
+          CppCall::direct(JIT::raiseMissingArgument));
         mcg->fixupMap().recordFixup(fixupAddr, fixup);
         break;
       }
@@ -385,7 +386,7 @@ SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
     assert(func->numParams() == 2);
     // Special __call prologue
     a.   Mov   (argReg(0), rStashedAR);
-    auto fixupAddr = emitCall(a, CppCall(shuffleArgsForMagicCall));
+    auto fixupAddr = emitCall(a, CppCall::direct(shuffleArgsForMagicCall));
     if (RuntimeOption::HHProfServerEnabled) {
       mcg->fixupMap().recordFixup(
         fixupAddr,

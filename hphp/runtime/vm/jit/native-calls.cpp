@@ -56,16 +56,6 @@ Arg immed(intptr_t imm) { return Arg(ArgType::Imm, imm); }
 
 FuncPtr fssa(uint64_t i) { return FuncPtr { FuncType::SSA, i }; }
 
-template<class Ret, class T, class... Args>
-FuncPtr method(Ret (T::*fp)(Args...) const) {
-  return FuncPtr(reinterpret_cast<TCA>(getMethodPtr(fp)));
-}
-
-template<class Ret, class T, class... Args>
-FuncPtr method(Ret (T::*fp)(Args...)) {
-  return FuncPtr(reinterpret_cast<TCA>(getMethodPtr(fp)));
-}
-
 auto constexpr SSA      = ArgType::SSA;
 auto constexpr TV       = ArgType::TV;
 auto constexpr MemberKeyS  = ArgType::MemberKeyS;
@@ -87,7 +77,7 @@ using IFaceSupportFn = bool (*)(const StringData*);
  * Func
  *   A value describing the function to call:
  *     <function pointer>          - Raw function pointer
- *     method(<pointer to member>) - Dispatch to a C++ member function---the
+ *     <pointer to member>         - Dispatch to a C++ member function---the
  *                                   function must be non-virtual.
  *     fssa(idx)                   - Use a const TCA from inst->src(idx)
  *
@@ -130,7 +120,7 @@ static CallMap s_callMap {
     {ConvCellToArr,      convCellToArrHelper, DSSA, SSync,
                            {{TV, 0}}},
 
-    {ConvStrToBool,      method(&StringData::toBoolean), DSSA, SNone,
+    {ConvStrToBool,      &StringData::toBoolean, DSSA, SNone,
                            {{SSA, 0}}},
     {ConvCellToBool,     cellToBool, DSSA, SNone,
                            {{TV, 0}}},
@@ -148,7 +138,7 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ConvObjToInt,       cellToInt, DSSA, SSync,
                            {{TV, 0}}},
-    {ConvStrToInt,       method(&StringData::toInt64), DSSA, SNone,
+    {ConvStrToInt,       &StringData::toInt64, DSSA, SNone,
                            {{SSA, 0}, immed(10)}},
     {ConvCellToInt,      cellToInt, DSSA, SSync,
                            {{TV, 0}}},
@@ -180,7 +170,7 @@ static CallMap s_callMap {
     {ArrayAdd,           arrayAdd, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {Box,                boxValue, DSSA, SNone, {{TV, 0}}},
     {NewArray,           MixedArray::MakeReserve, DSSA, SNone, {{SSA, 0}}},
-    {Clone,              method(&ObjectData::clone), DSSA, SSync,
+    {Clone,              &ObjectData::clone, DSSA, SSync,
                            {{SSA, 0}}},
     {NewPackedArray,     MixedArray::MakePacked, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
@@ -191,7 +181,7 @@ static CallMap s_callMap {
                            {{SSA, 0}, {TV, 1}, {TV, 2}}},
     {AllocObj,           newInstance, DSSA, SSync,
                            {{SSA, 0}}},
-    {CustomInstanceInit, method(&ObjectData::callCustomInstanceInit),
+    {CustomInstanceInit, &ObjectData::callCustomInstanceInit,
                            DSSA, SSync, {{SSA, 0}}},
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
                            {{SSA, 0}}},
@@ -342,8 +332,8 @@ static CallMap s_callMap {
                  {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
 
     /* instanceof checks */
-    {InstanceOf, method(&Class::classof), DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
-    {InstanceOfIface, method(&Class::ifaceofDirect), DSSA,
+    {InstanceOf, &Class::classof, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+    {InstanceOfIface, &Class::ifaceofDirect, DSSA,
                       SNone, {{SSA, 0}, {SSA, 1}}},
     {InterfaceSupportsArr, IFaceSupportFn{interface_supports_array},
                              DSSA, SNone, {{SSA, 0}}},

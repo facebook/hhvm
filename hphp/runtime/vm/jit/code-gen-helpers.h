@@ -19,50 +19,129 @@
 
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/util/abi-cxx.h"
 
 namespace HPHP { namespace JIT {
 
+/*
+ * Information about how to make different sorts of calls from the JIT
+ * to C++ code.
+ */
 struct CppCall {
+  enum class Kind {
+    /*
+     * Normal direct calls to a known address.  We don't distinguish
+     * between direct calls to methods or direct calls to free
+     * functions, with the assumption they have the same calling
+     * convention.
+     */
+    Direct,
+    /*
+     * Limited support for C++ virtual function calls (simple single
+     * inheritance situations---we're not supporting things like this
+     * pointer adjustments, etc).
+     */
+    Virtual,
+    /*
+     * Calls through a register.
+     */
+    Indirect,
+  };
+
+  CppCall() = delete;
+  CppCall(const CppCall&) = default;
+
+  /*
+   * Create a CppCall that represents a direct call to a non-member
+   * function.
+   */
   template<class Ret, class... Args>
-  explicit CppCall(Ret (*pfun)(Args...))
-    : m_kind(Direct)
-    , m_fptr(reinterpret_cast<void*>(pfun))
-  {}
-
-  explicit CppCall(void* p)
-    : m_kind(Direct)
-    , m_fptr(p)
-  {}
-
-  explicit CppCall(int off) : m_kind(Virtual), m_offset(off) {}
-
-  explicit CppCall(PhysReg reg)
-    : m_kind(Indirect)
-    , m_reg(reg)
-  {}
-
-  CppCall(CppCall const&) = default;
-
-  bool isDirect()   const { return m_kind == Direct;  }
-  bool isVirtual()  const { return m_kind == Virtual; }
-  bool isIndirect() const { return m_kind == Indirect; }
-
-  const void*       getAddress() const { return m_fptr; }
-  int               getOffset()  const { return m_offset; }
-  PhysReg           getReg()     const { return m_reg; }
-
-  void updateCallIndirect(PhysReg reg) {
-    assert(isIndirect());
-    m_reg = reg;
+  static CppCall direct(Ret (*pfun)(Args...)) {
+    return CppCall { Kind::Direct, reinterpret_cast<void*>(pfun) };
   }
 
- private:
-  enum { Direct, Virtual, Indirect } m_kind;
-  union {
-    void* m_fptr;
-    int   m_offset;
-    PhysReg m_reg;
+  /*
+   * Create a CppCall that targets a /non-virtual/ C++ instance
+   * method.
+   *
+   * Note: this uses ABI-specific tricks to get the address of the
+   * code out of the pointer-to-member, and the fact that we just
+   * treat it as the same Kind after this stuff requires that the
+   * calling convention for member functions and non-member functions
+   * is the same.
+   */
+  template<class Ret, class Cls, class... Args>
+  static CppCall method(Ret (Cls::*fp)(Args...)) {
+    return CppCall { Kind::Direct, getMethodPtr(fp) };
+  }
+  template<class Ret, class Cls, class... Args>
+  static CppCall method(Ret (Cls::*fp)(Args...) const) {
+    return CppCall { Kind::Direct, getMethodPtr(fp) };
+  }
+
+  /*
+   * Create a CppCall that represents a call to a virtual function.
+   */
+  static CppCall virt(int vtableOffset) {
+    return CppCall { Kind::Virtual, vtableOffset };
+  }
+
+  /*
+   * Indirect call through a register.
+   */
+  static CppCall indirect(PhysReg r) {
+    return CppCall { Kind::Indirect, r };
+  }
+
+  /*
+   * Return the type tag.
+   */
+  Kind kind() const { return m_kind; }
+
+  /*
+   * The point of this class is to discriminate these three fields are
+   * mutually exclusive, depending on the kind.
+   */
+  void* address() const {
+    assert(kind() == Kind::Direct);
+    return m_u.fptr;
+  }
+  int vtableOffset() const {
+    assert(m_kind == Kind::Virtual);
+    return m_u.vtableOffset;
+  }
+  PhysReg reg() const {
+    assert(m_kind == Kind::Indirect);
+    return m_u.reg;
+  }
+
+  /*
+   * Change the target register for an indirect call.
+   *
+   * Pre: kind() == Kind::Indirect
+   */
+  void updateCallIndirect(PhysReg reg) {
+    assert(m_kind == Kind::Indirect);
+    m_u.reg = reg;
+  }
+
+private:
+  union U {
+    /* implicit */ U(void* fptr)       : fptr(fptr) {}
+    /* implicit */ U(int vtableOffset) : vtableOffset(vtableOffset) {}
+    /* implicit */ U(PhysReg reg)      : reg(reg) {}
+
+    void* fptr;
+    int vtableOffset;
+    PhysReg reg;
   };
+
+private:
+  CppCall(Kind k, U u) : m_kind(k), m_u(u) {}
+
+private:
+  Kind m_kind;
+  U m_u;
 };
 
 /*

@@ -371,7 +371,7 @@ void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
   a.    movq   (rVmSp, argNumToRegName[1]);
   a.    cmpq   (rStashedAR, rVmFp);
   a.    jne8   (popAndXchg);
-  emitCall(a, CppCall(helper));
+  emitCall(a, CppCall::direct(helper));
   a.    jmp    (rax);
   // The ud2 is a hint to the processor that the fall-through path of the
   // indirect jump (which it statically predicts as most likely) is not
@@ -391,7 +391,7 @@ asm_label(a, popAndXchg);
   // frames, however, so switch it into rbp in case fcallHelper throws.
   a.    pop    (rStashedAR[AROFF(m_savedRip)]);
   a.    xchgq  (rStashedAR, rVmFp);
-  emitCall(a, CppCall(helper));
+  emitCall(a, CppCall::direct(helper));
   a.    testq  (rax, rax);
   a.    js8    (skip);
   a.    xchgq  (rStashedAR, rVmFp);
@@ -422,7 +422,7 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
   // fcallArrayHelper). So the stack parity is already correct.
   a.    movq   (rVmFp, argNumToRegName[0]);
   a.    movq   (rVmSp, argNumToRegName[1]);
-  emitCall(a, CppCall(helper));
+  emitCall(a, CppCall::direct(helper));
   a.    jmp    (rax);
   a.    ud2    ();
 
@@ -445,7 +445,7 @@ void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
   a.   push    (ar[AROFF(m_savedRip)]);
   a.   push    (ar[AROFF(m_sfp)]);
   a.   movq    (EventHook::NormalFunc, argNumToRegName[1]);
-  emitCall(a, CppCall(helper));
+  emitCall(a, CppCall::direct(helper));
   a.   testb   (al, al);
   a.   je8     (skip);
   a.   addq    (16, rsp);

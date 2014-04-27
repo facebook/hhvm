@@ -43,15 +43,19 @@ void emitStoreRetIntoActRec(vixl::MacroAssembler& a) {
 //////////////////////////////////////////////////////////////////////
 
 TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
-  if (call.isDirect()) {
-    a. Mov  (rHostCallReg, reinterpret_cast<intptr_t>(call.getAddress()));
-  } else if (call.isVirtual()) {
+  switch (call.kind()) {
+  case CppCall::Kind::Direct:
+    a. Mov  (rHostCallReg, reinterpret_cast<intptr_t>(call.address()));
+    break;
+  case CppCall::Kind::Virtual:
     a. Ldr  (rHostCallReg, argReg(0)[0]);
-    a. Ldr  (rHostCallReg, rHostCallReg[call.getOffset()]);
-  } else {
+    a. Ldr  (rHostCallReg, rHostCallReg[call.vtableOffset()]);
+    break;
+  case CppCall::Kind::Indirect:
     // call indirect currently not implemented. It'll be somthing like
     // a.Br(x2a(call.getReg()))
     not_implemented();
+    break;
   }
 
   using namespace vixl;
@@ -68,7 +72,7 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
 }
 
 TCA emitCallWithinTC(vixl::MacroAssembler& a, TCA call) {
-  a. Mov  (rHostCallReg, reinterpret_cast<intptr_t>(call));
+  a.   Mov     (rHostCallReg, reinterpret_cast<intptr_t>(call));
 
   a.   Blr     (rHostCallReg);
   auto fixupAddr = a.frontier();

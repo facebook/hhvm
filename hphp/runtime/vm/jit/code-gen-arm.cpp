@@ -748,7 +748,7 @@ void CodeGenerator::emitDecRefDynamicType(vixl::Register baseReg,
 
   // Went to zero. Have to destruct.
   cgCallHelper(m_as,
-               CppCall(tv_release_generic),
+               CppCall::direct(tv_release_generic),
                kVoidDest,
                SyncOptions::kSyncPoint,
                argGroup().addr(baseReg, offset));
@@ -1020,11 +1020,18 @@ static void shuffleArgs(vixl::MacroAssembler& a,
       moves[dstReg] = srcReg;
       argDescs[dstReg] = &args[i];
     }
-    if (call.isIndirect() && dstReg == call.getReg()) {
-      // an indirect call uses an argument register for the func ptr.
-      // Use rAsm2 instead and update the CppCall
-      moves[rAsm2] = call.getReg();
-      call.updateCallIndirect(rAsm2);
+    switch (call.kind()) {
+    case CppCall::Kind::Indirect:
+      if (dstReg == call.reg()) {
+        // an indirect call uses an argument register for the func ptr.
+        // Use rAsm2 instead and update the CppCall
+        moves[rAsm2] = call.reg();
+        call.updateCallIndirect(rAsm2);
+      }
+      break;
+    case CppCall::Kind::Direct:
+    case CppCall::Kind::Virtual:
+      break;
     }
   }
 
@@ -1090,7 +1097,8 @@ void CodeGenerator::cgCallNative(vixl::MacroAssembler& as,
     case FuncType::Call:
       return CppCall(info.func.call);
     case FuncType::SSA:
-      return CppCall(inst->src(info.func.srcIdx)->tcaVal());
+      return CppCall::direct(
+        reinterpret_cast<void(*)()>(inst->src(info.func.srcIdx)->tcaVal()));
     }
     not_reached();
   }();
@@ -1623,7 +1631,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   auto dstTypeReg = x2a(dloc.reg(1));
 
   cgCallHelper(m_as,
-               CppCall((TCA)func->nativeFuncPtr()),
+               CppCall::direct(func->nativeFuncPtr()),
                isCppByRef(funcReturnType) ? kVoidDest : callDest(dstReg),
                SyncOptions::kSyncPoint,
                callArgs);
@@ -1714,7 +1722,7 @@ static void unwindResumeHelper() {
 }
 
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
-  emitCall(m_as, CppCall{unwindResumeHelper});
+  emitCall(m_as, CppCall::direct(unwindResumeHelper));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1881,7 +1889,7 @@ void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
   const Func* (*const func)(const StringData*) = lookupUnknownFunc;
   cgCallHelper(
     m_as,
-    CppCall(func),
+    CppCall::direct(func),
     callDest(inst),
     SyncOptions::kSyncPoint,
     argGroup().immPtr(inst->extra<LdFuncCached>()->name)
@@ -1922,7 +1930,7 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
   auto* interpOneHelper = interpOneEntryPoints[opc];
 
   cgCallHelper(m_as,
-               CppCall(interpOneHelper),
+               CppCall::direct(reinterpret_cast<void (*)()>(interpOneHelper)),
                callDest(InvalidReg),
                SyncOptions::kSyncPoint,
                argGroup().ssa(1/*fp*/).ssa(0/*sp*/).imm(pcOff));

@@ -241,7 +241,7 @@ const int kNumServiceReqArgRegs =
 #define AFWHOFF(nm) int(offsetof(c_AsyncFunctionWaitHandle, nm))
 #define CONTOFF(nm) int(offsetof(c_Continuation, nm))
 
-const Abi abi {
+UNUSED const Abi abi {
   kGPUnreserved,  // gpUnreserved
   kGPReserved,    // gpReserved
   kXMMUnreserved, // simdUnreserved

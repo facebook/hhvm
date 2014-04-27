@@ -146,15 +146,15 @@ __thread VMRegState tl_regState = VMRegState::CLEAN;
 CppCall MCGenerator::getDtorCall(DataType type) {
   switch (type) {
   case BitwiseKindOfString:
-    return CppCall(getMethodPtr(&StringData::release));
+    return CppCall::method(&StringData::release);
   case KindOfArray:
-    return CppCall(getMethodPtr(&ArrayData::release));
+    return CppCall::method(&ArrayData::release);
   case KindOfObject:
-    return CppCall(getMethodPtr(&ObjectData::release));
+    return CppCall::method(&ObjectData::release);
   case KindOfResource:
-    return CppCall(getMethodPtr(&ResourceData::release));
+    return CppCall::method(&ResourceData::release);
   case KindOfRef:
-    return CppCall(getMethodPtr(&RefData::release));
+    return CppCall::method(&RefData::release);
   default:
     assert(false);
     NOT_REACHED();

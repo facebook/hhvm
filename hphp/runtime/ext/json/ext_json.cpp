@@ -24,15 +24,16 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // json_encode() options
-const int64_t k_JSON_HEX_TAG           = 1<<0;
-const int64_t k_JSON_HEX_AMP           = 1<<1;
-const int64_t k_JSON_HEX_APOS          = 1<<2;
-const int64_t k_JSON_HEX_QUOT          = 1<<3;
-const int64_t k_JSON_FORCE_OBJECT      = 1<<4;
-const int64_t k_JSON_NUMERIC_CHECK     = 1<<5;
-const int64_t k_JSON_UNESCAPED_SLASHES = 1<<6;
-const int64_t k_JSON_PRETTY_PRINT      = 1<<7;
-const int64_t k_JSON_UNESCAPED_UNICODE = 1<<8;
+const int64_t k_JSON_HEX_TAG                 = 1<<0;
+const int64_t k_JSON_HEX_AMP                 = 1<<1;
+const int64_t k_JSON_HEX_APOS                = 1<<2;
+const int64_t k_JSON_HEX_QUOT                = 1<<3;
+const int64_t k_JSON_FORCE_OBJECT            = 1<<4;
+const int64_t k_JSON_NUMERIC_CHECK           = 1<<5;
+const int64_t k_JSON_UNESCAPED_SLASHES       = 1<<6;
+const int64_t k_JSON_PRETTY_PRINT            = 1<<7;
+const int64_t k_JSON_UNESCAPED_UNICODE       = 1<<8;
+const int64_t k_JSON_PARTIAL_OUTPUT_ON_ERROR = 1<<9;
 
 // json_decode() options
 const int64_t k_JSON_BIGINT_AS_STRING  = 1<<0;
@@ -57,6 +58,12 @@ const int64_t k_JSON_ERROR_SYNTAX
   = json_error_codes::JSON_ERROR_SYNTAX;
 const int64_t k_JSON_ERROR_UTF8
   = json_error_codes::JSON_ERROR_UTF8;
+const int64_t k_JSON_ERROR_RECURSION
+  = json_error_codes::JSON_ERROR_RECURSION;
+const int64_t k_JSON_ERROR_INF_OR_NAN
+  = json_error_codes::JSON_ERROR_INF_OR_NAN;
+const int64_t k_JSON_ERROR_UNSUPPORTED_TYPE
+  = json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE;
 
 ///////////////////////////////////////////////////////////////////////////////
 int64_t HHVM_FUNCTION(json_last_error) {
@@ -164,6 +171,7 @@ const StaticString s_JSON_NUMERIC_CHECK("JSON_NUMERIC_CHECK");
 const StaticString s_JSON_UNESCAPED_SLASHES("JSON_UNESCAPED_SLASHES");
 const StaticString s_JSON_PRETTY_PRINT("JSON_PRETTY_PRINT");
 const StaticString s_JSON_UNESCAPED_UNICODE("JSON_UNESCAPED_UNICODE");
+const StaticString s_JSON_PARTIAL_OUTPUT_ON_ERROR("JSON_PARTIAL_OUTPUT_ON_ERROR");
 const StaticString s_JSON_BIGINT_AS_STRING("JSON_BIGINT_AS_STRING");
 const StaticString s_JSON_FB_LOOSE("JSON_FB_LOOSE");
 const StaticString s_JSON_FB_UNLIMITED("JSON_FB_UNLIMITED");
@@ -176,6 +184,9 @@ const StaticString s_JSON_ERROR_STATE_MISMATCH("JSON_ERROR_STATE_MISMATCH");
 const StaticString s_JSON_ERROR_CTRL_CHAR("JSON_ERROR_CTRL_CHAR");
 const StaticString s_JSON_ERROR_SYNTAX("JSON_ERROR_SYNTAX");
 const StaticString s_JSON_ERROR_UTF8("JSON_ERROR_UTF8");
+const StaticString s_JSON_ERROR_RECURSION("JSON_ERROR_RECURSION");
+const StaticString s_JSON_ERROR_INF_OR_NAN("JSON_ERROR_INF_OR_NAN");
+const StaticString s_JSON_ERROR_UNSUPPORTED_TYPE("JSON_ERROR_UNSUPPORTED_TYPE");
 
 class JsonExtension : public Extension {
  public:
@@ -207,6 +218,9 @@ class JsonExtension : public Extension {
     );
     Native::registerConstant<KindOfInt64>(
       s_JSON_UNESCAPED_UNICODE.get(), k_JSON_UNESCAPED_UNICODE
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_JSON_PARTIAL_OUTPUT_ON_ERROR.get(), k_JSON_PARTIAL_OUTPUT_ON_ERROR
     );
     Native::registerConstant<KindOfInt64>(
       s_JSON_BIGINT_AS_STRING.get(), k_JSON_BIGINT_AS_STRING
@@ -244,6 +258,15 @@ class JsonExtension : public Extension {
     Native::registerConstant<KindOfInt64>(
       s_JSON_ERROR_UTF8.get(), k_JSON_ERROR_UTF8
     );
+	Native::registerConstant<KindOfInt64>(
+	  s_JSON_ERROR_RECURSION.get(), k_JSON_ERROR_RECURSION
+	);
+	Native::registerConstant<KindOfInt64>(
+	  s_JSON_ERROR_INF_OR_NAN.get(), k_JSON_ERROR_INF_OR_NAN
+	);
+	Native::registerConstant<KindOfInt64>(
+	  s_JSON_ERROR_UNSUPPORTED_TYPE.get(), k_JSON_ERROR_UNSUPPORTED_TYPE
+	);
 
     HHVM_FE(json_last_error);
     HHVM_FE(json_last_error_msg);

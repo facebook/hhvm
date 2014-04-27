@@ -50,7 +50,7 @@ FunctionCall::FunctionCall
     StaticClassName(classExp), m_nameExp(nameExp),
     m_ciTemp(-1), m_params(params), m_valid(false),
     m_extraArg(0), m_variableArgument(false), m_voidReturn(false),
-    m_voidWrapper(false), m_redeclared(false),
+    m_voidUsed(false), m_redeclared(false),
     m_noStatic(false), m_noInline(false), m_invokeFewArgsDecision(true),
     m_arrayParams(false), m_hadBackslash(hadBackslash),
     m_argArrayId(-1), m_argArrayHash(-1), m_argArrayIndex(-1) {
@@ -73,7 +73,7 @@ void FunctionCall::reset() {
   m_valid = false;
   m_extraArg = 0;
   m_variableArgument = false;
-  m_voidWrapper = false;
+  m_voidUsed = false;
 }
 
 bool FunctionCall::isTemporary() const {
@@ -207,6 +207,9 @@ void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   if (m_nameExp) m_nameExp->analyzeProgram(ar);
   if (m_params) m_params->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    if (m_voidUsed) {
+      Compiler::Error(Compiler::UseVoidReturn, shared_from_this());
+    }
     checkParamTypeCodeErrors(ar);
   }
 }
@@ -558,6 +561,7 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
     frt = Type::GetType(Type::KindOfObject, "WaitHandle");
   }
 
+  m_voidUsed = false;
   if (!frt) {
     m_voidReturn = true;
     setActualType(TypePtr());
@@ -566,17 +570,15 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
           !func->isFirstPass() && !func->isAbstract()) {
         if (Option::WholeProgram || !func->getContainingClass() ||
             func->isStatic() || func->isFinal() || func->isPrivate()) {
-          Compiler::Error(Compiler::UseVoidReturn, self);
+          m_voidUsed = true;
         }
       }
       if (!Type::IsMappedToVariant(type)) {
         setExpectedType(type);
       }
-      m_voidWrapper = true;
     }
   } else {
     m_voidReturn = false;
-    m_voidWrapper = false;
     type = checkTypesImpl(ar, type, frt, coerce);
     assert(m_actualType);
   }

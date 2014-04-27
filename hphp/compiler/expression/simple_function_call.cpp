@@ -1254,7 +1254,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       }
     }
     rtype = checkTypesImpl(ar, type, atype, coerce);
-    m_voidReturn = m_voidWrapper = false;
+    m_voidReturn = m_voidUsed = false;
   }
 
   if (m_valid && !m_className.empty() &&

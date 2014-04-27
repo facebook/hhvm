@@ -86,7 +86,7 @@ protected:
   int m_extraArg;
   unsigned m_variableArgument : 1;
   unsigned m_voidReturn : 1;  // no return type
-  unsigned m_voidWrapper : 1; // void wrapper is needed
+  unsigned m_voidUsed : 1; // void return is used
   unsigned m_redeclared : 1;
   unsigned m_noStatic : 1;
   unsigned m_noInline : 1;

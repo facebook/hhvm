@@ -228,6 +228,14 @@ struct IndexedDispReg {
     assert(int(base) != -1 && "invalid register");
   }
 
+  // Constructor for baseless()
+  explicit IndexedDispReg(ScaledIndexDisp sid)
+    : base(r64(RegNumber(-1)))
+    , index(sid.si.index)
+    , scale(sid.si.scale)
+    , disp(sid.disp)
+  {}
+
   IndexedMemoryRef operator*() const;
   IndexedMemoryRef operator[](intptr_t disp) const;
 
@@ -355,10 +363,13 @@ inline RIPRelativeRef RegRIP::operator[](intptr_t disp) const {
 }
 
 /*
- * Used for the x64 addressing mode where there is a displacement but
- * no base register.
+ * Used for the x64 addressing mode where there is a displacement,
+ * possibly with a scaled index, but no base register.
  */
 inline MemoryRef baseless(intptr_t disp) { return *(DispReg { disp }); }
+inline IndexedMemoryRef baseless(ScaledIndexDisp sid) {
+  return *(IndexedDispReg { sid });
+}
 
 //////////////////////////////////////////////////////////////////////
 

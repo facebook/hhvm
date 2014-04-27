@@ -800,4 +800,20 @@ cvttsd2si %xmm12, %r12
 )");
 }
 
+TEST(Asm, Baseless) {
+  TestDataBlock db(10 << 24);
+  Asm a { db };
+
+  a.   call  (baseless(rax*8 + 0x400));
+  a.   call  (baseless(rax*8 + 0x40));
+  a.   call  (baseless(rsi*4 + 0x42));
+  a.   call  (baseless(rbx*2 + 0x700));
+  expect_asm(a, R"(
+callq 0x400(,%rax,8)
+callq 0x40(,%rax,8)
+callq 0x42(,%rsi,4)
+callq 0x700(,%rbx,2)
+)");
+}
+
 }}

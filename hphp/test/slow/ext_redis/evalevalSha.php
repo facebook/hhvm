@@ -8,8 +8,8 @@ $r->delete($key);
 
 // eval
 echo "eval\n";
-var_dump($r->_eval("return redis.call('set',KEYS[1],ARGV[1])", [$key,'bar'], 1)); // With parameters -> OK
-var_dump($r->_eval("return redis.call('get','{$key}')")); // Without parameters -> bar
+var_dump($r->eval("return redis.call('set',KEYS[1],ARGV[1])", [$key,'bar'], 1)); // With parameters -> OK
+var_dump($r->eval("return redis.call('get','{$key}')")); // Without parameters -> bar
 
 // evalSha
 echo "evalSha\n";

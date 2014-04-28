@@ -70,7 +70,7 @@ class Xenon {
     Xenon(Xenon const&) = delete;
     void operator=(Xenon const&) = delete;
 
-    void start(double seconds);
+    void start(uint64_t msec);
     void stop();
     void log(bool skipFirst);
     void surpriseAll();
@@ -83,8 +83,6 @@ class Xenon {
 #ifndef __APPLE__
     timer_t   m_timerid;
 #endif
-    long      m_sec;
-    long      m_nsec;
 };
 }
 

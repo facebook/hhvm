@@ -135,7 +135,7 @@ Xenon& Xenon::getInstance() {
   return instance;
 }
 
-Xenon::Xenon() : m_stopping(false), m_sec(10*60), m_nsec(0) {
+Xenon::Xenon() : m_stopping(false) {
 #ifndef __APPLE__
   m_timerid = 0;
 #endif
@@ -146,22 +146,30 @@ Xenon::~Xenon() {
 
 // XenonForceAlwaysOn is active - it doesn't need a timer, it is always on.
 // Xenon needs to be started once per process.
-// The number of seconds has to be greater than zero.
+// The number of milliseconds has to be greater than zero.
 // We need to create a semaphore and a thread.
 // If all of those happen, then we need a timer attached to a signal handler.
-void Xenon::start(double seconds) {
+void Xenon::start(uint64_t msec) {
 #ifndef __APPLE__
   TRACE(1, "XenonForceAlwaysOn %d\n", RuntimeOption::XenonForceAlwaysOn);
   if (!RuntimeOption::XenonForceAlwaysOn
       && m_timerid == 0
-      && seconds > 0
+      && msec > 0
       && sem_init(&m_timerTriggered, 0, 0) == 0
       && pthread_create(&m_triggerThread, nullptr, s_waitThread,
           static_cast<void*>(&m_timerTriggered)) == 0) {
 
-    m_sec = (int)seconds;
-    m_nsec = (int)((seconds - m_sec) * 1000000000);
-    TRACE(1, "Xenon::start %ld seconds, %ld nanoseconds\n", m_sec, m_nsec);
+    time_t sec = msec / 1000;
+    long nsec = (msec % 1000) * 1000000;
+    TRACE(1, "Xenon::start periodic %ld seconds, %ld nanoseconds\n", sec, nsec);
+
+    // for the initial timer, we want to stagger time for large installations
+    unsigned int seed = time(nullptr);
+    uint64_t msecInit = msec * (1.0 + rand_r(&seed) / (double)RAND_MAX);
+    time_t fSec = msecInit / 1000;
+    long fNsec = (msecInit % 1000) * 1000000;
+    TRACE(1, "Xenon::start initial %ld seconds, %ld nanoseconds\n",
+       fSec, fNsec);
 
     sigevent sev={};
     sev.sigev_notify = SIGEV_SIGNAL;
@@ -170,10 +178,10 @@ void Xenon::start(double seconds) {
     timer_create(CLOCK_REALTIME, &sev, &m_timerid);
 
     itimerspec ts={};
-    ts.it_value.tv_sec = m_sec;
-    ts.it_value.tv_nsec = m_nsec;
-    ts.it_interval.tv_sec = m_sec;
-    ts.it_interval.tv_nsec = m_nsec;
+    ts.it_value.tv_sec = fSec;
+    ts.it_value.tv_nsec = fNsec;
+    ts.it_interval.tv_sec = sec;
+    ts.it_interval.tv_nsec = nsec;
     timer_settime(m_timerid, 0, &ts, nullptr);
   }
 #endif

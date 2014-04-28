@@ -1543,7 +1543,8 @@ void hphp_process_init() {
   action.sa_sigaction = on_timeout;
   action.sa_flags = SA_SIGINFO | SA_NODEFER;
   sigaction(SIGVTALRM, &action, nullptr);
-  Xenon::getInstance().start(RuntimeOption::XenonPeriodSeconds);
+  // start takes milliseconds, Period is a double in seconds
+  Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
 
   init_thread_locals();
 

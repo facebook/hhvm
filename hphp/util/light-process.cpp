@@ -25,6 +25,7 @@
 #include <sys/socket.h>
 
 #include <afdt.h>
+#include <grp.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <poll.h>
@@ -299,6 +300,7 @@ static void do_change_user(FILE *fin, FILE *fout) {
     struct passwd *pw = getpwnam(uname.c_str());
     if (pw) {
       if (pw->pw_gid) {
+        initgroups(pw->pw_name, pw->pw_gid);
         setgid(pw->pw_gid);
       }
       if (pw->pw_uid) {

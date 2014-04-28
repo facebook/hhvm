@@ -24,6 +24,7 @@
 #include <sys/prctl.h>
 #include <sys/types.h>
 #include <pwd.h>
+#include <grp.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,6 +99,12 @@ bool Capability::ChangeUnixUser(uid_t uid) {
 
     if ((pw = getpwuid(uid)) == nullptr) {
       Logger::Error("unable to getpwuid(%d): %s", uid,
+                    folly::errnoStr(errno).c_str());
+      return false;
+    }
+
+    if (initgroups(pw->pw_name, pw->pw_gid) < 0) {
+      Logger::Error("unable to drop supplementary group privs: %s",
                     folly::errnoStr(errno).c_str());
       return false;
     }

@@ -38,7 +38,7 @@ one_array:
           CGetL $func
           DecodeCufIter 0 bad_func
 .try_fault kill_iter_0 {
-            NewArray 3  # MixedArray::SmallSize
+            NewLikeArrayL $arr 0
             SetL $res
             PopC
 

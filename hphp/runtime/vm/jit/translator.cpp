@@ -1068,6 +1068,7 @@ static const struct {
   { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
   { OpNewMixedArray,  {None,          Stack1,       OutArray,          1 }},
+  { OpNewLikeArrayL,  {None,          Stack1,       OutArray,          1 }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutArray,         -2 }},

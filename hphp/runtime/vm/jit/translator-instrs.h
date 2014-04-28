@@ -164,6 +164,7 @@
   CASE(NativeImpl) \
   CASE(NewArray) \
   CASE(NewCol) \
+  CASE(NewLikeArrayL) \
   CASE(NewMixedArray) \
   CASE(NewPackedArray) \
   CASE(Nop) \

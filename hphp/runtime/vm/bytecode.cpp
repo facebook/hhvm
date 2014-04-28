@@ -3734,6 +3734,23 @@ OPTBLD_INLINE void ExecutionContext::iopNewMixedArray(IOP_ARGS) {
   }
 }
 
+OPTBLD_INLINE void ExecutionContext::iopNewLikeArrayL(IOP_ARGS) {
+  NEXT();
+  DECODE_LA(local);
+  DECODE_IVA(capacity);
+
+  ArrayData* arr;
+  TypedValue* fr = frame_local(vmfp(), local);
+
+  if (LIKELY(fr->m_type == KindOfArray)) {
+    arr = MixedArray::MakeReserveLike(fr->m_data.parr, capacity);
+  } else {
+    capacity = (capacity ? capacity : MixedArray::SmallSize);
+    arr = MixedArray::MakeReserve(capacity);
+  }
+  vmStack().pushArrayNoRc(arr);
+}
+
 OPTBLD_INLINE void ExecutionContext::iopNewPackedArray(IOP_ARGS) {
   NEXT();
   DECODE_IVA(n);

@@ -122,6 +122,15 @@ public:
   static ArrayData* MakeReserveMixed(uint32_t capacity);
 
   /*
+   * Allocate a new, empty, request-local array with the same mode as
+   * `other' and with enough space reserved for `capacity' members, or
+   * if `capacity' is zero, with the same capacity as `other'.
+   *
+   * The returned array is already incref'd.
+   */
+  static ArrayData* MakeReserveLike(const ArrayData* other, uint32_t capacity);
+
+  /*
    * Allocate a packed MixedArray.  This is an array in packed
    * mode, containing `size' values, in the reverse order of the
    * `values' array.

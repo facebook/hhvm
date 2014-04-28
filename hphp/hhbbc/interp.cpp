@@ -245,6 +245,10 @@ void in(ISS& env, const bc::NewStructArray& op) {
   push(env, carr_struct(std::move(map)));
 }
 
+void in(ISS& env, const bc::NewLikeArrayL&) {
+  push(env, counted_aempty());
+}
+
 void in(ISS& env, const bc::AddElemC& op) {
   popC(env); popC(env); popC(env);
   push(env, TArr);

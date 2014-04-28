@@ -173,6 +173,8 @@ static CallMap s_callMap {
     {Clone,              &ObjectData::clone, DSSA, SSync, {{SSA, 0}}},
     {NewArray,           MixedArray::MakeReserve, DSSA, SNone, {{SSA, 0}}},
     {NewMixedArray,      MixedArray::MakeReserveMixed, DSSA, SNone, {{SSA, 0}}},
+    {NewLikeArray,       MixedArray::MakeReserveLike, DSSA, SNone,
+                           {{SSA, 0}, {SSA, 1}}},
     {NewPackedArray,     MixedArray::MakePacked, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
     {NewCol,             newColHelper, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},

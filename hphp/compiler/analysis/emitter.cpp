@@ -2773,12 +2773,24 @@ bool isPackedInit(ExpressionPtr init_expr, int* size,
   return checkKeys(init_expr, check_size, [&](ArrayPairExpressionPtr ap) {
     Variant key;
 
-    // If we have a key but it is not the next integral index, then we don't
-    // have a packed initializer.
-    if (ap->getName() != nullptr && !(ap->getScalarValue(key) &&
-                                      key.isInteger() &&
-                                      key.asInt64Val() == *size)) {
-      return false;
+    // If we have a key...
+    if (ap->getName() != nullptr) {
+      // ...and it has no scalar value, bail.
+      if (!ap->getScalarValue(key)) return false;
+
+      if (key.isInteger()) {
+        // If it's an integer key, check if it's the next packed index.
+        if (key.asInt64Val() != *size) return false;
+      } else {
+        // Give up if it's not a string.
+        if (!key.isString()) return false;
+
+        int64_t i; double d;
+        auto numtype = key.getStringData()->isNumericWithVal(i, d, false);
+
+        // If it's a string of the next packed index,
+        if (numtype != KindOfInt64 || i != *size) return false;
+      }
     }
 
     (*size)++;

@@ -557,6 +557,22 @@ void HhbcTranslator::emitNewMixedArray(int capacity) {
   }
 }
 
+void HhbcTranslator::emitNewLikeArrayL(int id, int capacity) {
+  auto const ldrefExit = makeExit();
+  auto const ldgblExit = makeExit();
+  auto const ld = ldLocInner(id, ldrefExit, ldgblExit, DataTypeSpecific);
+
+  SSATmp* arr;
+
+  if (ld->isA(Type::Arr)) {
+    arr = gen(NewLikeArray, ld, cns(capacity));
+  } else {
+    capacity = (capacity ? capacity : MixedArray::SmallSize);
+    arr = gen(NewArray, cns(capacity));
+  }
+  push(arr);
+}
+
 void HhbcTranslator::emitNewPackedArray(int numArgs) {
   // The NewPackedArray opcode's helper needs array values passed to it
   // via the stack.  We use spillStack() to flush the eval stack and

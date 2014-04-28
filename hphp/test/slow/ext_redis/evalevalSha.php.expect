@@ -1,0 +1,6 @@
+eval
+string(2) "OK"
+string(3) "bar"
+evalSha
+string(2) "OK"
+string(45) "NOSCRIPT No matching script. Please use EVAL."

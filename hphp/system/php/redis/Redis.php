@@ -592,20 +592,22 @@ class Redis {
   /* Scripting ----------------------------------------------------------- */
 
   protected function doEval($cmd, $script, array $args, $numKeys) {
+    $keyCount = $numKeys;
     foreach($args as &$arg) {
-      if ($numKeys-- <= 0) break;
+      if ($keyCount-- <= 0) break;
       $arg = $this->prefix($arg);
     }
+    array_unshift($args, $numKeys);
     array_unshift($args, $script);
     $this->processArrayCommand($cmd, $args);
     return $this->processVariantResponse();
   }
 
-  public function _eval($script, array $args = null, $numKeys = 0) {
+  public function _eval($script, array $args = array(), $numKeys = 0) {
     return $this->doEval('EVAL', $script, $args, $numKeys);
   }
 
-  public function evalSha($sha, array $args = null, $numKeys = 0) {
+  public function evalSha($sha, array $args = array(), $numKeys = 0) {
     return $this->doEval('EVALSHA', $sha, $args, $numKeys);
   }
 

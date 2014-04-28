@@ -267,17 +267,6 @@ struct Index {
   folly::Optional<res::Class> resolve_class(Context, SString name) const;
 
   /*
-   * Resolve a closure class.
-   *
-   * Returns both a resolved Class, and the actual php::Class for the
-   * closure.  This function should only be used with class names are
-   * guaranteed to be closures (for example, the name supplied to a
-   * CreateCl opcode).
-   */
-  std::pair<res::Class,borrowed_ptr<php::Class>>
-    resolve_closure_class(Context ctx, SString name) const;
-
-  /*
    * Return a resolved class for a builtin class.
    *
    * Pre: `name' must be the name of a class defined in a systemlib.
@@ -364,16 +353,8 @@ struct Index {
   Type lookup_return_type_raw(borrowed_ptr<const php::Func>) const;
 
   /*
-   * Return the best known types of a closure's used variables (on
-   * entry to the closure).  The function is the closure body.
-   */
-  std::vector<Type>
-    lookup_closure_use_vars(borrowed_ptr<const php::Func>) const;
-
-  /*
    * Return the availability of $this on entry to the provided method.
-   * If the Func provided is not a method of a class false is
-   * returned.
+   * If the Func provided is not a method of a class false is returned.
    */
   bool lookup_this_available(borrowed_ptr<const php::Func>) const;
 
@@ -415,18 +396,6 @@ struct Index {
    * this php::Func.
    */
   std::vector<Context> refine_return_type(borrowed_ptr<const php::Func>, Type);
-
-  /*
-   * Refine the used var types for a closure, based on a round of
-   * analysis.
-   *
-   * No other threads should be calling functions on this Index when
-   * this function is called.
-   *
-   * Returns: true if the types have changed.
-   */
-  bool refine_closure_use_vars(borrowed_ptr<const php::Class>,
-                               const std::vector<Type>&);
 
   /*
    * Refine the private property types for a class, based on a round

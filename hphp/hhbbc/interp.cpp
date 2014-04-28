@@ -1808,30 +1808,16 @@ void in(ISS& env, const bc::Self&)   { push(env, TCls); }
 void in(ISS& env, const bc::Parent&) { push(env, TCls); }
 
 void in(ISS& env, const bc::CreateCl& op) {
-  auto const nargs   = op.arg1;
-  auto const clsPair = env.index.resolve_closure_class(env.ctx, op.str2);
-
-  /*
-   * Every closure should have a unique allocation site, but we may
-   * see it multiple times in a given round of analyzing this
-   * function.  Each time we may have more information about the used
-   * variables; the types should only possibly grow.  If it's already
-   * there we need to merge the used vars in with what we saw last
-   * time.
-   */
-  if (nargs) {
-    std::vector<Type> usedVars(nargs);
-    for (auto i = uint32_t{0}; i < nargs; ++i) {
-      usedVars[nargs - i - 1] = popT(env);
-    }
-    merge_closure_use_vars_into(
-      env.collect.closureUseTypes,
-      clsPair.second,
-      usedVars
-    );
+  auto const nargs = op.arg1;
+  for (auto i = uint32_t{0}; i < nargs; ++i) {
+    // TODO(#3599292): propagate these types into closure analysis
+    // information.
+    popT(env);
   }
-
-  return push(env, objExact(clsPair.first));
+  if (auto const rcls = env.index.resolve_class(env.ctx, op.str2)) {
+    return push(env, objExact(*rcls));
+  }
+  push(env, TObj);
 }
 
 void in(ISS& env, const bc::CreateCont& op) {

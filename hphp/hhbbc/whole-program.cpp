@@ -24,8 +24,6 @@
 #include "folly/Memory.h"
 #include "folly/ScopeGuard.h"
 
-#include "hphp/runtime/vm/unit.h"
-
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/parse.h"
@@ -36,7 +34,7 @@
 #include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/stats.h"
-#include "hphp/hhbbc/class-util.h"
+#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -45,10 +43,6 @@ TRACE_SET_MOD(hhbbc);
 //////////////////////////////////////////////////////////////////////
 
 namespace {
-
-//////////////////////////////////////////////////////////////////////
-
-const StaticString s_invoke("__invoke");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -179,14 +173,9 @@ WorkItem work_item_for(Context ctx) {
     return WorkItem { WorkType::Func, ctx };
   }
 
-  return
-    ctx.cls == nullptr ? WorkItem { WorkType::Func, ctx } :
-    ctx.cls->closureContextCls ?
-      WorkItem {
-        WorkType::Class,
-        Context { ctx.unit, nullptr, ctx.cls->closureContextCls }
-      } :
-    WorkItem { WorkType::Class, Context { ctx.unit, nullptr, ctx.cls } };
+  return ctx.cls == nullptr
+    ? WorkItem { WorkType::Func, ctx }
+    : WorkItem { WorkType::Class, Context { ctx.unit, nullptr, ctx.cls } };
 }
 
 void optimize(Index& index, php::Program& program) {
@@ -254,20 +243,6 @@ void optimize(Index& index, php::Program& program) {
     auto update_func = [&] (const FuncAnalysis& fa) {
       auto deps = index.refine_return_type(fa.ctx.func, fa.inferredReturn);
       for (auto& d : deps) revisit.insert(work_item_for(d));
-
-      for (auto& kv : fa.closureUseTypes) {
-        assert(is_closure(*kv.first));
-        if (index.refine_closure_use_vars(kv.first, kv.second)) {
-          auto const func = find_method(kv.first, s_invoke.get());
-          always_assert_flog(
-            func != nullptr,
-            "Failed to find __invoke on {} during index update\n",
-            kv.first->name->data()
-          );
-          auto const ctx = Context { func->unit, func, kv.first };
-          revisit.insert(work_item_for(ctx));
-        }
-      }
     };
 
     for (auto& result : results) {

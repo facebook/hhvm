@@ -878,6 +878,8 @@ class Redis {
     'mget' => [ 'vararg' => self::VAR_KEY_ALL,
                 'return' => 'Vector', 'retargs' => [1] ],
     'getmultiple' => [ 'alias' => 'mget' ],
+    // Eval
+    'eval' => [ 'alias' => '_eval' ],
   ];
 
 

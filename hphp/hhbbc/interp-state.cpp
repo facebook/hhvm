@@ -133,6 +133,21 @@ const PropState& PropertiesInfo::privateStatics() const {
 
 //////////////////////////////////////////////////////////////////////
 
+void merge_closure_use_vars_into(ClosureUseVarMap& dst,
+                                 borrowed_ptr<php::Class> clo,
+                                 std::vector<Type> types) {
+  auto& current = dst[clo];
+  if (current.empty()) {
+    current = std::move(types);
+    return;
+  }
+
+  assert(types.size() == current.size());
+  for (auto i = uint32_t{0}; i < current.size(); ++i) {
+    current[i] = union_of(std::move(current[i]), std::move(types[i]));
+  }
+}
+
 bool widen_into(PropState& dst, const PropState& src) {
   assert(dst.size() == src.size());
 

@@ -433,11 +433,11 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
       auto state = fa.bdata[blk->id].stateIn;
       if (!state.initialized) continue;
 
-      PropertiesInfo props { index, ctx, nullptr };
-      Interp interp { index, ctx, props, borrow(blk), state };
+      CollectedInfo collect { index, ctx, nullptr };
+      Interp interp { index, ctx, collect, borrow(blk), state };
       for (auto& bc : blk->hhbcs) {
-        auto noop = [] (php::Block&, const State&) {};
-        auto flags = StepFlags {};
+        auto noop    = [] (php::Block&, const State&) {};
+        auto flags   = StepFlags {};
         ISS env { interp, flags, noop };
         StatsSS sss { env, stats };
         dispatch(sss, bc);

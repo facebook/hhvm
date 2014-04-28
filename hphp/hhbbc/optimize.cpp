@@ -249,8 +249,8 @@ void insert_assertions(const Index& index,
 
   auto lastStackOutputObvious = false;
 
-  PropertiesInfo props { index, ctx, nullptr };
-  auto interp = Interp { index, ctx, props, blk, state };
+  CollectedInfo collect { index, ctx, nullptr };
+  auto interp = Interp { index, ctx, collect, blk, state };
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(op));
 
@@ -364,8 +364,8 @@ void first_pass(const Index& index,
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
-  PropertiesInfo props(index, ctx, nullptr);
-  auto interp = Interp { index, ctx, props, blk, state };
+  CollectedInfo collect { index, ctx, nullptr };
+  auto interp = Interp { index, ctx, collect, blk, state };
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(op));
 

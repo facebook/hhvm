@@ -30,7 +30,8 @@ void f_thrift_protocol_write_binary(const Object& transportobj,
   int64_t msgtype,
   const Object& request_struct,
   int seqid,
-  bool strict_write);
+  bool strict_write,
+  bool oneway = false);
 
 Variant f_thrift_protocol_read_binary(const Object& transportobj,
   const String& obj_typename,
@@ -42,7 +43,8 @@ void f_thrift_protocol_write_compact(const Object& transportobj,
   const String& method_name,
   int64_t msgtype,
   const Object& request_struct,
-  int seqid);
+  int seqid,
+  bool oneway = false);
 
 Variant f_thrift_protocol_read_compact(const Object& transportobj,
   const String& obj_typename);

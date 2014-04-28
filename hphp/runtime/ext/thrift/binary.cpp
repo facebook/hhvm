@@ -32,6 +32,7 @@ namespace HPHP {
 
 StaticString PHPTransport::s_getTransport("getTransport");
 StaticString PHPTransport::s_flush("flush");
+StaticString PHPTransport::s_onewayFlush("onewayFlush");
 StaticString PHPTransport::s_write("write");
 StaticString PHPTransport::s_putBack("putBack");
 StaticString PHPTransport::s_read("read");
@@ -536,7 +537,7 @@ void binary_serialize_spec(const Object& zthis, PHPOutputTransport& transport,
 
 void f_thrift_protocol_write_binary(const Object& transportobj, const String& method_name,
                                     int64_t msgtype, const Object& request_struct,
-                                    int seqid, bool strict_write) {
+                                    int seqid, bool strict_write, bool oneway) {
 
   PHPOutputTransport transport(transportobj);
 
@@ -557,7 +558,11 @@ void f_thrift_protocol_write_binary(const Object& transportobj, const String& me
                                             false);
   binary_serialize_spec(request_struct, transport, spec.toArray());
 
-  transport.flush();
+  if (oneway) {
+    transport.onewayFlush();
+  } else {
+    transport.flush();
+  }
 }
 
 Variant f_thrift_protocol_read_binary(const Object& transportobj,

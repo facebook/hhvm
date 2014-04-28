@@ -1017,7 +1017,8 @@ void f_thrift_protocol_write_compact(const Object& transportobj,
                                      const String& method_name,
                                      int64_t msgtype,
                                      const Object& request_struct,
-                                     int seqid) {
+                                     int seqid,
+                                     bool oneway) {
   PHPOutputTransport transport(transportobj);
 
   CompactWriter writer(&transport);
@@ -1025,7 +1026,11 @@ void f_thrift_protocol_write_compact(const Object& transportobj,
   writer.writeHeader(method_name, (uint8_t)msgtype, (uint32_t)seqid);
   writer.write(request_struct);
 
-  transport.flush();
+  if (oneway) {
+    transport.onewayFlush();
+  } else {
+    transport.flush();
+  }
 }
 
 Variant f_thrift_protocol_read_compact(const Object& transportobj,

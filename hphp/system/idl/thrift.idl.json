@@ -34,6 +34,11 @@
                 {
                     "name": "strict_write",
                     "type": "Boolean"
+                },
+                {
+                    "name": "oneway",
+                    "type": "Boolean",
+                    "value": "false"
                 }
             ]
         },
@@ -100,6 +105,11 @@
                 {
                     "name": "seqid",
                     "type": "Int32"
+                },
+                {
+                    "name": "oneway",
+                    "type": "Boolean",
+                    "value": "false"
                 }
             ]
         },

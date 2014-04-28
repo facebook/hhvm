@@ -715,9 +715,8 @@ int64_t File::print() {
 }
 
 int64_t File::printf(const String& format, const Array& args) {
-  int len = 0;
-  char *output = string_printf(format.data(), format.size(), args, &len);
-  return write(String(output, len, AttachString));
+  String str = string_printf(format.data(), format.size(), args);
+  return write(str);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

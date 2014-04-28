@@ -165,7 +165,7 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign,
   if (value == 0.0) {
     *decpt = 1 - fmode; /* 1 for 'e', 0 for 'f' */
     *sign = 0;
-    if ((rve = s = (char *)malloc(ndigit?siz:2)) == nullptr) {
+    if ((rve = s = (char *)smart_malloc(ndigit?siz:2)) == nullptr) {
       return(nullptr);
     }
     *rve++ = '0';
@@ -186,7 +186,7 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign,
     if (pad && fmode) {
       siz += *decpt;
     }
-    if ((s = (char *)malloc(siz+1)) == nullptr) {
+    if ((s = (char *)smart_malloc(siz+1)) == nullptr) {
       zend_freedtoa(p);
       return(nullptr);
     }
@@ -482,7 +482,7 @@ char * php_conv_fp(register char format, register double num,
     *len = strlen(p);
     memcpy(buf, p, *len + 1);
     *is_negative = 0;
-    free(p_orig);
+    smart_free(p_orig);
     return (buf);
   }
   if (format == 'F') {
@@ -546,7 +546,7 @@ char * php_conv_fp(register char format, register double num,
     }
   }
   *len = s - buf;
-  free(p_orig);
+  smart_free(p_orig);
   return (buf);
 }
 
@@ -560,11 +560,24 @@ inline static void appendchar(char **buffer, int *pos, int *size, char add) {
   (*buffer)[(*pos)++] = add;
 }
 
-inline static void appendstring(char **buffer, int *pos, int *size,
-                                const char *add,
+inline static void appendsimplestring(char **buffer, int *pos, int *size,
+                                      const char *add, int len) {
+  int req_size = *pos + len;
+
+  if (req_size > *size) {
+    while (req_size > *size) {
+      *size <<= 1;
+    }
+    *buffer = (char *)realloc(*buffer, *size);
+  }
+  memcpy(&(*buffer)[*pos], add, len);
+  *pos += len;
+}
+
+inline static void appendstring(StringBuffer *buffer, const char *add,
                                 int min_width, int max_width, char padding,
                                 int alignment, int len, int neg, int expprec,
-                                int always_sign, bool nullterm = true) {
+                                int always_sign) {
   register int npad;
   int req_size;
   int copy_len;
@@ -576,38 +589,29 @@ inline static void appendstring(char **buffer, int *pos, int *size,
     npad = 0;
   }
 
-  req_size = *pos + (min_width > copy_len ? min_width : copy_len);
-  if (nullterm) {
-    req_size += 1;
-  }
+  req_size = buffer->size() + (min_width > copy_len ? min_width : copy_len);
 
-  if (req_size > *size) {
-    while (req_size > *size) {
-      *size <<= 1;
-    }
-    *buffer = (char*)realloc(*buffer, *size);
-  }
+  buffer->appendCursor(req_size);
   if (alignment == ALIGN_RIGHT) {
     if ((neg || always_sign) && padding=='0') {
-      (*buffer)[(*pos)++] = (neg) ? '-' : '+';
+      buffer->append((neg) ? '-' : '+');
       add++;
       len--;
       copy_len--;
     }
     while (npad-- > 0) {
-      (*buffer)[(*pos)++] = padding;
+      buffer->append(padding);
     }
   }
-  memcpy(&(*buffer)[*pos], add, nullterm ? copy_len + 1 : copy_len);
-  *pos += copy_len;
+  buffer->append(add, copy_len);
   if (alignment == ALIGN_LEFT) {
     while (npad--) {
-      (*buffer)[(*pos)++] = padding;
+      buffer->append(padding);
     }
   }
 }
 
-inline static void appendint(char **buffer, int *pos, int *size, long number,
+inline static void appendint(StringBuffer *buffer, long number,
                              int width, char padding, int alignment,
                              int always_sign) {
   char numbuf[NUM_BUF_SIZE];
@@ -638,12 +642,12 @@ inline static void appendint(char **buffer, int *pos, int *size, long number,
   } else if (always_sign) {
     numbuf[--i] = '+';
   }
-  appendstring(buffer, pos, size, &numbuf[i], width, 0,
-                           padding, alignment, (NUM_BUF_SIZE - 1) - i,
-                           neg, 0, always_sign);
+  appendstring(buffer, &numbuf[i], width, 0,
+                       padding, alignment, (NUM_BUF_SIZE - 1) - i,
+                       neg, 0, always_sign);
 }
 
-inline static void appenduint(char **buffer, int *pos, int *size,
+inline static void appenduint(StringBuffer *buffer,
                               unsigned long number,
                               int width, char padding, int alignment) {
   char numbuf[NUM_BUF_SIZE];
@@ -662,12 +666,12 @@ inline static void appenduint(char **buffer, int *pos, int *size,
     magn = nmagn;
   } while (magn > 0 && i > 0);
 
-  appendstring(buffer, pos, size, &numbuf[i], width, 0,
+  appendstring(buffer, &numbuf[i], width, 0,
                padding, alignment, (NUM_BUF_SIZE - 1) - i, 0, 0, 0);
 }
 
-inline static void appenddouble(char **buffer, int *pos,
-                                int *size, double number,
+inline static void appenddouble(StringBuffer *buffer,
+                                double number,
                                 int width, char padding,
                                 int alignment, int precision,
                                 int adjust, char fmt,
@@ -684,14 +688,14 @@ inline static void appenddouble(char **buffer, int *pos,
 
   if (isnan(number)) {
     is_negative = (number<0);
-    appendstring(buffer, pos, size, "NaN", 3, 0, padding,
+    appendstring(buffer, "NaN", 3, 0, padding,
                  alignment, 3, is_negative, 0, always_sign);
     return;
   }
 
   if (isinf(number)) {
     is_negative = (number<0);
-    appendstring(buffer, pos, size, "INF", 3, 0, padding,
+    appendstring(buffer, "INF", 3, 0, padding,
                  alignment, 3, is_negative, 0, always_sign);
     return;
   }
@@ -735,11 +739,11 @@ inline static void appenddouble(char **buffer, int *pos,
     break;
   }
 
-  appendstring(buffer, pos, size, s, width, 0, padding,
+  appendstring(buffer, s, width, 0, padding,
                alignment, s_len, is_negative, 0, always_sign);
 }
 
-inline static void append2n(char **buffer, int *pos, int *size, long number,
+inline static void append2n(StringBuffer *buffer, long number,
                             int width, char padding, int alignment, int n,
                             char *chartable, int expprec) {
   char numbuf[NUM_BUF_SIZE];
@@ -756,7 +760,7 @@ inline static void append2n(char **buffer, int *pos, int *size, long number,
   }
   while (num > 0);
 
-  appendstring(buffer, pos, size, &numbuf[i], width, 0,
+  appendstring(buffer, &numbuf[i], width, 0,
                padding, alignment, (NUM_BUF_SIZE - 1) - i,
                0, expprec, 0);
 }
@@ -800,7 +804,7 @@ inline static int getnumber(const char *buffer, int *pos) {
  *  "x"   integer argument is printed as lowercase hexadecimal
  *  "X"   integer argument is printed as uppercase hexadecimal
  */
-char *string_printf(const char *format, int len, const Array& args, int *outlen) {
+String string_printf(const char *format, int len, const Array& args) {
   Array vargs = args;
   if (!vargs.isNull() && !vargs->isVectorData()) {
     vargs = Array::Create();
@@ -810,12 +814,11 @@ char *string_printf(const char *format, int len, const Array& args, int *outlen)
   }
 
   if (len == 0) {
-    return strdup("");
+    return String("", 0, CopyString);
   }
 
   int size = 240;
-  char *result = (char *)malloc(size);
-  int outpos = 0;
+  StringBuffer result(size);
 
   int argnum = 0, currarg = 1;
   for (int inpos = 0; inpos < len; ++inpos) {
@@ -823,12 +826,12 @@ char *string_printf(const char *format, int len, const Array& args, int *outlen)
 
     int expprec = 0;
     if (ch != '%') {
-      appendchar(&result, &outpos, &size, ch);
+      result.append(ch);
       continue;
     }
 
     if (format[inpos + 1] == '%') {
-      appendchar(&result, &outpos, &size, '%');
+      result.append('%');
       inpos++;
       continue;
     }
@@ -849,9 +852,8 @@ char *string_printf(const char *format, int len, const Array& args, int *outlen)
       if (format[temppos] == '$') {
         argnum = getnumber(format, &inpos);
         if (argnum <= 0) {
-          free(result);
           throw_invalid_argument("argnum: must be greater than zero");
-          return nullptr;
+          return String();
         }
         inpos++;  /* skip the '$' */
       } else {
@@ -880,10 +882,9 @@ char *string_printf(const char *format, int len, const Array& args, int *outlen)
       /* after modifiers comes width */
       if (isdigit(ch)) {
         if ((width = getnumber(format, &inpos)) < 0) {
-          free(result);
           throw_invalid_argument("width: must be greater than zero "
                                  "and less than %d", INT_MAX);
-          return nullptr;
+          return String();
         }
         adjusting |= ADJ_WIDTH;
       } else {
@@ -896,10 +897,9 @@ char *string_printf(const char *format, int len, const Array& args, int *outlen)
         ch = format[++inpos];
         if (isdigit((int)ch)) {
           if ((precision = getnumber(format, &inpos)) < 0) {
-            free(result);
             throw_invalid_argument("precision: must be greater than zero "
                                    "and less than %d", INT_MAX);
-            return nullptr;
+            return String();
           }
           ch = format[inpos];
           adjusting |= ADJ_PRECISION;
@@ -916,9 +916,8 @@ char *string_printf(const char *format, int len, const Array& args, int *outlen)
     }
 
     if (argnum > vargs.size()) {
-      free(result);
       throw_invalid_argument("arguments: (too few)");
-      return nullptr;
+      return String();
     }
 
     if (ch == 'l') {
@@ -930,17 +929,17 @@ char *string_printf(const char *format, int len, const Array& args, int *outlen)
     switch (ch) {
     case 's': {
       String s = tmp.toString();
-      appendstring(&result, &outpos, &size, s.c_str(),
+      appendstring(&result, s.c_str(),
                    width, precision, padding, alignment, s.size(),
                    0, expprec, 0);
       break;
     }
     case 'd':
-      appendint(&result, &outpos, &size, tmp.toInt64(),
+      appendint(&result, tmp.toInt64(),
                 width, padding, alignment, always_sign);
       break;
     case 'u':
-      appenduint(&result, &outpos, &size, tmp.toInt64(),
+      appenduint(&result, tmp.toInt64(),
                  width, padding, alignment);
       break;
 
@@ -950,37 +949,37 @@ char *string_printf(const char *format, int len, const Array& args, int *outlen)
     case 'E':
     case 'f':
     case 'F':
-      appenddouble(&result, &outpos, &size, tmp.toDouble(),
+      appenddouble(&result, tmp.toDouble(),
                    width, padding, alignment, precision, adjusting,
                    ch, always_sign);
       break;
 
     case 'c':
-      appendchar(&result, &outpos, &size, tmp.toByte());
+      result.append(tmp.toByte());
       break;
 
     case 'o':
-      append2n(&result, &outpos, &size, tmp.toInt64(),
+      append2n(&result, tmp.toInt64(),
                width, padding, alignment, 3, hexchars, expprec);
       break;
 
     case 'x':
-      append2n(&result, &outpos, &size, tmp.toInt64(),
+      append2n(&result, tmp.toInt64(),
                width, padding, alignment, 4, hexchars, expprec);
       break;
 
     case 'X':
-      append2n(&result, &outpos, &size, tmp.toInt64(),
+      append2n(&result, tmp.toInt64(),
                width, padding, alignment, 4, HEXCHARS, expprec);
       break;
 
     case 'b':
-      append2n(&result, &outpos, &size, tmp.toInt64(),
+      append2n(&result, tmp.toInt64(),
                width, padding, alignment, 1, hexchars, expprec);
       break;
 
     case '%':
-      appendchar(&result, &outpos, &size, '%');
+      result.append('%');
 
       break;
     default:
@@ -988,10 +987,7 @@ char *string_printf(const char *format, int len, const Array& args, int *outlen)
     }
   }
 
-  /* possibly, we have to make sure we have room for the terminating null? */
-  result[outpos]=0;
-  if (outlen) *outlen = outpos;
-  return result;
+  return result.detach();
 }
 
 /*
@@ -1570,8 +1566,7 @@ fmt_error:
       /*
        * Print the (for now) non-null terminated string s.
        */
-      appendstring(&result, &outpos, &size, s, 0, 0, ' ', 0, s_len, 0, 0, 0,
-                   false);
+      appendsimplestring(&result, &outpos, &size, s, s_len);
 
       if (adjust_width && adjust == LEFT && min_width > s_len) {
         for (int i = 0; i < min_width - s_len; i++) {

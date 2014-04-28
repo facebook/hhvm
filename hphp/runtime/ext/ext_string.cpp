@@ -736,33 +736,29 @@ String f_str_repeat(const String& input, int multiplier) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_printf(int _argc, const String& format, const Array& _argv /* = null_array */) {
-  int len = 0; char *output = string_printf(format.data(), format.size(),
-                                            _argv, &len);
-  if (output == NULL) return false;
-  echo(output, len); free(output);
-  return len;
+  String output = string_printf(format.data(), format.size(), _argv);
+  if (output.isNull()) return false;
+  echo(output.data(), output.size());
+  return output.size();
 }
 
 Variant f_vprintf(const String& format, const Array& args) {
-  int len = 0; char *output = string_printf(format.data(), format.size(),
-                                            args, &len);
-  if (output == NULL) return false;
-  echo(output, len); free(output);
-  return len;
+  String output = string_printf(format.data(), format.size(), args);
+  if (output.isNull()) return false;
+  echo(output.data(), output.size());
+  return output.size();
 }
 
 Variant f_sprintf(int _argc, const String& format, const Array& _argv /* = null_array */) {
-  int len = 0;
-  char *output = string_printf(format.data(), format.size(), _argv, &len);
-  if (output == NULL) return false;
-  return String(output, len, AttachString);
+  String output = string_printf(format.data(), format.size(), _argv);
+  if (output.isNull()) return false;
+  return output;
 }
 
 Variant f_vsprintf(const String& format, const Array& args) {
-  int len = 0;
-  char *output = string_printf(format.data(), format.size(), args, &len);
-  if (output == NULL) return false;
-  return String(output, len, AttachString);
+  String output = string_printf(format.data(), format.size(), args);
+  if (output.isNull()) return false;
+  return output;
 }
 
 Variant f_sscanf(int _argc,

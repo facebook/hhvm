@@ -748,22 +748,6 @@
             "value": 0
         },
         {
-            "name": "ICONV_IMPL",
-            "value": "glibc"
-        },
-        {
-            "name": "ICONV_MIME_DECODE_CONTINUE_ON_ERROR",
-            "value": 2
-        },
-        {
-            "name": "ICONV_MIME_DECODE_STRICT",
-            "value": 1
-        },
-        {
-            "name": "ICONV_VERSION",
-            "value": "2.5"
-        },
-        {
             "name": "IDNA_ALLOW_UNASSIGNED",
             "value": 1
         },

@@ -1869,12 +1869,14 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
   // If we are inheriting a variable environment then args_ must be empty
   assert(!varEnv || cellIsNull(&args) || !getContainerSize(args));
 
+  Cell* originalSP = m_stack.top();
+
   VMRegAnchor _;
+  DEBUG_ONLY Cell* reentrySP = m_stack.top();
 
   if (this_ != nullptr) {
     this_->incRefCount();
   }
-  Cell* savedSP = m_stack.top();
 
   if (f->attrs() & AttrPhpLeafFn ||
       f->numParams() > kStackCheckReenterPadding - kNumActRecCells) {
@@ -1939,8 +1941,11 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
     }
   }
 
-  pushVMState(savedSP);
-  SCOPE_EXIT { popVMState(); };
+  pushVMState(originalSP);
+  SCOPE_EXIT {
+    assert(m_stack.top() == reentrySP);
+    popVMState();
+  };
 
   enterVM(ar, varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed);
 
@@ -1968,12 +1973,14 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
   assert(!invName || f->name()->isame(s___call.get()) ||
          f->name()->isame(s___callStatic.get()));
 
+  Cell* originalSP = m_stack.top();
+
   VMRegAnchor _;
+  DEBUG_ONLY Cell* reentrySP = m_stack.top();
 
   if (ObjectData* thiz = ActRec::decodeThis(thisOrCls)) {
     thiz->incRefCount();
   }
-  Cell* savedSP = m_stack.top();
 
   if (f->attrs() & AttrPhpLeafFn ||
       argc > kStackCheckReenterPadding - kNumActRecCells) {
@@ -2017,8 +2024,11 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
     }
   }
 
-  pushVMState(savedSP);
-  SCOPE_EXIT { popVMState(); };
+  pushVMState(originalSP);
+  SCOPE_EXIT {
+    assert(m_stack.top() == reentrySP);
+    popVMState();
+  };
 
   enterVM(ar, StackArgsState::Untrimmed);
 
@@ -7687,7 +7697,7 @@ void ExecutionContext::popVMState() {
   m_pc = savedVM.pc;
   m_fp = savedVM.fp;
   m_firstAR = savedVM.firstAR;
-  assert(m_stack.top() == savedVM.sp);
+  m_stack.top() = savedVM.sp;
 
   if (debug) {
     if (savedVM.fp &&

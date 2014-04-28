@@ -218,7 +218,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
       case StLoc: {
         auto const frameInst = frameRoot(inst->src(0)->inst());
         if (frameInst->op() == DefInlineFP) {
-          ITRACE(4, "{} weak use of {}\n", *inst, *frameInst->dst());
+          ITRACE(4, "weak use of {} from {}\n", *frameInst->dst(), *inst);
           state[frameInst].incWeakUse();
         }
         break;
@@ -227,25 +227,16 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
       case PassFP: {
         auto frameInst = frameRoot(inst->src(0)->inst());
         if (frameInst->op() == DefInlineFP) {
-          ITRACE(4, "{} weak use of {}\n", *inst, *frameInst->dst());
+          ITRACE(4, "weak use of {} from {}\n", *frameInst->dst(), *inst);
           state[frameInst].incWeakUse();
         }
         break;
       }
 
-      /* DefInlineFP counts as two weak uses of its containing frame, one for
-       * the DefInlineFP itself and one for the SpillFrame used here. We wait
-       * until this instruction to mark the SpillFrame's use as weak so a
-       * normal Call will prevent frames from being elided. */
       case DefInlineFP: {
         auto outerFrame = frameRoot(inst->src(2)->inst());
         if (outerFrame->is(DefInlineFP)) {
-          ITRACE(4, "{} weak use of {}\n", *inst, *outerFrame->dst());
-          state[outerFrame].incWeakUse();
-
-          auto DEBUG_ONLY spillFrame = findSpillFrame(inst->src(0));
-          assert(spillFrame);
-          ITRACE(4, "{} weak use of {}\n", *spillFrame, *outerFrame->dst());
+          ITRACE(4, "weak use of {} from {}\n", *outerFrame->dst(), *inst);
           state[outerFrame].incWeakUse();
         }
         break;
@@ -255,7 +246,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
       case DefInlineSP: {
         auto const frameInst = frameRoot(inst->src(1)->inst());
         if (frameInst->op() == DefInlineFP) {
-          ITRACE(4, "{} weak use of {}\n", *inst, *frameInst->dst());
+          ITRACE(4, "weak use of {} from {}\n", *frameInst->dst(), *inst);
           state[frameInst].incWeakUse();
         }
         break;
@@ -265,7 +256,6 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
         auto* frameInst = frameRoot(inst->src(0)->inst());
         assert(frameInst->is(DefInlineFP));
         auto frameUses = folly::get_default(uses, frameInst->dst(), 0);
-        auto* spillInst = findSpillFrame(frameInst->src(0));
 
         auto weakUses = state[frameInst].weakUseCount();
         // We haven't counted this InlineReturn as a weak use yet,
@@ -276,10 +266,9 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
 
           Offset retBCOff = frameInst->extra<DefInlineFP>()->retBCOff;
           retFixupMap[frameInst->dst()] = retBCOff;
-          ITRACE(4, "replacing {} and {} with PassFP/PassSP, removing {}\n",
-                 *frameInst, *spillInst, *inst);
+          ITRACE(4, "replacing {} with PassFP, removing {}\n",
+                 *frameInst, *inst);
           unit.replace(frameInst, PassFP, frameInst->src(2));
-          unit.replace(spillInst, PassSP, spillInst->src(0));
           inst->convertToNop();
         } else {
           ITRACE(3, "not killing frame {}, weak/strong {}/{}\n",
@@ -416,7 +405,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
          */
         case Call: {
           if (auto fpInst = findPassFP(inst.src(1)->inst())) {
-            not_reached(); // TODO t3203284
+            always_assert(false); // TODO t3203284
             assert(retFixupMap.count(fpInst->dst()));
             ITRACE(4, "{} repairing\n", inst);
             Offset retBCOff = retFixupMap[fpInst->dst()];

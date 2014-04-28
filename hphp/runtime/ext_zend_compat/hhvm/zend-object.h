@@ -14,7 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_OBJECT
+#ifndef incl_HPHP_ZEND_OBJECT_H_
+#define incl_HPHP_ZEND_OBJECT_H_
 
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_types.h"
 #include "hphp/runtime/base/object-data.h"
@@ -25,7 +26,7 @@ class ZendObject {
   public:
     static void registerNativeData();
 
-    void setHandle(zend_object_handle handle) {
+    void setHandle(unsigned int handle) {
       m_handle = handle;
     }
 
@@ -33,11 +34,26 @@ class ZendObject {
       return m_handle;
     }
 
+    void setHandlers(const zend_object_handlers * handlers) {
+      m_handlers = handlers;
+    }
+
+    const zend_object_handlers * getHandlers() const {
+      return m_handlers;
+    }
+
   protected:
     static void nativeDataCtor(ObjectData* obj);
-    void initZendObject(Class* cls);
+    static void nativeDataCopy(ObjectData* dest, ObjectData* src);
+    static void nativeDataDtor(ObjectData* obj);
 
-    int64_t m_handle;
+    void initZendObject(Class* cls);
+    void destroyZendObject();
+
+    zend_object_handle m_handle;
+    // Note: zend_object_handlers will be an opaque (incomplete) type for
+    // callers external to EZC
+    const zend_object_handlers * m_handlers;
 };
 
 }

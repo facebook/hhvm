@@ -36,7 +36,9 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSR
 
 ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
 {
-  not_implemented();
+  // No action is needed here.
+  // Zend deletes properties here, but we delete properties in the ObjectData
+  // destructor.
 }
 
 ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
@@ -74,19 +76,28 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_va
   not_implemented();
 }
 
+/**
+ * This is the standard clone handler, which, confusingly, does NOT call the
+ * clone handler in the object bucket. It is necessary to override this handler
+ * with zend_objects_store_clone_obj, which does call the bucket clone handler.
+ * This is undocumented in Zend, and several extensions get it wrong.
+ *
+ * In Zend, this creates a new store bucket and copies properties, but it does
+ * NOT copy handlers. It also does not copy any extension-specific data. If
+ * there is any such data, it will be uninitialised. So, it is generally
+ * unsuitable for extensions that use handlers or extra data.
+ *
+ * In HHVM, properties are copied elsewhere, so all we have to do here is make
+ * the new bucket.
+ */
 ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 {
   zend_object_value new_obj_val;
   zend_object *old_object;
   zend_object *new_object;
-  zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
-  /* assume that create isn't overwritten, so when clone depends on the
-   * overwritten one then it must itself be overwritten */
   old_object = zend_objects_get_address(zobject TSRMLS_CC);
   new_obj_val = zend_objects_new(&new_object, old_object->ce TSRMLS_CC);
-
-  zend_objects_clone_members(new_object, new_obj_val, old_object, handle TSRMLS_CC);
 
   return new_obj_val;
 }

@@ -16,12 +16,9 @@
 
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-exception-store.h"
 
+
 namespace HPHP {
 
-static __thread RequestLocal<ZendExceptionStore> tl_exceptionStore;
-
-ZendExceptionStore& ZendExceptionStore::getInstance() {
-  return *tl_exceptionStore;
-}
+__thread RequestLocal<ZendExceptionStore> ZendExceptionStore::tl_instance;
 
 }

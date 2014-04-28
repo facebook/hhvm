@@ -3,6 +3,7 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,53 +15,45 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_EXCEPTION_STORE
-#define incl_HPHP_ZEND_EXCEPTION_STORE
+#ifndef incl_ZEND_OBJECT_STORE_H_
+#define incl_ZEND_OBJECT_STORE_H_
 
-#include <exception>
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/request-event-handler.h"
+#include <vector>
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-request-local.h"
+#include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_objects_API.h"
 
 namespace HPHP {
 
-class ZendExceptionStore final : public RequestEventHandler {
+class ZendObjectStore final : public RequestEventHandler {
   public:
-    static ZendExceptionStore& getInstance() {
+    static ZendObjectStore & getInstance() {
       return *tl_instance;
     }
 
-    template <class E> void set(E e) {
-      m_ptr = std::make_exception_ptr(e);
-    }
-    void setPointer(std::exception_ptr ptr) {
-      m_ptr = ptr;
-    }
-    void clear() {
-      m_ptr = nullptr;
-    }
-    virtual void requestInit() {
-    }
-    virtual void requestShutdown() {
-      clear();
-    }
-    std::exception_ptr get() {
-      return m_ptr;
-    }
-    bool empty() {
-      return !m_ptr;
-    }
-    void rethrow() {
-      if (m_ptr) {
-        std::exception_ptr p = get();
-        clear();
-        std::rethrow_exception(p);
-      }
-    }
+    ZendObjectStore()
+      : m_free_list_head(0)
+    {}
+
+    virtual void requestInit() {};
+    virtual void requestShutdown();
+
+    zend_object_handle insertObject(void *object, zend_objects_store_dtor_t dtor,
+        zend_objects_free_object_storage_t free_storage,
+        zend_objects_store_clone_t clone);
+
+    void * getObject(zend_object_handle handle);
+    void freeObject(zend_object_handle handle);
+    zend_object_handle cloneObject(zend_object_handle handle);
 
   private:
-    std::exception_ptr m_ptr;
-    static __thread RequestLocal<ZendExceptionStore> tl_instance;
+    static __thread RequestLocal<ZendObjectStore> tl_instance;
+
+    std::vector<zend_object_store_bucket> m_store;
+    zend_object_handle m_free_list_head;
 };
 
 }
+
 #endif

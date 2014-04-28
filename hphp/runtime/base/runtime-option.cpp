@@ -151,6 +151,7 @@ int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownListenNoWork = -1;
 std::vector<std::string> RuntimeOption::ServerNextProtocols;
 int RuntimeOption::GzipCompressionLevel = 3;
+bool RuntimeOption::EnableChanneledJson = true;
 std::string RuntimeOption::ForceCompressionURL;
 std::string RuntimeOption::ForceCompressionCookie;
 std::string RuntimeOption::ForceCompressionParam;
@@ -832,6 +833,7 @@ void RuntimeOption::Load(Hdf &config,
       ServerGracefulShutdownWait = ServerDanglingWait;
     }
     GzipCompressionLevel = server["GzipCompressionLevel"].getInt16(3);
+    EnableChanneledJson = server["EnableChanneledJson"].getBool(true);
 
     ForceCompressionURL    = server["ForceCompression"]["URL"].getString();
     ForceCompressionCookie = server["ForceCompression"]["Cookie"].getString();

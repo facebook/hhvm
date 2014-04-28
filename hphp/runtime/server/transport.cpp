@@ -680,6 +680,28 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
   }
 }
 
+namespace {
+
+void LogException(const char* msg) {
+  try {
+    throw;
+  } catch (Exception& e) {
+    Logger::Error("%s: %s", msg, e.getMessage().c_str());
+  } catch (std::exception& e) {
+    Logger::Error("%s: %s", msg, e.what());
+  } catch (Object& e) {
+    try {
+      Logger::Error("%s: %s", msg, e.toString().c_str());
+    } catch (...) {
+      Logger::Error("%s: (e.toString() failed)", msg);
+    }
+  } catch (...) {
+    Logger::Error("%s: (unknown exception)", msg);
+  }
+}
+
+}
+
 String Transport::prepareResponse(const void *data, int size, bool &compressed,
                                   bool last) {
   String response((const char *)data, size, CopyString);
@@ -696,10 +718,12 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
   }
 
 #ifdef FACEBOOK
-  if ((strstr(getHeader("X-FB-Channeled-Json").c_str(), "true") != nullptr) &&
+  if (RuntimeOption::EnableChanneledJson &&
+      (strstr(getHeader("X-FB-Channeled-Json").c_str(), "true") != nullptr) &&
       (size > ChanneledJsonCompressor::MIN_LENGTH_TO_CHANNEL_JSON) &&
       (m_compressor == nullptr) && (last) && (!m_headerSent)) {
-
+    bool okToFail = true;
+    try {
       ChanneledJsonCompressor channeledJsonCompressor;
       channeledJsonCompressor.processJson((const char*)data, size);
       folly::IOBufQueue bufQueue;
@@ -709,6 +733,8 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
 
       String concatenated((const char*)output->data(), output->length(),
               CopyString);
+
+      okToFail = false;
       response = concatenated;
 
       // overriding the data pointer
@@ -716,6 +742,10 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
       size = response.length();
 
       replaceHeader("Content-Type", "application/channeled-json");
+    } catch (...) {
+      if (!okToFail) throw;
+      LogException("ChanneledJsonCompressor");
+    }
   }
 #endif
 
@@ -785,7 +815,11 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
     // flush() triggers php's recursion guard
     // the recursion guard calls back into m_headerCallback
     m_headerCallbackDone = true;
-    vm_call_user_func(m_headerCallback, init_null_variant);
+    try {
+      vm_call_user_func(m_headerCallback, init_null_variant);
+    } catch (...) {
+      LogException("HeaderCallback");
+    }
   }
 
   // compression handling

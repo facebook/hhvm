@@ -1593,11 +1593,15 @@ SSATmp* Simplifier::simplifyConvCellToBool(const IRInstruction* inst) {
   if (srcType <= Type::Str)  return gen(ConvStrToBool, src);
   if (srcType <= Type::Obj) {
     if (auto cls = srcType.getClass()) {
-      // t3429711 we should test cls->m_ODAttr
-      // here, but currently it doesnt have all
-      // the flags set.
-      if (!cls->instanceCtor()) {
-        return cns(true);
+      // We need to exclude interfaces like ConstSet.  For now, just
+      // skip anything that's an interface.
+      if (!(cls->attrs() & AttrInterface)) {
+        // t3429711 we should test cls->m_ODAttr
+        // here, but currently it doesnt have all
+        // the flags set.
+        if (!cls->instanceCtor()) {
+          return cns(true);
+        }
       }
     }
     return gen(ConvObjToBool, src);

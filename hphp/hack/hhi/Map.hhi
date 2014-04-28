@@ -150,6 +150,11 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public function removeKey(Tk $k): Map<Tk, Tv>;
 
   /**
+   * Returns a Map containing the first n key/value pairs of this Map.
+   */
+  public function take(int $n): Map<Tk, Tv>;
+
+  /**
    * Returns a new Map with the keys in this Map not in $iterable
    */
   public function differenceByKey(KeyedTraversable<Tk, Tv> $iterable): Map<Tk, Tv>;

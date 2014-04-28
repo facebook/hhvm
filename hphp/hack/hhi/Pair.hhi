@@ -74,7 +74,6 @@ final class Pair<Tv1, Tv2> implements ConstVector<mixed> {
     ImmVector<mixed>;
   public function zip<Tu>(Traversable<Tu> $iterable):
     ImmVector<Pair<mixed, Tu>>;
-  public function concat(Traversable<Tv> $iterable): ImmVector<Tv>;
   public function firstValue(): Tv1;
   public function firstKey(): int;
   public function lastValue(): Tv2;

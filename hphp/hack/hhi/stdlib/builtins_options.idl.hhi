@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh // decl
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -38,6 +38,9 @@ function clock_gettime($clk_id, &$sec, &$nsec) { }
 function clock_settime($clk_id, $sec, $nsec) { }
 function cpu_get_count() { }
 function cpu_get_model() { }
+function hphp_memory_get_interval_peak_usage(bool $real_usage = false): int { }
+function hphp_memory_start_interval(): bool { }
+function hphp_memory_stop_interval(): bool { }
 function ini_alter($varname, $newvalue) { }
 function ini_get_all($extension = null) { }
 function ini_get($varname) { }

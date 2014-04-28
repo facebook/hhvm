@@ -86,11 +86,11 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
   **/
   public function rowBlocks() { }
 }
-class AsyncMysqlRowBlock {
+class AsyncMysqlRowBlock extends Countable, KeyedTraversable<int, AsyncMysqlRow> {
   public function __construct() { }
-  public function getFieldAsInt(int $row, mixed $field) { }
-  public function getFieldAsDouble(int $row, mixed $field) { }
-  public function getFieldAsString(int $row, mixed $field) { }
+  public function getFieldAsInt(int $row, mixed $field): int { }
+  public function getFieldAsDouble(int $row, mixed $field): float { }
+  public function getFieldAsString(int $row, mixed $field): string { }
   public function isNull(int $row, mixed $field): bool { }
   public function fieldType(mixed $field): int { }
   public function fieldFlags(mixed $field): int { }
@@ -98,10 +98,11 @@ class AsyncMysqlRowBlock {
   public function isEmpty(): bool { }
   public function fieldsCount(): int { }
   public function count(): int { }
-  public function getIterator(): AsyncMysqlRowBlockIterator { }
+  public function getIterator(): KeyedIterator<int, AsyncMysqlRow> { }
   public function getRow(int $row): AsyncMysqlRow { }
 }
-class AsyncMysqlRowBlockIterator {
+/* actually returned from AsyncMysqlRowBlock::getIterator
+class AsyncMysqlRowBlockIterator implements Iterator, Traversable {
   public function __construct() { }
   public function valid() { }
   public function next() { }
@@ -109,6 +110,7 @@ class AsyncMysqlRowBlockIterator {
   public function key() { }
   public function rewind() { }
 }
+*/
 class AsyncMysqlRow implements MysqlRow {
   public function __construct() { }
   public function getFieldAsInt(mixed $field): int { }
@@ -117,13 +119,25 @@ class AsyncMysqlRow implements MysqlRow {
   public function isNull(mixed $field): bool { }
   public function fieldType(mixed $field): int { }
   public function count(): int { }
-  public function getIterator(): AsyncMysqlRowIterator { }
+  public function getIterator(): KeyedIterator<string, ?mixed> { }
 }
-class AsyncMysqlRowIterator {
+/* actually returned from AsyncMysqlRow::getIterator
+class AsyncMysqlRowIterator implements KeyedIterator<string, ?mixed> {
   public function __construct() { }
   public function valid() { }
   public function next() { }
   public function current() { }
   public function key() { }
   public function rewind() { }
+}
+*/
+interface MysqlRow extends Countable, KeyedTraversable<string, ?mixed>, IteratorAggregate<?mixed>
+{
+  public function getFieldAsInt(mixed $field): int;
+  public function getFieldAsDouble(mixed $field): float;
+  public function getFieldAsString(mixed $field): string;
+  public function fieldType(mixed $field): int;
+  public function isNull(mixed $field): bool;
+  public function count(): int;
+  public function getIterator(): KeyedIterator<string, ?mixed>;
 }

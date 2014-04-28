@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "parser.h"
+
+#include "folly/Format.h"
+
 #include "hphp/util/hash.h"
 
 #include <boost/lexical_cast.hpp>
@@ -30,6 +32,10 @@ bool ParserBase::IsClosureName(const std::string &name) {
 std::string ParserBase::newClosureName(
     const std::string &className,
     const std::string &funcName) {
+  // Closure names must be globally unique.  The easiest way to do
+  // this is include a hash of the filename.
+  int64_t hash = hash_string_cs(m_fileName, strlen(m_fileName));
+
   std::string name = "Closure$";
   if (!className.empty()) {
     name += className + "::";
@@ -37,6 +43,9 @@ std::string ParserBase::newClosureName(
   name += funcName;
 
   int id = ++m_seenClosures[name];
+
+  folly::format(&name, ";{}", hash);
+
   if (id > 1) {
     // we've seen the same name before, uniquify
     name = name + '#' + std::to_string(id);

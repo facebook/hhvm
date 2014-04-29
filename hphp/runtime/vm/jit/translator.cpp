@@ -3639,6 +3639,8 @@ Translator::Translator()
   , m_mode(TransInvalid)
   , m_profData(nullptr)
   , m_analysisDepth(0)
+  , m_useAHot(RuntimeOption::RepoAuthoritative &&
+              RuntimeOption::EvalJitAHotSize > 0)
 {
   initInstrInfo();
   if (RuntimeOption::EvalJitPGO) {
@@ -4093,8 +4095,18 @@ Translator::translateRegion(const RegionDesc& region,
       });
     toInterp.insert(sk);
     return Retry;
+  } catch (const DataBlockFull& dbFull) {
+    if (dbFull.name == "hot") {
+      assert(m_useAHot);
+      m_useAHot = false;
+      // We can't return Retry here because the code block selection
+      // will still say hot.
+      return Translator::Failure;
+    } else {
+      always_assert_flog(0, "data block = {}\nmessage: {}\n",
+                         dbFull.name, dbFull.what());
+    }
   }
-
   return Success;
 }
 

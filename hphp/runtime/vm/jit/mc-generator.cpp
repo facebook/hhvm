@@ -465,9 +465,9 @@ MCGenerator::translate(const TranslArgs& args) {
   }
 
   Func* func = const_cast<Func*>(args.m_sk.func());
-  CodeCache::Selector asmSel(CodeCache::Selector::Args(code)
-                             .profile(m_tx.mode() == TransProfile)
-                             .hot(func->attrs() & AttrHot));
+  CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
+                            .profile(m_tx.mode() == TransProfile)
+                            .hot((func->attrs() & AttrHot) && m_tx.useAHot()));
 
   if (args.m_align) {
     mcg->backEnd().moveToAlign(code.main(),
@@ -667,9 +667,9 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   }
   SCOPE_EXIT{ m_tx.setMode(TransInvalid); };
 
-  CodeCache::Selector asmSel(CodeCache::Selector::Args(code)
-                             .profile(m_tx.mode() == TransProflogue)
-                             .hot(func->attrs() & AttrHot));
+  CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
+                            .profile(m_tx.mode() == TransProflogue)
+                            .hot((func->attrs() & AttrHot) && m_tx.useAHot()));
 
   // If we're close to a cache line boundary, just burn some space to
   // try to keep the func and its body on fewer total lines.
@@ -2013,6 +2013,16 @@ MCGenerator::translateTracelet(Tracelet& t) {
         }
       }
       throw fcg;
+    } catch (const DataBlockFull& dbFull) {
+      if (dbFull.name == "hot") {
+        always_assert_flog(tx().useAHot(), "data block = {}\nmessage: {}\n",
+                           dbFull.name, dbFull.what());
+        tx().setUseAHot(false);
+        // We can't return Retry here because the code block selection
+        // will still say hot.
+        return Translator::Failure;
+      }
+      throw dbFull;
     }
   } catch (FailedCodeGen& fcg) {
     TRACE(1, "HHIR: FAILED to generate code for Translation %d "
@@ -2034,7 +2044,17 @@ MCGenerator::translateTracelet(Tracelet& t) {
   } catch (const FailedTraceGen& e) {
     FTRACE(1, "HHIR: FAILED to translate whole unit: {}\n",
            e.what());
+  } catch (const DataBlockFull& dbFull) {
+    FTRACE(1, "HHIR: FAILED due to full data block: {}\n", dbFull.name);
+    if (dbFull.name == "hot") {
+      assert(tx().useAHot());
+      tx().setUseAHot(false);
+    } else {
+      always_assert_flog(0, "data block = {}\nmessage: {}\n",
+                         dbFull.name, dbFull.what());
+    }
   }
+
   return Translator::Failure;
 }
 
@@ -2087,7 +2107,8 @@ MCGenerator::MCGenerator()
 
 void MCGenerator::initUniqueStubs() {
   // Put the following stubs into ahot, rather than a.
-  CodeCache::Selector asmSel(CodeCache::Selector::Args(code).hot(true));
+  CodeCache::Selector cbSel(CodeCache::Selector::Args(code).
+                            hot(m_tx.useAHot()));
   m_tx.uniqueStubs = mcg->backEnd().emitUniqueStubs();
 }
 

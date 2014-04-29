@@ -39,37 +39,56 @@ namespace sz {
 typedef uint8_t* Address;
 typedef uint8_t* CodeAddress;
 
+class DataBlockFull : public std::runtime_error {
+ public:
+  std::string name;
+
+  DataBlockFull(const std::string& blockName, const std::string msg)
+      : std::runtime_error(msg)
+      , name(blockName)
+    {}
+
+  ~DataBlockFull() noexcept {}
+};
+
 /**
  * DataBlock is a simple bump-allocating wrapper around a chunk of memory.
  */
 struct DataBlock {
 
-  DataBlock() : m_base(nullptr), m_frontier(nullptr), m_size(0) {}
+  DataBlock() : m_base(nullptr), m_frontier(nullptr), m_size(0), m_name("") {}
 
   DataBlock(const DataBlock& other) = delete;
   DataBlock& operator=(const DataBlock& other) = delete;
 
   DataBlock(DataBlock&& other)
-    : m_base(other.m_base), m_frontier(other.m_frontier), m_size(other.m_size) {
+    : m_base(other.m_base)
+    , m_frontier(other.m_frontier)
+    , m_size(other.m_size)
+    , m_name(other.m_name) {
     other.m_base = other.m_frontier = nullptr;
     other.m_size = 0;
+    other.m_name = "";
   }
 
   DataBlock& operator=(DataBlock&& other) {
     m_base = other.m_base;
     m_frontier = other.m_frontier;
     m_size = other.m_size;
+    m_name = other.m_name;
     other.m_base = other.m_frontier = nullptr;
     other.m_size = 0;
+    other.m_name = "";
     return *this;
   }
 
   /**
    * Uses an existing chunk of memory.
    */
-  void init(Address start, size_t sz) {
+  void init(Address start, size_t sz, const char* name) {
     m_base = m_frontier = start;
     m_size = sz;
+    m_name = name;
   }
 
   /*
@@ -112,17 +131,15 @@ struct DataBlock {
   }
 
   void assertCanEmit(size_t nBytes) {
-    always_assert_log(
-      canEmit(nBytes),
-      ([this,nBytes] {
-        return folly::format(
-          "Attempted to emit {} byte(s) into a {} byte DataBlock with {} bytes "
-          "available. This almost certainly means the TC is full. If this is "
-          "the case, increasing Eval.JitASize, Eval.JitAStubsSize and "
-          "Eval.JitGlobalDataSize in the configuration file when running this "
-          "script or application should fix this problem.",
-          nBytes, m_size, m_size - (m_frontier - m_base)).str();
-      }));
+    if (!canEmit(nBytes)) {
+      throw DataBlockFull(m_name, folly::format(
+        "Attempted to emit {} byte(s) into a {} byte DataBlock with {} bytes "
+        "available. This almost certainly means the TC is full. If this is "
+        "the case, increasing Eval.JitASize, Eval.JitAStubsSize and "
+        "Eval.JitGlobalDataSize in the configuration file when running this "
+        "script or application should fix this problem.",
+        nBytes, m_size, m_size - (m_frontier - m_base)).str());
+    }
   }
 
   bool isValidAddress(const CodeAddress tca) const {
@@ -155,7 +172,7 @@ struct DataBlock {
   }
 
   void bytes(size_t n, const uint8_t *bs) {
-    assertCanEmit(canEmit(n));
+    assertCanEmit(n);
     if (n <= 8) {
       // If it is a modest number of bytes, try executing in one machine
       // store. This allows control-flow edges, including nop, to be
@@ -185,6 +202,7 @@ struct DataBlock {
 
   Address base() const { return m_base; }
   Address frontier() const { return m_frontier; }
+  std::string name() const { return m_name; }
 
   void setFrontier(Address addr) {
     m_frontier = addr;
@@ -222,7 +240,8 @@ struct DataBlock {
  protected:
   Address m_base;
   Address m_frontier;
-  size_t m_size;
+  size_t  m_size;
+  std::string m_name;
 };
 
 typedef DataBlock CodeBlock;

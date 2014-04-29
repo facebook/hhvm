@@ -544,6 +544,7 @@ private:
 
 private:
   int m_analysisDepth;
+  bool m_useAHot;
 
 public:
   void clearDbgBL();
@@ -563,6 +564,14 @@ public:
   int analysisDepth() const {
     assert(m_analysisDepth >= 0);
     return m_analysisDepth;
+  }
+
+  bool useAHot() const {
+    return m_useAHot;
+  }
+
+  void setUseAHot(bool val) {
+    m_useAHot = val;
   }
 
   // Start a new translation space. Returns true IFF this thread created

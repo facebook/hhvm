@@ -101,7 +101,7 @@ namespace vixl {
 #define SETUP_SIZE(buf_size)                                                   \
   byte* buf = new byte[buf_size];                                              \
   HPHP::CodeBlock cb;                                                          \
-  cb.init(buf, buf_size);                                                      \
+  cb.init(buf, buf_size, "test");                                              \
   Decoder decoder;                                                             \
   Simulator* simulator = nullptr;                                              \
   simulator = new Simulator(&decoder, std::cout);                              \
@@ -133,7 +133,7 @@ namespace vixl {
 #define SETUP_SIZE(buf_size)                                                   \
   byte* buf = new byte[buf_size];                                              \
   HPHP::CodeBlock cb;                                                          \
-  cb.init(buf, buf_size);                                                      \
+  cb.init(buf, buf_size, "test");                                              \
   MacroAssembler masm(cb);                                                     \
   RegisterDump core;                                                           \
   CPU::SetUp()

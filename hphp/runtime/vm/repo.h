@@ -200,9 +200,9 @@ public:
   void setIntPragma(int repoId, const char* name, int val);
   void getTextPragma(int repoId, const char* name, std::string& val);
   void setTextPragma(int repoId, const char* name, const char* val);
-  bool initSchema(int repoId, bool& isWritable);
+  bool initSchema(int repoId, bool& isWritable, std::string& errorMsg);
   bool schemaExists(int repoId);
-  bool createSchema(int repoId);
+  bool createSchema(int repoId, std::string& errorMsg);
   bool writable(int repoId);
 
 private:

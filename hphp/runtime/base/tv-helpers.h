@@ -337,16 +337,24 @@ inline void tvSet(const Cell& fr, TypedValue& inTo) {
 /*
  * Assign null to `to', with appropriate reference count modifications.
  *
+ * `to' must contain a live php value; use tvWriteNull when it doesn't.
+ */
+inline void cellSetNull(Cell& to) {
+  auto const oldType = to.m_type;
+  auto const oldDatum = to.m_data.num;
+  tvWriteNull(&to);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+/*
+ * Assign null to `to', with appropriate reference count modifications.
+ *
  * If `to' is KindOfRef, places the null in the RefData pointed to by `to'.
  *
  * `to' must contain a live php value; use tvWriteNull when it doesn't.
  */
-inline void tvSetNull(TypedValue& inTo) {
-  Cell* to = tvToCell(&inTo);
-  auto const oldType = to->m_type;
-  auto const oldDatum = to->m_data.num;
-  tvWriteNull(to);
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+inline void tvSetNull(TypedValue& to) {
+  cellSetNull(*tvToCell(&to));
 }
 
 /*

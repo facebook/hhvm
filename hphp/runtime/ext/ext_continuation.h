@@ -132,8 +132,8 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
 
   inline void finish() {
     assert(getState() == Running);
-    cellSet(make_tv<KindOfNull>(), m_key);
-    cellSet(make_tv<KindOfNull>(), m_value);
+    cellSetNull(m_key);
+    cellSetNull(m_value);
     setState(Done);
   }
 

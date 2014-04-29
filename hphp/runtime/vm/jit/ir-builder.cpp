@@ -432,11 +432,17 @@ SSATmp* IRBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* IRBuilder::preOptimizeLdGbl(IRInstruction* inst) {
+  auto const locId = inst->extra<LdGbl>()->locId;
+  auto const locType = localType(locId, DataTypeGeneric);
+  auto const minType = std::min(locType, inst->typeParam()).relaxToGuardable();
+  inst->setTypeParam(minType);
+  return nullptr;
+}
+
 SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   auto const locId = inst->extra<LdLoc>()->locId;
-  if (auto tmp = localValue(locId, DataTypeGeneric)) {
-    return tmp;
-  }
+  if (auto tmp = localValue(locId, DataTypeGeneric)) return tmp;
 
   auto const type = localType(locId, DataTypeGeneric);
   // If FrameState's type isn't as good as the type param, we're missing
@@ -509,6 +515,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
     X(DecRefThis);
     X(DecRefLoc);
     X(LdLoc);
+    X(LdGbl);
     X(LdLocAddr);
     X(StLoc);
   default:

@@ -59,6 +59,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/php-debug.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -313,7 +314,8 @@ MCGenerator::getTranslation(const TranslArgs& args) {
           sk.offset());
   SKTRACE(2, sk, "   funcId: %x \n", sk.func()->getFuncId());
 
-  if (Translator::liveFrameIsPseudoMain()) {
+  if (Translator::liveFrameIsPseudoMain() &&
+      !RuntimeOption::EvalJitPseudomain) {
     SKTRACE(2, sk, "punting on pseudoMain\n");
     return nullptr;
   }
@@ -1897,7 +1899,6 @@ MCGenerator::translateTracelet(Tracelet& t) {
   Timer _t(Timer::translateTracelet);
 
   FTRACE(2, "attempting to translate tracelet:\n{}\n", t.toString());
-  assert(!Translator::liveFrameIsPseudoMain());
   const SrcKey &sk = t.m_sk;
   SrcRec& srcRec = *m_tx.getSrcRec(sk);
   HhbcTranslator& ht = m_tx.irTrans()->hhbcTrans();

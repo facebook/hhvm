@@ -408,6 +408,11 @@ static inline bool simulateARMDefault() {
 #endif
 }
 
+static inline bool jitPseudomainDefault() {
+  // TODO(#4238120)
+  return !RuntimeOption::EvalSimulateARM;
+}
+
 static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }
@@ -1428,6 +1433,8 @@ void RuntimeOption::Load(Hdf &config,
   // HPHP specific
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
                    "hhvm.eval.jit", &EvalJit);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
+                   "hhvm.eval.jit_pseudomain", &EvalJitPseudomain);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.compiler_id",
                    IniSetting::SetAndGet<std::string>(

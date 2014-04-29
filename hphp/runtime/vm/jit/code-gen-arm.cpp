@@ -378,6 +378,7 @@ PUNT_OPCODE(LdProp)
 PUNT_OPCODE(LdElem)
 PUNT_OPCODE(LdPackedArrayElem)
 PUNT_OPCODE(LdRef)
+PUNT_OPCODE(LdGbl)
 PUNT_OPCODE(LdThis)
 PUNT_OPCODE(LdRetAddr)
 PUNT_OPCODE(ConvClsToCctx)
@@ -1820,11 +1821,14 @@ void CodeGenerator::cgLdLoc(IRInstruction* inst) {
   emitLoad(inst->dst()->type(), dstLoc(0), baseReg, offset);
 }
 
-void CodeGenerator::cgStLoc(IRInstruction* inst) {
+void CodeGenerator::cgStLocWork(IRInstruction* inst) {
   auto baseReg = x2a(srcLoc(0).reg());
-  auto offset = localOffset(inst->extra<StLoc>()->locId);
+  auto offset = localOffset(inst->extra<LocalId>()->locId);
   emitStore(baseReg, offset, inst->src(1), srcLoc(1), true /* store type */);
 }
+
+void CodeGenerator::cgStLoc(IRInstruction* inst) { cgStLocWork(inst); }
+void CodeGenerator::cgStGbl(IRInstruction* inst) { cgStLocWork(inst); }
 
 void CodeGenerator::cgLdStack(IRInstruction* inst) {
   assert(inst->taken() == nullptr);

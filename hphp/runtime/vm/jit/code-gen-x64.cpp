@@ -4439,6 +4439,21 @@ void CodeGenerator::cgLdLocAddr(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgLdGbl(IRInstruction* inst) {
+  cgLoad(
+    inst->dst(),
+    dstLoc(0),
+    srcLoc(0).reg()[localOffset(inst->extra<LdGbl>()->locId)],
+    inst->taken()
+  );
+}
+
+void CodeGenerator::cgStGbl(IRInstruction* inst) {
+  auto ptr = srcLoc(0).reg();
+  auto off = localOffset(inst->extra<StGbl>()->locId);
+  cgStore(ptr[off], inst->src(1), srcLoc(1), Width::Full);
+}
+
 void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
   auto const base   = srcLoc(0).reg();
   auto const offset = cellsToBytes(inst->extra<LdStackAddr>()->offset);

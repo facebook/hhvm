@@ -852,26 +852,47 @@ private:
   void    replace(uint32_t index, SSATmp* tmp);
 
   /*
-   * Local instruction helpers.
+   * Local instruction helpers. The ldgblExit is so helpers can emit the guard
+   * for LdGbl insts if we're in the pseudomain. The ldrefExit is for helpers
+   * that might need to emit a LdRef to unbox a local.
    */
-  SSATmp* ldLoc(uint32_t id, TypeConstraint constraint);
+  SSATmp* ldLoc(uint32_t id,
+                Block* ldgblExit,
+                TypeConstraint constraint);
   SSATmp* ldLocAddr(uint32_t id, TypeConstraint constraint);
 private:
-  SSATmp* ldLocInner(uint32_t id, Block* exit,
+  SSATmp* ldLocInner(uint32_t id,
+                     Block* ldrefExit,
+                     Block* ldgblExit,
                      TypeConstraint constraint);
-  SSATmp* ldLocInnerWarn(uint32_t id, Block* target,
+  SSATmp* ldLocInnerWarn(uint32_t id,
+                         Block* ldrefExit,
+                         Block* ldgblExit,
                          TypeConstraint constraint,
                          Block* catchBlock = nullptr);
-public:
-  SSATmp* pushStLoc(uint32_t id, Block* exit, SSATmp* newVal);
-  SSATmp* stLoc(uint32_t id, Block* exit, SSATmp* newVal);
-  SSATmp* stLocNRC(uint32_t id, Block* exit, SSATmp* newVal);
 
+  SSATmp* pushStLoc(uint32_t id,
+                    Block* ldrefExit,
+                    Block* ldgblExit,
+                    SSATmp* newVal);
+  SSATmp* stLoc(uint32_t id,
+                Block* ldrefExit,
+                Block* ldgblExit,
+                SSATmp* newVal);
+  SSATmp* stLocNRC(uint32_t id,
+                   Block* ldrefExit,
+                   Block* ldgblExit,
+                   SSATmp* newVal);
   SSATmp* stLocImpl(uint32_t id,
-                    Block* exit,
+                    Block* ldrefExit,
+                    Block* ldgblExit,
                     SSATmp* newVal,
                     bool decRefOld,
                     bool incRefOld);
+
+  SSATmp* genStLocal(uint32_t id, SSATmp* fp, SSATmp* newVal);
+
+  bool inPseudoMain() const;
 
 private:
   // Tracks information about the current bytecode offset and which

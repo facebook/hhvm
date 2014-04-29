@@ -754,6 +754,12 @@ D:T = LdLoc<T,localId> S0:FramePtr
 
   Loads local slot localId from the frame S0 and puts the value in D as type T.
 
+D:T = LdGbl<T,localId> S0:FramePtr -> B
+
+  Loads local number localId from frame S0 and puts the value in D if the
+  local's type is a subtype of T. If the local's type is not a subtype of T,
+  then the load does not happen, and this instruction branches to B.
+
 D:PtrToGen = LdStackAddr<offset> S0:StkPtr
 
   Loads the address of the stack slot given by the pointer in S0 at the offset
@@ -1282,6 +1288,12 @@ StLocNT<localId> S0:FramePtr S1:Gen
 
   Store S1 to local number localId on the frame pointed to by S0, without
   storing the type.
+
+StGbl<localId> S0:FramePtr S1:Gen
+
+  Behaves just like StLoc, except the hard requirement that it is only emitted
+  for globals. We don't optimize StGbl the same way as StLoc, as we need
+  intraprocedural analysis to know whether the store is truly dead.
 
 D:BoxedCell = StRef S0:BoxedCell S1:Cell
 

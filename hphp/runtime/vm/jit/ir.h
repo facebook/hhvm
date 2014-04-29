@@ -423,6 +423,7 @@ O(LdPackedArrayElem,            D(Gen), S(Arr) S(Int),                     E) \
 O(LdRef,                        DLdRef, S(BoxedCell),                      B) \
 O(LdThis,                        DThis, S(FramePtr),                     B|C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
+O(LdGbl,                        DParam, S(FramePtr),                       B) \
 O(DefConst,                     DParam, NA,                                C) \
 O(Conjure,                      DParam, NA,                               NF) \
 O(ConvClsToCctx,               D(Cctx), S(Cls),                            C) \
@@ -524,6 +525,7 @@ O(StMem,                            ND, S(PtrToGen)                           \
 O(StProp,                           ND, S(Obj) C(Int) S(Gen),          E|CRc) \
 O(StLoc,                            ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StLocNT,                          ND, S(FramePtr) S(Gen),            E|CRc) \
+O(StGbl,                            ND, S(FramePtr) S(Gen),            E|CRc) \
 O(StRef,                       DBox(1), S(BoxedCell) S(Cell),        E|CRc|P) \
 O(StRaw,                            ND, S(Obj) S(Int),                     E) \
 O(StElem,                           ND, S(PtrToCell)                          \

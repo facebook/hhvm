@@ -555,6 +555,19 @@ Type liveTVType(const TypedValue* tv) {
   return Type(outer, inner);
 }
 
+Type Type::relaxToGuardable() const {
+  auto const ty = unspecialize();
+
+  if (ty.isKnownDataType()) return ty;
+
+  if (ty.subtypeOf(UncountedInit)) return Type::UncountedInit;
+  if (ty.subtypeOf(Uncounted)) return Type::Uncounted;
+  if (ty.subtypeOf(Cell)) return Type::Cell;
+  if (ty.subtypeOf(BoxedCell)) return Type::BoxedCell;
+  if (ty.subtypeOf(Gen)) return Type::Gen;
+  not_reached();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {

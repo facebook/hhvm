@@ -384,6 +384,9 @@ public:
     return Type(m_bits);
   }
 
+  // Relaxes the type to one that we can check in codegen
+  Type relaxToGuardable() const;
+
   bool hasRawVal() const {
     return m_hasConstVal;
   }

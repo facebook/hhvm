@@ -169,7 +169,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     finishPass("reoptimize");
     // Cleanup any dead code left around by CSE/Simplification
     // Ideally, this would be controlled by a flag returned
-    // by optimzeTrace indicating whether DCE is necessary
+    // by optimizeTrace indicating whether DCE is necessary
     dce("reoptimize");
   }
 

@@ -98,6 +98,9 @@ struct CodeGenerator : public JIT::CodeGenerator {
                     ArgGroup& args);
 
   void emitDecRefDynamicType(vixl::Register baseReg, int offset);
+
+  void cgStLocWork(IRInstruction* inst);
+
   void emitDecRefStaticType(Type type, vixl::Register reg);
   void emitDecRefMem(Type type, vixl::Register baseReg, int offset);
 

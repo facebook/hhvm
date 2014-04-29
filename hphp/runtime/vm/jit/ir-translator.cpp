@@ -591,6 +591,10 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
     // TODO(#3331014): hack until more ARM codegen is working.
     return false;
   }
+  if (caller->isPseudoMain()) {
+    // TODO(#4238160): Hack inlining into pseudomain callsites is still buggy
+    return false;
+  }
 
   auto refuse = [&](const char* why) -> bool {
     FTRACE(1, "shouldIRInline: refusing {} <reason: {}> [NI = {}]\n",

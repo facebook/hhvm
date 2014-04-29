@@ -386,12 +386,12 @@ Variant ArrayUtil::Shuffle(const Array& input) {
   }
   php_array_data_shuffle(indices);
 
-  Array ret = Array::Create();
+  PackedArrayInit ret(count);
   for (int i = 0; i < count; i++) {
     ssize_t pos = indices[i];
     ret.appendWithRef(input->getValueRef(pos));
   }
-  return ret;
+  return ret.toVariant();
 }
 
 Variant ArrayUtil::RandomKeys(const Array& input, int num_req /* = 1 */) {
@@ -424,12 +424,12 @@ Variant ArrayUtil::RandomKeys(const Array& input, int num_req /* = 1 */) {
   }
   php_array_data_shuffle(indices);
 
-  Array ret = Array::Create();
+  PackedArrayInit ret(num_req);
   for (int i = 0; i < num_req; i++) {
     ssize_t pos = indices[i];
     ret.append(input->getKey(pos));
   }
-  return ret;
+  return ret.toVariant();
 }
 
 Variant ArrayUtil::StringUnique(const Array& input) {

@@ -107,28 +107,16 @@ int string_natural_cmp(char const *a, size_t a_len,
                        char const *b, size_t b_len, int fold_case);
 
 /**
- * Changing string's cases. Return's length is always the same as "len".
+ * Changing string's cases in place. Return's length is always the same
+ * as "len".
  */
-char *string_to_case(const char *s, int len, int (*tocase)(int));
-char *string_to_case_first(const char *s, int len, int (*tocase)(int));
-char *string_to_case_words(const char *s, int len, int (*tocase)(int));
+void string_to_case(String& s, int (*tocase)(int));
 
 // Use lambdas wrapping the ctype.h functions because of linker weirdness on
 // OS X Mavericks.
 
-#define string_to_upper(s,len)        \
-  string_to_case((s), (len), [] (int i) -> int { return toupper(i); })
-#define string_to_upper_first(s, len) \
-  string_to_case_first((s), (len), [] (int i) -> int { return toupper(i); })
-#define string_to_upper_words(s, len) \
-  string_to_case_words((s), (len), [] (int i) -> int { return toupper(i); })
-
-#define string_to_lower(s,len)        \
-  string_to_case((s), (len), [] (int i) -> int { return tolower(i); })
-#define string_to_lower_first(s, len) \
-  string_to_case_first((s), (len), [] (int i) -> int { return tolower(i); })
-#define string_to_lower_words(s, len) \
-  string_to_case_words((s), (len), [] (int i) -> int { return tolower(i); })
+#define string_to_upper(s)        \
+  string_to_case((s), [] (int i) -> int { return toupper(i); })
 
 /**
  * Pad a string with pad_string to pad_length. "len" is

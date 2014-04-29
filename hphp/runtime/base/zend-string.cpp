@@ -288,40 +288,14 @@ int string_natural_cmp(char const *a, size_t a_len,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-char *string_to_case(const char *s, int len, int (*tocase)(int)) {
-  assert(s);
+void string_to_case(String& s, int (*tocase)(int)) {
+  assert(!s.isNull());
   assert(tocase);
-  char *ret = (char *)malloc(len + 1);
+  auto data = s.bufferSlice().ptr;
+  auto len = s.size();
   for (int i = 0; i < len; i++) {
-    ret[i] = tocase(s[i]);
+    data[i] = tocase(data[i]);
   }
-  ret[len] = '\0';
-  return ret;
-}
-
-char *string_to_case_first(const char *s, int len, int (*tocase)(int)) {
-  assert(s);
-  assert(tocase);
-  char *ret = string_duplicate(s, len);
-  if (*ret) {
-    *ret = tocase(*ret);
-  }
-  return ret;
-}
-
-char *string_to_case_words(const char *s, int len, int (*tocase)(int)) {
-  assert(s);
-  assert(tocase);
-  char *ret = string_duplicate(s, len);
-  if (*ret) {
-    *ret = tocase(*ret);
-    for (int i = 1; i < len; i++) {
-      if (isspace(ret[i-1])) {
-        ret[i] = tocase(ret[i]);
-      }
-    }
-  }
-  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

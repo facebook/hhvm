@@ -187,15 +187,16 @@ static int _xml_xmlcharlen(const XML_Char *s) {
   return len;
 }
 
-char *xml_utf8_decode(const XML_Char *s, int len, int *newlen,
-                      const XML_Char *encoding) {
+String xml_utf8_decode(const XML_Char *s, int len,
+                       const XML_Char *encoding) {
   int pos = len;
-  char *newbuf = (char*)malloc(len+1);
+  String str = String(len, ReserveString);
+  char *newbuf = str.bufferSlice().ptr;
   unsigned short c;
   char (*decoder)(unsigned short) = NULL;
   xml_encoding *enc = xml_get_encoding(encoding);
 
-  *newlen = 0;
+  int newlen = 0;
   if (enc) {
     decoder = enc->decoding_function;
   }
@@ -204,9 +205,8 @@ char *xml_utf8_decode(const XML_Char *s, int len, int *newlen,
      * was specified, return the UTF-8-encoded data as-is.
      */
     memcpy(newbuf, s, len);
-    *newlen = len;
-    newbuf[*newlen] = '\0';
-    return newbuf;
+    str.setSize(len);
+    return str;
   }
   while (pos > 0) {
     c = (unsigned char)(*s);
@@ -238,14 +238,11 @@ char *xml_utf8_decode(const XML_Char *s, int len, int *newlen,
       s++;
       pos--;
     }
-    newbuf[*newlen] = decoder ? decoder(c) : c;
-    ++*newlen;
+    newbuf[newlen] = decoder ? decoder(c) : c;
+    ++newlen;
   }
-  if (*newlen < len) {
-    newbuf = (char*)realloc(newbuf, *newlen + 1);
-  }
-  newbuf[*newlen] = '\0';
-  return newbuf;
+  str.setSize(newlen);
+  return str;
 }
 
 static Variant _xml_xmlchar_zval(const XML_Char *s, int len,
@@ -256,20 +253,15 @@ static Variant _xml_xmlchar_zval(const XML_Char *s, int len,
   if (len == 0) {
     len = _xml_xmlcharlen(s);
   }
-  int ret_len;
-  char * ret = xml_utf8_decode(s, len, &ret_len, encoding);
-  return String(ret, ret_len, AttachString);
+  String ret = xml_utf8_decode(s, len, encoding);
+  return ret;
 }
 
-static char *_xml_decode_tag(XmlParser *parser, const char *tag) {
-  char *newstr;
-  int out_len;
-  newstr = xml_utf8_decode((const XML_Char*)tag, strlen(tag), &out_len,
-                           parser->target_encoding);
+static String _xml_decode_tag(XmlParser *parser, const char *tag) {
+  auto newstr = xml_utf8_decode((const XML_Char*)tag, strlen(tag),
+                                parser->target_encoding);
   if (parser->case_folding) {
-    char* oldstr = newstr;
-    newstr = string_to_upper(oldstr, out_len);
-    free(oldstr);
+    string_to_upper(newstr);
   }
   return newstr;
 }
@@ -324,10 +316,6 @@ static Variant php_xml_parser_create_impl(const String& encoding_param,
   return Resource(parser);
 }
 
-static String _xml_string_zval(const char *str) {
-  return String(str, CopyString);
-}
-
 static Variant xml_call_handler(XmlParser *parser, const Variant& handler,
                                 const Array& args) {
   if (parser && handler.toBoolean()) {
@@ -352,11 +340,10 @@ static Variant xml_call_handler(XmlParser *parser, const Variant& handler,
   return uninit_null();
 }
 
-static void _xml_add_to_info(XmlParser *parser, char *name) {
+static void _xml_add_to_info(XmlParser *parser, const String& nameStr) {
   if (parser->info.isNull()) {
     return;
   }
-  String nameStr(name, CopyString);
   forceToArray(parser->info);
   if (!parser->info.toCArrRef().exists(nameStr)) {
     parser->info.toArrRef().set(nameStr, Array::Create());
@@ -379,17 +366,16 @@ const StaticString
 
 void _xml_endElementHandler(void *userData, const XML_Char *name) {
   XmlParser *parser = (XmlParser *)userData;
-  char *tag_name;
 
   if (parser) {
     Variant retval;
     Array args = Array::Create();
 
-    tag_name = _xml_decode_tag(parser, (const char*)name);
+    auto tag_name = _xml_decode_tag(parser, (const char*)name);
 
     if (parser->endElementHandler.toBoolean()) {
       args.append(parser);
-      args.append(_xml_string_zval(tag_name));
+      args.append(tag_name);
       xml_call_handler(parser, parser->endElementHandler, args);
     }
 
@@ -398,8 +384,8 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
         parser->ctag.toArrRef().set(s_type, s_complete);
       } else {
         ArrayInit tag(3, ArrayInit::Map{});
-        _xml_add_to_info(parser,((char*)tag_name) + parser->toffset);
-        tag.set(s_tag, String(((char*)tag_name) + parser->toffset, CopyString));
+        _xml_add_to_info(parser, tag_name.substr(parser->toffset));
+        tag.set(s_tag, tag_name.substr(parser->toffset));
         tag.set(s_type, s_close);
         tag.set(s_level, parser->level);
         parser->data.toArrRef().append(tag.create());
@@ -407,7 +393,6 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
       parser->lastwasopen = 0;
     }
 
-    free(tag_name);
 
     if ((parser->ltags) && (parser->level <= XML_MAXLEVEL)) {
       free(parser->ltags[parser->level-1]);
@@ -434,10 +419,11 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
       int i;
       int doprint = 0;
 
-      char *decoded_value;
+      String decoded_value;
       int decoded_len;
-      decoded_value = xml_utf8_decode(s,len,&decoded_len,
-                                      parser->target_encoding);
+      decoded_value = xml_utf8_decode(s,len,
+                                          parser->target_encoding);
+      decoded_len = decoded_value.size();
       for (i = 0; i < decoded_len; i++) {
         switch (decoded_value[i]) {
         case ' ':
@@ -458,12 +444,12 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           // check if value exists, if yes append to that
           if (parser->ctag.toArrRef().exists(s_value)) {
             myval = parser->ctag.toArray().rvalAt(s_value).toString();
-            myval += String(decoded_value, decoded_len, AttachString);
+            myval += decoded_value;
             parser->ctag.toArrRef().set(s_value, myval);
           } else {
             parser->ctag.toArrRef().set(
               s_value,
-              String(decoded_value,decoded_len,AttachString)
+              decoded_value
             );
           }
         } else {
@@ -479,7 +465,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
             if (!strcmp(mytype.data(), "cdata") &&
                 curtag.toArrRef().exists(s_value)) {
               myval = curtag.toArrRef().rvalAt(s_value).toString();
-              myval += String(decoded_value, decoded_len, AttachString);
+              myval += decoded_value;
               curtag.toArrRef().set(s_value, myval);
               return;
             }
@@ -490,7 +476,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
                              parser->toffset);
             tag.set(s_tag, String(parser->ltags[parser->level-1] +
                                   parser->toffset, CopyString));
-            tag.set(s_value, String(decoded_value, AttachString));
+            tag.set(s_value, decoded_value);
             tag.set(s_type, s_cdata);
             tag.set(s_level, parser->level);
             parser->data.toArrRef().append(tag);
@@ -498,8 +484,6 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
             raise_warning("Maximum depth exceeded - Results truncated");
           }
         }
-      } else {
-        free(decoded_value);
       }
     }
   }
@@ -523,23 +507,19 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
   if (parser) {
     parser->level++;
 
-    char* tag_name = _xml_decode_tag(parser, (const char*)name);
+    String tag_name = _xml_decode_tag(parser, (const char*)name);
 
     if (parser->startElementHandler.toBoolean()) {
       args.append(parser);
-      args.append(_xml_string_zval(tag_name));
+      args.append(tag_name);
       args.append(Array::Create());
 
       while (attributes && *attributes) {
-        char* att = _xml_decode_tag(parser, (const char*)attributes[0]);
-        int val_len;
-        char* val = xml_utf8_decode(attributes[1],
+        String att = _xml_decode_tag(parser, (const char*)attributes[0]);
+        String val = xml_utf8_decode(attributes[1],
                                     strlen((const char*)attributes[1]),
-                                    &val_len, parser->target_encoding);
-        args.lvalAt(2).toArrRef().set(
-          String(att, AttachString),
-          String(val, val_len, AttachString)
-        );
+                                    parser->target_encoding);
+        args.lvalAt(2).toArrRef().set(att, val);
         attributes += 2;
       }
 
@@ -553,25 +533,23 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         tag = Array::Create();
         atr = Array::Create();
 
-        _xml_add_to_info(parser,((char *) tag_name) + parser->toffset);
+        _xml_add_to_info(parser, tag_name.substr(parser->toffset));
 
-        tag.set(s_tag,String(((char *)tag_name)+parser->toffset,CopyString));
+        tag.set(s_tag, tag_name.substr(parser->toffset));
         tag.set(s_type, s_open);
         tag.set(s_level, parser->level);
 
-        parser->ltags[parser->level-1] = strdup(tag_name);
+        parser->ltags[parser->level-1] = strdup(tag_name.data());
         parser->lastwasopen = 1;
 
         attributes = (const XML_Char **) attrs;
 
         while (attributes && *attributes) {
-          char* att = _xml_decode_tag(parser, (const char*)attributes[0]);
-          int val_len;
-          char* val = xml_utf8_decode(attributes[1],
+          String att = _xml_decode_tag(parser, (const char*)attributes[0]);
+          String val = xml_utf8_decode(attributes[1],
                                       strlen((const char*)attributes[1]),
-                                      &val_len, parser->target_encoding);
-          atr.set(String(att, AttachString),
-                  String(val, val_len, AttachString));
+                                      parser->target_encoding);
+          atr.set(att, val);
           atcnt++;
           attributes += 2;
         }
@@ -586,8 +564,6 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         raise_warning("Maximum depth exceeded - Results truncated");
       }
     }
-
-    free(tag_name);
   }
 }
 

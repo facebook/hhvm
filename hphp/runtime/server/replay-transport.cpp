@@ -57,10 +57,8 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
   int size;
   const void *data = transport->getPostData(size);
   if (size) {
-    int len;
-    char *encoded = string_uuencode((const char *)data, size, len);
-    hdf["post"] = encoded;
-    free(encoded);
+    String encoded = string_uuencode((const char *)data, size);
+    hdf["post"] = encoded.get()->data();
   } else {
     hdf["post"] = "";
   }

@@ -33,10 +33,8 @@ String StringUtil::Pad(const String& input, int final_length,
                        const String& pad_string /* = " " */,
                        PadType type /* = PadType::Right */) {
   int len = input.size();
-  char *ret = string_pad(input.data(), len, final_length, pad_string.data(),
-                         pad_string.size(), static_cast<int>(type));
-  if (ret) return String(ret, len, AttachString);
-  return String();
+  return string_pad(input.data(), len, final_length, pad_string.data(),
+                    pad_string.size(), static_cast<int>(type));
 }
 
 String StringUtil::StripHTMLTags(const String& input,
@@ -190,9 +188,8 @@ Variant StringUtil::ChunkSplit(const String& body, int chunklen /* = 76 */,
     ret = body;
     ret += end;
   } else {
-    char *chunked = string_chunk_split(body.data(), len, end.c_str(),
-                                       end.size(), chunklen);
-    return String(chunked, len, AttachString);
+    return string_chunk_split(body.data(), len, end.c_str(),
+                              end.size(), chunklen);
   }
   return ret;
 }
@@ -335,40 +332,30 @@ String StringUtil::HtmlDecode(const String& input, QuoteStyle quoteStyle,
 String StringUtil::QuotedPrintableEncode(const String& input) {
   if (input.empty()) return input;
   int len = input.size();
-  char *ret = string_quoted_printable_encode(input.data(), len);
-  return String(ret, len, AttachString);
+  return string_quoted_printable_encode(input.data(), len);
 }
 
 String StringUtil::QuotedPrintableDecode(const String& input) {
   if (input.empty()) return input;
   int len = input.size();
-  char *ret = string_quoted_printable_decode(input.data(), len, false);
-  return String(ret, len, AttachString);
+  return string_quoted_printable_decode(input.data(), len, false);
 }
 
 String StringUtil::UUEncode(const String& input) {
   if (input.empty()) return input;
-
-  int len;
-  char *encoded = string_uuencode(input.data(), input.size(), len);
-  return String(encoded, len, AttachString);
+  return string_uuencode(input.data(), input.size());
 }
 
 String StringUtil::UUDecode(const String& input) {
   if (!input.empty()) {
-    int len;
-    char *decoded = string_uudecode(input.data(), input.size(), len);
-    if (decoded) {
-      return String(decoded, len, AttachString);
-    }
+    return string_uudecode(input.data(), input.size());
   }
   return String();
 }
 
 String StringUtil::Base64Encode(const String& input) {
   int len = input.size();
-  char *ret = string_base64_encode(input.data(), len);
-  return String(ret, len, AttachString);
+  return string_base64_encode(input.data(), len);
 }
 
 String StringUtil::Base64Decode(const String& input,
@@ -407,8 +394,7 @@ String StringUtil::UrlDecode(const String& input,
 
 String StringUtil::MoneyFormat(const char *format, double value) {
   assert(format);
-  char *formatted = string_money_format(format, value);
-  return formatted ? String(formatted, AttachString) : String();
+  return string_money_format(format, value);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

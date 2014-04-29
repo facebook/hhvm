@@ -1084,8 +1084,7 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
         case PHP_ICONV_ENC_SCHEME_QPRINT:
           {
             int len = encoded_text_len;
-            char *ret = string_quoted_printable_decode(encoded_text, len, true);
-            decoded = String(ret, len, AttachString);
+            decoded = string_quoted_printable_decode(encoded_text, len, true);
           }
           break;
         default:
@@ -1494,8 +1493,7 @@ Variant f_iconv_mime_encode(const String& field_name, const String& field_value,
 
 
         int encoded_len = out_size - out_left;
-        char *encoded_str = string_base64_encode(buf, encoded_len);
-        String encoded(encoded_str, encoded_len, AttachString);
+        String encoded = string_base64_encode(buf, encoded_len);
         if ((int)char_cnt < encoded.size()) {
           /* something went wrong! */
           err = PHP_ICONV_ERR_UNKNOWN;

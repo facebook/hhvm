@@ -971,8 +971,7 @@ const StaticString s_twosinglequotes("''");
 
 String f_escapeshellarg(const String& arg) {
   if (!arg.empty()) {
-    char *ret = string_escape_shell_arg(arg.c_str());
-    return String(ret, AttachString);
+    return string_escape_shell_arg(arg.c_str());
   } else if (!RuntimeOption::EnableHipHopSyntax) {
     return String(s_twosinglequotes);
   }
@@ -981,8 +980,7 @@ String f_escapeshellarg(const String& arg) {
 
 String f_escapeshellcmd(const String& command) {
   if (!command.empty()) {
-    char *ret = string_escape_shell_cmd(command.c_str());
-    return String(ret, AttachString);
+    return string_escape_shell_cmd(command.c_str());
   }
   return command;
 }

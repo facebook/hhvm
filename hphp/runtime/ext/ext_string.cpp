@@ -818,9 +818,8 @@ String f_number_format(double number, int decimals /* = 0 */,
       ch_thousands_sep = 0;
     }
   }
-  char *ret = string_number_format(number, decimals, ch_dec_point,
-                                   ch_thousands_sep);
-  return String(ret, AttachString);
+  return string_number_format(number, decimals, ch_dec_point,
+                               ch_thousands_sep);
 }
 
 int64_t f_strcmp(const String& str1, const String& str2) {
@@ -1327,11 +1326,7 @@ Variant f_soundex(const String& str) {
 }
 
 Variant f_metaphone(const String& str, int phones /* = 0 */) {
-  char *ret = string_metaphone(str.data(), str.size(), 0, 1);
-  if (ret) {
-    return String(ret, AttachString);
-  }
-  return false;
+  return string_metaphone(str.data(), str.size(), 0, 1);
 }
 
 String f_html_entity_decode(const String& str, int flags /* = k_ENT_COMPAT */,

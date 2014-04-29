@@ -1575,7 +1575,7 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
           "You are trying to access an element of this container"^
           " but the container could be null. "
         ] @
-        (Reason.to_string 
+        (Reason.to_string
           "This is what makes me believe it can be null"
           (fst ety1)
         )
@@ -1717,17 +1717,20 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
           | None ->
             (match Env.get_static_member is_method env class_ "__callStatic" with
               | env, None when !is_silent_mode ->
-                  env, (Reason.Rnone, Tany)
+                env, (Reason.Rnone, Tany)
               | env, None ->
-                  smember_not_found p ~is_const ~is_method env class_ mid
-              | env, Some { ce_visibility = vis; ce_type = r, Tfun ft } ->
-                  check_visibility p env (Reason.to_pos r, vis) (Some cid);
-                  let ft = {ft with
-                            ft_arity_min = 0;
-                            ft_arity_max = 1000;
-                            ft_tparams = [];
-                            ft_params = [];
-                          } in env, (r, Tfun ft)
+                smember_not_found p ~is_const ~is_method env class_ mid
+              | env, Some {ce_visibility = vis; ce_type = (r, Tfun ft)} ->
+                check_visibility p env (Reason.to_pos r, vis) (Some cid);
+                (* xxx: is there a need to subst in "this" *)
+                let subst = Inst.make_subst class_.tc_tparams paraml in
+                let env, ft_ret = Inst.instantiate subst env ft.ft_ret in
+                let ft = {ft with
+                  ft_arity_min = 0; ft_arity_max = 1000;
+                  ft_tparams = []; ft_params = [];
+                  ft_ret = ft_ret;
+                } in
+                env, (r, Tfun ft)
               | _ -> assert false)
           | Some { ce_visibility = vis; ce_type = method_ } ->
               check_visibility p env (Reason.to_pos (fst method_), vis) (Some cid);
@@ -1826,14 +1829,14 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
     | Tapply (x, paraml) ->
         let env, class_ = Env.get_class env (snd x) in
         (match class_ with
-        | None ->
+          | None ->
             (match env.Env.genv.Env.mode with
-            | Ast.Mstrict ->
+              | Ast.Mstrict ->
                 error p ("class "^snd x^" is undefined")
-            | Ast.Mdecl | Ast.Mpartial ->
+              | Ast.Mdecl | Ast.Mpartial ->
                 env, (Reason.Rnone, Tany), None
             )
-        | Some class_ ->
+          | Some class_ ->
             let paraml =
               if List.length paraml = 0
               then List.map (fun _ -> Reason.Rwitness p, Tany) class_.tc_tparams
@@ -1842,19 +1845,19 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
             let env, method_ = Env.get_member is_method env class_ s in
             if !Typing_defs.accumulate_method_calls then
               Typing_defs.accumulate_method_calls_result :=
-                  (p, (class_.tc_name^"::"^s)) ::
-                      !Typing_defs.accumulate_method_calls_result;
+                (p, (class_.tc_name^"::"^s)) ::
+                !Typing_defs.accumulate_method_calls_result;
             Find_refs.process_find_refs (Some class_.tc_name) s p;
             (match method_ with
-            | None when !auto_complete ->
+              | None when !auto_complete ->
                 if is_auto_complete s
                 then begin
                   argument_global_type := Some Acclass_get;
                   let filter = begin fun key x map ->
                     if class_.tc_members_fully_known then
                       match is_visible env x.ce_visibility None with
-                      | None -> SMap.add key x map
-                      | _ -> map
+                        | None -> SMap.add key x map
+                        | _ -> map
                     else SMap.add key x map end in
                   let results =
                     SMap.fold SMap.add class_.tc_methods class_.tc_cvars in
@@ -1862,35 +1865,49 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
                     (SMap.fold filter results SMap.empty);
                 end;
                 env, (Reason.Rnone, Tany), None
-            | None ->
+              | None ->
                 (match Env.get_member is_method env class_ "__call" with
-                | env, None when !is_silent_mode ->
+                  | env, None when !is_silent_mode ->
                     env, (Reason.Rnone, Tany), None
-                | env, None ->
+                  | env, None ->
                     member_not_found p ~is_method env class_ s x
-                | env, Some { ce_visibility = vis; ce_type = r, Tfun ft } ->
-                    check_visibility p env (Reason.to_pos r, vis) None;
-                    let pos = Reason.to_pos r in
-                    let ft = {ft with
-                              ft_arity_min = 0;
-                              ft_arity_max = 1000;
-                              ft_tparams = [];
-                              ft_params = [];
-                            } in env, (r, Tfun ft), Some (pos, vis)
-                | _ -> assert false)
-            | Some { ce_visibility = vis; ce_type = method_ } ->
-                check_visibility p env (Reason.to_pos (fst method_), vis) None;
-                let new_name = "alpha_varied_this" in
+                  | env, Some {ce_visibility = vis; ce_type = (r, Tfun ft)}  ->
+                    let meth_pos = Reason.to_pos r in
+                    check_visibility p env (meth_pos, vis) None;
+                    let new_name = "alpha_varied_this" in
 
-                (* Since a param might include a "this" type, let's alpha vary
-                 * all the "this" types in the params*)
-                let env, paraml = List.fold_right
-                  (fun param (env, paraml) ->
-                    let env, param =
-                      Typing_generic.rename env "this" new_name param in
-                    env, param::paraml)
-                    paraml
-                    (env, []) in
+                    let env, paraml = alpha_this ~new_name env paraml in
+                    (* the return type of __call can depend on the
+                     * class params or be this *)
+                    let this_ty = k_lhs ety1 in
+                    let subst = Inst.make_subst_with_this
+                      ~this:this_ty class_.tc_tparams paraml in
+                    let env, ft_ret = Inst.instantiate subst env ft.ft_ret in
+
+                    (* we change the params of the underlying
+                     * declaration to act as a variadic function
+                     * ... this transform cannot be done when
+                     * processing the declaratation of call because
+                     * direct calls to $inst->__call are also
+                     * valid.  *)
+                    let ft = {ft with
+                      ft_arity_min = 0; ft_arity_max = 1000;
+                      ft_tparams = []; ft_params = [];
+                      ft_ret = ft_ret;
+                    } in
+                    let env, method_ =
+                      Typing_generic.rename env new_name "this" (r, Tfun ft) in
+                    env, method_, Some (meth_pos, vis)
+                  | _ -> assert false
+                )
+              | Some {ce_visibility = vis; ce_type = method_} ->
+                let meth_pos = Reason.to_pos (fst method_) in
+                check_visibility p env (meth_pos, vis) None;
+                let new_name = "alpha_varied_this" in
+                (* Since a paraml member might include a "this" type,
+                 * let's alpha vary all the "this" types in the
+                 * params*)
+                let env, paraml = alpha_this ~new_name env paraml in
 
                 let subst = Inst.make_subst class_.tc_tparams paraml in
                 let env, method_ = Inst.instantiate subst env method_ in
@@ -1905,49 +1922,57 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
                 let env, method_ = Inst.instantiate_this env method_ this_ty in
 
                 (* Now this has been substituted, we can de-alpha-vary *)
-                let env, method_ =
-                  Typing_generic.rename env new_name "this" method_ in
-                let meth_pos = Reason.to_pos (fst method_)in
+                let env, method_ = Typing_generic.rename env new_name "this" method_ in
                 env, method_, Some (meth_pos, vis)
             )
         )
     | Tobject
     | Tany -> env, (fst ety1, Tany), None
     | _ when !is_silent_mode ->
-        env, (fst ety1, Tany), None
+      env, (fst ety1, Tany), None
     | Toption _ ->
-        error_l (
-          [
-            p,
-            "You are trying to access the member "^s^
+      error_l (
+        [
+          p,
+          "You are trying to access the member "^s^
             " but this object can be null. "
-          ] @
+        ] @
           (Reason.to_string
-            "This is what makes me believe it can be null"
-            (fst ety1)
+             "This is what makes me believe it can be null"
+             (fst ety1)
           )
-        )
+      )
     | ty ->
-        error_l [p,
-                 ("You are trying to access the member "^s^
-                  " but this is not an object, it is "^
-                  Typing_print.error ty);
-                 Reason.to_pos (fst ety1),
-                 "Check this out"]
+      error_l [p,
+               ("You are trying to access the member "^s^
+                   " but this is not an object, it is "^
+                   Typing_print.error ty);
+               Reason.to_pos (fst ety1),
+               "Check this out"]
   end
+
+and alpha_this ~new_name env paraml =
+  (* Since a param might include a "this" type, let's alpha vary
+   * all the "this" types in the params*)
+  List.fold_right
+    (fun param (env, paraml) ->
+      let env, param = Typing_generic.rename env "this" new_name param in
+      env, param::paraml)
+    paraml
+    (env, [])
 
 and class_id p env cid =
   let env, obj = static_class_id p env cid in
   match obj with
-  | _, Tgeneric ("this", Some (_, Tapply ((_, cid as c), _)))
-  | _, Tapply ((_, cid as c), _) ->
+    | _, Tgeneric ("this", Some (_, Tapply ((_, cid as c), _)))
+    | _, Tapply ((_, cid as c), _) ->
       let env, class_ = Env.get_class env cid in
       (match class_ with
-      | None -> env, None
-      | Some class_ ->
+        | None -> env, None
+        | Some class_ ->
           env, Some (c, class_)
       )
-  | _ -> env, None
+    | _ -> env, None
 
 (* To be a valid trait declaration, all of its 'require extends' must
  * match; since there's no multiple inheritance, it follows that all of
@@ -2048,13 +2073,13 @@ and is_visible env vis cid =
     Some ("You cannot access this member", "This member is private")
   | Vprivate x ->
     (match cid with
-      | Some CIstatic -> 
+      | Some CIstatic ->
           Some ("Private members cannot be accessed"
           ^" with static:: since a child class may also have an identically"
           ^" named private member", "This member is private")
-      | Some CIparent -> 
+      | Some CIparent ->
           Some (
-            "You cannot access a private member with parent::", 
+            "You cannot access a private member with parent::",
             "This member is private")
       | Some CIself -> None
       | Some (CI (_, called_ci)) when x <> self_id ->
@@ -2063,11 +2088,11 @@ and is_visible env vis cid =
               Some ("You cannot access private members"
               ^" using the trait's name (did you mean to use self::?)",
               "This member is private")
-          | _ -> 
+          | _ ->
             Some ("You cannot access this member", "This member is private"))
-      | None when x <> self_id -> 
+      | None when x <> self_id ->
         Some ("You cannot access this member", "This member is private")
-      | Some (CI _) 
+      | Some (CI _)
       | None -> None)
   | Vprotected x when x = self_id -> None
   | Vprotected _ when self_id = "" ->
@@ -2094,7 +2119,7 @@ and is_visible env vis cid =
               then None
               else Some (
                 "Cannot access this protected member, you don't extend "^
-                  (Utils.strip_ns x), 
+                  (Utils.strip_ns x),
                 "This member is protected"
               )
             | _, _ -> None

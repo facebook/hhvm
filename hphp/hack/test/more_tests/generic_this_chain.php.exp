@@ -1,0 +1,6 @@
+intersect(intersect(App \X<>), App \X<>)
+intersect(intersect(App \X<>), App \X<>)
+App \Another<[260]intersect(), >
+App \Another<[273]intersect(App \X<>), >
+option([277]intersect(App \X<>))
+No errors

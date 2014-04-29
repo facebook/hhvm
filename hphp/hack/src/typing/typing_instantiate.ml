@@ -21,7 +21,7 @@ type subst = ty SMap.t
 (*****************************************************************************)
 (* Builds a substitution out of a list of type parameters and a list of types.
  *
- * Typical use-case: 
+ * Typical use-case:
  *   class Y<T> { ... }
  *   class X extends Y<int>
  *
@@ -40,10 +40,10 @@ let rec make_subst tparams tyl =
   List.iter (make_subst_tparam subst tyl) tparams;
   !subst
 
-and make_subst_with_this ~this tparams tyl = 
+and make_subst_with_this ~this tparams tyl =
   make_subst (((Pos.none, "this"), None)::tparams) (this::tyl)
 
-and make_subst_tparam subst tyl ((_, tparam_name), _) = 
+and make_subst_tparam subst tyl ((_, tparam_name), _) =
   let ty =
     match !tyl with
     | [] -> Reason.Rnone, Tany
@@ -193,6 +193,6 @@ and instantiate_ce subst env ({ ce_type = x; _ } as ce) =
   let env, x = instantiate subst env x in
   env, { ce with ce_type = x }
 
-let instantiate_this env ty this_ty = 
+let instantiate_this env ty this_ty =
   let subst = make_subst_with_this this_ty [] [] in
   instantiate subst env ty

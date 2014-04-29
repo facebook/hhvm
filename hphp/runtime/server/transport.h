@@ -421,7 +421,7 @@ protected:
   // output
   bool m_chunkedEncoding;
   bool m_headerSent;
-  Variant m_headerCallback;
+  Cell m_headerCallback;
   bool m_headerCallbackDone;  // used to prevent infinite loops
   int m_responseCode;
   std::string m_responseCodeInfo;

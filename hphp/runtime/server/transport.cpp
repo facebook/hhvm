@@ -52,7 +52,7 @@ Transport::Transport()
     m_nsleepTimeS(0), m_nsleepTimeN(0), m_url(nullptr),
     m_postData(nullptr), m_postDataParsed(false),
     m_chunkedEncoding(false), m_headerSent(false),
-    m_headerCallback(uninit_null()), m_headerCallbackDone(false),
+    m_headerCallbackDone(false),
     m_responseCode(-1), m_firstHeaderSet(false), m_firstHeaderLine(0),
     m_responseSize(0), m_responseTotalSize(0), m_responseSentSize(0),
     m_flushTimeUs(0), m_sendContentType(true),
@@ -63,6 +63,7 @@ Transport::Transport()
   memset(&m_wallTime, 0, sizeof(m_wallTime));
   memset(&m_cpuTime, 0, sizeof(m_cpuTime));
   m_chunksSentSizes.clear();
+  tvWriteUninit(&m_headerCallback);
 }
 
 Transport::~Transport() {
@@ -778,11 +779,11 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
 }
 
 bool Transport::setHeaderCallback(const Variant& callback) {
-  if (m_headerCallback.toBoolean()) {
+  if (cellAsVariant(m_headerCallback).toBoolean()) {
     // return false if a callback has already been set.
     return false;
   }
-  m_headerCallback = callback;
+  cellAsVariant(m_headerCallback) = callback;
   return true;
 }
 
@@ -808,7 +809,7 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
     return;
   }
 
-  if (!m_headerCallbackDone && !m_headerCallback.isNull()) {
+  if (!m_headerCallbackDone && !cellIsNull(&m_headerCallback)) {
     // We could use m_headerSent here, however it seems we can still
     // end up in an infinite loop when:
     // m_headerCallback calls flush()
@@ -816,7 +817,7 @@ void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
     // the recursion guard calls back into m_headerCallback
     m_headerCallbackDone = true;
     try {
-      vm_call_user_func(m_headerCallback, init_null_variant);
+      vm_call_user_func(cellAsVariant(m_headerCallback), init_null_variant);
     } catch (...) {
       LogException("HeaderCallback");
     }

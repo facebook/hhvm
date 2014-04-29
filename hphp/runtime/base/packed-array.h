@@ -124,6 +124,12 @@ struct PackedArray {
 
   static bool checkInvariants(const ArrayData*);
 
+  /*
+   * Accepts any array of any kind satisfying isVectorData() and makes a
+   * non-smart packed copy, like NonSmartCopy().
+   */
+  static ArrayData* NonSmartConvert(const ArrayData*);
+
 private:
   static ArrayData* Grow(ArrayData*);
   static MixedArray* ToMixedHeader(const ArrayData*, size_t);

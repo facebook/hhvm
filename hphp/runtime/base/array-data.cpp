@@ -59,9 +59,16 @@ ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr, const std::string& key) {
   if (arr->empty()) return staticEmptyArray();
   assert(key == f_serialize(arr).toCppString());
+
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
-    ArrayData *ad = arr->nonSmartCopy();
+    ArrayData* ad;
+
+    if (arr->isVectorData() && !arr->isPacked()) {
+      ad = PackedArray::NonSmartConvert(arr);
+    } else {
+      ad = arr->nonSmartCopy();
+    }
     ad->setStatic();
     ad->onSetEvalScalar();
     acc->second = ad;

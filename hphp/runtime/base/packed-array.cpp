@@ -330,6 +330,35 @@ ArrayData* PackedArray::NonSmartCopy(const ArrayData* adIn) {
   return ad;
 }
 
+ArrayData* PackedArray::NonSmartConvert(const ArrayData* arr) {
+  assert(arr->isVectorData());
+
+  auto const cap  = arr->m_size;
+  auto const size = arr->m_size;
+
+  auto const ad = static_cast<ArrayData*>(
+    std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+  );
+  ad->m_kindAndSize = uint64_t{size} << 32 | cap; // zero kind
+  ad->m_posAndCount = static_cast<uint32_t>(arr->m_pos);
+
+  auto data = reinterpret_cast<TypedValue*>(ad + 1);
+
+  for (auto pos = arr->iter_begin();
+      pos != ArrayData::invalid_index;
+      pos = arr->iter_advance(pos), ++data) {
+    tvDupFlattenVars(arr->getValueRef(pos).asTypedValue(), data, arr);
+  }
+
+  assert(ad->m_kind == ArrayData::kPackedKind);
+  assert(ad->m_packedCap == cap);
+  assert(ad->m_size == size);
+  assert(ad->m_pos == arr->m_pos);
+  assert(ad->m_count == 0);
+  assert(checkInvariants(ad));
+  return ad;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* MixedArray::MakeReserve(uint32_t capacity) {

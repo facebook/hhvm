@@ -147,8 +147,9 @@ static void on_constant(Parser *_p, Token &out, Token &name, Token &value) {
   Token params1; _p->onCallParam(params1, NULL, sname, 0);
   Token params2; _p->onCallParam(params2, &params1, value, 0);
   Token call;    _p->onCall(call, 0, fname, params2, 0);
+  Token expr;    _p->onExpStatement(expr, call);
 
-  _p->onExpStatement(out, call);
+  _p->addTopStatement(expr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

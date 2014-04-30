@@ -67,9 +67,7 @@ public:
 
   // Take ownership of this ArrayData.
   static Array attach(ArrayData* ad) {
-    Array a(ad, SmartPtr::NoIncRef{});
-    a.m_px = ad;
-    return a;
+    return Array(ad, SmartPtr::NoIncRef{});
   }
 
   // Transfer ownership of our reference to this ArrayData.

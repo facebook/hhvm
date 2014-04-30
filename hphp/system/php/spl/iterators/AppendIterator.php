@@ -89,8 +89,16 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
    */
   function rewind() {
     $this->iterators->rewind();
-    if ($this->iterators->valid()) {
+
+    /**
+     * Advance to the first valid element contained in a child iterator
+     */
+    while ($this->iterators->valid()) {
       $this->getInnerIterator()->rewind();
+      if ($this->getInnerIterator()->valid()) {
+        return; /* found a valid element to start on */
+      }
+      $this->iterators->next();
     }
   }
 

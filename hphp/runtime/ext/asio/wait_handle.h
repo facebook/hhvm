@@ -31,8 +31,6 @@ namespace HPHP {
  *
  * WaitHandle                     - abstract wait handle
  *   StaticWaitHandle             - statically finished wait handle
- *     StaticResultWaitHandle     - statically succeeded wait handle with result
- *     StaticExceptionWaitHandle  - statically failed wait handle with exception
  *   WaitableWaitHandle           - wait handle that can be waited for
  *     BlockableWaitHandle        - wait handle that can be blocked by other WH
  *       AsyncFunctionWaitHandle  - async function-based asynchronous execution

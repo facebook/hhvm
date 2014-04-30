@@ -29,8 +29,6 @@
 #include "hphp/runtime/ext/asio/session_scoped_wait_handle.h"
 #include "hphp/runtime/ext/asio/set_result_to_ref_wait_handle.h"
 #include "hphp/runtime/ext/asio/sleep_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_result_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 

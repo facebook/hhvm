@@ -3285,9 +3285,9 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(ReleaseVVOrExit, makeExitSlow(), m_irb->fp());
   }
 
-  // If in async function, wrap the return value with a StaticResultWaitHandle.
+  // In async function, wrap the return value into succeeded StaticWaitHandle.
   if (!resumed() && func->isAsync()) {
-    push(gen(CreateSRWH, pop(type, DataTypeGeneric)));
+    push(gen(CreateSSWH, pop(type, DataTypeGeneric)));
   }
 
   // Pop the return value. Since it will be teleported to its place in memory,

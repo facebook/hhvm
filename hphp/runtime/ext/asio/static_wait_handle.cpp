@@ -17,11 +17,38 @@
 
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 
+#include "hphp/system/systemlib.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void c_StaticWaitHandle::t___construct() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
+  throw Object(SystemLib::AllocInvalidOperationExceptionObject(
+        "Use async functions instead of this constructor"));
+}
+
+c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceeded(const Cell& result) {
+  auto waitHandle = NEWOBJ(c_StaticWaitHandle)();
+  waitHandle->setState(STATE_SUCCEEDED);
+  cellDup(result, waitHandle->m_resultOrException);
+  return waitHandle;
+}
+
+c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceededVM(const Cell result) {
+  auto waitHandle = NEWOBJ(c_StaticWaitHandle)();
+  waitHandle->setState(STATE_SUCCEEDED);
+  waitHandle->incRefCount();
+  cellCopy(result, waitHandle->m_resultOrException);
+  return waitHandle;
+}
+
+c_StaticWaitHandle* c_StaticWaitHandle::CreateFailed(ObjectData* exception) {
+  assert(exception->instanceof(SystemLib::s_ExceptionClass));
+
+  auto waitHandle = NEWOBJ(c_StaticWaitHandle)();
+  waitHandle->setState(STATE_FAILED);
+  tvWriteObject(exception, &waitHandle->m_resultOrException);
+  return waitHandle;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -41,7 +41,7 @@ enum class UnwindAction {
 
   /**
    * An exception thrown from an eagerly executed async function was
-   * wrapped into a StaticExceptionWaitHandle. The async function was
+   * wrapped into a failed StaticWaitHandle. The async function was
    * running in the top frame, so we need to return from the VM instance.
    */
   Return,

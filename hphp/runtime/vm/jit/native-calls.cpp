@@ -26,8 +26,7 @@
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_result_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
+#include "hphp/runtime/ext/asio/static_wait_handle.h"
 
 namespace HPHP {  namespace JIT { namespace NativeCalls {
 
@@ -251,7 +250,7 @@ static CallMap s_callMap {
     /* Async function support helpers */
     {CreateAFWH,         &c_AsyncFunctionWaitHandle::Create, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
-    {CreateSRWH,         &c_StaticResultWaitHandle::CreateFromVM, DSSA, SNone,
+    {CreateSSWH,         &c_StaticWaitHandle::CreateSucceededVM, DSSA, SNone,
                           {{TV, 0}}},
 
     /* MInstrTranslator helpers */

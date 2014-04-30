@@ -202,55 +202,6 @@
             "parent": "WaitHandle",
             "desc": "A wait handle that is always finished",
             "flags": [
-                "IsAbstract",
-                "IsCppAbstract",
-                "NoDefaultSweep"
-            ],
-            "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                }
-            ],
-            "consts": [
-            ]
-        },
-        {
-            "name": "StaticResultWaitHandle",
-            "parent": "StaticWaitHandle",
-            "desc": "A wait handle representing static result",
-            "flags": [
-                "IsFinal",
-                "NoDefaultSweep"
-            ],
-            "funcs": [
-                {
-                    "name": "__construct",
-                    "flags": [
-                        "IsPrivate"
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                }
-            ],
-            "consts": [
-            ]
-        },
-        {
-            "name": "StaticExceptionWaitHandle",
-            "parent": "StaticWaitHandle",
-            "desc": "A wait handle representing statically failed operation",
-            "flags": [
                 "IsFinal",
                 "NoDefaultSweep"
             ],

@@ -21,8 +21,7 @@
 #include <hphp/runtime/ext/ext_closure.h>
 #include <hphp/runtime/ext/asio/asio_context.h>
 #include <hphp/runtime/ext/asio/asio_session.h>
-#include <hphp/runtime/ext/asio/static_exception_wait_handle.h>
-#include <hphp/runtime/ext/asio/static_result_wait_handle.h>
+#include <hphp/runtime/ext/asio/static_wait_handle.h>
 #include <hphp/system/systemlib.h>
 
 namespace HPHP {
@@ -111,9 +110,10 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
   }
 
   if (exception.isNull()) {
-    return c_StaticResultWaitHandle::Create(make_tv<KindOfObject>(deps.get()));
+    return c_StaticWaitHandle::CreateSucceeded(
+      make_tv<KindOfObject>(deps.get()));
   } else {
-    return c_StaticExceptionWaitHandle::Create(exception.get());
+    return c_StaticWaitHandle::CreateFailed(exception.get());
   }
 }
 

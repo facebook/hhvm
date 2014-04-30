@@ -79,8 +79,7 @@
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_result_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
+#include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
@@ -4470,10 +4469,10 @@ OPTBLD_INLINE void ExecutionContext::iopSSwitch(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   // If in an eagerly executed async function, wrap the return value
-  // with a StaticResultWaitHandle.
+  // into succeeded StaticWaitHandle.
   if (UNLIKELY(!m_fp->resumed() && m_fp->func()->isAsync())) {
     auto const top = m_stack.topC();
-    top->m_data.pobj = c_StaticResultWaitHandle::CreateFromVM(*top);
+    top->m_data.pobj = c_StaticWaitHandle::CreateSucceededVM(*top);
     top->m_type = KindOfObject;
   }
 

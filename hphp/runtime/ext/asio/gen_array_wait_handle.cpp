@@ -20,8 +20,7 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
-#include <hphp/runtime/ext/asio/static_exception_wait_handle.h>
-#include <hphp/runtime/ext/asio/static_result_wait_handle.h>
+#include <hphp/runtime/ext/asio/static_wait_handle.h>
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -134,10 +133,10 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
   // that's all we give back.  Otherwise give back the array of
   // results.
   if (exception.isNull()) {
-    return c_StaticResultWaitHandle::Create(
+    return c_StaticWaitHandle::CreateSucceeded(
       make_tv<KindOfArray>(depCopy.get()));
   } else {
-    return c_StaticExceptionWaitHandle::Create(exception.get());
+    return c_StaticWaitHandle::CreateFailed(exception.get());
   }
 }
 

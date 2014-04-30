@@ -38,9 +38,17 @@ class c_StaticWaitHandle : public c_WaitHandle {
   explicit c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::classof())
     : c_WaitHandle(cls)
   {}
-  ~c_StaticWaitHandle() {}
+  ~c_StaticWaitHandle() {
+    assert(isFinished());
+    tvRefcountedDecRefCell(&m_resultOrException);
+  }
 
   void t___construct();
+
+ public:
+  static c_StaticWaitHandle* CreateSucceeded(const Cell& result);
+  static c_StaticWaitHandle* CreateSucceededVM(const Cell result);
+  static c_StaticWaitHandle* CreateFailed(ObjectData* exception);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

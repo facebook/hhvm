@@ -22,7 +22,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_continuation.h"
-#include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
+#include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/unit.h"
@@ -247,7 +247,7 @@ void tearDownEagerAsyncFrame(ActRec*& fp, Stack& stack, PC& pc, ObjectData* e) {
   stack.ndiscard(func->numSlotsInFrame());
   stack.ret();
   assert(stack.topTV() == &fp->m_r);
-  tvWriteObject(c_StaticExceptionWaitHandle::Create(e), &fp->m_r);
+  tvWriteObject(c_StaticWaitHandle::CreateFailed(e), &fp->m_r);
   e->decRefCount();
 
   if (UNLIKELY(!prevFp)) {
@@ -333,7 +333,7 @@ bool chainFaults(Fault& fault) {
  *
  *   - Check if we are handling user exception in an eagerly executed
  *     async function. If so, pop its frame, wrap the exception into
- *     StaticExceptionWaitHandle object, leave it on the stack as
+ *     failed StaticWaitHandle object, leave it on the stack as
  *     a return value from the async function and resume VM.
  *
  *   - Failing any of the above, pop the frame for the current
@@ -427,7 +427,7 @@ UnwindAction unwind(ActRec*& fp,
     } while (chainFaults(fault));
 
     // If in an eagerly executed async function, wrap the user exception
-    // into a StaticExceptionWaitHandle and return it to the caller.
+    // into a failed StaticWaitHandle and return it to the caller.
     if (!fp->resumed() && fp->m_func->isAsync() &&
         fault.m_faultType == Fault::Type::UserException) {
       tearDownEagerAsyncFrame(fp, stack, pc, fault.m_userException);

@@ -647,7 +647,7 @@ O(CreateAFWH,                   D(Obj), S(FramePtr)                           \
                                           S(TCA,Nullptr)                      \
                                           C(Int)                              \
                                           S(Obj),             E|Er|N|CRc|PRc) \
-O(CreateSRWH,                   D(Obj), S(Cell),                   N|CRc|PRc) \
+O(CreateSSWH,                   D(Obj), S(Cell),                   N|CRc|PRc) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr),            Er|E|N|CRc) \
 O(IterInitK,                   D(Bool), S(Arr,Obj)                            \

@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/mutation.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -89,6 +90,7 @@ void splitCriticalEdge(IRUnit& unit, Edge* edge) {
 bool splitCriticalEdges(IRUnit& unit) {
   FTRACE(2, "splitting critical edges\n");
   auto modified = removeUnreachable(unit);
+  if (modified) reflowTypes(unit);
   auto const startBlocks = unit.numBlocks();
 
   // Try to split outgoing edges of each reachable block.  This is safe in

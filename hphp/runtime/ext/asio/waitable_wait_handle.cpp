@@ -29,15 +29,9 @@ namespace HPHP {
 
 c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb)
     : c_WaitHandle(cb)
-    , m_creator(AsioSession::Get()->getCurrentWaitHandle())
     , m_firstParent(nullptr) {
   setState(STATE_NEW);
   setContextIdx(AsioSession::Get()->getCurrentContextIdx());
-
-  // ref creator
-  if (m_creator) {
-    m_creator->incRefCount();
-  }
 }
 
 c_WaitableWaitHandle::~c_WaitableWaitHandle() {
@@ -50,12 +44,6 @@ c_WaitableWaitHandle::~c_WaitableWaitHandle() {
       tvDecRefObj(&m_resultOrException);
       break;
   }
-
-  // unref creator
-  if (m_creator) {
-    decRefObj(m_creator);
-    m_creator = nullptr;
-  }
 }
 
 void c_WaitableWaitHandle::t___construct() {
@@ -67,7 +55,7 @@ int c_WaitableWaitHandle::t_getcontextidx() {
 }
 
 Object c_WaitableWaitHandle::t_getcreator() {
-  return m_creator;
+  return Object();
 }
 
 Array c_WaitableWaitHandle::t_getparents() {
@@ -107,12 +95,6 @@ void c_WaitableWaitHandle::setException(ObjectData* exception) {
 void c_WaitableWaitHandle::done() {
   assert(isFinished());
   assert(cellIsPlausible(m_resultOrException));
-
-  // unref creator
-  if (m_creator) {
-    decRefObj(m_creator);
-    m_creator = nullptr;
-  }
 
   // unblock parents
   while (m_firstParent) {
@@ -189,15 +171,7 @@ Array c_WaitableWaitHandle::t_getdependencystack() {
     }
     if (p) continue;
 
-    // 2. follow creator
-    if (m_creator && !m_creator->isFinished() &&
-        (m_creator->getContextIdx() == context_idx) &&
-        visited.find(m_creator->t_getid()) == visited.end()) {
-      wait_handle = m_creator;
-      continue;
-    }
-
-    // 3. cross the context boundary
+    // 2. cross the context boundary
     result.append(null_object);
     wait_handle = (context_idx > 1)
       ? AsioSession::Get()->getContext(context_idx - 1)->getCurrent()

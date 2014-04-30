@@ -425,8 +425,11 @@ SSATmp* IRBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
     return nullptr;
   }
 
-  if (!typeMightRelax()) {
-    inst->setTypeParam(std::min(knownType, inst->typeParam()));
+  if (typeMightRelax()) return nullptr;
+
+  inst->setTypeParam(std::min(knownType, inst->typeParam()));
+  if (inst->typeParam().notCounted()) {
+    inst->convertToNop();
   }
 
   return nullptr;

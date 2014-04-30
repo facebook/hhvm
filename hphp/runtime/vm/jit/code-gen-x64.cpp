@@ -3318,6 +3318,8 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
 void CodeGenerator::cgDecRefMem(Type type,
                                 PhysReg baseReg,
                                 int64_t offset) {
+  if (type.notCounted()) return;
+
   auto scratchReg = m_rScratch;
   assert(baseReg != scratchReg);
 

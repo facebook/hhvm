@@ -14,31 +14,31 @@ object(HH\ImmMap)#6 (1) {
   [123]=>
   string(3) "abc"
 }
-object(HH\Set)#7 (1) {
+object(HH\Set)#8 (1) {
   string(3) "abc"
 }
-object(HH\ImmSet)#8 (1) {
+object(HH\ImmSet)#9 (1) {
   string(3) "abc"
 }
-object(HH\Vector)#11 (1) {
+object(HH\Vector)#12 (1) {
   [0]=>
   string(3) "abc"
 }
-object(HH\ImmVector)#15 (1) {
+object(HH\ImmVector)#16 (1) {
   [0]=>
   string(3) "abc"
 }
-object(HH\Map)#19 (1) {
+object(HH\Map)#20 (1) {
   [123]=>
   string(3) "abc"
 }
-object(HH\ImmMap)#23 (1) {
+object(HH\ImmMap)#24 (1) {
   [123]=>
   string(3) "abc"
 }
-object(HH\Set)#27 (1) {
+object(HH\Set)#28 (1) {
   string(3) "abc"
 }
-object(HH\ImmSet)#31 (1) {
+object(HH\ImmSet)#32 (1) {
   string(3) "abc"
 }

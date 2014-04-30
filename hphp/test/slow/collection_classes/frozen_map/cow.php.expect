@@ -1,0 +1,134 @@
+------ ArraySet -------
+object(HH\Map)#3 (3) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(HH\ImmMap)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ ArrayAppend -------
+object(HH\Map)#3 (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(42)
+}
+object(HH\ImmMap)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ add -------
+object(HH\Map)#3 (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(42)
+}
+object(HH\ImmMap)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ addAll -------
+object(HH\Map)#3 (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(42)
+}
+object(HH\ImmMap)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ clear -------
+object(HH\Map)#3 (0) {
+}
+object(HH\ImmMap)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ set -------
+object(HH\Map)#3 (3) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(HH\ImmMap)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ setAll -------
+object(HH\Map)#3 (3) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(HH\ImmMap)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+------ removeKey -------
+object(HH\Map)#3 (2) {
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+object(HH\ImmMap)#4 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}

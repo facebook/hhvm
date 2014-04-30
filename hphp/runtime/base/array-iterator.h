@@ -35,9 +35,9 @@ struct TypedValue;
 class BaseVector;
 class BaseMap;
 class c_Set;
-class c_Pair;
 class c_ImmVector;
 class c_ImmSet;
+class c_Pair;
 struct Iter;
 
 enum class IterNextIndex : uint16_t {
@@ -47,6 +47,7 @@ enum class IterNextIndex : uint16_t {
   Vector,
   ImmVector,
   Map,
+  ImmMap,
   Set,
   Pair,
   Object,
@@ -324,7 +325,7 @@ private:
            getCollectionType() == Collection::ImmVectorType);
     return (BaseVector*)((intptr_t)m_obj & ~1);
   }
-  BaseMap* getMappish() {
+  BaseMap* getMap() {
     assert(hasCollection());
     assert(Collection::isMapType(getCollectionType()));
     return (BaseMap*)((intptr_t)m_obj & ~1);

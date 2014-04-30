@@ -603,7 +603,6 @@ class c_ImmVector : public BaseVector {
  * c_-prefixed child classes.
  */
 class BaseMap : public ExtCollectionObjectData {
-
  public:
   struct Elm {
     /* The key is either a string pointer or an int value, and the m_aux
@@ -669,9 +668,10 @@ class BaseMap : public ExtCollectionObjectData {
   };
   Elm* m_data;              // Elm store.
   int32_t* m_hash;          // Hash table.
+  // A pointer to a ImmMap which with it shares the buffer.
+  Object m_immCopy;
 
  public:
-
   static const int32_t Empty      = -1;
   static const int32_t Tombstone  = -2;
 
@@ -709,7 +709,7 @@ class BaseMap : public ExtCollectionObjectData {
   inline Elm* data() { return m_data; }
   inline const Elm* data() const { return m_data; }
   inline int32_t* hashTab() const { return (int32_t*)m_hash; }
-  inline uint32_t iterLimit() const { return m_used; }
+  inline uint32_t posLimit() const { return m_used; }
 
   // We use this funny-looking helper to make g++ use lea and shl
   // instructions instead of imul when indexing into m_data
@@ -731,30 +731,14 @@ class BaseMap : public ExtCollectionObjectData {
   static int32_t* warnUnbalanced(size_t n, int32_t* ei);
 
  public:
-
   TypedValue* at(int64_t key) const;
   TypedValue* at(StringData* key) const;
   TypedValue* get(int64_t key) const;
   TypedValue* get(StringData* key) const;
-  void set(int64_t key, const TypedValue* val) {
-    assert(val->m_type != KindOfRef);
-    update(key, val);
-  }
-  void set(StringData* key, const TypedValue* val) {
-    assert(val->m_type != KindOfRef);
-    update(key, val);
-  }
-  void set(const TypedValue* key, const TypedValue* val) {
-    assert(key->m_type != KindOfRef);
-    if (key->m_type == KindOfInt64) {
-      set(key->m_data.num, val);
-    } else if (IS_STRING_TYPE(key->m_type)) {
-      set(key->m_data.pstr, val);
-    } else {
-      throwBadKeyType();
-    }
-  }
+
   void add(const TypedValue* val);
+  void add(const Variant& val) { add(val.asCell()); }
+
   Variant pop();
   Variant popFront();
   void remove(int64_t key);
@@ -828,10 +812,10 @@ class BaseMap : public ExtCollectionObjectData {
   }
 
   inline Elm* elmLimit() {
-    return fetchElm(data(), iterLimit());
+    return fetchElm(data(), posLimit());
   }
   inline const Elm* elmLimit() const {
-    return fetchElm(data(), iterLimit());
+    return fetchElm(data(), posLimit());
   }
 
   inline static Elm* nextElm(Elm* e, Elm* eLimit) {
@@ -891,27 +875,88 @@ class BaseMap : public ExtCollectionObjectData {
   int32_t* findForNewInsert(size_t h0) const;
   int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
 
-  void update(int64_t h, const TypedValue* data);
-  void update(StringData* key, const TypedValue* data);
+  template<bool raw>
+  void setImpl(int64_t h, const TypedValue* val);
+  template<bool raw>
+  void setImpl(StringData* key, const TypedValue* data);
 
-  void erase(int32_t* pos);
+  // setRaw() assigns a value to the specified key in this Map, but doesn't
+  // check for an immutable buffer and doesn't increment m_version, so it's
+  // only safe to use in some cases. If you're not sure, use set() instead.
+  void setRaw(int64_t h, const TypedValue* data);
+  void setRaw(StringData* key, const TypedValue* data);
+  void setRaw(int64_t h, const Variant& data) {
+    setRaw(h, data.asCell());
+  }
+  void setRaw(StringData* key, const Variant& data) {
+    setRaw(key, data.asCell());
+  }
+  void setRaw(const TypedValue* key, const TypedValue* data) {
+    assert(key->m_type != KindOfRef);
+    if (key->m_type == KindOfInt64) {
+      setRaw(key->m_data.num, data);
+    } else if (IS_STRING_TYPE(key->m_type)) {
+      setRaw(key->m_data.pstr, data);
+    } else {
+      throwBadKeyType();
+    }
+  }
+  void setRaw(const Variant& key, const Variant& data) {
+    setRaw(key.asCell(), data.asCell());
+  }
+
+  void set(int64_t h, const TypedValue* data);
+  void set(StringData* key, const TypedValue* data);
+  void set(int64_t h, const Variant& data) {
+    set(h, data.asCell());
+  }
+  void set(StringData* key, const Variant& data) {
+    set(key, data.asCell());
+  }
+  void set(const TypedValue* key, const TypedValue* data) {
+    assert(key->m_type != KindOfRef);
+    if (key->m_type == KindOfInt64) {
+      set(key->m_data.num, data);
+    } else if (IS_STRING_TYPE(key->m_type)) {
+      set(key->m_data.pstr, data);
+    } else {
+      throwBadKeyType();
+    }
+  }
+  void set(const Variant& key, const Variant& data) {
+    set(key.asCell(), data.asCell());
+  }
+
+ protected:
+  // eraseNoCompact removes the specified element, but doesn't check for an
+  // immutable buffer, doesn't increment m_version, and doesn't perform
+  // compaction, so callers need to take care of these things.
   void eraseNoCompact(int32_t* pos);
 
+  // erase removes the specified element, but doesn't check for an
+  // immutable buffer and doesn't increment m_version, so callers need
+  // to take care of these things.
+  void erase(int32_t* pos);
+
   bool isFull() { return m_used == m_cap; }
-  bool isDensityTooLow() const { return (m_size < m_used / 2); }
+
+  bool isDensityTooLow() const {
+    bool b = (m_size < m_used / 2);
+    assert(IMPLIES(m_data == nullptr, !b));
+    assert(IMPLIES(m_cap == 0, !b));
+    return b;
+  }
 
   // This method will grow or compact as needed to make room to add
   // one new element.
   void makeRoom();
 
-  // This method will grow or compact as needed in preparation for
-  // repeatedly adding new elements until m_size >= sz.
-  void reserve(int64_t sz);
-
   void grow(uint32_t newCap, uint32_t newMask);
-  void compactIfNecessary();
+  void compact();
+  void compactIfNecessary() { if (isDensityTooLow()) compact(); }
 
   BaseMap::Elm& allocElm(int32_t* ei) {
+    assert(!hasImmutableBuffer());
     assert(ei && !validPos(*ei) && m_size <= m_used && m_used < m_cap);
     size_t i = m_used;
     (*ei) = i;
@@ -919,6 +964,11 @@ class BaseMap : public ExtCollectionObjectData {
     ++m_size;
     return *fetchElm(data(), i);
   }
+
+ public:
+  // This method will grow or compact as needed in preparation for
+  // repeatedly adding new elements until m_size >= sz.
+  void reserve(int64_t sz);
 
   static void copyElm(const Elm& frE, Elm& toE) {
     memcpy(&toE, &frE, sizeof(Elm));
@@ -931,53 +981,76 @@ class BaseMap : public ExtCollectionObjectData {
     tvRefcountedIncRef(&toE.data);
   }
 
- public:
+  // The iter functions below facilitate iteration over Maps and ImmMaps.
+  // Iterators cannot store Elm pointers (because it's possible for m_data
+  // to change without bumping m_version when a Map is using shared immutable
+  // buffer and an existing element is overwritten via assignment). Iterators
+  // track their position in terms of _bytes_ from the beginning of the buffer
+  // since it requires less computation overall.
+
+  ssize_t iter_limit() const {
+    return (ssize_t)fetchElm((Elm*)nullptr, m_used);
+  }
+
+  bool iter_valid(ssize_t ipos) const {
+    return ipos != iter_limit();
+  }
+
+  bool iter_valid(ssize_t ipos, ssize_t limit) const {
+    assert(limit == iter_limit());
+    return ipos != limit;
+  }
+
+  const Elm* iter_elm(ssize_t ipos) const {
+    assert(iter_valid(ipos));
+    return (const Elm*)((ssize_t)data() + ipos);
+  }
+
   ssize_t iter_begin() const {
-    const Elm* p = firstElm();
-    auto* pLimit = elmLimit();
-    if (p != pLimit) {
-      return ssize_t(p);
+    ssize_t limit = iter_limit();
+    ssize_t ipos = 0;
+    while (ipos != limit) {
+      auto* e = iter_elm(ipos);
+      if (!isTombstone(e)) break;
+      ipos += sizeof(Elm);
     }
-    return 0;
+    return ipos;
   }
 
-  ssize_t iter_next(ssize_t pos) const {
-    if (!iter_valid(pos)) return pos;
-    auto* pLimit = elmLimit();
-    auto* p = nextElm((Elm*)pos, pLimit);
-    if (p != pLimit) {
-      return ssize_t(p);
+  ssize_t iter_next(ssize_t ipos) const {
+    ssize_t limit = iter_limit();
+    ipos += sizeof(Elm);
+    while (ipos < limit) {
+      auto* e = iter_elm(ipos);
+      if (!isTombstone(e)) return ipos;
+      ipos += sizeof(Elm);
     }
-    return 0;
+    return limit;
   }
 
-  ssize_t iter_prev(ssize_t pos) const {
-    if (!iter_valid(pos)) return pos;
-    auto* p = (Elm*)pos;
-    auto* pLimit = fetchElm(data(), -1);
-    for (--p; p != pLimit; --p) {
-      if (LIKELY(!isTombstone(p))) return ssize_t(p);
+  ssize_t iter_prev(ssize_t ipos) const {
+    ssize_t orig_ipos = ipos;
+    ipos -= sizeof(Elm);
+    while (ipos >= 0) {
+      auto* e = iter_elm(ipos);
+      if (!isTombstone(e)) return ipos;
+      ipos -= sizeof(Elm);
     }
-    return 0;
+    return orig_ipos;
   }
 
-  Variant iter_key(ssize_t pos) const {
-    assert(iter_valid(pos));
-    auto* p = (Elm*)pos;
-    if (p->hasStrKey()) {
-      return p->skey;
+  Variant iter_key(ssize_t ipos) const {
+    assert(iter_valid(ipos));
+    auto* e = iter_elm(ipos);
+    if (e->hasStrKey()) {
+      return e->skey;
     }
-    return (int64_t)p->ikey;
+    return (int64_t)e->ikey;
   }
 
-  TypedValue* iter_value(ssize_t pos) const {
-    assert(iter_valid(pos));
-    auto* p = (Elm*)pos;
-    return &p->data;
-  }
-
-  bool iter_valid(ssize_t pos) const {
-    return pos != 0;
+  const TypedValue* iter_value(ssize_t ipos) const {
+    assert(iter_valid(ipos));
+    return &iter_elm(ipos)->data;
   }
 
   uint32_t nthElmPos(size_t n) {
@@ -1026,8 +1099,21 @@ class BaseMap : public ExtCollectionObjectData {
 
   static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
- private:
+  bool hasImmutableBuffer() const { return !m_immCopy.isNull(); }
 
+  /**
+   * Should be called by any operation that mutates the map, since
+   * we might need to to trigger COW.
+   */
+  void mutate() { if (hasImmutableBuffer()) cow(); }
+
+ protected:
+  /**
+   * Copy-On-Write the buffer and reset the immutable copy.
+   */
+  void cow();
+
+ private:
   template<class TMap>
   typename std::enable_if<
    std::is_base_of<BaseMap, TMap>::value, ObjectData*>::type
@@ -1035,6 +1121,7 @@ class BaseMap : public ExtCollectionObjectData {
 
   friend class c_MapIterator;
   friend class c_Vector;
+  friend class c_Map;
   friend class c_ImmMap;
   friend class ArrayIter;
   friend class c_GenMapWaitHandle;
@@ -1046,12 +1133,6 @@ class BaseMap : public ExtCollectionObjectData {
                   == FAST_COLLECTION_SIZE_OFFSET, "");
   }
 
- protected: // implementations of the API accessible from user PHP code
-
-  void php_construct(const Variant& iterable = null_variant);
-  Object php_add(const Variant& val);
-  Object php_addAll(const Variant& val);
-  Object php_clear();
   bool php_isEmpty() const { return !toBoolImpl(); }
   Object php_items() {
     return SystemLib::AllocLazyKVZipIterableObject(this);
@@ -1062,11 +1143,7 @@ class BaseMap : public ExtCollectionObjectData {
   }
   Variant php_at(const Variant& key) const;
   Variant php_get(const Variant& key) const;
-  Object php_set(const Variant& key, const Variant& value);
-  Object php_setAll(const Variant& iterable);
-  Object php_put(const Variant& key, const Variant& value); // deprecated
   bool php_contains(const Variant& key) const;
-  Object php_remove(const Variant& key);
   Array php_toArray() const;
   Array php_toKeysArray() const;
   Array php_toValuesArray() const;
@@ -1135,7 +1212,7 @@ class BaseMap : public ExtCollectionObjectData {
   template<class TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
-  static php_mapFromIterable(const Variant& iterable);
+  static php_mapFromItems(const Variant& iterable);
 
   template<class TMap>
   typename std::enable_if<
@@ -1148,7 +1225,6 @@ class BaseMap : public ExtCollectionObjectData {
 
 FORWARD_DECLARE_CLASS(Map);
 class c_Map : public BaseMap {
-
  public:
   DECLARE_CLASS_NO_SWEEP(Map)
 
@@ -1203,6 +1279,12 @@ class c_Map : public BaseMap {
   static Object ti_fromitems(const Variant& iterable);
   static Object ti_fromarray(const Variant& arr); // deprecated
   Object t_immutable();
+
+ protected:
+  Object getImmutableCopy();
+
+  friend class BaseMap;
+  friend class c_ImmMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1210,11 +1292,10 @@ class c_Map : public BaseMap {
 
 FORWARD_DECLARE_CLASS(ImmMap);
 class c_ImmMap : public BaseMap {
-
  public:
   DECLARE_CLASS_NO_SWEEP(ImmMap)
 
-  public:
+ public:
   explicit c_ImmMap(Class* cls = c_ImmMap::classof());
 
   static c_ImmMap* Clone(ObjectData* obj);
@@ -1255,6 +1336,9 @@ class c_ImmMap : public BaseMap {
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(const Variant& iterable);
   Object t_immutable();
+
+  friend class BaseMap;
+  friend class c_Map;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

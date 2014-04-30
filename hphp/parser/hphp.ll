@@ -467,7 +467,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"tuple"/("("|{WHITESPACE_AND_COMMENTS}"(") {
-  HH_ONLY_KEYWORD(T_TUPLE);
+  HH_ONLY_KEYWORD(T_ARRAY);
 }
 
 <ST_IN_SCRIPTING>"?"/":"[a-zA-Z_\x7f-\xff] {

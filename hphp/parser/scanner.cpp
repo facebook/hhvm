@@ -346,7 +346,6 @@ void Scanner::parseApproxParamDefVal(TokenStore::iterator& pos) {
       case T_NAMESPACE:
       case T_SHAPE:
       case T_ARRAY:
-      case T_TUPLE:
       case T_FUNCTION:
       case T_DOUBLE_ARROW:
       case T_DOUBLE_COLON:

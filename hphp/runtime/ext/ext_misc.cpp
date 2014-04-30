@@ -545,7 +545,6 @@ const int UserTokenId_T_UNRESOLVED_NEWTYPE = 406;
 const int UserTokenId_T_COMPILER_HALT_OFFSET = 407;
 const int UserTokenId_T_AWAIT = 408;
 const int UserTokenId_T_ASYNC = 409;
-const int UserTokenId_T_TUPLE = 410;
 const int UserTokenId_T_FROM = 411;
 const int UserTokenId_T_WHERE = 412;
 const int UserTokenId_T_JOIN = 413;

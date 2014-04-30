@@ -32,7 +32,6 @@ $expected_exceptions = array(
   'T_UNRESOLVED_NEWTYPE' => true,
   'T_AWAIT' => true,
   'T_ASYNC' => true,
-  'T_TUPLE' => true,
   'T_FROM' => true,
   'T_WHERE' => true,
   'T_JOIN' => true,

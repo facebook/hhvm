@@ -464,7 +464,6 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "invariant_callback_register" ||
            stripped == "invariant" ||
            stripped == "invariant_violation" ||
-           stripped == "tuple" ||
            stripped == "xenon_get_data"
           )) {
         funcName = "HH\\" + stripped;
